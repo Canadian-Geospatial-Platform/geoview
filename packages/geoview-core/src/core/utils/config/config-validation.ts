@@ -7,6 +7,7 @@ import { generateId } from '../utilities';
 import schema from '../../../../schema.json';
 import { TypeBasemapId, TypeBasemapOptions, VALID_BASEMAP_ID } from '../../../geo/layer/basemap/basemap-types';
 import { geoviewEntryIsWMS } from '../../../geo/layer/geoview-layers/raster/wms';
+import { geoviewEntryIsImageStatic } from '../../../geo/layer/geoview-layers/raster/image-static';
 import { geoviewEntryIsXYZTiles } from '../../../geo/layer/geoview-layers/raster/xyz-tiles';
 import { geoviewEntryIsEsriDynamic } from '../../../geo/layer/geoview-layers/raster/esri-dynamic';
 import { geoviewEntryIsEsriFeature } from '../../../geo/layer/geoview-layers/vector/esri-feature';
@@ -417,6 +418,10 @@ export class ConfigValidation {
             this.geoviewLayerIdIsMandatory(geoviewLayerConfig);
             this.processLayerEntryConfig(geoviewLayerConfig, geoviewLayerConfig, geoviewLayerConfig.listOfLayerEntryConfig);
             break;
+          case 'imageStatic':
+            this.geoviewLayerIdIsMandatory(geoviewLayerConfig);
+            this.processLayerEntryConfig(geoviewLayerConfig, geoviewLayerConfig, geoviewLayerConfig.listOfLayerEntryConfig);
+            break;
           case 'xyzTiles':
             this.geoviewLayerIdIsMandatory(geoviewLayerConfig);
             this.processLayerEntryConfig(geoviewLayerConfig, geoviewLayerConfig, geoviewLayerConfig.listOfLayerEntryConfig);
@@ -507,6 +512,17 @@ export class ConfigValidation {
         }
         // Default value for layerEntryConfig.source.serverType is 'mapserver'.
         if (!layerEntryConfig.source.serverType) layerEntryConfig.source.serverType = 'mapserver';
+      } else if (geoviewEntryIsImageStatic(layerEntryConfig)) {
+        // Value for layerEntryConfig.entryType can only be raster
+        if (!layerEntryConfig.entryType) layerEntryConfig.entryType = 'raster';
+
+        if (!layerEntryConfig.source.dataAccessPath) {
+          throw new Error(
+            `source.dataAccessPath on layer entry ${Layer.getLayerPath(layerEntryConfig)} is mandatory for GeoView layer ${
+              rootLayerConfig.geoviewLayerId
+            } of type ${rootLayerConfig.geoviewLayerType}`
+          );
+        }
       } else if (geoviewEntryIsXYZTiles(layerEntryConfig)) {
         // Value for layerEntryConfig.entryType can only be raster
         if (!layerEntryConfig.entryType) layerEntryConfig.entryType = 'raster';

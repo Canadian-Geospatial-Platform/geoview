@@ -27,7 +27,12 @@ import {
 } from '../../../ui';
 import { api, EsriDynamic } from '../../../app';
 import { LegendIconList } from './legend-icon-list';
-import { AbstractGeoViewLayer, isVectorLegend, isWmsLegend } from '../../../geo/layer/geoview-layers/abstract-geoview-layers';
+import {
+  AbstractGeoViewLayer,
+  isImageStaticLegend,
+  isVectorLegend,
+  isWmsLegend,
+} from '../../../geo/layer/geoview-layers/abstract-geoview-layers';
 import {
   TypeClassBreakStyleConfig,
   TypeListOfLayerEntryConfig,
@@ -208,7 +213,7 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
       const { geoviewLayerId } = geoviewLayerInstance;
       if (layerLegend) {
         // WMS layers just return a string
-        if (isWmsLegend(layerLegend)) {
+        if (isWmsLegend(layerLegend) || isImageStaticLegend(layerLegend)) {
           setIconType('simple');
           setIconImg(layerLegend.legend.toDataURL());
         } else if (isVectorLegend(layerLegend)) {

@@ -629,7 +629,10 @@ export type TypeOfServer = 'mapserver' | 'geoserver' | 'qgis';
 /** ******************************************************************************************************************************
  * Initial settings for image sources.
  */
-export type TypeSourceImageInitialConfig = TypeSourceImageWmsInitialConfig | TypeSourceImageEsriInitialConfig;
+export type TypeSourceImageInitialConfig =
+  | TypeSourceImageWmsInitialConfig
+  | TypeSourceImageEsriInitialConfig
+  | TypeSourceImageStaticInitialConfig;
 
 /** ******************************************************************************************************************************
  * Initial settings for image sources.
@@ -659,6 +662,14 @@ export interface TypeSourceImageWmsInitialConfig extends TypeBaseSourceImageInit
   serverType?: TypeOfServer;
   /** Style to apply. Default = '' */
   style?: string;
+}
+
+/** ******************************************************************************************************************************
+ * Initial settings for static image sources.
+ */
+export interface TypeSourceImageStaticInitialConfig extends TypeBaseSourceImageInitialConfig {
+  /** Image extent */
+  extent: Extent;
 }
 
 /** ******************************************************************************************************************************

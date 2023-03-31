@@ -20,6 +20,9 @@ Once the project matures, these docs can be the basis of official public docs, h
 
 - [Theme](./app/ui/theming.md)
 - [Events documentation](./app/event/README.md)
+- [Accessing types](./app/accessing-types.md)
+- [Accessibility](./app/accessibility.md)
 - [Components vs Core Packages vs External Packages](./app/components-packages.md)
 - [Packages](./app/packages.md)
 - [Load maps](./app/loading-maps.md)
+- [Add new layer type](./app/add-layer-type.md)

@@ -14,19 +14,28 @@
     <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
     <link rel="stylesheet" href="css/style.css" />
     <style>
-      table.info, th.info, td.info, th.infoCol1, td.infoCol1 {
+      table.info,
+      th.info,
+      td.info,
+      th.infoCol1,
+      td.infoCol1 {
         border: 1px solid black;
       }
-      th.info, td.info, th.infoCol1, td.infoCol1 {
+      th.info,
+      td.info,
+      th.infoCol1,
+      td.infoCol1 {
         padding: 15px;
         width: 15%;
       }
-      th.info, th.infoCol1, td.infoCol1 {
+      th.info,
+      th.infoCol1,
+      td.infoCol1 {
         text-align: left;
         font-weight: bold;
         font-size: 15px;
       }
-      </style>
+    </style>
   </head>
 
   <body>
@@ -54,7 +63,8 @@
               <a href="#HLYR6">6. WFS Layer</a><br />
               <a href="#HLYR7">7. OGC API Feature Layer</a><br />
               <a href="#HLYR8">8. GeoCore UUID Layer</a><br />
-              <a href="#HLYR9">9. GeoPackage Layer</a>
+              <a href="#HLYR9">9. GeoPackage Layer</a><br />
+              <a href="#HLYR10">10. Static Image Layer</a>
             </td>
           </tr>
         </tbody>
@@ -659,7 +669,9 @@
     <button class="collapsible">Get Legend</button>
     <pre style="height: 20pc; overflow-y: scroll" id="esriDynamicLegendsId-table-div" class="panel"></pre>
     <button type="button" class="collapsible">Get Feature Info</button>
-    <pre style="height: 20pc; overflow-y: scroll; overflow-x: scroll;" id="esriDynamicResultSetId" class="panel">Click on feature on the map</pre>
+    <pre style="height: 20pc; overflow-y: scroll; overflow-x: scroll" id="esriDynamicResultSetId" class="panel">
+Click on feature on the map</pre
+    >
     <hr />
     <p>This map has an Esri dynamic layer added from configuration.</p>
     <button type="button" class="collapsible">Configuration Snippet</button>
@@ -1199,6 +1211,72 @@
     <pre id="LYR9CS" class="panel"></pre>
     <hr />
 
+    <div class="map-title-holder">
+      <h4 id="HLYR10">10. Static Image Layer</h4>
+      <a class="ref-link" href="#top">Top</a>
+    </div>
+    <div
+      id="LYR10"
+      class="llwp-map"
+      triggerReadyCallback="true"
+      data-lang="en"
+      data-config="{
+          'map': {
+            'interaction': 'dynamic',
+            'viewSettings': {
+              'zoom': 6,
+              'center': [-90, 50],
+              'projection': 3857
+            },
+            'basemapOptions': {
+              'basemapId': 'transport',
+              'shaded': false,
+              'labeled': true
+            },
+            'listOfGeoviewLayerConfig': [
+              {
+                'geoviewLayerId': 'staticLYR10',
+                'geoviewLayerName': {
+                  'en': 'Static Image'
+                },
+                'geoviewLayerType': 'imageStatic',
+                'listOfLayerEntryConfig': [
+                  {
+                    'layerId': 'thumbnail',
+                    'layerName': { 'en': 'DataCube' },
+                    'source': {
+                      'dataAccessPath': {
+                        'en': 'https://datacube-prod-data-public.s3.ca-central-1.amazonaws.com/store/imagery/aerial/napl/napl-ring-of-fire/napl-ring-of-fire-1954-08-07-60k-thumbnail.png',
+                        'fr': 'https://datacube-prod-data-public.s3.ca-central-1.amazonaws.com/store/imagery/aerial/napl/napl-ring-of-fire/napl-ring-of-fire-1954-08-07-60k-thumbnail.png'
+                      },
+                      'extent': [-87.77486341686723,
+                        51.62285357468582,
+                        -84.57727128084842,
+                        53.833354975551075
+                      ],
+                      'projection': 4326
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          'components': ['overview-map', 'nav-bar', 'footer-bar'],
+          'corePackages': [],
+          'theme': 'dark',
+          'suportedLanguages': ['en']
+        }"
+    ></div>
+    <button type="button" class="collapsible">Visibility</button>
+    <pre style="height: 20pc; overflow-y: scroll" id="layer10-buttons-div" class="panel"></pre>
+    <button class="collapsible">Get Legend</button>
+    <pre style="height: 20pc; overflow-y: scroll" id="staticImageLegendsId-table-div" class="panel"></pre>
+    <hr />
+    <p>This map has a static image layer added from configuration.</p>
+    <button type="button" class="collapsible">Configuration Snippet</button>
+    <pre id="LYR10CS" class="panel"></pre>
+    <hr />
+
     <button type="button" class="collapsible">Code Snippet</button>
     <pre id="codeSnippet" class="panel"></pre>
 
@@ -1209,7 +1287,7 @@
         infoTable.textContent = '';
         var oldContent = document.getElementById(`layer${mapId.slice(3)}-info`);
         if (oldContent) oldContent.remove();
-        var content = document.createElement("div");
+        var content = document.createElement('div');
         content.id = `layer${mapId.slice(3)}-info`;
         infoTable.appendChild(content);
         Object.keys(resultSets).forEach((layerPath) => {
@@ -1284,8 +1362,8 @@
             createHeaders = true;
 
             layerData.forEach((row) => {
-            // Header of the data table
-            if (createHeaders) {
+              // Header of the data table
+              if (createHeaders) {
                 tableRow = document.createElement('tr');
                 tableRow.classList.add('info');
                 tableElement.appendChild(tableRow);
@@ -1309,8 +1387,8 @@
                 createHeaders = false;
               }
 
-            // Data row (feature information)
-            tableRow = document.createElement('tr');
+              // Data row (feature information)
+              tableRow = document.createElement('tr');
               tableRow.classList.add('info');
               tableElement.appendChild(tableRow);
 
@@ -1342,7 +1420,6 @@
             });
           } else {
             content.appendChild(document.createElement('hr'));
-
           }
         });
       };
@@ -1352,7 +1429,7 @@
         var mapButtonsDiv = document.getElementById(`layer${mapId.slice(3)}-buttons-div`);
         var oldTable = document.getElementById(`layer${mapId.slice(3)}-buttons-table`);
         if (oldTable) oldTable.remove();
-        var tableElement = document.createElement("table");
+        var tableElement = document.createElement('table');
         tableElement.id = `layer${mapId.slice(3)}-buttons-table`;
         tableElement.style.width = '100%';
         tableElement.border = '1px solid black';
@@ -1364,7 +1441,6 @@
               const layerConfig = cgpv.api.maps[mapId].layer.registeredLayers[layerPath];
               const { geoviewRenderer } = cgpv.api.maps[mapId];
               geoviewRenderer.getLegendStyles(layerConfig).then((legendStyle) => {
-
                 mapButtonsDiv = document.createElement('td');
                 mapButtonsDiv.style.width = '16.66%';
                 mapButtonsDiv.border = '1px solid black';
@@ -1374,7 +1450,7 @@
                 geoviewLayerH1.innerText = geoviewLayer.geoviewLayerName.en;
                 mapButtonsDiv.appendChild(geoviewLayerH1);
 
-                  const layerConfigH2 = document.createElement('h2');
+                const layerConfigH2 = document.createElement('h2');
                 layerConfigH2.innerText = `${layerConfig.layerName.en}  `;
                 layerConfigH2.style.height = '15px';
                 mapButtonsDiv.appendChild(layerConfigH2);
@@ -1393,28 +1469,28 @@
 
                 if (layerConfig.style) {
                   Object.keys(layerConfig.style).forEach((geometry) => {
-                    const geometryText = document.createElement("p");
+                    const geometryText = document.createElement('p');
                     geometryText.innerText = `Geometry = ${geometry}`;
                     geometryText.style.height = '15px';
                     mapButtonsDiv.appendChild(geometryText);
                     if (layerConfig.style[geometry].styleType === 'uniqueValue') {
                       if (layerConfig.style[geometry].defaultSettings) {
                         if (layerConfig.style[geometry].defaultVisible === 'always') {
-                          const alwaysDefaultLabel = document.createElement("label");
-                          alwaysDefaultLabel.innerText =  `Always show `;
+                          const alwaysDefaultLabel = document.createElement('label');
+                          alwaysDefaultLabel.innerText = `Always show `;
                           alwaysDefaultLabel.style.fontSize = '15px';
                           alwaysDefaultLabel.style.height = '15px';
                           mapButtonsDiv.appendChild(alwaysDefaultLabel);
                           mapButtonsDiv.appendChild(legendStyle[geometry].defaultCanvas);
-                          const br = document.createElement("br");
+                          const br = document.createElement('br');
                           br.style.height = '1px';
                           mapButtonsDiv.appendChild(br);
                         } else {
-                          const toggleUniqueValueDefault = document.createElement("button");
+                          const toggleUniqueValueDefault = document.createElement('button');
                           if (layerConfig.style[geometry].defaultVisible === 'yes')
                             toggleUniqueValueDefault.innerText = `Hide ${layerConfig.style[geometry].defaultLabel}`;
                           else if (layerConfig.style[geometry].defaultVisible === 'no')
-                            toggleUniqueValueDefault.innerText =  `Show ${layerConfig.style[geometry].defaultLabel}`;
+                            toggleUniqueValueDefault.innerText = `Show ${layerConfig.style[geometry].defaultLabel}`;
                           toggleUniqueValueDefault.addEventListener('click', function (e) {
                             if (layerConfig.style[geometry].defaultVisible === 'yes') {
                               layerConfig.style[geometry].defaultVisible = 'no';
@@ -1429,24 +1505,24 @@
                             geoviewLayer.applyViewFilter(layerConfig, filter);
                           });
                           mapButtonsDiv.appendChild(toggleUniqueValueDefault);
-                          const br = document.createElement("br");
+                          const br = document.createElement('br');
                           br.style.height = '1px';
                           mapButtonsDiv.appendChild(br);
                         }
                       }
                       for (let i = 0; i < layerConfig.style[geometry].uniqueValueStyleInfo.length; i++) {
                         if (layerConfig.style[geometry].uniqueValueStyleInfo[i].visible === 'always') {
-                          const alwaysEntry = document.createElement("label");
-                          alwaysEntry.innerText =  `Always show `;
+                          const alwaysEntry = document.createElement('label');
+                          alwaysEntry.innerText = `Always show `;
                           alwaysEntry.style.fontSize = '15px';
                           mapButtonsDiv.appendChild(alwaysEntry);
                           mapButtonsDiv.appendChild(legendStyle[geometry].arrayOfCanvas[i]);
 
-                          const br = document.createElement("br");
+                          const br = document.createElement('br');
                           br.style.height = '1px';
                           mapButtonsDiv.appendChild(br);
                         } else {
-                          const toggleUniqueValueFeature = document.createElement("button");
+                          const toggleUniqueValueFeature = document.createElement('button');
                           if (layerConfig.style[geometry].uniqueValueStyleInfo[i].visible === 'yes')
                             toggleUniqueValueFeature.innerText = `Hide ${layerConfig.style[geometry].uniqueValueStyleInfo[i].label}`;
                           else if (layerConfig.style[geometry].uniqueValueStyleInfo[i].visible === 'no')
@@ -1468,7 +1544,7 @@
                           mapButtonsDiv.appendChild(toggleUniqueValueFeature);
                           mapButtonsDiv.appendChild(legendStyle[geometry].arrayOfCanvas[i]);
 
-                          const br = document.createElement("br");
+                          const br = document.createElement('br');
                           br.style.height = '1px';
                           mapButtonsDiv.appendChild(br);
                         }
@@ -1476,52 +1552,52 @@
                     } else if (layerConfig.style[geometry].styleType === 'classBreaks') {
                       if (layerConfig.style[geometry].defaultSettings) {
                         if (layerConfig.style[geometry].defaultVisible === 'always') {
-                          const alwaysDefaultLabel = document.createElement("label");
-                          alwaysDefaultLabel.innerText =  `Always show `;
+                          const alwaysDefaultLabel = document.createElement('label');
+                          alwaysDefaultLabel.innerText = `Always show `;
                           alwaysDefaultLabel.style.fontSize = '15px';
                           mapButtonsDiv.appendChild(alwaysDefaultLabel);
                           mapButtonsDiv.appendChild(legendStyle[geometry].defaultCanvas);
-                          const br = document.createElement("br");
+                          const br = document.createElement('br');
                           br.style.height = '1px';
                           mapButtonsDiv.appendChild(br);
                         } else {
-                          const toggleClassBreakDefault = document.createElement("button");
+                          const toggleClassBreakDefault = document.createElement('button');
                           if (layerConfig.style[geometry].defaultVisible === 'yes')
                             toggleClassBreakDefault.innerText = `Hide ${layerConfig.style[geometry].defaultLabel}`;
                           else if (layerConfig.style[geometry].defaultVisible === 'no')
                             toggleClassBreakDefault.innerText = `Show ${layerConfig.style[geometry].defaultLabel}`;
                           toggleClassBreakDefault.addEventListener('click', function (e) {
-                          if (layerConfig.style[geometry].defaultVisible === 'yes') {
-                            layerConfig.style[geometry].defaultVisible = 'no';
-                            toggleClassBreakDefault.innerText = `Show ${layerConfig.style[geometry].defaultLabel}`;
-                          } else if (layerConfig.style[geometry].defaultVisible === 'no') {
-                            layerConfig.style[geometry].defaultVisible = 'yes';
-                            toggleClassBreakDefault.innerText = `Hide ${layerConfig.style[geometry].defaultLabel}`;
-                          }
+                            if (layerConfig.style[geometry].defaultVisible === 'yes') {
+                              layerConfig.style[geometry].defaultVisible = 'no';
+                              toggleClassBreakDefault.innerText = `Show ${layerConfig.style[geometry].defaultLabel}`;
+                            } else if (layerConfig.style[geometry].defaultVisible === 'no') {
+                              layerConfig.style[geometry].defaultVisible = 'yes';
+                              toggleClassBreakDefault.innerText = `Hide ${layerConfig.style[geometry].defaultLabel}`;
+                            }
                             const checkbox = document.getElementById(`checkbox-${mapId}-${geoviewLayer.geoviewLayerId}`);
                             const filterInput = document.getElementById(`filter-input-${mapId}`);
                             const filter = checkbox.value === 'true' ? filterInput.value : '';
                             geoviewLayer.applyViewFilter(layerConfig, filter);
                           });
                           mapButtonsDiv.appendChild(toggleClassBreakDefault);
-                          const br = document.createElement("br");
+                          const br = document.createElement('br');
                           br.style.height = '1px';
                           mapButtonsDiv.appendChild(br);
                         }
                       }
                       for (let i = 0; i < layerConfig.style[geometry].classBreakStyleInfo.length; i++) {
                         if (layerConfig.style[geometry].classBreakStyleInfo[i].visible === 'always') {
-                          const alwaysEntry = document.createElement("label");
-                          alwaysEntry.innerText =  `Always show `;
+                          const alwaysEntry = document.createElement('label');
+                          alwaysEntry.innerText = `Always show `;
                           alwaysEntry.style.fontSize = '15px';
                           mapButtonsDiv.appendChild(alwaysEntry);
                           mapButtonsDiv.appendChild(legendStyle[geometry].arrayOfCanvas[i]);
 
-                          const br = document.createElement("br");
+                          const br = document.createElement('br');
                           br.style.height = '1px';
                           mapButtonsDiv.appendChild(br);
                         } else {
-                          const toggleClassBreakFeature = document.createElement("button");
+                          const toggleClassBreakFeature = document.createElement('button');
                           if (layerConfig.style[geometry].classBreakStyleInfo[i].visible === 'yes')
                             toggleClassBreakFeature.innerText = `Hide ${layerConfig.style[geometry].classBreakStyleInfo[i].label}`;
                           else if (layerConfig.style[geometry].classBreakStyleInfo[i].visible === 'no')
@@ -1543,26 +1619,25 @@
                           mapButtonsDiv.appendChild(toggleClassBreakFeature);
                           mapButtonsDiv.appendChild(legendStyle[geometry].arrayOfCanvas[i]);
 
-                          const br = document.createElement("br");
+                          const br = document.createElement('br');
                           br.style.height = '1px';
                           mapButtonsDiv.appendChild(br);
                         }
                       }
                     }
                     if (geoviewLayer.getLayerFilter) {
-                      const layerFilterText = document.createElement("p");
+                      const layerFilterText = document.createElement('p');
                       layerFilterText.innerText = `Extra filter: `;
                       mapButtonsDiv.appendChild(layerFilterText);
-                      const layerFilterInput = document.createElement("input");
+                      const layerFilterInput = document.createElement('input');
                       layerFilterInput.id = `filter-input-${mapId}`;
                       layerFilterInput.style.width = '50%';
                       layerFilterText.appendChild(layerFilterInput);
                       layerFilterInput.value = geoviewLayer.getLayerFilter(layerConfig) || '';
-                      const layerFilterButton = document.createElement("button");
+                      const layerFilterButton = document.createElement('button');
                       layerFilterButton.addEventListener('click', function (e) {
                         const checkbox = document.getElementById(`checkbox-${mapId}-${geoviewLayer.geoviewLayerId}`);
-                        if (checkbox.value === 'true')
-                          geoviewLayer.applyViewFilter(layerConfig, layerFilterInput.value);
+                        if (checkbox.value === 'true') geoviewLayer.applyViewFilter(layerConfig, layerFilterInput.value);
                         else {
                           geoviewLayer.setLayerFilter(layerFilterInput.value, layerConfig);
                           geoviewLayer.applyViewFilter(layerConfig);
@@ -1571,21 +1646,20 @@
                       layerFilterButton.innerText = 'Apply';
                       layerFilterText.appendChild(layerFilterButton);
 
-                      const checkboxInput = document.createElement("input");
-                      checkboxInput.type='checkbox';
+                      const checkboxInput = document.createElement('input');
+                      checkboxInput.type = 'checkbox';
                       checkboxInput.value = 'false';
                       checkboxInput.id = `checkbox-${mapId}-${geoviewLayer.geoviewLayerId}`;
                       checkboxInput.addEventListener('click', function (e) {
-                        checkboxInput.value =checkboxInput.value === 'true' ? 'false' : 'true';
-                        if (checkboxInput.value === 'true')
-                          geoviewLayer.applyViewFilter(layerConfig, layerFilterInput.value);
+                        checkboxInput.value = checkboxInput.value === 'true' ? 'false' : 'true';
+                        if (checkboxInput.value === 'true') geoviewLayer.applyViewFilter(layerConfig, layerFilterInput.value);
                         else {
                           geoviewLayer.setLayerFilter(layerFilterInput.value, layerConfig);
                           geoviewLayer.applyViewFilter(layerConfig);
                         }
                       });
                       mapButtonsDiv.appendChild(checkboxInput);
-                      const checkboxText = document.createElement("label");
+                      const checkboxText = document.createElement('label');
                       checkboxText.innerText = `apply only the extra filter`;
                       mapButtonsDiv.appendChild(checkboxText);
                     }
@@ -1595,14 +1669,14 @@
             }
           });
         });
-      }
+      };
     </script>
     <script>
       // initialize cgpv and api events, a callback is optional, used if calling api's after the rendering is ready
       cgpv.init(function (mapId) {
         console.log(`api is ready for ${mapId}`);
 
-      if (['LYR1', 'LYR3', 'LYR4', 'LYR5', 'LYR6', 'LYR7', 'LYR8', 'LYR9'].includes(mapId)) createTableOfFilter(mapId);
+        if (['LYR1', 'LYR3', 'LYR4', 'LYR5', 'LYR6', 'LYR7', 'LYR8', 'LYR9'].includes(mapId)) createTableOfFilter(mapId);
 
         if (mapId === 'allMaps') {
           //create snippets
@@ -1657,12 +1731,11 @@
         document.getElementById('new-layer-id-label').innerText = layerID;
         cgpv.api.event.once(
           cgpv.api.eventNames.LAYER.EVENT_LAYER_ADDED,
-            (payload) => {
-              createTableOfFilter('LYR5');
-            },
-            'LYR5/geoJsonSample'
-          );
-
+          (payload) => {
+            createTableOfFilter('LYR5');
+          },
+          'LYR5/geoJsonSample'
+        );
       });
 
       // find the button element by ID
@@ -1675,7 +1748,6 @@
         if (layerPath) cgpv.api.map('LYR5').layer.removeLayersUsingPath(layerPath);
         document.getElementById('new-layer-id-label').innerText = '';
         createTableOfFilter('LYR5');
-
       });
 
       // WMS ======================================================================================================================
@@ -1969,22 +2041,18 @@
       function addBoundsPolygon(mapId, bbox) {
         const newBbox = cgpv.api.map(mapId).transformAndDensifyExtent(bbox, `EPSG:${cgpv.api.map(mapId).currentProjection}`, `EPSG:4326`);
 
-       const vector = cgpv.api.map(mapId).layer.vector;
-       vector.setActiveGeometryGroup();
-       vector.deleteGeometriesFromGroup(0);
+        const vector = cgpv.api.map(mapId).layer.vector;
+        vector.setActiveGeometryGroup();
+        vector.deleteGeometriesFromGroup(0);
 
-        const polygon = cgpv.api.map(mapId).layer.vector.addPolygon(
-          [ newBbox ],
-          {
-            style: {
-              strokeColor: '#000',
-              strokeWidth: 5,
-              strokeOpacity: 0.8,
-            },
-          }
-        );
+        const polygon = cgpv.api.map(mapId).layer.vector.addPolygon([newBbox], {
+          style: {
+            strokeColor: '#000',
+            strokeWidth: 5,
+            strokeOpacity: 0.8,
+          },
+        });
       }
-
     </script>
   </body>
 </html>
