@@ -13,7 +13,6 @@ import { EVENT_NAMES } from '../../../api/events/event-types';
 import { generateId, setAlphaColor } from '../../../core/utils/utilities';
 import {
   payloadIsACircleConfig,
-  payloadIsACircleMarkerConfig,
   payloadIsAMarkerConfig,
   payloadIsAPolygonConfig,
   payloadIsAPolylineConfig,
@@ -69,15 +68,13 @@ export class Vector {
       EVENT_NAMES.VECTOR.EVENT_VECTOR_ADD,
       (payload) => {
         if (payloadIsACircleConfig(payload)) {
-          this.addCircle(payload.coordintate, payload.radius, payload.options, payload.id);
+          this.addCircle(payload.coordintate, payload.options, payload.id);
         } else if (payloadIsAPolygonConfig(payload)) {
           this.addPolygon(payload.points, payload.options, payload.id);
         } else if (payloadIsAPolylineConfig(payload)) {
           this.addPolyline(payload.points, payload.options, payload.id);
         } else if (payloadIsAMarkerConfig(payload)) {
-          this.addMarker(payload.coordinate, payload.options, payload.id);
-        } else if (payloadIsACircleMarkerConfig(payload)) {
-          this.addCircleMarker(payload.coordinate, payload.radius, payload.options, payload.id);
+          this.addMarkerIcon(payload.coordinate, payload.options, payload.id);
         }
       },
       this.#mapId
@@ -260,7 +257,6 @@ export class Vector {
    * Create a new circle
    *
    * @param {Coordinate} coordinate long lat coordinate of the circle
-   * @param {number} radius an optional radius
    * @param options circle options including styling
    * @param {string} optionalFeatureId an optional id to be used to manage this geometry
    *
@@ -268,17 +264,18 @@ export class Vector {
    */
   addCircle = (
     coordinate: Coordinate,
-    radius?: number,
     options?: {
       geometryLayout?: 'XY' | 'XYZ' | 'XYM' | 'XYZM';
       style?: TypeFeatureCircleStyle;
     },
     optionalFeatureId?: string
   ): Feature => {
-    // TODO: Refactoring - TypeFeatureCircleStyle already has a "radius" property, it's redundant with the radius parameter received in this function. The extra parameter also unbalances the signature with the other "addShapes" functions.
     const circleOptions = options || {};
 
     const featureId = generateId(optionalFeatureId);
+
+    // get radius, if not define, set default
+    const radius = circleOptions.style !== undefined ? circleOptions.style.radius || 1 : 1;
 
     // create a line geometry
     const circle = new Feature({
@@ -328,154 +325,6 @@ export class Vector {
     api.event.emit(VectorPayload.forCircle(EVENT_NAMES.VECTOR.EVENT_VECTOR_ADDED, this.#mapId, circle));
 
     return circle;
-  };
-
-  /**
-   * Create a new circle marker
-   *
-   * @param {Coordinate} coordinate long lat coordinate of the circle marker
-   * @param {number} radius optional circle marker radius
-   * @param options circle marker options including styling
-   * @param {string} optionalFeatureId an optional id to be used to manage this geometry
-   *
-   * @returns {Feature} a geometry containing the id and the created geometry
-   */
-  addCircleMarker = (
-    coordinate: Coordinate,
-    radius?: number,
-    options?: {
-      geometryLayout?: 'XY' | 'XYZ' | 'XYM' | 'XYZM';
-      style?: TypeFeatureCircleStyle;
-    },
-    optionalFeatureId?: string
-  ): Feature => {
-    // TODO: Refactoring - TypeFeatureCircleStyle already has a "radius" property, it's redundant with the radius parameter received in this function. The extra parameter also unbalances the signature with the other "addShapes" functions.
-    // TODO: Refactoring - Based on the test page, addCircleMarker and addCircle seem to provide the exact same results? Should addCircleMarker be removed?
-    const circleMarkerOptions = options || {};
-
-    const featureId = generateId(optionalFeatureId);
-
-    // create a line geometry
-    const circleMarker = new Feature({
-      geometry: new Circle(coordinate, radius, circleMarkerOptions.geometryLayout).transform(
-        'EPSG:4326',
-        api.projection.projections[api.map(this.#mapId).currentProjection]
-      ),
-    });
-
-    // if style is provided then set override the vector layer style for this feature
-    if (circleMarkerOptions.style) {
-      let fill: Fill | undefined;
-      let stroke: Stroke | undefined;
-
-      if (circleMarkerOptions.style.fillColor) {
-        fill = new Fill({
-          color: asString(setAlphaColor(asArray(circleMarkerOptions.style.fillColor), circleMarkerOptions.style.fillOpacity || 1)),
-        });
-      }
-
-      if (circleMarkerOptions.style.strokeColor || circleMarkerOptions.style.strokeOpacity || circleMarkerOptions.style.strokeWidth) {
-        stroke = new Stroke({
-          color: asString(
-            setAlphaColor(asArray(circleMarkerOptions.style.strokeColor || 'blue'), circleMarkerOptions.style.strokeOpacity || 1)
-          ),
-          width: circleMarkerOptions.style.strokeWidth || 1,
-        });
-      }
-
-      circleMarker.setStyle(
-        new Style({
-          fill,
-          stroke,
-        })
-      );
-    }
-
-    // set a feature id and a geometry group index for this geometry
-    circleMarker.set('featureId', featureId);
-    circleMarker.set('GeometryGroupIndex', this.activeGeometryGroupIndex);
-
-    // add geometry to feature collection
-    this.geometryGroups[this.activeGeometryGroupIndex].vectorSource.addFeature(circleMarker);
-
-    // add the geometry to the geometries array
-    this.geometries.push(circleMarker);
-
-    // emit an event that a circle vector has been added
-    api.event.emit(VectorPayload.forCircleMarker(EVENT_NAMES.VECTOR.EVENT_VECTOR_ADDED, this.#mapId, circleMarker));
-
-    return circleMarker;
-  };
-
-  /**
-   * Create a new marker
-   *
-   * @param {Coordinate} coordinate the long lat position of the marker
-   * @param options marker options including styling
-   * @param {string} optionalFeatureId an optional id to be used to manage this geometry
-   *
-   * @returns {Feature} a geometry containing the id and the created geometry
-   */
-  addMarker = (
-    coordinate: Coordinate,
-    options?: {
-      geometryLayout?: 'XY' | 'XYZ' | 'XYM' | 'XYZM';
-      style?: TypeFeatureStyle;
-    },
-    optionalFeatureId?: string
-  ): Feature => {
-    const markerOptions = options || {};
-
-    const featureId = generateId(optionalFeatureId);
-
-    // create a line geometry
-    const marker = new Feature({
-      geometry: new Point(coordinate, markerOptions.geometryLayout).transform(
-        'EPSG:4326',
-        api.projection.projections[api.map(this.#mapId).currentProjection]
-      ),
-    });
-
-    // if style is provided then set override the vector layer style for this feature
-    if (markerOptions.style) {
-      let fill: Fill | undefined;
-      let stroke: Stroke | undefined;
-
-      if (markerOptions.style.fillColor) {
-        fill = new Fill({
-          color: asString(setAlphaColor(asArray(markerOptions.style.fillColor), markerOptions.style.fillOpacity || 1)),
-        });
-      }
-
-      if (markerOptions.style.strokeColor || markerOptions.style.strokeOpacity || markerOptions.style.strokeWidth) {
-        stroke = new Stroke({
-          color: asString(setAlphaColor(asArray(markerOptions.style.strokeColor || 'blue'), markerOptions.style.strokeOpacity || 1)),
-          width: markerOptions.style.strokeWidth || 1,
-        });
-      }
-
-      marker.setStyle(
-        new Style({
-          fill,
-          stroke,
-        })
-      );
-    }
-
-    // set a feature id and a geometry group index for this geometry
-    marker.set('featureId', featureId);
-    marker.set('GeometryGroupIndex', this.activeGeometryGroupIndex);
-
-    // add geometry to feature collection
-    this.geometryGroups[this.activeGeometryGroupIndex].vectorSource.addFeature(marker);
-
-    // add the geometry to the geometries array
-    this.geometries.push(marker);
-
-    // emit an event that a marker vector has been added
-    api.event.emit(VectorPayload.forMarker(EVENT_NAMES.VECTOR.EVENT_VECTOR_ADDED, this.#mapId, marker));
-
-    return marker;
   };
 
   /**

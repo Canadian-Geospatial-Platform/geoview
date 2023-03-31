@@ -291,12 +291,13 @@
           const coord = generateRandomCoord();
 
           // call an api function to draw a polygon
-          const circleMarker = cgpv.api.map('mapWM').layer.vector.addCircleMarker([coord[0], coord[1]], 1.0, {
+          const circle = cgpv.api.map('mapWM').layer.vector.addCircle([coord[0], coord[1]], {
             style: {
               strokeColor: 'red',
               strokeOpacity: 0.15,
               fillColor: '#f03',
               fillOpacity: 0.15,
+              radius: 1,
             },
           });
         }
