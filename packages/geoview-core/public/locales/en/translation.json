@@ -46,7 +46,8 @@
     "opacity": "Opacity",
     "expand_legend": "Expand Legend",
     "toggle_cluster": "Toggle Clustering",
-    "toggle_opacity": "Toggle Opacity"
+    "toggle_opacity": "Toggle Opacity",
+    "zoom_to": "Zoom to Layer"
   },
   "datagrid": {
     "exportJson": "Download GeoJSON",

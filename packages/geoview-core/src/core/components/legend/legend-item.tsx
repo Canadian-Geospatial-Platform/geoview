@@ -44,6 +44,7 @@ import {
 import { MapContext } from '../../app-start';
 import { AbstractGeoViewVector } from '../../../geo/layer/geoview-layers/vector/abstract-geoview-vector';
 import { disableScrolling } from '../../utils/utilities';
+import { Extent } from 'ol/extent';
 
 const sxClasses = {
   expandableGroup: {
@@ -133,6 +134,7 @@ export interface TypeLegendItemProps {
   toggleParentVisible?: () => void;
   expandAll?: boolean;
   hideAll?: boolean;
+  canZoomTo?: boolean;
 }
 
 /**
@@ -152,6 +154,7 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
     toggleParentVisible,
     expandAll,
     hideAll,
+    canZoomTo,
   } = props;
 
   const { t, i18n } = useTranslation<string>();
@@ -180,10 +183,11 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
   const [layerName, setLayerName] = useState<string>('');
   const [menuAnchorElement, setMenuAnchorElement] = useState<null | HTMLElement>(null);
   const [opacity, setOpacity] = useState<number>(1);
+  const [zoomToExtent, setZoomtoExtent] = useState<Extent | undefined>();
+
   const closeIconRef = useRef() as RefObject<HTMLButtonElement>;
   const stackIconRef = useRef() as MutableRefObject<HTMLDivElement | undefined>;
   const maxIconRef = useRef() as RefObject<HTMLButtonElement>;
-
   const menuOpen = Boolean(menuAnchorElement);
 
   const getGroupsDetails = (): boolean => {
@@ -383,6 +387,11 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
     }
   };
 
+  const handleZoomTo = () => {
+    api.map(mapId).zoomToExtent(zoomToExtent!);
+    handleCloseMenu();
+  };
+
   useEffect(() => {
     document.addEventListener('keydown', (e) => disableScrolling(e, stackIconRef));
     return () => {
@@ -412,6 +421,13 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
       ?.source as TypeVectorSourceInitialConfig;
     setIsClusterToggleEnabled(source?.cluster?.enable ?? false);
     // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    const bounds = api.map(mapId).layer?.geoviewLayers[layerId].getMetadataBounds() || undefined;
+    if (bounds) {
+      setZoomtoExtent(bounds);
+    }
   }, []);
 
   return (
@@ -518,6 +534,12 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
             )}
           </MenuItem>
         )}
+
+        {canZoomTo && groupItems.length === 0 && (
+          <MenuItem onClick={handleZoomTo} disabled={!zoomToExtent}>
+            <ListItemText>{t('legend.zoom_to')}</ListItemText>
+          </MenuItem>
+        )}
       </Menu>
       <Collapse in={isOpacityOpen} timeout="auto">
         <Box sx={sxClasses.opacityMenu}>
@@ -565,6 +587,7 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
                 toggleParentVisible={handleToggleLayer}
                 expandAll={expandAll}
                 hideAll={hideAll}
+                canZoomTo={canZoomTo}
               />
             ))}
           </Box>
