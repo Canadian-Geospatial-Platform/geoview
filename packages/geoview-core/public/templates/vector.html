@@ -44,20 +44,20 @@
     </div>
     <button class="create-group-btn">Create Geometry Group</button>
     <input type="text" id="groupname" />
-    <div id="created-group"></div>
-    <label>If not provided, default group will be used</label>
+    <div>
+      <label>Active Geometry Group</label>
+      <select name="selectGroupsName" id="selectGroupsName">
+        <option value="">Default</option>
+      </select>
+      <button class="delete-group-btn">Delete Active Group</button>
+    </div>
     <div class="toolbar">
       <button class="add-polyline-btn">Add Polyline</button>
       <button class="add-polygon-btn">Add Polygon</button>
       <button class="add-circle-btn">Add Circle</button>
-      <button class="add-circle-marker-btn">Add Circle Marker</button>
       <button class="add-marker-icon-btn">Add Marker Icon</button>
     </div>
-    <button class="delete-group-btn">Delete Group</button>
-    <label>
-      The Delete Group button will delete the group provided above. if the input field is empty, all the geometries created in the default
-      group will be deleted. If the group name is invalid, nothing is done and the input field is cleared.
-    </label>
+    <label> Geometries will be created in the active group. The Delete Group button will delete geometries from the active group. </label>
     <div
       id="mapWM"
       class="llwp-map"
@@ -94,7 +94,6 @@
     <script>
       // TODO: for layer.vector.add* add a optional param to specify the geometry group - UPDATE CODE AND SAMPLE
       function addPolyline(map) {
-        cgpv.api.map(map).layer.vector.setActiveGeometryGroup(document.getElementById('groupname').value);
         // call an api function to draw a polyline with default styles
         const polyline1 = cgpv.api.map(map).layer.vector.addPolyline(
           [
@@ -131,13 +130,9 @@
             },
           }
         );
-
-
       }
 
       function addPolygon(map) {
-        cgpv.api.map(map).layer.vector.setActiveGeometryGroup(document.getElementById('groupname').value);
-
         // call an api function to draw a polygon with default styles
         const polygon1 = cgpv.api.map(map).layer.vector.addPolygon(
           [
@@ -189,60 +184,28 @@
       }
 
       function addCircle(map) {
-        cgpv.api.map(map).layer.vector.setActiveGeometryGroup(document.getElementById('groupname').value);
-
         // call an api function to draw a circle with default style
-        const circle1 = cgpv.api.map(map).layer.vector.addCircle([-100, 50], 1, undefined);
-
+        const circle1 = cgpv.api.map(map).layer.vector.addCircle([-100, 50], undefined);
 
         // call an api function to draw a circle with 1 style
-        const circle2 = cgpv.api.map(map).layer.vector.addCircle([-90, 50], 1, {
+        const circle2 = cgpv.api.map(map).layer.vector.addCircle([-90, 50], {
           style: {
-            strokeColor: 'red'
+            strokeColor: 'red',
+            radius: 5
           },
         });
 
         // call an api function to draw a circle with some styles
-        const circle3 = cgpv.api.map(map).layer.vector.addCircle([-80, 50], 1, {
+        const circle3 = cgpv.api.map(map).layer.vector.addCircle([-80, 50], {
           style: {
             fillColor: 'orange',
             fillOpacity: 0.5,
+            radius: 2
           },
         });
 
         // call an api function to draw a circle with all styles
-        const circle4 = cgpv.api.map(map).layer.vector.addCircle([-80, 50], 1, {
-          style: {
-            strokeColor: 'black',
-            fillColor: 'orange',
-            fillOpacity: 0.5,
-          },
-        });
-      }
-
-      function addCircleMarker(map) {
-        cgpv.api.map(map).layer.vector.setActiveGeometryGroup(document.getElementById('groupname').value);
-
-        // call an api function to draw a circle marker with default styles
-        const circleMarker1 = cgpv.api.map(map).layer.vector.addCircleMarker([-100, 55], 1, undefined);
-
-        // call an api function to draw a circle marker with 1 style
-        const circleMarker2 = cgpv.api.map(map).layer.vector.addCircleMarker([-90, 55], 1, {
-          style: {
-            strokeColor: 'red',
-          },
-        });
-
-        // call an api function to draw a circle marker with some styles
-        const circleMarker3 = cgpv.api.map(map).layer.vector.addCircleMarker([-80, 55], 1, {
-          style: {
-            fillColor: 'orange',
-            fillOpacity: 0.5,
-          },
-        });
-
-        // call an api function to draw a circle marker with all styles
-        const circleMarker4 = cgpv.api.map(map).layer.vector.addCircleMarker([-70, 55], 1, {
+        const circle4 = cgpv.api.map(map).layer.vector.addCircle([-60, 50], {
           style: {
             strokeColor: 'black',
             fillColor: 'orange',
@@ -252,8 +215,6 @@
       }
 
       function addMarkerIcon(map) {
-        cgpv.api.map(map).layer.vector.setActiveGeometryGroup(document.getElementById('groupname').value);
-
         // call an api function to draw a marker icon with default styles
         const markerIcon1 = cgpv.api.map(map).layer.vector.addMarkerIcon([-100, 60], undefined);
 
@@ -279,7 +240,6 @@
 
       // initialize cgpv and api events, a callback is optional, used if calling api's after the rendering is ready
       cgpv.init(function () {
-        let groupNames = [];
         console.log('api is ready');
 
         //create snippets
@@ -305,44 +265,44 @@
         });
 
         // get add circle marker button element and add event handler
-        var addCircleMarkerBtn = document.getElementsByClassName('add-circle-marker-btn')[0];
-        addCircleMarkerBtn.addEventListener('click', function (e) {
-          addCircleMarker('mapWM');
-        });
-
-        // get add circle marker button element and add event handler
         var addMarkerIconBtn = document.getElementsByClassName('add-marker-icon-btn')[0];
         addMarkerIconBtn.addEventListener('click', function (e) {
           addMarkerIcon('mapWM');
+        });
+
+        // option list for delete geometry groups
+        const optionSelect = document.getElementById('selectGroupsName');
+        const optionList = optionSelect.options;
+        optionSelect.addEventListener('change', function (e) {
+          console.log(optionList[optionList.selectedIndex].value)
+          cgpv.api.map('mapWM').layer.vector.setActiveGeometryGroup(optionList[optionList.selectedIndex].value);
         });
 
         // get delete GeomtryGroup button element and add event handler
         var deleteGeometryGroup = document.getElementsByClassName('delete-group-btn')[0];
         deleteGeometryGroup.addEventListener('click', function (e) {
           // call an api function to  delete the geometry group
-          var groupName = document.getElementById('groupname').value ? document.getElementById('groupname').value : '';
-          if (groupName) {
-            const groupIndex = groupNames.findIndex((groupNameFromArray) => groupNameFromArray === groupName);
-            if (groupIndex === -1) document.getElementById('groupname').value = '';
-            else {
-              groupNames.splice(groupIndex, 1);
-              cgpv.api.map('mapWM').layer.vector.deleteGeometryGroup(groupName);
-            }
+          const groupName = optionList[optionList.selectedIndex].value;
+
+          if (groupName !== '') {
+            cgpv.api.map('mapWM').layer.vector.deleteGeometryGroup(groupName);
+            optionList.remove(optionList.selectedIndex);
+            cgpv.api.map('mapWM').layer.vector.setActiveGeometryGroup()
           } else {
             cgpv.api.map('mapWM').layer.vector.setActiveGeometryGroup();
             cgpv.api.map('mapWM').layer.vector.deleteGeometryGroup();
           }
-          document.getElementById('created-group').textContent = groupNames.join(', ');
         });
 
         // get create GeomtryFromGroup button element and add event handler
         var createGeometryFromGroup = document.getElementsByClassName('create-group-btn')[0];
         createGeometryFromGroup.addEventListener('click', function (e) {
-          // call an api function to  delete the geometry group
+          // create geometry group
           var name = document.getElementById('groupname').value ? document.getElementById('groupname').value : '';
-          cgpv.api.map('mapWM').layer.vector.createGeometryGroup(name);
-          groupNames.push(name);
-          document.getElementById('created-group').textContent = groupNames.join(', ');
+          if (name !== '') {
+            cgpv.api.map('mapWM').layer.vector.createGeometryGroup(name);
+            optionList.add(new Option(name, name));
+          }
         });
       });
     </script>
