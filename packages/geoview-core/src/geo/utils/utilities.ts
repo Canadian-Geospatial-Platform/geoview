@@ -1,6 +1,7 @@
 import axios from 'axios';
 
-import { WMSCapabilities } from 'ol/format';
+import { WMSCapabilities, WKT } from 'ol/format';
+import { Geometry } from 'ol/geom';
 
 import { Cast, TypeJsonObject } from '../../core/types/global-types';
 import { xmlToJson } from '../../core/utils/utilities';
@@ -17,6 +18,24 @@ interface TypeCSSStyleDeclaration extends CSSStyleDeclaration {
 }
 
 export class GeoUtilities {
+  /**
+   * Returns the WKT representation of a given geoemtry
+   * @function geometryToWKT
+   * @param {string} geometry the geometry
+   * @returns {string | null} the WKT representation of the geometry
+   */
+  geometryToWKT = (geometry: Geometry): string | null => {
+    // This method should be static, but I've made it like the others here as I think what's exported via the api is an instance not the class itself.
+    // Therefore applications importing geoUtilities wouldn't be able to see the method.
+    // See api.constructor: this.geoUtilities = new GeoUtilities();
+    if (geometry) {
+      // Get the wkt for the geometry
+      const format = new WKT();
+      return format.writeGeometry(geometry);
+    }
+    return null;
+  };
+
   /**
    * Fetch the json response from the ESRI map server to get REST endpoint metadata
    * @function getESRIServiceMetadata
