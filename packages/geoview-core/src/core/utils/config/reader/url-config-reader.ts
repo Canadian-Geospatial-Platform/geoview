@@ -121,7 +121,8 @@ export class URLmapConfigReader {
       let versionUsed = urlParams.v as TypeValidVersions;
       if (versionUsed) versionUsed = configValidation.validateVersion(versionUsed);
 
-      let center = (urlParams.c as string).split(',');
+      let center;
+      if (urlParams.c) center = (urlParams.c as string).split(',');
       if (!center) center = ['-100', '60'];
 
       const basemapOptions = Cast<TypeBasemapOptions>(this.parseObjectFromUrl(urlParams.b as string));
