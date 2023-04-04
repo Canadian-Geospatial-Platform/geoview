@@ -79,6 +79,7 @@ export class Modify extends Interaction {
 
   /**
    * Handles when the modification has started
+   * @param {OLModifyEvent} e the modify started event as received from the Open Layers interaction
    */
   onModifyStarted = (e: OLModifyEvent) => {
     api.event.emit(modifyPayload(EVENT_NAMES.INTERACTION.EVENT_MODIFY_STARTED, this.mapViewer.mapId, e));
@@ -86,6 +87,7 @@ export class Modify extends Interaction {
 
   /**
    * Handles when the modification has ended
+   * @param {OLModifyEvent} e the modify ended event as received from the Open Layers interaction
    */
   onModifyEnded = (e: OLModifyEvent) => {
     api.event.emit(modifyPayload(EVENT_NAMES.INTERACTION.EVENT_MODIFY_ENDED, this.mapViewer.mapId, e));
