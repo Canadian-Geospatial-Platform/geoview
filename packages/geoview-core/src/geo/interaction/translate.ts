@@ -26,6 +26,7 @@ export class Translate extends Interaction {
 
   /**
    * Initialize Translate component
+   * @param {TranslateOptions} options the essential options for the translating interaction
    */
   constructor(options: TranslateOptions) {
     super(options);
