@@ -67,6 +67,7 @@ export class Translate extends Interaction {
 
   /**
    * Handles when the translation has started
+   * @param {OLTranslateEvent} e the translate started event as received from the Open Layers interaction
    */
   onTranslateStarted = (e: OLTranslateEvent) => {
     api.event.emit(translatePayload(EVENT_NAMES.INTERACTION.EVENT_TRANSLATE_STARTED, this.mapViewer.mapId, e));
@@ -74,6 +75,7 @@ export class Translate extends Interaction {
 
   /**
    * Handles when the translation has ended
+   * @param {OLTranslateEvent} e the translate ended event as received from the Open Layers interaction
    */
   onTranslateEnded = (e: OLTranslateEvent) => {
     api.event.emit(translatePayload(EVENT_NAMES.INTERACTION.EVENT_TRANSLATE_ENDED, this.mapViewer.mapId, e));
