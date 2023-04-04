@@ -24,6 +24,7 @@ export class Snap extends Interaction {
 
   /**
    * initialize modify component
+   * @param {SnapOptions} options the essential options for the snapping interaction
    */
   constructor(options: SnapOptions) {
     super(options);
