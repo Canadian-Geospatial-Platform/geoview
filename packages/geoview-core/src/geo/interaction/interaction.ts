@@ -1,6 +1,6 @@
 import { Interaction as OLInteraction } from 'ol/interaction';
-// import OLBaseEvent from 'ol/events/Event';
 import { MapViewer } from '../map/map';
+// import OLBaseEvent from 'ol/events/Event'; Uncomment this line to start handling core interaction events
 
 /**
  * Options for interactions
