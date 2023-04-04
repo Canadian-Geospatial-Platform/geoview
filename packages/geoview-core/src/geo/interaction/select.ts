@@ -68,6 +68,7 @@ export class Select extends Interaction {
 
   /**
    * Handles when the selection has changed
+   * @param {OLSelectEvent} e the select changed event as received from the Open Layers interaction
    */
   onSelectChanged = (e: OLSelectEvent) => {
     // Raises EVENT_SELECTED event via the api
