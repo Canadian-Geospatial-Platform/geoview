@@ -30,6 +30,7 @@ export class Modify extends Interaction {
 
   /**
    * Initialize Modify component
+   * @param {ModifyOptions} options the essential options for the modifying interaction
    */
   constructor(options: ModifyOptions) {
     super(options);
