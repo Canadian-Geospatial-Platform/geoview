@@ -30,6 +30,7 @@ export class Draw extends Interaction {
 
   /**
    * Initialize Draw component
+   * @param {DrawOptions} options the essential options for the drawing interaction
    */
   constructor(options: DrawOptions) {
     super(options);
