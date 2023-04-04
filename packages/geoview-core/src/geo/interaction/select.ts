@@ -30,6 +30,7 @@ export class Select extends Interaction {
 
   /**
    * Initialize Select component
+   * @param {SelectOptions} options the essential options for the selection interaction
    */
   constructor(options: SelectOptions) {
     super(options);
