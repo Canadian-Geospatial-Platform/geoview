@@ -27,21 +27,6 @@ export interface CirclePayload extends VectorPayload {
     circle: Feature;
 }
 /**
- * type guard function that redefines a PayloadBaseClass as a CircleMarkerPayload
- * if the type attribute of the verifyIfPayload parameter is valid. The type ascention
- * applies only to the true block of the if clause.
- *
- * @param {PayloadBaseClass} verifyIfPayload object to test in order to determine if the type ascention is valid
- * @returns {boolean} returns true if the payload is valid
- */
-export declare const payloadIsACircleMarker: (verifyIfPayload: PayloadBaseClass) => verifyIfPayload is CircleMarkerPayload;
-/**
- * Additional attributes needed to define a CircleMarkerPayload
- */
-export interface CircleMarkerPayload extends VectorPayload {
-    circleMarker: Feature;
-}
-/**
  * type guard function that redefines a PayloadBaseClass as a MarkerPayload
  * if the type attribute of the verifyIfPayload parameter is valid. The type ascention
  * applies only to the true block of the if clause.
@@ -112,16 +97,6 @@ export declare class VectorPayload extends PayloadBaseClass {
      * @returns {CirclePayload} the CirclePayload object created
      */
     static forCircle: (event: EventStringId, handlerName: string | null, circle: Feature) => CirclePayload;
-    /**
-     * Static method used to create a CircleMarkerPayload
-     *
-     * @param {EventStringId} event the event identifier for which the payload is constructed
-     * @param {string | null} handlerName the handler Name
-     * @param {Feature} circleMarker the circle marker payload
-     *
-     * @returns {CircleMarkerPayload} the CircleMarkerPayload object created
-     */
-    static forCircleMarker: (event: EventStringId, handlerName: string | null, circleMarker: Feature) => CircleMarkerPayload;
     /**
      * Static method used to create a MarkerPayload
      *

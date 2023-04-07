@@ -30,7 +30,27 @@ export type TypePanelProps = {
     title: string | TypeJsonValue;
     /** Panel body content. */
     content?: React.ReactNode | Element;
+    /** Custom panel styles */
+    panelStyles?: PanelStyles;
 };
+export interface PanelStyles {
+    /** Panel/Card Container style object */
+    panelContainer?: {
+        [key: string]: string;
+    };
+    /** Panel/Card Wrapper style object */
+    panelCard?: {
+        [key: string]: string;
+    };
+    /** Panel/Card header style object */
+    panelCardHeader?: {
+        [key: string]: string;
+    };
+    /** Panel/Card content style object */
+    panelCardContent?: {
+        [key: string]: string;
+    };
+}
 /** ******************************************************************************************************************************
  * Interface for the button properties used when creating a new button.
  */

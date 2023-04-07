@@ -1,6 +1,6 @@
 /// <reference types="react" />
 import { CheckboxListAPI } from '../list/checkbox-list/checkbox-list-api';
-import { TypePanelProps } from './panel-types';
+import { PanelStyles, TypePanelProps } from './panel-types';
 /**
  * Class used to handle creating a new panel
  *
@@ -18,6 +18,7 @@ export declare class PanelApi {
     buttonId: string;
     mapId: string;
     checkboxListAPI?: CheckboxListAPI;
+    panelStyles?: PanelStyles;
     /**
      * Initialize a new panel
      *
