@@ -1,4 +1,4 @@
-import { createElement } from 'react';
+import { createElement, Fragment } from 'react';
 import { api } from '../../../app';
 import { Legend } from './legend';
 import { LegendItem, TypeLegendItemProps } from './legend-item';
@@ -46,15 +46,12 @@ export class LegendApi {
     const { layerIds, isRemoveable, canSetOpacity, expandAll, hideAll } = props;
     const legendItems = layerIds.map((layerId) => {
       const geoviewLayerInstance = api.map(this.mapId).layer.geoviewLayers[layerId];
-      return createElement(LegendItem, {
-        key: `layerKey-${layerId}`,
-        layerId,
-        geoviewLayerInstance,
-        isRemoveable,
-        canSetOpacity,
-        expandAll,
-        hideAll,
-      });
+
+      return createElement(
+        Fragment,
+        { key: layerId },
+        createElement(LegendItem, { layerId, geoviewLayerInstance, isRemoveable, canSetOpacity, expandAll, hideAll })
+      );
     });
     return createElement('div', {}, createElement(List, { sx: { width: '100%' } }, legendItems));
   };
@@ -66,6 +63,6 @@ export class LegendApi {
   createLegendItem = (props: TypeLegendItemProps) => {
     const { layerId } = props;
     const geoviewLayerInstance = api.map(this.mapId).layer.geoviewLayers[layerId];
-    return createElement(LegendItem, { layerId, geoviewLayerInstance });
+    return createElement(LegendItem, { layerId, geoviewLayerInstance, key: layerId });
   };
 }

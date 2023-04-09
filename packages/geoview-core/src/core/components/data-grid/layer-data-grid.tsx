@@ -244,11 +244,14 @@ export function LayerDataGrid(props: CustomDataGridProps) {
    */
   function CustomExportButton(props: ButtonProps) {
     return (
-      <GridToolbarExportContainer onResize={undefined} onResizeCapture={undefined} {...props}>
-        <GridCsvExportMenuItem options={csvOptions} />
-        <JsonExportMenuItem />
-        <GridPrintExportMenuItem options={printOptions} />
-      </GridToolbarExportContainer>
+      <>
+        {/* @ts-ignore: */}
+        <GridToolbarExportContainer {...props}>
+          <GridCsvExportMenuItem options={csvOptions} />
+          <JsonExportMenuItem />
+          <GridPrintExportMenuItem options={printOptions} />
+        </GridToolbarExportContainer>
+      </>
     );
   }
 
@@ -282,13 +285,16 @@ export function LayerDataGrid(props: CustomDataGridProps) {
   function CustomToolbar(props: GridToolbarContainerProps) {
     const label = !mapfiltered ? t('datagrid.filterMap') : t('datagrid.stopFilterMap');
     return (
-      <GridToolbarContainer {...props}>
-        <GridToolbarColumnsButton onResize={undefined} onResizeCapture={undefined} />
-        <GridToolbarFilterButton onResize={undefined} onResizeCapture={undefined} />
+      <GridToolbarContainer>
+        {/* @ts-ignore */}
+        <GridToolbarColumnsButton />
+        {/* @ts-ignore */}
+        <GridToolbarFilterButton />
         <Button>
           <Switch size="small" onChange={() => filterMap()} title={label} checked={mapfiltered} />
         </Button>
-        <GridToolbarDensitySelector onResize={undefined} onResizeCapture={undefined} />
+        {/* @ts-ignore */}
+        <GridToolbarDensitySelector />
         <CustomExportButton />
       </GridToolbarContainer>
     );
