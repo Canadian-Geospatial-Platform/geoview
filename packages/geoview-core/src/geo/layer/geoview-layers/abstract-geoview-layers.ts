@@ -65,6 +65,22 @@ export interface TypeWmsLegend extends Omit<TypeLegend, 'styleConfig'> {
   legend: HTMLCanvasElement;
 }
 
+/**
+ * type guard function that redefines a TypeLegend as a TypeWmsLegend
+ * if the event attribute of the verifyIfPayload parameter is valid. The type ascention
+ * applies only to the true block of the if clause.
+ *
+ * @param {TypeLegend} verifyIfLegend object to test in order to determine if the type ascention is valid
+ * @returns {boolean} returns true if the payload is valid
+ */
+export const isImageStaticLegend = (verifyIfLegend: TypeLegend): verifyIfLegend is TypeImageStaticLegend => {
+  return verifyIfLegend?.type === 'imageStatic';
+};
+
+export interface TypeImageStaticLegend extends Omit<TypeLegend, 'styleConfig'> {
+  legend: HTMLCanvasElement;
+}
+
 const validEvents: TypeGeoviewLayerType[] = ['GeoJSON', 'esriDynamic', 'esriFeature', 'ogcFeature', 'ogcWfs', 'GeoPackage'];
 /**
  * type guard function that redefines a TypeLegend as a TypeVectorLegend
@@ -102,6 +118,7 @@ export type TypeLayerStyles = { Point?: TypeStyleRepresentation; LineString?: Ty
 const DEFAULT_LAYER_NAMES: Record<TypeGeoviewLayerType, string> = {
   esriDynamic: 'Esri Dynamic Layer',
   esriFeature: 'Esri Feature Layer',
+  imageStatic: 'Static Image Layer',
   GeoJSON: 'GeoJson Layer',
   geoCore: 'GeoCore Layer',
   GeoPackage: 'GeoPackage Layer',
@@ -112,7 +129,17 @@ const DEFAULT_LAYER_NAMES: Record<TypeGeoviewLayerType, string> = {
 };
 
 // Definition of the keys used to create the constants of the GeoView layer
-type LayerTypesKey = 'ESRI_DYNAMIC' | 'ESRI_FEATURE' | 'GEOJSON' | 'GEOCORE' | 'GEOPACKAGE' | 'XYZ_TILES' | 'OGC_FEATURE' | 'WFS' | 'WMS';
+type LayerTypesKey =
+  | 'ESRI_DYNAMIC'
+  | 'ESRI_FEATURE'
+  | 'IMAGE_STATIC'
+  | 'GEOJSON'
+  | 'GEOCORE'
+  | 'GEOPACKAGE'
+  | 'XYZ_TILES'
+  | 'OGC_FEATURE'
+  | 'WFS'
+  | 'WMS';
 
 /**
  * Type of GeoView layers
@@ -120,6 +147,7 @@ type LayerTypesKey = 'ESRI_DYNAMIC' | 'ESRI_FEATURE' | 'GEOJSON' | 'GEOCORE' | '
 export type TypeGeoviewLayerType =
   | 'esriDynamic'
   | 'esriFeature'
+  | 'imageStatic'
   | 'GeoJSON'
   | 'geoCore'
   | 'GeoPackage'
@@ -134,6 +162,7 @@ export type TypeGeoviewLayerType =
 export const CONST_LAYER_TYPES: Record<LayerTypesKey, TypeGeoviewLayerType> = {
   ESRI_DYNAMIC: 'esriDynamic',
   ESRI_FEATURE: 'esriFeature',
+  IMAGE_STATIC: 'imageStatic',
   GEOJSON: 'GeoJSON',
   GEOCORE: 'geoCore',
   GEOPACKAGE: 'GeoPackage',
@@ -759,7 +788,7 @@ export abstract class AbstractGeoViewLayer {
    * Return the type of the specified field.
    *
    * @param {string} fieldName field name for which we want to get the type.
-   * @param {TypeLayerEntryConfig} layeConfig layer configuration.
+   * @param {TypeLayerEntryConfig} layerConfig layer configuration.
    *
    * @returns {null | codedValueType | rangeDomainType} The domain of the field.
    */
@@ -769,7 +798,7 @@ export abstract class AbstractGeoViewLayer {
    * Return the domain of the specified field. If the type can not be found, return 'string'.
    *
    * @param {string} fieldName field name for which we want to get the domain.
-   * @param {TypeLayerEntryConfig} layeConfig layer configuration.
+   * @param {TypeLayerEntryConfig} layerConfig layer configuration.
    *
    * @returns {'string' | 'date' | 'number'} The type of the field.
    */

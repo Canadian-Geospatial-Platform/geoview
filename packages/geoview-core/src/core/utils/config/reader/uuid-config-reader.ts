@@ -6,6 +6,7 @@ import { TypeListOfGeoviewLayerConfig, TypeOfServer } from '../../../../geo/map/
 import { CONST_LAYER_TYPES } from '../../../../geo/layer/geoview-layers/abstract-geoview-layers';
 import { TypeEsriDynamicLayerConfig, TypeEsriDynamicLayerEntryConfig } from '../../../../geo/layer/geoview-layers/raster/esri-dynamic';
 import { TypeEsriFeatureLayerConfig, TypeEsriFeatureLayerEntryConfig } from '../../../../geo/layer/geoview-layers/vector/esri-feature';
+import { TypeImageStaticLayerConfig, TypeImageStaticLayerEntryConfig } from '../../../../geo/layer/geoview-layers/raster/image-static';
 import { TypeWMSLayerConfig, TypeWmsLayerEntryConfig } from '../../../../geo/layer/geoview-layers/raster/wms';
 import { TypeWFSLayerConfig, TypeWfsLayerEntryConfig } from '../../../../geo/layer/geoview-layers/vector/wfs';
 import { TypeOgcFeatureLayerConfig, TypeOgcFeatureLayerEntryConfig } from '../../../../geo/layer/geoview-layers/vector/ogc-feature';
@@ -296,6 +297,34 @@ export class UUIDmapConfigReader {
                     },
                   };
                   return geoPackageLayerEntryConfig;
+                }),
+              };
+              listOfGeoviewLayerConfig.push(layerConfig);
+            } else if (layerType === CONST_LAYER_TYPES.IMAGE_STATIC) {
+              const layerConfig: TypeImageStaticLayerConfig = {
+                geoviewLayerId: `${id}`,
+                geoviewLayerName: {
+                  en: name as string,
+                  fr: name as string,
+                },
+                metadataAccessPath: {
+                  en: url as string,
+                  fr: url as string,
+                },
+                geoviewLayerType: 'imageStatic',
+                listOfLayerEntryConfig: (layerEntries as TypeJsonArray).map((item): TypeImageStaticLayerEntryConfig => {
+                  const imageStaticLayerEntryConfig: TypeImageStaticLayerEntryConfig = {
+                    entryType: 'raster',
+                    layerId: `${item.id}`,
+                    source: {
+                      dataAccessPath: {
+                        en: url as string,
+                        fr: url as string,
+                      },
+                      extent: [],
+                    },
+                  };
+                  return imageStaticLayerEntryConfig;
                 }),
               };
               listOfGeoviewLayerConfig.push(layerConfig);

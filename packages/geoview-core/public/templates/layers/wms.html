@@ -347,6 +347,8 @@
       'suportedLanguages': ['en']
     }"
     ></div>
+    <button type="button" class="collapsible">Visibility and filters</button>
+    <pre style="height: 20pc; overflow-y: scroll" id="layer2-buttons-pre" class="panel"></pre>
     <button class="collapsible">Get Legend</button>
     <pre style="height: 20pc; overflow-y: scroll" id="LegendsId2-table-pre" class="panel"></pre>
     <button type="button" class="collapsible">Get Feature Info</button>
@@ -427,6 +429,7 @@
           createConfigSnippet();
 
           createTableOfFilter('LYR1');
+          createTableOfFilter('LYR2');
           cgpv.api.event.emit({ handlerName: 'LYR1/LegendsId1', event: cgpv.api.eventNames.GET_LEGENDS.TRIGGER });
           cgpv.api.event.emit({ handlerName: 'LYR2/LegendsId2', event: cgpv.api.eventNames.GET_LEGENDS.TRIGGER });
           cgpv.api.event.emit({ handlerName: 'LYR3/LegendsId3', event: cgpv.api.eventNames.GET_LEGENDS.TRIGGER });

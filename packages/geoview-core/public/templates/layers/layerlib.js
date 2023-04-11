@@ -438,7 +438,7 @@ function displayLegend(layerSetId, resultSets) {
   legendTable.appendChild(table);
   let createHeader = true;
   Object.keys(resultSets).forEach((layerPath) => {
-    if (resultSets[layerPath]?.type === 'ogcWms') {
+    if (resultSets[layerPath]?.type === 'ogcWms' || resultSets[layerPath]?.type === 'imageStatic') {
       if (createHeader) {
         createHeader = false;
         const tableRow1 = document.createElement('tr');
