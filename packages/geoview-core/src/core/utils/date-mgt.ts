@@ -90,10 +90,11 @@ dayjs.extend(localizedFormat);
  */
 
 /**
- * IMPORANT WMS-Time dimension Specification
- * Conformant WMS servers and clients SHALL specify all time values in Coordinated Universal Time (UTC) so that “Z” is the only time zone designator allowed.
- * Conformant WMS servers SHALL use the dimension REFERENCE_TIME only with units declared using the units identifier ”ISO8601” to indicate time values conformant with the standard ISO8601:2000
- * The use of a DEFAULT value for REFERENCE_TIME is intended for mass market clients.
+ * IMPORTANT WMS-Time dimension Specification
+ * Conformant WMS servers and clients SHALL specify all time values in Coordinated Universal Time (UTC) so that “Z” is the only
+ * time zone designator allowed. Conformant WMS servers SHALL use the dimension REFERENCE_TIME only with units declared using the
+ * units identifier ”ISO8601” to indicate time values conformant with the standard ISO8601:2000. The use of a DEFAULT value for
+ * REFERENCE_TIME is intended for mass market clients.
  */
 
 /**
@@ -193,7 +194,7 @@ export class DateMgt {
     if (typeof date === 'string' && !isValidDate(date)) throw INVALID_DATE;
 
     // create or reformat date in ISO format
-    const pattern = `${datePattern}${timePattern !== undefined ? timePattern : ''}`;
+    const pattern = `${DEFAULT_DATE_PRECISION[datePattern]}${timePattern !== undefined ? DEFAULT_TIME_PRECISION[timePattern] : ''}`;
 
     // output as local by default
     return dayjs(date).utc(true).format(pattern);

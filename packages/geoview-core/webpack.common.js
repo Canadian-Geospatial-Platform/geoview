@@ -18,7 +18,19 @@ const hash = JSON.stringify(childProcess.execSync('git rev-parse HEAD').toString
 console.log(`Build CGP Viewer: ${major}.${minor}.${patch} - ${date}`);
 
 // inject all sample files
-const multipleHtmlPlugins = glob.sync('./public/templates/*.html').map((name) => {
+const multipleHtmlPlugins1 = glob.sync('./public/templates/*.html').map((name) => {
+  return new HtmlWebpackPlugin({
+    template: `${name}`,
+    filename: `${name.substring(name.lastIndexOf('/') + 1, name.length)}`,
+    title: 'Canadian Geospatial Platform Viewer',
+    inject: 'head',
+    scriptLoading: 'blocking',
+    chunks: ['cgpv-main'],
+  });
+});
+
+// inject all layer files
+const multipleHtmlPlugins2 = glob.sync('./public/templates/layers/*.html').map((name) => {
   return new HtmlWebpackPlugin({
     template: `${name}`,
     filename: `${name.substring(name.lastIndexOf('/') + 1, name.length)}`,
@@ -123,6 +135,7 @@ const config = {
         { from: './public/plugins', to: 'plugins', noErrorOnMissing: true },
         { from: './public/favicon.ico' },
         { from: './public/templates/codedoc.js' },
+        { from: './public/templates/layers/layerlib.js' },
       ],
     }),
     new webpack.BannerPlugin({
@@ -139,7 +152,9 @@ const config = {
         timestamp: Date.now(),
       },
     }),
-  ].concat(multipleHtmlPlugins),
+  ]
+    .concat(multipleHtmlPlugins1)
+    .concat(multipleHtmlPlugins2),
 };
 
 module.exports = config;
