@@ -60,42 +60,14 @@ export declare class Vector {
      * Create a new circle
      *
      * @param {Coordinate} coordinate long lat coordinate of the circle
-     * @param {number} radius an optional radius
      * @param options circle options including styling
      * @param {string} optionalFeatureId an optional id to be used to manage this geometry
      *
      * @returns {Feature} a geometry containing the id and the created geometry
      */
-    addCircle: (coordinate: Coordinate, radius?: number, options?: {
+    addCircle: (coordinate: Coordinate, options?: {
         geometryLayout?: 'XY' | 'XYZ' | 'XYM' | 'XYZM';
         style?: TypeFeatureCircleStyle;
-    }, optionalFeatureId?: string) => Feature;
-    /**
-     * Create a new circle marker
-     *
-     * @param {Coordinate} coordinate long lat coordinate of the circle marker
-     * @param {number} radius optional circle marker radius
-     * @param options circle marker options including styling
-     * @param {string} optionalFeatureId an optional id to be used to manage this geometry
-     *
-     * @returns {Feature} a geometry containing the id and the created geometry
-     */
-    addCircleMarker: (coordinate: Coordinate, radius?: number, options?: {
-        geometryLayout?: 'XY' | 'XYZ' | 'XYM' | 'XYZM';
-        style?: TypeFeatureCircleStyle;
-    }, optionalFeatureId?: string) => Feature;
-    /**
-     * Create a new marker
-     *
-     * @param {Coordinate} coordinate the long lat position of the marker
-     * @param options marker options including styling
-     * @param {string} optionalFeatureId an optional id to be used to manage this geometry
-     *
-     * @returns {Feature} a geometry containing the id and the created geometry
-     */
-    addMarker: (coordinate: Coordinate, options?: {
-        geometryLayout?: 'XY' | 'XYZ' | 'XYM' | 'XYZM';
-        style?: TypeFeatureStyle;
     }, optionalFeatureId?: string) => Feature;
     /**
      * Create a new marker icon

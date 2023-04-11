@@ -1,5 +1,13 @@
+import { Geometry } from 'ol/geom';
 import { TypeJsonObject } from '../../core/types/global-types';
 export declare class GeoUtilities {
+    /**
+     * Returns the WKT representation of a given geoemtry
+     * @function geometryToWKT
+     * @param {string} geometry the geometry
+     * @returns {string | null} the WKT representation of the geometry
+     */
+    geometryToWKT: (geometry: Geometry) => string | null;
     /**
      * Fetch the json response from the ESRI map server to get REST endpoint metadata
      * @function getESRIServiceMetadata
