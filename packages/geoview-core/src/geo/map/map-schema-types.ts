@@ -629,7 +629,10 @@ export type TypeOfServer = 'mapserver' | 'geoserver' | 'qgis';
 /** ******************************************************************************************************************************
  * Initial settings for image sources.
  */
-export type TypeSourceImageInitialConfig = TypeSourceImageWmsInitialConfig | TypeSourceImageEsriInitialConfig;
+export type TypeSourceImageInitialConfig =
+  | TypeSourceImageWmsInitialConfig
+  | TypeSourceImageEsriInitialConfig
+  | TypeSourceImageStaticInitialConfig;
 
 /** ******************************************************************************************************************************
  * Initial settings for image sources.
@@ -659,6 +662,14 @@ export interface TypeSourceImageWmsInitialConfig extends TypeBaseSourceImageInit
   serverType?: TypeOfServer;
   /** Style to apply. Default = '' */
   style?: string | string[];
+}
+
+/** ******************************************************************************************************************************
+ * Initial settings for static image sources.
+ */
+export interface TypeSourceImageStaticInitialConfig extends TypeBaseSourceImageInitialConfig {
+  /** Image extent */
+  extent: Extent;
 }
 
 /** ******************************************************************************************************************************
@@ -701,7 +712,7 @@ export type TypeTileGrid = {
  * Initial settings for tile image sources.
  */
 export type TypeSourceTileInitialConfig = {
-  /** The path (English/French) to reach the data to display. If not specified, metadatAccessPath will be assigne dto it. */
+  /** The path (English/French) to reach the data to display. If not specified, metadatAccessPath will be assigne to it. */
   dataAccessPath: TypeLocalizedString;
   /** The crossOrigin attribute for loaded images. Note that you must provide a crossOrigin value if you want to access pixel data
    * with the Canvas renderer.
