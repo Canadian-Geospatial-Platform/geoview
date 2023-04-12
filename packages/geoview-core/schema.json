@@ -481,7 +481,11 @@
     },
 
     "TypeSourceImageInitialConfig": {
-      "anyOf": [{ "$ref": "#/definitions/TypeSourceImageWmsInitialConfig" }, { "$ref": "#/definitions/TypeSourceImageEsriInitialConfig" }]
+      "anyOf": [
+        { "$ref": "#/definitions/TypeSourceImageWmsInitialConfig" },
+        { "$ref": "#/definitions/TypeSourceImageEsriInitialConfig" },
+        { "$ref": "#/definitions/TypeSourceImageStaticInitialConfig" }
+      ]
     },
 
     "TypeSourceImageWmsInitialConfig": {
@@ -508,9 +512,19 @@
           "description": "The type of the remote WMS server. The default value is mapserver."
         },
         "style": {
-          "type": "string",
-          "default": "",
-          "description": "Style to apply"
+          "anyOf": [
+            {
+              "type": "string",
+              "description": "Single style to apply"
+            },
+            {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "Array of style to choose."
+            }
+          ]
         }
       }
     },
@@ -554,6 +568,37 @@
       "enum": ["png", "jpg", "gif", "svg"],
       "default": "png",
       "description": "The format of the exported image. The default format is png."
+    },
+
+    "TypeSourceImageStaticInitialConfig": {
+      "additionalProperties": false,
+      "type": "object",
+      "properties": {
+        "dataAccessPath": {
+          "$ref": "#/definitions/TypeLocalizedString",
+          "description": "The path (English/French) to reach the data to display. If not specified, metadatAccessPath will be assigne dto it."
+        },
+        "crossOrigin": {
+          "type": "string",
+          "description": "The crossOrigin attribute for loaded images. Note that you must provide a crossOrigin value if you want to access pixel data with the Canvas renderer."
+        },
+        "projection": {
+          "type": "integer",
+          "description": "Spatial Reference EPSG code supported (https://epsg.io/). We support Web Mercator and Lambert Conical Conform Canada."
+        },
+        "featureInfo": {
+          "$ref": "#/definitions/TypeFeatureInfoLayerConfig"
+        },
+        "extent": {
+          "type": "array",
+          "minItems": 4,
+          "maxItems": 4,
+          "items": {
+            "type": "number"
+          },
+          "description": "The extent of the static image. Called with [minX, minY, maxX, maxY] extent coordinates."
+        }
+      }
     },
 
     "TypeSourceTileInitialConfig": {
@@ -996,7 +1041,7 @@
     "TypeGeoviewLayerType": {
       "type": "string",
       "items": {
-        "enum": ["esriDynamic", "esriFeature", "GeoJSON", "geoCore", "GeoPackage", "xyzTiles", "ogcFeature", "ogcWfs", "ogcWms"]
+        "enum": ["esriDynamic", "esriFeature", "imageStatic", "GeoJSON", "geoCore", "GeoPackage", "xyzTiles", "ogcFeature", "ogcWfs", "ogcWms"]
       },
       "description": "Type of GeoView layer."
     },
@@ -1156,7 +1201,8 @@
           "type": "string",
           "description": "An optional proxy to be used for dealing with same-origin issues.  URL must either be a relative path on the same server or an absolute path on a server which sets CORS headers."
         }
-      }
+      },
+      "required": ["keys"]
     },
 
     "TypeDisplayLanguage": {
@@ -1201,7 +1247,7 @@
         "externalPackages": { "$ref": "#/definitions/TypeExternalPackages" },
         "serviceUrls": { "$ref": "#/definitions/TypeServiceUrls" },
         "suportedLanguages": { "$ref": "#/definitions/TypeListOfLocalizedLanguages" },
-        "versionUsed": { "$ref": "#/definitions/TypeValidVersions" }
+        "schemaVersionUsed": { "$ref": "#/definitions/TypeValidVersions" }
       },
       "required": ["map", "suportedLanguages"]
     }
@@ -1221,7 +1267,7 @@
     "externalPackages": { "$ref": "#/definitions/TypeExternalPackages" },
     "serviceUrls": { "$ref": "#/definitions/TypeServiceUrls" },
     "suportedLanguages": { "$ref": "#/definitions/TypeListOfLocalizedLanguages" },
-    "versionUsed": { "$ref": "#/definitions/TypeValidVersions" }
+    "schemaVersionUsed": { "$ref": "#/definitions/TypeValidVersions" }
   },
   "required": ["map", "suportedLanguages"]
 }

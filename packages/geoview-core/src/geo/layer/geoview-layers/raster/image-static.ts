@@ -1,81 +1,68 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable block-scoped-var, no-var, vars-on-top, no-param-reassign */
-import TileLayer from 'ol/layer/Tile';
-import { Options as TileOptions } from 'ol/layer/BaseTile';
-import XYZ, { Options as SourceOptions } from 'ol/source/XYZ';
+import axios from 'axios';
+
+import ImageLayer from 'ol/layer/Image';
+import Static, { Options as SourceOptions } from 'ol/source/ImageStatic';
+import { Options as ImageOptions } from 'ol/layer/BaseImage';
 import { Coordinate } from 'ol/coordinate';
-import TileGrid, { Options as TileGridOptions } from 'ol/tilegrid/TileGrid';
 import { Pixel } from 'ol/pixel';
 import { transformExtent } from 'ol/proj';
-import { Extent } from 'ol/extent';
 
 import defaultsDeep from 'lodash/defaultsDeep';
-import { AbstractGeoViewLayer, CONST_LAYER_TYPES } from '../abstract-geoview-layers';
+import { Cast, toJsonObject, TypeJsonObject } from '../../../../core/types/global-types';
+import { AbstractGeoViewLayer, CONST_LAYER_TYPES, TypeLegend } from '../abstract-geoview-layers';
 import { AbstractGeoViewRaster, TypeBaseRasterLayer } from './abstract-geoview-raster';
 import {
+  TypeImageLayerEntryConfig,
   TypeLayerEntryConfig,
-  TypeSourceTileInitialConfig,
-  TypeTileLayerEntryConfig,
+  TypeSourceImageStaticInitialConfig,
   TypeGeoviewLayerConfig,
   TypeListOfLayerEntryConfig,
   layerEntryIsGroupLayer,
-  TypeLocalizedString,
 } from '../../../map/map-schema-types';
-import { getLocalizedValue, getXMLHttpRequest } from '../../../../core/utils/utilities';
 import { codedValueType, rangeDomainType, TypeArrayOfFeatureInfoEntries } from '../../../../api/events/payloads/get-feature-info-payload';
-import { Cast, toJsonObject } from '../../../../core/types/global-types';
+import { getLocalizedValue, getXMLHttpRequest } from '../../../../core/utils/utilities';
 import { api } from '../../../../app';
 import { Layer } from '../../layer';
 
-// ? Do we keep this TODO ? Dynamic parameters can be placed on the dataAccessPath and initial settings can be used on xyz-tiles.
-// TODO: Implement method to validate XYZ tile service
-//
-// NOTE: The signature of tile services may vary depending of if it's a dynamic or static tile service. Dynamic tile services solutions like TiTiler allows users
-// to define query parameters such as a COG url, a TileMatrixSet and a resampling method.
-// e.g.: http://{s}.somedomain.com/blabla/{z}/{x}/{y}{r}.png?url=http://smtg/cog.tif&TileMatrixSetId=CanadianNAD83_LCC&resampling_method=bilinear
-
-// TODO: Add more customization (minZoom, maxZoom, TMS)
-
-export type TypeSourceImageXYZTilesInitialConfig = TypeSourceTileInitialConfig;
-
-export interface TypeXYZTilesLayerEntryConfig extends Omit<TypeTileLayerEntryConfig, 'source'> {
-  source: TypeSourceImageXYZTilesInitialConfig;
+export interface TypeImageStaticLayerEntryConfig extends Omit<TypeImageLayerEntryConfig, 'source'> {
+  source: TypeSourceImageStaticInitialConfig;
 }
 
-export interface TypeXYZTilesConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig'> {
-  geoviewLayerType: 'xyzTiles';
-  listOfLayerEntryConfig: TypeXYZTilesLayerEntryConfig[];
+export interface TypeImageStaticLayerConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig'> {
+  geoviewLayerType: 'imageStatic';
+  listOfLayerEntryConfig: TypeImageStaticLayerEntryConfig[];
 }
 
 /** *****************************************************************************************************************************
- * type guard function that redefines a TypeGeoviewLayerConfig as a TypeXYZTilesConfig if the geoviewLayerType attribute of the
- * verifyIfLayer parameter is XYZ_TILES. The type ascention applies only to the true block of the if clause that use this
- * function.
+ * type guard function that redefines a TypeGeoviewLayerConfig as a TypeImageStaticLayerConfig if the geoviewLayerType attribute of the
+ * verifyIfLayer parameter is ImageStatic. The type ascention applies only to the true block of the if clause that use this function.
  *
  * @param {TypeGeoviewLayerConfig} verifyIfLayer Polymorphic object to test in order to determine if the type ascention is valid.
  *
  * @returns {boolean} true if the type ascention is valid.
  */
-export const layerConfigIsXYZTiles = (verifyIfLayer: TypeGeoviewLayerConfig): verifyIfLayer is TypeXYZTilesConfig => {
-  return verifyIfLayer?.geoviewLayerType === CONST_LAYER_TYPES.XYZ_TILES;
+export const layerConfigIsImageStatic = (verifyIfLayer: TypeGeoviewLayerConfig): verifyIfLayer is TypeImageStaticLayerConfig => {
+  return verifyIfLayer?.geoviewLayerType === CONST_LAYER_TYPES.IMAGE_STATIC;
 };
 
 /** *****************************************************************************************************************************
- * type guard function that redefines an AbstractGeoViewLayer as an XYZTiles if the type attribute of the verifyIfGeoViewLayer
- * parameter is XYZ_TILES. The type ascention applies only to the true block of the if clause that use this function.
+ * type guard function that redefines an AbstractGeoViewLayer as a ImageStatic if the type attribute of the verifyIfGeoViewLayer
+ * parameter is ImageStatic. The type ascention applies only to the true block of the if clause that use this function.
  *
- * @param {AbstractGeoViewLayer} verifyIfGeoViewLayer Polymorphic object to test in order to determine if the type ascention
- * is valid
+ * @param {AbstractGeoViewLayer} verifyIfGeoViewLayer Polymorphic object to test in order to determine if the type ascention is
+ * valid.
  *
  * @returns {boolean} true if the type ascention is valid.
  */
-export const geoviewLayerIsXYZTiles = (verifyIfGeoViewLayer: AbstractGeoViewLayer): verifyIfGeoViewLayer is XYZTiles => {
-  return verifyIfGeoViewLayer?.type === CONST_LAYER_TYPES.XYZ_TILES;
+export const geoviewLayerIsImageStatic = (verifyIfGeoViewLayer: AbstractGeoViewLayer): verifyIfGeoViewLayer is ImageStatic => {
+  return verifyIfGeoViewLayer?.type === CONST_LAYER_TYPES.IMAGE_STATIC;
 };
 
 /** *****************************************************************************************************************************
- * type guard function that redefines a TypeLayerEntryConfig as a TypeXYZTilesLayerEntryConfig if the geoviewLayerType attribute
- * of the verifyIfGeoViewEntry.geoviewRootLayer attribute is XYZ_TILES. The type ascention applies only to the true block of
+ * type guard function that redefines a TypeLayerEntryConfig as a TypeImageStaticLayerEntryConfig if the geoviewLayerType attribute of the
+ * verifyIfGeoViewEntry.geoviewRootLayer attribute is ImageStatic. The type ascention applies only to the true block of
  * the if clause that use this function.
  *
  * @param {TypeLayerEntryConfig} verifyIfGeoViewEntry Polymorphic object to test in order to determine if the type ascention is
@@ -83,33 +70,30 @@ export const geoviewLayerIsXYZTiles = (verifyIfGeoViewLayer: AbstractGeoViewLaye
  *
  * @returns {boolean} true if the type ascention is valid.
  */
-export const geoviewEntryIsXYZTiles = (
+export const geoviewEntryIsImageStatic = (
   verifyIfGeoViewEntry: TypeLayerEntryConfig
-): verifyIfGeoViewEntry is TypeXYZTilesLayerEntryConfig => {
-  return verifyIfGeoViewEntry?.geoviewRootLayer?.geoviewLayerType === CONST_LAYER_TYPES.XYZ_TILES;
+): verifyIfGeoViewEntry is TypeImageStaticLayerEntryConfig => {
+  return verifyIfGeoViewEntry?.geoviewRootLayer?.geoviewLayerType === CONST_LAYER_TYPES.IMAGE_STATIC;
 };
 
 // ******************************************************************************************************************************
 // ******************************************************************************************************************************
 /** *****************************************************************************************************************************
- * a class to add xyz-tiles layer
+ * A class to add image static layer.
  *
  * @exports
- * @class XYZTiles
+ * @class ImageStatic
  */
 // ******************************************************************************************************************************
-export class XYZTiles extends AbstractGeoViewRaster {
-  // layer
-  layer!: TileLayer<XYZ>;
-
+export class ImageStatic extends AbstractGeoViewRaster {
   /** ***************************************************************************************************************************
    * Initialize layer
    *
    * @param {string} mapId the id of the map
-   * @param {TypeXYZTilesConfig} layerConfig the layer configuration
+   * @param {TypeImageStaticLayerConfig} layerConfig the layer configuration
    */
-  constructor(mapId: string, layerConfig: TypeXYZTilesConfig) {
-    super(CONST_LAYER_TYPES.XYZ_TILES, layerConfig, mapId);
+  constructor(mapId: string, layerConfig: TypeImageStaticLayerConfig) {
+    super(CONST_LAYER_TYPES.IMAGE_STATIC, layerConfig, mapId);
   }
 
   /** ***************************************************************************************************************************
@@ -121,14 +105,11 @@ export class XYZTiles extends AbstractGeoViewRaster {
    * @returns {'string' | 'date' | 'number'} The type of the field.
    */
   protected getFieldType(fieldName: string, layerConfig: TypeLayerEntryConfig): 'string' | 'date' | 'number' {
-    const fieldDefinitions = this.layerMetadata[Layer.getLayerPath(layerConfig)].source.featureInfo;
-    const fieldIndex = getLocalizedValue(Cast<TypeLocalizedString>(fieldDefinitions.outfields), this.mapId)?.split(',').indexOf(fieldName);
-    if (!fieldIndex || fieldIndex === -1) return 'string';
-    return (fieldDefinitions.fieldTypes as string).split(',')[fieldIndex!] as 'string' | 'date' | 'number';
+    return 'string';
   }
 
   /** ***************************************************************************************************************************
-   * Returns null. XYZ services don't have domains.
+   * Returns null. Image Static services don't have domains.
    *
    * @param {string} fieldName field name for which we want to get the domain.
    * @param {TypeLayerEntryConfig} layerConfig layer configuration.
@@ -146,21 +127,100 @@ export class XYZTiles extends AbstractGeoViewRaster {
    */
   protected getServiceMetadata(): Promise<void> {
     const promisedExecution = new Promise<void>((resolve) => {
-      const metadataUrl = getLocalizedValue(this.metadataAccessPath, this.mapId);
-      if (metadataUrl) {
-        getXMLHttpRequest(`${metadataUrl}?f=json`).then((metadataString) => {
-          if (metadataString === '{}')
-            throw new Error(`Cant't read service metadata for GeoView layer ${this.geoviewLayerId} of map ${this.mapId}.`);
-          else {
-            this.metadata = toJsonObject(JSON.parse(metadataString));
-            const { copyrightText } = this.metadata;
-            if (copyrightText) this.attributions.push(copyrightText as string);
-            resolve();
-          }
-        });
-      } else resolve();
+      // there is no metadata for static image layer type
+      resolve();
     });
     return promisedExecution;
+  }
+
+  /** ***************************************************************************************************************************
+   * Get the legend image of a layer.
+   *
+   * @param {TypeImageStaticLayerEntryConfig} layerConfig layer configuration.
+   *
+   * @returns {blob} image blob
+   */
+  private getLegendImage(layerConfig: TypeImageStaticLayerEntryConfig): Promise<string | ArrayBuffer | null> {
+    const promisedImage = new Promise<string | ArrayBuffer | null>((resolve) => {
+      const readImage = (blob: Blob): Promise<string | ArrayBuffer | null> =>
+        // eslint-disable-next-line @typescript-eslint/no-shadow
+        new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onloadend = () => resolve(reader.result);
+          reader.onerror = () => resolve(null);
+          reader.readAsDataURL(blob);
+        });
+
+      let legendUrl: string | undefined = getLocalizedValue(layerConfig.source.dataAccessPath, this.mapId);
+
+      if (legendUrl) {
+        legendUrl = legendUrl.toLowerCase().startsWith('http:') ? `https${legendUrl.slice(4)}` : legendUrl;
+
+        axios
+          .get<TypeJsonObject>(legendUrl, { responseType: 'blob', withCredentials: false })
+          .then((response) => {
+            resolve(readImage(Cast<Blob>(response.data)));
+          })
+          .catch((error) => resolve(null));
+      } else resolve(null);
+    });
+    return promisedImage;
+  }
+
+  /** ***************************************************************************************************************************
+   * Return the legend of the layer. When layerPathOrConfig is undefined, the activeLayer of the class is used. This routine
+   * return null when the layerPath specified is not found or when the layerPathOrConfig is undefined and the active layer
+   * is null or the selected layerConfig is undefined or null.
+   *
+   * @param {string | TypeLayerEntryConfig | null} layerPathOrConfig Optional layer path or configuration.
+   *
+   * @returns {Promise<TypeLegend | null>} The legend of the layer.
+   */
+  getLegend(layerPathOrConfig: string | TypeLayerEntryConfig | null = this.activeLayer): Promise<TypeLegend | null> {
+    const promisedLegend = new Promise<TypeLegend | null>((resolve) => {
+      const layerConfig = Cast<TypeImageStaticLayerEntryConfig | undefined | null>(
+        typeof layerPathOrConfig === 'string' ? this.getLayerConfig(layerPathOrConfig) : layerPathOrConfig
+      );
+      if (!layerConfig) resolve(null);
+
+      this.getLegendImage(layerConfig!).then((legendImage) => {
+        if (!legendImage)
+          resolve({
+            type: this.type,
+            layerPath: Layer.getLayerPath(layerConfig!),
+            layerName: layerConfig!.layerName,
+            legend: null,
+          });
+        else {
+          api
+            .map(this.mapId)
+            .geoviewRenderer.loadImage(legendImage as string)
+            .then((image) => {
+              if (image) {
+                const drawingCanvas = document.createElement('canvas');
+                drawingCanvas.width = image.width;
+                drawingCanvas.height = image.height;
+                const drawingContext = drawingCanvas.getContext('2d')!;
+                drawingContext.drawImage(image, 0, 0);
+                const legend: TypeLegend = {
+                  type: this.type,
+                  layerPath: Layer.getLayerPath(layerConfig!),
+                  layerName: layerConfig!.layerName,
+                  legend: drawingCanvas,
+                };
+                resolve(legend);
+              } else
+                resolve({
+                  type: this.type,
+                  layerPath: Layer.getLayerPath(layerConfig!),
+                  layerName: layerConfig!.layerName,
+                  legend: null,
+                });
+            });
+        }
+      });
+    });
+    return promisedLegend;
   }
 
   /** ***************************************************************************************************************************
@@ -200,7 +260,7 @@ export class XYZTiles extends AbstractGeoViewRaster {
         return true;
       }
 
-      // Note that XYZ metadata as we defined it does not contains metadata layer group. If you need geogson layer group,
+      // Note that Image Static metadata as we defined it does not contains metadata layer group. If you need geojson layer group,
       // you can define them in the configuration section.
       if (Array.isArray(this.metadata?.listOfLayerEntryConfig)) {
         const metadataLayerList = Cast<TypeLayerEntryConfig[]>(this.metadata?.listOfLayerEntryConfig);
@@ -226,40 +286,40 @@ export class XYZTiles extends AbstractGeoViewRaster {
   }
 
   /** ****************************************************************************************************************************
-   * This method creates a GeoView XYZTiles layer using the definition provided in the layerEntryConfig parameter.
+   * This method creates a GeoView Image Static layer using the definition provided in the layerEntryConfig parameter.
    *
-   * @param {TypeXYZTilesLayerEntryConfig} layerEntryConfig Information needed to create the GeoView layer.
+   * @param {TypeImageStaticLayerEntryConfig} layerEntryConfig Information needed to create the GeoView layer.
    *
    * @returns {TypeBaseRasterLayer} The GeoView raster layer that has been created.
    */
-  processOneLayerEntry(layerEntryConfig: TypeXYZTilesLayerEntryConfig): Promise<TypeBaseRasterLayer | null> {
+  processOneLayerEntry(layerEntryConfig: TypeImageStaticLayerEntryConfig): Promise<TypeBaseRasterLayer | null> {
     const promisedVectorLayer = new Promise<TypeBaseRasterLayer | null>((resolve) => {
       const sourceOptions: SourceOptions = {
-        url: getLocalizedValue(layerEntryConfig.source.dataAccessPath, this.mapId),
+        url: getLocalizedValue(layerEntryConfig.source.dataAccessPath, this.mapId) || '',
       };
-      if (layerEntryConfig.source.crossOrigin) sourceOptions.crossOrigin = layerEntryConfig.source.crossOrigin;
-      if (layerEntryConfig.source.projection) sourceOptions.projection = `EPSG:${layerEntryConfig.source.projection}`;
-      if (layerEntryConfig.source.tileGrid) {
-        const tileGridOptions: TileGridOptions = {
-          origin: layerEntryConfig.source.tileGrid?.origin,
-          resolutions: layerEntryConfig.source.tileGrid?.resolutions as number[],
-        };
-        if (layerEntryConfig.source.tileGrid?.tileSize) tileGridOptions.tileSize = layerEntryConfig.source.tileGrid?.tileSize;
-        if (layerEntryConfig.source.tileGrid?.extent) tileGridOptions.extent = layerEntryConfig.source.tileGrid?.extent;
-        sourceOptions.tileGrid = new TileGrid(tileGridOptions);
+      if (layerEntryConfig.source.crossOrigin) {
+        sourceOptions.crossOrigin = layerEntryConfig.source.crossOrigin;
+      } else {
+        sourceOptions.crossOrigin = 'Anonymous';
       }
 
-      const tileLayerOptions: TileOptions<XYZ> = { source: new XYZ(sourceOptions) };
-      // layerEntryConfig.initialSettings cannot be undefined because config-validation set it to {} if it is undefined.
-      if (layerEntryConfig.initialSettings?.className !== undefined)
-        tileLayerOptions.className = layerEntryConfig.initialSettings?.className;
-      if (layerEntryConfig.initialSettings?.extent !== undefined) tileLayerOptions.extent = layerEntryConfig.initialSettings?.extent;
-      if (layerEntryConfig.initialSettings?.maxZoom !== undefined) tileLayerOptions.maxZoom = layerEntryConfig.initialSettings?.maxZoom;
-      if (layerEntryConfig.initialSettings?.minZoom !== undefined) tileLayerOptions.minZoom = layerEntryConfig.initialSettings?.minZoom;
-      if (layerEntryConfig.initialSettings?.opacity !== undefined) tileLayerOptions.opacity = layerEntryConfig.initialSettings?.opacity;
-      if (layerEntryConfig.initialSettings?.visible !== undefined) tileLayerOptions.visible = layerEntryConfig.initialSettings?.visible;
+      if (layerEntryConfig.source.projection) {
+        sourceOptions.projection = `EPSG:${layerEntryConfig.source.projection}`;
+      } else throw new Error('Parameter projection is not define in source element of layerEntryConfig.');
 
-      layerEntryConfig.gvLayer = new TileLayer(tileLayerOptions);
+      if (layerEntryConfig.source.extent) {
+        sourceOptions.imageExtent = layerEntryConfig.source.extent;
+      } else throw new Error('Parameter extent is not define in source element of layerEntryConfig.');
+
+      const staticImageOptions: ImageOptions<Static> = { source: new Static(sourceOptions) };
+      // layerEntryConfig.initialSettings cannot be undefined because config-validation set it to {} if it is undefined.
+      if (layerEntryConfig.initialSettings?.extent !== undefined) staticImageOptions.extent = layerEntryConfig.initialSettings?.extent;
+      if (layerEntryConfig.initialSettings?.maxZoom !== undefined) staticImageOptions.maxZoom = layerEntryConfig.initialSettings?.maxZoom;
+      if (layerEntryConfig.initialSettings?.minZoom !== undefined) staticImageOptions.minZoom = layerEntryConfig.initialSettings?.minZoom;
+      if (layerEntryConfig.initialSettings?.opacity !== undefined) staticImageOptions.opacity = layerEntryConfig.initialSettings?.opacity;
+      if (layerEntryConfig.initialSettings?.visible !== undefined) staticImageOptions.visible = layerEntryConfig.initialSettings?.visible;
+
+      layerEntryConfig.gvLayer = new ImageLayer(staticImageOptions);
       resolve(layerEntryConfig.gvLayer);
     });
     return promisedVectorLayer;
@@ -271,43 +331,26 @@ export class XYZTiles extends AbstractGeoViewRaster {
    *
    * @param {TypeVectorLayerEntryConfig} layerEntryConfig The layer entry configuration to process.
    *
-   * @returns {Promise<void>} A promise that the vector layer configuration has its metadata processed.
+   * @returns {Promise<void>} A promise that the layer configuration has its metadata processed.
    */
-  protected processLayerMetadata(layerEntryConfig: TypeXYZTilesLayerEntryConfig): Promise<void> {
-    const promiseOfExecution = new Promise<void>((resolve) => {
-      if (!this.metadata) resolve();
-      else {
-        const metadataLayerConfigFound = Cast<TypeXYZTilesLayerEntryConfig[]>(this.metadata?.listOfLayerEntryConfig).find(
-          (metadataLayerConfig) => metadataLayerConfig.layerId === layerEntryConfig.layerId
-        );
-        // metadataLayerConfigFound can not be undefined because we have already validated the config exist
-        this.layerMetadata[Layer.getLayerPath(layerEntryConfig)] = toJsonObject(metadataLayerConfigFound);
-        layerEntryConfig.source = defaultsDeep(layerEntryConfig.source, metadataLayerConfigFound!.source);
-        layerEntryConfig.initialSettings = defaultsDeep(layerEntryConfig.initialSettings, metadataLayerConfigFound!.initialSettings);
-
-        if (layerEntryConfig.initialSettings?.extent)
-          layerEntryConfig.initialSettings.extent = transformExtent(
-            layerEntryConfig.initialSettings.extent,
-            'EPSG:4326',
-            `EPSG:${api.map(this.mapId).currentProjection}`
-          );
-
-        resolve();
-      }
+  protected processLayerMetadata(layerEntryConfig: TypeImageStaticLayerEntryConfig): Promise<void> {
+    const promisedExecution = new Promise<void>((resolve) => {
+      // there is no metadata for static image layer type
+      resolve();
     });
-    return promiseOfExecution;
+    return promisedExecution;
   }
 
   /** ***************************************************************************************************************************
-   * XYZ tiles return null because these services do not support getFeatureInfo queries. When getFeatureInfo is supported this
+   * Image Static return null because these services do not support getFeatureInfo queries. When getFeatureInfo is supported this
    * method returns feature information for all the features around the provided Pixel.
    *
    * @param {Coordinate} location The pixel coordinate that will be used by the query.
-   * @param {TypeXYZTilesLayerEntryConfig} layerConfig The layer configuration.
+   * @param {TypeImageStaticLayerEntryConfig} layerConfig The layer configuration.
    *
    * @returns {Promise<TypeArrayOfFeatureInfoEntries>} The feature info table.
    */
-  protected getFeatureInfoAtPixel(location: Pixel, layerConfig: TypeXYZTilesLayerEntryConfig): Promise<TypeArrayOfFeatureInfoEntries> {
+  protected getFeatureInfoAtPixel(location: Pixel, layerConfig: TypeImageStaticLayerEntryConfig): Promise<TypeArrayOfFeatureInfoEntries> {
     const promisedQueryResult = new Promise<TypeArrayOfFeatureInfoEntries>((resolve) => {
       resolve([]);
     });
@@ -315,17 +358,17 @@ export class XYZTiles extends AbstractGeoViewRaster {
   }
 
   /** ***************************************************************************************************************************
-   * XYZ tiles return null because these services do not support getFeatureInfo queries. When getFeatureInfo is supported this
+   * Image Static return null because these services do not support getFeatureInfo queries. When getFeatureInfo is supported this
    * method returns information for all the features around the provided coordinate.
    *
    * @param {Coordinate} location The coordinate that will be used by the query.
-   * @param {TypeXYZTilesLayerEntryConfig} layerConfig The layer configuration.
+   * @param {TypeImageStaticLayerEntryConfig} layerConfig The layer configuration.
    *
    * @returns {Promise<TypeArrayOfFeatureInfoEntries>} The feature info table.
    */
   protected getFeatureInfoAtCoordinate(
     location: Coordinate,
-    layerConfig: TypeXYZTilesLayerEntryConfig
+    layerConfig: TypeImageStaticLayerEntryConfig
   ): Promise<TypeArrayOfFeatureInfoEntries> {
     const promisedQueryResult = new Promise<TypeArrayOfFeatureInfoEntries>((resolve) => {
       resolve([]);
@@ -334,17 +377,17 @@ export class XYZTiles extends AbstractGeoViewRaster {
   }
 
   /** ***************************************************************************************************************************
-   * XYZ tiles return null because these services do not support getFeatureInfo queries. When getFeatureInfo is supported this
+   * Image Static return null because these services do not support getFeatureInfo queries. When getFeatureInfo is supported this
    * method returns feature information for all the features around the provided longitude latitude.
    *
    * @param {Coordinate} location The coordinate that will be used by the query.
-   * @param {TypeXYZTilesLayerEntryConfig} layerConfig The layer configuration.
+   * @param {TypeImageStaticLayerEntryConfig} layerConfig The layer configuration.
    *
    * @returns {Promise<TypeArrayOfFeatureInfoEntries>} The feature info table.
    */
   protected getFeatureInfoAtLongLat(
     location: Coordinate,
-    layerConfig: TypeXYZTilesLayerEntryConfig
+    layerConfig: TypeImageStaticLayerEntryConfig
   ): Promise<TypeArrayOfFeatureInfoEntries> {
     const promisedQueryResult = new Promise<TypeArrayOfFeatureInfoEntries>((resolve) => {
       resolve([]);
@@ -353,17 +396,17 @@ export class XYZTiles extends AbstractGeoViewRaster {
   }
 
   /** ***************************************************************************************************************************
-   * XYZ tiles return null because these services do not support getFeatureInfo queries. When getFeatureInfo is supported this
+   * Image Static return null because these services do not support getFeatureInfo queries. When getFeatureInfo is supported this
    * method returns feature information for all the features in the provided bounding box.
    *
    * @param {Coordinate} location The coordinate that will be used by the query.
-   * @param {TypeXYZTilesLayerEntryConfig} layerConfig The layer configuration.
+   * @param {TypeImageStaticLayerEntryConfig} layerConfig The layer configuration.
    *
    * @returns {Promise<TypeArrayOfFeatureInfoEntries>} The feature info table.
    */
   protected getFeatureInfoUsingBBox(
     location: Coordinate[],
-    layerConfig: TypeXYZTilesLayerEntryConfig
+    layerConfig: TypeImageStaticLayerEntryConfig
   ): Promise<TypeArrayOfFeatureInfoEntries> {
     const promisedQueryResult = new Promise<TypeArrayOfFeatureInfoEntries>((resolve) => {
       resolve([]);
@@ -372,17 +415,17 @@ export class XYZTiles extends AbstractGeoViewRaster {
   }
 
   /** ***************************************************************************************************************************
-   * XYZ tiles return null because these services do not support getFeatureInfo queries. When getFeatureInfo is supported this
+   * Image Static return null because these services do not support getFeatureInfo queries. When getFeatureInfo is supported this
    * method returns feature information for all the features in the provided polygon.
    *
    * @param {Coordinate} location The coordinate that will be used by the query.
-   * @param {TypeXYZTilesLayerEntryConfig} layerConfig The layer configuration.
+   * @param {TypeImageStaticLayerEntryConfig} layerConfig The layer configuration.
    *
    * @returns {Promise<TypeArrayOfFeatureInfoEntries>} The feature info table.
    */
   protected getFeatureInfoUsingPolygon(
     location: Coordinate[],
-    layerConfig: TypeXYZTilesLayerEntryConfig
+    layerConfig: TypeImageStaticLayerEntryConfig
   ): Promise<TypeArrayOfFeatureInfoEntries> {
     const promisedQueryResult = new Promise<TypeArrayOfFeatureInfoEntries>((resolve) => {
       resolve([]);

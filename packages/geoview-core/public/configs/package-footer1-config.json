@@ -3,7 +3,10 @@
     "interaction": "dynamic",
     "viewSettings": {
       "zoom": 3,
-      "center": [-100, 50],
+      "center": [
+        -100,
+        50
+      ],
       "projection": 3978
     },
     "basemapOptions": {
@@ -14,43 +17,103 @@
     "listOfGeoviewLayerConfig": [
       {
         "geoviewLayerId": "esriFeatureLYR4",
-        "geoviewLayerName": { "en": "Water quality at monitoring sites" },
+        "geoviewLayerName": {
+          "en": "Water quality at monitoring sites"
+        },
         "metadataAccessPath": {
           "en": "https://maps-cartes.ec.gc.ca/arcgis/rest/services/DMS/DEU_CSO_Volume/MapServer"
         },
         "geoviewLayerType": "esriFeature",
-        "listOfLayerEntryConfig": [{ "layerId": "8" }]
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "8"
+          }
+        ]
       },
       {
         "geoviewLayerId": "esriFeatureLYR5",
-        "geoviewLayerName": { "en": "Top Projects" },
+        "geoviewLayerName": {
+          "en": "Top Projects"
+        },
         "metadataAccessPath": {
           "en": "https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/900A_and_top_100_en/MapServer/"
         },
         "geoviewLayerType": "esriFeature",
-        "listOfLayerEntryConfig": [{ "layerId": "0" }]
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "0"
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "staticLYR10",
+        "geoviewLayerName": {
+          "en": "Static Image"
+        },
+        "geoviewLayerType": "imageStatic",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "thumbnail",
+            "layerName": {
+              "en": "DataCube"
+            },
+            "source": {
+              "dataAccessPath": {
+                "en": "https://datacube-prod-data-public.s3.ca-central-1.amazonaws.com/store/imagery/aerial/napl/napl-ring-of-fire/napl-ring-of-fire-1954-08-07-60k-thumbnail.png",
+                "fr": "https://datacube-prod-data-public.s3.ca-central-1.amazonaws.com/store/imagery/aerial/napl/napl-ring-of-fire/napl-ring-of-fire-1954-08-07-60k-thumbnail.png"
+              },
+              "extent": [
+                -87.77486341686723,
+                51.62285357468582,
+                -84.57727128084842,
+                53.833354975551075
+              ],
+              "projection": 4326
+            }
+          }
+        ]
       },
       {
         "geoviewLayerId": "geojsonLYR5",
-        "geoviewLayerName": { "en": "GeoJSON Sample" },
-        "metadataAccessPath": { "en": "./geojson/metadata.json" },
+        "geoviewLayerName": {
+          "en": "GeoJSON Sample"
+        },
+        "metadataAccessPath": {
+          "en": "./geojson/metadata.json"
+        },
         "geoviewLayerType": "GeoJSON",
         "listOfLayerEntryConfig": [
           {
             "layerId": "polygons.json",
-            "layerName": { "en": "Polygons" }
+            "layerName": {
+              "en": "Polygons"
+            }
           },
           {
             "layerId": "lines.json",
-            "layerName": { "en": "Lines" }
+            "layerName": {
+              "en": "Lines"
+            }
           },
           {
             "entryType": "group",
             "layerId": "point-feature-group",
-            "layerName": { "en": "point-feature-group" },
+            "layerName": {
+              "en": "point-feature-group"
+            },
             "listOfLayerEntryConfig": [
-              { "layerId": "icon_points.json", "layerName": { "en": "Icons" } },
-              { "layerId": "points.json", "layerName": { "en": "Points" } }
+              {
+                "layerId": "icon_points.json",
+                "layerName": {
+                  "en": "Icons"
+                }
+              },
+              {
+                "layerId": "points.json",
+                "layerName": {
+                  "en": "Points"
+                }
+              }
             ]
           }
         ]
@@ -58,8 +121,17 @@
     ]
   },
   "theme": "light",
-  "components": ["nav-bar", "north-arrow", "overview-map", "footer-bar"],
-  "corePackages": ["footer-panel"],
+  "components": [
+    "nav-bar",
+    "north-arrow",
+    "overview-map",
+    "footer-bar"
+  ],
+  "corePackages": [
+    "footer-panel"
+  ],
   "externalPackages": [],
-  "suportedLanguages": ["en"]
+  "suportedLanguages": [
+    "en"
+  ]
 }
