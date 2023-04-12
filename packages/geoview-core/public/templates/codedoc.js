@@ -122,7 +122,7 @@ function addDefaultShapes(map, groupKey) {
   map.layer.vector.setActiveGeometryGroup(groupKey);
 
   // Add dummy shapes
-  //map.layer.vector.addCircle([-98.94, 57.94], { style: { strokeColor: 'purple', strokeWidth: 2, radius: 40000 } });
+  map.layer.vector.addCircle([-98.94, 57.94], { style: { strokeColor: 'purple', strokeWidth: 2 } });
 
   // Add dummy shapes
   map.layer.vector.addMarkerIcon([-105.78, 57.52]);
@@ -142,7 +142,7 @@ function addDefaultShapes(map, groupKey) {
     [
       [
         [-96.71, 64.41],
-        [-93.10, 62.86],
+        [-93.1, 62.86],
         [-94.36, 56.67],
         [-96.71, 64.41],
       ],
