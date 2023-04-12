@@ -89,6 +89,11 @@
   <hr />
   <button type="button" class="collapsible">Configuration Snippet</button>
   <pre id="MAP1CS" class="panel"></pre>
+  <hr />
+  <button type="button" class="collapsible">Code Snippet</button>
+  <pre id="codeSnippet" class="panel"></pre>
+  <!-- /SNAP -->
+
 
   <script>
     let map1;
@@ -116,12 +121,7 @@
       // Init snap interactions
       const snap1 = map.initSnapInteractions(snapKey);
     }
-  </script>
-  <!-- /SNAP -->
 
-
-  <script>
-    // COMMON SCRIPT(!)
     // initialize cgpv and api events, a callback is optional, used if calling api's after the rendering is ready
     cgpv.init(function (mapId) {
       // If all maps initialized
