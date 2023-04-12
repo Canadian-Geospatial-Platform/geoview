@@ -2,12 +2,18 @@ import axios, { AxiosResponse } from 'axios';
 
 import { TypeJsonObject, TypeJsonArray, TypeJsonValue } from '../../../types/global-types';
 
-import { TypeListOfGeoviewLayerConfig, TypeOfServer } from '../../../../geo/map/map-schema-types';
+import {
+  TypeEsriDynamicLayerEntryConfig,
+  TypeImageStaticLayerEntryConfig,
+  TypeListOfGeoviewLayerConfig,
+  TypeOfServer,
+  TypeOgcWmsLayerEntryConfig,
+} from '../../../../geo/map/map-schema-types';
 import { CONST_LAYER_TYPES } from '../../../../geo/layer/geoview-layers/abstract-geoview-layers';
-import { TypeEsriDynamicLayerConfig, TypeEsriDynamicLayerEntryConfig } from '../../../../geo/layer/geoview-layers/raster/esri-dynamic';
+import { TypeEsriDynamicLayerConfig } from '../../../../geo/layer/geoview-layers/raster/esri-dynamic';
 import { TypeEsriFeatureLayerConfig, TypeEsriFeatureLayerEntryConfig } from '../../../../geo/layer/geoview-layers/vector/esri-feature';
-import { TypeImageStaticLayerConfig, TypeImageStaticLayerEntryConfig } from '../../../../geo/layer/geoview-layers/raster/image-static';
-import { TypeWMSLayerConfig, TypeWmsLayerEntryConfig } from '../../../../geo/layer/geoview-layers/raster/wms';
+import { TypeImageStaticLayerConfig } from '../../../../geo/layer/geoview-layers/raster/image-static';
+import { TypeWMSLayerConfig } from '../../../../geo/layer/geoview-layers/raster/wms';
 import { TypeWFSLayerConfig, TypeWfsLayerEntryConfig } from '../../../../geo/layer/geoview-layers/vector/wfs';
 import { TypeOgcFeatureLayerConfig, TypeOgcFeatureLayerEntryConfig } from '../../../../geo/layer/geoview-layers/vector/ogc-feature';
 import { TypeGeoJSONLayerConfig, TypeGeoJSONLayerEntryConfig } from '../../../../geo/layer/geoview-layers/vector/geojson';
@@ -35,11 +41,11 @@ export class UUIDmapConfigReader {
   private static getLayerConfigFromResponse(result: AxiosResponse<TypeJsonObject>): TypeListOfGeoviewLayerConfig {
     const listOfGeoviewLayerConfig: TypeListOfGeoviewLayerConfig = [];
 
-    if (result && result.data) {
-      for (let i = 0; i < result.data.length; i++) {
+    if (result?.data) {
+      for (let i = 0; i < (result.data as TypeJsonArray).length; i++) {
         const data = result.data[i];
 
-        if (data && data.layers && data.layers.length > 0) {
+        if (data?.layers && (data.layers as TypeJsonArray).length > 0) {
           const layer = data.layers[0];
 
           if (layer) {
@@ -61,7 +67,8 @@ export class UUIDmapConfigReader {
                 geoviewLayerType: 'esriDynamic',
                 listOfLayerEntryConfig: (layerEntries as TypeJsonArray).map((item): TypeEsriDynamicLayerEntryConfig => {
                   const esriDynamicLayerEntryConfig: TypeEsriDynamicLayerEntryConfig = {
-                    entryType: 'raster',
+                    schemaTag: 'esriDynamic',
+                    entryType: 'raster-image',
                     layerId: `${item.index}`,
                     source: {
                       dataAccessPath: {
@@ -75,7 +82,7 @@ export class UUIDmapConfigReader {
               };
               listOfGeoviewLayerConfig.push(layerConfig);
             } else if (isFeature) {
-              for (let j = 0; j < layerEntries.length; j++) {
+              for (let j = 0; j < (layerEntries as TypeJsonArray).length; j++) {
                 const featureUrl = `${url}/${layerEntries[j].index}`;
                 const layerConfig: TypeEsriFeatureLayerConfig = {
                   geoviewLayerId: `${id}`,
@@ -90,6 +97,7 @@ export class UUIDmapConfigReader {
                   geoviewLayerType: 'esriFeature',
                   listOfLayerEntryConfig: (layerEntries as TypeJsonArray).map((item): TypeEsriFeatureLayerEntryConfig => {
                     const esriFeatureLayerEntryConfig: TypeEsriFeatureLayerEntryConfig = {
+                      schemaTag: 'esriFeature',
                       entryType: 'vector',
                       layerId: `${item.index}`,
                       source: {
@@ -119,6 +127,7 @@ export class UUIDmapConfigReader {
                 geoviewLayerType: 'esriFeature',
                 listOfLayerEntryConfig: (layerEntries as TypeJsonArray).map((item): TypeEsriFeatureLayerEntryConfig => {
                   const esriFeatureLayerEntryConfig: TypeEsriFeatureLayerEntryConfig = {
+                    schemaTag: 'esriFeature',
                     entryType: 'vector',
                     layerId: `${item.index}`,
                     source: {
@@ -145,9 +154,10 @@ export class UUIDmapConfigReader {
                   fr: url as string,
                 },
                 geoviewLayerType: 'ogcWms',
-                listOfLayerEntryConfig: (layerEntries as TypeJsonArray).map((item): TypeWmsLayerEntryConfig => {
-                  const wmsLayerEntryConfig: TypeWmsLayerEntryConfig = {
-                    entryType: 'raster',
+                listOfLayerEntryConfig: (layerEntries as TypeJsonArray).map((item): TypeOgcWmsLayerEntryConfig => {
+                  const wmsLayerEntryConfig: TypeOgcWmsLayerEntryConfig = {
+                    schemaTag: 'ogcWms',
+                    entryType: 'raster-image',
                     layerId: `${item.id}`,
                     source: {
                       dataAccessPath: {
@@ -175,6 +185,7 @@ export class UUIDmapConfigReader {
                 geoviewLayerType: 'ogcWfs',
                 listOfLayerEntryConfig: (layerEntries as TypeJsonArray).map((item): TypeWfsLayerEntryConfig => {
                   const wfsLayerEntryConfig: TypeWfsLayerEntryConfig = {
+                    schemaTag: 'ogcWfs',
                     entryType: 'vector',
                     layerId: `${item.id}`,
                     source: {
@@ -203,6 +214,7 @@ export class UUIDmapConfigReader {
                 geoviewLayerType: 'ogcFeature',
                 listOfLayerEntryConfig: (layerEntries as TypeJsonArray).map((item): TypeOgcFeatureLayerEntryConfig => {
                   const ogcFeatureLayerEntryConfig: TypeOgcFeatureLayerEntryConfig = {
+                    schemaTag: 'ogcFeature',
                     entryType: 'vector',
                     layerId: `${item.id}`,
                     source: {
@@ -231,6 +243,7 @@ export class UUIDmapConfigReader {
                 geoviewLayerType: 'GeoJSON',
                 listOfLayerEntryConfig: (layerEntries as TypeJsonArray).map((item): TypeGeoJSONLayerEntryConfig => {
                   const geoJSONLayerEntryConfig: TypeGeoJSONLayerEntryConfig = {
+                    schemaTag: 'GeoJSON',
                     entryType: 'vector',
                     layerId: `${item.id}`,
                     source: {
@@ -259,7 +272,8 @@ export class UUIDmapConfigReader {
                 geoviewLayerType: 'xyzTiles',
                 listOfLayerEntryConfig: (layerEntries as TypeJsonArray).map((item): TypeXYZTilesLayerEntryConfig => {
                   const xyzTilesLayerEntryConfig: TypeXYZTilesLayerEntryConfig = {
-                    entryType: 'raster',
+                    schemaTag: 'xyzTiles',
+                    entryType: 'raster-tile',
                     layerId: `${item.id}`,
                     source: {
                       dataAccessPath: {
@@ -286,6 +300,7 @@ export class UUIDmapConfigReader {
                 geoviewLayerType: 'GeoPackage',
                 listOfLayerEntryConfig: (layerEntries as TypeJsonArray).map((item): TypeGeoPackageLayerEntryConfig => {
                   const geoPackageLayerEntryConfig: TypeGeoPackageLayerEntryConfig = {
+                    schemaTag: 'GeoPackage',
                     entryType: 'vector',
                     layerId: `${item.id}`,
                     source: {
@@ -314,7 +329,8 @@ export class UUIDmapConfigReader {
                 geoviewLayerType: 'imageStatic',
                 listOfLayerEntryConfig: (layerEntries as TypeJsonArray).map((item): TypeImageStaticLayerEntryConfig => {
                   const imageStaticLayerEntryConfig: TypeImageStaticLayerEntryConfig = {
-                    entryType: 'raster',
+                    schemaTag: 'imageStatic',
+                    entryType: 'raster-image',
                     layerId: `${item.id}`,
                     source: {
                       dataAccessPath: {

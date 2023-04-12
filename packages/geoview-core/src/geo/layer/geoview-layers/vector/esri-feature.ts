@@ -14,6 +14,7 @@ import {
   TypeVectorSourceInitialConfig,
   TypeGeoviewLayerConfig,
   TypeListOfLayerEntryConfig,
+  TypeEsriDynamicLayerEntryConfig,
 } from '../../../map/map-schema-types';
 
 import { getLocalizedValue } from '../../../../core/utils/utilities';
@@ -29,7 +30,6 @@ import {
 } from '../esri-layer-common';
 import { AbstractGeoViewVector } from './abstract-geoview-vector';
 import { TypeJsonArray, TypeJsonObject } from '../../../../core/types/global-types';
-import { TypeEsriDynamicLayerEntryConfig } from '../raster/esri-dynamic';
 import { codedValueType, rangeDomainType } from '../../../../api/events/payloads/get-feature-info-payload';
 import { Layer } from '../../layer';
 
