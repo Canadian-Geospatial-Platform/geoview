@@ -21,6 +21,7 @@ export abstract class Interaction {
 
   /**
    * initialize modify component
+   * @param {InteractionOptions} options object to configure the initialization of the Interaction mother class
    */
   constructor(public options: InteractionOptions) {
     // Keep reference
@@ -29,6 +30,7 @@ export abstract class Interaction {
 
   /**
    * Starts the drawing interaction on the map
+   * @param {OLInteraction} olInteraction the Open Layers Interaction object the map should start interacting on
    */
   protected startInteraction(olInteraction: OLInteraction) {
     // Add modifier interaction on the map
@@ -37,6 +39,7 @@ export abstract class Interaction {
 
   /**
    * Stops the drawing interaction on the map
+   * @param {OLInteraction} olInteraction the Open Layers Interaction object the map should stop interacting on
    */
   protected stopInteraction(olInteraction: OLInteraction) {
     // Stop modifier interaction on the map
