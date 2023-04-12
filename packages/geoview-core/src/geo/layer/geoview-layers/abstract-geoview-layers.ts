@@ -19,8 +19,10 @@ import {
   TypeStyleConfig,
   TypeLayerGroupEntryConfig,
   TypeVectorLayerEntryConfig,
-  TypeImageLayerEntryConfig,
   layerEntryIsVector,
+  TypeLayerEntryType,
+  TypeOgcWmsLayerEntryConfig,
+  TypeEsriDynamicLayerEntryConfig,
 } from '../../map/map-schema-types';
 import {
   codedValueType,
@@ -170,6 +172,22 @@ export const CONST_LAYER_TYPES: Record<LayerTypesKey, TypeGeoviewLayerType> = {
   OGC_FEATURE: 'ogcFeature',
   WFS: 'ogcWfs',
   WMS: 'ogcWms',
+};
+
+/**
+ * Definition of the GeoView layer constants
+ */
+export const CONST_LAYER_ENTRY_TYPE: Record<TypeGeoviewLayerType, TypeLayerEntryType> = {
+  imageStatic: 'raster-image',
+  esriDynamic: 'raster-image',
+  esriFeature: 'vector',
+  GeoJSON: 'vector',
+  geoCore: 'geocore',
+  GeoPackage: 'vector',
+  xyzTiles: 'raster-tile',
+  ogcFeature: 'vector',
+  ogcWfs: 'vector',
+  ogcWms: 'raster-image',
 };
 
 type TypeLayerSetHandlerFunctions = {
@@ -500,10 +518,9 @@ export abstract class AbstractGeoViewLayer {
     queryType: TypeQueryType = 'at pixel'
   ): Promise<TypeArrayOfFeatureInfoEntries> {
     const queryResult = new Promise<TypeArrayOfFeatureInfoEntries>((resolve) => {
-      const layerConfig = (typeof layerPathOrConfig === 'string' ? this.getLayerConfig(layerPathOrConfig) : layerPathOrConfig) as
-        | TypeVectorLayerEntryConfig
-        | TypeImageLayerEntryConfig
-        | null;
+      const layerConfig = (
+        typeof layerPathOrConfig === 'string' ? this.getLayerConfig(layerPathOrConfig) : layerPathOrConfig
+      ) as TypeLayerEntryConfig | null;
       if (!layerConfig || !layerConfig.source?.featureInfo?.queryable) resolve([]);
 
       switch (queryType) {
@@ -981,7 +998,7 @@ export abstract class AbstractGeoViewLayer {
    */
   protected formatFeatureInfoResult(
     features: Feature<Geometry>[],
-    layerEntryConfig: TypeImageLayerEntryConfig | TypeVectorLayerEntryConfig
+    layerEntryConfig: TypeOgcWmsLayerEntryConfig | TypeEsriDynamicLayerEntryConfig | TypeVectorLayerEntryConfig
   ): Promise<TypeArrayOfFeatureInfoEntries> {
     const promisedArrayOfFeatureInfo = new Promise<TypeArrayOfFeatureInfoEntries>((resolve) => {
       if (!features.length) resolve([]);

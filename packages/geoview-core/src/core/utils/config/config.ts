@@ -1,5 +1,6 @@
 /* eslint-disable no-console */
-import { TypeDisplayLanguage } from '../../../geo/map/map-schema-types';
+import { TypeDisplayLanguage, TypeListOfLayerEntryConfig } from '../../../geo/map/map-schema-types';
+import { CONST_LAYER_ENTRY_TYPE, TypeGeoviewLayerType } from '../../../geo/layer/geoview-layers/abstract-geoview-layers';
 import { TypeMapFeaturesConfig } from '../../types/global-types';
 import { ConfigValidation } from './config-validation';
 import { InlineDivConfigReader } from './reader/div-config-reader';
@@ -119,6 +120,23 @@ export class Config {
   }
 
   /** ***************************************************************************************************************************
+   * Initialize all layer entry type fields accordingly to the GeoView layer type..
+   * @param {TypeListOfLayerEntryConfig} listOfLayerEntryConfig The list of layer entry configuration to adjust.
+   * @param {TypeGeoviewLayerType} geoviewLayerType The GeoView layer type.
+   */
+  private setLayerEntryType(listOfLayerEntryConfig: TypeListOfLayerEntryConfig, geoviewLayerType: TypeGeoviewLayerType): void {
+    listOfLayerEntryConfig?.forEach((layerEntryConfig) => {
+      if (layerEntryConfig.entryType === 'group') this.setLayerEntryType(layerEntryConfig.listOfLayerEntryConfig!, geoviewLayerType);
+      else {
+        // eslint-disable-next-line no-param-reassign
+        layerEntryConfig.schemaTag = geoviewLayerType;
+        // eslint-disable-next-line no-param-reassign
+        layerEntryConfig.entryType = CONST_LAYER_ENTRY_TYPE[geoviewLayerType];
+      }
+    });
+  }
+
+  /** ***************************************************************************************************************************
    * Initialize a map config from either inline div, url params, json file.
    *
    * @returns {Promise<TypeMapFeaturesConfig | undefined>} The initialized valid map config.
@@ -170,6 +188,13 @@ export class Config {
       console.log(`- Map: ${mapId} - Empty JSON configuration object, using default -`);
     }
 
+    if (mapFeaturesConfig?.map?.listOfGeoviewLayerConfig) {
+      mapFeaturesConfig.map.listOfGeoviewLayerConfig.forEach((geoviewLayerEntry) => {
+        if (Object.keys(CONST_LAYER_ENTRY_TYPE).includes(geoviewLayerEntry.geoviewLayerType))
+          this.setLayerEntryType(geoviewLayerEntry.listOfLayerEntryConfig!, geoviewLayerEntry.geoviewLayerType);
+        else throw new Error(`Invalid GeoView Layer Type ${geoviewLayerEntry.geoviewLayerType}`);
+      });
+    }
     return this.configValidation.validateMapConfigAgainstSchema(mapFeaturesConfig);
   }
 }
