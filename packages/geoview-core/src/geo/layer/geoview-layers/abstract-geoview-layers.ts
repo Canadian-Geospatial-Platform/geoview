@@ -1,3 +1,4 @@
+/* eslint-disable no-param-reassign */
 import BaseLayer from 'ol/layer/Base';
 import Collection from 'ol/Collection';
 import { Coordinate } from 'ol/coordinate';
@@ -19,8 +20,10 @@ import {
   TypeStyleConfig,
   TypeLayerGroupEntryConfig,
   TypeVectorLayerEntryConfig,
-  TypeImageLayerEntryConfig,
   layerEntryIsVector,
+  TypeLayerEntryType,
+  TypeOgcWmsLayerEntryConfig,
+  TypeEsriDynamicLayerEntryConfig,
 } from '../../map/map-schema-types';
 import {
   codedValueType,
@@ -170,6 +173,38 @@ export const CONST_LAYER_TYPES: Record<LayerTypesKey, TypeGeoviewLayerType> = {
   OGC_FEATURE: 'ogcFeature',
   WFS: 'ogcWfs',
   WMS: 'ogcWms',
+};
+
+/**
+ * Definition of the GeoView layer entry types for each type of Geoview layer
+ */
+export const CONST_LAYER_ENTRY_TYPE: Record<TypeGeoviewLayerType, TypeLayerEntryType> = {
+  imageStatic: 'raster-image',
+  esriDynamic: 'raster-image',
+  esriFeature: 'vector',
+  GeoJSON: 'vector',
+  geoCore: 'geoCore',
+  GeoPackage: 'vector',
+  xyzTiles: 'raster-tile',
+  ogcFeature: 'vector',
+  ogcWfs: 'vector',
+  ogcWms: 'raster-image',
+};
+
+/**
+ * Definition of the sub schema to use for each type of Geoview layer
+ */
+export const CONST_GEOVIEW_SCHEMA_BY_TYPE: Record<TypeGeoviewLayerType, string> = {
+  imageStatic: 'TypeImageStaticLayerEntryConfig',
+  esriDynamic: 'TypeEsriDynamicLayerEntryConfig',
+  esriFeature: 'TypeVectorLayerEntryConfig',
+  GeoJSON: 'TypeVectorLayerEntryConfig',
+  geoCore: 'TypeGeocoreLayerEntryConfig',
+  GeoPackage: 'TypeVectorLayerEntryConfig',
+  xyzTiles: 'TypeTileLayerEntryConfig',
+  ogcFeature: 'TypeVectorLayerEntryConfig',
+  ogcWfs: 'TypeVectorLayerEntryConfig',
+  ogcWms: 'TypeOgcWmsLayerEntryConfig',
 };
 
 type TypeLayerSetHandlerFunctions = {
@@ -402,16 +437,23 @@ export abstract class AbstractGeoViewLayer {
    * Process recursively the list of layer Entries to create the layers and the layer groups.
    *
    * @param {TypeListOfLayerEntryConfig} listOfLayerEntryConfig The list of layer entries to process.
+   * @param {LayerGroup} layerGroup Optionnal layer group to use when we have many layers. The very first call to
+   *  processListOfLayerEntryConfig must not provide a value for this parameter. It is defined for internal use.
    *
    * @returns {Promise<BaseLayer | null>} The promise that the layers were processed.
    */
-  protected processListOfLayerEntryConfig(listOfLayerEntryConfig: TypeListOfLayerEntryConfig): Promise<BaseLayer | null> {
+  protected processListOfLayerEntryConfig(
+    listOfLayerEntryConfig: TypeListOfLayerEntryConfig,
+    layerGroup?: LayerGroup
+  ): Promise<BaseLayer | null> {
     const promisedListOfLayerEntryProcessed = new Promise<BaseLayer | null>((resolve) => {
       if (listOfLayerEntryConfig.length === 1) {
         if (layerEntryIsGroupLayer(listOfLayerEntryConfig[0])) {
-          this.processListOfLayerEntryConfig(listOfLayerEntryConfig[0].listOfLayerEntryConfig!).then((groupCreated) => {
-            if (groupCreated) {
-              resolve(groupCreated);
+          const newLayerGroup = this.createLayerGroup(listOfLayerEntryConfig[0]);
+          this.processListOfLayerEntryConfig(listOfLayerEntryConfig[0].listOfLayerEntryConfig!, newLayerGroup).then((groupReturned) => {
+            if (groupReturned) {
+              if (layerGroup) layerGroup.getLayers().push(groupReturned);
+              resolve(groupReturned);
             } else {
               this.layerLoadError.push({
                 layer: Layer.getLayerPath(listOfLayerEntryConfig[0]),
@@ -424,7 +466,10 @@ export abstract class AbstractGeoViewLayer {
           this.processOneLayerEntry(listOfLayerEntryConfig[0] as TypeBaseLayerEntryConfig).then((baseLayer) => {
             if (baseLayer) {
               this.registerToLayerSets(listOfLayerEntryConfig[0] as TypeBaseLayerEntryConfig);
-              resolve(baseLayer);
+              if (layerGroup) {
+                layerGroup.getLayers().push(baseLayer);
+                resolve(layerGroup);
+              } else resolve(baseLayer);
             } else {
               this.layerLoadError.push({
                 layer: Layer.getLayerPath(listOfLayerEntryConfig[0]),
@@ -435,36 +480,42 @@ export abstract class AbstractGeoViewLayer {
           });
         }
       } else {
+        if (!layerGroup) {
+          // All children of this level in the tree have the same parent, so we use the first element of the array to retrieve the parent node.
+          layerGroup = this.createLayerGroup(listOfLayerEntryConfig[0].parentLayerConfig as TypeLayerEntryConfig);
+        }
         const promiseOfLayerCreated: Promise<BaseLayer | LayerGroup | null>[] = [];
-        listOfLayerEntryConfig.forEach((layerEntryConfig) => {
+        listOfLayerEntryConfig.forEach((layerEntryConfig, i) => {
           if (layerEntryIsGroupLayer(layerEntryConfig)) {
-            promiseOfLayerCreated.push(this.processListOfLayerEntryConfig(layerEntryConfig.listOfLayerEntryConfig!));
+            const newLayerGroup = this.createLayerGroup(listOfLayerEntryConfig[i]);
+            promiseOfLayerCreated.push(this.processListOfLayerEntryConfig(layerEntryConfig.listOfLayerEntryConfig!, newLayerGroup));
           } else promiseOfLayerCreated.push(this.processOneLayerEntry(layerEntryConfig as TypeBaseLayerEntryConfig));
         });
         Promise.all(promiseOfLayerCreated)
           .then((listOfLayerCreated) => {
-            if (listOfLayerCreated?.length) {
-              // All child of this level in the tree have the same parent, so we use the first element of the array to retrieve the parent node.
-              const layerGroup = this.createLayerGroup(listOfLayerEntryConfig[0].parentLayerConfig as TypeLayerEntryConfig);
-
-              listOfLayerCreated.forEach((baseLayer, i) => {
+            listOfLayerCreated.forEach((baseLayer, i) => {
+              if (layerEntryIsGroupLayer(listOfLayerEntryConfig[i])) {
                 if (baseLayer) {
-                  if (!layerEntryIsGroupLayer(listOfLayerEntryConfig[i]))
-                    this.registerToLayerSets(listOfLayerEntryConfig[i] as TypeBaseLayerEntryConfig);
-                  layerGroup.getLayers().push(baseLayer);
-                } else if (layerEntryIsGroupLayer(listOfLayerEntryConfig[i]))
+                  layerGroup!.getLayers().push(baseLayer);
+                } else {
                   this.layerLoadError.push({
                     layer: Layer.getLayerPath(listOfLayerEntryConfig[i]),
                     consoleMessage: `Unable to create group layer ${Layer.getLayerPath(listOfLayerEntryConfig[i])} on map ${this.mapId}`,
                   });
-                else
-                  this.layerLoadError.push({
-                    layer: Layer.getLayerPath(listOfLayerEntryConfig[i]),
-                    consoleMessage: `Unable to create layer ${Layer.getLayerPath(listOfLayerEntryConfig[i])} on map ${this.mapId}`,
-                  });
-              });
-              resolve(layerGroup);
-            } else resolve(null);
+                  resolve(null);
+                }
+              } else if (baseLayer) {
+                this.registerToLayerSets(listOfLayerEntryConfig[i] as TypeBaseLayerEntryConfig);
+                layerGroup!.getLayers().push(baseLayer);
+              } else {
+                this.layerLoadError.push({
+                  layer: Layer.getLayerPath(listOfLayerEntryConfig[i]),
+                  consoleMessage: `Unable to create layer ${Layer.getLayerPath(listOfLayerEntryConfig[i])} on map ${this.mapId}`,
+                });
+                resolve(null);
+              }
+            });
+            resolve(layerGroup!);
           })
           .catch((reason) => {
             // eslint-disable-next-line no-console
@@ -500,10 +551,9 @@ export abstract class AbstractGeoViewLayer {
     queryType: TypeQueryType = 'at pixel'
   ): Promise<TypeArrayOfFeatureInfoEntries> {
     const queryResult = new Promise<TypeArrayOfFeatureInfoEntries>((resolve) => {
-      const layerConfig = (typeof layerPathOrConfig === 'string' ? this.getLayerConfig(layerPathOrConfig) : layerPathOrConfig) as
-        | TypeVectorLayerEntryConfig
-        | TypeImageLayerEntryConfig
-        | null;
+      const layerConfig = (
+        typeof layerPathOrConfig === 'string' ? this.getLayerConfig(layerPathOrConfig) : layerPathOrConfig
+      ) as TypeLayerEntryConfig | null;
       if (!layerConfig || !layerConfig.source?.featureInfo?.queryable) resolve([]);
 
       switch (queryType) {
@@ -675,24 +725,22 @@ export abstract class AbstractGeoViewLayer {
   }
 
   /** ***************************************************************************************************************************
-   * This method create a layer group. it uses the layer initial settings of the GeoView layer configuration.
-   *
+   * This method create a layer group.
+   * @param {TypeLayerEntryConfig | TypeGeoviewLayerConfig} layerConfig
    * @returns {LayerGroup} A new layer group.
    */
-  private createLayerGroup(layerEntryConfig: TypeLayerEntryConfig): LayerGroup {
+  private createLayerGroup(layerConfig: TypeLayerEntryConfig | TypeGeoviewLayerConfig): LayerGroup {
     const layerGroupOptions: LayerGroupOptions = {
       layers: new Collection(),
-      properties: { layerEntryConfig },
+      properties: { layerConfig },
     };
-    // layerEntryConfig.initialSettings cannot be undefined because config-validation set it to {} if it is undefined.
-    if (layerEntryConfig.initialSettings?.extent !== undefined) layerGroupOptions.extent = layerEntryConfig.initialSettings?.extent;
-    if (layerEntryConfig.initialSettings?.maxZoom !== undefined) layerGroupOptions.maxZoom = layerEntryConfig.initialSettings?.maxZoom;
-    if (layerEntryConfig.initialSettings?.minZoom !== undefined) layerGroupOptions.minZoom = layerEntryConfig.initialSettings?.minZoom;
-    if (layerEntryConfig.initialSettings?.opacity !== undefined) layerGroupOptions.opacity = layerEntryConfig.initialSettings?.opacity;
-    if (layerEntryConfig.initialSettings?.visible !== undefined) layerGroupOptions.visible = layerEntryConfig.initialSettings?.visible;
-    // eslint-disable-next-line no-param-reassign
-    layerEntryConfig.gvLayer = new LayerGroup(layerGroupOptions);
-    return layerEntryConfig.gvLayer as LayerGroup;
+    if (layerConfig.initialSettings?.extent !== undefined) layerGroupOptions.extent = layerConfig.initialSettings?.extent;
+    if (layerConfig.initialSettings?.maxZoom !== undefined) layerGroupOptions.maxZoom = layerConfig.initialSettings?.maxZoom;
+    if (layerConfig.initialSettings?.minZoom !== undefined) layerGroupOptions.minZoom = layerConfig.initialSettings?.minZoom;
+    if (layerConfig.initialSettings?.opacity !== undefined) layerGroupOptions.opacity = layerConfig.initialSettings?.opacity;
+    if (layerConfig.initialSettings?.visible !== undefined) layerGroupOptions.visible = layerConfig.initialSettings?.visible;
+    layerConfig.gvLayer = new LayerGroup(layerGroupOptions);
+    return layerConfig.gvLayer as LayerGroup;
   }
 
   /** ***************************************************************************************************************************
@@ -981,7 +1029,7 @@ export abstract class AbstractGeoViewLayer {
    */
   protected formatFeatureInfoResult(
     features: Feature<Geometry>[],
-    layerEntryConfig: TypeImageLayerEntryConfig | TypeVectorLayerEntryConfig
+    layerEntryConfig: TypeOgcWmsLayerEntryConfig | TypeEsriDynamicLayerEntryConfig | TypeVectorLayerEntryConfig
   ): Promise<TypeArrayOfFeatureInfoEntries> {
     const promisedArrayOfFeatureInfo = new Promise<TypeArrayOfFeatureInfoEntries>((resolve) => {
       if (!features.length) resolve([]);
@@ -1024,7 +1072,6 @@ export abstract class AbstractGeoViewLayer {
 
               const featureInfoEntry: TypeFeatureInfoEntry = {
                 // feature key for building the data-grid
-                // eslint-disable-next-line no-param-reassign
                 featureKey: featureKeyCounter++,
                 geoviewLayerType: this.type,
                 extent,
