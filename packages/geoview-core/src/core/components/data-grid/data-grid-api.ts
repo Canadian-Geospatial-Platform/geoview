@@ -171,7 +171,10 @@ export class DataGridAPI {
 
     useEffect(() => {
       const geoviewLayerInstance = api.map(this.mapId).layer.geoviewLayers[layerId];
-      if (geoviewLayerInstance.listOfLayerEntryConfig.length > 0) {
+      if (
+        geoviewLayerInstance.listOfLayerEntryConfig.length > 0 &&
+        (geoviewLayerInstance as AbstractGeoViewVector).getAllFeatureInfo !== undefined
+      ) {
         const grouplayerKeys: string[] = [];
         const grouplayerValues: { layerkey: string; layerValues: {}[] }[] = [];
         const getGroupKeys = (listOfLayerEntryConfig: TypeListOfLayerEntryConfig, parentLayerId: string) => {

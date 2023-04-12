@@ -142,7 +142,7 @@ export function commonValidateListOfLayerEntryConfig(
  * Extract the domain of the specified field from the metadata. If the type can not be found, return 'string'.
  *
  * @param {string} fieldName field name for which we want to get the domain.
- * @param {TypeLayerEntryConfig} layeConfig layer configuration.
+ * @param {TypeLayerEntryConfig} layerConfig layer configuration.
  *
  * @returns {'string' | 'date' | 'number'} The type of the field.
  */
@@ -165,7 +165,7 @@ export function commonGetFieldType(
  * Return the type of the specified field.
  *
  * @param {string} fieldName field name for which we want to get the type.
- * @param {TypeLayerEntryConfig} layeConfig layer configuration.
+ * @param {TypeLayerEntryConfig} layerConfig layer configuration.
  *
  * @returns {null | codedValueType | rangeDomainType} The domain of the field.
  */

@@ -112,7 +112,7 @@ export class WMS extends AbstractGeoViewRaster {
    * Extract the type of the specified field from the metadata. If the type can not be found, return 'string'.
    *
    * @param {string} fieldName field name for which we want to get the type.
-   * @param {TypeLayerEntryConfig} layeConfig layer configuration.
+   * @param {TypeLayerEntryConfig} layerConfig layer configuration.
    *
    * @returns {'string' | 'date' | 'number'} The type of the field.
    */
@@ -124,7 +124,7 @@ export class WMS extends AbstractGeoViewRaster {
    * Returns null. WMS services don't have domains.
    *
    * @param {string} fieldName field name for which we want to get the domain.
-   * @param {TypeLayerEntryConfig} layeConfig layer configuration.
+   * @param {TypeLayerEntryConfig} layerConfig layer configuration.
    *
    * @returns {null | codedValueType | rangeDomainType} The domain of the field.
    */
@@ -302,11 +302,13 @@ export class WMS extends AbstractGeoViewRaster {
       this.addLayerToMetadataInstance(metadataLayerPathToAdd.slice(1), metadataLayer.Layer, layerToAdd.Layer);
     else {
       let i: number;
-      for (i = 0; i < metadataLayer.length; i++) if (metadataLayer[i].Name === layerToAdd[metadataLayerPathToAdd[0]].Name) break;
-      if (i < metadataLayer.length)
+      const metadataLayerFound = (metadataLayer as TypeJsonArray).find(
+        (layerEntry) => layerEntry.Name === layerToAdd[metadataLayerPathToAdd[0]].Name
+      );
+      if (metadataLayerFound)
         this.addLayerToMetadataInstance(
           metadataLayerPathToAdd.slice(1),
-          metadataLayer[i].Layer,
+          metadataLayerFound.Layer,
           layerToAdd[metadataLayerPathToAdd[0]].Layer
         );
       else (metadataLayer as TypeJsonArray).push(layerToAdd[metadataLayerPathToAdd[0]]);
@@ -360,19 +362,15 @@ export class WMS extends AbstractGeoViewRaster {
       if (parentLayer.Style) {
         if (!layer.Style as TypeJsonArray) (layer.Style as TypeJsonArray) = [];
         (parentLayer.Style as TypeJsonArray).forEach((parentStyle) => {
-          // eslint-disable-next-line vars-on-top, no-var
-          for (var found = false, i = 0; i < layer.Style.length && !found; i++) found = layer.Style[i].Name === parentStyle.Name;
-          // eslint-disable-next-line block-scoped-var
-          if (!found) (layer.Style as TypeJsonArray).push(parentStyle);
+          const styleFound = (layer.Style as TypeJsonArray).find((styleEntry) => styleEntry.Name === parentStyle.Name);
+          if (!styleFound) (layer.Style as TypeJsonArray).push(parentStyle);
         });
       }
       if (parentLayer.CRS) {
         if (!layer.CRS as TypeJsonArray) (layer.CRS as TypeJsonArray) = [];
         (parentLayer.CRS as TypeJsonArray).forEach((parentCRS) => {
-          // eslint-disable-next-line vars-on-top, no-var
-          for (var found = false, i = 0; i < layer.CRS.length && !found; i++) found = layer.CRS[i] === parentCRS;
-          // eslint-disable-next-line block-scoped-var
-          if (!found) (layer.CRS as TypeJsonArray).push(parentCRS);
+          const crsFound = (layer.CRS as TypeJsonArray).find((crsEntry) => crsEntry.Name === parentCRS);
+          if (!crsFound) (layer.CRS as TypeJsonArray).push(parentCRS);
         });
       }
     }
@@ -503,9 +501,13 @@ export class WMS extends AbstractGeoViewRaster {
       const layerCapabilities = this.getLayerMetadataEntry(layerEntryConfig.layerId);
       if (layerCapabilities) {
         const dataAccessPath = getLocalizedValue(layerEntryConfig.source.dataAccessPath!, this.mapId)!;
+        const styleToUse =
+          Array.isArray(layerEntryConfig.source?.style) && layerEntryConfig.source?.style
+            ? layerEntryConfig.source?.style[0]
+            : layerEntryConfig.source?.style;
         const sourceOptions: SourceOptions = {
           url: dataAccessPath.endsWith('?') ? dataAccessPath : `${dataAccessPath}?`,
-          params: { LAYERS: layerEntryConfig.layerId, STYLES: layerEntryConfig.source?.style ? layerEntryConfig.source.style : '' },
+          params: { LAYERS: layerEntryConfig.layerId, STYLES: styleToUse || '' },
         };
         sourceOptions.attributions = this.attributions;
         sourceOptions.serverType = layerEntryConfig.source.serverType;
@@ -750,7 +752,7 @@ export class WMS extends AbstractGeoViewRaster {
     const layerCapabilities = this.getLayerMetadataEntry(layerConfig.layerId);
     if (Array.isArray(layerCapabilities?.Style)) {
       const legendStyle = layerCapabilities?.Style.find((style) => {
-        if (layerConfig?.source?.style) return layerConfig.source.style === style.Name;
+        if (layerConfig?.source?.style && !Array.isArray(layerConfig?.source?.style)) return layerConfig.source.style === style.Name;
         return style.Name === 'default';
       });
       if (Array.isArray(legendStyle?.LegendURL)) {
@@ -946,5 +948,20 @@ export class WMS extends AbstractGeoViewRaster {
   private getAttribute(jsonObject: TypeJsonObject, attributeEnding: string): TypeJsonObject | undefined {
     const keyFound = Object.keys(jsonObject).find((key) => key.endsWith(attributeEnding));
     return keyFound ? jsonObject[keyFound] : undefined;
+  }
+
+  /** ***************************************************************************************************************************
+   * Return the attribute of an object that ends with the specified ending string or null if not found.
+   *
+   * @param {TypeJsonObject} jsonObject The object that is supposed to have the needed attribute.
+   * @param {string} attribute The attribute searched.
+   *
+   * @returns {TypeJsonObject | undefined} The promised feature info table.
+   */
+  setStyle(StyleId: string, layerPathOrConfig: string | TypeLayerEntryConfig | null = this.activeLayer) {
+    const layerConfig = Cast<TypeWmsLayerEntryConfig | undefined | null>(
+      typeof layerPathOrConfig === 'string' ? this.getLayerConfig(layerPathOrConfig) : layerPathOrConfig
+    );
+    if (layerConfig?.gvLayer) (layerConfig.gvLayer as ImageLayer<ImageWMS>).getSource()?.updateParams({ STYLES: StyleId });
   }
 }
