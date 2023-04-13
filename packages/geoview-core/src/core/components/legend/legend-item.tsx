@@ -1,5 +1,5 @@
 /* eslint-disable react/require-default-props */
-import React, { useEffect, useState, useContext, useRef, MutableRefObject, RefObject, Fragment } from 'react';
+import React, { useEffect, useState, useRef, MutableRefObject, RefObject } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useTheme, Theme } from '@mui/material/styles';
 import Grid from '@mui/material/Grid';
@@ -24,15 +24,12 @@ import {
   OpacityIcon,
   SliderBase,
   CheckIcon,
+  MoreHorizIcon,
+  BrowserNotSupportedIcon,
 } from '../../../ui';
-import { api, EsriDynamic } from '../../../app';
+import { api, EsriDynamic, payloadIsLegendInfo } from '../../../app';
 import { LegendIconList } from './legend-icon-list';
-import {
-  AbstractGeoViewLayer,
-  isImageStaticLegend,
-  isVectorLegend,
-  isWmsLegend,
-} from '../../../geo/layer/geoview-layers/abstract-geoview-layers';
+import { AbstractGeoViewLayer, TypeLegend, isVectorLegend, isWmsLegend, isImageStaticLegend } from '../../../geo/layer/geoview-layers/abstract-geoview-layers';
 import {
   TypeClassBreakStyleConfig,
   TypeListOfLayerEntryConfig,
@@ -46,9 +43,8 @@ import {
   isUniqueValueStyleConfig,
   layerEntryIsGroupLayer,
 } from '../../../geo/map/map-schema-types';
-import { MapContext } from '../../app-start';
 import { AbstractGeoViewVector } from '../../../geo/layer/geoview-layers/vector/abstract-geoview-vector';
-import { disableScrolling } from '../../utils/utilities';
+import { disableScrolling, isVectorLayer } from '../../utils/utilities';
 
 const sxClasses = {
   expandableGroup: {
@@ -164,11 +160,8 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
     iconImg: React.CSSProperties;
   } = useTheme();
 
-  const mapConfig = useContext(MapContext);
-  const { mapId } = mapConfig;
-  // check if layer is a vectorlayer, so that clustering can be toggled
-  const vectorLayers = ['esriFeature', 'GeoJSON', 'GeoPackage', 'ogcFeature', 'ogcWfs'];
-  const canCluster = vectorLayers.includes(geoviewLayerInstance?.type);
+  const { mapId } = geoviewLayerInstance;
+  const canCluster = isVectorLayer(geoviewLayerInstance);
   const [isClusterToggleEnabled, setIsClusterToggleEnabled] = useState(false);
   const [isChecked, setChecked] = useState(true);
   const [isOpacityOpen, setOpacityOpen] = useState(false);
@@ -190,6 +183,7 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
   const maxIconRef = useRef() as RefObject<HTMLButtonElement>;
 
   const menuOpen = Boolean(menuAnchorElement);
+  const path = subLayerId || `${layerId}/${geoviewLayerInstance.activeLayer?.layerId}`;
 
   const getGroupsDetails = (): boolean => {
     let isGroup = false;
@@ -208,81 +202,79 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
     return isGroup;
   };
 
-  const getLegendDetails = () => {
-    if (!geoviewLayerInstance) return;
-    geoviewLayerInstance.getLegend(subLayerId).then((layerLegend) => {
-      const { geoviewLayerId } = geoviewLayerInstance;
-      if (layerLegend?.legend) {
-        // WMS layers just return a string
-        if (isWmsLegend(layerLegend) || isImageStaticLegend(layerLegend)) {
-          setIconType('simple');
-          setIconImg(layerLegend.legend.toDataURL());
-        } else if (isVectorLegend(layerLegend)) {
-          Object.entries(layerLegend.legend).forEach(([, styleRepresentation]) => {
-            if (styleRepresentation.arrayOfCanvas) {
-              setIconType('list');
-              const iconImageList = (styleRepresentation.arrayOfCanvas as HTMLCanvasElement[]).map((canvas) => {
-                return canvas.toDataURL();
+  const getLegendDetails = (layerLegend: TypeLegend) => {
+    const { geoviewLayerId } = geoviewLayerInstance;
+    if (layerLegend) {
+      if (layerLegend.legend === null) setIconImg('no data');
+      // WMS layers just return a string
+      if (isWmsLegend(layerLegend) || isImageStaticLegend(layerLegend)) {
+        setIconType('simple');
+        if (layerLegend.legend) setIconImg(layerLegend.legend?.toDataURL());
+      } else if (isVectorLegend(layerLegend)) {
+        Object.entries(layerLegend.legend).forEach(([, styleRepresentation]) => {
+          if (styleRepresentation.arrayOfCanvas) {
+            setIconType('list');
+            const iconImageList = (styleRepresentation.arrayOfCanvas as HTMLCanvasElement[]).map((canvas) => {
+              return canvas.toDataURL();
+            });
+            if (iconImageList.length > 0) setIconImg(iconImageList[0]);
+            if (iconImageList.length > 1) setIconImgStacked(iconImageList[1]);
+            if (styleRepresentation.defaultCanvas) iconImageList.push(styleRepresentation.defaultCanvas.toDataURL());
+            if (styleRepresentation.clusterCanvas) iconImageList.push(styleRepresentation.clusterCanvas.toDataURL());
+            setIconList(iconImageList);
+            if (layerLegend.styleConfig) {
+              // let uniqueValueStyleInfoEntry = layerConfig.style[geometry].uniqueValueStyleInfo[i]
+              let geometryKey: TypeStyleGeometry | null = null;
+              Object.entries(layerLegend.styleConfig).forEach(([key, styleSettings]) => {
+                if (isClassBreakStyleConfig(styleSettings)) {
+                  const iconLabelList = (styleSettings as TypeClassBreakStyleConfig).classBreakStyleInfo.map((styleInfo) => {
+                    return styleInfo.label;
+                  });
+                  if (styleRepresentation.defaultCanvas) iconLabelList.push((styleSettings as TypeClassBreakStyleConfig).defaultLabel!);
+                  if (styleRepresentation.clusterCanvas) iconLabelList.push('Cluster');
+                  setLabelList(iconLabelList);
+                  geometryKey = key as TypeStyleGeometry;
+                }
+                if (isUniqueValueStyleConfig(styleSettings)) {
+                  const iconLabelList = (styleSettings as TypeUniqueValueStyleConfig).uniqueValueStyleInfo.map((styleInfo) => {
+                    return styleInfo.label;
+                  });
+                  if (styleRepresentation.defaultCanvas) iconLabelList.push((styleSettings as TypeUniqueValueStyleConfig).defaultLabel!);
+                  if (styleRepresentation.clusterCanvas) iconLabelList.push('Cluster');
+                  setLabelList(iconLabelList);
+                  geometryKey = key as TypeStyleGeometry;
+                }
               });
-              if (iconImageList.length > 0) setIconImg(iconImageList[0]);
-              if (iconImageList.length > 1) setIconImgStacked(iconImageList[1]);
-              if (styleRepresentation.defaultCanvas) iconImageList.push(styleRepresentation.defaultCanvas.toDataURL());
-              if (styleRepresentation.clusterCanvas) iconImageList.push(styleRepresentation.clusterCanvas.toDataURL());
-              setIconList(iconImageList);
-              if (layerLegend.styleConfig) {
-                // let uniqueValueStyleInfoEntry = layerConfig.style[geometry].uniqueValueStyleInfo[i]
-                let geometryKey: TypeStyleGeometry | null = null;
-                Object.entries(layerLegend.styleConfig).forEach(([key, styleSettings]) => {
-                  if (isClassBreakStyleConfig(styleSettings)) {
-                    const iconLabelList = (styleSettings as TypeClassBreakStyleConfig).classBreakStyleInfo.map((styleInfo) => {
-                      return styleInfo.label;
-                    });
-                    if (styleRepresentation.defaultCanvas) iconLabelList.push((styleSettings as TypeClassBreakStyleConfig).defaultLabel!);
-                    if (styleRepresentation.clusterCanvas) iconLabelList.push('Cluster');
-                    setLabelList(iconLabelList);
-                    geometryKey = key as TypeStyleGeometry;
-                  }
-                  if (isUniqueValueStyleConfig(styleSettings)) {
-                    const iconLabelList = (styleSettings as TypeUniqueValueStyleConfig).uniqueValueStyleInfo.map((styleInfo) => {
-                      return styleInfo.label;
-                    });
-                    if (styleRepresentation.defaultCanvas) iconLabelList.push((styleSettings as TypeUniqueValueStyleConfig).defaultLabel!);
-                    if (styleRepresentation.clusterCanvas) iconLabelList.push('Cluster');
-                    setLabelList(iconLabelList);
-                    geometryKey = key as TypeStyleGeometry;
-                  }
-                });
 
-                Object.keys(api.map(mapId).layer.registeredLayers).forEach((layerPath) => {
-                  if (layerPath.startsWith(geoviewLayerId)) {
-                    const layerConfig = api.map(mapId).layer.registeredLayers[layerPath] as TypeVectorLayerEntryConfig;
-                    if (layerConfig && layerConfig.style && geometryKey) {
-                      const geometryStyle = layerConfig.style[geometryKey as TypeStyleGeometry];
-                      if (
-                        geometryStyle !== undefined &&
-                        (geometryStyle.styleType === 'uniqueValue' || geometryStyle.styleType === 'classBreaks')
-                      ) {
-                        setGeometryKey(geometryKey);
-                        setLayerConfig(layerConfig);
-                      }
+              Object.keys(api.map(mapId).layer.registeredLayers).forEach((layerPath) => {
+                if (layerPath.startsWith(geoviewLayerId)) {
+                  const layerConfig = api.map(mapId).layer.registeredLayers[layerPath] as TypeVectorLayerEntryConfig;
+                  if (layerConfig && layerConfig.style && geometryKey) {
+                    const geometryStyle = layerConfig.style[geometryKey as TypeStyleGeometry];
+                    if (
+                      geometryStyle !== undefined &&
+                      (geometryStyle.styleType === 'uniqueValue' || geometryStyle.styleType === 'classBreaks')
+                    ) {
+                      setGeometryKey(geometryKey);
+                      setLayerConfig(layerConfig);
                     }
                   }
-                });
-              }
-            } else {
-              setIconType('simple');
-              setIconImg((styleRepresentation.defaultCanvas as HTMLCanvasElement).toDataURL());
+                }
+              });
             }
-          });
-        } else {
-          // eslint-disable-next-line no-console
-          console.log(`${layerId} - UNHANDLED LEGEND TYPE`);
-        }
+          } else {
+            setIconType('simple');
+            setIconImg((styleRepresentation.defaultCanvas as HTMLCanvasElement).toDataURL());
+          }
+        });
       } else {
         // eslint-disable-next-line no-console
-        console.log(`${layerId} - NULL LAYER DATA`);
+        console.log(`${layerId} - UNHANDLED LEGEND TYPE`);
       }
-    });
+    } else {
+      // eslint-disable-next-line no-console
+      console.log(`${layerId} - NULL LAYER DATA`);
+    }
   };
 
   const getLayerName = () => {
@@ -303,11 +295,29 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
     getLayerName();
     const isGroup = getGroupsDetails();
     if (!isGroup) {
-      getLegendDetails();
+      setOpacity(geoviewLayerInstance.getOpacity() ?? 1);
+      const legendInfo = api.maps[mapId].legend.legendLayerSet.resultSets[path];
+      if (legendInfo) {
+        getLegendDetails(legendInfo);
+      }
     }
-    if (geoviewLayerInstance) setOpacity(geoviewLayerInstance.getOpacity() ?? 1);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  api.event.on(
+    api.eventNames.GET_LEGENDS.LEGEND_INFO,
+    (payload) => {
+      if (payloadIsLegendInfo(payload)) {
+        const { layerPath, legendInfo } = payload;
+        if (!getGroupsDetails() && legendInfo) {
+          if (path === layerPath) {
+            getLegendDetails(legendInfo);
+          }
+        }
+      }
+    },
+    mapId
+  );
 
   useEffect(() => {
     if (expandAll !== undefined) setGroupOpen(expandAll);
@@ -432,9 +442,15 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
                 {isGroupOpen ? <ExpandMoreIcon /> : <ExpandLessIcon />}
               </IconButton>
             )}
-            {groupItems.length === 0 && isLegendOpen && iconList && (
-              <IconButton sx={sxClasses.iconPreview} color="primary" size="small" onClick={handleLegendClick} iconRef={closeIconRef}>
-                <CloseIcon />
+            {groupItems.length === 0 && isLegendOpen && (
+              <IconButton
+                sx={sxClasses.iconPreview}
+                color="primary"
+                size="small"
+                onClick={iconImg === null ? undefined : handleLegendClick}
+                iconRef={closeIconRef}
+              >
+                {iconList || iconImg !== null ? <CloseIcon /> : <MoreHorizIcon />}
               </IconButton>
             )}
             {iconType === 'simple' && iconImg !== null && !isLegendOpen && (
@@ -442,12 +458,16 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
                 sx={sxClasses.iconPreview}
                 color="primary"
                 size="small"
-                {...(iconList?.length && { onClick: handleLegendClick })}
                 iconRef={maxIconRef}
+                onClick={iconImg === 'no data' ? undefined : handleLegendClick}
               >
-                <Box sx={sxClasses.legendIcon}>
-                  <img alt="icon" src={iconImg} style={sxClasses.maxIconImg} />
-                </Box>
+                {iconImg === 'no data' ? (
+                  <BrowserNotSupportedIcon />
+                ) : (
+                  <Box sx={sxClasses.legendIcon}>
+                    <img alt="icon" src={iconImg} style={sxClasses.maxIconImg} />
+                  </Box>
+                )}
               </IconButton>
             )}
             {iconType === 'list' && !isLegendOpen && (
@@ -562,19 +582,18 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
         <Box>
           <Box sx={sxClasses.expandableIconContainer}>
             {groupItems.map((subItem) => (
-              <Fragment key={subItem.layerId}>
-                <LegendItem
-                  layerId={layerId}
-                  geoviewLayerInstance={geoviewLayerInstance}
-                  subLayerId={subLayerId ? `${subLayerId}/${subItem.layerId}` : `${layerId}/${subItem.layerId}`}
-                  layerConfigEntry={subItem}
-                  isParentVisible={isParentVisible === false ? false : isChecked}
-                  canSetOpacity={canSetOpacity}
-                  toggleParentVisible={handleToggleLayer}
-                  expandAll={expandAll}
-                  hideAll={hideAll}
-                />
-              </Fragment>
+              <LegendItem
+                key={subItem.layerId}
+                layerId={layerId}
+                geoviewLayerInstance={geoviewLayerInstance}
+                subLayerId={subLayerId ? `${subLayerId}/${subItem.layerId}` : `${layerId}/${subItem.layerId}`}
+                layerConfigEntry={subItem}
+                isParentVisible={isParentVisible === false ? false : isChecked}
+                canSetOpacity={canSetOpacity}
+                toggleParentVisible={handleToggleLayer}
+                expandAll={expandAll}
+                hideAll={hideAll}
+              />
             ))}
           </Box>
         </Box>
