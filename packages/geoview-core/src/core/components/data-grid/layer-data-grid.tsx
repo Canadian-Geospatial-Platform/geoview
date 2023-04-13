@@ -286,15 +286,12 @@ export function LayerDataGrid(props: CustomDataGridProps) {
     const label = !mapfiltered ? t('datagrid.filterMap') : t('datagrid.stopFilterMap');
     return (
       <GridToolbarContainer>
-        {/* @ts-ignore */}
-        <GridToolbarColumnsButton />
-        {/* @ts-ignore */}
-        <GridToolbarFilterButton />
+        <GridToolbarColumnsButton onResize={undefined} onResizeCapture={undefined} />
+        <GridToolbarFilterButton onResize={undefined} onResizeCapture={undefined} />
         <Button>
           <Switch size="small" onChange={() => filterMap()} title={label} checked={mapfiltered} />
         </Button>
-        {/* @ts-ignore */}
-        <GridToolbarDensitySelector />
+        <GridToolbarDensitySelector onResize={undefined} onResizeCapture={undefined} />
         <CustomExportButton />
       </GridToolbarContainer>
     );
