@@ -15,7 +15,6 @@ import {
   enUS,
   GridToolbarExportContainer,
   GridCsvExportMenuItem,
-  GridToolbarContainerProps,
   GridToolbarContainer,
   GridToolbarColumnsButton,
   GridToolbarFilterButton,
@@ -274,8 +273,6 @@ export function LayerDataGrid(props: CustomDataGridProps) {
 
   /**
    * Customize the toolbar, replace the Export button menu with the customized one
-   *
-   * @param {GridToolbarContainerProps} props pass the props
    * @return {GridToolbarExportContainer} toolbar
    *
    */
