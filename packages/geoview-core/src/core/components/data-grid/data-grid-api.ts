@@ -5,7 +5,14 @@ import { createElement, ReactElement, useState, useEffect } from 'react';
 import { toLonLat } from 'ol/proj';
 import { Extent } from 'ol/extent';
 import { Geometry, Point, Polygon, LineString, MultiPoint } from 'ol/geom';
-import { AbstractGeoViewVector, api, TypeArrayOfFeatureInfoEntries, TypeDisplayLanguage, TypeListOfLayerEntryConfig } from '../../../app';
+import {
+  AbstractGeoViewVector,
+  api,
+  TypeArrayOfFeatureInfoEntries,
+  TypeDisplayLanguage,
+  TypeListOfLayerEntryConfig,
+  isVectorLayer,
+} from '../../../app';
 
 import { LayerDataGrid } from './layer-data-grid';
 
@@ -192,23 +199,25 @@ export class DataGridAPI {
         };
         getGroupKeys(geoviewLayerInstance.listOfLayerEntryConfig, layerId);
 
-        let count = 0;
-        grouplayerKeys.forEach((layerkey) => {
-          // eslint-disable-next-line @typescript-eslint/ban-types
-          let layerValues: {}[] = [];
-          (geoviewLayerInstance as AbstractGeoViewVector)?.getAllFeatureInfo(layerkey).then((arrayOfFeatureInfoEntries) => {
-            if (arrayOfFeatureInfoEntries?.length > 0) {
-              // set values
-              count++;
-              layerValues = buildFeatureRows(arrayOfFeatureInfoEntries);
-              grouplayerValues.push({ layerkey, layerValues });
-            }
-            if (count === grouplayerKeys.length) {
-              setGroupKeys(grouplayerKeys);
-              setGroupValues(grouplayerValues);
-            }
+        if (isVectorLayer(geoviewLayerInstance)) {
+          let count = 0;
+          grouplayerKeys.forEach((layerkey) => {
+            // eslint-disable-next-line @typescript-eslint/ban-types
+            let layerValues: {}[] = [];
+            (geoviewLayerInstance as AbstractGeoViewVector)?.getAllFeatureInfo(layerkey).then((arrayOfFeatureInfoEntries) => {
+              if (arrayOfFeatureInfoEntries?.length > 0) {
+                // set values
+                count++;
+                layerValues = buildFeatureRows(arrayOfFeatureInfoEntries);
+                grouplayerValues.push({ layerkey, layerValues });
+              }
+              if (count === grouplayerKeys.length) {
+                setGroupKeys(grouplayerKeys);
+                setGroupValues(grouplayerValues);
+              }
+            });
           });
-        });
+        }
       }
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [layerId]);
