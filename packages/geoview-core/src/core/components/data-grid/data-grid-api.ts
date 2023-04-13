@@ -223,7 +223,7 @@ export class DataGridAPI {
             style: { fontSize: '1em', margin: '1em', padding: '0.3em' },
           },
           groupKeys.map((layerkey) => {
-            return createElement('option', { key: layerId + '-' + layerkey }, layerkey);
+            return createElement('option', { key: `${layerId}-${layerkey}` }, layerkey);
           })
         ),
       groupValues.map((groupValue, index) => {

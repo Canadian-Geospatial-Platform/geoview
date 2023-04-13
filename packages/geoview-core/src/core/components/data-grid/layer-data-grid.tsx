@@ -244,13 +244,11 @@ export function LayerDataGrid(props: CustomDataGridProps) {
    */
   function CustomExportButton(props: ButtonProps) {
     return (
-      <>
-        <GridToolbarExportContainer onResize={undefined} onResizeCapture={undefined} {...props}>
-          <GridCsvExportMenuItem options={csvOptions} />
-          <JsonExportMenuItem />
-          <GridPrintExportMenuItem options={printOptions} />
-        </GridToolbarExportContainer>
-      </>
+      <GridToolbarExportContainer onResize={undefined} onResizeCapture={undefined} {...props}>
+        <GridCsvExportMenuItem options={csvOptions} />
+        <JsonExportMenuItem />
+        <GridPrintExportMenuItem options={printOptions} />
+      </GridToolbarExportContainer>
     );
   }
 
@@ -281,7 +279,7 @@ export function LayerDataGrid(props: CustomDataGridProps) {
    * @return {GridToolbarExportContainer} toolbar
    *
    */
-  function CustomToolbar(props: GridToolbarContainerProps) {
+  function CustomToolbar() {
     const label = !mapfiltered ? t('datagrid.filterMap') : t('datagrid.stopFilterMap');
     return (
       <GridToolbarContainer>
