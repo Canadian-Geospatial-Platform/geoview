@@ -245,8 +245,7 @@ export function LayerDataGrid(props: CustomDataGridProps) {
   function CustomExportButton(props: ButtonProps) {
     return (
       <>
-        {/* @ts-ignore: */}
-        <GridToolbarExportContainer {...props}>
+        <GridToolbarExportContainer onResize={undefined} onResizeCapture={undefined} {...props}>
           <GridCsvExportMenuItem options={csvOptions} />
           <JsonExportMenuItem />
           <GridPrintExportMenuItem options={printOptions} />
