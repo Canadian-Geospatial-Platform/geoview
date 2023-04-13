@@ -15,7 +15,6 @@ import {
   enUS,
   GridToolbarExportContainer,
   GridCsvExportMenuItem,
-  GridToolbarContainerProps,
   GridToolbarContainer,
   GridToolbarColumnsButton,
   GridToolbarFilterButton,
@@ -274,15 +273,13 @@ export function LayerDataGrid(props: CustomDataGridProps) {
 
   /**
    * Customize the toolbar, replace the Export button menu with the customized one
-   *
-   * @param {GridToolbarContainerProps} props pass the props
    * @return {GridToolbarExportContainer} toolbar
    *
    */
-  function CustomToolbar(props: GridToolbarContainerProps) {
+  function CustomToolbar() {
     const label = !mapfiltered ? t('datagrid.filterMap') : t('datagrid.stopFilterMap');
     return (
-      <GridToolbarContainer {...props}>
+      <GridToolbarContainer>
         <GridToolbarColumnsButton onResize={undefined} onResizeCapture={undefined} />
         <GridToolbarFilterButton onResize={undefined} onResizeCapture={undefined} />
         <Button>
