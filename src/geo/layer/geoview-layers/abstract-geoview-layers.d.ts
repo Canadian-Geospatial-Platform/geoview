@@ -29,6 +29,18 @@ export interface TypeWmsLegend extends Omit<TypeLegend, 'styleConfig'> {
     legend: HTMLCanvasElement;
 }
 /**
+ * type guard function that redefines a TypeLegend as a TypeWmsLegend
+ * if the event attribute of the verifyIfPayload parameter is valid. The type ascention
+ * applies only to the true block of the if clause.
+ *
+ * @param {TypeLegend} verifyIfLegend object to test in order to determine if the type ascention is valid
+ * @returns {boolean} returns true if the payload is valid
+ */
+export declare const isImageStaticLegend: (verifyIfLegend: TypeLegend) => verifyIfLegend is TypeImageStaticLegend;
+export interface TypeImageStaticLegend extends Omit<TypeLegend, 'styleConfig'> {
+    legend: HTMLCanvasElement;
+}
+/**
  * type guard function that redefines a TypeLegend as a TypeVectorLegend
  * if the event attribute of the verifyIfPayload parameter is valid. The type ascention
  * applies only to the true block of the if clause.
@@ -55,11 +67,11 @@ export type TypeLayerStyles = {
     LineString?: TypeStyleRepresentation;
     Polygon?: TypeStyleRepresentation;
 };
-type LayerTypesKey = 'ESRI_DYNAMIC' | 'ESRI_FEATURE' | 'GEOJSON' | 'GEOCORE' | 'GEOPACKAGE' | 'XYZ_TILES' | 'OGC_FEATURE' | 'WFS' | 'WMS';
+type LayerTypesKey = 'ESRI_DYNAMIC' | 'ESRI_FEATURE' | 'IMAGE_STATIC' | 'GEOJSON' | 'GEOCORE' | 'GEOPACKAGE' | 'XYZ_TILES' | 'OGC_FEATURE' | 'WFS' | 'WMS';
 /**
  * Type of GeoView layers
  */
-export type TypeGeoviewLayerType = 'esriDynamic' | 'esriFeature' | 'GeoJSON' | 'geoCore' | 'GeoPackage' | 'xyzTiles' | 'ogcFeature' | 'ogcWfs' | 'ogcWms';
+export type TypeGeoviewLayerType = 'esriDynamic' | 'esriFeature' | 'imageStatic' | 'GeoJSON' | 'geoCore' | 'GeoPackage' | 'xyzTiles' | 'ogcFeature' | 'ogcWfs' | 'ogcWms';
 /**
  * Definition of the GeoView layer constants
  */
@@ -330,7 +342,7 @@ export declare abstract class AbstractGeoViewLayer {
      * Return the type of the specified field.
      *
      * @param {string} fieldName field name for which we want to get the type.
-     * @param {TypeLayerEntryConfig} layeConfig layer configuration.
+     * @param {TypeLayerEntryConfig} layerConfig layer configuration.
      *
      * @returns {null | codedValueType | rangeDomainType} The domain of the field.
      */
@@ -339,7 +351,7 @@ export declare abstract class AbstractGeoViewLayer {
      * Return the domain of the specified field. If the type can not be found, return 'string'.
      *
      * @param {string} fieldName field name for which we want to get the domain.
-     * @param {TypeLayerEntryConfig} layeConfig layer configuration.
+     * @param {TypeLayerEntryConfig} layerConfig layer configuration.
      *
      * @returns {'string' | 'date' | 'number'} The type of the field.
      */

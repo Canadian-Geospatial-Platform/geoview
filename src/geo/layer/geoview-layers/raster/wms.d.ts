@@ -59,7 +59,7 @@ export declare class WMS extends AbstractGeoViewRaster {
      * Extract the type of the specified field from the metadata. If the type can not be found, return 'string'.
      *
      * @param {string} fieldName field name for which we want to get the type.
-     * @param {TypeLayerEntryConfig} layeConfig layer configuration.
+     * @param {TypeLayerEntryConfig} layerConfig layer configuration.
      *
      * @returns {'string' | 'date' | 'number'} The type of the field.
      */
@@ -68,7 +68,7 @@ export declare class WMS extends AbstractGeoViewRaster {
      * Returns null. WMS services don't have domains.
      *
      * @param {string} fieldName field name for which we want to get the domain.
-     * @param {TypeLayerEntryConfig} layeConfig layer configuration.
+     * @param {TypeLayerEntryConfig} layerConfig layer configuration.
      *
      * @returns {null | codedValueType | rangeDomainType} The domain of the field.
      */
@@ -270,4 +270,13 @@ export declare class WMS extends AbstractGeoViewRaster {
      * @returns {TypeJsonObject | undefined} The promised feature info table.
      */
     private getAttribute;
+    /** ***************************************************************************************************************************
+     * Return the attribute of an object that ends with the specified ending string or null if not found.
+     *
+     * @param {TypeJsonObject} jsonObject The object that is supposed to have the needed attribute.
+     * @param {string} attribute The attribute searched.
+     *
+     * @returns {TypeJsonObject | undefined} The promised feature info table.
+     */
+    setStyle(StyleId: string, layerPathOrConfig?: string | TypeLayerEntryConfig | null): void;
 }

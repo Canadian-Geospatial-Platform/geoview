@@ -522,7 +522,7 @@ export type TypeOfServer = 'mapserver' | 'geoserver' | 'qgis';
 /** ******************************************************************************************************************************
  * Initial settings for image sources.
  */
-export type TypeSourceImageInitialConfig = TypeSourceImageWmsInitialConfig | TypeSourceImageEsriInitialConfig;
+export type TypeSourceImageInitialConfig = TypeSourceImageWmsInitialConfig | TypeSourceImageEsriInitialConfig | TypeSourceImageStaticInitialConfig;
 /** ******************************************************************************************************************************
  * Initial settings for image sources.
  */
@@ -549,7 +549,14 @@ export interface TypeSourceImageWmsInitialConfig extends TypeBaseSourceImageInit
     /** The type of the remote WMS server. The default value is mapserver. */
     serverType?: TypeOfServer;
     /** Style to apply. Default = '' */
-    style?: string;
+    style?: string | string[];
+}
+/** ******************************************************************************************************************************
+ * Initial settings for static image sources.
+ */
+export interface TypeSourceImageStaticInitialConfig extends TypeBaseSourceImageInitialConfig {
+    /** Image extent */
+    extent: Extent;
 }
 /** ******************************************************************************************************************************
  * Initial settings for WMS image sources.
@@ -589,7 +596,7 @@ export type TypeTileGrid = {
  * Initial settings for tile image sources.
  */
 export type TypeSourceTileInitialConfig = {
-    /** The path (English/French) to reach the data to display. If not specified, metadatAccessPath will be assigne dto it. */
+    /** The path (English/French) to reach the data to display. If not specified, metadatAccessPath will be assigne to it. */
     dataAccessPath: TypeLocalizedString;
     /** The crossOrigin attribute for loaded images. Note that you must provide a crossOrigin value if you want to access pixel data
      * with the Canvas renderer.
@@ -744,14 +751,14 @@ export type TypeMapFeaturesInstance = {
     serviceUrls?: TypeServiceUrls;
     /**
      * ISO 639-1 code indicating the languages supported by the configuration file. It will use value(s) provided here to
-     * access bilangual configuration nodes. For value(s) provided here, each bilingual configuration node MUST provide a value..
+     * access bilangual configuration nodes. For value(s) provided here, each bilingual configuration node MUST provide a value.
      * */
     suportedLanguages: TypeListOfLocalizedLanguages;
     /**
      * The schema version used to validate the configuration file. The schema should enumerate the list of versions accepted by
      * this version of the viewer.
      */
-    versionUsed?: '1.0';
+    schemaVersionUsed?: '1.0';
 };
 export type TypeDisplayLanguage = 'en' | 'fr';
 /** Constante mainly use for language prefix validation. */
@@ -784,7 +791,7 @@ export type TypeMapConfig = {
     extraOptions?: Record<string, unknown>;
 };
 /** ******************************************************************************************************************************
- *  Definition of the valid map interactiom valuess. If map is dynamic (pan/zoom) or static to act as a thumbnail (no nav bar).
+ *  Definition of the valid map interactiom values. If map is dynamic (pan/zoom) or static to act as a thumbnail (no nav bar).
  */
 export type TypeInteraction = 'static' | 'dynamic';
 /** Constante mainly use for interaction validation. */
@@ -872,7 +879,7 @@ export type TypeAppBarProps = {
     about: TypeLocalizedString;
 };
 /** ******************************************************************************************************************************
- * Controls availalbe on the navigation bar. Default = ['zoom', 'fullscreen', 'fullextent'].
+ * Controls available on the navigation bar. Default = ['zoom', 'fullscreen', 'fullextent'].
  */
 export type TypeNavBarProps = Array<'zoom' | 'fullscreen' | 'fullextent'>;
 /** ******************************************************************************************************************************
@@ -910,5 +917,5 @@ export type TypeServiceUrls = {
      * An optional proxy to be used for dealing with same-origin issues.  URL must either be a relative path on the same server
      * or an absolute path on a server which sets CORS headers.
      */
-    proxyUrl: string;
+    proxyUrl?: string;
 };
