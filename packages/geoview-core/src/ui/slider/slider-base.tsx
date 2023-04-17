@@ -27,6 +27,7 @@ export function SliderBase(props: TypeSliderProps): JSX.Element {
   const { ...properties } = props;
 
   const [sliderValue, setValue] = useState<number[] | number | undefined>(properties.value);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [activeThumb, setActiveThumb] = useState<number>(0);
 
   // handle constant change on the slider to set active thumb and instant values

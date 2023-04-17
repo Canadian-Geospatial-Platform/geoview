@@ -15,7 +15,6 @@ import { getLocalizedValue } from '../../../../core/utils/utilities';
 import { AbstractGeoViewLayer, CONST_LAYER_TYPES, TypeLayerStyles } from '../abstract-geoview-layers';
 import { AbstractGeoViewRaster, TypeBaseRasterLayer } from './abstract-geoview-raster';
 import {
-  TypeImageLayerEntryConfig,
   TypeLayerEntryConfig,
   TypeSourceImageEsriInitialConfig,
   TypeGeoviewLayerConfig,
@@ -26,6 +25,7 @@ import {
   TypeClassBreakStyleConfig,
   isSimpleStyleConfig,
   TypeListOfLayerEntryConfig,
+  TypeEsriDynamicLayerEntryConfig,
 } from '../../../map/map-schema-types';
 import {
   TypeFeatureInfoEntry,
@@ -49,10 +49,6 @@ import {
 } from '../esri-layer-common';
 import { TypeJsonArray, TypeJsonObject } from '../../../../core/types/global-types';
 import { TypeEsriFeatureLayerEntryConfig } from '../vector/esri-feature';
-
-export interface TypeEsriDynamicLayerEntryConfig extends Omit<TypeImageLayerEntryConfig, 'source'> {
-  source: TypeSourceImageEsriInitialConfig;
-}
 
 export interface TypeEsriDynamicLayerConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig'> {
   geoviewLayerType: 'esriDynamic';

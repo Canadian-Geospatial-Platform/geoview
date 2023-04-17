@@ -7,28 +7,21 @@ import Static, { Options as SourceOptions } from 'ol/source/ImageStatic';
 import { Options as ImageOptions } from 'ol/layer/BaseImage';
 import { Coordinate } from 'ol/coordinate';
 import { Pixel } from 'ol/pixel';
-import { transformExtent } from 'ol/proj';
 
-import defaultsDeep from 'lodash/defaultsDeep';
-import { Cast, toJsonObject, TypeJsonObject } from '../../../../core/types/global-types';
+import { Cast, TypeJsonObject } from '../../../../core/types/global-types';
 import { AbstractGeoViewLayer, CONST_LAYER_TYPES, TypeLegend } from '../abstract-geoview-layers';
 import { AbstractGeoViewRaster, TypeBaseRasterLayer } from './abstract-geoview-raster';
 import {
-  TypeImageLayerEntryConfig,
   TypeLayerEntryConfig,
-  TypeSourceImageStaticInitialConfig,
   TypeGeoviewLayerConfig,
   TypeListOfLayerEntryConfig,
   layerEntryIsGroupLayer,
+  TypeImageStaticLayerEntryConfig,
 } from '../../../map/map-schema-types';
 import { codedValueType, rangeDomainType, TypeArrayOfFeatureInfoEntries } from '../../../../api/events/payloads/get-feature-info-payload';
-import { getLocalizedValue, getXMLHttpRequest } from '../../../../core/utils/utilities';
+import { getLocalizedValue } from '../../../../core/utils/utilities';
 import { api } from '../../../../app';
 import { Layer } from '../../layer';
-
-export interface TypeImageStaticLayerEntryConfig extends Omit<TypeImageLayerEntryConfig, 'source'> {
-  source: TypeSourceImageStaticInitialConfig;
-}
 
 export interface TypeImageStaticLayerConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig'> {
   geoviewLayerType: 'imageStatic';

@@ -11,6 +11,7 @@ import { Cast, Coordinate, TypeJsonArray, TypeJsonObject } from '../../../core/t
 import { AbstractGeoViewLayer, TypeGeoviewLayerType } from './abstract-geoview-layers';
 import {
   layerEntryIsGroupLayer,
+  TypeEsriDynamicLayerEntryConfig,
   TypeLayerEntryConfig,
   TypeLayerGroupEntryConfig,
   TypeListOfLayerEntryConfig,
@@ -18,7 +19,7 @@ import {
 import { getLocalizedValue, getXMLHttpRequest } from '../../../core/utils/utilities';
 import { api } from '../../../app';
 import { Layer } from '../layer';
-import { EsriDynamic, geoviewEntryIsEsriDynamic, TypeEsriDynamicLayerConfig, TypeEsriDynamicLayerEntryConfig } from './raster/esri-dynamic';
+import { EsriDynamic, geoviewEntryIsEsriDynamic, TypeEsriDynamicLayerConfig } from './raster/esri-dynamic';
 import { EsriFeature, geoviewEntryIsEsriFeature, TypeEsriFeatureLayerConfig, TypeEsriFeatureLayerEntryConfig } from './vector/esri-feature';
 import { EsriBaseRenderer, getStyleFromEsriRenderer } from '../../renderer/esri-renderer';
 import { TimeDimensionESRI } from '../../../core/utils/date-mgt';
