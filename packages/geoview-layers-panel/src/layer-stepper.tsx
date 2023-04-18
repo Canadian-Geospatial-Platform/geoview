@@ -274,7 +274,7 @@ function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
       if (!supportedProj.includes(proj)) throw new Error('proj');
       const layers: TypeJsonArray[] = [];
       const hasChildLayers = (layer: TypeJsonObject) => {
-        if (layer.Layer && layer.Layer.length > 0) {
+        if (layer.Layer && (layer.Layer as TypeJsonArray).length > 0) {
           (layer.Layer as TypeJsonObject[]).forEach((childLayer: TypeJsonObject) => {
             hasChildLayers(childLayer);
           });
@@ -291,7 +291,7 @@ function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
           {
             layerId: (layersParam ?? layers[0][0]) as string,
           },
-        ]);
+        ] as TypeListOfLayerEntryConfig);
       } else {
         setLayerList(layers);
       }
@@ -326,7 +326,7 @@ function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
           {
             layerId: layers[0][0] as string,
           },
-        ]);
+        ] as TypeListOfLayerEntryConfig);
       } else {
         setLayerList(layers);
       }
@@ -357,7 +357,7 @@ function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
         {
           layerId: jsonSingle.id,
         },
-      ]);
+      ] as TypeListOfLayerEntryConfig);
       setLayerName(jsonSingle.title);
       return true;
     }
@@ -375,7 +375,7 @@ function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
           {
             layerId: layers[0][0] as string,
           },
-        ]);
+        ] as TypeListOfLayerEntryConfig);
       } else {
         setLayerList(layers);
       }
@@ -400,7 +400,7 @@ function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
         {
           layerId: layerURL,
         },
-      ]);
+      ] as TypeListOfLayerEntryConfig);
     } catch (err) {
       emitErrorServer('GeoCore UUID');
       return false;
@@ -427,7 +427,7 @@ function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
               {
                 layerId: layers[0][0] as string,
               },
-            ]);
+            ] as TypeListOfLayerEntryConfig);
           } else {
             setLayerList(layers);
           }
@@ -437,7 +437,7 @@ function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
             {
               layerId: esri.id as string,
             },
-          ]);
+          ] as TypeListOfLayerEntryConfig);
         }
       } else {
         throw new Error('err');
@@ -479,7 +479,7 @@ function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
           },
         },
       },
-    ]);
+    ] as TypeListOfLayerEntryConfig);
     return true;
   };
 
@@ -508,7 +508,7 @@ function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
             },
           },
         },
-      ]);
+      ] as TypeListOfLayerEntryConfig);
     } catch (err) {
       emitErrorServer('GeoJSON');
       return false;
@@ -536,7 +536,7 @@ function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
           },
         },
       },
-    ]);
+    ] as TypeListOfLayerEntryConfig);
     return true;
   };
 
@@ -763,11 +763,11 @@ function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
       setLayerEntries(
         newValue.map((x: string) => {
           return { layerId: `${x[0]}` };
-        })
+        }) as TypeListOfLayerEntryConfig
       );
       setLayerName(newValue.map((x) => x[1]).join(', '));
     } else {
-      setLayerEntries([{ layerId: `${newValue[0]}` }]);
+      setLayerEntries([{ layerId: `${newValue[0]}` }] as TypeListOfLayerEntryConfig);
       setLayerName(newValue[1]);
     }
   };

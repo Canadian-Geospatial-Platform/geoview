@@ -1,5 +1,5 @@
 /* eslint-disable react/require-default-props */
-import React, { useEffect, useState, useContext, useRef, MutableRefObject, RefObject } from 'react';
+import React, { useEffect, useState, useContext, useRef, MutableRefObject, RefObject, Fragment } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useTheme, Theme } from '@mui/material/styles';
 import Grid from '@mui/material/Grid';
@@ -562,18 +562,19 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
         <Box>
           <Box sx={sxClasses.expandableIconContainer}>
             {groupItems.map((subItem) => (
-              <LegendItem
-                key={`sub-${subItem.layerId}`}
-                layerId={layerId}
-                geoviewLayerInstance={geoviewLayerInstance}
-                subLayerId={subLayerId ? `${subLayerId}/${subItem.layerId}` : `${layerId}/${subItem.layerId}`}
-                layerConfigEntry={subItem}
-                isParentVisible={isParentVisible === false ? false : isChecked}
-                canSetOpacity={canSetOpacity}
-                toggleParentVisible={handleToggleLayer}
-                expandAll={expandAll}
-                hideAll={hideAll}
-              />
+              <Fragment key={subItem.layerId}>
+                <LegendItem
+                  layerId={layerId}
+                  geoviewLayerInstance={geoviewLayerInstance}
+                  subLayerId={subLayerId ? `${subLayerId}/${subItem.layerId}` : `${layerId}/${subItem.layerId}`}
+                  layerConfigEntry={subItem}
+                  isParentVisible={isParentVisible === false ? false : isChecked}
+                  canSetOpacity={canSetOpacity}
+                  toggleParentVisible={handleToggleLayer}
+                  expandAll={expandAll}
+                  hideAll={hideAll}
+                />
+              </Fragment>
             ))}
           </Box>
         </Box>

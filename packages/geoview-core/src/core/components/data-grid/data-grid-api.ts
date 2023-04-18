@@ -155,7 +155,7 @@ export class DataGridAPI {
       });
 
       return {
-        key: `${layerId}-datagrid`,
+        key: `${layerId}-datagrid-${layerKey}`,
         mapId: this.mapId,
         layerKey,
         columns,
@@ -217,9 +217,13 @@ export class DataGridAPI {
       groupKeys.length > 1 &&
         createElement(
           'select',
-          { id: `${layerId}-groupLayerSelection`, style: { fontSize: '1em', margin: '1em', padding: '0.3em' } },
+          {
+            id: `${layerId}-groupLayerSelection`,
+            key: `${layerId}-groupLayerSelection`,
+            style: { fontSize: '1em', margin: '1em', padding: '0.3em' },
+          },
           groupKeys.map((layerkey) => {
-            return createElement('option', { key: layerkey }, [layerkey]);
+            return createElement('option', { key: `${layerId}-${layerkey}` }, layerkey);
           })
         ),
       groupValues.map((groupValue, index) => {
