@@ -153,7 +153,7 @@ const createInfoTable = (mapId, resultSetsId, resultSets) => {
           if (row.fieldInfo[fieldName].dataType === 'date') {
             const { dateUtilities } = cgpv.api;
             // tableData.innerText = dateUtilities.convertToDate(row.fieldInfo[fieldName].value);
-            tableData.innerText = dateUtilities.format(dateUtilities.convertToUTC(row.fieldInfo[fieldName].value), 'day', 'second');
+            tableData.innerText = dateUtilities.format(dateUtilities.convertToLocal(row.fieldInfo[fieldName].value), 'day', 'second');
           } else tableData.innerText = row.fieldInfo[fieldName].value;
           tableRow.appendChild(tableData);
         });
@@ -244,6 +244,7 @@ const createTableOfFilter = (mapId) => {
                       geoviewLayer.applyViewFilter(layerConfig, filter);
                     });
                     mapButtonsDiv.appendChild(toggleUniqueValueDefault);
+                    mapButtonsDiv.appendChild(legendStyle[geometry].defaultCanvas);
                     const br = document.createElement('br');
                     br.style.height = '1px';
                     mapButtonsDiv.appendChild(br);

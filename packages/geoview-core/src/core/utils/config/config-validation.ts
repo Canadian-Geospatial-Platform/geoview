@@ -1,5 +1,6 @@
 /* eslint-disable no-console, no-underscore-dangle, no-param-reassign */
 import Ajv from 'ajv';
+import { AnyValidateFunction } from 'ajv/dist/types';
 
 import defaultsDeep from 'lodash/defaultsDeep';
 import { generateId } from '../utilities';
@@ -15,7 +16,6 @@ import { geoviewEntryIsWFS } from '../../../geo/layer/geoview-layers/vector/wfs'
 import { geoviewEntryIsOgcFeature } from '../../../geo/layer/geoview-layers/vector/ogc-feature';
 import { geoviewEntryIsGeoJSON } from '../../../geo/layer/geoview-layers/vector/geojson';
 import { geoviewEntryIsGeoPackage } from '../../../geo/layer/geoview-layers/vector/geopackage';
-import { geoviewEntryIsGeocore } from '../../../geo/layer/other/geocore';
 import {
   layerEntryIsGroupLayer,
   TypeGeoviewLayerConfig,
@@ -38,6 +38,7 @@ import { api } from '../../../app';
 import { snackbarMessagePayload } from '../../../api/events/payloads/snackbar-message-payload';
 import { EVENT_NAMES } from '../../../api/events/event-types';
 import { Layer } from '../../../geo/layer/layer';
+import { CONST_GEOVIEW_SCHEMA_BY_TYPE, TypeGeoviewLayerType } from '../../../geo/layer/geoview-layers/abstract-geoview-layers';
 
 // ******************************************************************************************************************************
 // ******************************************************************************************************************************
@@ -298,6 +299,127 @@ export class ConfigValidation {
   }
 
   /** ***************************************************************************************************************************
+   * Print a trace to help locate schema errors.
+   * @param {AnyValidateFunction<unknown>} validate The Ajv validator.
+   * @param {any} objectAffected Object that was validated.
+   */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  private printSchemaError(validate: AnyValidateFunction<unknown>, objectAffected: any) {
+    for (let i = 0; i < validate.errors!.length; i += 1) {
+      const error = validate.errors![i];
+      const { instancePath } = error;
+      const path = instancePath.split('/');
+      let node = objectAffected;
+      for (let j = 1; j < path.length; j += 1) {
+        node = node[path[j]];
+      }
+      console.log(this.mapId, '='.repeat(200));
+      console.log('Schema error: ', this.mapId, error);
+      console.log('Object affected: ', this.mapId, node);
+    }
+
+    setTimeout(() => {
+      const errorMessage = `- Map ${this.mapId}: A schema error was found, check the console to see what is wrong.`;
+
+      api.event.emit(
+        snackbarMessagePayload(EVENT_NAMES.SNACKBAR.EVENT_SNACKBAR_OPEN, this.mapId, {
+          type: 'string',
+          value: errorMessage,
+        })
+      );
+    }, 2000);
+  }
+
+  /** ***************************************************************************************************************************
+   * Validate the configuration of the map features against the TypeMapFeaturesInstance defined in the schema..
+   * @param {TypeMapFeaturesConfig} mapFeaturesConfigToValidate The map features configuration to validate.
+   * @param {Ajv} validator The schema validator to use.
+   *
+   * @returns {TypeMapFeaturesConfig} A valid map features configuration.
+   */
+  private IsValidTypeMapFeaturesInstance(mapFeaturesConfigToValidate: TypeMapFeaturesConfig, validator: Ajv): boolean {
+    const schemaPath = 'https://cgpv/schema#/definitions/TypeMapFeaturesInstance';
+    const validate = validator.getSchema(schemaPath);
+
+    if (!validate) {
+      setTimeout(() => {
+        const errorMessage = `- Map ${this.mapId}: Cannot find schema "${schemaPath}".`;
+        console.log(errorMessage);
+
+        api.event.emit(
+          snackbarMessagePayload(EVENT_NAMES.SNACKBAR.EVENT_SNACKBAR_OPEN, this.mapId, {
+            type: 'string',
+            value: errorMessage,
+          })
+        );
+      }, 2000);
+      return false;
+    }
+
+    // validate configuration
+    const valid = validate({ ...mapFeaturesConfigToValidate });
+
+    if (!valid) {
+      this.printSchemaError(validate, mapFeaturesConfigToValidate);
+      return false;
+    }
+    return true;
+  }
+
+  /** ***************************************************************************************************************************
+   * Validate the configuration of the map features against the TypeMapFeaturesInstance defined in the schema.
+   * @param {TypeGeoviewLayerType} geoviewLayerType The GeoView layer type to validate.
+   * @param {TypeListOfLayerEntryConfig} listOfLayerEntryConfig The list of layer entry configurations to validate.
+   * @param {Ajv} validator The schema validator to use.
+   *
+   * @returns {TypeMapFeaturesConfig} A valid map features configuration.
+   */
+  private IsValidTypeListOfLayerEntryConfig(
+    geoviewLayerType: TypeGeoviewLayerType,
+    listOfLayerEntryConfig: TypeListOfLayerEntryConfig,
+    validator: Ajv
+  ): boolean {
+    const layerSchemaPath = `https://cgpv/schema#/definitions/${CONST_GEOVIEW_SCHEMA_BY_TYPE[geoviewLayerType]}`;
+    const groupSchemaPath = `https://cgpv/schema#/definitions/TypeLayerGroupEntryConfig`;
+
+    for (let i = 0; i < listOfLayerEntryConfig.length; i++) {
+      const schemaPath = layerEntryIsGroupLayer(listOfLayerEntryConfig[i]) ? groupSchemaPath : layerSchemaPath;
+      const validate = validator.getSchema(schemaPath);
+
+      if (!validate) {
+        setTimeout(() => {
+          const errorMessage = `- Map ${this.mapId}: Cannot find schema "${schemaPath}".`;
+          console.log(errorMessage);
+
+          api.event.emit(
+            snackbarMessagePayload(EVENT_NAMES.SNACKBAR.EVENT_SNACKBAR_OPEN, this.mapId, {
+              type: 'string',
+              value: errorMessage,
+            })
+          );
+        }, 2000);
+        return false;
+      }
+      // validate configuration
+      const valid = validate(listOfLayerEntryConfig[i]);
+
+      if (!valid) {
+        this.printSchemaError(validate, listOfLayerEntryConfig[i]);
+        return false;
+      }
+    }
+
+    for (let i = 0; i < listOfLayerEntryConfig.length; i++) {
+      if (
+        layerEntryIsGroupLayer(listOfLayerEntryConfig[i]) &&
+        !this.IsValidTypeListOfLayerEntryConfig(geoviewLayerType, listOfLayerEntryConfig[i].listOfLayerEntryConfig!, validator)
+      )
+        return false;
+    }
+    return true;
+  }
+
+  /** ***************************************************************************************************************************
    * Validate the map features configuration.
    * @param {TypeMapFeaturesConfig} mapFeaturesConfigToValidate The map features configuration to validate.
    *
@@ -315,40 +437,22 @@ export class ConfigValidation {
       // create a validator object
       const validator = new Ajv({
         strict: false,
-        allErrors: true,
+        allErrors: false,
       });
 
       // initialize validator with schema file
-      const validate = validator.compile(schema);
+      validator.compile(schema);
 
-      // validate configuration
-      const valid = validate({ ...mapFeaturesConfigToValidate });
+      let isValid = this.IsValidTypeMapFeaturesInstance(mapFeaturesConfigToValidate, validator);
+      for (let i = 0; i < mapFeaturesConfigToValidate.map.listOfGeoviewLayerConfig.length && isValid; i++) {
+        isValid = this.IsValidTypeListOfLayerEntryConfig(
+          mapFeaturesConfigToValidate.map.listOfGeoviewLayerConfig[i].geoviewLayerType,
+          mapFeaturesConfigToValidate.map.listOfGeoviewLayerConfig[i].listOfLayerEntryConfig,
+          validator
+        );
+      }
 
-      if (!valid && validate.errors && validate.errors.length) {
-        for (let j = 0; j < validate.errors.length; j += 1) {
-          const error = validate.errors[j];
-          const { instancePath } = error;
-          const path = instancePath.split('/');
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          let node: any = mapFeaturesConfigToValidate;
-          for (let i = 1; i < path.length; i += 1) {
-            node = node[path[i]];
-          }
-          console.log(this.mapId, error);
-          console.log(this.mapId, node);
-        }
-
-        setTimeout(() => {
-          const errorMessage = `- Map ${this.mapId}: A schema error was found, check the console to see what is wrong.`;
-
-          api.event.emit(
-            snackbarMessagePayload(EVENT_NAMES.SNACKBAR.EVENT_SNACKBAR_OPEN, this.mapId, {
-              type: 'string',
-              value: errorMessage,
-            })
-          );
-        }, 2000);
-
+      if (!isValid) {
         validMapFeaturesConfig = {
           ...this.adjustMapConfiguration(mapFeaturesConfigToValidate),
           mapId: this.mapId,
@@ -398,47 +502,22 @@ export class ConfigValidation {
       listOfGeoviewLayerConfig.forEach((geoviewLayerConfig) => {
         switch (geoviewLayerConfig.geoviewLayerType) {
           case 'GeoJSON':
+          case 'xyzTiles':
+          case 'GeoPackage':
+          case 'imageStatic':
             this.geoviewLayerIdIsMandatory(geoviewLayerConfig);
             this.processLayerEntryConfig(geoviewLayerConfig, geoviewLayerConfig, geoviewLayerConfig.listOfLayerEntryConfig);
             break;
           case 'esriDynamic':
-            this.geoviewLayerIdIsMandatory(geoviewLayerConfig);
-            this.metadataAccessPathIsMandatory(geoviewLayerConfig);
-            this.processLayerEntryConfig(geoviewLayerConfig, geoviewLayerConfig, geoviewLayerConfig.listOfLayerEntryConfig);
-            break;
           case 'esriFeature':
+          case 'ogcFeature':
+          case 'ogcWfs':
+          case 'ogcWms':
             this.geoviewLayerIdIsMandatory(geoviewLayerConfig);
             this.metadataAccessPathIsMandatory(geoviewLayerConfig);
             this.processLayerEntryConfig(geoviewLayerConfig, geoviewLayerConfig, geoviewLayerConfig.listOfLayerEntryConfig);
             break;
           case 'geoCore':
-            this.processLayerEntryConfig(geoviewLayerConfig, geoviewLayerConfig, geoviewLayerConfig.listOfLayerEntryConfig);
-            break;
-          case 'GeoPackage':
-            this.geoviewLayerIdIsMandatory(geoviewLayerConfig);
-            this.processLayerEntryConfig(geoviewLayerConfig, geoviewLayerConfig, geoviewLayerConfig.listOfLayerEntryConfig);
-            break;
-          case 'imageStatic':
-            this.geoviewLayerIdIsMandatory(geoviewLayerConfig);
-            this.processLayerEntryConfig(geoviewLayerConfig, geoviewLayerConfig, geoviewLayerConfig.listOfLayerEntryConfig);
-            break;
-          case 'xyzTiles':
-            this.geoviewLayerIdIsMandatory(geoviewLayerConfig);
-            this.processLayerEntryConfig(geoviewLayerConfig, geoviewLayerConfig, geoviewLayerConfig.listOfLayerEntryConfig);
-            break;
-          case 'ogcFeature':
-            this.geoviewLayerIdIsMandatory(geoviewLayerConfig);
-            this.metadataAccessPathIsMandatory(geoviewLayerConfig);
-            this.processLayerEntryConfig(geoviewLayerConfig, geoviewLayerConfig, geoviewLayerConfig.listOfLayerEntryConfig);
-            break;
-          case 'ogcWfs':
-            this.geoviewLayerIdIsMandatory(geoviewLayerConfig);
-            this.metadataAccessPathIsMandatory(geoviewLayerConfig);
-            this.processLayerEntryConfig(geoviewLayerConfig, geoviewLayerConfig, geoviewLayerConfig.listOfLayerEntryConfig);
-            break;
-          case 'ogcWms':
-            this.geoviewLayerIdIsMandatory(geoviewLayerConfig);
-            this.metadataAccessPathIsMandatory(geoviewLayerConfig);
             this.processLayerEntryConfig(geoviewLayerConfig, geoviewLayerConfig, geoviewLayerConfig.listOfLayerEntryConfig);
             break;
           default:
@@ -493,8 +572,6 @@ export class ConfigValidation {
       if (layerEntryIsGroupLayer(layerEntryConfig))
         this.processLayerEntryConfig(rootLayerConfig, layerEntryConfig, layerEntryConfig.listOfLayerEntryConfig);
       else if (geoviewEntryIsWMS(layerEntryConfig)) {
-        // Value for layerEntryConfig.entryType can only be raster
-        if (!layerEntryConfig.entryType) layerEntryConfig.entryType = 'raster';
         // if layerEntryConfig.source.dataAccessPath is undefined, the metadataAccessPath defined on the root is used.
         if (!layerEntryConfig.source) layerEntryConfig.source = {};
         if (!layerEntryConfig.source.dataAccessPath) {
@@ -514,7 +591,7 @@ export class ConfigValidation {
         if (!layerEntryConfig.source.serverType) layerEntryConfig.source.serverType = 'mapserver';
       } else if (geoviewEntryIsImageStatic(layerEntryConfig)) {
         // Value for layerEntryConfig.entryType can only be raster
-        if (!layerEntryConfig.entryType) layerEntryConfig.entryType = 'raster';
+        if (!layerEntryConfig.entryType) layerEntryConfig.entryType = 'raster-image';
 
         if (!layerEntryConfig.source.dataAccessPath) {
           throw new Error(
@@ -524,8 +601,6 @@ export class ConfigValidation {
           );
         }
       } else if (geoviewEntryIsXYZTiles(layerEntryConfig)) {
-        // Value for layerEntryConfig.entryType can only be raster
-        if (!layerEntryConfig.entryType) layerEntryConfig.entryType = 'raster';
         /** layerEntryConfig.source.dataAccessPath is mandatory. */
         if (!layerEntryConfig.source.dataAccessPath) {
           throw new Error(
@@ -538,8 +613,6 @@ export class ConfigValidation {
         if (Number.isNaN(layerEntryConfig.layerId)) {
           throw new Error(`The layer entry with layerId equal to ${Layer.getLayerPath(layerEntryConfig)} must be an integer string`);
         }
-        // Value for layerEntryConfig.entryType can only be raster
-        if (!layerEntryConfig.entryType) layerEntryConfig.entryType = 'raster';
         // if layerEntryConfig.source.dataAccessPath is undefined, we assign the metadataAccessPath of the GeoView layer to it.
         if (!layerEntryConfig.source) layerEntryConfig.source = {};
         if (!layerEntryConfig.source.dataAccessPath)
@@ -548,8 +621,6 @@ export class ConfigValidation {
         if (Number.isNaN(layerEntryConfig.layerId)) {
           throw new Error(`The layer entry with layerId equal to ${Layer.getLayerPath(layerEntryConfig)} must be an integer string`);
         }
-        // Default value for layerEntryConfig.entryType is vector
-        if (!layerEntryConfig.entryType) layerEntryConfig.entryType = 'vector';
         // Attribute 'style' must exist in layerEntryConfig even if it is undefined
         if (!('style' in layerEntryConfig)) layerEntryConfig.style = undefined;
         // if layerEntryConfig.source.dataAccessPath is undefined, we assign the metadataAccessPath of the GeoView layer to it
@@ -560,8 +631,6 @@ export class ConfigValidation {
         if (!layerEntryConfig.source.dataAccessPath)
           layerEntryConfig.source.dataAccessPath = { ...rootLayerConfig.metadataAccessPath } as TypeLocalizedString;
       } else if (geoviewEntryIsWFS(layerEntryConfig)) {
-        // Default value for layerEntryConfig.entryType is vector
-        if (!layerEntryConfig.entryType) layerEntryConfig.entryType = 'vector';
         // Attribute 'style' must exist in layerEntryConfig even if it is undefined
         if (!('style' in layerEntryConfig)) layerEntryConfig.style = undefined;
         // if layerEntryConfig.source.dataAccessPath is undefined, we assign the metadataAccessPath of the GeoView layer to it.
@@ -572,8 +641,6 @@ export class ConfigValidation {
           layerEntryConfig.source.dataAccessPath = { ...rootLayerConfig.metadataAccessPath } as TypeLocalizedString;
         if (!layerEntryConfig?.source?.dataProjection) layerEntryConfig.source.dataProjection = 'EPSG:4326';
       } else if (geoviewEntryIsOgcFeature(layerEntryConfig)) {
-        // Default value for layerEntryConfig.entryType is vector
-        if (!layerEntryConfig.entryType) layerEntryConfig.entryType = 'vector';
         // Attribute 'style' must exist in layerEntryConfig even if it is undefined
         if (!('style' in layerEntryConfig)) layerEntryConfig.style = undefined;
         // if layerEntryConfig.source.dataAccessPath is undefined, we assign the metadataAccessPath of the GeoView layer to it.
@@ -584,8 +651,6 @@ export class ConfigValidation {
           layerEntryConfig.source.dataAccessPath = { ...rootLayerConfig.metadataAccessPath } as TypeLocalizedString;
         if (!layerEntryConfig?.source?.dataProjection) layerEntryConfig.source.dataProjection = 'EPSG:4326';
       } else if (geoviewEntryIsGeoPackage(layerEntryConfig)) {
-        // Default value for layerEntryConfig.entryType is vector
-        if (!layerEntryConfig.entryType) layerEntryConfig.entryType = 'vector';
         // Attribute 'style' must exist in layerEntryConfig even if it is undefined
         if (!('style' in layerEntryConfig)) layerEntryConfig.style = undefined;
         // if layerEntryConfig.source.dataAccessPath is undefined, we assign the metadataAccessPath of the GeoView layer to it.
@@ -610,9 +675,6 @@ export class ConfigValidation {
             : `${layerEntryConfig.source.dataAccessPath!.fr}/${layerEntryConfig.layerId}`;
         }
         if (!layerEntryConfig?.source?.dataProjection) layerEntryConfig.source.dataProjection = 'EPSG:4326';
-      } else if (geoviewEntryIsGeocore(layerEntryConfig)) {
-        // Default value for layerEntryConfig.entryType is vector
-        if (!layerEntryConfig.entryType) layerEntryConfig.entryType = 'geocore';
       } else if (geoviewEntryIsGeoJSON(layerEntryConfig)) {
         if (!layerEntryConfig.geoviewRootLayer.metadataAccessPath && !layerEntryConfig.source?.dataAccessPath) {
           throw new Error(
