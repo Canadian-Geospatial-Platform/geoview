@@ -1,3 +1,4 @@
+/* eslint-disable prefer-destructuring */
 import dayjs, { Dayjs } from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import duration from 'dayjs/plugin/duration';
@@ -7,6 +8,15 @@ import 'dayjs/locale/en-ca';
 import 'dayjs/locale/fr-ca';
 import { TypeLocalizedLanguages } from '../../geo/map/map-schema-types';
 import { TypeJsonObject } from '../types/global-types';
+
+export type TypeDateFragments = [number[], number[], string[]] | [];
+
+const FIRST_DATE_ELEMENT = 0;
+const DATE = 0;
+const SECOND_DATE_ELEMENT = 1;
+const THIRD_DATE_ELEMENT = 2;
+const DATE_TIME = 2;
+const TIME = 3;
 
 /** ******************************************************************************************************************************
  * constant/interface used to define the precision for date object (yyyy, mm, dd).
@@ -179,7 +189,7 @@ export class DateMgt {
     if (typeof date === 'string' && !isValidDate(date)) throw INVALID_DATE;
 
     // return ISO string
-    return dayjs(date).utc(true).format();
+    return dayjs(date).utc(false).format();
   }
 
   /**
@@ -197,7 +207,7 @@ export class DateMgt {
     const pattern = `${DEFAULT_DATE_PRECISION[datePattern]}${timePattern !== undefined ? DEFAULT_TIME_PRECISION[timePattern] : ''}`;
 
     // output as local by default
-    return dayjs(date).utc(true).format(pattern);
+    return dayjs(date).utc(false).format(pattern);
   }
 
   /**
@@ -213,13 +223,12 @@ export class DateMgt {
   }
 
   /**
-   * Convert a milliseconds date to string date
+   * Convert a milliseconds date to string date. Date format is YYYY-MM-DDTHH:mm:ss.
    * @param {number} date milliseconds date
    * @returns {string} date string
    */
-  convertToDate(date: number, dateFormat = 'YYYY-MM-DDTHH:mm:ss'): string {
-    // TODO check if date is in UTC or local
-    return dayjs(date).utc(true).format(dateFormat);
+  convertMilisecondsToDate(date: number, dateFormat = 'YYYY-MM-DDTHH:mm:ss'): string {
+    return dayjs(date).utc(false).format(dateFormat);
   }
 
   /**
@@ -242,22 +251,24 @@ export class DateMgt {
 
     // get time format
     let timePrecision: TimePrecision;
-    if (time !== undefined && time.split(':').length === 3) timePrecision = 'second';
-    else if (time !== undefined && time.split(':').length === 2) timePrecision = 'minute';
-    else timePrecision = 'hour';
+    if (time) {
+      const numberOfTimeElements = time.slice(0, 8).split(':').length;
+      if (numberOfTimeElements === 3) timePrecision = 'second';
+      else if (numberOfTimeElements === 2) timePrecision = 'minute';
+      else timePrecision = 'hour';
+      return `${DEFAULT_DATE_PRECISION[datePrecision]}${DEFAULT_TIME_PRECISION[timePrecision]}`;
+    }
 
-    // full format
-    const fullFormat = `${DEFAULT_DATE_PRECISION[datePrecision]}${time !== undefined ? DEFAULT_TIME_PRECISION[timePrecision] : ''}`;
-
-    return fullFormat;
+    return DEFAULT_DATE_PRECISION[datePrecision];
   }
 
   /**
    * Create the Geoview time dimension from ESRI dimension
    * @param {TimeDimensionESRI} timeDimensionESRI esri time dimension object
+   * @param dateFragmentsOrder {TypeDateFragments} The date fragments order (obtained with getDateFragmentsOrder).
    * @returns {TimeDimension} the Geoview time dimension
    */
-  createDimensionFromESRI(timeDimensionESRI: TimeDimensionESRI): TimeDimension {
+  createDimensionFromESRI(timeDimensionESRI: TimeDimensionESRI, dateFragmentsOrder: TypeDateFragments): TimeDimension {
     const { startTimeField, timeExtent, timeInterval, timeIntervalUnits } = timeDimensionESRI;
 
     // create interval string
@@ -272,7 +283,13 @@ export class DateMgt {
       return interval;
     };
 
-    const dimensionValues = `${this.convertToDate(timeExtent[0])}/${this.convertToDate(timeExtent[1])}${calcDuration()}`;
+    const dimensionValues = `${this.applyInputDateFormat(
+      this.applyOutputDateFormat(this.convertMilisecondsToDate(timeExtent[0]), dateFragmentsOrder),
+      dateFragmentsOrder
+    )}/${this.applyInputDateFormat(
+      this.applyOutputDateFormat(this.convertMilisecondsToDate(timeExtent[1]), dateFragmentsOrder),
+      dateFragmentsOrder
+    )}${calcDuration()}`;
     const rangeItem = this.createRangeOGC(dimensionValues);
     const timeDimension: TimeDimension = {
       field: startTimeField,
@@ -363,24 +380,35 @@ export class DateMgt {
     if (!isValidDate(date1)) throw INVALID_DATE;
     if (!isValidDate(date2)) throw INVALID_DATE;
     if (!isValidDuration(durationCheck)) throw INVALID_TIME_DIMENSION_DURATION;
+    const endsWithZ = date1.slice(-1).toUpperCase() === 'Z';
 
     // get the date format
     const format: string = this.extractDateFormat(date1);
 
     // set min and max
-    const min: string = dayjs(date1).format(format);
-    const max: string = dayjs(date2).format(format);
+    const min: string = endsWithZ ? `${dayjs(date1).utc(false).format(format).slice(0, -6)}Z` : dayjs(date1).utc(false).format(format);
+    const max: string = endsWithZ ? `${dayjs(date2).utc(false).format(format).slice(0, -6)}Z` : dayjs(date2).utc(false).format(format);
 
     // create intervalle items
     const msDuration: number = dayjs.duration(durationCheck).asMilliseconds();
+    const calcDuration = dayjs.duration({ milliseconds: msDuration });
     const items: string[] = [];
-    let i = 1;
+    let i = 0;
 
-    // TODO: handle leap year
     items.push(min);
     do {
-      const calcDuration = dayjs.duration({ milliseconds: i * msDuration });
-      items.push(dayjs(min).add(calcDuration).format(format));
+      let nextDate: string = dayjs(items[i]).add(calcDuration).utc(false).format(format);
+      if (endsWithZ) nextDate = `${nextDate.slice(0, -6)}Z`;
+      items.push(nextDate);
+      // Apply a correction if it is a leap year
+      if (msDuration === 31536000000 && items[i].slice(4, 10) !== items[i + 1].slice(4, 10)) {
+        nextDate = dayjs(items[i])
+          .add(dayjs.duration({ milliseconds: 31622400000 }))
+          .utc(false)
+          .format(format);
+        if (endsWithZ) nextDate = `${nextDate.slice(0, -6)}Z`;
+        items[i + 1] = nextDate;
+      }
       i++;
     } while (dayjs(items[items.length - 1]).isBefore(max));
 
@@ -413,9 +441,184 @@ export class DateMgt {
 
     // set min and max (from duration or date)
     const msDuration = dayjs.duration(durationCheck);
-    const min: string = dayjs(date).format(format);
+    const min: string = dayjs(date).utc(false).format(format);
     const max: Dayjs = !isValidDate(durationCheck) ? dayjs(date).add(msDuration) : dayjs(durationCheck);
 
-    return [min, dayjs(max).format(format)];
+    return [min, dayjs(max).utc(false).format(format)];
+  }
+
+  /**
+   * Get the date fragments order. Normaly, the order is year followed by month followed by day.
+   * @param dateFormat {string} The date format to be analyzed.
+   * @returns {TypeDateFragments} array of index indicating the field position in the format. index 0 is for
+   * year, 1 for month, 2 for day and 4 for time. A value of -1 indicates theat the fragment is missing.
+   */
+  getDateFragmentsOrder(dateFormat?: string): TypeDateFragments {
+    /*
+      The structure of the date fragments is:
+        index 0 is for the input format;
+        index 1 is for the output format;
+        index 2 is for the date separators and the time zone extracted from the dateFormat parameter. These values are
+        used to format the output dates. Input dates are converted to UTC ISO format.
+        The meaning of the dateFragmentsOrder elements are as follow:
+        [
+          [year position, month position, day position, time position], <- input format
+          [year position, month position, day position, time position], <- output format
+          [first date separator, second date separator, time separator, time zone separator, absolute value of time zone]
+        ]
+        Date separator are '/' or '-', time separator is either ' ' or 'T' and time zone separator is the sign ('+' or '-')
+        to apply to the absolute value of time zone. Note that dateFragmentsOrder[0] is only used for internal formatting and
+        dateFragmentsOrder[1] for output formatting. Also, if output formatting specifies a time zone different than the
+        internal format, no zone conversion will be done. It is just considered as a flag saying that we must include the
+        time zone in the output string.
+    */
+    const dateFragmentsOrder: TypeDateFragments = [[-1, -1, -1, -1], [-1, -1, -1, -1], []];
+    if (dateFormat) {
+      // eslint-disable-next-line no-param-reassign
+      dateFormat = dateFormat.toUpperCase().replace(/Z/, '+00:00');
+      for (let i = 0; i < dateFormat.length; i++) {
+        if (['/', '-', ' ', 'T', '+'].includes(dateFormat[i])) dateFragmentsOrder[2].push(dateFormat[i]);
+      }
+      if (
+        // We cannot have more than 4 fragments (2 date separators, 1 time separator and one time zone separator).
+        dateFragmentsOrder[2].length > 4 ||
+        // if present, The time zone separator must be either '+' or '-'.
+        (dateFragmentsOrder[2].length > 3 && !['+', '-'].includes(dateFragmentsOrder[2][3])) ||
+        // if present, The time separator must be either ' ' or 'T'.
+        (dateFragmentsOrder[2].length > 2 && ![' ', 'T'].includes(dateFragmentsOrder[2][2])) ||
+        // if present, The 2 date separators must be either '-' or '/' and they must be the same.
+        (dateFragmentsOrder[2].length > 1 &&
+          (!['-', '/'].includes(dateFragmentsOrder[2][0]) ||
+            !['-', '/'].includes(dateFragmentsOrder[2][1]) ||
+            dateFragmentsOrder[2][0] !== dateFragmentsOrder[2][1]))
+      )
+        throw new Error(`The string "${dateFormat}" is an invalid date format.`);
+
+      const [dateString, timeString] = dateFormat.replaceAll(' ', 'T').split('T');
+      const dateFragments = dateString.replaceAll('/', '-').split('-');
+      ['Y', 'M', 'D'].forEach((fragmentType, i) => {
+        dateFragmentsOrder[0][i] = dateFragments.findIndex((fragment) => fragment[0] === fragmentType);
+        if (dateFragmentsOrder[0][i] >= 0) dateFragmentsOrder[1][dateFragmentsOrder[0][i]] = i;
+      });
+      // Year not found
+      if (dateFragmentsOrder[0][0] === -1) throw new Error(`The string "${dateFormat}" is an invalid date format.`);
+
+      if (timeString) {
+        dateFragmentsOrder[0][3] = 3;
+        dateFragmentsOrder[1][3] = 3;
+        // Get time zone.
+        for (let i = 0; i < timeString.length; i++) {
+          if (['-', '+'].includes(timeString[i])) {
+            dateFragmentsOrder[2][4] = timeString.slice(i + 1);
+            break;
+          }
+        }
+      }
+
+      // Month is not specified, use default position and separator
+      if (dateFragmentsOrder[0][1] === -1) {
+        dateFragmentsOrder[0][1] = 1;
+        dateFragmentsOrder[2][0] = '-';
+      }
+      // Day is not specified, use default position and separator
+      if (dateFragmentsOrder[0][2] === -1) {
+        dateFragmentsOrder[0][2] = 2;
+        dateFragmentsOrder[2][1] = dateFragmentsOrder[2][0];
+      }
+      // Time is not specified, use default position and separators and set time zone to UTC
+      if (dateFragmentsOrder[0][3] === -1) {
+        dateFragmentsOrder[0][3] = 3;
+        dateFragmentsOrder[2][2] = 'T';
+        dateFragmentsOrder[2][3] = '+';
+        dateFragmentsOrder[2][4] = '00:00';
+      }
+      return dateFragmentsOrder;
+    }
+    return [];
+  }
+
+  /**
+   * Reorder the date to the ISO UTC format using the input section (index = 0) of the date fragments order provided.
+   * This routine is used to convert the dates returned by the server to the internal ISO UTC format. It is also used
+   * to convert the date constants (date '...') found in the layer filter string using a reverse time zone to return
+   * the date to the same time zone the server use since the filter string will be sent to the server to perform the
+   * query.
+   *
+   * @param date {string} The date to format.
+   * @param dateFragmentsOrder {TypeDateFragments} The date fragments order (obtained with getDateFragmentsOrder).
+   * @returns {string} The reformatted date string.
+   */
+  applyInputDateFormat(date: string, dateFragmentsOrder: TypeDateFragments, reverseTimeZone = false): string {
+    // If the dateFragmentsOrder is empty, we assume a value corresponding to ISO UTC -> YYYY-MM-DDTHH:MM:SS+00:00
+    if (!dateFragmentsOrder.length)
+      // eslint-disable-next-line no-param-reassign
+      dateFragmentsOrder = [
+        [0, 1, 2, 3],
+        [0, 1, 2, 3],
+        ['-', '-', 'T', '+', '00:00'],
+      ];
+    // eslint-disable-next-line prefer-const
+    let [dateString, timeString] = date.toUpperCase().replace('Z', '+00:00').replaceAll(' ', 'T').split('T');
+    if (!timeString) timeString = '00:00:00';
+    const dateFragments = dateString
+      .replaceAll('/', '-')
+      .toUpperCase()
+      .split('-')
+      .map((fragment) => {
+        return fragment.length === 1 ? `0${fragment}` : fragment;
+      });
+    let outputDateFragments: string[] = [];
+    // We assume the smallest date value are the year alone or the year with the month
+    if (dateFragments.length === 3) outputDateFragments = dateFragments;
+    else {
+      if (dateFragments[0].length < 3) outputDateFragments[dateFragmentsOrder[0][1]] = dateFragments[0];
+      else outputDateFragments[dateFragmentsOrder[0][0]] = dateFragments[0];
+      if (!dateFragments[1]) outputDateFragments[dateFragmentsOrder[0][1]] = '01';
+      else if (dateFragments[1].length < 3) outputDateFragments[dateFragmentsOrder[0][1]] = dateFragments[1];
+      else outputDateFragments[dateFragmentsOrder[0][0]] = dateFragments[1];
+      outputDateFragments[dateFragmentsOrder[0][2]] = '01';
+    }
+    // eslint-disable-next-line prettier/prettier
+    let returnValue = `${outputDateFragments[dateFragmentsOrder[0][0]]}-${outputDateFragments[dateFragmentsOrder[0][1]]}-${
+      // eslint-disable-next-line prettier/prettier
+      outputDateFragments[dateFragmentsOrder[0][2]]
+    }T${
+      // eslint-disable-next-line prettier/prettier
+      timeString
+    }`;
+    if (returnValue.length === 19) returnValue = `${returnValue}${dateFragmentsOrder[2][3]}${dateFragmentsOrder[2][4]}`;
+    if (reverseTimeZone)
+      returnValue = `${returnValue.slice(0, 19)}${returnValue.slice(19, 20) === '+' ? '-' : '+'}${returnValue.slice(20)}`;
+    returnValue = this.convertToUTC(returnValue);
+    if (date.toUpperCase().endsWith('Z') && returnValue.endsWith('+00:00')) returnValue = returnValue.replace('+00:00', 'Z');
+    return returnValue;
+  }
+
+  /**
+   * Reorder the ISO date to the output format using the output section (index = 1) of the date fragments order provided.
+   * The output date format does not perform any conversion, it is used to specify the parts that will be displayed. The
+   * time zone is empty since all dates shown to the user are in UTC.
+   *
+   * @param date {string} The ISO date to format.
+   * @param dateFragmentsOrder {TypeDateFragments} The date fragments order (obtained with getDateFragmentsOrder).
+   * @returns {string} The reformatted date string.
+   */
+  applyOutputDateFormat(date: string, dateFragmentsOrder: TypeDateFragments): string {
+    if (dateFragmentsOrder?.length) {
+      const [dateString, timeString] = date.toUpperCase().split('T');
+      const dateFragments = dateString.replaceAll('/', '-').toUpperCase().split('-');
+      const index = dateFragmentsOrder[1];
+      const separators = dateFragmentsOrder[2];
+
+      // index[X] + 1 = 0 (false) means corresponding field is not used
+      const returnValue = `${dateFragments[index[FIRST_DATE_ELEMENT]]}${
+        index[SECOND_DATE_ELEMENT] + 1 ? `${separators[DATE]}${dateFragments[index[SECOND_DATE_ELEMENT]]}` : ''
+      }${index[THIRD_DATE_ELEMENT] + 1 ? `${separators[DATE]}${dateFragments[index[THIRD_DATE_ELEMENT]]}` : ''}${
+        index[TIME] + 1 ? `${separators[DATE_TIME]}${timeString.slice(0, 8)}` : ''
+      }`;
+
+      return returnValue;
+    }
+    return date;
   }
 }
