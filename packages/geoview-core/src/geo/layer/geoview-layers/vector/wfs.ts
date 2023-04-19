@@ -1,7 +1,6 @@
 /* eslint-disable no-var, vars-on-top, block-scoped-var, no-param-reassign */
 import { transformExtent } from 'ol/proj';
 import { Options as SourceOptions } from 'ol/source/Vector';
-import { all, bbox } from 'ol/loadingstrategy';
 import { WFS as FormatWFS } from 'ol/format';
 import { ReadOptions } from 'ol/format/Feature';
 import { Vector as VectorSource } from 'ol/source';
