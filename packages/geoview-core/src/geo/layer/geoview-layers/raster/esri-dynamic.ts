@@ -11,6 +11,7 @@ import { EsriJSON } from 'ol/format';
 import Feature from 'ol/Feature';
 import Geometry from 'ol/geom/Geometry';
 
+import cloneDeep from 'lodash/cloneDeep';
 import { getLocalizedValue } from '../../../../core/utils/utilities';
 import { AbstractGeoViewLayer, CONST_LAYER_TYPES, TypeLayerStyles } from '../abstract-geoview-layers';
 import { AbstractGeoViewRaster, TypeBaseRasterLayer } from './abstract-geoview-raster';
@@ -26,6 +27,8 @@ import {
   isSimpleStyleConfig,
   TypeListOfLayerEntryConfig,
   TypeEsriDynamicLayerEntryConfig,
+  TypeUniqueValueStyleInfo,
+  TypeFeatureInfoLayerConfig,
 } from '../../../map/map-schema-types';
 import {
   TypeFeatureInfoEntry,
@@ -54,6 +57,9 @@ export interface TypeEsriDynamicLayerConfig extends Omit<TypeGeoviewLayerConfig,
   geoviewLayerType: 'esriDynamic';
   listOfLayerEntryConfig: TypeEsriDynamicLayerEntryConfig[];
 }
+
+type TypeFieldOfTheSameValue = { value: string | number | Date; nbOccurence: number };
+type TypeQueryTree = { fieldValue: string | number | Date; nextField: TypeQueryTree }[];
 
 /** ******************************************************************************************************************************
  * type guard function that redefines a TypeGeoviewLayerConfig as a TypeEsriDynamicLayerConfig if the geoviewLayerType attribute of
@@ -295,7 +301,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
       );
 
       layerEntryConfig.gvLayer = new ImageLayer(imageLayerOptions);
-      layerEntryConfig.gvLayer?.set('layerFilter', layerEntryConfig.layerFilter);
+      this.setLayerFilter(layerEntryConfig.layerFilter ? layerEntryConfig.layerFilter : '', layerEntryConfig);
       this.applyViewFilter(layerEntryConfig);
 
       resolve(layerEntryConfig.gvLayer);
@@ -360,11 +366,15 @@ export class EsriDynamic extends AbstractGeoViewRaster {
 
           const extent = { xmin: bounds[0], ymin: bounds[1], xmax: bounds[2], ymax: bounds[3] };
 
+          const source = (layerConfig.gvLayer as ImageLayer<ImageArcGISRest>).getSource()!;
+          const { layerDefs } = source.getParams();
+
           identifyUrl =
             `${identifyUrl}identify?f=json&tolerance=7` +
             `&mapExtent=${extent.xmin},${extent.ymin},${extent.xmax},${extent.ymax}` +
             `&imageDisplay=${size[0]},${size[1]},96` +
             `&layers=visible:${layerConfig.layerId}` +
+            `&layerDefs=${layerDefs}` +
             `&returnFieldName=true&sr=4326&returnGeometry=true` +
             `&geometryType=esriGeometryPoint&geometry=${lnglat[0]},${lnglat[1]}`;
 
@@ -422,7 +432,181 @@ export class EsriDynamic extends AbstractGeoViewRaster {
   }
 
   /** ***************************************************************************************************************************
-   * Get the layer view filter. The filter is derived fron the uniqueValue or the classBreak visibility flags and an layerFilter
+   * Count the number of times the value of a field is used by the unique value style information object. Depending on the
+   * visibility of the default, we count visible or invisible settings.
+   *
+   * @param {TypeUniqueValueStyleConfig} styleSettings The unique value style settings to evaluate.
+   *
+   * @returns {TypeFieldOfTheSameValue[][]} The result of the evaluation. The first index of the array correspond to the field's
+   * index in the style settings and the second one to the number of different values the field may have based on visibility of
+   * the feature.
+   */
+  private countFieldOfTheSameValue(styleSettings: TypeUniqueValueStyleConfig): TypeFieldOfTheSameValue[][] {
+    return styleSettings.uniqueValueStyleInfo.reduce<TypeFieldOfTheSameValue[][]>(
+      (counter, styleEntry): TypeFieldOfTheSameValue[][] => {
+        if (
+          (styleEntry.visible === 'no' && styleSettings.defaultVisible !== 'no') ||
+          (styleEntry.visible !== 'no' && styleSettings.defaultVisible === 'no')
+        ) {
+          styleEntry.values.forEach((styleValue, i) => {
+            const valueExist = counter[i].find((counterEntry) => counterEntry.value === styleValue);
+            if (valueExist) valueExist.nbOccurence++;
+            else counter[i].push({ value: styleValue, nbOccurence: 1 });
+          });
+        }
+        return counter;
+      },
+      styleSettings.fields.map<TypeFieldOfTheSameValue[]>(() => [])
+    );
+  }
+
+  /** ***************************************************************************************************************************
+   * Sort the number of times the value of a field is used by the unique value style information object. Depending on the
+   * visibility of the default value, we count the visible or invisible parameters. The order goes from the highest number of
+   * occurrences to the lowest number of occurrences.
+   *
+   * @param {TypeUniqueValueStyleConfig} styleSettings The unique value style settings to evaluate.
+   * @param {TypeFieldOfTheSameValue[][]} fieldOfTheSameValue The count information that contains the number of occurrences
+   * of a value.
+   *
+   * @returns {number[]} An array that gives the field order to use to build the query tree.
+   */
+  private sortFieldOfTheSameValue(styleSettings: TypeUniqueValueStyleConfig, fieldOfTheSameValue: TypeFieldOfTheSameValue[][]): number[] {
+    const fieldNotUsed = styleSettings.fields.map(() => true);
+    const fieldOrder: number[] = [];
+    const query = '';
+    for (let entrySelected = 0; entrySelected !== -1; entrySelected = fieldNotUsed.findIndex((flag) => flag)) {
+      let entrySelectedTotalEntryCount = fieldOfTheSameValue[entrySelected].reduce((accumulator, fieldEntry) => {
+        return accumulator + fieldEntry.nbOccurence;
+      }, 0);
+      for (let i = 0; i < styleSettings.fields.length; i++) {
+        if (fieldNotUsed[i] && i !== entrySelected) {
+          const newEntrySelectedTotalEntryCount = fieldOfTheSameValue[i].reduce((accumulator, fieldEntry) => {
+            return accumulator + fieldEntry.nbOccurence;
+          }, 0);
+          if (
+            fieldOfTheSameValue[entrySelected].length > fieldOfTheSameValue[i].length ||
+            (fieldOfTheSameValue[entrySelected].length === fieldOfTheSameValue[i].length &&
+              entrySelectedTotalEntryCount < newEntrySelectedTotalEntryCount)
+          ) {
+            entrySelected = i;
+            entrySelectedTotalEntryCount = newEntrySelectedTotalEntryCount;
+          }
+        }
+      }
+      fieldNotUsed[entrySelected] = false;
+      fieldOrder.push(entrySelected);
+    }
+    return fieldOrder;
+  }
+
+  /** ***************************************************************************************************************************
+   * Get the query tree. The tree structure is a representation of the optimized query we have to create. It contains the field
+   * values in the order specified by the fieldOrder parameter. The optimization is based on the distributivity and associativity
+   * of the Boolean algebra. The form is the following:
+   *
+   * (f1 = v11 and (f2 = v21 and f3 in (v31, v32) or f2 = v22 and f3 in (v31, v32, v33)) or f1 = v12 and (f2 = v21 and ...)))
+   *
+   * which is equivalent to:
+   *
+   * f1 = v11 and f2 = v21 and f3 = v31 or f1 = v11 and f2 = v21 and f3 = v32 or f1 = v11 and f2 = v22 and f3 = v31 ...
+   *
+   * @param {TypeUniqueValueStyleConfig} styleSettings The unique value style settings to evaluate.
+   * @param {TypeFieldOfTheSameValue[][]} fieldOfTheSameValue The count information that contains the number of occurrences
+   * of a value.
+   * @param {number[]} fieldOrder The field order to use when building the tree.
+   *
+   * @returns {TypeQueryTree} The query tree to use when building the final query string.
+   */
+  private getQueryTree(
+    styleSettings: TypeUniqueValueStyleConfig,
+    fieldOfTheSameValue: TypeFieldOfTheSameValue[][],
+    fieldOrder: number[]
+  ): TypeQueryTree {
+    const queryTree: TypeQueryTree = [];
+    styleSettings.uniqueValueStyleInfo.forEach((styleEntry) => {
+      if (
+        (styleEntry.visible === 'no' && styleSettings.defaultVisible !== 'no') ||
+        (styleEntry.visible !== 'no' && styleSettings.defaultVisible === 'no')
+      ) {
+        let levelToSearch = queryTree;
+        for (let i = 0; i < fieldOrder.length; i++) {
+          if (fieldOfTheSameValue[fieldOrder[i]].find((field) => field.value === styleEntry.values[fieldOrder[i]])) {
+            const treeElementFound = levelToSearch.find((treeElement) => styleEntry.values[fieldOrder[i]] === treeElement.fieldValue);
+            if (!treeElementFound) {
+              levelToSearch.push({ fieldValue: styleEntry.values[fieldOrder[i]], nextField: [] });
+              levelToSearch = levelToSearch[levelToSearch.length - 1].nextField;
+            } else levelToSearch = treeElementFound.nextField;
+          }
+        }
+      }
+    });
+    return queryTree;
+  }
+
+  /** ***************************************************************************************************************************
+   * format the field value to use in the query.
+   *
+   * @param {string} fieldName The field name.
+   * @param {string | number | Date} rawValue The unformatted field value.
+   * @param {TypeFeatureInfoLayerConfig} sourceFeatureInfo The source feature informationthat knows the field type.
+   *
+   * @returns {string} The resulting field value.
+   */
+  private formatFieldValue(fieldName: string, rawValue: string | number | Date, sourceFeatureInfo: TypeFeatureInfoLayerConfig): string {
+    const fieldIndex = getLocalizedValue(sourceFeatureInfo.outfields, this.mapId)?.split(',').indexOf(fieldName);
+    const fieldType = sourceFeatureInfo.fieldTypes?.split(',')[fieldIndex!];
+    switch (fieldType) {
+      case 'date':
+        return `date '${rawValue}'`;
+      case 'string':
+        return `'${rawValue}'`;
+      default:
+        return `${rawValue}`;
+    }
+  }
+
+  /** ***************************************************************************************************************************
+   * Build the query using the provided query tree.
+   *
+   * @param {TypeQueryTree} queryTree The query tree to use.
+   * @param {number} level The level to use for solving the tree.
+   * @param {number[]} fieldOrder The field order to use for solving the tree.
+   * @param {TypeUniqueValueStyleConfig} styleSettings The unique value style settings to evaluate.
+   * @param {TypeFeatureInfoLayerConfig} sourceFeatureInfo The source feature informationthat knows the field type.
+   *
+   * @returns {string} The resulting query.
+   */
+  private buildQuery(
+    queryTree: TypeQueryTree,
+    level: number,
+    fieldOrder: number[],
+    styleSettings: TypeUniqueValueStyleConfig,
+    sourceFeatureInfo: TypeFeatureInfoLayerConfig
+  ): string {
+    let queryString = styleSettings.defaultVisible !== 'no' && !level ? 'not (' : '(';
+    for (let i = 0; i < queryTree.length; i++) {
+      const value = this.formatFieldValue(styleSettings.fields[fieldOrder[level]], queryTree[i].fieldValue, sourceFeatureInfo);
+      if (queryTree[i].nextField.length) {
+        if (i) queryString = `${queryString} or `;
+        queryString = `${queryString}${styleSettings.fields[fieldOrder[level]]} = ${value} and ${this.buildQuery(
+          queryTree[i].nextField,
+          level + 1,
+          fieldOrder,
+          styleSettings,
+          sourceFeatureInfo
+        )}`;
+        if (i === queryTree.length - 1) queryString = `${queryString})`;
+      } else {
+        queryString = i ? `${queryString}, ${value}` : `${styleSettings.fields[fieldOrder[level]]}${level ? ' not in (' : ' in ('}${value}`;
+        if (i === queryTree.length - 1) queryString = `${queryString})`;
+      }
+    }
+    return queryString === '(' ? '(1=0)' : queryString;
+  }
+
+  /** ***************************************************************************************************************************
+   * Get the layer view filter. The filter is derived fron the uniqueValue or the classBreak visibility flags and a layerFilter
    * associated to the layer.
    *
    * @param {string | TypeLayerEntryConfig | null} layerPathOrConfig Optional layer path or configuration.
@@ -466,37 +650,12 @@ export class EsriDynamic extends AbstractGeoViewRaster {
         )
           return `(1=1)${layerFilter ? ` and (${layerFilter})` : ''}`;
 
-        const fieldNames = styleSettings.fields
-          .reduce((fieldConcatenation, fieldName) => {
-            const fieldFound = (this.layerMetadata[Layer.getLayerPath(layerEntryConfig)].fields as TypeJsonArray).find(
-              (metadataFieldEntry) => metadataFieldEntry.name === fieldName
-            );
-            if (fieldFound!.type === 'esriFieldTypeString') return `${fieldConcatenation}||'~+~'||${fieldName}`;
-            return `${fieldConcatenation}||'~+~'||cast(${fieldName} as char(25))`;
-          }, '')
-          .slice(9);
-
-        const fieldValues = styleSettings.uniqueValueStyleInfo
-          .reduce((valueConcatenation, fieldEntry) => {
-            if (
-              (fieldEntry.visible === 'no' && styleSettings.defaultVisible !== 'no') ||
-              (fieldEntry.visible !== 'no' && styleSettings.defaultVisible === 'no')
-            ) {
-              const fieldEntryValues: string = fieldEntry.values
-                .reduce((fieldValuesConcatenation, nextFieldValue) => {
-                  return `${fieldValuesConcatenation}~+~${nextFieldValue}`;
-                }, '')
-                .slice(3);
-              return `${valueConcatenation},'${fieldEntryValues}'`;
-            }
-            return valueConcatenation;
-          }, '')
-          .slice(1);
-
-        const selectionOperator = styleSettings.defaultVisible !== 'no' ? 'not in' : 'in';
-        const filterValue = `(${fieldNames} ${selectionOperator} (${fieldValues || "''"}))`;
-
-        return `${filterValue}${layerFilter ? ` and (${layerFilter})` : ''}`;
+        // This section of code optimize the query to reduce it at it shortest expression.
+        const fieldOfTheSameValue = this.countFieldOfTheSameValue(styleSettings);
+        const fieldOrder = this.sortFieldOfTheSameValue(styleSettings, fieldOfTheSameValue);
+        const queryTree = this.getQueryTree(styleSettings, fieldOfTheSameValue, fieldOrder);
+        const query = this.buildQuery(queryTree, 0, fieldOrder, styleSettings, layerEntryConfig.source.featureInfo!);
+        return `${query}${layerFilter ? ` and (${layerFilter})` : ''}`;
       }
 
       if (isClassBreakStyleConfig(styleSettings)) {
@@ -512,34 +671,88 @@ export class EsriDynamic extends AbstractGeoViewRaster {
           if (filterArray.length % 2 === 0) {
             if (i === 0) {
               if (styleSettings.classBreakStyleInfo[0].visible !== 'no' && styleSettings.defaultVisible === 'no')
-                filterArray.push(`${styleSettings.field} >= ${styleSettings.classBreakStyleInfo[0].minValue}`);
+                filterArray.push(
+                  `${styleSettings.field} >= ${this.formatFieldValue(
+                    styleSettings.field,
+                    styleSettings.classBreakStyleInfo[0].minValue!,
+                    layerEntryConfig.source.featureInfo!
+                  )}`
+                );
               else if (styleSettings.classBreakStyleInfo[0].visible === 'no' && styleSettings.defaultVisible !== 'no') {
-                filterArray.push(`${styleSettings.field} < ${styleSettings.classBreakStyleInfo[0].minValue}`);
+                filterArray.push(
+                  `${styleSettings.field} < ${this.formatFieldValue(
+                    styleSettings.field,
+                    styleSettings.classBreakStyleInfo[0].minValue!,
+                    layerEntryConfig.source.featureInfo!
+                  )}`
+                );
                 visibleWhenGreatherThisIndex = i;
               }
             } else if (styleSettings.classBreakStyleInfo[i].visible !== 'no' && styleSettings.defaultVisible === 'no') {
-              filterArray.push(`${styleSettings.field} > ${styleSettings.classBreakStyleInfo[i].minValue}`);
+              filterArray.push(
+                `${styleSettings.field} > ${this.formatFieldValue(
+                  styleSettings.field,
+                  styleSettings.classBreakStyleInfo[i].minValue!,
+                  layerEntryConfig.source.featureInfo!
+                )}`
+              );
               if (i + 1 === styleSettings.classBreakStyleInfo.length)
-                filterArray.push(`${styleSettings.field} <= ${styleSettings.classBreakStyleInfo[i].maxValue}`);
+                filterArray.push(
+                  `${styleSettings.field} <= ${this.formatFieldValue(
+                    styleSettings.field,
+                    styleSettings.classBreakStyleInfo[i].maxValue!,
+                    layerEntryConfig.source.featureInfo!
+                  )}`
+                );
             } else if (styleSettings.classBreakStyleInfo[i].visible === 'no' && styleSettings.defaultVisible !== 'no') {
-              filterArray.push(`${styleSettings.field} <= ${styleSettings.classBreakStyleInfo[i].minValue}`);
+              filterArray.push(
+                `${styleSettings.field} <= ${this.formatFieldValue(
+                  styleSettings.field,
+                  styleSettings.classBreakStyleInfo[i].minValue!,
+                  layerEntryConfig.source.featureInfo!
+                )}`
+              );
               visibleWhenGreatherThisIndex = i;
             }
           } else if (styleSettings.defaultVisible === 'no') {
             if (styleSettings.classBreakStyleInfo[i].visible === 'no') {
-              filterArray.push(`${styleSettings.field} <= ${styleSettings.classBreakStyleInfo[i - 1].maxValue}`);
+              filterArray.push(
+                `${styleSettings.field} <= ${this.formatFieldValue(
+                  styleSettings.field,
+                  styleSettings.classBreakStyleInfo[i - 1].maxValue!,
+                  layerEntryConfig.source.featureInfo!
+                )}`
+              );
             } else if (i + 1 === styleSettings.classBreakStyleInfo.length) {
-              filterArray.push(`${styleSettings.field} <= ${styleSettings.classBreakStyleInfo[i].maxValue}`);
+              filterArray.push(
+                `${styleSettings.field} <= ${this.formatFieldValue(
+                  styleSettings.field,
+                  styleSettings.classBreakStyleInfo[i].maxValue!,
+                  layerEntryConfig.source.featureInfo!
+                )}`
+              );
             }
           } else if (styleSettings.classBreakStyleInfo[i].visible !== 'no') {
-            filterArray.push(`${styleSettings.field} > ${styleSettings.classBreakStyleInfo[i - 1].maxValue}`);
+            filterArray.push(
+              `${styleSettings.field} > ${this.formatFieldValue(
+                styleSettings.field,
+                styleSettings.classBreakStyleInfo[i - 1].maxValue!,
+                layerEntryConfig.source.featureInfo!
+              )}`
+            );
             visibleWhenGreatherThisIndex = -1;
           } else {
             visibleWhenGreatherThisIndex = i;
           }
         }
         if (visibleWhenGreatherThisIndex !== -1)
-          filterArray.push(`${styleSettings.field} > ${styleSettings.classBreakStyleInfo[visibleWhenGreatherThisIndex].maxValue}`);
+          filterArray.push(
+            `${styleSettings.field} > ${this.formatFieldValue(
+              styleSettings.field,
+              styleSettings.classBreakStyleInfo[visibleWhenGreatherThisIndex].maxValue!,
+              layerEntryConfig.source.featureInfo!
+            )}`
+          );
 
         if (styleSettings.defaultVisible !== 'no') {
           const filterValue = `${filterArray.slice(0, -1).reduce((previousFilterValue, filterNode, i) => {
@@ -579,40 +792,29 @@ export class EsriDynamic extends AbstractGeoViewRaster {
     ) as TypeEsriDynamicLayerEntryConfig;
     if ((layerEntryConfig.gvLayer as ImageLayer<ImageArcGISRest>).getSource()) {
       const source = (layerEntryConfig.gvLayer as ImageLayer<ImageArcGISRest>).getSource()!;
-      source.updateParams({ layerDefs: `{"${layerEntryConfig.layerId}": "${filter || this.getViewFilter(layerEntryConfig)}"}` });
+      let filterValueToUse = (filter || this.getViewFilter(layerEntryConfig)).replaceAll(/\s{2,}/g, ' ').trim();
+
+      // Convert date constants using the serviceDateFormat
+      const searchDateEntry = [
+        ...`${filterValueToUse?.replaceAll(/\s{2,}/g, ' ').trim()} `.matchAll(
+          /(?<=^date\b\s')[\d/\-T\s:+Z]{4,25}(?=')|(?<=[(\s]date\b\s')[\d/\-T\s:+Z]{4,25}(?=')/gi
+        ),
+      ];
+      searchDateEntry.reverse();
+      searchDateEntry.forEach((dateFound) => {
+        const reverseTimeZone = true;
+        let reformattedDate = api.dateUtilities.applyInputDateFormat(dateFound[0], this.dateFragmentsOrder, reverseTimeZone);
+        // ESRI Dynamic layers doesn't accept the ISO date format. The time zone must be removed. The 'T' separator
+        // normally placed between the date and the time must be replaced by a space.
+        reformattedDate = reformattedDate.slice(0, -6);
+        reformattedDate = reformattedDate.split('T').join(' ');
+        filterValueToUse = `${filterValueToUse!.slice(0, dateFound.index)}${reformattedDate}${filterValueToUse!.slice(
+          dateFound.index! + dateFound[0].length
+        )}`;
+      });
+      source.updateParams({ layerDefs: `{"${layerEntryConfig.layerId}": "${filterValueToUse}"}` });
       layerEntryConfig.gvLayer!.set('legendFilterIsOff', !!filter);
       layerEntryConfig.gvLayer!.changed();
     }
-  }
-
-  /** ***************************************************************************************************************************
-   * Set the layerFilter that will be applied with the legend filters derived from the uniqueValue or classBreabs style of
-   * the layer. The resulting filter will be (legend filters) and (layerFilter). When the layer config is invalid, nothing is
-   * done.
-   *
-   * @param {string} filterValue The filter to associate to the layer.
-   * @param {string | TypeLayerEntryConfig | null} layerPathOrConfig Optional layer path or configuration.
-   */
-  setLayerFilter(filterValue: string, layerPathOrConfig: string | TypeLayerEntryConfig | null = this.activeLayer) {
-    const layerEntryConfig = (
-      typeof layerPathOrConfig === 'string' ? this.getLayerConfig(layerPathOrConfig) : layerPathOrConfig
-    ) as TypeEsriDynamicLayerEntryConfig;
-    if (layerEntryConfig) layerEntryConfig.gvLayer?.set('layerFilter', filterValue);
-  }
-
-  /** ***************************************************************************************************************************
-   * Get the layerFilter that is associated to the layer. Returns undefined when the layer config is invalid.
-   * If layerPathOrConfig is undefined, this.activeLayer is used.
-   *
-   * @param {string | TypeLayerEntryConfig | null} layerPathOrConfig Optional layer path or configuration.
-   *
-   * @returns {string | undefined} The filter associated to the layer or undefined.
-   */
-  getLayerFilter(layerPathOrConfig: string | TypeLayerEntryConfig | null = this.activeLayer): string | undefined {
-    const layerEntryConfig = (
-      typeof layerPathOrConfig === 'string' ? this.getLayerConfig(layerPathOrConfig) : layerPathOrConfig
-    ) as TypeEsriDynamicLayerEntryConfig;
-    if (layerEntryConfig) return layerEntryConfig.gvLayer?.get('layerFilter');
-    return undefined;
   }
 }
