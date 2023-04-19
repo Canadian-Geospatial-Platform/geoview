@@ -20,13 +20,10 @@ import { AbstractGeoViewLayer, CONST_LAYER_TYPES, TypeLegend } from '../abstract
 import { AbstractGeoViewRaster, TypeBaseRasterLayer } from './abstract-geoview-raster';
 import {
   TypeLayerEntryConfig,
-  TypeSourceImageWmsInitialConfig,
   TypeGeoviewLayerConfig,
   TypeListOfLayerEntryConfig,
   layerEntryIsGroupLayer,
   TypeLayerGroupEntryConfig,
-  TypeFeatureInfoLayerConfig,
-  TypeSourceImageInitialConfig,
   TypeBaseLayerEntryConfig,
   TypeOgcWmsLayerEntryConfig,
 } from '../../../map/map-schema-types';
@@ -542,6 +539,8 @@ export class WMS extends AbstractGeoViewRaster {
             imageLayerOptions.visible = layerEntryConfig.initialSettings?.visible;
 
           layerEntryConfig.gvLayer = new ImageLayer(imageLayerOptions);
+          this.setLayerFilter(layerEntryConfig.layerFilter ? layerEntryConfig.layerFilter : '', layerEntryConfig);
+          this.applyViewFilter(layerEntryConfig);
           resolve(layerEntryConfig.gvLayer);
         } else {
           api.event.emit(
@@ -980,5 +979,49 @@ export class WMS extends AbstractGeoViewRaster {
       typeof layerPathOrConfig === 'string' ? this.getLayerConfig(layerPathOrConfig) : layerPathOrConfig
     );
     if (layerConfig?.gvLayer) (layerConfig.gvLayer as ImageLayer<ImageWMS>).getSource()?.updateParams({ STYLES: StyleId });
+  }
+
+  /** ***************************************************************************************************************************
+   * Apply a view filter to the layer. When the filter parameter is not empty (''), the view filter does not use the legend
+   * filter. Otherwise, the getViewFilter method is used to define the view filter and the resulting filter is
+   * (legend filters) and (layerFilter). The legend filters are derived from the uniqueValue or classBreaks style of the layer.
+   * When the layer config is invalid, nothing is done.
+   *
+   * @param {string | TypeLayerEntryConfig | null} layerPathOrConfig Optional layer path or configuration.
+   * @param {string} filter An optional filter to be used in place of the getViewFilter value.
+   */
+  applyViewFilter(layerPathOrConfig: string | TypeLayerEntryConfig | null = this.activeLayer, filter = '') {
+    const layerEntryConfig = (
+      typeof layerPathOrConfig === 'string' ? this.getLayerConfig(layerPathOrConfig) : layerPathOrConfig
+    ) as TypeOgcWmsLayerEntryConfig;
+    const source = (layerEntryConfig.gvLayer as ImageLayer<ImageWMS>).getSource();
+    if (source) {
+      let filterValueToUse = filter || this.getLayerFilter(layerEntryConfig);
+      if (filterValueToUse) {
+        filterValueToUse = filterValueToUse.replaceAll(/\s{2,}/g, ' ').trim();
+        const queryElements = filterValueToUse.split(/(?<=\b)\s*=/);
+        const dimension = queryElements[0].trim();
+        filterValueToUse = queryElements[1].trim();
+
+        // Convert date constants using the serviceDateFormat
+        const searchDateEntry = [
+          ...`${filterValueToUse?.replaceAll(/\s{2,}/g, ' ').trim()} `.matchAll(
+            /(?<=^date\b\s')[\d/\-T\s:+]{4,25}(?=')|(?<=[(\s]date\b\s')[\d/\-T\s:+]{4,25}(?=')/gi
+          ),
+        ];
+        searchDateEntry.reverse();
+        searchDateEntry.forEach((dateFound) => {
+          const reverseTimeZone = true;
+          const reformattedDate = api.dateUtilities.applyInputDateFormat(dateFound[0], this.dateFragmentsOrder, reverseTimeZone);
+          filterValueToUse = `${filterValueToUse!.slice(0, dateFound.index)}${reformattedDate}${filterValueToUse!.slice(
+            dateFound.index! + dateFound[0].length + 1
+          )}`;
+        });
+        filterValueToUse = filterValueToUse.split(/^date\b\s'|(?<=\s)date\b\s'/gi).join('');
+        source.updateParams({ [dimension]: filterValueToUse });
+        layerEntryConfig.gvLayer!.set('legendFilterIsOff', !!filter);
+        layerEntryConfig.gvLayer!.changed();
+      }
+    }
   }
 }
