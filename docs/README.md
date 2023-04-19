@@ -18,7 +18,7 @@ Once the project matures, these docs can be the basis of official public docs, h
 
 ## How the application works
 
-- [GoeView Map configuration](./app/map-config/README.md)
+- [GoeView layer documentation](./app/geoview-layer/README.md)
 - [Theme](./app/ui/theming.md)
 - [Events documentation](./app/event/README.md)
 - [Accessing types](./app/accessing-types.md)
@@ -26,4 +26,3 @@ Once the project matures, these docs can be the basis of official public docs, h
 - [Components vs Core Packages vs External Packages](./app/components-packages.md)
 - [Packages](./app/packages.md)
 - [Load maps](./app/loading-maps.md)
-- [Add new layer type](./app/add-layer-type.md)
