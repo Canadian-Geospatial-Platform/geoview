@@ -3,7 +3,10 @@
   "features": [
     {
       "type": "Feature",
-      "properties": { "Province": "Ontario" },
+      "properties": {
+        "Province": "Ontario",
+        "creationDate": "02/15/2020T00:00:00"
+       },
       "geometry": {
         "type": "Polygon",
         "coordinates": [
@@ -19,7 +22,10 @@
     },
     {
       "type": "Feature",
-      "properties": { "Province": "Ontario" },
+      "properties": {
+        "Province": "Ontario",
+        "creationDate": "05/23/2020T12:00:00"
+      },
       "geometry": {
         "type": "Polygon",
         "coordinates": [
@@ -35,7 +41,10 @@
     },
     {
       "type": "Feature",
-      "properties": { "Province": "Quebec" },
+      "properties": {
+        "Province": "Quebec",
+        "creationDate": "06/24/2020T17:00:00"
+      },
       "geometry": {
         "type": "Polygon",
         "coordinates": [
@@ -51,7 +60,10 @@
     },
     {
       "type": "Feature",
-      "properties": { "Province": "Alberta" },
+      "properties": {
+        "Province": "Alberta",
+        "creationDate": "02/15/2021T13:00:00"
+      },
       "geometry": {
         "type": "Polygon",
         "coordinates": [

@@ -152,8 +152,7 @@ const createInfoTable = (mapId, resultSetsId, resultSets) => {
           tableData.classList.add('info');
           if (row.fieldInfo[fieldName].dataType === 'date') {
             const { dateUtilities } = cgpv.api;
-            // tableData.innerText = dateUtilities.convertToDate(row.fieldInfo[fieldName].value);
-            tableData.innerText = dateUtilities.format(dateUtilities.convertToLocal(row.fieldInfo[fieldName].value), 'day', 'second');
+            tableData.innerText = row.fieldInfo[fieldName].value;
           } else tableData.innerText = row.fieldInfo[fieldName].value;
           tableRow.appendChild(tableData);
         });
@@ -239,7 +238,7 @@ const createTableOfFilter = (mapId) => {
                         toggleUniqueValueDefault.innerText = `Hide ${layerConfig.style[geometry].defaultLabel}`;
                       }
                       const checkbox = document.getElementById(`checkbox-${mapId}-${geoviewLayer.geoviewLayerId}`);
-                      const filterInput = document.getElementById(`filter-input-${mapId}`);
+                      const filterInput = document.getElementById(`filter-input-${mapId}-${geoviewLayer.geoviewLayerId}`);
                       const filter = checkbox.value === 'true' ? filterInput.value : '';
                       geoviewLayer.applyViewFilter(layerConfig, filter);
                     });
@@ -277,7 +276,7 @@ const createTableOfFilter = (mapId) => {
                         toggleUniqueValueFeature.innerText = `Hide ${uniqueValueStyleInfoEntry.label}`;
                       }
                       const checkbox = document.getElementById(`checkbox-${mapId}-${geoviewLayer.geoviewLayerId}`);
-                      const filterInput = document.getElementById(`filter-input-${mapId}`);
+                      const filterInput = document.getElementById(`filter-input-${mapId}-${geoviewLayer.geoviewLayerId}`);
                       const filter = checkbox.value === 'true' ? filterInput.value : '';
                       geoviewLayer.applyViewFilter(layerConfig, filter);
                     });
@@ -315,7 +314,7 @@ const createTableOfFilter = (mapId) => {
                         toggleClassBreakDefault.innerText = `Hide ${layerConfig.style[geometry].defaultLabel}`;
                       }
                       const checkbox = document.getElementById(`checkbox-${mapId}-${geoviewLayer.geoviewLayerId}`);
-                      const filterInput = document.getElementById(`filter-input-${mapId}`);
+                      const filterInput = document.getElementById(`filter-input-${mapId}-${geoviewLayer.geoviewLayerId}`);
                       const filter = checkbox.value === 'true' ? filterInput.value : '';
                       geoviewLayer.applyViewFilter(layerConfig, filter);
                     });
@@ -352,7 +351,7 @@ const createTableOfFilter = (mapId) => {
                         toggleClassBreakFeature.innerText = `Hide ${classBreakStyleInfoEntry.label}`;
                       }
                       const checkbox = document.getElementById(`checkbox-${mapId}-${geoviewLayer.geoviewLayerId}`);
-                      const filterInput = document.getElementById(`filter-input-${mapId}`);
+                      const filterInput = document.getElementById(`filter-input-${mapId}-${geoviewLayer.geoviewLayerId}`);
                       const filter = checkbox.value === 'true' ? filterInput.value : '';
                       geoviewLayer.applyViewFilter(layerConfig, filter);
                     });
@@ -370,7 +369,7 @@ const createTableOfFilter = (mapId) => {
                 layerFilterText.innerText = `Extra filter: `;
                 mapButtonsDiv.appendChild(layerFilterText);
                 const layerFilterInput = document.createElement('input');
-                layerFilterInput.id = `filter-input-${mapId}`;
+                layerFilterInput.id = `filter-input-${mapId}-${geoviewLayer.geoviewLayerId}`;
                 layerFilterInput.style.width = '50%';
                 layerFilterText.appendChild(layerFilterInput);
                 layerFilterInput.value = geoviewLayer.getLayerFilter(layerConfig) || '';

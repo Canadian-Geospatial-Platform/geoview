@@ -365,7 +365,10 @@
           "values": {
             "type": "array",
             "items": {
-              "type": "string"
+              "oneOf": [
+                { "type": "string" },
+                { "type": "number" }
+              ]
             },
             "minItems": 1
           },
@@ -441,10 +444,16 @@
             "description": "Flag used to show/hide features associated to the label (default: yes)."
           },
           "minValue": {
-            "type": "number"
+            "oneOf": [
+              { "type": "string" },
+              { "type": "number" }
+            ]
           },
           "maxValue": {
-            "type": "number"
+            "oneOf": [
+              { "type": "string" },
+              { "type": "number" }
+            ]
           },
           "settings": {
             "$ref": "#/definitions/TypeKindOfVectorSettings"
@@ -1063,6 +1072,10 @@
           "$ref": "#/definitions/TypeLocalizedString",
           "description": "The display name of the layer (English/French). If it is not present the viewer will make an attempt to scrape this information."
         },
+        "layerFilter": {
+          "type": "string",
+          "description": "Filter to apply on feature of this layer."
+        },
         "initialSettings": {
           "$ref": "#/definitions/TypeLayerInitialSettings",
           "description": "Initial settings to apply to the layer entry at creation time. Initial settings are inherited from the parent in the configuration tree."
@@ -1338,7 +1351,7 @@
       ]
     },
     "TypeLayerEntryConfig": {
-      "anyOf": [
+      "oneOf": [
         {
           "$ref": "#/definitions/TypeLayerGroupEntryConfig"
         },
@@ -1371,7 +1384,7 @@
       "minItems": 1,
       "additionalProperties": false,
       "items": {
-        "anyOf": [
+        "oneOf": [
           {
             "$ref": "#/definitions/TypeLayerGroupEntryConfig"
           },
@@ -1387,7 +1400,7 @@
       "minItems": 1,
       "additionalProperties": false,
       "items": {
-        "anyOf": [
+        "oneOf": [
           {
             "$ref": "#/definitions/TypeLayerGroupEntryConfig"
           },
@@ -1403,7 +1416,7 @@
       "minItems": 1,
       "additionalProperties": false,
       "items": {
-        "anyOf": [
+        "oneOf": [
           {
             "$ref": "#/definitions/TypeLayerGroupEntryConfig"
           },
@@ -1419,7 +1432,7 @@
       "minItems": 1,
       "additionalProperties": false,
       "items": {
-        "anyOf": [
+        "oneOf": [
           {
             "$ref": "#/definitions/TypeLayerGroupEntryConfig"
           },
@@ -1435,7 +1448,7 @@
       "minItems": 1,
       "additionalProperties": false,
       "items": {
-        "anyOf": [
+        "oneOf": [
           {
             "$ref": "#/definitions/TypeLayerGroupEntryConfig"
           },
@@ -1451,7 +1464,7 @@
       "minItems": 1,
       "additionalProperties": false,
       "items": {
-        "anyOf": [
+        "oneOf": [
           {
             "$ref": "#/definitions/TypeLayerGroupEntryConfig"
           },
@@ -1467,7 +1480,7 @@
       "minItems": 1,
       "additionalProperties": false,
       "items": {
-        "anyOf": [
+        "oneOf": [
           {
             "$ref": "#/definitions/TypeLayerGroupEntryConfig"
           },
@@ -1483,7 +1496,7 @@
       "minItems": 1,
       "additionalProperties": false,
       "items": {
-        "anyOf": [
+        "oneOf": [
           {
             "$ref": "#/definitions/TypeLayerGroupEntryConfig"
           },
@@ -1499,7 +1512,7 @@
       "minItems": 1,
       "additionalProperties": false,
       "items": {
-        "anyOf": [
+        "oneOf": [
           {
             "$ref": "#/definitions/TypeLayerGroupEntryConfig"
           },
@@ -1515,7 +1528,7 @@
       "minItems": 1,
       "additionalProperties": false,
       "items": {
-        "anyOf": [
+        "oneOf": [
           {
             "$ref": "#/definitions/TypeLayerGroupEntryConfig"
           },
@@ -1626,6 +1639,14 @@
         "geoviewLayerType": {
           "$ref": "#/definitions/TypeGeoviewLayerType",
           "description": "Type of GeoView layer."
+        },
+        "serviceDateFormat": {
+          "type": "string",
+          "description": "Date format used by the service endpoint."
+        },
+        "outputDateFormat": {
+          "type": "string",
+          "description": "Date format used by the getFeatureInfo to output date variable."
         },
         "initialSettings": {
           "$ref": "#/definitions/TypeLayerInitialSettings",

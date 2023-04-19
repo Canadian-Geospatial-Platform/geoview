@@ -141,7 +141,7 @@ export class WFS extends AbstractGeoViewVector {
     const promisedExecution = new Promise<void>((resolve) => {
       const metadataUrl = getLocalizedValue(this.metadataAccessPath, this.mapId);
       if (metadataUrl) {
-        getXMLHttpRequest(`${metadataUrl}?service=WFS&request=getcapabilities`).then((metadataString) => {
+        getXMLHttpRequest(`${metadataUrl}?service=WFS&request=GetCapabilities`).then((metadataString) => {
           if (metadataString === '{}')
             throw new Error(`Cant't read service metadata for layer ${this.geoviewLayerId} of map ${this.mapId}.`);
           else {
@@ -149,8 +149,8 @@ export class WFS extends AbstractGeoViewVector {
             const xmlDOMCapabilities = new DOMParser().parseFromString(metadataString, 'text/xml');
             const xmlJsonCapabilities = xmlToJson(xmlDOMCapabilities);
 
-            this.metadata = xmlJsonCapabilities['wfs:WFS_Capabilities'];
-            this.version = xmlJsonCapabilities['wfs:WFS_Capabilities']['@attributes'].version as string;
+            this.metadata = xmlJsonCapabilities.WFS_Capabilities;
+            this.version = xmlJsonCapabilities.WFS_Capabilities['@attributes'].version as string;
             resolve();
           }
         });
