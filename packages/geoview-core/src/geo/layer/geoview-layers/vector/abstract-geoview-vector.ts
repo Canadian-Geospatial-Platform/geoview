@@ -24,6 +24,7 @@ import {
   layerEntryIsGroupLayer,
 } from '../../../map/map-schema-types';
 import { api } from '../../../../app';
+import { getLocalizedValue } from '../../../../core/utils/utilities';
 import { TypeArrayOfFeatureInfoEntries } from '../../../../api/events/payloads/get-feature-info-payload';
 import { NodeType } from '../../../renderer/geoview-renderer-types';
 
@@ -111,7 +112,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
       let url = vectorSource.getUrl();
 
       // if an extent is provided, use it in the url
-      if (Number.isFinite(extent[0])) {
+      if (Number.isFinite(extent[0]) && this.type === 'ogcWfs') {
         url = `${url}&bbox=${extent},EPSG:${api.map(this.mapId).currentProjection}`;
       }
 
@@ -136,6 +137,36 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
             featureProjection: projection,
             extent,
           }) as Feature<Geometry>[];
+          /* For vector layers, all fields of type date must be specified in milliseconds (number) that has elapsed since the epoch,
+             which is defined as the midnight at the beginning of January 1, 1970, UTC (equivalent to the UNIX epoch). If the date type
+             is not a number, we assume it is provided as an ISO UTC string. If not, the result is unpredictable.
+          */
+          if (layerEntryConfig.source?.featureInfo?.queryable) {
+            const featureInfo = (layerEntryConfig.source as TypeBaseSourceVectorInitialConfig).featureInfo!;
+            const fieldTypes = featureInfo.fieldTypes?.split(',');
+            const fieldNames = getLocalizedValue(featureInfo.outfields, this.mapId)!.split(',');
+            const dateFields = fieldTypes?.reduce<string[]>((accumulator, entryFieldType, i) => {
+              if (entryFieldType === 'date') accumulator.push(fieldNames![i]);
+              return accumulator;
+            }, []);
+            if (dateFields?.length) {
+              features.forEach((feature) => {
+                dateFields.forEach((fieldName) => {
+                  let fieldValue = feature.get(fieldName);
+                  if (typeof fieldValue === 'number') {
+                    if (this.dateFragmentsOrder.length) {
+                      let dateString = api.dateUtilities.convertMilisecondsToDate(fieldValue);
+                      dateString = api.dateUtilities.applyInputDateFormat(dateString, this.dateFragmentsOrder);
+                      feature.set(fieldName, api.dateUtilities.convertToMilliseconds(dateString), true);
+                    }
+                  } else {
+                    fieldValue = api.dateUtilities.applyInputDateFormat(fieldValue, this.dateFragmentsOrder);
+                    feature.set(fieldName, api.dateUtilities.convertToMilliseconds(fieldValue), true);
+                  }
+                });
+              });
+            }
+          }
           vectorSource.addFeatures(features);
           if (success) success(features);
         } else {
@@ -203,7 +234,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
     };
 
     layerEntryConfig.gvLayer = new VectorLayer(layerOptions);
-    layerEntryConfig.gvLayer?.set('layerFilter', layerEntryConfig.layerFilter);
+    this.setLayerFilter(layerEntryConfig.layerFilter ? layerEntryConfig.layerFilter : '', layerEntryConfig);
     this.applyViewFilter(layerEntryConfig);
 
     return layerEntryConfig.gvLayer as VectorLayer<VectorSource>;
@@ -394,59 +425,38 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
       typeof layerPathOrConfig === 'string' ? this.getLayerConfig(layerPathOrConfig) : layerPathOrConfig
     ) as TypeVectorLayerEntryConfig;
     if (layerEntryConfig) {
-      try {
-        const layerFilter = this.getLayerFilter(layerEntryConfig);
-        const nodeValue = filter || layerFilter || '';
-        const { geoviewRenderer } = api.map(this.mapId);
-        const filterEquation = geoviewRenderer.analyzeLayerFilter([{ nodeType: NodeType.unprocessedNode, nodeValue }]);
-        layerEntryConfig.gvLayer!.set('filterEquation', filterEquation);
-      } catch (error) {
-        throw new Error(`Invalid vector layer filter (${(error as { message: string }).message}).\nfilter = ${filter}`);
-      }
-      layerEntryConfig.gvLayer!.set('legendFilterIsOff', !!filter);
-      layerEntryConfig.gvLayer?.changed();
-    }
-  }
+      let filterValueToUse = filter || this.getLayerFilter(layerEntryConfig) || '';
 
-  /** ***************************************************************************************************************************
-   * Set the layerFilter that will be applied with the legend filters derived from the uniqueValue or classBreabs style of
-   * the layer. The resulting filter will be (legend filters) and (layerFilter). When the layer config is invalid, nothing is
-   * done.
-   *
-   * @param {string} filterValue The filter to associate to the layer.
-   * @param {string | TypeLayerEntryConfig | null} layerPathOrConfig Optional layer path or configuration.
-   */
-  setLayerFilter(filterValue: string, layerPathOrConfig: string | TypeLayerEntryConfig | null = this.activeLayer) {
-    const layerEntryConfig = (
-      typeof layerPathOrConfig === 'string' ? this.getLayerConfig(layerPathOrConfig) : layerPathOrConfig
-    ) as TypeVectorLayerEntryConfig;
-    if (layerEntryConfig) {
+      // Convert date constants using the serviceDateFormat
+      const searchDateEntry = [
+        ...`${filterValueToUse?.replaceAll(/\s{2,}/g, ' ').trim()} `.matchAll(
+          /(?<=^date\b\s')[\d/\-T\s:+Z]{4,25}(?=')|(?<=[(\s]date\b\s')[\d/\-T\s:+Z]{4,25}(?=')/gi
+        ),
+      ];
+      searchDateEntry.reverse();
+      searchDateEntry.forEach((dateFound) => {
+        const reformattedDate = api.dateUtilities.applyInputDateFormat(dateFound[0], []);
+        filterValueToUse = `${filterValueToUse!.slice(0, dateFound.index)}${reformattedDate}${filterValueToUse!.slice(
+          dateFound.index! + dateFound[0].length
+        )}`;
+      });
+
       try {
         const filterEquation = api
           .map(this.mapId)
-          .geoviewRenderer.analyzeLayerFilter([{ nodeType: NodeType.unprocessedNode, nodeValue: filterValue }]);
+          .geoviewRenderer.analyzeLayerFilter([{ nodeType: NodeType.unprocessedNode, nodeValue: filterValueToUse }], []);
         layerEntryConfig.gvLayer?.set('filterEquation', filterEquation);
       } catch (error) {
-        throw new Error(`Invalid vector layer filter (${(error as { message: string }).message}).\nfilter = ${filterValue}`);
+        throw new Error(
+          `Invalid vector layer filter (${(error as { message: string }).message}).\nfilter = ${this.getLayerFilter(
+            layerEntryConfig
+          )}\ninternal filter = ${filterValueToUse}`
+        );
       }
-      layerEntryConfig.gvLayer?.set('layerFilter', filterValue);
-    }
-  }
 
-  /** ***************************************************************************************************************************
-   * Get the layerFilter that is associated to the layer. Returns undefined when the layer config is invalid.
-   * If layerPathOrConfig is undefined, this.activeLayer is used.
-   *
-   * @param {string | TypeLayerEntryConfig | null} layerPathOrConfig Optional layer path or configuration.
-   *
-   * @returns {string | undefined} The filter associated to the layer or undefined.
-   */
-  getLayerFilter(layerPathOrConfig: string | TypeLayerEntryConfig | null = this.activeLayer): string | undefined {
-    const layerEntryConfig = (
-      typeof layerPathOrConfig === 'string' ? this.getLayerConfig(layerPathOrConfig) : layerPathOrConfig
-    ) as TypeVectorLayerEntryConfig;
-    if (layerEntryConfig) return layerEntryConfig.gvLayer?.get('layerFilter');
-    return undefined;
+      layerEntryConfig.gvLayer!.set('legendFilterIsOff', !!filter);
+      layerEntryConfig.gvLayer?.changed();
+    }
   }
 
   /** ***************************************************************************************************************************

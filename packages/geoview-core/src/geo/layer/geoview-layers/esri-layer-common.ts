@@ -192,7 +192,8 @@ export function commonProcessTemporalDimension(
 ) {
   if (esriTimeDimension !== undefined) {
     this.layerTemporalDimension[Layer.getLayerPath(layerEntryConfig)] = api.dateUtilities.createDimensionFromESRI(
-      Cast<TimeDimensionESRI>(esriTimeDimension)
+      Cast<TimeDimensionESRI>(esriTimeDimension),
+      this.dateFragmentsOrder
     );
   }
 }

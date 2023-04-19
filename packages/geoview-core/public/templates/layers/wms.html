@@ -58,6 +58,7 @@
               <a href="#HLYR1">1. Many WMS Layers</a><br />
               <a href="#HLYR2">2. All Styles of a WMS Layer</a><br />
               <a href="#HLYR3">3. Choose from a list of styles</a><br />
+              <a href="#HLYR4">4. Automatic group creation from metadata information</a><br />
             </td>
           </tr>
         </tbody>
@@ -113,6 +114,7 @@
                         },
                         {
                           'layerId': 'CGSL.ETA_ICEC',
+                          'layerFilter': 'time = date \'2023-04-18T07:00:00-04:00\'',
                           'layerName': { 'en': 'Ice Cover' }
                         }
                       ]
@@ -142,6 +144,20 @@
                   ]
                 },
                 {
+                  'geoviewLayerId': 'wmsLYR1-spatiotemporel',
+                  'geoviewLayerName': { 'en': 'Spatiotemporel' },
+                  'metadataAccessPath': { 'en': 'https://geo.weather.gc.ca/geomet' },
+                  'geoviewLayerType': 'ogcWms',
+                  'listOfLayerEntryConfig': [
+                    {
+                      'layerId': 'RADAR_1KM_RSNO',
+                      'layerFilter': 'time = date \'2023-05-02T14:18:00Z\'',
+                      'layerName': { 'en': 'Test Spatiotemporel' }
+                    }
+                  ]
+                }/*,
+                ==========================================================================================
+                { https://geo.weather.gc.ca/geomet?service=WMS&version=1.3&request=GetCapabilities&layers=RADAR_1KM_RSNO
                   'geoviewLayerId': 'Hydro',
                   'geoviewLayerName': { 'en': 'Hydro' },
                   'metadataAccessPath': { 'en': 'https://maps.geogratis.gc.ca/wms/hydro_network_en' },
@@ -153,6 +169,7 @@
                     }
                   ]
                 }
+                ==========================================================================================*/
               ]
             },
             'components': ['overview-map', 'nav-bar', 'footer-bar'],
@@ -416,6 +433,60 @@
     <pre id="LYR3CS" class="panel"></pre>
     <hr />
 
+    <div class="map-title-holder">
+      <h4 id="HLYR4">4. Automatic group creation from metadata information</h4>
+      <a class="ref-link" href="#top">Top</a>
+    </div>
+    <div
+      id="LYR4"
+      class="llwp-map"
+      data-lang="en"
+      data-config="{
+            'map': {
+              'interaction': 'dynamic',
+              'viewSettings': {
+                'zoom': 4,
+                'center': [-100, 60],
+                'projection': 3857
+              },
+              'basemapOptions': {
+                'basemapId': 'transport',
+                'shaded': false,
+                'labeled': true
+              },
+              'listOfGeoviewLayerConfig': [
+                {
+                  'geoviewLayerId': 'Hydro',
+                  'geoviewLayerName': { 'en': 'Hydro' },
+                  'metadataAccessPath': { 'en': 'https://maps.geogratis.gc.ca/wms/hydro_network_en' },
+                  'geoviewLayerType': 'ogcWms',
+                  'listOfLayerEntryConfig': [
+                    {
+                      'layerId': 'hydro_network',
+                      'layerName': { 'en': 'hydro_network' }
+                    }
+                  ]
+                }
+              ]
+            },
+            'components': ['overview-map', 'nav-bar', 'footer-bar'],
+            'corePackages': [],
+            'theme': 'dark',
+            'suportedLanguages': ['en']
+          }"
+    ></div>
+    <button type="button" class="collapsible">Visibility and filters</button>
+    <pre style="height: 20pc; overflow-y: scroll" id="layer4-buttons-pre" class="panel"></pre>
+    <button class="collapsible">Get Legend</button>
+    <pre style="height: 20pc; overflow-y: scroll" id="LegendsId4-table-pre" class="panel"></pre>
+    <hr />
+    <p>This map has a wms layer added from configuration.</p>
+    <button type="button" class="collapsible">Configuration Snippet</button>
+    <pre id="LYR4CS" class="panel"></pre>
+    <hr />
+    <button type="button" class="collapsible">Code Snippet</button>
+    <pre id="codeSnippet" class="panel"></pre>
+
     <script src="codedoc.js"></script>
     <script src="layerlib.js"></script>
     <script>
@@ -430,9 +501,12 @@
 
           createTableOfFilter('LYR1');
           createTableOfFilter('LYR2');
+          createTableOfFilter('LYR4');
           cgpv.api.event.emit({ handlerName: 'LYR1/LegendsId1', event: cgpv.api.eventNames.GET_LEGENDS.TRIGGER });
           cgpv.api.event.emit({ handlerName: 'LYR2/LegendsId2', event: cgpv.api.eventNames.GET_LEGENDS.TRIGGER });
           cgpv.api.event.emit({ handlerName: 'LYR3/LegendsId3', event: cgpv.api.eventNames.GET_LEGENDS.TRIGGER });
+          cgpv.api.event.emit({ handlerName: 'LYR4/LegendsId4', event: cgpv.api.eventNames.GET_LEGENDS.TRIGGER });
+
           const lyr3LayerConfig = cgpv.api.maps.LYR3.layer.registeredLayers['wmsLYR3-Root/landcover_2015_19classes'];
           if (Array.isArray(lyr3LayerConfig?.source?.style)) {
             const dropDownContent = document.getElementById('style');
@@ -446,6 +520,15 @@
               cgpv.api.maps.LYR3.layer.geoviewLayers['wmsLYR3-Root'].setStyle(dropDownContent.value, 'wmsLYR3-Root/landcover_2015_19classes');
             });
           }
+
+          let i = 0;
+          window.setInterval(() => {
+            const layerConfig = cgpv.api.maps.LYR1.layer.registeredLayers['wmsLYR1-spatiotemporel/RADAR_1KM_RSNO'];
+            const temporalData = cgpv.api.maps.LYR1.layer.geoviewLayers['wmsLYR1-spatiotemporel'].layerTemporalDimension['wmsLYR1-spatiotemporel/RADAR_1KM_RSNO'];
+            cgpv.api.maps.LYR1.layer.geoviewLayers['wmsLYR1-spatiotemporel'].applyViewFilter(layerConfig, `time=date '${temporalData.range.range[i]}'`);
+            if (++i === temporalData.range.range.length) i = 0;
+            console.log(i);
+          }, 1000)
         }
       });
 
@@ -518,6 +601,25 @@
         },
         'LYR3/LegendsId3'
       );
+
+      //LYR4 ===================================================================================================================
+      const LegendsWmsLayerSet4 = cgpv.api.createLegendsLayerSet('LYR4', 'LegendsId4');
+      cgpv.api.event.on(
+        cgpv.api.eventNames.GET_LEGENDS.ALL_LEGENDS_DONE,
+        (payload) => {
+          const { resultSets } = payload;
+          displayLegend('LegendsId4', resultSets);
+        },
+        'LYR4/LegendsId4'
+      );
+
+      // ========================================================================================================================
+      // Test a refresh WMS from projection change
+      var testRefreshBtn = document.getElementsByClassName('test-refresh-WMS-btn')[0];
+      testRefreshBtn.addEventListener('click', function (e) {
+        cgpv.api.event.emit(cgpv.types.mapViewProjectionPayload(cgpv.api.eventNames.MAP.EVENT_MAP_VIEW_PROJECTION_CHANGE, 'LYR1', 3978));
+      });
+
     </script>
   </body>
 </html>
