@@ -2,8 +2,11 @@ import axios from 'axios';
 
 import { WMSCapabilities, WKT } from 'ol/format';
 import { Geometry } from 'ol/geom';
+import { Style, Stroke, Fill, Circle } from 'ol/style';
+import { Color } from 'ol/color';
 
 import { Cast, TypeJsonObject } from '../../core/types/global-types';
+import { TypeFeatureStyle } from '../layer/vector/vector-types';
 import { xmlToJson } from '../../core/utils/utilities';
 
 import { api } from '../../app';
@@ -25,15 +28,51 @@ export class GeoUtilities {
    * @returns {string | null} the WKT representation of the geometry
    */
   geometryToWKT = (geometry: Geometry): string | null => {
-    // This method should be static, but I've made it like the others here as I think what's exported via the api is an instance not the class itself.
-    // Therefore applications importing geoUtilities wouldn't be able to see the method.
-    // See api.constructor: this.geoUtilities = new GeoUtilities();
+    // TODO: Refactoring - This method should be static, but since it goes through the api instance to be importable afterwards it loses non static methods. For this reason, I've left it like this. See api.constructor: this.geoUtilities = new GeoUtilities();
     if (geometry) {
       // Get the wkt for the geometry
       const format = new WKT();
       return format.writeGeometry(geometry);
     }
     return null;
+  };
+
+  /**
+   * Default drawing style for GeoView
+   * @returns an Open Layers styling for drawing on a map
+   */
+  defaultDrawingStyle = (strokeColor?: Color | string, strokeWidth?: number, fillColor?: Color | string): Style => {
+    // TODO: Refactoring - This method should be static, but since it goes through the api instance to be importable afterwards it loses non static methods. For this reason, I've left it like this. See api.constructor: this.geoUtilities = new GeoUtilities();
+    return new Style({
+      stroke: new Stroke({
+        color: strokeColor || 'orange',
+        width: strokeWidth || 2,
+      }),
+      fill: new Fill({
+        color: fillColor || 'transparent',
+      }),
+      image: new Circle({
+        radius: 4,
+        fill: new Fill({
+          color: fillColor || 'orange',
+        }),
+        stroke: new Stroke({
+          color: strokeColor || 'orange',
+          width: strokeWidth || 2,
+        }),
+      }),
+    });
+  };
+
+  /**
+   * Converts a TypeFeatureStyle to an Open Layers Style object.
+   * @returns an Open Layers styling for drawing on a map or undefined
+   */
+  convertTypeFeatureStyleToOpenLayersStyle = (style?: TypeFeatureStyle): Style => {
+    // TODO: Refactoring - This method should be static, but since it goes through the api instance to be importable afterwards it loses non static methods. For this reason, I've left it like this. See api.constructor: this.geoUtilities = new GeoUtilities();
+    // TODO: Refactoring - This function could also be used by vector class when it works with the styling. So I'm putting it in this utilities class so that it eventually becomes shared between vector class and interactions classes.
+    // Redirect
+    return this.defaultDrawingStyle(style?.strokeColor, style?.strokeWidth, style?.fillColor);
   };
 
   /**
