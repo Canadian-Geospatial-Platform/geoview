@@ -254,7 +254,10 @@ export class EsriFeature extends AbstractGeoViewVector {
     readOptions: ReadOptions = {}
   ): VectorSource<Geometry> {
     sourceOptions.url = getLocalizedValue(layerEntryConfig.source!.dataAccessPath!, this.mapId);
-    sourceOptions.url = `${sourceOptions.url}/${layerEntryConfig.layerId}/query?f=pjson&outfields=*&where=1%3D1`;
+    sourceOptions.url = `${sourceOptions.url}/${layerEntryConfig.layerId.replace(
+      '-unclustered',
+      ''
+    )}/query?f=pjson&outfields=*&where=1%3D1`;
     sourceOptions.format = new EsriJSON();
     const vectorSource = super.createVectorSource(layerEntryConfig, sourceOptions, readOptions);
     return vectorSource;

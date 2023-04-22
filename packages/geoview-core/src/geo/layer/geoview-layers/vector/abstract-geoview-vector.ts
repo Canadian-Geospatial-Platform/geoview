@@ -106,7 +106,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
     if (this.attributions.length !== 0) sourceOptions.attributions = this.attributions;
 
     // set loading strategy option
-    sourceOptions.strategy = (layerEntryConfig.source! as TypeBaseSourceVectorInitialConfig).strategy === 'all' ? all : bbox;
+    sourceOptions.strategy = (layerEntryConfig.source! as TypeBaseSourceVectorInitialConfig).strategy === 'bbox' ? bbox : all;
 
     sourceOptions.loader = (extent, resolution, projection, success, failure) => {
       let url = vectorSource.getUrl();
@@ -419,12 +419,28 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
    *
    * @param {string | TypeLayerEntryConfig | null} layerPathOrConfig Optional layer path or configuration.
    * @param {string} filter An optional filter to be used in place of the getViewFilter value.
+   * @param {boolean} checkCluster An optional value to see if we check for clustered layers.
    */
-  applyViewFilter(layerPathOrConfig: string | TypeLayerEntryConfig | null = this.activeLayer, filter = '') {
+  applyViewFilter(layerPathOrConfig: string | TypeLayerEntryConfig | null = this.activeLayer, filter = '', checkCluster = true) {
     const layerEntryConfig = (
       typeof layerPathOrConfig === 'string' ? this.getLayerConfig(layerPathOrConfig) : layerPathOrConfig
     ) as TypeVectorLayerEntryConfig;
     if (layerEntryConfig) {
+      const layerPath = layerEntryConfig.geoviewRootLayer
+        ? `${layerEntryConfig.geoviewRootLayer.geoviewLayerId}/${layerEntryConfig.layerId.replace('-unclustered', '')}`
+        : layerEntryConfig.layerId.replace('-unclustered', '');
+      const unclusteredLayerPath = `${layerPath}-unclustered`;
+      const cluster = !!api.maps[this.mapId].layer.registeredLayers[unclusteredLayerPath];
+      if (cluster && checkCluster) {
+        this.applyViewFilter(api.maps[this.mapId].layer.registeredLayers[layerPath] as TypeVectorLayerEntryConfig, filter, false);
+        this.applyViewFilter(
+          api.maps[this.mapId].layer.registeredLayers[unclusteredLayerPath] as TypeVectorLayerEntryConfig,
+          filter,
+          false
+        );
+        return;
+      }
+
       let filterValueToUse = filter || this.getLayerFilter(layerEntryConfig) || '';
 
       // Convert date constants using the serviceDateFormat
@@ -454,20 +470,8 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
         );
       }
 
-      layerEntryConfig.gvLayer!.set('legendFilterIsOff', !!filter);
+      layerEntryConfig.gvLayer?.set('legendFilterIsOff', !!filter);
       layerEntryConfig.gvLayer?.changed();
     }
-  }
-
-  /** ***************************************************************************************************************************
-   * Toggle cluster status.
-   *
-   * @param {string | TypeLayerEntryConfig | null} layerPathOrConfig Optional layer path or configuration.
-   */
-  toggleCluster(layerPathOrConfig: string | TypeLayerEntryConfig | null = this.activeLayer) {
-    const config = (
-      typeof layerPathOrConfig === 'string' ? this.getLayerConfig(layerPathOrConfig) : layerPathOrConfig
-    ) as TypeVectorLayerEntryConfig;
-    config.source!.cluster!.enable = !config.source!.cluster!.enable;
   }
 }

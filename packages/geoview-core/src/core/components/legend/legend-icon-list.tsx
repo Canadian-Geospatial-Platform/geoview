@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { useTheme, Theme } from '@mui/material/styles';
 import Box from '@mui/material/Box';
+import { api } from '../../../app';
 import {
   List,
   ListItem,
@@ -39,18 +40,20 @@ export interface TypeLegendIconListProps {
   iconImages: string[];
   iconLabels: string[];
   layerConfig?: TypeVectorLayerEntryConfig;
+  mapId?: string;
   geometryKey?: TypeStyleGeometry;
   isParentVisible?: boolean;
   toggleParentVisible?: () => void;
   toggleMapVisible?: (layerConfig: TypeLayerEntryConfig) => void;
 }
+
 /**
  * List of Icons to show in expanded Legend Item
  *
  * @returns {JSX.Element} the list of icons
  */
 export function LegendIconList(props: TypeLegendIconListProps): JSX.Element {
-  const { iconImages, iconLabels, isParentVisible, toggleParentVisible, toggleMapVisible, geometryKey, layerConfig } = props;
+  const { iconImages, iconLabels, isParentVisible, toggleParentVisible, toggleMapVisible, geometryKey, layerConfig, mapId } = props;
   const theme: Theme & {
     iconImg: React.CSSProperties;
   } = useTheme();
@@ -60,6 +63,7 @@ export function LegendIconList(props: TypeLegendIconListProps): JSX.Element {
   const [isChecked, setChecked] = useState<boolean[]>(isParentVisible === true ? allChecked : allUnChecked);
   const [checkedCount, setCheckCount] = useState<number>(isParentVisible === true ? iconImages.length : 0);
   const [initParentVisible, setInitParentVisible] = useState(isParentVisible);
+
   /**
    * Handle view/hide layers.
    */
@@ -85,13 +89,8 @@ export function LegendIconList(props: TypeLegendIconListProps): JSX.Element {
       return 1;
     };
 
-    if (isParentVisible !== initParentVisible) {
-      setChecked(isParentVisible === true ? allChecked : allUnChecked);
-      setCheckCount(isParentVisible === true ? allChecked.length : 0);
-      setInitParentVisible(isParentVisible);
-    }
-    if (layerConfig && layerConfig.style !== undefined && geometryKey) {
-      const geometryStyle = layerConfig.style[geometryKey];
+    const handleVisibility = (visibilityLayerConfig: TypeVectorLayerEntryConfig) => {
+      const geometryStyle = visibilityLayerConfig.style![geometryKey!];
       if (geometryStyle !== undefined) {
         const styleArraySize = getStyleArraySize(geometryStyle);
         isChecked.forEach((checked, i) => {
@@ -101,8 +100,8 @@ export function LegendIconList(props: TypeLegendIconListProps): JSX.Element {
                 (geometryStyle as TypeUniqueValueStyleConfig).uniqueValueStyleInfo[i].visible = checked === true ? 'yes' : 'no';
             } else if (i === styleArraySize && (geometryStyle as TypeUniqueValueStyleConfig).defaultSettings) {
               (geometryStyle as TypeUniqueValueStyleConfig).defaultVisible = checked === true ? 'yes' : 'no';
-            } else if (layerConfig.entryType === 'vector' && layerConfig.source?.cluster) {
-              layerConfig.source.cluster.enable = checked;
+            } else if (visibilityLayerConfig.entryType === 'vector' && visibilityLayerConfig.source?.cluster) {
+              (geometryStyle as TypeUniqueValueStyleConfig).defaultVisible = 'yes';
             }
           } else if (geometryStyle.styleType === 'classBreaks') {
             if (i < styleArraySize) {
@@ -110,17 +109,45 @@ export function LegendIconList(props: TypeLegendIconListProps): JSX.Element {
                 (geometryStyle as TypeClassBreakStyleConfig).classBreakStyleInfo[i].visible = checked === true ? 'yes' : 'no';
             } else if (i === styleArraySize && (geometryStyle as TypeClassBreakStyleConfig).defaultSettings) {
               (geometryStyle as TypeClassBreakStyleConfig).defaultVisible = checked === true ? 'yes' : 'no';
-            } else if (layerConfig.entryType === 'vector' && layerConfig.source?.cluster) {
-              layerConfig.source.cluster.enable = checked;
+            } else if (visibilityLayerConfig.entryType === 'vector' && visibilityLayerConfig.source?.cluster) {
+              (geometryStyle as TypeUniqueValueStyleConfig).defaultVisible = 'yes';
             }
           }
         });
         if (toggleMapVisible !== undefined) {
-          toggleMapVisible(layerConfig as TypeLayerEntryConfig);
+          toggleMapVisible(visibilityLayerConfig as TypeLayerEntryConfig);
         }
       }
+    };
+
+    if (isParentVisible !== initParentVisible) {
+      setChecked(isParentVisible === true ? allChecked : allUnChecked);
+      setCheckCount(isParentVisible === true ? allChecked.length : 0);
+      setInitParentVisible(isParentVisible);
     }
-  }, [isParentVisible, allChecked, allUnChecked, checkedCount, initParentVisible, isChecked, layerConfig, geometryKey, toggleMapVisible]);
+    if (layerConfig && layerConfig.style !== undefined && geometryKey && mapId) {
+      const layerPath = layerConfig.geoviewRootLayer
+        ? `${layerConfig.geoviewRootLayer.geoviewLayerId}/${layerConfig.layerId.replace('-unclustered', '')}`
+        : layerConfig.layerId.replace('-unclustered', '');
+      const unclusteredLayerPath = `${layerPath}-unclustered`;
+      const cluster = !!api.maps[mapId].layer.registeredLayers[unclusteredLayerPath];
+      if (cluster) {
+        handleVisibility(api.maps[mapId].layer.registeredLayers[layerPath] as TypeVectorLayerEntryConfig);
+        handleVisibility(api.maps[mapId].layer.registeredLayers[unclusteredLayerPath] as TypeVectorLayerEntryConfig);
+      } else handleVisibility(layerConfig);
+    }
+  }, [
+    isParentVisible,
+    allChecked,
+    allUnChecked,
+    checkedCount,
+    initParentVisible,
+    isChecked,
+    layerConfig,
+    geometryKey,
+    toggleMapVisible,
+    mapId,
+  ]);
 
   return (
     <List>

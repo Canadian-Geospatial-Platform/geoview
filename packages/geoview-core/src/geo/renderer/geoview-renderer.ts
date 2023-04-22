@@ -40,7 +40,6 @@ import {
   isSimpleStyleConfig,
   isUniqueValueStyleConfig,
   isClassBreakStyleConfig,
-  TypeBaseVectorConfig,
   TypeUniqueValueStyleConfig,
   TypeClassBreakStyleConfig,
   TypeBaseSourceVectorInitialConfig,
@@ -59,8 +58,7 @@ import {
   unaryKeywords,
 } from './geoview-renderer-types';
 import { Layer } from '../layer/layer';
-import { TypeLayerStyles, TypeStyleRepresentation } from '../layer/geoview-layers/abstract-geoview-layers';
-import { TypeDateFragments } from '../../core/utils/date-mgt';
+import { TypeLayerStyles } from '../layer/geoview-layers/abstract-geoview-layers';
 import { api } from '../../app';
 
 type TypeStyleProcessor = (
@@ -641,8 +639,15 @@ export class GeoviewRenderer {
     if (feature === undefined || clusterSize > 1) {
       const styleSettings = layerEntryConfig.source!.cluster!.settings!;
       if (!styleSettings.color || !styleSettings.stroke?.color) {
-        const color = this.getDefaultColor(0.45);
-        const strokeColor = this.getDefaultColorAndIncrementIndex(1);
+        const { style } = layerEntryConfig;
+        let geoColor: string | null = null;
+        const geoStyle = style?.Point || style?.Polygon || style?.LineString || null;
+        if (geoStyle) {
+          const geoStyleSettings = (isSimpleStyleConfig(geoStyle) ? geoStyle.settings : geoStyle) as TypeSimpleSymbolVectorConfig;
+          geoColor = geoStyleSettings.stroke?.color || null;
+        }
+        const color = geoColor ? asString(setAlphaColor(asArray(geoColor), 0.45)) : this.getDefaultColor(0.45);
+        const strokeColor = geoColor || this.getDefaultColorAndIncrementIndex(1);
         if (!styleSettings.color) styleSettings.color = color;
         if (!styleSettings.stroke) styleSettings.stroke = {};
         if (!styleSettings.stroke.color) styleSettings.stroke.color = strokeColor;
@@ -661,7 +666,6 @@ export class GeoviewRenderer {
     // When there is only a single feature left, use that features original geometry
     if (clusterSize < 2) {
       const originalFeature = clusterSize ? feature!.get('features')[0] : feature;
-      const originalGeometryType = getGeometryType(originalFeature);
 
       // If style does not exist for the geometryType, getFeatureStyle will create it.
       return this.getFeatureStyle(originalFeature, layerEntryConfig);
@@ -1438,9 +1442,9 @@ export class GeoviewRenderer {
     if (geometryType === 'Point') {
       const settings: TypeSimpleSymbolVectorConfig = {
         type: 'simpleSymbol',
-        color: this.getDefaultColor(0.25),
+        color: layerEntryConfig.source?.cluster?.settings?.color || this.getDefaultColor(0.25),
         stroke: {
-          color: this.getDefaultColor(1),
+          color: layerEntryConfig.source?.cluster?.settings?.stroke?.color || this.getDefaultColorAndIncrementIndex(1),
           lineStyle: 'solid',
           width: 1,
         },
@@ -1448,29 +1452,26 @@ export class GeoviewRenderer {
       };
       const styleSettings: TypeSimpleStyleConfig = { styleId, styleType: 'simple', label, settings };
       layerEntryConfig.style[geometryType] = styleSettings;
-      this.incrementDefaultColorIndex();
       return layerEntryConfig.style;
     }
     if (geometryType === 'LineString') {
       const settings: TypeLineStringVectorConfig = {
         type: 'lineString',
-        stroke: { color: this.getDefaultColor(1) },
+        stroke: { color: layerEntryConfig.source?.cluster?.settings?.stroke?.color || this.getDefaultColorAndIncrementIndex(1) },
       };
       const styleSettings: TypeSimpleStyleConfig = { styleId, styleType: 'simple', label, settings };
       layerEntryConfig.style[geometryType] = styleSettings;
-      this.incrementDefaultColorIndex();
       return layerEntryConfig.style;
     }
     if (geometryType === 'Polygon') {
       const settings: TypePolygonVectorConfig = {
         type: 'filledPolygon',
-        color: this.getDefaultColor(0.25),
-        stroke: { color: this.getDefaultColor(1) },
+        color: layerEntryConfig.source?.cluster?.settings?.color || this.getDefaultColor(0.25),
+        stroke: { color: layerEntryConfig.source?.cluster?.settings?.stroke?.color || this.getDefaultColorAndIncrementIndex(1) },
         fillStyle: 'solid',
       };
       const styleSettings: TypeSimpleStyleConfig = { styleId, styleType: 'simple', label, settings };
       layerEntryConfig.style[geometryType] = styleSettings;
-      this.incrementDefaultColorIndex();
       return layerEntryConfig.style;
     }
     // eslint-disable-next-line no-console
