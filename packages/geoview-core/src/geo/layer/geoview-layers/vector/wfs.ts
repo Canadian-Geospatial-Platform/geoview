@@ -247,7 +247,7 @@ export class WFS extends AbstractGeoViewVector {
     const promiseOfExecution = new Promise<void>((resolve) => {
       const queryUrl = getLocalizedValue(layerEntryConfig.source!.dataAccessPath, this.mapId);
       if (queryUrl) {
-        fetch(`${queryUrl}?service=WFS&request=DescribeFeatureType&outputFormat=application/json&typeName=${layerEntryConfig.layerId}`)
+        fetch(`${queryUrl}?service=WFS&request=DescribeFeatureType&outputFormat=application/json&typeName=${layerEntryConfig.layerId.replace('-unclustered', '')}`)
           .then<TypeJsonObject>((fetchResponse) => {
             return fetchResponse.json();
           })
@@ -327,7 +327,7 @@ export class WFS extends AbstractGeoViewVector {
     sourceOptions.url = getLocalizedValue(layerEntryConfig.source!.dataAccessPath!, this.mapId);
     sourceOptions.url = `${sourceOptions.url}?service=WFS&request=getFeature&outputFormat=application/json&version=2.0.0`;
     sourceOptions.url = `${sourceOptions.url}&srsname=${(layerEntryConfig.source as TypeBaseSourceVectorInitialConfig).dataProjection}`;
-    sourceOptions.url = `${sourceOptions.url}&typeName=${layerEntryConfig.layerId}`;
+    sourceOptions.url = `${sourceOptions.url}&typeName=${layerEntryConfig.layerId.replace('-unclustered', '')}`;
     sourceOptions.format = new FormatGeoJSON();
     const vectorSource = super.createVectorSource(layerEntryConfig, sourceOptions, readOptions);
     return vectorSource;

@@ -9,6 +9,8 @@ import { transformExtent } from 'ol/proj';
 import Feature from 'ol/Feature';
 import Geometry from 'ol/geom/Geometry';
 
+import cloneDeep from 'lodash/cloneDeep';
+
 import { generateId, getLocalizedValue } from '../../../core/utils/utilities';
 import {
   TypeGeoviewLayerConfig,
@@ -24,6 +26,7 @@ import {
   TypeLayerEntryType,
   TypeOgcWmsLayerEntryConfig,
   TypeEsriDynamicLayerEntryConfig,
+  TypeBaseSourceVectorInitialConfig,
 } from '../../map/map-schema-types';
 import {
   codedValueType,
@@ -437,7 +440,7 @@ export abstract class AbstractGeoViewLayer {
    * Process recursively the list of layer Entries to create the layers and the layer groups.
    *
    * @param {TypeListOfLayerEntryConfig} listOfLayerEntryConfig The list of layer entries to process.
-   * @param {LayerGroup} layerGroup Optionnal layer group to use when we have many layers. The very first call to
+   * @param {LayerGroup} layerGroup Optional layer group to use when we have many layers. The very first call to
    *  processListOfLayerEntryConfig must not provide a value for this parameter. It is defined for internal use.
    *
    * @returns {Promise<BaseLayer | null>} The promise that the layers were processed.
@@ -463,8 +466,28 @@ export abstract class AbstractGeoViewLayer {
             }
           });
         } else {
+          if (
+            listOfLayerEntryConfig[0].entryType === 'vector' &&
+            (listOfLayerEntryConfig[0].source as TypeBaseSourceVectorInitialConfig)?.cluster?.enable
+          ) {
+            const unclusteredLayerConfig = cloneDeep(listOfLayerEntryConfig[0]) as TypeVectorLayerEntryConfig;
+            unclusteredLayerConfig.layerId = `${listOfLayerEntryConfig[0].layerId}-unclustered`;
+            unclusteredLayerConfig.source!.cluster!.enable = false;
+            this.processOneLayerEntry(unclusteredLayerConfig as TypeBaseLayerEntryConfig).then((baseLayer) => {
+              if (baseLayer) {
+                baseLayer.setVisible(false);
+                api.maps[this.mapId].layer.registerLayerConfig(unclusteredLayerConfig);
+                this.registerToLayerSets(unclusteredLayerConfig as TypeBaseLayerEntryConfig);
+                if (!layerGroup) layerGroup = this.createLayerGroup(unclusteredLayerConfig.parentLayerConfig as TypeLayerEntryConfig);
+                layerGroup.getLayers().push(baseLayer);
+              }
+            });
+            (listOfLayerEntryConfig[0].source as TypeBaseSourceVectorInitialConfig)!.cluster!.settings =
+              unclusteredLayerConfig.source!.cluster!.settings;
+          }
           this.processOneLayerEntry(listOfLayerEntryConfig[0] as TypeBaseLayerEntryConfig).then((baseLayer) => {
             if (baseLayer) {
+              baseLayer.setVisible(true);
               this.registerToLayerSets(listOfLayerEntryConfig[0] as TypeBaseLayerEntryConfig);
               if (layerGroup) {
                 layerGroup.getLayers().push(baseLayer);
@@ -489,23 +512,39 @@ export abstract class AbstractGeoViewLayer {
           if (layerEntryIsGroupLayer(layerEntryConfig)) {
             const newLayerGroup = this.createLayerGroup(listOfLayerEntryConfig[i]);
             promiseOfLayerCreated.push(this.processListOfLayerEntryConfig(layerEntryConfig.listOfLayerEntryConfig!, newLayerGroup));
-          } else promiseOfLayerCreated.push(this.processOneLayerEntry(layerEntryConfig as TypeBaseLayerEntryConfig));
+          } else {
+            if (
+              layerEntryConfig.entryType === 'vector' &&
+              (layerEntryConfig.source as TypeBaseSourceVectorInitialConfig)?.cluster?.enable
+            ) {
+              const unclusteredLayerConfig = cloneDeep(layerEntryConfig) as TypeVectorLayerEntryConfig;
+              unclusteredLayerConfig.layerId = `${layerEntryConfig.layerId}-unclustered`;
+              unclusteredLayerConfig.source!.cluster!.enable = false;
+              api.maps[this.mapId].layer.registerLayerConfig(unclusteredLayerConfig);
+              promiseOfLayerCreated.push(this.processOneLayerEntry(unclusteredLayerConfig as TypeBaseLayerEntryConfig));
+              (layerEntryConfig.source as TypeBaseSourceVectorInitialConfig)!.cluster!.settings =
+                unclusteredLayerConfig.source!.cluster!.settings;
+            }
+            promiseOfLayerCreated.push(this.processOneLayerEntry(layerEntryConfig as TypeBaseLayerEntryConfig));
+          }
         });
         Promise.all(promiseOfLayerCreated)
           .then((listOfLayerCreated) => {
             listOfLayerCreated.forEach((baseLayer, i) => {
+              if (baseLayer?.get('layerEntryConfig')?.layerId.endsWith('-unclustered')) {
+                baseLayer.setVisible(false);
+              } else if (baseLayer) baseLayer.setVisible(true);
               if (layerEntryIsGroupLayer(listOfLayerEntryConfig[i])) {
                 if (baseLayer) {
                   layerGroup!.getLayers().push(baseLayer);
-                } else {
+                } else if (listOfLayerEntryConfig[i]) {
                   this.layerLoadError.push({
                     layer: Layer.getLayerPath(listOfLayerEntryConfig[i]),
                     consoleMessage: `Unable to create group layer ${Layer.getLayerPath(listOfLayerEntryConfig[i])} on map ${this.mapId}`,
                   });
-                  resolve(null);
-                }
+                } else resolve(null);
               } else if (baseLayer) {
-                this.registerToLayerSets(listOfLayerEntryConfig[i] as TypeBaseLayerEntryConfig);
+                this.registerToLayerSets(baseLayer.get('layerEntryConfig') as TypeBaseLayerEntryConfig);
                 layerGroup!.getLayers().push(baseLayer);
               } else {
                 this.layerLoadError.push({

@@ -253,8 +253,8 @@ export class OgcFeature extends AbstractGeoViewVector {
       const metadataUrl = getLocalizedValue(this.metadataAccessPath, this.mapId);
       if (metadataUrl) {
         const queryUrl = metadataUrl.endsWith('/')
-          ? `${metadataUrl}collections/${layerEntryConfig.layerId}/queryables?f=json`
-          : `${metadataUrl}/collections/${layerEntryConfig.layerId}/queryables?f=json`;
+          ? `${metadataUrl}collections/${layerEntryConfig.layerId.replace('-unclustered', '')}/queryables?f=json`
+          : `${metadataUrl}/collections/${layerEntryConfig.layerId.replace('-unclustered', '')}/queryables?f=json`;
         const queryResult = axios.get<TypeJsonObject>(queryUrl);
         queryResult.then((response) => {
           if (response.data.properties) {

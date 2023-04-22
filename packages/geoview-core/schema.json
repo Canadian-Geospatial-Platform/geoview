@@ -453,7 +453,7 @@
           "type": "object",
           "properties": {
             "header": { "type": "object" },
-            "data":  { "type": "object" }
+            "data": { "type": "object" }
           }
         },
         "format": { "$ref": "#/definitions/TypeVectorSourceFormats" },
@@ -477,11 +477,15 @@
         },
         "distance": {
           "type": "integer",
-          "description": "Distance in pixels within which features will be clustered together (deafult 20px)."
+          "description": "Distance in pixels within which features will be clustered together (default 20px)."
         },
         "minDistance": {
           "type": "integer",
           "description": "Minimum distance in pixels between clusters. Will be capped at the configured distance. By default no minimum distance is guaranteed. This config can be used to avoid overlapping icons. As a tradoff, the cluster feature's position will no longer be the center of all its features."
+        },
+        "splitZoom": {
+          "type": "integer",
+          "description": "Zoom level at which all clusters will split (default 8)."
         },
         "textColor": {
           "type": "string",
@@ -861,7 +865,8 @@
             "$ref": "#/definitions/TypeListOfLayerEntryConfig",
             "description": "The list of layer entry configurations to use from the GeoView layer group."
           }
-        }      },
+        }
+      },
       "required": ["schemaTag", "entryType", "layerId"]
     },
 
@@ -1067,10 +1072,7 @@
       "type": "array",
       "minItems": 1,
       "additionalProperties": false,
-      "items": {"anyOf": [
-        { "$ref": "#/definitions/TypeLayerGroupEntryConfig" },
-        { "$ref": "#/definitions/TypeOgcWmsLayerEntryConfig" }
-      ]}
+      "items": { "anyOf": [{ "$ref": "#/definitions/TypeLayerGroupEntryConfig" }, { "$ref": "#/definitions/TypeOgcWmsLayerEntryConfig" }] }
     },
 
     "TypeListOfImageStaticLayerEntryConfig": {
@@ -1078,10 +1080,9 @@
       "type": "array",
       "minItems": 1,
       "additionalProperties": false,
-      "items": {"anyOf": [
-        { "$ref": "#/definitions/TypeLayerGroupEntryConfig" },
-        { "$ref": "#/definitions/TypeImageStaticLayerEntryConfig" }
-      ]}
+      "items": {
+        "anyOf": [{ "$ref": "#/definitions/TypeLayerGroupEntryConfig" }, { "$ref": "#/definitions/TypeImageStaticLayerEntryConfig" }]
+      }
     },
 
     "TypeListOfXyzTilesLayerEntryConfig": {
@@ -1089,10 +1090,7 @@
       "type": "array",
       "minItems": 1,
       "additionalProperties": false,
-      "items": {"anyOf": [
-        { "$ref": "#/definitions/TypeLayerGroupEntryConfig" },
-        { "$ref": "#/definitions/TypeTileLayerEntryConfig" }
-      ]}
+      "items": { "anyOf": [{ "$ref": "#/definitions/TypeLayerGroupEntryConfig" }, { "$ref": "#/definitions/TypeTileLayerEntryConfig" }] }
     },
 
     "TypeListOfEsriDynamicLayerEntryConfig": {
@@ -1100,10 +1098,9 @@
       "type": "array",
       "minItems": 1,
       "additionalProperties": false,
-      "items": {"anyOf": [
-        { "$ref": "#/definitions/TypeLayerGroupEntryConfig" },
-        { "$ref": "#/definitions/TypeEsriDynamicLayerEntryConfig" }
-      ]}
+      "items": {
+        "anyOf": [{ "$ref": "#/definitions/TypeLayerGroupEntryConfig" }, { "$ref": "#/definitions/TypeEsriDynamicLayerEntryConfig" }]
+      }
     },
 
     "TypeListOfEsriFeatureLayerEntryConfig": {
@@ -1111,10 +1108,7 @@
       "type": "array",
       "minItems": 1,
       "additionalProperties": false,
-      "items": {"anyOf": [
-        { "$ref": "#/definitions/TypeLayerGroupEntryConfig" },
-        { "$ref": "#/definitions/TypeVectorLayerEntryConfig" }
-      ]}
+      "items": { "anyOf": [{ "$ref": "#/definitions/TypeLayerGroupEntryConfig" }, { "$ref": "#/definitions/TypeVectorLayerEntryConfig" }] }
     },
 
     "TypeListOfGeoJSONLayerEntryConfig": {
@@ -1122,10 +1116,7 @@
       "type": "array",
       "minItems": 1,
       "additionalProperties": false,
-      "items": {"anyOf": [
-        { "$ref": "#/definitions/TypeLayerGroupEntryConfig" },
-        { "$ref": "#/definitions/TypeVectorLayerEntryConfig" }
-      ]}
+      "items": { "anyOf": [{ "$ref": "#/definitions/TypeLayerGroupEntryConfig" }, { "$ref": "#/definitions/TypeVectorLayerEntryConfig" }] }
     },
 
     "TypeListOfOgcWfsLayerEntryConfig": {
@@ -1133,10 +1124,7 @@
       "type": "array",
       "minItems": 1,
       "additionalProperties": false,
-      "items": {"anyOf": [
-        { "$ref": "#/definitions/TypeLayerGroupEntryConfig" },
-        { "$ref": "#/definitions/TypeVectorLayerEntryConfig" }
-      ]}
+      "items": { "anyOf": [{ "$ref": "#/definitions/TypeLayerGroupEntryConfig" }, { "$ref": "#/definitions/TypeVectorLayerEntryConfig" }] }
     },
 
     "TypeListOfOgcFeatureLayerEntryConfig": {
@@ -1144,10 +1132,7 @@
       "type": "array",
       "minItems": 1,
       "additionalProperties": false,
-      "items": {"anyOf": [
-        { "$ref": "#/definitions/TypeLayerGroupEntryConfig" },
-        { "$ref": "#/definitions/TypeVectorLayerEntryConfig" }
-      ]}
+      "items": { "anyOf": [{ "$ref": "#/definitions/TypeLayerGroupEntryConfig" }, { "$ref": "#/definitions/TypeVectorLayerEntryConfig" }] }
     },
 
     "TypeListOfGeoPackageLayerEntryConfig": {
@@ -1155,10 +1140,7 @@
       "type": "array",
       "minItems": 1,
       "additionalProperties": false,
-      "items": {"anyOf": [
-        { "$ref": "#/definitions/TypeLayerGroupEntryConfig" },
-        { "$ref": "#/definitions/TypeVectorLayerEntryConfig" }
-      ]}
+      "items": { "anyOf": [{ "$ref": "#/definitions/TypeLayerGroupEntryConfig" }, { "$ref": "#/definitions/TypeVectorLayerEntryConfig" }] }
     },
 
     "TypeListOfGeoCoreLayerEntryConfig": {
@@ -1166,10 +1148,7 @@
       "type": "array",
       "minItems": 1,
       "additionalProperties": false,
-      "items": {"anyOf": [
-        { "$ref": "#/definitions/TypeLayerGroupEntryConfig" },
-        { "$ref": "#/definitions/TypeGeocoreLayerEntryConfig" }
-      ]}
+      "items": { "anyOf": [{ "$ref": "#/definitions/TypeLayerGroupEntryConfig" }, { "$ref": "#/definitions/TypeGeocoreLayerEntryConfig" }] }
     },
 
     "TypeListOfLayerEntryConfig": {

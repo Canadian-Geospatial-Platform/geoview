@@ -23,7 +23,7 @@ import { ClickMarker } from '../click-marker/click-marker';
 
 import { disableScrolling, generateId } from '../../utils/utilities';
 
-import { api, inKeyfocusPayload } from '../../../app';
+import { TypeVectorSourceInitialConfig, api, inKeyfocusPayload } from '../../../app';
 import { EVENT_NAMES } from '../../../api/events/event-types';
 
 import { MapViewer } from '../../../geo/map/map';
@@ -91,11 +91,28 @@ export function Map(mapFeaturesConfig: TypeMapFeaturesConfig): JSX.Element {
    * @param {ObjectEvent} event Zoom end event container a reference to the map
    */
   function mapZoomEnd(event: ObjectEvent): void {
+    const prevZoom = api.map(mapId).currentZoom;
     const view: View = event.target;
-
     const currentZoom = view.getZoom()!;
+    const layers = api.maps[mapId].layer.registeredLayers;
 
     api.map(mapId).currentZoom = currentZoom;
+
+    Object.keys(layers).forEach((layer) => {
+      if (layer.endsWith('-unclustered')) {
+        const clusterLayerId = layer.replace('-unclustered', '');
+        const splitZoom =
+          (api.map(mapId).layer.registeredLayers[clusterLayerId].source as TypeVectorSourceInitialConfig)!.cluster!.splitZoom || 8;
+        if (prevZoom < splitZoom && currentZoom >= splitZoom) {
+          api.map(mapId).layer.registeredLayers[clusterLayerId]?.gvLayer!.setVisible(false);
+          api.map(mapId).layer.registeredLayers[layer]?.gvLayer!.setVisible(true);
+        }
+        if (prevZoom >= splitZoom && currentZoom < splitZoom) {
+          api.map(mapId).layer.registeredLayers[clusterLayerId]?.gvLayer!.setVisible(true);
+          api.map(mapId).layer.registeredLayers[layer]?.gvLayer!.setVisible(false);
+        }
+      }
+    });
 
     // emit the moveend event to the api
     api.event.emit(numberPayload(EVENT_NAMES.MAP.EVENT_MAP_ZOOM_END, mapId, currentZoom));

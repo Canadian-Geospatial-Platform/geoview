@@ -25,7 +25,7 @@ import {
   SliderBase,
   CheckIcon,
 } from '../../../ui';
-import { api, EsriDynamic } from '../../../app';
+import { api, EsriDynamic, NumberPayload, PayloadBaseClass } from '../../../app';
 import { LegendIconList } from './legend-icon-list';
 import {
   AbstractGeoViewLayer,
@@ -166,9 +166,12 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
 
   const mapConfig = useContext(MapContext);
   const { mapId } = mapConfig;
-  // check if layer is a vectorlayer, so that clustering can be toggled
-  const vectorLayers = ['esriFeature', 'GeoJSON', 'GeoPackage', 'ogcFeature', 'ogcWfs'];
-  const canCluster = vectorLayers.includes(geoviewLayerInstance?.type);
+  // check if layer is a clustered, so that clustering can be toggled
+  const clusterPath = subLayerId || `${layerId}/${geoviewLayerInstance.activeLayer?.layerId}`;
+  const clusterLayerId = clusterPath.replace('-unclustered', '');
+  const unclusterLayerId = `${clusterLayerId}-unclustered`;
+  const [canCluster, setCanCluster] = useState(!!api.maps[mapId].layer.registeredLayers[unclusterLayerId]);
+
   const [isClusterToggleEnabled, setIsClusterToggleEnabled] = useState(false);
   const [isChecked, setChecked] = useState(true);
   const [isOpacityOpen, setOpacityOpen] = useState(false);
@@ -331,6 +334,19 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
     }
   }, [isParentVisible, isChecked, layerConfigEntry, geoviewLayerInstance]);
 
+  useEffect(() => {
+    if (api.maps[mapId].layer.registeredLayers[unclusterLayerId]) {
+      const mapZoomHandler = (payload: PayloadBaseClass) => {
+        const splitZoom =
+          (api.map(mapId).layer.registeredLayers[clusterLayerId].source as TypeVectorSourceInitialConfig)!.cluster!.splitZoom || 8;
+        if ((payload as NumberPayload).value >= splitZoom) setCanCluster(false);
+        if ((payload as NumberPayload).value < splitZoom) setCanCluster(true);
+      };
+      api.event.on(api.eventNames.MAP.EVENT_MAP_ZOOM_END, mapZoomHandler, mapId);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   /**
    * Handle expand/shrink of layer groups.
    */
@@ -362,29 +378,44 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
   const handleMoreClick = (event: React.MouseEvent<HTMLElement>) => {
     setMenuAnchorElement(event.currentTarget);
   };
+
   const handleCloseMenu = () => {
     setMenuAnchorElement(null);
   };
+
   const handleRemoveLayer = () => {
     api.map(mapId).layer.removeGeoviewLayer(geoviewLayerInstance);
     // NOTE: parent component needs to deal with removing this legend-item when recieving the layer remove event
     handleCloseMenu();
   };
+
   const handleOpacityOpen = () => {
     setOpacityOpen(!isOpacityOpen);
     handleCloseMenu();
   };
+
   const handleSetOpacity = (opacityValue: number | number[]) => {
     if (!geoviewLayerInstance) return;
     if (subLayerId) geoviewLayerInstance.setOpacity((opacityValue as number) / 100, subLayerId);
     else geoviewLayerInstance.setOpacity((opacityValue as number) / 100);
   };
+
   const handleClusterToggle = () => {
-    (geoviewLayerInstance as AbstractGeoViewVector).toggleCluster();
-    const layerConfig = api.map(mapId).layer.getGeoviewLayerById(layerId)?.activeLayer?.geoviewRootLayer;
-    api.map(mapId).layer.removeGeoviewLayer(geoviewLayerInstance);
-    api.map(mapId).layer.addGeoviewLayer(layerConfig!);
+    if (api.map(mapId).layer.registeredLayers[clusterLayerId]?.gvLayer) {
+      api
+        .map(mapId)
+        .layer.registeredLayers[clusterLayerId]?.gvLayer!.setVisible(
+          !api.map(mapId).layer.registeredLayers[clusterLayerId]?.gvLayer!.getVisible()
+        );
+      api
+        .map(mapId)
+        .layer.registeredLayers[unclusterLayerId]?.gvLayer!.setVisible(
+          !api.map(mapId).layer.registeredLayers[unclusterLayerId]?.gvLayer!.getVisible()
+        );
+    }
+    setIsClusterToggleEnabled(!isClusterToggleEnabled);
   };
+
   const handleStackIcon = (e: React.KeyboardEvent<HTMLElement>) => {
     if (e.key === 'Enter') {
       handleLegendClick();
