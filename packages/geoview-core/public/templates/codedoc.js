@@ -79,3 +79,92 @@ function createCollapsible() {
     });
   }
 }
+
+/**
+ * Get all interaction based events to log in the API EVENTS LOGS across all maps
+ * @param {*} eventNames The CGPV API EVENT_NAMES
+ */
+function getAllInteractionEvents(api) {
+  return [
+    api.eventNames.INTERACTION.EVENT_SELECTED,
+    api.eventNames.INTERACTION.EVENT_DRAW_STARTED,
+    api.eventNames.INTERACTION.EVENT_DRAW_ENDED,
+    api.eventNames.INTERACTION.EVENT_MODIFY_STARTED,
+    api.eventNames.INTERACTION.EVENT_MODIFY_ENDED,
+    api.eventNames.INTERACTION.EVENT_TRANSLATE_STARTED,
+    api.eventNames.INTERACTION.EVENT_TRANSLATE_ENDED,
+  ];
+}
+
+function addLog(logId, msg) {
+  const logs = document.getElementById(logId);
+  logs.innerText += `${msg}\n`;
+  logs.scrollTop = logs.scrollHeight;
+}
+
+function wireLogs(api, mapId, logsDomId) {
+  getAllInteractionEvents(api).forEach((eventName) => {
+    // Listen to the event
+    api.event.on(
+      eventName,
+      (payload) => {
+        // Log the event
+        addLog(logsDomId, payload.event);
+        console.log(payload);
+      },
+      mapId
+    );
+  });
+}
+
+function addDefaultShapes(map, groupKey) {
+  // Set active geometry group
+  map.layer.vector.setActiveGeometryGroup(groupKey);
+
+  // Add dummy shapes
+  map.layer.vector.addCircle([-98.94, 57.94], { style: { strokeColor: 'purple', strokeWidth: 2 } });
+
+  // Add dummy shapes
+  map.layer.vector.addMarkerIcon([-105.78, 57.52]);
+
+  // Add dummy shapes
+  map.layer.vector.addPolyline(
+    [
+      [-106.17, 63.99],
+      [-104.46, 62.55],
+      [-102.26, 56.44],
+    ],
+    { style: { strokeColor: 'blue', strokeWidth: 2 } }
+  );
+
+  // Add dummy shapes
+  map.layer.vector.addPolygon(
+    [
+      [
+        [-96.71, 64.41],
+        [-93.1, 62.86],
+        [-94.36, 56.67],
+        [-96.71, 64.41],
+      ],
+    ],
+    { style: { strokeColor: 'green', strokeWidth: 2 } }
+  );
+}
+
+function addSpecialShapes(map, groupKey) {
+  // Set active geometry group
+  map.layer.vector.setActiveGeometryGroup(groupKey);
+
+  // Add dummy shapes
+  map.layer.vector.addPolygon(
+    [
+      [
+        [-86.06, 62.59],
+        [-78.29, 62.59],
+        [-80.43, 55.73],
+        [-86.06, 62.59],
+      ],
+    ],
+    { style: { strokeColor: 'red', strokeWidth: 2 } }
+  );
+}
