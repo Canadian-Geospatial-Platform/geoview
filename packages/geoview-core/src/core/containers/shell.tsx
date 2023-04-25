@@ -13,6 +13,7 @@ import { Map } from '../components/map/map';
 import { Appbar } from '../components/app-bar/app-bar';
 import { Navbar } from '../components/nav-bar/nav-bar';
 import { FooterTabs } from '../components/footer-tabs/footer-tabs';
+import { Geolocator } from '../components/geolocator/geolocator';
 
 import { FocusTrapDialog } from './focus-trap';
 
@@ -187,6 +188,8 @@ export function Shell(props: ShellProps): JSX.Element {
           {mapFeaturesConfig.components !== undefined && mapFeaturesConfig.components.indexOf('app-bar') > -1 && (
             <Appbar setActivetrap={setActivetrap} />
           )}
+          {/* load geolocator component if config includes in list of components */}
+          {mapFeaturesConfig?.components?.includes('geolocator') && <Geolocator />}
           <Map {...mapFeaturesConfig} />
           {mapFeaturesConfig?.components && mapFeaturesConfig?.components.includes('nav-bar') && <Navbar setActivetrap={setActivetrap} />}
         </div>
