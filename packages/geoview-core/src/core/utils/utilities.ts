@@ -7,7 +7,7 @@ import ReactDOM from 'react-dom';
 
 import sanitizeHtml from 'sanitize-html';
 
-import { api } from '../../app';
+import { AbstractGeoViewLayer, api } from '../../app';
 import { TypeLocalizedString } from '../../geo/map/map-schema-types';
 import { EVENT_NAMES } from '../../api/events/event-types';
 
@@ -302,4 +302,15 @@ export const disableScrolling = (e: KeyboardEvent, elem: MutableRefObject<HTMLEl
       e.preventDefault();
     }
   }
+};
+
+/**
+ * Determine if layer instance is a vector layer
+ *
+ * @param {AbstractGeoViewLayer} layer the layer to check
+ * @returns {boolean} true if layer is a vector layer
+ */
+export const isVectorLayer = (layer: AbstractGeoViewLayer): boolean => {
+  const vectorLayers = { esriFeature: '', GeoJSON: '', GeoPackage: '', ogcFeature: '', ogcWfs: '' };
+  return layer?.type in vectorLayers;
 };
