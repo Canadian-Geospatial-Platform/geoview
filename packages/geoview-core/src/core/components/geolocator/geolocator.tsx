@@ -32,7 +32,7 @@ export function Geolocator() {
 
   const updateUrl = useCallback(() => {
     if (searchValue.length) {
-      const updatedUrl = `https://fr59c5usw4.execute-api.ca-central-1.amazonaws.com/dev?q=${searchValue}&lang=${i18n.language}&keys=geonames,nominatim,locate,nts`;
+      const updatedUrl = `https://fr59c5usw4.execute-api.ca-central-1.amazonaws.com/dev?q=${searchValue}&lang=${i18n.language}&keys=geonames`;
       setUrl(updatedUrl);
     }
   }, [searchValue, i18n.language]);
