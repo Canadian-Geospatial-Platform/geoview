@@ -190,6 +190,7 @@ export class UUIDmapConfigReader {
                     layerId: `${item.id}`,
                     source: {
                       format: 'WFS',
+                      strategy: 'all',
                       dataAccessPath: {
                         en: url as string,
                         fr: url as string,

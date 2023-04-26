@@ -635,7 +635,7 @@ export class ConfigValidation {
         if (!('style' in layerEntryConfig)) layerEntryConfig.style = undefined;
         // if layerEntryConfig.source.dataAccessPath is undefined, we assign the metadataAccessPath of the GeoView layer to it.
         // Value for layerEntryConfig.source.format can only be WFS.
-        if (!layerEntryConfig.source) layerEntryConfig.source = { format: 'WFS' };
+        if (!layerEntryConfig.source) layerEntryConfig.source = { format: 'WFS', strategy: 'all' };
         if (!layerEntryConfig?.source?.format) layerEntryConfig.source.format = 'WFS';
         if (!layerEntryConfig.source.dataAccessPath)
           layerEntryConfig.source.dataAccessPath = { ...rootLayerConfig.metadataAccessPath } as TypeLocalizedString;

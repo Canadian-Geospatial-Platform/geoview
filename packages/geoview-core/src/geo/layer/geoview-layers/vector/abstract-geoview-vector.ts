@@ -105,7 +105,13 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
     if (this.attributions.length !== 0) sourceOptions.attributions = this.attributions;
 
     sourceOptions.loader = (extent, resolution, projection, success, failure) => {
-      const url = vectorSource.getUrl();
+      let url = vectorSource.getUrl();
+
+      // if an extent is provided, use it in the url
+      if (Number.isFinite(extent[0])) {
+        url = `${url}&bbox=${extent},EPSG:3857`;
+      }
+
       const xhr = new XMLHttpRequest();
       if ((layerEntryConfig?.source as TypeBaseSourceVectorInitialConfig)?.postSettings) {
         const { postSettings } = layerEntryConfig.source as TypeBaseSourceVectorInitialConfig;
