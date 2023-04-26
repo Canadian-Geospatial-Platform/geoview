@@ -20,6 +20,10 @@
   "components": [
     "geolocator"
   ],
+  "serviceUrls": {
+    "keys": "https://geocore.api.geo.ca",
+    "geolocator": "https://fr59c5usw4.execute-api.ca-central-1.amazonaws.com/dev?keys=geonames"
+  },
   "corePackages": [],
   "externalPackages": [],
   "suportedLanguages": [

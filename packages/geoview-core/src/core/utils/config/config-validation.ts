@@ -850,6 +850,7 @@ export class ConfigValidation {
       appBar: tempMapFeaturesConfig.appBar,
       externalPackages: tempMapFeaturesConfig.externalPackages,
       schemaVersionUsed,
+      serviceUrls: tempMapFeaturesConfig.serviceUrls,
     };
     this.logModifs(tempMapFeaturesConfig, validMapFeaturesConfig);
 

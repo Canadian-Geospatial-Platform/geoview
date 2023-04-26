@@ -1,6 +1,5 @@
 import { useCallback, useContext, useState } from 'react';
 import { AppBar, Box, Toolbar, IconButton, Divider, LinearProgress, Typography, Paper } from '@mui/material';
-import MenuIcon from '@mui/icons-material/Menu';
 import SearchIcon from '@mui/icons-material/Search';
 import CloseIcon from '@mui/icons-material/Close';
 import { useTranslation } from 'react-i18next';
@@ -10,35 +9,37 @@ import { GeoListItem } from './types';
 import useFetch from './useFetch';
 import { StyledInputField, sxClasses } from './styles';
 import { MapContext } from '../../app-start';
-import { TypeWindow } from '../../types/cgpv-types';
-
-const w = window as TypeWindow;
+import { cgpv } from '../../../app';
 
 export function Geolocator() {
-  const { cgpv } = w;
   const { api } = cgpv;
-  const mapConfig = useContext(MapContext);
+  const { mapId } = useContext(MapContext);
 
-  const { mapId } = mapConfig;
-  const { map } = api.map(mapId);
+  const {
+    map,
+    mapFeaturesConfig: { serviceUrls },
+  } = api.map(mapId);
   const mapSize = map?.getSize() || [0, 0];
 
   const { i18n } = useTranslation<string>();
-  const [searchValue, setSearchValue] = useState('');
-  const [url, setUrl] = useState('');
-  const [isSearchInputVisible, setIsSearchInputVisible] = useState(false);
+  const [searchValue, setSearchValue] = useState<string>('');
+  const [url, setUrl] = useState<string>('');
+  const [isSearchInputVisible, setIsSearchInputVisible] = useState<boolean>(false);
 
   const { data, error, loading, reset } = useFetch<GeoListItem[]>(url);
 
   const updateUrl = useCallback(() => {
     if (searchValue.length) {
-      const updatedUrl = `https://fr59c5usw4.execute-api.ca-central-1.amazonaws.com/dev?q=${searchValue}&lang=${i18n.language}&keys=geonames`;
+      const updatedUrl = `${serviceUrls!.geolocator}&q=${encodeURIComponent(searchValue)}&lang=${i18n.language}`;
       setUrl(updatedUrl);
     }
-  }, [searchValue, i18n.language]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchValue]);
 
-  // coords : [lng, lat]
-  const zoomToLocation = (coords: [number, number]) => {
+  /**
+   * Update the map zoom and location with given coordinates[lng, lat]
+   */
+  const zoomToLocation = (coords: [number, number]): void => {
     const { currentProjection } = api.map(mapId);
 
     const projectionConfig = api.projection.projections[currentProjection];
@@ -46,15 +47,17 @@ export function Geolocator() {
     map.getView().animate({ center: fromLonLat(coords, projectionConfig), duration: 1000, zoom: 11 });
   };
 
-  const resetMap = () => {
-    const { currentProjection } = api.map(mapId);
-
-    // get map and set initial bounds to use in zoom home
-    const { zoom, center } = api.map(mapId).mapFeaturesConfig.map.viewSettings;
-    const projectionConfig = api.projection.projections[currentProjection];
-
-    map.getView().animate({ center: fromLonLat(center, projectionConfig), duration: 1000, zoom });
-  };
+  /**
+   * Reset search component values when close icon is clicked..
+   */
+  const resetSearch = useCallback(() => {
+    setIsSearchInputVisible(false);
+    setUrl('');
+    setSearchValue('');
+    if (reset) {
+      reset();
+    }
+  }, [reset]);
 
   return (
     <Box sx={sxClasses.root} id="geolocator-search">
@@ -91,21 +94,7 @@ export function Geolocator() {
                 {isSearchInputVisible && (
                   <>
                     <Divider orientation="vertical" variant="middle" flexItem />
-                    <IconButton
-                      size="small"
-                      edge="end"
-                      color="inherit"
-                      sx={{ mr: 2, ml: 4 }}
-                      onClick={() => {
-                        setIsSearchInputVisible(false);
-                        setUrl('');
-                        setSearchValue('');
-                        resetMap();
-                        if (reset) {
-                          reset();
-                        }
-                      }}
-                    >
+                    <IconButton size="small" edge="end" color="inherit" sx={{ mr: 2, ml: 4 }} onClick={resetSearch}>
                       <CloseIcon fontSize="small" />
                     </IconButton>
                   </>
