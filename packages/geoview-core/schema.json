@@ -598,6 +598,14 @@
         },
         "cluster": {
           "$ref": "#/definitions/TypeSourceVectorClusterConfig"
+        },
+        "strategy": {
+          "enum": [
+            "all",
+            "bbox"
+          ],
+          "default": "all",
+          "description": "The loading strategy to use. By default an all strategy is used, a one-off strategy which loads all features at once."
         }
       }
     },

@@ -348,8 +348,8 @@ export function exportPNG(mapId: string): void {
  * Disable scrolling, so that screen doesnt scroll down.
  *  when focus is set to map and
  * arrows and enter keys are used to navigate the map
- * @param e - keybaord event like, tab, space
- * @param elem - mutable reference object of html elements.
+ * @param {KeyboardEvent} e - keybaord event like, tab, space
+ * @param {MutableRefObject} elem - mutable reference object of html elements.
  */
 export const disableScrolling = (e: KeyboardEvent, elem: MutableRefObject<HTMLElement | undefined>): void => {
   if (elem.current === document.activeElement) {
@@ -368,4 +368,20 @@ export const disableScrolling = (e: KeyboardEvent, elem: MutableRefObject<HTMLEl
 export const isVectorLayer = (layer: AbstractGeoViewLayer): boolean => {
   const vectorLayers = { esriFeature: '', GeoJSON: '', GeoPackage: '', ogcFeature: '', ogcWfs: '' };
   return layer?.type in vectorLayers;
+};
+
+/**
+ * Find an object property by regex value
+ * @param {TypeJsonObject} objectItem the object item
+ * @param {RegExp} regex the regex value to find
+ * @returns {TypeJsonObject | undefined} the object if it exist or undefined
+ */
+export const findPropertyNameByRegex = (objectItem: TypeJsonObject, regex: RegExp): TypeJsonObject | undefined => {
+  // eslint-disable-next-line no-restricted-syntax
+  for (const key in objectItem) {
+    if (key.match(regex)) {
+      return objectItem[key] as TypeJsonObject;
+    }
+  }
+  return undefined;
 };

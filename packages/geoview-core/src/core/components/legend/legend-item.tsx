@@ -29,7 +29,13 @@ import {
 } from '../../../ui';
 import { api, EsriDynamic, payloadIsLegendInfo } from '../../../app';
 import { LegendIconList } from './legend-icon-list';
-import { AbstractGeoViewLayer, TypeLegend, isVectorLegend, isWmsLegend, isImageStaticLegend } from '../../../geo/layer/geoview-layers/abstract-geoview-layers';
+import {
+  AbstractGeoViewLayer,
+  TypeLegend,
+  isVectorLegend,
+  isWmsLegend,
+  isImageStaticLegend,
+} from '../../../geo/layer/geoview-layers/abstract-geoview-layers';
 import {
   TypeClassBreakStyleConfig,
   TypeListOfLayerEntryConfig,
