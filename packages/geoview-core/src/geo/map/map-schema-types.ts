@@ -1156,4 +1156,8 @@ export type TypeServiceUrls = {
    * or an absolute path on a server which sets CORS headers.
    */
   proxyUrl?: string;
+  /**
+   * An optional geolocator service end point url, which will be used to call to get geo location of address.
+   */
+  geolocator?: string;
 };

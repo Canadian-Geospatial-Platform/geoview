@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { ListItem, ListItemButton, Grid, Typography, Tooltip } from '@mui/material';
-import { GeoListItem } from './types';
+import { GeoListItem } from './geolocator';
 
 type GeoListProps = {
   geoListItems: GeoListItem[];
@@ -24,28 +24,52 @@ const sxClasses = {
 
 type tooltipProp = Pick<GeoListItem, 'name' | 'tag' | 'province'>;
 
+/**
+ * Get the title for tooltip
+ * @param {name} - name of the geo item
+ * @param {tag} - tags associated with geo item
+ * @param {province} - province of the geo item
+ * @returns {string} - tooltip title
+ */
 const getTooltipTitle = ({ name, tag, province }: tooltipProp): string => {
   let title = name;
   if (tag && tag.length && !!tag[0]) {
     title += `, ${tag[0]}`;
   }
+
+  if (tag && tag.length > 1 && !!tag[1]) {
+    title += `, ${tag[1]}`;
+  }
+
   if (province && province !== 'null') {
     title += `, ${province}`;
   }
+
   return title;
 };
 
+/**
+ * Create list of items to display under search.
+ * @param {geoListItems} - items to display
+ * @param {zoomToLocation} - callback fn to be fired when clicked on geo list item
+ * @returns {JSX} - React JSX element
+ */
 export default function GeoList({ geoListItems, zoomToLocation }: GeoListProps) {
   return (
     <>
       {geoListItems.map((geoListItem, index) => (
-        // sometime when we search by `bay`,response have name and lat same, thats why index is used to distinguish
-        // eslint-disable-next-line react/no-array-index-key
-        <ListItem key={`${geoListItem.name}-${geoListItem.lat}-${index}`} component="div" disablePadding>
-          <ListItemButton onClick={() => zoomToLocation([geoListItem.lng, geoListItem.lat])}>
-            <Grid container>
-              <Grid item xs={12} sm={8}>
-                <Tooltip title={getTooltipTitle(geoListItem)} placement="top" enterDelay={500}>
+        <Tooltip
+          title={getTooltipTitle(geoListItem)}
+          placement="top"
+          enterDelay={500}
+          // sometime when we search by `bay`, response have name and lat same, thats why index is used to distinguish
+          // eslint-disable-next-line react/no-array-index-key
+          key={`${geoListItem.name}-${geoListItem.lat}-${index}`}
+        >
+          <ListItem component="div" disablePadding>
+            <ListItemButton onClick={() => zoomToLocation([geoListItem.lng, geoListItem.lat])}>
+              <Grid container>
+                <Grid item xs={12} sm={8}>
                   <Typography component="p" sx={sxClasses.main}>
                     <Typography component="span">{geoListItem.name}</Typography>
                     {!!geoListItem.tag && geoListItem.tag.length && !!geoListItem.tag[0] && (
@@ -55,20 +79,18 @@ export default function GeoList({ geoListItems, zoomToLocation }: GeoListProps) 
                       <Typography component="span">{`, ${geoListItem.province}`}</Typography>
                     )}
                   </Typography>
-                </Tooltip>
-              </Grid>
-              <Grid item xs={12} sm={4} sx={{ textAlign: 'right' }}>
-                {!!geoListItem.tag && geoListItem.tag.length > 1 && !!geoListItem.tag[1] && (
-                  <Tooltip title={geoListItem.tag[1]} placement="right" enterDelay={500}>
+                </Grid>
+                <Grid item xs={12} sm={4} sx={{ textAlign: 'right' }}>
+                  {!!geoListItem.tag && geoListItem.tag.length > 1 && !!geoListItem.tag[1] && (
                     <Typography component="p" sx={sxClasses.main}>
                       <Typography component="span"> {geoListItem.tag[1]}</Typography>
                     </Typography>
-                  </Tooltip>
-                )}
+                  )}
+                </Grid>
               </Grid>
-            </Grid>
-          </ListItemButton>
-        </ListItem>
+            </ListItemButton>
+          </ListItem>
+        </Tooltip>
       ))}
     </>
   );

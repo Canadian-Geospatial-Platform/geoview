@@ -1,6 +1,20 @@
 import { useEffect, useReducer, useRef } from 'react';
-import { Action, State } from './types';
 
+interface State<T> {
+  data?: T;
+  error?: Error;
+  loading?: boolean;
+  reset?: () => void;
+}
+
+type Action<T> = { type: 'loading' } | { type: 'fetched'; payload: T } | { type: 'error'; payload: Error } | { type: 'reset' };
+
+/**
+ * Fetch call to send api request to service.
+ * @param {url} - url of the service where request need to send
+ * @param {options} - extra parameter that need to send along with request like headers.
+ * @returns {State} - data, error, loading and reset function.
+ */
 function useFetch<T = unknown>(url?: string, options?: RequestInit): State<T> {
   // Used to prevent state update if the component is unmounted
   const cancelRequest = useRef<boolean>(false);
