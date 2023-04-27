@@ -1,11 +1,10 @@
-import { useCallback, useContext, useState } from 'react';
+import { useCallback, useContext, useEffect, useState } from 'react';
 import { AppBar, Box, Toolbar, IconButton, Divider, LinearProgress, Typography, Paper } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import CloseIcon from '@mui/icons-material/Close';
 import { useTranslation } from 'react-i18next';
 import { fromLonLat } from 'ol/proj';
 import GeoList from './geo-list';
-import useFetch from './useFetch';
 import { StyledInputField, sxClasses } from './styles';
 import { MapContext } from '../../app-start';
 import { api } from '../../../app';
@@ -34,7 +33,30 @@ export function Geolocator() {
   const [url, setUrl] = useState<string>('');
   const [isSearchInputVisible, setIsSearchInputVisible] = useState<boolean>(false);
 
-  const { data, error, loading, reset } = useFetch<GeoListItem[]>(url);
+  const [data, setData] = useState<GeoListItem[]>();
+  const [error, setError] = useState<Error>();
+  const [loading, setLoading] = useState<boolean>(false);
+
+  /**
+   * Send fetch call to given service url.
+   * @param {geoLocationUrl} -service url
+   * @returns void
+   */
+  const getGeolocations = async (geoLocationUrl: string) => {
+    try {
+      setLoading(true);
+      const response = await fetch(geoLocationUrl);
+      if (!response.ok) {
+        throw new Error('Error');
+      }
+      const result = (await response.json()) as GeoListItem[];
+      setLoading(false);
+      setData(result);
+    } catch (err) {
+      setLoading(false);
+      setError(err as Error);
+    }
+  };
 
   /**
    * Update the url with search value to send new fetch call.
@@ -69,10 +91,16 @@ export function Geolocator() {
     setIsSearchInputVisible(false);
     setUrl('');
     setSearchValue('');
-    if (reset) {
-      reset();
-    }
-  }, [reset]);
+    setData(undefined);
+  }, []);
+
+  /**
+   * Send api call when url changes by search value
+   */
+  useEffect(() => {
+    if (!url) return;
+    getGeolocations(url);
+  }, [url]);
 
   return (
     <Box sx={sxClasses.root} id="geolocator-search">
