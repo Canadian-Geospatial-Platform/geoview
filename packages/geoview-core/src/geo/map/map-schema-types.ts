@@ -1118,7 +1118,7 @@ export type TypeNavBarProps = Array<'zoom' | 'fullscreen' | 'fullextent'>;
 /** ******************************************************************************************************************************
  * Core components to initialize on viewer load. Default = ['app-bar', 'footer-bar', 'nav-bar', 'north-arrow', 'overview-map'].
  */
-export type TypeMapComponents = Array<'app-bar' | 'footer-bar' | 'nav-bar' | 'north-arrow' | 'overview-map'>;
+export type TypeMapComponents = Array<'app-bar' | 'footer-bar' | 'nav-bar' | 'north-arrow' | 'overview-map' | 'geolocator'>;
 
 /** ******************************************************************************************************************************
  * Core packages to initialize on viewer load. The schema for those are on their own package. NOTE: config from packages are in
@@ -1156,4 +1156,8 @@ export type TypeServiceUrls = {
    * or an absolute path on a server which sets CORS headers.
    */
   proxyUrl?: string;
+  /**
+   * An optional geolocator service end point url, which will be used to call to get geo location of address.
+   */
+  geolocator?: string;
 };

@@ -1,36 +1,32 @@
 {
   "map": {
     "interaction": "dynamic",
-    "controls": {
-      "boxZoom": true,
-      "selectBox": true
-    },
-    "projection": 3978,
     "viewSettings": {
-      "zoom": 12,
+      "zoom": 4,
       "center": [
-        -106,
+        -100,
         60
-      ]
+      ],
+      "projection": 3978
     },
     "basemapOptions": {
-      "id": "transport",
-      "shaded": true,
+      "basemapId": "transport",
+      "shaded": false,
       "labeled": true
     },
     "listOfGeoviewLayerConfig": []
   },
-  "theme": "dark",
-  "components": [],
-  "corePackages": [],
-  "externalPackages": [],
+  "theme": "light",
+  "components": [
+    "geolocator"
+  ],
   "serviceUrls": {
     "keys": "https://geocore.api.geo.ca",
     "geolocator": "https://fr59c5usw4.execute-api.ca-central-1.amazonaws.com/dev?keys=geonames"
   },
+  "corePackages": [],
+  "externalPackages": [],
   "suportedLanguages": [
-    "en",
-    "fr"
-  ],
-  "version": "1.0"
+    "en"
+  ]
 }
