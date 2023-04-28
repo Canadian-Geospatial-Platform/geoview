@@ -101,6 +101,10 @@ export function Map(mapFeaturesConfig: TypeMapFeaturesConfig): JSX.Element {
     api.event.emit(numberPayload(EVENT_NAMES.MAP.EVENT_MAP_ZOOM_END, mapId, currentZoom));
   }
 
+  /**
+   * Map single click handler
+   * @param {MapEvent} event the map single click event
+   */
   function mapSingleClick(event: MapEvent): void {
     if (mapInteraction !== 'static') {
       const coordinates: TypeMapSingleClick = {
