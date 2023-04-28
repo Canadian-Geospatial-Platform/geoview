@@ -28,18 +28,73 @@ export function getLocalizedValue(localizedString: TypeLocalizedString | undefin
 }
 
 /**
+ * Reusable utility function to send event to display a message in the snackbar
+ *
+ * @param {string} mapId the map to show the message for
+ * @param {string} message the message string
+ */
+function _showSnackbarMessage(mapId: string, type: string, message: string, options?: TypeJsonObject) {
+  api.event.emit(
+    snackbarMessagePayload(
+      EVENT_NAMES.SNACKBAR.EVENT_SNACKBAR_OPEN,
+      mapId,
+      {
+        type,
+        value: message,
+      },
+      options
+    )
+  );
+}
+
+/**
  * Display a message in the snackbar
  *
  * @param {string} mapId the map to show the message for
  * @param {string} message the message string
  */
 export function showMessage(mapId: string, message: string) {
-  api.event.emit(
-    snackbarMessagePayload(EVENT_NAMES.SNACKBAR.EVENT_SNACKBAR_OPEN, mapId, {
-      type: 'string',
-      value: message,
-    })
-  );
+  // Redirect
+  _showSnackbarMessage(mapId, 'string', message);
+}
+
+/**
+ * Display an success message in the snackbar
+ *
+ * @param {string} mapId the map to show the message for
+ * @param {string} message the message string
+ */
+export function showSuccess(mapId: string, message: string) {
+  // Redirect
+  _showSnackbarMessage(mapId, 'string', message, {
+    variant: 'success',
+  } as unknown as TypeJsonObject);
+}
+
+/**
+ * Display an warning message in the snackbar
+ *
+ * @param {string} mapId the map to show the message for
+ * @param {string} message the message string
+ */
+export function showWarning(mapId: string, message: string) {
+  // Redirect
+  _showSnackbarMessage(mapId, 'string', message, {
+    variant: 'warning',
+  } as unknown as TypeJsonObject);
+}
+
+/**
+ * Display an error message in the snackbar
+ *
+ * @param {string} mapId the map to show the message for
+ * @param {string} message the message string
+ */
+export function showError(mapId: string, message: string) {
+  // Redirect
+  _showSnackbarMessage(mapId, 'string', message, {
+    variant: 'error',
+  } as unknown as TypeJsonObject);
 }
 
 /**
