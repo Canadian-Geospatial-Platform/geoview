@@ -4,6 +4,8 @@ import { useEffect, useState, useRef, useContext } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import makeStyles from '@mui/styles/makeStyles';
+import { toLonLat } from 'ol/proj';
+import { KeyboardPan } from 'ol/interaction';
 
 import { MapContext } from '../../app-start';
 
@@ -58,6 +60,7 @@ export function Crosshair(): JSX.Element {
 
   const mapConfig = useContext(MapContext);
   const { mapId, interaction } = mapConfig;
+  const projection = api.projection.projections[api.map(mapId).currentProjection];
 
   // tracks if the last action was done through a keyboard (map navigation) or mouse (mouse movement)
   const [isCrosshairsActive, setCrosshairsActive] = useState(false);
@@ -66,8 +69,10 @@ export function Crosshair(): JSX.Element {
   const isCrosshairsActiveValue = useRef(false);
   const panelButtonId = useRef('');
 
+  let panDelta = 128;
+
   /**
-   * Siimulate map mouse click to trigger details panel
+   * Simulate map mouse click to trigger details panel
    * @function simulateClick
    * @param {KeyboardEvent} evt the keyboard event
    */
@@ -75,12 +80,33 @@ export function Crosshair(): JSX.Element {
     if (evt.key === 'Enter') {
       const { map } = api.map(mapId);
 
-      const lnglatPoint = map.getView().getCenter()!;
+      const lnglatPoint = toLonLat(map.getView().getCenter()!, projection);
 
       if (isCrosshairsActiveValue.current) {
         // emit an event with the lnglat point
-        api.event.emit(lngLatPayload(EVENT_NAMES.DETAILS_PANEL.EVENT_DETAILS_PANEL_CROSSHAIR_ENTER, mapId, lnglatPoint));
+        api.event.emit(lngLatPayload(EVENT_NAMES.MAP.EVENT_MAP_CROSSHAIR_ENTER, mapId, lnglatPoint));
       }
+    }
+  }
+
+  /**
+   * Modify the pixelDelta value for the keyboard pan on Shift arrow up or down
+   *
+   * @param {KeyboardEvent} evt the keyboard event to trap
+   */
+  function managePanDelta(evt: KeyboardEvent): void {
+    if ((evt.key === 'ArrowDown' && evt.shiftKey) || (evt.key === 'ArrowUp' && evt.shiftKey)) {
+      panDelta = evt.key === 'ArrowDown' ? (panDelta -= 10) : (panDelta += 10);
+      panDelta = panDelta < 10 ? 10 : panDelta; // minus panDelta reset the value so we need to trap
+
+      // replace the KeyboardPan interraction by a new one
+      const { map } = api.map(mapId);
+      map.getInteractions().forEach((interactionItem) => {
+        if (interactionItem instanceof KeyboardPan) {
+          map.removeInteraction(interactionItem);
+        }
+      });
+      map.addInteraction(new KeyboardPan({ pixelDelta: panDelta }));
     }
   }
 
@@ -114,6 +140,7 @@ export function Crosshair(): JSX.Element {
             api.event.emit(booleanPayload(EVENT_NAMES.MAP.EVENT_MAP_CROSSHAIR_ENABLE_DISABLE, mapId, true));
 
             mapContainer.addEventListener('keydown', simulateClick);
+            mapContainer.addEventListener('keydown', managePanDelta);
             panelButtonId.current = 'detailsPanel';
           }
         }
@@ -127,6 +154,7 @@ export function Crosshair(): JSX.Element {
     return () => {
       api.event.off(EVENT_NAMES.MAP.EVENT_MAP_IN_KEYFOCUS, mapId);
       mapContainer.removeEventListener('keydown', simulateClick);
+      mapContainer.removeEventListener('keydown', managePanDelta);
       mapContainer.removeEventListener('keydown', removeCrosshair);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps

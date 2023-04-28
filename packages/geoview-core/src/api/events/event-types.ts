@@ -1,7 +1,6 @@
 import { APPBAR } from './constants/app-bar';
 import { ATTRIBUTION } from './constants/attribution';
 import { BASEMAP } from './constants/basemap';
-import { DETAILS_PANEL } from './constants/details-panel';
 import { DRAWER } from './constants/drawer';
 import { FOOTERBAR } from './constants/footer-bar';
 import { FOOTER_TABS } from './constants/footer-tabs';
@@ -27,7 +26,6 @@ export const EVENT_NAMES = {
   APPBAR,
   ATTRIBUTION,
   BASEMAP,
-  DETAILS_PANEL,
   DRAWER,
   FOOTERBAR,
   FOOTER_TABS,
@@ -86,6 +84,7 @@ export type EventStringId =
   | 'layer/if_condition'
   | 'map/add_component'
   | 'map/crosshair_enable_disable'
+  | 'map/crosshair_enter'
   | 'map/fix_north'
   | 'map/inkeyfocus'
   | 'map/loaded'
