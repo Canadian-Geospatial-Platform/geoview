@@ -33,7 +33,7 @@ export function getLocalizedValue(localizedString: TypeLocalizedString | undefin
  * @param {string} mapId the map to show the message for
  * @param {string} message the message string
  */
-export function _showSnackbarMessage(mapId: string, type: string, message: string, options?: TypeJsonObject) {
+function _showSnackbarMessage(mapId: string, type: string, message: string, options?: TypeJsonObject) {
   api.event.emit(
     snackbarMessagePayload(
       EVENT_NAMES.SNACKBAR.EVENT_SNACKBAR_OPEN,
