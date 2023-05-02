@@ -123,6 +123,8 @@ export type TypeBaseSourceVectorInitialConfig = {
   featureInfo?: TypeFeatureInfoLayerConfig;
   /** Vector source clustering configuration. */
   cluster?: TypeSourceVectorClusterConfig;
+  /** Loading strategy to use (all or bbox). */
+  strategy?: 'all' | 'bbox';
 };
 
 /** ******************************************************************************************************************************

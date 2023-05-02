@@ -5,7 +5,7 @@ import { Options as SourceOptions } from 'ol/source/Vector';
 import { VectorImage as VectorLayer } from 'ol/layer';
 import { Options as VectorLayerOptions } from 'ol/layer/VectorImage';
 import { Geometry, Point } from 'ol/geom';
-import { all } from 'ol/loadingstrategy';
+import { all, bbox } from 'ol/loadingstrategy';
 import { ReadOptions } from 'ol/format/Feature';
 import BaseLayer from 'ol/layer/Base';
 import LayerGroup from 'ol/layer/Group';
@@ -97,15 +97,24 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
    */
   protected createVectorSource(
     layerEntryConfig: TypeBaseLayerEntryConfig,
-    sourceOptions: SourceOptions = { strategy: all },
+    sourceOptions: SourceOptions = {},
     readOptions: ReadOptions = {}
   ): VectorSource<Geometry> {
     // The line below uses var because a var declaration has a wider scope than a let declaration.
     var vectorSource: VectorSource<Geometry>;
     if (this.attributions.length !== 0) sourceOptions.attributions = this.attributions;
 
+    // set loading strategy option
+    sourceOptions.strategy = (layerEntryConfig.source! as TypeBaseSourceVectorInitialConfig).strategy === 'all' ? all : bbox;
+
     sourceOptions.loader = (extent, resolution, projection, success, failure) => {
-      const url = vectorSource.getUrl();
+      let url = vectorSource.getUrl();
+
+      // if an extent is provided, use it in the url
+      if (Number.isFinite(extent[0])) {
+        url = `${url}&bbox=${extent},EPSG:${api.map(this.mapId).currentProjection}`;
+      }
+
       const xhr = new XMLHttpRequest();
       if ((layerEntryConfig?.source as TypeBaseSourceVectorInitialConfig)?.postSettings) {
         const { postSettings } = layerEntryConfig.source as TypeBaseSourceVectorInitialConfig;

@@ -3,7 +3,6 @@ import axios from 'axios';
 
 import { get, transformExtent } from 'ol/proj';
 import { Options as SourceOptions } from 'ol/source/Vector';
-import { all } from 'ol/loadingstrategy';
 import { GeoJSON as FormatGeoJSON } from 'ol/format';
 import { ReadOptions } from 'ol/format/Feature';
 import { Vector as VectorSource } from 'ol/source';
@@ -318,12 +317,14 @@ export class OgcFeature extends AbstractGeoViewVector {
    * Create a source configuration for the vector layer.
    *
    * @param {TypeBaseLayerEntryConfig} layerEntryConfig The layer entry configuration.
+   * @param {SourceOptions} sourceOptions The source options (default: {}).
+   * @param {ReadOptions} readOptions The read options (default: {}).
    *
    * @returns {VectorSource<Geometry>} The source configuration that will be used to create the vector layer.
    */
   protected createVectorSource(
     layerEntryConfig: TypeBaseLayerEntryConfig,
-    sourceOptions: SourceOptions = { strategy: all },
+    sourceOptions: SourceOptions = {},
     readOptions: ReadOptions = {}
   ): VectorSource<Geometry> {
     readOptions.dataProjection = (layerEntryConfig.source as TypeBaseSourceVectorInitialConfig).dataProjection;

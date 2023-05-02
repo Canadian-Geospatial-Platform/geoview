@@ -75,8 +75,8 @@
         'map': {
           'interaction': 'dynamic',
           'viewSettings': {
-            'zoom': 8,
-            'center': [-71.370748, 42.001058],
+            'zoom': 10,
+            'center': [-75.370748, 45.001058],
             'projection': 3857
           },
           'basemapOptions': {
@@ -88,17 +88,50 @@
             {
               'geoviewLayerId': 'wfsLYR1',
               'geoviewLayerName': {
-                'en': 'Airport data'
+                'en': 'US States'
               },
               'metadataAccessPath': {
-                'en': 'https://giswebservices.massgis.state.ma.us/geoserver/wfs'
+                'en': 'https://ahocevar.com/geoserver/wfs?REQUEST=GetCapabilities&VERSION=2.0.0&SERVICE=WFS'
               },
               'geoviewLayerType': 'ogcWfs',
               'listOfLayerEntryConfig': [
                 {
-                  'layerId': 'GISDATA.AIRPORTS_PT',
-                  'layerName': { 'en': 'Airport' },
-                  'layerFilter': 'id in (\'MVY\',\'MA6\',\'MA02\',\'7B2\',\'CEF\')'
+                  'layerId': 'usa:states',
+                  'layerName': { 'en': 'US States' },
+                  'layerFilter': 'STATE_ABBR = \'NY\''
+                }
+              ]
+            },
+            {
+              'geoviewLayerId': 'wfsLYR2',
+              'geoviewLayerName': {
+                'en': 'Current Conditions'
+              },
+              'metadataAccessPath': {
+                'en': 'https://geo.weather.gc.ca/geomet?REQUEST=GetCapabilities&VERSION=2.0.0&SERVICE=WFS'
+              },
+              'geoviewLayerType': 'ogcWfs',
+              'listOfLayerEntryConfig': [
+                {
+                  'layerId': 'ec-msc:CURRENT_CONDITIONS',
+                  'layerName': { 'en': 'Current Conditions' }
+                }
+              ]
+            },
+            {
+              'geoviewLayerId': 'wfsLYR4',
+              'geoviewLayerName': {
+                'en': 'USGS mrds'
+              },
+              'metadataAccessPath': {
+                'en': 'https://mrdata.usgs.gov/services/wfs/mrds?request=GetCapabilities&service=WFS&version=1.1.0'
+              },
+              'geoviewLayerType': 'ogcWfs',
+              'listOfLayerEntryConfig': [
+                {
+                  'layerId': 'mrds',
+                  'source': { 'strategy': 'bbox' },
+                  'layerName': { 'en': 'USGS mrds' }
                 }
               ]
             }
