@@ -560,7 +560,7 @@ export class DateMgt {
    * @param dateFragmentsOrder {TypeDateFragments} The date fragments order (obtained with getDateFragmentsOrder).
    * @returns {string} The reformatted date string.
    */
-  applyInputDateFormat(date: string, dateFragmentsOrder: TypeDateFragments, reverseTimeZone = false): string {
+  applyInputDateFormat(date: string, dateFragmentsOrder = ISO_UTC_DATE_FRAGMENTS_ORDER, reverseTimeZone = false): string {
     const index = dateFragmentsOrder[0];
     const separators = dateFragmentsOrder[2];
     // eslint-disable-next-line prefer-const

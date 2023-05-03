@@ -128,18 +128,6 @@ export class XYZTiles extends AbstractGeoViewRaster {
   }
 
   /** ***************************************************************************************************************************
-   * Returns null. XYZ services don't have domains.
-   *
-   * @param {string} fieldName field name for which we want to get the domain.
-   * @param {TypeLayerEntryConfig} layerConfig layer configuration.
-   *
-   * @returns {null | codedValueType | rangeDomainType} The domain of the field.
-   */
-  protected getFieldDomain(fieldName: string, layerConfig: TypeLayerEntryConfig): null | codedValueType | rangeDomainType {
-    return null;
-  }
-
-  /** ***************************************************************************************************************************
    * This method reads the service metadata from the metadataAccessPath.
    *
    * @returns {Promise<void>} A promise that the execution is completed.

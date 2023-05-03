@@ -26,7 +26,6 @@ import { getLocalizedValue, getXMLHttpRequest } from '../../../../core/utils/uti
 
 import { api } from '../../../../app';
 import { Layer } from '../../layer';
-import { codedValueType, rangeDomainType } from '../../../../api/events/payloads/get-feature-info-payload';
 
 export interface TypeSourceGeoPackageInitialConfig extends TypeVectorSourceInitialConfig {
   format: 'GeoPackage';
@@ -102,32 +101,6 @@ export class GeoPackage extends AbstractGeoViewVector {
    */
   constructor(mapId: string, layerConfig: TypeGeoPackageLayerConfig) {
     super(CONST_LAYER_TYPES.GEOPACKAGE, layerConfig, mapId);
-  }
-
-  /** ***************************************************************************************************************************
-   * Extract the type of the specified field from the metadata. If the type can not be found, return 'string'.
-   *
-   * @param {string} fieldName field name for which we want to get the type.
-   * @param {TypeLayerEntryConfig} layerConfig layer configuration.
-   *
-   * @returns {'string' | 'date' | 'number'} The type of the field.
-   */
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  protected getFieldType(fieldName: string, layerConfig: TypeLayerEntryConfig): 'string' | 'date' | 'number' {
-    return 'string';
-  }
-
-  /** ***************************************************************************************************************************
-   * Returns null. Geo package services don't have domains.
-   *
-   * @param {string} fieldName field name for which we want to get the domain.
-   * @param {TypeLayerEntryConfig} layerConfig layer configuration.
-   *
-   * @returns {null | codedValueType | rangeDomainType} The domain of the field.
-   */
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  protected getFieldDomain(fieldName: string, layerConfig: TypeLayerEntryConfig): null | codedValueType | rangeDomainType {
-    return null;
   }
 
   /** ***************************************************************************************************************************

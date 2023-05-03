@@ -39,14 +39,14 @@ export type TypeBaseVectorLayer = BaseLayer | TypeVectorLayerGroup | TypeVectorL
 
 // ******************************************************************************************************************************
 // ******************************************************************************************************************************
-/** ******************************************************************************************************************************
+/** *****************************************************************************************************************************
  * The AbstractGeoViewVector class is a direct descendant of AbstractGeoViewLayer. As its name indicates, it is used to
  * instanciate GeoView vector layers. It inherits from its parent class an attribute named gvLayers where the vector elements
  * of the class will be kept.
  *
- * The gvLayers attribute has a hierarchical structure. Its data type is TypetBaseVectorLayer. Subclasses of this type
- * are TypeVectorLayerGroup and TypeVectorLayer. The TypeVectorLayerGroup is a collection of TypetBaseVectorLayer. It is
- * important to note that a TypetBaseVectorLayer attribute can polymorphically refer to a TypeVectorLayerGroup or a
+ * The gvLayers attribute has a hierarchical structure. Its data type is TypeBaseVectorLayer. Subclasses of this type are
+ * BaseLayer, TypeVectorLayerGroup and TypeVectorLayer. The TypeVectorLayerGroup is a collection of TypeBaseVectorLayer. It is
+ * important to note that a TypeBaseVectorLayer attribute can polymorphically refer to a TypeVectorLayerGroup or a
  * TypeVectorLayer. Here, we must not confuse instantiation and declaration of a polymorphic attribute.
  *
  * All leaves of the tree structure stored in the gvLayers attribute must be of type TypeVectorLayer. This is where the
@@ -435,7 +435,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
       ];
       searchDateEntry.reverse();
       searchDateEntry.forEach((dateFound) => {
-        const reformattedDate = api.dateUtilities.applyInputDateFormat(dateFound[0], []);
+        const reformattedDate = api.dateUtilities.applyInputDateFormat(dateFound[0]);
         filterValueToUse = `${filterValueToUse!.slice(0, dateFound.index)}${reformattedDate}${filterValueToUse!.slice(
           dateFound.index! + dateFound[0].length
         )}`;
@@ -444,7 +444,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
       try {
         const filterEquation = api
           .map(this.mapId)
-          .geoviewRenderer.analyzeLayerFilter([{ nodeType: NodeType.unprocessedNode, nodeValue: filterValueToUse }], []);
+          .geoviewRenderer.analyzeLayerFilter([{ nodeType: NodeType.unprocessedNode, nodeValue: filterValueToUse }]);
         layerEntryConfig.gvLayer?.set('filterEquation', filterEquation);
       } catch (error) {
         throw new Error(

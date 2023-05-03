@@ -376,9 +376,15 @@ export abstract class AbstractGeoViewLayer {
   /** ***************************************************************************************************************************
    * This method reads the service metadata from the metadataAccessPath.
    *
-   * @returns {Promise<void>} A promise that the execution is done.
+   * @returns {Promise<void>} A promise that the execution is completed.
    */
-  protected abstract getServiceMetadata(): Promise<void>;
+  protected getServiceMetadata(): Promise<void> {
+    const promisedExecution = new Promise<void>((resolve) => {
+      // there is no metadata for static image layer type
+      resolve();
+    });
+    return promisedExecution;
+  }
 
   /** ***************************************************************************************************************************
    * This method recursively validates the configuration of the layer entries to ensure that each layer is correctly defined. If
@@ -841,24 +847,30 @@ export abstract class AbstractGeoViewLayer {
   }
 
   /** ***************************************************************************************************************************
-   * Return the type of the specified field.
+   * Returns the domaine of the specified field or null if the field has no domain.
    *
-   * @param {string} fieldName field name for which we want to get the type.
+   * @param {string} fieldName field name for which we want to get the domaine.
    * @param {TypeLayerEntryConfig} layerConfig layer configuration.
    *
    * @returns {null | codedValueType | rangeDomainType} The domain of the field.
    */
-  protected abstract getFieldDomain(fieldName: string, layerConfig: TypeLayerEntryConfig): null | codedValueType | rangeDomainType;
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  protected getFieldDomain(fieldName: string, layerConfig: TypeLayerEntryConfig): null | codedValueType | rangeDomainType {
+    return null;
+  }
 
   /** ***************************************************************************************************************************
-   * Return the domain of the specified field. If the type can not be found, return 'string'.
+   * Extract the type of the specified field from the metadata. If the type can not be found, return 'string'.
    *
-   * @param {string} fieldName field name for which we want to get the domain.
+   * @param {string} fieldName field name for which we want to get the type.
    * @param {TypeLayerEntryConfig} layerConfig layer configuration.
    *
    * @returns {'string' | 'date' | 'number'} The type of the field.
    */
-  protected abstract getFieldType(fieldName: string, layerConfig: TypeLayerEntryConfig): 'string' | 'date' | 'number';
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  protected getFieldType(fieldName: string, layerConfig: TypeLayerEntryConfig): 'string' | 'date' | 'number' {
+    return 'string';
+  }
 
   /** ***************************************************************************************************************************
    * set the extent of the layer. Use undefined if it will be visible regardless of extent. The layer extent is an array of
