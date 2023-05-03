@@ -46,7 +46,6 @@ export * from '../utils/utilities';
 export * from '../../api/events/constants/app-bar';
 export * from '../../api/events/constants/attribution';
 export * from '../../api/events/constants/basemap';
-export * from '../../api/events/constants/details-panel';
 export * from '../../api/events/constants/drawer';
 export * from '../../api/events/constants/footer-tabs';
 export * from '../../api/events/constants/footer-bar';

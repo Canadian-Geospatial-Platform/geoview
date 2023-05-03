@@ -17,6 +17,7 @@ export type MapEventKey =
   | 'EVENT_MAP_REMOVE_COMPONENT'
   | 'EVENT_MAP_IN_KEYFOCUS'
   | 'EVENT_MAP_CROSSHAIR_ENABLE_DISABLE'
+  | 'EVENT_MAP_CROSSHAIR_ENTER'
   | 'EVENT_MAP_VIEW_PROJECTION_CHANGE'
   | 'EVENT_MAP_FIX_NORTH';
 
@@ -66,6 +67,11 @@ export const MAP: Record<MapEventKey, EventStringId> = {
    * Event triggered to enable / disable crosshair
    */
   EVENT_MAP_CROSSHAIR_ENABLE_DISABLE: 'map/crosshair_enable_disable',
+
+  /**
+   * Event triggered to crosshair enable and enter pressed
+   */
+  EVENT_MAP_CROSSHAIR_ENTER: 'map/crosshair_enter',
 
   /**
    * Event triggered to change map view projection
