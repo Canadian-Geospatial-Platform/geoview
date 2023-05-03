@@ -1724,11 +1724,7 @@ export class GeoviewRenderer {
             if (operand.nodeValue === null) dataStack.push(operand);
             else if (typeof operand.nodeValue !== 'string') throw new Error(`DATE operator error`);
             else {
-              const dateOperator = operator as FilterNodeType & {
-                dateFragmentsOrder: TypeDateFragments;
-              };
-              // const reverseTimeZone = true;
-              operand.nodeValue = api.dateUtilities.applyInputDateFormat(operand.nodeValue, []);
+              operand.nodeValue = api.dateUtilities.applyInputDateFormat(operand.nodeValue);
               dataStack.push({
                 nodeType: NodeType.variable,
                 nodeValue: api.dateUtilities.convertToMilliseconds(api.dateUtilities.convertToUTC(operand.nodeValue)),
@@ -1758,11 +1754,10 @@ export class GeoviewRenderer {
    * explanatory message.
    *
    * @param {FilterNodeArrayType} filterNodeArrayType the node array to analyse.
-   * @param {TypeDateFragments} dateFragmentsOrder Object used to format input dates.
    *
    * @returns {FilterNodeArrayType} The new node array with all nodes classified.
    */
-  analyzeLayerFilter(filterNodeArrayType: FilterNodeArrayType, dateFragmentsOrder: TypeDateFragments): FilterNodeArrayType {
+  analyzeLayerFilter(filterNodeArrayType: FilterNodeArrayType): FilterNodeArrayType {
     let resultingKeywordArray = filterNodeArrayType;
     resultingKeywordArray[0].nodeValue = (resultingKeywordArray[0].nodeValue as string).replaceAll(/\s{2,}/g, ' ').trim();
     resultingKeywordArray[0].nodeValue = resultingKeywordArray[0].nodeValue.split(/^date '|(?<=\s)date '/gi).join("date°'");
@@ -1779,9 +1774,6 @@ export class GeoviewRenderer {
       throw new Error(`unbalanced parentheses`);
 
     resultingKeywordArray = this.extractKeyword(resultingKeywordArray, 'date', /^date°$|^date°|(?<=\s)date°/g);
-    resultingKeywordArray = resultingKeywordArray.map((node) => {
-      return node.nodeType === NodeType.unary && node.nodeValue === 'date' ? Object.assign(node, { dateFragmentsOrder }) : node;
-    });
     resultingKeywordArray = this.extractKeyword(resultingKeywordArray, 'upper', /^upper\b|(?<=\s)upper\b/gi);
     resultingKeywordArray = this.extractKeyword(resultingKeywordArray, 'lower', /^lower\b|(?<=\s)lower\b/gi);
     resultingKeywordArray = this.extractKeyword(resultingKeywordArray, 'is not', /^is\s+not\b|(?<=\s)is\s+not\b/gi);

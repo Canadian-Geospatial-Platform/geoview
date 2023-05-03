@@ -24,7 +24,6 @@ import { getLocalizedValue, getXMLHttpRequest } from '../../../../core/utils/uti
 import { Cast, toJsonObject } from '../../../../core/types/global-types';
 import { api } from '../../../../app';
 import { Layer } from '../../layer';
-import { codedValueType, rangeDomainType } from '../../../../api/events/payloads/get-feature-info-payload';
 
 export interface TypeSourceGeoJSONInitialConfig extends Omit<TypeVectorSourceInitialConfig, 'format'> {
   format: 'GeoJSON';
@@ -113,19 +112,6 @@ export class GeoJSON extends AbstractGeoViewVector {
     const fieldIndex = getLocalizedValue(Cast<TypeLocalizedString>(fieldDefinitions.outfields), this.mapId)?.split(',').indexOf(fieldName);
     if (!fieldIndex || fieldIndex === -1) return 'string';
     return (fieldDefinitions.fieldTypes as string).split(',')[fieldIndex!] as 'string' | 'date' | 'number';
-  }
-
-  /** ***************************************************************************************************************************
-   * Returns null. GeoJSON services don't have domains.
-   *
-   * @param {string} fieldName field name for which we want to get the domain.
-   * @param {TypeLayerEntryConfig} layerConfig layer configuration.
-   *
-   * @returns {null | codedValueType | rangeDomainType} The domain of the field.
-   */
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  protected getFieldDomain(fieldName: string, layerConfig: TypeLayerEntryConfig): null | codedValueType | rangeDomainType {
-    return null;
   }
 
   /** ***************************************************************************************************************************

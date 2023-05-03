@@ -25,7 +25,6 @@ import {
 import { getLocalizedValue } from '../../../../core/utils/utilities';
 import { api } from '../../../../app';
 import { Layer } from '../../layer';
-import { codedValueType, rangeDomainType } from '../../../../api/events/payloads/get-feature-info-payload';
 
 export interface TypeSourceOgcFeatureInitialConfig extends TypeVectorSourceInitialConfig {
   format: 'featureAPI';
@@ -121,19 +120,6 @@ export class OgcFeature extends AbstractGeoViewVector {
     if (fieldEntryType === 'date') return 'date';
     if (['int', 'number'].includes(fieldEntryType)) return 'number';
     return 'string';
-  }
-
-  /** ***************************************************************************************************************************
-   * Returns null. OGC feature services don't have domains.
-   *
-   * @param {string} fieldName field name for which we want to get the domain.
-   * @param {TypeLayerEntryConfig} layerConfig layer configuration.
-   *
-   * @returns {null | codedValueType | rangeDomainType} The domain of the field.
-   */
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  protected getFieldDomain(fieldName: string, layerConfig: TypeLayerEntryConfig): null | codedValueType | rangeDomainType {
-    return null;
   }
 
   /** ***************************************************************************************************************************

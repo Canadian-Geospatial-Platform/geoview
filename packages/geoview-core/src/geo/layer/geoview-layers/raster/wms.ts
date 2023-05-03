@@ -103,30 +103,6 @@ export class WMS extends AbstractGeoViewRaster {
   }
 
   /** ***************************************************************************************************************************
-   * Extract the type of the specified field from the metadata. If the type can not be found, return 'string'.
-   *
-   * @param {string} fieldName field name for which we want to get the type.
-   * @param {TypeLayerEntryConfig} layerConfig layer configuration.
-   *
-   * @returns {'string' | 'date' | 'number'} The type of the field.
-   */
-  protected getFieldType(fieldName: string, layerConfig: TypeLayerEntryConfig): 'string' | 'date' | 'number' {
-    return 'string';
-  }
-
-  /** ***************************************************************************************************************************
-   * Returns null. WMS services don't have domains.
-   *
-   * @param {string} fieldName field name for which we want to get the domain.
-   * @param {TypeLayerEntryConfig} layerConfig layer configuration.
-   *
-   * @returns {null | codedValueType | rangeDomainType} The domain of the field.
-   */
-  protected getFieldDomain(fieldName: string, layerConfig: TypeLayerEntryConfig): null | codedValueType | rangeDomainType {
-    return null;
-  }
-
-  /** ***************************************************************************************************************************
    * This method reads the service metadata from the metadataAccessPath.
    *
    * @returns {Promise<void>} A promise that the execution is completed.
