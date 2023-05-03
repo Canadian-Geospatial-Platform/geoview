@@ -1,9 +1,11 @@
-import { useCallback, useContext, useEffect, useState } from 'react';
+import { ChangeEvent, useCallback, useContext, useRef, useState } from 'react';
 import { AppBar, Box, Toolbar, IconButton, Divider, LinearProgress, Typography, Paper } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import CloseIcon from '@mui/icons-material/Close';
 import { useTranslation } from 'react-i18next';
 import { fromLonLat } from 'ol/proj';
+import debounce from 'lodash/debounce';
+
 import GeoList from './geo-list';
 import { StyledInputField, sxClasses } from './styles';
 import { MapContext } from '../../app-start';
@@ -14,7 +16,7 @@ export interface GeoListItem {
   name: string;
   lat: number;
   lng: number;
-  bbox: number[];
+  bbox: [number, number, number, number];
   province: string;
   tag: (string | null)[] | null;
 }
@@ -25,62 +27,55 @@ export function Geolocator() {
   const {
     map,
     mapFeaturesConfig: { serviceUrls },
+    zoomToExtent,
   } = api.map(mapId);
   const mapSize = map?.getSize() || [0, 0];
-
   const { i18n, t } = useTranslation<string>();
+
   const [searchValue, setSearchValue] = useState<string>('');
-  const [url, setUrl] = useState<string>('');
   const [isSearchInputVisible, setIsSearchInputVisible] = useState<boolean>(false);
+
+  const urlRef = useRef<string>(`${serviceUrls!.geolocator}&lang=${i18n.language}`);
 
   const [data, setData] = useState<GeoListItem[]>();
   const [error, setError] = useState<Error>();
-  const [loading, setLoading] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   /**
-   * Send fetch call to given service url.
-   * @param {geoLocationUrl} -service url
+   * Send fetch call to the service for given search term.
+   * @param {searchTerm} - search term url
    * @returns void
    */
-  const getGeolocations = async (geoLocationUrl: string) => {
+  const getGeolocations = async (searchTerm: string) => {
     try {
-      setLoading(true);
-      const response = await fetch(geoLocationUrl);
+      setIsLoading(true);
+      const response = await fetch(`${urlRef.current}&q=${encodeURIComponent(`${searchTerm}*`)}`);
       if (!response.ok) {
         throw new Error('Error');
       }
       const result = (await response.json()) as GeoListItem[];
-      setLoading(false);
+      setIsLoading(false);
       setData(result);
     } catch (err) {
-      setLoading(false);
+      setIsLoading(false);
       setError(err as Error);
     }
   };
 
   /**
-   * Update the url with search value to send new fetch call.
-   * @returns void
-   */
-  const updateUrl = useCallback(() => {
-    if (searchValue.length) {
-      const updatedUrl = `${serviceUrls!.geolocator}&q=${encodeURIComponent(searchValue)}&lang=${i18n.language}`;
-      setUrl(updatedUrl);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [searchValue]);
-
-  /**
    * Update the map zoom and location with given coordinates
    * @param {coords} - coordinates [lng, lat] where we want to zoom
+   * @param {bbox} - zoom extent coordinates
    * @returns void
    */
-  const zoomToLocation = (coords: [number, number]): void => {
-    const { currentProjection } = api.map(mapId);
-
-    const projectionConfig = api.projection.projections[currentProjection];
-
-    map.getView().animate({ center: fromLonLat(coords, projectionConfig), duration: 1000, zoom: 11 });
+  const zoomToLocation = (coords: [number, number], bbox: [number, number, number, number]): void => {
+    if (bbox) {
+      api.map(mapId).zoomToExtent(bbox, { padding: [170, 50, 30, 150], maxZoom: 4 });
+    } else {
+      const { currentProjection } = api.map(mapId);
+      const projectionConfig = api.projection.projections[currentProjection];
+      map.getView().animate({ center: fromLonLat(coords, projectionConfig), duration: 1000, zoom: 11 });
+    }
   };
 
   /**
@@ -89,37 +84,63 @@ export function Geolocator() {
    */
   const resetSearch = useCallback(() => {
     setIsSearchInputVisible(false);
-    setUrl('');
     setSearchValue('');
     setData(undefined);
   }, []);
 
   /**
-   * Send api call when url changes by search value
+   * Do service request after debouncing.
+   * @returns void
    */
-  useEffect(() => {
-    if (!url) return;
-    getGeolocations(url);
-  }, [url]);
+  const doRequest = debounce((searchTerm: string) => {
+    getGeolocations(searchTerm);
+  }, 1500);
+
+  /**
+   * Debounce the get geolocation service request
+   * @param {searchTerm} - value to be searched
+   * @returns void
+   */
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const debouncedRequest = useCallback((searchTerm: string) => doRequest(searchTerm), []);
+
+  /**
+   * onChange handler for search input field
+   * @param {e} - HTML Change event handler
+   * @returns void
+   */
+  const onChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const { value } = e.target;
+    setSearchValue(value);
+    if (value.length) {
+      debouncedRequest(value);
+    }
+    // clear geo list when search term cleared from input field.
+    if (!value.length && data?.length) {
+      setData(undefined);
+    }
+  };
 
   return (
     <Box sx={sxClasses.root} id="geolocator-search">
       <Box sx={sxClasses.geolocator}>
         <AppBar position="static">
-          <Toolbar variant="dense">
+          <Toolbar
+            variant="dense"
+            // attach event handler to toolbar when search input is hidden.
+            {...(!isSearchInputVisible && { onClick: () => setIsSearchInputVisible(true) })}
+            sx={{ cursor: !isSearchInputVisible ? 'pointer' : 'default' }}
+          >
             <form
               onSubmit={(e) => {
                 e.preventDefault();
-                updateUrl();
+                // cancel the debounce fn, when enter key clicked before wait time.
+                doRequest.cancel();
+                getGeolocations(searchValue);
               }}
             >
               {isSearchInputVisible && (
-                <StyledInputField
-                  placeholder={t('geolocator.search')!}
-                  autoFocus
-                  onChange={(e) => setSearchValue(e.target.value)}
-                  value={searchValue}
-                />
+                <StyledInputField placeholder={t('geolocator.search')!} autoFocus onChange={onChange} value={searchValue} />
               )}
 
               <Box sx={{ display: 'flex', marginLeft: 'auto' }}>
@@ -133,7 +154,8 @@ export function Geolocator() {
                     if (!isSearchInputVisible) {
                       setIsSearchInputVisible(true);
                     } else if (searchValue.length) {
-                      updateUrl();
+                      doRequest.cancel();
+                      getGeolocations(searchValue);
                     }
                   }}
                 >
@@ -152,7 +174,7 @@ export function Geolocator() {
           </Toolbar>
         </AppBar>
       </Box>
-      {loading && (
+      {isLoading && (
         <Box sx={sxClasses.progressBar}>
           <LinearProgress color="inherit" />
         </Box>
