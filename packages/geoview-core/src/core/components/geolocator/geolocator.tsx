@@ -5,8 +5,6 @@ import CloseIcon from '@mui/icons-material/Close';
 import { useTranslation } from 'react-i18next';
 import { fromLonLat } from 'ol/proj';
 import debounce from 'lodash/debounce';
-
-import { Extent } from 'ol/extent';
 import GeoList from './geo-list';
 import { StyledInputField, sxClasses } from './styles';
 import { MapContext } from '../../app-start';
@@ -17,7 +15,7 @@ export interface GeoListItem {
   name: string;
   lat: number;
   lng: number;
-  bbox: Extent;
+  bbox: [number, number, number, number];
   province: string;
   tag: (string | null)[] | null;
 }
@@ -68,7 +66,7 @@ export function Geolocator() {
    * @param {bbox} - zoom extent coordinates
    * @returns void
    */
-  const zoomToLocation = (coords: [number, number], bbox: Extent): void => {
+  const zoomToLocation = (coords: [number, number], bbox: [number, number, number, number]): void => {
     if (bbox) {
       const convertedExtent1 = api.projection.lngLatToLCC([bbox[0], bbox[1]])[0] as number[];
       const convertedExtent2 = api.projection.lngLatToLCC([bbox[2], bbox[3]])[0] as number[];
