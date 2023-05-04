@@ -1,7 +1,6 @@
 /* eslint-disable block-scoped-var, no-var, vars-on-top, no-param-reassign */
 import { transformExtent } from 'ol/proj';
 import { Options as SourceOptions } from 'ol/source/Vector';
-import { all } from 'ol/loadingstrategy';
 import { GeoJSON as FormatGeoJSON } from 'ol/format';
 import { ReadOptions } from 'ol/format/Feature';
 import { Vector as VectorSource } from 'ol/source';
@@ -25,7 +24,6 @@ import { getLocalizedValue, getXMLHttpRequest } from '../../../../core/utils/uti
 import { Cast, toJsonObject } from '../../../../core/types/global-types';
 import { api } from '../../../../app';
 import { Layer } from '../../layer';
-import { codedValueType, rangeDomainType } from '../../../../api/events/payloads/get-feature-info-payload';
 
 export interface TypeSourceGeoJSONInitialConfig extends Omit<TypeVectorSourceInitialConfig, 'format'> {
   format: 'GeoJSON';
@@ -114,19 +112,6 @@ export class GeoJSON extends AbstractGeoViewVector {
     const fieldIndex = getLocalizedValue(Cast<TypeLocalizedString>(fieldDefinitions.outfields), this.mapId)?.split(',').indexOf(fieldName);
     if (!fieldIndex || fieldIndex === -1) return 'string';
     return (fieldDefinitions.fieldTypes as string).split(',')[fieldIndex!] as 'string' | 'date' | 'number';
-  }
-
-  /** ***************************************************************************************************************************
-   * Returns null. GeoJSON services don't have domains.
-   *
-   * @param {string} fieldName field name for which we want to get the domain.
-   * @param {TypeLayerEntryConfig} layerConfig layer configuration.
-   *
-   * @returns {null | codedValueType | rangeDomainType} The domain of the field.
-   */
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  protected getFieldDomain(fieldName: string, layerConfig: TypeLayerEntryConfig): null | codedValueType | rangeDomainType {
-    return null;
   }
 
   /** ***************************************************************************************************************************
@@ -277,12 +262,14 @@ export class GeoJSON extends AbstractGeoViewVector {
    * Create a source configuration for the vector layer.
    *
    * @param {TypeBaseLayerEntryConfig} layerEntryConfig The layer entry configuration.
+   * @param {SourceOptions} sourceOptions The source options (default: {}).
+   * @param {ReadOptions} readOptions The read options (default: {}).
    *
    * @returns {VectorSource<Geometry>} The source configuration that will be used to create the vector layer.
    */
   protected createVectorSource(
     layerEntryConfig: TypeBaseLayerEntryConfig,
-    sourceOptions: SourceOptions = { strategy: all },
+    sourceOptions: SourceOptions = {},
     readOptions: ReadOptions = {}
   ): VectorSource<Geometry> {
     readOptions.dataProjection = (layerEntryConfig.source as TypeBaseSourceVectorInitialConfig).dataProjection;

@@ -41,7 +41,7 @@ import { TypeJsonObject } from '../../../core/types/global-types';
 import { Layer } from '../layer';
 import { LayerSetPayload, payloadIsRequestLayerInventory } from '../../../api/events/payloads/layer-set-payload';
 import { GetLegendsPayload, payloadIsQueryLegend } from '../../../api/events/payloads/get-legends-payload';
-import { TimeDimension } from '../../../core/utils/date-mgt';
+import { TimeDimension, TypeDateFragments } from '../../../core/utils/date-mgt';
 import { TypeEventHandlerFunction } from '../../../api/events/event';
 
 export type TypeLegend = {
@@ -285,6 +285,12 @@ export abstract class AbstractGeoViewLayer {
   /** LayerSet handler functions indexed by layerPath. This property is used to deactivate (off) events attached to a layer. */
   registerToLayerSetListenerFunctions: Record<string, TypeLayerSetHandlerFunctions> = {};
 
+  /** Date format object used to translate server to ISO format and ISO to server format */
+  dateFragmentsOrder: TypeDateFragments;
+
+  /** Date format object used to translate internal UTC ISO format to output format used by the getFeatureInfo */
+  outputFragmentsOrder: TypeDateFragments;
+
   /** ***************************************************************************************************************************
    * The class constructor saves parameters and common configuration parameters in attributes.
    *
@@ -302,6 +308,8 @@ export abstract class AbstractGeoViewLayer {
     if (mapLayerConfig.metadataAccessPath?.en) this.metadataAccessPath.en = mapLayerConfig.metadataAccessPath.en.trim();
     if (mapLayerConfig.metadataAccessPath?.fr) this.metadataAccessPath.fr = mapLayerConfig.metadataAccessPath.fr.trim();
     if (mapLayerConfig.listOfLayerEntryConfig) this.listOfLayerEntryConfig = mapLayerConfig.listOfLayerEntryConfig;
+    this.dateFragmentsOrder = api.dateUtilities.getDateFragmentsOrder(mapLayerConfig.serviceDateFormat);
+    this.outputFragmentsOrder = api.dateUtilities.getDateFragmentsOrder(mapLayerConfig.outputDateFormat);
   }
 
   /** ***************************************************************************************************************************
@@ -368,9 +376,15 @@ export abstract class AbstractGeoViewLayer {
   /** ***************************************************************************************************************************
    * This method reads the service metadata from the metadataAccessPath.
    *
-   * @returns {Promise<void>} A promise that the execution is done.
+   * @returns {Promise<void>} A promise that the execution is completed.
    */
-  protected abstract getServiceMetadata(): Promise<void>;
+  protected getServiceMetadata(): Promise<void> {
+    const promisedExecution = new Promise<void>((resolve) => {
+      // there is no metadata for static image layer type
+      resolve();
+    });
+    return promisedExecution;
+  }
 
   /** ***************************************************************************************************************************
    * This method recursively validates the configuration of the layer entries to ensure that each layer is correctly defined. If
@@ -833,24 +847,30 @@ export abstract class AbstractGeoViewLayer {
   }
 
   /** ***************************************************************************************************************************
-   * Return the type of the specified field.
+   * Returns the domaine of the specified field or null if the field has no domain.
    *
-   * @param {string} fieldName field name for which we want to get the type.
+   * @param {string} fieldName field name for which we want to get the domaine.
    * @param {TypeLayerEntryConfig} layerConfig layer configuration.
    *
    * @returns {null | codedValueType | rangeDomainType} The domain of the field.
    */
-  protected abstract getFieldDomain(fieldName: string, layerConfig: TypeLayerEntryConfig): null | codedValueType | rangeDomainType;
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  protected getFieldDomain(fieldName: string, layerConfig: TypeLayerEntryConfig): null | codedValueType | rangeDomainType {
+    return null;
+  }
 
   /** ***************************************************************************************************************************
-   * Return the domain of the specified field. If the type can not be found, return 'string'.
+   * Extract the type of the specified field from the metadata. If the type can not be found, return 'string'.
    *
-   * @param {string} fieldName field name for which we want to get the domain.
+   * @param {string} fieldName field name for which we want to get the type.
    * @param {TypeLayerEntryConfig} layerConfig layer configuration.
    *
    * @returns {'string' | 'date' | 'number'} The type of the field.
    */
-  protected abstract getFieldType(fieldName: string, layerConfig: TypeLayerEntryConfig): 'string' | 'date' | 'number';
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  protected getFieldType(fieldName: string, layerConfig: TypeLayerEntryConfig): 'string' | 'date' | 'number' {
+    return 'string';
+  }
 
   /** ***************************************************************************************************************************
    * set the extent of the layer. Use undefined if it will be visible regardless of extent. The layer extent is an array of
@@ -1020,6 +1040,33 @@ export abstract class AbstractGeoViewLayer {
   }
 
   /** ***************************************************************************************************************************
+   * Get and format the value of the field with the name passed in parameter. Vector GeoView layers convert dates to milliseconds
+   * since the base date. Vector feature dates must be in ISO format.
+   *
+   * @param {Feature<Geometry>} features The features that hold the field values.
+   * @param {string} fieldName The field name.
+   * @param {'number' | 'string' | 'date'} fieldType The field type.
+   *
+   * @returns {string | number | Date} The formatted value of the field.
+   */
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  protected getFieldValue(feature: Feature<Geometry>, fieldName: string, fieldType: 'number' | 'string' | 'date'): string | number | Date {
+    const fieldValue = feature.get(fieldName);
+    let returnValue: string | number | Date;
+    if (fieldType === 'date') {
+      if (typeof fieldValue === 'string') returnValue = api.dateUtilities.applyInputDateFormat(fieldValue, this.dateFragmentsOrder);
+      else {
+        // All vector dates are kept internally in UTC.
+        returnValue = api.dateUtilities.convertToUTC(`${api.dateUtilities.convertMilisecondsToDate(fieldValue)}Z`);
+      }
+      // The output date format does not perform any conversion, it is used to specify the parts that will be displayed.
+      if (this.outputFragmentsOrder?.length) returnValue = api.dateUtilities.applyOutputDateFormat(returnValue, this.outputFragmentsOrder);
+      return returnValue;
+    }
+    return fieldValue;
+  }
+
+  /** ***************************************************************************************************************************
    * Convert the feature information to an array of TypeArrayOfFeatureInfoEntries.
    *
    * @param {Feature<Geometry>[]} features The array of features to convert.
@@ -1035,7 +1082,7 @@ export abstract class AbstractGeoViewLayer {
       if (!features.length) resolve([]);
       else {
         const featureInfo = layerEntryConfig?.source?.featureInfo;
-        const fieldTypes = featureInfo?.fieldTypes?.split(',');
+        const fieldTypes = featureInfo?.fieldTypes?.split(',') as ('string' | 'number' | 'date')[];
         const outfields = getLocalizedValue(featureInfo?.outfields, this.mapId)?.split(',');
         const aliasFields = getLocalizedValue(featureInfo?.aliasFields, this.mapId)?.split(',');
         const queryResult: TypeArrayOfFeatureInfoEntries = [];
@@ -1087,7 +1134,7 @@ export abstract class AbstractGeoViewLayer {
                     const fieldIndex = outfields.indexOf(fieldName);
                     featureInfoEntry.fieldInfo[fieldName] = {
                       fieldKey: fieldKeyCounter++,
-                      value: feature.get(fieldName),
+                      value: this.getFieldValue(feature, fieldName, fieldTypes![fieldIndex]),
                       dataType: fieldTypes![fieldIndex] as 'string' | 'date' | 'number',
                       alias: aliasFields![fieldIndex],
                       domain: this.getFieldDomain(fieldName, layerEntryConfig!),
@@ -1095,7 +1142,7 @@ export abstract class AbstractGeoViewLayer {
                   } else if (!outfields) {
                     featureInfoEntry.fieldInfo[fieldName] = {
                       fieldKey: fieldKeyCounter++,
-                      value: feature.get(fieldName),
+                      value: this.getFieldValue(feature, fieldName, this.getFieldType(fieldName, layerEntryConfig!)),
                       dataType: this.getFieldType(fieldName, layerEntryConfig!),
                       alias: fieldName,
                       domain: this.getFieldDomain(fieldName, layerEntryConfig!),
@@ -1104,12 +1151,43 @@ export abstract class AbstractGeoViewLayer {
                 }
               });
               queryResult.push(featureInfoEntry);
-              resolve(queryResult);
             }
           });
+          resolve(queryResult);
         });
       }
     });
     return promisedArrayOfFeatureInfo;
+  }
+
+  /** ***************************************************************************************************************************
+   * Set the layerFilter that will be applied with the legend filters derived from the uniqueValue or classBreabs style of
+   * the layer. The resulting filter will be (legend filters) and (layerFilter). When the layer config is invalid, nothing is
+   * done.
+   *
+   * @param {string} filterValue The filter to associate to the layer.
+   * @param {string | TypeLayerEntryConfig | null} layerPathOrConfig Optional layer path or configuration.
+   */
+  setLayerFilter(filterValue: string, layerPathOrConfig: string | TypeLayerEntryConfig | null = this.activeLayer) {
+    const layerEntryConfig = (
+      typeof layerPathOrConfig === 'string' ? this.getLayerConfig(layerPathOrConfig) : layerPathOrConfig
+    ) as TypeLayerEntryConfig;
+    if (layerEntryConfig) layerEntryConfig.gvLayer?.set('layerFilter', filterValue);
+  }
+
+  /** ***************************************************************************************************************************
+   * Get the layerFilter that is associated to the layer. Returns undefined when the layer config is invalid.
+   * If layerPathOrConfig is undefined, this.activeLayer is used.
+   *
+   * @param {string | TypeLayerEntryConfig | null} layerPathOrConfig Optional layer path or configuration.
+   *
+   * @returns {string | undefined} The filter associated to the layer or undefined.
+   */
+  getLayerFilter(layerPathOrConfig: string | TypeLayerEntryConfig | null = this.activeLayer): string | undefined {
+    const layerEntryConfig = (
+      typeof layerPathOrConfig === 'string' ? this.getLayerConfig(layerPathOrConfig) : layerPathOrConfig
+    ) as TypeLayerEntryConfig;
+    if (layerEntryConfig) return layerEntryConfig.gvLayer?.get('layerFilter');
+    return undefined;
   }
 }

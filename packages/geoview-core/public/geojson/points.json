@@ -8,7 +8,8 @@
         "Green": 43.54,
         "Blue": 12.3,
         "Yellow": 66,
-        "Orange": 75
+        "Orange": 75,
+        "creationDate": "02/15/2022T00:00:00"
       },
       "geometry": {
         "type": "Point",
@@ -22,7 +23,8 @@
         "Green": 54,
         "Blue": 32.3,
         "Yellow": 5.43,
-        "Orange": 55
+        "Orange": 55,
+        "creationDate": "07/01/2020T12:00:00"
       },
       "geometry": {
         "type": "Point",
@@ -36,7 +38,8 @@
         "Green": 255,
         "Blue": 32.3,
         "Yellow": 5.43,
-        "Orange": 55
+        "Orange": 55,
+        "creationDate": "02/15/2019T17:00:00"
       },
       "geometry": {
         "type": "Point",

@@ -88,17 +88,19 @@
             {
               'geoviewLayerId': 'geojsonLYR1',
               'geoviewLayerName': { 'en': 'GeoJSON Sample' },
+              'serviceDateFormat': 'mm/dd/yyyy 00:00:00Z',
               'metadataAccessPath': { 'en': './geojson/metadata.json' },
               'geoviewLayerType': 'GeoJSON',
               'listOfLayerEntryConfig': [
                 {
                   'layerId': 'polygons.json',
                   'layerName': { 'en': 'Polygons' },
-                  'layerFilter': '1=1'
+                  'layerFilter': 'creationDate > date \'2020-06-01\''
                 },
                 {
                   'layerId': 'lines.json',
-                  'layerName': { 'en': 'Lines' }
+                  'layerName': { 'en': 'Lines' },
+                  'layerFilter': 'creationDate > date \'2020-06-01\''
                 },
                 {
                   'entryType': 'group',
@@ -107,11 +109,13 @@
                   'listOfLayerEntryConfig': [
                     {
                       'layerId': 'icon_points.json',
-                      'layerName': { 'en': 'Icons' }
+                      'layerName': { 'en': 'Icons' },
+                      'layerFilter': 'creationDate > date \'2020-06-01\''
                     },
                     {
                       'layerId': 'points.json',
-                      'layerName': { 'en': 'Points' }
+                      'layerName': { 'en': 'Points' },
+                      'layerFilter': 'creationDate > date \'2020-06-01\''
                     }
                   ]
                 }

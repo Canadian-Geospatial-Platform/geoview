@@ -20,13 +20,10 @@ import { AbstractGeoViewLayer, CONST_LAYER_TYPES, TypeLegend } from '../abstract
 import { AbstractGeoViewRaster, TypeBaseRasterLayer } from './abstract-geoview-raster';
 import {
   TypeLayerEntryConfig,
-  TypeSourceImageWmsInitialConfig,
   TypeGeoviewLayerConfig,
   TypeListOfLayerEntryConfig,
   layerEntryIsGroupLayer,
   TypeLayerGroupEntryConfig,
-  TypeFeatureInfoLayerConfig,
-  TypeSourceImageInitialConfig,
   TypeBaseLayerEntryConfig,
   TypeOgcWmsLayerEntryConfig,
 } from '../../../map/map-schema-types';
@@ -103,30 +100,6 @@ export class WMS extends AbstractGeoViewRaster {
    */
   constructor(mapId: string, layerConfig: TypeWMSLayerConfig) {
     super(CONST_LAYER_TYPES.WMS, layerConfig, mapId);
-  }
-
-  /** ***************************************************************************************************************************
-   * Extract the type of the specified field from the metadata. If the type can not be found, return 'string'.
-   *
-   * @param {string} fieldName field name for which we want to get the type.
-   * @param {TypeLayerEntryConfig} layerConfig layer configuration.
-   *
-   * @returns {'string' | 'date' | 'number'} The type of the field.
-   */
-  protected getFieldType(fieldName: string, layerConfig: TypeLayerEntryConfig): 'string' | 'date' | 'number' {
-    return 'string';
-  }
-
-  /** ***************************************************************************************************************************
-   * Returns null. WMS services don't have domains.
-   *
-   * @param {string} fieldName field name for which we want to get the domain.
-   * @param {TypeLayerEntryConfig} layerConfig layer configuration.
-   *
-   * @returns {null | codedValueType | rangeDomainType} The domain of the field.
-   */
-  protected getFieldDomain(fieldName: string, layerConfig: TypeLayerEntryConfig): null | codedValueType | rangeDomainType {
-    return null;
   }
 
   /** ***************************************************************************************************************************
@@ -542,6 +515,8 @@ export class WMS extends AbstractGeoViewRaster {
             imageLayerOptions.visible = layerEntryConfig.initialSettings?.visible;
 
           layerEntryConfig.gvLayer = new ImageLayer(imageLayerOptions);
+          this.setLayerFilter(layerEntryConfig.layerFilter ? layerEntryConfig.layerFilter : '', layerEntryConfig);
+          this.applyViewFilter(layerEntryConfig);
           resolve(layerEntryConfig.gvLayer);
         } else {
           api.event.emit(
@@ -980,5 +955,48 @@ export class WMS extends AbstractGeoViewRaster {
       typeof layerPathOrConfig === 'string' ? this.getLayerConfig(layerPathOrConfig) : layerPathOrConfig
     );
     if (layerConfig?.gvLayer) (layerConfig.gvLayer as ImageLayer<ImageWMS>).getSource()?.updateParams({ STYLES: StyleId });
+  }
+
+  /** ***************************************************************************************************************************
+   * Apply a view filter to the layer. When the filter parameter is not empty (''), the view filter does not use the legend
+   * filter. Otherwise, the getViewFilter method is used to define the view filter and the resulting filter is
+   * (legend filters) and (layerFilter). The legend filters are derived from the uniqueValue or classBreaks style of the layer.
+   * When the layer config is invalid, nothing is done.
+   *
+   * @param {string | TypeLayerEntryConfig | null} layerPathOrConfig Optional layer path or configuration.
+   * @param {string} filter An optional filter to be used in place of the getViewFilter value.
+   */
+  applyViewFilter(layerPathOrConfig: string | TypeLayerEntryConfig | null = this.activeLayer, filter = '') {
+    const layerEntryConfig = (
+      typeof layerPathOrConfig === 'string' ? this.getLayerConfig(layerPathOrConfig) : layerPathOrConfig
+    ) as TypeOgcWmsLayerEntryConfig;
+    const source = (layerEntryConfig.gvLayer as ImageLayer<ImageWMS>).getSource();
+    if (source) {
+      let filterValueToUse = filter || this.getLayerFilter(layerEntryConfig);
+      if (filterValueToUse) {
+        filterValueToUse = filterValueToUse.replaceAll(/\s{2,}/g, ' ').trim();
+        const queryElements = filterValueToUse.split(/(?<=\b)\s*=/);
+        const dimension = queryElements[0].trim();
+        filterValueToUse = queryElements[1].trim();
+
+        // Convert date constants using the serviceDateFormat
+        const searchDateEntry = [
+          ...`${filterValueToUse?.replaceAll(/\s{2,}/g, ' ').trim()} `.matchAll(
+            /(?<=^date\b\s')[\d/\-T\s:+Z]{4,25}(?=')|(?<=[(\s]date\b\s')[\d/\-T\s:+Z]{4,25}(?=')/gi
+          ),
+        ];
+        searchDateEntry.reverse();
+        searchDateEntry.forEach((dateFound) => {
+          const reverseTimeZone = true;
+          const reformattedDate = api.dateUtilities.applyInputDateFormat(dateFound[0], this.dateFragmentsOrder, reverseTimeZone);
+          filterValueToUse = `${filterValueToUse!.slice(0, dateFound.index! - 6)}${reformattedDate}${filterValueToUse!.slice(
+            dateFound.index! + dateFound[0].length + 2
+          )}`;
+        });
+        source.updateParams({ [dimension]: filterValueToUse.replace(/\s*/g, '') });
+        layerEntryConfig.gvLayer!.set('legendFilterIsOff', !!filter);
+        layerEntryConfig.gvLayer!.changed();
+      }
+    }
   }
 }

@@ -2,7 +2,6 @@
 import { Vector as VectorSource } from 'ol/source';
 import { Geometry } from 'ol/geom';
 import { Options as SourceOptions } from 'ol/source/Vector';
-import { all } from 'ol/loadingstrategy';
 import { EsriJSON } from 'ol/format';
 import { ReadOptions } from 'ol/format/Feature';
 
@@ -244,14 +243,14 @@ export class EsriFeature extends AbstractGeoViewVector {
    * Create a source configuration for the vector layer.
    *
    * @param {TypeEsriFeatureLayerEntryConfig} layerEntryConfig The layer entry configuration.
-   * @param {SourceOptions} sourceOptions The source options (default: { strategy: all }).
+   * @param {SourceOptions} sourceOptions The source options (default: {}).
    * @param {ReadOptions} readOptions The read options (default: {}).
    *
    * @returns {VectorSource<Geometry>} The source configuration that will be used to create the vector layer.
    */
   protected createVectorSource(
     layerEntryConfig: TypeEsriFeatureLayerEntryConfig,
-    sourceOptions: SourceOptions = { strategy: all },
+    sourceOptions: SourceOptions = {},
     readOptions: ReadOptions = {}
   ): VectorSource<Geometry> {
     sourceOptions.url = getLocalizedValue(layerEntryConfig.source!.dataAccessPath!, this.mapId);

@@ -123,6 +123,8 @@ export type TypeBaseSourceVectorInitialConfig = {
   featureInfo?: TypeFeatureInfoLayerConfig;
   /** Vector source clustering configuration. */
   cluster?: TypeSourceVectorClusterConfig;
+  /** Loading strategy to use (all or bbox). */
+  strategy?: 'all' | 'bbox';
 };
 
 /** ******************************************************************************************************************************
@@ -376,9 +378,9 @@ export type TypeUniqueValueStyleInfo = {
   /** Label used by the style. */
   label: string;
   /** Values associated to the style. */
-  visible?: 'yes' | 'no' | 'always';
+  values: (string | number | Date)[];
   /** Flag used to show/hide features associated to the label (default: yes). */
-  values: string[];
+  visible?: 'yes' | 'no' | 'always';
   /** options associated to the style. */
   settings: TypeKindOfVectorSettings;
 };
@@ -410,9 +412,10 @@ export interface TypeUniqueValueStyleConfig extends TypeBaseStyleConfig {
   /** Label used if field/value association is not found. */
   defaultLabel?: string;
   /** Options used if field/value association is not found. */
-  defaultVisible?: 'yes' | 'no' | 'always';
-  /** Flag used to show/hide features associated to the default label (default: yes). */
   defaultSettings?: TypeKindOfVectorSettings;
+  /** Flag used to show/hide features associated to the default label
+   *  (default: no if ESRI renderer in the metadata has no default symbol defined). */
+  defaultVisible?: 'yes' | 'no' | 'always';
   /** Fields used by the style. */
   fields: string[];
   /** Unique value style information configuration. */
@@ -426,11 +429,11 @@ export type TypeClassBreakStyleInfo = {
   /** Label used by the style. */
   label: string;
   /** Minimum values associated to the style. */
-  visible?: 'yes' | 'no' | 'always';
+  minValue: number | string | Date | undefined | null;
   /** Flag used to show/hide features associated to the label (default: yes). */
-  minValue: number | undefined | null;
+  visible?: 'yes' | 'no' | 'always';
   /** Maximum values associated to the style. */
-  maxValue: number;
+  maxValue: number | string | Date;
   /** options associated to the style. */
   settings: TypeKindOfVectorSettings;
 };
@@ -1044,6 +1047,10 @@ export type TypeGeoviewLayerConfig = {
   metadataAccessPath?: TypeLocalizedString;
   /** Type of GeoView layer. */
   geoviewLayerType: TypeGeoviewLayerType;
+  /** Date format used by the service endpoint. */
+  serviceDateFormat?: string;
+  /** Date format used by the getFeatureInfo to output date variable. */
+  outputDateFormat?: string;
   /**
    * Initial settings to apply to the GeoView layer at creation time.
    * This attribute is allowed only if listOfLayerEntryConfig.length > 1.
