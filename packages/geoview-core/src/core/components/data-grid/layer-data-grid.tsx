@@ -29,8 +29,9 @@ import {
 import { useTheme, Theme } from '@mui/material/styles';
 import Button, { ButtonProps } from '@mui/material/Button';
 import { Extent } from 'ol/extent';
-import { TypeLayerEntryConfig, AbstractGeoViewVector, EsriDynamic, api, TypeDisplayLanguage } from '../../../app';
+import { TypeLayerEntryConfig, AbstractGeoViewVector, EsriDynamic, api, TypeDisplayLanguage, TypeJsonObject } from '../../../app';
 import { Tooltip, MenuItem, Switch, ZoomInSearchIcon, IconButton } from '../../../ui';
+import { FieldWithPossiblyUndefined } from 'lodash';
 
 /**
  * Create a data grid (table) component for a lyer features all request
@@ -47,6 +48,45 @@ interface CustomDataGridProps extends DataGridProps {
   layerKey: string;
   displayLanguage: TypeDisplayLanguage;
 }
+
+interface FilterObject {
+  operatorValue: string;
+  columnField: string;
+  value: string;
+}
+
+const DATE_FILTER: { [index: string]: string } = {
+  is: '= date value',
+  not: '<> date value',
+  after: '> date value',
+  onOrAfter: '>= date value',
+  before: '< date value',
+  onOrBefore: '<= date value',
+  isEmpty: 'is null',
+  isNotEmpty: 'is not null',
+};
+
+const STRING_FILTER: { [index: string]: string } = {
+  contains: `like '%value%'`,
+  equals: `= 'value'`,
+  startsWith: `like 'value%'`,
+  endsWith: `like '%value'`,
+  isAnyOf: `in (value)`,
+  isEmpty: 'is null',
+  isNotEmpty: 'is not null',
+};
+
+const NUMBER_FILTER: { [index: string]: string } = {
+  '=': '=',
+  '!=': '=',
+  '<=': '<=',
+  '<': '<',
+  '>': '>',
+  '>=': '>=',
+  isAnyOf: `in`,
+  isEmpty: 'is null',
+  isNotEmpty: 'is not null',
+};
 
 const sxClasses = {
   DataGrid: {
@@ -109,48 +149,13 @@ export function LayerDataGrid(props: CustomDataGridProps) {
 
   const [filterString, setFilterString] = useState<string>('');
   const [mapfiltered, setMapFiltered] = useState<boolean>(false);
-  /**
-   * Convert the filter string from the Filter Model
-   *
-   * @param {GridFilterModel} gridFilterModel
-   * @return {string} filter string
-   *
-   */
-  const buildFilterString = (gridFilterModel: GridFilterModel) => {
-    const filterObj = gridFilterModel.items[0];
-    const fieldType = columns.find((column) => column.field === filterObj.columnField)?.type;
-    if (
-      filterObj === undefined ||
-      ((filterObj.value === undefined || filterObj.value === '') &&
-        filterObj.operatorValue !== 'isEmpty' &&
-        filterObj.operatorValue !== 'isNotEmpty')
-    ) {
-      return '';
-    }
-    switch (filterObj.operatorValue) {
-      case 'contains':
-        return `${filterObj.columnField} like '%${filterObj.value as string}%'`;
-      case 'equals':
-        return `${filterObj.columnField} = '${filterObj.value as string}'`;
-      case 'startsWith':
-        return `${filterObj.columnField} like '${filterObj.value as string}%'`;
-      case 'endsWith':
-        return `${filterObj.columnField} like '%${filterObj.value as string}'`;
-      case 'isEmpty':
-        return `${filterObj.columnField} is null`;
-      case 'isNotEmpty':
-        return `${filterObj.columnField} is not null`;
-      case 'isAnyOf':
-        if (filterObj.value.length === 0) {
-          return '';
-        }
-        return `${filterObj.columnField} in ${
-          fieldType === 'number' ? `(${filterObj.value.join(',')})` : `('${filterObj.value.join("','")}')`
-        }`;
-      default:
-        return `${filterObj.columnField} ${filterObj.operatorValue} ${filterObj.value}`;
-    }
-  };
+
+  const csvOptions: GridCsvExportOptions = { delimiter: ';' };
+  const printOptions: GridPrintExportOptions = {};
+
+  // set locale from display language
+  const locale =
+    displayLanguage === 'en' ? enUS.components.MuiDataGrid.defaultProps.localeText : frFR.components.MuiDataGrid.defaultProps.localeText;
 
   /**
    * build the JSON file
@@ -218,19 +223,14 @@ export function LayerDataGrid(props: CustomDataGridProps) {
     return <MenuItem onClick={() => onMenuItemClick()}>{t('datagrid.exportJson')}</MenuItem>;
   }
 
-  const csvOptions: GridCsvExportOptions = { delimiter: ';' };
-  const printOptions: GridPrintExportOptions = {};
-
   /**
    * featureinfo data grid Zoom in/out handling
    *
    * @param {React.MouseEvent<HTMLButtonElement, MouseEvent>} e mouse clicking event
-   *  @param {number} zoomid in of zoom incon button clicking
    * @param {Extent} extent feature exten
    *
    */
-
-  const handleZoomIn = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>, zoomid: number, extent: Extent) => {
+  const handleZoomIn = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>, extent: Extent) => {
     api.map(mapId).zoomToExtent(extent);
   };
 
@@ -252,6 +252,57 @@ export function LayerDataGrid(props: CustomDataGridProps) {
     );
   }
 
+  /**
+   * Convert the filter string from the Filter Model
+   *
+   * @param {GridFilterModel} gridFilterModel
+   *
+   * @return {string} filter string
+   */
+  const buildFilterString = (gridFilterModel: GridFilterModel): string => {
+    const filterObj = gridFilterModel.items[0] as FilterObject;
+    const fieldType = columns.find((column) => column.field === filterObj.columnField)?.type;
+
+    let filterString = '';
+    if (
+      filterObj === undefined ||
+      ((filterObj.value === undefined || filterObj.value === '') &&
+        filterObj.operatorValue !== 'isEmpty' &&
+        filterObj.operatorValue !== 'isNotEmpty')
+    ) {
+      filterString = '';
+    } else if (fieldType === 'date') {
+      filterString = `${filterObj.columnField} ${(DATE_FILTER[filterObj.operatorValue] as string).replace(
+        'value',
+        `'${filterObj.value as string}'`
+      )}`;
+    } else if (fieldType === 'number') {
+      filterString = `${filterObj.columnField} ${NUMBER_FILTER[filterObj.operatorValue]} `;
+      filterString +=
+        filterObj.operatorValue !== 'isAnyOf' ? `${filterObj.value}` : `(${(filterObj.value as unknown as string[]).join(',')})`;
+    } else if (fieldType === 'string') {
+      filterString =
+        filterObj.operatorValue !== 'isAnyOf'
+          ? `${filterObj.columnField} ${(STRING_FILTER[filterObj.operatorValue] as string).replace(
+              'value',
+              `${filterObj.value as string}`
+            )}`
+          : `${filterObj.columnField} ${(STRING_FILTER[filterObj.operatorValue] as string).replace(
+              'value',
+              `'${(filterObj.value as unknown as string[]).join("','")}'`
+            )}`;
+    }
+
+    console.log(filterString);
+
+    return filterString;
+  };
+
+  /**
+   * Apply the filter who is on the data grid to the map
+   *
+   * @param {string} filter filter to apply to map
+   */
   const filterMap = (filter?: string) => {
     let applyFilterString = '';
     const geoviewLayerInstance = api.map(mapId).layer.geoviewLayers[layerId];
@@ -264,6 +315,7 @@ export function LayerDataGrid(props: CustomDataGridProps) {
       } else if (!mapfiltered) {
         applyFilterString = filterString;
       }
+      applyFilterString = filter !== undefined ? filter : filterString;
       (geoviewLayerInstance as AbstractGeoViewVector | EsriDynamic)?.applyViewFilter(filterLayerConfig, applyFilterString);
     }
 
@@ -274,7 +326,7 @@ export function LayerDataGrid(props: CustomDataGridProps) {
 
   /**
    * Customize the toolbar, replace the Export button menu with the customized one
-   * @return {GridToolbarExportContainer} toolbar
+   * @return {GridToolbarContainer} toolbar
    *
    */
   function CustomToolbar() {
@@ -305,7 +357,7 @@ export function LayerDataGrid(props: CustomDataGridProps) {
 
       if (column.field === 'featureActions') {
         return (
-          <IconButton color="primary" onClick={(e) => handleZoomIn(e, params.id as number, rows[params.id as number].extent)}>
+          <IconButton color="primary" onClick={(e) => handleZoomIn(e, rows[params.id as number].extent)}>
             <ZoomInSearchIcon />
           </IconButton>
         );
@@ -318,10 +370,6 @@ export function LayerDataGrid(props: CustomDataGridProps) {
       );
     };
   });
-
-  // set locale from display language
-  const locale =
-    displayLanguage === 'en' ? enUS.components.MuiDataGrid.defaultProps.localeText : frFR.components.MuiDataGrid.defaultProps.localeText;
 
   return (
     <div style={{ display: 'flex', height: '100%' }}>
