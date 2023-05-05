@@ -13,14 +13,14 @@ import { TypeArrayOfFeatureInfoEntries } from '../../../../api/events/payloads/g
 export type TypeVectorLayerGroup = LayerGroup;
 export type TypeVectorLayer = VectorSource<Geometry>;
 export type TypeBaseVectorLayer = BaseLayer | TypeVectorLayerGroup | TypeVectorLayer;
-/** ******************************************************************************************************************************
+/** *****************************************************************************************************************************
  * The AbstractGeoViewVector class is a direct descendant of AbstractGeoViewLayer. As its name indicates, it is used to
  * instanciate GeoView vector layers. It inherits from its parent class an attribute named gvLayers where the vector elements
  * of the class will be kept.
  *
- * The gvLayers attribute has a hierarchical structure. Its data type is TypetBaseVectorLayer. Subclasses of this type
- * are TypeVectorLayerGroup and TypeVectorLayer. The TypeVectorLayerGroup is a collection of TypetBaseVectorLayer. It is
- * important to note that a TypetBaseVectorLayer attribute can polymorphically refer to a TypeVectorLayerGroup or a
+ * The gvLayers attribute has a hierarchical structure. Its data type is TypeBaseVectorLayer. Subclasses of this type are
+ * BaseLayer, TypeVectorLayerGroup and TypeVectorLayer. The TypeVectorLayerGroup is a collection of TypeBaseVectorLayer. It is
+ * important to note that a TypeBaseVectorLayer attribute can polymorphically refer to a TypeVectorLayerGroup or a
  * TypeVectorLayer. Here, we must not confuse instantiation and declaration of a polymorphic attribute.
  *
  * All leaves of the tree structure stored in the gvLayers attribute must be of type TypeVectorLayer. This is where the
@@ -148,24 +148,6 @@ export declare abstract class AbstractGeoViewVector extends AbstractGeoViewLayer
      * @param {string} filter An optional filter to be used in place of the getViewFilter value.
      */
     applyViewFilter(layerPathOrConfig?: string | TypeLayerEntryConfig | null, filter?: string): void;
-    /** ***************************************************************************************************************************
-     * Set the layerFilter that will be applied with the legend filters derived from the uniqueValue or classBreabs style of
-     * the layer. The resulting filter will be (legend filters) and (layerFilter). When the layer config is invalid, nothing is
-     * done.
-     *
-     * @param {string} filterValue The filter to associate to the layer.
-     * @param {string | TypeLayerEntryConfig | null} layerPathOrConfig Optional layer path or configuration.
-     */
-    setLayerFilter(filterValue: string, layerPathOrConfig?: string | TypeLayerEntryConfig | null): void;
-    /** ***************************************************************************************************************************
-     * Get the layerFilter that is associated to the layer. Returns undefined when the layer config is invalid.
-     * If layerPathOrConfig is undefined, this.activeLayer is used.
-     *
-     * @param {string | TypeLayerEntryConfig | null} layerPathOrConfig Optional layer path or configuration.
-     *
-     * @returns {string | undefined} The filter associated to the layer or undefined.
-     */
-    getLayerFilter(layerPathOrConfig?: string | TypeLayerEntryConfig | null): string | undefined;
     /** ***************************************************************************************************************************
      * Toggle cluster status.
      *

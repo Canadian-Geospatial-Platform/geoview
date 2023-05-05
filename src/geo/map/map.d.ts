@@ -8,6 +8,7 @@ import { Coordinate } from 'ol/coordinate';
 import { Extent } from 'ol/extent';
 import { Basemap } from '../layer/basemap/basemap';
 import { Layer } from '../layer/layer';
+import { TypeFeatureStyle } from '../layer/vector/vector-types';
 import { AppbarButtons } from '../../core/components/app-bar/app-bar-buttons';
 import { NavbarButtons } from '../../core/components/nav-bar/nav-bar-buttons';
 import { FooterTabsApi } from '../../core/components/footer-tabs/footer-tabs-api';
@@ -15,6 +16,11 @@ import { LegendApi } from '../../core/components/legend/legend-api';
 import { DetailsAPI } from '../../core/components/details/details-api';
 import { DataGridAPI } from '../../core/components/data-grid/data-grid-api';
 import { GeoviewRenderer } from '../renderer/geoview-renderer';
+import { Select } from '../interaction/select';
+import { Draw } from '../interaction/draw';
+import { Modify } from '../interaction/modify';
+import { Snap } from '../interaction/snap';
+import { Translate } from '../interaction/translate';
 import { ModalApi } from '../../ui';
 import { TypeListOfGeoviewLayerConfig, TypeDisplayLanguage, TypeViewSettings } from './map-schema-types';
 import { TypeMapFeaturesConfig, TypeHTMLElement } from '../../core/types/global-types';
@@ -179,4 +185,29 @@ export declare class MapViewer {
      * @returns The densified extent transformed in the destination projection.
      */
     transformAndDensifyExtent: (extent: Extent, source: ProjectionLike, destination: ProjectionLike, stops?: number) => Coordinate[];
+    /**
+     * Initializes selection interactions
+     */
+    initSelectInteractions: () => Select;
+    /**
+     * Initializes translation interactions
+     */
+    initTranslateInteractions: () => Translate;
+    /**
+     * Initializes drawing interactions on the given vector source
+     * @param geomGroupKey the geometry group key in which to hold the geometries
+     * @param type the type of geometry to draw (Polygon, LineString, Circle, etc)
+     * @param styles the styles for the drawing
+     */
+    initDrawInteractions: (geomGroupKey: string, type: string, style: TypeFeatureStyle) => Draw;
+    /**
+     * Initializes modifying interactions on the given vector source
+     * @param geomGroupKey the geometry group key in which to hold the geometries
+     */
+    initModifyInteractions: (geomGroupKey: string) => Modify;
+    /**
+     * Initializes snapping interactions on the given vector source
+     * @param geomGroupKey the geometry group key in which to hold the geometries
+     */
+    initSnapInteractions: (geomGroupKey: string) => Snap;
 }

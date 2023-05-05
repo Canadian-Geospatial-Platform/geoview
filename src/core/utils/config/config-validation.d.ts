@@ -123,6 +123,29 @@ export declare class ConfigValidation {
      */
     private validateCenter;
     /** ***************************************************************************************************************************
+     * Print a trace to help locate schema errors.
+     * @param {AnyValidateFunction<unknown>} validate The Ajv validator.
+     * @param {any} objectAffected Object that was validated.
+     */
+    private printSchemaError;
+    /** ***************************************************************************************************************************
+     * Validate the configuration of the map features against the TypeMapFeaturesInstance defined in the schema..
+     * @param {TypeMapFeaturesConfig} mapFeaturesConfigToValidate The map features configuration to validate.
+     * @param {Ajv} validator The schema validator to use.
+     *
+     * @returns {TypeMapFeaturesConfig} A valid map features configuration.
+     */
+    private IsValidTypeMapFeaturesInstance;
+    /** ***************************************************************************************************************************
+     * Validate the configuration of the map features against the TypeMapFeaturesInstance defined in the schema.
+     * @param {TypeGeoviewLayerType} geoviewLayerType The GeoView layer type to validate.
+     * @param {TypeListOfLayerEntryConfig} listOfLayerEntryConfig The list of layer entry configurations to validate.
+     * @param {Ajv} validator The schema validator to use.
+     *
+     * @returns {TypeMapFeaturesConfig} A valid map features configuration.
+     */
+    private IsValidTypeListOfLayerEntryConfig;
+    /** ***************************************************************************************************************************
      * Validate the map features configuration.
      * @param {TypeMapFeaturesConfig} mapFeaturesConfigToValidate The map features configuration to validate.
      *

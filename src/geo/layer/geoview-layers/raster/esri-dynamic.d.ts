@@ -2,13 +2,10 @@ import { Coordinate } from 'ol/coordinate';
 import { Pixel } from 'ol/pixel';
 import { AbstractGeoViewLayer } from '../abstract-geoview-layers';
 import { AbstractGeoViewRaster, TypeBaseRasterLayer } from './abstract-geoview-raster';
-import { TypeImageLayerEntryConfig, TypeLayerEntryConfig, TypeSourceImageEsriInitialConfig, TypeGeoviewLayerConfig, TypeListOfLayerEntryConfig } from '../../../map/map-schema-types';
+import { TypeLayerEntryConfig, TypeGeoviewLayerConfig, TypeListOfLayerEntryConfig, TypeEsriDynamicLayerEntryConfig } from '../../../map/map-schema-types';
 import { TypeArrayOfFeatureInfoEntries, codedValueType, rangeDomainType } from '../../../../api/events/payloads/get-feature-info-payload';
 import { TypeJsonArray, TypeJsonObject } from '../../../../core/types/global-types';
 import { TypeEsriFeatureLayerEntryConfig } from '../vector/esri-feature';
-export interface TypeEsriDynamicLayerEntryConfig extends Omit<TypeImageLayerEntryConfig, 'source'> {
-    source: TypeSourceImageEsriInitialConfig;
-}
 export interface TypeEsriDynamicLayerConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig'> {
     geoviewLayerType: 'esriDynamic';
     listOfLayerEntryConfig: TypeEsriDynamicLayerEntryConfig[];
@@ -188,7 +185,71 @@ export declare class EsriDynamic extends AbstractGeoViewRaster {
      */
     protected getFeatureInfoUsingPolygon(location: Coordinate[], layerConfig: TypeEsriDynamicLayerEntryConfig): Promise<TypeArrayOfFeatureInfoEntries>;
     /** ***************************************************************************************************************************
-     * Get the layer view filter. The filter is derived fron the uniqueValue or the classBreak visibility flags and an layerFilter
+     * Count the number of times the value of a field is used by the unique value style information object. Depending on the
+     * visibility of the default, we count visible or invisible settings.
+     *
+     * @param {TypeUniqueValueStyleConfig} styleSettings The unique value style settings to evaluate.
+     *
+     * @returns {TypeFieldOfTheSameValue[][]} The result of the evaluation. The first index of the array correspond to the field's
+     * index in the style settings and the second one to the number of different values the field may have based on visibility of
+     * the feature.
+     */
+    private countFieldOfTheSameValue;
+    /** ***************************************************************************************************************************
+     * Sort the number of times the value of a field is used by the unique value style information object. Depending on the
+     * visibility of the default value, we count the visible or invisible parameters. The order goes from the highest number of
+     * occurrences to the lowest number of occurrences.
+     *
+     * @param {TypeUniqueValueStyleConfig} styleSettings The unique value style settings to evaluate.
+     * @param {TypeFieldOfTheSameValue[][]} fieldOfTheSameValue The count information that contains the number of occurrences
+     * of a value.
+     *
+     * @returns {number[]} An array that gives the field order to use to build the query tree.
+     */
+    private sortFieldOfTheSameValue;
+    /** ***************************************************************************************************************************
+     * Get the query tree. The tree structure is a representation of the optimized query we have to create. It contains the field
+     * values in the order specified by the fieldOrder parameter. The optimization is based on the distributivity and associativity
+     * of the Boolean algebra. The form is the following:
+     *
+     * (f1 = v11 and (f2 = v21 and f3 in (v31, v32) or f2 = v22 and f3 in (v31, v32, v33)) or f1 = v12 and (f2 = v21 and ...)))
+     *
+     * which is equivalent to:
+     *
+     * f1 = v11 and f2 = v21 and f3 = v31 or f1 = v11 and f2 = v21 and f3 = v32 or f1 = v11 and f2 = v22 and f3 = v31 ...
+     *
+     * @param {TypeUniqueValueStyleConfig} styleSettings The unique value style settings to evaluate.
+     * @param {TypeFieldOfTheSameValue[][]} fieldOfTheSameValue The count information that contains the number of occurrences
+     * of a value.
+     * @param {number[]} fieldOrder The field order to use when building the tree.
+     *
+     * @returns {TypeQueryTree} The query tree to use when building the final query string.
+     */
+    private getQueryTree;
+    /** ***************************************************************************************************************************
+     * format the field value to use in the query.
+     *
+     * @param {string} fieldName The field name.
+     * @param {string | number | Date} rawValue The unformatted field value.
+     * @param {TypeFeatureInfoLayerConfig} sourceFeatureInfo The source feature information that knows the field type.
+     *
+     * @returns {string} The resulting field value.
+     */
+    private formatFieldValue;
+    /** ***************************************************************************************************************************
+     * Build the query using the provided query tree.
+     *
+     * @param {TypeQueryTree} queryTree The query tree to use.
+     * @param {number} level The level to use for solving the tree.
+     * @param {number[]} fieldOrder The field order to use for solving the tree.
+     * @param {TypeUniqueValueStyleConfig} styleSettings The unique value style settings to evaluate.
+     * @param {TypeFeatureInfoLayerConfig} sourceFeatureInfo The source feature information that knows the field type.
+     *
+     * @returns {string} The resulting query.
+     */
+    private buildQuery;
+    /** ***************************************************************************************************************************
+     * Get the layer view filter. The filter is derived fron the uniqueValue or the classBreak visibility flags and a layerFilter
      * associated to the layer.
      *
      * @param {string | TypeLayerEntryConfig | null} layerPathOrConfig Optional layer path or configuration.
@@ -206,22 +267,4 @@ export declare class EsriDynamic extends AbstractGeoViewRaster {
      * @param {string} filter An optional filter to be used in place of the getViewFilter value.
      */
     applyViewFilter(layerPathOrConfig?: string | TypeLayerEntryConfig | null, filter?: string): void;
-    /** ***************************************************************************************************************************
-     * Set the layerFilter that will be applied with the legend filters derived from the uniqueValue or classBreabs style of
-     * the layer. The resulting filter will be (legend filters) and (layerFilter). When the layer config is invalid, nothing is
-     * done.
-     *
-     * @param {string} filterValue The filter to associate to the layer.
-     * @param {string | TypeLayerEntryConfig | null} layerPathOrConfig Optional layer path or configuration.
-     */
-    setLayerFilter(filterValue: string, layerPathOrConfig?: string | TypeLayerEntryConfig | null): void;
-    /** ***************************************************************************************************************************
-     * Get the layerFilter that is associated to the layer. Returns undefined when the layer config is invalid.
-     * If layerPathOrConfig is undefined, this.activeLayer is used.
-     *
-     * @param {string | TypeLayerEntryConfig | null} layerPathOrConfig Optional layer path or configuration.
-     *
-     * @returns {string | undefined} The filter associated to the layer or undefined.
-     */
-    getLayerFilter(layerPathOrConfig?: string | TypeLayerEntryConfig | null): string | undefined;
 }

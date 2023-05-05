@@ -40,6 +40,7 @@ export declare class Vector {
      * @returns {Feature} a geometry containing the id and the created geometry
      */
     addPolyline: (points: Coordinate, options?: {
+        projection?: number;
         geometryLayout?: 'XY' | 'XYZ' | 'XYM' | 'XYZM';
         style?: TypeFeatureStyle;
     }, id?: string) => Feature;
@@ -53,6 +54,7 @@ export declare class Vector {
      * @returns {Feature} a geometry containing the id and the created geometry
      */
     addPolygon: (points: number[] | Coordinate[][], options?: {
+        projection?: number;
         geometryLayout?: 'XY' | 'XYZ' | 'XYM' | 'XYZM';
         style?: TypeFeatureStyle;
     }, optionalFeatureId?: string) => Feature;
@@ -66,6 +68,7 @@ export declare class Vector {
      * @returns {Feature} a geometry containing the id and the created geometry
      */
     addCircle: (coordinate: Coordinate, options?: {
+        projection?: number;
         geometryLayout?: 'XY' | 'XYZ' | 'XYM' | 'XYZM';
         style?: TypeFeatureCircleStyle;
     }, optionalFeatureId?: string) => Feature;
@@ -79,6 +82,7 @@ export declare class Vector {
      * @returns {Feature} a geometry containing the id and the created geometry
      */
     addMarkerIcon: (coordinate: Coordinate, options?: {
+        projection?: number;
         geometryLayout?: 'XY' | 'XYZ' | 'XYM' | 'XYZM';
         style?: TypeIconStyle;
     }, optionalFeatureId?: string) => Feature;

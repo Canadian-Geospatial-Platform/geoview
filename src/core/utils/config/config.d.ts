@@ -39,7 +39,7 @@ export declare class Config {
      */
     get triggerReadyCallback(): boolean;
     /** ***************************************************************************************************************************
-     * Set mapId value.
+     * Set triggerReadyCallback value.
      * @param {string} triggerReadyCallback The value to assign to the triggerReadyCallback flag for the Geoview map.
      */
     set triggerReadyCallback(triggerReadyCallback: boolean);
@@ -62,6 +62,12 @@ export declare class Config {
      * @returns {TypeMapFeaturesConfig} A valid map config.
      */
     getMapConfigFromFunc(mapFeaturesConfig: TypeMapFeaturesConfig): TypeMapFeaturesConfig | undefined;
+    /** ***************************************************************************************************************************
+     * Initialize all layer entry type fields accordingly to the GeoView layer type..
+     * @param {TypeListOfLayerEntryConfig} listOfLayerEntryConfig The list of layer entry configuration to adjust.
+     * @param {TypeGeoviewLayerType} geoviewLayerType The GeoView layer type.
+     */
+    private setLayerEntryType;
     /** ***************************************************************************************************************************
      * Initialize a map config from either inline div, url params, json file.
      *

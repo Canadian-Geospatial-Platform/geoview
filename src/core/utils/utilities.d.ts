@@ -1,4 +1,5 @@
 import { MutableRefObject } from 'react';
+import { AbstractGeoViewLayer } from '../../app';
 import { TypeLocalizedString } from '../../geo/map/map-schema-types';
 import { TypeJsonObject } from '../types/global-types';
 /**
@@ -17,6 +18,27 @@ export declare function getLocalizedValue(localizedString: TypeLocalizedString |
  * @param {string} message the message string
  */
 export declare function showMessage(mapId: string, message: string): void;
+/**
+ * Display an success message in the snackbar
+ *
+ * @param {string} mapId the map to show the message for
+ * @param {string} message the message string
+ */
+export declare function showSuccess(mapId: string, message: string): void;
+/**
+ * Display an warning message in the snackbar
+ *
+ * @param {string} mapId the map to show the message for
+ * @param {string} message the message string
+ */
+export declare function showWarning(mapId: string, message: string): void;
+/**
+ * Display an error message in the snackbar
+ *
+ * @param {string} mapId the map to show the message for
+ * @param {string} message the message string
+ */
+export declare function showError(mapId: string, message: string): void;
 /**
  * Generate a unique id if an id was not provided
  * @param {string} id an id to return if it was already passed
@@ -87,7 +109,21 @@ export declare function exportPNG(mapId: string): void;
  * Disable scrolling, so that screen doesnt scroll down.
  *  when focus is set to map and
  * arrows and enter keys are used to navigate the map
- * @param e - keybaord event like, tab, space
- * @param elem - mutable reference object of html elements.
+ * @param {KeyboardEvent} e - keybaord event like, tab, space
+ * @param {MutableRefObject} elem - mutable reference object of html elements.
  */
 export declare const disableScrolling: (e: KeyboardEvent, elem: MutableRefObject<HTMLElement | undefined>) => void;
+/**
+ * Determine if layer instance is a vector layer
+ *
+ * @param {AbstractGeoViewLayer} layer the layer to check
+ * @returns {boolean} true if layer is a vector layer
+ */
+export declare const isVectorLayer: (layer: AbstractGeoViewLayer) => boolean;
+/**
+ * Find an object property by regex value
+ * @param {TypeJsonObject} objectItem the object item
+ * @param {RegExp} regex the regex value to find
+ * @returns {TypeJsonObject | undefined} the object if it exist or undefined
+ */
+export declare const findPropertyNameByRegex: (objectItem: TypeJsonObject, regex: RegExp) => TypeJsonObject | undefined;

@@ -1,6 +1,6 @@
 import { TypeJsonArray, TypeJsonObject } from '../../../core/types/global-types';
-import { TypeLayerEntryConfig, TypeListOfLayerEntryConfig } from '../../map/map-schema-types';
-import { EsriDynamic, TypeEsriDynamicLayerEntryConfig } from './raster/esri-dynamic';
+import { TypeEsriDynamicLayerEntryConfig, TypeLayerEntryConfig, TypeListOfLayerEntryConfig } from '../../map/map-schema-types';
+import { EsriDynamic } from './raster/esri-dynamic';
 import { EsriFeature, TypeEsriFeatureLayerEntryConfig } from './vector/esri-feature';
 import { codedValueType, rangeDomainType } from '../../../api/events/payloads/get-feature-info-payload';
 /** ***************************************************************************************************************************
