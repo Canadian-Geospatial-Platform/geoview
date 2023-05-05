@@ -4,7 +4,7 @@ import { GeoListItem } from './geolocator';
 
 type GeoListProps = {
   geoListItems: GeoListItem[];
-  zoomToLocation: (coords: [number, number]) => void;
+  zoomToLocation: (coords: [number, number], bbox: [number, number, number, number]) => void;
 };
 
 const sxClasses = {
@@ -67,7 +67,7 @@ export default function GeoList({ geoListItems, zoomToLocation }: GeoListProps) 
           key={`${geoListItem.name}-${geoListItem.lat}-${index}`}
         >
           <ListItem component="div" disablePadding>
-            <ListItemButton onClick={() => zoomToLocation([geoListItem.lng, geoListItem.lat])}>
+            <ListItemButton onClick={() => zoomToLocation([geoListItem.lng, geoListItem.lat], geoListItem.bbox)}>
               <Grid container>
                 <Grid item xs={12} sm={8}>
                   <Typography component="p" sx={sxClasses.main}>

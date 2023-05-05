@@ -15,9 +15,9 @@ export const sxClasses = {
     '& form': {
       display: 'flex',
       width: '100%',
+      paddingLeft: 5,
     },
     '& .MuiPaper-root': {
-      paddingLeft: 5,
       backgroundColor: 'background.default',
       color: 'text.primary',
       '& .MuiToolbar-root': {
