@@ -22,7 +22,7 @@ export interface GeoListItem {
 
 export function Geolocator() {
   const { mapId } = useContext(MapContext);
-
+  const ANIMATION_DURATION = 1000;
   const {
     map,
     mapFeaturesConfig: { serviceUrls },
@@ -67,17 +67,17 @@ export function Geolocator() {
    * @returns void
    */
   const zoomToLocation = (coords: [number, number], bbox: [number, number, number, number]): void => {
+    const { currentProjection } = api.map(mapId);
+    const projectionConfig = api.projection.projections[currentProjection];
     if (bbox) {
-      const convertedExtent1 = api.projection.lngLatToLCC([bbox[0], bbox[1]])[0] as number[];
-      const convertedExtent2 = api.projection.lngLatToLCC([bbox[2], bbox[3]])[0] as number[];
+      const convertedExtent1 = fromLonLat([bbox[0], bbox[1]], projectionConfig);
+      const convertedExtent2 = fromLonLat([bbox[2], bbox[3]], projectionConfig);
       api
         .map(mapId)
         .getView()
-        .fit([...convertedExtent1, ...convertedExtent2]);
+        .fit([...convertedExtent1, ...convertedExtent2], { duration: ANIMATION_DURATION });
     } else {
-      const { currentProjection } = api.map(mapId);
-      const projectionConfig = api.projection.projections[currentProjection];
-      map.getView().animate({ center: fromLonLat(coords, projectionConfig), duration: 1000, zoom: 11 });
+      map.getView().animate({ center: fromLonLat(coords, projectionConfig), duration: ANIMATION_DURATION, zoom: 11 });
     }
   };
 
@@ -97,7 +97,7 @@ export function Geolocator() {
    */
   const doRequest = debounce((searchTerm: string) => {
     getGeolocations(searchTerm);
-  }, 1500);
+  }, ANIMATION_DURATION);
 
   /**
    * Debounce the get geolocation service request
