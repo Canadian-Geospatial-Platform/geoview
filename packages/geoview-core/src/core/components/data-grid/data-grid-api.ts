@@ -177,6 +177,7 @@ export class DataGridAPI {
     };
 
     useEffect(() => {
+      let isMounted = true;
       const geoviewLayerInstance = api.map(this.mapId).layer.geoviewLayers[layerId];
       if (
         geoviewLayerInstance.listOfLayerEntryConfig.length > 0 &&
@@ -212,13 +213,16 @@ export class DataGridAPI {
                 grouplayerValues.push({ layerkey, layerValues });
               }
               if (count === grouplayerKeys.length) {
-                setGroupKeys(grouplayerKeys);
-                setGroupValues(grouplayerValues);
+                if (isMounted) setGroupKeys(grouplayerKeys);
+                if (isMounted) setGroupValues(grouplayerValues);
               }
             });
           });
         }
       }
+      return () => {
+        isMounted = false;
+      };
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [layerId]);
 

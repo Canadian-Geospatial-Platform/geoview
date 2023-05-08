@@ -175,7 +175,7 @@ export function commonGetFieldDomain(
   fieldName: string,
   layerConfig: TypeLayerEntryConfig
 ): null | codedValueType | rangeDomainType {
-  const esriFieldDefinitions = this.layerMetadata[Layer.getLayerPath(layerConfig)].fields as TypeJsonArray;
+  const esriFieldDefinitions = this.layerMetadata[Layer.getLayerPath(layerConfig).replace('-unclustered', '')].fields as TypeJsonArray;
   const fieldDefinition = esriFieldDefinitions.find((metadataEntry) => metadataEntry.name === fieldName);
   return fieldDefinition ? Cast<codedValueType | rangeDomainType>(fieldDefinition.domain) : null;
 }

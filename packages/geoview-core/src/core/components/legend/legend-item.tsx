@@ -27,7 +27,7 @@ import {
   MoreHorizIcon,
   BrowserNotSupportedIcon,
 } from '../../../ui';
-import { api, EsriDynamic, payloadIsLegendInfo } from '../../../app';
+import { api, EsriDynamic, payloadIsLegendInfo, NumberPayload, PayloadBaseClass } from '../../../app';
 import { LegendIconList } from './legend-icon-list';
 import {
   AbstractGeoViewLayer,
@@ -50,7 +50,7 @@ import {
   layerEntryIsGroupLayer,
 } from '../../../geo/map/map-schema-types';
 import { AbstractGeoViewVector } from '../../../geo/layer/geoview-layers/vector/abstract-geoview-vector';
-import { disableScrolling, isVectorLayer } from '../../utils/utilities';
+import { disableScrolling } from '../../utils/utilities';
 
 const sxClasses = {
   expandableGroup: {
@@ -167,7 +167,12 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
   } = useTheme();
 
   const { mapId } = geoviewLayerInstance;
-  const canCluster = isVectorLayer(geoviewLayerInstance);
+  // check if layer is a clustered, so that clustering can be toggled
+  const path = subLayerId || `${layerId}/${geoviewLayerInstance.activeLayer?.layerId}`;
+  const clusterLayerPath = path.replace('-unclustered', '');
+  const unclusterLayerPath = `${clusterLayerPath}-unclustered`;
+  const canCluster = !!api.maps[mapId].layer.registeredLayers[unclusterLayerPath];
+
   const [isClusterToggleEnabled, setIsClusterToggleEnabled] = useState(false);
   const [isChecked, setChecked] = useState(true);
   const [isOpacityOpen, setOpacityOpen] = useState(false);
@@ -184,12 +189,14 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
   const [layerName, setLayerName] = useState<string>('');
   const [menuAnchorElement, setMenuAnchorElement] = useState<null | HTMLElement>(null);
   const [opacity, setOpacity] = useState<number>(1);
+  const [zoom, setZoom] = useState<number>(api.map(mapId).currentZoom);
+  const splitZoom =
+    (api.map(mapId).layer.registeredLayers[clusterLayerPath]?.source as TypeVectorSourceInitialConfig)?.cluster?.splitZoom || 7;
   const closeIconRef = useRef() as RefObject<HTMLButtonElement>;
   const stackIconRef = useRef() as MutableRefObject<HTMLDivElement | undefined>;
   const maxIconRef = useRef() as RefObject<HTMLButtonElement>;
 
   const menuOpen = Boolean(menuAnchorElement);
-  const path = subLayerId || `${layerId}/${geoviewLayerInstance.activeLayer?.layerId}`;
 
   const getGroupsDetails = (): boolean => {
     let isGroup = false;
@@ -216,7 +223,7 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
       if (isWmsLegend(layerLegend) || isImageStaticLegend(layerLegend)) {
         setIconType('simple');
         if (layerLegend.legend) setIconImg(layerLegend.legend?.toDataURL());
-      } else if (isVectorLegend(layerLegend)) {
+      } else if (isVectorLegend(layerLegend) && layerLegend.legend) {
         Object.entries(layerLegend.legend).forEach(([, styleRepresentation]) => {
           if (styleRepresentation.arrayOfCanvas) {
             setIconType('list');
@@ -347,6 +354,18 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
     }
   }, [isParentVisible, isChecked, layerConfigEntry, geoviewLayerInstance]);
 
+  useEffect(() => {
+    const mapZoomHandler = (payload: PayloadBaseClass) => {
+      if (canCluster) {
+        setZoom((payload as NumberPayload).value);
+      }
+    };
+    api.event.on(api.eventNames.MAP.EVENT_MAP_ZOOM_END, mapZoomHandler, mapId);
+    return () => {
+      api.event.off(api.eventNames.MAP.EVENT_MAP_ZOOM_END, mapId);
+    };
+  }, [canCluster, mapId]);
+
   /**
    * Handle expand/shrink of layer groups.
    */
@@ -378,29 +397,47 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
   const handleMoreClick = (event: React.MouseEvent<HTMLElement>) => {
     setMenuAnchorElement(event.currentTarget);
   };
+
   const handleCloseMenu = () => {
     setMenuAnchorElement(null);
   };
+
   const handleRemoveLayer = () => {
     api.map(mapId).layer.removeGeoviewLayer(geoviewLayerInstance);
     // NOTE: parent component needs to deal with removing this legend-item when recieving the layer remove event
     handleCloseMenu();
   };
+
   const handleOpacityOpen = () => {
     setOpacityOpen(!isOpacityOpen);
     handleCloseMenu();
   };
+
   const handleSetOpacity = (opacityValue: number | number[]) => {
     if (!geoviewLayerInstance) return;
-    if (subLayerId) geoviewLayerInstance.setOpacity((opacityValue as number) / 100, subLayerId);
+    if (canCluster) {
+      geoviewLayerInstance.setOpacity((opacityValue as number) / 100, clusterLayerPath);
+      geoviewLayerInstance.setOpacity((opacityValue as number) / 100, unclusterLayerPath);
+    } else if (subLayerId) geoviewLayerInstance.setOpacity((opacityValue as number) / 100, subLayerId);
     else geoviewLayerInstance.setOpacity((opacityValue as number) / 100);
   };
+
   const handleClusterToggle = () => {
-    (geoviewLayerInstance as AbstractGeoViewVector).toggleCluster();
-    const layerConfig = api.map(mapId).layer.getGeoviewLayerById(layerId)?.activeLayer?.geoviewRootLayer;
-    api.map(mapId).layer.removeGeoviewLayer(geoviewLayerInstance);
-    api.map(mapId).layer.addGeoviewLayer(layerConfig!);
+    if (api.map(mapId).layer.registeredLayers[clusterLayerPath]?.gvLayer) {
+      api
+        .map(mapId)
+        .layer.registeredLayers[clusterLayerPath]?.gvLayer!.setVisible(
+          !api.map(mapId).layer.registeredLayers[clusterLayerPath]?.gvLayer!.getVisible()
+        );
+      api
+        .map(mapId)
+        .layer.registeredLayers[unclusterLayerPath]?.gvLayer!.setVisible(
+          !api.map(mapId).layer.registeredLayers[unclusterLayerPath]?.gvLayer!.getVisible()
+        );
+    }
+    setIsClusterToggleEnabled(!isClusterToggleEnabled);
   };
+
   const handleStackIcon = (e: React.KeyboardEvent<HTMLElement>) => {
     if (e.key === 'Enter') {
       handleLegendClick();
@@ -542,7 +579,7 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
             )}
           </MenuItem>
         )}
-        {canCluster && groupItems.length === 0 && (
+        {zoom < splitZoom && canCluster && groupItems.length === 0 && (
           <MenuItem onClick={handleClusterToggle}>
             <ListItemText> {t('legend.toggle_cluster')}</ListItemText>
             {isClusterToggleEnabled && (
@@ -578,6 +615,7 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
                   (geoviewLayerInstance as AbstractGeoViewVector | EsriDynamic).applyViewFilter(sublayerConfig);
                 }}
                 layerConfig={geometryLayerConfig as TypeVectorLayerEntryConfig}
+                mapId={mapId}
                 geometryKey={layerGeometryKey!}
               />
             )}
