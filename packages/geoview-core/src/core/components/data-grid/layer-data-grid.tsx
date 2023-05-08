@@ -243,7 +243,7 @@ export function LayerDataGrid(props: CustomDataGridProps) {
    */
   function CustomExportButton(props: ButtonProps) {
     return (
-      // @ts-expect-error its known issue of x-data-grid, where onResize is required and we dnt need it.
+      // @ts-expect-error its known issue of x-data-grid, where onResize is required and we don' need it.
       <GridToolbarExportContainer {...props}>
         <GridCsvExportMenuItem options={csvOptions} />
         <JsonExportMenuItem />
@@ -281,14 +281,14 @@ export function LayerDataGrid(props: CustomDataGridProps) {
     const label = !mapfiltered ? t('datagrid.filterMap') : t('datagrid.stopFilterMap');
     return (
       <GridToolbarContainer>
-        {/* @ts-expect-error its known issue of x-data-grid, where onResize is required and we dnt need it. */}
+        {/* @ts-expect-error its known issue of x-data-grid, where onResize is required and we don' need it. */}
         <GridToolbarColumnsButton />
-        {/* @ts-expect-error its known issue of x-data-grid, where onResize is required and we dnt need it. */}
+        {/* @ts-expect-error its known issue of x-data-grid, where onResize is required and we don' need it. */}
         <GridToolbarFilterButton />
         <Button>
           <Switch size="small" onChange={() => filterMap()} title={label} checked={mapfiltered} />
         </Button>
-        {/* @ts-expect-error its known issue of x-data-grid, where onResize is required and we dnt need it. */}
+        {/* @ts-expect-error its known issue of x-data-grid, where onResize is required and we don't need it. */}
         <GridToolbarDensitySelector />
         <CustomExportButton />
       </GridToolbarContainer>
