@@ -425,13 +425,19 @@ export class Layer {
       const subLayerZIndex =
         geoviewLayer.layerOrder.indexOf(subLayer.layerId) !== -1 ? geoviewLayer.layerOrder.indexOf(subLayer.layerId) : 0;
       subLayer.gvLayer?.setZIndex(subLayerZIndex + zIndex);
+      const unclusteredLayer =
+        api.maps[this.mapId].layer.registeredLayers[`${geoviewLayer.geoviewLayerId}/${subLayer.layerId}-unclustered`];
+      if (unclusteredLayer) {
+        unclusteredLayer.gvLayer?.setZIndex(subLayerZIndex + zIndex);
+      }
     });
   };
 
   /**
-   * Move layer one level in the given direction.
+   * Move layer to new spot.
    *
    * @param {string} layerId ID of layer to be moved
+   * @param {number} destination index that layer is to move to
    * @param {string} parentLayerId ID of parent layer if layer is a sublayer
    */
   moveLayer = (layerId: string, destination: number, parentLayerId?: string) => {
