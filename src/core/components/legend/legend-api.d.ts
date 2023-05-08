@@ -1,5 +1,5 @@
 /// <reference types="react" />
-import { Legend } from './legend';
+import { LegendsLayerSet } from '../../../app';
 import { TypeLegendItemProps } from './legend-item';
 export interface TypeLegendProps {
     layerIds: string[];
@@ -16,17 +16,13 @@ export interface TypeLegendProps {
  */
 export declare class LegendApi {
     mapId: string;
+    legendLayerSet: LegendsLayerSet;
     /**
      * initialize the legend api
      *
      * @param mapId the id of the map this legend belongs to
      */
     constructor(mapId: string);
-    /**
-     * Create a legend as a component
-     * @deprecated
-     */
-    createLegendComponent: () => typeof Legend;
     /**
      * Create a legend as an element
      *

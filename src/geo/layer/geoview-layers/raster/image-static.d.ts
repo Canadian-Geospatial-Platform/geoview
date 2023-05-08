@@ -2,11 +2,8 @@ import { Coordinate } from 'ol/coordinate';
 import { Pixel } from 'ol/pixel';
 import { AbstractGeoViewLayer, TypeLegend } from '../abstract-geoview-layers';
 import { AbstractGeoViewRaster, TypeBaseRasterLayer } from './abstract-geoview-raster';
-import { TypeImageLayerEntryConfig, TypeLayerEntryConfig, TypeSourceImageStaticInitialConfig, TypeGeoviewLayerConfig, TypeListOfLayerEntryConfig } from '../../../map/map-schema-types';
-import { codedValueType, rangeDomainType, TypeArrayOfFeatureInfoEntries } from '../../../../api/events/payloads/get-feature-info-payload';
-export interface TypeImageStaticLayerEntryConfig extends Omit<TypeImageLayerEntryConfig, 'source'> {
-    source: TypeSourceImageStaticInitialConfig;
-}
+import { TypeLayerEntryConfig, TypeGeoviewLayerConfig, TypeListOfLayerEntryConfig, TypeImageStaticLayerEntryConfig } from '../../../map/map-schema-types';
+import { TypeArrayOfFeatureInfoEntries } from '../../../../api/events/payloads/get-feature-info-payload';
 export interface TypeImageStaticLayerConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig'> {
     geoviewLayerType: 'imageStatic';
     listOfLayerEntryConfig: TypeImageStaticLayerEntryConfig[];
@@ -55,24 +52,6 @@ export declare class ImageStatic extends AbstractGeoViewRaster {
      * @param {TypeImageStaticLayerConfig} layerConfig the layer configuration
      */
     constructor(mapId: string, layerConfig: TypeImageStaticLayerConfig);
-    /** ***************************************************************************************************************************
-     * Extract the type of the specified field from the metadata. If the type can not be found, return 'string'.
-     *
-     * @param {string} fieldName field name for which we want to get the type.
-     * @param {TypeLayerEntryConfig} layerConfig layer configuration.
-     *
-     * @returns {'string' | 'date' | 'number'} The type of the field.
-     */
-    protected getFieldType(fieldName: string, layerConfig: TypeLayerEntryConfig): 'string' | 'date' | 'number';
-    /** ***************************************************************************************************************************
-     * Returns null. Image Static services don't have domains.
-     *
-     * @param {string} fieldName field name for which we want to get the domain.
-     * @param {TypeLayerEntryConfig} layerConfig layer configuration.
-     *
-     * @returns {null | codedValueType | rangeDomainType} The domain of the field.
-     */
-    protected getFieldDomain(fieldName: string, layerConfig: TypeLayerEntryConfig): null | codedValueType | rangeDomainType;
     /** ***************************************************************************************************************************
      * This method reads the service metadata from the metadataAccessPath.
      *
