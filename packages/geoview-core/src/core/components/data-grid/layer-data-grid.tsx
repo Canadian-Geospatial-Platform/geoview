@@ -1,8 +1,4 @@
-/* eslint-disable no-param-reassign */
-/* eslint-disable @typescript-eslint/ban-types */
-/* eslint-disable @typescript-eslint/no-shadow */
-/* eslint-disable react/no-unstable-nested-components */
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   DataGrid,
@@ -29,9 +25,8 @@ import {
 import { useTheme, Theme } from '@mui/material/styles';
 import Button, { ButtonProps } from '@mui/material/Button';
 import { Extent } from 'ol/extent';
-import { TypeLayerEntryConfig, AbstractGeoViewVector, EsriDynamic, api, TypeDisplayLanguage, TypeJsonObject } from '../../../app';
+import { TypeLayerEntryConfig, AbstractGeoViewVector, EsriDynamic, api, TypeDisplayLanguage } from '../../../app';
 import { Tooltip, MenuItem, Switch, ZoomInSearchIcon, IconButton } from '../../../ui';
-import { FieldWithPossiblyUndefined } from 'lodash';
 
 /**
  * Create a data grid (table) component for a lyer features all request
@@ -148,7 +143,7 @@ export function LayerDataGrid(props: CustomDataGridProps) {
   } = useTheme();
 
   const [filterString, setFilterString] = useState<string>('');
-  const [mapfiltered, setMapFiltered] = useState<boolean>(false);
+  const [mapFiltered, setMapFiltered] = useState<boolean>(false);
 
   const csvOptions: GridCsvExportOptions = { delimiter: ';' };
   const printOptions: GridPrintExportOptions = {};
@@ -203,12 +198,14 @@ export function LayerDataGrid(props: CustomDataGridProps) {
   /**
    * the export Json item added in menu
    *
-   * @param {GridExportMenuItemProps} props hideMenu
+   * @param {GridExportMenuItemProps} propsExport hideMenu
    * @return {MenuItem} export json item in menu
    *
    */
-  function JsonExportMenuItem(props: GridExportMenuItemProps<{}>) {
-    const { hideMenu } = props;
+  // TODO: refactor unstable component to be in its own file
+  // eslint-disable-next-line react/no-unstable-nested-components
+  function JsonExportMenuItem(propsExport: GridExportMenuItemProps<object>) {
+    const { hideMenu } = propsExport;
     const apiRef = useGridApiContext();
     const onMenuItemClick = () => {
       const jsonString = getJson(gridFilteredSortedRowIdsSelector(apiRef));
@@ -237,14 +234,16 @@ export function LayerDataGrid(props: CustomDataGridProps) {
   /**
    * Customize the export menu, adding the export json button
    *
-   * @param {ButtonProps} props pass the props
+   * @param {ButtonProps} propsButton pass the props
    * @return {GridToolbarExportContainer} export menu
    *
    */
-  function CustomExportButton(props: ButtonProps) {
+  // TODO: refactor unstable component to be in its own file
+  // eslint-disable-next-line react/no-unstable-nested-components
+  function CustomExportButton(propsButton: ButtonProps) {
     return (
       // @ts-expect-error its known issue of x-data-grid, where onResize is required and we don't need it.
-      <GridToolbarExportContainer {...props}>
+      <GridToolbarExportContainer {...propsButton}>
         <GridCsvExportMenuItem options={csvOptions} />
         <JsonExportMenuItem />
         <GridPrintExportMenuItem options={printOptions} />
@@ -256,81 +255,67 @@ export function LayerDataGrid(props: CustomDataGridProps) {
    * Convert the filter string from the Filter Model
    *
    * @param {GridFilterModel} gridFilterModel
-   *
-   * @return {string} filter string
    */
-  const buildFilterString = (gridFilterModel: GridFilterModel): string => {
-    const filterObj = gridFilterModel.items[0] as FilterObject;
-    const fieldType = columns.find((column) => column.field === filterObj.columnField)?.type;
+  const buildFilterString = (gridFilterModel: GridFilterModel) => {
+    // checkif if there is items in filter object
+    let filter = '';
+    if (gridFilterModel.items.length > 0) {
+      const filterObj = gridFilterModel.items[0] as FilterObject;
+      const fieldType = columns.find((column) => column.field === filterObj.columnField)?.type;
 
-    let filterString = '';
-    if (
-      filterObj === undefined ||
-      ((filterObj.value === undefined || filterObj.value === '') &&
+      if (
+        (filterObj.value === undefined || filterObj.value === '') &&
         filterObj.operatorValue !== 'isEmpty' &&
-        filterObj.operatorValue !== 'isNotEmpty')
-    ) {
-      filterString = '';
-    } else if (fieldType === 'date') {
-      filterString = `${filterObj.columnField} ${(DATE_FILTER[filterObj.operatorValue] as string).replace(
-        'value',
-        `'${filterObj.value as string}'`
-      )}`;
-    } else if (fieldType === 'number') {
-      filterString = `${filterObj.columnField} ${NUMBER_FILTER[filterObj.operatorValue]} `;
-      filterString +=
-        filterObj.operatorValue !== 'isAnyOf' ? `${filterObj.value}` : `(${(filterObj.value as unknown as string[]).join(',')})`;
-    } else if (fieldType === 'string') {
-      filterString =
-        filterObj.operatorValue !== 'isAnyOf'
-          ? `${filterObj.columnField} ${(STRING_FILTER[filterObj.operatorValue] as string).replace(
-              'value',
-              `${filterObj.value as string}`
-            )}`
-          : `${filterObj.columnField} ${(STRING_FILTER[filterObj.operatorValue] as string).replace(
-              'value',
-              `'${(filterObj.value as unknown as string[]).join("','")}'`
-            )}`;
+        filterObj.operatorValue !== 'isNotEmpty'
+      ) {
+        filter = '';
+      } else if (fieldType === 'date') {
+        filter = `${filterObj.columnField} ${(DATE_FILTER[filterObj.operatorValue] as string).replace(
+          'value',
+          `'${filterObj.value as string}'`
+        )}`;
+      } else if (fieldType === 'number') {
+        filter = `${filterObj.columnField} ${NUMBER_FILTER[filterObj.operatorValue]} `;
+        filter += filterObj.operatorValue !== 'isAnyOf' ? `${filterObj.value}` : `(${(filterObj.value as unknown as string[]).join(',')})`;
+      } else if (fieldType === 'string') {
+        filter =
+          filterObj.operatorValue !== 'isAnyOf'
+            ? `${filterObj.columnField} ${(STRING_FILTER[filterObj.operatorValue] as string).replace(
+                'value',
+                `${filterObj.value as string}`
+              )}`
+            : `${filterObj.columnField} ${(STRING_FILTER[filterObj.operatorValue] as string).replace(
+                'value',
+                `'${(filterObj.value as unknown as string[]).join("','")}'`
+              )}`;
+      }
     }
 
-    console.log(filterString);
-
-    return filterString;
+    setFilterString(filter);
   };
 
   /**
    * Apply the filter who is on the data grid to the map
-   *
-   * @param {string} filter filter to apply to map
    */
-  const filterMap = (filter?: string) => {
-    let applyFilterString = '';
+  useEffect(() => {
     const geoviewLayerInstance = api.map(mapId).layer.geoviewLayers[layerId];
     const filterLayerConfig = api.map(mapId).layer.registeredLayers[layerKey] as TypeLayerEntryConfig;
-    if (geoviewLayerInstance !== undefined && filterLayerConfig !== undefined) {
-      if (filter !== undefined) {
-        if (mapfiltered) {
-          applyFilterString = filter;
-        }
-      } else if (!mapfiltered) {
-        applyFilterString = filterString;
-      }
-      applyFilterString = filter !== undefined ? filter : filterString;
-      (geoviewLayerInstance as AbstractGeoViewVector | EsriDynamic)?.applyViewFilter(filterLayerConfig, applyFilterString);
+    if (mapFiltered && geoviewLayerInstance !== undefined && filterLayerConfig !== undefined) {
+      (geoviewLayerInstance as AbstractGeoViewVector | EsriDynamic)?.applyViewFilter(filterLayerConfig, filterString);
+    } else {
+      (geoviewLayerInstance as AbstractGeoViewVector | EsriDynamic)?.applyViewFilter(filterLayerConfig, '');
     }
-
-    if (filter === undefined) {
-      setMapFiltered(!mapfiltered);
-    }
-  };
+  }, [mapFiltered, filterString, mapId, layerId, layerKey]);
 
   /**
    * Customize the toolbar, replace the Export button menu with the customized one
    * @return {GridToolbarContainer} toolbar
    *
    */
+  // TODO: refactor unstable component to be in its own file
+  // eslint-disable-next-line react/no-unstable-nested-components
   function CustomToolbar() {
-    const label = !mapfiltered ? t('datagrid.filterMap') : t('datagrid.stopFilterMap');
+    const label = !mapFiltered ? t('datagrid.filterMap') : t('datagrid.stopFilterMap');
     return (
       <GridToolbarContainer>
         {/* @ts-expect-error its known issue of x-data-grid, where onResize is required and we don't need it. */}
@@ -338,7 +323,7 @@ export function LayerDataGrid(props: CustomDataGridProps) {
         {/* @ts-expect-error its known issue of x-data-grid, where onResize is required and we don't need it. */}
         <GridToolbarFilterButton />
         <Button>
-          <Switch size="small" onChange={() => filterMap()} title={label} checked={mapfiltered} />
+          <Switch size="small" onChange={() => setMapFiltered(!mapFiltered)} title={label} checked={mapFiltered} />
         </Button>
         {/* @ts-expect-error its known issue of x-data-grid, where onResize is required and we don't need it. */}
         <GridToolbarDensitySelector />
@@ -350,6 +335,7 @@ export function LayerDataGrid(props: CustomDataGridProps) {
   // tooltip implementation for column content
   // TODO: works only with hover and add tooltips even when not needed. need improvement
   columns.forEach((column) => {
+    /* eslint-disable no-param-reassign */
     column.renderCell = (params: GridCellParams) => {
       if (column.field === 'featureIcon') {
         return <img alt={params.value} src={params.value} style={{ ...theme.iconImg, width: '35px', height: '35px' }} />;
@@ -391,11 +377,7 @@ export function LayerDataGrid(props: CustomDataGridProps) {
            * You may wish to remove this line when working on the data grid
            */
           logLevel={false}
-          onFilterModelChange={(filterModel) => {
-            const filter = filterModel.items.length > 0 ? buildFilterString(filterModel) : '';
-            setFilterString(filter);
-            filterMap(filter);
-          }}
+          onFilterModelChange={(filterModel) => buildFilterString(filterModel)}
         />
       </div>
     </div>
