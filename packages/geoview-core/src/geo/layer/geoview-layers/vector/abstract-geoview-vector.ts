@@ -12,7 +12,7 @@ import LayerGroup from 'ol/layer/Group';
 import { Coordinate } from 'ol/coordinate';
 import { getCenter, Extent } from 'ol/extent';
 import { Pixel } from 'ol/pixel';
-import { transform } from 'ol/proj';
+import { transform, transformExtent } from 'ol/proj';
 
 import { AbstractGeoViewLayer } from '../abstract-geoview-layers';
 import {
@@ -353,11 +353,11 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
   }
 
   /** ***************************************************************************************************************************
-   * Compute the layer bounds or undefined if the result can not be obtained from le feature extents that compose the layer. If
+   * Compute the layer bounds or undefined if the result can not be obtained from the feature extents that compose the layer. If
    * layerPathOrConfig is undefined, the active layer is used. If projectionCode is defined, returns the bounds in the specified
    * projection otherwise use the map projection. The bounds are different from the extent. They are mainly used for display
    * purposes to show the bounding box in which the data resides and to zoom in on the entire layer data. It is not used by
-   * openlayer to limit the display of data on the map.
+   * openlayer to limit the display of data on the map. If the bounds lie outside the extents, they are reduced to the extents.
    *
    * @param {string | TypeLayerEntryConfig | TypeListOfLayerEntryConfig | null} layerPathOrConfig Optional layer path or
    * configuration.
@@ -367,7 +367,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
    */
   calculateBounds(
     layerPathOrConfig: string | TypeLayerEntryConfig | TypeListOfLayerEntryConfig | null = this.activeLayer,
-    projectionCode: string | number | undefined = undefined
+    projectionCode: string | number = api.map(this.mapId).currentProjection
   ): Extent | undefined {
     let bounds: Extent | undefined;
     const processGroupLayerBounds = (listOfLayerEntryConfig: TypeListOfLayerEntryConfig) => {
@@ -402,10 +402,19 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
     if (rootLayerConfig) {
       if (Array.isArray(rootLayerConfig)) processGroupLayerBounds(rootLayerConfig);
       else processGroupLayerBounds([rootLayerConfig]);
-      if (projectionCode && bounds) {
-        const minXY = transform([bounds[0], bounds[1]], `EPSG:4326`, `EPSG:${projectionCode}`);
-        const maxXY = transform([bounds[2], bounds[3]], `EPSG:4326`, `EPSG:${projectionCode}`);
-        bounds = [minXY[0], minXY[1], maxXY[0], maxXY[1]];
+      const extent = transformExtent(
+        this.getExtent() || api.map(this.mapId).getView().get('extent'),
+        `EPSG:${api.map(this.mapId).currentProjection}`,
+        `EPSG:4326`
+      );
+      if (bounds) {
+        bounds = [
+          Math.max(extent[0], bounds[0]),
+          Math.max(extent[1], bounds[1]),
+          Math.min(extent[2], bounds[2]),
+          Math.min(extent[3], bounds[3]),
+        ];
+        bounds = transformExtent(bounds, `EPSG:4326`, `EPSG:${projectionCode}`);
       }
     }
     return bounds;

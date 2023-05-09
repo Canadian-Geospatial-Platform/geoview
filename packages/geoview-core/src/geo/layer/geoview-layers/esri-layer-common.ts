@@ -2,13 +2,10 @@
 /* eslint-disable no-param-reassign */
 import axios from 'axios';
 import { Extent } from 'ol/extent';
-import BaseLayer from 'ol/layer/Base';
-import { Pixel } from 'ol/pixel';
-import { transform, transformExtent } from 'ol/proj';
+import { transformExtent } from 'ol/proj';
 
 import cloneDeep from 'lodash/cloneDeep';
-import { Cast, Coordinate, TypeJsonArray, TypeJsonObject } from '../../../core/types/global-types';
-import { AbstractGeoViewLayer, TypeGeoviewLayerType } from './abstract-geoview-layers';
+import { Cast, TypeJsonArray, TypeJsonObject } from '../../../core/types/global-types';
 import {
   layerEntryIsGroupLayer,
   TypeEsriDynamicLayerEntryConfig,
@@ -19,12 +16,11 @@ import {
 import { getLocalizedValue, getXMLHttpRequest } from '../../../core/utils/utilities';
 import { api } from '../../../app';
 import { Layer } from '../layer';
-import { EsriDynamic, geoviewEntryIsEsriDynamic, TypeEsriDynamicLayerConfig } from './raster/esri-dynamic';
-import { EsriFeature, geoviewEntryIsEsriFeature, TypeEsriFeatureLayerConfig, TypeEsriFeatureLayerEntryConfig } from './vector/esri-feature';
+import { EsriDynamic, geoviewEntryIsEsriDynamic } from './raster/esri-dynamic';
+import { EsriFeature, geoviewEntryIsEsriFeature, TypeEsriFeatureLayerEntryConfig } from './vector/esri-feature';
 import { EsriBaseRenderer, getStyleFromEsriRenderer } from '../../renderer/esri-renderer';
 import { TimeDimensionESRI } from '../../../core/utils/date-mgt';
-import { codedValueType, rangeDomainType, TypeArrayOfFeatureInfoEntries } from '../../../api/events/payloads/get-feature-info-payload';
-import { AbstractGeoViewVector } from './vector/abstract-geoview-vector';
+import { codedValueType, rangeDomainType } from '../../../api/events/payloads/get-feature-info-payload';
 
 /** ***************************************************************************************************************************
  * This method reads the service metadata from the metadataAccessPath.
