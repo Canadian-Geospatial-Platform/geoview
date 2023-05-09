@@ -75,6 +75,7 @@
       },
       {
         "geoviewLayerId": "geojsonLYR5",
+        "serviceDateFormat": "mm/dd/yyyy hh:mm:ssz",
         "geoviewLayerName": {
           "en": "GeoJSON Sample"
         },
