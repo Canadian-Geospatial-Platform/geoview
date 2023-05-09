@@ -17,7 +17,7 @@
     "listOfGeoviewLayerConfig": [
       {
         "geoviewLayerId": "historical-flood",
-        "serviceDateFormat": "yyyy/mm/ddThh:mm:ss-05:00",
+        "serviceDateFormat": "yyyy/mm/ddThh:mm:ssz",
         "geoviewLayerName": {
           "en": "Historical Flood Events (HFE)"
         },
@@ -27,12 +27,7 @@
         "geoviewLayerType": "esriFeature",
         "listOfLayerEntryConfig": [
           {
-            "layerId": "0",
-            "source": {
-              "cluster": {
-                "enable": false
-              }
-            }
+            "layerId": "0"
           }
         ]
       }
