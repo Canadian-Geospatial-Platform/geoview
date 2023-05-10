@@ -41,6 +41,9 @@ export class Basemap {
   // default extent
   defaultExtent?: Extent;
 
+  // default overview map layer
+  overviewMap?: TypeBasemapProps;
+
   // attribution text
   attribution: string;
 
@@ -577,8 +580,10 @@ export class Basemap {
    */
   loadDefaultBasemaps = async (): Promise<TypeBasemapProps | undefined> => {
     const basemap = await this.createCoreBasemap(this.basemapOptions);
+    const overviewBasemap = await this.createCoreBasemap({ basemapId: 'transport', shaded: false, labeled: false });
 
     this.activeBasemap = basemap;
+    this.overviewMap = overviewBasemap;
 
     this.defaultOrigin = basemap?.defaultOrigin;
     this.defaultResolutions = basemap?.defaultResolutions;
