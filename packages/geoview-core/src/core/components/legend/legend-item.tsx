@@ -3,6 +3,7 @@ import React, { useEffect, useState, useRef, MutableRefObject, RefObject } from 
 import { useTranslation } from 'react-i18next';
 import { useTheme, Theme } from '@mui/material/styles';
 import Grid from '@mui/material/Grid';
+import { Extent } from 'ol/extent';
 import {
   Box,
   Collapse,
@@ -51,7 +52,6 @@ import {
 } from '../../../geo/map/map-schema-types';
 import { AbstractGeoViewVector } from '../../../geo/layer/geoview-layers/vector/abstract-geoview-vector';
 import { disableScrolling } from '../../utils/utilities';
-import { Extent } from 'ol/extent';
 
 const sxClasses = {
   expandableGroup: {
@@ -489,6 +489,7 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
     if (bounds) {
       setZoomtoExtent(bounds);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (

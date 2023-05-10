@@ -51,6 +51,7 @@ export class LegendApi {
           canSetOpacity,
           expandAll,
           hideAll,
+          canZoomTo: true,
         });
       }
       return null;
