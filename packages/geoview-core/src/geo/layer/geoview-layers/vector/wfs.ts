@@ -1,8 +1,7 @@
 /* eslint-disable no-var, vars-on-top, block-scoped-var, no-param-reassign */
 import { transformExtent } from 'ol/proj';
 import { Options as SourceOptions } from 'ol/source/Vector';
-import { all } from 'ol/loadingstrategy';
-import { GeoJSON as FormatGeoJSON } from 'ol/format';
+import { WFS as FormatWFS } from 'ol/format';
 import { ReadOptions } from 'ol/format/Feature';
 import { Vector as VectorSource } from 'ol/source';
 import { Geometry } from 'ol/geom';
@@ -21,10 +20,9 @@ import {
   TypeBaseLayerEntryConfig,
 } from '../../../map/map-schema-types';
 
-import { getLocalizedValue, getXMLHttpRequest, xmlToJson } from '../../../../core/utils/utilities';
+import { getLocalizedValue, getXMLHttpRequest, xmlToJson, findPropertyNameByRegex } from '../../../../core/utils/utilities';
 import { api } from '../../../../app';
 import { Layer } from '../../layer';
-import { codedValueType, rangeDomainType } from '../../../../api/events/payloads/get-feature-info-payload';
 
 export interface TypeSourceWFSVectorInitialConfig extends TypeVectorSourceInitialConfig {
   format: 'WFS';
@@ -104,7 +102,7 @@ export class WFS extends AbstractGeoViewVector {
    * Extract the type of the specified field from the metadata. If the type can not be found, return 'string'.
    *
    * @param {string} fieldName field name for which we want to get the type.
-   * @param {TypeLayerEntryConfig} layeConfig layer configuration.
+   * @param {TypeLayerEntryConfig} layerConfig layer configuration.
    *
    * @returns {'string' | 'date' | 'number'} The type of the field.
    */
@@ -120,28 +118,21 @@ export class WFS extends AbstractGeoViewVector {
   }
 
   /** ***************************************************************************************************************************
-   * Returns null. WFS services don't have domains.
-   *
-   * @param {string} fieldName field name for which we want to get the domain.
-   * @param {TypeLayerEntryConfig} layeConfig layer configuration.
-   *
-   * @returns {null | codedValueType | rangeDomainType} The domain of the field.
-   */
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  protected getFieldDomain(fieldName: string, layerConfig: TypeLayerEntryConfig): null | codedValueType | rangeDomainType {
-    return null;
-  }
-
-  /** ***************************************************************************************************************************
    * This method reads the service metadata from the metadataAccessPath.
    *
    * @returns {Promise<void>} A promise that the execution is completed.
    */
   protected getServiceMetadata(): Promise<void> {
     const promisedExecution = new Promise<void>((resolve) => {
-      const metadataUrl = getLocalizedValue(this.metadataAccessPath, this.mapId);
+      let metadataUrl = getLocalizedValue(this.metadataAccessPath, this.mapId) as string;
+
+      // check if url contains metadata parameters for the getCapabilities request and reformat the urls
+      const getCapabilitiesUrl =
+        metadataUrl!.indexOf('?') > -1 ? metadataUrl.substring(metadataUrl!.indexOf('?')) : `?service=WFS&request=GetCapabilities`;
+      metadataUrl = metadataUrl!.indexOf('?') > -1 ? metadataUrl.substring(0, metadataUrl!.indexOf('?')) : metadataUrl;
+
       if (metadataUrl) {
-        getXMLHttpRequest(`${metadataUrl}?service=WFS&request=getcapabilities`).then((metadataString) => {
+        getXMLHttpRequest(`${metadataUrl}${getCapabilitiesUrl}`).then((metadataString) => {
           if (metadataString === '{}')
             throw new Error(`Cant't read service metadata for layer ${this.geoviewLayerId} of map ${this.mapId}.`);
           else {
@@ -149,8 +140,10 @@ export class WFS extends AbstractGeoViewVector {
             const xmlDOMCapabilities = new DOMParser().parseFromString(metadataString, 'text/xml');
             const xmlJsonCapabilities = xmlToJson(xmlDOMCapabilities);
 
-            this.metadata = xmlJsonCapabilities['wfs:WFS_Capabilities'];
-            this.version = xmlJsonCapabilities['wfs:WFS_Capabilities']['@attributes'].version as string;
+            const capabilitiesObject = findPropertyNameByRegex(xmlJsonCapabilities, /(?:WFS_Capabilities)/);
+
+            this.metadata = capabilitiesObject as TypeJsonObject;
+            this.version = (capabilitiesObject as TypeJsonObject)['@attributes'].version as string;
             resolve();
           }
         });
@@ -192,6 +185,12 @@ export class WFS extends AbstractGeoViewVector {
 
       // Note that the code assumes wfs feature type list does not contains metadata layer group. If you need layer group,
       // you can define them in the configuration section.
+      // when there is only one layer, it is not an array but an object
+      if (!Array.isArray(this.metadata?.FeatureTypeList?.FeatureType)) {
+        const tempFeature = this.metadata?.FeatureTypeList?.FeatureType as TypeJsonObject;
+        this.metadata!.FeatureTypeList!.FeatureType = [tempFeature] as TypeJsonObject;
+      }
+
       if (Array.isArray(this.metadata?.FeatureTypeList?.FeatureType)) {
         const metadataLayerList = this.metadata?.FeatureTypeList.FeatureType as Array<TypeJsonObject>;
         for (var i = 0; i < metadataLayerList.length; i++) {
@@ -245,9 +244,32 @@ export class WFS extends AbstractGeoViewVector {
    */
   protected processLayerMetadata(layerEntryConfig: TypeVectorLayerEntryConfig): Promise<void> {
     const promiseOfExecution = new Promise<void>((resolve) => {
-      const queryUrl = getLocalizedValue(layerEntryConfig.source!.dataAccessPath, this.mapId);
-      if (queryUrl) {
-        fetch(`${queryUrl}?service=WFS&request=DescribeFeatureType&outputFormat=application/json&typeName=${layerEntryConfig.layerId}`)
+      let queryUrl = getLocalizedValue(layerEntryConfig.source!.dataAccessPath, this.mapId);
+
+      // check if url contains metadata parameters for the getCapabilities request and reformat the urls
+      queryUrl = queryUrl!.indexOf('?') > -1 ? queryUrl!.substring(0, queryUrl!.indexOf('?')) : queryUrl;
+
+      // extract DescribeFeatureType operation parameters
+      const describeFeatureParams = this.metadata!['ows:OperationsMetadata']['ows:Operation'][1]['ows:Parameter'];
+      const describeFeatureParamsValues = findPropertyNameByRegex(describeFeatureParams, /(?:Value)/);
+      let outputFormat = '';
+      if (describeFeatureParamsValues !== undefined) {
+        if (Array.isArray(describeFeatureParamsValues['ows:Value'])) {
+          outputFormat = describeFeatureParamsValues['ows:Value'][0]['#text'] as string;
+        } else if (describeFeatureParamsValues['ows:Value'] === undefined) {
+          outputFormat = describeFeatureParamsValues[0]['#text'] as string;
+        } else {
+          outputFormat = (describeFeatureParamsValues as TypeJsonObject)['ows:Value']['#text'] as string;
+        }
+      }
+
+      // eslint-disable-next-line prettier/prettier
+      const describeFeatureUrl = `${queryUrl}?service=WFS&request=DescribeFeatureType&version=${
+        this.version
+      }&outputFormat=${encodeURIComponent(outputFormat as string)}&typeName=${layerEntryConfig.layerId}`;
+
+      if (describeFeatureUrl && outputFormat === 'application/json') {
+        fetch(describeFeatureUrl)
           .then<TypeJsonObject>((fetchResponse) => {
             return fetchResponse.json();
           })
@@ -255,6 +277,33 @@ export class WFS extends AbstractGeoViewVector {
             if (Array.isArray(layerMetadata.featureTypes) && Array.isArray(layerMetadata.featureTypes[0].properties)) {
               this.layerMetadata[Layer.getLayerPath(layerEntryConfig)] = layerMetadata.featureTypes[0].properties;
               this.processFeatureInfoConfig(layerMetadata.featureTypes[0].properties as TypeJsonArray, layerEntryConfig);
+            }
+            resolve();
+          });
+      } else if (describeFeatureUrl && outputFormat.toUpperCase().includes('XML')) {
+        fetch(describeFeatureUrl)
+          .then<string>((fetchResponse) => {
+            return fetchResponse.text();
+          })
+          .then((layerMetadata) => {
+            // need to pass a xmldom to xmlToJson to convert xsd schema to json
+            const xmlDOMDescribe = new DOMParser().parseFromString(layerMetadata, 'text/xml');
+            const xmlJsonDescribe = xmlToJson(xmlDOMDescribe);
+            const prefix = Object.keys(xmlJsonDescribe)[0].includes('xsd:') ? 'xsd:' : '';
+            const xmlJsonDescribeElement =
+              xmlJsonDescribe[`${prefix}schema`][`${prefix}complexType`][`${prefix}complexContent`][`${prefix}extension`][
+                `${prefix}sequence`
+              ][`${prefix}element`];
+
+            if (Array.isArray(xmlJsonDescribeElement)) {
+              // recreate the array of properties as if it was json
+              const featureTypeProperties: TypeJsonArray = [];
+              xmlJsonDescribeElement.forEach((element) => {
+                featureTypeProperties.push(element['@attributes']);
+              });
+
+              this.layerMetadata[Layer.getLayerPath(layerEntryConfig)] = featureTypeProperties as TypeJsonObject;
+              this.processFeatureInfoConfig(featureTypeProperties as TypeJsonArray, layerEntryConfig);
             }
             resolve();
           });
@@ -315,21 +364,30 @@ export class WFS extends AbstractGeoViewVector {
    * Create a source configuration for the vector layer.
    *
    * @param {TypeBaseLayerEntryConfig} layerEntryConfig The layer entry configuration.
+   * @param {SourceOptions} sourceOptions The source options (default: {}).
+   * @param {ReadOptions} readOptions The read options (default: {}).
    *
    * @returns {VectorSource<Geometry>} The source configuration that will be used to create the vector layer.
    */
   protected createVectorSource(
     layerEntryConfig: TypeBaseLayerEntryConfig,
-    sourceOptions: SourceOptions = { strategy: all },
+    sourceOptions: SourceOptions = {},
     readOptions: ReadOptions = {}
   ): VectorSource<Geometry> {
     readOptions.dataProjection = (layerEntryConfig.source as TypeBaseSourceVectorInitialConfig).dataProjection;
-    sourceOptions.url = getLocalizedValue(layerEntryConfig.source!.dataAccessPath!, this.mapId);
-    sourceOptions.url = `${sourceOptions.url}?service=WFS&request=getFeature&outputFormat=application/json&version=2.0.0`;
-    sourceOptions.url = `${sourceOptions.url}&srsname=${(layerEntryConfig.source as TypeBaseSourceVectorInitialConfig).dataProjection}`;
+
+    // check if url contains metadata parameters for the getCapabilities request and reformat the urls
+    const sourceUrl = getLocalizedValue(layerEntryConfig.source!.dataAccessPath!, this.mapId);
+    sourceOptions.url = sourceUrl!.indexOf('?') > -1 ? sourceUrl!.substring(0, sourceUrl!.indexOf('?')) : sourceUrl;
+    sourceOptions.url = `${sourceOptions.url}?service=WFS&request=getFeature&version=${this.version}`;
     sourceOptions.url = `${sourceOptions.url}&typeName=${layerEntryConfig.layerId}`;
-    sourceOptions.format = new FormatGeoJSON();
+
+    sourceOptions.format = new FormatWFS({
+      version: this.version,
+    });
+
     const vectorSource = super.createVectorSource(layerEntryConfig, sourceOptions, readOptions);
+
     return vectorSource;
   }
 }

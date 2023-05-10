@@ -8,7 +8,10 @@
     "projection": 3978,
     "viewSettings": {
       "zoom": 12,
-      "center": [-106, 60]
+      "center": [
+        -106,
+        60
+      ]
     },
     "basemapOptions": {
       "id": "transport",
@@ -22,8 +25,12 @@
   "corePackages": [],
   "externalPackages": [],
   "serviceUrls": {
-    "keys": "https://geocore.api.geo.ca"
+    "keys": "https://geocore.api.geo.ca",
+    "geolocator": "https://o2ie3cx0o6.execute-api.ca-central-1.amazonaws.com/dev/v0?keys=geonames,nominatim"
   },
-  "suportedLanguages": ["en", "fr"],
+  "suportedLanguages": [
+    "en",
+    "fr"
+  ],
   "version": "1.0"
 }

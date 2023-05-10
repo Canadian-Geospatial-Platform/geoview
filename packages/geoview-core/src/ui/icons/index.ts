@@ -38,6 +38,8 @@ import CheckBoxOutlineBlankIcon from '@mui/icons-material/CheckBoxOutlineBlank';
 import ZoomInSearchIcon from '@mui/icons-material/ZoomIn';
 import ZoomOutSearchIcon from '@mui/icons-material/ZoomOut';
 import FileUploadIcon from '@mui/icons-material/FileUpload';
+import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
+import BrowserNotSupportedIcon from '@mui/icons-material/BrowserNotSupported';
 
 export {
   Layers as LayersIcon,
@@ -82,4 +84,6 @@ export {
   ZoomInSearchIcon,
   ZoomOutSearchIcon,
   FileUploadIcon,
+  MoreHorizIcon,
+  BrowserNotSupportedIcon,
 };

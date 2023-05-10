@@ -123,6 +123,7 @@ export class Vector {
   addPolyline = (
     points: Coordinate,
     options?: {
+      projection?: number;
       geometryLayout?: 'XY' | 'XYZ' | 'XYM' | 'XYZM';
       style?: TypeFeatureStyle;
     },
@@ -135,7 +136,7 @@ export class Vector {
     // create a line geometry
     const polyline = new Feature({
       geometry: new LineString(points, polylineOptions.geometryLayout).transform(
-        'EPSG:4326',
+        `EPSG:${options?.projection || 4326}`,
         api.projection.projections[api.map(this.#mapId).currentProjection]
       ),
     });
@@ -194,6 +195,7 @@ export class Vector {
   addPolygon = (
     points: number[] | Coordinate[][],
     options?: {
+      projection?: number;
       geometryLayout?: 'XY' | 'XYZ' | 'XYM' | 'XYZM';
       style?: TypeFeatureStyle;
     },
@@ -206,7 +208,7 @@ export class Vector {
     // create a line geometry
     const polygon = new Feature({
       geometry: new Polygon(points, polygonOptions.geometryLayout).transform(
-        'EPSG:4326',
+        `EPSG:${options?.projection || 4326}`,
         api.projection.projections[api.map(this.#mapId).currentProjection]
       ),
     });
@@ -265,6 +267,7 @@ export class Vector {
   addCircle = (
     coordinate: Coordinate,
     options?: {
+      projection?: number;
       geometryLayout?: 'XY' | 'XYZ' | 'XYM' | 'XYZM';
       style?: TypeFeatureCircleStyle;
     },
@@ -280,7 +283,7 @@ export class Vector {
     // create a line geometry
     const circle = new Feature({
       geometry: new Circle(coordinate, radius, circleOptions.geometryLayout).transform(
-        'EPSG:4326',
+        `EPSG:${options?.projection || 4326}`,
         api.projection.projections[api.map(this.#mapId).currentProjection]
       ),
     });
@@ -339,6 +342,7 @@ export class Vector {
   addMarkerIcon = (
     coordinate: Coordinate,
     options?: {
+      projection?: number;
       geometryLayout?: 'XY' | 'XYZ' | 'XYM' | 'XYZM';
       style?: TypeIconStyle;
     },
@@ -361,7 +365,7 @@ export class Vector {
     // create a point feature
     const marker = new Feature({
       geometry: new Point(coordinate, markerOptions.geometryLayout).transform(
-        'EPSG:4326',
+        `EPSG:${options?.projection || 4326}`,
         api.projection.projections[api.map(this.#mapId).currentProjection]
       ),
     });

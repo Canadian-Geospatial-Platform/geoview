@@ -30,7 +30,7 @@
     "attribution": {
       "defaultnrcan": "© Sa Majesté le Roi du Chef du Canada, représentée par le ministre des Ressources naturelle"
     },
-    "crosshair": "Utilisez les touches <strong>fléchées</strong>, <strong>+</strong> et <strong>-</strong> pour naviguer sur la carte et <strong>Entrée</strong> pour sélectionner."
+    "crosshair": "Utilisez les touches <strong>fléchées</strong>, <strong>+</strong> et <strong>-</strong> pour naviguer sur la carte, <strong>Entrée</strong> pour sélectionner et <strong>Shift+fléchées</strong> <strong>Haut</strong> et <strong>Bas</strong> pour modfier le déplacement."
   },
   "appbar": {
     "export": "Exporter",
@@ -78,5 +78,9 @@
     "title": "Exporter la carte en PNG",
     "cancelBtn": "Annuler",
     "exportBtn": "Exporter"
+  },
+  "geolocator": {
+    "search": "Texte à rechercher",
+    "errorMessage": "Aucun résultat correspondant à"
   }
 }

@@ -446,7 +446,7 @@ function processUniqueValueRenderer(styleId: string, renderer: EsriUniqueValueRe
   const style: TypeStyleConfig = {};
   const styleType = 'uniqueValue';
   const defaultLabel = renderer.defaultLabel === null ? undefined : renderer.defaultLabel;
-  const defaultVisible = 'yes';
+  const defaultVisible = renderer.defaultSymbol ? 'yes' : 'no';
   const defaultSettings = convertSymbol(renderer.defaultSymbol);
   const fields = [renderer.field1];
   if (renderer.field2) fields.push(renderer.field2);
@@ -520,7 +520,7 @@ function processClassBreakRenderer(styleId: string, EsriRenderer: EsriClassBreak
   const styleType = 'classBreaks';
   const defaultLabel = EsriRenderer.defaultLabel === null ? undefined : EsriRenderer.defaultLabel;
   const defaultSettings = convertSymbol(EsriRenderer.defaultSymbol);
-  const defaultVisible = 'yes';
+  const defaultVisible = EsriRenderer.defaultLabel ? 'yes' : 'no';
   const { field } = EsriRenderer;
   const classBreakStyleInfo: TypeClassBreakStyleInfo[] = [];
   for (let i = 0; i < EsriRenderer.classBreakInfos.length; i++) {

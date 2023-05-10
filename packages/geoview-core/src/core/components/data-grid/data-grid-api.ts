@@ -5,7 +5,14 @@ import { createElement, ReactElement, useState, useEffect } from 'react';
 import { toLonLat } from 'ol/proj';
 import { Extent } from 'ol/extent';
 import { Geometry, Point, Polygon, LineString, MultiPoint } from 'ol/geom';
-import { AbstractGeoViewVector, api, TypeArrayOfFeatureInfoEntries, TypeDisplayLanguage, TypeListOfLayerEntryConfig } from '../../../app';
+import {
+  AbstractGeoViewVector,
+  api,
+  TypeArrayOfFeatureInfoEntries,
+  TypeDisplayLanguage,
+  TypeListOfLayerEntryConfig,
+  isVectorLayer,
+} from '../../../app';
 
 import { LayerDataGrid } from './layer-data-grid';
 
@@ -155,7 +162,7 @@ export class DataGridAPI {
       });
 
       return {
-        key: `${layerId}-datagrid`,
+        key: `${layerId}-datagrid-${layerKey}`,
         mapId: this.mapId,
         layerKey,
         columns,
@@ -170,8 +177,12 @@ export class DataGridAPI {
     };
 
     useEffect(() => {
+      let isMounted = true;
       const geoviewLayerInstance = api.map(this.mapId).layer.geoviewLayers[layerId];
-      if (geoviewLayerInstance.listOfLayerEntryConfig.length > 0) {
+      if (
+        geoviewLayerInstance.listOfLayerEntryConfig.length > 0 &&
+        (geoviewLayerInstance as AbstractGeoViewVector).getAllFeatureInfo !== undefined
+      ) {
         const grouplayerKeys: string[] = [];
         const grouplayerValues: { layerkey: string; layerValues: {}[] }[] = [];
         const getGroupKeys = (listOfLayerEntryConfig: TypeListOfLayerEntryConfig, parentLayerId: string) => {
@@ -189,24 +200,29 @@ export class DataGridAPI {
         };
         getGroupKeys(geoviewLayerInstance.listOfLayerEntryConfig, layerId);
 
-        let count = 0;
-        grouplayerKeys.forEach((layerkey) => {
-          // eslint-disable-next-line @typescript-eslint/ban-types
-          let layerValues: {}[] = [];
-          (geoviewLayerInstance as AbstractGeoViewVector)?.getAllFeatureInfo(layerkey).then((arrayOfFeatureInfoEntries) => {
-            if (arrayOfFeatureInfoEntries?.length > 0) {
-              // set values
-              count++;
-              layerValues = buildFeatureRows(arrayOfFeatureInfoEntries);
-              grouplayerValues.push({ layerkey, layerValues });
-            }
-            if (count === grouplayerKeys.length) {
-              setGroupKeys(grouplayerKeys);
-              setGroupValues(grouplayerValues);
-            }
+        if (isVectorLayer(geoviewLayerInstance)) {
+          let count = 0;
+          grouplayerKeys.forEach((layerkey) => {
+            // eslint-disable-next-line @typescript-eslint/ban-types
+            let layerValues: {}[] = [];
+            (geoviewLayerInstance as AbstractGeoViewVector)?.getAllFeatureInfo(layerkey).then((arrayOfFeatureInfoEntries) => {
+              if (arrayOfFeatureInfoEntries?.length > 0) {
+                // set values
+                count++;
+                layerValues = buildFeatureRows(arrayOfFeatureInfoEntries);
+                grouplayerValues.push({ layerkey, layerValues });
+              }
+              if (count === grouplayerKeys.length) {
+                if (isMounted) setGroupKeys(grouplayerKeys);
+                if (isMounted) setGroupValues(grouplayerValues);
+              }
+            });
           });
-        });
+        }
       }
+      return () => {
+        isMounted = false;
+      };
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [layerId]);
 
@@ -214,9 +230,13 @@ export class DataGridAPI {
       groupKeys.length > 1 &&
         createElement(
           'select',
-          { id: `${layerId}-groupLayerSelection`, style: { fontSize: '1em', margin: '1em', padding: '0.3em' } },
+          {
+            id: `${layerId}-groupLayerSelection`,
+            key: `${layerId}-groupLayerSelection`,
+            style: { fontSize: '1em', margin: '1em', padding: '0.3em' },
+          },
           groupKeys.map((layerkey) => {
-            return createElement('option', { key: layerkey }, [layerkey]);
+            return createElement('option', { key: `${layerId}-${layerkey}` }, layerkey);
           })
         ),
       groupValues.map((groupValue, index) => {

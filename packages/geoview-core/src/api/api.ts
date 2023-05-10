@@ -11,6 +11,8 @@ import { DateMgt } from '../core/utils/date-mgt';
 
 import { CONST_LAYER_TYPES } from '../geo/layer/geoview-layers/abstract-geoview-layers';
 import * as MarkerDefinitions from '../core/types/marker-definitions';
+import * as Utilities from '../core/utils/utilities';
+// TODO: Refactor - Remove this following import and the class attributes, now that we have the higher level utilities import :)
 import { generateId, addUiComponent, showMessage } from '../core/utils/utilities';
 import { FeatureInfoLayerSet } from '../geo/utils/feature-info-layer-set';
 import { LegendsLayerSet } from '../geo/utils/legends-layer-set';
@@ -52,6 +54,9 @@ export class API {
   plugin: Plugin;
 
   // utilities object
+  utilities = Utilities;
+
+  // geo utilities object
   geoUtilities: GeoUtilities;
 
   // dates utilities object

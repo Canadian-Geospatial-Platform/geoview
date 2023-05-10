@@ -7,7 +7,7 @@ import ReactDOM from 'react-dom';
 
 import sanitizeHtml from 'sanitize-html';
 
-import { api } from '../../app';
+import { AbstractGeoViewLayer, api } from '../../app';
 import { TypeLocalizedString } from '../../geo/map/map-schema-types';
 import { EVENT_NAMES } from '../../api/events/event-types';
 
@@ -28,18 +28,73 @@ export function getLocalizedValue(localizedString: TypeLocalizedString | undefin
 }
 
 /**
+ * Reusable utility function to send event to display a message in the snackbar
+ *
+ * @param {string} mapId the map to show the message for
+ * @param {string} message the message string
+ */
+function _showSnackbarMessage(mapId: string, type: string, message: string, options?: TypeJsonObject) {
+  api.event.emit(
+    snackbarMessagePayload(
+      EVENT_NAMES.SNACKBAR.EVENT_SNACKBAR_OPEN,
+      mapId,
+      {
+        type,
+        value: message,
+      },
+      options
+    )
+  );
+}
+
+/**
  * Display a message in the snackbar
  *
  * @param {string} mapId the map to show the message for
  * @param {string} message the message string
  */
 export function showMessage(mapId: string, message: string) {
-  api.event.emit(
-    snackbarMessagePayload(EVENT_NAMES.SNACKBAR.EVENT_SNACKBAR_OPEN, mapId, {
-      type: 'string',
-      value: message,
-    })
-  );
+  // Redirect
+  _showSnackbarMessage(mapId, 'string', message);
+}
+
+/**
+ * Display an success message in the snackbar
+ *
+ * @param {string} mapId the map to show the message for
+ * @param {string} message the message string
+ */
+export function showSuccess(mapId: string, message: string) {
+  // Redirect
+  _showSnackbarMessage(mapId, 'string', message, {
+    variant: 'success',
+  } as unknown as TypeJsonObject);
+}
+
+/**
+ * Display an warning message in the snackbar
+ *
+ * @param {string} mapId the map to show the message for
+ * @param {string} message the message string
+ */
+export function showWarning(mapId: string, message: string) {
+  // Redirect
+  _showSnackbarMessage(mapId, 'string', message, {
+    variant: 'warning',
+  } as unknown as TypeJsonObject);
+}
+
+/**
+ * Display an error message in the snackbar
+ *
+ * @param {string} mapId the map to show the message for
+ * @param {string} message the message string
+ */
+export function showError(mapId: string, message: string) {
+  // Redirect
+  _showSnackbarMessage(mapId, 'string', message, {
+    variant: 'error',
+  } as unknown as TypeJsonObject);
 }
 
 /**
@@ -293,8 +348,8 @@ export function exportPNG(mapId: string): void {
  * Disable scrolling, so that screen doesnt scroll down.
  *  when focus is set to map and
  * arrows and enter keys are used to navigate the map
- * @param e - keybaord event like, tab, space
- * @param elem - mutable reference object of html elements.
+ * @param {KeyboardEvent} e - keybaord event like, tab, space
+ * @param {MutableRefObject} elem - mutable reference object of html elements.
  */
 export const disableScrolling = (e: KeyboardEvent, elem: MutableRefObject<HTMLElement | undefined>): void => {
   if (elem.current === document.activeElement) {
@@ -302,4 +357,31 @@ export const disableScrolling = (e: KeyboardEvent, elem: MutableRefObject<HTMLEl
       e.preventDefault();
     }
   }
+};
+
+/**
+ * Determine if layer instance is a vector layer
+ *
+ * @param {AbstractGeoViewLayer} layer the layer to check
+ * @returns {boolean} true if layer is a vector layer
+ */
+export const isVectorLayer = (layer: AbstractGeoViewLayer): boolean => {
+  const vectorLayers = { esriFeature: '', GeoJSON: '', GeoPackage: '', ogcFeature: '', ogcWfs: '' };
+  return layer?.type in vectorLayers;
+};
+
+/**
+ * Find an object property by regex value
+ * @param {TypeJsonObject} objectItem the object item
+ * @param {RegExp} regex the regex value to find
+ * @returns {TypeJsonObject | undefined} the object if it exist or undefined
+ */
+export const findPropertyNameByRegex = (objectItem: TypeJsonObject, regex: RegExp): TypeJsonObject | undefined => {
+  // eslint-disable-next-line no-restricted-syntax
+  for (const key in objectItem) {
+    if (key.match(regex)) {
+      return objectItem[key] as TypeJsonObject;
+    }
+  }
+  return undefined;
 };

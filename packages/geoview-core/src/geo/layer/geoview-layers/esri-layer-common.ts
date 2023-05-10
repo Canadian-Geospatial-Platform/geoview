@@ -2,15 +2,13 @@
 /* eslint-disable no-param-reassign */
 import axios from 'axios';
 import { Extent } from 'ol/extent';
-import BaseLayer from 'ol/layer/Base';
-import { Pixel } from 'ol/pixel';
-import { transform, transformExtent } from 'ol/proj';
+import { transformExtent } from 'ol/proj';
 
 import cloneDeep from 'lodash/cloneDeep';
-import { Cast, Coordinate, TypeJsonArray, TypeJsonObject } from '../../../core/types/global-types';
-import { AbstractGeoViewLayer, TypeGeoviewLayerType } from './abstract-geoview-layers';
+import { Cast, TypeJsonArray, TypeJsonObject } from '../../../core/types/global-types';
 import {
   layerEntryIsGroupLayer,
+  TypeEsriDynamicLayerEntryConfig,
   TypeLayerEntryConfig,
   TypeLayerGroupEntryConfig,
   TypeListOfLayerEntryConfig,
@@ -18,12 +16,11 @@ import {
 import { getLocalizedValue, getXMLHttpRequest } from '../../../core/utils/utilities';
 import { api } from '../../../app';
 import { Layer } from '../layer';
-import { EsriDynamic, geoviewEntryIsEsriDynamic, TypeEsriDynamicLayerConfig, TypeEsriDynamicLayerEntryConfig } from './raster/esri-dynamic';
-import { EsriFeature, geoviewEntryIsEsriFeature, TypeEsriFeatureLayerConfig, TypeEsriFeatureLayerEntryConfig } from './vector/esri-feature';
+import { EsriDynamic, geoviewEntryIsEsriDynamic } from './raster/esri-dynamic';
+import { EsriFeature, geoviewEntryIsEsriFeature, TypeEsriFeatureLayerEntryConfig } from './vector/esri-feature';
 import { EsriBaseRenderer, getStyleFromEsriRenderer } from '../../renderer/esri-renderer';
 import { TimeDimensionESRI } from '../../../core/utils/date-mgt';
-import { codedValueType, rangeDomainType, TypeArrayOfFeatureInfoEntries } from '../../../api/events/payloads/get-feature-info-payload';
-import { AbstractGeoViewVector } from './vector/abstract-geoview-vector';
+import { codedValueType, rangeDomainType } from '../../../api/events/payloads/get-feature-info-payload';
 
 /** ***************************************************************************************************************************
  * This method reads the service metadata from the metadataAccessPath.
@@ -142,7 +139,7 @@ export function commonValidateListOfLayerEntryConfig(
  * Extract the domain of the specified field from the metadata. If the type can not be found, return 'string'.
  *
  * @param {string} fieldName field name for which we want to get the domain.
- * @param {TypeLayerEntryConfig} layeConfig layer configuration.
+ * @param {TypeLayerEntryConfig} layerConfig layer configuration.
  *
  * @returns {'string' | 'date' | 'number'} The type of the field.
  */
@@ -156,7 +153,11 @@ export function commonGetFieldType(
   if (!fieldDefinition) return 'string';
   const esriFieldType = fieldDefinition.type as string;
   if (esriFieldType === 'esriFieldTypeDate') return 'date';
-  if (['esriFieldTypeDouble', 'esriFieldTypeInteger', 'esriFieldTypeSingle', 'esriFieldTypeSmallInteger'].includes(esriFieldType))
+  if (
+    ['esriFieldTypeDouble', 'esriFieldTypeInteger', 'esriFieldTypeSingle', 'esriFieldTypeSmallInteger', 'esriFieldTypeOID'].includes(
+      esriFieldType
+    )
+  )
     return 'number';
   return 'string';
 }
@@ -165,7 +166,7 @@ export function commonGetFieldType(
  * Return the type of the specified field.
  *
  * @param {string} fieldName field name for which we want to get the type.
- * @param {TypeLayerEntryConfig} layeConfig layer configuration.
+ * @param {TypeLayerEntryConfig} layerConfig layer configuration.
  *
  * @returns {null | codedValueType | rangeDomainType} The domain of the field.
  */
@@ -174,7 +175,7 @@ export function commonGetFieldDomain(
   fieldName: string,
   layerConfig: TypeLayerEntryConfig
 ): null | codedValueType | rangeDomainType {
-  const esriFieldDefinitions = this.layerMetadata[Layer.getLayerPath(layerConfig)].fields as TypeJsonArray;
+  const esriFieldDefinitions = this.layerMetadata[Layer.getLayerPath(layerConfig).replace('-unclustered', '')].fields as TypeJsonArray;
   const fieldDefinition = esriFieldDefinitions.find((metadataEntry) => metadataEntry.name === fieldName);
   return fieldDefinition ? Cast<codedValueType | rangeDomainType>(fieldDefinition.domain) : null;
 }
@@ -191,7 +192,8 @@ export function commonProcessTemporalDimension(
 ) {
   if (esriTimeDimension !== undefined) {
     this.layerTemporalDimension[Layer.getLayerPath(layerEntryConfig)] = api.dateUtilities.createDimensionFromESRI(
-      Cast<TimeDimensionESRI>(esriTimeDimension)
+      Cast<TimeDimensionESRI>(esriTimeDimension),
+      this.dateFragmentsOrder
     );
   }
 }

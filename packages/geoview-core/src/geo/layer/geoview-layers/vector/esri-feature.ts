@@ -2,7 +2,6 @@
 import { Vector as VectorSource } from 'ol/source';
 import { Geometry } from 'ol/geom';
 import { Options as SourceOptions } from 'ol/source/Vector';
-import { all } from 'ol/loadingstrategy';
 import { EsriJSON } from 'ol/format';
 import { ReadOptions } from 'ol/format/Feature';
 
@@ -14,6 +13,7 @@ import {
   TypeVectorSourceInitialConfig,
   TypeGeoviewLayerConfig,
   TypeListOfLayerEntryConfig,
+  TypeEsriDynamicLayerEntryConfig,
 } from '../../../map/map-schema-types';
 
 import { getLocalizedValue } from '../../../../core/utils/utilities';
@@ -29,7 +29,6 @@ import {
 } from '../esri-layer-common';
 import { AbstractGeoViewVector } from './abstract-geoview-vector';
 import { TypeJsonArray, TypeJsonObject } from '../../../../core/types/global-types';
-import { TypeEsriDynamicLayerEntryConfig } from '../raster/esri-dynamic';
 import { codedValueType, rangeDomainType } from '../../../../api/events/payloads/get-feature-info-payload';
 import { Layer } from '../../layer';
 
@@ -154,7 +153,7 @@ export class EsriFeature extends AbstractGeoViewVector {
    * Extract the type of the specified field from the metadata. If the type can not be found, return 'string'.
    *
    * @param {string} fieldName field name for which we want to get the type.
-   * @param {TypeLayerEntryConfig} layeConfig layer configuration.
+   * @param {TypeLayerEntryConfig} layerConfig layer configuration.
    *
    * @returns {'string' | 'date' | 'number'} The type of the field.
    */
@@ -166,7 +165,7 @@ export class EsriFeature extends AbstractGeoViewVector {
    * Return the domain of the specified field.
    *
    * @param {string} fieldName field name for which we want to get the domain.
-   * @param {TypeLayerEntryConfig} layeConfig layer configuration.
+   * @param {TypeLayerEntryConfig} layerConfig layer configuration.
    *
    * @returns {null | codedValueType | rangeDomainType} The domain of the field.
    */
@@ -244,18 +243,21 @@ export class EsriFeature extends AbstractGeoViewVector {
    * Create a source configuration for the vector layer.
    *
    * @param {TypeEsriFeatureLayerEntryConfig} layerEntryConfig The layer entry configuration.
-   * @param {SourceOptions} sourceOptions The source options (default: { strategy: all }).
+   * @param {SourceOptions} sourceOptions The source options (default: {}).
    * @param {ReadOptions} readOptions The read options (default: {}).
    *
    * @returns {VectorSource<Geometry>} The source configuration that will be used to create the vector layer.
    */
   protected createVectorSource(
     layerEntryConfig: TypeEsriFeatureLayerEntryConfig,
-    sourceOptions: SourceOptions = { strategy: all },
+    sourceOptions: SourceOptions = {},
     readOptions: ReadOptions = {}
   ): VectorSource<Geometry> {
     sourceOptions.url = getLocalizedValue(layerEntryConfig.source!.dataAccessPath!, this.mapId);
-    sourceOptions.url = `${sourceOptions.url}/${layerEntryConfig.layerId}/query?f=pjson&outfields=*&where=1%3D1`;
+    sourceOptions.url = `${sourceOptions.url}/${layerEntryConfig.layerId.replace(
+      '-unclustered',
+      ''
+    )}/query?f=pjson&outfields=*&where=1%3D1`;
     sourceOptions.format = new EsriJSON();
     const vectorSource = super.createVectorSource(layerEntryConfig, sourceOptions, readOptions);
     return vectorSource;

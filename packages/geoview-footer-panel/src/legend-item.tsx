@@ -22,26 +22,23 @@ export function LegendItem({ mapId }: Props): JSX.Element {
   const [legend, setLegend] = useState<DetailedReactHTMLElement<{}, HTMLElement>>();
   const [mapLayers, setMapLayers] = useState<string[]>([]);
 
-  const addLayer = (addGeoviewLayerId: string) => {
-    if (Object.keys(api.map(mapId).layer.geoviewLayers).includes(addGeoviewLayerId)) {
-      setMapLayers((orderedLayers) => [addGeoviewLayerId, ...orderedLayers]);
-    } else {
-      // eslint-disable-next-line no-console
-      console.error('geoviewLayerId is not in the layers list');
-    }
-  };
-
-  const removeLayer = (removeGeoviewLayerId: string) => {
-    setMapLayers((orderedLayers) => orderedLayers.filter((layerId) => layerId !== removeGeoviewLayerId));
+  const updateLayers = () => {
+    if (api.map(mapId).layer?.layerOrder !== undefined) setMapLayers([...api.map(mapId).layer.layerOrder].reverse());
   };
 
   useEffect(() => {
-    setMapLayers(Object.keys(api.map(mapId!).layer.geoviewLayers));
+    api.event.on(
+      api.eventNames.MAP.EVENT_MAP_LOADED,
+      () => {
+        updateLayers();
+      },
+      mapId
+    );
     api.event.on(
       api.eventNames.LAYER.EVENT_REMOVE_LAYER,
       (payload) => {
         if (payloadIsRemoveGeoViewLayer(payload)) {
-          removeLayer(payload.geoviewLayer.geoviewLayerId);
+          setMapLayers((orderedLayers) => orderedLayers.filter((layerId) => layerId !== payload.geoviewLayer.geoviewLayerId));
         }
       },
       mapId
@@ -53,7 +50,7 @@ export function LegendItem({ mapId }: Props): JSX.Element {
           api.event.on(
             api.eventNames.LAYER.EVENT_LAYER_ADDED,
             () => {
-              addLayer(payload.layerConfig.geoviewLayerId);
+              updateLayers();
               api.event.off(api.eventNames.LAYER.EVENT_LAYER_ADDED, `${mapId}/${payload.layerConfig.geoviewLayerId}`);
             },
             `${mapId}/${payload.layerConfig.geoviewLayerId}`
@@ -63,6 +60,7 @@ export function LegendItem({ mapId }: Props): JSX.Element {
       mapId
     );
     return () => {
+      api.event.off(api.eventNames.MAP.EVENT_MAP_LOADED, mapId);
       api.event.off(api.eventNames.LAYER.EVENT_ADD_LAYER, mapId);
       api.event.off(api.eventNames.LAYER.EVENT_REMOVE_LAYER, mapId);
     };

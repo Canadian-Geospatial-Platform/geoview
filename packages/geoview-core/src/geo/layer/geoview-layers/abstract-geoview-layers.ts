@@ -1,3 +1,4 @@
+/* eslint-disable no-param-reassign */
 import BaseLayer from 'ol/layer/Base';
 import Collection from 'ol/Collection';
 import { Coordinate } from 'ol/coordinate';
@@ -7,6 +8,8 @@ import LayerGroup, { Options as LayerGroupOptions } from 'ol/layer/Group';
 import { transformExtent } from 'ol/proj';
 import Feature from 'ol/Feature';
 import Geometry from 'ol/geom/Geometry';
+
+import cloneDeep from 'lodash/cloneDeep';
 
 import { generateId, getLocalizedValue } from '../../../core/utils/utilities';
 import {
@@ -19,8 +22,11 @@ import {
   TypeStyleConfig,
   TypeLayerGroupEntryConfig,
   TypeVectorLayerEntryConfig,
-  TypeImageLayerEntryConfig,
   layerEntryIsVector,
+  TypeLayerEntryType,
+  TypeOgcWmsLayerEntryConfig,
+  TypeEsriDynamicLayerEntryConfig,
+  TypeBaseSourceVectorInitialConfig,
 } from '../../map/map-schema-types';
 import {
   codedValueType,
@@ -38,7 +44,7 @@ import { TypeJsonObject } from '../../../core/types/global-types';
 import { Layer } from '../layer';
 import { LayerSetPayload, payloadIsRequestLayerInventory } from '../../../api/events/payloads/layer-set-payload';
 import { GetLegendsPayload, payloadIsQueryLegend } from '../../../api/events/payloads/get-legends-payload';
-import { TimeDimension } from '../../../core/utils/date-mgt';
+import { TimeDimension, TypeDateFragments } from '../../../core/utils/date-mgt';
 import { TypeEventHandlerFunction } from '../../../api/events/event';
 
 export type TypeLegend = {
@@ -62,6 +68,22 @@ export const isWmsLegend = (verifyIfLegend: TypeLegend): verifyIfLegend is TypeW
 };
 
 export interface TypeWmsLegend extends Omit<TypeLegend, 'styleConfig'> {
+  legend: HTMLCanvasElement;
+}
+
+/**
+ * type guard function that redefines a TypeLegend as a TypeWmsLegend
+ * if the event attribute of the verifyIfPayload parameter is valid. The type ascention
+ * applies only to the true block of the if clause.
+ *
+ * @param {TypeLegend} verifyIfLegend object to test in order to determine if the type ascention is valid
+ * @returns {boolean} returns true if the payload is valid
+ */
+export const isImageStaticLegend = (verifyIfLegend: TypeLegend): verifyIfLegend is TypeImageStaticLegend => {
+  return verifyIfLegend?.type === 'imageStatic';
+};
+
+export interface TypeImageStaticLegend extends Omit<TypeLegend, 'styleConfig'> {
   legend: HTMLCanvasElement;
 }
 
@@ -102,6 +124,7 @@ export type TypeLayerStyles = { Point?: TypeStyleRepresentation; LineString?: Ty
 const DEFAULT_LAYER_NAMES: Record<TypeGeoviewLayerType, string> = {
   esriDynamic: 'Esri Dynamic Layer',
   esriFeature: 'Esri Feature Layer',
+  imageStatic: 'Static Image Layer',
   GeoJSON: 'GeoJson Layer',
   geoCore: 'GeoCore Layer',
   GeoPackage: 'GeoPackage Layer',
@@ -112,7 +135,17 @@ const DEFAULT_LAYER_NAMES: Record<TypeGeoviewLayerType, string> = {
 };
 
 // Definition of the keys used to create the constants of the GeoView layer
-type LayerTypesKey = 'ESRI_DYNAMIC' | 'ESRI_FEATURE' | 'GEOJSON' | 'GEOCORE' | 'GEOPACKAGE' | 'XYZ_TILES' | 'OGC_FEATURE' | 'WFS' | 'WMS';
+type LayerTypesKey =
+  | 'ESRI_DYNAMIC'
+  | 'ESRI_FEATURE'
+  | 'IMAGE_STATIC'
+  | 'GEOJSON'
+  | 'GEOCORE'
+  | 'GEOPACKAGE'
+  | 'XYZ_TILES'
+  | 'OGC_FEATURE'
+  | 'WFS'
+  | 'WMS';
 
 /**
  * Type of GeoView layers
@@ -120,6 +153,7 @@ type LayerTypesKey = 'ESRI_DYNAMIC' | 'ESRI_FEATURE' | 'GEOJSON' | 'GEOCORE' | '
 export type TypeGeoviewLayerType =
   | 'esriDynamic'
   | 'esriFeature'
+  | 'imageStatic'
   | 'GeoJSON'
   | 'geoCore'
   | 'GeoPackage'
@@ -134,6 +168,7 @@ export type TypeGeoviewLayerType =
 export const CONST_LAYER_TYPES: Record<LayerTypesKey, TypeGeoviewLayerType> = {
   ESRI_DYNAMIC: 'esriDynamic',
   ESRI_FEATURE: 'esriFeature',
+  IMAGE_STATIC: 'imageStatic',
   GEOJSON: 'GeoJSON',
   GEOCORE: 'geoCore',
   GEOPACKAGE: 'GeoPackage',
@@ -141,6 +176,38 @@ export const CONST_LAYER_TYPES: Record<LayerTypesKey, TypeGeoviewLayerType> = {
   OGC_FEATURE: 'ogcFeature',
   WFS: 'ogcWfs',
   WMS: 'ogcWms',
+};
+
+/**
+ * Definition of the GeoView layer entry types for each type of Geoview layer
+ */
+export const CONST_LAYER_ENTRY_TYPE: Record<TypeGeoviewLayerType, TypeLayerEntryType> = {
+  imageStatic: 'raster-image',
+  esriDynamic: 'raster-image',
+  esriFeature: 'vector',
+  GeoJSON: 'vector',
+  geoCore: 'geoCore',
+  GeoPackage: 'vector',
+  xyzTiles: 'raster-tile',
+  ogcFeature: 'vector',
+  ogcWfs: 'vector',
+  ogcWms: 'raster-image',
+};
+
+/**
+ * Definition of the sub schema to use for each type of Geoview layer
+ */
+export const CONST_GEOVIEW_SCHEMA_BY_TYPE: Record<TypeGeoviewLayerType, string> = {
+  imageStatic: 'TypeImageStaticLayerEntryConfig',
+  esriDynamic: 'TypeEsriDynamicLayerEntryConfig',
+  esriFeature: 'TypeVectorLayerEntryConfig',
+  GeoJSON: 'TypeVectorLayerEntryConfig',
+  geoCore: 'TypeGeocoreLayerEntryConfig',
+  GeoPackage: 'TypeVectorLayerEntryConfig',
+  xyzTiles: 'TypeTileLayerEntryConfig',
+  ogcFeature: 'TypeVectorLayerEntryConfig',
+  ogcWfs: 'TypeVectorLayerEntryConfig',
+  ogcWms: 'TypeOgcWmsLayerEntryConfig',
 };
 
 type TypeLayerSetHandlerFunctions = {
@@ -221,6 +288,12 @@ export abstract class AbstractGeoViewLayer {
   /** LayerSet handler functions indexed by layerPath. This property is used to deactivate (off) events attached to a layer. */
   registerToLayerSetListenerFunctions: Record<string, TypeLayerSetHandlerFunctions> = {};
 
+  /** Date format object used to translate server to ISO format and ISO to server format */
+  dateFragmentsOrder: TypeDateFragments;
+
+  /** Date format object used to translate internal UTC ISO format to output format used by the getFeatureInfo */
+  outputFragmentsOrder: TypeDateFragments;
+
   /** ***************************************************************************************************************************
    * The class constructor saves parameters and common configuration parameters in attributes.
    *
@@ -238,6 +311,8 @@ export abstract class AbstractGeoViewLayer {
     if (mapLayerConfig.metadataAccessPath?.en) this.metadataAccessPath.en = mapLayerConfig.metadataAccessPath.en.trim();
     if (mapLayerConfig.metadataAccessPath?.fr) this.metadataAccessPath.fr = mapLayerConfig.metadataAccessPath.fr.trim();
     if (mapLayerConfig.listOfLayerEntryConfig) this.listOfLayerEntryConfig = mapLayerConfig.listOfLayerEntryConfig;
+    this.dateFragmentsOrder = api.dateUtilities.getDateFragmentsOrder(mapLayerConfig.serviceDateFormat);
+    this.outputFragmentsOrder = api.dateUtilities.getDateFragmentsOrder(mapLayerConfig.outputDateFormat);
   }
 
   /** ***************************************************************************************************************************
@@ -304,9 +379,15 @@ export abstract class AbstractGeoViewLayer {
   /** ***************************************************************************************************************************
    * This method reads the service metadata from the metadataAccessPath.
    *
-   * @returns {Promise<void>} A promise that the execution is done.
+   * @returns {Promise<void>} A promise that the execution is completed.
    */
-  protected abstract getServiceMetadata(): Promise<void>;
+  protected getServiceMetadata(): Promise<void> {
+    const promisedExecution = new Promise<void>((resolve) => {
+      // there is no metadata for static image layer type
+      resolve();
+    });
+    return promisedExecution;
+  }
 
   /** ***************************************************************************************************************************
    * This method recursively validates the configuration of the layer entries to ensure that each layer is correctly defined. If
@@ -373,16 +454,23 @@ export abstract class AbstractGeoViewLayer {
    * Process recursively the list of layer Entries to create the layers and the layer groups.
    *
    * @param {TypeListOfLayerEntryConfig} listOfLayerEntryConfig The list of layer entries to process.
+   * @param {LayerGroup} layerGroup Optional layer group to use when we have many layers. The very first call to
+   *  processListOfLayerEntryConfig must not provide a value for this parameter. It is defined for internal use.
    *
    * @returns {Promise<BaseLayer | null>} The promise that the layers were processed.
    */
-  protected processListOfLayerEntryConfig(listOfLayerEntryConfig: TypeListOfLayerEntryConfig): Promise<BaseLayer | null> {
+  protected processListOfLayerEntryConfig(
+    listOfLayerEntryConfig: TypeListOfLayerEntryConfig,
+    layerGroup?: LayerGroup
+  ): Promise<BaseLayer | null> {
     const promisedListOfLayerEntryProcessed = new Promise<BaseLayer | null>((resolve) => {
       if (listOfLayerEntryConfig.length === 1) {
         if (layerEntryIsGroupLayer(listOfLayerEntryConfig[0])) {
-          this.processListOfLayerEntryConfig(listOfLayerEntryConfig[0].listOfLayerEntryConfig!).then((groupCreated) => {
-            if (groupCreated) {
-              resolve(groupCreated);
+          const newLayerGroup = this.createLayerGroup(listOfLayerEntryConfig[0]);
+          this.processListOfLayerEntryConfig(listOfLayerEntryConfig[0].listOfLayerEntryConfig!, newLayerGroup).then((groupReturned) => {
+            if (groupReturned) {
+              if (layerGroup) layerGroup.getLayers().push(groupReturned);
+              resolve(groupReturned);
             } else {
               this.layerLoadError.push({
                 layer: Layer.getLayerPath(listOfLayerEntryConfig[0]),
@@ -392,10 +480,33 @@ export abstract class AbstractGeoViewLayer {
             }
           });
         } else {
+          if (
+            listOfLayerEntryConfig[0].entryType === 'vector' &&
+            (listOfLayerEntryConfig[0].source as TypeBaseSourceVectorInitialConfig)?.cluster?.enable
+          ) {
+            const unclusteredLayerConfig = cloneDeep(listOfLayerEntryConfig[0]) as TypeVectorLayerEntryConfig;
+            unclusteredLayerConfig.layerId = `${listOfLayerEntryConfig[0].layerId}-unclustered`;
+            unclusteredLayerConfig.source!.cluster!.enable = false;
+            this.processOneLayerEntry(unclusteredLayerConfig as TypeBaseLayerEntryConfig).then((baseLayer) => {
+              if (baseLayer) {
+                baseLayer.setVisible(false);
+                api.maps[this.mapId].layer.registerLayerConfig(unclusteredLayerConfig);
+                this.registerToLayerSets(unclusteredLayerConfig as TypeBaseLayerEntryConfig);
+                if (!layerGroup) layerGroup = this.createLayerGroup(unclusteredLayerConfig.parentLayerConfig as TypeLayerEntryConfig);
+                layerGroup.getLayers().push(baseLayer);
+              }
+            });
+            (listOfLayerEntryConfig[0].source as TypeBaseSourceVectorInitialConfig)!.cluster!.settings =
+              unclusteredLayerConfig.source!.cluster!.settings;
+          }
           this.processOneLayerEntry(listOfLayerEntryConfig[0] as TypeBaseLayerEntryConfig).then((baseLayer) => {
             if (baseLayer) {
+              baseLayer.setVisible(true);
               this.registerToLayerSets(listOfLayerEntryConfig[0] as TypeBaseLayerEntryConfig);
-              resolve(baseLayer);
+              if (layerGroup) {
+                layerGroup.getLayers().push(baseLayer);
+                resolve(layerGroup);
+              } else resolve(baseLayer);
             } else {
               this.layerLoadError.push({
                 layer: Layer.getLayerPath(listOfLayerEntryConfig[0]),
@@ -406,36 +517,58 @@ export abstract class AbstractGeoViewLayer {
           });
         }
       } else {
+        if (!layerGroup) {
+          // All children of this level in the tree have the same parent, so we use the first element of the array to retrieve the parent node.
+          layerGroup = this.createLayerGroup(listOfLayerEntryConfig[0].parentLayerConfig as TypeLayerEntryConfig);
+        }
         const promiseOfLayerCreated: Promise<BaseLayer | LayerGroup | null>[] = [];
-        listOfLayerEntryConfig.forEach((layerEntryConfig) => {
+        listOfLayerEntryConfig.forEach((layerEntryConfig, i) => {
           if (layerEntryIsGroupLayer(layerEntryConfig)) {
-            promiseOfLayerCreated.push(this.processListOfLayerEntryConfig(layerEntryConfig.listOfLayerEntryConfig!));
-          } else promiseOfLayerCreated.push(this.processOneLayerEntry(layerEntryConfig as TypeBaseLayerEntryConfig));
+            const newLayerGroup = this.createLayerGroup(listOfLayerEntryConfig[i]);
+            promiseOfLayerCreated.push(this.processListOfLayerEntryConfig(layerEntryConfig.listOfLayerEntryConfig!, newLayerGroup));
+          } else {
+            if (
+              layerEntryConfig.entryType === 'vector' &&
+              (layerEntryConfig.source as TypeBaseSourceVectorInitialConfig)?.cluster?.enable
+            ) {
+              const unclusteredLayerConfig = cloneDeep(layerEntryConfig) as TypeVectorLayerEntryConfig;
+              unclusteredLayerConfig.layerId = `${layerEntryConfig.layerId}-unclustered`;
+              unclusteredLayerConfig.source!.cluster!.enable = false;
+              api.maps[this.mapId].layer.registerLayerConfig(unclusteredLayerConfig);
+              promiseOfLayerCreated.push(this.processOneLayerEntry(unclusteredLayerConfig as TypeBaseLayerEntryConfig));
+              (layerEntryConfig.source as TypeBaseSourceVectorInitialConfig)!.cluster!.settings =
+                unclusteredLayerConfig.source!.cluster!.settings;
+            }
+            promiseOfLayerCreated.push(this.processOneLayerEntry(layerEntryConfig as TypeBaseLayerEntryConfig));
+          }
         });
         Promise.all(promiseOfLayerCreated)
           .then((listOfLayerCreated) => {
-            if (listOfLayerCreated?.length) {
-              // All child of this level in the tree have the same parent, so we use the first element of the array to retrieve the parent node.
-              const layerGroup = this.createLayerGroup(listOfLayerEntryConfig[0].parentLayerConfig as TypeLayerEntryConfig);
-
-              listOfLayerCreated.forEach((baseLayer, i) => {
+            listOfLayerCreated.forEach((baseLayer, i) => {
+              if (baseLayer?.get('layerEntryConfig')?.layerId.endsWith('-unclustered')) {
+                baseLayer.setVisible(false);
+              } else if (baseLayer) baseLayer.setVisible(true);
+              if (layerEntryIsGroupLayer(listOfLayerEntryConfig[i])) {
                 if (baseLayer) {
-                  if (!layerEntryIsGroupLayer(listOfLayerEntryConfig[i]))
-                    this.registerToLayerSets(listOfLayerEntryConfig[i] as TypeBaseLayerEntryConfig);
-                  layerGroup.getLayers().push(baseLayer);
-                } else if (layerEntryIsGroupLayer(listOfLayerEntryConfig[i]))
+                  layerGroup!.getLayers().push(baseLayer);
+                } else if (listOfLayerEntryConfig[i]) {
                   this.layerLoadError.push({
                     layer: Layer.getLayerPath(listOfLayerEntryConfig[i]),
                     consoleMessage: `Unable to create group layer ${Layer.getLayerPath(listOfLayerEntryConfig[i])} on map ${this.mapId}`,
                   });
-                else
-                  this.layerLoadError.push({
-                    layer: Layer.getLayerPath(listOfLayerEntryConfig[i]),
-                    consoleMessage: `Unable to create layer ${Layer.getLayerPath(listOfLayerEntryConfig[i])} on map ${this.mapId}`,
-                  });
-              });
-              resolve(layerGroup);
-            } else resolve(null);
+                } else resolve(null);
+              } else if (baseLayer) {
+                this.registerToLayerSets(baseLayer.get('layerEntryConfig') as TypeBaseLayerEntryConfig);
+                layerGroup!.getLayers().push(baseLayer);
+              } else {
+                this.layerLoadError.push({
+                  layer: Layer.getLayerPath(listOfLayerEntryConfig[i]),
+                  consoleMessage: `Unable to create layer ${Layer.getLayerPath(listOfLayerEntryConfig[i])} on map ${this.mapId}`,
+                });
+                resolve(null);
+              }
+            });
+            resolve(layerGroup!);
           })
           .catch((reason) => {
             // eslint-disable-next-line no-console
@@ -471,10 +604,9 @@ export abstract class AbstractGeoViewLayer {
     queryType: TypeQueryType = 'at pixel'
   ): Promise<TypeArrayOfFeatureInfoEntries> {
     const queryResult = new Promise<TypeArrayOfFeatureInfoEntries>((resolve) => {
-      const layerConfig = (typeof layerPathOrConfig === 'string' ? this.getLayerConfig(layerPathOrConfig) : layerPathOrConfig) as
-        | TypeVectorLayerEntryConfig
-        | TypeImageLayerEntryConfig
-        | null;
+      const layerConfig = (
+        typeof layerPathOrConfig === 'string' ? this.getLayerConfig(layerPathOrConfig) : layerPathOrConfig
+      ) as TypeLayerEntryConfig | null;
       if (!layerConfig || !layerConfig.source?.featureInfo?.queryable) resolve([]);
 
       switch (queryType) {
@@ -646,24 +778,22 @@ export abstract class AbstractGeoViewLayer {
   }
 
   /** ***************************************************************************************************************************
-   * This method create a layer group. it uses the layer initial settings of the GeoView layer configuration.
-   *
+   * This method create a layer group.
+   * @param {TypeLayerEntryConfig | TypeGeoviewLayerConfig} layerConfig
    * @returns {LayerGroup} A new layer group.
    */
-  private createLayerGroup(layerEntryConfig: TypeLayerEntryConfig): LayerGroup {
+  private createLayerGroup(layerConfig: TypeLayerEntryConfig | TypeGeoviewLayerConfig): LayerGroup {
     const layerGroupOptions: LayerGroupOptions = {
       layers: new Collection(),
-      properties: { layerEntryConfig },
+      properties: { layerConfig },
     };
-    // layerEntryConfig.initialSettings cannot be undefined because config-validation set it to {} if it is undefined.
-    if (layerEntryConfig.initialSettings?.extent !== undefined) layerGroupOptions.extent = layerEntryConfig.initialSettings?.extent;
-    if (layerEntryConfig.initialSettings?.maxZoom !== undefined) layerGroupOptions.maxZoom = layerEntryConfig.initialSettings?.maxZoom;
-    if (layerEntryConfig.initialSettings?.minZoom !== undefined) layerGroupOptions.minZoom = layerEntryConfig.initialSettings?.minZoom;
-    if (layerEntryConfig.initialSettings?.opacity !== undefined) layerGroupOptions.opacity = layerEntryConfig.initialSettings?.opacity;
-    if (layerEntryConfig.initialSettings?.visible !== undefined) layerGroupOptions.visible = layerEntryConfig.initialSettings?.visible;
-    // eslint-disable-next-line no-param-reassign
-    layerEntryConfig.gvLayer = new LayerGroup(layerGroupOptions);
-    return layerEntryConfig.gvLayer as LayerGroup;
+    if (layerConfig.initialSettings?.extent !== undefined) layerGroupOptions.extent = layerConfig.initialSettings?.extent;
+    if (layerConfig.initialSettings?.maxZoom !== undefined) layerGroupOptions.maxZoom = layerConfig.initialSettings?.maxZoom;
+    if (layerConfig.initialSettings?.minZoom !== undefined) layerGroupOptions.minZoom = layerConfig.initialSettings?.minZoom;
+    if (layerConfig.initialSettings?.opacity !== undefined) layerGroupOptions.opacity = layerConfig.initialSettings?.opacity;
+    if (layerConfig.initialSettings?.visible !== undefined) layerGroupOptions.visible = layerConfig.initialSettings?.visible;
+    layerConfig.gvLayer = new LayerGroup(layerGroupOptions);
+    return layerConfig.gvLayer as LayerGroup;
   }
 
   /** ***************************************************************************************************************************
@@ -756,24 +886,30 @@ export abstract class AbstractGeoViewLayer {
   }
 
   /** ***************************************************************************************************************************
-   * Return the type of the specified field.
+   * Returns the domaine of the specified field or null if the field has no domain.
    *
-   * @param {string} fieldName field name for which we want to get the type.
-   * @param {TypeLayerEntryConfig} layeConfig layer configuration.
+   * @param {string} fieldName field name for which we want to get the domaine.
+   * @param {TypeLayerEntryConfig} layerConfig layer configuration.
    *
    * @returns {null | codedValueType | rangeDomainType} The domain of the field.
    */
-  protected abstract getFieldDomain(fieldName: string, layerConfig: TypeLayerEntryConfig): null | codedValueType | rangeDomainType;
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  protected getFieldDomain(fieldName: string, layerConfig: TypeLayerEntryConfig): null | codedValueType | rangeDomainType {
+    return null;
+  }
 
   /** ***************************************************************************************************************************
-   * Return the domain of the specified field. If the type can not be found, return 'string'.
+   * Extract the type of the specified field from the metadata. If the type can not be found, return 'string'.
    *
-   * @param {string} fieldName field name for which we want to get the domain.
-   * @param {TypeLayerEntryConfig} layeConfig layer configuration.
+   * @param {string} fieldName field name for which we want to get the type.
+   * @param {TypeLayerEntryConfig} layerConfig layer configuration.
    *
    * @returns {'string' | 'date' | 'number'} The type of the field.
    */
-  protected abstract getFieldType(fieldName: string, layerConfig: TypeLayerEntryConfig): 'string' | 'date' | 'number';
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  protected getFieldType(fieldName: string, layerConfig: TypeLayerEntryConfig): 'string' | 'date' | 'number' {
+    return 'string';
+  }
 
   /** ***************************************************************************************************************************
    * set the extent of the layer. Use undefined if it will be visible regardless of extent. The layer extent is an array of
@@ -943,6 +1079,33 @@ export abstract class AbstractGeoViewLayer {
   }
 
   /** ***************************************************************************************************************************
+   * Get and format the value of the field with the name passed in parameter. Vector GeoView layers convert dates to milliseconds
+   * since the base date. Vector feature dates must be in ISO format.
+   *
+   * @param {Feature<Geometry>} features The features that hold the field values.
+   * @param {string} fieldName The field name.
+   * @param {'number' | 'string' | 'date'} fieldType The field type.
+   *
+   * @returns {string | number | Date} The formatted value of the field.
+   */
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  protected getFieldValue(feature: Feature<Geometry>, fieldName: string, fieldType: 'number' | 'string' | 'date'): string | number | Date {
+    const fieldValue = feature.get(fieldName);
+    let returnValue: string | number | Date;
+    if (fieldType === 'date') {
+      if (typeof fieldValue === 'string') returnValue = api.dateUtilities.applyInputDateFormat(fieldValue, this.dateFragmentsOrder);
+      else {
+        // All vector dates are kept internally in UTC.
+        returnValue = api.dateUtilities.convertToUTC(`${api.dateUtilities.convertMilisecondsToDate(fieldValue)}Z`);
+      }
+      // The output date format does not perform any conversion, it is used to specify the parts that will be displayed.
+      if (this.outputFragmentsOrder?.length) returnValue = api.dateUtilities.applyOutputDateFormat(returnValue, this.outputFragmentsOrder);
+      return returnValue;
+    }
+    return fieldValue;
+  }
+
+  /** ***************************************************************************************************************************
    * Convert the feature information to an array of TypeArrayOfFeatureInfoEntries.
    *
    * @param {Feature<Geometry>[]} features The array of features to convert.
@@ -952,13 +1115,13 @@ export abstract class AbstractGeoViewLayer {
    */
   protected formatFeatureInfoResult(
     features: Feature<Geometry>[],
-    layerEntryConfig: TypeImageLayerEntryConfig | TypeVectorLayerEntryConfig
+    layerEntryConfig: TypeOgcWmsLayerEntryConfig | TypeEsriDynamicLayerEntryConfig | TypeVectorLayerEntryConfig
   ): Promise<TypeArrayOfFeatureInfoEntries> {
     const promisedArrayOfFeatureInfo = new Promise<TypeArrayOfFeatureInfoEntries>((resolve) => {
       if (!features.length) resolve([]);
       else {
         const featureInfo = layerEntryConfig?.source?.featureInfo;
-        const fieldTypes = featureInfo?.fieldTypes?.split(',');
+        const fieldTypes = featureInfo?.fieldTypes?.split(',') as ('string' | 'number' | 'date')[];
         const outfields = getLocalizedValue(featureInfo?.outfields, this.mapId)?.split(',');
         const aliasFields = getLocalizedValue(featureInfo?.aliasFields, this.mapId)?.split(',');
         const queryResult: TypeArrayOfFeatureInfoEntries = [];
@@ -995,7 +1158,6 @@ export abstract class AbstractGeoViewLayer {
 
               const featureInfoEntry: TypeFeatureInfoEntry = {
                 // feature key for building the data-grid
-                // eslint-disable-next-line no-param-reassign
                 featureKey: featureKeyCounter++,
                 geoviewLayerType: this.type,
                 extent,
@@ -1011,7 +1173,7 @@ export abstract class AbstractGeoViewLayer {
                     const fieldIndex = outfields.indexOf(fieldName);
                     featureInfoEntry.fieldInfo[fieldName] = {
                       fieldKey: fieldKeyCounter++,
-                      value: feature.get(fieldName),
+                      value: this.getFieldValue(feature, fieldName, fieldTypes![fieldIndex]),
                       dataType: fieldTypes![fieldIndex] as 'string' | 'date' | 'number',
                       alias: aliasFields![fieldIndex],
                       domain: this.getFieldDomain(fieldName, layerEntryConfig!),
@@ -1019,7 +1181,7 @@ export abstract class AbstractGeoViewLayer {
                   } else if (!outfields) {
                     featureInfoEntry.fieldInfo[fieldName] = {
                       fieldKey: fieldKeyCounter++,
-                      value: feature.get(fieldName),
+                      value: this.getFieldValue(feature, fieldName, this.getFieldType(fieldName, layerEntryConfig!)),
                       dataType: this.getFieldType(fieldName, layerEntryConfig!),
                       alias: fieldName,
                       domain: this.getFieldDomain(fieldName, layerEntryConfig!),
@@ -1028,12 +1190,43 @@ export abstract class AbstractGeoViewLayer {
                 }
               });
               queryResult.push(featureInfoEntry);
-              resolve(queryResult);
             }
           });
+          resolve(queryResult);
         });
       }
     });
     return promisedArrayOfFeatureInfo;
+  }
+
+  /** ***************************************************************************************************************************
+   * Set the layerFilter that will be applied with the legend filters derived from the uniqueValue or classBreabs style of
+   * the layer. The resulting filter will be (legend filters) and (layerFilter). When the layer config is invalid, nothing is
+   * done.
+   *
+   * @param {string} filterValue The filter to associate to the layer.
+   * @param {string | TypeLayerEntryConfig | null} layerPathOrConfig Optional layer path or configuration.
+   */
+  setLayerFilter(filterValue: string, layerPathOrConfig: string | TypeLayerEntryConfig | null = this.activeLayer) {
+    const layerEntryConfig = (
+      typeof layerPathOrConfig === 'string' ? this.getLayerConfig(layerPathOrConfig) : layerPathOrConfig
+    ) as TypeLayerEntryConfig;
+    if (layerEntryConfig) layerEntryConfig.gvLayer?.set('layerFilter', filterValue);
+  }
+
+  /** ***************************************************************************************************************************
+   * Get the layerFilter that is associated to the layer. Returns undefined when the layer config is invalid.
+   * If layerPathOrConfig is undefined, this.activeLayer is used.
+   *
+   * @param {string | TypeLayerEntryConfig | null} layerPathOrConfig Optional layer path or configuration.
+   *
+   * @returns {string | undefined} The filter associated to the layer or undefined.
+   */
+  getLayerFilter(layerPathOrConfig: string | TypeLayerEntryConfig | null = this.activeLayer): string | undefined {
+    const layerEntryConfig = (
+      typeof layerPathOrConfig === 'string' ? this.getLayerConfig(layerPathOrConfig) : layerPathOrConfig
+    ) as TypeLayerEntryConfig;
+    if (layerEntryConfig) return layerEntryConfig.gvLayer?.get('layerFilter');
+    return undefined;
   }
 }

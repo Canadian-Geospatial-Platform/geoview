@@ -68,6 +68,8 @@ export type TypeSourceVectorClusterConfig = {
    * be the center of all its features.
    */
   minDistance?: number;
+  /** Zoom level at which all clusters will split. Default = 7. */
+  splitZoom?: number;
   /** Color for the text showing the number of points in a cluster */
   textColor?: string;
   /** settings for the cluster symbol and clustered geometries */
@@ -123,6 +125,8 @@ export type TypeBaseSourceVectorInitialConfig = {
   featureInfo?: TypeFeatureInfoLayerConfig;
   /** Vector source clustering configuration. */
   cluster?: TypeSourceVectorClusterConfig;
+  /** Loading strategy to use (all or bbox). */
+  strategy?: 'all' | 'bbox';
 };
 
 /** ******************************************************************************************************************************
@@ -376,9 +380,9 @@ export type TypeUniqueValueStyleInfo = {
   /** Label used by the style. */
   label: string;
   /** Values associated to the style. */
-  visible?: 'yes' | 'no' | 'always';
+  values: (string | number | Date)[];
   /** Flag used to show/hide features associated to the label (default: yes). */
-  values: string[];
+  visible?: 'yes' | 'no' | 'always';
   /** options associated to the style. */
   settings: TypeKindOfVectorSettings;
 };
@@ -410,9 +414,10 @@ export interface TypeUniqueValueStyleConfig extends TypeBaseStyleConfig {
   /** Label used if field/value association is not found. */
   defaultLabel?: string;
   /** Options used if field/value association is not found. */
-  defaultVisible?: 'yes' | 'no' | 'always';
-  /** Flag used to show/hide features associated to the default label (default: yes). */
   defaultSettings?: TypeKindOfVectorSettings;
+  /** Flag used to show/hide features associated to the default label
+   *  (default: no if ESRI renderer in the metadata has no default symbol defined). */
+  defaultVisible?: 'yes' | 'no' | 'always';
   /** Fields used by the style. */
   fields: string[];
   /** Unique value style information configuration. */
@@ -426,11 +431,11 @@ export type TypeClassBreakStyleInfo = {
   /** Label used by the style. */
   label: string;
   /** Minimum values associated to the style. */
-  visible?: 'yes' | 'no' | 'always';
+  minValue: number | string | Date | undefined | null;
   /** Flag used to show/hide features associated to the label (default: yes). */
-  minValue: number | undefined | null;
+  visible?: 'yes' | 'no' | 'always';
   /** Maximum values associated to the style. */
-  maxValue: number;
+  maxValue: number | string | Date;
   /** options associated to the style. */
   settings: TypeKindOfVectorSettings;
 };
@@ -489,7 +494,7 @@ export type TypeStyleConfig = Partial<Record<TypeStyleGeometry, TypeStyleSetting
 /** ******************************************************************************************************************************
  * Type of Style to apply to the GeoView vector layer source at creation time.
  */
-export type TypeLayerEntryType = 'vector' | 'vectorTile' | 'vectorHeatmap' | 'raster' | 'geocore';
+export type TypeLayerEntryType = 'vector' | 'vector-tile' | 'vector-heatmap' | 'raster-tile' | 'raster-image' | 'geoCore';
 
 /** ******************************************************************************************************************************
  * type guard function that redefines a TypeLayerEntryConfig as a TypeLayerGroupEntryConfig if the entryType attribute of the
@@ -526,7 +531,7 @@ export const layerEntryIsVector = (verifyIfLayer: TypeLayerEntryConfig): verifyI
  * @returns {boolean} true if the type ascention is valid.
  */
 export const layerEntryIsVectorHeatmap = (verifyIfLayer: TypeLayerEntryConfig): verifyIfLayer is TypeVectorHeatmapLayerEntryConfig => {
-  return verifyIfLayer?.entryType === 'vectorHeatmap';
+  return verifyIfLayer?.entryType === 'vector-heatmap';
 };
 
 /** ******************************************************************************************************************************
@@ -539,22 +544,59 @@ export const layerEntryIsVectorHeatmap = (verifyIfLayer: TypeLayerEntryConfig): 
  * @returns {boolean} true if the type ascention is valid.
  */
 export const layerEntryIsVectorTile = (verifyIfLayer: TypeLayerEntryConfig): verifyIfLayer is TypeVectorTileLayerEntryConfig => {
-  return verifyIfLayer?.entryType === 'vectorTile';
+  return verifyIfLayer?.entryType === 'vector-tile';
 };
 
 /** ******************************************************************************************************************************
- * type guard function that redefines a TypeLayerEntryConfig as a TypeImageLayerEntryConfig | TypeTileLayerEntryConfig if the
- * entryType attribute of the verifyIfLayer parameter is 'raster'. The type ascention applies only to the true block of the if
- * clause that use this function.
+ * type guard function that redefines a TypeLayerEntryConfig as a TypeOgcWmsLayerEntryConfig if the schemaTag attribute of the
+ * verifyIfLayer parameter is 'ogcWms'. The type ascention applies only to the true block of the if clause that use this
+ * function.
  *
  * @param {TypeLayerEntryConfig} verifyIfLayer Polymorphic object to test in order to determine if the type ascention is valid.
  *
  * @returns {boolean} true if the type ascention is valid.
  */
-export const layerEntryIsRaster = (
-  verifyIfLayer: TypeLayerEntryConfig
-): verifyIfLayer is TypeImageLayerEntryConfig | TypeTileLayerEntryConfig => {
-  return verifyIfLayer?.entryType === 'raster';
+export const layerEntryIsOgcWms = (verifyIfLayer: TypeLayerEntryConfig): verifyIfLayer is TypeOgcWmsLayerEntryConfig => {
+  return verifyIfLayer?.schemaTag === 'ogcWms';
+};
+
+/** ******************************************************************************************************************************
+ * type guard function that redefines a TypeLayerEntryConfig as a TypeEsriDynamicLayerEntryConfig if the schemaTag attribute of
+ * the verifyIfLayer parameter is 'ogcWms'. The type ascention applies only to the true block of the if clause that use this
+ * function.
+ *
+ * @param {TypeLayerEntryConfig} verifyIfLayer Polymorphic object to test in order to determine if the type ascention is valid.
+ *
+ * @returns {boolean} true if the type ascention is valid.
+ */
+export const layerEntryIsEsriDynamic = (verifyIfLayer: TypeLayerEntryConfig): verifyIfLayer is TypeEsriDynamicLayerEntryConfig => {
+  return verifyIfLayer?.schemaTag === 'esriDynamic';
+};
+
+/** ******************************************************************************************************************************
+ * type guard function that redefines a TypeLayerEntryConfig as a TypeImageStaticLayerEntryConfig if the schemaTag attribute of
+ * the verifyIfLayer parameter is 'ogcWms'. The type ascention applies only to the true block of the if clause that use this
+ * function.
+ *
+ * @param {TypeLayerEntryConfig} verifyIfLayer Polymorphic object to test in order to determine if the type ascention is valid.
+ *
+ * @returns {boolean} true if the type ascention is valid.
+ */
+export const layerEntryIsImageStatic = (verifyIfLayer: TypeLayerEntryConfig): verifyIfLayer is TypeImageStaticLayerEntryConfig => {
+  return verifyIfLayer?.schemaTag === 'imageStatic';
+};
+
+/** ******************************************************************************************************************************
+ * type guard function that redefines a TypeLayerEntryConfig as a TypeTileLayerEntryConfig if the entryType attribute of the
+ * verifyIfLayer parameter is 'raster-tile'. The type ascention applies only to the true block of the if clause that use this
+ * function.
+ *
+ * @param {TypeLayerEntryConfig} verifyIfLayer Polymorphic object to test in order to determine if the type ascention is valid.
+ *
+ * @returns {boolean} true if the type ascention is valid.
+ */
+export const layerEntryIsRasterTile = (verifyIfLayer: TypeLayerEntryConfig): verifyIfLayer is TypeTileLayerEntryConfig => {
+  return verifyIfLayer?.entryType === 'raster-tile';
 };
 
 /** ******************************************************************************************************************************
@@ -567,7 +609,7 @@ export const layerEntryIsRaster = (
  * @returns {boolean} true if the type ascention is valid.
  */
 export const layerEntryIsGeocore = (verifyIfLayer: TypeLayerEntryConfig): verifyIfLayer is TypeGeocoreLayerEntryConfig => {
-  return verifyIfLayer?.entryType === 'geocore';
+  return verifyIfLayer?.entryType === 'geoCore';
 };
 
 /** ******************************************************************************************************************************
@@ -583,8 +625,10 @@ export type TypeBaseLayerEntryConfig = {
   /** This attribute is not part of the schema. It is used internally to distinguish layer groups derived from the
    * metadata. */
   isMetadataLayerGroup?: boolean;
+  /** Tag used to link the entry to a specific schema. */
+  schemaTag: TypeGeoviewLayerType;
   /** Layer entry data type. */
-  entryType?: 'vector' | 'vectorTile' | 'vectorHeatmap' | 'raster' | 'group';
+  entryType?: 'vector' | 'vector-tile' | 'vector-heatmap' | 'raster-image' | 'raster-tile' | 'group';
   /** The ending element of the layer configuration path. */
   layerPathEnding?: string;
   /** The id of the layer to display on the map. */
@@ -629,7 +673,10 @@ export type TypeOfServer = 'mapserver' | 'geoserver' | 'qgis';
 /** ******************************************************************************************************************************
  * Initial settings for image sources.
  */
-export type TypeSourceImageInitialConfig = TypeSourceImageWmsInitialConfig | TypeSourceImageEsriInitialConfig;
+export type TypeSourceImageInitialConfig =
+  | TypeSourceImageWmsInitialConfig
+  | TypeSourceImageEsriInitialConfig
+  | TypeSourceImageStaticInitialConfig;
 
 /** ******************************************************************************************************************************
  * Initial settings for image sources.
@@ -658,7 +705,19 @@ export interface TypeSourceImageWmsInitialConfig extends TypeBaseSourceImageInit
   /** The type of the remote WMS server. The default value is mapserver. */
   serverType?: TypeOfServer;
   /** Style to apply. Default = '' */
-  style?: string;
+  style?: string | string[];
+}
+
+/** ******************************************************************************************************************************
+ * Initial settings for static image sources.
+ */
+export interface TypeSourceImageStaticInitialConfig extends Omit<TypeBaseSourceImageInitialConfig, 'featureInfo'> {
+  /** Definition of the feature information structure that will be used by the getFeatureInfo method. We only use queryable and
+   * it must be set to false if specified.
+   */
+  featureInfo?: { queryable: false };
+  /** Image extent */
+  extent: Extent;
 }
 
 /** ******************************************************************************************************************************
@@ -700,25 +759,21 @@ export type TypeTileGrid = {
 /** ******************************************************************************************************************************
  * Initial settings for tile image sources.
  */
-export type TypeSourceTileInitialConfig = {
-  /** The path (English/French) to reach the data to display. If not specified, metadatAccessPath will be assigne dto it. */
-  dataAccessPath: TypeLocalizedString;
-  /** The crossOrigin attribute for loaded images. Note that you must provide a crossOrigin value if you want to access pixel data
-   * with the Canvas renderer.
+export interface TypeSourceTileInitialConfig extends Omit<TypeBaseSourceImageInitialConfig, 'featureInfo'> {
+  /** Definition of the feature information structure that will be used by the getFeatureInfo method. We only use queryable and
+   * it must be set to false if specified.
    */
-  crossOrigin?: string;
-  /** Spatial Reference EPSG code supported (https://epsg.io/). We support Web Mercator and Lambert Conical Conform Canada. */
-  projection?: TypeValidMapProjectionCodes;
+  featureInfo?: { queryable: false };
   /** Tile grid parameters to use. */
   tileGrid?: TypeTileGrid;
-};
+}
 
 /** ******************************************************************************************************************************
  * Type used to identify a GeoView vector heamap layer to display on the map.
  */
 export interface TypeVectorHeatmapLayerEntryConfig extends TypeBaseLayerEntryConfig {
   /** Layer entry data type. */
-  entryType?: 'vectorHeatmap';
+  entryType?: 'vector-heatmap';
   /** Initial settings to apply to the GeoView vector layer source at creation time. */
   source?: TypeVectorSourceInitialConfig;
   /**
@@ -747,7 +802,7 @@ export interface TypeVectorTileSourceInitialConfig extends TypeBaseSourceVectorI
  */
 export interface TypeVectorTileLayerEntryConfig extends TypeBaseLayerEntryConfig {
   /** Layer entry data type. */
-  entryType?: 'vectorTile';
+  entryType?: 'vector-tile';
   /** Filter to apply on feature of this layer. */
   layerFilter?: string;
   /** Source settings to apply to the GeoView vector layer source at creation time. */
@@ -759,13 +814,15 @@ export interface TypeVectorTileLayerEntryConfig extends TypeBaseLayerEntryConfig
 /** ******************************************************************************************************************************
  * Type used to define a GeoView image layer to display on the map.
  */
-export interface TypeImageLayerEntryConfig extends TypeBaseLayerEntryConfig {
+export interface TypeOgcWmsLayerEntryConfig extends TypeBaseLayerEntryConfig {
+  /** Tag used to link the entry to a specific schema. */
+  schemaTag: 'ogcWms';
   /** Layer entry data type. */
-  entryType?: 'raster';
+  entryType?: 'raster-image';
   /** Filter to apply on feature of this layer. */
   layerFilter?: string;
   /** Source settings to apply to the GeoView image layer source at creation time. */
-  source?: TypeSourceImageInitialConfig;
+  source: TypeSourceImageWmsInitialConfig;
   /** Style to apply to the raster layer. */
   style?: TypeStyleConfig;
 }
@@ -773,9 +830,39 @@ export interface TypeImageLayerEntryConfig extends TypeBaseLayerEntryConfig {
 /** ******************************************************************************************************************************
  * Type used to define a GeoView image layer to display on the map.
  */
+export interface TypeEsriDynamicLayerEntryConfig extends TypeBaseLayerEntryConfig {
+  /** Tag used to link the entry to a specific schema. */
+  schemaTag: 'esriDynamic';
+  /** Layer entry data type. */
+  entryType?: 'raster-image';
+  /** Filter to apply on feature of this layer. */
+  layerFilter?: string;
+  /** Source settings to apply to the GeoView image layer source at creation time. */
+  source: TypeSourceImageEsriInitialConfig;
+  /** Style to apply to the raster layer. */
+  style?: TypeStyleConfig;
+}
+
+/** ******************************************************************************************************************************
+ * Type used to define a GeoView image layer to display on the map.
+ */
+export interface TypeImageStaticLayerEntryConfig extends TypeBaseLayerEntryConfig {
+  /** Tag used to link the entry to a specific schema. */
+  schemaTag: 'imageStatic';
+  /** Layer entry data type. */
+  entryType?: 'raster-image';
+  /** Filter to apply on feature of this layer. */
+  layerFilter?: string;
+  /** Source settings to apply to the GeoView image layer source at creation time. */
+  source: TypeSourceImageStaticInitialConfig;
+}
+
+/** ******************************************************************************************************************************
+ * Type used to define a GeoView image layer to display on the map.
+ */
 export interface TypeTileLayerEntryConfig extends TypeBaseLayerEntryConfig {
   /** Layer entry data type. */
-  entryType?: 'raster';
+  entryType?: 'raster-tile';
   /** Initial settings to apply to the GeoView image layer source at creation time. */
   source?: TypeSourceTileInitialConfig;
 }
@@ -791,8 +878,10 @@ export type TypeGeocoreLayerEntryConfig = {
   parentLayerConfig?: TypeGeoviewLayerConfig | TypeLayerGroupEntryConfig;
   /** This attribute is not part of the schema. It is used to link the displayed layer to its layer entry config. */
   gvLayer?: BaseLayer;
+  /** Tag used to link the entry to a specific schema. */
+  schemaTag: 'geoCore';
   /** Layer entry data type. */
-  entryType?: 'geocore';
+  entryType?: 'geoCore';
   /** The layerId is not used by geocore layers. */
   layerId: never;
   /** The layerPathEnding is not used by geocore layers. */
@@ -816,6 +905,10 @@ export type TypeGeocoreLayerEntryConfig = {
  * Initial settings to apply to the GeoView vector layer source at creation time.
  */
 export type TypeSourceGeocoreConfig = {
+  /** Definition of the feature information structure that will be used by the getFeatureInfo method. We only use queryable and
+   * it must be set to false if specified.
+   */
+  featureInfo?: { queryable: false };
   /** Path used to access the data. */
   dataAccessPath: TypeLocalizedString;
 };
@@ -844,7 +937,9 @@ export type TypeLayerEntryConfig =
   | TypeVectorHeatmapLayerEntryConfig
   | TypeVectorTileLayerEntryConfig
   | TypeVectorLayerEntryConfig
-  | TypeImageLayerEntryConfig
+  | TypeOgcWmsLayerEntryConfig
+  | TypeEsriDynamicLayerEntryConfig
+  | TypeImageStaticLayerEntryConfig
   | TypeTileLayerEntryConfig
   | TypeGeocoreLayerEntryConfig;
 
@@ -872,17 +967,18 @@ export type TypeMapFeaturesInstance = {
   /** List of external packages. */
   externalPackages?: TypeExternalPackages;
   /** Service URLs. */
+  // ?: Is this attribute realy needed, it is used nowhere in our code. If you delete it, update the doc (docs\app\map-config\README.md)
   serviceUrls?: TypeServiceUrls;
   /**
    * ISO 639-1 code indicating the languages supported by the configuration file. It will use value(s) provided here to
-   * access bilangual configuration nodes. For value(s) provided here, each bilingual configuration node MUST provide a value..
+   * access bilangual configuration nodes. For value(s) provided here, each bilingual configuration node MUST provide a value.
    * */
   suportedLanguages: TypeListOfLocalizedLanguages;
   /**
    * The schema version used to validate the configuration file. The schema should enumerate the list of versions accepted by
    * this version of the viewer.
    */
-  versionUsed?: '1.0';
+  schemaVersionUsed?: '1.0';
 };
 
 /* *******************************************************************************************************************************
@@ -923,7 +1019,7 @@ export type TypeMapConfig = {
 };
 
 /** ******************************************************************************************************************************
- *  Definition of the valid map interactiom valuess. If map is dynamic (pan/zoom) or static to act as a thumbnail (no nav bar).
+ *  Definition of the valid map interactiom values. If map is dynamic (pan/zoom) or static to act as a thumbnail (no nav bar).
  */
 export type TypeInteraction = 'static' | 'dynamic';
 /** Constante mainly use for interaction validation. */
@@ -938,6 +1034,8 @@ export type TypeListOfGeoviewLayerConfig = TypeGeoviewLayerConfig[];
  *  Definition of a single Geoview layer configuration.
  */
 export type TypeGeoviewLayerConfig = {
+  /** This attribute is not part of the schema. It is used to link the displayed layer to its layer entry config. */
+  gvLayer?: BaseLayer;
   /**
    * The GeoView layer identifier.
    */
@@ -951,6 +1049,10 @@ export type TypeGeoviewLayerConfig = {
   metadataAccessPath?: TypeLocalizedString;
   /** Type of GeoView layer. */
   geoviewLayerType: TypeGeoviewLayerType;
+  /** Date format used by the service endpoint. */
+  serviceDateFormat?: string;
+  /** Date format used by the getFeatureInfo to output date variable. */
+  outputDateFormat?: string;
   /**
    * Initial settings to apply to the GeoView layer at creation time.
    * This attribute is allowed only if listOfLayerEntryConfig.length > 1.
@@ -1018,14 +1120,14 @@ export type TypeAppBarProps = {
 };
 
 /** ******************************************************************************************************************************
- * Controls availalbe on the navigation bar. Default = ['zoom', 'fullscreen', 'fullextent'].
+ * Controls available on the navigation bar. Default = ['zoom', 'fullscreen', 'fullextent'].
  */
 export type TypeNavBarProps = Array<'zoom' | 'fullscreen' | 'fullextent'>;
 
 /** ******************************************************************************************************************************
  * Core components to initialize on viewer load. Default = ['app-bar', 'footer-bar', 'nav-bar', 'north-arrow', 'overview-map'].
  */
-export type TypeMapComponents = Array<'app-bar' | 'footer-bar' | 'nav-bar' | 'north-arrow' | 'overview-map'>;
+export type TypeMapComponents = Array<'app-bar' | 'footer-bar' | 'nav-bar' | 'north-arrow' | 'overview-map' | 'geolocator'>;
 
 /** ******************************************************************************************************************************
  * Core packages to initialize on viewer load. The schema for those are on their own package. NOTE: config from packages are in
@@ -1047,6 +1149,7 @@ export type TypeExternalPackages = {
   configUrl?: string;
 }[];
 
+// ?: Is this type realy needed, it is used nowhere in our code.
 /** ******************************************************************************************************************************
  * Service endpoint urls. Default = 'https://geocore.api.geo.ca'.
  */
@@ -1055,10 +1158,15 @@ export type TypeServiceUrls = {
    * Service end point to access API for layers specification (loading and plugins parameters). By default it is GeoCore but can
    * be another endpoint with similar output.
    */
+  // ?: key or keys - The description only talk about a single service endpoint and the type is not an array but a string.
   keys: string;
   /**
    * An optional proxy to be used for dealing with same-origin issues.  URL must either be a relative path on the same server
    * or an absolute path on a server which sets CORS headers.
    */
-  proxyUrl: string;
+  proxyUrl?: string;
+  /**
+   * An optional geolocator service end point url, which will be used to call to get geo location of address.
+   */
+  geolocator?: string;
 };

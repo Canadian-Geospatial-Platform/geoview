@@ -118,8 +118,8 @@ export class URLmapConfigReader {
       if (displayLanguage) displayLanguage = configValidation.validateDisplayLanguage(displayLanguage);
 
       // update the version if provided from the map configuration.
-      let versionUsed = urlParams.v as TypeValidVersions;
-      if (versionUsed) versionUsed = configValidation.validateVersion(versionUsed);
+      let schemaVersionUsed = urlParams.v as TypeValidVersions;
+      if (schemaVersionUsed) schemaVersionUsed = configValidation.validateVersion(schemaVersionUsed);
 
       let center;
       if (urlParams.c) center = (urlParams.c as string).split(',');
@@ -163,7 +163,7 @@ export class URLmapConfigReader {
         components,
         corePackages,
         suportedLanguages: ['en', 'fr'],
-        versionUsed,
+        schemaVersionUsed,
       };
     }
 

@@ -2,6 +2,7 @@
 import { EVENT_NAMES } from '../../api/events/event-types';
 import { GetFeatureInfoPayload, payloadIsQueryResult, TypeFeatureInfoResultSets } from '../../api/events/payloads/get-feature-info-payload';
 import { payloadIsAMapSingleClick } from '../../api/events/payloads/map-slingle-click-payload';
+import { payloadIsALngLat } from '../../api/events/payloads/lng-lat-payload';
 import { api } from '../../app';
 import { LayerSet } from './layer-set';
 
@@ -33,7 +34,7 @@ export class FeatureInfoLayerSet {
   constructor(mapId: string, layerSetId: string) {
     const registrationConditionFunction = (layerPath: string): boolean => {
       const layerEntryConfig = api.map(this.mapId).layer.registeredLayers[layerPath];
-      if (layerEntryConfig.source) {
+      if (layerEntryConfig?.source) {
         return 'featureInfo' in layerEntryConfig.source! && !!layerEntryConfig.source.featureInfo?.queryable;
       }
       return false;
@@ -41,8 +42,7 @@ export class FeatureInfoLayerSet {
     this.mapId = mapId;
     this.layerSet = new LayerSet(mapId, layerSetId, this.resultSets, registrationConditionFunction);
 
-    // Listen to map click and send a query layers event to queryable layers. These layers will return a result set if features
-    // are found.
+    // Listen to "map click"-"crosshair enter" and send a query layers event to queryable layers. These layers will return a result set of features.
     api.event.on(
       EVENT_NAMES.MAP.EVENT_MAP_SINGLE_CLICK,
       (payload) => {
@@ -51,6 +51,18 @@ export class FeatureInfoLayerSet {
             this.resultSets[layerPath] = undefined;
           });
           api.event.emit(GetFeatureInfoPayload.createQueryLayerPayload(this.mapId, 'at long lat', payload.coordinates.lnglat));
+        }
+      },
+      this.mapId
+    );
+    api.event.on(
+      EVENT_NAMES.MAP.EVENT_MAP_CROSSHAIR_ENTER,
+      (payload) => {
+        if (payloadIsALngLat(payload)) {
+          Object.keys(this.resultSets).forEach((layerPath) => {
+            this.resultSets[layerPath] = undefined;
+          });
+          api.event.emit(GetFeatureInfoPayload.createQueryLayerPayload(this.mapId, 'at long lat', payload.lnglat));
         }
       },
       this.mapId

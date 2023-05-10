@@ -5,14 +5,14 @@ import { Options as SourceOptions } from 'ol/source/Vector';
 import { VectorImage as VectorLayer } from 'ol/layer';
 import { Options as VectorLayerOptions } from 'ol/layer/VectorImage';
 import { Geometry, Point } from 'ol/geom';
-import { all } from 'ol/loadingstrategy';
+import { all, bbox } from 'ol/loadingstrategy';
 import { ReadOptions } from 'ol/format/Feature';
 import BaseLayer from 'ol/layer/Base';
 import LayerGroup from 'ol/layer/Group';
 import { Coordinate } from 'ol/coordinate';
 import { getCenter, Extent } from 'ol/extent';
 import { Pixel } from 'ol/pixel';
-import { transform } from 'ol/proj';
+import { transform, transformExtent } from 'ol/proj';
 
 import { AbstractGeoViewLayer } from '../abstract-geoview-layers';
 import {
@@ -24,6 +24,7 @@ import {
   layerEntryIsGroupLayer,
 } from '../../../map/map-schema-types';
 import { api } from '../../../../app';
+import { getLocalizedValue } from '../../../../core/utils/utilities';
 import { TypeArrayOfFeatureInfoEntries } from '../../../../api/events/payloads/get-feature-info-payload';
 import { NodeType } from '../../../renderer/geoview-renderer-types';
 
@@ -38,14 +39,14 @@ export type TypeBaseVectorLayer = BaseLayer | TypeVectorLayerGroup | TypeVectorL
 
 // ******************************************************************************************************************************
 // ******************************************************************************************************************************
-/** ******************************************************************************************************************************
+/** *****************************************************************************************************************************
  * The AbstractGeoViewVector class is a direct descendant of AbstractGeoViewLayer. As its name indicates, it is used to
  * instanciate GeoView vector layers. It inherits from its parent class an attribute named gvLayers where the vector elements
  * of the class will be kept.
  *
- * The gvLayers attribute has a hierarchical structure. Its data type is TypetBaseVectorLayer. Subclasses of this type
- * are TypeVectorLayerGroup and TypeVectorLayer. The TypeVectorLayerGroup is a collection of TypetBaseVectorLayer. It is
- * important to note that a TypetBaseVectorLayer attribute can polymorphically refer to a TypeVectorLayerGroup or a
+ * The gvLayers attribute has a hierarchical structure. Its data type is TypeBaseVectorLayer. Subclasses of this type are
+ * BaseLayer, TypeVectorLayerGroup and TypeVectorLayer. The TypeVectorLayerGroup is a collection of TypeBaseVectorLayer. It is
+ * important to note that a TypeBaseVectorLayer attribute can polymorphically refer to a TypeVectorLayerGroup or a
  * TypeVectorLayer. Here, we must not confuse instantiation and declaration of a polymorphic attribute.
  *
  * All leaves of the tree structure stored in the gvLayers attribute must be of type TypeVectorLayer. This is where the
@@ -97,15 +98,24 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
    */
   protected createVectorSource(
     layerEntryConfig: TypeBaseLayerEntryConfig,
-    sourceOptions: SourceOptions = { strategy: all },
+    sourceOptions: SourceOptions = {},
     readOptions: ReadOptions = {}
   ): VectorSource<Geometry> {
     // The line below uses var because a var declaration has a wider scope than a let declaration.
     var vectorSource: VectorSource<Geometry>;
     if (this.attributions.length !== 0) sourceOptions.attributions = this.attributions;
 
+    // set loading strategy option
+    sourceOptions.strategy = (layerEntryConfig.source! as TypeBaseSourceVectorInitialConfig).strategy === 'bbox' ? bbox : all;
+
     sourceOptions.loader = (extent, resolution, projection, success, failure) => {
-      const url = vectorSource.getUrl();
+      let url = vectorSource.getUrl();
+
+      // if an extent is provided, use it in the url
+      if (Number.isFinite(extent[0]) && this.type === 'ogcWfs') {
+        url = `${url}&bbox=${extent},EPSG:${api.map(this.mapId).currentProjection}`;
+      }
+
       const xhr = new XMLHttpRequest();
       if ((layerEntryConfig?.source as TypeBaseSourceVectorInitialConfig)?.postSettings) {
         const { postSettings } = layerEntryConfig.source as TypeBaseSourceVectorInitialConfig;
@@ -127,6 +137,36 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
             featureProjection: projection,
             extent,
           }) as Feature<Geometry>[];
+          /* For vector layers, all fields of type date must be specified in milliseconds (number) that has elapsed since the epoch,
+             which is defined as the midnight at the beginning of January 1, 1970, UTC (equivalent to the UNIX epoch). If the date type
+             is not a number, we assume it is provided as an ISO UTC string. If not, the result is unpredictable.
+          */
+          if (layerEntryConfig.source?.featureInfo?.queryable) {
+            const featureInfo = (layerEntryConfig.source as TypeBaseSourceVectorInitialConfig).featureInfo!;
+            const fieldTypes = featureInfo.fieldTypes?.split(',');
+            const fieldNames = getLocalizedValue(featureInfo.outfields, this.mapId)!.split(',');
+            const dateFields = fieldTypes?.reduce<string[]>((accumulator, entryFieldType, i) => {
+              if (entryFieldType === 'date') accumulator.push(fieldNames![i]);
+              return accumulator;
+            }, []);
+            if (dateFields?.length) {
+              features.forEach((feature) => {
+                dateFields.forEach((fieldName) => {
+                  let fieldValue = feature.get(fieldName);
+                  if (typeof fieldValue === 'number') {
+                    if (this.dateFragmentsOrder.length) {
+                      let dateString = api.dateUtilities.convertMilisecondsToDate(fieldValue);
+                      dateString = api.dateUtilities.applyInputDateFormat(dateString, this.dateFragmentsOrder);
+                      feature.set(fieldName, api.dateUtilities.convertToMilliseconds(dateString), true);
+                    }
+                  } else {
+                    fieldValue = api.dateUtilities.applyInputDateFormat(fieldValue, this.dateFragmentsOrder);
+                    feature.set(fieldName, api.dateUtilities.convertToMilliseconds(fieldValue), true);
+                  }
+                });
+              });
+            }
+          }
           vectorSource.addFeatures(features);
           if (success) success(features);
         } else {
@@ -194,7 +234,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
     };
 
     layerEntryConfig.gvLayer = new VectorLayer(layerOptions);
-    layerEntryConfig.gvLayer?.set('layerFilter', layerEntryConfig.layerFilter);
+    this.setLayerFilter(layerEntryConfig.layerFilter ? layerEntryConfig.layerFilter : '', layerEntryConfig);
     this.applyViewFilter(layerEntryConfig);
 
     return layerEntryConfig.gvLayer as VectorLayer<VectorSource>;
@@ -313,11 +353,11 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
   }
 
   /** ***************************************************************************************************************************
-   * Compute the layer bounds or undefined if the result can not be obtained from le feature extents that compose the layer. If
+   * Compute the layer bounds or undefined if the result can not be obtained from the feature extents that compose the layer. If
    * layerPathOrConfig is undefined, the active layer is used. If projectionCode is defined, returns the bounds in the specified
    * projection otherwise use the map projection. The bounds are different from the extent. They are mainly used for display
    * purposes to show the bounding box in which the data resides and to zoom in on the entire layer data. It is not used by
-   * openlayer to limit the display of data on the map.
+   * openlayer to limit the display of data on the map. If the bounds lie outside the extents, they are reduced to the extents.
    *
    * @param {string | TypeLayerEntryConfig | TypeListOfLayerEntryConfig | null} layerPathOrConfig Optional layer path or
    * configuration.
@@ -327,7 +367,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
    */
   calculateBounds(
     layerPathOrConfig: string | TypeLayerEntryConfig | TypeListOfLayerEntryConfig | null = this.activeLayer,
-    projectionCode: string | number | undefined = undefined
+    projectionCode: string | number = api.map(this.mapId).currentProjection
   ): Extent | undefined {
     let bounds: Extent | undefined;
     const processGroupLayerBounds = (listOfLayerEntryConfig: TypeListOfLayerEntryConfig) => {
@@ -362,10 +402,19 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
     if (rootLayerConfig) {
       if (Array.isArray(rootLayerConfig)) processGroupLayerBounds(rootLayerConfig);
       else processGroupLayerBounds([rootLayerConfig]);
-      if (projectionCode && bounds) {
-        const minXY = transform([bounds[0], bounds[1]], `EPSG:4326`, `EPSG:${projectionCode}`);
-        const maxXY = transform([bounds[2], bounds[3]], `EPSG:4326`, `EPSG:${projectionCode}`);
-        bounds = [minXY[0], minXY[1], maxXY[0], maxXY[1]];
+      const extent = transformExtent(
+        this.getExtent() || api.map(this.mapId).getView().get('extent'),
+        `EPSG:${api.map(this.mapId).currentProjection}`,
+        `EPSG:4326`
+      );
+      if (bounds) {
+        bounds = [
+          Math.max(extent[0], bounds[0]),
+          Math.max(extent[1], bounds[1]),
+          Math.min(extent[2], bounds[2]),
+          Math.min(extent[3], bounds[3]),
+        ];
+        bounds = transformExtent(bounds, `EPSG:4326`, `EPSG:${projectionCode}`);
       }
     }
     return bounds;
@@ -379,76 +428,59 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
    *
    * @param {string | TypeLayerEntryConfig | null} layerPathOrConfig Optional layer path or configuration.
    * @param {string} filter An optional filter to be used in place of the getViewFilter value.
+   * @param {boolean} checkCluster An optional value to see if we check for clustered layers.
    */
-  applyViewFilter(layerPathOrConfig: string | TypeLayerEntryConfig | null = this.activeLayer, filter = '') {
+  applyViewFilter(layerPathOrConfig: string | TypeLayerEntryConfig | null = this.activeLayer, filter = '', checkCluster = true) {
     const layerEntryConfig = (
       typeof layerPathOrConfig === 'string' ? this.getLayerConfig(layerPathOrConfig) : layerPathOrConfig
     ) as TypeVectorLayerEntryConfig;
     if (layerEntryConfig) {
-      try {
-        const layerFilter = this.getLayerFilter(layerEntryConfig);
-        const nodeValue = filter || layerFilter || '';
-        const { geoviewRenderer } = api.map(this.mapId);
-        const filterEquation = geoviewRenderer.analyzeLayerFilter([{ nodeType: NodeType.unprocessedNode, nodeValue }]);
-        layerEntryConfig.gvLayer!.set('filterEquation', filterEquation);
-      } catch (error) {
-        throw new Error(`Invalid vector layer filter (${(error as { message: string }).message}).\nfilter = ${filter}`);
+      const layerPath = layerEntryConfig.geoviewRootLayer
+        ? `${layerEntryConfig.geoviewRootLayer.geoviewLayerId}/${layerEntryConfig.layerId.replace('-unclustered', '')}`
+        : layerEntryConfig.layerId.replace('-unclustered', '');
+      const unclusteredLayerPath = `${layerPath}-unclustered`;
+      const cluster = !!api.maps[this.mapId].layer.registeredLayers[unclusteredLayerPath];
+      if (cluster && checkCluster) {
+        this.applyViewFilter(api.maps[this.mapId].layer.registeredLayers[layerPath] as TypeVectorLayerEntryConfig, filter, false);
+        this.applyViewFilter(
+          api.maps[this.mapId].layer.registeredLayers[unclusteredLayerPath] as TypeVectorLayerEntryConfig,
+          filter,
+          false
+        );
+        return;
       }
-      layerEntryConfig.gvLayer!.set('legendFilterIsOff', !!filter);
-      layerEntryConfig.gvLayer?.changed();
-    }
-  }
 
-  /** ***************************************************************************************************************************
-   * Set the layerFilter that will be applied with the legend filters derived from the uniqueValue or classBreabs style of
-   * the layer. The resulting filter will be (legend filters) and (layerFilter). When the layer config is invalid, nothing is
-   * done.
-   *
-   * @param {string} filterValue The filter to associate to the layer.
-   * @param {string | TypeLayerEntryConfig | null} layerPathOrConfig Optional layer path or configuration.
-   */
-  setLayerFilter(filterValue: string, layerPathOrConfig: string | TypeLayerEntryConfig | null = this.activeLayer) {
-    const layerEntryConfig = (
-      typeof layerPathOrConfig === 'string' ? this.getLayerConfig(layerPathOrConfig) : layerPathOrConfig
-    ) as TypeVectorLayerEntryConfig;
-    if (layerEntryConfig) {
+      let filterValueToUse = filter || this.getLayerFilter(layerEntryConfig) || '';
+
+      // Convert date constants using the serviceDateFormat
+      const searchDateEntry = [
+        ...`${filterValueToUse?.replaceAll(/\s{2,}/g, ' ').trim()} `.matchAll(
+          /(?<=^date\b\s')[\d/\-T\s:+Z]{4,25}(?=')|(?<=[(\s]date\b\s')[\d/\-T\s:+Z]{4,25}(?=')/gi
+        ),
+      ];
+      searchDateEntry.reverse();
+      searchDateEntry.forEach((dateFound) => {
+        const reformattedDate = api.dateUtilities.applyInputDateFormat(dateFound[0]);
+        filterValueToUse = `${filterValueToUse!.slice(0, dateFound.index)}${reformattedDate}${filterValueToUse!.slice(
+          dateFound.index! + dateFound[0].length
+        )}`;
+      });
+
       try {
         const filterEquation = api
           .map(this.mapId)
-          .geoviewRenderer.analyzeLayerFilter([{ nodeType: NodeType.unprocessedNode, nodeValue: filterValue }]);
+          .geoviewRenderer.analyzeLayerFilter([{ nodeType: NodeType.unprocessedNode, nodeValue: filterValueToUse }]);
         layerEntryConfig.gvLayer?.set('filterEquation', filterEquation);
       } catch (error) {
-        throw new Error(`Invalid vector layer filter (${(error as { message: string }).message}).\nfilter = ${filterValue}`);
+        throw new Error(
+          `Invalid vector layer filter (${(error as { message: string }).message}).\nfilter = ${this.getLayerFilter(
+            layerEntryConfig
+          )}\ninternal filter = ${filterValueToUse}`
+        );
       }
-      layerEntryConfig.gvLayer?.set('layerFilter', filterValue);
+
+      layerEntryConfig.gvLayer?.set('legendFilterIsOff', !!filter);
+      layerEntryConfig.gvLayer?.changed();
     }
-  }
-
-  /** ***************************************************************************************************************************
-   * Get the layerFilter that is associated to the layer. Returns undefined when the layer config is invalid.
-   * If layerPathOrConfig is undefined, this.activeLayer is used.
-   *
-   * @param {string | TypeLayerEntryConfig | null} layerPathOrConfig Optional layer path or configuration.
-   *
-   * @returns {string | undefined} The filter associated to the layer or undefined.
-   */
-  getLayerFilter(layerPathOrConfig: string | TypeLayerEntryConfig | null = this.activeLayer): string | undefined {
-    const layerEntryConfig = (
-      typeof layerPathOrConfig === 'string' ? this.getLayerConfig(layerPathOrConfig) : layerPathOrConfig
-    ) as TypeVectorLayerEntryConfig;
-    if (layerEntryConfig) return layerEntryConfig.gvLayer?.get('layerFilter');
-    return undefined;
-  }
-
-  /** ***************************************************************************************************************************
-   * Toggle cluster status.
-   *
-   * @param {string | TypeLayerEntryConfig | null} layerPathOrConfig Optional layer path or configuration.
-   */
-  toggleCluster(layerPathOrConfig: string | TypeLayerEntryConfig | null = this.activeLayer) {
-    const config = (
-      typeof layerPathOrConfig === 'string' ? this.getLayerConfig(layerPathOrConfig) : layerPathOrConfig
-    ) as TypeVectorLayerEntryConfig;
-    config.source!.cluster!.enable = !config.source!.cluster!.enable;
   }
 }

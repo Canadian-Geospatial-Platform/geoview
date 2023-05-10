@@ -1,9 +1,9 @@
-/* 
+/*
 This file is use to hold styles relative to sample page
 No style for React viewer component should be here. To add style specific to the viewer go to src/assests/style
   - theme.tsx for Material-UI
   - style.css for specific viewer style
-  - vendor.css to override a third party library style 
+  - vendor.css to override a third party library style
 */
 html {
   font-family: 'Roboto', sans-serif;
@@ -120,4 +120,35 @@ td {
   width: 120px;
   height: 30px;
   font-size: 1rem;
+}
+
+.draw-menu {
+  text-align: center;
+}
+
+.draw-menu-item {
+  display: inline-block;
+  margin: 0px 20px;
+}
+
+.logs-container {
+  position: absolute;
+  top: 0px;
+  right: 0px;
+  width: 200px;
+  height: 100%;
+  background-color: lightgrey;
+  z-index: 1;
+  overflow: auto;
+  font-size: smaller;
+}
+
+.logs-container-title {
+  text-align: center;
+  font-weight: bold;
+}
+
+.logs-container-sub-title {
+  text-align: center;
+  font-size: smaller;
 }
