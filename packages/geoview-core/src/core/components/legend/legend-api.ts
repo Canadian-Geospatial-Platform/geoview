@@ -9,6 +9,7 @@ export interface TypeLegendProps {
   canSetOpacity?: boolean;
   expandAll?: boolean;
   hideAll?: boolean;
+  canZoomTo?: boolean;
 }
 
 /**
@@ -50,6 +51,7 @@ export class LegendApi {
           canSetOpacity,
           expandAll,
           hideAll,
+          canZoomTo: true,
         });
       }
       return null;

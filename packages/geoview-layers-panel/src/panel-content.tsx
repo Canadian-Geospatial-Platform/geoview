@@ -142,7 +142,7 @@ function PanelContent(props: TypePanelContentProps): JSX.Element {
   }, []);
 
   useEffect(() => {
-    setLegend(api.map(mapId!).legend.createLegend({ layerIds: mapLayers, isRemoveable: true, canSetOpacity: true }));
+    setLegend(api.map(mapId!).legend.createLegend({ layerIds: mapLayers, isRemoveable: true, canSetOpacity: true, canZoomTo: true }));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mapLayers]);
 
@@ -162,13 +162,19 @@ function PanelContent(props: TypePanelContentProps): JSX.Element {
 
   useEffect(() => {
     setLegend(
-      api.map(mapId!).legend.createLegend({ layerIds: mapLayers, isRemoveable: true, canSetOpacity: true, expandAll: isExpandAll })
+      api
+        .map(mapId!)
+        .legend.createLegend({ layerIds: mapLayers, isRemoveable: true, canSetOpacity: true, expandAll: isExpandAll, canZoomTo: true })
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isExpandAll]);
 
   useEffect(() => {
-    setLegend(api.map(mapId!).legend.createLegend({ layerIds: mapLayers, isRemoveable: true, canSetOpacity: true, hideAll: isHideAll }));
+    setLegend(
+      api
+        .map(mapId!)
+        .legend.createLegend({ layerIds: mapLayers, isRemoveable: true, canSetOpacity: true, hideAll: isHideAll, canZoomTo: true })
+    );
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isHideAll]);
 
