@@ -5,7 +5,6 @@ import { Options as SourceOptions } from 'ol/source/Vector';
 import { VectorImage as VectorLayer } from 'ol/layer';
 import { Options as VectorLayerOptions } from 'ol/layer/VectorImage';
 import { Geometry, Point } from 'ol/geom';
-import { all, bbox } from 'ol/loadingstrategy';
 import { ReadOptions } from 'ol/format/Feature';
 import BaseLayer from 'ol/layer/Base';
 import LayerGroup from 'ol/layer/Group';
@@ -55,13 +54,6 @@ export type TypeBaseVectorLayer = BaseLayer | TypeVectorLayerGroup | TypeVectorL
 // ******************************************************************************************************************************
 export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
   /** ***************************************************************************************************************************
-   * This method reads the service metadata from the metadataAccessPath.
-   *
-   * @returns {Promise<void>} A promise that the execution is completed.
-   */
-  protected abstract getServiceMetadata(): Promise<void>;
-
-  /** ***************************************************************************************************************************
    * This method recursively validates the configuration of the layer entries to ensure that each layer is correctly defined. If
    * necessary, additional code can be executed in the child method to complete the layer configuration.
    *
@@ -104,18 +96,11 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
     // The line below uses var because a var declaration has a wider scope than a let declaration.
     var vectorSource: VectorSource<Geometry>;
     if (this.attributions.length !== 0) sourceOptions.attributions = this.attributions;
-
-    // set loading strategy option
-    sourceOptions.strategy = (layerEntryConfig.source! as TypeBaseSourceVectorInitialConfig).strategy === 'bbox' ? bbox : all;
+    const childLoaderInitialisation = sourceOptions.loader;
 
     sourceOptions.loader = (extent, resolution, projection, success, failure) => {
-      let url = vectorSource.getUrl();
-
-      // if an extent is provided, use it in the url
-      if (Number.isFinite(extent[0]) && this.type === 'ogcWfs') {
-        url = `${url}&bbox=${extent},EPSG:${api.map(this.mapId).currentProjection}`;
-      }
-
+      if (childLoaderInitialisation) childLoaderInitialisation.call(vectorSource, extent, resolution, projection, success, failure);
+      const url = vectorSource.getUrl();
       const xhr = new XMLHttpRequest();
       if ((layerEntryConfig?.source as TypeBaseSourceVectorInitialConfig)?.postSettings) {
         const { postSettings } = layerEntryConfig.source as TypeBaseSourceVectorInitialConfig;
@@ -154,13 +139,15 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
                 dateFields.forEach((fieldName) => {
                   let fieldValue = feature.get(fieldName);
                   if (typeof fieldValue === 'number') {
-                    if (this.dateFragmentsOrder.length) {
-                      let dateString = api.dateUtilities.convertMilisecondsToDate(fieldValue);
-                      dateString = api.dateUtilities.applyInputDateFormat(dateString, this.dateFragmentsOrder);
-                      feature.set(fieldName, api.dateUtilities.convertToMilliseconds(dateString), true);
-                    }
+                    let dateString = api.dateUtilities.convertMilisecondsToDate(fieldValue);
+                    dateString = api.dateUtilities.applyInputDateFormat(dateString, this.serverDateFragmentsOrder);
+                    feature.set(fieldName, api.dateUtilities.convertToMilliseconds(dateString), true);
                   } else {
-                    fieldValue = api.dateUtilities.applyInputDateFormat(fieldValue, this.dateFragmentsOrder);
+                    if (!this.serverDateFragmentsOrder)
+                      this.serverDateFragmentsOrder = api.dateUtilities.getDateFragmentsOrder(
+                        api.dateUtilities.deduceDateFormat(fieldValue)
+                      );
+                    fieldValue = api.dateUtilities.applyInputDateFormat(fieldValue, this.serverDateFragmentsOrder);
                     feature.set(fieldName, api.dateUtilities.convertToMilliseconds(fieldValue), true);
                   }
                 });
@@ -234,8 +221,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
     };
 
     layerEntryConfig.gvLayer = new VectorLayer(layerOptions);
-    this.setLayerFilter(layerEntryConfig.layerFilter ? layerEntryConfig.layerFilter : '', layerEntryConfig);
-    this.applyViewFilter(layerEntryConfig);
+    this.applyViewFilter(layerEntryConfig, layerEntryConfig.layerFilter ? layerEntryConfig.layerFilter : '');
 
     return layerEntryConfig.gvLayer as VectorLayer<VectorSource>;
   }
@@ -321,39 +307,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
   }
 
   /** ***************************************************************************************************************************
-   * Return feature information for all the features in the provided bounding box.
-   *
-   * @param {Coordinate} location The coordinate that will be used by the query.
-   * @param {TypeLayerEntryConfig} layerConfig The layer configuration.
-   *
-   * @returns {Promise<TypeArrayOfFeatureInfoEntries>} The feature info table.
-   */
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  protected getFeatureInfoUsingBBox(location: Coordinate[], layerConfig: TypeLayerEntryConfig): Promise<TypeArrayOfFeatureInfoEntries> {
-    const promisedQueryResult = new Promise<TypeArrayOfFeatureInfoEntries>((resolve) => {
-      resolve([]);
-    });
-    return promisedQueryResult;
-  }
-
-  /** ***************************************************************************************************************************
-   * Return feature information for all the features in the provided polygon.
-   *
-   * @param {Coordinate} location The coordinate that will be used by the query.
-   * @param {TypeLayerEntryConfig} layerConfig The layer configuration.
-   *
-   * @returns {Promise<TypeArrayOfFeatureInfoEntries>} The feature info table.
-   */
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  protected getFeatureInfoUsingPolygon(location: Coordinate[], layerConfig: TypeLayerEntryConfig): Promise<TypeArrayOfFeatureInfoEntries> {
-    const promisedQueryResult = new Promise<TypeArrayOfFeatureInfoEntries>((resolve) => {
-      resolve([]);
-    });
-    return promisedQueryResult;
-  }
-
-  /** ***************************************************************************************************************************
-   * Compute the layer bounds or undefined if the result can not be obtained from the feature extents that compose the layer. If
+   * Compute the layer bounds or undefined if the result can not be obtained from le feature extents that compose the layer. If
    * layerPathOrConfig is undefined, the active layer is used. If projectionCode is defined, returns the bounds in the specified
    * projection otherwise use the map projection. The bounds are different from the extent. They are mainly used for display
    * purposes to show the bounding box in which the data resides and to zoom in on the entire layer data. It is not used by
@@ -421,16 +375,22 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
   }
 
   /** ***************************************************************************************************************************
-   * Apply a view filter to the layer. When the optional filter parameter is not empty (''), it is used alone to display the
-   * features. Otherwise, the legend filter and the layerFilter are used to define the view filter and the resulting filter is
-   * (legend filters) and (layerFilter). The legend filters are derived from the uniqueValue or classBreaks style of the layer.
-   * When the layer config is invalid, nothing is done.
+   * Apply a view filter to the layer. When the CombineLegendFilter flag is false, the filter paramater is used alone to display
+   * the features. Otherwise, the legend filter and the filter parameter are combined together to define the view filter. The
+   * legend filters are derived from the uniqueValue or classBreaks style of the layer. When the layer config is invalid, nothing
+   * is done.
    *
    * @param {string | TypeLayerEntryConfig | null} layerPathOrConfig Optional layer path or configuration.
    * @param {string} filter An optional filter to be used in place of the getViewFilter value.
+   * @param {boolean} CombineLegendFilter Flag used to combine the legend filter and the filter together (default: true)
    * @param {boolean} checkCluster An optional value to see if we check for clustered layers.
    */
-  applyViewFilter(layerPathOrConfig: string | TypeLayerEntryConfig | null = this.activeLayer, filter = '', checkCluster = true) {
+  applyViewFilter(
+    layerPathOrConfig: string | TypeLayerEntryConfig | null = this.activeLayer,
+    filter = '',
+    CombineLegendFilter = true,
+    checkCluster = true
+  ) {
     const layerEntryConfig = (
       typeof layerPathOrConfig === 'string' ? this.getLayerConfig(layerPathOrConfig) : layerPathOrConfig
     ) as TypeVectorLayerEntryConfig;
@@ -441,18 +401,26 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
       const unclusteredLayerPath = `${layerPath}-unclustered`;
       const cluster = !!api.maps[this.mapId].layer.registeredLayers[unclusteredLayerPath];
       if (cluster && checkCluster) {
-        this.applyViewFilter(api.maps[this.mapId].layer.registeredLayers[layerPath] as TypeVectorLayerEntryConfig, filter, false);
+        this.applyViewFilter(
+          api.maps[this.mapId].layer.registeredLayers[layerPath] as TypeVectorLayerEntryConfig,
+          filter,
+          CombineLegendFilter,
+          false
+        );
         this.applyViewFilter(
           api.maps[this.mapId].layer.registeredLayers[unclusteredLayerPath] as TypeVectorLayerEntryConfig,
           filter,
+          CombineLegendFilter,
           false
         );
         return;
       }
+      if (!layerEntryConfig.gvLayer) return; // We must wait for the layer to be created.
+      let filterValueToUse = filter;
+      layerEntryConfig.gvLayer!.set('legendFilterIsOff', !CombineLegendFilter);
+      if (CombineLegendFilter) layerEntryConfig.gvLayer?.set('layerFilter', filter);
 
-      let filterValueToUse = filter || this.getLayerFilter(layerEntryConfig) || '';
-
-      // Convert date constants using the serviceDateFormat
+      // Convert date constants using the externalFragmentsOrder derived from the externalDateFormat
       const searchDateEntry = [
         ...`${filterValueToUse?.replaceAll(/\s{2,}/g, ' ').trim()} `.matchAll(
           /(?<=^date\b\s')[\d/\-T\s:+Z]{4,25}(?=')|(?<=[(\s]date\b\s')[\d/\-T\s:+Z]{4,25}(?=')/gi
@@ -460,7 +428,9 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
       ];
       searchDateEntry.reverse();
       searchDateEntry.forEach((dateFound) => {
-        const reformattedDate = api.dateUtilities.applyInputDateFormat(dateFound[0]);
+        // If the date has a time zone, keep it as is, otherwise reverse its time zone by changing its sign
+        const reverseTimeZone = ![20, 25].includes(dateFound[0].length);
+        const reformattedDate = api.dateUtilities.applyInputDateFormat(dateFound[0], this.externalFragmentsOrder, reverseTimeZone);
         filterValueToUse = `${filterValueToUse!.slice(0, dateFound.index)}${reformattedDate}${filterValueToUse!.slice(
           dateFound.index! + dateFound[0].length
         )}`;
@@ -479,7 +449,6 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
         );
       }
 
-      layerEntryConfig.gvLayer?.set('legendFilterIsOff', !!filter);
       layerEntryConfig.gvLayer?.changed();
     }
   }

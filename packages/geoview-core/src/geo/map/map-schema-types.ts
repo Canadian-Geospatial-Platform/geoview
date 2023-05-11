@@ -1052,7 +1052,7 @@ export type TypeGeoviewLayerConfig = {
   /** Date format used by the service endpoint. */
   serviceDateFormat?: string;
   /** Date format used by the getFeatureInfo to output date variable. */
-  outputDateFormat?: string;
+  externalDateFormat?: string;
   /**
    * Initial settings to apply to the GeoView layer at creation time.
    * This attribute is allowed only if listOfLayerEntryConfig.length > 1.
