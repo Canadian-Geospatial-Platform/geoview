@@ -16,7 +16,6 @@ import { EVENT_NAMES } from '../../../api/events/event-types';
 import { api } from '../../../app';
 import { MapContext } from '../../app-start';
 
-import { payloadIsABasemapLayerArray } from '../../../api/events/payloads/basemap-layers-payload';
 import { payloadIsAMapViewProjection } from '../../../api/events/payloads/map-view-projection-payload';
 
 import { cgpvTheme } from '../../../ui/style/theme';
@@ -108,57 +107,6 @@ export function OverviewMap(): JSX.Element {
   const classes = useStyles();
 
   useEffect(() => {
-    // listen to adding a new basemap events
-    api.event.on(
-      EVENT_NAMES.BASEMAP.EVENT_BASEMAP_LAYERS_UPDATE,
-      (payload) => {
-        if (payloadIsABasemapLayerArray(payload)) {
-          const overviewMap = api
-            .map(mapId)
-            .map.getControls()
-            .getArray()
-            .filter((item) => {
-              return item instanceof OLOverviewMap;
-            })[0] as OLOverviewMap;
-
-          // remove previous basemaps
-          const layers = overviewMap.getOverviewMap().getAllLayers();
-
-          // loop through all layers on the map
-          for (let layerIndex = 0; layerIndex < layers.length; layerIndex++) {
-            const layer = layers[layerIndex];
-
-            // get group id that this layer belongs to
-            const layerMapId = layer.get('mapId');
-
-            // check if the group id matches basemap
-            if (layerMapId && layerMapId === 'basemap') {
-              // remove the basemap layer
-              overviewMap.getOverviewMap().removeLayer(layer);
-            }
-          }
-
-          // add basemap layers
-          payload.layers.forEach((layer) => {
-            const basemapLayer = new TileLayer({
-              opacity: layer.opacity,
-              source: layer.source,
-            });
-
-            // set this basemap's group id to basemap
-            basemapLayer.set('mapId', 'basemap');
-
-            // add the basemap layer
-            overviewMap.getOverviewMap().addLayer(basemapLayer);
-
-            // render the layer
-            basemapLayer.changed();
-          });
-        }
-      },
-      mapId
-    );
-
     // listen to geoview-basemap-panel package change projection event
     api.event.on(
       EVENT_NAMES.MAP.EVENT_MAP_VIEW_PROJECTION_CHANGE,
@@ -189,7 +137,6 @@ export function OverviewMap(): JSX.Element {
     );
 
     return () => {
-      api.event.off(EVENT_NAMES.BASEMAP.EVENT_BASEMAP_LAYERS_UPDATE, mapId);
       api.event.off(EVENT_NAMES.MAP.EVENT_MAP_VIEW_PROJECTION_CHANGE, mapId);
     };
   }, [mapId]);
@@ -197,7 +144,8 @@ export function OverviewMap(): JSX.Element {
   useEffect(() => {
     const { map, mapFeaturesConfig } = api.map(mapId);
 
-    const defaultBasemap = api.map(mapId).basemap.activeBasemap;
+    // get default overview map
+    const defaultBasemap = api.map(mapId).basemap.overviewMap;
 
     const toggleButton = document.createElement('div');
 
