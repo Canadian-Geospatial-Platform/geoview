@@ -289,10 +289,10 @@ export abstract class AbstractGeoViewLayer {
   registerToLayerSetListenerFunctions: Record<string, TypeLayerSetHandlerFunctions> = {};
 
   /** Date format object used to translate server to ISO format and ISO to server format */
-  dateFragmentsOrder: TypeDateFragments;
+  serverDateFragmentsOrder?: TypeDateFragments;
 
-  /** Date format object used to translate internal UTC ISO format to output format used by the getFeatureInfo */
-  outputFragmentsOrder: TypeDateFragments;
+  /** Date format object used to translate internal UTC ISO format to the external format, the one used by the user */
+  externalFragmentsOrder: TypeDateFragments;
 
   /** ***************************************************************************************************************************
    * The class constructor saves parameters and common configuration parameters in attributes.
@@ -311,8 +311,10 @@ export abstract class AbstractGeoViewLayer {
     if (mapLayerConfig.metadataAccessPath?.en) this.metadataAccessPath.en = mapLayerConfig.metadataAccessPath.en.trim();
     if (mapLayerConfig.metadataAccessPath?.fr) this.metadataAccessPath.fr = mapLayerConfig.metadataAccessPath.fr.trim();
     if (mapLayerConfig.listOfLayerEntryConfig) this.listOfLayerEntryConfig = mapLayerConfig.listOfLayerEntryConfig;
-    this.dateFragmentsOrder = api.dateUtilities.getDateFragmentsOrder(mapLayerConfig.serviceDateFormat);
-    this.outputFragmentsOrder = api.dateUtilities.getDateFragmentsOrder(mapLayerConfig.outputDateFormat);
+    this.serverDateFragmentsOrder = mapLayerConfig.serviceDateFormat
+      ? api.dateUtilities.getDateFragmentsOrder(mapLayerConfig.serviceDateFormat)
+      : undefined;
+    this.externalFragmentsOrder = api.dateUtilities.getDateFragmentsOrder(mapLayerConfig.externalDateFormat);
   }
 
   /** ***************************************************************************************************************************
@@ -377,13 +379,12 @@ export abstract class AbstractGeoViewLayer {
   }
 
   /** ***************************************************************************************************************************
-   * This method reads the service metadata from the metadataAccessPath.
+   * This method reads the service metadata from the metadataAccessPath. It does nothing if the layer has no metadata.
    *
    * @returns {Promise<void>} A promise that the execution is completed.
    */
   protected getServiceMetadata(): Promise<void> {
     const promisedExecution = new Promise<void>((resolve) => {
-      // there is no metadata for static image layer type
       resolve();
     });
     return promisedExecution;
@@ -441,14 +442,21 @@ export abstract class AbstractGeoViewLayer {
   }
 
   /** ***************************************************************************************************************************
-   * This method is used to process the layer's metadata. It will fill the empty fields of the layer's configuration (renderer,
-   * initial settings, fields and aliases).
+   * This method is used to process the layer's metadata. It will fill the empty outfields and aliasFields properties of the
+   * layer's configuration when applicable.
    *
    * @param {TypeLayerEntryConfig} layerEntryConfig The layer entry configuration to process.
    *
-   * @returns {Promise<void>} A promise that the layer configuration has its metadata processed.
+   * @returns {Promise<void>} A promise that the vector layer configuration has its metadata processed.
    */
-  protected abstract processLayerMetadata(layerEntryConfig: TypeLayerEntryConfig): Promise<void>;
+  protected processLayerMetadata(layerEntryConfig: TypeLayerEntryConfig): Promise<void> {
+    const promiseOfExecution = new Promise<void>((resolve) => {
+      if (!layerEntryConfig.source) layerEntryConfig.source = {};
+      if (!layerEntryConfig.source.featureInfo) layerEntryConfig.source.featureInfo = { queryable: true };
+      resolve();
+    });
+    return promiseOfExecution;
+  }
 
   /** ***************************************************************************************************************************
    * Process recursively the list of layer Entries to create the layers and the layer groups.
@@ -635,66 +643,89 @@ export abstract class AbstractGeoViewLayer {
   }
 
   /** ***************************************************************************************************************************
-   * Return feature information for all the features around the provided Pixel.
+   * Return feature information for all the features around the provided Pixel. Returns an empty array [] when the layer is
+   * not queryable.
    *
    * @param {Coordinate} location The pixel coordinate that will be used by the query.
    * @param {TypeLayerEntryConfig} layerConfig The layer configuration.
    *
-   * @returns {Promise<TypeFeatureInfoResult>} The feature info table.
+   * @returns {Promise<TypeArrayOfFeatureInfoEntries>} The feature info table.
    */
-  protected abstract getFeatureInfoAtPixel(location: Pixel, layerConfig: TypeLayerEntryConfig): Promise<TypeArrayOfFeatureInfoEntries>;
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  protected getFeatureInfoAtPixel(location: Pixel, layerConfig: TypeLayerEntryConfig): Promise<TypeArrayOfFeatureInfoEntries> {
+    const promisedQueryResult = new Promise<TypeArrayOfFeatureInfoEntries>((resolve) => {
+      resolve([]);
+    });
+    return promisedQueryResult;
+  }
 
   /** ***************************************************************************************************************************
-   * Return feature information for all the features around the provided coordinate.
+   * Return feature information for all the features around the provided coordinate. Returns an empty array [] when the layer is
+   * not queryable.
    *
    * @param {Coordinate} location The coordinate that will be used by the query.
    * @param {TypeLayerEntryConfig} layerConfig The layer configuration.
    *
-   * @returns {Promise<TypeFeatureInfoResult>} The feature info table.
+   * @returns {Promise<TypeArrayOfFeatureInfoEntries>} The feature info table.
    */
-  protected abstract getFeatureInfoAtCoordinate(
-    location: Coordinate,
-    layerConfig: TypeLayerEntryConfig
-  ): Promise<TypeArrayOfFeatureInfoEntries>;
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  protected getFeatureInfoAtCoordinate(location: Coordinate, layerConfig: TypeLayerEntryConfig): Promise<TypeArrayOfFeatureInfoEntries> {
+    const promisedQueryResult = new Promise<TypeArrayOfFeatureInfoEntries>((resolve) => {
+      resolve([]);
+    });
+    return promisedQueryResult;
+  }
 
   /** ***************************************************************************************************************************
-   * Return feature information for all the features around the provided longitude latitude.
+   * Return feature information for all the features around the provided longitude latitude. Returns an empty array [] when the
+   * layer is not queryable.
    *
    * @param {Coordinate} location The coordinate that will be used by the query.
    * @param {TypeLayerEntryConfig} layerConfig The layer configuration.
    *
-   * @returns {Promise<TypeFeatureInfoResult>} The feature info table.
+   * @returns {Promise<TypeArrayOfFeatureInfoEntries>} The feature info table.
    */
-  protected abstract getFeatureInfoAtLongLat(
-    location: Coordinate,
-    layerConfig: TypeLayerEntryConfig
-  ): Promise<TypeArrayOfFeatureInfoEntries>;
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  protected getFeatureInfoAtLongLat(location: Coordinate, layerConfig: TypeLayerEntryConfig): Promise<TypeArrayOfFeatureInfoEntries> {
+    const promisedQueryResult = new Promise<TypeArrayOfFeatureInfoEntries>((resolve) => {
+      resolve([]);
+    });
+    return promisedQueryResult;
+  }
 
   /** ***************************************************************************************************************************
-   * Return feature information for all the features in the provided bounding box.
+   * Return feature information for all the features in the provided bounding box. Returns an empty array [] when the layer is
+   * not queryable.
    *
    * @param {Coordinate} location The coordinate that will be used by the query.
    * @param {TypeLayerEntryConfig} layerConfig The layer configuration.
    *
-   * @returns {Promise<TypeFeatureInfoResult>} The feature info table.
+   * @returns {Promise<TypeArrayOfFeatureInfoEntries>} The feature info table.
    */
-  protected abstract getFeatureInfoUsingBBox(
-    location: Coordinate[],
-    layerConfig: TypeLayerEntryConfig
-  ): Promise<TypeArrayOfFeatureInfoEntries>;
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  protected getFeatureInfoUsingBBox(location: Coordinate[], layerConfig: TypeLayerEntryConfig): Promise<TypeArrayOfFeatureInfoEntries> {
+    const promisedQueryResult = new Promise<TypeArrayOfFeatureInfoEntries>((resolve) => {
+      resolve([]);
+    });
+    return promisedQueryResult;
+  }
 
   /** ***************************************************************************************************************************
-   * Return feature information for all the features in the provided polygon.
+   * Return feature information for all the features in the provided polygon. Returns an empty array [] when the layer is
+   * not queryable.
    *
    * @param {Coordinate} location The coordinate that will be used by the query.
    * @param {TypeLayerEntryConfig} layerConfig The layer configuration.
    *
-   * @returns {Promise<TypeFeatureInfoResult>} The feature info table.
+   * @returns {Promise<TypeArrayOfFeatureInfoEntries>} The feature info table.
    */
-  protected abstract getFeatureInfoUsingPolygon(
-    location: Coordinate[],
-    layerConfig: TypeLayerEntryConfig
-  ): Promise<TypeArrayOfFeatureInfoEntries>;
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  protected getFeatureInfoUsingPolygon(location: Coordinate[], layerConfig: TypeLayerEntryConfig): Promise<TypeArrayOfFeatureInfoEntries> {
+    const promisedQueryResult = new Promise<TypeArrayOfFeatureInfoEntries>((resolve) => {
+      resolve([]);
+    });
+    return promisedQueryResult;
+  }
 
   /** ***************************************************************************************************************************
    * This method register the layer entry to layer sets.
@@ -1093,13 +1124,15 @@ export abstract class AbstractGeoViewLayer {
     const fieldValue = feature.get(fieldName);
     let returnValue: string | number | Date;
     if (fieldType === 'date') {
-      if (typeof fieldValue === 'string') returnValue = api.dateUtilities.applyInputDateFormat(fieldValue, this.dateFragmentsOrder);
-      else {
+      if (typeof fieldValue === 'string') {
+        if (!this.serverDateFragmentsOrder)
+          this.serverDateFragmentsOrder = api.dateUtilities.getDateFragmentsOrder(api.dateUtilities.deduceDateFormat(fieldValue));
+        returnValue = api.dateUtilities.applyInputDateFormat(fieldValue, this.serverDateFragmentsOrder);
+      } else {
         // All vector dates are kept internally in UTC.
         returnValue = api.dateUtilities.convertToUTC(`${api.dateUtilities.convertMilisecondsToDate(fieldValue)}Z`);
       }
-      // The output date format does not perform any conversion, it is used to specify the parts that will be displayed.
-      if (this.outputFragmentsOrder?.length) returnValue = api.dateUtilities.applyOutputDateFormat(returnValue, this.outputFragmentsOrder);
+      if (this.externalFragmentsOrder) returnValue = api.dateUtilities.applyOutputDateFormat(returnValue, this.externalFragmentsOrder);
       return returnValue;
     }
     return fieldValue;
@@ -1197,21 +1230,6 @@ export abstract class AbstractGeoViewLayer {
       }
     });
     return promisedArrayOfFeatureInfo;
-  }
-
-  /** ***************************************************************************************************************************
-   * Set the layerFilter that will be applied with the legend filters derived from the uniqueValue or classBreabs style of
-   * the layer. The resulting filter will be (legend filters) and (layerFilter). When the layer config is invalid, nothing is
-   * done.
-   *
-   * @param {string} filterValue The filter to associate to the layer.
-   * @param {string | TypeLayerEntryConfig | null} layerPathOrConfig Optional layer path or configuration.
-   */
-  setLayerFilter(filterValue: string, layerPathOrConfig: string | TypeLayerEntryConfig | null = this.activeLayer) {
-    const layerEntryConfig = (
-      typeof layerPathOrConfig === 'string' ? this.getLayerConfig(layerPathOrConfig) : layerPathOrConfig
-    ) as TypeLayerEntryConfig;
-    if (layerEntryConfig) layerEntryConfig.gvLayer?.set('layerFilter', filterValue);
   }
 
   /** ***************************************************************************************************************************

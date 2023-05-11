@@ -5,12 +5,14 @@ function createCodeSnippet() {
   });
 
   const script = scripts[scripts.length - 1];
-  const el = document.getElementById('codeSnippet');
-  if (el !== null) {
-    el.innerHTML = `<pre>${script.textContent
-      .replace('//create snippets\n', '')
-      .replace('createConfigSnippet();\n', '')
-      .replace('createCodeSnippet();\n', '')}</pre>`;
+  for (let i = 0, loop = true; loop; i++) {
+    const el = document.getElementById(`codeSnippet${i || ''}`);
+    if (el !== null) {
+      el.innerHTML = `<pre>${script.textContent
+        .replace('//create snippets\n', '')
+        .replace('createConfigSnippet();\n', '')
+        .replace('createCodeSnippet();\n', '')}</pre>`;
+    } else loop = false;
   }
 }
 
