@@ -485,7 +485,11 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
   }, []);
 
   useEffect(() => {
-    const bounds = api.map(mapId).layer?.geoviewLayers[layerId].getMetadataBounds() || undefined;
+    const layerPath = api.maps[mapId].legend.legendLayerSet.resultSets[path]?.layerPath;
+    const geoLayer = api.map(mapId).layer.getGeoviewLayerById(layerId) as AbstractGeoViewVector;
+    const { activeLayer } = geoLayer;
+
+    const bounds = activeLayer ? geoLayer.calculateBounds() : geoLayer.calculateBounds(layerPath);
     if (bounds) {
       setZoomtoExtent(bounds);
     }

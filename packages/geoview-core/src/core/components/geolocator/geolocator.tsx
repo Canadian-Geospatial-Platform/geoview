@@ -72,10 +72,7 @@ export function Geolocator() {
     if (bbox) {
       const convertedExtent1 = fromLonLat([bbox[0], bbox[1]], projectionConfig);
       const convertedExtent2 = fromLonLat([bbox[2], bbox[3]], projectionConfig);
-      api
-        .map(mapId)
-        .getView()
-        .fit([...convertedExtent1, ...convertedExtent2], { duration: ANIMATION_DURATION });
+      api.map(mapId).zoomToExtent([...convertedExtent1, ...convertedExtent2]);
     } else {
       map.getView().animate({ center: fromLonLat(coords, projectionConfig), duration: ANIMATION_DURATION, zoom: 11 });
     }
