@@ -3,9 +3,7 @@
 import TileLayer from 'ol/layer/Tile';
 import { Options as TileOptions } from 'ol/layer/BaseTile';
 import XYZ, { Options as SourceOptions } from 'ol/source/XYZ';
-import { Coordinate } from 'ol/coordinate';
 import TileGrid, { Options as TileGridOptions } from 'ol/tilegrid/TileGrid';
-import { Pixel } from 'ol/pixel';
 import { transformExtent } from 'ol/proj';
 import { Extent } from 'ol/extent';
 
@@ -22,7 +20,6 @@ import {
   TypeLocalizedString,
 } from '../../../map/map-schema-types';
 import { getLocalizedValue, getXMLHttpRequest } from '../../../../core/utils/utilities';
-import { codedValueType, rangeDomainType, TypeArrayOfFeatureInfoEntries } from '../../../../api/events/payloads/get-feature-info-payload';
 import { Cast, toJsonObject } from '../../../../core/types/global-types';
 import { api } from '../../../../app';
 import { Layer } from '../../layer';
@@ -257,11 +254,11 @@ export class XYZTiles extends AbstractGeoViewRaster {
    * This method is used to process the layer's metadata. It will fill the empty fields of the layer's configuration (renderer,
    * initial settings, fields and aliases).
    *
-   * @param {TypeVectorLayerEntryConfig} layerEntryConfig The layer entry configuration to process.
+   * @param {TypeVectorLaTypeLayerEntryConfigyerEntryConfig} layerEntryConfig The layer entry configuration to process.
    *
    * @returns {Promise<void>} A promise that the vector layer configuration has its metadata processed.
    */
-  protected processLayerMetadata(layerEntryConfig: TypeXYZTilesLayerEntryConfig): Promise<void> {
+  protected processLayerMetadata(layerEntryConfig: TypeLayerEntryConfig): Promise<void> {
     const promiseOfExecution = new Promise<void>((resolve) => {
       if (!this.metadata) resolve();
       else {
@@ -284,98 +281,6 @@ export class XYZTiles extends AbstractGeoViewRaster {
       }
     });
     return promiseOfExecution;
-  }
-
-  /** ***************************************************************************************************************************
-   * XYZ tiles return null because these services do not support getFeatureInfo queries. When getFeatureInfo is supported this
-   * method returns feature information for all the features around the provided Pixel.
-   *
-   * @param {Coordinate} location The pixel coordinate that will be used by the query.
-   * @param {TypeXYZTilesLayerEntryConfig} layerConfig The layer configuration.
-   *
-   * @returns {Promise<TypeArrayOfFeatureInfoEntries>} The feature info table.
-   */
-  protected getFeatureInfoAtPixel(location: Pixel, layerConfig: TypeXYZTilesLayerEntryConfig): Promise<TypeArrayOfFeatureInfoEntries> {
-    const promisedQueryResult = new Promise<TypeArrayOfFeatureInfoEntries>((resolve) => {
-      resolve([]);
-    });
-    return promisedQueryResult;
-  }
-
-  /** ***************************************************************************************************************************
-   * XYZ tiles return null because these services do not support getFeatureInfo queries. When getFeatureInfo is supported this
-   * method returns information for all the features around the provided coordinate.
-   *
-   * @param {Coordinate} location The coordinate that will be used by the query.
-   * @param {TypeXYZTilesLayerEntryConfig} layerConfig The layer configuration.
-   *
-   * @returns {Promise<TypeArrayOfFeatureInfoEntries>} The feature info table.
-   */
-  protected getFeatureInfoAtCoordinate(
-    location: Coordinate,
-    layerConfig: TypeXYZTilesLayerEntryConfig
-  ): Promise<TypeArrayOfFeatureInfoEntries> {
-    const promisedQueryResult = new Promise<TypeArrayOfFeatureInfoEntries>((resolve) => {
-      resolve([]);
-    });
-    return promisedQueryResult;
-  }
-
-  /** ***************************************************************************************************************************
-   * XYZ tiles return null because these services do not support getFeatureInfo queries. When getFeatureInfo is supported this
-   * method returns feature information for all the features around the provided longitude latitude.
-   *
-   * @param {Coordinate} location The coordinate that will be used by the query.
-   * @param {TypeXYZTilesLayerEntryConfig} layerConfig The layer configuration.
-   *
-   * @returns {Promise<TypeArrayOfFeatureInfoEntries>} The feature info table.
-   */
-  protected getFeatureInfoAtLongLat(
-    location: Coordinate,
-    layerConfig: TypeXYZTilesLayerEntryConfig
-  ): Promise<TypeArrayOfFeatureInfoEntries> {
-    const promisedQueryResult = new Promise<TypeArrayOfFeatureInfoEntries>((resolve) => {
-      resolve([]);
-    });
-    return promisedQueryResult;
-  }
-
-  /** ***************************************************************************************************************************
-   * XYZ tiles return null because these services do not support getFeatureInfo queries. When getFeatureInfo is supported this
-   * method returns feature information for all the features in the provided bounding box.
-   *
-   * @param {Coordinate} location The coordinate that will be used by the query.
-   * @param {TypeXYZTilesLayerEntryConfig} layerConfig The layer configuration.
-   *
-   * @returns {Promise<TypeArrayOfFeatureInfoEntries>} The feature info table.
-   */
-  protected getFeatureInfoUsingBBox(
-    location: Coordinate[],
-    layerConfig: TypeXYZTilesLayerEntryConfig
-  ): Promise<TypeArrayOfFeatureInfoEntries> {
-    const promisedQueryResult = new Promise<TypeArrayOfFeatureInfoEntries>((resolve) => {
-      resolve([]);
-    });
-    return promisedQueryResult;
-  }
-
-  /** ***************************************************************************************************************************
-   * XYZ tiles return null because these services do not support getFeatureInfo queries. When getFeatureInfo is supported this
-   * method returns feature information for all the features in the provided polygon.
-   *
-   * @param {Coordinate} location The coordinate that will be used by the query.
-   * @param {TypeXYZTilesLayerEntryConfig} layerConfig The layer configuration.
-   *
-   * @returns {Promise<TypeArrayOfFeatureInfoEntries>} The feature info table.
-   */
-  protected getFeatureInfoUsingPolygon(
-    location: Coordinate[],
-    layerConfig: TypeXYZTilesLayerEntryConfig
-  ): Promise<TypeArrayOfFeatureInfoEntries> {
-    const promisedQueryResult = new Promise<TypeArrayOfFeatureInfoEntries>((resolve) => {
-      resolve([]);
-    });
-    return promisedQueryResult;
   }
 
   /** ***************************************************************************************************************************

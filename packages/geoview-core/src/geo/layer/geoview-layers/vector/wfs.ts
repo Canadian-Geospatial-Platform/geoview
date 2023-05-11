@@ -5,6 +5,7 @@ import { WFS as FormatWFS } from 'ol/format';
 import { ReadOptions } from 'ol/format/Feature';
 import { Vector as VectorSource } from 'ol/source';
 import { Geometry } from 'ol/geom';
+import { all, bbox } from 'ol/loadingstrategy';
 
 import { TypeJsonArray, TypeJsonObject } from '../../../../core/types/global-types';
 import { AbstractGeoViewLayer, CONST_LAYER_TYPES } from '../abstract-geoview-layers';
@@ -374,6 +375,10 @@ export class WFS extends AbstractGeoViewVector {
     sourceOptions: SourceOptions = {},
     readOptions: ReadOptions = {}
   ): VectorSource<Geometry> {
+    // The line below uses var because a var declaration has a wider scope than a let declaration.
+    // eslint-disable-next-line no-var
+    var vectorSource: VectorSource<Geometry>;
+
     readOptions.dataProjection = (layerEntryConfig.source as TypeBaseSourceVectorInitialConfig).dataProjection;
 
     // check if url contains metadata parameters for the getCapabilities request and reformat the urls
@@ -381,12 +386,21 @@ export class WFS extends AbstractGeoViewVector {
     sourceOptions.url = sourceUrl!.indexOf('?') > -1 ? sourceUrl!.substring(0, sourceUrl!.indexOf('?')) : sourceUrl;
     sourceOptions.url = `${sourceOptions.url}?service=WFS&request=getFeature&version=${this.version}`;
     sourceOptions.url = `${sourceOptions.url}&typeName=${layerEntryConfig.layerId}`;
-
     sourceOptions.format = new FormatWFS({
       version: this.version,
     });
-
-    const vectorSource = super.createVectorSource(layerEntryConfig, sourceOptions, readOptions);
+    // set loading strategy option
+    sourceOptions.strategy = (layerEntryConfig.source! as TypeBaseSourceVectorInitialConfig).strategy === 'all' ? all : bbox;
+    sourceOptions.loader = (extent) => {
+      if ((layerEntryConfig.source! as TypeBaseSourceVectorInitialConfig).strategy === 'bbox') {
+        // if an extent is provided, use it in the url
+        if (Number.isFinite(extent[0])) {
+          const url = vectorSource.getUrl();
+          vectorSource.setUrl(`${url}&bbox=${extent},EPSG:${api.map(this.mapId).currentProjection}`);
+        }
+      }
+    };
+    vectorSource = super.createVectorSource(layerEntryConfig, sourceOptions, readOptions);
 
     return vectorSource;
   }

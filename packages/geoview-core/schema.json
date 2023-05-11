@@ -1404,7 +1404,7 @@
           "type": "string",
           "description": "Date format used by the service endpoint."
         },
-        "outputDateFormat": {
+        "externalDateFormat": {
           "type": "string",
           "description": "Date format used by the getFeatureInfo to output date variable."
         },

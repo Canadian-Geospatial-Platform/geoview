@@ -253,13 +253,17 @@ export class EsriFeature extends AbstractGeoViewVector {
     sourceOptions: SourceOptions = {},
     readOptions: ReadOptions = {}
   ): VectorSource<Geometry> {
+    // The line below uses var because a var declaration has a wider scope than a let declaration.
+    // eslint-disable-next-line no-var
+    var vectorSource: VectorSource<Geometry>;
     sourceOptions.url = getLocalizedValue(layerEntryConfig.source!.dataAccessPath!, this.mapId);
     sourceOptions.url = `${sourceOptions.url}/${layerEntryConfig.layerId.replace(
       '-unclustered',
       ''
     )}/query?f=pjson&outfields=*&where=1%3D1`;
     sourceOptions.format = new EsriJSON();
-    const vectorSource = super.createVectorSource(layerEntryConfig, sourceOptions, readOptions);
+
+    vectorSource = super.createVectorSource(layerEntryConfig, sourceOptions, readOptions);
     return vectorSource;
   }
 }

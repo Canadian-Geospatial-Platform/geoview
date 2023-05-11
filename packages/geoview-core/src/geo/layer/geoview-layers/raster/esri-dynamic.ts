@@ -112,6 +112,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
    * @param {TypeEsriDynamicLayerConfig} layerConfig The layer configuration.
    */
   constructor(mapId: string, layerConfig: TypeEsriDynamicLayerConfig) {
+    if (!layerConfig.serviceDateFormat) layerConfig.serviceDateFormat = 'DD/MM/YYYY HH:MM:SSZ';
     super(CONST_LAYER_TYPES.ESRI_DYNAMIC, layerConfig, mapId);
   }
 
@@ -294,8 +295,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
       );
 
       layerEntryConfig.gvLayer = new ImageLayer(imageLayerOptions);
-      this.setLayerFilter(layerEntryConfig.layerFilter ? layerEntryConfig.layerFilter : '', layerEntryConfig);
-      this.applyViewFilter(layerEntryConfig);
+      this.applyViewFilter(layerEntryConfig, layerEntryConfig.layerFilter ? layerEntryConfig.layerFilter : '');
 
       resolve(layerEntryConfig.gvLayer);
     });
@@ -384,42 +384,6 @@ export class EsriDynamic extends AbstractGeoViewRaster {
           });
         }
       }
-    });
-    return promisedQueryResult;
-  }
-
-  /** ***************************************************************************************************************************
-   * Return feature information for all the features in the provided bounding box.
-   *
-   * @param {Coordinate} location The coordinate that will be used by the query.
-   * @param {TypeEsriDynamicLayerEntryConfig} layerConfig The layer configuration.
-   *
-   * @returns {Promise<TypeArrayOfFeatureInfoEntries>} The feature info table.
-   */
-  protected getFeatureInfoUsingBBox(
-    location: Coordinate[],
-    layerConfig: TypeEsriDynamicLayerEntryConfig
-  ): Promise<TypeArrayOfFeatureInfoEntries> {
-    const promisedQueryResult = new Promise<TypeArrayOfFeatureInfoEntries>((resolve) => {
-      resolve([]);
-    });
-    return promisedQueryResult;
-  }
-
-  /** ***************************************************************************************************************************
-   * Return feature information for all the features in the provided polygon.
-   *
-   * @param {Coordinate} location The coordinate that will be used by the query.
-   * @param {TypeEsriDynamicLayerEntryConfig} layerConfig The layer configuration.
-   *
-   * @returns {Promise<TypeArrayOfFeatureInfoEntries>} The feature info table.
-   */
-  protected getFeatureInfoUsingPolygon(
-    location: Coordinate[],
-    layerConfig: TypeEsriDynamicLayerEntryConfig
-  ): Promise<TypeArrayOfFeatureInfoEntries> {
-    const promisedQueryResult = new Promise<TypeArrayOfFeatureInfoEntries>((resolve) => {
-      resolve([]);
     });
     return promisedQueryResult;
   }
@@ -580,8 +544,11 @@ export class EsriDynamic extends AbstractGeoViewRaster {
     let queryString = styleSettings.defaultVisible !== 'no' && !level ? 'not (' : '(';
     for (let i = 0; i < queryTree.length; i++) {
       const value = this.formatFieldValue(styleSettings.fields[fieldOrder[level]], queryTree[i].fieldValue, sourceFeatureInfo);
+      // The nextField array is not empty, then it is is not the last field
       if (queryTree[i].nextField.length) {
+        // If i > 0 (true) then we add a OR clause
         if (i) queryString = `${queryString} or `;
+        // Add to the query the 'fieldName = value and ' + the result of the recursive call to buildQuery using the next field and level
         queryString = `${queryString}${styleSettings.fields[fieldOrder[level]]} = ${value} and ${this.buildQuery(
           queryTree[i].nextField,
           level + 1,
@@ -589,11 +556,12 @@ export class EsriDynamic extends AbstractGeoViewRaster {
           styleSettings,
           sourceFeatureInfo
         )}`;
-        if (i === queryTree.length - 1) queryString = `${queryString})`;
       } else {
-        queryString = i ? `${queryString}, ${value}` : `${styleSettings.fields[fieldOrder[level]]}${level ? ' not in (' : ' in ('}${value}`;
-        if (i === queryTree.length - 1) queryString = `${queryString})`;
+        // We have reached the last field and i = 0 (false) we concatenate 'fieldName in (value' else we concatenate ', value'
+        queryString = i ? `${queryString}, ${value}` : `${styleSettings.fields[fieldOrder[level]]} in (${value}`;
       }
+      // If i points to the last element of the queryTree, close the parenthesis.
+      if (i === queryTree.length - 1) queryString = `${queryString})`;
     }
     return queryString === '(' ? '(1=0)' : queryString;
   }
@@ -771,42 +739,46 @@ export class EsriDynamic extends AbstractGeoViewRaster {
   }
 
   /** ***************************************************************************************************************************
-   * Apply a view filter to the layer. When the filter parameter is not empty (''), the view filter does not use the legend
-   * filter. Otherwise, the getViewFilter method is used to define the view filter and the resulting filter is
-   * (legend filters) and (layerFilter). The legend filters are derived from the uniqueValue or classBreaks style of the layer.
-   * When the layer config is invalid, nothing is done.
+   * Apply a view filter to the layer. When the keep legend filter flag is false, the filter paramater is used alone to display
+   * the features. Otherwise, the legend filter and the filter parameter are combined together to define the view filter. The
+   * legend filters are derived from the uniqueValue or classBreaks style of the layer. When the layer config is invalid, nothing
+   * is done.
    *
    * @param {string | TypeLayerEntryConfig | null} layerPathOrConfig Optional layer path or configuration.
    * @param {string} filter An optional filter to be used in place of the getViewFilter value.
+   * @param {boolean} CombineLegendFilter Flag used to combine the legend filter and the filter together (default: true)
    */
-  applyViewFilter(layerPathOrConfig: string | TypeLayerEntryConfig | null = this.activeLayer, filter = '') {
+  applyViewFilter(layerPathOrConfig: string | TypeLayerEntryConfig | null = this.activeLayer, filter = '', CombineLegendFilter = true) {
     const layerEntryConfig = (
       typeof layerPathOrConfig === 'string' ? this.getLayerConfig(layerPathOrConfig) : layerPathOrConfig
     ) as TypeEsriDynamicLayerEntryConfig;
-    if ((layerEntryConfig.gvLayer as ImageLayer<ImageArcGISRest>).getSource()) {
-      const source = (layerEntryConfig.gvLayer as ImageLayer<ImageArcGISRest>).getSource()!;
-      let filterValueToUse = (filter || this.getViewFilter(layerEntryConfig)).replaceAll(/\s{2,}/g, ' ').trim();
+    const source = (layerEntryConfig.gvLayer as ImageLayer<ImageArcGISRest>).getSource();
+    if (source) {
+      let filterValueToUse = filter.replaceAll(/\s{2,}/g, ' ').trim();
+      layerEntryConfig.gvLayer!.set('legendFilterIsOff', !CombineLegendFilter);
+      if (CombineLegendFilter) {
+        layerEntryConfig.gvLayer?.set('layerFilter', filterValueToUse);
+        filterValueToUse = this.getViewFilter(layerEntryConfig);
+      }
 
-      // Convert date constants using the serviceDateFormat
+      // Convert date constants using the externalFragmentsOrder derived from the externalDateFormat
       const searchDateEntry = [
-        ...`${filterValueToUse?.replaceAll(/\s{2,}/g, ' ').trim()} `.matchAll(
-          /(?<=^date\b\s')[\d/\-T\s:+Z]{4,25}(?=')|(?<=[(\s]date\b\s')[\d/\-T\s:+Z]{4,25}(?=')/gi
-        ),
+        ...filterValueToUse.matchAll(/(?<=^date\b\s')[\d/\-T\s:+Z]{4,25}(?=')|(?<=[(\s]date\b\s')[\d/\-T\s:+Z]{4,25}(?=')/gi),
       ];
       searchDateEntry.reverse();
       searchDateEntry.forEach((dateFound) => {
-        const reverseTimeZone = true;
-        let reformattedDate = api.dateUtilities.applyInputDateFormat(dateFound[0], this.dateFragmentsOrder, reverseTimeZone);
+        // If the date has a time zone, keep it as is, otherwise reverse its time zone by changing its sign
+        const reverseTimeZone = ![20, 25].includes(dateFound[0].length);
+        let reformattedDate = api.dateUtilities.applyInputDateFormat(dateFound[0], this.externalFragmentsOrder, reverseTimeZone);
         // ESRI Dynamic layers doesn't accept the ISO date format. The time zone must be removed. The 'T' separator
         // normally placed between the date and the time must be replaced by a space.
-        reformattedDate = reformattedDate.slice(0, -6);
-        reformattedDate = reformattedDate.split('T').join(' ');
+        reformattedDate = reformattedDate.slice(0, reformattedDate.length === 20 ? -1 : -6); // drop time zone.
+        reformattedDate = reformattedDate.replace('T', ' ');
         filterValueToUse = `${filterValueToUse!.slice(0, dateFound.index)}${reformattedDate}${filterValueToUse!.slice(
           dateFound.index! + dateFound[0].length
         )}`;
       });
       source.updateParams({ layerDefs: `{"${layerEntryConfig.layerId}": "${filterValueToUse}"}` });
-      layerEntryConfig.gvLayer!.set('legendFilterIsOff', !!filter);
       layerEntryConfig.gvLayer!.changed();
     }
   }

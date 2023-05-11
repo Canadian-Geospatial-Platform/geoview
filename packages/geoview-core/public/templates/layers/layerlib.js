@@ -239,8 +239,8 @@ const createTableOfFilter = (mapId) => {
                       }
                       const checkbox = document.getElementById(`checkbox-${mapId}-${geoviewLayer.geoviewLayerId}`);
                       const filterInput = document.getElementById(`filter-input-${mapId}-${geoviewLayer.geoviewLayerId}`);
-                      const filter = checkbox.value === 'true' ? filterInput.value : '';
-                      geoviewLayer.applyViewFilter(layerConfig, filter);
+                      const filter = checkbox.value === 'true' ? filterInput.value : geoviewLayer.getLayerFilter(layerConfig);
+                      geoviewLayer.applyViewFilter(layerConfig, filter, checkbox.value !== 'true');
                     });
                     mapButtonsDiv.appendChild(toggleUniqueValueDefault);
                     mapButtonsDiv.appendChild(legendStyle[geometry].defaultCanvas);
@@ -277,8 +277,8 @@ const createTableOfFilter = (mapId) => {
                       }
                       const checkbox = document.getElementById(`checkbox-${mapId}-${geoviewLayer.geoviewLayerId}`);
                       const filterInput = document.getElementById(`filter-input-${mapId}-${geoviewLayer.geoviewLayerId}`);
-                      const filter = checkbox.value === 'true' ? filterInput.value : '';
-                      geoviewLayer.applyViewFilter(layerConfig, filter);
+                      const filter = checkbox.value === 'true' ? filterInput.value : geoviewLayer.getLayerFilter(layerConfig);
+                      geoviewLayer.applyViewFilter(layerConfig, filter, checkbox.value !== 'true');
                     });
                     mapButtonsDiv.appendChild(toggleUniqueValueFeature);
                     mapButtonsDiv.appendChild(legendStyle[geometry].arrayOfCanvas[i]);
@@ -315,8 +315,8 @@ const createTableOfFilter = (mapId) => {
                       }
                       const checkbox = document.getElementById(`checkbox-${mapId}-${geoviewLayer.geoviewLayerId}`);
                       const filterInput = document.getElementById(`filter-input-${mapId}-${geoviewLayer.geoviewLayerId}`);
-                      const filter = checkbox.value === 'true' ? filterInput.value : '';
-                      geoviewLayer.applyViewFilter(layerConfig, filter);
+                      const filter = checkbox.value === 'true' ? filterInput.value : geoviewLayer.getLayerFilter(layerConfig);
+                      geoviewLayer.applyViewFilter(layerConfig, filter, checkbox.value !== 'true');
                     });
                     mapButtonsDiv.appendChild(toggleClassBreakDefault);
                     const br = document.createElement('br');
@@ -352,8 +352,8 @@ const createTableOfFilter = (mapId) => {
                       }
                       const checkbox = document.getElementById(`checkbox-${mapId}-${geoviewLayer.geoviewLayerId}`);
                       const filterInput = document.getElementById(`filter-input-${mapId}-${geoviewLayer.geoviewLayerId}`);
-                      const filter = checkbox.value === 'true' ? filterInput.value : '';
-                      geoviewLayer.applyViewFilter(layerConfig, filter);
+                      const filter = checkbox.value === 'true' ? filterInput.value : geoviewLayer.getLayerFilter(layerConfig);
+                      geoviewLayer.applyViewFilter(layerConfig, filter, checkbox.value !== 'true');
                     });
                     mapButtonsDiv.appendChild(toggleClassBreakFeature);
                     mapButtonsDiv.appendChild(legendStyle[geometry].arrayOfCanvas[i]);
@@ -376,11 +376,7 @@ const createTableOfFilter = (mapId) => {
                 const layerFilterButton = document.createElement('button');
                 layerFilterButton.addEventListener('click', (e) => {
                   const checkbox = document.getElementById(`checkbox-${mapId}-${geoviewLayer.geoviewLayerId}`);
-                  if (checkbox.value === 'true') geoviewLayer.applyViewFilter(layerConfig, layerFilterInput.value);
-                  else {
-                    geoviewLayer.setLayerFilter(layerFilterInput.value, layerConfig);
-                    geoviewLayer.applyViewFilter(layerConfig);
-                  }
+                  geoviewLayer.applyViewFilter(layerConfig, layerFilterInput.value, checkbox.value !== 'true');
                 });
                 layerFilterButton.innerText = 'Apply';
                 layerFilterText.appendChild(layerFilterButton);
@@ -391,11 +387,7 @@ const createTableOfFilter = (mapId) => {
                 checkboxInput.id = `checkbox-${mapId}-${geoviewLayer.geoviewLayerId}`;
                 checkboxInput.addEventListener('click', (e) => {
                   checkboxInput.value = checkboxInput.value === 'true' ? 'false' : 'true';
-                  if (checkboxInput.value === 'true') geoviewLayer.applyViewFilter(layerConfig, layerFilterInput.value);
-                  else {
-                    geoviewLayer.setLayerFilter(layerFilterInput.value, layerConfig);
-                    geoviewLayer.applyViewFilter(layerConfig);
-                  }
+                  geoviewLayer.applyViewFilter(layerConfig, layerFilterInput.value, checkboxInput.value !== 'true');
                 });
                 mapButtonsDiv.appendChild(checkboxInput);
                 const checkboxText = document.createElement('label');
