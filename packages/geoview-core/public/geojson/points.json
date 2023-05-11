@@ -9,7 +9,7 @@
         "Blue": 12.3,
         "Yellow": 66,
         "Orange": 75,
-        "creationDate": "02/15/2022T00:00:00"
+        "creationDate": "15/02/2022T05:00:00-05:00"
       },
       "geometry": {
         "type": "Point",
@@ -24,7 +24,7 @@
         "Blue": 32.3,
         "Yellow": 5.43,
         "Orange": 55,
-        "creationDate": "07/01/2020T12:00:00"
+        "creationDate": "07/01/2020T12:00:00-05:00"
       },
       "geometry": {
         "type": "Point",
@@ -39,7 +39,7 @@
         "Blue": 32.3,
         "Yellow": 5.43,
         "Orange": 55,
-        "creationDate": "02/15/2019T17:00:00"
+        "creationDate": "15/02/2019T17:00:00-05:00"
       },
       "geometry": {
         "type": "Point",
