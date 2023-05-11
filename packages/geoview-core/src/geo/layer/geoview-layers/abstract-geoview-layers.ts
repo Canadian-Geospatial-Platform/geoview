@@ -1245,4 +1245,56 @@ export abstract class AbstractGeoViewLayer {
     if (layerEntryConfig) return layerEntryConfig.gvLayer?.get('layerFilter');
     return undefined;
   }
+
+  /** ***************************************************************************************************************************
+   * Get the bounds of the layer represented in the layerConfig, returns updated bounds
+   *
+   * @param {TypeLayerEntryConfig} layerConfig Layer config to get bounds from.
+   * @param {Extent | undefined} bounds The current bounding box to be adjusted.
+   *
+   * @returns {Extent} The layer bounding box.
+   */
+  getBounds(layerConfig: TypeLayerEntryConfig, bounds: Extent | undefined): Extent | undefined {
+    return bounds;
+  }
+
+  /** ***************************************************************************************************************************
+   * Compute the layer bounds or undefined if the result can not be obtained from the feature extents that compose the layer. If
+   * layerPathOrConfig is undefined, the active layer is used. If projectionCode is defined, returns the bounds in the specified
+   * projection otherwise use the map projection. The bounds are different from the extent. They are mainly used for display
+   * purposes to show the bounding box in which the data resides and to zoom in on the entire layer data. It is not used by
+   * openlayer to limit the display of data on the map.
+   *
+   * @param {string | TypeLayerEntryConfig | TypeListOfLayerEntryConfig | null} layerPathOrConfig Optional layer path or
+   * configuration.
+   * @param {string | number | undefined} projectionCode Optional projection code to use for the returned bounds.
+   *
+   * @returns {Extent} The layer bounding box.
+   */
+  calculateBounds(
+    layerPathOrConfig: string | TypeLayerEntryConfig | TypeListOfLayerEntryConfig | null = this.activeLayer,
+    projectionCode: string | number = api.map(this.mapId).currentProjection
+  ): Extent | undefined {
+    let bounds: Extent | undefined;
+    const processGroupLayerBounds = (listOfLayerEntryConfig: TypeListOfLayerEntryConfig) => {
+      listOfLayerEntryConfig.forEach((layerConfig) => {
+        if (layerEntryIsGroupLayer(layerConfig)) processGroupLayerBounds(layerConfig.listOfLayerEntryConfig);
+        else {
+          bounds = this.getBounds(layerConfig, bounds);
+        }
+      });
+    };
+
+    const rootLayerConfig = typeof layerPathOrConfig === 'string' ? this.getLayerConfig(layerPathOrConfig) : layerPathOrConfig;
+    if (rootLayerConfig) {
+      if (Array.isArray(rootLayerConfig)) processGroupLayerBounds(rootLayerConfig);
+      else processGroupLayerBounds([rootLayerConfig]);
+    }
+
+    if (bounds) {
+      bounds = transformExtent(bounds, `EPSG:4326`, `EPSG:${projectionCode}`);
+    }
+
+    return bounds;
+  }
 }
