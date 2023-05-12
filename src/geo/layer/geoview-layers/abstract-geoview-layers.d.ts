@@ -225,7 +225,7 @@ export declare abstract class AbstractGeoViewLayer {
      * Process recursively the list of layer Entries to create the layers and the layer groups.
      *
      * @param {TypeListOfLayerEntryConfig} listOfLayerEntryConfig The list of layer entries to process.
-     * @param {LayerGroup} layerGroup Optionnal layer group to use when we have many layers. The very first call to
+     * @param {LayerGroup} layerGroup Optional layer group to use when we have many layers. The very first call to
      *  processListOfLayerEntryConfig must not provide a value for this parameter. It is defined for internal use.
      *
      * @returns {Promise<BaseLayer | null>} The promise that the layers were processed.

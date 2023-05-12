@@ -2,6 +2,7 @@ import TileLayer from 'ol/layer/Tile';
 import XYZ from 'ol/source/XYZ';
 import { Coordinate } from 'ol/coordinate';
 import { Pixel } from 'ol/pixel';
+import { Extent } from 'ol/extent';
 import { AbstractGeoViewLayer } from '../abstract-geoview-layers';
 import { AbstractGeoViewRaster, TypeBaseRasterLayer } from './abstract-geoview-raster';
 import { TypeLayerEntryConfig, TypeSourceTileInitialConfig, TypeTileLayerEntryConfig, TypeGeoviewLayerConfig, TypeListOfLayerEntryConfig } from '../../../map/map-schema-types';
@@ -151,4 +152,18 @@ export declare class XYZTiles extends AbstractGeoViewRaster {
      * @returns {Promise<TypeArrayOfFeatureInfoEntries>} The feature info table.
      */
     protected getFeatureInfoUsingPolygon(location: Coordinate[], layerConfig: TypeXYZTilesLayerEntryConfig): Promise<TypeArrayOfFeatureInfoEntries>;
+    /** ***************************************************************************************************************************
+     * Compute the layer bounds or undefined if the result can not be obtained from the feature extents that compose the layer. If
+     * layerPathOrConfig is undefined, the active layer is used. If projectionCode is defined, returns the bounds in the specified
+     * projection otherwise use the map projection. The bounds are different from the extent. They are mainly used for display
+     * purposes to show the bounding box in which the data resides and to zoom in on the entire layer data. It is not used by
+     * openlayer to limit the display of data on the map. If the bounds lie outside the extents, they are reduced to the extents.
+     *
+     * @param {string | TypeLayerEntryConfig | TypeListOfLayerEntryConfig | null} layerPathOrConfig Optional layer path or
+     * configuration.
+     * @param {string | number | undefined} projectionCode Optional projection code to use for the returned bounds.
+     *
+     * @returns {Extent} The layer bounding box.
+     */
+    calculateBounds(layerPathOrConfig?: string | TypeLayerEntryConfig | TypeListOfLayerEntryConfig | null, projectionCode?: string | number): Extent | undefined;
 }

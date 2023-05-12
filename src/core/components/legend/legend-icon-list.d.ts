@@ -4,6 +4,7 @@ export interface TypeLegendIconListProps {
     iconImages: string[];
     iconLabels: string[];
     layerConfig?: TypeVectorLayerEntryConfig;
+    mapId?: string;
     geometryKey?: TypeStyleGeometry;
     isParentVisible?: boolean;
     toggleParentVisible?: () => void;

@@ -7,6 +7,7 @@ export interface TypeLegendProps {
     canSetOpacity?: boolean;
     expandAll?: boolean;
     hideAll?: boolean;
+    canZoomTo?: boolean;
 }
 /**
  * API to manage legend component

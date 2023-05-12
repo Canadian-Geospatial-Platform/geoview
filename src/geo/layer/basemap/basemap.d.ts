@@ -17,6 +17,7 @@ export declare class Basemap {
     defaultOrigin?: number[];
     defaultResolutions?: number[];
     defaultExtent?: Extent;
+    overviewMap?: TypeBasemapProps;
     attribution: string;
     displayLanguage: TypeDisplayLanguage;
     basemapOptions: TypeBasemapOptions;

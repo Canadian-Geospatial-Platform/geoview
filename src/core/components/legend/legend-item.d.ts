@@ -12,6 +12,7 @@ export interface TypeLegendItemProps {
     toggleParentVisible?: () => void;
     expandAll?: boolean;
     hideAll?: boolean;
+    canZoomTo?: boolean;
 }
 /**
  * Legend Item for a Legend list
