@@ -20,6 +20,9 @@ import { Crosshair } from '../crosshair/crosshair';
 import { Footerbar } from '../footer-bar/footer-bar';
 import { OverviewMap } from '../overview-map/overview-map';
 import { ClickMarker } from '../click-marker/click-marker';
+import { HoverTooltip } from '../hover-tooltip/hover-tooltip';
+
+import { Tooltip } from '../../../ui';
 
 import { disableScrolling, generateId } from '../../utils/utilities';
 
@@ -79,7 +82,7 @@ export function Map(mapFeaturesConfig: TypeMapFeaturesConfig): JSX.Element {
 
     const position = map.getView().getCenter()!;
 
-    api.map(mapId).currentPosition = position;
+    api.map(mapId).currentMapCenterPosition = position;
 
     // emit the moveend event to the api
     api.event.emit(lngLatPayload(EVENT_NAMES.MAP.EVENT_MAP_MOVE_END, mapId, position));
@@ -128,12 +131,33 @@ export function Map(mapFeaturesConfig: TypeMapFeaturesConfig): JSX.Element {
         projected: (event as MapBrowserEvent<UIEvent>).coordinate,
         pixel: (event as MapBrowserEvent<UIEvent>).pixel,
         lnglat: toLonLat((event as MapBrowserEvent<UIEvent>).coordinate, `EPSG:${api.map(mapId).currentProjection}`),
+        dragging: (event as MapBrowserEvent<UIEvent>).dragging,
       };
 
       api.map(mapId).singleClickedPosition = coordinates;
 
       // emit the singleclick map position
       api.event.emit(mapSingleClickPayload(EVENT_NAMES.MAP.EVENT_MAP_SINGLE_CLICK, mapId, coordinates));
+    }
+  }
+
+  /**
+   * Map pointer move handler
+   * @param {MapEvent} event the map pointer move event
+   */
+  function mapPointerMove(event: MapEvent): void {
+    if (mapInteraction !== 'static') {
+      const coordinates: TypeMapSingleClick = {
+        projected: (event as MapBrowserEvent<UIEvent>).coordinate,
+        pixel: (event as MapBrowserEvent<UIEvent>).pixel,
+        lnglat: toLonLat((event as MapBrowserEvent<UIEvent>).coordinate, `EPSG:${api.map(mapId).currentProjection}`),
+        dragging: (event as MapBrowserEvent<UIEvent>).dragging,
+      };
+
+      api.map(mapId).pointerPosition = coordinates;
+
+      // emit the pointer move map position
+      api.event.emit(mapSingleClickPayload(EVENT_NAMES.MAP.EVENT_MAP_POINTER_MOVE, mapId, coordinates));
     }
   }
 
@@ -154,6 +178,7 @@ export function Map(mapFeaturesConfig: TypeMapFeaturesConfig): JSX.Element {
 
     cgpvMap.on('moveend', mapMoveEnd);
     cgpvMap.on('singleclick', mapSingleClick);
+    cgpvMap.on('pointermove', mapPointerMove);
     cgpvMap.getView().on('change:resolution', mapZoomEnd);
 
     viewer.toggleMapInteraction(mapConfig.interaction);
@@ -305,7 +330,7 @@ export function Map(mapFeaturesConfig: TypeMapFeaturesConfig): JSX.Element {
   }, [mapId]);
 
   return (
-    // eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex
+    /* eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex */
     <div id={`map-${mapId}`} ref={mapElement as MutableRefObject<HTMLDivElement>} className={classes.mapContainer} tabIndex={0}>
       {isLoaded && (
         <>
@@ -315,6 +340,7 @@ export function Map(mapFeaturesConfig: TypeMapFeaturesConfig): JSX.Element {
           <NorthPoleFlag projection={api.projection.projections[api.map(mapId).currentProjection].getCode()} />
           <Crosshair />
           <ClickMarker />
+          <HoverTooltip />
           {deviceSizeMedUp && components !== undefined && components.indexOf('overview-map') > -1 && <OverviewMap />}
           {deviceSizeMedUp && components !== undefined && components.indexOf('footer-bar') > -1 && <Footerbar />}
         </>

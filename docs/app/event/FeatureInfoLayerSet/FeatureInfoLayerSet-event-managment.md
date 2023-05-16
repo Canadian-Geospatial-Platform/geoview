@@ -12,6 +12,8 @@ export type TypeFeatureInfoEntry = {
   geometry: FeatureLike | null;
   featureIcon: HTMLCanvasElement;
   fieldInfo: Partial<Record<string, TypeFieldEntry>>;
+  nameField: string | null;
+  schemaTag: string;
 };
 
 export type TypeFieldEntry = {

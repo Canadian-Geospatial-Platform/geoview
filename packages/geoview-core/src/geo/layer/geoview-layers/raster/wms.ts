@@ -850,6 +850,8 @@ export class WMS extends AbstractGeoViewRaster {
       geometry: null,
       featureIcon: document.createElement('canvas'),
       fieldInfo: {},
+      nameField: null,
+      schemaTag: layerEntryConfig.schemaTag,
     };
     const createFieldEntries = (entry: TypeJsonObject, prefix = '') => {
       const keys = Object.keys(entry);

@@ -100,10 +100,13 @@ export class MapViewer {
   currentZoom: number;
 
   // store current position
-  currentPosition: Coordinate;
+  currentMapCenterPosition: Coordinate;
 
   // store last single click position
   singleClickedPosition: TypeMapSingleClick;
+
+  // store live pointer position
+  pointerPosition: TypeMapSingleClick;
 
   // i18n instance
   i18nInstance!: i18n;
@@ -141,8 +144,9 @@ export class MapViewer {
     this.currentProjection = mapFeaturesConfig.map.viewSettings.projection;
     this.i18nInstance = i18instance;
     this.currentZoom = mapFeaturesConfig.map.viewSettings.zoom;
-    this.currentPosition = [mapFeaturesConfig.map.viewSettings.center[0], mapFeaturesConfig.map.viewSettings.center[1]];
-    this.singleClickedPosition = { pixel: [], lnglat: [], projected: [] };
+    this.currentMapCenterPosition = [mapFeaturesConfig.map.viewSettings.center[0], mapFeaturesConfig.map.viewSettings.center[1]];
+    this.singleClickedPosition = { pixel: [], lnglat: [], projected: [], dragging: false };
+    this.pointerPosition = { pixel: [], lnglat: [], projected: [], dragging: false };
 
     this.appBarButtons = new AppbarButtons(this.mapId);
     this.navBarButtons = new NavbarButtons(this.mapId);
