@@ -240,7 +240,6 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
             if (styleRepresentation.clusterCanvas) iconImageList.push(styleRepresentation.clusterCanvas.toDataURL());
             setIconList(iconImageList);
             if (layerLegend.styleConfig) {
-              // let uniqueValueStyleInfoEntry = layerConfig.style[geometry].uniqueValueStyleInfo[i]
               let geometryKey: TypeStyleGeometry | null = null;
               Object.entries(layerLegend.styleConfig).forEach(([key, styleSettings]) => {
                 if (isClassBreakStyleConfig(styleSettings)) {
@@ -344,8 +343,8 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
     if (hideAll !== undefined) setChecked(!hideAll);
   }, [hideAll]);
 
+  // TODO ! Revise this useEffect because it prevent the visibility flag of the config to work properly.
   useEffect(() => {
-    if (!geoviewLayerInstance) return;
     if (layerConfigEntry) {
       if (isParentVisible && isChecked) {
         geoviewLayerInstance.setVisible(true, layerConfigEntry);

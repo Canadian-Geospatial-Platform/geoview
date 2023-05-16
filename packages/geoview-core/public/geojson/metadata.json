@@ -50,7 +50,7 @@
                 }
               },
               "values": ["Quebec"],
-              "visible": "yes"
+              "visible": "always"
             },
             {
               "label": "Alberta",
@@ -66,7 +66,7 @@
                 }
               },
               "values": ["Alberta"],
-              "visible": "yes"
+              "visible": "no"
             }
           ]
         }

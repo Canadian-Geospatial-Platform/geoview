@@ -24,6 +24,7 @@
           "en": "https://maps-cartes.ec.gc.ca/arcgis/rest/services/DMS/DEU_CSO_Volume/MapServer"
         },
         "geoviewLayerType": "esriFeature",
+        "initialSettings": { "visible": false },
         "listOfLayerEntryConfig": [
           {
             "layerId": "8"
@@ -39,6 +40,7 @@
           "en": "https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/900A_and_top_100_en/MapServer/"
         },
         "geoviewLayerType": "esriFeature",
+        "initialSettings": { "visible": true },
         "listOfLayerEntryConfig": [
           {
             "layerId": "0"
@@ -51,6 +53,7 @@
           "en": "Static Image"
         },
         "geoviewLayerType": "imageStatic",
+        "initialSettings": { "visible": false },
         "listOfLayerEntryConfig": [
           {
             "layerId": "thumbnail",
@@ -82,6 +85,7 @@
           "en": "./geojson/metadata.json"
         },
         "geoviewLayerType": "GeoJSON",
+        "initialSettings": { "visible": true },
         "listOfLayerEntryConfig": [
           {
             "layerId": "polygons.json",
@@ -104,6 +108,7 @@
             "listOfLayerEntryConfig": [
               {
                 "layerId": "icon_points.json",
+                "initialSettings": { "visible": false },
                 "layerName": {
                   "en": "Icons"
                 }
