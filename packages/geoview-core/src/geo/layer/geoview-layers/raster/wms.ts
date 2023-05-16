@@ -515,8 +515,7 @@ export class WMS extends AbstractGeoViewRaster {
             imageLayerOptions.visible = layerEntryConfig.initialSettings?.visible;
 
           layerEntryConfig.gvLayer = new ImageLayer(imageLayerOptions);
-          this.setLayerFilter(layerEntryConfig.layerFilter ? layerEntryConfig.layerFilter : '', layerEntryConfig);
-          this.applyViewFilter(layerEntryConfig);
+          this.applyViewFilter(layerEntryConfig, layerEntryConfig.layerFilter ? layerEntryConfig.layerFilter : '');
           resolve(layerEntryConfig.gvLayer);
         } else {
           api.event.emit(
@@ -693,42 +692,6 @@ export class WMS extends AbstractGeoViewRaster {
           } else resolve([]);
         }
       }
-    });
-    return promisedQueryResult;
-  }
-
-  /** ***************************************************************************************************************************
-   * Return feature information for all the features in the provided bounding box.
-   *
-   * @param {Coordinate} location The coordinate that will be used by the query.
-   * @param {TypeOgcWmsLayerEntryConfig} layerConfig The layer configuration.
-   *
-   * @returns {Promise<TypeArrayOfFeatureInfoEntries>} The feature info table.
-   */
-  protected getFeatureInfoUsingBBox(
-    location: Coordinate[],
-    layerConfig: TypeOgcWmsLayerEntryConfig
-  ): Promise<TypeArrayOfFeatureInfoEntries> {
-    const promisedQueryResult = new Promise<TypeArrayOfFeatureInfoEntries>((resolve) => {
-      resolve([]);
-    });
-    return promisedQueryResult;
-  }
-
-  /** ***************************************************************************************************************************
-   * Return feature information for all the features in the provided polygon.
-   *
-   * @param {Coordinate} location The coordinate that will be used by the query.
-   * @param {TypeOgcWmsLayerEntryConfig} layerConfig The layer configuration.
-   *
-   * @returns {Promise<TypeArrayOfFeatureInfoEntries>} The feature info table.
-   */
-  protected getFeatureInfoUsingPolygon(
-    location: Coordinate[],
-    layerConfig: TypeOgcWmsLayerEntryConfig
-  ): Promise<TypeArrayOfFeatureInfoEntries> {
-    const promisedQueryResult = new Promise<TypeArrayOfFeatureInfoEntries>((resolve) => {
-      resolve([]);
     });
     return promisedQueryResult;
   }
@@ -958,43 +921,46 @@ export class WMS extends AbstractGeoViewRaster {
   }
 
   /** ***************************************************************************************************************************
-   * Apply a view filter to the layer. When the filter parameter is not empty (''), the view filter does not use the legend
-   * filter. Otherwise, the getViewFilter method is used to define the view filter and the resulting filter is
-   * (legend filters) and (layerFilter). The legend filters are derived from the uniqueValue or classBreaks style of the layer.
-   * When the layer config is invalid, nothing is done.
+   * Apply a view filter to the layer. When the CombineLegendFilter flag is false, the filter paramater is used alone to display
+   * the features. Otherwise, the legend filter and the filter parameter are combined together to define the view filter. The
+   * legend filters are derived from the uniqueValue or classBreaks style of the layer. When the layer config is invalid, nothing
+   * is done.
+   * TODO ! The combination of the legend filter and the dimension filter probably does not apply to WMS. The code can be simplified.
    *
    * @param {string | TypeLayerEntryConfig | null} layerPathOrConfig Optional layer path or configuration.
    * @param {string} filter An optional filter to be used in place of the getViewFilter value.
+   * @param {boolean} CombineLegendFilter Flag used to combine the legend filter and the filter together (default: true)
    */
-  applyViewFilter(layerPathOrConfig: string | TypeLayerEntryConfig | null = this.activeLayer, filter = '') {
+  applyViewFilter(layerPathOrConfig: string | TypeLayerEntryConfig | null = this.activeLayer, filter = '', CombineLegendFilter = true) {
     const layerEntryConfig = (
       typeof layerPathOrConfig === 'string' ? this.getLayerConfig(layerPathOrConfig) : layerPathOrConfig
     ) as TypeOgcWmsLayerEntryConfig;
     const source = (layerEntryConfig.gvLayer as ImageLayer<ImageWMS>).getSource();
     if (source) {
-      let filterValueToUse = filter || this.getLayerFilter(layerEntryConfig);
+      let filterValueToUse = filter;
+      layerEntryConfig.gvLayer!.set('legendFilterIsOff', !CombineLegendFilter);
+      if (CombineLegendFilter) layerEntryConfig.gvLayer?.set('layerFilter', filter);
+
       if (filterValueToUse) {
         filterValueToUse = filterValueToUse.replaceAll(/\s{2,}/g, ' ').trim();
         const queryElements = filterValueToUse.split(/(?<=\b)\s*=/);
         const dimension = queryElements[0].trim();
         filterValueToUse = queryElements[1].trim();
 
-        // Convert date constants using the serviceDateFormat
+        // Convert date constants using the externalFragmentsOrder derived from the externalDateFormat
         const searchDateEntry = [
-          ...`${filterValueToUse?.replaceAll(/\s{2,}/g, ' ').trim()} `.matchAll(
-            /(?<=^date\b\s')[\d/\-T\s:+Z]{4,25}(?=')|(?<=[(\s]date\b\s')[\d/\-T\s:+Z]{4,25}(?=')/gi
-          ),
+          ...`${filterValueToUse} `.matchAll(/(?<=^date\b\s')[\d/\-T\s:+Z]{4,25}(?=')|(?<=[(\s]date\b\s')[\d/\-T\s:+Z]{4,25}(?=')/gi),
         ];
         searchDateEntry.reverse();
         searchDateEntry.forEach((dateFound) => {
-          const reverseTimeZone = true;
-          const reformattedDate = api.dateUtilities.applyInputDateFormat(dateFound[0], this.dateFragmentsOrder, reverseTimeZone);
+          // If the date has a time zone, keep it as is, otherwise reverse its time zone by changing its sign
+          const reverseTimeZone = ![20, 25].includes(dateFound[0].length);
+          const reformattedDate = api.dateUtilities.applyInputDateFormat(dateFound[0], this.externalFragmentsOrder, reverseTimeZone);
           filterValueToUse = `${filterValueToUse!.slice(0, dateFound.index! - 6)}${reformattedDate}${filterValueToUse!.slice(
             dateFound.index! + dateFound[0].length + 2
           )}`;
         });
         source.updateParams({ [dimension]: filterValueToUse.replace(/\s*/g, '') });
-        layerEntryConfig.gvLayer!.set('legendFilterIsOff', !!filter);
         layerEntryConfig.gvLayer!.changed();
       }
     }

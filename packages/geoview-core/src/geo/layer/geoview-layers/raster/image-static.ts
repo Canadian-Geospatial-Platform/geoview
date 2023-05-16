@@ -5,8 +5,6 @@ import axios from 'axios';
 import ImageLayer from 'ol/layer/Image';
 import Static, { Options as SourceOptions } from 'ol/source/ImageStatic';
 import { Options as ImageOptions } from 'ol/layer/BaseImage';
-import { Coordinate } from 'ol/coordinate';
-import { Pixel } from 'ol/pixel';
 import { Extent } from 'ol/extent';
 import { transformExtent } from 'ol/proj';
 
@@ -20,7 +18,6 @@ import {
   layerEntryIsGroupLayer,
   TypeImageStaticLayerEntryConfig,
 } from '../../../map/map-schema-types';
-import { codedValueType, rangeDomainType, TypeArrayOfFeatureInfoEntries } from '../../../../api/events/payloads/get-feature-info-payload';
 import { getLocalizedValue } from '../../../../core/utils/utilities';
 import { api } from '../../../../app';
 import { Layer } from '../../layer';
@@ -89,19 +86,6 @@ export class ImageStatic extends AbstractGeoViewRaster {
    */
   constructor(mapId: string, layerConfig: TypeImageStaticLayerConfig) {
     super(CONST_LAYER_TYPES.IMAGE_STATIC, layerConfig, mapId);
-  }
-
-  /** ***************************************************************************************************************************
-   * This method reads the service metadata from the metadataAccessPath.
-   *
-   * @returns {Promise<void>} A promise that the execution is completed.
-   */
-  protected getServiceMetadata(): Promise<void> {
-    const promisedExecution = new Promise<void>((resolve) => {
-      // there is no metadata for static image layer type
-      resolve();
-    });
-    return promisedExecution;
   }
 
   /** ***************************************************************************************************************************
@@ -294,114 +278,6 @@ export class ImageStatic extends AbstractGeoViewRaster {
       resolve(layerEntryConfig.gvLayer);
     });
     return promisedVectorLayer;
-  }
-
-  /** ***************************************************************************************************************************
-   * This method is used to process the layer's metadata. It will fill the empty fields of the layer's configuration (renderer,
-   * initial settings, fields and aliases).
-   *
-   * @param {TypeVectorLayerEntryConfig} layerEntryConfig The layer entry configuration to process.
-   *
-   * @returns {Promise<void>} A promise that the layer configuration has its metadata processed.
-   */
-  protected processLayerMetadata(layerEntryConfig: TypeImageStaticLayerEntryConfig): Promise<void> {
-    const promisedExecution = new Promise<void>((resolve) => {
-      // there is no metadata for static image layer type
-      resolve();
-    });
-    return promisedExecution;
-  }
-
-  /** ***************************************************************************************************************************
-   * Image Static return null because these services do not support getFeatureInfo queries. When getFeatureInfo is supported this
-   * method returns feature information for all the features around the provided Pixel.
-   *
-   * @param {Coordinate} location The pixel coordinate that will be used by the query.
-   * @param {TypeImageStaticLayerEntryConfig} layerConfig The layer configuration.
-   *
-   * @returns {Promise<TypeArrayOfFeatureInfoEntries>} The feature info table.
-   */
-  protected getFeatureInfoAtPixel(location: Pixel, layerConfig: TypeImageStaticLayerEntryConfig): Promise<TypeArrayOfFeatureInfoEntries> {
-    const promisedQueryResult = new Promise<TypeArrayOfFeatureInfoEntries>((resolve) => {
-      resolve([]);
-    });
-    return promisedQueryResult;
-  }
-
-  /** ***************************************************************************************************************************
-   * Image Static return null because these services do not support getFeatureInfo queries. When getFeatureInfo is supported this
-   * method returns information for all the features around the provided coordinate.
-   *
-   * @param {Coordinate} location The coordinate that will be used by the query.
-   * @param {TypeImageStaticLayerEntryConfig} layerConfig The layer configuration.
-   *
-   * @returns {Promise<TypeArrayOfFeatureInfoEntries>} The feature info table.
-   */
-  protected getFeatureInfoAtCoordinate(
-    location: Coordinate,
-    layerConfig: TypeImageStaticLayerEntryConfig
-  ): Promise<TypeArrayOfFeatureInfoEntries> {
-    const promisedQueryResult = new Promise<TypeArrayOfFeatureInfoEntries>((resolve) => {
-      resolve([]);
-    });
-    return promisedQueryResult;
-  }
-
-  /** ***************************************************************************************************************************
-   * Image Static return null because these services do not support getFeatureInfo queries. When getFeatureInfo is supported this
-   * method returns feature information for all the features around the provided longitude latitude.
-   *
-   * @param {Coordinate} location The coordinate that will be used by the query.
-   * @param {TypeImageStaticLayerEntryConfig} layerConfig The layer configuration.
-   *
-   * @returns {Promise<TypeArrayOfFeatureInfoEntries>} The feature info table.
-   */
-  protected getFeatureInfoAtLongLat(
-    location: Coordinate,
-    layerConfig: TypeImageStaticLayerEntryConfig
-  ): Promise<TypeArrayOfFeatureInfoEntries> {
-    const promisedQueryResult = new Promise<TypeArrayOfFeatureInfoEntries>((resolve) => {
-      resolve([]);
-    });
-    return promisedQueryResult;
-  }
-
-  /** ***************************************************************************************************************************
-   * Image Static return null because these services do not support getFeatureInfo queries. When getFeatureInfo is supported this
-   * method returns feature information for all the features in the provided bounding box.
-   *
-   * @param {Coordinate} location The coordinate that will be used by the query.
-   * @param {TypeImageStaticLayerEntryConfig} layerConfig The layer configuration.
-   *
-   * @returns {Promise<TypeArrayOfFeatureInfoEntries>} The feature info table.
-   */
-  protected getFeatureInfoUsingBBox(
-    location: Coordinate[],
-    layerConfig: TypeImageStaticLayerEntryConfig
-  ): Promise<TypeArrayOfFeatureInfoEntries> {
-    const promisedQueryResult = new Promise<TypeArrayOfFeatureInfoEntries>((resolve) => {
-      resolve([]);
-    });
-    return promisedQueryResult;
-  }
-
-  /** ***************************************************************************************************************************
-   * Image Static return null because these services do not support getFeatureInfo queries. When getFeatureInfo is supported this
-   * method returns feature information for all the features in the provided polygon.
-   *
-   * @param {Coordinate} location The coordinate that will be used by the query.
-   * @param {TypeImageStaticLayerEntryConfig} layerConfig The layer configuration.
-   *
-   * @returns {Promise<TypeArrayOfFeatureInfoEntries>} The feature info table.
-   */
-  protected getFeatureInfoUsingPolygon(
-    location: Coordinate[],
-    layerConfig: TypeImageStaticLayerEntryConfig
-  ): Promise<TypeArrayOfFeatureInfoEntries> {
-    const promisedQueryResult = new Promise<TypeArrayOfFeatureInfoEntries>((resolve) => {
-      resolve([]);
-    });
-    return promisedQueryResult;
   }
 
   /** ***************************************************************************************************************************

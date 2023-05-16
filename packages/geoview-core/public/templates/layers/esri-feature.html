@@ -55,7 +55,9 @@
           </tr>
           <tr>
             <td>
-              <a href="#HLYR1">1. Many ESRI Feature Layers</a><br />
+              <a href="#HLYR1">1. Many ESRI Feature Layers with legend settings from the metadata</a><br />
+              <a href="#HLYR2">2. Date filtering using time zone change and non ISO date format</a><br />
+              <a href="#HLYR3">3. Date filtering using ISO UTC dates</a><br />
             </td>
           </tr>
         </tbody>
@@ -98,22 +100,6 @@
                 ]
               },
               {
-                'geoviewLayerId': 'historical-flood',
-                'geoviewLayerName': { 'en': 'Historical Flood Events (HFE)' },
-                'serviceDateFormat': 'yyyy/mm/ddThh:mm:ss-05:00',
-                'outputDateFormat': 'mm/dd/yyyy hh:mm:ss',
-                'metadataAccessPath': {
-                  'en': 'https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/historical_flood_event_en/MapServer'
-                },
-                'geoviewLayerType': 'esriFeature',
-                'listOfLayerEntryConfig': [
-                  {
-                    'layerId': '0',
-                    'layerFilter': 'year >= date \'2018-01-01T05:00:00\' and year <= date \'2020\''
-                  }
-                ]
-              },
-              {
                 'geoviewLayerId': 'esriFeatureLYR4.1',
                 'geoviewLayerName': { 'en': 'Temporal_Test_Bed_en' },
                 'metadataAccessPath': {
@@ -122,7 +108,8 @@
                 'geoviewLayerType': 'esriFeature',
                 'listOfLayerEntryConfig': [
                   {
-                    'layerId': '0'
+                    'layerId': '0',
+                    'layerFilter': 'Date <= date \'2020-09-01T00:00:00Z\''
                   }
                 ]
               },
@@ -130,207 +117,12 @@
                 'geoviewLayerId': 'classBreaksId',
                 'geoviewLayerName': { 'en': 'classBreaks' },
                 'metadataAccessPath': { 'en': 'https://maps-cartes.ec.gc.ca/arcgis/rest/services/DMS/DEU_CSO_Volume/MapServer/' },
-                'geoviewLayerType': 'esriDynamic',
+                'geoviewLayerType': 'esriFeature',
                 'listOfLayerEntryConfig': [
                   {
                     'layerId': '8',
                     'layerFilter': 'Total_CSO_Volume > 5000000',
-                    'initialSettings': { 'visible': true },
-                    'style': {
-                      'Point': {
-                        'styleId': 'classBreaksId',
-                        'styleType': 'classBreaks',
-                        'defaultLabel': 'Pas de données de volume / No volume data',
-                        'defaultSettings': {
-                          'symbol': 'square',
-                          'type': 'simpleSymbol',
-                          'color': 'rgba(255,127,127,1)',
-                          'offset': [0, 0],
-                          'rotation': 0,
-                          'size': 2.0010000000000003,
-                          'stroke': {
-                            'color': 'rgba(0,0,0,1)',
-                            'lineStyle': 'solid',
-                            'width': 0.5
-                          }
-                        },
-                        'defaultVisible': 'yes',
-                        'field': 'Total_CSO_Volume',
-                        'classBreakStyleInfo': [
-                          {
-                            'label': '0 m3',
-                            'minValue': 0,
-                            'maxValue': 0,
-                            'visible': 'yes',
-                            'settings': {
-                              'symbol': 'circle',
-                              'type': 'simpleSymbol',
-                              'color': 'rgba(76,230,0,1)',
-                              'offset': [0, 0],
-                              'rotation': 0,
-                              'size': 2.6679999999999997,
-                              'stroke': {
-                                'color': 'rgba(0,0,0,1)',
-                                'lineStyle': 'solid',
-                                'width': 0.5
-                              }
-                            }
-                          },
-                          {
-                            'label': '0.0001 - ≤ 5,000,000 m3',
-                            'minValue': 0,
-                            'maxValue': 5000000,
-                            'visible': 'yes',
-                            'settings': {
-                              'symbol': 'circle',
-                              'type': 'simpleSymbol',
-                              'color': 'rgba(196,97,255,1)',
-                              'offset': [0, 0],
-                              'rotation': 0,
-                              'size': 5.114407777777778,
-                              'stroke': {
-                                'color': 'rgba(0,0,0,1)',
-                                'lineStyle': 'solid',
-                                'width': 0.5
-                              }
-                            }
-                          },
-                          {
-                            'label': '> 5,000,000 - ≤ 10,000,000 m3',
-                            'minValue': 5000000,
-                            'maxValue': 10000000,
-                            'visible': 'yes',
-                            'settings': {
-                              'symbol': 'circle',
-                              'type': 'simpleSymbol',
-                              'color': 'rgba(196,97,255,1)',
-                              'offset': [0, 0],
-                              'rotation': 0,
-                              'size': 7.560815555555555,
-                              'stroke': {
-                                'color': 'rgba(0,0,0,1)',
-                                'lineStyle': 'solid',
-                                'width': 0.5
-                              }
-                            }
-                          },
-                          {
-                            'label': '> 10,000,000 - ≤ 15,000,000 m3',
-                            'minValue': 10000000,
-                            'maxValue': 15000000,
-                            'visible': 'yes',
-                            'settings': {
-                              'symbol': 'circle',
-                              'type': 'simpleSymbol',
-                              'color': 'rgba(196,97,255,1)',
-                              'offset': [0, 0],
-                              'rotation': 0,
-                              'size': 10.007223333333332,
-                              'stroke': {
-                                'color': 'rgba(0,0,0,1)',
-                                'lineStyle': 'solid',
-                                'width': 0.5
-                              }
-                            }
-                          },
-                          {
-                            'label': '> 15,000,000 - ≤ 20,000,000 m3',
-                            'minValue': 15000000,
-                            'maxValue': 20000000,
-                            'visible': 'yes',
-                            'settings': {
-                              'symbol': 'circle',
-                              'type': 'simpleSymbol',
-                              'color': 'rgba(196,97,255,1)',
-                              'offset': [0, 0],
-                              'rotation': 0,
-                              'size': 12.453631111111111,
-                              'stroke': {
-                                'color': 'rgba(0,0,0,1)',
-                                'lineStyle': 'solid',
-                                'width': 0.5
-                              }
-                            }
-                          },
-                          {
-                            'label': '> 20,000,000 - ≤ 25,000,000 m3',
-                            'minValue': 20000000,
-                            'maxValue': 25000000,
-                            'visible': 'yes',
-                            'settings': {
-                              'symbol': 'circle',
-                              'type': 'simpleSymbol',
-                              'color': 'rgba(196,97,255,1)',
-                              'offset': [0, 0],
-                              'rotation': 0,
-                              'size': 14.90003888888889,
-                              'stroke': {
-                                'color': 'rgba(0,0,0,1)',
-                                'lineStyle': 'solid',
-                                'width': 0.5
-                              }
-                            }
-                          },
-                          {
-                            'label': '> 25,000,000 - ≤ 30,000,000 m3',
-                            'minValue': 25000000,
-                            'maxValue': 30000000,
-                            'visible': 'yes',
-                            'settings': {
-                              'symbol': 'circle',
-                              'type': 'simpleSymbol',
-                              'color': 'rgba(196,97,255,1)',
-                              'offset': [0, 0],
-                              'rotation': 0,
-                              'size': 17.346446666666665,
-                              'stroke': {
-                                'color': 'rgba(0,0,0,1)',
-                                'lineStyle': 'solid',
-                                'width': 0.5
-                              }
-                            }
-                          },
-                          {
-                            'label': '> 30,000,000 - ≤ 35,000,000 m3',
-                            'minValue': 30000000,
-                            'maxValue': 35000000,
-                            'visible': 'yes',
-                            'settings': {
-                              'symbol': 'circle',
-                              'type': 'simpleSymbol',
-                              'color': 'rgba(196,97,255,1)',
-                              'offset': [0, 0],
-                              'rotation': 0,
-                              'size': 19.792854444444444,
-                              'stroke': {
-                                'color': 'rgba(0,0,0,1)',
-                                'lineStyle': 'solid',
-                                'width': 0.5
-                              }
-                            }
-                          },
-                          {
-                            'label': '> 35,000,000 m3',
-                            'minValue': 35000000,
-                            'maxValue': 999000000,
-                            'visible': 'yes',
-                            'settings': {
-                              'symbol': 'circle',
-                              'type': 'simpleSymbol',
-                              'color': 'rgba(196,97,255,1)',
-                              'offset': [0, 0],
-                              'rotation': 0,
-                              'size': 22.239262222222223,
-                              'stroke': {
-                                'color': 'rgba(0,0,0,1)',
-                                'lineStyle': 'solid',
-                                'width': 0.5
-                              }
-                            }
-                          }
-                        ]
-                      }
-                    }
+                    'initialSettings': { 'visible': true }
                   }
                 ]
               }
@@ -356,6 +148,121 @@
     <button type="button" class="collapsible">Code Snippet</button>
     <pre id="codeSnippet" class="panel"></pre>
 
+    <div class="map-title-holder">
+      <h4 id="HLYR2">2. Date filtering using time zone changed and non ISO date format</h4>
+      <a class="ref-link" href="#top">Top</a>
+    </div>
+    <div
+      id="LYR2"
+      class="llwp-map"
+      triggerReadyCallback="true"
+      data-lang="en"
+      data-config="{
+        'map': {
+          'interaction': 'dynamic',
+          'viewSettings': {
+            'zoom': 4,
+            'center': [-100, 60],
+            'projection': 3857
+          },
+          'basemapOptions': {
+            'basemapId': 'transport',
+            'shaded': true,
+            'labeled': true
+          },
+          'listOfGeoviewLayerConfig': [
+            {
+              'geoviewLayerId': 'historical-flood',
+              'geoviewLayerName': { 'en': 'Historical Flood Events (HFE)' },
+              'externalDateFormat': 'mm/dd/yyyy hh:mm:ss-05:00',
+              'metadataAccessPath': {
+                'en': 'https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/historical_flood_event_en/MapServer'
+              },
+              'geoviewLayerType': 'esriFeature',
+              'listOfLayerEntryConfig': [
+                {
+                  'layerId': '0',
+                  'layerFilter': 'year >= date \'01/01/2018 05:00:00\' and year <= date \'12/31/2019 19:00:00-05:00\''
+                }
+              ]
+            }
+          ]
+        },
+        'components': ['overview-map', 'nav-bar', 'north-arrow', 'footer-bar'],
+        'corePackages': [],
+        'theme': 'dark',
+        'suportedLanguages': ['en']
+      }"
+    ></div>
+    <pre id="layer2-buttons-pre"></pre>
+    <button class="collapsible">Get Legend</button>
+    <pre style="height: 20pc; overflow-y: scroll" id="LegendsId2-table-pre" class="panel"></pre>
+    <button type="button" class="collapsible" >Get Feature Info</button>
+    <pre style="height: 20pc; overflow-y: scroll" id="ResultSetId2" class="panel">Click on feature on the map</pre>
+    <hr />
+    <button type="button" class="collapsible">Configuration Snippet</button>
+    <pre id="LYR2CS" class="panel"></pre>
+    <hr />
+    <button type="button" class="collapsible">Code Snippet</button>
+    <pre id="codeSnippet1" class="panel"></pre>
+
+    <div class="map-title-holder">
+      <h4 id="HLYR3">3. Date filtering using ISO UTC dates</h4>
+      <a class="ref-link" href="#top">Top</a>
+    </div>
+    <div
+      id="LYR3"
+      class="llwp-map"
+      triggerReadyCallback="true"
+      data-lang="en"
+      data-config="{
+        'map': {
+          'interaction': 'dynamic',
+          'viewSettings': {
+            'zoom': 4,
+            'center': [-100, 60],
+            'projection': 3857
+          },
+          'basemapOptions': {
+            'basemapId': 'transport',
+            'shaded': true,
+            'labeled': true
+          },
+          'listOfGeoviewLayerConfig': [
+            {
+              'geoviewLayerId': 'historical-flood',
+              'geoviewLayerName': { 'en': 'Historical Flood Events (HFE)' },
+              'metadataAccessPath': {
+                'en': 'https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/historical_flood_event_en/MapServer'
+              },
+              'geoviewLayerType': 'esriFeature',
+              'listOfLayerEntryConfig': [
+                {
+                  'layerId': '0',
+                  'layerFilter': 'year >= date \'2018-01-01T00:00:00\' and year <= date \'2019-01-01T00:00:00\''
+                }
+              ]
+            }
+          ]
+        },
+        'components': ['overview-map', 'nav-bar', 'north-arrow', 'footer-bar'],
+        'corePackages': [],
+        'theme': 'dark',
+        'suportedLanguages': ['en']
+      }"
+    ></div>
+    <pre id="layer3-buttons-pre"></pre>
+    <button class="collapsible">Get Legend</button>
+    <pre style="height: 20pc; overflow-y: scroll" id="LegendsId3-table-pre" class="panel"></pre>
+    <button type="button" class="collapsible" >Get Feature Info</button>
+    <pre style="height: 20pc; overflow-y: scroll" id="ResultSetId3" class="panel">Click on feature on the map</pre>
+    <hr />
+    <button type="button" class="collapsible">Configuration Snippet</button>
+    <pre id="LYR3CS" class="panel"></pre>
+    <hr />
+    <button type="button" class="collapsible">Code Snippet</button>
+    <pre id="codeSnippet2" class="panel"></pre>
+
     <script src="codedoc.js"></script>
     <script src="layerlib.js"></script>
     <script>
@@ -369,7 +276,63 @@
           createConfigSnippet();
 
           createTableOfFilter('LYR1');
+          createTableOfFilter('LYR2');
+          createTableOfFilter('LYR3');
           cgpv.api.event.emit({ handlerName: 'LYR1/LegendsId1', event: cgpv.api.eventNames.GET_LEGENDS.TRIGGER });
+          cgpv.api.event.emit({ handlerName: 'LYR2/LegendsId2', event: cgpv.api.eventNames.GET_LEGENDS.TRIGGER });
+          cgpv.api.event.emit({ handlerName: 'LYR3/LegendsId3', event: cgpv.api.eventNames.GET_LEGENDS.TRIGGER });
+
+          const LYR2_FILTERS = ["year >= date '01/01/2018 05:00:00' and year <= date '12/31/2019 19:00:00-05:00'",
+                                "year > date '01/01/2018 05:00:00' and year <= date '01/01/2020 05:00:00Z'",
+                                "year >= date '01/01/2018 05:00:00' and year < date '01/01/2020 00:00:00+05:00'"];
+          let i = 0;
+          window.setInterval(() => {
+            const input = document.getElementById('filter-input-LYR2-historical-flood');
+            if (input) {
+              input.value = LYR2_FILTERS[i];
+              const layerConfig = cgpv.api.maps.LYR2.layer.registeredLayers['historical-flood/0'];
+              const checkbox = document.getElementById('checkbox-LYR2-historical-flood');
+              cgpv.api.maps.LYR2.layer.geoviewLayers['historical-flood'].applyViewFilter(layerConfig,
+                LYR2_FILTERS[j],
+                checkbox.value !== 'true'
+              );
+              if (++i === LYR2_FILTERS.length) i = 0;
+            }
+          }, 3000)
+
+          const LYR3_FILTERS = ["year >= date '2018-01-01T00:00:00' and year <= date '2020-01-01T00:00:00'",
+                                "year > date '2018-01-01T00:00:00' and year <= date '2020-01-01T00:00:00'",
+                                "year >= date '2018-01-01T00:00:00' and year < date '2020-01-01T00:00:00'"];
+          let j = 0;
+          window.setInterval(() => {
+            const input = document.getElementById('filter-input-LYR3-historical-flood');
+            if (input) {
+              input.value = LYR3_FILTERS[j];
+              const layerConfig = cgpv.api.maps.LYR3.layer.registeredLayers['historical-flood/0'];
+              const checkbox = document.getElementById('checkbox-LYR3-historical-flood');
+              cgpv.api.maps.LYR3.layer.geoviewLayers['historical-flood'].applyViewFilter(layerConfig,
+                LYR3_FILTERS[j],
+                checkbox.value !== 'true'
+              );
+              if (++j === LYR3_FILTERS.length) j = 0;
+            }
+          }, 3000)
+
+          let k = 0;
+          window.setInterval(() => {
+            const input = document.getElementById('filter-input-LYR1-esriFeatureLYR4.1');
+            if (input) {
+              const layerConfig = cgpv.api.maps.LYR1.layer.registeredLayers['esriFeatureLYR4.1/0'];
+              const checkbox = document.getElementById('checkbox-LYR1-esriFeatureLYR4.1');
+              const temporalData = cgpv.api.maps.LYR1.layer.geoviewLayers['esriFeatureLYR4.1'].layerTemporalDimension['esriFeatureLYR4.1/0'];
+              cgpv.api.maps.LYR1.layer.geoviewLayers['esriFeatureLYR4.1'].applyViewFilter(layerConfig,
+                `Date < date '${temporalData.range.range[k]}'`,
+                checkbox.value !== 'true'
+              );
+              input.value = `Date < date '${temporalData.range.range[k]}'`;
+              if (++k === temporalData.range.range.length) k = 0;
+            }
+          }, 1000)
         }
       });
 
@@ -392,6 +355,48 @@
           displayLegend('LegendsId1', resultSets);
         },
         'LYR1/LegendsId1'
+      );
+
+      // LYR2 ===================================================================================================================
+      const featureInfoWmsLayerSet2 = cgpv.api.createFeatureInfoLayerSet('LYR2', 'ResultSetId2');
+      cgpv.api.event.on(
+        cgpv.api.eventNames.GET_FEATURE_INFO.ALL_QUERIES_DONE,
+        (payload) => {
+          const { layerSetId, resultSets } = payload;
+          createInfoTable('LYR2', 'ResultSetId2', resultSets);
+        },
+        'LYR2/ResultSetId2'
+      );
+
+      const LegendsWmsLayerSet2 = cgpv.api.createLegendsLayerSet('LYR2', 'LegendsId2');
+      cgpv.api.event.on(
+        cgpv.api.eventNames.GET_LEGENDS.ALL_LEGENDS_DONE,
+        (payload) => {
+          const { resultSets } = payload;
+          displayLegend('LegendsId2', resultSets);
+        },
+        'LYR2/LegendsId2'
+      );
+
+      // LYR3 ===================================================================================================================
+      const featureInfoWmsLayerSet3 = cgpv.api.createFeatureInfoLayerSet('LYR3', 'ResultSetId3');
+      cgpv.api.event.on(
+        cgpv.api.eventNames.GET_FEATURE_INFO.ALL_QUERIES_DONE,
+        (payload) => {
+          const { layerSetId, resultSets } = payload;
+          createInfoTable('LYR3', 'ResultSetId3', resultSets);
+        },
+        'LYR3/ResultSetId3'
+      );
+
+      const LegendsWmsLayerSet3 = cgpv.api.createLegendsLayerSet('LYR3', 'LegendsId3');
+      cgpv.api.event.on(
+        cgpv.api.eventNames.GET_LEGENDS.ALL_LEGENDS_DONE,
+        (payload) => {
+          const { resultSets } = payload;
+          displayLegend('LegendsId3', resultSets);
+        },
+        'LYR3/LegendsId3'
       );
     </script>
   </body>
