@@ -189,14 +189,15 @@ export class MapViewer {
     this.remainingLayersThatNeedToBeLoaded += listOfGeoviewLayerConfig.length;
     if (listOfGeoviewLayerConfig.length) {
       listOfGeoviewLayerConfig.forEach((geoviewLayerConfig) => {
+        // The timeout section is used to release the waiting for a layer that can not be loaded.
+        // Its execution is canceled if the layer loads before the timeout
         if (!layerConfigIsGeoCore(geoviewLayerConfig)) {
-          // The timeout section is used to release the waiting for a layer that can not be loaded.
-          // Its execution is canceled if the layer loads before the timeout
+          let i = 0;
           this.layerLoadedTimeoutId[geoviewLayerConfig.geoviewLayerId] = setTimeout(() => {
             if (this.remainingLayersThatNeedToBeLoadedIsDecrementedToZero4TheFirstTime())
               api.event.emit(GeoViewLayerPayload.createTestGeoviewLayersPayload('run cgpv.init callback?'));
             const isNotLoaded = !this.layer.geoviewLayers[geoviewLayerConfig.geoviewLayerId]?.isLoaded;
-            if (isNotLoaded) {
+            if (isNotLoaded && i > 15) {
               if (geoviewLayerConfig.geoviewLayerId in this.layer.geoviewLayers)
                 this.layer.geoviewLayers[geoviewLayerConfig.geoviewLayerId].loadError = true;
               // Force the creation of an empty geoview layer with the two flags needed to signal a load error
@@ -215,7 +216,8 @@ export class MapViewer {
                 })
               );
             }
-          }, 15000);
+            i++;
+          }, 1000);
 
           api.event.on(
             EVENT_NAMES.LAYER.EVENT_LAYER_ADDED,

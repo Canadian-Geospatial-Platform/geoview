@@ -6,7 +6,7 @@
       "properties": {
         "Road_Number": 55,
         "Province": "Quebec",
-        "creationDate": "05/28/2020T12:00:00Z"
+        "creationDate": "28/05/2020T12:00:00-05:00"
       },
       "geometry": {
         "type": "LineString",
@@ -21,7 +21,7 @@
       "properties": {
         "Road_Number": 55,
         "Province": "Quebec",
-        "creationDate": "09/14/2021T13:00:00Z"
+        "creationDate": "14/09/2021T13:00:00-05:00"
       },
       "geometry": {
         "type": "LineString",
@@ -37,7 +37,7 @@
       "properties": {
         "Road_Number": 20,
         "Province": "Ontario",
-        "creationDate": "12/25/2020T12:00:00Z"
+        "creationDate": "25/12/2020T12:00:00-05:00"
       },
       "geometry": {
         "type": "LineString",

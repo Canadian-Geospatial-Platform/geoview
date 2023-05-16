@@ -902,9 +902,21 @@
         "entryType": {
           "enum": ["raster-image"]
         },
+        "layerId": {
+          "type": "string",
+          "description": "The id of the layer to display on the map."
+        },
+        "layerPathEnding": {
+          "type": "string",
+          "description": "The ending element of the layer configuration path."
+        },
         "layerName": {
           "$ref": "#/definitions/TypeLocalizedString",
           "description": "The display name of the layer (English/French). If it is not present the viewer will make an attempt to scrape this information."
+        },
+        "layerFilter": {
+          "type": "string",
+          "description": "Filter to apply on feature of this layer."
         },
         "initialSettings": {
           "$ref": "#/definitions/TypeLayerInitialSettings",
@@ -1404,7 +1416,7 @@
           "type": "string",
           "description": "Date format used by the service endpoint."
         },
-        "outputDateFormat": {
+        "externalDateFormat": {
           "type": "string",
           "description": "Date format used by the getFeatureInfo to output date variable."
         },
