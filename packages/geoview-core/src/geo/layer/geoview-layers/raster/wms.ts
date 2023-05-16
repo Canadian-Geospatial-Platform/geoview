@@ -989,15 +989,15 @@ export class WMS extends AbstractGeoViewRaster {
         if (layerEntryIsGroupLayer(layerConfig)) processGroupLayerBounds(layerConfig.listOfLayerEntryConfig);
         else {
           const layerBounds = layerConfig!.initialSettings?.bounds || [];
-          const boundingBox = this.metadata?.Capability.Layer.BoundingBox['0'].extent;
+          const boundingBox = this.metadata?.Capability?.Layer?.BoundingBox?.['0']?.extent;
           if (boundingBox?.length) {
             layerBounds[0] = boundingBox[0] as number;
             layerBounds[1] = boundingBox[1] as number;
             layerBounds[2] = boundingBox[2] as number;
             layerBounds[3] = boundingBox[3] as number;
           }
-          const projection =
-            (this.metadata?.Capability.Layer.BoundingBox['0'].crs as string).replace('EPSG:', '') || api.map(this.mapId).currentProjection;
+          let projection = (this.metadata?.Capability?.Layer?.BoundingBox?.['0']?.crs as string) || api.map(this.mapId).currentProjection;
+          if (typeof projection === 'string') projection = projection.replace('EPSG:', '');
           if (layerBounds) {
             const transformedBounds = transformExtent(layerBounds, `EPSG:${projection}`, `EPSG:4326`);
             if (!bounds) bounds = [transformedBounds[0], transformedBounds[1], transformedBounds[2], transformedBounds[3]];

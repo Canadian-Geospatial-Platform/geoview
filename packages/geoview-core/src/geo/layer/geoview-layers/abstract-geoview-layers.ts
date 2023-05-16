@@ -553,25 +553,21 @@ export abstract class AbstractGeoViewLayer {
         Promise.all(promiseOfLayerCreated)
           .then((listOfLayerCreated) => {
             listOfLayerCreated.forEach((baseLayer, i) => {
-              if (baseLayer?.get('layerEntryConfig')?.layerId.endsWith('-unclustered')) {
-                baseLayer.setVisible(false);
-              } else if (baseLayer) baseLayer.setVisible(true);
-              if (layerEntryIsGroupLayer(listOfLayerEntryConfig[i])) {
-                if (baseLayer) {
-                  layerGroup!.getLayers().push(baseLayer);
-                } else if (listOfLayerEntryConfig[i]) {
-                  this.layerLoadError.push({
-                    layer: Layer.getLayerPath(listOfLayerEntryConfig[i]),
-                    consoleMessage: `Unable to create group layer ${Layer.getLayerPath(listOfLayerEntryConfig[i])} on map ${this.mapId}`,
-                  });
-                } else resolve(null);
-              } else if (baseLayer) {
-                this.registerToLayerSets(baseLayer.get('layerEntryConfig') as TypeBaseLayerEntryConfig);
+              if (baseLayer) {
+                const layerEntryConfig = baseLayer?.get('layerEntryConfig');
+                if (layerEntryConfig && (!layerEntryConfig.initialSettings.visible || layerEntryConfig.layerId.endsWith('-unclustered')))
+                  baseLayer.setVisible(false);
+                else baseLayer.setVisible(true);
+
+                if (!layerEntryIsGroupLayer(listOfLayerEntryConfig[i]))
+                  this.registerToLayerSets(baseLayer.get('layerEntryConfig') as TypeBaseLayerEntryConfig);
                 layerGroup!.getLayers().push(baseLayer);
               } else {
                 this.layerLoadError.push({
                   layer: Layer.getLayerPath(listOfLayerEntryConfig[i]),
-                  consoleMessage: `Unable to create layer ${Layer.getLayerPath(listOfLayerEntryConfig[i])} on map ${this.mapId}`,
+                  consoleMessage: `Unable to create ${
+                    layerEntryIsGroupLayer(listOfLayerEntryConfig[i]) ? 'group' : ''
+                  } layer ${Layer.getLayerPath(listOfLayerEntryConfig[i])} on map ${this.mapId}`,
                 });
                 resolve(null);
               }
@@ -810,21 +806,21 @@ export abstract class AbstractGeoViewLayer {
 
   /** ***************************************************************************************************************************
    * This method create a layer group.
-   * @param {TypeLayerEntryConfig | TypeGeoviewLayerConfig} layerConfig
+   * @param {TypeLayerEntryConfig | TypeGeoviewLayerConfig} layerEntryConfig The layer configuration.
    * @returns {LayerGroup} A new layer group.
    */
-  private createLayerGroup(layerConfig: TypeLayerEntryConfig | TypeGeoviewLayerConfig): LayerGroup {
+  private createLayerGroup(layerEntryConfig: TypeLayerEntryConfig | TypeGeoviewLayerConfig): LayerGroup {
     const layerGroupOptions: LayerGroupOptions = {
       layers: new Collection(),
-      properties: { layerConfig },
+      properties: { layerEntryConfig },
     };
-    if (layerConfig.initialSettings?.extent !== undefined) layerGroupOptions.extent = layerConfig.initialSettings?.extent;
-    if (layerConfig.initialSettings?.maxZoom !== undefined) layerGroupOptions.maxZoom = layerConfig.initialSettings?.maxZoom;
-    if (layerConfig.initialSettings?.minZoom !== undefined) layerGroupOptions.minZoom = layerConfig.initialSettings?.minZoom;
-    if (layerConfig.initialSettings?.opacity !== undefined) layerGroupOptions.opacity = layerConfig.initialSettings?.opacity;
-    if (layerConfig.initialSettings?.visible !== undefined) layerGroupOptions.visible = layerConfig.initialSettings?.visible;
-    layerConfig.gvLayer = new LayerGroup(layerGroupOptions);
-    return layerConfig.gvLayer as LayerGroup;
+    if (layerEntryConfig.initialSettings?.extent !== undefined) layerGroupOptions.extent = layerEntryConfig.initialSettings?.extent;
+    if (layerEntryConfig.initialSettings?.maxZoom !== undefined) layerGroupOptions.maxZoom = layerEntryConfig.initialSettings?.maxZoom;
+    if (layerEntryConfig.initialSettings?.minZoom !== undefined) layerGroupOptions.minZoom = layerEntryConfig.initialSettings?.minZoom;
+    if (layerEntryConfig.initialSettings?.opacity !== undefined) layerGroupOptions.opacity = layerEntryConfig.initialSettings?.opacity;
+    if (layerEntryConfig.initialSettings?.visible !== undefined) layerGroupOptions.visible = layerEntryConfig.initialSettings?.visible;
+    layerEntryConfig.gvLayer = new LayerGroup(layerGroupOptions);
+    return layerEntryConfig.gvLayer as LayerGroup;
   }
 
   /** ***************************************************************************************************************************
