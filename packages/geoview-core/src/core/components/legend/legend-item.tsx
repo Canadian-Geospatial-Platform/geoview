@@ -240,7 +240,6 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
             if (styleRepresentation.clusterCanvas) iconImageList.push(styleRepresentation.clusterCanvas.toDataURL());
             setIconList(iconImageList);
             if (layerLegend.styleConfig) {
-              // let uniqueValueStyleInfoEntry = layerConfig.style[geometry].uniqueValueStyleInfo[i]
               let geometryKey: TypeStyleGeometry | null = null;
               Object.entries(layerLegend.styleConfig).forEach(([key, styleSettings]) => {
                 if (isClassBreakStyleConfig(styleSettings)) {
@@ -344,6 +343,8 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
     if (hideAll !== undefined) setChecked(!hideAll);
   }, [hideAll]);
 
+  // TODO ! Revise the utility of this useEffect because it prevent the visibility flag of the config to work properly.
+  /*
   useEffect(() => {
     if (!geoviewLayerInstance) return;
     if (layerConfigEntry) {
@@ -352,11 +353,9 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
       } else {
         geoviewLayerInstance.setVisible(false, layerConfigEntry);
       }
-    } else {
-      // parent layer with no sub layers
-      geoviewLayerInstance.setVisible(isChecked);
     }
   }, [isParentVisible, isChecked, layerConfigEntry, geoviewLayerInstance]);
+  */
 
   useEffect(() => {
     const mapZoomHandler = (payload: PayloadBaseClass) => {
