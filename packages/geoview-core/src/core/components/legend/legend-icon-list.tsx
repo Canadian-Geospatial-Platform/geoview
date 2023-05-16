@@ -3,17 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { useTheme, Theme } from '@mui/material/styles';
 import Box from '@mui/material/Box';
 import { api } from '../../../app';
-import {
-  List,
-  ListItem,
-  ListItemButton,
-  ListItemIcon,
-  ListItemText,
-  Tooltip,
-  IconButton,
-  CheckBoxOutIcon,
-  CheckBoxIcon,
-} from '../../../ui';
+import { List, ListItem, ListItemButton, ListItemIcon, ListItemText, Tooltip, IconButton, MaterialUIRadio } from '../../../ui';
 import {
   TypeClassBreakStyleConfig,
   TypeLayerEntryConfig,
@@ -168,8 +158,8 @@ export function LegendIconList(props: TypeLegendIconListProps): JSX.Element {
                 </Tooltip>
                 <ListItemIcon>
                   {iconLabels[index] !== 'Cluster' && (
-                    <IconButton color="primary" onClick={() => handleToggleLayer(index)}>
-                      {isChecked[index] === true ? <CheckBoxIcon /> : <CheckBoxOutIcon />}
+                    <IconButton color="primary" onClick={() => handleToggleLayer(index)} sx={{ padding: 0 }}>
+                      <MaterialUIRadio checked={!!isChecked[index]} />
                     </IconButton>
                   )}
                 </ListItemIcon>

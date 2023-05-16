@@ -28,3 +28,4 @@ export * from './tooltip/tooltip';
 export * from './typography/typography';
 export * from './layout';
 export * from './menu';
+export * from './radio';
