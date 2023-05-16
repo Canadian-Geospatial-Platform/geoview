@@ -92,6 +92,7 @@ export type EventStringId =
   | 'map/reload'
   | 'map/remove_component'
   | 'map/singleclick'
+  | 'map/pointermove'
   | 'map/view_projection_change'
   | 'map/zoomend'
   | 'marker_icon/hide'

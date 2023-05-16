@@ -272,6 +272,8 @@ export class OgcFeature extends AbstractGeoViewVector {
         layerEntryConfig.source.featureInfo.fieldTypes = '';
       }
       if (processAliasFields) layerEntryConfig.source.featureInfo.aliasFields = { en: '' };
+
+      // TODO: check if this is a duplicate of getField function. Clean in other classes as well
       Object.keys(fields).forEach((fieldEntry) => {
         if (fields[fieldEntry].type === 'Geometry') return;
         if (processOutField) {

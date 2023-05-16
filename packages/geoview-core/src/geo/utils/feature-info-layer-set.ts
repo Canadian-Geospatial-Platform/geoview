@@ -1,4 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import debounce from 'lodash/debounce';
+
 import { EVENT_NAMES } from '../../api/events/event-types';
 import { GetFeatureInfoPayload, payloadIsQueryResult, TypeFeatureInfoResultSets } from '../../api/events/payloads/get-feature-info-payload';
 import { payloadIsAMapSingleClick } from '../../api/events/payloads/map-slingle-click-payload';
@@ -67,6 +69,19 @@ export class FeatureInfoLayerSet {
           api.event.emit(GetFeatureInfoPayload.createQueryLayerPayload(this.mapId, 'at long lat', payload.lnglat));
         }
       },
+      this.mapId
+    );
+
+    api.event.on(
+      EVENT_NAMES.MAP.EVENT_MAP_POINTER_MOVE,
+      debounce((payload) => {
+        if (payloadIsAMapSingleClick(payload)) {
+          Object.keys(this.resultSets).forEach((layerPath) => {
+            this.resultSets[layerPath] = undefined;
+          });
+          api.event.emit(GetFeatureInfoPayload.createQueryLayerPayload(this.mapId, 'at pixel', payload.coordinates.pixel));
+        }
+      }, 750),
       this.mapId
     );
 
