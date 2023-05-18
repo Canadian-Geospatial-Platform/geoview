@@ -105,9 +105,10 @@ export declare class Layer {
      */
     setLayerZIndices: (geoviewLayer: AbstractGeoViewLayer) => void;
     /**
-     * Move layer one level in the given direction.
+     * Move layer to new spot.
      *
      * @param {string} layerId ID of layer to be moved
+     * @param {number} destination index that layer is to move to
      * @param {string} parentLayerId ID of parent layer if layer is a sublayer
      */
     moveLayer: (layerId: string, destination: number, parentLayerId?: string) => void;

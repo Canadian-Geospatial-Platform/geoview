@@ -62,6 +62,8 @@ export type TypeSourceVectorClusterConfig = {
      * be the center of all its features.
      */
     minDistance?: number;
+    /** Zoom level at which all clusters will split. Default = 7. */
+    splitZoom?: number;
     /** Color for the text showing the number of points in a cluster */
     textColor?: string;
     /** settings for the cluster symbol and clustered geometries */

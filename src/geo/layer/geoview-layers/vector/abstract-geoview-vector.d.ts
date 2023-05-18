@@ -125,11 +125,11 @@ export declare abstract class AbstractGeoViewVector extends AbstractGeoViewLayer
      */
     protected getFeatureInfoUsingPolygon(location: Coordinate[], layerConfig: TypeLayerEntryConfig): Promise<TypeArrayOfFeatureInfoEntries>;
     /** ***************************************************************************************************************************
-     * Compute the layer bounds or undefined if the result can not be obtained from le feature extents that compose the layer. If
+     * Compute the layer bounds or undefined if the result can not be obtained from the feature extents that compose the layer. If
      * layerPathOrConfig is undefined, the active layer is used. If projectionCode is defined, returns the bounds in the specified
      * projection otherwise use the map projection. The bounds are different from the extent. They are mainly used for display
      * purposes to show the bounding box in which the data resides and to zoom in on the entire layer data. It is not used by
-     * openlayer to limit the display of data on the map.
+     * openlayer to limit the display of data on the map. If the bounds lie outside the extents, they are reduced to the extents.
      *
      * @param {string | TypeLayerEntryConfig | TypeListOfLayerEntryConfig | null} layerPathOrConfig Optional layer path or
      * configuration.
@@ -137,7 +137,7 @@ export declare abstract class AbstractGeoViewVector extends AbstractGeoViewLayer
      *
      * @returns {Extent} The layer bounding box.
      */
-    calculateBounds(layerPathOrConfig?: string | TypeLayerEntryConfig | TypeListOfLayerEntryConfig | null, projectionCode?: string | number | undefined): Extent | undefined;
+    calculateBounds(layerPathOrConfig?: string | TypeLayerEntryConfig | TypeListOfLayerEntryConfig | null, projectionCode?: string | number): Extent | undefined;
     /** ***************************************************************************************************************************
      * Apply a view filter to the layer. When the optional filter parameter is not empty (''), it is used alone to display the
      * features. Otherwise, the legend filter and the layerFilter are used to define the view filter and the resulting filter is
@@ -146,12 +146,7 @@ export declare abstract class AbstractGeoViewVector extends AbstractGeoViewLayer
      *
      * @param {string | TypeLayerEntryConfig | null} layerPathOrConfig Optional layer path or configuration.
      * @param {string} filter An optional filter to be used in place of the getViewFilter value.
+     * @param {boolean} checkCluster An optional value to see if we check for clustered layers.
      */
-    applyViewFilter(layerPathOrConfig?: string | TypeLayerEntryConfig | null, filter?: string): void;
-    /** ***************************************************************************************************************************
-     * Toggle cluster status.
-     *
-     * @param {string | TypeLayerEntryConfig | null} layerPathOrConfig Optional layer path or configuration.
-     */
-    toggleCluster(layerPathOrConfig?: string | TypeLayerEntryConfig | null): void;
+    applyViewFilter(layerPathOrConfig?: string | TypeLayerEntryConfig | null, filter?: string, checkCluster?: boolean): void;
 }

@@ -1,5 +1,6 @@
 import { Coordinate } from 'ol/coordinate';
 import { Pixel } from 'ol/pixel';
+import { Extent } from 'ol/extent';
 import { TypeJsonObject } from '../../../../core/types/global-types';
 import { AbstractGeoViewLayer, TypeLegend } from '../abstract-geoview-layers';
 import { AbstractGeoViewRaster, TypeBaseRasterLayer } from './abstract-geoview-raster';
@@ -268,4 +269,18 @@ export declare class WMS extends AbstractGeoViewRaster {
      * @param {string} filter An optional filter to be used in place of the getViewFilter value.
      */
     applyViewFilter(layerPathOrConfig?: string | TypeLayerEntryConfig | null, filter?: string): void;
+    /** ***************************************************************************************************************************
+     * Compute the layer bounds or undefined if the result can not be obtained from the feature extents that compose the layer. If
+     * layerPathOrConfig is undefined, the active layer is used. If projectionCode is defined, returns the bounds in the specified
+     * projection otherwise use the map projection. The bounds are different from the extent. They are mainly used for display
+     * purposes to show the bounding box in which the data resides and to zoom in on the entire layer data. It is not used by
+     * openlayer to limit the display of data on the map. If the bounds lie outside the extents, they are reduced to the extents.
+     *
+     * @param {string | TypeLayerEntryConfig | TypeListOfLayerEntryConfig | null} layerPathOrConfig Optional layer path or
+     * configuration.
+     * @param {string | number | undefined} projectionCode Optional projection code to use for the returned bounds.
+     *
+     * @returns {Extent} The layer bounding box.
+     */
+    calculateBounds(layerPathOrConfig?: string | TypeLayerEntryConfig | TypeListOfLayerEntryConfig | null, projectionCode?: string | number): Extent | undefined;
 }
