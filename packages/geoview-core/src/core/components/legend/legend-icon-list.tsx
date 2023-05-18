@@ -125,10 +125,11 @@ export function LegendIconList(props: TypeLegendIconListProps): JSX.Element {
       setCheckCount(isParentVisible === true ? allChecked.length : 0);
       setInitParentVisible(isParentVisible);
     }
+
     if (layerConfig && layerConfig.style !== undefined && geometryKey && mapId) {
       const layerPath = layerConfig.geoviewRootLayer
-        ? `${layerConfig.geoviewRootLayer.geoviewLayerId}/${layerConfig.layerId.replace('-unclustered', '')}`
-        : layerConfig.layerId.replace('-unclustered', '');
+        ? `${layerConfig.geoviewRootLayer.geoviewLayerId}/${String(layerConfig.layerId).replace('-unclustered', '')}`
+        : String(layerConfig.layerId).replace('-unclustered', '');
       const unclusteredLayerPath = `${layerPath}-unclustered`;
       const cluster = !!api.maps[mapId].layer.registeredLayers[unclusteredLayerPath];
       if (cluster) {

@@ -18,7 +18,7 @@ import {
   layerEntryIsGroupLayer,
   TypeImageStaticLayerEntryConfig,
 } from '../../../map/map-schema-types';
-import { getLocalizedValue } from '../../../../core/utils/utilities';
+import { getLocalizedValue, getMinOrMaxExtents } from '../../../../core/utils/utilities';
 import { api } from '../../../../app';
 import { Layer } from '../../layer';
 
@@ -281,65 +281,25 @@ export class ImageStatic extends AbstractGeoViewRaster {
   }
 
   /** ***************************************************************************************************************************
-   * Compute the layer bounds or undefined if the result can not be obtained from the feature extents that compose the layer. If
-   * layerPathOrConfig is undefined, the active layer is used. If projectionCode is defined, returns the bounds in the specified
-   * projection otherwise use the map projection. The bounds are different from the extent. They are mainly used for display
-   * purposes to show the bounding box in which the data resides and to zoom in on the entire layer data. It is not used by
-   * openlayer to limit the display of data on the map. If the bounds lie outside the extents, they are reduced to the extents.
+   * Get the bounds of the layer represented in the layerConfig, returns updated bounds
    *
-   * @param {string | TypeLayerEntryConfig | TypeListOfLayerEntryConfig | null} layerPathOrConfig Optional layer path or
-   * configuration.
-   * @param {string | number | undefined} projectionCode Optional projection code to use for the returned bounds.
+   * @param {TypeLayerEntryConfig} layerConfig Layer config to get bounds from.
+   * @param {Extent | undefined} bounds The current bounding box to be adjusted.
    *
    * @returns {Extent} The layer bounding box.
    */
-  calculateBounds(
-    layerPathOrConfig: string | TypeLayerEntryConfig | TypeListOfLayerEntryConfig | null = this.activeLayer,
-    projectionCode: string | number = api.map(this.mapId).currentProjection
-  ): Extent | undefined {
-    let bounds: Extent | undefined;
-    const processGroupLayerBounds = (listOfLayerEntryConfig: TypeListOfLayerEntryConfig) => {
-      listOfLayerEntryConfig.forEach((layerConfig) => {
-        if (layerEntryIsGroupLayer(layerConfig)) processGroupLayerBounds(layerConfig.listOfLayerEntryConfig);
-        else {
-          const layerBounds = (layerConfig.gvLayer as ImageLayer<Static>).getSource()?.getImageExtent();
-          const projection =
-            (layerConfig.gvLayer as ImageLayer<Static>).getSource()?.getProjection()?.getCode().replace('EPSG:', '') ||
-            api.map(this.mapId).currentProjection;
-          if (layerBounds) {
-            const transformedBounds = transformExtent(layerBounds, `EPSG:${projection}`, `EPSG:4326`);
-            if (!bounds) bounds = [transformedBounds[0], transformedBounds[1], transformedBounds[2], transformedBounds[3]];
-            else {
-              bounds = [
-                Math.min(transformedBounds[0], bounds[0]),
-                Math.min(transformedBounds[1], bounds[1]),
-                Math.max(transformedBounds[2], bounds[2]),
-                Math.max(transformedBounds[3], bounds[3]),
-              ];
-            }
-          }
-        }
-      });
-    };
-    const rootLayerConfig = typeof layerPathOrConfig === 'string' ? this.getLayerConfig(layerPathOrConfig) : layerPathOrConfig;
-    if (rootLayerConfig) {
-      if (Array.isArray(rootLayerConfig)) processGroupLayerBounds(rootLayerConfig);
-      else processGroupLayerBounds([rootLayerConfig]);
-      const extent = transformExtent(
-        this.getExtent() || api.map(this.mapId).getView().get('extent'),
-        `EPSG:${api.map(this.mapId).currentProjection}`,
-        `EPSG:4326`
-      );
-      if (bounds) {
-        bounds = [
-          Math.max(extent[0], bounds[0]),
-          Math.max(extent[1], bounds[1]),
-          Math.min(extent[2], bounds[2]),
-          Math.min(extent[3], bounds[3]),
-        ];
-        bounds = transformExtent(bounds, `EPSG:4326`, `EPSG:${projectionCode}`);
-      }
+  getBounds(layerConfig: TypeLayerEntryConfig, bounds: Extent | undefined): Extent | undefined {
+    const layerBounds = (layerConfig.gvLayer as ImageLayer<Static>).getSource()?.getImageExtent();
+    const projection =
+      (layerConfig.gvLayer as ImageLayer<Static>).getSource()?.getProjection()?.getCode().replace('EPSG:', '') ||
+      api.map(this.mapId).currentProjection;
+
+    if (layerBounds) {
+      const transformedBounds = transformExtent(layerBounds, `EPSG:${projection}`, `EPSG:4326`);
+      if (!bounds) bounds = [transformedBounds[0], transformedBounds[1], transformedBounds[2], transformedBounds[3]];
+      else bounds = getMinOrMaxExtents(bounds, transformedBounds);
     }
+
     return bounds;
   }
 }

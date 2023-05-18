@@ -11,7 +11,7 @@ import LayerGroup from 'ol/layer/Group';
 import { Coordinate } from 'ol/coordinate';
 import { getCenter, Extent } from 'ol/extent';
 import { Pixel } from 'ol/pixel';
-import { transform, transformExtent } from 'ol/proj';
+import { transform } from 'ol/proj';
 
 import { AbstractGeoViewLayer } from '../abstract-geoview-layers';
 import {
@@ -20,7 +20,6 @@ import {
   TypeLayerEntryConfig,
   TypeListOfLayerEntryConfig,
   TypeVectorLayerEntryConfig,
-  layerEntryIsGroupLayer,
 } from '../../../map/map-schema-types';
 import { api } from '../../../../app';
 import { getLocalizedValue } from '../../../../core/utils/utilities';
@@ -307,70 +306,35 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
   }
 
   /** ***************************************************************************************************************************
-   * Compute the layer bounds or undefined if the result can not be obtained from le feature extents that compose the layer. If
-   * layerPathOrConfig is undefined, the active layer is used. If projectionCode is defined, returns the bounds in the specified
-   * projection otherwise use the map projection. The bounds are different from the extent. They are mainly used for display
-   * purposes to show the bounding box in which the data resides and to zoom in on the entire layer data. It is not used by
-   * openlayer to limit the display of data on the map. If the bounds lie outside the extents, they are reduced to the extents.
+   * Get the bounds of the layer represented in the layerConfig, returns updated bounds
    *
-   * @param {string | TypeLayerEntryConfig | TypeListOfLayerEntryConfig | null} layerPathOrConfig Optional layer path or
-   * configuration.
-   * @param {string | number | undefined} projectionCode Optional projection code to use for the returned bounds.
+   * @param {TypeLayerEntryConfig} layerConfig Layer config to get bounds from.
+   * @param {Extent | undefined} bounds The current bounding box to be adjusted.
    *
    * @returns {Extent} The layer bounding box.
    */
-  calculateBounds(
-    layerPathOrConfig: string | TypeLayerEntryConfig | TypeListOfLayerEntryConfig | null = this.activeLayer,
-    projectionCode: string | number = api.map(this.mapId).currentProjection
-  ): Extent | undefined {
-    let bounds: Extent | undefined;
-    const processGroupLayerBounds = (listOfLayerEntryConfig: TypeListOfLayerEntryConfig) => {
-      listOfLayerEntryConfig.forEach((layerConfig) => {
-        if (layerEntryIsGroupLayer(layerConfig)) processGroupLayerBounds(layerConfig.listOfLayerEntryConfig);
-        else {
-          (layerConfig.gvLayer as VectorLayer<VectorSource<Geometry>>).getSource()?.forEachFeature((feature) => {
-            const coordinates = feature.get('geometry').flatCoordinates;
-            for (let i = 0; i < coordinates.length; i += 2) {
-              const geographicCoordinate = transform(
-                [coordinates[i], coordinates[i + 1]],
-                `EPSG:${api.map(this.mapId).currentProjection}`,
-                `EPSG:4326`
-              );
-              if (geographicCoordinate) {
-                if (!bounds) bounds = [geographicCoordinate[0], geographicCoordinate[1], geographicCoordinate[0], geographicCoordinate[1]];
-                else {
-                  bounds = [
-                    Math.min(geographicCoordinate[0], bounds[0]),
-                    Math.min(geographicCoordinate[1], bounds[1]),
-                    Math.max(geographicCoordinate[0], bounds[2]),
-                    Math.max(geographicCoordinate[1], bounds[3]),
-                  ];
-                }
-              }
-            }
-          });
+  getBounds(layerConfig: TypeLayerEntryConfig, bounds: Extent | undefined): Extent | undefined {
+    (layerConfig.gvLayer as VectorLayer<VectorSource<Geometry>>).getSource()?.forEachFeature((feature) => {
+      const coordinates = feature.get('geometry').flatCoordinates;
+      for (let i = 0; i < coordinates.length; i += 2) {
+        const geographicCoordinate = transform(
+          [coordinates[i], coordinates[i + 1]],
+          `EPSG:${api.map(this.mapId).currentProjection}`,
+          `EPSG:4326`
+        );
+        if (geographicCoordinate) {
+          if (!bounds) bounds = [geographicCoordinate[0], geographicCoordinate[1], geographicCoordinate[0], geographicCoordinate[1]];
+          else {
+            bounds = [
+              Math.min(geographicCoordinate[0], bounds[0]),
+              Math.min(geographicCoordinate[1], bounds[1]),
+              Math.max(geographicCoordinate[0], bounds[2]),
+              Math.max(geographicCoordinate[1], bounds[3]),
+            ];
+          }
         }
-      });
-    };
-    const rootLayerConfig = typeof layerPathOrConfig === 'string' ? this.getLayerConfig(layerPathOrConfig) : layerPathOrConfig;
-    if (rootLayerConfig) {
-      if (Array.isArray(rootLayerConfig)) processGroupLayerBounds(rootLayerConfig);
-      else processGroupLayerBounds([rootLayerConfig]);
-      const extent = transformExtent(
-        this.getExtent() || api.map(this.mapId).getView().get('extent'),
-        `EPSG:${api.map(this.mapId).currentProjection}`,
-        `EPSG:4326`
-      );
-      if (bounds) {
-        bounds = [
-          Math.max(extent[0], bounds[0]),
-          Math.max(extent[1], bounds[1]),
-          Math.min(extent[2], bounds[2]),
-          Math.min(extent[3], bounds[3]),
-        ];
-        bounds = transformExtent(bounds, `EPSG:4326`, `EPSG:${projectionCode}`);
       }
-    }
+    });
     return bounds;
   }
 
@@ -396,8 +360,8 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
     ) as TypeVectorLayerEntryConfig;
     if (layerEntryConfig) {
       const layerPath = layerEntryConfig.geoviewRootLayer
-        ? `${layerEntryConfig.geoviewRootLayer.geoviewLayerId}/${layerEntryConfig.layerId.replace('-unclustered', '')}`
-        : layerEntryConfig.layerId.replace('-unclustered', '');
+        ? `${layerEntryConfig.geoviewRootLayer.geoviewLayerId}/${String(layerEntryConfig.layerId).replace('-unclustered', '')}`
+        : String(layerEntryConfig.layerId).replace('-unclustered', '');
       const unclusteredLayerPath = `${layerPath}-unclustered`;
       const cluster = !!api.maps[this.mapId].layer.registeredLayers[unclusteredLayerPath];
       if (cluster && checkCluster) {

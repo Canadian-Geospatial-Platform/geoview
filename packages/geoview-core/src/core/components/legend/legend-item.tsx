@@ -3,6 +3,7 @@ import React, { useEffect, useState, useRef, MutableRefObject, RefObject } from 
 import { useTranslation } from 'react-i18next';
 import { useTheme, Theme } from '@mui/material/styles';
 import Grid from '@mui/material/Grid';
+import { transformExtent } from 'ol/proj';
 import { Extent } from 'ol/extent';
 import {
   Box,
@@ -192,7 +193,6 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
   const [layerName, setLayerName] = useState<string>('');
   const [menuAnchorElement, setMenuAnchorElement] = useState<null | HTMLElement>(null);
   const [opacity, setOpacity] = useState<number>(1);
-  const [zoomToExtent, setZoomtoExtent] = useState<Extent | undefined>();
 
   const [zoom, setZoom] = useState<number>(api.map(mapId).currentZoom);
   const splitZoom =
@@ -439,6 +439,7 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
         );
     }
     setIsClusterToggleEnabled(!isClusterToggleEnabled);
+    handleCloseMenu();
   };
 
   const handleStackIcon = (e: React.KeyboardEvent<HTMLElement>) => {
@@ -448,7 +449,21 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
   };
 
   const handleZoomTo = () => {
-    api.map(mapId).zoomToExtent(zoomToExtent!);
+    let bounds = api.maps[mapId].layer.geoviewLayers[layerId].calculateBounds(path);
+    let transformedBounds: Extent | undefined;
+    if (bounds) transformedBounds = transformExtent(bounds, `EPSG:${api.map(mapId).currentProjection}`, `EPSG:4326`);
+
+    if (
+      !bounds ||
+      (transformedBounds &&
+        transformedBounds[0] === -180 &&
+        transformedBounds[1] === -90 &&
+        transformedBounds[2] === 180 &&
+        transformedBounds[3] === 90)
+    )
+      bounds = api.map(mapId).getView().get('extent');
+
+    if (bounds) api.map(mapId).zoomToExtent(bounds);
     handleCloseMenu();
   };
 
@@ -480,18 +495,6 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
     const source = (api.map(mapId).layer.getGeoviewLayerById(layerId) as AbstractGeoViewVector)?.activeLayer
       ?.source as TypeVectorSourceInitialConfig;
     setIsClusterToggleEnabled(source?.cluster?.enable ?? false);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  useEffect(() => {
-    const layerPath = api.maps[mapId].legend.legendLayerSet.resultSets[path]?.layerPath;
-    const geoLayer = api.map(mapId).layer.getGeoviewLayerById(layerId) as AbstractGeoViewVector;
-    const { activeLayer } = geoLayer;
-
-    const bounds = activeLayer ? geoLayer.calculateBounds() : geoLayer.calculateBounds(layerPath);
-    if (bounds) {
-      setZoomtoExtent(bounds);
-    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -611,7 +614,7 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
         )}
 
         {canZoomTo && groupItems.length === 0 && (
-          <MenuItem onClick={handleZoomTo} disabled={!zoomToExtent}>
+          <MenuItem onClick={handleZoomTo}>
             <ListItemText>{t('legend.zoom_to')}</ListItemText>
           </MenuItem>
         )}
