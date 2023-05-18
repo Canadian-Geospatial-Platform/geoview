@@ -5,6 +5,7 @@ import { Options as SourceOptions } from 'ol/source/Vector';
 import { VectorImage as VectorLayer } from 'ol/layer';
 import { Options as VectorLayerOptions } from 'ol/layer/VectorImage';
 import { Geometry, Point } from 'ol/geom';
+import { all, bbox } from 'ol/loadingstrategy';
 import { ReadOptions } from 'ol/format/Feature';
 import BaseLayer from 'ol/layer/Base';
 import LayerGroup from 'ol/layer/Group';
@@ -96,11 +97,14 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
     // The line below uses var because a var declaration has a wider scope than a let declaration.
     var vectorSource: VectorSource<Geometry>;
     if (this.attributions.length !== 0) sourceOptions.attributions = this.attributions;
-    const childLoaderInitialisation = sourceOptions.loader;
+
+    // set loading strategy option
+    sourceOptions.strategy = (layerEntryConfig.source! as TypeBaseSourceVectorInitialConfig).strategy === 'bbox' ? bbox : all;
 
     sourceOptions.loader = (extent, resolution, projection, success, failure) => {
-      if (childLoaderInitialisation) childLoaderInitialisation.call(vectorSource, extent, resolution, projection, success, failure);
-      const url = vectorSource.getUrl();
+      let url = vectorSource.getUrl();
+      if (typeof url === 'function') url = url(extent, resolution, projection);
+
       const xhr = new XMLHttpRequest();
       if ((layerEntryConfig?.source as TypeBaseSourceVectorInitialConfig)?.postSettings) {
         const { postSettings } = layerEntryConfig.source as TypeBaseSourceVectorInitialConfig;
@@ -221,6 +225,15 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
     };
 
     layerEntryConfig.gvLayer = new VectorLayer(layerOptions);
+    if (layerEntryConfig.initialSettings?.extent !== undefined) this.setExtent(layerEntryConfig.initialSettings?.extent, layerEntryConfig);
+    if (layerEntryConfig.initialSettings?.maxZoom !== undefined)
+      this.setMaxZoom(layerEntryConfig.initialSettings?.maxZoom, layerEntryConfig);
+    if (layerEntryConfig.initialSettings?.minZoom !== undefined)
+      this.setMinZoom(layerEntryConfig.initialSettings?.minZoom, layerEntryConfig);
+    if (layerEntryConfig.initialSettings?.opacity !== undefined)
+      this.setOpacity(layerEntryConfig.initialSettings?.opacity, layerEntryConfig);
+    if (layerEntryConfig.initialSettings?.visible !== undefined)
+      this.setVisible(layerEntryConfig.initialSettings?.visible, layerEntryConfig);
     this.applyViewFilter(layerEntryConfig, layerEntryConfig.layerFilter ? layerEntryConfig.layerFilter : '');
 
     return layerEntryConfig.gvLayer as VectorLayer<VectorSource>;

@@ -196,7 +196,7 @@ export class MapViewer {
           this.layerLoadedTimeoutId[geoviewLayerConfig.geoviewLayerId] = setTimeout(() => {
             if (this.remainingLayersThatNeedToBeLoadedIsDecrementedToZero4TheFirstTime())
               api.event.emit(GeoViewLayerPayload.createTestGeoviewLayersPayload('run cgpv.init callback?'));
-            const isNotLoaded = !this.layer.geoviewLayers[geoviewLayerConfig.geoviewLayerId]?.isLoaded;
+            const isNotLoaded = !this?.layer?.geoviewLayers?.[geoviewLayerConfig.geoviewLayerId]?.isLoaded;
             if (isNotLoaded && i > 15) {
               if (geoviewLayerConfig.geoviewLayerId in this.layer.geoviewLayers)
                 this.layer.geoviewLayers[geoviewLayerConfig.geoviewLayerId].loadError = true;

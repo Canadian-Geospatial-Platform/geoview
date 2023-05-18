@@ -27,6 +27,7 @@ import {
   TypeOgcWmsLayerEntryConfig,
   TypeEsriDynamicLayerEntryConfig,
   TypeBaseSourceVectorInitialConfig,
+  TypeLayerInitialSettings,
 } from '../../map/map-schema-types';
 import {
   codedValueType,
@@ -261,7 +262,12 @@ export abstract class AbstractGeoViewLayer {
    */
   listOfLayerEntryConfig: TypeListOfLayerEntryConfig = [];
 
-  /** Name of listOfLayerEntryConfig that did not load. */
+  /**
+   * Initial settings to apply to the GeoView layer at creation time. This attribute is allowed only if listOfLayerEntryConfig.length > 1.
+   */
+  initialSettings?: TypeLayerInitialSettings;
+
+  /** layers of listOfLayerEntryConfig that did not load. */
   layerLoadError: { layer: string; consoleMessage: string }[] = [];
 
   /**
@@ -311,6 +317,7 @@ export abstract class AbstractGeoViewLayer {
     if (mapLayerConfig.metadataAccessPath?.en) this.metadataAccessPath.en = mapLayerConfig.metadataAccessPath.en.trim();
     if (mapLayerConfig.metadataAccessPath?.fr) this.metadataAccessPath.fr = mapLayerConfig.metadataAccessPath.fr.trim();
     if (mapLayerConfig.listOfLayerEntryConfig) this.listOfLayerEntryConfig = mapLayerConfig.listOfLayerEntryConfig;
+    this.initialSettings = mapLayerConfig.initialSettings;
     this.serverDateFragmentsOrder = mapLayerConfig.serviceDateFormat
       ? api.dateUtilities.getDateFragmentsOrder(mapLayerConfig.serviceDateFormat)
       : undefined;
@@ -898,21 +905,6 @@ export abstract class AbstractGeoViewLayer {
   }
 
   /** ***************************************************************************************************************************
-   * Return the extent of the layer or undefined if it will be visible regardless of extent. The layer extent is an array of
-   * numbers representing an extent: [minx, miny, maxx, maxy]. If layerPathOrConfig is undefined, the activeLayer of the class
-   * will be used. This routine return undefined when no layerPathOrConfig is specified and the active layer is null. The extent
-   * is used to clip the data displayed on the map.
-   *
-   * @param {string | TypeLayerEntryConfig | null} layerPathOrConfig Optional layer path or configuration.
-   *
-   * @returns {Extent} The layer extent.
-   */
-  getExtent(layerPathOrConfig: string | TypeLayerEntryConfig | null = this.activeLayer): Extent | undefined {
-    const gvLayer = typeof layerPathOrConfig === 'string' ? this.getLayerConfig(layerPathOrConfig)?.gvLayer : layerPathOrConfig?.gvLayer;
-    return gvLayer ? gvLayer.getExtent() : undefined;
-  }
-
-  /** ***************************************************************************************************************************
    * Returns the domaine of the specified field or null if the field has no domain.
    *
    * @param {string} fieldName field name for which we want to get the domaine.
@@ -936,6 +928,21 @@ export abstract class AbstractGeoViewLayer {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   protected getFieldType(fieldName: string, layerConfig: TypeLayerEntryConfig): 'string' | 'date' | 'number' {
     return 'string';
+  }
+
+  /** ***************************************************************************************************************************
+   * Return the extent of the layer or undefined if it will be visible regardless of extent. The layer extent is an array of
+   * numbers representing an extent: [minx, miny, maxx, maxy]. If layerPathOrConfig is undefined, the activeLayer of the class
+   * will be used. This routine return undefined when no layerPathOrConfig is specified and the active layer is null. The extent
+   * is used to clip the data displayed on the map.
+   *
+   * @param {string | TypeLayerEntryConfig | null} layerPathOrConfig Optional layer path or configuration.
+   *
+   * @returns {Extent} The layer extent.
+   */
+  getExtent(layerPathOrConfig: string | TypeLayerEntryConfig | null = this.activeLayer): Extent | undefined {
+    const gvLayer = typeof layerPathOrConfig === 'string' ? this.getLayerConfig(layerPathOrConfig)?.gvLayer : layerPathOrConfig?.gvLayer;
+    return gvLayer ? gvLayer.getExtent() : undefined;
   }
 
   /** ***************************************************************************************************************************

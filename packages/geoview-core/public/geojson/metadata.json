@@ -14,8 +14,7 @@
         }
       },
       "initialSettings": {
-        "visible": true,
-        "extent": [-177.29275972275843, 34.301384132573055, -9.977229778239453, 84.400481529465]
+        "visible": true
       },
       "style": {
         "Polygon": {
@@ -85,8 +84,7 @@
         }
       },
       "initialSettings": {
-        "visible": true,
-        "extent": [-177.29275972275843, 34.301384132573055, -9.977229778239453, 84.400481529465]
+        "visible": true
       },
       "style": {
         "LineString": {
@@ -114,8 +112,7 @@
         }
       },
       "initialSettings": {
-        "visible": true,
-        "extent": [-177.29275972275843, 34.301384132573055, -9.977229778239453, 84.400481529465]
+        "visible": true
       },
       "style": {
         "Point": {
@@ -143,8 +140,7 @@
         }
       },
       "initialSettings": {
-        "visible": true,
-        "extent": [-177.29275972275843, 34.301384132573055, -9.977229778239453, 84.400481529465]
+        "visible": true
       },
       "style": {
         "Point": {
