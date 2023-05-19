@@ -500,6 +500,8 @@ export class ConfigValidation {
   private doExtraValidation(listOfGeoviewLayerConfig?: TypeListOfGeoviewLayerConfig) {
     if (listOfGeoviewLayerConfig) {
       listOfGeoviewLayerConfig.forEach((geoviewLayerConfig) => {
+        // The default value for geoviewLayerConfig.initialSettings.visible is true.
+        if (!geoviewLayerConfig.initialSettings) geoviewLayerConfig.initialSettings = { visible: true };
         switch (geoviewLayerConfig.geoviewLayerType) {
           case 'GeoJSON':
           case 'xyzTiles':

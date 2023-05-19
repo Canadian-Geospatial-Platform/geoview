@@ -139,27 +139,27 @@
           createConfigSnippet();
 
           createTableOfFilter('LYR1');
-          cgpv.api.event.emit({ handlerName: 'LYR1/LegendsId1', event: cgpv.api.eventNames.GET_LEGENDS.TRIGGER });
+          cgpv.api.event.emit({ handlerName: 'LYR1/$LegendsLayerSet$', event: cgpv.api.eventNames.GET_LEGENDS.TRIGGER });
         }
       });
 
       // LYR1 ===================================================================================================================
-      const featureInfoWmsLayerSet1 = cgpv.api.createFeatureInfoLayerSet('LYR1', 'ResultSetId1');
+      const featureInfoLayerSet1 = cgpv.api.getFeatureInfoLayerSet('LYR1');
       cgpv.api.event.on(
         cgpv.api.eventNames.GET_FEATURE_INFO.ALL_QUERIES_DONE,
         (payload) => {
           const { layerSetId, resultSets } = payload;
           createInfoTable('LYR1', 'ResultSetId1', resultSets);
         },
-        'LYR1/ResultSetId1'
+        'LYR1/$FeatureInfoLayerSet$'
       );
 
-      const LegendsWmsLayerSet1 = cgpv.api.createLegendsLayerSet('LYR1', 'LegendsId1');
+      const LegendsLayerSet1 = cgpv.api.getLegendsLayerSet('LYR1');
       cgpv.api.event.on(
         cgpv.api.eventNames.GET_LEGENDS.ALL_LEGENDS_DONE,
         (payload) => {
           const { resultSets } = payload;
-          displayLegend('LegendsId1', resultSets);
+          displayLegend('$LegendsLayerSet$', resultSets);
         },
         'LYR1/LegendsId1'
       );

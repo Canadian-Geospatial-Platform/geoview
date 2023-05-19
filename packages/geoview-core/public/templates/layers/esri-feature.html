@@ -278,9 +278,9 @@
           createTableOfFilter('LYR1');
           createTableOfFilter('LYR2');
           createTableOfFilter('LYR3');
-          cgpv.api.event.emit({ handlerName: 'LYR1/LegendsId1', event: cgpv.api.eventNames.GET_LEGENDS.TRIGGER });
-          cgpv.api.event.emit({ handlerName: 'LYR2/LegendsId2', event: cgpv.api.eventNames.GET_LEGENDS.TRIGGER });
-          cgpv.api.event.emit({ handlerName: 'LYR3/LegendsId3', event: cgpv.api.eventNames.GET_LEGENDS.TRIGGER });
+          cgpv.api.event.emit({ handlerName: 'LYR1/$LegendsLayerSet$', event: cgpv.api.eventNames.GET_LEGENDS.TRIGGER });
+          cgpv.api.event.emit({ handlerName: 'LYR2/$LegendsLayerSet$', event: cgpv.api.eventNames.GET_LEGENDS.TRIGGER });
+          cgpv.api.event.emit({ handlerName: 'LYR3/$LegendsLayerSet$', event: cgpv.api.eventNames.GET_LEGENDS.TRIGGER });
 
           const LYR2_FILTERS = ["year >= date '01/01/2018 05:00:00' and year <= date '12/31/2019 19:00:00-05:00'",
                                 "year > date '01/01/2018 05:00:00' and year <= date '01/01/2020 05:00:00Z'",
@@ -337,66 +337,66 @@
       });
 
       // LYR1 ===================================================================================================================
-      const featureInfoWmsLayerSet1 = cgpv.api.createFeatureInfoLayerSet('LYR1', 'ResultSetId1');
+      const featureInfoLayerSet1 = cgpv.api.getFeatureInfoLayerSet('LYR1');
       cgpv.api.event.on(
         cgpv.api.eventNames.GET_FEATURE_INFO.ALL_QUERIES_DONE,
         (payload) => {
           const { layerSetId, resultSets } = payload;
           createInfoTable('LYR1', 'ResultSetId1', resultSets);
         },
-        'LYR1/ResultSetId1'
+        'LYR1/$FeatureInfoLayerSet$'
       );
 
-      const LegendsWmsLayerSet1 = cgpv.api.createLegendsLayerSet('LYR1', 'LegendsId1');
+      const LegendsLayerSet1 = cgpv.api.getLegendsLayerSet('LYR1');
       cgpv.api.event.on(
         cgpv.api.eventNames.GET_LEGENDS.ALL_LEGENDS_DONE,
         (payload) => {
           const { resultSets } = payload;
           displayLegend('LegendsId1', resultSets);
         },
-        'LYR1/LegendsId1'
+        'LYR1/$LegendsLayerSet$'
       );
 
       // LYR2 ===================================================================================================================
-      const featureInfoWmsLayerSet2 = cgpv.api.createFeatureInfoLayerSet('LYR2', 'ResultSetId2');
+      const featureInfoLayerSet2 = cgpv.api.getFeatureInfoLayerSet('LYR2');
       cgpv.api.event.on(
         cgpv.api.eventNames.GET_FEATURE_INFO.ALL_QUERIES_DONE,
         (payload) => {
           const { layerSetId, resultSets } = payload;
           createInfoTable('LYR2', 'ResultSetId2', resultSets);
         },
-        'LYR2/ResultSetId2'
+        'LYR2/$FeatureInfoLayerSet$'
       );
 
-      const LegendsWmsLayerSet2 = cgpv.api.createLegendsLayerSet('LYR2', 'LegendsId2');
+      const LegendsLayerSet2 = cgpv.api.getLegendsLayerSet('LYR2');
       cgpv.api.event.on(
         cgpv.api.eventNames.GET_LEGENDS.ALL_LEGENDS_DONE,
         (payload) => {
           const { resultSets } = payload;
           displayLegend('LegendsId2', resultSets);
         },
-        'LYR2/LegendsId2'
+        'LYR2/$LegendsLayerSet$'
       );
 
       // LYR3 ===================================================================================================================
-      const featureInfoWmsLayerSet3 = cgpv.api.createFeatureInfoLayerSet('LYR3', 'ResultSetId3');
+      const featureInfoLayerSet3 = cgpv.api.getFeatureInfoLayerSet('LYR3');
       cgpv.api.event.on(
         cgpv.api.eventNames.GET_FEATURE_INFO.ALL_QUERIES_DONE,
         (payload) => {
           const { layerSetId, resultSets } = payload;
           createInfoTable('LYR3', 'ResultSetId3', resultSets);
         },
-        'LYR3/ResultSetId3'
+        'LYR3/$FeatureInfoLayerSet$'
       );
 
-      const LegendsWmsLayerSet3 = cgpv.api.createLegendsLayerSet('LYR3', 'LegendsId3');
+      const LegendsLayerSet3 = cgpv.api.getLegendsLayerSet('LYR3');
       cgpv.api.event.on(
         cgpv.api.eventNames.GET_LEGENDS.ALL_LEGENDS_DONE,
         (payload) => {
           const { resultSets } = payload;
           displayLegend('LegendsId3', resultSets);
         },
-        'LYR3/LegendsId3'
+        'LYR3/$LegendsLayerSet$'
       );
     </script>
   </body>

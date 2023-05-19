@@ -78,10 +78,10 @@ export class API {
   showMessage = showMessage;
 
   // FeatureInfo layer set instanciator
-  createFeatureInfoLayerSet = FeatureInfoLayerSet.create;
+  getFeatureInfoLayerSet = FeatureInfoLayerSet.get;
 
   // Legends layer set instanciator
-  createLegendsLayerSet = LegendsLayerSet.create;
+  getLegendsLayerSet = LegendsLayerSet.get;
 
   /**
    * Initiate the event and projection objects

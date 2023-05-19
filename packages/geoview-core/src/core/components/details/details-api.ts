@@ -22,7 +22,7 @@ export class DetailsAPI {
    */
   constructor(mapId: string) {
     this.mapId = mapId;
-    this.featureInfoLayerSet = api.createFeatureInfoLayerSet(mapId, `${mapId}-DetailsAPI`);
+    this.featureInfoLayerSet = api.getFeatureInfoLayerSet(mapId);
   }
 
   /**

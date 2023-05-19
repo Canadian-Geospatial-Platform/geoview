@@ -30,7 +30,7 @@ export class LegendApi {
    */
   constructor(mapId: string) {
     this.mapId = mapId;
-    this.legendLayerSet = api.createLegendsLayerSet(mapId, `${mapId}Legends`);
+    this.legendLayerSet = api.getLegendsLayerSet(mapId);
   }
 
   /**
@@ -39,7 +39,7 @@ export class LegendApi {
    */
   createLegend = (props: TypeLegendProps) => {
     const { layerIds, isRemoveable, canSetOpacity, expandAll, hideAll } = props;
-    api.event.emit({ handlerName: `${this.mapId}/${this.mapId}Legends`, event: api.eventNames.GET_LEGENDS.TRIGGER });
+    api.event.emit({ handlerName: `${this.mapId}/$LegendsLayerSet$`, event: api.eventNames.GET_LEGENDS.TRIGGER });
     const legendItems = layerIds.map((layerId) => {
       const geoviewLayerInstance = api.map(this.mapId).layer.geoviewLayers[layerId];
       if (geoviewLayerInstance) {

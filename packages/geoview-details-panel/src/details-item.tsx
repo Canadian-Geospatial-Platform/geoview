@@ -63,7 +63,7 @@ export function DetailsItem({ mapId, buttonId }: Props): JSX.Element {
           setDetails([]);
         }
       },
-      `${mapId}/${mapId}-DetailsAPI`
+      `${mapId}/$FeatureInfoLayerSet$`
     );
     // get click info.
     api.event.on(

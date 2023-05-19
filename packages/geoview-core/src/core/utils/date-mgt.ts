@@ -538,6 +538,7 @@ export class DateMgt {
    * @returns {string} The reformatted date string.
    */
   applyInputDateFormat(date: string, dateFragmentsOrder = ISO_UTC_DATE_FRAGMENTS_ORDER, reverseTimeZone = false): string {
+    if (!date) return date;
     const index = dateFragmentsOrder[0];
     const separators = dateFragmentsOrder[2];
     // eslint-disable-next-line prefer-const
@@ -589,6 +590,7 @@ export class DateMgt {
    * @returns {string} The reformatted date string.
    */
   applyOutputDateFormat(date: string, dateFragmentsOrder?: TypeDateFragments, reverseTimeZone = false): string {
+    if (!date) return date;
     if (dateFragmentsOrder) {
       const index = dateFragmentsOrder[1];
       const separators = dateFragmentsOrder[2];

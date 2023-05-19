@@ -58,7 +58,7 @@ export function DetailsItem({ mapId }: Props): JSX.Element {
           setDetails([]);
         }
       },
-      `${mapId}/${mapId}-DetailsAPI`
+      `${mapId}/$FeatureInfoLayerSet$`
     );
     api.event.on(
       api.eventNames.MAP.EVENT_MAP_SINGLE_CLICK,
