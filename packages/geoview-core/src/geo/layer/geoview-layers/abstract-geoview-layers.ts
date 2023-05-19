@@ -532,7 +532,7 @@ export abstract class AbstractGeoViewLayer {
           });
         }
       } else {
-        if (!layerGroup) {
+        if (!layerGroup && listOfLayerEntryConfig.length > 0) {
           // All children of this level in the tree have the same parent, so we use the first element of the array to retrieve the parent node.
           layerGroup = this.createLayerGroup(listOfLayerEntryConfig[0].parentLayerConfig as TypeLayerEntryConfig);
         }
