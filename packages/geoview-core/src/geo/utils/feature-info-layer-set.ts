@@ -15,6 +15,9 @@ import { LayerSet } from './layer-set';
  * @class FeatureInfoLayerSet
  */
 export class FeatureInfoLayerSet {
+  /** Private static variable to keep the single instance that can be created by this class for a mapId (see singleton design pattern) */
+  private static featureInfoLayerSetInstance: Record<string, FeatureInfoLayerSet> = {};
+
   /** The map identifier the layer set belongs to. */
   mapId: string;
 
@@ -28,10 +31,9 @@ export class FeatureInfoLayerSet {
    * The class constructor that instanciate a set of layer.
    *
    * @param {string} mapId The map identifier the layer set belongs to.
-   * @param {string} layerSetId The layer set identifier.
    *
    */
-  constructor(mapId: string, layerSetId: string) {
+  private constructor(mapId: string) {
     const registrationConditionFunction = (layerPath: string): boolean => {
       const layerEntryConfig = api.map(this.mapId).layer.registeredLayers[layerPath];
       if (layerEntryConfig?.source) {
@@ -40,7 +42,7 @@ export class FeatureInfoLayerSet {
       return false;
     };
     this.mapId = mapId;
-    this.layerSet = new LayerSet(mapId, layerSetId, this.resultSets, registrationConditionFunction);
+    this.layerSet = new LayerSet(mapId, `${mapId}/$FeatureInfoLayerSet$`, this.resultSets, registrationConditionFunction);
 
     // Listen to "map click"-"crosshair enter" and send a query layers event to queryable layers. These layers will return a result set of features.
     api.event.on(
@@ -81,11 +83,7 @@ export class FeatureInfoLayerSet {
           }, true);
           if (allDone)
             api.event.emit(
-              GetFeatureInfoPayload.createAllQueriesDonePayload(
-                `${this.mapId}/${this.layerSet.layerSetId}`,
-                this.layerSet.layerSetId,
-                this.resultSets
-              )
+              GetFeatureInfoPayload.createAllQueriesDonePayload(`${this.layerSet.layerSetId}`, this.layerSet.layerSetId, this.resultSets)
             );
         }
       },
@@ -98,11 +96,12 @@ export class FeatureInfoLayerSet {
    * avoids the "new FeatureInfoLayerSet" syntax.
    *
    * @param {string} mapId The map identifier the layer set belongs to.
-   * @param {string} layerSetId The layer set identifier.
    *
    * @returns {FeatureInfoLayerSet} the FeatureInfoLayerSet object created
    */
-  static create(mapId: string, layerSetId: string): FeatureInfoLayerSet {
-    return new FeatureInfoLayerSet(mapId, layerSetId);
+  static get(mapId: string): FeatureInfoLayerSet {
+    if (!FeatureInfoLayerSet.featureInfoLayerSetInstance[mapId])
+      FeatureInfoLayerSet.featureInfoLayerSetInstance[mapId] = new FeatureInfoLayerSet(mapId);
+    return FeatureInfoLayerSet.featureInfoLayerSetInstance[mapId];
   }
 }

@@ -18,6 +18,9 @@ import { LayerSet } from './layer-set';
  * @class LegendsLayerSet
  */
 export class LegendsLayerSet {
+  /** Private static variable to keep the single instance that can be created by this class for a mapIId (see singleton design pattern) */
+  private static legendsLayerSetInstance: Record<string, LegendsLayerSet> = {};
+
   /** The map identifier the layer set belongs to. */
   mapId: string;
 
@@ -31,10 +34,9 @@ export class LegendsLayerSet {
    * The class constructor that instanciate a set of layer.
    *
    * @param {string} mapId The map identifier the layer set belongs to.
-   * @param {string} layerSetId The layer set identifier.
    *
    */
-  constructor(mapId: string, layerSetId: string) {
+  private constructor(mapId: string) {
     const isAllDone = (): boolean => {
       return Object.keys(this.resultSets).reduce((doneFlag, layerPathToTest) => {
         return doneFlag && this.resultSets[layerPathToTest] !== undefined;
@@ -46,7 +48,7 @@ export class LegendsLayerSet {
       return layerEntryConfig.geoviewRootLayer?.geoviewLayerType !== 'xyzTiles';
     };
     this.mapId = mapId;
-    this.layerSet = new LayerSet(mapId, layerSetId, this.resultSets, registrationConditionFunction);
+    this.layerSet = new LayerSet(mapId, `${mapId}/$LegendsLayerSet$`, this.resultSets, registrationConditionFunction);
 
     // This listener receives the legend information returned by the a layer's getLegend call and store it in the resultSets
     // if all the registered layers has received their legend information, an EVENT_NAMES.GET_LEGENDS.ALL_LEGENDS_DONE event
@@ -57,7 +59,8 @@ export class LegendsLayerSet {
         if (payloadIsLegendInfo(payload)) {
           const { layerPath, legendInfo } = payload;
           if (layerPath in this.resultSets) this.resultSets[layerPath] = legendInfo;
-          if (isAllDone()) api.event.emit(GetLegendsPayload.createAllQueriesDonePayload(`${this.mapId}/${layerSetId}`, this.resultSets));
+          if (isAllDone())
+            api.event.emit(GetLegendsPayload.createAllQueriesDonePayload(`${this.mapId}/$LegendsLayerSet$`, this.resultSets));
         }
       },
       this.mapId
@@ -80,9 +83,9 @@ export class LegendsLayerSet {
             EVENT_NAMES.LAYER_SET.UPDATED,
             (layerUpdatedPayload) => {
               if (payloadIsLayerSetUpdated(layerUpdatedPayload)) {
-                if (layerUpdatedPayload.layerSetId === layerSetId) {
+                if (layerUpdatedPayload.layerSetId === `${mapId}/$LegendsLayerSet$`) {
                   if (isAllDone())
-                    api.event.emit(GetLegendsPayload.createAllQueriesDonePayload(`${this.mapId}/${layerSetId}`, this.resultSets));
+                    api.event.emit(GetLegendsPayload.createAllQueriesDonePayload(`${this.mapId}/$LegendsLayerSet$`, this.resultSets));
                   else queryUndefinedLegend();
                 }
               }
@@ -93,7 +96,7 @@ export class LegendsLayerSet {
           queryUndefinedLegend();
         }
       },
-      `${mapId}/${layerSetId}`
+      `${mapId}/$LegendsLayerSet$`
     );
   }
 
@@ -102,11 +105,11 @@ export class LegendsLayerSet {
    * avoids the "new LegendsLayerSet" syntax.
    *
    * @param {string} mapId The map identifier the layer set belongs to.
-   * @param {string} layerSetId The layer set identifier.
    *
    * @returns {LegendsLayerSet} the LegendsLayerSet object created
    */
-  static create(mapId: string, layerSetId: string): LegendsLayerSet {
-    return new LegendsLayerSet(mapId, layerSetId);
+  static get(mapId: string): LegendsLayerSet {
+    if (!LegendsLayerSet.legendsLayerSetInstance[mapId]) LegendsLayerSet.legendsLayerSetInstance[mapId] = new LegendsLayerSet(mapId);
+    return LegendsLayerSet.legendsLayerSetInstance[mapId];
   }
 }

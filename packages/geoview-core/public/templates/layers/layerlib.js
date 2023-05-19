@@ -189,18 +189,24 @@ const createTableOfFilter = (mapId) => {
           mapButtonsDiv.appendChild(geoviewLayerH1);
 
           const layerConfigH2 = document.createElement('h2');
-          layerConfigH2.innerText = `${layerConfig.layerName.en}  `;
+          layerConfigH2.innerText = `${layerConfig.layerName.en}`;
           layerConfigH2.style.height = '15px';
           mapButtonsDiv.appendChild(layerConfigH2);
 
           const toggleLayerVisibility = document.createElement('button');
           let visibilityFlag = geoviewLayer.getVisible(layerConfig);
-          if (visibilityFlag) toggleLayerVisibility.innerText = 'Hide';
-          else toggleLayerVisibility.innerText = 'Show';
+          if (visibilityFlag)
+            toggleLayerVisibility.innerText = layerConfig?.source?.style === undefined ? 'Hide' : `Hide style ${layerConfig.source.style}`;
+          else
+            toggleLayerVisibility.innerText = layerConfig?.source?.style === undefined ? 'Show' : `Show style ${layerConfig.source.style}`;
           toggleLayerVisibility.addEventListener('click', (e) => {
             visibilityFlag = !geoviewLayer.getVisible(layerConfig);
-            if (visibilityFlag) toggleLayerVisibility.innerText = 'Hide';
-            else toggleLayerVisibility.innerText = 'Show';
+            if (visibilityFlag)
+              toggleLayerVisibility.innerText =
+                layerConfig?.source?.style === undefined ? 'Hide' : `Hide style ${layerConfig.source.style}`;
+            else
+              toggleLayerVisibility.innerText =
+                layerConfig?.source?.style === undefined ? 'Show' : `Show style ${layerConfig.source.style}`;
             geoviewLayer.setVisible(visibilityFlag, layerConfig);
           });
           layerConfigH2.appendChild(toggleLayerVisibility);

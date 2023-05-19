@@ -187,7 +187,7 @@
         cgpv.api.event.emit({ handlerName: 'LYR1/LegendsId1', event: cgpv.api.eventNames.GET_LEGENDS.TRIGGER });
 
         //LYR1 ===================================================================================================================
-        const featureInfoWmsLayerSet1 = cgpv.api.createFeatureInfoLayerSet('LYR1', 'ResultSetId1');
+        const featureInfoWmsLayerSet1 = cgpv.api.getFeatureInfoLayerSet('LYR1', 'ResultSetId1');
         cgpv.api.event.on(
           cgpv.api.eventNames.GET_FEATURE_INFO.ALL_QUERIES_DONE,
           (payload) => {
@@ -197,7 +197,7 @@
           'LYR1/ResultSetId1'
         );
 
-        const LegendsWmsLayerSet1 = cgpv.api.createLegendsLayerSet('LYR1', 'LegendsId1');
+        const LegendsWmsLayerSet1 = cgpv.api.getLegendsLayerSet('LYR1', 'LegendsId1');
         cgpv.api.event.on(
           cgpv.api.eventNames.GET_LEGENDS.ALL_LEGENDS_DONE,
           (payload) => {

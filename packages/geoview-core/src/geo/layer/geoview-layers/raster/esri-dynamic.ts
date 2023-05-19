@@ -287,7 +287,6 @@ export class EsriDynamic extends AbstractGeoViewRaster {
       // postpone the setVisible action until all layers have been loaded on the map.
       api.event.once(
         EVENT_NAMES.LAYER.EVENT_IF_CONDITION,
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         (payload) => {
           this.setVisible(layerEntryConfig.initialSettings!.visible!, layerEntryConfig);
         },
