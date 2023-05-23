@@ -159,7 +159,7 @@ export function LegendIconList(props: TypeLegendIconListProps): JSX.Element {
                 <ListItemIcon>
                   {iconLabels[index] !== 'Cluster' && (
                     <IconButton color="primary" onClick={() => handleToggleLayer(index)} sx={{ padding: 0 }}>
-                      <MaterialUIRadio checked={!!isChecked[index]} />
+                      <MaterialUIRadio checked={!!isChecked[index]} name="radio1" />
                     </IconButton>
                   )}
                 </ListItemIcon>
