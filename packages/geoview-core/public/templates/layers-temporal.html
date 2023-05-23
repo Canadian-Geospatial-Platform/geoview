@@ -229,7 +229,9 @@
           var timeConsoleLyr2 = document.getElementById('LYR2TD');
           var timeConsoleLyr3 = document.getElementById('LYR3TD');
           timeConsoleLyr1.textContent = JSON.stringify(
-            cgpv.api.map('LYR1').layer.geoviewLayers['wmsLYR1-Root'].layerTemporalDimension['wmsLYR1-Root/wmsLYR1-Group1/wmsLYR1-Group2/wmsLYR1-Group3/RADAR_1KM_RSNO/ending'],
+            cgpv.api.map('LYR1').layer.geoviewLayers['wmsLYR1-Root'].layerTemporalDimension[
+              'wmsLYR1-Root/wmsLYR1-Group1/wmsLYR1-Group2/wmsLYR1-Group3/RADAR_1KM_RSNO.ending'
+            ],
             undefined,
             2
           );

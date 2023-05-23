@@ -118,9 +118,9 @@
               'shaded': true,
               'labeledWhat': true
             },
-            'layers': []
+            'listOfGeoviewLayerConfig': []
           },
-          'components': ['overview-map', 'nav-bar', 'footer-bar'],
+          'components': ['overview-map', 'nav-bar'],
           'corePackages': [],
           'theme': 'dark',
           'suportedLanguages': ['en']
@@ -150,29 +150,29 @@
           'basemapOptions': {
             'basemapId': 'notdefined',
             'shaded': true,
-            'labeledWhat': true
+            'labeled': true
           },
           'listOfGeoviewLayerConfig': [
             {
               'geoviewLayerId': 'wmsLYR1',
               'geoviewLayerName': {
-                'en': 'Census WMS',
-                'fr': 'Census WMS'
+                'en': 'earthquakes',
+                'fr': 'earthquakes'
               },
               'metadataAccessPath': {
-                'en': 'https://webservices.maps.canada.ca/arcgis/services/StatCan/census_subdivisions_2016_en/MapServer/WMSServer',
-                'fr': 'https://webservices.maps.canada.ca/arcgis/services/StatCan/census_subdivisions_2016_en/MapServer/WMSServer'
+                'en': 'https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/earthquakes_en/MapServer/',
+                'fr': 'https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/earthquakes_en/MapServer/'
               },
-              'geoviewLayerType': 'ogcWms',
+              'geoviewLayerType': 'esriDynamic',
               'listOfLayerEntryConfig': [
                 {
                   'layerId': '0'
                 }
               ]
-            },
+            }
           ]
         },
-        'components': ['overview-map', 'nav-bar', 'footer-bar'],
+        'components': ['overview-map', 'nav-bar'],
         'corePackages': [],
         'theme': 'dark',
         'suportedLanguages': ['en']
@@ -220,26 +220,44 @@
         console.log('api is ready');
 
         if (cgpv.api.map('CONF7')) {
-          cgpv.api.map('CONF7').loadMapConfig(`{
-          'map': {
-            'interaction': 'dynamic',
-            'viewSettings': {
-              'zoom': 10,
-              'center': [-100, 60],
-              'projection': 3978
-            },
-            'basemapOptions': {
-              'basemapId': 'transport',
-              'shaded': false,
-              'labeled': true
-            },
-            'listOfGeoviewLayerConfig': []
-          },
-          'components': ['app-bar', 'overview-map', 'nav-bar', 'footer-bar'],
-          'corePackages': [],
-          'theme': 'dark',
-          'suportedLanguages': ['en']
-        }`);
+          setTimeout(() => {
+            cgpv.api.map('CONF7').loadMapConfig(`{
+              'map': {
+                'interaction': 'dynamic',
+                'viewSettings': {
+                  'zoom': 7,
+                  'center': [-110, 70],
+                  'projection': 3978
+                },
+                'basemapOptions': {
+                  'basemapId': 'transport',
+                  'shaded': false,
+                  'labeled': true
+                },
+                'listOfGeoviewLayerConfig': [{
+                  'geoviewLayerId': 'wmsLYR1',
+                  'geoviewLayerName': {
+                    'en': 'earthquakes',
+                    'fr': 'earthquakes'
+                  },
+                  'metadataAccessPath': {
+                    'en': 'https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/earthquakes_en/MapServer/',
+                    'fr': 'https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/earthquakes_en/MapServer/'
+                  },
+                  'geoviewLayerType': 'esriDynamic',
+                  'listOfLayerEntryConfig': [
+                    {
+                      'layerId': '0'
+                    }
+                  ]
+                }]
+              },
+              'components': ['app-bar', 'overview-map', 'nav-bar'],
+              'corePackages': [],
+              'theme': 'dark',
+              'suportedLanguages': ['en']
+            }`);
+          }, 2000);
         }
 
         //create snippets

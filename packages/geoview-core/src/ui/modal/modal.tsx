@@ -39,7 +39,7 @@ interface TypeDialogProps extends Omit<DialogProps, 'title'> {
   titleId?: string;
 
   // dialog content and content styling
-  content?: React.ReactNode;
+  contentModal?: React.ReactNode;
   contentClassName?: string;
   contentStyle?: CSSProperties;
 
@@ -120,7 +120,7 @@ export function Modal(props: TypeDialogProps): JSX.Element {
     open,
     actions,
     fullScreen,
-    content,
+    contentModal,
     contentClassName,
     contentStyle,
     contentTextId,
@@ -311,7 +311,7 @@ export function Modal(props: TypeDialogProps): JSX.Element {
             className={`${dialogClasses.content} ${contentTextClassName && contentTextClassName}`}
             style={contentTextStyle}
           >
-            {content}
+            {contentModal}
           </div>
         </DialogContent>
         <DialogActions>{actions}</DialogActions>

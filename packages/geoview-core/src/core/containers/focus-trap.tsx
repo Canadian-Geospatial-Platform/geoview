@@ -169,7 +169,7 @@ export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
       titleId="wcag-dialog-title"
       title={t('keyboardnav.focusdialog.title')}
       contentTextId="wcag-dialog-description"
-      content={<HtmlToReact htmlContent={t('keyboardnav.focusdialog.main')} />}
+      contentModal={<HtmlToReact htmlContent={t('keyboardnav.focusdialog.main')} />}
       actions={
         <>
           <Button

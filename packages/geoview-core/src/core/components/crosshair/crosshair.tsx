@@ -173,7 +173,7 @@ export function Crosshair(): JSX.Element {
         </div>
       </Fade>
       <div className={classes.crosshairInfo}>
-        <span dangerouslySetInnerHTML={{ __html: t('mapctrl.crosshair') }} />
+        <span dangerouslySetInnerHTML={{ __html: t('mapctrl.crosshair')! }} />
       </div>
     </div>
   );

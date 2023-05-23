@@ -6,7 +6,7 @@ import MaterialCardContent from '@mui/material/CardContent';
 
 export interface TypeCardProps extends CardProps {
   title?: string;
-  content?: React.ReactNode | Element;
+  contentCard?: React.ReactNode | Element;
 }
 
 /**
@@ -18,11 +18,11 @@ export interface TypeCardProps extends CardProps {
 
 // TODO - KenChase MaterialCardHeader component is hard-coded as h3. It should be passed as a prop
 export function Card(props: TypeCardProps): JSX.Element {
-  const { title, content, ...rest } = props;
+  const { title, contentCard, ...rest } = props;
   return (
     <MaterialCard {...rest}>
       <MaterialCardHeader title={title} component="h3" disableTypography />
-      <MaterialCardContent>{content}</MaterialCardContent>
+      <MaterialCardContent>{contentCard}</MaterialCardContent>
     </MaterialCard>
   );
 }
