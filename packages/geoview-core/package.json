@@ -64,14 +64,12 @@
     "proj4": "^2.7.5",
     "prop-types": "^15.8.1",
     "query-string": "^7.1.0",
+    "react": "^17.0.2",
     "react-dom": "^17.0.2",
     "react-i18next": "^12.2.0",
     "react-test-renderer": "^17.0.2",
     "sanitize-html": "^2.7.3",
     "sql.js": "^1.8.0"
-  },
-  "peerDependencies": {
-    "react": "^17.0.2"
   },
   "devDependencies": {
     "@babel/cli": "^7.17.0",
@@ -141,6 +139,7 @@
     "prettier": "^2.6.0",
     "prop-types": "^15.8.1",
     "react": "^17.0.2",
+    "react-dom": "^17.0.2",
     "sass": "^1.49.7",
     "sass-loader": "^12.4.0",
     "style-loader": "^3.3.1",
@@ -155,6 +154,8 @@
     "webpack-merge": "^5.8.0"
   },
   "resolutions": {
-    "@types/react": "^17.0.2"
+    "@types/react": "^17.0.2",
+    "react": "^17.0.2",
+    "react-dom": "^17.0.2"
   }
 }

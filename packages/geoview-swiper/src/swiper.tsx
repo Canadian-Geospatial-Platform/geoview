@@ -1,6 +1,5 @@
 import { TypeJsonObject, TypeWindow } from 'geoview-core';
 
-import { useEffect, useState, useRef, RefObject } from 'react';
 import Draggable from 'react-draggable';
 
 import { getRenderPixel } from 'ol/render';
@@ -102,7 +101,9 @@ export function Swiper(props: SwiperProps): JSX.Element {
   const { mapId, config, translations } = props;
 
   const { cgpv } = w;
-  const { api, ui } = cgpv;
+  const { api, ui, react } = cgpv;
+  const { useEffect, useState, useRef } = react;
+
   const { Box, Tooltip, HandleIcon } = ui.elements;
 
   const { displayLanguage } = api.map(mapId!);
@@ -120,7 +121,7 @@ export function Swiper(props: SwiperProps): JSX.Element {
   const [orientation] = useState(config.orientation);
 
   const swiperValue = useRef(50);
-  const swiperRef = useRef() as RefObject<HTMLElement>;
+  const swiperRef = useRef<HTMLElement>();
 
   /**
    * Pre compose, Pre render event callback
@@ -230,16 +231,33 @@ export function Swiper(props: SwiperProps): JSX.Element {
     setOffset(offSetOnClick);
   };
 
+  /**
+   * Set the prerender and postremder events
+   *
+   * @param {string} layer the layer name
+   */
+  const setRenderEvents = (layer: string) => {
+    const olLayer = geoviewLayers[`${layer}`].gvLayers;
+    setOlLayers((prevArray) => [...prevArray, olLayer!]);
+    olLayer?.on(['precompose' as EventTypes, 'prerender' as EventTypes], prerender);
+    olLayer?.on(['postcompose' as EventTypes, 'postrender' as EventTypes], postcompose);
+    // force VectorImage to refresh
+    if (typeof (olLayer as VectorImage<VectorSource>).getImageRatio === 'function') olLayer?.changed();
+  };
+
   useEffect(() => {
     // set listener for layers in config array
     layersIds.forEach((layer: string) => {
       if (geoviewLayers[`${layer}`] !== undefined) {
-        const olLayer = geoviewLayers[`${layer}`].gvLayers;
-        setOlLayers((prevArray) => [...prevArray, olLayer!]);
-        olLayer?.on(['precompose' as EventTypes, 'prerender' as EventTypes], prerender);
-        olLayer?.on(['postcompose' as EventTypes, 'postrender' as EventTypes], postcompose);
-        // force VectorImage to refresh
-        if (typeof (olLayer as VectorImage<VectorSource>).getImageRatio === 'function') olLayer?.changed();
+        setRenderEvents(layer);
+      } else {
+        const layerName = layer;
+        const renderInterval = setInterval(() => {
+          if (geoviewLayers[`${layerName}`] !== undefined) {
+            setRenderEvents(layer);
+            clearInterval(renderInterval);
+          }
+        }, 1000);
       }
     });
 

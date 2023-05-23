@@ -638,9 +638,10 @@
           cgpv.api.event.emit({ handlerName: 'LYR2/$LegendsLayerSet$', event: cgpv.api.eventNames.GET_LEGENDS.TRIGGER });
           cgpv.api.event.emit({ handlerName: 'LYR3/$LegendsLayerSet$', event: cgpv.api.eventNames.GET_LEGENDS.TRIGGER });
 
-          const LYR2_FILTERS = ["year >= date '01/01/2018 05:00:00' and year <= date '12/31/2019 19:00:00-05:00'",
-                                "year > date '01/01/2018 05:00:00' and year <= date '01/01/2020 05:00:00Z'",
-                                "year >= date '01/01/2018 05:00:00' and year < date '01/01/2020 00:00:00+05:00'"];
+          const field2 = cgpv.api.maps.LYR2.layer.geoviewLayers['historical-flood'].layerTemporalDimension['historical-flood/0'].field;
+          const LYR2_FILTERS = [`${field2} >= date '01/01/2018 05:00:00' and ${field2} <= date '12/31/2019 19:00:00-05:00'`,
+                                `${field2} > date '01/01/2018 05:00:00' and ${field2} <= date '01/01/2020 05:00:00Z'`,
+                                `${field2} >= date '01/01/2018 05:00:00' and ${field2} < date '01/01/2020 00:00:00+05:00'`];
           let i = 0;
           window.setInterval(() => {
             const input = document.getElementById('filter-input-LYR2-historical-flood');
@@ -656,9 +657,10 @@
             }
           }, 3000)
 
-          const LYR3_FILTERS = ["year >= date '2018-01-01T00:00:00' and year <= date '2020-01-01T00:00:00'",
-                                "year > date '2018-01-01T00:00:00' and year <= date '2020-01-01T00:00:00'",
-                                "year >= date '2018-01-01T00:00:00' and year < date '2020-01-01T00:00:00'"];
+          const field3 = cgpv.api.maps.LYR3.layer.geoviewLayers['historical-flood'].layerTemporalDimension['historical-flood/0'].field;
+          const LYR3_FILTERS = [`${field2} >= date '2018-01-01T00:00:00' and ${field2} <= date '2020-01-01T00:00:00'`,
+                               `${field2} > date '2018-01-01T00:00:00' and ${field2} <= date '2020-01-01T00:00:00'`,
+                               `${field2} >= date '2018-01-01T00:00:00' and ${field2} < date '2020-01-01T00:00:00'`];
           let j = 0;
           window.setInterval(() => {
             const input = document.getElementById('filter-input-LYR3-historical-flood');

@@ -1,5 +1,3 @@
-import { createElement } from 'react';
-
 import { Cast, AbstractPlugin, TypePluginOptions, TypeWindow, toJsonObject, TypeJsonObject, AnySchemaObject } from 'geoview-core';
 
 import schema from '../schema.json';
@@ -55,6 +53,8 @@ class SwiperPlugin extends AbstractPlugin {
 
     // access the cgpv object from the window object
     const { cgpv } = w;
+    const { react } = cgpv;
+    const { createElement } = react;
 
     // if there is layers in the array, initialize the swiper
     if (cgpv && (configObj?.layers as string[]).length > 0) {

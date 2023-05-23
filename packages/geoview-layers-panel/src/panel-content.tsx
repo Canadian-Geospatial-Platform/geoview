@@ -1,3 +1,4 @@
+import type React from 'react';
 import {
   toJsonObject,
   TypeJsonObject,
@@ -6,7 +7,6 @@ import {
   payloadIsALayerConfig,
   payloadIsRemoveGeoViewLayer,
 } from 'geoview-core';
-import { DetailedReactHTMLElement } from 'react';
 
 import LayerStepper from './layer-stepper';
 import ReorderLayersList from './reorder-layers-list';
@@ -28,13 +28,13 @@ function PanelContent(props: TypePanelContentProps): JSX.Element {
   const { mapId, buttonPanel } = props;
 
   const { cgpv } = w;
-  const { api, react, ui } = cgpv;
+  const { api, ui, react } = cgpv;
   const { useState, useEffect } = react;
   const [addLayerVisible, setAddLayerVisible] = useState(false);
   const [reorderLayersVisible, setReorderLayersVisible] = useState(false);
   const [mapLayers, setMapLayers] = useState<string[]>([]);
   // eslint-disable-next-line @typescript-eslint/ban-types
-  const [legend, setLegend] = useState<DetailedReactHTMLElement<{}, HTMLElement>>();
+  const [legend, setLegend] = useState<React.DetailedReactHTMLElement<{}, HTMLElement>>();
   const [actionMenuAnchorElement, setActionMenuAnchorElement] = useState<null | HTMLElement>(null);
   const [isExpandAll, setExpandAll] = useState<boolean>(false);
   const [isHideAll, setHideAll] = useState<boolean>(false);

@@ -1,5 +1,5 @@
 /* eslint-disable react/require-default-props */
-import React, { DragEvent } from 'react';
+import type React from 'react';
 import {
   TypeWindow,
   TypeJsonArray,
@@ -33,11 +33,11 @@ const w = window as TypeWindow;
  */
 function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
   const { cgpv } = w;
-  const { api, react, ui } = cgpv;
+  const { api, ui, react } = cgpv;
   const { displayLanguage } = api.map(mapId);
 
   const { ESRI_DYNAMIC, ESRI_FEATURE, GEOJSON, GEOPACKAGE, WMS, WFS, OGC_FEATURE, XYZ_TILES, GEOCORE } = api.layerTypes;
-  const { useState, useEffect } = react;
+  const { useState, useEffect, useRef } = react;
   const {
     Select,
     Stepper,
@@ -62,7 +62,7 @@ function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [drag, setDrag] = useState<boolean>(false);
 
-  const dragPopover = React.useRef(null);
+  const dragPopover = useRef(null);
 
   const sxClasses = {
     buttonGroup: {
@@ -786,7 +786,7 @@ function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
    *
    * @param {DragEvent<HTMLDivElement>} event Drag event
    */
-  const handleDragEnter = (event: DragEvent<HTMLDivElement>) => {
+  const handleDragEnter = (event: React.DragEvent<HTMLDivElement>) => {
     event.preventDefault();
     event.stopPropagation();
     if (event.target !== dragPopover.current) {
@@ -799,7 +799,7 @@ function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
    *
    * @param {DragEvent<HTMLDivElement>} event Drag event
    */
-  const handleDragLeave = (event: DragEvent<HTMLDivElement>) => {
+  const handleDragLeave = (event: React.DragEvent<HTMLDivElement>) => {
     event.preventDefault();
     event.stopPropagation();
     if (event.target === dragPopover.current) setDrag(false);
@@ -810,7 +810,7 @@ function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
    *
    * @param {DragEvent<HTMLDivElement>} event Drag event
    */
-  const handleDragOver = (event: DragEvent<HTMLDivElement>) => {
+  const handleDragOver = (event: React.DragEvent<HTMLDivElement>) => {
     event.preventDefault();
     event.stopPropagation();
   };
@@ -820,7 +820,7 @@ function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
    *
    * @param {DragEvent<HTMLDivElement>} event Drag event
    */
-  const handleDrop = (event: DragEvent<HTMLDivElement>) => {
+  const handleDrop = (event: React.DragEvent<HTMLDivElement>) => {
     event.preventDefault();
     event.stopPropagation();
     setDrag(false);

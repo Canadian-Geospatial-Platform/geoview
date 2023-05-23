@@ -180,7 +180,7 @@ const createTableOfFilter = (mapId) => {
         const { geoviewRenderer } = cgpv.api.maps[mapId];
         geoviewRenderer.getLegendStyles(layerConfig).then((legendStyle) => {
           mapButtonsDiv = document.createElement('td');
-          mapButtonsDiv.style.width = '16.66%';
+          // mapButtonsDiv.style.width = '16.66%';
           mapButtonsDiv.border = '1px solid black';
           tableElement.appendChild(mapButtonsDiv);
 
@@ -385,6 +385,7 @@ const createTableOfFilter = (mapId) => {
                   geoviewLayer.applyViewFilter(layerConfig, layerFilterInput.value, checkbox.value !== 'true');
                 });
                 layerFilterButton.innerText = 'Apply';
+                layerFilterText.style.width = 'max-content';
                 layerFilterText.appendChild(layerFilterButton);
 
                 const checkboxInput = document.createElement('input');

@@ -41,7 +41,7 @@ function LayersList(props: TypeLayersPanelListProps): JSX.Element {
   const { mapId, layers, displayLanguage } = props;
 
   const { cgpv } = w;
-  const { ui, react, api } = cgpv;
+  const { ui, api, react } = cgpv;
   const { useState, useEffect } = react;
 
   const [selectedLayer, setSelectedLayer] = useState<string>('');
@@ -396,7 +396,7 @@ function LayersList(props: TypeLayersPanelListProps): JSX.Element {
                 </Tooltip>
                 <div className={classes.slider}>
                   <Slider
-                    id={api.generateId()}
+                    sliderId={api.generateId()}
                     min={0}
                     max={100}
                     size="small"

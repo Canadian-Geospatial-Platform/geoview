@@ -1,5 +1,5 @@
 /* eslint-disable react/require-default-props */
-import { DetailedReactHTMLElement } from 'react';
+import type React from 'react';
 import { TypeWindow, payloadIsALayerConfig, payloadIsRemoveGeoViewLayer } from 'geoview-core';
 
 interface Props {
@@ -19,7 +19,7 @@ export function LegendItem({ mapId }: Props): JSX.Element {
   const { useState, useEffect } = react;
 
   // eslint-disable-next-line @typescript-eslint/ban-types
-  const [legend, setLegend] = useState<DetailedReactHTMLElement<{}, HTMLElement>>();
+  const [legend, setLegend] = useState<React.DetailedReactHTMLElement<{}, HTMLElement>>();
   const [mapLayers, setMapLayers] = useState<string[]>([]);
 
   const updateLayers = () => {
