@@ -144,7 +144,8 @@
             ],
             track: 'normal',
             customOnChange: (dates) => {
-              cgpv.api.maps.UI1.layer.geoviewLayers['historical-flood'].applyViewFilter(undefined, `year >= date '${dates[0]}/01/01' and year <= date '${dates[1]}/12/31'`);
+              const field = cgpv.api.maps.UI1.layer.geoviewLayers['historical-flood'].layerTemporalDimension['historical-flood/0'].field;
+              cgpv.api.maps.UI1.layer.geoviewLayers['historical-flood'].applyViewFilter(undefined, `${field} >= date '${dates[0]}-01-01' and ${field} <= date '${dates[1]}-12-31'`);
             },
           })
         );
