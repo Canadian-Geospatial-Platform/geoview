@@ -35,6 +35,7 @@
                   "en": "band-0-pixel-value",
                   "fr": "band-0-pixel-value"
                 },
+                "fieldTypes": "number",
                 "aliasFields": {
                   "en": "Pixel value",
                   "fr": "Valeur du pixel"

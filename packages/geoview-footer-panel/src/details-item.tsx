@@ -1,6 +1,5 @@
 /* eslint-disable react/require-default-props */
-import { ReactElement } from 'react';
-
+import type React from 'react';
 import {
   TypeWindow,
   payloadIsAMapSingleClick,
@@ -30,7 +29,7 @@ export function DetailsItem({ mapId }: Props): JSX.Element {
 
   const [details, setDetails] = useState<TypeArrayOfLayerData>([]);
   // eslint-disable-next-line @typescript-eslint/ban-types
-  const [list, setList] = useState<ReactElement>();
+  const [list, setList] = useState<React.ReactElement>();
   const [lngLat, setLngLat] = useState<Coordinate>([]);
   const [handlerName, setHandlerName] = useState<string | null>(null);
 
