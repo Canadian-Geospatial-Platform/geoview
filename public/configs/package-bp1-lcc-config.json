@@ -1,0 +1,19 @@
+{
+  "map": {
+    "interaction": "dynamic",
+    "viewSettings": {
+      "zoom": 4,
+      "center": [-106, 60],
+      "projection": 3978
+    },
+    "basemapOptions": {
+      "basemapId": "transport",
+      "shaded": true,
+      "labeled": true
+    }
+  },
+  "corePackages": ["basemap-panel"],
+  "components": ["app-bar", "overview-map", "north-arrow", "footer-bar"],
+  "theme": "dark",
+  "suportedLanguages": ["en", "fr"]
+}

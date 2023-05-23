@@ -1,0 +1,668 @@
+<!doctype html><html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><title>Canadian Geospatial Platform Viewer</title><link rel="shortcut icon" href="./favicon.ico"/><meta name="msapplication-TileColor" content="#da532c"/><meta name="msapplication-config" content="./img/browserconfig.xml"/><meta name="theme-color" content="#ffffff"/><meta name="msapplication-TileColor" content="#da532c"/><meta name="theme-color" content="#ffffff"/><link href="https://fonts.googleapis.com/css?family=Roboto|Montserrat:200,300,400,900|Merriweather" rel="stylesheet"/><link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons"/><link rel="stylesheet" href="css/style.css"/><style>table.info, th.info, td.info, th.infoCol1, td.infoCol1 {
+        border: 1px solid black;
+      }
+      th.info, td.info, th.infoCol1, td.infoCol1 {
+        padding: 15px;
+        width: 15%;
+      }
+      th.info, th.infoCol1, td.infoCol1 {
+        text-align: left;
+        font-weight: bold;
+        font-size: 15px;
+      }</style><script src="cgpv-main.js"></script></head><body><div class="header-table"><table><tbody><tr><td><img class="header-logo" alt="logo" src="./img/Logo.png"/></td><td class="header-title"><h1><strong>Pygeoapi process on a GeoJSON layer</strong></h1></td></tr></tbody></table></div><table><tbody><tr><td><a href="./index.html">Main</a><br/></td></tr></tbody></table><table><tbody><tr><td>This page is used to showcase how we can load a GeoJSON layer from data returned by a process using a POST query.</td></tr></tbody></table><div class="map-title-holder"><h4 id="HLYR5">GeoJSON Layer</h4></div><div id="LYR5" class="llwp-map" data-lang="en" data-config="{
+    'map': {
+      'interaction': 'dynamic',
+      'viewSettings': {
+        'zoom': 4,
+        'center': [-100, 60],
+        'projection': 3978
+      },
+      'basemapOptions': {
+        'basemapId': 'transport',
+        'shaded': true,
+        'labeled': false
+      },
+      'listOfGeoviewLayerConfig': []
+    },
+    'components': ['overview-map', 'nav-bar', 'footer-bar'],
+    'corePackages': [],
+    'theme': 'dark',
+    'suportedLanguages': ['en']
+    }"></div><table style="border: 1px solid black;"><tbody><tr style="border: 1px solid black;padding: 15px; width: 5%;"><td style="border: 1px solid black;padding: 15px; width: 5%;"><button id="Add-GeoMet-Button">Raster Drill process</button><br/>Latitude: <input id="GeoMet-Lat-Input" type="number" value="51.132831196692806"><br/>Longitude: <input id="GeoMet-Long-Input" type="number" value="-114.74968888274337"><br/><label>Added Layer ID :</label><label id="GeoMet-New-Layer-Id-Label"></label></td><td style="border: 1px solid black;padding: 15px; width: 5%;"><button id="Add-Hydro-Button">Downstream Analysis</button><br/>Latitude: <input id="Hydro-Lat-Input" type="number" value="45.1823"><br/>Longitude: <input id="Hydro-Long-Input" type="number" value="-72.0556"><br/><label>Added Layer ID :</label><label id="Hydro-New-Layer-Id-Label"></label></td></tr></tbody></table><button type="button" class="collapsible">Visibility and filters</button><pre style="height: 20pc; overflow-y: scroll" id="layer5-buttons-div" class="panel"></pre><button class="collapsible">Get Legend</button><pre style="height: 20pc; overflow-y: scroll" id="geojsonLegendsId-table-div" class="panel"></pre><button type="button" class="collapsible">Get Feature Info</button><pre style="height: 20pc; overflow-y: scroll" id="geoJsonResultSetId" class="panel">Click on feature on the map</pre><hr/><p>This map has an empty configuration. You can add a GeoJSON layer by clicking the buttons.</p><button type="button" class="collapsible">Configuration Snippet</button><pre id="LYR5CS" class="panel"></pre><hr/><button type="button" class="collapsible">Code Snippet</button><pre id="codeSnippet" class="panel"></pre><script src="codedoc.js"></script><script>const createInfoTable = (mapId, resultSetsId, resultSets) => {
+        var infoTable = document.getElementById(resultSetsId);
+        infoTable.textContent = '';
+        var oldContent = document.getElementById(`layer${mapId.slice(3)}-info`);
+        if (oldContent) oldContent.remove();
+        var content = document.createElement("div");
+        content.id = `layer${mapId.slice(3)}-info`;
+        infoTable.appendChild(content);
+        Object.keys(resultSets).forEach((layerPath) => {
+          const layerData = resultSets[layerPath];
+
+          // Header of the layer
+          infoH1 = document.createElement('h1');
+          infoH1.innerText = layerData.length ? layerPath : `${layerPath} (empty)`;
+          content.appendChild(infoH1);
+
+          if (layerData.length) {
+            infoH2 = document.createElement('h2');
+            infoH2.innerText = 'Aliases and types';
+            content.appendChild(infoH2);
+
+            // Header of the layer table that describe the aliases and the types
+            tableElement = document.createElement('table');
+            tableElement.classList.add('info');
+            content.appendChild(tableElement);
+
+            tableRow = document.createElement('tr');
+            tableRow.classList.add('info');
+            tableElement.appendChild(tableRow);
+            tableData = document.createElement('th');
+            tableData.classList.add('infoCol1');
+            tableRow.appendChild(tableData);
+            Object.keys(layerData[0].fieldInfo).forEach((fieldName) => {
+              tableData = document.createElement('th');
+              tableData.classList.add('info');
+              tableData.innerText = fieldName;
+              tableRow.appendChild(tableData);
+            });
+
+            // Row describing the aliases
+            tableRow = document.createElement('tr');
+            tableRow.classList.add('info');
+            tableElement.appendChild(tableRow);
+            tableData = document.createElement('td');
+            tableData.classList.add('infoCol1');
+            tableData.innerText = 'Aliases =>';
+            tableRow.appendChild(tableData);
+            Object.keys(layerData[0].fieldInfo).forEach((fieldName) => {
+              tableData = document.createElement('td');
+              tableData.classList.add('info');
+              tableData.innerText = layerData[0].fieldInfo[fieldName].alias;
+              tableRow.appendChild(tableData);
+            });
+
+            // Row describing the types
+            tableRow = document.createElement('tr');
+            tableRow.classList.add('infoCol1');
+            tableElement.appendChild(tableRow);
+            tableData = document.createElement('td');
+            tableData.classList.add('infoCol1');
+            tableData.innerText = 'Types =>';
+            tableRow.appendChild(tableData);
+            Object.keys(layerData[0].fieldInfo).forEach((fieldName) => {
+              tableData = document.createElement('td');
+              tableData.classList.add('info');
+              tableData.innerText = layerData[0].fieldInfo[fieldName].dataType;
+              tableRow.appendChild(tableData);
+            });
+
+            // Header of the data section
+            infoH2 = document.createElement('h2');
+            infoH2.innerText = 'Data';
+            content.appendChild(infoH2);
+
+            tableElement = document.createElement('table');
+            tableElement.classList.add('info');
+            content.appendChild(tableElement);
+            createHeaders = true;
+
+            layerData.forEach((row) => {
+            // Header of the data table
+            if (createHeaders) {
+                tableRow = document.createElement('tr');
+                tableRow.classList.add('info');
+                tableElement.appendChild(tableRow);
+
+                tableData = document.createElement('th');
+                tableData.classList.add('infoCol1');
+                tableData.innerText = 'Symbology';
+                tableRow.appendChild(tableData);
+
+                tableData = document.createElement('th');
+                tableData.classList.add('infoCol1');
+                tableData.innerText = 'Zoom To';
+                tableRow.appendChild(tableData);
+
+                Object.keys(row.fieldInfo).forEach((fieldName) => {
+                  tableData = document.createElement('th');
+                  tableData.classList.add('info');
+                  tableData.innerText = fieldName;
+                  tableRow.appendChild(tableData);
+                });
+                createHeaders = false;
+              }
+
+            // Data row (feature information)
+            tableRow = document.createElement('tr');
+              tableRow.classList.add('info');
+              tableElement.appendChild(tableRow);
+
+              // Feature icon
+              tableData = document.createElement('td');
+              tableData.classList.add('info');
+              tableData.appendChild(row.featureIcon);
+              tableRow.appendChild(tableData);
+
+              // Zoom to button
+              tableData = document.createElement('td');
+              tableData.classList.add('info');
+              tableRow.appendChild(tableData);
+              tableZoomTo = document.createElement('button');
+              tableZoomTo.innerText = 'Zoom To Feature';
+              tableZoomTo.addEventListener('click', function (e) {
+                cgpv.api.map(mapId).zoomToExtent(row.extent, { padding: [100, 100, 100, 100], maxZoom: 20 });
+                addBoundsPolygon(mapId, row.extent);
+              });
+              tableData.appendChild(tableZoomTo);
+
+              // feature fields
+              Object.keys(row.fieldInfo).forEach((fieldName) => {
+                tableData = document.createElement('td');
+                tableData.classList.add('info');
+                tableData.innerText = row.fieldInfo[fieldName].value;
+                tableRow.appendChild(tableData);
+              });
+            });
+          } else {
+            content.appendChild(document.createElement('hr'));
+
+          }
+        });
+      };</script><script>const createTableOfFilter = (mapId) => {
+        var mapButtonsDiv = document.getElementById(`layer${mapId.slice(3)}-buttons-div`);
+        var oldTable = document.getElementById(`layer${mapId.slice(3)}-buttons-table`);
+        if (oldTable) oldTable.remove();
+        var tableElement = document.createElement("table");
+        tableElement.id = `layer${mapId.slice(3)}-buttons-table`;
+        tableElement.style.width = '100%';
+        tableElement.border = '1px solid black';
+        mapButtonsDiv.appendChild(tableElement);
+        Object.keys(cgpv.api.maps[mapId].layer.geoviewLayers).forEach((geoviewLayerId) => {
+          const geoviewLayer = cgpv.api.maps[mapId].layer.geoviewLayers[geoviewLayerId];
+          Object.keys(cgpv.api.maps[mapId].layer.registeredLayers).forEach((layerPath) => {
+            if (layerPath.startsWith(geoviewLayerId)) {
+              const layerConfig = cgpv.api.maps[mapId].layer.registeredLayers[layerPath];
+              const { geoviewRenderer } = cgpv.api.maps[mapId];
+              geoviewRenderer.getLegendStyles(layerConfig).then((legendStyle) => {
+
+                mapButtonsDiv = document.createElement('td');
+                mapButtonsDiv.style.width = '16.66%';
+                mapButtonsDiv.border = '1px solid black';
+                tableElement.appendChild(mapButtonsDiv);
+
+                const geoviewLayerH1 = document.createElement('h1');
+                geoviewLayerH1.innerText = geoviewLayer.geoviewLayerName.en;
+                mapButtonsDiv.appendChild(geoviewLayerH1);
+
+                  const layerConfigH2 = document.createElement('h2');
+                layerConfigH2.innerText = `${layerConfig.layerName.en}`;
+                layerConfigH2.style.height = '15px';
+                mapButtonsDiv.appendChild(layerConfigH2);
+
+                const toggleLayerVisibility = document.createElement('button');
+                const visibilityFlag = geoviewLayer.getVisible(layerConfig);
+                if (visibilityFlag) toggleLayerVisibility.innerText = 'Hide';
+                else toggleLayerVisibility.innerText = 'Show';
+                toggleLayerVisibility.addEventListener('click', function (e) {
+                  const visibilityFlag = !geoviewLayer.getVisible(layerConfig);
+                  if (visibilityFlag) toggleLayerVisibility.innerText = 'Hide';
+                  else toggleLayerVisibility.innerText = 'Show';
+                  geoviewLayer.setVisible(visibilityFlag, layerConfig);
+                });
+                layerConfigH2.appendChild(toggleLayerVisibility);
+
+                if (layerConfig.style) {
+                  Object.keys(layerConfig.style).forEach((geometry) => {
+                    const geometryText = document.createElement("p");
+                    geometryText.innerText = `Geometry = ${geometry}`;
+                    geometryText.style.height = '15px';
+                    mapButtonsDiv.appendChild(geometryText);
+                    if (layerConfig.style[geometry].styleType === 'uniqueValue') {
+                      if (layerConfig.style[geometry].defaultSettings) {
+                        if (layerConfig.style[geometry].defaultVisible === 'always') {
+                          const alwaysDefaultLabel = document.createElement("label");
+                          alwaysDefaultLabel.innerText =  `Always show `;
+                          alwaysDefaultLabel.style.fontSize = '15px';
+                          alwaysDefaultLabel.style.height = '15px';
+                          mapButtonsDiv.appendChild(alwaysDefaultLabel);
+                          mapButtonsDiv.appendChild(legendStyle[geometry].defaultCanvas);
+                          const br = document.createElement("br");
+                          br.style.height = '1px';
+                          mapButtonsDiv.appendChild(br);
+                        } else {
+                          const toggleUniqueValueDefault = document.createElement("button");
+                          if (layerConfig.style[geometry].defaultVisible === 'yes')
+                            toggleUniqueValueDefault.innerText = `Hide ${layerConfig.style[geometry].defaultLabel}`;
+                          else if (layerConfig.style[geometry].defaultVisible === 'no')
+                            toggleUniqueValueDefault.innerText =  `Show ${layerConfig.style[geometry].defaultLabel}`;
+                          toggleUniqueValueDefault.addEventListener('click', function (e) {
+                            if (layerConfig.style[geometry].defaultVisible === 'yes') {
+                              layerConfig.style[geometry].defaultVisible = 'no';
+                              toggleUniqueValueDefault.innerText = `Show ${layerConfig.style[geometry].defaultLabel}`;
+                            } else if (layerConfig.style[geometry].defaultVisible === 'no') {
+                              layerConfig.style[geometry].defaultVisible = 'yes';
+                              toggleUniqueValueDefault.innerText = `Hide ${layerConfig.style[geometry].defaultLabel}`;
+                            }
+                            const checkbox = document.getElementById(`checkbox-${mapId}-${geoviewLayer.geoviewLayerId}`);
+                            const filterInput = document.getElementById(`filter-input-${mapId}`);
+                            const filter = checkbox.value === 'true' ? filterInput.value : '';
+                            geoviewLayer.applyViewFilter(layerConfig, filter);
+                          });
+                          mapButtonsDiv.appendChild(toggleUniqueValueDefault);
+                          const br = document.createElement("br");
+                          br.style.height = '1px';
+                          mapButtonsDiv.appendChild(br);
+                        }
+                      }
+                      for (let i = 0; i < layerConfig.style[geometry].uniqueValueStyleInfo.length; i++) {
+                        if (layerConfig.style[geometry].uniqueValueStyleInfo[i].visible === 'always') {
+                          const alwaysEntry = document.createElement("label");
+                          alwaysEntry.innerText =  `Always show `;
+                          alwaysEntry.style.fontSize = '15px';
+                          mapButtonsDiv.appendChild(alwaysEntry);
+                          mapButtonsDiv.appendChild(legendStyle[geometry].arrayOfCanvas[i]);
+
+                          const br = document.createElement("br");
+                          br.style.height = '1px';
+                          mapButtonsDiv.appendChild(br);
+                        } else {
+                          const toggleUniqueValueFeature = document.createElement("button");
+                          if (layerConfig.style[geometry].uniqueValueStyleInfo[i].visible === 'yes')
+                            toggleUniqueValueFeature.innerText = `Hide ${layerConfig.style[geometry].uniqueValueStyleInfo[i].label}`;
+                          else if (layerConfig.style[geometry].uniqueValueStyleInfo[i].visible === 'no')
+                            toggleUniqueValueFeature.innerText = `Show ${layerConfig.style[geometry].uniqueValueStyleInfo[i].label}`;
+                          toggleUniqueValueFeature.addEventListener('click', function (e) {
+                            const uniqueValueStyleInfoEntry = layerConfig.style[geometry].uniqueValueStyleInfo[i];
+                            if (uniqueValueStyleInfoEntry.visible === 'yes') {
+                              uniqueValueStyleInfoEntry.visible = 'no';
+                              toggleUniqueValueFeature.innerText = `Show ${uniqueValueStyleInfoEntry.label}`;
+                            } else if (uniqueValueStyleInfoEntry.visible === 'no') {
+                              uniqueValueStyleInfoEntry.visible = 'yes';
+                              toggleUniqueValueFeature.innerText = `Hide ${uniqueValueStyleInfoEntry.label}`;
+                            }
+                            const checkbox = document.getElementById(`checkbox-${mapId}-${geoviewLayer.geoviewLayerId}`);
+                            const filterInput = document.getElementById(`filter-input-${mapId}`);
+                            const filter = checkbox.value === 'true' ? filterInput.value : '';
+                            geoviewLayer.applyViewFilter(layerConfig, filter);
+                          });
+                          mapButtonsDiv.appendChild(toggleUniqueValueFeature);
+                          mapButtonsDiv.appendChild(legendStyle[geometry].arrayOfCanvas[i]);
+
+                          const br = document.createElement("br");
+                          br.style.height = '1px';
+                          mapButtonsDiv.appendChild(br);
+                        }
+                      }
+                    } else if (layerConfig.style[geometry].styleType === 'classBreaks') {
+                      if (layerConfig.style[geometry].defaultSettings) {
+                        if (layerConfig.style[geometry].defaultVisible === 'always') {
+                          const alwaysDefaultLabel = document.createElement("label");
+                          alwaysDefaultLabel.innerText =  `Always show `;
+                          alwaysDefaultLabel.style.fontSize = '15px';
+                          mapButtonsDiv.appendChild(alwaysDefaultLabel);
+                          mapButtonsDiv.appendChild(legendStyle[geometry].defaultCanvas);
+                          const br = document.createElement("br");
+                          br.style.height = '1px';
+                          mapButtonsDiv.appendChild(br);
+                        } else {
+                          const toggleClassBreakDefault = document.createElement("button");
+                          if (layerConfig.style[geometry].defaultVisible === 'yes')
+                            toggleClassBreakDefault.innerText = `Hide ${layerConfig.style[geometry].defaultLabel}`;
+                          else if (layerConfig.style[geometry].defaultVisible === 'no')
+                            toggleClassBreakDefault.innerText = `Show ${layerConfig.style[geometry].defaultLabel}`;
+                          toggleClassBreakDefault.addEventListener('click', function (e) {
+                          if (layerConfig.style[geometry].defaultVisible === 'yes') {
+                            layerConfig.style[geometry].defaultVisible = 'no';
+                            toggleClassBreakDefault.innerText = `Show ${layerConfig.style[geometry].defaultLabel}`;
+                          } else if (layerConfig.style[geometry].defaultVisible === 'no') {
+                            layerConfig.style[geometry].defaultVisible = 'yes';
+                            toggleClassBreakDefault.innerText = `Hide ${layerConfig.style[geometry].defaultLabel}`;
+                          }
+                            const checkbox = document.getElementById(`checkbox-${mapId}-${geoviewLayer.geoviewLayerId}`);
+                            const filterInput = document.getElementById(`filter-input-${mapId}`);
+                            const filter = checkbox.value === 'true' ? filterInput.value : '';
+                            geoviewLayer.applyViewFilter(layerConfig, filter);
+                          });
+                          mapButtonsDiv.appendChild(toggleClassBreakDefault);
+                          const br = document.createElement("br");
+                          br.style.height = '1px';
+                          mapButtonsDiv.appendChild(br);
+                        }
+                      }
+                      for (let i = 0; i < layerConfig.style[geometry].classBreakStyleInfo.length; i++) {
+                        if (layerConfig.style[geometry].classBreakStyleInfo[i].visible === 'always') {
+                          const alwaysEntry = document.createElement("label");
+                          alwaysEntry.innerText =  `Always show `;
+                          alwaysEntry.style.fontSize = '15px';
+                          mapButtonsDiv.appendChild(alwaysEntry);
+                          mapButtonsDiv.appendChild(legendStyle[geometry].arrayOfCanvas[i]);
+
+                          const br = document.createElement("br");
+                          br.style.height = '1px';
+                          mapButtonsDiv.appendChild(br);
+                        } else {
+                          const toggleClassBreakFeature = document.createElement("button");
+                          if (layerConfig.style[geometry].classBreakStyleInfo[i].visible === 'yes')
+                            toggleClassBreakFeature.innerText = `Hide ${layerConfig.style[geometry].classBreakStyleInfo[i].label}`;
+                          else if (layerConfig.style[geometry].classBreakStyleInfo[i].visible === 'no')
+                            toggleClassBreakFeature.innerText = `Show ${layerConfig.style[geometry].classBreakStyleInfo[i].label}`;
+                          toggleClassBreakFeature.addEventListener('click', function (e) {
+                            const classBreakStyleInfoEntry = layerConfig.style[geometry].classBreakStyleInfo[i];
+                            if (classBreakStyleInfoEntry.visible === 'yes') {
+                              classBreakStyleInfoEntry.visible = 'no';
+                              toggleClassBreakFeature.innerText = `Show ${classBreakStyleInfoEntry.label}`;
+                            } else if (classBreakStyleInfoEntry.visible === 'no') {
+                              classBreakStyleInfoEntry.visible = 'yes';
+                              toggleClassBreakFeature.innerText = `Hide ${classBreakStyleInfoEntry.label}`;
+                            }
+                            const checkbox = document.getElementById(`checkbox-${mapId}-${geoviewLayer.geoviewLayerId}`);
+                            const filterInput = document.getElementById(`filter-input-${mapId}`);
+                            const filter = checkbox.value === 'true' ? filterInput.value : '';
+                            geoviewLayer.applyViewFilter(layerConfig, filter);
+                          });
+                          mapButtonsDiv.appendChild(toggleClassBreakFeature);
+                          mapButtonsDiv.appendChild(legendStyle[geometry].arrayOfCanvas[i]);
+
+                          const br = document.createElement("br");
+                          br.style.height = '1px';
+                          mapButtonsDiv.appendChild(br);
+                        }
+                      }
+                    }
+                    if (geoviewLayer.getLayerFilter) {
+                      const layerFilterText = document.createElement("p");
+                      layerFilterText.innerText = `Extra filter: `;
+                      mapButtonsDiv.appendChild(layerFilterText);
+                      const layerFilterInput = document.createElement("input");
+                      layerFilterInput.id = `filter-input-${mapId}`;
+                      layerFilterInput.style.width = '50%';
+                      layerFilterText.appendChild(layerFilterInput);
+                      layerFilterInput.value = geoviewLayer.getLayerFilter(layerConfig) || '';
+                      const layerFilterButton = document.createElement("button");
+                      layerFilterButton.addEventListener('click', function (e) {
+                        const checkbox = document.getElementById(`checkbox-${mapId}-${geoviewLayer.geoviewLayerId}`);
+                        if (checkbox.value === 'true')
+                          geoviewLayer.applyViewFilter(layerConfig, layerFilterInput.value);
+                        else {
+                          geoviewLayer.setLayerFilter(layerFilterInput.value, layerConfig);
+                          geoviewLayer.applyViewFilter(layerConfig);
+                        }
+                      });
+                      layerFilterButton.innerText = 'Apply';
+                      layerFilterText.appendChild(layerFilterButton);
+
+                      const checkboxInput = document.createElement("input");
+                      checkboxInput.type='checkbox';
+                      checkboxInput.value = 'false';
+                      checkboxInput.id = `checkbox-${mapId}-${geoviewLayer.geoviewLayerId}`;
+                      checkboxInput.addEventListener('click', function (e) {
+                        checkboxInput.value =checkboxInput.value === 'true' ? 'false' : 'true';
+                        if (checkboxInput.value === 'true')
+                          geoviewLayer.applyViewFilter(layerConfig, layerFilterInput.value);
+                        else {
+                          geoviewLayer.setLayerFilter(layerFilterInput.value, layerConfig);
+                          geoviewLayer.applyViewFilter(layerConfig);
+                        }
+                      });
+                      mapButtonsDiv.appendChild(checkboxInput);
+                      const checkboxText = document.createElement("label");
+                      checkboxText.innerText = `apply only the extra filter`;
+                      mapButtonsDiv.appendChild(checkboxText);
+                    }
+                  });
+                }
+              });
+            }
+          });
+        });
+      }</script><script>// GeoJson ==================================================================================================================
+    const featureInfoGeoJsonLayerSet = cgpv.api.createFeatureInfoLayerSet('LYR5', 'geoJsonResultSetId');
+    cgpv.api.event.on(
+      cgpv.api.eventNames.GET_FEATURE_INFO.ALL_QUERIES_DONE,
+      (payload) => {
+        const { layerSetId, resultSets } = payload;
+        createInfoTable('LYR5', 'geoJsonResultSetId', resultSets);
+      },
+      'LYR5/geoJsonResultSetId'
+    );
+
+    const LegendsGeoJsonLayerSet = cgpv.api.createLegendsLayerSet('LYR5', 'geojsonLegendsId');
+    cgpv.api.event.on(
+      cgpv.api.eventNames.GET_LEGENDS.ALL_LEGENDS_DONE,
+      (payload) => {
+        const { resultSets } = payload;
+        displayLegend('geojsonLegendsId', resultSets);
+      },
+      'LYR5/geojsonLegendsId'
+    );
+
+    // ==========================================================================================================================
+    function displayLegend(layerSetId, resultSets) {
+      const addHeader = (title, container) => {
+        const tableHeader = document.createElement('th');
+        tableHeader.style = 'text-align: center; vertical-align: middle;';
+        tableHeader.innerHTML = title;
+        container.appendChild(tableHeader);
+      };
+      const addData = (data, container) => {
+        const tableData = document.createElement('td');
+        tableData.style.verticalAlign = 'middle';
+        tableData.style.textAlign = 'center';
+        if (data)
+          if (typeof data === 'string') tableData.innerHTML = data.replaceAll('<', '&lt;').replaceAll('>', '&gt;');
+          else tableData.appendChild(data);
+        else tableData.innerHTML = 'NO LEGEND';
+        container.appendChild(tableData);
+      };
+      var oldTable = document.getElementById(`${layerSetId}-table`);
+      if (oldTable) oldTable.parentNode.removeChild(oldTable);
+      var legendTable = document.getElementById(`${layerSetId}-table-div`);
+      const table = document.createElement('table');
+      table.id = `${layerSetId}-table`;
+      table.border = '1';
+      table.style = 'width:50%';
+      legendTable.appendChild(table);
+      var createHeader = true;
+      Object.keys(resultSets).forEach((layerPath) => {
+        if (resultSets[layerPath]?.type === 'ogcWms') {
+          if (createHeader) {
+            createHeader = false;
+            const tableRow1 = document.createElement('tr');
+            table.appendChild(tableRow1);
+            addHeader('Layer Path', tableRow1);
+            addHeader('Symbology', tableRow1);
+          }
+          const tableRow = document.createElement('tr');
+          addData(resultSets[layerPath].layerPath, tableRow);
+          addData(resultSets[layerPath].legend, tableRow);
+          table.appendChild(tableRow);
+        } else {
+          const addRow = (layerPath, label, canvas) => {
+            const tableRow = document.createElement('tr');
+            addData(layerPath, tableRow);
+            addData(label, tableRow); // canvas.style = "border: 1px solid black;"
+            addData(canvas, tableRow);
+            table.appendChild(tableRow);
+          };
+          if (createHeader) {
+            createHeader = false;
+            const tableRow1 = document.createElement('tr');
+            table.appendChild(tableRow1);
+            addHeader('Layer Path', tableRow1);
+            addHeader('Label', tableRow1);
+            addHeader('Symbology', tableRow1);
+          }
+          if (resultSets[layerPath]?.legend) {
+            Object.keys(resultSets[layerPath].legend).forEach((geometryKey) => {
+              if (geometryKey) {
+                if (resultSets[layerPath].styleConfig[geometryKey].styleType === 'uniqueValue') {
+                  if (resultSets[layerPath].legend[geometryKey].defaultCanvas)
+                    addRow(
+                      layerPath,
+                      resultSets[layerPath].styleConfig[geometryKey].defaultLabel,
+                      resultSets[layerPath].legend[geometryKey].defaultCanvas
+                    );
+                  for (let i = 0; i < resultSets[layerPath].legend[geometryKey].arrayOfCanvas.length; i++) {
+                    addRow(
+                      layerPath,
+                      resultSets[layerPath].styleConfig[geometryKey].uniqueValueStyleInfo[i].label,
+                      resultSets[layerPath].legend[geometryKey].arrayOfCanvas[i]
+                    );
+                  }
+                } else if (resultSets[layerPath].styleConfig[geometryKey].styleType === 'classBreaks') {
+                  if (resultSets[layerPath].legend[geometryKey].defaultCanvas)
+                    addRow(
+                      layerPath,
+                      resultSets[layerPath].styleConfig[geometryKey].defaultLabel,
+                      resultSets[layerPath].legend[geometryKey].defaultCanvas
+                    );
+                  for (let i = 0; i < resultSets[layerPath].legend[geometryKey].arrayOfCanvas.length; i++) {
+                    addRow(
+                      layerPath,
+                      resultSets[layerPath].styleConfig[geometryKey].classBreakStyleInfo[i].label,
+                      resultSets[layerPath].legend[geometryKey].arrayOfCanvas[i]
+                    );
+                  }
+                } else if (resultSets[layerPath].styleConfig[geometryKey].styleType === 'simple') {
+                  addRow(
+                    layerPath,
+                    resultSets[layerPath].styleConfig[geometryKey].label,
+                    resultSets[layerPath].legend[geometryKey].defaultCanvas
+                  );
+                }
+              }
+            });
+          }
+        }
+      });
+    }
+    // ==========================================================================================================================
+    function addBoundsPolygon(mapId, bbox) {
+      const newBbox = cgpv.api.map(mapId).transformAndDensifyExtent(bbox, `EPSG:${cgpv.api.map(mapId).currentProjection}`, `EPSG:4326`);
+
+    const vector = cgpv.api.map(mapId).layer.vector;
+    vector.setActiveGeometryGroup();
+    vector.deleteGeometriesFromGroup(0);
+
+      const polygon = cgpv.api.map(mapId).layer.vector.addPolygon(
+        [ newBbox ],
+        {
+          style: {
+            strokeColor: '#000',
+            strokeWidth: 5,
+            strokeOpacity: 0.8,
+          },
+        }
+      );
+    }</script><script>// initialize cgpv and api events, a callback is optional, used if calling api's after the rendering is ready
+      cgpv.init(function (mapId) {
+        console.log(`api is ready for ${mapId}`);
+        //create snippets
+        createCodeSnippet();
+        createConfigSnippet();
+
+        createTableOfFilter('LYR5');
+        cgpv.api.event.emit({ handlerName: 'LYR5/geojsonLegendsId', event: cgpv.api.eventNames.GET_LEGENDS.TRIGGER });
+      });
+
+      // GeoMetButton============================================================================================================
+      // find the button element by ID
+      var addGeoJSONButton = document.getElementById('Add-GeoMet-Button');
+
+      // add an event listener when a button is clicked
+      addGeoJSONButton.addEventListener('click', function (e) {
+        const layerPath = document.getElementById('GeoMet-New-Layer-Id-Label').innerText;
+        if (layerPath) cgpv.api.map('LYR5').layer.removeLayersUsingPath(layerPath);
+        document.getElementById('GeoMet-New-Layer-Id-Label').innerText = '';
+        createTableOfFilter('LYR5');
+
+        // adding a geojson layer requires a type of geojson and url
+        const lat = document.getElementById('GeoMet-Lat-Input').value;
+        const long = document.getElementById('GeoMet-Long-Input').value;
+        const layerID = cgpv.api.map('LYR5').layer.addGeoviewLayer(
+          {
+            geoviewLayerId: 'GeoMetGeoJsonProcess',
+            metadataAccessPath: { 'en': './geojson/processes-metadata.json' },
+            geoviewLayerName: {
+              en: 'GeoMet-OGC-API',
+              fr: 'GeoMet-OGC-API',
+            },
+            geoviewLayerType: 'GeoJSON',
+            'listOfLayerEntryConfig': [
+              {
+                'layerId': 'execution',
+                'source': {
+                  'postSettings': {
+                    'data': {
+                      'inputs': {
+                        'y': lat,
+                        'x': long,
+                      }
+                    }
+                  }
+                }
+              }
+            ],
+          },
+          ['en']
+        );
+        document.getElementById('GeoMet-New-Layer-Id-Label').innerText = layerID;
+        cgpv.api.event.once(
+          cgpv.api.eventNames.LAYER.EVENT_LAYER_ADDED,
+            (payload) => {
+              createTableOfFilter('LYR5');
+            },
+            `LYR5/${layerID}`
+          );
+      });
+
+      // HydroButton============================================================================================================
+      // find the button element by ID
+      var addGeoJSONButton = document.getElementById('Add-Hydro-Button');
+
+      // add an event listener when a button is clicked
+      addGeoJSONButton.addEventListener('click', function (e) {
+        const layerPath = document.getElementById('Hydro-New-Layer-Id-Label').innerText;
+        if (layerPath) cgpv.api.map('LYR5').layer.removeLayersUsingPath(layerPath);
+        document.getElementById('Hydro-New-Layer-Id-Label').innerText = '';
+        createTableOfFilter('LYR5');
+
+        // adding a geojson layer requires a type of geojson and url
+        const lat = document.getElementById('Hydro-Lat-Input').value;
+        const long = document.getElementById('Hydro-Long-Input').value;
+        const layerID = cgpv.api.map('LYR5').layer.addGeoviewLayer(
+          {
+            geoviewLayerId: 'HydroGeoJsonProcess',
+            metadataAccessPath: { 'en': './geojson/hydro-metadata.json' },
+            geoviewLayerName: {
+              en: 'Downstream Analysis'
+            },
+            geoviewLayerType: 'GeoJSON',
+            'listOfLayerEntryConfig': [
+              {
+                'layerId': 'execution',
+                'source': {
+                  'postSettings': {
+                    'data': {
+                      'inputs': {
+                        'lat': lat,
+                        'long': long,
+                      }
+                    }
+                  }
+                }
+              }
+            ],
+          },
+          ['en']
+        );
+        document.getElementById('Hydro-New-Layer-Id-Label').innerText = layerID;
+        cgpv.api.event.once(
+          cgpv.api.eventNames.LAYER.EVENT_LAYER_ADDED,
+            (payload) => {
+              createTableOfFilter('LYR5');
+            },
+            `LYR5/${layerID}`
+          );
+      });</script></body></html>

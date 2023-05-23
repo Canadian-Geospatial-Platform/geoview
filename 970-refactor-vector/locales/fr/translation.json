@@ -1,0 +1,81 @@
+{
+  "general": {
+    "close": "Fermer",
+    "open": "Ouvrir"
+  },
+  "mapnav": {
+    "arianavbar": "groupe de buttons vertical pour navigation sur la carte",
+    "export": "Exporter la carte en PNG",
+    "fullscreen": "Plein Écran",
+    "home": "Retour à la vue initiale",
+    "zoomIn": "Zoom avant",
+    "zoomOut": "Zoom arrière",
+    "coordinates": "Basculer le format des coordonnées",
+    "scale": "Basculer entre l'échelle et la résolution"
+  },
+  "mapctrl": {
+    "rotation": {
+      "resetRotation": "Réinitialiser la rotation",
+      "fixedNorth": "Nord fixe"
+    },
+    "mouseposition": {
+      "east": "E",
+      "west": "O",
+      "north": "N",
+      "south": "S"
+    },
+    "overviewmap": {
+      "toggle": "Basculer la mini-carte"
+    },
+    "attribution": {
+      "defaultnrcan": "© Sa Majesté le Roi du Chef du Canada, représentée par le ministre des Ressources naturelle"
+    },
+    "crosshair": "Utilisez les touches <strong>fléchées</strong>, <strong>+</strong> et <strong>-</strong> pour naviguer sur la carte et <strong>Entrée</strong> pour sélectionner."
+  },
+  "appbar": {
+    "export": "Exporter",
+    "fullscreen": "Plein écran",
+    "help": "Aide",
+    "layers": "Couches",
+    "share": "Partager",
+    "version": "Accéder au repo sur GitHub"
+  },
+  "legend": {
+    "unknown": "Titre de légende inconnu",
+    "remove_layer": "Supprimer le calque",
+    "opacity": "Opacité",
+    "expand_legend": "Développer la légende",
+    "toggle_cluster": "Basculer le groupement",
+    "toggle_opacity": "Basculer le Opacité"
+  },
+  "datagrid": {
+    "exportJson": "Télécharger GeoJSON",
+    "filterMap": "Filtrer la carte",
+    "stopFilterMap": "Filtrer la carte d'arrêt"
+  },
+  "keyboardnav": {
+    "start": "Aller après l'élément carte",
+    "end": "Aller avant l'élément carte",
+    "focusdialog": {
+      "title": "Navigation clavier",
+      "main": "Si activé, le focus sera verrouillé sur le visualiseur. \nPour sortir, appuyez sur <strong>CTRL + Q</strong>.",
+      "button": {
+        "enable": "Activer",
+        "skip": "Sauter"
+      }
+    }
+  },
+  "validation": {
+    "layer": {
+      "loadfailed": "Le chargement de la couche [__param__] a échoué sur la carte __param__.",
+      "notfound": "La sous couche __param__ de la couche GeoView __param__ n'existe pas sur le sereur",
+      "createtwice": "On ne peut exécuter deux fois la méthode createGeoViewRasterLayers pour la carte __param__",
+      "usedtwice": "Utilisation en double de l'identifiant de couche geoview [__param__] sur la carte __param__"
+    }
+  },
+  "exportModal": {
+    "title": "Exporter la carte en PNG",
+    "cancelBtn": "Annuler",
+    "exportBtn": "Exporter"
+  }
+}

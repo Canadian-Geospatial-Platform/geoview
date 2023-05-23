@@ -1,0 +1,83 @@
+<!doctype html><html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><title>Canadian Geospatial Platform Viewer</title><link rel="shortcut icon" href="./favicon.ico"/><meta name="msapplication-TileColor" content="#da532c"/><meta name="msapplication-config" content="./img/browserconfig.xml"/><meta name="theme-color" content="#ffffff"/><meta name="msapplication-TileColor" content="#da532c"/><meta name="theme-color" content="#ffffff"/><link href="https://fonts.googleapis.com/css?family=Roboto|Montserrat:200,300,400,900|Merriweather" rel="stylesheet"/><link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons"/><link rel="stylesheet" href="css/style.css"/><script src="cgpv-main.js"></script></head><body><div class="header-table"><table><tbody><tr><td><img class="header-logo" alt="logo" src="./img/Logo.png"/></td><td class="header-title"><h1><strong>Theme Switching</strong></h1></td></tr><tr><td><a href="./index.html">Main</a><br/></td></tr></tbody></table><table><tbody><tr><td>This page is used to showcase different theme of the components and can be done by below selector.</td></tr></tbody></table></div><div class="theme-selector"><select name="Switch Theme" id="switchTheme"><option value="dark">Dark</option><option value="light">Light</option></select></div><div id="mapWM1" class="llwp-map" data-lang="en"></div><script src="codedoc.js"></script><script>const config = {
+      "map": {
+        "interaction": "dynamic",
+        "viewSettings": {
+          "zoom": 4,
+          "center": [-100, 60],
+          "projection": 3978
+        },
+        "basemapOptions": {
+          "basemapId": "transport",
+          "shaded": false,
+          "labeled": true
+        },
+        "listOfGeoviewLayerConfig": [
+          {
+            "geoviewLayerId": "esriFeatureLYR4",
+            "geoviewLayerName": { "en": "Water quality at monitoring sites" },
+            "metadataAccessPath": {
+              "en": "https://maps-cartes.ec.gc.ca/arcgis/rest/services/DMS/DEU_CSO_Volume/MapServer"
+            },
+            "geoviewLayerType": "esriFeature",
+            "listOfLayerEntryConfig": [{ "layerId": "8" }]
+          },
+          {
+            "geoviewLayerId": "esriFeatureLYR5",
+            "geoviewLayerName": { "en": "Top Projects" },
+            "metadataAccessPath": {
+              "en": "https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/900A_and_top_100_en/MapServer/"
+            },
+            "geoviewLayerType": "esriFeature",
+            "listOfLayerEntryConfig": [{ "layerId": "0" }]
+          },
+          {
+            "geoviewLayerId": "geojsonLYR5",
+            "geoviewLayerName": { "en": "GeoJSON Sample" },
+            "metadataAccessPath": { "en": "./geojson/metadata.json" },
+            "geoviewLayerType": "GeoJSON",
+            "listOfLayerEntryConfig": [
+              {
+                "layerId": "polygons.json",
+                "layerName": { "en": "Polygons" }
+              },
+              {
+                "layerId": "lines.json",
+                "layerName": { "en": "Lines" }
+              },
+              {
+                "entryType": "group",
+                "layerId": "point-feature-group",
+                "layerName": { "en": "point-feature-group" },
+                "listOfLayerEntryConfig": [
+                  { "layerId": "icon_points.json", "layerName": { "en": "Icons" } },
+                  { "layerId": "points.json", "layerName": { "en": "Points" } }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "theme": "dark",
+      "components": ["app-bar", "nav-bar", "north-arrow", "overview-map", "footer-bar"],
+      "corePackages": ["basemap-panel", "layers-panel", "details-panel", "footer-panel"],
+      "externalPackages": [],
+      "suportedLanguages": ["en"]
+    }
+
+    function reloadMap(theme) {
+      cgpv.api.map('mapWM1').loadMapConfig(JSON.stringify({ ...config, theme: theme }))
+    }
+
+    // initialize cgpv and api events, a callback is optional, used if calling api's after the rendering is ready
+    cgpv.init(function () {
+      console.log('api is ready');
+
+      cgpv.api.map('mapWM1').loadMapConfig(JSON.stringify(config))
+      //create snippets
+      createConfigSnippet();
+      createCodeSnippet();
+      const switchThemeElem = document.getElementById("switchTheme");
+      switchThemeElem.addEventListener("change", (e) => {
+        reloadMap(e.target.value)
+      });
+    });</script></body></html>

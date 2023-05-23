@@ -1,0 +1,169 @@
+<!doctype html><html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><title>Canadian Geospatial Platform Viewer</title><link rel="shortcut icon" href="./favicon.ico"/><meta name="msapplication-TileColor" content="#da532c"/><meta name="msapplication-config" content="./img/browserconfig.xml"/><meta name="theme-color" content="#ffffff"/><meta name="msapplication-TileColor" content="#da532c"/><meta name="theme-color" content="#ffffff"/><link href="https://fonts.googleapis.com/css?family=Roboto|Montserrat:200,300,400,900|Merriweather" rel="stylesheet"/><link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons"/><link rel="stylesheet" href="css/style.css"/><script src="cgpv-main.js"></script></head><body><div id="LYR1" class="llwp-map" style="height:100vh" data-lang="en" data-config="{
+      'map': {
+        'interaction': 'dynamic',
+        'viewSettings': {
+          'zoom': 12,
+          'center': [
+            -72.19264871031771,
+            45.2397825669345
+          ],
+          'projection': 3978
+        },
+        'basemapOptions': {
+          'basemapId': 'transport',
+          'shaded': true,
+          'labeled': false
+        },
+        'listOfGeoviewLayerConfig': [
+          {
+            'geoviewLayerId': 'analysislimit',
+            'geoviewLayerName': { 'en': 'Analysis Limit' },
+            'metadataAccessPath': { 'en': 'https://132.156.9.48:30102/api' },
+            'geoviewLayerType': 'ogcFeature',
+            'initialSettings': { 'visible': false },
+            'listOfLayerEntryConfig': [
+              {
+                'layerId': 'analysis-limit',
+                'style': {
+                  'Polygon': {
+                    'styleType': 'simple',
+                    'label': 'Analysis Limit',
+                    'settings': {
+                      'type': 'filledPolygon',
+                      'fillStyle': 'null',
+                      'stroke': {
+                        'color': 'rgba(243, 134, 217, 1)',
+                        'lineStyle': 'solid',
+                        'width': 3
+                      }
+                    }
+                  }
+                }
+              }
+            ]
+          },
+          {
+            'geoviewLayerId': 'analysislimit-chn',
+            'geoviewLayerName': { 'en': 'Analysis Limit CHN' },
+            'metadataAccessPath': { 'en': 'https://132.156.9.48:30102/api' },
+            'geoviewLayerType': 'ogcFeature',
+            'initialSettings': { 'visible': false },
+            'listOfLayerEntryConfig': [
+              {
+                'layerId': 'analysis-limit-CHN',
+                'style': {
+                  'Polygon': {
+                    'styleType': 'simple',
+                    'label': 'Analysis Limit CHN',
+                    'settings': {
+                      'type': 'filledPolygon',
+                      'fillStyle': 'null',
+                      'stroke': {
+                        'color': 'rgba(69, 87, 232, 1)',
+                        'lineStyle': 'solid',
+                        'width': 3
+                      }
+                    }
+                  }
+                }
+              }
+            ]
+          },
+          {
+            'geoviewLayerId': 'blurlayer',
+            'geoviewLayerName': { 'en': 'Blur Layer' },
+            'metadataAccessPath': { 'en': 'https://132.156.9.48:30102/api' },
+            'geoviewLayerType': 'ogcFeature',
+            'initialSettings': { 'visible': false },
+            'listOfLayerEntryConfig': [
+              {
+                'layerId': 'blurlayer'
+              }
+            ]
+          },
+          {
+            'geoviewLayerId': 'NHN',
+            'geoviewLayerName': {
+              'en': 'Hydro Network',
+              'fr': 'Hydro Network'
+            },
+            'metadataAccessPath': {
+              'en': 'https://maps.geogratis.gc.ca/wms/hydro_network_en',
+              'fr': 'https://maps.geogratis.gc.ca/wms/hydro_network_en'
+            },
+            'geoviewLayerType': 'ogcWms',
+            'initialSettings': { 'visible': false },
+            'listOfLayerEntryConfig': [
+              {
+                'entryType': 'raster-image',
+                'layerId': 'hydro_network',
+                'layerName': { 'en': 'Hydro Network' }
+              }
+            ]
+          },
+          {
+            'geoviewLayerId': 'HRDEM',
+            'geoviewLayerName': {
+              'en': 'HRDEM',
+              'fr': 'HRDEM'
+            },
+            'metadataAccessPath': {
+              'en': 'https://datacube.services.geo.ca/ows/elevation',
+              'fr': 'https://datacube.services.geo.ca/ows/elevation'
+            },
+            'geoviewLayerType': 'ogcWms',
+            'initialSettings': { 'visible': false },
+            'listOfLayerEntryConfig': [
+              {
+                'entryType': 'group',
+                'layerId': 'HRDEM',
+                'layerName': { 'en': ' HRDEM group' },
+                'listOfLayerEntryConfig': [
+                  {
+                    'layerId': 'dsm-hillshade'
+                  },
+                  {
+                    'layerId': 'dtm-hillshade'
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      'theme': 'dark',
+      'components': ['app-bar', 'nav-bar', 'north-arrow', 'overview-map'],
+      'corePackages': [],
+      'suportedLanguages': ['en']
+    }"></div><button type="button" class="collapsible">Visibility and filters</button><pre style="height: 20pc; overflow-y: scroll" id="layer1-buttons-pre" class="panel"></pre><button class="collapsible">Get Legend</button><pre style="height: 20pc; overflow-y: scroll" id="LegendsId1-table-pre" class="panel"></pre><button type="button" class="collapsible">Get Feature Info</button><pre style="height: 20pc; overflow-y: scroll" id="ResultSetId1" class="panel">Click on feature on the map</pre><hr/><p>This map has a wms layer added from configuration.</p><button type="button" class="collapsible">Configuration Snippet</button><pre id="LYR1CS" class="panel"></pre><hr/><button type="button" class="collapsible">Code Snippet</button><pre id="codeSnippet" class="panel"></pre><script src="codedoc.js"></script><script src="layerlib.js"></script><script>// initialize cgpv and api events, a callback is optional, used if calling api's after the rendering is ready
+      cgpv.init(function () {
+        console.log('api is ready');
+        //create snippets
+        createCodeSnippet();
+        createConfigSnippet();
+
+        createTableOfFilter('LYR1');
+        cgpv.api.event.emit({ handlerName: 'LYR1/LegendsId1', event: cgpv.api.eventNames.GET_LEGENDS.TRIGGER });
+
+        //LYR1 ===================================================================================================================
+        const featureInfoWmsLayerSet1 = cgpv.api.getFeatureInfoLayerSet('LYR1', 'ResultSetId1');
+        cgpv.api.event.on(
+          cgpv.api.eventNames.GET_FEATURE_INFO.ALL_QUERIES_DONE,
+          (payload) => {
+            const { layerSetId, resultSets } = payload;
+            createInfoTable('LYR1', 'ResultSetId1', resultSets);
+          },
+          'LYR1/ResultSetId1'
+        );
+
+        const LegendsWmsLayerSet1 = cgpv.api.getLegendsLayerSet('LYR1', 'LegendsId1');
+        cgpv.api.event.on(
+          cgpv.api.eventNames.GET_LEGENDS.ALL_LEGENDS_DONE,
+          (payload) => {
+            const { resultSets } = payload;
+            displayLegend('LegendsId1', resultSets);
+          },
+          'LYR1/LegendsId1'
+        );
+
+      });</script></body></html>

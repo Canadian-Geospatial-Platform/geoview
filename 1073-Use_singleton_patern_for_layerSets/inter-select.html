@@ -1,0 +1,59 @@
+<!doctype html><html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><title>Canadian Geospatial Platform Viewer</title><link rel="shortcut icon" href="./favicon.ico"/><meta name="msapplication-TileColor" content="#da532c"/><meta name="msapplication-config" content="./img/browserconfig.xml"/><meta name="theme-color" content="#ffffff"/><meta name="msapplication-TileColor" content="#da532c"/><meta name="theme-color" content="#ffffff"/><link href="https://fonts.googleapis.com/css?family=Roboto|Montserrat:200,300,400,900|Merriweather" rel="stylesheet"/><link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons"/><link rel="stylesheet" href="css/style.css"/><script src="codedoc.js"></script><script src="cgpv-main.js"></script></head><body><div class="header-table"><table><tbody><tr><td><img class="header-logo" alt="logo" src="./img/Logo.png"/></td><td class="header-title"><h1><strong>Select</strong></h1></td></tr></tbody></table><table><tbody><tr><td><ol><a href="./index.html">Main</a><li><a href="#SELECT1">Select (simple case)</a></li></ol></td></tr></tbody></table><table><tbody><tr><td>This page is used to showcase different Select functionalities</td></tr></tbody></table></div><div class="map-title-holder"><h4 id="SELECT1">1. Select (simple case)</h4><a class="ref-link" href="#top">Top</a></div><div>In this example, all shapes are selectable. Click features to see information on the selection. Hold shift-key to select more than one shape.</div><div style="position:relative;"><div class="logs-container"><div class="logs-container-title">API EVENTS LOGS</div><div class="logs-container-sub-title">(see console for more)</div><div id="LOGS1"></div></div><div id="MAP1" class="llwp-map" data-lang="en" data-config="{
+            'map': {
+              'interaction': 'dynamic',
+              'viewSettings': {
+                    'zoom': 4,
+                    'minZoom': 2,
+                    'maxZoom': 12,
+                    'center': [-100, 60],
+                    'projection': 3978
+                },
+                'basemapOptions': {
+                    'basemapId': 'simple',
+                    'shaded': true,
+                    'labeled': false
+                }
+            },
+            'theme': 'dark',
+            'corePackages': [],
+            'suportedLanguages': ['en']
+          }"></div></div><hr/><button type="button" class="collapsible">Configuration Snippet</button><pre id="MAP1CS" class="panel"></pre><hr/><button type="button" class="collapsible">Code Snippet</button><pre id="codeSnippet" class="panel"></pre><script>let map1;
+    function initMap1(map) {
+      // Keep reference
+      map1 = map;
+
+      // Create geometry group which will handle the drawing and set it as active
+      const groupKey = 'selectGroup';
+      const geomGrp = map.layer.vector.createGeometryGroup(groupKey);
+
+      // Add dummy shapes
+      addDefaultShapes(map, groupKey);
+
+      // Init select interactions
+      const select1 = map.initSelectInteractions();
+    }
+
+    // initialize cgpv and api events, a callback is optional, used if calling api's after the rendering is ready
+    cgpv.init(function (mapId) {
+      // If all maps initialized
+      if (mapId === 'allMaps') {
+        console.log('api is ready');
+
+        // Listen to the map loaded event
+        const mapId1 = "MAP1";
+        cgpv.api.event.on(
+          cgpv.api.eventNames.MAP.EVENT_MAP_LOADED,
+            (payload) => {
+              // Init map
+              initMap1(cgpv.api.map(mapId1));
+              // Wire the logs
+              wireLogs(cgpv.api, mapId1, 'LOGS1');
+            },
+            mapId1
+        );
+      }
+
+      //create snippets
+      createCodeSnippet();
+      createConfigSnippet();
+    });</script></body></html>

@@ -1,0 +1,79 @@
+<!doctype html><html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><title>Canadian Geospatial Platform Viewer</title><link rel="shortcut icon" href="./favicon.ico"/><meta name="msapplication-TileColor" content="#da532c"/><meta name="msapplication-config" content="./img/browserconfig.xml"/><meta name="theme-color" content="#ffffff"/><meta name="msapplication-TileColor" content="#da532c"/><meta name="theme-color" content="#ffffff"/><link href="https://fonts.googleapis.com/css?family=Roboto|Montserrat:200,300,400,900|Merriweather" rel="stylesheet"/><link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons"/><link rel="stylesheet" href="css/style.css"/><style>table.info, th.info, td.info, th.infoCol1, td.infoCol1 {
+        border: 1px solid black;
+      }
+      th.info, td.info, th.infoCol1, td.infoCol1 {
+        padding: 15px;
+        width: 15%;
+      }
+      th.info, th.infoCol1, td.infoCol1 {
+        text-align: left;
+        font-weight: bold;
+        font-size: 15px;
+      }</style><script src="cgpv-main.js"></script></head><body><div class="header-table"><table><tbody><tr><td><img class="header-logo" alt="logo" src="./img/Logo.png"/></td><td class="header-title"><h1><strong>Static Image Layers</strong></h1></td></tr></tbody></table><table><tbody><tr><td><a href="./index.html">Main</a><br/>&nbsp;&nbsp;&nbsp;&nbsp;<a href="./type-of-layers.html">Type Of Layers</a><br/></td></tr><tr><td><p>This page is used to showcase how the viewer may show static image layer types</p></td></tr><tr><td><a href="#HLYR1">1. Static Image Layers</a><br/></td></tr></tbody></table></div><div class="map-title-holder"><h4 id="HLYR1">1. Static Image Layers</h4><a class="ref-link" href="#top">Top</a></div><div id="LYR1" class="llwp-map" triggerreadycallback="true" data-lang="en" data-config="{
+        'map': {
+          'interaction': 'dynamic',
+          'viewSettings': {
+            'zoom': 6,
+            'center': [-90, 50],
+            'projection': 3857
+          },
+          'basemapOptions': {
+            'basemapId': 'transport',
+            'shaded': false,
+            'labeled': true
+          },
+          'listOfGeoviewLayerConfig': [
+            {
+              'geoviewLayerId': 'staticLYR10',
+              'geoviewLayerName': {
+                'en': 'Static Image'
+              },
+              'geoviewLayerType': 'imageStatic',
+              'listOfLayerEntryConfig': [
+                {
+                  'layerId': 'thumbnail',
+                  'layerName': { 'en': 'Static Image' },
+                  'source': {
+                    'dataAccessPath': {
+                      'en': 'https://datacube-prod-data-public.s3.ca-central-1.amazonaws.com/store/imagery/aerial/napl/napl-ring-of-fire/napl-ring-of-fire-1954-08-07-60k-thumbnail.png',
+                      'fr': 'https://datacube-prod-data-public.s3.ca-central-1.amazonaws.com/store/imagery/aerial/napl/napl-ring-of-fire/napl-ring-of-fire-1954-08-07-60k-thumbnail.png'
+                    },
+                    'extent': [-87.77486341686723,
+                      51.62285357468582,
+                      -84.57727128084842,
+                      53.833354975551075
+                    ],
+                    'projection': 4326
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        'components': ['overview-map', 'nav-bar', 'footer-bar'],
+        'corePackages': [],
+        'theme': 'dark',
+        'suportedLanguages': ['en']
+      }"></div><button type="button" class="collapsible">Visibility</button><pre style="height: 20pc; overflow-y: scroll" id="layer1-buttons-pre" class="panel"></pre><button class="collapsible">Get Legend</button><pre style="height: 20pc; overflow-y: scroll" id="LegendsId1-table-pre" class="panel"></pre><p>This map has a static image layer added from configuration.</p><button type="button" class="collapsible">Configuration Snippet</button><pre id="LYR1CS" class="panel"></pre><hr/><button type="button" class="collapsible">Code Snippet</button><pre id="codeSnippet" class="panel"></pre><script src="codedoc.js"></script><script src="layerlib.js"></script><script>// initialize cgpv and api events, a callback is optional, used if calling api's after the rendering is ready
+      cgpv.init(function (mapId) {
+        console.log(`api is ready for ${mapId}`);
+
+        if (mapId === 'allMaps') {
+          //create snippets
+          createCodeSnippet();
+          createConfigSnippet();
+
+          cgpv.api.event.emit({ handlerName: 'LYR1/LegendsId1', event: cgpv.api.eventNames.GET_LEGENDS.TRIGGER });
+        }
+      });
+
+      // LYR1 ===================================================================================================================
+      const LegendsWmsLayerSet1 = cgpv.api.createLegendsLayerSet('LYR1', 'LegendsId1');
+      cgpv.api.event.on(
+        cgpv.api.eventNames.GET_LEGENDS.ALL_LEGENDS_DONE,
+        (payload) => {
+          const { resultSets } = payload;
+          displayLegend('LegendsId1', resultSets);
+        },
+        'LYR1/LegendsId1'
+      );</script></body></html>

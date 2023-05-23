@@ -1,0 +1,194 @@
+<!doctype html><html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><title>Canadian Geospatial Platform Viewer</title><link rel="shortcut icon" href="./favicon.ico"/><meta name="msapplication-TileColor" content="#da532c"/><meta name="msapplication-config" content="./img/browserconfig.xml"/><meta name="theme-color" content="#ffffff"/><meta name="msapplication-TileColor" content="#da532c"/><meta name="theme-color" content="#ffffff"/><link href="https://fonts.googleapis.com/css?family=Roboto|Montserrat:200,300,400,900|Merriweather" rel="stylesheet"/><link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons"/><link rel="stylesheet" href="css/style.css"/><script src="cgpv-main.js"></script></head><body><div id="LYR1" class="llwp-map" style="height:100vh" data-lang="en" data-config="{
+        'map': {
+            'interaction': 'dynamic',
+            'viewSettings': {
+                'zoom': 4,
+                'minZoom': 2,
+                'maxZoom': 12,
+                'center': [-100, 60],
+                'projection': 3978
+            },
+            'basemapOptions': {
+                'basemapId': 'simple',
+                'shaded': true,
+                'labeled': false
+            },
+            'listOfGeoviewLayerConfig': [
+                {
+                    'geoviewLayerId': 'ogcFeatureLYR1',
+                    'geoviewLayerName': {
+                        'en': 'MProjects Inv Points'
+                    },
+                    'metadataAccessPath': {
+                        'en': 'https://demo.pygeoapi.io/master'
+                    },
+                    'geoviewLayerType': 'ogcFeature',
+                    'listOfLayerEntryConfig': [
+                        {
+                            'layerId': 'obs'
+                        }
+                    ]
+                },
+                {
+                    'geoviewLayerId': 'ogcFeatureLYR2',
+                    'geoviewLayerName': {
+                        'en': 'MProjects Inv Lines'
+                    },
+                    'metadataAccessPath': {
+                        'en': 'https://demo.pygeoapi.io/master'
+                    },
+                    'geoviewLayerType': 'ogcFeature',
+                    'listOfLayerEntryConfig': [
+                        {
+                            'layerId': 'obs'
+                        }
+                    ]
+                }
+            ]
+        },
+        'theme': 'dark',
+        'components': ['app-bar', 'nav-bar', 'north-arrow', 'overview-map', 'footer-bar'],
+        'corePackages': ['layers-panel'],
+        'suportedLanguages': ['en']
+        }"></div><button class="Get-Legend">Get Legend</button><div id="legend-table-div"></div><button type="button" class="collapsible">Get Feature Info</button><pre style="height: 20pc; overflow-y: scroll" id="ResultSetId" class="panel">Click on feature on the map</pre><hr/><button type="button" class="collapsible">Configuration Snippet</button><pre id="LYR1CS" class="panel"></pre><hr/><script src="codedoc.js"></script><script>// initialize cgpv and api events, a callback is optional, used if calling api's after the rendering is ready
+      cgpv.init(function () {
+        console.log('api is ready');
+        //create snippets
+        createCodeSnippet();
+        createConfigSnippet();
+        // showBoundsFunction();
+        // ======================================================================================================================
+        const featureInfoLayerSet = cgpv.api.createFeatureInfoLayerSet('LYR1', 'ResultSetId');
+        cgpv.api.event.on(
+          cgpv.api.eventNames.GET_FEATURE_INFO.ALL_QUERIES_DONE,
+          (payload) => {
+            const { layerSetId, resultSets } = payload;
+            document.getElementById(layerSetId).textContent = JSON.stringify(resultSets, undefined, 2);
+          },
+          'LYR1/ResultSetId'
+        );
+
+        const LegendsLayerSet = cgpv.api.createLegendsLayerSet('LYR1', 'LegendsId');
+        cgpv.api.event.on(
+          cgpv.api.eventNames.GET_LEGENDS.ALL_LEGENDS_DONE,
+          (payload) => {
+            const { resultSets } = payload;
+            displayLegend('LegendsId', resultSets);
+          },
+        'LYR1/LegendsId'
+        );
+
+        var addGeoJsonLegendButton = document.getElementsByClassName('Get-Legend')[0];
+        addGeoJsonLegendButton.addEventListener('click', function (e) {
+          cgpv.api.event.emit({ handlerName: 'LYR1/LegendsId', event: cgpv.api.eventNames.GET_LEGENDS.TRIGGER });
+        });
+      });
+      // ========================================================================================================================
+      function displayLegend(layerSetId, resultSets) {
+        const addHeader = (title, container) => {
+          const tableHeader = document.createElement('th');
+          tableHeader.style = 'text-align: center; vertical-align: middle;';
+          tableHeader.innerHTML = title;
+          container.appendChild(tableHeader);
+        };
+        const addData = (data, container) => {
+          const tableData = document.createElement('td');
+          tableData.style.verticalAlign = 'middle';
+          tableData.style.textAlign = 'center';
+          if (typeof data === 'string') tableData.innerHTML = data.replaceAll('<', '&lt;').replaceAll('>', '&gt;');
+          else tableData.appendChild(data);
+          container.appendChild(tableData);
+        };
+        var oldTable = document.getElementById(`${layerSetId}-table`);
+        if (oldTable) oldTable.parentNode.removeChild(oldTable);
+        var legendTable = document.getElementById('legend-table-div');
+        const table = document.createElement('table');
+        table.id = `${layerSetId}-table`;
+        table.border = '1';
+        table.style = 'width:50%';
+        legendTable.appendChild(table);
+        var createHeader = true;
+        Object.keys(resultSets).forEach((layerPath) => {
+          if (resultSets[layerPath]?.type === 'ogcWms') {
+            if (createHeader) {
+              createHeader = false;
+              const tableRow1 = document.createElement('tr');
+              table.appendChild(tableRow1);
+              addHeader('Layer Path', tableRow1);
+              addHeader('Symbology', tableRow1);
+              addHeader('Action', tableRow1);
+            }
+            const tableRow = document.createElement('tr');
+            addData(resultSets[layerPath].layerPath, tableRow);
+            addData(resultSets[layerPath].legend, tableRow);
+            const showHideButton = document.createElement('button');
+            const visibilityFlag = true;
+            showHideButton.innerText = 'Hide';
+            showHideButton.addEventListener('click', function (e) {
+              const visibilityFlag = !cgpv.api.maps.LYR1.layer.geoviewLayers['LYR1-Root'].getVisible(layerPath);
+              if (visibilityFlag) showHideButton.innerText = 'Hide';
+              else showHideButton.innerText = 'Show';
+              cgpv.api.maps.LYR1.layer.geoviewLayers['LYR1-Root'].setVisible(visibilityFlag, layerPath);
+            });
+            addData(showHideButton, tableRow);
+            table.appendChild(tableRow);
+          } else {
+            const addRow = (layerPath, label, canvas) => {
+              const tableRow = document.createElement('tr');
+              addData(layerPath, tableRow);
+              addData(label, tableRow); // canvas.style = "border: 1px solid black;"
+              addData(canvas, tableRow);
+              table.appendChild(tableRow);
+            };
+            if (createHeader) {
+              createHeader = false;
+              const tableRow1 = document.createElement('tr');
+              table.appendChild(tableRow1);
+              addHeader('Layer Path', tableRow1);
+              addHeader('Label', tableRow1);
+              addHeader('Symbology', tableRow1);
+            }
+            if (resultSets[layerPath]?.legend) {
+              Object.keys(resultSets[layerPath].legend).forEach((geometryKey) => {
+                if (geometryKey) {
+                  if (resultSets[layerPath].styleConfig[geometryKey].styleType === 'uniqueValue') {
+                    if (resultSets[layerPath].legend[geometryKey].defaultCanvas)
+                      addRow(
+                        layerPath,
+                        resultSets[layerPath].styleConfig[geometryKey].defaultLabel,
+                        resultSets[layerPath].legend[geometryKey].defaultCanvas
+                      );
+                    for (let i = 0; i < resultSets[layerPath].legend[geometryKey].arrayOfCanvas.length; i++) {
+                      addRow(
+                        layerPath,
+                        resultSets[layerPath].styleConfig[geometryKey].uniqueValueStyleInfo[i].label,
+                        resultSets[layerPath].legend[geometryKey].arrayOfCanvas[i]
+                      );
+                    }
+                  } else if (resultSets[layerPath].styleConfig[geometryKey].styleType === 'classBreaks') {
+                    if (resultSets[layerPath].legend[geometryKey].defaultCanvas)
+                      addRow(
+                        layerPath,
+                        resultSets[layerPath].styleConfig[geometryKey].defaultLabel,
+                        resultSets[layerPath].legend[geometryKey].defaultCanvas
+                      );
+                    for (let i = 0; i < resultSets[layerPath].legend[geometryKey].arrayOfCanvas.length; i++) {
+                      addRow(
+                        layerPath,
+                        resultSets[layerPath].styleConfig[geometryKey].classBreakStyleInfos[i].label,
+                        resultSets[layerPath].legend[geometryKey].arrayOfCanvas[i]
+                      );
+                    }
+                  } else if (resultSets[layerPath].styleConfig[geometryKey].styleType === 'simple') {
+                    addRow(
+                      layerPath,
+                      resultSets[layerPath].styleConfig[geometryKey].label,
+                      resultSets[layerPath].legend[geometryKey].defaultCanvas
+                    );
+                  }
+                }
+              });
+            }
+          }
+        });
+      }</script></body></html>

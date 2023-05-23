@@ -1,0 +1,32 @@
+{
+  "map": {
+    "interaction": "dynamic",
+    "viewSettings": {
+      "zoom": 4,
+      "center": [
+        -100,
+        60
+      ],
+      "projection": 3978
+    },
+    "basemapOptions": {
+      "basemapId": "transport",
+      "shaded": false,
+      "labeled": true
+    },
+    "listOfGeoviewLayerConfig": []
+  },
+  "theme": "light",
+  "components": [
+    "geolocator"
+  ],
+  "serviceUrls": {
+    "keys": "https://geocore.api.geo.ca",
+    "geolocator": "https://o2ie3cx0o6.execute-api.ca-central-1.amazonaws.com/dev/v0?keys=geonames,nominatim"
+  },
+  "corePackages": [],
+  "externalPackages": [],
+  "suportedLanguages": [
+    "en"
+  ]
+}

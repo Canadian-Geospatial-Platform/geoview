@@ -1,0 +1,103 @@
+<!doctype html><html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><title>Canadian Geospatial Platform Viewer</title><link rel="stylesheet" href="css/style.css"/><link rel="shortcut icon" href="./favicon.ico"/><meta name="msapplication-TileColor" content="#da532c"/><meta name="msapplication-config" content="./img/browserconfig.xml"/><meta name="theme-color" content="#ffffff"/><meta name="msapplication-TileColor" content="#da532c"/><meta name="theme-color" content="#ffffff"/><link href="https://fonts.googleapis.com/css?family=Roboto|Montserrat:200,300,400,900|Merriweather" rel="stylesheet"/><link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons"/><style>.panel {
+      display: inline-block;
+      background: #ffffff;
+      box-shadow: 0px 0px 5px 5px #666666;
+      -webkit-box-shadow: 2px 2px 5px 5x #666666;
+      -moz-box-shadow: 2px 2px 5px 5px #666666;
+      margin: 10px;
+      padding: 10px;
+      font-size: 12px;
+    }
+
+    .toolbar {
+      display: flex;
+      flex-direction: row;
+      justify-content: center;
+      width: 100%;
+      margin: 10px;
+    }
+
+    button {
+      margin: 10px;
+    }
+
+    body {
+      padding: 50px;
+    }
+
+    .titleheader {
+      width: 979px;
+      text-align: center;
+    }
+
+    .header-table {
+      width: 1180px;
+      text-align: left;
+      margin: 0 auto;
+    }
+
+    .logo {
+      height: 120px;
+      width: 120px;
+      text-align: left;
+    }</style><script src="cgpv-main.js"></script></head><body><div class="header-table"><table><tbody><tr><td><img class="logo" alt="logo" src="./img/Logo.png"/></td><td class="header-title"><h1><strong>Loading Packages</strong></h1></td></tr><tr><td><a href="./index.html">Main</a><br/></td></tr></tbody></table><table><tbody><tr><td>This page is used to showcase loading / unloading packages at runtime.</td></tr></tbody></table></div><div class="toolbar"><button id="load-details-panel-btn">Load Details Panel</button> <button id="unload-details-panel-btn">Unload Details Panel</button> <button id="load-basemap-panel-btn">Load Basemap Panel</button> <button id="unload-basemap-panel-btn">Unload Basemap Panel</button> <button id="load-layers-panel-btn">Load Layers Panel</button> <button id="unload-layers-panel-btn">Unload Layers Panel</button></div><div id="mapWM" class="llwp-map" data-lang="en" data-config-url="./configs/loading-packages-config.json"></div><p></p><hr/><button type="button" class="collapsible">Code Snippet</button><pre id="codeSnippet" class="panel"></pre><script src="codedoc.js"></script><script>// initialize cgpv and api events, a callback is optional, used if calling api's after the rendering is ready
+    cgpv.init(function () {
+      console.log('api is ready');
+
+      createCodeSnippet();
+      createConfigSnippet();
+
+      // get load details panel button element
+      var loadDetailsPanelBtn = document.getElementById('load-details-panel-btn');
+
+      // add event handler to the load details panel button
+      loadDetailsPanelBtn.addEventListener('click', function (e) {
+        cgpv.api.addPlugin('details-panel', 'mapWM', window.plugins['details-panel'], {
+          mapId: 'mapWM',
+        });
+      });
+
+      // get unload details panel button element
+      var unloadDetailsPanelBtn = document.getElementById('unload-details-panel-btn');
+
+      // add event handler to the unload details panel button
+      unloadDetailsPanelBtn.addEventListener('click', function (e) {
+        cgpv.api.removePlugin('details-panel');
+      });
+
+      // get load basemap panel button element
+      var loadBasemapPanelBtn = document.getElementById('load-basemap-panel-btn');
+
+      // add event handler to the load basemap panel button
+      loadBasemapPanelBtn.addEventListener('click', function (e) {
+        cgpv.api.addPlugin('basemap-panel', 'mapWM', window.plugins['basemap-panel'], {
+          mapId: 'mapWM',
+        });
+      });
+
+      // get unload basemap panel button element
+      var unloadBasemapPanelBtn = document.getElementById('unload-basemap-panel-btn');
+
+      // add event handler to the unload basemap panel button
+      unloadBasemapPanelBtn.addEventListener('click', function (e) {
+        cgpv.api.removePlugin('basemap-panel', 'mapWM');
+      });
+
+      // get load layers panel button element
+      var loadLayersPanelBtn = document.getElementById('load-layers-panel-btn');
+
+      // add event handler to the load layers panel button
+      loadLayersPanelBtn.addEventListener('click', function (e) {
+        cgpv.api.addPlugin('layers-panel', 'mapWM', window.plugins['layers-panel'], {
+          mapId: 'mapWM',
+        });
+      });
+
+      // get unload layers panel button element
+      var unloadLayersPanelBtn = document.getElementById('unload-layers-panel-btn');
+
+      // add event handler to the unload layers panel button
+      unloadLayersPanelBtn.addEventListener('click', function (e) {
+        cgpv.api.removePlugin('layers-panel');
+      });
+    });</script></body></html>

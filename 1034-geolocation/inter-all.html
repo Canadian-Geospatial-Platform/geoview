@@ -1,0 +1,165 @@
+<!doctype html><html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><title>Canadian Geospatial Platform Viewer</title><link rel="shortcut icon" href="./favicon.ico"/><meta name="msapplication-TileColor" content="#da532c"/><meta name="msapplication-config" content="./img/browserconfig.xml"/><meta name="theme-color" content="#ffffff"/><meta name="msapplication-TileColor" content="#da532c"/><meta name="theme-color" content="#ffffff"/><link href="https://fonts.googleapis.com/css?family=Roboto|Montserrat:200,300,400,900|Merriweather" rel="stylesheet"/><link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons"/><link rel="stylesheet" href="css/style.css"/><script src="codedoc.js"></script><script src="cgpv-main.js"></script></head><body><div class="header-table"><table><tbody><tr><td><img class="header-logo" alt="logo" src="./img/Logo.png"/></td><td class="header-title"><h1><strong>Interactions</strong></h1></td></tr></tbody></table><table><tbody><tr><td><ol><a href="./index.html">Main</a><li><a href="#ALL">Draw, Modify and Snap</a></li></ol></td></tr></tbody></table><table><tbody><tr><td>This page is used to showcase different Interactions functionalities</td></tr></tbody></table></div><div class="map-title-holder"><h4 id="ALL">1. Draw, Modify and Snap</h4><a class="ref-link" href="#top">Top</a></div><div>In this example, select a shape to draw in a specific group, draw the shape, adjust modifying capabilities on the group, adjust snapping capabilities on the group.</div><div class="draw-menu"><div id="geomGroupA" style="color: blue"><div class="draw-menu-item">GROUP A:</div><div class="draw-menu-item"><span>Select shape:</span> <select name="Draw switcher" id="switchDrawA" onchange="selDrawChanged('geomGroupA');"><option value="None" selected="selected">None</option><option value="Point">Points</option><option value="LineString">Lines</option><option value="Circle">Circles</option><option value="Polygon">Polygons</option></select> <button onclick="btnDrawStop('switchDrawA')">Stop drawing</button></div><div class="draw-menu-item"><span>Modify shapes?</span> <input id="chkModifA" type="checkbox" onchange="chkModif('geomGroupA')"/></div><div class="draw-menu-item"><span>Snap on shapes?</span> <input id="chkSnapA" type="checkbox" onchange="chkSnap('geomGroupA')"/></div><div class="draw-menu-item"><button onclick="btnClearGroup('geomGroupA')">Clear group</button></div></div><div id="geomGroupB" style="color: green"><div class="draw-menu-item">GROUP B:</div><div class="draw-menu-item"><span>Select shape:</span> <select name="Draw switcher" id="switchDrawB" onchange="selDrawChanged('geomGroupB');"><option value="None" selected="selected">None</option><option value="Point">Points</option><option value="LineString">Lines</option><option value="Circle">Circles</option><option value="Polygon">Polygons</option></select> <button onclick="btnDrawStop('switchDrawB')">Stop drawing</button></div><div class="draw-menu-item"><span>Modify shapes?</span> <input id="chkModifB" type="checkbox" onchange="chkModif('geomGroupB')"/></div><div class="draw-menu-item"><span>Snap on shapes?</span> <input id="chkSnapB" type="checkbox" onchange="chkSnap('geomGroupB')"/></div><div class="draw-menu-item"><button onclick="btnClearGroup('geomGroupB')">Clear group</button></div></div><div id="geomGroupC" style="color: red"><div class="draw-menu-item">GROUP C:</div><div class="draw-menu-item"><span>Select shape:</span> <select name="Draw switcher" id="switchDrawC" onchange="selDrawChanged('geomGroupC');"><option value="None" selected="selected">None</option><option value="Point">Points</option><option value="LineString">Lines</option><option value="Circle">Circles</option><option value="Polygon">Polygons</option></select> <button onclick="btnDrawStop('switchDrawC')">Stop drawing</button></div><div class="draw-menu-item"><span>Modify shapes?</span> <input id="chkModifC" type="checkbox" onchange="chkModif('geomGroupC')"/></div><div class="draw-menu-item"><span>Snap on shapes?</span> <input id="chkSnapC" type="checkbox" onchange="chkSnap('geomGroupC')"/></div><div class="draw-menu-item"><button onclick="btnClearGroup('geomGroupC')">Clear group</button></div></div></div><div style="position:relative;font-size:smaller;">From the doc: The snap interaction must be added after the Modify and Draw interactions in order for its map browser event handlers to be fired first. Its handlers are responsible of doing the snapping.</div><div style="position:relative;"><div class="logs-container"><div class="logs-container-title">API EVENTS LOGS</div><div class="logs-container-sub-title">(see console for more)</div><div id="LOGS1"></div></div><div id="MAP1" class="llwp-map" data-lang="en" data-config="{
+            'map': {
+              'interaction': 'dynamic',
+              'viewSettings': {
+                    'zoom': 4,
+                    'minZoom': 2,
+                    'maxZoom': 12,
+                    'center': [-100, 60],
+                    'projection': 3978
+                },
+                'basemapOptions': {
+                    'basemapId': 'simple',
+                    'shaded': true,
+                    'labeled': false
+                }
+            },
+            'theme': 'dark',
+            'corePackages': [],
+            'suportedLanguages': ['en']
+          }"></div></div><hr/><button type="button" class="collapsible">Configuration Snippet</button><pre id="MAP1CS" class="panel"></pre><hr/><button type="button" class="collapsible">Code Snippet</button><pre id="codeSnippet" class="panel"></pre><script>let groupInteractions = {
+      'geomGroupA': {}, 'geomGroupB': {}, 'geomGroupC': {},
+    }
+
+    let map1;
+    function initMap1(map) {
+      // Keep reference
+      map1 = map;
+    }
+
+    function btnClearGroup(groupKey) {
+      // Delete the geometries from the group
+      map1.layer.vector.deleteGeometriesFromGroup(groupKey);
+    }
+
+    function selDrawChanged(groupKey) {
+      // Redirect
+      startDrawing(groupKey, event.currentTarget.value);
+    }
+
+    function btnDrawStop(groupKey) {
+      // Redirect
+      stopDrawings();
+      // Set None in the drop down
+      document.getElementById(groupKey).options[0].selected = true;
+    }
+
+    function startDrawing(groupKey, geomType) {
+      // Stop if any
+      stopDrawings();
+
+      // Start drawing interaction
+      groupInteractions[groupKey]['draw'] = map1.initDrawInteractions(groupKey, geomType);
+
+      // Get the style based on the group
+      let styleForGroup = cgpv.api.geoUtilities.defaultDrawingStyle('blue');
+      if (groupKey == 'geomGroupB') styleForGroup = cgpv.api.geoUtilities.defaultDrawingStyle('green');
+      else if (groupKey == 'geomGroupC') styleForGroup = cgpv.api.geoUtilities.defaultDrawingStyle('red');
+
+      // Set the default styling for the vector layer itself as well, that is, once the drawing is done
+      map1.layer.vector.getGeometryGroup(groupKey).vectorLayer.setStyle(styleForGroup);
+    }
+
+    function stopDrawings() {
+      // Stop any/all drawings of all groups to not confuse user
+      ['geomGroupA', 'geomGroupB', 'geomGroupC'].forEach((groupKey) => {
+        // If drawing
+        if (groupInteractions[groupKey]['draw']) {
+          // Stop drawing interaction
+          groupInteractions[groupKey]['draw'].stopInteraction();
+        }
+
+      });
+
+      // Stop any/all snappings of all groups
+      stopSnappings();
+    }
+
+    function stopSnappings() {
+      // Stop any/all snappings of all groups to not confuse user
+      ['geomGroupA', 'geomGroupB', 'geomGroupC'].forEach((groupKey) => {
+        // If snapping
+        if (groupInteractions[groupKey]['snap']) {
+          // Stop drawing interaction
+          groupInteractions[groupKey]['snap'].stopInteraction();
+        }
+      });
+
+      // Reset snapping options
+      ['chkSnapA', 'chkSnapB', 'chkSnapC'].forEach((snap) => {
+        document.getElementById(snap).checked = false;
+      });
+      //addLog('logs', "Snappings reset");
+    }
+
+    function chkModif(groupKey) {
+      // Get the corresponding modify interaction
+      let modify = groupInteractions[groupKey]['modify'];
+
+      // If activating
+      if (document.getElementById(event.currentTarget.id).checked) {
+        // Reset snapping options
+        stopSnappings();
+
+        // If already was initialized
+        //addLog('logs', "Start modifying " + groupKey);
+        if (modify) {
+          modify.startInteraction();
+        }
+
+        else {
+            groupInteractions[groupKey]['modify'] = map1.initModifyInteractions(groupKey);
+        }
+      }
+
+      else if (modify) {
+        // Stop
+        //addLog('logs', "Stop modifying " + groupKey);
+        modify.stopInteraction();
+      }
+    }
+
+    function chkSnap(groupKey) {
+      // Get the corresponding snap interaction
+      let snap = groupInteractions[groupKey]['snap'];
+
+      // If activating
+      if (document.getElementById(event.currentTarget.id).checked) {
+        // If already was initialized
+        //addLog('logs', "Start snapping " + groupKey);
+        if (snap) {
+          snap.startInteraction();
+        }
+
+        else {
+          // Init snap interaction
+          groupInteractions[groupKey]['snap'] = map1.initSnapInteractions(groupKey);
+        }
+      }
+
+      else if (snap) {
+        // Stop
+        //addLog('logs', "Stop snapping " + groupKey);
+        snap.stopInteraction();
+      }
+    }</script><script>// COMMON SCRIPT(!)
+    // initialize cgpv and api events, a callback is optional, used if calling api's after the rendering is ready
+    cgpv.init(function (mapId) {
+      // If all maps initialized
+      if (mapId === 'allMaps') {
+        console.log('api is ready');
+
+        // Listen to the map loaded event
+        const mapId1 = "MAP1";
+        cgpv.api.event.on(
+          cgpv.api.eventNames.MAP.EVENT_MAP_LOADED,
+            (payload) => {
+              // Init map
+              initMap1(cgpv.api.map(mapId1));
+              // Wire the logs
+              wireLogs(cgpv.api, mapId1, 'LOGS1');
+            },
+            mapId1
+        );
+      }
+    });</script></body></html>
