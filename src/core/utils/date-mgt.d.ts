@@ -87,10 +87,10 @@ export declare class DateMgt {
     /**
      * Create the Geoview time dimension from ESRI dimension
      * @param {TimeDimensionESRI} timeDimensionESRI esri time dimension object
-     * @param dateFragmentsOrder {TypeDateFragments} The layer's date fragments order obtained with getDateFragmentsOrder.
+     *
      * @returns {TimeDimension} the Geoview time dimension
      */
-    createDimensionFromESRI(timeDimensionESRI: TimeDimensionESRI, dateFragmentsOrder: TypeDateFragments): TimeDimension;
+    createDimensionFromESRI(timeDimensionESRI: TimeDimensionESRI): TimeDimension;
     /**
      * Create the Geoview time dimension from OGC dimension
      * @param {TypeJsonObject | string} ogcTimeDimension The OGC time dimension object or string
@@ -126,18 +126,27 @@ export declare class DateMgt {
      *
      * @param date {string} The date to format.
      * @param dateFragmentsOrder {TypeDateFragments} The date fragments order (obtained with getDateFragmentsOrder).
+     * @param reverseTimeZone {boolean} Flag indicating that we must change the time zone sign before the conversion.
      * @returns {string} The reformatted date string.
      */
     applyInputDateFormat(date: string, dateFragmentsOrder?: TypeDateFragments, reverseTimeZone?: boolean): string;
     /**
-     * Reorder the ISO date to the output format using the output section (index = 1) of the date fragments order provided.
-     * The output date format does not perform any conversion, it is used to specify the parts that will be displayed. The
-     * time zone is empty since all dates shown to the user are in UTC.
+     * Reorder the ISO UTC date to the output format using the output section (index = 1) of the date fragments order provided.
+     * The time zone is empty since all dates shown to the user are in UTC.
      *
      * @param date {string} The ISO date to format.
      * @param dateFragmentsOrder {TypeDateFragments} The date fragments order (obtained with getDateFragmentsOrder).
+     * @param reverseTimeZone {boolean} Flag indicating that we must change the time zone sign before the conversion.
      * @returns {string} The reformatted date string.
      */
-    applyOutputDateFormat(date: string, dateFragmentsOrder: TypeDateFragments): string;
+    applyOutputDateFormat(date: string, dateFragmentsOrder?: TypeDateFragments, reverseTimeZone?: boolean): string;
+    /**
+     * Deduce the date format using a date value.
+     *
+     * @param date {string} The date value to be used to deduce the format.
+     *
+     * @returns {string} The date format.
+     */
+    deduceDateFormat(dateString: string): string;
 }
 export {};

@@ -8,4 +8,4 @@ export interface GeoListItem {
     province: string;
     tag: (string | null)[] | null;
 }
-export declare function Geolocator(): JSX.Element;
+export declare function Geolocator(): import("react").JSX.Element;

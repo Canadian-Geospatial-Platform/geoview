@@ -188,24 +188,6 @@ export declare class WMS extends AbstractGeoViewRaster {
      */
     protected getFeatureInfoAtLongLat(lnglat: Coordinate, layerConfig: TypeOgcWmsLayerEntryConfig): Promise<TypeArrayOfFeatureInfoEntries>;
     /** ***************************************************************************************************************************
-     * Return feature information for all the features in the provided bounding box.
-     *
-     * @param {Coordinate} location The coordinate that will be used by the query.
-     * @param {TypeOgcWmsLayerEntryConfig} layerConfig The layer configuration.
-     *
-     * @returns {Promise<TypeArrayOfFeatureInfoEntries>} The feature info table.
-     */
-    protected getFeatureInfoUsingBBox(location: Coordinate[], layerConfig: TypeOgcWmsLayerEntryConfig): Promise<TypeArrayOfFeatureInfoEntries>;
-    /** ***************************************************************************************************************************
-     * Return feature information for all the features in the provided polygon.
-     *
-     * @param {Coordinate} location The coordinate that will be used by the query.
-     * @param {TypeOgcWmsLayerEntryConfig} layerConfig The layer configuration.
-     *
-     * @returns {Promise<TypeArrayOfFeatureInfoEntries>} The feature info table.
-     */
-    protected getFeatureInfoUsingPolygon(location: Coordinate[], layerConfig: TypeOgcWmsLayerEntryConfig): Promise<TypeArrayOfFeatureInfoEntries>;
-    /** ***************************************************************************************************************************
      * Get the legend image URL of a layer from the capabilities. Return null if it does not exist.
      *
      * @param {TypeOgcWmsLayerEntryConfig} layerConfig layer configuration.
@@ -260,27 +242,24 @@ export declare class WMS extends AbstractGeoViewRaster {
      */
     setStyle(StyleId: string, layerPathOrConfig?: string | TypeLayerEntryConfig | null): void;
     /** ***************************************************************************************************************************
-     * Apply a view filter to the layer. When the filter parameter is not empty (''), the view filter does not use the legend
-     * filter. Otherwise, the getViewFilter method is used to define the view filter and the resulting filter is
-     * (legend filters) and (layerFilter). The legend filters are derived from the uniqueValue or classBreaks style of the layer.
-     * When the layer config is invalid, nothing is done.
+     * Apply a view filter to the layer. When the CombineLegendFilter flag is false, the filter paramater is used alone to display
+     * the features. Otherwise, the legend filter and the filter parameter are combined together to define the view filter. The
+     * legend filters are derived from the uniqueValue or classBreaks style of the layer. When the layer config is invalid, nothing
+     * is done.
+     * TODO ! The combination of the legend filter and the dimension filter probably does not apply to WMS. The code can be simplified.
      *
      * @param {string | TypeLayerEntryConfig | null} layerPathOrConfig Optional layer path or configuration.
      * @param {string} filter An optional filter to be used in place of the getViewFilter value.
+     * @param {boolean} CombineLegendFilter Flag used to combine the legend filter and the filter together (default: true)
      */
-    applyViewFilter(layerPathOrConfig?: string | TypeLayerEntryConfig | null, filter?: string): void;
+    applyViewFilter(layerPathOrConfig?: string | TypeLayerEntryConfig | null, filter?: string, CombineLegendFilter?: boolean): void;
     /** ***************************************************************************************************************************
-     * Compute the layer bounds or undefined if the result can not be obtained from the feature extents that compose the layer. If
-     * layerPathOrConfig is undefined, the active layer is used. If projectionCode is defined, returns the bounds in the specified
-     * projection otherwise use the map projection. The bounds are different from the extent. They are mainly used for display
-     * purposes to show the bounding box in which the data resides and to zoom in on the entire layer data. It is not used by
-     * openlayer to limit the display of data on the map. If the bounds lie outside the extents, they are reduced to the extents.
+     * Get the bounds of the layer represented in the layerConfig, returns updated bounds
      *
-     * @param {string | TypeLayerEntryConfig | TypeListOfLayerEntryConfig | null} layerPathOrConfig Optional layer path or
-     * configuration.
-     * @param {string | number | undefined} projectionCode Optional projection code to use for the returned bounds.
+     * @param {TypeLayerEntryConfig} layerConfig Layer config to get bounds from.
+     * @param {Extent | undefined} bounds The current bounding box to be adjusted.
      *
      * @returns {Extent} The layer bounding box.
      */
-    calculateBounds(layerPathOrConfig?: string | TypeLayerEntryConfig | TypeListOfLayerEntryConfig | null, projectionCode?: string | number): Extent | undefined;
+    getBounds(layerConfig: TypeLayerEntryConfig, bounds: Extent | undefined): Extent | undefined;
 }

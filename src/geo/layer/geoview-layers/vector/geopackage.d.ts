@@ -77,15 +77,6 @@ export declare class GeoPackage extends AbstractGeoViewVector {
      */
     protected validateListOfLayerEntryConfig(listOfLayerEntryConfig: TypeListOfLayerEntryConfig): TypeListOfLayerEntryConfig;
     /** ***************************************************************************************************************************
-     * This method is used to process the layer's metadata. It will fill the empty outfields and aliasFields properties of the
-     * layer's configuration.
-     *
-     * @param {TypeVectorLayerEntryConfig} layerEntryConfig The layer entry configuration to process.
-     *
-     * @returns {Promise<void>} A promise that the vector layer configuration has its metadata processed.
-     */
-    protected processLayerMetadata(layerEntryConfig: TypeVectorLayerEntryConfig): Promise<void>;
-    /** ***************************************************************************************************************************
      * Create a source configuration for the vector layer.
      *
      * @param {TypeBaseLayerEntryConfig} layerEntryConfig The layer entry configuration.
