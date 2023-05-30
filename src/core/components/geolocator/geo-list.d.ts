@@ -1,4 +1,4 @@
-/// <reference types="react" />
+import * as React from 'react';
 import { GeoListItem } from './geolocator';
 type GeoListProps = {
     geoListItems: GeoListItem[];
@@ -10,5 +10,5 @@ type GeoListProps = {
  * @param {zoomToLocation} - callback fn to be fired when clicked on geo list item
  * @returns {JSX} - React JSX element
  */
-export default function GeoList({ geoListItems, zoomToLocation }: GeoListProps): JSX.Element;
+export default function GeoList({ geoListItems, zoomToLocation }: GeoListProps): React.JSX.Element;
 export {};

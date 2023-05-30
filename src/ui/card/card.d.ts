@@ -2,7 +2,7 @@
 import { CardProps } from '@mui/material';
 export interface TypeCardProps extends CardProps {
     title?: string;
-    content?: React.ReactNode | Element;
+    contentCard?: React.ReactNode | Element;
 }
 /**
  * Create a customized Material UI Card

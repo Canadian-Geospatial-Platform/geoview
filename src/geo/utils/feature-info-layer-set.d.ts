@@ -9,6 +9,8 @@ import { LayerSet } from './layer-set';
  * @class FeatureInfoLayerSet
  */
 export declare class FeatureInfoLayerSet {
+    /** Private static variable to keep the single instance that can be created by this class for a mapId (see singleton design pattern) */
+    private static featureInfoLayerSetInstance;
     /** The map identifier the layer set belongs to. */
     mapId: string;
     /** The layer set object. */
@@ -19,18 +21,16 @@ export declare class FeatureInfoLayerSet {
      * The class constructor that instanciate a set of layer.
      *
      * @param {string} mapId The map identifier the layer set belongs to.
-     * @param {string} layerSetId The layer set identifier.
      *
      */
-    constructor(mapId: string, layerSetId: string);
+    private constructor();
     /**
      * Helper function used to instanciate a FeatureInfoLayerSet object. This function
      * avoids the "new FeatureInfoLayerSet" syntax.
      *
      * @param {string} mapId The map identifier the layer set belongs to.
-     * @param {string} layerSetId The layer set identifier.
      *
      * @returns {FeatureInfoLayerSet} the FeatureInfoLayerSet object created
      */
-    static create(mapId: string, layerSetId: string): FeatureInfoLayerSet;
+    static get(mapId: string): FeatureInfoLayerSet;
 }

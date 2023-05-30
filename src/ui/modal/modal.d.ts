@@ -9,7 +9,7 @@ interface TypeDialogProps extends Omit<DialogProps, 'title'> {
     style?: CSSProperties;
     title?: React.ReactNode;
     titleId?: string;
-    content?: React.ReactNode;
+    contentModal?: React.ReactNode;
     contentClassName?: string;
     contentStyle?: CSSProperties;
     contentTextId?: string;

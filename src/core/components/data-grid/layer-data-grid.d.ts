@@ -14,5 +14,5 @@ interface CustomDataGridProps extends DataGridProps {
     layerKey: string;
     displayLanguage: TypeDisplayLanguage;
 }
-export declare function LayerDataGrid(props: CustomDataGridProps): JSX.Element;
+export declare function LayerDataGrid(props: CustomDataGridProps): import("react").JSX.Element;
 export {};

@@ -58,8 +58,8 @@ export declare class API {
     createMapFromConfig: typeof createMapFromConfig;
     addUiComponent: typeof Utilities.addUiComponent;
     showMessage: typeof Utilities.showMessage;
-    createFeatureInfoLayerSet: typeof FeatureInfoLayerSet.create;
-    createLegendsLayerSet: typeof LegendsLayerSet.create;
+    getFeatureInfoLayerSet: typeof FeatureInfoLayerSet.get;
+    getLegendsLayerSet: typeof LegendsLayerSet.get;
     /**
      * Initiate the event and projection objects
      */

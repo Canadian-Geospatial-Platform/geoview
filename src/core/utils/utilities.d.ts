@@ -1,4 +1,5 @@
 import { MutableRefObject } from 'react';
+import { Extent } from 'ol/extent';
 import { AbstractGeoViewLayer } from '../../app';
 import { TypeLocalizedString } from '../../geo/map/map-schema-types';
 import { TypeJsonObject } from '../types/global-types';
@@ -127,3 +128,13 @@ export declare const isVectorLayer: (layer: AbstractGeoViewLayer) => boolean;
  * @returns {TypeJsonObject | undefined} the object if it exist or undefined
  */
 export declare const findPropertyNameByRegex: (objectItem: TypeJsonObject, regex: RegExp) => TypeJsonObject | undefined;
+/**
+ * Compare sets of extents of the same projection and return the smallest or largest set.
+ * Extents must be in OpenLayers extent format - [minx, miny, maxx, maxy]
+ *
+ * @param {Extent} extentsA First set of extents
+ * @param {Extent} extentsB Second set of extents
+ * @param {string} minmax Decides whether to get smallest or largest extent
+ * @returns {Extent} the smallest or largest set from the extents
+ */
+export declare function getMinOrMaxExtents(extentsA: Extent, extentsB: Extent, minmax?: string): Extent;
