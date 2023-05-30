@@ -24,7 +24,7 @@ export function BasemapPanel(props: BaseMapPanelProps): JSX.Element {
   const { cgpv } = w;
   const myMap = cgpv.api.map(mapId);
 
-  const { api, react, ui } = cgpv;
+  const { api, ui, react } = cgpv;
   const { Select, Card } = ui.elements;
 
   const { useState, useEffect } = react;
@@ -145,7 +145,7 @@ export function BasemapPanel(props: BaseMapPanelProps): JSX.Element {
     setBasemapList([]);
 
     // create the custom config basemap
-    for (let basemapIndex = 0; basemapIndex < basemapsArray.customBasemaps.length; basemapIndex++) {
+    for (let basemapIndex = 0; basemapIndex < (basemapsArray.customBasemaps.length as number); basemapIndex++) {
       const customBasemap = basemapsArray.customBasemaps[basemapIndex] as TypeJsonObject;
       const basemap = api.map(mapId).basemap.createCustomBasemap(customBasemap as unknown as TypeBasemapProps);
       if (basemap) setBasemapList((prevArray) => [...prevArray, basemap]);
@@ -158,7 +158,7 @@ export function BasemapPanel(props: BaseMapPanelProps): JSX.Element {
     }
 
     // create the core basemap
-    for (let basemapIndex = 0; basemapIndex < basemapsArray.coreBasemaps.length; basemapIndex++) {
+    for (let basemapIndex = 0; basemapIndex < (basemapsArray.coreBasemaps.length as number); basemapIndex++) {
       const basemapOptions = basemapsArray.coreBasemaps[basemapIndex] as TypeJsonObject;
       // eslint-disable-next-line no-await-in-loop
       const basemap = await api.map(mapId).basemap.createCoreBasemap(basemapOptions as unknown as TypeBasemapOptions, projection);
@@ -253,7 +253,7 @@ export function BasemapPanel(props: BaseMapPanelProps): JSX.Element {
             onKeyPress={() => setBasemap(basemap.basemapId as string)}
             key={basemap.basemapId}
             title={basemap.name}
-            content={
+            contentCard={
               <>
                 {typeof basemap.thumbnailUrl === 'string' && (
                   <img src={basemap.thumbnailUrl} alt={basemap.altText} className="basemapCardThumbnail" />
