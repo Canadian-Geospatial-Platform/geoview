@@ -82,5 +82,8 @@
   "geolocator": {
     "search": "Texte à rechercher",
     "errorMessage": "Aucun résultat correspondant à"
+  },
+  "hovertooltip": {
+    "alticon": "Symbol de l'élément sélectionné"
   }
 }

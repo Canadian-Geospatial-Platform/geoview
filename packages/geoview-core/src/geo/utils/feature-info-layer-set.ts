@@ -1,4 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import debounce from 'lodash/debounce';
+
 import { EVENT_NAMES } from '../../api/events/event-types';
 import { GetFeatureInfoPayload, payloadIsQueryResult, TypeFeatureInfoResultSets } from '../../api/events/payloads/get-feature-info-payload';
 import { payloadIsAMapSingleClick } from '../../api/events/payloads/map-slingle-click-payload';
@@ -52,7 +54,7 @@ export class FeatureInfoLayerSet {
           Object.keys(this.resultSets).forEach((layerPath) => {
             this.resultSets[layerPath] = undefined;
           });
-          api.event.emit(GetFeatureInfoPayload.createQueryLayerPayload(this.mapId, 'at long lat', payload.coordinates.lnglat));
+          api.event.emit(GetFeatureInfoPayload.createQueryLayerPayload(this.mapId, 'at long lat', payload.coordinates.lnglat, false));
         }
       },
       this.mapId
@@ -64,9 +66,22 @@ export class FeatureInfoLayerSet {
           Object.keys(this.resultSets).forEach((layerPath) => {
             this.resultSets[layerPath] = undefined;
           });
-          api.event.emit(GetFeatureInfoPayload.createQueryLayerPayload(this.mapId, 'at long lat', payload.lnglat));
+          api.event.emit(GetFeatureInfoPayload.createQueryLayerPayload(this.mapId, 'at long lat', payload.lnglat, false));
         }
       },
+      this.mapId
+    );
+
+    api.event.on(
+      EVENT_NAMES.MAP.EVENT_MAP_POINTER_MOVE,
+      debounce((payload) => {
+        if (payloadIsAMapSingleClick(payload)) {
+          Object.keys(this.resultSets).forEach((layerPath) => {
+            this.resultSets[layerPath] = undefined;
+          });
+          api.event.emit(GetFeatureInfoPayload.createQueryLayerPayload(this.mapId, 'at pixel', payload.coordinates.pixel, true));
+        }
+      }, 750),
       this.mapId
     );
 
@@ -74,17 +89,23 @@ export class FeatureInfoLayerSet {
       EVENT_NAMES.GET_FEATURE_INFO.QUERY_RESULT,
       (payload) => {
         if (payloadIsQueryResult(payload)) {
-          const { layerPath, arrayOfRecords } = payload;
+          const { layerPath, arrayOfRecords, isHover } = payload;
           if (layerPath in this.resultSets) {
             this.resultSets[layerPath] = arrayOfRecords;
           }
+
           const allDone = Object.keys(this.resultSets).reduce((doneFlag, layerPathToTest) => {
             return doneFlag && this.resultSets[layerPathToTest] !== undefined;
           }, true);
-          if (allDone)
+          if (allDone && !isHover) {
             api.event.emit(
               GetFeatureInfoPayload.createAllQueriesDonePayload(`${this.layerSet.layerSetId}`, this.layerSet.layerSetId, this.resultSets)
             );
+          } else if (allDone && isHover) {
+            api.event.emit(
+              GetFeatureInfoPayload.createHoverQueryDonePayload(`${this.layerSet.layerSetId}`, this.layerSet.layerSetId, this.resultSets)
+            );
+          }
         }
       },
       this.mapId

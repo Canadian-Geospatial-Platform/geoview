@@ -5,13 +5,14 @@ import { PayloadBaseClass } from './payload-base-class';
 import { EventStringId, EVENT_NAMES } from '../event-types';
 
 /** Valid events that can create MapSingleClickPayload */
-const validEvents: EventStringId[] = [EVENT_NAMES.MAP.EVENT_MAP_SINGLE_CLICK];
+const validEvents: EventStringId[] = [EVENT_NAMES.MAP.EVENT_MAP_SINGLE_CLICK, EVENT_NAMES.MAP.EVENT_MAP_POINTER_MOVE];
 
 /** Type used to define an map single click action  */
 export type TypeMapSingleClick = {
   lnglat: Coordinate;
   pixel: Coordinate;
   projected: Coordinate;
+  dragging: boolean;
 };
 
 /**

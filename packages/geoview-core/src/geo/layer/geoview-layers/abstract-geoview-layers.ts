@@ -772,9 +772,9 @@ export abstract class AbstractGeoViewLayer {
       // Listen to events that request to query a layer and return the resultset to the requester.
       this.registerToLayerSetListenerFunctions[layerPath].queryLayer = (payload) => {
         if (payloadIsQueryLayer(payload)) {
-          const { queryType, location } = payload;
+          const { queryType, location, isHover } = payload;
           this.getFeatureInfo(location, layerPath, queryType).then((queryResult) => {
-            api.event.emit(GetFeatureInfoPayload.createQueryResultPayload(this.mapId, layerPath, queryResult));
+            api.event.emit(GetFeatureInfoPayload.createQueryResultPayload(this.mapId, layerPath, queryResult, isHover));
           });
         }
       };
@@ -1202,6 +1202,8 @@ export abstract class AbstractGeoViewLayer {
                 geometry: feature,
                 featureIcon: canvas,
                 fieldInfo: {},
+                nameField: getLocalizedValue(layerEntryConfig?.source?.featureInfo?.nameField, this.mapId) || null,
+                schemaTag: layerEntryConfig.schemaTag,
               };
 
               const featureFields = feature.getKeys();

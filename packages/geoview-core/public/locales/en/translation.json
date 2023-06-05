@@ -82,5 +82,8 @@
   "geolocator": {
     "search": "Search",
     "errorMessage": "No matches found for"
+  },
+  "hovertooltip": {
+    "alticon": "Selected feature icon"
   }
 }

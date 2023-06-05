@@ -9,7 +9,7 @@ import { Geometry } from 'ol/geom';
 import initSqlJs from 'sql.js';
 
 import { Feature } from 'ol';
-import { toJsonObject } from '../../../../core/types/global-types';
+import { toJsonObject, TypeJsonObject } from '../../../../core/types/global-types';
 import { AbstractGeoViewLayer, CONST_LAYER_TYPES } from '../abstract-geoview-layers';
 import { AbstractGeoViewVector } from './abstract-geoview-vector';
 import {
@@ -298,6 +298,8 @@ export class GeoPackage extends AbstractGeoViewVector {
             db.close();
             vectorSource.addFeatures(features);
 
+            this.processFeatureInfoConfig(properties as TypeJsonObject, layerEntryConfig as TypeVectorLayerEntryConfig);
+
             if (success) success(features);
           } else {
             onError();
@@ -307,7 +309,55 @@ export class GeoPackage extends AbstractGeoViewVector {
       });
     };
     vectorSource = new VectorSource(sourceOptions);
+
     return vectorSource;
+  }
+
+  /** ***************************************************************************************************************************
+   * This method sets the outfields and aliasFields of the source feature info.
+   *
+   * @param {TypeJsonArray} fields An array of field names and its aliases.
+   * @param {TypeVectorLayerEntryConfig} layerEntryConfig The vector layer entry to configure.
+   */
+  private processFeatureInfoConfig(fields: TypeJsonObject, layerEntryConfig: TypeVectorLayerEntryConfig) {
+    if (!layerEntryConfig.source) layerEntryConfig.source = {};
+    if (!layerEntryConfig.source.featureInfo) layerEntryConfig.source.featureInfo = { queryable: true };
+    // Process undefined outfields or aliasFields ('' = false and !'' = true). Also, if en is undefined, then fr is also undefined.
+    // when en and fr are undefined, we set both en and fr to the same value.
+    if (!layerEntryConfig.source.featureInfo.outfields?.en || !layerEntryConfig.source.featureInfo.aliasFields?.en) {
+      const processOutField = !layerEntryConfig.source.featureInfo.outfields?.en;
+      const processAliasFields = !layerEntryConfig.source.featureInfo.aliasFields?.en;
+      if (processOutField) {
+        layerEntryConfig.source.featureInfo.outfields = { en: '' };
+        layerEntryConfig.source.featureInfo.fieldTypes = '';
+      }
+      if (processAliasFields) layerEntryConfig.source.featureInfo.aliasFields = { en: '' };
+
+      Object.keys(fields).forEach((fieldEntry) => {
+        if (fields[fieldEntry].type === 'Geometry') return;
+        if (processOutField) {
+          layerEntryConfig.source!.featureInfo!.outfields!.en = `${layerEntryConfig.source!.featureInfo!.outfields!.en}${fieldEntry},`;
+          let fieldType: 'string' | 'date' | 'number';
+          if (fields[fieldEntry].type === 'date') fieldType = 'date';
+          else if (['int', 'number'].includes(fields[fieldEntry].type as string)) fieldType = 'number';
+          else fieldType = 'string';
+          layerEntryConfig.source!.featureInfo!.fieldTypes = `${layerEntryConfig.source!.featureInfo!.fieldTypes}${fieldType},`;
+        }
+        layerEntryConfig.source!.featureInfo!.aliasFields!.en = `${layerEntryConfig.source!.featureInfo!.aliasFields!.en}${fieldEntry},`;
+      });
+      layerEntryConfig.source.featureInfo!.outfields!.en = layerEntryConfig.source.featureInfo!.outfields?.en?.slice(0, -1);
+      layerEntryConfig.source.featureInfo!.fieldTypes = layerEntryConfig.source.featureInfo!.fieldTypes?.slice(0, -1);
+      layerEntryConfig.source.featureInfo!.aliasFields!.en = layerEntryConfig.source.featureInfo!.aliasFields?.en?.slice(0, -1);
+      layerEntryConfig.source!.featureInfo!.outfields!.fr = layerEntryConfig.source!.featureInfo!.outfields?.en;
+      layerEntryConfig.source!.featureInfo!.aliasFields!.fr = layerEntryConfig.source!.featureInfo!.aliasFields?.en;
+    }
+    if (!layerEntryConfig.source.featureInfo.nameField) {
+      const en =
+        layerEntryConfig.source.featureInfo!.outfields!.en?.split(',')[0] ||
+        layerEntryConfig.source.featureInfo!.outfields!.fr?.split(',')[0];
+      const fr = en;
+      if (en) layerEntryConfig.source.featureInfo.nameField = { en, fr };
+    }
   }
 
   /** ***************************************************************************************************************************

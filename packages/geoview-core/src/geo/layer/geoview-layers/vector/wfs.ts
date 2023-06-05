@@ -291,10 +291,13 @@ export class WFS extends AbstractGeoViewVector {
             const xmlDOMDescribe = new DOMParser().parseFromString(layerMetadata, 'text/xml');
             const xmlJsonDescribe = xmlToJson(xmlDOMDescribe);
             const prefix = Object.keys(xmlJsonDescribe)[0].includes('xsd:') ? 'xsd:' : '';
+            const xmlJsonSchema = xmlJsonDescribe[`${prefix}schema`];
             const xmlJsonDescribeElement =
-              xmlJsonDescribe[`${prefix}schema`][`${prefix}complexType`][`${prefix}complexContent`][`${prefix}extension`][
-                `${prefix}sequence`
-              ][`${prefix}element`];
+              xmlJsonSchema[`${prefix}complexType`] !== undefined
+                ? xmlJsonSchema[`${prefix}complexType`][`${prefix}complexContent`][`${prefix}extension`][`${prefix}sequence`][
+                    `${prefix}element`
+                  ]
+                : [];
 
             if (Array.isArray(xmlJsonDescribeElement)) {
               // recreate the array of properties as if it was json
@@ -353,9 +356,10 @@ export class WFS extends AbstractGeoViewVector {
       layerEntryConfig.source!.featureInfo!.aliasFields!.fr = layerEntryConfig.source!.featureInfo!.aliasFields?.en;
     }
     if (!layerEntryConfig.source.featureInfo.nameField) {
+      // INFO: WFS as geometry for first field, use second one
       const en =
-        layerEntryConfig.source.featureInfo!.outfields!.en?.split(',')[0] ||
-        layerEntryConfig.source.featureInfo!.outfields!.fr?.split(',')[0];
+        layerEntryConfig.source.featureInfo!.outfields!.en?.split(',')[1] ||
+        layerEntryConfig.source.featureInfo!.outfields!.fr?.split(',')[1];
       const fr = en;
       if (en) layerEntryConfig.source.featureInfo.nameField = { en, fr };
     }

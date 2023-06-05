@@ -12,6 +12,7 @@ export type MapEventKey =
   | 'EVENT_MAP_RELOAD'
   | 'EVENT_MAP_MOVE_END'
   | 'EVENT_MAP_SINGLE_CLICK'
+  | 'EVENT_MAP_POINTER_MOVE'
   | 'EVENT_MAP_ZOOM_END'
   | 'EVENT_MAP_ADD_COMPONENT'
   | 'EVENT_MAP_REMOVE_COMPONENT'
@@ -42,6 +43,11 @@ export const MAP: Record<MapEventKey, EventStringId> = {
    * Event triggered when a user does a true single click with no dragging and no double click. Note that this event is delayed by 250 ms to ensure that it is not a double click
    */
   EVENT_MAP_SINGLE_CLICK: 'map/singleclick',
+
+  /**
+   * Event triggered when a user does a pointer move
+   */
+  EVENT_MAP_POINTER_MOVE: 'map/pointermove',
 
   /**
    * Event triggered when a user stops zooming the map

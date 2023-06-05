@@ -6,7 +6,7 @@ import { EventStringId } from '../event-types';
  */
 
 /** Valid keys for the GET_FEATURE_INFO category */
-export type GetFeatureInfoEventKey = 'QUERY_LAYER' | 'ALL_QUERIES_DONE' | 'QUERY_RESULT';
+export type GetFeatureInfoEventKey = 'QUERY_LAYER' | 'ALL_QUERIES_DONE' | 'HOVER_QUERY_DONE' | 'QUERY_RESULT';
 
 /** Record that associates GET_FEATURE_INFO's event keys to their event string id */
 export const GET_FEATURE_INFO: Record<GetFeatureInfoEventKey, EventStringId> = {
@@ -19,6 +19,11 @@ export const GET_FEATURE_INFO: Record<GetFeatureInfoEventKey, EventStringId> = {
    * Event triggered when all the queries of the layer set are done
    */
   ALL_QUERIES_DONE: 'get_feature_info/all_queries_done',
+
+  /**
+   * Event triggered when one queries of the layer set are done
+   */
+  HOVER_QUERY_DONE: 'get_feature_info/hover_query_done',
 
   /**
    * Event triggered to send the result of the query
