@@ -3,7 +3,6 @@ import type React from 'react';
 import {
   TypeWindow,
   payloadIsAMapSingleClick,
-  markerDefinitionPayload,
   payloadIsAllQueriesDone,
   TypeArrayOfLayerData,
   getLocalizedValue,
@@ -66,9 +65,6 @@ export function DetailsItem({ mapId }: Props): JSX.Element {
           const { coordinates } = payload;
           setHandlerName(payload.handlerName);
           setLngLat(coordinates.lnglat);
-          api.event.emit(
-            markerDefinitionPayload(api.eventNames.MARKER_ICON.EVENT_MARKER_ICON_SHOW, payload.handlerName, coordinates.lnglat)
-          );
         } else {
           setLngLat([]);
         }
@@ -84,9 +80,6 @@ export function DetailsItem({ mapId }: Props): JSX.Element {
 
   useEffect(() => {
     setList(api.map(mapId).details.createDetails(mapId, details, { mapId, location: lngLat, handlerName }));
-    setTimeout(() => {
-      api.event.emit(markerDefinitionPayload(api.eventNames.MARKER_ICON.EVENT_MARKER_ICON_SHOW, handlerName, lngLat));
-    }, 1800);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [details, lngLat]);
 

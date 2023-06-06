@@ -3,7 +3,6 @@ import type React from 'react';
 import {
   TypeWindow,
   payloadIsAMapSingleClick,
-  markerDefinitionPayload,
   payloadIsAllQueriesDone,
   TypeArrayOfLayerData,
   getLocalizedValue,
@@ -92,9 +91,6 @@ export function DetailsItem({ mapId, buttonId }: Props): JSX.Element {
         .map(mapId)
         .details.createDetails(mapId, details, { mapId, location: LngLat, backgroundStyle: 'dark', singleColumn: true, handlerName })
     );
-    setTimeout(() => {
-      api.event.emit(markerDefinitionPayload(api.eventNames.MARKER_ICON.EVENT_MARKER_ICON_SHOW, handlerName, LngLat));
-    }, 800);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [details, LngLat]);
 
