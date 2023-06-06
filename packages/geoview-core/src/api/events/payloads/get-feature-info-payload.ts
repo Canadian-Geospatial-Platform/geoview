@@ -52,7 +52,6 @@ export type TypeFeatureInfoEntry = {
   featureIcon: HTMLCanvasElement;
   fieldInfo: Partial<Record<string, TypeFieldEntry>>;
   nameField: string | null;
-  schemaTag: string;
 };
 
 export type TypeArrayOfFeatureInfoEntries = TypeFeatureInfoEntry[];
