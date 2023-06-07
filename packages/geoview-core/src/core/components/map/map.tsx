@@ -22,8 +22,6 @@ import { OverviewMap } from '../overview-map/overview-map';
 import { ClickMarker } from '../click-marker/click-marker';
 import { HoverTooltip } from '../hover-tooltip/hover-tooltip';
 
-import { Tooltip } from '../../../ui';
-
 import { disableScrolling, generateId } from '../../utils/utilities';
 
 import { TypeVectorSourceInitialConfig, api, inKeyfocusPayload } from '../../../app';

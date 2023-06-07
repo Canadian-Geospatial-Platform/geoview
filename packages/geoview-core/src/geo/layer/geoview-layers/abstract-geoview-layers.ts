@@ -1203,7 +1203,6 @@ export abstract class AbstractGeoViewLayer {
                 featureIcon: canvas,
                 fieldInfo: {},
                 nameField: getLocalizedValue(layerEntryConfig?.source?.featureInfo?.nameField, this.mapId) || null,
-                schemaTag: layerEntryConfig.schemaTag,
               };
 
               const featureFields = feature.getKeys();
