@@ -455,17 +455,12 @@ function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
    * @returns {boolean} True if layer passes validation
    */
   const xyzValidation = (): boolean => {
-    const proj = api.projection.projections[api.map(mapId).currentProjection].getCode();
     const tiles = ['{x}', '{y}', '{z}'];
     for (let i = 0; i < tiles.length; i += 1) {
       if (!layerURL.includes(tiles[i])) {
         emitErrorServer('XYZ Tile');
         return false;
       }
-    }
-    if (proj !== 'EPSG:3857') {
-      emitErrorProj('XYZ Tiles', proj, ['EPSG:3857']);
-      return false;
     }
     const dataAccessPath = layerURL;
     setLayerName('');
