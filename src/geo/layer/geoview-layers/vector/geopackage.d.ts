@@ -87,6 +87,13 @@ export declare class GeoPackage extends AbstractGeoViewVector {
      */
     protected createVectorSource(layerEntryConfig: TypeBaseLayerEntryConfig, sourceOptions?: SourceOptions, readOptions?: ReadOptions): VectorSource<Geometry>;
     /** ***************************************************************************************************************************
+     * This method sets the outfields and aliasFields of the source feature info.
+     *
+     * @param {TypeJsonArray} fields An array of field names and its aliases.
+     * @param {TypeVectorLayerEntryConfig} layerEntryConfig The vector layer entry to configure.
+     */
+    private processFeatureInfoConfig;
+    /** ***************************************************************************************************************************
      * Create a source configuration for the vector layer.
      *
      * @param {Uint8Array} gpkgBinGeom Binary geometry array to be parsed.

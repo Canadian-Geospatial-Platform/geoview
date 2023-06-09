@@ -46,8 +46,9 @@ export declare class MapViewer {
     displayLanguage: TypeDisplayLanguage;
     currentProjection: number;
     currentZoom: number;
-    currentPosition: Coordinate;
+    currentMapCenterPosition: Coordinate;
     singleClickedPosition: TypeMapSingleClick;
+    pointerPosition: TypeMapSingleClick;
     i18nInstance: i18n;
     modal: ModalApi;
     geoviewRenderer: GeoviewRenderer;
