@@ -73,7 +73,7 @@ export interface TypeWmsLegend extends Omit<TypeLegend, 'styleConfig'> {
 }
 
 /**
- * type guard function that redefines a TypeLegend as a TypeWmsLegend
+ * type guard function that redefines a TypeLegend as a TypeImageStaticLegend
  * if the event attribute of the verifyIfPayload parameter is valid. The type ascention
  * applies only to the true block of the if clause.
  *
@@ -130,6 +130,7 @@ const DEFAULT_LAYER_NAMES: Record<TypeGeoviewLayerType, string> = {
   geoCore: 'GeoCore Layer',
   GeoPackage: 'GeoPackage Layer',
   xyzTiles: 'XYZ Tiles',
+  vectorTiles: 'Vector Tiles',
   ogcFeature: 'OGC Feature Layer',
   ogcWfs: 'WFS Layer',
   ogcWms: 'WMS Layer',
@@ -144,6 +145,7 @@ type LayerTypesKey =
   | 'GEOCORE'
   | 'GEOPACKAGE'
   | 'XYZ_TILES'
+  | 'VECTOR_TILES'
   | 'OGC_FEATURE'
   | 'WFS'
   | 'WMS';
@@ -159,6 +161,7 @@ export type TypeGeoviewLayerType =
   | 'geoCore'
   | 'GeoPackage'
   | 'xyzTiles'
+  | 'vectorTiles'
   | 'ogcFeature'
   | 'ogcWfs'
   | 'ogcWms';
@@ -174,6 +177,7 @@ export const CONST_LAYER_TYPES: Record<LayerTypesKey, TypeGeoviewLayerType> = {
   GEOCORE: 'geoCore',
   GEOPACKAGE: 'GeoPackage',
   XYZ_TILES: 'xyzTiles',
+  VECTOR_TILES: 'vectorTiles',
   OGC_FEATURE: 'ogcFeature',
   WFS: 'ogcWfs',
   WMS: 'ogcWms',
@@ -190,6 +194,7 @@ export const CONST_LAYER_ENTRY_TYPE: Record<TypeGeoviewLayerType, TypeLayerEntry
   geoCore: 'geoCore',
   GeoPackage: 'vector',
   xyzTiles: 'raster-tile',
+  vectorTiles: 'raster-tile',
   ogcFeature: 'vector',
   ogcWfs: 'vector',
   ogcWms: 'raster-image',
@@ -206,6 +211,7 @@ export const CONST_GEOVIEW_SCHEMA_BY_TYPE: Record<TypeGeoviewLayerType, string> 
   geoCore: 'TypeGeocoreLayerEntryConfig',
   GeoPackage: 'TypeVectorLayerEntryConfig',
   xyzTiles: 'TypeTileLayerEntryConfig',
+  vectorTiles: 'TypeTileLayerEntryConfig',
   ogcFeature: 'TypeVectorLayerEntryConfig',
   ogcWfs: 'TypeVectorLayerEntryConfig',
   ogcWms: 'TypeOgcWmsLayerEntryConfig',

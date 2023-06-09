@@ -10,6 +10,7 @@ import { TypeBasemapId, TypeBasemapOptions, VALID_BASEMAP_ID } from '../../../ge
 import { geoviewEntryIsWMS } from '../../../geo/layer/geoview-layers/raster/wms';
 import { geoviewEntryIsImageStatic } from '../../../geo/layer/geoview-layers/raster/image-static';
 import { geoviewEntryIsXYZTiles } from '../../../geo/layer/geoview-layers/raster/xyz-tiles';
+import { geoviewEntryIsVectorTiles } from '../../../geo/layer/geoview-layers/raster/vector-tiles';
 import { geoviewEntryIsEsriDynamic } from '../../../geo/layer/geoview-layers/raster/esri-dynamic';
 import { geoviewEntryIsEsriFeature } from '../../../geo/layer/geoview-layers/vector/esri-feature';
 import { geoviewEntryIsWFS } from '../../../geo/layer/geoview-layers/vector/wfs';
@@ -505,8 +506,10 @@ export class ConfigValidation {
         switch (geoviewLayerConfig.geoviewLayerType) {
           case 'GeoJSON':
           case 'xyzTiles':
+          case 'vectorTiles':
           case 'GeoPackage':
           case 'imageStatic':
+            // TODO: Why there is stuff here and not in the other cases?
             this.geoviewLayerIdIsMandatory(geoviewLayerConfig);
             this.processLayerEntryConfig(geoviewLayerConfig, geoviewLayerConfig, geoviewLayerConfig.listOfLayerEntryConfig);
             break;
@@ -605,6 +608,15 @@ export class ConfigValidation {
       } else if (geoviewEntryIsXYZTiles(layerEntryConfig)) {
         /** layerEntryConfig.source.dataAccessPath is mandatory. */
         if (!layerEntryConfig.source.dataAccessPath) {
+          throw new Error(
+            `source.dataAccessPath on layer entry ${Layer.getLayerPath(layerEntryConfig)} is mandatory for GeoView layer ${
+              rootLayerConfig.geoviewLayerId
+            } of type ${rootLayerConfig.geoviewLayerType}`
+          );
+        }
+      } else if (geoviewEntryIsVectorTiles(layerEntryConfig)) {
+        /** layerEntryConfig.source.dataAccessPath is mandatory. */
+        if (!layerEntryConfig.source!.dataAccessPath) {
           throw new Error(
             `source.dataAccessPath on layer entry ${Layer.getLayerPath(layerEntryConfig)} is mandatory for GeoView layer ${
               rootLayerConfig.geoviewLayerId

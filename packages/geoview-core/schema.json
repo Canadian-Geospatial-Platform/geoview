@@ -1022,7 +1022,7 @@
       "type": "object",
       "properties": {
         "schemaTag": {
-          "enum": ["ogcWms", "xyzTiles"]
+          "enum": ["ogcWms", "xyzTiles", "vectorTiles"]
         },
         "entryType": {
           "enum": ["raster-tile"]
@@ -1434,7 +1434,7 @@
     "TypeGeoviewLayerType": {
       "type": "string",
       "items": {
-        "enum": ["esriDynamic", "esriFeature", "GeoJSON", "geoCore", "GeoPackage", "xyzTiles", "ogcFeature", "ogcWfs", "ogcWms"]
+        "enum": ["esriDynamic", "esriFeature", "GeoJSON", "geoCore", "GeoPackage", "xyzTiles", "ogcFeature", "ogcWfs", "ogcWms", "imageStatic", "vectorTiles"]
       },
       "description": "Type of GeoView layer."
     },

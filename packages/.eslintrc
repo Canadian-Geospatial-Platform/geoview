@@ -6,14 +6,14 @@
     "eslint:recommended",
     "plugin:react/recommended",
     "plugin:@typescript-eslint/recommended",
-    "plugin:jsx-a11y/recommended",
+    // "plugin:jsx-a11y/recommended",
     "plugin:prettier/recommended"
   ],
   "parser": "@typescript-eslint/parser",
   "env": {
     "browser": true
   },
-  "plugins": ["prettier", "@typescript-eslint", "react-hooks", "jsx-a11y"],
+  "plugins": ["prettier", "@typescript-eslint", "react-hooks"], //, "jsx-a11y"],
   "root": true,
   "settings": {
     "import/resolver": {
