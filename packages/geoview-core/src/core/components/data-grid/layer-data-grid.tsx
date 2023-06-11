@@ -1,32 +1,10 @@
-import { useState, useEffect } from 'react';
-import { useTranslation } from 'react-i18next';
-import {
-  DataGrid,
-  DataGridProps,
-  gridClasses,
-  GridCellParams,
-  GridCsvExportOptions,
-  GridExportMenuItemProps,
-  frFR,
-  enUS,
-  GridToolbarExportContainer,
-  GridCsvExportMenuItem,
-  GridToolbarContainer,
-  GridToolbarColumnsButton,
-  GridToolbarFilterButton,
-  GridToolbarDensitySelector,
-  GridPrintExportMenuItem,
-  GridPrintExportOptions,
-  useGridApiContext,
-  GridRowId,
-  gridFilteredSortedRowIdsSelector,
-  GridFilterModel,
-} from '@mui/x-data-grid';
+import { useState, useEffect, memo } from 'react';
+import { DataGrid, DataGridProps, gridClasses, GridCellParams, frFR, enUS, GridFilterModel } from '@mui/x-data-grid';
 import { useTheme, Theme } from '@mui/material/styles';
-import Button, { ButtonProps } from '@mui/material/Button';
 import { Extent } from 'ol/extent';
 import { TypeLayerEntryConfig, AbstractGeoViewVector, EsriDynamic, api, TypeDisplayLanguage } from '../../../app';
-import { Tooltip, MenuItem, Switch, ZoomInSearchIcon, IconButton } from '../../../ui';
+import { Tooltip, ZoomInSearchIcon, IconButton } from '../../../ui';
+import MenuDataGrid from './menu-data-grid';
 
 /**
  * Create a data grid (table) component for a lyer features all request
@@ -135,9 +113,8 @@ const sxClasses = {
   },
 };
 
-export function LayerDataGrid(props: CustomDataGridProps) {
+function LayerDataGrid(props: CustomDataGridProps) {
   const { mapId, layerId, rowId, layerKey, displayLanguage, columns, rows } = props;
-  const { t } = useTranslation<string>();
   const theme: Theme & {
     iconImg: React.CSSProperties;
   } = useTheme();
@@ -145,80 +122,9 @@ export function LayerDataGrid(props: CustomDataGridProps) {
   const [filterString, setFilterString] = useState<string>('');
   const [mapFiltered, setMapFiltered] = useState<boolean>(false);
 
-  const csvOptions: GridCsvExportOptions = { delimiter: ';' };
-  const printOptions: GridPrintExportOptions = {};
-
   // set locale from display language
   const locale =
     displayLanguage === 'en' ? enUS.components.MuiDataGrid.defaultProps.localeText : frFR.components.MuiDataGrid.defaultProps.localeText;
-
-  /**
-   * build the JSON file
-   *
-   * @param {GridRowId} gridRowIds the array of the rowId
-   * @return {JSON.stringify} Json gile content
-   *
-   */
-  const getJson = (gridRowIds: GridRowId[]) => {
-    const geoData = gridRowIds.map((gridRowId) => {
-      const { geometry, ...featureInfo } = rows[gridRowId as number];
-      delete featureInfo.featureKey;
-      delete featureInfo.featureIcon;
-      delete featureInfo.featureActions;
-      delete featureInfo.extent;
-      return {
-        type: 'Feature',
-        geometry,
-        properties: featureInfo,
-      };
-    });
-    // Stringify with some indentation
-    return JSON.stringify({ type: 'FeatureCollection', features: geoData }, null, 2);
-  };
-
-  /**
-   * export the blob to a file
-   *
-   * @param {Blob} blob the blob to save to file
-   * @param {string} filename file name
-   *
-   */
-  const exportBlob = (blob: Blob, filename: string) => {
-    // Save the blob in a json file
-    const url = URL.createObjectURL(blob);
-
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = filename;
-    a.click();
-
-    URL.revokeObjectURL(url);
-  };
-
-  /**
-   * the export Json item added in menu
-   *
-   * @param {GridExportMenuItemProps} propsExport hideMenu
-   * @return {MenuItem} export json item in menu
-   *
-   */
-  // TODO: refactor unstable component to be in its own file
-  // eslint-disable-next-line react/no-unstable-nested-components
-  function JsonExportMenuItem(propsExport: GridExportMenuItemProps<object>) {
-    const { hideMenu } = propsExport;
-    const apiRef = useGridApiContext();
-    const onMenuItemClick = () => {
-      const jsonString = getJson(gridFilteredSortedRowIdsSelector(apiRef));
-      const blob = new Blob([jsonString], {
-        type: 'text/json',
-      });
-      exportBlob(blob, `DataGrid_${layerKey.replaceAll('/', '-').replaceAll('.', '-')}.json`);
-      // Hide the export menu after the export
-      hideMenu?.();
-    };
-
-    return <MenuItem onClick={() => onMenuItemClick()}>{t('datagrid.exportJson')}</MenuItem>;
-  }
 
   /**
    * featureinfo data grid Zoom in/out handling
@@ -230,27 +136,6 @@ export function LayerDataGrid(props: CustomDataGridProps) {
   const handleZoomIn = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>, extent: Extent) => {
     api.map(mapId).zoomToExtent(extent);
   };
-
-  /**
-   * Customize the export menu, adding the export json button
-   *
-   * @param {ButtonProps} propsButton pass the props
-   * @return {GridToolbarExportContainer} export menu
-   *
-   */
-  // TODO: refactor unstable component to be in its own file
-  // eslint-disable-next-line react/no-unstable-nested-components
-  function CustomExportButton(propsButton: ButtonProps) {
-    return (
-      // @ts-expect-error its known issue of x-data-grid, where onResize is required and we don't need it.
-      <GridToolbarExportContainer {...propsButton}>
-        <GridCsvExportMenuItem options={csvOptions} />
-        <JsonExportMenuItem />
-        <GridPrintExportMenuItem options={printOptions} />
-      </GridToolbarExportContainer>
-    );
-  }
-
   /**
    * Convert the filter string from the Filter Model
    *
@@ -307,31 +192,6 @@ export function LayerDataGrid(props: CustomDataGridProps) {
     }
   }, [mapFiltered, filterString, mapId, layerId, layerKey]);
 
-  /**
-   * Customize the toolbar, replace the Export button menu with the customized one
-   * @return {GridToolbarContainer} toolbar
-   *
-   */
-  // TODO: refactor unstable component to be in its own file
-  // eslint-disable-next-line react/no-unstable-nested-components
-  function CustomToolbar() {
-    const label = !mapFiltered ? t('datagrid.filterMap') : t('datagrid.stopFilterMap');
-    return (
-      <GridToolbarContainer>
-        {/* @ts-expect-error its known issue of x-data-grid, where onResize is required and we don't need it. */}
-        <GridToolbarColumnsButton />
-        {/* @ts-expect-error its known issue of x-data-grid, where onResize is required and we don't need it. */}
-        <GridToolbarFilterButton />
-        <Button>
-          <Switch size="small" onChange={() => setMapFiltered(!mapFiltered)} title={label} checked={mapFiltered} />
-        </Button>
-        {/* @ts-expect-error its known issue of x-data-grid, where onResize is required and we don't need it. */}
-        <GridToolbarDensitySelector />
-        <CustomExportButton />
-      </GridToolbarContainer>
-    );
-  }
-
   // tooltip implementation for column content
   // TODO: works only with hover and add tooltips even when not needed. need improvement
   columns.forEach((column) => {
@@ -370,8 +230,9 @@ export function LayerDataGrid(props: CustomDataGridProps) {
           disableSelectionOnClick
           rowsPerPageOptions={[50]}
           components={{
-            Toolbar: CustomToolbar,
+            Toolbar: MenuDataGrid,
           }}
+          componentsProps={{ toolbar: { mapFiltered, setMapFiltered, rows, layerKey } }}
           /**
            * logLevel={false} will suppress useResizeContainer warnings if the data grid is rendered in an un-selected tab
            * You may wish to remove this line when working on the data grid
@@ -383,3 +244,5 @@ export function LayerDataGrid(props: CustomDataGridProps) {
     </div>
   );
 }
+
+export default memo(LayerDataGrid);

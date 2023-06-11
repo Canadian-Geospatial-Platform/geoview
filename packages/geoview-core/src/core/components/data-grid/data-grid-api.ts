@@ -14,7 +14,7 @@ import {
   isVectorLayer,
 } from '../../../app';
 
-import { LayerDataGrid } from './layer-data-grid';
+import LayerDataGrid from './layer-data-grid';
 
 export interface TypeLayerDataGridProps {
   layerId: string;
