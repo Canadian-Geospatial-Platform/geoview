@@ -1,6 +1,5 @@
 /* eslint-disable react/require-default-props */
 import { TypeWindow, getLocalizedValue, TypeTabs, AbstractGeoViewVector, TypeListOfLayerEntryConfig } from 'geoview-core';
-import GroupLayers from './group-layers';
 
 interface Props {
   mapId: string;
@@ -86,15 +85,14 @@ export function DataItem({ mapId }: Props): JSX.Element {
         const labelValue = getLocalizedValue(geoviewLayerInstance.geoviewLayerName, mapId);
         const layerKeys = getLayerKeys(geoviewLayerInstance, layerId);
 
+        // TODO: needs refactor here for group layers.
         return {
           value: index,
           label: labelValue !== undefined ? labelValue : `data-${index}`,
-          content: () => {
-            return api.map(mapId).dataGrid.createDataGrid({
+          content: () =>
+            api.map(mapId).dataGrid.createDataGrid({
               layerId,
-              ...(layerKeys.length > 1 && { groupLayers: <GroupLayers layerKeys={layerKeys} layerId={layerId} mapId={mapId} /> }),
-            });
-          },
+            }),
         };
       })}
     />

@@ -18,7 +18,6 @@ import LayerDataGrid from './layer-data-grid';
 
 export interface TypeLayerDataGridProps {
   layerId: string;
-  groupLayers?: ReactElement;
 }
 
 /**
@@ -51,7 +50,7 @@ export class DataGridAPI {
    */
 
   createDataGrid = (layerDataGridProps: TypeLayerDataGridProps): ReactElement => {
-    const { layerId, groupLayers } = layerDataGridProps;
+    const { layerId } = layerDataGridProps;
     const [groupValues, setGroupValues] = useState<{ layerkey: string; layerValues: {}[] }[]>([]);
     const [groupKeys, setGroupKeys] = useState<string[]>([]);
     const { currentProjection } = api.map(this.mapId);
@@ -225,17 +224,8 @@ export class DataGridAPI {
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [layerId]);
 
-    /**
-     * Create array of children that will be rendered by data grid
-     * @returns array of react elements.
-     */
-    const layerDataGridChildren = () => {
-      const list = [];
-      if (groupLayers) {
-        list.push(groupLayers);
-      }
-
-      const table = groupValues.map((groupValue, index) => {
+    return createElement('div', {}, [
+      groupValues.map((groupValue, index) => {
         if (groupValue.layerValues.length > 0) {
           return createElement(
             'div',
@@ -248,12 +238,7 @@ export class DataGridAPI {
           );
         }
         return null;
-      });
-      list.push(table);
-
-      return list;
-    };
-
-    return createElement('div', {}, layerDataGridChildren());
+      }),
+    ]);
   };
 }
