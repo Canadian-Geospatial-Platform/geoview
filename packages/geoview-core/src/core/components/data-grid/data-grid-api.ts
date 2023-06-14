@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/ban-types */
 /* eslint-disable react/no-array-index-key */
-import { createElement, ReactElement, useState, useEffect } from 'react';
+import { createElement, ReactElement, useState, useEffect, FunctionComponent } from 'react';
 // import { useTranslation } from 'react-i18next';
 import { toLonLat } from 'ol/proj';
 import { Extent } from 'ol/extent';
@@ -14,7 +14,7 @@ import {
   isVectorLayer,
 } from '../../../app';
 
-import { LayerDataGrid } from './layer-data-grid';
+import LayerDataGrid from './layer-data-grid';
 
 export interface TypeLayerDataGridProps {
   layerId: string;
@@ -51,7 +51,6 @@ export class DataGridAPI {
 
   createDataGrid = (layerDataGridProps: TypeLayerDataGridProps): ReactElement => {
     const { layerId } = layerDataGridProps;
-    // const { t } = useTranslation<string>();
     const [groupValues, setGroupValues] = useState<{ layerkey: string; layerValues: {}[] }[]>([]);
     const [groupKeys, setGroupKeys] = useState<string[]>([]);
     const { currentProjection } = api.map(this.mapId);
@@ -91,7 +90,6 @@ export class DataGridAPI {
 
     /**
      * Create a data grid rows
-     *
      * @param {TypeArrayOfFeatureInfoEntries} arrayOfFeatureInfoEntries the properties of the data grid to be created
      * @return {TypeJsonArray} the data grid rows
      *
@@ -227,18 +225,6 @@ export class DataGridAPI {
     }, [layerId]);
 
     return createElement('div', {}, [
-      groupKeys.length > 1 &&
-        createElement(
-          'select',
-          {
-            id: `${layerId}-groupLayerSelection`,
-            key: `${layerId}-groupLayerSelection`,
-            style: { fontSize: '1em', margin: '1em', padding: '0.3em' },
-          },
-          groupKeys.map((layerkey) => {
-            return createElement('option', { key: `${layerId}-${layerkey}` }, layerkey);
-          })
-        ),
       groupValues.map((groupValue, index) => {
         if (groupValue.layerValues.length > 0) {
           return createElement(
