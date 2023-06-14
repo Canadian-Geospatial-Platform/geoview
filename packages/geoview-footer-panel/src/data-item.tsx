@@ -1,5 +1,6 @@
 /* eslint-disable react/require-default-props */
-import { TypeWindow, getLocalizedValue, TypeTabs } from 'geoview-core';
+import { TypeWindow, getLocalizedValue, TypeTabs, AbstractGeoViewVector, TypeListOfLayerEntryConfig } from 'geoview-core';
+import GroupLayers from './group-layers';
 
 interface Props {
   mapId: string;
@@ -15,7 +16,9 @@ export function DataItem({ mapId }: Props): JSX.Element {
   const { cgpv } = w;
   const { api, ui, react } = cgpv;
   const { Tabs } = ui.elements;
-
+  const {
+    utilities: { isVectorLayer },
+  } = api;
   const { useState, useEffect } = react;
 
   // eslint-disable-next-line @typescript-eslint/ban-types
@@ -42,18 +45,56 @@ export function DataItem({ mapId }: Props): JSX.Element {
       }
     });
   }, 2000);
+
+  /**
+   * Extract layers keys from layer entry config of geoviewinstance
+   * @param geoviewLayerInstance layer instance which hold all properties of layer rendered on map.
+   * @param layerId id of the layer rendered on the map.
+   * @returns array of layer keys.
+   */
+  const getLayerKeys = (geoviewLayerInstance: AbstractGeoViewVector, layerId: string): string[] => {
+    const groupLayerKeys: string[] = [];
+    if (
+      geoviewLayerInstance.listOfLayerEntryConfig.length > 0 &&
+      (geoviewLayerInstance as AbstractGeoViewVector).getAllFeatureInfo !== undefined
+    ) {
+      const getGroupKeys = (listOfLayerEntryConfig: TypeListOfLayerEntryConfig, parentLayerId: string) => {
+        listOfLayerEntryConfig.forEach((LayerEntryConfig) => {
+          if (
+            LayerEntryConfig.entryType === 'group' &&
+            LayerEntryConfig.listOfLayerEntryConfig !== undefined &&
+            LayerEntryConfig.listOfLayerEntryConfig.length > 1
+          ) {
+            getGroupKeys(LayerEntryConfig.listOfLayerEntryConfig, `${parentLayerId}/${LayerEntryConfig.layerId}`);
+          } else if (LayerEntryConfig.entryType !== 'group') {
+            groupLayerKeys.push(`${parentLayerId}/${LayerEntryConfig.layerId}`);
+          }
+        });
+      };
+      getGroupKeys(geoviewLayerInstance.listOfLayerEntryConfig, layerId);
+    }
+    return isVectorLayer(geoviewLayerInstance) ? groupLayerKeys : [];
+  };
+
   return (
     <Tabs
       tabsProps={{
         variant: 'scrollable',
       }}
       tabs={dataLayers.map((layerId, index): TypeTabs => {
-        const geoviewLayerInstance = api.map(mapId).layer.geoviewLayers[layerId];
+        const geoviewLayerInstance = api.map(mapId).layer.geoviewLayers[layerId] as AbstractGeoViewVector;
         const labelValue = getLocalizedValue(geoviewLayerInstance.geoviewLayerName, mapId);
+        const layerKeys = getLayerKeys(geoviewLayerInstance, layerId);
+
         return {
           value: index,
           label: labelValue !== undefined ? labelValue : `data-${index}`,
-          content: () => api.map(mapId).dataGrid.createDataGrid({ layerId }),
+          content: () => {
+            return api.map(mapId).dataGrid.createDataGrid({
+              layerId,
+              ...(layerKeys.length > 1 && { groupLayers: <GroupLayers layerKeys={layerKeys} layerId={layerId} mapId={mapId} /> }),
+            });
+          },
         };
       })}
     />
