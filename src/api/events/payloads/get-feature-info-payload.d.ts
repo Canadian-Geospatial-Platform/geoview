@@ -35,6 +35,7 @@ export type TypeFeatureInfoEntry = {
     geometry: FeatureLike | null;
     featureIcon: HTMLCanvasElement;
     fieldInfo: Partial<Record<string, TypeFieldEntry>>;
+    nameField: string | null;
 };
 export type TypeArrayOfFeatureInfoEntries = TypeFeatureInfoEntry[];
 export type TypeFeatureInfoResultSets = {
@@ -55,6 +56,7 @@ export declare const payloadIsQueryLayer: (verifyIfPayload: PayloadBaseClass) =>
 export interface TypeQueryLayerPayload extends GetFeatureInfoPayload {
     queryType: TypeQueryType;
     location: Pixel | Coordinate | Coordinate[];
+    isHover: boolean;
 }
 /**
  * type guard function that redefines a PayloadBaseClass as a TypeAllQueriesDonePayload
@@ -65,6 +67,15 @@ export interface TypeQueryLayerPayload extends GetFeatureInfoPayload {
  * @returns {boolean} returns true if the payload is valid
  */
 export declare const payloadIsAllQueriesDone: (verifyIfPayload: PayloadBaseClass) => verifyIfPayload is TypeAllQueriesDonePayload;
+/**
+ * type guard function that redefines a PayloadBaseClass as a TypeHoverQueryDonePayload
+ * if the event attribute of the verifyIfPayload parameter is valid. The type ascention
+ * applies only to the true block of the if clause.
+ *
+ * @param {PayloadBaseClass} verifyIfPayload object to test in order to determine if the type ascention is valid
+ * @returns {boolean} returns true if the payload is valid
+ */
+export declare const payloadIsHoverQueryDone: (verifyIfPayload: PayloadBaseClass) => verifyIfPayload is TypeAllQueriesDonePayload;
 /**
  * Additional attributes needed to define a GetFeatureInfoPayload
  */
@@ -87,6 +98,7 @@ export declare const payloadIsQueryResult: (verifyIfPayload: PayloadBaseClass) =
 export interface TypeQueryResultPayload extends GetFeatureInfoPayload {
     layerPath: string;
     arrayOfRecords: TypeArrayOfFeatureInfoEntries;
+    isHover: boolean;
 }
 /**
  * type guard function that redefines a PayloadBaseClass as a GetFeatureInfoPayload
@@ -117,27 +129,40 @@ export declare class GetFeatureInfoPayload extends PayloadBaseClass {
      * @param {string | null} handlerName the handler Name
      * @param {TypeQueryType} queryType the query type to perform
      * @param {Pixel | Coordinate | Coordinate[]} location the location to query
+     * @param {boolean} isHover the type of query
      *
      * @returns {TypeQueryLayerPayload} the queryLayerPayload object created
      */
-    static createQueryLayerPayload: (handlerName: string, queryType: TypeQueryType, location: Pixel | Coordinate | Coordinate[]) => TypeQueryLayerPayload;
+    static createQueryLayerPayload: (handlerName: string, queryType: TypeQueryType, location: Pixel | Coordinate | Coordinate[], isHover: boolean) => TypeQueryLayerPayload;
     /**
      * Static method used to create an "all queries done" payload.
      *
      * @param {string | null} handlerName the handler Name
      * @param {string} layerSetId the layer set identifier
+     * @param {TypeFeatureInfoResultSets} resultSets the result set for the query
      *
      * @returns {TypeAllQueriesDonePayload} the TypeAllQueriesDonePayload object created
      */
     static createAllQueriesDonePayload: (handlerName: string, layerSetId: string, resultSets: TypeFeatureInfoResultSets) => TypeAllQueriesDonePayload;
+    /**
+     * Static method used to create an "hover query done" payload.
+     *
+     * @param {string | null} handlerName the handler Name
+     * @param {string} layerSetId the layer set identifier
+     * @param {TypeFeatureInfoResultSets} resultSets the result set for the query
+     *
+     * @returns {TypeAllQueriesDonePayload} the TypeAllQueriesDonePayload object created
+     */
+    static createHoverQueryDonePayload: (handlerName: string, layerSetId: string, resultSets: TypeFeatureInfoResultSets) => TypeAllQueriesDonePayload;
     /**
      * Static method used to create a get feature info payload that will return the layer's query result
      *
      * @param {string | null} handlerName the handler Name
      * @param {string} layerPath the layer path
      * @param {TypeArrayOfFeatureInfoEntries} arrayOfRecords the resultset of the get feature info query
+     * @param {boolean} isHover the type of query
      *
      * @returns {TypeQueryResultPayload} the queryResultPayload object created
      */
-    static createQueryResultPayload: (handlerName: string, layerPath: string, arrayOfRecords: TypeArrayOfFeatureInfoEntries) => TypeQueryResultPayload;
+    static createQueryResultPayload: (handlerName: string, layerPath: string, arrayOfRecords: TypeArrayOfFeatureInfoEntries, isHover: boolean) => TypeQueryResultPayload;
 }

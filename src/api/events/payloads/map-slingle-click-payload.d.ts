@@ -6,6 +6,7 @@ export type TypeMapSingleClick = {
     lnglat: Coordinate;
     pixel: Coordinate;
     projected: Coordinate;
+    dragging: boolean;
 };
 /**
  * type guard function that redefines a PayloadBaseClass as a MapSingleClickPayload
