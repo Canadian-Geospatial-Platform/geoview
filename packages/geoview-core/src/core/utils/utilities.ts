@@ -240,7 +240,6 @@ export function addUiComponent(targetDivId: string, component: React.ReactElemen
  */
 export function sanitizeHtmlContent(contentHtml: string) {
   const clean = sanitizeHtml(contentHtml);
-  console.log(clean);
   return clean;
 }
 
@@ -414,4 +413,28 @@ export function getMinOrMaxExtents(extentsA: Extent, extentsB: Extent, minmax = 
       Math.min(extentsA[3], extentsB[3]),
     ];
   return bounds;
+}
+
+/**
+ * Check string to see if it is an image
+ *
+ * @param {string} item item to validate
+ * @returns {boolean} true if it is an image, false otherwise
+ */
+export function isImage(item: string): boolean {
+  return /^https:\/\/.+\.(jpg|jpeg|png|gif|bmp)$/.test(item);
+}
+
+/**
+ * Checks object to see if it can be converted to a string; if not, returns an empty string
+ *
+ * @param {unknown} str
+ * @return {unknown|String} returns the original object if it can be converted to a string; '' otherwise
+ */
+export function stringify(str: unknown): unknown | string {
+  if (typeof str === 'undefined' || str === null) {
+    return '';
+  }
+
+  return str;
 }
