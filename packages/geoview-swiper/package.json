@@ -11,7 +11,7 @@
   "license": "MIT",
   "dependencies": {
     "lodash": "^4.17.21",
-    "ol": "^7.1.0",
+    "ol": "^7.4.0",
     "react-draggable": "^4.4.5",
     "geoview-core": "workspace:~0.1.0"
   },

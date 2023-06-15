@@ -30,6 +30,7 @@ import { ImageStatic, layerConfigIsImageStatic } from './geoview-layers/raster/i
 import { layerConfigIsWFS, WFS } from './geoview-layers/vector/wfs';
 import { layerConfigIsOgcFeature, OgcFeature } from './geoview-layers/vector/ogc-feature';
 import { layerConfigIsXYZTiles, XYZTiles } from './geoview-layers/raster/xyz-tiles';
+import { layerConfigIsVectorTiles, VectorTiles } from './geoview-layers/raster/vector-tiles';
 import { LayerSetPayload } from '../../api/events/payloads/layer-set-payload';
 
 /**
@@ -144,6 +145,11 @@ export class Layer {
             const xyzTiles = new XYZTiles(this.mapId, layerConfig);
             xyzTiles.createGeoViewLayers().then(() => {
               this.addToMap(xyzTiles);
+            });
+          } else if (layerConfigIsVectorTiles(layerConfig)) {
+            const vectorTiles = new VectorTiles(this.mapId, layerConfig);
+            vectorTiles.createGeoViewLayers().then(() => {
+              this.addToMap(vectorTiles);
             });
           }
         }

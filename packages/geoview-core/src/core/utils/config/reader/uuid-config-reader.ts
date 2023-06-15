@@ -8,6 +8,7 @@ import {
   TypeListOfGeoviewLayerConfig,
   TypeOfServer,
   TypeOgcWmsLayerEntryConfig,
+  TypeTileGrid,
 } from '../../../../geo/map/map-schema-types';
 import { CONST_LAYER_TYPES } from '../../../../geo/layer/geoview-layers/abstract-geoview-layers';
 import { TypeEsriDynamicLayerConfig } from '../../../../geo/layer/geoview-layers/raster/esri-dynamic';
@@ -19,6 +20,7 @@ import { TypeOgcFeatureLayerConfig, TypeOgcFeatureLayerEntryConfig } from '../..
 import { TypeGeoJSONLayerConfig, TypeGeoJSONLayerEntryConfig } from '../../../../geo/layer/geoview-layers/vector/geojson';
 import { TypeGeoPackageLayerConfig, TypeGeoPackageLayerEntryConfig } from '../../../../geo/layer/geoview-layers/vector/geopackage';
 import { TypeXYZTilesConfig, TypeXYZTilesLayerEntryConfig } from '../../../../geo/layer/geoview-layers/raster/xyz-tiles';
+import { TypeVectorTilesConfig, TypeVectorTilesLayerEntryConfig } from '../../../../geo/layer/geoview-layers/raster/vector-tiles';
 import { api } from '../../../../app';
 import { EVENT_NAMES } from '../../../../api/events/event-types';
 import { snackbarMessagePayload } from '../../../../api/events/payloads/snackbar-message-payload';
@@ -284,6 +286,35 @@ export class UUIDmapConfigReader {
                     },
                   };
                   return xyzTilesLayerEntryConfig;
+                }),
+              };
+              listOfGeoviewLayerConfig.push(layerConfig);
+            } else if (layerType === CONST_LAYER_TYPES.VECTOR_TILES) {
+              const layerConfig: TypeVectorTilesConfig = {
+                geoviewLayerId: `${id}`,
+                geoviewLayerName: {
+                  en: name as string,
+                  fr: name as string,
+                },
+                metadataAccessPath: {
+                  en: url as string,
+                  fr: url as string,
+                },
+                geoviewLayerType: 'vectorTiles',
+                listOfLayerEntryConfig: (layerEntries as TypeJsonArray).map((item): TypeVectorTilesLayerEntryConfig => {
+                  const vectorTilesLayerEntryConfig: TypeVectorTilesLayerEntryConfig = {
+                    schemaTag: 'vectorTiles',
+                    entryType: 'raster-tile',
+                    layerId: `${item.id}`,
+                    tileGrid: item.tileGrid as unknown as TypeTileGrid,
+                    source: {
+                      dataAccessPath: {
+                        en: url as string,
+                        fr: url as string,
+                      },
+                    },
+                  };
+                  return vectorTilesLayerEntryConfig;
                 }),
               };
               listOfGeoviewLayerConfig.push(layerConfig);
