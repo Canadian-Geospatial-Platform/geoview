@@ -49,6 +49,9 @@
     "toggle_opacity": "Basculer le Opacité",
     "zoom_to": "Zoom sur la Couche"
   },
+  "details": {
+    "zoom_to": "Zoom à l'élément"
+  },
   "datagrid": {
     "exportJson": "Télécharger GeoJSON",
     "filterMap": "Filtrer la carte",
