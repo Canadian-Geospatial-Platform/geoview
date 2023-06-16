@@ -822,7 +822,7 @@ export abstract class AbstractGeoViewLayer {
    * @param {TypeLayerEntryConfig | TypeGeoviewLayerConfig} layerEntryConfig The layer configuration.
    * @returns {LayerGroup} A new layer group.
    */
-  private createLayerGroup(layerEntryConfig: TypeLayerEntryConfig | TypeGeoviewLayerConfig): LayerGroup {
+  createLayerGroup(layerEntryConfig: TypeLayerEntryConfig | TypeGeoviewLayerConfig): LayerGroup {
     const layerGroupOptions: LayerGroupOptions = {
       layers: new Collection(),
       properties: { layerEntryConfig },

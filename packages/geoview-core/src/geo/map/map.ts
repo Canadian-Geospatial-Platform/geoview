@@ -415,7 +415,7 @@ export class MapViewer {
    */
   mapReady = (): void => {
     const layerInterval = setInterval(() => {
-      if (this.remainingLayersThatNeedToBeLoaded === 0) {
+      if (this.remainingLayersThatNeedToBeLoaded === 0 && this.layer?.geoviewLayers) {
         const { geoviewLayers } = this.layer;
         let allGeoviewLayerReady =
           this.mapFeaturesConfig.map.listOfGeoviewLayerConfig?.length === 0 || Object.keys(geoviewLayers).length !== 0;
