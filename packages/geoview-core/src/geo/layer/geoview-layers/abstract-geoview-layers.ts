@@ -522,7 +522,6 @@ export abstract class AbstractGeoViewLayer {
           }
           this.processOneLayerEntry(listOfLayerEntryConfig[0] as TypeBaseLayerEntryConfig).then((baseLayer) => {
             if (baseLayer) {
-              baseLayer.setVisible(true);
               this.registerToLayerSets(listOfLayerEntryConfig[0] as TypeBaseLayerEntryConfig);
               if (layerGroup) {
                 layerGroup.getLayers().push(baseLayer);
@@ -822,7 +821,7 @@ export abstract class AbstractGeoViewLayer {
    * @param {TypeLayerEntryConfig | TypeGeoviewLayerConfig} layerEntryConfig The layer configuration.
    * @returns {LayerGroup} A new layer group.
    */
-  private createLayerGroup(layerEntryConfig: TypeLayerEntryConfig | TypeGeoviewLayerConfig): LayerGroup {
+  createLayerGroup(layerEntryConfig: TypeLayerEntryConfig | TypeGeoviewLayerConfig): LayerGroup {
     const layerGroupOptions: LayerGroupOptions = {
       layers: new Collection(),
       properties: { layerEntryConfig },
