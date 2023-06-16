@@ -5,11 +5,14 @@ import { WKB as FormatWKB } from 'ol/format';
 import { ReadOptions } from 'ol/format/Feature';
 import { Vector as VectorSource } from 'ol/source';
 import { Geometry } from 'ol/geom';
+import BaseLayer from 'ol/layer/Base';
+import LayerGroup from 'ol/layer/Group';
+import { Feature } from 'ol';
 
 import initSqlJs from 'sql.js';
 
-import { Feature } from 'ol';
-import { toJsonObject, TypeJsonObject } from '../../../../core/types/global-types';
+import { cloneDeep } from 'lodash';
+import { TypeJsonObject } from '../../../../core/types/global-types';
 import { AbstractGeoViewLayer, CONST_LAYER_TYPES } from '../abstract-geoview-layers';
 import { AbstractGeoViewVector } from './abstract-geoview-vector';
 import {
@@ -20,9 +23,11 @@ import {
   TypeListOfLayerEntryConfig,
   layerEntryIsGroupLayer,
   TypeBaseLayerEntryConfig,
+  TypeBaseSourceVectorInitialConfig,
+  TypeLayerGroupEntryConfig,
 } from '../../../map/map-schema-types';
 
-import { getLocalizedValue, getXMLHttpRequest } from '../../../../core/utils/utilities';
+import { getLocalizedValue } from '../../../../core/utils/utilities';
 
 import { api } from '../../../../app';
 import { Layer } from '../../layer';
@@ -38,6 +43,16 @@ export interface TypeGeoPackageLayerEntryConfig extends Omit<TypeVectorLayerEntr
 export interface TypeGeoPackageLayerConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig' | 'geoviewLayerType'> {
   geoviewLayerType: 'GeoPackage';
   listOfLayerEntryConfig: TypeGeoPackageLayerEntryConfig[];
+}
+
+interface sldsInterface {
+  [key: string | number]: string | number | Uint8Array;
+}
+
+interface layerData {
+  name: string;
+  source: VectorSource<Geometry>;
+  properties: initSqlJs.ParamsObject | undefined;
 }
 
 /** *****************************************************************************************************************************
@@ -110,19 +125,7 @@ export class GeoPackage extends AbstractGeoViewVector {
    */
   protected getServiceMetadata(): Promise<void> {
     const promisedExecution = new Promise<void>((resolve) => {
-      const metadataUrl = getLocalizedValue(this.metadataAccessPath, this.mapId);
-      if (metadataUrl) {
-        getXMLHttpRequest(`${metadataUrl}?f=json`).then((metadataString) => {
-          if (metadataString === '{}')
-            throw new Error(`Cant't read service metadata for GeoView layer ${this.geoviewLayerId} of map ${this.mapId}.`);
-          else {
-            this.metadata = toJsonObject(JSON.parse(metadataString));
-            const { copyrightText } = this.metadata;
-            if (copyrightText) this.attributions.push(copyrightText as string);
-            resolve();
-          }
-        });
-      } else resolve();
+      resolve();
     });
     return promisedExecution;
   }
@@ -220,41 +223,106 @@ export class GeoPackage extends AbstractGeoViewVector {
   }
 
   /** ***************************************************************************************************************************
+   * Process recursively the list of layer Entries to create the layers and the layer groups.
+   *
+   * @param {TypeListOfLayerEntryConfig} listOfLayerEntryConfig The list of layer entries to process.
+   * @param {LayerGroup} layerGroup Optional layer group to use when we have many layers. The very first call to
+   *  processListOfLayerEntryConfig must not provide a value for this parameter. It is defined for internal use.
+   *
+   * @returns {Promise<BaseLayer | null>} The promise that the layers were processed.
+   */
+  protected processListOfLayerEntryConfig(
+    listOfLayerEntryConfig: TypeListOfLayerEntryConfig,
+    layerGroup?: LayerGroup
+  ): Promise<BaseLayer | null> {
+    const promisedListOfLayerEntryProcessed = new Promise<BaseLayer | null>((resolve) => {
+      // Single group layer handled recursively
+      if (listOfLayerEntryConfig.length === 1 && layerEntryIsGroupLayer(listOfLayerEntryConfig[0])) {
+        const newLayerGroup = this.createLayerGroup(listOfLayerEntryConfig[0]);
+
+        this.processListOfLayerEntryConfig(listOfLayerEntryConfig[0].listOfLayerEntryConfig!, newLayerGroup).then((groupReturned) => {
+          if (groupReturned) {
+            if (layerGroup) layerGroup.getLayers().push(groupReturned);
+            resolve(groupReturned);
+          } else {
+            this.layerLoadError.push({
+              layer: Layer.getLayerPath(listOfLayerEntryConfig[0]),
+              consoleMessage: `Unable to create group layer ${Layer.getLayerPath(listOfLayerEntryConfig[0])} on map ${this.mapId}`,
+            });
+            resolve(null);
+          }
+        });
+        // Multiple layer configs are processed individually and added to layer group
+      } else if (listOfLayerEntryConfig.length > 1) {
+        const promiseOfLayerCreated: Promise<BaseLayer | LayerGroup | null>[] = [];
+        if (!layerGroup) layerGroup = this.createLayerGroup(listOfLayerEntryConfig[0].parentLayerConfig as TypeLayerEntryConfig);
+
+        listOfLayerEntryConfig.forEach((layerEntryConfig) => {
+          if (layerEntryIsGroupLayer(layerEntryConfig)) {
+            const newLayerGroup = this.createLayerGroup(layerEntryConfig);
+            promiseOfLayerCreated.push(this.processListOfLayerEntryConfig(layerEntryConfig.listOfLayerEntryConfig!, newLayerGroup));
+          } else {
+            this.processOneGeopackage(layerEntryConfig as TypeBaseLayerEntryConfig).then((layers) => {
+              if (layers) {
+                layerGroup!.getLayers().push(layers);
+              } else {
+                this.layerLoadError.push({
+                  layer: Layer.getLayerPath(listOfLayerEntryConfig[0]),
+                  consoleMessage: `Unable to create group layer ${Layer.getLayerPath(layerEntryConfig)} on map ${this.mapId}`,
+                });
+              }
+            });
+          }
+        });
+        if (layerGroup) resolve(layerGroup);
+        // Single non-group config
+      } else {
+        this.processOneGeopackage(listOfLayerEntryConfig[0] as TypeBaseLayerEntryConfig, layerGroup).then((layers) => {
+          if (layers) {
+            resolve(layers);
+          } else {
+            this.layerLoadError.push({
+              layer: Layer.getLayerPath(listOfLayerEntryConfig[0]),
+              consoleMessage: `Unable to create group layer ${Layer.getLayerPath(listOfLayerEntryConfig[0])} on map ${this.mapId}`,
+            });
+          }
+        });
+      }
+    });
+
+    return promisedListOfLayerEntryProcessed;
+  }
+
+  /** ***************************************************************************************************************************
    * Create a source configuration for the vector layer.
    *
    * @param {TypeBaseLayerEntryConfig} layerEntryConfig The layer entry configuration.
    * @param {SourceOptions} sourceOptions The source options (default: {}).
    * @param {ReadOptions} readOptions The read options (default: {}).
-   *
-   * @returns {VectorSource<Geometry>} The source configuration that will be used to create the vector layer.
    */
-  protected createVectorSource(
+  protected extractGeopackageData(
     layerEntryConfig: TypeBaseLayerEntryConfig,
     sourceOptions: SourceOptions = {},
     readOptions: ReadOptions = {}
-  ): VectorSource<Geometry> {
-    sourceOptions.url = getLocalizedValue(layerEntryConfig.source!.dataAccessPath!, this.mapId);
-    var vectorSource: VectorSource<Geometry>;
-    if (this.attributions.length !== 0) sourceOptions.attributions = this.attributions;
+  ): Promise<[layerData[], sldsInterface]> {
+    const promisedGeopackageData = new Promise<[layerData[], sldsInterface]>((resolve) => {
+      const url = getLocalizedValue(layerEntryConfig.source!.dataAccessPath!, this.mapId);
+      if (this.attributions.length !== 0) sourceOptions.attributions = this.attributions;
+      const layersInfo: layerData[] = [];
+      const styleSlds: sldsInterface = {};
 
-    sourceOptions.loader = (extent, resolution, projection, success, failure) => {
-      const url = vectorSource.getUrl();
       const xhr = new XMLHttpRequest();
       xhr.responseType = 'arraybuffer';
+
       initSqlJs({
         locateFile: (file) => `https://sql.js.org/dist/${file}`,
       }).then((SQL) => {
         xhr.open('GET', url as string);
-        const onError = () => {
-          vectorSource.removeLoadedExtent(extent);
-          if (failure) failure();
-        };
-        xhr.onerror = onError;
         xhr.onload = () => {
           if (xhr.status === 200) {
-            const res = xhr.response as ArrayBuffer;
-            const db = new SQL.Database(new Uint8Array(res));
-            var featureTableNames = [];
+            const db = new SQL.Database(new Uint8Array(xhr.response as ArrayBuffer));
+            var tables = [];
+
             let stmt = db.prepare(`
             SELECT gpkg_contents.table_name, gpkg_contents.srs_id,
                 gpkg_geometry_columns.column_name
@@ -262,55 +330,192 @@ export class GeoPackage extends AbstractGeoViewVector {
             WHERE gpkg_contents.data_type='features' AND
                 gpkg_contents.table_name=gpkg_geometry_columns.table_name;
                 `);
+
             while (stmt.step()) {
               const row = stmt.get();
-              featureTableNames.push({
+              tables.push({
                 table_name: row[0],
                 srs_id: row[1]?.toString(),
                 geometry_column_name: row[2],
               });
             }
 
-            var format = new FormatWKB();
-            const table = featureTableNames[0];
-            const tableName = table.table_name;
-            const tableDataProjection = `EPSG:${table.srs_id}`;
-            stmt = db.prepare(`SELECT * FROM '${tableName}'`);
-            const columnName = table.geometry_column_name as string;
-            const features: Feature<Geometry>[] = [];
-            let properties;
+            // Extract styles
+            stmt = db.prepare(`
+            SELECT gpkg_contents.table_name
+            FROM gpkg_contents
+            WHERE gpkg_contents.table_name='layer_styles'
+            `);
 
-            while (stmt.step()) {
-              properties = stmt.getAsObject();
-              const geomProp = properties[columnName] as Uint8Array;
-              delete properties[columnName];
-              const feature = this.parseGpkgGeom(geomProp);
-              const formattedFeature = format.readFeatures(feature, {
-                ...readOptions,
-                dataProjection: tableDataProjection,
-                featureProjection: projection,
-                extent,
+            if (stmt.step()) {
+              stmt = db.prepare('SELECT f_table_name, styleSLD FROM layer_styles');
+              while (stmt.step()) {
+                const row = stmt.get();
+                if (row[1]) [, styleSlds[row[0] as string]] = row;
+              }
+            }
+
+            var format = new FormatWKB();
+
+            // Turn each table's geometries into a vector source
+            for (let i = 0; i < tables.length; i++) {
+              const vectorSource = new VectorSource(sourceOptions);
+              const table = tables[i];
+              const tableName = table.table_name;
+              const tableDataProjection = `EPSG:${table.srs_id}`;
+              const columnName = table.geometry_column_name as string;
+              const features: Feature<Geometry>[] = [];
+              let properties;
+
+              stmt = db.prepare(`SELECT * FROM '${tableName}'`);
+              while (stmt.step()) {
+                properties = stmt.getAsObject();
+                const geomProp = properties[columnName] as Uint8Array;
+                delete properties[columnName];
+                const feature = this.parseGpkgGeom(geomProp);
+                const formattedFeature = format.readFeatures(feature, {
+                  ...readOptions,
+                  dataProjection: tableDataProjection,
+                  featureProjection: `EPSG:${api.map(this.mapId).currentProjection}`,
+                });
+                formattedFeature[0].setProperties(properties);
+                features.push(formattedFeature[0]);
+              }
+
+              vectorSource.addFeatures(features);
+              layersInfo.push({
+                name: tableName as string,
+                source: vectorSource,
+                properties,
               });
-              formattedFeature[0].setProperties(properties);
-              features.push(formattedFeature[0]);
             }
 
             db.close();
-            vectorSource.addFeatures(features);
-
-            this.processFeatureInfoConfig(properties as TypeJsonObject, layerEntryConfig as TypeVectorLayerEntryConfig);
-
-            if (success) success(features);
-          } else {
-            onError();
+            resolve([layersInfo, styleSlds]);
           }
         };
         xhr.send();
       });
-    };
-    vectorSource = new VectorSource(sourceOptions);
+    });
 
-    return vectorSource;
+    return promisedGeopackageData;
+  }
+
+  /** ***************************************************************************************************************************
+   * This method creates a GeoView layer using the definition provided in the layerEntryConfig parameter.
+   *
+   * @param {TypeLayerEntryConfig} layerEntryConfig Information needed to create the GeoView layer.
+   *
+   * @returns {Promise<BaseLayer | null>} The GeoView base layer that has been created.
+   */
+  protected processOneGeopackageLayer(layerEntryConfig: TypeBaseLayerEntryConfig, layerInfo: layerData): Promise<BaseLayer | null> {
+    const promisedVectorLayer = new Promise<BaseLayer | null>((resolve) => {
+      const { source } = layerInfo;
+
+      if (layerInfo.properties) {
+        const { properties } = layerInfo;
+        this.processFeatureInfoConfig(properties as TypeJsonObject, layerEntryConfig as TypeVectorLayerEntryConfig);
+      }
+      const vectorLayer = this.createVectorLayer(layerEntryConfig as TypeVectorLayerEntryConfig, source);
+      resolve(vectorLayer);
+    });
+
+    return promisedVectorLayer;
+  }
+
+  /** ***************************************************************************************************************************
+   * This method creates all layers from a single geopackage
+   *
+   * @param {TypeLayerEntryConfig} layerEntryConfig Information needed to create the GeoView layer.
+   * @param {LayerGroup} layerGroup Optional layer group for multiple layers.
+   *
+   * @returns {Promise<BaseLayer | null>} The GeoView base layer that has been created.
+   */
+  protected processOneGeopackage(layerEntryConfig: TypeBaseLayerEntryConfig, layerGroup?: LayerGroup): Promise<BaseLayer | null> {
+    const promisedLayers = new Promise<BaseLayer | LayerGroup | null>((resolve) => {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      this.extractGeopackageData(layerEntryConfig).then(([layers, slds]) => {
+        if (layers.length === 1) {
+          if ((layerEntryConfig.source as TypeBaseSourceVectorInitialConfig)?.cluster?.enable) {
+            const unclusteredLayerConfig = cloneDeep(layerEntryConfig) as TypeVectorLayerEntryConfig;
+            unclusteredLayerConfig.layerId = `${layerEntryConfig.layerId}-unclustered`;
+            unclusteredLayerConfig.source!.cluster!.enable = false;
+
+            this.processOneGeopackageLayer(unclusteredLayerConfig as TypeBaseLayerEntryConfig, layers[0]).then((baseLayer) => {
+              if (baseLayer) {
+                baseLayer.setVisible(false);
+                api.maps[this.mapId].layer.registerLayerConfig(unclusteredLayerConfig);
+                this.registerToLayerSets(unclusteredLayerConfig as TypeBaseLayerEntryConfig);
+                if (!layerGroup) layerGroup = this.createLayerGroup(unclusteredLayerConfig.parentLayerConfig as TypeLayerEntryConfig);
+                layerGroup.getLayers().push(baseLayer);
+              }
+            });
+
+            (layerEntryConfig.source as TypeBaseSourceVectorInitialConfig)!.cluster!.settings =
+              unclusteredLayerConfig.source!.cluster!.settings;
+          }
+
+          this.processOneGeopackageLayer(layerEntryConfig, layers[0]).then((baseLayer) => {
+            if (baseLayer) {
+              if (layerGroup) {
+                layerGroup.getLayers().push(baseLayer);
+                resolve(layerGroup);
+              } else resolve(baseLayer);
+            } else {
+              this.layerLoadError.push({
+                layer: Layer.getLayerPath(layerEntryConfig),
+                consoleMessage: `Unable to create layer ${Layer.getLayerPath(layerEntryConfig)} on map ${this.mapId}`,
+              });
+              resolve(null);
+            }
+          });
+        } else {
+          layerEntryConfig.entryType = 'group';
+          (layerEntryConfig as TypeLayerEntryConfig).listOfLayerEntryConfig = [];
+          const newLayerGroup = this.createLayerGroup(layerEntryConfig);
+          for (let i = 0; i < layers.length; i++) {
+            const newLayerEntryConfig = cloneDeep(layerEntryConfig) as TypeBaseLayerEntryConfig;
+            newLayerEntryConfig.layerId = layers[i].name;
+            newLayerEntryConfig.layerName = { en: layers[i].name, fr: layers[i].name };
+            newLayerEntryConfig.parentLayerConfig = layerEntryConfig as unknown as TypeLayerGroupEntryConfig;
+            if ((newLayerEntryConfig.source as TypeBaseSourceVectorInitialConfig)?.cluster?.enable) {
+              const unclusteredLayerConfig = cloneDeep(newLayerEntryConfig) as TypeVectorLayerEntryConfig;
+              unclusteredLayerConfig.layerId = `${layerEntryConfig.layerId}-unclustered`;
+              unclusteredLayerConfig.source!.cluster!.enable = false;
+
+              this.processOneGeopackageLayer(unclusteredLayerConfig as TypeBaseLayerEntryConfig, layers[0]).then((baseLayer) => {
+                if (baseLayer) {
+                  baseLayer.setVisible(false);
+                  api.maps[this.mapId].layer.registerLayerConfig(unclusteredLayerConfig);
+                  this.registerToLayerSets(unclusteredLayerConfig as TypeBaseLayerEntryConfig);
+                  newLayerGroup.getLayers().push(baseLayer);
+                }
+              });
+
+              (newLayerEntryConfig.source as TypeBaseSourceVectorInitialConfig)!.cluster!.settings =
+                unclusteredLayerConfig.source!.cluster!.settings;
+            }
+
+            this.processOneGeopackageLayer(newLayerEntryConfig, layers[i]).then((baseLayer) => {
+              if (baseLayer) {
+                (layerEntryConfig as unknown as TypeLayerGroupEntryConfig).listOfLayerEntryConfig!.push(newLayerEntryConfig);
+                newLayerGroup.getLayers().push(baseLayer);
+                api.maps[this.mapId].layer.registerLayerConfig(newLayerEntryConfig as TypeBaseLayerEntryConfig);
+              } else {
+                this.layerLoadError.push({
+                  layer: Layer.getLayerPath(layerEntryConfig),
+                  consoleMessage: `Unable to create layer ${Layer.getLayerPath(layerEntryConfig)} on map ${this.mapId}`,
+                });
+                resolve(null);
+              }
+            });
+          }
+          resolve(newLayerGroup);
+        }
+      });
+    });
+    this.registerToLayerSets(layerEntryConfig);
+    return promisedLayers;
   }
 
   /** ***************************************************************************************************************************
@@ -334,6 +539,7 @@ export class GeoPackage extends AbstractGeoViewVector {
       if (processAliasFields) layerEntryConfig.source.featureInfo.aliasFields = { en: '' };
 
       Object.keys(fields).forEach((fieldEntry) => {
+        if (!fields[fieldEntry]) return;
         if (fields[fieldEntry].type === 'Geometry') return;
         if (processOutField) {
           layerEntryConfig.source!.featureInfo!.outfields!.en = `${layerEntryConfig.source!.featureInfo!.outfields!.en}${fieldEntry},`;

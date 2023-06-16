@@ -119,7 +119,66 @@
     <button type="button" class="collapsible">Get Feature Info</button>
     <pre style="height: 20pc; overflow-y: scroll" id="ResultSetId1" class="panel">Click on feature on the map</pre>
     <hr />
-    <p>This map has a wms layer added from configuration.</p>
+
+    <div class="map-title-holder">
+      <h4 id="HLYR2">2. Multiple GeoPackage Layers - one with multiple layers</h4>
+      <a class="ref-link" href="#top">Top</a>
+    </div>
+    <hr />
+    <div
+      id="LYR2"
+      class="llwp-map"
+      triggerReadyCallback="true"
+      data-lang="en"
+      data-config="{
+        'map': {
+          'interaction': 'dynamic',
+          'viewSettings': {
+            'zoom': 10,
+            'center': [-2.4, 51.25],
+            'projection': 3857
+          },
+          'basemapOptions': {
+            'basemapId': 'osm',
+            'shaded': false,
+            'labeled': true
+          },
+          'listOfGeoviewLayerConfig': [
+            {
+              'geoviewLayerId': 'GeoPackageLYR1',
+              'geoviewLayerName': {
+                'en': 'Rivers and Canals'
+              },
+              'geoviewLayerType': 'GeoPackage',
+              'listOfLayerEntryConfig': [
+                {
+                  'layerId': 'QGIS Packaged Layers (D+S Canal).gpkg',
+                  'layerName': { 'en': 'D+S Canal' },
+                  'source': {
+                    'dataAccessPath': {
+                      'en': './geojson'
+                    }
+                  }
+                },
+                {
+                  'layerId': 'rivers.gpkg',
+                  'layerName': { 'en': 'Rivers' },
+                  'source': {
+                    'dataAccessPath': {
+                      'en': './geojson'
+                    }
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        'components': ['overview-map', 'nav-bar', 'footer-bar'],
+        'corePackages': ['footer-panel'],
+        'theme': 'dark',
+        'suportedLanguages': ['en']
+      }"
+    ></div>
     <button type="button" class="collapsible">Configuration Snippet</button>
     <pre id="LYR1CS" class="panel"></pre>
     <hr />
