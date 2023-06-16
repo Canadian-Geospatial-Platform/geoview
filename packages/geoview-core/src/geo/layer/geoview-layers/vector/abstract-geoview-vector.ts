@@ -180,7 +180,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
    *
    * @returns {VectorLayer<VectorSource>} The vector layer created.
    */
-  private createVectorLayer(layerEntryConfig: TypeVectorLayerEntryConfig, vectorSource: VectorSource<Geometry>): VectorLayer<VectorSource> {
+  createVectorLayer(layerEntryConfig: TypeVectorLayerEntryConfig, vectorSource: VectorSource<Geometry>): VectorLayer<VectorSource> {
     let configSource: TypeBaseSourceVectorInitialConfig = {};
     if (layerEntryConfig.source !== undefined) {
       configSource = layerEntryConfig.source as TypeBaseSourceVectorInitialConfig;

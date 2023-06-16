@@ -76,12 +76,12 @@
         'map': {
           'interaction': 'dynamic',
           'viewSettings': {
-            'zoom': 4,
-            'center': [-100, 60],
+            'zoom': 10,
+            'center': [-2.4, 51.25],
             'projection': 3857
           },
           'basemapOptions': {
-            'basemapId': 'transport',
+            'basemapId': 'osm',
             'shaded': false,
             'labeled': true
           },
@@ -89,10 +89,19 @@
             {
               'geoviewLayerId': 'GeoPackageLYR1',
               'geoviewLayerName': {
-                'en': 'Rivers'
+                'en': 'Rivers and Canals'
               },
               'geoviewLayerType': 'GeoPackage',
               'listOfLayerEntryConfig': [
+                {
+                  'layerId': 'QGIS Packaged Layers (D+S Canal).gpkg',
+                  'layerName': { 'en': 'D+S Canal' },
+                  'source': {
+                    'dataAccessPath': {
+                      'en': './geojson'
+                    }
+                  }
+                },
                 {
                   'layerId': 'rivers.gpkg',
                   'layerName': { 'en': 'Rivers' },
@@ -107,7 +116,7 @@
           ]
         },
         'components': ['overview-map', 'nav-bar', 'footer-bar'],
-        'corePackages': [],
+        'corePackages': ['footer-panel'],
         'theme': 'dark',
         'suportedLanguages': ['en']
       }"
