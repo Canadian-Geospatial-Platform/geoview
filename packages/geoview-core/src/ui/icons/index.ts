@@ -27,7 +27,7 @@ import ListAlt from '@mui/icons-material/ListAlt';
 import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
 import MoreVert from '@mui/icons-material/MoreVert';
-import { ArrowDropDown, ArrowRight } from '@mui/icons-material';
+import { ArrowDropDown, ArrowRight, ArrowLeft } from '@mui/icons-material';
 import DragHandle from '@mui/icons-material/DragHandle';
 import Opacity from '@mui/icons-material/Opacity';
 import Menu from '@mui/icons-material/Menu';
@@ -73,6 +73,7 @@ export {
   VisibilityOff as VisibilityOffIcon,
   MoreVert as MoreVertIcon,
   ArrowRight as ArrowRightIcon,
+  ArrowLeft as ArrowLeftIcon,
   ArrowDropDown as ArrowDownIcon,
   DragHandle as HandleIcon,
   Opacity as OpacityIcon,

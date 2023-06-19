@@ -5,7 +5,8 @@
       "type": "Feature",
       "properties": {
         "Province": "Ontario",
-        "creationDate": "14/02/2020T19:00:00-05:00"
+        "creationDate": "14/02/2020T19:00:00-05:00",
+        "myImages": "https://cdn.photoswipe.com/photoswipe-demo-images/photos/1/img-2500.jpg;https://cdn.photoswipe.com/photoswipe-demo-images/photos/2/img-2500.jpg;https://cdn.photoswipe.com/photoswipe-demo-images/photos/3/img-2500.jpg"
        },
       "geometry": {
         "type": "Polygon",
@@ -24,7 +25,8 @@
       "type": "Feature",
       "properties": {
         "Province": "Ontario",
-        "creationDate": "23/05/2020T12:00:00-05:00"
+        "creationDate": "23/05/2020T12:00:00-05:00",
+        "myImages": "https://cdn.photoswipe.com/photoswipe-demo-images/photos/1/img-2500.jpg;https://cdn.photoswipe.com/photoswipe-demo-images/photos/2/img-2500.jpg;https://cdn.photoswipe.com/photoswipe-demo-images/photos/3/img-2500.jpg"
       },
       "geometry": {
         "type": "Polygon",

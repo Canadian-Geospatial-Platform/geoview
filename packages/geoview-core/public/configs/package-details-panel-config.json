@@ -13,6 +13,22 @@
     },
     "listOfGeoviewLayerConfig": [
       {
+        "geoviewLayerId": "historical-flood",
+        "serviceDateFormat": "yyyy/mm/ddThh:mm:ssz",
+        "geoviewLayerName": {
+          "en": "Historical Flood Events (HFE)"
+        },
+        "metadataAccessPath": {
+          "en": "https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/historical_flood_event_en/MapServer"
+        },
+        "geoviewLayerType": "esriFeature",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "0"
+          }
+        ]
+      },
+      {
         "geoviewLayerId": "esriFeatureLYR4",
         "geoviewLayerName": { "en": "Water quality at monitoring sites" },
         "metadataAccessPath": {

@@ -8,9 +8,9 @@
         "featureInfo": {
           "queryable": "true",
           "nameField": { "en": "Province", "fr": "Province" },
-          "outfields": { "en": "Province,creationDate", "fr": "Province,creationDate" },
+          "outfields": { "en": "Province,creationDate,myImages", "fr": "Province,creationDate,myImages" },
           "fieldTypes": "string,date",
-          "aliasFields": { "en": "Province,Creation Date", "fr": "Province,Date de création" }
+          "aliasFields": { "en": "Province,Creation Date,My Images", "fr": "Province,Date de création,Mes images" }
         }
       },
       "initialSettings": {
