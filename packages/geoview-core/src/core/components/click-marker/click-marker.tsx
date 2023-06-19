@@ -90,8 +90,10 @@ export function ClickMarker(): JSX.Element {
    * Set animation for points
    * @param {number} radius max radius of circle to draw
    * @param {Feature<Point>} pointFeature the feature to animate
+   *
+   * @returns {NodeJS.Timer} The interval timer.
    */
-  function pointInterval(radius: number, pointFeature: Feature<Point>): NodeJS.Timeout {
+  function pointInterval(radius: number, pointFeature: Feature<Point>): NodeJS.Timer {
     let animationRadius = radius;
     const pointIntervalId = setInterval(() => {
       const radStyle = new Style({
@@ -108,6 +110,27 @@ export function ClickMarker(): JSX.Element {
       if (animationRadius <= 0) animationRadius = radius;
     }, 250);
     return pointIntervalId;
+  }
+
+  /**
+   * Set animation for polygons
+   * @param {Geometry} geometry the geometry to animate
+   *
+   * @returns {NodeJS.Timer} The interval timer.
+   */
+  function polygonInterval(geometry: Geometry, feature: Feature): NodeJS.Timer {
+    let counter = 10;
+    let adjustGeometry = geometry.clone();
+    const polygonIntervalId = setInterval(() => {
+      adjustGeometry.scale(0.1 * counter);
+      feature.setGeometry(adjustGeometry);
+      counter--;
+      if (counter === 0) {
+        counter = 10;
+        adjustGeometry = geometry.clone();
+      }
+    }, 250);
+    return polygonIntervalId;
   }
 
   /**
@@ -153,17 +176,27 @@ export function ClickMarker(): JSX.Element {
     (animationPoint as Feature).setGeometry(geometry);
     animationPoint.setStyle(whiteStyle);
 
-    let counter = 10;
-    let adjustGeometry = geometry.clone();
-    intervalId = setInterval(() => {
-      adjustGeometry.scale(0.1 * counter);
-      (animationPoint as Feature).setGeometry(adjustGeometry);
-      counter--;
-      if (counter === 0) {
-        counter = 10;
-        adjustGeometry = geometry.clone();
-      }
-    }, 250);
+    intervalId = polygonInterval(geometry, animationPoint);
+  }
+
+  /**
+   * Animate all points in MultiPolygon feature
+   * @param {TypeFeatureInfoEntry} feature the feature to animate
+   */
+  function animateMultiPolygon(geometry: Geometry) {
+    const polygons = (geometry as MultiPolygon).getPolygons();
+
+    for (let i = 0; i < polygons.length; i++) {
+      const newPolygon = polygons[i];
+      const newFeature = new Feature(newPolygon);
+      newFeature.setStyle(whiteStyle);
+      newFeature.setId(`multiPoint${i}`);
+      multiPointIds.push(`multiPoint${i}`);
+      animationSource.addFeature(newFeature);
+
+      const multiIntervalId = polygonInterval(polygons[i], newFeature);
+      multiIntervals.push(multiIntervalId);
+    }
   }
 
   /**
@@ -242,12 +275,14 @@ export function ClickMarker(): JSX.Element {
 
           if (feature) {
             const geometry = feature.geometry?.getGeometry();
-            if (geometry instanceof Polygon || geometry instanceof MultiPolygon) {
+            if (geometry instanceof Polygon) {
               animatePolygon(geometry);
             } else if (geometry instanceof LineString || geometry instanceof MultiLineString) {
               animateLineString(geometry);
             } else if (geometry instanceof MultiPoint) {
               animateMultiPoint(feature);
+            } else if (geometry instanceof MultiPolygon) {
+              animateMultiPolygon(geometry);
             } else animateSelection(feature);
           } else showMarkerIcon(markerCoordinates.current);
         }
