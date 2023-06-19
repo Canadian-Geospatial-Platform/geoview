@@ -58,17 +58,17 @@ jobs:
     with:
       cache_sha: ${{ github.event.pull_request.head.sha || github.sha }}
 
-  remove-old-artifacts:
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
+  # remove-old-artifacts:
+    # runs-on: ubuntu-latest
+    # timeout-minutes: 10
 
-    steps:
-    - name: Remove old artifacts
-      uses: c-hive/gha-remove-artifacts@v1.3.0
-      with:
-        age: '15 days' # '<number> <unit>', e.g. 5 days, 2 years, 90 seconds, parsed by Moment.js
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        skip-recent: 10
+    # steps:
+    # - name: Remove old artifacts
+      # uses: c-hive/gha-remove-artifacts@v1.3.0
+      # with:
+        # age: '15 days' # '<number> <unit>', e.g. 5 days, 2 years, 90 seconds, parsed by Moment.js
+        # GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        # skip-recent: 10
         # Optional inputs
         # skip-tags: true
         # skip-recent: 5
