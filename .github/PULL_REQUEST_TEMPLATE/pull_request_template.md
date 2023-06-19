@@ -15,8 +15,11 @@ Fixes # (issue)
 
 Please describe the tests that you ran to verify your changes. Provide instructions so we can reproduce.
 
+__Add the URL for your deploy!__
+
 # Checklist:
 
+- [ ] I have build __(rush build)__ and deploy __(rush host)__ my PR
 - [ ] I have connected the issues(s) to this PR
 - [ ] My code follows the style guidelines of this project
 - [ ] I have performed a self-review of my own code
