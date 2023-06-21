@@ -15,14 +15,17 @@ Fixes # (issue)
 
 Please describe the tests that you ran to verify your changes. Provide instructions so we can reproduce.
 
+__Add the URL for your deploy!__
+
 # Checklist:
 
+- [ ] I have build __(rush build)__ and deploy __(rush host)__ my PR
 - [ ] I have connected the issues(s) to this PR
 - [ ] My code follows the style guidelines of this project
 - [ ] I have performed a self-review of my own code
 - [ ] I have commented my code, particularly in hard-to-understand areas
 - [ ] My changes generate no new warnings
-- [ ] I have created new issue(s) related to the outcome of this PR if needed
+- [ ] I have created new issue(s) related to the outcome of this PR is needed
 -  ~~I have made corresponding changes to the documentation~~
 -  ~~I have added tests that prove my fix is effective or that my feature works~~
 -  ~~New and existing unit tests pass locally with my changes~~
