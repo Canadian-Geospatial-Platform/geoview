@@ -434,19 +434,22 @@ export class MapViewer {
    * Change the display language of the map
    *
    * @param {TypeDisplayLanguage} displayLanguage the language to use (en, fr)
-   * @param {TypeListOfGeoviewLayerConfig} geoviewLayerConfi optional new set of layers to apply (will override origional set of layers)
+   * @param {TypeListOfGeoviewLayerConfig} listOfGeoviewLayerConfig optional new set of layers to apply (will override original set of layers)
    */
   changeLanguage = (displayLanguage: TypeDisplayLanguage, listOfGeoviewLayerConfig?: TypeListOfGeoviewLayerConfig): void => {
     const updatedMapConfig: TypeMapFeaturesConfig = { ...this.mapFeaturesConfig };
 
     updatedMapConfig.displayLanguage = displayLanguage;
 
-    if (listOfGeoviewLayerConfig && listOfGeoviewLayerConfig.length > 0) {
-      updatedMapConfig.map.listOfGeoviewLayerConfig = updatedMapConfig.map.listOfGeoviewLayerConfig?.concat(listOfGeoviewLayerConfig);
+    // if a list of geoview layers parameter is present, replace the one from the config
+    // do not concat like updatedMapConfig.map.listOfGeoviewLayerConfig?.concat(listOfGeoviewLayerConfig) this
+    // because it will keep layer in wrong languages if they are present.
+    if (listOfGeoviewLayerConfig) {
+      updatedMapConfig.map.listOfGeoviewLayerConfig = listOfGeoviewLayerConfig;
     }
 
     // emit an event to reload the map to change the language
-    api.event.emit(mapConfigPayload(EVENT_NAMES.MAP.EVENT_MAP_RELOAD, null, updatedMapConfig));
+    api.event.emit(mapConfigPayload(EVENT_NAMES.MAP.EVENT_MAP_RELOAD, 'all', updatedMapConfig));
   };
 
   /**
@@ -455,7 +458,11 @@ export class MapViewer {
    * @param {string} mapConfig a new config passed in from the function call
    */
   loadMapConfig = (mapConfig: string) => {
+    // get target div and modify the id to remove map-.
+    // this string came from the GeoView map div element, not the original one
+    // if we do not do this, it creates a new map id in the array of maps instead of replacing.
     const targetDiv = this.map.getTargetElement();
+    targetDiv.id = targetDiv.id.replace('map-', '');
 
     const configObjString = removeCommentsFromJSON(mapConfig);
     const parsedMapConfig = parseJSONConfig(configObjString);
