@@ -21,6 +21,7 @@ import { api } from '../../../app';
 import { TypeFeatureInfoEntry, TypeFieldEntry } from '../../../api/events/payloads/get-feature-info-payload';
 import { DetailsProps } from './details';
 import { isImage, stringify, generateId } from '../../utils/utilities';
+import { LightboxImg, LightBoxSlides } from '../lightbox/lightbox';
 
 const sxClasses = {
   layerItem: {
@@ -50,19 +51,22 @@ const sxClasses = {
     justifyContent: 'flex-end',
   },
   featureInfoItemKey: {
-    fontSize: '0.7em',
+    fontSize: '0.85em',
     marginRight: 0,
     paddingRight: '10px',
     fontWeight: 700,
     wordBreak: 'break-word',
   },
   featureInfoItemValue: {
-    fontSize: '0.7em',
+    fontSize: '0.85em',
     marginRight: 0,
-    paddingLeft: '15px',
+    marginTop: '5px',
     wordBreak: 'break-word',
     overflow: 'hidden',
     textOverflow: 'ellipsis',
+  },
+  featureInfoItemImage: {
+    cursor: 'pointer',
   },
 };
 
@@ -96,6 +100,11 @@ export function FeatureInfo(props: TypeFeatureProps): JSX.Element {
     };
   });
 
+  // lightbox component state
+  const [isLightboxOpen, setIsLighboxOpen] = useState(false);
+  const [slides, setSlides] = useState<LightBoxSlides[]>([]);
+  const [slidesIndex, setSlidesIndex] = useState(0);
+
   const theme: Theme & {
     iconImg: React.CSSProperties;
   } = useTheme();
@@ -126,10 +135,34 @@ export function FeatureInfo(props: TypeFeatureProps): JSX.Element {
    * @returns {JSX.Element | JSX.Element[]} the React element(s)
    */
   function setFeatureItem(featureInfoItem: TypeFieldEntry): JSX.Element | JSX.Element[] {
-    function process(item: string, alias: string): JSX.Element {
+    const slidesSetup: LightBoxSlides[] = [];
+
+    function process(item: string, alias: string, index: number): JSX.Element {
       let element: JSX.Element;
       if (typeof item === 'string' && isImage(item)) {
-        element = <MaterialCardMedia key={generateId()} component="img" sx={sxClasses.featureInfoItemValue} alt={alias} src={item} />;
+        slidesSetup.push({ src: item, alt: alias, downloadUrl: item });
+        const id = generateId();
+        element = (
+          <MaterialCardMedia
+            key={id}
+            component="img"
+            sx={[sxClasses.featureInfoItemValue, sxClasses.featureInfoItemImage]}
+            alt={alias}
+            src={item}
+            tabIndex={0}
+            onClick={() => {
+              setIsLighboxOpen(true);
+              setSlides(slidesSetup);
+              setSlidesIndex(index);
+            }}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                setIsLighboxOpen(true);
+                setSlides(slidesSetup);
+              }
+            }}
+          />
+        );
       } else {
         element = (
           <Box key={generateId()} sx={sxClasses.featureInfoItemValue}>
@@ -146,7 +179,9 @@ export function FeatureInfo(props: TypeFeatureProps): JSX.Element {
     const { value } = featureInfoItem;
     let values: string | string[] = Array.isArray(value) ? String(value.map(stringify)) : String(stringify(value));
     values = values.toString().split(';');
-    const results = Array.isArray(values) ? values.map((item: string) => process(item, alias)) : process(values, alias);
+    const results = Array.isArray(values)
+      ? values.map((item: string, index: number) => process(item, alias, index))
+      : process(values, alias, 0);
 
     return results;
   }
@@ -173,6 +208,18 @@ export function FeatureInfo(props: TypeFeatureProps): JSX.Element {
       </ListItem>
       <Collapse in={isOpen} timeout="auto" unmountOnExit>
         <Box>
+          <LightboxImg
+            open={isLightboxOpen}
+            slides={slides}
+            index={slidesIndex}
+            exited={() => {
+              // TODO: because lighbox element is render outside the map container, the focus trap is not able to access it.
+              // TODO: if we use the keyboard to access the image, we can only close with esc key.
+              // TODO: #1113
+              setIsLighboxOpen(false);
+              setSlides([]);
+            }}
+          />
           <List sx={sxClasses.expandableIconContainer}>
             {
               // loop through each feature

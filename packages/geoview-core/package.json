@@ -70,7 +70,8 @@
     "react-i18next": "^12.2.0",
     "react-test-renderer": "^17.0.2",
     "sanitize-html": "^2.7.3",
-    "sql.js": "^1.8.0"
+    "sql.js": "^1.8.0",
+    "yet-another-react-lightbox": "^3.11.1"
   },
   "devDependencies": {
     "@babel/cli": "^7.17.0",
