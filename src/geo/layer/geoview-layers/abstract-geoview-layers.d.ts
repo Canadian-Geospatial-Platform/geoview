@@ -30,7 +30,7 @@ export interface TypeWmsLegend extends Omit<TypeLegend, 'styleConfig'> {
     legend: HTMLCanvasElement;
 }
 /**
- * type guard function that redefines a TypeLegend as a TypeWmsLegend
+ * type guard function that redefines a TypeLegend as a TypeImageStaticLegend
  * if the event attribute of the verifyIfPayload parameter is valid. The type ascention
  * applies only to the true block of the if clause.
  *
@@ -68,11 +68,11 @@ export type TypeLayerStyles = {
     LineString?: TypeStyleRepresentation;
     Polygon?: TypeStyleRepresentation;
 };
-type LayerTypesKey = 'ESRI_DYNAMIC' | 'ESRI_FEATURE' | 'IMAGE_STATIC' | 'GEOJSON' | 'GEOCORE' | 'GEOPACKAGE' | 'XYZ_TILES' | 'OGC_FEATURE' | 'WFS' | 'WMS';
+type LayerTypesKey = 'ESRI_DYNAMIC' | 'ESRI_FEATURE' | 'IMAGE_STATIC' | 'GEOJSON' | 'GEOCORE' | 'GEOPACKAGE' | 'XYZ_TILES' | 'VECTOR_TILES' | 'OGC_FEATURE' | 'WFS' | 'WMS';
 /**
  * Type of GeoView layers
  */
-export type TypeGeoviewLayerType = 'esriDynamic' | 'esriFeature' | 'imageStatic' | 'GeoJSON' | 'geoCore' | 'GeoPackage' | 'xyzTiles' | 'ogcFeature' | 'ogcWfs' | 'ogcWms';
+export type TypeGeoviewLayerType = 'esriDynamic' | 'esriFeature' | 'imageStatic' | 'GeoJSON' | 'geoCore' | 'GeoPackage' | 'xyzTiles' | 'vectorTiles' | 'ogcFeature' | 'ogcWfs' | 'ogcWms';
 /**
  * Definition of the GeoView layer constants
  */
@@ -320,7 +320,7 @@ export declare abstract class AbstractGeoViewLayer {
      * @param {TypeLayerEntryConfig | TypeGeoviewLayerConfig} layerEntryConfig The layer configuration.
      * @returns {LayerGroup} A new layer group.
      */
-    private createLayerGroup;
+    createLayerGroup(layerEntryConfig: TypeLayerEntryConfig | TypeGeoviewLayerConfig): LayerGroup;
     /** ***************************************************************************************************************************
      * Set the active layer. It is the layer that will be used in some functions when the optional layer path is undefined.
      * The parameter can be a layer path (string) or a layer configuration. When the parameter is a layer path that

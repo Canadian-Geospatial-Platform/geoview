@@ -138,3 +138,17 @@ export declare const findPropertyNameByRegex: (objectItem: TypeJsonObject, regex
  * @returns {Extent} the smallest or largest set from the extents
  */
 export declare function getMinOrMaxExtents(extentsA: Extent, extentsB: Extent, minmax?: string): Extent;
+/**
+ * Check string to see if it is an image
+ *
+ * @param {string} item item to validate
+ * @returns {boolean} true if it is an image, false otherwise
+ */
+export declare function isImage(item: string): boolean;
+/**
+ * Checks object to see if it can be converted to a string; if not, returns an empty string
+ *
+ * @param {unknown} str
+ * @return {unknown|String} returns the original object if it can be converted to a string; '' otherwise
+ */
+export declare function stringify(str: unknown): unknown | string;
