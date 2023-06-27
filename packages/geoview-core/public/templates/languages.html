@@ -52,6 +52,7 @@
     </div>
     <div id="LNG1" class="llwp-map" data-lang="fr"></div>
     <p>This map is in French.</p>
+    <div>Set map to English and override layers <button id="Change-Lang-Button">Reset Lang</button></div>
     <hr />
 
     <div class="map-title-holder">
@@ -112,6 +113,12 @@
 
         // loads config in blank map
         cgpv.api.map('LNG2').loadMapConfig(config);
+
+        // change map language
+        var mapLangButton = document.getElementById('Change-Lang-Button');
+        mapLangButton.addEventListener('click', function (e) {
+          cgpv.api.map('LNG1').changeLanguage('en', [])
+        });
 
         //create snippet
         createConfigSnippet();
