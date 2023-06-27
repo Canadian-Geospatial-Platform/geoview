@@ -1,5 +1,6 @@
 import { Vector as VectorSource } from 'ol/source';
 import { Options as SourceOptions } from 'ol/source/Vector';
+import { VectorImage as VectorLayer } from 'ol/layer';
 import { Geometry } from 'ol/geom';
 import { ReadOptions } from 'ol/format/Feature';
 import BaseLayer from 'ol/layer/Base';
@@ -8,7 +9,7 @@ import { Coordinate } from 'ol/coordinate';
 import { Extent } from 'ol/extent';
 import { Pixel } from 'ol/pixel';
 import { AbstractGeoViewLayer } from '../abstract-geoview-layers';
-import { TypeBaseLayerEntryConfig, TypeLayerEntryConfig, TypeListOfLayerEntryConfig } from '../../../map/map-schema-types';
+import { TypeBaseLayerEntryConfig, TypeLayerEntryConfig, TypeListOfLayerEntryConfig, TypeVectorLayerEntryConfig } from '../../../map/map-schema-types';
 import { TypeArrayOfFeatureInfoEntries } from '../../../../api/events/payloads/get-feature-info-payload';
 export type TypeVectorLayerGroup = LayerGroup;
 export type TypeVectorLayer = VectorSource<Geometry>;
@@ -64,7 +65,7 @@ export declare abstract class AbstractGeoViewVector extends AbstractGeoViewLayer
      *
      * @returns {VectorLayer<VectorSource>} The vector layer created.
      */
-    private createVectorLayer;
+    createVectorLayer(layerEntryConfig: TypeVectorLayerEntryConfig, vectorSource: VectorSource<Geometry>): VectorLayer<VectorSource>;
     /** ***************************************************************************************************************************
      * Return feature information for all the features stored in the layer.
      *
