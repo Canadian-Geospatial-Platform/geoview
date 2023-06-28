@@ -9,6 +9,7 @@ import ZoomOut from './buttons/zoom-out';
 import Fullscreen from './buttons/fullscreen';
 import Home from './buttons/home';
 import Export from './buttons/export';
+import Location from './buttons/location';
 
 import ExportModal from '../export/export-modal';
 
@@ -278,6 +279,7 @@ export function Navbar({ setActivetrap }: NavbarProps): JSX.Element {
           classes={{ root: classes.navBtnGroup }}
         >
           <Fullscreen className={classes.navBarButton} />
+          <Location className={classes.navBarButton} />
           <Home className={classes.navBarButton} />
           <Export className={classes.navBarButton} openModal={openModal} />
         </ButtonGroup>

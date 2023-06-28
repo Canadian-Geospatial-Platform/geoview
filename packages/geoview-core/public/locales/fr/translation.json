@@ -11,7 +11,8 @@
     "zoomIn": "Zoom avant",
     "zoomOut": "Zoom arrière",
     "coordinates": "Basculer le format des coordonnées",
-    "scale": "Basculer entre l'échelle et la résolution"
+    "scale": "Basculer entre l'échelle et la résolution",
+    "location": "Zoom sur ma position"
   },
   "mapctrl": {
     "rotation": {
