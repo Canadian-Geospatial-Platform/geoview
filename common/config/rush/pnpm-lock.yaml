@@ -121,6 +121,7 @@ importers:
       '@mui/styles': ^5.13.1
       '@mui/system': ^5.13.1
       '@mui/x-data-grid': ^5.13.1
+      '@nieuwlandgeo/sldreader': ^0.3.0
       '@types/create-react-class': ^15.6.3
       '@types/flux': ^3.1.11
       '@types/glob': ^7.2.0
@@ -203,6 +204,7 @@ importers:
       '@mui/styles': 5.13.2_s55kszw6pq5iqmorlydcdh42pa
       '@mui/system': 5.13.5_ixhfk55ybdwyytvt4qwwrnwpry
       '@mui/x-data-grid': 5.17.26_doemgv7cd7mkh6fau6v5pgi7mq
+      '@nieuwlandgeo/sldreader': 0.3.0_ol@7.4.0
       ajv: 8.12.0
       axios: 1.4.0
       dayjs: 1.11.8
@@ -2841,6 +2843,14 @@ packages:
     dependencies:
       eslint-scope: 5.1.1
     dev: true
+
+  /@nieuwlandgeo/sldreader/0.3.0_ol@7.4.0:
+    resolution: {integrity: sha512-oxuHLFu5AAlNgg1wd9X+58ez7EoH5O56dXwvL+/KdPAn+fxFm9w9NkOist5GUR3FCZjqfbZwus7VSIgYPtMEVQ==}
+    peerDependencies:
+      ol: '>= 5.3.0'
+    dependencies:
+      ol: 7.4.0
+    dev: false
 
   /@nodelib/fs.scandir/2.1.5:
     resolution: {integrity: sha512-vq24Bq3ym5HEQm2NKCr3yXDwjc7vTsEThRDnkp2DK9p1uqLR+DHurm/NOTo0KG7HYHU7eppKZj3MyqYuMBf62g==}

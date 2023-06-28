@@ -458,11 +458,7 @@ export class MapViewer {
    * @param {string} mapConfig a new config passed in from the function call
    */
   loadMapConfig = (mapConfig: string) => {
-    // get target div and modify the id to remove map-.
-    // this string came from the GeoView map div element, not the original one
-    // if we do not do this, it creates a new map id in the array of maps instead of replacing.
     const targetDiv = this.map.getTargetElement();
-    targetDiv.id = targetDiv.id.replace('map-', '');
 
     const configObjString = removeCommentsFromJSON(mapConfig);
     const parsedMapConfig = parseJSONConfig(configObjString);
