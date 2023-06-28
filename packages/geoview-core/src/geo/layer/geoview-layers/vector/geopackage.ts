@@ -2,6 +2,7 @@
 import { get, transformExtent } from 'ol/proj';
 import { Options as SourceOptions } from 'ol/source/Vector';
 import { WKB as FormatWKB } from 'ol/format';
+
 import { ReadOptions } from 'ol/format/Feature';
 import { Vector as VectorSource } from 'ol/source';
 import { Geometry } from 'ol/geom';
@@ -10,6 +11,7 @@ import LayerGroup from 'ol/layer/Group';
 import { Feature } from 'ol';
 
 import initSqlJs from 'sql.js';
+import * as SLDReader from '@nieuwlandgeo/sldreader';
 
 import { cloneDeep } from 'lodash';
 import { TypeJsonObject } from '../../../../core/types/global-types';
@@ -25,6 +27,11 @@ import {
   TypeBaseLayerEntryConfig,
   TypeBaseSourceVectorInitialConfig,
   TypeLayerGroupEntryConfig,
+  TypeSimpleSymbolVectorConfig,
+  TypeStrokeSymbolConfig,
+  TypeLineStringVectorConfig,
+  TypePolygonVectorConfig,
+  TypeFillStyle,
 } from '../../../map/map-schema-types';
 
 import { getLocalizedValue } from '../../../../core/utils/utilities';
@@ -414,23 +421,166 @@ export class GeoPackage extends AbstractGeoViewVector {
    * This method creates a GeoView layer using the definition provided in the layerEntryConfig parameter.
    *
    * @param {TypeLayerEntryConfig} layerEntryConfig Information needed to create the GeoView layer.
+   * @param {sldsInterface} sld The SLD style associated with the layers geopackage, if any
    *
    * @returns {Promise<BaseLayer | null>} The GeoView base layer that has been created.
    */
-  protected processOneGeopackageLayer(layerEntryConfig: TypeBaseLayerEntryConfig, layerInfo: layerData): Promise<BaseLayer | null> {
+  protected processOneGeopackageLayer(
+    layerEntryConfig: TypeBaseLayerEntryConfig,
+    layerInfo: layerData,
+    sld?: sldsInterface
+  ): Promise<BaseLayer | null> {
     const promisedVectorLayer = new Promise<BaseLayer | null>((resolve) => {
-      const { source } = layerInfo;
+      const { name, source } = layerInfo;
+      // entryType will be group if copied from group parent
       layerEntryConfig.entryType = 'vector';
+
+      // Extract layer styles if they exist
+      if (sld && sld[name]) {
+        const { rules } = SLDReader.Reader(sld[name]).layers[0].styles[0].featuretypestyles[0];
+        if ((layerEntryConfig as TypeVectorLayerEntryConfig).style === undefined)
+          (layerEntryConfig as TypeVectorLayerEntryConfig).style = {};
+
+        for (let i = 0; i < rules.length; i++) {
+          Object.keys(rules[i]).forEach((key) => {
+            // Polygon style
+            if (key.toLowerCase() === 'polygonsymbolizer' && !(layerEntryConfig as TypeVectorLayerEntryConfig).style!.Polygon) {
+              const polyStyles = rules[i].polygonsymbolizer[0];
+              let color: string | undefined;
+              let graphicSize: number | undefined;
+              let patternWidth: number | undefined;
+              let fillStyle: TypeFillStyle | undefined;
+              if ('fill' in polyStyles && polyStyles.fill.styling?.fill) color = polyStyles.fill.styling.fill;
+
+              const stroke: TypeStrokeSymbolConfig = {};
+              if (polyStyles.stroke) {
+                if (polyStyles.stroke.styling?.stroke) stroke.color = polyStyles.stroke.styling.stroke;
+                if (polyStyles.stroke.styling?.strokeWidth) stroke.width = polyStyles.stroke.styling.strokeWidth;
+              }
+
+              if ('fill' in polyStyles && 'graphicfill' in polyStyles.fill) {
+                if (
+                  polyStyles.fill.graphicfill.graphic &&
+                  polyStyles.fill.graphicfill.graphic.mark &&
+                  polyStyles.fill.graphicfill.graphic.mark.stroke
+                ) {
+                  if (polyStyles.fill.graphicfill.graphic.mark.stroke.styling?.stroke) color = polyStyles.stroke.styling.stroke;
+                  if (polyStyles.fill.graphicfill.graphic.mark.stroke.styling?.strokeWidth)
+                    patternWidth = polyStyles.stroke.styling.strokeWidth;
+                }
+
+                if (polyStyles.fill.graphicfill.graphic) {
+                  if (polyStyles.fill.graphicfill.graphic.size) graphicSize = polyStyles.fill.graphicfill.graphic.size;
+                  if (polyStyles.fill.graphicfill.graphic.mark && polyStyles.fill.graphicfill.graphic.mark.wellknownname) {
+                    const fillName = polyStyles.fill.graphicfill.graphic.mark.wellknownname;
+                    // Translate sld fill styles to geoview versions
+                    switch (fillName) {
+                      case 'vertline':
+                        fillStyle = 'vertical';
+                        break;
+                      case 'horline':
+                        fillStyle = 'horizontal';
+                        break;
+                      case 'slash':
+                        fillStyle = 'forwardDiagonal';
+                        break;
+                      case 'backslash':
+                        fillStyle = 'backwardDiagonal';
+                        break;
+                      case 'plus':
+                        fillStyle = 'cross';
+                        break;
+                      case 'times':
+                        fillStyle = 'diagonalCross';
+                        break;
+                      default:
+                        fillStyle = 'solid';
+                    }
+                  }
+                }
+              }
+
+              const styles: TypePolygonVectorConfig = {
+                type: 'filledPolygon',
+                color,
+                stroke,
+                paternSize: graphicSize || 8,
+                paternWidth: patternWidth || 1,
+                fillStyle: fillStyle || 'solid',
+              };
+              (layerEntryConfig as TypeVectorLayerEntryConfig).style!.Polygon = { styleType: 'simple', settings: styles };
+              // LineString style
+            } else if (key.toLowerCase() === 'linesymbolizer' && !(layerEntryConfig as TypeVectorLayerEntryConfig).style!.LineString) {
+              const lineStyles = rules[i].linesymbolizer[0];
+
+              const stroke: TypeStrokeSymbolConfig = {};
+              if (lineStyles.stroke) {
+                if (lineStyles.stroke.styling?.stroke) stroke.color = lineStyles.stroke.styling.stroke;
+                if (lineStyles.stroke.styling?.strokeWidth) stroke.width = lineStyles.stroke.styling.strokeWidth;
+              }
+
+              const styles: TypeLineStringVectorConfig = { type: 'lineString', stroke };
+              (layerEntryConfig as TypeVectorLayerEntryConfig).style!.LineString = { styleType: 'simple', settings: styles };
+              // Point style
+            } else if (key.toLowerCase() === 'pointsymbolizer' && !(layerEntryConfig as TypeVectorLayerEntryConfig).style!.Point) {
+              const { graphic } = rules[i].pointsymbolizer[0];
+
+              let offset: [number, number] | null = null;
+              if ('displacement' in graphic) {
+                offset = [
+                  graphic.displacement.displacementx ? graphic.displacement.displacementx : 0,
+                  graphic.displacement.displacementx ? graphic.displacement.displacementx : 0,
+                ];
+              }
+
+              const { size, rotation } = graphic;
+
+              if ('mark' in graphic) {
+                let color: string | null = null;
+                if ('fill' in graphic.mark && graphic.mark.fill.styling.fill) color = graphic.mark.fill.styling.fill;
+                if ('wellknownname' in graphic.mark) {
+                  let symbol;
+                  if (graphic.mark.wellknownname === 'cross') symbol = '+';
+                  else if (graphic.mark.wellknownname === 'x') symbol = 'X';
+                  else symbol = graphic.mark.wellknownname;
+
+                  const styles: TypeSimpleSymbolVectorConfig = {
+                    type: 'simpleSymbol',
+                    symbol,
+                  };
+
+                  if (color) styles.color = color;
+                  if (rotation) styles.rotation = rotation;
+                  if (size) styles.size = size;
+                  if (offset) styles.offset = offset;
+
+                  const stroke: TypeStrokeSymbolConfig = {};
+                  if (graphic.mark.stroke) {
+                    if (graphic.mark.stroke.styling?.stroke) stroke.color = graphic.mark.stroke.styling.stroke;
+                    if (graphic.mark.stroke.styling?.strokeWidth) stroke.width = graphic.mark.stroke.styling.strokeWidth;
+                  }
+
+                  (layerEntryConfig as TypeVectorLayerEntryConfig).style!.Point = { styleType: 'simple', settings: styles };
+                }
+              }
+            }
+          });
+        }
+      }
 
       if (layerInfo.properties) {
         const { properties } = layerInfo;
         this.processFeatureInfoConfig(properties as TypeJsonObject, layerEntryConfig as TypeVectorLayerEntryConfig);
       }
+
       const vectorLayer = this.createVectorLayer(layerEntryConfig as TypeVectorLayerEntryConfig, source);
       if (vectorLayer) api.maps[this.mapId].layer.registerLayerConfig(layerEntryConfig);
+
       resolve(vectorLayer);
     });
+
     this.registerToLayerSets(layerEntryConfig);
+
     return promisedVectorLayer;
   }
 
@@ -452,7 +602,7 @@ export class GeoPackage extends AbstractGeoViewVector {
             unclusteredLayerConfig.layerId = `${layerEntryConfig.layerId}-unclustered`;
             unclusteredLayerConfig.source!.cluster!.enable = false;
 
-            this.processOneGeopackageLayer(unclusteredLayerConfig as TypeBaseLayerEntryConfig, layers[0]).then((baseLayer) => {
+            this.processOneGeopackageLayer(unclusteredLayerConfig as TypeBaseLayerEntryConfig, layers[0], slds).then((baseLayer) => {
               if (baseLayer) {
                 baseLayer.setVisible(false);
                 if (!layerGroup) layerGroup = this.createLayerGroup(unclusteredLayerConfig.parentLayerConfig as TypeLayerEntryConfig);
@@ -464,7 +614,7 @@ export class GeoPackage extends AbstractGeoViewVector {
               unclusteredLayerConfig.source!.cluster!.settings;
           }
 
-          this.processOneGeopackageLayer(layerEntryConfig, layers[0]).then((baseLayer) => {
+          this.processOneGeopackageLayer(layerEntryConfig, layers[0], slds).then((baseLayer) => {
             if (baseLayer) {
               if (layerGroup) {
                 layerGroup.getLayers().push(baseLayer);
@@ -492,7 +642,7 @@ export class GeoPackage extends AbstractGeoViewVector {
               unclusteredLayerConfig.layerId = `${layerEntryConfig.layerId}-unclustered`;
               unclusteredLayerConfig.source!.cluster!.enable = false;
 
-              this.processOneGeopackageLayer(unclusteredLayerConfig as TypeBaseLayerEntryConfig, layers[0]).then((baseLayer) => {
+              this.processOneGeopackageLayer(unclusteredLayerConfig as TypeBaseLayerEntryConfig, layers[0], slds).then((baseLayer) => {
                 if (baseLayer) {
                   baseLayer.setVisible(false);
                   newLayerGroup.getLayers().push(baseLayer);
@@ -503,7 +653,7 @@ export class GeoPackage extends AbstractGeoViewVector {
                 unclusteredLayerConfig.source!.cluster!.settings;
             }
 
-            this.processOneGeopackageLayer(newLayerEntryConfig, layers[i]).then((baseLayer) => {
+            this.processOneGeopackageLayer(newLayerEntryConfig, layers[i], slds).then((baseLayer) => {
               if (baseLayer) {
                 (layerEntryConfig as unknown as TypeLayerGroupEntryConfig).listOfLayerEntryConfig!.push(newLayerEntryConfig);
                 newLayerGroup.getLayers().push(baseLayer);
