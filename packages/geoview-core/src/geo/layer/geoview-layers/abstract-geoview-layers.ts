@@ -234,11 +234,11 @@ type TypeLayerSetHandlerFunctions = {
  */
 // ******************************************************************************************************************************
 export abstract class AbstractGeoViewLayer {
-  /** Flag used to indicate that the layer is loaded */
-  isLoaded = false;
+  /** Flag used to indicate the layer's state */
+  layerState = 'loading';
 
-  /** Flag used to indicate a layer load error */
-  loadError = false;
+  /** Flag used to indicate the layer's phase */
+  layerPhase = 'newInstance';
 
   /** The unique identifier of the map on which the GeoView layer will be drawn. */
   mapId: string;
@@ -328,6 +328,7 @@ export abstract class AbstractGeoViewLayer {
       ? api.dateUtilities.getDateFragmentsOrder(mapLayerConfig.serviceDateFormat)
       : undefined;
     this.externalFragmentsOrder = api.dateUtilities.getDateFragmentsOrder(mapLayerConfig.externalDateFormat);
+    api.maps[mapId].layer.geoviewLayers[this.geoviewLayerId] = this;
   }
 
   /** ***************************************************************************************************************************
@@ -349,6 +350,7 @@ export abstract class AbstractGeoViewLayer {
    * the details-panel.
    */
   createGeoViewLayers(): Promise<void> {
+    this.layerPhase = 'createGeoViewLayers';
     const promisedExecution = new Promise<void>((resolve) => {
       if (this.gvLayers === null) {
         this.getAdditionalServiceDefinition().then(() => {
@@ -379,6 +381,7 @@ export abstract class AbstractGeoViewLayer {
    * If the GeoView layer does not have a service definition, this method does nothing.
    */
   protected getAdditionalServiceDefinition(): Promise<void> {
+    this.layerPhase = 'getAdditionalServiceDefinition';
     const promisedExecution = new Promise<void>((resolve) => {
       this.getServiceMetadata().then(() => {
         if (this.listOfLayerEntryConfig.length) {
@@ -397,6 +400,7 @@ export abstract class AbstractGeoViewLayer {
    * @returns {Promise<void>} A promise that the execution is completed.
    */
   protected getServiceMetadata(): Promise<void> {
+    this.layerPhase = 'getServiceMetadata';
     const promisedExecution = new Promise<void>((resolve) => {
       resolve();
     });
@@ -423,6 +427,7 @@ export abstract class AbstractGeoViewLayer {
   protected processListOfLayerEntryMetadata(
     listOfLayerEntryConfig: TypeListOfLayerEntryConfig = this.listOfLayerEntryConfig
   ): Promise<void> {
+    this.layerPhase = 'processListOfLayerEntryMetadata';
     const promisedListOfLayerEntryProcessed = new Promise<void>((resolve) => {
       const promisedAllLayerDone: Promise<void>[] = [];
       listOfLayerEntryConfig.forEach((layerEntryConfig: TypeLayerEntryConfig) => {
@@ -446,6 +451,7 @@ export abstract class AbstractGeoViewLayer {
    * @returns {Promise<void>} A promise that the vector layer configuration has its metadata and group layers processed.
    */
   private processMetadataGroupLayer(layerEntryConfig: TypeLayerGroupEntryConfig): Promise<void> {
+    this.layerPhase = 'processMetadataGroupLayer';
     const promisedListOfLayerEntryProcessed = new Promise<void>((resolve) => {
       this.processLayerMetadata(layerEntryConfig).then(() => {
         this.processListOfLayerEntryMetadata(layerEntryConfig.listOfLayerEntryConfig!).then(() => resolve());
@@ -463,6 +469,7 @@ export abstract class AbstractGeoViewLayer {
    * @returns {Promise<void>} A promise that the vector layer configuration has its metadata processed.
    */
   protected processLayerMetadata(layerEntryConfig: TypeLayerEntryConfig): Promise<void> {
+    this.layerPhase = 'processLayerMetadata';
     const promiseOfExecution = new Promise<void>((resolve) => {
       if (!layerEntryConfig.source) layerEntryConfig.source = {};
       if (!layerEntryConfig.source.featureInfo) layerEntryConfig.source.featureInfo = { queryable: true };
@@ -484,6 +491,7 @@ export abstract class AbstractGeoViewLayer {
     listOfLayerEntryConfig: TypeListOfLayerEntryConfig,
     layerGroup?: LayerGroup
   ): Promise<BaseLayer | null> {
+    this.layerPhase = 'processListOfLayerEntryConfig';
     const promisedListOfLayerEntryProcessed = new Promise<BaseLayer | null>((resolve) => {
       if (listOfLayerEntryConfig.length === 1) {
         if (layerEntryIsGroupLayer(listOfLayerEntryConfig[0])) {

@@ -66,6 +66,7 @@
 
     <div class="map-title-holder">
       <h4 id="HLYR1">1. Many Esri Feature Layers</h4>
+      &nbsp;<h5 id="HLYR1-state">(undefined)</h5>
       <a class="ref-link" href="#top">Top</a>
     </div>
     <div
@@ -100,7 +101,7 @@
                 ]
               },
               {
-                'geoviewLayerId': 'esriFeatureLYR4.1',
+                'geoviewLayerId': 'esriFeatureLYR1',
                 'geoviewLayerName': { 'en': 'Temporal_Test_Bed_en' },
                 'metadataAccessPath': {
                   'en': 'https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/Temporal_Test_Bed_en/MapServer/'
@@ -150,6 +151,7 @@
 
     <div class="map-title-holder">
       <h4 id="HLYR2">2. Date filtering using time zone changed and non ISO date format</h4>
+      &nbsp;<h5 id="HLYR2-state">(undefined)</h5>
       <a class="ref-link" href="#top">Top</a>
     </div>
     <div
@@ -208,6 +210,7 @@
 
     <div class="map-title-holder">
       <h4 id="HLYR3">3. Date filtering using ISO UTC dates</h4>
+      &nbsp;<h5 id="HLYR3-state">(undefined)</h5>
       <a class="ref-link" href="#top">Top</a>
     </div>
     <div
@@ -322,12 +325,12 @@
 
           let k = 0;
           window.setInterval(() => {
-            const input = document.getElementById('filter-input-LYR1-esriFeatureLYR4.1');
+            const input = document.getElementById('filter-input-LYR1-esriFeatureLYR1');
             if (input) {
-              const layerConfig = cgpv.api.maps.LYR1.layer.registeredLayers['esriFeatureLYR4.1/0'];
-              const checkbox = document.getElementById('checkbox-LYR1-esriFeatureLYR4.1');
-              const temporalData = cgpv.api.maps.LYR1.layer.geoviewLayers['esriFeatureLYR4.1'].layerTemporalDimension['esriFeatureLYR4.1/0'];
-              cgpv.api.maps.LYR1.layer.geoviewLayers['esriFeatureLYR4.1'].applyViewFilter(layerConfig,
+              const layerConfig = cgpv.api.maps.LYR1.layer.registeredLayers['esriFeatureLYR1/0'];
+              const checkbox = document.getElementById('checkbox-LYR1-esriFeatureLYR1');
+              const temporalData = cgpv.api.maps.LYR1.layer.geoviewLayers['esriFeatureLYR1'].layerTemporalDimension['esriFeatureLYR1/0'];
+              cgpv.api.maps.LYR1.layer.geoviewLayers['esriFeatureLYR1'].applyViewFilter(layerConfig,
                 `Date < date '${temporalData.range.range[k]}'`,
                 checkbox.value !== 'true'
               );
@@ -400,6 +403,43 @@
         },
         'LYR3/$LegendsLayerSet$'
       );
+      
+      window.setInterval(() => {
+        const displayField1 = document.getElementById('HLYR1-state');
+        const geoviewLayers = cgpv.api.maps?.LYR1?.layer?.geoviewLayers;
+        if (geoviewLayers) {
+          const output = Object.keys(cgpv.api.maps?.LYR1?.layer?.geoviewLayers).reduce((outputValue, layerId) => {
+            const stateValue = cgpv.api.maps?.LYR1?.layer?.geoviewLayers[layerId].layerPhase;
+            return `${outputValue}${layerId}: ${stateValue}, `;
+          }, '(');
+          displayField1.textContent = output ? `${output.slice(0, -2)})` : '(undefined)';
+        } else displayField1.textContent = '(undefined)';
+      }, 250)
+
+      window.setInterval(() => {
+        const displayField2 = document.getElementById('HLYR2-state');
+        const geoviewLayers = cgpv.api.maps?.LYR2?.layer?.geoviewLayers;
+        if (geoviewLayers) {
+          const output = Object.keys(cgpv.api.maps?.LYR2?.layer?.geoviewLayers).reduce((outputValue, layerId) => {
+            const stateValue = cgpv.api.maps?.LYR2?.layer?.geoviewLayers[layerId].layerPhase;
+            return `${outputValue}${layerId}: ${stateValue}, `;
+          }, '(');
+          displayField2.textContent = output ? `${output.slice(0, -2)})` : '(undefined)';
+        } else displayField2.textContent = '(undefined)';
+      }, 250)
+
+      window.setInterval(() => {
+        const displayField3 = document.getElementById('HLYR3-state');
+        const geoviewLayers = cgpv.api.maps?.LYR3?.layer?.geoviewLayers;
+        if (geoviewLayers) {
+          const output = Object.keys(cgpv.api.maps?.LYR3?.layer?.geoviewLayers).reduce((outputValue, layerId) => {
+            const stateValue = cgpv.api.maps?.LYR3?.layer?.geoviewLayers[layerId].layerPhase;
+            return `${outputValue}${layerId}: ${stateValue}, `;
+          }, '(');
+          displayField3.textContent = output ? `${output.slice(0, -2)})` : '(undefined)';
+        } else displayField3.textContent = '(undefined)';
+      }, 250)
+
     </script>
   </body>
 </html>

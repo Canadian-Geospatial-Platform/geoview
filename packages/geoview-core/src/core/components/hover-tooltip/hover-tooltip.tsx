@@ -6,7 +6,7 @@ import { useTheme, Theme } from '@mui/material/styles';
 import { getUid } from 'ol/util';
 
 import { Box } from '../../../ui';
-import { api, payloadIsAMapSingleClick } from '../../../app';
+import { api, payloadIsAMapMouseEvent } from '../../../app';
 import { MapContext } from '../../app-start';
 import { EVENT_NAMES } from '../../../api/events/event-types';
 import {
@@ -69,7 +69,7 @@ export function HoverTooltip(): JSX.Element {
     api.event.on(
       EVENT_NAMES.MAP.EVENT_MAP_POINTER_MOVE,
       (payload) => {
-        if (payloadIsAMapSingleClick(payload)) {
+        if (payloadIsAMapMouseEvent(payload)) {
           if (payload.coordinates.dragging) {
             setShowTooltip(false);
             setTooltipValue('');
@@ -134,7 +134,7 @@ export function HoverTooltip(): JSX.Element {
     api.event.on(
       EVENT_NAMES.MAP.EVENT_MAP_SINGLE_CLICK,
       (payload) => {
-        if (payloadIsAMapSingleClick(payload)) {
+        if (payloadIsAMapMouseEvent(payload)) {
           selectedFeature.current = undefined;
           setShowTooltip(false);
           setTooltipValue('');

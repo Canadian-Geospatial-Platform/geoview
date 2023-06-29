@@ -20,9 +20,8 @@ import { FocusTrapDialog } from './focus-trap';
 import { api } from '../../app';
 import { EVENT_NAMES } from '../../api/events/event-types';
 
-import { CircularProgress, Modal, Snackbar } from '../../ui';
+import { Modal, Snackbar } from '../../ui';
 import { payloadIsAMapComponent } from '../../api/events/payloads/map-component-payload';
-import { payloadIsAMap } from '../../api/events/payloads/map-payload';
 import { payloadIsAModal } from '../../api/events/payloads/modal-payload';
 import { TypeMapFeaturesConfig } from '../types/global-types';
 
@@ -96,9 +95,6 @@ export function Shell(props: ShellProps): JSX.Element {
 
   const [, setUpdate] = useState<number>(0);
 
-  // show a splash screen before map is loaded
-  const [isLoaded, setIsLoaded] = useState(false);
-
   /**
    * Set the focus trap
    * @param {boolean} dialogTrap the callback value from dialog trap
@@ -147,17 +143,6 @@ export function Shell(props: ShellProps): JSX.Element {
       shellId
     );
 
-    api.event.on(
-      EVENT_NAMES.MAP.EVENT_MAP_LOADED,
-      (payload) => {
-        if (payloadIsAMap(payload)) {
-          // even if the map loads some layers (basemap) are not finish rendering. Same for north arrow
-          setIsLoaded(true);
-        }
-      },
-      shellId
-    );
-
     // CHANGED
     api.event.on(
       EVENT_NAMES.MODAL.EVENT_MODAL_CREATE,
@@ -180,7 +165,6 @@ export function Shell(props: ShellProps): JSX.Element {
   return (
     <FocusTrap active={activeTrap} focusTrapOptions={{ escapeDeactivates: false }}>
       <div id={`shell-${shellId}`} className={classes.shell}>
-        <CircularProgress isLoaded={isLoaded} />
         <a id={`toplink-${shellId}`} href={`#bottomlink-${shellId}`} className={classes.skip} style={{ top: '0px' }}>
           {t('keyboardnav.start')}
         </a>

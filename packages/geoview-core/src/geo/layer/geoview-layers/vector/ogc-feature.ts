@@ -128,6 +128,7 @@ export class OgcFeature extends AbstractGeoViewVector {
    * @returns {Promise<void>} A promise that the execution is completed.
    */
   protected getServiceMetadata(): Promise<void> {
+    this.layerPhase = 'getServiceMetadata';
     const promisedExecution = new Promise<void>((resolve) => {
       const metadataUrl = getLocalizedValue(this.metadataAccessPath, this.mapId);
       if (metadataUrl) {
@@ -234,6 +235,7 @@ export class OgcFeature extends AbstractGeoViewVector {
    * @returns {Promise<void>} A promise that the vector layer configuration has its metadata processed.
    */
   protected processLayerMetadata(layerEntryConfig: TypeVectorLayerEntryConfig): Promise<void> {
+    this.layerPhase = 'processLayerMetadata';
     const promiseOfExecution = new Promise<void>((resolve) => {
       const metadataUrl = getLocalizedValue(this.metadataAccessPath, this.mapId);
       if (metadataUrl) {
