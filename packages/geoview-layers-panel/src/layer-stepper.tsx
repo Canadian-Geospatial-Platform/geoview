@@ -71,8 +71,7 @@ function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
     },
   };
 
-  // TODO see issue #714, removed adding multiple layerType === WMS until resolved
-  const isMultiple = () => layerType === ESRI_DYNAMIC || layerType === WFS;
+  const isMultiple = () => layerType === ESRI_DYNAMIC || layerType === WFS || layerType === WMS;
 
   /**
    * List of layer types and labels
@@ -265,31 +264,40 @@ function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
   const wmsValidation = async (): Promise<boolean> => {
     const proj = api.projection.projections[api.map(mapId).currentProjection].getCode();
     let supportedProj: string[] = [];
+
     try {
       const [baseUrl, queryString] = layerURL.split('?');
       const urlParams = new URLSearchParams(queryString);
-      const layersParam = urlParams.get('layers');
-      const wms = await api.geoUtilities.getWMSServiceMetadata(baseUrl, layersParam ?? '');
+      const paramLayers = urlParams.get('layers')?.split(',') || [''];
+      // query layers are not sent, as not all services support asking for multiple layers
+      const wms = await api.geoUtilities.getWMSServiceMetadata(baseUrl, '');
+
       supportedProj = wms.Capability.Layer.CRS as string[];
       if (!supportedProj.includes(proj)) throw new Error('proj');
+
       const layers: TypeJsonArray[] = [];
+
       const hasChildLayers = (layer: TypeJsonObject) => {
         if (layer.Layer && (layer.Layer as TypeJsonArray).length > 0) {
           (layer.Layer as TypeJsonObject[]).forEach((childLayer: TypeJsonObject) => {
             hasChildLayers(childLayer);
           });
         } else {
-          layers.push([layer.Name, layer.Title] as TypeJsonArray);
+          for (let i = 0; i < paramLayers.length; i++) {
+            if ((layer.Name as string) === paramLayers[i]) layers.push([layer.Name, layer.Title] as TypeJsonArray);
+          }
         }
       };
+
       if (wms.Capability.Layer) {
         hasChildLayers(wms.Capability.Layer);
       }
+
       if (layers.length === 1) {
         setLayerName(layers[0][1] as string);
         setLayerEntries([
           {
-            layerId: (layersParam ?? layers[0][0]) as string,
+            layerId: layers[0][0] as string,
           },
         ] as TypeListOfLayerEntryConfig);
       } else {
@@ -595,7 +603,7 @@ function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
     else if (layerType === ESRI_DYNAMIC) valid = await esriValidation(ESRI_DYNAMIC);
     else if (layerType === ESRI_FEATURE) valid = await esriValidation(ESRI_FEATURE);
     else if (layerType === GEOJSON) valid = await geoJSONValidation();
-    else if (layerType === GEOPACKAGE) valid = await geoPackageValidation();
+    else if (layerType === GEOPACKAGE) valid = geoPackageValidation();
     else if (layerType === GEOCORE) valid = await geocoreValidation();
     if (valid) {
       setIsLoading(false);
@@ -981,7 +989,6 @@ function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
                     <Autocomplete
                       fullWidth
                       multiple={isMultiple()}
-                      disableCloseOnSelect
                       disableClearable={!isMultiple()}
                       id="service-layer-label"
                       options={layerList}
