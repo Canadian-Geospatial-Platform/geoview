@@ -159,6 +159,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
           }
           vectorSource.addFeatures(features);
           if (success) success(features);
+          layerEntryConfig.gvLayer!.changed();
         } else {
           onError();
         }

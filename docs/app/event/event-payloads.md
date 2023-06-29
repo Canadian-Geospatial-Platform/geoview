@@ -32,7 +32,7 @@ Below you will find a list of some available functions and payload types/interfa
   <li><a href="https://canadian-geospatial-platform.github.io/geoview/public/docs/functions/payloadIsAMapComponent.html">payloadIsAMapComponent</a></li>
   <li><a href="https://canadian-geospatial-platform.github.io/geoview/public/docs/functions/payloadIsAmapFeaturesConfig.html">payloadIsAmapFeaturesConfig</a></li>
   <li><a href="https://canadian-geospatial-platform.github.io/geoview/public/docs/functions/payloadIsAMap.html">payloadIsAMap</a></li>
-  <li><a href="https://canadian-geospatial-platform.github.io/geoview/public/docs/functions/payloadIsAMapSingleClick.html">payloadIsAMapSingleClick</a></li>
+  <li><a href="https://canadian-geospatial-platform.github.io/geoview/public/docs/functions/payloadIsAMapMouseEvent.html">payloadIsAMapMouseEvent</a></li>
   <li><a href="https://canadian-geospatial-platform.github.io/geoview/public/docs/functions/payloadIsAMapViewProjection.html">payloadIsAMapViewProjection</a></li>
   <li><a href="https://canadian-geospatial-platform.github.io/geoview/public/docs/functions/payloadIsAMarkerDefinition.html">payloadIsAMarkerDefinition</a></li>
   <li><a href="https://canadian-geospatial-platform.github.io/geoview/public/docs/functions/payloadIsAModal.html">payloadIsAModal</a></li>
@@ -103,7 +103,7 @@ Below you will find a list of some available functions and payload types/interfa
   <li><a href="https://canadian-geospatial-platform.github.io/geoview/public/docs/functions/mapComponentPayload-1.html">mapComponentPayload</a></li>
   <li><a href="https://canadian-geospatial-platform.github.io/geoview/public/docs/functions/mapConfigPayload.html">mapConfigPayload</a></li>
   <li><a href="https://canadian-geospatial-platform.github.io/geoview/public/docs/functions/mapPayload-1.html">mapPayload</a></li>
-  <li><a href="https://canadian-geospatial-platform.github.io/geoview/public/docs/functions/mapSingleClickPayload-1.html">mapSingleClickPayload</a></li>
+  <li><a href="https://canadian-geospatial-platform.github.io/geoview/public/docs/functions/mapMouseEventPayload-1.html">mapMouseEventPayload</a></li>
   <li><a href="https://canadian-geospatial-platform.github.io/geoview/public/docs/functions/mapViewProjectionPayload-1.html">mapViewProjectionPayload</a></li>
   <li><a href="https://canadian-geospatial-platform.github.io/geoview/public/docs/functions/markerDefinitionPayload.html">markerDefinitionPayload</a></li>
   <li><a href="https://canadian-geospatial-platform.github.io/geoview/public/docs/functions/modalPayload-1.html">modalPayload</a></li>
@@ -133,7 +133,7 @@ Below you will find a list of some available functions and payload types/interfa
   <li><a href="https://canadian-geospatial-platform.github.io/geoview/public/docs/classes/MapComponentPayload.html">MapComponentPayload</a></li>
   <li><a href="https://canadian-geospatial-platform.github.io/geoview/public/docs/classes/MapFeaturesPayload.html">MapFeaturesPayload</a></li>
   <li><a href="https://canadian-geospatial-platform.github.io/geoview/public/docs/classes/MapPayload.html">MapPayload</a></li>
-  <li><a href="https://canadian-geospatial-platform.github.io/geoview/public/docs/classes/MapSingleClickPayload.html">MapSingleClickPayload</a></li>
+  <li><a href="https://canadian-geospatial-platform.github.io/geoview/public/docs/classes/MapMouseEventPayload.html">MapMouseEventPayload</a></li>
   <li><a href="https://canadian-geospatial-platform.github.io/geoview/public/docs/classes/MapViewProjectionPayload.html">MapViewProjectionPayload</a></li>
   <li><a href="https://canadian-geospatial-platform.github.io/geoview/public/docs/classes/MarkerDefinitionPayload.html">MarkerDefinitionPayload</a></li>
   <li><a href="https://canadian-geospatial-platform.github.io/geoview/public/docs/classes/ModalPayload.html">ModalPayload</a></li>

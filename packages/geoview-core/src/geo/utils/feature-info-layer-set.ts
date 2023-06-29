@@ -3,7 +3,7 @@ import debounce from 'lodash/debounce';
 
 import { EVENT_NAMES } from '../../api/events/event-types';
 import { GetFeatureInfoPayload, payloadIsQueryResult, TypeFeatureInfoResultSets } from '../../api/events/payloads/get-feature-info-payload';
-import { payloadIsAMapSingleClick } from '../../api/events/payloads/map-slingle-click-payload';
+import { payloadIsAMapMouseEvent } from '../../api/events/payloads/map-mouse-event-payload';
 import { payloadIsALngLat } from '../../api/events/payloads/lng-lat-payload';
 import { api } from '../../app';
 import { LayerSet } from './layer-set';
@@ -50,7 +50,7 @@ export class FeatureInfoLayerSet {
     api.event.on(
       EVENT_NAMES.MAP.EVENT_MAP_SINGLE_CLICK,
       (payload) => {
-        if (payloadIsAMapSingleClick(payload)) {
+        if (payloadIsAMapMouseEvent(payload)) {
           Object.keys(this.resultSets).forEach((layerPath) => {
             this.resultSets[layerPath] = undefined;
           });
@@ -75,7 +75,7 @@ export class FeatureInfoLayerSet {
     api.event.on(
       EVENT_NAMES.MAP.EVENT_MAP_POINTER_MOVE,
       debounce((payload) => {
-        if (payloadIsAMapSingleClick(payload)) {
+        if (payloadIsAMapMouseEvent(payload)) {
           Object.keys(this.resultSets).forEach((layerPath) => {
             this.resultSets[layerPath] = undefined;
           });

@@ -2,7 +2,7 @@
 import type React from 'react';
 import {
   TypeWindow,
-  payloadIsAMapSingleClick,
+  payloadIsAMapMouseEvent,
   payloadIsAllQueriesDone,
   TypeArrayOfLayerData,
   getLocalizedValue,
@@ -61,7 +61,7 @@ export function DetailsItem({ mapId }: Props): JSX.Element {
     api.event.on(
       api.eventNames.MAP.EVENT_MAP_SINGLE_CLICK,
       (payload) => {
-        if (payloadIsAMapSingleClick(payload)) {
+        if (payloadIsAMapMouseEvent(payload)) {
           const { coordinates } = payload;
           setHandlerName(payload.handlerName);
           setLngLat(coordinates.lnglat);

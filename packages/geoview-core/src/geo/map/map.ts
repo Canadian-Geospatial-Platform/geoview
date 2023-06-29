@@ -40,8 +40,7 @@ import { GeoViewLayerPayload, payloadIsGeoViewLayerAdded } from '../../api/event
 import { generateId, parseJSONConfig, removeCommentsFromJSON } from '../../core/utils/utilities';
 import { TypeListOfGeoviewLayerConfig, TypeDisplayLanguage, TypeViewSettings } from './map-schema-types';
 import { TypeMapFeaturesConfig, TypeHTMLElement } from '../../core/types/global-types';
-import { TypeMapSingleClick } from '../../api/events/payloads/map-slingle-click-payload';
-import { snackbarMessagePayload } from '../../api/events/payloads/snackbar-message-payload';
+import { TypeMapMouseInfo } from '../../api/events/payloads/map-mouse-event-payload';
 import { layerConfigIsGeoCore } from '../layer/other/geocore';
 
 interface TypeDcoument extends Document {
@@ -103,10 +102,10 @@ export class MapViewer {
   currentMapCenterPosition: Coordinate;
 
   // store last single click position
-  singleClickedPosition: TypeMapSingleClick;
+  singleClickedPosition: TypeMapMouseInfo;
 
   // store live pointer position
-  pointerPosition: TypeMapSingleClick;
+  pointerPosition: TypeMapMouseInfo;
 
   // i18n instance
   i18nInstance!: i18n;
@@ -122,9 +121,6 @@ export class MapViewer {
 
   // flag used to indicate that the ready callback routine has been called once
   readyCallbackHasRun = false;
-
-  // record of geoview layer identifier on the map and their associated layer loaded timeout identifier
-  layerLoadedTimeoutId: Record<string, NodeJS.Timeout> = {};
 
   /**
    * Add the map instance to the maps array in the api
@@ -169,7 +165,7 @@ export class MapViewer {
 
     // extract the number of layers to load and listen to added layers event to decrease the number of expected layer
     const listOfGeoviewLayerConfig: TypeListOfGeoviewLayerConfig = this.mapFeaturesConfig.map.listOfGeoviewLayerConfig || [];
-    this.setEventListenerAndTimeout4ThisListOfLayer(listOfGeoviewLayerConfig);
+    this.setLayerAddedListener4ThisListOfLayer(listOfGeoviewLayerConfig);
   }
 
   /**
@@ -189,40 +185,11 @@ export class MapViewer {
    *
    * @param {TypeListOfGeoviewLayerConfig} listOfGeoviewLayerConfig The list of geoview layer configurations.
    */
-  setEventListenerAndTimeout4ThisListOfLayer(listOfGeoviewLayerConfig: TypeListOfGeoviewLayerConfig) {
-    this.remainingLayersThatNeedToBeLoaded += listOfGeoviewLayerConfig.length;
+  setLayerAddedListener4ThisListOfLayer(listOfGeoviewLayerConfig: TypeListOfGeoviewLayerConfig) {
     if (listOfGeoviewLayerConfig.length) {
+      this.remainingLayersThatNeedToBeLoaded += listOfGeoviewLayerConfig.length;
       listOfGeoviewLayerConfig.forEach((geoviewLayerConfig) => {
-        // The timeout section is used to release the waiting for a layer that can not be loaded.
-        // Its execution is canceled if the layer loads before the timeout
         if (!layerConfigIsGeoCore(geoviewLayerConfig)) {
-          let i = 0;
-          this.layerLoadedTimeoutId[geoviewLayerConfig.geoviewLayerId] = setTimeout(() => {
-            if (this.remainingLayersThatNeedToBeLoadedIsDecrementedToZero4TheFirstTime())
-              api.event.emit(GeoViewLayerPayload.createTestGeoviewLayersPayload('run cgpv.init callback?'));
-            const isNotLoaded = !this?.layer?.geoviewLayers?.[geoviewLayerConfig.geoviewLayerId]?.isLoaded;
-            if (isNotLoaded && i > 15) {
-              if (geoviewLayerConfig.geoviewLayerId in this.layer.geoviewLayers)
-                this.layer.geoviewLayers[geoviewLayerConfig.geoviewLayerId].loadError = true;
-              // Force the creation of an empty geoview layer with the two flags needed to signal a load error
-              else
-                (this.layer.geoviewLayers[geoviewLayerConfig.geoviewLayerId] as { isLoaded: boolean; loadError: boolean }) = {
-                  isLoaded: false,
-                  loadError: true,
-                };
-              // eslint-disable-next-line no-console
-              console.log(`Layer ${geoviewLayerConfig.geoviewLayerId} failed to load on map ${this.mapId}`);
-              api.event.emit(
-                snackbarMessagePayload(EVENT_NAMES.SNACKBAR.EVENT_SNACKBAR_OPEN, this.mapId, {
-                  type: 'key',
-                  value: 'validation.layer.loadfailed',
-                  params: [geoviewLayerConfig.geoviewLayerId, this.mapId],
-                })
-              );
-            }
-            i++;
-          }, 1000);
-
           api.event.on(
             EVENT_NAMES.LAYER.EVENT_LAYER_ADDED,
             (payload) => {
@@ -230,9 +197,9 @@ export class MapViewer {
                 const { geoviewLayer } = payload;
                 geoviewLayer.layerOrder = this.layer.orderSubLayers(geoviewLayer.listOfLayerEntryConfig);
                 this.layer.setLayerZIndices(geoviewLayer);
-                geoviewLayer!.isLoaded = true;
+                geoviewLayer!.layerState = 'loaded';
+                geoviewLayer!.layerPhase = 'loaded';
                 if (this.remainingLayersThatNeedToBeLoadedIsDecrementedToZero4TheFirstTime()) {
-                  clearTimeout(this.layerLoadedTimeoutId[geoviewLayerConfig.geoviewLayerId]);
                   api.event.emit(GeoViewLayerPayload.createTestGeoviewLayersPayload('run cgpv.init callback?'));
                 }
               }
@@ -254,7 +221,7 @@ export class MapViewer {
     const arrayOfGeoviewLayerId = this.layer?.geoviewLayers ? Object.keys(this.layer.geoviewLayers) : [];
     for (let i = 0; i < arrayOfGeoviewLayerId.length && allGeoviewLayersAreReady; i++) {
       const geoviewLayer = this.layer.geoviewLayers[arrayOfGeoviewLayerId[i]];
-      allGeoviewLayersAreReady &&= geoviewLayer.isLoaded || geoviewLayer.loadError;
+      allGeoviewLayersAreReady &&= geoviewLayer.layerState === 'loaded';
     }
     return allGeoviewLayersAreReady && this.layer !== undefined;
   }
@@ -269,7 +236,8 @@ export class MapViewer {
     this.map = cgpMap;
 
     // initialize layers and load the layers passed in from map config if any
-    this.layer = new Layer(this.mapId, this.mapFeaturesConfig.map.listOfGeoviewLayerConfig);
+    this.layer = new Layer(this.mapId);
+    this.layer.loadListOfGeoviewLayer(this.mapFeaturesConfig.map.listOfGeoviewLayerConfig);
 
     // check if geometries are provided from url
     this.loadGeometries();
@@ -420,7 +388,7 @@ export class MapViewer {
         let allGeoviewLayerReady =
           this.mapFeaturesConfig.map.listOfGeoviewLayerConfig?.length === 0 || Object.keys(geoviewLayers).length !== 0;
         Object.keys(geoviewLayers).forEach((geoviewLayerId) => {
-          allGeoviewLayerReady &&= geoviewLayers[geoviewLayerId].isLoaded || geoviewLayers[geoviewLayerId].loadError;
+          allGeoviewLayerReady &&= geoviewLayers[geoviewLayerId].layerState === 'loaded';
         });
         if (allGeoviewLayerReady) {
           api.event.emit(mapPayload(EVENT_NAMES.MAP.EVENT_MAP_LOADED, this.mapId, this.map));

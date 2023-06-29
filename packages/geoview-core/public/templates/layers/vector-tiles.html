@@ -52,6 +52,7 @@
 
     <div class="map-title-holder">
       <h4 id="HLYR1">1. Vector Tiles Layers (3978)</h4>
+      &nbsp;<h5 id="HLYR1-state">(undefined)</h5>
       <a class="ref-link" href="#top">Top</a>
     </div>
     <div
@@ -107,6 +108,7 @@
 
     <div class="map-title-holder">
       <h4 id="HLYR2">2. Vector Tiles Layers (3857)</h4>
+      &nbsp;<h5 id="HLYR2-state">(undefined)</h5>
       <a class="ref-link" href="#top">Top</a>
     </div>
     <div
@@ -128,7 +130,7 @@
             },
             'listOfGeoviewLayerConfig': [
               {
-                'geoviewLayerId': 'vectorTilesLYR1',
+                'geoviewLayerId': 'vectorTilesLYR2',
                 'geoviewLayerName': {
                   'en': 'new basemap'
                 },
@@ -162,6 +164,7 @@
 
     <div class="map-title-holder">
       <h4 id="HLYR3">3. Vector Tiles olms library no GeoView</h4>
+      &nbsp;<h5 id="HLYR3-state">(undefined)</h5>
       <a class="ref-link" href="#top">Top</a>
     </div>
     <div id="LYR3" style="width: 100%; height:400px"></div>
@@ -190,6 +193,43 @@
           };
         }
       });
-    </script>
+
+      window.setInterval(() => {
+        const displayField1 = document.getElementById('HLYR1-state');
+        const geoviewLayers = cgpv.api.maps?.LYR1?.layer?.geoviewLayers;
+        if (geoviewLayers) {
+          const output = Object.keys(cgpv.api.maps?.LYR1?.layer?.geoviewLayers).reduce((outputValue, layerId) => {
+            const stateValue = cgpv.api.maps?.LYR1?.layer?.geoviewLayers[layerId].layerPhase;
+            return `${outputValue}${layerId}: ${stateValue}, `;
+          }, '(');
+          displayField1.textContent = output ? `${output.slice(0, -2)})` : '(undefined)';
+        } else displayField1.textContent = '(undefined)';
+      }, 250)
+
+      window.setInterval(() => {
+        const displayField2 = document.getElementById('HLYR2-state');
+        const geoviewLayers = cgpv.api.maps?.LYR2?.layer?.geoviewLayers;
+        if (geoviewLayers) {
+          const output = Object.keys(cgpv.api.maps?.LYR2?.layer?.geoviewLayers).reduce((outputValue, layerId) => {
+            const stateValue = cgpv.api.maps?.LYR2?.layer?.geoviewLayers[layerId].layerPhase;
+            return `${outputValue}${layerId}: ${stateValue}, `;
+          }, '(');
+          displayField2.textContent = output ? `${output.slice(0, -2)})` : '(undefined)';
+        } else displayField2.textContent = '(undefined)';
+      }, 250)
+
+      window.setInterval(() => {
+        const displayField3 = document.getElementById('HLYR3-state');
+        const geoviewLayers = cgpv.api.maps?.LYR3?.layer?.geoviewLayers;
+        if (geoviewLayers) {
+          const output = Object.keys(cgpv.api.maps?.LYR3?.layer?.geoviewLayers).reduce((outputValue, layerId) => {
+            const stateValue = cgpv.api.maps?.LYR3?.layer?.geoviewLayers[layerId].layerPhase;
+            return `${outputValue}${layerId}: ${stateValue}, `;
+          }, '(');
+          displayField3.textContent = output ? `${output.slice(0, -2)})` : '(undefined)';
+        } else displayField3.textContent = '(undefined)';
+      }, 250)
+
+</script>
   </body>
 </html>

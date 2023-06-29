@@ -130,6 +130,7 @@ export class VectorTiles extends AbstractGeoViewRaster {
    * @returns {Promise<void>} A promise that the execution is completed.
    */
   protected getServiceMetadata(): Promise<void> {
+    this.layerPhase = 'getServiceMetadata';
     const promisedExecution = new Promise<void>((resolve) => {
       const metadataUrl = getLocalizedValue(this.metadataAccessPath, this.mapId);
       if (metadataUrl) {
@@ -282,6 +283,7 @@ export class VectorTiles extends AbstractGeoViewRaster {
    */
   protected processLayerMetadata(layerEntryConfig: TypeTileLayerEntryConfig): Promise<void> {
     const promiseOfExecution = new Promise<void>((resolve) => {
+      this.layerPhase = 'processLayerMetadata';
       if (!this.metadata) resolve();
       else {
         // TODO: Clean this up from testing
@@ -362,9 +364,11 @@ export class VectorTiles extends AbstractGeoViewRaster {
       // ! by default the value is 3857. This seems wrong as it is 3978 in metadata
       map.getLayers().forEach((layer) => {
         const mapboxSource = layer.get('mapbox-source');
+        // eslint-disable-next-line no-console
         console.log(mapboxStyle.sources[mapboxSource]);
         if (mapboxSource && mapboxStyle.sources[mapboxSource].type === 'vector') {
           const source = (layer as VectorTileLayer).getSource();
+          // eslint-disable-next-line no-console
           console.log(source);
           // layer.setSource(
           //   new VectorTileSource({
