@@ -40,6 +40,7 @@ import ZoomOutSearchIcon from '@mui/icons-material/ZoomOut';
 import FileUploadIcon from '@mui/icons-material/FileUpload';
 import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
 import BrowserNotSupportedIcon from '@mui/icons-material/BrowserNotSupported';
+import EmojiPeopleIcon from '@mui/icons-material/EmojiPeople';
 
 export {
   Layers as LayersIcon,
@@ -87,4 +88,5 @@ export {
   FileUploadIcon,
   MoreHorizIcon,
   BrowserNotSupportedIcon,
+  EmojiPeopleIcon,
 };

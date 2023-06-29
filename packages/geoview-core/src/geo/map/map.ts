@@ -404,7 +404,7 @@ export class MapViewer {
    * Zoom to the specified extent.
    *
    * @param {Extent} extent The extent to zoom to.
-   * @param {FitOptions} zoomOptions The options to configure the zoomToExtent (default: { padding: [100, 100, 100, 100], maxZoom: 11 }).
+   * @param {FitOptions} options The options to configure the zoomToExtent (default: { padding: [100, 100, 100, 100], maxZoom: 11 }).
    */
   zoomToExtent(extent: Extent, options: FitOptions = { padding: [100, 100, 100, 100], maxZoom: 11, duration: 1000 }) {
     this.map.getView().fit(extent, options);

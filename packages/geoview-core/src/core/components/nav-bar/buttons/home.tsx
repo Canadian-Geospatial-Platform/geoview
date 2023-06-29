@@ -1,6 +1,8 @@
 import { useContext } from 'react';
 
 import { fromLonLat } from 'ol/proj';
+import { Extent } from 'ol/extent';
+import { FitOptions } from 'ol/View';
 
 import { MapContext } from '../../../app-start';
 
@@ -46,14 +48,12 @@ export default function Home(props: HomeProps): JSX.Element {
 
     const projectionConfig = api.projection.projections[currentProjection];
 
-    api
-      .map(mapId)
-      .map.getView()
-      .animate({
-        center: fromLonLat(center, projectionConfig),
-        duration: 500,
-        zoom,
-      });
+    const projectedCoords = fromLonLat(center, projectionConfig);
+    const extent: Extent = [...projectedCoords, ...projectedCoords];
+
+    const options: FitOptions = { padding: [100, 100, 100, 100], maxZoom: zoom, duration: 500 };
+
+    api.map(mapId).zoomToExtent(extent, options);
   }
 
   return (
