@@ -121,7 +121,7 @@ importers:
       '@mui/styles': ^5.13.1
       '@mui/system': ^5.13.1
       '@mui/x-data-grid': ^5.13.1
-      '@nieuwlandgeo/sldreader': ^0.3.0
+      '@nieuwlandgeo/sldreader': ^0.3.1
       '@types/create-react-class': ^15.6.3
       '@types/flux': ^3.1.11
       '@types/glob': ^7.2.0
@@ -195,7 +195,7 @@ importers:
       webpack-cli: ^4.9.2
       webpack-dev-server: ^4.7.4
       webpack-merge: ^5.8.0
-      yet-another-react-lightbox: ^3.11.1
+      yet-another-react-lightbox: ^3.11.3
     dependencies:
       '@emotion/react': 11.11.1_s55kszw6pq5iqmorlydcdh42pa
       '@emotion/styled': 11.11.0_no77f2murwbnail7sv6vzvz7ki
@@ -204,7 +204,7 @@ importers:
       '@mui/styles': 5.13.2_s55kszw6pq5iqmorlydcdh42pa
       '@mui/system': 5.13.5_ixhfk55ybdwyytvt4qwwrnwpry
       '@mui/x-data-grid': 5.17.26_doemgv7cd7mkh6fau6v5pgi7mq
-      '@nieuwlandgeo/sldreader': 0.3.0_ol@7.4.0
+      '@nieuwlandgeo/sldreader': 0.3.1_ol@7.4.0
       ajv: 8.12.0
       axios: 1.4.0
       dayjs: 1.11.8
@@ -228,7 +228,7 @@ importers:
       react-test-renderer: 17.0.2_react@17.0.2
       sanitize-html: 2.10.0
       sql.js: 1.8.0
-      yet-another-react-lightbox: 3.11.1_sfoxds7t5ydpegc3knd667wn6m
+      yet-another-react-lightbox: 3.11.3_sfoxds7t5ydpegc3knd667wn6m
     devDependencies:
       '@babel/cli': 7.22.5_@babel+core@7.22.5
       '@babel/core': 7.22.5
@@ -2844,8 +2844,8 @@ packages:
       eslint-scope: 5.1.1
     dev: true
 
-  /@nieuwlandgeo/sldreader/0.3.0_ol@7.4.0:
-    resolution: {integrity: sha512-oxuHLFu5AAlNgg1wd9X+58ez7EoH5O56dXwvL+/KdPAn+fxFm9w9NkOist5GUR3FCZjqfbZwus7VSIgYPtMEVQ==}
+  /@nieuwlandgeo/sldreader/0.3.1_ol@7.4.0:
+    resolution: {integrity: sha512-gP1dw7ftVT34L6nv8dDtERNIJYENwe2I37Vwdm3NQH+KKHDk7vwrTANxvgKgbNybMXHF29jvI97Z/bkZYBqdxQ==}
     peerDependencies:
       ol: '>= 5.3.0'
     dependencies:
@@ -9594,8 +9594,8 @@ packages:
       yargs-parser: 20.2.9
     dev: true
 
-  /yet-another-react-lightbox/3.11.1_sfoxds7t5ydpegc3knd667wn6m:
-    resolution: {integrity: sha512-j/AzvthN8fYU/vgVtiQ6lRp2ZWR0EyCmkLYXDNSHYTXWoSClBRZDrbIll4yME3ZnbbvPc6uZ100nYwItkiXwfw==}
+  /yet-another-react-lightbox/3.11.3_sfoxds7t5ydpegc3knd667wn6m:
+    resolution: {integrity: sha512-/Wb6QPXeg51XJIfFp+mwQlvoz+WJsSSZbBDRJopB6hL8SQWpqPKHxQcc3zpNmhgZWKtMZn6/XR1D6GrY/zPCWw==}
     engines: {node: '>=14'}
     peerDependencies:
       react: '>=16.8.0'
