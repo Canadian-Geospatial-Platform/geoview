@@ -231,7 +231,7 @@ export function MousePosition(props: MousePositionProps): JSX.Element {
   }, []);
 
   return (
-    <Tooltip title={t('mapnav.coordinates')!}>
+    <Tooltip title={t('mapnav.coordinates')!} placement="top">
       <button type="button" onClick={() => switchPositionMode()} className={classes.mousePositionContainer}>
         <Box className={classes.mousePositionTextContainer}>
           <Box id="mousePositionWrapper" sx={{ display: !expanded ? 'none' : 'block', transition: 'display 1ms ease-in 300ms' }}>

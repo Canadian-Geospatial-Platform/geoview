@@ -80,17 +80,7 @@ class FooterPanelPlugin extends AbstractPlugin {
     if (cgpv) {
       // access the api calls
       const { api } = cgpv;
-      const { displayLanguage, footerTabs, map } = api.map(mapId);
-
-      const mapContainer = map.getTargetElement().parentElement;
-      // Set size of map container based on whether footer-panel is collapsed or not
-      if (mapContainer) {
-        if (configObj?.collapsed === false) {
-          mapContainer.style.height = 'calc( 100% - 300px )';
-        } else {
-          mapContainer.style.height = 'calc( 100% - 55px )';
-        }
-      }
+      const { displayLanguage, footerTabs } = api.map(mapId);
 
       const defaultTabs = configObj?.tabs.defaultTabs as Array<string>;
       let tabsCounter = 0;
@@ -105,44 +95,44 @@ class FooterPanelPlugin extends AbstractPlugin {
         tabsCounter++;
       }
 
-      // create the listener to return the details
-      if (defaultTabs.includes('details')) {
-        // create new tab and add the DetailComponent to the footer tab
-        const detailsTabValue = tabsCounter;
-        footerTabs.createFooterTab({
-          value: detailsTabValue,
-          label: this.translations[displayLanguage].details as string,
-          content: () => <DetailsItem mapId={mapId} />,
-        });
-        tabsCounter++;
-        // select the details tab when map click queries are done
-        api.event.on(
-          api.eventNames.GET_FEATURE_INFO.ALL_QUERIES_DONE,
-          (payload) => {
-            if (payloadIsAllQueriesDone(payload)) {
-              const { resultSets } = payload;
-              let features: TypeArrayOfFeatureInfoEntries = [];
-              Object.keys(resultSets).forEach((layerPath) => {
-                features = features.concat(resultSets[layerPath]!);
-              });
-              if (features.length > 0) {
-                footerTabs.selectFooterTab(detailsTabValue);
-              }
-            }
-          },
-          `${mapId}/$FeatureInfoLayerSet$`
-        );
-      }
+      // // create the listener to return the details
+      // if (defaultTabs.includes('details')) {
+      //   // create new tab and add the DetailComponent to the footer tab
+      //   const detailsTabValue = tabsCounter;
+      //   footerTabs.createFooterTab({
+      //     value: detailsTabValue,
+      //     label: this.translations[displayLanguage].details as string,
+      //     content: () => <DetailsItem mapId={mapId} />,
+      //   });
+      //   tabsCounter++;
+      //   // select the details tab when map click queries are done
+      //   api.event.on(
+      //     api.eventNames.GET_FEATURE_INFO.ALL_QUERIES_DONE,
+      //     (payload) => {
+      //       if (payloadIsAllQueriesDone(payload)) {
+      //         const { resultSets } = payload;
+      //         let features: TypeArrayOfFeatureInfoEntries = [];
+      //         Object.keys(resultSets).forEach((layerPath) => {
+      //           features = features.concat(resultSets[layerPath]!);
+      //         });
+      //         if (features.length > 0) {
+      //           footerTabs.selectFooterTab(detailsTabValue);
+      //         }
+      //       }
+      //     },
+      //     `${mapId}/$FeatureInfoLayerSet$`
+      //   );
+      // }
 
-      if (defaultTabs.includes('data-grid')) {
-        /// create new tab and add the DataGridComponent to the footer tab
-        footerTabs.createFooterTab({
-          value: tabsCounter,
-          label: this.translations[displayLanguage].dataGrid as string,
-          content: () => <DataItem mapId={mapId} />,
-        });
-        tabsCounter++;
-      }
+      // if (defaultTabs.includes('data-grid')) {
+      //   /// create new tab and add the DataGridComponent to the footer tab
+      //   footerTabs.createFooterTab({
+      //     value: tabsCounter,
+      //     label: this.translations[displayLanguage].dataGrid as string,
+      //     content: () => <DataItem mapId={mapId} />,
+      //   });
+      //   tabsCounter++;
+      // }
 
       // TODO add custom detail reusable component when done
 
