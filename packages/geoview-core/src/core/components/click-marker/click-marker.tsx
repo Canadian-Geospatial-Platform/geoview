@@ -10,14 +10,17 @@ import { fromLonLat } from 'ol/proj';
 import { getCenter } from 'ol/extent';
 import { Fill, Stroke, Style } from 'ol/style';
 import CircleStyle from 'ol/style/Circle';
+import { getUid } from 'ol';
 import { MapContext } from '../../app-start';
 
-import { TypeFeatureInfoEntry, api, payloadIsAllQueriesDone } from '../../../app';
+import { PayloadBaseClass, TypeFeatureInfoEntry, api, payloadIsAllQueriesDone } from '../../../app';
 import { EVENT_NAMES } from '../../../api/events/event-types';
 import { ClickMapMarker } from '../../../ui';
 
 import { payloadIsAMarkerDefinition } from '../../../api/events/payloads/marker-definition-payload';
 import { payloadIsAMapMouseEvent } from '../../../api/events/payloads/map-mouse-event-payload';
+import { featureHighlightPayload, payloadIsAFeatureHighlight } from '../../../api/events/payloads/feature-highlight-payload';
+import { clearHighlightsPayload, payloadIsAClearHighlights } from '../../../api/events/payloads/clear-highlights-payload';
 
 /**
  * Create a react element to display a marker when a user clicks on
@@ -50,20 +53,14 @@ export function ClickMarker(): JSX.Element {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const overlayLayer = new VectorLayer({ source: animationSource, map: api.maps[mapId].map });
 
-  // create feature to animate for selection
-  const geom = new Point(fromLonLat([0, 0]));
-  const animationPoint = new Feature(geom);
+  // create styles to animate selections
   const blankStyle = new Style({});
   const whiteFill = new Fill({ color: [255, 255, 255, 0.3] });
   const whiteStyle = new Style({ stroke: new Stroke({ color: 'white', width: 1.25 }), fill: whiteFill });
-  animationPoint.setStyle(blankStyle);
-  animationPoint.setId('animationPoint');
-  animationSource.addFeature(animationPoint);
 
-  // variables to hold ids that need to be cleared
-  let intervalId: NodeJS.Timeout | undefined;
-  let multiPointIds: string[] = [];
-  let multiIntervals: NodeJS.Timer[] = [];
+  // variables to hold info about selected features
+  let featureIds: string[] = [];
+  let intervals: NodeJS.Timer[] = [];
 
   /**
    * Remove the marker icon
@@ -88,9 +85,9 @@ export function ClickMarker(): JSX.Element {
 
   /**
    * Set animation for points
+   *
    * @param {number} radius max radius of circle to draw
    * @param {Feature<Point>} pointFeature the feature to animate
-   *
    * @returns {NodeJS.Timer} The interval timer.
    */
   function pointInterval(radius: number, pointFeature: Feature<Point>): NodeJS.Timer {
@@ -114,8 +111,8 @@ export function ClickMarker(): JSX.Element {
 
   /**
    * Set animation for polygons
-   * @param {Geometry} geometry the geometry to animate
    *
+   * @param {Geometry} geometry the geometry to animate
    * @returns {NodeJS.Timer} The interval timer.
    */
   function polygonInterval(geometry: Geometry, feature: Feature): NodeJS.Timer {
@@ -134,107 +131,171 @@ export function ClickMarker(): JSX.Element {
   }
 
   /**
+   * Style, register, and add feature for animation
+   *
+   * @param {Feature} feature the feature to add
+   * @param {string} id the id of the feature
+   */
+  function addFeatureAnimation(feature: Feature, id: string) {
+    feature.setStyle(whiteStyle);
+    feature.setId(id);
+    featureIds.push(id);
+    animationSource.addFeature(feature);
+  }
+
+  /**
    * Animate selected point
-   * @param {TypeFeatureInfoEntry} feature the feature to animate
+   *
+   * @param {TypeFeatureInfoEntry} feature the point feature to animate
    */
   function animateSelection(feature: TypeFeatureInfoEntry) {
     const { height, width } = feature.featureIcon;
     const radius = Math.min(height, width) / 2 - 2 < 7 ? 7 : Math.min(height, width) / 2 - 2;
     const center = getCenter(feature.extent);
-    (animationPoint.getGeometry() as Point).setCoordinates(center);
-    intervalId = pointInterval(radius, animationPoint);
+    const newPoint = new Point(center);
+    const newFeature = new Feature(newPoint);
+    const featureUid = getUid(feature.geometry);
+    addFeatureAnimation(newFeature, featureUid);
+
+    const multiIntervalId = pointInterval(radius, newFeature);
+    intervals.push(multiIntervalId);
   }
 
   /**
    * Animate all points in MultiPoint feature
-   * @param {TypeFeatureInfoEntry} feature the feature to animate
+   *
+   * @param {TypeFeatureInfoEntry} feature the MultiPoint feature to animate
    */
   function animateMultiPoint(feature: TypeFeatureInfoEntry) {
     const geometry = feature.geometry!.getGeometry() as MultiPoint;
     const { height, width } = feature.featureIcon;
     const radius = Math.min(height, width) / 2 - 2 < 7 ? 7 : Math.min(height, width) / 2 - 2;
     const coordinates: Coordinate[] = geometry.getCoordinates();
+    const featureUid = getUid(feature.geometry);
 
     for (let i = 0; i < coordinates.length; i++) {
       const newPoint = new Point(coordinates[i]);
       const newFeature = new Feature(newPoint);
-      newFeature.setStyle(whiteStyle);
-      newFeature.setId(`multiPoint${i}`);
-      multiPointIds.push(`multiPoint${i}`);
-      animationSource.addFeature(newFeature);
+      const id = `${featureUid}-${i}`;
+      addFeatureAnimation(newFeature, id);
 
       const multiIntervalId = pointInterval(radius, newFeature);
-      multiIntervals.push(multiIntervalId);
+      intervals.push(multiIntervalId);
     }
   }
 
   /**
    * Animate selected polygon
-   * @param {Geometry} geometry the geometry of the polygon to select
+   *
+   * @param {TypeFeatureInfoEntry} feature the feature Polygon to animate
    */
-  function animatePolygon(geometry: Geometry) {
-    (animationPoint as Feature).setGeometry(geometry);
-    animationPoint.setStyle(whiteStyle);
+  function animatePolygon(feature: TypeFeatureInfoEntry) {
+    const newPolygon = feature.geometry!.getGeometry();
+    const newFeature = new Feature(newPolygon);
+    const featureUid = getUid(feature.geometry);
+    addFeatureAnimation(newFeature, featureUid);
 
-    intervalId = polygonInterval(geometry, animationPoint);
+    const multiIntervalId = polygonInterval(feature.geometry!.getGeometry()! as Geometry, newFeature);
+    intervals.push(multiIntervalId);
   }
 
   /**
    * Animate all points in MultiPolygon feature
-   * @param {TypeFeatureInfoEntry} feature the feature to animate
+   *
+   * @param {TypeFeatureInfoEntry} feature the multiPolygon feature to animate
    */
-  function animateMultiPolygon(geometry: Geometry) {
-    const polygons = (geometry as MultiPolygon).getPolygons();
+  function animateMultiPolygon(feature: TypeFeatureInfoEntry) {
+    const polygons = (feature.geometry?.getGeometry() as MultiPolygon).getPolygons();
+    const featureUid = getUid(feature.geometry);
 
     for (let i = 0; i < polygons.length; i++) {
       const newPolygon = polygons[i];
       const newFeature = new Feature(newPolygon);
-      newFeature.setStyle(whiteStyle);
-      newFeature.setId(`multiPoint${i}`);
-      multiPointIds.push(`multiPoint${i}`);
-      animationSource.addFeature(newFeature);
+      const id = `${featureUid}-${i}`;
+      addFeatureAnimation(newFeature, id);
 
       const multiIntervalId = polygonInterval(polygons[i], newFeature);
-      multiIntervals.push(multiIntervalId);
+      intervals.push(multiIntervalId);
     }
   }
 
   /**
    * Animate selected lineString
-   * @param {Geometry} geometry the geometry of the lineString to select
+   *
+   * @param {TypeFeatureInfoEntry} feature the lineString feature to animate
    */
-  function animateLineString(geometry: Geometry) {
-    (animationPoint as Feature).setGeometry(geometry);
+  function animateLineString(feature: TypeFeatureInfoEntry) {
+    const newLineString = feature.geometry?.getGeometry();
+    const newFeature = new Feature(newLineString);
+    const featureUid = getUid(feature.geometry);
+    addFeatureAnimation(newFeature, featureUid);
     let counter = 0;
-    intervalId = setInterval(() => {
-      if (!(counter % 8)) animationPoint.setStyle(whiteStyle);
-      else animationPoint.setStyle(blankStyle);
-      counter++;
-      if (counter > 9999) counter = 0;
-    }, 250);
+    intervals.push(
+      setInterval(() => {
+        if (!(counter % 8)) newFeature.setStyle(whiteStyle);
+        else newFeature.setStyle(blankStyle);
+        counter++;
+        if (counter > 9999) counter = 0;
+      }, 250)
+    );
   }
 
   /**
    * Reset animation feature and clear intervals
-   * @param {Geometry} geometry the geometry of the lineString to select
+   *
+   * @param {string} id the Uid of the feature to deselect, or 'all' to clear all
    */
-  function resetAnimation() {
-    if (intervalId) clearInterval(intervalId);
-
-    if (multiPointIds) {
-      for (let i = 0; i < multiPointIds.length; i++) {
-        animationSource.removeFeature(animationSource.getFeatureById(multiPointIds[i]) as Feature);
-        clearInterval(multiIntervals[i]);
+  function resetAnimation(id: string) {
+    if (id === 'all' && featureIds.length) {
+      for (let i = 0; i < featureIds.length; i++) {
+        animationSource.removeFeature(animationSource.getFeatureById(featureIds[i]) as Feature);
+        clearInterval(intervals[i]);
       }
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-      multiPointIds = [];
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-      multiIntervals = [];
+      featureIds = [];
+      intervals = [];
+    } else if (featureIds.length) {
+      for (let i = featureIds.length - 1; i >= 0; i--) {
+        if (featureIds[i] === id || featureIds[i].startsWith(`${id}-`)) {
+          if (animationSource.getFeatureById(featureIds[i]))
+            animationSource.removeFeature(animationSource.getFeatureById(featureIds[i]) as Feature);
+          clearInterval(intervals[i]);
+          intervals.splice(i, 1);
+          featureIds.splice(i, 1);
+        }
+      }
     }
-
-    (animationPoint as Feature).setGeometry(geom);
-    animationPoint.setStyle(blankStyle);
   }
+
+  /**
+   * Highlight a feature
+   *
+   * @param {TypeFeatureInfoEntry} feature the feature to highlight
+   */
+  function highlightFeature(feature: TypeFeatureInfoEntry) {
+    removeIcon();
+    const geometry = feature.geometry!.getGeometry();
+    if (geometry instanceof Polygon) {
+      animatePolygon(feature);
+    } else if (geometry instanceof LineString || geometry instanceof MultiLineString) {
+      animateLineString(feature);
+    } else if (geometry instanceof MultiPoint) {
+      animateMultiPoint(feature);
+    } else if (geometry instanceof MultiPolygon) {
+      animateMultiPolygon(feature);
+    } else animateSelection(feature);
+  }
+
+  const highlightCallbackFunction = (payload: PayloadBaseClass) => {
+    if (payloadIsAFeatureHighlight(payload)) {
+      highlightFeature(payload.feature);
+    }
+  };
+
+  const clearHighlightCallbackFunction = (payload: PayloadBaseClass) => {
+    if (payloadIsAClearHighlights(payload)) {
+      resetAnimation(payload.id);
+    }
+  };
 
   useEffect(() => {
     const { map } = api.map(mapId);
@@ -249,7 +310,7 @@ export function ClickMarker(): JSX.Element {
         if (payloadIsAMapMouseEvent(payload)) {
           removeIcon();
           markerCoordinates.current = payload.coordinates.lnglat;
-          resetAnimation();
+          api.event.emit(clearHighlightsPayload(EVENT_NAMES.FEATURE_HIGHLIGHT.EVENT_CLEAR_HIGHLIGHTS, mapId, 'all'));
         }
       },
       mapId
@@ -259,7 +320,6 @@ export function ClickMarker(): JSX.Element {
       EVENT_NAMES.GET_FEATURE_INFO.ALL_QUERIES_DONE,
       (payload) => {
         if (payloadIsAllQueriesDone(payload)) {
-          resetAnimation();
           const { resultSets } = payload;
           let feature: TypeFeatureInfoEntry | undefined;
 
@@ -274,16 +334,7 @@ export function ClickMarker(): JSX.Element {
           });
 
           if (feature) {
-            const geometry = feature.geometry?.getGeometry();
-            if (geometry instanceof Polygon) {
-              animatePolygon(geometry);
-            } else if (geometry instanceof LineString || geometry instanceof MultiLineString) {
-              animateLineString(geometry);
-            } else if (geometry instanceof MultiPoint) {
-              animateMultiPoint(feature);
-            } else if (geometry instanceof MultiPolygon) {
-              animateMultiPolygon(geometry);
-            } else animateSelection(feature);
+            api.event.emit(featureHighlightPayload(EVENT_NAMES.FEATURE_HIGHLIGHT.EVENT_HIGHLIGHT_FEATURE, mapId, feature));
           } else showMarkerIcon(markerCoordinates.current);
         }
       },
@@ -309,11 +360,16 @@ export function ClickMarker(): JSX.Element {
       mapId
     );
 
+    api.event.on(EVENT_NAMES.FEATURE_HIGHLIGHT.EVENT_HIGHLIGHT_FEATURE, highlightCallbackFunction, mapId);
+    api.event.on(EVENT_NAMES.FEATURE_HIGHLIGHT.EVENT_CLEAR_HIGHLIGHTS, clearHighlightCallbackFunction, mapId);
+
     return () => {
       api.event.off(EVENT_NAMES.GET_FEATURE_INFO.ALL_QUERIES_DONE, mapId);
       api.event.off(EVENT_NAMES.MAP.EVENT_MAP_SINGLE_CLICK, mapId);
       api.event.off(EVENT_NAMES.MARKER_ICON.EVENT_MARKER_ICON_SHOW, mapId);
       api.event.off(EVENT_NAMES.MARKER_ICON.EVENT_MARKER_ICON_HIDE, mapId);
+      api.event.off(EVENT_NAMES.FEATURE_HIGHLIGHT.EVENT_HIGHLIGHT_FEATURE, mapId, highlightCallbackFunction);
+      api.event.off(EVENT_NAMES.FEATURE_HIGHLIGHT.EVENT_CLEAR_HIGHLIGHTS, mapId, clearHighlightCallbackFunction);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
