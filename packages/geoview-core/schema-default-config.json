@@ -26,7 +26,7 @@
   "externalPackages": [],
   "serviceUrls": {
     "keys": "https://geocore.api.geo.ca",
-    "geolocator": "https://geolocator.api.geo.ca?keys=geonames,nominatim"
+    "geolocator": "https://geolocator.api.geo.ca?keys=geonames,nominatim,locate"
   },
   "suportedLanguages": [
     "en",
