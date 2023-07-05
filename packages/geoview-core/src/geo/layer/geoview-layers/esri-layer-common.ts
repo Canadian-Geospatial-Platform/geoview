@@ -28,6 +28,7 @@ import { codedValueType, rangeDomainType } from '../../../api/events/payloads/ge
  * @returns {Promise<void>} A promise that the execution is completed.
  */
 export function commonGetServiceMetadata(this: EsriDynamic | EsriFeature, resolve: (value: void | PromiseLike<void>) => void) {
+  this.layerPhase = 'getServiceMetadata';
   const metadataUrl = getLocalizedValue(this.metadataAccessPath, this.mapId);
   if (metadataUrl) {
     getXMLHttpRequest(`${metadataUrl}?f=json`).then((metadataString) => {
@@ -310,6 +311,7 @@ export function commonProcessLayerMetadata(
   resolve: (value: void | PromiseLike<void>) => void,
   layerEntryConfig: TypeLayerEntryConfig
 ) {
+  this.layerPhase = 'processLayerMetadata';
   // User-defined groups do not have metadata provided by the service endpoint.
   if (layerEntryIsGroupLayer(layerEntryConfig) && !layerEntryConfig.isMetadataLayerGroup) resolve();
   else {

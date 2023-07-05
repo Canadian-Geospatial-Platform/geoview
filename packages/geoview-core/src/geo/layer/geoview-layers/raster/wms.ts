@@ -109,6 +109,7 @@ export class WMS extends AbstractGeoViewRaster {
    */
   protected getServiceMetadata(): Promise<void> {
     const promisedExecution = new Promise<void>((resolve) => {
+      this.layerPhase = 'getServiceMetadata';
       const metadataUrl = getLocalizedValue(this.metadataAccessPath, this.mapId);
       if (metadataUrl) {
         const metadataAccessPathIsXmlFile = metadataUrl.slice(-4).toLowerCase() === '.xml';
@@ -175,13 +176,19 @@ export class WMS extends AbstractGeoViewRaster {
    */
   private fetchServiceMetadata(url: string): Promise<TypeJsonObject | null> {
     const promisedJsonObject = new Promise<TypeJsonObject | null>((resolve) => {
-      fetch(url).then((response) => {
-        response.text().then((capabilitiesString) => {
-          const parser = new WMSCapabilities();
-          const metadata: TypeJsonObject = parser.read(capabilitiesString);
-          resolve(metadata);
+      fetch(url)
+        .then((response) => {
+          response.text().then((capabilitiesString) => {
+            const parser = new WMSCapabilities();
+            const metadata: TypeJsonObject = parser.read(capabilitiesString);
+            resolve(metadata);
+          });
+        })
+        .catch(() => {
+          this.layerState = 'ERROR';
+          this.layerPhase = 'fetchServiceMetadata';
+          resolve(null);
         });
-      });
     });
     return promisedJsonObject;
   }
@@ -541,6 +548,7 @@ export class WMS extends AbstractGeoViewRaster {
    * @returns {Promise<void>} A promise that the layer configuration has its metadata processed.
    */
   protected processLayerMetadata(layerEntryConfig: TypeLayerEntryConfig): Promise<void> {
+    this.layerPhase = 'processLayerMetadata';
     const promiseOfExecution = new Promise<void>((resolve) => {
       if (geoviewEntryIsWMS(layerEntryConfig)) {
         const layerCapabilities = this.getLayerMetadataEntry(layerEntryConfig.layerId)!;
@@ -655,40 +663,44 @@ export class WMS extends AbstractGeoViewRaster {
           });
           if (featureInfoUrl) {
             let featureMember: TypeJsonObject | undefined;
-            axios(featureInfoUrl).then((response) => {
-              if (infoFormat === 'text/xml') {
-                const xmlDomResponse = new DOMParser().parseFromString(response.data, 'text/xml');
-                const jsonResponse = xmlToJson(xmlDomResponse);
-                // ! TODO: We should use a WMS format setting in the schema to decide what feature info response interpreter to use
-                // ! For the moment, we try to guess the response format based on properties returned from the query
-                const featureCollection = this.getAttribute(jsonResponse, 'FeatureCollection');
-                if (featureCollection) featureMember = this.getAttribute(featureCollection, 'featureMember');
-                else {
-                  const featureInfoResponse = this.getAttribute(jsonResponse, 'GetFeatureInfoResponse');
-                  if (featureInfoResponse?.Layer) {
-                    featureMember = {};
-                    const layerName =
-                      featureInfoResponse.Layer['@attributes'] && featureInfoResponse.Layer['@attributes'].name
-                        ? (featureInfoResponse.Layer['@attributes'].name as string)
-                        : 'undefined';
-                    featureMember['Layer name'] = toJsonObject({ '#text': layerName });
-                    if (featureInfoResponse.Layer.Attribute && featureInfoResponse.Layer.Attribute['@attributes']) {
-                      const fieldName = featureInfoResponse.Layer.Attribute['@attributes'].name
-                        ? (featureInfoResponse.Layer.Attribute['@attributes'].name as string)
-                        : 'undefined';
-                      const fieldValue = featureInfoResponse.Layer.Attribute['@attributes'].value
-                        ? (featureInfoResponse.Layer.Attribute['@attributes'].value as string)
-                        : 'undefined';
-                      featureMember[fieldName] = toJsonObject({ '#text': fieldValue });
+            axios(featureInfoUrl)
+              .then((response) => {
+                if (infoFormat === 'text/xml') {
+                  const xmlDomResponse = new DOMParser().parseFromString(response.data, 'text/xml');
+                  const jsonResponse = xmlToJson(xmlDomResponse);
+                  // ! TODO: We should use a WMS format setting in the schema to decide what feature info response interpreter to use
+                  // ! For the moment, we try to guess the response format based on properties returned from the query
+                  const featureCollection = this.getAttribute(jsonResponse, 'FeatureCollection');
+                  if (featureCollection) featureMember = this.getAttribute(featureCollection, 'featureMember');
+                  else {
+                    const featureInfoResponse = this.getAttribute(jsonResponse, 'GetFeatureInfoResponse');
+                    if (featureInfoResponse?.Layer) {
+                      featureMember = {};
+                      const layerName =
+                        featureInfoResponse.Layer['@attributes'] && featureInfoResponse.Layer['@attributes'].name
+                          ? (featureInfoResponse.Layer['@attributes'].name as string)
+                          : 'undefined';
+                      featureMember['Layer name'] = toJsonObject({ '#text': layerName });
+                      if (featureInfoResponse.Layer.Attribute && featureInfoResponse.Layer.Attribute['@attributes']) {
+                        const fieldName = featureInfoResponse.Layer.Attribute['@attributes'].name
+                          ? (featureInfoResponse.Layer.Attribute['@attributes'].name as string)
+                          : 'undefined';
+                        const fieldValue = featureInfoResponse.Layer.Attribute['@attributes'].value
+                          ? (featureInfoResponse.Layer.Attribute['@attributes'].value as string)
+                          : 'undefined';
+                        featureMember[fieldName] = toJsonObject({ '#text': fieldValue });
+                      }
                     }
                   }
+                } else featureMember = { plain_text: { '#text': response.data } };
+                if (featureMember) {
+                  const featureInfoResult = this.formatWmsFeatureInfoResult(featureMember, layerConfig, clickCoordinate);
+                  resolve(featureInfoResult);
                 }
-              } else featureMember = { plain_text: { '#text': response.data } };
-              if (featureMember) {
-                const featureInfoResult = this.formatWmsFeatureInfoResult(featureMember, layerConfig, clickCoordinate);
-                resolve(featureInfoResult);
-              }
-            });
+              })
+              .catch(() => {
+                resolve([]);
+              });
           } else resolve([]);
         }
       }

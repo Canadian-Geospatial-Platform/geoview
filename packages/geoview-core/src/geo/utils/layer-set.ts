@@ -57,7 +57,7 @@ export class LayerSet {
                   this.resultSets[layerPath] = undefined;
                   clearInterval(layerInterval);
                   api.event.emit(LayerSetPayload.createLayerSetUpdatedPayload(this.mapId, this.layerSetId));
-                } else if (api.maps[this.mapId].layer.geoviewLayers[layerPath.split('/')[0]].loadError) clearInterval(layerInterval);
+                }
               }, 250);
             } else {
               delete this.resultSets[layerPath];

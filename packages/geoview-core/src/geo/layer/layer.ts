@@ -50,7 +50,7 @@ export class Layer {
   vector: Vector | undefined;
 
   // order to load layers
-  layerOrder: string[];
+  layerOrder: string[] = [];
 
   /** used to reference the map id */
   private mapId: string;
@@ -59,26 +59,9 @@ export class Layer {
    * Initialize layer types and listen to add/remove layer events from outside
    *
    * @param {string} mapId a reference to the map
-   * @param {TypeGeoviewLayerConfig} layersConfig an optional array containing layers passed within the map config
    */
-  constructor(mapId: string, geoviewLayerConfigs?: TypeGeoviewLayerConfig[]) {
+  constructor(mapId: string) {
     this.mapId = mapId;
-
-    const validGeoviewLayerConfigs = this.deleteDuplicatGeoviewLayerConfig(geoviewLayerConfigs);
-
-    // set order for layers to appear on the map according to config
-    this.layerOrder = [];
-    validGeoviewLayerConfigs.forEach((layer) => {
-      if (layer.geoviewLayerId) {
-        // layer order reversed so highest index is top layer
-        this.layerOrder.unshift(layer.geoviewLayerId);
-        // layers without id uses sublayer ids
-      } else if (layer.listOfLayerEntryConfig !== undefined) {
-        layer.listOfLayerEntryConfig.forEach((subLayer) => {
-          if (subLayer.layerId) this.layerOrder.unshift(subLayer.layerId);
-        });
-      }
-    });
 
     this.vector = new Vector(this.mapId);
 
@@ -168,8 +151,30 @@ export class Layer {
       },
       this.mapId
     );
+  }
 
-    // Load layers that was passed in with the map config
+  /**
+   * Load layers that was passed in with the map config
+   *
+   * @param {TypeGeoviewLayerConfig[]} layersConfig an optional array containing layers passed within the map config
+   */
+  loadListOfGeoviewLayer(geoviewLayerConfigs?: TypeGeoviewLayerConfig[]) {
+    const validGeoviewLayerConfigs = this.deleteDuplicatGeoviewLayerConfig(geoviewLayerConfigs);
+
+    // set order for layers to appear on the map according to config
+    this.layerOrder = [];
+    validGeoviewLayerConfigs.forEach((layer) => {
+      if (layer.geoviewLayerId) {
+        // layer order reversed so highest index is top layer
+        this.layerOrder.unshift(layer.geoviewLayerId);
+        // layers without id uses sublayer ids
+      } else if (layer.listOfLayerEntryConfig !== undefined) {
+        layer.listOfLayerEntryConfig.forEach((subLayer) => {
+          if (subLayer.layerId) this.layerOrder.unshift(subLayer.layerId);
+        });
+      }
+    });
+
     if (validGeoviewLayerConfigs.length > 0) {
       validGeoviewLayerConfigs.forEach((geoviewLayerConfig) =>
         api.event.emit(layerConfigPayload(EVENT_NAMES.LAYER.EVENT_ADD_LAYER, this.mapId, geoviewLayerConfig))
@@ -188,10 +193,9 @@ export class Layer {
       const validGeoviewLayerConfigs = geoviewLayerConfigs.filter((geoviewLayerConfigToCreate, configToCreateIndex) => {
         for (let configToTestIndex = 0; configToTestIndex < geoviewLayerConfigs.length; configToTestIndex++)
           if (
-            configToCreateIndex !== configToTestIndex &&
             geoviewLayerConfigToCreate.geoviewLayerId === geoviewLayerConfigs[configToTestIndex].geoviewLayerId &&
             // We keep the first instance of the duplicat entry.
-            configToCreateIndex >= configToTestIndex
+            configToCreateIndex > configToTestIndex
           ) {
             this.printDuplicateGeoviewLayerConfigError(geoviewLayerConfigToCreate);
             return false;
@@ -270,6 +274,8 @@ export class Layer {
    * @param {any} geoviewLayer the layer config
    */
   private addToMap(geoviewLayer: AbstractGeoViewLayer): void {
+    // eslint-disable-next-line no-param-reassign
+    geoviewLayer.layerPhase = 'addToMap';
     // if the returned layer object has something in the layerLoadError, it is because an error was detected
     // do not add the layer to the map
     if (geoviewLayer.layerLoadError.length !== 0) {
@@ -287,20 +293,15 @@ export class Layer {
       });
     } else {
       // trigger the layer added event when layer is loaded on to the map
-      geoviewLayer.gvLayers?.once(['change', 'prerender'] as EventTypes[], () => {
-        if (!geoviewLayer.isLoaded) {
-          const layerInterval = setInterval(() => {
-            if (this.geoviewLayers[geoviewLayer.geoviewLayerId]) {
-              clearInterval(layerInterval);
-              api.event.emit(
-                GeoViewLayerPayload.createGeoviewLayerAddedPayload(`${this.mapId}/${geoviewLayer.geoviewLayerId}`, geoviewLayer)
-              );
-            }
-          }, 10);
-        }
+      geoviewLayer.gvLayers?.once('prerender' as EventTypes, () => {
+        if (geoviewLayer.layerState !== 'loaded')
+          api.event.emit(GeoViewLayerPayload.createGeoviewLayerAddedPayload(`${this.mapId}/${geoviewLayer.geoviewLayerId}`, geoviewLayer));
+      });
+      geoviewLayer.gvLayers?.once('change' as EventTypes, () => {
+        if (geoviewLayer.layerState !== 'loaded')
+          api.event.emit(GeoViewLayerPayload.createGeoviewLayerAddedPayload(`${this.mapId}/${geoviewLayer.geoviewLayerId}`, geoviewLayer));
       });
       api.map(this.mapId).map.addLayer(geoviewLayer.gvLayers!);
-      this.geoviewLayers[geoviewLayer.geoviewLayerId] = geoviewLayer;
     }
   }
 
@@ -340,9 +341,6 @@ export class Layer {
     if (listOfLayerEntryConfigAffected) listOfLayerEntryConfigAffected.splice(indexToDelete!, 1);
 
     if (this.geoviewLayers[partialLayerPath]) {
-      // The clearTimeout is there for those rare extreme cases where you create a layer and then immediately destroy
-      // it before the creation process is completed
-      clearTimeout(api.maps[this.mapId].layerLoadedTimeoutId[partialLayerPath]);
       this.geoviewLayers[partialLayerPath].gvLayers!.dispose();
       delete this.geoviewLayers[partialLayerPath];
       const { mapFeaturesConfig } = api.map(this.mapId);
@@ -372,7 +370,7 @@ export class Layer {
       this.printDuplicateGeoviewLayerConfigError(geoviewLayerConfig);
     else {
       api.map(this.mapId).mapFeaturesConfig.map.listOfGeoviewLayerConfig!.push(geoviewLayerConfig);
-      api.map(this.mapId).setEventListenerAndTimeout4ThisListOfLayer([geoviewLayerConfig]);
+      api.map(this.mapId).setLayerAddedListener4ThisListOfLayer([geoviewLayerConfig]);
       api.event.emit(layerConfigPayload(EVENT_NAMES.LAYER.EVENT_ADD_LAYER, this.mapId, geoviewLayerConfig));
     }
 

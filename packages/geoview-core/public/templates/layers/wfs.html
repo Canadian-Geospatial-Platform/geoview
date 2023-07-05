@@ -64,6 +64,7 @@
 
     <div class="map-title-holder">
       <h4 id="HLYR1">1. WFS Layers</h4>
+      &nbsp;<h5 id="HLYR1-state">(undefined)</h5>
       <a class="ref-link" href="#top">Top</a>
     </div>
     <div
@@ -117,7 +118,53 @@
                   'layerName': { 'en': 'Current Conditions' }
                 }
               ]
-            },
+            }
+          ]
+        },
+        'components': ['overview-map', 'nav-bar', 'footer-bar'],
+        'corePackages': [],
+        'theme': 'dark',
+        'suportedLanguages': ['en']
+      }"
+    ></div>
+    <button type="button" class="collapsible">Visibility and filters</button>
+    <pre style="height: 20pc; overflow-y: scroll" id="layer1-buttons-pre" class="panel"></pre>
+    <button class="collapsible">Get Legend</button>
+    <pre style="height: 20pc; overflow-y: scroll" id="LegendsId1-table-pre" class="panel"></pre>
+    <button type="button" class="collapsible">Get Feature Info</button>
+    <pre style="height: 20pc; overflow-y: scroll" id="ResultSetId1" class="panel">Click on feature on the map</pre>
+    <hr />
+    <p>This map has a wfs layer added from configuration.</p>
+    <button type="button" class="collapsible">Configuration Snippet</button>
+    <pre id="LYR1CS" class="panel"></pre>
+    <hr />
+    <button type="button" class="collapsible">Code Snippet</button>
+    <pre id="codeSnippet" class="panel"></pre>
+
+    <div class="map-title-holder">
+      <h4 id="HLYR2">2. WFS Layers using bbox strategy</h4>
+      &nbsp;<h5 id="HLYR2-state">(undefined)</h5>
+      <a class="ref-link" href="#top">Top</a>
+    </div>
+    <div
+      id="LYR2"
+      class="llwp-map"
+      triggerReadyCallback="true"
+      data-lang="en"
+      data-config="{
+        'map': {
+          'interaction': 'dynamic',
+          'viewSettings': {
+            'zoom': 10,
+            'center': [-75.370748, 45.001058],
+            'projection': 3857
+          },
+          'basemapOptions': {
+            'basemapId': 'transport',
+            'shaded': false,
+            'labeled': true
+          },
+          'listOfGeoviewLayerConfig': [
             {
               'geoviewLayerId': 'wfsLYR4',
               'geoviewLayerName': {
@@ -144,13 +191,13 @@
       }"
     ></div>
     <button type="button" class="collapsible">Visibility and filters</button>
-    <pre style="height: 20pc; overflow-y: scroll" id="layer1-buttons-pre" class="panel"></pre>
+    <pre style="height: 20pc; overflow-y: scroll" id="layer2-buttons-pre" class="panel"></pre>
     <button class="collapsible">Get Legend</button>
-    <pre style="height: 20pc; overflow-y: scroll" id="LegendsId1-table-pre" class="panel"></pre>
+    <pre style="height: 20pc; overflow-y: scroll" id="LegendsId2-table-pre" class="panel"></pre>
     <button type="button" class="collapsible">Get Feature Info</button>
-    <pre style="height: 20pc; overflow-y: scroll" id="ResultSetId1" class="panel">Click on feature on the map</pre>
+    <pre style="height: 20pc; overflow-y: scroll" id="ResultSetId2" class="panel">Click on feature on the map</pre>
     <hr />
-    <p>This map has a wms layer added from configuration.</p>
+    <p>This map has a wfs layer added from configuration.</p>
     <button type="button" class="collapsible">Configuration Snippet</button>
     <pre id="LYR1CS" class="panel"></pre>
     <hr />
@@ -164,15 +211,41 @@
       cgpv.init(function (mapId) {
         console.log(`api is ready for ${mapId}`);
 
-        if (mapId === 'allMaps') {
+        if (mapId === 'LYR1') {
           //create snippets
           createCodeSnippet();
           createConfigSnippet();
 
           createTableOfFilter('LYR1');
+          createTableOfFilter('LYR2');
           cgpv.api.event.emit({ handlerName: 'LYR1/$LegendsLayerSet$', event: cgpv.api.eventNames.GET_LEGENDS.TRIGGER });
+          cgpv.api.event.emit({ handlerName: 'LYR2/$LegendsLayerSet$', event: cgpv.api.eventNames.GET_LEGENDS.TRIGGER });
         }
       });
+
+      window.setInterval(() => {
+        const displayField1 = document.getElementById('HLYR1-state');
+        const geoviewLayers = cgpv.api.maps?.LYR1?.layer?.geoviewLayers;
+        if (geoviewLayers) {
+          const output = Object.keys(cgpv.api.maps?.LYR1?.layer?.geoviewLayers).reduce((outputValue, layerId) => {
+            const stateValue = cgpv.api.maps?.LYR1?.layer?.geoviewLayers[layerId].layerPhase;
+            return `${outputValue}${layerId}: ${stateValue}, `;
+          }, '(');
+          displayField1.textContent = output ? `${output.slice(0, -2)})` : '(undefined)';
+        } else displayField1.textContent = '(undefined)';
+      }, 250)
+
+      window.setInterval(() => {
+        const displayField2 = document.getElementById('HLYR2-state');
+        const geoviewLayers = cgpv.api.maps?.LYR2?.layer?.geoviewLayers;
+        if (geoviewLayers) {
+          const output = Object.keys(cgpv.api.maps?.LYR2?.layer?.geoviewLayers).reduce((outputValue, layerId) => {
+            const stateValue = cgpv.api.maps?.LYR2?.layer?.geoviewLayers[layerId].layerPhase;
+            return `${outputValue}${layerId}: ${stateValue}, `;
+          }, '(');
+          displayField2.textContent = output ? `${output.slice(0, -2)})` : '(undefined)';
+        } else displayField2.textContent = '(undefined)';
+      }, 250)
 
       // LYR1 ===================================================================================================================
       const featureInfoLayerSet1 = cgpv.api.getFeatureInfoLayerSet('LYR1');
@@ -194,6 +267,28 @@
         },
         'LYR1/$LegendsLayerSet$'
       );
+
+      // LYR2 ===================================================================================================================
+      const featureInfoLayerSet2 = cgpv.api.getFeatureInfoLayerSet('LYR2');
+      cgpv.api.event.on(
+        cgpv.api.eventNames.GET_FEATURE_INFO.ALL_QUERIES_DONE,
+        (payload) => {
+          const { layerSetId, resultSets } = payload;
+          createInfoTable('LYR2', 'ResultSetId2', resultSets);
+        },
+        'LYR2/$FeatureInfoLayerSet$'
+      );
+
+      const LegendsLayerSet2 = cgpv.api.getLegendsLayerSet('LYR2');
+      cgpv.api.event.on(
+        cgpv.api.eventNames.GET_LEGENDS.ALL_LEGENDS_DONE,
+        (payload) => {
+          const { resultSets } = payload;
+          displayLegend('LegendsId2', resultSets);
+        },
+        'LYR2/$LegendsLayerSet$'
+      );
+
     </script>
   </body>
 </html>

@@ -126,18 +126,6 @@ export class GeoPackage extends AbstractGeoViewVector {
   }
 
   /** ***************************************************************************************************************************
-   * This method reads the service metadata from the metadataAccessPath.
-   *
-   * @returns {Promise<void>} A promise that the execution is completed.
-   */
-  protected getServiceMetadata(): Promise<void> {
-    const promisedExecution = new Promise<void>((resolve) => {
-      resolve();
-    });
-    return promisedExecution;
-  }
-
-  /** ***************************************************************************************************************************
    * This method validates recursively the configuration of the layer entries to ensure that it is a feature layer identified
    * with a numeric layerId and creates a group entry when a layer is a group.
    *

@@ -34,7 +34,7 @@ import { payloadIsAMapViewProjection } from '../../../api/events/payloads/map-vi
 import { numberPayload } from '../../../api/events/payloads/number-payload';
 import { lngLatPayload } from '../../../api/events/payloads/lng-lat-payload';
 import { TypeMapFeaturesConfig } from '../../types/global-types';
-import { TypeMapSingleClick, mapSingleClickPayload } from '../../../api/events/payloads/map-slingle-click-payload';
+import { TypeMapMouseInfo, mapMouseEventPayload } from '../../../api/events/payloads/map-mouse-event-payload';
 
 const useStyles = makeStyles(() => ({
   mapContainer: {
@@ -125,7 +125,7 @@ export function Map(mapFeaturesConfig: TypeMapFeaturesConfig): JSX.Element {
    */
   function mapSingleClick(event: MapEvent): void {
     if (mapInteraction !== 'static') {
-      const coordinates: TypeMapSingleClick = {
+      const coordinates: TypeMapMouseInfo = {
         projected: (event as MapBrowserEvent<UIEvent>).coordinate,
         pixel: (event as MapBrowserEvent<UIEvent>).pixel,
         lnglat: toLonLat((event as MapBrowserEvent<UIEvent>).coordinate, `EPSG:${api.map(mapId).currentProjection}`),
@@ -135,7 +135,7 @@ export function Map(mapFeaturesConfig: TypeMapFeaturesConfig): JSX.Element {
       api.map(mapId).singleClickedPosition = coordinates;
 
       // emit the singleclick map position
-      api.event.emit(mapSingleClickPayload(EVENT_NAMES.MAP.EVENT_MAP_SINGLE_CLICK, mapId, coordinates));
+      api.event.emit(mapMouseEventPayload(EVENT_NAMES.MAP.EVENT_MAP_SINGLE_CLICK, mapId, coordinates));
     }
   }
 
@@ -145,7 +145,7 @@ export function Map(mapFeaturesConfig: TypeMapFeaturesConfig): JSX.Element {
    */
   function mapPointerMove(event: MapEvent): void {
     if (mapInteraction !== 'static') {
-      const coordinates: TypeMapSingleClick = {
+      const coordinates: TypeMapMouseInfo = {
         projected: (event as MapBrowserEvent<UIEvent>).coordinate,
         pixel: (event as MapBrowserEvent<UIEvent>).pixel,
         lnglat: toLonLat((event as MapBrowserEvent<UIEvent>).coordinate, `EPSG:${api.map(mapId).currentProjection}`),
@@ -155,7 +155,7 @@ export function Map(mapFeaturesConfig: TypeMapFeaturesConfig): JSX.Element {
       api.map(mapId).pointerPosition = coordinates;
 
       // emit the pointer move map position
-      api.event.emit(mapSingleClickPayload(EVENT_NAMES.MAP.EVENT_MAP_POINTER_MOVE, mapId, coordinates));
+      api.event.emit(mapMouseEventPayload(EVENT_NAMES.MAP.EVENT_MAP_POINTER_MOVE, mapId, coordinates));
     }
   }
 
