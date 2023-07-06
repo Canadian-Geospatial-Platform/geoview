@@ -24,6 +24,7 @@ import { Modal, Snackbar } from '../../ui';
 import { payloadIsAMapComponent } from '../../api/events/payloads/map-component-payload';
 import { payloadIsAModal } from '../../api/events/payloads/modal-payload';
 import { TypeMapFeaturesConfig } from '../types/global-types';
+import { Legend } from '../components/legend/legend';
 
 const useStyles = makeStyles((theme) => {
   return {
@@ -168,7 +169,7 @@ export function Shell(props: ShellProps): JSX.Element {
         <a id={`toplink-${shellId}`} href={`#bottomlink-${shellId}`} className={classes.skip} style={{ top: '0px' }}>
           {t('keyboardnav.start')}
         </a>
-        <div className={`${classes.mapContainer} mapContainer`}>
+        <div className={classes.mapContainer} style={{ height: mapFeaturesConfig?.components?.includes('legend') ? '800px' : '100%' }}>
           {mapFeaturesConfig.components !== undefined && mapFeaturesConfig.components.indexOf('app-bar') > -1 && (
             <Appbar setActivetrap={setActivetrap} />
           )}
@@ -177,7 +178,14 @@ export function Shell(props: ShellProps): JSX.Element {
           <Map {...mapFeaturesConfig} />
           {mapFeaturesConfig?.components && mapFeaturesConfig?.components.includes('nav-bar') && <Navbar setActivetrap={setActivetrap} />}
         </div>
-        {mapFeaturesConfig?.corePackages && mapFeaturesConfig?.corePackages.includes('footer-panel') && <FooterTabs />}
+        {/* load legend component if config includes in list of components */}
+        {mapFeaturesConfig?.components?.includes('legend') && <Legend />}
+
+        {/* load details component if config includes in list of components */}
+        {/* {mapFeaturesConfig?.components?.includes('details') && <DetailsInfo />} */}
+        {/* load FooterTabs if config includes in list of components */}
+        {/* <FooterTabs /> */}
+
         {Object.keys(api.map(shellId).modal.modals).map((modalId) => (
           <Modal key={modalId} id={modalId} open={false} mapId={shellId} />
         ))}
@@ -188,6 +196,7 @@ export function Shell(props: ShellProps): JSX.Element {
         {Object.keys(components).map((key: string) => {
           return <Fragment key={key}>{components[key]}</Fragment>;
         })}
+
         <SnackbarProvider
           maxSnack={3}
           dense
