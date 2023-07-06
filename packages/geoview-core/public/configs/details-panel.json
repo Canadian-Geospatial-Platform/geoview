@@ -143,9 +143,7 @@
     "footer-bar",
     "details"
   ],
-  "corePackages": [
-    "footer-panel"
-  ],
+  "corePackages": [],
   "externalPackages": [],
   "suportedLanguages": [
     "en"

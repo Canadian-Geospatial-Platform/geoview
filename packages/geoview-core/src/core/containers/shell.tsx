@@ -25,6 +25,7 @@ import { payloadIsAMapComponent } from '../../api/events/payloads/map-component-
 import { payloadIsAModal } from '../../api/events/payloads/modal-payload';
 import { TypeMapFeaturesConfig } from '../types/global-types';
 import { Legend } from '../components/legend/legend';
+import { DetailsInfo } from '../components/details/details-info';
 
 const useStyles = makeStyles((theme) => {
   return {
@@ -162,14 +163,17 @@ export function Shell(props: ShellProps): JSX.Element {
       api.event.off(EVENT_NAMES.MODAL.EVENT_MODAL_CREATE, shellId);
     };
   }, [components, shellId, updateShell]);
-
+  const isFooterPanelComponent =
+    mapFeaturesConfig?.components?.includes('legend') ||
+    mapFeaturesConfig?.components?.includes('details') ||
+    mapFeaturesConfig?.components?.includes('dataTable');
   return (
     <FocusTrap active={activeTrap} focusTrapOptions={{ escapeDeactivates: false }}>
       <div id={`shell-${shellId}`} className={classes.shell}>
         <a id={`toplink-${shellId}`} href={`#bottomlink-${shellId}`} className={classes.skip} style={{ top: '0px' }}>
           {t('keyboardnav.start')}
         </a>
-        <div className={classes.mapContainer} style={{ height: mapFeaturesConfig?.components?.includes('legend') ? '800px' : '100%' }}>
+        <div className={classes.mapContainer} style={{ height: isFooterPanelComponent ? '800px' : '100%' }}>
           {mapFeaturesConfig.components !== undefined && mapFeaturesConfig.components.indexOf('app-bar') > -1 && (
             <Appbar setActivetrap={setActivetrap} />
           )}
@@ -182,7 +186,7 @@ export function Shell(props: ShellProps): JSX.Element {
         {mapFeaturesConfig?.components?.includes('legend') && <Legend />}
 
         {/* load details component if config includes in list of components */}
-        {/* {mapFeaturesConfig?.components?.includes('details') && <DetailsInfo />} */}
+        {mapFeaturesConfig?.components?.includes('details') && <DetailsInfo />}
         {/* load FooterTabs if config includes in list of components */}
         {/* <FooterTabs /> */}
 
