@@ -1,9 +1,8 @@
 import { MutableRefObject, useContext, useRef } from 'react';
 
-import makeStyles from '@mui/styles/makeStyles';
-
 import { useMediaQuery } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
+import { Box } from '../../../ui';
 
 import { Attribution } from '../attribution/attribution';
 import { MousePosition } from '../mouse-position/mouse-position';
@@ -14,7 +13,7 @@ import { FooterbarExpandButton } from './footer-bar-expand-button';
 import { FooterbarRotationButton } from './footer-bar-rotation-button';
 import { FooterbarFixNorthSwitch } from './footer-bar-fixnorth-switch';
 
-const useStyles = makeStyles(() => ({
+const sxClasses = {
   footerBarContainer: {
     display: 'flex',
     flexDirection: 'row',
@@ -46,7 +45,7 @@ const useStyles = makeStyles(() => ({
     marginLeft: 20,
     alignItems: 'flex-end',
   },
-}));
+};
 
 /**
  * Create a footer bar element that contains attribtuion, mouse position and scale
@@ -54,8 +53,6 @@ const useStyles = makeStyles(() => ({
  * @returns {JSX.Element} the footer bar element
  */
 export function Footerbar(): JSX.Element {
-  const classes = useStyles();
-
   const mapConfig = useContext(MapContext);
 
   const { mapId, interaction } = mapConfig;
@@ -70,19 +67,19 @@ export function Footerbar(): JSX.Element {
   const mapIsDynamic = interaction === 'dynamic';
 
   return (
-    <div id={`${mapId}-footerBar`} className={`${classes.footerBarContainer}`} ref={footerBarRef as MutableRefObject<HTMLDivElement>}>
+    <Box id={`${mapId}-footerBar`} sx={sxClasses.footerBarContainer} ref={footerBarRef as MutableRefObject<HTMLDivElement>}>
       <FooterbarExpandButton />
       {deviceSizeMedUp && <Attribution />}
-      <div id="mouseAndScaleControls" className={classes.mouseScaleControlsContainer}>
+      <Box id="mouseAndScaleControls" sx={sxClasses.mouseScaleControlsContainer}>
         {deviceSizeMedUp && mapIsDynamic && <MousePosition mousePositionMapId={mapId} />}
         <Scale />
-      </div>
+      </Box>
       {mapIsDynamic && (
-        <div className={classes.rotationControlsContainer}>
+        <Box sx={sxClasses.rotationControlsContainer}>
           <FooterbarRotationButton />
           <FooterbarFixNorthSwitch />
-        </div>
+        </Box>
       )}
-    </div>
+    </Box>
   );
 }
