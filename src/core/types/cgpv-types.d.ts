@@ -77,7 +77,7 @@ export * from '../../api/events/payloads/layer-set-payload';
 export * from '../../api/events/payloads/map-component-payload';
 export * from '../../api/events/payloads/map-config-payload';
 export * from '../../api/events/payloads/map-payload';
-export * from '../../api/events/payloads/map-slingle-click-payload';
+export * from '../../api/events/payloads/map-mouse-event-payload';
 export * from '../../api/events/payloads/map-view-projection-payload';
 export * from '../../api/events/payloads/marker-definition-payload';
 export * from '../../api/events/payloads/modal-payload';

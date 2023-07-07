@@ -23,9 +23,14 @@ export declare class Layer {
      * Initialize layer types and listen to add/remove layer events from outside
      *
      * @param {string} mapId a reference to the map
-     * @param {TypeGeoviewLayerConfig} layersConfig an optional array containing layers passed within the map config
      */
-    constructor(mapId: string, geoviewLayerConfigs?: TypeGeoviewLayerConfig[]);
+    constructor(mapId: string);
+    /**
+     * Load layers that was passed in with the map config
+     *
+     * @param {TypeGeoviewLayerConfig[]} layersConfig an optional array containing layers passed within the map config
+     */
+    loadListOfGeoviewLayer(geoviewLayerConfigs?: TypeGeoviewLayerConfig[]): void;
     /**
      * Validate the geoview layer configuration array to eliminate duplicate entries and inform the user.
      * @param {TypeGeoviewLayerConfig[]} geoviewLayerConfigs The geoview layer configurations to validate.
