@@ -168,7 +168,7 @@ export function Shell(props: ShellProps): JSX.Element {
         <a id={`toplink-${shellId}`} href={`#bottomlink-${shellId}`} className={classes.skip} style={{ top: '0px' }}>
           {t('keyboardnav.start')}
         </a>
-        <div className={classes.mapContainer}>
+        <div className={`${classes.mapContainer} mapContainer`}>
           {mapFeaturesConfig.components !== undefined && mapFeaturesConfig.components.indexOf('app-bar') > -1 && (
             <Appbar setActivetrap={setActivetrap} />
           )}
@@ -177,7 +177,7 @@ export function Shell(props: ShellProps): JSX.Element {
           <Map {...mapFeaturesConfig} />
           {mapFeaturesConfig?.components && mapFeaturesConfig?.components.includes('nav-bar') && <Navbar setActivetrap={setActivetrap} />}
         </div>
-        <FooterTabs />
+        {mapFeaturesConfig?.corePackages && mapFeaturesConfig?.corePackages.includes('footer-panel') && <FooterTabs />}
         {Object.keys(api.map(shellId).modal.modals).map((modalId) => (
           <Modal key={modalId} id={modalId} open={false} mapId={shellId} />
         ))}

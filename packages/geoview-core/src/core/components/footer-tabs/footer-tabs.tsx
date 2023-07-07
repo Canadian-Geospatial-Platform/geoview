@@ -15,8 +15,10 @@ export const useStyles = makeStyles((theme) => ({
     backgroundColor: theme.palette.background.default,
     width: '100%',
     transition: 'height 0.2s ease-out',
+    height: '55px',
   },
 }));
+
 /**
  * The FooterTabs component is used to display a list of tabs and their content.
  *
@@ -36,6 +38,10 @@ export function FooterTabs(): JSX.Element | null {
   const tabsContainerRef = useRef<HTMLDivElement>();
 
   const { mapId } = mapConfig;
+
+  // get map div and follow state of original map height
+  const mapDiv = document.getElementById(mapId)!;
+  const [origHeight, setOrigHeight] = useState<number>(0);
 
   /**
    * Add a tab
@@ -64,78 +70,75 @@ export function FooterTabs(): JSX.Element | null {
     [setFooterTabs]
   );
 
+  // on map creation, get original height to set the foorter collapse/expand height
+  useEffect(() => {
+    setOrigHeight(mapDiv!.clientHeight + 55);
+  }, [mapDiv]);
+
+  // TODO: need a refactor to use proper sx classes and style
+  // !https://github.com/Canadian-Geospatial-Platform/geoview/issues/1136
+  /**
+   * Handle the collapse/expand state effect
+   */
+  useEffect(() => {
+    // map div
+    mapDiv.style.height = 'fit-content';
+    mapDiv.style.transition = 'height 0.2s ease-out 0.2s';
+
+    // ol map container div
+    (mapDiv.querySelectorAll('[class*="mapContainer"]')[0] as HTMLElement).style.minHeight = `${origHeight - 55}px`;
+
+    // tabs container div
+    const tabs = mapDiv.querySelectorAll('[class*="tabsContainer"]') as NodeListOf<HTMLElement>;
+    if (tabs.length > 0) {
+      const tab: HTMLElement = tabs[0];
+      tab.style.height = isCollapsed ? '55px' : 'fit-content';
+      (tab.firstChild!.lastChild! as HTMLElement).style.overflow = isCollapsed ? 'unset' : 'auto';
+      (tab.firstChild!.lastChild! as HTMLElement).style.maxHeight = isCollapsed ? '0px' : `${origHeight - 55}px`;
+    }
+  }, [isCollapsed, mapDiv, mapDiv.style, origHeight]);
+
+  // TODO: need a refactor to use proper sx classes and style.
+  // TODO: maybe this component should all be in the package-footer-panel.
+  // !https://github.com/Canadian-Geospatial-Platform/geoview/issues/1136
+  /**
+   * Handle the fullscreen state effect
+   */
+  useEffect(() => {
+    // ol map container div
+    const olMapDiv: HTMLElement = mapDiv.querySelectorAll('[class*="mapContainer"]')[0] as HTMLElement;
+    olMapDiv.style.visibility = isFullscreen ? 'hidden' : 'visible';
+    olMapDiv.style.minHeight = isFullscreen ? '0px' : `${origHeight - 55}px`;
+    olMapDiv.style.height = isFullscreen ? '0px' : `${origHeight - 55}px`;
+
+    // tabs container div
+    if (isFullscreen) setIsCollapsed(false);
+    const tabs = mapDiv.querySelectorAll('[class*="tabsContainer"]') as NodeListOf<HTMLElement>;
+
+    if (tabs.length > 0) {
+      const tab: HTMLElement = tabs[0];
+      tab.style.minHeight = isFullscreen ? `${2 * (origHeight - 55)}px` : '55px';
+      (tab.firstChild!.lastChild! as HTMLElement).style.maxHeight = isFullscreen ? '' : `${origHeight - 55}px`;
+    }
+  }, [isFullscreen, mapDiv, origHeight]);
+
   /**
    * Handle a collapse, expand event for the tabs component
    */
   const handleCollapse = () => {
-    // check if tabs component is created
-    if (tabsContainerRef && tabsContainerRef.current) {
-      const tabsContainer = tabsContainerRef.current as HTMLDivElement;
-      const mapContainer = tabsContainer.previousElementSibling as HTMLDivElement;
-      mapContainer.style.transition = 'height 0.2s ease-out';
-      // check if the tabs container is collapsed
-      if (!isCollapsed) {
-        tabsContainer.style.height = '55px';
-        mapContainer.style.height = 'calc( 100% - 55px)';
-      } else {
-        tabsContainer.style.height = '300px';
-        mapContainer.style.height = 'calc( 100% - 300px)';
-      }
-    }
     setIsFullscreen(false);
     setIsCollapsed(!isCollapsed);
-
-    // update map container size
-    setTimeout(() => {
-      api.map(mapId).map.updateSize();
-    }, 1000);
   };
 
-  const handleFullscreen = () => {
-    // check if tabs component is created
-    if (tabsContainerRef && tabsContainerRef.current) {
-      const tabsContaine = tabsContainerRef.current as HTMLDivElement;
-      const mapContaine = tabsContaine.previousElementSibling as HTMLDivElement;
-      mapContaine.style.transition = 'height 0.2s ease-in-out';
-      // check if the tabs container is collapsed
-      if (isFullscreen) {
-        tabsContaine.style.height = '300px';
-        mapContaine.style.height = 'calc( 100% - 300px)';
-        setIsCollapsed(false);
-      } else {
-        tabsContaine.style.height = '100%';
-        mapContaine.style.height = '0';
-      }
-    }
-
-    setIsFullscreen(!isFullscreen);
-
-    // update map container size
-    setTimeout(() => {
-      api.map(mapId).map.updateSize();
-    }, 1500);
-  };
-
+  /**
+   * Manage the tab 'create', 'remove' and 'select'
+   */
   useEffect(() => {
     // listen to new tab creation
     api.event.on(
       EVENT_NAMES.FOOTER_TABS.EVENT_FOOTER_TABS_TAB_CREATE,
       (payload) => {
-        if (payloadIsAFooterTab(payload)) {
-          addTab(payload);
-          // Check if footer-panel is collapsed or not, and size accordingly
-          if (tabsContainerRef && tabsContainerRef.current) {
-            const tabsContainer = tabsContainerRef.current as HTMLDivElement;
-            const mapContainer = tabsContainer.previousElementSibling as HTMLDivElement;
-            if (mapContainer.style.height === 'calc(100% - 300px)') {
-              setIsCollapsed(false);
-              tabsContainer.style.height = '300px';
-            } else {
-              setIsCollapsed(true);
-              tabsContainer.style.height = '55px';
-            }
-          }
-        }
+        if (payloadIsAFooterTab(payload)) addTab(payload);
       },
       mapId
     );
@@ -144,9 +147,7 @@ export function FooterTabs(): JSX.Element | null {
     api.event.on(
       EVENT_NAMES.FOOTER_TABS.EVENT_FOOTER_TABS_TAB_REMOVE,
       (payload) => {
-        if (payloadIsAFooterTab(payload)) {
-          removeTab(payload);
-        }
+        if (payloadIsAFooterTab(payload)) removeTab(payload);
       },
       mapId
     );
@@ -175,7 +176,7 @@ export function FooterTabs(): JSX.Element | null {
   }, [addTab, mapId, removeTab]);
 
   return api.map(mapId).footerTabs.tabs.length > 0 ? (
-    <div ref={tabsContainerRef as MutableRefObject<HTMLDivElement>} className={classes.tabsContainer}>
+    <div ref={tabsContainerRef as MutableRefObject<HTMLDivElement>} className={`${classes.tabsContainer} tabsContainer`}>
       <Tabs
         isCollapsed={isCollapsed}
         handleCollapse={handleCollapse}
@@ -189,8 +190,12 @@ export function FooterTabs(): JSX.Element | null {
         TabContentVisibilty={!isCollapsed ? 'visible' : 'hidden'}
         rightButtons={
           <>
+            {!isCollapsed && (
+              <IconButton onClick={() => setIsFullscreen(!isFullscreen)}>
+                {isFullscreen ? <FullscreenExitIcon /> : <FullscreenIcon />}
+              </IconButton>
+            )}
             {!isFullscreen && <IconButton onClick={handleCollapse}>{!isCollapsed ? <ExpandMoreIcon /> : <ExpandLessIcon />}</IconButton>}
-            <IconButton onClick={handleFullscreen}>{isFullscreen ? <FullscreenExitIcon /> : <FullscreenIcon />}</IconButton>
           </>
         }
       />

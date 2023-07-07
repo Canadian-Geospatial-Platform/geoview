@@ -152,7 +152,7 @@ export function Scale(): JSX.Element {
   }, [mapId]);
 
   return (
-    <Tooltip title={t('mapnav.scale')!}>
+    <Tooltip title={t('mapnav.scale')!} placement="top">
       <Box sx={{ minWidth: 120 }}>
         <div id={`${mapId}-scaleControlBar`} className={classes.scaleControl} />
         <div id={`${mapId}-scaleControlLine`} className={classes.scaleControl} />

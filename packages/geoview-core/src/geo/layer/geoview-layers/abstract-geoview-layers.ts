@@ -353,17 +353,21 @@ export abstract class AbstractGeoViewLayer {
     this.layerPhase = 'createGeoViewLayers';
     const promisedExecution = new Promise<void>((resolve) => {
       if (this.gvLayers === null) {
-        this.getAdditionalServiceDefinition().then(() => {
-          this.processListOfLayerEntryConfig(this.listOfLayerEntryConfig).then((layersCreated) => {
-            this.gvLayers = layersCreated as BaseLayer;
-            if (this.listOfLayerEntryConfig.length) this.setActiveLayer(this.listOfLayerEntryConfig[0]);
-            resolve();
-          }).catch(() => {
-            console.log('Catch de la fonction processListOfLayerEntryConfig');
+        this.getAdditionalServiceDefinition()
+          .then(() => {
+            this.processListOfLayerEntryConfig(this.listOfLayerEntryConfig)
+              .then((layersCreated) => {
+                this.gvLayers = layersCreated as BaseLayer;
+                if (this.listOfLayerEntryConfig.length) this.setActiveLayer(this.listOfLayerEntryConfig[0]);
+                resolve();
+              })
+              .catch(() => {
+                console.log('Catch de la fonction processListOfLayerEntryConfig');
+              });
+          })
+          .catch(() => {
+            console.log('Catch de la fonction getAdditionalServiceDefinition');
           });
-        }).catch(() => {
-          console.log('Catch de la fonction getAdditionalServiceDefinition');
-        });
       } else {
         api.event.emit(
           snackbarMessagePayload(EVENT_NAMES.SNACKBAR.EVENT_SNACKBAR_OPEN, this.mapId, {

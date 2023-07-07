@@ -99,7 +99,7 @@ export function FooterbarRotationButton(): JSX.Element {
   return (
     <IconButton
       sx={sxClasses.rotationButton}
-      tooltipPlacement="bottom"
+      tooltipPlacement="top"
       tooltip={t('mapctrl.rotation.resetRotation')!}
       title={t('mapctrl.rotation.resetRotation')!}
       onClick={() => resetRotation()}
