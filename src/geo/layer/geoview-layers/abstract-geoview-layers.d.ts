@@ -98,10 +98,10 @@ type TypeLayerSetHandlerFunctions = {
  * metadataAccessPath attribute whose value is passed as an attribute of the mapLayerConfig object.
  */
 export declare abstract class AbstractGeoViewLayer {
-    /** Flag used to indicate that the layer is loaded */
-    isLoaded: boolean;
-    /** Flag used to indicate a layer load error */
-    loadError: boolean;
+    /** Flag used to indicate the layer's state */
+    layerState: string;
+    /** Flag used to indicate the layer's phase */
+    layerPhase: string;
     /** The unique identifier of the map on which the GeoView layer will be drawn. */
     mapId: string;
     /** The type of GeoView layer that is instantiated. */

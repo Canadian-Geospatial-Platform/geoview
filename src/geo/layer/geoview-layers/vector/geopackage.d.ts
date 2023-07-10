@@ -73,12 +73,6 @@ export declare class GeoPackage extends AbstractGeoViewVector {
      */
     constructor(mapId: string, layerConfig: TypeGeoPackageLayerConfig);
     /** ***************************************************************************************************************************
-     * This method reads the service metadata from the metadataAccessPath.
-     *
-     * @returns {Promise<void>} A promise that the execution is completed.
-     */
-    protected getServiceMetadata(): Promise<void>;
-    /** ***************************************************************************************************************************
      * This method validates recursively the configuration of the layer entries to ensure that it is a feature layer identified
      * with a numeric layerId and creates a group entry when a layer is a group.
      *
@@ -109,10 +103,11 @@ export declare class GeoPackage extends AbstractGeoViewVector {
      * This method creates a GeoView layer using the definition provided in the layerEntryConfig parameter.
      *
      * @param {TypeLayerEntryConfig} layerEntryConfig Information needed to create the GeoView layer.
+     * @param {sldsInterface} sld The SLD style associated with the layers geopackage, if any
      *
      * @returns {Promise<BaseLayer | null>} The GeoView base layer that has been created.
      */
-    protected processOneGeopackageLayer(layerEntryConfig: TypeBaseLayerEntryConfig, layerInfo: layerData): Promise<BaseLayer | null>;
+    protected processOneGeopackageLayer(layerEntryConfig: TypeBaseLayerEntryConfig, layerInfo: layerData, sld?: sldsInterface): Promise<BaseLayer | null>;
     /** ***************************************************************************************************************************
      * This method creates all layers from a single geopackage
      *
