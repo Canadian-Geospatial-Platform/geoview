@@ -1128,7 +1128,7 @@ export type TypeNavBarProps = Array<'zoom' | 'fullscreen' | 'fullextent'>;
  * Core components to initialize on viewer load. Default = ['app-bar', 'footer-bar', 'nav-bar', 'north-arrow', 'overview-map'].
  */
 export type TypeMapComponents = Array<
-  'app-bar' | 'footer-bar' | 'nav-bar' | 'north-arrow' | 'overview-map' | 'geolocator' | 'legend' | 'details' | 'dataTable'
+  'app-bar' | 'footer-bar' | 'nav-bar' | 'north-arrow' | 'overview-map' | 'geolocator' | 'legend' | 'details' | 'data-table'
 >;
 
 /** ******************************************************************************************************************************

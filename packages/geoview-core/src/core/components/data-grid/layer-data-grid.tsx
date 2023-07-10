@@ -185,10 +185,12 @@ function LayerDataGrid(props: CustomDataGridProps) {
   useEffect(() => {
     const geoviewLayerInstance = api.map(mapId).layer.geoviewLayers[layerId];
     const filterLayerConfig = api.map(mapId).layer.registeredLayers[layerKey] as TypeLayerEntryConfig;
-    if (mapFiltered && geoviewLayerInstance !== undefined && filterLayerConfig !== undefined) {
-      (geoviewLayerInstance as AbstractGeoViewVector | EsriDynamic)?.applyViewFilter(filterLayerConfig, filterString);
-    } else {
-      (geoviewLayerInstance as AbstractGeoViewVector | EsriDynamic)?.applyViewFilter(filterLayerConfig, '');
+    if (typeof (geoviewLayerInstance as AbstractGeoViewVector | EsriDynamic)?.applyViewFilter === 'function') {
+      if (mapFiltered && geoviewLayerInstance !== undefined && filterLayerConfig !== undefined) {
+        (geoviewLayerInstance as AbstractGeoViewVector | EsriDynamic)?.applyViewFilter(filterLayerConfig, filterString);
+      } else {
+        (geoviewLayerInstance as AbstractGeoViewVector | EsriDynamic)?.applyViewFilter(filterLayerConfig, '');
+      }
     }
   }, [mapFiltered, filterString, mapId, layerId, layerKey]);
 

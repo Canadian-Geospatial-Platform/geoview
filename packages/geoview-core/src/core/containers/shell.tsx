@@ -26,6 +26,7 @@ import { payloadIsAModal } from '../../api/events/payloads/modal-payload';
 import { TypeMapFeaturesConfig } from '../types/global-types';
 import { Legend } from '../components/legend/legend';
 import { DetailsInfo } from '../components/details/details-info';
+import DataTable from '../components/data-grid/dataTable';
 
 const useStyles = makeStyles((theme) => {
   return {
@@ -166,7 +167,7 @@ export function Shell(props: ShellProps): JSX.Element {
   const isFooterPanelComponent =
     mapFeaturesConfig?.components?.includes('legend') ||
     mapFeaturesConfig?.components?.includes('details') ||
-    mapFeaturesConfig?.components?.includes('dataTable');
+    mapFeaturesConfig?.components?.includes('data-table');
   return (
     <FocusTrap active={activeTrap} focusTrapOptions={{ escapeDeactivates: false }}>
       <div id={`shell-${shellId}`} className={classes.shell}>
@@ -187,8 +188,12 @@ export function Shell(props: ShellProps): JSX.Element {
 
         {/* load details component if config includes in list of components */}
         {mapFeaturesConfig?.components?.includes('details') && <DetailsInfo />}
+
+        {/* load details component if config includes in list of components */}
+        {mapFeaturesConfig?.components?.includes('data-table') && <DataTable />}
+
         {/* load FooterTabs if config includes in list of components */}
-        {/* <FooterTabs /> */}
+        {mapFeaturesConfig?.corePackages?.includes('footer-panel') && <FooterTabs />}
 
         {Object.keys(api.map(shellId).modal.modals).map((modalId) => (
           <Modal key={modalId} id={modalId} open={false} mapId={shellId} />

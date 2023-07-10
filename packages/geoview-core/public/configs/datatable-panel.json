@@ -140,11 +140,10 @@
     "nav-bar",
     "north-arrow",
     "overview-map",
-    "footer-bar"
+    "footer-bar",
+    "data-table"
   ],
-  "corePackages": [
-    "footer-panel"
-  ],
+  "corePackages": [],
   "externalPackages": [],
   "suportedLanguages": [
     "en"
