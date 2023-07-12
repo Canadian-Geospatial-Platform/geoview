@@ -1,13 +1,5 @@
 import type React from 'react';
-import {
-  toJsonObject,
-  TypeJsonObject,
-  TypeWindow,
-  TypeButtonPanel,
-  payloadIsAllLegendsDone,
-  payloadIsALayerConfig,
-  payloadIsRemoveGeoViewLayer,
-} from 'geoview-core';
+import { toJsonObject, TypeJsonObject, TypeWindow, TypeButtonPanel, payloadIsAllLegendsDone } from 'geoview-core';
 
 import LayerStepper from './layer-stepper';
 import ReorderLayersList from './reorder-layers-list';
