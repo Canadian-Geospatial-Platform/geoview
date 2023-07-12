@@ -25,6 +25,7 @@ import { FooterTabsApi } from '../../core/components/footer-tabs/footer-tabs-api
 import { LegendApi } from '../../core/components/legend/legend-api';
 import { DetailsAPI } from '../../core/components/details/details-api';
 import { DataGridAPI } from '../../core/components/data-grid/data-grid-api';
+import { DataTableApi } from '../../core/components/data-table/data-table-api';
 import { GeoviewRenderer } from '../renderer/geoview-renderer';
 import { Select } from '../interaction/select';
 import { Draw } from '../interaction/draw';
@@ -82,6 +83,8 @@ export class MapViewer {
 
   // used to access the footer tabs api
   dataGrid!: DataGridAPI;
+
+  dataTable!: DataTableApi;
 
   // used to access basemap functions
   basemap!: Basemap;
@@ -150,7 +153,7 @@ export class MapViewer {
     this.legend = new LegendApi(this.mapId);
     this.details = new DetailsAPI(this.mapId);
     this.dataGrid = new DataGridAPI(this.mapId);
-
+    this.dataTable = new DataTableApi(this.mapId);
     this.modal = new ModalApi(this.mapId);
 
     this.geoviewRenderer = new GeoviewRenderer(this.mapId);

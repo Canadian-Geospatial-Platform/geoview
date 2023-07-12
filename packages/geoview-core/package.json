@@ -29,8 +29,8 @@
     ]
   },
   "scripts": {
-    "serve": "npm run format && npm run fix && webpack serve --progress --color --config webpack.dev.js",
-    "build": "npm run format && npm run fix && npm run doc && webpack --progress --color --config webpack.prod.js && npm run generate.d.ts",
+    "serve": "webpack serve --progress --color --config webpack.dev.js",
+    "build": "npm run doc && webpack --progress --color --config webpack.prod.js && npm run generate.d.ts",
     "serveMac": "npm run formatMac && npm run fixMac && webpack serve --progress --color --config webpack.dev.js",
     "buildMac": "npm run formatMac && npm run fixMac && npm run doc && webpack --progress --color --config webpack.prod.js && npm run generate.d.ts",
     "doc": "typedoc src/app.tsx --logLevel Error --out public/docs",
@@ -45,11 +45,15 @@
     "fixMac": "eslint '../geoview-**/src/**/*.{ts,tsx,js}' --fix",
     "generate.d.ts": "tsc --noEmit false --skipLibCheck true --declaration --allowJs --emitDeclarationOnly --outDir types"
   },
-  "dependencies": {
+  "peerDependencies": {
     "@emotion/react": "^11.8.1",
     "@emotion/styled": "^11.8.1",
     "@mui/icons-material": "^5.11.16",
     "@mui/material": "^5.13.1",
+    "react": "^17.0.2",
+    "react-dom": "^17.0.2"
+  },
+  "dependencies": {
     "@mui/styles": "^5.13.1",
     "@mui/system": "^5.13.1",
     "@mui/x-data-grid": "^5.13.1",
@@ -65,14 +69,13 @@
     "i18next-http-backend": "^1.0.21",
     "immutable": "^4.0.0",
     "lodash": "^4.17.21",
+    "material-react-table": "^1.14.0",
     "notistack": "^2.0.3",
     "ol": "^7.4.0",
     "ol-mapbox-style": "^10.6.0",
     "proj4": "^2.7.5",
     "prop-types": "^15.8.1",
     "query-string": "^7.1.0",
-    "react": "^17.0.2",
-    "react-dom": "^17.0.2",
     "react-i18next": "^12.2.0",
     "react-test-renderer": "^17.0.2",
     "sanitize-html": "^2.7.3",
@@ -80,6 +83,10 @@
     "yet-another-react-lightbox": "^3.11.3"
   },
   "devDependencies": {
+    "@emotion/react": "^11.8.1",
+    "@emotion/styled": "^11.8.1",
+    "@mui/icons-material": "^5.11.16",
+    "@mui/material": "^5.13.1",
     "@babel/cli": "^7.17.0",
     "@babel/core": "^7.17.0",
     "@babel/eslint-parser": "^7.17.0",
