@@ -3,6 +3,9 @@ import React, { useEffect, useState } from 'react';
 import { useTheme, Theme } from '@mui/material/styles';
 import MaterialCardMedia from '@mui/material/CardMedia';
 import { useTranslation } from 'react-i18next';
+
+import linkifyHtml from 'linkify-html';
+
 import {
   Collapse,
   List,
@@ -18,8 +21,9 @@ import {
   Box,
 } from '../../../ui';
 import { api } from '../../../app';
+import { HtmlToReact } from '../../containers/html-to-react';
 import { TypeFeatureInfoEntry, TypeFieldEntry } from '../../../api/events/payloads/get-feature-info-payload';
-import { isImage, stringify, generateId } from '../../utils/utilities';
+import { isImage, stringify, generateId, sanitizeHtmlContent } from '../../utils/utilities';
 import { LightboxImg, LightBoxSlides } from '../lightbox/lightbox';
 
 const sxClasses = {
@@ -32,7 +36,7 @@ const sxClasses = {
     noWrap: true,
   },
   expandableIconContainer: {
-    paddingLeft: 10,
+    padding: '10px',
   },
   featureInfoItem: {
     width: '100%',
@@ -102,6 +106,19 @@ export function FeatureInfo(props: TypeFeatureInfoProps): JSX.Element {
   const [slides, setSlides] = useState<LightBoxSlides[]>([]);
   const [slidesIndex, setSlidesIndex] = useState(0);
 
+  // linkify options
+  const linkifyOptions = {
+    attributes: {
+      title: t('details.external_link'),
+    },
+    defaultProtocol: 'https',
+    format: {
+      url: (value: string) => (value.length > 50 ? `${value.slice(0, 40)}…${value.slice(value.length - 10, value.length)}` : value),
+    },
+    ignoreTags: ['script', 'style'],
+    target: '_blank',
+  };
+
   const theme: Theme & {
     iconImg: React.CSSProperties;
   } = useTheme();
@@ -157,7 +174,7 @@ export function FeatureInfo(props: TypeFeatureInfoProps): JSX.Element {
       } else {
         element = (
           <Box key={generateId()} sx={sxClasses.featureInfoItemValue}>
-            {item}
+            <HtmlToReact htmlContent={sanitizeHtmlContent(linkifyHtml(item, linkifyOptions))} />
           </Box>
         );
       }

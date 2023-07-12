@@ -52,7 +52,8 @@
   },
   "details": {
     "zoom_to": "Zoom à l'élément",
-    "select": "Sélectionner l'élément sur la carte"
+    "select": "Sélectionner l'élément sur la carte",
+    "external_link": "Lien externe"
   },
   "lightbox": {
     "next": "Prochaine",
