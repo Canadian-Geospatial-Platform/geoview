@@ -4,7 +4,7 @@ importers:
 
   .:
     specifiers: {}
-
+F
   ../../packages:
     specifiers:
       '@babel/core': ^7.17.0
@@ -168,6 +168,8 @@ importers:
       i18next-http-backend: ^1.0.21
       immutable: ^4.0.0
       jest: ^27.4.7
+      linkify-html: ^4.1.0
+      linkifyjs: ^4.1.0
       lodash: ^4.17.21
       lodash-webpack-plugin: ^0.11.6
       material-react-table: ^1.14.0
@@ -216,8 +218,9 @@ importers:
       i18next: 22.5.1
       i18next-http-backend: 1.4.5
       immutable: 4.3.1
+      linkify-html: 4.1.1_linkifyjs@4.1.1
+      linkifyjs: 4.1.1
       lodash: 4.17.21
-      material-react-table: 1.14.0_e6j5tmmoj4hvohw5polz4escra
       notistack: 2.0.8_e274cu6ntqog6uzuo6omd2nghu
       ol: 7.4.0
       ol-mapbox-style: 10.6.0
@@ -571,6 +574,7 @@ packages:
       '@babel/template': 7.22.5
       '@babel/traverse': 7.22.8
       '@babel/types': 7.22.5
+      '@nicolo-ribaudo/semver-v6': 6.3.3
       convert-source-map: 1.9.0
       debug: 4.3.4
       gensync: 1.0.0-beta.2
@@ -627,6 +631,7 @@ packages:
       '@babel/compat-data': 7.22.9
       '@babel/core': 7.22.9
       '@babel/helper-validator-option': 7.22.5
+      '@nicolo-ribaudo/semver-v6': 6.3.3
       browserslist: 4.21.9
       lru-cache: 5.1.1
       semver: 6.3.1
@@ -658,6 +663,7 @@ packages:
     dependencies:
       '@babel/core': 7.22.9
       '@babel/helper-annotate-as-pure': 7.22.5
+      '@nicolo-ribaudo/semver-v6': 6.3.3
       regexpu-core: 5.3.2
       semver: 6.3.1
     dev: true
@@ -7097,6 +7103,18 @@ packages:
 
   /lines-and-columns/1.2.4:
     resolution: {integrity: sha512-7ylylesZQ/PV29jhEDl3Ufjo6ZX7gCqJr5F7PKrqc93v7fzSymt1BpwEU8nAUXs8qzzvqhbjhK5QZg6Mt/HkBg==}
+
+  /linkify-html/4.1.1_linkifyjs@4.1.1:
+    resolution: {integrity: sha512-7RcF7gIhEOGBBvs7orCJ2tevaz7iF0ZLZSRPWNNBOnW/uGjOOQYB+ztSeHF6dchMC2dM9H8zZlt6Z959bjteaw==}
+    peerDependencies:
+      linkifyjs: ^4.0.0
+    dependencies:
+      linkifyjs: 4.1.1
+    dev: false
+
+  /linkifyjs/4.1.1:
+    resolution: {integrity: sha512-zFN/CTVmbcVef+WaDXT63dNzzkfRBKT1j464NJQkV7iSgJU0sLBus9W0HBwnXK13/hf168pbrx/V/bjEHOXNHA==}
+    dev: false
 
   /loader-runner/4.3.0:
     resolution: {integrity: sha512-3R/1M+yS3j5ou80Me59j7F9IMs4PXs3VqRrm0TU3AbKPxlmpoY1TNscJV/oGJXo8qCatFGTfDbY6W6ipGOYXfg==}
