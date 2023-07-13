@@ -1117,6 +1117,8 @@ export type TypeAppBarProps = {
    * on the app-bar to open the panel. In the basic view, this information may be added in a container above the map.
    */
   about: TypeLocalizedString;
+  /** Enable export button in app-bar. Default false */
+  export: boolean;
 };
 
 /** ******************************************************************************************************************************

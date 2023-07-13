@@ -225,13 +225,15 @@ export function Appbar({ setActivetrap }: AppbarProps): JSX.Element {
               </List>
             );
           })}
-          <div className={classes.exportButtonDiv}>
-            <List className={classes.appBarList}>
-              <ListItem>
-                <Export className={`${classes.appBarButton} ${ModalIsShown ? 'active' : ''}`} openModal={openModal} />
-              </ListItem>
-            </List>
-          </div>
+          {api.map(mapId).mapFeaturesConfig.appBar?.export && (
+            <div className={classes.exportButtonDiv}>
+              <List className={classes.appBarList}>
+                <ListItem>
+                  <Export className={`${classes.appBarButton} ${ModalIsShown ? 'active' : ''}`} openModal={openModal} />
+                </ListItem>
+              </List>
+            </div>
+          )}
         </div>
       )}
       {Object.keys(buttonPanelGroups).map((groupName: string) => {
