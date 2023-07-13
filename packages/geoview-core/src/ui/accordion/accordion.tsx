@@ -13,6 +13,7 @@ interface AccordionProps {
   id: string;
   items: Array<AccordionItem>;
   className: string;
+  defaultExpanded: boolean;
 }
 
 export type AccordionItem = {
@@ -27,13 +28,13 @@ export type AccordionItem = {
  * @returns {JSX.Element} the created Fade element
  */
 export function Accordion(props: AccordionProps): JSX.Element {
-  const { id, items, className } = props;
+  const { id, items, className, defaultExpanded = false } = props;
 
   return (
     <div id={generateId(id)} className="accordion-group">
       {Object.values(items).map((item: AccordionItem, idx: number) => (
         // eslint-disable-next-line react/no-array-index-key
-        <MaterialAccordion key={idx} className={className}>
+        <MaterialAccordion key={idx} className={className} defaultExpanded={defaultExpanded}>
           <MaterialAccordionSummary expandIcon={<ExpandMoreIcon />} aria-controls={`accordion-panel-${idx}-a-content`}>
             <div>{item.title}</div>
           </MaterialAccordionSummary>
