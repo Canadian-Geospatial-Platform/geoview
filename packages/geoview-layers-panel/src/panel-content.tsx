@@ -4,9 +4,10 @@ import {
   TypeJsonObject,
   TypeWindow,
   TypeButtonPanel,
-  payloadIsAllLegendsDone,
+  payloadIsLegendsLayersetUpdated,
   payloadIsALayerConfig,
   payloadIsRemoveGeoViewLayer,
+  PayloadBaseClass,
 } from 'geoview-core';
 
 import LayerStepper from './layer-stepper';
@@ -103,22 +104,23 @@ function PanelContent(props: TypePanelContentProps): JSX.Element {
 
   cgpv.api.event.emit({ handlerName: `${mapId}/$LegendsLayerSet$`, event: cgpv.api.eventNames.GET_LEGENDS.TRIGGER });
   useEffect(() => {
+    const legendsLayerSetUpdatedListenerFunction = (payload: PayloadBaseClass) => {
+      if (payloadIsLegendsLayersetUpdated(payload)) {
+        const { resultSets } = payload;
+        const mapLayerSet: string[] = [];
+        Object.keys(resultSets).forEach((layerPath) => {
+          mapLayerSet.push(layerPath.split('/')[0]);
+        });
+        setMapLayers([...new Set(mapLayerSet)]);
+      }
+    };
     cgpv.api.event.on(
-      cgpv.api.eventNames.GET_LEGENDS.ALL_LEGENDS_DONE,
-      (payload) => {
-        if (payloadIsAllLegendsDone(payload)) {
-          const { resultSets } = payload;
-          const mapLayerSet: string[] = [];
-          Object.keys(resultSets).forEach((layerPath) => {
-            mapLayerSet.push(layerPath.split('/')[0]);
-          });
-          setMapLayers([...new Set(mapLayerSet)]);
-        }
-      },
+      cgpv.api.eventNames.GET_LEGENDS.LEGENDS_LAYERSET_UPDATED,
+      legendsLayerSetUpdatedListenerFunction,
       `${mapId}/$LegendsLayerSet$`
     );
     return () => {
-      api.event.off(cgpv.api.eventNames.GET_LEGENDS.ALL_LEGENDS_DONE, mapId);
+      api.event.off(cgpv.api.eventNames.GET_LEGENDS.LEGENDS_LAYERSET_UPDATED, mapId, legendsLayerSetUpdatedListenerFunction);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

@@ -255,6 +255,7 @@ export class Layer {
     const layerPath = Layer.getLayerPath(layerEntryConfig);
     if (this.registeredLayers[layerPath]) return false;
     this.registeredLayers[layerPath] = layerEntryConfig;
+    (this.registeredLayers[layerPath] as TypeBaseLayerEntryConfig).layerStatus = 'newInstance';
     return true;
   }
 

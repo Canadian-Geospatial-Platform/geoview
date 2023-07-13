@@ -30,6 +30,7 @@ import { getLocalizedValue, getMinOrMaxExtents, getXMLHttpRequest } from '../../
 import { Cast, TypeJsonObject, toJsonObject } from '../../../../core/types/global-types';
 import { api } from '../../../../app';
 import { Layer } from '../../layer';
+import { LayerSetPayload } from '../../../../api/events/payloads/layer-set-payload';
 
 // TODO: Implement method to validate Vector Tiles service
 // TODO: Add more customization (minZoom, maxZoom, TMS)
@@ -154,43 +155,31 @@ export class VectorTiles extends AbstractGeoViewRaster {
    * extra configuration may be done here.
    *
    * @param {TypeListOfLayerEntryConfig} listOfLayerEntryConfig The list of layer entries configuration to validate.
-   *
-   * @returns {TypeListOfLayerEntryConfig} A new list of layer entries configuration with deleted error layers.
    */
-  protected validateListOfLayerEntryConfig(listOfLayerEntryConfig: TypeListOfLayerEntryConfig): TypeListOfLayerEntryConfig {
-    return listOfLayerEntryConfig.filter((layerEntryConfig: TypeLayerEntryConfig) => {
-      if (api.map(this.mapId).layer.isRegistered(layerEntryConfig)) {
-        this.layerLoadError.push({
-          layer: Layer.getLayerPath(layerEntryConfig),
-          consoleMessage: `Duplicate layerPath (mapId:  ${this.mapId}, layerPath: ${Layer.getLayerPath(layerEntryConfig)})`,
-        });
-        return false;
-      }
-
+  protected validateListOfLayerEntryConfig(listOfLayerEntryConfig: TypeListOfLayerEntryConfig) {
+    listOfLayerEntryConfig.forEach((layerEntryConfig: TypeLayerEntryConfig) => {
+      const layerPath = Layer.getLayerPath(layerEntryConfig);
+      api.event.emit(LayerSetPayload.createLayerSetChangeLayerStatusPayload(this.mapId, layerPath, 'loading'));
       if (layerEntryIsGroupLayer(layerEntryConfig)) {
-        layerEntryConfig.listOfLayerEntryConfig = this.validateListOfLayerEntryConfig(layerEntryConfig.listOfLayerEntryConfig!);
-        if (layerEntryConfig.listOfLayerEntryConfig.length) {
-          api.map(this.mapId).layer.registerLayerConfig(layerEntryConfig);
-          return true;
+        this.validateListOfLayerEntryConfig(layerEntryConfig.listOfLayerEntryConfig!);
+        if (!layerEntryConfig.listOfLayerEntryConfig.length) {
+          this.layerLoadError.push({
+            layer: layerPath,
+            consoleMessage: `Empty layer group (mapId:  ${this.mapId}, layerPath: ${layerPath})`,
+          });
+          api.event.emit(LayerSetPayload.createLayerSetChangeLayerStatusPayload(this.mapId, layerPath, 'error'));
+          return;
         }
-        this.layerLoadError.push({
-          layer: Layer.getLayerPath(layerEntryConfig),
-          consoleMessage: `Empty layer group (mapId:  ${this.mapId}, layerPath: ${Layer.getLayerPath(layerEntryConfig)})`,
-        });
-        return false;
       }
 
       // When no metadata are provided, all layers are considered valid.
-      if (!this.metadata) {
-        api.map(this.mapId).layer.registerLayerConfig(layerEntryConfig);
-        return true;
-      }
+      if (!this.metadata) return;
 
       // TODO: reformat to grab needed pieces
-      if (this.metadata) {
-        api.map(this.mapId).layer.registerLayerConfig(layerEntryConfig);
-        return true;
-      }
+      // if (this.metadata) {
+      //   api.map(this.mapId).layer.registerLayerConfig(layerEntryConfig);
+      //   return true;
+      // }
 
       // TODO: Clean this up from testing
       // Note that Vector Tiles metadata as we defined it does not contains metadata layer group. If you need geogson layer group,
@@ -200,21 +189,18 @@ export class VectorTiles extends AbstractGeoViewRaster {
       //   for (var i = 0; i < metadataLayerList.length; i++) if (metadataLayerList[i].layerId === layerEntryConfig.layerId) break;
       //   if (i === metadataLayerList.length) {
       //     this.layerLoadError.push({
-      //       layer: Layer.getLayerPath(layerEntryConfig),
-      //       consoleMessage: `Vector Tiles layer not found (mapId:  ${this.mapId}, layerPath: ${Layer.getLayerPath(layerEntryConfig)})`,
+      //       layer: layerPath,
+      //       consoleMessage: `Vector Tiles layer not found (mapId:  ${this.mapId}, layerPath: ${layerPath})`,
       //     });
       //     return false;
       //   }
       //   api.map(this.mapId).layer.registerLayerConfig(layerEntryConfig);
       //   return true;
       // }
-      this.layerLoadError.push({
-        layer: Layer.getLayerPath(layerEntryConfig),
-        consoleMessage: `Invalid GeoJSON metadata (listOfLayerEntryConfig) prevent loading of layer (mapId:  ${
-          this.mapId
-        }, layerPath: ${Layer.getLayerPath(layerEntryConfig)})`,
-      });
-      return false;
+
+      throw new Error(
+        `Invalid GeoJSON metadata (listOfLayerEntryConfig) prevent loading of layer (mapId:  ${this.mapId}, layerPath: ${layerPath})`
+      );
     });
   }
 

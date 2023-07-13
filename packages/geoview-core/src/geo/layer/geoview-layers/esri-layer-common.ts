@@ -21,6 +21,7 @@ import { EsriFeature, geoviewEntryIsEsriFeature, TypeEsriFeatureLayerEntryConfig
 import { EsriBaseRenderer, getStyleFromEsriRenderer } from '../../renderer/esri-renderer';
 import { TimeDimensionESRI } from '../../../core/utils/date-mgt';
 import { codedValueType, rangeDomainType } from '../../../api/events/payloads/get-feature-info-payload';
+import { LayerSetPayload } from '../../../api/events/payloads/layer-set-payload';
 
 /** ***************************************************************************************************************************
  * This method reads the service metadata from the metadataAccessPath.
@@ -47,43 +48,33 @@ export function commonGetServiceMetadata(this: EsriDynamic | EsriFeature, resolv
  * This method validates recursively the configuration of the layer entries to ensure that it is a feature layer identified
  * with a numeric layerId and creates a group entry when a layer is a group.
  *
+ * @param {EsriDynamic | EsriFeature} this The this property of the ESRI layer.
  * @param {TypeListOfLayerEntryConfig} listOfLayerEntryConfig The list of layer entries configuration to validate.
- *
- * @returns {TypeListOfLayerEntryConfig} A new list of layer entries configuration with deleted error layers.
  */
-export function commonValidateListOfLayerEntryConfig(
-  this: EsriDynamic | EsriFeature,
-  listOfLayerEntryConfig: TypeListOfLayerEntryConfig
-): TypeListOfLayerEntryConfig {
-  return listOfLayerEntryConfig.filter((layerEntryConfig: TypeLayerEntryConfig) => {
-    if (api.map(this.mapId).layer.isRegistered(layerEntryConfig)) {
-      this.layerLoadError.push({
-        layer: Layer.getLayerPath(layerEntryConfig),
-        consoleMessage: `Duplicate layerPath (mapId:  ${this.mapId}, layerPath: ${Layer.getLayerPath(layerEntryConfig)})`,
-      });
-      return false;
-    }
-
+export function commonValidateListOfLayerEntryConfig(this: EsriDynamic | EsriFeature, listOfLayerEntryConfig: TypeListOfLayerEntryConfig) {
+  listOfLayerEntryConfig.forEach((layerEntryConfig: TypeLayerEntryConfig) => {
+    const layerPath = Layer.getLayerPath(layerEntryConfig);
+    api.event.emit(LayerSetPayload.createLayerSetChangeLayerStatusPayload(this.mapId, layerPath, 'loading'));
     if (layerEntryIsGroupLayer(layerEntryConfig)) {
-      layerEntryConfig.listOfLayerEntryConfig = this.validateListOfLayerEntryConfig(layerEntryConfig.listOfLayerEntryConfig!);
-      if (layerEntryConfig.listOfLayerEntryConfig.length) {
-        api.map(this.mapId).layer.registerLayerConfig(layerEntryConfig);
-        return true;
+      this.validateListOfLayerEntryConfig(layerEntryConfig.listOfLayerEntryConfig!);
+      if (!layerEntryConfig.listOfLayerEntryConfig.length) {
+        this.layerLoadError.push({
+          layer: layerPath,
+          consoleMessage: `Empty layer group (mapId:  ${this.mapId}, layerPath: ${layerPath})`,
+        });
+        api.event.emit(LayerSetPayload.createLayerSetChangeLayerStatusPayload(this.mapId, layerPath, 'error'));
+        return;
       }
-      this.layerLoadError.push({
-        layer: Layer.getLayerPath(layerEntryConfig),
-        consoleMessage: `Empty layer group (mapId:  ${this.mapId}, layerPath: ${Layer.getLayerPath(layerEntryConfig)})`,
-      });
-      return false;
     }
 
     let esriIndex = Number(layerEntryConfig.layerId);
     if (Number.isNaN(esriIndex)) {
       this.layerLoadError.push({
-        layer: Layer.getLayerPath(layerEntryConfig),
-        consoleMessage: `ESRI layerId must be a number (mapId:  ${this.mapId}, layerPath: ${Layer.getLayerPath(layerEntryConfig)})`,
+        layer: layerPath,
+        consoleMessage: `ESRI layerId must be a number (mapId:  ${this.mapId}, layerPath: ${layerPath})`,
       });
-      return false;
+      api.event.emit(LayerSetPayload.createLayerSetChangeLayerStatusPayload(this.mapId, layerPath, 'error'));
+      return;
     }
 
     esriIndex = this.metadata?.layers
@@ -92,10 +83,11 @@ export function commonValidateListOfLayerEntryConfig(
 
     if (esriIndex === -1) {
       this.layerLoadError.push({
-        layer: Layer.getLayerPath(layerEntryConfig),
-        consoleMessage: `ESRI layerId not found (mapId:  ${this.mapId}, layerPath: ${Layer.getLayerPath(layerEntryConfig)})`,
+        layer: layerPath,
+        consoleMessage: `ESRI layerId not found (mapId:  ${this.mapId}, layerPath: ${layerPath})`,
       });
-      return false;
+      api.event.emit(LayerSetPayload.createLayerSetChangeLayerStatusPayload(this.mapId, layerPath, 'error'));
+      return;
     }
 
     if (this.metadata!.layers[esriIndex].type === 'Group Layer') {
@@ -120,19 +112,19 @@ export function commonValidateListOfLayerEntryConfig(
       switchToGroupLayer.listOfLayerEntryConfig = newListOfLayerEntryConfig;
       api.map(this.mapId).layer.registerLayerConfig(layerEntryConfig);
       this.validateListOfLayerEntryConfig(newListOfLayerEntryConfig);
-      return true;
+      return;
     }
 
-    if (this.esriChildHasDetectedAnError(layerEntryConfig, esriIndex)) return false;
+    if (this.esriChildHasDetectedAnError(layerEntryConfig, esriIndex)) {
+      api.event.emit(LayerSetPayload.createLayerSetChangeLayerStatusPayload(this.mapId, layerPath, 'error'));
+      return;
+    }
 
     if (!layerEntryConfig.layerName)
       layerEntryConfig.layerName = {
         en: this.metadata!.layers[esriIndex].name as string,
         fr: this.metadata!.layers[esriIndex].name as string,
       };
-
-    api.map(this.mapId).layer.registerLayerConfig(layerEntryConfig);
-    return true;
   });
 }
 

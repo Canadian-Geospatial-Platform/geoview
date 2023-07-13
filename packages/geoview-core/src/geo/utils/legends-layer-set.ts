@@ -37,12 +37,6 @@ export class LegendsLayerSet {
    *
    */
   private constructor(mapId: string) {
-    const isAllDone = (): boolean => {
-      return Object.keys(this.resultSets).reduce((doneFlag, layerPathToTest) => {
-        return doneFlag && this.resultSets[layerPathToTest] !== undefined;
-      }, true);
-    };
-
     const registrationConditionFunction = (layerPath: string): boolean => {
       const layerEntryConfig = api.map(this.mapId).layer.registeredLayers[layerPath];
       return layerEntryConfig.geoviewRootLayer?.geoviewLayerType !== 'xyzTiles';
@@ -58,9 +52,10 @@ export class LegendsLayerSet {
       (payload) => {
         if (payloadIsLegendInfo(payload)) {
           const { layerPath, legendInfo } = payload;
-          if (layerPath in this.resultSets) this.resultSets[layerPath] = legendInfo;
-          if (isAllDone())
-            api.event.emit(GetLegendsPayload.createAllQueriesDonePayload(`${this.mapId}/$LegendsLayerSet$`, this.resultSets));
+          if (layerPath in this.resultSets) {
+            this.resultSets[layerPath].data = legendInfo;
+            api.event.emit(GetLegendsPayload.createLegendsLayersetUpdatedPayload(`${this.mapId}/$LegendsLayerSet$`, this.resultSets));
+          }
         }
       },
       this.mapId
@@ -74,7 +69,7 @@ export class LegendsLayerSet {
         if (payloadIsTriggerLegend(payload)) {
           const queryUndefinedLegend = () => {
             Object.keys(this.resultSets).forEach((layerPath) => {
-              if (this.resultSets[layerPath] === undefined)
+              if (this.resultSets[layerPath]?.layerStatus === 'loaded' && this.resultSets[layerPath] === undefined)
                 api.event.emit(GetLegendsPayload.createQueryLegendPayload(`${this.mapId}/${layerPath}`, layerPath));
             });
           };
@@ -83,14 +78,11 @@ export class LegendsLayerSet {
             EVENT_NAMES.LAYER_SET.UPDATED,
             (layerUpdatedPayload) => {
               if (payloadIsLayerSetUpdated(layerUpdatedPayload)) {
-                if (layerUpdatedPayload.layerSetId === `${mapId}/$LegendsLayerSet$`) {
-                  if (isAllDone())
-                    api.event.emit(GetLegendsPayload.createAllQueriesDonePayload(`${this.mapId}/$LegendsLayerSet$`, this.resultSets));
-                  else queryUndefinedLegend();
-                }
+                queryUndefinedLegend();
+                api.event.emit(GetLegendsPayload.createLegendsLayersetUpdatedPayload(`${this.mapId}/$LegendsLayerSet$`, this.resultSets));
               }
             },
-            mapId
+            `${mapId}/$LegendsLayerSet$`
           );
 
           queryUndefinedLegend();

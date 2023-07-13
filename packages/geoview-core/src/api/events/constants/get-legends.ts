@@ -6,14 +6,14 @@ import { EventStringId } from '../event-types';
  */
 
 /** Valid keys for the GET_LEGENDS category */
-export type GetLegendsEventKey = 'ALL_LEGENDS_DONE' | 'LEGEND_INFO' | 'QUERY_LEGEND' | 'TRIGGER';
+export type GetLegendsEventKey = 'LEGENDS_LAYERSET_UPDATED' | 'LEGEND_INFO' | 'QUERY_LEGEND' | 'TRIGGER';
 
 /** Record that associates GET_LEGENDS's event keys to their event string id */
 export const GET_LEGENDS: Record<GetLegendsEventKey, EventStringId> = {
   /**
    * Event triggered when all the queries of the layer set are done
    */
-  ALL_LEGENDS_DONE: 'get_legends/all_legends_done',
+  LEGENDS_LAYERSET_UPDATED: 'get_legends/legends_layerset_updated',
 
   /**
    * Event triggered to send the result of the query

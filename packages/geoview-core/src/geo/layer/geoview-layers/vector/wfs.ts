@@ -24,6 +24,7 @@ import {
 import { getLocalizedValue, getXMLHttpRequest, xmlToJson, findPropertyNameByRegex } from '../../../../core/utils/utilities';
 import { api } from '../../../../app';
 import { Layer } from '../../layer';
+import { LayerSetPayload } from '../../../../api/events/payloads/layer-set-payload';
 
 export interface TypeSourceWFSVectorInitialConfig extends TypeVectorSourceInitialConfig {
   format: 'WFS';
@@ -33,7 +34,7 @@ export interface TypeWfsLayerEntryConfig extends Omit<TypeVectorLayerEntryConfig
   source: TypeSourceWFSVectorInitialConfig;
 }
 
-export interface TypeWFSLayerConfig extends Omit<TypeGeoviewLayerConfig, 'geoviewLayerType' | 'geoviewLayerType'> {
+export interface TypeWFSLayerConfig extends Omit<TypeGeoviewLayerConfig, 'geoviewLayerType'> {
   geoviewLayerType: 'ogcWfs';
   listOfLayerEntryConfig: TypeWfsLayerEntryConfig[];
 }
@@ -159,52 +160,43 @@ export class WFS extends AbstractGeoViewVector {
    * necessary, additional code can be executed in the child method to complete the layer configuration.
    *
    * @param {TypeListOfLayerEntryConfig} listOfLayerEntryConfig The list of layer entries configuration to validate.
-   *
-   * @returns {TypeListOfLayerEntryConfig} A new layer configuration list with layers in error removed.
    */
-  protected validateListOfLayerEntryConfig(listOfLayerEntryConfig: TypeListOfLayerEntryConfig): TypeListOfLayerEntryConfig {
-    return listOfLayerEntryConfig.filter((layerEntryConfig: TypeLayerEntryConfig) => {
-      if (api.map(this.mapId).layer.isRegistered(layerEntryConfig)) {
-        this.layerLoadError.push({
-          layer: Layer.getLayerPath(layerEntryConfig),
-          consoleMessage: `Duplicate layerPath (mapId:  ${this.mapId}, layerPath: ${Layer.getLayerPath(layerEntryConfig)})`,
-        });
-        return false;
-      }
-
+  protected validateListOfLayerEntryConfig(listOfLayerEntryConfig: TypeListOfLayerEntryConfig) {
+    listOfLayerEntryConfig.forEach((layerEntryConfig: TypeLayerEntryConfig) => {
+      const layerPath = Layer.getLayerPath(layerEntryConfig);
+      api.event.emit(LayerSetPayload.createLayerSetChangeLayerStatusPayload(this.mapId, layerPath, 'loading'));
       if (layerEntryIsGroupLayer(layerEntryConfig)) {
-        layerEntryConfig.listOfLayerEntryConfig = this.validateListOfLayerEntryConfig(layerEntryConfig.listOfLayerEntryConfig!);
-        if (layerEntryConfig.listOfLayerEntryConfig.length) {
-          api.map(this.mapId).layer.registerLayerConfig(layerEntryConfig);
-          return true;
+        this.validateListOfLayerEntryConfig(layerEntryConfig.listOfLayerEntryConfig!);
+        if (!layerEntryConfig.listOfLayerEntryConfig.length) {
+          this.layerLoadError.push({
+            layer: layerPath,
+            consoleMessage: `Empty layer group (mapId:  ${this.mapId}, layerPath: ${layerPath})`,
+          });
+          api.event.emit(LayerSetPayload.createLayerSetChangeLayerStatusPayload(this.mapId, layerPath, 'error'));
+          return;
         }
-        this.layerLoadError.push({
-          layer: Layer.getLayerPath(layerEntryConfig),
-          consoleMessage: `Empty layer group (mapId:  ${this.mapId}, layerPath: ${Layer.getLayerPath(layerEntryConfig)})`,
-        });
-        return false;
       }
 
       // Note that the code assumes wfs feature type list does not contains metadata layer group. If you need layer group,
       // you can define them in the configuration section.
       // when there is only one layer, it is not an array but an object
-      if (!Array.isArray(this.metadata?.FeatureTypeList?.FeatureType)) {
-        const tempFeature = this.metadata?.FeatureTypeList?.FeatureType as TypeJsonObject;
-        this.metadata!.FeatureTypeList!.FeatureType = [tempFeature] as TypeJsonObject;
-      }
+      if (!Array.isArray(this.metadata?.FeatureTypeList?.FeatureType))
+        this.metadata!.FeatureTypeList!.FeatureType = [this.metadata?.FeatureTypeList?.FeatureType] as TypeJsonObject;
 
       if (Array.isArray(this.metadata?.FeatureTypeList?.FeatureType)) {
         const metadataLayerList = this.metadata?.FeatureTypeList.FeatureType as Array<TypeJsonObject>;
-        for (var i = 0; i < metadataLayerList.length; i++) {
-          const metadataLayerId = (metadataLayerList[i].Name && metadataLayerList[i].Name['#text']) as string;
-          if (metadataLayerId.includes(layerEntryConfig.layerId)) break;
-        }
-        if (i === metadataLayerList.length) {
+        const foundMetadata = metadataLayerList.find((layerMetadata) => {
+          const metadataLayerId = (layerMetadata.Name && layerMetadata.Name['#text']) as string;
+          return metadataLayerId.includes(layerEntryConfig.layerId);
+        });
+
+        if (!foundMetadata) {
           this.layerLoadError.push({
-            layer: Layer.getLayerPath(layerEntryConfig),
-            consoleMessage: `WFS feature layer not found (mapId:  ${this.mapId}, layerPath: ${Layer.getLayerPath(layerEntryConfig)})`,
+            layer: layerPath,
+            consoleMessage: `WFS feature layer not found (mapId:  ${this.mapId}, layerPath: ${layerPath})`,
           });
-          return false;
+          api.event.emit(LayerSetPayload.createLayerSetChangeLayerStatusPayload(this.mapId, layerPath, 'error'));
+          return;
         }
 
         if (layerEntryConfig.initialSettings?.extent)
@@ -214,25 +206,14 @@ export class WFS extends AbstractGeoViewVector {
             `EPSG:${api.map(this.mapId).currentProjection}`
           );
 
-        if (!layerEntryConfig.initialSettings?.bounds && metadataLayerList[i]['ows:WGS84BoundingBox']) {
-          const lowerCorner = (metadataLayerList[i]['ows:WGS84BoundingBox']['ows:LowerCorner']['#text'] as string).split(' ');
-          const upperCorner = (metadataLayerList[i]['ows:WGS84BoundingBox']['ows:UpperCorner']['#text'] as string).split(' ');
+        if (!layerEntryConfig.initialSettings?.bounds && foundMetadata['ows:WGS84BoundingBox']) {
+          const lowerCorner = (foundMetadata['ows:WGS84BoundingBox']['ows:LowerCorner']['#text'] as string).split(' ');
+          const upperCorner = (foundMetadata['ows:WGS84BoundingBox']['ows:UpperCorner']['#text'] as string).split(' ');
           const bounds = [Number(lowerCorner[0]), Number(lowerCorner[1]), Number(upperCorner[0]), Number(upperCorner[1])];
           // layerEntryConfig.initialSettings cannot be undefined because config-validation set it to {} if it is undefined.
           layerEntryConfig.initialSettings!.bounds = transformExtent(bounds, 'EPSG:4326', `EPSG:${api.map(this.mapId).currentProjection}`);
         }
-
-        api.map(this.mapId).layer.registerLayerConfig(layerEntryConfig);
-        return true;
       }
-
-      this.layerLoadError.push({
-        layer: Layer.getLayerPath(layerEntryConfig),
-        consoleMessage: `Invalid feature type list in WFS metadata prevent loading of layer (mapId:  ${
-          this.mapId
-        }, layerPath: ${Layer.getLayerPath(layerEntryConfig)})`,
-      });
-      return false;
     });
   }
 

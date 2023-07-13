@@ -11,6 +11,7 @@ import { LAYER_SET } from './constants/layer-set';
 import { LAYER } from './constants/layer';
 import { MAP } from './constants/map';
 import { MARKER_ICON } from './constants/marker-icon';
+import { FEATURE_HIGHLIGHT } from './constants/feature-highlight';
 import { MODAL } from './constants/modal';
 import { NAVBAR } from './constants/nav-bar';
 import { OVERVIEW_MAP } from './constants/overview-map';
@@ -36,6 +37,7 @@ export const EVENT_NAMES = {
   LAYER,
   MAP,
   MARKER_ICON,
+  FEATURE_HIGHLIGHT,
   MODAL,
   NAVBAR,
   OVERVIEW_MAP,
@@ -55,6 +57,8 @@ export type EventStringId =
   | 'basemap/layers_update'
   | 'details_panel/crosshair_enter'
   | 'drawer/open_close'
+  | 'feature_highlight/highlight'
+  | 'feature_highlight/clear'
   | 'footerbar/expand_collapse'
   | 'footer_tabs/tab_create'
   | 'footer_tabs/tab_remove'
@@ -63,7 +67,7 @@ export type EventStringId =
   | 'get_feature_info/hover_query_done'
   | 'get_feature_info/query_layer'
   | 'get_feature_info/query_result'
-  | 'get_legends/all_legends_done'
+  | 'get_legends/legends_layerset_updated'
   | 'get_legends/legend_info'
   | 'get_legends/query_legends'
   | 'get_legends/trigger'
@@ -76,6 +80,7 @@ export type EventStringId =
   | 'interaction/translate_started'
   | 'interaction/translate_ended'
   | 'layer_set/layer_registration'
+  | 'layer_set/change_layer_status'
   | 'layer_set/request_layer_inventory'
   | 'layer_set/updated'
   | 'layer/add'

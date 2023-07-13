@@ -1,6 +1,12 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { EVENT_NAMES } from '../../api/events/event-types';
-import { LayerSetPayload, payloadIsLayerRegistration, TypeResultSets } from '../../api/events/payloads/layer-set-payload';
+import {
+  LayerSetPayload,
+  payloadIsLayerRegistration,
+  payloadIsLayerSetChangeLayerStatus,
+  TypeResultSets,
+} from '../../api/events/payloads/layer-set-payload';
+import { PayloadBaseClass } from '../../api/events/payloads/payload-base-class';
 import { api } from '../../app';
 
 /** ***************************************************************************************************************************
@@ -43,6 +49,17 @@ export class LayerSet {
     this.resultSets = resultSets;
     this.registrationConditionFunction = registrationConditionFunction;
 
+    const changeLayerStatusListenerFunctions = (payload: PayloadBaseClass) => {
+      if (payloadIsLayerSetChangeLayerStatus(payload)) {
+        const { layerPath, layerStatus } = payload;
+        if (this.resultSets[layerPath]) {
+          this.resultSets[layerPath].layerStatus = layerStatus;
+          api.event.emit(LayerSetPayload.createLayerSetUpdatedPayload(this.layerSetId, this.resultSets, layerPath));
+        }
+      }
+    };
+    api.event.on(EVENT_NAMES.LAYER_SET.CHANGE_LAYER_STATUS, changeLayerStatusListenerFunctions, this.mapId);
+
     // Register a layer to the layer set or unregister the layer when it is deleted from the map.
     api.event.on(
       EVENT_NAMES.LAYER_SET.LAYER_REGISTRATION,
@@ -51,17 +68,12 @@ export class LayerSet {
           const { action, layerPath, layerSetId } = payload;
           // update the registration of all layer sets if !payload.layerSetId or update only the specified layer set
           if (!layerSetId || layerSetId === this.layerSetId) {
-            if (this.registrationConditionFunction(layerPath) && action === 'add') {
-              const layerInterval = setInterval(() => {
-                if (api.maps[this.mapId].mapIsReady()) {
-                  this.resultSets[layerPath] = undefined;
-                  clearInterval(layerInterval);
-                  api.event.emit(LayerSetPayload.createLayerSetUpdatedPayload(this.mapId, this.layerSetId));
-                }
-              }, 250);
-            } else {
+            if (action === 'add' && this.registrationConditionFunction(layerPath) && !(layerPath in this.resultSets)) {
+              this.resultSets[layerPath] = { data: undefined, layerStatus: 'newInstance' };
+              api.event.emit(LayerSetPayload.createLayerSetUpdatedPayload(this.layerSetId, this.resultSets, layerPath));
+            } else if (action === 'remove' && layerPath in this.resultSets) {
               delete this.resultSets[layerPath];
-              api.event.emit(LayerSetPayload.createLayerSetUpdatedPayload(this.mapId, this.layerSetId));
+              api.event.emit(LayerSetPayload.createLayerSetUpdatedPayload(this.layerSetId, this.resultSets, layerPath));
             }
           }
         }
