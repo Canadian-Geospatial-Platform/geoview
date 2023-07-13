@@ -1,22 +1,23 @@
 - [The Map Features Instance](./README.md#the-map-features-instance)
-    - [Map](./README.md#map)
-    - [Theme](./README.md#theme)
-    - [AppBar](./README.md#appbar)
-    - [NavBar](./README.md#navbar)
-    - [Components](./README.md#components)
-    - [CorePackages](./README.md#corepackages)
-    - [ExternalPackages](./README.md#externalpackages)
-    - [ServiceUrls](./README.md#serviceurls)
+  - [Map](./README.md#map)
+  - [Theme](./README.md#theme)
+  - [AppBar](./README.md#appbar)
+  - [NavBar](./README.md#navbar)
+  - [Components](./README.md#components)
+  - [CorePackages](./README.md#corepackages)
+  - [ExternalPackages](./README.md#externalpackages)
+  - [ServiceUrls](./README.md#serviceurls)
 - [The Map Configuration](./README.md#the-map-configuration)
-    - [The nesting levels](./README.md#the-nesting-levels)
-    - [Base Layer Entry Config Chaining](./README.md#base-layer-entry-config-chaining)
-    - [The notion of layer path](./README.md#the-notion-of-layer-path)
+  - [The nesting levels](./README.md#the-nesting-levels)
+  - [Base Layer Entry Config Chaining](./README.md#base-layer-entry-config-chaining)
+  - [The notion of layer path](./README.md#the-notion-of-layer-path)
 
 # The Map Features Instance
 
 The global configuration of the maps we want to display is kept internally in the properties of a javascript object whose type is defined by the TypeMapFeaturesInstance. The value of these properties is passed to the viewer using JSON streams that can come from an HTML div, an application code segment, a GeoCore entry, a URL, or a JSON file. The structure of the configuration consists of several sections nested within each other. Each section is associated with a data type and one of these types is recursive. Within the configuration, some mandatory parameters are defined as optional in the validation schema, because their value can be deduced from the information provided by other parameters. It is the validation algorithm that will ensure these parameters are properly initialized. by doing so, we reduce the size of the map configuration.
 
 At its highest level, the configuration allows to define not only the map to be displayed, but also the content of the appBar, the components, the corePackages and externalPackages, the serviceUrls, the supported languages and the version of the configuration schema used.
+
 <p>&nbsp;</p>
 <p align="center">
   <img src="./draw.io/TypeMapFeaturesInstance.drawio.svg" />
@@ -32,7 +33,7 @@ The `theme` property is optional and its value can be `'dark'` or `'light'`. Whe
 
 ## appBar
 
-The `appBar` property is optional and its type is `TypeAppBarProps`. It contains a localized `about` string providing an English/French description in Markdown format. When undefined, it is ignored. If not, it will create a button on the app-bar to open the panel. In the basic view, this information may be added in a container above the map.
+The `appBar` property is optional and its type is `TypeAppBarProps`. It contains a localized `about` string providing an English/French description in Markdown format. When undefined, it is ignored. If not, it will create a button on the app-bar to open the panel. In the basic view, this information may be added in a container above the map. The boolean `export` property enables an export button on the app-bar when set to true.
 
 ## navBar
 
@@ -62,6 +63,7 @@ The `suportedLanguages` property is mandatory and its type is `TypeListOfLocaliz
 # The Map Configuration
 
 The map configuration section is used to define the elements we want to appear on the map. Here, we define the base map to use and its options, the kind of interaction, the list of GeoView layer configurations, the view settings and extraOptions. The following figure shows a deeper but not complete representation of the configuration.
+
 <p>&nbsp;</p>
 <p align="center">
   <img id="TypeMapConfig" src="./draw.io/TypeMapConfig.drawio.svg" />
@@ -83,6 +85,7 @@ next and final level of nesting. Its data type is polymorphic. It can therefore 
 ## Base Layer Entry Config Chaining
 
 All nodes at the lowest nesting level are linked to their parent node by the `parentLayerConfig` property and to their Geoview root node by the `geoviewRootLayer` property. When both properties are equal, we know we are at the root of the tree. The chaining of layer entries is illustrated by the dotted lines in the figure [MapConfiguration](./README.md#TypeMapConfig). The red dotted line emphasizes that recursive groups are chained with their parent group nodes until the root of the tree is reached. The chaining of configuration nodes is more easily seen in the following figure.
+
 <p>&nbsp;</p>
 <p align="center">
   <img id="layerGroupingAndEntryConfigChaining" src="./draw.io/layerGroupingAndEntryConfigChaining.drawio.svg" />
@@ -92,14 +95,14 @@ All nodes at the lowest nesting level are linked to their parent node by the `pa
 
 The layer path is the internal identifier of a layer displayed on a map. The GeoView viewer can place multiple maps on a page and each of these maps can display various types of layers from different servers. We will see later how to link a layer served by an access point to the viewer. Let's just say for now that the link to the layer coming from the server is only done using the `layerId`.
 
-For now, we will concentrate on the Layer path. This is the path that we need to follow from the root of the tree shown above in figure [Layer Grouping and Entry Config Chaining](./README.md#layerGroupingAndEntryConfigChaining) to get to the layer we are interested in. The syntax used is a string of values separated by forward slashes and where the nodes are the value of the identifiers of the path followed. So, for example, the layer path that identifies the ***icons configuration*** in the tree shown in the [figure above](./README.md#layerGroupingAndEntryConfigChaining) is:
- ***<p align="center">My_map_layer/Points/Icons.</p>***
+For now, we will concentrate on the Layer path. This is the path that we need to follow from the root of the tree shown above in figure [Layer Grouping and Entry Config Chaining](./README.md#layerGroupingAndEntryConfigChaining) to get to the layer we are interested in. The syntax used is a string of values separated by forward slashes and where the nodes are the value of the identifiers of the path followed. So, for example, the layer path that identifies the **_icons configuration_** in the tree shown in the [figure above](./README.md#layerGroupingAndEntryConfigChaining) is:
+**_<p align="center">My_map_layer/Points/Icons.</p>_**
 
 It is thanks to this identifier that we can unambiguously identify this layer when we code.
 
 Layer paths can only be used once. However, it sometimes happens that we want to place the same layer from the same server twice on the same display level in the viewer, because some servers differentiate the data with styles. This is the case with WMS sometimes. But in this case, how can we achieve this since the link is only made with the `layerId`? We would have to repeat the same path twice.
 
 To do this, the viewer uses an additional field named `layerPathEnding` to be able to place the layer again on the same display level. In this case, the syntax of the layer path is a bit different. In figure [Layer Grouping and Entry Config Chaining](./README.md#layerGroupingAndEntryConfigChaining) there are two layers on the lowest level that exploit this capability. Let's take the layer path to get to the bottom left configuration. Its value is:
-***<p align="center">My_map_layer/Points/Symbols/Squares.Style1.</p>***
+**_<p align="center">My_map_layer/Points/Symbols/Squares.Style1.</p>_**
 
 The `layerPathEnding` does not participate in the connection to the server. Only the `layerId` does. And it is not a node in the tree either. So we can't use a forward slash as a separator. We differentiate it with a dot as a separator.
