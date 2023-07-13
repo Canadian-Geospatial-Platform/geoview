@@ -29,8 +29,8 @@
     ]
   },
   "scripts": {
-    "serve": "webpack serve --progress --color --config webpack.dev.js",
-    "build": "npm run doc && webpack --progress --color --config webpack.prod.js && npm run generate.d.ts",
+    "serve": "npm run format && npm run fix && webpack serve --progress --color --config webpack.dev.js",
+    "build": "npm run format && npm run fix && npm run doc && webpack --progress --color --config webpack.prod.js && npm run generate.d.ts",
     "serveMac": "npm run formatMac && npm run fixMac && webpack serve --progress --color --config webpack.dev.js",
     "buildMac": "npm run formatMac && npm run fixMac && npm run doc && webpack --progress --color --config webpack.prod.js && npm run generate.d.ts",
     "doc": "typedoc src/app.tsx --logLevel Error --out public/docs",
