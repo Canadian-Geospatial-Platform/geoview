@@ -11,6 +11,7 @@ import { LAYER_SET } from './constants/layer-set';
 import { LAYER } from './constants/layer';
 import { MAP } from './constants/map';
 import { MARKER_ICON } from './constants/marker-icon';
+import { FEATURE_HIGHLIGHT } from './constants/feature-highlight';
 import { MODAL } from './constants/modal';
 import { NAVBAR } from './constants/nav-bar';
 import { OVERVIEW_MAP } from './constants/overview-map';
@@ -36,6 +37,7 @@ export const EVENT_NAMES = {
   LAYER,
   MAP,
   MARKER_ICON,
+  FEATURE_HIGHLIGHT,
   MODAL,
   NAVBAR,
   OVERVIEW_MAP,
@@ -55,6 +57,8 @@ export type EventStringId =
   | 'basemap/layers_update'
   | 'details_panel/crosshair_enter'
   | 'drawer/open_close'
+  | 'feature_highlight/highlight'
+  | 'feature_highlight/clear'
   | 'footerbar/expand_collapse'
   | 'footer_tabs/tab_create'
   | 'footer_tabs/tab_remove'

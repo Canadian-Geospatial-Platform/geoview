@@ -51,7 +51,8 @@
     "zoom_to": "Zoom to Layer"
   },
   "details": {
-    "zoom_to": "Zoom to feature"
+    "zoom_to": "Zoom to feature",
+    "select": "Highlight feature on map"
   },
   "lightbox": {
     "next": "Next",

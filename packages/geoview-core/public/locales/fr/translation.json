@@ -51,7 +51,8 @@
     "zoom_to": "Zoom sur la Couche"
   },
   "details": {
-    "zoom_to": "Zoom à l'élément"
+    "zoom_to": "Zoom à l'élément",
+    "select": "Sélectionner l'élément sur la carte"
   },
   "lightbox": {
     "next": "Prochaine",
