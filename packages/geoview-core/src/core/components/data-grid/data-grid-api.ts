@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/ban-types */
 /* eslint-disable react/no-array-index-key */
-import { createElement, ReactElement, useState, useEffect, FunctionComponent } from 'react';
+import { createElement, ReactElement, useState, useEffect } from 'react';
 // import { useTranslation } from 'react-i18next';
 import { toLonLat } from 'ol/proj';
 import { Extent } from 'ol/extent';
