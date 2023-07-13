@@ -69,21 +69,28 @@
       //create snippets
       createConfigSnippet();
       createCodeSnippet();
-
-      createDataTable = ({ tableType, tableLabel }) => {
+      const url = 'https://geoappext.nrcan.gc.ca/arcgis/rest/services/GSCC/Geochronology/MapServer/0/query?f=json&where=OBJECTID+%3E+0&text=&objectIds=&time=&geometry=&geometryType=esriGeometryEnvelope&inSR=&spatialRel=esriSpatialRelIntersects&relationParam=&outFields=*&returnGeometry=true&returnTrueCurves=false&maxAllowableOffset=&geometryPrecision=&outSR=&having=&returnIdsOnly=false&returnCountOnly=false&orderByFields=&groupByFieldsForStatistics=&outStatistics=&returnZ=false&returnM=false&gdbVersion=&historicMoment=&returnDistinctValues=false&resultOffset=&resultRecordCount=&queryByDistance=&returnExtentOnly=false&datumTransformation=&parameterValues=&rangeValues=&quantizationParameters=&f=html'
+      createDataTable = async ({ tableType, tableLabel }) => {
 
         console.log(`create ${tableType} data table`)
-        console.time("TableCreation")
+
+        const response = await fetch(url);
+        if (!response.ok) {
+          throw new Error('Error');
+        }
+        const result = await response.json();
+
+        console.time("tableCreation")
         const itemAcc = {
           title: tableLabel,
-          content: cgpv.api.maps['mapWM1'].dataTable.createDataTable(tableType),
+          content: cgpv.api.maps['mapWM1'].dataTable.createDataTable({ tableType, data: result }),
         }
 
         cgpv.api.addUiComponent(
           tableType,
           cgpv.react.createElement(cgpv.ui.elements.Accordion, { items: [itemAcc], defaultExpanded: true })
         );
-        console.timeEnd("TableCreation")
+        console.timeEnd("tableCreation")
       }
 
 

@@ -45,15 +45,11 @@
     "fixMac": "eslint '../geoview-**/src/**/*.{ts,tsx,js}' --fix",
     "generate.d.ts": "tsc --noEmit false --skipLibCheck true --declaration --allowJs --emitDeclarationOnly --outDir types"
   },
-  "peerDependencies": {
+  "dependencies": {
     "@emotion/react": "^11.8.1",
     "@emotion/styled": "^11.8.1",
     "@mui/icons-material": "^5.11.16",
     "@mui/material": "^5.13.1",
-    "react": "^17.0.2",
-    "react-dom": "^17.0.2"
-  },
-  "dependencies": {
     "@mui/styles": "^5.13.1",
     "@mui/system": "^5.13.1",
     "@mui/x-data-grid": "^5.13.1",
@@ -76,6 +72,8 @@
     "proj4": "^2.7.5",
     "prop-types": "^15.8.1",
     "query-string": "^7.1.0",
+    "react": "^17.0.2",
+    "react-dom": "^17.0.2",
     "react-i18next": "^12.2.0",
     "react-test-renderer": "^17.0.2",
     "sanitize-html": "^2.7.3",

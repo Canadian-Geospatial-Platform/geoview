@@ -1,8 +1,7 @@
-import { useEffect, useRef, useState, useMemo } from 'react';
+import { useMemo } from 'react';
 import { MaterialReactTable } from 'material-react-table';
-import { Box } from '@mui/material';
 import { DataGrid } from '@mui/x-data-grid';
-import DataLoader from './data-loader';
+import { Box } from '../../../ui';
 
 const sxClasses = {
   DataGrid: {
@@ -24,7 +23,7 @@ interface Features {
   geometry: { x: string; y: string };
 }
 
-interface DataTableData {
+export interface DataTableData {
   displayFieldName: string;
   features: Features[];
   fieldAliases: { [key: string]: string };
@@ -42,43 +41,14 @@ interface DataTableData {
 }
 
 interface DataTableProps {
-  tableType: 'materialReactDataTable' | 'muiDataTable';
+  tableType: 'materialReactDataTable';
+  data: DataTableData;
 }
 
-function DataTable({ tableType }: DataTableProps) {
-  const urlRef = useRef<string>(
-    'https://geoappext.nrcan.gc.ca/arcgis/rest/services/GSCC/Geochronology/MapServer/0/query?f=json&where=OBJECTID+%3E+0&text=&objectIds=&time=&geometry=&geometryType=esriGeometryEnvelope&inSR=&spatialRel=esriSpatialRelIntersects&relationParam=&outFields=*&returnGeometry=true&returnTrueCurves=false&maxAllowableOffset=&geometryPrecision=&outSR=&having=&returnIdsOnly=false&returnCountOnly=false&orderByFields=&groupByFieldsForStatistics=&outStatistics=&returnZ=false&returnM=false&gdbVersion=&historicMoment=&returnDistinctValues=false&resultOffset=&resultRecordCount=&queryByDistance=&returnExtentOnly=false&datumTransformation=&parameterValues=&rangeValues=&quantizationParameters=&f=html'
-  );
-
-  const [data, setData] = useState<DataTableData>();
-  const [isLoading, setIsLoading] = useState(false);
-
-  /**
-   * Get Data table data from url.
-   * @returns void
-   */
-  const getData = async () => {
-    try {
-      setIsLoading(true);
-      const response = await fetch(`${urlRef.current}`);
-      if (!response.ok) {
-        throw new Error('Error');
-      }
-      const result = await response.json();
-      setIsLoading(false);
-      setData(result);
-    } catch (err) {
-      setIsLoading(false);
-      console.log('error');
-    }
-  };
-
-  useEffect(() => {
-    getData();
-  }, []);
-
+function DataTable({ tableType, data }: DataTableProps) {
   /**
    * Build material react data table column header.
+   *
    * @param {object} fieldAliases object values transformed into required key value property of material react data table
    */
   const getMaterialReactDatatableColumnHeader = useMemo(() => {
@@ -94,6 +64,7 @@ function DataTable({ tableType }: DataTableProps) {
 
   /**
    * Build Rows for datatable
+   *
    * @param {Features} features list of objects transform into rows.
    */
   const getRows = useMemo(() => {
@@ -106,6 +77,7 @@ function DataTable({ tableType }: DataTableProps) {
 
   /**
    * Build MUI data table column header.
+   *
    * @param {object} fieldAliases object values transformed into required key value property of MUI data table
    */
   const getMUIDatatableColumnHeader = useMemo(() => {
@@ -119,33 +91,28 @@ function DataTable({ tableType }: DataTableProps) {
     };
   }, []);
 
-  if (isLoading) {
-    return <DataLoader />;
-  }
-
   return (
     <Box sx={{ padding: '1rem 0' }}>
-      {data &&
-        (tableType === 'materialReactDataTable' ? (
-          <MaterialReactTable
-            columns={getMaterialReactDatatableColumnHeader(data.fieldAliases)}
-            data={getRows(data.features)}
-            enableGlobalFilter={false}
-            enableRowSelection
-            initialState={{ density: 'compact', pagination: { pageSize: 100, pageIndex: 0 } }}
-          />
-        ) : (
-          <DataGrid
-            sx={sxClasses.DataGrid}
-            getRowId={(row) => row.OBJECTID}
-            checkboxSelection
-            disableSelectionOnClick
-            rowsPerPageOptions={[50]}
-            logLevel={false}
-            columns={getMUIDatatableColumnHeader(data.fieldAliases)}
-            rows={getRows(data.features)}
-          />
-        ))}
+      {tableType === 'materialReactDataTable' ? (
+        <MaterialReactTable
+          columns={getMaterialReactDatatableColumnHeader(data.fieldAliases)}
+          data={getRows(data.features)}
+          enableGlobalFilter={false}
+          enableRowSelection
+          initialState={{ density: 'compact', pagination: { pageSize: 100, pageIndex: 0 } }}
+        />
+      ) : (
+        <DataGrid
+          sx={sxClasses.DataGrid}
+          getRowId={(row) => row.OBJECTID}
+          checkboxSelection
+          disableSelectionOnClick
+          rowsPerPageOptions={[50]}
+          logLevel={false}
+          columns={getMUIDatatableColumnHeader(data.fieldAliases)}
+          rows={getRows(data.features)}
+        />
+      )}
     </Box>
   );
 }

@@ -86,6 +86,7 @@ export class MapViewer {
   featureInfo!: FeatureInfoAPI;
 
   // used to access the footer tabs api
+  // TODO: To be removed once dataTable is done
   dataGrid!: DataGridAPI;
 
   // used to access the data table api
