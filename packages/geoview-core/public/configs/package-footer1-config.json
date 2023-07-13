@@ -3,10 +3,7 @@
     "interaction": "dynamic",
     "viewSettings": {
       "zoom": 3,
-      "center": [
-        -100,
-        50
-      ],
+      "center": [-100, 50],
       "projection": 3978
     },
     "basemapOptions": {
@@ -65,12 +62,7 @@
                 "en": "https://datacube-prod-data-public.s3.ca-central-1.amazonaws.com/store/imagery/aerial/napl/napl-ring-of-fire/napl-ring-of-fire-1954-08-07-60k-thumbnail.png",
                 "fr": "https://datacube-prod-data-public.s3.ca-central-1.amazonaws.com/store/imagery/aerial/napl/napl-ring-of-fire/napl-ring-of-fire-1954-08-07-60k-thumbnail.png"
               },
-              "extent": [
-                -87.77486341686723,
-                51.62285357468582,
-                -84.57727128084842,
-                53.833354975551075
-              ],
+              "extent": [-87.77486341686723, 51.62285357468582, -84.57727128084842, 53.833354975551075],
               "projection": 4326
             }
           }
@@ -126,17 +118,8 @@
     ]
   },
   "theme": "light",
-  "components": [
-    "nav-bar",
-    "north-arrow",
-    "overview-map",
-    "footer-bar"
-  ],
-  "corePackages": [
-    "footer-panel"
-  ],
+  "components": ["nav-bar", "north-arrow", "overview-map", "footer-bar"],
+  "corePackages": ["footer-panel"],
   "externalPackages": [],
-  "suportedLanguages": [
-    "en"
-  ]
+  "suportedLanguages": ["en"]
 }
