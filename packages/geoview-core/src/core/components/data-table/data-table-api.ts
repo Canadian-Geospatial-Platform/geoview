@@ -19,7 +19,7 @@ export class DataTableApi {
    * @return {ReactElement} the data table react element
    */
 
-  createDataTable = ({ tableType, data }: { tableType: 'materialReactDataTable'; data: DataTableData }) => {
-    return createElement(DataTable, { tableType, data }, []);
+  createDataTable = ({ data }: { data: DataTableData }) => {
+    return createElement(DataTable, { data }, []);
   };
 }
