@@ -88,6 +88,7 @@ export class MapViewer {
   // used to access the footer tabs api
   dataGrid!: DataGridAPI;
 
+  // used to access the data table api
   dataTable!: DataTableApi;
 
   // used to access basemap functions

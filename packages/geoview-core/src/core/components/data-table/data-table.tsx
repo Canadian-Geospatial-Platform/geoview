@@ -55,7 +55,6 @@ function DataTable({ tableType }: DataTableProps) {
 
   /**
    * Get Data table data from url.
-   * @param {searchTerm} - search term url
    * @returns void
    */
   const getData = async () => {
@@ -78,6 +77,10 @@ function DataTable({ tableType }: DataTableProps) {
     getData();
   }, []);
 
+  /**
+   * Build material react data table column header.
+   * @param {object} fieldAliases object values transformed into required key value property of material react data table
+   */
   const getMaterialReactDatatableColumnHeader = useMemo(() => {
     return (fieldAliases: { [key: string]: string }) => {
       return Object.values(fieldAliases).map((fieldAlias) => {
@@ -89,7 +92,11 @@ function DataTable({ tableType }: DataTableProps) {
     };
   }, []);
 
-  const getMaterialReactDatatableRows = useMemo(() => {
+  /**
+   * Build Rows for datatable
+   * @param {Features} features list of objects transform into rows.
+   */
+  const getRows = useMemo(() => {
     return (features: Features[]) => {
       return features.map((feature) => {
         return feature.attributes;
@@ -97,6 +104,10 @@ function DataTable({ tableType }: DataTableProps) {
     };
   }, []);
 
+  /**
+   * Build MUI data table column header.
+   * @param {object} fieldAliases object values transformed into required key value property of MUI data table
+   */
   const getMUIDatatableColumnHeader = useMemo(() => {
     return (fieldAliases: { [key: string]: string }) => {
       return Object.values(fieldAliases).map((fieldAlias) => {
@@ -104,14 +115,6 @@ function DataTable({ tableType }: DataTableProps) {
           field: fieldAlias,
           headerName: fieldAlias,
         };
-      });
-    };
-  }, []);
-
-  const getMUIDatatableRows = useMemo(() => {
-    return (features: Features[]) => {
-      return features.map((feature) => {
-        return feature.attributes;
       });
     };
   }, []);
@@ -126,7 +129,7 @@ function DataTable({ tableType }: DataTableProps) {
         (tableType === 'materialReactDataTable' ? (
           <MaterialReactTable
             columns={getMaterialReactDatatableColumnHeader(data.fieldAliases)}
-            data={getMaterialReactDatatableRows(data.features)}
+            data={getRows(data.features)}
             enableGlobalFilter={false}
             enableRowSelection
             initialState={{ density: 'compact', pagination: { pageSize: 100, pageIndex: 0 } }}
@@ -140,7 +143,7 @@ function DataTable({ tableType }: DataTableProps) {
             rowsPerPageOptions={[50]}
             logLevel={false}
             columns={getMUIDatatableColumnHeader(data.fieldAliases)}
-            rows={getMUIDatatableRows(data.features)}
+            rows={getRows(data.features)}
           />
         ))}
     </Box>
