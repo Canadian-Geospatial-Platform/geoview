@@ -1,5 +1,5 @@
 /* eslint-disable react/require-default-props */
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { useTheme, Theme } from '@mui/material/styles';
 import MaterialCardMedia from '@mui/material/CardMedia';
 import { useTranslation } from 'react-i18next';
@@ -86,7 +86,7 @@ export function FeatureInfo(props: TypeFeatureInfoProps): JSX.Element {
   const { feature, startOpen, mapId } = props;
   const featureIconSrc = feature.featureIcon.toDataURL();
   const nameFieldValue = feature.fieldInfo[feature.nameField!]!.value as string;
-  const [isOpen, setOpen] = useState<boolean>(false);
+  const [isOpen, setOpen] = useState<boolean | undefined>(startOpen);
   const featureInfoList: TypeFieldEntry[] = Object.keys(feature.fieldInfo).map((fieldName) => {
     return {
       fieldKey: feature.fieldInfo[fieldName]!.fieldKey,
@@ -111,14 +111,6 @@ export function FeatureInfo(props: TypeFeatureInfoProps): JSX.Element {
     api.map(mapId).zoomToExtent(feature.extent);
     setOpen(true);
   }
-
-  useEffect(() => {
-    // a list of FeatureInfo with only one element will pass down the startOpen prop
-    if (startOpen) {
-      setOpen(true);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   /**
    * Parse the content of the field to see if we need to create an image, a string element or a link
