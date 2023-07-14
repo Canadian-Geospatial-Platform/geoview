@@ -309,7 +309,7 @@
           }
           cgpv.api.addUiComponent(
             'accordionList',
-            cgpv.react.createElement(cgpv.ui.elements.Accordion, { items: [itemAcc] })
+            cgpv.react.createElement(cgpv.ui.elements.Accordion, { items: [itemAcc], showLoadingIcon: true })
           );
           console.log(`Rendered Accordion ${Date.now() - startAcc}`);
         }
