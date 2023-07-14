@@ -16,7 +16,7 @@ import { transform, transformExtent } from 'ol/proj';
 import cloneDeep from 'lodash/cloneDeep';
 
 import { Cast, toJsonObject, TypeJsonArray, TypeJsonObject } from '../../../../core/types/global-types';
-import { AbstractGeoViewLayer, CONST_LAYER_TYPES, TypeLegend } from '../abstract-geoview-layers';
+import { AbstractGeoViewLayer, CONST_LAYER_TYPES, TypeLegend, TypeWmsLegend, TypeWmsLegendStyle } from '../abstract-geoview-layers';
 import { AbstractGeoViewRaster, TypeBaseRasterLayer } from './abstract-geoview-raster';
 import {
   TypeLayerEntryConfig,
@@ -93,6 +93,8 @@ export const geoviewEntryIsWMS = (verifyIfGeoViewEntry: TypeLayerEntryConfig): v
  */
 // ******************************************************************************************************************************
 export class WMS extends AbstractGeoViewRaster {
+  WMSStyles: string[];
+
   /** ***************************************************************************************************************************
    * Initialize layer
    * @param {string} mapId the id of the map
@@ -100,6 +102,7 @@ export class WMS extends AbstractGeoViewRaster {
    */
   constructor(mapId: string, layerConfig: TypeWMSLayerConfig) {
     super(CONST_LAYER_TYPES.WMS, layerConfig, mapId);
+    this.WMSStyles = [];
   }
 
   /** ***************************************************************************************************************************
@@ -487,14 +490,30 @@ export class WMS extends AbstractGeoViewRaster {
         const layerCapabilities = this.getLayerMetadataEntry(layerEntryConfig.layerId);
         if (layerCapabilities) {
           const dataAccessPath = getLocalizedValue(layerEntryConfig.source.dataAccessPath, this.mapId)!;
-          const styleToUse =
-            Array.isArray(layerEntryConfig.source?.style) && layerEntryConfig.source?.style
-              ? layerEntryConfig.source?.style[0]
-              : layerEntryConfig.source?.style;
+
+          let styleToUse = '';
+          if (Array.isArray(layerEntryConfig.source?.style) && layerEntryConfig.source?.style) {
+            styleToUse = layerEntryConfig.source?.style[0];
+          } else if (layerEntryConfig.source.style) {
+            styleToUse = layerEntryConfig.source?.style as string;
+          } else if (layerCapabilities.Style) {
+            styleToUse = layerCapabilities.Style[0].Name as string;
+          }
+
+          if (Array.isArray(layerEntryConfig.source?.style)) {
+            this.WMSStyles = layerEntryConfig.source.style;
+          } else if ((layerCapabilities.Style.length as number) > 1) {
+            this.WMSStyles = [];
+            for (let i = 0; i < (layerCapabilities.Style.length as number); i++) {
+              this.WMSStyles.push(layerCapabilities.Style[i].Name as string);
+            }
+          } else this.WMSStyles = [styleToUse];
+
           const sourceOptions: SourceOptions = {
             url: dataAccessPath.endsWith('?') ? dataAccessPath : `${dataAccessPath}?`,
-            params: { LAYERS: layerEntryConfig.layerId, STYLES: styleToUse || '' },
+            params: { LAYERS: layerEntryConfig.layerId, STYLES: styleToUse },
           };
+
           sourceOptions.attributions = this.attributions;
           sourceOptions.serverType = layerEntryConfig.source.serverType;
           if (layerEntryConfig.source.crossOrigin) {
@@ -586,7 +605,7 @@ export class WMS extends AbstractGeoViewRaster {
   }
 
   /** ***************************************************************************************************************************
-   * This method will create a Geoview temporal dimension if ot exist in the service metadata
+   * This method will create a Geoview temporal dimension if it existds in the service metadata
    * @param {TypeJsonObject} wmsTimeDimension The WMS time dimension object
    * @param {TypeOgcWmsLayerEntryConfig} layerEntryConfig The layer entry to configure
    */
@@ -712,16 +731,23 @@ export class WMS extends AbstractGeoViewRaster {
    * Get the legend image URL of a layer from the capabilities. Return null if it does not exist.
    *
    * @param {TypeOgcWmsLayerEntryConfig} layerConfig layer configuration.
+   * @param {string} style the style to get the url for
    *
    * @returns {TypeJsonObject | null} URL of a Legend image in png format or null
    */
-  private getLegendUrlFromCapabilities(layerConfig: TypeOgcWmsLayerEntryConfig): TypeJsonObject | null {
+  private getLegendUrlFromCapabilities(layerConfig: TypeOgcWmsLayerEntryConfig, chosenStyle?: string): TypeJsonObject | null {
     const layerCapabilities = this.getLayerMetadataEntry(layerConfig.layerId);
     if (Array.isArray(layerCapabilities?.Style)) {
-      const legendStyle = layerCapabilities?.Style.find((style) => {
-        if (layerConfig?.source?.style && !Array.isArray(layerConfig?.source?.style)) return layerConfig.source.style === style.Name;
-        return style.Name === 'default';
-      });
+      let legendStyle;
+      if (chosenStyle) {
+        legendStyle = layerCapabilities?.Style[chosenStyle];
+      } else {
+        legendStyle = layerCapabilities?.Style.find((style) => {
+          if (layerConfig?.source?.style && !Array.isArray(layerConfig?.source?.style)) return layerConfig.source.style === style.Name;
+          return style.Name === 'default';
+        });
+      }
+
       if (Array.isArray(legendStyle?.LegendURL)) {
         const legendUrl = legendStyle!.LegendURL.find((urlEntry) => {
           if (urlEntry.Format === 'image/png') return true;
@@ -737,10 +763,11 @@ export class WMS extends AbstractGeoViewRaster {
    * Get the legend image of a layer.
    *
    * @param {TypeOgcWmsLayerEntryConfig} layerConfig layer configuration.
+   * @param {striung} chosenStyle Style to get the legend image for.
    *
    * @returns {blob} image blob
    */
-  private getLegendImage(layerConfig: TypeOgcWmsLayerEntryConfig): Promise<string | ArrayBuffer | null> {
+  private getLegendImage(layerConfig: TypeOgcWmsLayerEntryConfig, chosenStyle?: string): Promise<string | ArrayBuffer | null> {
     const promisedImage = new Promise<string | ArrayBuffer | null>((resolve) => {
       const readImage = (blob: Blob): Promise<string | ArrayBuffer | null> =>
         // eslint-disable-next-line @typescript-eslint/no-shadow
@@ -752,7 +779,7 @@ export class WMS extends AbstractGeoViewRaster {
         });
 
       let queryUrl: string | undefined;
-      const legendUrlFromCapabilities = this.getLegendUrlFromCapabilities(layerConfig);
+      const legendUrlFromCapabilities = this.getLegendUrlFromCapabilities(layerConfig, chosenStyle);
       if (legendUrlFromCapabilities) queryUrl = legendUrlFromCapabilities.OnlineResource as string;
       else if (Object.keys(this.metadata!.Capability.Request).includes('GetLegendGraphic'))
         queryUrl = `${getLocalizedValue(
@@ -777,6 +804,57 @@ export class WMS extends AbstractGeoViewRaster {
   }
 
   /** ***************************************************************************************************************************
+   * Get the legend info of a style.
+   *
+   * @param {TypeOgcWmsLayerEntryConfig} layerConfig layer configuration.
+   * @param {number} position index number of style to get
+   *
+   * @returns {Promise<TypeWmsLegendStylel>} The legend of the style.
+   */
+  private async getStyleLegend(layerConfig: TypeOgcWmsLayerEntryConfig, position: number): Promise<TypeWmsLegendStyle> {
+    const promisedStyleLegend = new Promise<TypeWmsLegendStyle>((resolve) => {
+      let chosenStyle: string | undefined;
+      if (this.WMSStyles[position] === 'default') chosenStyle = undefined;
+      else chosenStyle = this.WMSStyles[position];
+      let styleLegend: TypeWmsLegendStyle;
+      this.getLegendImage(layerConfig!, chosenStyle).then((styleLegendImage) => {
+        if (!styleLegendImage) {
+          styleLegend = {
+            name: this.WMSStyles[position],
+            legend: null,
+          };
+          resolve(styleLegend);
+        } else {
+          api
+            .map(this.mapId)
+            .geoviewRenderer.loadImage(styleLegendImage as string)
+            .then((styleImage) => {
+              if (styleImage) {
+                const drawingCanvas = document.createElement('canvas');
+                drawingCanvas.width = styleImage.width;
+                drawingCanvas.height = styleImage.height;
+                const drawingContext = drawingCanvas.getContext('2d')!;
+                drawingContext.drawImage(styleImage, 0, 0);
+                styleLegend = {
+                  name: this.WMSStyles[position],
+                  legend: drawingCanvas,
+                };
+                resolve(styleLegend);
+              } else {
+                styleLegend = {
+                  name: this.WMSStyles[position],
+                  legend: null,
+                };
+                resolve(styleLegend);
+              }
+            });
+        }
+      });
+    });
+    return promisedStyleLegend;
+  }
+
+  /** ***************************************************************************************************************************
    * Return the legend of the layer. When layerPathOrConfig is undefined, the activeLayer of the class is used. This routine
    * return null when the layerPath specified is not found or when the layerPathOrConfig is undefined and the active layer
    * is null or the selected layerConfig is undefined or null.
@@ -792,39 +870,54 @@ export class WMS extends AbstractGeoViewRaster {
       );
       if (!layerConfig) resolve(null);
 
-      this.getLegendImage(layerConfig!).then((legendImage) => {
-        if (!legendImage)
-          resolve({
+      let legend: TypeWmsLegend;
+      this.getLegendImage(layerConfig!).then(async (legendImage) => {
+        const styleLegends: TypeWmsLegendStyle[] = [];
+        if (this.WMSStyles.length > 1) {
+          for (let i = 0; i < this.WMSStyles.length; i++) {
+            // eslint-disable-next-line no-await-in-loop
+            const styleLegend = await this.getStyleLegend(layerConfig!, i);
+            styleLegends.push(styleLegend);
+          }
+        }
+
+        if (!legendImage) {
+          legend = {
             type: this.type,
             layerPath: Layer.getLayerPath(layerConfig!),
             layerName: layerConfig!.layerName,
             legend: null,
-          });
-        else {
+            styles: styleLegends.length > 1 ? styleLegends : undefined,
+          };
+          resolve(legend);
+        } else {
           api
             .map(this.mapId)
             .geoviewRenderer.loadImage(legendImage as string)
-            .then((image) => {
+            .then(async (image) => {
               if (image) {
                 const drawingCanvas = document.createElement('canvas');
                 drawingCanvas.width = image.width;
                 drawingCanvas.height = image.height;
                 const drawingContext = drawingCanvas.getContext('2d')!;
                 drawingContext.drawImage(image, 0, 0);
-                const legend: TypeLegend = {
+                legend = {
                   type: this.type,
                   layerPath: Layer.getLayerPath(layerConfig!),
                   layerName: layerConfig!.layerName,
                   legend: drawingCanvas,
+                  styles: styleLegends.length > 1 ? styleLegends : undefined,
                 };
                 resolve(legend);
               } else
-                resolve({
+                legend = {
                   type: this.type,
                   layerPath: Layer.getLayerPath(layerConfig!),
                   layerName: layerConfig!.layerName,
                   legend: null,
-                });
+                  styles: styleLegends.length > 1 ? styleLegends : undefined,
+                };
+              resolve(legend);
             });
         }
       });

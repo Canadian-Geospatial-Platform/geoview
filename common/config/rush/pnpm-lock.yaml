@@ -5044,10 +5044,9 @@ packages:
       eslint: 8.45.0
       eslint-import-resolver-node: 0.3.7
       eslint-module-utils: 2.8.0_h2tu665zyzp3li3mokdnt2kw74
-      has: 1.0.3
-      is-core-module: 2.12.1
-      is-glob: 4.0.3
-      minimatch: 3.1.2
+      eslint: 8.44.0
+      eslint-import-resolver-node: 0.3.7
+      eslint-module-utils: 2.8.0_obwxlbvpmtyn54zwezzu2ooh6u
       object.values: 1.1.6
       resolve: 1.22.2
       semver: 6.3.1
