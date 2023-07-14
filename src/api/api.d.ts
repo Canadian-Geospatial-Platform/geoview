@@ -31,6 +31,7 @@ export declare class API {
         LAYER: Record<import("../app").LayerEventKey, import("./events/event-types").EventStringId>;
         MAP: Record<import("../app").MapEventKey, import("./events/event-types").EventStringId>;
         MARKER_ICON: Record<import("../app").MarkerIconEventKey, import("./events/event-types").EventStringId>;
+        FEATURE_HIGHLIGHT: Record<import("./events/constants/feature-highlight").FeatureHighlightEventKey, import("./events/event-types").EventStringId>;
         MODAL: Record<import("../app").ModalEventKey, import("./events/event-types").EventStringId>;
         NAVBAR: Record<import("../app").NavbarEventKey, import("./events/event-types").EventStringId>;
         OVERVIEW_MAP: Record<"EVENT_OVERVIEW_MAP_TOGGLE", import("./events/event-types").EventStringId>;
