@@ -20,6 +20,7 @@ import { PANEL } from './constants/panel';
 import { SLIDER } from './constants/slider';
 import { SNACKBAR } from './constants/snackbar';
 import { VECTOR } from './constants/vector';
+import { NOTIFICATIONS } from './constants/notifications';
 
 /**
  * constant contains event names
@@ -47,6 +48,7 @@ export const EVENT_NAMES = {
   SLIDER,
   SNACKBAR,
   VECTOR,
+  NOTIFICATIONS,
 };
 
 /**
@@ -127,4 +129,6 @@ export type EventStringId =
   | 'vector/added'
   | 'vector/off'
   | 'vector/on'
-  | 'vector/remove';
+  | 'vector/remove'
+  | 'notification/add'
+  | 'notification/remove';
