@@ -4,6 +4,7 @@ export * from './avatar/avatar';
 export * from './button';
 export * from './button-group';
 export * from './card';
+export * from './card-media/card-media';
 export * from './circular-progress/circular-progress-base';
 export * from './circular-progress/circular-progress';
 export * from './checkbox/checkbox';
