@@ -1,8 +1,16 @@
-import { useMemo } from 'react';
-import { MaterialReactTable } from 'material-react-table';
-import { Box } from '../../../ui';
+import React, { useMemo } from 'react';
+import {
+  MaterialReactTable,
+  type MRT_ColumnDef as MRTColumnDef,
+  MRT_ToggleDensePaddingButton as MRTToggleDensePaddingButton,
+  MRT_FullScreenToggleButton as MRTFullScreenToggleButton,
+} from 'material-react-table';
+import { Extent } from 'ol/extent';
+import { Geometry } from 'ol/geom';
+import { ZoomInSearchIcon } from '../../../ui/icons';
+import { Box, IconButton } from '../../../ui';
 
-interface Features {
+export interface Features {
   attributes: {
     [key: string]: string;
   };
@@ -26,25 +34,38 @@ export interface DataTableData {
   };
 }
 
+export interface ColumnsType {
+  ICON: string;
+  ZOOM: string;
+  [key: string]: string;
+}
+
 interface DataTableProps {
   data: DataTableData;
+}
+
+export interface Rows {
+  geometry: Geometry;
+  extent?: Extent;
+  featureKey?: string;
+  featureIcon?: string;
+  featureActions?: unknown;
 }
 
 function DataTable({ data }: DataTableProps) {
   /**
    * Build material react data table column header.
    *
-   * @param {object} fieldAliases object values transformed into required key value property of material react data table
+   * @param {object} data.fieldAliases object values transformed into required key value property of material react data table
    */
-  const getMaterialReactDatatableColumnHeader = useMemo(() => {
-    return (fieldAliases: { [key: string]: string }) => {
-      return Object.values(fieldAliases).map((fieldAlias) => {
-        return {
-          accessorKey: fieldAlias,
-          header: fieldAlias,
-        };
-      });
-    };
+  const columns = useMemo<MRTColumnDef<ColumnsType>[]>(() => {
+    return Object.values({ icon: 'ICON', zoom: 'ZOOM', ...data.fieldAliases }).map((fieldAlias) => {
+      return {
+        accessorKey: fieldAlias,
+        header: fieldAlias,
+      };
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   /**
@@ -52,22 +73,38 @@ function DataTable({ data }: DataTableProps) {
    *
    * @param {Features} features list of objects transform into rows.
    */
-  const getRows = useMemo(() => {
-    return (features: Features[]) => {
-      return features.map((feature) => {
-        return feature.attributes;
-      });
-    };
+  const rows = useMemo(() => {
+    return data.features.map((feature) => {
+      return {
+        ICON: 'Image',
+        ZOOM: (
+          <IconButton>
+            <ZoomInSearchIcon />
+          </IconButton>
+        ),
+        ...feature.attributes,
+      };
+    }) as unknown as ColumnsType[];
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
     <Box sx={{ padding: '1rem 0' }}>
       <MaterialReactTable
-        columns={getMaterialReactDatatableColumnHeader(data.fieldAliases)}
-        data={getRows(data.features)}
+        columns={columns}
+        data={rows}
         enableGlobalFilter={false}
         enableRowSelection
-        initialState={{ density: 'compact', pagination: { pageSize: 100, pageIndex: 0 } }}
+        initialState={{ density: 'compact', pagination: { pageSize: 10, pageIndex: 0 } }}
+        renderToolbarInternalActions={({ table }) => (
+          <Box>
+            {/* add custom button to print table  */}
+
+            {/* along-side built-in buttons in whatever order you want them */}
+            <MRTToggleDensePaddingButton table={table} />
+            <MRTFullScreenToggleButton table={table} />
+          </Box>
+        )}
       />
     </Box>
   );
