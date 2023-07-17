@@ -8,7 +8,8 @@ import debounce from 'lodash/debounce';
 import GeoList from './geo-list';
 import { StyledInputField, sxClasses } from './styles';
 import { MapContext } from '../../app-start';
-import { api } from '../../../app';
+import { api, payloadIsABoolean } from '../../../app';
+import { EVENT_NAMES } from '../../../api/events/event-types';
 
 export interface GeoListItem {
   key: string;
@@ -38,6 +39,18 @@ export function Geolocator() {
   const [data, setData] = useState<GeoListItem[]>();
   const [error, setError] = useState<Error>();
   const [isLoading, setIsLoading] = useState<boolean>(false);
+
+  // set the active (visible) or not active (hidden) from geolocator button click
+  const [active, setActive] = useState(true);
+  api.event.on(
+    EVENT_NAMES.GEOLOCATOR.EVENT_GEOLOCATOR_TOGGLE,
+    (payload) => {
+      if (payloadIsABoolean(payload)) {
+        setActive(!payload.status);
+      }
+    },
+    mapId
+  );
 
   /**
    * Send fetch call to the service for given search term.
@@ -122,7 +135,7 @@ export function Geolocator() {
   };
 
   return (
-    <Box sx={sxClasses.root} id="geolocator-search">
+    <Box sx={sxClasses.root} visibility={`${active ? 'visible' : 'hidden'}`} id="geolocator-search">
       <Box sx={sxClasses.geolocator}>
         <AppBar position="static">
           <Toolbar

@@ -37,11 +37,11 @@ The `appBar` property is optional and its type is `TypeAppBarProps`. It contains
 
 ## navBar
 
-The `navBar` property is optional and its type is `TypeNavBarProps`. It is used to define the controls available on the navigation bar. When its value is undefined, the default `['zoom' | 'fullscreen' | 'fullextent']` will be used.
+The `navBar` property is optional and its type is `TypeNavBarProps`. It is used to define the controls available on the navigation bar. When its value is undefined, the default `['zoom' | 'fullscreen' | 'home', 'location', 'export']` will be used.
 
 ## components
 
-The `components` property is optional and its type is `TypeMapComponents` which is an array whose value domain is `'app-bar', 'footer-bar', 'nav-bar', 'north-arrow', 'overview-map'`.
+The `components` property is optional and its type is `TypeMapComponents` which is an array whose value domain is `'north-arrow', 'overview-map'`.
 
 ## corePackages
 

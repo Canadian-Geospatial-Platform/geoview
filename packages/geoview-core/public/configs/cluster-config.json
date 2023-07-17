@@ -47,7 +47,7 @@
     ]
   },
   "theme": "dark",
-  "components": ["app-bar", "footer-bar"],
+  "components": [],
   "corePackages": ["layers-panel"],
   "suportedLanguages": ["en"]
 }

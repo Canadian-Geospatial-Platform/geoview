@@ -35,6 +35,7 @@
   },
   "appbar": {
     "export": "Export",
+    "geolocator": "Geolocator",
     "fullscreen": "Full Screen",
     "help": "Help",
     "layers": "Layers",

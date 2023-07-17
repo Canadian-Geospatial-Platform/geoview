@@ -65,7 +65,7 @@
     ]
   },
   "theme": "light",
-  "components": ["app-bar", "nav-bar", "north-arrow", "overview-map", "footer-bar"],
+  "components": ["north-arrow", "overview-map"],
   "corePackages": ["details-panel"],
   "externalPackages": [],
   "suportedLanguages": ["en"]

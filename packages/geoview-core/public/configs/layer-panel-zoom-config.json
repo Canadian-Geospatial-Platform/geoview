@@ -93,9 +93,7 @@
     ]
   },
   "theme": "dark",
-  "components": [
-    "app-bar"
-  ],
+  "components": [],
   "corePackages": [
     "layers-panel",
     "footer-panel"

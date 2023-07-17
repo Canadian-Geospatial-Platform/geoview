@@ -13,7 +13,7 @@ Some components, like legends and data grids can be reused in another package or
 Other components can be added to the map from the configuration via the following line:
 
 ```js
-'components': ['app-bar', 'nav-bar', 'north-arrow', 'overview-map', 'footer-bar']
+'components': ['north-arrow', 'overview-map']
 ```
 
 In all these cases, components are building blocks on which we can build more important functionality.
