@@ -37,7 +37,7 @@ type TypePanelAppProps = {
 const useStyles = makeStyles((theme) => ({
   panelContainer: {
     backgroundColor: theme.panel.background,
-    height: '100%',
+    height: 'calc(100% - 35px)',
     borderRadius: 0,
     flexDirection: 'column',
     [theme.breakpoints.down('sm')]: {

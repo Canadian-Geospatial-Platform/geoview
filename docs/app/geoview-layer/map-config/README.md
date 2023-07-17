@@ -33,15 +33,15 @@ The `theme` property is optional and its value can be `'dark'` or `'light'`. Whe
 
 ## appBar
 
-The `appBar` property is optional and its type is `TypeAppBarProps`. It contains a localized `about` string providing an English/French description in Markdown format. When undefined, it is ignored. If not, it will create a button on the app-bar to open the panel. In the basic view, this information may be added in a container above the map. The boolean `export` property enables an export button on the app-bar when set to true.
+The `appBar` property is optional and its type is `TypeAppBarProps`. It is used to define the controls available on the application bar. When its value is undefined, the default `['geolocator']` will be used.
 
 ## navBar
 
-The `navBar` property is optional and its type is `TypeNavBarProps`. It is used to define the controls available on the navigation bar. When its value is undefined, the default `['zoom' | 'fullscreen' | 'fullextent']` will be used.
+The `navBar` property is optional and its type is `TypeNavBarProps`. It is used to define the controls available on the navigation bar. When its value is undefined, the default `['zoom' | 'fullscreen' | 'home']` will be used.
 
 ## components
 
-The `components` property is optional and its type is `TypeMapComponents` which is an array whose value domain is `'app-bar', 'footer-bar', 'nav-bar', 'north-arrow', 'overview-map'`.
+The `components` property is optional and its type is `TypeMapComponents` which is an array whose value domain is `'north-arrow', 'overview-map'`.
 
 ## corePackages
 

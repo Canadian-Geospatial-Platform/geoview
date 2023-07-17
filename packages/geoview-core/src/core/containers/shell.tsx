@@ -169,13 +169,11 @@ export function Shell(props: ShellProps): JSX.Element {
           {t('keyboardnav.start')}
         </a>
         <div className={`${classes.mapContainer} mapContainer`}>
-          {mapFeaturesConfig.components !== undefined && mapFeaturesConfig.components.indexOf('app-bar') > -1 && (
-            <Appbar setActivetrap={setActivetrap} />
-          )}
-          {/* load geolocator component if config includes in list of components */}
-          {mapFeaturesConfig?.components?.includes('geolocator') && <Geolocator />}
+          <Appbar setActivetrap={setActivetrap} />
+          {/* load geolocator component if config includes in list of components in appBar */}
+          {mapFeaturesConfig?.appBar?.includes('geolocator') && mapFeaturesConfig?.map.interaction === 'dynamic' && <Geolocator />}
           <Map {...mapFeaturesConfig} />
-          {mapFeaturesConfig?.components && mapFeaturesConfig?.components.includes('nav-bar') && <Navbar setActivetrap={setActivetrap} />}
+          {mapFeaturesConfig?.map.interaction === 'dynamic' && <Navbar setActivetrap={setActivetrap} />}
         </div>
         {mapFeaturesConfig?.corePackages && mapFeaturesConfig?.corePackages.includes('footer-panel') && <FooterTabs />}
         {Object.keys(api.map(shellId).modal.modals).map((modalId) => (
