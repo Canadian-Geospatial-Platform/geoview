@@ -6,6 +6,7 @@ interface AccordionProps {
     id: string;
     items: Array<AccordionItem>;
     className: string;
+    defaultExpanded: boolean;
 }
 export type AccordionItem = {
     title: string;
