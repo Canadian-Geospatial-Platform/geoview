@@ -33,12 +33,11 @@
       }
     ]
   },
-  "theme": "light",
+  "theme": "dark",
+  "navBar": ["zoom", "fullscreen", "home", "location", "export"],
   "components": [
-    "nav-bar",
     "north-arrow",
-    "overview-map",
-    "footer-bar"
+    "overview-map"
   ],
   "corePackages": [
     "footer-panel"

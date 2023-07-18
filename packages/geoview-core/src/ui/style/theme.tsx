@@ -215,7 +215,7 @@ const darkPalette = {
 };
 
 const darkAppBar = {
-  background: '#1E1E1E',
+  background: '#000000dd',
   border: '#444444',
   btnActiveBg: '#ffffffe6',
   btnDefaultBg: '#222222',
@@ -224,7 +224,7 @@ const darkAppBar = {
 };
 
 const darkPanel = {
-  background: '#1E1E1E',
+  background: '#000000dd',
   border: '#393939',
   borderLight: '#4f4f4f',
   defaultBg: '#232323',
@@ -379,8 +379,8 @@ const themeOptions: ThemeOptions = {
     objectFit: 'scale-down',
   },
   appBar: {
-    background: '#1E1E1E',
-    border: '#fff',
+    background: '#FFFFFFee',
+    border: '1px solid #bdbbdb',
     btnActiveBg: '#000000e6',
     btnDefaultBg: '#222222',
     btnFocusBg: '#333333',

@@ -1526,26 +1526,22 @@
       "description": "Spatial Reference EPSG code supported (https://epsg.io/). We support Web Mercator and Lambert Conical Conform Canada."
     },
     "TypeAppBarProps": {
-      "additionalProperties": false,
-      "type": "object",
-      "properties": {
-        "about": {
-          "$ref": "#/definitions/TypeLocalizedString",
-          "description": "The content of the about section in Markdown format. If empty, it will be ignored. If not, it will create a button on the app-bar to open the panel. In the basic view, this information may be added in a container above the map."
-        },
-        "export": {
-          "type": "boolean",
-          "description": "Enable export button in app-bar"
-        }
-      }
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "enum": ["geolocator", "export", "version"]
+      },
+      "default": ["geolocator"],
+      "description": "Controls availalbe on the application bar.",
+      "minItems": 0
     },
     "TypeNavBarProps": {
       "type": "array",
       "uniqueItems": true,
       "items": {
-        "enum": ["zoom", "fullscreen", "fullextent"]
+        "enum": ["zoom", "fullscreen", "home", "location", "export"]
       },
-      "default": ["zoom", "fullscreen", "fullextent"],
+      "default": ["zoom", "fullscreen", "home"],
       "description": "Controls availalbe on the navigation bar.",
       "minItems": 0
     },
@@ -1553,9 +1549,9 @@
       "type": "array",
       "uniqueItems": true,
       "items": {
-        "enum": ["app-bar", "footer-bar", "nav-bar", "overview-map", "north-arrow", "geolocator"]
+        "enum": ["overview-map", "north-arrow", "geolocator"]
       },
-      "default": ["app-bar", "footer-bar", "nav-bar", "overview-map", "north-arrow", "geolocator"],
+      "default": ["overview-map", "north-arrow", "geolocator"],
       "description": "Core components to initialize on viewer load. The schema for those are inside this file.",
       "minItems": 0
     },

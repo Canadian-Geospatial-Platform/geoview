@@ -2,7 +2,7 @@ import { useState, useRef, useEffect, useCallback, Fragment, useContext, SetStat
 
 import makeStyles from '@mui/styles/makeStyles';
 
-import { List, ListItem, Panel, IconButton } from '../../../ui';
+import { List, ListItem, Panel, IconButton, Popover } from '../../../ui';
 
 import { api } from '../../../app';
 import { EVENT_NAMES } from '../../../api/events/event-types';
@@ -13,17 +13,21 @@ import { payloadIsAButtonPanel, ButtonPanelPayload } from '../../../api/events/p
 import { TypeButtonPanel } from '../../../ui/panel/panel-types';
 
 import Export from './buttons/export';
+import Geolocator from './buttons/geolocator';
 import ExportModal from '../export/export-modal';
 
 const useStyles = makeStyles((theme) => ({
   appBar: {
+    position: 'absolute',
     display: 'flex',
     flexDirection: 'row',
     justifyContent: 'space-between',
     height: '100%',
+    minWidth: 64,
     zIndex: theme.zIndex.appBar,
     pointerEvents: 'all',
     backgroundColor: theme.appBar.background,
+    border: theme.appBar.border,
   },
   appBarList: {
     width: 60,
@@ -37,11 +41,6 @@ const useStyles = makeStyles((theme) => ({
         color: theme.palette.primary.light,
       },
     },
-  },
-
-  exportButtonDiv: {
-    position: 'absolute',
-    bottom: 0,
   },
 
   appBarButtons: {
@@ -87,6 +86,7 @@ const useStyles = makeStyles((theme) => ({
 type AppbarProps = {
   setActivetrap: Dispatch<SetStateAction<boolean>>;
 };
+
 /**
  * Create an app-bar with buttons that can open a panel
  */
@@ -102,6 +102,7 @@ export function Appbar({ setActivetrap }: AppbarProps): JSX.Element {
   const mapConfig = useContext(MapContext);
 
   const { mapId } = mapConfig;
+  const { mapFeaturesConfig } = api.map(mapId);
 
   const openModal = () => {
     setModalIsShown(true);
@@ -181,61 +182,78 @@ export function Appbar({ setActivetrap }: AppbarProps): JSX.Element {
     };
   }, [addButtonPanel, mapId, removeButtonPanel, selectedAppBarButtonId]);
 
+  console.log(mapFeaturesConfig.appBar)
+
   return (
     <div className={classes.appBar} ref={appBar}>
-      {Object.keys(api.map(mapId).appBarButtons.getAllButtonPanels()).filter((buttonPanel) => {
-        return api.map(mapId).appBarButtons.getAllButtonPanels()[buttonPanel].button?.visible;
-      }).length > 0 && (
-        <div className={classes.appBarButtons}>
-          {Object.keys(buttonPanelGroups).map((groupName: string) => {
-            // get button panels from group
-            const buttonPanels = buttonPanelGroups[groupName];
+      <div className={classes.appBarButtons}>
+        {mapFeaturesConfig.appBar?.includes('geolocator') && mapFeaturesConfig?.map.interaction === 'dynamic' && (
+          <div>
+            <List className={classes.appBarList}>
+              <ListItem>
+                <Geolocator className={classes.appBarButton} mapId={mapId} />
+              </ListItem>
+            </List>
+          </div>
+        )}
 
-            // display the button panels in the list
-            return (
-              <List key={groupName} className={classes.appBarList}>
-                {Object.keys(buttonPanels).map((buttonPanelsKey) => {
-                  const buttonPanel = buttonPanels[buttonPanelsKey];
-                  return buttonPanel?.button.visible !== undefined && buttonPanel?.button.visible ? (
-                    <Fragment key={buttonPanel.button.id}>
-                      <ListItem>
-                        <IconButton
-                          id={buttonPanel.button.id}
-                          aria-label={buttonPanel.button.tooltip}
-                          tooltip={buttonPanel.button.tooltip}
-                          tooltipPlacement="right"
-                          className={`${classes.appBarButton} ${selectedAppBarButtonId === buttonPanel.button.id ? 'active' : ''}`}
-                          size="small"
-                          onClick={() => {
-                            if (!buttonPanel.panel?.status) {
-                              buttonPanel.panel?.open();
-                              setSelectedAppbarButtonId(buttonPanel?.button?.id ?? '');
-                            } else {
-                              buttonPanel.panel?.close();
-                              setSelectedAppbarButtonId('');
-                            }
-                          }}
-                        >
-                          {buttonPanel.button.children}
-                        </IconButton>
-                      </ListItem>
-                    </Fragment>
-                  ) : null;
-                })}
-              </List>
-            );
-          })}
-          {api.map(mapId).mapFeaturesConfig.appBar?.export && (
-            <div className={classes.exportButtonDiv}>
-              <List className={classes.appBarList}>
-                <ListItem>
-                  <Export className={`${classes.appBarButton} ${ModalIsShown ? 'active' : ''}`} openModal={openModal} />
-                </ListItem>
-              </List>
-            </div>
-          )}
-        </div>
-      )}
+        {Object.keys(buttonPanelGroups).map((groupName: string) => {
+          // get button panels from group
+          const buttonPanels = buttonPanelGroups[groupName];
+
+          // display the button panels in the list
+          return (
+            <List key={groupName} className={classes.appBarList}>
+              {Object.keys(buttonPanels).map((buttonPanelsKey) => {
+                const buttonPanel = buttonPanels[buttonPanelsKey];
+                return buttonPanel?.button.visible !== undefined && buttonPanel?.button.visible ? (
+                  <Fragment key={buttonPanel.button.id}>
+                    <ListItem>
+                      <IconButton
+                        id={buttonPanel.button.id}
+                        aria-label={buttonPanel.button.tooltip}
+                        tooltip={buttonPanel.button.tooltip}
+                        tooltipPlacement="right"
+                        className={`${classes.appBarButton} ${selectedAppBarButtonId === buttonPanel.button.id ? 'active' : ''}`}
+                        size="small"
+                        onClick={() => {
+                          if (!buttonPanel.panel?.status) {
+                            buttonPanel.panel?.open();
+                            setSelectedAppbarButtonId(buttonPanel?.button?.id ?? '');
+                          } else {
+                            buttonPanel.panel?.close();
+                            setSelectedAppbarButtonId('');
+                          }
+                        }}
+                      >
+                        {buttonPanel.button.children}
+                      </IconButton>
+                    </ListItem>
+                  </Fragment>
+                ) : null;
+              })}
+            </List>
+          );
+        })}
+        {mapFeaturesConfig.appBar?.includes('export') && (
+          <div>
+            <List className={classes.appBarList}>
+              <ListItem>
+                <Export className={`${classes.appBarButton} ${ModalIsShown ? 'active' : ''}`} openModal={openModal} />
+              </ListItem>
+            </List>
+          </div>
+        )}
+        {mapFeaturesConfig.appBar?.includes('version') && (
+          <div>
+            <List className={classes.appBarList}>
+              <ListItem>
+                <Popover />
+              </ListItem>
+            </List>
+          </div>
+        )}
+      </div>
       {Object.keys(buttonPanelGroups).map((groupName: string) => {
         // get button panels from group
         const buttonPanels = buttonPanelGroups[groupName];
