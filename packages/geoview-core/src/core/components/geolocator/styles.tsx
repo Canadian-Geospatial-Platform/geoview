@@ -4,7 +4,7 @@ export const sxClasses = {
   root: {
     position: 'absolute',
     top: 16,
-    left: 16,
+    left: 80,
     maxWidth: 400,
     width: 400,
   },

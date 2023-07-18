@@ -112,6 +112,7 @@ export function Navbar({ setActivetrap }: NavbarProps): JSX.Element {
   const mapConfig = useContext(MapContext);
 
   const { mapId } = mapConfig;
+  const { navBar } = api.map(mapId).mapFeaturesConfig;
 
   const addButtonPanel = useCallback(
     (payload: ButtonPanelPayload) => {
@@ -278,10 +279,10 @@ export function Navbar({ setActivetrap }: NavbarProps): JSX.Element {
           variant="contained"
           classes={{ root: classes.navBtnGroup }}
         >
-          <Fullscreen className={classes.navBarButton} />
-          <Location className={classes.navBarButton} />
-          <Home className={classes.navBarButton} />
-          <Export className={classes.navBarButton} openModal={openModal} />
+          {navBar?.includes('fullscreen') && <Fullscreen className={classes.navBarButton} />}
+          {navBar?.includes('location') && <Location className={classes.navBarButton} />}
+          {navBar?.includes('home') && <Home className={classes.navBarButton} />}
+          {navBar?.includes('export') && <Export className={classes.navBarButton} openModal={openModal} />}
         </ButtonGroup>
         <ExportModal isShown={ModalIsShown} closeModal={closeModal} />
       </div>

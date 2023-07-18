@@ -340,7 +340,7 @@ export function Map(mapFeaturesConfig: TypeMapFeaturesConfig): JSX.Element {
           <ClickMarker />
           <HoverTooltip />
           {deviceSizeMedUp && components !== undefined && components.indexOf('overview-map') > -1 && <OverviewMap />}
-          {deviceSizeMedUp && components !== undefined && components.indexOf('footer-bar') > -1 && <Footerbar />}
+          {deviceSizeMedUp && <Footerbar />}
         </>
       )}
     </div>
