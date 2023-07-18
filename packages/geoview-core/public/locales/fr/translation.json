@@ -35,11 +35,12 @@
   },
   "appbar": {
     "export": "Exporter",
+    "geolocator": "Géolocalisation",
     "fullscreen": "Plein écran",
     "help": "Aide",
     "layers": "Couches",
     "share": "Partager",
-    "version": "Accéder au repo sur GitHub"
+    "version": "À propos de GéoView"
   },
   "legend": {
     "unknown": "Titre de légende inconnu",

@@ -1,8 +1,11 @@
 import { useState, useRef, useEffect, useCallback, Fragment, useContext, SetStateAction, Dispatch } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import makeStyles from '@mui/styles/makeStyles';
 
-import { List, ListItem, Panel, IconButton } from '../../../ui';
+import { List, ListItem, Panel, IconButton, Popover } from '../../../ui';
+
+import { GITUHUB_REPO, GEO_URL } from '../../utils/constant';
 
 import { api } from '../../../app';
 import { EVENT_NAMES } from '../../../api/events/event-types';
@@ -13,17 +16,38 @@ import { payloadIsAButtonPanel, ButtonPanelPayload } from '../../../api/events/p
 import { TypeButtonPanel } from '../../../ui/panel/panel-types';
 
 import Export from './buttons/export';
+import Geolocator from './buttons/geolocator';
 import ExportModal from '../export/export-modal';
+
+// eslint-disable-next-line no-underscore-dangle
+declare const __VERSION__: TypeAppVersion;
+
+/**
+ * An object containing version information.
+ *
+ * @export
+ * @interface TypeAppVersion
+ */
+export type TypeAppVersion = {
+  hash: string;
+  major: number;
+  minor: number;
+  patch: number;
+  timestamp: string;
+};
 
 const useStyles = makeStyles((theme) => ({
   appBar: {
+    position: 'absolute',
     display: 'flex',
     flexDirection: 'row',
     justifyContent: 'space-between',
     height: '100%',
+    minWidth: 64,
     zIndex: theme.zIndex.appBar,
     pointerEvents: 'all',
     backgroundColor: theme.appBar.background,
+    border: theme.appBar.border,
   },
   appBarList: {
     width: 60,
@@ -37,11 +61,6 @@ const useStyles = makeStyles((theme) => ({
         color: theme.palette.primary.light,
       },
     },
-  },
-
-  exportButtonDiv: {
-    position: 'absolute',
-    bottom: 0,
   },
 
   appBarButtons: {
@@ -87,6 +106,7 @@ const useStyles = makeStyles((theme) => ({
 type AppbarProps = {
   setActivetrap: Dispatch<SetStateAction<boolean>>;
 };
+
 /**
  * Create an app-bar with buttons that can open a panel
  */
@@ -101,7 +121,10 @@ export function Appbar({ setActivetrap }: AppbarProps): JSX.Element {
 
   const mapConfig = useContext(MapContext);
 
+  const { t } = useTranslation<string>();
+
   const { mapId } = mapConfig;
+  const { mapFeaturesConfig } = api.map(mapId);
 
   const openModal = () => {
     setModalIsShown(true);
@@ -143,6 +166,27 @@ export function Appbar({ setActivetrap }: AppbarProps): JSX.Element {
     [setButtonPanelGroups]
   );
 
+  const getPopoverContent = (): JSX.Element => {
+    return (
+      <div>
+        <div>{t('appbar.version')}</div>
+        <hr />
+        <div>
+          <a href={GEO_URL} target="_black">
+            Geo.ca
+          </a>
+        </div>
+        <div>
+          <a href={GITUHUB_REPO} target="_black">
+            Repo link
+          </a>
+        </div>
+        <div>{`v.${__VERSION__.major}.${__VERSION__.minor}.${__VERSION__.patch}`}</div>
+        <div>{new Date(__VERSION__.timestamp).toLocaleDateString()}</div>
+      </div>
+    );
+  };
+
   useEffect(() => {
     // listen to new panel creation
     api.event.on(
@@ -183,59 +227,72 @@ export function Appbar({ setActivetrap }: AppbarProps): JSX.Element {
 
   return (
     <div className={classes.appBar} ref={appBar}>
-      {Object.keys(api.map(mapId).appBarButtons.getAllButtonPanels()).filter((buttonPanel) => {
-        return api.map(mapId).appBarButtons.getAllButtonPanels()[buttonPanel].button?.visible;
-      }).length > 0 && (
-        <div className={classes.appBarButtons}>
-          {Object.keys(buttonPanelGroups).map((groupName: string) => {
-            // get button panels from group
-            const buttonPanels = buttonPanelGroups[groupName];
+      <div className={classes.appBarButtons}>
+        {mapFeaturesConfig.appBar?.includes('geolocator') && mapFeaturesConfig?.map.interaction === 'dynamic' && (
+          <div>
+            <List className={classes.appBarList}>
+              <ListItem>
+                <Geolocator className={classes.appBarButton} mapId={mapId} />
+              </ListItem>
+            </List>
+          </div>
+        )}
 
-            // display the button panels in the list
-            return (
-              <List key={groupName} className={classes.appBarList}>
-                {Object.keys(buttonPanels).map((buttonPanelsKey) => {
-                  const buttonPanel = buttonPanels[buttonPanelsKey];
-                  return buttonPanel?.button.visible !== undefined && buttonPanel?.button.visible ? (
-                    <Fragment key={buttonPanel.button.id}>
-                      <ListItem>
-                        <IconButton
-                          id={buttonPanel.button.id}
-                          aria-label={buttonPanel.button.tooltip}
-                          tooltip={buttonPanel.button.tooltip}
-                          tooltipPlacement="right"
-                          className={`${classes.appBarButton} ${selectedAppBarButtonId === buttonPanel.button.id ? 'active' : ''}`}
-                          size="small"
-                          onClick={() => {
-                            if (!buttonPanel.panel?.status) {
-                              buttonPanel.panel?.open();
-                              setSelectedAppbarButtonId(buttonPanel?.button?.id ?? '');
-                            } else {
-                              buttonPanel.panel?.close();
-                              setSelectedAppbarButtonId('');
-                            }
-                          }}
-                        >
-                          {buttonPanel.button.children}
-                        </IconButton>
-                      </ListItem>
-                    </Fragment>
-                  ) : null;
-                })}
-              </List>
-            );
-          })}
-          {api.map(mapId).mapFeaturesConfig.appBar?.export && (
-            <div className={classes.exportButtonDiv}>
-              <List className={classes.appBarList}>
-                <ListItem>
-                  <Export className={`${classes.appBarButton} ${ModalIsShown ? 'active' : ''}`} openModal={openModal} />
-                </ListItem>
-              </List>
-            </div>
-          )}
+        {Object.keys(buttonPanelGroups).map((groupName: string) => {
+          // get button panels from group
+          const buttonPanels = buttonPanelGroups[groupName];
+
+          // display the button panels in the list
+          return (
+            <List key={groupName} className={classes.appBarList}>
+              {Object.keys(buttonPanels).map((buttonPanelsKey) => {
+                const buttonPanel = buttonPanels[buttonPanelsKey];
+                return buttonPanel?.button.visible !== undefined && buttonPanel?.button.visible ? (
+                  <Fragment key={buttonPanel.button.id}>
+                    <ListItem>
+                      <IconButton
+                        id={buttonPanel.button.id}
+                        aria-label={buttonPanel.button.tooltip}
+                        tooltip={buttonPanel.button.tooltip}
+                        tooltipPlacement="right"
+                        className={`${classes.appBarButton} ${selectedAppBarButtonId === buttonPanel.button.id ? 'active' : ''}`}
+                        size="small"
+                        onClick={() => {
+                          if (!buttonPanel.panel?.status) {
+                            buttonPanel.panel?.open();
+                            setSelectedAppbarButtonId(buttonPanel?.button?.id ?? '');
+                          } else {
+                            buttonPanel.panel?.close();
+                            setSelectedAppbarButtonId('');
+                          }
+                        }}
+                      >
+                        {buttonPanel.button.children}
+                      </IconButton>
+                    </ListItem>
+                  </Fragment>
+                ) : null;
+              })}
+            </List>
+          );
+        })}
+        {mapFeaturesConfig.appBar?.includes('export') && (
+          <div>
+            <List className={classes.appBarList}>
+              <ListItem>
+                <Export className={`${classes.appBarButton} ${ModalIsShown ? 'active' : ''}`} openModal={openModal} />
+              </ListItem>
+            </List>
+          </div>
+        )}
+        <div>
+          <List className={classes.appBarList}>
+            <ListItem>
+              <Popover content={getPopoverContent()} />
+            </ListItem>
+          </List>
         </div>
-      )}
+      </div>
       {Object.keys(buttonPanelGroups).map((groupName: string) => {
         // get button panels from group
         const buttonPanels = buttonPanelGroups[groupName];

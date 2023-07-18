@@ -6,6 +6,7 @@ import { FOOTERBAR } from './constants/footer-bar';
 import { FOOTER_TABS } from './constants/footer-tabs';
 import { GET_FEATURE_INFO } from './constants/get-feature-info';
 import { GET_LEGENDS } from './constants/get-legends';
+import { GEOLOCATOR } from './constants/geolocator';
 import { INTERACTION } from './constants/interaction';
 import { LAYER_SET } from './constants/layer-set';
 import { LAYER } from './constants/layer';
@@ -32,6 +33,7 @@ export const EVENT_NAMES = {
   FOOTER_TABS,
   GET_FEATURE_INFO,
   GET_LEGENDS,
+  GEOLOCATOR,
   INTERACTION,
   LAYER_SET,
   LAYER,
@@ -71,6 +73,7 @@ export type EventStringId =
   | 'get_legends/legend_info'
   | 'get_legends/query_legends'
   | 'get_legends/trigger'
+  | 'geolocator/toggle'
   | 'interaction/draw_started'
   | 'interaction/draw_ended'
   | 'interaction/draw_aborted'

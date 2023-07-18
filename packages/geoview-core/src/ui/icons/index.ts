@@ -37,6 +37,7 @@ import CheckBoxIcon from '@mui/icons-material/CheckBox';
 import CheckBoxOutlineBlankIcon from '@mui/icons-material/CheckBoxOutlineBlank';
 import ZoomInSearchIcon from '@mui/icons-material/ZoomIn';
 import ZoomOutSearchIcon from '@mui/icons-material/ZoomOut';
+import SearchIcon from '@mui/icons-material/Search';
 import FileUploadIcon from '@mui/icons-material/FileUpload';
 import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
 import BrowserNotSupportedIcon from '@mui/icons-material/BrowserNotSupported';
@@ -85,6 +86,7 @@ export {
   CheckBoxOutlineBlankIcon as CheckBoxOutIcon,
   ZoomInSearchIcon,
   ZoomOutSearchIcon,
+  SearchIcon,
   FileUploadIcon,
   MoreHorizIcon,
   BrowserNotSupportedIcon,
