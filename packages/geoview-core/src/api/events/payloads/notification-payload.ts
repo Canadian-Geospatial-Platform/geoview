@@ -14,7 +14,7 @@ const validEvents: EventStringId[] = [EVENT_NAMES.NOTIFICATIONS.NOTIFICATION_ADD
  * @param {PayloadBaseClass} verifyIfPayload object to test in order to determine if the type ascention is valid
  * @returns {boolean} returns true if the payload is valid
  */
-export const payloadIsASnackbarMessage = (verifyIfPayload: PayloadBaseClass): verifyIfPayload is NotificationPayload => {
+export const payloadIsANotification = (verifyIfPayload: PayloadBaseClass): verifyIfPayload is NotificationPayload => {
   return validEvents.includes(verifyIfPayload?.event);
 };
 
