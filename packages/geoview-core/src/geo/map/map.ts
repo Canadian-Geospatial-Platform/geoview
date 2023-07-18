@@ -22,6 +22,7 @@ import { Config } from '../../core/utils/config/config';
 import { AppbarButtons } from '../../core/components/app-bar/app-bar-buttons';
 import { NavbarButtons } from '../../core/components/nav-bar/nav-bar-buttons';
 import { FooterTabsApi } from '../../core/components/footer-tabs/footer-tabs-api';
+import { NotificationsApi } from '../../core/components/notifications/notifications-api';
 import { LegendApi } from '../../core/components/legend/legend-api';
 import { DetailsAPI } from '../../core/components/details/details-api';
 import { FeatureInfoAPI } from '../../core/components/feature-info/feature-info.api';
@@ -75,6 +76,9 @@ export class MapViewer {
 
   // used to access the footer tabs api
   footerTabs!: FooterTabsApi;
+
+  // used to access the notifications api
+  notifications!: NotificationsApi;
 
   // used to access the legend api
   legend!: LegendApi;
