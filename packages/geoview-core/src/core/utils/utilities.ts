@@ -438,3 +438,70 @@ export function stringify(str: unknown): unknown | string {
 
   return str;
 }
+
+/**
+ * Internal function to work with async "whenThisThat"... methods.
+ * This function is recursive and checks for a validity of something via the checkCallback() until it's found or until the timer runs out.
+ * When the check callback returns true (or some found object), the doCallback() function is called with the found information.
+ * If checkCallback wasn't found and timer expired, the failCallback() function is called.
+ * @param checkCallback the function executed to verify a particular condition until it's passed
+ * @param doCallback the function executed when checkCallback returns true or some object
+ * @param failCallback the function executed when checkCallback has failed for too long (went over the timeout)
+ * @param startDate the initial date this task was started
+ * @param timeout the duration in milliseconds until the task is aborted
+ */
+function _whenThisThenThat<T>(
+  checkCallback: () => T,
+  doCallback: (value: T) => void,
+  failCallback: (reason?: any) => void,
+  startDate: Date,
+  timeout: number
+) {
+  // Check if we're good
+  const v = checkCallback();
+  if (v) {
+    // Do that
+    doCallback(v);
+  } else if (new Date().getTime() - startDate.getTime() <= timeout) {
+    // Check again later
+    setTimeout(() => {
+      _whenThisThenThat(checkCallback, doCallback, failCallback, startDate, timeout);
+    }, 10);
+  } else {
+    // Failed, took too long
+    failCallback('Task abandonned, took too long.');
+  }
+}
+
+/**
+ * This generic function checks for a validity of something via the checkCallback() until it's found or until the timer runs out.
+ * When the check callback returns true (or some found object), the doCallback() function is called with the found information.
+ * If checkCallback wasn't found and timer expired, the failCallback() function is called.
+ * @param checkCallback the function executed to verify a particular condition until it's passed
+ * @param doCallback the function executed when checkCallback returns true or some object
+ * @param failCallback the function executed when checkCallback has failed for too long (went over the timeout)
+ * @param timeout? the duration in milliseconds until the task is aborted (defaults to 10 seconds)
+ */
+export function whenThisThenThat<T>(
+  checkCallback: () => T,
+  doCallback: (value: T) => void,
+  failCallback: (reason?: any) => void,
+  timeout?: number
+) {
+  const startDate = new Date();
+  if (!timeout) timeout = 10000;
+  _whenThisThenThat(checkCallback, doCallback, failCallback, startDate, timeout);
+}
+
+/**
+ * This asynchronous generic function checks for a validity of something via the checkCallback() until it's found or until the timer runs out.
+ * This method returns a Promise which the developper can use to await or use .then().catch().finally() principles.
+ * @param checkCallback the function executed to verify a particular condition until it's passed
+ * @param timeout? the duration in milliseconds until the task is aborted
+ */
+export async function whenThisThenAsync<T>(checkCallback: () => T, timeout?: number) {
+  return new Promise<T>((resolve, reject) => {
+    // Redirect
+    whenThisThenThat(checkCallback, resolve, reject, timeout);
+  });
+}
