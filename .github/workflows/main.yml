@@ -2,7 +2,7 @@ name: Deploy process on Pull Request
 
 on:
   pull_request_target:
-    types: [opened, synchronize, closed]
+    types: [opened, synchronize, closed, ready_for_review]
 
   push:
     branches:
@@ -53,7 +53,7 @@ jobs:
   install-build:
     name: Build demo files
     needs: [check-member]
-    if: github.event.pull_request.merged == false || github.event.pull_request.merged == true
+    if: github.event.pull_request.merged == false || github.event.pull_request.merged == true && !github.event.pull_request.draft
     uses: ./.github/workflows/build.yml
     with:
       cache_sha: ${{ github.event.pull_request.head.sha || github.sha }}
@@ -61,7 +61,7 @@ jobs:
   deploy-public:
     name: Deploy public
     needs: [install-build]
-    if: github.event.pull_request.merged == true && github.head_ref != ''
+    if: github.event.pull_request.merged == true && github.head_ref != '' && !github.event.pull_request.draft
     uses: ./.github/workflows/deploy.yml
     with:
       cache_sha: ${{ github.event.pull_request.head.sha || github.sha }}
