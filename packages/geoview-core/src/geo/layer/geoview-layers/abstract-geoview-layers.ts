@@ -336,7 +336,7 @@ export abstract class AbstractGeoViewLayer {
   }
 
   /** ***************************************************************************************************************************
-   * Process recursively the list of layer Entries to initialize the registeredLayers object.
+   * Process recursively the list of layer Entries to initialize the registeredLayers object..
    *
    * @param {TypeListOfLayerEntryConfig} listOfLayerEntryConfig The list of layer entries to process.
    */
