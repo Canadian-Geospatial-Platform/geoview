@@ -169,7 +169,7 @@ importers:
       i18next-http-backend: ^1.0.21
       immutable: ^4.0.0
       jest: ^27.4.7
-      linkify-html: ^4.1.0
+      linkify-html: ^4.1.1
       linkifyjs: ^4.1.0
       lodash: ^4.17.21
       lodash-webpack-plugin: ^0.11.6
