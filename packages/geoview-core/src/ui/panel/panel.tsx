@@ -77,6 +77,7 @@ const useStyles = makeStyles((theme) => ({
     },
   },
   panelContentContainer: {
+    position: 'relative',
     flexBasis: 'auto',
     overflow: 'hidden',
     overflowY: 'auto',
