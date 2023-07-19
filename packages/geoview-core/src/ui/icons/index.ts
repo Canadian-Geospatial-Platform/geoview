@@ -44,6 +44,8 @@ import BrowserNotSupportedIcon from '@mui/icons-material/BrowserNotSupported';
 import EmojiPeopleIcon from '@mui/icons-material/EmojiPeople';
 import RadioButtonCheckedIcon from '@mui/icons-material/RadioButtonChecked';
 import RadioButtonUncheckedIcon from '@mui/icons-material/RadioButtonUnchecked';
+import NotificationsIcon from '@mui/icons-material/Notifications';
+import NotificationsActiveIcon from '@mui/icons-material/NotificationsActive';
 
 export {
   Layers as LayersIcon,
@@ -95,4 +97,6 @@ export {
   EmojiPeopleIcon,
   RadioButtonCheckedIcon,
   RadioButtonUncheckedIcon,
+  NotificationsIcon,
+  NotificationsActiveIcon,
 };

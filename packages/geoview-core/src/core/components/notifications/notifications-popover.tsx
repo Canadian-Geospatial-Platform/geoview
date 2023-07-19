@@ -1,4 +1,4 @@
-import { useCallback, useContext, useEffect, useState } from 'react';
+import { useCallback, useContext, useEffect, useState, MouseEventHandler } from 'react';
 
 import { MapContext } from '../../app-start';
 import { api } from '../../../app';
@@ -6,21 +6,23 @@ import { api } from '../../../app';
 import { EVENT_NAMES } from '../../../api/events/event-types';
 import { NotificationPayload, payloadIsANotification } from '../../../api/events/payloads/notification-payload';
 
-import { Box } from '../../../ui';
+import { Box, Popover } from '../../../ui';
 import { NotificationType } from './notifications-api';
 
-const notificationsContainer = {
-  flexDirection: 'column',
-  justifyContent: 'flex-start',
-};
+interface NotificationPopoverProps {
+  anchorEl: HTMLElement | null;
+  handleClose: MouseEventHandler;
+}
 
 /**
- * The FooterTabs component is used to display a list of tabs and their content.
+ * The NotificationPopover component is used to display a list of tabs and their content.
  *
  * @returns {JSX.Element} returns the Footer Tabs component
  */
-export function NotificationCenter(): JSX.Element | null {
+export function NotificationsPopover(props: NotificationPopoverProps): JSX.Element | null {
   const [activeNotifications, setActiveNotifications] = useState<NotificationType[]>([]);
+
+  const { anchorEl, handleClose } = props;
 
   const mapConfig = useContext(MapContext);
 
@@ -88,7 +90,29 @@ export function NotificationCenter(): JSX.Element | null {
     return <Box>{notification.message}</Box>;
   }
 
-  return api.map(mapId).notifications.notificationsList.length > 0 ? (
-    <Box sx={notificationsContainer}>{activeNotifications.map((details) => renderNotification(details))}</Box>
-  ) : null;
+  const open = Boolean(anchorEl);
+
+  return (
+    <Popover
+      open={open}
+      anchorEl={anchorEl}
+      anchorOrigin={{
+        vertical: 'top',
+        horizontal: 'right',
+      }}
+      transformOrigin={{
+        vertical: 'bottom',
+        horizontal: 'left',
+      }}
+      onClose={handleClose}
+    >
+      <Box sx={{ flexDirection: 'column', padding: '5px 20px' }}>
+        {api.map(mapId).notifications && api.map(mapId).notifications.notificationsList.length > 0 ? (
+          activeNotifications.map((details) => renderNotification(details))
+        ) : (
+          <p>No notifications available</p>
+        )}
+      </Box>
+    </Popover>
+  );
 }

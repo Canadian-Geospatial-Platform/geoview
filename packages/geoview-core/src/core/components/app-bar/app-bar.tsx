@@ -14,8 +14,11 @@ import { TypeButtonPanel } from '@/ui/panel/panel-types';
 
 import Export from './buttons/export';
 import Geolocator from './buttons/geolocator';
+import Notifications from './buttons/notifications';
 import Version from './buttons/version';
 import ExportModal from '../export/export-modal';
+import { payloadIsANotification } from '@/api/events/payloads/notification-payload';
+import { NotificationsPopover } from '../notifications/notifications-popover';
 
 const useStyles = makeStyles((theme) => ({
   appBar: {
@@ -96,6 +99,9 @@ export function Appbar({ setActivetrap }: AppbarProps): JSX.Element {
   const [ModalIsShown, setModalIsShown] = useState(false);
   const [selectedAppBarButtonId, setSelectedAppbarButtonId] = useState<string>('');
 
+  const [notificationsCount, setNotificationsCount] = useState<number>(0);
+  const [notifPopoverAnchorEl, setNotifPopoverAnchorEl] = useState<HTMLButtonElement | null>(null);
+
   const classes = useStyles();
 
   const appBar = useRef<HTMLDivElement>(null);
@@ -115,6 +121,26 @@ export function Appbar({ setActivetrap }: AppbarProps): JSX.Element {
     setModalIsShown(false);
     // this will add back focus active trap from map and focus will be on export modal
     setActivetrap(true);
+  };
+
+  const openNotificationsPopover = (event: React.MouseEvent<HTMLButtonElement>) => {
+    setNotifPopoverAnchorEl(event.currentTarget);
+  };
+
+  const onCloseNotificationsPopover = () => {
+    setNotifPopoverAnchorEl(null);
+  };
+
+  const onNotificationAddEvent = (payload: PayloadBaseClass) => {
+    if (payloadIsANotification(payload)) {
+      setNotificationsCount(notificationsCount + 1);
+    }
+  };
+
+  const onNotificationRemoveEvent = (payload: PayloadBaseClass) => {
+    if (payloadIsANotification(payload)) {
+      setNotificationsCount(notificationsCount - 1);
+    }
   };
 
   const addButtonPanel = useCallback(
@@ -176,12 +202,20 @@ export function Appbar({ setActivetrap }: AppbarProps): JSX.Element {
       `${mapId}/${selectedAppBarButtonId}`
     );
 
+    // listen to notifications add
+    api.event.on(EVENT_NAMES.NOTIFICATIONS.NOTIFICATION_ADD, onNotificationAddEvent, mapId);
+
+    // listen to notifications add
+    api.event.on(EVENT_NAMES.NOTIFICATIONS.NOTIFICATION_REMOVE, onNotificationRemoveEvent, mapId);
+
     return () => {
       api.event.off(EVENT_NAMES.APPBAR.EVENT_APPBAR_PANEL_CREATE, mapId);
       api.event.off(EVENT_NAMES.APPBAR.EVENT_APPBAR_PANEL_REMOVE, mapId);
       api.event.off(EVENT_NAMES.PANEL.EVENT_PANEL_CLOSE, mapId);
+      api.event.off(EVENT_NAMES.NOTIFICATIONS.NOTIFICATION_REMOVE, mapId, onNotificationRemoveEvent);
+      api.event.off(EVENT_NAMES.NOTIFICATIONS.NOTIFICATION_ADD, mapId, onNotificationAddEvent);
     };
-  }, [addButtonPanel, mapId, removeButtonPanel, selectedAppBarButtonId]);
+  }, [addButtonPanel, mapId, removeButtonPanel, notificationsCount, selectedAppBarButtonId]);
 
   return (
     <div className={classes.appBar} ref={appBar}>
@@ -246,6 +280,13 @@ export function Appbar({ setActivetrap }: AppbarProps): JSX.Element {
         <div className={classes.versionButtonDiv}>
           <List className={classes.appBarList}>
             <ListItem>
+              <Notifications
+                notificationsCount={notificationsCount}
+                className={`${classes.appBarButton} ${ModalIsShown ? 'active' : ''}`}
+                openPopover={openNotificationsPopover}
+              />
+            </ListItem>
+            <ListItem>
               <Version />
             </ListItem>
           </List>
@@ -268,6 +309,7 @@ export function Appbar({ setActivetrap }: AppbarProps): JSX.Element {
         );
       })}
       <ExportModal isShown={ModalIsShown} closeModal={closeModal} />
+      <NotificationsPopover anchorEl={notifPopoverAnchorEl} handleClose={onCloseNotificationsPopover} />
     </div>
   );
 }

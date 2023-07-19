@@ -36,6 +36,7 @@
   "appbar": {
     "export": "Exporter",
     "geolocator": "Géolocalisation",
+    "notifications": "Avis",
     "fullscreen": "Plein écran",
     "help": "Aide",
     "layers": "Couches",
