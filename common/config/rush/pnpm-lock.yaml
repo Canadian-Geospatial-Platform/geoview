@@ -5044,7 +5044,6 @@ packages:
       eslint: 8.45.0
       eslint-import-resolver-node: 0.3.7
       eslint-module-utils: 2.8.0_h2tu665zyzp3li3mokdnt2kw74
-      eslint: 8.44.0
       eslint-import-resolver-node: 0.3.7
       eslint-module-utils: 2.8.0_obwxlbvpmtyn54zwezzu2ooh6u
       object.values: 1.1.6
