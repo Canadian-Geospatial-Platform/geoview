@@ -109,7 +109,7 @@ export function Appbar({ setActivetrap }: AppbarProps): JSX.Element {
   const [ModalIsShown, setModalIsShown] = useState(false);
   const [selectedAppBarButtonId, setSelectedAppbarButtonId] = useState<string>('');
 
-  const [notificationsCount, setNotificationsCount] = useState<number>(3);
+  const [notificationsCount, setNotificationsCount] = useState<number>(0);
   const [notifPopoverAnchorEl, setNotifPopoverAnchorEl] = useState<HTMLButtonElement | null>(null);
 
   const classes = useStyles();

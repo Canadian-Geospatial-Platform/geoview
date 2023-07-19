@@ -128,6 +128,47 @@
               }
             )
           );
+
+          //emit notification
+          cgpv.api.event.emit(
+            cgpv.types.notificationPayload(
+              cgpv.api.eventNames.NOTIFICATIONS.NOTIFICATION_ADD,
+              'EVNT1',
+              "success",
+              "this is a success notification title",
+              "this is notification description"
+            )
+          );
+
+          cgpv.api.event.emit(
+            cgpv.types.notificationPayload(
+              cgpv.api.eventNames.NOTIFICATIONS.NOTIFICATION_ADD,
+              'EVNT1',
+              "info",
+              "this is an info notification",
+              "this is notification description"
+            )
+          );
+
+          cgpv.api.event.emit(
+            cgpv.types.notificationPayload(
+              cgpv.api.eventNames.NOTIFICATIONS.NOTIFICATION_ADD,
+              'EVNT1',
+              "warning",
+              "this is an warning notification",
+              "this is notification description"
+            )
+          );
+
+          cgpv.api.event.emit(
+            cgpv.types.notificationPayload(
+              cgpv.api.eventNames.NOTIFICATIONS.NOTIFICATION_ADD,
+              'EVNT1',
+              "error",
+              "this is an error notification",
+              "this is notification description"
+            )
+          );
         }, 20000);
 
         //create snippets
