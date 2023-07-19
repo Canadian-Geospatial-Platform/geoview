@@ -199,7 +199,7 @@
 
         const LegendsWmsLayerSet1 = cgpv.api.getLegendsLayerSet('LYR1', 'LegendsId1');
         cgpv.api.event.on(
-          cgpv.api.eventNames.GET_LEGENDS.ALL_LEGENDS_DONE,
+          cgpv.api.eventNames.GET_LEGENDS.LEGENDS_LAYERSET_UPDATED,
           (payload) => {
             const { resultSets } = payload;
             displayLegend('LegendsId1', resultSets);

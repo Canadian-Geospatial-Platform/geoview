@@ -324,8 +324,8 @@ export function ClickMarker(): JSX.Element {
           let feature: TypeFeatureInfoEntry | undefined;
 
           Object.keys(resultSets).every((layerPath) => {
-            const features = resultSets[layerPath]!;
-            if (features.length > 0 && features[0].geoviewLayerType !== 'ogcWms') {
+            const features = resultSets[layerPath]!.layerStatus === 'error' ? null : resultSets[layerPath]!.data;
+            if (features && features.length > 0 && features[0].geoviewLayerType !== 'ogcWms') {
               [feature] = features;
               return false;
             }

@@ -76,9 +76,6 @@ export class Layer {
             const geoCore = new GeoCore(this.mapId);
             geoCore.createLayers(layerConfig).then((arrayOfListOfGeoviewLayerConfig) => {
               arrayOfListOfGeoviewLayerConfig.forEach((listOfGeoviewLayerConfig) => {
-                // the -1 applied is because each geocore UUID config count for one. We want to replace the geocore entry by
-                // the list of geoview layer entries.
-                api.maps[this.mapId].remainingLayersThatNeedToBeLoaded += listOfGeoviewLayerConfig.length - 1;
                 listOfGeoviewLayerConfig.forEach((geoviewLayerConfig) => {
                   this.addGeoviewLayer(geoviewLayerConfig);
                 });
@@ -275,8 +272,6 @@ export class Layer {
    * @param {any} geoviewLayer the layer config
    */
   private addToMap(geoviewLayer: AbstractGeoViewLayer): void {
-    // eslint-disable-next-line no-param-reassign
-    geoviewLayer.layerPhase = 'addToMap';
     // if the returned layer object has something in the layerLoadError, it is because an error was detected
     // do not add the layer to the map
     if (geoviewLayer.layerLoadError.length !== 0) {
@@ -293,16 +288,8 @@ export class Layer {
         console.log(consoleMessage);
       });
     } else {
-      // trigger the layer added event when layer is loaded on to the map
-      geoviewLayer.gvLayers?.once('prerender' as EventTypes, () => {
-        if (geoviewLayer.layerState !== 'loaded')
-          api.event.emit(GeoViewLayerPayload.createGeoviewLayerAddedPayload(`${this.mapId}/${geoviewLayer.geoviewLayerId}`, geoviewLayer));
-      });
-      geoviewLayer.gvLayers?.once('change' as EventTypes, () => {
-        if (geoviewLayer.layerState !== 'loaded')
-          api.event.emit(GeoViewLayerPayload.createGeoviewLayerAddedPayload(`${this.mapId}/${geoviewLayer.geoviewLayerId}`, geoviewLayer));
-      });
       api.map(this.mapId).map.addLayer(geoviewLayer.gvLayers!);
+      api.event.emit(GeoViewLayerPayload.createGeoviewLayerAddedPayload(`${this.mapId}/${geoviewLayer.geoviewLayerId}`, geoviewLayer));
     }
   }
 

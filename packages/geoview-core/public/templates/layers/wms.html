@@ -497,7 +497,7 @@
           cgpv.api.event.emit({ handlerName: 'LYR4/$LegendsLayerSet$', event: cgpv.api.eventNames.GET_LEGENDS.TRIGGER });
 
           const intervalId = window.setInterval(() => {
-            if (cgpv.api.maps.LYR3?.layer?.geoviewLayers?.['wmsLYR3-Root']?.layerState === 'loaded') {
+            if (cgpv.api.maps.LYR3?.layer?.geoviewLayers?.['wmsLYR3-Root']?.allLayerEntryConfigProcessed()) {
               const lyr3LayerConfig = cgpv.api.maps.LYR3.layer.registeredLayers['wmsLYR3-Root/landcover_2015_19classes'];
               if (Array.isArray(lyr3LayerConfig?.source?.style)) {
                 const dropDownContent = document.getElementById('style');
@@ -528,7 +528,7 @@
 
           const LegendsLayerSet1 = cgpv.api.getLegendsLayerSet('LYR1');
           cgpv.api.event.on(
-            cgpv.api.eventNames.GET_LEGENDS.ALL_LEGENDS_DONE,
+            cgpv.api.eventNames.GET_LEGENDS.LEGENDS_LAYERSET_UPDATED,
             (payload) => {
               const { resultSets } = payload;
               displayLegend('LegendsId1', resultSets);
@@ -556,7 +556,7 @@
 
           const LegendsLayerSet2 = cgpv.api.getLegendsLayerSet('LYR2');
           cgpv.api.event.on(
-            cgpv.api.eventNames.GET_LEGENDS.ALL_LEGENDS_DONE,
+            cgpv.api.eventNames.GET_LEGENDS.LEGENDS_LAYERSET_UPDATED,
             (payload) => {
               const { resultSets } = payload;
               displayLegend('LegendsId2', resultSets);
@@ -577,7 +577,7 @@
 
           const LegendsLayerSet3 = cgpv.api.getLegendsLayerSet('LYR3');
           cgpv.api.event.on(
-            cgpv.api.eventNames.GET_LEGENDS.ALL_LEGENDS_DONE,
+            cgpv.api.eventNames.GET_LEGENDS.LEGENDS_LAYERSET_UPDATED,
             (payload) => {
               const { resultSets } = payload;
               displayLegend('LegendsId3', resultSets);
@@ -588,7 +588,7 @@
           //LYR4 ===================================================================================================================
           const LegendsLayerSet4 = cgpv.api.getLegendsLayerSet('LYR4', 'LegendsId4');
           cgpv.api.event.on(
-            cgpv.api.eventNames.GET_LEGENDS.ALL_LEGENDS_DONE,
+            cgpv.api.eventNames.GET_LEGENDS.LEGENDS_LAYERSET_UPDATED,
             (payload) => {
               const { resultSets } = payload;
               displayLegend('LegendsId4', resultSets);
@@ -632,7 +632,7 @@
             const geoviewLayers = cgpv.api.maps?.LYR1?.layer?.geoviewLayers;
             if (geoviewLayers) {
               const output = Object.keys(cgpv.api.maps?.LYR1?.layer?.geoviewLayers).reduce((outputValue, layerId) => {
-                const stateValue = cgpv.api.maps?.LYR1?.layer?.geoviewLayers[layerId].layerPhase;
+                const stateValue = cgpv.api.maps?.LYR1?.layer?.geoviewLayers[layerId].allLayerEntryConfigProcessed() ? 'Loaded' : 'Not totaly loaded';
                 return `${outputValue}${layerId}: ${stateValue}, `;
               }, '(');
               displayField1.textContent = output ? `${output.slice(0, -2)})` : '(undefined)';
@@ -644,7 +644,7 @@
             const geoviewLayers = cgpv.api.maps?.LYR2?.layer?.geoviewLayers;
             if (geoviewLayers) {
               const output = Object.keys(cgpv.api.maps?.LYR2?.layer?.geoviewLayers).reduce((outputValue, layerId) => {
-                const stateValue = cgpv.api.maps?.LYR2?.layer?.geoviewLayers[layerId].layerPhase;
+                const stateValue = cgpv.api.maps?.LYR2?.layer?.geoviewLayers[layerId].allLayerEntryConfigProcessed() ? 'Loaded' : 'Not totaly loaded';
                 return `${outputValue}${layerId}: ${stateValue}, `;
               }, '(');
               displayField2.textContent = output ? `${output.slice(0, -2)})` : '(undefined)';
@@ -656,7 +656,7 @@
             const geoviewLayers = cgpv.api.maps?.LYR3?.layer?.geoviewLayers;
             if (geoviewLayers) {
               const output = Object.keys(cgpv.api.maps?.LYR3?.layer?.geoviewLayers).reduce((outputValue, layerId) => {
-                const stateValue = cgpv.api.maps?.LYR3?.layer?.geoviewLayers[layerId].layerPhase;
+                const stateValue = cgpv.api.maps?.LYR3?.layer?.geoviewLayers[layerId].allLayerEntryConfigProcessed() ? 'Loaded' : 'Not totaly loaded';
                 return `${outputValue}${layerId}: ${stateValue}, `;
               }, '(');
               displayField3.textContent = output ? `${output.slice(0, -2)})` : '(undefined)';
@@ -668,7 +668,7 @@
             const geoviewLayers = cgpv.api.maps?.LYR4?.layer?.geoviewLayers;
             if (geoviewLayers) {
               const output = Object.keys(cgpv.api.maps?.LYR4?.layer?.geoviewLayers).reduce((outputValue, layerId) => {
-                const stateValue = cgpv.api.maps?.LYR4?.layer?.geoviewLayers[layerId].layerPhase;
+                const stateValue = cgpv.api.maps?.LYR4?.layer?.geoviewLayers[layerId].allLayerEntryConfigProcessed() ? 'Loaded' : 'Not totaly loaded';
                 return `${outputValue}${layerId}: ${stateValue}, `;
               }, '(');
               displayField4.textContent = output ? `${output.slice(0, -2)})` : '(undefined)';

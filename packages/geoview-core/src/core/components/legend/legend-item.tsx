@@ -312,7 +312,7 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
     const isGroup = getGroupsDetails();
     if (!isGroup) {
       setOpacity(geoviewLayerInstance.getOpacity() ?? 1);
-      const legendInfo = api.maps[mapId].legend.legendLayerSet.resultSets[path];
+      const legendInfo = api.maps[mapId].legend.legendLayerSet.resultSets[path].data;
       if (legendInfo) {
         getLegendDetails(legendInfo);
       }

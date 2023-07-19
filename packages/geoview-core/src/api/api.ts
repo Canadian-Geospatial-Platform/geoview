@@ -103,9 +103,9 @@ export class API {
             let allMapsAreReady = true;
             Object.keys(this.maps).forEach((mapId) => {
               if (this.maps[mapId].mapIsReady()) {
+                this.event.emit(GeoViewLayerPayload.createTestGeoviewLayersPayload(`${mapId}/visibilityTest`));
                 // Run the callback for maps that have the triggerReadyCallback set using the mapId for the parameter value
                 if (this.maps[mapId].mapFeaturesConfig.triggerReadyCallback && !this.maps[mapId].readyCallbackHasRun) {
-                  this.event.emit(GeoViewLayerPayload.createTestGeoviewLayersPayload(`${mapId}/visibilityTest`));
                   if (this.readyCallback) this.readyCallback(mapId);
                   this.maps[mapId].readyCallbackHasRun = true;
                 }

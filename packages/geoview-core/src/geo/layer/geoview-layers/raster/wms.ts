@@ -110,7 +110,6 @@ export class WMS extends AbstractGeoViewRaster {
    */
   protected getServiceMetadata(): Promise<void> {
     const promisedExecution = new Promise<void>((resolve) => {
-      this.layerPhase = 'getServiceMetadata';
       const metadataUrl = getLocalizedValue(this.metadataAccessPath, this.mapId);
       if (metadataUrl) {
         const metadataAccessPathIsXmlFile = metadataUrl.slice(-4).toLowerCase() === '.xml';
@@ -123,13 +122,21 @@ export class WMS extends AbstractGeoViewRaster {
           const layersToQuery = this.getLayersToQuery();
           if (layersToQuery.length === 0) {
             // Use GetCapabilities to get the metadata
-            this.fetchServiceMetadata(`${metadataUrl}?service=WMS&version=1.3.0&request=GetCapabilities`).then((metadata) => {
-              if (metadata) {
-                this.metadata = metadata;
-                this.processMetadataInheritance();
-                resolve();
-              }
-            });
+            this.fetchServiceMetadata(`${metadataUrl}?service=WMS&version=1.3.0&request=GetCapabilities`)
+              .then((metadata) => {
+                if (metadata) {
+                  this.metadata = metadata;
+                  this.processMetadataInheritance();
+                  resolve();
+                } else {
+                  api.geoUtilities.setAllLayerStatus(this.mapId, this.listOfLayerEntryConfig, 'error');
+                  throw new Error(`Cant't read service metadata for layer ${this.geoviewLayerId} of map ${this.mapId}.`);
+                }
+              })
+              .catch((reason) => {
+                api.geoUtilities.setAllLayerStatus(this.mapId, this.listOfLayerEntryConfig, 'error');
+                throw new Error(`Cant't read service metadata for layer ${this.geoviewLayerId} of map ${this.mapId}.`);
+              });
           } else {
             // Uses GetCapabilities to get the metadata. However, to allow geomet metadata to be retrieved using the non-standard
             // "Layers" parameter on the command line, we need to process each layer individually and merge all layer metadata at
@@ -146,29 +153,38 @@ export class WMS extends AbstractGeoViewRaster {
                 );
               else promisedArrayOfMetadata.push(promisedArrayOfMetadata[i]);
             });
-            Promise.all(promisedArrayOfMetadata).then((arrayOfMetadata) => {
-              for (i = 0; i < arrayOfMetadata.length && !arrayOfMetadata[i]; i++);
-              this.metadata = i < arrayOfMetadata.length ? arrayOfMetadata[i] : null;
-              if (this.metadata) {
-                for (i++; i < arrayOfMetadata.length; i++) {
-                  if (!this.getLayerMetadataEntry(layersToQuery[i])) {
-                    if (arrayOfMetadata[i]) {
-                      const metadataLayerPathToAdd = this.getMetadataLayerPath(layersToQuery[i], arrayOfMetadata[i]!.Capability.Layer);
-                      this.addLayerToMetadataInstance(
-                        metadataLayerPathToAdd,
-                        this.metadata?.Capability?.Layer,
-                        arrayOfMetadata[i]!.Capability.Layer
-                      );
+            Promise.all(promisedArrayOfMetadata)
+              .then((arrayOfMetadata) => {
+                for (i = 0; i < arrayOfMetadata.length && !arrayOfMetadata[i]; i++);
+                this.metadata = i < arrayOfMetadata.length ? arrayOfMetadata[i] : null;
+                if (this.metadata) {
+                  for (i++; i < arrayOfMetadata.length; i++) {
+                    if (!this.getLayerMetadataEntry(layersToQuery[i])) {
+                      if (arrayOfMetadata[i]) {
+                        const metadataLayerPathToAdd = this.getMetadataLayerPath(layersToQuery[i], arrayOfMetadata[i]!.Capability.Layer);
+                        this.addLayerToMetadataInstance(
+                          metadataLayerPathToAdd,
+                          this.metadata?.Capability?.Layer,
+                          arrayOfMetadata[i]!.Capability.Layer
+                        );
+                      }
                     }
                   }
+                } else {
+                  throw new Error(`Cant't read service metadata for layer ${this.geoviewLayerId} of map ${this.mapId}.`);
                 }
-              }
-              this.processMetadataInheritance();
-              resolve();
-            });
+                this.processMetadataInheritance();
+                resolve();
+              })
+              .catch((reason) => {
+                api.geoUtilities.setAllLayerStatus(this.mapId, this.listOfLayerEntryConfig, 'error');
+              });
           }
         }
-      } else throw new Error(`Cant't read service metadata for layer ${this.geoviewLayerId} of map ${this.mapId}.`);
+      } else {
+        api.geoUtilities.setAllLayerStatus(this.mapId, this.listOfLayerEntryConfig, 'error');
+        throw new Error(`Cant't read service metadata for layer ${this.geoviewLayerId} of map ${this.mapId}.`);
+      }
     });
     return promisedExecution;
   }
@@ -191,8 +207,7 @@ export class WMS extends AbstractGeoViewRaster {
           });
         })
         .catch(() => {
-          this.layerState = 'ERROR';
-          this.layerPhase = 'fetchServiceMetadata';
+          api.geoUtilities.setAllLayerStatus(this.mapId, this.listOfLayerEntryConfig, 'error');
           resolve(null);
         });
     });
@@ -209,29 +224,37 @@ export class WMS extends AbstractGeoViewRaster {
   private getXmlServiceMetadata(metadataUrl: string): Promise<void> {
     const promisedExecution = new Promise<void>((resolve) => {
       const parser = new WMSCapabilities();
-      fetch(metadataUrl).then((response) => {
-        response.text().then((capabilitiesString) => {
-          this.metadata = parser.read(capabilitiesString);
-          if (this.metadata) {
-            this.processMetadataInheritance();
-            const metadataAccessPath = this.metadata.Capability.Request.GetMap.DCPType[0].HTTP.Get.OnlineResource as string;
-            this.metadataAccessPath.en = metadataAccessPath;
-            this.metadataAccessPath.fr = metadataAccessPath;
-            const dataAccessPath = this.metadata.Capability.Request.GetMap.DCPType[0].HTTP.Get.OnlineResource as string;
-            const setDataAccessPath = (listOfLayerEntryConfig: TypeListOfLayerEntryConfig) => {
-              listOfLayerEntryConfig.forEach((layerEntryConfig) => {
-                if (layerEntryIsGroupLayer(layerEntryConfig)) setDataAccessPath(layerEntryConfig.listOfLayerEntryConfig);
-                else {
-                  layerEntryConfig.source!.dataAccessPath!.en = dataAccessPath;
-                  layerEntryConfig.source!.dataAccessPath!.fr = dataAccessPath;
-                }
-              });
-            };
-            setDataAccessPath(this.listOfLayerEntryConfig);
-          }
-          resolve();
+      fetch(metadataUrl)
+        .then((response) => {
+          response.text().then((capabilitiesString) => {
+            this.metadata = parser.read(capabilitiesString);
+            if (this.metadata) {
+              this.processMetadataInheritance();
+              const metadataAccessPath = this.metadata.Capability.Request.GetMap.DCPType[0].HTTP.Get.OnlineResource as string;
+              this.metadataAccessPath.en = metadataAccessPath;
+              this.metadataAccessPath.fr = metadataAccessPath;
+              const dataAccessPath = this.metadata.Capability.Request.GetMap.DCPType[0].HTTP.Get.OnlineResource as string;
+              const setDataAccessPath = (listOfLayerEntryConfig: TypeListOfLayerEntryConfig) => {
+                listOfLayerEntryConfig.forEach((layerEntryConfig) => {
+                  if (layerEntryIsGroupLayer(layerEntryConfig)) setDataAccessPath(layerEntryConfig.listOfLayerEntryConfig);
+                  else {
+                    layerEntryConfig.source!.dataAccessPath!.en = dataAccessPath;
+                    layerEntryConfig.source!.dataAccessPath!.fr = dataAccessPath;
+                  }
+                });
+              };
+              setDataAccessPath(this.listOfLayerEntryConfig);
+            } else {
+              api.geoUtilities.setAllLayerStatus(this.mapId, this.listOfLayerEntryConfig, 'error');
+              throw new Error(`Cant't read service metadata for layer ${this.geoviewLayerId} of map ${this.mapId}.`);
+            }
+            resolve();
+          });
+        })
+        .catch((reason) => {
+          api.geoUtilities.setAllLayerStatus(this.mapId, this.listOfLayerEntryConfig, 'error');
+          throw new Error(`Cant't read service metadata for layer ${this.geoviewLayerId} of map ${this.mapId}.`);
         });
-      });
     });
     return promisedExecution;
   }
@@ -372,7 +395,6 @@ export class WMS extends AbstractGeoViewRaster {
   protected validateListOfLayerEntryConfig(listOfLayerEntryConfig: TypeListOfLayerEntryConfig) {
     listOfLayerEntryConfig.forEach((layerEntryConfig: TypeLayerEntryConfig) => {
       const layerPath = Layer.getLayerPath(layerEntryConfig);
-      api.event.emit(LayerSetPayload.createLayerSetChangeLayerStatusPayload(this.mapId, layerPath, 'loading'));
       if (layerEntryIsGroupLayer(layerEntryConfig)) {
         this.validateListOfLayerEntryConfig(layerEntryConfig.listOfLayerEntryConfig!);
         if (!layerEntryConfig.listOfLayerEntryConfig.length) {
@@ -381,9 +403,11 @@ export class WMS extends AbstractGeoViewRaster {
             consoleMessage: `Empty layer group (mapId:  ${this.mapId}, layerPath: ${layerPath})`,
           });
           api.event.emit(LayerSetPayload.createLayerSetChangeLayerStatusPayload(this.mapId, layerPath, 'error'));
-          return;
         }
+        return;
       }
+
+      api.event.emit(LayerSetPayload.createLayerSetChangeLayerStatusPayload(this.mapId, layerPath, 'loading'));
 
       const layerFound = this.getLayerMetadataEntry(layerEntryConfig.layerId);
       if (!layerFound) {
@@ -427,9 +451,11 @@ export class WMS extends AbstractGeoViewRaster {
         fr: subLayer.Title as string,
       };
       newListOfLayerEntryConfig.push(subLayerEntryConfig);
+      api.map(this.mapId).layer.registerLayerConfig(subLayerEntryConfig);
     });
 
     const switchToGroupLayer = Cast<TypeLayerGroupEntryConfig>(layerEntryConfig);
+    delete (layerEntryConfig as TypeBaseLayerEntryConfig).layerStatus;
     switchToGroupLayer.entryType = 'group';
     switchToGroupLayer.layerName = {
       en: layer.Title as string,
@@ -437,9 +463,7 @@ export class WMS extends AbstractGeoViewRaster {
     };
     switchToGroupLayer.isMetadataLayerGroup = true;
     switchToGroupLayer.listOfLayerEntryConfig = newListOfLayerEntryConfig;
-    api.map(this.mapId).layer.registerLayerConfig(layerEntryConfig);
     this.validateListOfLayerEntryConfig(newListOfLayerEntryConfig);
-    return true;
   }
 
   /** ****************************************************************************************************************************
@@ -543,7 +567,6 @@ export class WMS extends AbstractGeoViewRaster {
    * @returns {Promise<void>} A promise that the layer configuration has its metadata processed.
    */
   protected processLayerMetadata(layerEntryConfig: TypeLayerEntryConfig): Promise<void> {
-    this.layerPhase = 'processLayerMetadata';
     const promiseOfExecution = new Promise<void>((resolve) => {
       if (geoviewEntryIsWMS(layerEntryConfig)) {
         const layerCapabilities = this.getLayerMetadataEntry(layerEntryConfig.layerId)!;

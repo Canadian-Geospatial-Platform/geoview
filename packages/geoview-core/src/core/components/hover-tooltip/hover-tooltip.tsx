@@ -93,11 +93,12 @@ export function HoverTooltip(): JSX.Element {
           for (const [, value] of Object.entries(resultSets)) {
             // if there is a result and layer is not ogcWms, and it is not selected, show tooltip
             if (
-              value!.length > 0 &&
-              value![0].geoviewLayerType !== 'ogcWms' &&
-              !(selectedFeature.current && getUid(value![0].geometry) === getUid(selectedFeature.current?.geometry))
+              value?.data &&
+              value!.data.length > 0 &&
+              value!.data[0].geoviewLayerType !== 'ogcWms' &&
+              !(selectedFeature.current && getUid(value!.data[0].geometry) === getUid(selectedFeature.current?.geometry))
             ) {
-              const item = value![0];
+              const item = value!.data[0];
               const nameField = item.nameField || Object.entries(item.fieldInfo)[0][0];
               const field = item.fieldInfo[nameField];
               setTooltipValue(field!.value as string | '');
@@ -118,8 +119,8 @@ export function HoverTooltip(): JSX.Element {
         if (payloadIsAllQueriesDone(payload)) {
           const { resultSets } = payload;
           Object.keys(resultSets).every((layerPath) => {
-            const features = resultSets[layerPath]!;
-            if (features.length > 0 && features[0].geoviewLayerType !== 'ogcWms') {
+            const features = resultSets[layerPath]!.data;
+            if (features && features.length > 0 && features[0].geoviewLayerType !== 'ogcWms') {
               [selectedFeature.current] = features;
               return false;
             }

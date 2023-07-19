@@ -52,19 +52,20 @@ export class FeatureInfoLayerSet {
       (payload) => {
         if (payloadIsAMapMouseEvent(payload)) {
           Object.keys(this.resultSets).forEach((layerPath) => {
-            this.resultSets[layerPath] = undefined;
+            this.resultSets[layerPath].data = undefined;
           });
           api.event.emit(GetFeatureInfoPayload.createQueryLayerPayload(this.mapId, 'at long lat', payload.coordinates.lnglat, false));
         }
       },
       this.mapId
     );
+
     api.event.on(
       EVENT_NAMES.MAP.EVENT_MAP_CROSSHAIR_ENTER,
       (payload) => {
         if (payloadIsALngLat(payload)) {
           Object.keys(this.resultSets).forEach((layerPath) => {
-            this.resultSets[layerPath] = undefined;
+            this.resultSets[layerPath].data = undefined;
           });
           api.event.emit(GetFeatureInfoPayload.createQueryLayerPayload(this.mapId, 'at long lat', payload.lnglat, false));
         }
@@ -77,7 +78,7 @@ export class FeatureInfoLayerSet {
       debounce((payload) => {
         if (payloadIsAMapMouseEvent(payload)) {
           Object.keys(this.resultSets).forEach((layerPath) => {
-            this.resultSets[layerPath] = undefined;
+            this.resultSets[layerPath].data = undefined;
           });
           api.event.emit(GetFeatureInfoPayload.createQueryLayerPayload(this.mapId, 'at pixel', payload.coordinates.pixel, true));
         }
@@ -91,12 +92,13 @@ export class FeatureInfoLayerSet {
         if (payloadIsQueryResult(payload)) {
           const { layerPath, arrayOfRecords, isHover } = payload;
           if (layerPath in this.resultSets) {
-            this.resultSets[layerPath] = arrayOfRecords;
+            this.resultSets[layerPath].data = arrayOfRecords;
           }
 
           const allDone = Object.keys(this.resultSets).reduce((doneFlag, layerPathToTest) => {
-            return doneFlag && this.resultSets[layerPathToTest] !== undefined;
+            return doneFlag && this.resultSets[layerPathToTest].data !== undefined;
           }, true);
+
           if (allDone && !isHover) {
             api.event.emit(
               GetFeatureInfoPayload.createAllQueriesDonePayload(`${this.layerSet.layerSetId}`, this.layerSet.layerSetId, this.resultSets)

@@ -235,12 +235,6 @@ type TypeLayerSetHandlerFunctions = {
  */
 // ******************************************************************************************************************************
 export abstract class AbstractGeoViewLayer {
-  /** Flag used to indicate the layer's state */
-  layerState = 'loading';
-
-  /** Flag used to indicate the layer's phase */
-  layerPhase = 'newInstance';
-
   /** The unique identifier of the map on which the GeoView layer will be drawn. */
   mapId: string;
 
@@ -336,7 +330,23 @@ export abstract class AbstractGeoViewLayer {
   }
 
   /** ***************************************************************************************************************************
-   * Process recursively the list of layer Entries to initialize the registeredLayers object.
+   * Process recursively the list of layer entries to see if all of them are processed.
+   *
+   * @param {TypeListOfLayerEntryConfig} listOfLayerEntryConfig The list of layer's configuration
+   *                                                            (default: this.listOfLayerEntryConfig).
+   *
+   * @returns {boolean} true when all layers are processed.
+   */
+  allLayerEntryConfigProcessed(listOfLayerEntryConfig: TypeListOfLayerEntryConfig = this.listOfLayerEntryConfig): boolean {
+    // Try to find an unprocessed layer. If you can, return false
+    return !listOfLayerEntryConfig.find((layerEntryConfig: TypeLayerEntryConfig) => {
+      if (layerEntryIsGroupLayer(layerEntryConfig)) return !this.allLayerEntryConfigProcessed(layerEntryConfig.listOfLayerEntryConfig);
+      return !['loaded', 'error'].includes((layerEntryConfig as TypeBaseLayerEntryConfig).layerStatus || '');
+    });
+  }
+
+  /** ***************************************************************************************************************************
+   * Process recursively the list of layer entries to initialize the registeredLayers object.
    *
    * @param {TypeListOfLayerEntryConfig} listOfLayerEntryConfig The list of layer entries to process.
    */
@@ -391,7 +401,6 @@ export abstract class AbstractGeoViewLayer {
    * the details-panel.
    */
   createGeoViewLayers(): Promise<void> {
-    this.layerPhase = 'createGeoViewLayers';
     const promisedExecution = new Promise<void>((resolve) => {
       if (this.gvLayers === null) {
         this.getAdditionalServiceDefinition().then(() => {
@@ -422,7 +431,6 @@ export abstract class AbstractGeoViewLayer {
    * If the GeoView layer does not have a service definition, this method does nothing.
    */
   protected getAdditionalServiceDefinition(): Promise<void> {
-    this.layerPhase = 'getAdditionalServiceDefinition';
     const promisedExecution = new Promise<void>((resolve) => {
       this.getServiceMetadata().then(() => {
         if (this.listOfLayerEntryConfig.length) {
@@ -441,7 +449,6 @@ export abstract class AbstractGeoViewLayer {
    * @returns {Promise<void>} A promise that the execution is completed.
    */
   protected getServiceMetadata(): Promise<void> {
-    this.layerPhase = 'getServiceMetadata';
     const promisedExecution = new Promise<void>((resolve) => {
       resolve();
     });
@@ -466,7 +473,6 @@ export abstract class AbstractGeoViewLayer {
   protected processListOfLayerEntryMetadata(
     listOfLayerEntryConfig: TypeListOfLayerEntryConfig = this.listOfLayerEntryConfig
   ): Promise<void> {
-    this.layerPhase = 'processListOfLayerEntryMetadata';
     const promisedListOfLayerEntryProcessed = new Promise<void>((resolve) => {
       const promisedAllLayerDone: Promise<void>[] = [];
       listOfLayerEntryConfig.forEach((layerEntryConfig: TypeLayerEntryConfig) => {
@@ -490,7 +496,6 @@ export abstract class AbstractGeoViewLayer {
    * @returns {Promise<void>} A promise that the vector layer configuration has its metadata and group layers processed.
    */
   private processMetadataGroupLayer(layerEntryConfig: TypeLayerGroupEntryConfig): Promise<void> {
-    this.layerPhase = 'processMetadataGroupLayer';
     const promisedListOfLayerEntryProcessed = new Promise<void>((resolve) => {
       this.processLayerMetadata(layerEntryConfig).then(() => {
         this.processListOfLayerEntryMetadata(layerEntryConfig.listOfLayerEntryConfig!).then(() => resolve());
@@ -508,7 +513,6 @@ export abstract class AbstractGeoViewLayer {
    * @returns {Promise<void>} A promise that the vector layer configuration has its metadata processed.
    */
   protected processLayerMetadata(layerEntryConfig: TypeLayerEntryConfig): Promise<void> {
-    this.layerPhase = 'processLayerMetadata';
     const promiseOfExecution = new Promise<void>((resolve) => {
       if (!layerEntryConfig.source) layerEntryConfig.source = {};
       if (!layerEntryConfig.source.featureInfo) layerEntryConfig.source.featureInfo = { queryable: true };
@@ -530,7 +534,6 @@ export abstract class AbstractGeoViewLayer {
     listOfLayerEntryConfig: TypeListOfLayerEntryConfig,
     layerGroup?: LayerGroup
   ): Promise<BaseLayer | null> {
-    this.layerPhase = 'processListOfLayerEntryConfig';
     const promisedListOfLayerEntryProcessed = new Promise<BaseLayer | null>((resolve) => {
       if (listOfLayerEntryConfig.length === 1) {
         if (layerEntryIsGroupLayer(listOfLayerEntryConfig[0])) {
@@ -544,7 +547,6 @@ export abstract class AbstractGeoViewLayer {
                 layer: Layer.getLayerPath(listOfLayerEntryConfig[0]),
                 consoleMessage: `Unable to create group layer ${Layer.getLayerPath(listOfLayerEntryConfig[0])} on map ${this.mapId}`,
               });
-              (listOfLayerEntryConfig[0] as TypeBaseLayerEntryConfig).layerStatus = 'error';
               resolve(null);
             }
           });
@@ -571,15 +573,20 @@ export abstract class AbstractGeoViewLayer {
           this.processOneLayerEntry(listOfLayerEntryConfig[0] as TypeBaseLayerEntryConfig).then((baseLayer) => {
             if (baseLayer) {
               baseLayer.setVisible(true);
-              if (layerGroup) {
-                layerGroup.getLayers().push(baseLayer);
-                resolve(layerGroup);
-              } else resolve(baseLayer);
+              this.registerToLayerSets(listOfLayerEntryConfig[0] as TypeBaseLayerEntryConfig);
+              if (layerGroup) layerGroup.getLayers().push(baseLayer);
+              api.event.emit(
+                LayerSetPayload.createLayerSetChangeLayerStatusPayload(this.mapId, Layer.getLayerPath(listOfLayerEntryConfig[0]), 'loaded')
+              );
+              resolve(layerGroup || baseLayer);
             } else {
               this.layerLoadError.push({
                 layer: Layer.getLayerPath(listOfLayerEntryConfig[0]),
                 consoleMessage: `Unable to create layer ${Layer.getLayerPath(listOfLayerEntryConfig[0])} on map ${this.mapId}`,
               });
+              api.event.emit(
+                LayerSetPayload.createLayerSetChangeLayerStatusPayload(this.mapId, Layer.getLayerPath(listOfLayerEntryConfig[0]), 'error')
+              );
               resolve(null);
             }
           });
@@ -614,15 +621,28 @@ export abstract class AbstractGeoViewLayer {
           .then((listOfLayerCreated) => {
             listOfLayerCreated.forEach((baseLayer, i) => {
               if (baseLayer) {
-                const layerEntryConfig = baseLayer?.get('layerEntryConfig');
+                const layerEntryConfig = baseLayer?.get('layerEntryConfig') as TypeBaseLayerEntryConfig;
                 if (layerEntryConfig) {
                   if (layerEntryConfig.layerId.endsWith('-unclustered')) {
                     this.registerToLayerSets(layerEntryConfig);
                     baseLayer.setVisible(false);
-                  } else if (!layerEntryConfig.initialSettings.visible) baseLayer.setVisible(false);
-                  else baseLayer.setVisible(true);
+                  } else
+                    baseLayer.setVisible(
+                      layerEntryConfig.initialSettings?.visible === undefined ? true : layerEntryConfig.initialSettings.visible
+                    );
+
+                  if (!layerEntryIsGroupLayer(listOfLayerEntryConfig[i])) {
+                    this.registerToLayerSets(baseLayer.get('layerEntryConfig') as TypeBaseLayerEntryConfig);
+                    api.event.emit(
+                      LayerSetPayload.createLayerSetChangeLayerStatusPayload(
+                        this.mapId,
+                        Layer.getLayerPath(listOfLayerEntryConfig[i]),
+                        'loaded'
+                      )
+                    );
+                  }
+                  layerGroup!.getLayers().push(baseLayer);
                 }
-                layerGroup!.getLayers().push(baseLayer);
               } else {
                 this.layerLoadError.push({
                   layer: Layer.getLayerPath(listOfLayerEntryConfig[i]),
@@ -630,7 +650,9 @@ export abstract class AbstractGeoViewLayer {
                     layerEntryIsGroupLayer(listOfLayerEntryConfig[i]) ? 'group' : ''
                   } layer ${Layer.getLayerPath(listOfLayerEntryConfig[i])} on map ${this.mapId}`,
                 });
-                (listOfLayerEntryConfig[i] as TypeBaseLayerEntryConfig).layerStatus = 'error';
+                api.event.emit(
+                  LayerSetPayload.createLayerSetChangeLayerStatusPayload(this.mapId, Layer.getLayerPath(listOfLayerEntryConfig[i]), 'error')
+                );
                 resolve(null);
               }
             });
@@ -786,7 +808,7 @@ export abstract class AbstractGeoViewLayer {
   }
 
   /** ***************************************************************************************************************************
-   * This method register the layer entry to layer sets. If the registration is already done, it won't be registered twice.
+   * This method register the layer entry to layer sets. Nothing is done if the registration is already done.
    *
    * @param {TypeBaseLayerEntryConfig} layerEntryConfig The layer entry to register.
    */

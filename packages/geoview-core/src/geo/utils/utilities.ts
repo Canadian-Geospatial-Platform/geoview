@@ -12,6 +12,15 @@ import { xmlToJson } from '../../core/utils/utilities';
 import { api } from '../../app';
 import { EVENT_NAMES } from '../../api/events/event-types';
 import { inKeyfocusPayload } from '../../api/events/payloads/in-keyfocus-payload';
+import {
+  TypeBaseLayerEntryConfig,
+  TypeLayerEntryConfig,
+  TypeLayerStatus,
+  TypeListOfLayerEntryConfig,
+  layerEntryIsGroupLayer,
+} from '../map/map-schema-types';
+import { LayerSetPayload } from '../../api/events/payloads/layer-set-payload';
+import { Layer } from '../layer/layer';
 
 /**
  * Interface used for css style declarations
@@ -21,6 +30,20 @@ interface TypeCSSStyleDeclaration extends CSSStyleDeclaration {
 }
 
 export class GeoUtilities {
+  /**
+   * Set the layerStatus code of all layers in the listOfLayerEntryConfig.
+   *
+   * @param {string} mapId The map identifier.
+   * @param {TypeListOfLayerEntryConfig} listOfLayerEntryConfig The list of layer's configuration.
+   * @param {TypeLayerStatus} layerStatus The layer status value to use.
+   */
+  setAllLayerStatus(mapId: string, listOfLayerEntryConfig: TypeListOfLayerEntryConfig, layerStatus: TypeLayerStatus) {
+    listOfLayerEntryConfig.forEach((layerEntryConfig: TypeLayerEntryConfig) => {
+      if (layerEntryIsGroupLayer(layerEntryConfig)) this.setAllLayerStatus(mapId, layerEntryConfig.listOfLayerEntryConfig, layerStatus);
+      else api.event.emit(LayerSetPayload.createLayerSetChangeLayerStatusPayload(mapId, Layer.getLayerPath(layerEntryConfig), layerStatus));
+    });
+  }
+
   /**
    * Returns the WKT representation of a given geoemtry
    * @function geometryToWKT
