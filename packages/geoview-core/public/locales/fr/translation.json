@@ -35,6 +35,7 @@
   },
   "appbar": {
     "export": "Exporter",
+    "geolocator": "Géolocalisation",
     "fullscreen": "Plein écran",
     "help": "Aide",
     "layers": "Couches",
@@ -52,7 +53,8 @@
   },
   "details": {
     "zoom_to": "Zoom à l'élément",
-    "select": "Sélectionner l'élément sur la carte"
+    "select": "Sélectionner l'élément sur la carte",
+    "external_link": "Lien externe"
   },
   "lightbox": {
     "next": "Prochaine",

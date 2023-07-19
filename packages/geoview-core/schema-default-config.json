@@ -21,6 +21,8 @@
     "listOfGeoviewLayerConfig": []
   },
   "theme": "dark",
+  "appBar": ["geolocator"],
+  "navBar": ["zoom", "fullscreen", "home"],
   "components": [],
   "corePackages": [],
   "externalPackages": [],

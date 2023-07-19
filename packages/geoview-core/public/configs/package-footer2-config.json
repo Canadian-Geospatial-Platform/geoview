@@ -24,7 +24,8 @@
     ]
   },
   "theme": "light",
-  "components": ["footer-bar"],
+  "navBar": ["zoom", "fullscreen", "home", "location", "export"],
+  "components": [],
   "corePackages": ["footer-panel"],
   "externalPackages": [],
   "suportedLanguages": ["en"]

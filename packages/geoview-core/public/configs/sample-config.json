@@ -116,7 +116,7 @@
     ]
   },
   "theme": "dark",
-  "components": ["app-bar", "nav-bar", "north-arrow", "overview-map", "footer-bar"],
+  "components": ["north-arrow", "overview-map"],
   "corePackages": ["basemap-panel"],
   "externalPackages": [],
   "serviceUrls": {

@@ -208,7 +208,7 @@ export function Swiper(props: SwiperProps): JSX.Element {
 
     // force VectorImage to refresh
     olLayers.forEach((layer: BaseLayer) => {
-      if (typeof (layer as VectorImage<VectorSource>).getImageRatio === 'function') layer?.changed();
+      if (layer !== null && typeof (layer as VectorImage<VectorSource>).getImageRatio === 'function') layer?.changed();
     });
 
     map.render();
@@ -242,7 +242,7 @@ export function Swiper(props: SwiperProps): JSX.Element {
     olLayer?.on(['precompose' as EventTypes, 'prerender' as EventTypes], prerender);
     olLayer?.on(['postcompose' as EventTypes, 'postrender' as EventTypes], postcompose);
     // force VectorImage to refresh
-    if (typeof (olLayer as VectorImage<VectorSource>).getImageRatio === 'function') olLayer?.changed();
+    if (olLayer !== null && typeof (olLayer as VectorImage<VectorSource>).getImageRatio === 'function') olLayer?.changed();
   };
 
   useEffect(() => {

@@ -54,7 +54,29 @@
     </select>
     <button type="button" onclick="reloadMap()">Set Projection</button>
 
-    <div id="mapWM" class="llwp-map" data-lang="en"></div>
+    <div id="mapWM" class="llwp-map" data-lang="en" data-config="{
+        'map': {
+          'interaction': 'dynamic',
+          'viewSettings': {
+            'zoom': 4,
+            'center': [-100, 60],
+            'projection': 3857
+          },
+          'basemapOptions': {
+            'basemapId': 'transport',
+            'shaded': true,
+            'labeled': true
+          },
+          'listOfGeoviewLayerConfig': [
+          ]
+        },
+        'theme': 'dark',
+        'components': [],
+        'corePackages': ['layers-panel', 'details-panel'],
+        'appBar': ['export'],
+        'suportedLanguages': ['en']
+      }">
+    </div>
     <h4>Add Layer Examples</h4>
     <div style="font-size: smaller">
       <div>
@@ -150,38 +172,15 @@
             ]
           },
           'theme': 'dark',
-          'components': ['app-bar', 'footer-bar'],
+          'components': [],
           'corePackages': ['layers-panel', 'details-panel'],
-          'appBar': {'export': true},
+          'appBar': ['export'],
           'suportedLanguages': ['en']
         }`);
       }
       // initialize cgpv and api events, a callback is optional, used if calling api's after the rendering is ready
       cgpv.init(function () {
         console.log('api is ready');
-
-        cgpv.api.map('mapWM').loadMapConfig(`{
-        'map': {
-          'interaction': 'dynamic',
-          'viewSettings': {
-            'zoom': 4,
-            'center': [-100, 60],
-            'projection': 3857
-          },
-          'basemapOptions': {
-            'basemapId': 'transport',
-            'shaded': true,
-            'labeled': true
-          },
-          'listOfGeoviewLayerConfig': [
-          ]
-        },
-        'theme': 'dark',
-        'components': ['app-bar', 'footer-bar'],
-        'corePackages': ['layers-panel', 'details-panel'],
-        'appBar': {'export': true},
-        'suportedLanguages': ['en']
-      }`);
 
         //create snippets
         createConfigSnippet();

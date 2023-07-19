@@ -64,6 +64,8 @@
     "i18next": "^22.4.13",
     "i18next-http-backend": "^1.0.21",
     "immutable": "^4.0.0",
+    "linkifyjs": "^4.1.0",
+    "linkify-html": "^4.1.0",
     "lodash": "^4.17.21",
     "material-react-table": "^1.14.0",
     "notistack": "^2.0.3",

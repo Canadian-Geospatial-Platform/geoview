@@ -35,6 +35,7 @@
   },
   "appbar": {
     "export": "Export",
+    "geolocator": "Geolocator",
     "fullscreen": "Full Screen",
     "help": "Help",
     "layers": "Layers",
@@ -52,7 +53,8 @@
   },
   "details": {
     "zoom_to": "Zoom to feature",
-    "select": "Highlight feature on map"
+    "select": "Highlight feature on map",
+    "external_link": "External Link"
   },
   "lightbox": {
     "next": "Next",
