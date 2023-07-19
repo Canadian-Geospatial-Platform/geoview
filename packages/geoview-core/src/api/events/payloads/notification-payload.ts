@@ -1,7 +1,6 @@
 import { PayloadBaseClass } from './payload-base-class';
 
 import { EventStringId, EVENT_NAMES } from '../event-types';
-import { TypeJsonObject } from '../../../core/types/global-types';
 
 /** Valid events that can create NotificationPayload */
 const validEvents: EventStringId[] = [EVENT_NAMES.NOTIFICATIONS.NOTIFICATION_ADD, EVENT_NAMES.NOTIFICATIONS.NOTIFICATION_REMOVE];
@@ -18,6 +17,8 @@ export const payloadIsANotification = (verifyIfPayload: PayloadBaseClass): verif
   return validEvents.includes(verifyIfPayload?.event);
 };
 
+export type NotificationType = 'success' | 'error' | 'info' | 'warning';
+
 /**
  * Class definition for NotificationPayload
  *
@@ -27,21 +28,25 @@ export const payloadIsANotification = (verifyIfPayload: PayloadBaseClass): verif
 export class NotificationPayload extends PayloadBaseClass {
   message: string;
 
-  options?: TypeJsonObject;
+  description?: string;
+
+  notificationType: NotificationType;
 
   /**
    * Constructor for the class
    *
    * @param {EventStringId} event the event identifier for which the payload is constructed
    * @param {string | null} handlerName the handler Name
+   * @param {NotificationType} notificationType the  type of notification
    * @param {string} message the notification message
-   * @param {TypeJsonObject} options optional notification options
+   * @param {string} description optional notification description
    */
-  constructor(event: EventStringId, handlerName: string | null, message: string, options?: TypeJsonObject) {
+  constructor(event: EventStringId, handlerName: string | null, notifType: NotificationType, message: string, description?: string) {
     if (!validEvents.includes(event)) throw new Error(`NotificationPayload can't be instanciated for event of type ${event}`);
     super(event, handlerName);
     this.message = message;
-    this.options = options;
+    this.notificationType = notifType;
+    this.description = description;
   }
 }
 
@@ -51,16 +56,18 @@ export class NotificationPayload extends PayloadBaseClass {
  *
  * @param {EventStringId} event the event identifier for which the payload is constructed
  * @param {string | null} handlerName the handler Name
+ * @param {NotificationType} notificationType the  type of notification
  * @param {string} message the notification message
- * @param {TypeJsonObject} options optional notification options
+ * @param {string} description optional notification description
  *
  * @returns {NotificationPayload} the NotificationPayload object created
  */
 export const notificationPayload = (
   event: EventStringId,
   handlerName: string | null,
+  notificationType: NotificationType,
   message: string,
-  options?: TypeJsonObject
+  description?: string
 ): NotificationPayload => {
-  return new NotificationPayload(event, handlerName, message, options);
+  return new NotificationPayload(event, handlerName, notificationType, message, description);
 };

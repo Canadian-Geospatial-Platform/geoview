@@ -1,13 +1,13 @@
-import { useCallback, useContext, useEffect, useState, MouseEventHandler } from 'react';
+import { useCallback, useContext, useEffect, useState, MouseEventHandler, useRef } from 'react';
 
 import { MapContext } from '../../app-start';
 import { api } from '../../../app';
 
 import { EVENT_NAMES } from '../../../api/events/event-types';
-import { NotificationPayload, payloadIsANotification } from '../../../api/events/payloads/notification-payload';
+import { notificationPayload, NotificationPayload, payloadIsANotification } from '../../../api/events/payloads/notification-payload';
 
-import { Box, Popover } from '../../../ui';
-import { NotificationType } from './notifications-api';
+import { Box, Popover, InfoIcon, ErrorIcon, WarningIcon, CheckCircleIcon, CloseIcon, IconButton } from '../../../ui';
+import { NotificationDetailsType } from './notifications-api';
 
 interface NotificationPopoverProps {
   anchorEl: HTMLElement | null;
@@ -20,7 +20,8 @@ interface NotificationPopoverProps {
  * @returns {JSX.Element} returns the Footer Tabs component
  */
 export function NotificationsPopover(props: NotificationPopoverProps): JSX.Element | null {
-  const [activeNotifications, setActiveNotifications] = useState<NotificationType[]>([]);
+  const [activeNotifications, setActiveNotifications] = useState<NotificationDetailsType[]>([]);
+  const notifsListRef = useRef<NotificationDetailsType[]>([]);
 
   const { anchorEl, handleClose } = props;
 
@@ -32,30 +33,37 @@ export function NotificationsPopover(props: NotificationPopoverProps): JSX.Eleme
    * Add a notification
    */
   const addNotification = useCallback((payload: NotificationPayload) => {
-    // push the tab to the end of the list
-    console.log('payload-addNotifcation ', payload);
-    // setActiveNotifications((prevArray) => [...prevArray, payload.tab as TypeTabs]);
+    // push the notification to the end of the list
+    const toAdd = payload as NotificationDetailsType;
+    notifsListRef.current.push(toAdd);
+    setActiveNotifications(notifsListRef.current);
   }, []);
 
   /**
    * Remove a notification
    */
-  const removeNotification = useCallback(
-    (payload: NotificationPayload) => {
-      // remove the tab from the list
-      console.log('payload-removeNotifcation ', payload);
-      /* setActiveNotifications((prevState) => {
-        const state = [...prevState];
-        const index = state.findIndex((tab) => tab.value === payload.tab.value);
-        if (index > -1) {
-          state.splice(index, 1);
-          return state;
-        }
-        return state;
-      }); */
-    },
-    [setActiveNotifications]
-  );
+  const removeNotification = useCallback((payload: NotificationDetailsType) => {
+    // remove the notification from the list
+
+    const state = [...notifsListRef.current];
+    const index = state.findIndex((notif) => notif.message === payload.message && payload.notificationType === notif.notificationType);
+    if (index > -1) {
+      const toRemove = state[index];
+      state.splice(index, 1);
+      api.event.emit(
+        notificationPayload(
+          EVENT_NAMES.NOTIFICATIONS.NOTIFICATION_REMOVE,
+          mapId,
+          toRemove.notificationType,
+          toRemove.message,
+          toRemove.description
+        )
+      );
+    }
+
+    notifsListRef.current = state;
+    setActiveNotifications(notifsListRef.current);
+  }, []);
 
   /**
    * Manage the notifications 'add', 'remove'
@@ -86,8 +94,29 @@ export function NotificationsPopover(props: NotificationPopoverProps): JSX.Eleme
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [addNotification, removeNotification, mapId]);
 
-  function renderNotification(notification: NotificationType) {
-    return <Box>{notification.message}</Box>;
+  function getNotificationIcon(notification: NotificationDetailsType) {
+    switch (notification.notificationType) {
+      case 'success':
+        return <CheckCircleIcon color="success" />;
+      case 'info':
+        return <InfoIcon color="info" />;
+      case 'warning':
+        return <WarningIcon color="warning" />;
+      default:
+        return <ErrorIcon color="error" />;
+    }
+  }
+
+  function renderNotification(notification: NotificationDetailsType, index: number) {
+    return (
+      <Box sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '8px' }} key={index}>
+        <div>{getNotificationIcon(notification)}</div>
+        <Box sx={{ flexGrow: 1 }}>{notification.message}</Box>
+        <IconButton onClick={() => removeNotification(notification)}>
+          <CloseIcon />
+        </IconButton>
+      </Box>
+    );
   }
 
   const open = Boolean(anchorEl);
@@ -106,9 +135,19 @@ export function NotificationsPopover(props: NotificationPopoverProps): JSX.Eleme
       }}
       onClose={handleClose}
     >
-      <Box sx={{ flexDirection: 'column', padding: '5px 20px' }}>
-        {api.map(mapId).notifications && api.map(mapId).notifications.notificationsList.length > 0 ? (
-          activeNotifications.map((details) => renderNotification(details))
+      <Box
+        sx={{
+          display: 'flex',
+          flexDirection: 'column',
+          padding: '5px 20px',
+          width: '300px',
+          maxHeight: '500px',
+          overflowY: 'auto',
+          gap: '8px',
+        }}
+      >
+        {activeNotifications.length > 0 ? (
+          activeNotifications.map((details, index) => renderNotification(details, index))
         ) : (
           <p>No notifications available</p>
         )}
