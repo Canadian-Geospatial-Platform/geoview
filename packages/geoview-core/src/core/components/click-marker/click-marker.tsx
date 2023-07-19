@@ -375,7 +375,7 @@ export function ClickMarker(): JSX.Element {
   }, []);
 
   return (
-    <div ref={clickMarkerRef} id={clickMarkerId} style={{ visibility: showMarker ? 'visible' : 'hidden' }}>
+    <div ref={clickMarkerRef} id={clickMarkerId} style={{ position: 'absolute', visibility: showMarker ? 'visible' : 'hidden' }}>
       <ClickMapMarker fontSize="medium" color="action" />
     </div>
   );
