@@ -42,6 +42,8 @@ import FileUploadIcon from '@mui/icons-material/FileUpload';
 import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
 import BrowserNotSupportedIcon from '@mui/icons-material/BrowserNotSupported';
 import EmojiPeopleIcon from '@mui/icons-material/EmojiPeople';
+import NotificationsIcon from '@mui/icons-material/Notifications';
+import NotificationsActiveIcon from '@mui/icons-material/NotificationsActive';
 
 export {
   Layers as LayersIcon,
@@ -91,4 +93,6 @@ export {
   MoreHorizIcon,
   BrowserNotSupportedIcon,
   EmojiPeopleIcon,
+  NotificationsIcon,
+  NotificationsActiveIcon,
 };
