@@ -1,14 +1,18 @@
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
   MaterialReactTable,
   type MRT_ColumnDef as MRTColumnDef,
   MRT_ToggleDensePaddingButton as MRTToggleDensePaddingButton,
+  MRT_ShowHideColumnsButton as MRTShowHideColumnsButton,
+  MRT_ToggleFiltersButton as MRTToggleFiltersButton,
   MRT_FullScreenToggleButton as MRTFullScreenToggleButton,
+  type MRT_SortingState as MRTSortingState,
+  type MRT_Virtualizer as MRTVirtualizer,
 } from 'material-react-table';
 import { Extent } from 'ol/extent';
 import { Geometry } from 'ol/geom';
-import { ZoomInSearchIcon } from '../../../ui/icons';
-import { Box, IconButton } from '../../../ui';
+import { Box, IconButton, ZoomInSearchIcon } from '../../../ui';
+import ExportButton from './export-button';
 
 export interface Features {
   attributes: {
@@ -53,6 +57,19 @@ export interface Rows {
 }
 
 function DataTable({ data }: DataTableProps) {
+  // optionally access the underlying virtualizer instance
+  const rowVirtualizerInstanceRef = useRef<MRTVirtualizer<HTMLDivElement, HTMLTableRowElement>>(null);
+
+  const [sorting, setSorting] = useState<MRTSortingState>([]);
+
+  useEffect(() => {
+    // scroll to the top of the table when the sorting changes
+    try {
+      rowVirtualizerInstanceRef.current?.scrollToIndex?.(0);
+    } catch (error) {
+      console.error(error);
+    }
+  }, [sorting]);
   /**
    * Build material react data table column header.
    *
@@ -63,6 +80,7 @@ function DataTable({ data }: DataTableProps) {
       return {
         accessorKey: fieldAlias,
         header: fieldAlias,
+        ...(['ICON', 'ZOOM'].includes(fieldAlias) && { size: 100 }),
       };
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -98,13 +116,26 @@ function DataTable({ data }: DataTableProps) {
         initialState={{ density: 'compact', pagination: { pageSize: 10, pageIndex: 0 } }}
         renderToolbarInternalActions={({ table }) => (
           <Box>
-            {/* add custom button to print table  */}
-
-            {/* along-side built-in buttons in whatever order you want them */}
+            <MRTToggleFiltersButton table={table} />
+            <MRTShowHideColumnsButton table={table} />
             <MRTToggleDensePaddingButton table={table} />
             <MRTFullScreenToggleButton table={table} />
+            <ExportButton dataTableData={rows} columns={columns} />
           </Box>
         )}
+        enableBottomToolbar={false}
+        enableColumnResizing
+        enableColumnVirtualization
+        enableGlobalFilterModes
+        enablePagination={false}
+        enablePinning
+        enableRowVirtualization
+        muiTableContainerProps={{ sx: { maxHeight: '600px' } }}
+        onSortingChange={setSorting}
+        state={{ sorting }}
+        rowVirtualizerInstanceRef={rowVirtualizerInstanceRef}
+        rowVirtualizerProps={{ overscan: 5 }}
+        columnVirtualizerProps={{ overscan: 2 }}
       />
     </Box>
   );

@@ -1,40 +1,50 @@
-import { ButtonProps } from '@mui/material';
-import {
-  GridCsvExportMenuItem,
-  GridCsvExportOptions,
-  GridPrintExportMenuItem,
-  GridPrintExportOptions,
-  GridToolbarExportContainer,
-} from '@mui/x-data-grid';
-import { memo } from 'react';
-import JsonExportMenuItem from './json-export-menu-item';
-import { Rows } from './data-table';
+import React from 'react';
+import { ExportToCsv } from 'export-to-csv';
+import { type MRT_ColumnDef as MRTColumnDef } from 'material-react-table';
+import { IconButton, DownloadIcon, Tooltip } from '../../../ui';
+import { ColumnsType } from './data-table';
 
-type ExportButtonProps = ButtonProps & {
-  rows: Rows[];
-  layerKey: string;
-};
+interface ExportButtonProps {
+  dataTableData: ColumnsType[];
+  columns: MRTColumnDef<ColumnsType>[];
+}
 
 /**
- * Custom the export menu, adding the export json button
- * @param {ButtonProps} propsButton material ui button props.
- * @param {rows} rows list of rows to be displayed in data-grid table
- * @param {layerId} layerId unique id of layers rendered in map.
- * @return {GridToolbarExportContainer} export menu
+ * Custom  export button which will help to download data table data in csv format.
+ * @param {ColumnsType} dataTableData list of rows to be displayed in data table
+ * @param {MRTColumnDef<ColumnsType>[]} columns array of object represent column header data.
+ * @returns {JSX.Element} returns export button
  *
  */
-function ExportButton({ rows, layerKey, ...rest }: ExportButtonProps) {
-  const csvOptions: GridCsvExportOptions = { delimiter: ';' };
-  const printOptions: GridPrintExportOptions = {};
+function ExportButton({ dataTableData, columns }: ExportButtonProps): JSX.Element {
+  /**
+   * Build CSV Options for download.
+   */
+  const getCsvOptions = () => ({
+    fieldSeparator: ',',
+    quoteStrings: '"',
+    decimalSeparator: '.',
+    showLabels: true,
+    useBom: true,
+    useKeysAsHeaders: false,
+    headers: columns.map((c) => c.header),
+  });
+
+  /**
+   * Export data table in csv format.
+   */
+  const handleExportData = () => {
+    const csvExporter = new ExportToCsv(getCsvOptions());
+    csvExporter.generateCsv(dataTableData);
+  };
 
   return (
-    // @ts-expect-error its known issue of x-data-grid, where onResize is required and we don't need it.
-    <GridToolbarExportContainer {...rest}>
-      <GridCsvExportMenuItem options={csvOptions} />
-      <JsonExportMenuItem rows={rows} layerKey={layerKey} />
-      <GridPrintExportMenuItem options={printOptions} />
-    </GridToolbarExportContainer>
+    <IconButton onClick={handleExportData}>
+      <Tooltip title="Download All Table Data" placement="bottom" enterDelay={100}>
+        <DownloadIcon />
+      </Tooltip>
+    </IconButton>
   );
 }
 
-export default memo(ExportButton);
+export default ExportButton;

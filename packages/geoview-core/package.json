@@ -78,7 +78,8 @@
     "react-test-renderer": "^17.0.2",
     "sanitize-html": "^2.7.3",
     "sql.js": "^1.8.0",
-    "yet-another-react-lightbox": "^3.11.3"
+    "yet-another-react-lightbox": "^3.11.3",
+    "export-to-csv": "^0.2.1"
   },
   "devDependencies": {
     "@emotion/react": "^11.8.1",
