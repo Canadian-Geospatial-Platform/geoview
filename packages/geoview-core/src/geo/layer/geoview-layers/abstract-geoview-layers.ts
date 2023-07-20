@@ -68,8 +68,14 @@ export const isWmsLegend = (verifyIfLegend: TypeLegend): verifyIfLegend is TypeW
   return verifyIfLegend?.type === 'ogcWms';
 };
 
+export interface TypeWmsLegendStyle {
+  name: string;
+  legend: HTMLCanvasElement | null;
+}
+
 export interface TypeWmsLegend extends Omit<TypeLegend, 'styleConfig'> {
-  legend: HTMLCanvasElement;
+  legend: HTMLCanvasElement | null;
+  styles?: TypeWmsLegendStyle[];
 }
 
 /**
