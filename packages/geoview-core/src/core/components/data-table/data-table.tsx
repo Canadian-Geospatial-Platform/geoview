@@ -113,7 +113,11 @@ function DataTable({ data }: DataTableProps) {
         data={rows}
         enableGlobalFilter={false}
         enableRowSelection
-        initialState={{ density: 'compact', pagination: { pageSize: 10, pageIndex: 0 } }}
+        initialState={{
+          columnPinning: { left: ['ICON', 'ZOOM'] },
+          density: 'compact',
+          pagination: { pageSize: 10, pageIndex: 0 },
+        }}
         renderToolbarInternalActions={({ table }) => (
           <Box>
             <MRTToggleFiltersButton table={table} />
