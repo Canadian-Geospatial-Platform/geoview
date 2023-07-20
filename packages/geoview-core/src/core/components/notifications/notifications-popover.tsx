@@ -43,27 +43,30 @@ export function NotificationsPopover(props: NotificationPopoverProps): JSX.Eleme
    * Remove a notification
    */
   const removeNotification = useCallback((payload: NotificationDetailsType) => {
-    // remove the notification from the list
-
     const state = [...notifsListRef.current];
     const index = state.findIndex((notif) => notif.message === payload.message && payload.notificationType === notif.notificationType);
     if (index > -1) {
-      const toRemove = state[index];
       state.splice(index, 1);
+      notifsListRef.current = state;
+      setActiveNotifications(notifsListRef.current);
+    }
+  }, []);
+
+  const handleRemoveNotificationClick = (payload: NotificationDetailsType) => {
+    const state = [...notifsListRef.current];
+    const index = state.findIndex((notif) => notif.message === payload.message && payload.notificationType === notif.notificationType);
+    if (index > -1) {
       api.event.emit(
         notificationPayload(
           EVENT_NAMES.NOTIFICATIONS.NOTIFICATION_REMOVE,
           mapId,
-          toRemove.notificationType,
-          toRemove.message,
-          toRemove.description
+          payload.notificationType,
+          payload.message,
+          payload.description
         )
       );
     }
-
-    notifsListRef.current = state;
-    setActiveNotifications(notifsListRef.current);
-  }, []);
+  };
 
   /**
    * Manage the notifications 'add', 'remove'
@@ -109,10 +112,10 @@ export function NotificationsPopover(props: NotificationPopoverProps): JSX.Eleme
 
   function renderNotification(notification: NotificationDetailsType, index: number) {
     return (
-      <Box sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '8px' }} key={index}>
+      <Box sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '8px', borderBottom: '1px solid #474747' }} key={index}>
         <div>{getNotificationIcon(notification)}</div>
         <Box sx={{ flexGrow: 1 }}>{notification.message}</Box>
-        <IconButton onClick={() => removeNotification(notification)}>
+        <IconButton onClick={() => handleRemoveNotificationClick(notification)}>
           <CloseIcon />
         </IconButton>
       </Box>
