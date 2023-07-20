@@ -9,6 +9,8 @@ import 'dayjs/locale/fr-ca';
 import { TypeLocalizedLanguages } from '../../geo/map/map-schema-types';
 import { TypeJsonObject } from '../types/global-types';
 
+dayjs.extend(duration);
+
 export type TypeDateFragments = [number[], number[], string[]];
 
 const FIRST_DATE_ELEMENT = 0;
@@ -339,8 +341,8 @@ export class DateMgt {
 
     // find what type of dimension it is:
     //    discrete = 1696, 1701, 1734, 1741
-    //    discrete 2022-04-27T14:50:00Z/2022-04-27T17:50:00Z/PT10M
-    //    relative 2022-04-27T14:50:00Z/PT10M OR 2022-04-27T14:50:00Z/2022-04-27T17:50:00Z
+    //    relative = 2022-04-27T14:50:00Z/PT10M OR 2022-04-27T14:50:00Z/2022-04-27T17:50:00Z
+    //    absolute = 2022-04-27T14:50:00Z/2022-04-27T17:50:00Z/PT10M
     // and create the range object
     if (isDiscreteRange(ogcTimeDimensionValues))
       rangeItems = { type: 'discrete', range: ogcTimeDimensionValues.replace(/\s/g, '').split(',') };
@@ -398,7 +400,7 @@ export class DateMgt {
 
     // create intervalle items
     const msDuration: number = dayjs.duration(durationCheck).asMilliseconds();
-    const calcDuration = dayjs.duration({ milliseconds: msDuration });
+    const calcDuration = dayjs.duration(msDuration);
     const items: string[] = [];
     let i = 0;
 

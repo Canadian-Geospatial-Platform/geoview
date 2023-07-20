@@ -44,9 +44,8 @@ export class LegendsLayerSet {
     this.mapId = mapId;
     this.layerSet = new LayerSet(mapId, `${mapId}/$LegendsLayerSet$`, this.resultSets, registrationConditionFunction);
 
-    // This listener receives the legend information returned by the a layer's getLegend call and store it in the resultSets
-    // if all the registered layers has received their legend information, an EVENT_NAMES.GET_LEGENDS.LEGENDS_LAYERSET_UPDATED event
-    // is triggered.
+    // This listener receives the legend information returned by the layer's getLegend call and store it in the resultSets.
+    // Every time a registered layer changes, an EVENT_NAMES.GET_LEGENDS.LEGENDS_LAYERSET_UPDATED event is triggered.
     api.event.on(
       EVENT_NAMES.GET_LEGENDS.LEGEND_INFO,
       (payload) => {
@@ -69,7 +68,7 @@ export class LegendsLayerSet {
         if (payloadIsTriggerLegend(payload)) {
           const queryUndefinedLegend = () => {
             Object.keys(this.resultSets).forEach((layerPath) => {
-              if (this.resultSets[layerPath]?.layerStatus === 'loaded' && this.resultSets[layerPath].data === undefined)
+              if (this.resultSets[layerPath]?.layerStatus === 'processed' && this.resultSets[layerPath].data === undefined)
                 api.event.emit(GetLegendsPayload.createQueryLegendPayload(`${this.mapId}/${layerPath}`, layerPath));
             });
           };
@@ -86,6 +85,7 @@ export class LegendsLayerSet {
           );
 
           queryUndefinedLegend();
+          api.event.emit(GetLegendsPayload.createLegendsLayersetUpdatedPayload(`${this.mapId}/$LegendsLayerSet$`, this.resultSets));
         }
       },
       `${mapId}/$LegendsLayerSet$`

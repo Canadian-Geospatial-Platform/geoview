@@ -439,7 +439,7 @@ function displayLegend(layerSetId, resultSets) {
   let createHeader = true;
   Object.keys(resultSets).forEach((layerPath) => {
     const activeResultSet = resultSets[layerPath];
-    if (activeResultSet.layerStatus !== 'loaded' || !activeResultSet?.data?.legend) {
+    if (activeResultSet.layerStatus !== 'processed' || !activeResultSet?.data?.legend) {
       if (createHeader) {
         createHeader = false;
         const tableRow1 = document.createElement('tr');
@@ -449,8 +449,9 @@ function displayLegend(layerSetId, resultSets) {
       }
       const tableRow = document.createElement('tr');
       addData(layerPath, tableRow);
-      let legendValue = activeResultSet.data === undefined && activeResultSet.layerStatus === 'loaded' ? '(waiting for legend)' : '';
-          legendValue = activeResultSet.data === null      && activeResultSet.layerStatus === 'loaded' ? '(legend fetch error)' : legendValue;
+      let legendValue = activeResultSet.data === undefined && activeResultSet.layerStatus === 'processed' ? '(waiting for legend)' : '';
+      legendValue = activeResultSet.data === null && activeResultSet.layerStatus === 'processed' ? '(legend fetch error)' : legendValue;
+      legendValue = activeResultSet.data && !activeResultSet.data.legend && activeResultSet.layerStatus === 'processed' ? '(no legend)' : legendValue;
       addData(`${activeResultSet.layerStatus} ${legendValue}`, tableRow);
       table.appendChild(tableRow);
     } else if (activeResultSet.data?.type === 'ogcWms' || activeResultSet.data?.type === 'imageStatic') {

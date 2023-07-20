@@ -491,10 +491,6 @@
           createTableOfFilter('LYR1');
           createTableOfFilter('LYR2');
           createTableOfFilter('LYR4');
-          cgpv.api.event.emit({ handlerName: 'LYR1/$LegendsLayerSet$', event: cgpv.api.eventNames.GET_LEGENDS.TRIGGER });
-          cgpv.api.event.emit({ handlerName: 'LYR2/$LegendsLayerSet$', event: cgpv.api.eventNames.GET_LEGENDS.TRIGGER });
-          cgpv.api.event.emit({ handlerName: 'LYR3/$LegendsLayerSet$', event: cgpv.api.eventNames.GET_LEGENDS.TRIGGER });
-          cgpv.api.event.emit({ handlerName: 'LYR4/$LegendsLayerSet$', event: cgpv.api.eventNames.GET_LEGENDS.TRIGGER });
 
           const intervalId = window.setInterval(() => {
             if (cgpv.api.maps.LYR3?.layer?.geoviewLayers?.['wmsLYR3-Root']?.allLayerEntryConfigProcessed()) {
@@ -535,6 +531,8 @@
             },
             'LYR1/$LegendsLayerSet$'
           );
+          // The GET_LEGENDS.TRIGGER event must be triggered after the GET_LEGENDS.LEGENDS_LAYERSET_UPDATED listener is created
+          cgpv.api.event.emit({ handlerName: 'LYR1/$LegendsLayerSet$', event: cgpv.api.eventNames.GET_LEGENDS.TRIGGER });
 
           // ========================================================================================================================
           // Test a refresh WMS from projection change
@@ -563,6 +561,8 @@
             },
             'LYR2/$LegendsLayerSet$'
           );
+          // The GET_LEGENDS.TRIGGER event must be triggered after the GET_LEGENDS.LEGENDS_LAYERSET_UPDATED listener is created
+          cgpv.api.event.emit({ handlerName: 'LYR2/$LegendsLayerSet$', event: cgpv.api.eventNames.GET_LEGENDS.TRIGGER });
 
           // LYR3 ===================================================================================================================
           const featureInfoLayerSet3 = cgpv.api.getFeatureInfoLayerSet('LYR3');
@@ -584,6 +584,8 @@
             },
             'LYR3/$LegendsLayerSet$'
           );
+          // The GET_LEGENDS.TRIGGER event must be triggered after the GET_LEGENDS.LEGENDS_LAYERSET_UPDATED listener is created
+          cgpv.api.event.emit({ handlerName: 'LYR3/$LegendsLayerSet$', event: cgpv.api.eventNames.GET_LEGENDS.TRIGGER });
 
           //LYR4 ===================================================================================================================
           const LegendsLayerSet4 = cgpv.api.getLegendsLayerSet('LYR4', 'LegendsId4');
@@ -595,6 +597,8 @@
             },
             'LYR4/$LegendsLayerSet$'
           );
+          // The GET_LEGENDS.TRIGGER event must be triggered after the GET_LEGENDS.LEGENDS_LAYERSET_UPDATED listener is created
+          cgpv.api.event.emit({ handlerName: 'LYR4/$LegendsLayerSet$', event: cgpv.api.eventNames.GET_LEGENDS.TRIGGER });
 
           // ========================================================================================================================
           // Test a refresh WMS from projection change
@@ -625,6 +629,9 @@
             }
           }, 2500)
 
+        }
+      });
+
           // ========================================================================================================================
           // Display layer state
           window.setInterval(() => {
@@ -632,8 +639,11 @@
             const geoviewLayers = cgpv.api.maps?.LYR1?.layer?.geoviewLayers;
             if (geoviewLayers) {
               const output = Object.keys(cgpv.api.maps?.LYR1?.layer?.geoviewLayers).reduce((outputValue, layerId) => {
-                const stateValue = cgpv.api.maps?.LYR1?.layer?.geoviewLayers[layerId].allLayerEntryConfigProcessed() ? 'Loaded' : 'Not totaly loaded';
-                return `${outputValue}${layerId}: ${stateValue}, `;
+                const stateValue = cgpv.api.maps?.LYR1?.layer?.geoviewLayers[layerId].allLayerEntryConfigProcessed() ? 'Processed' : 'Not totaly processed';
+                const numberOfErrors = cgpv.api.maps?.LYR1?.layer?.geoviewLayers[layerId].countErrorStatus();
+                let errorIndicator = '';
+                if (numberOfErrors) errorIndicator = numberOfErrors === 1 ? ' (1 error)' : ` (${numberOfErrors} errors)`;
+                return `${outputValue}${layerId}: ${stateValue}${errorIndicator}, `;
               }, '(');
               displayField1.textContent = output ? `${output.slice(0, -2)})` : '(undefined)';
             } else displayField1.textContent = '(undefined)';
@@ -644,8 +654,11 @@
             const geoviewLayers = cgpv.api.maps?.LYR2?.layer?.geoviewLayers;
             if (geoviewLayers) {
               const output = Object.keys(cgpv.api.maps?.LYR2?.layer?.geoviewLayers).reduce((outputValue, layerId) => {
-                const stateValue = cgpv.api.maps?.LYR2?.layer?.geoviewLayers[layerId].allLayerEntryConfigProcessed() ? 'Loaded' : 'Not totaly loaded';
-                return `${outputValue}${layerId}: ${stateValue}, `;
+                const stateValue = cgpv.api.maps?.LYR2?.layer?.geoviewLayers[layerId].allLayerEntryConfigProcessed() ? 'Processed' : 'Not totaly processed';
+                const numberOfErrors = cgpv.api.maps?.LYR2?.layer?.geoviewLayers[layerId].countErrorStatus();
+                let errorIndicator = '';
+                if (numberOfErrors) errorIndicator = numberOfErrors === 1 ? ' (1 error)' : ` (${numberOfErrors} errors)`;
+                return `${outputValue}${layerId}: ${stateValue}${errorIndicator}, `;
               }, '(');
               displayField2.textContent = output ? `${output.slice(0, -2)})` : '(undefined)';
             } else displayField2.textContent = '(undefined)';
@@ -656,8 +669,11 @@
             const geoviewLayers = cgpv.api.maps?.LYR3?.layer?.geoviewLayers;
             if (geoviewLayers) {
               const output = Object.keys(cgpv.api.maps?.LYR3?.layer?.geoviewLayers).reduce((outputValue, layerId) => {
-                const stateValue = cgpv.api.maps?.LYR3?.layer?.geoviewLayers[layerId].allLayerEntryConfigProcessed() ? 'Loaded' : 'Not totaly loaded';
-                return `${outputValue}${layerId}: ${stateValue}, `;
+                const stateValue = cgpv.api.maps?.LYR3?.layer?.geoviewLayers[layerId].allLayerEntryConfigProcessed() ? 'Processed' : 'Not totaly processed';
+                const numberOfErrors = cgpv.api.maps?.LYR3?.layer?.geoviewLayers[layerId].countErrorStatus();
+                let errorIndicator = '';
+                if (numberOfErrors) errorIndicator = numberOfErrors === 1 ? ' (1 error)' : ` (${numberOfErrors} errors)`;
+                return `${outputValue}${layerId}: ${stateValue}${errorIndicator}, `;
               }, '(');
               displayField3.textContent = output ? `${output.slice(0, -2)})` : '(undefined)';
             } else displayField3.textContent = '(undefined)';
@@ -668,14 +684,15 @@
             const geoviewLayers = cgpv.api.maps?.LYR4?.layer?.geoviewLayers;
             if (geoviewLayers) {
               const output = Object.keys(cgpv.api.maps?.LYR4?.layer?.geoviewLayers).reduce((outputValue, layerId) => {
-                const stateValue = cgpv.api.maps?.LYR4?.layer?.geoviewLayers[layerId].allLayerEntryConfigProcessed() ? 'Loaded' : 'Not totaly loaded';
-                return `${outputValue}${layerId}: ${stateValue}, `;
+                const stateValue = cgpv.api.maps?.LYR4?.layer?.geoviewLayers[layerId].allLayerEntryConfigProcessed() ? 'Processed' : 'Not totaly processed';
+                const numberOfErrors = cgpv.api.maps?.LYR4?.layer?.geoviewLayers[layerId].countErrorStatus();
+                let errorIndicator = '';
+                if (numberOfErrors) errorIndicator = numberOfErrors === 1 ? ' (1 error)' : ` (${numberOfErrors} errors)`;
+                return `${outputValue}${layerId}: ${stateValue}${errorIndicator}, `;
               }, '(');
               displayField4.textContent = output ? `${output.slice(0, -2)})` : '(undefined)';
             } else displayField4.textContent = '(undefined)';
           }, 250);
-        }
-      });
 
     </script>
   </body>

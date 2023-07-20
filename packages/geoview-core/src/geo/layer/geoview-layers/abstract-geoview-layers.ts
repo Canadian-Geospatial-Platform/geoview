@@ -341,8 +341,24 @@ export abstract class AbstractGeoViewLayer {
     // Try to find an unprocessed layer. If you can, return false
     return !listOfLayerEntryConfig.find((layerEntryConfig: TypeLayerEntryConfig) => {
       if (layerEntryIsGroupLayer(layerEntryConfig)) return !this.allLayerEntryConfigProcessed(layerEntryConfig.listOfLayerEntryConfig);
-      return !['loaded', 'error'].includes((layerEntryConfig as TypeBaseLayerEntryConfig).layerStatus || '');
+      return !['processed', 'error'].includes((layerEntryConfig as TypeBaseLayerEntryConfig).layerStatus || '');
     });
+  }
+
+  /** ***************************************************************************************************************************
+   * Recursively process the list of layer entries to count all layers in error.
+   *
+   * @param {TypeListOfLayerEntryConfig} listOfLayerEntryConfig The list of layer's configuration
+   *                                                            (default: this.listOfLayerEntryConfig).
+   *
+   * @returns {number} The number of layers in error.
+   */
+  countErrorStatus(listOfLayerEntryConfig: TypeListOfLayerEntryConfig = this.listOfLayerEntryConfig): number {
+    return listOfLayerEntryConfig.reduce((counter: number, layerEntryConfig: TypeLayerEntryConfig) => {
+      if (layerEntryIsGroupLayer(layerEntryConfig)) return counter + this.countErrorStatus(layerEntryConfig.listOfLayerEntryConfig);
+      if ((layerEntryConfig as TypeBaseLayerEntryConfig).layerStatus === 'error') return counter + 1;
+      return counter;
+    }, 0);
   }
 
   /** ***************************************************************************************************************************
@@ -576,7 +592,11 @@ export abstract class AbstractGeoViewLayer {
               this.registerToLayerSets(listOfLayerEntryConfig[0] as TypeBaseLayerEntryConfig);
               if (layerGroup) layerGroup.getLayers().push(baseLayer);
               api.event.emit(
-                LayerSetPayload.createLayerSetChangeLayerStatusPayload(this.mapId, Layer.getLayerPath(listOfLayerEntryConfig[0]), 'loaded')
+                LayerSetPayload.createLayerSetChangeLayerStatusPayload(
+                  this.mapId,
+                  Layer.getLayerPath(listOfLayerEntryConfig[0]),
+                  'processed'
+                )
               );
               resolve(layerGroup || baseLayer);
             } else {
@@ -637,7 +657,7 @@ export abstract class AbstractGeoViewLayer {
                       LayerSetPayload.createLayerSetChangeLayerStatusPayload(
                         this.mapId,
                         Layer.getLayerPath(listOfLayerEntryConfig[i]),
-                        'loaded'
+                        'processed'
                       )
                     );
                   }
