@@ -45,11 +45,12 @@
   <div id="mapWM1" class="llwp-map" data-lang="en"></div>
 
   <div>
-    <button
-      onClick="createDataTable({tableType : 'materialReactDataTable', tableLabel : 'Material React Data Table'})">Create
-      Material React
-      DataTable</button>
-    <div id="materialReactDataTable" style="margin: 1rem 0"></div>
+
+    <button disabled onClick="renderDataTable()" id="createDataTableBtn">Create
+      DataTable
+      <span id="loadingIndicator"></span>
+    </button>
+    <div id="dataTable" style="margin: 1rem 0"></div>
   </div>
 
 
@@ -59,35 +60,46 @@
     cgpv.init(function () {
       console.log('api is ready');
       const { react, reactDOM, api, ui } = cgpv;
-
+      let result = []
       //create snippets
       createConfigSnippet();
       createCodeSnippet();
-      const url = 'https://geoappext.nrcan.gc.ca/arcgis/rest/services/GSCC/Geochronology/MapServer/0/query?f=json&where=OBJECTID+%3E+0&text=&objectIds=&time=&geometry=&geometryType=esriGeometryEnvelope&inSR=&spatialRel=esriSpatialRelIntersects&relationParam=&outFields=*&returnGeometry=true&returnTrueCurves=false&maxAllowableOffset=&geometryPrecision=&outSR=&having=&returnIdsOnly=false&returnCountOnly=false&orderByFields=&groupByFieldsForStatistics=&outStatistics=&returnZ=false&returnM=false&gdbVersion=&historicMoment=&returnDistinctValues=false&resultOffset=&resultRecordCount=&queryByDistance=&returnExtentOnly=false&datumTransformation=&parameterValues=&rangeValues=&quantizationParameters=&f=html'
-      createDataTable = async ({ tableType, tableLabel }) => {
 
-        console.log(`create ${tableType} data table`)
-
-        const response = await fetch(url);
-        if (!response.ok) {
-          throw new Error('Error');
-        }
-        const result = await response.json();
-
+      renderDataTable = () => {
         console.time("tableCreation")
         const itemAcc = {
-          title: tableLabel,
+          title: "Data Table",
           content: cgpv.api.maps['mapWM1'].dataTable.createDataTable({ data: result }),
         }
 
         cgpv.api.addUiComponent(
-          tableType,
+          "dataTable",
           cgpv.react.createElement(cgpv.ui.elements.Accordion, { items: [itemAcc], defaultExpanded: true })
         );
         console.timeEnd("tableCreation")
       }
 
+      const url = 'https://geoappext.nrcan.gc.ca/arcgis/rest/services/GSCC/Geochronology/MapServer/0/query?f=json&where=OBJECTID+%3E+0&text=&objectIds=&time=&geometry=&geometryType=esriGeometryEnvelope&inSR=&spatialRel=esriSpatialRelIntersects&relationParam=&outFields=*&returnGeometry=true&returnTrueCurves=false&maxAllowableOffset=&geometryPrecision=&outSR=&having=&returnIdsOnly=false&returnCountOnly=false&orderByFields=&groupByFieldsForStatistics=&outStatistics=&returnZ=false&returnM=false&gdbVersion=&historicMoment=&returnDistinctValues=false&resultOffset=&resultRecordCount=&queryByDistance=&returnExtentOnly=false&datumTransformation=&parameterValues=&rangeValues=&quantizationParameters=&f=html'
 
+      fetchData = async () => {
+        const loadingIndicator = document.getElementById("loadingIndicator");
+        const createDataTableBtn = document.getElementById("createDataTableBtn");
+
+        cgpv.api.addUiComponent(
+          "loadingIndicator",
+          cgpv.react.createElement(cgpv.ui.elements.CircularProgressBase, { size: '1rem' })
+        );
+
+        const response = await fetch(url);
+        if (!response.ok) {
+          throw new Error('Error');
+        }
+        result = await response.json();
+
+        reactDOM.unmountComponentAtNode(loadingIndicator)
+        createDataTableBtn.removeAttribute("disabled")
+      }
+      fetchData();
     });
   </script>
 </body>
