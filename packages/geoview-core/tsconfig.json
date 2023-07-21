@@ -17,7 +17,7 @@
     "isolatedModules": true,
     "esModuleInterop": true,
     "lib": ["esnext", "dom", "dom.iterable", "scripthost"],
-    "baseUrl": "/src",
+    "baseUrl": "./",
     "paths": {
       "@/*": ["./src/*"]
     }

@@ -1,8 +1,8 @@
 import { api } from '../../app';
-import { EVENT_NAMES } from '../../api/events/event-types';
+import { EVENT_NAMES } from '@/api/events/event-types';
 
 import { modalHeader, modalFooter, TypeModalProps, ModalActionsType } from './modal-api';
-import { modalPayload } from '../../api/events/payloads/modal-payload';
+import { modalPayload } from '@/api/events/payloads/modal-payload';
 
 /**
  * Class used to create a template (model) of a modal

@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { EVENT_NAMES } from '../../api/events/event-types';
-import { LayerSetPayload, payloadIsLayerRegistration, TypeResultSets } from '../../api/events/payloads/layer-set-payload';
+import { EVENT_NAMES } from '@/api/events/event-types';
+import { LayerSetPayload, payloadIsLayerRegistration, TypeResultSets } from '@/api/events/payloads/layer-set-payload';
 import { api } from '../../app';
 
 /** ***************************************************************************************************************************
