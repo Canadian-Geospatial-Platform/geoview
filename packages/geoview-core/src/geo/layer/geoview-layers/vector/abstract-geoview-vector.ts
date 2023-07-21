@@ -58,10 +58,8 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
    * necessary, additional code can be executed in the child method to complete the layer configuration.
    *
    * @param {TypeListOfLayerEntryConfig} listOfLayerEntryConfig The list of layer entries configuration to validate.
-   *
-   * @returns {TypeListOfLayerEntryConfig} A new layer configuration list with layers in error removed.
    */
-  protected abstract validateListOfLayerEntryConfig(listOfLayerEntryConfig: TypeListOfLayerEntryConfig): TypeListOfLayerEntryConfig;
+  protected abstract validateListOfLayerEntryConfig(listOfLayerEntryConfig: TypeListOfLayerEntryConfig): void;
 
   /** ***************************************************************************************************************************
    * This method creates a GeoView layer using the definition provided in the layerEntryConfig parameter.

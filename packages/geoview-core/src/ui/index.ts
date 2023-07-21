@@ -17,6 +17,7 @@ export * from './icons';
 export * from './list';
 export * from './modal';
 export * from './panel';
+export * from './popover/popover';
 export * from './select/select';
 export * from './slider/slider';
 export * from './slider/slider-base';

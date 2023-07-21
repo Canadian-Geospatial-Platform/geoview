@@ -194,7 +194,7 @@ export function Navbar({ setActivetrap }: NavbarProps): JSX.Element {
 
   return (
     /** TODO - KenChase Need to add styling for scenario when more buttons that can fit vertically occurs (or limit number of buttons that can be added) */
-    <Box ref={navBarRef} className={`${classes.navBarRef}`} sx={{ bottom: footerBarExpanded ? 80 : 40 }}>
+    <Box ref={navBarRef} className={classes.navBarRef} sx={{ bottom: footerBarExpanded ? 80 : 40 }}>
       {Object.keys(buttonPanelGroups).map((groupName) => {
         const buttonPanelGroup = buttonPanelGroups[groupName];
 

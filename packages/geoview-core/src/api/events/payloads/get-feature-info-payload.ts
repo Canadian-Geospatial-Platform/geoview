@@ -7,6 +7,7 @@ import { PayloadBaseClass } from './payload-base-class';
 
 import { EventStringId, EVENT_NAMES } from '../event-types';
 import { TypeGeoviewLayerType } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
+import { TypeLayerStatus } from '../../../geo/map/map-schema-types';
 
 /** Valid events that can create GetFeatureInfoPayload */
 const validEvents: EventStringId[] = [
@@ -55,7 +56,9 @@ export type TypeFeatureInfoEntry = {
 };
 
 export type TypeArrayOfFeatureInfoEntries = TypeFeatureInfoEntry[];
-export type TypeFeatureInfoResultSets = { [layerPath: string]: TypeArrayOfFeatureInfoEntries | undefined | null };
+export type TypeFeatureInfoResultSets = {
+  [layerPath: string]: { layerStatus: TypeLayerStatus; data: TypeArrayOfFeatureInfoEntries | undefined | null };
+};
 
 /**
  * type guard function that redefines a PayloadBaseClass as a TypeQueryLayerPayload

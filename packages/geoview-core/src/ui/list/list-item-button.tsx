@@ -11,7 +11,7 @@ export function ListItemButton(props: ListItemButtonProps): JSX.Element {
   const { children, className, style } = props;
 
   return (
-    <MaterialListItemButton className={`${className || ''}`} style={style || undefined}>
+    <MaterialListItemButton className={className || ''} style={style || undefined}>
       {children !== undefined && children}
     </MaterialListItemButton>
   );

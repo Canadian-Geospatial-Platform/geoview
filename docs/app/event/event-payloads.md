@@ -17,7 +17,7 @@ Below you will find a list of some available functions and payload types/interfa
   <li><a href="https://canadian-geospatial-platform.github.io/geoview/public/docs/functions/payloadIsAllQueriesDone.html">payloadIsAllQueriesDone</a></li>
   <li><a href="https://canadian-geospatial-platform.github.io/geoview/public/docs/functions/payloadIsQueryResult.html">payloadIsQueryResult</a></li>
   <li><a href="https://canadian-geospatial-platform.github.io/geoview/public/docs/functions/payloadIsGetFeatureInfo.html">payloadIsGetFeatureInfo</a></li>
-  <li><a href="https://canadian-geospatial-platform.github.io/geoview/public/docs/functions/payloadIsAllLegendsDone.html">payloadIsAllLegendsDone</a></li>
+  <li><a href="https://canadian-geospatial-platform.github.io/geoview/public/docs/functions/payloadIsLegendsLayersetUpdated.html">payloadIsLegendsLayersetUpdated</a></li>
   <li><a href="https://canadian-geospatial-platform.github.io/geoview/public/docs/functions/payloadIsLegendInfo.html">payloadIsLegendInfo</a></li>
   <li><a href="https://canadian-geospatial-platform.github.io/geoview/public/docs/functions/payloadIsQueryLegend.html">payloadIsQueryLegend</a></li>
   <li><a href="https://canadian-geospatial-platform.github.io/geoview/public/docs/functions/payloadIsTriggerLegend.html">payloadIsTriggerLegend</a></li>

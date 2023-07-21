@@ -125,9 +125,6 @@ export class MapViewer {
   // GeoView renderer
   geoviewRenderer: GeoviewRenderer;
 
-  // number of remaining layers that need to be loaded
-  remainingLayersThatNeedToBeLoaded = 0;
-
   // flag used to indicate that the ready callback routine has been called once
   readyCallbackHasRun = false;
 
@@ -160,7 +157,7 @@ export class MapViewer {
     this.details = new DetailsAPI(this.mapId);
     this.featureInfo = new FeatureInfoAPI(this.mapId);
     this.dataGrid = new DataGridAPI(this.mapId);
-    this.dataTable = new DataTableApi(this.mapId);
+
     this.modal = new ModalApi(this.mapId);
 
     this.geoviewRenderer = new GeoviewRenderer(this.mapId);
@@ -179,25 +176,12 @@ export class MapViewer {
   }
 
   /**
-   * Utility function used to decrement the remainingLayersThatNeedToBeLoaded property, preventing it to become less that zero.
-   * The methode returns true when the zero value is reached for the first time.
-   *
-   * @returns true when the zero value is reached for the first time.
-   */
-  private remainingLayersThatNeedToBeLoadedIsDecrementedToZero4TheFirstTime(): boolean {
-    const equalZero4TheFirstTime = this.remainingLayersThatNeedToBeLoaded === 1;
-    this.remainingLayersThatNeedToBeLoaded = this.remainingLayersThatNeedToBeLoaded ? this.remainingLayersThatNeedToBeLoaded - 1 : 0;
-    return equalZero4TheFirstTime;
-  }
-
-  /**
    * Set the layer added event listener and timeout function for the list of geoview layer configurations.
    *
    * @param {TypeListOfGeoviewLayerConfig} listOfGeoviewLayerConfig The list of geoview layer configurations.
    */
   setLayerAddedListener4ThisListOfLayer(listOfGeoviewLayerConfig: TypeListOfGeoviewLayerConfig) {
     if (listOfGeoviewLayerConfig.length) {
-      this.remainingLayersThatNeedToBeLoaded += listOfGeoviewLayerConfig.length;
       listOfGeoviewLayerConfig.forEach((geoviewLayerConfig) => {
         if (!layerConfigIsGeoCore(geoviewLayerConfig)) {
           api.event.on(
@@ -207,9 +191,7 @@ export class MapViewer {
                 const { geoviewLayer } = payload;
                 geoviewLayer.layerOrder = this.layer.orderSubLayers(geoviewLayer.listOfLayerEntryConfig);
                 this.layer.setLayerZIndices(geoviewLayer);
-                geoviewLayer!.layerState = 'loaded';
-                geoviewLayer!.layerPhase = 'loaded';
-                if (this.remainingLayersThatNeedToBeLoadedIsDecrementedToZero4TheFirstTime()) {
+                if (geoviewLayer.allLayerEntryConfigProcessed()) {
                   api.event.emit(GeoViewLayerPayload.createTestGeoviewLayersPayload('run cgpv.init callback?'));
                 }
               }
@@ -227,11 +209,11 @@ export class MapViewer {
    * @returns true if all geoview layers on the map are loaded or detected as a load error.
    */
   mapIsReady(): boolean {
-    let allGeoviewLayersAreReady = this.remainingLayersThatNeedToBeLoaded === 0;
+    let allGeoviewLayersAreReady = true;
     const arrayOfGeoviewLayerId = this.layer?.geoviewLayers ? Object.keys(this.layer.geoviewLayers) : [];
     for (let i = 0; i < arrayOfGeoviewLayerId.length && allGeoviewLayersAreReady; i++) {
       const geoviewLayer = this.layer.geoviewLayers[arrayOfGeoviewLayerId[i]];
-      allGeoviewLayersAreReady &&= geoviewLayer.layerState === 'loaded';
+      allGeoviewLayersAreReady &&= geoviewLayer.allLayerEntryConfigProcessed();
     }
     return allGeoviewLayersAreReady && this.layer !== undefined;
   }
@@ -393,12 +375,12 @@ export class MapViewer {
    */
   mapReady = (): void => {
     const layerInterval = setInterval(() => {
-      if (this.remainingLayersThatNeedToBeLoaded === 0 && this.layer?.geoviewLayers) {
+      if (this.layer?.geoviewLayers) {
         const { geoviewLayers } = this.layer;
         let allGeoviewLayerReady =
           this.mapFeaturesConfig.map.listOfGeoviewLayerConfig?.length === 0 || Object.keys(geoviewLayers).length !== 0;
         Object.keys(geoviewLayers).forEach((geoviewLayerId) => {
-          allGeoviewLayerReady &&= geoviewLayers[geoviewLayerId].layerState === 'loaded';
+          allGeoviewLayerReady &&= geoviewLayers[geoviewLayerId].allLayerEntryConfigProcessed();
         });
         if (allGeoviewLayerReady) {
           api.event.emit(mapPayload(EVENT_NAMES.MAP.EVENT_MAP_LOADED, this.mapId, this.map));

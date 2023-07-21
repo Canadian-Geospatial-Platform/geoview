@@ -1,5 +1,5 @@
 import type React from 'react';
-import { toJsonObject, TypeJsonObject, TypeWindow, TypeButtonPanel, payloadIsAllLegendsDone } from 'geoview-core';
+import { toJsonObject, TypeJsonObject, TypeWindow, TypeButtonPanel, payloadIsLegendsLayersetUpdated, PayloadBaseClass } from 'geoview-core';
 
 import LayerStepper from './layer-stepper';
 import ReorderLayersList from './reorder-layers-list';
@@ -93,24 +93,21 @@ function PanelContent(props: TypePanelContentProps): JSX.Element {
     if (api.map(mapId).layer?.layerOrder !== undefined) setMapLayers([...api.map(mapId).layer.layerOrder].reverse());
   };
 
-  cgpv.api.event.emit({ handlerName: `${mapId}/$LegendsLayerSet$`, event: cgpv.api.eventNames.GET_LEGENDS.TRIGGER });
+  api.event.emit({ handlerName: `${mapId}/$LegendsLayerSet$`, event: api.eventNames.GET_LEGENDS.TRIGGER });
   useEffect(() => {
-    cgpv.api.event.on(
-      cgpv.api.eventNames.GET_LEGENDS.ALL_LEGENDS_DONE,
-      (payload) => {
-        if (payloadIsAllLegendsDone(payload)) {
-          const { resultSets } = payload;
-          const mapLayerSet: string[] = [];
-          Object.keys(resultSets).forEach((layerPath) => {
-            mapLayerSet.push(layerPath.split('/')[0]);
-          });
-          setMapLayers([...new Set(mapLayerSet)]);
-        }
-      },
-      `${mapId}/$LegendsLayerSet$`
-    );
+    const legendsLayerSetUpdatedListenerFunction = (payload: PayloadBaseClass) => {
+      if (payloadIsLegendsLayersetUpdated(payload)) {
+        const { resultSets } = payload;
+        const mapLayerSet: string[] = [];
+        Object.keys(resultSets).forEach((layerPath) => {
+          mapLayerSet.push(layerPath.split('/')[0]);
+        });
+        setMapLayers([...new Set(mapLayerSet)]);
+      }
+    };
+    api.event.on(api.eventNames.GET_LEGENDS.LEGENDS_LAYERSET_UPDATED, legendsLayerSetUpdatedListenerFunction, `${mapId}/$LegendsLayerSet$`);
     return () => {
-      api.event.off(cgpv.api.eventNames.GET_LEGENDS.ALL_LEGENDS_DONE, mapId);
+      api.event.off(api.eventNames.GET_LEGENDS.LEGENDS_LAYERSET_UPDATED, mapId, legendsLayerSetUpdatedListenerFunction);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

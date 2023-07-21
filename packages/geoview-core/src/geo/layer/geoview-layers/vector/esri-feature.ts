@@ -124,11 +124,9 @@ export class EsriFeature extends AbstractGeoViewVector {
    * with a numeric layerId and creates a group entry when a layer is a group.
    *
    * @param {TypeListOfLayerEntryConfig} listOfLayerEntryConfig The list of layer entries configuration to validate.
-   *
-   * @returns {TypeListOfLayerEntryConfig} A new list of layer entries configuration with deleted error layers.
    */
-  validateListOfLayerEntryConfig(listOfLayerEntryConfig: TypeListOfLayerEntryConfig): TypeListOfLayerEntryConfig {
-    return commonValidateListOfLayerEntryConfig.call(this, listOfLayerEntryConfig);
+  validateListOfLayerEntryConfig(listOfLayerEntryConfig: TypeListOfLayerEntryConfig) {
+    commonValidateListOfLayerEntryConfig.call(this, listOfLayerEntryConfig);
   }
 
   /** ***************************************************************************************************************************

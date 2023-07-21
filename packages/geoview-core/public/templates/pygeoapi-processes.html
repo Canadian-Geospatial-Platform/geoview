@@ -520,7 +520,7 @@
 
     const LegendsGeoJsonLayerSet = cgpv.api.getLegendsLayerSet('LYR5');
     cgpv.api.event.on(
-      cgpv.api.eventNames.GET_LEGENDS.ALL_LEGENDS_DONE,
+      cgpv.api.eventNames.GET_LEGENDS.LEGENDS_LAYERSET_UPDATED,
       (payload) => {
         const { resultSets } = payload;
         displayLegend('geojsonLegendsId', resultSets);

@@ -319,7 +319,7 @@ export function Swiper(props: SwiperProps): JSX.Element {
   return (
     <Box sx={sxClasses.layerSwipe}>
       <Draggable
-        axis={`${orientation === 'vertical' ? 'x' : 'y'}`}
+        axis={orientation === 'vertical' ? 'x' : 'y'}
         bounds="parent"
         defaultPosition={{ x: orientation === 'vertical' ? defaultX : 0, y: orientation === 'vertical' ? 0 : defaultY }}
         onMouseDown={(e) => setMouseOffset(e)}

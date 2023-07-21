@@ -20,10 +20,11 @@ import {
   TypeBaseLayerEntryConfig,
   TypeLocalizedString,
 } from '../../../map/map-schema-types';
-import { getLocalizedValue, getXMLHttpRequest } from '@/core/utils/utilities';
+import { getLocalizedValue } from '@/core/utils/utilities';
 import { Cast, toJsonObject } from '@/core/types/global-types';
 import { api } from '@/app';
 import { Layer } from '../../layer';
+import { LayerSetPayload } from '@/api/events/payloads/layer-set-payload';
 
 export interface TypeSourceGeoJSONInitialConfig extends Omit<TypeVectorSourceInitialConfig, 'format'> {
   format: 'GeoJSON';
@@ -115,93 +116,53 @@ export class GeoJSON extends AbstractGeoViewVector {
   }
 
   /** ***************************************************************************************************************************
-   * This method reads the service metadata from the metadataAccessPath.
-   *
-   * @returns {Promise<void>} A promise that the execution is completed.
-   */
-  protected getServiceMetadata(): Promise<void> {
-    this.layerPhase = 'getServiceMetadata';
-    const promisedExecution = new Promise<void>((resolve) => {
-      const metadataUrl = getLocalizedValue(this.metadataAccessPath, this.mapId);
-      if (metadataUrl) {
-        getXMLHttpRequest(`${metadataUrl}?f=json`).then((metadataString) => {
-          if (metadataString === '{}')
-            throw new Error(`Cant't read service metadata for GeoView layer ${this.geoviewLayerId} of map ${this.mapId}.`);
-          else {
-            this.metadata = toJsonObject(JSON.parse(metadataString));
-            const { copyrightText } = this.metadata;
-            if (copyrightText) this.attributions.push(copyrightText as string);
-            resolve();
-          }
-        });
-      } else resolve();
-    });
-    return promisedExecution;
-  }
-
-  /** ***************************************************************************************************************************
    * This method recursively validates the layer configuration entries by filtering and reporting invalid layers. If needed,
    * extra configuration may be done here.
    *
    * @param {TypeListOfLayerEntryConfig} listOfLayerEntryConfig The list of layer entries configuration to validate.
-   *
-   * @returns {TypeListOfLayerEntryConfig} A new list of layer entries configuration with deleted error layers.
    */
-  protected validateListOfLayerEntryConfig(listOfLayerEntryConfig: TypeListOfLayerEntryConfig): TypeListOfLayerEntryConfig {
-    return listOfLayerEntryConfig.filter((layerEntryConfig: TypeLayerEntryConfig) => {
-      if (api.map(this.mapId).layer.isRegistered(layerEntryConfig)) {
-        this.layerLoadError.push({
-          layer: Layer.getLayerPath(layerEntryConfig),
-          consoleMessage: `Duplicate layerPath (mapId:  ${this.mapId}, layerPath: ${Layer.getLayerPath(layerEntryConfig)})`,
-        });
-        return false;
+  protected validateListOfLayerEntryConfig(listOfLayerEntryConfig: TypeListOfLayerEntryConfig) {
+    listOfLayerEntryConfig.forEach((layerEntryConfig: TypeLayerEntryConfig) => {
+      const layerPath = Layer.getLayerPath(layerEntryConfig);
+      if (layerEntryIsGroupLayer(layerEntryConfig)) {
+        this.validateListOfLayerEntryConfig(layerEntryConfig.listOfLayerEntryConfig!);
+        if (!layerEntryConfig.listOfLayerEntryConfig.length) {
+          this.layerLoadError.push({
+            layer: layerPath,
+            consoleMessage: `Empty layer group (mapId:  ${this.mapId}, layerPath: ${layerPath})`,
+          });
+          api.event.emit(LayerSetPayload.createLayerSetChangeLayerStatusPayload(this.mapId, layerPath, 'error'));
+          return;
+        }
       }
 
-      if (layerEntryIsGroupLayer(layerEntryConfig)) {
-        layerEntryConfig.listOfLayerEntryConfig = this.validateListOfLayerEntryConfig(layerEntryConfig.listOfLayerEntryConfig!);
-        if (layerEntryConfig.listOfLayerEntryConfig.length) {
-          api.map(this.mapId).layer.registerLayerConfig(layerEntryConfig);
-          return true;
-        }
-        this.layerLoadError.push({
-          layer: Layer.getLayerPath(layerEntryConfig),
-          consoleMessage: `Empty layer group (mapId:  ${this.mapId}, layerPath: ${Layer.getLayerPath(layerEntryConfig)})`,
-        });
-        return false;
-      }
+      api.event.emit(LayerSetPayload.createLayerSetChangeLayerStatusPayload(this.mapId, layerPath, 'loading'));
 
       // When no metadata are provided, all layers are considered valid.
-      if (!this.metadata) {
-        api.map(this.mapId).layer.registerLayerConfig(layerEntryConfig);
-        return true;
-      }
+      if (!this.metadata) return;
 
       // Note that geojson metadata as we defined it does not contains layer group. If you need geogson layer group,
       // you can define them in the configuration section.
       if (Array.isArray(this.metadata?.listOfLayerEntryConfig)) {
-        const layerIdFound = Cast<TypeLayerEntryConfig[]>(this.metadata?.listOfLayerEntryConfig).find(
-          (nextLayerEntryConfig) =>
-            nextLayerEntryConfig.layerId === layerEntryConfig.layerId &&
-            nextLayerEntryConfig.layerPathEnding === layerEntryConfig.layerPathEnding
+        const metadataLayerList = Cast<TypeLayerEntryConfig[]>(this.metadata?.listOfLayerEntryConfig);
+        const foundEntry = metadataLayerList.find(
+          (layerMetadata) =>
+            layerMetadata.layerId === layerEntryConfig.layerId && layerMetadata.layerPathEnding === layerEntryConfig.layerPathEnding
         );
-        if (!layerIdFound) {
+        if (!foundEntry) {
           this.layerLoadError.push({
-            layer: Layer.getLayerPath(layerEntryConfig),
-            consoleMessage: `GeoJSON layer not found (mapId:  ${this.mapId}, layerPath: ${Layer.getLayerPath(layerEntryConfig)})`,
+            layer: layerPath,
+            consoleMessage: `GeoJSON layer not found (mapId:  ${this.mapId}, layerPath: ${layerPath})`,
           });
-          return false;
+          api.event.emit(LayerSetPayload.createLayerSetChangeLayerStatusPayload(this.mapId, layerPath, 'error'));
+          return;
         }
-        api.map(this.mapId).layer.registerLayerConfig(layerEntryConfig);
-        return true;
+        return;
       }
 
-      this.layerLoadError.push({
-        layer: Layer.getLayerPath(layerEntryConfig),
-        consoleMessage: `Invalid GeoJSON metadata (listOfLayerEntryConfig) prevent loading of layer (mapId:  ${
-          this.mapId
-        }, layerPath: ${Layer.getLayerPath(layerEntryConfig)})`,
-      });
-      return false;
+      throw new Error(
+        `Invalid GeoJSON metadata (listOfLayerEntryConfig) prevent loading of layer (mapId:  ${this.mapId}, layerPath: ${layerPath})`
+      );
     });
   }
 
@@ -214,7 +175,6 @@ export class GeoJSON extends AbstractGeoViewVector {
    * @returns {Promise<void>} A promise that the vector layer configuration has its metadata processed.
    */
   protected processLayerMetadata(layerEntryConfig: TypeVectorLayerEntryConfig): Promise<void> {
-    this.layerPhase = 'processLayerMetadata';
     const promiseOfExecution = new Promise<void>((resolve) => {
       if (!this.metadata) resolve();
       else {
