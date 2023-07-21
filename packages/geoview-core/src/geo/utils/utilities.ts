@@ -12,13 +12,7 @@ import { xmlToJson } from '../../core/utils/utilities';
 import { api } from '../../app';
 import { EVENT_NAMES } from '../../api/events/event-types';
 import { inKeyfocusPayload } from '../../api/events/payloads/in-keyfocus-payload';
-import {
-  TypeBaseLayerEntryConfig,
-  TypeLayerEntryConfig,
-  TypeLayerStatus,
-  TypeListOfLayerEntryConfig,
-  layerEntryIsGroupLayer,
-} from '../map/map-schema-types';
+import { TypeLayerEntryConfig, TypeLayerStatus, TypeListOfLayerEntryConfig, layerEntryIsGroupLayer } from '../map/map-schema-types';
 import { LayerSetPayload } from '../../api/events/payloads/layer-set-payload';
 import { Layer } from '../layer/layer';
 
