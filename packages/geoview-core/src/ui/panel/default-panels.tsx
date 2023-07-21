@@ -15,7 +15,7 @@ export const DefaultPanel: TypeButtonPanelProps = {
   },
   panel: {
     title: 'Default',
-    icon: HelpIcon,
+    icon: <HelpIcon />,
     content: (
       <Typography variant="body2" color="textSecondary" component="p">
         This is a placeholder panel for the panel components

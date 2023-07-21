@@ -45,7 +45,7 @@ export function DetailsItem({ mapId, buttonId }: Props): JSX.Element {
           const newDetails: TypeArrayOfLayerData = [];
           Object.keys(resultSets).forEach((layerPath) => {
             const layerName = getLocalizedValue(api.map(mapId).layer.registeredLayers[layerPath].layerName, mapId)!;
-            const features = resultSets[layerPath]!;
+            const features = resultSets[layerPath]!.data;
             if (features.length > 0) {
               newDetails.push({ layerPath, layerName, features });
             }

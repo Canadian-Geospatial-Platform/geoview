@@ -28,7 +28,6 @@ function ExportButton({ rows, layerKey, ...rest }: ExportButtonProps) {
   const printOptions: GridPrintExportOptions = {};
 
   return (
-    // @ts-expect-error its known issue of x-data-grid, where onResize is required and we don't need it.
     <GridToolbarExportContainer {...rest}>
       <GridCsvExportMenuItem options={csvOptions} />
       <JsonExportMenuItem rows={rows} layerKey={layerKey} />

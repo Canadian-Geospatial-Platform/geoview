@@ -1,5 +1,5 @@
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { Root, createRoot } from 'react-dom/client';
 
 import { useTranslation } from 'react-i18next';
 
@@ -28,6 +28,8 @@ export const api = new API();
 
 // TODO look for a better place to put this when working on issue #8
 
+let root: Root | null = null;
+
 // listen to map reload event
 api.event.on(
   EVENT_NAMES.MAP.EVENT_MAP_RELOAD,
@@ -44,8 +46,21 @@ api.event.on(
         const map = document.getElementById(payload.mapFeaturesConfig.mapId);
 
         if (map) {
+          // TODO: As part of #1118 refactor, see if we can just rehydrate the App compoent or we still need the add and remove
           // remove the dom element (remove rendered map)
-          ReactDOM.unmountComponentAtNode(map);
+          // eslint-disable-next-line no-underscore-dangle
+          if (root !== null) root.unmount();
+
+          // recreate the map - crate e new div and remove the active one
+          const newDiv = document.createElement('div');
+          newDiv.setAttribute('id', payload.mapFeaturesConfig.mapId);
+          newDiv.setAttribute('class', 'llwp-map');
+          map!.parentNode!.insertBefore(newDiv, map);
+          map.remove();
+
+          // create the new root
+          const newRoot = document.getElementById(payload.mapFeaturesConfig.mapId);
+          root = createRoot(newRoot!);
 
           // delete the map instance from the maps array
           delete api.maps[payload.mapFeaturesConfig.mapId];
@@ -57,7 +72,7 @@ api.event.on(
           api.plugin.pluginsLoaded = false;
 
           // re-render map with updated config keeping previous values if unchanged
-          ReactDOM.render(<AppStart mapFeaturesConfig={payload.mapFeaturesConfig} />, map);
+          root.render(<AppStart mapFeaturesConfig={payload.mapFeaturesConfig} />);
         }
       }
     }
@@ -95,7 +110,8 @@ async function init(callback: () => void) {
     // if valid config was provided
     if (configObj) {
       // render the map with the config
-      ReactDOM.render(<AppStart mapFeaturesConfig={configObj} />, mapElement);
+      root = createRoot(mapElement!);
+      root.render(<AppStart mapFeaturesConfig={configObj} />);
     }
   }
 }
@@ -110,7 +126,7 @@ export const cgpv: types.TypeCGPV = {
     ...api.plugin,
   }),
   react: React,
-  reactDOM: ReactDOM,
+  createRoot,
   ui: {
     useTheme,
     useMediaQuery,

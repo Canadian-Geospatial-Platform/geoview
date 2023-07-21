@@ -171,13 +171,26 @@ export function Map(mapFeaturesConfig: TypeMapFeaturesConfig): JSX.Element {
       api.plugin.loadPlugins();
     });
 
-    // emit the initial map position
-    api.event.emit(lngLatPayload(EVENT_NAMES.MAP.EVENT_MAP_MOVE_END, mapId || '', cgpvMap.getView().getCenter()!));
+    // TODO: when map is loaded from function call, there is a first init with the empty config then an overwrite by the the function call.
+    // !Some of the reference are not set properly, so we have this work around. EWven with this is it not 100% perfect. This needs to be refactor
+    // !so we do not have access before the api map is set. Related to language as well #1118
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    let intervalMap: any;
+    const setMapEvents = () => {
+      if (api.map(mapId) !== undefined) {
+        // emit the initial map position
+        api.event.emit(lngLatPayload(EVENT_NAMES.MAP.EVENT_MAP_MOVE_END, mapId || '', cgpvMap.getView().getCenter()!));
 
-    cgpvMap.on('moveend', mapMoveEnd);
-    cgpvMap.on('singleclick', mapSingleClick);
-    cgpvMap.on('pointermove', mapPointerMove);
-    cgpvMap.getView().on('change:resolution', mapZoomEnd);
+        cgpvMap.on('moveend', mapMoveEnd);
+        cgpvMap.on('singleclick', mapSingleClick);
+        cgpvMap.on('pointermove', mapPointerMove);
+        cgpvMap.getView().on('change:resolution', mapZoomEnd);
+
+        clearInterval(intervalMap);
+        intervalMap = null;
+      }
+    };
+    intervalMap = setInterval(setMapEvents, 500);
 
     viewer.toggleMapInteraction(mapConfig.interaction);
 

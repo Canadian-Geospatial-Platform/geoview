@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, ReactNode } from 'react';
 import {
   Accordion as MaterialAccordion,
   AccordionSummary as MaterialAccordionSummary,
@@ -20,7 +20,7 @@ interface AccordionProps {
 
 export type AccordionItem = {
   title: string;
-  content: React.ReactNode | Element;
+  content: ReactNode;
 };
 
 const sxClasses = {
@@ -43,7 +43,7 @@ const sxClasses = {
  * @param {AccordionProps} props the properties passed to the Fade element
  * @returns {JSX.Element} the created Fade element
  */
-export function Accordion(props: AccordionProps): JSX.Element {
+export function Accordion(props: AccordionProps): ReactNode {
   const { id, items, className, defaultExpanded = false, showLoadingIcon = false } = props;
 
   const [isExpanded, setIsExpanded] = useState<boolean>(false);

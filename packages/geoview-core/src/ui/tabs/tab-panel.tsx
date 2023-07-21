@@ -1,7 +1,7 @@
 /* eslint-disable react/require-default-props */
-// import MaterialBox from '@mui/material/Box';
+import { ReactNode } from 'react';
 
-type TypeChildren = React.ReactNode;
+type TypeChildren = ReactNode;
 
 /**
  * Interface used for the tab panel properties
