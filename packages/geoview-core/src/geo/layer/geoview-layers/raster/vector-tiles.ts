@@ -131,7 +131,6 @@ export class VectorTiles extends AbstractGeoViewRaster {
    * @returns {Promise<void>} A promise that the execution is completed.
    */
   protected getServiceMetadata(): Promise<void> {
-    this.layerPhase = 'getServiceMetadata';
     const promisedExecution = new Promise<void>((resolve) => {
       const metadataUrl = getLocalizedValue(this.metadataAccessPath, this.mapId);
       if (metadataUrl) {
@@ -269,7 +268,6 @@ export class VectorTiles extends AbstractGeoViewRaster {
    */
   protected processLayerMetadata(layerEntryConfig: TypeTileLayerEntryConfig): Promise<void> {
     const promiseOfExecution = new Promise<void>((resolve) => {
-      this.layerPhase = 'processLayerMetadata';
       if (!this.metadata) resolve();
       else {
         // TODO: Clean this up from testing

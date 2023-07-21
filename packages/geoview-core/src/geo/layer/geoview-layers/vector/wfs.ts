@@ -125,7 +125,6 @@ export class WFS extends AbstractGeoViewVector {
    * @returns {Promise<void>} A promise that the execution is completed.
    */
   protected getServiceMetadata(): Promise<void> {
-    this.layerPhase = 'getServiceMetadata';
     const promisedExecution = new Promise<void>((resolve) => {
       let metadataUrl = getLocalizedValue(this.metadataAccessPath, this.mapId) as string;
 
@@ -226,7 +225,6 @@ export class WFS extends AbstractGeoViewVector {
    * @returns {Promise<void>} A promise that the vector layer configuration has its metadata processed.
    */
   protected processLayerMetadata(layerEntryConfig: TypeVectorLayerEntryConfig): Promise<void> {
-    this.layerPhase = 'processLayerMetadata';
     const promiseOfExecution = new Promise<void>((resolve) => {
       let queryUrl = getLocalizedValue(layerEntryConfig.source!.dataAccessPath, this.mapId);
 
