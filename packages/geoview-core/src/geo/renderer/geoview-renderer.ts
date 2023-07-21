@@ -13,7 +13,7 @@ import Feature, { FeatureLike } from 'ol/Feature';
 import { toContext } from 'ol/render';
 import { Size } from 'ol/size';
 
-import { getLocalizedValue, setAlphaColor } from '../../core/utils/utilities';
+import { getLocalizedValue, setAlphaColor } from '@/core/utils/utilities';
 import {
   isFilledPolygonVectorConfig,
   isIconSymbolVectorConfig,
@@ -59,7 +59,7 @@ import {
 } from './geoview-renderer-types';
 import { Layer } from '../layer/layer';
 import { TypeLayerStyles } from '../layer/geoview-layers/abstract-geoview-layers';
-import { api } from '../../app';
+import { api } from '@/app';
 
 type TypeStyleProcessor = (
   styleSettings: TypeStyleSettings | TypeKindOfVectorSettings,

@@ -85,6 +85,9 @@ const config = {
       buffer: false,
       fs: false,
     },
+    alias: {
+      '@': path.resolve(__dirname, 'src'),
+    },
   },
   module: {
     rules: [

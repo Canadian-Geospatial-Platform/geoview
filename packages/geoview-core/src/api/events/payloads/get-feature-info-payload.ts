@@ -6,7 +6,7 @@ import { Pixel } from 'ol/pixel';
 import { PayloadBaseClass } from './payload-base-class';
 
 import { EventStringId, EVENT_NAMES } from '../event-types';
-import { TypeGeoviewLayerType } from '../../../geo/layer/geoview-layers/abstract-geoview-layers';
+import { TypeGeoviewLayerType } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 
 /** Valid events that can create GetFeatureInfoPayload */
 const validEvents: EventStringId[] = [

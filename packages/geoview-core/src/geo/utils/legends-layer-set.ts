@@ -1,13 +1,13 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { EVENT_NAMES } from '../../api/events/event-types';
+import { EVENT_NAMES } from '@/api/events/event-types';
 import {
   GetLegendsPayload,
   payloadIsLegendInfo,
   payloadIsTriggerLegend,
   TypeLegendResultSets,
-} from '../../api/events/payloads/get-legends-payload';
-import { payloadIsLayerSetUpdated } from '../../api/events/payloads/layer-set-payload';
-import { api } from '../../app';
+} from '@/api/events/payloads/get-legends-payload';
+import { payloadIsLayerSetUpdated } from '@/api/events/payloads/layer-set-payload';
+import { api } from '@/app';
 import { LayerSet } from './layer-set';
 
 /** *****************************************************************************************************************************

@@ -9,12 +9,12 @@ import { Extent } from 'ol/extent';
 
 import sanitizeHtml from 'sanitize-html';
 
-import { AbstractGeoViewLayer, api } from '../../app';
-import { TypeLocalizedString } from '../../geo/map/map-schema-types';
-import { EVENT_NAMES } from '../../api/events/event-types';
+import { AbstractGeoViewLayer, api } from '@/app';
+import { TypeLocalizedString } from '@/geo/map/map-schema-types';
+import { EVENT_NAMES } from '@/api/events/event-types';
 
 import { Cast, TypeJsonArray, TypeJsonObject, TypeJsonValue } from '../types/global-types';
-import { snackbarMessagePayload } from '../../api/events/payloads/snackbar-message-payload';
+import { snackbarMessagePayload } from '@/api/events/payloads/snackbar-message-payload';
 
 /**
  * Get the string associated to the current display language.

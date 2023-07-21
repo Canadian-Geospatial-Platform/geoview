@@ -11,7 +11,7 @@ import { EsriJSON } from 'ol/format';
 import { Extent } from 'ol/extent';
 
 import cloneDeep from 'lodash/cloneDeep';
-import { getLocalizedValue, getMinOrMaxExtents } from '../../../../core/utils/utilities';
+import { getLocalizedValue, getMinOrMaxExtents } from '@/core/utils/utilities';
 import { AbstractGeoViewLayer, CONST_LAYER_TYPES, TypeLayerStyles } from '../abstract-geoview-layers';
 import { AbstractGeoViewRaster, TypeBaseRasterLayer } from './abstract-geoview-raster';
 import {
@@ -29,10 +29,10 @@ import {
   TypeFeatureInfoLayerConfig,
   layerEntryIsGroupLayer,
 } from '../../../map/map-schema-types';
-import { TypeArrayOfFeatureInfoEntries, codedValueType, rangeDomainType } from '../../../../api/events/payloads/get-feature-info-payload';
-import { api } from '../../../../app';
+import { TypeArrayOfFeatureInfoEntries, codedValueType, rangeDomainType } from '@/api/events/payloads/get-feature-info-payload';
+import { api } from '@/app';
 import { Layer } from '../../layer';
-import { EVENT_NAMES } from '../../../../api/events/event-types';
+import { EVENT_NAMES } from '@/api/events/event-types';
 import {
   commonGetFieldDomain,
   commonGetFieldType,
@@ -43,7 +43,7 @@ import {
   commonProcessTemporalDimension,
   commonValidateListOfLayerEntryConfig,
 } from '../esri-layer-common';
-import { TypeJsonArray, TypeJsonObject } from '../../../../core/types/global-types';
+import { TypeJsonArray, TypeJsonObject } from '@/core/types/global-types';
 import { TypeEsriFeatureLayerEntryConfig } from '../vector/esri-feature';
 
 export interface TypeEsriDynamicLayerConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig'> {

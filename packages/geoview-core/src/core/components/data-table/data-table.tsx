@@ -13,7 +13,7 @@ import {
 import { Extent } from 'ol/extent';
 import { Geometry } from 'ol/geom';
 import { darken } from '@mui/material';
-import { Box, IconButton, ZoomInSearchIcon } from '../../../ui';
+import { Box, IconButton, ZoomInSearchIcon } from '@/ui';
 import ExportButton from './export-button';
 
 export interface Features {

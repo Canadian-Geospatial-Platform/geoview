@@ -8,8 +8,8 @@ import debounce from 'lodash/debounce';
 import GeoList from './geo-list';
 import { StyledInputField, sxClasses } from './styles';
 import { MapContext } from '../../app-start';
-import { api, payloadIsABoolean } from '../../../app';
-import { EVENT_NAMES } from '../../../api/events/event-types';
+import { api, payloadIsABoolean } from '@/app';
+import { EVENT_NAMES } from '@/api/events/event-types';
 
 export interface GeoListItem {
   key: string;

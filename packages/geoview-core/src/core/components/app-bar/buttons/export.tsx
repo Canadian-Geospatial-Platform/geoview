@@ -1,5 +1,5 @@
 import { MouseEventHandler } from 'react';
-import { IconButton, DownloadIcon } from '../../../../ui';
+import { IconButton, DownloadIcon } from '@/ui';
 
 /**
  * Interface used for export button properties

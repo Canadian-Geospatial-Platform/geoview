@@ -7,7 +7,7 @@ import { Vector as VectorSource } from 'ol/source';
 import { Geometry } from 'ol/geom';
 import { bbox } from 'ol/loadingstrategy';
 
-import { TypeJsonArray, TypeJsonObject } from '../../../../core/types/global-types';
+import { TypeJsonArray, TypeJsonObject } from '@/core/types/global-types';
 import { AbstractGeoViewLayer, CONST_LAYER_TYPES } from '../abstract-geoview-layers';
 import { AbstractGeoViewVector } from './abstract-geoview-vector';
 import {
@@ -21,8 +21,8 @@ import {
   TypeBaseLayerEntryConfig,
 } from '../../../map/map-schema-types';
 
-import { getLocalizedValue, getXMLHttpRequest, xmlToJson, findPropertyNameByRegex } from '../../../../core/utils/utilities';
-import { api } from '../../../../app';
+import { getLocalizedValue, getXMLHttpRequest, xmlToJson, findPropertyNameByRegex } from '@/core/utils/utilities';
+import { api } from '@/app';
 import { Layer } from '../../layer';
 
 export interface TypeSourceWFSVectorInitialConfig extends TypeVectorSourceInitialConfig {

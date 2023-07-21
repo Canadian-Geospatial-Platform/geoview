@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 
 import makeStyles from '@mui/styles/makeStyles';
 
-import { ChevronLeftIcon, Tooltip } from '../../../ui';
+import { ChevronLeftIcon, Tooltip } from '@/ui';
 
 const useStyles = makeStyles((theme) => ({
   toggleBtn: {

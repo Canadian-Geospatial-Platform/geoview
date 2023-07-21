@@ -8,7 +8,7 @@ import { ReadOptions } from 'ol/format/Feature';
 import { Vector as VectorSource } from 'ol/source';
 import { Geometry } from 'ol/geom';
 
-import { TypeJsonObject } from '../../../../core/types/global-types';
+import { TypeJsonObject } from '@/core/types/global-types';
 import { AbstractGeoViewLayer, CONST_LAYER_TYPES } from '../abstract-geoview-layers';
 import { AbstractGeoViewVector } from './abstract-geoview-vector';
 import {
@@ -22,8 +22,8 @@ import {
   TypeBaseSourceVectorInitialConfig,
 } from '../../../map/map-schema-types';
 
-import { getLocalizedValue } from '../../../../core/utils/utilities';
-import { api } from '../../../../app';
+import { getLocalizedValue } from '@/core/utils/utilities';
+import { api } from '@/app';
 import { Layer } from '../../layer';
 
 export interface TypeSourceOgcFeatureInitialConfig extends TypeVectorSourceInitialConfig {

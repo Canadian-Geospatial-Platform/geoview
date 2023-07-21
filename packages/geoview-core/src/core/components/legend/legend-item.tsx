@@ -28,8 +28,8 @@ import {
   MoreHorizIcon,
   BrowserNotSupportedIcon,
   Grid,
-} from '../../../ui';
-import { api, EsriDynamic, payloadIsLegendInfo, NumberPayload, PayloadBaseClass } from '../../../app';
+} from '@/ui';
+import { api, EsriDynamic, payloadIsLegendInfo, NumberPayload, PayloadBaseClass } from '@/app';
 import { LegendIconList } from './legend-icon-list';
 import {
   AbstractGeoViewLayer,
@@ -38,7 +38,7 @@ import {
   isWmsLegend,
   isImageStaticLegend,
   TypeWmsLegendStyle,
-} from '../../../geo/layer/geoview-layers/abstract-geoview-layers';
+} from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import {
   TypeClassBreakStyleConfig,
   TypeListOfLayerEntryConfig,
@@ -51,8 +51,8 @@ import {
   isClassBreakStyleConfig,
   isUniqueValueStyleConfig,
   layerEntryIsGroupLayer,
-} from '../../../geo/map/map-schema-types';
-import { AbstractGeoViewVector } from '../../../geo/layer/geoview-layers/vector/abstract-geoview-vector';
+} from '@/geo/map/map-schema-types';
+import { AbstractGeoViewVector } from '@/geo/layer/geoview-layers/vector/abstract-geoview-vector';
 import { disableScrolling } from '../../utils/utilities';
 import { WMSStyleItem } from './WMS-style-item';
 

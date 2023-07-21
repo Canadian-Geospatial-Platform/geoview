@@ -1,8 +1,8 @@
 import { PayloadBaseClass } from './payload-base-class';
 
 import { EventStringId, EVENT_NAMES } from '../event-types';
-import { TypeSnackbarMessage } from '../../../ui/snackbar/snackbar-types';
-import { TypeJsonObject } from '../../../core/types/global-types';
+import { TypeSnackbarMessage } from '@/ui/snackbar/snackbar-types';
+import { TypeJsonObject } from '@/core/types/global-types';
 
 /** Valid events that can create SnackbarMessagePayload */
 const validEvents: EventStringId[] = [EVENT_NAMES.SNACKBAR.EVENT_SNACKBAR_OPEN];

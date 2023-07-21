@@ -13,7 +13,7 @@ import Typography from '@mui/material/Typography';
 
 import { Button } from '../button';
 
-import { HtmlToReact } from '../../core/containers/html-to-react';
+import { HtmlToReact } from '@/core/containers/html-to-react';
 
 /**
  * Properties for the Custom Stepper

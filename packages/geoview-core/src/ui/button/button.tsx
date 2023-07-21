@@ -8,9 +8,9 @@ import Tooltip from '@mui/material/Tooltip';
 import Fade from '@mui/material/Fade';
 import MaterialButton from '@mui/material/Button';
 
-import { Cast } from '../../core/types/global-types';
+import { Cast } from '@/core/types/global-types';
 
-import { HtmlToReact } from '../../core/containers/html-to-react';
+import { HtmlToReact } from '@/core/containers/html-to-react';
 import { TypeButtonProps } from '../panel/panel-types';
 
 const useStyles = makeStyles((theme) => ({

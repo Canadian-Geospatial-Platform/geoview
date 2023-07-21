@@ -6,13 +6,13 @@ import { useTranslation } from 'react-i18next';
 
 import makeStyles from '@mui/styles/makeStyles';
 
-import { api } from '../../../app';
+import { api } from '@/app';
 
 import { MapContext } from '../../app-start';
-import { EVENT_NAMES } from '../../../api/events/event-types';
+import { EVENT_NAMES } from '@/api/events/event-types';
 
-import { CheckIcon, Tooltip, Box } from '../../../ui';
-import { payloadIsABoolean } from '../../../api/events/payloads/boolean-payload';
+import { CheckIcon, Tooltip, Box } from '@/ui';
+import { payloadIsABoolean } from '@/api/events/payloads/boolean-payload';
 
 const useStyles = makeStyles((theme) => ({
   scaleControl: {

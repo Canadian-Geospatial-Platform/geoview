@@ -2,16 +2,16 @@ import React, { useContext, useEffect, useState } from 'react';
 
 import { useTranslation } from 'react-i18next';
 
-import { Switch } from '../../../ui';
+import { Switch } from '@/ui';
 
-import { api } from '../../../app';
+import { api } from '@/app';
 import { MapContext } from '../../app-start';
 
-import { PROJECTION_NAMES } from '../../../geo/projection/projection';
+import { PROJECTION_NAMES } from '@/geo/projection/projection';
 
-import { EVENT_NAMES } from '../../../api/events/event-types';
-import { booleanPayload, payloadIsABoolean } from '../../../api/events/payloads/boolean-payload';
-import { payloadIsAMapViewProjection } from '../../../api/events/payloads/map-view-projection-payload';
+import { EVENT_NAMES } from '@/api/events/event-types';
+import { booleanPayload, payloadIsABoolean } from '@/api/events/payloads/boolean-payload';
+import { payloadIsAMapViewProjection } from '@/api/events/payloads/map-view-projection-payload';
 
 /**
  * Footerbar Fix North Switch component

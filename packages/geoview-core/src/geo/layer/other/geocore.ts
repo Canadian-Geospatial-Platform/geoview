@@ -1,7 +1,7 @@
 /* eslint-disable no-param-reassign */
 import defaultsDeep from 'lodash/defaultsDeep';
-import { api } from '../../../app';
-import { catalogUrl } from '../../../core/utils/config/config';
+import { api } from '@/app';
+import { catalogUrl } from '@/core/utils/config/config';
 import {
   TypeLayerEntryConfig,
   TypeGeoviewLayerConfig,
@@ -12,8 +12,8 @@ import {
   TypeListOfLayerEntryConfig,
 } from '../../map/map-schema-types';
 import { CONST_LAYER_TYPES } from '../geoview-layers/abstract-geoview-layers';
-import { UUIDmapConfigReader } from '../../../core/utils/config/reader/uuid-config-reader';
-import { ConfigValidation } from '../../../core/utils/config/config-validation';
+import { UUIDmapConfigReader } from '@/core/utils/config/reader/uuid-config-reader';
+import { ConfigValidation } from '@/core/utils/config/config-validation';
 
 export interface TypeGeoCoreLayerConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig'> {
   geoviewLayerType: 'geoCore';

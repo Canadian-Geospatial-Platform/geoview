@@ -4,13 +4,13 @@ import { View } from 'ol';
 
 import { useTranslation } from 'react-i18next';
 
-import { ArrowUpIcon, IconButton } from '../../../ui';
+import { ArrowUpIcon, IconButton } from '@/ui';
 
 import { MapContext } from '../../app-start';
-import { api } from '../../../app';
+import { api } from '@/app';
 
-import { EVENT_NAMES } from '../../../api/events/event-types';
-import { payloadIsAMapViewProjection } from '../../../api/events/payloads/map-view-projection-payload';
+import { EVENT_NAMES } from '@/api/events/event-types';
+import { payloadIsAMapViewProjection } from '@/api/events/payloads/map-view-projection-payload';
 
 const sxClasses = {
   rotationButton: {
