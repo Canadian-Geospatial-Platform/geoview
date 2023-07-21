@@ -14,6 +14,7 @@ import { TypeButtonPanel } from '@/ui/panel/panel-types';
 
 import Export from './buttons/export';
 import Geolocator from './buttons/geolocator';
+import Version from './buttons/version';
 import ExportModal from '../export/export-modal';
 
 const useStyles = makeStyles((theme) => ({
@@ -76,9 +77,9 @@ const useStyles = makeStyles((theme) => ({
       width: 20,
     },
   },
-  appBarButtonIcon: {
-    backgroundColor: theme.palette.primary.dark,
-    color: theme.palette.primary.light,
+  versionButtonDiv: {
+    position: 'absolute',
+    bottom: 0,
   },
   appBarPanels: {},
 }));
@@ -242,6 +243,13 @@ export function Appbar({ setActivetrap }: AppbarProps): JSX.Element {
             </List>
           </div>
         )}
+        <div className={classes.versionButtonDiv}>
+          <List className={classes.appBarList}>
+            <ListItem>
+              <Version />
+            </ListItem>
+          </List>
+        </div>
       </div>
       {Object.keys(buttonPanelGroups).map((groupName: string) => {
         // get button panels from group
