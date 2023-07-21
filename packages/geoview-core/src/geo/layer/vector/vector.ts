@@ -8,17 +8,17 @@ import { Options as VectorLayerOptions } from 'ol/layer/BaseVector';
 import { asArray, asString } from 'ol/color';
 
 import { api } from '../../../app';
-import { EVENT_NAMES } from '../../../api/events/event-types';
+import { EVENT_NAMES } from '@/api/events/event-types';
 
-import { generateId, setAlphaColor } from '../../../core/utils/utilities';
+import { generateId, setAlphaColor } from '@/core/utils/utilities';
 import {
   payloadIsACircleConfig,
   payloadIsAMarkerConfig,
   payloadIsAPolygonConfig,
   payloadIsAPolylineConfig,
   payloadIsAVectorConfig,
-} from '../../../api/events/payloads/vector-config-payload';
-import { VectorPayload } from '../../../api/events/payloads/vector-payload';
+} from '@/api/events/payloads/vector-config-payload';
+import { VectorPayload } from '@/api/events/payloads/vector-payload';
 import { TypeFeatureCircleStyle, TypeFeatureStyle, TypeIconStyle } from './vector-types';
 
 /**

@@ -7,8 +7,8 @@ import { Vector } from './vector/vector';
 import { api } from '../../app';
 import { EVENT_NAMES } from '@/api/events/event-types';
 
-import { Config } from '../../core/utils/config/config';
-import { generateId } from '../../core/utils/utilities';
+import { Config } from '@/core/utils/config/config';
+import { generateId } from '@/core/utils/utilities';
 import { layerConfigPayload, payloadIsALayerConfig } from '@/api/events/payloads/layer-config-payload';
 import { GeoViewLayerPayload, payloadIsRemoveGeoViewLayer } from '@/api/events/payloads/geoview-layer-payload';
 import { snackbarMessagePayload } from '@/api/events/payloads/snackbar-message-payload';

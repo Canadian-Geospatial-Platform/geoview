@@ -22,8 +22,8 @@ import { TypeGeoPackageLayerConfig, TypeGeoPackageLayerEntryConfig } from '../..
 import { TypeXYZTilesConfig, TypeXYZTilesLayerEntryConfig } from '../../../../geo/layer/geoview-layers/raster/xyz-tiles';
 import { TypeVectorTilesConfig, TypeVectorTilesLayerEntryConfig } from '../../../../geo/layer/geoview-layers/raster/vector-tiles';
 import { api } from '../../../../app';
-import { EVENT_NAMES } from '../../../../api/events/event-types';
-import { snackbarMessagePayload } from '../../../../api/events/payloads/snackbar-message-payload';
+import { EVENT_NAMES } from '@/api/events/event-types';
+import { snackbarMessagePayload } from '@/api/events/payloads/snackbar-message-payload';
 
 // ******************************************************************************************************************************
 // ******************************************************************************************************************************

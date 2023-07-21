@@ -9,9 +9,9 @@ import { Style, Stroke, Fill, Circle } from 'ol/style';
 import { Color } from 'ol/color';
 import { getArea as getAreaOL } from 'ol/sphere';
 
-import { Cast, TypeJsonObject } from '../../core/types/global-types';
+import { Cast, TypeJsonObject } from '@/core/types/global-types';
 import { TypeFeatureStyle } from '../layer/vector/vector-types';
-import { xmlToJson } from '../../core/utils/utilities';
+import { xmlToJson } from '@/core/utils/utilities';
 
 import { api } from '../../app';
 import { EVENT_NAMES } from '@/api/events/event-types';

@@ -14,8 +14,8 @@ import DialogTitle from '@mui/material/DialogTitle';
 import DialogContent from '@mui/material/DialogContent';
 import DialogActions from '@mui/material/DialogActions';
 
-import { TypeJsonObject } from '../../core/types/global-types';
-import { HtmlToReact } from '../../core/containers/html-to-react';
+import { TypeJsonObject } from '@/core/types/global-types';
+import { HtmlToReact } from '@/core/containers/html-to-react';
 
 import { EVENT_NAMES } from '@/api/events/event-types';
 import { api } from '../../app';

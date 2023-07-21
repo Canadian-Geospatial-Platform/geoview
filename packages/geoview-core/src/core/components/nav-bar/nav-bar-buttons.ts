@@ -1,13 +1,13 @@
 import { api } from '../../../app';
 
-import { EVENT_NAMES } from '../../../api/events/event-types';
+import { EVENT_NAMES } from '@/api/events/event-types';
 
 import { PanelApi } from '../../../ui';
 
 import { generateId } from '../../utils/utilities';
-import { buttonPanelPayload } from '../../../api/events/payloads/button-panel-payload';
-import { CONST_PANEL_TYPES, TypeButtonPanel, TypePanelProps } from '../../../ui/panel/panel-types';
-import { TypeIconButtonProps } from '../../../ui/icon-button/icon-button-types';
+import { buttonPanelPayload } from '@/api/events/payloads/button-panel-payload';
+import { CONST_PANEL_TYPES, TypeButtonPanel, TypePanelProps } from '@/ui/panel/panel-types';
+import { TypeIconButtonProps } from '@/ui/icon-button/icon-button-types';
 
 /**
  * Class to manage buttons on the nav-bar

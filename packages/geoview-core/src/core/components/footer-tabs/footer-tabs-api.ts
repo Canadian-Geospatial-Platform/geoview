@@ -1,11 +1,11 @@
 import { api } from '../../../app';
 
-import { EVENT_NAMES } from '../../../api/events/event-types';
+import { EVENT_NAMES } from '@/api/events/event-types';
 import { sanitizeHtmlContent } from '../../utils/utilities';
 
-import { footerTabPayload } from '../../../api/events/payloads/footer-tab-payload';
+import { footerTabPayload } from '@/api/events/payloads/footer-tab-payload';
 
-import { TypeTabs } from '../../../ui/tabs/tabs';
+import { TypeTabs } from '@/ui/tabs/tabs';
 
 /**
  * API to manage tabs on the tabs component

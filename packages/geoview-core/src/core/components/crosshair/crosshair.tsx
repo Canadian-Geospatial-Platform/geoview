@@ -10,13 +10,13 @@ import { KeyboardPan } from 'ol/interaction';
 import { MapContext } from '../../app-start';
 
 import { api } from '../../../app';
-import { EVENT_NAMES } from '../../../api/events/event-types';
+import { EVENT_NAMES } from '@/api/events/event-types';
 import { CrosshairIcon } from './crosshair-icon';
 
 import { Fade } from '../../../ui';
-import { lngLatPayload } from '../../../api/events/payloads/lng-lat-payload';
-import { booleanPayload } from '../../../api/events/payloads/boolean-payload';
-import { payloadIsAInKeyfocus } from '../../../api/events/payloads/in-keyfocus-payload';
+import { lngLatPayload } from '@/api/events/payloads/lng-lat-payload';
+import { booleanPayload } from '@/api/events/payloads/boolean-payload';
+import { payloadIsAInKeyfocus } from '@/api/events/payloads/in-keyfocus-payload';
 
 const useStyles = makeStyles((theme) => ({
   crosshairContainer: {

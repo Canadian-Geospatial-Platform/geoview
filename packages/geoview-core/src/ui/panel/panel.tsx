@@ -12,9 +12,9 @@ import Card from '@mui/material/Card';
 import CardHeader from '@mui/material/CardHeader';
 import CardContent from '@mui/material/CardContent';
 
-import { Cast } from '../../core/types/global-types';
-import { HtmlToReact } from '../../core/containers/html-to-react';
-import { MapContext } from '../../core/app-start';
+import { Cast } from '@/core/types/global-types';
+import { HtmlToReact } from '@/core/containers/html-to-react';
+import { MapContext } from '@/core/app-start';
 
 import { api } from '../../app';
 import { EVENT_NAMES } from '@/api/events/event-types';

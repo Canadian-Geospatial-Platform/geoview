@@ -5,7 +5,7 @@ import {
   AccordionDetails as MaterialAccordionDetails,
 } from '@mui/material';
 import { ExpandMore as ExpandMoreIcon, Loop as LoopIcon } from '@mui/icons-material';
-import { generateId } from '../../core/utils/utilities';
+import { generateId } from '@/core/utils/utilities';
 
 /**
  * Properties for the Accordion element

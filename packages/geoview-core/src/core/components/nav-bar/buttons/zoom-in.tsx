@@ -4,7 +4,7 @@ import { MapContext } from '../../../app-start';
 
 import { api } from '../../../../app';
 
-import { IconButton, ZoomInIcon } from '../../../../ui';
+import { IconButton, ZoomInIcon } from '@/ui';
 
 /**
  * Zoom in button properties
