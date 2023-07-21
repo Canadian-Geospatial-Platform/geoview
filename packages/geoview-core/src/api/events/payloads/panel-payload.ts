@@ -1,5 +1,6 @@
-import { PayloadBaseClass } from './payload-base-class';
+import { ReactNode } from 'react';
 
+import { PayloadBaseClass } from './payload-base-class';
 import { EventStringId, EVENT_NAMES } from '../event-types';
 
 /** Valid events that can create PanelPayload */
@@ -99,7 +100,7 @@ export interface PanelAndContentPayload extends PanelPayload {
   buttonId: string;
 
   // action button configuration
-  content: Element | React.ReactNode;
+  content: ReactNode;
 }
 
 /**
@@ -184,7 +185,7 @@ export class PanelPayload extends PayloadBaseClass {
    * @param {EventStringId} event the event identifier for which the payload is constructed
    * @param {string | null} handlerName the handler Name
    * @param {string} buttonId the panel buton id
-   * @param {Element | React.ReactNode} content the content object
+   * @param {ReactNode} content the content object
    *
    * @returns {PanelAndContentPayload} the PanelAndContentPayload object created
    */
@@ -192,7 +193,7 @@ export class PanelPayload extends PayloadBaseClass {
     event: EventStringId,
     handlerName: string | null,
     buttonId: string,
-    content: Element | React.ReactNode
+    content: ReactNode
   ): PanelAndContentPayload => {
     if (!validEvents4Content.includes(event)) throw new Error(`PanelPayload can't use withButtonIdAndContent for ${event}`);
     const panelAndContentPayload = new PanelPayload(event, handlerName) as PanelAndContentPayload;

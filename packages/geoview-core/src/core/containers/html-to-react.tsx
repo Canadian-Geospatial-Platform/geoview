@@ -1,5 +1,6 @@
 /* eslint-disable react/require-default-props */
-import React, { CSSProperties } from 'react';
+import { CSSProperties, ReactNode } from 'react';
+import parse from 'html-react-parser';
 
 /**
  * Interface used for custom html elements
@@ -20,6 +21,25 @@ interface HtmlToReactProps {
 export function HtmlToReact(props: HtmlToReactProps): JSX.Element {
   const { htmlContent, className, style, extraOptions } = props;
 
-  // eslint-disable-next-line react/jsx-props-no-spreading, react/no-danger
-  return <div {...extraOptions} className={className} style={style} dangerouslySetInnerHTML={{ __html: htmlContent }} />;
+  // the html-react-parser can return 2 type in an array or not, make sure we have an array
+  const parsed = parse(htmlContent) as string | Array<string | TrustedHTML>;
+  const items = typeof parsed === 'string' || typeof parsed === 'object' ? [parsed] : parsed;
+
+  // loop trought the array and set the elements
+  const reactItems: Array<TrustedHTML> = [];
+  for (let i = 0; i < items.length; i++) {
+    // eslint-disable-next-line react/no-danger
+    if (typeof items[i] === 'string') reactItems.push(<div dangerouslySetInnerHTML={{ __html: items[i] }} />);
+    else reactItems.push(items[i]);
+  }
+
+  // eslint-disable-next-line react/jsx-props-no-spreading
+  return (
+    <div {...extraOptions} className={className} style={style}>
+      {reactItems.map((item: TrustedHTML, index) => (
+        // eslint-disable-next-line react/no-array-index-key
+        <div key={index}>{item as ReactNode}</div>
+      ))}
+    </div>
+  );
 }

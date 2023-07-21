@@ -1,7 +1,7 @@
 /* eslint-disable react/require-default-props */
 /* eslint-disable react/destructuring-assignment */
 /* eslint-disable react/no-array-index-key */
-import { SyntheticEvent, useEffect, useState } from 'react';
+import { SyntheticEvent, useEffect, useState, ReactNode } from 'react';
 
 import { TabsProps, TabProps, BoxProps } from '@mui/material';
 import MaterialTabs from '@mui/material/Tabs';
@@ -12,7 +12,7 @@ import { HtmlToReact } from '@/core/containers/html-to-react';
 
 import { TabPanel } from './tab-panel';
 
-type TypeChildren = React.ReactNode;
+type TypeChildren = ReactNode;
 /**
  * Type used for properties of each tab
  */
@@ -109,7 +109,7 @@ export function Tabs(props: TypeTabsProps): JSX.Element {
         </MaterialTabs>
       </Grid>
       <Grid item xs={5} sm={2} sx={{ textAlign: 'right' }}>
-        {rightButtons}
+        {rightButtons as ReactNode}
       </Grid>
       <Grid item xs={12} sx={{ height: 'calc( 100% - 55px )', borderTop: 1, borderColor: 'divider', visibility: TabContentVisibilty }}>
         {tabs.map((tab, index) => {

@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 /* eslint-disable react/jsx-no-useless-fragment */
 /* eslint-disable no-nested-ternary */
-import React, { useRef, useState, useEffect, useCallback, useContext } from 'react';
+import { useRef, useState, useEffect, useCallback, useContext, ReactNode } from 'react';
 
 import { useTranslation } from 'react-i18next';
 
@@ -109,7 +109,7 @@ export function Panel(props: TypePanelAppProps): JSX.Element {
     transition: 'width 300ms ease',
   };
 
-  const [actionButtons, setActionButtons] = useState<JSX.Element[] & React.ReactNode[]>([]);
+  const [actionButtons, setActionButtons] = useState<JSX.Element[] & ReactNode[]>([]);
   const [, updatePanelContent] = useState(0);
 
   const classes = useStyles(props);
@@ -243,7 +243,7 @@ export function Panel(props: TypePanelAppProps): JSX.Element {
                     htmlContent={actionButton.children}
                   />
                 ) : (
-                  actionButton.children
+                  (actionButton.children as ReactNode)
                 )}
               </IconButton>,
             ]);

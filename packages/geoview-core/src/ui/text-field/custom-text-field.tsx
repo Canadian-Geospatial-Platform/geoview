@@ -1,6 +1,6 @@
 /* eslint-disable react/require-default-props */
 /* eslint-disable react/jsx-props-no-spreading */
-import React from 'react';
+import React, { ReactNode } from 'react';
 
 import makeStyles from '@mui/styles/makeStyles';
 
@@ -17,7 +17,7 @@ interface TypeCustomTextFieldProps extends Omit<BaseTextFieldProps, 'prefix'> {
   errorHelpertext?: string | undefined;
 
   // the HTML Element (for example, an icon) that is embedded inside the text field (left side)
-  prefix?: string | JSX.Element | HTMLElement | React.ReactNode;
+  prefix?: string | JSX.Element | HTMLElement | ReactNode;
 
   // the HTML Element (for example, an icon) that is embedded inside the text field (right side)
   suffix?: string | JSX.Element | HTMLElement | undefined;
@@ -72,8 +72,8 @@ export function CustomTextField(props: TypeCustomTextFieldProps): JSX.Element {
       onChange={changeHandler}
       inputRef={inputRef || undefined}
       InputProps={{
-        startAdornment: prefix && <InputAdornment position="start">{prefix}</InputAdornment>,
-        endAdornment: suffix && <InputAdornment position="end">{suffix}</InputAdornment>,
+        startAdornment: prefix && <InputAdornment position="start">{prefix as unknown as ReactNode}</InputAdornment>,
+        endAdornment: suffix && <InputAdornment position="end">{suffix as unknown as ReactNode}</InputAdornment>,
       }}
       helperText={helperText && !error ? helperText || undefined : (error && errorHelpertext) || undefined}
       {...otherProps}

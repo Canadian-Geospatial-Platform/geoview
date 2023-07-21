@@ -59,8 +59,8 @@
     // initialize cgpv and api events, a callback is optional, used if calling api's after the rendering is ready
     cgpv.init(function () {
       console.log('api is ready');
-      const { react, reactDOM, api, ui } = cgpv;
-      let result = []
+      const { react, createRoot, api, ui } = cgpv;
+
       //create snippets
       createConfigSnippet();
       createCodeSnippet();

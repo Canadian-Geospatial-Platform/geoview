@@ -1,5 +1,5 @@
 import { useContext, useEffect } from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 
 import i18n from 'i18next';
 import { I18nextProvider } from 'react-i18next';
@@ -178,13 +178,13 @@ export function OverviewMap(): JSX.Element {
       fallbackLng: mapFeaturesConfig.displayLanguage,
     });
 
-    ReactDOM.render(
+    const root = createRoot(toggleButton!);
+    root.render(
       <I18nextProvider i18n={i18nInstance}>
         <ThemeProvider theme={cgpvTheme}>
           <OverviewMapToggle overviewMap={overviewMapControl} />
         </ThemeProvider>
-      </I18nextProvider>,
-      toggleButton
+      </I18nextProvider>
     );
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
