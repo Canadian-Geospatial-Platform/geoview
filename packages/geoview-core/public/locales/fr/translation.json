@@ -98,5 +98,10 @@
   },
   "hovertooltip": {
     "alticon": "Symbol de l'élément sélectionné"
+  },
+  "dataTable": {
+    "icon": "ICÔNE",
+    "zoom": "ZOOM",
+    "exportBtn": "Exporter"
   }
 }
