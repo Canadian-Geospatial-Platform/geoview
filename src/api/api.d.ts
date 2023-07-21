@@ -1,14 +1,14 @@
 import { Event } from './events/event';
-import { Projection } from '../geo/projection/projection';
-import { MapViewer } from '../geo/map/map';
+import { Projection } from '@/geo/projection/projection';
+import { MapViewer } from '@/geo/map/map';
 import { Plugin } from './plugin/plugin';
-import { GeoUtilities } from '../geo/utils/utilities';
-import { DateMgt } from '../core/utils/date-mgt';
+import { GeoUtilities } from '@/geo/utils/utilities';
+import { DateMgt } from '@/core/utils/date-mgt';
 import * as MarkerDefinitions from '../core/types/marker-definitions';
 import * as Utilities from '../core/utils/utilities';
-import { FeatureInfoLayerSet } from '../geo/utils/feature-info-layer-set';
-import { LegendsLayerSet } from '../geo/utils/legends-layer-set';
-import { createMapFromConfig } from '../core/utils/create-map-from-config';
+import { FeatureInfoLayerSet } from '@/geo/utils/feature-info-layer-set';
+import { LegendsLayerSet } from '@/geo/utils/legends-layer-set';
+import { createMapFromConfig } from '@/core/utils/create-map-from-config';
 /**
  * Class used to handle api calls (events, functions etc...)
  *
@@ -26,6 +26,7 @@ export declare class API {
         FOOTER_TABS: Record<import("../app").FooterTabsEventKey, import("./events/event-types").EventStringId>;
         GET_FEATURE_INFO: Record<import("../app").GetFeatureInfoEventKey, import("./events/event-types").EventStringId>;
         GET_LEGENDS: Record<import("../app").GetLegendsEventKey, import("./events/event-types").EventStringId>;
+        GEOLOCATOR: Record<"EVENT_GEOLOCATOR_TOGGLE", import("./events/event-types").EventStringId>;
         INTERACTION: Record<import("./events/constants/interaction").InteractionEventKey, import("./events/event-types").EventStringId>;
         LAYER_SET: Record<import("../app").LayerSetEventKey, import("./events/event-types").EventStringId>;
         LAYER: Record<import("../app").LayerEventKey, import("./events/event-types").EventStringId>;
@@ -46,7 +47,7 @@ export declare class API {
         WM: string;
         LNGLAT: string;
     };
-    layerTypes: Record<"ESRI_DYNAMIC" | "ESRI_FEATURE" | "IMAGE_STATIC" | "GEOJSON" | "GEOCORE" | "GEOPACKAGE" | "XYZ_TILES" | "VECTOR_TILES" | "OGC_FEATURE" | "WFS" | "WMS", import("../geo/layer/geoview-layers/abstract-geoview-layers").TypeGeoviewLayerType>;
+    layerTypes: Record<"ESRI_DYNAMIC" | "ESRI_FEATURE" | "IMAGE_STATIC" | "GEOJSON" | "GEOCORE" | "GEOPACKAGE" | "XYZ_TILES" | "VECTOR_TILES" | "OGC_FEATURE" | "WFS" | "WMS", import("@/geo/layer/geoview-layers/abstract-geoview-layers").TypeGeoviewLayerType>;
     maps: Record<string, MapViewer>;
     isReady: number;
     readyCallback?: (mapId?: string) => void;

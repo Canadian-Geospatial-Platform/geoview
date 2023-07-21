@@ -1,7 +1,7 @@
 import { Coordinate } from 'ol/coordinate';
 import { PayloadBaseClass } from './payload-base-class';
 import { EventStringId } from '../event-types';
-import { TypeJsonObject } from '../../../core/types/global-types';
+import { TypeJsonObject } from '@/core/types/global-types';
 /**
  * type guard function that redefines a PayloadBaseClass as a MarkerDefinitionPayload
  * if the event attribute of the verifyIfPayload parameter is valid. The type ascention

@@ -1,8 +1,8 @@
-import { TypeJsonArray, TypeJsonObject } from '../../../core/types/global-types';
+import { TypeJsonArray, TypeJsonObject } from '@/core/types/global-types';
 import { TypeEsriDynamicLayerEntryConfig, TypeLayerEntryConfig, TypeListOfLayerEntryConfig } from '../../map/map-schema-types';
 import { EsriDynamic } from './raster/esri-dynamic';
 import { EsriFeature, TypeEsriFeatureLayerEntryConfig } from './vector/esri-feature';
-import { codedValueType, rangeDomainType } from '../../../api/events/payloads/get-feature-info-payload';
+import { codedValueType, rangeDomainType } from '@/api/events/payloads/get-feature-info-payload';
 /** ***************************************************************************************************************************
  * This method reads the service metadata from the metadataAccessPath.
  *

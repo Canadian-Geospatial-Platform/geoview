@@ -1,5 +1,5 @@
 /// <reference types="react" />
-import { LegendsLayerSet } from '../../../app';
+import { LegendsLayerSet } from '@/app';
 import { TypeLegendItemProps } from './legend-item';
 export interface TypeLegendProps {
     layerIds: string[];

@@ -1,6 +1,6 @@
 import { AbstractPlugin } from './abstract-plugin';
 import { TypeRecordOfPlugin } from './plugin-types';
-import { TypeJsonObject, TypeJsonValue } from '../../core/types/global-types';
+import { TypeJsonObject, TypeJsonValue } from '@/core/types/global-types';
 /**
  * Class to manage plugins
  *

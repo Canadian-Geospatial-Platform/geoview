@@ -1,4 +1,4 @@
-import { TypeListOfGeoviewLayerConfig } from '../../../../geo/map/map-schema-types';
+import { TypeListOfGeoviewLayerConfig } from '@/geo/map/map-schema-types';
 /** *****************************************************************************************************************************
  * A class to generate GeoView layers config from a URL using a UUID.
  * @exports

@@ -1,4 +1,4 @@
-import { TypeFeatureInfoResultSets } from '../../api/events/payloads/get-feature-info-payload';
+import { TypeFeatureInfoResultSets } from '@/api/events/payloads/get-feature-info-payload';
 import { LayerSet } from './layer-set';
 /** ***************************************************************************************************************************
  * A class to hold a set of layers associated with an array of TypeArrayOfFeatureInfoEntries. When this class is instantiated,

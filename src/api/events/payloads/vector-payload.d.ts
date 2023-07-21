@@ -1,7 +1,7 @@
 import { Feature } from 'ol';
 import { PayloadBaseClass } from './payload-base-class';
 import { EventStringId } from '../event-types';
-import { TypeOfVector } from '../../../geo/layer/vector/vector-types';
+import { TypeOfVector } from '@/geo/layer/vector/vector-types';
 /**
  * type guard function that redefines a PayloadBaseClass as a VectorPayload
  * if the event attribute of the verifyIfPayload parameter is valid. The type ascention

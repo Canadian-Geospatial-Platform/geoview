@@ -1,5 +1,5 @@
-import { TypeBasemapOptions } from '../../../geo/layer/basemap/basemap-types';
-import { TypeDisplayLanguage, TypeValidMapProjectionCodes, TypeValidVersions, TypeListOfGeoviewLayerConfig, TypeListOfLocalizedLanguages } from '../../../geo/map/map-schema-types';
+import { TypeBasemapOptions } from '@/geo/layer/basemap/basemap-types';
+import { TypeDisplayLanguage, TypeValidMapProjectionCodes, TypeValidVersions, TypeListOfGeoviewLayerConfig, TypeListOfLocalizedLanguages } from '@/geo/map/map-schema-types';
 import { TypeMapFeaturesConfig } from '../../types/global-types';
 /** *****************************************************************************************************************************
  * A class to define the default values of a GeoView map configuration and validation methods for the map config attributes.

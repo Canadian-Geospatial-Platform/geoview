@@ -1,6 +1,6 @@
 import { PayloadBaseClass } from './payload-base-class';
 import { EventStringId } from '../event-types';
-import { TypeBasemapLayer } from '../../../geo/layer/basemap/basemap-types';
+import { TypeBasemapLayer } from '@/geo/layer/basemap/basemap-types';
 /**
  * type guard function that redefines a PayloadBaseClass as a BasemapLayerArrayPayload
  * if the event attribute of the verifyIfPayload parameter is valid. The type ascention

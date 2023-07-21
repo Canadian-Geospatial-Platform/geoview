@@ -1,21 +1,53 @@
+import { ReadOptions } from 'ol/format/Feature';
 import { Geometry } from 'ol/geom';
+import { Extent } from 'ol/extent';
 import { Style } from 'ol/style';
 import { Color } from 'ol/color';
-import { TypeJsonObject } from '../../core/types/global-types';
+import { TypeJsonObject } from '@/core/types/global-types';
 import { TypeFeatureStyle } from '../layer/vector/vector-types';
 export declare class GeoUtilities {
     /**
-     * Returns the WKT representation of a given geoemtry
+     * Returns the WKT representation of a given geometry
      * @function geometryToWKT
      * @param {string} geometry the geometry
      * @returns {string | null} the WKT representation of the geometry
      */
     geometryToWKT: (geometry: Geometry) => string | null;
     /**
+     * Returns the Geometry representation of a given wkt
+     * @function wktToGeometry
+     * @param {string} wkt the well known text
+     * @param {ReadOptions} readOptions read options to convert the wkt to a geometry
+     * @returns {Geometry | null} the Geometry representation of the wkt
+     */
+    wktToGeometry: (wkt: string, readOptions: ReadOptions) => Geometry | null;
+    /**
+     * Returns the Geometry representation of a given geojson
+     * @function geojsonToGeometry
+     * @param {string} geojson the geojson
+     * @param {ReadOptions} readOptions read options to convert the geojson to a geometry
+     * @returns {Geometry | null} the Geometry representation of the geojson
+     */
+    geojsonToGeometry: (geojson: string, readOptions: ReadOptions) => Geometry | null;
+    /**
+     * Returns the Geometry representation of a given geojson
+     * @function geojsonToGeometry
+     * @param {string} geojson the geojson
+     * @param {ReadOptions} readOptions read options to convert the geojson to a geometry
+     * @returns {Geometry | null} the Geometry representation of the geojson
+     */
+    getExtent: (coordinates: number[], inCrs: number, outCrs: number) => Extent;
+    /**
      * Default drawing style for GeoView
      * @returns an Open Layers styling for drawing on a map
      */
     defaultDrawingStyle: (strokeColor?: Color | string, strokeWidth?: number, fillColor?: Color | string) => Style;
+    /**
+     * Gets the area of a given geometry
+     * @param {Geometry} geometry the geometry to calculate the area
+     * @returns the area of the given geometry
+     */
+    getArea: (geometry: Geometry) => number;
     /**
      * Converts a TypeFeatureStyle to an Open Layers Style object.
      * @returns an Open Layers styling for drawing on a map or undefined

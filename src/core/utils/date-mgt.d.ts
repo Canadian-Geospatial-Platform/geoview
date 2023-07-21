@@ -1,6 +1,6 @@
 import 'dayjs/locale/en-ca';
 import 'dayjs/locale/fr-ca';
-import { TypeLocalizedLanguages } from '../../geo/map/map-schema-types';
+import { TypeLocalizedLanguages } from '@/geo/map/map-schema-types';
 import { TypeJsonObject } from '../types/global-types';
 export type TypeDateFragments = [number[], number[], string[]];
 /** ******************************************************************************************************************************

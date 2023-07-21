@@ -1,6 +1,6 @@
 import { PayloadBaseClass } from './payload-base-class';
 import { EventStringId } from '../event-types';
-import { TypeTabs } from '../../../ui/tabs/tabs';
+import { TypeTabs } from '@/ui/tabs/tabs';
 /**
  * type guard function that redefines a PayloadBaseClass as a FooterTabPayload
  * if the event attribute of the verifyIfPayload parameter is valid. The type ascention

@@ -1,6 +1,6 @@
 import { PayloadBaseClass } from './payload-base-class';
 import { EventStringId } from '../event-types';
-import { TypeButtonPanel } from '../../../ui/panel/panel-types';
+import { TypeButtonPanel } from '@/ui/panel/panel-types';
 /**
  * type guard function that redefines a PayloadBaseClass as a ButtonPanelPayload
  * if the event attribute of the verifyIfPayload parameter is valid. The type ascention

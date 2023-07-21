@@ -1,7 +1,7 @@
 import { PayloadBaseClass } from './payload-base-class';
 import { EventStringId } from '../event-types';
-import { TypeSnackbarMessage } from '../../../ui/snackbar/snackbar-types';
-import { TypeJsonObject } from '../../../core/types/global-types';
+import { TypeSnackbarMessage } from '@/ui/snackbar/snackbar-types';
+import { TypeJsonObject } from '@/core/types/global-types';
 /**
  * type guard function that redefines a PayloadBaseClass as a SnackbarMessagePayload
  * if the event attribute of the verifyIfPayload parameter is valid. The type ascention

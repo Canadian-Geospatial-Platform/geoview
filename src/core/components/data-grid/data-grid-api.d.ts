@@ -1,5 +1,5 @@
 import { ReactElement } from 'react';
-import { TypeDisplayLanguage } from '../../../app';
+import { TypeDisplayLanguage } from '@/app';
 export interface TypeLayerDataGridProps {
     layerId: string;
 }

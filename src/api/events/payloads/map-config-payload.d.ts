@@ -1,6 +1,6 @@
 import { PayloadBaseClass } from './payload-base-class';
 import { EventStringId } from '../event-types';
-import { TypeMapFeaturesConfig } from '../../../core/types/global-types';
+import { TypeMapFeaturesConfig } from '@/core/types/global-types';
 /**
  * type guard function that redefines a PayloadBaseClass as a MapFeaturesPayload
  * if the event attribute of the verifyIfPayload parameter is valid. The type ascention

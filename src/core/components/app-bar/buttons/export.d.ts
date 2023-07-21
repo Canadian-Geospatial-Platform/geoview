@@ -1,6 +1,6 @@
 import { MouseEventHandler } from 'react';
 /**
- * Interface used for home button properties
+ * Interface used for export button properties
  */
 interface ExportProps {
     className?: string | undefined;

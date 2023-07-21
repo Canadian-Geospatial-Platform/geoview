@@ -1,7 +1,7 @@
 import { Coordinate } from 'ol/coordinate';
 import { PayloadBaseClass } from './payload-base-class';
 import { EventStringId } from '../event-types';
-import { TypeFeatureStyle, TypeIconStyle, TypeFeatureCircleStyle, TypeOfVector } from '../../../geo/layer/vector/vector-types';
+import { TypeFeatureStyle, TypeIconStyle, TypeFeatureCircleStyle, TypeOfVector } from '@/geo/layer/vector/vector-types';
 /**
  * type guard function that redefines a PayloadBaseClass as a VectorConfigPayload
  * if the event attribute of the verifyIfPayload parameter is valid. The type ascention

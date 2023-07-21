@@ -1,5 +1,5 @@
 /// <reference types="react" />
-import { TypeFeatureInfoEntry } from '../../../api/events/payloads/get-feature-info-payload';
+import { TypeFeatureInfoEntry } from '@/api/events/payloads/get-feature-info-payload';
 export interface TypeFeatureInfoProps {
     mapId: string;
     feature: TypeFeatureInfoEntry;

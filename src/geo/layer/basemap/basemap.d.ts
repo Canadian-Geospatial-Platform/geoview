@@ -1,5 +1,5 @@
 import { Extent } from 'ol/extent';
-import { TypeJsonObject } from '../../../core/types/global-types';
+import { TypeJsonObject } from '@/core/types/global-types';
 import { TypeBasemapProps, TypeBasemapOptions, TypeBasemapLayer } from './basemap-types';
 import { TypeDisplayLanguage, TypeValidMapProjectionCodes } from '../../map/map-schema-types';
 /**
