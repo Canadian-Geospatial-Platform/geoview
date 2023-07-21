@@ -1,8 +1,8 @@
-import { api } from '../../../app';
+import { api } from '@/app';
 
 import { EVENT_NAMES } from '@/api/events/event-types';
 
-import { PanelApi } from '../../../ui';
+import { PanelApi } from '@/ui';
 
 import { generateId } from '../../utils/utilities';
 

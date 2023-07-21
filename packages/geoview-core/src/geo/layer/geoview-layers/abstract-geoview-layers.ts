@@ -39,7 +39,7 @@ import {
   TypeQueryType,
 } from '@/api/events/payloads/get-feature-info-payload';
 import { snackbarMessagePayload } from '@/api/events/payloads/snackbar-message-payload';
-import { api } from '../../../app';
+import { api } from '@/app';
 import { EVENT_NAMES } from '@/api/events/event-types';
 import { TypeJsonObject } from '@/core/types/global-types';
 import { Layer } from '../layer';

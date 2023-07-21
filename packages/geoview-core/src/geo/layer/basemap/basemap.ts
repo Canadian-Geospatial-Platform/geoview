@@ -6,7 +6,7 @@ import { Extent } from 'ol/extent';
 import { XYZ, OSM } from 'ol/source';
 import TileGrid from 'ol/tilegrid/TileGrid';
 
-import { api } from '../../../app';
+import { api } from '@/app';
 
 import { EVENT_NAMES } from '@/api/events/event-types';
 

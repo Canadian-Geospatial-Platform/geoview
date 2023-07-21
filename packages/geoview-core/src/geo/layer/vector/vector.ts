@@ -7,7 +7,7 @@ import { Fill, Stroke, Style, Icon } from 'ol/style';
 import { Options as VectorLayerOptions } from 'ol/layer/BaseVector';
 import { asArray, asString } from 'ol/color';
 
-import { api } from '../../../app';
+import { api } from '@/app';
 import { EVENT_NAMES } from '@/api/events/event-types';
 
 import { generateId, setAlphaColor } from '@/core/utils/utilities';

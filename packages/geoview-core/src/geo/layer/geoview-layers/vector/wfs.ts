@@ -22,7 +22,7 @@ import {
 } from '../../../map/map-schema-types';
 
 import { getLocalizedValue, getXMLHttpRequest, xmlToJson, findPropertyNameByRegex } from '@/core/utils/utilities';
-import { api } from '../../../../app';
+import { api } from '@/app';
 import { Layer } from '../../layer';
 
 export interface TypeSourceWFSVectorInitialConfig extends TypeVectorSourceInitialConfig {

@@ -2,7 +2,7 @@ import { useContext } from 'react';
 
 import { MapContext } from '../../../app-start';
 
-import { api } from '../../../../app';
+import { api } from '@/app';
 
 import { IconButton, ZoomInIcon } from '@/ui';
 

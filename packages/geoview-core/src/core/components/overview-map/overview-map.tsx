@@ -13,7 +13,7 @@ import { OverviewMap as OLOverviewMap } from 'ol/control';
 import { OverviewMapToggle } from './overview-map-toggle';
 
 import { EVENT_NAMES } from '@/api/events/event-types';
-import { api } from '../../../app';
+import { api } from '@/app';
 import { MapContext } from '../../app-start';
 
 import { payloadIsAMapViewProjection } from '@/api/events/payloads/map-view-projection-payload';

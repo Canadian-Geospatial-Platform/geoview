@@ -12,7 +12,7 @@ import {
   TypeDisplayLanguage,
   TypeListOfLayerEntryConfig,
   isVectorLayer,
-} from '../../../app';
+} from '@/app';
 
 import LayerDataGrid from './layer-data-grid';
 

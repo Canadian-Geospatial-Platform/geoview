@@ -13,9 +13,9 @@ import CircleStyle from 'ol/style/Circle';
 import { getUid } from 'ol';
 import { MapContext } from '../../app-start';
 
-import { PayloadBaseClass, TypeFeatureInfoEntry, api, payloadIsAllQueriesDone } from '../../../app';
+import { PayloadBaseClass, TypeFeatureInfoEntry, api, payloadIsAllQueriesDone } from '@/app';
 import { EVENT_NAMES } from '@/api/events/event-types';
-import { ClickMapMarker } from '../../../ui';
+import { ClickMapMarker } from '@/ui';
 
 import { payloadIsAMarkerDefinition } from '@/api/events/payloads/marker-definition-payload';
 import { payloadIsAMapMouseEvent } from '@/api/events/payloads/map-mouse-event-payload';

@@ -13,7 +13,7 @@ import { Cast, TypeJsonObject } from '@/core/types/global-types';
 import { TypeFeatureStyle } from '../layer/vector/vector-types';
 import { xmlToJson } from '@/core/utils/utilities';
 
-import { api } from '../../app';
+import { api } from '@/app';
 import { EVENT_NAMES } from '@/api/events/event-types';
 import { inKeyfocusPayload } from '@/api/events/payloads/in-keyfocus-payload';
 

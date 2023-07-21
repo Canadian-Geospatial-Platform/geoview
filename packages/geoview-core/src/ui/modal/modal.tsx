@@ -18,7 +18,7 @@ import { TypeJsonObject } from '@/core/types/global-types';
 import { HtmlToReact } from '@/core/containers/html-to-react';
 
 import { EVENT_NAMES } from '@/api/events/event-types';
-import { api } from '../../app';
+import { api } from '@/app';
 
 import { TypeModalProps } from '.';
 import { CloseIcon, IconButton } from '..';

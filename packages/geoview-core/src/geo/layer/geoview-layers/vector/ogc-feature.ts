@@ -23,7 +23,7 @@ import {
 } from '../../../map/map-schema-types';
 
 import { getLocalizedValue } from '@/core/utils/utilities';
-import { api } from '../../../../app';
+import { api } from '@/app';
 import { Layer } from '../../layer';
 
 export interface TypeSourceOgcFeatureInitialConfig extends TypeVectorSourceInitialConfig {

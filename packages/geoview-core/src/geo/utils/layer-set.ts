@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { EVENT_NAMES } from '@/api/events/event-types';
 import { LayerSetPayload, payloadIsLayerRegistration, TypeResultSets } from '@/api/events/payloads/layer-set-payload';
-import { api } from '../../app';
+import { api } from '@/app';
 
 /** ***************************************************************************************************************************
  * A class to hold a set of layers associated with an value of any type. When this class is instantiated, all layers already

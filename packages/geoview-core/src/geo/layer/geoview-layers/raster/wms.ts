@@ -36,7 +36,7 @@ import {
 import { getLocalizedValue, getMinOrMaxExtents, xmlToJson } from '@/core/utils/utilities';
 import { snackbarMessagePayload } from '@/api/events/payloads/snackbar-message-payload';
 import { EVENT_NAMES } from '@/api/events/event-types';
-import { api } from '../../../../app';
+import { api } from '@/app';
 import { Layer } from '../../layer';
 
 export interface TypeWMSLayerConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig'> {

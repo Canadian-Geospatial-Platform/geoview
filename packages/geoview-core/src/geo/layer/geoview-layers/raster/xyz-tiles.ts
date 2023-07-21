@@ -21,7 +21,7 @@ import {
 } from '../../../map/map-schema-types';
 import { getLocalizedValue, getMinOrMaxExtents, getXMLHttpRequest } from '@/core/utils/utilities';
 import { Cast, toJsonObject } from '@/core/types/global-types';
-import { api } from '../../../../app';
+import { api } from '@/app';
 import { Layer } from '../../layer';
 
 // ? Do we keep this TODO ? Dynamic parameters can be placed on the dataAccessPath and initial settings can be used on xyz-tiles.

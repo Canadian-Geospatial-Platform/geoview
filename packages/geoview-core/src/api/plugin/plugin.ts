@@ -9,7 +9,7 @@ import makeStyles from '@mui/styles/makeStyles';
 
 import { MapViewer } from '../../geo/map/map';
 
-import { api } from '../../app';
+import { api } from '@/app';
 import { AbstractPlugin } from './abstract-plugin';
 import { TypePluginStructure, TypeRecordOfPlugin } from './plugin-types';
 import { toJsonObject, TypeJsonObject, TypeJsonValue } from '@/core/types/global-types';

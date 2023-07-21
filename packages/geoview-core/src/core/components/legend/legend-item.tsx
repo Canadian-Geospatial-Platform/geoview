@@ -28,8 +28,8 @@ import {
   MoreHorizIcon,
   BrowserNotSupportedIcon,
   Grid,
-} from '../../../ui';
-import { api, EsriDynamic, payloadIsLegendInfo, NumberPayload, PayloadBaseClass } from '../../../app';
+} from '@/ui';
+import { api, EsriDynamic, payloadIsLegendInfo, NumberPayload, PayloadBaseClass } from '@/app';
 import { LegendIconList } from './legend-icon-list';
 import {
   AbstractGeoViewLayer,

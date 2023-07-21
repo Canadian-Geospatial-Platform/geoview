@@ -14,10 +14,10 @@ import {
   ExpandLessIcon,
   Tooltip,
   IconButton,
-} from '../../../ui';
+} from '@/ui';
 import { TypeArrayOfLayerData, DetailsProps } from './details';
 import { FeatureInfo } from './feature-info';
-import { PayloadBaseClass, api } from '../../../app';
+import { PayloadBaseClass, api } from '@/app';
 import { EVENT_NAMES } from '@/api/events/event-types';
 import { payloadIsAFeatureHighlight } from '@/api/events/payloads/feature-highlight-payload';
 import { payloadIsAClearHighlights } from '@/api/events/payloads/clear-highlights-payload';

@@ -36,7 +36,7 @@ import {
 
 import { getLocalizedValue } from '@/core/utils/utilities';
 
-import { api } from '../../../../app';
+import { api } from '@/app';
 import { Layer } from '../../layer';
 
 export interface TypeSourceGeoPackageInitialConfig extends TypeVectorSourceInitialConfig {

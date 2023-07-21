@@ -6,7 +6,7 @@ import makeStyles from '@mui/styles/makeStyles';
 import MaterialDrawer from '@mui/material/Drawer';
 import { DrawerProps } from '@mui/material';
 
-import { api } from '../../app';
+import { api } from '@/app';
 import { EVENT_NAMES } from '@/api/events/event-types';
 
 import { IconButton, ChevronLeftIcon, ChevronRightIcon } from '..';

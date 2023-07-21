@@ -9,13 +9,13 @@ import { useTranslation } from 'react-i18next';
 
 import debounce from 'lodash/debounce';
 
-import { api } from '../../../app';
+import { api } from '@/app';
 import { MapContext } from '../../app-start';
 
 import { EVENT_NAMES } from '@/api/events/event-types';
 import { payloadIsABoolean } from '@/api/events/payloads/boolean-payload';
 
-import { Box, CheckIcon, Tooltip } from '../../../ui';
+import { Box, CheckIcon, Tooltip } from '@/ui';
 
 const useStyles = makeStyles((theme) => ({
   mousePositionContainer: {

@@ -12,9 +12,9 @@ import {
   RadioButtonCheckedIcon,
   RadioButtonUncheckedIcon,
   Grid,
-} from '../../../ui';
+} from '@/ui';
 import { TypeWmsLegendStyle } from '../../../geo/layer/geoview-layers/abstract-geoview-layers';
-import { api, WMS } from '../../../app';
+import { api, WMS } from '@/app';
 
 const sxClasses = {
   legendIcon: {

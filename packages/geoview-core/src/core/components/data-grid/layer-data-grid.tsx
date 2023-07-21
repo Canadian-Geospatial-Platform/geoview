@@ -2,8 +2,8 @@ import { useState, useEffect, memo } from 'react';
 import { DataGrid, DataGridProps, gridClasses, GridCellParams, frFR, enUS, GridFilterModel } from '@mui/x-data-grid';
 import { useTheme, Theme } from '@mui/material/styles';
 import { Extent } from 'ol/extent';
-import { TypeLayerEntryConfig, AbstractGeoViewVector, EsriDynamic, api, TypeDisplayLanguage } from '../../../app';
-import { Tooltip, ZoomInSearchIcon, IconButton } from '../../../ui';
+import { TypeLayerEntryConfig, AbstractGeoViewVector, EsriDynamic, api, TypeDisplayLanguage } from '@/app';
+import { Tooltip, ZoomInSearchIcon, IconButton } from '@/ui';
 import MenuDataGrid from './menu-data-grid';
 
 /**

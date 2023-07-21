@@ -1,7 +1,7 @@
 import { createElement } from 'react';
-import { LegendsLayerSet, api } from '../../../app';
+import { LegendsLayerSet, api } from '@/app';
 import { LegendItem, TypeLegendItemProps } from './legend-item';
-import { List } from '../../../ui';
+import { List } from '@/ui';
 
 export interface TypeLegendProps {
   layerIds: string[];

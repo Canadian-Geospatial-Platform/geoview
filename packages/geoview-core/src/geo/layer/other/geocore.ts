@@ -1,6 +1,6 @@
 /* eslint-disable no-param-reassign */
 import defaultsDeep from 'lodash/defaultsDeep';
-import { api } from '../../../app';
+import { api } from '@/app';
 import { catalogUrl } from '@/core/utils/config/config';
 import {
   TypeLayerEntryConfig,

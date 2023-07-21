@@ -14,7 +14,7 @@ import {
   TypeListOfLayerEntryConfig,
 } from '../../map/map-schema-types';
 import { getLocalizedValue, getXMLHttpRequest } from '@/core/utils/utilities';
-import { api } from '../../../app';
+import { api } from '@/app';
 import { Layer } from '../layer';
 import { EsriDynamic, geoviewEntryIsEsriDynamic } from './raster/esri-dynamic';
 import { EsriFeature, geoviewEntryIsEsriFeature, TypeEsriFeatureLayerEntryConfig } from './vector/esri-feature';

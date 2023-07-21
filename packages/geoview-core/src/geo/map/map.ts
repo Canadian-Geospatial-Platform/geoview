@@ -14,7 +14,7 @@ import { Basemap } from '../layer/basemap/basemap';
 import { Layer } from '../layer/layer';
 import { TypeFeatureStyle } from '../layer/vector/vector-types';
 
-import { api } from '../../app';
+import { api } from '@/app';
 import { EVENT_NAMES } from '@/api/events/event-types';
 
 import { Config } from '@/core/utils/config/config';
@@ -34,7 +34,7 @@ import { Modify } from '../interaction/modify';
 import { Snap } from '../interaction/snap';
 import { Translate } from '../interaction/translate';
 
-import { ModalApi } from '../../ui';
+import { ModalApi } from '@/ui';
 import { mapPayload } from '@/api/events/payloads/map-payload';
 import { mapComponentPayload } from '@/api/events/payloads/map-component-payload';
 import { mapConfigPayload } from '@/api/events/payloads/map-config-payload';

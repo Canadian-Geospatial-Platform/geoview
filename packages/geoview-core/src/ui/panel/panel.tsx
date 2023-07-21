@@ -16,7 +16,7 @@ import { Cast } from '@/core/types/global-types';
 import { HtmlToReact } from '@/core/containers/html-to-react';
 import { MapContext } from '@/core/app-start';
 
-import { api } from '../../app';
+import { api } from '@/app';
 import { EVENT_NAMES } from '@/api/events/event-types';
 
 import { IconButton, CloseIcon, PanelApi, Box } from '..';

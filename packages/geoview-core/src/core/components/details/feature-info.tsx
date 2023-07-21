@@ -21,8 +21,8 @@ import {
   Box,
   CheckBoxIcon,
   CheckBoxOutIcon,
-} from '../../../ui';
-import { api } from '../../../app';
+} from '@/ui';
+import { api } from '@/app';
 import { TypeFeatureInfoEntry, TypeFieldEntry } from '@/api/events/payloads/get-feature-info-payload';
 import { DetailsProps } from './details';
 import { isImage, stringify, generateId } from '../../utils/utilities';

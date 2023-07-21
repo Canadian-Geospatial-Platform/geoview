@@ -5,7 +5,7 @@ import MaterialSlider from '@mui/material/Slider';
 import makeStyles from '@mui/styles/makeStyles';
 import { SliderProps } from '@mui/material';
 
-import { api } from '../../app';
+import { api } from '@/app';
 import { EVENT_NAMES } from '@/api/events/event-types';
 import { sliderPayload, payloadIsASlider, SliderTypePayload } from '@/api/events/payloads/slider-payload';
 

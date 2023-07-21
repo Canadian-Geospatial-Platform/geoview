@@ -24,7 +24,7 @@ import { HoverTooltip } from '../hover-tooltip/hover-tooltip';
 
 import { disableScrolling, generateId } from '../../utils/utilities';
 
-import { TypeVectorSourceInitialConfig, api, inKeyfocusPayload } from '../../../app';
+import { TypeVectorSourceInitialConfig, api, inKeyfocusPayload } from '@/app';
 import { EVENT_NAMES } from '@/api/events/event-types';
 
 import { MapViewer } from '../../../geo/map/map';

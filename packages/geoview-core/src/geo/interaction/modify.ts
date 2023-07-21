@@ -3,7 +3,7 @@ import { ModifyEvent as OLModifyEvent, Options as OLModifyOptions } from 'ol/int
 import Collection from 'ol/Collection';
 import Feature from 'ol/Feature';
 import { Interaction, InteractionOptions } from './interaction';
-import { api } from '../../app';
+import { api } from '@/app';
 import { EVENT_NAMES } from '@/api/events/event-types';
 import { modifyPayload } from '@/api/events/payloads/inter-modify-payload';
 import { TypeFeatureStyle } from '../layer/vector/vector-types';

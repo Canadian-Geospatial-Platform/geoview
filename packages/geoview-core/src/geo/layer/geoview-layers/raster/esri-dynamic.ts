@@ -30,7 +30,7 @@ import {
   layerEntryIsGroupLayer,
 } from '../../../map/map-schema-types';
 import { TypeArrayOfFeatureInfoEntries, codedValueType, rangeDomainType } from '@/api/events/payloads/get-feature-info-payload';
-import { api } from '../../../../app';
+import { api } from '@/app';
 import { Layer } from '../../layer';
 import { EVENT_NAMES } from '@/api/events/event-types';
 import {

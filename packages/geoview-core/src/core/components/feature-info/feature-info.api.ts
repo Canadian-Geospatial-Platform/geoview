@@ -1,7 +1,7 @@
 import { createElement, ReactElement } from 'react';
 
 import { FeatureInfoLayerSet } from '../../../geo/utils/feature-info-layer-set';
-import { api } from '../../../app';
+import { api } from '@/app';
 
 import { generateId } from '../../utils/utilities';
 

@@ -17,7 +17,7 @@ import { Geolocator } from '../components/geolocator/geolocator';
 
 import { FocusTrapDialog } from './focus-trap';
 
-import { api } from '../../app';
+import { api } from '@/app';
 import { EVENT_NAMES } from '@/api/events/event-types';
 
 import { Modal, Snackbar } from '@/ui';
