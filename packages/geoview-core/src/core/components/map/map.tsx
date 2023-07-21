@@ -27,7 +27,7 @@ import { disableScrolling, generateId } from '../../utils/utilities';
 import { TypeVectorSourceInitialConfig, api, inKeyfocusPayload } from '@/app';
 import { EVENT_NAMES } from '@/api/events/event-types';
 
-import { MapViewer } from '../../../geo/map/map';
+import { MapViewer } from '@/geo/map/map';
 
 import { payloadIsABasemapLayerArray } from '@/api/events/payloads/basemap-layers-payload';
 import { payloadIsAMapViewProjection } from '@/api/events/payloads/map-view-projection-payload';

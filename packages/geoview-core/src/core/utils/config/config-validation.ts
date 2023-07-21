@@ -6,17 +6,17 @@ import defaultsDeep from 'lodash/defaultsDeep';
 import { generateId } from '../utilities';
 
 import schema from '../../../../schema.json';
-import { TypeBasemapId, TypeBasemapOptions, VALID_BASEMAP_ID } from '../../../geo/layer/basemap/basemap-types';
-import { geoviewEntryIsWMS } from '../../../geo/layer/geoview-layers/raster/wms';
-import { geoviewEntryIsImageStatic } from '../../../geo/layer/geoview-layers/raster/image-static';
-import { geoviewEntryIsXYZTiles } from '../../../geo/layer/geoview-layers/raster/xyz-tiles';
-import { geoviewEntryIsVectorTiles } from '../../../geo/layer/geoview-layers/raster/vector-tiles';
-import { geoviewEntryIsEsriDynamic } from '../../../geo/layer/geoview-layers/raster/esri-dynamic';
-import { geoviewEntryIsEsriFeature } from '../../../geo/layer/geoview-layers/vector/esri-feature';
-import { geoviewEntryIsWFS } from '../../../geo/layer/geoview-layers/vector/wfs';
-import { geoviewEntryIsOgcFeature } from '../../../geo/layer/geoview-layers/vector/ogc-feature';
-import { geoviewEntryIsGeoJSON } from '../../../geo/layer/geoview-layers/vector/geojson';
-import { geoviewEntryIsGeoPackage } from '../../../geo/layer/geoview-layers/vector/geopackage';
+import { TypeBasemapId, TypeBasemapOptions, VALID_BASEMAP_ID } from '@/geo/layer/basemap/basemap-types';
+import { geoviewEntryIsWMS } from '@/geo/layer/geoview-layers/raster/wms';
+import { geoviewEntryIsImageStatic } from '@/geo/layer/geoview-layers/raster/image-static';
+import { geoviewEntryIsXYZTiles } from '@/geo/layer/geoview-layers/raster/xyz-tiles';
+import { geoviewEntryIsVectorTiles } from '@/geo/layer/geoview-layers/raster/vector-tiles';
+import { geoviewEntryIsEsriDynamic } from '@/geo/layer/geoview-layers/raster/esri-dynamic';
+import { geoviewEntryIsEsriFeature } from '@/geo/layer/geoview-layers/vector/esri-feature';
+import { geoviewEntryIsWFS } from '@/geo/layer/geoview-layers/vector/wfs';
+import { geoviewEntryIsOgcFeature } from '@/geo/layer/geoview-layers/vector/ogc-feature';
+import { geoviewEntryIsGeoJSON } from '@/geo/layer/geoview-layers/vector/geojson';
+import { geoviewEntryIsGeoPackage } from '@/geo/layer/geoview-layers/vector/geopackage';
 import {
   layerEntryIsGroupLayer,
   TypeGeoviewLayerConfig,
@@ -33,13 +33,13 @@ import {
   TypeListOfGeoviewLayerConfig,
   TypeListOfLocalizedLanguages,
   layerEntryIsVector,
-} from '../../../geo/map/map-schema-types';
+} from '@/geo/map/map-schema-types';
 import { Cast, toJsonObject, TypeJsonObject, TypeMapFeaturesConfig } from '../../types/global-types';
 import { api } from '@/app';
 import { snackbarMessagePayload } from '@/api/events/payloads/snackbar-message-payload';
 import { EVENT_NAMES } from '@/api/events/event-types';
-import { Layer } from '../../../geo/layer/layer';
-import { CONST_GEOVIEW_SCHEMA_BY_TYPE, TypeGeoviewLayerType } from '../../../geo/layer/geoview-layers/abstract-geoview-layers';
+import { Layer } from '@/geo/layer/layer';
+import { CONST_GEOVIEW_SCHEMA_BY_TYPE, TypeGeoviewLayerType } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 
 // ******************************************************************************************************************************
 // ******************************************************************************************************************************

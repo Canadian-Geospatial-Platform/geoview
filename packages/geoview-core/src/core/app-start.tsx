@@ -9,7 +9,7 @@ import CssBaseline from '@mui/material/CssBaseline';
 
 import { Shell } from './containers/shell';
 import { getTheme, cgpvTheme } from '../ui/style/theme';
-import { MapViewer } from '../geo/map/map';
+import { MapViewer } from '@/geo/map/map';
 import { TypeMapFeaturesConfig } from './types/global-types';
 import { TypeInteraction } from '../app';
 

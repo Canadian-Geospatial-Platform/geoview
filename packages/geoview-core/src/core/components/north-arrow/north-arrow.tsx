@@ -10,7 +10,7 @@ import makeStyles from '@mui/styles/makeStyles';
 
 import debounce from 'lodash/debounce';
 
-import { PROJECTION_NAMES } from '../../../geo/projection/projection';
+import { PROJECTION_NAMES } from '@/geo/projection/projection';
 
 import { NorthArrowIcon, NorthPoleIcon } from './north-arrow-icon';
 

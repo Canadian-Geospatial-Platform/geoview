@@ -7,7 +7,7 @@ import { Switch } from '@/ui';
 import { api } from '@/app';
 import { MapContext } from '../../app-start';
 
-import { PROJECTION_NAMES } from '../../../geo/projection/projection';
+import { PROJECTION_NAMES } from '@/geo/projection/projection';
 
 import { EVENT_NAMES } from '@/api/events/event-types';
 import { booleanPayload, payloadIsABoolean } from '@/api/events/payloads/boolean-payload';

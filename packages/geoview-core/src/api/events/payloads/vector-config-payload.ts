@@ -4,13 +4,7 @@ import { PayloadBaseClass } from './payload-base-class';
 
 import { EventStringId, EVENT_NAMES } from '../event-types';
 
-import {
-  CONST_VECTOR_TYPES,
-  TypeFeatureStyle,
-  TypeIconStyle,
-  TypeFeatureCircleStyle,
-  TypeOfVector,
-} from '../../../geo/layer/vector/vector-types';
+import { CONST_VECTOR_TYPES, TypeFeatureStyle, TypeIconStyle, TypeFeatureCircleStyle, TypeOfVector } from '@/geo/layer/vector/vector-types';
 
 /** Valid events that can create VectorConfigPayload */
 const validEvents: EventStringId[] = [EVENT_NAMES.VECTOR.EVENT_VECTOR_ADD, EVENT_NAMES.VECTOR.EVENT_VECTOR_REMOVE];
