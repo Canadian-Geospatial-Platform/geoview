@@ -1,8 +1,12 @@
 import { useState, useRef, useEffect, useCallback, Fragment, useContext, SetStateAction, Dispatch } from 'react';
+import { useTranslation } from 'react-i18next';
+import Typography from '@mui/material/Typography';
 
 import makeStyles from '@mui/styles/makeStyles';
 
-import { List, ListItem, Panel, IconButton } from '../../../ui';
+import { List, ListItem, Panel, IconButton, Popover } from '../../../ui';
+
+import { GITUHUB_REPO, GEO_URL_TEXT } from '../../utils/constant';
 
 import { api } from '../../../app';
 import { EVENT_NAMES } from '../../../api/events/event-types';
@@ -15,6 +19,23 @@ import { TypeButtonPanel } from '../../../ui/panel/panel-types';
 import Export from './buttons/export';
 import Geolocator from './buttons/geolocator';
 import ExportModal from '../export/export-modal';
+
+// eslint-disable-next-line no-underscore-dangle
+declare const __VERSION__: TypeAppVersion;
+
+/**
+ * An object containing version information.
+ *
+ * @export
+ * @interface TypeAppVersion
+ */
+export type TypeAppVersion = {
+  hash: string;
+  major: number;
+  minor: number;
+  patch: number;
+  timestamp: string;
+};
 
 const useStyles = makeStyles((theme) => ({
   appBar: {
@@ -76,9 +97,14 @@ const useStyles = makeStyles((theme) => ({
       width: 20,
     },
   },
-  appBarButtonIcon: {
-    backgroundColor: theme.palette.primary.dark,
-    color: theme.palette.primary.light,
+  versionButtonDiv: {
+    position: 'absolute',
+    bottom: 0,
+  },
+  appBarPopoverContent: {
+    '& a': {
+      color: theme.palette.primary.light,
+    },
   },
   appBarPanels: {},
 }));
@@ -100,6 +126,8 @@ export function Appbar({ setActivetrap }: AppbarProps): JSX.Element {
   const appBar = useRef<HTMLDivElement>(null);
 
   const mapConfig = useContext(MapContext);
+
+  const { t } = useTranslation<string>();
 
   const { mapId } = mapConfig;
   const { mapFeaturesConfig } = api.map(mapId);
@@ -143,6 +171,27 @@ export function Appbar({ setActivetrap }: AppbarProps): JSX.Element {
     },
     [setButtonPanelGroups]
   );
+
+  const getPopoverContent = (): JSX.Element => {
+    return (
+      <Typography component="div" className={classes.appBarPopoverContent}>
+        <Typography component="div">{t('appbar.version')}</Typography>
+        <hr />
+        <Typography component="div">
+          <a href={GEO_URL_TEXT.url} target="_black">
+            {GEO_URL_TEXT.text}
+          </a>
+        </Typography>
+        <Typography component="div">
+          <a href={GITUHUB_REPO} target="_black">
+            {t('appbar.repoLink')}
+          </a>
+        </Typography>
+        <Typography component="div">{`v.${__VERSION__.major}.${__VERSION__.minor}.${__VERSION__.patch}`}</Typography>
+        <Typography component="div">{new Date(__VERSION__.timestamp).toLocaleDateString()}</Typography>
+      </Typography>
+    );
+  };
 
   useEffect(() => {
     // listen to new panel creation
@@ -242,6 +291,13 @@ export function Appbar({ setActivetrap }: AppbarProps): JSX.Element {
             </List>
           </div>
         )}
+        <div className={classes.versionButtonDiv}>
+          <List className={classes.appBarList}>
+            <ListItem>
+              <Popover content={getPopoverContent()} />
+            </ListItem>
+          </List>
+        </div>
       </div>
       {Object.keys(buttonPanelGroups).map((groupName: string) => {
         // get button panels from group

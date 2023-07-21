@@ -5,7 +5,7 @@ export * from '../components/app-bar/app-bar';
 export * from '../components/app-bar/app-bar-buttons';
 export * from '../components/app-bar/buttons/export';
 export * from '../components/app-bar/buttons/help';
-export * from '../components/app-bar/buttons/version';
+// export * from '../components/app-bar/buttons/version';
 export * from '../components/attribution/attribution';
 export * from '../components/click-marker/click-marker';
 export * from '../components/crosshair/crosshair';

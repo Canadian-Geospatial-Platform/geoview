@@ -40,7 +40,8 @@
     "help": "Help",
     "layers": "Layers",
     "share": "Share",
-    "version": "Access GitHub repo"
+    "version": "About GeoView",
+    "repoLink": "Repo link"
   },
   "legend": {
     "unknown": "Unknown Layer Title",
