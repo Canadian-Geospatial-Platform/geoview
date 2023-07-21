@@ -3,8 +3,8 @@ import { ModalModel } from './modal-model';
 import { generateId } from '../../core/utils/utilities';
 
 import { api } from '../../app';
-import { EVENT_NAMES } from '../../api/events/event-types';
-import { modalPayload } from '../../api/events/payloads/modal-payload';
+import { EVENT_NAMES } from '@/api/events/event-types';
+import { modalPayload } from '@/api/events/payloads/modal-payload';
 
 /**
  * Both header and footer actions' properties interface

@@ -1,10 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import debounce from 'lodash/debounce';
 
-import { EVENT_NAMES } from '../../api/events/event-types';
-import { GetFeatureInfoPayload, payloadIsQueryResult, TypeFeatureInfoResultSets } from '../../api/events/payloads/get-feature-info-payload';
-import { payloadIsAMapMouseEvent } from '../../api/events/payloads/map-mouse-event-payload';
-import { payloadIsALngLat } from '../../api/events/payloads/lng-lat-payload';
+import { EVENT_NAMES } from '@/api/events/event-types';
+import { GetFeatureInfoPayload, payloadIsQueryResult, TypeFeatureInfoResultSets } from '@/api/events/payloads/get-feature-info-payload';
+import { payloadIsAMapMouseEvent } from '@/api/events/payloads/map-mouse-event-payload';
+import { payloadIsALngLat } from '@/api/events/payloads/lng-lat-payload';
 import { api } from '../../app';
 import { LayerSet } from './layer-set';
 

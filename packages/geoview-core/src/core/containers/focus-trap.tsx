@@ -9,12 +9,12 @@ import makeStyles from '@mui/styles/makeStyles';
 import useMediaQuery from '@mui/material/useMediaQuery';
 
 import { api } from '../../app';
-import { EVENT_NAMES } from '../../api/events/event-types';
+import { EVENT_NAMES } from '@/api/events/event-types';
 
 import { HtmlToReact } from './html-to-react';
 
 import { Modal, Button } from '../../ui';
-import { inKeyfocusPayload, payloadIsAInKeyfocus } from '../../api/events/payloads/in-keyfocus-payload';
+import { inKeyfocusPayload, payloadIsAInKeyfocus } from '@/api/events/payloads/in-keyfocus-payload';
 
 const useStyles = makeStyles((theme) => ({
   trap: {

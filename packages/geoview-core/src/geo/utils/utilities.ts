@@ -14,8 +14,8 @@ import { TypeFeatureStyle } from '../layer/vector/vector-types';
 import { xmlToJson } from '../../core/utils/utilities';
 
 import { api } from '../../app';
-import { EVENT_NAMES } from '../../api/events/event-types';
-import { inKeyfocusPayload } from '../../api/events/payloads/in-keyfocus-payload';
+import { EVENT_NAMES } from '@/api/events/event-types';
+import { inKeyfocusPayload } from '@/api/events/payloads/in-keyfocus-payload';
 
 /**
  * Interface used for css style declarations

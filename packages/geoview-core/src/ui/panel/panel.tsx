@@ -17,12 +17,12 @@ import { HtmlToReact } from '../../core/containers/html-to-react';
 import { MapContext } from '../../core/app-start';
 
 import { api } from '../../app';
-import { EVENT_NAMES } from '../../api/events/event-types';
+import { EVENT_NAMES } from '@/api/events/event-types';
 
 import { IconButton, CloseIcon, PanelApi, Box } from '..';
-import { payloadBaseClass } from '../../api/events/payloads/payload-base-class';
-import { payloadIsAPanelAction, payloadIsAPanelContent, payloadHasAButtonIdAndType } from '../../api/events/payloads/panel-payload';
-import { inKeyfocusPayload } from '../../api/events/payloads/in-keyfocus-payload';
+import { payloadBaseClass } from '@/api/events/payloads/payload-base-class';
+import { payloadIsAPanelAction, payloadIsAPanelContent, payloadHasAButtonIdAndType } from '@/api/events/payloads/panel-payload';
+import { inKeyfocusPayload } from '@/api/events/payloads/in-keyfocus-payload';
 import { TypeIconButtonProps } from '../icon-button/icon-button-types';
 
 /**

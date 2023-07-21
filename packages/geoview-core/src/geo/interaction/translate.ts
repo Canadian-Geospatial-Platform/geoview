@@ -4,8 +4,8 @@ import Collection from 'ol/Collection';
 import Feature from 'ol/Feature';
 import { Interaction, InteractionOptions } from './interaction';
 import { api } from '../../app';
-import { EVENT_NAMES } from '../../api/events/event-types';
-import { translatePayload } from '../../api/events/payloads/inter-translate-payload';
+import { EVENT_NAMES } from '@/api/events/event-types';
+import { translatePayload } from '@/api/events/payloads/inter-translate-payload';
 
 /**
  * Supported options for translate interactions

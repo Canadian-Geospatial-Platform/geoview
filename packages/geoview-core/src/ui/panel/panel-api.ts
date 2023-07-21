@@ -1,11 +1,11 @@
 import { createElement } from 'react';
 
 import { api } from '../../app';
-import { EVENT_NAMES } from '../../api/events/event-types';
+import { EVENT_NAMES } from '@/api/events/event-types';
 
 import { CheckboxListAPI } from '../list/checkbox-list/checkbox-list-api';
 
-import { PanelPayload, TypeActionButton } from '../../api/events/payloads/panel-payload';
+import { PanelPayload, TypeActionButton } from '@/api/events/payloads/panel-payload';
 import { generateId } from '../../core/utils/utilities';
 import { PanelStyles, TypePanelProps } from './panel-types';
 
