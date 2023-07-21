@@ -13,7 +13,7 @@ import Feature, { FeatureLike } from 'ol/Feature';
 import { toContext } from 'ol/render';
 import { Size } from 'ol/size';
 
-import { getLocalizedValue, setAlphaColor } from '../../core/utils/utilities';
+import { getLocalizedValue, setAlphaColor } from '@/core/utils/utilities';
 import {
   isFilledPolygonVectorConfig,
   isIconSymbolVectorConfig,

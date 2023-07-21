@@ -25,16 +25,16 @@ import { HoverTooltip } from '../hover-tooltip/hover-tooltip';
 import { disableScrolling, generateId } from '../../utils/utilities';
 
 import { TypeVectorSourceInitialConfig, api, inKeyfocusPayload } from '../../../app';
-import { EVENT_NAMES } from '../../../api/events/event-types';
+import { EVENT_NAMES } from '@/api/events/event-types';
 
 import { MapViewer } from '../../../geo/map/map';
 
-import { payloadIsABasemapLayerArray } from '../../../api/events/payloads/basemap-layers-payload';
-import { payloadIsAMapViewProjection } from '../../../api/events/payloads/map-view-projection-payload';
-import { numberPayload } from '../../../api/events/payloads/number-payload';
-import { lngLatPayload } from '../../../api/events/payloads/lng-lat-payload';
+import { payloadIsABasemapLayerArray } from '@/api/events/payloads/basemap-layers-payload';
+import { payloadIsAMapViewProjection } from '@/api/events/payloads/map-view-projection-payload';
+import { numberPayload } from '@/api/events/payloads/number-payload';
+import { lngLatPayload } from '@/api/events/payloads/lng-lat-payload';
 import { TypeMapFeaturesConfig } from '../../types/global-types';
-import { TypeMapMouseInfo, mapMouseEventPayload } from '../../../api/events/payloads/map-mouse-event-payload';
+import { TypeMapMouseInfo, mapMouseEventPayload } from '@/api/events/payloads/map-mouse-event-payload';
 
 const useStyles = makeStyles(() => ({
   mapContainer: {

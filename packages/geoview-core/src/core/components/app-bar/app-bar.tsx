@@ -5,12 +5,12 @@ import makeStyles from '@mui/styles/makeStyles';
 import { List, ListItem, Panel, IconButton } from '../../../ui';
 
 import { api } from '../../../app';
-import { EVENT_NAMES } from '../../../api/events/event-types';
+import { EVENT_NAMES } from '@/api/events/event-types';
 
 import { MapContext } from '../../app-start';
 
-import { payloadIsAButtonPanel, ButtonPanelPayload } from '../../../api/events/payloads/button-panel-payload';
-import { TypeButtonPanel } from '../../../ui/panel/panel-types';
+import { payloadIsAButtonPanel, ButtonPanelPayload } from '@/api/events/payloads/button-panel-payload';
+import { TypeButtonPanel } from '@/ui/panel/panel-types';
 
 import Export from './buttons/export';
 import Geolocator from './buttons/geolocator';

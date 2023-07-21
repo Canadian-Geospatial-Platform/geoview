@@ -2,7 +2,7 @@ import { PayloadBaseClass } from './payload-base-class';
 
 import { EventStringId, EVENT_NAMES } from '../event-types';
 
-import { TypeTabs } from '../../../ui/tabs/tabs';
+import { TypeTabs } from '@/ui/tabs/tabs';
 
 /** Valid events that can create FooterTabPayload */
 const validEvents: EventStringId[] = [

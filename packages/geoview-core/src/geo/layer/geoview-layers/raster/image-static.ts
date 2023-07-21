@@ -8,7 +8,7 @@ import { Options as ImageOptions } from 'ol/layer/BaseImage';
 import { Extent } from 'ol/extent';
 import { transformExtent } from 'ol/proj';
 
-import { Cast, TypeJsonObject } from '../../../../core/types/global-types';
+import { Cast, TypeJsonObject } from '@/core/types/global-types';
 import { AbstractGeoViewLayer, CONST_LAYER_TYPES, TypeLegend } from '../abstract-geoview-layers';
 import { AbstractGeoViewRaster, TypeBaseRasterLayer } from './abstract-geoview-raster';
 import {
@@ -18,7 +18,7 @@ import {
   layerEntryIsGroupLayer,
   TypeImageStaticLayerEntryConfig,
 } from '../../../map/map-schema-types';
-import { getLocalizedValue, getMinOrMaxExtents } from '../../../../core/utils/utilities';
+import { getLocalizedValue, getMinOrMaxExtents } from '@/core/utils/utilities';
 import { api } from '../../../../app';
 import { Layer } from '../../layer';
 

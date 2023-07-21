@@ -15,7 +15,7 @@ import { transform, transformExtent } from 'ol/proj';
 
 import cloneDeep from 'lodash/cloneDeep';
 
-import { Cast, toJsonObject, TypeJsonArray, TypeJsonObject } from '../../../../core/types/global-types';
+import { Cast, toJsonObject, TypeJsonArray, TypeJsonObject } from '@/core/types/global-types';
 import { AbstractGeoViewLayer, CONST_LAYER_TYPES, TypeLegend, TypeWmsLegend, TypeWmsLegendStyle } from '../abstract-geoview-layers';
 import { AbstractGeoViewRaster, TypeBaseRasterLayer } from './abstract-geoview-raster';
 import {
@@ -32,10 +32,10 @@ import {
   TypeArrayOfFeatureInfoEntries,
   rangeDomainType,
   codedValueType,
-} from '../../../../api/events/payloads/get-feature-info-payload';
-import { getLocalizedValue, getMinOrMaxExtents, xmlToJson } from '../../../../core/utils/utilities';
-import { snackbarMessagePayload } from '../../../../api/events/payloads/snackbar-message-payload';
-import { EVENT_NAMES } from '../../../../api/events/event-types';
+} from '@/api/events/payloads/get-feature-info-payload';
+import { getLocalizedValue, getMinOrMaxExtents, xmlToJson } from '@/core/utils/utilities';
+import { snackbarMessagePayload } from '@/api/events/payloads/snackbar-message-payload';
+import { EVENT_NAMES } from '@/api/events/event-types';
 import { api } from '../../../../app';
 import { Layer } from '../../layer';
 

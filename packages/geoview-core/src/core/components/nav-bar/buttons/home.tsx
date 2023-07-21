@@ -6,7 +6,7 @@ import { FitOptions } from 'ol/View';
 
 import { MapContext } from '../../../app-start';
 
-import { IconButton, HomeIcon } from '../../../../ui';
+import { IconButton, HomeIcon } from '@/ui';
 
 import { api } from '../../../../app';
 

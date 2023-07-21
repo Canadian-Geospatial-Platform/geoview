@@ -36,8 +36,8 @@ import {
 } from '../../../geo/map/map-schema-types';
 import { Cast, toJsonObject, TypeJsonObject, TypeMapFeaturesConfig } from '../../types/global-types';
 import { api } from '../../../app';
-import { snackbarMessagePayload } from '../../../api/events/payloads/snackbar-message-payload';
-import { EVENT_NAMES } from '../../../api/events/event-types';
+import { snackbarMessagePayload } from '@/api/events/payloads/snackbar-message-payload';
+import { EVENT_NAMES } from '@/api/events/event-types';
 import { Layer } from '../../../geo/layer/layer';
 import { CONST_GEOVIEW_SCHEMA_BY_TYPE, TypeGeoviewLayerType } from '../../../geo/layer/geoview-layers/abstract-geoview-layers';
 

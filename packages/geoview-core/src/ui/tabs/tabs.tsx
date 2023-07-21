@@ -8,7 +8,7 @@ import MaterialTabs from '@mui/material/Tabs';
 import MaterialTab from '@mui/material/Tab';
 import Grid from '@mui/material/Grid';
 
-import { HtmlToReact } from '../../core/containers/html-to-react';
+import { HtmlToReact } from '@/core/containers/html-to-react';
 
 import { TabPanel } from './tab-panel';
 

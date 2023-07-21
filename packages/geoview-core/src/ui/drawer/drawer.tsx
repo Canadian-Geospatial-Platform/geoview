@@ -10,7 +10,7 @@ import { api } from '../../app';
 import { EVENT_NAMES } from '@/api/events/event-types';
 
 import { IconButton, ChevronLeftIcon, ChevronRightIcon } from '..';
-import { MapContext } from '../../core/app-start';
+import { MapContext } from '@/core/app-start';
 import { booleanPayload, payloadIsABoolean } from '@/api/events/payloads/boolean-payload';
 
 /**

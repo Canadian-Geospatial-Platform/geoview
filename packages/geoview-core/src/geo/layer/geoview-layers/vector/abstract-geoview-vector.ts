@@ -23,8 +23,8 @@ import {
   TypeVectorLayerEntryConfig,
 } from '../../../map/map-schema-types';
 import { api } from '../../../../app';
-import { getLocalizedValue } from '../../../../core/utils/utilities';
-import { TypeArrayOfFeatureInfoEntries } from '../../../../api/events/payloads/get-feature-info-payload';
+import { getLocalizedValue } from '@/core/utils/utilities';
+import { TypeArrayOfFeatureInfoEntries } from '@/api/events/payloads/get-feature-info-payload';
 import { NodeType } from '../../../renderer/geoview-renderer-types';
 
 /* *******************************************************************************************************************************
