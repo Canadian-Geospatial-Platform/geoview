@@ -70,6 +70,13 @@
           'suportedLanguages': ['en']
         }"
     ></div>
+
+    <div>
+      <button id="success-notif-but">Success Notification</button>
+      <button id="info-notif-but">Info Notification</button>
+      <button id="error-notif-but">Error Notification</button>
+      <button id="warning-notif-but">Warning Notification</button>
+    </div>
     <p>This script tag will trigger a basic notification on load and another with a custom function every 20 seconds.</p>
 
     <p>Accessing map center from outside of the core viewer on Map MOVE event using api event listeners:</p>
@@ -89,6 +96,54 @@
 
         //get map posiion panel
         const mapsPosition = document.getElementsByClassName('maps-position');
+
+        document.getElementById('success-notif-but').addEventListener('click', function (e) {
+          cgpv.api.event.emit(
+            cgpv.types.notificationPayload(
+              cgpv.api.eventNames.NOTIFICATIONS.NOTIFICATION_ADD,
+              'EVNT1',
+              'success',
+              'this is a success notification title',
+              'this is notification description'
+            )
+          );
+        });
+
+        document.getElementById('info-notif-but').addEventListener('click', function (e) {
+          cgpv.api.event.emit(
+            cgpv.types.notificationPayload(
+              cgpv.api.eventNames.NOTIFICATIONS.NOTIFICATION_ADD,
+              'EVNT1',
+              'info',
+              'this is an info notification',
+              'this is notification description'
+            )
+          );
+        });
+
+        document.getElementById('warning-notif-but').addEventListener('click', function (e) {
+          cgpv.api.event.emit(
+            cgpv.types.notificationPayload(
+              cgpv.api.eventNames.NOTIFICATIONS.NOTIFICATION_ADD,
+              'EVNT1',
+              'warning',
+              'this is an warning notification',
+              'this is notification description'
+            )
+          );
+        });
+
+        document.getElementById('error-notif-but').addEventListener('click', function (e) {
+          cgpv.api.event.emit(
+            cgpv.types.notificationPayload(
+              cgpv.api.eventNames.NOTIFICATIONS.NOTIFICATION_ADD,
+              'EVNT1',
+              'error',
+              'this is an error notification',
+              'this is notification description'
+            )
+          );
+        });
 
         // listen to map moveend event
         cgpv.api.event.on(
@@ -126,47 +181,6 @@
                   alert('You clicked me!');
                 },
               }
-            )
-          );
-
-          //emit notification
-          cgpv.api.event.emit(
-            cgpv.types.notificationPayload(
-              cgpv.api.eventNames.NOTIFICATIONS.NOTIFICATION_ADD,
-              'EVNT1',
-              "success",
-              "this is a success notification title",
-              "this is notification description"
-            )
-          );
-
-          cgpv.api.event.emit(
-            cgpv.types.notificationPayload(
-              cgpv.api.eventNames.NOTIFICATIONS.NOTIFICATION_ADD,
-              'EVNT1',
-              "info",
-              "this is an info notification",
-              "this is notification description"
-            )
-          );
-
-          cgpv.api.event.emit(
-            cgpv.types.notificationPayload(
-              cgpv.api.eventNames.NOTIFICATIONS.NOTIFICATION_ADD,
-              'EVNT1',
-              "warning",
-              "this is an warning notification",
-              "this is notification description"
-            )
-          );
-
-          cgpv.api.event.emit(
-            cgpv.types.notificationPayload(
-              cgpv.api.eventNames.NOTIFICATIONS.NOTIFICATION_ADD,
-              'EVNT1',
-              "error",
-              "this is an error notification",
-              "this is notification description"
             )
           );
         }, 20000);
