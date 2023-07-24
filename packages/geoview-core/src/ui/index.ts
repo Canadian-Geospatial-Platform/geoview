@@ -16,6 +16,7 @@ export * from './grid';
 export * from './icon-button/icon-button';
 export * from './icons';
 export * from './list';
+export * from './linear-progress/linear-progress';
 export * from './modal';
 export * from './panel';
 export * from './popover/popover';
