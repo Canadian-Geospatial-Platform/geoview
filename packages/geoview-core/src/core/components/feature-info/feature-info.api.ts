@@ -1,12 +1,12 @@
 import { createElement, ReactElement } from 'react';
 
-import { FeatureInfoLayerSet } from '../../../geo/utils/feature-info-layer-set';
-import { api } from '../../../app';
+import { FeatureInfoLayerSet } from '@/geo/utils/feature-info-layer-set';
+import { api } from '@/app';
 
 import { generateId } from '../../utils/utilities';
 
 import { FeatureInfo } from './feature-info';
-import { TypeFeatureInfoEntry } from '../../../api/events/payloads/get-feature-info-payload';
+import { TypeFeatureInfoEntry } from '@/api/events/payloads/get-feature-info-payload';
 
 /**
  * API to manage Feature Info component api

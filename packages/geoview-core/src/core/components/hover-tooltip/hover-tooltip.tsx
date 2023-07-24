@@ -5,15 +5,11 @@ import { useTheme, Theme } from '@mui/material/styles';
 
 import { getUid } from 'ol/util';
 
-import { Box } from '../../../ui';
-import { api, payloadIsAMapMouseEvent } from '../../../app';
+import { Box } from '@/ui';
+import { api, payloadIsAMapMouseEvent } from '@/app';
 import { MapContext } from '../../app-start';
-import { EVENT_NAMES } from '../../../api/events/event-types';
-import {
-  TypeFeatureInfoEntry,
-  payloadIsAllQueriesDone,
-  payloadIsHoverQueryDone,
-} from '../../../api/events/payloads/get-feature-info-payload';
+import { EVENT_NAMES } from '@/api/events/event-types';
+import { TypeFeatureInfoEntry, payloadIsAllQueriesDone, payloadIsHoverQueryDone } from '@/api/events/payloads/get-feature-info-payload';
 
 const sxClasses = {
   tooltipItem: {

@@ -1,7 +1,8 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { ExportToCsv } from 'export-to-csv';
 import { type MRT_ColumnDef as MRTColumnDef } from 'material-react-table';
-import { IconButton, DownloadIcon, Tooltip } from '../../../ui';
+import { IconButton, DownloadIcon, Tooltip } from '@/ui';
 import { ColumnsType } from './data-table';
 
 interface ExportButtonProps {
@@ -17,6 +18,7 @@ interface ExportButtonProps {
  *
  */
 function ExportButton({ dataTableData, columns }: ExportButtonProps): JSX.Element {
+  const { t } = useTranslation<string>();
   /**
    * Build CSV Options for download.
    */
@@ -40,7 +42,7 @@ function ExportButton({ dataTableData, columns }: ExportButtonProps): JSX.Elemen
 
   return (
     <IconButton onClick={handleExportData}>
-      <Tooltip title="Download All Table Data" placement="bottom" enterDelay={100}>
+      <Tooltip title={t('dataTable.exportBtn')} placement="bottom" enterDelay={100}>
         <DownloadIcon />
       </Tooltip>
     </IconButton>

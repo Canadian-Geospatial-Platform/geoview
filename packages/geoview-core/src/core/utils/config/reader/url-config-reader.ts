@@ -1,4 +1,4 @@
-import { TypeBasemapOptions } from '../../../../geo/layer/basemap/basemap-types';
+import { TypeBasemapOptions } from '@/geo/layer/basemap/basemap-types';
 import {
   TypeListOfGeoviewLayerConfig,
   TypeInteraction,
@@ -7,7 +7,7 @@ import {
   TypeValidVersions,
   TypeDisplayLanguage,
   TypeMapComponents,
-} from '../../../../geo/map/map-schema-types';
+} from '@/geo/map/map-schema-types';
 import { Cast, TypeJsonObject, TypeJsonValue, TypeMapFeaturesConfig } from '../../../types/global-types';
 import { catalogUrl } from '../config';
 import { UUIDmapConfigReader } from './uuid-config-reader';

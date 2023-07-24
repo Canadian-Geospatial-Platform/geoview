@@ -6,9 +6,9 @@ import { FitOptions } from 'ol/View';
 
 import { MapContext } from '../../../app-start';
 
-import { IconButton, EmojiPeopleIcon } from '../../../../ui';
+import { IconButton, EmojiPeopleIcon } from '@/ui';
 
-import { Coordinate, api } from '../../../../app';
+import { Coordinate, api } from '@/app';
 
 /**
  * Interface used for location button properties

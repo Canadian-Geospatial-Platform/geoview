@@ -1,8 +1,9 @@
-import makeStyles from '@mui/styles/makeStyles';
+import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { Typography, Box, Link, Theme } from '@mui/material';
 
-import { GITUHUB_REPO } from '../../../utils/constant';
-
-import { Button, GitHubIcon } from '../../../../ui';
+import { GITUHUB_REPO, GEO_URL_TEXT } from '@/core/utils/constant';
+import { GitHubIcon, Popover, IconButton } from '@/ui';
 
 // eslint-disable-next-line no-underscore-dangle
 declare const __VERSION__: TypeAppVersion;
@@ -21,61 +22,72 @@ export type TypeAppVersion = {
   timestamp: string;
 };
 
-const useStyles = makeStyles((theme) => {
-  return {
-    github: {
-      textAlign: 'center',
-      lineHeight: theme.typography.subtitle1.lineHeight,
-      '& .cgp-version': {
-        fontWeight: 'bold',
-        display: 'block',
-        fontSize: theme.typography.subtitle1.fontSize,
-      },
-      '& .cgp-timestamp': {
-        fontWeight: 'normal',
-        fontSize: theme.typography.subtitle2.fontSize,
-      },
+export default function Version(): JSX.Element {
+  const { t } = useTranslation<string>();
+
+  const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
+
+  const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
+
+  const open = Boolean(anchorEl);
+  const id = open ? 'simple-popover' : undefined;
+
+  const sxClasses = {
+    p: 7,
+    m: 7,
+    justifyContent: 'center',
+    textAlign: 'center',
+    '& a': {
+      color: (theme: Theme) => theme.palette.primary.light,
+      textDecoration: 'underLine',
     },
   };
-});
-
-interface VersionProps {
-  drawerStatus: boolean;
-}
-
-export default function Version(props: VersionProps): JSX.Element {
-  const { drawerStatus } = props;
-
-  const classes = useStyles();
-
-  function getRepo(): void {
-    window.open(GITUHUB_REPO, '_blank');
-  }
-
-  function getVersion(): string {
-    return `v.${__VERSION__.major}.${__VERSION__.minor}.${__VERSION__.patch}`;
-  }
-
-  function getTimestamp(): string {
-    return new Date(__VERSION__.timestamp).toLocaleDateString();
-  }
 
   return (
-    <Button
-      id="version-button"
-      variant="text"
-      tooltip="appbar.version"
-      tooltipPlacement="right"
-      type="textWithIcon"
-      onClick={() => getRepo()}
-      icon={<GitHubIcon />}
-      className=""
-      state={drawerStatus ? 'expanded' : 'collapsed'}
-    >
-      <div className={classes.github}>
-        <span className="cgp-version">{getVersion()}</span>
-        <span className="cgp-timestamp">{getTimestamp()}</span>
-      </div>
-    </Button>
+    <>
+      <IconButton
+        aria-describedby={id}
+        id="version-button"
+        tooltip="appbar.version"
+        tooltipPlacement="bottom-end"
+        onClick={handleClick}
+        className={open ? 'active' : ''}
+      >
+        <GitHubIcon />
+      </IconButton>
+      <Popover
+        id={id}
+        open={open}
+        anchorEl={anchorEl}
+        onClose={handleClose}
+        anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+        transformOrigin={{ vertical: 'bottom', horizontal: 'left' }}
+      >
+        <Box sx={sxClasses}>
+          <Typography component="div">
+            <Typography component="div">{t('appbar.version')}</Typography>
+            <hr />
+            <Typography component="div">
+              <Link rel="noopener" href={GEO_URL_TEXT.url} target="_black">
+                {GEO_URL_TEXT.text}
+              </Link>
+            </Typography>
+            <Typography component="div">
+              <Link rel="noopener" href={GITUHUB_REPO} target="_black">
+                {t('appbar.repoLink')}
+              </Link>
+            </Typography>
+            <Typography component="div">{`v.${__VERSION__.major}.${__VERSION__.minor}.${__VERSION__.patch}`}</Typography>
+            <Typography component="div">{new Date(__VERSION__.timestamp).toLocaleDateString()}</Typography>
+          </Typography>
+        </Box>
+      </Popover>
+    </>
   );
 }

@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   MaterialReactTable,
   type MRT_ColumnDef as MRTColumnDef,
@@ -11,7 +12,8 @@ import {
 } from 'material-react-table';
 import { Extent } from 'ol/extent';
 import { Geometry } from 'ol/geom';
-import { Box, IconButton, ZoomInSearchIcon } from '../../../ui';
+import { darken } from '@mui/material';
+import { Box, IconButton, ZoomInSearchIcon } from '@/ui';
 import ExportButton from './export-button';
 
 export interface Features {
@@ -57,6 +59,8 @@ export interface Rows {
 }
 
 function DataTable({ data }: DataTableProps) {
+  const { t } = useTranslation<string>();
+
   // optionally access the underlying virtualizer instance
   const rowVirtualizerInstanceRef = useRef<MRTVirtualizer<HTMLDivElement, HTMLTableRowElement>>(null);
 
@@ -76,11 +80,11 @@ function DataTable({ data }: DataTableProps) {
    * @param {object} data.fieldAliases object values transformed into required key value property of material react data table
    */
   const columns = useMemo<MRTColumnDef<ColumnsType>[]>(() => {
-    return Object.values({ icon: 'ICON', zoom: 'ZOOM', ...data.fieldAliases }).map((fieldAlias) => {
+    return Object.values({ icon: t('dataTable.icon'), zoom: t('dataTable.zoom'), ...data.fieldAliases }).map((fieldAlias) => {
       return {
         accessorKey: fieldAlias,
         header: fieldAlias,
-        ...(['ICON', 'ZOOM'].includes(fieldAlias) && { size: 100 }),
+        ...([t('dataTable.icon'), t('dataTable.zoom')].includes(fieldAlias) && { size: 100 }),
       };
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -114,7 +118,7 @@ function DataTable({ data }: DataTableProps) {
         enableGlobalFilter={false}
         enableRowSelection
         initialState={{
-          columnPinning: { left: ['ICON', 'ZOOM'] },
+          columnPinning: { left: [t('dataTable.icon'), t('dataTable.zoom')] },
           density: 'compact',
           pagination: { pageSize: 10, pageIndex: 0 },
         }}
@@ -140,6 +144,20 @@ function DataTable({ data }: DataTableProps) {
         rowVirtualizerInstanceRef={rowVirtualizerInstanceRef}
         rowVirtualizerProps={{ overscan: 5 }}
         columnVirtualizerProps={{ overscan: 2 }}
+        muiTableBodyProps={{
+          sx: (theme) => ({
+            // stripe style of table
+            '& tr:nth-of-type(odd)': {
+              backgroundColor: darken(theme.palette.background.default, 0.1),
+            },
+            '& tr:hover > td': {
+              backgroundColor: '#00ffff14',
+            },
+            '& td': {
+              backgroundColor: 'inherit',
+            },
+          }),
+        }}
       />
     </Box>
   );

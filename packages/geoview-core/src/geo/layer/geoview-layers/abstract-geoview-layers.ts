@@ -11,7 +11,7 @@ import Geometry from 'ol/geom/Geometry';
 
 import cloneDeep from 'lodash/cloneDeep';
 
-import { generateId, getLocalizedValue } from '../../../core/utils/utilities';
+import { generateId, getLocalizedValue } from '@/core/utils/utilities';
 import {
   TypeGeoviewLayerConfig,
   TypeListOfLayerEntryConfig,
@@ -37,16 +37,16 @@ import {
   TypeArrayOfFeatureInfoEntries,
   TypeFeatureInfoEntry,
   TypeQueryType,
-} from '../../../api/events/payloads/get-feature-info-payload';
-import { snackbarMessagePayload } from '../../../api/events/payloads/snackbar-message-payload';
-import { api } from '../../../app';
-import { EVENT_NAMES } from '../../../api/events/event-types';
-import { TypeJsonObject } from '../../../core/types/global-types';
+} from '@/api/events/payloads/get-feature-info-payload';
+import { snackbarMessagePayload } from '@/api/events/payloads/snackbar-message-payload';
+import { api } from '@/app';
+import { EVENT_NAMES } from '@/api/events/event-types';
+import { TypeJsonObject } from '@/core/types/global-types';
 import { Layer } from '../layer';
-import { LayerSetPayload, payloadIsRequestLayerInventory } from '../../../api/events/payloads/layer-set-payload';
-import { GetLegendsPayload, payloadIsQueryLegend } from '../../../api/events/payloads/get-legends-payload';
-import { TimeDimension, TypeDateFragments } from '../../../core/utils/date-mgt';
-import { TypeEventHandlerFunction } from '../../../api/events/event';
+import { LayerSetPayload, payloadIsRequestLayerInventory } from '@/api/events/payloads/layer-set-payload';
+import { GetLegendsPayload, payloadIsQueryLegend } from '@/api/events/payloads/get-legends-payload';
+import { TimeDimension, TypeDateFragments } from '@/core/utils/date-mgt';
+import { TypeEventHandlerFunction } from '@/api/events/event';
 
 export type TypeLegend = {
   layerPath: string;

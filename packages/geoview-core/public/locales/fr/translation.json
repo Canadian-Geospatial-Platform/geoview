@@ -40,7 +40,8 @@
     "help": "Aide",
     "layers": "Couches",
     "share": "Partager",
-    "version": "Accéder au repo sur GitHub"
+    "version": "À propos de GéoView",
+    "repoLink": "Lien repo"
   },
   "legend": {
     "unknown": "Titre de légende inconnu",
@@ -98,5 +99,10 @@
   },
   "hovertooltip": {
     "alticon": "Symbol de l'élément sélectionné"
+  },
+  "dataTable": {
+    "icon": "ICÔNE",
+    "zoom": "ZOOM",
+    "exportBtn": "Exporter"
   }
 }

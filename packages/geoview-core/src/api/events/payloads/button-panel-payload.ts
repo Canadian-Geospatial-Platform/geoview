@@ -1,7 +1,7 @@
 import { PayloadBaseClass } from './payload-base-class';
 
 import { EventStringId, EVENT_NAMES } from '../event-types';
-import { TypeButtonPanel } from '../../../ui/panel/panel-types';
+import { TypeButtonPanel } from '@/ui/panel/panel-types';
 
 /** Valid events that can create ButtonPanelPayload */
 const validEvents: EventStringId[] = [

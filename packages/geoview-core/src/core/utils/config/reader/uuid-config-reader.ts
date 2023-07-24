@@ -9,21 +9,21 @@ import {
   TypeOfServer,
   TypeOgcWmsLayerEntryConfig,
   TypeTileGrid,
-} from '../../../../geo/map/map-schema-types';
-import { CONST_LAYER_TYPES } from '../../../../geo/layer/geoview-layers/abstract-geoview-layers';
-import { TypeEsriDynamicLayerConfig } from '../../../../geo/layer/geoview-layers/raster/esri-dynamic';
-import { TypeEsriFeatureLayerConfig, TypeEsriFeatureLayerEntryConfig } from '../../../../geo/layer/geoview-layers/vector/esri-feature';
-import { TypeImageStaticLayerConfig } from '../../../../geo/layer/geoview-layers/raster/image-static';
-import { TypeWMSLayerConfig } from '../../../../geo/layer/geoview-layers/raster/wms';
-import { TypeWFSLayerConfig, TypeWfsLayerEntryConfig } from '../../../../geo/layer/geoview-layers/vector/wfs';
-import { TypeOgcFeatureLayerConfig, TypeOgcFeatureLayerEntryConfig } from '../../../../geo/layer/geoview-layers/vector/ogc-feature';
-import { TypeGeoJSONLayerConfig, TypeGeoJSONLayerEntryConfig } from '../../../../geo/layer/geoview-layers/vector/geojson';
-import { TypeGeoPackageLayerConfig, TypeGeoPackageLayerEntryConfig } from '../../../../geo/layer/geoview-layers/vector/geopackage';
-import { TypeXYZTilesConfig, TypeXYZTilesLayerEntryConfig } from '../../../../geo/layer/geoview-layers/raster/xyz-tiles';
-import { TypeVectorTilesConfig, TypeVectorTilesLayerEntryConfig } from '../../../../geo/layer/geoview-layers/raster/vector-tiles';
-import { api } from '../../../../app';
-import { EVENT_NAMES } from '../../../../api/events/event-types';
-import { snackbarMessagePayload } from '../../../../api/events/payloads/snackbar-message-payload';
+} from '@/geo/map/map-schema-types';
+import { CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
+import { TypeEsriDynamicLayerConfig } from '@/geo/layer/geoview-layers/raster/esri-dynamic';
+import { TypeEsriFeatureLayerConfig, TypeEsriFeatureLayerEntryConfig } from '@/geo/layer/geoview-layers/vector/esri-feature';
+import { TypeImageStaticLayerConfig } from '@/geo/layer/geoview-layers/raster/image-static';
+import { TypeWMSLayerConfig } from '@/geo/layer/geoview-layers/raster/wms';
+import { TypeWFSLayerConfig, TypeWfsLayerEntryConfig } from '@/geo/layer/geoview-layers/vector/wfs';
+import { TypeOgcFeatureLayerConfig, TypeOgcFeatureLayerEntryConfig } from '@/geo/layer/geoview-layers/vector/ogc-feature';
+import { TypeGeoJSONLayerConfig, TypeGeoJSONLayerEntryConfig } from '@/geo/layer/geoview-layers/vector/geojson';
+import { TypeGeoPackageLayerConfig, TypeGeoPackageLayerEntryConfig } from '@/geo/layer/geoview-layers/vector/geopackage';
+import { TypeXYZTilesConfig, TypeXYZTilesLayerEntryConfig } from '@/geo/layer/geoview-layers/raster/xyz-tiles';
+import { TypeVectorTilesConfig, TypeVectorTilesLayerEntryConfig } from '@/geo/layer/geoview-layers/raster/vector-tiles';
+import { api } from '@/app';
+import { EVENT_NAMES } from '@/api/events/event-types';
+import { snackbarMessagePayload } from '@/api/events/payloads/snackbar-message-payload';
 
 // ******************************************************************************************************************************
 // ******************************************************************************************************************************

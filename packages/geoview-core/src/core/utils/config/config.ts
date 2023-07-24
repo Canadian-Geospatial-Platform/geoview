@@ -1,6 +1,6 @@
 /* eslint-disable no-console */
-import { TypeDisplayLanguage, TypeListOfLayerEntryConfig } from '../../../geo/map/map-schema-types';
-import { CONST_LAYER_ENTRY_TYPE, TypeGeoviewLayerType } from '../../../geo/layer/geoview-layers/abstract-geoview-layers';
+import { TypeDisplayLanguage, TypeListOfLayerEntryConfig } from '@/geo/map/map-schema-types';
+import { CONST_LAYER_ENTRY_TYPE, TypeGeoviewLayerType } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { TypeMapFeaturesConfig } from '../../types/global-types';
 import { ConfigValidation } from './config-validation';
 import { InlineDivConfigReader } from './reader/div-config-reader';

@@ -18,6 +18,7 @@ export * from './list';
 export * from './linear-progress/linear-progress';
 export * from './modal';
 export * from './panel';
+export * from './popover/popover';
 export * from './select/select';
 export * from './slider/slider';
 export * from './slider/slider-base';
