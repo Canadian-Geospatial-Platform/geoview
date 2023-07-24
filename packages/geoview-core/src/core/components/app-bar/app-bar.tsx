@@ -4,7 +4,7 @@ import makeStyles from '@mui/styles/makeStyles';
 
 import { List, ListItem, Panel, IconButton } from '@/ui';
 
-import { api } from '@/app';
+import { api, PayloadBaseClass } from '@/app';
 import { EVENT_NAMES } from '@/api/events/event-types';
 
 import { MapContext } from '../../app-start';
