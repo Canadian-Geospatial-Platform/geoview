@@ -4,7 +4,7 @@ import makeStyles from '@mui/styles/makeStyles';
 
 import { List, ListItem, Panel, IconButton } from '@/ui';
 
-import { api } from '@/app';
+import { api, PayloadBaseClass } from '@/app';
 import { EVENT_NAMES } from '@/api/events/event-types';
 
 import { MapContext } from '../../app-start';
@@ -131,6 +131,18 @@ export function Appbar({ setActivetrap }: AppbarProps): JSX.Element {
     setNotifPopoverAnchorEl(null);
   };
 
+  const onNotificationAddEvent = (payload: PayloadBaseClass) => {
+    if (payloadIsANotification(payload)) {
+      setNotificationsCount(notificationsCount + 1);
+    }
+  };
+
+  const onNotificationRemoveEvent = (payload: PayloadBaseClass) => {
+    if (payloadIsANotification(payload)) {
+      setNotificationsCount(notificationsCount - 1);
+    }
+  };
+
   const addButtonPanel = useCallback(
     (payload: ButtonPanelPayload) => {
       setButtonPanelGroups({
@@ -191,31 +203,17 @@ export function Appbar({ setActivetrap }: AppbarProps): JSX.Element {
     );
 
     // listen to notifications add
-    api.event.on(
-      EVENT_NAMES.NOTIFICATIONS.NOTIFICATION_ADD,
-      (payload) => {
-        if (payloadIsANotification(payload)) {
-          setNotificationsCount(notificationsCount + 1);
-        }
-      },
-      mapId
-    );
+    api.event.on(EVENT_NAMES.NOTIFICATIONS.NOTIFICATION_ADD, onNotificationAddEvent, mapId);
 
     // listen to notifications add
-    api.event.on(
-      EVENT_NAMES.NOTIFICATIONS.NOTIFICATION_REMOVE,
-      (payload) => {
-        if (payloadIsANotification(payload)) {
-          setNotificationsCount(notificationsCount - 1);
-        }
-      },
-      mapId
-    );
+    api.event.on(EVENT_NAMES.NOTIFICATIONS.NOTIFICATION_REMOVE, onNotificationRemoveEvent, mapId);
 
     return () => {
       api.event.off(EVENT_NAMES.APPBAR.EVENT_APPBAR_PANEL_CREATE, mapId);
       api.event.off(EVENT_NAMES.APPBAR.EVENT_APPBAR_PANEL_REMOVE, mapId);
       api.event.off(EVENT_NAMES.PANEL.EVENT_PANEL_CLOSE, mapId);
+      api.event.off(EVENT_NAMES.NOTIFICATIONS.NOTIFICATION_REMOVE, mapId, onNotificationRemoveEvent);
+      api.event.off(EVENT_NAMES.NOTIFICATIONS.NOTIFICATION_ADD, mapId, onNotificationAddEvent);
     };
   }, [addButtonPanel, mapId, removeButtonPanel, notificationsCount, selectedAppBarButtonId]);
 
