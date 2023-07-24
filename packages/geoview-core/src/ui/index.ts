@@ -11,6 +11,7 @@ export * from './checkbox/checkbox';
 export * from './divider/divider';
 export * from './drawer/drawer';
 export * from './fade/fade';
+export * from './svg/geo-ca-icon';
 export * from './grid';
 export * from './icon-button/icon-button';
 export * from './icons';
