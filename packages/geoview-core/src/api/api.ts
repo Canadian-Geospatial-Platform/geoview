@@ -1,23 +1,23 @@
 import { EVENT_NAMES } from './events/event-types';
 import { Event } from './events/event';
 
-import { Projection, PROJECTION_NAMES } from '../geo/projection/projection';
+import { Projection, PROJECTION_NAMES } from '@/geo/projection/projection';
 
-import { MapViewer } from '../geo/map/map';
+import { MapViewer } from '@/geo/map/map';
 
 import { Plugin } from './plugin/plugin';
-import { GeoUtilities } from '../geo/utils/utilities';
-import { DateMgt } from '../core/utils/date-mgt';
+import { GeoUtilities } from '@/geo/utils/utilities';
+import { DateMgt } from '@/core/utils/date-mgt';
 
-import { CONST_LAYER_TYPES } from '../geo/layer/geoview-layers/abstract-geoview-layers';
+import { CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import * as MarkerDefinitions from '../core/types/marker-definitions';
 import * as Utilities from '../core/utils/utilities';
 // TODO: Refactor - Remove this following import and the class attributes, now that we have the higher level utilities import :)
-import { generateId, addUiComponent, showMessage } from '../core/utils/utilities';
-import { FeatureInfoLayerSet } from '../geo/utils/feature-info-layer-set';
-import { LegendsLayerSet } from '../geo/utils/legends-layer-set';
+import { generateId, addUiComponent, showMessage } from '@/core/utils/utilities';
+import { FeatureInfoLayerSet } from '@/geo/utils/feature-info-layer-set';
+import { LegendsLayerSet } from '@/geo/utils/legends-layer-set';
 import { GeoViewLayerPayload, payloadIsTestGeoViewLayers } from './events/payloads/geoview-layer-payload';
-import { createMapFromConfig } from '../core/utils/create-map-from-config';
+import { createMapFromConfig } from '@/core/utils/create-map-from-config';
 
 /**
  * Class used to handle api calls (events, functions etc...)

@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import Button from '@mui/material/Button';
 import { Extent } from 'ol/extent';
 import { Geometry } from 'ol/geom';
-import { Switch } from '../../../ui';
+import { Switch } from '@/ui';
 import ExportButton from './export-button';
 
 export interface Rows {

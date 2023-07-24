@@ -197,6 +197,7 @@
   <hr />
   <button type="button" class="collapsible">Code Snippet</button>
   <pre id="codeSnippet" class="panel"></pre>
+  <!-- /ALL -->
 
   <script>
     let groupInteractions = {
@@ -205,7 +206,7 @@
 
     let map1;
     function initMap1(map) {
-      // Keep reference
+      // Keep reference and nothing else, rest is driven by the user interface
       map1 = map;
     }
 
@@ -325,12 +326,7 @@
         snap.stopInteraction();
       }
     }
-    </script>
 
-  <!-- /ALL -->
-
-  <script>
-    // COMMON SCRIPT(!)
     // initialize cgpv and api events, a callback is optional, used if calling api's after the rendering is ready
     cgpv.init(function (mapId) {
       // If all maps initialized
@@ -349,6 +345,10 @@
             },
             mapId1
         );
+
+        //create snippets
+        createCodeSnippet();
+        createConfigSnippet();
       }
     });
 

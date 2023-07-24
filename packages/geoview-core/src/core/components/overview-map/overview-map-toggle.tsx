@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 
 import makeStyles from '@mui/styles/makeStyles';
 
-import { ChevronLeftIcon, Tooltip } from '../../../ui';
+import { ChevronLeftIcon, Tooltip } from '@/ui';
 
 const useStyles = makeStyles((theme) => ({
   toggleBtn: {
@@ -89,7 +89,7 @@ export function OverviewMapToggle(props: OverviewMapToggleProps): JSX.Element {
 
   return (
     <Tooltip title={t('mapctrl.overviewmap.toggle')!}>
-      <div ref={divRef} className={`${classes.toggleBtnContainer}`}>
+      <div ref={divRef} className={classes.toggleBtnContainer}>
         <div
           className={`${classes.toggleBtn} ${!status ? classes.minimapOpen : classes.minimapClosed}`}
           style={{

@@ -3,9 +3,9 @@ import { SelectEvent as OLSelectEvent, Options as OLSelectOptions } from 'ol/int
 import Collection from 'ol/Collection';
 import Feature from 'ol/Feature';
 import { Interaction, InteractionOptions } from './interaction';
-import { api } from '../../app';
-import { EVENT_NAMES } from '../../api/events/event-types';
-import { selectPayload } from '../../api/events/payloads/inter-select-payload';
+import { api } from '@/app';
+import { EVENT_NAMES } from '@/api/events/event-types';
+import { selectPayload } from '@/api/events/payloads/inter-select-payload';
 import { TypeFeatureStyle } from '../layer/vector/vector-types';
 import { GeoUtilities } from '../utils/utilities';
 

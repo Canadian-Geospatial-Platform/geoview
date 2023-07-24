@@ -1,8 +1,7 @@
 /* eslint-disable react/require-default-props */
-import React, { useEffect, useState, useRef, MutableRefObject, RefObject } from 'react';
+import React, { useEffect, useState, useRef, MutableRefObject, RefObject, Dispatch, SetStateAction } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useTheme, Theme } from '@mui/material/styles';
-import Grid from '@mui/material/Grid';
 import { transformExtent } from 'ol/proj';
 import { Extent } from 'ol/extent';
 import {
@@ -28,8 +27,9 @@ import {
   CheckIcon,
   MoreHorizIcon,
   BrowserNotSupportedIcon,
-} from '../../../ui';
-import { api, EsriDynamic, payloadIsLegendInfo, NumberPayload, PayloadBaseClass } from '../../../app';
+  Grid,
+} from '@/ui';
+import { api, EsriDynamic, payloadIsLegendInfo, NumberPayload, PayloadBaseClass } from '@/app';
 import { LegendIconList } from './legend-icon-list';
 import {
   AbstractGeoViewLayer,
@@ -37,7 +37,8 @@ import {
   isVectorLegend,
   isWmsLegend,
   isImageStaticLegend,
-} from '../../../geo/layer/geoview-layers/abstract-geoview-layers';
+  TypeWmsLegendStyle,
+} from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import {
   TypeClassBreakStyleConfig,
   TypeListOfLayerEntryConfig,
@@ -50,9 +51,10 @@ import {
   isClassBreakStyleConfig,
   isUniqueValueStyleConfig,
   layerEntryIsGroupLayer,
-} from '../../../geo/map/map-schema-types';
-import { AbstractGeoViewVector } from '../../../geo/layer/geoview-layers/vector/abstract-geoview-vector';
+} from '@/geo/map/map-schema-types';
+import { AbstractGeoViewVector } from '@/geo/layer/geoview-layers/vector/abstract-geoview-vector';
 import { disableScrolling } from '../../utils/utilities';
+import { WMSStyleItem } from './WMS-style-item';
 
 const sxClasses = {
   expandableGroup: {
@@ -183,6 +185,8 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
   const [isGroupOpen, setGroupOpen] = useState(true);
   const [isLegendOpen, setLegendOpen] = useState(true);
   const [groupItems, setGroupItems] = useState<TypeListOfLayerEntryConfig>([]);
+  const [WMSStyles, setWMSStyles] = useState<TypeWmsLegendStyle[]>([]);
+  const [currentWMSStyle, setCurrentWMSStyle] = useState<string>();
   const [iconType, setIconType] = useState<string | null>(null);
   const [iconImg, setIconImg] = useState<string | null>(null);
   const [iconImgStacked, setIconImgStacked] = useState<string | null>(null);
@@ -223,8 +227,12 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
     const { geoviewLayerId } = geoviewLayerInstance;
     if (layerLegend) {
       if (layerLegend.legend === null) setIconImg('no data');
-      // WMS layers just return a string
+      // WMS layers just return a string and get styles
       if (isWmsLegend(layerLegend) || isImageStaticLegend(layerLegend)) {
+        if (isWmsLegend(layerLegend) && layerLegend.styles) {
+          setWMSStyles(layerLegend.styles);
+          setCurrentWMSStyle(layerLegend.styles[0].name);
+        }
         setIconType('simple');
         if (layerLegend.legend) setIconImg(layerLegend.legend?.toDataURL());
       } else if (isVectorLegend(layerLegend) && layerLegend.legend) {
@@ -503,7 +511,7 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
       <ListItem>
         <ListItemButton>
           <ListItemIcon>
-            {groupItems.length > 0 && (
+            {(groupItems.length > 0 || WMSStyles.length) && (
               <IconButton color="primary" onClick={handleExpandGroupClick}>
                 {isGroupOpen ? <ExpandMoreIcon /> : <ExpandLessIcon />}
               </IconButton>
@@ -519,7 +527,7 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
                 {iconList || iconImg !== null ? <CloseIcon /> : <MoreHorizIcon />}
               </IconButton>
             )}
-            {iconType === 'simple' && iconImg !== null && !isLegendOpen && (
+            {iconType === 'simple' && iconImg !== null && !isLegendOpen && !WMSStyles.length && (
               <IconButton
                 sx={sxClasses.iconPreview}
                 color="primary"
@@ -556,7 +564,7 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
                 </Box>
               </Tooltip>
             )}
-            {groupItems.length === 0 && !iconType && !isLegendOpen && (
+            {groupItems.length === 0 && WMSStyles.length === 0 && !iconType && !isLegendOpen && (
               <IconButton sx={sxClasses.iconPreview} color="primary" size="small" onClick={handleLegendClick}>
                 <TodoIcon />
               </IconButton>
@@ -566,7 +574,7 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
             <ListItemText primary={layerName} onClick={handleExpandGroupClick} />
           </Tooltip>
           <ListItemIcon style={{ justifyContent: 'right' }}>
-            {(isRemoveable || (canSetOpacity && groupItems.length === 0)) && (
+            {(isRemoveable || (canSetOpacity && groupItems.length === 0 && WMSStyles.length === 0)) && (
               <IconButton id="setOpacityBtn" onClick={handleMoreClick} aria-label="more" aria-haspopup="true">
                 <MoreVertIcon />
               </IconButton>
@@ -592,7 +600,7 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
       >
         {/* Add more layer options here - zoom to, reorder */}
         {isRemoveable && <MenuItem onClick={handleRemoveLayer}>{t('legend.remove_layer')}</MenuItem>}
-        {canSetOpacity && groupItems.length === 0 && (
+        {canSetOpacity && groupItems.length === 0 && WMSStyles.length === 0 && (
           <MenuItem onClick={handleOpacityOpen}>
             <ListItemText>{t('legend.toggle_opacity')}</ListItemText>
             {isOpacityOpen && (
@@ -667,6 +675,19 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
                 expandAll={expandAll}
                 hideAll={hideAll}
                 canZoomTo={canZoomTo}
+              />
+            ))}
+          </Box>
+          <Box sx={sxClasses.expandableIconContainer}>
+            {WMSStyles.map((style) => (
+              <WMSStyleItem
+                key={`${layerId}-${style.name}`}
+                layerId={layerId}
+                mapId={mapId}
+                subLayerId={subLayerId}
+                style={style}
+                currentWMSStyle={currentWMSStyle}
+                setCurrentWMSStyle={setCurrentWMSStyle as Dispatch<SetStateAction<string>>}
               />
             ))}
           </Box>

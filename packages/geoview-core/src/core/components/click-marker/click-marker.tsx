@@ -13,14 +13,14 @@ import CircleStyle from 'ol/style/Circle';
 import { getUid } from 'ol';
 import { MapContext } from '../../app-start';
 
-import { PayloadBaseClass, TypeFeatureInfoEntry, api, payloadIsAllQueriesDone } from '../../../app';
-import { EVENT_NAMES } from '../../../api/events/event-types';
-import { ClickMapMarker } from '../../../ui';
+import { PayloadBaseClass, TypeFeatureInfoEntry, api, payloadIsAllQueriesDone } from '@/app';
+import { EVENT_NAMES } from '@/api/events/event-types';
+import { ClickMapMarker } from '@/ui';
 
-import { payloadIsAMarkerDefinition } from '../../../api/events/payloads/marker-definition-payload';
-import { payloadIsAMapMouseEvent } from '../../../api/events/payloads/map-mouse-event-payload';
-import { featureHighlightPayload, payloadIsAFeatureHighlight } from '../../../api/events/payloads/feature-highlight-payload';
-import { clearHighlightsPayload, payloadIsAClearHighlights } from '../../../api/events/payloads/clear-highlights-payload';
+import { payloadIsAMarkerDefinition } from '@/api/events/payloads/marker-definition-payload';
+import { payloadIsAMapMouseEvent } from '@/api/events/payloads/map-mouse-event-payload';
+import { featureHighlightPayload, payloadIsAFeatureHighlight } from '@/api/events/payloads/feature-highlight-payload';
+import { clearHighlightsPayload, payloadIsAClearHighlights } from '@/api/events/payloads/clear-highlights-payload';
 
 /**
  * Create a react element to display a marker when a user clicks on
@@ -375,7 +375,7 @@ export function ClickMarker(): JSX.Element {
   }, []);
 
   return (
-    <div ref={clickMarkerRef} id={clickMarkerId} style={{ visibility: showMarker ? 'visible' : 'hidden' }}>
+    <div ref={clickMarkerRef} id={clickMarkerId} style={{ position: 'absolute', visibility: showMarker ? 'visible' : 'hidden' }}>
       <ClickMapMarker fontSize="medium" color="action" />
     </div>
   );

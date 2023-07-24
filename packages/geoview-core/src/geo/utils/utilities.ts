@@ -1,17 +1,21 @@
 import axios from 'axios';
 
-import { WMSCapabilities, WKT } from 'ol/format';
+import { WMSCapabilities, WKT, GeoJSON } from 'ol/format';
+import { ReadOptions } from 'ol/format/Feature';
 import { Geometry } from 'ol/geom';
+import { Extent } from 'ol/extent';
+import { transformExtent } from 'ol/proj';
 import { Style, Stroke, Fill, Circle } from 'ol/style';
 import { Color } from 'ol/color';
+import { getArea as getAreaOL } from 'ol/sphere';
 
-import { Cast, TypeJsonObject } from '../../core/types/global-types';
+import { Cast, TypeJsonObject } from '@/core/types/global-types';
 import { TypeFeatureStyle } from '../layer/vector/vector-types';
-import { xmlToJson } from '../../core/utils/utilities';
+import { xmlToJson } from '@/core/utils/utilities';
 
-import { api } from '../../app';
-import { EVENT_NAMES } from '../../api/events/event-types';
-import { inKeyfocusPayload } from '../../api/events/payloads/in-keyfocus-payload';
+import { api } from '@/app';
+import { EVENT_NAMES } from '@/api/events/event-types';
+import { inKeyfocusPayload } from '@/api/events/payloads/in-keyfocus-payload';
 
 /**
  * Interface used for css style declarations
@@ -22,7 +26,7 @@ interface TypeCSSStyleDeclaration extends CSSStyleDeclaration {
 
 export class GeoUtilities {
   /**
-   * Returns the WKT representation of a given geoemtry
+   * Returns the WKT representation of a given geometry
    * @function geometryToWKT
    * @param {string} geometry the geometry
    * @returns {string | null} the WKT representation of the geometry
@@ -35,6 +39,51 @@ export class GeoUtilities {
       return format.writeGeometry(geometry);
     }
     return null;
+  };
+
+  /**
+   * Returns the Geometry representation of a given wkt
+   * @function wktToGeometry
+   * @param {string} wkt the well known text
+   * @param {ReadOptions} readOptions read options to convert the wkt to a geometry
+   * @returns {Geometry | null} the Geometry representation of the wkt
+   */
+  wktToGeometry = (wkt: string, readOptions: ReadOptions): Geometry | null => {
+    // TODO: Refactoring - This method should be static, but since it goes through the api instance to be importable afterwards it loses non static methods. For this reason, I've left it like this. See api.constructor: this.geoUtilities = new GeoUtilities();
+    if (wkt) {
+      // Get the feature for the wkt
+      const format = new WKT();
+      return format.readGeometry(wkt, readOptions);
+    }
+    return null;
+  };
+
+  /**
+   * Returns the Geometry representation of a given geojson
+   * @function geojsonToGeometry
+   * @param {string} geojson the geojson
+   * @param {ReadOptions} readOptions read options to convert the geojson to a geometry
+   * @returns {Geometry | null} the Geometry representation of the geojson
+   */
+  geojsonToGeometry = (geojson: string, readOptions: ReadOptions): Geometry | null => {
+    // TODO: Refactoring - This method should be static, but since it goes through the api instance to be importable afterwards it loses non static methods. For this reason, I've left it like this. See api.constructor: this.geoUtilities = new GeoUtilities();
+    if (geojson) {
+      // Get the feature for the geojson
+      const format = new GeoJSON();
+      return format.readGeometry(geojson, readOptions);
+    }
+    return null;
+  };
+
+  /**
+   * Returns the Geometry representation of a given geojson
+   * @function geojsonToGeometry
+   * @param {string} geojson the geojson
+   * @param {ReadOptions} readOptions read options to convert the geojson to a geometry
+   * @returns {Geometry | null} the Geometry representation of the geojson
+   */
+  getExtent = (coordinates: number[], inCrs: number, outCrs: number): Extent => {
+    return transformExtent(coordinates, `EPSG:${inCrs}`, `EPSG:${outCrs}`);
   };
 
   /**
@@ -62,6 +111,15 @@ export class GeoUtilities {
         }),
       }),
     });
+  };
+
+  /**
+   * Gets the area of a given geometry
+   * @param {Geometry} geometry the geometry to calculate the area
+   * @returns the area of the given geometry
+   */
+  getArea = (geometry: Geometry): number => {
+    return getAreaOL(geometry);
   };
 
   /**

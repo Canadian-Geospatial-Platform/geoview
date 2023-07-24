@@ -2,18 +2,8 @@
 import React, { useState, useEffect } from 'react';
 import { useTheme, Theme } from '@mui/material/styles';
 import Box from '@mui/material/Box';
-import { api } from '../../../app';
-import {
-  List,
-  ListItem,
-  ListItemButton,
-  ListItemIcon,
-  ListItemText,
-  Tooltip,
-  IconButton,
-  CheckBoxOutIcon,
-  CheckBoxIcon,
-} from '../../../ui';
+import { api } from '@/app';
+import { List, ListItem, ListItemButton, ListItemIcon, ListItemText, Tooltip, IconButton, CheckBoxOutIcon, CheckBoxIcon } from '@/ui';
 import {
   TypeClassBreakStyleConfig,
   TypeLayerEntryConfig,

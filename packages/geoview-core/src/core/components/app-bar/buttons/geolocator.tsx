@@ -1,8 +1,8 @@
 import { useState } from 'react';
 
-import { api, booleanPayload } from '../../../../app';
-import { EVENT_NAMES } from '../../../../api/events/event-types';
-import { IconButton, SearchIcon } from '../../../../ui';
+import { api, booleanPayload } from '@/app';
+import { EVENT_NAMES } from '@/api/events/event-types';
+import { IconButton, SearchIcon } from '@/ui';
 
 /**
  * Interface used for geolocator button properties

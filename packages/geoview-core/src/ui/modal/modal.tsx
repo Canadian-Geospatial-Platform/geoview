@@ -14,15 +14,15 @@ import DialogTitle from '@mui/material/DialogTitle';
 import DialogContent from '@mui/material/DialogContent';
 import DialogActions from '@mui/material/DialogActions';
 
-import { TypeJsonObject } from '../../core/types/global-types';
-import { HtmlToReact } from '../../core/containers/html-to-react';
+import { TypeJsonObject } from '@/core/types/global-types';
+import { HtmlToReact } from '@/core/containers/html-to-react';
 
-import { EVENT_NAMES } from '../../api/events/event-types';
-import { api } from '../../app';
+import { EVENT_NAMES } from '@/api/events/event-types';
+import { api } from '@/app';
 
 import { TypeModalProps } from '.';
 import { CloseIcon, IconButton } from '..';
-import { payloadIsAModal } from '../../api/events/payloads/modal-payload';
+import { payloadIsAModal } from '@/api/events/payloads/modal-payload';
 
 /**
  * Customized Material UI Dialog Properties

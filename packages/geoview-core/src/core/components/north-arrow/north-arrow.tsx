@@ -10,15 +10,15 @@ import makeStyles from '@mui/styles/makeStyles';
 
 import debounce from 'lodash/debounce';
 
-import { PROJECTION_NAMES } from '../../../geo/projection/projection';
+import { PROJECTION_NAMES } from '@/geo/projection/projection';
 
 import { NorthArrowIcon, NorthPoleIcon } from './north-arrow-icon';
 
 import { MapContext } from '../../app-start';
-import { api } from '../../../app';
-import { EVENT_NAMES } from '../../../api/events/event-types';
-import { payloadIsAMapViewProjection } from '../../../api/events/payloads/map-view-projection-payload';
-import { payloadIsABoolean } from '../../../api/events/payloads/boolean-payload';
+import { api } from '@/app';
+import { EVENT_NAMES } from '@/api/events/event-types';
+import { payloadIsAMapViewProjection } from '@/api/events/payloads/map-view-projection-payload';
+import { payloadIsABoolean } from '@/api/events/payloads/boolean-payload';
 
 const useStyles = makeStyles((theme) => ({
   northArrowContainer: {

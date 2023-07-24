@@ -13,13 +13,13 @@ import Location from './buttons/location';
 
 import ExportModal from '../export/export-modal';
 
-import { api, payloadIsABoolean } from '../../../app';
-import { Panel, ButtonGroup, IconButton, Box } from '../../../ui';
+import { api, payloadIsABoolean } from '@/app';
+import { Panel, ButtonGroup, IconButton, Box } from '@/ui';
 
 import { MapContext } from '../../app-start';
-import { EVENT_NAMES } from '../../../api/events/event-types';
-import { payloadIsAButtonPanel, ButtonPanelPayload } from '../../../api/events/payloads/button-panel-payload';
-import { TypeButtonPanel } from '../../../ui/panel/panel-types';
+import { EVENT_NAMES } from '@/api/events/event-types';
+import { payloadIsAButtonPanel, ButtonPanelPayload } from '@/api/events/payloads/button-panel-payload';
+import { TypeButtonPanel } from '@/ui/panel/panel-types';
 
 const navBtnWidth = '44px';
 const navBtnHeight = '44px';
@@ -194,7 +194,7 @@ export function Navbar({ setActivetrap }: NavbarProps): JSX.Element {
 
   return (
     /** TODO - KenChase Need to add styling for scenario when more buttons that can fit vertically occurs (or limit number of buttons that can be added) */
-    <Box ref={navBarRef} className={`${classes.navBarRef}`} sx={{ bottom: footerBarExpanded ? 80 : 40 }}>
+    <Box ref={navBarRef} className={classes.navBarRef} sx={{ bottom: footerBarExpanded ? 80 : 40 }}>
       {Object.keys(buttonPanelGroups).map((groupName) => {
         const buttonPanelGroup = buttonPanelGroups[groupName];
 

@@ -248,7 +248,7 @@ export function BasemapPanel(props: BaseMapPanelProps): JSX.Element {
           <Card
             tabIndex={0}
             classes={{ root: classes.basemapCard }}
-            className={`${basemap.basemapId === activeBasemapId ? 'active' : ''}`}
+            className={basemap.basemapId === activeBasemapId ? 'active' : ''}
             onClick={() => setBasemap(basemap.basemapId as string)}
             onKeyPress={() => setBasemap(basemap.basemapId as string)}
             key={basemap.basemapId}

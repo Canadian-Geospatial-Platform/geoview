@@ -11,7 +11,7 @@ export function ListItemIcon(props: ListItemIconProps): JSX.Element {
   const { children, className, style } = props;
 
   return (
-    <MaterialListItemIcon className={`${className || ''}`} style={style || undefined}>
+    <MaterialListItemIcon className={className || ''} style={style || undefined}>
       {children !== undefined && children}
     </MaterialListItemIcon>
   );

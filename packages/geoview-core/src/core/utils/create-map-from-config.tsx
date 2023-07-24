@@ -1,5 +1,5 @@
 import ReactDOM from 'react-dom';
-import { api } from '../../app';
+import { api } from '@/app';
 import AppStart from '../app-start';
 import { Config } from './config/config';
 import { parseJSONConfig, removeCommentsFromJSON } from './utilities';

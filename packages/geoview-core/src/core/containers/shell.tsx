@@ -17,12 +17,12 @@ import { Geolocator } from '../components/geolocator/geolocator';
 
 import { FocusTrapDialog } from './focus-trap';
 
-import { api } from '../../app';
-import { EVENT_NAMES } from '../../api/events/event-types';
+import { api } from '@/app';
+import { EVENT_NAMES } from '@/api/events/event-types';
 
-import { Modal, Snackbar } from '../../ui';
-import { payloadIsAMapComponent } from '../../api/events/payloads/map-component-payload';
-import { payloadIsAModal } from '../../api/events/payloads/modal-payload';
+import { Modal, Snackbar } from '@/ui';
+import { payloadIsAMapComponent } from '@/api/events/payloads/map-component-payload';
+import { payloadIsAModal } from '@/api/events/payloads/modal-payload';
 import { TypeMapFeaturesConfig } from '../types/global-types';
 
 const useStyles = makeStyles((theme) => {
@@ -194,7 +194,7 @@ export function Shell(props: ShellProps): JSX.Element {
             vertical: 'bottom',
             horizontal: 'center',
           }}
-          className={`${classes.snackBar}`}
+          className={classes.snackBar}
         >
           <Snackbar snackBarId={shellId} />
         </SnackbarProvider>

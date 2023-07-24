@@ -2,7 +2,7 @@ import { MutableRefObject, useContext, useRef } from 'react';
 
 import { useMediaQuery } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
-import { Box } from '../../../ui';
+import { Box } from '@/ui';
 
 import { Attribution } from '../attribution/attribution';
 import { MousePosition } from '../mouse-position/mouse-position';

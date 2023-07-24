@@ -9,12 +9,12 @@ import { Extent } from 'ol/extent';
 
 import sanitizeHtml from 'sanitize-html';
 
-import { AbstractGeoViewLayer, api } from '../../app';
-import { TypeLocalizedString } from '../../geo/map/map-schema-types';
-import { EVENT_NAMES } from '../../api/events/event-types';
+import { AbstractGeoViewLayer, api } from '@/app';
+import { TypeLocalizedString } from '@/geo/map/map-schema-types';
+import { EVENT_NAMES } from '@/api/events/event-types';
 
 import { Cast, TypeJsonArray, TypeJsonObject, TypeJsonValue } from '../types/global-types';
-import { snackbarMessagePayload } from '../../api/events/payloads/snackbar-message-payload';
+import { snackbarMessagePayload } from '@/api/events/payloads/snackbar-message-payload';
 
 /**
  * Get the string associated to the current display language.
@@ -437,4 +437,78 @@ export function stringify(str: unknown): unknown | string {
   }
 
   return str;
+}
+
+/**
+ * Internal function to work with async "whenThisThat"... methods.
+ * This function is recursive and checks for a validity of something via the checkCallback() until it's found or until the timer runs out.
+ * When the check callback returns true (or some found object), the doCallback() function is called with the found information.
+ * If checkCallback wasn't found and timer expired, the failCallback() function is called.
+ * @param checkCallback the function executed to verify a particular condition until it's passed
+ * @param doCallback the function executed when checkCallback returns true or some object
+ * @param failCallback the function executed when checkCallback has failed for too long (went over the timeout)
+ * @param startDate the initial date this task was started
+ * @param checkFrequency the frequency in milliseconds to callback for a check (defaults to 100 milliseconds)
+ * @param timeout the duration in milliseconds until the task is aborted
+ */
+function _whenThisThenThat<T>(
+  checkCallback: () => T,
+  doCallback: (value: T) => void,
+  failCallback: (reason?: any) => void,
+  startDate: Date,
+  checkFrequency: number,
+  timeout: number
+) {
+  // Check if we're good
+  const v = checkCallback();
+  if (v) {
+    // Do that
+    doCallback(v);
+  } else if (new Date().getTime() - startDate.getTime() <= timeout) {
+    // Check again later
+    setTimeout(() => {
+      // Recursive call
+      _whenThisThenThat(checkCallback, doCallback, failCallback, startDate, checkFrequency, timeout);
+    }, checkFrequency);
+  } else {
+    // Failed, took too long
+    failCallback('Task abandonned, took too long.');
+  }
+}
+
+/**
+ * This generic function checks for a validity of something via the checkCallback() until it's found or until the timer runs out.
+ * When the check callback returns true (or some found object), the doCallback() function is called with the found information.
+ * If checkCallback wasn't found and timer expired, the failCallback() function is called.
+ * @param checkCallback the function executed to verify a particular condition until it's passed
+ * @param doCallback the function executed when checkCallback returns true or some object
+ * @param failCallback the function executed when checkCallback has failed for too long (went over the timeout)
+ * @param checkFrequency the frequency in milliseconds to callback for a check (defaults to 100 milliseconds)
+ * @param timeout the duration in milliseconds until the task is aborted (defaults to 10 seconds)
+ */
+export function whenThisThenThat<T>(
+  checkCallback: () => T,
+  doCallback: (value: T) => void,
+  failCallback: (reason?: any) => void,
+  checkFrequency?: number,
+  timeout?: number
+) {
+  const startDate = new Date();
+  if (!checkFrequency) checkFrequency = 100; // Check every 100 milliseconds by default
+  if (!timeout) timeout = 10000; // Timeout after 10 seconds by default
+  _whenThisThenThat(checkCallback, doCallback, failCallback, startDate, checkFrequency, timeout);
+}
+
+/**
+ * This asynchronous generic function checks for a validity of something via the checkCallback() until it's found or until the timer runs out.
+ * This method returns a Promise which the developper can use to await or use .then().catch().finally() principles.
+ * @param checkCallback the function executed to verify a particular condition until it's passed
+ * @param checkFrequency the frequency in milliseconds to check for an update (defaults to 100 milliseconds)
+ * @param timeout the duration in milliseconds until the task is aborted (defaults to 10 seconds)
+ */
+export async function whenThisThenAsync<T>(checkCallback: () => T, checkFrequency?: number, timeout?: number) {
+  return new Promise<T>((resolve, reject) => {
+    // Redirect
+    whenThisThenThat(checkCallback, resolve, reject, checkFrequency, timeout);
+  });
 }

@@ -13,13 +13,7 @@ export function Collapse(props: CollapseProps): JSX.Element {
   const inProp = props.in;
 
   return (
-    <MaterialCollapse
-      className={`${className || ''}`}
-      style={style || undefined}
-      in={inProp}
-      timeout={timeout}
-      unmountOnExit={unmountOnExit}
-    >
+    <MaterialCollapse className={className || ''} style={style || undefined} in={inProp} timeout={timeout} unmountOnExit={unmountOnExit}>
       {children !== undefined && children}
     </MaterialCollapse>
   );
