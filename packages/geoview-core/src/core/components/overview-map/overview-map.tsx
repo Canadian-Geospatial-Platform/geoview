@@ -13,7 +13,7 @@ import { OverviewMap as OLOverviewMap } from 'ol/control';
 import { OverviewMapToggle } from './overview-map-toggle';
 
 import { EVENT_NAMES } from '@/api/events/event-types';
-import { api } from '@/app';
+import { api, payloadIsANumber } from '@/app';
 import { MapContext } from '../../app-start';
 
 import { payloadIsAMapViewProjection } from '@/api/events/payloads/map-view-projection-payload';
@@ -136,13 +136,34 @@ export function OverviewMap(): JSX.Element {
       mapId
     );
 
+    api.event.on(
+      EVENT_NAMES.MAP.EVENT_MAP_ZOOM_END,
+      (payload) => {
+        if (payloadIsANumber(payload)) {
+          if (payload.value <= 5) {
+            const overviewMap = api
+              .map(mapId)
+              .map.getControls()
+              .getArray()
+              .filter((item) => {
+                return item instanceof OLOverviewMap;
+              })[0] as OLOverviewMap;
+            overviewMap.setPosition(undefined);
+          }
+        }
+      },
+      mapId
+    );
+
     return () => {
+      api.event.off(EVENT_NAMES.MAP.EVENT_MAP_ZOOM_END, mapId);
       api.event.off(EVENT_NAMES.MAP.EVENT_MAP_VIEW_PROJECTION_CHANGE, mapId);
     };
   }, [mapId]);
 
   useEffect(() => {
     const { map, mapFeaturesConfig } = api.map(mapId);
+    console.log(mapFeaturesConfig);
 
     // get default overview map
     const defaultBasemap = api.map(mapId).basemap.overviewMap;
