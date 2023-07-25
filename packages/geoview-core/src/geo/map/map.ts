@@ -157,6 +157,7 @@ export class MapViewer {
     this.details = new DetailsAPI(this.mapId);
     this.featureInfo = new FeatureInfoAPI(this.mapId);
     this.dataGrid = new DataGridAPI(this.mapId);
+    this.dataTable = new DataTableApi(this.mapId);
 
     this.modal = new ModalApi(this.mapId);
 

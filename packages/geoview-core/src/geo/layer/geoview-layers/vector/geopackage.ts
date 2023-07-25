@@ -127,7 +127,7 @@ export class GeoPackage extends AbstractGeoViewVector {
   }
 
   /** ***************************************************************************************************************************
-   * Image static has no metadata.
+   * Geopackages have no metadata.
    *
    * @returns {Promise<void>} A promise that the execution is completed.
    */

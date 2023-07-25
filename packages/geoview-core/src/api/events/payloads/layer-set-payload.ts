@@ -139,7 +139,7 @@ export class LayerSetPayload extends PayloadBaseClass {
    *
    * @param {string | null} handlerName the handler Name
    * @param {string} layerPath the layer path to add to the inventory
-   * @param {'add' | 'remove' | undefined} action the kind of layer registration (default: add)
+   * @param {'add' | 'remove'} action the kind of layer registration (default: add)
    * @param {string | undefined} layerSetId the layer set identifier that will register the layer
    *
    * @returns {TypeLayerRegistrationPayload} the registerLayerPayload object created
@@ -147,7 +147,7 @@ export class LayerSetPayload extends PayloadBaseClass {
   static createLayerRegistrationPayload = (
     handlerName: string,
     layerPath: string,
-    action: 'add' | 'remove' | undefined = 'add',
+    action: 'add' | 'remove' = 'add',
     layerSetId: string | undefined = undefined
   ): TypeLayerRegistrationPayload => {
     const layerRegistrationPayload = new LayerSetPayload(

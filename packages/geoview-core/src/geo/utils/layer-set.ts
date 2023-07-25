@@ -5,7 +5,7 @@ import {
   payloadIsLayerRegistration,
   payloadIsLayerSetChangeLayerStatus,
   TypeResultSets,
-} from '../../api/events/payloads/layer-set-payload';
+} from '@/api/events/payloads/layer-set-payload';
 import { PayloadBaseClass } from '@/api/events/payloads/payload-base-class';
 import { api } from '@/app';
 

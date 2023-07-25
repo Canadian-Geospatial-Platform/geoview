@@ -56,7 +56,7 @@ export class GeoUtilities {
   }
 
   /**
-   * Returns the WKT representation of a given geoemtry
+   * Returns the WKT representation of a given geometry
    * @function geometryToWKT
    * @param {string} geometry the geometry
    * @returns {string | null} the WKT representation of the geometry

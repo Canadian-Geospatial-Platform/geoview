@@ -141,11 +141,9 @@ export class OgcFeature extends AbstractGeoViewVector {
           }) // eslint-disable-next-line @typescript-eslint/no-unused-vars
           .catch((reason) => {
             api.geoUtilities.setAllLayerStatusToError(this, this.listOfLayerEntryConfig, 'Unable to read metadata');
-            throw new Error(`Can't read service metadata for layer ${this.geoviewLayerId} of map ${this.mapId}.`);
           });
       } else {
         api.geoUtilities.setAllLayerStatusToError(this, this.listOfLayerEntryConfig, 'Unable to read metadata');
-        throw new Error(`Can't read service metadata for layer ${this.geoviewLayerId} of map ${this.mapId}.`);
       }
     });
     return promisedExecution;

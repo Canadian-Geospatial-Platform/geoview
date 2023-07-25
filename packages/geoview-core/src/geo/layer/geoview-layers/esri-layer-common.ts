@@ -5,7 +5,7 @@ import { Extent } from 'ol/extent';
 import { transformExtent } from 'ol/proj';
 
 import cloneDeep from 'lodash/cloneDeep';
-import { Cast, TypeJsonArray, TypeJsonObject } from '../../../core/types/global-types';
+import { Cast, TypeJsonArray, TypeJsonObject } from '@/core/types/global-types';
 import {
   layerEntryIsGroupLayer,
   TypeBaseLayerEntryConfig,
@@ -14,15 +14,15 @@ import {
   TypeLayerGroupEntryConfig,
   TypeListOfLayerEntryConfig,
 } from '../../map/map-schema-types';
-import { getLocalizedValue, getXMLHttpRequest } from '../../../core/utils/utilities';
-import { api } from '../../../app';
+import { getLocalizedValue, getXMLHttpRequest } from '@/core/utils/utilities';
+import { api } from '@/app';
 import { Layer } from '../layer';
 import { EsriDynamic, geoviewEntryIsEsriDynamic } from './raster/esri-dynamic';
 import { EsriFeature, geoviewEntryIsEsriFeature, TypeEsriFeatureLayerEntryConfig } from './vector/esri-feature';
 import { EsriBaseRenderer, getStyleFromEsriRenderer } from '../../renderer/esri-renderer';
 import { TimeDimensionESRI } from '@/core/utils/date-mgt';
 import { codedValueType, rangeDomainType } from '@/api/events/payloads/get-feature-info-payload';
-import { LayerSetPayload } from '../../../api/events/payloads/layer-set-payload';
+import { LayerSetPayload } from '@/api/events/payloads/layer-set-payload';
 
 /** ***************************************************************************************************************************
  * This method reads the service metadata from the metadataAccessPath.
@@ -36,7 +36,6 @@ export function commonGetServiceMetadata(this: EsriDynamic | EsriFeature, resolv
       .then((metadataString) => {
         if (metadataString === '{}') {
           api.geoUtilities.setAllLayerStatusToError(this, this.listOfLayerEntryConfig, 'Unable to read metadata');
-          throw new Error(`Can't read service metadata for layer ${this.geoviewLayerId} of map ${this.mapId}.`);
         } else {
           this.metadata = JSON.parse(metadataString) as TypeJsonObject;
           const { copyrightText } = this.metadata;
@@ -46,11 +45,9 @@ export function commonGetServiceMetadata(this: EsriDynamic | EsriFeature, resolv
       })
       .catch((reason) => {
         api.geoUtilities.setAllLayerStatusToError(this, this.listOfLayerEntryConfig, 'Unable to read metadata');
-        throw new Error(`Can't read service metadata for layer ${this.geoviewLayerId} of map ${this.mapId}.`);
       });
   } else {
     api.geoUtilities.setAllLayerStatusToError(this, this.listOfLayerEntryConfig, 'Unable to read metadata');
-    throw new Error(`Can't read service metadata for layer ${this.geoviewLayerId} of map ${this.mapId}.`);
   }
 }
 
@@ -114,6 +111,9 @@ export function commonValidateListOfLayerEntryConfig(this: EsriDynamic | EsriFea
         newListOfLayerEntryConfig.push(subLayerEntryConfig);
         api.map(this.mapId).layer.registerLayerConfig(subLayerEntryConfig);
       });
+
+      if (this.registerToLayerSetListenerFunctions[Layer.getLayerPath(layerEntryConfig)])
+        this.unregisterFromLayerSets(layerEntryConfig as TypeBaseLayerEntryConfig);
       const switchToGroupLayer = Cast<TypeLayerGroupEntryConfig>(layerEntryConfig);
       delete (layerEntryConfig as TypeBaseLayerEntryConfig).layerStatus;
       switchToGroupLayer.entryType = 'group';

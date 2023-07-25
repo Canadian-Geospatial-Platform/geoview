@@ -138,7 +138,6 @@ export class WFS extends AbstractGeoViewVector {
           .then((metadataString) => {
             if (metadataString === '{}') {
               api.geoUtilities.setAllLayerStatusToError(this, this.listOfLayerEntryConfig, 'Unable to read metadata');
-              throw new Error(`Can't read service metadata for layer ${this.geoviewLayerId} of map ${this.mapId}.`);
             } else {
               // need to pass a xmldom to xmlToJson
               const xmlDOMCapabilities = new DOMParser().parseFromString(metadataString, 'text/xml');
@@ -153,11 +152,9 @@ export class WFS extends AbstractGeoViewVector {
           }) // eslint-disable-next-line @typescript-eslint/no-unused-vars
           .catch((reason) => {
             api.geoUtilities.setAllLayerStatusToError(this, this.listOfLayerEntryConfig, 'Unable to read metadata');
-            throw new Error(`Can't read service metadata for layer ${this.geoviewLayerId} of map ${this.mapId}.`);
           });
       } else {
         api.geoUtilities.setAllLayerStatusToError(this, this.listOfLayerEntryConfig, 'Unable to read metadata');
-        throw new Error(`Can't read service metadata for layer ${this.geoviewLayerId} of map ${this.mapId}.`);
       }
     });
     return promisedExecution;

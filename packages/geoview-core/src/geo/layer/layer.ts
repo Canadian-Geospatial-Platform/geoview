@@ -29,7 +29,6 @@ import { layerConfigIsWFS, WFS } from './geoview-layers/vector/wfs';
 import { layerConfigIsOgcFeature, OgcFeature } from './geoview-layers/vector/ogc-feature';
 import { layerConfigIsXYZTiles, XYZTiles } from './geoview-layers/raster/xyz-tiles';
 import { layerConfigIsVectorTiles, VectorTiles } from './geoview-layers/raster/vector-tiles';
-import { LayerSetPayload } from '@/api/events/payloads/layer-set-payload';
 
 /**
  * A class to get the layer from layer type. Layer type can be esriFeature, esriDynamic and ogcWMS
@@ -317,10 +316,8 @@ export class Layer {
       if (pathBeginningAreEqual) {
         const layerEntryConfigToRemove = this.registeredLayers[completeLayerPath];
         layerEntryConfigToRemove.gvLayer?.dispose();
-        if (layerEntryConfigToRemove.entryType !== 'group') {
+        if (layerEntryConfigToRemove.entryType !== 'group')
           this.geoviewLayers[partialLayerPathNodes[0]].unregisterFromLayerSets(layerEntryConfigToRemove as TypeBaseLayerEntryConfig);
-          api.event.emit(LayerSetPayload.createLayerRegistrationPayload(this.mapId, completeLayerPath, 'remove'));
-        }
         delete this.registeredLayers[completeLayerPath];
       }
     });

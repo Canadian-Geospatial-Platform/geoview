@@ -133,12 +133,10 @@ export class WMS extends AbstractGeoViewRaster {
                   resolve();
                 } else {
                   api.geoUtilities.setAllLayerStatusToError(this, this.listOfLayerEntryConfig, 'Unable to read metadata');
-                  throw new Error(`Can't read service metadata for layer ${this.geoviewLayerId} of map ${this.mapId}.`);
                 }
               })
               .catch((reason) => {
                 api.geoUtilities.setAllLayerStatusToError(this, this.listOfLayerEntryConfig, 'Unable to read metadata');
-                throw new Error(`Can't read service metadata for layer ${this.geoviewLayerId} of map ${this.mapId}.`);
               });
           } else {
             // Uses GetCapabilities to get the metadata. However, to allow geomet metadata to be retrieved using the non-standard
@@ -174,7 +172,7 @@ export class WMS extends AbstractGeoViewRaster {
                     }
                   }
                 } else {
-                  throw new Error(`Can't read service metadata for layer ${this.geoviewLayerId} of map ${this.mapId}.`);
+                  api.geoUtilities.setAllLayerStatusToError(this, this.listOfLayerEntryConfig, 'Unable to read metadata');
                 }
                 this.processMetadataInheritance();
                 resolve();
@@ -186,7 +184,6 @@ export class WMS extends AbstractGeoViewRaster {
         }
       } else {
         api.geoUtilities.setAllLayerStatusToError(this, this.listOfLayerEntryConfig, 'Unable to read metadata');
-        throw new Error(`Can't read service metadata for layer ${this.geoviewLayerId} of map ${this.mapId}.`);
       }
     });
     return promisedExecution;
@@ -211,7 +208,6 @@ export class WMS extends AbstractGeoViewRaster {
         })
         .catch(() => {
           api.geoUtilities.setAllLayerStatusToError(this, this.listOfLayerEntryConfig, 'Unable to read metadata');
-          throw new Error(`Can't read service metadata for layer ${this.geoviewLayerId} of map ${this.mapId}.`);
         });
     });
     return promisedJsonObject;
@@ -249,14 +245,12 @@ export class WMS extends AbstractGeoViewRaster {
               setDataAccessPath(this.listOfLayerEntryConfig);
             } else {
               api.geoUtilities.setAllLayerStatusToError(this, this.listOfLayerEntryConfig, 'Unable to read metadata');
-              throw new Error(`Can't read service metadata for layer ${this.geoviewLayerId} of map ${this.mapId}.`);
             }
             resolve();
           });
         })
         .catch((reason) => {
           api.geoUtilities.setAllLayerStatusToError(this, this.listOfLayerEntryConfig, 'Unable to read metadata');
-          throw new Error(`Can't read service metadata for layer ${this.geoviewLayerId} of map ${this.mapId}.`);
         });
     });
     return promisedExecution;
@@ -457,6 +451,8 @@ export class WMS extends AbstractGeoViewRaster {
       api.map(this.mapId).layer.registerLayerConfig(subLayerEntryConfig);
     });
 
+    if (this.registerToLayerSetListenerFunctions[Layer.getLayerPath(layerEntryConfig)])
+      this.unregisterFromLayerSets(layerEntryConfig as TypeBaseLayerEntryConfig);
     const switchToGroupLayer = Cast<TypeLayerGroupEntryConfig>(layerEntryConfig);
     delete (layerEntryConfig as TypeBaseLayerEntryConfig).layerStatus;
     switchToGroupLayer.entryType = 'group';

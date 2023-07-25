@@ -425,13 +425,19 @@ export abstract class AbstractGeoViewLayer {
   createGeoViewLayers(): Promise<void> {
     const promisedExecution = new Promise<void>((resolve) => {
       if (this.gvLayers === null) {
-        this.getAdditionalServiceDefinition().then(() => {
-          this.processListOfLayerEntryConfig(this.listOfLayerEntryConfig).then((layersCreated) => {
-            this.gvLayers = layersCreated as BaseLayer;
-            if (this.listOfLayerEntryConfig.length) this.setActiveLayer(this.listOfLayerEntryConfig[0]);
+        this.getAdditionalServiceDefinition()
+          .then(() => {
+            this.processListOfLayerEntryConfig(this.listOfLayerEntryConfig).then((layersCreated) => {
+              this.gvLayers = layersCreated as BaseLayer;
+              if (this.listOfLayerEntryConfig.length) this.setActiveLayer(this.listOfLayerEntryConfig[0]);
+              resolve();
+            });
+          })
+          .catch((reason) => {
+            // eslint-disable-next-line no-console
+            console.log(reason);
             resolve();
           });
-        });
       } else {
         api.event.emit(
           snackbarMessagePayload(EVENT_NAMES.SNACKBAR.EVENT_SNACKBAR_OPEN, this.mapId, {
@@ -478,7 +484,6 @@ export abstract class AbstractGeoViewLayer {
           .then((metadataString) => {
             if (metadataString === '{}') {
               api.geoUtilities.setAllLayerStatusToError(this, this.listOfLayerEntryConfig, 'Unable to read metadata');
-              throw new Error(`Can't read service metadata for layer ${this.geoviewLayerId} of map ${this.mapId}.`);
             } else {
               this.metadata = toJsonObject(JSON.parse(metadataString));
               const { copyrightText } = this.metadata;
@@ -489,7 +494,6 @@ export abstract class AbstractGeoViewLayer {
           // eslint-disable-next-line @typescript-eslint/no-unused-vars
           .catch((reason) => {
             api.geoUtilities.setAllLayerStatusToError(this, this.listOfLayerEntryConfig, 'Unable to read metadata');
-            throw new Error(`Can't read service metadata for layer ${this.geoviewLayerId} of map ${this.mapId}.`);
           });
       } else resolve();
     });
@@ -863,7 +867,7 @@ export abstract class AbstractGeoViewLayer {
 
     if (!this.registerToLayerSetListenerFunctions[layerPath].layerStatusUpdated) {
       this.registerToLayerSetListenerFunctions[layerPath].layerStatusUpdated = (layerUpdatedPayload) => {
-        if (payloadIsLayerSetUpdated(layerUpdatedPayload))
+        if (payloadIsLayerSetUpdated(layerUpdatedPayload) && layerUpdatedPayload.resultSets[layerPath])
           layerEntryConfig.layerStatus = layerUpdatedPayload.resultSets[layerPath].layerStatus;
       };
       api.event.on(
@@ -961,6 +965,9 @@ export abstract class AbstractGeoViewLayer {
     if (this.registerToLayerSetListenerFunctions[layerPath].queryLayer) {
       api.event.off(EVENT_NAMES.GET_FEATURE_INFO.QUERY_LAYER, this.mapId, this.registerToLayerSetListenerFunctions[layerPath].queryLayer);
     }
+
+    delete this.registerToLayerSetListenerFunctions[layerPath];
+    api.event.emit(LayerSetPayload.createLayerRegistrationPayload(this.mapId, layerPath, 'remove'));
   }
 
   /** ***************************************************************************************************************************
