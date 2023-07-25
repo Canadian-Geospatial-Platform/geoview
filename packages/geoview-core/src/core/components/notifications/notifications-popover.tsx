@@ -1,5 +1,6 @@
 import { useCallback, useContext, useEffect, useState, MouseEventHandler, useRef } from 'react';
-
+import { useTranslation } from 'react-i18next';
+import { Typography } from '@mui/material';
 import { MapContext } from '../../app-start';
 import { api } from '../../../app';
 
@@ -22,6 +23,7 @@ interface NotificationPopoverProps {
 export function NotificationsPopover(props: NotificationPopoverProps): JSX.Element | null {
   const [activeNotifications, setActiveNotifications] = useState<NotificationDetailsType[]>([]);
   const notifsListRef = useRef<NotificationDetailsType[]>([]);
+  const { t } = useTranslation<string>();
 
   const { anchorEl, handleClose } = props;
 
@@ -142,17 +144,21 @@ export function NotificationsPopover(props: NotificationPopoverProps): JSX.Eleme
         sx={{
           display: 'flex',
           flexDirection: 'column',
-          padding: '5px 20px',
-          width: '300px',
+          padding: '10px 20px',
+          width: '400px',
           maxHeight: '500px',
           overflowY: 'auto',
           gap: '8px',
         }}
       >
+        <Typography component="div">{t('appbar.notifications')}</Typography>
+        <Typography component="div">
+          <hr />
+        </Typography>
         {activeNotifications.length > 0 ? (
           activeNotifications.map((details, index) => renderNotification(details, index))
         ) : (
-          <p>No notifications available</p>
+          <Typography component="div">{t('appbar.no_notifications_available')}</Typography>
         )}
       </Box>
     </Popover>

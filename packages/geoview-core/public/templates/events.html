@@ -183,6 +183,17 @@
               }
             )
           );
+
+          cgpv.api.event.emit(
+            cgpv.types.notificationPayload(
+              cgpv.api.eventNames.NOTIFICATIONS.NOTIFICATION_ADD,
+              'EVNT1',
+              'success',
+              'this is a success notification title',
+              'this is notification description'
+            )
+          );
+          
         }, 20000);
 
         //create snippets
