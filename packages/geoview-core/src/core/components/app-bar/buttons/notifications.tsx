@@ -5,20 +5,10 @@ import { MapContext } from '@/core/app-start';
 import { api } from '@/app';
 
 import { EVENT_NAMES } from '@/api/events/event-types';
-import {
-  notificationPayload,
-  NotificationPayload,
-  payloadIsANotification,
-  NotificationType,
-} from '@/api/events/payloads/notification-payload';
+import { notificationPayload, NotificationPayload, payloadIsANotification } from '@/api/events/payloads/notification-payload';
 
 import { Box, Popover, InfoIcon, ErrorIcon, WarningIcon, CheckCircleIcon, CloseIcon, IconButton, NotificationsIcon, Badge } from '@/ui';
-
-type NotificationDetailsType = {
-  notificationType: NotificationType;
-  message: string;
-  description?: string;
-};
+import { NotificationDetailsType } from '@/core/components/notifications/notifications-api';
 
 /**
  * Notification PNG Button component
