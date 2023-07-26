@@ -86,6 +86,7 @@ export * from '../../api/events/payloads/slider-payload';
 export * from '../../api/events/payloads/snackbar-message-payload';
 export * from '../../api/events/payloads/vector-config-payload';
 export * from '../../api/events/payloads/vector-payload';
+export * from '../../api/events/payloads/notification-payload';
 export * from '../../api/plugin/abstract-plugin';
 export * from '../../api/plugin/plugin';
 export * from '../../api/plugin/plugin-types';

@@ -14,6 +14,7 @@ import { TypeButtonPanel } from '@/ui/panel/panel-types';
 
 import Export from './buttons/export';
 import Geolocator from './buttons/geolocator';
+import Notifications from './buttons/notifications';
 import Version from './buttons/version';
 import ExportModal from '../export/export-modal';
 
@@ -245,6 +246,9 @@ export function Appbar({ setActivetrap }: AppbarProps): JSX.Element {
         )}
         <div className={classes.versionButtonDiv}>
           <List className={classes.appBarList}>
+            <ListItem>
+              <Notifications />
+            </ListItem>
             <ListItem>
               <Version />
             </ListItem>
