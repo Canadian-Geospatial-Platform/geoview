@@ -1,6 +1,6 @@
 /// <reference types="react" />
 import { DataGridProps } from '@mui/x-data-grid';
-import { TypeDisplayLanguage } from '../../../app';
+import { TypeDisplayLanguage } from '@/app';
 /**
  * Create a data grid (table) component for a lyer features all request
  *

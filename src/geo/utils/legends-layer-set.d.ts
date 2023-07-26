@@ -1,4 +1,4 @@
-import { TypeLegendResultSets } from '../../api/events/payloads/get-legends-payload';
+import { TypeLegendResultSets } from '@/api/events/payloads/get-legends-payload';
 import { LayerSet } from './layer-set';
 /** *****************************************************************************************************************************
  * A class to hold a set of layers associated with an array of TypeLegend. When this class is instantiated, all layers already

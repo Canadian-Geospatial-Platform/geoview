@@ -1,6 +1,6 @@
 import { PayloadBaseClass } from './payload-base-class';
 import { EventStringId } from '../event-types';
-import { TypeFeatureInfoEntry } from '../../../app';
+import { TypeFeatureInfoEntry } from '@/app';
 /**
  * type guard function that redefines a PayloadBaseClass as a FeatureHighlightPayload
  * if the event attribute of the verifyIfPayload parameter is valid. The type ascention

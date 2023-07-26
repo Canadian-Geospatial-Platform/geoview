@@ -1,6 +1,6 @@
 /// <reference types="react" />
 import { Coordinate } from 'ol/coordinate';
-import { TypeArrayOfFeatureInfoEntries } from '../../../api/events/payloads/get-feature-info-payload';
+import { TypeArrayOfFeatureInfoEntries } from '@/api/events/payloads/get-feature-info-payload';
 export interface DetailsProps {
     mapId: string;
     location: Coordinate;

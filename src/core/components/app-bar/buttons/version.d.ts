@@ -12,8 +12,4 @@ export type TypeAppVersion = {
     patch: number;
     timestamp: string;
 };
-interface VersionProps {
-    drawerStatus: boolean;
-}
-export default function Version(props: VersionProps): JSX.Element;
-export {};
+export default function Version(): JSX.Element;

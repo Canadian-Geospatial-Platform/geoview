@@ -1,11 +1,11 @@
 import { Coordinate } from 'ol/coordinate';
 import { Pixel } from 'ol/pixel';
 import { Extent } from 'ol/extent';
-import { TypeJsonObject } from '../../../../core/types/global-types';
+import { TypeJsonObject } from '@/core/types/global-types';
 import { AbstractGeoViewLayer, TypeLegend } from '../abstract-geoview-layers';
 import { AbstractGeoViewRaster, TypeBaseRasterLayer } from './abstract-geoview-raster';
 import { TypeLayerEntryConfig, TypeGeoviewLayerConfig, TypeListOfLayerEntryConfig, TypeBaseLayerEntryConfig, TypeOgcWmsLayerEntryConfig } from '../../../map/map-schema-types';
-import { TypeArrayOfFeatureInfoEntries } from '../../../../api/events/payloads/get-feature-info-payload';
+import { TypeArrayOfFeatureInfoEntries } from '@/api/events/payloads/get-feature-info-payload';
 export interface TypeWMSLayerConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig'> {
     geoviewLayerType: 'ogcWms';
     listOfLayerEntryConfig: TypeOgcWmsLayerEntryConfig[];
@@ -47,6 +47,7 @@ export declare const geoviewEntryIsWMS: (verifyIfGeoViewEntry: TypeLayerEntryCon
  * @class WMS
  */
 export declare class WMS extends AbstractGeoViewRaster {
+    WMSStyles: string[];
     /** ***************************************************************************************************************************
      * Initialize layer
      * @param {string} mapId the id of the map
@@ -155,7 +156,7 @@ export declare class WMS extends AbstractGeoViewRaster {
      */
     protected processLayerMetadata(layerEntryConfig: TypeLayerEntryConfig): Promise<void>;
     /** ***************************************************************************************************************************
-     * This method will create a Geoview temporal dimension if ot exist in the service metadata
+     * This method will create a Geoview temporal dimension if it existds in the service metadata
      * @param {TypeJsonObject} wmsTimeDimension The WMS time dimension object
      * @param {TypeOgcWmsLayerEntryConfig} layerEntryConfig The layer entry to configure
      */
@@ -191,6 +192,7 @@ export declare class WMS extends AbstractGeoViewRaster {
      * Get the legend image URL of a layer from the capabilities. Return null if it does not exist.
      *
      * @param {TypeOgcWmsLayerEntryConfig} layerConfig layer configuration.
+     * @param {string} style the style to get the url for
      *
      * @returns {TypeJsonObject | null} URL of a Legend image in png format or null
      */
@@ -199,10 +201,20 @@ export declare class WMS extends AbstractGeoViewRaster {
      * Get the legend image of a layer.
      *
      * @param {TypeOgcWmsLayerEntryConfig} layerConfig layer configuration.
+     * @param {striung} chosenStyle Style to get the legend image for.
      *
      * @returns {blob} image blob
      */
     private getLegendImage;
+    /** ***************************************************************************************************************************
+     * Get the legend info of a style.
+     *
+     * @param {TypeOgcWmsLayerEntryConfig} layerConfig layer configuration.
+     * @param {number} position index number of style to get
+     *
+     * @returns {Promise<TypeWmsLegendStylel>} The legend of the style.
+     */
+    private getStyleLegend;
     /** ***************************************************************************************************************************
      * Return the legend of the layer. When layerPathOrConfig is undefined, the activeLayer of the class is used. This routine
      * return null when the layerPath specified is not found or when the layerPathOrConfig is undefined and the active layer

@@ -6,10 +6,10 @@ import LayerGroup from 'ol/layer/Group';
 import Feature from 'ol/Feature';
 import Geometry from 'ol/geom/Geometry';
 import { TypeGeoviewLayerConfig, TypeListOfLayerEntryConfig, TypeLocalizedString, TypeLayerEntryConfig, TypeBaseLayerEntryConfig, TypeStyleConfig, TypeVectorLayerEntryConfig, TypeLayerEntryType, TypeOgcWmsLayerEntryConfig, TypeEsriDynamicLayerEntryConfig, TypeLayerInitialSettings } from '../../map/map-schema-types';
-import { codedValueType, rangeDomainType, TypeArrayOfFeatureInfoEntries, TypeQueryType } from '../../../api/events/payloads/get-feature-info-payload';
-import { TypeJsonObject } from '../../../core/types/global-types';
-import { TimeDimension, TypeDateFragments } from '../../../core/utils/date-mgt';
-import { TypeEventHandlerFunction } from '../../../api/events/event';
+import { codedValueType, rangeDomainType, TypeArrayOfFeatureInfoEntries, TypeQueryType } from '@/api/events/payloads/get-feature-info-payload';
+import { TypeJsonObject } from '@/core/types/global-types';
+import { TimeDimension, TypeDateFragments } from '@/core/utils/date-mgt';
+import { TypeEventHandlerFunction } from '@/api/events/event';
 export type TypeLegend = {
     layerPath: string;
     layerName?: TypeLocalizedString;
@@ -26,8 +26,13 @@ export type TypeLegend = {
  * @returns {boolean} returns true if the payload is valid
  */
 export declare const isWmsLegend: (verifyIfLegend: TypeLegend) => verifyIfLegend is TypeWmsLegend;
+export interface TypeWmsLegendStyle {
+    name: string;
+    legend: HTMLCanvasElement | null;
+}
 export interface TypeWmsLegend extends Omit<TypeLegend, 'styleConfig'> {
-    legend: HTMLCanvasElement;
+    legend: HTMLCanvasElement | null;
+    styles?: TypeWmsLegendStyle[];
 }
 /**
  * type guard function that redefines a TypeLegend as a TypeImageStaticLegend

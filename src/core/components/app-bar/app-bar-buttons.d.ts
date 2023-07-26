@@ -1,5 +1,5 @@
-import { TypeButtonPanel, TypePanelProps } from '../../../ui/panel/panel-types';
-import { TypeIconButtonProps } from '../../../ui/icon-button/icon-button-types';
+import { TypeButtonPanel, TypePanelProps } from '@/ui/panel/panel-types';
+import { TypeIconButtonProps } from '@/ui/icon-button/icon-button-types';
 /**
  * Class to manage buttons on the app-bar
  *

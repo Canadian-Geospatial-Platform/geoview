@@ -1,5 +1,7 @@
-/// <reference types="react" />
-interface Features {
+import React from 'react';
+import { Extent } from 'ol/extent';
+import { Geometry } from 'ol/geom';
+export interface Features {
     attributes: {
         [key: string]: string;
     };
@@ -25,8 +27,20 @@ export interface DataTableData {
         wkid: number;
     };
 }
+export interface ColumnsType {
+    ICON: string;
+    ZOOM: string;
+    [key: string]: string;
+}
 interface DataTableProps {
     data: DataTableData;
 }
-declare function DataTable({ data }: DataTableProps): import("react").JSX.Element;
+export interface Rows {
+    geometry: Geometry;
+    extent?: Extent;
+    featureKey?: string;
+    featureIcon?: string;
+    featureActions?: unknown;
+}
+declare function DataTable({ data }: DataTableProps): React.JSX.Element;
 export default DataTable;

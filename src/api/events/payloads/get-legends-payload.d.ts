@@ -1,6 +1,6 @@
 import { PayloadBaseClass } from './payload-base-class';
 import { EventStringId } from '../event-types';
-import { TypeLegend } from '../../../geo/layer/geoview-layers/abstract-geoview-layers';
+import { TypeLegend } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 /** The legend resultset type associate a layer path to a legend object. The undefined value indicate that the get legend query
  * hasn't been run and the null value indicate that there was a get legend error.
  */

@@ -5,8 +5,8 @@ import { ReadOptions } from 'ol/format/Feature';
 import { AbstractGeoViewLayer } from '../abstract-geoview-layers';
 import { TypeLayerEntryConfig, TypeVectorLayerEntryConfig, TypeVectorSourceInitialConfig, TypeGeoviewLayerConfig, TypeListOfLayerEntryConfig, TypeEsriDynamicLayerEntryConfig } from '../../../map/map-schema-types';
 import { AbstractGeoViewVector } from './abstract-geoview-vector';
-import { TypeJsonArray, TypeJsonObject } from '../../../../core/types/global-types';
-import { codedValueType, rangeDomainType } from '../../../../api/events/payloads/get-feature-info-payload';
+import { TypeJsonArray, TypeJsonObject } from '@/core/types/global-types';
+import { codedValueType, rangeDomainType } from '@/api/events/payloads/get-feature-info-payload';
 export interface TypeSourceEsriFeatureInitialConfig extends Omit<TypeVectorSourceInitialConfig, 'format'> {
     format: 'EsriJSON';
 }

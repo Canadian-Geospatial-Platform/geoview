@@ -1,4 +1,4 @@
-import { TypeTabs } from '../../../ui/tabs/tabs';
+import { TypeTabs } from '@/ui/tabs/tabs';
 /**
  * API to manage tabs on the tabs component
  *

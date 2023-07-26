@@ -1,6 +1,6 @@
 import { PayloadBaseClass } from './payload-base-class';
 import { EventStringId } from '../event-types';
-import { TypeValidMapProjectionCodes } from '../../../geo/map/map-schema-types';
+import { TypeValidMapProjectionCodes } from '@/geo/map/map-schema-types';
 /**
  * type guard function that redefines a PayloadBaseClass as a MapViewProjectionPayload
  * if the event attribute of the verifyIfPayload parameter is valid. The type ascention

@@ -954,25 +954,17 @@ export type TypeValidMapProjectionCodes = 3978 | 3857;
  */
 export declare const VALID_PROJECTION_CODES: number[];
 /** ******************************************************************************************************************************
- *  Definition of the app bar properties.
+ *  Controls available on the application bar. Default = ['geolocator']. The about GeoView and notification are always there.
  */
-export type TypeAppBarProps = {
-    /**
-     * The content of the about section in Markdown format. If empty, it will be ignored. If not, it will create a button
-     * on the app-bar to open the panel. In the basic view, this information may be added in a container above the map.
-     */
-    about: TypeLocalizedString;
-    /** Enable export button in app-bar. Default false */
-    export: boolean;
-};
+export type TypeAppBarProps = Array<'geolocator' | 'export'>;
 /** ******************************************************************************************************************************
- * Controls available on the navigation bar. Default = ['zoom', 'fullscreen', 'fullextent'].
+ * Controls available on the navigation bar. Default = ['zoom', 'fullscreen', 'home'].
  */
-export type TypeNavBarProps = Array<'zoom' | 'fullscreen' | 'fullextent'>;
+export type TypeNavBarProps = Array<'zoom' | 'fullscreen' | 'home' | 'location' | 'export'>;
 /** ******************************************************************************************************************************
- * Core components to initialize on viewer load. Default = ['app-bar', 'footer-bar', 'nav-bar', 'north-arrow', 'overview-map'].
+ * Core components to initialize on viewer load. Default = ['north-arrow', 'overview-map'].
  */
-export type TypeMapComponents = Array<'app-bar' | 'footer-bar' | 'nav-bar' | 'north-arrow' | 'overview-map' | 'geolocator'>;
+export type TypeMapComponents = Array<'north-arrow' | 'overview-map'>;
 /** ******************************************************************************************************************************
  * Core packages to initialize on viewer load. The schema for those are on their own package. NOTE: config from packages are in
  * the same loaction as core config (<<core config name>>-<<package name>>.json).

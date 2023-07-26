@@ -1,4 +1,4 @@
-import { TypeDisplayLanguage } from '../../../geo/map/map-schema-types';
+import { TypeDisplayLanguage } from '@/geo/map/map-schema-types';
 import { TypeMapFeaturesConfig } from '../../types/global-types';
 import { ConfigValidation } from './config-validation';
 export declare const catalogUrl = "https://maps.canada.ca/geonetwork/srv/api/v2/docs";

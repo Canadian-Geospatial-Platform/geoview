@@ -4,10 +4,10 @@ import { useTheme } from '@mui/material/styles';
 import { useTranslation } from 'react-i18next';
 import { useMediaQuery } from '@mui/material';
 import makeStyles from '@mui/styles/makeStyles';
-import { API } from '../../api/api';
+import { API } from '@/api/api';
 import * as UI from '../../ui';
-import { AbstractPlugin } from '../../api/plugin/abstract-plugin';
-import { TypeDisplayLanguage, TypeMapFeaturesInstance } from '../../geo/map/map-schema-types';
+import { AbstractPlugin } from '@/api/plugin/abstract-plugin';
+import { TypeDisplayLanguage, TypeMapFeaturesInstance } from '@/geo/map/map-schema-types';
 export type { SelectChangeEvent } from '@mui/material';
 export type { Coordinate } from 'ol/coordinate';
 /** ******************************************************************************************************************************

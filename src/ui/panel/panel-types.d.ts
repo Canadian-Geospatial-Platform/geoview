@@ -1,6 +1,6 @@
 /// <reference types="react" />
 import { TooltipProps, ButtonProps } from '@mui/material';
-import { TypeJsonValue } from '../../core/types/global-types';
+import { TypeJsonValue } from '@/core/types/global-types';
 import { TypeIconButtonProps } from '../icon-button/icon-button-types';
 import { PanelApi } from './panel-api';
 /** ******************************************************************************************************************************

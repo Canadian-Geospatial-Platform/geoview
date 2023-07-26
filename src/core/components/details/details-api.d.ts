@@ -1,5 +1,5 @@
 import { ReactElement } from 'react';
-import { FeatureInfoLayerSet } from '../../../geo/utils/feature-info-layer-set';
+import { FeatureInfoLayerSet } from '@/geo/utils/feature-info-layer-set';
 import { TypeArrayOfLayerData, DetailsProps } from './details';
 /**
  * API to manage details component
