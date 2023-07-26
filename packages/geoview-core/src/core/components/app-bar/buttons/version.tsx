@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Typography, Box, Link, Theme } from '@mui/material';
+import { Typography, Box, Link, Theme, SvgIcon } from '@mui/material';
 
 import { GITUHUB_REPO, GEO_URL_TEXT } from '@/core/utils/constant';
-import { GitHubIcon, Popover, IconButton } from '@/ui';
+import { GeoCaIcon, Popover, IconButton } from '@/ui';
 
 // eslint-disable-next-line no-underscore-dangle
 declare const __VERSION__: TypeAppVersion;
@@ -39,12 +39,11 @@ export default function Version(): JSX.Element {
   const id = open ? 'simple-popover' : undefined;
 
   const sxClasses = {
+    width: '200px',
     p: 7,
     m: 7,
-    justifyContent: 'center',
-    textAlign: 'center',
     '& a': {
-      color: (theme: Theme) => theme.palette.primary.light,
+      color: (theme: Theme) => (theme.palette.mode === 'light' ? theme.palette.secondary.contrastText : theme.palette.primary.light),
       textDecoration: 'underLine',
     },
   };
@@ -59,7 +58,9 @@ export default function Version(): JSX.Element {
         onClick={handleClick}
         className={open ? 'active' : ''}
       >
-        <GitHubIcon />
+        <SvgIcon viewBox="-4 -2 38 36">
+          <GeoCaIcon />
+        </SvgIcon>
       </IconButton>
       <Popover
         id={id}

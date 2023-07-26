@@ -14,6 +14,7 @@ import { TypeButtonPanel } from '@/ui/panel/panel-types';
 
 import Export from './buttons/export';
 import Geolocator from './buttons/geolocator';
+import Notifications from './buttons/notifications';
 import Version from './buttons/version';
 import ExportModal from '../export/export-modal';
 
@@ -41,6 +42,10 @@ const useStyles = makeStyles((theme) => ({
         backgroundColor: 'transparent',
         color: theme.palette.primary.light,
       },
+    },
+    '& hr': {
+      width: '80%',
+      marginLeft: '7px',
     },
   },
 
@@ -245,6 +250,10 @@ export function Appbar({ setActivetrap }: AppbarProps): JSX.Element {
         )}
         <div className={classes.versionButtonDiv}>
           <List className={classes.appBarList}>
+            <hr />
+            <ListItem>
+              <Notifications />
+            </ListItem>
             <ListItem>
               <Version />
             </ListItem>
