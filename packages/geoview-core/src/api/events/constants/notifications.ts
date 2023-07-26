@@ -8,7 +8,7 @@ import { EventStringId } from '../event-types';
 /** Valid keys for the NOTIFICATIONS */
 export type NotificationsEventKey = 'NOTIFICATION_ADD' | 'NOTIFICATION_REMOVE';
 
-/** Record that associates FOOTER_TABS's event keys to their event string id */
+/** Record that associates NOTIFICATIONS event keys to their event string id */
 export const NOTIFICATIONS: Record<NotificationsEventKey, EventStringId> = {
   /**
    * Event triggered when a new notification has been added
@@ -16,7 +16,7 @@ export const NOTIFICATIONS: Record<NotificationsEventKey, EventStringId> = {
   NOTIFICATION_ADD: 'notification/add',
 
   /**
-   * Event triggered when a footer tabs tab has been removed
+   * Event triggered when a notification has been removed
    */
   NOTIFICATION_REMOVE: 'notification/remove',
 };

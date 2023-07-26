@@ -1,5 +1,5 @@
 import { MouseEventHandler } from 'react';
-import { IconButton, NotificationsIcon, Badge } from '../../../../ui';
+import { IconButton, NotificationsIcon, Badge } from '@/ui';
 
 /**
  * Interface used for notification button properties

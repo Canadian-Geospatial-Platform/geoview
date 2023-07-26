@@ -1,13 +1,13 @@
 import { useCallback, useContext, useEffect, useState, MouseEventHandler, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Typography } from '@mui/material';
-import { MapContext } from '../../app-start';
-import { api } from '../../../app';
+import { MapContext } from '@/core/app-start';
+import { api } from '@/app';
 
-import { EVENT_NAMES } from '../../../api/events/event-types';
-import { notificationPayload, NotificationPayload, payloadIsANotification } from '../../../api/events/payloads/notification-payload';
+import { EVENT_NAMES } from '@/api/events/event-types';
+import { notificationPayload, NotificationPayload, payloadIsANotification } from '@/api/events/payloads/notification-payload';
 
-import { Box, Popover, InfoIcon, ErrorIcon, WarningIcon, CheckCircleIcon, CloseIcon, IconButton } from '../../../ui';
+import { Box, Popover, InfoIcon, ErrorIcon, WarningIcon, CheckCircleIcon, CloseIcon, IconButton } from '@/ui';
 import { NotificationDetailsType } from './notifications-api';
 
 interface NotificationPopoverProps {

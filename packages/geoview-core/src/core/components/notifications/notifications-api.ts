@@ -1,14 +1,15 @@
-import { api } from '../../../app';
+import { api } from '@/app';
 
-import { EVENT_NAMES } from '../../../api/events/event-types';
+import { EVENT_NAMES } from '@/api/events/event-types';
 
-import { notificationPayload, NotificationType } from '../../../api/events/payloads/notification-payload';
+import { notificationPayload, NotificationType } from '@/api/events/payloads/notification-payload';
 
 export type NotificationDetailsType = {
   notificationType: NotificationType;
   message: string;
   description?: string;
 };
+
 /**
  * API to manage notifications in the notification component
  *
