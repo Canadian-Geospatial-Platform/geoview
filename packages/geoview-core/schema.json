@@ -1532,7 +1532,7 @@
         "enum": ["geolocator", "export"]
       },
       "default": ["geolocator"],
-      "description": "Controls availalbe on the application bar.",
+      "description": "Controls available on the application bar.",
       "minItems": 0
     },
     "TypeNavBarProps": {
@@ -1544,6 +1544,19 @@
       "default": ["zoom", "fullscreen", "home"],
       "description": "Controls availalbe on the navigation bar.",
       "minItems": 0
+    },
+    "TypeOverviewMapProps": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "hideOnZoom": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 10,
+          "default": 0,
+          "description": "Minimum zoom level to show overview map"
+        }
+      }
     },
     "TypeMapComponents": {
       "type": "array",
@@ -1647,6 +1660,9 @@
         },
         "navBar": {
           "$ref": "#/definitions/TypeNavBarProps"
+        },
+        "overviewMap": {
+          "$ref": "#/definitions/TypeOverviewMapProps"
         },
         "components": {
           "$ref": "#/definitions/TypeMapComponents"

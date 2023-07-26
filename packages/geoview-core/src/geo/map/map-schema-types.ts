@@ -967,6 +967,8 @@ export type TypeMapFeaturesInstance = {
   appBar?: TypeAppBarProps;
   /** Nav bar properies. */
   navBar?: TypeNavBarProps;
+  /** Overview map properies. */
+  overviewMap?: TypeOverviewMapProps;
   /** Map components. */
   components?: TypeMapComponents;
   /** List of core packages. */
@@ -1124,6 +1126,11 @@ export type TypeAppBarProps = Array<'geolocator' | 'export'>;
  * Controls available on the navigation bar. Default = ['zoom', 'fullscreen', 'home'].
  */
 export type TypeNavBarProps = Array<'zoom' | 'fullscreen' | 'home' | 'location' | 'export'>;
+
+/** ******************************************************************************************************************************
+ *  Overview map options. Default none.
+ */
+export type TypeOverviewMapProps = { hideOnZoom: number } | undefined;
 
 /** ******************************************************************************************************************************
  * Core components to initialize on viewer load. Default = ['north-arrow', 'overview-map'].
