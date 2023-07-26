@@ -1,3 +1,5 @@
+/* eslint-disable no-param-reassign */
+import { EventTypes } from 'ol/Observable';
 import { indexOf } from 'lodash';
 import { GeoCore, layerConfigIsGeoCore } from './other/geocore';
 import { Vector } from './vector/vector';
@@ -284,10 +286,21 @@ export class Layer {
         // eslint-disable-next-line no-console
         console.log(consoleMessage);
       });
-    } else {
-      api.map(this.mapId).map.addLayer(geoviewLayer.gvLayers!);
-      api.event.emit(GeoViewLayerPayload.createGeoviewLayerAddedPayload(`${this.mapId}/${geoviewLayer.geoviewLayerId}`, geoviewLayer));
     }
+    geoviewLayer.gvLayers?.once('prerender' as EventTypes, () => {
+      if (geoviewLayer.layerPhase !== 'processed') {
+        geoviewLayer.layerPhase = 'processed';
+        api.event.emit(GeoViewLayerPayload.createGeoviewLayerAddedPayload(`${this.mapId}/${geoviewLayer.geoviewLayerId}`, geoviewLayer));
+      }
+    });
+    geoviewLayer.gvLayers?.once('change' as EventTypes, () => {
+      if (geoviewLayer.layerPhase !== 'processed') {
+        geoviewLayer.layerPhase = 'processed';
+        api.event.emit(GeoViewLayerPayload.createGeoviewLayerAddedPayload(`${this.mapId}/${geoviewLayer.geoviewLayerId}`, geoviewLayer));
+      }
+    });
+    api.map(this.mapId).map.addLayer(geoviewLayer.gvLayers!);
+    api.event.emit(GeoViewLayerPayload.createGeoviewLayerAddedPayload(`${this.mapId}/${geoviewLayer.geoviewLayerId}`, geoviewLayer));
   }
 
   /**

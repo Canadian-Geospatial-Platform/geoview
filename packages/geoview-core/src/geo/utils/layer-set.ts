@@ -69,7 +69,11 @@ export class LayerSet {
           // update the registration of all layer sets if !payload.layerSetId or update only the specified layer set
           if (!layerSetId || layerSetId === this.layerSetId) {
             if (action === 'add' && this.registrationConditionFunction(layerPath) && !(layerPath in this.resultSets)) {
-              this.resultSets[layerPath] = { data: undefined, layerStatus: 'newInstance' };
+              this.resultSets[layerPath] = {
+                data: undefined,
+                layerStatus: 'newInstance',
+                layerName: api.map(this.mapId).layer.registeredLayers[layerPath].layerName,
+              };
               api.event.emit(LayerSetPayload.createLayerSetUpdatedPayload(`${this.layerSetId}/${layerPath}`, this.resultSets, layerPath));
             } else if (action === 'remove' && layerPath in this.resultSets) {
               delete this.resultSets[layerPath];
