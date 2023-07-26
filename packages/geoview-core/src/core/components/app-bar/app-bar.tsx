@@ -43,6 +43,10 @@ const useStyles = makeStyles((theme) => ({
         color: theme.palette.primary.light,
       },
     },
+    '& hr': {
+      width: '80%',
+      marginLeft: '7px',
+    },
   },
 
   appBarButtons: {
@@ -246,6 +250,7 @@ export function Appbar({ setActivetrap }: AppbarProps): JSX.Element {
         )}
         <div className={classes.versionButtonDiv}>
           <List className={classes.appBarList}>
+            <hr />
             <ListItem>
               <Notifications />
             </ListItem>
