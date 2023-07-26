@@ -83,6 +83,7 @@ export class ConfigValidation {
     appBar: ['geolocator'],
     navBar: ['zoom', 'fullscreen', 'home'],
     corePackages: [],
+    overviewMap: undefined,
     serviceUrls: {
       keys: 'https://geocore.api.geo.ca',
       geolocator: 'https://geolocator.api.geo.ca?keys=geonames,nominatim,locate',
@@ -869,6 +870,7 @@ export class ConfigValidation {
       displayLanguage: this._displayLanguage,
       appBar: tempMapFeaturesConfig.appBar,
       navBar: tempMapFeaturesConfig.navBar,
+      overviewMap: tempMapFeaturesConfig.overviewMap,
       externalPackages: tempMapFeaturesConfig.externalPackages,
       schemaVersionUsed,
       serviceUrls: tempMapFeaturesConfig.serviceUrls,

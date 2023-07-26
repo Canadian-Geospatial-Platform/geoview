@@ -13,7 +13,7 @@ import { OverviewMap as OLOverviewMap } from 'ol/control';
 import { OverviewMapToggle } from './overview-map-toggle';
 
 import { EVENT_NAMES } from '@/api/events/event-types';
-import { api, payloadIsANumber } from '@/app';
+import { PayloadBaseClass, api, payloadIsANumber } from '@/app';
 import { MapContext } from '../../app-start';
 
 import { payloadIsAMapViewProjection } from '@/api/events/payloads/map-view-projection-payload';
@@ -103,68 +103,60 @@ export function OverviewMap(): JSX.Element {
   const mapConfig = useContext(MapContext);
 
   const { mapId } = mapConfig;
+  const { map, mapFeaturesConfig } = api.map(mapId);
+  const hideOnZoom = mapFeaturesConfig.overviewMap?.hideOnZoom || 0;
 
   const classes = useStyles();
 
+  const handleProjectionChange = (payload: PayloadBaseClass) => {
+    if (payloadIsAMapViewProjection(payload)) {
+      const overviewMap = map
+        .getControls()
+        .getArray()
+        .filter((item) => {
+          return item instanceof OLOverviewMap;
+        })[0] as OLOverviewMap;
+
+      // collapse the overview map, if not projection throw an error
+      overviewMap.setCollapsed(true);
+      overviewMap.setMap(null);
+
+      // wait for the view change then set the map and open the overview
+      // TODO: look for better options then Timeout
+      setTimeout(() => {
+        overviewMap.setMap(api.map(mapId).map);
+
+        setTimeout(() => overviewMap.setCollapsed(false), 500);
+      }, 2000);
+    }
+  };
+
+  const hideBasedOnZoom = (payload: PayloadBaseClass) => {
+    if (payloadIsANumber(payload)) {
+      const overviewMap = map
+        .getControls()
+        .getArray()
+        .filter((item) => {
+          return item instanceof OLOverviewMap;
+        })[0] as OLOverviewMap;
+      if (payload.value < hideOnZoom) overviewMap.setMap(null);
+      else overviewMap.setMap(api.map(mapId).map);
+    }
+  };
+
   useEffect(() => {
     // listen to geoview-basemap-panel package change projection event
-    api.event.on(
-      EVENT_NAMES.MAP.EVENT_MAP_VIEW_PROJECTION_CHANGE,
-      (payload) => {
-        if (payloadIsAMapViewProjection(payload)) {
-          const overviewMap = api
-            .map(mapId)
-            .map.getControls()
-            .getArray()
-            .filter((item) => {
-              return item instanceof OLOverviewMap;
-            })[0] as OLOverviewMap;
-
-          // collapse the overview map, if not projection throw an error
-          overviewMap.setCollapsed(true);
-          overviewMap.setMap(null);
-
-          // wait for the view change then set the map and open the overview
-          // TODO: look for better options then Timeout
-          setTimeout(() => {
-            overviewMap.setMap(api.map(mapId).map);
-
-            setTimeout(() => overviewMap.setCollapsed(false), 500);
-          }, 2000);
-        }
-      },
-      mapId
-    );
-
-    api.event.on(
-      EVENT_NAMES.MAP.EVENT_MAP_ZOOM_END,
-      (payload) => {
-        if (payloadIsANumber(payload)) {
-          if (payload.value <= 5) {
-            const overviewMap = api
-              .map(mapId)
-              .map.getControls()
-              .getArray()
-              .filter((item) => {
-                return item instanceof OLOverviewMap;
-              })[0] as OLOverviewMap;
-            overviewMap.setPosition(undefined);
-          }
-        }
-      },
-      mapId
-    );
+    api.event.on(EVENT_NAMES.MAP.EVENT_MAP_VIEW_PROJECTION_CHANGE, handleProjectionChange, mapId);
+    api.event.on(EVENT_NAMES.MAP.EVENT_MAP_ZOOM_END, hideBasedOnZoom, mapId);
 
     return () => {
-      api.event.off(EVENT_NAMES.MAP.EVENT_MAP_ZOOM_END, mapId);
-      api.event.off(EVENT_NAMES.MAP.EVENT_MAP_VIEW_PROJECTION_CHANGE, mapId);
+      api.event.off(EVENT_NAMES.MAP.EVENT_MAP_VIEW_PROJECTION_CHANGE, mapId, handleProjectionChange);
+      api.event.off(EVENT_NAMES.MAP.EVENT_MAP_ZOOM_END, mapId, hideBasedOnZoom);
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mapId]);
 
   useEffect(() => {
-    const { map, mapFeaturesConfig } = api.map(mapId);
-    console.log(mapFeaturesConfig);
-
     // get default overview map
     const defaultBasemap = api.map(mapId).basemap.overviewMap;
 
@@ -192,6 +184,7 @@ export function OverviewMap(): JSX.Element {
     });
 
     map.addControl(overviewMapControl);
+    if (api.map(mapId).map.getView().getZoom() && api.map(mapId).map.getView().getZoom()! < hideOnZoom) overviewMapControl.setMap(null);
 
     // need to recreate the i18n instance as the overviewmap is a new map inside the main map
     const i18nInstance = i18n.cloneInstance({
