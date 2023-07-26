@@ -204,7 +204,7 @@
         if (geoviewLayers) {
           const output = Object.keys(cgpv.api.maps?.LYR1?.layer?.geoviewLayers).reduce((outputValue, layerId) => {
             const layerName = cgpv.api.maps?.LYR1?.layer?.geoviewLayers[layerId].geoviewLayerName.en;
-            const stateValue = cgpv.api.maps?.LYR1?.layer?.geoviewLayers[layerId].allLayerEntryConfigProcessed() ? 'processed' : 'inprogress';
+            const stateValue = cgpv.api.maps?.LYR1?.layer?.geoviewLayers[layerId].layerPhase;
             return `${outputValue}${layerName}: ${stateValue}, `;
           }, '(');
           displayField1.textContent = output ? `${output.slice(0, -2)})` : '(undefined)';
