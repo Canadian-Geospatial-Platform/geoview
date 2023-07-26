@@ -21,6 +21,7 @@ import {
 import { getLocalizedValue, getMinOrMaxExtents } from '@/core/utils/utilities';
 import { api } from '@/app';
 import { Layer } from '../../layer';
+import { LayerSetPayload } from '@/api/events/payloads/layer-set-payload';
 
 export interface TypeImageStaticLayerConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig'> {
   geoviewLayerType: 'imageStatic';
@@ -86,6 +87,18 @@ export class ImageStatic extends AbstractGeoViewRaster {
    */
   constructor(mapId: string, layerConfig: TypeImageStaticLayerConfig) {
     super(CONST_LAYER_TYPES.IMAGE_STATIC, layerConfig, mapId);
+  }
+
+  /** ***************************************************************************************************************************
+   * Image static has no metadata.
+   *
+   * @returns {Promise<void>} A promise that the execution is completed.
+   */
+  protected getServiceMetadata(): Promise<void> {
+    const promisedExecution = new Promise<void>((resolve) => {
+      resolve();
+    });
+    return promisedExecution;
   }
 
   /** ***************************************************************************************************************************
@@ -186,57 +199,45 @@ export class ImageStatic extends AbstractGeoViewRaster {
    *
    * @returns {TypeListOfLayerEntryConfig} A new list of layer entries configuration with deleted error layers.
    */
-  protected validateListOfLayerEntryConfig(listOfLayerEntryConfig: TypeListOfLayerEntryConfig): TypeListOfLayerEntryConfig {
-    return listOfLayerEntryConfig.filter((layerEntryConfig: TypeLayerEntryConfig) => {
-      if (api.map(this.mapId).layer.isRegistered(layerEntryConfig)) {
-        this.layerLoadError.push({
-          layer: Layer.getLayerPath(layerEntryConfig),
-          consoleMessage: `Duplicate layerPath (mapId:  ${this.mapId}, layerPath: ${Layer.getLayerPath(layerEntryConfig)})`,
-        });
-        return false;
+  protected validateListOfLayerEntryConfig(listOfLayerEntryConfig: TypeListOfLayerEntryConfig) {
+    listOfLayerEntryConfig.forEach((layerEntryConfig: TypeLayerEntryConfig) => {
+      const layerPath = Layer.getLayerPath(layerEntryConfig);
+      if (layerEntryIsGroupLayer(layerEntryConfig)) {
+        this.validateListOfLayerEntryConfig(layerEntryConfig.listOfLayerEntryConfig!);
+        if (!layerEntryConfig.listOfLayerEntryConfig.length) {
+          this.layerLoadError.push({
+            layer: layerPath,
+            consoleMessage: `Empty layer group (mapId:  ${this.mapId}, layerPath: ${layerPath})`,
+          });
+          api.event.emit(LayerSetPayload.createLayerSetChangeLayerStatusPayload(this.mapId, layerPath, 'error'));
+          return;
+        }
       }
 
-      if (layerEntryIsGroupLayer(layerEntryConfig)) {
-        layerEntryConfig.listOfLayerEntryConfig = this.validateListOfLayerEntryConfig(layerEntryConfig.listOfLayerEntryConfig!);
-        if (layerEntryConfig.listOfLayerEntryConfig.length) {
-          api.map(this.mapId).layer.registerLayerConfig(layerEntryConfig);
-          return true;
-        }
-        this.layerLoadError.push({
-          layer: Layer.getLayerPath(layerEntryConfig),
-          consoleMessage: `Empty layer group (mapId:  ${this.mapId}, layerPath: ${Layer.getLayerPath(layerEntryConfig)})`,
-        });
-        return false;
-      }
+      api.event.emit(LayerSetPayload.createLayerSetChangeLayerStatusPayload(this.mapId, layerPath, 'loading'));
 
       // When no metadata are provided, all layers are considered valid.
-      if (!this.metadata) {
-        api.map(this.mapId).layer.registerLayerConfig(layerEntryConfig);
-        return true;
-      }
+      if (!this.metadata) return;
 
       // Note that Image Static metadata as we defined it does not contains metadata layer group. If you need geojson layer group,
       // you can define them in the configuration section.
       if (Array.isArray(this.metadata?.listOfLayerEntryConfig)) {
         const metadataLayerList = Cast<TypeLayerEntryConfig[]>(this.metadata?.listOfLayerEntryConfig);
-        for (var i = 0; i < metadataLayerList.length; i++) if (metadataLayerList[i].layerId === layerEntryConfig.layerId) break;
-        if (i === metadataLayerList.length) {
+        const foundEntry = metadataLayerList.find((layerMetadata) => layerMetadata.layerId === layerEntryConfig.layerId);
+        if (!foundEntry) {
           this.layerLoadError.push({
-            layer: Layer.getLayerPath(layerEntryConfig),
-            consoleMessage: `GeoJSON layer not found (mapId:  ${this.mapId}, layerPath: ${Layer.getLayerPath(layerEntryConfig)})`,
+            layer: layerPath,
+            consoleMessage: `GeoJSON layer not found (mapId:  ${this.mapId}, layerPath: ${layerPath})`,
           });
-          return false;
+          api.event.emit(LayerSetPayload.createLayerSetChangeLayerStatusPayload(this.mapId, layerPath, 'error'));
+          return;
         }
-        api.map(this.mapId).layer.registerLayerConfig(layerEntryConfig);
-        return true;
+        return;
       }
-      this.layerLoadError.push({
-        layer: Layer.getLayerPath(layerEntryConfig),
-        consoleMessage: `Invalid GeoJSON metadata (listOfLayerEntryConfig) prevent loading of layer (mapId:  ${
-          this.mapId
-        }, layerPath: ${Layer.getLayerPath(layerEntryConfig)})`,
-      });
-      return false;
+
+      throw new Error(
+        `Invalid GeoJSON metadata (listOfLayerEntryConfig) prevent loading of layer (mapId:  ${this.mapId}, layerPath: ${layerPath})`
+      );
     });
   }
 

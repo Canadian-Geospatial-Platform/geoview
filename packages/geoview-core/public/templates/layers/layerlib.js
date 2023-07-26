@@ -26,7 +26,8 @@ const createInfoTable = (mapId, resultSetsId, resultSets) => {
   content.id = `layer${mapId.slice(-1)}-info`;
   infoTable.appendChild(content);
   Object.keys(resultSets).forEach((layerPath) => {
-    const layerData = resultSets[layerPath];
+    const activeResultSet = resultSets[layerPath];
+    const layerData = activeResultSet.data;
 
     // Header of the layer
     const infoH1 = document.createElement('h1');
@@ -157,9 +158,9 @@ const createInfoTable = (mapId, resultSetsId, resultSets) => {
           tableRow.appendChild(tableData);
         });
       });
-    } else {
-      content.appendChild(document.createElement('hr'));
     }
+    content.appendChild(document.createElement('br'));
+    content.appendChild(document.createElement('hr'));
   });
 };
 
@@ -189,7 +190,7 @@ const createTableOfFilter = (mapId) => {
           mapButtonsDiv.appendChild(geoviewLayerH1);
 
           const layerConfigH2 = document.createElement('h2');
-          layerConfigH2.innerText = `${layerConfig.layerName.en}`;
+          layerConfigH2.innerText = `${layerConfig?.layerName?.en}`;
           layerConfigH2.style.height = '15px';
           mapButtonsDiv.appendChild(layerConfigH2);
 
@@ -437,7 +438,24 @@ function displayLegend(layerSetId, resultSets) {
   legendTable.appendChild(table);
   let createHeader = true;
   Object.keys(resultSets).forEach((layerPath) => {
-    if (resultSets[layerPath]?.type === 'ogcWms' || resultSets[layerPath]?.type === 'imageStatic') {
+    const activeResultSet = resultSets[layerPath];
+    if (activeResultSet.layerStatus !== 'processed' || !activeResultSet?.data?.legend) {
+      if (createHeader) {
+        createHeader = false;
+        const tableRow1 = document.createElement('tr');
+        table.appendChild(tableRow1);
+        addHeader('Layer Path', tableRow1);
+        addHeader('Status', tableRow1);
+      }
+      const tableRow = document.createElement('tr');
+      addData(layerPath, tableRow);
+      let legendValue = activeResultSet.data === undefined && activeResultSet.layerStatus === 'processed' ? '(waiting for legend)' : '';
+      legendValue = activeResultSet.data === null && activeResultSet.layerStatus === 'processed' ? '(legend fetch error)' : legendValue;
+      legendValue =
+        activeResultSet.data && !activeResultSet.data.legend && activeResultSet.layerStatus === 'processed' ? '(no legend)' : legendValue;
+      addData(`${activeResultSet.layerStatus} ${legendValue}`, tableRow);
+      table.appendChild(tableRow);
+    } else if (activeResultSet.data?.type === 'ogcWms' || activeResultSet.data?.type === 'imageStatic') {
       if (createHeader) {
         createHeader = false;
         const tableRow1 = document.createElement('tr');
@@ -446,8 +464,8 @@ function displayLegend(layerSetId, resultSets) {
         addHeader('Symbology', tableRow1);
       }
       const tableRow = document.createElement('tr');
-      addData(resultSets[layerPath].layerPath, tableRow);
-      addData(resultSets[layerPath].legend, tableRow);
+      addData(activeResultSet.data.layerPath, tableRow);
+      addData(activeResultSet.data.legend, tableRow);
       table.appendChild(tableRow);
     } else {
       const addRow = (layerPathToUse, label, canvas) => {
@@ -465,42 +483,42 @@ function displayLegend(layerSetId, resultSets) {
         addHeader('Label', tableRow1);
         addHeader('Symbology', tableRow1);
       }
-      if (resultSets[layerPath]?.legend) {
-        Object.keys(resultSets[layerPath].legend).forEach((geometryKey) => {
+      if (activeResultSet.data?.legend) {
+        Object.keys(activeResultSet.data.legend).forEach((geometryKey) => {
           if (geometryKey) {
-            if (resultSets[layerPath].styleConfig[geometryKey].styleType === 'uniqueValue') {
-              if (resultSets[layerPath].legend[geometryKey].defaultCanvas)
+            if (activeResultSet.data.styleConfig[geometryKey].styleType === 'uniqueValue') {
+              if (activeResultSet.data.legend[geometryKey].defaultCanvas)
                 addRow(
                   layerPath,
-                  resultSets[layerPath].styleConfig[geometryKey].defaultLabel,
-                  resultSets[layerPath].legend[geometryKey].defaultCanvas
+                  activeResultSet.data.styleConfig[geometryKey].defaultLabel,
+                  activeResultSet.data.legend[geometryKey].defaultCanvas
                 );
-              for (let i = 0; i < resultSets[layerPath].legend[geometryKey].arrayOfCanvas.length; i++) {
+              for (let i = 0; i < activeResultSet.data.legend[geometryKey].arrayOfCanvas.length; i++) {
                 addRow(
                   layerPath,
-                  resultSets[layerPath].styleConfig[geometryKey].uniqueValueStyleInfo[i].label,
-                  resultSets[layerPath].legend[geometryKey].arrayOfCanvas[i]
-                );
-              }
-            } else if (resultSets[layerPath].styleConfig[geometryKey].styleType === 'classBreaks') {
-              if (resultSets[layerPath].legend[geometryKey].defaultCanvas)
-                addRow(
-                  layerPath,
-                  resultSets[layerPath].styleConfig[geometryKey].defaultLabel,
-                  resultSets[layerPath].legend[geometryKey].defaultCanvas
-                );
-              for (let i = 0; i < resultSets[layerPath].legend[geometryKey].arrayOfCanvas.length; i++) {
-                addRow(
-                  layerPath,
-                  resultSets[layerPath].styleConfig[geometryKey].classBreakStyleInfo[i].label,
-                  resultSets[layerPath].legend[geometryKey].arrayOfCanvas[i]
+                  activeResultSet.data.styleConfig[geometryKey].uniqueValueStyleInfo[i].label,
+                  activeResultSet.data.legend[geometryKey].arrayOfCanvas[i]
                 );
               }
-            } else if (resultSets[layerPath].styleConfig[geometryKey].styleType === 'simple') {
+            } else if (activeResultSet.data.styleConfig[geometryKey].styleType === 'classBreaks') {
+              if (activeResultSet.data.legend[geometryKey].defaultCanvas)
+                addRow(
+                  layerPath,
+                  activeResultSet.data.styleConfig[geometryKey].defaultLabel,
+                  activeResultSet.data.legend[geometryKey].defaultCanvas
+                );
+              for (let i = 0; i < activeResultSet.data.legend[geometryKey].arrayOfCanvas.length; i++) {
+                addRow(
+                  layerPath,
+                  activeResultSet.data.styleConfig[geometryKey].classBreakStyleInfo[i].label,
+                  activeResultSet.data.legend[geometryKey].arrayOfCanvas[i]
+                );
+              }
+            } else if (activeResultSet.data.styleConfig[geometryKey].styleType === 'simple') {
               addRow(
                 layerPath,
-                resultSets[layerPath].styleConfig[geometryKey].label,
-                resultSets[layerPath].legend[geometryKey].defaultCanvas
+                activeResultSet.data.styleConfig[geometryKey].label,
+                activeResultSet.data.legend[geometryKey].defaultCanvas
               );
             }
           }

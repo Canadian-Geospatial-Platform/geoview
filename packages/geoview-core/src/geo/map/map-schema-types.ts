@@ -613,9 +613,16 @@ export const layerEntryIsGeocore = (verifyIfLayer: TypeLayerEntryConfig): verify
 };
 
 /** ******************************************************************************************************************************
+ * Valid values for the LayerStatus property
+ */
+export type TypeLayerStatus = 'newInstance' | 'loading' | 'processed' | 'error' | undefined;
+
+/** ******************************************************************************************************************************
  * Base type used to define a GeoView layer to display on the map.
  */
 export type TypeBaseLayerEntryConfig = {
+  /** This attribute is not part of the schema. It is used to identified unprocessed layers and shows the final layer state */
+  layerStatus?: TypeLayerStatus;
   /** This attribute is not part of the schema. It is used to link the layer entry config to the GeoView root layer config. */
   geoviewRootLayer?: TypeGeoviewLayerConfig;
   /** This attribute is not part of the schema. It is used to link the layer entry config to the parent's layer config. */
@@ -916,7 +923,7 @@ export type TypeSourceGeocoreConfig = {
 /** ******************************************************************************************************************************
  * Type used to define a layer group.
  */
-export interface TypeLayerGroupEntryConfig extends Omit<TypeBaseLayerEntryConfig, 'listOfLayerEntryConfig'> {
+export interface TypeLayerGroupEntryConfig extends Omit<TypeBaseLayerEntryConfig, 'layerStatus' | 'listOfLayerEntryConfig'> {
   /** This attribute is not part of the schema. It is used internally to distinguish layer groups derived from the
    * metadata. */
   isMetadataLayerGroup?: boolean;

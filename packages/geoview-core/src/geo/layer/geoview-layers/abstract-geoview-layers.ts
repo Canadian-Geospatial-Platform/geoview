@@ -11,7 +11,7 @@ import Geometry from 'ol/geom/Geometry';
 
 import cloneDeep from 'lodash/cloneDeep';
 
-import { generateId, getLocalizedValue } from '@/core/utils/utilities';
+import { generateId, getLocalizedValue, getXMLHttpRequest } from '@/core/utils/utilities';
 import {
   TypeGeoviewLayerConfig,
   TypeListOfLayerEntryConfig,
@@ -41,9 +41,9 @@ import {
 import { snackbarMessagePayload } from '@/api/events/payloads/snackbar-message-payload';
 import { api } from '@/app';
 import { EVENT_NAMES } from '@/api/events/event-types';
-import { TypeJsonObject } from '@/core/types/global-types';
+import { TypeJsonObject, toJsonObject } from '@/core/types/global-types';
 import { Layer } from '../layer';
-import { LayerSetPayload, payloadIsRequestLayerInventory } from '@/api/events/payloads/layer-set-payload';
+import { LayerSetPayload, payloadIsLayerSetUpdated, payloadIsRequestLayerInventory } from '@/api/events/payloads/layer-set-payload';
 import { GetLegendsPayload, payloadIsQueryLegend } from '@/api/events/payloads/get-legends-payload';
 import { TimeDimension, TypeDateFragments } from '@/core/utils/date-mgt';
 import { TypeEventHandlerFunction } from '@/api/events/event';
@@ -227,6 +227,7 @@ type TypeLayerSetHandlerFunctions = {
   requestLayerInventory?: TypeEventHandlerFunction;
   queryLegend?: TypeEventHandlerFunction;
   queryLayer?: TypeEventHandlerFunction;
+  layerStatusUpdated?: TypeEventHandlerFunction;
 };
 
 // ******************************************************************************************************************************
@@ -240,12 +241,6 @@ type TypeLayerSetHandlerFunctions = {
  */
 // ******************************************************************************************************************************
 export abstract class AbstractGeoViewLayer {
-  /** Flag used to indicate the layer's state */
-  layerState = 'loading';
-
-  /** Flag used to indicate the layer's phase */
-  layerPhase = 'newInstance';
-
   /** The unique identifier of the map on which the GeoView layer will be drawn. */
   mapId: string;
 
@@ -334,7 +329,79 @@ export abstract class AbstractGeoViewLayer {
       ? api.dateUtilities.getDateFragmentsOrder(mapLayerConfig.serviceDateFormat)
       : undefined;
     this.externalFragmentsOrder = api.dateUtilities.getDateFragmentsOrder(mapLayerConfig.externalDateFormat);
-    api.maps[mapId].layer.geoviewLayers[this.geoviewLayerId] = this;
+    const { layer } = api.maps[mapId];
+    layer.geoviewLayers[this.geoviewLayerId] = this;
+    this.initRegisteredLayers();
+    this.registerAllLayersToLayerSets();
+  }
+
+  /** ***************************************************************************************************************************
+   * Process recursively the list of layer entries to see if all of them are processed.
+   *
+   * @param {TypeListOfLayerEntryConfig} listOfLayerEntryConfig The list of layer's configuration
+   *                                                            (default: this.listOfLayerEntryConfig).
+   *
+   * @returns {boolean} true when all layers are processed.
+   */
+  allLayerEntryConfigProcessed(listOfLayerEntryConfig: TypeListOfLayerEntryConfig = this.listOfLayerEntryConfig): boolean {
+    // Try to find an unprocessed layer. If you can, return false
+    return !listOfLayerEntryConfig.find((layerEntryConfig: TypeLayerEntryConfig) => {
+      if (layerEntryIsGroupLayer(layerEntryConfig)) return !this.allLayerEntryConfigProcessed(layerEntryConfig.listOfLayerEntryConfig);
+      return !['processed', 'error'].includes((layerEntryConfig as TypeBaseLayerEntryConfig).layerStatus || '');
+    });
+  }
+
+  /** ***************************************************************************************************************************
+   * Recursively process the list of layer entries to count all layers in error.
+   *
+   * @param {TypeListOfLayerEntryConfig} listOfLayerEntryConfig The list of layer's configuration
+   *                                                            (default: this.listOfLayerEntryConfig).
+   *
+   * @returns {number} The number of layers in error.
+   */
+  countErrorStatus(listOfLayerEntryConfig: TypeListOfLayerEntryConfig = this.listOfLayerEntryConfig): number {
+    return listOfLayerEntryConfig.reduce((counter: number, layerEntryConfig: TypeLayerEntryConfig) => {
+      if (layerEntryIsGroupLayer(layerEntryConfig)) return counter + this.countErrorStatus(layerEntryConfig.listOfLayerEntryConfig);
+      if ((layerEntryConfig as TypeBaseLayerEntryConfig).layerStatus === 'error') return counter + 1;
+      return counter;
+    }, 0);
+  }
+
+  /** ***************************************************************************************************************************
+   * Process recursively the list of layer entries to initialize the registeredLayers object.
+   *
+   * @param {TypeListOfLayerEntryConfig} listOfLayerEntryConfig The list of layer entries to process.
+   */
+  private initRegisteredLayers(listOfLayerEntryConfig: TypeListOfLayerEntryConfig = this.listOfLayerEntryConfig) {
+    const { layer } = api.maps[this.mapId];
+    listOfLayerEntryConfig.forEach((layerEntryConfig: TypeLayerEntryConfig, i) => {
+      if (layer.isRegistered(layerEntryConfig)) {
+        this.layerLoadError.push({
+          layer: Layer.getLayerPath(layerEntryConfig),
+          consoleMessage: `Duplicate layerPath (mapId:  ${this.mapId}, layerPath: ${Layer.getLayerPath(layerEntryConfig)})`,
+        });
+        // Duplicat layer can't be kept because it has the same layer path than the first encontered layer.
+        delete listOfLayerEntryConfig[i];
+      } else layer.registerLayerConfig(layerEntryConfig);
+      if (layerEntryIsGroupLayer(layerEntryConfig)) this.initRegisteredLayers(layerEntryConfig.listOfLayerEntryConfig);
+    });
+  }
+
+  /** ***************************************************************************************************************************
+   * Process recursively the list of layer Entries to register all layers to the layerSets.
+   *
+   * @param {TypeListOfLayerEntryConfig} listOfLayerEntryConfig The list of layer entries to process.
+   */
+  private registerAllLayersToLayerSets(listOfLayerEntryConfig: TypeListOfLayerEntryConfig = this.listOfLayerEntryConfig) {
+    if (listOfLayerEntryConfig.length === 1)
+      if (layerEntryIsGroupLayer(listOfLayerEntryConfig[0]))
+        this.registerAllLayersToLayerSets(listOfLayerEntryConfig[0].listOfLayerEntryConfig!);
+      else this.registerToLayerSets(listOfLayerEntryConfig[0] as TypeBaseLayerEntryConfig);
+    else if (listOfLayerEntryConfig.length > 0)
+      listOfLayerEntryConfig.forEach((layerEntryConfig) => {
+        if (layerEntryIsGroupLayer(layerEntryConfig)) this.registerAllLayersToLayerSets(layerEntryConfig.listOfLayerEntryConfig!);
+        else this.registerToLayerSets(layerEntryConfig as TypeBaseLayerEntryConfig);
+      });
   }
 
   /** ***************************************************************************************************************************
@@ -356,23 +423,20 @@ export abstract class AbstractGeoViewLayer {
    * the details-panel.
    */
   createGeoViewLayers(): Promise<void> {
-    this.layerPhase = 'createGeoViewLayers';
     const promisedExecution = new Promise<void>((resolve) => {
       if (this.gvLayers === null) {
         this.getAdditionalServiceDefinition()
           .then(() => {
-            this.processListOfLayerEntryConfig(this.listOfLayerEntryConfig)
-              .then((layersCreated) => {
-                this.gvLayers = layersCreated as BaseLayer;
-                if (this.listOfLayerEntryConfig.length) this.setActiveLayer(this.listOfLayerEntryConfig[0]);
-                resolve();
-              })
-              .catch(() => {
-                console.log('Catch de la fonction processListOfLayerEntryConfig');
-              });
+            this.processListOfLayerEntryConfig(this.listOfLayerEntryConfig).then((layersCreated) => {
+              this.gvLayers = layersCreated as BaseLayer;
+              if (this.listOfLayerEntryConfig.length) this.setActiveLayer(this.listOfLayerEntryConfig[0]);
+              resolve();
+            });
           })
-          .catch(() => {
-            console.log('Catch de la fonction getAdditionalServiceDefinition');
+          .catch((reason) => {
+            // eslint-disable-next-line no-console
+            console.log(reason);
+            resolve();
           });
       } else {
         api.event.emit(
@@ -395,12 +459,11 @@ export abstract class AbstractGeoViewLayer {
    * If the GeoView layer does not have a service definition, this method does nothing.
    */
   protected getAdditionalServiceDefinition(): Promise<void> {
-    this.layerPhase = 'getAdditionalServiceDefinition';
     const promisedExecution = new Promise<void>((resolve) => {
       this.getServiceMetadata().then(() => {
         if (this.listOfLayerEntryConfig.length) {
           // Recursively process the configuration tree of layer entries by removing layers in error and processing valid layers.
-          this.listOfLayerEntryConfig = this.validateListOfLayerEntryConfig(this.listOfLayerEntryConfig);
+          this.validateListOfLayerEntryConfig(this.listOfLayerEntryConfig);
           this.processListOfLayerEntryMetadata(this.listOfLayerEntryConfig).then(() => resolve());
         } else resolve(); // no layer entry.
       });
@@ -409,14 +472,30 @@ export abstract class AbstractGeoViewLayer {
   }
 
   /** ***************************************************************************************************************************
-   * This method reads the service metadata from the metadataAccessPath. It does nothing if the layer has no metadata.
+   * This method reads the service metadata from the metadataAccessPath.
    *
    * @returns {Promise<void>} A promise that the execution is completed.
    */
   protected getServiceMetadata(): Promise<void> {
-    this.layerPhase = 'getServiceMetadata';
     const promisedExecution = new Promise<void>((resolve) => {
-      resolve();
+      const metadataUrl = getLocalizedValue(this.metadataAccessPath, this.mapId);
+      if (metadataUrl) {
+        getXMLHttpRequest(`${metadataUrl}?f=json`)
+          .then((metadataString) => {
+            if (metadataString === '{}') {
+              api.geoUtilities.setAllLayerStatusToError(this, this.listOfLayerEntryConfig, 'Unable to read metadata');
+            } else {
+              this.metadata = toJsonObject(JSON.parse(metadataString));
+              const { copyrightText } = this.metadata;
+              if (copyrightText) this.attributions.push(copyrightText as string);
+              resolve();
+            }
+          })
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          .catch((reason) => {
+            api.geoUtilities.setAllLayerStatusToError(this, this.listOfLayerEntryConfig, 'Unable to read metadata');
+          });
+      } else resolve();
     });
     return promisedExecution;
   }
@@ -426,10 +505,8 @@ export abstract class AbstractGeoViewLayer {
    * necessary, additional code can be executed in the child method to complete the layer configuration.
    *
    * @param {TypeListOfLayerEntryConfig} listOfLayerEntryConfig The list of layer entries configuration to validate.
-   *
-   * @returns {TypeListOfLayerEntryConfig} A new layer configuration list with layers in error removed.
    */
-  protected abstract validateListOfLayerEntryConfig(listOfLayerEntryConfig: TypeListOfLayerEntryConfig): TypeListOfLayerEntryConfig;
+  protected abstract validateListOfLayerEntryConfig(listOfLayerEntryConfig: TypeListOfLayerEntryConfig): void;
 
   /** ***************************************************************************************************************************
    * This method processes recursively the metadata of each layer in the "layer list" configuration.
@@ -441,7 +518,6 @@ export abstract class AbstractGeoViewLayer {
   protected processListOfLayerEntryMetadata(
     listOfLayerEntryConfig: TypeListOfLayerEntryConfig = this.listOfLayerEntryConfig
   ): Promise<void> {
-    this.layerPhase = 'processListOfLayerEntryMetadata';
     const promisedListOfLayerEntryProcessed = new Promise<void>((resolve) => {
       const promisedAllLayerDone: Promise<void>[] = [];
       listOfLayerEntryConfig.forEach((layerEntryConfig: TypeLayerEntryConfig) => {
@@ -465,7 +541,6 @@ export abstract class AbstractGeoViewLayer {
    * @returns {Promise<void>} A promise that the vector layer configuration has its metadata and group layers processed.
    */
   private processMetadataGroupLayer(layerEntryConfig: TypeLayerGroupEntryConfig): Promise<void> {
-    this.layerPhase = 'processMetadataGroupLayer';
     const promisedListOfLayerEntryProcessed = new Promise<void>((resolve) => {
       this.processLayerMetadata(layerEntryConfig).then(() => {
         this.processListOfLayerEntryMetadata(layerEntryConfig.listOfLayerEntryConfig!).then(() => resolve());
@@ -483,7 +558,6 @@ export abstract class AbstractGeoViewLayer {
    * @returns {Promise<void>} A promise that the vector layer configuration has its metadata processed.
    */
   protected processLayerMetadata(layerEntryConfig: TypeLayerEntryConfig): Promise<void> {
-    this.layerPhase = 'processLayerMetadata';
     const promiseOfExecution = new Promise<void>((resolve) => {
       if (!layerEntryConfig.source) layerEntryConfig.source = {};
       if (!layerEntryConfig.source.featureInfo) layerEntryConfig.source.featureInfo = { queryable: true };
@@ -505,7 +579,6 @@ export abstract class AbstractGeoViewLayer {
     listOfLayerEntryConfig: TypeListOfLayerEntryConfig,
     layerGroup?: LayerGroup
   ): Promise<BaseLayer | null> {
-    this.layerPhase = 'processListOfLayerEntryConfig';
     const promisedListOfLayerEntryProcessed = new Promise<BaseLayer | null>((resolve) => {
       if (listOfLayerEntryConfig.length === 1) {
         if (layerEntryIsGroupLayer(listOfLayerEntryConfig[0])) {
@@ -546,15 +619,23 @@ export abstract class AbstractGeoViewLayer {
             if (baseLayer) {
               baseLayer.setVisible(true);
               this.registerToLayerSets(listOfLayerEntryConfig[0] as TypeBaseLayerEntryConfig);
-              if (layerGroup) {
-                layerGroup.getLayers().push(baseLayer);
-                resolve(layerGroup);
-              } else resolve(baseLayer);
+              if (layerGroup) layerGroup.getLayers().push(baseLayer);
+              api.event.emit(
+                LayerSetPayload.createLayerSetChangeLayerStatusPayload(
+                  this.mapId,
+                  Layer.getLayerPath(listOfLayerEntryConfig[0]),
+                  'processed'
+                )
+              );
+              resolve(layerGroup || baseLayer);
             } else {
               this.layerLoadError.push({
                 layer: Layer.getLayerPath(listOfLayerEntryConfig[0]),
                 consoleMessage: `Unable to create layer ${Layer.getLayerPath(listOfLayerEntryConfig[0])} on map ${this.mapId}`,
               });
+              api.event.emit(
+                LayerSetPayload.createLayerSetChangeLayerStatusPayload(this.mapId, Layer.getLayerPath(listOfLayerEntryConfig[0]), 'error')
+              );
               resolve(null);
             }
           });
@@ -589,14 +670,28 @@ export abstract class AbstractGeoViewLayer {
           .then((listOfLayerCreated) => {
             listOfLayerCreated.forEach((baseLayer, i) => {
               if (baseLayer) {
-                const layerEntryConfig = baseLayer?.get('layerEntryConfig');
-                if (layerEntryConfig && (!layerEntryConfig.initialSettings.visible || layerEntryConfig.layerId.endsWith('-unclustered')))
-                  baseLayer.setVisible(false);
-                else baseLayer.setVisible(true);
+                const layerEntryConfig = baseLayer?.get('layerEntryConfig') as TypeBaseLayerEntryConfig;
+                if (layerEntryConfig) {
+                  if (layerEntryConfig.layerId.endsWith('-unclustered')) {
+                    this.registerToLayerSets(layerEntryConfig);
+                    baseLayer.setVisible(false);
+                  } else
+                    baseLayer.setVisible(
+                      layerEntryConfig.initialSettings?.visible === undefined ? true : layerEntryConfig.initialSettings.visible
+                    );
 
-                if (!layerEntryIsGroupLayer(listOfLayerEntryConfig[i]))
-                  this.registerToLayerSets(baseLayer.get('layerEntryConfig') as TypeBaseLayerEntryConfig);
-                layerGroup!.getLayers().push(baseLayer);
+                  if (!layerEntryIsGroupLayer(listOfLayerEntryConfig[i])) {
+                    this.registerToLayerSets(baseLayer.get('layerEntryConfig') as TypeBaseLayerEntryConfig);
+                    api.event.emit(
+                      LayerSetPayload.createLayerSetChangeLayerStatusPayload(
+                        this.mapId,
+                        Layer.getLayerPath(listOfLayerEntryConfig[i]),
+                        'processed'
+                      )
+                    );
+                  }
+                  layerGroup!.getLayers().push(baseLayer);
+                }
               } else {
                 this.layerLoadError.push({
                   layer: Layer.getLayerPath(listOfLayerEntryConfig[i]),
@@ -604,6 +699,9 @@ export abstract class AbstractGeoViewLayer {
                     layerEntryIsGroupLayer(listOfLayerEntryConfig[i]) ? 'group' : ''
                   } layer ${Layer.getLayerPath(listOfLayerEntryConfig[i])} on map ${this.mapId}`,
                 });
+                api.event.emit(
+                  LayerSetPayload.createLayerSetChangeLayerStatusPayload(this.mapId, Layer.getLayerPath(listOfLayerEntryConfig[i]), 'error')
+                );
                 resolve(null);
               }
             });
@@ -759,7 +857,7 @@ export abstract class AbstractGeoViewLayer {
   }
 
   /** ***************************************************************************************************************************
-   * This method register the layer entry to layer sets.
+   * This method register the layer entry to layer sets. Nothing is done if the registration is already done.
    *
    * @param {TypeBaseLayerEntryConfig} layerEntryConfig The layer entry to register.
    */
@@ -767,47 +865,65 @@ export abstract class AbstractGeoViewLayer {
     const layerPath = Layer.getLayerPath(layerEntryConfig);
     if (!this.registerToLayerSetListenerFunctions[layerPath]) this.registerToLayerSetListenerFunctions[layerPath] = {};
 
-    // Listen to events that request a layer inventory and emit a register payload event.
-    // This will register all existing layers to a newly created layer set.
-    this.registerToLayerSetListenerFunctions[layerPath].requestLayerInventory = (payload) => {
-      if (payloadIsRequestLayerInventory(payload)) {
-        const { layerSetId } = payload;
-        api.event.emit(LayerSetPayload.createLayerRegistrationPayload(this.mapId, layerPath, 'add', layerSetId));
-      }
-    };
+    if (!this.registerToLayerSetListenerFunctions[layerPath].layerStatusUpdated) {
+      this.registerToLayerSetListenerFunctions[layerPath].layerStatusUpdated = (layerUpdatedPayload) => {
+        if (payloadIsLayerSetUpdated(layerUpdatedPayload) && layerUpdatedPayload.resultSets[layerPath])
+          layerEntryConfig.layerStatus = layerUpdatedPayload.resultSets[layerPath].layerStatus;
+      };
+      api.event.on(
+        EVENT_NAMES.LAYER_SET.UPDATED,
+        this.registerToLayerSetListenerFunctions[layerPath].layerStatusUpdated!,
+        `${this.mapId}/$LegendsLayerSet$/${layerPath}`
+      );
+    }
 
-    api.event.on(
-      EVENT_NAMES.LAYER_SET.REQUEST_LAYER_INVENTORY,
-      this.registerToLayerSetListenerFunctions[layerPath].requestLayerInventory!,
-      this.mapId
-    );
+    if (!this.registerToLayerSetListenerFunctions[layerPath].requestLayerInventory) {
+      // Listen to events that request a layer inventory and emit a register payload event.
+      // This will register all existing layers to a newly created layer set.
+      this.registerToLayerSetListenerFunctions[layerPath].requestLayerInventory = (payload) => {
+        if (payloadIsRequestLayerInventory(payload)) {
+          const { layerSetId } = payload;
+          api.event.emit(LayerSetPayload.createLayerRegistrationPayload(this.mapId, layerPath, 'add', layerSetId));
+        }
+      };
 
-    this.registerToLayerSetListenerFunctions[layerPath].queryLegend = (payload) => {
-      if (payloadIsQueryLegend(payload)) {
-        this.getLegend(layerPath).then((queryResult) => {
-          api.event.emit(GetLegendsPayload.createLegendInfoPayload(this.mapId, layerPath, queryResult));
-        });
-      }
-    };
+      api.event.on(
+        EVENT_NAMES.LAYER_SET.REQUEST_LAYER_INVENTORY,
+        this.registerToLayerSetListenerFunctions[layerPath].requestLayerInventory!,
+        this.mapId
+      );
+    }
 
-    api.event.on(
-      EVENT_NAMES.GET_LEGENDS.QUERY_LEGEND,
-      this.registerToLayerSetListenerFunctions[layerPath].queryLegend!,
-      `${this.mapId}/${layerPath}`
-    );
-
-    if ('featureInfo' in layerEntryConfig.source! && layerEntryConfig.source.featureInfo?.queryable) {
-      // Listen to events that request to query a layer and return the resultset to the requester.
-      this.registerToLayerSetListenerFunctions[layerPath].queryLayer = (payload) => {
-        if (payloadIsQueryLayer(payload)) {
-          const { queryType, location, isHover } = payload;
-          this.getFeatureInfo(location, layerPath, queryType).then((queryResult) => {
-            api.event.emit(GetFeatureInfoPayload.createQueryResultPayload(this.mapId, layerPath, queryResult, isHover));
+    if (!this.registerToLayerSetListenerFunctions[layerPath].queryLegend) {
+      this.registerToLayerSetListenerFunctions[layerPath].queryLegend = (payload) => {
+        if (payloadIsQueryLegend(payload)) {
+          this.getLegend(layerPath).then((queryResult) => {
+            api.event.emit(GetLegendsPayload.createLegendInfoPayload(this.mapId, layerPath, queryResult));
           });
         }
       };
 
-      api.event.on(EVENT_NAMES.GET_FEATURE_INFO.QUERY_LAYER, this.registerToLayerSetListenerFunctions[layerPath].queryLayer!, this.mapId);
+      api.event.on(
+        EVENT_NAMES.GET_LEGENDS.QUERY_LEGEND,
+        this.registerToLayerSetListenerFunctions[layerPath].queryLegend!,
+        `${this.mapId}/${layerPath}`
+      );
+    }
+
+    if (!this.registerToLayerSetListenerFunctions[layerPath].queryLayer) {
+      if ('featureInfo' in layerEntryConfig.source! && layerEntryConfig.source.featureInfo?.queryable) {
+        // Listen to events that request to query a layer and return the resultset to the requester.
+        this.registerToLayerSetListenerFunctions[layerPath].queryLayer = (payload) => {
+          if (payloadIsQueryLayer(payload)) {
+            const { queryType, location, isHover } = payload;
+            this.getFeatureInfo(location, layerPath, queryType).then((queryResult) => {
+              api.event.emit(GetFeatureInfoPayload.createQueryResultPayload(this.mapId, layerPath, queryResult, isHover));
+            });
+          }
+        };
+
+        api.event.on(EVENT_NAMES.GET_FEATURE_INFO.QUERY_LAYER, this.registerToLayerSetListenerFunctions[layerPath].queryLayer!, this.mapId);
+      }
     }
 
     // Register to layer sets that are already created.
@@ -822,21 +938,36 @@ export abstract class AbstractGeoViewLayer {
   unregisterFromLayerSets(layerEntryConfig: TypeBaseLayerEntryConfig) {
     const layerPath = Layer.getLayerPath(layerEntryConfig);
 
-    api.event.off(
-      EVENT_NAMES.LAYER_SET.REQUEST_LAYER_INVENTORY,
-      this.mapId,
-      this.registerToLayerSetListenerFunctions[layerPath].requestLayerInventory
-    );
+    if (this.registerToLayerSetListenerFunctions[layerPath].layerStatusUpdated) {
+      api.event.off(
+        EVENT_NAMES.LAYER_SET.UPDATED,
+        `${this.mapId}/$LegendsLayerSet$`,
+        this.registerToLayerSetListenerFunctions[layerPath].layerStatusUpdated
+      );
+    }
 
-    api.event.off(
-      EVENT_NAMES.GET_LEGENDS.QUERY_LEGEND,
-      `${this.mapId}/${layerPath}`,
-      this.registerToLayerSetListenerFunctions[layerPath].queryLegend
-    );
+    if (this.registerToLayerSetListenerFunctions[layerPath].requestLayerInventory) {
+      api.event.off(
+        EVENT_NAMES.LAYER_SET.REQUEST_LAYER_INVENTORY,
+        this.mapId,
+        this.registerToLayerSetListenerFunctions[layerPath].requestLayerInventory
+      );
+    }
 
-    if ('featureInfo' in layerEntryConfig.source! && layerEntryConfig.source.featureInfo?.queryable) {
+    if (this.registerToLayerSetListenerFunctions[layerPath].queryLegend) {
+      api.event.off(
+        EVENT_NAMES.GET_LEGENDS.QUERY_LEGEND,
+        `${this.mapId}/${layerPath}`,
+        this.registerToLayerSetListenerFunctions[layerPath].queryLegend
+      );
+    }
+
+    if (this.registerToLayerSetListenerFunctions[layerPath].queryLayer) {
       api.event.off(EVENT_NAMES.GET_FEATURE_INFO.QUERY_LAYER, this.mapId, this.registerToLayerSetListenerFunctions[layerPath].queryLayer);
     }
+
+    delete this.registerToLayerSetListenerFunctions[layerPath];
+    api.event.emit(LayerSetPayload.createLayerRegistrationPayload(this.mapId, layerPath, 'remove'));
   }
 
   /** ***************************************************************************************************************************

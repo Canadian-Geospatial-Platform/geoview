@@ -16,6 +16,10 @@ import { xmlToJson } from '@/core/utils/utilities';
 import { api } from '@/app';
 import { EVENT_NAMES } from '@/api/events/event-types';
 import { inKeyfocusPayload } from '@/api/events/payloads/in-keyfocus-payload';
+import { TypeLayerEntryConfig, TypeListOfLayerEntryConfig, layerEntryIsGroupLayer } from '../map/map-schema-types';
+import { AbstractGeoViewLayer } from '../layer/geoview-layers/abstract-geoview-layers';
+import { LayerSetPayload } from '@/api/events/payloads/layer-set-payload';
+import { Layer } from '../layer/layer';
 
 /**
  * Interface used for css style declarations
@@ -25,6 +29,32 @@ interface TypeCSSStyleDeclaration extends CSSStyleDeclaration {
 }
 
 export class GeoUtilities {
+  /**
+   * Set the layerStatus code of all layers in the listOfLayerEntryConfig.
+   *
+   * @param {AbstractGeoViewLayer} geoviewLayerInstance The GeoView layer instance.
+   * @param {TypeListOfLayerEntryConfig} listOfLayerEntryConfig The list of layer's configuration.
+   * @param {string} errorMessage The error message.
+   */
+  setAllLayerStatusToError(
+    geoviewLayerInstance: AbstractGeoViewLayer,
+    listOfLayerEntryConfig: TypeListOfLayerEntryConfig,
+    errorMessage: string
+  ) {
+    listOfLayerEntryConfig.forEach((layerEntryConfig: TypeLayerEntryConfig) => {
+      if (layerEntryIsGroupLayer(layerEntryConfig))
+        this.setAllLayerStatusToError(geoviewLayerInstance, layerEntryConfig.listOfLayerEntryConfig, errorMessage);
+      else {
+        const layerPath = Layer.getLayerPath(layerEntryConfig);
+        api.event.emit(LayerSetPayload.createLayerSetChangeLayerStatusPayload(geoviewLayerInstance.mapId, layerPath, 'error'));
+        geoviewLayerInstance.layerLoadError.push({
+          layer: layerPath,
+          consoleMessage: `${errorMessage} for layer ${layerPath} of map ${geoviewLayerInstance.mapId}`,
+        });
+      }
+    });
+  }
+
   /**
    * Returns the WKT representation of a given geometry
    * @function geometryToWKT

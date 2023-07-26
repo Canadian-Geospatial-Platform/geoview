@@ -149,7 +149,7 @@
       // LYR1 ===================================================================================================================
       const LegendsLayerSet1 = cgpv.api.getLegendsLayerSet('LYR1', 'LegendsId1');
       cgpv.api.event.on(
-        cgpv.api.eventNames.GET_LEGENDS.ALL_LEGENDS_DONE,
+        cgpv.api.eventNames.GET_LEGENDS.LEGENDS_LAYERSET_UPDATED,
         (payload) => {
           const { resultSets } = payload;
           displayLegend('LegendsId1', resultSets);
@@ -162,7 +162,7 @@
         const geoviewLayers = cgpv.api.maps?.LYR1?.layer?.geoviewLayers;
         if (geoviewLayers) {
           const output = Object.keys(cgpv.api.maps?.LYR1?.layer?.geoviewLayers).reduce((outputValue, layerId) => {
-            const stateValue = cgpv.api.maps?.LYR1?.layer?.geoviewLayers[layerId].layerPhase;
+            const stateValue = cgpv.api.maps?.LYR1?.layer?.geoviewLayers[layerId].allLayerEntryConfigProcessed() ? 'processed' : 'inprogress';
             return `${outputValue}${layerId}: ${stateValue}, `;
           }, '(');
           displayField1.textContent = output ? `${output.slice(0, -2)})` : '(undefined)';

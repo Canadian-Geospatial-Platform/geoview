@@ -32,7 +32,7 @@ export function List(props: TypeListProps): JSX.Element {
     <MaterialList
       ref={innerref}
       sx={{ ...sxClasses.list, ...sx }}
-      className={`${className || ''}`}
+      className={className || ''}
       style={style || undefined}
       component={type || 'ul'}
     >

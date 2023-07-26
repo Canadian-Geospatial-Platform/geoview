@@ -37,30 +37,24 @@ export class LegendsLayerSet {
    *
    */
   private constructor(mapId: string) {
-    const isAllDone = (): boolean => {
-      return Object.keys(this.resultSets).reduce((doneFlag, layerPathToTest) => {
-        return doneFlag && this.resultSets[layerPathToTest] !== undefined;
-      }, true);
-    };
-
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const registrationConditionFunction = (layerPath: string): boolean => {
-      const layerEntryConfig = api.map(this.mapId).layer.registeredLayers[layerPath];
-      return layerEntryConfig.geoviewRootLayer?.geoviewLayerType !== 'xyzTiles';
+      return true;
     };
     this.mapId = mapId;
     this.layerSet = new LayerSet(mapId, `${mapId}/$LegendsLayerSet$`, this.resultSets, registrationConditionFunction);
 
-    // This listener receives the legend information returned by the a layer's getLegend call and store it in the resultSets
-    // if all the registered layers has received their legend information, an EVENT_NAMES.GET_LEGENDS.ALL_LEGENDS_DONE event
-    // is triggered.
+    // This listener receives the legend information returned by the layer's getLegend call and store it in the resultSets.
+    // Every time a registered layer changes, an EVENT_NAMES.GET_LEGENDS.LEGENDS_LAYERSET_UPDATED event is triggered.
     api.event.on(
       EVENT_NAMES.GET_LEGENDS.LEGEND_INFO,
       (payload) => {
         if (payloadIsLegendInfo(payload)) {
           const { layerPath, legendInfo } = payload;
-          if (layerPath in this.resultSets) this.resultSets[layerPath] = legendInfo;
-          if (isAllDone())
-            api.event.emit(GetLegendsPayload.createAllQueriesDonePayload(`${this.mapId}/$LegendsLayerSet$`, this.resultSets));
+          if (layerPath in this.resultSets) {
+            this.resultSets[layerPath].data = legendInfo;
+            api.event.emit(GetLegendsPayload.createLegendsLayersetUpdatedPayload(`${this.mapId}/$LegendsLayerSet$`, this.resultSets));
+          }
         }
       },
       this.mapId
@@ -74,7 +68,7 @@ export class LegendsLayerSet {
         if (payloadIsTriggerLegend(payload)) {
           const queryUndefinedLegend = () => {
             Object.keys(this.resultSets).forEach((layerPath) => {
-              if (this.resultSets[layerPath] === undefined)
+              if (this.resultSets[layerPath]?.layerStatus === 'processed' && this.resultSets[layerPath].data === undefined)
                 api.event.emit(GetLegendsPayload.createQueryLegendPayload(`${this.mapId}/${layerPath}`, layerPath));
             });
           };
@@ -83,17 +77,15 @@ export class LegendsLayerSet {
             EVENT_NAMES.LAYER_SET.UPDATED,
             (layerUpdatedPayload) => {
               if (payloadIsLayerSetUpdated(layerUpdatedPayload)) {
-                if (layerUpdatedPayload.layerSetId === `${mapId}/$LegendsLayerSet$`) {
-                  if (isAllDone())
-                    api.event.emit(GetLegendsPayload.createAllQueriesDonePayload(`${this.mapId}/$LegendsLayerSet$`, this.resultSets));
-                  else queryUndefinedLegend();
-                }
+                queryUndefinedLegend();
+                api.event.emit(GetLegendsPayload.createLegendsLayersetUpdatedPayload(`${this.mapId}/$LegendsLayerSet$`, this.resultSets));
               }
             },
-            mapId
+            `${mapId}/$LegendsLayerSet$`
           );
 
           queryUndefinedLegend();
+          api.event.emit(GetLegendsPayload.createLegendsLayersetUpdatedPayload(`${this.mapId}/$LegendsLayerSet$`, this.resultSets));
         }
       },
       `${mapId}/$LegendsLayerSet$`

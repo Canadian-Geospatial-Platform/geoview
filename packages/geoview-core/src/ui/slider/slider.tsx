@@ -202,7 +202,7 @@ export function Slider(props: TypeSliderProps): JSX.Element {
   // TODO: better implement WCAG on slider
   return (
     <MaterialSlider
-      className={`${properties.className !== undefined ? properties.className : classes.slider}`}
+      className={properties.className !== undefined ? properties.className : classes.slider}
       style={properties.style}
       getAriaLabel={() => 'To implement with translation'}
       getAriaValueText={() => 'To implement with translation'}

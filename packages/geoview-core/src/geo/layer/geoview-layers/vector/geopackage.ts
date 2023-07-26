@@ -14,7 +14,7 @@ import initSqlJs from 'sql.js';
 import * as SLDReader from '@nieuwlandgeo/sldreader';
 
 import { cloneDeep } from 'lodash';
-import { TypeJsonObject } from '@/core/types/global-types';
+import { Cast, TypeJsonObject } from '@/core/types/global-types';
 import { AbstractGeoViewLayer, CONST_LAYER_TYPES } from '../abstract-geoview-layers';
 import { AbstractGeoViewVector } from './abstract-geoview-vector';
 import {
@@ -38,6 +38,7 @@ import { getLocalizedValue } from '@/core/utils/utilities';
 
 import { api } from '@/app';
 import { Layer } from '../../layer';
+import { LayerSetPayload } from '@/api/events/payloads/layer-set-payload';
 
 export interface TypeSourceGeoPackageInitialConfig extends TypeVectorSourceInitialConfig {
   format: 'GeoPackage';
@@ -126,61 +127,60 @@ export class GeoPackage extends AbstractGeoViewVector {
   }
 
   /** ***************************************************************************************************************************
+   * Geopackages have no metadata.
+   *
+   * @returns {Promise<void>} A promise that the execution is completed.
+   */
+  protected getServiceMetadata(): Promise<void> {
+    const promisedExecution = new Promise<void>((resolve) => {
+      resolve();
+    });
+    return promisedExecution;
+  }
+
+  /** ***************************************************************************************************************************
    * This method validates recursively the configuration of the layer entries to ensure that it is a feature layer identified
    * with a numeric layerId and creates a group entry when a layer is a group.
    *
    * @param {TypeListOfLayerEntryConfig} listOfLayerEntryConfig The list of layer entries configuration to validate.
-   *
-   * @returns {TypeListOfLayerEntryConfig} A new list of layer entries configuration with deleted error layers.
    */
-  protected validateListOfLayerEntryConfig(listOfLayerEntryConfig: TypeListOfLayerEntryConfig): TypeListOfLayerEntryConfig {
-    return listOfLayerEntryConfig.filter((layerEntryConfig: TypeLayerEntryConfig) => {
-      if (api.map(this.mapId).layer.isRegistered(layerEntryConfig)) {
-        this.layerLoadError.push({
-          layer: Layer.getLayerPath(layerEntryConfig),
-          consoleMessage: `Duplicate layerPath (mapId:  ${this.mapId}, layerPath: ${Layer.getLayerPath(layerEntryConfig)})`,
-        });
-        return false;
+  protected validateListOfLayerEntryConfig(listOfLayerEntryConfig: TypeListOfLayerEntryConfig) {
+    return listOfLayerEntryConfig.forEach((layerEntryConfig: TypeLayerEntryConfig) => {
+      const layerPath = Layer.getLayerPath(layerEntryConfig);
+      if (layerEntryIsGroupLayer(layerEntryConfig)) {
+        this.validateListOfLayerEntryConfig(layerEntryConfig.listOfLayerEntryConfig!);
+        if (!layerEntryConfig.listOfLayerEntryConfig.length) {
+          this.layerLoadError.push({
+            layer: layerPath,
+            consoleMessage: `Empty layer group (mapId:  ${this.mapId}, layerPath: ${layerPath})`,
+          });
+          api.event.emit(LayerSetPayload.createLayerSetChangeLayerStatusPayload(this.mapId, layerPath, 'error'));
+          return;
+        }
       }
 
-      if (layerEntryIsGroupLayer(layerEntryConfig)) {
-        layerEntryConfig.listOfLayerEntryConfig = this.validateListOfLayerEntryConfig(layerEntryConfig.listOfLayerEntryConfig!);
-        if (layerEntryConfig.listOfLayerEntryConfig.length) {
-          api.map(this.mapId).layer.registerLayerConfig(layerEntryConfig);
-          return true;
-        }
-        this.layerLoadError.push({
-          layer: Layer.getLayerPath(layerEntryConfig),
-          consoleMessage: `Empty layer group (mapId:  ${this.mapId}, layerPath: ${Layer.getLayerPath(layerEntryConfig)})`,
-        });
-        return false;
-      }
+      api.event.emit(LayerSetPayload.createLayerSetChangeLayerStatusPayload(this.mapId, layerPath, 'loading'));
 
       // When no metadata are provided, all layers are considered valid.
-      if (!this.metadata) {
-        api.map(this.mapId).layer.registerLayerConfig(layerEntryConfig);
-        return true;
-      }
+      if (!this.metadata) return;
 
       // Note that the code assumes geopackage does not contains metadata layer group. If you need layer group,
       // you can define them in the configuration section.
       if (Array.isArray(this.metadata!.collections)) {
-        for (var i = 0; i < this.metadata!.collections.length; i++)
-          if (this.metadata!.collections[i].id === layerEntryConfig.layerId) break;
-        if (i === this.metadata!.collections.length) {
+        const foundCollection = this.metadata!.collections.find((layerMetadata) => layerMetadata.id === layerEntryConfig.layerId);
+        if (!foundCollection) {
           this.layerLoadError.push({
-            layer: Layer.getLayerPath(layerEntryConfig),
-            consoleMessage: `GeoPackage feature layer not found (mapId:  ${this.mapId}, layerPath: ${Layer.getLayerPath(
-              layerEntryConfig
-            )})`,
+            layer: layerPath,
+            consoleMessage: `GeoPackage feature layer not found (mapId:  ${this.mapId}, layerPath: ${layerPath})`,
           });
-          return false;
+          api.event.emit(LayerSetPayload.createLayerSetChangeLayerStatusPayload(this.mapId, layerPath, 'error'));
+          return;
         }
 
-        if (this.metadata!.collections[i].description)
+        if (foundCollection.description)
           layerEntryConfig.layerName = {
-            en: this.metadata!.collections[i].description as string,
-            fr: this.metadata!.collections[i].description as string,
+            en: foundCollection.description as string,
+            fr: foundCollection.description as string,
           };
 
         if (layerEntryConfig.initialSettings?.extent)
@@ -190,30 +190,18 @@ export class GeoPackage extends AbstractGeoViewVector {
             `EPSG:${api.map(this.mapId).currentProjection}`
           );
 
-        if (
-          !layerEntryConfig.initialSettings?.bounds &&
-          this.metadata?.collections[i].extent?.spatial?.bbox &&
-          this.metadata?.collections[i].extent?.spatial?.crs
-        ) {
+        if (!layerEntryConfig.initialSettings?.bounds && foundCollection.extent?.spatial?.bbox && foundCollection.extent?.spatial?.crs) {
           // layerEntryConfig.initialSettings cannot be undefined because config-validation set it to {} if it is undefined.
           layerEntryConfig.initialSettings!.bounds = transformExtent(
-            this.metadata.collections[i].extent.spatial.bbox[0] as number[],
-            get(this.metadata.collections[i].extent.spatial.crs as string)!,
+            foundCollection.extent.spatial.bbox[0] as number[],
+            get(foundCollection.extent.spatial.crs as string)!,
             `EPSG:${api.map(this.mapId).currentProjection}`
           );
         }
-
-        api.map(this.mapId).layer.registerLayerConfig(layerEntryConfig);
-        return true;
+        return;
       }
 
-      this.layerLoadError.push({
-        layer: Layer.getLayerPath(layerEntryConfig),
-        consoleMessage: `Invalid collection's metadata prevent loading of layer (mapId:  ${this.mapId}, layerPath: ${Layer.getLayerPath(
-          layerEntryConfig
-        )})`,
-      });
-      return false;
+      throw new Error(`Invalid collection's metadata prevent loading of layer (mapId:  ${this.mapId}, layerPath: ${layerPath})`);
     });
   }
 
@@ -269,11 +257,17 @@ export class GeoPackage extends AbstractGeoViewVector {
             this.processOneGeopackage(layerEntryConfig as TypeBaseLayerEntryConfig).then((layers) => {
               if (layers) {
                 layerGroup!.getLayers().push(layers);
+                api.event.emit(
+                  LayerSetPayload.createLayerSetChangeLayerStatusPayload(this.mapId, Layer.getLayerPath(layerEntryConfig), 'processed')
+                );
               } else {
                 this.layerLoadError.push({
                   layer: Layer.getLayerPath(listOfLayerEntryConfig[0]),
-                  consoleMessage: `Unable to create group layer ${Layer.getLayerPath(layerEntryConfig)} on map ${this.mapId}`,
+                  consoleMessage: `Unable to create layer ${Layer.getLayerPath(layerEntryConfig)} on map ${this.mapId}`,
                 });
+                api.event.emit(
+                  LayerSetPayload.createLayerSetChangeLayerStatusPayload(this.mapId, Layer.getLayerPath(layerEntryConfig), 'error')
+                );
               }
             });
           }
@@ -283,12 +277,18 @@ export class GeoPackage extends AbstractGeoViewVector {
       } else {
         this.processOneGeopackage(listOfLayerEntryConfig[0] as TypeBaseLayerEntryConfig, layerGroup).then((layer) => {
           if (layer) {
+            api.event.emit(
+              LayerSetPayload.createLayerSetChangeLayerStatusPayload(this.mapId, Layer.getLayerPath(listOfLayerEntryConfig[0]), 'processed')
+            );
             resolve(layer);
           } else {
             this.layerLoadError.push({
               layer: Layer.getLayerPath(listOfLayerEntryConfig[0]),
-              consoleMessage: `Unable to create group layer ${Layer.getLayerPath(listOfLayerEntryConfig[0])} on map ${this.mapId}`,
+              consoleMessage: `Unable to create layer ${Layer.getLayerPath(listOfLayerEntryConfig[0])} on map ${this.mapId}`,
             });
+            api.event.emit(
+              LayerSetPayload.createLayerSetChangeLayerStatusPayload(this.mapId, Layer.getLayerPath(listOfLayerEntryConfig[0]), 'error')
+            );
           }
         });
       }
@@ -419,6 +419,9 @@ export class GeoPackage extends AbstractGeoViewVector {
     sld?: sldsInterface
   ): Promise<BaseLayer | null> {
     const promisedVectorLayer = new Promise<BaseLayer | null>((resolve) => {
+      api.maps[this.mapId].layer.registerLayerConfig(layerEntryConfig);
+      this.registerToLayerSets(layerEntryConfig);
+
       const { name, source } = layerInfo;
       // entryType will be group if copied from group parent
       layerEntryConfig.entryType = 'vector';
@@ -562,12 +565,10 @@ export class GeoPackage extends AbstractGeoViewVector {
       }
 
       const vectorLayer = this.createVectorLayer(layerEntryConfig as TypeVectorLayerEntryConfig, source);
-      if (vectorLayer) api.maps[this.mapId].layer.registerLayerConfig(layerEntryConfig);
+      api.event.emit(LayerSetPayload.createLayerSetChangeLayerStatusPayload(this.mapId, Layer.getLayerPath(layerEntryConfig), 'processed'));
 
       resolve(vectorLayer);
     });
-
-    this.registerToLayerSets(layerEntryConfig);
 
     return promisedVectorLayer;
   }
@@ -595,6 +596,13 @@ export class GeoPackage extends AbstractGeoViewVector {
                 baseLayer.setVisible(false);
                 if (!layerGroup) layerGroup = this.createLayerGroup(unclusteredLayerConfig.parentLayerConfig as TypeLayerEntryConfig);
                 layerGroup.getLayers().push(baseLayer);
+                api.event.emit(
+                  LayerSetPayload.createLayerSetChangeLayerStatusPayload(
+                    this.mapId,
+                    Layer.getLayerPath(unclusteredLayerConfig),
+                    'processed'
+                  )
+                );
               }
             });
 
@@ -604,15 +612,19 @@ export class GeoPackage extends AbstractGeoViewVector {
 
           this.processOneGeopackageLayer(layerEntryConfig, layers[0], slds).then((baseLayer) => {
             if (baseLayer) {
-              if (layerGroup) {
-                layerGroup.getLayers().push(baseLayer);
-                resolve(layerGroup);
-              } else resolve(baseLayer);
+              api.event.emit(
+                LayerSetPayload.createLayerSetChangeLayerStatusPayload(this.mapId, Layer.getLayerPath(layerEntryConfig), 'processed')
+              );
+              if (layerGroup) layerGroup.getLayers().push(baseLayer);
+              resolve(layerGroup || baseLayer);
             } else {
               this.layerLoadError.push({
                 layer: Layer.getLayerPath(layerEntryConfig),
                 consoleMessage: `Unable to create layer ${Layer.getLayerPath(layerEntryConfig)} on map ${this.mapId}`,
               });
+              api.event.emit(
+                LayerSetPayload.createLayerSetChangeLayerStatusPayload(this.mapId, Layer.getLayerPath(layerEntryConfig), 'error')
+              );
               resolve(null);
             }
           });
@@ -624,7 +636,7 @@ export class GeoPackage extends AbstractGeoViewVector {
             const newLayerEntryConfig = cloneDeep(layerEntryConfig) as TypeBaseLayerEntryConfig;
             newLayerEntryConfig.layerId = layers[i].name;
             newLayerEntryConfig.layerName = { en: layers[i].name, fr: layers[i].name };
-            newLayerEntryConfig.parentLayerConfig = layerEntryConfig as unknown as TypeLayerGroupEntryConfig;
+            newLayerEntryConfig.parentLayerConfig = Cast<TypeLayerGroupEntryConfig>(layerEntryConfig);
             if ((newLayerEntryConfig.source as TypeBaseSourceVectorInitialConfig)?.cluster?.enable) {
               const unclusteredLayerConfig = cloneDeep(newLayerEntryConfig) as TypeVectorLayerEntryConfig;
               unclusteredLayerConfig.layerId = `${layerEntryConfig.layerId}-unclustered`;
@@ -634,6 +646,13 @@ export class GeoPackage extends AbstractGeoViewVector {
                 if (baseLayer) {
                   baseLayer.setVisible(false);
                   newLayerGroup.getLayers().push(baseLayer);
+                  api.event.emit(
+                    LayerSetPayload.createLayerSetChangeLayerStatusPayload(
+                      this.mapId,
+                      Layer.getLayerPath(unclusteredLayerConfig),
+                      'processed'
+                    )
+                  );
                 }
               });
 
@@ -645,11 +664,17 @@ export class GeoPackage extends AbstractGeoViewVector {
               if (baseLayer) {
                 (layerEntryConfig as unknown as TypeLayerGroupEntryConfig).listOfLayerEntryConfig!.push(newLayerEntryConfig);
                 newLayerGroup.getLayers().push(baseLayer);
+                api.event.emit(
+                  LayerSetPayload.createLayerSetChangeLayerStatusPayload(this.mapId, Layer.getLayerPath(newLayerEntryConfig), 'processed')
+                );
               } else {
                 this.layerLoadError.push({
                   layer: Layer.getLayerPath(layerEntryConfig),
                   consoleMessage: `Unable to create layer ${Layer.getLayerPath(layerEntryConfig)} on map ${this.mapId}`,
                 });
+                api.event.emit(
+                  LayerSetPayload.createLayerSetChangeLayerStatusPayload(this.mapId, Layer.getLayerPath(newLayerEntryConfig), 'error')
+                );
                 resolve(null);
               }
             });

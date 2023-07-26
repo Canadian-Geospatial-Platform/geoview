@@ -25,6 +25,7 @@ import {
 import { getLocalizedValue } from '@/core/utils/utilities';
 import { api } from '@/app';
 import { Layer } from '../../layer';
+import { LayerSetPayload } from '@/api/events/payloads/layer-set-payload';
 
 export interface TypeSourceOgcFeatureInitialConfig extends TypeVectorSourceInitialConfig {
   format: 'featureAPI';
@@ -128,16 +129,22 @@ export class OgcFeature extends AbstractGeoViewVector {
    * @returns {Promise<void>} A promise that the execution is completed.
    */
   protected getServiceMetadata(): Promise<void> {
-    this.layerPhase = 'getServiceMetadata';
     const promisedExecution = new Promise<void>((resolve) => {
       const metadataUrl = getLocalizedValue(this.metadataAccessPath, this.mapId);
       if (metadataUrl) {
         const queryUrl = metadataUrl.endsWith('/') ? `${metadataUrl}collections?f=json` : `${metadataUrl}/collections?f=json`;
-        axios.get<TypeJsonObject>(queryUrl).then((response) => {
-          this.metadata = response.data;
-          resolve();
-        });
-      } else throw new Error(`Cant't read service metadata for layer ${this.geoviewLayerId} of map ${this.mapId}.`);
+        axios
+          .get<TypeJsonObject>(queryUrl)
+          .then((response) => {
+            this.metadata = response.data;
+            resolve();
+          }) // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          .catch((reason) => {
+            api.geoUtilities.setAllLayerStatusToError(this, this.listOfLayerEntryConfig, 'Unable to read metadata');
+          });
+      } else {
+        api.geoUtilities.setAllLayerStatusToError(this, this.listOfLayerEntryConfig, 'Unable to read metadata');
+      }
     });
     return promisedExecution;
   }
@@ -147,49 +154,41 @@ export class OgcFeature extends AbstractGeoViewVector {
    * with a numeric layerId and creates a group entry when a layer is a group.
    *
    * @param {TypeListOfLayerEntryConfig} listOfLayerEntryConfig The list of layer entries configuration to validate.
-   *
-   * @returns {TypeListOfLayerEntryConfig} A new list of layer entries configuration with deleted error layers.
    */
-  protected validateListOfLayerEntryConfig(listOfLayerEntryConfig: TypeListOfLayerEntryConfig): TypeListOfLayerEntryConfig {
-    return listOfLayerEntryConfig.filter((layerEntryConfig: TypeLayerEntryConfig) => {
-      if (api.map(this.mapId).layer.isRegistered(layerEntryConfig)) {
-        this.layerLoadError.push({
-          layer: Layer.getLayerPath(layerEntryConfig),
-          consoleMessage: `Duplicate layerPath (mapId:  ${this.mapId}, layerPath: ${Layer.getLayerPath(layerEntryConfig)})`,
-        });
-        return false;
+  protected validateListOfLayerEntryConfig(listOfLayerEntryConfig: TypeListOfLayerEntryConfig) {
+    listOfLayerEntryConfig.forEach((layerEntryConfig: TypeLayerEntryConfig) => {
+      const layerPath = Layer.getLayerPath(layerEntryConfig);
+      if (layerEntryIsGroupLayer(layerEntryConfig)) {
+        this.validateListOfLayerEntryConfig(layerEntryConfig.listOfLayerEntryConfig!);
+        if (!layerEntryConfig.listOfLayerEntryConfig.length) {
+          this.layerLoadError.push({
+            layer: layerPath,
+            consoleMessage: `Empty layer group (mapId:  ${this.mapId}, layerPath: ${layerPath})`,
+          });
+          api.event.emit(LayerSetPayload.createLayerSetChangeLayerStatusPayload(this.mapId, layerPath, 'error'));
+          return;
+        }
       }
 
-      if (layerEntryIsGroupLayer(layerEntryConfig)) {
-        layerEntryConfig.listOfLayerEntryConfig = this.validateListOfLayerEntryConfig(layerEntryConfig.listOfLayerEntryConfig!);
-        if (layerEntryConfig.listOfLayerEntryConfig.length) {
-          api.map(this.mapId).layer.registerLayerConfig(layerEntryConfig);
-          return true;
-        }
-        this.layerLoadError.push({
-          layer: Layer.getLayerPath(layerEntryConfig),
-          consoleMessage: `Empty layer group (mapId:  ${this.mapId}, layerPath: ${Layer.getLayerPath(layerEntryConfig)})`,
-        });
-        return false;
-      }
+      api.event.emit(LayerSetPayload.createLayerSetChangeLayerStatusPayload(this.mapId, layerPath, 'loading'));
 
       // Note that the code assumes ogc-feature collections does not contains metadata layer group. If you need layer group,
       // you can define them in the configuration section.
       if (Array.isArray(this.metadata!.collections)) {
-        for (var i = 0; i < this.metadata!.collections.length; i++)
-          if (this.metadata!.collections[i].id === layerEntryConfig.layerId) break;
-        if (i === this.metadata!.collections.length) {
+        const foundCollection = this.metadata!.collections.find((layerMetadata) => layerMetadata.id === layerEntryConfig.layerId);
+        if (!foundCollection) {
           this.layerLoadError.push({
-            layer: Layer.getLayerPath(layerEntryConfig),
-            consoleMessage: `OGC feature layer not found (mapId:  ${this.mapId}, layerPath: ${Layer.getLayerPath(layerEntryConfig)})`,
+            layer: layerPath,
+            consoleMessage: `OGC feature layer not found (mapId:  ${this.mapId}, layerPath: ${layerPath})`,
           });
-          return false;
+          api.event.emit(LayerSetPayload.createLayerSetChangeLayerStatusPayload(this.mapId, layerPath, 'error'));
+          return;
         }
 
-        if (this.metadata!.collections[i].description)
+        if (foundCollection.description)
           layerEntryConfig.layerName = {
-            en: this.metadata!.collections[i].description as string,
-            fr: this.metadata!.collections[i].description as string,
+            en: foundCollection.description as string,
+            fr: foundCollection.description as string,
           };
 
         if (layerEntryConfig.initialSettings?.extent)
@@ -199,30 +198,18 @@ export class OgcFeature extends AbstractGeoViewVector {
             `EPSG:${api.map(this.mapId).currentProjection}`
           );
 
-        if (
-          !layerEntryConfig.initialSettings?.bounds &&
-          this.metadata?.collections[i].extent?.spatial?.bbox &&
-          this.metadata?.collections[i].extent?.spatial?.crs
-        ) {
+        if (!layerEntryConfig.initialSettings?.bounds && foundCollection.extent?.spatial?.bbox && foundCollection.extent?.spatial?.crs) {
           // layerEntryConfig.initialSettings cannot be undefined because config-validation set it to {} if it is undefined.
           layerEntryConfig.initialSettings!.bounds = transformExtent(
-            this.metadata.collections[i].extent.spatial.bbox[0] as number[],
-            get(this.metadata.collections[i].extent.spatial.crs as string)!,
+            foundCollection.extent.spatial.bbox[0] as number[],
+            get(foundCollection.extent.spatial.crs as string)!,
             `EPSG:${api.map(this.mapId).currentProjection}`
           );
         }
-
-        api.map(this.mapId).layer.registerLayerConfig(layerEntryConfig);
-        return true;
+        return;
       }
 
-      this.layerLoadError.push({
-        layer: Layer.getLayerPath(layerEntryConfig),
-        consoleMessage: `Invalid collection's metadata prevent loading of layer (mapId:  ${this.mapId}, layerPath: ${Layer.getLayerPath(
-          layerEntryConfig
-        )})`,
-      });
-      return false;
+      throw new Error(`Invalid collection's metadata prevent loading of layer (mapId:  ${this.mapId}, layerPath: ${layerPath})`);
     });
   }
 
@@ -235,7 +222,6 @@ export class OgcFeature extends AbstractGeoViewVector {
    * @returns {Promise<void>} A promise that the vector layer configuration has its metadata processed.
    */
   protected processLayerMetadata(layerEntryConfig: TypeVectorLayerEntryConfig): Promise<void> {
-    this.layerPhase = 'processLayerMetadata';
     const promiseOfExecution = new Promise<void>((resolve) => {
       const metadataUrl = getLocalizedValue(this.metadataAccessPath, this.mapId);
       if (metadataUrl) {

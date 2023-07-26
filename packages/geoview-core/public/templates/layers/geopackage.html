@@ -128,6 +128,7 @@
 
     <div class="map-title-holder">
       <h4 id="HLYR2">2. Multiple GeoPackage Layers - one with multiple layers</h4>
+      &nbsp;<h5 id="HLYR2-state">(undefined)</h5>
       <a class="ref-link" href="#top">Top</a>
     </div>
     <hr />
@@ -221,7 +222,7 @@
 
       const LegendsLayerSet1 = cgpv.api.getLegendsLayerSet('LYR1');
       cgpv.api.event.on(
-        cgpv.api.eventNames.GET_LEGENDS.ALL_LEGENDS_DONE,
+        cgpv.api.eventNames.GET_LEGENDS.LEGENDS_LAYERSET_UPDATED,
         (payload) => {
           const { resultSets } = payload;
           displayLegend('LegendsId1', resultSets);
@@ -233,8 +234,20 @@
         const displayField1 = document.getElementById('HLYR1-state');
         const geoviewLayers = cgpv.api.maps?.LYR1?.layer?.geoviewLayers;
         if (geoviewLayers) {
-          const output = Object.keys(cgpv.api.maps?.LYR1?.layer?.geoviewLayers).reduce((outputValue, layerId) => {
-            const stateValue = cgpv.api.maps?.LYR1?.layer?.geoviewLayers[layerId].layerPhase;
+          const output = Object.keys(geoviewLayers).reduce((outputValue, layerId) => {
+            const stateValue = geoviewLayers[layerId].allLayerEntryConfigProcessed() ? 'processed' : 'inprogress';
+            return `${outputValue}${layerId}: ${stateValue}, `;
+          }, '(');
+          displayField1.textContent = output ? `${output.slice(0, -2)})` : '(undefined)';
+        } else displayField1.textContent = '(undefined)';
+      }, 250)
+
+      window.setInterval(() => {
+        const displayField1 = document.getElementById('HLYR2-state');
+        const geoviewLayers = cgpv.api.maps?.LYR2?.layer?.geoviewLayers;
+        if (geoviewLayers) {
+          const output = Object.keys(geoviewLayers).reduce((outputValue, layerId) => {
+            const stateValue = geoviewLayers[layerId].allLayerEntryConfigProcessed() ? 'processed' : 'inprogress';
             return `${outputValue}${layerId}: ${stateValue}, `;
           }, '(');
           displayField1.textContent = output ? `${output.slice(0, -2)})` : '(undefined)';

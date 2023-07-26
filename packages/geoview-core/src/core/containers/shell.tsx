@@ -194,7 +194,7 @@ export function Shell(props: ShellProps): JSX.Element {
             vertical: 'bottom',
             horizontal: 'center',
           }}
-          className={`${classes.snackBar}`}
+          className={classes.snackBar}
         >
           <Snackbar snackBarId={shellId} />
         </SnackbarProvider>
