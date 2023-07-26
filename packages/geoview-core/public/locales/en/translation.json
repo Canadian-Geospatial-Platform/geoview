@@ -103,6 +103,7 @@
   "dataTable": {
     "icon": "ICON",
     "zoom": "ZOOM",
-    "exportBtn": "Export"
+    "exportBtn": "Export",
+    "jsonExportBtn": "Download JSON"
   }
 }

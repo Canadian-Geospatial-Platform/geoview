@@ -103,6 +103,7 @@
   "dataTable": {
     "icon": "ICÔNE",
     "zoom": "ZOOM",
-    "exportBtn": "Exporter"
+    "exportBtn": "Exporter",
+    "jsonExportBtn": "Télécharger GeoJSON"
   }
 }
