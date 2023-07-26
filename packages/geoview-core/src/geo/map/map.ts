@@ -527,9 +527,9 @@ export class MapViewer {
    * @returns The densified extent transformed in the destination projection.
    */
   transformAndDensifyExtent = (extent: Extent, source: ProjectionLike, destination: ProjectionLike, stops = 25): Coordinate[] => {
-    const coordinates = [];
-    const width = extent[2] - extent[0];
-    const height = extent[3] - extent[1];
+    const coordinates: number[][] = [];
+    const width: number = extent[2] - extent[0];
+    const height: number = extent[3] - extent[1];
     for (let i = 0; i < stops; ++i) coordinates.push([extent[0] + (width * i) / stops, extent[1]]);
     for (let i = 0; i < stops; ++i) coordinates.push([extent[2], extent[1] + (height * i) / stops]);
     for (let i = 0; i < stops; ++i) coordinates.push([extent[2] - (width * i) / stops, extent[3]]);
