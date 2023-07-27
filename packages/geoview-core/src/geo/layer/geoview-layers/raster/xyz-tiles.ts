@@ -23,7 +23,7 @@ import { getLocalizedValue, getMinOrMaxExtents, getXMLHttpRequest } from '@/core
 import { Cast, toJsonObject } from '@/core/types/global-types';
 import { api } from '@/app';
 import { Layer } from '../../layer';
-import { LayerSetPayload } from '@/api/events/payloads/layer-set-payload';
+import { LayerSetPayload } from '@/api/events/payloads';
 
 // ? Do we keep this TODO ? Dynamic parameters can be placed on the dataAccessPath and initial settings can be used on xyz-tiles.
 // TODO: Implement method to validate XYZ tile service

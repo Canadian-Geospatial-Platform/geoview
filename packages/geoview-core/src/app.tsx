@@ -20,7 +20,7 @@ import { EVENT_NAMES } from './api/events/event-types';
 import { API } from './api/api';
 
 import { Config } from './core/utils/config/config';
-import { payloadIsAmapFeaturesConfig } from './api/events/payloads/map-config-payload';
+import { payloadIsAmapFeaturesConfig } from './api/events/payloads';
 
 // The next export allow to import the cgpv-types from 'geoview-core' from outside of the geoview-core package.
 export * from './core/types/cgpv-types';

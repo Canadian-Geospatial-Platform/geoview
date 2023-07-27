@@ -24,7 +24,7 @@ import { getLocalizedValue } from '@/core/utils/utilities';
 import { Cast, toJsonObject } from '@/core/types/global-types';
 import { api } from '@/app';
 import { Layer } from '../../layer';
-import { LayerSetPayload } from '@/api/events/payloads/layer-set-payload';
+import { LayerSetPayload } from '@/api/events/payloads';
 
 export interface TypeSourceGeoJSONInitialConfig extends Omit<TypeVectorSourceInitialConfig, 'format'> {
   format: 'GeoJSON';

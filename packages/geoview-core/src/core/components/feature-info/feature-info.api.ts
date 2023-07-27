@@ -6,7 +6,7 @@ import { api } from '@/app';
 import { generateId } from '../../utils/utilities';
 
 import { FeatureInfo } from './feature-info';
-import { TypeFeatureInfoEntry } from '@/api/events/payloads/get-feature-info-payload';
+import { TypeFeatureInfoEntry } from '@/api/events/payloads';
 
 /**
  * API to manage Feature Info component api

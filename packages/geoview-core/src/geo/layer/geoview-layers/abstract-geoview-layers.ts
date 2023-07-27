@@ -37,14 +37,17 @@ import {
   TypeArrayOfFeatureInfoEntries,
   TypeFeatureInfoEntry,
   TypeQueryType,
-} from '@/api/events/payloads/get-feature-info-payload';
-import { snackbarMessagePayload } from '@/api/events/payloads/snackbar-message-payload';
+  snackbarMessagePayload,
+  LayerSetPayload,
+  payloadIsLayerSetUpdated,
+  payloadIsRequestLayerInventory,
+  GetLegendsPayload,
+  payloadIsQueryLegend,
+} from '@/api/events/payloads';
 import { api } from '@/app';
 import { EVENT_NAMES } from '@/api/events/event-types';
 import { TypeJsonObject, toJsonObject } from '@/core/types/global-types';
 import { Layer } from '../layer';
-import { LayerSetPayload, payloadIsLayerSetUpdated, payloadIsRequestLayerInventory } from '@/api/events/payloads/layer-set-payload';
-import { GetLegendsPayload, payloadIsQueryLegend } from '@/api/events/payloads/get-legends-payload';
 import { TimeDimension, TypeDateFragments } from '@/core/utils/date-mgt';
 import { TypeEventHandlerFunction } from '@/api/events/event';
 

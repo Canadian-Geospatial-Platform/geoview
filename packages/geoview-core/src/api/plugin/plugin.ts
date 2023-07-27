@@ -15,7 +15,7 @@ import { TypePluginStructure, TypeRecordOfPlugin } from './plugin-types';
 import { toJsonObject, TypeJsonObject, TypeJsonValue } from '@/core/types/global-types';
 
 import { EVENT_NAMES } from '../events/event-types';
-import { snackbarMessagePayload } from '../events/payloads/snackbar-message-payload';
+import { snackbarMessagePayload } from '../events/payloads';
 
 /**
  * Class to manage plugins

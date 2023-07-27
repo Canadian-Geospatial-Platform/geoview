@@ -36,14 +36,17 @@ import { Snap } from '../interaction/snap';
 import { Translate } from '../interaction/translate';
 
 import { ModalApi } from '@/ui';
-import { mapPayload } from '@/api/events/payloads/map-payload';
-import { mapComponentPayload } from '@/api/events/payloads/map-component-payload';
-import { mapConfigPayload } from '@/api/events/payloads/map-config-payload';
-import { GeoViewLayerPayload, payloadIsGeoViewLayerAdded } from '@/api/events/payloads/geoview-layer-payload';
+import {
+  mapPayload,
+  mapComponentPayload,
+  mapConfigPayload,
+  GeoViewLayerPayload,
+  payloadIsGeoViewLayerAdded,
+  TypeMapMouseInfo,
+} from '@/api/events/payloads';
 import { generateId, parseJSONConfig, removeCommentsFromJSON } from '@/core/utils/utilities';
 import { TypeListOfGeoviewLayerConfig, TypeDisplayLanguage, TypeViewSettings } from './map-schema-types';
 import { TypeMapFeaturesConfig, TypeHTMLElement } from '@/core/types/global-types';
-import { TypeMapMouseInfo } from '@/api/events/payloads/map-mouse-event-payload';
 import { layerConfigIsGeoCore } from '../layer/other/geocore';
 
 interface TypeDcoument extends Document {

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Coordinate } from 'ol/coordinate';
-import { TypeArrayOfFeatureInfoEntries } from '@/api/events/payloads/get-feature-info-payload';
+import { TypeArrayOfFeatureInfoEntries } from '@/api/events/payloads';
 import { LayersList } from './layers-list';
 
 export interface DetailsProps {
