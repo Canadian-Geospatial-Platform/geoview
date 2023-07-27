@@ -59,6 +59,7 @@
     "dayjs": "^1.11.1",
     "domhandler": "^4.3.0",
     "eventemitter3": "^4.0.7",
+    "export-to-csv": "^0.2.1",
     "focus-trap-react": "^8.9.1",
     "html-react-parser": "^1.4.6",
     "i18next": "^22.4.13",
@@ -80,8 +81,7 @@
     "react-test-renderer": "^18.2.0",
     "sanitize-html": "^2.7.3",
     "sql.js": "^1.8.0",
-    "yet-another-react-lightbox": "^3.11.3",
-    "export-to-csv": "^0.2.1"
+    "yet-another-react-lightbox": "^3.11.3"
   },
   "devDependencies": {
     "@babel/cli": "^7.17.0",
