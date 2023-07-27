@@ -17,10 +17,14 @@ import { PayloadBaseClass, TypeFeatureInfoEntry, api, payloadIsAllQueriesDone } 
 import { EVENT_NAMES } from '@/api/events/event-types';
 import { ClickMapMarker } from '@/ui';
 
-import { payloadIsAMarkerDefinition } from '@/api/events/payloads/marker-definition-payload';
-import { payloadIsAMapMouseEvent } from '@/api/events/payloads/map-mouse-event-payload';
-import { featureHighlightPayload, payloadIsAFeatureHighlight } from '@/api/events/payloads/feature-highlight-payload';
-import { clearHighlightsPayload, payloadIsAClearHighlights } from '@/api/events/payloads/clear-highlights-payload';
+import {
+  payloadIsAMarkerDefinition,
+  payloadIsAMapMouseEvent,
+  featureHighlightPayload,
+  payloadIsAFeatureHighlight,
+  clearHighlightsPayload,
+  payloadIsAClearHighlights,
+} from '@/api/events/payloads';
 
 /**
  * Create a react element to display a marker when a user clicks on
