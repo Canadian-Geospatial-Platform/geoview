@@ -13,7 +13,7 @@ import { EVENT_NAMES } from '@/api/events/event-types';
 import { TypeJsonObject, toJsonObject, TypeJsonArray } from '@/core/types/global-types';
 
 import { generateId, showMessage } from '@/core/utils/utilities';
-import { basemapLayerArrayPayload } from '@/api/events/payloads/basemap-layers-payload';
+import { basemapLayerArrayPayload } from '@/api/events/payloads';
 import { TypeBasemapProps, TypeBasemapOptions, TypeBasemapLayer } from './basemap-types';
 import { TypeDisplayLanguage, TypeValidMapProjectionCodes, TypeLocalizedString } from '../../map/map-schema-types';
 

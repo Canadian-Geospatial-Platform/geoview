@@ -5,7 +5,7 @@ import { EVENT_NAMES } from '@/api/events/event-types';
 
 import { CheckboxListAPI } from '../list/checkbox-list/checkbox-list-api';
 
-import { PanelPayload, TypeActionButton } from '@/api/events/payloads/panel-payload';
+import { PanelPayload, TypeActionButton } from '@/api/events/payloads';
 import { generateId } from '@/core/utils/utilities';
 import { PanelStyles, TypePanelProps } from './panel-types';
 

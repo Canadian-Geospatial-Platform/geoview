@@ -9,9 +9,13 @@ import { EVENT_NAMES } from '@/api/events/event-types';
 
 import { Config } from '@/core/utils/config/config';
 import { generateId } from '@/core/utils/utilities';
-import { layerConfigPayload, payloadIsALayerConfig } from '@/api/events/payloads/layer-config-payload';
-import { GeoViewLayerPayload, payloadIsRemoveGeoViewLayer } from '@/api/events/payloads/geoview-layer-payload';
-import { snackbarMessagePayload } from '@/api/events/payloads/snackbar-message-payload';
+import {
+  layerConfigPayload,
+  payloadIsALayerConfig,
+  GeoViewLayerPayload,
+  payloadIsRemoveGeoViewLayer,
+  snackbarMessagePayload,
+} from '@/api/events/payloads';
 import { AbstractGeoViewLayer } from './geoview-layers/abstract-geoview-layers';
 import {
   TypeBaseLayerEntryConfig,

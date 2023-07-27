@@ -25,7 +25,7 @@ import {
 import { getLocalizedValue } from '@/core/utils/utilities';
 import { api } from '@/app';
 import { Layer } from '../../layer';
-import { LayerSetPayload } from '@/api/events/payloads/layer-set-payload';
+import { LayerSetPayload } from '@/api/events/payloads';
 
 export interface TypeSourceOgcFeatureInitialConfig extends TypeVectorSourceInitialConfig {
   format: 'featureAPI';

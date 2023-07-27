@@ -4,7 +4,7 @@ import { ExpandMoreIcon, ExpandLessIcon, IconButton, Box } from '@/ui';
 import { MapContext } from '../../app-start';
 import { api } from '@/app';
 
-import { booleanPayload } from '@/api/events/payloads/boolean-payload';
+import { booleanPayload } from '@/api/events/payloads';
 import { EVENT_NAMES } from '@/api/events/event-types';
 
 const sxClasses = {

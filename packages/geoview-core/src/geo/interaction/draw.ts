@@ -4,7 +4,7 @@ import { DrawEvent as OLDrawEvent, Options as OLDrawOptions } from 'ol/interacti
 import { Interaction, InteractionOptions } from './interaction';
 import { api } from '@/app';
 import { EVENT_NAMES } from '@/api/events/event-types';
-import { drawPayload } from '@/api/events/payloads/inter-draw-payload';
+import { drawPayload } from '@/api/events/payloads';
 import { TypeFeatureStyle } from '../layer/vector/vector-types';
 import { GeoUtilities } from '../utils/utilities';
 

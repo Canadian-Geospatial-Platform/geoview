@@ -22,7 +22,7 @@ import { api } from '@/app';
 
 import { TypeModalProps } from '.';
 import { CloseIcon, IconButton } from '..';
-import { payloadIsAModal } from '@/api/events/payloads/modal-payload';
+import { payloadIsAModal } from '@/api/events/payloads';
 
 /**
  * Customized Material UI Dialog Properties

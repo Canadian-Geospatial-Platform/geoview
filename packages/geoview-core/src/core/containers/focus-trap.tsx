@@ -14,7 +14,7 @@ import { EVENT_NAMES } from '@/api/events/event-types';
 import { HtmlToReact } from './html-to-react';
 
 import { Modal, Button } from '@/ui';
-import { inKeyfocusPayload, payloadIsAInKeyfocus } from '@/api/events/payloads/in-keyfocus-payload';
+import { inKeyfocusPayload, payloadIsAInKeyfocus } from '@/api/events/payloads';
 
 const useStyles = makeStyles((theme) => ({
   trap: {
