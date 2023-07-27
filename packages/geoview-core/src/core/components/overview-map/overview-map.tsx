@@ -16,7 +16,7 @@ import { EVENT_NAMES } from '@/api/events/event-types';
 import { PayloadBaseClass, api, payloadIsANumber } from '@/app';
 import { MapContext } from '../../app-start';
 
-import { payloadIsAMapViewProjection } from '@/api/events/payloads/map-view-projection-payload';
+import { payloadIsAMapViewProjection } from '@/api/events/payloads';
 
 import { cgpvTheme } from '@/ui/style/theme';
 

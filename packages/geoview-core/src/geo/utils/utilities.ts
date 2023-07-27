@@ -15,10 +15,9 @@ import { xmlToJson } from '@/core/utils/utilities';
 
 import { api } from '@/app';
 import { EVENT_NAMES } from '@/api/events/event-types';
-import { inKeyfocusPayload } from '@/api/events/payloads/in-keyfocus-payload';
+import { inKeyfocusPayload, LayerSetPayload } from '@/api/events/payloads';
 import { TypeLayerEntryConfig, TypeListOfLayerEntryConfig, layerEntryIsGroupLayer } from '../map/map-schema-types';
 import { AbstractGeoViewLayer } from '../layer/geoview-layers/abstract-geoview-layers';
-import { LayerSetPayload } from '@/api/events/payloads/layer-set-payload';
 import { Layer } from '../layer/layer';
 
 /**

@@ -30,7 +30,7 @@ import { getLocalizedValue, getMinOrMaxExtents, getXMLHttpRequest } from '@/core
 import { Cast, TypeJsonObject, toJsonObject } from '@/core/types/global-types';
 import { api } from '@/app';
 import { Layer } from '../../layer';
-import { LayerSetPayload } from '@/api/events/payloads/layer-set-payload';
+import { LayerSetPayload } from '@/api/events/payloads';
 
 // TODO: Implement method to validate Vector Tiles service
 // TODO: Add more customization (minZoom, maxZoom, TMS)

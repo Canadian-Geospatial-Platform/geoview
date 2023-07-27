@@ -2,7 +2,7 @@ import { api } from '@/app';
 
 import { EVENT_NAMES } from '@/api/events/event-types';
 
-import { notificationPayload, NotificationType } from '@/api/events/payloads/notification-payload';
+import { notificationPayload, NotificationType } from '@/api/events/payloads';
 
 export type NotificationDetailsType = {
   notificationType: NotificationType;

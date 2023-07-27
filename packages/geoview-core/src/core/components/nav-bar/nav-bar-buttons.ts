@@ -5,7 +5,7 @@ import { EVENT_NAMES } from '@/api/events/event-types';
 import { PanelApi } from '@/ui';
 
 import { generateId } from '../../utils/utilities';
-import { buttonPanelPayload } from '@/api/events/payloads/button-panel-payload';
+import { buttonPanelPayload } from '@/api/events/payloads';
 import { CONST_PANEL_TYPES, TypeButtonPanel, TypePanelProps } from '@/ui/panel/panel-types';
 import { TypeIconButtonProps } from '@/ui/icon-button/icon-button-types';
 

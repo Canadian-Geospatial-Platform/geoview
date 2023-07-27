@@ -29,7 +29,7 @@ import {
 } from '../esri-layer-common';
 import { AbstractGeoViewVector } from './abstract-geoview-vector';
 import { TypeJsonArray, TypeJsonObject } from '@/core/types/global-types';
-import { codedValueType, rangeDomainType } from '@/api/events/payloads/get-feature-info-payload';
+import { codedValueType, rangeDomainType } from '@/api/events/payloads';
 import { Layer } from '../../layer';
 
 export interface TypeSourceEsriFeatureInitialConfig extends Omit<TypeVectorSourceInitialConfig, 'format'> {

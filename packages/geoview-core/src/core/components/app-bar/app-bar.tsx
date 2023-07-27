@@ -9,7 +9,7 @@ import { EVENT_NAMES } from '@/api/events/event-types';
 
 import { MapContext } from '../../app-start';
 
-import { payloadIsAButtonPanel, ButtonPanelPayload } from '@/api/events/payloads/button-panel-payload';
+import { payloadIsAButtonPanel, ButtonPanelPayload } from '@/api/events/payloads';
 import { TypeButtonPanel } from '@/ui/panel/panel-types';
 
 import Export from './buttons/export';

@@ -11,7 +11,7 @@ import { EVENT_NAMES } from '@/api/events/event-types';
 
 import { IconButton, ChevronLeftIcon, ChevronRightIcon } from '..';
 import { MapContext } from '@/core/app-start';
-import { booleanPayload, payloadIsABoolean } from '@/api/events/payloads/boolean-payload';
+import { booleanPayload, payloadIsABoolean } from '@/api/events/payloads';
 
 /**
  * Drawer Properties

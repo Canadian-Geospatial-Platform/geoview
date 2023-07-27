@@ -17,8 +17,8 @@ import {
   payloadIsAPolygonConfig,
   payloadIsAPolylineConfig,
   payloadIsAVectorConfig,
-} from '@/api/events/payloads/vector-config-payload';
-import { VectorPayload } from '@/api/events/payloads/vector-payload';
+  VectorPayload,
+} from '@/api/events/payloads';
 import { TypeFeatureCircleStyle, TypeFeatureStyle, TypeIconStyle } from './vector-types';
 
 /**

@@ -14,7 +14,7 @@ import { TypeLocalizedString } from '@/geo/map/map-schema-types';
 import { EVENT_NAMES } from '@/api/events/event-types';
 
 import { Cast, TypeJsonArray, TypeJsonObject, TypeJsonValue } from '../types/global-types';
-import { snackbarMessagePayload } from '@/api/events/payloads/snackbar-message-payload';
+import { snackbarMessagePayload } from '@/api/events/payloads';
 
 /**
  * Get the string associated to the current display language.

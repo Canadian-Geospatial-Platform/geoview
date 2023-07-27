@@ -13,7 +13,7 @@ import { api } from '@/app';
 import { MapContext } from '../../app-start';
 
 import { EVENT_NAMES } from '@/api/events/event-types';
-import { payloadIsABoolean } from '@/api/events/payloads/boolean-payload';
+import { payloadIsABoolean } from '@/api/events/payloads';
 
 import { Box, CheckIcon, Tooltip } from '@/ui';
 

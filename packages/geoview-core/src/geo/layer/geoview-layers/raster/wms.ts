@@ -32,13 +32,13 @@ import {
   TypeArrayOfFeatureInfoEntries,
   rangeDomainType,
   codedValueType,
-} from '@/api/events/payloads/get-feature-info-payload';
+  snackbarMessagePayload,
+  LayerSetPayload,
+} from '@/api/events/payloads';
 import { getLocalizedValue, getMinOrMaxExtents, xmlToJson } from '@/core/utils/utilities';
-import { snackbarMessagePayload } from '@/api/events/payloads/snackbar-message-payload';
 import { EVENT_NAMES } from '@/api/events/event-types';
 import { api } from '@/app';
 import { Layer } from '../../layer';
-import { LayerSetPayload } from '@/api/events/payloads/layer-set-payload';
 
 export interface TypeWMSLayerConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig'> {
   geoviewLayerType: 'ogcWms';
