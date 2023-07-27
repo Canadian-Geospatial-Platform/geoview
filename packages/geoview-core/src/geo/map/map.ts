@@ -423,13 +423,13 @@ export class MapViewer {
    * @param {string} mapConfig a new config passed in from the function call
    */
   loadMapConfig = (mapConfig: string) => {
-    const targetDiv = this.map.getTargetElement();
+    const targetDiv = this.map.getTargetElement().parentElement!.parentElement!.parentElement;
 
     const configObjString = removeCommentsFromJSON(mapConfig);
     const parsedMapConfig = parseJSONConfig(configObjString);
 
     // create a new config for this map element
-    const config = new Config(targetDiv);
+    const config = new Config(targetDiv!);
 
     const configObj = config.getMapConfigFromFunc(parsedMapConfig);
     if (this.displayLanguage) {

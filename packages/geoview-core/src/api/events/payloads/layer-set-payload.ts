@@ -1,7 +1,7 @@
 import { PayloadBaseClass } from './payload-base-class';
 
 import { EventStringId, EVENT_NAMES } from '../event-types';
-import { TypeLayerStatus } from '@/geo/map/map-schema-types';
+import { TypeLayerStatus, TypeLocalizedString } from '@/geo/map/map-schema-types';
 
 /** Valid events that can create LayerSetPayload */
 const validEvents: EventStringId[] = [
@@ -11,8 +11,14 @@ const validEvents: EventStringId[] = [
   EVENT_NAMES.LAYER_SET.UPDATED,
 ];
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export type TypeResultSets = { [layerPath: string]: { layerStatus: TypeLayerStatus; data: any | null } };
+export type TypeResultSets = {
+  [layerPath: string]: {
+    layerName?: TypeLocalizedString;
+    layerStatus: TypeLayerStatus;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    data: any | null;
+  };
+};
 
 /**
  * type guard function that redefines a PayloadBaseClass as a TypeLayerRegistrationPayload

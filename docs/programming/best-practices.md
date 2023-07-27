@@ -126,7 +126,7 @@ We do the import statement in the following order
 We add an empty line between each group of import from different category
 ```
 import { useRef, useEffect } from 'react';
-import { render } from 'react-dom';
+import { createRoot } from 'react-dom/client';
 
 import { useTranslation } from 'react-i18next';
 

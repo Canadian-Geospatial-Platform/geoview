@@ -132,6 +132,7 @@ export class GeoPackage extends AbstractGeoViewVector {
    * @returns {Promise<void>} A promise that the execution is completed.
    */
   protected getServiceMetadata(): Promise<void> {
+    this.layerPhase = 'getServiceMetadata';
     const promisedExecution = new Promise<void>((resolve) => {
       resolve();
     });
@@ -145,6 +146,7 @@ export class GeoPackage extends AbstractGeoViewVector {
    * @param {TypeListOfLayerEntryConfig} listOfLayerEntryConfig The list of layer entries configuration to validate.
    */
   protected validateListOfLayerEntryConfig(listOfLayerEntryConfig: TypeListOfLayerEntryConfig) {
+    this.layerPhase = 'validateListOfLayerEntryConfig';
     return listOfLayerEntryConfig.forEach((layerEntryConfig: TypeLayerEntryConfig) => {
       const layerPath = Layer.getLayerPath(layerEntryConfig);
       if (layerEntryIsGroupLayer(layerEntryConfig)) {
@@ -218,6 +220,7 @@ export class GeoPackage extends AbstractGeoViewVector {
     listOfLayerEntryConfig: TypeListOfLayerEntryConfig,
     layerGroup?: LayerGroup
   ): Promise<BaseLayer | null> {
+    this.layerPhase = 'processListOfLayerEntryConfig';
     const promisedListOfLayerEntryProcessed = new Promise<BaseLayer | null>((resolve) => {
       // Single group layer handled recursively
       if (listOfLayerEntryConfig.length === 1 && layerEntryIsGroupLayer(listOfLayerEntryConfig[0])) {

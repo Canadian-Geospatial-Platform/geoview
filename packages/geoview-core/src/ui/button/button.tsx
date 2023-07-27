@@ -1,4 +1,4 @@
-import { useRef, useState, useEffect, useCallback } from 'react';
+import { useRef, useState, useEffect, useCallback, ReactNode } from 'react';
 
 import { useTranslation } from 'react-i18next';
 
@@ -55,7 +55,7 @@ const useStyles = makeStyles((theme) => ({
  * @returns {JSX.Element} the new UI element
  */
 export function Button(props: TypeButtonProps): JSX.Element {
-  const [content, setContent] = useState<React.ReactNode>();
+  const [content, setContent] = useState<ReactNode>();
 
   const {
     sx,
@@ -91,10 +91,10 @@ export function Button(props: TypeButtonProps): JSX.Element {
   /**
    * Get text container with provided text content
    *
-   * @returns {React.ReactNode} return the text container
+   * @returns {ReactNode} return the text container
    */
-  const getText = useCallback((): React.ReactNode => {
-    let textContent: React.ReactNode;
+  const getText = useCallback((): ReactNode => {
+    let textContent: ReactNode;
     if (children === undefined) {
       textContent = <div />;
     } else if (typeof children === 'string') {
@@ -119,10 +119,10 @@ export function Button(props: TypeButtonProps): JSX.Element {
   /**
    * Get icon container with provided icon content
    *
-   * @returns {React.ReactNode} returns icon container
+   * @returns {ReactNode} returns icon container
    */
-  const getIcon = useCallback((): React.ReactNode => {
-    let iconContent: React.ReactNode;
+  const getIcon = useCallback((): ReactNode => {
+    let iconContent: ReactNode;
 
     if (icon === undefined) {
       iconContent = <div />;
@@ -138,27 +138,27 @@ export function Button(props: TypeButtonProps): JSX.Element {
   /**
    * Create a text only button
    *
-   * @returns {React.ReactNode} return the created text button
+   * @returns {ReactNode} return the created text button
    */
-  const createTextButton = useCallback((): React.ReactNode => {
+  const createTextButton = useCallback((): ReactNode => {
     return getText();
   }, [getText]);
 
   /**
    * Create an icon only button
    *
-   * @returns {React.ReactNode} return the created icon button
+   * @returns {ReactNode} return the created icon button
    */
-  const createIconButton = useCallback((): React.ReactNode => {
+  const createIconButton = useCallback((): ReactNode => {
     return getIcon();
   }, [getIcon]);
 
   /**
    * Create a button with icon and text
    *
-   * @returns {React.ReactNode} return a button with an icon and text
+   * @returns {ReactNode} return a button with an icon and text
    */
-  const createTextIconButton = useCallback((): React.ReactNode => {
+  const createTextIconButton = useCallback((): ReactNode => {
     return (
       <div className={classes.textIconContainer}>
         {getIcon()}

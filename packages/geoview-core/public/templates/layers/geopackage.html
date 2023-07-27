@@ -235,7 +235,7 @@
         const geoviewLayers = cgpv.api.maps?.LYR1?.layer?.geoviewLayers;
         if (geoviewLayers) {
           const output = Object.keys(geoviewLayers).reduce((outputValue, layerId) => {
-            const stateValue = geoviewLayers[layerId].allLayerEntryConfigProcessed() ? 'processed' : 'inprogress';
+            const stateValue = geoviewLayers[layerId].layerPhase;
             return `${outputValue}${layerId}: ${stateValue}, `;
           }, '(');
           displayField1.textContent = output ? `${output.slice(0, -2)})` : '(undefined)';
@@ -247,7 +247,7 @@
         const geoviewLayers = cgpv.api.maps?.LYR2?.layer?.geoviewLayers;
         if (geoviewLayers) {
           const output = Object.keys(geoviewLayers).reduce((outputValue, layerId) => {
-            const stateValue = geoviewLayers[layerId].allLayerEntryConfigProcessed() ? 'processed' : 'inprogress';
+            const stateValue = geoviewLayers[layerId].layerPhase;
             return `${outputValue}${layerId}: ${stateValue}, `;
           }, '(');
           displayField1.textContent = output ? `${output.slice(0, -2)})` : '(undefined)';

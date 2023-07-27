@@ -145,7 +145,7 @@
           },
           'theme': 'light',
           'components': [],
-          'corePackages': [],
+          'corePackages': ['footer-panel'],
           'suportedLanguages': ['en']
         }"
     ></div>
@@ -194,7 +194,7 @@
           },
           'theme': 'dark',
           'components': [],
-          'corePackages': [],
+          'corePackages': ['footer-panel'],
           'suportedLanguages': ['en']
         }"
     ></div>
@@ -242,7 +242,7 @@
             ]
           },
           'components': [],
-          'corePackages': [],
+          'corePackages': ['footer-panel'],
           'theme': 'dark',
           'suportedLanguages': ['en']
         }"
@@ -331,7 +331,7 @@
       ]
   }"
     ></div>
-    <p>Add a legend component in Panel.</p>
+    <p>Add a legend component in Panel from the HTML script tag with custom width.</p>
     <div id="legend-item-example"></div>
     <p>Add a single legend item component in div.</p>
     <button type="button" class="collapsible">Configuration Snippet</button>
@@ -348,7 +348,7 @@
         createConfigSnippet();
 
         // import react and api from the core
-        const { react, reactDOM, api, ui } = cgpv;
+        const { react, createRoot, api, ui } = cgpv;
 
         // define the map id
         const mapIdOne = 'UC1';
@@ -409,15 +409,17 @@
           panelId: 'AppbarPanelId',
           title: 'Legend',
           content: legendFour,
-          width: 200,
+          width: 500,
         };
 
         // call an api function to add a panel with a button in the default group
         api.map(mapIdFour).appBarButtons.createAppbarPanel(button, panel, null);
 
         const legendDiv = document.getElementById('legend-item-example');
+        // TODO: The legend component does not render properly
         const legendItemOutside = api.map(mapIdFour).legend.createLegendItem({ layerId: 'UC4Layer2-msi' });
-        reactDOM.render(legendItemOutside, legendDiv);
+        const root = createRoot(legendDiv);
+        root.render(legendItemOutside)
       });
     </script>
   </body>

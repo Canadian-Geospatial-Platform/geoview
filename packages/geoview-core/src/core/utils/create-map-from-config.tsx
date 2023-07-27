@@ -1,4 +1,4 @@
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { api } from '@/app';
 import AppStart from '../app-start';
 import { Config } from './config/config';
@@ -27,7 +27,8 @@ export function createMapFromConfig(divId: string, mapConfig: string) {
 
       if (configObj) {
         // render the map with the config
-        ReactDOM.render(<AppStart mapFeaturesConfig={configObj} />, mapDiv);
+        const root = createRoot(mapDiv!);
+        root.render(<AppStart mapFeaturesConfig={configObj} />);
       }
     }
   } else {

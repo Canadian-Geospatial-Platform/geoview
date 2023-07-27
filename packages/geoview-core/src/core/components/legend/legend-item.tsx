@@ -511,7 +511,7 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
       <ListItem>
         <ListItemButton>
           <ListItemIcon>
-            {(groupItems.length > 0 || WMSStyles.length) && (
+            {(groupItems.length > 0 || WMSStyles.length > 1) && (
               <IconButton color="primary" onClick={handleExpandGroupClick}>
                 {isGroupOpen ? <ExpandMoreIcon /> : <ExpandLessIcon />}
               </IconButton>
@@ -527,7 +527,7 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
                 {iconList || iconImg !== null ? <CloseIcon /> : <MoreHorizIcon />}
               </IconButton>
             )}
-            {iconType === 'simple' && iconImg !== null && !isLegendOpen && !WMSStyles.length && (
+            {iconType === 'simple' && iconImg !== null && !isLegendOpen && WMSStyles.length < 2 && (
               <IconButton
                 sx={sxClasses.iconPreview}
                 color="primary"
@@ -564,7 +564,7 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
                 </Box>
               </Tooltip>
             )}
-            {groupItems.length === 0 && WMSStyles.length === 0 && !iconType && !isLegendOpen && (
+            {groupItems.length === 0 && WMSStyles.length < 2 && !iconType && !isLegendOpen && (
               <IconButton sx={sxClasses.iconPreview} color="primary" size="small" onClick={handleLegendClick}>
                 <TodoIcon />
               </IconButton>
@@ -574,7 +574,7 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
             <ListItemText primary={layerName} onClick={handleExpandGroupClick} />
           </Tooltip>
           <ListItemIcon style={{ justifyContent: 'right' }}>
-            {(isRemoveable || (canSetOpacity && groupItems.length === 0 && WMSStyles.length === 0)) && (
+            {(isRemoveable || (canSetOpacity && groupItems.length === 0)) && (
               <IconButton id="setOpacityBtn" onClick={handleMoreClick} aria-label="more" aria-haspopup="true">
                 <MoreVertIcon />
               </IconButton>
@@ -600,7 +600,7 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
       >
         {/* Add more layer options here - zoom to, reorder */}
         {isRemoveable && <MenuItem onClick={handleRemoveLayer}>{t('legend.remove_layer')}</MenuItem>}
-        {canSetOpacity && groupItems.length === 0 && WMSStyles.length === 0 && (
+        {canSetOpacity && groupItems.length === 0 && (
           <MenuItem onClick={handleOpacityOpen}>
             <ListItemText>{t('legend.toggle_opacity')}</ListItemText>
             {isOpacityOpen && (
@@ -678,19 +678,21 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
               />
             ))}
           </Box>
-          <Box sx={sxClasses.expandableIconContainer}>
-            {WMSStyles.map((style) => (
-              <WMSStyleItem
-                key={`${layerId}-${style.name}`}
-                layerId={layerId}
-                mapId={mapId}
-                subLayerId={subLayerId}
-                style={style}
-                currentWMSStyle={currentWMSStyle}
-                setCurrentWMSStyle={setCurrentWMSStyle as Dispatch<SetStateAction<string>>}
-              />
-            ))}
-          </Box>
+          {WMSStyles.length > 1 && (
+            <Box sx={sxClasses.expandableIconContainer}>
+              {WMSStyles.map((style) => (
+                <WMSStyleItem
+                  key={`${layerId}-${style.name}`}
+                  layerId={layerId}
+                  mapId={mapId}
+                  subLayerId={subLayerId}
+                  style={style}
+                  currentWMSStyle={currentWMSStyle}
+                  setCurrentWMSStyle={setCurrentWMSStyle as Dispatch<SetStateAction<string>>}
+                />
+              ))}
+            </Box>
+          )}
         </Box>
       </Collapse>
     </Grid>

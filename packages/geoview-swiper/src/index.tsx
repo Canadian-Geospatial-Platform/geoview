@@ -53,7 +53,7 @@ class SwiperPlugin extends AbstractPlugin {
 
     // access the cgpv object from the window object
     const { cgpv } = w;
-    const { react } = cgpv;
+    const { react, createRoot } = cgpv;
     const { createElement } = react;
 
     // if there is layers in the array, initialize the swiper
@@ -65,7 +65,8 @@ class SwiperPlugin extends AbstractPlugin {
 
       // create the swiper component and render
       const node = createElement(Swiper, { mapId, config: configObj!, translations: this.translations });
-      cgpv.reactDOM.render(node, document.getElementById(`${mapId}-swiper`));
+      const root = createRoot(document.getElementById(`${mapId}-swiper`)!);
+      root.render(node);
     }
   };
 
@@ -73,14 +74,14 @@ class SwiperPlugin extends AbstractPlugin {
    * Function called when the plugin is removed, used for clean up
    */
   removed(): void {
-    const { mapId } = this.pluginProps;
+    // const { mapId } = this.pluginProps;
 
     // access the cgpv object from the window object
     const { cgpv } = w;
 
     if (cgpv) {
-      // TODO: Enable swiper removal
-      cgpv.reactDOM.unmountComponentAtNode(document.getElementById(`${mapId}-swiper`)! as Element);
+      // TODO: Enable swiper removal, make it work with React 18+ new root and unmount
+      // cgpv.reactDOM.unmountComponentAtNode(document.getElementById(`${mapId}-swiper`)! as Element);
     }
   }
 }

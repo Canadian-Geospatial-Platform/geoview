@@ -23,14 +23,14 @@ export class DataTableApi {
   constructor(mapId: string) {
     this.mapId = mapId;
   }
+
   /**
    * Create a data table as an element
    *
    * @param { 'materialReactDataTable'} tableType type of table that user want to create.
    * @return {ReactElement} the data table react element
    */
-
-  createDataTable = ({ data }: { data: DataTableData }) => {
+  createDataTable = ({ data }: { data: DataTableData }): ReactElement => {
     return createElement(DataTable, { data }, []);
   };
 

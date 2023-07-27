@@ -59,6 +59,7 @@
     "dayjs": "^1.11.1",
     "domhandler": "^4.3.0",
     "eventemitter3": "^4.0.7",
+    "export-to-csv": "^0.2.1",
     "focus-trap-react": "^8.9.1",
     "html-react-parser": "^1.4.6",
     "i18next": "^22.4.13",
@@ -74,14 +75,13 @@
     "proj4": "^2.7.5",
     "prop-types": "^15.8.1",
     "query-string": "^7.1.0",
-    "react": "^17.0.2",
-    "react-dom": "^17.0.2",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
     "react-i18next": "^12.2.0",
-    "react-test-renderer": "^17.0.2",
+    "react-test-renderer": "^18.2.0",
     "sanitize-html": "^2.7.3",
     "sql.js": "^1.8.0",
-    "yet-another-react-lightbox": "^3.11.3",
-    "export-to-csv": "^0.2.1"
+    "yet-another-react-lightbox": "^3.11.3"
   },
   "devDependencies": {
     "@babel/cli": "^7.17.0",
@@ -122,8 +122,8 @@
     "@types/lodash-webpack-plugin": "^0.11.6",
     "@types/ol": "^6.5.3",
     "@types/proj4": "^2.5.2",
-    "@types/react": "^17.0.2",
-    "@types/react-dom": "^17.0.2",
+    "@types/react": "^18.2.0",
+    "@types/react-dom": "^18.2.0",
     "@types/react-router-dom": "^5.3.3",
     "@types/sanitize-html": "^2.6.2",
     "@types/sql.js": "^1.4.4",
@@ -154,8 +154,8 @@
     "lodash-webpack-plugin": "^0.11.6",
     "prettier": "^2.6.0",
     "prop-types": "^15.8.1",
-    "react": "^17.0.2",
-    "react-dom": "^17.0.2",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
     "sass": "^1.49.7",
     "sass-loader": "^12.4.0",
     "style-loader": "^3.3.1",
@@ -170,8 +170,9 @@
     "webpack-merge": "^5.8.0"
   },
   "resolutions": {
-    "@types/react": "^17.0.2",
-    "react": "^17.0.2",
-    "react-dom": "^17.0.2"
+    "@types/react": "^18.2.0",
+    "@types/react-dom": "^18.2.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
   }
 }

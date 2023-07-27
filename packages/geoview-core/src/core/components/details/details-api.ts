@@ -40,7 +40,6 @@ export class DetailsAPI {
       createElement(Details, {
         key: `${mapId}-details-sets`,
         arrayOfLayerData: detailsElements,
-        mapId,
         detailsSettings,
       }),
     ]);
