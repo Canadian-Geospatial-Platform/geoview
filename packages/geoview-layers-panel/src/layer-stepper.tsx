@@ -10,6 +10,7 @@ import {
   ButtonPropsLayerPanel,
   TypeListOfLayerEntryConfig,
   TypeJsonObject,
+  PayloadBaseClass,
 } from 'geoview-core';
 
 type Event = { target: { value: string } };
@@ -143,19 +144,15 @@ function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
   };
 
   useEffect(() => {
-    api.event.on(
-      api.eventNames.SNACKBAR.EVENT_SNACKBAR_OPEN,
-      (payload) => {
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
-        if (payload.message && payload.message.value === 'validation.layer.loadfailed') {
-          setIsLoading(false);
-        }
-      },
-      mapId
-    );
+    const snackbarEventOpenListenerFunction = (payload: PayloadBaseClass) => {
+      if (payload.message && payload.message.value === 'validation.layer.loadfailed') {
+        setIsLoading(false);
+      }
+    };
+
+    api.event.on(api.eventNames.SNACKBAR.EVENT_SNACKBAR_OPEN, snackbarEventOpenListenerFunction, mapId);
     return () => {
-      api.event.off(api.eventNames.SNACKBAR.EVENT_SNACKBAR_OPEN, mapId);
+      api.event.off(api.eventNames.SNACKBAR.EVENT_SNACKBAR_OPEN, mapId, snackbarEventOpenListenerFunction);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

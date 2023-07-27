@@ -161,16 +161,11 @@ function PanelContent(props: TypePanelContentProps): JSX.Element {
   }, [mapLayers]);
 
   useEffect(() => {
-    api.event.on(
-      api.eventNames.PANEL.EVENT_PANEL_CLOSE,
-      () => {
-        setAddLayerVisible(false);
-      },
-      `${mapId}/${buttonPanel.buttonPanelId}`
-    );
+    const setAddLayerVisibleListenerFunction = () => setAddLayerVisible(false);
 
+    api.event.on(api.eventNames.PANEL.EVENT_PANEL_CLOSE, setAddLayerVisibleListenerFunction, `${mapId}/${buttonPanel.buttonPanelId}`);
     return () => {
-      api.event.off(api.eventNames.PANEL.EVENT_PANEL_CLOSE, `${mapId}/${buttonPanel.buttonPanelId}`);
+      api.event.off(api.eventNames.PANEL.EVENT_PANEL_CLOSE, `${mapId}/${buttonPanel.buttonPanelId}`, setAddLayerVisibleListenerFunction);
     };
   }, [api, buttonPanel.buttonPanelId, mapId]);
 
