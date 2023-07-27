@@ -63,7 +63,7 @@
           "projection": 3978
         },
         "basemapOptions": {
-          "basemapId": "transport",
+          "basemapId": "simple",
           "shaded": false,
           "labeled": true
         },
@@ -129,11 +129,15 @@
     // initialize cgpv and api events, a callback is optional, used if calling api's after the rendering is ready
     cgpv.init(function () {
       console.log('api is ready');
+      // !put a timeout to show the problem.... map is loaded with default configt then the function trigger
+      // !basemap good, one secondlater bad bassemap. After using the droopdown to set, everything is good
+      // TODO: Refactor loading, related to language as well #1118
+      setTimeout(() => cgpv.api.map('mapWM1').loadMapConfig(JSON.stringify(config)), 2000);
 
-      cgpv.api.map('mapWM1').loadMapConfig(JSON.stringify(config))
       //create snippets
       createConfigSnippet();
       createCodeSnippet();
+
       const switchThemeElem = document.getElementById("switchTheme");
       switchThemeElem.addEventListener("change", (e) => {
         reloadMap(e.target.value)

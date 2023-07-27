@@ -21,6 +21,7 @@ const sxClasses = {
     alignItems: 'center',
     width: 'calc(100% - 64px)',
     minHeight: '35px',
+    maxHeight: '35px',
     backdropFilter: 'blur(5px)',
     backgroundColor: '#000000cc',
     pointerEvents: 'all',

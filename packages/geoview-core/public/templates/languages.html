@@ -59,7 +59,7 @@
       <h4 id="HLNG2">2. English</h4>
       <a class="ref-link" href="#top">Top</a>
     </div>
-    <div id="LNG2" class="llwp-map" data-lang="en"></div>
+    <div id="LNG2" class="llwp-map1" data-lang="en"></div>
     <p>This map is in English.</p>
     <hr />
 
@@ -114,7 +114,10 @@
         cgpv.api.createMapFromConfig('LNG1', config);
 
         // loads config in blank map
-        cgpv.api.map('LNG2').loadMapConfig(config);
+        // cgpv.api.map('LNG2').loadMapConfig(config);
+        // TODO: Investigate part of #1118, if we remove the calss on div it works by passing with getMapConfigFromFunc
+        // if using the loadMapConfig (when cass exist) it fails for the second map. This whole start from function must be refactor.
+        setTimeout(()=>cgpv.api.createMapFromConfig('LNG2', config), 5000);
 
         // change map language
         var mapLangButton = document.getElementById('Change-Lang-Button');

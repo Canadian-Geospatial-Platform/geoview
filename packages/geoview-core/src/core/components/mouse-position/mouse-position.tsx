@@ -123,7 +123,10 @@ export function MousePosition(props: MousePositionProps): JSX.Element {
    * @returns {Object} the coordinates
    */
   function getCoordinates(coord: Coordinate) {
-    const projection = api.projection.projections[api.map(mapId).currentProjection];
+    // TODO: when map is loaded from function call, there is a first init with the empty config then an overwrite by the the function call.
+    // !Some of the reference are not set properly, so we have this work around. EWven with this is it not 100% perfect. This needs to be refactor
+    // !so we do not have access before the api map is set
+    const projection = api.projection.projections[api.map(mapId) !== undefined ? api.map(mapId).currentProjection : 3978];
     const coordinate = toLonLat(coord, projection);
 
     const DMS = formatCoordinates(coordinate, true);
