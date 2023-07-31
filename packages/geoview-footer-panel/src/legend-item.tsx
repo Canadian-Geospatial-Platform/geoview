@@ -1,6 +1,7 @@
 /* eslint-disable react/require-default-props */
 import type React from 'react';
 import { TypeWindow, payloadIsALayerConfig, payloadIsRemoveGeoViewLayer } from 'geoview-core';
+import { PayloadBaseClass } from 'geoview-core/src/api/events/payloads';
 
 interface Props {
   mapId: string;
@@ -26,43 +27,35 @@ export function LegendItem({ mapId }: Props): JSX.Element {
     if (api.map(mapId).layer?.layerOrder !== undefined) setMapLayers([...api.map(mapId).layer.layerOrder].reverse());
   };
 
+  const eventMapLoadedListenerFunction = () => updateLayers();
+  const eventRemoveLayerListenerFunction = (payload: PayloadBaseClass) => {
+    if (payloadIsRemoveGeoViewLayer(payload)) {
+      setMapLayers((orderedLayers) => orderedLayers.filter((layerId) => layerId !== payload.geoviewLayer.geoviewLayerId));
+    }
+  };
+
+  const eventAddLayerListenerFunction = (payload: PayloadBaseClass) => {
+    if (payloadIsALayerConfig(payload)) {
+      api.event.on(
+        api.eventNames.LAYER.EVENT_LAYER_ADDED,
+        () => {
+          updateLayers();
+          api.event.off(api.eventNames.LAYER.EVENT_LAYER_ADDED, `${mapId}/${payload.layerConfig.geoviewLayerId}`);
+        },
+        `${mapId}/${payload.layerConfig.geoviewLayerId}`
+      );
+    }
+  };
+
   useEffect(() => {
-    api.event.on(
-      api.eventNames.MAP.EVENT_MAP_LOADED,
-      () => {
-        updateLayers();
-      },
-      mapId
-    );
-    api.event.on(
-      api.eventNames.LAYER.EVENT_REMOVE_LAYER,
-      (payload) => {
-        if (payloadIsRemoveGeoViewLayer(payload)) {
-          setMapLayers((orderedLayers) => orderedLayers.filter((layerId) => layerId !== payload.geoviewLayer.geoviewLayerId));
-        }
-      },
-      mapId
-    );
-    api.event.on(
-      api.eventNames.LAYER.EVENT_ADD_LAYER,
-      (payload) => {
-        if (payloadIsALayerConfig(payload)) {
-          api.event.on(
-            api.eventNames.LAYER.EVENT_LAYER_ADDED,
-            () => {
-              updateLayers();
-              api.event.off(api.eventNames.LAYER.EVENT_LAYER_ADDED, `${mapId}/${payload.layerConfig.geoviewLayerId}`);
-            },
-            `${mapId}/${payload.layerConfig.geoviewLayerId}`
-          );
-        }
-      },
-      mapId
-    );
+    api.event.on(api.eventNames.MAP.EVENT_MAP_LOADED, eventMapLoadedListenerFunction, mapId);
+    api.event.on(api.eventNames.LAYER.EVENT_REMOVE_LAYER, eventRemoveLayerListenerFunction, mapId);
+    api.event.on(api.eventNames.LAYER.EVENT_ADD_LAYER, eventAddLayerListenerFunction, mapId);
+
     return () => {
-      api.event.off(api.eventNames.MAP.EVENT_MAP_LOADED, mapId);
-      api.event.off(api.eventNames.LAYER.EVENT_ADD_LAYER, mapId);
-      api.event.off(api.eventNames.LAYER.EVENT_REMOVE_LAYER, mapId);
+      api.event.off(api.eventNames.MAP.EVENT_MAP_LOADED, mapId, eventMapLoadedListenerFunction);
+      api.event.off(api.eventNames.LAYER.EVENT_REMOVE_LAYER, mapId, eventRemoveLayerListenerFunction);
+      api.event.off(api.eventNames.LAYER.EVENT_ADD_LAYER, mapId, eventAddLayerListenerFunction);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
