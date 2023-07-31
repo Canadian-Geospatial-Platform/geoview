@@ -1,5 +1,5 @@
 /* eslint-disable no-console */
-import { TypeMapFeaturesConfig } from '../../../types/global-types';
+import { TypeMapFeaturesConfig } from '@/core/types/global-types';
 import { isJsonString, removeCommentsFromJSON } from '../../utilities';
 
 // ******************************************************************************************************************************

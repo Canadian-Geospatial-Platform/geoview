@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { Switch } from '@/ui';
 
 import { api } from '@/app';
-import { MapContext } from '../../app-start';
+import { MapContext } from '@/core/app-start';
 
 import { PROJECTION_NAMES } from '@/geo/projection/projection';
 

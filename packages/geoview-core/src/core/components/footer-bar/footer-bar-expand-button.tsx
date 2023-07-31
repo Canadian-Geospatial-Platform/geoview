@@ -1,7 +1,7 @@
 import { useContext, useState } from 'react';
 
 import { ExpandMoreIcon, ExpandLessIcon, IconButton, Box } from '@/ui';
-import { MapContext } from '../../app-start';
+import { MapContext } from '@/core/app-start';
 import { api } from '@/app';
 
 import { booleanPayload } from '@/api/events/payloads';

@@ -26,7 +26,7 @@ import {
   TypeLayerGroupEntryConfig,
   TypeBaseLayerEntryConfig,
   TypeOgcWmsLayerEntryConfig,
-} from '../../../map/map-schema-types';
+} from '@/geo/map/map-schema-types';
 import {
   TypeFeatureInfoEntry,
   TypeArrayOfFeatureInfoEntries,

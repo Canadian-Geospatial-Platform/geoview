@@ -28,7 +28,7 @@ import {
   TypeUniqueValueStyleInfo,
   TypeFeatureInfoLayerConfig,
   layerEntryIsGroupLayer,
-} from '../../../map/map-schema-types';
+} from '@/geo/map/map-schema-types';
 import { TypeArrayOfFeatureInfoEntries, codedValueType, rangeDomainType } from '@/api/events/payloads';
 import { api } from '@/app';
 import { Layer } from '../../layer';

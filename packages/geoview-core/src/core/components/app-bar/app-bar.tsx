@@ -7,7 +7,7 @@ import { List, ListItem, Panel, IconButton } from '@/ui';
 import { api } from '@/app';
 import { EVENT_NAMES } from '@/api/events/event-types';
 
-import { MapContext } from '../../app-start';
+import { MapContext } from '@/core/app-start';
 
 import { payloadIsAButtonPanel, ButtonPanelPayload } from '@/api/events/payloads';
 import { TypeButtonPanel } from '@/ui/panel/panel-types';

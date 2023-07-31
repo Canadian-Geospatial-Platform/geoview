@@ -19,7 +19,7 @@ import {
   layerEntryIsGroupLayer,
   TypeBaseSourceVectorInitialConfig,
   TypeBaseLayerEntryConfig,
-} from '../../../map/map-schema-types';
+} from '@/geo/map/map-schema-types';
 
 import { getLocalizedValue, getXMLHttpRequest, xmlToJson, findPropertyNameByRegex } from '@/core/utils/utilities';
 import { api } from '@/app';

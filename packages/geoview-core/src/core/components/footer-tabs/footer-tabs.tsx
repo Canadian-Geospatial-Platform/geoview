@@ -1,7 +1,7 @@
 import { MutableRefObject, useCallback, useContext, useEffect, useRef, useState } from 'react';
 import makeStyles from '@mui/styles/makeStyles';
 
-import { MapContext } from '../../app-start';
+import { MapContext } from '@/core/app-start';
 import { api } from '@/app';
 
 import { EVENT_NAMES } from '@/api/events/event-types';
