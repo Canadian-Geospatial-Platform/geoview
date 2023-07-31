@@ -14,7 +14,7 @@ import {
   TypeGeoviewLayerConfig,
   TypeListOfLayerEntryConfig,
   TypeEsriDynamicLayerEntryConfig,
-} from '../../../map/map-schema-types';
+} from '@/geo/map/map-schema-types';
 
 import { getLocalizedValue } from '@/core/utils/utilities';
 import {

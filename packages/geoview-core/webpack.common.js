@@ -87,6 +87,7 @@ const config = {
     },
     alias: {
       '@': path.resolve(__dirname, 'src'),
+      '@public': path.resolve(__dirname, 'public'),
     },
   },
   module: {

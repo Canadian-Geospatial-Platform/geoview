@@ -19,7 +19,8 @@
     "lib": ["esnext", "dom", "dom.iterable", "scripthost"],
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "@public/*": ["./public/*"]
     }
   },
   "include": ["src"],

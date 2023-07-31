@@ -14,7 +14,7 @@ import { PROJECTION_NAMES } from '@/geo/projection/projection';
 
 import { NorthArrowIcon, NorthPoleIcon } from './north-arrow-icon';
 
-import { MapContext } from '../../app-start';
+import { MapContext } from '@/core/app-start';
 import { api } from '@/app';
 import { EVENT_NAMES } from '@/api/events/event-types';
 import { payloadIsAMapViewProjection, payloadIsABoolean } from '@/api/events/payloads';

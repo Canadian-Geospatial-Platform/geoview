@@ -1,6 +1,6 @@
 import axios, { AxiosResponse } from 'axios';
 
-import { TypeJsonObject, TypeJsonArray, TypeJsonValue } from '../../../types/global-types';
+import { TypeJsonObject, TypeJsonArray, TypeJsonValue } from '@/core/types/global-types';
 
 import {
   TypeEsriDynamicLayerEntryConfig,

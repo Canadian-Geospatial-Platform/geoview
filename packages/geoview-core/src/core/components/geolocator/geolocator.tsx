@@ -7,7 +7,7 @@ import { fromLonLat } from 'ol/proj';
 import debounce from 'lodash/debounce';
 import GeoList from './geo-list';
 import { StyledInputField, sxClasses } from './styles';
-import { MapContext } from '../../app-start';
+import { MapContext } from '@/core/app-start';
 import { api, payloadIsABoolean } from '@/app';
 import { EVENT_NAMES } from '@/api/events/event-types';
 
