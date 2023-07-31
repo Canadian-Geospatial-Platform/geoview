@@ -18,7 +18,7 @@ function JSONExportButton({ features }: JSONExportButtonProps): JSX.Element {
 
   /**
    * build the JSON file
-   * @return {JSON.stringify} Json gile content
+   * @return {JSON.stringify} Json file content
    *
    */
   const getJson = () => {

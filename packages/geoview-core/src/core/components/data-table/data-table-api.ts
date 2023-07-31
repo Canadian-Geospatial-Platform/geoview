@@ -37,10 +37,10 @@ export class DataTableApi {
   /**
    * Create group layer keys based on layer rendered on map
    *
-   * @param listOfLayerEntryConfig list of layers configured to be rendered on map.
-   * @param parentLayerId layer id
-   * @param grouplayerKeys list of keys already exists.
-   * @returns array of layer keys
+   * @param {TyepListOfLayerEntryConfig} listOfLayerEntryConfig list of layers configured to be rendered on map.
+   * @param {string} parentLayerId layer id
+   * @param {string[]} grouplayerKeys list of keys already exists.
+   * @returns {string[]} array of layer keys
    */
 
   getGroupKeys = (listOfLayerEntryConfig: TypeListOfLayerEntryConfig, parentLayerId: string, grouplayerKeys: string[]) => {
@@ -61,7 +61,7 @@ export class DataTableApi {
   /**
    * Create a data table rows
    *
-   * @param {arrayOfFeatureInfoEntries} arrayOfFeatureInfoEntries the properties of the data table to be created
+   * @param {TypeArrayOfFeatureInfoEntries} arrayOfFeatureInfoEntries the properties of the data table to be created
    * @return {TypeJsonArray} the data table rows
    */
 
@@ -95,7 +95,7 @@ export class DataTableApi {
   /**
    * Create data table based on layer id from map.
    * @param {string} layerId layerId of the feature added on map.
-   * @returns Promise of ReactElement.
+   * @returns {Promise<ReactElement | null>} Promise of ReactElement.
    */
 
   createDataTableByLayerId = async ({ layerId }: TypeLayerDataGridProps): Promise<ReactElement | null> => {

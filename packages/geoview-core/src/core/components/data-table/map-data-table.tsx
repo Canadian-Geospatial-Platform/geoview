@@ -40,6 +40,13 @@ export interface Rows {
   featureActions?: unknown;
 }
 
+/**
+ * Build Data table from map.
+ * @param {MapDataTableProps} data map data which will be used to build data table.
+ *
+ * @return {ReactElement} Data table as react element.
+ */
+
 function MapDataTable({ data }: MapDataTableProps) {
   const { t } = useTranslation<string>();
 
