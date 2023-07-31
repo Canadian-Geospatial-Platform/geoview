@@ -623,7 +623,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
         )
           return `(1=1)${layerFilter ? ` and (${layerFilter})` : ''}`;
 
-        const filterArray = [];
+        const filterArray: string[] = [];
         let visibleWhenGreatherThisIndex = -1;
         for (let i = 0; i < styleSettings.classBreakStyleInfo.length; i++) {
           if (filterArray.length % 2 === 0) {
