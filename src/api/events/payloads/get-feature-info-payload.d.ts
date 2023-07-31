@@ -5,6 +5,7 @@ import { Pixel } from 'ol/pixel';
 import { PayloadBaseClass } from './payload-base-class';
 import { EventStringId } from '../event-types';
 import { TypeGeoviewLayerType } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
+import { TypeLayerStatus } from '../../../geo/map/map-schema-types';
 export type TypeQueryType = 'at pixel' | 'at coordinate' | 'at long lat' | 'using a bounding box' | 'using a polygon';
 export type codeValueEntryType = {
     name: string;
@@ -39,7 +40,10 @@ export type TypeFeatureInfoEntry = {
 };
 export type TypeArrayOfFeatureInfoEntries = TypeFeatureInfoEntry[];
 export type TypeFeatureInfoResultSets = {
-    [layerPath: string]: TypeArrayOfFeatureInfoEntries | undefined | null;
+    [layerPath: string]: {
+        layerStatus: TypeLayerStatus;
+        data: TypeArrayOfFeatureInfoEntries | undefined | null;
+    };
 };
 /**
  * type guard function that redefines a PayloadBaseClass as a TypeQueryLayerPayload

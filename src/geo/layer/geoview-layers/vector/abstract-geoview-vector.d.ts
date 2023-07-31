@@ -10,7 +10,7 @@ import { Extent } from 'ol/extent';
 import { Pixel } from 'ol/pixel';
 import { AbstractGeoViewLayer } from '../abstract-geoview-layers';
 import { TypeBaseLayerEntryConfig, TypeLayerEntryConfig, TypeListOfLayerEntryConfig, TypeVectorLayerEntryConfig } from '../../../map/map-schema-types';
-import { TypeArrayOfFeatureInfoEntries } from '@/api/events/payloads/get-feature-info-payload';
+import { TypeArrayOfFeatureInfoEntries } from '@/api/events/payloads';
 export type TypeVectorLayerGroup = LayerGroup;
 export type TypeVectorLayer = VectorSource<Geometry>;
 export type TypeBaseVectorLayer = BaseLayer | TypeVectorLayerGroup | TypeVectorLayer;
@@ -33,10 +33,8 @@ export declare abstract class AbstractGeoViewVector extends AbstractGeoViewLayer
      * necessary, additional code can be executed in the child method to complete the layer configuration.
      *
      * @param {TypeListOfLayerEntryConfig} listOfLayerEntryConfig The list of layer entries configuration to validate.
-     *
-     * @returns {TypeListOfLayerEntryConfig} A new layer configuration list with layers in error removed.
      */
-    protected abstract validateListOfLayerEntryConfig(listOfLayerEntryConfig: TypeListOfLayerEntryConfig): TypeListOfLayerEntryConfig;
+    protected abstract validateListOfLayerEntryConfig(listOfLayerEntryConfig: TypeListOfLayerEntryConfig): void;
     /** ***************************************************************************************************************************
      * This method creates a GeoView layer using the definition provided in the layerEntryConfig parameter.
      *

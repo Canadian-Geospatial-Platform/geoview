@@ -1,4 +1,4 @@
-/// <reference types="react" />
+import { ReactNode } from 'react';
 import { CheckboxListAPI } from '../list/checkbox-list/checkbox-list-api';
 import { PanelStyles, TypePanelProps } from './panel-types';
 /**
@@ -12,9 +12,9 @@ export declare class PanelApi {
     type: string | undefined;
     status: boolean | undefined;
     width: string | number;
-    icon: React.ReactNode | Element;
+    icon: ReactNode;
     title: string;
-    content: React.ElementType | React.ReactNode | Element;
+    content: ReactNode;
     buttonId: string;
     mapId: string;
     checkboxListAPI?: CheckboxListAPI;
@@ -61,11 +61,11 @@ export declare class PanelApi {
     /**
      * Change the content of the panel
      *
-     * @param {React Element} content the content to update to
+     * @param {ReactNode} content the content to update to
      *
      * @returns {Panel} this panel
      */
-    changeContent: (content: React.ReactNode | Element) => PanelApi;
+    changeContent: (content: ReactNode) => PanelApi;
     /**
      * Remove action button
      *

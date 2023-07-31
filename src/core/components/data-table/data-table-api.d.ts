@@ -1,4 +1,4 @@
-/// <reference types="react" />
+import { ReactElement } from 'react';
 import { DataTableData } from './data-table';
 export declare class DataTableApi {
     mapId: string;
@@ -16,7 +16,5 @@ export declare class DataTableApi {
      */
     createDataTable: ({ data }: {
         data: DataTableData;
-    }) => import("react").FunctionComponentElement<{
-        data: DataTableData;
-    }>;
+    }) => ReactElement;
 }

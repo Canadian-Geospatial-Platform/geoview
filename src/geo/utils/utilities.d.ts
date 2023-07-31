@@ -5,7 +5,17 @@ import { Style } from 'ol/style';
 import { Color } from 'ol/color';
 import { TypeJsonObject } from '@/core/types/global-types';
 import { TypeFeatureStyle } from '../layer/vector/vector-types';
+import { TypeListOfLayerEntryConfig } from '../map/map-schema-types';
+import { AbstractGeoViewLayer } from '../layer/geoview-layers/abstract-geoview-layers';
 export declare class GeoUtilities {
+    /**
+     * Set the layerStatus code of all layers in the listOfLayerEntryConfig.
+     *
+     * @param {AbstractGeoViewLayer} geoviewLayerInstance The GeoView layer instance.
+     * @param {TypeListOfLayerEntryConfig} listOfLayerEntryConfig The list of layer's configuration.
+     * @param {string} errorMessage The error message.
+     */
+    setAllLayerStatusToError(geoviewLayerInstance: AbstractGeoViewLayer, listOfLayerEntryConfig: TypeListOfLayerEntryConfig, errorMessage: string): void;
     /**
      * Returns the WKT representation of a given geometry
      * @function geometryToWKT

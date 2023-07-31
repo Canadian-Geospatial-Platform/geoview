@@ -1,4 +1,4 @@
-/// <reference types="react" />
+import { ReactNode } from 'react';
 import { TooltipProps, ButtonProps } from '@mui/material';
 import { TypeJsonValue } from '@/core/types/global-types';
 import { TypeIconButtonProps } from '../icon-button/icon-button-types';
@@ -25,11 +25,11 @@ export type TypePanelProps = {
     /** Width of the panel. */
     width: string | number;
     /** Panel header icon. */
-    icon: React.ReactNode | Element;
+    icon: ReactNode;
     /** Panel header title. */
     title: string | TypeJsonValue;
     /** Panel body content. */
-    content?: React.ReactNode | Element;
+    content?: ReactNode;
     /** Custom panel styles */
     panelStyles?: PanelStyles;
 };
@@ -60,7 +60,7 @@ export interface TypeButtonProps extends Omit<ButtonProps, 'type'> {
     /** Location for tooltip. */
     tooltipPlacement?: TooltipProps['placement'];
     /** Button icon. */
-    icon?: React.ReactNode;
+    icon?: ReactNode;
     /** Optional class names */
     iconClassName?: string;
     /** Optional class names. */

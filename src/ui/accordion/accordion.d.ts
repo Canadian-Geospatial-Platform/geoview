@@ -1,4 +1,4 @@
-/// <reference types="react" />
+import { ReactNode } from 'react';
 /**
  * Properties for the Accordion element
  */
@@ -11,7 +11,7 @@ interface AccordionProps {
 }
 export type AccordionItem = {
     title: string;
-    content: React.ReactNode | Element;
+    content: ReactNode;
 };
 /**
  * Create a customized Material UI Fade
@@ -19,7 +19,7 @@ export type AccordionItem = {
  * @param {AccordionProps} props the properties passed to the Fade element
  * @returns {JSX.Element} the created Fade element
  */
-export declare function Accordion(props: AccordionProps): JSX.Element;
+export declare function Accordion(props: AccordionProps): ReactNode;
 export {};
 /**
  * Example of usage

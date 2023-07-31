@@ -503,9 +503,15 @@ export declare const layerEntryIsRasterTile: (verifyIfLayer: TypeLayerEntryConfi
  */
 export declare const layerEntryIsGeocore: (verifyIfLayer: TypeLayerEntryConfig) => verifyIfLayer is TypeGeocoreLayerEntryConfig;
 /** ******************************************************************************************************************************
+ * Valid values for the LayerStatus property
+ */
+export type TypeLayerStatus = 'newInstance' | 'loading' | 'processed' | 'error' | undefined;
+/** ******************************************************************************************************************************
  * Base type used to define a GeoView layer to display on the map.
  */
 export type TypeBaseLayerEntryConfig = {
+    /** This attribute is not part of the schema. It is used to identified unprocessed layers and shows the final layer state */
+    layerStatus?: TypeLayerStatus;
     /** This attribute is not part of the schema. It is used to link the layer entry config to the GeoView root layer config. */
     geoviewRootLayer?: TypeGeoviewLayerConfig;
     /** This attribute is not part of the schema. It is used to link the layer entry config to the parent's layer config. */
@@ -789,7 +795,7 @@ export type TypeSourceGeocoreConfig = {
 /** ******************************************************************************************************************************
  * Type used to define a layer group.
  */
-export interface TypeLayerGroupEntryConfig extends Omit<TypeBaseLayerEntryConfig, 'listOfLayerEntryConfig'> {
+export interface TypeLayerGroupEntryConfig extends Omit<TypeBaseLayerEntryConfig, 'layerStatus' | 'listOfLayerEntryConfig'> {
     /** This attribute is not part of the schema. It is used internally to distinguish layer groups derived from the
      * metadata. */
     isMetadataLayerGroup?: boolean;
@@ -820,6 +826,8 @@ export type TypeMapFeaturesInstance = {
     appBar?: TypeAppBarProps;
     /** Nav bar properies. */
     navBar?: TypeNavBarProps;
+    /** Overview map properies. */
+    overviewMap?: TypeOverviewMapProps;
     /** Map components. */
     components?: TypeMapComponents;
     /** List of core packages. */
@@ -961,6 +969,12 @@ export type TypeAppBarProps = Array<'geolocator' | 'export'>;
  * Controls available on the navigation bar. Default = ['zoom', 'fullscreen', 'home'].
  */
 export type TypeNavBarProps = Array<'zoom' | 'fullscreen' | 'home' | 'location' | 'export'>;
+/** ******************************************************************************************************************************
+ *  Overview map options. Default none.
+ */
+export type TypeOverviewMapProps = {
+    hideOnZoom: number;
+} | undefined;
 /** ******************************************************************************************************************************
  * Core components to initialize on viewer load. Default = ['north-arrow', 'overview-map'].
  */

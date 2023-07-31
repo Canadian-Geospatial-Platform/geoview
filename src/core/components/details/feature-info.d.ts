@@ -1,5 +1,5 @@
 import { MutableRefObject } from 'react';
-import { TypeFeatureInfoEntry } from '@/api/events/payloads/get-feature-info-payload';
+import { TypeFeatureInfoEntry } from '@/api/events/payloads';
 import { DetailsProps } from './details';
 export interface TypeFeatureProps {
     feature: TypeFeatureInfoEntry;

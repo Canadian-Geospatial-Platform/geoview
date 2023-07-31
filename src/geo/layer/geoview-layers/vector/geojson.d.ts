@@ -70,20 +70,12 @@ export declare class GeoJSON extends AbstractGeoViewVector {
      */
     protected getFieldType(fieldName: string, layerConfig: TypeLayerEntryConfig): 'string' | 'date' | 'number';
     /** ***************************************************************************************************************************
-     * This method reads the service metadata from the metadataAccessPath.
-     *
-     * @returns {Promise<void>} A promise that the execution is completed.
-     */
-    protected getServiceMetadata(): Promise<void>;
-    /** ***************************************************************************************************************************
      * This method recursively validates the layer configuration entries by filtering and reporting invalid layers. If needed,
      * extra configuration may be done here.
      *
      * @param {TypeListOfLayerEntryConfig} listOfLayerEntryConfig The list of layer entries configuration to validate.
-     *
-     * @returns {TypeListOfLayerEntryConfig} A new list of layer entries configuration with deleted error layers.
      */
-    protected validateListOfLayerEntryConfig(listOfLayerEntryConfig: TypeListOfLayerEntryConfig): TypeListOfLayerEntryConfig;
+    protected validateListOfLayerEntryConfig(listOfLayerEntryConfig: TypeListOfLayerEntryConfig): void;
     /** ***************************************************************************************************************************
      * This method is used to process the layer's metadata. It will fill the empty fields of the layer's configuration (renderer,
      * initial settings, fields and aliases).

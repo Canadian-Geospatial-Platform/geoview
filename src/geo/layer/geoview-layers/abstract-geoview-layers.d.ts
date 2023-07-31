@@ -6,7 +6,7 @@ import LayerGroup from 'ol/layer/Group';
 import Feature from 'ol/Feature';
 import Geometry from 'ol/geom/Geometry';
 import { TypeGeoviewLayerConfig, TypeListOfLayerEntryConfig, TypeLocalizedString, TypeLayerEntryConfig, TypeBaseLayerEntryConfig, TypeStyleConfig, TypeVectorLayerEntryConfig, TypeLayerEntryType, TypeOgcWmsLayerEntryConfig, TypeEsriDynamicLayerEntryConfig, TypeLayerInitialSettings } from '../../map/map-schema-types';
-import { codedValueType, rangeDomainType, TypeArrayOfFeatureInfoEntries, TypeQueryType } from '@/api/events/payloads/get-feature-info-payload';
+import { codedValueType, rangeDomainType, TypeArrayOfFeatureInfoEntries, TypeQueryType } from '@/api/events/payloads';
 import { TypeJsonObject } from '@/core/types/global-types';
 import { TimeDimension, TypeDateFragments } from '@/core/utils/date-mgt';
 import { TypeEventHandlerFunction } from '@/api/events/event';
@@ -94,6 +94,7 @@ type TypeLayerSetHandlerFunctions = {
     requestLayerInventory?: TypeEventHandlerFunction;
     queryLegend?: TypeEventHandlerFunction;
     queryLayer?: TypeEventHandlerFunction;
+    layerStatusUpdated?: TypeEventHandlerFunction;
 };
 /** ******************************************************************************************************************************
  * The AbstractGeoViewLayer class is normally used for creating subclasses and is not instantiated (using the new operator) in the
@@ -103,8 +104,6 @@ type TypeLayerSetHandlerFunctions = {
  * metadataAccessPath attribute whose value is passed as an attribute of the mapLayerConfig object.
  */
 export declare abstract class AbstractGeoViewLayer {
-    /** Flag used to indicate the layer's state */
-    layerState: string;
     /** Flag used to indicate the layer's phase */
     layerPhase: string;
     /** The unique identifier of the map on which the GeoView layer will be drawn. */
@@ -165,6 +164,36 @@ export declare abstract class AbstractGeoViewLayer {
      */
     constructor(type: TypeGeoviewLayerType, mapLayerConfig: TypeGeoviewLayerConfig, mapId: string);
     /** ***************************************************************************************************************************
+     * Process recursively the list of layer entries to see if all of them are processed.
+     *
+     * @param {TypeListOfLayerEntryConfig} listOfLayerEntryConfig The list of layer's configuration
+     *                                                            (default: this.listOfLayerEntryConfig).
+     *
+     * @returns {boolean} true when all layers are processed.
+     */
+    allLayerEntryConfigProcessed(listOfLayerEntryConfig?: TypeListOfLayerEntryConfig): boolean;
+    /** ***************************************************************************************************************************
+     * Recursively process the list of layer entries to count all layers in error.
+     *
+     * @param {TypeListOfLayerEntryConfig} listOfLayerEntryConfig The list of layer's configuration
+     *                                                            (default: this.listOfLayerEntryConfig).
+     *
+     * @returns {number} The number of layers in error.
+     */
+    countErrorStatus(listOfLayerEntryConfig?: TypeListOfLayerEntryConfig): number;
+    /** ***************************************************************************************************************************
+     * Process recursively the list of layer entries to initialize the registeredLayers object.
+     *
+     * @param {TypeListOfLayerEntryConfig} listOfLayerEntryConfig The list of layer entries to process.
+     */
+    private initRegisteredLayers;
+    /** ***************************************************************************************************************************
+     * Process recursively the list of layer Entries to register all layers to the layerSets.
+     *
+     * @param {TypeListOfLayerEntryConfig} listOfLayerEntryConfig The list of layer entries to process.
+     */
+    private registerAllLayersToLayerSets;
+    /** ***************************************************************************************************************************
      * This method is used to create the layers specified in the listOfLayerEntryConfig attribute inherited from its parent.
      * Normally, it is the second method called in the life cycle of a GeoView layer, the first one being the constructor.
      * Its code is the same for all child classes. It must first validate that the gvLayers attribute is null indicating
@@ -189,7 +218,7 @@ export declare abstract class AbstractGeoViewLayer {
      */
     protected getAdditionalServiceDefinition(): Promise<void>;
     /** ***************************************************************************************************************************
-     * This method reads the service metadata from the metadataAccessPath. It does nothing if the layer has no metadata.
+     * This method reads the service metadata from the metadataAccessPath.
      *
      * @returns {Promise<void>} A promise that the execution is completed.
      */
@@ -199,10 +228,8 @@ export declare abstract class AbstractGeoViewLayer {
      * necessary, additional code can be executed in the child method to complete the layer configuration.
      *
      * @param {TypeListOfLayerEntryConfig} listOfLayerEntryConfig The list of layer entries configuration to validate.
-     *
-     * @returns {TypeListOfLayerEntryConfig} A new layer configuration list with layers in error removed.
      */
-    protected abstract validateListOfLayerEntryConfig(listOfLayerEntryConfig: TypeListOfLayerEntryConfig): TypeListOfLayerEntryConfig;
+    protected abstract validateListOfLayerEntryConfig(listOfLayerEntryConfig: TypeListOfLayerEntryConfig): void;
     /** ***************************************************************************************************************************
      * This method processes recursively the metadata of each layer in the "layer list" configuration.
      *
@@ -309,7 +336,7 @@ export declare abstract class AbstractGeoViewLayer {
      */
     protected getFeatureInfoUsingPolygon(location: Coordinate[], layerConfig: TypeLayerEntryConfig): Promise<TypeArrayOfFeatureInfoEntries>;
     /** ***************************************************************************************************************************
-     * This method register the layer entry to layer sets.
+     * This method register the layer entry to layer sets. Nothing is done if the registration is already done.
      *
      * @param {TypeBaseLayerEntryConfig} layerEntryConfig The layer entry to register.
      */
