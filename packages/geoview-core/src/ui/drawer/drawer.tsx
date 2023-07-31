@@ -11,7 +11,7 @@ import { EVENT_NAMES } from '@/api/events/event-types';
 
 import { IconButton, ChevronLeftIcon, ChevronRightIcon } from '..';
 import { MapContext } from '@/core/app-start';
-import { booleanPayload, payloadIsABoolean } from '@/api/events/payloads';
+import { PayloadBaseClass, booleanPayload, payloadIsABoolean } from '@/api/events/payloads';
 
 /**
  * Drawer Properties
@@ -88,6 +88,10 @@ export function Drawer(props: TypeDrawerProps): JSX.Element {
     // use an event to close the panel instead of calling a function
   };
 
+  const drawerOpenCloseListenerFunction = (payload: PayloadBaseClass) => {
+    if (payloadIsABoolean(payload)) setOpen(payload.status);
+  };
+
   useEffect(() => {
     // set status from props if passed in
     if (status !== undefined) {
@@ -95,15 +99,7 @@ export function Drawer(props: TypeDrawerProps): JSX.Element {
     }
 
     // listen to drawer open/close events
-    api.event.on(
-      EVENT_NAMES.DRAWER.EVENT_DRAWER_OPEN_CLOSE,
-      (payload) => {
-        if (payloadIsABoolean(payload)) {
-          setOpen(payload.status);
-        }
-      },
-      mapId
-    );
+    api.event.on(EVENT_NAMES.DRAWER.EVENT_DRAWER_OPEN_CLOSE, drawerOpenCloseListenerFunction, mapId);
 
     return () => {
       api.event.off(EVENT_NAMES.DRAWER.EVENT_DRAWER_OPEN_CLOSE, mapId);

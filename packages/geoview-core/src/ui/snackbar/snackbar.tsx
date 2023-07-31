@@ -12,7 +12,7 @@ import { api } from '@/app';
 import { EVENT_NAMES } from '@/api/events/event-types';
 
 import { Cast, TypeJsonArray, TypeJsonValue } from '@/core/types/global-types';
-import { payloadIsASnackbarMessage } from '@/api/events/payloads';
+import { PayloadBaseClass, payloadIsASnackbarMessage } from '@/api/events/payloads';
 
 /**
  * Snackbar properties interface
@@ -71,38 +71,36 @@ export function Snackbar(props: SnackBarProps): null {
     return tmpMess;
   }
 
+  const snackBarOpenListenerFunction = (payload: PayloadBaseClass) => {
+    if (payloadIsASnackbarMessage(payload)) {
+      const options = payload.options ? payload.options : {};
+
+      // apply function if provided
+      (options.action as TypeJsonValue) = payload.button
+        ? Cast<TypeJsonValue>(
+            SnackButton({
+              label: payload.button.label as string,
+              action: Cast<() => void>(payload.button.action),
+            })
+          )
+        : null;
+
+      // get message
+      const message =
+        payload.message.type === 'string' ? payload.message.value : replaceParams(payload.message.params!, t(payload.message.value));
+
+      // show the notification
+      if (payload && snackBarId === payload.handlerName) enqueueSnackbar(message, options);
+    }
+  };
+
   useEffect(() => {
     // listen to API event when app wants to show message
-    api.event.on(
-      EVENT_NAMES.SNACKBAR.EVENT_SNACKBAR_OPEN,
-      (payload) => {
-        if (payloadIsASnackbarMessage(payload)) {
-          const options = payload.options ? payload.options : {};
-
-          // apply function if provided
-          (options.action as TypeJsonValue) = payload.button
-            ? Cast<TypeJsonValue>(
-                SnackButton({
-                  label: payload.button.label as string,
-                  action: Cast<() => void>(payload.button.action),
-                })
-              )
-            : null;
-
-          // get message
-          const message =
-            payload.message.type === 'string' ? payload.message.value : replaceParams(payload.message.params!, t(payload.message.value));
-
-          // show the notification
-          if (payload && snackBarId === payload.handlerName) enqueueSnackbar(message, options);
-        }
-      },
-      mapId
-    );
+    api.event.on(EVENT_NAMES.SNACKBAR.EVENT_SNACKBAR_OPEN, snackBarOpenListenerFunction, mapId);
 
     // remove the listener when the component unmounts
     return () => {
-      api.event.off(EVENT_NAMES.SNACKBAR.EVENT_SNACKBAR_OPEN, mapId);
+      api.event.off(EVENT_NAMES.SNACKBAR.EVENT_SNACKBAR_OPEN, mapId, snackBarOpenListenerFunction);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

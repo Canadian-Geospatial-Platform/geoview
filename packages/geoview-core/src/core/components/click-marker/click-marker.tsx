@@ -301,6 +301,44 @@ export function ClickMarker(): JSX.Element {
     }
   };
 
+  const allQueriesDoneListenerFunction = (payload: PayloadBaseClass) => {
+    if (payloadIsAllQueriesDone(payload)) {
+      const { resultSets } = payload;
+      let feature: TypeFeatureInfoEntry | undefined;
+
+      Object.keys(resultSets).every((layerPath) => {
+        const features = resultSets[layerPath]!.layerStatus === 'error' ? null : resultSets[layerPath]!.data;
+        if (features && features.length > 0 && features[0].geoviewLayerType !== 'ogcWms') {
+          [feature] = features;
+          return false;
+        }
+
+        return true;
+      });
+
+      if (feature) {
+        api.event.emit(featureHighlightPayload(EVENT_NAMES.FEATURE_HIGHLIGHT.EVENT_HIGHLIGHT_FEATURE, mapId, feature));
+      } else showMarkerIcon(markerCoordinates.current);
+    }
+  };
+
+  const eventMarkerIconShowListenerFunction = (payload: PayloadBaseClass) => {
+    if (payloadIsAMarkerDefinition(payload)) {
+      // TODO: Also implement a symbology define by the payload for feature details item selection.
+      showMarkerIcon(payload.lnglat);
+    }
+  };
+
+  const eventMapSingleClickListenerFunction = (payload: PayloadBaseClass) => {
+    if (payloadIsAMapMouseEvent(payload)) {
+      removeIcon();
+      markerCoordinates.current = payload.coordinates.lnglat;
+      api.event.emit(clearHighlightsPayload(EVENT_NAMES.FEATURE_HIGHLIGHT.EVENT_HIGHLIGHT_CLEAR, mapId, 'all'));
+    }
+  };
+
+  const eventMarkerIconHideListenerFunction = () => setShowMarker(false);
+
   useEffect(() => {
     const { map } = api.map(mapId);
 
@@ -308,70 +346,18 @@ export function ClickMarker(): JSX.Element {
     map.getView().on('change:resolution', removeIcon);
     map.on('movestart', removeIcon);
 
-    api.event.on(
-      EVENT_NAMES.MAP.EVENT_MAP_SINGLE_CLICK,
-      (payload) => {
-        if (payloadIsAMapMouseEvent(payload)) {
-          removeIcon();
-          markerCoordinates.current = payload.coordinates.lnglat;
-          api.event.emit(clearHighlightsPayload(EVENT_NAMES.FEATURE_HIGHLIGHT.EVENT_HIGHLIGHT_CLEAR, mapId, 'all'));
-        }
-      },
-      mapId
-    );
-
-    api.event.on(
-      EVENT_NAMES.GET_FEATURE_INFO.ALL_QUERIES_DONE,
-      (payload) => {
-        if (payloadIsAllQueriesDone(payload)) {
-          const { resultSets } = payload;
-          let feature: TypeFeatureInfoEntry | undefined;
-
-          Object.keys(resultSets).every((layerPath) => {
-            const features = resultSets[layerPath]!.layerStatus === 'error' ? null : resultSets[layerPath]!.data;
-            if (features && features.length > 0 && features[0].geoviewLayerType !== 'ogcWms') {
-              [feature] = features;
-              return false;
-            }
-
-            return true;
-          });
-
-          if (feature) {
-            api.event.emit(featureHighlightPayload(EVENT_NAMES.FEATURE_HIGHLIGHT.EVENT_HIGHLIGHT_FEATURE, mapId, feature));
-          } else showMarkerIcon(markerCoordinates.current);
-        }
-      },
-      `${mapId}/$FeatureInfoLayerSet$`
-    );
-
-    api.event.on(
-      EVENT_NAMES.MARKER_ICON.EVENT_MARKER_ICON_SHOW,
-      (payload) => {
-        if (payloadIsAMarkerDefinition(payload)) {
-          // TODO: Also implement a symbology define by the payload for feature details item selection.
-          showMarkerIcon(payload.lnglat);
-        }
-      },
-      mapId
-    );
-
-    api.event.on(
-      EVENT_NAMES.MARKER_ICON.EVENT_MARKER_ICON_HIDE,
-      () => {
-        setShowMarker(false);
-      },
-      mapId
-    );
-
+    api.event.on(EVENT_NAMES.MAP.EVENT_MAP_SINGLE_CLICK, eventMapSingleClickListenerFunction, mapId);
+    api.event.on(EVENT_NAMES.GET_FEATURE_INFO.ALL_QUERIES_DONE, allQueriesDoneListenerFunction, `${mapId}/$FeatureInfoLayerSet$`);
+    api.event.on(EVENT_NAMES.MARKER_ICON.EVENT_MARKER_ICON_SHOW, eventMarkerIconShowListenerFunction, mapId);
+    api.event.on(EVENT_NAMES.MARKER_ICON.EVENT_MARKER_ICON_HIDE, eventMarkerIconHideListenerFunction, mapId);
     api.event.on(EVENT_NAMES.FEATURE_HIGHLIGHT.EVENT_HIGHLIGHT_FEATURE, highlightCallbackFunction, mapId);
     api.event.on(EVENT_NAMES.FEATURE_HIGHLIGHT.EVENT_HIGHLIGHT_CLEAR, clearHighlightCallbackFunction, mapId);
 
     return () => {
-      api.event.off(EVENT_NAMES.GET_FEATURE_INFO.ALL_QUERIES_DONE, mapId);
-      api.event.off(EVENT_NAMES.MAP.EVENT_MAP_SINGLE_CLICK, mapId);
-      api.event.off(EVENT_NAMES.MARKER_ICON.EVENT_MARKER_ICON_SHOW, mapId);
-      api.event.off(EVENT_NAMES.MARKER_ICON.EVENT_MARKER_ICON_HIDE, mapId);
+      api.event.off(EVENT_NAMES.GET_FEATURE_INFO.ALL_QUERIES_DONE, mapId, allQueriesDoneListenerFunction);
+      api.event.off(EVENT_NAMES.MAP.EVENT_MAP_SINGLE_CLICK, mapId, eventMapSingleClickListenerFunction);
+      api.event.off(EVENT_NAMES.MARKER_ICON.EVENT_MARKER_ICON_SHOW, mapId, eventMarkerIconShowListenerFunction);
+      api.event.off(EVENT_NAMES.MARKER_ICON.EVENT_MARKER_ICON_HIDE, mapId, eventMarkerIconHideListenerFunction);
       api.event.off(EVENT_NAMES.FEATURE_HIGHLIGHT.EVENT_HIGHLIGHT_FEATURE, mapId, highlightCallbackFunction);
       api.event.off(EVENT_NAMES.FEATURE_HIGHLIGHT.EVENT_HIGHLIGHT_CLEAR, mapId, clearHighlightCallbackFunction);
     };

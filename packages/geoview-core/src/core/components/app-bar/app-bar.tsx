@@ -9,7 +9,7 @@ import { EVENT_NAMES } from '@/api/events/event-types';
 
 import { MapContext } from '@/core/app-start';
 
-import { payloadIsAButtonPanel, ButtonPanelPayload } from '@/api/events/payloads';
+import { payloadIsAButtonPanel, ButtonPanelPayload, PayloadBaseClass } from '@/api/events/payloads';
 import { TypeButtonPanel } from '@/ui/panel/panel-types';
 
 import Export from './buttons/export';
@@ -150,41 +150,30 @@ export function Appbar({ setActivetrap }: AppbarProps): JSX.Element {
     [setButtonPanelGroups]
   );
 
+  const appBarPanelCreateListenerFunction = (payload: PayloadBaseClass) => {
+    if (payloadIsAButtonPanel(payload)) addButtonPanel(payload);
+  };
+
+  const appBarPanelRemoveListenerFunction = (payload: PayloadBaseClass) => {
+    if (payloadIsAButtonPanel(payload)) removeButtonPanel(payload);
+  };
+
+  const appBarPanelCloseListenerFunction = () => setSelectedAppbarButtonId('');
+
   useEffect(() => {
     // listen to new panel creation
-    api.event.on(
-      EVENT_NAMES.APPBAR.EVENT_APPBAR_PANEL_CREATE,
-      (payload) => {
-        if (payloadIsAButtonPanel(payload)) {
-          addButtonPanel(payload);
-        }
-      },
-      mapId
-    );
+    api.event.on(EVENT_NAMES.APPBAR.EVENT_APPBAR_PANEL_CREATE, appBarPanelCreateListenerFunction, mapId);
 
     // listen on panel removal
-    api.event.on(
-      EVENT_NAMES.APPBAR.EVENT_APPBAR_PANEL_REMOVE,
-      (payload) => {
-        if (payloadIsAButtonPanel(payload)) {
-          removeButtonPanel(payload);
-        }
-      },
-      mapId
-    );
+    api.event.on(EVENT_NAMES.APPBAR.EVENT_APPBAR_PANEL_REMOVE, appBarPanelRemoveListenerFunction, mapId);
 
-    api.event.on(
-      EVENT_NAMES.PANEL.EVENT_PANEL_CLOSE,
-      () => {
-        setSelectedAppbarButtonId('');
-      },
-      `${mapId}/${selectedAppBarButtonId}`
-    );
+    // listen on panel close
+    api.event.on(EVENT_NAMES.PANEL.EVENT_PANEL_CLOSE, appBarPanelCloseListenerFunction, `${mapId}/${selectedAppBarButtonId}`);
 
     return () => {
-      api.event.off(EVENT_NAMES.APPBAR.EVENT_APPBAR_PANEL_CREATE, mapId);
-      api.event.off(EVENT_NAMES.APPBAR.EVENT_APPBAR_PANEL_REMOVE, mapId);
-      api.event.off(EVENT_NAMES.PANEL.EVENT_PANEL_CLOSE, mapId);
+      api.event.off(EVENT_NAMES.APPBAR.EVENT_APPBAR_PANEL_CREATE, mapId, appBarPanelCreateListenerFunction);
+      api.event.off(EVENT_NAMES.APPBAR.EVENT_APPBAR_PANEL_REMOVE, mapId, appBarPanelRemoveListenerFunction);
+      api.event.off(EVENT_NAMES.PANEL.EVENT_PANEL_CLOSE, mapId, appBarPanelCloseListenerFunction);
     };
   }, [addButtonPanel, mapId, removeButtonPanel, selectedAppBarButtonId]);
 

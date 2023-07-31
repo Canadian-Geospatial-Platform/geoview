@@ -22,7 +22,7 @@ import { api } from '@/app';
 
 import { TypeModalProps } from '.';
 import { CloseIcon, IconButton } from '..';
-import { payloadIsAModal } from '@/api/events/payloads';
+import { PayloadBaseClass, payloadIsAModal } from '@/api/events/payloads';
 
 /**
  * Customized Material UI Dialog Properties
@@ -236,57 +236,50 @@ export function Modal(props: TypeDialogProps): JSX.Element {
     return <CustomDialog />;
   };
 
+  const modalOpenListenerFunction = (payload: PayloadBaseClass) => {
+    if (payloadIsAModal(payload)) {
+      if (modalId === payload.modalId) {
+        const modal = api.map(mapId).modal.modals[payload.modalId] as TypeModalProps;
+        openEvent = true;
+
+        setCreatedModal(ceatedModalJSXReturner(modal));
+      }
+    }
+  };
+
+  const modalUpdateListenerFunction = (payload: PayloadBaseClass) => {
+    if (payloadIsAModal(payload)) {
+      if (modalId === payload.modalId) {
+        const modal = api.map(mapId).modal.modals[payload.modalId] as TypeModalProps;
+
+        setCreatedModal(ceatedModalJSXReturner(modal));
+      }
+    }
+  };
+
+  const modalCloseListenerFunction = (payload: PayloadBaseClass) => {
+    if (payloadIsAModal(payload)) {
+      if (modalId === payload.modalId) {
+        if (!payload.open) openEvent = false;
+        setCreatedModal(<Dialog open={openEvent} className={dialogClasses.closedModal} />);
+      }
+    }
+  };
+
   useEffect(() => {
     // to open the modal
-    api.event.on(
-      EVENT_NAMES.MODAL.EVENT_MODAL_OPEN,
-      (payload) => {
-        if (payloadIsAModal(payload)) {
-          if (modalId === payload.modalId) {
-            const modal = api.map(mapId).modal.modals[payload.modalId] as TypeModalProps;
-            // eslint-disable-next-line react-hooks/exhaustive-deps
-            openEvent = true;
-
-            setCreatedModal(ceatedModalJSXReturner(modal));
-          }
-        }
-      },
-      mapId
-    );
+    api.event.on(EVENT_NAMES.MODAL.EVENT_MODAL_OPEN, modalOpenListenerFunction, mapId);
 
     // to update modals
-    api.event.on(
-      EVENT_NAMES.MODAL.EVENT_MODAL_UPDATE,
-      (payload) => {
-        if (payloadIsAModal(payload)) {
-          if (modalId === payload.modalId) {
-            const modal = api.map(mapId).modal.modals[payload.modalId] as TypeModalProps;
-
-            setCreatedModal(ceatedModalJSXReturner(modal));
-          }
-        }
-      },
-      mapId
-    );
+    api.event.on(EVENT_NAMES.MODAL.EVENT_MODAL_UPDATE, modalUpdateListenerFunction, mapId);
 
     // to close the modal
-    api.event.on(
-      EVENT_NAMES.MODAL.EVENT_MODAL_CLOSE,
-      (payload) => {
-        if (payloadIsAModal(payload)) {
-          if (modalId === payload.modalId) {
-            if (!payload.open) openEvent = false;
-            setCreatedModal(<Dialog open={openEvent} className={dialogClasses.closedModal} />);
-          }
-        }
-      },
-      mapId
-    );
+    api.event.on(EVENT_NAMES.MODAL.EVENT_MODAL_CLOSE, modalCloseListenerFunction, mapId);
 
     return () => {
-      api.event.off(EVENT_NAMES.MODAL.EVENT_MODAL_OPEN, mapId);
-      api.event.off(EVENT_NAMES.MODAL.EVENT_MODAL_CLOSE, mapId);
-      api.event.off(EVENT_NAMES.MODAL.EVENT_MODAL_UPDATE, mapId);
+      api.event.off(EVENT_NAMES.MODAL.EVENT_MODAL_OPEN, mapId, modalOpenListenerFunction);
+      api.event.off(EVENT_NAMES.MODAL.EVENT_MODAL_CLOSE, mapId, modalCloseListenerFunction);
+      api.event.off(EVENT_NAMES.MODAL.EVENT_MODAL_UPDATE, mapId, modalUpdateListenerFunction);
     };
   }, [updateModal, createdModal]);
 

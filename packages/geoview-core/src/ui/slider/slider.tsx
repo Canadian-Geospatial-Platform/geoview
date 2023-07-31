@@ -7,7 +7,7 @@ import { SliderProps } from '@mui/material';
 
 import { api } from '@/app';
 import { EVENT_NAMES } from '@/api/events/event-types';
-import { sliderPayload, payloadIsASlider, SliderTypePayload } from '@/api/events/payloads';
+import { sliderPayload, payloadIsASlider, SliderTypePayload, PayloadBaseClass } from '@/api/events/payloads';
 
 /**
  * Properties for the Slider
@@ -144,57 +144,53 @@ export function Slider(props: TypeSliderProps): JSX.Element {
     }
   };
 
+  const sliderSetMinMaxListenerFunction = (payload: PayloadBaseClass) => {
+    if (payloadIsASlider(payload)) {
+      setMin(payload.sliderValues.min);
+      setMax(payload.sliderValues.max);
+
+      // emit the slider values change event to the api
+      const sliderValues: SliderTypePayload = {
+        min: payload.sliderValues.min,
+        max: payload.sliderValues.max,
+        value,
+        activeThumb,
+      };
+      api.event.emit(sliderPayload(EVENT_NAMES.SLIDER.EVENT_SLIDER_CHANGE, properties.sliderId, sliderValues));
+    }
+  };
+
+  const sliderSetValuesListenerFunction = (payload: PayloadBaseClass) => {
+    if (payloadIsASlider(payload)) {
+      setValue(payload.sliderValues.value);
+
+      // run the custon onChange function
+      if (properties.customOnChange !== undefined) properties.customOnChange(payload.sliderValues.value);
+
+      // emit the slider values change event to the api
+      const sliderValues: SliderTypePayload = {
+        min,
+        max,
+        value: payload.sliderValues.value,
+        activeThumb,
+      };
+      api.event.emit(sliderPayload(EVENT_NAMES.SLIDER.EVENT_SLIDER_CHANGE, properties.sliderId, sliderValues));
+    }
+  };
+
   useEffect(() => {
     // remove overlaping labels
     removeLabelOverlap();
 
     // on set min/max, update slider
-    api.event.on(
-      EVENT_NAMES.SLIDER.EVENT_SLIDER_SET_MINMAX,
-      (payload) => {
-        if (payloadIsASlider(payload)) {
-          setMin(payload.sliderValues.min);
-          setMax(payload.sliderValues.max);
-
-          // emit the slider values change event to the api
-          const sliderValues: SliderTypePayload = {
-            min: payload.sliderValues.min,
-            max: payload.sliderValues.max,
-            value,
-            activeThumb,
-          };
-          api.event.emit(sliderPayload(EVENT_NAMES.SLIDER.EVENT_SLIDER_CHANGE, properties.sliderId, sliderValues));
-        }
-      },
-      properties.id
-    );
+    api.event.on(EVENT_NAMES.SLIDER.EVENT_SLIDER_SET_MINMAX, sliderSetMinMaxListenerFunction, properties.id);
 
     // on set values update slider
-    api.event.on(
-      EVENT_NAMES.SLIDER.EVENT_SLIDER_SET_VALUES,
-      (payload) => {
-        if (payloadIsASlider(payload)) {
-          setValue(payload.sliderValues.value);
-
-          // run the custon onChange function
-          if (properties.customOnChange !== undefined) properties.customOnChange(payload.sliderValues.value);
-
-          // emit the slider values change event to the api
-          const sliderValues: SliderTypePayload = {
-            min,
-            max,
-            value: payload.sliderValues.value,
-            activeThumb,
-          };
-          api.event.emit(sliderPayload(EVENT_NAMES.SLIDER.EVENT_SLIDER_CHANGE, properties.sliderId, sliderValues));
-        }
-      },
-      properties.id
-    );
+    api.event.on(EVENT_NAMES.SLIDER.EVENT_SLIDER_SET_VALUES, sliderSetValuesListenerFunction, properties.id);
 
     return () => {
-      api.event.off(EVENT_NAMES.SLIDER.EVENT_SLIDER_SET_MINMAX, properties.id);
-      api.event.off(EVENT_NAMES.SLIDER.EVENT_SLIDER_SET_VALUES, properties.id);
+      api.event.off(EVENT_NAMES.SLIDER.EVENT_SLIDER_SET_MINMAX, properties.id, sliderSetMinMaxListenerFunction);
+      api.event.off(EVENT_NAMES.SLIDER.EVENT_SLIDER_SET_VALUES, properties.id, sliderSetValuesListenerFunction);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [min, max, value]);

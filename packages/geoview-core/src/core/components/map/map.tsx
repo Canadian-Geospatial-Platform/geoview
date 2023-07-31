@@ -37,6 +37,7 @@ import {
   lngLatPayload,
   TypeMapMouseInfo,
   mapMouseEventPayload,
+  PayloadBaseClass,
 } from '@/api/events/payloads';
 import { TypeMapFeaturesConfig } from '../../types/global-types';
 
@@ -257,90 +258,86 @@ export function Map(mapFeaturesConfig: TypeMapFeaturesConfig): JSX.Element {
     initCGPVMap(initialMap);
   };
 
+  const basemapLayerUpdateListenerFunction = (payload: PayloadBaseClass) => {
+    if (payloadIsABasemapLayerArray(payload)) {
+      // remove previous basemaps
+      const layers = api.map(mapId).map.getAllLayers();
+
+      // loop through all layers on the map
+      for (let layerIndex = 0; layerIndex < layers.length; layerIndex++) {
+        const layer = layers[layerIndex];
+
+        // get group id that this layer belongs to
+        const layerId = layer.get('mapId');
+
+        // check if the group id matches basemap
+        if (layerId && layerId === 'basemap') {
+          // remove the basemap layer
+          api.map(mapId).map.removeLayer(layer);
+        }
+      }
+
+      // add basemap layers
+      payload.layers.forEach((layer, index) => {
+        const basemapLayer = new TileLayer({
+          opacity: layer.opacity,
+          source: layer.source,
+        });
+
+        // set this basemap's group id to basemap
+        basemapLayer.set('mapId', 'basemap');
+
+        // add the basemap layer
+        api.map(mapId).map.getLayers().insertAt(index, basemapLayer);
+
+        // render the layer
+        basemapLayer.changed();
+      });
+    }
+  };
+
+  const mapviewProjectionChangeListenetFunction = (payload: PayloadBaseClass) => {
+    if (payloadIsAMapViewProjection(payload)) {
+      // on map view projection change, layer source needs to be refreshed
+      const currentView = api.map(mapId).getView();
+      const centerCoordinate = toLonLat(currentView.getCenter()!, currentView.getProjection());
+      api.map(mapId).setView({
+        projection: 3978,
+        zoom: currentView.getZoom()!,
+        center: [centerCoordinate[0], centerCoordinate[1]],
+      });
+      const mapLayers = api.map(mapId).layer.geoviewLayers;
+      Object.entries(mapLayers).forEach((mapLayerEntry) => {
+        const refreshBaseLayer = (baseLayer: BaseLayer | null) => {
+          if (baseLayer) {
+            const layerGroup: Array<BaseLayer> | Collection<BaseLayer> | undefined = baseLayer.get('layers');
+            if (layerGroup) {
+              layerGroup.forEach((baseLayerEntry) => {
+                refreshBaseLayer(baseLayerEntry);
+              });
+            } else {
+              const layerSource: Source = baseLayer.get('source');
+              layerSource.refresh();
+            }
+          }
+        };
+        refreshBaseLayer(mapLayerEntry[1].gvLayers);
+      });
+    }
+  };
+
   useEffect(() => {
     initMap();
 
     // listen to adding a new basemap events
-    api.event.on(
-      EVENT_NAMES.BASEMAP.EVENT_BASEMAP_LAYERS_UPDATE,
-      (payload) => {
-        if (payloadIsABasemapLayerArray(payload)) {
-          // remove previous basemaps
-          const layers = api.map(mapId).map.getAllLayers();
-
-          // loop through all layers on the map
-          for (let layerIndex = 0; layerIndex < layers.length; layerIndex++) {
-            const layer = layers[layerIndex];
-
-            // get group id that this layer belongs to
-            const layerId = layer.get('mapId');
-
-            // check if the group id matches basemap
-            if (layerId && layerId === 'basemap') {
-              // remove the basemap layer
-              api.map(mapId).map.removeLayer(layer);
-            }
-          }
-
-          // add basemap layers
-          payload.layers.forEach((layer, index) => {
-            const basemapLayer = new TileLayer({
-              opacity: layer.opacity,
-              source: layer.source,
-            });
-
-            // set this basemap's group id to basemap
-            basemapLayer.set('mapId', 'basemap');
-
-            // add the basemap layer
-            api.map(mapId).map.getLayers().insertAt(index, basemapLayer);
-
-            // render the layer
-            basemapLayer.changed();
-          });
-        }
-      },
-      mapId
-    );
+    api.event.on(EVENT_NAMES.BASEMAP.EVENT_BASEMAP_LAYERS_UPDATE, basemapLayerUpdateListenerFunction, mapId);
 
     // listen to geoview-basemap-panel package change projection event
-    api.event.on(
-      EVENT_NAMES.MAP.EVENT_MAP_VIEW_PROJECTION_CHANGE,
-      (payload) => {
-        if (payloadIsAMapViewProjection(payload)) {
-          // on map view projection change, layer source needs to be refreshed
-          const currentView = api.map(mapId).getView();
-          const centerCoordinate = toLonLat(currentView.getCenter()!, currentView.getProjection());
-          api.map(mapId).setView({
-            projection: 3978,
-            zoom: currentView.getZoom()!,
-            center: [centerCoordinate[0], centerCoordinate[1]],
-          });
-          const mapLayers = api.map(mapId).layer.geoviewLayers;
-          Object.entries(mapLayers).forEach((mapLayerEntry) => {
-            const refreshBaseLayer = (baseLayer: BaseLayer | null) => {
-              if (baseLayer) {
-                const layerGroup: Array<BaseLayer> | Collection<BaseLayer> | undefined = baseLayer.get('layers');
-                if (layerGroup) {
-                  layerGroup.forEach((baseLayerEntry) => {
-                    refreshBaseLayer(baseLayerEntry);
-                  });
-                } else {
-                  const layerSource: Source = baseLayer.get('source');
-                  layerSource.refresh();
-                }
-              }
-            };
-            refreshBaseLayer(mapLayerEntry[1].gvLayers);
-          });
-        }
-      },
-      mapId
-    );
+    api.event.on(EVENT_NAMES.MAP.EVENT_MAP_VIEW_PROJECTION_CHANGE, mapviewProjectionChangeListenetFunction, mapId);
 
     return () => {
-      api.event.off(EVENT_NAMES.BASEMAP.EVENT_BASEMAP_LAYERS_UPDATE, mapId);
-      api.event.off(EVENT_NAMES.MAP.EVENT_MAP_VIEW_PROJECTION_CHANGE, mapId);
+      api.event.off(EVENT_NAMES.BASEMAP.EVENT_BASEMAP_LAYERS_UPDATE, mapId, basemapLayerUpdateListenerFunction);
+      api.event.off(EVENT_NAMES.MAP.EVENT_MAP_VIEW_PROJECTION_CHANGE, mapId, mapviewProjectionChangeListenetFunction);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

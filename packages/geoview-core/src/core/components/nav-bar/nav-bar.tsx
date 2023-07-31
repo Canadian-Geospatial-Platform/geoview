@@ -18,7 +18,7 @@ import { Panel, ButtonGroup, IconButton, Box } from '@/ui';
 
 import { MapContext } from '@/core/app-start';
 import { EVENT_NAMES } from '@/api/events/event-types';
-import { payloadIsAButtonPanel, ButtonPanelPayload } from '@/api/events/payloads';
+import { payloadIsAButtonPanel, ButtonPanelPayload, PayloadBaseClass } from '@/api/events/payloads';
 import { TypeButtonPanel } from '@/ui/panel/panel-types';
 
 const navBtnWidth = '44px';
@@ -152,43 +152,32 @@ export function Navbar({ setActivetrap }: NavbarProps): JSX.Element {
     setActivetrap(true);
   };
 
+  const navbarBtnPanelCreateListenerFunction = (payload: PayloadBaseClass) => {
+    if (payloadIsAButtonPanel(payload)) addButtonPanel(payload);
+  };
+
+  const navbarBtnPanelRemoveListenerFunction = (payload: PayloadBaseClass) => {
+    if (payloadIsAButtonPanel(payload)) removeButtonPanel(payload);
+  };
+
+  const footerbarExpandCollapseListenerFunction = (payload: PayloadBaseClass) => {
+    if (payloadIsABoolean(payload)) setFooterBarExpanded(payload.status);
+  };
+
   useEffect(() => {
     // listen to new nav-bar panel creation
-    api.event.on(
-      EVENT_NAMES.NAVBAR.EVENT_NAVBAR_BUTTON_PANEL_CREATE,
-      (payload) => {
-        if (payloadIsAButtonPanel(payload)) {
-          addButtonPanel(payload);
-        }
-      },
-      mapId
-    );
+    api.event.on(EVENT_NAMES.NAVBAR.EVENT_NAVBAR_BUTTON_PANEL_CREATE, navbarBtnPanelCreateListenerFunction, mapId);
 
     // listen to new nav-bar panel removal
-    api.event.on(
-      EVENT_NAMES.NAVBAR.EVENT_NAVBAR_BUTTON_PANEL_REMOVE,
-      (payload) => {
-        if (payloadIsAButtonPanel(payload)) {
-          removeButtonPanel(payload);
-        }
-      },
-      mapId
-    );
+    api.event.on(EVENT_NAMES.NAVBAR.EVENT_NAVBAR_BUTTON_PANEL_REMOVE, navbarBtnPanelRemoveListenerFunction, mapId);
 
-    api.event.on(
-      EVENT_NAMES.FOOTERBAR.EVENT_FOOTERBAR_EXPAND_COLLAPSE,
-      (payload) => {
-        if (payloadIsABoolean(payload)) {
-          setFooterBarExpanded(payload.status);
-        }
-      },
-      mapId
-    );
+    // listen to footerbar expand/collapse event
+    api.event.on(EVENT_NAMES.FOOTERBAR.EVENT_FOOTERBAR_EXPAND_COLLAPSE, footerbarExpandCollapseListenerFunction, mapId);
 
     return () => {
-      api.event.off(EVENT_NAMES.NAVBAR.EVENT_NAVBAR_BUTTON_PANEL_CREATE, mapId);
-      api.event.off(EVENT_NAMES.NAVBAR.EVENT_NAVBAR_BUTTON_PANEL_REMOVE, mapId);
-      api.event.off(EVENT_NAMES.FOOTERBAR.EVENT_FOOTERBAR_EXPAND_COLLAPSE, mapId);
+      api.event.off(EVENT_NAMES.NAVBAR.EVENT_NAVBAR_BUTTON_PANEL_CREATE, mapId, navbarBtnPanelCreateListenerFunction);
+      api.event.off(EVENT_NAMES.NAVBAR.EVENT_NAVBAR_BUTTON_PANEL_REMOVE, mapId, navbarBtnPanelRemoveListenerFunction);
+      api.event.off(EVENT_NAMES.FOOTERBAR.EVENT_FOOTERBAR_EXPAND_COLLAPSE, mapId, footerbarExpandCollapseListenerFunction);
     };
   }, [addButtonPanel, mapId, removeButtonPanel]);
 
