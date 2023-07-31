@@ -18,7 +18,7 @@ import {
   TypeListOfLayerEntryConfig,
   layerEntryIsGroupLayer,
   TypeLocalizedString,
-} from '../../../map/map-schema-types';
+} from '@/geo/map/map-schema-types';
 import { getLocalizedValue, getMinOrMaxExtents, getXMLHttpRequest } from '@/core/utils/utilities';
 import { Cast, toJsonObject } from '@/core/types/global-types';
 import { api } from '@/app';

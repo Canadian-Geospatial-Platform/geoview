@@ -17,7 +17,7 @@ import {
   TypeListOfLayerEntryConfig,
   layerEntryIsGroupLayer,
   TypeImageStaticLayerEntryConfig,
-} from '../../../map/map-schema-types';
+} from '@/geo/map/map-schema-types';
 import { getLocalizedValue, getMinOrMaxExtents } from '@/core/utils/utilities';
 import { api } from '@/app';
 import { Layer } from '../../layer';

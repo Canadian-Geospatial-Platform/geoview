@@ -1,6 +1,6 @@
 import { useContext } from 'react';
 
-import { MapContext } from '../../../app-start';
+import { MapContext } from '@/core/app-start';
 
 import { api } from '@/app';
 

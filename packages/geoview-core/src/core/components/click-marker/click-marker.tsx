@@ -11,7 +11,7 @@ import { getCenter } from 'ol/extent';
 import { Fill, Stroke, Style } from 'ol/style';
 import CircleStyle from 'ol/style/Circle';
 import { getUid } from 'ol';
-import { MapContext } from '../../app-start';
+import { MapContext } from '@/core/app-start';
 
 import { PayloadBaseClass, TypeFeatureInfoEntry, api, payloadIsAllQueriesDone } from '@/app';
 import { EVENT_NAMES } from '@/api/events/event-types';

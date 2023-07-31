@@ -20,7 +20,8 @@
       "node": {
         "alias": {
           "map": [
-            ["@", "./src"]
+            ["@", "./src"],
+            ["@public", "./public"]
           ]
         },
         "extensions": [".js", ".jsx", ".ts", ".tsx"]
