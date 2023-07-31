@@ -1,6 +1,6 @@
-/// <reference types="react" />
+import { ReactNode } from 'react';
 import { TabsProps, TabProps, BoxProps } from '@mui/material';
-type TypeChildren = React.ReactNode;
+type TypeChildren = ReactNode;
 /**
  * Type used for properties of each tab
  */

@@ -1,4 +1,4 @@
-import { TypeResultSets } from '@/api/events/payloads/layer-set-payload';
+import { TypeResultSets } from '@/api/events/payloads';
 /** ***************************************************************************************************************************
  * A class to hold a set of layers associated with an value of any type. When this class is instantiated, all layers already
  * loaded on the specified map that have a return value equal to true when the registrationConditionFunction is called using

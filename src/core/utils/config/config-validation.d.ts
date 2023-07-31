@@ -117,11 +117,20 @@ export declare class ConfigValidation {
     /** ***************************************************************************************************************************
      * Validate the center.
      * @param {TypeValidMapProjectionCodes} projection The projection used by the map.
-     * @param {[number, number]} center The map center to valdate.
+     * @param {[number, number]} center The map center to validate.
      *
      * @returns {[number, number]} A valid map center.
      */
     private validateCenter;
+    /** ***************************************************************************************************************************
+     * Validate the extent.
+     * @param {TypeValidMapProjectionCodes} projection The projection used by the map.
+     * @param {[number, number, number, number]} extent The map extent to valdate.
+     * @param {[number, number]} center The map extent to validate.
+     *
+     * @returns {[number, number, number, number]} A valid map extent.
+     */
+    private validateExtent;
     /** ***************************************************************************************************************************
      * Print a trace to help locate schema errors.
      * @param {AnyValidateFunction<unknown>} validate The Ajv validator.

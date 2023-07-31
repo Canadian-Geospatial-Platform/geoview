@@ -1,25 +1,29 @@
 import { PayloadBaseClass } from './payload-base-class';
 import { EventStringId } from '../event-types';
 import { TypeLegend } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
+import { TypeLayerStatus } from '@/geo/map/map-schema-types';
 /** The legend resultset type associate a layer path to a legend object. The undefined value indicate that the get legend query
  * hasn't been run and the null value indicate that there was a get legend error.
  */
 export type TypeLegendResultSets = {
-    [layerPath: string]: TypeLegend | undefined | null;
+    [layerPath: string]: {
+        layerStatus: TypeLayerStatus;
+        data: TypeLegend | undefined | null;
+    };
 };
 /**
- * type guard function that redefines a PayloadBaseClass as a TypeAllLegendsDonePayload
+ * type guard function that redefines a PayloadBaseClass as a TypeLegendsLayersetUpdatedPayload
  * if the event attribute of the verifyIfPayload parameter is valid. The type ascention
  * applies only to the true block of the if clause.
  *
  * @param {PayloadBaseClass} verifyIfPayload object to test in order to determine if the type ascention is valid
  * @returns {boolean} returns true if the payload is valid
  */
-export declare const payloadIsAllLegendsDone: (verifyIfPayload: PayloadBaseClass) => verifyIfPayload is TypeAllLegendsDonePayload;
+export declare const payloadIsLegendsLayersetUpdated: (verifyIfPayload: PayloadBaseClass) => verifyIfPayload is TypeLegendsLayersetUpdatedPayload;
 /**
  * Additional attributes needed to define a TypeAllLegendsDonePayload
  */
-export interface TypeAllLegendsDonePayload extends GetLegendsPayload {
+export interface TypeLegendsLayersetUpdatedPayload extends GetLegendsPayload {
     resultSets: TypeLegendResultSets;
 }
 /**
@@ -90,13 +94,13 @@ export declare class GetLegendsPayload extends PayloadBaseClass {
      */
     constructor(event: EventStringId, handlerName: string);
     /**
-     * Static method used to create an "all legends done" payload.
+     * Static method used to create a "legend updated" payload.
      *
      * @param {string | null} handlerName the handler Name
      *
-     * @returns {TypeAlllegendsDonePayload} the TypeAllQueriesDonePayload object created
+     * @returns {TypeLegendsLayersetUpdatedPayload} the TypeLegendsLayersetUpdatedPayload object created
      */
-    static createAllQueriesDonePayload: (handlerName: string, resultSets: TypeLegendResultSets) => TypeAllLegendsDonePayload;
+    static createLegendsLayersetUpdatedPayload: (handlerName: string, resultSets: TypeLegendResultSets) => TypeLegendsLayersetUpdatedPayload;
     /**
      * Static method used to create a get legends payload that will return the legend's query result
      *

@@ -1,5 +1,5 @@
-/// <reference types="react" />
-type TypeChildren = React.ReactNode;
+import { ReactNode } from 'react';
+type TypeChildren = ReactNode;
 /**
  * Interface used for the tab panel properties
  */

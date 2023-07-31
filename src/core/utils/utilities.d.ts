@@ -1,4 +1,5 @@
 import { MutableRefObject } from 'react';
+import { Root } from 'react-dom/client';
 import { Extent } from 'ol/extent';
 import { AbstractGeoViewLayer } from '@/app';
 import { TypeLocalizedString } from '@/geo/map/map-schema-types';
@@ -78,8 +79,10 @@ export declare function getXMLHttpRequest(url: string): Promise<string>;
  *
  * @param {React.ReactElement} component the UI react component
  * @param {string} targetDivId the div id to insert the component in
+ *
+ * @return {Root} the React root element
  */
-export declare function addUiComponent(targetDivId: string, component: React.ReactElement): void;
+export declare function addUiComponent(targetDivId: string, component: React.ReactElement): Root;
 /**
  * Sanitize HTML to remove threat
  *

@@ -5,7 +5,7 @@ import { TypeJsonObject } from '@/core/types/global-types';
 import { AbstractGeoViewLayer, TypeLegend } from '../abstract-geoview-layers';
 import { AbstractGeoViewRaster, TypeBaseRasterLayer } from './abstract-geoview-raster';
 import { TypeLayerEntryConfig, TypeGeoviewLayerConfig, TypeListOfLayerEntryConfig, TypeBaseLayerEntryConfig, TypeOgcWmsLayerEntryConfig } from '../../../map/map-schema-types';
-import { TypeArrayOfFeatureInfoEntries } from '@/api/events/payloads/get-feature-info-payload';
+import { TypeArrayOfFeatureInfoEntries } from '@/api/events/payloads';
 export interface TypeWMSLayerConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig'> {
     geoviewLayerType: 'ogcWms';
     listOfLayerEntryConfig: TypeOgcWmsLayerEntryConfig[];
@@ -104,7 +104,7 @@ export declare class WMS extends AbstractGeoViewRaster {
     /** ***************************************************************************************************************************
      * This method reads the layer identifiers from the configuration to create an array that will be used in the GetCapabilities.
      *
-     * @returns {string[]} The array of layer identifiers.
+     * @returns {TypeLayerEntryConfig[]} The array of layer configurations.
      */
     private getLayersToQuery;
     /** ***************************************************************************************************************************
@@ -118,10 +118,8 @@ export declare class WMS extends AbstractGeoViewRaster {
      * This method recursively validates the configuration of the layer entries to ensure that each layer is correctly defined.
      *
      * @param {TypeListOfLayerEntryConfig} listOfLayerEntryConfig The list of layer entries configuration to validate.
-     *
-     * @returns {TypeListOfLayerEntryConfig} A new layer configuration list with layers in error removed.
      */
-    protected validateListOfLayerEntryConfig(listOfLayerEntryConfig: TypeListOfLayerEntryConfig): TypeListOfLayerEntryConfig;
+    protected validateListOfLayerEntryConfig(listOfLayerEntryConfig: TypeListOfLayerEntryConfig): void;
     /** ***************************************************************************************************************************
      * This method create recursively dynamic group layers from the service metadata.
      *

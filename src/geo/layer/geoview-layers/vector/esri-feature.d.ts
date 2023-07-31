@@ -6,7 +6,7 @@ import { AbstractGeoViewLayer } from '../abstract-geoview-layers';
 import { TypeLayerEntryConfig, TypeVectorLayerEntryConfig, TypeVectorSourceInitialConfig, TypeGeoviewLayerConfig, TypeListOfLayerEntryConfig, TypeEsriDynamicLayerEntryConfig } from '../../../map/map-schema-types';
 import { AbstractGeoViewVector } from './abstract-geoview-vector';
 import { TypeJsonArray, TypeJsonObject } from '@/core/types/global-types';
-import { codedValueType, rangeDomainType } from '@/api/events/payloads/get-feature-info-payload';
+import { codedValueType, rangeDomainType } from '@/api/events/payloads';
 export interface TypeSourceEsriFeatureInitialConfig extends Omit<TypeVectorSourceInitialConfig, 'format'> {
     format: 'EsriJSON';
 }
@@ -73,10 +73,8 @@ export declare class EsriFeature extends AbstractGeoViewVector {
      * with a numeric layerId and creates a group entry when a layer is a group.
      *
      * @param {TypeListOfLayerEntryConfig} listOfLayerEntryConfig The list of layer entries configuration to validate.
-     *
-     * @returns {TypeListOfLayerEntryConfig} A new list of layer entries configuration with deleted error layers.
      */
-    validateListOfLayerEntryConfig(listOfLayerEntryConfig: TypeListOfLayerEntryConfig): TypeListOfLayerEntryConfig;
+    validateListOfLayerEntryConfig(listOfLayerEntryConfig: TypeListOfLayerEntryConfig): void;
     /** ***************************************************************************************************************************
      * This method perform specific validation that can only be done by the child of the AbstractGeoViewEsriLayer class.
      *

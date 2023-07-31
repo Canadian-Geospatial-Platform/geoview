@@ -11,6 +11,7 @@ import { TypeFeatureStyle } from '../layer/vector/vector-types';
 import { AppbarButtons } from '@/core/components/app-bar/app-bar-buttons';
 import { NavbarButtons } from '@/core/components/nav-bar/nav-bar-buttons';
 import { FooterTabsApi } from '@/core/components/footer-tabs/footer-tabs-api';
+import { NotificationsApi } from '@/core/components/notifications/notifications-api';
 import { LegendApi } from '@/core/components/legend/legend-api';
 import { DetailsAPI } from '@/core/components/details/details-api';
 import { FeatureInfoAPI } from '@/core/components/feature-info/feature-info.api';
@@ -23,9 +24,9 @@ import { Modify } from '../interaction/modify';
 import { Snap } from '../interaction/snap';
 import { Translate } from '../interaction/translate';
 import { ModalApi } from '@/ui';
+import { TypeMapMouseInfo } from '@/api/events/payloads';
 import { TypeListOfGeoviewLayerConfig, TypeDisplayLanguage, TypeViewSettings } from './map-schema-types';
 import { TypeMapFeaturesConfig, TypeHTMLElement } from '@/core/types/global-types';
-import { TypeMapMouseInfo } from '@/api/events/payloads/map-mouse-event-payload';
 /**
  * Class used to manage created maps
  *
@@ -39,6 +40,7 @@ export declare class MapViewer {
     appBarButtons: AppbarButtons;
     navBarButtons: NavbarButtons;
     footerTabs: FooterTabsApi;
+    notifications: NotificationsApi;
     legend: LegendApi;
     details: DetailsAPI;
     featureInfo: FeatureInfoAPI;
@@ -55,7 +57,6 @@ export declare class MapViewer {
     i18nInstance: i18n;
     modal: ModalApi;
     geoviewRenderer: GeoviewRenderer;
-    remainingLayersThatNeedToBeLoaded: number;
     readyCallbackHasRun: boolean;
     /**
      * Add the map instance to the maps array in the api
@@ -64,13 +65,6 @@ export declare class MapViewer {
      * @param {i18n} i18instance language instance
      */
     constructor(mapFeaturesConfig: TypeMapFeaturesConfig, i18instance: i18n);
-    /**
-     * Utility function used to decrement the remainingLayersThatNeedToBeLoaded property, preventing it to become less that zero.
-     * The methode returns true when the zero value is reached for the first time.
-     *
-     * @returns true when the zero value is reached for the first time.
-     */
-    private remainingLayersThatNeedToBeLoadedIsDecrementedToZero4TheFirstTime;
     /**
      * Set the layer added event listener and timeout function for the list of geoview layer configurations.
      *

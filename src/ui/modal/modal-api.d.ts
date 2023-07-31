@@ -1,11 +1,11 @@
-/// <reference types="react" />
+import { ReactNode } from 'react';
 import { ModalModel } from './modal-model';
 /**
  * Both header and footer actions' properties interface
  */
 export interface ModalActionsType {
     actionId: string;
-    content?: React.ReactNode;
+    content?: ReactNode;
 }
 /**
  * Modal header properties interface
@@ -26,7 +26,7 @@ export interface modalFooter {
 export type TypeModalProps = {
     modalId?: string;
     header?: modalHeader;
-    content: React.ReactNode | string;
+    content: ReactNode | string;
     footer?: modalFooter;
     active?: boolean;
     open?: () => void;

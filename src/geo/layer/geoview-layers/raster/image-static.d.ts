@@ -51,6 +51,12 @@ export declare class ImageStatic extends AbstractGeoViewRaster {
      */
     constructor(mapId: string, layerConfig: TypeImageStaticLayerConfig);
     /** ***************************************************************************************************************************
+     * Image static has no metadata.
+     *
+     * @returns {Promise<void>} A promise that the execution is completed.
+     */
+    protected getServiceMetadata(): Promise<void>;
+    /** ***************************************************************************************************************************
      * Get the legend image of a layer.
      *
      * @param {TypeImageStaticLayerEntryConfig} layerConfig layer configuration.
@@ -76,7 +82,7 @@ export declare class ImageStatic extends AbstractGeoViewRaster {
      *
      * @returns {TypeListOfLayerEntryConfig} A new list of layer entries configuration with deleted error layers.
      */
-    protected validateListOfLayerEntryConfig(listOfLayerEntryConfig: TypeListOfLayerEntryConfig): TypeListOfLayerEntryConfig;
+    protected validateListOfLayerEntryConfig(listOfLayerEntryConfig: TypeListOfLayerEntryConfig): void;
     /** ****************************************************************************************************************************
      * This method creates a GeoView Image Static layer using the definition provided in the layerEntryConfig parameter.
      *

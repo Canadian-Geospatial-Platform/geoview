@@ -2,7 +2,7 @@ import { TypeJsonArray, TypeJsonObject } from '@/core/types/global-types';
 import { TypeEsriDynamicLayerEntryConfig, TypeLayerEntryConfig, TypeListOfLayerEntryConfig } from '../../map/map-schema-types';
 import { EsriDynamic } from './raster/esri-dynamic';
 import { EsriFeature, TypeEsriFeatureLayerEntryConfig } from './vector/esri-feature';
-import { codedValueType, rangeDomainType } from '@/api/events/payloads/get-feature-info-payload';
+import { codedValueType, rangeDomainType } from '@/api/events/payloads';
 /** ***************************************************************************************************************************
  * This method reads the service metadata from the metadataAccessPath.
  *
@@ -13,11 +13,10 @@ export declare function commonGetServiceMetadata(this: EsriDynamic | EsriFeature
  * This method validates recursively the configuration of the layer entries to ensure that it is a feature layer identified
  * with a numeric layerId and creates a group entry when a layer is a group.
  *
+ * @param {EsriDynamic | EsriFeature} this The this property of the ESRI layer.
  * @param {TypeListOfLayerEntryConfig} listOfLayerEntryConfig The list of layer entries configuration to validate.
- *
- * @returns {TypeListOfLayerEntryConfig} A new list of layer entries configuration with deleted error layers.
  */
-export declare function commonValidateListOfLayerEntryConfig(this: EsriDynamic | EsriFeature, listOfLayerEntryConfig: TypeListOfLayerEntryConfig): TypeListOfLayerEntryConfig;
+export declare function commonValidateListOfLayerEntryConfig(this: EsriDynamic | EsriFeature, listOfLayerEntryConfig: TypeListOfLayerEntryConfig): void;
 /** ***************************************************************************************************************************
  * Extract the domain of the specified field from the metadata. If the type can not be found, return 'string'.
  *

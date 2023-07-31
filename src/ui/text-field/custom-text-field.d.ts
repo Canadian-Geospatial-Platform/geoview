@@ -1,4 +1,4 @@
-import React from 'react';
+import { ReactNode } from 'react';
 import { BaseTextFieldProps } from '@mui/material/TextField';
 /**
  * Customized Material UI Custom TextField Properties
@@ -6,7 +6,7 @@ import { BaseTextFieldProps } from '@mui/material/TextField';
 interface TypeCustomTextFieldProps extends Omit<BaseTextFieldProps, 'prefix'> {
     textFieldId: string;
     errorHelpertext?: string | undefined;
-    prefix?: string | JSX.Element | HTMLElement | React.ReactNode;
+    prefix?: string | JSX.Element | HTMLElement | ReactNode;
     suffix?: string | JSX.Element | HTMLElement | undefined;
     changeHandler?: <T>(params: T) => void;
 }
