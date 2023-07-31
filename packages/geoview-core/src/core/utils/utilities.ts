@@ -3,7 +3,7 @@ import { MutableRefObject } from 'react';
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable no-console */
 /* eslint-disable no-underscore-dangle */
-import ReactDOM from 'react-dom';
+import { Root, createRoot } from 'react-dom/client';
 
 import { Extent } from 'ol/extent';
 
@@ -14,7 +14,7 @@ import { TypeLocalizedString } from '@/geo/map/map-schema-types';
 import { EVENT_NAMES } from '@/api/events/event-types';
 
 import { Cast, TypeJsonArray, TypeJsonObject, TypeJsonValue } from '../types/global-types';
-import { snackbarMessagePayload } from '@/api/events/payloads/snackbar-message-payload';
+import { snackbarMessagePayload } from '@/api/events/payloads';
 
 /**
  * Get the string associated to the current display language.
@@ -227,9 +227,14 @@ export function getXMLHttpRequest(url: string): Promise<string> {
  *
  * @param {React.ReactElement} component the UI react component
  * @param {string} targetDivId the div id to insert the component in
+ *
+ * @return {Root} the React root element
  */
-export function addUiComponent(targetDivId: string, component: React.ReactElement) {
-  ReactDOM.render(component, document.getElementById(targetDivId));
+export function addUiComponent(targetDivId: string, component: React.ReactElement): Root {
+  const root = createRoot(document.getElementById(targetDivId)!);
+  root.render(component);
+
+  return root;
 }
 
 /**

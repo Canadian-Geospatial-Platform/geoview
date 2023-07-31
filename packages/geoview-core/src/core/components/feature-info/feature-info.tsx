@@ -22,7 +22,7 @@ import {
 } from '@/ui';
 import { api } from '@/app';
 import { HtmlToReact } from '../../containers/html-to-react';
-import { TypeFeatureInfoEntry, TypeFieldEntry } from '@/api/events/payloads/get-feature-info-payload';
+import { TypeFeatureInfoEntry, TypeFieldEntry } from '@/api/events/payloads';
 import { isImage, stringify, generateId, sanitizeHtmlContent } from '../../utils/utilities';
 import { LightboxImg, LightBoxSlides } from '../lightbox/lightbox';
 

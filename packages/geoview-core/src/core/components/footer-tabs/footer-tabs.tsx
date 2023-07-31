@@ -1,11 +1,11 @@
 import { MutableRefObject, useCallback, useContext, useEffect, useRef, useState } from 'react';
 import makeStyles from '@mui/styles/makeStyles';
 
-import { MapContext } from '../../app-start';
+import { MapContext } from '@/core/app-start';
 import { api } from '@/app';
 
 import { EVENT_NAMES } from '@/api/events/event-types';
-import { FooterTabPayload, payloadIsAFooterTab } from '@/api/events/payloads/footer-tab-payload';
+import { FooterTabPayload, payloadIsAFooterTab } from '@/api/events/payloads';
 
 import { ExpandLessIcon, ExpandMoreIcon, FullscreenIcon, FullscreenExitIcon, IconButton, Tabs, TypeTabs } from '@/ui';
 

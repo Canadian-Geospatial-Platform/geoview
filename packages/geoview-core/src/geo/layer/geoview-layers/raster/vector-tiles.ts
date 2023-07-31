@@ -25,12 +25,12 @@ import {
   layerEntryIsGroupLayer,
   TypeLocalizedString,
   TypeTileGrid,
-} from '../../../map/map-schema-types';
+} from '@/geo/map/map-schema-types';
 import { getLocalizedValue, getMinOrMaxExtents, getXMLHttpRequest } from '@/core/utils/utilities';
 import { Cast, TypeJsonObject, toJsonObject } from '@/core/types/global-types';
 import { api } from '@/app';
 import { Layer } from '../../layer';
-import { LayerSetPayload } from '@/api/events/payloads/layer-set-payload';
+import { LayerSetPayload } from '@/api/events/payloads';
 
 // TODO: Implement method to validate Vector Tiles service
 // TODO: Add more customization (minZoom, maxZoom, TMS)

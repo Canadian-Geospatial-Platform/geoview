@@ -1,6 +1,6 @@
 import axios, { AxiosResponse } from 'axios';
 
-import { TypeJsonObject, TypeJsonArray, TypeJsonValue } from '../../../types/global-types';
+import { TypeJsonObject, TypeJsonArray, TypeJsonValue } from '@/core/types/global-types';
 
 import {
   TypeEsriDynamicLayerEntryConfig,
@@ -23,7 +23,7 @@ import { TypeXYZTilesConfig, TypeXYZTilesLayerEntryConfig } from '@/geo/layer/ge
 import { TypeVectorTilesConfig, TypeVectorTilesLayerEntryConfig } from '@/geo/layer/geoview-layers/raster/vector-tiles';
 import { api } from '@/app';
 import { EVENT_NAMES } from '@/api/events/event-types';
-import { snackbarMessagePayload } from '@/api/events/payloads/snackbar-message-payload';
+import { snackbarMessagePayload } from '@/api/events/payloads';
 
 // ******************************************************************************************************************************
 // ******************************************************************************************************************************

@@ -20,20 +20,20 @@ export interface Features {
   attributes: {
     [key: string]: string;
   };
-  geometry: { x: string; y: string };
+  geometry?: { x: string; y: string };
 }
 
 export interface DataTableData {
   displayFieldName: string;
   features: Features[];
   fieldAliases: { [key: string]: string };
-  fields: {
+  fields?: {
     alias: string;
     type: string;
     name: string;
   }[];
-  geometryType: string;
-  spatialReference: {
+  geometryType?: string;
+  spatialReference?: {
     latestWkid: number;
 
     wkid: number;

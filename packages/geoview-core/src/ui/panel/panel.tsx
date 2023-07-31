@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 /* eslint-disable react/jsx-no-useless-fragment */
 /* eslint-disable no-nested-ternary */
-import React, { useRef, useState, useEffect, useCallback, useContext } from 'react';
+import { useRef, useState, useEffect, useCallback, useContext, ReactNode } from 'react';
 
 import { useTranslation } from 'react-i18next';
 
@@ -20,9 +20,13 @@ import { api } from '@/app';
 import { EVENT_NAMES } from '@/api/events/event-types';
 
 import { IconButton, CloseIcon, PanelApi, Box } from '..';
-import { payloadBaseClass } from '@/api/events/payloads/payload-base-class';
-import { payloadIsAPanelAction, payloadIsAPanelContent, payloadHasAButtonIdAndType } from '@/api/events/payloads/panel-payload';
-import { inKeyfocusPayload } from '@/api/events/payloads/in-keyfocus-payload';
+import {
+  payloadBaseClass,
+  payloadIsAPanelAction,
+  payloadIsAPanelContent,
+  payloadHasAButtonIdAndType,
+  inKeyfocusPayload,
+} from '@/api/events/payloads';
 import { TypeIconButtonProps } from '../icon-button/icon-button-types';
 
 /**
@@ -109,7 +113,7 @@ export function Panel(props: TypePanelAppProps): JSX.Element {
     transition: 'width 300ms ease',
   };
 
-  const [actionButtons, setActionButtons] = useState<JSX.Element[] & React.ReactNode[]>([]);
+  const [actionButtons, setActionButtons] = useState<JSX.Element[] & ReactNode[]>([]);
   const [, updatePanelContent] = useState(0);
 
   const classes = useStyles(props);
@@ -243,7 +247,7 @@ export function Panel(props: TypePanelAppProps): JSX.Element {
                     htmlContent={actionButton.children}
                   />
                 ) : (
-                  actionButton.children
+                  (actionButton.children as ReactNode)
                 )}
               </IconButton>,
             ]);

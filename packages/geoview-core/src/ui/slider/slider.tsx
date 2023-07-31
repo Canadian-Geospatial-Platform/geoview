@@ -7,7 +7,7 @@ import { SliderProps } from '@mui/material';
 
 import { api } from '@/app';
 import { EVENT_NAMES } from '@/api/events/event-types';
-import { sliderPayload, payloadIsASlider, SliderTypePayload } from '@/api/events/payloads/slider-payload';
+import { sliderPayload, payloadIsASlider, SliderTypePayload } from '@/api/events/payloads';
 
 /**
  * Properties for the Slider

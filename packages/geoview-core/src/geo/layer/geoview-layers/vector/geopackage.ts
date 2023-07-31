@@ -32,13 +32,13 @@ import {
   TypeLineStringVectorConfig,
   TypePolygonVectorConfig,
   TypeFillStyle,
-} from '../../../map/map-schema-types';
+} from '@/geo/map/map-schema-types';
 
 import { getLocalizedValue } from '@/core/utils/utilities';
 
 import { api } from '@/app';
 import { Layer } from '../../layer';
-import { LayerSetPayload } from '@/api/events/payloads/layer-set-payload';
+import { LayerSetPayload } from '@/api/events/payloads';
 
 export interface TypeSourceGeoPackageInitialConfig extends TypeVectorSourceInitialConfig {
   format: 'GeoPackage';

@@ -21,8 +21,7 @@ import { api } from '@/app';
 import { EVENT_NAMES } from '@/api/events/event-types';
 
 import { Modal, Snackbar } from '@/ui';
-import { payloadIsAMapComponent } from '@/api/events/payloads/map-component-payload';
-import { payloadIsAModal } from '@/api/events/payloads/modal-payload';
+import { payloadIsAMapComponent, payloadIsAModal } from '@/api/events/payloads';
 import { TypeMapFeaturesConfig } from '../types/global-types';
 
 const useStyles = makeStyles((theme) => {

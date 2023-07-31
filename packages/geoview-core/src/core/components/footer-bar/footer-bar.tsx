@@ -8,7 +8,7 @@ import { Attribution } from '../attribution/attribution';
 import { MousePosition } from '../mouse-position/mouse-position';
 import { Scale } from '../scale/scale';
 
-import { MapContext } from '../../app-start';
+import { MapContext } from '@/core/app-start';
 import { FooterbarExpandButton } from './footer-bar-expand-button';
 import { FooterbarRotationButton } from './footer-bar-rotation-button';
 import { FooterbarFixNorthSwitch } from './footer-bar-fixnorth-switch';
@@ -21,6 +21,7 @@ const sxClasses = {
     alignItems: 'center',
     width: 'calc(100% - 64px)',
     minHeight: '35px',
+    maxHeight: '35px',
     backdropFilter: 'blur(5px)',
     backgroundColor: '#000000cc',
     pointerEvents: 'all',

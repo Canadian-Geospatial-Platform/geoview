@@ -8,7 +8,7 @@ import {
   TypeDisplayLanguage,
   TypeMapComponents,
 } from '@/geo/map/map-schema-types';
-import { Cast, TypeJsonObject, TypeJsonValue, TypeMapFeaturesConfig } from '../../../types/global-types';
+import { Cast, TypeJsonObject, TypeJsonValue, TypeMapFeaturesConfig } from '@/core/types/global-types';
 import { catalogUrl } from '../config';
 import { UUIDmapConfigReader } from './uuid-config-reader';
 import { ConfigValidation } from '../config-validation';

@@ -4,7 +4,7 @@ import { fromLonLat } from 'ol/proj';
 import { Extent } from 'ol/extent';
 import { FitOptions } from 'ol/View';
 
-import { MapContext } from '../../../app-start';
+import { MapContext } from '@/core/app-start';
 
 import { IconButton, HomeIcon } from '@/ui';
 

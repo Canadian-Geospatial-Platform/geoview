@@ -1,10 +1,12 @@
+import { ReactNode } from 'react';
+
 import { ModalModel } from './modal-model';
 
 import { generateId } from '@/core/utils/utilities';
 
 import { api } from '@/app';
 import { EVENT_NAMES } from '@/api/events/event-types';
-import { modalPayload } from '@/api/events/payloads/modal-payload';
+import { modalPayload } from '@/api/events/payloads';
 
 /**
  * Both header and footer actions' properties interface
@@ -14,7 +16,7 @@ export interface ModalActionsType {
   actionId: string;
 
   // content is the action itself, HTML (in the form of a string) or JSX
-  content?: React.ReactNode;
+  content?: ReactNode;
 }
 
 /**
@@ -47,7 +49,7 @@ export type TypeModalProps = {
   header?: modalHeader;
 
   // content (description) of the modal. The HTML passed will be displayed inside a <div> element
-  content: React.ReactNode | string;
+  content: ReactNode | string;
 
   // footer object for the modal. Can contain buttons list as an array of JSX elements. If none provided, there will be no action buttons or footer
   footer?: modalFooter;

@@ -23,13 +23,11 @@ import {
   CheckBoxOutIcon,
 } from '@/ui';
 import { api } from '@/app';
-import { TypeFeatureInfoEntry, TypeFieldEntry } from '@/api/events/payloads/get-feature-info-payload';
+import { TypeFeatureInfoEntry, TypeFieldEntry, featureHighlightPayload, clearHighlightsPayload } from '@/api/events/payloads';
 import { DetailsProps } from './details';
 import { isImage, stringify, generateId } from '../../utils/utilities';
 import { LightboxImg, LightBoxSlides } from '../lightbox/lightbox';
 import { EVENT_NAMES } from '@/api/events/event-types';
-import { featureHighlightPayload } from '@/api/events/payloads/feature-highlight-payload';
-import { clearHighlightsPayload } from '@/api/events/payloads/clear-highlights-payload';
 
 const sxClasses = {
   layerItem: {

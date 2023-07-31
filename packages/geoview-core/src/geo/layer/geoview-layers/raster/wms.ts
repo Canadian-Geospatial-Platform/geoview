@@ -26,19 +26,19 @@ import {
   TypeLayerGroupEntryConfig,
   TypeBaseLayerEntryConfig,
   TypeOgcWmsLayerEntryConfig,
-} from '../../../map/map-schema-types';
+} from '@/geo/map/map-schema-types';
 import {
   TypeFeatureInfoEntry,
   TypeArrayOfFeatureInfoEntries,
   rangeDomainType,
   codedValueType,
-} from '@/api/events/payloads/get-feature-info-payload';
+  snackbarMessagePayload,
+  LayerSetPayload,
+} from '@/api/events/payloads';
 import { getLocalizedValue, getMinOrMaxExtents, xmlToJson } from '@/core/utils/utilities';
-import { snackbarMessagePayload } from '@/api/events/payloads/snackbar-message-payload';
 import { EVENT_NAMES } from '@/api/events/event-types';
 import { api } from '@/app';
 import { Layer } from '../../layer';
-import { LayerSetPayload } from '@/api/events/payloads/layer-set-payload';
 
 export interface TypeWMSLayerConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig'> {
   geoviewLayerType: 'ogcWms';
@@ -771,7 +771,9 @@ export class WMS extends AbstractGeoViewRaster {
     if (Array.isArray(layerCapabilities?.Style)) {
       let legendStyle;
       if (chosenStyle) {
-        legendStyle = layerCapabilities?.Style[chosenStyle];
+        [legendStyle] = layerCapabilities!.Style.filter((style) => {
+          return style.Name === chosenStyle;
+        });
       } else {
         legendStyle = layerCapabilities?.Style.find((style) => {
           if (layerConfig?.source?.style && !Array.isArray(layerConfig?.source?.style)) return layerConfig.source.style === style.Name;
@@ -844,9 +846,7 @@ export class WMS extends AbstractGeoViewRaster {
    */
   private async getStyleLegend(layerConfig: TypeOgcWmsLayerEntryConfig, position: number): Promise<TypeWmsLegendStyle> {
     const promisedStyleLegend = new Promise<TypeWmsLegendStyle>((resolve) => {
-      let chosenStyle: string | undefined;
-      if (this.WMSStyles[position] === 'default') chosenStyle = undefined;
-      else chosenStyle = this.WMSStyles[position];
+      const chosenStyle: string | undefined = this.WMSStyles[position];
       let styleLegend: TypeWmsLegendStyle;
       this.getLegendImage(layerConfig!, chosenStyle).then((styleLegendImage) => {
         if (!styleLegendImage) {

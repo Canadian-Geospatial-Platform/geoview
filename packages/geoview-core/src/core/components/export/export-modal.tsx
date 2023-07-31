@@ -2,7 +2,7 @@ import { MouseEventHandler, useContext } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Button, Dialog, DialogActions, DialogTitle } from '@mui/material';
 
-import { MapContext } from '../../app-start';
+import { MapContext } from '@/core/app-start';
 import { exportPNG } from '../../utils/utilities';
 
 /**

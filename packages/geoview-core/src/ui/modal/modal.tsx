@@ -1,6 +1,6 @@
 /* eslint-disable react/require-default-props */
 /* eslint-disable react/prop-types */
-import React, { useState, useEffect, useCallback, Fragment, CSSProperties } from 'react';
+import { useState, useEffect, useCallback, Fragment, CSSProperties, ReactNode } from 'react';
 
 import { useTranslation } from 'react-i18next';
 
@@ -22,7 +22,7 @@ import { api } from '@/app';
 
 import { TypeModalProps } from '.';
 import { CloseIcon, IconButton } from '..';
-import { payloadIsAModal } from '@/api/events/payloads/modal-payload';
+import { payloadIsAModal } from '@/api/events/payloads';
 
 /**
  * Customized Material UI Dialog Properties
@@ -35,11 +35,11 @@ interface TypeDialogProps extends Omit<DialogProps, 'title'> {
   style?: CSSProperties;
 
   // custom title
-  title?: React.ReactNode;
+  title?: ReactNode;
   titleId?: string;
 
   // dialog content and content styling
-  contentModal?: React.ReactNode;
+  contentModal?: ReactNode;
   contentClassName?: string;
   contentStyle?: CSSProperties;
 
@@ -49,7 +49,7 @@ interface TypeDialogProps extends Omit<DialogProps, 'title'> {
   contentTextStyle?: CSSProperties;
 
   // action elements / buttons
-  actions?: React.ReactNode;
+  actions?: ReactNode;
 
   // id of the map that is using this modal
   mapId: string;

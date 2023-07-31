@@ -68,7 +68,7 @@
         console.log('api is ready');
 
         // import react and api from the core
-        const { react, reactDOM, api, ui } = cgpv;
+        const { react, createRoot, api, ui } = cgpv;
 
         // create fake canvas element
         const canvas = document.createElement('canvas');
@@ -300,7 +300,8 @@
         /********* SMALL LIST START **********************************************************************************/
         const smallDiv = document.getElementById('smallList');
         const item = cgpv.api.maps['mapWM1'].featureInfo.createFeatureInfoItem(featureInfoArray);
-        reactDOM.render(item, smallDiv);
+        const root = createRoot(smallDiv);
+        root.render(item);
         /********* SMALL LIST END **********************************************************************************/
 
         /********* BIG LIST START **********************************************************************************/
@@ -314,7 +315,8 @@
             lotItems.push(cgpv.api.maps['mapWM1'].featureInfo.createFeatureInfoItem([featureInfoArray[0]]));
           }
           console.log(`Created ${Date.now() - start}`);
-          reactDOM.render(lotItems, bigDiv);
+          const root = createRoot(bigDiv);
+          root.render(lotItems);
           console.log(`Rendered ${Date.now() - start}`);
         }
         /********* BIG LIST END **********************************************************************************/

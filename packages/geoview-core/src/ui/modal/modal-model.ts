@@ -1,8 +1,10 @@
+import { ReactNode } from 'react';
+
 import { api } from '@/app';
 import { EVENT_NAMES } from '@/api/events/event-types';
 
 import { modalHeader, modalFooter, TypeModalProps, ModalActionsType } from './modal-api';
-import { modalPayload } from '@/api/events/payloads/modal-payload';
+import { modalPayload } from '@/api/events/payloads';
 
 /**
  * Class used to create a template (model) of a modal
@@ -14,7 +16,7 @@ export class ModalModel {
 
   header?: modalHeader;
 
-  content: React.ReactNode | string;
+  content: ReactNode | string;
 
   footer?: modalFooter;
 
@@ -29,9 +31,9 @@ export class ModalModel {
   /**
    * constructor to initiate the modal properties
    *
-   * @param { React.ReactNode | string } content is the body copy (description) of the modal
+   * @param { ReactNode | string } content is the body copy (description) of the modal
    */
-  constructor(content: React.ReactNode | string) {
+  constructor(content: ReactNode | string) {
     this.content = content;
   }
 

@@ -36,14 +36,11 @@ function MenuDataGrid({ mapFiltered, setMapFiltered, rows, layerKey }: MenuDataG
   const label = !mapFiltered ? t('datagrid.filterMap') : t('datagrid.stopFilterMap');
   return (
     <GridToolbarContainer>
-      {/* @ts-expect-error its known issue of x-data-grid, where onResize is required and we don't need it. */}
       <GridToolbarColumnsButton />
-      {/* @ts-expect-error its known issue of x-data-grid, where onResize is required and we don't need it. */}
       <GridToolbarFilterButton />
       <Button>
         <Switch size="small" onChange={() => setMapFiltered(!mapFiltered)} title={label} checked={mapFiltered} />
       </Button>
-      {/* @ts-expect-error its known issue of x-data-grid, where onResize is required and we don't need it. */}
       <GridToolbarDensitySelector />
       <ExportButton rows={rows} layerKey={layerKey} />
     </GridToolbarContainer>

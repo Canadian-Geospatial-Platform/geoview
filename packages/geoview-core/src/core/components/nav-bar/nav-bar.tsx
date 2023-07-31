@@ -16,9 +16,9 @@ import ExportModal from '../export/export-modal';
 import { api, payloadIsABoolean } from '@/app';
 import { Panel, ButtonGroup, IconButton, Box } from '@/ui';
 
-import { MapContext } from '../../app-start';
+import { MapContext } from '@/core/app-start';
 import { EVENT_NAMES } from '@/api/events/event-types';
-import { payloadIsAButtonPanel, ButtonPanelPayload } from '@/api/events/payloads/button-panel-payload';
+import { payloadIsAButtonPanel, ButtonPanelPayload } from '@/api/events/payloads';
 import { TypeButtonPanel } from '@/ui/panel/panel-types';
 
 const navBtnWidth = '44px';

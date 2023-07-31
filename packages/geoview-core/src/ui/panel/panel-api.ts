@@ -1,11 +1,11 @@
-import { createElement } from 'react';
+import { createElement, ReactNode } from 'react';
 
 import { api } from '@/app';
 import { EVENT_NAMES } from '@/api/events/event-types';
 
 import { CheckboxListAPI } from '../list/checkbox-list/checkbox-list-api';
 
-import { PanelPayload, TypeActionButton } from '@/api/events/payloads/panel-payload';
+import { PanelPayload, TypeActionButton } from '@/api/events/payloads';
 import { generateId } from '@/core/utils/utilities';
 import { PanelStyles, TypePanelProps } from './panel-types';
 
@@ -29,13 +29,13 @@ export class PanelApi {
   width: string | number;
 
   // panel header icon
-  icon: React.ReactNode | Element;
+  icon: ReactNode;
 
   // panel header title
   title: string;
 
   // panel body content
-  content: React.ElementType | React.ReactNode | Element;
+  content: ReactNode;
 
   // the linked button id that will open/close the panel
   buttonId: string;
@@ -184,11 +184,11 @@ export class PanelApi {
   /**
    * Change the content of the panel
    *
-   * @param {React Element} content the content to update to
+   * @param {ReactNode} content the content to update to
    *
    * @returns {Panel} this panel
    */
-  changeContent = (content: React.ReactNode | Element): PanelApi => {
+  changeContent = (content: ReactNode): PanelApi => {
     this.content = content;
 
     api.event.emit(

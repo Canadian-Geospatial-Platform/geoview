@@ -1,5 +1,5 @@
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 
 import { useTheme } from '@mui/material/styles';
 import { useTranslation } from 'react-i18next';
@@ -53,7 +53,7 @@ export type TypeCGPV = {
   init: TypeCallback;
   api: TypeApi;
   react: typeof React;
-  reactDOM: typeof ReactDOM;
+  createRoot: typeof createRoot;
   ui: TypeCGPVUI;
   useTranslation: typeof useTranslation;
   types: typeof import('./cgpv-types');

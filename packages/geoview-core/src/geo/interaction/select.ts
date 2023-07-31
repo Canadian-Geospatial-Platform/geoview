@@ -5,7 +5,7 @@ import Feature from 'ol/Feature';
 import { Interaction, InteractionOptions } from './interaction';
 import { api } from '@/app';
 import { EVENT_NAMES } from '@/api/events/event-types';
-import { selectPayload } from '@/api/events/payloads/inter-select-payload';
+import { selectPayload } from '@/api/events/payloads';
 import { TypeFeatureStyle } from '../layer/vector/vector-types';
 import { GeoUtilities } from '../utils/utilities';
 

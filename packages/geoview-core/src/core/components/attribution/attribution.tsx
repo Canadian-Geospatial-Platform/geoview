@@ -5,11 +5,10 @@ import OLAttribution, { Options } from 'ol/control/Attribution';
 
 import makeStyles from '@mui/styles/makeStyles';
 
-import { MapContext } from '../../app-start';
+import { MapContext } from '@/core/app-start';
 import { api } from '@/app';
 import { Tooltip, Box } from '@/ui';
-import { EVENT_NAMES } from '@/api/events/event-types';
-import { payloadIsABoolean } from '@/api/events/payloads/boolean-payload';
+import { EVENT_NAMES, payloadIsABoolean } from '@/api/events';
 
 const useStyles = makeStyles((theme) => ({
   attributionContainer: {

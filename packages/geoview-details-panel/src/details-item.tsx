@@ -1,5 +1,6 @@
 /* eslint-disable react/require-default-props */
 import type React from 'react';
+import { PayloadBaseClass } from 'geoview-core/src/api/events/payloads';
 import {
   TypeWindow,
   payloadIsAMapMouseEvent,
@@ -35,52 +36,48 @@ export function DetailsItem({ mapId, buttonId }: Props): JSX.Element {
 
   const panel = api.map(mapId).appBarButtons.getAppBarButtonPanelById(buttonId === undefined ? '' : buttonId)?.panel;
 
+  const allQueriesDoneListenerFunction = (payload: PayloadBaseClass) => {
+    if (payloadIsAllQueriesDone(payload)) {
+      const { resultSets } = payload;
+      const newDetails: TypeArrayOfLayerData = [];
+      Object.keys(resultSets).forEach((layerPath) => {
+        const layerName = getLocalizedValue(api.map(mapId).layer.registeredLayers[layerPath].layerName, mapId)!;
+        const features = resultSets[layerPath]!.data;
+        if (features.length > 0) {
+          newDetails.push({ layerPath, layerName, features });
+        }
+      });
+      if (newDetails.length > 0) {
+        setDetails(newDetails);
+        // open the details panel
+        panel?.open();
+      } else {
+        setDetails([]);
+      }
+    } else {
+      setDetails([]);
+    }
+  };
+
+  const eventMapSingleClickListenerFunction = (payload: PayloadBaseClass) => {
+    if (payloadIsAMapMouseEvent(payload)) {
+      const { coordinates } = payload;
+      setHandlerName(payload.handlerName);
+      setLngLat(coordinates.lnglat);
+    } else {
+      setLngLat([]);
+    }
+  };
+
   useEffect(() => {
     // create the listener to return the details
-    api.event.on(
-      api.eventNames.GET_FEATURE_INFO.ALL_QUERIES_DONE,
-      (payload) => {
-        if (payloadIsAllQueriesDone(payload)) {
-          const { resultSets } = payload;
-          const newDetails: TypeArrayOfLayerData = [];
-          Object.keys(resultSets).forEach((layerPath) => {
-            const layerName = getLocalizedValue(api.map(mapId).layer.registeredLayers[layerPath].layerName, mapId)!;
-            const features = resultSets[layerPath]!;
-            if (features.length > 0) {
-              newDetails.push({ layerPath, layerName, features });
-            }
-          });
-          if (newDetails.length > 0) {
-            setDetails(newDetails);
-            // open the details panel
-            panel?.open();
-          } else {
-            setDetails([]);
-          }
-        } else {
-          setDetails([]);
-        }
-      },
-      `${mapId}/$FeatureInfoLayerSet$`
-    );
+    api.event.on(api.eventNames.GET_FEATURE_INFO.ALL_QUERIES_DONE, allQueriesDoneListenerFunction, `${mapId}/$FeatureInfoLayerSet$`);
     // get click info.
-    api.event.on(
-      api.eventNames.MAP.EVENT_MAP_SINGLE_CLICK,
-      (payload) => {
-        if (payloadIsAMapMouseEvent(payload)) {
-          const { coordinates } = payload;
-          setHandlerName(payload.handlerName);
-          setLngLat(coordinates.lnglat);
-        } else {
-          setLngLat([]);
-        }
-      },
-      mapId
-    );
+    api.event.on(api.eventNames.MAP.EVENT_MAP_SINGLE_CLICK, eventMapSingleClickListenerFunction, mapId);
 
     return () => {
-      api.event.off(api.eventNames.GET_FEATURE_INFO.ALL_QUERIES_DONE, mapId);
-      api.event.off(api.eventNames.MAP.EVENT_MAP_SINGLE_CLICK, mapId);
+      api.event.off(api.eventNames.GET_FEATURE_INFO.ALL_QUERIES_DONE, mapId, allQueriesDoneListenerFunction);
+      api.event.off(api.eventNames.MAP.EVENT_MAP_SINGLE_CLICK, mapId, eventMapSingleClickListenerFunction);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

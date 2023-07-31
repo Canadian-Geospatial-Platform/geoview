@@ -1,4 +1,6 @@
 /* eslint-disable no-console, no-underscore-dangle, no-param-reassign */
+import { Extent } from 'ol/extent';
+
 import Ajv from 'ajv';
 import { AnyValidateFunction } from 'ajv/dist/types';
 
@@ -36,7 +38,7 @@ import {
 } from '@/geo/map/map-schema-types';
 import { Cast, toJsonObject, TypeJsonObject, TypeMapFeaturesConfig } from '../../types/global-types';
 import { api } from '@/app';
-import { snackbarMessagePayload } from '@/api/events/payloads/snackbar-message-payload';
+import { snackbarMessagePayload } from '@/api/events/payloads';
 import { EVENT_NAMES } from '@/api/events/event-types';
 import { Layer } from '@/geo/layer/layer';
 import { CONST_GEOVIEW_SCHEMA_BY_TYPE, TypeGeoviewLayerType } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
@@ -83,6 +85,7 @@ export class ConfigValidation {
     appBar: ['geolocator'],
     navBar: ['zoom', 'fullscreen', 'home'],
     corePackages: [],
+    overviewMap: undefined,
     serviceUrls: {
       keys: 'https://geocore.api.geo.ca',
       geolocator: 'https://geolocator.api.geo.ca?keys=geonames,nominatim,locate',
@@ -282,7 +285,7 @@ export class ConfigValidation {
   /** ***************************************************************************************************************************
    * Validate the center.
    * @param {TypeValidMapProjectionCodes} projection The projection used by the map.
-   * @param {[number, number]} center The map center to valdate.
+   * @param {[number, number]} center The map center to validate.
    *
    * @returns {[number, number]} A valid map center.
    */
@@ -303,6 +306,31 @@ export class ConfigValidation {
       return [x, y];
     }
     return this._defaultMapFeaturesConfig.map.viewSettings.center;
+  }
+
+  /** ***************************************************************************************************************************
+   * Validate the extent.
+   * @param {TypeValidMapProjectionCodes} projection The projection used by the map.
+   * @param {[number, number, number, number]} extent The map extent to valdate.
+   * @param {[number, number]} center The map extent to validate.
+   *
+   * @returns {[number, number, number, number]} A valid map extent.
+   */
+  private validateExtent(
+    projection: TypeValidMapProjectionCodes,
+    extent: [number, number, number, number],
+    center: [number, number]
+  ): Extent | undefined {
+    if (projection && extent) {
+      const [extentMinX, extentMinY, extentMaxX, extentMaxY] = extent;
+      const minX = !Number.isNaN(extentMinX) && extentMinX < center[0] ? extentMinX : this._center[projection].long[0];
+      const minY = !Number.isNaN(extentMinY) && extentMinY < center[1] ? extentMinY : this._center[projection].lat[0];
+      const maxX = !Number.isNaN(extentMaxX) && extentMaxX > center[0] ? extentMaxX : this._center[projection].long[1];
+      const maxY = !Number.isNaN(extentMaxY) && extentMaxY > center[1] ? extentMaxY : this._center[projection].lat[1];
+
+      return [minX, minY, maxX, maxY] as Extent;
+    }
+    return undefined;
   }
 
   /** ***************************************************************************************************************************
@@ -845,6 +873,9 @@ export class ConfigValidation {
     const schemaVersionUsed = this.validateVersion(tempMapFeaturesConfig.schemaVersionUsed);
     const minZoom = this.validateMinZoom(tempMapFeaturesConfig?.map?.viewSettings?.minZoom);
     const maxZoom = this.validateMaxZoom(tempMapFeaturesConfig?.map?.viewSettings?.maxZoom);
+    const extent = tempMapFeaturesConfig?.map?.viewSettings?.extent
+      ? this.validateExtent(projection, tempMapFeaturesConfig?.map?.viewSettings?.extent as [number, number, number, number], center)
+      : undefined;
 
     // recreate the prop object to remove unwanted items and check if same as original. Log the modifications
     const validMapFeaturesConfig: TypeMapFeaturesConfig = {
@@ -856,6 +887,7 @@ export class ConfigValidation {
           projection,
           minZoom,
           maxZoom,
+          extent,
         },
         interaction: tempMapFeaturesConfig.map.interaction,
         listOfGeoviewLayerConfig: tempMapFeaturesConfig.map.listOfGeoviewLayerConfig,
@@ -869,6 +901,7 @@ export class ConfigValidation {
       displayLanguage: this._displayLanguage,
       appBar: tempMapFeaturesConfig.appBar,
       navBar: tempMapFeaturesConfig.navBar,
+      overviewMap: tempMapFeaturesConfig.overviewMap,
       externalPackages: tempMapFeaturesConfig.externalPackages,
       schemaVersionUsed,
       serviceUrls: tempMapFeaturesConfig.serviceUrls,
