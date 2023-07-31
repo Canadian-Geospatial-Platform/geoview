@@ -15,6 +15,7 @@ import makeStyles from '@mui/styles/makeStyles';
 import { useMediaQuery } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 
+import { Extent } from 'ol/extent';
 import { NorthArrow, NorthPoleFlag } from '../north-arrow/north-arrow';
 import { Crosshair } from '../crosshair/crosshair';
 import { Footerbar } from '../footer-bar/footer-bar';
@@ -24,7 +25,7 @@ import { HoverTooltip } from '../hover-tooltip/hover-tooltip';
 
 import { disableScrolling, generateId } from '../../utils/utilities';
 
-import { TypeVectorSourceInitialConfig, api, inKeyfocusPayload } from '@/app';
+import { TypeVectorSourceInitialConfig, api, inKeyfocusPayload, notificationPayload } from '@/app';
 import { EVENT_NAMES } from '@/api/events/event-types';
 
 import { MapViewer } from '@/geo/map/map';
@@ -207,6 +208,26 @@ export function Map(mapFeaturesConfig: TypeMapFeaturesConfig): JSX.Element {
 
     const defaultBasemap = await api.map(mapId).basemap.loadDefaultBasemaps();
 
+    let extent: Extent | undefined;
+    if (mapConfig.viewSettings?.extent) {
+      if (projection.getCode() === 'EPSG:3978') {
+        // eslint-disable-next-line no-console
+        console.error('Extents not available for LLC projections (EPSG: 3978)');
+        api.event.emit(
+          notificationPayload(
+            EVENT_NAMES.NOTIFICATIONS.NOTIFICATION_ADD,
+            mapId,
+            'warning',
+            'Extents not available for LLC projections (EPSG: 3978)'
+          )
+        );
+      } else {
+        const mins = fromLonLat([mapConfig.viewSettings.extent[0], mapConfig.viewSettings.extent[1]], projection.getCode());
+        const maxs = fromLonLat([mapConfig.viewSettings.extent[2], mapConfig.viewSettings.extent[3]], projection.getCode());
+        extent = [mins[0], mins[1], maxs[0], maxs[1]];
+      }
+    }
+
     const initialMap = new OLMap({
       target: mapElement.current as string | HTMLElement | undefined,
       layers: defaultBasemap?.layers.map((layer) => {
@@ -225,8 +246,7 @@ export function Map(mapFeaturesConfig: TypeMapFeaturesConfig): JSX.Element {
         projection,
         center: fromLonLat([mapConfig.viewSettings.center[0], mapConfig.viewSettings.center[1]], projection),
         zoom: mapConfig.viewSettings.zoom,
-        // TODO: is still valid? extent: projectionConfig.extent,
-        extent: defaultBasemap?.defaultExtent ? defaultBasemap?.defaultExtent : undefined,
+        extent: extent || defaultBasemap?.defaultExtent || undefined,
         minZoom: mapConfig.viewSettings.minZoom || defaultBasemap?.zoomLevels.min || 0,
         maxZoom: mapConfig.viewSettings.maxZoom || defaultBasemap?.zoomLevels.max || 17,
       }),

@@ -771,7 +771,9 @@ export class WMS extends AbstractGeoViewRaster {
     if (Array.isArray(layerCapabilities?.Style)) {
       let legendStyle;
       if (chosenStyle) {
-        legendStyle = layerCapabilities?.Style[chosenStyle];
+        [legendStyle] = layerCapabilities!.Style.filter((style) => {
+          return style.Name === chosenStyle;
+        });
       } else {
         legendStyle = layerCapabilities?.Style.find((style) => {
           if (layerConfig?.source?.style && !Array.isArray(layerConfig?.source?.style)) return layerConfig.source.style === style.Name;
@@ -844,9 +846,7 @@ export class WMS extends AbstractGeoViewRaster {
    */
   private async getStyleLegend(layerConfig: TypeOgcWmsLayerEntryConfig, position: number): Promise<TypeWmsLegendStyle> {
     const promisedStyleLegend = new Promise<TypeWmsLegendStyle>((resolve) => {
-      let chosenStyle: string | undefined;
-      if (this.WMSStyles[position] === 'default') chosenStyle = undefined;
-      else chosenStyle = this.WMSStyles[position];
+      const chosenStyle: string | undefined = this.WMSStyles[position];
       let styleLegend: TypeWmsLegendStyle;
       this.getLegendImage(layerConfig!, chosenStyle).then((styleLegendImage) => {
         if (!styleLegendImage) {
