@@ -16,11 +16,9 @@ import * as UI from './ui';
 import AppStart from './core/app-start';
 import * as types from './core/types/cgpv-types';
 
-import { EVENT_NAMES } from './api/events/event-types';
 import { API } from './api/api';
 
 import { Config } from './core/utils/config/config';
-import { payloadIsAmapFeaturesConfig } from './api/events/payloads';
 
 // The next export allow to import the cgpv-types from 'geoview-core' from outside of the geoview-core package.
 export * from './core/types/cgpv-types';
@@ -31,54 +29,48 @@ export const api = new API();
 let root: Root | null = null;
 
 // listen to map reload event
-api.event.on(
-  EVENT_NAMES.MAP.EVENT_MAP_RELOAD,
-  (payload) => {
-    if (payloadIsAmapFeaturesConfig(payload)) {
-      if (payload.mapFeaturesConfig && payload.mapFeaturesConfig.mapId) {
-        // unsubscribe from all events registered on this map
-        api.event.offAll(payload.mapFeaturesConfig.mapId);
+// api.event.on(
+//   EVENT_NAMES.MAP.EVENT_MAP_RELOAD,
+//   async (payload) => {
+//     if (payloadIsAmapFeaturesConfig(payload)) {
+//       if (payload.mapFeaturesConfig && payload.mapFeaturesConfig.mapId) {
+//         const { mapId } = payload.mapFeaturesConfig;
+//         const map = api.map(mapId);
 
-        // unload all loaded plugins on the map
-        api.plugin.removePlugins(payload.mapFeaturesConfig.mapId);
+//         // remove geoview layers from map
+//         map.layer.removeAllGeoviewLayers();
 
-        // get the map container
-        const map = document.getElementById(payload.mapFeaturesConfig.mapId);
+//         // unload all loaded plugins on the map
+//         api.plugin.removePlugins(mapId);
+//         api.plugin.pluginsLoaded = false;
 
-        if (map) {
-          // TODO: As part of #1118 refactor, see if we can just rehydrate the App compoent or we still need the add and remove
-          // remove the dom element (remove rendered map)
-          // eslint-disable-next-line no-underscore-dangle
-          if (root !== null) root.unmount();
+//         map.mapFeaturesConfig = payload.mapFeaturesConfig;
+//         if (payload.mapFeaturesConfig.displayLanguage) map.displayLanguage = payload.mapFeaturesConfig.displayLanguage;
 
-          // recreate the map - crate e new div and remove the active one
-          const newDiv = document.createElement('div');
-          newDiv.setAttribute('id', payload.mapFeaturesConfig.mapId);
-          newDiv.setAttribute('class', 'llwp-map');
-          map!.parentNode!.insertBefore(newDiv, map);
-          map.remove();
+//         // reset basemaps array and reload basemap and plugins
+//         map.basemap.basemaps = [];
+//         map.basemap.displayLanguage = payload.mapFeaturesConfig.displayLanguage || 'en';
+//         map.basemap.loadDefaultBasemaps().then((basemap) => {
+//           if (basemap?.basemapId) map.basemap.setBasemap(basemap!.basemapId!);
+//           api.plugin.loadPlugins();
+//         });
 
-          // create the new root
-          const newRoot = document.getElementById(payload.mapFeaturesConfig.mapId);
-          root = createRoot(newRoot!);
+//         // reset view
+//         const { center, zoom } = map.mapFeaturesConfig.map.viewSettings;
+//         const projectionConfig = api.projection.projections[map.currentProjection];
+//         const projectedCoords = fromLonLat(center, projectionConfig);
+//         const extent: Extent = [...projectedCoords, ...projectedCoords];
+//         const options: FitOptions = { padding: [100, 100, 100, 100], maxZoom: zoom, duration: 500 };
 
-          // delete the map instance from the maps array
-          delete api.maps[payload.mapFeaturesConfig.mapId];
+//         map.zoomToExtent(extent, options);
 
-          // delete plugins that were loaded on the map
-          delete api.plugin.plugins[payload.mapFeaturesConfig.mapId];
-
-          // set plugin's loaded to false
-          api.plugin.pluginsLoaded = false;
-
-          // re-render map with updated config keeping previous values if unchanged
-          root.render(<AppStart mapFeaturesConfig={payload.mapFeaturesConfig} />);
-        }
-      }
-    }
-  },
-  'all'
-);
+//         // load layers
+//         map.layer.loadListOfGeoviewLayer(map.mapFeaturesConfig.map.listOfGeoviewLayerConfig);
+//       }
+//     }
+//   },
+//   'all'
+// );
 
 /**
  * Initialize the cgpv and render it to root element
