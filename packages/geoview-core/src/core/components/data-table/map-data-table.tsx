@@ -17,8 +17,23 @@ import { Box, IconButton, ZoomInSearchIcon } from '@/ui';
 import ExportButton from './export-button';
 import JSONExportButton from './json-export-button';
 
+interface FeatureInfo {
+  featureInfoKey: string;
+  featureInfoValue: string | number;
+  fieldType: string;
+}
+
+export interface Features {
+  geometry: Geometry;
+  extent?: Extent;
+  featureKey?: FeatureInfo;
+  featureIcon?: FeatureInfo;
+  featureActions?: FeatureInfo;
+  rows: Record<string, string>;
+}
+
 export interface MapDataTableData {
-  features: Record<string, string>[];
+  features: Features[];
   fieldAliases: Record<string, string>;
 }
 
@@ -30,24 +45,18 @@ export interface ColumnsType {
 
 interface MapDataTableProps {
   data: MapDataTableData;
-}
-
-export interface Rows {
-  geometry: Geometry;
-  extent?: Extent;
-  featureKey?: string;
-  featureIcon?: string;
-  featureActions?: unknown;
+  layerId: string;
 }
 
 /**
  * Build Data table from map.
  * @param {MapDataTableProps} data map data which will be used to build data table.
+ * @param {string} layerId id of the layer
  *
  * @return {ReactElement} Data table as react element.
  */
 
-function MapDataTable({ data }: MapDataTableProps) {
+function MapDataTable({ data, layerId }: MapDataTableProps) {
   const { t } = useTranslation<string>();
 
   // optionally access the underlying virtualizer instance
@@ -94,7 +103,7 @@ function MapDataTable({ data }: MapDataTableProps) {
             <ZoomInSearchIcon />
           </IconButton>
         ),
-        ...feature,
+        ...feature.rows,
       };
     }) as unknown as ColumnsType[];
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -118,8 +127,9 @@ function MapDataTable({ data }: MapDataTableProps) {
             <MRTShowHideColumnsButton table={table} />
             <MRTToggleDensePaddingButton table={table} />
             <MRTFullScreenToggleButton table={table} />
-            <ExportButton dataTableData={rows} columns={columns} />
-            <JSONExportButton features={data.features} />
+            <ExportButton rows={rows} columns={columns}>
+              <JSONExportButton features={data.features} layerId={layerId} />
+            </ExportButton>
           </Box>
         )}
         enableBottomToolbar={false}

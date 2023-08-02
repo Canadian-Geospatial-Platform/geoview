@@ -1,4 +1,7 @@
 import { createElement, ReactElement } from 'react';
+import { toLonLat, Projection } from 'ol/proj';
+import { Geometry, Point, Polygon, LineString, MultiPoint } from 'ol/geom';
+
 import DataTable, { DataTableData } from './data-table';
 
 import {
@@ -59,21 +62,61 @@ export class DataTableApi {
   };
 
   /**
+   * Create a geometry json
+   *
+   * @param {Geometry} geometry the geometry
+   * @return {TypeJsonObject} the geometry json
+   *
+   */
+  buildGeometry = (geometry: Geometry, projectionConfig: Projection) => {
+    if (geometry instanceof Polygon) {
+      return {
+        type: 'Polygon',
+        coordinates: geometry.getCoordinates().map((coords) => {
+          return coords.map((coord) => toLonLat(coord, projectionConfig));
+        }),
+      };
+    }
+
+    if (geometry instanceof LineString) {
+      return { type: 'LineString', coordinates: geometry.getCoordinates().map((coord) => toLonLat(coord, projectionConfig)) };
+    }
+
+    if (geometry instanceof Point) {
+      return { type: 'Point', coordinates: toLonLat(geometry.getCoordinates(), projectionConfig) };
+    }
+
+    if (geometry instanceof MultiPoint) {
+      return { type: 'MultiPoint', coordinates: geometry.getCoordinates().map((coord) => toLonLat(coord, projectionConfig)) };
+    }
+
+    return {};
+  };
+
+  /**
    * Create a data table rows
    *
    * @param {TypeArrayOfFeatureInfoEntries} arrayOfFeatureInfoEntries the properties of the data table to be created
    * @return {TypeJsonArray} the data table rows
    */
 
-  buildFeatureRows = (arrayOfFeatureInfoEntries: TypeArrayOfFeatureInfoEntries) => {
-    const rows = arrayOfFeatureInfoEntries.map((entries) => {
-      return Object.values(entries.fieldInfo).reduce((acc, curr) => {
-        if (curr) {
-          acc[curr.alias] = curr.value as string;
-        }
+  buildFeatureRows = (arrayOfFeatureInfoEntries: TypeArrayOfFeatureInfoEntries, projectionConfig: Projection) => {
+    const features = arrayOfFeatureInfoEntries.map((feature) => {
+      const { featureKey, fieldInfo, geometry, featureIcon, extent } = feature;
 
-        return acc;
-      }, {} as Record<string, string>);
+      return {
+        featureKey: { featureInfoKey: 'featureKey', featureInfoValue: featureKey, fieldType: 'string' },
+        featureIcon: { featureInfoKey: 'Icon', featureInfoValue: featureIcon.toDataURL(), fieldType: 'string' },
+        featureActions: { featureInfoKey: 'Zoom', featureInfoValue: '', fieldType: 'string' },
+        geometry: this.buildGeometry(geometry?.getGeometry() as Geometry, projectionConfig) as Geometry,
+        extent,
+        rows: Object.values(fieldInfo).reduce((acc, curr) => {
+          if (curr) {
+            acc[curr.alias] = curr.value as string;
+          }
+          return acc;
+        }, {} as Record<string, string>),
+      };
     });
 
     const columns = arrayOfFeatureInfoEntries.reduce((acc, curr) => {
@@ -87,7 +130,7 @@ export class DataTableApi {
     }, {} as Record<string, string>);
 
     return {
-      features: rows,
+      features,
       fieldAliases: columns,
     };
   };
@@ -100,6 +143,8 @@ export class DataTableApi {
 
   createDataTableByLayerId = async ({ layerId }: TypeLayerDataGridProps): Promise<ReactElement | null> => {
     const geoviewLayerInstance = api.map(this.mapId).layer.geoviewLayers[layerId];
+    const { currentProjection } = api.map(this.mapId);
+    const projectionConfig = api.projection.projections[currentProjection];
 
     if (
       geoviewLayerInstance.listOfLayerEntryConfig.length > 0 &&
@@ -117,10 +162,10 @@ export class DataTableApi {
           .filter((req) => req.status === 'fulfilled')
           .map((result) => {
             /* @ts-expect-error value prop is part of promise, filter function already filter fullfilled promise, still thrown type error. */
-            return this.buildFeatureRows(result.value);
+            return this.buildFeatureRows(result.value, projectionConfig);
           });
 
-        return createElement(MapDataTable, { data: data[0] }, []);
+        return createElement(MapDataTable, { data: data[0], layerId }, []);
       }
     }
     return null;

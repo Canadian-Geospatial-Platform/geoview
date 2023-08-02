@@ -106,6 +106,7 @@
     "icon": "ICON",
     "zoom": "ZOOM",
     "exportBtn": "Export",
-    "jsonExportBtn": "Download JSON"
+    "jsonExportBtn": "Download GeoJSON",
+    "downloadAsCSV": "Download as CSV"
   }
 }
