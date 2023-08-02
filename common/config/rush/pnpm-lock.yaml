@@ -58,12 +58,14 @@ importers:
       eslint-plugin-react: ^7.28.0
       eslint-plugin-react-hooks: ^4.3.0
       geoview-core: workspace:~0.1.0
+      lodash: ^4.17.21
       prettier: ^2.6.0
       react: ^18.2.0
       react-dom: ^18.2.0
       typescript: ^4.5.5
     dependencies:
       geoview-core: link:../geoview-core
+      lodash: 4.17.21
     devDependencies:
       '@babel/core': 7.22.11
       '@babel/eslint-parser': 7.22.11_uigyy4cvxrfgnh6h4oubbidkhu

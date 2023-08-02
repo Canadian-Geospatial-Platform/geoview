@@ -275,7 +275,7 @@ export class Basemap {
   /**
    * Create a basemap layer
    *
-   * @param {string} id the id of the layer
+   * @param {string} basemapId the id of the layer
    * @param {TypeJsonObject} basemapLayer the basemap layer url and json url
    * @param {number} opacity the opacity to use for this layer
    * @param {boolean} rest should we do a get request to get the info from the server
@@ -338,7 +338,7 @@ export class Basemap {
         // set extent for this layer
         extent = [fullExtent.xmin as number, fullExtent.ymin as number, fullExtent.xmax as number, fullExtent.ymax as number];
 
-        // Because OpenLayers can reporject on the fly raster, some like Shaded and Simple even if only available in 3978
+        // Because OpenLayers can reproject on the fly raster, some like Shaded and Simple even if only available in 3978
         // can be use in 3857. For this we need to make a difference between map projection and url use for the basemap
         urlProj = this.getProjectionFromUrl(basemapLayer.url as string);
       } catch (error) {
@@ -393,7 +393,7 @@ export class Basemap {
       // check if projection is provided for the basemap creation
       const projectionCode = projection === undefined ? this.projection : projection;
 
-      // check if basemap options are provided for the baemao creation
+      // check if basemap options are provided for the basemap creation
       const coreBasemapOptions = basemapOptions === undefined ? this.basemapOptions : basemapOptions;
 
       if (coreBasemapOptions) {
@@ -579,7 +579,7 @@ export class Basemap {
    * @returns {TypeBasemapProps | undefined} the default basemap
    */
   loadDefaultBasemaps = async (): Promise<TypeBasemapProps | undefined> => {
-    const basemap = await this.createCoreBasemap(this.basemapOptions);
+    const basemap = await this.createCoreBasemap(api.map(this.#mapId).mapFeaturesConfig.map.basemapOptions);
     const overviewBasemap = await this.createCoreBasemap({ basemapId: 'transport', shaded: false, labeled: false });
 
     this.activeBasemap = basemap;
@@ -623,7 +623,7 @@ export class Basemap {
   /**
    * Set the current basemap and update the basemap layers on the map
    *
-   * @param {string} id the id of the basemap
+   * @param {string} basemapId the id of the basemap
    */
   setBasemap = (basemapId: string): void => {
     // get basemap by id
@@ -633,6 +633,7 @@ export class Basemap {
     this.activeBasemap = basemap;
 
     // emit an event to update the basemap layers on the map
-    api.event.emit(basemapLayerArrayPayload(EVENT_NAMES.BASEMAP.EVENT_BASEMAP_LAYERS_UPDATE, this.#mapId, basemap.layers));
+    if (basemap?.layers)
+      api.event.emit(basemapLayerArrayPayload(EVENT_NAMES.BASEMAP.EVENT_BASEMAP_LAYERS_UPDATE, this.#mapId, basemap.layers));
   };
 }

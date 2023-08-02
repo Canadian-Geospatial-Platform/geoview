@@ -416,8 +416,28 @@ export class MapViewer {
       updatedMapConfig.map.listOfGeoviewLayerConfig = listOfGeoviewLayerConfig;
     }
 
-    // emit an event to reload the map to change the language
-    api.event.emit(mapConfigPayload(EVENT_NAMES.MAP.EVENT_MAP_RELOAD, 'all', updatedMapConfig));
+    // reload the map to change the language
+    this.reloadMap(updatedMapConfig);
+  };
+
+  /**
+   * Reload map from config
+   *
+   * @param {TypeMapFeaturesConfig} mapFeaturesConfig a new config passed in from the function call
+   */
+  reloadMap = async (mapFeaturesConfig: TypeMapFeaturesConfig) => {
+    const map = api.map(this.mapId);
+    // remove geoview layers from map
+    map.layer.removeAllGeoviewLayers();
+
+    // unload all loaded plugins on the map
+    api.plugin.removePlugins(this.mapId);
+    api.plugin.pluginsLoaded = false;
+
+    map.mapFeaturesConfig = mapFeaturesConfig;
+
+    // emit an event to reload the map with the new config
+    api.event.emit(mapConfigPayload(EVENT_NAMES.MAP.EVENT_MAP_RELOAD, 'all', mapFeaturesConfig));
   };
 
   /**
@@ -426,7 +446,7 @@ export class MapViewer {
    * @param {string} mapConfig a new config passed in from the function call
    */
   loadMapConfig = (mapConfig: string) => {
-    const targetDiv = this.map.getTargetElement().parentElement!.parentElement!.parentElement;
+    const targetDiv = document.getElementById(this.mapId);
 
     const configObjString = removeCommentsFromJSON(mapConfig);
     const parsedMapConfig = parseJSONConfig(configObjString);
@@ -439,8 +459,8 @@ export class MapViewer {
       configObj!.displayLanguage = this.displayLanguage;
     }
 
-    // emit an event to reload the map with the new config
-    api.event.emit(mapConfigPayload(EVENT_NAMES.MAP.EVENT_MAP_RELOAD, 'all', configObj!));
+    // reload the map with the new config
+    this.reloadMap(configObj!);
   };
 
   /**

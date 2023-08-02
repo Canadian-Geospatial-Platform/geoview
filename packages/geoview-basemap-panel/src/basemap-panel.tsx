@@ -1,15 +1,8 @@
-import {
-  toJsonObject,
-  TypeBasemapProps,
-  TypeJsonObject,
-  TypeJsonArray,
-  SelectChangeEvent,
-  TypeWindow,
-  TypeViewSettings,
-  mapViewProjectionPayload,
-  TypeBasemapOptions,
-  TypeValidMapProjectionCodes,
-} from 'geoview-core';
+import { toJsonObject, TypeJsonObject, TypeJsonArray, SelectChangeEvent, TypeWindow } from 'geoview-core';
+import { mapViewProjectionPayload } from 'geoview-core/src/api/events/payloads';
+import { TypeBasemapOptions, TypeBasemapProps } from 'geoview-core/src/geo/layer/basemap/basemap-types';
+import { TypeValidMapProjectionCodes, TypeViewSettings } from 'geoview-core/src/geo/map/map-schema-types';
+import { isEqual } from 'lodash';
 
 const w = window as TypeWindow;
 
@@ -22,9 +15,8 @@ export function BasemapPanel(props: BaseMapPanelProps): JSX.Element {
   const { mapId, config } = props;
 
   const { cgpv } = w;
-  const myMap = cgpv.api.map(mapId);
-
-  const { api, ui, react } = cgpv;
+  const { ui, react, api } = cgpv;
+  const myMap = api.map(mapId);
   const { Select, Card } = ui.elements;
 
   const { useState, useEffect } = react;
@@ -121,7 +113,7 @@ export function BasemapPanel(props: BaseMapPanelProps): JSX.Element {
   /**
    * Update the basemap with the layers on the map
    *
-   * @param {string} id update the basemap on the map
+   * @param {string} basemapId update the basemap on the map
    */
   const setBasemap = (basemapId: string) => {
     // set the new basemap and update the active basemap variable
@@ -141,34 +133,43 @@ export function BasemapPanel(props: BaseMapPanelProps): JSX.Element {
     let isInit = false;
 
     // reset the basemaps array
-    api.map(mapId).basemap.basemaps = [];
+    myMap.basemap.basemaps = [];
     setBasemapList([]);
+
+    // create basemap from basemapOptions in config
+    const configBasemapOptions = myMap.mapFeaturesConfig.map.basemapOptions;
+    const configBasemap = await myMap.basemap.createCoreBasemap(configBasemapOptions as unknown as TypeBasemapOptions, projection);
+    if (configBasemap) setBasemapList([configBasemap]);
 
     // create the custom config basemap
     for (let basemapIndex = 0; basemapIndex < (basemapsArray.customBasemaps.length as number); basemapIndex++) {
-      const customBasemap = basemapsArray.customBasemaps[basemapIndex] as TypeJsonObject;
-      const basemap = api.map(mapId).basemap.createCustomBasemap(customBasemap as unknown as TypeBasemapProps);
-      if (basemap) setBasemapList((prevArray) => [...prevArray, basemap]);
+      if (!isEqual(basemapsArray.customBasemaps[basemapIndex], configBasemapOptions)) {
+        const customBasemap = basemapsArray.customBasemaps[basemapIndex] as TypeJsonObject;
+        const basemap = myMap.basemap.createCustomBasemap(customBasemap as unknown as TypeBasemapProps);
+        if (basemap) setBasemapList((prevArray) => [...prevArray, basemap]);
 
-      // custom basemap are provided set it by default (can't be set as basemap from geoview config)
-      if (basemap && basemapIndex === 0 && activeBasemapId === '') {
-        setBasemap(basemap.basemapId!);
-        isInit = true;
+        // custom basemap are provided set it by default (can't be set as basemap from geoview config)
+        if (basemap && basemapIndex === 0 && activeBasemapId === '') {
+          setBasemap(basemap.basemapId!);
+          isInit = true;
+        }
       }
     }
 
     // create the core basemap
     for (let basemapIndex = 0; basemapIndex < (basemapsArray.coreBasemaps.length as number); basemapIndex++) {
-      const basemapOptions = basemapsArray.coreBasemaps[basemapIndex] as TypeJsonObject;
-      // eslint-disable-next-line no-await-in-loop
-      const basemap = await api.map(mapId).basemap.createCoreBasemap(basemapOptions as unknown as TypeBasemapOptions, projection);
-      if (basemap) setBasemapList((prevArray) => [...prevArray, basemap]);
+      if (!isEqual(basemapsArray.coreBasemaps[basemapIndex], configBasemapOptions)) {
+        const basemapOptions = basemapsArray.coreBasemaps[basemapIndex] as TypeJsonObject;
+        // eslint-disable-next-line no-await-in-loop
+        const basemap = await myMap.basemap.createCoreBasemap(basemapOptions as unknown as TypeBasemapOptions, projection);
+        if (basemap) setBasemapList((prevArray) => [...prevArray, basemap]);
 
-      // set basemap if previously selected in previous projection
-      const id = `${basemapOptions.shaded ? 'shaded' : ''}${basemapOptions.id}${basemapOptions.labeled ? 'label' : ''}`;
-      if (basemap && id === activeBasemapId && !isInit) {
-        setBasemap(activeBasemapId);
-        isInit = true;
+        // set basemap if previously selected in previous projection
+        const id = `${basemapOptions.shaded ? 'shaded' : ''}${basemapOptions.id}${basemapOptions.labeled ? 'label' : ''}`;
+        if (basemap && id === activeBasemapId && !isInit) {
+          setBasemap(activeBasemapId);
+          isInit = true;
+        }
       }
     }
 
@@ -259,7 +260,7 @@ export function BasemapPanel(props: BaseMapPanelProps): JSX.Element {
                   <img src={basemap.thumbnailUrl} alt={basemap.altText} className="basemapCardThumbnail" />
                 )}
                 {Array.isArray(basemap.thumbnailUrl) &&
-                  basemap.thumbnailUrl.map((thumbnail, index) => {
+                  basemap.thumbnailUrl.map((thumbnail: string, index: number) => {
                     // eslint-disable-next-line react/no-array-index-key
                     return <img key={index} src={thumbnail} alt={basemap.altText} className="basemapCardThumbnail" />;
                   })}

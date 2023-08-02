@@ -156,29 +156,27 @@ export class Layer {
   /**
    * Load layers that was passed in with the map config
    *
-   * @param {TypeGeoviewLayerConfig[]} layersConfig an optional array containing layers passed within the map config
+   * @param {TypeGeoviewLayerConfig[]} geoviewLayerConfigs an optional array containing layers passed within the map config
    */
   loadListOfGeoviewLayer(geoviewLayerConfigs?: TypeGeoviewLayerConfig[]) {
     const validGeoviewLayerConfigs = this.deleteDuplicatGeoviewLayerConfig(geoviewLayerConfigs);
 
     // set order for layers to appear on the map according to config
     this.layerOrder = [];
-    validGeoviewLayerConfigs.forEach((layer) => {
-      if (layer.geoviewLayerId) {
-        // layer order reversed so highest index is top layer
-        this.layerOrder.unshift(layer.geoviewLayerId);
-        // layers without id uses sublayer ids
-      } else if (layer.listOfLayerEntryConfig !== undefined) {
-        layer.listOfLayerEntryConfig.forEach((subLayer) => {
-          if (subLayer.layerId) this.layerOrder.unshift(subLayer.layerId);
-        });
-      }
-    });
 
     if (validGeoviewLayerConfigs.length > 0) {
-      validGeoviewLayerConfigs.forEach((geoviewLayerConfig) =>
-        api.event.emit(layerConfigPayload(EVENT_NAMES.LAYER.EVENT_ADD_LAYER, this.mapId, geoviewLayerConfig))
-      );
+      validGeoviewLayerConfigs.forEach((geoviewLayerConfig) => {
+        if (geoviewLayerConfig.geoviewLayerId) {
+          // layer order reversed so highest index is top layer
+          this.layerOrder.unshift(geoviewLayerConfig.geoviewLayerId);
+          // layers without id uses sublayer ids
+        } else if (geoviewLayerConfig.listOfLayerEntryConfig !== undefined) {
+          geoviewLayerConfig.listOfLayerEntryConfig.forEach((subLayer) => {
+            if (subLayer.layerId) this.layerOrder.unshift(subLayer.layerId);
+          });
+        }
+        api.event.emit(layerConfigPayload(EVENT_NAMES.LAYER.EVENT_ADD_LAYER, this.mapId, geoviewLayerConfig));
+      });
     }
   }
 
@@ -387,6 +385,17 @@ export class Layer {
     api.event.emit(GeoViewLayerPayload.createRemoveGeoviewLayerPayload(this.mapId, geoviewLayer));
 
     return geoviewLayer.geoviewLayerId;
+  };
+
+  /**
+   * Remove all geoview layers from the map
+   */
+  removeAllGeoviewLayers = () => {
+    Object.keys(this.geoviewLayers).forEach((layerId: string) => {
+      this.removeGeoviewLayer(this.geoviewLayers[layerId]);
+    });
+
+    return this.mapId;
   };
 
   /**

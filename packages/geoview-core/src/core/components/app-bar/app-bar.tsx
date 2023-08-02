@@ -175,6 +175,7 @@ export function Appbar({ setActivetrap }: AppbarProps): JSX.Element {
       api.event.off(EVENT_NAMES.APPBAR.EVENT_APPBAR_PANEL_REMOVE, mapId, appBarPanelRemoveListenerFunction);
       api.event.off(EVENT_NAMES.PANEL.EVENT_PANEL_CLOSE, mapId, appBarPanelCloseListenerFunction);
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [addButtonPanel, mapId, removeButtonPanel, selectedAppBarButtonId]);
 
   return (
