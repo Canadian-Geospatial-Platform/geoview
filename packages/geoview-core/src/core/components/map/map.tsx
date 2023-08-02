@@ -177,7 +177,7 @@ export function Map(mapFeaturesConfig: TypeMapFeaturesConfig): JSX.Element {
     });
 
     // TODO: when map is loaded from function call, there is a first init with the empty config then an overwrite by the the function call.
-    // !Some of the reference are not set properly, so we have this work around. EWven with this is it not 100% perfect. This needs to be refactor
+    // !Some of the reference are not set properly, so we have this work around. Even with this is it not 100% perfect. This needs to be refactor
     // !so we do not have access before the api map is set. Related to language as well #1118
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let intervalMap: any;
