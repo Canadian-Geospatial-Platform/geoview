@@ -1,6 +1,6 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { MenuItem } from '../../../ui';
+import { MenuItem } from '@/ui';
 import { Features } from './map-data-table';
 
 interface JSONExportButtonProps {
@@ -10,7 +10,7 @@ interface JSONExportButtonProps {
 
 /**
  * Custom  GeoJson export button which will help to download data table data in geojson format.
- * @param {Features} features list of rows to be displayed in data table
+ * @param {Features[]} features list of rows to be displayed in data table
  * @param {string} layerId id of the layer
  * @returns {JSX.Element} returns Menu Item
  *

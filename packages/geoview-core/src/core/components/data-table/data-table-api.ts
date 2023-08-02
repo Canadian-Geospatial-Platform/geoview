@@ -65,6 +65,7 @@ export class DataTableApi {
    * Create a geometry json
    *
    * @param {Geometry} geometry the geometry
+   * @param {Projection} projectionConfig projection config to transfer lat long.
    * @return {TypeJsonObject} the geometry json
    *
    */
@@ -97,6 +98,7 @@ export class DataTableApi {
    * Create a data table rows
    *
    * @param {TypeArrayOfFeatureInfoEntries} arrayOfFeatureInfoEntries the properties of the data table to be created
+   * @param {Projection} projectionConfig projection config to transfer lat long.
    * @return {TypeJsonArray} the data table rows
    */
 
