@@ -97,7 +97,6 @@ export class Plugin {
   ): Promise<void> => {
     if ((this.plugins[mapId] && !this.plugins[mapId][pluginId]) || !(mapId in this.plugins)) {
       let plugin: TypePluginStructure | null = null;
-
       if (constructor) {
         // create new instance of the plugin. Here we must type the constructor variable to any
         // in order to cancel the "'new' expression, whose target lacks a construct signature" error message

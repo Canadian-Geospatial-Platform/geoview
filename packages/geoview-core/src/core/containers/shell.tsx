@@ -75,7 +75,10 @@ interface ShellProps {
  * @returns {JSX.Element} the shell component
  */
 export function Shell(props: ShellProps): JSX.Element {
-  const { shellId, mapFeaturesConfig } = props;
+  const { mapFeaturesConfig, shellId } = props;
+  const updatedMapFeaturesConfig: TypeMapFeaturesConfig = api.map(mapFeaturesConfig?.mapId as string).mapFeaturesConfig
+    ? api.map(mapFeaturesConfig.mapId!).mapFeaturesConfig
+    : mapFeaturesConfig;
 
   const classes = useStyles();
 
@@ -87,7 +90,7 @@ export function Shell(props: ShellProps): JSX.Element {
   // render additional components if added by api
   const [components, setComponents] = useState<Record<string, JSX.Element>>({});
 
-  const [, setUpdate] = useState<number>(0);
+  const [update, setUpdate] = useState<number>(0);
 
   /**
    * Set the focus trap
@@ -140,25 +143,31 @@ export function Shell(props: ShellProps): JSX.Element {
     // CHANGED
     api.event.on(EVENT_NAMES.MODAL.EVENT_MODAL_CREATE, modalCreateListenerFunction, shellId);
 
+    // Reload
+    api.event.on(EVENT_NAMES.MAP.EVENT_MAP_RELOAD, updateShell, 'all');
+
     return () => {
       api.event.off(EVENT_NAMES.MAP.EVENT_MAP_ADD_COMPONENT, shellId, mapAddedComponentListenerFunction);
       api.event.off(EVENT_NAMES.MAP.EVENT_MAP_REMOVE_COMPONENT, shellId, mapRemoveComponentListenerFunction);
       api.event.off(EVENT_NAMES.MODAL.EVENT_MODAL_CREATE, shellId, modalCreateListenerFunction);
+      api.event.off(EVENT_NAMES.MAP.EVENT_MAP_RELOAD, 'all', updateShell);
     };
   }, [components, shellId, updateShell]);
 
   return (
     <FocusTrap active={activeTrap} focusTrapOptions={{ escapeDeactivates: false }}>
-      <div id={`shell-${shellId}`} className={classes.shell}>
+      <div id={`shell-${shellId}`} className={classes.shell} key={update}>
         <a id={`toplink-${shellId}`} href={`#bottomlink-${shellId}`} className={classes.skip} style={{ top: '0px' }}>
           {t('keyboardnav.start')}
         </a>
         <div className={`${classes.mapContainer} mapContainer`}>
           <Appbar setActivetrap={setActivetrap} />
           {/* load geolocator component if config includes in list of components in appBar */}
-          {mapFeaturesConfig?.appBar?.includes('geolocator') && mapFeaturesConfig?.map.interaction === 'dynamic' && <Geolocator />}
-          <Map {...mapFeaturesConfig} />
-          {mapFeaturesConfig?.map.interaction === 'dynamic' && <Navbar setActivetrap={setActivetrap} />}
+          {updatedMapFeaturesConfig?.appBar?.includes('geolocator') && updatedMapFeaturesConfig?.map.interaction === 'dynamic' && (
+            <Geolocator />
+          )}
+          <Map {...updatedMapFeaturesConfig} />
+          {updatedMapFeaturesConfig?.map.interaction === 'dynamic' && <Navbar setActivetrap={setActivetrap} />}
         </div>
         {mapFeaturesConfig?.corePackages && mapFeaturesConfig?.corePackages.includes('footer-panel') && <FooterTabs />}
         {Object.keys(api.maps[shellId].modal.modals).map((modalId) => (

@@ -10,6 +10,7 @@ import * as UI from '../../ui';
 import { AbstractPlugin } from '@/api/plugin/abstract-plugin';
 import { TypeDisplayLanguage, TypeMapFeaturesInstance } from '@/geo/map/map-schema-types';
 
+export { isEqual } from 'lodash';
 export type { MutableRefObject, RefObject, Dispatch, SetStateAction } from 'react';
 export type { TypeArrayOfLayerData } from '@/core/components';
 export type { ButtonPropsLayerPanel } from '@/ui/panel/panel-types';
