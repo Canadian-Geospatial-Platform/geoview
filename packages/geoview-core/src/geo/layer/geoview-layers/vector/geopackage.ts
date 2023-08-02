@@ -10,7 +10,7 @@ import BaseLayer from 'ol/layer/Base';
 import LayerGroup from 'ol/layer/Group';
 import { Feature } from 'ol';
 
-import initSqlJs from 'sql.js';
+import initSqlJs, { SqlValue } from 'sql.js';
 import * as SLDReader from '@nieuwlandgeo/sldreader';
 
 import { cloneDeep } from 'lodash';
@@ -32,7 +32,7 @@ import {
   TypeLineStringVectorConfig,
   TypePolygonVectorConfig,
   TypeFillStyle,
-} from '../../../map/map-schema-types';
+} from '@/geo/map/map-schema-types';
 
 import { getLocalizedValue } from '@/core/utils/utilities';
 
@@ -62,6 +62,12 @@ interface layerData {
   source: VectorSource<Geometry>;
   properties: initSqlJs.ParamsObject | undefined;
 }
+
+type tableInfo = {
+  table_name: SqlValue;
+  srs_id?: string;
+  geometry_column_name: SqlValue;
+};
 
 /** *****************************************************************************************************************************
  * type guard function that redefines a TypeGeoviewLayerConfig as a TypeGeoPackageFeatureLayerConfig if the geoviewLayerType attribute of
@@ -328,7 +334,7 @@ export class GeoPackage extends AbstractGeoViewVector {
         xhr.onload = () => {
           if (xhr.status === 200) {
             const db = new SQL.Database(new Uint8Array(xhr.response as ArrayBuffer));
-            var tables = [];
+            var tables: tableInfo[] = [];
 
             let stmt = db.prepare(`
             SELECT gpkg_contents.table_name, gpkg_contents.srs_id,

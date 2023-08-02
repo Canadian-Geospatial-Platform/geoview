@@ -1,7 +1,7 @@
 import { useContext } from 'react';
 import { api } from '@/app';
 import { IconButton, ZoomOutIcon } from '@/ui';
-import { MapContext } from '../../../app-start';
+import { MapContext } from '@/core/app-start';
 
 /**
  * Zoom out button properties

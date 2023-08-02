@@ -28,7 +28,7 @@ import {
   TypeUniqueValueStyleInfo,
   TypeFeatureInfoLayerConfig,
   layerEntryIsGroupLayer,
-} from '../../../map/map-schema-types';
+} from '@/geo/map/map-schema-types';
 import { TypeArrayOfFeatureInfoEntries, codedValueType, rangeDomainType } from '@/api/events/payloads';
 import { api } from '@/app';
 import { Layer } from '../../layer';
@@ -623,7 +623,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
         )
           return `(1=1)${layerFilter ? ` and (${layerFilter})` : ''}`;
 
-        const filterArray = [];
+        const filterArray: string[] = [];
         let visibleWhenGreatherThisIndex = -1;
         for (let i = 0; i < styleSettings.classBreakStyleInfo.length; i++) {
           if (filterArray.length % 2 === 0) {

@@ -15,29 +15,11 @@ import { Geometry } from 'ol/geom';
 import { darken } from '@mui/material';
 import { Box, IconButton, ZoomInSearchIcon } from '@/ui';
 import ExportButton from './export-button';
+import JSONExportButton from './json-export-button';
 
-export interface Features {
-  attributes: {
-    [key: string]: string;
-  };
-  geometry?: { x: string; y: string };
-}
-
-export interface DataTableData {
-  displayFieldName: string;
-  features: Features[];
-  fieldAliases: { [key: string]: string };
-  fields?: {
-    alias: string;
-    type: string;
-    name: string;
-  }[];
-  geometryType?: string;
-  spatialReference?: {
-    latestWkid: number;
-
-    wkid: number;
-  };
+export interface MapDataTableData {
+  features: Record<string, string>[];
+  fieldAliases: Record<string, string>;
 }
 
 export interface ColumnsType {
@@ -46,8 +28,8 @@ export interface ColumnsType {
   [key: string]: string;
 }
 
-interface DataTableProps {
-  data: DataTableData;
+interface MapDataTableProps {
+  data: MapDataTableData;
 }
 
 export interface Rows {
@@ -58,7 +40,14 @@ export interface Rows {
   featureActions?: unknown;
 }
 
-function DataTable({ data }: DataTableProps) {
+/**
+ * Build Data table from map.
+ * @param {MapDataTableProps} data map data which will be used to build data table.
+ *
+ * @return {ReactElement} Data table as react element.
+ */
+
+function MapDataTable({ data }: MapDataTableProps) {
   const { t } = useTranslation<string>();
 
   // optionally access the underlying virtualizer instance
@@ -74,6 +63,7 @@ function DataTable({ data }: DataTableProps) {
       console.error(error);
     }
   }, [sorting]);
+
   /**
    * Build material react data table column header.
    *
@@ -104,7 +94,7 @@ function DataTable({ data }: DataTableProps) {
             <ZoomInSearchIcon />
           </IconButton>
         ),
-        ...feature.attributes,
+        ...feature,
       };
     }) as unknown as ColumnsType[];
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -129,6 +119,7 @@ function DataTable({ data }: DataTableProps) {
             <MRTToggleDensePaddingButton table={table} />
             <MRTFullScreenToggleButton table={table} />
             <ExportButton dataTableData={rows} columns={columns} />
+            <JSONExportButton features={data.features} />
           </Box>
         )}
         enableBottomToolbar={false}
@@ -163,4 +154,4 @@ function DataTable({ data }: DataTableProps) {
   );
 }
 
-export default DataTable;
+export default MapDataTable;

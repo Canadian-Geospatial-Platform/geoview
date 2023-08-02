@@ -1,11 +1,11 @@
 import { useContext, useState } from 'react';
 
-import { MapContext } from '../../../app-start';
+import { MapContext } from '@/core/app-start';
 
 import { api } from '@/app';
 
 import { IconButton, FullscreenIcon, FullscreenExitIcon } from '@/ui';
-import { TypeHTMLElement } from '../../../types/global-types';
+import { TypeHTMLElement } from '@/core/types/global-types';
 
 /**
  * Interface used for fullscreen button properties

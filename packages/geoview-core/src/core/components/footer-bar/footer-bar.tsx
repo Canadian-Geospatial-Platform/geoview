@@ -8,7 +8,7 @@ import { Attribution } from '../attribution/attribution';
 import { MousePosition } from '../mouse-position/mouse-position';
 import { Scale } from '../scale/scale';
 
-import { MapContext } from '../../app-start';
+import { MapContext } from '@/core/app-start';
 import { FooterbarExpandButton } from './footer-bar-expand-button';
 import { FooterbarRotationButton } from './footer-bar-rotation-button';
 import { FooterbarFixNorthSwitch } from './footer-bar-fixnorth-switch';
