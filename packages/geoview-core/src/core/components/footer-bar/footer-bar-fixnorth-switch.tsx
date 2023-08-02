@@ -10,7 +10,7 @@ import { MapContext } from '@/core/app-start';
 import { PROJECTION_NAMES } from '@/geo/projection/projection';
 
 import { EVENT_NAMES } from '@/api/events/event-types';
-import { booleanPayload, payloadIsABoolean, payloadIsAMapViewProjection } from '@/api/events/payloads';
+import { PayloadBaseClass, booleanPayload, payloadIsABoolean, payloadIsAMapViewProjection } from '@/api/events/payloads';
 
 /**
  * Footerbar Fix North Switch component
@@ -46,34 +46,30 @@ export function FooterbarFixNorthSwitch(): JSX.Element {
     }
   };
 
+  const footerBarExpandCollapseListenerFunction = (payload: PayloadBaseClass) => {
+    if (payloadIsABoolean(payload)) {
+      setExpanded(payload.status);
+    }
+  };
+
+  const eventMapViewProjectionChangeListenerFunction = (payload: PayloadBaseClass) => {
+    if (payloadIsAMapViewProjection(payload)) {
+      setMapProjection(`EPSG:${payload.projection}`);
+
+      // uncheck the control
+      if (switchChecked) setSwitchChecked(false);
+    }
+  };
+
   useEffect(() => {
-    api.event.on(
-      EVENT_NAMES.FOOTERBAR.EVENT_FOOTERBAR_EXPAND_COLLAPSE,
-      (payload) => {
-        if (payloadIsABoolean(payload)) {
-          setExpanded(payload.status);
-        }
-      },
-      mapId
-    );
+    api.event.on(EVENT_NAMES.FOOTERBAR.EVENT_FOOTERBAR_EXPAND_COLLAPSE, footerBarExpandCollapseListenerFunction, mapId);
 
     // listen to geoview-basemap-panel package change projection event
-    api.event.on(
-      EVENT_NAMES.MAP.EVENT_MAP_VIEW_PROJECTION_CHANGE,
-      (payload) => {
-        if (payloadIsAMapViewProjection(payload)) {
-          setMapProjection(`EPSG:${payload.projection}`);
-
-          // uncheck the control
-          if (switchChecked) setSwitchChecked(false);
-        }
-      },
-      mapId
-    );
+    api.event.on(EVENT_NAMES.MAP.EVENT_MAP_VIEW_PROJECTION_CHANGE, eventMapViewProjectionChangeListenerFunction, mapId);
 
     return () => {
-      api.event.off(EVENT_NAMES.FOOTERBAR.EVENT_FOOTERBAR_EXPAND_COLLAPSE, mapId);
-      api.event.off(EVENT_NAMES.MAP.EVENT_MAP_VIEW_PROJECTION_CHANGE, mapId);
+      api.event.off(EVENT_NAMES.FOOTERBAR.EVENT_FOOTERBAR_EXPAND_COLLAPSE, mapId, footerBarExpandCollapseListenerFunction);
+      api.event.off(EVENT_NAMES.MAP.EVENT_MAP_VIEW_PROJECTION_CHANGE, mapId, eventMapViewProjectionChangeListenerFunction);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

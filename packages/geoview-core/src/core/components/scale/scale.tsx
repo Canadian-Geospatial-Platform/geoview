@@ -12,7 +12,7 @@ import { MapContext } from '@/core/app-start';
 import { EVENT_NAMES } from '@/api/events/event-types';
 
 import { CheckIcon, Tooltip, Box } from '@/ui';
-import { payloadIsABoolean } from '@/api/events/payloads';
+import { PayloadBaseClass, payloadIsABoolean } from '@/api/events/payloads';
 
 const useStyles = makeStyles((theme) => ({
   scaleControl: {
@@ -113,6 +113,10 @@ export function Scale(): JSX.Element {
     ]);
   };
 
+  const footerbarExpandCollapseListenerFunction = (payload: PayloadBaseClass) => {
+    if (payloadIsABoolean(payload)) setExpanded(payload.status);
+  };
+
   useEffect(() => {
     const { map } = api.map(mapId);
 
@@ -133,21 +137,13 @@ export function Scale(): JSX.Element {
 
     map.on('moveend', onMoveEnd);
 
-    api.event.on(
-      EVENT_NAMES.FOOTERBAR.EVENT_FOOTERBAR_EXPAND_COLLAPSE,
-      (payload) => {
-        if (payloadIsABoolean(payload)) {
-          setExpanded(payload.status);
-        }
-      },
-      mapId
-    );
+    api.event.on(EVENT_NAMES.FOOTERBAR.EVENT_FOOTERBAR_EXPAND_COLLAPSE, footerbarExpandCollapseListenerFunction, mapId);
 
     return () => {
       map.removeControl(scaleLine);
       map.removeControl(scaleBar);
       map.un('moveend', onMoveEnd);
-      api.event.off(EVENT_NAMES.FOOTERBAR.EVENT_FOOTERBAR_EXPAND_COLLAPSE, mapId);
+      api.event.off(EVENT_NAMES.FOOTERBAR.EVENT_FOOTERBAR_EXPAND_COLLAPSE, mapId, footerbarExpandCollapseListenerFunction);
     };
   }, [mapId]);
 
