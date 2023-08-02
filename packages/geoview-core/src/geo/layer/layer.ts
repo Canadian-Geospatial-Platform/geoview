@@ -42,16 +42,6 @@ type TypeEventHandlerFunctions = {
   removeLayer: (payload: PayloadBaseClass) => void;
 };
 
-type TypeEventHandlerFunctions = {
-  addLayer: (payload: PayloadBaseClass) => void;
-  removeLayer: (payload: PayloadBaseClass) => void;
-};
-
-type TypeEventHandlerFunctions = {
-  addLayer: (payload: PayloadBaseClass) => void;
-  removeLayer: (payload: PayloadBaseClass) => void;
-};
-
 /**
  * A class to get the layer from layer type. Layer type can be esriFeature, esriDynamic and ogcWMS
  *
