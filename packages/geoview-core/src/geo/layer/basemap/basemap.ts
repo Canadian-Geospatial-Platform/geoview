@@ -579,7 +579,7 @@ export class Basemap {
    * @returns {TypeBasemapProps | undefined} the default basemap
    */
   loadDefaultBasemaps = async (): Promise<TypeBasemapProps | undefined> => {
-    const basemap = await this.createCoreBasemap(api.map(this.#mapId).mapFeaturesConfig.map.basemapOptions);
+    const basemap = await this.createCoreBasemap(api.maps[this.#mapId].mapFeaturesConfig.map.basemapOptions);
     const overviewBasemap = await this.createCoreBasemap({ basemapId: 'transport', shaded: false, labeled: false });
 
     this.activeBasemap = basemap;

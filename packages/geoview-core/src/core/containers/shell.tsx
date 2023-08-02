@@ -76,8 +76,8 @@ interface ShellProps {
  */
 export function Shell(props: ShellProps): JSX.Element {
   const { mapFeaturesConfig, shellId } = props;
-  const updatedMapFeaturesConfig: TypeMapFeaturesConfig = api.map(mapFeaturesConfig?.mapId as string).mapFeaturesConfig
-    ? api.map(mapFeaturesConfig.mapId!).mapFeaturesConfig
+  const updatedMapFeaturesConfig: TypeMapFeaturesConfig = api.maps[mapFeaturesConfig?.mapId as string].mapFeaturesConfig
+    ? api.maps[mapFeaturesConfig.mapId!].mapFeaturesConfig
     : mapFeaturesConfig;
 
   const classes = useStyles();

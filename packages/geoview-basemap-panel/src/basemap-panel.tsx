@@ -24,7 +24,7 @@ export function BasemapPanel(props: BaseMapPanelProps): JSX.Element {
 
   const { cgpv } = w;
   const { ui, react, api } = cgpv;
-  const myMap = api.map(mapId);
+  const myMap = api.maps[mapId];
   const { Select, Card } = ui.elements;
 
   const { useState, useEffect } = react;

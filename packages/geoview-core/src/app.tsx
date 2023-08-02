@@ -35,7 +35,7 @@ let root: Root | null = null;
 //     if (payloadIsAmapFeaturesConfig(payload)) {
 //       if (payload.mapFeaturesConfig && payload.mapFeaturesConfig.mapId) {
 //         const { mapId } = payload.mapFeaturesConfig;
-//         const map = api.map(mapId);
+//         const map = api.maps[mapId];
 
 //         // remove geoview layers from map
 //         map.layer.removeAllGeoviewLayers();

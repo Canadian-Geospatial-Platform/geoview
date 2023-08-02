@@ -10,8 +10,8 @@ import { Extent } from 'ol/extent';
 
 import queryString from 'query-string';
 
-import { Basemap } from '../layer/basemap/basemap';
-import { Layer } from '../layer/layer';
+import { Basemap } from '@/geo/layer/basemap/basemap';
+import { Layer } from '@/geo/layer/layer';
 import { TypeFeatureStyle } from '../layer/vector/vector-types';
 
 import { api } from '@/app';
@@ -62,6 +62,9 @@ interface TypeDcoument extends Document {
  * @class MapViewer
  */
 export class MapViewer {
+  // Function create-map-from-config has run
+  createMapConfigHasRun = false;
+
   // map config properties
   mapFeaturesConfig: TypeMapFeaturesConfig;
 
@@ -425,13 +428,14 @@ export class MapViewer {
   reloadMap = async (mapFeaturesConfig: TypeMapFeaturesConfig) => {
     const map = api.maps[this.mapId];
     // remove geoview layers from map
-    map.layer.removeAllGeoviewLayers();
+    if (map.layer) {
+      map.layer.removeAllGeoviewLayers();
+      map.layer.deleteEventHandlerFunctionsOfThisLayerInstance();
+    }
 
     // unload all loaded plugins on the map
     api.plugin.removePlugins(this.mapId);
     api.plugin.pluginsLoaded = false;
-
-    map.layer.deleteEventHandlerFunctionsOfThisLayerInstance();
 
     map.mapFeaturesConfig = mapFeaturesConfig;
 
@@ -446,14 +450,13 @@ export class MapViewer {
    */
   loadMapConfig = (mapConfig: string) => {
     const targetDiv = document.getElementById(this.mapId);
+    // create a new config for this map element
+    const config = new Config(targetDiv!);
 
     const configObjString = removeCommentsFromJSON(mapConfig);
     const parsedMapConfig = parseJSONConfig(configObjString);
 
-    // create a new config for this map element
-    const config = new Config(targetDiv!);
-
-    const configObj = config.getMapConfigFromFunc(parsedMapConfig);
+    const configObj = config.getValidMapConfig(parsedMapConfig);
     if (this.displayLanguage) {
       configObj!.displayLanguage = this.displayLanguage;
     }

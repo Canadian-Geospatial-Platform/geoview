@@ -84,13 +84,13 @@
       };
 
       function reloadMap(theme) {
-        cgpv.api.map('mapWM1').loadMapConfig(JSON.stringify({ ...config, theme: theme }));
+        cgpv.api.maps['mapWM1'].loadMapConfig(JSON.stringify({ ...config, theme: theme }));
       }
 
       // initialize cgpv and api events, a callback is optional, used if calling api's after the rendering is ready
       cgpv.init(function () {
         console.log('api is ready');
-        cgpv.api.map('mapWM1').loadMapConfig(JSON.stringify(config));
+        cgpv.s['mapWM1'].loadMapConfig(JSON.stringify(config));
 
         //create snippets
         createConfigSnippet();
