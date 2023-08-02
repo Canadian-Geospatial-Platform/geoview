@@ -20,7 +20,7 @@ import { FocusTrapDialog } from './focus-trap';
 import { api } from '@/app';
 import { EVENT_NAMES } from '@/api/events/event-types';
 
-import { Modal, Snackbar } from '@/ui';
+import { Modal, Snackbar, Box } from '@/ui';
 import { PayloadBaseClass, payloadIsAMapComponent, payloadIsAModal } from '@/api/events/payloads';
 import { TypeMapFeaturesConfig } from '../types/global-types';
 
@@ -41,6 +41,13 @@ const useStyles = makeStyles((theme) => {
       display: 'flex',
       flexDirection: 'row',
       height: '100%',
+      width: '100%',
+      position: 'relative',
+    },
+    appBarContainer: {
+      width: '64px',
+      height: '100%',
+      backgroundColor: 'red',
       position: 'relative',
     },
     skip: {
@@ -159,7 +166,9 @@ export function Shell(props: ShellProps): JSX.Element {
           {t('keyboardnav.start')}
         </a>
         <div className={`${classes.mapContainer} mapContainer`}>
-          <Appbar setActivetrap={setActivetrap} />
+          <Box className={classes.appBarContainer}>
+            <Appbar setActivetrap={setActivetrap} />
+          </Box>
           {/* load geolocator component if config includes in list of components in appBar */}
           {mapFeaturesConfig?.appBar?.includes('geolocator') && mapFeaturesConfig?.map.interaction === 'dynamic' && <Geolocator />}
           <Map {...mapFeaturesConfig} />
