@@ -128,7 +128,7 @@ function DataTable({ data }: DataTableProps) {
             <MRTShowHideColumnsButton table={table} />
             <MRTToggleDensePaddingButton table={table} />
             <MRTFullScreenToggleButton table={table} />
-            <ExportButton dataTableData={rows} columns={columns} />
+            <ExportButton rows={rows} columns={columns} />
           </Box>
         )}
         enableBottomToolbar={false}

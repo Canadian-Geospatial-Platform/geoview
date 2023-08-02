@@ -1,19 +1,21 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { IconButton, DownloadIcon, Tooltip } from '../../../ui';
+import { MenuItem } from '@/ui';
+import { Features } from './map-data-table';
 
 interface JSONExportButtonProps {
-  features: Record<string, string>[];
+  features: Features[];
+  layerId: string;
 }
 
 /**
- * Custom  export button which will help to download data table data in csv format.
- * @param {ColumnsType} dataTableData list of rows to be displayed in data table
- * @param {MRTColumnDef<ColumnsType>[]} columns array of object represent column header data.
- * @returns {JSX.Element} returns export button
+ * Custom  GeoJson export button which will help to download data table data in geojson format.
+ * @param {Features[]} features list of rows to be displayed in data table
+ * @param {string} layerId id of the layer
+ * @returns {JSX.Element} returns Menu Item
  *
  */
-function JSONExportButton({ features }: JSONExportButtonProps): JSX.Element {
+function JSONExportButton({ features, layerId }: JSONExportButtonProps): JSX.Element {
   const { t } = useTranslation<string>();
 
   /**
@@ -22,8 +24,17 @@ function JSONExportButton({ features }: JSONExportButtonProps): JSX.Element {
    *
    */
   const getJson = () => {
+    const geoData = features.map((feature) => {
+      const { geometry, rows } = feature;
+      return {
+        type: 'Feature',
+        geometry,
+        properties: rows,
+      };
+    });
+
     // Stringify with some indentation
-    return JSON.stringify(features, null, 2);
+    return JSON.stringify({ type: 'FeatureCollection', features: geoData }, null, 2);
   };
 
   /**
@@ -52,16 +63,10 @@ function JSONExportButton({ features }: JSONExportButtonProps): JSX.Element {
       type: 'text/json',
     });
 
-    exportBlob(blob, `table.json`);
+    exportBlob(blob, `table-${layerId}.json`);
   };
 
-  return (
-    <IconButton onClick={handleExportData}>
-      <Tooltip title={t('dataTable.jsonExportBtn')} placement="bottom" enterDelay={100}>
-        <DownloadIcon />
-      </Tooltip>
-    </IconButton>
-  );
+  return <MenuItem onClick={handleExportData}>{t('dataTable.jsonExportBtn')}</MenuItem>;
 }
 
 export default JSONExportButton;
