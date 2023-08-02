@@ -17,7 +17,7 @@ import { NorthArrowIcon, NorthPoleIcon } from './north-arrow-icon';
 import { MapContext } from '@/core/app-start';
 import { api } from '@/app';
 import { EVENT_NAMES } from '@/api/events/event-types';
-import { payloadIsAMapViewProjection, payloadIsABoolean } from '@/api/events/payloads';
+import { payloadIsAMapViewProjection, payloadIsABoolean, PayloadBaseClass } from '@/api/events/payloads';
 
 const useStyles = makeStyles((theme) => ({
   northArrowContainer: {
@@ -241,26 +241,24 @@ export function NorthArrow(props: NorthArrowProps): JSX.Element {
     []
   );
 
+  const mapFixNorthListenerFunction = (payload: PayloadBaseClass) => {
+    if (payloadIsABoolean(payload)) {
+      isNorthFixedValue.current = payload.status;
+
+      // if north is fix, trigger the map rotation
+      if (payload.status) {
+        manageArrow(api.map(mapId).map);
+      }
+    }
+  };
+
   useEffect(() => {
     const { map } = api.map(mapId);
 
     // listen to map moveend event
     map.on('moveend', onMapMoveEnd);
 
-    api.event.on(
-      EVENT_NAMES.MAP.EVENT_MAP_FIX_NORTH,
-      (payload) => {
-        if (payloadIsABoolean(payload)) {
-          isNorthFixedValue.current = payload.status;
-
-          // if north is fix, trigger the map rotation
-          if (payload.status) {
-            manageArrow(api.map(mapId).map);
-          }
-        }
-      },
-      mapId
-    );
+    api.event.on(EVENT_NAMES.MAP.EVENT_MAP_FIX_NORTH, mapFixNorthListenerFunction, mapId);
 
     return () => {
       api.event.off(EVENT_NAMES.MAP.EVENT_MAP_FIX_NORTH, mapId);
@@ -304,6 +302,12 @@ export function NorthPoleFlag(props: NorthArrowProps): JSX.Element {
   const { mapId } = mapConfig;
   const northPoleId = `${mapId}-northpole`;
 
+  const mapviewProjectionChangeListenerFunction = (payload: PayloadBaseClass) => {
+    if (payloadIsAMapViewProjection(payload)) {
+      setMapProjection(`EPSG:${payload.projection}`);
+    }
+  };
+
   useEffect(() => {
     const { map } = api.map(mapId);
     const projectionPosition = fromLonLat(
@@ -322,18 +326,10 @@ export function NorthPoleFlag(props: NorthArrowProps): JSX.Element {
     map.addOverlay(northPoleMarker);
 
     // listen to geoview-basemap-panel package change projection event
-    api.event.on(
-      EVENT_NAMES.MAP.EVENT_MAP_VIEW_PROJECTION_CHANGE,
-      (payload) => {
-        if (payloadIsAMapViewProjection(payload)) {
-          setMapProjection(`EPSG:${payload.projection}`);
-        }
-      },
-      mapId
-    );
+    api.event.on(EVENT_NAMES.MAP.EVENT_MAP_VIEW_PROJECTION_CHANGE, mapviewProjectionChangeListenerFunction, mapId);
 
     return () => {
-      api.event.off(EVENT_NAMES.MAP.EVENT_MAP_VIEW_PROJECTION_CHANGE, mapId);
+      api.event.off(EVENT_NAMES.MAP.EVENT_MAP_VIEW_PROJECTION_CHANGE, mapId, mapviewProjectionChangeListenerFunction);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

@@ -13,7 +13,7 @@ import { api } from '@/app';
 import { MapContext } from '@/core/app-start';
 
 import { EVENT_NAMES } from '@/api/events/event-types';
-import { payloadIsABoolean } from '@/api/events/payloads';
+import { PayloadBaseClass, payloadIsABoolean } from '@/api/events/payloads';
 
 import { Box, CheckIcon, Tooltip } from '@/ui';
 
@@ -194,40 +194,36 @@ export function MousePosition(props: MousePositionProps): JSX.Element {
 
   useEffect(() => {
     let opacityTimeout: string | number | NodeJS.Timeout | undefined;
+
+    const crossHairEnableDiableListenerFunction = (payload: PayloadBaseClass) => {
+      if (payloadIsABoolean(payload)) {
+        if (payload.handlerName!.includes(mousePositionMapId)) {
+          isCrosshairsActive.current = payload.status;
+        }
+      }
+    };
+
+    const footerbarExpandCollapseListenerFunction = (payload: PayloadBaseClass) => {
+      if (payloadIsABoolean(payload)) {
+        if (payload.handlerName!.includes(mousePositionMapId)) {
+          if (payload.status) {
+            opacityTimeout = setTimeout(() => setExpanded(payload.status), 300);
+          } else {
+            setExpanded(payload.status);
+          }
+          setMousePositionText(payload.status);
+        }
+      }
+    };
+
     // on map crosshair enable\disable, set variable for WCAG mouse position
     // TODO: On crosshaih, add crosshair center information to screen reader / mouse position component
-    api.event.on(
-      EVENT_NAMES.MAP.EVENT_MAP_CROSSHAIR_ENABLE_DISABLE,
-      (payload) => {
-        if (payloadIsABoolean(payload)) {
-          if (payload.handlerName!.includes(mousePositionMapId)) {
-            isCrosshairsActive.current = payload.status;
-          }
-        }
-      },
-      mapId
-    );
-
-    api.event.on(
-      EVENT_NAMES.FOOTERBAR.EVENT_FOOTERBAR_EXPAND_COLLAPSE,
-      (payload) => {
-        if (payloadIsABoolean(payload)) {
-          if (payload.handlerName!.includes(mousePositionMapId)) {
-            if (payload.status) {
-              opacityTimeout = setTimeout(() => setExpanded(payload.status), 300);
-            } else {
-              setExpanded(payload.status);
-            }
-            setMousePositionText(payload.status);
-          }
-        }
-      },
-      mapId
-    );
+    api.event.on(EVENT_NAMES.MAP.EVENT_MAP_CROSSHAIR_ENABLE_DISABLE, crossHairEnableDiableListenerFunction, mapId);
+    api.event.on(EVENT_NAMES.FOOTERBAR.EVENT_FOOTERBAR_EXPAND_COLLAPSE, footerbarExpandCollapseListenerFunction, mapId);
 
     return () => {
-      api.event.off(EVENT_NAMES.MAP.EVENT_MAP_CROSSHAIR_ENABLE_DISABLE, mapId);
-      api.event.off(EVENT_NAMES.FOOTERBAR.EVENT_FOOTERBAR_EXPAND_COLLAPSE, mapId);
+      api.event.off(EVENT_NAMES.MAP.EVENT_MAP_CROSSHAIR_ENABLE_DISABLE, mapId, crossHairEnableDiableListenerFunction);
+      api.event.off(EVENT_NAMES.FOOTERBAR.EVENT_FOOTERBAR_EXPAND_COLLAPSE, mapId, footerbarExpandCollapseListenerFunction);
       clearTimeout(opacityTimeout);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps

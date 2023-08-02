@@ -373,7 +373,7 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
     };
     api.event.on(api.eventNames.MAP.EVENT_MAP_ZOOM_END, mapZoomHandler, mapId);
     return () => {
-      api.event.off(api.eventNames.MAP.EVENT_MAP_ZOOM_END, mapId);
+      api.event.off(api.eventNames.MAP.EVENT_MAP_ZOOM_END, mapId, mapZoomHandler);
     };
   }, [canCluster, mapId]);
 

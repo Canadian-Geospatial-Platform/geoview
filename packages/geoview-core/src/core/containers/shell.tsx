@@ -21,7 +21,7 @@ import { api } from '@/app';
 import { EVENT_NAMES } from '@/api/events/event-types';
 
 import { Modal, Snackbar } from '@/ui';
-import { payloadIsAMapComponent, payloadIsAModal } from '@/api/events/payloads';
+import { PayloadBaseClass, payloadIsAMapComponent, payloadIsAModal } from '@/api/events/payloads';
 import { TypeMapFeaturesConfig } from '../types/global-types';
 
 const useStyles = makeStyles((theme) => {
@@ -111,53 +111,44 @@ export function Shell(props: ShellProps): JSX.Element {
     });
   }, []);
 
+  const mapAddedComponentListenerFunction = (payload: PayloadBaseClass) => {
+    if (payloadIsAMapComponent(payload)) {
+      setComponents((tempComponents) => ({
+        ...tempComponents,
+        [payload.mapComponentId]: payload.component!,
+      }));
+    }
+  };
+
+  const mapRemoveComponentListenerFunction = (payload: PayloadBaseClass) => {
+    if (payloadIsAMapComponent(payload)) {
+      const tempComponents: Record<string, JSX.Element> = { ...components };
+      delete tempComponents[payload.mapComponentId];
+
+      setComponents(() => ({
+        ...tempComponents,
+      }));
+    }
+  };
+
+  const modalCreateListenerFunction = (payload: PayloadBaseClass) => {
+    if (payloadIsAModal(payload)) updateShell();
+  };
+
   useEffect(() => {
     // listen to adding a new component events
-    api.event.on(
-      EVENT_NAMES.MAP.EVENT_MAP_ADD_COMPONENT,
-      (payload) => {
-        if (payloadIsAMapComponent(payload)) {
-          setComponents((tempComponents) => ({
-            ...tempComponents,
-            [payload.mapComponentId]: payload.component!,
-          }));
-        }
-      },
-      shellId
-    );
+    api.event.on(EVENT_NAMES.MAP.EVENT_MAP_ADD_COMPONENT, mapAddedComponentListenerFunction, shellId);
 
     // listen to removing a component events
-    api.event.on(
-      EVENT_NAMES.MAP.EVENT_MAP_REMOVE_COMPONENT,
-      (payload) => {
-        if (payloadIsAMapComponent(payload)) {
-          const tempComponents: Record<string, JSX.Element> = { ...components };
-          delete tempComponents[payload.mapComponentId];
-
-          setComponents(() => ({
-            ...tempComponents,
-          }));
-        }
-      },
-      shellId
-    );
+    api.event.on(EVENT_NAMES.MAP.EVENT_MAP_REMOVE_COMPONENT, mapRemoveComponentListenerFunction, shellId);
 
     // CHANGED
-    api.event.on(
-      EVENT_NAMES.MODAL.EVENT_MODAL_CREATE,
-      (payload) => {
-        if (payloadIsAModal(payload)) {
-          updateShell();
-        }
-      },
-      shellId
-    );
+    api.event.on(EVENT_NAMES.MODAL.EVENT_MODAL_CREATE, modalCreateListenerFunction, shellId);
 
     return () => {
-      api.event.off(EVENT_NAMES.MAP.EVENT_MAP_ADD_COMPONENT, shellId);
-      api.event.off(EVENT_NAMES.MAP.EVENT_MAP_REMOVE_COMPONENT, shellId);
-      api.event.off(EVENT_NAMES.MAP.EVENT_MAP_LOADED, shellId);
-      api.event.off(EVENT_NAMES.MODAL.EVENT_MODAL_CREATE, shellId);
+      api.event.off(EVENT_NAMES.MAP.EVENT_MAP_ADD_COMPONENT, shellId, mapAddedComponentListenerFunction);
+      api.event.off(EVENT_NAMES.MAP.EVENT_MAP_REMOVE_COMPONENT, shellId, mapRemoveComponentListenerFunction);
+      api.event.off(EVENT_NAMES.MODAL.EVENT_MODAL_CREATE, shellId, modalCreateListenerFunction);
     };
   }, [components, shellId, updateShell]);
 

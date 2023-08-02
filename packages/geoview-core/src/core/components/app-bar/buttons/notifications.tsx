@@ -5,7 +5,7 @@ import { MapContext } from '@/core/app-start';
 import { api } from '@/app';
 
 import { EVENT_NAMES } from '@/api/events/event-types';
-import { notificationPayload, NotificationPayload, payloadIsANotification } from '@/api/events/payloads';
+import { notificationPayload, NotificationPayload, PayloadBaseClass, payloadIsANotification } from '@/api/events/payloads';
 
 import { Box, Popover, InfoIcon, ErrorIcon, WarningIcon, CheckCircleIcon, CloseIcon, IconButton, NotificationsIcon, Badge } from '@/ui';
 import { NotificationDetailsType } from '@/core/components/notifications/notifications-api';
@@ -79,31 +79,27 @@ export default function Notifications(): JSX.Element {
     }
   };
 
+  const notificationAddListenerFunction = (payload: PayloadBaseClass) => {
+    if (payloadIsANotification(payload)) addNotification(payload);
+  };
+
+  const notificationRemoveListenerFunction = (payload: PayloadBaseClass) => {
+    if (payloadIsANotification(payload)) removeNotification(payload);
+  };
+
   /**
    * Manage the notifications 'add', 'remove'
    */
   useEffect(() => {
     // listen to new notification
-    api.event.on(
-      EVENT_NAMES.NOTIFICATIONS.NOTIFICATION_ADD,
-      (payload) => {
-        if (payloadIsANotification(payload)) addNotification(payload);
-      },
-      mapId
-    );
+    api.event.on(EVENT_NAMES.NOTIFICATIONS.NOTIFICATION_ADD, notificationAddListenerFunction, mapId);
 
     // listen on notification removal
-    api.event.on(
-      EVENT_NAMES.NOTIFICATIONS.NOTIFICATION_REMOVE,
-      (payload) => {
-        if (payloadIsANotification(payload)) removeNotification(payload);
-      },
-      mapId
-    );
+    api.event.on(EVENT_NAMES.NOTIFICATIONS.NOTIFICATION_REMOVE, notificationRemoveListenerFunction, mapId);
 
     return () => {
-      api.event.off(EVENT_NAMES.NOTIFICATIONS.NOTIFICATION_ADD, mapId);
-      api.event.off(EVENT_NAMES.NOTIFICATIONS.NOTIFICATION_REMOVE, mapId);
+      api.event.off(EVENT_NAMES.NOTIFICATIONS.NOTIFICATION_ADD, mapId, notificationAddListenerFunction);
+      api.event.off(EVENT_NAMES.NOTIFICATIONS.NOTIFICATION_REMOVE, mapId, notificationRemoveListenerFunction);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mapId]);

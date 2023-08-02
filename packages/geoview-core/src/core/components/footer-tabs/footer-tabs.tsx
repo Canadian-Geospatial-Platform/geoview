@@ -5,7 +5,7 @@ import { MapContext } from '@/core/app-start';
 import { api } from '@/app';
 
 import { EVENT_NAMES } from '@/api/events/event-types';
-import { FooterTabPayload, payloadIsAFooterTab } from '@/api/events/payloads';
+import { FooterTabPayload, PayloadBaseClass, payloadIsAFooterTab } from '@/api/events/payloads';
 
 import { ExpandLessIcon, ExpandMoreIcon, FullscreenIcon, FullscreenExitIcon, IconButton, Tabs, TypeTabs } from '@/ui';
 
@@ -130,47 +130,41 @@ export function FooterTabs(): JSX.Element | null {
     setIsCollapsed(!isCollapsed);
   };
 
+  const eventFooterTabsCreateListenerFunction = (payload: PayloadBaseClass) => {
+    if (payloadIsAFooterTab(payload)) addTab(payload);
+  };
+
+  const eventFooterTabsRemoveListenerFunction = (payload: PayloadBaseClass) => {
+    if (payloadIsAFooterTab(payload)) removeTab(payload);
+  };
+
+  const eventFooterTabsSelectListenerFunction = (payload: PayloadBaseClass) => {
+    if (payloadIsAFooterTab(payload)) {
+      // for details tab, extand the tab
+      if (payload.tab.value === 1) {
+        handleCollapse();
+      }
+      setSelectedTab(undefined); // this will always trigger the tab change, needed in case user changes selection
+      setSelectedTab(payload.tab.value);
+    }
+  };
+
   /**
    * Manage the tab 'create', 'remove' and 'select'
    */
   useEffect(() => {
     // listen to new tab creation
-    api.event.on(
-      EVENT_NAMES.FOOTER_TABS.EVENT_FOOTER_TABS_TAB_CREATE,
-      (payload) => {
-        if (payloadIsAFooterTab(payload)) addTab(payload);
-      },
-      mapId
-    );
+    api.event.on(EVENT_NAMES.FOOTER_TABS.EVENT_FOOTER_TABS_TAB_CREATE, eventFooterTabsCreateListenerFunction, mapId);
 
     // listen on tab removal
-    api.event.on(
-      EVENT_NAMES.FOOTER_TABS.EVENT_FOOTER_TABS_TAB_REMOVE,
-      (payload) => {
-        if (payloadIsAFooterTab(payload)) removeTab(payload);
-      },
-      mapId
-    );
+    api.event.on(EVENT_NAMES.FOOTER_TABS.EVENT_FOOTER_TABS_TAB_REMOVE, eventFooterTabsRemoveListenerFunction, mapId);
 
     // listen for tab selection
-    api.event.on(
-      EVENT_NAMES.FOOTER_TABS.EVENT_FOOTER_TABS_TAB_SELECT,
-      (payload) => {
-        if (payloadIsAFooterTab(payload)) {
-          // for details tab, extand the tab
-          if (payload.tab.value === 1) {
-            handleCollapse();
-          }
-          setSelectedTab(undefined); // this will always trigger the tab change, needed in case user changes selection
-          setSelectedTab(payload.tab.value);
-        }
-      },
-      mapId
-    );
+    api.event.on(EVENT_NAMES.FOOTER_TABS.EVENT_FOOTER_TABS_TAB_SELECT, eventFooterTabsSelectListenerFunction, mapId);
     return () => {
-      api.event.off(EVENT_NAMES.FOOTER_TABS.EVENT_FOOTER_TABS_TAB_CREATE, mapId);
-      api.event.off(EVENT_NAMES.FOOTER_TABS.EVENT_FOOTER_TABS_TAB_REMOVE, mapId);
-      api.event.off(EVENT_NAMES.FOOTER_TABS.EVENT_FOOTER_TABS_TAB_SELECT, mapId);
+      api.event.off(EVENT_NAMES.FOOTER_TABS.EVENT_FOOTER_TABS_TAB_CREATE, mapId, eventFooterTabsCreateListenerFunction);
+      api.event.off(EVENT_NAMES.FOOTER_TABS.EVENT_FOOTER_TABS_TAB_REMOVE, mapId, eventFooterTabsRemoveListenerFunction);
+      api.event.off(EVENT_NAMES.FOOTER_TABS.EVENT_FOOTER_TABS_TAB_SELECT, mapId, eventFooterTabsSelectListenerFunction);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [addTab, mapId, removeTab]);

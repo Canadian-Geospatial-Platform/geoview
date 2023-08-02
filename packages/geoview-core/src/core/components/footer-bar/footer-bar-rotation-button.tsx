@@ -10,7 +10,7 @@ import { MapContext } from '@/core/app-start';
 import { api } from '@/app';
 
 import { EVENT_NAMES } from '@/api/events/event-types';
-import { payloadIsAMapViewProjection } from '@/api/events/payloads';
+import { PayloadBaseClass, payloadIsAMapViewProjection } from '@/api/events/payloads';
 
 const sxClasses = {
   rotationButton: {
@@ -67,31 +67,29 @@ export function FooterbarRotationButton(): JSX.Element {
     });
   };
 
+  const eventMapViewProjectionChangeCallbackFunction = (payload: PayloadBaseClass) => {
+    if (payloadIsAMapViewProjection(payload)) {
+      // reset icon rotation to 0 because the new view rotation is 0
+      // will be set again by proper function if needed (i.e. if fix north switch is checked)
+      if (iconRef && iconRef.current) {
+        const icon = iconRef.current as HTMLElement;
+        icon.style.transform = `rotate(${0}rad)`;
+      }
+
+      // recreate the event on projection change because there is a new view
+      setViewRotationEvent();
+    }
+  };
+
   useEffect(() => {
     // set rotation change event
     setViewRotationEvent();
 
     // listen to geoview-basemap-panel package change projection event to reset icon rotation
-    api.event.on(
-      EVENT_NAMES.MAP.EVENT_MAP_VIEW_PROJECTION_CHANGE,
-      (payload) => {
-        if (payloadIsAMapViewProjection(payload)) {
-          // reset icon rotation to 0 because the new view rotation is 0
-          // will be set again by proper function if needed (i.e. if fix north switch is checked)
-          if (iconRef && iconRef.current) {
-            const icon = iconRef.current as HTMLElement;
-            icon.style.transform = `rotate(${0}rad)`;
-          }
-
-          // recreate the event on projection change because there is a new view
-          setViewRotationEvent();
-        }
-      },
-      mapId
-    );
+    api.event.on(EVENT_NAMES.MAP.EVENT_MAP_VIEW_PROJECTION_CHANGE, eventMapViewProjectionChangeCallbackFunction, mapId);
 
     return () => {
-      api.event.off(EVENT_NAMES.MAP.EVENT_MAP_VIEW_PROJECTION_CHANGE, mapId);
+      api.event.off(EVENT_NAMES.MAP.EVENT_MAP_VIEW_PROJECTION_CHANGE, mapId, eventMapViewProjectionChangeCallbackFunction);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

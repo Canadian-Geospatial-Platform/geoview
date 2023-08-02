@@ -14,7 +14,7 @@ import { EVENT_NAMES } from '@/api/events/event-types';
 import { CrosshairIcon } from './crosshair-icon';
 
 import { Fade } from '@/ui';
-import { lngLatPayload, booleanPayload, payloadIsAInKeyfocus } from '@/api/events/payloads';
+import { lngLatPayload, booleanPayload, payloadIsAInKeyfocus, PayloadBaseClass } from '@/api/events/payloads';
 
 const useStyles = makeStyles((theme) => ({
   crosshairContainer: {
@@ -127,30 +127,28 @@ export function Crosshair(): JSX.Element {
 
     const mapContainer = map.getTargetElement();
 
-    // on map keyboard focus, add crosshair
-    api.event.on(
-      EVENT_NAMES.MAP.EVENT_MAP_IN_KEYFOCUS,
-      (payload) => {
-        if (payloadIsAInKeyfocus(payload)) {
-          if (interaction !== 'static') {
-            setCrosshairsActive(true);
-            isCrosshairsActiveValue.current = true;
-            api.event.emit(booleanPayload(EVENT_NAMES.MAP.EVENT_MAP_CROSSHAIR_ENABLE_DISABLE, mapId, true));
+    const eventMapInKeyFocusListenerFunction = (payload: PayloadBaseClass) => {
+      if (payloadIsAInKeyfocus(payload)) {
+        if (interaction !== 'static') {
+          setCrosshairsActive(true);
+          isCrosshairsActiveValue.current = true;
+          api.event.emit(booleanPayload(EVENT_NAMES.MAP.EVENT_MAP_CROSSHAIR_ENABLE_DISABLE, mapId, true));
 
-            mapContainer.addEventListener('keydown', simulateClick);
-            mapContainer.addEventListener('keydown', managePanDelta);
-            panelButtonId.current = 'detailsPanel';
-          }
+          mapContainer.addEventListener('keydown', simulateClick);
+          mapContainer.addEventListener('keydown', managePanDelta);
+          panelButtonId.current = 'detailsPanel';
         }
-      },
-      mapId
-    );
+      }
+    };
+
+    // on map keyboard focus, add crosshair
+    api.event.on(EVENT_NAMES.MAP.EVENT_MAP_IN_KEYFOCUS, eventMapInKeyFocusListenerFunction, mapId);
 
     // when map blur, remove the crosshair and click event
     mapContainer.addEventListener('blur', removeCrosshair);
 
     return () => {
-      api.event.off(EVENT_NAMES.MAP.EVENT_MAP_IN_KEYFOCUS, mapId);
+      api.event.off(EVENT_NAMES.MAP.EVENT_MAP_IN_KEYFOCUS, mapId, eventMapInKeyFocusListenerFunction);
       mapContainer.removeEventListener('keydown', simulateClick);
       mapContainer.removeEventListener('keydown', managePanDelta);
       mapContainer.removeEventListener('keydown', removeCrosshair);
