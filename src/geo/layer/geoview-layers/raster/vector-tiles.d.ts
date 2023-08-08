@@ -1,7 +1,7 @@
 import { Extent } from 'ol/extent';
 import { AbstractGeoViewLayer } from '../abstract-geoview-layers';
 import { AbstractGeoViewRaster, TypeBaseRasterLayer } from './abstract-geoview-raster';
-import { TypeLayerEntryConfig, TypeSourceTileInitialConfig, TypeTileLayerEntryConfig, TypeGeoviewLayerConfig, TypeListOfLayerEntryConfig, TypeTileGrid } from '../../../map/map-schema-types';
+import { TypeLayerEntryConfig, TypeSourceTileInitialConfig, TypeTileLayerEntryConfig, TypeGeoviewLayerConfig, TypeListOfLayerEntryConfig, TypeTileGrid } from '@/geo/map/map-schema-types';
 export type TypeSourceVectorTilesInitialConfig = TypeSourceTileInitialConfig;
 export interface TypeVectorTilesLayerEntryConfig extends Omit<TypeTileLayerEntryConfig, 'source'> {
     source: TypeSourceVectorTilesInitialConfig;

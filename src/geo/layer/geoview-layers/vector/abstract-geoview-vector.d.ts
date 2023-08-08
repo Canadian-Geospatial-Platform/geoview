@@ -9,7 +9,7 @@ import { Coordinate } from 'ol/coordinate';
 import { Extent } from 'ol/extent';
 import { Pixel } from 'ol/pixel';
 import { AbstractGeoViewLayer } from '../abstract-geoview-layers';
-import { TypeBaseLayerEntryConfig, TypeLayerEntryConfig, TypeListOfLayerEntryConfig, TypeVectorLayerEntryConfig } from '../../../map/map-schema-types';
+import { TypeBaseLayerEntryConfig, TypeLayerEntryConfig, TypeListOfLayerEntryConfig, TypeVectorLayerEntryConfig } from '@/geo/map/map-schema-types';
 import { TypeArrayOfFeatureInfoEntries } from '@/api/events/payloads';
 export type TypeVectorLayerGroup = LayerGroup;
 export type TypeVectorLayer = VectorSource<Geometry>;
