@@ -5,7 +5,7 @@ export interface Features {
     attributes: {
         [key: string]: string;
     };
-    geometry: {
+    geometry?: {
         x: string;
         y: string;
     };
@@ -16,13 +16,13 @@ export interface DataTableData {
     fieldAliases: {
         [key: string]: string;
     };
-    fields: {
+    fields?: {
         alias: string;
         type: string;
         name: string;
     }[];
-    geometryType: string;
-    spatialReference: {
+    geometryType?: string;
+    spatialReference?: {
         latestWkid: number;
         wkid: number;
     };

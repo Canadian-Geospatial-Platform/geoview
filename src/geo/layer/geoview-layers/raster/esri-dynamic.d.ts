@@ -3,7 +3,7 @@ import { Pixel } from 'ol/pixel';
 import { Extent } from 'ol/extent';
 import { AbstractGeoViewLayer } from '../abstract-geoview-layers';
 import { AbstractGeoViewRaster, TypeBaseRasterLayer } from './abstract-geoview-raster';
-import { TypeLayerEntryConfig, TypeGeoviewLayerConfig, TypeListOfLayerEntryConfig, TypeEsriDynamicLayerEntryConfig } from '../../../map/map-schema-types';
+import { TypeLayerEntryConfig, TypeGeoviewLayerConfig, TypeListOfLayerEntryConfig, TypeEsriDynamicLayerEntryConfig } from '@/geo/map/map-schema-types';
 import { TypeArrayOfFeatureInfoEntries, codedValueType, rangeDomainType } from '@/api/events/payloads';
 import { TypeJsonArray, TypeJsonObject } from '@/core/types/global-types';
 import { TypeEsriFeatureLayerEntryConfig } from '../vector/esri-feature';
