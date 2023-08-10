@@ -115,6 +115,7 @@ const sxClasses = {
 
 function LayerDataGrid(props: CustomDataGridProps) {
   const { mapId, layerId, rowId, layerKey, displayLanguage, columns, rows } = props;
+
   const theme: Theme & {
     iconImg: React.CSSProperties;
   } = useTheme();
@@ -143,6 +144,7 @@ function LayerDataGrid(props: CustomDataGridProps) {
    */
   const buildFilterString = (gridFilterModel: GridFilterModel) => {
     // checkif if there is items in filter object
+    console.log('gridFilterModel', gridFilterModel);
     let filter = '';
     if (gridFilterModel.items.length > 0) {
       const filterObj = gridFilterModel.items[0] as FilterObject;
@@ -175,7 +177,7 @@ function LayerDataGrid(props: CustomDataGridProps) {
               )}`;
       }
     }
-
+    console.log('filter value, filter', filter);
     setFilterString(filter);
   };
 

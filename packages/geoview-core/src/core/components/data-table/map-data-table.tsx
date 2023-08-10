@@ -16,6 +16,8 @@ import { darken } from '@mui/material';
 import { Box, IconButton, ZoomInSearchIcon } from '@/ui';
 import ExportButton from './export-button';
 import JSONExportButton from './json-export-button';
+import FilterMap from './filter-map';
+import { TypeLayerEntryConfig, AbstractGeoViewVector, EsriDynamic, api } from '@/app';
 
 interface FeatureInfo {
   featureInfoKey: string;
@@ -46,6 +48,8 @@ export interface ColumnsType {
 interface MapDataTableProps {
   data: MapDataTableData;
   layerId: string;
+  mapId: string;
+  layerKey: string;
 }
 
 /**
@@ -56,8 +60,12 @@ interface MapDataTableProps {
  * @return {ReactElement} Data table as react element.
  */
 
-function MapDataTable({ data, layerId }: MapDataTableProps) {
+function MapDataTable({ data, layerId, mapId, layerKey }: MapDataTableProps) {
   const { t } = useTranslation<string>();
+
+  const tableInstanceRef = useRef(null);
+  const [filterString, setFilterString] = useState<string>('');
+  const [mapFiltered, setMapFiltered] = useState<boolean>(false);
 
   // optionally access the underlying virtualizer instance
   const rowVirtualizerInstanceRef = useRef<MRTVirtualizer<HTMLDivElement, HTMLTableRowElement>>(null);
@@ -72,6 +80,20 @@ function MapDataTable({ data, layerId }: MapDataTableProps) {
       console.error(error);
     }
   }, [sorting]);
+
+  useEffect(() => {
+    console.log(tableInstanceRef.current);
+  }, [tableInstanceRef]);
+
+  useEffect(() => {
+    // const geoviewLayerInstance = api.map(mapId).layer.geoviewLayers[layerId];
+    // const filterLayerConfig = api.map(mapId).layer.registeredLayers[layerKey] as TypeLayerEntryConfig;
+    // if (mapFiltered && geoviewLayerInstance !== undefined && filterLayerConfig !== undefined) {
+    //   (geoviewLayerInstance as AbstractGeoViewVector | EsriDynamic)?.applyViewFilter(filterLayerConfig, filterString);
+    // } else {
+    //   (geoviewLayerInstance as AbstractGeoViewVector | EsriDynamic)?.applyViewFilter(filterLayerConfig, '');
+    // }
+  }, [filterString, layerId, layerKey, mapFiltered, mapId]);
 
   /**
    * Build material react data table column header.
@@ -112,6 +134,7 @@ function MapDataTable({ data, layerId }: MapDataTableProps) {
   return (
     <Box sx={{ padding: '1rem 0' }}>
       <MaterialReactTable
+        tableInstanceRef={tableInstanceRef}
         columns={columns}
         data={rows}
         enableGlobalFilter={false}
@@ -124,6 +147,7 @@ function MapDataTable({ data, layerId }: MapDataTableProps) {
         renderToolbarInternalActions={({ table }) => (
           <Box>
             <MRTToggleFiltersButton table={table} />
+            <FilterMap mapFiltered={mapFiltered} setMapFiltered={setMapFiltered} />
             <MRTShowHideColumnsButton table={table} />
             <MRTToggleDensePaddingButton table={table} />
             <MRTFullScreenToggleButton table={table} />

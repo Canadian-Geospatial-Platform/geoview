@@ -110,9 +110,10 @@
       renderDataTableFromMap = async () => {
         console.time("MapTableCreation")
         const layers = Object.keys(api.map('mapWM1').layer.geoviewLayers);
+
         const itemAcc = {
           title: "Data Table",
-          content: await cgpv.api.maps['mapWM1'].dataTable.createDataTableByLayerId({ layerId: layers[0] })
+          content: await cgpv.api.maps['mapWM1'].dataTable.createDataTableByLayerId({ layerId: layers[0], layerKey: `${layers[0]}8` })
         }
 
         cgpv.api.addUiComponent(
