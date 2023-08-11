@@ -140,6 +140,7 @@ export class DataTableApi {
   /**
    * Create data table based on layer id from map.
    * @param {string} layerId layerId of the feature added on map.
+   * @param {string} mapId id of the map.
    * @returns {Promise<ReactElement | null>} Promise of ReactElement.
    */
 

@@ -54,7 +54,7 @@ interface MapDataTableProps {
  * Build Data table from map.
  * @param {MapDataTableProps} data map data which will be used to build data table.
  * @param {string} layerId id of the layer
- *
+ * @param {string} mapId id of the map.
  * @return {ReactElement} Data table as react element.
  */
 
