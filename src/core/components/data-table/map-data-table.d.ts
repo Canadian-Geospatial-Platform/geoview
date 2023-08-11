@@ -26,13 +26,14 @@ export interface ColumnsType {
 interface MapDataTableProps {
     data: MapDataTableData;
     layerId: string;
+    mapId: string;
 }
 /**
  * Build Data table from map.
  * @param {MapDataTableProps} data map data which will be used to build data table.
  * @param {string} layerId id of the layer
- *
+ * @param {string} mapId id of the map.
  * @return {ReactElement} Data table as react element.
  */
-declare function MapDataTable({ data, layerId }: MapDataTableProps): React.JSX.Element;
+declare function MapDataTable({ data, layerId, mapId }: MapDataTableProps): React.JSX.Element;
 export default MapDataTable;
