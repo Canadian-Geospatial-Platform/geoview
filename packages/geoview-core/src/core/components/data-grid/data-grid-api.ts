@@ -18,7 +18,6 @@ import LayerDataGrid from './layer-data-grid';
 
 export interface TypeLayerDataGridProps {
   layerId: string;
-  mapId: string;
 }
 
 /**
