@@ -16,6 +16,7 @@ import { darken } from '@mui/material';
 import { Box, IconButton, ZoomInSearchIcon } from '@/ui';
 import ExportButton from './export-button';
 import JSONExportButton from './json-export-button';
+import { api } from '@/app';
 
 interface FeatureInfo {
   featureInfoKey: string;
@@ -46,6 +47,7 @@ export interface ColumnsType {
 interface MapDataTableProps {
   data: MapDataTableData;
   layerId: string;
+  mapId: string;
 }
 
 /**
@@ -56,8 +58,18 @@ interface MapDataTableProps {
  * @return {ReactElement} Data table as react element.
  */
 
-function MapDataTable({ data, layerId }: MapDataTableProps) {
+function MapDataTable({ data, layerId, mapId }: MapDataTableProps) {
   const { t } = useTranslation<string>();
+
+  const iconImage = {
+    padding: 3,
+    borderRadius: 0,
+    border: '1px solid',
+    borderColor: '#757575',
+    boxShadow: 'rgb(0 0 0 / 20%) 0px 3px 1px -2px, rgb(0 0 0 / 14%) 0px 2px 2px 0px, rgb(0 0 0 / 12%) 0px 1px 5px 0px',
+    background: '#fff',
+    objectFit: 'scale-down',
+  } as React.CSSProperties;
 
   // optionally access the underlying virtualizer instance
   const rowVirtualizerInstanceRef = useRef<MRTVirtualizer<HTMLDivElement, HTMLTableRowElement>>(null);
@@ -90,6 +102,17 @@ function MapDataTable({ data, layerId }: MapDataTableProps) {
   }, []);
 
   /**
+   * featureinfo data grid Zoom in/out handling
+   *
+   * @param {React.MouseEvent<HTMLButtonElement, MouseEvent>} e mouse clicking event
+   * @param {Extent} extent feature exten
+   *
+   */
+  const handleZoomIn = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>, extent: Extent) => {
+    api.map(mapId).zoomToExtent(extent);
+  };
+
+  /**
    * Build Rows for datatable
    *
    * @param {Features} features list of objects transform into rows.
@@ -97,9 +120,15 @@ function MapDataTable({ data, layerId }: MapDataTableProps) {
   const rows = useMemo(() => {
     return data.features.map((feature) => {
       return {
-        ICON: 'Image',
+        ICON: (
+          <img
+            alt={feature.featureIcon?.featureInfoValue.toString()}
+            src={feature.featureIcon?.featureInfoValue.toString()}
+            style={{ ...iconImage, width: '35px', height: '35px' }}
+          />
+        ),
         ZOOM: (
-          <IconButton>
+          <IconButton color="primary" onClick={(e) => handleZoomIn(e, feature.extent!)}>
             <ZoomInSearchIcon />
           </IconButton>
         ),

@@ -143,7 +143,7 @@ export class DataTableApi {
    * @returns {Promise<ReactElement | null>} Promise of ReactElement.
    */
 
-  createDataTableByLayerId = async ({ layerId }: TypeLayerDataGridProps): Promise<ReactElement | null> => {
+  createDataTableByLayerId = async ({ layerId, mapId }: TypeLayerDataGridProps): Promise<ReactElement | null> => {
     const geoviewLayerInstance = api.map(this.mapId).layer.geoviewLayers[layerId];
     const { currentProjection } = api.map(this.mapId);
     const projectionConfig = api.projection.projections[currentProjection];
@@ -167,7 +167,7 @@ export class DataTableApi {
             return this.buildFeatureRows(result.value, projectionConfig);
           });
 
-        return createElement(MapDataTable, { data: data[0], layerId }, []);
+        return createElement(MapDataTable, { data: data[0], layerId, mapId }, []);
       }
     }
     return null;
