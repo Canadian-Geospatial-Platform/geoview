@@ -506,6 +506,7 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
   return (
     <Grid item sm={12} md={subLayerId ? 12 : 6} lg={subLayerId ? 12 : 4}>
       <ListItem>
+        XXXXX
         <ListItemButton>
           <ListItemIcon>
             {(groupItems.length > 0 || WMSStyles.length > 1) && (
@@ -587,6 +588,7 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
             )}
           </ListItemIcon>
         </ListItemButton>
+        YYYYY
       </ListItem>
       <Menu
         anchorEl={menuAnchorElement}
