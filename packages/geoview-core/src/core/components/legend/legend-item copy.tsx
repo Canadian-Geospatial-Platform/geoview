@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable react/require-default-props */
 import React, { useEffect, useState, useRef, MutableRefObject, RefObject, Dispatch, SetStateAction } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -8,16 +7,26 @@ import { Extent } from 'ol/extent';
 import {
   Box,
   Collapse,
+  ListItem,
+  ListItemButton,
   ListItemIcon,
   ListItemText,
   CloseIcon,
+  TodoIcon,
   Tooltip,
+  VisibilityIcon,
+  VisibilityOffIcon,
   IconButton,
   Menu,
   MenuItem,
+  MoreVertIcon,
+  ExpandMoreIcon,
+  ExpandLessIcon,
   OpacityIcon,
   SliderBase,
   CheckIcon,
+  MoreHorizIcon,
+  BrowserNotSupportedIcon,
   Grid,
 } from '@/ui';
 import { api, EsriDynamic, payloadIsLegendInfo, NumberPayload, PayloadBaseClass } from '@/app';
@@ -143,7 +152,7 @@ export interface TypeLegendItemProps {
  *
  * @returns {JSX.Element} the legend list item
  */
-export function LegendItemDetails(props: TypeLegendItemProps): JSX.Element {
+export function LegendItem(props: TypeLegendItemProps): JSX.Element {
   const {
     layerId,
     geoviewLayerInstance,
@@ -180,7 +189,6 @@ export function LegendItemDetails(props: TypeLegendItemProps): JSX.Element {
   const [currentWMSStyle, setCurrentWMSStyle] = useState<string>();
   const [iconType, setIconType] = useState<string | null>(null);
   const [iconImg, setIconImg] = useState<string | null>(null);
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [iconImgStacked, setIconImgStacked] = useState<string | null>(null);
   const [iconList, setIconList] = useState<string[] | null>(null);
   const [labelList, setLabelList] = useState<string[] | null>(null);
@@ -370,6 +378,20 @@ export function LegendItemDetails(props: TypeLegendItemProps): JSX.Element {
   }, [canCluster, mapId]);
 
   /**
+   * Handle expand/shrink of layer groups.
+   */
+  const handleExpandGroupClick = () => {
+    setGroupOpen(!isGroupOpen);
+  };
+
+  /**
+   * Handle expand/shrink of legends.
+   */
+  const handleLegendClick = () => {
+    setLegendOpen(!isLegendOpen);
+  };
+
+  /**
    * Handle view/hide layers.
    */
   const handleToggleLayer = () => {
@@ -381,6 +403,10 @@ export function LegendItemDetails(props: TypeLegendItemProps): JSX.Element {
       }
     }
     setChecked(!isChecked);
+  };
+
+  const handleMoreClick = (event: React.MouseEvent<HTMLElement>) => {
+    setMenuAnchorElement(event.currentTarget);
   };
 
   const handleCloseMenu = () => {
@@ -422,6 +448,12 @@ export function LegendItemDetails(props: TypeLegendItemProps): JSX.Element {
     }
     setIsClusterToggleEnabled(!isClusterToggleEnabled);
     handleCloseMenu();
+  };
+
+  const handleStackIcon = (e: React.KeyboardEvent<HTMLElement>) => {
+    if (e.key === 'Enter') {
+      handleLegendClick();
+    }
   };
 
   const handleZoomTo = () => {
@@ -477,44 +509,6 @@ export function LegendItemDetails(props: TypeLegendItemProps): JSX.Element {
   function legendItemDetails() {
     return (
       <>
-        <Menu
-          anchorEl={menuAnchorElement}
-          open={menuOpen}
-          onClose={handleCloseMenu}
-          MenuListProps={{
-            'aria-labelledby': 'setOpacityBtn',
-          }}
-          disablePortal
-        >
-          {/* Add more layer options here - zoom to, reorder */}
-          {isRemoveable && <MenuItem onClick={handleRemoveLayer}>{t('legend.remove_layer')}</MenuItem>}
-          {canSetOpacity && groupItems.length === 0 && (
-            <MenuItem onClick={handleOpacityOpen}>
-              <ListItemText>{t('legend.toggle_opacity')}</ListItemText>
-              {isOpacityOpen && (
-                <ListItemIcon sx={sxClasses.menuListIcon}>
-                  <CheckIcon fontSize="small" />
-                </ListItemIcon>
-              )}
-            </MenuItem>
-          )}
-          {zoom < splitZoom && canCluster && groupItems.length === 0 && (
-            <MenuItem onClick={handleClusterToggle}>
-              <ListItemText> {t('legend.toggle_cluster')}</ListItemText>
-              {isClusterToggleEnabled && (
-                <ListItemIcon sx={sxClasses.menuListIcon}>
-                  <CheckIcon fontSize="small" />
-                </ListItemIcon>
-              )}
-            </MenuItem>
-          )}
-
-          {canZoomTo && groupItems.length === 0 && (
-            <MenuItem onClick={handleZoomTo}>
-              <ListItemText>{t('legend.zoom_to')}</ListItemText>
-            </MenuItem>
-          )}
-        </Menu>
         <Collapse in={isOpacityOpen} timeout="auto">
           <Box sx={sxClasses.opacityMenu}>
             <Tooltip title={t('legend.opacity')}>
@@ -547,12 +541,169 @@ export function LegendItemDetails(props: TypeLegendItemProps): JSX.Element {
             </Box>
           </Box>
         </Collapse>
+        <Collapse in={isGroupOpen} timeout="auto">
+          <Box>
+            <Box sx={sxClasses.expandableIconContainer}>
+              {groupItems.map((subItem) => (
+                <LegendItem
+                  key={subItem.layerId}
+                  layerId={layerId}
+                  geoviewLayerInstance={geoviewLayerInstance}
+                  subLayerId={subLayerId ? `${subLayerId}/${subItem.layerId}` : `${layerId}/${subItem.layerId}`}
+                  layerConfigEntry={subItem}
+                  isParentVisible={isParentVisible === false ? false : isChecked}
+                  canSetOpacity={canSetOpacity}
+                  toggleParentVisible={handleToggleLayer}
+                  expandAll={expandAll}
+                  hideAll={hideAll}
+                  canZoomTo={canZoomTo}
+                />
+              ))}
+            </Box>
+            {WMSStyles.length > 1 && (
+              <Box sx={sxClasses.expandableIconContainer}>
+                {WMSStyles.map((style) => (
+                  <WMSStyleItem
+                    key={`${layerId}-${style.name}`}
+                    layerId={layerId}
+                    mapId={mapId}
+                    subLayerId={subLayerId}
+                    style={style}
+                    currentWMSStyle={currentWMSStyle}
+                    setCurrentWMSStyle={setCurrentWMSStyle as Dispatch<SetStateAction<string>>}
+                  />
+                ))}
+              </Box>
+            )}
+          </Box>
+        </Collapse>
       </>
     );
   }
 
   return (
     <Grid item sm={12} md={subLayerId ? 12 : 6} lg={subLayerId ? 12 : 4}>
+      <ListItem>
+        XXXXX
+        <ListItemButton>
+          <ListItemIcon>
+            {(groupItems.length > 0 || WMSStyles.length > 1) && (
+              <IconButton color="primary" onClick={handleExpandGroupClick}>
+                {isGroupOpen ? <ExpandMoreIcon /> : <ExpandLessIcon />}
+              </IconButton>
+            )}
+            {groupItems.length === 0 && isLegendOpen && (
+              <IconButton
+                sx={sxClasses.iconPreview}
+                color="primary"
+                size="small"
+                onClick={iconImg === null ? undefined : handleLegendClick}
+                iconRef={closeIconRef}
+              >
+                {iconList || iconImg !== null ? <CloseIcon /> : <MoreHorizIcon />}
+              </IconButton>
+            )}
+            {iconType === 'simple' && iconImg !== null && !isLegendOpen && WMSStyles.length < 2 && (
+              <IconButton
+                sx={sxClasses.iconPreview}
+                color="primary"
+                size="small"
+                iconRef={maxIconRef}
+                onClick={iconImg === 'no data' ? undefined : handleLegendClick}
+              >
+                {iconImg === 'no data' ? (
+                  <BrowserNotSupportedIcon />
+                ) : (
+                  <Box sx={sxClasses.legendIcon}>
+                    <img alt="icon" src={iconImg} style={sxClasses.maxIconImg} />
+                  </Box>
+                )}
+              </IconButton>
+            )}
+            {iconType === 'list' && !isLegendOpen && (
+              <Tooltip title={t('legend.expand_legend')!} placement="top" enterDelay={1000}>
+                <Box
+                  tabIndex={0}
+                  onClick={handleLegendClick}
+                  sx={sxClasses.stackIconsBox}
+                  ref={stackIconRef}
+                  onKeyPress={(e) => handleStackIcon(e)}
+                >
+                  <IconButton sx={sxClasses.iconPreviewStacked} color="primary" size="small" tabIndex={-1}>
+                    <Box sx={sxClasses.legendIconTransparent}>
+                      {iconImgStacked && <img alt="icon" src={iconImgStacked} style={sxClasses.maxIconImg} />}
+                    </Box>
+                  </IconButton>
+                  <IconButton sx={sxClasses.iconPreviewHoverable} color="primary" size="small" tabIndex={-1}>
+                    <Box sx={sxClasses.legendIcon}>{iconImg && <img alt="icon" src={iconImg} style={sxClasses.maxIconImg} />}</Box>
+                  </IconButton>
+                </Box>
+              </Tooltip>
+            )}
+            {groupItems.length === 0 && WMSStyles.length < 2 && !iconType && !isLegendOpen && (
+              <IconButton sx={sxClasses.iconPreview} color="primary" size="small" onClick={handleLegendClick}>
+                <TodoIcon />
+              </IconButton>
+            )}
+          </ListItemIcon>
+          <Tooltip title={layerName} placement="top" enterDelay={1000}>
+            <ListItemText primary={layerName} onClick={handleExpandGroupClick} />
+          </Tooltip>
+          <ListItemIcon style={{ justifyContent: 'right' }}>
+            {(isRemoveable || (canSetOpacity && groupItems.length === 0)) && (
+              <IconButton id="setOpacityBtn" onClick={handleMoreClick} aria-label="more" aria-haspopup="true">
+                <MoreVertIcon />
+              </IconButton>
+            )}
+            <IconButton color="primary" onClick={() => handleToggleLayer()}>
+              {(() => {
+                if (isParentVisible === false) return <VisibilityOffIcon />;
+                if (isChecked) return <VisibilityIcon />;
+                return <VisibilityOffIcon />;
+              })()}
+            </IconButton>
+          </ListItemIcon>
+        </ListItemButton>
+        YYYYY
+      </ListItem>
+      <Menu
+        anchorEl={menuAnchorElement}
+        open={menuOpen}
+        onClose={handleCloseMenu}
+        MenuListProps={{
+          'aria-labelledby': 'setOpacityBtn',
+        }}
+        disablePortal
+      >
+        {/* Add more layer options here - zoom to, reorder */}
+        {isRemoveable && <MenuItem onClick={handleRemoveLayer}>{t('legend.remove_layer')}</MenuItem>}
+        {canSetOpacity && groupItems.length === 0 && (
+          <MenuItem onClick={handleOpacityOpen}>
+            <ListItemText>{t('legend.toggle_opacity')}</ListItemText>
+            {isOpacityOpen && (
+              <ListItemIcon sx={sxClasses.menuListIcon}>
+                <CheckIcon fontSize="small" />
+              </ListItemIcon>
+            )}
+          </MenuItem>
+        )}
+        {zoom < splitZoom && canCluster && groupItems.length === 0 && (
+          <MenuItem onClick={handleClusterToggle}>
+            <ListItemText> {t('legend.toggle_cluster')}</ListItemText>
+            {isClusterToggleEnabled && (
+              <ListItemIcon sx={sxClasses.menuListIcon}>
+                <CheckIcon fontSize="small" />
+              </ListItemIcon>
+            )}
+          </MenuItem>
+        )}
+
+        {canZoomTo && groupItems.length === 0 && (
+          <MenuItem onClick={handleZoomTo}>
+            <ListItemText>{t('legend.zoom_to')}</ListItemText>
+          </MenuItem>
+        )}
+      </Menu>
       {legendItemDetails()}
     </Grid>
   );
