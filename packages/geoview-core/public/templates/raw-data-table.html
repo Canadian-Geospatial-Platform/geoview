@@ -113,7 +113,7 @@
 
         const itemAcc = {
           title: "Data Table",
-          content: await cgpv.api.maps['mapWM1'].dataTable.createDataTableByLayerId({ layerId: layers[0], layerKey: `${layers[0]}8` })
+          content: await cgpv.api.maps['mapWM1'].dataTable.createDataTableByLayerId({ layerId: layers[0], layerKey: `${layers[0]}8`, mapId: "mapWM1" })
         }
 
         cgpv.api.addUiComponent(

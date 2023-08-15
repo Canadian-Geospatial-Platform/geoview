@@ -167,7 +167,7 @@ export class DataTableApi {
             return this.buildFeatureRows(result.value, projectionConfig);
           });
 
-        return createElement(MapDataTable, { data: data[0], layerId }, []);
+        return createElement(MapDataTable, { data: data[0], layerId, mapId: this.mapId }, []);
       }
     }
     return null;

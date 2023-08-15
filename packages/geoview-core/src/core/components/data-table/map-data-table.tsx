@@ -17,7 +17,7 @@ import { Box, IconButton, ZoomInSearchIcon } from '@/ui';
 import ExportButton from './export-button';
 import JSONExportButton from './json-export-button';
 import FilterMap from './filter-map';
-import { TypeLayerEntryConfig, AbstractGeoViewVector, EsriDynamic, api } from '@/app';
+import { api } from '@/app';
 
 interface FeatureInfo {
   featureInfoKey: string;
@@ -56,7 +56,7 @@ interface MapDataTableProps {
  * Build Data table from map.
  * @param {MapDataTableProps} data map data which will be used to build data table.
  * @param {string} layerId id of the layer
- *
+ * @param {string} mapId id of the map.
  * @return {ReactElement} Data table as react element.
  */
 
@@ -66,6 +66,18 @@ function MapDataTable({ data, layerId, mapId, layerKey }: MapDataTableProps) {
   const tableInstanceRef = useRef(null);
   const [filterString, setFilterString] = useState<string>('');
   const [mapFiltered, setMapFiltered] = useState<boolean>(false);
+
+  const iconImage = {
+    padding: 3,
+    borderRadius: 0,
+    border: '1px solid',
+    borderColor: '#757575',
+    boxShadow: 'rgb(0 0 0 / 20%) 0px 3px 1px -2px, rgb(0 0 0 / 14%) 0px 2px 2px 0px, rgb(0 0 0 / 12%) 0px 1px 5px 0px',
+    background: '#fff',
+    objectFit: 'scale-down',
+    width: '35px',
+    height: '35px',
+  } as React.CSSProperties;
 
   // optionally access the underlying virtualizer instance
   const rowVirtualizerInstanceRef = useRef<MRTVirtualizer<HTMLDivElement, HTMLTableRowElement>>(null);
@@ -112,6 +124,17 @@ function MapDataTable({ data, layerId, mapId, layerKey }: MapDataTableProps) {
   }, []);
 
   /**
+   * featureinfo data grid Zoom in/out handling
+   *
+   * @param {React.MouseEvent<HTMLButtonElement, MouseEvent>} e mouse clicking event
+   * @param {Extent} extent feature exten
+   *
+   */
+  const handleZoomIn = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>, extent: Extent) => {
+    api.map(mapId).zoomToExtent(extent);
+  };
+
+  /**
    * Build Rows for datatable
    *
    * @param {Features} features list of objects transform into rows.
@@ -119,9 +142,15 @@ function MapDataTable({ data, layerId, mapId, layerKey }: MapDataTableProps) {
   const rows = useMemo(() => {
     return data.features.map((feature) => {
       return {
-        ICON: 'Image',
+        ICON: (
+          <img
+            alt={feature.featureIcon?.featureInfoValue.toString()}
+            src={feature.featureIcon?.featureInfoValue.toString()}
+            style={iconImage}
+          />
+        ),
         ZOOM: (
-          <IconButton>
+          <IconButton color="primary" onClick={(e) => handleZoomIn(e, feature.extent!)}>
             <ZoomInSearchIcon />
           </IconButton>
         ),
