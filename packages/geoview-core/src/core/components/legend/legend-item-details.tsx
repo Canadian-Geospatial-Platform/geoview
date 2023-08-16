@@ -46,6 +46,7 @@ import {
 import { AbstractGeoViewVector } from '@/geo/layer/geoview-layers/vector/abstract-geoview-vector';
 import { disableScrolling } from '../../utils/utilities';
 import { WMSStyleItem } from './WMS-style-item';
+import { TypeLegendItemProps } from './types';
 
 const sxClasses = {
   expandableGroup: {
@@ -123,20 +124,6 @@ const sxClasses = {
   },
   menuListIcon: { justifyContent: 'right', 'min-width': '56px' },
 };
-
-export interface TypeLegendItemProps {
-  layerId: string;
-  geoviewLayerInstance: AbstractGeoViewLayer;
-  subLayerId?: string;
-  layerConfigEntry?: TypeLayerEntryConfig;
-  isRemoveable?: boolean;
-  canSetOpacity?: boolean;
-  isParentVisible?: boolean;
-  toggleParentVisible?: () => void;
-  expandAll?: boolean;
-  hideAll?: boolean;
-  canZoomTo?: boolean;
-}
 
 /**
  * Legend Item for a Legend list
@@ -477,6 +464,7 @@ export function LegendItemDetails(props: TypeLegendItemProps): JSX.Element {
   function legendItemDetails() {
     return (
       <>
+        <h1>This is Layer:: {layerId}</h1>
         <Menu
           anchorEl={menuAnchorElement}
           open={menuOpen}

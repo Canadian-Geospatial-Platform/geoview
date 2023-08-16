@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable react/destructuring-assignment */
 /* eslint-disable react/require-default-props */
 import React, { useEffect, useState, useRef, MutableRefObject, RefObject, Dispatch, SetStateAction } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -51,6 +53,7 @@ import {
 import { AbstractGeoViewVector } from '@/geo/layer/geoview-layers/vector/abstract-geoview-vector';
 import { disableScrolling } from '../../utils/utilities';
 import { WMSStyleItem } from './WMS-style-item';
+import { TypeLegendItemProps } from './types';
 
 const sxClasses = {
   expandableGroup: {
@@ -129,20 +132,6 @@ const sxClasses = {
   menuListIcon: { justifyContent: 'right', 'min-width': '56px' },
 };
 
-export interface TypeLegendItemProps {
-  layerId: string;
-  geoviewLayerInstance: AbstractGeoViewLayer;
-  subLayerId?: string;
-  layerConfigEntry?: TypeLayerEntryConfig;
-  isRemoveable?: boolean;
-  canSetOpacity?: boolean;
-  isParentVisible?: boolean;
-  toggleParentVisible?: () => void;
-  expandAll?: boolean;
-  hideAll?: boolean;
-  canZoomTo?: boolean;
-}
-
 /**
  * Legend Item for a Legend list
  *
@@ -161,6 +150,7 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
     expandAll,
     hideAll,
     canZoomTo,
+    onOpenDetails,
   } = props;
 
   const { t, i18n } = useTranslation<string>();
@@ -381,6 +371,9 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
    */
   const handleLegendClick = () => {
     setLegendOpen(!isLegendOpen);
+    if (onOpenDetails) {
+      onOpenDetails(props.layerId, props.layerConfigEntry);
+    }
   };
 
   /**
@@ -610,6 +603,7 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
                 expandAll={expandAll}
                 hideAll={hideAll}
                 canZoomTo={canZoomTo}
+                onOpenDetails={onOpenDetails}
               />
             ))}
           </Box>
