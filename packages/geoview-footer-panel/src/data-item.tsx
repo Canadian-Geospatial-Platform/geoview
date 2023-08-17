@@ -20,10 +20,19 @@ export function DataItem({ mapId }: Props): JSX.Element {
   // eslint-disable-next-line @typescript-eslint/ban-types
   const [dataLayers, setDataLayers] = useState<string[]>([]);
 
+  const updateLayers = () => {
+    if (api.map(mapId).layer?.layerOrder !== undefined) setDataLayers([...api.map(mapId).layer.layerOrder].reverse());
+  };
+
   useEffect(() => {
-    setDataLayers(Object.keys(api.map(mapId!).layer.geoviewLayers));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [api, mapId]);
+    api.event.on(api.eventNames.MAP.EVENT_MAP_LOADED, updateLayers, mapId);
+    api.event.on(api.eventNames.LAYER_SET.UPDATED, updateLayers, `${mapId}/$LegendsLayerSet$`);
+
+    return () => {
+      api.event.off(api.eventNames.MAP.EVENT_MAP_LOADED, mapId, updateLayers);
+      api.event.off(api.eventNames.LAYER_SET.UPDATED, mapId, updateLayers);
+    };
+  });
 
   setTimeout(() => {
     dataLayers.forEach((layerId) => {

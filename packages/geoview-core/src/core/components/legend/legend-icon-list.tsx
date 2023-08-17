@@ -50,7 +50,35 @@ export function LegendIconList(props: TypeLegendIconListProps): JSX.Element {
 
   const allChecked = iconImages.map(() => true);
   const allUnChecked = iconImages.map(() => false);
-  const [isChecked, setChecked] = useState<boolean[]>(isParentVisible === true ? allChecked : allUnChecked);
+  const initialChecked = isParentVisible === true ? allChecked : allUnChecked;
+
+  // set initial visibility of layers according to metadata
+  if (layerConfig && layerConfig.style !== undefined && geometryKey) {
+    const itemStyle = layerConfig.style[geometryKey];
+    if (itemStyle && itemStyle.styleType === 'uniqueValue' && (itemStyle as TypeUniqueValueStyleConfig).uniqueValueStyleInfo) {
+      const uniqueItemStyles = (itemStyle as TypeUniqueValueStyleConfig).uniqueValueStyleInfo;
+      for (let i = 0; i < uniqueItemStyles.length; i++) {
+        if (
+          uniqueItemStyles[i].visible === 'no' ||
+          ((itemStyle as TypeUniqueValueStyleConfig).defaultVisible === 'no' && uniqueItemStyles[i].visible !== 'always')
+        ) {
+          initialChecked[iconLabels.indexOf(uniqueItemStyles[i].label)] = false;
+        }
+      }
+    } else if (itemStyle && itemStyle.styleType === 'classBreaks' && (itemStyle as TypeClassBreakStyleConfig).classBreakStyleInfo) {
+      const classbreakItemStyles = (itemStyle as TypeClassBreakStyleConfig).classBreakStyleInfo;
+      for (let i = 0; i < classbreakItemStyles.length; i++) {
+        if (
+          classbreakItemStyles[i].visible === 'no' ||
+          ((itemStyle as TypeClassBreakStyleConfig).defaultVisible === 'no' && classbreakItemStyles[i].visible !== 'always')
+        ) {
+          initialChecked[iconLabels.indexOf(classbreakItemStyles[i].label)] = false;
+        }
+      }
+    }
+  }
+
+  const [isChecked, setChecked] = useState<boolean[]>(initialChecked);
   const [checkedCount, setCheckCount] = useState<number>(isParentVisible === true ? iconImages.length : 0);
   const [initParentVisible, setInitParentVisible] = useState(isParentVisible);
 

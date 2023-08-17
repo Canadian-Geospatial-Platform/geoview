@@ -180,7 +180,9 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
   const canCluster = !!api.maps[mapId].layer.registeredLayers[unclusterLayerPath];
 
   const [isClusterToggleEnabled, setIsClusterToggleEnabled] = useState(false);
-  const [isChecked, setChecked] = useState(true);
+  const [isChecked, setChecked] = useState<boolean>(
+    api.map(mapId).layer.registeredLayers[clusterLayerPath]?.initialSettings?.visible !== false
+  );
   const [isOpacityOpen, setOpacityOpen] = useState(false);
   const [isGroupOpen, setGroupOpen] = useState(true);
   const [isLegendOpen, setLegendOpen] = useState(true);
@@ -351,7 +353,6 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
     if (hideAll !== undefined) setChecked(!hideAll);
   }, [hideAll]);
 
-  // TODO ! Revise this useEffect because it prevent the visibility flag of the config to work properly.
   useEffect(() => {
     if (layerConfigEntry) {
       if (isParentVisible && isChecked) {
