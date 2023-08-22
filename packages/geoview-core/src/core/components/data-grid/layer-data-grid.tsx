@@ -144,7 +144,6 @@ function LayerDataGrid(props: CustomDataGridProps) {
    */
   const buildFilterString = (gridFilterModel: GridFilterModel) => {
     // checkif if there is items in filter object
-    console.log('gridFilterModel', gridFilterModel);
     let filter = '';
     if (gridFilterModel.items.length > 0) {
       const filterObj = gridFilterModel.items[0] as FilterObject;
@@ -177,7 +176,6 @@ function LayerDataGrid(props: CustomDataGridProps) {
               )}`;
       }
     }
-    console.log('filter value, filter', filter);
     setFilterString(filter);
   };
 
