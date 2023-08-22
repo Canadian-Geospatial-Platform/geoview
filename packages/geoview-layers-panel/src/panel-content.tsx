@@ -1,5 +1,5 @@
 import type React from 'react';
-import { toJsonObject, TypeJsonObject, TypeWindow, TypeButtonPanel, payloadIsLegendsLayersetUpdated, PayloadBaseClass } from 'geoview-core';
+import { toJsonObject, TypeJsonObject, TypeWindow, TypeButtonPanel } from 'geoview-core';
 
 import LayerStepper from './layer-stepper';
 import ReorderLayersList from './reorder-layers-list';
@@ -93,66 +93,13 @@ function PanelContent(props: TypePanelContentProps): JSX.Element {
     if (api.map(mapId).layer?.layerOrder !== undefined) setMapLayers([...api.map(mapId).layer.layerOrder].reverse());
   };
 
-  api.event.emit({ handlerName: `${mapId}/$LegendsLayerSet$`, event: api.eventNames.GET_LEGENDS.TRIGGER });
   useEffect(() => {
-    const legendsLayerSetUpdatedListenerFunction = (payload: PayloadBaseClass) => {
-      if (payloadIsLegendsLayersetUpdated(payload)) {
-        const { resultSets } = payload;
-        const mapLayerSet: string[] = [];
-        Object.keys(resultSets).forEach((layerPath) => {
-          mapLayerSet.push(layerPath.split('/')[0]);
-        });
-        setMapLayers([...new Set(mapLayerSet)]);
-      }
-    };
-    api.event.on(api.eventNames.GET_LEGENDS.LEGENDS_LAYERSET_UPDATED, legendsLayerSetUpdatedListenerFunction, `${mapId}/$LegendsLayerSet$`);
+    api.event.on(api.eventNames.MAP.EVENT_MAP_LOADED, updateLayers, mapId);
+    api.event.on(api.eventNames.GET_LEGENDS.LEGENDS_LAYERSET_UPDATED, updateLayers, `${mapId}/$LegendsLayerSet$`);
+
     return () => {
-      api.event.off(api.eventNames.GET_LEGENDS.LEGENDS_LAYERSET_UPDATED, mapId, legendsLayerSetUpdatedListenerFunction);
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  const updateLayersListenerFunction = () => updateLayers();
-
-  useEffect(() => {
-    api.event.on(
-      api.eventNames.MAP.EVENT_MAP_LOADED,
-      () => {
-        updateLayers();
-      },
-      mapId
-    );
-
-    // TODO: Refactor properly to use the legend layer set #1104
-    // api.event.on(
-    //   api.eventNames.LAYER.EVENT_REMOVE_LAYER,
-    //   (payload) => {
-    //     if (payloadIsRemoveGeoViewLayer(payload)) {
-    //       setMapLayers((orderedLayers) => orderedLayers.filter((layerId) => layerId !== payload.geoviewLayer.geoviewLayerId));
-    //     }
-    //   },
-    //   mapId
-    // );
-    // api.event.on(
-    //   api.eventNames.LAYER.EVENT_ADD_LAYER,
-    //   (payload) => {
-    //     if (payloadIsALayerConfig(payload)) {
-    //       api.event.on(
-    //         api.eventNames.LAYER.EVENT_LAYER_ADDED,
-    //         () => {
-    //           updateLayers();
-    //           api.event.off(api.eventNames.LAYER.EVENT_LAYER_ADDED, `${mapId}/${payload.layerConfig.geoviewLayerId}`);
-    //         },
-    //         `${mapId}/${payload.layerConfig.geoviewLayerId}`
-    //       );
-    //     }
-    //   },
-    //   mapId
-    // );
-    return () => {
-      api.event.off(api.eventNames.MAP.EVENT_MAP_LOADED, mapId, updateLayersListenerFunction);
-      api.event.off(api.eventNames.LAYER.EVENT_ADD_LAYER, mapId);
-      api.event.off(api.eventNames.LAYER.EVENT_REMOVE_LAYER, mapId);
+      api.event.off(api.eventNames.MAP.EVENT_MAP_LOADED, mapId, updateLayers);
+      api.event.off(api.eventNames.GET_LEGENDS.LEGENDS_LAYERSET_UPDATED, mapId, updateLayers);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
