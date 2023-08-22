@@ -46,35 +46,45 @@ const sxClasses = {
 export function Accordion(props: AccordionProps): ReactNode {
   const { id, items, className, defaultExpanded = false, showLoadingIcon = false } = props;
 
-  const [isExpanded, setIsExpanded] = useState<boolean>(false);
-  const [isTransitionStarted, setIsTransitionStarted] = useState<boolean>(false);
+  const [expandedStates, setExpandedStates] = useState<boolean[]>(Array(items.length).fill(defaultExpanded));
+  const [transitionStates, setTransitionStates] = useState<boolean[]>(Array(items.length).fill(false));
+
+  const handleAccordionChange = (index: number) => (event: React.SyntheticEvent, expanded: boolean) => {
+    const updatedStates = [...expandedStates];
+    updatedStates[index] = expanded;
+    setExpandedStates(updatedStates);
+  };
 
   const handleTransitionEnd = useCallback(
-    (e: React.TransitionEvent) => {
-      if (!isExpanded && showLoadingIcon) {
-        setIsTransitionStarted(true);
+    (index: number) => (e: React.TransitionEvent) => {
+      if (!expandedStates[index] && showLoadingIcon) {
+        const updatedStates = [...transitionStates];
+        updatedStates[index] = true;
+        setTransitionStates(updatedStates);
+
         if (e.propertyName === 'height') {
-          setIsTransitionStarted(false);
+          const resetStates = [...transitionStates];
+          resetStates[index] = false;
+          setTransitionStates(resetStates);
         }
       }
     },
-    [isExpanded, showLoadingIcon]
+    [expandedStates, showLoadingIcon, transitionStates]
   );
 
   return (
     <div id={generateId(id)} className="accordion-group">
-      {Object.values(items).map((item: AccordionItem, idx: number) => (
-        /* eslint-disable react/no-array-index-key */
+      {items.map((item: AccordionItem, idx: number) => (
         <MaterialAccordion
+          // eslint-disable-next-line react/no-array-index-key
           key={idx}
           className={className}
-          defaultExpanded={defaultExpanded}
-          onChange={(_, expanded) => setIsExpanded(expanded)}
-          onTransitionEnd={handleTransitionEnd}
-          expanded={isExpanded}
+          expanded={expandedStates[idx]}
+          onChange={handleAccordionChange(idx)}
+          onTransitionEnd={handleTransitionEnd(idx)}
         >
           <MaterialAccordionSummary
-            expandIcon={showLoadingIcon && isTransitionStarted ? <LoopIcon sx={sxClasses.loadingIcon} /> : <ExpandMoreIcon />}
+            expandIcon={showLoadingIcon && transitionStates[idx] ? <LoopIcon sx={sxClasses.loadingIcon} /> : <ExpandMoreIcon />}
             aria-controls={`accordion-panel-${idx}-a-content`}
           >
             <div>{item.title}</div>
