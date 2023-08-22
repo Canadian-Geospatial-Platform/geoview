@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   MaterialReactTable,
@@ -9,6 +9,7 @@ import {
   MRT_FullScreenToggleButton as MRTFullScreenToggleButton,
   type MRT_SortingState as MRTSortingState,
   type MRT_Virtualizer as MRTVirtualizer,
+  type MRT_ColumnFiltersState as MRTColumnFiltersState,
 } from 'material-react-table';
 import { Extent } from 'ol/extent';
 import { Geometry } from 'ol/geom';
@@ -17,7 +18,7 @@ import { Box, IconButton, ZoomInSearchIcon } from '@/ui';
 import ExportButton from './export-button';
 import JSONExportButton from './json-export-button';
 import FilterMap from './filter-map';
-import { api } from '@/app';
+import { AbstractGeoViewVector, TypeLayerEntryConfig, EsriDynamic, api } from '@/app';
 
 interface FeatureInfo {
   featureInfoKey: string;
@@ -64,8 +65,9 @@ function MapDataTable({ data, layerId, mapId, layerKey }: MapDataTableProps) {
   const { t } = useTranslation<string>();
 
   const tableInstanceRef = useRef(null);
-  const [filterString, setFilterString] = useState<string>('');
   const [mapFiltered, setMapFiltered] = useState<boolean>(false);
+  const [filteredData] = useState(data.features);
+  const [columnFilters, setColumnFilters] = useState<MRTColumnFiltersState>([]);
 
   const iconImage = {
     padding: 3,
@@ -84,28 +86,43 @@ function MapDataTable({ data, layerId, mapId, layerKey }: MapDataTableProps) {
 
   const [sorting, setSorting] = useState<MRTSortingState>([]);
 
+  /**
+   * Convert the filter list from the Column Filter
+   *
+   * @param {MRTColumnFiltersState} columnFilter list of filter from table.
+   */
+  const buildFilterList = useCallback((columnFilter: MRTColumnFiltersState) => {
+    return columnFilter.map((filter) => {
+      return `${filter.id} like '%${filter.value}%'`;
+    });
+  }, []);
+
   useEffect(() => {
     // scroll to the top of the table when the sorting changes
     try {
       rowVirtualizerInstanceRef.current?.scrollToIndex?.(0);
     } catch (error) {
+      // eslint-disable-next-line no-console
       console.error(error);
     }
   }, [sorting]);
 
   useEffect(() => {
-    console.log(tableInstanceRef.current);
-  }, [tableInstanceRef]);
+    if (mapFiltered) {
+      const filterList = buildFilterList(columnFilters);
+      filterList.forEach((filterString) => {
+        const geoviewLayerInstance = api.map(mapId).layer.geoviewLayers[layerId];
+        const filterLayerConfig = api.map(mapId).layer.registeredLayers[layerKey] as TypeLayerEntryConfig;
+        if (mapFiltered && geoviewLayerInstance !== undefined && filterLayerConfig !== undefined) {
+          (geoviewLayerInstance as AbstractGeoViewVector | EsriDynamic)?.applyViewFilter(filterLayerConfig, filterString);
+        } else {
+          (geoviewLayerInstance as AbstractGeoViewVector | EsriDynamic)?.applyViewFilter(filterLayerConfig, '');
+        }
+      });
+    }
 
-  useEffect(() => {
-    // const geoviewLayerInstance = api.map(mapId).layer.geoviewLayers[layerId];
-    // const filterLayerConfig = api.map(mapId).layer.registeredLayers[layerKey] as TypeLayerEntryConfig;
-    // if (mapFiltered && geoviewLayerInstance !== undefined && filterLayerConfig !== undefined) {
-    //   (geoviewLayerInstance as AbstractGeoViewVector | EsriDynamic)?.applyViewFilter(filterLayerConfig, filterString);
-    // } else {
-    //   (geoviewLayerInstance as AbstractGeoViewVector | EsriDynamic)?.applyViewFilter(filterLayerConfig, '');
-    // }
-  }, [filterString, layerId, layerKey, mapFiltered, mapId]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [columnFilters]);
 
   /**
    * Build material react data table column header.
@@ -117,7 +134,7 @@ function MapDataTable({ data, layerId, mapId, layerKey }: MapDataTableProps) {
       return {
         accessorKey: fieldAlias,
         header: fieldAlias,
-        ...([t('dataTable.icon'), t('dataTable.zoom')].includes(fieldAlias) && { size: 100 }),
+        ...([t('dataTable.icon'), t('dataTable.zoom')].includes(fieldAlias) && { size: 100, enableColumnFilter: false }),
       };
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -140,7 +157,7 @@ function MapDataTable({ data, layerId, mapId, layerKey }: MapDataTableProps) {
    * @param {Features} features list of objects transform into rows.
    */
   const rows = useMemo(() => {
-    return data.features.map((feature) => {
+    return filteredData.map((feature) => {
       return {
         ICON: (
           <img
@@ -158,7 +175,7 @@ function MapDataTable({ data, layerId, mapId, layerKey }: MapDataTableProps) {
       };
     }) as unknown as ColumnsType[];
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [filteredData]);
 
   return (
     <Box sx={{ padding: '1rem 0' }}>
@@ -173,6 +190,9 @@ function MapDataTable({ data, layerId, mapId, layerKey }: MapDataTableProps) {
           density: 'compact',
           pagination: { pageSize: 10, pageIndex: 0 },
         }}
+        onSortingChange={setSorting}
+        onColumnFiltersChange={setColumnFilters}
+        state={{ sorting, columnFilters }}
         renderToolbarInternalActions={({ table }) => (
           <Box>
             <MRTToggleFiltersButton table={table} />
@@ -193,8 +213,6 @@ function MapDataTable({ data, layerId, mapId, layerKey }: MapDataTableProps) {
         enablePinning
         enableRowVirtualization
         muiTableContainerProps={{ sx: { maxHeight: '600px' } }}
-        onSortingChange={setSorting}
-        state={{ sorting }}
         rowVirtualizerInstanceRef={rowVirtualizerInstanceRef}
         rowVirtualizerProps={{ overscan: 5 }}
         columnVirtualizerProps={{ overscan: 2 }}
