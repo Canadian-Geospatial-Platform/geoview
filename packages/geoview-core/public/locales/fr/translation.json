@@ -108,7 +108,7 @@
     "exportBtn": "Exporter",
     "jsonExportBtn": "Télécharger GeoJSON",
     "downloadAsCSV": "Télécharger la CSV",
-    "filterMap": "Filter Map",
-    "stopFilterMap": "Stop Filter Map"
+    "filterMap": "Filtrer la carte",
+    "stopFilterMap": "Filtrer la carte d'arrêt"
   }
 }

@@ -92,8 +92,12 @@ function MapDataTable({ data, layerId, mapId, layerKey }: MapDataTableProps) {
    * @param {MRTColumnFiltersState} columnFilter list of filter from table.
    */
   const buildFilterList = useCallback((columnFilter: MRTColumnFiltersState) => {
+    if (!columnFilter.length) return [''];
     return columnFilter.map((filter) => {
-      return `${filter.id} like '%${filter.value}%'`;
+      if ((filter.value as string).match(/^-?\d+$/)) {
+        return `${filter.id} = ${filter.value}`;
+      }
+      return `'${filter.id}' like '%${filter.value}%'`;
     });
   }, []);
 
