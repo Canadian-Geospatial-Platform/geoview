@@ -380,11 +380,11 @@ export class Layer {
   /**
    * Remove a geoview layer from the map
    *
-   * @param {TypeGeoviewLayerConfig} layer the layer configuration to remove
+   * @param {TypeGeoviewLayerConfig} geoviewLayer the layer configuration to remove
    */
   removeGeoviewLayer = (geoviewLayer: AbstractGeoViewLayer): string => {
-    api.event.emit(GeoViewLayerPayload.createRemoveGeoviewLayerPayload(this.mapId, geoviewLayer));
     this.layerOrder.splice(indexOf(api.map(this.mapId).layer.layerOrder, geoviewLayer.geoviewLayerId), 1);
+    api.event.emit(GeoViewLayerPayload.createRemoveGeoviewLayerPayload(this.mapId, geoviewLayer));
 
     return geoviewLayer.geoviewLayerId;
   };
@@ -392,7 +392,7 @@ export class Layer {
   /**
    * Search for a layer using it's id and return the layer data
    *
-   * @param {string} id the layer id to look for
+   * @param {string} geoviewLayerId the layer id to look for
    * @returns the found layer data object
    */
   getGeoviewLayerById = (geoviewLayerId: string): AbstractGeoViewLayer | null => {

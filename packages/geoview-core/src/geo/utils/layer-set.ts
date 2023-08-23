@@ -74,10 +74,10 @@ export class LayerSet {
                 layerStatus: 'newInstance',
                 layerName: api.map(this.mapId).layer.registeredLayers[layerPath].layerName,
               };
-              api.event.emit(LayerSetPayload.createLayerSetUpdatedPayload(`${this.layerSetId}/${layerPath}`, this.resultSets, layerPath));
+              api.event.emit(LayerSetPayload.createLayerSetUpdatedPayload(`${this.mapId}/$LegendsLayerSet$`, this.resultSets, layerPath));
             } else if (action === 'remove' && layerPath in this.resultSets) {
               delete this.resultSets[layerPath];
-              api.event.emit(LayerSetPayload.createLayerSetUpdatedPayload(`${this.layerSetId}/${layerPath}`, this.resultSets, layerPath));
+              api.event.emit(LayerSetPayload.createLayerSetUpdatedPayload(`${this.mapId}/$LegendsLayerSet$`, this.resultSets, layerPath));
             }
           }
         }
