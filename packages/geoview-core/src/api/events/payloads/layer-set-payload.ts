@@ -1,13 +1,15 @@
 import { PayloadBaseClass } from './payload-base-class';
 
 import { EventStringId, EVENT_NAMES } from '../event-types';
-import { TypeLayerStatus, TypeLocalizedString } from '@/geo/map/map-schema-types';
+import { TypeLayerEntryConfig, TypeLayerStatus, TypeLocalizedString } from '@/geo/map/map-schema-types';
+import { Layer } from '@/geo/layer/layer';
 
 /** Valid events that can create LayerSetPayload */
 const validEvents: EventStringId[] = [
   EVENT_NAMES.LAYER_SET.LAYER_REGISTRATION,
   EVENT_NAMES.LAYER_SET.REQUEST_LAYER_INVENTORY,
   EVENT_NAMES.LAYER_SET.CHANGE_LAYER_STATUS,
+  EVENT_NAMES.LAYER_SET.CHANGE_LAYER_PHASE,
   EVENT_NAMES.LAYER_SET.UPDATED,
 ];
 
@@ -15,6 +17,7 @@ export type TypeResultSets = {
   [layerPath: string]: {
     layerName?: TypeLocalizedString;
     layerStatus: TypeLayerStatus;
+    layerPhase: string;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     data: any | null;
   };
@@ -101,13 +104,37 @@ export const payloadIsLayerSetChangeLayerStatus = (
 };
 
 /**
- * Additional attributes needed to define a TypeLegendChangeLayerStatusPayload
+ * type guard function that redefines a PayloadBaseClass as a TypeLayerSetChangeLayerPhasePayload
+ * if the event attribute of the verifyIfPayload parameter is valid. The type ascention
+ * applies only to the true block of the if clause.
+ *
+ * @param {PayloadBaseClass} verifyIfPayload object to test in order to determine if the type ascention is valid
+ * @returns {boolean} returns true if the payload is valid
+ */
+export const payloadIsLayerSetChangeLayerPhase = (
+  verifyIfPayload: PayloadBaseClass
+): verifyIfPayload is TypeLayerSetChangeLayerPhasePayload => {
+  return verifyIfPayload?.event === EVENT_NAMES.LAYER_SET.CHANGE_LAYER_PHASE;
+};
+
+/**
+ * Additional attributes needed to define a TypeLayerSetChangeLayerStatusPayload
  */
 export interface TypeLayerSetChangeLayerStatusPayload extends LayerSetPayload {
   // the layer path affected.
   layerPath: string;
   // The new layer status to assign to the layer path.
   layerStatus: TypeLayerStatus;
+}
+
+/**
+ * Additional attributes needed to define a TypeLayerSetChangeLayerPhasePayload
+ */
+export interface TypeLayerSetChangeLayerPhasePayload extends LayerSetPayload {
+  // the layer path affected.
+  layerPath: string;
+  // The new layer phase to assign to the layer path.
+  layerPhase: string;
 }
 
 /**
@@ -187,17 +214,17 @@ export class LayerSetPayload extends PayloadBaseClass {
    * Static method used to create a layer set payload when we need to change a layer status
    *
    * @param {string | null} handlerName the handler Name
-   * @param {string} LayerSetId the layer set identifier that has changed
-   * @param {string} layerPath the layer path to add to the inventory
+   * @param {string | TypeLayerEntryConfig} layerPathOrConfig the layer path affected by the change
    * @param {TypeLayerStatus} layerStatus the value to assign to the layerStatus property
    *
    * @returns {TypelayerSetUpdatedPayload} the requestLayerInventoryPayload object created
    */
   static createLayerSetChangeLayerStatusPayload = (
     handlerName: string,
-    layerPath: string,
+    layerPathOrConfig: string | TypeLayerEntryConfig,
     layerStatus: TypeLayerStatus
   ): TypeLayerSetChangeLayerStatusPayload => {
+    const layerPath = typeof layerPathOrConfig === 'string' ? layerPathOrConfig : Layer.getLayerPath(layerPathOrConfig);
     const layerSetChangeLayerStatusPayload = new LayerSetPayload(
       EVENT_NAMES.LAYER_SET.CHANGE_LAYER_STATUS,
       handlerName
@@ -205,6 +232,30 @@ export class LayerSetPayload extends PayloadBaseClass {
     layerSetChangeLayerStatusPayload.layerPath = layerPath;
     layerSetChangeLayerStatusPayload.layerStatus = layerStatus;
     return layerSetChangeLayerStatusPayload;
+  };
+
+  /**
+   * Static method used to create a layer set payload when we need to change a layer status
+   *
+   * @param {string | null} handlerName the handler Name
+   * @param {string | TypeLayerEntryConfig} layerPathOrConfig the layer path affected by the change
+   * @param {string} layerPhase the value to assign to the layerPhase property
+   *
+   * @returns {TypelayerSetUpdatedPayload} the requestLayerInventoryPayload object created
+   */
+  static createLayerSetChangeLayerPhasePayload = (
+    handlerName: string,
+    layerPathOrConfig: string | TypeLayerEntryConfig,
+    layerPhase: string
+  ): TypeLayerSetChangeLayerPhasePayload => {
+    const layerPath = typeof layerPathOrConfig === 'string' ? layerPathOrConfig : Layer.getLayerPath(layerPathOrConfig);
+    const layerSetChangeLayerPhasePayload = new LayerSetPayload(
+      EVENT_NAMES.LAYER_SET.CHANGE_LAYER_PHASE,
+      handlerName
+    ) as TypeLayerSetChangeLayerPhasePayload;
+    layerSetChangeLayerPhasePayload.layerPath = layerPath;
+    layerSetChangeLayerPhasePayload.layerPhase = layerPhase;
+    return layerSetChangeLayerPhasePayload;
   };
 
   /**

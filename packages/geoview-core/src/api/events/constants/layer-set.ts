@@ -6,7 +6,7 @@ import { EventStringId } from '../event-types';
  */
 
 /** Valid keys for the LAYER_SET category */
-export type LayerSetEventKey = 'REQUEST_LAYER_INVENTORY' | 'LAYER_REGISTRATION' | 'CHANGE_LAYER_STATUS' | 'UPDATED';
+export type LayerSetEventKey = 'REQUEST_LAYER_INVENTORY' | 'LAYER_REGISTRATION' | 'CHANGE_LAYER_STATUS' | 'CHANGE_LAYER_PHASE' | 'UPDATED';
 
 /** Record that associates LAYER_SET's event keys to their event string id */
 export const LAYER_SET: Record<LayerSetEventKey, EventStringId> = {
@@ -21,9 +21,14 @@ export const LAYER_SET: Record<LayerSetEventKey, EventStringId> = {
   LAYER_REGISTRATION: 'layer_set/layer_registration',
 
   /**
-   * Event triggered when a layer's status has changed
+   * Event triggered when a layer's status must be changed
    */
   CHANGE_LAYER_STATUS: 'layer_set/change_layer_status',
+
+  /**
+   * Event triggered when a layer's phase must be changed
+   */
+  CHANGE_LAYER_PHASE: 'layer_set/change_layer_phase',
 
   /**
    * Event triggered when a layer set has changed

@@ -4,6 +4,7 @@ import {
   LayerSetPayload,
   payloadIsLayerRegistration,
   payloadIsLayerSetChangeLayerStatus,
+  payloadIsLayerSetChangeLayerPhase,
   TypeResultSets,
   PayloadBaseClass,
 } from '@/api/events/payloads';
@@ -54,11 +55,37 @@ export class LayerSet {
         const { layerPath, layerStatus } = payload;
         if (this.resultSets[layerPath]) {
           this.resultSets[layerPath].layerStatus = layerStatus;
-          api.event.emit(LayerSetPayload.createLayerSetUpdatedPayload(`${this.layerSetId}/${layerPath}`, this.resultSets, layerPath));
+          if (layerStatus === 'processed') this.resultSets[layerPath].layerPhase = layerStatus;
+          api.event.emit(
+            LayerSetPayload.createLayerSetUpdatedPayload(`${this.layerSetId}/${layerPath}/status`, this.resultSets, layerPath)
+          );
+          api.event.emit(LayerSetPayload.createLayerSetUpdatedPayload(this.layerSetId, this.resultSets, layerPath));
         }
       }
     };
     api.event.on(EVENT_NAMES.LAYER_SET.CHANGE_LAYER_STATUS, changeLayerStatusListenerFunctions, this.mapId);
+
+    const changeLayerPhaseListenerFunctions = (payload: PayloadBaseClass) => {
+      if (payloadIsLayerSetChangeLayerPhase(payload)) {
+        const { layerPath, layerPhase } = payload;
+        if (this.resultSets[layerPath]) {
+          this.resultSets[layerPath].layerPhase = layerPhase;
+          api.event.emit(LayerSetPayload.createLayerSetUpdatedPayload(`${this.layerSetId}/${layerPath}/phase`, this.resultSets, layerPath));
+          api.event.emit(LayerSetPayload.createLayerSetUpdatedPayload(this.layerSetId, this.resultSets, layerPath));
+        } else {
+          Object.keys(this.resultSets).forEach((aLayerPath) => {
+            if (aLayerPath.startsWith(layerPath)) {
+              this.resultSets[aLayerPath].layerPhase = layerPhase;
+              api.event.emit(
+                LayerSetPayload.createLayerSetUpdatedPayload(`${this.layerSetId}/${aLayerPath}/phase`, this.resultSets, layerPath)
+              );
+              api.event.emit(LayerSetPayload.createLayerSetUpdatedPayload(this.layerSetId, this.resultSets, layerPath));
+            }
+          });
+        }
+      }
+    };
+    api.event.on(EVENT_NAMES.LAYER_SET.CHANGE_LAYER_PHASE, changeLayerPhaseListenerFunctions, this.mapId);
 
     // Register a layer to the layer set or unregister the layer when it is deleted from the map.
     api.event.on(
@@ -72,12 +99,13 @@ export class LayerSet {
               this.resultSets[layerPath] = {
                 data: undefined,
                 layerStatus: 'newInstance',
+                layerPhase: 'newInstance',
                 layerName: api.map(this.mapId).layer.registeredLayers[layerPath].layerName,
               };
-              api.event.emit(LayerSetPayload.createLayerSetUpdatedPayload(`${this.mapId}/$LegendsLayerSet$`, this.resultSets, layerPath));
+              api.event.emit(LayerSetPayload.createLayerSetUpdatedPayload(this.layerSetId, this.resultSets, layerPath));
             } else if (action === 'remove' && layerPath in this.resultSets) {
               delete this.resultSets[layerPath];
-              api.event.emit(LayerSetPayload.createLayerSetUpdatedPayload(`${this.mapId}/$LegendsLayerSet$`, this.resultSets, layerPath));
+              api.event.emit(LayerSetPayload.createLayerSetUpdatedPayload(this.layerSetId, this.resultSets, layerPath));
             }
           }
         }
