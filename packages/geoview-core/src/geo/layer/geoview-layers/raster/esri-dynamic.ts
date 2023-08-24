@@ -286,7 +286,10 @@ export class EsriDynamic extends AbstractGeoViewRaster {
       api.event.once(
         EVENT_NAMES.LAYER.EVENT_IF_CONDITION,
         (payload) => {
-          this.setVisible(layerEntryConfig.initialSettings!.visible!, layerEntryConfig);
+          this.setVisible(
+            layerEntryConfig.initialSettings!.visible! === 'yes' || layerEntryConfig.initialSettings!.visible! === 'always',
+            layerEntryConfig
+          );
         },
         `${this.mapId}/visibilityTest`
       );

@@ -35,8 +35,8 @@ export type TypeLocalizedStringEnAndFr = Required<Record<TypeDisplayLanguage, st
 export type TypeLayerInitialSettings = {
   /** Initial opacity setting. Domain = [0..1] and default = 1. */
   opacity?: number;
-  /** Initial visibility setting. Default = true. */
-  visible?: boolean;
+  /** Initial visibility setting. Default = yes. */
+  visible?: 'yes' | 'no' | 'always';
   /** The geographic bounding box that contains all the layer's features. */
   bounds?: Extent;
   /** The extent that constrains the view. Called with [minX, minY, maxX, maxY] extent coordinates. */

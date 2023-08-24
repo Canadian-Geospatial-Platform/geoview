@@ -3,10 +3,7 @@
     "interaction": "dynamic",
     "viewSettings": {
       "zoom": 3,
-      "center": [
-        -100,
-        50
-      ],
+      "center": [-100, 50],
       "projection": 3978
     },
     "basemapOptions": {
@@ -25,7 +22,7 @@
         },
         "geoviewLayerType": "esriFeature",
         "initialSettings": {
-          "visible": false
+          "visible": "no"
         },
         "listOfLayerEntryConfig": [
           {
@@ -43,7 +40,7 @@
         },
         "geoviewLayerType": "GeoJSON",
         "initialSettings": {
-          "visible": true
+          "visible": "yes"
         },
         "listOfLayerEntryConfig": [
           {
@@ -68,7 +65,7 @@
               {
                 "layerId": "icon_points.json",
                 "initialSettings": {
-                  "visible": false
+                  "visible": "no"
                 },
                 "layerName": {
                   "en": "Icons"
@@ -87,20 +84,9 @@
     ]
   },
   "theme": "dark",
-  "navBar": [
-    "zoom",
-    "fullscreen",
-    "home",
-    "location",
-    "export"
-  ],
-  "components": [
-    "north-arrow",
-    "overview-map"
-  ],
+  "navBar": ["zoom", "fullscreen", "home", "location", "export"],
+  "components": ["north-arrow", "overview-map"],
   "corePackages": [],
   "externalPackages": [],
-  "suportedLanguages": [
-    "en"
-  ]
+  "suportedLanguages": ["en"]
 }

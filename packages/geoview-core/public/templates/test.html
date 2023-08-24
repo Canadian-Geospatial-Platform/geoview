@@ -16,11 +16,11 @@
   </head>
   <body>
     <div
-    id="LYR1"
-    class="llwp-map"
-    style='height:100vh'
-    data-lang="en"
-    data-config="{
+      id="LYR1"
+      class="llwp-map"
+      style="height: 100vh"
+      data-lang="en"
+      data-config="{
       'map': {
         'interaction': 'dynamic',
         'viewSettings': {
@@ -42,7 +42,7 @@
             'geoviewLayerName': { 'en': 'Analysis Limit' },
             'metadataAccessPath': { 'en': 'https://132.156.9.48:30102/api' },
             'geoviewLayerType': 'ogcFeature',
-            'initialSettings': { 'visible': false },
+            'initialSettings': { 'visible': 'no' },
             'listOfLayerEntryConfig': [
               {
                 'layerId': 'analysis-limit',
@@ -69,7 +69,7 @@
             'geoviewLayerName': { 'en': 'Analysis Limit CHN' },
             'metadataAccessPath': { 'en': 'https://132.156.9.48:30102/api' },
             'geoviewLayerType': 'ogcFeature',
-            'initialSettings': { 'visible': false },
+            'initialSettings': { 'visible': 'no' },
             'listOfLayerEntryConfig': [
               {
                 'layerId': 'analysis-limit-CHN',
@@ -96,7 +96,7 @@
             'geoviewLayerName': { 'en': 'Blur Layer' },
             'metadataAccessPath': { 'en': 'https://132.156.9.48:30102/api' },
             'geoviewLayerType': 'ogcFeature',
-            'initialSettings': { 'visible': false },
+            'initialSettings': { 'visible': 'no' },
             'listOfLayerEntryConfig': [
               {
                 'layerId': 'blurlayer'
@@ -114,7 +114,7 @@
               'fr': 'https://maps.geogratis.gc.ca/wms/hydro_network_en'
             },
             'geoviewLayerType': 'ogcWms',
-            'initialSettings': { 'visible': false },
+            'initialSettings': { 'visible': 'no' },
             'listOfLayerEntryConfig': [
               {
                 'entryType': 'raster-image',
@@ -134,7 +134,7 @@
               'fr': 'https://datacube.services.geo.ca/ows/elevation'
             },
             'geoviewLayerType': 'ogcWms',
-            'initialSettings': { 'visible': false },
+            'initialSettings': { 'visible': 'no' },
             'listOfLayerEntryConfig': [
               {
                 'entryType': 'group',
@@ -157,8 +157,8 @@
       'components': ['north-arrow', 'overview-map'],
       'corePackages': [],
       'suportedLanguages': ['en']
-    }">
-    </div>
+    }"
+    ></div>
     <button type="button" class="collapsible">Visibility and filters</button>
     <pre style="height: 20pc; overflow-y: scroll" id="layer1-buttons-pre" class="panel"></pre>
     <button class="collapsible">Get Legend</button>
@@ -206,7 +206,6 @@
           },
           'LYR1/LegendsId1'
         );
-
       });
     </script>
   </body>

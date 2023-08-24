@@ -286,7 +286,7 @@ export function commonProcessInitialSettings(
   layerEntryConfig: TypeEsriFeatureLayerEntryConfig | TypeEsriDynamicLayerEntryConfig
 ) {
   // layerEntryConfig.initialSettings cannot be undefined because config-validation set it to {} if it is undefined.
-  if (layerEntryConfig.initialSettings?.visible === undefined) layerEntryConfig.initialSettings!.visible = visibility;
+  if (layerEntryConfig.initialSettings?.visible === undefined) layerEntryConfig.initialSettings!.visible = visibility ? 'yes' : 'no';
   // ! TODO: The solution implemented in the following two lines is not right. scale and zoom are not the same things.
   // ! if (layerEntryConfig.initialSettings?.minZoom === undefined && minScale !== 0) layerEntryConfig.initialSettings.minZoom = minScale;
   // ! if (layerEntryConfig.initialSettings?.maxZoom === undefined && maxScale !== 0) layerEntryConfig.initialSettings.maxZoom = maxScale;

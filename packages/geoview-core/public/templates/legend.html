@@ -286,7 +286,7 @@
             },
             'geoviewLayerType': 'ogcWms',
             'initialSettings': {
-              'visible': true
+              'visible': 'yes'
             },
             'listOfLayerEntryConfig': [
               {
@@ -419,7 +419,7 @@
         // TODO: The legend component does not render properly
         const legendItemOutside = api.map(mapIdFour).legend.createLegendItem({ layerId: 'UC4Layer2-msi' });
         const root = createRoot(legendDiv);
-        root.render(legendItemOutside)
+        root.render(legendItemOutside);
       });
     </script>
   </body>

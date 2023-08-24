@@ -275,7 +275,9 @@ export class ImageStatic extends AbstractGeoViewRaster {
       if (layerEntryConfig.initialSettings?.maxZoom !== undefined) staticImageOptions.maxZoom = layerEntryConfig.initialSettings?.maxZoom;
       if (layerEntryConfig.initialSettings?.minZoom !== undefined) staticImageOptions.minZoom = layerEntryConfig.initialSettings?.minZoom;
       if (layerEntryConfig.initialSettings?.opacity !== undefined) staticImageOptions.opacity = layerEntryConfig.initialSettings?.opacity;
-      if (layerEntryConfig.initialSettings?.visible !== undefined) staticImageOptions.visible = layerEntryConfig.initialSettings?.visible;
+      if (layerEntryConfig.initialSettings?.visible !== undefined)
+        staticImageOptions.visible =
+          layerEntryConfig.initialSettings?.visible === 'yes' || layerEntryConfig.initialSettings?.visible === 'always';
 
       layerEntryConfig.gvLayer = new ImageLayer(staticImageOptions);
       resolve(layerEntryConfig.gvLayer);
