@@ -7,7 +7,6 @@ import DataTable, { DataTableData } from './data-table';
 import {
   AbstractGeoViewVector,
   api,
-  TypeLayerDataGridProps,
   TypeListOfLayerEntryConfig,
   isVectorLayer,
   TypeArrayOfFeatureInfoEntries,
@@ -15,6 +14,10 @@ import {
 } from '@/app';
 import MapDataTable from './map-data-table';
 
+interface CreataDataTableProps {
+  layerId: string;
+  layerKey: string;
+}
 export class DataTableApi {
   mapId!: string;
 
@@ -112,9 +115,9 @@ export class DataTableApi {
         featureActions: { featureInfoKey: 'Zoom', featureInfoValue: '', fieldType: 'string' },
         geometry: this.buildGeometry(geometry?.getGeometry() as Geometry, projectionConfig) as Geometry,
         extent,
-        rows: Object.values(fieldInfo).reduce((acc, curr) => {
+        rows: Object.keys(fieldInfo).reduce((acc, curr) => {
           if (curr) {
-            acc[curr.alias] = curr.value as string;
+            acc[curr] = fieldInfo[curr]?.value as string;
           }
           return acc;
         }, {} as Record<string, string>),
@@ -122,14 +125,15 @@ export class DataTableApi {
     });
 
     const columns = arrayOfFeatureInfoEntries.reduce((acc, curr) => {
-      const entries = Object.values(curr.fieldInfo) as TypeFieldEntry[];
-      entries.forEach((entry) => {
-        if (entry) {
-          acc[entry.alias] = entry.alias;
+      const keys = Object.keys(curr.fieldInfo);
+
+      keys.forEach((key) => {
+        if (!acc[key]) {
+          acc[key] = curr.fieldInfo[key] as TypeFieldEntry;
         }
       });
       return acc;
-    }, {} as Record<string, string>);
+    }, {} as Record<string, TypeFieldEntry>);
 
     return {
       features,
@@ -140,10 +144,11 @@ export class DataTableApi {
   /**
    * Create data table based on layer id from map.
    * @param {string} layerId layerId of the feature added on map.
+   * @param {string} layerKey layerKey of the feature added on map.
    * @returns {Promise<ReactElement | null>} Promise of ReactElement.
    */
 
-  createDataTableByLayerId = async ({ layerId }: TypeLayerDataGridProps): Promise<ReactElement | null> => {
+  createDataTableByLayerId = async ({ layerId, layerKey }: CreataDataTableProps): Promise<ReactElement | null> => {
     const geoviewLayerInstance = api.map(this.mapId).layer.geoviewLayers[layerId];
     const { currentProjection } = api.map(this.mapId);
     const projectionConfig = api.projection.projections[currentProjection];
@@ -155,8 +160,8 @@ export class DataTableApi {
       const groupLayerKeys = this.getGroupKeys(geoviewLayerInstance.listOfLayerEntryConfig, layerId, []);
 
       if (isVectorLayer(geoviewLayerInstance)) {
-        const requests = groupLayerKeys.map((layerKey) => {
-          return (geoviewLayerInstance as AbstractGeoViewVector)?.getAllFeatureInfo(layerKey);
+        const requests = groupLayerKeys.map((groupLayerKey) => {
+          return (geoviewLayerInstance as AbstractGeoViewVector)?.getAllFeatureInfo(groupLayerKey);
         });
 
         const response = await Promise.allSettled(requests);
@@ -167,7 +172,7 @@ export class DataTableApi {
             return this.buildFeatureRows(result.value, projectionConfig);
           });
 
-        return createElement(MapDataTable, { data: data[0], layerId, mapId: this.mapId }, []);
+        return createElement(MapDataTable, { data: data[0], layerId, mapId: this.mapId, layerKey }, []);
       }
     }
     return null;

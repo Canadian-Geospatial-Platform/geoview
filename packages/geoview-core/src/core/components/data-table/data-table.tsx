@@ -13,7 +13,7 @@ import {
 import { Extent } from 'ol/extent';
 import { Geometry } from 'ol/geom';
 import { darken } from '@mui/material';
-import { Box, IconButton, ZoomInSearchIcon } from '@/ui';
+import { Box, IconButton, Switch, ZoomInSearchIcon } from '@/ui';
 import ExportButton from './export-button';
 
 export interface Features {
@@ -109,7 +109,7 @@ function DataTable({ data }: DataTableProps) {
     }) as unknown as ColumnsType[];
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
+  const label = { inputProps: { 'aria-label': 'Switch demo' } };
   return (
     <Box sx={{ padding: '1rem 0' }}>
       <MaterialReactTable
@@ -128,6 +128,7 @@ function DataTable({ data }: DataTableProps) {
             <MRTShowHideColumnsButton table={table} />
             <MRTToggleDensePaddingButton table={table} />
             <MRTFullScreenToggleButton table={table} />
+            <Switch {...label} size="small" />
             <ExportButton rows={rows} columns={columns} />
           </Box>
         )}

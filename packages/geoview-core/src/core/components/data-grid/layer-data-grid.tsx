@@ -115,6 +115,7 @@ const sxClasses = {
 
 function LayerDataGrid(props: CustomDataGridProps) {
   const { mapId, layerId, rowId, layerKey, displayLanguage, columns, rows } = props;
+
   const theme: Theme & {
     iconImg: React.CSSProperties;
   } = useTheme();
@@ -175,7 +176,6 @@ function LayerDataGrid(props: CustomDataGridProps) {
               )}`;
       }
     }
-
     setFilterString(filter);
   };
 
