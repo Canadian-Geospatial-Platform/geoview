@@ -115,9 +115,9 @@ export class DataTableApi {
         featureActions: { featureInfoKey: 'Zoom', featureInfoValue: '', fieldType: 'string' },
         geometry: this.buildGeometry(geometry?.getGeometry() as Geometry, projectionConfig) as Geometry,
         extent,
-        rows: Object.values(fieldInfo).reduce((acc, curr) => {
+        rows: Object.keys(fieldInfo).reduce((acc, curr) => {
           if (curr) {
-            acc[curr.alias] = curr.value as string;
+            acc[curr] = fieldInfo[curr]?.value as string;
           }
           return acc;
         }, {} as Record<string, string>),
@@ -125,14 +125,15 @@ export class DataTableApi {
     });
 
     const columns = arrayOfFeatureInfoEntries.reduce((acc, curr) => {
-      const entries = Object.values(curr.fieldInfo) as TypeFieldEntry[];
-      entries.forEach((entry) => {
-        if (entry) {
-          acc[entry.alias] = entry.alias;
+      const keys = Object.keys(curr.fieldInfo);
+
+      keys.forEach((key) => {
+        if (!acc[key]) {
+          acc[key] = curr.fieldInfo[key] as TypeFieldEntry;
         }
       });
       return acc;
-    }, {} as Record<string, string>);
+    }, {} as Record<string, TypeFieldEntry>);
 
     return {
       features,

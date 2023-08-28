@@ -18,7 +18,7 @@ import { Box, IconButton, ZoomInSearchIcon } from '@/ui';
 import ExportButton from './export-button';
 import JSONExportButton from './json-export-button';
 import FilterMap from './filter-map';
-import { AbstractGeoViewVector, TypeLayerEntryConfig, EsriDynamic, api } from '@/app';
+import { AbstractGeoViewVector, TypeLayerEntryConfig, EsriDynamic, api, TypeFieldEntry } from '@/app';
 
 interface FeatureInfo {
   featureInfoKey: string;
@@ -37,7 +37,7 @@ export interface Features {
 
 export interface MapDataTableData {
   features: Features[];
-  fieldAliases: Record<string, string>;
+  fieldAliases: Record<string, TypeFieldEntry>;
 }
 
 export interface ColumnsType {
@@ -63,11 +63,13 @@ interface MapDataTableProps {
 
 function MapDataTable({ data, layerId, mapId, layerKey }: MapDataTableProps) {
   const { t } = useTranslation<string>();
+  const iconColumn = { alias: t('dataTable.icon'), dataType: 'string', id: t('dataTable.icon') };
+  const zoomColumn = { alias: t('dataTable.zoom'), dataType: 'string', id: t('dataTable.zoom') };
 
-  const tableInstanceRef = useRef(null);
   const [mapFiltered, setMapFiltered] = useState<boolean>(false);
   const [filteredData] = useState(data.features);
   const [columnFilters, setColumnFilters] = useState<MRTColumnFiltersState>([]);
+  const [filterStrings, setFilterStrings] = useState<string[]>();
 
   const iconImage = {
     padding: 3,
@@ -92,12 +94,11 @@ function MapDataTable({ data, layerId, mapId, layerKey }: MapDataTableProps) {
    * @param {MRTColumnFiltersState} columnFilter list of filter from table.
    */
   const buildFilterList = useCallback((columnFilter: MRTColumnFiltersState) => {
-    if (!columnFilter.length) return [''];
     return columnFilter.map((filter) => {
       if ((filter.value as string).match(/^-?\d+$/)) {
         return `${filter.id} = ${filter.value}`;
       }
-      return `'${filter.id}' like '%${filter.value}%'`;
+      return `${filter.id} like '%${filter.value}%'`;
     });
   }, []);
 
@@ -112,9 +113,15 @@ function MapDataTable({ data, layerId, mapId, layerKey }: MapDataTableProps) {
   }, [sorting]);
 
   useEffect(() => {
-    if (mapFiltered) {
-      const filterList = buildFilterList(columnFilters);
-      filterList.forEach((filterString) => {
+    const filterList = buildFilterList(columnFilters);
+    setFilterStrings(filterList);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [columnFilters]);
+
+  useEffect(() => {
+    // filter map when filterMap is toggled true.
+    if (mapFiltered && filterStrings) {
+      filterStrings.forEach((filterString) => {
         const geoviewLayerInstance = api.map(mapId).layer.geoviewLayers[layerId];
         const filterLayerConfig = api.map(mapId).layer.registeredLayers[layerKey] as TypeLayerEntryConfig;
         if (mapFiltered && geoviewLayerInstance !== undefined && filterLayerConfig !== undefined) {
@@ -124,9 +131,8 @@ function MapDataTable({ data, layerId, mapId, layerKey }: MapDataTableProps) {
         }
       });
     }
-
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [columnFilters]);
+  }, [mapFiltered, filterStrings]);
 
   /**
    * Build material react data table column header.
@@ -134,13 +140,17 @@ function MapDataTable({ data, layerId, mapId, layerKey }: MapDataTableProps) {
    * @param {object} data.fieldAliases object values transformed into required key value property of material react data table
    */
   const columns = useMemo<MRTColumnDef<ColumnsType>[]>(() => {
-    return Object.values({ icon: t('dataTable.icon'), zoom: t('dataTable.zoom'), ...data.fieldAliases }).map((fieldAlias) => {
-      return {
-        accessorKey: fieldAlias,
-        header: fieldAlias,
-        ...([t('dataTable.icon'), t('dataTable.zoom')].includes(fieldAlias) && { size: 100, enableColumnFilter: false }),
-      };
+    const entries = Object.entries({ ICON: iconColumn, ZOOM: zoomColumn, ...data.fieldAliases });
+    const columnList = [] as MRTColumnDef<ColumnsType>[];
+    entries.forEach(([key, value]) => {
+      columnList.push({
+        accessorKey: key,
+        header: value.alias,
+        ...([t('dataTable.icon'), t('dataTable.zoom')].includes(value.alias) && { size: 100, enableColumnFilter: false }),
+      });
     });
+
+    return columnList;
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -184,7 +194,6 @@ function MapDataTable({ data, layerId, mapId, layerKey }: MapDataTableProps) {
   return (
     <Box sx={{ padding: '1rem 0' }}>
       <MaterialReactTable
-        tableInstanceRef={tableInstanceRef}
         columns={columns}
         data={rows}
         enableGlobalFilter={false}
