@@ -62,6 +62,7 @@ interface MapDataTableProps {
  */
 
 function MapDataTable({ data, layerId, mapId, layerKey }: MapDataTableProps) {
+  const mountedRef = useRef(false);
   const { t } = useTranslation<string>();
   const iconColumn = { alias: t('dataTable.icon'), dataType: 'string', id: t('dataTable.icon') };
   const zoomColumn = { alias: t('dataTable.zoom'), dataType: 'string', id: t('dataTable.zoom') };
@@ -94,6 +95,7 @@ function MapDataTable({ data, layerId, mapId, layerKey }: MapDataTableProps) {
    * @param {MRTColumnFiltersState} columnFilter list of filter from table.
    */
   const buildFilterList = useCallback((columnFilter: MRTColumnFiltersState) => {
+    if (!columnFilter.length) return [''];
     return columnFilter.map((filter) => {
       if ((filter.value as string).match(/^-?\d+$/)) {
         return `${filter.id} = ${filter.value}`;
@@ -113,17 +115,19 @@ function MapDataTable({ data, layerId, mapId, layerKey }: MapDataTableProps) {
   }, [sorting]);
 
   useEffect(() => {
-    const filterList = buildFilterList(columnFilters);
-    setFilterStrings(filterList);
+    if (columnFilters && mountedRef.current) {
+      const filterList = buildFilterList(columnFilters);
+      setFilterStrings(filterList);
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [columnFilters]);
 
   useEffect(() => {
+    const geoviewLayerInstance = api.map(mapId).layer.geoviewLayers[layerId];
+    const filterLayerConfig = api.map(mapId).layer.registeredLayers[layerKey] as TypeLayerEntryConfig;
     // filter map when filterMap is toggled true.
     if (mapFiltered && filterStrings) {
       filterStrings.forEach((filterString) => {
-        const geoviewLayerInstance = api.map(mapId).layer.geoviewLayers[layerId];
-        const filterLayerConfig = api.map(mapId).layer.registeredLayers[layerKey] as TypeLayerEntryConfig;
         if (mapFiltered && geoviewLayerInstance !== undefined && filterLayerConfig !== undefined) {
           (geoviewLayerInstance as AbstractGeoViewVector | EsriDynamic)?.applyViewFilter(filterLayerConfig, filterString);
         } else {
@@ -131,9 +135,17 @@ function MapDataTable({ data, layerId, mapId, layerKey }: MapDataTableProps) {
         }
       });
     }
+    // clear filters filtering is off
+    if (!mapFiltered) {
+      (geoviewLayerInstance as AbstractGeoViewVector | EsriDynamic)?.applyViewFilter(filterLayerConfig, '');
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mapFiltered, filterStrings]);
 
+  useEffect(() => {
+    // This is created to counter column filter that is fired when component is mounted.
+    mountedRef.current = true;
+  }, []);
   /**
    * Build material react data table column header.
    *
