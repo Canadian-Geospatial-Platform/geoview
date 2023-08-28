@@ -29,7 +29,7 @@ import { codedValueType, rangeDomainType, LayerSetPayload } from '@/api/events/p
  * @returns {Promise<void>} A promise that the execution is completed.
  */
 export function commonGetServiceMetadata(this: EsriDynamic | EsriFeature, resolve: (value: void | PromiseLike<void>) => void) {
-  this.layerPhase = 'getServiceMetadata';
+  api.event.emit(LayerSetPayload.createLayerSetChangeLayerPhasePayload(this.mapId, this.geoviewLayerId, 'getServiceMetadata'));
   const metadataUrl = getLocalizedValue(this.metadataAccessPath, this.mapId);
   if (metadataUrl) {
     getXMLHttpRequest(`${metadataUrl}?f=json`)
@@ -59,7 +59,7 @@ export function commonGetServiceMetadata(this: EsriDynamic | EsriFeature, resolv
  * @param {TypeListOfLayerEntryConfig} listOfLayerEntryConfig The list of layer entries configuration to validate.
  */
 export function commonValidateListOfLayerEntryConfig(this: EsriDynamic | EsriFeature, listOfLayerEntryConfig: TypeListOfLayerEntryConfig) {
-  this.layerPhase = 'validateListOfLayerEntryConfig';
+  api.event.emit(LayerSetPayload.createLayerSetChangeLayerPhasePayload(this.mapId, this.geoviewLayerId, 'validateListOfLayerEntryConfig'));
   listOfLayerEntryConfig.forEach((layerEntryConfig: TypeLayerEntryConfig) => {
     const layerPath = Layer.getLayerPath(layerEntryConfig);
     if (layerEntryIsGroupLayer(layerEntryConfig)) {

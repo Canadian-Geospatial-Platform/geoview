@@ -86,6 +86,7 @@ export type EventStringId =
   | 'interaction/translate_ended'
   | 'layer_set/layer_registration'
   | 'layer_set/change_layer_status'
+  | 'layer_set/change_layer_phase'
   | 'layer_set/request_layer_inventory'
   | 'layer_set/updated'
   | 'layer/add'

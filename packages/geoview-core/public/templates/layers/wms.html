@@ -67,9 +67,9 @@
 
     <div class="map-title-holder">
       <h4 id="HLYR1">1. Many WMS Layers</h4>
-      &nbsp;<h5 id="HLYR1-state">(undefined)</h5>
       <a class="ref-link" href="#top">Top</a>
     </div>
+    <div id="HLYR1-state"></div>
     <button class="test-refresh-WMS-btn">Test Refresh WMS</button>
     <div
       id="LYR1"
@@ -522,18 +522,6 @@
             'LYR1/$FeatureInfoLayerSet$'
           );
 
-          const LegendsLayerSet1 = cgpv.api.getLegendsLayerSet('LYR1');
-          cgpv.api.event.on(
-            cgpv.api.eventNames.GET_LEGENDS.LEGENDS_LAYERSET_UPDATED,
-            (payload) => {
-              const { resultSets } = payload;
-              displayLegend('LegendsId1', resultSets);
-            },
-            'LYR1/$LegendsLayerSet$'
-          );
-          // The GET_LEGENDS.TRIGGER event must be triggered after the GET_LEGENDS.LEGENDS_LAYERSET_UPDATED listener is created
-          cgpv.api.event.emit({ handlerName: 'LYR1/$LegendsLayerSet$', event: cgpv.api.eventNames.GET_LEGENDS.TRIGGER });
-
           // ========================================================================================================================
           // Test a refresh WMS from projection change
           var testRefreshBtn = document.getElementsByClassName('test-refresh-WMS-btn')[0];
@@ -632,9 +620,56 @@
         }
       });
 
+          console.log('Begin monitoring');
+          const LegendsLayerSet1 = cgpv.api.getLegendsLayerSet('LYR1');
+          cgpv.api.event.on(
+            cgpv.api.eventNames.GET_LEGENDS.LEGENDS_LAYERSET_UPDATED,
+            (payload) => {
+              const { resultSets } = payload;
+              displayLegend('LegendsId1', resultSets);
+
+              const displayField1 = document.getElementById('HLYR1-state');
+              if (resultSets) {
+                const oldData = document.getElementById(`HLYR1-state-data`);
+                if (oldData) oldData.parentNode.removeChild(oldData);
+                const data = document.createElement('div');
+                data.id = `HLYR1-state-data`;
+                displayField1.appendChild(data);
+
+                Object.keys(resultSets).forEach((key) => {
+                  const addToTable = (field, value, table) => {
+                    const tableRow = document.createElement('tr');
+                    table.appendChild(tableRow);
+                    let tableData = document.createElement('td');
+                    tableData.style = 'width:50%';
+                    tableData.innerText = field
+                    tableRow.appendChild(tableData);
+                    tableData = document.createElement('td');
+                    tableData.style = 'width:50%';
+                    tableData.innerText = value;
+                    tableRow.appendChild(tableData);
+                  }
+                  const h4 = document.createElement('h4');
+                  h4.innerText = key;
+                  data.appendChild(h4);
+                  const table = document.createElement('table');
+                  table.border = '1';
+                  table.style = 'width:50%';
+                  data.appendChild(table);
+                  addToTable('Layer Name', resultSets[key].layerName?.en, table);
+                  addToTable('Layer Status', resultSets[key].layerStatus, table);
+                  addToTable('Layer Phase', resultSets[key].layerPhase, table);
+               });
+              }
+            },
+            'LYR1/$LegendsLayerSet$'
+          );
+          // The GET_LEGENDS.TRIGGER event must be triggered after the GET_LEGENDS.LEGENDS_LAYERSET_UPDATED listener is created
+          cgpv.api.event.emit({ handlerName: 'LYR1/$LegendsLayerSet$', event: cgpv.api.eventNames.GET_LEGENDS.TRIGGER });
+
           // ========================================================================================================================
           // Display layer state
-          window.setInterval(() => {
+          /* window.setInterval(() => {
             const displayField1 = document.getElementById('HLYR1-state');
             const geoviewLayers = cgpv.api.maps?.LYR1?.layer?.geoviewLayers;
             if (geoviewLayers) {
@@ -648,6 +683,7 @@
               displayField1.textContent = output ? `${output.slice(0, -2)})` : '(undefined)';
             } else displayField1.textContent = '(undefined)';
           }, 250)
+          */
 
           window.setInterval(() => {
             const displayField2 = document.getElementById('HLYR2-state');
