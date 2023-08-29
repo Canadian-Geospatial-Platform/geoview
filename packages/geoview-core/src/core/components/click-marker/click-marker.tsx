@@ -64,7 +64,7 @@ export function ClickMarker(): JSX.Element {
 
   // variables to hold info about selected features
   let featureIds: string[] = [];
-  let intervals: NodeJS.Timer[] = [];
+  let intervals: NodeJS.Timeout[] = [];
 
   /**
    * Remove the marker icon
@@ -162,7 +162,7 @@ export function ClickMarker(): JSX.Element {
     addFeatureAnimation(newFeature, featureUid);
 
     const multiIntervalId = pointInterval(radius, newFeature);
-    intervals.push(multiIntervalId);
+    intervals.push(multiIntervalId as NodeJS.Timeout);
   }
 
   /**
@@ -184,7 +184,7 @@ export function ClickMarker(): JSX.Element {
       addFeatureAnimation(newFeature, id);
 
       const multiIntervalId = pointInterval(radius, newFeature);
-      intervals.push(multiIntervalId);
+      intervals.push(multiIntervalId as NodeJS.Timeout);
     }
   }
 
@@ -200,7 +200,7 @@ export function ClickMarker(): JSX.Element {
     addFeatureAnimation(newFeature, featureUid);
 
     const multiIntervalId = polygonInterval(feature.geometry!.getGeometry()! as Geometry, newFeature);
-    intervals.push(multiIntervalId);
+    intervals.push(multiIntervalId as NodeJS.Timeout);
   }
 
   /**
@@ -219,7 +219,7 @@ export function ClickMarker(): JSX.Element {
       addFeatureAnimation(newFeature, id);
 
       const multiIntervalId = polygonInterval(polygons[i], newFeature);
-      intervals.push(multiIntervalId);
+      intervals.push(multiIntervalId as NodeJS.Timeout);
     }
   }
 
@@ -234,14 +234,13 @@ export function ClickMarker(): JSX.Element {
     const featureUid = getUid(feature.geometry);
     addFeatureAnimation(newFeature, featureUid);
     let counter = 0;
-    intervals.push(
-      setInterval(() => {
-        if (!(counter % 8)) newFeature.setStyle(whiteStyle);
-        else newFeature.setStyle(blankStyle);
-        counter++;
-        if (counter > 9999) counter = 0;
-      }, 250)
-    );
+    const intervalId = setInterval(() => {
+      if (!(counter % 8)) newFeature.setStyle(whiteStyle);
+      else newFeature.setStyle(blankStyle);
+      counter++;
+      if (counter > 9999) counter = 0;
+    }, 250);
+    intervals.push(intervalId as NodeJS.Timeout);
   }
 
   /**
