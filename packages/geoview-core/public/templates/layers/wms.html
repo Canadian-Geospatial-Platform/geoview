@@ -52,7 +52,6 @@
           <tr>
             <td><p>This page is used to showcase how the viewer may show WMS layer types</p></td>
           </tr>
-          </tr>
           <tr>
             <td>
               <a href="#HLYR1">1. Many WMS Layers</a><br />
@@ -632,68 +631,67 @@
         }
       });
 
-          // ========================================================================================================================
-          // Display layer state
-          window.setInterval(() => {
-            const displayField1 = document.getElementById('HLYR1-state');
-            const geoviewLayers = cgpv.api.maps?.LYR1?.layer?.geoviewLayers;
-            if (geoviewLayers) {
-              const output = Object.keys(cgpv.api.maps?.LYR1?.layer?.geoviewLayers).reduce((outputValue, layerId) => {
-                const stateValue = cgpv.api.maps?.LYR1?.layer?.geoviewLayers[layerId].layerPhase;
-                const numberOfErrors = cgpv.api.maps?.LYR1?.layer?.geoviewLayers[layerId].countErrorStatus();
-                let errorIndicator = '';
-                if (numberOfErrors) errorIndicator = numberOfErrors === 1 ? ' (1 error)' : ` (${numberOfErrors} errors)`;
-                return `${outputValue}${layerId}: ${stateValue}${errorIndicator}, `;
-              }, '(');
-              displayField1.textContent = output ? `${output.slice(0, -2)})` : '(undefined)';
-            } else displayField1.textContent = '(undefined)';
-          }, 250)
+      // ========================================================================================================================
+      // Display layer state
+      window.setInterval(() => {
+        const displayField1 = document.getElementById('HLYR1-state');
+        const geoviewLayers = cgpv.api.maps?.LYR1?.layer?.geoviewLayers;
+        if (geoviewLayers) {
+          const output = Object.keys(cgpv.api.maps?.LYR1?.layer?.geoviewLayers).reduce((outputValue, layerId) => {
+            const stateValue = cgpv.api.maps?.LYR1?.layer?.geoviewLayers[layerId].layerPhase;
+            const numberOfErrors = cgpv.api.maps?.LYR1?.layer?.geoviewLayers[layerId].countErrorStatus();
+            let errorIndicator = '';
+            if (numberOfErrors) errorIndicator = numberOfErrors === 1 ? ' (1 error)' : ` (${numberOfErrors} errors)`;
+            return `${outputValue}${layerId}: ${stateValue}${errorIndicator}, `;
+          }, '(');
+          displayField1.textContent = output ? `${output.slice(0, -2)})` : '(undefined)';
+        } else displayField1.textContent = '(undefined)';
+      }, 250)
 
-          window.setInterval(() => {
-            const displayField2 = document.getElementById('HLYR2-state');
-            const geoviewLayers = cgpv.api.maps?.LYR2?.layer?.geoviewLayers;
-            if (geoviewLayers) {
-              const output = Object.keys(cgpv.api.maps?.LYR2?.layer?.geoviewLayers).reduce((outputValue, layerId) => {
-                const stateValue = cgpv.api.maps?.LYR2?.layer?.geoviewLayers[layerId].layerPhase;
-                const numberOfErrors = cgpv.api.maps?.LYR2?.layer?.geoviewLayers[layerId].countErrorStatus();
-                let errorIndicator = '';
-                if (numberOfErrors) errorIndicator = numberOfErrors === 1 ? ' (1 error)' : ` (${numberOfErrors} errors)`;
-                return `${outputValue}${layerId}: ${stateValue}${errorIndicator}, `;
-              }, '(');
-              displayField2.textContent = output ? `${output.slice(0, -2)})` : '(undefined)';
-            } else displayField2.textContent = '(undefined)';
-          }, 250);
+      window.setInterval(() => {
+        const displayField2 = document.getElementById('HLYR2-state');
+        const geoviewLayers = cgpv.api.maps?.LYR2?.layer?.geoviewLayers;
+        if (geoviewLayers) {
+          const output = Object.keys(cgpv.api.maps?.LYR2?.layer?.geoviewLayers).reduce((outputValue, layerId) => {
+            const stateValue = cgpv.api.maps?.LYR2?.layer?.geoviewLayers[layerId].layerPhase;
+            const numberOfErrors = cgpv.api.maps?.LYR2?.layer?.geoviewLayers[layerId].countErrorStatus();
+            let errorIndicator = '';
+            if (numberOfErrors) errorIndicator = numberOfErrors === 1 ? ' (1 error)' : ` (${numberOfErrors} errors)`;
+            return `${outputValue}${layerId}: ${stateValue}${errorIndicator}, `;
+          }, '(');
+          displayField2.textContent = output ? `${output.slice(0, -2)})` : '(undefined)';
+        } else displayField2.textContent = '(undefined)';
+      }, 250);
 
-          window.setInterval(() => {
-            const displayField3 = document.getElementById('HLYR3-state');
-            const geoviewLayers = cgpv.api.maps?.LYR3?.layer?.geoviewLayers;
-            if (geoviewLayers) {
-              const output = Object.keys(cgpv.api.maps?.LYR3?.layer?.geoviewLayers).reduce((outputValue, layerId) => {
-                const stateValue = cgpv.api.maps?.LYR3?.layer?.geoviewLayers[layerId].layerPhase;
-                const numberOfErrors = cgpv.api.maps?.LYR3?.layer?.geoviewLayers[layerId].countErrorStatus();
-                let errorIndicator = '';
-                if (numberOfErrors) errorIndicator = numberOfErrors === 1 ? ' (1 error)' : ` (${numberOfErrors} errors)`;
-                return `${outputValue}${layerId}: ${stateValue}${errorIndicator}, `;
-              }, '(');
-              displayField3.textContent = output ? `${output.slice(0, -2)})` : '(undefined)';
-            } else displayField3.textContent = '(undefined)';
-          }, 250);
+      window.setInterval(() => {
+        const displayField3 = document.getElementById('HLYR3-state');
+        const geoviewLayers = cgpv.api.maps?.LYR3?.layer?.geoviewLayers;
+        if (geoviewLayers) {
+          const output = Object.keys(cgpv.api.maps?.LYR3?.layer?.geoviewLayers).reduce((outputValue, layerId) => {
+            const stateValue = cgpv.api.maps?.LYR3?.layer?.geoviewLayers[layerId].layerPhase;
+            const numberOfErrors = cgpv.api.maps?.LYR3?.layer?.geoviewLayers[layerId].countErrorStatus();
+            let errorIndicator = '';
+            if (numberOfErrors) errorIndicator = numberOfErrors === 1 ? ' (1 error)' : ` (${numberOfErrors} errors)`;
+            return `${outputValue}${layerId}: ${stateValue}${errorIndicator}, `;
+          }, '(');
+          displayField3.textContent = output ? `${output.slice(0, -2)})` : '(undefined)';
+        } else displayField3.textContent = '(undefined)';
+      }, 250);
 
-          window.setInterval(() => {
-            const displayField4 = document.getElementById('HLYR4-state');
-            const geoviewLayers = cgpv.api.maps?.LYR4?.layer?.geoviewLayers;
-            if (geoviewLayers) {
-              const output = Object.keys(cgpv.api.maps?.LYR4?.layer?.geoviewLayers).reduce((outputValue, layerId) => {
-                const stateValue = cgpv.api.maps?.LYR4?.layer?.geoviewLayers[layerId].layerPhase;
-                const numberOfErrors = cgpv.api.maps?.LYR4?.layer?.geoviewLayers[layerId].countErrorStatus();
-                let errorIndicator = '';
-                if (numberOfErrors) errorIndicator = numberOfErrors === 1 ? ' (1 error)' : ` (${numberOfErrors} errors)`;
-                return `${outputValue}${layerId}: ${stateValue}${errorIndicator}, `;
-              }, '(');
-              displayField4.textContent = output ? `${output.slice(0, -2)})` : '(undefined)';
-            } else displayField4.textContent = '(undefined)';
-          }, 250);
-
+      window.setInterval(() => {
+        const displayField4 = document.getElementById('HLYR4-state');
+        const geoviewLayers = cgpv.api.maps?.LYR4?.layer?.geoviewLayers;
+        if (geoviewLayers) {
+          const output = Object.keys(cgpv.api.maps?.LYR4?.layer?.geoviewLayers).reduce((outputValue, layerId) => {
+            const stateValue = cgpv.api.maps?.LYR4?.layer?.geoviewLayers[layerId].layerPhase;
+            const numberOfErrors = cgpv.api.maps?.LYR4?.layer?.geoviewLayers[layerId].countErrorStatus();
+            let errorIndicator = '';
+            if (numberOfErrors) errorIndicator = numberOfErrors === 1 ? ' (1 error)' : ` (${numberOfErrors} errors)`;
+            return `${outputValue}${layerId}: ${stateValue}${errorIndicator}, `;
+          }, '(');
+          displayField4.textContent = output ? `${output.slice(0, -2)})` : '(undefined)';
+        } else displayField4.textContent = '(undefined)';
+      }, 250);
     </script>
   </body>
 </html>

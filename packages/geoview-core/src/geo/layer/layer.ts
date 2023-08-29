@@ -291,20 +291,25 @@ export class Layer {
         console.log(consoleMessage);
       });
     }
-    geoviewLayer.gvLayers?.once('prerender' as EventTypes, () => {
-      if (geoviewLayer.layerPhase !== 'processed') {
-        geoviewLayer.layerPhase = 'processed';
-        api.event.emit(GeoViewLayerPayload.createGeoviewLayerAddedPayload(`${this.mapId}/${geoviewLayer.geoviewLayerId}`, geoviewLayer));
-      }
-    });
-    geoviewLayer.gvLayers?.once('change' as EventTypes, () => {
-      if (geoviewLayer.layerPhase !== 'processed') {
-        geoviewLayer.layerPhase = 'processed';
-        api.event.emit(GeoViewLayerPayload.createGeoviewLayerAddedPayload(`${this.mapId}/${geoviewLayer.geoviewLayerId}`, geoviewLayer));
-      }
-    });
-    api.map(this.mapId).map.addLayer(geoviewLayer.gvLayers!);
-    api.event.emit(GeoViewLayerPayload.createGeoviewLayerAddedPayload(`${this.mapId}/${geoviewLayer.geoviewLayerId}`, geoviewLayer));
+
+    if (geoviewLayer.allLayerEntryConfigAreInError())
+      // an empty geoview layer is created
+      api.event.emit(GeoViewLayerPayload.createGeoviewLayerAddedPayload(`${this.mapId}/${geoviewLayer.geoviewLayerId}`, geoviewLayer));
+    else {
+      geoviewLayer.gvLayers?.once('prerender' as EventTypes, () => {
+        if (geoviewLayer.layerPhase !== 'processed') {
+          geoviewLayer.layerPhase = 'processed';
+          api.event.emit(GeoViewLayerPayload.createGeoviewLayerAddedPayload(`${this.mapId}/${geoviewLayer.geoviewLayerId}`, geoviewLayer));
+        }
+      });
+      geoviewLayer.gvLayers?.once('change' as EventTypes, () => {
+        if (geoviewLayer.layerPhase !== 'processed') {
+          geoviewLayer.layerPhase = 'processed';
+          api.event.emit(GeoViewLayerPayload.createGeoviewLayerAddedPayload(`${this.mapId}/${geoviewLayer.geoviewLayerId}`, geoviewLayer));
+        }
+      });
+      api.map(this.mapId).map.addLayer(geoviewLayer.gvLayers!);
+    }
   }
 
   /**

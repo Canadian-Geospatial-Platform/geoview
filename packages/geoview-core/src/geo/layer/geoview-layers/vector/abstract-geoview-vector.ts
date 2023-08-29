@@ -24,7 +24,7 @@ import {
 } from '@/geo/map/map-schema-types';
 import { api } from '@/app';
 import { getLocalizedValue } from '@/core/utils/utilities';
-import { TypeArrayOfFeatureInfoEntries } from '@/api/events/payloads';
+import { LayerSetPayload, TypeArrayOfFeatureInfoEntries } from '@/api/events/payloads';
 import { NodeType } from '@/geo/renderer/geoview-renderer-types';
 
 /* *******************************************************************************************************************************
@@ -69,7 +69,9 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
    * @returns {Promise<BaseLayer | null>} The GeoView base layer that has been created.
    */
   protected processOneLayerEntry(layerEntryConfig: TypeBaseLayerEntryConfig): Promise<BaseLayer | null> {
+    layerEntryConfig.layerPhase = 'processOneLayerEntry';
     const promisedVectorLayer = new Promise<BaseLayer | null>((resolve) => {
+      api.event.emit(LayerSetPayload.createLayerSetChangeLayerPhasePayload(this.mapId, layerEntryConfig, 'processOneLayerEntry'));
       const vectorSource = this.createVectorSource(layerEntryConfig);
       const vectorLayer = this.createVectorLayer(layerEntryConfig as TypeVectorLayerEntryConfig, vectorSource);
       resolve(vectorLayer);
@@ -93,6 +95,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
   ): VectorSource<Geometry> {
     // The line below uses var because a var declaration has a wider scope than a let declaration.
     var vectorSource: VectorSource<Geometry>;
+    layerEntryConfig.layerPhase = 'createVectorSource';
     if (this.attributions.length !== 0) sourceOptions.attributions = this.attributions;
 
     // set loading strategy option
@@ -180,6 +183,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
    * @returns {VectorLayer<VectorSource>} The vector layer created.
    */
   createVectorLayer(layerEntryConfig: TypeVectorLayerEntryConfig, vectorSource: VectorSource<Geometry>): VectorLayer<VectorSource> {
+    layerEntryConfig.layerPhase = 'createVectorLayer';
     let configSource: TypeBaseSourceVectorInitialConfig = {};
     if (layerEntryConfig.source !== undefined) {
       configSource = layerEntryConfig.source as TypeBaseSourceVectorInitialConfig;
