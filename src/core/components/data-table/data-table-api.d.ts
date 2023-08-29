@@ -2,7 +2,11 @@ import { ReactElement } from 'react';
 import { Projection } from 'ol/proj';
 import { Geometry } from 'ol/geom';
 import { DataTableData } from './data-table';
-import { TypeLayerDataGridProps, TypeListOfLayerEntryConfig, TypeArrayOfFeatureInfoEntries } from '@/app';
+import { TypeListOfLayerEntryConfig, TypeArrayOfFeatureInfoEntries, TypeFieldEntry } from '@/app';
+interface CreataDataTableProps {
+    layerId: string;
+    layerKey: string;
+}
 export declare class DataTableApi {
     mapId: string;
     /**
@@ -78,12 +82,14 @@ export declare class DataTableApi {
             extent: import("ol/extent").Extent;
             rows: Record<string, string>;
         }[];
-        fieldAliases: Record<string, string>;
+        fieldAliases: Record<string, TypeFieldEntry>;
     };
     /**
      * Create data table based on layer id from map.
      * @param {string} layerId layerId of the feature added on map.
+     * @param {string} layerKey layerKey of the feature added on map.
      * @returns {Promise<ReactElement | null>} Promise of ReactElement.
      */
-    createDataTableByLayerId: ({ layerId }: TypeLayerDataGridProps) => Promise<ReactElement | null>;
+    createDataTableByLayerId: ({ layerId, layerKey }: CreataDataTableProps) => Promise<ReactElement | null>;
 }
+export {};

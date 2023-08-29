@@ -87,13 +87,13 @@ export declare class Layer {
     /**
      * Remove a geoview layer from the map
      *
-     * @param {TypeGeoviewLayerConfig} layer the layer configuration to remove
+     * @param {TypeGeoviewLayerConfig} geoviewLayer the layer configuration to remove
      */
     removeGeoviewLayer: (geoviewLayer: AbstractGeoViewLayer) => string;
     /**
      * Search for a layer using it's id and return the layer data
      *
-     * @param {string} id the layer id to look for
+     * @param {string} geoviewLayerId the layer id to look for
      * @returns the found layer data object
      */
     getGeoviewLayerById: (geoviewLayerId: string) => AbstractGeoViewLayer | null;
