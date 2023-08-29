@@ -207,7 +207,9 @@ export class VectorTiles extends AbstractGeoViewRaster {
       if (layerEntryConfig.initialSettings?.maxZoom !== undefined) tileLayerOptions.maxZoom = layerEntryConfig.initialSettings?.maxZoom;
       if (layerEntryConfig.initialSettings?.minZoom !== undefined) tileLayerOptions.minZoom = layerEntryConfig.initialSettings?.minZoom;
       if (layerEntryConfig.initialSettings?.opacity !== undefined) tileLayerOptions.opacity = layerEntryConfig.initialSettings?.opacity;
-      if (layerEntryConfig.initialSettings?.visible !== undefined) tileLayerOptions.visible = layerEntryConfig.initialSettings?.visible;
+      if (layerEntryConfig.initialSettings?.visible !== undefined)
+        tileLayerOptions.visible =
+          layerEntryConfig.initialSettings?.visible === 'yes' || layerEntryConfig.initialSettings?.visible === 'always';
 
       layerEntryConfig.gvLayer = new VectorTileLayer(tileLayerOptions);
       resolve(layerEntryConfig.gvLayer);

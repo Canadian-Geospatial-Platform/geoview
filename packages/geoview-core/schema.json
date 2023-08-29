@@ -429,8 +429,8 @@
           "description": "Initial opacity setting."
         },
         "visible": {
-          "type": "boolean",
-          "default": true,
+          "enum": ["yes", "no", "always"],
+          "default": "yes",
           "description": "Initial visibility setting."
         },
         "bounds": {

@@ -231,7 +231,10 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
     if (layerEntryConfig.initialSettings?.opacity !== undefined)
       this.setOpacity(layerEntryConfig.initialSettings?.opacity, layerEntryConfig);
     if (layerEntryConfig.initialSettings?.visible !== undefined)
-      this.setVisible(layerEntryConfig.initialSettings?.visible, layerEntryConfig);
+      this.setVisible(
+        !!(layerEntryConfig.initialSettings?.visible === 'yes' || layerEntryConfig.initialSettings?.visible === 'always'),
+        layerEntryConfig
+      );
     this.applyViewFilter(layerEntryConfig, layerEntryConfig.layerFilter ? layerEntryConfig.layerFilter : '');
 
     return layerEntryConfig.gvLayer as VectorLayer<VectorSource>;

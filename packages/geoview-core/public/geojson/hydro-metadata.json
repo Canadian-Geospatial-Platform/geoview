@@ -33,7 +33,7 @@
             "en": "feature_date,groupe_id,hydrosequence_id,level_path_id,slope,fid,feature_type,name_id,shreve_order,downstream_main_path_hydro_seq,feature_id,feature_type_en,name_en,strahler_order,downstream_minor_path_hydro_seq,md_id,feature_type_fr,name_fr,from_node,start_flag,code_spec,permanency,flow_priority,to_node,terminal_flag,mainstemid,isolated,flow_direction,comid,divergence,work_unit_code,in_isolated_network,hack_order,tocomid,length_km,drainage_area_code,in_network,horton_order,terminal_path_id",
             "fr": "feature_date,groupe_id,hydrosequence_id,level_path_id,slope,fid,feature_type,name_id,shreve_order,downstream_main_path_hydro_seq,feature_id,feature_type_en,name_en,strahler_order,downstream_minor_path_hydro_seq,md_id,feature_type_fr,name_fr,from_node,start_flag,code_spec,permanency,flow_priority,to_node,terminal_flag,mainstemid,isolated,flow_direction,comid,divergence,work_unit_code,in_isolated_network,hack_order,tocomid,length_km,drainage_area_code,in_network,horton_order,terminal_path_id"
           },
-          "fieldTypes":"string,number,number,number,number,number,number,number,number,number,number,string,string,number,number,string,string,string,number,number,number,number,number,number,number,number,number,number,number,number,string,number,number,number,number,string,number,number,number",
+          "fieldTypes": "string,number,number,number,number,number,number,number,number,number,number,string,string,number,number,string,string,string,number,number,number,number,number,number,number,number,number,number,number,number,string,number,number,number,number,string,number,number,number",
           "aliasFields": {
             "en": "feature_date,groupe_id,hydrosequence_id,level_path_id,slope,fid,feature_type,name_id,shreve_order,downstream_main_path_hydro_seq,feature_id,feature_type_en,name_en,strahler_order,downstream_minor_path_hydro_seq,md_id,feature_type_fr,name_fr,from_node,start_flag,code_spec,permanency,flow_priority,to_node,terminal_flag,mainstemid,isolated,flow_direction,comid,divergence,work_unit_code,in_isolated_network,hack_order,tocomid,length_km,drainage_area_code,in_network,horton_order,terminal_path_id",
             "fr": "feature_date,groupe_id,hydrosequence_id,level_path_id,slope,fid,feature_type,name_id,shreve_order,downstream_main_path_hydro_seq,feature_id,feature_type_en,name_en,strahler_order,downstream_minor_path_hydro_seq,md_id,feature_type_fr,name_fr,from_node,start_flag,code_spec,permanency,flow_priority,to_node,terminal_flag,mainstemid,isolated,flow_direction,comid,divergence,work_unit_code,in_isolated_network,hack_order,tocomid,length_km,drainage_area_code,in_network,horton_order,terminal_path_id"
@@ -41,7 +41,7 @@
         }
       },
       "initialSettings": {
-        "visible": true,
+        "visible": "yes",
         "extent": [-177.29275972275843, 34.301384132573055, -9.977229778239453, 84.400481529465]
       },
       "style": {

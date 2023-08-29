@@ -186,7 +186,7 @@ export function LegendIconList(props: TypeLegendIconListProps): JSX.Element {
                   />
                 </Tooltip>
                 <ListItemIcon>
-                  {iconLabels[index] !== 'Cluster' && (
+                  {iconLabels[index] !== 'Cluster' && layerConfig?.initialSettings?.visible !== 'always' && (
                     <IconButton color="primary" onClick={() => handleToggleLayer(index)}>
                       {isChecked[index] === true ? <CheckBoxIcon /> : <CheckBoxOutIcon />}
                     </IconButton>

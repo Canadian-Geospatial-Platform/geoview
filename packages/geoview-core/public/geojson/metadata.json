@@ -14,7 +14,7 @@
         }
       },
       "initialSettings": {
-        "visible": true
+        "visible": "yes"
       },
       "style": {
         "Polygon": {
@@ -84,7 +84,7 @@
         }
       },
       "initialSettings": {
-        "visible": true
+        "visible": "yes"
       },
       "style": {
         "LineString": {
@@ -112,7 +112,7 @@
         }
       },
       "initialSettings": {
-        "visible": true
+        "visible": "yes"
       },
       "style": {
         "Point": {
@@ -140,7 +140,7 @@
         }
       },
       "initialSettings": {
-        "visible": true
+        "visible": "yes"
       },
       "style": {
         "Point": {

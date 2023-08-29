@@ -181,7 +181,7 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
 
   const [isClusterToggleEnabled, setIsClusterToggleEnabled] = useState(false);
   const [isChecked, setChecked] = useState<boolean>(
-    api.map(mapId).layer.registeredLayers[clusterLayerPath]?.initialSettings?.visible !== false
+    api.map(mapId).layer.registeredLayers[clusterLayerPath]?.initialSettings?.visible !== 'no'
   );
   const [isOpacityOpen, setOpacityOpen] = useState(false);
   const [isGroupOpen, setGroupOpen] = useState(true);
@@ -580,13 +580,15 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
                 <MoreVertIcon />
               </IconButton>
             )}
-            <IconButton color="primary" onClick={() => handleToggleLayer()}>
-              {(() => {
-                if (isParentVisible === false) return <VisibilityOffIcon />;
-                if (isChecked) return <VisibilityIcon />;
-                return <VisibilityOffIcon />;
-              })()}
-            </IconButton>
+            {api.map(mapId).layer.registeredLayers[clusterLayerPath]?.initialSettings?.visible !== 'always' && (
+              <IconButton color="primary" onClick={() => handleToggleLayer()}>
+                {(() => {
+                  if (isParentVisible === false) return <VisibilityOffIcon />;
+                  if (isChecked) return <VisibilityIcon />;
+                  return <VisibilityOffIcon />;
+                })()}
+              </IconButton>
+            )}
           </ListItemIcon>
         </ListItemButton>
       </ListItem>

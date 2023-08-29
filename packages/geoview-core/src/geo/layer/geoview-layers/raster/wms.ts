@@ -570,7 +570,8 @@ export class WMS extends AbstractGeoViewRaster {
           if (layerEntryConfig.initialSettings?.opacity !== undefined)
             imageLayerOptions.opacity = layerEntryConfig.initialSettings?.opacity;
           if (layerEntryConfig.initialSettings?.visible !== undefined)
-            imageLayerOptions.visible = layerEntryConfig.initialSettings?.visible;
+            imageLayerOptions.visible =
+              layerEntryConfig.initialSettings?.visible === 'yes' || layerEntryConfig.initialSettings?.visible === 'always';
 
           layerEntryConfig.gvLayer = new ImageLayer(imageLayerOptions);
           this.applyViewFilter(layerEntryConfig, layerEntryConfig.layerFilter ? layerEntryConfig.layerFilter : '');

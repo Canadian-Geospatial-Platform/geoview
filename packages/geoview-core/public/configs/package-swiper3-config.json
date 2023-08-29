@@ -106,7 +106,7 @@
         },
         "geoviewLayerType": "xyzTiles",
         "initialSettings": {
-          "visible": true
+          "visible": "yes"
         },
         "listOfLayerEntryConfig": [
           {
