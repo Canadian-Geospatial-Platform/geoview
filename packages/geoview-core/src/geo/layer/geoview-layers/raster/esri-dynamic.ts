@@ -29,7 +29,7 @@ import {
   TypeFeatureInfoLayerConfig,
   layerEntryIsGroupLayer,
 } from '@/geo/map/map-schema-types';
-import { TypeArrayOfFeatureInfoEntries, codedValueType, rangeDomainType } from '@/api/events/payloads';
+import { LayerSetPayload, TypeArrayOfFeatureInfoEntries, codedValueType, rangeDomainType } from '@/api/events/payloads';
 import { api } from '@/app';
 import { Layer } from '../../layer';
 import { EVENT_NAMES } from '@/api/events/event-types';
@@ -255,6 +255,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
    */
   processOneLayerEntry(layerEntryConfig: TypeEsriDynamicLayerEntryConfig): Promise<TypeBaseRasterLayer | null> {
     const promisedVectorLayer = new Promise<TypeBaseRasterLayer | null>((resolve) => {
+      api.event.emit(LayerSetPayload.createLayerSetChangeLayerPhasePayload(this.mapId, layerEntryConfig, 'processOneLayerEntry'));
       const sourceOptions: SourceOptions = {};
       sourceOptions.attributions = [(this.metadata!.copyrightText ? this.metadata!.copyrightText : '') as string];
       sourceOptions.url = getLocalizedValue(layerEntryConfig.source.dataAccessPath!, this.mapId);
