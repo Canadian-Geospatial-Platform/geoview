@@ -46,9 +46,7 @@ const useStyles = makeStyles((theme) => {
     },
     appBarContainer: {
       width: '64px',
-      height: '100%',
-      backgroundColor: 'red',
-      position: 'relative',
+      height: '100%'
     },
     skip: {
       position: 'absolute',
