@@ -1,6 +1,7 @@
 import React from 'react';
 import { Extent } from 'ol/extent';
 import { Geometry } from 'ol/geom';
+import { TypeFieldEntry } from '@/app';
 interface FeatureInfo {
     featureInfoKey: string;
     featureInfoValue: string | number;
@@ -16,7 +17,7 @@ export interface Features {
 }
 export interface MapDataTableData {
     features: Features[];
-    fieldAliases: Record<string, string>;
+    fieldAliases: Record<string, TypeFieldEntry>;
 }
 export interface ColumnsType {
     ICON: string;
@@ -27,13 +28,15 @@ interface MapDataTableProps {
     data: MapDataTableData;
     layerId: string;
     mapId: string;
+    layerKey: string;
 }
 /**
  * Build Data table from map.
  * @param {MapDataTableProps} data map data which will be used to build data table.
  * @param {string} layerId id of the layer
  * @param {string} mapId id of the map.
+ * @param {string} layerKey key of the layer.
  * @return {ReactElement} Data table as react element.
  */
-declare function MapDataTable({ data, layerId, mapId }: MapDataTableProps): React.JSX.Element;
+declare function MapDataTable({ data, layerId, mapId, layerKey }: MapDataTableProps): React.JSX.Element;
 export default MapDataTable;
