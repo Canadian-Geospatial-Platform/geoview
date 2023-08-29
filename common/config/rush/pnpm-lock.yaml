@@ -114,13 +114,13 @@ importers:
       '@babel/preset-typescript': ^7.16.7
       '@babel/runtime': ^7.17.0
       '@babel/runtime-corejs3': ^7.17.0
-      '@emotion/react': ^11.8.1
-      '@emotion/styled': ^11.8.1
-      '@mui/icons-material': ^5.11.16
-      '@mui/material': ^5.13.1
-      '@mui/styles': ^5.13.1
-      '@mui/system': ^5.13.1
-      '@mui/x-data-grid': ^5.13.1
+      '@emotion/react': ^11.11.0
+      '@emotion/styled': ^11.11.0
+      '@mui/icons-material': ^5.14.6
+      '@mui/material': ^5.14.6
+      '@mui/styles': ^5.14.6
+      '@mui/system': ^5.14.6
+      '@mui/x-data-grid': ^5.17.26
       '@nieuwlandgeo/sldreader': ^0.3.1
       '@types/create-react-class': ^15.6.3
       '@types/flux': ^3.1.11
@@ -2284,8 +2284,8 @@ packages:
     resolution: {integrity: sha512-m0G6wlnhm/AX0H12IOWtK8gASEMffnX08RtKkCgTdHb9JpHKGloI7icFfLg9ZmQeavcvR0PKmzxClyuFPSjKWw==}
     dev: false
 
-  /@humanwhocodes/config-array/0.11.10:
-    resolution: {integrity: sha512-KVVjQmNUepDVGXNuoRRdmmEjruj0KfiGSbS8LVc12LMsWDQzRXJ0qdhN8L8uUigKpfEHRhlaQFY0ib1tnUbNeQ==}
+  /@humanwhocodes/config-array/0.11.11:
+    resolution: {integrity: sha512-N2brEuAadi0CcdeMXUkhbZB84eskAc8MEX1By6qEchoVywSgXPIjou4rYsl0V3Hj0ZnuGycGCjdNgockbzeWNA==}
     engines: {node: '>=10.10.0'}
     dependencies:
       '@humanwhocodes/object-schema': 1.2.1
@@ -5262,7 +5262,7 @@ packages:
       '@eslint-community/regexpp': 4.8.0
       '@eslint/eslintrc': 2.1.2
       '@eslint/js': 8.48.0
-      '@humanwhocodes/config-array': 0.11.10
+      '@humanwhocodes/config-array': 0.11.11
       '@humanwhocodes/module-importer': 1.0.1
       '@nodelib/fs.walk': 1.2.8
       ajv: 6.12.6
