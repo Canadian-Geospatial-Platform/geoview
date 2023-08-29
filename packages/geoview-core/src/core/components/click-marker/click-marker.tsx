@@ -64,7 +64,7 @@ export function ClickMarker(): JSX.Element {
 
   // variables to hold info about selected features
   let featureIds: string[] = [];
-  let intervals: NodeJS.Timer[] = [];
+  let intervals: NodeJS.Timeout[] = [];
 
   /**
    * Remove the marker icon
@@ -92,9 +92,9 @@ export function ClickMarker(): JSX.Element {
    *
    * @param {number} radius max radius of circle to draw
    * @param {Feature<Point>} pointFeature the feature to animate
-   * @returns {NodeJS.Timer} The interval timer.
+   * @returns {NodeJS.Timeout} The interval timer.
    */
-  function pointInterval(radius: number, pointFeature: Feature<Point>): NodeJS.Timer {
+  function pointInterval(radius: number, pointFeature: Feature<Point>): NodeJS.Timeout {
     let animationRadius = radius;
     const pointIntervalId = setInterval(() => {
       const radStyle = new Style({
@@ -117,9 +117,9 @@ export function ClickMarker(): JSX.Element {
    * Set animation for polygons
    *
    * @param {Geometry} geometry the geometry to animate
-   * @returns {NodeJS.Timer} The interval timer.
+   * @returns {NodeJS.Timeout} The interval timer.
    */
-  function polygonInterval(geometry: Geometry, feature: Feature): NodeJS.Timer {
+  function polygonInterval(geometry: Geometry, feature: Feature): NodeJS.Timeout {
     let counter = 10;
     let adjustGeometry = geometry.clone();
     const polygonIntervalId = setInterval(() => {
