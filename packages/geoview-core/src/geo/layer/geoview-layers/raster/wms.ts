@@ -112,7 +112,7 @@ export class WMS extends AbstractGeoViewRaster {
    * @returns {Promise<void>} A promise that the execution is completed.
    */
   protected getServiceMetadata(): Promise<void> {
-    this.layerPhase = 'getServiceMetadata';
+    api.event.emit(LayerSetPayload.createLayerSetChangeLayerPhasePayload(this.mapId, this.geoviewLayerId, 'getServiceMetadata'));
     const promisedExecution = new Promise<void>((resolve) => {
       const metadataUrl = getLocalizedValue(this.metadataAccessPath, this.mapId);
       if (metadataUrl) {
@@ -165,14 +165,14 @@ export class WMS extends AbstractGeoViewRaster {
             });
             Promise.all(promisedArrayOfMetadata)
               .then((arrayOfMetadata) => {
-                for (i = 0; i < arrayOfMetadata.length && !arrayOfMetadata[i]; i++)
+                for (i = 0; i < arrayOfMetadata.length && !arrayOfMetadata[i]?.Capability; i++)
                   api.event.emit(
                     LayerSetPayload.createLayerSetChangeLayerStatusPayload(this.mapId, Layer.getLayerPath(layersToQuery[i]), 'error')
                   );
                 this.metadata = i < arrayOfMetadata.length ? arrayOfMetadata[i] : null;
                 if (this.metadata) {
                   for (i++; i < arrayOfMetadata.length; i++) {
-                    if (!arrayOfMetadata[i])
+                    if (!arrayOfMetadata[i]?.Capability)
                       api.event.emit(
                         LayerSetPayload.createLayerSetChangeLayerStatusPayload(this.mapId, Layer.getLayerPath(layersToQuery[i]), 'error')
                       );
@@ -236,7 +236,7 @@ export class WMS extends AbstractGeoViewRaster {
    * @returns {Promise<void>} A promise that the execution is completed.
    */
   private getXmlServiceMetadata(metadataUrl: string): Promise<void> {
-    this.layerPhase = 'getXmlServiceMetadata';
+    api.event.emit(LayerSetPayload.createLayerSetChangeLayerPhasePayload(this.mapId, this.geoviewLayerId, 'getXmlServiceMetadata'));
     const promisedExecution = new Promise<void>((resolve) => {
       const parser = new WMSCapabilities();
       fetch(metadataUrl)
@@ -406,7 +406,9 @@ export class WMS extends AbstractGeoViewRaster {
    * @param {TypeListOfLayerEntryConfig} listOfLayerEntryConfig The list of layer entries configuration to validate.
    */
   protected validateListOfLayerEntryConfig(listOfLayerEntryConfig: TypeListOfLayerEntryConfig) {
-    this.layerPhase = 'validateListOfLayerEntryConfig';
+    api.event.emit(
+      LayerSetPayload.createLayerSetChangeLayerPhasePayload(this.mapId, this.geoviewLayerId, 'validateListOfLayerEntryConfig')
+    );
     listOfLayerEntryConfig.forEach((layerEntryConfig: TypeLayerEntryConfig) => {
       const layerPath = Layer.getLayerPath(layerEntryConfig);
       if (layerEntryIsGroupLayer(layerEntryConfig)) {
@@ -421,28 +423,30 @@ export class WMS extends AbstractGeoViewRaster {
         return;
       }
 
-      api.event.emit(LayerSetPayload.createLayerSetChangeLayerStatusPayload(this.mapId, layerPath, 'loading'));
+      if ((layerEntryConfig as TypeBaseLayerEntryConfig).layerStatus !== 'error') {
+        api.event.emit(LayerSetPayload.createLayerSetChangeLayerStatusPayload(this.mapId, layerPath, 'loading'));
 
-      const layerFound = this.getLayerMetadataEntry(layerEntryConfig.layerId);
-      if (!layerFound) {
-        this.layerLoadError.push({
-          layer: layerPath,
-          consoleMessage: `Layer metadata not found (mapId:  ${this.mapId}, layerPath: ${layerPath})`,
-        });
-        api.event.emit(LayerSetPayload.createLayerSetChangeLayerStatusPayload(this.mapId, layerPath, 'error'));
-        return;
+        const layerFound = this.getLayerMetadataEntry(layerEntryConfig.layerId);
+        if (!layerFound) {
+          this.layerLoadError.push({
+            layer: layerPath,
+            consoleMessage: `Layer metadata not found (mapId:  ${this.mapId}, layerPath: ${layerPath})`,
+          });
+          api.event.emit(LayerSetPayload.createLayerSetChangeLayerStatusPayload(this.mapId, layerPath, 'error'));
+          return;
+        }
+
+        if ('Layer' in layerFound) {
+          this.createGroupLayer(layerFound, layerEntryConfig);
+          return;
+        }
+
+        if (!layerEntryConfig.layerName)
+          layerEntryConfig.layerName = {
+            en: layerFound.Title as string,
+            fr: layerFound.Title as string,
+          };
       }
-
-      if ('Layer' in layerFound) {
-        this.createGroupLayer(layerFound, layerEntryConfig);
-        return;
-      }
-
-      if (!layerEntryConfig.layerName)
-        layerEntryConfig.layerName = {
-          en: layerFound.Title as string,
-          fr: layerFound.Title as string,
-        };
     });
   }
 
@@ -518,6 +522,7 @@ export class WMS extends AbstractGeoViewRaster {
    */
   processOneLayerEntry(layerEntryConfig: TypeBaseLayerEntryConfig): Promise<TypeBaseRasterLayer | null> {
     const promisedVectorLayer = new Promise<TypeBaseRasterLayer | null>((resolve) => {
+      api.event.emit(LayerSetPayload.createLayerSetChangeLayerPhasePayload(this.mapId, layerEntryConfig, 'processOneLayerEntry'));
       if (geoviewEntryIsWMS(layerEntryConfig)) {
         const layerCapabilities = this.getLayerMetadataEntry(layerEntryConfig.layerId);
         if (layerCapabilities) {

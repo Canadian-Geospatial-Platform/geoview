@@ -15,7 +15,13 @@ const validEvents: EventStringId[] = [
 /** The legend resultset type associate a layer path to a legend object. The undefined value indicate that the get legend query
  * hasn't been run and the null value indicate that there was a get legend error.
  */
-export type TypeLegendResultSets = { [layerPath: string]: { layerStatus: TypeLayerStatus; data: TypeLegend | undefined | null } };
+export type TypeLegendResultSets = {
+  [layerPath: string]: {
+    layerStatus: TypeLayerStatus;
+    layerPhase: string;
+    data: TypeLegend | undefined | null;
+  };
+};
 
 /**
  * type guard function that redefines a PayloadBaseClass as a TypeLegendsLayersetUpdatedPayload

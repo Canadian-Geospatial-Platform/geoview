@@ -230,7 +230,8 @@ type TypeLayerSetHandlerFunctions = {
   requestLayerInventory?: TypeEventHandlerFunction;
   queryLegend?: TypeEventHandlerFunction;
   queryLayer?: TypeEventHandlerFunction;
-  layerStatusUpdated?: TypeEventHandlerFunction;
+  updateLayerStatus?: TypeEventHandlerFunction;
+  updateLayerPhase?: TypeEventHandlerFunction;
 };
 
 // ******************************************************************************************************************************
@@ -358,6 +359,22 @@ export abstract class AbstractGeoViewLayer {
   }
 
   /** ***************************************************************************************************************************
+   * Process recursively the list of layer entries to see if all of them are in error.
+   *
+   * @param {TypeListOfLayerEntryConfig} listOfLayerEntryConfig The list of layer's configuration
+   *                                                            (default: this.listOfLayerEntryConfig).
+   *
+   * @returns {boolean} true when all layers are in error.
+   */
+  allLayerEntryConfigAreInError(listOfLayerEntryConfig: TypeListOfLayerEntryConfig = this.listOfLayerEntryConfig): boolean {
+    // Try to find a layer not in error. If you can, return false
+    return !listOfLayerEntryConfig.find((layerEntryConfig: TypeLayerEntryConfig) => {
+      if (layerEntryIsGroupLayer(layerEntryConfig)) return !this.allLayerEntryConfigAreInError(layerEntryConfig.listOfLayerEntryConfig);
+      return (layerEntryConfig as TypeBaseLayerEntryConfig).layerStatus !== 'error';
+    });
+  }
+
+  /** ***************************************************************************************************************************
    * Recursively process the list of layer entries to count all layers in error.
    *
    * @param {TypeListOfLayerEntryConfig} listOfLayerEntryConfig The list of layer's configuration
@@ -402,11 +419,17 @@ export abstract class AbstractGeoViewLayer {
     if (listOfLayerEntryConfig.length === 1)
       if (layerEntryIsGroupLayer(listOfLayerEntryConfig[0]))
         this.registerAllLayersToLayerSets(listOfLayerEntryConfig[0].listOfLayerEntryConfig!);
-      else this.registerToLayerSets(listOfLayerEntryConfig[0] as TypeBaseLayerEntryConfig);
+      else {
+        this.registerToLayerSets(listOfLayerEntryConfig[0] as TypeBaseLayerEntryConfig);
+        api.event.emit(LayerSetPayload.createLayerSetChangeLayerPhasePayload(this.mapId, listOfLayerEntryConfig[0], 'newInstance'));
+      }
     else if (listOfLayerEntryConfig.length > 0)
       listOfLayerEntryConfig.forEach((layerEntryConfig) => {
         if (layerEntryIsGroupLayer(layerEntryConfig)) this.registerAllLayersToLayerSets(layerEntryConfig.listOfLayerEntryConfig!);
-        else this.registerToLayerSets(layerEntryConfig as TypeBaseLayerEntryConfig);
+        else {
+          this.registerToLayerSets(layerEntryConfig as TypeBaseLayerEntryConfig);
+          api.event.emit(LayerSetPayload.createLayerSetChangeLayerPhasePayload(this.mapId, layerEntryConfig, 'newInstance'));
+        }
       });
   }
 
@@ -430,12 +453,12 @@ export abstract class AbstractGeoViewLayer {
    */
   createGeoViewLayers(): Promise<void> {
     const promisedExecution = new Promise<void>((resolve) => {
-      this.layerPhase = 'createGeoViewLayers';
+      api.event.emit(LayerSetPayload.createLayerSetChangeLayerPhasePayload(this.mapId, this.geoviewLayerId, 'createGeoViewLayers'));
       if (this.gvLayers === null) {
         this.getAdditionalServiceDefinition()
           .then(() => {
             this.processListOfLayerEntryConfig(this.listOfLayerEntryConfig).then((layersCreated) => {
-              this.gvLayers = layersCreated as BaseLayer;
+              this.gvLayers = layersCreated;
               if (this.listOfLayerEntryConfig.length) this.setActiveLayer(this.listOfLayerEntryConfig[0]);
               resolve();
             });
@@ -466,7 +489,9 @@ export abstract class AbstractGeoViewLayer {
    * If the GeoView layer does not have a service definition, this method does nothing.
    */
   protected getAdditionalServiceDefinition(): Promise<void> {
-    this.layerPhase = 'getAdditionalServiceDefinition';
+    api.event.emit(
+      LayerSetPayload.createLayerSetChangeLayerPhasePayload(this.mapId, this.geoviewLayerId, 'getAdditionalServiceDefinition')
+    );
     const promisedExecution = new Promise<void>((resolve) => {
       this.getServiceMetadata().then(() => {
         if (this.listOfLayerEntryConfig.length) {
@@ -485,7 +510,7 @@ export abstract class AbstractGeoViewLayer {
    * @returns {Promise<void>} A promise that the execution is completed.
    */
   protected getServiceMetadata(): Promise<void> {
-    this.layerPhase = 'getServiceMetadata';
+    api.event.emit(LayerSetPayload.createLayerSetChangeLayerPhasePayload(this.mapId, this.geoviewLayerId, 'getServiceMetadata'));
     const promisedExecution = new Promise<void>((resolve) => {
       const metadataUrl = getLocalizedValue(this.metadataAccessPath, this.mapId);
       if (metadataUrl) {
@@ -527,7 +552,9 @@ export abstract class AbstractGeoViewLayer {
   protected processListOfLayerEntryMetadata(
     listOfLayerEntryConfig: TypeListOfLayerEntryConfig = this.listOfLayerEntryConfig
   ): Promise<void> {
-    this.layerPhase = 'processListOfLayerEntryMetadata';
+    api.event.emit(
+      LayerSetPayload.createLayerSetChangeLayerPhasePayload(this.mapId, this.geoviewLayerId, 'processListOfLayerEntryMetadata')
+    );
     const promisedListOfLayerEntryProcessed = new Promise<void>((resolve) => {
       const promisedAllLayerDone: Promise<void>[] = [];
       listOfLayerEntryConfig.forEach((layerEntryConfig: TypeLayerEntryConfig) => {
@@ -589,7 +616,7 @@ export abstract class AbstractGeoViewLayer {
     listOfLayerEntryConfig: TypeListOfLayerEntryConfig,
     layerGroup?: LayerGroup
   ): Promise<BaseLayer | null> {
-    this.layerPhase = 'processListOfLayerEntryConfig';
+    api.event.emit(LayerSetPayload.createLayerSetChangeLayerPhasePayload(this.mapId, this.geoviewLayerId, 'processListOfLayerEntryConfig'));
     const promisedListOfLayerEntryProcessed = new Promise<BaseLayer | null>((resolve) => {
       if (listOfLayerEntryConfig.length === 1) {
         if (layerEntryIsGroupLayer(listOfLayerEntryConfig[0])) {
@@ -606,7 +633,8 @@ export abstract class AbstractGeoViewLayer {
               resolve(null);
             }
           });
-        } else {
+        } else if ((listOfLayerEntryConfig[0] as TypeBaseLayerEntryConfig).layerStatus === 'error') resolve(null);
+        else {
           if (
             listOfLayerEntryConfig[0].entryType === 'vector' &&
             (listOfLayerEntryConfig[0].source as TypeBaseSourceVectorInitialConfig)?.cluster?.enable
@@ -661,7 +689,9 @@ export abstract class AbstractGeoViewLayer {
           if (layerEntryIsGroupLayer(layerEntryConfig)) {
             const newLayerGroup = this.createLayerGroup(listOfLayerEntryConfig[i]);
             promiseOfLayerCreated.push(this.processListOfLayerEntryConfig(layerEntryConfig.listOfLayerEntryConfig!, newLayerGroup));
-          } else {
+          } else if ((listOfLayerEntryConfig[i] as TypeBaseLayerEntryConfig).layerStatus === 'error')
+            promiseOfLayerCreated.push(Promise.resolve(null));
+          else {
             if (
               layerEntryConfig.entryType === 'vector' &&
               (layerEntryConfig.source as TypeBaseSourceVectorInitialConfig)?.cluster?.enable
@@ -713,7 +743,6 @@ export abstract class AbstractGeoViewLayer {
                 api.event.emit(
                   LayerSetPayload.createLayerSetChangeLayerStatusPayload(this.mapId, Layer.getLayerPath(listOfLayerEntryConfig[i]), 'error')
                 );
-                resolve(null);
               }
             });
             resolve(layerGroup!);
@@ -876,8 +905,8 @@ export abstract class AbstractGeoViewLayer {
     const layerPath = Layer.getLayerPath(layerEntryConfig);
     if (!this.registerToLayerSetListenerFunctions[layerPath]) this.registerToLayerSetListenerFunctions[layerPath] = {};
 
-    if (!this.registerToLayerSetListenerFunctions[layerPath].layerStatusUpdated) {
-      this.registerToLayerSetListenerFunctions[layerPath].layerStatusUpdated = (layerUpdatedPayload) => {
+    if (!this.registerToLayerSetListenerFunctions[layerPath].updateLayerStatus) {
+      this.registerToLayerSetListenerFunctions[layerPath].updateLayerStatus = (layerUpdatedPayload) => {
         if (payloadIsLayerSetUpdated(layerUpdatedPayload) && layerUpdatedPayload.resultSets[layerPath]) {
           layerUpdatedPayload.resultSets[layerPath].layerName = layerEntryConfig.layerName;
           layerEntryConfig.layerStatus = layerUpdatedPayload.resultSets[layerPath].layerStatus;
@@ -885,8 +914,22 @@ export abstract class AbstractGeoViewLayer {
       };
       api.event.on(
         EVENT_NAMES.LAYER_SET.UPDATED,
-        this.registerToLayerSetListenerFunctions[layerPath].layerStatusUpdated!,
-        `${this.mapId}/$LegendsLayerSet$/${layerPath}`
+        this.registerToLayerSetListenerFunctions[layerPath].updateLayerStatus!,
+        `${this.mapId}/$LegendsLayerSet$/${layerPath}/status`
+      );
+    }
+
+    if (!this.registerToLayerSetListenerFunctions[layerPath].updateLayerPhase) {
+      this.registerToLayerSetListenerFunctions[layerPath].updateLayerPhase = (layerUpdatedPayload) => {
+        if (payloadIsLayerSetUpdated(layerUpdatedPayload)) {
+          if (layerUpdatedPayload.resultSets[layerPath]) layerEntryConfig.layerPhase = layerUpdatedPayload.resultSets[layerPath].layerPhase;
+          if (layerUpdatedPayload.layerPath !== layerPath) this.layerPhase = layerUpdatedPayload.resultSets[layerPath].layerPhase;
+        }
+      };
+      api.event.on(
+        EVENT_NAMES.LAYER_SET.UPDATED,
+        this.registerToLayerSetListenerFunctions[layerPath].updateLayerPhase!,
+        `${this.mapId}/$LegendsLayerSet$/${layerPath}/phase`
       );
     }
 
@@ -951,11 +994,19 @@ export abstract class AbstractGeoViewLayer {
   unregisterFromLayerSets(layerEntryConfig: TypeBaseLayerEntryConfig) {
     const layerPath = Layer.getLayerPath(layerEntryConfig);
 
-    if (this.registerToLayerSetListenerFunctions[layerPath].layerStatusUpdated) {
+    if (this.registerToLayerSetListenerFunctions[layerPath].updateLayerStatus) {
       api.event.off(
         EVENT_NAMES.LAYER_SET.UPDATED,
-        `${this.mapId}/$LegendsLayerSet$`,
-        this.registerToLayerSetListenerFunctions[layerPath].layerStatusUpdated
+        `${this.mapId}/$LegendsLayerSet$/${layerPath}/status`,
+        this.registerToLayerSetListenerFunctions[layerPath].updateLayerStatus
+      );
+    }
+
+    if (this.registerToLayerSetListenerFunctions[layerPath].updateLayerPhase) {
+      api.event.off(
+        EVENT_NAMES.LAYER_SET.UPDATED,
+        `${this.mapId}/$LegendsLayerSet$/${layerPath}/phase`,
+        this.registerToLayerSetListenerFunctions[layerPath].updateLayerPhase
       );
     }
 
