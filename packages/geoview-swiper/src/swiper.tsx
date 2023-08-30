@@ -1,3 +1,4 @@
+import { RefObject } from 'react';
 import { TypeJsonObject, TypeWindow } from 'geoview-core';
 
 import Draggable from 'react-draggable';
@@ -114,9 +115,10 @@ export function Swiper(props: SwiperProps): JSX.Element {
   const defaultY = mapSize.current[1] / 2;
 
   const [layersIds] = useState<string[]>(config.layers);
-  const [geoviewLayers] = useState(api.map(mapId).layer.geoviewLayers);
+  const [geoviewLayers, setGeoviewLayers] = useState(api.map(mapId).layer.geoviewLayers);
   const [olLayers, setOlLayers] = useState<BaseLayer[]>([]);
   const [offset, setOffset] = useState(0);
+  const [counter, setCounter] = useState(0);
 
   const [orientation] = useState(config.orientation);
 
@@ -274,12 +276,29 @@ export function Swiper(props: SwiperProps): JSX.Element {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [geoviewLayers]);
 
+  useEffect(() => {
+    api.maps[mapId].map.on('featuresloadend', () => {
+      setGeoviewLayers(api.maps[mapId].layer.geoviewLayers);
+      setCounter(counter + 1);
+    });
+    // api.event.on(
+    //   EVENT_NAMES.LAYER_SET.UPDATED,
+    //   (payload: PayloadBaseClass) => {
+    //     if (payloadIsLayerSetUpdated(payload)) {
+    //       setGeoviewLayers(api.map(mapId).layer.geoviewLayers);
+    //       setCounter(counter + 1);
+    //     }
+    //   },
+    //   `${mapId}/$LegendsLayerSet$`
+    // );
+  });
+
   /**
    * Update swiper and layers from keyboard CTRL + Arrow key
    * @param {KeyboardEvent} evt The keyboard event to calculate the swiper position
    */
   const updateSwiper = debounce((evt: KeyboardEvent): void => {
-    // * there is a know issue when stiching from keyboard to mouse swiper but we can live with it as we are not experctin to face this
+    // * there is a know issue when stiching from keyboard to mouse swiper but we can live with it as we are not expecting to face this
     // * offset from mouse method is not working properly anymore
 
     if (evt.ctrlKey && 'ArrowLeft ArrowRight ArrowUp ArrowDown'.includes(evt.key)) {
@@ -317,7 +336,7 @@ export function Swiper(props: SwiperProps): JSX.Element {
   });
 
   return (
-    <Box sx={sxClasses.layerSwipe}>
+    <Box sx={sxClasses.layerSwipe} key={counter}>
       <Draggable
         axis={orientation === 'vertical' ? 'x' : 'y'}
         bounds="parent"
@@ -329,10 +348,10 @@ export function Swiper(props: SwiperProps): JSX.Element {
         onDrag={(e) => {
           onStop(e as MouseEvent);
         }}
-        nodeRef={swiperRef}
+        nodeRef={swiperRef as RefObject<HTMLElement>}
       >
         <Box sx={[orientation === 'vertical' ? sxClasses.vertical : sxClasses.horizontal, sxClasses.bar]} tabIndex={0} ref={swiperRef}>
-          <Tooltip title={translations[displayLanguage].tooltip}>
+          <Tooltip title={translations[displayLanguage].tooltip as string}>
             <Box className="handleContainer">
               <HandleIcon sx={sxClasses.handle} className="handleL" />
               <HandleIcon sx={sxClasses.handle} className="handleR" />
