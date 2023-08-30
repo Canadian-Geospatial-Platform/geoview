@@ -46,6 +46,7 @@ const useStyles = makeStyles((theme) => {
     },
     appBarContainer: {
       width: '64px',
+      minWidth: '64px',
       height: '100%',
       position: 'relative',
     },
