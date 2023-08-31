@@ -171,7 +171,10 @@ export function Shell(props: ShellProps): JSX.Element {
           </Box>
           {/* load geolocator component if config includes in list of components in appBar */}
           {mapFeaturesConfig?.appBar?.includes('geolocator') && mapFeaturesConfig?.map.interaction === 'dynamic' && <Geolocator />}
-          <Map {...mapFeaturesConfig} />
+          <Box sx={{ flexGrow: 1, height: '100%' }}>
+            <Map {...mapFeaturesConfig} />
+          </Box>
+
           {mapFeaturesConfig?.map.interaction === 'dynamic' && <Navbar setActivetrap={setActivetrap} />}
         </div>
         {mapFeaturesConfig?.corePackages && mapFeaturesConfig?.corePackages.includes('footer-panel') && <FooterTabs />}
