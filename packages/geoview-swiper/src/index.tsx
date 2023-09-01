@@ -46,8 +46,8 @@ class SwiperPlugin extends AbstractPlugin {
   /**
    * Added function called after the plugin has been initialized
    */
-  added = (): void => {
-    const { configObj, pluginProps } = this;
+  added(): void {
+    const { configObj, pluginProps } = this as AbstractPlugin;
 
     const { mapId } = pluginProps;
 
@@ -68,7 +68,7 @@ class SwiperPlugin extends AbstractPlugin {
       const root = createRoot(document.getElementById(`${mapId}-swiper`)!);
       root.render(node);
     }
-  };
+  }
 
   /**
    * Function called when the plugin is removed, used for clean up

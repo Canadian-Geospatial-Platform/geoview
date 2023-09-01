@@ -47,7 +47,7 @@ function PanelContent(props: TypePanelContentProps): JSX.Element {
     ReorderIcon,
   } = ui.elements;
 
-  const { displayLanguage } = api.map(mapId!);
+  const { displayLanguage } = api.maps[mapId!];
 
   const translations: TypeJsonObject = toJsonObject({
     en: {
@@ -90,7 +90,7 @@ function PanelContent(props: TypePanelContentProps): JSX.Element {
   const actionMenuOpen = Boolean(actionMenuAnchorElement);
 
   const updateLayers = () => {
-    if (api.map(mapId).layer?.layerOrder !== undefined) setMapLayers([...api.map(mapId).layer.layerOrder].reverse());
+    if (api.maps[mapId].layer?.layerOrder !== undefined) setMapLayers([...api.maps[mapId].layer.layerOrder].reverse());
   };
 
   useEffect(() => {
@@ -105,7 +105,7 @@ function PanelContent(props: TypePanelContentProps): JSX.Element {
   }, []);
 
   useEffect(() => {
-    setLegend(api.map(mapId!).legend.createLegend({ layerIds: mapLayers, isRemoveable: true, canSetOpacity: true, canZoomTo: true }));
+    setLegend(api.maps[mapId!].legend.createLegend({ layerIds: mapLayers, isRemoveable: true, canSetOpacity: true, canZoomTo: true }));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mapLayers]);
 
@@ -120,18 +120,26 @@ function PanelContent(props: TypePanelContentProps): JSX.Element {
 
   useEffect(() => {
     setLegend(
-      api
-        .map(mapId!)
-        .legend.createLegend({ layerIds: mapLayers, isRemoveable: true, canSetOpacity: true, expandAll: isExpandAll, canZoomTo: true })
+      api.maps[mapId!].legend.createLegend({
+        layerIds: mapLayers,
+        isRemoveable: true,
+        canSetOpacity: true,
+        expandAll: isExpandAll,
+        canZoomTo: true,
+      })
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isExpandAll]);
 
   useEffect(() => {
     setLegend(
-      api
-        .map(mapId!)
-        .legend.createLegend({ layerIds: mapLayers, isRemoveable: true, canSetOpacity: true, hideAll: isHideAll, canZoomTo: true })
+      api.maps[mapId!].legend.createLegend({
+        layerIds: mapLayers,
+        isRemoveable: true,
+        canSetOpacity: true,
+        hideAll: isHideAll,
+        canZoomTo: true,
+      })
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isHideAll]);
@@ -184,31 +192,31 @@ function PanelContent(props: TypePanelContentProps): JSX.Element {
           <ListItemIcon>
             <ExpandMoreIcon />
           </ListItemIcon>
-          <ListItemText>{translations[displayLanguage].expandAll}</ListItemText>
+          <ListItemText>{translations[displayLanguage].expandAll as string}</ListItemText>
         </MenuItem>
         <MenuItem onClick={() => handleExpandAllClick(false)}>
           <ListItemIcon>
             <ExpandLessIcon />
           </ListItemIcon>
-          <ListItemText>{translations[displayLanguage].collapseAll}</ListItemText>
+          <ListItemText>{translations[displayLanguage].collapseAll as string}</ListItemText>
         </MenuItem>
         <MenuItem onClick={() => handleShowAllClick(true)}>
           <ListItemIcon>
             <VisibilityIcon />
           </ListItemIcon>
-          <ListItemText>{translations[displayLanguage].showAll}</ListItemText>
+          <ListItemText>{translations[displayLanguage].showAll as string}</ListItemText>
         </MenuItem>
         <MenuItem onClick={() => handleShowAllClick(false)}>
           <ListItemIcon>
             <VisibilityOffIcon />
           </ListItemIcon>
-          <ListItemText>{translations[displayLanguage].hideAll}</ListItemText>
+          <ListItemText>{translations[displayLanguage].hideAll as string}</ListItemText>
         </MenuItem>
         <MenuItem onClick={() => handleReorderLayersClick(true)}>
           <ListItemIcon>
             <ReorderIcon />
           </ListItemIcon>
-          <ListItemText>{translations[displayLanguage].reorderLayers}</ListItemText>
+          <ListItemText>{translations[displayLanguage].reorderLayers as string}</ListItemText>
         </MenuItem>
       </Menu>
       <Box sx={sxClasses.mainContainer}>
@@ -229,7 +237,7 @@ function PanelContent(props: TypePanelContentProps): JSX.Element {
             </IconButton>
           </div>
           <Box onClick={handleShowAddLayer}>
-            {translations[displayLanguage].addLayer}
+            {translations[displayLanguage].addLayer as string}
             <IconButton>
               <AddIcon />
             </IconButton>

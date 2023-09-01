@@ -219,9 +219,9 @@
       cgpv.init(function (mapId) {
         console.log('api is ready');
 
-        if (cgpv.api.map('CONF7')) {
+        if (cgpv.api.maps['CONF7']) {
           setTimeout(() => {
-            cgpv.api.map('CONF7').loadMapConfig(`{
+            cgpv.api.maps['CONF7'].loadMapConfig(`{
               'map': {
                 'interaction': 'dynamic',
                 'viewSettings': {

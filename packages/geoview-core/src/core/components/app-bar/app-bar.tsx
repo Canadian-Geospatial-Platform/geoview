@@ -108,7 +108,7 @@ export function Appbar({ setActivetrap }: AppbarProps): JSX.Element {
   const mapConfig = useContext(MapContext);
 
   const { mapId } = mapConfig;
-  const { mapFeaturesConfig } = api.map(mapId);
+  const { mapFeaturesConfig } = api.maps[mapId];
 
   const openModal = () => {
     setModalIsShown(true);
@@ -150,19 +150,18 @@ export function Appbar({ setActivetrap }: AppbarProps): JSX.Element {
     [setButtonPanelGroups]
   );
 
-  const appBarPanelCreateListenerFunction = (payload: PayloadBaseClass) => {
-    if (payloadIsAButtonPanel(payload)) addButtonPanel(payload);
-  };
-
-  const appBarPanelRemoveListenerFunction = (payload: PayloadBaseClass) => {
-    if (payloadIsAButtonPanel(payload)) removeButtonPanel(payload);
-  };
-
   const appBarPanelCloseListenerFunction = () => setSelectedAppbarButtonId('');
 
   useEffect(() => {
+    const appBarPanelCreateListenerFunction = (payload: PayloadBaseClass) => {
+      if (payloadIsAButtonPanel(payload)) addButtonPanel(payload);
+    };
     // listen to new panel creation
     api.event.on(EVENT_NAMES.APPBAR.EVENT_APPBAR_PANEL_CREATE, appBarPanelCreateListenerFunction, mapId);
+
+    const appBarPanelRemoveListenerFunction = (payload: PayloadBaseClass) => {
+      if (payloadIsAButtonPanel(payload)) removeButtonPanel(payload);
+    };
 
     // listen on panel removal
     api.event.on(EVENT_NAMES.APPBAR.EVENT_APPBAR_PANEL_REMOVE, appBarPanelRemoveListenerFunction, mapId);

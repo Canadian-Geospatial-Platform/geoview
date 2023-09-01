@@ -42,9 +42,9 @@ export default function Home(props: HomeProps): JSX.Element {
    */
   function setHome() {
     // get map and set initial bounds to use in zoom home
-    const { center, zoom } = api.map(mapId).mapFeaturesConfig.map.viewSettings;
+    const { center, zoom } = api.maps[mapId].mapFeaturesConfig.map.viewSettings;
 
-    const { currentProjection } = api.map(mapId);
+    const { currentProjection } = api.maps[mapId];
 
     const projectionConfig = api.projection.projections[currentProjection];
 
@@ -53,7 +53,7 @@ export default function Home(props: HomeProps): JSX.Element {
 
     const options: FitOptions = { padding: [100, 100, 100, 100], maxZoom: zoom, duration: 500 };
 
-    api.map(mapId).zoomToExtent(extent, options);
+    api.maps[mapId].zoomToExtent(extent, options);
   }
 
   return (

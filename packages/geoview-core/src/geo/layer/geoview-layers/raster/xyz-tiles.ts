@@ -243,7 +243,7 @@ export class XYZTiles extends AbstractGeoViewRaster {
           layerEntryConfig.initialSettings.extent = transformExtent(
             layerEntryConfig.initialSettings.extent,
             'EPSG:4326',
-            `EPSG:${api.map(this.mapId).currentProjection}`
+            `EPSG:${api.maps[this.mapId].currentProjection}`
           );
 
         resolve();
@@ -264,7 +264,7 @@ export class XYZTiles extends AbstractGeoViewRaster {
     const layerBounds = (layerConfig.gvLayer as TileLayer<XYZ>).getSource()?.getTileGrid()?.getExtent();
     const projection =
       (layerConfig.gvLayer as TileLayer<XYZ>).getSource()?.getProjection()?.getCode().replace('EPSG:', '') ||
-      api.map(this.mapId).currentProjection;
+      api.maps[this.mapId].currentProjection;
 
     if (layerBounds) {
       const transformedBounds = transformExtent(layerBounds, `EPSG:${projection}`, `EPSG:4326`);

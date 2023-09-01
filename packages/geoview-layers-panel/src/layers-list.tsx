@@ -207,7 +207,7 @@ function LayersList(props: TypeLayersPanelListProps): JSX.Element {
    *
    * @param layer layer config
    */
-  const onZoom = (layer: AbstractGeoViewLayer) => api.map(mapId).fitBounds(layerBounds[layer.geoviewLayerId]);
+  const onZoom = (layer: AbstractGeoViewLayer) => api.maps[mapId].fitBounds(layerBounds[layer.geoviewLayerId]);
 
   /**
    * Returns polygon with segmented top and bottom to handle curved projection
@@ -261,11 +261,11 @@ function LayersList(props: TypeLayersPanelListProps): JSX.Element {
     const bbox = polygonFromBounds(layerBounds[layer.geoviewLayerId]);
 
     if (layerBbox.toString() === bbox.toString()) {
-      api.map(mapId).layer.vector?.deleteGeometry('layerBoundingBox');
+      api.maps[mapId].layer.vector?.deleteGeometry('layerBoundingBox');
       setLayerBbox([]);
     } else {
-      api.map(mapId).layer.vector?.deleteGeometry('layerBoundingBox');
-      api.map(mapId).layer.vector?.addPolygon(
+      api.maps[mapId].layer.vector?.deleteGeometry('layerBoundingBox');
+      api.maps[mapId].layer.vector?.addPolygon(
         [bbox],
         {
           style: {
@@ -289,9 +289,9 @@ function LayersList(props: TypeLayersPanelListProps): JSX.Element {
     // empty bounding box
     setLayerBbox([]);
     // remove bounding box layer from map
-    api.map(mapId).layer.vector?.deleteGeometry('layerBoundingBox');
+    api.maps[mapId].layer.vector?.deleteGeometry('layerBoundingBox');
     // remove layer from map
-    api.map(mapId).layer.removeGeoviewLayer(layer);
+    api.maps[mapId].layer.removeGeoviewLayer(layer);
   };
 
   /**
@@ -391,7 +391,7 @@ function LayersList(props: TypeLayersPanelListProps): JSX.Element {
                 />
               </div>
               <div className={classes.flexGroup}>
-                <Tooltip title={translations[displayLanguage].opacity}>
+                <Tooltip title={translations[displayLanguage].opacity as string}>
                   <i className="material-icons">contrast</i>
                 </Tooltip>
                 <div className={classes.slider}>
@@ -405,7 +405,7 @@ function LayersList(props: TypeLayersPanelListProps): JSX.Element {
                     customOnChange={(value) => onSliderChange(value as number, layer)}
                   />
                 </div>
-                <Tooltip title={translations[displayLanguage].visibility}>
+                <Tooltip title={translations[displayLanguage].visibility as string}>
                   <Checkbox checked={layerVisibility[layer.geoviewLayerId]} onChange={(e) => onVisibilityChange(e.target.checked, layer)} />
                 </Tooltip>
               </div>
@@ -414,9 +414,9 @@ function LayersList(props: TypeLayersPanelListProps): JSX.Element {
                   {subLayer!.legend && (
                     <div className={classes.legendSubLayerGroup}>
                       <div className={classes.layerItemText} title={subLayer.layerName as string}>
-                        {subLayer.layerName}
+                        {subLayer.layerName as string}
                       </div>
-                      <Tooltip title={translations[displayLanguage].visibility}>
+                      <Tooltip title={translations[displayLanguage].visibility as string}>
                         <Checkbox
                           checked={subLayerVisibility[layer.geoviewLayerId].includes(subLayer.layerId as number)}
                           onChange={(e) => onSubVisibilityChange(e.target.checked, layer, subLayer.layerId as number)}
@@ -430,7 +430,7 @@ function LayersList(props: TypeLayersPanelListProps): JSX.Element {
                         alt="Layer Legend"
                         src={`data:${subLayer.drawingInfo?.renderer.symbol.contentType};base64,${subLayer.drawingInfo?.renderer.symbol.imageData}`}
                       />
-                      {subLayer.drawingInfo?.renderer.label || subLayer.name}
+                      {(subLayer.drawingInfo?.renderer.label || subLayer.name) as string}
                     </div>
                   )}
                   {subLayer.drawingInfo?.renderer.type === 'uniqueValue' &&
@@ -438,20 +438,20 @@ function LayersList(props: TypeLayersPanelListProps): JSX.Element {
                     (subLayer.drawingInfo.renderer.uniqueValueInfos as TypeJsonArray).map((uniqueValue, i: number) => (
                       <div key={i} className={classes.layerItemText}>
                         <img alt="Layer Legend" src={`data:${uniqueValue.symbol.contentType};base64,${uniqueValue.symbol.imageData}`} />
-                        {uniqueValue.label}
+                        {uniqueValue.label as string}
                       </div>
                     ))}
                   {subLayer.legend &&
                     (subLayer.legend as TypeJsonArray).map((uniqueValue, i: number) => (
                       <div key={i} className={classes.layerItemText}>
                         <img alt="Layer Legend" src={`data:${uniqueValue.contentType};base64,${uniqueValue.imageData}`} />
-                        {uniqueValue.label || subLayer.layerName}
+                        {(uniqueValue.label || subLayer.layerName) as string}
                       </div>
                     ))}
                   {subLayer.dataUrl && (
                     <div className={classes.layerItemText}>
                       <img alt="Layer Legend" src={subLayer.dataUrl as string} />
-                      {subLayer.name}
+                      {subLayer.name as string}
                     </div>
                   )}
                 </div>

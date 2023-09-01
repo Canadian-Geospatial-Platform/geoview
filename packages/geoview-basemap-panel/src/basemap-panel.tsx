@@ -22,7 +22,7 @@ export function BasemapPanel(props: BaseMapPanelProps): JSX.Element {
   const { mapId, config } = props;
 
   const { cgpv } = w;
-  const myMap = cgpv.api.map(mapId);
+  const myMap = cgpv.api.maps[mapId];
 
   const { api, ui, react } = cgpv;
   const { Select, Card } = ui.elements;
@@ -141,13 +141,13 @@ export function BasemapPanel(props: BaseMapPanelProps): JSX.Element {
     let isInit = false;
 
     // reset the basemaps array
-    api.map(mapId).basemap.basemaps = [];
+    api.maps[mapId].basemap.basemaps = [];
     setBasemapList([]);
 
     // create the custom config basemap
     for (let basemapIndex = 0; basemapIndex < (basemapsArray.customBasemaps.length as number); basemapIndex++) {
       const customBasemap = basemapsArray.customBasemaps[basemapIndex] as TypeJsonObject;
-      const basemap = api.map(mapId).basemap.createCustomBasemap(customBasemap as unknown as TypeBasemapProps);
+      const basemap = api.maps[mapId].basemap.createCustomBasemap(customBasemap as unknown as TypeBasemapProps);
       if (basemap) setBasemapList((prevArray) => [...prevArray, basemap]);
 
       // custom basemap are provided set it by default (can't be set as basemap from geoview config)
@@ -161,7 +161,7 @@ export function BasemapPanel(props: BaseMapPanelProps): JSX.Element {
     for (let basemapIndex = 0; basemapIndex < (basemapsArray.coreBasemaps.length as number); basemapIndex++) {
       const basemapOptions = basemapsArray.coreBasemaps[basemapIndex] as TypeJsonObject;
       // eslint-disable-next-line no-await-in-loop
-      const basemap = await api.map(mapId).basemap.createCoreBasemap(basemapOptions as unknown as TypeBasemapOptions, projection);
+      const basemap = await api.maps[mapId].basemap.createCoreBasemap(basemapOptions as unknown as TypeBasemapOptions, projection);
       if (basemap) setBasemapList((prevArray) => [...prevArray, basemap]);
 
       // set basemap if previously selected in previous projection
@@ -259,7 +259,7 @@ export function BasemapPanel(props: BaseMapPanelProps): JSX.Element {
                   <img src={basemap.thumbnailUrl} alt={basemap.altText} className="basemapCardThumbnail" />
                 )}
                 {Array.isArray(basemap.thumbnailUrl) &&
-                  basemap.thumbnailUrl.map((thumbnail, index) => {
+                  (basemap.thumbnailUrl as string[]).map((thumbnail, index) => {
                     // eslint-disable-next-line react/no-array-index-key
                     return <img key={index} src={thumbnail} alt={basemap.altText} className="basemapCardThumbnail" />;
                   })}

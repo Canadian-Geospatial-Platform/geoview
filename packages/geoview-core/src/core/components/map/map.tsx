@@ -67,7 +67,7 @@ export function Map(mapFeaturesConfig: TypeMapFeaturesConfig): JSX.Element {
   const mapElement = useRef<HTMLDivElement | undefined>();
 
   // create a new map viewer instance
-  const viewer: MapViewer = api.map(mapId);
+  const viewer: MapViewer = api.maps[mapId];
 
   const defaultTheme = useTheme();
 
@@ -85,7 +85,7 @@ export function Map(mapFeaturesConfig: TypeMapFeaturesConfig): JSX.Element {
 
     const position = map.getView().getCenter()!;
 
-    api.map(mapId).currentMapCenterPosition = position;
+    api.maps[mapId].currentMapCenterPosition = position;
 
     // emit the moveend event to the api
     api.event.emit(lngLatPayload(EVENT_NAMES.MAP.EVENT_MAP_MOVE_END, mapId, position));
@@ -97,25 +97,25 @@ export function Map(mapFeaturesConfig: TypeMapFeaturesConfig): JSX.Element {
    * @param {ObjectEvent} event Zoom end event container a reference to the map
    */
   function mapZoomEnd(event: ObjectEvent): void {
-    const prevZoom = api.map(mapId).currentZoom;
+    const prevZoom = api.maps[mapId].currentZoom;
     const view: View = event.target;
     const currentZoom = view.getZoom()!;
     const layers = api.maps[mapId].layer.registeredLayers;
 
-    api.map(mapId).currentZoom = currentZoom;
+    api.maps[mapId].currentZoom = currentZoom;
 
     Object.keys(layers).forEach((layer) => {
       if (layer.endsWith('-unclustered')) {
         const clusterLayerId = layer.replace('-unclustered', '');
         const splitZoom =
-          (api.map(mapId).layer.registeredLayers[clusterLayerId].source as TypeVectorSourceInitialConfig)!.cluster!.splitZoom || 7;
+          (api.maps[mapId].layer.registeredLayers[clusterLayerId].source as TypeVectorSourceInitialConfig)!.cluster!.splitZoom || 7;
         if (prevZoom < splitZoom && currentZoom >= splitZoom) {
-          api.map(mapId).layer.registeredLayers[clusterLayerId]?.gvLayer!.setVisible(false);
-          api.map(mapId).layer.registeredLayers[layer]?.gvLayer!.setVisible(true);
+          api.maps[mapId].layer.registeredLayers[clusterLayerId]?.gvLayer!.setVisible(false);
+          api.maps[mapId].layer.registeredLayers[layer]?.gvLayer!.setVisible(true);
         }
         if (prevZoom >= splitZoom && currentZoom < splitZoom) {
-          api.map(mapId).layer.registeredLayers[clusterLayerId]?.gvLayer!.setVisible(true);
-          api.map(mapId).layer.registeredLayers[layer]?.gvLayer!.setVisible(false);
+          api.maps[mapId].layer.registeredLayers[clusterLayerId]?.gvLayer!.setVisible(true);
+          api.maps[mapId].layer.registeredLayers[layer]?.gvLayer!.setVisible(false);
         }
       }
     });
@@ -133,11 +133,11 @@ export function Map(mapFeaturesConfig: TypeMapFeaturesConfig): JSX.Element {
       const coordinates: TypeMapMouseInfo = {
         projected: (event as MapBrowserEvent<UIEvent>).coordinate,
         pixel: (event as MapBrowserEvent<UIEvent>).pixel,
-        lnglat: toLonLat((event as MapBrowserEvent<UIEvent>).coordinate, `EPSG:${api.map(mapId).currentProjection}`),
+        lnglat: toLonLat((event as MapBrowserEvent<UIEvent>).coordinate, `EPSG:${api.maps[mapId].currentProjection}`),
         dragging: (event as MapBrowserEvent<UIEvent>).dragging,
       };
 
-      api.map(mapId).singleClickedPosition = coordinates;
+      api.maps[mapId].singleClickedPosition = coordinates;
 
       // emit the singleclick map position
       api.event.emit(mapMouseEventPayload(EVENT_NAMES.MAP.EVENT_MAP_SINGLE_CLICK, mapId, coordinates));
@@ -153,11 +153,11 @@ export function Map(mapFeaturesConfig: TypeMapFeaturesConfig): JSX.Element {
       const coordinates: TypeMapMouseInfo = {
         projected: (event as MapBrowserEvent<UIEvent>).coordinate,
         pixel: (event as MapBrowserEvent<UIEvent>).pixel,
-        lnglat: toLonLat((event as MapBrowserEvent<UIEvent>).coordinate, `EPSG:${api.map(mapId).currentProjection}`),
+        lnglat: toLonLat((event as MapBrowserEvent<UIEvent>).coordinate, `EPSG:${api.maps[mapId].currentProjection}`),
         dragging: (event as MapBrowserEvent<UIEvent>).dragging,
       };
 
-      api.map(mapId).pointerPosition = coordinates;
+      api.maps[mapId].pointerPosition = coordinates;
 
       // emit the pointer move map position
       api.event.emit(mapMouseEventPayload(EVENT_NAMES.MAP.EVENT_MAP_POINTER_MOVE, mapId, coordinates));
@@ -182,7 +182,7 @@ export function Map(mapFeaturesConfig: TypeMapFeaturesConfig): JSX.Element {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let intervalMap: any;
     const setMapEvents = () => {
-      if (api.map(mapId) !== undefined) {
+      if (api.maps[mapId] !== undefined) {
         // emit the initial map position
         api.event.emit(lngLatPayload(EVENT_NAMES.MAP.EVENT_MAP_MOVE_END, mapId || '', cgpvMap.getView().getCenter()!));
 
@@ -207,7 +207,7 @@ export function Map(mapFeaturesConfig: TypeMapFeaturesConfig): JSX.Element {
     // create map
     const projection = api.projection.projections[mapConfig.viewSettings.projection];
 
-    const defaultBasemap = await api.map(mapId).basemap.loadDefaultBasemaps();
+    const defaultBasemap = await api.maps[mapId].basemap.loadDefaultBasemaps();
 
     let extent: Extent | undefined;
     if (mapConfig.viewSettings?.extent) {
@@ -261,7 +261,7 @@ export function Map(mapFeaturesConfig: TypeMapFeaturesConfig): JSX.Element {
   const basemapLayerUpdateListenerFunction = (payload: PayloadBaseClass) => {
     if (payloadIsABasemapLayerArray(payload)) {
       // remove previous basemaps
-      const layers = api.map(mapId).map.getAllLayers();
+      const layers = api.maps[mapId].map.getAllLayers();
 
       // loop through all layers on the map
       for (let layerIndex = 0; layerIndex < layers.length; layerIndex++) {
@@ -273,7 +273,7 @@ export function Map(mapFeaturesConfig: TypeMapFeaturesConfig): JSX.Element {
         // check if the group id matches basemap
         if (layerId && layerId === 'basemap') {
           // remove the basemap layer
-          api.map(mapId).map.removeLayer(layer);
+          api.maps[mapId].map.removeLayer(layer);
         }
       }
 
@@ -288,7 +288,7 @@ export function Map(mapFeaturesConfig: TypeMapFeaturesConfig): JSX.Element {
         basemapLayer.set('mapId', 'basemap');
 
         // add the basemap layer
-        api.map(mapId).map.getLayers().insertAt(index, basemapLayer);
+        api.maps[mapId].map.getLayers().insertAt(index, basemapLayer);
 
         // render the layer
         basemapLayer.changed();
@@ -299,14 +299,14 @@ export function Map(mapFeaturesConfig: TypeMapFeaturesConfig): JSX.Element {
   const mapviewProjectionChangeListenetFunction = (payload: PayloadBaseClass) => {
     if (payloadIsAMapViewProjection(payload)) {
       // on map view projection change, layer source needs to be refreshed
-      const currentView = api.map(mapId).getView();
+      const currentView = api.maps[mapId].getView();
       const centerCoordinate = toLonLat(currentView.getCenter()!, currentView.getProjection());
-      api.map(mapId).setView({
+      api.maps[mapId].setView({
         projection: 3978,
         zoom: currentView.getZoom()!,
         center: [centerCoordinate[0], centerCoordinate[1]],
       });
-      const mapLayers = api.map(mapId).layer.geoviewLayers;
+      const mapLayers = api.maps[mapId].layer.geoviewLayers;
       Object.entries(mapLayers).forEach((mapLayerEntry) => {
         const refreshBaseLayer = (baseLayer: BaseLayer | null) => {
           if (baseLayer) {
@@ -366,9 +366,9 @@ export function Map(mapFeaturesConfig: TypeMapFeaturesConfig): JSX.Element {
       {isLoaded && (
         <>
           {components !== undefined && components.indexOf('north-arrow') > -1 && (
-            <NorthArrow projection={api.projection.projections[api.map(mapId).currentProjection].getCode()} />
+            <NorthArrow projection={api.projection.projections[api.maps[mapId].currentProjection].getCode()} />
           )}
-          <NorthPoleFlag projection={api.projection.projections[api.map(mapId).currentProjection].getCode()} />
+          <NorthPoleFlag projection={api.projection.projections[api.maps[mapId].currentProjection].getCode()} />
           <Crosshair />
           <ClickMarker />
           <HoverTooltip />

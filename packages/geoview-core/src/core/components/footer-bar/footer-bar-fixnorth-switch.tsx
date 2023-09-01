@@ -24,9 +24,9 @@ export function FooterbarFixNorthSwitch(): JSX.Element {
   const { t } = useTranslation<string>();
 
   const [expanded, setExpanded] = useState(false);
-  const [mapProjection, setMapProjection] = useState(`EPSG:${api.map(mapId).currentProjection}`);
+  const [mapProjection, setMapProjection] = useState(`EPSG:${api.maps[mapId].currentProjection}`);
   const [switchChecked, setSwitchChecked] = useState(false);
-  const [isNorthEnable] = useState(api.map(mapId).mapFeaturesConfig.components!.indexOf('north-arrow') > -1);
+  const [isNorthEnable] = useState(api.maps[mapId].mapFeaturesConfig.components!.indexOf('north-arrow') > -1);
 
   /**
    * Emit an event to specify the map to rotate to keep north straight
@@ -39,7 +39,7 @@ export function FooterbarFixNorthSwitch(): JSX.Element {
 
     // if unchecked, reset rotation
     if (!event.target.checked) {
-      const { map } = api.map(mapId);
+      const { map } = api.maps[mapId];
       map.getView().animate({
         rotation: 0,
       });

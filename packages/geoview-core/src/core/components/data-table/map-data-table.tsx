@@ -124,8 +124,8 @@ function MapDataTable({ data, layerId, mapId, layerKey }: MapDataTableProps) {
   }, [columnFilters]);
 
   useEffect(() => {
-    const geoviewLayerInstance = api.map(mapId).layer.geoviewLayers[layerId];
-    const filterLayerConfig = api.map(mapId).layer.registeredLayers[layerKey] as TypeLayerEntryConfig;
+    const geoviewLayerInstance = api.maps[mapId].layer.geoviewLayers[layerId];
+    const filterLayerConfig = api.maps[mapId].layer.registeredLayers[layerKey] as TypeLayerEntryConfig;
     // filter map when filterMap is toggled true.
     if (mapFiltered && filterStrings) {
       filterStrings.forEach((filterString) => {
@@ -175,7 +175,7 @@ function MapDataTable({ data, layerId, mapId, layerKey }: MapDataTableProps) {
    *
    */
   const handleZoomIn = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>, extent: Extent) => {
-    api.map(mapId).zoomToExtent(extent);
+    api.maps[mapId].zoomToExtent(extent);
   };
 
   /**

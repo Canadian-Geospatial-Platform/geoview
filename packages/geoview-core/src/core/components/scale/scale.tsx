@@ -118,7 +118,7 @@ export function Scale(): JSX.Element {
   };
 
   useEffect(() => {
-    const { map } = api.map(mapId);
+    const { map } = api.maps[mapId];
 
     const scaleBar = new ScaleLine({
       units: 'metric',

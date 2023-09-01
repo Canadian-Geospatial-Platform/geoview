@@ -43,7 +43,7 @@ export function FooterbarRotationButton(): JSX.Element {
    * Reset the map rotation
    */
   const resetRotation = () => {
-    const { map } = api.map(mapId);
+    const { map } = api.maps[mapId];
 
     map.getView().animate({
       rotation: 0,
@@ -54,7 +54,7 @@ export function FooterbarRotationButton(): JSX.Element {
    * Set the rotation icon on masp view rotation change
    */
   const setViewRotationEvent = () => {
-    const { map } = api.map(mapId);
+    const { map } = api.maps[mapId];
 
     map.getView().on('change:rotation', (e) => {
       const rotation = (e.target as View).getRotation();

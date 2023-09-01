@@ -135,7 +135,7 @@ function LayerDataGrid(props: CustomDataGridProps) {
    *
    */
   const handleZoomIn = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>, extent: Extent) => {
-    api.map(mapId).zoomToExtent(extent);
+    api.maps[mapId].zoomToExtent(extent);
   };
   /**
    * Convert the filter string from the Filter Model
@@ -183,8 +183,8 @@ function LayerDataGrid(props: CustomDataGridProps) {
    * Apply the filter who is on the data grid to the map
    */
   useEffect(() => {
-    const geoviewLayerInstance = api.map(mapId).layer.geoviewLayers[layerId];
-    const filterLayerConfig = api.map(mapId).layer.registeredLayers[layerKey] as TypeLayerEntryConfig;
+    const geoviewLayerInstance = api.maps[mapId].layer.geoviewLayers[layerId];
+    const filterLayerConfig = api.maps[mapId].layer.registeredLayers[layerKey] as TypeLayerEntryConfig;
     if (mapFiltered && geoviewLayerInstance !== undefined && filterLayerConfig !== undefined) {
       (geoviewLayerInstance as AbstractGeoViewVector | EsriDynamic)?.applyViewFilter(filterLayerConfig, filterString);
     } else {

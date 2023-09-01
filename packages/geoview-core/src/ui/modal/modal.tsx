@@ -239,7 +239,7 @@ export function Modal(props: TypeDialogProps): JSX.Element {
   const modalOpenListenerFunction = (payload: PayloadBaseClass) => {
     if (payloadIsAModal(payload)) {
       if (modalId === payload.modalId) {
-        const modal = api.map(mapId).modal.modals[payload.modalId] as TypeModalProps;
+        const modal = api.maps[mapId].modal.modals[payload.modalId] as TypeModalProps;
         openEvent = true;
 
         setCreatedModal(ceatedModalJSXReturner(modal));
@@ -250,7 +250,7 @@ export function Modal(props: TypeDialogProps): JSX.Element {
   const modalUpdateListenerFunction = (payload: PayloadBaseClass) => {
     if (payloadIsAModal(payload)) {
       if (modalId === payload.modalId) {
-        const modal = api.map(mapId).modal.modals[payload.modalId] as TypeModalProps;
+        const modal = api.maps[mapId].modal.modals[payload.modalId] as TypeModalProps;
 
         setCreatedModal(ceatedModalJSXReturner(modal));
       }

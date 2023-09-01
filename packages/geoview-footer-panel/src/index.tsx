@@ -9,6 +9,7 @@ import {
   AnySchemaObject,
   payloadIsAllQueriesDone,
   TypeArrayOfFeatureInfoEntries,
+  PayloadBaseClass,
 } from 'geoview-core';
 
 import schema from '../schema.json';
@@ -70,7 +71,7 @@ class FooterPanelPlugin extends AbstractPlugin {
    * Added function called after the plugin has been initialized
    */
   added = (): void => {
-    const { configObj, pluginProps } = this;
+    const { configObj, pluginProps } = this as AbstractPlugin;
 
     const { mapId } = pluginProps;
 
@@ -80,7 +81,7 @@ class FooterPanelPlugin extends AbstractPlugin {
     if (cgpv) {
       // access the api calls
       const { api } = cgpv;
-      const { displayLanguage, footerTabs, map } = api.map(mapId);
+      const { displayLanguage, footerTabs, map } = api.maps[mapId];
 
       const mapContainer = map.getTargetElement().parentElement;
       // Set size of map container based on whether footer-panel is collapsed or not
@@ -118,7 +119,7 @@ class FooterPanelPlugin extends AbstractPlugin {
         // select the details tab when map click queries are done
         api.event.on(
           api.eventNames.GET_FEATURE_INFO.ALL_QUERIES_DONE,
-          (payload) => {
+          (payload: PayloadBaseClass) => {
             if (payloadIsAllQueriesDone(payload)) {
               const { resultSets } = payload;
               let features: TypeArrayOfFeatureInfoEntries = [];

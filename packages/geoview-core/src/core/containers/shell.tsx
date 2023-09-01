@@ -120,27 +120,27 @@ export function Shell(props: ShellProps): JSX.Element {
     }
   };
 
-  const mapRemoveComponentListenerFunction = (payload: PayloadBaseClass) => {
-    if (payloadIsAMapComponent(payload)) {
-      const tempComponents: Record<string, JSX.Element> = { ...components };
-      delete tempComponents[payload.mapComponentId];
-
-      setComponents(() => ({
-        ...tempComponents,
-      }));
-    }
-  };
-
-  const modalCreateListenerFunction = (payload: PayloadBaseClass) => {
-    if (payloadIsAModal(payload)) updateShell();
-  };
-
   useEffect(() => {
     // listen to adding a new component events
     api.event.on(EVENT_NAMES.MAP.EVENT_MAP_ADD_COMPONENT, mapAddedComponentListenerFunction, shellId);
 
+    const mapRemoveComponentListenerFunction = (payload: PayloadBaseClass) => {
+      if (payloadIsAMapComponent(payload)) {
+        const tempComponents: Record<string, JSX.Element> = { ...components };
+        delete tempComponents[payload.mapComponentId];
+
+        setComponents(() => ({
+          ...tempComponents,
+        }));
+      }
+    };
+
     // listen to removing a component events
     api.event.on(EVENT_NAMES.MAP.EVENT_MAP_REMOVE_COMPONENT, mapRemoveComponentListenerFunction, shellId);
+
+    const modalCreateListenerFunction = (payload: PayloadBaseClass) => {
+      if (payloadIsAModal(payload)) updateShell();
+    };
 
     // CHANGED
     api.event.on(EVENT_NAMES.MODAL.EVENT_MODAL_CREATE, modalCreateListenerFunction, shellId);
@@ -166,7 +166,7 @@ export function Shell(props: ShellProps): JSX.Element {
           {mapFeaturesConfig?.map.interaction === 'dynamic' && <Navbar setActivetrap={setActivetrap} />}
         </div>
         {mapFeaturesConfig?.corePackages && mapFeaturesConfig?.corePackages.includes('footer-panel') && <FooterTabs />}
-        {Object.keys(api.map(shellId).modal.modals).map((modalId) => (
+        {Object.keys(api.maps[shellId].modal.modals).map((modalId) => (
           <Modal key={modalId} id={modalId} open={false} mapId={shellId} />
         ))}
         <FocusTrapDialog focusTrapId={shellId} callback={(isActive) => handleCallback(isActive)} />
