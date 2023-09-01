@@ -42,6 +42,7 @@ export type TypeArrayOfFeatureInfoEntries = TypeFeatureInfoEntry[];
 export type TypeFeatureInfoResultSets = {
     [layerPath: string]: {
         layerStatus: TypeLayerStatus;
+        layerPhase: string;
         data: TypeArrayOfFeatureInfoEntries | undefined | null;
     };
 };
