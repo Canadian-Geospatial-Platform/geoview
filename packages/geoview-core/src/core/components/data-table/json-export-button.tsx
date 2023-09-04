@@ -1,22 +1,58 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
+import { toLonLat, Projection } from 'ol/proj';
+import { Geometry, Point, Polygon, LineString, MultiPoint } from 'ol/geom';
 import { MenuItem } from '@/ui';
-import { Features } from './map-data-table';
+import { MapDataTableDataEntrys } from './map-data-table';
 
 interface JSONExportButtonProps {
-  features: Features[];
+  features: MapDataTableDataEntrys[];
   layerId: string;
+  projectionConfig: Projection;
 }
 
 /**
  * Custom  GeoJson export button which will help to download data table data in geojson format.
- * @param {Features[]} features list of rows to be displayed in data table
+ * @param {MapDataTableDataEntrys[]} features list of rows to be displayed in data table
  * @param {string} layerId id of the layer
+ * @param {Projection} projectionConfig projection config to transfer lat long.
  * @returns {JSX.Element} returns Menu Item
  *
  */
-function JSONExportButton({ features, layerId }: JSONExportButtonProps): JSX.Element {
+function JSONExportButton({ features, layerId, projectionConfig }: JSONExportButtonProps): JSX.Element {
   const { t } = useTranslation<string>();
+
+  /**
+   * Create a geometry json
+   *
+   * @param {Geometry} geometry the geometry
+   * @return {TypeJsonObject} the geometry json
+   *
+   */
+  const buildGeometry = (geometry: Geometry) => {
+    if (geometry instanceof Polygon) {
+      return {
+        type: 'Polygon',
+        coordinates: geometry.getCoordinates().map((coords) => {
+          return coords.map((coord) => toLonLat(coord, projectionConfig));
+        }),
+      };
+    }
+
+    if (geometry instanceof LineString) {
+      return { type: 'LineString', coordinates: geometry.getCoordinates().map((coord) => toLonLat(coord, projectionConfig)) };
+    }
+
+    if (geometry instanceof Point) {
+      return { type: 'Point', coordinates: toLonLat(geometry.getCoordinates(), projectionConfig) };
+    }
+
+    if (geometry instanceof MultiPoint) {
+      return { type: 'MultiPoint', coordinates: geometry.getCoordinates().map((coord) => toLonLat(coord, projectionConfig)) };
+    }
+
+    return {};
+  };
 
   /**
    * build the JSON file
@@ -28,7 +64,7 @@ function JSONExportButton({ features, layerId }: JSONExportButtonProps): JSX.Ele
       const { geometry, rows } = feature;
       return {
         type: 'Feature',
-        geometry,
+        geometry: buildGeometry(geometry?.getGeometry() as Geometry),
         properties: rows,
       };
     });
