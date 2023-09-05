@@ -25,7 +25,7 @@ import { snackbarMessagePayload } from '@/api/events/payloads';
  * @returns {string} The string value according to the map display language,
  */
 export function getLocalizedValue(localizedString: TypeLocalizedString | undefined, mapId: string): string | undefined {
-  if (localizedString) return localizedString[api.map(mapId).displayLanguage];
+  if (localizedString) return localizedString[api.maps[mapId].displayLanguage];
   return undefined;
 }
 
@@ -292,7 +292,7 @@ export function parseJSONConfig(configObjStr: string): any {
  */
 export function exportPNG(mapId: string): void {
   document.body.style.cursor = 'progress';
-  const { map } = api.map(mapId);
+  const { map } = api.maps[mapId];
 
   map.once('rendercomplete', () => {
     const mapCanvas = document.createElement('canvas');

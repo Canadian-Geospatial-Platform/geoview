@@ -9,6 +9,7 @@ import {
   snackbarMessagePayload,
   ButtonPropsLayerPanel,
   TypeListOfLayerEntryConfig,
+  TypeLayerEntryConfig,
   TypeJsonObject,
   PayloadBaseClass,
   payloadIsASnackbarMessage,
@@ -36,7 +37,7 @@ const w = window as TypeWindow;
 function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
   const { cgpv } = w;
   const { api, ui, react } = cgpv;
-  const { displayLanguage } = api.map(mapId);
+  const displayLanguage = api.maps[mapId].displayLanguage as 'en' | 'fr';
 
   const { ESRI_DYNAMIC, ESRI_FEATURE, GEOJSON, GEOPACKAGE, WMS, WFS, OGC_FEATURE, XYZ_TILES, GEOCORE } = api.layerTypes;
   const { useState, useEffect, useRef } = react;
@@ -262,7 +263,7 @@ function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
    * @returns {Promise<boolean>} True if layer passes validation
    */
   const wmsValidation = async (): Promise<boolean> => {
-    const proj = api.projection.projections[api.map(mapId).currentProjection].getCode();
+    const proj = api.projection.projections[api.maps[mapId].currentProjection].getCode();
     let supportedProj: string[] = [];
 
     try {
@@ -696,14 +697,14 @@ function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
       }
 
       if (layerConfig.geoviewLayerId) {
-        api.map(mapId).layer.layerOrder.push(layerConfig.geoviewLayerId);
+        api.maps[mapId].layer.layerOrder.push(layerConfig.geoviewLayerId);
       } else if (layerConfig.listOfLayerEntryConfig !== undefined) {
-        layerConfig.listOfLayerEntryConfig.forEach((subLayer) => {
-          if (subLayer.layerId) api.map(mapId).layer.layerOrder.unshift(subLayer.layerId);
+        layerConfig.listOfLayerEntryConfig.forEach((subLayer: TypeLayerEntryConfig) => {
+          if (subLayer.layerId) api.maps[mapId].layer.layerOrder.unshift(subLayer.layerId);
         });
       }
 
-      api.map(mapId).layer.addGeoviewLayer(layerConfig);
+      api.maps[mapId].layer.addGeoviewLayer(layerConfig);
     }
   };
 
@@ -993,7 +994,7 @@ function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
                       id="service-layer-label"
                       options={layerList}
                       getOptionLabel={(option) => `${option[1]} (${option[0]})`}
-                      renderOption={(props, option) => <span {...props}>{option[1]}</span>}
+                      renderOption={(props, option) => <span {...props}>{option[1] as string}</span>}
                       // eslint-disable-next-line @typescript-eslint/no-explicit-any
                       onChange={handleSelectLayer as any}
                       renderInput={(params) => <TextField {...params} label={translations[displayLanguage].layerSelect} />}

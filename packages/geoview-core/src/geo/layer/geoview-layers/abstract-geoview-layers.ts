@@ -1066,7 +1066,7 @@ export abstract class AbstractGeoViewLayer {
    */
   setActiveLayer(layerPathOrConfig: string | TypeLayerEntryConfig) {
     if (typeof layerPathOrConfig === 'string') {
-      const activeLayer = api.map(this.mapId).layer.registeredLayers[layerPathOrConfig];
+      const activeLayer = api.maps[this.mapId].layer.registeredLayers[layerPathOrConfig];
       if (activeLayer !== undefined) this.activeLayer = activeLayer;
     } else this.activeLayer = layerPathOrConfig as TypeLayerEntryConfig;
   }
@@ -1080,7 +1080,7 @@ export abstract class AbstractGeoViewLayer {
    */
   getLayerConfig(layerPath?: string): TypeLayerEntryConfig | null | undefined {
     if (layerPath === undefined) return this.activeLayer;
-    return api.map(this.mapId).layer.registeredLayers[layerPath];
+    return api.maps[this.mapId].layer.registeredLayers[layerPath];
   }
 
   /** ***************************************************************************************************************************
@@ -1323,7 +1323,7 @@ export abstract class AbstractGeoViewLayer {
           legend: null,
         } as TypeLegend);
       else {
-        const { geoviewRenderer } = api.map(this.mapId);
+        const { geoviewRenderer } = api.maps[this.mapId];
         geoviewRenderer.getLegendStyles(layerConfig).then((legendStyle) => {
           const legend: TypeLegend = {
             type: this.type,
@@ -1396,9 +1396,8 @@ export abstract class AbstractGeoViewLayer {
         features.forEach((featureNeedingItsCanvas) => {
           promisedAllCanvasFound.push(
             new Promise<{ feature: Feature<Geometry>; canvas: HTMLCanvasElement | undefined }>((resolveCanvas) => {
-              api
-                .map(this.mapId)
-                .geoviewRenderer.getFeatureCanvas(featureNeedingItsCanvas, layerEntryConfig as TypeVectorLayerEntryConfig)
+              api.maps[this.mapId].geoviewRenderer
+                .getFeatureCanvas(featureNeedingItsCanvas, layerEntryConfig as TypeVectorLayerEntryConfig)
                 .then((canvas) => {
                   resolveCanvas({ feature: featureNeedingItsCanvas, canvas });
                 });
@@ -1508,7 +1507,7 @@ export abstract class AbstractGeoViewLayer {
    */
   calculateBounds(
     layerPathOrConfig: string | TypeLayerEntryConfig | TypeListOfLayerEntryConfig | null = this.activeLayer,
-    projectionCode: string | number = api.map(this.mapId).currentProjection
+    projectionCode: string | number = api.maps[this.mapId].currentProjection
   ): Extent | undefined {
     let bounds: Extent | undefined;
     const processGroupLayerBounds = (listOfLayerEntryConfig: TypeListOfLayerEntryConfig) => {

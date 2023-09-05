@@ -100,7 +100,7 @@ export class LayerSet {
                 data: undefined,
                 layerStatus: 'newInstance',
                 layerPhase: 'newInstance',
-                layerName: api.map(this.mapId).layer.registeredLayers[layerPath].layerName,
+                layerName: api.maps[this.mapId].layer.registeredLayers[layerPath].layerName,
               };
               api.event.emit(LayerSetPayload.createLayerSetUpdatedPayload(this.layerSetId, this.resultSets, layerPath));
             } else if (action === 'remove' && layerPath in this.resultSets) {

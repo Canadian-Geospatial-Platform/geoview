@@ -58,8 +58,8 @@ class LayersPanelPlugin extends AbstractPlugin {
   /**
    * Added function called after the plugin has been initialized
    */
-  added = (): void => {
-    const { mapId } = this.pluginProps;
+  added(): void {
+    const { mapId } = (this as AbstractPlugin).pluginProps;
 
     // access the cgpv object from the window object
     const { cgpv } = w;
@@ -67,11 +67,11 @@ class LayersPanelPlugin extends AbstractPlugin {
     // access the api calls
     const { api, ui } = cgpv;
     const { LayersOutlinedIcon } = ui.elements;
-    const { displayLanguage } = api.map(mapId);
+    const { displayLanguage } = api.maps[mapId];
 
     let panelStatus = false;
 
-    panelStatus = this.configObj?.isOpen?.large as boolean;
+    panelStatus = (this as AbstractPlugin).configObj?.isOpen?.large as boolean;
 
     // button props
     const button: TypeIconButtonProps = {
@@ -91,17 +91,17 @@ class LayersPanelPlugin extends AbstractPlugin {
     };
 
     // create a new button panel on the app-bar
-    this.buttonPanel = api.map(mapId).appBarButtons.createAppbarPanel(button, panel, null);
+    this.buttonPanel = api.maps[mapId].appBarButtons.createAppbarPanel(button, panel, null);
 
     // set panel content
     this.buttonPanel?.panel?.changeContent(<PanelContent buttonPanel={this.buttonPanel} mapId={mapId} />);
-  };
+  }
 
   /**
    * Function called when the plugin is removed, used for clean up
    */
   removed(): void {
-    const { mapId } = this.pluginProps;
+    const { mapId } = (this as AbstractPlugin).pluginProps;
 
     // access the cgpv object from the window object
     const { cgpv } = w;
@@ -110,7 +110,7 @@ class LayersPanelPlugin extends AbstractPlugin {
     const { api } = cgpv;
 
     if (this.buttonPanel) {
-      api.map(mapId).appBarButtons.removeAppbarPanel(this.buttonPanel.buttonPanelId);
+      api.maps[mapId].appBarButtons.removeAppbarPanel(this.buttonPanel.buttonPanelId);
     }
   }
 }

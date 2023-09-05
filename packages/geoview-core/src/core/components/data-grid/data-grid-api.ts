@@ -38,7 +38,7 @@ export class DataGridAPI {
    */
   constructor(mapId: string) {
     this.mapId = mapId;
-    this.displayLanguage = api.map(mapId).displayLanguage;
+    this.displayLanguage = api.maps[mapId].displayLanguage;
   }
 
   /**
@@ -53,7 +53,7 @@ export class DataGridAPI {
     const { layerId } = layerDataGridProps;
     const [groupValues, setGroupValues] = useState<{ layerkey: string; layerValues: {}[] }[]>([]);
     const [groupKeys, setGroupKeys] = useState<string[]>([]);
-    const { currentProjection } = api.map(this.mapId);
+    const { currentProjection } = api.maps[this.mapId];
     const projectionConfig = api.projection.projections[currentProjection];
 
     /**
@@ -176,7 +176,7 @@ export class DataGridAPI {
 
     useEffect(() => {
       let isMounted = true;
-      const geoviewLayerInstance = api.map(this.mapId).layer.geoviewLayers[layerId];
+      const geoviewLayerInstance = api.maps[this.mapId].layer.geoviewLayers[layerId];
       if (
         geoviewLayerInstance.listOfLayerEntryConfig.length > 0 &&
         (geoviewLayerInstance as AbstractGeoViewVector).getAllFeatureInfo !== undefined

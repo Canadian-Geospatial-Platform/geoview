@@ -86,9 +86,9 @@ export class PanelApi {
    */
   closeAll = (): void => {
     if (this.type === 'app-bar') {
-      Object.keys(api.map(this.mapId).appBarButtons.buttons).forEach((groupName: string) => {
+      Object.keys(api.maps[this.mapId].appBarButtons.buttons).forEach((groupName: string) => {
         // get button panels from group
-        const buttonPanels = api.map(this.mapId).appBarButtons.buttons[groupName];
+        const buttonPanels = api.maps[this.mapId].appBarButtons.buttons[groupName];
 
         // get all button panels in each group
         Object.keys(buttonPanels).forEach((buttonPanelId) => {
@@ -100,9 +100,9 @@ export class PanelApi {
         });
       });
     } else if (this.type === 'nav-bar') {
-      Object.keys(api.map(this.mapId).navBarButtons.buttons).forEach((groupName: string) => {
+      Object.keys(api.maps[this.mapId].navBarButtons.buttons).forEach((groupName: string) => {
         // get button panels from group
-        const buttonPanels = api.map(this.mapId).navBarButtons.buttons[groupName];
+        const buttonPanels = api.maps[this.mapId].navBarButtons.buttons[groupName];
 
         // get all button panels in each group
         Object.keys(buttonPanels).forEach((buttonPanelId) => {

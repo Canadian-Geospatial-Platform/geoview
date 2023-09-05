@@ -137,7 +137,7 @@ An example of this:
 
 <script>
 cgpv.init(function() {
-    cgpv.api.map('mapWM').loadConfig({
+    cgpv.api.maps['mapWM'].loadConfig({
         map: {
             interaction: 'dynamic',
             viewSettings: {

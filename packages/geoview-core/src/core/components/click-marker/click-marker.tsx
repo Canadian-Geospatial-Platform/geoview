@@ -50,7 +50,7 @@ export function ClickMarker(): JSX.Element {
     element: document.getElementById(clickMarkerId) as HTMLElement,
     stopEvent: false,
   });
-  api.map(mapId).map.addOverlay(clickMarkerOverlay);
+  api.maps[mapId].map.addOverlay(clickMarkerOverlay);
 
   // create resources to highlight features
   const animationSource = new VectorSource();
@@ -81,10 +81,7 @@ export function ClickMarker(): JSX.Element {
   function showMarkerIcon(lnglat: Coordinate) {
     // toggle the marker icon
     setShowMarker(true);
-    api
-      .map(mapId)
-      .map.getOverlayById(`${mapId}-clickmarker`)
-      .setPosition(fromLonLat(lnglat, `EPSG:${api.map(mapId).currentProjection}`));
+    api.maps[mapId].map.getOverlayById(`${mapId}-clickmarker`).setPosition(fromLonLat(lnglat, `EPSG:${api.maps[mapId].currentProjection}`));
   }
 
   /**
@@ -340,7 +337,7 @@ export function ClickMarker(): JSX.Element {
   const eventMarkerIconHideListenerFunction = () => setShowMarker(false);
 
   useEffect(() => {
-    const { map } = api.map(mapId);
+    const { map } = api.maps[mapId];
 
     // remove the marker on map zoom and move
     map.getView().on('change:resolution', removeIcon);

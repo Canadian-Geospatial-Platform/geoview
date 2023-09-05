@@ -189,8 +189,8 @@ export class VectorTiles extends AbstractGeoViewRaster {
 
       // TODO: Clean this up from testing
       sourceOptions.format = new MVT();
-      const proj = api.map(this.mapId).currentProjection;
-      if (proj === 3978) sourceOptions.projection = `EPSG:${api.map(this.mapId).currentProjection}`; // 'EPSG:3978';
+      const proj = api.maps[this.mapId].currentProjection;
+      if (proj === 3978) sourceOptions.projection = `EPSG:${api.maps[this.mapId].currentProjection}`; // 'EPSG:3978';
 
       // const tileGrid = new TileGrid({
       //   tileSize: 512,
@@ -254,7 +254,7 @@ export class VectorTiles extends AbstractGeoViewRaster {
           layerEntryConfig.initialSettings.extent = transformExtent(
             layerEntryConfig.initialSettings.extent,
             'EPSG:4326',
-            `EPSG:${api.map(this.mapId).currentProjection}`
+            `EPSG:${api.maps[this.mapId].currentProjection}`
           );
 
         resolve();
@@ -275,7 +275,7 @@ export class VectorTiles extends AbstractGeoViewRaster {
     const layerBounds = (layerConfig.gvLayer as TileLayer<VectorTileSource>).getSource()?.getTileGrid()?.getExtent();
     const projection =
       (layerConfig.gvLayer as TileLayer<VectorTileSource>).getSource()?.getProjection()?.getCode().replace('EPSG:', '') ||
-      api.map(this.mapId).currentProjection;
+      api.maps[this.mapId].currentProjection;
 
     if (layerBounds) {
       const transformedBounds = transformExtent(layerBounds, `EPSG:${projection}`, `EPSG:4326`);
@@ -346,11 +346,11 @@ export class VectorTiles extends AbstractGeoViewRaster {
     if (proj === 3857) {
       // ! If we put 3857 as projection for map and tile it render fuzzy at first but then there is no problem.
       apply(
-        api.map('LYR2').map,
+        api.maps.LYR2.map,
         'https://tiles.arcgis.com/tiles/HsjBaDykC1mjhXz9/arcgis/rest/services/CBMT3978_v11/VectorTileServer/resources/styles/root.json'
       );
     } else if (proj === 3978) {
-      const layers1 = api.map('LYR1').map.getLayers();
+      const layers1 = api.maps.LYR1.map.getLayers();
       // ! when we use default projection from service, zome resolutions are bad and label are overlapping
       // ! we can't use apply because the map seems to be 3857... there is a mistmacht between tiles and service. If we set 3978 in apply coordinates is wrong
       applyStyle(

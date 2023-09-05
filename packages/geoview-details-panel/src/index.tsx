@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 import {
-  Cast,
   AbstractPlugin,
   toJsonObject,
   TypeJsonObject,
@@ -65,8 +64,8 @@ class DetailsPlugin extends AbstractPlugin {
   /**
    * Added function called after the plugin has been initialized
    */
-  added = (): void => {
-    const { mapId } = this.pluginProps;
+  added(): void {
+    const { mapId } = (this as AbstractPlugin).pluginProps;
 
     // access the cgpv object from the window object
     const { cgpv } = w;
@@ -74,7 +73,7 @@ class DetailsPlugin extends AbstractPlugin {
     // access the api calls
     const { api, ui } = cgpv;
     const { DetailsIcon } = ui.elements;
-    const { displayLanguage } = api.map(mapId);
+    const { displayLanguage } = api.maps[mapId];
 
     // button props
     const button: TypeIconButtonProps = {
@@ -93,17 +92,17 @@ class DetailsPlugin extends AbstractPlugin {
     };
 
     // create a new button panel on the app-bar
-    this.buttonPanel = api.map(mapId).appBarButtons.createAppbarPanel(button, panel, null);
+    this.buttonPanel = api.maps[mapId].appBarButtons.createAppbarPanel(button, panel, null);
 
     // set panel content
     this.buttonPanel?.panel?.changeContent(<DetailsItem mapId={mapId} buttonId={button.id} />);
-  };
+  }
 
   /**
    * Function called when the plugin is removed, used for clean up
    */
   removed(): void {
-    const { mapId } = this.pluginProps;
+    const { mapId } = (this as AbstractPlugin).pluginProps;
 
     // access the cgpv object from the window object
     const { cgpv } = w;
@@ -112,7 +111,7 @@ class DetailsPlugin extends AbstractPlugin {
     const { api } = cgpv;
 
     if (this.buttonPanel) {
-      api.map(mapId as string).appBarButtons.removeAppbarPanel(this.buttonPanel.buttonPanelId);
+      api.maps[mapId as string].appBarButtons.removeAppbarPanel(this.buttonPanel.buttonPanelId);
     }
   }
 }
@@ -120,4 +119,4 @@ class DetailsPlugin extends AbstractPlugin {
 export default DetailsPlugin;
 
 w.plugins = w.plugins || {};
-w.plugins['details-panel'] = Cast<AbstractPlugin>(DetailsPlugin);
+w.plugins['details-panel'] = DetailsPlugin as AbstractPlugin;

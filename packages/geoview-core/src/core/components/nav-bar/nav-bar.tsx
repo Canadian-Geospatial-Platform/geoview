@@ -112,7 +112,7 @@ export function Navbar({ setActivetrap }: NavbarProps): JSX.Element {
   const mapConfig = useContext(MapContext);
 
   const { mapId } = mapConfig;
-  const { navBar } = api.map(mapId).mapFeaturesConfig;
+  const { navBar } = api.maps[mapId].mapFeaturesConfig;
 
   const addButtonPanel = useCallback(
     (payload: ButtonPanelPayload) => {
@@ -152,25 +152,22 @@ export function Navbar({ setActivetrap }: NavbarProps): JSX.Element {
     setActivetrap(true);
   };
 
-  const navbarBtnPanelCreateListenerFunction = (payload: PayloadBaseClass) => {
-    if (payloadIsAButtonPanel(payload)) addButtonPanel(payload);
-  };
-
-  const navbarBtnPanelRemoveListenerFunction = (payload: PayloadBaseClass) => {
-    if (payloadIsAButtonPanel(payload)) removeButtonPanel(payload);
-  };
-
-  const footerbarExpandCollapseListenerFunction = (payload: PayloadBaseClass) => {
-    if (payloadIsABoolean(payload)) setFooterBarExpanded(payload.status);
-  };
-
   useEffect(() => {
+    const navbarBtnPanelCreateListenerFunction = (payload: PayloadBaseClass) => {
+      if (payloadIsAButtonPanel(payload)) addButtonPanel(payload);
+    };
     // listen to new nav-bar panel creation
     api.event.on(EVENT_NAMES.NAVBAR.EVENT_NAVBAR_BUTTON_PANEL_CREATE, navbarBtnPanelCreateListenerFunction, mapId);
 
+    const navbarBtnPanelRemoveListenerFunction = (payload: PayloadBaseClass) => {
+      if (payloadIsAButtonPanel(payload)) removeButtonPanel(payload);
+    };
     // listen to new nav-bar panel removal
     api.event.on(EVENT_NAMES.NAVBAR.EVENT_NAVBAR_BUTTON_PANEL_REMOVE, navbarBtnPanelRemoveListenerFunction, mapId);
 
+    const footerbarExpandCollapseListenerFunction = (payload: PayloadBaseClass) => {
+      if (payloadIsABoolean(payload)) setFooterBarExpanded(payload.status);
+    };
     // listen to footerbar expand/collapse event
     api.event.on(EVENT_NAMES.FOOTERBAR.EVENT_FOOTERBAR_EXPAND_COLLAPSE, footerbarExpandCollapseListenerFunction, mapId);
 

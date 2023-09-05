@@ -126,7 +126,7 @@ export function MousePosition(props: MousePositionProps): JSX.Element {
     // TODO: when map is loaded from function call, there is a first init with the empty config then an overwrite by the the function call.
     // !Some of the reference are not set properly, so we have this work around. EWven with this is it not 100% perfect. This needs to be refactor
     // !so we do not have access before the api map is set
-    const projection = api.projection.projections[api.map(mapId) !== undefined ? api.map(mapId).currentProjection : 3978];
+    const projection = api.projection.projections[api.maps[mapId] !== undefined ? api.maps[mapId].currentProjection : 3978];
     const coordinate = toLonLat(coord, projection);
 
     const DMS = formatCoordinates(coordinate, true);
@@ -168,7 +168,7 @@ export function MousePosition(props: MousePositionProps): JSX.Element {
    * Switch position mode
    */
   const switchPositionMode = () => {
-    const { map } = api.map(mapId);
+    const { map } = api.maps[mapId];
     const coord = getCoordinates(map.getView().getCenter()!);
 
     setPositions([
@@ -181,7 +181,7 @@ export function MousePosition(props: MousePositionProps): JSX.Element {
   };
 
   useEffect(() => {
-    const { map } = api.map(mapId);
+    const { map } = api.maps[mapId];
 
     map.on('pointermove', onMouseMove);
     map.on('moveend', onMoveEnd);

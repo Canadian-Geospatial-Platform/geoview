@@ -197,7 +197,7 @@ export class GeoPackage extends AbstractGeoViewVector {
           layerEntryConfig.initialSettings.extent = transformExtent(
             layerEntryConfig.initialSettings.extent,
             'EPSG:4326',
-            `EPSG:${api.map(this.mapId).currentProjection}`
+            `EPSG:${api.maps[this.mapId].currentProjection}`
           );
 
         if (!layerEntryConfig.initialSettings?.bounds && foundCollection.extent?.spatial?.bbox && foundCollection.extent?.spatial?.crs) {
@@ -205,7 +205,7 @@ export class GeoPackage extends AbstractGeoViewVector {
           layerEntryConfig.initialSettings!.bounds = transformExtent(
             foundCollection.extent.spatial.bbox[0] as number[],
             get(foundCollection.extent.spatial.crs as string)!,
-            `EPSG:${api.map(this.mapId).currentProjection}`
+            `EPSG:${api.maps[this.mapId].currentProjection}`
           );
         }
         return;
@@ -391,7 +391,7 @@ export class GeoPackage extends AbstractGeoViewVector {
                 const formattedFeature = format.readFeatures(feature, {
                   ...readOptions,
                   dataProjection: tableDataProjection,
-                  featureProjection: `EPSG:${api.map(this.mapId).currentProjection}`,
+                  featureProjection: `EPSG:${api.maps[this.mapId].currentProjection}`,
                 });
                 formattedFeature[0].setProperties(properties);
                 features.push(formattedFeature[0]);

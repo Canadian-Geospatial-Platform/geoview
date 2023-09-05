@@ -169,7 +169,7 @@ export function FooterTabs(): JSX.Element | null {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [addTab, mapId, removeTab]);
 
-  return api.map(mapId).footerTabs.tabs.length > 0 ? (
+  return api.maps[mapId].footerTabs.tabs.length > 0 ? (
     <div ref={tabsContainerRef as MutableRefObject<HTMLDivElement>} className={`${classes.tabsContainer} tabsContainer`}>
       <Tabs
         isCollapsed={isCollapsed}
