@@ -78,13 +78,13 @@
       //   const [layers, setLayers] = useState([]);
 
       //   async function getWMSLegend(geoviewLayerId) {
-      //     const res = await api.map(mapId).layer.geoviewLayers[layerId].getLegendGraphic();
+      //     const res = await api.maps[mapId].layer.geoviewLayers[layerId].getLegendGraphic();
 
       //     return res;
       //   }
 
       //   async function getEsriDynamicLegend(layerId) {
-      //     const res = await api.map(mapId).layer.geoviewLayers[layerId].getLegendJson();
+      //     const res = await api.maps[mapId].layer.geoviewLayers[layerId].getLegendJson();
 
       //     return res;
       //   }
@@ -92,7 +92,7 @@
       //   useEffect(() => {
       //     async function getLayers() {
       //       // get layers added to the map
-      //       const { layers: mapLayers } = api.map(mapId).layer;
+      //       const { layers: mapLayers } = api.maps[mapId].layer;
 
       //       // loop through added layers
       //       for (let layerIndex = 0; layerIndex < Object.keys(mapLayers).length; layerIndex++) {
@@ -271,13 +271,13 @@
       }
 
       // import footerTabs from the core for the current map
-      const { footerTabs } = api.map(mapId);
+      const { footerTabs } = api.maps[mapId];
 
       // create new tab and add the LegendComponent to the footer tab
       footerTabs.createFooterTab({
         value: 0,
         label: 'Legend',
-        content: () => api.map(mapId).legend.createLegend({layerIds: ['wmsLYR1', 'esriDynamicLYR2', 'esriFeatureLYR4']})
+        content: () => api.maps[mapId].legend.createLegend({layerIds: ['wmsLYR1', 'esriDynamicLYR2', 'esriFeatureLYR4']})
       });
 
       footerTabs.createFooterTab({

@@ -1,6 +1,6 @@
 /* eslint-disable react/require-default-props */
 import type React from 'react';
-import { PayloadBaseClass } from 'geoview-core/src/api/events/payloads';
+import { MapMouseEventPayload, PayloadBaseClass, TypeAllQueriesDonePayload } from 'geoview-core/src/api/events/payloads';
 import {
   TypeWindow,
   payloadIsAMapMouseEvent,
@@ -35,12 +35,12 @@ export function DetailsItem({ mapId }: Props): JSX.Element {
 
   const allQueriesDoneListenerFunction = (payload: PayloadBaseClass) => {
     if (payloadIsAllQueriesDone(payload)) {
-      const { resultSets } = payload;
+      const { resultSets } = payload as TypeAllQueriesDonePayload;
       const newDetails: TypeArrayOfLayerData = [];
       Object.keys(resultSets).forEach((layerPath) => {
-        const layerName = getLocalizedValue(api.map(mapId).layer.registeredLayers[layerPath].layerName, mapId)!;
-        const features = resultSets[layerPath]!.data;
-        if (features.length > 0) {
+        const layerName = getLocalizedValue(api.maps[mapId].layer.registeredLayers[layerPath].layerName, mapId)!;
+        const features = resultSets[layerPath]?.data;
+        if (features?.length && features?.length > 0) {
           newDetails.push({ layerPath, layerName, features });
         }
       });
@@ -56,7 +56,7 @@ export function DetailsItem({ mapId }: Props): JSX.Element {
 
   const eventMapSingleClickListenerFunction = (payload: PayloadBaseClass) => {
     if (payloadIsAMapMouseEvent(payload)) {
-      const { coordinates } = payload;
+      const { coordinates } = payload as MapMouseEventPayload;
       setHandlerName(payload.handlerName);
       setLngLat(coordinates.lnglat);
     } else {
@@ -76,7 +76,7 @@ export function DetailsItem({ mapId }: Props): JSX.Element {
   }, []);
 
   useEffect(() => {
-    setList(api.map(mapId).details.createDetails(mapId, details, { mapId, location: lngLat, handlerName }));
+    setList(api.maps[mapId].details.createDetails(mapId, details, { mapId, location: lngLat, handlerName }));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [details, lngLat]);
 

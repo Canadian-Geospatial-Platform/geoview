@@ -469,7 +469,7 @@ export class WMS extends AbstractGeoViewRaster {
         fr: subLayer.Title as string,
       };
       newListOfLayerEntryConfig.push(subLayerEntryConfig);
-      api.map(this.mapId).layer.registerLayerConfig(subLayerEntryConfig);
+      api.maps[this.mapId].layer.registerLayerConfig(subLayerEntryConfig);
     });
 
     if (this.registerToLayerSetListenerFunctions[Layer.getLayerPath(layerEntryConfig)])
@@ -621,7 +621,7 @@ export class WMS extends AbstractGeoViewRaster {
             layerEntryConfig.initialSettings.extent = transformExtent(
               layerEntryConfig.initialSettings.extent,
               'EPSG:4326',
-              `EPSG:${api.map(this.mapId).currentProjection}`
+              `EPSG:${api.maps[this.mapId].currentProjection}`
             );
 
           if (!layerEntryConfig.initialSettings?.bounds && layerCapabilities.EX_GeographicBoundingBox) {
@@ -662,7 +662,7 @@ export class WMS extends AbstractGeoViewRaster {
    */
   protected getFeatureInfoAtPixel(location: Pixel, layerConfig: TypeOgcWmsLayerEntryConfig): Promise<TypeArrayOfFeatureInfoEntries> {
     const promisedQueryResult = new Promise<TypeArrayOfFeatureInfoEntries>((resolve) => {
-      const { map } = api.map(this.mapId);
+      const { map } = api.maps[this.mapId];
       resolve(this.getFeatureInfoAtCoordinate(map.getCoordinateFromPixel(location), layerConfig));
     });
     return promisedQueryResult;
@@ -680,7 +680,7 @@ export class WMS extends AbstractGeoViewRaster {
     location: Coordinate,
     layerConfig: TypeOgcWmsLayerEntryConfig
   ): Promise<TypeArrayOfFeatureInfoEntries> {
-    const convertedLocation = transform(location, `EPSG:${api.map(this.mapId).currentProjection}`, 'EPSG:4326');
+    const convertedLocation = transform(location, `EPSG:${api.maps[this.mapId].currentProjection}`, 'EPSG:4326');
     return this.getFeatureInfoAtLongLat(convertedLocation, layerConfig);
   }
 
@@ -696,8 +696,8 @@ export class WMS extends AbstractGeoViewRaster {
     const promisedQueryResult = new Promise<TypeArrayOfFeatureInfoEntries>((resolve) => {
       if (!this.getVisible(layerConfig) || !layerConfig.gvLayer) resolve([]);
       else {
-        const viewResolution = api.map(this.mapId).getView().getResolution() as number;
-        const crs = `EPSG:${api.map(this.mapId).currentProjection}`;
+        const viewResolution = api.maps[this.mapId].getView().getResolution() as number;
+        const crs = `EPSG:${api.maps[this.mapId].currentProjection}`;
         const clickCoordinate = transform(lnglat, 'EPSG:4326', crs);
         if (
           lnglat[0] < layerConfig.initialSettings!.bounds![0] ||
@@ -862,29 +862,26 @@ export class WMS extends AbstractGeoViewRaster {
           };
           resolve(styleLegend);
         } else {
-          api
-            .map(this.mapId)
-            .geoviewRenderer.loadImage(styleLegendImage as string)
-            .then((styleImage) => {
-              if (styleImage) {
-                const drawingCanvas = document.createElement('canvas');
-                drawingCanvas.width = styleImage.width;
-                drawingCanvas.height = styleImage.height;
-                const drawingContext = drawingCanvas.getContext('2d')!;
-                drawingContext.drawImage(styleImage, 0, 0);
-                styleLegend = {
-                  name: this.WMSStyles[position],
-                  legend: drawingCanvas,
-                };
-                resolve(styleLegend);
-              } else {
-                styleLegend = {
-                  name: this.WMSStyles[position],
-                  legend: null,
-                };
-                resolve(styleLegend);
-              }
-            });
+          api.maps[this.mapId].geoviewRenderer.loadImage(styleLegendImage as string).then((styleImage) => {
+            if (styleImage) {
+              const drawingCanvas = document.createElement('canvas');
+              drawingCanvas.width = styleImage.width;
+              drawingCanvas.height = styleImage.height;
+              const drawingContext = drawingCanvas.getContext('2d')!;
+              drawingContext.drawImage(styleImage, 0, 0);
+              styleLegend = {
+                name: this.WMSStyles[position],
+                legend: drawingCanvas,
+              };
+              resolve(styleLegend);
+            } else {
+              styleLegend = {
+                name: this.WMSStyles[position],
+                legend: null,
+              };
+              resolve(styleLegend);
+            }
+          });
         }
       });
     });
@@ -928,34 +925,31 @@ export class WMS extends AbstractGeoViewRaster {
           };
           resolve(legend);
         } else {
-          api
-            .map(this.mapId)
-            .geoviewRenderer.loadImage(legendImage as string)
-            .then(async (image) => {
-              if (image) {
-                const drawingCanvas = document.createElement('canvas');
-                drawingCanvas.width = image.width;
-                drawingCanvas.height = image.height;
-                const drawingContext = drawingCanvas.getContext('2d')!;
-                drawingContext.drawImage(image, 0, 0);
-                legend = {
-                  type: this.type,
-                  layerPath: Layer.getLayerPath(layerConfig!),
-                  layerName: layerConfig!.layerName,
-                  legend: drawingCanvas,
-                  styles: styleLegends.length > 1 ? styleLegends : undefined,
-                };
-                resolve(legend);
-              } else
-                legend = {
-                  type: this.type,
-                  layerPath: Layer.getLayerPath(layerConfig!),
-                  layerName: layerConfig!.layerName,
-                  legend: null,
-                  styles: styleLegends.length > 1 ? styleLegends : undefined,
-                };
+          api.maps[this.mapId].geoviewRenderer.loadImage(legendImage as string).then(async (image) => {
+            if (image) {
+              const drawingCanvas = document.createElement('canvas');
+              drawingCanvas.width = image.width;
+              drawingCanvas.height = image.height;
+              const drawingContext = drawingCanvas.getContext('2d')!;
+              drawingContext.drawImage(image, 0, 0);
+              legend = {
+                type: this.type,
+                layerPath: Layer.getLayerPath(layerConfig!),
+                layerName: layerConfig!.layerName,
+                legend: drawingCanvas,
+                styles: styleLegends.length > 1 ? styleLegends : undefined,
+              };
               resolve(legend);
-            });
+            } else
+              legend = {
+                type: this.type,
+                layerPath: Layer.getLayerPath(layerConfig!),
+                layerName: layerConfig!.layerName,
+                legend: null,
+                styles: styleLegends.length > 1 ? styleLegends : undefined,
+              };
+            resolve(legend);
+          });
         }
       });
     });

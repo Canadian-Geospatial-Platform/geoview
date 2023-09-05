@@ -106,8 +106,8 @@ export class DataTableApi {
    */
 
   createDataTableByLayerId = async ({ layerId, layerKey }: CreataDataTableProps): Promise<ReactElement | null> => {
-    const geoviewLayerInstance = api.map(this.mapId).layer.geoviewLayers[layerId];
-    const { currentProjection } = api.map(this.mapId);
+    const geoviewLayerInstance = api.maps[this.mapId].layer.geoviewLayers[layerId];
+    const { currentProjection } = api.maps[this.mapId];
     const projectionConfig = api.projection.projections[currentProjection];
 
     if (

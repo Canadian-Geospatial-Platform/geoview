@@ -172,7 +172,7 @@
       // add an event listener when a button is clicked
       addGeoJSONButton.addEventListener('click', function (e) {
         // adding a geojson layer requires a type of geojson and url
-        const layerID = cgpv.api.map('LYR1').layer.addGeoviewLayer(
+        const layerID = cgpv.api.maps['LYR1'].layer.addGeoviewLayer(
           {
             geoviewLayerId: 'geoJsonSample',
             geoviewLayerName: {
@@ -219,7 +219,7 @@
       removeGeoJSONButton.addEventListener('click', function (e) {
         // removing a geojson layer using the ID
         const layerPath = document.getElementById('new-layer-id-label').innerText;
-        if (layerPath) cgpv.api.map('LYR1').layer.removeLayersUsingPath(layerPath);
+        if (layerPath) cgpv.api.maps['LYR1'].layer.removeLayersUsingPath(layerPath);
         document.getElementById('new-layer-id-label').innerText = '';
         createTableOfFilter('LYR1');
 

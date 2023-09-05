@@ -308,7 +308,7 @@ export class Layer {
           api.event.emit(GeoViewLayerPayload.createGeoviewLayerAddedPayload(`${this.mapId}/${geoviewLayer.geoviewLayerId}`, geoviewLayer));
         }
       });
-      api.map(this.mapId).map.addLayer(geoviewLayer.gvLayers!);
+      api.maps[this.mapId].map.addLayer(geoviewLayer.gvLayers!);
     }
   }
 
@@ -348,7 +348,7 @@ export class Layer {
     if (this.geoviewLayers[partialLayerPath]) {
       this.geoviewLayers[partialLayerPath].gvLayers!.dispose();
       delete this.geoviewLayers[partialLayerPath];
-      const { mapFeaturesConfig } = api.map(this.mapId);
+      const { mapFeaturesConfig } = api.maps[this.mapId];
       if (mapFeaturesConfig.map.listOfGeoviewLayerConfig)
         mapFeaturesConfig.map.listOfGeoviewLayerConfig = mapFeaturesConfig.map.listOfGeoviewLayerConfig.filter(
           (geoviewLayerConfig) => geoviewLayerConfig.geoviewLayerId !== partialLayerPath
@@ -366,7 +366,7 @@ export class Layer {
     // eslint-disable-next-line no-param-reassign
     geoviewLayerConfig.geoviewLayerId = generateId(geoviewLayerConfig.geoviewLayerId);
     // create a new config object for this map element
-    const config = new Config(api.map(this.mapId).map.getTargetElement());
+    const config = new Config(api.maps[this.mapId].map.getTargetElement());
 
     const suportedLanguages = optionalSuportedLanguages || config.configValidation.defaultMapFeaturesConfig.suportedLanguages;
     config.configValidation.validateListOfGeoviewLayerConfig(suportedLanguages, [geoviewLayerConfig]);
@@ -374,8 +374,8 @@ export class Layer {
     if (geoviewLayerConfig.geoviewLayerId in api.maps[this.mapId].layer.geoviewLayers)
       this.printDuplicateGeoviewLayerConfigError(geoviewLayerConfig);
     else {
-      api.map(this.mapId).mapFeaturesConfig.map.listOfGeoviewLayerConfig!.push(geoviewLayerConfig);
-      api.map(this.mapId).setLayerAddedListener4ThisListOfLayer([geoviewLayerConfig]);
+      api.maps[this.mapId].mapFeaturesConfig.map.listOfGeoviewLayerConfig!.push(geoviewLayerConfig);
+      api.maps[this.mapId].setLayerAddedListener4ThisListOfLayer([geoviewLayerConfig]);
       api.event.emit(layerConfigPayload(EVENT_NAMES.LAYER.EVENT_ADD_LAYER, this.mapId, geoviewLayerConfig));
     }
 
@@ -388,7 +388,7 @@ export class Layer {
    * @param {TypeGeoviewLayerConfig} geoviewLayer the layer configuration to remove
    */
   removeGeoviewLayer = (geoviewLayer: AbstractGeoViewLayer): string => {
-    this.layerOrder.splice(indexOf(api.map(this.mapId).layer.layerOrder, geoviewLayer.geoviewLayerId), 1);
+    this.layerOrder.splice(indexOf(api.maps[this.mapId].layer.layerOrder, geoviewLayer.geoviewLayerId), 1);
     api.event.emit(GeoViewLayerPayload.createRemoveGeoviewLayerPayload(this.mapId, geoviewLayer));
 
     return geoviewLayer.geoviewLayerId;

@@ -2,6 +2,8 @@
 import type React from 'react';
 import { PayloadBaseClass } from 'geoview-core/src/api/events/payloads';
 import {
+  TypeAllQueriesDonePayload,
+  MapMouseEventPayload,
   TypeWindow,
   payloadIsAMapMouseEvent,
   payloadIsAllQueriesDone,
@@ -34,14 +36,14 @@ export function DetailsItem({ mapId, buttonId }: Props): JSX.Element {
   const [LngLat, setLngLat] = useState<Coordinate>([]);
   const [handlerName, setHandlerName] = useState<string | null>(null);
 
-  const panel = api.map(mapId).appBarButtons.getAppBarButtonPanelById(buttonId === undefined ? '' : buttonId)?.panel;
+  const panel = api.maps[mapId].appBarButtons.getAppBarButtonPanelById(buttonId === undefined ? '' : buttonId)?.panel;
 
   const allQueriesDoneListenerFunction = (payload: PayloadBaseClass) => {
     if (payloadIsAllQueriesDone(payload)) {
-      const { resultSets } = payload;
+      const { resultSets } = payload as TypeAllQueriesDonePayload;
       const newDetails: TypeArrayOfLayerData = [];
       Object.keys(resultSets).forEach((layerPath) => {
-        const layerName = getLocalizedValue(api.map(mapId).layer.registeredLayers[layerPath].layerName, mapId)!;
+        const layerName = getLocalizedValue(api.maps[mapId].layer.registeredLayers[layerPath].layerName, mapId)!;
         const features = resultSets[layerPath]!.data;
         if (features.length > 0) {
           newDetails.push({ layerPath, layerName, features });
@@ -61,7 +63,7 @@ export function DetailsItem({ mapId, buttonId }: Props): JSX.Element {
 
   const eventMapSingleClickListenerFunction = (payload: PayloadBaseClass) => {
     if (payloadIsAMapMouseEvent(payload)) {
-      const { coordinates } = payload;
+      const { coordinates } = payload as MapMouseEventPayload;
       setHandlerName(payload.handlerName);
       setLngLat(coordinates.lnglat);
     } else {
@@ -84,9 +86,13 @@ export function DetailsItem({ mapId, buttonId }: Props): JSX.Element {
 
   useEffect(() => {
     setList(
-      api
-        .map(mapId)
-        .details.createDetails(mapId, details, { mapId, location: LngLat, backgroundStyle: 'dark', singleColumn: true, handlerName })
+      api.maps[mapId].details.createDetails(mapId, details, {
+        mapId,
+        location: LngLat,
+        backgroundStyle: 'dark',
+        singleColumn: true,
+        handlerName,
+      })
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [details, LngLat]);

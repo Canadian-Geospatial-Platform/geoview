@@ -110,7 +110,7 @@ export function commonValidateListOfLayerEntryConfig(this: EsriDynamic | EsriFea
           fr: this.metadata!.layers[layerId as number].name as string,
         };
         newListOfLayerEntryConfig.push(subLayerEntryConfig);
-        api.map(this.mapId).layer.registerLayerConfig(subLayerEntryConfig);
+        api.maps[this.mapId].layer.registerLayerConfig(subLayerEntryConfig);
       });
 
       if (this.registerToLayerSetListenerFunctions[Layer.getLayerPath(layerEntryConfig)])
@@ -294,7 +294,7 @@ export function commonProcessInitialSettings(
     layerEntryConfig.initialSettings.extent = transformExtent(
       layerEntryConfig.initialSettings.extent,
       'EPSG:4326',
-      `EPSG:${api.map(this.mapId).currentProjection}`
+      `EPSG:${api.maps[this.mapId].currentProjection}`
     );
 
   if (!layerEntryConfig.initialSettings?.bounds) {

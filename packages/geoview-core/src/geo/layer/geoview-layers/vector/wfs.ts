@@ -213,7 +213,7 @@ export class WFS extends AbstractGeoViewVector {
           layerEntryConfig.initialSettings.extent = transformExtent(
             layerEntryConfig.initialSettings.extent,
             'EPSG:4326',
-            `EPSG:${api.map(this.mapId).currentProjection}`
+            `EPSG:${api.maps[this.mapId].currentProjection}`
           );
 
         if (!layerEntryConfig.initialSettings?.bounds && foundMetadata['ows:WGS84BoundingBox']) {
@@ -221,7 +221,7 @@ export class WFS extends AbstractGeoViewVector {
           const upperCorner = (foundMetadata['ows:WGS84BoundingBox']['ows:UpperCorner']['#text'] as string).split(' ');
           const bounds = [Number(lowerCorner[0]), Number(lowerCorner[1]), Number(upperCorner[0]), Number(upperCorner[1])];
           // layerEntryConfig.initialSettings cannot be undefined because config-validation set it to {} if it is undefined.
-          layerEntryConfig.initialSettings!.bounds = transformExtent(bounds, 'EPSG:4326', `EPSG:${api.map(this.mapId).currentProjection}`);
+          layerEntryConfig.initialSettings!.bounds = transformExtent(bounds, 'EPSG:4326', `EPSG:${api.maps[this.mapId].currentProjection}`);
         }
       }
     });
@@ -381,7 +381,7 @@ export class WFS extends AbstractGeoViewVector {
       sourceUrl = `${sourceUrl}&typeName=${layerEntryConfig.layerId}`;
       // if an extent is provided, use it in the url
       if (sourceOptions.strategy === bbox && Number.isFinite(extent[0])) {
-        sourceUrl = `${sourceUrl}&bbox=${extent},EPSG:${api.map(this.mapId).currentProjection}`;
+        sourceUrl = `${sourceUrl}&bbox=${extent},EPSG:${api.maps[this.mapId].currentProjection}`;
       }
       return sourceUrl;
     };

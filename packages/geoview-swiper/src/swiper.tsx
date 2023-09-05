@@ -1,4 +1,4 @@
-import { TypeJsonObject, TypeWindow } from 'geoview-core';
+import { TypeJsonObject, TypeWindow, RefObject } from 'geoview-core';
 
 import Draggable from 'react-draggable';
 
@@ -106,15 +106,15 @@ export function Swiper(props: SwiperProps): JSX.Element {
 
   const { Box, Tooltip, HandleIcon } = ui.elements;
 
-  const { displayLanguage } = api.map(mapId!);
+  const { displayLanguage } = api.maps[mapId!];
 
-  const [map] = useState<Map>(api.map(mapId).map);
+  const [map] = useState<Map>(api.maps[mapId].map);
   const mapSize = useRef<number[]>(map?.getSize() || [0, 0]);
   const defaultX = mapSize.current[0] / 2;
   const defaultY = mapSize.current[1] / 2;
 
   const [layersIds] = useState<string[]>(config.layers);
-  const [geoviewLayers] = useState(api.map(mapId).layer.geoviewLayers);
+  const [geoviewLayers] = useState(api.maps[mapId].layer.geoviewLayers);
   const [olLayers, setOlLayers] = useState<BaseLayer[]>([]);
   const [offset, setOffset] = useState(0);
 
@@ -329,10 +329,10 @@ export function Swiper(props: SwiperProps): JSX.Element {
         onDrag={(e) => {
           onStop(e as MouseEvent);
         }}
-        nodeRef={swiperRef}
+        nodeRef={swiperRef as RefObject<HTMLElement>}
       >
         <Box sx={[orientation === 'vertical' ? sxClasses.vertical : sxClasses.horizontal, sxClasses.bar]} tabIndex={0} ref={swiperRef}>
-          <Tooltip title={translations[displayLanguage].tooltip}>
+          <Tooltip title={translations[displayLanguage].tooltip as string}>
             <Box className="handleContainer">
               <HandleIcon sx={sxClasses.handle} className="handleL" />
               <HandleIcon sx={sxClasses.handle} className="handleR" />

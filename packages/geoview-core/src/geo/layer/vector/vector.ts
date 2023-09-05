@@ -137,7 +137,7 @@ export class Vector {
     const polyline = new Feature({
       geometry: new LineString(points, polylineOptions.geometryLayout).transform(
         `EPSG:${options?.projection || 4326}`,
-        api.projection.projections[api.map(this.#mapId).currentProjection]
+        api.projection.projections[api.maps[this.#mapId].currentProjection]
       ),
     });
 
@@ -209,7 +209,7 @@ export class Vector {
     const polygon = new Feature({
       geometry: new Polygon(points, polygonOptions.geometryLayout).transform(
         `EPSG:${options?.projection || 4326}`,
-        api.projection.projections[api.map(this.#mapId).currentProjection]
+        api.projection.projections[api.maps[this.#mapId].currentProjection]
       ),
     });
 
@@ -264,7 +264,7 @@ export class Vector {
    *
    * @returns {Feature} a geometry containing the id and the created geometry
    */
-  addCircle = (
+  addCircle(
     coordinate: Coordinate,
     options?: {
       projection?: number;
@@ -272,7 +272,7 @@ export class Vector {
       style?: TypeFeatureCircleStyle;
     },
     optionalFeatureId?: string
-  ): Feature => {
+  ): Feature {
     const circleOptions = options || {};
 
     const featureId = generateId(optionalFeatureId);
@@ -284,7 +284,7 @@ export class Vector {
     const circle = new Feature({
       geometry: new Circle(coordinate, radius, circleOptions.geometryLayout).transform(
         `EPSG:${options?.projection || 4326}`,
-        api.projection.projections[api.map(this.#mapId).currentProjection]
+        api.projection.projections[api.maps[this.#mapId].currentProjection]
       ),
     });
 
@@ -328,7 +328,7 @@ export class Vector {
     api.event.emit(VectorPayload.forCircle(EVENT_NAMES.VECTOR.EVENT_VECTOR_ADDED, this.#mapId, circle));
 
     return circle;
-  };
+  }
 
   /**
    * Create a new marker icon
@@ -366,7 +366,7 @@ export class Vector {
     const marker = new Feature({
       geometry: new Point(coordinate, markerOptions.geometryLayout).transform(
         `EPSG:${options?.projection || 4326}`,
-        api.projection.projections[api.map(this.#mapId).currentProjection]
+        api.projection.projections[api.maps[this.#mapId].currentProjection]
       ),
     });
 
@@ -430,13 +430,13 @@ export class Vector {
    * @param options an optional vector layer and vector source options
    * @returns {FeatureCollection} created geometry group
    */
-  createGeometryGroup = (
+  createGeometryGroup(
     geometryGroupId: string,
     options?: {
       vectorLayerOptions?: VectorLayerOptions<VectorSource>;
       vectorSourceOptions?: VectorSourceOptions;
     }
-  ): FeatureCollection => {
+  ): FeatureCollection {
     const geometryGroupOptions = options || {};
 
     let geometryGroup = this.getGeometryGroup(geometryGroupId);
@@ -455,14 +455,14 @@ export class Vector {
       };
 
       if (geometryGroup.vectorLayer.getVisible()) {
-        api.map(this.#mapId).map.addLayer(geometryGroup.vectorLayer);
+        api.maps[this.#mapId].map.addLayer(geometryGroup.vectorLayer);
         geometryGroup.vectorLayer.changed();
       }
       this.geometryGroups.push(geometryGroup);
     }
 
     return geometryGroup;
-  };
+  }
 
   /**
    * set the active geometry group (the geometry group used when adding geometries).
@@ -498,14 +498,14 @@ export class Vector {
    *
    * @returns the geomtry group
    */
-  getGeometryGroup = (geometryGroupId?: string): FeatureCollection | undefined => {
+  getGeometryGroup(geometryGroupId?: string): FeatureCollection | undefined {
     if (geometryGroupId) {
       const geometryGroupIndex = this.geometryGroups.findIndex((theGeometryGroup) => theGeometryGroup.geometryGroupId === geometryGroupId);
       if (geometryGroupIndex === -1) return undefined;
       return this.geometryGroups[geometryGroupIndex];
     }
     return this.geometryGroups[this.activeGeometryGroupIndex];
-  };
+  }
 
   /**
    * Find the groups that contain the geometry using it's id

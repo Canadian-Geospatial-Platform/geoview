@@ -1,7 +1,7 @@
 /* eslint-disable react/require-default-props */
 import type React from 'react';
 import { TypeWindow, payloadIsALayerConfig, payloadIsRemoveGeoViewLayer } from 'geoview-core';
-import { PayloadBaseClass } from 'geoview-core/src/api/events/payloads';
+import { LayerConfigPayload, PayloadBaseClass, TypeRemoveGeoviewLayerPayload } from 'geoview-core/src/api/events/payloads';
 
 interface Props {
   mapId: string;
@@ -24,13 +24,15 @@ export function LegendItem({ mapId }: Props): JSX.Element {
   const [mapLayers, setMapLayers] = useState<string[]>([]);
 
   const updateLayers = () => {
-    if (api.map(mapId).layer?.layerOrder !== undefined) setMapLayers([...api.map(mapId).layer.layerOrder].reverse());
+    if (api.maps[mapId].layer?.layerOrder !== undefined) setMapLayers([...api.maps[mapId].layer.layerOrder].reverse());
   };
 
   const eventMapLoadedListenerFunction = () => updateLayers();
   const eventRemoveLayerListenerFunction = (payload: PayloadBaseClass) => {
     if (payloadIsRemoveGeoViewLayer(payload)) {
-      setMapLayers((orderedLayers) => orderedLayers.filter((layerId) => layerId !== payload.geoviewLayer.geoviewLayerId));
+      setMapLayers((orderedLayers) =>
+        orderedLayers.filter((layerId) => layerId !== (payload as TypeRemoveGeoviewLayerPayload).geoviewLayer.geoviewLayerId)
+      );
     }
   };
 
@@ -40,9 +42,9 @@ export function LegendItem({ mapId }: Props): JSX.Element {
         api.eventNames.LAYER.EVENT_LAYER_ADDED,
         () => {
           updateLayers();
-          api.event.off(api.eventNames.LAYER.EVENT_LAYER_ADDED, `${mapId}/${payload.layerConfig.geoviewLayerId}`);
+          api.event.off(api.eventNames.LAYER.EVENT_LAYER_ADDED, `${mapId}/${(payload as LayerConfigPayload).layerConfig.geoviewLayerId}`);
         },
-        `${mapId}/${payload.layerConfig.geoviewLayerId}`
+        `${mapId}/${(payload as LayerConfigPayload).layerConfig.geoviewLayerId}`
       );
     }
   };
@@ -61,7 +63,7 @@ export function LegendItem({ mapId }: Props): JSX.Element {
   }, []);
 
   useEffect(() => {
-    setLegend(api.map(mapId).legend.createLegend({ layerIds: mapLayers, isRemoveable: false, canSetOpacity: true, canZoomTo: true }));
+    setLegend(api.maps[mapId].legend.createLegend({ layerIds: mapLayers, isRemoveable: false, canSetOpacity: true, canZoomTo: true }));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mapLayers]);
 

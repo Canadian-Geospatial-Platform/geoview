@@ -119,10 +119,9 @@ async function init(callback: () => void) {
 // cgpv object to be exported with the api for outside use
 export const cgpv: types.TypeCGPV = {
   init,
-  api: types.Cast<types.TypeApi>({
+  api: types.Cast<API>({
     ...api,
     ...api.event,
-    // ...api.projection, TODO: Is this tilll needed?
     ...api.plugin,
   }),
   react: React,

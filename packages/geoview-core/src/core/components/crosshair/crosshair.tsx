@@ -58,7 +58,7 @@ export function Crosshair(): JSX.Element {
 
   const mapConfig = useContext(MapContext);
   const { mapId, interaction } = mapConfig;
-  const projection = api.projection.projections[api.map(mapId).currentProjection];
+  const projection = api.projection.projections[api.maps[mapId].currentProjection];
 
   // tracks if the last action was done through a keyboard (map navigation) or mouse (mouse movement)
   const [isCrosshairsActive, setCrosshairsActive] = useState(false);
@@ -76,7 +76,7 @@ export function Crosshair(): JSX.Element {
    */
   function simulateClick(evt: KeyboardEvent): void {
     if (evt.key === 'Enter') {
-      const { map } = api.map(mapId);
+      const { map } = api.maps[mapId];
 
       const lnglatPoint = toLonLat(map.getView().getCenter()!, projection);
 
@@ -98,7 +98,7 @@ export function Crosshair(): JSX.Element {
       panDelta = panDelta < 10 ? 10 : panDelta; // minus panDelta reset the value so we need to trap
 
       // replace the KeyboardPan interraction by a new one
-      const { map } = api.map(mapId);
+      const { map } = api.maps[mapId];
       map.getInteractions().forEach((interactionItem) => {
         if (interactionItem instanceof KeyboardPan) {
           map.removeInteraction(interactionItem);
@@ -113,7 +113,7 @@ export function Crosshair(): JSX.Element {
    * @function removeCrosshair
    */
   function removeCrosshair(): void {
-    const { map } = api.map(mapId);
+    const { map } = api.maps[mapId];
 
     // remove simulate click event listener
     map.getTargetElement().removeEventListener('keydown', simulateClick);
@@ -123,7 +123,7 @@ export function Crosshair(): JSX.Element {
   }
 
   useEffect(() => {
-    const { map } = api.map(mapId);
+    const { map } = api.maps[mapId];
 
     const mapContainer = map.getTargetElement();
 
