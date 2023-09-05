@@ -15,6 +15,7 @@ import {
   GeoViewLayerPayload,
   payloadIsRemoveGeoViewLayer,
   snackbarMessagePayload,
+  PayloadBaseClass,
 } from '@/api/events/payloads';
 import { AbstractGeoViewLayer } from './geoview-layers/abstract-geoview-layers';
 import {
@@ -35,6 +36,11 @@ import { layerConfigIsWFS, WFS } from './geoview-layers/vector/wfs';
 import { layerConfigIsOgcFeature, OgcFeature } from './geoview-layers/vector/ogc-feature';
 import { layerConfigIsXYZTiles, XYZTiles } from './geoview-layers/raster/xyz-tiles';
 import { layerConfigIsVectorTiles, VectorTiles } from './geoview-layers/raster/vector-tiles';
+
+type TypeEventHandlerFunctions = {
+  addLayer: (payload: PayloadBaseClass) => void;
+  removeLayer: (payload: PayloadBaseClass) => void;
+};
 
 /**
  * A class to get the layer from layer type. Layer type can be esriFeature, esriDynamic and ogcWMS
@@ -58,6 +64,9 @@ export class Layer {
   /** used to reference the map id */
   private mapId: string;
 
+  /** used to keep a reference the Layer's event handler functions */
+  private eventHandlerFunctions: TypeEventHandlerFunctions;
+
   /**
    * Initialize layer types and listen to add/remove layer events from outside
    *
@@ -68,10 +77,8 @@ export class Layer {
 
     this.vector = new Vector(this.mapId);
 
-    // listen to outside events to add layers
-    api.event.on(
-      EVENT_NAMES.LAYER.EVENT_ADD_LAYER,
-      (payload) => {
+    this.eventHandlerFunctions = {
+      addLayer: (payload: PayloadBaseClass) => {
         if (payloadIsALayerConfig(payload)) {
           const { layerConfig } = payload;
 
@@ -137,49 +144,51 @@ export class Layer {
           }
         }
       },
-      this.mapId
-    );
-
-    // listen to outside events to remove layers
-    api.event.on(
-      EVENT_NAMES.LAYER.EVENT_REMOVE_LAYER,
-      (payload) => {
+      removeLayer: (payload: PayloadBaseClass) => {
         if (payloadIsRemoveGeoViewLayer(payload)) {
           // remove layer from outside
           this.removeLayersUsingPath(payload.geoviewLayer!.geoviewLayerId);
         }
       },
-      this.mapId
-    );
+    };
+
+    // listen to outside events to add layers
+    api.event.on(EVENT_NAMES.LAYER.EVENT_ADD_LAYER, this.eventHandlerFunctions.addLayer, this.mapId);
+
+    // listen to outside events to remove layers
+    api.event.on(EVENT_NAMES.LAYER.EVENT_REMOVE_LAYER, this.eventHandlerFunctions.removeLayer, this.mapId);
+  }
+
+  /**
+   * Delete the event handler functions associated to the Layer instance.
+   */
+  deleteEventHandlerFunctionsOfThisLayerInstance() {
+    api.event.off(EVENT_NAMES.LAYER.EVENT_ADD_LAYER, this.mapId, this.eventHandlerFunctions!.addLayer);
+    api.event.off(EVENT_NAMES.LAYER.EVENT_REMOVE_LAYER, this.mapId, this.eventHandlerFunctions.removeLayer);
   }
 
   /**
    * Load layers that was passed in with the map config
    *
-   * @param {TypeGeoviewLayerConfig[]} layersConfig an optional array containing layers passed within the map config
+   * @param {TypeGeoviewLayerConfig[]} geoviewLayerConfigs an optional array containing layers passed within the map config
    */
   loadListOfGeoviewLayer(geoviewLayerConfigs?: TypeGeoviewLayerConfig[]) {
     const validGeoviewLayerConfigs = this.deleteDuplicatGeoviewLayerConfig(geoviewLayerConfigs);
 
     // set order for layers to appear on the map according to config
     this.layerOrder = [];
-    validGeoviewLayerConfigs.forEach((layer) => {
-      if (layer.geoviewLayerId) {
+    validGeoviewLayerConfigs.forEach((geoviewLayerConfig) => {
+      if (geoviewLayerConfig.geoviewLayerId) {
         // layer order reversed so highest index is top layer
-        this.layerOrder.unshift(layer.geoviewLayerId);
+        this.layerOrder.unshift(geoviewLayerConfig.geoviewLayerId);
         // layers without id uses sublayer ids
-      } else if (layer.listOfLayerEntryConfig !== undefined) {
-        layer.listOfLayerEntryConfig.forEach((subLayer) => {
+      } else if (geoviewLayerConfig.listOfLayerEntryConfig !== undefined) {
+        geoviewLayerConfig.listOfLayerEntryConfig.forEach((subLayer) => {
           if (subLayer.layerId) this.layerOrder.unshift(subLayer.layerId);
         });
       }
+      api.event.emit(layerConfigPayload(EVENT_NAMES.LAYER.EVENT_ADD_LAYER, this.mapId, geoviewLayerConfig));
     });
-
-    if (validGeoviewLayerConfigs.length > 0) {
-      validGeoviewLayerConfigs.forEach((geoviewLayerConfig) =>
-        api.event.emit(layerConfigPayload(EVENT_NAMES.LAYER.EVENT_ADD_LAYER, this.mapId, geoviewLayerConfig))
-      );
-    }
   }
 
   /**
@@ -392,6 +401,17 @@ export class Layer {
     api.event.emit(GeoViewLayerPayload.createRemoveGeoviewLayerPayload(this.mapId, geoviewLayer));
 
     return geoviewLayer.geoviewLayerId;
+  };
+
+  /**
+   * Remove all geoview layers from the map
+   */
+  removeAllGeoviewLayers = () => {
+    Object.keys(this.geoviewLayers).forEach((geoviewLayerId: string) => {
+      this.removeGeoviewLayer(this.geoviewLayers[geoviewLayerId]);
+    });
+
+    return this.mapId;
   };
 
   /**
