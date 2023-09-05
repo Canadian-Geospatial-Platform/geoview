@@ -1,13 +1,11 @@
-import React from 'react';
+import { useRef } from 'react';
 
+import { useTranslation } from 'react-i18next';
+
+import Tooltip from '@mui/material/Tooltip';
+import Fade from '@mui/material/Fade';
 import MaterialTextField from '@mui/material/TextField';
-import { TextFieldProps } from '@mui/material';
-
-/**
- * Custom Material UI Textfield properties
- */
-// eslint-disable-next-line react/require-default-props
-type TypeTextFieldProps = TextFieldProps & { mapId?: string };
+import { TypeTextFieldProps } from '../panel/panel-types';
 
 /**
  * Create a Material UI TextField component
@@ -16,5 +14,15 @@ type TypeTextFieldProps = TextFieldProps & { mapId?: string };
  * @returns {JSX.Element} the text field ui component
  */
 export function TextField(props: TypeTextFieldProps): JSX.Element {
-  return <MaterialTextField {...props} />;
+  const { tooltip, tooltipPlacement } = props;
+
+  const { t } = useTranslation<string>();
+
+  const textRef = useRef<HTMLElement>(null);
+
+  return (
+    <Tooltip title={t((tooltip as string) || '') as string} placement={tooltipPlacement} TransitionComponent={Fade} ref={textRef}>
+      <MaterialTextField {...props} />
+    </Tooltip>
+  );
 }
