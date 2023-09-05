@@ -30,28 +30,24 @@ function JSONExportButton({ features, layerId, projectionConfig }: JSONExportBut
    *
    */
   const buildGeometry = (geometry: Geometry) => {
+    let builtGeometry = {};
+
     if (geometry instanceof Polygon) {
-      return {
+      builtGeometry = {
         type: 'Polygon',
         coordinates: geometry.getCoordinates().map((coords) => {
           return coords.map((coord) => toLonLat(coord, projectionConfig));
         }),
       };
+    } else if (geometry instanceof LineString) {
+      builtGeometry = { type: 'LineString', coordinates: geometry.getCoordinates().map((coord) => toLonLat(coord, projectionConfig)) };
+    } else if (geometry instanceof Point) {
+      builtGeometry = { type: 'Point', coordinates: toLonLat(geometry.getCoordinates(), projectionConfig) };
+    } else if (geometry instanceof MultiPoint) {
+      builtGeometry = { type: 'MultiPoint', coordinates: geometry.getCoordinates().map((coord) => toLonLat(coord, projectionConfig)) };
     }
 
-    if (geometry instanceof LineString) {
-      return { type: 'LineString', coordinates: geometry.getCoordinates().map((coord) => toLonLat(coord, projectionConfig)) };
-    }
-
-    if (geometry instanceof Point) {
-      return { type: 'Point', coordinates: toLonLat(geometry.getCoordinates(), projectionConfig) };
-    }
-
-    if (geometry instanceof MultiPoint) {
-      return { type: 'MultiPoint', coordinates: geometry.getCoordinates().map((coord) => toLonLat(coord, projectionConfig)) };
-    }
-
-    return {};
+    return builtGeometry;
   };
 
   /**
