@@ -512,6 +512,8 @@ export type TypeLayerStatus = 'newInstance' | 'loading' | 'processed' | 'error' 
 export type TypeBaseLayerEntryConfig = {
     /** This attribute is not part of the schema. It is used to identified unprocessed layers and shows the final layer state */
     layerStatus?: TypeLayerStatus;
+    /** This attribute is not part of the schema. It is used to identified the process phase of the layer */
+    layerPhase?: string;
     /** This attribute is not part of the schema. It is used to link the layer entry config to the GeoView root layer config. */
     geoviewRootLayer?: TypeGeoviewLayerConfig;
     /** This attribute is not part of the schema. It is used to link the layer entry config to the parent's layer config. */

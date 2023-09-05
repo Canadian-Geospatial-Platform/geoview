@@ -8,6 +8,7 @@ import { TypeLayerStatus } from '@/geo/map/map-schema-types';
 export type TypeLegendResultSets = {
     [layerPath: string]: {
         layerStatus: TypeLayerStatus;
+        layerPhase: string;
         data: TypeLegend | undefined | null;
     };
 };

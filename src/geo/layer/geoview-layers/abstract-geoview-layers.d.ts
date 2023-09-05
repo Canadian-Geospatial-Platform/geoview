@@ -94,7 +94,8 @@ type TypeLayerSetHandlerFunctions = {
     requestLayerInventory?: TypeEventHandlerFunction;
     queryLegend?: TypeEventHandlerFunction;
     queryLayer?: TypeEventHandlerFunction;
-    layerStatusUpdated?: TypeEventHandlerFunction;
+    updateLayerStatus?: TypeEventHandlerFunction;
+    updateLayerPhase?: TypeEventHandlerFunction;
 };
 /** ******************************************************************************************************************************
  * The AbstractGeoViewLayer class is normally used for creating subclasses and is not instantiated (using the new operator) in the
@@ -172,6 +173,15 @@ export declare abstract class AbstractGeoViewLayer {
      * @returns {boolean} true when all layers are processed.
      */
     allLayerEntryConfigProcessed(listOfLayerEntryConfig?: TypeListOfLayerEntryConfig): boolean;
+    /** ***************************************************************************************************************************
+     * Process recursively the list of layer entries to see if all of them are in error.
+     *
+     * @param {TypeListOfLayerEntryConfig} listOfLayerEntryConfig The list of layer's configuration
+     *                                                            (default: this.listOfLayerEntryConfig).
+     *
+     * @returns {boolean} true when all layers are in error.
+     */
+    allLayerEntryConfigAreInError(listOfLayerEntryConfig?: TypeListOfLayerEntryConfig): boolean;
     /** ***************************************************************************************************************************
      * Recursively process the list of layer entries to count all layers in error.
      *
