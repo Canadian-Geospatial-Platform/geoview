@@ -66,6 +66,7 @@
       renderLayerSelectComponent = async () => {
         console.time("MapTableCreation")
         const layers = Object.keys(api.maps['mapWM1'].layer.geoviewLayers);
+        console.log('layers ', layers);
         const itemAcc = {
           title: "Layers Select",
           content: await cgpv.api.maps['mapWM1'].layersSelect.createLayersSelect({layerIds: layers, mapId: "mapWM1", isRemovable: false })
