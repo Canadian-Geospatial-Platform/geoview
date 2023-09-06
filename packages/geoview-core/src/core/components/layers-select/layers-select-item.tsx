@@ -544,9 +544,11 @@ export function LayersSelectItem(props: LayerSelectItemProps): JSX.Element {
             <ListItemText primary={layerName} onClick={handleExpandGroupClick} />
           </Tooltip>
           <ListItemIcon style={{ justifyContent: 'right' }}>
-            <IconButton color="primary" onClick={() => handleToggleLayer()}>
-              <ExpandIcon />
-            </IconButton>
+            {props.canSort && (
+              <IconButton color="primary" onClick={() => handleToggleLayer()}>
+                <ExpandIcon />
+              </IconButton>
+            )}
             {(isRemoveable || (canSetOpacity && groupItems.length === 0)) && (
               <IconButton id="setOpacityBtn" onClick={handleMoreClick} aria-label="more" aria-haspopup="true">
                 <MoreVertIcon />

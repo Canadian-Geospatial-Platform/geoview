@@ -48,7 +48,7 @@
     <button onClick="renderLayerSelectComponent()" id="createDataTableFromMapBtn">Draw Layer Select Component
     </button>
 
-    <div id="dataTable" style="margin: 1rem 0"></div>
+    <div id="dataTable" style="margin: 1rem 0; max-width: 500px"></div>
   </div>
 
 
@@ -69,7 +69,7 @@
         console.log('layers ', layers);
         const itemAcc = {
           title: "Layers Select",
-          content: await cgpv.api.maps['mapWM1'].layersSelect.createLayersSelect({layerIds: layers, mapId: "mapWM1", isRemovable: false })
+          content: await cgpv.api.maps['mapWM1'].layersSelect.createLayersSelect({layerIds: layers, mapId: "mapWM1", isSortable: false, isRemovable: false })
         }
 
         cgpv.api.addUiComponent(
