@@ -464,7 +464,6 @@ export function LegendItemDetails(props: TypeLegendItemProps): JSX.Element {
   function legendItemDetails() {
     return (
       <>
-        <h1>This is Layer:: {layerId}</h1>
         <Menu
           anchorEl={menuAnchorElement}
           open={menuOpen}
@@ -540,7 +539,7 @@ export function LegendItemDetails(props: TypeLegendItemProps): JSX.Element {
   }
 
   return (
-    <Grid item sm={12} md={subLayerId ? 12 : 6} lg={subLayerId ? 12 : 4}>
+    <Grid item sm={12} lg={8}>
       {legendItemDetails()}
     </Grid>
   );

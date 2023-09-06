@@ -26,6 +26,11 @@ import {
   CheckIcon,
   MoreHorizIcon,
   BrowserNotSupportedIcon,
+  ExpandIcon,
+  KeyboardArrowDownIcon,
+  KeyboardArrowUpIcon,
+  KeyboardArrowRightIcon,
+  GroupWorkIcon,
   Grid,
 } from '@/ui';
 import { api, payloadIsLegendInfo, NumberPayload, PayloadBaseClass } from '@/app';
@@ -474,13 +479,13 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
   }, []);
 
   return (
-    <Grid item sm={12} lg={subLayerId ? 12 : 4}>
+    <Grid item sm={12}>
       <ListItem>
         <ListItemButton>
           <ListItemIcon>
             {(groupItems.length > 0 || WMSStyles.length > 1) && (
-              <IconButton color="primary" onClick={handleExpandGroupClick}>
-                {isGroupOpen ? <ExpandMoreIcon /> : <ExpandLessIcon />}
+              <IconButton color="primary">
+                <GroupWorkIcon />
               </IconButton>
             )}
             {groupItems.length === 0 && isLegendOpen && (
@@ -541,18 +546,29 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
             <ListItemText primary={layerName} onClick={handleExpandGroupClick} />
           </Tooltip>
           <ListItemIcon style={{ justifyContent: 'right' }}>
+            <IconButton color="primary" onClick={() => handleToggleLayer()}>
+              <ExpandIcon />
+            </IconButton>
             {(isRemoveable || (canSetOpacity && groupItems.length === 0)) && (
               <IconButton id="setOpacityBtn" onClick={handleMoreClick} aria-label="more" aria-haspopup="true">
                 <MoreVertIcon />
               </IconButton>
             )}
-            {api.maps[mapId].layer.registeredLayers[clusterLayerPath]?.initialSettings?.visible !== 'always' && (
-              <IconButton color="primary" onClick={() => handleToggleLayer()}>
-                {(() => {
-                  if (isParentVisible === false) return <VisibilityOffIcon />;
-                  if (isChecked) return <VisibilityIcon />;
-                  return <VisibilityOffIcon />;
-                })()}
+            <IconButton color="primary" onClick={() => handleToggleLayer()}>
+              {(() => {
+                if (isParentVisible === false) return <VisibilityOffIcon />;
+                if (isChecked) return <VisibilityIcon />;
+                return <VisibilityOffIcon />;
+              })()}
+            </IconButton>
+            {groupItems.length === 0 && (
+              <IconButton color="primary" onClick={handleLegendClick}>
+                <KeyboardArrowRightIcon />
+              </IconButton>
+            )}
+            {(groupItems.length > 0 || WMSStyles.length > 1) && (
+              <IconButton color="primary" onClick={handleExpandGroupClick}>
+                {isGroupOpen ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
               </IconButton>
             )}
           </ListItemIcon>

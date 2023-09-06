@@ -3,11 +3,11 @@ import { styled } from '@mui/material';
 import { useState } from 'react';
 import { TypeLegendProps } from './legend-api';
 import { api } from '@/app';
-import { LegendItem } from './legend-item';
 import { LegendItemDetails } from './legend-item-details';
-import { List, Grid } from '@/ui';
+import { Grid, Box } from '@/ui';
 import { TypeLayerEntryConfig } from '@/geo/map/map-schema-types';
 import { TypeLegendItemProps } from './types';
+import { LayersSelect } from '../layers-select/LayersSelect';
 
 export interface LegendProps extends TypeLegendProps {
   mapId: string;
@@ -25,7 +25,6 @@ export function Legend(props: LegendProps): JSX.Element {
   const [selectedLayer, setSelectedLayer] = useState<TypeLegendItemProps | null>(null);
 
   const onOpenDetails = function (layerId: string, layerConfigEntry: TypeLayerEntryConfig | undefined): void {
-    console.log(`legend is open layerId: ${layerId},`, layerConfigEntry);
     const geoviewLayerInstance = api.map(mapId).layer.geoviewLayers[layerId];
 
     const det: TypeLegendItemProps = {
@@ -36,36 +35,31 @@ export function Legend(props: LegendProps): JSX.Element {
       isRemoveable,
       canSetOpacity,
     };
-
-    setSelectedLayer(det);
+    setSelectedLayer(null);
+    setTimeout(() => {
+      setSelectedLayer(det);
+    }, 300);
   };
 
   api.event.emit({ handlerName: `${mapId}/$LegendsLayerSet$`, event: api.eventNames.GET_LEGENDS.TRIGGER });
-  const legendItems = layerIds
-    .filter((layerId) => api.map(mapId).layer.geoviewLayers[layerId])
-    .map((layerId) => {
-      const geoviewLayerInstance = api.map(mapId).layer.geoviewLayers[layerId];
-
-      return (
-        <LegendItem
-          key={`layerKey-${layerId}`}
-          layerId={layerId}
-          geoviewLayerInstance={geoviewLayerInstance}
-          isRemoveable={isRemoveable}
-          canSetOpacity={canSetOpacity}
-          expandAll={expandAll}
-          hideAll={hideAll}
-          canZoomTo
-          onOpenDetails={(_layerId: string, _layerConfigEntry: TypeLayerEntryConfig | undefined) =>
-            onOpenDetails(_layerId, _layerConfigEntry)
-          }
-        />
-      );
-    });
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const leftPanel = () => {
-    return <List sx={{ width: '100%' }}>{legendItems}</List>;
+    return (
+      <LayersSelect
+        mapId={mapId}
+        layerIds={layerIds}
+        canSetOpacity={canSetOpacity}
+        expandAll={expandAll}
+        hideAll={hideAll}
+        isRemoveable={false}
+        canZoomTo
+        canSort
+        onOpenDetails={(_layerId: string, _layerConfigEntry: TypeLayerEntryConfig | undefined) =>
+          onOpenDetails(_layerId, _layerConfigEntry)
+        }
+      />
+    );
   };
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -77,13 +71,20 @@ export function Legend(props: LegendProps): JSX.Element {
   }
 
   return (
-    <Grid container direction={{ xs: 'column', sm: 'row' }} spacing={{ xs: 1, sm: 4, md: 8 }}>
-      <Grid item xs={12} sm={6}>
-        <Item>{leftPanel()}</Item>
+    <Box sx={{ px: '20px', pb: '20px', display: 'flex', flexDirection: 'column' }}>
+      <h2 style={{ marginBottom: '10px' }}>Legend</h2>
+      <p>
+        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent ornare posuere arcu, eu placerat nisl scelerisque eu. Integer
+        molestie, libero quis maximus elementum, nunc ante facilisis nunc, in auctor nisi enim tincidunt sapien.
+      </p>
+      <Grid container direction={{ xs: 'column', sm: 'row' }} spacing={{ xs: 1, sm: 4, md: 8 }}>
+        <Grid item xs={12} sm={4}>
+          <Item>{leftPanel()}</Item>
+        </Grid>
+        <Grid item xs={12} sm={6}>
+          <Item>{selectedLayer && <LegendItemDetails {...selectedLayer} />}</Item>
+        </Grid>
       </Grid>
-      <Grid item xs={12} sm={6}>
-        <Item>{rightPanel()}</Item>
-      </Grid>
-    </Grid>
+    </Box>
   );
 }
