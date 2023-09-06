@@ -3,19 +3,8 @@
 import { List } from '@/ui';
 import { TypeLayerEntryConfig } from '@/geo/map/map-schema-types';
 import { api } from '@/app';
-import { LayerSelectItem } from './LayerSelectItem';
-
-export interface LayersSelectProps {
-  mapId: string;
-  layerIds: string[];
-  isRemoveable: false;
-  canSetOpacity?: boolean;
-  expandAll?: boolean;
-  hideAll?: boolean;
-  canZoomTo?: boolean;
-  canSort?: boolean;
-  onOpenDetails?: (layerId: string, layerConfigEntry: TypeLayerEntryConfig | undefined) => void;
-}
+import { LayersSelectItem } from './layers-select-item';
+import { LayersSelectProps } from './types';
 
 export function LayersSelect(props: LayersSelectProps): JSX.Element {
   const { layerIds, isRemoveable, canSetOpacity, expandAll, hideAll, mapId, canSort, onOpenDetails } = props;
@@ -27,7 +16,7 @@ export function LayersSelect(props: LayersSelectProps): JSX.Element {
       const geoviewLayerInstance = api.maps[mapId].layer.geoviewLayers[layerId];
 
       return (
-        <LayerSelectItem
+        <LayersSelectItem
           key={`layerKey-${layerId}`}
           layerId={layerId}
           geoviewLayerInstance={geoviewLayerInstance}

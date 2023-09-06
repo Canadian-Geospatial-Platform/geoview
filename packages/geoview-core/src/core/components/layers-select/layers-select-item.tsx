@@ -139,7 +139,7 @@ const sxClasses = {
  *
  * @returns {JSX.Element} the legend list item
  */
-export function LayerSelectItem(props: LayerSelectItemProps): JSX.Element {
+export function LayersSelectItem(props: LayerSelectItemProps): JSX.Element {
   const {
     layerId,
     geoviewLayerInstance,
@@ -605,7 +605,7 @@ export function LayerSelectItem(props: LayerSelectItemProps): JSX.Element {
         <Box>
           <Box sx={sxClasses.expandableIconContainer}>
             {groupItems.map((subItem) => (
-              <LayerSelectItem
+              <LayersSelectItem
                 key={subItem.layerId}
                 layerId={layerId}
                 geoviewLayerInstance={geoviewLayerInstance}

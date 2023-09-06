@@ -28,6 +28,7 @@ import { DetailsAPI } from '@/core/components/details/details-api';
 import { FeatureInfoAPI } from '@/core/components/feature-info/feature-info.api';
 import { DataGridAPI } from '@/core/components/data-grid/data-grid-api';
 import { DataTableApi } from '@/core/components/data-table/data-table-api';
+import { LayersSelectApi } from '@/core/components/layers-select/layers-select-api';
 import { GeoviewRenderer } from '../renderer/geoview-renderer';
 import { Select } from '../interaction/select';
 import { Draw } from '../interaction/draw';
@@ -99,6 +100,9 @@ export class MapViewer {
   // used to access the data table api
   dataTable!: DataTableApi;
 
+  // used to access the layers select api
+  layersSelect!: LayersSelectApi;
+
   // used to access basemap functions
   basemap!: Basemap;
 
@@ -165,6 +169,7 @@ export class MapViewer {
     this.featureInfo = new FeatureInfoAPI(this.mapId);
     this.dataGrid = new DataGridAPI(this.mapId);
     this.dataTable = new DataTableApi(this.mapId);
+    this.layersSelect = new LayersSelectApi(this.mapId);
 
     this.modal = new ModalApi(this.mapId);
 

@@ -56,3 +56,4 @@ export * from './notifications/notifications-api';
 export * from './overview-map/overview-map-toggle';
 export * from './overview-map/overview-map';
 export * from './scale/scale';
+export * from './layers-select/layers-select';
