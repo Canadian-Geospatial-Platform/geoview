@@ -167,7 +167,7 @@ export function LayerSelectItem(props: LayerSelectItemProps): JSX.Element {
 
   const [isClusterToggleEnabled, setIsClusterToggleEnabled] = useState(false);
   const [isChecked, setChecked] = useState<boolean>(
-    api.map(mapId).layer.registeredLayers[clusterLayerPath]?.initialSettings?.visible !== false
+    api.maps[mapId].layer.registeredLayers[clusterLayerPath]?.initialSettings?.visible !== 'no'
   );
 
   const [isGroupOpen, setGroupOpen] = useState(true);
@@ -185,9 +185,9 @@ export function LayerSelectItem(props: LayerSelectItemProps): JSX.Element {
   const [layerName, setLayerName] = useState<string>('');
   const [menuAnchorElement, setMenuAnchorElement] = useState<null | HTMLElement>(null);
 
-  const [zoom, setZoom] = useState<number>(api.map(mapId).currentZoom);
+  const [zoom, setZoom] = useState<number>(api.maps[mapId].currentZoom);
   const splitZoom =
-    (api.map(mapId).layer.registeredLayers[clusterLayerPath]?.source as TypeVectorSourceInitialConfig)?.cluster?.splitZoom || 7;
+    (api.maps[mapId].layer.registeredLayers[clusterLayerPath]?.source as TypeVectorSourceInitialConfig)?.cluster?.splitZoom || 7;
   const closeIconRef = useRef() as RefObject<HTMLButtonElement>;
   const stackIconRef = useRef() as MutableRefObject<HTMLDivElement | undefined>;
   const maxIconRef = useRef() as RefObject<HTMLButtonElement>;
@@ -257,9 +257,9 @@ export function LayerSelectItem(props: LayerSelectItemProps): JSX.Element {
                 }
               });
 
-              Object.keys(api.map(mapId).layer.registeredLayers).forEach((layerPath) => {
+              Object.keys(api.maps[mapId].layer.registeredLayers).forEach((layerPath) => {
                 if (layerPath.startsWith(geoviewLayerId)) {
-                  const layerConfig = api.map(mapId).layer.registeredLayers[layerPath] as TypeVectorLayerEntryConfig;
+                  const layerConfig = api.maps[mapId].layer.registeredLayers[layerPath] as TypeVectorLayerEntryConfig;
                   if (layerConfig && layerConfig.style && geometryKey) {
                     const geometryStyle = layerConfig.style[geometryKey as TypeStyleGeometry];
                     if (
@@ -402,23 +402,19 @@ export function LayerSelectItem(props: LayerSelectItemProps): JSX.Element {
   };
 
   const handleRemoveLayer = () => {
-    api.map(mapId).layer.removeGeoviewLayer(geoviewLayerInstance);
+    api.maps[mapId].layer.removeGeoviewLayer(geoviewLayerInstance);
     // NOTE: parent component needs to deal with removing this legend-item when recieving the layer remove event
     handleCloseMenu();
   };
 
   const handleClusterToggle = () => {
-    if (api.map(mapId).layer.registeredLayers[clusterLayerPath]?.gvLayer) {
-      api
-        .map(mapId)
-        .layer.registeredLayers[clusterLayerPath]?.gvLayer!.setVisible(
-          !api.map(mapId).layer.registeredLayers[clusterLayerPath]?.gvLayer!.getVisible()
-        );
-      api
-        .map(mapId)
-        .layer.registeredLayers[unclusterLayerPath]?.gvLayer!.setVisible(
-          !api.map(mapId).layer.registeredLayers[unclusterLayerPath]?.gvLayer!.getVisible()
-        );
+    if (api.maps[mapId].layer.registeredLayers[clusterLayerPath]?.gvLayer) {
+      api.maps[mapId].layer.registeredLayers[clusterLayerPath]?.gvLayer!.setVisible(
+        !api.maps[mapId].layer.registeredLayers[clusterLayerPath]?.gvLayer!.getVisible()
+      );
+      api.maps[mapId].layer.registeredLayers[unclusterLayerPath]?.gvLayer!.setVisible(
+        !api.maps[mapId].layer.registeredLayers[unclusterLayerPath]?.gvLayer!.getVisible()
+      );
     }
     setIsClusterToggleEnabled(!isClusterToggleEnabled);
     handleCloseMenu();
@@ -433,7 +429,7 @@ export function LayerSelectItem(props: LayerSelectItemProps): JSX.Element {
   const handleZoomTo = () => {
     let bounds = api.maps[mapId].layer.geoviewLayers[layerId].calculateBounds(path);
     let transformedBounds: Extent | undefined;
-    if (bounds) transformedBounds = transformExtent(bounds, `EPSG:${api.map(mapId).currentProjection}`, `EPSG:4326`);
+    if (bounds) transformedBounds = transformExtent(bounds, `EPSG:${api.maps[mapId].currentProjection}`, `EPSG:4326`);
 
     if (
       !bounds ||
@@ -443,9 +439,9 @@ export function LayerSelectItem(props: LayerSelectItemProps): JSX.Element {
         transformedBounds[2] === 180 &&
         transformedBounds[3] === 90)
     )
-      bounds = api.map(mapId).getView().get('extent');
+      bounds = api.maps[mapId].getView().get('extent');
 
-    if (bounds) api.map(mapId).zoomToExtent(bounds);
+    if (bounds) api.maps[mapId].zoomToExtent(bounds);
     handleCloseMenu();
   };
 
@@ -474,7 +470,7 @@ export function LayerSelectItem(props: LayerSelectItemProps): JSX.Element {
   }, [iconList, iconType]);
 
   useEffect(() => {
-    const source = (api.map(mapId).layer.getGeoviewLayerById(layerId) as AbstractGeoViewVector)?.activeLayer
+    const source = (api.maps[mapId].layer.getGeoviewLayerById(layerId) as AbstractGeoViewVector)?.activeLayer
       ?.source as TypeVectorSourceInitialConfig;
     setIsClusterToggleEnabled(source?.cluster?.enable ?? false);
     // eslint-disable-next-line react-hooks/exhaustive-deps

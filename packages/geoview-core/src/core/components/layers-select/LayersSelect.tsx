@@ -22,9 +22,9 @@ export function LayersSelect(props: LayersSelectProps): JSX.Element {
   // const [selectedLayer, setSelectedLayer] = useState<TypeLegendItemProps | null>(null);
 
   const legendItems = layerIds
-    .filter((layerId) => api.map(mapId).layer.geoviewLayers[layerId])
+    .filter((layerId) => api.maps[mapId].layer.geoviewLayers[layerId])
     .map((layerId) => {
-      const geoviewLayerInstance = api.map(mapId).layer.geoviewLayers[layerId];
+      const geoviewLayerInstance = api.maps[mapId].layer.geoviewLayers[layerId];
 
       return (
         <LayerSelectItem
