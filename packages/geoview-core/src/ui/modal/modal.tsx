@@ -281,6 +281,7 @@ export function Modal(props: TypeDialogProps): JSX.Element {
       api.event.off(EVENT_NAMES.MODAL.EVENT_MODAL_CLOSE, mapId, modalCloseListenerFunction);
       api.event.off(EVENT_NAMES.MODAL.EVENT_MODAL_UPDATE, mapId, modalUpdateListenerFunction);
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [updateModal, createdModal]);
 
   return (
