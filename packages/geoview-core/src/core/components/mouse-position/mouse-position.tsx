@@ -16,6 +16,7 @@ import { EVENT_NAMES } from '@/api/events/event-types';
 import { PayloadBaseClass, payloadIsABoolean } from '@/api/events/payloads';
 
 import { Box, CheckIcon, Tooltip } from '@/ui';
+import { useGeoViewStore } from '@/core/stores/main';
 
 const useStyles = makeStyles((theme) => ({
   mousePositionContainer: {
@@ -79,6 +80,8 @@ interface MousePositionProps {
  * @returns {JSX.Element} the mouse position component
  */
 export function MousePosition(props: MousePositionProps): JSX.Element {
+  const geoViewStore = useGeoViewStore();
+
   const { mousePositionMapId } = props;
 
   const [expanded, setExpanded] = useState(false);
