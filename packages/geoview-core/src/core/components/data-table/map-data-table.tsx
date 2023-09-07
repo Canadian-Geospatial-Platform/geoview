@@ -16,7 +16,7 @@ import { Extent } from 'ol/extent';
 import { darken } from '@mui/material';
 import { difference } from 'lodash';
 import { getUid } from 'ol/util';
-import { Box, IconButton, ZoomInSearchIcon } from '@/ui';
+import { Box, IconButton, Tooltip, ZoomInSearchIcon } from '@/ui';
 import ExportButton from './export-button';
 import JSONExportButton from './json-export-button';
 import FilterMap from './filter-map';
@@ -192,6 +192,20 @@ function MapDataTable({ data, layerId, mapId, layerKey, projectionConfig }: MapD
   }, []);
 
   /**
+   * Create data table body cell with tooltip
+   * @param {string} cellValue cell value to be displayed in cell
+   * @returns JSX.Element
+   */
+  const getCellValueWithTooltip = (cellValue: string) => {
+    return (
+      <Tooltip title={cellValue}>
+        <Box component="span" sx={{ 'white-space': 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>
+          {cellValue}
+        </Box>
+      </Tooltip>
+    );
+  };
+  /**
    * Build material react data table column header.
    *
    * @param {object} data.fieldAliases object values transformed into required key value property of material react data table
@@ -204,6 +218,7 @@ function MapDataTable({ data, layerId, mapId, layerKey, projectionConfig }: MapD
         accessorKey: key,
         header: value.alias,
         Header: ({ column }) => getTableHeader(column.columnDef.header),
+        Cell: ({ cell }) => getCellValueWithTooltip(cell.getValue() as string),
         ...([t('dataTable.icon'), t('dataTable.zoom')].includes(value.alias) && { size: 100, enableColumnFilter: false }),
       });
     });
