@@ -306,6 +306,8 @@
         }"
     ></div>
 
+    <div id="resultMap">Click on a layer on the map</div>
+
     <div>
       <button onClick="createDetailsFeatureInfo()" id="createDetailsBtn">
         Create Details and Feature Info
@@ -327,8 +329,6 @@
 
         // import react and api from the core
         const { react, createRoot, api, ui } = cgpv;
-
-        createDetailsFeatureInfo = () => {
         
         cgpv.api.event.on(
           cgpv.api.eventNames.GET_FEATURE_INFO.ALL_QUERIES_DONE,
@@ -338,42 +338,21 @@
                 const newDetails = [];
 
                 Object.keys(resultSets).forEach((layerPath) => {
-                  // const layerName = getLocalizedValue(api.maps[mapId].layer.registeredLayers[layerPath].layerName, mapId)!;
-                  const layerName = 'TESTING';
+                  const layerName = cgpv.api.utilities.getLocalizedValue(api.maps['LYR2'].layer.registeredLayers[layerPath].layerName, 'LYR2');
                   const features = resultSets[layerPath]?.data;
                   if (features?.length && features?.length > 0) {
                     newDetails.push({ layerPath, layerName, features });
                   }
                });
 
+               // we need to display detailsResult in div id = resultMap
+               const detailsResult = api.maps['LYR2'].details.createDetailsFooter('LYR2', newDetails);
 
-               // ========== TODO ============
-               // we need to use code below to add newDetails inside a div
-               // this line will create a whole details tab inside a div, 
-               // code below is not complete yet
-              api.maps[mapId].details.createDetailsFooter(mapId, newDetails, { mapId, location: lngLat, handlerName })
+               console.log('==detailsResult ==> ', detailsResult);
 
-          
-        },
-        'LYR2/$FeatureInfoLayerSet$'
-      );
-
-        cgpv.api.event.on(
-          cgpv.api.eventNames.MAP.EVENT_MAP_SINGLE_CLICK,
-          (payload) => {
-            if (cgpv.types.payloadIsAMapMouseEvent(payload)) {
-              console.log('----payload is --> ', payload)
-              // Object.keys(this.resultSets).forEach((layerPath) => {
-              //   this.resultSets[layerPath].data = undefined;
-              // });
-              // api.event.emit(GetFeatureInfoPayload.createQueryLayerPayload(this.mapId, 'at long lat', payload.coordinates.lnglat, false));
-            }
-          },
-          'LYR2'
-        );
-
-        
-
+              },
+              'LYR2/$FeatureInfoLayerSet$'
+            );
 
         // const itemAcc = {
         //   title: "Data Table",
@@ -385,7 +364,7 @@
         //   cgpv.react.createElement(cgpv.ui.elements.Accordion, { items: [itemAcc] })
         // );
         
-      }
+      
         //create snippets
         createConfigSnippet();
         createCodeSnippet();

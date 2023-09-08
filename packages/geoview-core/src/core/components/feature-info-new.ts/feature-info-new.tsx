@@ -4,17 +4,10 @@ import React, { MutableRefObject, useEffect, useState } from 'react';
 import { useTheme, Theme } from '@mui/material/styles';
 import { useTranslation } from 'react-i18next';
 import { Paper } from '@mui/material';
-
-import linkifyHtml from 'linkify-html';
-
 import { getUid } from 'ol/util';
-
-import { CardMedia, List, ListItem, ListItemText, ZoomInSearchIcon, Tooltip, IconButton, Box, Checkbox } from '@/ui';
+import { List, ListItem, ListItemText, ZoomInSearchIcon, Tooltip, IconButton, Checkbox } from '@/ui';
 import { api, TypeFeatureInfoEntry } from '@/app';
-import { HtmlToReact } from '../../containers/html-to-react';
 import { featureHighlightPayload, clearHighlightsPayload, TypeFieldEntry } from '@/api/events/payloads';
-import { isImage, stringify, generateId, sanitizeHtmlContent } from '../../utils/utilities';
-import { LightBoxSlides } from '../lightbox/lightbox';
 import { EVENT_NAMES } from '@/api/events/event-types';
 import { FeatureInfoTable } from './feature-info-table';
 
@@ -97,11 +90,6 @@ export function FeatureInfo({ mapId, feature, selectedFeatures }: TypeFeatureInf
       domain: null,
     };
   });
-
-  // lightbox component state
-  const [isLightBoxOpen, setIsLightBoxOpen] = useState(false);
-  const [slides, setSlides] = useState<LightBoxSlides[]>([]);
-  const [slidesIndex, setSlidesIndex] = useState(0);
 
   const [checked, setChecked] = useState<boolean>(false);
 
