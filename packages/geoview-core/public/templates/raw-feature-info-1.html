@@ -71,10 +71,22 @@
               'en': 'https://maps-cartes.ec.gc.ca/arcgis/rest/services/DMS/DEU_CSO_Volume/MapServer'
             },
             'geoviewLayerType': 'esriFeature',
-            'initialSettings': { 'visible': 'no' },
+            'initialSettings': { 'visible': 'always' },
             'listOfLayerEntryConfig': [
               {
                 'layerId': '8'
+              }
+            ]
+          },
+          {
+            'geoviewLayerId': 'uniqueValueId',
+            'geoviewLayerName': { 'en': 'uniqueValue' },
+            'metadataAccessPath': { 'en': 'https://maps-cartes.ec.gc.ca/arcgis/rest/services/CESI/MapServer/' },
+            'geoviewLayerType': 'esriFeature',
+            'listOfLayerEntryConfig': [
+              {
+                'layerId': '1',
+                'layerFilter': 'E_Province = \'Alberta\' or E_Province = \'Manitoba\''
               }
             ]
           },
@@ -87,7 +99,6 @@
               'en': 'https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/900A_and_top_100_en/MapServer/'
             },
             'geoviewLayerType': 'esriFeature',
-            'initialSettings': { 'visible': 'yes' },
             'listOfLayerEntryConfig': [
               {
                 'layerId': '0'
@@ -129,7 +140,6 @@
               'geoviewLayerName': { 'en': 'GeoJSON Sample' },
               'metadataAccessPath': { 'en': './geojson/metadata.json' },
               'geoviewLayerType': 'GeoJSON',
-              'initialSettings': { 'visible': 'yes' },
               'listOfLayerEntryConfig': [
                 {
                   'layerId': 'polygons.json',
@@ -149,7 +159,7 @@
                     {
                       'layerId': 'icon_points.json',
                       'layerName': { 'en': 'Icons' },
-                      'initialSettings': { 'visible': 'no' },
+                      'initialSettings': { 'visible': 'yes' },
                       'layerFilter': 'creationDate >= date \'2020-01-14T12:00:01-05:00\''
                     },
                     {
@@ -170,7 +180,6 @@
                 'en': 'https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/900A_and_top_100_en/MapServer/'
               },
               'geoviewLayerType': 'esriFeature',
-              'initialSettings': { 'visible': 'yes' },
               'listOfLayerEntryConfig': [
                 {
                   'layerId': '0'
@@ -186,7 +195,6 @@
                 'en': 'https://maps-cartes.ec.gc.ca/arcgis/rest/services/DMS/DEU_CSO_Volume/MapServer'
               },
               'geoviewLayerType': 'esriFeature',
-              'initialSettings': { 'visible': 'no' },
               'listOfLayerEntryConfig': [
                 {
                   'layerId': '8'
@@ -203,15 +211,109 @@
         }"
     ></div>
 
-    <!-- <div style="display: flex">
-      <div id="smallList" style="width: 400px; border: black solid 1px;"></div>
-      <div id="bigList" style="width: 400px; height: 600px; overflow: scroll; border: black solid 1px;">
-        <button onClick="createBigList()">Create List</button>
-      </div>
-      <div id="accordionList" style="width: 400px; border: black solid 1px;">
-        <button onClick="createAccordionList()">Create List</button>
-      </div>
-    </div> -->
+    <div
+      id="LYR2"
+      class="llwp-map"
+      triggerReadyCallback="true"
+      data-lang="en"
+      data-config="{
+        'map': {
+          'interaction': 'dynamic',
+          'viewSettings': {
+            'zoom': 4,
+            'center': [-100, 60],
+            'projection': 3978
+          },
+          'basemapOptions': {
+            'basemapId': 'transport',
+            'shaded': true,
+            'labeled': false
+          },
+          'listOfGeoviewLayerConfig': [
+            {
+              'geoviewLayerId': 'geojsonLYR1',
+              'geoviewLayerName': { 'en': 'GeoJSON Sample' },
+              'metadataAccessPath': { 'en': './geojson/metadata.json' },
+              'geoviewLayerType': 'GeoJSON',
+              'listOfLayerEntryConfig': [
+                {
+                  'layerId': 'polygons.json',
+                  'layerName': { 'en': 'Polygons' },
+                  'layerFilter': 'creationDate >= date \'2020/02/15\''
+                },
+                {
+                  'layerId': 'lines.json',
+                  'layerName': { 'en': 'Lines' },
+                  'layerFilter': 'creationDate >= date \'2020-05-28T12:00:00-05:00\''
+                },
+                {
+                  'entryType': 'group',
+                  'layerId': 'point-feature-group',
+                  'layerName': { 'en': 'point-feature-group' },
+                  'listOfLayerEntryConfig': [
+                    {
+                      'layerId': 'icon_points.json',
+                      'layerName': { 'en': 'Icons' },
+                      'initialSettings': { 'visible': 'yes' },
+                      'layerFilter': 'creationDate >= date \'2020-01-14T12:00:01-05:00\''
+                    },
+                    {
+                      'layerId': 'points.json',
+                      'layerName': { 'en': 'Points' },
+                      'layerFilter': 'creationDate >= date \'2019-02-15T22:00:00Z\''
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              'geoviewLayerId': 'esriFeatureLYR5',
+              'geoviewLayerName': {
+                'en': 'Top Projects'
+              },
+              'metadataAccessPath': {
+                'en': 'https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/900A_and_top_100_en/MapServer/'
+              },
+              'geoviewLayerType': 'esriFeature',
+              'listOfLayerEntryConfig': [
+                {
+                  'layerId': '0'
+                }
+              ]
+            },
+            {
+              'geoviewLayerId': 'esriFeatureLYR4',
+              'geoviewLayerName': {
+                'en': 'Water quality at monitoring sites'
+              },
+              'metadataAccessPath': {
+                'en': 'https://maps-cartes.ec.gc.ca/arcgis/rest/services/DMS/DEU_CSO_Volume/MapServer'
+              },
+              'geoviewLayerType': 'esriFeature',
+              'listOfLayerEntryConfig': [
+                {
+                  'layerId': '8'
+                }
+              ]
+            }
+          ]
+        },
+        'components': ['overview-map'],
+        'overviewMap': {'hideOnZoom': 7},
+        'corePackages': [],
+        'theme': 'light',
+        'suportedLanguages': ['en']
+        }"
+    ></div>
+
+    <div>
+      <button onClick="createDetailsFeatureInfo()" id="createDetailsBtn">
+        Create Details and Feature Info
+      </button>
+  
+      <div id="detailsFeatureInfo" style="margin: 1rem 0"></div>
+    </div>
+
 
     <hr />
     <button type="button" class="collapsible">Code Snippet</button>
@@ -226,169 +328,64 @@
         // import react and api from the core
         const { react, createRoot, api, ui } = cgpv;
 
-        // create fake canvas element
-        const canvas = document.createElement('canvas');
-        canvas.width = 50;
-        canvas.height = 50;
-        const ctx = canvas.getContext('2d');
-        ctx.fillStyle = 'rgb(200,0,0)';
-        ctx.fillRect (10, 10, 55, 50);
+        createDetailsFeatureInfo = () => {
+        
+        cgpv.api.event.on(
+          cgpv.api.eventNames.GET_FEATURE_INFO.ALL_QUERIES_DONE,
+            (payload) => {
+                const { layerSetId, resultSets } = payload;
 
-        // create array of fake Feature Info objects following FeatureInfoLayerSet structure
-        const featureInfoArray = [
-          {
-            "featureKey": 0,
-            "geoviewLayerType": "GeoJSON",
-            "extent": [
-                339419.19836761174,
-                125038.02663518023,
-                781781.4590522015,
-                504663.0970258885
-            ],
-            "featureIcon": canvas,
-            "fieldInfo": {
-                "Province": {
-                    "fieldKey": 0,
-                    "value": "Ontario",
-                    "dataType": "string",
-                    "alias": "Province",
-                    "domain": null
-                },
-                "creationDate": {
-                    "fieldKey": 1,
-                    "value": "2020-05-23T17:00:00",
-                    "dataType": "date",
-                    "alias": "Creation Date",
-                    "domain": null
-                },
-                "myImages": {
-                    "fieldKey": 2,
-                    "value": "https://cdn.photoswipe.com/photoswipe-demo-images/photos/1/img-2500.jpg",
-                    "alias": "My Images",
-                    "domain": null
-                },
-                "myLink": {
-                  "fieldKey": 3,
-                  "value": "This is a JSON file https://ftp.maps.canada.ca/pub/nrcan_rncan/Floods_Inondation/HFE/event/f5ecba77-4f17-45c9-991a-06ce11078047/event_precipitation_data_en_f5ecba77-4f17-45c9-991a-06ce11078047.json",
-                  "alias": "My Link 1",
-                  "domain": null
-                },
-                "myScript": {
-                  "fieldKey": 4,
-                  "value": "This is an attemp to inject script: <script>console.log('oups')<\/script>",
-                  "alias": "My Script",
-                  "domain": null
-                },
-                "myLink2": {  
-                  "fieldKey": 5,
-                  "value": "This is a PDF file https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf",
-                  "alias": "My Link 2",
-                  "domain": null
-                },
-                "myLink3": {
-                  "fieldKey": 6,
-                  "value": "This is a Website https://github.com/Canadian-Geospatial-Platform/geoview and the demo site https://canadian-geospatial-platform.github.io/geoview/public/index.html",
-                  "alias": "My Link 3",
-                  "domain": null
-                }
-            },
-            "nameField": "Province"
-          }
-        ]
-        const longFeatureInfoArray = [
-          {
-            "featureKey": 0,
-            "geoviewLayerType": "GeoJSON",
-            "extent": [
-                339419.19836761174,
-                125038.02663518023,
-                781781.4590522015,
-                504663.0970258885
-            ],
-            "featureIcon": canvas,
-            "fieldInfo": {
-                "Info 1": {
-                    "fieldKey": 0,
-                    "value": "Lorem Ipsum 1Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum",
-                    "dataType": "string",
-                    "alias": "Lorem Ipsum 1",
-                    "domain": null
-                },
-                "Info 2": {
-                    "fieldKey": 1,
-                    "value": "Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur magni dolores eos qui ratione voluptatem sequi nesciunt. Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem. Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam, nisi ut aliquid ex ea commodi consequatur? Quis autem vel eum iure reprehenderit qui in ea voluptate velit esse quam nihil molestiae consequatur, vel illum qui dolorem eum fugiat quo voluptas nulla pariatur?",
-                    "dataType": "string",
-                    "alias": "Lorem Ipsum 2",
-                    "domain": null
-                },
-                "myImages 1": {
-                    "fieldKey": 11,
-                    "value": "https://cdn.photoswipe.com/photoswipe-demo-images/photos/1/img-2500.jpg",
-                    "alias": "My Images 1",
-                    "domain": null
-                },
-                "myImages 2": {
-                    "fieldKey": 12,
-                    "value": "https://cdn.photoswipe.com/photoswipe-demo-images/photos/3/img-2500.jpg",
-                    "alias": "My Images 2",
-                    "domain": null
-                },
-                "myImages 3": {
-                    "fieldKey": 13,
-                    "value": "https://cdn.photoswipe.com/photoswipe-demo-images/photos/2/img-2500.jpg",
-                    "alias": "My Images 3",
-                    "domain": null
-                },
-            },
-            "nameField": "Info 1"
+                const newDetails = [];
+
+                Object.keys(resultSets).forEach((layerPath) => {
+                  // const layerName = getLocalizedValue(api.maps[mapId].layer.registeredLayers[layerPath].layerName, mapId)!;
+                  const layerName = 'TESTING';
+                  const features = resultSets[layerPath]?.data;
+                  if (features?.length && features?.length > 0) {
+                    newDetails.push({ layerPath, layerName, features });
+                  }
+               });
+
+
+               // ========== TODO ============
+               // we need to use code below to add newDetails inside a div
+               // this line will create a whole details tab inside a div, 
+               // code below is not complete yet
+              api.maps[mapId].details.createDetailsFooter(mapId, newDetails, { mapId, location: lngLat, handlerName })
+
+          
+        },
+        'LYR2/$FeatureInfoLayerSet$'
+      );
+
+        cgpv.api.event.on(
+          cgpv.api.eventNames.MAP.EVENT_MAP_SINGLE_CLICK,
+          (payload) => {
+            if (cgpv.types.payloadIsAMapMouseEvent(payload)) {
+              console.log('----payload is --> ', payload)
+              // Object.keys(this.resultSets).forEach((layerPath) => {
+              //   this.resultSets[layerPath].data = undefined;
+              // });
+              // api.event.emit(GetFeatureInfoPayload.createQueryLayerPayload(this.mapId, 'at long lat', payload.coordinates.lnglat, false));
+            }
           },
-        ]
+          'LYR2'
+        );
 
-        /********* SMALL LIST START **********************************************************************************/
-        // const smallDiv = document.getElementById('smallList');
-        // const item = cgpv.api.maps['mapWM1'].featureInfo.createFeatureInfoItem(featureInfoArray);
-        // const root = createRoot(smallDiv);
-        // root.render(item);
-        /********* SMALL LIST END **********************************************************************************/
+        
 
-        /********* BIG LIST START **********************************************************************************/
-        // createBigList = () => {
-        //   console.log('create')
-        //   const bigDiv = document.getElementById('bigList');
-        //   const lotItems = [];
-        //   let len = 100;
-        //   const start = Date.now();
-        //   while (len--) {
-        //     lotItems.push(cgpv.api.maps['mapWM1'].featureInfo.createFeatureInfoItem([featureInfoArray[0]]));
-        //   }
-        //   console.log(`Created ${Date.now() - start}`);
-        //   const root = createRoot(bigDiv);
-        //   root.render(lotItems);
-        //   console.log(`Rendered ${Date.now() - start}`);
+
+        // const itemAcc = {
+        //   title: "Data Table",
+        //   content: await cgpv.api.maps['mapWM1'].dataTable.createDataTableByLayerId({ layerId: layers[0], layerKey: `${layers[0]}/8`, mapId: "mapWM1" })
         // }
-        /********* BIG LIST END **********************************************************************************/
 
-        /********* ACCORDION LIST START **********************************************************************************/
-        // createAccordionList = () => {
-        //   const lotItemsAcc = [];
-        //   let lenAcc = 100;
-        //   const startAcc = Date.now();
-        //   while (lenAcc--) {
-        //     lotItemsAcc.push(cgpv.api.maps['mapWM1'].featureInfo.createFeatureInfoItem([longFeatureInfoArray[0]]));
-        //   }
-        //   console.log(`Created Accordion ${Date.now() - startAcc}`);
-        //   const itemAcc = {
-        //     title: 'Details Accordion',
-        //     content: lotItemsAcc,
-        //   }
-        //   cgpv.api.addUiComponent(
-        //     'accordionList',
-        //     cgpv.react.createElement(cgpv.ui.elements.Accordion, { items: [itemAcc], showLoadingIcon: true })
-        //   );
-        //   console.log(`Rendered Accordion ${Date.now() - startAcc}`);
-        // }
-        /********* ACCORDION LIST END **********************************************************************************/
-
+        // cgpv.api.addUiComponent(
+        //   "detailsFeatureInfo",
+        //   cgpv.react.createElement(cgpv.ui.elements.Accordion, { items: [itemAcc] })
+        // );
+        
+      }
         //create snippets
         createConfigSnippet();
         createCodeSnippet();
