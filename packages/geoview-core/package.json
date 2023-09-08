@@ -69,7 +69,6 @@
     "linkifyjs": "^4.1.0",
     "lodash": "^4.17.21",
     "material-react-table": "^1.14.0",
-    "notistack": "^2.0.3",
     "ol": "^7.4.0",
     "ol-mapbox-style": "^10.6.0",
     "proj4": "^2.7.5",

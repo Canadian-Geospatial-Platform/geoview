@@ -145,10 +145,7 @@ cgpv.api.event.emit(
   cgpv.types.snackbarMessagePayload(
     cgpv.api.eventNames.SNACKBAR.EVENT_SNACKBAR_OPEN,
     "mapOne",
-    {
-      type: "string",
-      value: "Hello, World!",
-    }
+    "This is my message"
   )
 );
 ```
@@ -167,10 +164,7 @@ cgpv.api.event.emit(
   cgpv.types.snackbarMessagePayload(
     cgpv.api.eventNames.SNACKBAR.EVENT_SNACKBAR_OPEN,
     "mapOne/panelOne",
-    {
-      type: "string",
-      value: "Hello, World!",
-    }
+    "This is my message"
   )
 );
 ```

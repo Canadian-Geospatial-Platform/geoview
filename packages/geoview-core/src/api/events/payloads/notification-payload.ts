@@ -28,8 +28,6 @@ export type NotificationType = 'success' | 'error' | 'info' | 'warning';
 export class NotificationPayload extends PayloadBaseClass {
   message: string;
 
-  description?: string;
-
   notificationType: NotificationType;
 
   /**
@@ -39,14 +37,12 @@ export class NotificationPayload extends PayloadBaseClass {
    * @param {string | null} handlerName the handler Name
    * @param {NotificationType} notificationType the  type of notification
    * @param {string} message the notification message
-   * @param {string} description optional notification description
    */
-  constructor(event: EventStringId, handlerName: string | null, notifType: NotificationType, message: string, description?: string) {
+  constructor(event: EventStringId, handlerName: string | null, notifType: NotificationType, message: string) {
     if (!validEvents.includes(event)) throw new Error(`NotificationPayload can't be instanciated for event of type ${event}`);
     super(event, handlerName);
     this.message = message;
     this.notificationType = notifType;
-    this.description = description;
   }
 }
 
@@ -58,7 +54,6 @@ export class NotificationPayload extends PayloadBaseClass {
  * @param {string | null} handlerName the handler Name
  * @param {NotificationType} notificationType the  type of notification
  * @param {string} message the notification message
- * @param {string} description optional notification description
  *
  * @returns {NotificationPayload} the NotificationPayload object created
  */
@@ -66,8 +61,7 @@ export const notificationPayload = (
   event: EventStringId,
   handlerName: string | null,
   notificationType: NotificationType,
-  message: string,
-  description?: string
+  message: string
 ): NotificationPayload => {
-  return new NotificationPayload(event, handlerName, notificationType, message, description);
+  return new NotificationPayload(event, handlerName, notificationType, message);
 };
