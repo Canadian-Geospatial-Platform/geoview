@@ -6,7 +6,6 @@ import {
   TypeGeoviewLayerConfig,
   TypeGeoviewLayerType,
   SelectChangeEvent,
-  snackbarMessagePayload,
   ButtonPropsLayerPanel,
   TypeListOfLayerEntryConfig,
   TypeLayerEntryConfig,
@@ -185,12 +184,7 @@ function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
    */
   const emitErrorEmpty = (textField: string) => {
     setIsLoading(false);
-    api.event.emit(
-      snackbarMessagePayload(api.eventNames.SNACKBAR.EVENT_SNACKBAR_OPEN, mapId, {
-        type: 'string',
-        value: `${textField} ${translations[displayLanguage].errorEmpty}`,
-      })
-    );
+    api.utilities.showError(mapId, `${textField} ${translations[displayLanguage].errorEmpty}`, false);
   };
 
   /**
@@ -200,12 +194,7 @@ function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
    */
   const emitErrorNone = () => {
     setIsLoading(false);
-    api.event.emit(
-      snackbarMessagePayload(api.eventNames.SNACKBAR.EVENT_SNACKBAR_OPEN, mapId, {
-        type: 'string',
-        value: translations[displayLanguage].errorNone,
-      })
-    );
+    api.utilities.showError(mapId, translations[displayLanguage].errorNone, false);
   };
 
   /**
@@ -214,12 +203,7 @@ function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
    * @param textField label for the TextField input that cannot be empty
    */
   const emitErrorFile = () => {
-    api.event.emit(
-      snackbarMessagePayload(api.eventNames.SNACKBAR.EVENT_SNACKBAR_OPEN, mapId, {
-        type: 'string',
-        value: translations[displayLanguage].errorFile,
-      })
-    );
+    api.utilities.showError(mapId, translations[displayLanguage].errorFile, false);
   };
 
   /**
@@ -229,12 +213,7 @@ function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
    */
   const emitErrorServer = (serviceName: string) => {
     setIsLoading(false);
-    api.event.emit(
-      snackbarMessagePayload(api.eventNames.SNACKBAR.EVENT_SNACKBAR_OPEN, mapId, {
-        type: 'string',
-        value: `${serviceName} ${translations[displayLanguage].errorServer}`,
-      })
-    );
+    api.utilities.showError(mapId, `${serviceName} ${translations[displayLanguage].errorServer}`, false);
   };
 
   /**
@@ -245,14 +224,10 @@ function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
    */
   const emitErrorProj = (serviceName: string, proj: string | undefined, supportedProj: TypeJsonArray | string[]) => {
     setIsLoading(false);
-    api.event.emit(
-      snackbarMessagePayload(api.eventNames.SNACKBAR.EVENT_SNACKBAR_OPEN, mapId, {
-        type: 'string',
-        value: `${serviceName} ${translations[displayLanguage].errorProj} ${proj}, ${
-          translations[displayLanguage].only
-        } ${supportedProj.join(', ')}`,
-      })
-    );
+    const message = `${serviceName} ${translations[displayLanguage].errorProj} ${proj}, ${
+      translations[displayLanguage].only
+    } ${supportedProj.join(', ')}`;
+    api.utilities.showError(mapId, message, false);
   };
 
   /**

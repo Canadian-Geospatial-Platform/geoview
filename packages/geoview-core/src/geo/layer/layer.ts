@@ -1,6 +1,7 @@
 /* eslint-disable no-param-reassign */
 import { EventTypes } from 'ol/Observable';
 import { indexOf } from 'lodash';
+import i18n from 'i18next';
 import { GeoCore, layerConfigIsGeoCore } from './other/geocore';
 import { Vector } from './vector/vector';
 
@@ -8,14 +9,8 @@ import { api } from '@/app';
 import { EVENT_NAMES } from '@/api/events/event-types';
 
 import { Config } from '@/core/utils/config/config';
-import { generateId } from '@/core/utils/utilities';
-import {
-  layerConfigPayload,
-  payloadIsALayerConfig,
-  GeoViewLayerPayload,
-  payloadIsRemoveGeoViewLayer,
-  snackbarMessagePayload,
-} from '@/api/events/payloads';
+import { generateId, showError, replaceParams } from '@/core/utils/utilities';
+import { layerConfigPayload, payloadIsALayerConfig, GeoViewLayerPayload, payloadIsRemoveGeoViewLayer } from '@/api/events/payloads';
 import { AbstractGeoViewLayer } from './geoview-layers/abstract-geoview-layers';
 import {
   TypeBaseLayerEntryConfig,
@@ -212,13 +207,10 @@ export class Layer {
    * @param {TypeGeoviewLayerConfig} geoviewLayerConfig The geoview layer configuration in error.
    */
   private printDuplicateGeoviewLayerConfigError(geoviewLayerConfig: TypeGeoviewLayerConfig) {
-    api.event.emit(
-      snackbarMessagePayload(EVENT_NAMES.SNACKBAR.EVENT_SNACKBAR_OPEN, this.mapId, {
-        type: 'key',
-        value: 'validation.layer.usedtwice',
-        params: [geoviewLayerConfig.geoviewLayerId, this.mapId],
-      })
-    );
+    const trans = i18n.getFixedT(api.maps[this.mapId].displayLanguage);
+    const message = replaceParams([geoviewLayerConfig.geoviewLayerId, this.mapId], trans('validation.layer.usedtwice'));
+    showError(this.mapId, message);
+
     // eslint-disable-next-line no-console
     console.log(`Duplicate use of geoview layer identifier ${geoviewLayerConfig.geoviewLayerId} on map ${this.mapId}`);
   }
@@ -280,13 +272,10 @@ export class Layer {
     if (geoviewLayer.layerLoadError.length !== 0) {
       geoviewLayer.layerLoadError.forEach((loadError) => {
         const { layer, consoleMessage } = loadError;
-        api.event.emit(
-          snackbarMessagePayload(EVENT_NAMES.SNACKBAR.EVENT_SNACKBAR_OPEN, this.mapId, {
-            type: 'key',
-            value: 'validation.layer.loadfailed',
-            params: [layer, this.mapId],
-          })
-        );
+        const trans = i18n.getFixedT(api.maps[this.mapId].displayLanguage);
+        const message = replaceParams([layer, this.mapId], trans('validation.layer.loadfailed'));
+        showError(this.mapId, message);
+
         // eslint-disable-next-line no-console
         console.log(consoleMessage);
       });

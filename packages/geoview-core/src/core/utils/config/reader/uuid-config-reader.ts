@@ -1,6 +1,9 @@
 import axios, { AxiosResponse } from 'axios';
 
+import i18n from 'i18next';
 import { TypeJsonObject, TypeJsonArray, TypeJsonValue } from '@/core/types/global-types';
+
+import { api } from '@/app';
 
 import {
   TypeEsriDynamicLayerEntryConfig,
@@ -21,9 +24,8 @@ import { TypeGeoJSONLayerConfig, TypeGeoJSONLayerEntryConfig } from '@/geo/layer
 import { TypeGeoPackageLayerConfig, TypeGeoPackageLayerEntryConfig } from '@/geo/layer/geoview-layers/vector/geopackage';
 import { TypeXYZTilesConfig, TypeXYZTilesLayerEntryConfig } from '@/geo/layer/geoview-layers/raster/xyz-tiles';
 import { TypeVectorTilesConfig, TypeVectorTilesLayerEntryConfig } from '@/geo/layer/geoview-layers/raster/vector-tiles';
-import { api } from '@/app';
-import { EVENT_NAMES } from '@/api/events/event-types';
-import { snackbarMessagePayload } from '@/api/events/payloads';
+
+import { showError, replaceParams } from '@/core/utils/utilities';
 
 // ******************************************************************************************************************************
 // ******************************************************************************************************************************
@@ -399,13 +401,9 @@ export class UUIDmapConfigReader {
 
       return this.getLayerConfigFromResponse(result);
     } catch (error: unknown) {
-      api.event.emit(
-        snackbarMessagePayload(EVENT_NAMES.SNACKBAR.EVENT_SNACKBAR_OPEN, mapId, {
-          type: 'key',
-          value: 'validation.layer.loadfailed',
-          params: [error as TypeJsonValue, mapId],
-        })
-      );
+      const trans = i18n.getFixedT(api.maps[mapId].displayLanguage);
+      const message = replaceParams([error as TypeJsonValue, mapId], trans('validation.layer.loadfailed'));
+      showError(mapId, message);
     }
     return [];
   }

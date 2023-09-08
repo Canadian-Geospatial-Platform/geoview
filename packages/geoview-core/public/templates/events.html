@@ -98,51 +98,19 @@
         const mapsPosition = document.getElementsByClassName('maps-position');
 
         document.getElementById('success-notif-but').addEventListener('click', function (e) {
-          cgpv.api.event.emit(
-            cgpv.types.notificationPayload(
-              cgpv.api.eventNames.NOTIFICATIONS.NOTIFICATION_ADD,
-              'EVNT1',
-              'success',
-              'this is a success notification title',
-              'this is notification description'
-            )
-          );
+          cgpv.api.utilities.addNotificationSuccess('EVNT1', 'this is a success notification title');
         });
 
         document.getElementById('info-notif-but').addEventListener('click', function (e) {
-          cgpv.api.event.emit(
-            cgpv.types.notificationPayload(
-              cgpv.api.eventNames.NOTIFICATIONS.NOTIFICATION_ADD,
-              'EVNT1',
-              'info',
-              'this is an info notification',
-              'this is notification description'
-            )
-          );
+          cgpv.api.utilities.addNotificationMessage('EVNT1', 'this is an info notification');
         });
 
         document.getElementById('warning-notif-but').addEventListener('click', function (e) {
-          cgpv.api.event.emit(
-            cgpv.types.notificationPayload(
-              cgpv.api.eventNames.NOTIFICATIONS.NOTIFICATION_ADD,
-              'EVNT1',
-              'warning',
-              'this is an warning notification',
-              'this is notification description'
-            )
-          );
+          cgpv.api.utilities.addNotificationWarning('EVNT1', 'this is an warning notification');
         });
 
         document.getElementById('error-notif-but').addEventListener('click', function (e) {
-          cgpv.api.event.emit(
-            cgpv.types.notificationPayload(
-              cgpv.api.eventNames.NOTIFICATIONS.NOTIFICATION_ADD,
-              'EVNT1',
-              'error',
-              'this is an error notification',
-              'this is notification description'
-            )
-          );
+          cgpv.api.utilities.addNotificationError('EVNT1', 'this is an error notification');
         });
 
         // listen to map moveend event
@@ -158,41 +126,17 @@
         );
 
         // snackbar notification
-        cgpv.api.event.emit(
-          cgpv.types.snackbarMessagePayload(cgpv.api.eventNames.SNACKBAR.EVENT_SNACKBAR_OPEN, 'EVNT1', {
-            type: 'string',
-            value: 'This is my first snackbar!',
-          })
-        );
+        cgpv.api.utilities.showWarning('EVNT1', 'This is my first snackbar!');
 
         setInterval(() => {
-          cgpv.api.event.emit(
-            cgpv.types.snackbarMessagePayload(
-              cgpv.api.eventNames.SNACKBAR.EVENT_SNACKBAR_OPEN,
-              'EVNT1',
-              {
-                type: 'string',
-                value: 'I can even apply a function',
-              },
-              {},
-              {
-                label: 'Click me!',
-                action: () => {
-                  alert('You clicked me!');
-                },
-              }
-            )
-          );
+          cgpv.api.utilities.showMessage('EVNT1', 'I can even apply a function', false, {
+            label: 'Click me!',
+            action: () => {
+              alert('You clicked me!');
+            },
+          });
 
-          cgpv.api.event.emit(
-            cgpv.types.notificationPayload(
-              cgpv.api.eventNames.NOTIFICATIONS.NOTIFICATION_ADD,
-              'EVNT1',
-              'success',
-              'this is a success notification title',
-              'this is notification description'
-            )
-          );
+          cgpv.api.utilities.addNotificationSuccess('EVNT1', 'this is a success notification title');
         }, 20000);
 
         //create snippets

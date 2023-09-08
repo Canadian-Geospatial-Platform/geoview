@@ -29,7 +29,6 @@ export * from './select/custom-select';
 export * from './select/select';
 export * from './slider/slider-base';
 export * from './slider/slider';
-export * from './snackbar/snackbar-types';
 export * from './snackbar/snackbar';
 export * from './stepper/custom-stepper';
 export * from './stepper/stepper';
