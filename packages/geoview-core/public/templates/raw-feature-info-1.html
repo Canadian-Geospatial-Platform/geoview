@@ -306,16 +306,7 @@
         }"
     ></div>
 
-    <div id="resultMap">Click on a layer on the map</div>
-
-    <div>
-      <button onClick="createDetailsFeatureInfo()" id="createDetailsBtn">
-        Create Details and Feature Info
-      </button>
-  
-      <div id="detailsFeatureInfo" style="margin: 1rem 0"></div>
-    </div>
-
+    <div id="resultMap" style="margin-top: 20px;">Click on a layer on the map</div>
 
     <hr />
     <button type="button" class="collapsible">Code Snippet</button>
@@ -328,13 +319,12 @@
         console.log('api is ready');
 
         // import react and api from the core
-        const { react, createRoot, api, ui } = cgpv;
+        const { createRoot, api } = cgpv;
         
         cgpv.api.event.on(
           cgpv.api.eventNames.GET_FEATURE_INFO.ALL_QUERIES_DONE,
             (payload) => {
-                const { layerSetId, resultSets } = payload;
-
+                const { resultSets } = payload;
                 const newDetails = [];
 
                 Object.keys(resultSets).forEach((layerPath) => {
@@ -345,25 +335,15 @@
                   }
                });
 
-               // we need to display detailsResult in div id = resultMap
+               // detailsResult has React Element type
                const detailsResult = api.maps['LYR2'].details.createDetailsFooter('LYR2', newDetails);
 
-               console.log('==detailsResult ==> ', detailsResult);
+               const root = createRoot(document.getElementById("resultMap"));
+               root.render(detailsResult);
 
               },
               'LYR2/$FeatureInfoLayerSet$'
             );
-
-        // const itemAcc = {
-        //   title: "Data Table",
-        //   content: await cgpv.api.maps['mapWM1'].dataTable.createDataTableByLayerId({ layerId: layers[0], layerKey: `${layers[0]}/8`, mapId: "mapWM1" })
-        // }
-
-        // cgpv.api.addUiComponent(
-        //   "detailsFeatureInfo",
-        //   cgpv.react.createElement(cgpv.ui.elements.Accordion, { items: [itemAcc] })
-        // );
-        
       
         //create snippets
         createConfigSnippet();
