@@ -239,7 +239,7 @@ function MapDataTable({ data, layerId, mapId, layerKey, projectionConfig }: MapD
       columnList.push({
         accessorKey: key,
         header: value.alias,
-        ...(value.dataType === 'number' && { filterFn: 'between', size: 175 }),
+        ...(value.dataType === 'number' && { filterFn: 'betweenInclusive', size: 175 }),
         Header: ({ column }) => getTableHeader(column.columnDef.header),
         Cell: ({ cell }) => getCellValueWithTooltip(cell.getValue() as string),
         ...([t('dataTable.icon'), t('dataTable.zoom')].includes(value.alias) && { size: 100, enableColumnFilter: false }),
@@ -293,7 +293,6 @@ function MapDataTable({ data, layerId, mapId, layerKey, projectionConfig }: MapD
           columnPinning: { left: [t('dataTable.icon'), t('dataTable.zoom')] },
           density: 'compact',
           pagination: { pageSize: 10, pageIndex: 0 },
-          showColumnFilters: true,
         }}
         onSortingChange={setSorting}
         onColumnFiltersChange={setColumnFilters}
