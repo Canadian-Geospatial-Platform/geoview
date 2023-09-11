@@ -1,15 +1,18 @@
 /// <reference types="react" />
-import { Features } from './map-data-table';
+import { Projection } from 'ol/proj';
+import { MapDataTableDataEntrys } from './map-data-table';
 interface JSONExportButtonProps {
-    features: Features[];
+    features: MapDataTableDataEntrys[];
     layerId: string;
+    projectionConfig: Projection;
 }
 /**
  * Custom  GeoJson export button which will help to download data table data in geojson format.
- * @param {Features[]} features list of rows to be displayed in data table
+ * @param {MapDataTableDataEntrys[]} features list of rows to be displayed in data table
  * @param {string} layerId id of the layer
+ * @param {Projection} projectionConfig projection config to transfer lat long.
  * @returns {JSX.Element} returns Menu Item
  *
  */
-declare function JSONExportButton({ features, layerId }: JSONExportButtonProps): JSX.Element;
+declare function JSONExportButton({ features, layerId, projectionConfig }: JSONExportButtonProps): JSX.Element;
 export default JSONExportButton;

@@ -1,5 +1,5 @@
 import { ReactNode } from 'react';
-import { TooltipProps, ButtonProps } from '@mui/material';
+import { TooltipProps, ButtonProps, TextFieldProps } from '@mui/material';
 import { TypeJsonValue } from '@/core/types/global-types';
 import { TypeIconButtonProps } from '../icon-button/icon-button-types';
 import { PanelApi } from './panel-api';
@@ -71,6 +71,15 @@ export interface TypeButtonProps extends Omit<ButtonProps, 'type'> {
     type: 'text' | 'textWithIcon' | 'icon';
     /** Button visibility. */
     visible?: boolean;
+}
+/** ******************************************************************************************************************************
+ * Interface for the text properties used when creating a new text field.
+ */
+export interface TypeTextFieldProps extends Omit<TextFieldProps, 'type'> {
+    /** Text tooltip. */
+    tooltip?: string;
+    /** Location for tooltip. */
+    tooltipPlacement?: TooltipProps['placement'];
 }
 /** ******************************************************************************************************************************
  * Interface for the button properties used when creating a new button.

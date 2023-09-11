@@ -67,11 +67,11 @@ export declare class Vector {
      *
      * @returns {Feature} a geometry containing the id and the created geometry
      */
-    addCircle: (coordinate: Coordinate, options?: {
+    addCircle(coordinate: Coordinate, options?: {
         projection?: number;
         geometryLayout?: 'XY' | 'XYZ' | 'XYM' | 'XYZM';
         style?: TypeFeatureCircleStyle;
-    }, optionalFeatureId?: string) => Feature;
+    }, optionalFeatureId?: string): Feature;
     /**
      * Create a new marker icon
      *
@@ -107,10 +107,10 @@ export declare class Vector {
      * @param options an optional vector layer and vector source options
      * @returns {FeatureCollection} created geometry group
      */
-    createGeometryGroup: (geometryGroupId: string, options?: {
+    createGeometryGroup(geometryGroupId: string, options?: {
         vectorLayerOptions?: VectorLayerOptions<VectorSource>;
         vectorSourceOptions?: VectorSourceOptions;
-    }) => FeatureCollection;
+    }): FeatureCollection;
     /**
      * set the active geometry group (the geometry group used when adding geometries).
      * If id is not specified, use the default geometry group.
@@ -132,7 +132,7 @@ export declare class Vector {
      *
      * @returns the geomtry group
      */
-    getGeometryGroup: (geometryGroupId?: string) => FeatureCollection | undefined;
+    getGeometryGroup(geometryGroupId?: string): FeatureCollection | undefined;
     /**
      * Find the groups that contain the geometry using it's id
      *

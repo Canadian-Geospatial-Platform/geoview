@@ -27,12 +27,12 @@ export declare class API {
         GET_FEATURE_INFO: Record<import("./events").GetFeatureInfoEventKey, import("./events/event-types").EventStringId>;
         GET_LEGENDS: Record<import("./events").GetLegendsEventKey, import("./events/event-types").EventStringId>;
         GEOLOCATOR: Record<"EVENT_GEOLOCATOR_TOGGLE", import("./events/event-types").EventStringId>;
-        INTERACTION: Record<import("./events/constants/interaction").InteractionEventKey, import("./events/event-types").EventStringId>;
+        INTERACTION: Record<import("./events").InteractionEventKey, import("./events/event-types").EventStringId>;
         LAYER_SET: Record<import("./events").LayerSetEventKey, import("./events/event-types").EventStringId>;
         LAYER: Record<import("./events").LayerEventKey, import("./events/event-types").EventStringId>;
         MAP: Record<import("./events").MapEventKey, import("./events/event-types").EventStringId>;
         MARKER_ICON: Record<import("./events").MarkerIconEventKey, import("./events/event-types").EventStringId>;
-        FEATURE_HIGHLIGHT: Record<import("./events/constants/feature-highlight").FeatureHighlightEventKey, import("./events/event-types").EventStringId>;
+        FEATURE_HIGHLIGHT: Record<import("./events").FeatureHighlightEventKey, import("./events/event-types").EventStringId>;
         MODAL: Record<import("./events").ModalEventKey, import("./events/event-types").EventStringId>;
         NAVBAR: Record<import("./events").NavbarEventKey, import("./events/event-types").EventStringId>;
         OVERVIEW_MAP: Record<"EVENT_OVERVIEW_MAP_TOGGLE", import("./events/event-types").EventStringId>;
@@ -40,7 +40,7 @@ export declare class API {
         SLIDER: Record<import("./events").SliderEventKey, import("./events/event-types").EventStringId>;
         SNACKBAR: Record<"EVENT_SNACKBAR_OPEN", import("./events/event-types").EventStringId>;
         VECTOR: Record<import("./events").VectorEventKey, import("./events/event-types").EventStringId>;
-        NOTIFICATIONS: Record<import("./events/constants/notifications").NotificationsEventKey, import("./events/event-types").EventStringId>;
+        NOTIFICATIONS: Record<import("./events").NotificationsEventKey, import("./events/event-types").EventStringId>;
     };
     projection: Projection;
     projectNames: {
@@ -82,12 +82,4 @@ export declare class API {
      * including plugins
      */
     callInitCallback: () => void;
-    /**
-     * Get the instance of a map by it's ID to access API functions
-     *
-     * @param {string} mapId the map id
-     *
-     * @returns map api functions
-     */
-    map: (mapId: string) => MapViewer;
 }
