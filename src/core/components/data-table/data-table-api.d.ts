@@ -1,6 +1,4 @@
 import { ReactElement } from 'react';
-import { Projection } from 'ol/proj';
-import { Geometry } from 'ol/geom';
 import { DataTableData } from './data-table';
 import { TypeListOfLayerEntryConfig, TypeArrayOfFeatureInfoEntries, TypeFieldEntry } from '@/app';
 interface CreataDataTableProps {
@@ -34,53 +32,21 @@ export declare class DataTableApi {
      */
     getGroupKeys: (listOfLayerEntryConfig: TypeListOfLayerEntryConfig, parentLayerId: string, grouplayerKeys: string[]) => string[];
     /**
-     * Create a geometry json
-     *
-     * @param {Geometry} geometry the geometry
-     * @param {Projection} projectionConfig projection config to transfer lat long.
-     * @return {TypeJsonObject} the geometry json
-     *
-     */
-    buildGeometry: (geometry: Geometry, projectionConfig: Projection) => {
-        type: string;
-        coordinates: import("ol/coordinate").Coordinate[][];
-    } | {
-        type: string;
-        coordinates: import("ol/coordinate").Coordinate[];
-    } | {
-        type: string;
-        coordinates: import("ol/coordinate").Coordinate;
-    } | {
-        type?: undefined;
-        coordinates?: undefined;
-    };
-    /**
      * Create a data table rows
      *
      * @param {TypeArrayOfFeatureInfoEntries} arrayOfFeatureInfoEntries the properties of the data table to be created
-     * @param {Projection} projectionConfig projection config to transfer lat long.
      * @return {TypeJsonArray} the data table rows
      */
-    buildFeatureRows: (arrayOfFeatureInfoEntries: TypeArrayOfFeatureInfoEntries, projectionConfig: Projection) => {
+    buildFeatureRows: (arrayOfFeatureInfoEntries: TypeArrayOfFeatureInfoEntries) => {
         features: {
-            featureKey: {
-                featureInfoKey: string;
-                featureInfoValue: number;
-                fieldType: string;
-            };
-            featureIcon: {
-                featureInfoKey: string;
-                featureInfoValue: string;
-                fieldType: string;
-            };
-            featureActions: {
-                featureInfoKey: string;
-                featureInfoValue: string;
-                fieldType: string;
-            };
-            geometry: Geometry;
-            extent: import("ol/extent").Extent;
             rows: Record<string, string>;
+            featureKey: number;
+            geoviewLayerType: import("@/app").TypeGeoviewLayerType;
+            extent: import("ol/extent").Extent;
+            geometry: import("ol/Feature").FeatureLike | null;
+            featureIcon: HTMLCanvasElement;
+            fieldInfo: Partial<Record<string, TypeFieldEntry>>;
+            nameField: string | null;
         }[];
         fieldAliases: Record<string, TypeFieldEntry>;
     };
