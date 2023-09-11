@@ -2,13 +2,13 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 // ==========================================================================================================================
 const addBoundsPolygon = (mapId, bbox) => {
-  const newBbox = cgpv.api.map(mapId).transformAndDensifyExtent(bbox, `EPSG:${cgpv.api.map(mapId).currentProjection}`, `EPSG:4326`);
+  const newBbox = cgpv.api.maps[mapId].transformAndDensifyExtent(bbox, `EPSG:${cgpv.api.maps[mapId].currentProjection}`, `EPSG:4326`);
 
-  const { vector } = cgpv.api.map(mapId).layer;
+  const { vector } = cgpv.api.maps[mapId].layer;
   vector.setActiveGeometryGroup();
   vector.deleteGeometriesFromGroup(0);
 
-  const polygon = cgpv.api.map(mapId).layer.vector.addPolygon([newBbox], {
+  const polygon = cgpv.api.maps[mapId].layer.vector.addPolygon([newBbox], {
     style: {
       strokeColor: '#000',
       strokeWidth: 5,
@@ -142,7 +142,7 @@ const createInfoTable = (mapId, resultSetsId, resultSets) => {
         tableZoomTo.innerText = 'Zoom To Feature';
         tableZoomTo.addEventListener('click', (e) => {
           // eslint-disable-next-line no-undef
-          cgpv.api.map(mapId).zoomToExtent(row.extent);
+          cgpv.api.maps[mapId].zoomToExtent(row.extent);
           addBoundsPolygon(mapId, row.extent);
         });
         tableData.appendChild(tableZoomTo);

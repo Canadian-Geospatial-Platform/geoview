@@ -129,7 +129,7 @@ export class OgcFeature extends AbstractGeoViewVector {
    * @returns {Promise<void>} A promise that the execution is completed.
    */
   protected getServiceMetadata(): Promise<void> {
-    this.layerPhase = 'getServiceMetadata';
+    api.event.emit(LayerSetPayload.createLayerSetChangeLayerPhasePayload(this.mapId, this.geoviewLayerId, 'getServiceMetadata'));
     const promisedExecution = new Promise<void>((resolve) => {
       const metadataUrl = getLocalizedValue(this.metadataAccessPath, this.mapId);
       if (metadataUrl) {
@@ -157,7 +157,9 @@ export class OgcFeature extends AbstractGeoViewVector {
    * @param {TypeListOfLayerEntryConfig} listOfLayerEntryConfig The list of layer entries configuration to validate.
    */
   protected validateListOfLayerEntryConfig(listOfLayerEntryConfig: TypeListOfLayerEntryConfig) {
-    this.layerPhase = 'validateListOfLayerEntryConfig';
+    api.event.emit(
+      LayerSetPayload.createLayerSetChangeLayerPhasePayload(this.mapId, this.geoviewLayerId, 'validateListOfLayerEntryConfig')
+    );
     listOfLayerEntryConfig.forEach((layerEntryConfig: TypeLayerEntryConfig) => {
       const layerPath = Layer.getLayerPath(layerEntryConfig);
       if (layerEntryIsGroupLayer(layerEntryConfig)) {
@@ -197,7 +199,7 @@ export class OgcFeature extends AbstractGeoViewVector {
           layerEntryConfig.initialSettings.extent = transformExtent(
             layerEntryConfig.initialSettings.extent,
             'EPSG:4326',
-            `EPSG:${api.map(this.mapId).currentProjection}`
+            `EPSG:${api.maps[this.mapId].currentProjection}`
           );
 
         if (!layerEntryConfig.initialSettings?.bounds && foundCollection.extent?.spatial?.bbox && foundCollection.extent?.spatial?.crs) {
@@ -205,7 +207,7 @@ export class OgcFeature extends AbstractGeoViewVector {
           layerEntryConfig.initialSettings!.bounds = transformExtent(
             foundCollection.extent.spatial.bbox[0] as number[],
             get(foundCollection.extent.spatial.crs as string)!,
-            `EPSG:${api.map(this.mapId).currentProjection}`
+            `EPSG:${api.maps[this.mapId].currentProjection}`
           );
         }
         return;

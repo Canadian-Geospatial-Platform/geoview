@@ -95,7 +95,7 @@ export class ImageStatic extends AbstractGeoViewRaster {
    * @returns {Promise<void>} A promise that the execution is completed.
    */
   protected getServiceMetadata(): Promise<void> {
-    this.layerPhase = 'getServiceMetadata';
+    api.event.emit(LayerSetPayload.createLayerSetChangeLayerPhasePayload(this.mapId, this.geoviewLayerId, 'getServiceMetadata'));
     const promisedExecution = new Promise<void>((resolve) => {
       resolve();
     });
@@ -161,31 +161,28 @@ export class ImageStatic extends AbstractGeoViewRaster {
             legend: null,
           });
         else {
-          api
-            .map(this.mapId)
-            .geoviewRenderer.loadImage(legendImage as string)
-            .then((image) => {
-              if (image) {
-                const drawingCanvas = document.createElement('canvas');
-                drawingCanvas.width = image.width;
-                drawingCanvas.height = image.height;
-                const drawingContext = drawingCanvas.getContext('2d')!;
-                drawingContext.drawImage(image, 0, 0);
-                const legend: TypeLegend = {
-                  type: this.type,
-                  layerPath: Layer.getLayerPath(layerConfig!),
-                  layerName: layerConfig!.layerName,
-                  legend: drawingCanvas,
-                };
-                resolve(legend);
-              } else
-                resolve({
-                  type: this.type,
-                  layerPath: Layer.getLayerPath(layerConfig!),
-                  layerName: layerConfig!.layerName,
-                  legend: null,
-                });
-            });
+          api.maps[this.mapId].geoviewRenderer.loadImage(legendImage as string).then((image) => {
+            if (image) {
+              const drawingCanvas = document.createElement('canvas');
+              drawingCanvas.width = image.width;
+              drawingCanvas.height = image.height;
+              const drawingContext = drawingCanvas.getContext('2d')!;
+              drawingContext.drawImage(image, 0, 0);
+              const legend: TypeLegend = {
+                type: this.type,
+                layerPath: Layer.getLayerPath(layerConfig!),
+                layerName: layerConfig!.layerName,
+                legend: drawingCanvas,
+              };
+              resolve(legend);
+            } else
+              resolve({
+                type: this.type,
+                layerPath: Layer.getLayerPath(layerConfig!),
+                layerName: layerConfig!.layerName,
+                legend: null,
+              });
+          });
         }
       });
     });
@@ -201,7 +198,9 @@ export class ImageStatic extends AbstractGeoViewRaster {
    * @returns {TypeListOfLayerEntryConfig} A new list of layer entries configuration with deleted error layers.
    */
   protected validateListOfLayerEntryConfig(listOfLayerEntryConfig: TypeListOfLayerEntryConfig) {
-    this.layerPhase = 'validateListOfLayerEntryConfig';
+    api.event.emit(
+      LayerSetPayload.createLayerSetChangeLayerPhasePayload(this.mapId, this.geoviewLayerId, 'validateListOfLayerEntryConfig')
+    );
     listOfLayerEntryConfig.forEach((layerEntryConfig: TypeLayerEntryConfig) => {
       const layerPath = Layer.getLayerPath(layerEntryConfig);
       if (layerEntryIsGroupLayer(layerEntryConfig)) {
@@ -252,6 +251,7 @@ export class ImageStatic extends AbstractGeoViewRaster {
    */
   processOneLayerEntry(layerEntryConfig: TypeImageStaticLayerEntryConfig): Promise<TypeBaseRasterLayer | null> {
     const promisedVectorLayer = new Promise<TypeBaseRasterLayer | null>((resolve) => {
+      api.event.emit(LayerSetPayload.createLayerSetChangeLayerPhasePayload(this.mapId, layerEntryConfig, 'processOneLayerEntry'));
       const sourceOptions: SourceOptions = {
         url: getLocalizedValue(layerEntryConfig.source.dataAccessPath, this.mapId) || '',
       };
@@ -297,7 +297,7 @@ export class ImageStatic extends AbstractGeoViewRaster {
     const layerBounds = (layerConfig.gvLayer as ImageLayer<Static>).getSource()?.getImageExtent();
     const projection =
       (layerConfig.gvLayer as ImageLayer<Static>).getSource()?.getProjection()?.getCode().replace('EPSG:', '') ||
-      api.map(this.mapId).currentProjection;
+      api.maps[this.mapId].currentProjection;
 
     if (layerBounds) {
       const transformedBounds = transformExtent(layerBounds, `EPSG:${projection}`, `EPSG:4326`);

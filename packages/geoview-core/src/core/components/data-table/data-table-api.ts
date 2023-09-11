@@ -1,7 +1,4 @@
 import { createElement, ReactElement } from 'react';
-import { toLonLat, Projection } from 'ol/proj';
-import { Geometry, Point, Polygon, LineString, MultiPoint } from 'ol/geom';
-
 import DataTable, { DataTableData } from './data-table';
 
 import {
@@ -65,59 +62,19 @@ export class DataTableApi {
   };
 
   /**
-   * Create a geometry json
-   *
-   * @param {Geometry} geometry the geometry
-   * @param {Projection} projectionConfig projection config to transfer lat long.
-   * @return {TypeJsonObject} the geometry json
-   *
-   */
-  buildGeometry = (geometry: Geometry, projectionConfig: Projection) => {
-    if (geometry instanceof Polygon) {
-      return {
-        type: 'Polygon',
-        coordinates: geometry.getCoordinates().map((coords) => {
-          return coords.map((coord) => toLonLat(coord, projectionConfig));
-        }),
-      };
-    }
-
-    if (geometry instanceof LineString) {
-      return { type: 'LineString', coordinates: geometry.getCoordinates().map((coord) => toLonLat(coord, projectionConfig)) };
-    }
-
-    if (geometry instanceof Point) {
-      return { type: 'Point', coordinates: toLonLat(geometry.getCoordinates(), projectionConfig) };
-    }
-
-    if (geometry instanceof MultiPoint) {
-      return { type: 'MultiPoint', coordinates: geometry.getCoordinates().map((coord) => toLonLat(coord, projectionConfig)) };
-    }
-
-    return {};
-  };
-
-  /**
    * Create a data table rows
    *
    * @param {TypeArrayOfFeatureInfoEntries} arrayOfFeatureInfoEntries the properties of the data table to be created
-   * @param {Projection} projectionConfig projection config to transfer lat long.
    * @return {TypeJsonArray} the data table rows
    */
 
-  buildFeatureRows = (arrayOfFeatureInfoEntries: TypeArrayOfFeatureInfoEntries, projectionConfig: Projection) => {
+  buildFeatureRows = (arrayOfFeatureInfoEntries: TypeArrayOfFeatureInfoEntries) => {
     const features = arrayOfFeatureInfoEntries.map((feature) => {
-      const { featureKey, fieldInfo, geometry, featureIcon, extent } = feature;
-
       return {
-        featureKey: { featureInfoKey: 'featureKey', featureInfoValue: featureKey, fieldType: 'string' },
-        featureIcon: { featureInfoKey: 'Icon', featureInfoValue: featureIcon.toDataURL(), fieldType: 'string' },
-        featureActions: { featureInfoKey: 'Zoom', featureInfoValue: '', fieldType: 'string' },
-        geometry: this.buildGeometry(geometry?.getGeometry() as Geometry, projectionConfig) as Geometry,
-        extent,
-        rows: Object.keys(fieldInfo).reduce((acc, curr) => {
+        ...feature,
+        rows: Object.keys(feature.fieldInfo).reduce((acc, curr) => {
           if (curr) {
-            acc[curr] = fieldInfo[curr]?.value as string;
+            acc[curr] = feature.fieldInfo[curr]?.value as string;
           }
           return acc;
         }, {} as Record<string, string>),
@@ -149,8 +106,8 @@ export class DataTableApi {
    */
 
   createDataTableByLayerId = async ({ layerId, layerKey }: CreataDataTableProps): Promise<ReactElement | null> => {
-    const geoviewLayerInstance = api.map(this.mapId).layer.geoviewLayers[layerId];
-    const { currentProjection } = api.map(this.mapId);
+    const geoviewLayerInstance = api.maps[this.mapId].layer.geoviewLayers[layerId];
+    const { currentProjection } = api.maps[this.mapId];
     const projectionConfig = api.projection.projections[currentProjection];
 
     if (
@@ -169,10 +126,10 @@ export class DataTableApi {
           .filter((req) => req.status === 'fulfilled')
           .map((result) => {
             /* @ts-expect-error value prop is part of promise, filter function already filter fullfilled promise, still thrown type error. */
-            return this.buildFeatureRows(result.value, projectionConfig);
+            return this.buildFeatureRows(result.value);
           });
 
-        return createElement(MapDataTable, { data: data[0], layerId, mapId: this.mapId, layerKey }, []);
+        return createElement(MapDataTable, { data: data[0], layerId, mapId: this.mapId, layerKey, projectionConfig }, []);
       }
     }
     return null;

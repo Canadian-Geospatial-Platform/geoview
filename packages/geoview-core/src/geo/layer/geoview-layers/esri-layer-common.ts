@@ -29,7 +29,7 @@ import { codedValueType, rangeDomainType, LayerSetPayload } from '@/api/events/p
  * @returns {Promise<void>} A promise that the execution is completed.
  */
 export function commonGetServiceMetadata(this: EsriDynamic | EsriFeature, resolve: (value: void | PromiseLike<void>) => void) {
-  this.layerPhase = 'getServiceMetadata';
+  api.event.emit(LayerSetPayload.createLayerSetChangeLayerPhasePayload(this.mapId, this.geoviewLayerId, 'getServiceMetadata'));
   const metadataUrl = getLocalizedValue(this.metadataAccessPath, this.mapId);
   if (metadataUrl) {
     getXMLHttpRequest(`${metadataUrl}?f=json`)
@@ -59,7 +59,7 @@ export function commonGetServiceMetadata(this: EsriDynamic | EsriFeature, resolv
  * @param {TypeListOfLayerEntryConfig} listOfLayerEntryConfig The list of layer entries configuration to validate.
  */
 export function commonValidateListOfLayerEntryConfig(this: EsriDynamic | EsriFeature, listOfLayerEntryConfig: TypeListOfLayerEntryConfig) {
-  this.layerPhase = 'validateListOfLayerEntryConfig';
+  api.event.emit(LayerSetPayload.createLayerSetChangeLayerPhasePayload(this.mapId, this.geoviewLayerId, 'validateListOfLayerEntryConfig'));
   listOfLayerEntryConfig.forEach((layerEntryConfig: TypeLayerEntryConfig) => {
     const layerPath = Layer.getLayerPath(layerEntryConfig);
     if (layerEntryIsGroupLayer(layerEntryConfig)) {
@@ -110,7 +110,7 @@ export function commonValidateListOfLayerEntryConfig(this: EsriDynamic | EsriFea
           fr: this.metadata!.layers[layerId as number].name as string,
         };
         newListOfLayerEntryConfig.push(subLayerEntryConfig);
-        api.map(this.mapId).layer.registerLayerConfig(subLayerEntryConfig);
+        api.maps[this.mapId].layer.registerLayerConfig(subLayerEntryConfig);
       });
 
       if (this.registerToLayerSetListenerFunctions[Layer.getLayerPath(layerEntryConfig)])
@@ -294,7 +294,7 @@ export function commonProcessInitialSettings(
     layerEntryConfig.initialSettings.extent = transformExtent(
       layerEntryConfig.initialSettings.extent,
       'EPSG:4326',
-      `EPSG:${api.map(this.mapId).currentProjection}`
+      `EPSG:${api.maps[this.mapId].currentProjection}`
     );
 
   if (!layerEntryConfig.initialSettings?.bounds) {

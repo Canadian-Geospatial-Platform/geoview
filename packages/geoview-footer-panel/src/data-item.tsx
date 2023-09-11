@@ -21,7 +21,7 @@ export function DataItem({ mapId }: Props): JSX.Element {
   const [dataLayers, setDataLayers] = useState<string[]>([]);
 
   const updateLayers = () => {
-    if (api.map(mapId).layer?.layerOrder !== undefined) setDataLayers([...api.map(mapId).layer.layerOrder].reverse());
+    if (api.maps[mapId].layer?.layerOrder !== undefined) setDataLayers([...api.maps[mapId].layer.layerOrder].reverse());
   };
 
   useEffect(() => {
@@ -57,7 +57,7 @@ export function DataItem({ mapId }: Props): JSX.Element {
         variant: 'scrollable',
       }}
       tabs={dataLayers.map((layerId, index): TypeTabs => {
-        const geoviewLayerInstance = api.map(mapId).layer.geoviewLayers[layerId] as AbstractGeoViewVector;
+        const geoviewLayerInstance = api.maps[mapId].layer.geoviewLayers[layerId] as AbstractGeoViewVector;
         const labelValue = getLocalizedValue(geoviewLayerInstance.geoviewLayerName, mapId);
 
         // TODO: needs refactor here for group layers.
@@ -65,7 +65,7 @@ export function DataItem({ mapId }: Props): JSX.Element {
           value: index,
           label: labelValue !== undefined ? labelValue : `data-${index}`,
           content: () =>
-            api.map(mapId).dataGrid.createDataGrid({
+            api.maps[mapId].dataGrid.createDataGrid({
               layerId,
             }),
         };

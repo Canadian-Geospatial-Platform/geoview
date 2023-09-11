@@ -27,7 +27,7 @@ export function Geolocator() {
   const {
     map,
     mapFeaturesConfig: { serviceUrls },
-  } = api.map(mapId);
+  } = api.maps[mapId];
   const mapSize = map?.getSize() || [0, 0];
   const { i18n, t } = useTranslation<string>();
 
@@ -80,12 +80,12 @@ export function Geolocator() {
    * @returns void
    */
   const zoomToLocation = (coords: [number, number], bbox: [number, number, number, number]): void => {
-    const { currentProjection } = api.map(mapId);
+    const { currentProjection } = api.maps[mapId];
     const projectionConfig = api.projection.projections[currentProjection];
     if (bbox) {
       const convertedExtent1 = fromLonLat([bbox[0], bbox[1]], projectionConfig);
       const convertedExtent2 = fromLonLat([bbox[2], bbox[3]], projectionConfig);
-      api.map(mapId).zoomToExtent([...convertedExtent1, ...convertedExtent2]);
+      api.maps[mapId].zoomToExtent([...convertedExtent1, ...convertedExtent2]);
     } else {
       map.getView().animate({ center: fromLonLat(coords, projectionConfig), duration: ANIMATION_DURATION, zoom: 11 });
     }

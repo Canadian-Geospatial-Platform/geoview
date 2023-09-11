@@ -14,7 +14,7 @@ export function createMapFromConfig(divId: string, mapConfig: string) {
   const mapDiv = document.getElementById(divId);
   if (mapDiv) {
     if (mapDiv.className === 'llwp-map') {
-      api.map(divId).loadMapConfig(mapConfig);
+      api.maps[divId].loadMapConfig(mapConfig);
     } else {
       mapDiv.classList.add('llwp-map');
 

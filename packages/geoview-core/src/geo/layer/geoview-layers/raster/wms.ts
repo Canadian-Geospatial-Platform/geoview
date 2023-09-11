@@ -112,7 +112,7 @@ export class WMS extends AbstractGeoViewRaster {
    * @returns {Promise<void>} A promise that the execution is completed.
    */
   protected getServiceMetadata(): Promise<void> {
-    this.layerPhase = 'getServiceMetadata';
+    api.event.emit(LayerSetPayload.createLayerSetChangeLayerPhasePayload(this.mapId, this.geoviewLayerId, 'getServiceMetadata'));
     const promisedExecution = new Promise<void>((resolve) => {
       const metadataUrl = getLocalizedValue(this.metadataAccessPath, this.mapId);
       if (metadataUrl) {
@@ -165,14 +165,14 @@ export class WMS extends AbstractGeoViewRaster {
             });
             Promise.all(promisedArrayOfMetadata)
               .then((arrayOfMetadata) => {
-                for (i = 0; i < arrayOfMetadata.length && !arrayOfMetadata[i]; i++)
+                for (i = 0; i < arrayOfMetadata.length && !arrayOfMetadata[i]?.Capability; i++)
                   api.event.emit(
                     LayerSetPayload.createLayerSetChangeLayerStatusPayload(this.mapId, Layer.getLayerPath(layersToQuery[i]), 'error')
                   );
                 this.metadata = i < arrayOfMetadata.length ? arrayOfMetadata[i] : null;
                 if (this.metadata) {
                   for (i++; i < arrayOfMetadata.length; i++) {
-                    if (!arrayOfMetadata[i])
+                    if (!arrayOfMetadata[i]?.Capability)
                       api.event.emit(
                         LayerSetPayload.createLayerSetChangeLayerStatusPayload(this.mapId, Layer.getLayerPath(layersToQuery[i]), 'error')
                       );
@@ -236,7 +236,7 @@ export class WMS extends AbstractGeoViewRaster {
    * @returns {Promise<void>} A promise that the execution is completed.
    */
   private getXmlServiceMetadata(metadataUrl: string): Promise<void> {
-    this.layerPhase = 'getXmlServiceMetadata';
+    api.event.emit(LayerSetPayload.createLayerSetChangeLayerPhasePayload(this.mapId, this.geoviewLayerId, 'getXmlServiceMetadata'));
     const promisedExecution = new Promise<void>((resolve) => {
       const parser = new WMSCapabilities();
       fetch(metadataUrl)
@@ -406,7 +406,9 @@ export class WMS extends AbstractGeoViewRaster {
    * @param {TypeListOfLayerEntryConfig} listOfLayerEntryConfig The list of layer entries configuration to validate.
    */
   protected validateListOfLayerEntryConfig(listOfLayerEntryConfig: TypeListOfLayerEntryConfig) {
-    this.layerPhase = 'validateListOfLayerEntryConfig';
+    api.event.emit(
+      LayerSetPayload.createLayerSetChangeLayerPhasePayload(this.mapId, this.geoviewLayerId, 'validateListOfLayerEntryConfig')
+    );
     listOfLayerEntryConfig.forEach((layerEntryConfig: TypeLayerEntryConfig) => {
       const layerPath = Layer.getLayerPath(layerEntryConfig);
       if (layerEntryIsGroupLayer(layerEntryConfig)) {
@@ -421,28 +423,30 @@ export class WMS extends AbstractGeoViewRaster {
         return;
       }
 
-      api.event.emit(LayerSetPayload.createLayerSetChangeLayerStatusPayload(this.mapId, layerPath, 'loading'));
+      if ((layerEntryConfig as TypeBaseLayerEntryConfig).layerStatus !== 'error') {
+        api.event.emit(LayerSetPayload.createLayerSetChangeLayerStatusPayload(this.mapId, layerPath, 'loading'));
 
-      const layerFound = this.getLayerMetadataEntry(layerEntryConfig.layerId);
-      if (!layerFound) {
-        this.layerLoadError.push({
-          layer: layerPath,
-          consoleMessage: `Layer metadata not found (mapId:  ${this.mapId}, layerPath: ${layerPath})`,
-        });
-        api.event.emit(LayerSetPayload.createLayerSetChangeLayerStatusPayload(this.mapId, layerPath, 'error'));
-        return;
+        const layerFound = this.getLayerMetadataEntry(layerEntryConfig.layerId);
+        if (!layerFound) {
+          this.layerLoadError.push({
+            layer: layerPath,
+            consoleMessage: `Layer metadata not found (mapId:  ${this.mapId}, layerPath: ${layerPath})`,
+          });
+          api.event.emit(LayerSetPayload.createLayerSetChangeLayerStatusPayload(this.mapId, layerPath, 'error'));
+          return;
+        }
+
+        if ('Layer' in layerFound) {
+          this.createGroupLayer(layerFound, layerEntryConfig);
+          return;
+        }
+
+        if (!layerEntryConfig.layerName)
+          layerEntryConfig.layerName = {
+            en: layerFound.Title as string,
+            fr: layerFound.Title as string,
+          };
       }
-
-      if ('Layer' in layerFound) {
-        this.createGroupLayer(layerFound, layerEntryConfig);
-        return;
-      }
-
-      if (!layerEntryConfig.layerName)
-        layerEntryConfig.layerName = {
-          en: layerFound.Title as string,
-          fr: layerFound.Title as string,
-        };
     });
   }
 
@@ -465,7 +469,7 @@ export class WMS extends AbstractGeoViewRaster {
         fr: subLayer.Title as string,
       };
       newListOfLayerEntryConfig.push(subLayerEntryConfig);
-      api.map(this.mapId).layer.registerLayerConfig(subLayerEntryConfig);
+      api.maps[this.mapId].layer.registerLayerConfig(subLayerEntryConfig);
     });
 
     if (this.registerToLayerSetListenerFunctions[Layer.getLayerPath(layerEntryConfig)])
@@ -518,6 +522,7 @@ export class WMS extends AbstractGeoViewRaster {
    */
   processOneLayerEntry(layerEntryConfig: TypeBaseLayerEntryConfig): Promise<TypeBaseRasterLayer | null> {
     const promisedVectorLayer = new Promise<TypeBaseRasterLayer | null>((resolve) => {
+      api.event.emit(LayerSetPayload.createLayerSetChangeLayerPhasePayload(this.mapId, layerEntryConfig, 'processOneLayerEntry'));
       if (geoviewEntryIsWMS(layerEntryConfig)) {
         const layerCapabilities = this.getLayerMetadataEntry(layerEntryConfig.layerId);
         if (layerCapabilities) {
@@ -616,7 +621,7 @@ export class WMS extends AbstractGeoViewRaster {
             layerEntryConfig.initialSettings.extent = transformExtent(
               layerEntryConfig.initialSettings.extent,
               'EPSG:4326',
-              `EPSG:${api.map(this.mapId).currentProjection}`
+              `EPSG:${api.maps[this.mapId].currentProjection}`
             );
 
           if (!layerEntryConfig.initialSettings?.bounds && layerCapabilities.EX_GeographicBoundingBox) {
@@ -657,7 +662,7 @@ export class WMS extends AbstractGeoViewRaster {
    */
   protected getFeatureInfoAtPixel(location: Pixel, layerConfig: TypeOgcWmsLayerEntryConfig): Promise<TypeArrayOfFeatureInfoEntries> {
     const promisedQueryResult = new Promise<TypeArrayOfFeatureInfoEntries>((resolve) => {
-      const { map } = api.map(this.mapId);
+      const { map } = api.maps[this.mapId];
       resolve(this.getFeatureInfoAtCoordinate(map.getCoordinateFromPixel(location), layerConfig));
     });
     return promisedQueryResult;
@@ -675,7 +680,7 @@ export class WMS extends AbstractGeoViewRaster {
     location: Coordinate,
     layerConfig: TypeOgcWmsLayerEntryConfig
   ): Promise<TypeArrayOfFeatureInfoEntries> {
-    const convertedLocation = transform(location, `EPSG:${api.map(this.mapId).currentProjection}`, 'EPSG:4326');
+    const convertedLocation = transform(location, `EPSG:${api.maps[this.mapId].currentProjection}`, 'EPSG:4326');
     return this.getFeatureInfoAtLongLat(convertedLocation, layerConfig);
   }
 
@@ -691,8 +696,8 @@ export class WMS extends AbstractGeoViewRaster {
     const promisedQueryResult = new Promise<TypeArrayOfFeatureInfoEntries>((resolve) => {
       if (!this.getVisible(layerConfig) || !layerConfig.gvLayer) resolve([]);
       else {
-        const viewResolution = api.map(this.mapId).getView().getResolution() as number;
-        const crs = `EPSG:${api.map(this.mapId).currentProjection}`;
+        const viewResolution = api.maps[this.mapId].getView().getResolution() as number;
+        const crs = `EPSG:${api.maps[this.mapId].currentProjection}`;
         const clickCoordinate = transform(lnglat, 'EPSG:4326', crs);
         if (
           lnglat[0] < layerConfig.initialSettings!.bounds![0] ||
@@ -857,29 +862,26 @@ export class WMS extends AbstractGeoViewRaster {
           };
           resolve(styleLegend);
         } else {
-          api
-            .map(this.mapId)
-            .geoviewRenderer.loadImage(styleLegendImage as string)
-            .then((styleImage) => {
-              if (styleImage) {
-                const drawingCanvas = document.createElement('canvas');
-                drawingCanvas.width = styleImage.width;
-                drawingCanvas.height = styleImage.height;
-                const drawingContext = drawingCanvas.getContext('2d')!;
-                drawingContext.drawImage(styleImage, 0, 0);
-                styleLegend = {
-                  name: this.WMSStyles[position],
-                  legend: drawingCanvas,
-                };
-                resolve(styleLegend);
-              } else {
-                styleLegend = {
-                  name: this.WMSStyles[position],
-                  legend: null,
-                };
-                resolve(styleLegend);
-              }
-            });
+          api.maps[this.mapId].geoviewRenderer.loadImage(styleLegendImage as string).then((styleImage) => {
+            if (styleImage) {
+              const drawingCanvas = document.createElement('canvas');
+              drawingCanvas.width = styleImage.width;
+              drawingCanvas.height = styleImage.height;
+              const drawingContext = drawingCanvas.getContext('2d')!;
+              drawingContext.drawImage(styleImage, 0, 0);
+              styleLegend = {
+                name: this.WMSStyles[position],
+                legend: drawingCanvas,
+              };
+              resolve(styleLegend);
+            } else {
+              styleLegend = {
+                name: this.WMSStyles[position],
+                legend: null,
+              };
+              resolve(styleLegend);
+            }
+          });
         }
       });
     });
@@ -923,34 +925,31 @@ export class WMS extends AbstractGeoViewRaster {
           };
           resolve(legend);
         } else {
-          api
-            .map(this.mapId)
-            .geoviewRenderer.loadImage(legendImage as string)
-            .then(async (image) => {
-              if (image) {
-                const drawingCanvas = document.createElement('canvas');
-                drawingCanvas.width = image.width;
-                drawingCanvas.height = image.height;
-                const drawingContext = drawingCanvas.getContext('2d')!;
-                drawingContext.drawImage(image, 0, 0);
-                legend = {
-                  type: this.type,
-                  layerPath: Layer.getLayerPath(layerConfig!),
-                  layerName: layerConfig!.layerName,
-                  legend: drawingCanvas,
-                  styles: styleLegends.length > 1 ? styleLegends : undefined,
-                };
-                resolve(legend);
-              } else
-                legend = {
-                  type: this.type,
-                  layerPath: Layer.getLayerPath(layerConfig!),
-                  layerName: layerConfig!.layerName,
-                  legend: null,
-                  styles: styleLegends.length > 1 ? styleLegends : undefined,
-                };
+          api.maps[this.mapId].geoviewRenderer.loadImage(legendImage as string).then(async (image) => {
+            if (image) {
+              const drawingCanvas = document.createElement('canvas');
+              drawingCanvas.width = image.width;
+              drawingCanvas.height = image.height;
+              const drawingContext = drawingCanvas.getContext('2d')!;
+              drawingContext.drawImage(image, 0, 0);
+              legend = {
+                type: this.type,
+                layerPath: Layer.getLayerPath(layerConfig!),
+                layerName: layerConfig!.layerName,
+                legend: drawingCanvas,
+                styles: styleLegends.length > 1 ? styleLegends : undefined,
+              };
               resolve(legend);
-            });
+            } else
+              legend = {
+                type: this.type,
+                layerPath: Layer.getLayerPath(layerConfig!),
+                layerName: layerConfig!.layerName,
+                legend: null,
+                styles: styleLegends.length > 1 ? styleLegends : undefined,
+              };
+            resolve(legend);
+          });
         }
       });
     });

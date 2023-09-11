@@ -84,7 +84,7 @@ export function NorthArrow(props: NorthArrowProps): JSX.Element {
       const extent = map.getView().calculateExtent();
       const center: Coordinate = toLonLat(
         [(extent[0] + extent[2]) / 2, extent[1]],
-        api.projection.projections[api.map(mapId).currentProjection]
+        api.projection.projections[api.maps[mapId].currentProjection]
       );
       const pointB = { x: center[0], y: center[1] };
 
@@ -117,7 +117,7 @@ export function NorthArrow(props: NorthArrowProps): JSX.Element {
     // Check the container value for top middle of the screen
     // Convert this value to a lat long coordinate
     const pointXY = [map.getSize()![0] / 2, 1];
-    const pt = toLonLat(map.getCoordinateFromPixel(pointXY), api.projection.projections[api.map(mapId).currentProjection]);
+    const pt = toLonLat(map.getCoordinateFromPixel(pointXY), api.projection.projections[api.maps[mapId].currentProjection]);
 
     // If user is pass north, long value will start to be positive (other side of the earth).
     // This will work only for LCC Canada.
@@ -209,12 +209,9 @@ export function NorthArrow(props: NorthArrowProps): JSX.Element {
           angle = arrowAngle;
 
           // set map rotation to keep fix north
-          api
-            .map(mapId)
-            .map.getView()
-            .animate({
-              rotation: ((180 - arrowAngle) * (2 * Math.PI)) / 360,
-            });
+          api.maps[mapId].map.getView().animate({
+            rotation: ((180 - arrowAngle) * (2 * Math.PI)) / 360,
+          });
 
           setRotationAngle({ angle: 0 });
         } else {
@@ -247,13 +244,13 @@ export function NorthArrow(props: NorthArrowProps): JSX.Element {
 
       // if north is fix, trigger the map rotation
       if (payload.status) {
-        manageArrow(api.map(mapId).map);
+        manageArrow(api.maps[mapId].map);
       }
     }
   };
 
   useEffect(() => {
-    const { map } = api.map(mapId);
+    const { map } = api.maps[mapId];
 
     // listen to map moveend event
     map.on('moveend', onMapMoveEnd);
@@ -309,10 +306,10 @@ export function NorthPoleFlag(props: NorthArrowProps): JSX.Element {
   };
 
   useEffect(() => {
-    const { map } = api.map(mapId);
+    const { map } = api.maps[mapId];
     const projectionPosition = fromLonLat(
       [northPolePosition[1], northPolePosition[0]],
-      api.projection.projections[api.map(mapId).currentProjection]
+      api.projection.projections[api.maps[mapId].currentProjection]
     );
 
     // create overlay for north pole icon

@@ -217,13 +217,10 @@ export class MapViewer {
    * @returns true if all geoview layers on the map are loaded or detected as a load error.
    */
   mapIsReady(): boolean {
-    let allGeoviewLayersAreReady = true;
-    const arrayOfGeoviewLayerId = this.layer?.geoviewLayers ? Object.keys(this.layer.geoviewLayers) : [];
-    for (let i = 0; i < arrayOfGeoviewLayerId.length && allGeoviewLayersAreReady; i++) {
-      const geoviewLayer = this.layer.geoviewLayers[arrayOfGeoviewLayerId[i]];
-      allGeoviewLayersAreReady &&= geoviewLayer.allLayerEntryConfigProcessed();
-    }
-    return allGeoviewLayersAreReady && this.layer !== undefined;
+    if (this.layer === undefined) return false;
+    return !Object.keys(this.layer.geoviewLayers).find((geoviewLayerId) => {
+      return !this.layer.geoviewLayers[geoviewLayerId].allLayerEntryConfigProcessed();
+    });
   }
 
   /**

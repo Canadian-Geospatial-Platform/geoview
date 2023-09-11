@@ -138,7 +138,7 @@ export class GeoPackage extends AbstractGeoViewVector {
    * @returns {Promise<void>} A promise that the execution is completed.
    */
   protected getServiceMetadata(): Promise<void> {
-    this.layerPhase = 'getServiceMetadata';
+    api.event.emit(LayerSetPayload.createLayerSetChangeLayerPhasePayload(this.mapId, this.geoviewLayerId, 'getServiceMetadata'));
     const promisedExecution = new Promise<void>((resolve) => {
       resolve();
     });
@@ -152,7 +152,9 @@ export class GeoPackage extends AbstractGeoViewVector {
    * @param {TypeListOfLayerEntryConfig} listOfLayerEntryConfig The list of layer entries configuration to validate.
    */
   protected validateListOfLayerEntryConfig(listOfLayerEntryConfig: TypeListOfLayerEntryConfig) {
-    this.layerPhase = 'validateListOfLayerEntryConfig';
+    api.event.emit(
+      LayerSetPayload.createLayerSetChangeLayerPhasePayload(this.mapId, this.geoviewLayerId, 'validateListOfLayerEntryConfig')
+    );
     return listOfLayerEntryConfig.forEach((layerEntryConfig: TypeLayerEntryConfig) => {
       const layerPath = Layer.getLayerPath(layerEntryConfig);
       if (layerEntryIsGroupLayer(layerEntryConfig)) {
@@ -195,7 +197,7 @@ export class GeoPackage extends AbstractGeoViewVector {
           layerEntryConfig.initialSettings.extent = transformExtent(
             layerEntryConfig.initialSettings.extent,
             'EPSG:4326',
-            `EPSG:${api.map(this.mapId).currentProjection}`
+            `EPSG:${api.maps[this.mapId].currentProjection}`
           );
 
         if (!layerEntryConfig.initialSettings?.bounds && foundCollection.extent?.spatial?.bbox && foundCollection.extent?.spatial?.crs) {
@@ -203,7 +205,7 @@ export class GeoPackage extends AbstractGeoViewVector {
           layerEntryConfig.initialSettings!.bounds = transformExtent(
             foundCollection.extent.spatial.bbox[0] as number[],
             get(foundCollection.extent.spatial.crs as string)!,
-            `EPSG:${api.map(this.mapId).currentProjection}`
+            `EPSG:${api.maps[this.mapId].currentProjection}`
           );
         }
         return;
@@ -226,7 +228,7 @@ export class GeoPackage extends AbstractGeoViewVector {
     listOfLayerEntryConfig: TypeListOfLayerEntryConfig,
     layerGroup?: LayerGroup
   ): Promise<BaseLayer | null> {
-    this.layerPhase = 'processListOfLayerEntryConfig';
+    api.event.emit(LayerSetPayload.createLayerSetChangeLayerPhasePayload(this.mapId, this.geoviewLayerId, 'processListOfLayerEntryConfig'));
     const promisedListOfLayerEntryProcessed = new Promise<BaseLayer | null>((resolve) => {
       // Single group layer handled recursively
       if (listOfLayerEntryConfig.length === 1 && layerEntryIsGroupLayer(listOfLayerEntryConfig[0])) {
@@ -389,7 +391,7 @@ export class GeoPackage extends AbstractGeoViewVector {
                 const formattedFeature = format.readFeatures(feature, {
                   ...readOptions,
                   dataProjection: tableDataProjection,
-                  featureProjection: `EPSG:${api.map(this.mapId).currentProjection}`,
+                  featureProjection: `EPSG:${api.maps[this.mapId].currentProjection}`,
                 });
                 formattedFeature[0].setProperties(properties);
                 features.push(formattedFeature[0]);

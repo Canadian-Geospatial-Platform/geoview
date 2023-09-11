@@ -103,7 +103,7 @@ export function OverviewMap(): JSX.Element {
   const mapConfig = useContext(MapContext);
 
   const { mapId } = mapConfig;
-  const { map, mapFeaturesConfig } = api.map(mapId);
+  const { map, mapFeaturesConfig } = api.maps[mapId];
   const hideOnZoom = mapFeaturesConfig.overviewMap?.hideOnZoom || 0;
 
   const classes = useStyles();
@@ -124,7 +124,7 @@ export function OverviewMap(): JSX.Element {
       // wait for the view change then set the map and open the overview
       // TODO: look for better options then Timeout
       setTimeout(() => {
-        overviewMap.setMap(api.map(mapId).map);
+        overviewMap.setMap(api.maps[mapId].map);
 
         setTimeout(() => overviewMap.setCollapsed(false), 500);
       }, 2000);
@@ -140,7 +140,7 @@ export function OverviewMap(): JSX.Element {
           return item instanceof OLOverviewMap;
         })[0] as OLOverviewMap;
       if (payload.value < hideOnZoom) overviewMap.setMap(null);
-      else overviewMap.setMap(api.map(mapId).map);
+      else overviewMap.setMap(api.maps[mapId].map);
     }
   };
 
@@ -158,7 +158,7 @@ export function OverviewMap(): JSX.Element {
 
   useEffect(() => {
     // get default overview map
-    const defaultBasemap = api.map(mapId).basemap.overviewMap;
+    const defaultBasemap = api.maps[mapId].basemap.overviewMap;
 
     const toggleButton = document.createElement('div');
 
@@ -184,7 +184,7 @@ export function OverviewMap(): JSX.Element {
     });
 
     map.addControl(overviewMapControl);
-    if (api.map(mapId).map.getView().getZoom() && api.map(mapId).map.getView().getZoom()! < hideOnZoom) overviewMapControl.setMap(null);
+    if (api.maps[mapId].map.getView().getZoom() && api.maps[mapId].map.getView().getZoom()! < hideOnZoom) overviewMapControl.setMap(null);
 
     // need to recreate the i18n instance as the overviewmap is a new map inside the main map
     const i18nInstance = i18n.cloneInstance({

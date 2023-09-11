@@ -118,7 +118,7 @@ export function Scale(): JSX.Element {
   };
 
   useEffect(() => {
-    const { map } = api.map(mapId);
+    const { map } = api.maps[mapId];
 
     const scaleBar = new ScaleLine({
       units: 'metric',
@@ -136,6 +136,9 @@ export function Scale(): JSX.Element {
     map.addControl(scaleBar);
 
     map.on('moveend', onMoveEnd);
+
+    // trigger the move end manually to load the map with the scale
+    setTimeout(() => onMoveEnd({ map: api.maps[mapId].map } as MapEvent), 0);
 
     api.event.on(EVENT_NAMES.FOOTERBAR.EVENT_FOOTERBAR_EXPAND_COLLAPSE, footerbarExpandCollapseListenerFunction, mapId);
 

@@ -190,7 +190,7 @@
             customOnChange: (zoomLevel) => {
               const lat = 50;
               const lng = -95;
-              cgpv.api.map('UI1').getView().animate({ zoom: zoomLevel });
+              cgpv.api.maps['UI1'].getView().animate({ zoom: zoomLevel });
             },
           })
         );
@@ -239,13 +239,13 @@
 
       // document.addEventListener('DOMContentLoaded', async () => {
       // get map
-      // let map = cgpv.api.map('UI1');
+      // let map = cgpv.api.maps['UI1'];
 
       // zoom event to show hide layers
       // cgpv.api.event.on(
       //   cgpv.api.eventNames.MAP.EVENT_MAP_ZOOM_END,
       //   (payload) => {
-      //     let map = cgpv.api.map('UI1');
+      //     let map = cgpv.api.maps['UI1'];
       //     if (payload.value > 9) {
       //       document.getElementsByClassName('leaflet-heatmap-layer')[0].style.visibility = 'hidden';
       //       //document.getElementsByClassName('leaflet-zoom-animated')[0].style.visibility = 'visible';

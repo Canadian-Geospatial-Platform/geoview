@@ -59,7 +59,7 @@ class BasemapPanelPlugin extends AbstractPlugin {
    * Added function called after the plugin has been initialized
    */
   added = (): void => {
-    const { configObj, pluginProps } = this;
+    const { configObj, pluginProps } = this as AbstractPlugin;
 
     const { mapId } = pluginProps;
 
@@ -70,7 +70,7 @@ class BasemapPanelPlugin extends AbstractPlugin {
       // access the api calls
       const { api, ui } = cgpv;
       const { MapIcon } = ui.elements;
-      const { displayLanguage } = api.map(mapId);
+      const { displayLanguage } = api.maps[mapId];
       // button props
       const button: TypeIconButtonProps = {
         id: 'basemapPanelButton',
@@ -89,7 +89,7 @@ class BasemapPanelPlugin extends AbstractPlugin {
       };
 
       // create a new button panel on the app-bar
-      this.buttonPanel = api.map(mapId).appBarButtons.createAppbarPanel(button, panel, null);
+      this.buttonPanel = api.maps[mapId].appBarButtons.createAppbarPanel(button, panel, null);
       // set panel content
       this.buttonPanel?.panel?.changeContent(<BasemapPanel mapId={mapId} config={configObj || {}} />);
     }
@@ -99,7 +99,7 @@ class BasemapPanelPlugin extends AbstractPlugin {
    * Function called when the plugin is removed, used for clean up
    */
   removed(): void {
-    const { mapId } = this.pluginProps;
+    const { mapId } = (this as AbstractPlugin).pluginProps;
 
     // access the cgpv object from the window object
     const { cgpv } = w;
@@ -109,12 +109,12 @@ class BasemapPanelPlugin extends AbstractPlugin {
       const { api } = cgpv;
 
       if (this.buttonPanel) {
-        api.map(mapId).appBarButtons.removeAppbarPanel(this.buttonPanel.buttonPanelId);
+        api.maps[mapId].appBarButtons.removeAppbarPanel(this.buttonPanel.buttonPanelId);
 
         // reset basemaps array
-        api.map(mapId).basemap.basemaps = [];
+        api.maps[mapId].basemap.basemaps = [];
         // reload default basemap
-        api.map(mapId).basemap.loadDefaultBasemaps();
+        api.maps[mapId].basemap.loadDefaultBasemaps();
       }
     }
   }

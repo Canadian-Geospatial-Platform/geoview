@@ -167,7 +167,7 @@
           cgpv.api.eventNames.MAP.EVENT_MAP_LOADED,
             (payload) => {
               // Init map
-              initMap1(cgpv.api.map(mapId1));
+              initMap1(cgpv.api.maps[mapId1]);
               // Wire the logs
               wireLogs(cgpv.api, mapId1, 'LOGS1');
             },

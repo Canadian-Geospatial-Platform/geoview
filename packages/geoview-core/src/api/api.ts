@@ -154,15 +154,4 @@ export class API {
     // run the map ready function on each map instance
     Object.keys(this.maps).forEach((mapKey) => this.maps[mapKey].mapReady());
   };
-
-  /**
-   * Get the instance of a map by it's ID to access API functions
-   *
-   * @param {string} mapId the map id
-   *
-   * @returns map api functions
-   */
-  map = (mapId: string): MapViewer => {
-    return this.maps[mapId];
-  };
 }

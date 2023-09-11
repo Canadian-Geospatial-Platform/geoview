@@ -132,7 +132,9 @@ export class XYZTiles extends AbstractGeoViewRaster {
    * @param {TypeListOfLayerEntryConfig} listOfLayerEntryConfig The list of layer entries configuration to validate.
    */
   protected validateListOfLayerEntryConfig(listOfLayerEntryConfig: TypeListOfLayerEntryConfig) {
-    this.layerPhase = 'validateListOfLayerEntryConfig';
+    api.event.emit(
+      LayerSetPayload.createLayerSetChangeLayerPhasePayload(this.mapId, this.geoviewLayerId, 'validateListOfLayerEntryConfig')
+    );
     listOfLayerEntryConfig.forEach((layerEntryConfig: TypeLayerEntryConfig) => {
       const layerPath = Layer.getLayerPath(layerEntryConfig);
       if (layerEntryIsGroupLayer(layerEntryConfig)) {
@@ -183,6 +185,7 @@ export class XYZTiles extends AbstractGeoViewRaster {
    */
   processOneLayerEntry(layerEntryConfig: TypeXYZTilesLayerEntryConfig): Promise<TypeBaseRasterLayer | null> {
     const promisedVectorLayer = new Promise<TypeBaseRasterLayer | null>((resolve) => {
+      api.event.emit(LayerSetPayload.createLayerSetChangeLayerPhasePayload(this.mapId, layerEntryConfig, 'processOneLayerEntry'));
       const sourceOptions: SourceOptions = {
         url: getLocalizedValue(layerEntryConfig.source.dataAccessPath, this.mapId),
       };
@@ -240,7 +243,7 @@ export class XYZTiles extends AbstractGeoViewRaster {
           layerEntryConfig.initialSettings.extent = transformExtent(
             layerEntryConfig.initialSettings.extent,
             'EPSG:4326',
-            `EPSG:${api.map(this.mapId).currentProjection}`
+            `EPSG:${api.maps[this.mapId].currentProjection}`
           );
 
         resolve();
@@ -261,7 +264,7 @@ export class XYZTiles extends AbstractGeoViewRaster {
     const layerBounds = (layerConfig.gvLayer as TileLayer<XYZ>).getSource()?.getTileGrid()?.getExtent();
     const projection =
       (layerConfig.gvLayer as TileLayer<XYZ>).getSource()?.getProjection()?.getCode().replace('EPSG:', '') ||
-      api.map(this.mapId).currentProjection;
+      api.maps[this.mapId].currentProjection;
 
     if (layerBounds) {
       const transformedBounds = transformExtent(layerBounds, `EPSG:${projection}`, `EPSG:4326`);

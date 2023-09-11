@@ -45,7 +45,7 @@ export default function Location(props: LocationProps): JSX.Element {
     function success(pos: GeolocationPosition) {
       coordinates = [pos.coords.longitude, pos.coords.latitude];
 
-      const { currentProjection } = api.map(mapId);
+      const { currentProjection } = api.maps[mapId];
       const projectionConfig = api.projection.projections[currentProjection];
 
       const projectedCoords = fromLonLat(coordinates, projectionConfig);
@@ -53,7 +53,7 @@ export default function Location(props: LocationProps): JSX.Element {
 
       const options: FitOptions = { padding: [100, 100, 100, 100], maxZoom: 13, duration: 500 };
 
-      api.map(mapId).zoomToExtent(extent, options);
+      api.maps[mapId].zoomToExtent(extent, options);
     }
 
     function error(err: GeolocationPositionError) {

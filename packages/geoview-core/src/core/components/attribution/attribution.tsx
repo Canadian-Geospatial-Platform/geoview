@@ -148,7 +148,7 @@ export function Attribution(): JSX.Element {
   const { mapId } = mapConfig;
 
   useEffect(() => {
-    const { map } = api.map(mapId);
+    const { map } = api.maps[mapId];
 
     const attributionTextElement = document.getElementById(`${mapId}-attribution-text`) as HTMLElement;
 
