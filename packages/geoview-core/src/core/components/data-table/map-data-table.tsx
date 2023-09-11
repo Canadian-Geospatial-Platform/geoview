@@ -132,10 +132,11 @@ function MapDataTable({ data, layerId, mapId, layerKey, projectionConfig }: MapD
    * @param {Array} filterStrings list of filter strings.
    */
   const filterMap = debounce((filters: MRTColumnFiltersState) => {
-    const filterStrings = buildFilterList(filters).join(' and ');
+    const filterStrings = buildFilterList(filters)
+      .filter((filterValue) => filterValue.length)
+      .join(' and ');
     const geoviewLayerInstance = api.maps[mapId].layer.geoviewLayers[layerId];
     const filterLayerConfig = api.maps[mapId].layer.registeredLayers[layerKey] as TypeLayerEntryConfig;
-    console.log('new str', filterStrings);
 
     if (mapFiltered && geoviewLayerInstance !== undefined && filterLayerConfig !== undefined && filterStrings.length) {
       (geoviewLayerInstance as AbstractGeoViewVector | EsriDynamic)?.applyViewFilter(filterLayerConfig, filterStrings);
