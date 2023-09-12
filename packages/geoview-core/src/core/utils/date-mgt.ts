@@ -198,6 +198,10 @@ export class DateMgt {
    * @returns {string} UTC date
    */
   convertToUTC(date: Date | string): string {
+    // 1976-01-01T05:-00:00
+    const str = date.toString().split('T');
+    const replaceStr = str[1].replace('-', '');
+    date = `${str[0]}T${replaceStr}`;
     // check if it is a valid date
     if (typeof date === 'string' && !isValidDate(date)) throw new Error(`${INVALID_DATE} (convertToUTC)`);
 

@@ -3,7 +3,10 @@
     "interaction": "dynamic",
     "viewSettings": {
       "zoom": 3,
-      "center": [-100, 50],
+      "center": [
+        -100,
+        50
+      ],
       "projection": 3978
     },
     "basemapOptions": {
@@ -31,62 +34,38 @@
         ]
       },
       {
-        "geoviewLayerId": "geojsonLYR5",
+        "geoviewLayerId": "historical-flood",
+        "serviceDateFormat": "yyyy/mm/ddThh:mm:ssz",
         "geoviewLayerName": {
-          "en": "GeoJSON Sample"
+          "en": "Historical Flood Events (HFE)"
         },
         "metadataAccessPath": {
-          "en": "./geojson/metadata.json"
+          "en": "https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/historical_flood_event_en/MapServer"
         },
-        "geoviewLayerType": "GeoJSON",
-        "initialSettings": {
-          "visible": "yes"
-        },
+        "geoviewLayerType": "esriFeature",
         "listOfLayerEntryConfig": [
           {
-            "layerId": "polygons.json",
-            "layerName": {
-              "en": "Polygons"
-            }
-          },
-          {
-            "layerId": "lines.json",
-            "layerName": {
-              "en": "Lines"
-            }
-          },
-          {
-            "entryType": "group",
-            "layerId": "point-feature-group",
-            "layerName": {
-              "en": "point-feature-group"
-            },
-            "listOfLayerEntryConfig": [
-              {
-                "layerId": "icon_points.json",
-                "initialSettings": {
-                  "visible": "no"
-                },
-                "layerName": {
-                  "en": "Icons"
-                }
-              },
-              {
-                "layerId": "points.json",
-                "layerName": {
-                  "en": "Points"
-                }
-              }
-            ]
+            "layerId": "0"
           }
         ]
       }
     ]
   },
   "theme": "dark",
-  "navBar": ["zoom", "fullscreen", "home", "location", "export"],
-  "components": ["north-arrow", "overview-map"],
+  "navBar": [
+    "zoom",
+    "fullscreen",
+    "home",
+    "location",
+    "export"
+  ],
+  "components": [
+    "north-arrow",
+    "overview-map"
+  ],
   "corePackages": [],
   "externalPackages": [],
-  "suportedLanguages": ["en"]
+  "suportedLanguages": [
+    "en"
+  ]
 }

@@ -1,6 +1,10 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import debounce from 'lodash/debounce';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+
 import {
   MaterialReactTable,
   type MRT_ColumnDef as MRTColumnDef,
@@ -11,6 +15,7 @@ import {
   type MRT_SortingState as MRTSortingState,
   type MRT_Virtualizer as MRTVirtualizer,
   type MRT_ColumnFiltersState as MRTColumnFiltersState,
+  type MRT_Column as MRTColumn,
 } from 'material-react-table';
 import { Projection } from 'ol/proj';
 import { Extent } from 'ol/extent';
@@ -21,6 +26,7 @@ import { Box, IconButton, Tooltip, ZoomInSearchIcon } from '@/ui';
 import ExportButton from './export-button';
 import JSONExportButton from './json-export-button';
 import FilterMap from './filter-map';
+
 import {
   AbstractGeoViewVector,
   TypeLayerEntryConfig,
@@ -228,6 +234,15 @@ function MapDataTable({ data, layerId, mapId, layerKey, projectionConfig }: MapD
       </Tooltip>
     );
   };
+
+  const getDateFilter = (column: MRTColumn<ColumnsType>) => {
+    return (
+      <LocalizationProvider dateAdapter={AdapterDayjs}>
+        <DatePicker value={column.getFilterValue()} />
+      </LocalizationProvider>
+    );
+  };
+
   /**
    * Build material react data table column header.
    *
@@ -241,8 +256,19 @@ function MapDataTable({ data, layerId, mapId, layerKey, projectionConfig }: MapD
         accessorKey: key,
         header: value.alias,
         ...(value.dataType === 'number' && { filterFn: 'betweenInclusive', size: 175 }),
+
         Header: ({ column }) => getTableHeader(column.columnDef.header),
         Cell: ({ cell }) => getCellValueWithTooltip(cell.getValue() as string),
+        ...(value.dataType === 'date' && {
+          filterFn: 'lessThanOrEqualTo',
+          sortingFn: 'datetime',
+          Filter: ({ column }) => getDateFilter(column),
+          Cell: ({ cell }) => {
+            const dateValue = cell.getValue() as string;
+            console.log('celll', dateValue);
+            return dateValue;
+          },
+        }),
         ...([t('dataTable.icon'), t('dataTable.zoom')].includes(value.alias) && { size: 100, enableColumnFilter: false }),
       });
     });
