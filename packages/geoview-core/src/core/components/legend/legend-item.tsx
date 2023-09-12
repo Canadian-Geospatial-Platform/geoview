@@ -1,8 +1,7 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-/* eslint-disable react/destructuring-assignment */
 /* eslint-disable react/require-default-props */
 import React, { useEffect, useState, useRef, MutableRefObject, RefObject, Dispatch, SetStateAction } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useTheme, Theme } from '@mui/material/styles';
 import { transformExtent } from 'ol/proj';
 import { Extent } from 'ol/extent';
 import {
@@ -23,17 +22,15 @@ import {
   MoreVertIcon,
   ExpandMoreIcon,
   ExpandLessIcon,
+  OpacityIcon,
+  SliderBase,
   CheckIcon,
   MoreHorizIcon,
   BrowserNotSupportedIcon,
-  ExpandIcon,
-  KeyboardArrowDownIcon,
-  KeyboardArrowUpIcon,
-  KeyboardArrowRightIcon,
-  GroupWorkIcon,
   Grid,
 } from '@/ui';
-import { api, payloadIsLegendInfo, NumberPayload, PayloadBaseClass } from '@/app';
+import { api, EsriDynamic, payloadIsLegendInfo, NumberPayload, PayloadBaseClass } from '@/app';
+import { LegendIconList } from './legend-icon-list';
 import {
   AbstractGeoViewLayer,
   TypeLegend,
@@ -58,7 +55,6 @@ import {
 import { AbstractGeoViewVector } from '@/geo/layer/geoview-layers/vector/abstract-geoview-vector';
 import { disableScrolling } from '../../utils/utilities';
 import { WMSStyleItem } from './WMS-style-item';
-import { TypeLegendItemProps } from './types';
 
 const sxClasses = {
   expandableGroup: {
@@ -137,6 +133,20 @@ const sxClasses = {
   menuListIcon: { justifyContent: 'right', 'min-width': '56px' },
 };
 
+export interface TypeLegendItemProps {
+  layerId: string;
+  geoviewLayerInstance: AbstractGeoViewLayer;
+  subLayerId?: string;
+  layerConfigEntry?: TypeLayerEntryConfig;
+  isRemoveable?: boolean;
+  canSetOpacity?: boolean;
+  isParentVisible?: boolean;
+  toggleParentVisible?: () => void;
+  expandAll?: boolean;
+  hideAll?: boolean;
+  canZoomTo?: boolean;
+}
+
 /**
  * Legend Item for a Legend list
  *
@@ -155,10 +165,12 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
     expandAll,
     hideAll,
     canZoomTo,
-    onOpenDetails,
   } = props;
 
   const { t, i18n } = useTranslation<string>();
+  const theme: Theme & {
+    iconImg: React.CSSProperties;
+  } = useTheme();
 
   const { mapId } = geoviewLayerInstance;
   // check if layer is a clustered, so that clustering can be toggled
@@ -186,6 +198,7 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
   const [layerGeometryKey, setGeometryKey] = useState<TypeStyleGeometry | undefined>(undefined);
   const [layerName, setLayerName] = useState<string>('');
   const [menuAnchorElement, setMenuAnchorElement] = useState<null | HTMLElement>(null);
+  const [opacity, setOpacity] = useState<number>(1);
 
   const [zoom, setZoom] = useState<number>(api.maps[mapId].currentZoom);
   const splitZoom =
@@ -308,6 +321,7 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
     getLayerName();
     const isGroup = getGroupsDetails();
     if (!isGroup) {
+      setOpacity(geoviewLayerInstance.getOpacity() ?? 1);
       const legendInfo = api.maps[mapId].legend.legendLayerSet.resultSets?.[path]?.data;
       if (legendInfo) {
         getLegendDetails(legendInfo);
@@ -376,9 +390,6 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
    */
   const handleLegendClick = () => {
     setLegendOpen(!isLegendOpen);
-    if (onOpenDetails) {
-      onOpenDetails(props.layerId, props.layerConfigEntry);
-    }
   };
 
   /**
@@ -407,6 +418,20 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
     api.maps[mapId].layer.removeGeoviewLayer(geoviewLayerInstance);
     // NOTE: parent component needs to deal with removing this legend-item when recieving the layer remove event
     handleCloseMenu();
+  };
+
+  const handleOpacityOpen = () => {
+    setOpacityOpen(!isOpacityOpen);
+    handleCloseMenu();
+  };
+
+  const handleSetOpacity = (opacityValue: number | number[]) => {
+    if (!geoviewLayerInstance) return;
+    if (canCluster) {
+      geoviewLayerInstance.setOpacity((opacityValue as number) / 100, clusterLayerPath);
+      geoviewLayerInstance.setOpacity((opacityValue as number) / 100, unclusterLayerPath);
+    } else if (subLayerId) geoviewLayerInstance.setOpacity((opacityValue as number) / 100, subLayerId);
+    else geoviewLayerInstance.setOpacity((opacityValue as number) / 100);
   };
 
   const handleClusterToggle = () => {
@@ -479,13 +504,13 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
   }, []);
 
   return (
-    <Grid item sm={12}>
+    <Grid item sm={12} md={subLayerId ? 12 : 6} lg={subLayerId ? 12 : 4}>
       <ListItem>
         <ListItemButton>
           <ListItemIcon>
             {(groupItems.length > 0 || WMSStyles.length > 1) && (
-              <IconButton color="primary">
-                <GroupWorkIcon />
+              <IconButton color="primary" onClick={handleExpandGroupClick}>
+                {isGroupOpen ? <ExpandMoreIcon /> : <ExpandLessIcon />}
               </IconButton>
             )}
             {groupItems.length === 0 && isLegendOpen && (
@@ -546,29 +571,18 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
             <ListItemText primary={layerName} onClick={handleExpandGroupClick} />
           </Tooltip>
           <ListItemIcon style={{ justifyContent: 'right' }}>
-            <IconButton color="primary" onClick={() => handleToggleLayer()}>
-              <ExpandIcon />
-            </IconButton>
             {(isRemoveable || (canSetOpacity && groupItems.length === 0)) && (
               <IconButton id="setOpacityBtn" onClick={handleMoreClick} aria-label="more" aria-haspopup="true">
                 <MoreVertIcon />
               </IconButton>
             )}
-            <IconButton color="primary" onClick={() => handleToggleLayer()}>
-              {(() => {
-                if (isParentVisible === false) return <VisibilityOffIcon />;
-                if (isChecked) return <VisibilityIcon />;
-                return <VisibilityOffIcon />;
-              })()}
-            </IconButton>
-            {groupItems.length === 0 && (
-              <IconButton color="primary" onClick={handleLegendClick}>
-                <KeyboardArrowRightIcon />
-              </IconButton>
-            )}
-            {(groupItems.length > 0 || WMSStyles.length > 1) && (
-              <IconButton color="primary" onClick={handleExpandGroupClick}>
-                {isGroupOpen ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
+            {api.maps[mapId].layer.registeredLayers[clusterLayerPath]?.initialSettings?.visible !== 'always' && (
+              <IconButton color="primary" onClick={() => handleToggleLayer()}>
+                {(() => {
+                  if (isParentVisible === false) return <VisibilityOffIcon />;
+                  if (isChecked) return <VisibilityIcon />;
+                  return <VisibilityOffIcon />;
+                })()}
               </IconButton>
             )}
           </ListItemIcon>
@@ -585,7 +599,16 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
       >
         {/* Add more layer options here - zoom to, reorder */}
         {isRemoveable && <MenuItem onClick={handleRemoveLayer}>{t('legend.remove_layer')}</MenuItem>}
-
+        {canSetOpacity && groupItems.length === 0 && (
+          <MenuItem onClick={handleOpacityOpen}>
+            <ListItemText>{t('legend.toggle_opacity')}</ListItemText>
+            {isOpacityOpen && (
+              <ListItemIcon sx={sxClasses.menuListIcon}>
+                <CheckIcon fontSize="small" />
+              </ListItemIcon>
+            )}
+          </MenuItem>
+        )}
         {zoom < splitZoom && canCluster && groupItems.length === 0 && (
           <MenuItem onClick={handleClusterToggle}>
             <ListItemText> {t('legend.toggle_cluster')}</ListItemText>
@@ -603,6 +626,38 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
           </MenuItem>
         )}
       </Menu>
+      <Collapse in={isOpacityOpen} timeout="auto">
+        <Box sx={sxClasses.opacityMenu}>
+          <Tooltip title={t('legend.opacity')}>
+            <OpacityIcon />
+          </Tooltip>
+          <SliderBase min={0} max={100} value={opacity * 100} customOnChange={handleSetOpacity} />
+          <IconButton color="primary" onClick={() => setOpacityOpen(!isOpacityOpen)}>
+            <CloseIcon />
+          </IconButton>
+        </Box>
+      </Collapse>
+      <Collapse in={isLegendOpen} timeout={iconType === 'list' ? { enter: 800, exit: 800 } : 'auto'}>
+        <Box>
+          <Box sx={sxClasses.expandableIconContainer}>
+            {iconType === 'simple' && iconImg !== null && <img alt="" style={theme.iconImg} src={iconImg} />}
+            {iconType === 'list' && iconList !== null && labelList !== null && (
+              <LegendIconList
+                iconImages={iconList}
+                iconLabels={labelList}
+                isParentVisible={isChecked}
+                toggleParentVisible={() => setChecked(!isChecked)}
+                toggleMapVisible={(sublayerConfig) => {
+                  (geoviewLayerInstance as AbstractGeoViewVector | EsriDynamic).applyViewFilter(sublayerConfig);
+                }}
+                layerConfig={geometryLayerConfig as TypeVectorLayerEntryConfig}
+                mapId={mapId}
+                geometryKey={layerGeometryKey!}
+              />
+            )}
+          </Box>
+        </Box>
+      </Collapse>
       <Collapse in={isGroupOpen} timeout="auto">
         <Box>
           <Box sx={sxClasses.expandableIconContainer}>
@@ -619,7 +674,6 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
                 expandAll={expandAll}
                 hideAll={hideAll}
                 canZoomTo={canZoomTo}
-                onOpenDetails={onOpenDetails}
               />
             ))}
           </Box>

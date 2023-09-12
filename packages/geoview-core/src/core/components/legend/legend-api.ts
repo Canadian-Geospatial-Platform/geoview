@@ -1,7 +1,7 @@
 import { createElement } from 'react';
 import { LegendsLayerSet, api } from '@/app';
 import { LegendItem, TypeLegendItemProps } from './legend-item';
-import { Legend } from './legend';
+import { List } from '@/ui';
 
 export interface TypeLegendProps {
   layerIds: string[];
@@ -35,14 +35,10 @@ export class LegendApi {
 
   /**
    * Create a legend as an element
+   *
    */
   createLegend = (props: TypeLegendProps) => {
-    return createElement(Legend, {
-      ...props,
-      mapId: this.mapId,
-    });
-
-    /* const { layerIds, isRemoveable, canSetOpacity, expandAll, hideAll } = props;
+    const { layerIds, isRemoveable, canSetOpacity, expandAll, hideAll } = props;
     api.event.emit({ handlerName: `${this.mapId}/$LegendsLayerSet$`, event: api.eventNames.GET_LEGENDS.TRIGGER });
     const legendItems = layerIds.map((layerId) => {
       const geoviewLayerInstance = api.maps[this.mapId].layer.geoviewLayers[layerId];
@@ -60,7 +56,7 @@ export class LegendApi {
       }
       return null;
     });
-    return createElement('div', {}, createElement(List, { sx: { width: '100%' } }, legendItems)); */
+    return createElement('div', {}, createElement(List, { sx: { width: '100%' } }, legendItems));
   };
 
   /**
