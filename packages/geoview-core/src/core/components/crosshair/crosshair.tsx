@@ -63,10 +63,7 @@ export function Crosshair(): JSX.Element {
   const projection = api.projection.projections[api.maps[mapId].currentProjection];
 
   const store = getGeoViewStore(mapId);
-  const { setCrosshairsActive, isCrosshairsActive } = useStore(store, (state) => ({
-    setCrosshairsActive: state.setCrosshairsActive,
-    isCrosshairsActive: state.isCrosshairsActive,
-  }));
+  const isCrosshairsActive = useStore(store, (state) => state.isCrosshairsActive);
 
   // do not use useState for item used inside function only without rendering... use useRef
   const panelButtonId = useRef('');
@@ -121,7 +118,7 @@ export function Crosshair(): JSX.Element {
 
     // remove simulate click event listener
     map.getTargetElement().removeEventListener('keydown', simulateClick);
-    setCrosshairsActive(false);
+    store.setState({ isCrosshairsActive: false });
   }
 
   useEffect(() => {
@@ -132,7 +129,7 @@ export function Crosshair(): JSX.Element {
     const eventMapInKeyFocusListenerFunction = (payload: PayloadBaseClass) => {
       if (payloadIsAInKeyfocus(payload)) {
         if (interaction !== 'static') {
-          setCrosshairsActive(true);
+          store.setState({ isCrosshairsActive: true });
 
           mapContainer.addEventListener('keydown', simulateClick);
           mapContainer.addEventListener('keydown', managePanDelta);

@@ -21,7 +21,6 @@ import { EVENT_NAMES } from '@/api/events/event-types';
 import { Modal, Snackbar } from '@/ui';
 import { PayloadBaseClass, payloadIsAMapComponent, payloadIsAModal } from '@/api/events/payloads';
 import { TypeMapFeaturesConfig } from '../types/global-types';
-import { getGeoViewStore } from '../stores/stores-managers';
 
 const useStyles = makeStyles((theme) => {
   return {
@@ -77,9 +76,6 @@ interface ShellProps {
  */
 export function Shell(props: ShellProps): JSX.Element {
   const { shellId, mapFeaturesConfig } = props;
-
-  const mapId = useStore(getGeoViewStore(mapFeaturesConfig.mapId), (state) => state.mapId);
-  console.log('dfdsfd ----- in shell...... ', mapId, mapFeaturesConfig.mapId);
 
   const classes = useStyles();
 

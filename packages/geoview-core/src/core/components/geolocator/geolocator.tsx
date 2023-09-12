@@ -5,11 +5,12 @@ import CloseIcon from '@mui/icons-material/Close';
 import { useTranslation } from 'react-i18next';
 import { fromLonLat } from 'ol/proj';
 import debounce from 'lodash/debounce';
+import { useStore } from 'zustand';
 import GeoList from './geo-list';
 import { StyledInputField, sxClasses } from './styles';
 import { MapContext } from '@/core/app-start';
-import { api, payloadIsABoolean } from '@/app';
-import { EVENT_NAMES } from '@/api/events/event-types';
+import { api } from '@/app';
+import { getGeoViewStore } from '@/core/stores/stores-managers';
 
 export interface GeoListItem {
   key: string;
@@ -41,16 +42,7 @@ export function Geolocator() {
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
   // set the active (visible) or not active (hidden) from geolocator button click
-  const [active, setActive] = useState(true);
-  api.event.on(
-    EVENT_NAMES.GEOLOCATOR.EVENT_GEOLOCATOR_TOGGLE,
-    (payload) => {
-      if (payloadIsABoolean(payload)) {
-        setActive(!payload.status);
-      }
-    },
-    mapId
-  );
+  const active = useStore(getGeoViewStore(mapId), (state) => state.appBarState.geoLocatorActive);
 
   /**
    * Send fetch call to the service for given search term.
