@@ -88,6 +88,10 @@
       "notfound": "The sublayer __param__ of the GeoView layer __param__ does not exist on the server",
       "createtwice": "Can not execute twice the createGeoViewRasterLayers method for the map __param__",
       "usedtwice": "Duplicate use of geoview layer identifier [__param__] on map __param__"
+    },
+    "schema": {
+      "notFound": "A schema error was found, check the console to see what is wrong.",
+      "wrongPath": "Cannot find schema ([__param__])"
     }
   },
   "exportModal": {

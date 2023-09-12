@@ -206,7 +206,7 @@
       <h4 id="HLCONF7">7. Load config from function call</h4>
       <a class="ref-link" href="#top">Top</a>
     </div>
-    <div id="CONF7" class="llwp-map" data-lang="en"></div>
+    <div id="CONF7" class="llwp-map" data-lang="fr"></div>
     <p>This map loads it's configurations from a function call</p>
     <hr />
 
@@ -235,6 +235,22 @@
                   'labeled': true
                 },
                 'listOfGeoviewLayerConfig': [{
+                  'geoviewLayerId': 'wmsLYR1',
+                  'geoviewLayerName': {
+                    'en': 'earthquakes',
+                    'fr': 'earthquakes'
+                  },
+                  'metadataAccessPath': {
+                    'en': 'https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/earthquakes_en/MapServer/',
+                    'fr': 'https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/earthquakes_en/MapServer/'
+                  },
+                  'geoviewLayerType': 'esriDynamic',
+                  'listOfLayerEntryConfig': [
+                    {
+                      'layerId': '0'
+                    }
+                  ]
+                }, {
                   'geoviewLayerId': 'wmsLYR1',
                   'geoviewLayerName': {
                     'en': 'earthquakes',

@@ -48,8 +48,7 @@ export class NotificationsApi {
           EVENT_NAMES.NOTIFICATIONS.NOTIFICATION_ADD,
           this.mapId,
           notificationProps.notificationType,
-          notificationProps.message,
-          notificationProps.description
+          notificationProps.message
         )
       );
     }
@@ -78,8 +77,7 @@ export class NotificationsApi {
           EVENT_NAMES.NOTIFICATIONS.NOTIFICATION_REMOVE,
           this.mapId,
           notificationProps.notificationType,
-          notificationProps.message,
-          notificationProps.description
+          notificationProps.message
         )
       );
     }

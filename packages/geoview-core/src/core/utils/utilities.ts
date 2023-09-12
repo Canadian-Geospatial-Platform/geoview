@@ -14,7 +14,7 @@ import { TypeLocalizedString } from '@/geo/map/map-schema-types';
 import { EVENT_NAMES } from '@/api/events/event-types';
 
 import { Cast, TypeJsonArray, TypeJsonObject, TypeJsonValue } from '../types/global-types';
-import { snackbarMessagePayload } from '@/api/events/payloads';
+import { SnackbarType, snackbarMessagePayload } from '@/api/events/payloads';
 import { NotificationType, notificationPayload } from '@/api/events/payloads/notification-payload';
 
 /**
@@ -34,80 +34,67 @@ export function getLocalizedValue(localizedString: TypeLocalizedString | undefin
  * Reusable utility function to send event to add a notification in the notifications manager
  *
  * @param {string} mapId the map to show the message for
- * @param {string} type optional, the type of message (info, success, warning, error), info by default
+ * @param {NotificationType} type optional, the type of message (info, success, warning, error), info by default
  * @param {string} message optional, the message string
- * @param {string} description optional, the description string
  */
-function _addNotification(mapId: string, type: NotificationType = 'info', message = '', description = '') {
-  api.event.emit(notificationPayload(EVENT_NAMES.NOTIFICATIONS.NOTIFICATION_ADD, mapId, type, message, description));
+function _addNotification(mapId: string, type: NotificationType = 'info', message = '') {
+  api.event.emit(notificationPayload(EVENT_NAMES.NOTIFICATIONS.NOTIFICATION_ADD, mapId, type, message));
 }
 
 /**
  * Add a notification message
  *
  * @param {string} mapId the map to show the message for
- * @param {string} message optional, the message string
- * @param {string} description optional, the description string
+ * @param {string} message the message string
  */
-export function addNotificationMessage(mapId: string, message: string, description: string) {
+export function addNotificationMessage(mapId: string, message: string) {
   // Redirect
-  _addNotification(mapId, 'info', message, description);
+  _addNotification(mapId, 'info', message);
 }
 
 /**
  * Add a notification success
  *
  * @param {string} mapId the map to show the message for
- * @param {string} message optional, the message string
- * @param {string} description optional, the description string
+ * @param {string} message the message string
  */
-export function addNotificationSuccess(mapId: string, message: string, description: string) {
+export function addNotificationSuccess(mapId: string, message: string) {
   // Redirect
-  _addNotification(mapId, 'success', message, description);
+  _addNotification(mapId, 'success', message);
 }
 
 /**
  * Add a notification warning
  *
  * @param {string} mapId the map to show the message for
- * @param {string} message optional, the message string
- * @param {string} description optional, the description string
+ * @param {string} message the message string
  */
-export function addNotificationWarning(mapId: string, message: string, description: string) {
+export function addNotificationWarning(mapId: string, message: string) {
   // Redirect
-  _addNotification(mapId, 'warning', message, description);
+  _addNotification(mapId, 'warning', message);
 }
 
 /**
  * Add a notification error
  *
  * @param {string} mapId the map to show the message for
- * @param {string} message optional, the message string
- * @param {string} description optional, the description string
+ * @param {string} message the message string
  */
-export function addNotificationError(mapId: string, message: string, description: string) {
+export function addNotificationError(mapId: string, message: string) {
   // Redirect
-  _addNotification(mapId, 'error', message, description);
+  _addNotification(mapId, 'error', message);
 }
 
 /**
  * Reusable utility function to send event to display a message in the snackbar
  *
  * @param {string} mapId the map to show the message for
- * @param {string} message the message string
+ * @param {SnackbarType} snackbarType the  type of snackbar
+ * @param {string} message the snackbar message
+ * @param {TypeJsonObject} button optional snackbar button
  */
-function _showSnackbarMessage(mapId: string, type: string, message: string, options?: TypeJsonObject) {
-  api.event.emit(
-    snackbarMessagePayload(
-      EVENT_NAMES.SNACKBAR.EVENT_SNACKBAR_OPEN,
-      mapId,
-      {
-        type,
-        value: message,
-      },
-      options
-    )
-  );
+function _showSnackbarMessage(mapId: string, type: SnackbarType, message: string, button?: TypeJsonObject) {
+  api.event.emit(snackbarMessagePayload(EVENT_NAMES.SNACKBAR.EVENT_SNACKBAR_OPEN, mapId, type, message, button));
 }
 
 /**
@@ -116,11 +103,12 @@ function _showSnackbarMessage(mapId: string, type: string, message: string, opti
  * @param {string} mapId the map to show the message for
  * @param {string} message the message string
  * @param {string} withNotification optional, indicates if the message should also be added as a notification, default true
+ * @param {TypeJsonObject} button optional snackbar button
  */
-export function showMessage(mapId: string, message: string, withNotification = true) {
+export function showMessage(mapId: string, message: string, withNotification = true, button = {}) {
   // Redirect
-  _showSnackbarMessage(mapId, 'string', message);
-  if (withNotification) addNotificationMessage(mapId, message, '');
+  _showSnackbarMessage(mapId, 'info', message, button);
+  if (withNotification) addNotificationMessage(mapId, message);
 }
 
 /**
@@ -129,13 +117,12 @@ export function showMessage(mapId: string, message: string, withNotification = t
  * @param {string} mapId the map to show the message for
  * @param {string} message the message string
  * @param {string} withNotification optional, indicates if the message should also be added as a notification, default true
+ * @param {TypeJsonObject} button optional snackbar button
  */
-export function showSuccess(mapId: string, message: string, withNotification = true) {
+export function showSuccess(mapId: string, message: string, withNotification = true, button = {}) {
   // Redirect
-  _showSnackbarMessage(mapId, 'string', message, {
-    variant: 'success',
-  } as unknown as TypeJsonObject);
-  if (withNotification) addNotificationSuccess(mapId, message, '');
+  _showSnackbarMessage(mapId, 'success', message, button);
+  if (withNotification) addNotificationSuccess(mapId, message);
 }
 
 /**
@@ -144,13 +131,12 @@ export function showSuccess(mapId: string, message: string, withNotification = t
  * @param {string} mapId the map to show the message for
  * @param {string} message the message string
  * @param {string} withNotification optional, indicates if the message should also be added as a notification, default true
+ * @param {TypeJsonObject} button optional snackbar button
  */
-export function showWarning(mapId: string, message: string, withNotification = true) {
+export function showWarning(mapId: string, message: string, withNotification = true, button = {}) {
   // Redirect
-  _showSnackbarMessage(mapId, 'string', message, {
-    variant: 'warning',
-  } as unknown as TypeJsonObject);
-  if (withNotification) addNotificationWarning(mapId, message, '');
+  _showSnackbarMessage(mapId, 'warning', message, button);
+  if (withNotification) addNotificationWarning(mapId, message);
 }
 
 /**
@@ -159,13 +145,27 @@ export function showWarning(mapId: string, message: string, withNotification = t
  * @param {string} mapId the map to show the message for
  * @param {string} message the message string
  * @param {string} withNotification optional, indicates if the message should also be added as a notification, default true
+ * @param {TypeJsonObject} button optional snackbar button
  */
-export function showError(mapId: string, message: string, withNotification = true) {
+export function showError(mapId: string, message: string, withNotification = true, button = {}) {
   // Redirect
-  _showSnackbarMessage(mapId, 'string', message, {
-    variant: 'error',
-  } as unknown as TypeJsonObject);
-  if (withNotification) addNotificationError(mapId, message, '');
+  _showSnackbarMessage(mapId, 'error', message, button);
+  if (withNotification) addNotificationError(mapId, message);
+}
+
+/**
+ * Take string and replace parameters from array of values
+ * @param {string[]} params array of parameters to replace
+ * @param {string} message original message
+ * @returns {string} message with values replaced
+ */
+export function replaceParams(params: TypeJsonValue[] | TypeJsonArray | string[], message: string): string {
+  let tmpMess = message;
+  (params as string[]).forEach((item: string) => {
+    tmpMess = tmpMess.replace('__param__', item);
+  });
+
+  return tmpMess;
 }
 
 /**

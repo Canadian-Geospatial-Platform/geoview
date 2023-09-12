@@ -1,18 +1,18 @@
-import { useEffect, useContext } from 'react';
-
-import { useTranslation } from 'react-i18next';
+import { useEffect, useContext, forwardRef, useState } from 'react';
 
 import Button from '@mui/material/Button';
 
-import { useSnackbar } from 'notistack';
+import { Snackbar as MUISnackbar } from '@mui/material';
+import MuiAlert, { AlertProps } from '@mui/material/Alert';
 
 import { MapContext } from '@/core/app-start';
 
 import { api } from '@/app';
 import { EVENT_NAMES } from '@/api/events/event-types';
 
-import { Cast, TypeJsonArray, TypeJsonValue } from '@/core/types/global-types';
+import { Cast } from '@/core/types/global-types';
 import { PayloadBaseClass, payloadIsASnackbarMessage } from '@/api/events/payloads';
+import { SnackbarType } from '@/api/events/payloads/snackbar-message-payload';
 
 /**
  * Snackbar properties interface
@@ -39,59 +39,53 @@ function SnackButton(props: SnackButtonProps): JSX.Element {
   return <Button onClick={action}>{label}</Button>;
 }
 
+const Alert = forwardRef<HTMLDivElement, AlertProps>(function Alert(props, ref) {
+  return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
+});
+
 /**
  * Create a app/map message component to inform user on viewer state
- * We use the notistack npm module who has the following props (https://www.npmjs.com/package/notistack)
- *      - variant: 'default','success', 'warning', 'error', 'info'
+ * - severity: 'success', 'warning', 'error', 'info'
  * @param {SnackBarProps} props the snackbar properties
  */
-export function Snackbar(props: SnackBarProps): null {
+export function Snackbar(props: SnackBarProps): JSX.Element {
   const { snackBarId } = props;
-
-  const { t } = useTranslation<string>();
-
-  const { enqueueSnackbar } = useSnackbar();
 
   const mapConfig = useContext(MapContext);
 
   const { mapId } = mapConfig;
 
-  /**
-   * Take string and replace parameters from array of values
-   * @param {string[]} params array of parameters to replace
-   * @param {string} message original message
-   * @returns {string} message with values replaced
-   */
-  function replaceParams(params: TypeJsonValue[] | TypeJsonArray | string[], message: string) {
-    let tmpMess = message;
-    (params as string[]).forEach((item: string) => {
-      tmpMess = tmpMess.replace('__param__', item);
-    });
-
-    return tmpMess;
-  }
+  const [open, setOpen] = useState(false);
+  const [message, setMessage] = useState('');
+  const [snackbarType, setSnackbarType] = useState<SnackbarType>('info');
+  const [button, setButton] = useState<JSX.Element | undefined>();
 
   const snackBarOpenListenerFunction = (payload: PayloadBaseClass) => {
     if (payloadIsASnackbarMessage(payload)) {
-      const options = payload.options ? payload.options : {};
-
       // apply function if provided
-      (options.action as TypeJsonValue) = payload.button
-        ? Cast<TypeJsonValue>(
-            SnackButton({
-              label: payload.button.label as string,
-              action: Cast<() => void>(payload.button.action),
-            })
-          )
-        : null;
+      const myButton = payload.button
+        ? SnackButton({
+            label: payload.button.label as string,
+            action: Cast<() => void>(payload.button.action),
+          })
+        : undefined;
 
-      // get message
-      const message =
-        payload.message.type === 'string' ? payload.message.value : replaceParams(payload.message.params!, t(payload.message.value));
+      // get message and set type
+      setMessage(payload.message);
+      setButton(myButton);
+      setSnackbarType(payload.snackbarType);
 
       // show the notification
-      if (payload && snackBarId === payload.handlerName) enqueueSnackbar(message, options);
+      setOpen(true);
     }
+  };
+
+  const handleClose = (event?: React.SyntheticEvent | Event, reason?: string) => {
+    if (reason === 'clickaway') {
+      return;
+    }
+
+    setOpen(false);
   };
 
   useEffect(() => {
@@ -105,5 +99,22 @@ export function Snackbar(props: SnackBarProps): null {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  return null;
+  return (
+    <MUISnackbar
+      sx={{
+        position: 'absolute',
+        bottom: '40px!important',
+      }}
+      id={snackBarId}
+      anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      open={open}
+      autoHideDuration={6000}
+      onClose={handleClose}
+    >
+      <Alert onClose={handleClose} severity={snackbarType} sx={{ width: '100%' }}>
+        {message}
+        {button}
+      </Alert>
+    </MUISnackbar>
+  );
 }

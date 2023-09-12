@@ -67,15 +67,7 @@ export default function Notifications(): JSX.Element {
     const state = [...notificationsListRef.current];
     const index = state.findIndex((notif) => notif.message === payload.message && payload.notificationType === notif.notificationType);
     if (index > -1) {
-      api.event.emit(
-        notificationPayload(
-          EVENT_NAMES.NOTIFICATIONS.NOTIFICATION_REMOVE,
-          mapId,
-          payload.notificationType,
-          payload.message,
-          payload.description
-        )
-      );
+      api.event.emit(notificationPayload(EVENT_NAMES.NOTIFICATIONS.NOTIFICATION_REMOVE, mapId, payload.notificationType, payload.message));
     }
   };
 
@@ -119,7 +111,17 @@ export default function Notifications(): JSX.Element {
 
   function renderNotification(notification: NotificationDetailsType, index: number) {
     return (
-      <Box sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '8px', borderBottom: '1px solid #474747' }} key={index}>
+      <Box
+        sx={{
+          display: 'flex',
+          flexDirection: 'row',
+          alignItems: 'center',
+          gap: '8px',
+          borderBottom: '1px solid #474747',
+          padding: '10px 0px',
+        }}
+        key={index}
+      >
         <div>{getNotificationIcon(notification)}</div>
         <Box sx={{ flexGrow: 1 }}>{notification.message}</Box>
         <IconButton onClick={() => handleRemoveNotificationClick(notification)}>
@@ -165,7 +167,7 @@ export default function Notifications(): JSX.Element {
             padding: '10px 20px',
             width: '400px',
             maxHeight: '500px',
-            overflowY: 'auto',
+            overflowY: 'hidden',
             gap: '8px',
           }}
         >
@@ -173,11 +175,13 @@ export default function Notifications(): JSX.Element {
           <Typography component="div">
             <hr />
           </Typography>
-          {notificationsList.length > 0 ? (
-            notificationsList.map((details, index) => renderNotification(details, index))
-          ) : (
-            <Typography component="div">{t('appbar.no_notifications_available')}</Typography>
-          )}
+          <Box sx={{ overflowY: 'auto' }}>
+            {notificationsList.length > 0 ? (
+              notificationsList.map((details, index) => renderNotification(details, index))
+            ) : (
+              <Typography component="div">{t('appbar.no_notifications_available')}</Typography>
+            )}
+          </Box>
         </Box>
       </Popover>
     </>

@@ -7,8 +7,6 @@ import FocusTrap from 'focus-trap-react';
 
 import makeStyles from '@mui/styles/makeStyles';
 
-import { SnackbarProvider } from 'notistack';
-
 import { Map } from '../components/map/map';
 import { Appbar } from '../components/app-bar/app-bar';
 import { Navbar } from '../components/nav-bar/nav-bar';
@@ -59,9 +57,6 @@ const useStyles = makeStyles((theme) => {
         height: 'auto',
         overflow: 'visible',
       },
-    },
-    snackBar: {
-      '& .MuiButton-text': { color: theme.palette.primary.light },
     },
   };
 });
@@ -176,18 +171,7 @@ export function Shell(props: ShellProps): JSX.Element {
         {Object.keys(components).map((key: string) => {
           return <Fragment key={key}>{components[key]}</Fragment>;
         })}
-        <SnackbarProvider
-          maxSnack={3}
-          dense
-          autoHideDuration={5000}
-          anchorOrigin={{
-            vertical: 'bottom',
-            horizontal: 'center',
-          }}
-          className={classes.snackBar}
-        >
-          <Snackbar snackBarId={shellId} />
-        </SnackbarProvider>
+        <Snackbar snackBarId={shellId} />
       </div>
     </FocusTrap>
   );
