@@ -174,7 +174,6 @@ importers:
       lodash: ^4.17.21
       lodash-webpack-plugin: ^0.11.6
       material-react-table: ^1.14.0
-      notistack: ^2.0.3
       ol: ^7.4.0
       ol-mapbox-style: ^10.6.0
       prettier: ^2.6.0
@@ -224,7 +223,6 @@ importers:
       linkifyjs: 4.1.1
       lodash: 4.17.21
       material-react-table: 1.14.0_k2uxuhlnjzq4sw57nvhf6qe33m
-      notistack: 2.0.8_zsjv5mog45rt46urvcagmaty34
       ol: 7.5.1
       ol-mapbox-style: 10.7.0
       proj4: 2.9.0
@@ -7551,29 +7549,6 @@ packages:
     resolution: {integrity: sha512-6eZs5Ls3WtCisHWp9S2GUy8dqkpGi4BVSz3GaqiE6ezub0512ESztXUwUB6C6IKbQkY2Pnb/mD4WYojCRwcwLA==}
     engines: {node: '>=0.10.0'}
     dev: true
-
-  /notistack/2.0.8_zsjv5mog45rt46urvcagmaty34:
-    resolution: {integrity: sha512-/IY14wkFp5qjPgKNvAdfL5Jp6q90+MjgKTPh4c81r/lW70KeuX6b9pE/4f8L4FG31cNudbN9siiFS5ql1aSLRw==}
-    peerDependencies:
-      '@emotion/react': ^11.4.1
-      '@emotion/styled': ^11.3.0
-      '@mui/material': ^5.0.0
-      react: ^16.8.0 || ^17.0.0 || ^18.0.0
-      react-dom: ^16.8.0 || ^17.0.0 || ^18.0.0
-    peerDependenciesMeta:
-      '@emotion/react':
-        optional: true
-      '@emotion/styled':
-        optional: true
-    dependencies:
-      '@emotion/react': 11.11.1_gq4reeurwxuj4hvyerswzzqthy
-      '@emotion/styled': 11.11.0_rra5sb3jh6znd7zvpi7zwpaeky
-      '@mui/material': 5.14.7_mcyaowhjtk6juxjmabqaayfcxi
-      clsx: 1.2.1
-      hoist-non-react-statics: 3.3.2
-      react: 18.2.0
-      react-dom: 18.2.0_react@18.2.0
-    dev: false
 
   /npm-run-path/4.0.1:
     resolution: {integrity: sha512-S48WzZW777zhNIrn7gxOlISNAqi9ZC/uQFnRdbeIHhZhCA6UqpkOT8T1G7BvfdgP4Er8gF4sUbaS0i7QvIfCWw==}

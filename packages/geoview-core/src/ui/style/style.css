@@ -13,3 +13,15 @@ Hold viewer specific css not inside theme
 .llwp-map {
   position: relative !important;
 }
+
+/* FIX: fix issue when overview map is added on resize.
+        This is only a patch because we do not thing they should a a lot of resize in prod world
+*/
+.ol-overlaycontainer-stopevent .ol-overviewmap:not(:last-child) {
+  display: none;
+}
+@media (max-width: 960px) {
+  .ol-overviewmap {
+    display: none;
+  }
+}
