@@ -1,5 +1,5 @@
 /* eslint-disable react/jsx-props-no-spreading */
-import { useEffect, useState, useCallback, Fragment, useContext } from 'react';
+import { useEffect, useState, useCallback, Fragment } from 'react';
 
 import { useTranslation } from 'react-i18next';
 
@@ -18,13 +18,13 @@ import { Geolocator } from '../components/geolocator/geolocator';
 
 import { FocusTrapDialog } from './focus-trap';
 
-import { api, StoreContext } from '@/app';
+import { api } from '@/app';
 import { EVENT_NAMES } from '@/api/events/event-types';
 
 import { Modal, Snackbar } from '@/ui';
 import { PayloadBaseClass, payloadIsAMapComponent, payloadIsAModal } from '@/api/events/payloads';
 import { TypeMapFeaturesConfig } from '../types/global-types';
-import { GeoViewStoreType } from '../stores/geoview-store';
+import { getGeoViewStore } from '../stores/stores-managers';
 
 const useStyles = makeStyles((theme) => {
   return {
@@ -84,9 +84,8 @@ interface ShellProps {
 export function Shell(props: ShellProps): JSX.Element {
   const { shellId, mapFeaturesConfig } = props;
 
-  const store = useContext(StoreContext) as GeoViewStoreType;
-  const slice = useStore(store, (state) => state.mapId);
-  console.log('dfdsfd -----', slice);
+  const mapId = useStore(getGeoViewStore(mapFeaturesConfig.mapId), (state) => state.mapId);
+  console.log('dfdsfd ----- in shell...... ', mapId, mapFeaturesConfig.mapId);
 
   const classes = useStyles();
 

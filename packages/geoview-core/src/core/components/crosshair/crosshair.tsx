@@ -8,7 +8,7 @@ import { toLonLat } from 'ol/proj';
 import { KeyboardPan } from 'ol/interaction';
 
 import { useStore } from 'zustand';
-import { MapContext, StoreContext } from '@/core/app-start';
+import { MapContext } from '@/core/app-start';
 
 import { api } from '@/app';
 import { EVENT_NAMES } from '@/api/events/event-types';
@@ -16,7 +16,7 @@ import { CrosshairIcon } from './crosshair-icon';
 
 import { Fade } from '@/ui';
 import { lngLatPayload, payloadIsAInKeyfocus, PayloadBaseClass } from '@/api/events/payloads';
-import { GeoViewStoreType } from '@/core/stores/geoview-store';
+import { getGeoViewStore } from '@/core/stores/stores-managers';
 
 const useStyles = makeStyles((theme) => ({
   crosshairContainer: {
@@ -58,16 +58,15 @@ export function Crosshair(): JSX.Element {
   const classes = useStyles();
   const { t } = useTranslation<string>();
 
-  const store = useContext(StoreContext) as GeoViewStoreType;
+  const mapConfig = useContext(MapContext);
+  const { mapId, interaction } = mapConfig;
+  const projection = api.projection.projections[api.maps[mapId].currentProjection];
 
+  const store = getGeoViewStore(mapId);
   const { setCrosshairsActive, isCrosshairsActive } = useStore(store, (state) => ({
     setCrosshairsActive: state.setCrosshairsActive,
     isCrosshairsActive: state.isCrosshairsActive,
   }));
-
-  const mapConfig = useContext(MapContext);
-  const { mapId, interaction } = mapConfig;
-  const projection = api.projection.projections[api.maps[mapId].currentProjection];
 
   // do not use useState for item used inside function only without rendering... use useRef
   const panelButtonId = useRef('');

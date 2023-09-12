@@ -31,7 +31,6 @@ export const geoViewStoreDefinition = (
     isCrosshairsActive: false,
 
     setMapConfig: (config: TypeMapFeaturesConfig) => {
-      console.log('dsfsdfdfds get t');
       set({ mapConfig: config, mapId: config.mapId });
     },
 
