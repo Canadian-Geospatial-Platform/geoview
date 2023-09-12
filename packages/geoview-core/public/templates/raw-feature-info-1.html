@@ -306,7 +306,7 @@
         }"
     ></div>
 
-    <div id="resultMap" style="margin-top: 20px;">Click on a layer on the map</div>
+    <div id="resultMap" style="margin-top: 20px; margin-left: 15px;">Click on a layer on the map</div>
 
     <hr />
     <button type="button" class="collapsible">Code Snippet</button>
@@ -336,7 +336,7 @@
                });
 
                // detailsResult has React Element type
-               const detailsResult = api.maps['LYR2'].details.createDetailsFooter('LYR2', newDetails);
+               const detailsResult = api.maps['LYR2'].detailsFooter.createDetailsFooter('LYR2', newDetails);
 
                const root = createRoot(document.getElementById("resultMap"));
                root.render(detailsResult);

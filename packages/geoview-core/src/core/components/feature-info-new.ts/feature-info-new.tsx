@@ -80,6 +80,7 @@ export function FeatureInfo({ mapId, feature, selectedFeatures }: TypeFeatureInf
 
   const featureUid = getUid(feature.geometry);
 
+  const featureIconSrc = feature.featureIcon.toDataURL();
   const nameFieldValue = feature.fieldInfo[feature.nameField!]!.value as string;
   const featureInfoList: TypeFieldEntry[] = Object.keys(feature.fieldInfo).map((fieldName) => {
     return {
@@ -151,7 +152,8 @@ export function FeatureInfo({ mapId, feature, selectedFeatures }: TypeFeatureInf
             </>
           }
         >
-          <ListItemText sx={sxClasses.itemText} primary={nameFieldValue} secondary="Layer quick overview info" />
+          <img src={featureIconSrc} alt={nameFieldValue} style={{ width: '35px', height: '35px' }} />
+          <ListItemText sx={sxClasses.itemText} primary={nameFieldValue} />
         </ListItem>
       </List>
 

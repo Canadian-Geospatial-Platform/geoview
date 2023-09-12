@@ -84,9 +84,6 @@ export function LayersListFooter(props: TypeLayersListProps): JSX.Element {
   return (
     <Grid container spacing={2} style={{ backgroundColor: '#F1F2F5' }}>
       <div style={{ padding: '20px 28px 28px 28px' }}>
-        <Typography component="div" sx={sxClasses.footerTopPanlePrimary}>
-          {t('details.detailsView')}
-        </Typography>
         {layerDataInfo === null ? (
           <Typography component="p" sx={sxClasses.footerTopPanleSecondary}>
             {t('details.selectVisbleLayer')}
@@ -101,7 +98,7 @@ export function LayersListFooter(props: TypeLayersListProps): JSX.Element {
         <Grid container spacing={12} style={{ height: '300vh', overflow: 'hidden', display: 'flex' }}>
           {/* ================= LEFT PANEL ================= */}
 
-          <Grid item md={6} style={{ flex: '1', overflow: 'auto' }}>
+          <Grid item md={4} style={{ flex: '1', overflow: 'auto' }}>
             {/* <Paper style={{ height: '100vh' }}>Left Panel</Paper> */}
             <Typography component="div" sx={sxClasses.panelHeaders} style={{ paddingLeft: '20px' }}>
               {t('details.availableLayers')}
@@ -112,14 +109,16 @@ export function LayersListFooter(props: TypeLayersListProps): JSX.Element {
                   const isSelectedBorder = layerData.layerPath === layerDataInfo?.layerPath;
                   return (
                     <ListItem
+                      onClick={() => setLayerDataInfo(layerData)}
                       key={layerData.layerPath}
                       sx={{
                         padding: '8px 16px',
                         border: isSelectedBorder ? '2px solid #515BA5' : 'none',
                         borderRadius: isSelectedBorder ? '5px' : 'none',
+                        cursor: 'pointer',
                       }}
                       secondaryAction={
-                        <IconButton edge="end" aria-label="expand" onClick={() => setLayerDataInfo(layerData)}>
+                        <IconButton edge="end" aria-label="expand">
                           <KeyboardArrowRightIcon />
                         </IconButton>
                       }
@@ -137,7 +136,7 @@ export function LayersListFooter(props: TypeLayersListProps): JSX.Element {
             </Paper>
           </Grid>
           {/* ================= RIGHT PANEL ================= */}
-          <Grid item md={6}>
+          <Grid item md={8} style={{ paddingLeft: '40px' }}>
             <>
               <Typography component="div" sx={sxClasses.panelHeaders}>
                 {t('details.selectedFeature')}
