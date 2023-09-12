@@ -13,3 +13,16 @@ Hold viewer specific css not inside theme
 .llwp-map {
   position: relative !important;
 }
+
+/* FIX: fix issue when overview map is added on resize.
+        This is a patch and would better resolve managing the screen resize event and trap the control creation.
+        Because it would not happen very often in production it may be a suitable patch. 
+*/
+.ol-overlaycontainer-stopevent .ol-overviewmap:not(:last-child) {
+  display: none;
+}
+@media (max-width: 960px) {
+  .ol-overviewmap {
+    display: none;
+  }
+}
