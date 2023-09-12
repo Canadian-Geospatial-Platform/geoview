@@ -15,6 +15,8 @@ import { transform, transformExtent } from 'ol/proj';
 
 import cloneDeep from 'lodash/cloneDeep';
 
+import i18n from 'i18next';
+
 import { Cast, toJsonObject, TypeJsonArray, TypeJsonObject } from '@/core/types/global-types';
 import { AbstractGeoViewLayer, CONST_LAYER_TYPES, TypeLegend, TypeWmsLegend, TypeWmsLegendStyle } from '../abstract-geoview-layers';
 import { AbstractGeoViewRaster, TypeBaseRasterLayer } from './abstract-geoview-raster';
@@ -35,7 +37,7 @@ import {
   snackbarMessagePayload,
   LayerSetPayload,
 } from '@/api/events/payloads';
-import { getLocalizedValue, getMinOrMaxExtents, xmlToJson } from '@/core/utils/utilities';
+import { getLocalizedValue, getMinOrMaxExtents, xmlToJson, showError, replaceParams } from '@/core/utils/utilities';
 import { EVENT_NAMES } from '@/api/events/event-types';
 import { api } from '@/app';
 import { Layer } from '../../layer';
@@ -582,13 +584,10 @@ export class WMS extends AbstractGeoViewRaster {
           this.applyViewFilter(layerEntryConfig, layerEntryConfig.layerFilter ? layerEntryConfig.layerFilter : '');
           resolve(layerEntryConfig.gvLayer);
         } else {
-          api.event.emit(
-            snackbarMessagePayload(EVENT_NAMES.SNACKBAR.EVENT_SNACKBAR_OPEN, this.mapId, {
-              type: 'key',
-              value: 'validation.layer.notfound',
-              params: [layerEntryConfig.layerId, this.geoviewLayerId],
-            })
-          );
+          const trans = i18n.getFixedT(api.maps[this.mapId].displayLanguage);
+          const message = replaceParams([layerEntryConfig.layerId, this.geoviewLayerId], trans('validation.layer.notfound'));
+          showError(this.mapId, message);
+
           resolve(null);
         }
       }

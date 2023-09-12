@@ -11,7 +11,9 @@ import Geometry from 'ol/geom/Geometry';
 
 import cloneDeep from 'lodash/cloneDeep';
 
-import { generateId, getLocalizedValue, getXMLHttpRequest } from '@/core/utils/utilities';
+import i18n from 'i18next';
+
+import { generateId, getLocalizedValue, getXMLHttpRequest, showError, replaceParams } from '@/core/utils/utilities';
 import {
   TypeGeoviewLayerConfig,
   TypeListOfLayerEntryConfig,
@@ -37,7 +39,6 @@ import {
   TypeArrayOfFeatureInfoEntries,
   TypeFeatureInfoEntry,
   TypeQueryType,
-  snackbarMessagePayload,
   LayerSetPayload,
   payloadIsLayerSetUpdated,
   payloadIsRequestLayerInventory,
@@ -469,13 +470,10 @@ export abstract class AbstractGeoViewLayer {
             resolve();
           });
       } else {
-        api.event.emit(
-          snackbarMessagePayload(EVENT_NAMES.SNACKBAR.EVENT_SNACKBAR_OPEN, this.mapId, {
-            type: 'key',
-            value: 'validation.layer.createtwice',
-            params: [this.mapId],
-          })
-        );
+        const trans = i18n.getFixedT(api.maps[this.mapId].displayLanguage);
+        const message = replaceParams([this.mapId], trans('validation.layer.createtwice'));
+        showError(this.mapId, message);
+
         // eslint-disable-next-line no-console
         console.log(`Can not execute twice the createGeoViewLayers method for the map ${this.mapId}`);
         resolve();

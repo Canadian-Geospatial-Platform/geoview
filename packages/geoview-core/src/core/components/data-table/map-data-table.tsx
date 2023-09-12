@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import debounce from 'lodash/debounce';
 import {
   MaterialReactTable,
   type MRT_ColumnDef as MRTColumnDef,
@@ -16,7 +17,7 @@ import { Extent } from 'ol/extent';
 import { darken } from '@mui/material';
 import { difference } from 'lodash';
 import { getUid } from 'ol/util';
-import { Box, IconButton, ZoomInSearchIcon } from '@/ui';
+import { Box, IconButton, Tooltip, ZoomInSearchIcon } from '@/ui';
 import ExportButton from './export-button';
 import JSONExportButton from './json-export-button';
 import FilterMap from './filter-map';
@@ -67,6 +68,7 @@ interface MapDataTableProps {
 
 function MapDataTable({ data, layerId, mapId, layerKey, projectionConfig }: MapDataTableProps) {
   const mountedRef = useRef(false);
+  const FILTER_MAP_DELAY = 1000;
   const { t } = useTranslation<string>();
   const iconColumn = { alias: t('dataTable.icon'), dataType: 'string', id: t('dataTable.icon') };
   const zoomColumn = { alias: t('dataTable.zoom'), dataType: 'string', id: t('dataTable.zoom') };
@@ -74,7 +76,6 @@ function MapDataTable({ data, layerId, mapId, layerKey, projectionConfig }: MapD
   const [mapFiltered, setMapFiltered] = useState<boolean>(false);
   const [filteredData] = useState(data.features);
   const [columnFilters, setColumnFilters] = useState<MRTColumnFiltersState>([]);
-  const [filterStrings, setFilterStrings] = useState<string[]>();
 
   const [rowSelection, setRowSelection] = useState<Record<number, boolean>>({});
   const rowSelectionRef = useRef<Array<number>>([]);
@@ -104,12 +105,48 @@ function MapDataTable({ data, layerId, mapId, layerKey, projectionConfig }: MapD
   const buildFilterList = useCallback((columnFilter: MRTColumnFiltersState) => {
     if (!columnFilter.length) return [''];
     return columnFilter.map((filter) => {
-      if ((filter.value as string).match(/^-?\d+$/)) {
-        return `${filter.id} = ${filter.value}`;
+      const filterValue = filter.value;
+      const filterId = filter.id;
+      // Check if filterValue is of type array because columnfilters return array with min and max.
+      if (Array.isArray(filterValue)) {
+        let arrQuery = '';
+        const minValue = Number(filterValue[0]);
+        const maxValue = Number(filterValue[1]);
+
+        if (minValue && maxValue) {
+          arrQuery = `${filterId} >= ${filterValue[0]} and ${filterId} <= ${filterValue[1]}`;
+        } else if (minValue) {
+          arrQuery = `${filterId} > ${filterValue[0]}`;
+        } else if (maxValue) {
+          arrQuery = `${filterId} < ${filterValue[1]}`;
+        }
+        return arrQuery;
       }
-      return `${filter.id} like '%${filter.value}%'`;
+      return `upper(${filterId}) like upper('%${filter.value}%')`;
     });
   }, []);
+
+  /**
+   * Filter map based on the filter strings of data table.
+   *
+   * @param {Array} filterStrings list of filter strings.
+   */
+  const filterMap = debounce((filters: MRTColumnFiltersState) => {
+    const filterStrings = buildFilterList(filters)
+      .filter((filterValue) => filterValue.length)
+      .join(' and ');
+    const geoviewLayerInstance = api.maps[mapId].layer.geoviewLayers[layerId];
+    const filterLayerConfig = api.maps[mapId].layer.registeredLayers[layerKey] as TypeLayerEntryConfig;
+
+    if (mapFiltered && geoviewLayerInstance !== undefined && filterLayerConfig !== undefined && filterStrings.length) {
+      (geoviewLayerInstance as AbstractGeoViewVector | EsriDynamic)?.applyViewFilter(filterLayerConfig, filterStrings);
+    } else {
+      (geoviewLayerInstance as AbstractGeoViewVector | EsriDynamic)?.applyViewFilter(filterLayerConfig, '');
+    }
+  }, FILTER_MAP_DELAY);
+
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const debouncedColumnFilters = useCallback((filters: MRTColumnFiltersState) => filterMap(filters), [mapFiltered]);
 
   useEffect(() => {
     // scroll to the top of the table when the sorting changes
@@ -121,33 +158,19 @@ function MapDataTable({ data, layerId, mapId, layerKey, projectionConfig }: MapD
     }
   }, [sorting]);
 
+  // update map when column filters change
   useEffect(() => {
-    if (columnFilters && mountedRef.current) {
-      const filterList = buildFilterList(columnFilters);
-      setFilterStrings(filterList);
+    if (columnFilters && mountedRef.current && mapFiltered) {
+      debouncedColumnFilters(columnFilters);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [columnFilters]);
 
+  // Update map when filter map switch is toggled.
   useEffect(() => {
-    const geoviewLayerInstance = api.maps[mapId].layer.geoviewLayers[layerId];
-    const filterLayerConfig = api.maps[mapId].layer.registeredLayers[layerKey] as TypeLayerEntryConfig;
-    // filter map when filterMap is toggled true.
-    if (mapFiltered && filterStrings) {
-      filterStrings.forEach((filterString) => {
-        if (mapFiltered && geoviewLayerInstance !== undefined && filterLayerConfig !== undefined) {
-          (geoviewLayerInstance as AbstractGeoViewVector | EsriDynamic)?.applyViewFilter(filterLayerConfig, filterString);
-        } else {
-          (geoviewLayerInstance as AbstractGeoViewVector | EsriDynamic)?.applyViewFilter(filterLayerConfig, '');
-        }
-      });
-    }
-    // clear filters filtering is off
-    if (!mapFiltered) {
-      (geoviewLayerInstance as AbstractGeoViewVector | EsriDynamic)?.applyViewFilter(filterLayerConfig, '');
-    }
+    filterMap(columnFilters);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [mapFiltered, filterStrings]);
+  }, [mapFiltered]);
 
   useEffect(() => {
     // This is created to counter column filter that is fired when component is mounted.
@@ -192,6 +215,20 @@ function MapDataTable({ data, layerId, mapId, layerKey, projectionConfig }: MapD
   }, []);
 
   /**
+   * Create data table body cell with tooltip
+   * @param {string} cellValue cell value to be displayed in cell
+   * @returns JSX.Element
+   */
+  const getCellValueWithTooltip = (cellValue: string) => {
+    return (
+      <Tooltip title={cellValue}>
+        <Box component="span" sx={{ 'white-space': 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>
+          {cellValue}
+        </Box>
+      </Tooltip>
+    );
+  };
+  /**
    * Build material react data table column header.
    *
    * @param {object} data.fieldAliases object values transformed into required key value property of material react data table
@@ -203,7 +240,9 @@ function MapDataTable({ data, layerId, mapId, layerKey, projectionConfig }: MapD
       columnList.push({
         accessorKey: key,
         header: value.alias,
+        ...(value.dataType === 'number' && { filterFn: 'betweenInclusive', size: 175 }),
         Header: ({ column }) => getTableHeader(column.columnDef.header),
+        Cell: ({ cell }) => getCellValueWithTooltip(cell.getValue() as string),
         ...([t('dataTable.icon'), t('dataTable.zoom')].includes(value.alias) && { size: 100, enableColumnFilter: false }),
       });
     });
@@ -271,10 +310,10 @@ function MapDataTable({ data, layerId, mapId, layerKey, projectionConfig }: MapD
             </ExportButton>
           </Box>
         )}
+        enableFilterMatchHighlighting
         enableBottomToolbar={false}
         enableColumnResizing
         enableColumnVirtualization
-        enableGlobalFilterModes
         enablePagination={false}
         enablePinning
         enableRowVirtualization
@@ -282,6 +321,11 @@ function MapDataTable({ data, layerId, mapId, layerKey, projectionConfig }: MapD
         rowVirtualizerInstanceRef={rowVirtualizerInstanceRef}
         rowVirtualizerProps={{ overscan: 5 }}
         columnVirtualizerProps={{ overscan: 2 }}
+        muiTableHeadCellFilterTextFieldProps={{
+          sx: () => ({
+            minWidth: '50px',
+          }),
+        }}
         muiTableBodyProps={{
           sx: (theme) => ({
             // stripe style of table

@@ -137,6 +137,9 @@ export function Scale(): JSX.Element {
 
     map.on('moveend', onMoveEnd);
 
+    // trigger the move end manually to load the map with the scale
+    setTimeout(() => onMoveEnd({ map: api.maps[mapId].map } as MapEvent), 0);
+
     api.event.on(EVENT_NAMES.FOOTERBAR.EVENT_FOOTERBAR_EXPAND_COLLAPSE, footerbarExpandCollapseListenerFunction, mapId);
 
     return () => {
