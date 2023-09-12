@@ -1,5 +1,5 @@
 /* eslint-disable react/no-danger */
-import { useEffect, useState, useRef, useContext } from 'react';
+import { useEffect, useRef, useContext } from 'react';
 
 import { useTranslation } from 'react-i18next';
 
@@ -7,14 +7,16 @@ import makeStyles from '@mui/styles/makeStyles';
 import { toLonLat } from 'ol/proj';
 import { KeyboardPan } from 'ol/interaction';
 
-import { MapContext } from '@/core/app-start';
+import { useStore } from 'zustand';
+import { MapContext, StoreContext } from '@/core/app-start';
 
 import { api } from '@/app';
 import { EVENT_NAMES } from '@/api/events/event-types';
 import { CrosshairIcon } from './crosshair-icon';
 
 import { Fade } from '@/ui';
-import { lngLatPayload, booleanPayload, payloadIsAInKeyfocus, PayloadBaseClass } from '@/api/events/payloads';
+import { lngLatPayload, payloadIsAInKeyfocus, PayloadBaseClass } from '@/api/events/payloads';
+import { GeoViewStoreType } from '@/core/stores/geoview-store';
 
 const useStyles = makeStyles((theme) => ({
   crosshairContainer: {
@@ -56,15 +58,18 @@ export function Crosshair(): JSX.Element {
   const classes = useStyles();
   const { t } = useTranslation<string>();
 
+  const store = useContext(StoreContext) as GeoViewStoreType;
+
+  const { setCrosshairsActive, isCrosshairsActive } = useStore(store, (state) => ({
+    setCrosshairsActive: state.setCrosshairsActive,
+    isCrosshairsActive: state.isCrosshairsActive,
+  }));
+
   const mapConfig = useContext(MapContext);
   const { mapId, interaction } = mapConfig;
   const projection = api.projection.projections[api.maps[mapId].currentProjection];
 
-  // tracks if the last action was done through a keyboard (map navigation) or mouse (mouse movement)
-  const [isCrosshairsActive, setCrosshairsActive] = useState(false);
-
   // do not use useState for item used inside function only without rendering... use useRef
-  const isCrosshairsActiveValue = useRef(false);
   const panelButtonId = useRef('');
 
   let panDelta = 128;
@@ -80,7 +85,7 @@ export function Crosshair(): JSX.Element {
 
       const lnglatPoint = toLonLat(map.getView().getCenter()!, projection);
 
-      if (isCrosshairsActiveValue.current) {
+      if (isCrosshairsActive) {
         // emit an event with the lnglat point
         api.event.emit(lngLatPayload(EVENT_NAMES.MAP.EVENT_MAP_CROSSHAIR_ENTER, mapId, lnglatPoint));
       }
@@ -118,8 +123,6 @@ export function Crosshair(): JSX.Element {
     // remove simulate click event listener
     map.getTargetElement().removeEventListener('keydown', simulateClick);
     setCrosshairsActive(false);
-    isCrosshairsActiveValue.current = false;
-    api.event.emit(booleanPayload(EVENT_NAMES.MAP.EVENT_MAP_CROSSHAIR_ENABLE_DISABLE, mapId, false));
   }
 
   useEffect(() => {
@@ -131,8 +134,6 @@ export function Crosshair(): JSX.Element {
       if (payloadIsAInKeyfocus(payload)) {
         if (interaction !== 'static') {
           setCrosshairsActive(true);
-          isCrosshairsActiveValue.current = true;
-          api.event.emit(booleanPayload(EVENT_NAMES.MAP.EVENT_MAP_CROSSHAIR_ENABLE_DISABLE, mapId, true));
 
           mapContainer.addEventListener('keydown', simulateClick);
           mapContainer.addEventListener('keydown', managePanDelta);

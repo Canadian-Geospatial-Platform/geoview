@@ -1,5 +1,5 @@
 /* eslint-disable react/jsx-props-no-spreading */
-import { useEffect, useState, useCallback, Fragment } from 'react';
+import { useEffect, useState, useCallback, Fragment, useContext } from 'react';
 
 import { useTranslation } from 'react-i18next';
 
@@ -9,6 +9,7 @@ import makeStyles from '@mui/styles/makeStyles';
 
 import { SnackbarProvider } from 'notistack';
 
+import { useStore } from 'zustand';
 import { Map } from '../components/map/map';
 import { Appbar } from '../components/app-bar/app-bar';
 import { Navbar } from '../components/nav-bar/nav-bar';
@@ -17,12 +18,13 @@ import { Geolocator } from '../components/geolocator/geolocator';
 
 import { FocusTrapDialog } from './focus-trap';
 
-import { api } from '@/app';
+import { api, StoreContext } from '@/app';
 import { EVENT_NAMES } from '@/api/events/event-types';
 
 import { Modal, Snackbar } from '@/ui';
 import { PayloadBaseClass, payloadIsAMapComponent, payloadIsAModal } from '@/api/events/payloads';
 import { TypeMapFeaturesConfig } from '../types/global-types';
+import { GeoViewStoreType } from '../stores/geoview-store';
 
 const useStyles = makeStyles((theme) => {
   return {
@@ -81,6 +83,10 @@ interface ShellProps {
  */
 export function Shell(props: ShellProps): JSX.Element {
   const { shellId, mapFeaturesConfig } = props;
+
+  const store = useContext(StoreContext) as GeoViewStoreType;
+  const slice = useStore(store, (state) => state.mapId);
+  console.log('dfdsfd -----', slice);
 
   const classes = useStyles();
 

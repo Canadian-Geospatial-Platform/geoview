@@ -1,4 +1,4 @@
-import React, { Suspense, useMemo } from 'react';
+import React, { createContext, Suspense, useMemo } from 'react';
 
 import './translation/i18n';
 import i18n from 'i18next';
@@ -7,11 +7,14 @@ import { I18nextProvider } from 'react-i18next';
 import { ThemeProvider, Theme, StyledEngineProvider } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 
+import { createStore, StoreApi } from 'zustand';
 import { Shell } from './containers/shell';
 import { getTheme, cgpvTheme } from '../ui/style/theme';
 import { MapViewer } from '@/geo/map/map';
 import { TypeMapFeaturesConfig } from './types/global-types';
 import { TypeInteraction } from '../app';
+import { GeoViewState, geoViewStoreDefinition } from './stores/geoview-store';
+import { initializeEventProcessors } from '@/api/eventProcessors';
 
 declare module '@mui/styles/defaultTheme' {
   // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -24,6 +27,8 @@ export const MapContext = React.createContext<TypeMapContext>({
   mapId: '',
   interaction: 'dynamic',
 });
+
+export const StoreContext = createContext<StoreApi<GeoViewState> | undefined>(undefined);
 
 /**
  * Type used for the map context
@@ -46,6 +51,10 @@ interface AppStartProps {
 function AppStart(props: AppStartProps): JSX.Element {
   const { mapFeaturesConfig } = props;
 
+  const geoViewStore = createStore<GeoViewState>(geoViewStoreDefinition);
+  geoViewStore.getState().setMapConfig(mapFeaturesConfig);
+  initializeEventProcessors(geoViewStore);
+
   const mapContextValue = useMemo(() => {
     return { mapId: mapFeaturesConfig.mapId as string, interaction: mapFeaturesConfig.map.interaction };
   }, [mapFeaturesConfig.mapId, mapFeaturesConfig.map.interaction]);
@@ -65,11 +74,13 @@ function AppStart(props: AppStartProps): JSX.Element {
 
     return (
       <I18nextProvider i18n={i18nInstance}>
-        <MapContext.Provider value={mapContextValue}>
-          <ThemeProvider theme={getTheme(mapFeaturesConfig.theme)}>
-            <Shell shellId={mapFeaturesConfig.mapId as string} mapFeaturesConfig={mapFeaturesConfig} />
-          </ThemeProvider>
-        </MapContext.Provider>
+        <StoreContext.Provider value={geoViewStore}>
+          <MapContext.Provider value={mapContextValue}>
+            <ThemeProvider theme={getTheme(mapFeaturesConfig.theme)}>
+              <Shell shellId={mapFeaturesConfig.mapId as string} mapFeaturesConfig={mapFeaturesConfig} />
+            </ThemeProvider>
+          </MapContext.Provider>
+        </StoreContext.Provider>
       </I18nextProvider>
     );
   }
