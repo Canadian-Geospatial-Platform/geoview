@@ -1,9 +1,9 @@
 /* eslint-disable react/require-default-props */
 import { useState, useEffect, CSSProperties } from 'react';
 
-import MaterialSlider from '@mui/material/Slider';
+import { Slider as MaterialSlider, SliderProps } from '@mui/material';
+
 import makeStyles from '@mui/styles/makeStyles';
-import { SliderProps } from '@mui/material';
 
 import { api } from '@/app';
 import { EVENT_NAMES } from '@/api/events/event-types';

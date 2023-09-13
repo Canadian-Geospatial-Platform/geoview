@@ -1,5 +1,4 @@
-import MaterialListItemButton from '@mui/material/ListItemButton';
-import { ListItemButtonProps } from '@mui/material';
+import { ListItemButton as MaterialListItemButton, ListItemButtonProps } from '@mui/material';
 
 /**
  * Create a customized Material UI List Item
@@ -11,7 +10,7 @@ export function ListItemButton(props: ListItemButtonProps): JSX.Element {
   const { children, className, style } = props;
 
   return (
-    <MaterialListItemButton className={className || ''} style={style || undefined}>
+    <MaterialListItemButton className={className || ''} style={style || undefined} {...props}>
       {children !== undefined && children}
     </MaterialListItemButton>
   );

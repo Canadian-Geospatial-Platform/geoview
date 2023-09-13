@@ -8,11 +8,7 @@ import { ClassNameMap } from '@mui/styles';
 import withStyles from '@mui/styles/withStyles';
 import makeStyles from '@mui/styles/makeStyles';
 
-import Dialog from '@mui/material/Dialog';
-import { DialogProps } from '@mui/material';
-import DialogTitle from '@mui/material/DialogTitle';
-import DialogContent from '@mui/material/DialogContent';
-import DialogActions from '@mui/material/DialogActions';
+import { Dialog, DialogActions, DialogContent, DialogProps, DialogTitle } from '@mui/material';
 
 import { TypeJsonObject } from '@/core/types/global-types';
 import { HtmlToReact } from '@/core/containers/html-to-react';

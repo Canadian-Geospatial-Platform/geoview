@@ -1,16 +1,18 @@
 /* eslint-disable react/require-default-props */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import React, { useState, CSSProperties } from 'react';
+import { useState, CSSProperties } from 'react';
 
-import { SelectChangeEvent } from '@mui/material';
+import {
+  FormControl,
+  FormHelperText,
+  InputLabel,
+  ListSubheader,
+  MenuItem,
+  Select as MaterialSelect,
+  SelectChangeEvent,
+} from '@mui/material';
 
 import makeStyles from '@mui/styles/makeStyles';
-import FormControl from '@mui/material/FormControl';
-import FormHelperText from '@mui/material/FormHelperText';
-import InputLabel from '@mui/material/InputLabel';
-import ListSubheader from '@mui/material/ListSubheader';
-import MenuItem from '@mui/material/MenuItem';
-import MaterialSelect from '@mui/material/Select';
 
 /**
  * Properties for the Custom Select component

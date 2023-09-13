@@ -1,17 +1,11 @@
 /* eslint-disable react/require-default-props */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState, CSSProperties } from 'react';
+import { Box, Stepper as MaterialStepper, Step, StepButton, StepContent, StepLabel, Typography } from '@mui/material';
 
 import makeStyles from '@mui/styles/makeStyles';
-import Box from '@mui/material/Box';
-import MaterialStepper from '@mui/material/Stepper';
-import Step from '@mui/material/Step';
-import StepButton from '@mui/material/StepButton';
-import StepContent from '@mui/material/StepContent';
-import StepLabel from '@mui/material/StepLabel';
-import Typography from '@mui/material/Typography';
 
-import { Button } from '../button';
+import { Button } from '../button/button';
 
 import { HtmlToReact } from '@/core/containers/html-to-react';
 
