@@ -63,6 +63,7 @@ export function Crosshair(): JSX.Element {
   const projection = api.projection.projections[api.maps[mapId].currentProjection];
 
   const store = getGeoViewStore(mapId);
+  // tracks if the last action was done through a keyboard (map navigation) or mouse (mouse movement)
   const isCrosshairsActive = useStore(store, (state) => state.isCrosshairsActive);
 
   // do not use useState for item used inside function only without rendering... use useRef

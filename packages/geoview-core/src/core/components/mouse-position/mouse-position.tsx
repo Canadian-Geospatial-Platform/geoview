@@ -79,7 +79,7 @@ interface MousePositionProps {
  * @returns {JSX.Element} the mouse position component
  */
 export function MousePosition(props: MousePositionProps): JSX.Element {
-  // variable is not used, thus causing an error, commeting it out for later
+  // TODO variable is not used, thus causing an error, commeting it out for later
   // const isCrosshairsActive = useGeoViewStore((state) => state.isCrosshairsActive);
 
   const { mousePositionMapId } = props;
