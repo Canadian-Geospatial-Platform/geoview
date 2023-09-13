@@ -6,3 +6,11 @@ export interface TypeLegendProps {
   hideAll?: boolean;
   canZoomTo?: boolean;
 }
+
+export interface LegendItemsProps extends TypeLegendProps {
+  mapId: string;
+}
+
+export interface LegendProps extends TypeLegendProps {
+  mapId: string;
+}

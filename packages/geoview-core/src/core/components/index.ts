@@ -37,7 +37,7 @@ export * from './geolocator/styles';
 export * from './hover-tooltip/hover-tooltip';
 export * from './legend/legend-api';
 export * from './legend/legend-icon-list';
-export * from './legend/legend-item';
+export * from './legend/legend-items/legend-item';
 export * from './legend/WMS-style-item';
 export * from './lightbox/lightbox';
 export * from './map/map';

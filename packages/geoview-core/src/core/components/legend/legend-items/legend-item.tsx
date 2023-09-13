@@ -30,7 +30,7 @@ import {
   Grid,
 } from '@/ui';
 import { api, EsriDynamic, payloadIsLegendInfo, NumberPayload, PayloadBaseClass } from '@/app';
-import { LegendIconList } from './legend-icon-list';
+import { LegendIconList } from '../legend-icon-list';
 import {
   AbstractGeoViewLayer,
   TypeLegend,
@@ -53,8 +53,8 @@ import {
   layerEntryIsGroupLayer,
 } from '@/geo/map/map-schema-types';
 import { AbstractGeoViewVector } from '@/geo/layer/geoview-layers/vector/abstract-geoview-vector';
-import { disableScrolling } from '../../utils/utilities';
-import { WMSStyleItem } from './WMS-style-item';
+import { disableScrolling } from '../../../utils/utilities';
+import { WMSStyleItem } from '../WMS-style-item';
 
 const sxClasses = {
   expandableGroup: {
@@ -503,8 +503,9 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // item sm={12} md={subLayerId ? 12 : 6} lg={subLayerId ? 12 : 4}
   return (
-    <Grid item sm={12} md={subLayerId ? 12 : 6} lg={subLayerId ? 12 : 4}>
+    <Grid item sm={12}>
       <ListItem>
         <ListItemButton>
           <ListItemIcon>
