@@ -123,14 +123,15 @@ export function Swiper(props: SwiperProps): JSX.Element {
   const swiperRef = useRef<HTMLElement>();
 
   /**
-   * Sort layers to only include those that are processed/loaded
+   * Sort layers to only include those that are loaded
    * @param {TypeResultSets} resultsSets The resultSet from the layer set
+   *
+   * @returns {string[]} array of IDs for layers that are loaded on the map
    */
   function sortLayerIds(resultsSets: TypeResultSets) {
     const layerIds: string[] = [];
     Object.keys(resultsSets).forEach((result) => {
-      if (resultsSets[result].layerStatus === 'processed' || resultsSets[result].layerStatus === 'loaded')
-        layerIds.push(result.split('/')[0]);
+      if (resultsSets[result].layerStatus === 'loaded') layerIds.push(result.split('/')[0]);
     });
     return layerIds;
   }
@@ -247,19 +248,19 @@ export function Swiper(props: SwiperProps): JSX.Element {
 
   // Update layer list if a layer loads late
   useEffect(() => {
-    api.event.on(
-      EVENT_NAMES.LAYER_SET.UPDATED,
-      (payload: PayloadBaseClass) => {
-        if (payloadIsLayerSetUpdated(payload) && payload.resultSets[payload.layerPath]?.layerStatus === 'loaded') {
-          const layerId = payload.layerPath.split('/')[0];
-          const ids = [...layersIds];
-          if (ids.indexOf(layerId) !== -1) ids.splice(ids.indexOf(layerId));
-          ids.push(layerId);
-          setLayersIds(ids);
-        }
-      },
-      `${mapId}/$LegendsLayerSet$`
-    );
+    const layerSetUpdatedHandler = (payload: PayloadBaseClass) => {
+      if (payloadIsLayerSetUpdated(payload) && payload.resultSets[payload.layerPath]?.layerStatus === 'loaded') {
+        const layerId = payload.layerPath.split('/')[0];
+        const ids = [...layersIds];
+        if (ids.indexOf(layerId) !== -1) ids.splice(ids.indexOf(layerId));
+        ids.push(layerId);
+        setLayersIds(ids);
+      }
+    };
+    api.event.on(EVENT_NAMES.LAYER_SET.UPDATED, layerSetUpdatedHandler, `${mapId}/$LegendsLayerSet$`);
+    return () => {
+      api.event.off(EVENT_NAMES.LAYER_SET.UPDATED, mapId, layerSetUpdatedHandler);
+    };
   });
 
   /**
@@ -281,17 +282,7 @@ export function Swiper(props: SwiperProps): JSX.Element {
     // set listener for layers in config array
     const { geoviewLayers } = api.maps[mapId].layer;
     layersIds.forEach((layer: string) => {
-      if (geoviewLayers[layer] !== undefined) {
-        setRenderEvents(layer);
-      } else {
-        const layerName = layer;
-        const renderInterval = setInterval(() => {
-          if (geoviewLayers[layerName] !== undefined) {
-            setRenderEvents(layer);
-            clearInterval(renderInterval);
-          }
-        }, 1000);
-      }
+      setRenderEvents(layer);
     });
 
     return () => {
