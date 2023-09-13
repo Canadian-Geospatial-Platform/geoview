@@ -9,8 +9,14 @@ import { api } from '@/app';
 import { EVENT_NAMES } from '@/api/events/event-types';
 
 import { Config } from '@/core/utils/config/config';
-import { generateId, showError, replaceParams } from '@/core/utils/utilities';
-import { layerConfigPayload, payloadIsALayerConfig, GeoViewLayerPayload, payloadIsRemoveGeoViewLayer } from '@/api/events/payloads';
+import { generateId, replaceParams, showError } from '@/core/utils/utilities';
+import {
+  layerConfigPayload,
+  payloadIsALayerConfig,
+  GeoViewLayerPayload,
+  payloadIsRemoveGeoViewLayer,
+  LayerSetPayload,
+} from '@/api/events/payloads';
 import { AbstractGeoViewLayer } from './geoview-layers/abstract-geoview-layers';
 import {
   TypeBaseLayerEntryConfig,
@@ -151,7 +157,7 @@ export class Layer {
   /**
    * Load layers that was passed in with the map config
    *
-   * @param {TypeGeoviewLayerConfig[]} layersConfig an optional array containing layers passed within the map config
+   * @param {TypeGeoviewLayerConfig[]} geoviewLayerConfigs an optional array containing layers passed within the map config
    */
   loadListOfGeoviewLayer(geoviewLayerConfigs?: TypeGeoviewLayerConfig[]) {
     const validGeoviewLayerConfigs = this.deleteDuplicatGeoviewLayerConfig(geoviewLayerConfigs);
@@ -295,6 +301,13 @@ export class Layer {
         if (geoviewLayer.layerPhase !== 'processed') {
           geoviewLayer.layerPhase = 'processed';
           api.event.emit(GeoViewLayerPayload.createGeoviewLayerAddedPayload(`${this.mapId}/${geoviewLayer.geoviewLayerId}`, geoviewLayer));
+        }
+      });
+      geoviewLayer.gvLayers!.get('source').on('featuresloadend', () => {
+        if (geoviewLayer.getLayerConfig()) {
+          api.event.emit(
+            LayerSetPayload.createLayerSetChangeLayerStatusPayload(this.mapId, Layer.getLayerPath(geoviewLayer.getLayerConfig()!), 'loaded')
+          );
         }
       });
       api.maps[this.mapId].map.addLayer(geoviewLayer.gvLayers!);

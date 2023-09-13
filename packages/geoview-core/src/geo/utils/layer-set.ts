@@ -55,7 +55,7 @@ export class LayerSet {
         const { layerPath, layerStatus } = payload;
         if (this.resultSets[layerPath]) {
           this.resultSets[layerPath].layerStatus = layerStatus;
-          if (layerStatus === 'processed') this.resultSets[layerPath].layerPhase = layerStatus;
+          if (layerStatus === 'processed' || layerStatus === 'loaded') this.resultSets[layerPath].layerPhase = 'processed';
           api.event.emit(
             LayerSetPayload.createLayerSetUpdatedPayload(`${this.layerSetId}/${layerPath}/status`, this.resultSets, layerPath)
           );
