@@ -128,6 +128,14 @@ function MapDataTable({ data, layerId, mapId, layerKey, projectionConfig }: MapD
         }
         return arrQuery;
       }
+
+      // Check filter value is of type date,
+      if (typeof filterValue === 'object' && filterValue) {
+        const date = api.dateUtilities.applyInputDateFormat((filterValue as Date).toISOString());
+        const formattedDate = date.substring(0, date.lastIndexOf(':'));
+        return `${filterId} < date '${formattedDate}'`;
+      }
+
       return `upper(${filterId}) like upper('%${filter.value}%')`;
     });
   }, []);
@@ -141,6 +149,8 @@ function MapDataTable({ data, layerId, mapId, layerKey, projectionConfig }: MapD
     const filterStrings = buildFilterList(filters)
       .filter((filterValue) => filterValue.length)
       .join(' and ');
+
+    console.log('filterString', filterStrings);
     const geoviewLayerInstance = api.maps[mapId].layer.geoviewLayers[layerId];
     const filterLayerConfig = api.maps[mapId].layer.registeredLayers[layerKey] as TypeLayerEntryConfig;
 
@@ -167,6 +177,7 @@ function MapDataTable({ data, layerId, mapId, layerKey, projectionConfig }: MapD
   // update map when column filters change
   useEffect(() => {
     if (columnFilters && mountedRef.current && mapFiltered) {
+      console.log('column filtersss', columnFilters);
       debouncedColumnFilters(columnFilters);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -222,6 +233,7 @@ function MapDataTable({ data, layerId, mapId, layerKey, projectionConfig }: MapD
 
   /**
    * Create data table body cell with tooltip
+   *
    * @param {string} cellValue cell value to be displayed in cell
    * @returns JSX.Element
    */
@@ -235,10 +247,27 @@ function MapDataTable({ data, layerId, mapId, layerKey, projectionConfig }: MapD
     );
   };
 
+  /**
+   * Create Date filter with Datepicker.
+   *
+   * @param {MRTColumn<ColumnsType>} column filter column.
+   * @returns JSX.Element
+   */
   const getDateFilter = (column: MRTColumn<ColumnsType>) => {
     return (
       <LocalizationProvider dateAdapter={AdapterDayjs}>
-        <DatePicker value={column.getFilterValue()} />
+        <DatePicker
+          format="YYYY-MM-DD"
+          onChange={(newValue) => {
+            column.setFilterValue(newValue);
+          }}
+          slotProps={{
+            textField: {
+              sx: { minWidth: '120px' },
+              variant: 'standard',
+            },
+          }}
+        />
       </LocalizationProvider>
     );
   };
@@ -260,14 +289,11 @@ function MapDataTable({ data, layerId, mapId, layerKey, projectionConfig }: MapD
         Header: ({ column }) => getTableHeader(column.columnDef.header),
         Cell: ({ cell }) => getCellValueWithTooltip(cell.getValue() as string),
         ...(value.dataType === 'date' && {
+          accessorFn: (row) => new Date(row[key]),
           filterFn: 'lessThanOrEqualTo',
           sortingFn: 'datetime',
+          Cell: ({ cell }) => cell.getValue<Date>()?.toISOString().replace('Z', ''),
           Filter: ({ column }) => getDateFilter(column),
-          Cell: ({ cell }) => {
-            const dateValue = cell.getValue() as string;
-            console.log('celll', dateValue);
-            return dateValue;
-          },
         }),
         ...([t('dataTable.icon'), t('dataTable.zoom')].includes(value.alias) && { size: 100, enableColumnFilter: false }),
       });
@@ -320,6 +346,7 @@ function MapDataTable({ data, layerId, mapId, layerKey, projectionConfig }: MapD
           columnPinning: { left: [t('dataTable.icon'), t('dataTable.zoom')] },
           density: 'compact',
           pagination: { pageSize: 10, pageIndex: 0 },
+          showColumnFilters: true,
         }}
         onSortingChange={setSorting}
         onColumnFiltersChange={setColumnFilters}
