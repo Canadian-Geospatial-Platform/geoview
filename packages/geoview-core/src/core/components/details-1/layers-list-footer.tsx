@@ -2,43 +2,33 @@
 /* eslint-disable react/require-default-props */
 import React, { useEffect, useState, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Typography } from '@mui/material';
 import { getUid } from 'ol/util';
-import { ListItemText, ListItem, List, Tooltip, IconButton, KeyboardArrowRightIcon, Grid, Paper } from '@/ui';
+import { ListItemText, ListItem, List, Tooltip, IconButton, KeyboardArrowRightIcon, Grid, Paper, Typography } from '@/ui';
 import { TypeArrayOfLayerData, TypeLayerData } from './details';
 import { FeatureInfo } from '../feature-info-new.ts/feature-info-new';
 import { PayloadBaseClass, api } from '@/app';
 import { EVENT_NAMES } from '@/api/events/event-types';
 import { payloadIsAFeatureHighlight, payloadIsAClearHighlights } from '@/api/events/payloads';
 
-const sxClasses = {
-  footerTopPanlePrimary: {
-    font: 'normal normal 600 25px/19px Roboto, Helvetica, Arial, sans-serif',
-    paddingBottom: '20px',
-  },
-  footerTopPanleSecondary: {
-    font: 'normal normal normal 16px/24px Roboto, Helvetica, Arial, sans-serif',
-  },
-  panelHeaders: {
-    font: 'normal normal normal 600 22px/30px Roboto, Helvetica, Arial, sans-serif',
-    marginBottom: '20px',
-    paddingLeft: '20px',
-    '&:root': {
-      display: 'block',
+const getSxClasses = (isPanelHeaders = false) => {
+  return {
+    footerTopPanleSecondary: {
+      font: 'normal normal normal 16px/24px Roboto, Helvetica, Arial, sans-serif',
     },
-  },
-  panelHeaderSelectedFeature: {
-    font: 'normal normal normal 600 22px/30px Roboto, Helvetica, Arial, sans-serif',
-    marginBottom: '20px',
-    '&:root': {
-      display: 'block',
+    panelHeaders: {
+      font: 'normal normal normal 600 22px/30px Roboto, Helvetica, Arial, sans-serif',
+      marginBottom: '20px',
+      ...(isPanelHeaders && { paddingLeft: '20px' }),
     },
-  },
-  layerNamePrimary: {
-    font: 'normal normal normal 600 20px/27px Roboto, Helvetica, Arial, sans-serif',
-  },
+    panelHeaderSelectedFeature: {
+      font: 'normal normal normal 600 22px/30px Roboto, Helvetica, Arial, sans-serif',
+      marginBottom: '20px',
+    },
+    layerNamePrimary: {
+      font: 'normal normal normal 600 20px/27px Roboto, Helvetica, Arial, sans-serif',
+    },
+  };
 };
-
 interface TypeLayersListProps {
   arrayOfLayerData: TypeArrayOfLayerData;
   mapId: string;
@@ -97,11 +87,11 @@ export function LayersListFooter(props: TypeLayersListProps): JSX.Element {
     <Grid container spacing={2} sx={{ backgroundColor: '#F1F2F5' }}>
       <div style={{ padding: '20px 28px 28px 28px' }}>
         {layerDataInfo === null ? (
-          <Typography component="p" sx={sxClasses.footerTopPanleSecondary}>
+          <Typography component="p" sx={getSxClasses().footerTopPanleSecondary}>
             {t('details.selectVisbleLayer')}
           </Typography>
         ) : (
-          <Typography component="p" sx={sxClasses.footerTopPanleSecondary}>
+          <Typography component="p" sx={getSxClasses().footerTopPanleSecondary}>
             {t('details.mainDescription')}
           </Typography>
         )}
@@ -111,7 +101,9 @@ export function LayersListFooter(props: TypeLayersListProps): JSX.Element {
           {/* ================= LEFT PANEL ================= */}
 
           <Grid item md={4} sx={{ flex: '1', overflow: 'auto' }}>
-            <Typography sx={sxClasses.panelHeaders}>{t('details.availableLayers')}</Typography>
+            <Typography component="div" sx={getSxClasses(true).panelHeaders}>
+              {t('details.availableLayers')}
+            </Typography>
             <Paper sx={{ marginLeft: '20px' }}>
               <List sx={{ color: 'text.primary' }}>
                 {arrayOfLayerData.map((layerData) => {
@@ -134,7 +126,7 @@ export function LayersListFooter(props: TypeLayersListProps): JSX.Element {
                     >
                       <Tooltip title={layerData.layerPath} placement="top" enterDelay={1000}>
                         <ListItemText
-                          sx={sxClasses.layerNamePrimary}
+                          sx={getSxClasses().layerNamePrimary}
                           primary={layerData.layerPath ? layerData.layerName : 'Click on map'}
                         />
                       </Tooltip>
@@ -147,7 +139,7 @@ export function LayersListFooter(props: TypeLayersListProps): JSX.Element {
           {/* ================= RIGHT PANEL ================= */}
           <Grid item md={8} sx={{ paddingLeft: '40px' }}>
             <>
-              <Typography component="div" sx={sxClasses.panelHeaderSelectedFeature}>
+              <Typography component="div" sx={getSxClasses().panelHeaderSelectedFeature}>
                 {t('details.selectedFeature')}
               </Typography>
               <div style={{ border: '2px solid #515BA5', borderRadius: '5px', marginRight: '20px' }}>
