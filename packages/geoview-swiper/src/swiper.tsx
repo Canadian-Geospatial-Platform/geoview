@@ -12,6 +12,8 @@ import { EventTypes } from 'ol/Observable';
 import BaseEvent from 'ol/events/Event';
 
 import debounce from 'lodash/debounce';
+import { EVENT_NAMES } from 'geoview-core/src/api/events/event-types';
+import { PayloadBaseClass, TypeResultSets, payloadIsLayerSetUpdated } from 'geoview-core/src/api/events/payloads';
 
 const sxClasses = {
   layerSwipe: {
@@ -112,17 +114,28 @@ export function Swiper(props: SwiperProps): JSX.Element {
   const mapSize = useRef<number[]>(map?.getSize() || [0, 0]);
   const defaultX = mapSize.current[0] / 2;
   const defaultY = mapSize.current[1] / 2;
-
-  const [layersIds] = useState<string[]>(config.layers);
-  const [geoviewLayers] = useState(api.maps[mapId].layer.geoviewLayers);
   const [olLayers, setOlLayers] = useState<BaseLayer[]>([]);
   const [offset, setOffset] = useState(0);
-  const [counter, setCounter] = useState(0);
 
   const [orientation] = useState(config.orientation);
 
   const swiperValue = useRef(50);
   const swiperRef = useRef<HTMLElement>();
+
+  /**
+   * Sort layers to only include those that are processed/loaded
+   * @param {TypeResultSets} resultsSets The resultSet from the layer set
+   */
+  function sortLayerIds(resultsSets: TypeResultSets) {
+    const layerIds: string[] = [];
+    Object.keys(resultsSets).forEach((result) => {
+      if (resultsSets[result].layerStatus === 'processed' || resultsSets[result].layerStatus === 'loaded')
+        layerIds.push(result.split('/')[0]);
+    });
+    return layerIds;
+  }
+
+  const [layersIds, setLayersIds] = useState<string[]>(sortLayerIds(api.getLegendsLayerSet(mapId).resultSets));
 
   /**
    * Pre compose, Pre render event callback
@@ -232,13 +245,31 @@ export function Swiper(props: SwiperProps): JSX.Element {
     setOffset(offSetOnClick);
   };
 
+  // Update layer list if a layer loads late
+  useEffect(() => {
+    api.event.on(
+      EVENT_NAMES.LAYER_SET.UPDATED,
+      (payload: PayloadBaseClass) => {
+        if (payloadIsLayerSetUpdated(payload) && payload.resultSets[payload.layerPath]?.layerStatus === 'loaded') {
+          const layerId = payload.layerPath.split('/')[0];
+          const ids = [...layersIds];
+          if (ids.indexOf(layerId) !== -1) ids.splice(ids.indexOf(layerId));
+          ids.push(layerId);
+          setLayersIds(ids);
+        }
+      },
+      `${mapId}/$LegendsLayerSet$`
+    );
+  });
+
   /**
-   * Set the prerender and postremder events
+   * Set the prerender and postrender events
    *
    * @param {string} layer the layer name
    */
   const setRenderEvents = (layer: string) => {
-    const olLayer = geoviewLayers[`${layer}`].gvLayers;
+    const { geoviewLayers } = api.maps[mapId].layer;
+    const olLayer = geoviewLayers[layer].gvLayers;
     setOlLayers((prevArray) => [...prevArray, olLayer!]);
     olLayer?.on(['precompose' as EventTypes, 'prerender' as EventTypes], prerender);
     olLayer?.on(['postcompose' as EventTypes, 'postrender' as EventTypes], postcompose);
@@ -248,13 +279,14 @@ export function Swiper(props: SwiperProps): JSX.Element {
 
   useEffect(() => {
     // set listener for layers in config array
+    const { geoviewLayers } = api.maps[mapId].layer;
     layersIds.forEach((layer: string) => {
-      if (geoviewLayers[`${layer}`] !== undefined) {
+      if (geoviewLayers[layer] !== undefined) {
         setRenderEvents(layer);
       } else {
         const layerName = layer;
         const renderInterval = setInterval(() => {
-          if (geoviewLayers[`${layerName}`] !== undefined) {
+          if (geoviewLayers[layerName] !== undefined) {
             setRenderEvents(layer);
             clearInterval(renderInterval);
           }
@@ -264,33 +296,18 @@ export function Swiper(props: SwiperProps): JSX.Element {
 
     return () => {
       layersIds.forEach((layer: string) => {
-        const olLayer = geoviewLayers[`${layer}`].gvLayers;
-        olLayer?.un(['precompose' as EventTypes, 'prerender' as EventTypes], prerender);
-        olLayer?.un(['postcompose' as EventTypes, 'postrender' as EventTypes], postcompose);
+        if (geoviewLayers[layer] !== undefined) {
+          const olLayer = geoviewLayers[layer].gvLayers;
+          olLayer?.un(['precompose' as EventTypes, 'prerender' as EventTypes], prerender);
+          olLayer?.un(['postcompose' as EventTypes, 'postrender' as EventTypes], postcompose);
 
-        // empty layers array
-        setOlLayers([]);
+          // empty layers array
+          setOlLayers([]);
+        }
       });
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [geoviewLayers]);
-
-  useEffect(() => {
-    api.maps[mapId].map.on('featuresloadend', () => {
-      setGeoviewLayers(api.maps[mapId].layer.geoviewLayers);
-      setCounter(counter + 1);
-    });
-    // api.event.on(
-    //   EVENT_NAMES.LAYER_SET.UPDATED,
-    //   (payload: PayloadBaseClass) => {
-    //     if (payloadIsLayerSetUpdated(payload)) {
-    //       setGeoviewLayers(api.map(mapId).layer.geoviewLayers);
-    //       setCounter(counter + 1);
-    //     }
-    //   },
-    //   `${mapId}/$LegendsLayerSet$`
-    // );
-  });
+  }, [layersIds]);
 
   /**
    * Update swiper and layers from keyboard CTRL + Arrow key
@@ -335,7 +352,7 @@ export function Swiper(props: SwiperProps): JSX.Element {
   });
 
   return (
-    <Box sx={sxClasses.layerSwipe} key={counter}>
+    <Box sx={sxClasses.layerSwipe}>
       <Draggable
         axis={orientation === 'vertical' ? 'x' : 'y'}
         bounds="parent"
