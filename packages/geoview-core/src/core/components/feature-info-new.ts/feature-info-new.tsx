@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable react/require-default-props */
 import React, { MutableRefObject, useEffect, useState } from 'react';
-import { useTheme, Theme } from '@mui/material/styles';
 import { useTranslation } from 'react-i18next';
 import { Paper } from '@mui/material';
 import { getUid } from 'ol/util';
@@ -12,10 +11,6 @@ import { EVENT_NAMES } from '@/api/events/event-types';
 import { FeatureInfoTable } from './feature-info-table';
 
 const sxClasses = {
-  layerItem: {
-    color: 'text.primary',
-    padding: 0,
-  },
   itemText: {
     fontSize: 14,
     noWrap: true,
@@ -26,41 +21,6 @@ const sxClasses = {
       font: 'normal normal 16px/22px Roboto, Helvetica, Arial, sans-serif',
       color: '#000000',
     },
-  },
-  featureInfoItem: {
-    width: '100%',
-    margin: '5px 0',
-    display: 'flex',
-    flexWrap: 'wrap',
-    justifyContent: 'flex-end',
-  },
-  featureInfoItemOdd: {
-    display: 'flex',
-    width: '100%',
-    margin: '5px 0',
-    backgroundColor: 'rgba(0,0,0,0.2)',
-    flexWrap: 'wrap',
-    justifyContent: 'flex-end',
-  },
-  featureInfoItemKey: {
-    fontSize: '0.85em',
-    marginRight: 0,
-    paddingRight: '10px',
-    fontWeight: 700,
-    wordBreak: 'break-word',
-    // border: '1px solid red',
-  },
-  featureInfoItemValue: {
-    fontSize: '0.85em',
-    marginRight: 0,
-    marginTop: '5px',
-    wordBreak: 'break-word',
-    overflow: 'hidden',
-    textOverflow: 'ellipsis',
-    // border: '1px solid green',
-  },
-  featureInfoItemImage: {
-    cursor: 'pointer',
   },
 };
 
@@ -73,6 +33,7 @@ export interface TypeFeatureInfoProps {
 /**
  * feature info for a layer list
  *
+ * @param {TypeFeatureInfoProps} Object of the propetties for FeatureInfo component
  * @returns {JSX.Element} the feature info
  */
 export function FeatureInfo({ mapId, feature, selectedFeatures }: TypeFeatureInfoProps): JSX.Element {
@@ -107,10 +68,6 @@ export function FeatureInfo({ mapId, feature, selectedFeatures }: TypeFeatureInf
     target: '_blank',
   };
 
-  const theme: Theme & {
-    iconImg: React.CSSProperties;
-  } = useTheme();
-
   const handleSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     e.stopPropagation();
     if (!checked) {
@@ -137,7 +94,7 @@ export function FeatureInfo({ mapId, feature, selectedFeatures }: TypeFeatureInf
 
   return (
     <Paper sx={{ backgroundColor: checked ? '#FFFAD1' : 'initial' }}>
-      <List style={{ paddingLeft: '25px', paddingTop: '25px' }}>
+      <List sx={{ paddingLeft: '25px', paddingTop: '25px' }}>
         <ListItem
           secondaryAction={
             <>

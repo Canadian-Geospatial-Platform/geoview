@@ -1,15 +1,7 @@
 import React, { useEffect, useState } from 'react';
-// import { Coordinate } from 'ol/coordinate';
 import { TypeArrayOfFeatureInfoEntries } from '@/api/events/payloads';
 import { LayersListFooter } from './layers-list-footer';
 
-// export interface DetailsProps {
-//   mapId: string;
-//   location: Coordinate;
-//   backgroundStyle?: string;
-//   singleColumn?: boolean;
-//   handlerName: string | null;
-// }
 export interface TypeDetailsProps {
   arrayOfLayerData: TypeArrayOfLayerData;
   mapId: string;
@@ -28,8 +20,6 @@ export type TypeArrayOfLayerData = TypeLayerData[];
  * @returns {JSX.Element} returns the Details component
  */
 export function DetailsFooter({ arrayOfLayerData, mapId }: TypeDetailsProps): JSX.Element | null {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  // const { arrayOfLayerData, mapId } = props;
   const [details, setDetails] = useState<TypeArrayOfLayerData>([]);
 
   useEffect(() => {

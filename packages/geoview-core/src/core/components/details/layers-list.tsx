@@ -1,6 +1,7 @@
 /* eslint-disable prettier/prettier */
 /* eslint-disable react/require-default-props */
 import React, { useEffect, useState, useRef } from 'react';
+import Grid from '@mui/material/Grid';
 import { getUid } from 'ol/util';
 import {
   Collapse,
@@ -13,7 +14,6 @@ import {
   ExpandLessIcon,
   Tooltip,
   IconButton,
-  Grid,
 } from '@/ui';
 import { TypeArrayOfLayerData, DetailsProps } from './details';
 import { FeatureInfo } from './feature-info';

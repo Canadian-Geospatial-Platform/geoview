@@ -61,8 +61,8 @@
     "mainDescription": "Pour commencer, sélectionnez n'importe quelle couche visible sur la carte. Si vous ne voyez aucune couche sur la carte, assurez-vous de les sélectionner dans la section Légende.",
     "detailsView": "Vue détaillée",
     "selectVisbleLayer": "Sélectionnez n'importe quelle couche visible sur la carte pour commencer",
-    "availableLayers": "Calques disponibles",
-    "selectedFeature": "Fonctionnalité sélectionnée"
+    "availableLayers": "Couche disponibles",
+    "selectedFeature": "Fonctionnalité Item"
   },
   "lightbox": {
     "next": "Prochaine",

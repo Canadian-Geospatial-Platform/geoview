@@ -2,9 +2,9 @@
 /* eslint-disable react/require-default-props */
 import React, { useEffect, useState, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Paper, Typography } from '@mui/material';
+import { Typography } from '@mui/material';
 import { getUid } from 'ol/util';
-import { ListItemText, ListItem, List, Tooltip, IconButton, KeyboardArrowRightIcon, Grid } from '@/ui';
+import { ListItemText, ListItem, List, Tooltip, IconButton, KeyboardArrowRightIcon, Grid, Paper } from '@/ui';
 import { TypeArrayOfLayerData, TypeLayerData } from './details';
 import { FeatureInfo } from '../feature-info-new.ts/feature-info-new';
 import { PayloadBaseClass, api } from '@/app';
@@ -22,6 +22,17 @@ const sxClasses = {
   panelHeaders: {
     font: 'normal normal normal 600 22px/30px Roboto, Helvetica, Arial, sans-serif',
     marginBottom: '20px',
+    paddingLeft: '20px',
+    '&:root': {
+      display: 'block',
+    },
+  },
+  panelHeaderSelectedFeature: {
+    font: 'normal normal normal 600 22px/30px Roboto, Helvetica, Arial, sans-serif',
+    marginBottom: '20px',
+    '&:root': {
+      display: 'block',
+    },
   },
   layerNamePrimary: {
     font: 'normal normal normal 600 20px/27px Roboto, Helvetica, Arial, sans-serif',
@@ -36,6 +47,7 @@ interface TypeLayersListProps {
 /**
  * layers list
  *
+ * @param {TypeLayersListProps} props The properties passed to LayersListFooter
  * @returns {JSX.Element} the layers list
  */
 export function LayersListFooter(props: TypeLayersListProps): JSX.Element {
@@ -82,7 +94,7 @@ export function LayersListFooter(props: TypeLayersListProps): JSX.Element {
   }, [arrayOfLayerData]);
 
   return (
-    <Grid container spacing={2} style={{ backgroundColor: '#F1F2F5' }}>
+    <Grid container spacing={2} sx={{ backgroundColor: '#F1F2F5' }}>
       <div style={{ padding: '20px 28px 28px 28px' }}>
         {layerDataInfo === null ? (
           <Typography component="p" sx={sxClasses.footerTopPanleSecondary}>
@@ -95,14 +107,11 @@ export function LayersListFooter(props: TypeLayersListProps): JSX.Element {
         )}
       </div>
       {layerDataInfo !== null && (
-        <Grid container spacing={12} style={{ height: '300vh', overflow: 'hidden', display: 'flex' }}>
+        <Grid container spacing={12} sx={{ height: '300vh', overflow: 'hidden', display: 'flex' }}>
           {/* ================= LEFT PANEL ================= */}
 
-          <Grid item md={4} style={{ flex: '1', overflow: 'auto' }}>
-            {/* <Paper style={{ height: '100vh' }}>Left Panel</Paper> */}
-            <Typography component="div" sx={sxClasses.panelHeaders} style={{ paddingLeft: '20px' }}>
-              {t('details.availableLayers')}
-            </Typography>
+          <Grid item md={4} sx={{ flex: '1', overflow: 'auto' }}>
+            <Typography sx={sxClasses.panelHeaders}>{t('details.availableLayers')}</Typography>
             <Paper sx={{ marginLeft: '20px' }}>
               <List sx={{ color: 'text.primary' }}>
                 {arrayOfLayerData.map((layerData) => {
@@ -136,9 +145,9 @@ export function LayersListFooter(props: TypeLayersListProps): JSX.Element {
             </Paper>
           </Grid>
           {/* ================= RIGHT PANEL ================= */}
-          <Grid item md={8} style={{ paddingLeft: '40px' }}>
+          <Grid item md={8} sx={{ paddingLeft: '40px' }}>
             <>
-              <Typography component="div" sx={sxClasses.panelHeaders}>
+              <Typography component="div" sx={sxClasses.panelHeaderSelectedFeature}>
                 {t('details.selectedFeature')}
               </Typography>
               <div style={{ border: '2px solid #515BA5', borderRadius: '5px', marginRight: '20px' }}>
