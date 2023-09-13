@@ -223,9 +223,8 @@ importers:
       linkify-html: 4.1.1_linkifyjs@4.1.1
       linkifyjs: 4.1.1
       lodash: 4.17.21
-      notistack: 2.0.8_zi5jao76wkadbc5qfk3wwxd6yy
-      material-react-table: 1.14.0_k2uxuhlnjzq4sw57nvhf6qe33m
-      ol: 7.5.1
+      material-react-table: 1.14.0_po24ftsx7l3oajlny5lchivvry
+      ol: 7.5.2
       ol-mapbox-style: 10.7.0
       proj4: 2.9.0
       prop-types: 15.8.1
@@ -237,6 +236,7 @@ importers:
       sanitize-html: 2.11.0
       sql.js: 1.8.0
       yet-another-react-lightbox: 3.12.2_biqbaboplfbrettd7655fr4n2y
+      zustand: 4.4.1_gq4reeurwxuj4hvyerswzzqthy
     devDependencies:
       '@babel/cli': 7.22.15_@babel+core@7.22.15
       '@babel/core': 7.22.15
@@ -314,7 +314,6 @@ importers:
       webpack-cli: 4.10.0_qxbrif7cnxxydmbilqcdld3uj4
       webpack-dev-server: 4.15.1_w3wu7rcwmvifygnqiqkxwjppse
       webpack-merge: 5.9.0
-      zustand: 4.4.1_gq4reeurwxuj4hvyerswzzqthy
 
   ../../packages/geoview-details-panel:
     specifiers:
@@ -7580,29 +7579,6 @@ packages:
     engines: {node: '>=0.10.0'}
     dev: true
 
-  /notistack/2.0.8_zi5jao76wkadbc5qfk3wwxd6yy:
-    resolution: {integrity: sha512-/IY14wkFp5qjPgKNvAdfL5Jp6q90+MjgKTPh4c81r/lW70KeuX6b9pE/4f8L4FG31cNudbN9siiFS5ql1aSLRw==}
-    peerDependencies:
-      '@emotion/react': ^11.4.1
-      '@emotion/styled': ^11.3.0
-      '@mui/material': ^5.0.0
-      react: ^16.8.0 || ^17.0.0 || ^18.0.0
-      react-dom: ^16.8.0 || ^17.0.0 || ^18.0.0
-    peerDependenciesMeta:
-      '@emotion/react':
-        optional: true
-      '@emotion/styled':
-        optional: true
-    dependencies:
-      '@emotion/react': 11.11.1_gq4reeurwxuj4hvyerswzzqthy
-      '@emotion/styled': 11.11.0_rra5sb3jh6znd7zvpi7zwpaeky
-      '@mui/material': 5.14.8_mcyaowhjtk6juxjmabqaayfcxi
-      clsx: 1.2.1
-      hoist-non-react-statics: 3.3.2
-      react: 18.2.0
-      react-dom: 18.2.0_react@18.2.0
-    dev: false
-
   /npm-run-path/4.0.1:
     resolution: {integrity: sha512-S48WzZW777zhNIrn7gxOlISNAqi9ZC/uQFnRdbeIHhZhCA6UqpkOT8T1G7BvfdgP4Er8gF4sUbaS0i7QvIfCWw==}
     engines: {node: '>=8'}
@@ -9378,7 +9354,7 @@ packages:
       react: ^16.8.0 || ^17.0.0 || ^18.0.0
     dependencies:
       react: 18.2.0
-    dev: true
+    dev: false
 
   /util-deprecate/1.0.2:
     resolution: {integrity: sha512-EPD5q1uXyFxJpCrLnCc1nHnq3gOa6DZBocAIiI2TaSCA7VCJ1UJDMagCzIkXNsUYfD1daK//LTEQ8xiIbrHtcw==}
@@ -9904,4 +9880,4 @@ packages:
       '@types/react': 18.2.21
       react: 18.2.0
       use-sync-external-store: 1.2.0_react@18.2.0
-    dev: true
+    dev: false
