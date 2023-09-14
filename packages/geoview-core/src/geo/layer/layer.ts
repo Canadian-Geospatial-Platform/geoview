@@ -3,7 +3,7 @@ import { EventTypes } from 'ol/Observable';
 import { indexOf } from 'lodash';
 import i18n from 'i18next';
 import { GeoCore, layerConfigIsGeoCore } from './other/geocore';
-import { Vector } from './vector/vector';
+import { Geometry } from './geometry/geometry';
 
 import { api } from '@/app';
 import { EVENT_NAMES } from '@/api/events/event-types';
@@ -44,8 +44,8 @@ export class Layer {
   // variable used to store all added geoview layers
   geoviewLayers: { [geoviewLayerId: string]: AbstractGeoViewLayer } = {};
 
-  // used to access vector API to create and manage geometries
-  vector: Vector | undefined;
+  // used to access geometry API to create and manage geometries
+  geometry: Geometry | undefined;
 
   // order to load layers
   layerOrder: string[] = [];
@@ -61,7 +61,7 @@ export class Layer {
   constructor(mapId: string) {
     this.mapId = mapId;
 
-    this.vector = new Vector(this.mapId);
+    this.geometry = new Geometry(this.mapId);
 
     // listen to outside events to add layers
     api.event.on(

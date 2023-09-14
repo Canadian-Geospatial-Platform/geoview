@@ -102,7 +102,7 @@
 
       // Create geometry group which will handle the drawing and set it as active
       const groupKey = 'selectGroup';
-      const geomGrp = map.layer.vector.createGeometryGroup(groupKey);
+      const geomGrp = map.layer.geometry.createGeometryGroup(groupKey);
 
       // Add dummy shapes
       addDefaultShapes(map, groupKey);

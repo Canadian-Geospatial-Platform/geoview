@@ -40,7 +40,7 @@ export class Snap extends Interaction {
     } else if (options.geometryGroupKey) {
       // If a geometry group key is set
       // Get the vector source for the geometry group or create one when not existing
-      const geomGroup = this.mapViewer.layer.vector?.createGeometryGroup(options.geometryGroupKey);
+      const geomGroup = this.mapViewer.layer.geometry?.createGeometryGroup(options.geometryGroupKey);
       olOptions.source = geomGroup?.vectorSource;
     }
 

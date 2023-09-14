@@ -2,11 +2,12 @@ import { Modify as OLModify } from 'ol/interaction';
 import { ModifyEvent as OLModifyEvent, Options as OLModifyOptions } from 'ol/interaction/Modify';
 import Collection from 'ol/Collection';
 import Feature from 'ol/Feature';
+import { FlatStyle } from 'ol/style/flat';
 import { Interaction, InteractionOptions } from './interaction';
 import { api } from '@/app';
 import { EVENT_NAMES } from '@/api/events/event-types';
 import { modifyPayload } from '@/api/events/payloads';
-import { TypeFeatureStyle } from '../layer/vector/vector-types';
+import { TypeFeatureStyle } from '../layer/geometry/geometry-types';
 import { GeoUtilities } from '../utils/utilities';
 
 /**
@@ -38,7 +39,7 @@ export class Modify extends Interaction {
     // The OpenLayers Modify options
     // TODO: Enhancements - Add support for more modifying options
     const olOptions: OLModifyOptions = {
-      style: new GeoUtilities().convertTypeFeatureStyleToOpenLayersStyle(options.style),
+      style: new GeoUtilities().convertTypeFeatureStyleToOpenLayersStyle(options.style) as FlatStyle,
     };
 
     // If a list of features is specified
@@ -48,7 +49,7 @@ export class Modify extends Interaction {
     } else if (options.geometryGroupKey) {
       // If a geometry group key is set
       // Get the vector source for the geometry group or create one when not existing
-      const geomGroup = this.mapViewer.layer.vector?.createGeometryGroup(options.geometryGroupKey);
+      const geomGroup = this.mapViewer.layer.geometry?.createGeometryGroup(options.geometryGroupKey);
       olOptions.source = geomGroup?.vectorSource;
     }
 
