@@ -1,6 +1,4 @@
-import MaterialListItem from '@mui/material/ListItem';
-
-import { ListItemProps } from '@mui/material';
+import { ListItem as MaterialListItem, ListItemProps } from '@mui/material';
 
 /**
  * Custom MUI ListItem Props

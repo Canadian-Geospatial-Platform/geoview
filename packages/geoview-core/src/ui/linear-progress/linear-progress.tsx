@@ -4,7 +4,7 @@ import { LinearProgress as LinearProgressBar } from '@mui/material';
  * Properties for the Accordion element
  */
 interface ProgressbarProps {
-  className: string;
+  className?: string;
   /**
    * The variant to use.
    */
@@ -31,6 +31,7 @@ export function ProgressBar(props: ProgressbarProps): JSX.Element {
  * Default property values
  */
 ProgressBar.defaultProps = {
+  className: '',
   variant: 'indeterminate',
   value: 0,
 };

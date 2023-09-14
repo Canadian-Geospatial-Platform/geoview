@@ -1,5 +1,4 @@
-import MaterialTypography from '@mui/material/Typography';
-import { TypographyProps } from '@mui/material';
+import { Typography as MaterialTypography, TypographyProps } from '@mui/material';
 
 /**
  * Custom Material UI Typography properties

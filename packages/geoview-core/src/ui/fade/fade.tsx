@@ -1,6 +1,4 @@
-import MaterialFade from '@mui/material/Fade';
-
-import { FadeProps } from '@mui/material';
+import { Fade as MaterialFade, FadeProps } from '@mui/material';
 
 /**
  * Create a customized Material UI Fade

@@ -1,9 +1,6 @@
 import { useEffect, useContext, forwardRef, useState } from 'react';
 
-import Button from '@mui/material/Button';
-
-import { Snackbar as MUISnackbar } from '@mui/material';
-import MuiAlert, { AlertProps } from '@mui/material/Alert';
+import { Alert as MaterialAlert, AlertProps, Snackbar as MaterialSnackbar, Button } from '@mui/material';
 
 import { MapContext } from '@/core/app-start';
 
@@ -40,7 +37,7 @@ function SnackButton(props: SnackButtonProps): JSX.Element {
 }
 
 const Alert = forwardRef<HTMLDivElement, AlertProps>(function Alert(props, ref) {
-  return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
+  return <MaterialAlert elevation={6} ref={ref} variant="filled" {...props} />;
 });
 
 /**
@@ -100,7 +97,7 @@ export function Snackbar(props: SnackBarProps): JSX.Element {
   }, []);
 
   return (
-    <MUISnackbar
+    <MaterialSnackbar
       sx={{
         position: 'absolute',
         bottom: '40px!important',
@@ -115,6 +112,6 @@ export function Snackbar(props: SnackBarProps): JSX.Element {
         {message}
         {button}
       </Alert>
-    </MUISnackbar>
+    </MaterialSnackbar>
   );
 }

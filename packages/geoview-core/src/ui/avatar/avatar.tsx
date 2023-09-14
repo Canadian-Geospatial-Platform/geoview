@@ -1,6 +1,4 @@
-import MaterialAvatar from '@mui/material/Avatar';
-
-import { AvatarProps } from '@mui/material';
+import { Avatar as MaterialAvatar, AvatarProps } from '@mui/material';
 
 /**
  * Create a customized Material UI Avatar

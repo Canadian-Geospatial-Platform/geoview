@@ -1,14 +1,17 @@
 /* eslint-disable react/require-default-props */
-import React from 'react';
-
-import { MenuItemProps, ListSubheaderProps, SelectProps, InputLabelProps } from '@mui/material';
+import {
+  FormControl,
+  InputLabel,
+  InputLabelProps,
+  ListSubheader,
+  ListSubheaderProps,
+  MenuItem,
+  MenuItemProps,
+  Select as MaterialSelect,
+  SelectProps,
+} from '@mui/material';
 
 import makeStyles from '@mui/styles/makeStyles';
-import ListSubheader from '@mui/material/ListSubheader';
-import MaterialSelect from '@mui/material/Select';
-import FormControl from '@mui/material/FormControl';
-import InputLabel from '@mui/material/InputLabel';
-import MenuItem from '@mui/material/MenuItem';
 
 /**
  * Custom MUI Select properties

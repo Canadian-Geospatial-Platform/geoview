@@ -3,10 +3,7 @@
 /* eslint-disable react/no-array-index-key */
 import { SyntheticEvent, useEffect, useState, ReactNode } from 'react';
 
-import { TabsProps, TabProps, BoxProps } from '@mui/material';
-import MaterialTabs from '@mui/material/Tabs';
-import MaterialTab from '@mui/material/Tab';
-import Grid from '@mui/material/Grid';
+import { Grid, Tab as MaterialTab, Tabs as MaterialTabs, TabsProps, TabProps, BoxProps } from '@mui/material';
 
 import { HtmlToReact } from '@/core/containers/html-to-react';
 

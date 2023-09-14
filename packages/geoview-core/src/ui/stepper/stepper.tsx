@@ -1,8 +1,14 @@
-import MaterialStepper from '@mui/material/Stepper';
-import Step from '@mui/material/Step';
-import StepLabel from '@mui/material/StepLabel';
-import StepContent from '@mui/material/StepContent';
-import { StepperProps, StepLabelProps, StepContentProps, StepProps } from '@mui/material';
+import {
+  Stepper as MaterialStepper,
+  Step,
+  StepContent,
+  StepLabel,
+  StepperProps,
+  StepLabelProps,
+  StepContentProps,
+  StepProps,
+} from '@mui/material';
+
 import makeStyles from '@mui/styles/makeStyles';
 
 const useStyles = makeStyles((theme) => ({

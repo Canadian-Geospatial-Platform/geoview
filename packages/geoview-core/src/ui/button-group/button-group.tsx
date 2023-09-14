@@ -1,5 +1,4 @@
-import MaterialButtonGroup from '@mui/material/ButtonGroup';
-import { ButtonGroupProps } from '@mui/material';
+import { ButtonGroup as MaterialButtonGroup, ButtonGroupProps } from '@mui/material';
 
 /**
  * Create a customized Material UI button group
