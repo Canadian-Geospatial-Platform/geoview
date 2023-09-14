@@ -1,6 +1,10 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import debounce from 'lodash/debounce';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+
 import {
   MaterialReactTable,
   type MRT_ColumnDef as MRTColumnDef,
@@ -11,6 +15,7 @@ import {
   type MRT_SortingState as MRTSortingState,
   type MRT_Virtualizer as MRTVirtualizer,
   type MRT_ColumnFiltersState as MRTColumnFiltersState,
+  type MRT_Column as MRTColumn,
 } from 'material-react-table';
 import { Projection } from 'ol/proj';
 import { Extent } from 'ol/extent';
@@ -21,6 +26,7 @@ import { Box, IconButton, Tooltip, ZoomInSearchIcon } from '@/ui';
 import ExportButton from './export-button';
 import JSONExportButton from './json-export-button';
 import FilterMap from './filter-map';
+
 import {
   AbstractGeoViewVector,
   TypeLayerEntryConfig,
@@ -105,7 +111,7 @@ function MapDataTable({ data, layerId, mapId, layerKey, projectionConfig }: MapD
   const buildFilterList = useCallback((columnFilter: MRTColumnFiltersState) => {
     if (!columnFilter.length) return [''];
     return columnFilter.map((filter) => {
-      const filterValue = filter.value;
+      const filterValue = filter.value as string;
       const filterId = filter.id;
       // Check if filterValue is of type array because columnfilters return array with min and max.
       if (Array.isArray(filterValue)) {
@@ -122,6 +128,14 @@ function MapDataTable({ data, layerId, mapId, layerKey, projectionConfig }: MapD
         }
         return arrQuery;
       }
+
+      // Check filter value is of type date,
+      if (typeof filterValue === 'object' && filterValue) {
+        const date = api.dateUtilities.applyInputDateFormat(`${(filterValue as Date).toISOString().slice(0, -5)}Z`);
+        const formattedDate = date.slice(0, -1);
+        return `${filterId} <= date '${formattedDate}'`;
+      }
+
       return `upper(${filterId}) like upper('%${filter.value}%')`;
     });
   }, []);
@@ -135,6 +149,7 @@ function MapDataTable({ data, layerId, mapId, layerKey, projectionConfig }: MapD
     const filterStrings = buildFilterList(filters)
       .filter((filterValue) => filterValue.length)
       .join(' and ');
+
     const geoviewLayerInstance = api.maps[mapId].layer.geoviewLayers[layerId];
     const filterLayerConfig = api.maps[mapId].layer.registeredLayers[layerKey] as TypeLayerEntryConfig;
 
@@ -216,6 +231,7 @@ function MapDataTable({ data, layerId, mapId, layerKey, projectionConfig }: MapD
 
   /**
    * Create data table body cell with tooltip
+   *
    * @param {string} cellValue cell value to be displayed in cell
    * @returns JSX.Element
    */
@@ -228,6 +244,33 @@ function MapDataTable({ data, layerId, mapId, layerKey, projectionConfig }: MapD
       </Tooltip>
     );
   };
+
+  /**
+   * Create Date filter with Datepicker.
+   *
+   * @param {MRTColumn<ColumnsType>} column filter column.
+   * @returns JSX.Element
+   */
+  const getDateFilter = (column: MRTColumn<ColumnsType>) => {
+    return (
+      <LocalizationProvider dateAdapter={AdapterDayjs}>
+        <DatePicker
+          timezone="UTC"
+          format="YYYY-MM-DD"
+          onChange={(newValue) => {
+            column.setFilterValue(newValue);
+          }}
+          slotProps={{
+            textField: {
+              sx: { minWidth: '120px' },
+              variant: 'standard',
+            },
+          }}
+        />
+      </LocalizationProvider>
+    );
+  };
+
   /**
    * Build material react data table column header.
    *
@@ -241,8 +284,16 @@ function MapDataTable({ data, layerId, mapId, layerKey, projectionConfig }: MapD
         accessorKey: key,
         header: value.alias,
         ...(value.dataType === 'number' && { filterFn: 'betweenInclusive', size: 175 }),
+
         Header: ({ column }) => getTableHeader(column.columnDef.header),
         Cell: ({ cell }) => getCellValueWithTooltip(cell.getValue() as string),
+        ...(value.dataType === 'date' && {
+          accessorFn: (row) => new Date(row[key]),
+          filterFn: 'lessThanOrEqualTo',
+          sortingFn: 'datetime',
+          Cell: ({ cell }) => api.dateUtilities.formatDate(cell.getValue<Date>(), 'YYYY-MM-DDThh:mm:ss'),
+          Filter: ({ column }) => getDateFilter(column),
+        }),
         ...([t('dataTable.icon'), t('dataTable.zoom')].includes(value.alias) && { size: 100, enableColumnFilter: false }),
       });
     });
