@@ -38,7 +38,6 @@ import { Translate } from '../interaction/translate';
 
 import { ModalApi } from '@/ui';
 import {
-  mapPayload,
   mapComponentPayload,
   mapConfigPayload,
   GeoViewLayerPayload,
@@ -49,6 +48,7 @@ import { generateId, parseJSONConfig, removeCommentsFromJSON } from '@/core/util
 import { TypeListOfGeoviewLayerConfig, TypeDisplayLanguage, TypeViewSettings } from './map-schema-types';
 import { TypeMapFeaturesConfig, TypeHTMLElement } from '@/core/types/global-types';
 import { layerConfigIsGeoCore } from '../layer/other/geocore';
+import { getGeoViewStore } from '@/core/stores/stores-managers';
 
 interface TypeDcoument extends Document {
   webkitExitFullscreen: () => void;
@@ -395,7 +395,10 @@ export class MapViewer {
           allGeoviewLayerReady &&= geoviewLayers[geoviewLayerId].allLayerEntryConfigProcessed();
         });
         if (allGeoviewLayerReady) {
-          api.event.emit(mapPayload(EVENT_NAMES.MAP.EVENT_MAP_LOADED, this.mapId, this.map));
+          const store = getGeoViewStore(this.mapId);
+          store.setState({
+            mapState: { ...store.getState().mapState, mapLoaded: true, mapElement: this.map },
+          });
           clearInterval(layerInterval);
         }
       }

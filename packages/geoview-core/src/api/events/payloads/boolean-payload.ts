@@ -4,7 +4,6 @@ import { EventStringId, EVENT_NAMES } from '../event-types';
 
 /** Valid events that can create BooleanPayload */
 const validEvents: EventStringId[] = [
-  EVENT_NAMES.MAP.EVENT_MAP_CROSSHAIR_ENABLE_DISABLE,
   EVENT_NAMES.OVERVIEW_MAP.EVENT_OVERVIEW_MAP_TOGGLE,
   EVENT_NAMES.FOOTERBAR.EVENT_FOOTERBAR_EXPAND_COLLAPSE,
   EVENT_NAMES.MAP.EVENT_MAP_FIX_NORTH,
