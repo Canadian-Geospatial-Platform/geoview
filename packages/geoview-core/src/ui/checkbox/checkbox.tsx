@@ -1,7 +1,6 @@
-import React from 'react';
+import { forwardRef } from 'react';
 
-import MaterialCheckbox from '@mui/material/Checkbox';
-import { CheckboxProps } from '@mui/material';
+import { Checkbox as MaterialCheckbox, CheckboxProps } from '@mui/material';
 
 /**
  * Custom MUI Checkbox properties
@@ -18,6 +17,6 @@ interface TypeCheckboxProps extends CheckboxProps {
  * @returns {JSX.Element} the auto complete ui component
  */
 // eslint-disable-next-line react/display-name
-export const Checkbox = React.forwardRef((props: TypeCheckboxProps, ref): JSX.Element => {
+export const Checkbox = forwardRef((props: TypeCheckboxProps, ref): JSX.Element => {
   return <MaterialCheckbox ref={ref as React.RefObject<HTMLButtonElement>} {...props} />;
 });

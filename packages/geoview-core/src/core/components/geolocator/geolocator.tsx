@@ -1,10 +1,11 @@
 import { ChangeEvent, useCallback, useContext, useRef, useState } from 'react';
-import { AppBar, Box, Toolbar, IconButton, Divider, LinearProgress, Typography, Paper } from '@mui/material';
-import SearchIcon from '@mui/icons-material/Search';
-import CloseIcon from '@mui/icons-material/Close';
+
 import { useTranslation } from 'react-i18next';
 import { fromLonLat } from 'ol/proj';
 import debounce from 'lodash/debounce';
+
+import { CloseIcon, SearchIcon, AppBar, Box, Divider, IconButton, Paper, ProgressBar, Toolbar, Typography } from '@/ui';
+
 import GeoList from './geo-list';
 import { StyledInputField, sxClasses } from './styles';
 import { MapContext } from '@/core/app-start';
@@ -189,7 +190,7 @@ export function Geolocator() {
       </Box>
       {isLoading && (
         <Box sx={sxClasses.progressBar}>
-          <LinearProgress color="inherit" />
+          <ProgressBar />
         </Box>
       )}
       {!!data && (

@@ -2,9 +2,8 @@ import { useRef } from 'react';
 
 import { useTranslation } from 'react-i18next';
 
-import Tooltip from '@mui/material/Tooltip';
-import Fade from '@mui/material/Fade';
-import MaterialTextField from '@mui/material/TextField';
+import { Fade, TextField as MaterialTextField, Tooltip } from '@mui/material';
+
 import { TypeTextFieldProps } from '../panel/panel-types';
 
 /**

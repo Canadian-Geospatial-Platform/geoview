@@ -1,11 +1,11 @@
-import { Paper as PaperElement, PaperProps } from '@mui/material';
+import { Paper as MaterialPaper, PaperProps } from '@mui/material';
 
 /**
- * Create a popover component
+ * Create a paper component
  *
- * @param {PaperProps} props popover properties
- * @returns {JSX.Element} returns popover component
+ * @param {PaperProps} props paper properties
+ * @returns {JSX.Element} returns paper component
  */
 export function Paper(props: PaperProps): JSX.Element {
-  return <PaperElement {...props} />;
+  return <MaterialPaper {...props} />;
 }

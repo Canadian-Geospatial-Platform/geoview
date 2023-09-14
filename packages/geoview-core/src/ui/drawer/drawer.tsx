@@ -2,9 +2,9 @@ import { useContext, useEffect, useState } from 'react';
 
 import { useTranslation } from 'react-i18next';
 
+import { Drawer as MaterialDrawer, DrawerProps } from '@mui/material';
+
 import makeStyles from '@mui/styles/makeStyles';
-import MaterialDrawer from '@mui/material/Drawer';
-import { DrawerProps } from '@mui/material';
 
 import { api } from '@/app';
 import { EVENT_NAMES } from '@/api/events/event-types';

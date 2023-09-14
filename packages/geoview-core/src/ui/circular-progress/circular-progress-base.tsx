@@ -1,5 +1,4 @@
-import MaterialCircularProgress from '@mui/material/CircularProgress';
-import { CircularProgressProps } from '@mui/material';
+import { CircularProgress as MaterialCircularProgress, CircularProgressProps } from '@mui/material';
 
 /**
  * Create a customized Material UI Circular Progress

@@ -1,8 +1,8 @@
 /* eslint-disable react/require-default-props */
 import { CSSProperties } from 'react';
+import { CircularProgress as MaterialCircularProgress, CircularProgressProps } from '@mui/material';
+
 import makeStyles from '@mui/styles/makeStyles';
-import MaterialCircularProgress from '@mui/material/CircularProgress';
-import { CircularProgressProps } from '@mui/material';
 
 /**
  * Circular Progress Properties

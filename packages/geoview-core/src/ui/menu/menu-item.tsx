@@ -1,5 +1,4 @@
-import MaterialMenuItem from '@mui/material/MenuItem';
-import { MenuItemProps } from '@mui/material';
+import { MenuItem as MaterialMenuItem, MenuItemProps } from '@mui/material';
 
 /**
  * Create a customized Material UI MenuItem
