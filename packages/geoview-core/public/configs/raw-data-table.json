@@ -48,6 +48,60 @@
             "layerId": "0"
           }
         ]
+      },
+      {
+        "geoviewLayerId": "geojsonLYR5",
+        "geoviewLayerName": {
+          "en": "GeoJSON Sample"
+        },
+        "metadataAccessPath": {
+          "en": "./geojson/metadata.json"
+        },
+        "geoviewLayerType": "GeoJSON",
+        "initialSettings": {
+          "visible": "yes"
+        },
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "polygons.json",
+            "layerName": {
+              "en": "Polygons"
+            }
+          },
+          {
+            "layerId": "lines.json",
+            "layerName": {
+              "en": "Lines"
+            }
+          },
+          {
+            "entryType": "group",
+            "layerId": "point-feature-group",
+            "layerName": {
+              "en": "point-feature-group"
+            },
+            "listOfLayerEntryConfig": [
+              {
+                "layerId": "icon_points.json",
+                "initialSettings": {
+                  "visible": "no"
+                },
+                "layerName": {
+                  "en": "Icons"
+                }
+              },
+              {
+                "layerId": "points.json",
+                "initialSettings": {
+                  "visible": "always"
+                },
+                "layerName": {
+                  "en": "Points"
+                }
+              }
+            ]
+          }
+        ]
       }
     ]
   },
