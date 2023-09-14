@@ -212,7 +212,7 @@
 
     function btnClearGroup(groupKey) {
       // Delete the geometries from the group
-      map1.layer.vector.deleteGeometriesFromGroup(groupKey);
+      map1.layer.geometry.deleteGeometriesFromGroup(groupKey);
     }
 
     function selDrawChanged(groupKey) {
@@ -240,7 +240,7 @@
       else if (groupKey == 'geomGroupC') styleForGroup = cgpv.api.geoUtilities.defaultDrawingStyle('red');
 
       // Set the default styling for the vector layer itself as well, that is, once the drawing is done
-      map1.layer.vector.getGeometryGroup(groupKey).vectorLayer.setStyle(styleForGroup);
+      map1.layer.geometry.getGeometryGroup(groupKey).vectorLayer.setStyle(styleForGroup);
     }
 
     function stopDrawings() {

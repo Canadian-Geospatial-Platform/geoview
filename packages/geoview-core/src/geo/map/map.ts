@@ -12,7 +12,7 @@ import queryString from 'query-string';
 
 import { Basemap } from '../layer/basemap/basemap';
 import { Layer } from '../layer/layer';
-import { TypeFeatureStyle } from '../layer/vector/vector-types';
+import { TypeFeatureStyle } from '../layer/geometry/geometry-types';
 
 import { api } from '@/app';
 import { EVENT_NAMES } from '@/api/events/event-types';
@@ -268,8 +268,8 @@ export class MapViewer {
             response.json().then((data) => {
               if (data.geometry !== undefined) {
                 // add the geometry
-                // TODO: use the vector as GeoJSON and add properties to by queried by the details panel
-                this.layer.vector?.addPolygon(data.geometry.coordinates, undefined, generateId(null));
+                // TODO: use the geometrie as GeoJSON and add properties to by queried by the details panel
+                this.layer.geometry?.addPolygon(data.geometry.coordinates, undefined, generateId(null));
               }
             });
           }
