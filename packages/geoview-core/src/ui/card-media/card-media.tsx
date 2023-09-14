@@ -1,6 +1,5 @@
 /* eslint-disable react/require-default-props */
-import MaterialCardMedia from '@mui/material/CardMedia';
-import { CardMediaProps } from '@mui/material';
+import { CardMedia as MaterialCardMedia, CardMediaProps } from '@mui/material';
 
 /**
  * Properties for the Card Media

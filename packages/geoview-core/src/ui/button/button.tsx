@@ -4,9 +4,8 @@ import { useTranslation } from 'react-i18next';
 
 import makeStyles from '@mui/styles/makeStyles';
 import { useTheme } from '@mui/styles';
-import Tooltip from '@mui/material/Tooltip';
-import Fade from '@mui/material/Fade';
-import MaterialButton from '@mui/material/Button';
+
+import { Button as MaterialButton, Fade, Tooltip } from '@mui/material';
 
 import { Cast } from '@/core/types/global-types';
 

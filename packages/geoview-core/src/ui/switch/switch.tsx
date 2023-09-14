@@ -1,8 +1,5 @@
-import React from 'react';
+import { FormControlLabel as MaterialFormControlLabel, Switch as MaterialSwitch, SwitchProps } from '@mui/material';
 
-import { SwitchProps } from '@mui/material';
-import MaterialSwitch from '@mui/material/Switch';
-import MaterialFormControlLabel from '@mui/material/FormControlLabel';
 import makeStyles from '@mui/styles/makeStyles';
 
 /**

@@ -1,4 +1,4 @@
-import { Popover as PopoverElement, PopoverProps } from '@mui/material';
+import { Popover as MaterialPopover, PopoverProps } from '@mui/material';
 
 /**
  * Create a popover component
@@ -7,5 +7,5 @@ import { Popover as PopoverElement, PopoverProps } from '@mui/material';
  * @returns {JSX.Element} returns popover component
  */
 export function Popover(props: PopoverProps): JSX.Element {
-  return <PopoverElement {...props} />;
+  return <MaterialPopover {...props} />;
 }

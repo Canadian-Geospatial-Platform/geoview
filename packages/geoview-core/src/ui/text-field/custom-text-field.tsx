@@ -4,8 +4,7 @@ import React, { ReactNode } from 'react';
 
 import makeStyles from '@mui/styles/makeStyles';
 
-import InputAdornment from '@mui/material/InputAdornment';
-import MaterialTextField, { BaseTextFieldProps } from '@mui/material/TextField';
+import { BaseTextFieldProps, InputAdornment, TextField as MaterialTextField } from '@mui/material';
 
 /**
  * Customized Material UI Custom TextField Properties

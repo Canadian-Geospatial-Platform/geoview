@@ -1,5 +1,5 @@
-import * as React from 'react';
-import { ListItem, ListItemButton, Grid, Typography, Tooltip } from '@/ui';
+import { ListItem } from '@mui/material'; // TODO because of forward ref problem we can't use it inside the tooltip if provided by UI
+import { ListItemButton, Grid, Tooltip, Typography } from '@/ui';
 import { GeoListItem } from './geolocator';
 
 type GeoListProps = {

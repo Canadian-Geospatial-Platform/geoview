@@ -1,8 +1,6 @@
 /* eslint-disable react/require-default-props */
 import { useState } from 'react';
-import MaterialSlider from '@mui/material/Slider';
-
-import { SliderProps } from '@mui/material';
+import { Slider as MaterialSlider, SliderProps } from '@mui/material';
 
 /**
  * Properties for the Slider

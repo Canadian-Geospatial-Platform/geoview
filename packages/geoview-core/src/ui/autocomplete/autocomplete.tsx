@@ -1,8 +1,6 @@
 /* eslint-disable react/require-default-props */
 import { ReactNode } from 'react';
-import { AutocompleteProps } from '@mui/material';
-import FormControl from '@mui/material/FormControl';
-import MaterialAutocomplete from '@mui/material/Autocomplete';
+import { Autocomplete as MaterialAutocomplete, AutocompleteProps, FormControl } from '@mui/material';
 
 /**
  * Customized Material UI Autocomplete properties

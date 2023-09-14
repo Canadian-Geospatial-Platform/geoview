@@ -3,7 +3,10 @@
     "interaction": "dynamic",
     "viewSettings": {
       "zoom": 3,
-      "center": [-100, 50],
+      "center": [
+        -100,
+        50
+      ],
       "projection": 3978
     },
     "basemapOptions": {
@@ -27,6 +30,22 @@
         "listOfLayerEntryConfig": [
           {
             "layerId": "8"
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "historical-flood",
+        "serviceDateFormat": "yyyy/mm/ddThh:mm:ssz",
+        "geoviewLayerName": {
+          "en": "Historical Flood Events (HFE)"
+        },
+        "metadataAccessPath": {
+          "en": "https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/historical_flood_event_en/MapServer"
+        },
+        "geoviewLayerType": "esriFeature",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "0"
           }
         ]
       },
@@ -73,6 +92,9 @@
               },
               {
                 "layerId": "points.json",
+                "initialSettings": {
+                  "visible": "always"
+                },
                 "layerName": {
                   "en": "Points"
                 }
@@ -84,9 +106,20 @@
     ]
   },
   "theme": "dark",
-  "navBar": ["zoom", "fullscreen", "home", "location", "export"],
-  "components": ["north-arrow", "overview-map"],
+  "navBar": [
+    "zoom",
+    "fullscreen",
+    "home",
+    "location",
+    "export"
+  ],
+  "components": [
+    "north-arrow",
+    "overview-map"
+  ],
   "corePackages": [],
   "externalPackages": [],
-  "suportedLanguages": ["en"]
+  "suportedLanguages": [
+    "en"
+  ]
 }

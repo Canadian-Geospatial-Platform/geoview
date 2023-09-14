@@ -1,6 +1,4 @@
-import MaterialTooltip from '@mui/material/Tooltip';
-
-import { TooltipProps } from '@mui/material';
+import { Tooltip as MaterialTooltip, TooltipProps } from '@mui/material';
 
 /**
  * Custom MUI Tooltip properties

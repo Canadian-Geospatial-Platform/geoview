@@ -49,6 +49,10 @@
       DataTable From Map
     </button>
 
+    <button onClick="renderDataTableFromMapForHistoricalFlood()">
+      Create DataTable For Historical Floods
+    </button>
+
     <div id="dataTable" style="margin: 1rem 0"></div>
   </div>
 
@@ -78,6 +82,22 @@
           cgpv.react.createElement(cgpv.ui.elements.Accordion, { items: [itemAcc] })
         );
         console.timeEnd("MapTableCreation")
+      }
+
+      renderDataTableFromMapForHistoricalFlood = async () => {
+        console.time("HistoricalFloodsMapTableCreation")
+        const layers = Object.keys(api.maps['mapWM1'].layer.geoviewLayers);
+
+        const itemAcc = {
+          title: "Data Table",
+          content: await cgpv.api.maps['mapWM1'].dataTable.createDataTableByLayerId({ layerId: layers[1], layerKey: `${layers[1]}/0`, mapId: "mapWM1" })
+        }
+
+        cgpv.api.addUiComponent(
+          "dataTable",
+          cgpv.react.createElement(cgpv.ui.elements.Accordion, { items: [itemAcc] })
+        );
+        console.timeEnd("HistoricalFloodsMapTableCreation")
       }
     });
   </script>
