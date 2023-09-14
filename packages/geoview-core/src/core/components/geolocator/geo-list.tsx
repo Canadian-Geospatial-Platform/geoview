@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { ListItem, ListItemButton, Grid, Typography, Tooltip } from '@mui/material';
+import { ListItem, ListItemButton, Grid, Typography, Tooltip } from '@/ui';
 import { GeoListItem } from './geolocator';
 
 type GeoListProps = {
