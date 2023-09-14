@@ -24,6 +24,7 @@ import { NavbarButtons } from '@/core/components/nav-bar/nav-bar-buttons';
 import { FooterTabsApi } from '@/core/components/footer-tabs/footer-tabs-api';
 import { NotificationsApi } from '@/core/components/notifications/notifications-api';
 import { LegendApi } from '@/core/components/legend/legend-api';
+import { Legend2Api } from '@/core/components/legend-2/legend-api';
 import { DetailsAPI } from '@/core/components/details/details-api';
 import { DetailsAPI as DetailsAPIFooter } from '@/core/components/details-1/details-api';
 import { FeatureInfoAPI } from '@/core/components/feature-info/feature-info.api';
@@ -86,6 +87,8 @@ export class MapViewer {
 
   // used to access the legend api
   legend!: LegendApi;
+
+  legend2!: Legend2Api;
 
   // used to access the footer tabs api
   // TODO: Keep only FeatureInfo after refactor
@@ -166,6 +169,7 @@ export class MapViewer {
     this.navBarButtons = new NavbarButtons(this.mapId);
     this.footerTabs = new FooterTabsApi(this.mapId);
     this.legend = new LegendApi(this.mapId);
+    this.legend2 = new Legend2Api(this.mapId);
     // Line below is related to the existing detials will be shown in Details Panel in app bar
     this.details = new DetailsAPI(this.mapId);
     this.detailsFooter = new DetailsAPIFooter(this.mapId);
