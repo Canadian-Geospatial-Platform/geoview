@@ -345,7 +345,6 @@ function MapDataTable({ data, layerId, mapId, layerKey, projectionConfig }: MapD
           columnPinning: { left: [t('dataTable.icon'), t('dataTable.zoom')] },
           density: 'compact',
           pagination: { pageSize: 10, pageIndex: 0 },
-          showColumnFilters: true,
         }}
         onSortingChange={setSorting}
         onColumnFiltersChange={setColumnFilters}
