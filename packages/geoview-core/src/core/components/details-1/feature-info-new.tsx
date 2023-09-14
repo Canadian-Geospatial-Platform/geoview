@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable react/require-default-props */
 import React, { MutableRefObject, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -33,11 +32,12 @@ export interface TypeFeatureInfoProps {
 /**
  * feature info for a layer list
  *
- * @param {TypeFeatureInfoProps} Object of the propetties for FeatureInfo component
+ * @param {TypeFeatureInfoProps} Feature info propetties
  * @returns {JSX.Element} the feature info
  */
 export function FeatureInfo({ mapId, feature, selectedFeatures }: TypeFeatureInfoProps): JSX.Element {
   const { t } = useTranslation<string>();
+  const [checked, setChecked] = useState<boolean>(false);
 
   const featureUid = getUid(feature.geometry);
 
@@ -52,21 +52,6 @@ export function FeatureInfo({ mapId, feature, selectedFeatures }: TypeFeatureInf
       domain: null,
     };
   });
-
-  const [checked, setChecked] = useState<boolean>(false);
-
-  // linkify options
-  const linkifyOptions = {
-    attributes: {
-      title: t('details.external_link'),
-    },
-    defaultProtocol: 'https',
-    format: {
-      url: (value: string) => (value.length > 50 ? `${value.slice(0, 40)}…${value.slice(value.length - 10, value.length)}` : value),
-    },
-    ignoreTags: ['script', 'style', 'img'],
-    target: '_blank',
-  };
 
   const handleSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     e.stopPropagation();

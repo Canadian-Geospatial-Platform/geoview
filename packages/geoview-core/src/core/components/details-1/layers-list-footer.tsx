@@ -1,11 +1,10 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable react/require-default-props */
 import React, { useEffect, useState, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { getUid } from 'ol/util';
 import { ListItemText, ListItem, List, Tooltip, IconButton, KeyboardArrowRightIcon, Grid, Paper, Typography } from '@/ui';
 import { TypeArrayOfLayerData, TypeLayerData } from './details';
-import { FeatureInfo } from '../feature-info-new.ts/feature-info-new';
+import { FeatureInfo } from './feature-info-new';
 import { PayloadBaseClass, api } from '@/app';
 import { EVENT_NAMES } from '@/api/events/event-types';
 import { payloadIsAFeatureHighlight, payloadIsAClearHighlights } from '@/api/events/payloads';
