@@ -111,7 +111,7 @@ function MapDataTable({ data, layerId, mapId, layerKey, projectionConfig }: MapD
   const buildFilterList = useCallback((columnFilter: MRTColumnFiltersState) => {
     if (!columnFilter.length) return [''];
     return columnFilter.map((filter) => {
-      const filterValue = filter.value;
+      const filterValue = filter.value as string;
       const filterId = filter.id;
       // Check if filterValue is of type array because columnfilters return array with min and max.
       if (Array.isArray(filterValue)) {
@@ -131,9 +131,9 @@ function MapDataTable({ data, layerId, mapId, layerKey, projectionConfig }: MapD
 
       // Check filter value is of type date,
       if (typeof filterValue === 'object' && filterValue) {
-        const date = api.dateUtilities.applyInputDateFormat((filterValue as Date).toISOString());
-        const formattedDate = date.substring(0, date.lastIndexOf(':'));
-        return `${filterId} < date '${formattedDate}'`;
+        const date = api.dateUtilities.applyInputDateFormat(`${(filterValue as Date).toISOString().slice(0, -5)}Z`);
+        const formattedDate = date.slice(0, -1);
+        return `${filterId} <= date '${formattedDate}'`;
       }
 
       return `upper(${filterId}) like upper('%${filter.value}%')`;
@@ -150,7 +150,6 @@ function MapDataTable({ data, layerId, mapId, layerKey, projectionConfig }: MapD
       .filter((filterValue) => filterValue.length)
       .join(' and ');
 
-    console.log('filterString', filterStrings);
     const geoviewLayerInstance = api.maps[mapId].layer.geoviewLayers[layerId];
     const filterLayerConfig = api.maps[mapId].layer.registeredLayers[layerKey] as TypeLayerEntryConfig;
 
@@ -177,7 +176,6 @@ function MapDataTable({ data, layerId, mapId, layerKey, projectionConfig }: MapD
   // update map when column filters change
   useEffect(() => {
     if (columnFilters && mountedRef.current && mapFiltered) {
-      console.log('column filtersss', columnFilters);
       debouncedColumnFilters(columnFilters);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -257,6 +255,7 @@ function MapDataTable({ data, layerId, mapId, layerKey, projectionConfig }: MapD
     return (
       <LocalizationProvider dateAdapter={AdapterDayjs}>
         <DatePicker
+          timezone="UTC"
           format="YYYY-MM-DD"
           onChange={(newValue) => {
             column.setFilterValue(newValue);
@@ -292,7 +291,7 @@ function MapDataTable({ data, layerId, mapId, layerKey, projectionConfig }: MapD
           accessorFn: (row) => new Date(row[key]),
           filterFn: 'lessThanOrEqualTo',
           sortingFn: 'datetime',
-          Cell: ({ cell }) => cell.getValue<Date>()?.toISOString().replace('Z', ''),
+          Cell: ({ cell }) => api.dateUtilities.formatDate(cell.getValue<Date>(), 'YYYY-MM-DDThh:mm:ss'),
           Filter: ({ column }) => getDateFilter(column),
         }),
         ...([t('dataTable.icon'), t('dataTable.zoom')].includes(value.alias) && { size: 100, enableColumnFilter: false }),
