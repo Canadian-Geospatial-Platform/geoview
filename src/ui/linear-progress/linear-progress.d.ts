@@ -3,7 +3,7 @@
  * Properties for the Accordion element
  */
 interface ProgressbarProps {
-    className: string;
+    className?: string;
     /**
      * The variant to use.
      */
@@ -23,6 +23,7 @@ interface ProgressbarProps {
 export declare function ProgressBar(props: ProgressbarProps): JSX.Element;
 export declare namespace ProgressBar {
     var defaultProps: {
+        className: string;
         variant: string;
         value: number;
     };

@@ -1,4 +1,4 @@
-import { Vector } from './vector/vector';
+import { Geometry } from './geometry/geometry';
 import { AbstractGeoViewLayer } from './geoview-layers/abstract-geoview-layers';
 import { TypeGeoviewLayerConfig, TypeLayerEntryConfig, TypeListOfLayerEntryConfig, TypeListOfLocalizedLanguages } from '../map/map-schema-types';
 /**
@@ -15,7 +15,7 @@ export declare class Layer {
     geoviewLayers: {
         [geoviewLayerId: string]: AbstractGeoViewLayer;
     };
-    vector: Vector | undefined;
+    geometry: Geometry | undefined;
     layerOrder: string[];
     /** used to reference the map id */
     private mapId;

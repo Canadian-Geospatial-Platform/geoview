@@ -18,7 +18,6 @@ export type NotificationType = 'success' | 'error' | 'info' | 'warning';
  */
 export declare class NotificationPayload extends PayloadBaseClass {
     message: string;
-    description?: string;
     notificationType: NotificationType;
     /**
      * Constructor for the class
@@ -27,9 +26,8 @@ export declare class NotificationPayload extends PayloadBaseClass {
      * @param {string | null} handlerName the handler Name
      * @param {NotificationType} notificationType the  type of notification
      * @param {string} message the notification message
-     * @param {string} description optional notification description
      */
-    constructor(event: EventStringId, handlerName: string | null, notifType: NotificationType, message: string, description?: string);
+    constructor(event: EventStringId, handlerName: string | null, notifType: NotificationType, message: string);
 }
 /**
  * Helper function used to instanciate a NotificationPayload object. This function
@@ -39,8 +37,7 @@ export declare class NotificationPayload extends PayloadBaseClass {
  * @param {string | null} handlerName the handler Name
  * @param {NotificationType} notificationType the  type of notification
  * @param {string} message the notification message
- * @param {string} description optional notification description
  *
  * @returns {NotificationPayload} the NotificationPayload object created
  */
-export declare const notificationPayload: (event: EventStringId, handlerName: string | null, notificationType: NotificationType, message: string, description?: string) => NotificationPayload;
+export declare const notificationPayload: (event: EventStringId, handlerName: string | null, notificationType: NotificationType, message: string) => NotificationPayload;

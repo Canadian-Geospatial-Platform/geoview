@@ -1,4 +1,4 @@
-import React from 'react';
+/// <reference types="react" />
 import { ListItemTextProps } from '@mui/material';
 /**
  * Create a customized Material UI List Item Text
@@ -6,4 +6,4 @@ import { ListItemTextProps } from '@mui/material';
  * @param {ListItemTextProps} props the properties passed to the List Item element
  * @returns {JSX.Element} the created List Item element
  */
-export declare const ListItemText: React.ForwardRefExoticComponent<Omit<ListItemTextProps<"span", "p">, "ref"> & React.RefAttributes<unknown>>;
+export declare const ListItemText: import("react").ForwardRefExoticComponent<Omit<ListItemTextProps<"span", "p">, "ref"> & import("react").RefAttributes<unknown>>;

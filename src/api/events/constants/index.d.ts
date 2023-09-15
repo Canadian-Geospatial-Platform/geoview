@@ -20,4 +20,4 @@ export * from './overview-map';
 export * from './panel';
 export * from './slider';
 export * from './snackbar';
-export * from './vector';
+export * from './geometry';

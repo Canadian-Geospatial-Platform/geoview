@@ -1,5 +1,5 @@
 /// <reference types="react" />
-import { MenuItemProps, ListSubheaderProps, SelectProps, InputLabelProps } from '@mui/material';
+import { InputLabelProps, ListSubheaderProps, MenuItemProps, SelectProps } from '@mui/material';
 /**
  * Custom MUI Select properties
  */

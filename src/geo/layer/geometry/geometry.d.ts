@@ -3,7 +3,7 @@ import VectorSource, { Options as VectorSourceOptions } from 'ol/source/Vector';
 import { Feature } from 'ol';
 import { Coordinate } from 'ol/coordinate';
 import { Options as VectorLayerOptions } from 'ol/layer/BaseVector';
-import { TypeFeatureCircleStyle, TypeFeatureStyle, TypeIconStyle } from './vector-types';
+import { TypeFeatureCircleStyle, TypeFeatureStyle, TypeIconStyle } from './geometry-types';
 /**
  * Store a group of features
  */
@@ -16,16 +16,16 @@ interface FeatureCollection {
  * Class used to manage vector geometries (Polyline, Polygon, Circle, Marker...)
  *
  * @exports
- * @class Vector
+ * @class Geometry
  */
-export declare class Vector {
+export declare class Geometry {
     #private;
     geometryGroups: FeatureCollection[];
     geometries: Feature[];
     defaultGeometryGroupId: string;
     activeGeometryGroupIndex: number;
     /**
-     * Initialize map, vectors, and listen to add vector events
+     * Initialize map, vectors, and listen to add geometry events
      *
      * @param {string} mapId map id
      */
