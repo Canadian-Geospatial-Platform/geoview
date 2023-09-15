@@ -4,20 +4,26 @@ import { PayloadBaseClass } from './payload-base-class';
 
 import { EventStringId, EVENT_NAMES } from '../event-types';
 
-import { CONST_VECTOR_TYPES, TypeFeatureStyle, TypeIconStyle, TypeFeatureCircleStyle, TypeOfVector } from '@/geo/layer/vector/vector-types';
+import {
+  CONST_GEOMETRY_TYPES,
+  TypeFeatureStyle,
+  TypeIconStyle,
+  TypeFeatureCircleStyle,
+  TypeOfGeometry,
+} from '@/geo/layer/geometry/geometry-types';
 
-/** Valid events that can create VectorConfigPayload */
-const validEvents: EventStringId[] = [EVENT_NAMES.VECTOR.EVENT_VECTOR_ADD, EVENT_NAMES.VECTOR.EVENT_VECTOR_REMOVE];
+/** Valid events that can create GeometryConfigPayload */
+const validEvents: EventStringId[] = [EVENT_NAMES.GEOMETRY.EVENT_GEOMETRY_ADD, EVENT_NAMES.GEOMETRY.EVENT_GEOMETRY_REMOVE];
 
 /**
- * type guard function that redefines a PayloadBaseClass as a VectorConfigPayload
+ * type guard function that redefines a PayloadBaseClass as a GeometryConfigPayload
  * if the event attribute of the verifyIfPayload parameter is valid. The type ascention
  * applies only to the true block of the if clause.
  *
  * @param {PayloadBaseClass} verifyIfPayload object to test in order to determine if the type ascention is valid
  * @returns {boolean} returns true if the payload is valid
  */
-export const payloadIsAVectorConfig = (verifyIfPayload: PayloadBaseClass): verifyIfPayload is VectorConfigPayload => {
+export const payloadIsAGeometryConfig = (verifyIfPayload: PayloadBaseClass): verifyIfPayload is GeometryConfigPayload => {
   return validEvents.includes(verifyIfPayload?.event);
 };
 
@@ -30,8 +36,8 @@ export const payloadIsAVectorConfig = (verifyIfPayload: PayloadBaseClass): verif
  * @returns {boolean} returns true if the payload is valid
  */
 export const payloadIsACircleConfig = (verifyIfPayload: PayloadBaseClass): verifyIfPayload is CircleConfigPayload => {
-  if (payloadIsAVectorConfig(verifyIfPayload)) {
-    return verifyIfPayload?.type === CONST_VECTOR_TYPES.CIRCLE;
+  if (payloadIsAGeometryConfig(verifyIfPayload)) {
+    return verifyIfPayload?.type === CONST_GEOMETRY_TYPES.CIRCLE;
   }
   return false;
 };
@@ -39,7 +45,7 @@ export const payloadIsACircleConfig = (verifyIfPayload: PayloadBaseClass): verif
 /**
  * Additional attributes needed to define a CircleConfigPayload
  */
-export interface CircleConfigPayload extends VectorConfigPayload {
+export interface CircleConfigPayload extends GeometryConfigPayload {
   coordintate: Coordinate;
 
   radius?: number;
@@ -59,8 +65,8 @@ export interface CircleConfigPayload extends VectorConfigPayload {
  * @returns {boolean} returns true if the payload is valid
  */
 export const payloadIsAMarkerConfig = (verifyIfPayload: PayloadBaseClass): verifyIfPayload is MarkerConfigPayload => {
-  if (payloadIsAVectorConfig(verifyIfPayload)) {
-    return verifyIfPayload?.type === CONST_VECTOR_TYPES.MARKER;
+  if (payloadIsAGeometryConfig(verifyIfPayload)) {
+    return verifyIfPayload?.type === CONST_GEOMETRY_TYPES.MARKER;
   }
   return false;
 };
@@ -68,7 +74,7 @@ export const payloadIsAMarkerConfig = (verifyIfPayload: PayloadBaseClass): verif
 /**
  * Additional attributes needed to define a MarkerConfigPayload
  */
-export interface MarkerConfigPayload extends VectorConfigPayload {
+export interface MarkerConfigPayload extends GeometryConfigPayload {
   coordinate: Coordinate;
 
   options?: {
@@ -86,8 +92,8 @@ export interface MarkerConfigPayload extends VectorConfigPayload {
  * @returns {boolean} returns true if the payload is valid
  */
 export const payloadIsAPolygonConfig = (verifyIfPayload: PayloadBaseClass): verifyIfPayload is PolygonConfigPayload => {
-  if (payloadIsAVectorConfig(verifyIfPayload)) {
-    return verifyIfPayload?.type === CONST_VECTOR_TYPES.POLYGON;
+  if (payloadIsAGeometryConfig(verifyIfPayload)) {
+    return verifyIfPayload?.type === CONST_GEOMETRY_TYPES.POLYGON;
   }
   return false;
 };
@@ -95,7 +101,7 @@ export const payloadIsAPolygonConfig = (verifyIfPayload: PayloadBaseClass): veri
 /**
  * Additional attributes needed to define a PolygonConfigPayload
  */
-export interface PolygonConfigPayload extends VectorConfigPayload {
+export interface PolygonConfigPayload extends GeometryConfigPayload {
   points: Coordinate;
 
   options?: {
@@ -113,8 +119,8 @@ export interface PolygonConfigPayload extends VectorConfigPayload {
  * @returns {boolean} returns true if the payload is valid
  */
 export const payloadIsAPolylineConfig = (verifyIfPayload: PayloadBaseClass): verifyIfPayload is PolylineConfigPayload => {
-  if (payloadIsAVectorConfig(verifyIfPayload)) {
-    return verifyIfPayload?.type === CONST_VECTOR_TYPES.POLYLINE;
+  if (payloadIsAGeometryConfig(verifyIfPayload)) {
+    return verifyIfPayload?.type === CONST_GEOMETRY_TYPES.POLYLINE;
   }
   return false;
 };
@@ -122,7 +128,7 @@ export const payloadIsAPolylineConfig = (verifyIfPayload: PayloadBaseClass): ver
 /**
  * Additional attributes needed to define a PolylineConfigPayload
  */
-export interface PolylineConfigPayload extends VectorConfigPayload {
+export interface PolylineConfigPayload extends GeometryConfigPayload {
   points: Coordinate;
   options?: {
     geometryLayout?: 'XY' | 'XYZ' | 'XYM' | 'XYZM';
@@ -131,16 +137,16 @@ export interface PolylineConfigPayload extends VectorConfigPayload {
 }
 
 /**
- * Class definition for VectorConfigPayload
+ * Class definition for GeometryConfigPayload
  *
  * @exports
- * @class VectorConfigPayload
+ * @class GeometryConfigPayload
  */
-export class VectorConfigPayload extends PayloadBaseClass {
-  // The type of vector payload
-  type: TypeOfVector;
+export class GeometryConfigPayload extends PayloadBaseClass {
+  // The type of geometry payload
+  type: TypeOfGeometry;
 
-  // The vector object identifier
+  // The geometry object identifier
   id?: string;
 
   /**
@@ -148,11 +154,11 @@ export class VectorConfigPayload extends PayloadBaseClass {
    *
    * @param {EventStringId} event the event identifier for which the payload is constructed
    * @param {string | null} handlerName the handler Name
-   * @param {TypeOfVector} type the type of vector configuration object that makes up the payload
-   * @param {string} id the vector object identifier
+   * @param {TypeOfGeometry} type the type of geometry configuration object that makes up the payload
+   * @param {string} id the geometry object identifier
    */
-  constructor(event: EventStringId, handlerName: string | null, type: TypeOfVector, id?: string) {
-    if (!validEvents.includes(event)) throw new Error(`VectorConfigPayload can't be instanciated for event of type ${event}`);
+  constructor(event: EventStringId, handlerName: string | null, type: TypeOfGeometry, id?: string) {
+    if (!validEvents.includes(event)) throw new Error(`GeometryConfigPayload can't be instanciated for event of type ${event}`);
     super(event, handlerName);
     this.type = type;
     this.id = id;
@@ -181,7 +187,7 @@ export class VectorConfigPayload extends PayloadBaseClass {
     },
     id?: string
   ): CircleConfigPayload => {
-    const circleConfigPayload = new VectorConfigPayload(event, handlerName, CONST_VECTOR_TYPES.CIRCLE, id) as CircleConfigPayload;
+    const circleConfigPayload = new GeometryConfigPayload(event, handlerName, CONST_GEOMETRY_TYPES.CIRCLE, id) as CircleConfigPayload;
     circleConfigPayload.coordintate = coordinate;
     circleConfigPayload.radius = radius;
     circleConfigPayload.options = options;
@@ -209,7 +215,7 @@ export class VectorConfigPayload extends PayloadBaseClass {
     },
     id?: string
   ): MarkerConfigPayload => {
-    const markerConfigPayload = new VectorConfigPayload(event, handlerName, CONST_VECTOR_TYPES.MARKER, id) as MarkerConfigPayload;
+    const markerConfigPayload = new GeometryConfigPayload(event, handlerName, CONST_GEOMETRY_TYPES.MARKER, id) as MarkerConfigPayload;
     markerConfigPayload.coordinate = coordinate;
     markerConfigPayload.options = options;
     return markerConfigPayload;
@@ -236,7 +242,7 @@ export class VectorConfigPayload extends PayloadBaseClass {
     },
     id?: string
   ): PolygonConfigPayload => {
-    const polygonConfigPayload = new VectorConfigPayload(event, handlerName, CONST_VECTOR_TYPES.POLYGON, id) as PolygonConfigPayload;
+    const polygonConfigPayload = new GeometryConfigPayload(event, handlerName, CONST_GEOMETRY_TYPES.POLYGON, id) as PolygonConfigPayload;
     polygonConfigPayload.points = points;
     polygonConfigPayload.options = options;
     return polygonConfigPayload;
@@ -263,7 +269,7 @@ export class VectorConfigPayload extends PayloadBaseClass {
     },
     id?: string
   ): PolylineConfigPayload => {
-    const polylineConfigPayload = new VectorConfigPayload(event, handlerName, CONST_VECTOR_TYPES.POLYLINE, id) as PolylineConfigPayload;
+    const polylineConfigPayload = new GeometryConfigPayload(event, handlerName, CONST_GEOMETRY_TYPES.POLYLINE, id) as PolylineConfigPayload;
     polylineConfigPayload.points = points;
     polylineConfigPayload.options = options;
     return polylineConfigPayload;
@@ -271,21 +277,21 @@ export class VectorConfigPayload extends PayloadBaseClass {
 }
 
 /**
- * Helper function used to instanciate a VectorConfigPayload object. This function
- * avoids the "new VectorConfigPayload" syntax.
+ * Helper function used to instanciate a GeometryConfigPayload object. This function
+ * avoids the "new GeometryConfigPayload" syntax.
  *
  * @param {EventStringId} event the event identifier for which the payload is constructed
  * @param {string | null} handlerName the handler Name
- * @param {TypeOfVector} type the type of vector configuration object that makes up the payload
- * @param {string} id the vector object identifier
+ * @param {TypeOfGeometry} type the type of geometry configuration object that makes up the payload
+ * @param {string} id the geometry object identifier
  *
- * @returns {VectorConfigPayload} the VectorConfigPayload object created
+ * @returns {GeometryConfigPayload} the GeometryConfigPayload object created
  */
-export const vectorConfigPayload = (
+export const geometryConfigPayload = (
   event: EventStringId,
   handlerName: string | null,
-  type: TypeOfVector,
+  type: TypeOfGeometry,
   id?: string
-): VectorConfigPayload => {
-  return new VectorConfigPayload(event, handlerName, CONST_VECTOR_TYPES.POLYGON, id);
+): GeometryConfigPayload => {
+  return new GeometryConfigPayload(event, handlerName, CONST_GEOMETRY_TYPES.POLYGON, id);
 };

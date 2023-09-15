@@ -1,25 +1,25 @@
 /** ******************************************************************************************************************************
- * interface used to define the vector types.
+ * interface used to define the geometry types.
  */
-export type TypeOfVector = 'polyline' | 'polygon' | 'circle' | 'marker';
+export type TypeOfGeometry = 'polyline' | 'polygon' | 'circle' | 'marker';
 
 /** ******************************************************************************************************************************
- * interface used to define the vector type keys.
+ * interface used to define the geometry type keys.
  */
-export type TypeVectorKeys = 'POLYLINE' | 'POLYGON' | 'CIRCLE' | 'MARKER';
+export type TypeGeometryKeys = 'POLYLINE' | 'POLYGON' | 'CIRCLE' | 'MARKER';
 
 /** ******************************************************************************************************************************
- * constant used to specify available vectors to draw.
+ * constant used to specify available geometry to draw.
  */
-export const CONST_VECTOR_TYPES: Record<TypeVectorKeys, TypeOfVector> = {
+export const CONST_GEOMETRY_TYPES: Record<TypeGeometryKeys, TypeOfGeometry> = {
   POLYLINE: 'polyline',
-  POLYGON: 'polygon' as TypeOfVector,
-  CIRCLE: 'circle' as TypeOfVector,
-  MARKER: 'marker' as TypeOfVector,
+  POLYGON: 'polygon' as TypeOfGeometry,
+  CIRCLE: 'circle' as TypeOfGeometry,
+  MARKER: 'marker' as TypeOfGeometry,
 };
 
 /** ******************************************************************************************************************************
- * Line,Polygon,Marker styles.
+ * Line, Polygon, Marker styles.
  */
 export type TypeFeatureStyle = {
   strokeColor?: string;
