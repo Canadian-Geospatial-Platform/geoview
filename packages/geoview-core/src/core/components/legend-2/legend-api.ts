@@ -2,7 +2,7 @@ import { createElement } from 'react';
 import { LegendsLayerSet, api } from '@/app';
 import { LegendItem, TypeLegendItemProps } from './legend-items/legend-item';
 import { TypeLegendProps } from './types';
-import { Legend } from './legend';
+import { Legend2 } from './legend';
 
 // import { List } from '@/ui';
 
@@ -58,7 +58,7 @@ export class Legend2Api {
     //     });
     //   }
     //   return null;
-    return createElement(Legend, {
+    return createElement(Legend2, {
       ...props,
       mapId: this.mapId,
     });

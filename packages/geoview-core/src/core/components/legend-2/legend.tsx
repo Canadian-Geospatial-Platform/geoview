@@ -12,7 +12,7 @@ const Item = styled('div')(({ theme }) => ({
   textAlign: 'center',
   borderRadius: 4,
 }));
-export function Legend(props: LegendItemsDetailsProps): JSX.Element {
+export function Legend2(props: LegendItemsDetailsProps): JSX.Element {
   const { layerIds, isRemoveable, canSetOpacity, expandAll, hideAll, mapId } = props;
   api.event.emit({ handlerName: `${mapId}/$LegendsLayerSet$`, event: api.eventNames.GET_LEGENDS.TRIGGER });
 
