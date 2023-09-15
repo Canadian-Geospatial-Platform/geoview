@@ -16,10 +16,10 @@ import {
   payloadIsAMarkerConfig,
   payloadIsAPolygonConfig,
   payloadIsAPolylineConfig,
-  payloadIsAVectorConfig,
-  VectorPayload,
+  payloadIsAGeometryConfig,
+  GeometryPayload,
 } from '@/api/events/payloads';
-import { TypeFeatureCircleStyle, TypeFeatureStyle, TypeIconStyle } from './vector-types';
+import { TypeFeatureCircleStyle, TypeFeatureStyle, TypeIconStyle } from './geometry-types';
 
 /**
  * Store a group of features
@@ -34,9 +34,9 @@ interface FeatureCollection {
  * Class used to manage vector geometries (Polyline, Polygon, Circle, Marker...)
  *
  * @exports
- * @class Vector
+ * @class Geometry
  */
-export class Vector {
+export class Geometry {
   // reference to the map id
   #mapId: string;
 
@@ -53,7 +53,7 @@ export class Vector {
   activeGeometryGroupIndex = 0;
 
   /**
-   * Initialize map, vectors, and listen to add vector events
+   * Initialize map, vectors, and listen to add geometry events
    *
    * @param {string} mapId map id
    */
@@ -63,9 +63,9 @@ export class Vector {
     // create default geometry group
     this.createGeometryGroup(this.defaultGeometryGroupId);
 
-    // listen to add vector events
+    // listen to add geometry events
     api.event.on(
-      EVENT_NAMES.VECTOR.EVENT_VECTOR_ADD,
+      EVENT_NAMES.GEOMETRY.EVENT_GEOMETRY_ADD,
       (payload) => {
         if (payloadIsACircleConfig(payload)) {
           this.addCircle(payload.coordintate, payload.options, payload.id);
@@ -82,9 +82,9 @@ export class Vector {
 
     // listen to outside events to remove geometries
     api.event.on(
-      EVENT_NAMES.VECTOR.EVENT_VECTOR_REMOVE,
+      EVENT_NAMES.GEOMETRY.EVENT_GEOMETRY_REMOVE,
       (payload) => {
-        if (payloadIsAVectorConfig(payload)) {
+        if (payloadIsAGeometryConfig(payload)) {
           // remove geometry from outside
           this.deleteGeometry(payload.id!);
         }
@@ -94,7 +94,7 @@ export class Vector {
 
     // listen to outside events to turn on geometry groups
     api.event.on(
-      EVENT_NAMES.VECTOR.EVENT_VECTOR_ON,
+      EVENT_NAMES.GEOMETRY.EVENT_GEOMETRY_ON,
       () => {
         this.setGeometryGroupAsVisible();
       },
@@ -103,7 +103,7 @@ export class Vector {
 
     // listen to outside events to turn off geometry groups
     api.event.on(
-      EVENT_NAMES.VECTOR.EVENT_VECTOR_OFF,
+      EVENT_NAMES.GEOMETRY.EVENT_GEOMETRY_OFF,
       () => {
         this.setGeometryGroupAsInvisible();
       },
@@ -177,8 +177,8 @@ export class Vector {
     // add the geometry to the geometries array
     this.geometries.push(polyline);
 
-    // emit an event that a polyline vector has been added
-    api.event.emit(VectorPayload.forPolyline(EVENT_NAMES.VECTOR.EVENT_VECTOR_ADDED, this.#mapId, polyline));
+    // emit an event that a polyline geometry has been added
+    api.event.emit(GeometryPayload.forPolyline(EVENT_NAMES.GEOMETRY.EVENT_GEOMETRY_ADDED, this.#mapId, polyline));
 
     return polyline;
   };
@@ -249,8 +249,8 @@ export class Vector {
     // add the geometry to the geometries array
     this.geometries.push(polygon);
 
-    // emit an event that a polygon vector has been added
-    api.event.emit(VectorPayload.forPolygon(EVENT_NAMES.VECTOR.EVENT_VECTOR_ADDED, this.#mapId, polygon));
+    // emit an event that a polygon geometry has been added
+    api.event.emit(GeometryPayload.forPolygon(EVENT_NAMES.GEOMETRY.EVENT_GEOMETRY_ADDED, this.#mapId, polygon));
 
     return polygon;
   };
@@ -324,8 +324,8 @@ export class Vector {
     // add the geometry to the geometries array
     this.geometries.push(circle);
 
-    // emit an event that a circle vector has been added
-    api.event.emit(VectorPayload.forCircle(EVENT_NAMES.VECTOR.EVENT_VECTOR_ADDED, this.#mapId, circle));
+    // emit an event that a circle geometry has been added
+    api.event.emit(GeometryPayload.forCircle(EVENT_NAMES.GEOMETRY.EVENT_GEOMETRY_ADDED, this.#mapId, circle));
 
     return circle;
   }
@@ -387,8 +387,8 @@ export class Vector {
     // add the geometry to the geometries array
     this.geometries.push(marker);
 
-    // emit an event that a marker vector has been added
-    api.event.emit(VectorPayload.forMarker(EVENT_NAMES.VECTOR.EVENT_VECTOR_ADDED, this.#mapId, marker));
+    // emit an event that a marker geometry has been added
+    api.event.emit(GeometryPayload.forMarker(EVENT_NAMES.GEOMETRY.EVENT_GEOMETRY_ADDED, this.#mapId, marker));
 
     return marker;
   };

@@ -1,4 +1,4 @@
-import { useCallback, useState, useEffect, useRef, useContext } from 'react';
+import { useCallback, useState, useEffect, useContext } from 'react';
 
 import { Coordinate } from 'ol/coordinate';
 import { fromLonLat, toLonLat } from 'ol/proj';
@@ -79,6 +79,9 @@ interface MousePositionProps {
  * @returns {JSX.Element} the mouse position component
  */
 export function MousePosition(props: MousePositionProps): JSX.Element {
+  // TODO variable is not used, thus causing an error, commeting it out for later
+  // const isCrosshairsActive = useGeoViewStore((state) => state.isCrosshairsActive);
+
   const { mousePositionMapId } = props;
 
   const [expanded, setExpanded] = useState(false);
@@ -93,9 +96,6 @@ export function MousePosition(props: MousePositionProps): JSX.Element {
   // const [position, setPosition] = useState({ lng: '--', lat: '--' });
 
   const [positionMode, setPositionMode] = useState<number>(0);
-
-  // keep track of crosshair status to know when update coord from keyboard navigation
-  const isCrosshairsActive = useRef(false);
 
   const mapConfig = useContext(MapContext);
 
@@ -195,14 +195,6 @@ export function MousePosition(props: MousePositionProps): JSX.Element {
   useEffect(() => {
     let opacityTimeout: string | number | NodeJS.Timeout | undefined;
 
-    const crossHairEnableDiableListenerFunction = (payload: PayloadBaseClass) => {
-      if (payloadIsABoolean(payload)) {
-        if (payload.handlerName!.includes(mousePositionMapId)) {
-          isCrosshairsActive.current = payload.status;
-        }
-      }
-    };
-
     const footerbarExpandCollapseListenerFunction = (payload: PayloadBaseClass) => {
       if (payloadIsABoolean(payload)) {
         if (payload.handlerName!.includes(mousePositionMapId)) {
@@ -218,11 +210,9 @@ export function MousePosition(props: MousePositionProps): JSX.Element {
 
     // on map crosshair enable\disable, set variable for WCAG mouse position
     // TODO: On crosshaih, add crosshair center information to screen reader / mouse position component
-    api.event.on(EVENT_NAMES.MAP.EVENT_MAP_CROSSHAIR_ENABLE_DISABLE, crossHairEnableDiableListenerFunction, mapId);
     api.event.on(EVENT_NAMES.FOOTERBAR.EVENT_FOOTERBAR_EXPAND_COLLAPSE, footerbarExpandCollapseListenerFunction, mapId);
 
     return () => {
-      api.event.off(EVENT_NAMES.MAP.EVENT_MAP_CROSSHAIR_ENABLE_DISABLE, mapId, crossHairEnableDiableListenerFunction);
       api.event.off(EVENT_NAMES.FOOTERBAR.EVENT_FOOTERBAR_EXPAND_COLLAPSE, mapId, footerbarExpandCollapseListenerFunction);
       clearTimeout(opacityTimeout);
     };

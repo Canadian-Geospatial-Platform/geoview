@@ -121,16 +121,16 @@ function wireLogs(api, mapId, logsDomId) {
 
 function addDefaultShapes(map, groupKey) {
   // Set active geometry group
-  map.layer.vector.setActiveGeometryGroup(groupKey);
+  map.layer.geometry.setActiveGeometryGroup(groupKey);
 
   // Add dummy shapes
-  map.layer.vector.addCircle([-98.94, 57.94], { style: { strokeColor: 'purple', strokeWidth: 2 } });
+  map.layer.geometry.addCircle([-98.94, 57.94], { style: { strokeColor: 'purple', strokeWidth: 2 } });
 
   // Add dummy shapes
-  map.layer.vector.addMarkerIcon([-105.78, 57.52]);
+  map.layer.geometry.addMarkerIcon([-105.78, 57.52]);
 
   // Add dummy shapes
-  map.layer.vector.addPolyline(
+  map.layer.geometry.addPolyline(
     [
       [-106.17, 63.99],
       [-104.46, 62.55],
@@ -140,7 +140,7 @@ function addDefaultShapes(map, groupKey) {
   );
 
   // Add dummy shapes
-  map.layer.vector.addPolygon(
+  map.layer.geometry.addPolygon(
     [
       [
         [-96.71, 64.41],
@@ -155,10 +155,10 @@ function addDefaultShapes(map, groupKey) {
 
 function addSpecialShapes(map, groupKey) {
   // Set active geometry group
-  map.layer.vector.setActiveGeometryGroup(groupKey);
+  map.layer.geometry.setActiveGeometryGroup(groupKey);
 
   // Add dummy shapes
-  map.layer.vector.addPolygon(
+  map.layer.geometry.addPolygon(
     [
       [
         [-86.06, 62.59],
