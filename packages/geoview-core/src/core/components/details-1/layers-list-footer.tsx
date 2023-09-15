@@ -104,18 +104,21 @@ export function LayersListFooter(props: TypeLayersListProps): JSX.Element {
               {t('details.availableLayers')}
             </Typography>
             <Paper sx={{ marginLeft: '20px' }}>
-              <List sx={{ color: 'text.primary' }}>
+              <List sx={{ color: 'text.primary', width: '100%', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                 {arrayOfLayerData.map((layerData) => {
                   const isSelectedBorder = layerData.layerPath === layerDataInfo?.layerPath;
+                  const numOfFeatures = layerData.features.length;
+
                   return (
                     <ListItem
                       onClick={() => setLayerDataInfo(layerData)}
                       key={layerData.layerPath}
                       sx={{
-                        padding: '8px 16px',
+                        padding: '8px 40px 8px 16px',
                         border: isSelectedBorder ? '2px solid #515BA5' : 'none',
                         borderRadius: isSelectedBorder ? '5px' : 'none',
                         cursor: 'pointer',
+                        height: '50px',
                       }}
                       secondaryAction={
                         <IconButton edge="end" aria-label="expand">
@@ -123,10 +126,11 @@ export function LayersListFooter(props: TypeLayersListProps): JSX.Element {
                         </IconButton>
                       }
                     >
-                      <Tooltip title={layerData.layerPath} placement="top" enterDelay={1000}>
+                      <Tooltip title={layerData.layerName} placement="top" enterDelay={1000}>
                         <ListItemText
                           sx={getSxClasses().layerNamePrimary}
-                          primary={layerData.layerPath ? layerData.layerName : 'Click on map'}
+                          primary={layerData.layerName ? layerData.layerName : t('details.clickOnMap')}
+                          secondary={`${numOfFeatures} ${t('details.feature')}${numOfFeatures > 1 ? 's' : ''}`}
                         />
                       </Tooltip>
                     </ListItem>
