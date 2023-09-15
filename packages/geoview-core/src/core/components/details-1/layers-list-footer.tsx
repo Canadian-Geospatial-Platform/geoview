@@ -44,6 +44,7 @@ export function LayersListFooter(props: TypeLayersListProps): JSX.Element {
   const selectedFeatures = useRef<string[]>([]);
   const { t } = useTranslation<string>();
   const [layerDataInfo, setLayerDataInfo] = useState<TypeLayerData | null>(null);
+  const [currentFeatureIndex, setCurrentFeatureIndex] = useState<number>(0);
 
   const highlightCallbackFunction = (payload: PayloadBaseClass) => {
     if (payloadIsAFeatureHighlight(payload)) {
@@ -146,10 +147,46 @@ export function LayersListFooter(props: TypeLayersListProps): JSX.Element {
                 {t('details.selectedFeature')}
               </Typography>
               <div style={{ border: '2px solid #515BA5', borderRadius: '5px', marginRight: '20px' }}>
-                {layerDataInfo?.features.map((feature, index: number) => (
-                  // eslint-disable-next-line react/jsx-key, react/no-array-index-key
-                  <FeatureInfo feature={feature} selectedFeatures={selectedFeatures} mapId={mapId} key={index} />
-                ))}
+                <Grid container sx={{ marginTop: '20px' }}>
+                  <Grid item xs={6}>
+                    <div style={{ marginLeft: '26px' }}>
+                      {/* Content for the left item */}
+                      Features 2 of 4, select all features
+                    </div>
+                  </Grid>
+                  <Grid item xs={6}>
+                    <div style={{ textAlign: 'right', marginRight: '26px' }}>
+                      <a
+                        href="#"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          setCurrentFeatureIndex((prevValue) => prevValue - 1);
+                        }}
+                      >
+                        Prev
+                      </a>
+                      <a
+                        href="#"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          setCurrentFeatureIndex((prevValue) => prevValue + 1);
+                        }}
+                      >
+                        Next
+                      </a>
+                    </div>
+                  </Grid>
+                </Grid>
+
+                {/* {layerDataInfo?.features.map((feature, index: number) => ( */}
+                {/* // eslint-disable-next-line react/jsx-key, react/no-array-index-key */}
+                <FeatureInfo
+                  features={layerDataInfo?.features}
+                  currentFeatureIndex={currentFeatureIndex}
+                  selectedFeatures={selectedFeatures}
+                  mapId={mapId}
+                />
+                {/* ))} */}
               </div>
             </>
           </Grid>
