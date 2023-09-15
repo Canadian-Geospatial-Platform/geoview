@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { Paper } from '@mui/material';
 import { getUid } from 'ol/util';
 import { List, ListItem, ListItemText, ZoomInSearchIcon, Tooltip, IconButton, Checkbox } from '@/ui';
-import { api, TypeFeatureInfoEntry } from '@/app';
+import { api } from '@/app';
 import { featureHighlightPayload, clearHighlightsPayload, TypeFieldEntry, TypeArrayOfFeatureInfoEntries } from '@/api/events/payloads';
 import { EVENT_NAMES } from '@/api/events/event-types';
 import { FeatureInfoTable } from './feature-info-table';
