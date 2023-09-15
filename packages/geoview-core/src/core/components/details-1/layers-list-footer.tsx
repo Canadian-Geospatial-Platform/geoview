@@ -1,3 +1,4 @@
+/* eslint-disable jsx-a11y/anchor-is-valid */
 /* eslint-disable react/require-default-props */
 import React, { useEffect, useState, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
