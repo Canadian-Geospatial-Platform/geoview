@@ -5,7 +5,7 @@ import { Paper } from '@mui/material';
 import { getUid } from 'ol/util';
 import { List, ListItem, ListItemText, ZoomInSearchIcon, Tooltip, IconButton, Checkbox } from '@/ui';
 import { api, TypeFeatureInfoEntry } from '@/app';
-import { featureHighlightPayload, clearHighlightsPayload, TypeFieldEntry } from '@/api/events/payloads';
+import { featureHighlightPayload, clearHighlightsPayload, TypeFieldEntry, TypeArrayOfFeatureInfoEntries } from '@/api/events/payloads';
 import { EVENT_NAMES } from '@/api/events/event-types';
 import { FeatureInfoTable } from './feature-info-table';
 
@@ -25,7 +25,8 @@ const sxClasses = {
 
 export interface TypeFeatureInfoProps {
   mapId: string;
-  feature: TypeFeatureInfoEntry;
+  features: TypeArrayOfFeatureInfoEntries;
+  currentFeatureIndex: number;
   selectedFeatures?: MutableRefObject<string[]>;
 }
 
@@ -35,9 +36,11 @@ export interface TypeFeatureInfoProps {
  * @param {TypeFeatureInfoProps} Feature info propetties
  * @returns {JSX.Element} the feature info
  */
-export function FeatureInfo({ mapId, feature, selectedFeatures }: TypeFeatureInfoProps): JSX.Element {
+export function FeatureInfo({ mapId, features, currentFeatureIndex, selectedFeatures }: TypeFeatureInfoProps): JSX.Element {
   const { t } = useTranslation<string>();
   const [checked, setChecked] = useState<boolean>(false);
+
+  const feature = features[currentFeatureIndex];
 
   const featureUid = getUid(feature.geometry);
 
@@ -78,7 +81,7 @@ export function FeatureInfo({ mapId, feature, selectedFeatures }: TypeFeatureInf
   }, [featureUid, selectedFeatures]);
 
   return (
-    <Paper sx={{ backgroundColor: checked ? '#FFFAD1' : 'initial' }}>
+    <Paper sx={{ backgroundColor: checked ? '#FFFAD1' : 'initial', border: '1px solid blue' }}>
       <List sx={{ paddingLeft: '25px', paddingTop: '25px' }}>
         <ListItem
           secondaryAction={

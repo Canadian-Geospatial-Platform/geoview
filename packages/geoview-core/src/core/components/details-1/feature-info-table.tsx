@@ -108,7 +108,7 @@ export function FeatureInfoTable({ featureInfoList }: FeatureInfoTableProps): JS
   }
 
   return (
-    <TableContainer sx={{ backgroundColor: '#FFFFFF' }}>
+    <TableContainer sx={{ backgroundColor: '#FFFFFF', border: '1px solid red' }}>
       {isLightBoxOpen && (
         <LightboxImg
           open={isLightBoxOpen}
