@@ -638,7 +638,7 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
           </IconButton>
         </Box>
       </Collapse>
-      <Collapse in={isLegendOpen} timeout={iconType === 'list' ? { enter: 800, exit: 800 } : 'auto'}>
+      {/* <Collapse in={isLegendOpen} timeout={iconType === 'list' ? { enter: 800, exit: 800 } : 'auto'}>
         <Box>
           <Box sx={sxClasses.expandableIconContainer}>
             {iconType === 'simple' && iconImg !== null && <img alt="" style={theme.iconImg} src={iconImg} />}
@@ -694,7 +694,7 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
             </Box>
           )}
         </Box>
-      </Collapse>
+      </Collapse> */}
     </Grid>
   );
 }

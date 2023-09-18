@@ -133,7 +133,7 @@ const sxClasses = {
   menuListIcon: { justifyContent: 'right', 'min-width': '56px' },
 };
 
-export interface TypeLegendItemProps {
+export interface TypeLegendItemDetailsProps {
   layerId: string;
   geoviewLayerInstance: AbstractGeoViewLayer;
   subLayerId?: string;
@@ -152,7 +152,7 @@ export interface TypeLegendItemProps {
  *
  * @returns {JSX.Element} the legend list item
  */
-export function LegendItem(props: TypeLegendItemProps): JSX.Element {
+export function LegendItemDetails(props: TypeLegendItemDetailsProps): JSX.Element {
   const {
     layerId,
     geoviewLayerInstance,
@@ -506,7 +506,7 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
   // <Grid item sm={12} md={subLayerId ? 12 : 6} lg={subLayerId ? 12 : 4}>
   return (
     <Grid item sm={12}>
-      <ListItem>
+      {/* <ListItem>
         <ListItemButton>
           <ListItemIcon>
             {(groupItems.length > 0 || WMSStyles.length > 1) && (
@@ -588,7 +588,7 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
             )}
           </ListItemIcon>
         </ListItemButton>
-      </ListItem>
+      </ListItem> */}
       <Menu
         anchorEl={menuAnchorElement}
         open={menuOpen}
@@ -627,7 +627,7 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
           </MenuItem>
         )}
       </Menu>
-      <Collapse in={isOpacityOpen} timeout="auto">
+      {/* <Collapse in={isOpacityOpen} timeout="auto">
         <Box sx={sxClasses.opacityMenu}>
           <Tooltip title={t('legend.opacity')}>
             <OpacityIcon />
@@ -637,7 +637,7 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
             <CloseIcon />
           </IconButton>
         </Box>
-      </Collapse>
+      </Collapse> */}
       <Collapse in={isLegendOpen} timeout={iconType === 'list' ? { enter: 800, exit: 800 } : 'auto'}>
         <Box>
           <Box sx={sxClasses.expandableIconContainer}>
@@ -663,7 +663,7 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
         <Box>
           <Box sx={sxClasses.expandableIconContainer}>
             {groupItems.map((subItem) => (
-              <LegendItem
+              <LegendItemDetails
                 key={subItem.layerId}
                 layerId={layerId}
                 geoviewLayerInstance={geoviewLayerInstance}
