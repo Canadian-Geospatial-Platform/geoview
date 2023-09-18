@@ -246,23 +246,6 @@ export function Swiper(props: SwiperProps): JSX.Element {
     setOffset(offSetOnClick);
   };
 
-  // Update layer list if a layer loads late
-  useEffect(() => {
-    const layerSetUpdatedHandler = (payload: PayloadBaseClass) => {
-      if (payloadIsLayerSetUpdated(payload) && payload.resultSets[payload.layerPath]?.layerStatus === 'loaded') {
-        const layerId = payload.layerPath.split('/')[0];
-        const ids = [...layersIds];
-        if (ids.indexOf(layerId) !== -1) ids.splice(ids.indexOf(layerId));
-        ids.push(layerId);
-        setLayersIds(ids);
-      }
-    };
-    api.event.on(EVENT_NAMES.LAYER_SET.UPDATED, layerSetUpdatedHandler, `${mapId}/$LegendsLayerSet$`);
-    return () => {
-      api.event.off(EVENT_NAMES.LAYER_SET.UPDATED, mapId, layerSetUpdatedHandler);
-    };
-  });
-
   /**
    * Set the prerender and postrender events
    *
@@ -271,7 +254,7 @@ export function Swiper(props: SwiperProps): JSX.Element {
   const setRenderEvents = (layer: string) => {
     const { geoviewLayers } = api.maps[mapId].layer;
     const olLayer = geoviewLayers[layer].gvLayers;
-    setOlLayers((prevArray) => [...prevArray, olLayer!]);
+    setOlLayers((prevArray: string[]) => [...prevArray, olLayer!]);
     olLayer?.on(['precompose' as EventTypes, 'prerender' as EventTypes], prerender);
     olLayer?.on(['postcompose' as EventTypes, 'postrender' as EventTypes], postcompose);
     // force VectorImage to refresh
@@ -299,6 +282,24 @@ export function Swiper(props: SwiperProps): JSX.Element {
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [layersIds]);
+
+  // Update layer list if a layer loads late
+  useEffect(() => {
+    const layerSetUpdatedHandler = (payload: PayloadBaseClass) => {
+      if (payloadIsLayerSetUpdated(payload) && payload.resultSets[payload.layerPath]?.layerStatus === 'loaded') {
+        const layerId = payload.layerPath.split('/')[0];
+        const ids = [...layersIds];
+        if (ids.indexOf(layerId) === -1) {
+          ids.push(layerId);
+          setLayersIds(ids);
+        }
+      }
+    };
+    api.event.on(EVENT_NAMES.LAYER_SET.UPDATED, layerSetUpdatedHandler, `${mapId}/$LegendsLayerSet$`);
+    return () => {
+      api.event.off(EVENT_NAMES.LAYER_SET.UPDATED, mapId, layerSetUpdatedHandler);
+    };
+  });
 
   /**
    * Update swiper and layers from keyboard CTRL + Arrow key
