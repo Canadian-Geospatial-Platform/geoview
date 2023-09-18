@@ -1,4 +1,4 @@
-import { Dispatch, SetStateAction, useCallback, useContext, useEffect, useRef, useState } from 'react';
+import { useCallback, useContext, useEffect, useRef, useState } from 'react';
 
 import { useTranslation } from 'react-i18next';
 
@@ -91,14 +91,10 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-type NavbarProps = {
-  setActivetrap: Dispatch<SetStateAction<boolean>>;
-};
-
 /**
  * Create a nav-bar with buttons that can call functions or open custom panels
  */
-export function Navbar({ setActivetrap }: NavbarProps): JSX.Element {
+export function Navbar(): JSX.Element {
   const [buttonPanelGroups, setButtonPanelGroups] = useState<Record<string, Record<string, TypeButtonPanel>>>({});
   const [ModalIsShown, setModalIsShown] = useState(false);
   const [footerBarExpanded, setFooterBarExpanded] = useState<boolean>(false);
@@ -144,12 +140,10 @@ export function Navbar({ setActivetrap }: NavbarProps): JSX.Element {
 
   const openModal = () => {
     setModalIsShown(true);
-    setActivetrap(false);
   };
 
   const closeModal = () => {
     setModalIsShown(false);
-    setActivetrap(true);
   };
 
   useEffect(() => {
