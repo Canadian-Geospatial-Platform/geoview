@@ -64,4 +64,6 @@ export {
   WhereToVote as ClickMapMarker,
   ZoomIn as ZoomInSearchIcon,
   ZoomOut as ZoomOutSearchIcon,
+  ArrowForwardIosOutlined as ArrowForwardIosOutlinedIcon,
+  ArrowBackIosOutlined as ArrowBackIosOutlinedIcon,
 } from '@mui/icons-material';

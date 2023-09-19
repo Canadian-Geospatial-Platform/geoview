@@ -68,7 +68,10 @@
     "availableLayers": "Couche disponibles",
     "selectedFeature": "Fonctionnalité Item",
     "feature": "item",
-    "clickOnMap": "Cliquer sur la carte"
+    "clickOnMap": "Cliquer sur la carte",
+    "nextFeatureBtn": "Suivante item",
+    "previousFeatureBtn": "Précédent item",
+    "selectAllfeature": "Tout sélectionner items"
   },
   "lightbox": {
     "next": "Prochaine",
