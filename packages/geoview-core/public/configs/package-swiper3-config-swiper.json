@@ -1,6 +1,6 @@
 {
   "orientation": "vertical",
   "keyboardOffset": 10,
-  "layers": ["swipe0", "swipe1", "swipe4", "swipe5", "swipe6", "rcs.ccc75c12-5acc-4a6a-959f-ef6f621147b9.en"],
+  "layers": ["swipe0", "swipe1", "swipe4", "swipe5", "swipe6", "rcs.ccc75c12-5acc-4a6a-959f-ef6f621147b9.en", "swipe7"],
   "suportedLanguages": ["en", "fr"]
 }
