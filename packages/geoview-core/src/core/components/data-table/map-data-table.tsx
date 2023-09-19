@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import debounce from 'lodash/debounce';
+import startCase from 'lodash/startCase';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
@@ -16,6 +17,7 @@ import {
   type MRT_Virtualizer as MRTVirtualizer,
   type MRT_ColumnFiltersState as MRTColumnFiltersState,
   type MRT_Column as MRTColumn,
+  type MRT_TableInstance as MRTTableInstance,
 } from 'material-react-table';
 import { Projection } from 'ol/proj';
 import { Extent } from 'ol/extent';
@@ -62,6 +64,28 @@ interface MapDataTableProps {
   projectionConfig: Projection;
 }
 
+const DATE_FILTER: Record<string, string> = {
+  greaterThan: `> date 'value'`,
+  greaterThanOrEqualTo: `>= date 'value'`,
+  lessThan: `< date 'value'`,
+  lessThanOrEqualTo: `<= date 'value'`,
+  equals: `= date 'value'`,
+};
+
+const STRING_FILTER: Record<string, string> = {
+  contains: `like upper('%value%')`,
+  equals: `= upper('value')`,
+  startsWith: `like upper('value%')`,
+  endsWith: `like upper('%value')`,
+};
+
+const NUMBER_FILTER: Record<string, string> = {
+  lessThanOrEqualTo: '<=',
+  lessThan: '<',
+  greaterThan: '>',
+  greaterThanOrEqualTo: '>=',
+};
+
 /**
  * Build Data table from map.
  * @param {MapDataTableProps} data map data which will be used to build data table.
@@ -74,6 +98,7 @@ interface MapDataTableProps {
 
 function MapDataTable({ data, layerId, mapId, layerKey, projectionConfig }: MapDataTableProps) {
   const mountedRef = useRef(false);
+  const tableInstanceRef = useRef<MRTTableInstance>(null);
   const FILTER_MAP_DELAY = 1000;
   const { t } = useTranslation<string>();
   const iconColumn = { alias: t('dataTable.icon'), dataType: 'string', id: t('dataTable.icon') };
@@ -109,34 +134,42 @@ function MapDataTable({ data, layerId, mapId, layerKey, projectionConfig }: MapD
    * @param {MRTColumnFiltersState} columnFilter list of filter from table.
    */
   const buildFilterList = useCallback((columnFilter: MRTColumnFiltersState) => {
+    const tableState = tableInstanceRef?.current?.getState();
+
     if (!columnFilter.length) return [''];
     return columnFilter.map((filter) => {
       const filterValue = filter.value as string;
       const filterId = filter.id;
+
       // Check if filterValue is of type array because columnfilters return array with min and max.
       if (Array.isArray(filterValue)) {
-        let arrQuery = '';
+        let numQuery = '';
         const minValue = Number(filterValue[0]);
         const maxValue = Number(filterValue[1]);
+        const numOpr = tableState?.columnFilterFns[filterId] || 'equals';
+        const numFilter = NUMBER_FILTER[numOpr] as string;
 
         if (minValue && maxValue) {
-          arrQuery = `${filterId} >= ${filterValue[0]} and ${filterId} <= ${filterValue[1]}`;
+          numQuery = `${filterId} ${numFilter} ${filterValue[0]} and ${filterId} ${numFilter} ${filterValue[1]}`;
         } else if (minValue) {
-          arrQuery = `${filterId} > ${filterValue[0]}`;
+          numQuery = `${filterId} ${numFilter} ${filterValue[0]}`;
         } else if (maxValue) {
-          arrQuery = `${filterId} < ${filterValue[1]}`;
+          numQuery = `${filterId} ${numFilter} ${filterValue[1]}`;
         }
-        return arrQuery;
+        return numQuery;
       }
 
       // Check filter value is of type date,
       if (typeof filterValue === 'object' && filterValue) {
+        const dateOpr = tableState?.columnFilterFns[filterId] || 'equals';
+        const dateFilter = DATE_FILTER[dateOpr] as string;
         const date = api.dateUtilities.applyInputDateFormat(`${(filterValue as Date).toISOString().slice(0, -5)}Z`);
         const formattedDate = date.slice(0, -1);
-        return `${filterId} <= date '${formattedDate}'`;
+        return `${filterId} ${dateFilter.replace('value', formattedDate)}`;
       }
-
-      return `upper(${filterId}) like upper('%${filter.value}%')`;
+      const operator = tableState?.columnFilterFns[filterId] || 'contains';
+      const strFilter = STRING_FILTER[operator] as string;
+      return `upper(${filterId}) ${strFilter.replace('value', filterValue)}`;
     });
   }, []);
 
@@ -262,6 +295,8 @@ function MapDataTable({ data, layerId, mapId, layerKey, projectionConfig }: MapD
           }}
           slotProps={{
             textField: {
+              // eslint-disable-next-line no-underscore-dangle
+              helperText: `Filter Mode: ${startCase(column.columnDef._filterFn.replace(/([a-z0-9])([A-Z])/g, '$1 $2'))}`,
               sx: { minWidth: '120px' },
               variant: 'standard',
             },
@@ -283,16 +318,25 @@ function MapDataTable({ data, layerId, mapId, layerKey, projectionConfig }: MapD
       columnList.push({
         accessorKey: key,
         header: value.alias,
-        ...(value.dataType === 'number' && { filterFn: 'betweenInclusive', size: 175 }),
+        filterFn: 'contains',
+        columnFilterModeOptions: ['contains', 'equals', 'startsWith', 'endsWith'],
+        ...(value.dataType === 'number' && {
+          size: 225,
+          filterVariant: 'range',
+          filterFn: 'lessThan',
+          columnFilterModeOptions: ['lessThan', 'greaterThan', 'lessThanOrEqualTo', 'greaterThanOrEqualTo'],
+        }),
 
         Header: ({ column }) => getTableHeader(column.columnDef.header),
         Cell: ({ cell }) => getCellValueWithTooltip(cell.getValue() as string),
         ...(value.dataType === 'date' && {
           accessorFn: (row) => new Date(row[key]),
-          filterFn: 'lessThanOrEqualTo',
           sortingFn: 'datetime',
           Cell: ({ cell }) => api.dateUtilities.formatDate(cell.getValue<Date>(), 'YYYY-MM-DDThh:mm:ss'),
           Filter: ({ column }) => getDateFilter(column),
+          filterFn: 'lessThanOrEqualTo',
+          columnFilterModeOptions: ['equals', 'lessThan', 'greaterThan', 'lessThanOrEqualTo', 'greaterThanOrEqualTo'],
+          size: 250,
         }),
         ...([t('dataTable.icon'), t('dataTable.zoom')].includes(value.alias) && { size: 100, enableColumnFilter: false }),
       });
@@ -336,7 +380,7 @@ function MapDataTable({ data, layerId, mapId, layerKey, projectionConfig }: MapD
   return (
     <Box sx={{ padding: '1rem 0' }}>
       <MaterialReactTable
-        columns={columns}
+        columns={columns as MRTColumnDef[]}
         data={rows}
         enableGlobalFilter={false}
         enableRowSelection
@@ -346,9 +390,10 @@ function MapDataTable({ data, layerId, mapId, layerKey, projectionConfig }: MapD
           density: 'compact',
           pagination: { pageSize: 10, pageIndex: 0 },
         }}
+        state={{ sorting, columnFilters, rowSelection }}
+        enableColumnFilterModes
         onSortingChange={setSorting}
         onColumnFiltersChange={setColumnFilters}
-        state={{ sorting, columnFilters, rowSelection }}
         renderToolbarInternalActions={({ table }) => (
           <Box>
             <MRTToggleFiltersButton table={table} />
@@ -361,6 +406,7 @@ function MapDataTable({ data, layerId, mapId, layerKey, projectionConfig }: MapD
             </ExportButton>
           </Box>
         )}
+        tableInstanceRef={tableInstanceRef}
         enableFilterMatchHighlighting
         enableBottomToolbar={false}
         enableColumnResizing
