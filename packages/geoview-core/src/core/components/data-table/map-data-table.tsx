@@ -70,13 +70,21 @@ const DATE_FILTER: Record<string, string> = {
   lessThan: `< date 'value'`,
   lessThanOrEqualTo: `<= date 'value'`,
   equals: `= date 'value'`,
+  empty: 'is null',
+  notEmpty: 'is not null',
+  notEquals: `<> date 'value'`,
+  between: `> date 'value'`,
+  betweenInclusive: `>= date 'value'`,
 };
 
 const STRING_FILTER: Record<string, string> = {
-  contains: `like upper('%value%')`,
-  equals: `= upper('value')`,
-  startsWith: `like upper('value%')`,
-  endsWith: `like upper('%value')`,
+  contains: `upper(filterId) like upper('%value%')`,
+  startsWith: `upper(filterId) like upper('value%')`,
+  endsWith: `upper(filterId) like upper('%value')`,
+  empty: 'upper(filterId) is null',
+  notEmpty: 'upper(filterId) is not null',
+  equals: `filterId = 'value'`,
+  notEquals: `filterId <> 'value'`,
 };
 
 const NUMBER_FILTER: Record<string, string> = {
@@ -84,6 +92,12 @@ const NUMBER_FILTER: Record<string, string> = {
   lessThan: '<',
   greaterThan: '>',
   greaterThanOrEqualTo: '>=',
+  empty: 'is null',
+  notEmpty: 'is not null',
+  between: '>',
+  betweenInclusive: '>=',
+  equals: '=',
+  notEquals: '<>',
 };
 
 /**
@@ -140,17 +154,19 @@ function MapDataTable({ data, layerId, mapId, layerKey, projectionConfig }: MapD
     return columnFilter.map((filter) => {
       const filterValue = filter.value as string;
       const filterId = filter.id;
-
       // Check if filterValue is of type array because columnfilters return array with min and max.
       if (Array.isArray(filterValue)) {
         let numQuery = '';
         const minValue = Number(filterValue[0]);
         const maxValue = Number(filterValue[1]);
-        const numOpr = tableState?.columnFilterFns[filterId] || 'equals';
-        const numFilter = NUMBER_FILTER[numOpr] as string;
+
+        const numOpr = tableState?.columnFilterFns[filterId] as string;
+
+        const numFilter = NUMBER_FILTER[numOpr] ?? '=';
 
         if (minValue && maxValue) {
-          numQuery = `${filterId} ${numFilter} ${filterValue[0]} and ${filterId} ${numFilter} ${filterValue[1]}`;
+          const opr2 = numFilter === '>' ? '<' : '<=';
+          numQuery = `${filterId} ${numFilter} ${filterValue[0]} and ${filterId} ${opr2} ${filterValue[1]}`;
         } else if (minValue) {
           numQuery = `${filterId} ${numFilter} ${filterValue[0]}`;
         } else if (maxValue) {
@@ -167,9 +183,11 @@ function MapDataTable({ data, layerId, mapId, layerKey, projectionConfig }: MapD
         const formattedDate = date.slice(0, -1);
         return `${filterId} ${dateFilter.replace('value', formattedDate)}`;
       }
-      const operator = tableState?.columnFilterFns[filterId] || 'contains';
+      const operator = tableState?.columnFilterFns[filterId] ?? 'contains';
+
       const strFilter = STRING_FILTER[operator] as string;
-      return `upper(${filterId}) ${strFilter.replace('value', filterValue)}`;
+
+      return `${strFilter.replace('filterId', filterId).replace('value', filterValue)}`;
     });
   }, []);
 
@@ -316,15 +334,26 @@ function MapDataTable({ data, layerId, mapId, layerKey, projectionConfig }: MapD
     const columnList = [] as MRTColumnDef<ColumnsType>[];
     entries.forEach(([key, value]) => {
       columnList.push({
-        accessorKey: key,
+        id: key,
+        accessorFn: (row) => row[key] ?? '',
         header: value.alias,
         filterFn: 'contains',
-        columnFilterModeOptions: ['contains', 'equals', 'startsWith', 'endsWith'],
+        columnFilterModeOptions: ['contains', 'startsWith', 'endsWith', 'empty', 'notEmpty'],
         ...(value.dataType === 'number' && {
           size: 225,
-          filterVariant: 'range',
-          filterFn: 'lessThan',
-          columnFilterModeOptions: ['lessThan', 'greaterThan', 'lessThanOrEqualTo', 'greaterThanOrEqualTo'],
+          filterFn: 'between',
+          columnFilterModeOptions: [
+            'equals',
+            'notEquals',
+            'between',
+            'betweenInclusive',
+            'lessThan',
+            'greaterThan',
+            'lessThanOrEqualTo',
+            'greaterThanOrEqualTo',
+            'empty',
+            'notEmpty',
+          ],
         }),
 
         Header: ({ column }) => getTableHeader(column.columnDef.header),
@@ -334,8 +363,19 @@ function MapDataTable({ data, layerId, mapId, layerKey, projectionConfig }: MapD
           sortingFn: 'datetime',
           Cell: ({ cell }) => api.dateUtilities.formatDate(cell.getValue<Date>(), 'YYYY-MM-DDThh:mm:ss'),
           Filter: ({ column }) => getDateFilter(column),
-          filterFn: 'lessThanOrEqualTo',
-          columnFilterModeOptions: ['equals', 'lessThan', 'greaterThan', 'lessThanOrEqualTo', 'greaterThanOrEqualTo'],
+          filterFn: 'equals',
+          columnFilterModeOptions: [
+            'equals',
+            'notEquals',
+            'between',
+            'betweenInclusive',
+            'lessThan',
+            'greaterThan',
+            'lessThanOrEqualTo',
+            'greaterThanOrEqualTo',
+            'empty',
+            'notEmpty',
+          ],
           size: 250,
         }),
         ...([t('dataTable.icon'), t('dataTable.zoom')].includes(value.alias) && { size: 100, enableColumnFilter: false }),
