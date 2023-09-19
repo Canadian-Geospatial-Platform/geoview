@@ -12,7 +12,7 @@ import queryString from 'query-string';
 
 import { Basemap } from '../layer/basemap/basemap';
 import { Layer } from '../layer/layer';
-import { TypeFeatureStyle } from '../layer/vector/vector-types';
+import { TypeFeatureStyle } from '../layer/geometry/geometry-types';
 
 import { api } from '@/app';
 import { EVENT_NAMES } from '@/api/events/event-types';
@@ -24,6 +24,7 @@ import { NavbarButtons } from '@/core/components/nav-bar/nav-bar-buttons';
 import { FooterTabsApi } from '@/core/components/footer-tabs/footer-tabs-api';
 import { NotificationsApi } from '@/core/components/notifications/notifications-api';
 import { LegendApi } from '@/core/components/legend/legend-api';
+import { Legend2Api } from '@/core/components/legend-2/legend-api';
 import { DetailsAPI } from '@/core/components/details/details-api';
 import { DetailsAPI as DetailsAPIFooter } from '@/core/components/details-1/details-api';
 import { FeatureInfoAPI } from '@/core/components/feature-info/feature-info.api';
@@ -38,7 +39,6 @@ import { Translate } from '../interaction/translate';
 
 import { ModalApi } from '@/ui';
 import {
-  mapPayload,
   mapComponentPayload,
   mapConfigPayload,
   GeoViewLayerPayload,
@@ -49,6 +49,7 @@ import { generateId, parseJSONConfig, removeCommentsFromJSON } from '@/core/util
 import { TypeListOfGeoviewLayerConfig, TypeDisplayLanguage, TypeViewSettings } from './map-schema-types';
 import { TypeMapFeaturesConfig, TypeHTMLElement } from '@/core/types/global-types';
 import { layerConfigIsGeoCore } from '../layer/other/geocore';
+import { getGeoViewStore } from '@/core/stores/stores-managers';
 
 interface TypeDcoument extends Document {
   webkitExitFullscreen: () => void;
@@ -86,6 +87,8 @@ export class MapViewer {
 
   // used to access the legend api
   legend!: LegendApi;
+
+  legend2!: Legend2Api;
 
   // used to access the footer tabs api
   // TODO: Keep only FeatureInfo after refactor
@@ -166,6 +169,7 @@ export class MapViewer {
     this.navBarButtons = new NavbarButtons(this.mapId);
     this.footerTabs = new FooterTabsApi(this.mapId);
     this.legend = new LegendApi(this.mapId);
+    this.legend2 = new Legend2Api(this.mapId);
     // Line below is related to the existing detials will be shown in Details Panel in app bar
     this.details = new DetailsAPI(this.mapId);
     this.detailsFooter = new DetailsAPIFooter(this.mapId);
@@ -268,8 +272,8 @@ export class MapViewer {
             response.json().then((data) => {
               if (data.geometry !== undefined) {
                 // add the geometry
-                // TODO: use the vector as GeoJSON and add properties to by queried by the details panel
-                this.layer.vector?.addPolygon(data.geometry.coordinates, undefined, generateId(null));
+                // TODO: use the geometry as GeoJSON and add properties to by queried by the details panel
+                this.layer.geometry?.addPolygon(data.geometry.coordinates, undefined, generateId(null));
               }
             });
           }
@@ -395,7 +399,10 @@ export class MapViewer {
           allGeoviewLayerReady &&= geoviewLayers[geoviewLayerId].allLayerEntryConfigProcessed();
         });
         if (allGeoviewLayerReady) {
-          api.event.emit(mapPayload(EVENT_NAMES.MAP.EVENT_MAP_LOADED, this.mapId, this.map));
+          const store = getGeoViewStore(this.mapId);
+          store.setState({
+            mapState: { ...store.getState().mapState, mapLoaded: true, mapElement: this.map },
+          });
           clearInterval(layerInterval);
         }
       }

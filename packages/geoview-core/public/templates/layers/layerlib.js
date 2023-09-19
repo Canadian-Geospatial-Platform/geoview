@@ -4,11 +4,11 @@
 const addBoundsPolygon = (mapId, bbox) => {
   const newBbox = cgpv.api.maps[mapId].transformAndDensifyExtent(bbox, `EPSG:${cgpv.api.maps[mapId].currentProjection}`, `EPSG:4326`);
 
-  const { vector } = cgpv.api.maps[mapId].layer;
-  vector.setActiveGeometryGroup();
-  vector.deleteGeometriesFromGroup(0);
+  const { geometry } = cgpv.api.maps[mapId].layer;
+  geometry.setActiveGeometryGroup();
+  geometry.deleteGeometriesFromGroup(0);
 
-  const polygon = cgpv.api.maps[mapId].layer.vector.addPolygon([newBbox], {
+  const polygon = cgpv.api.maps[mapId].layer.geometry.addPolygon([newBbox], {
     style: {
       strokeColor: '#000',
       strokeWidth: 5,

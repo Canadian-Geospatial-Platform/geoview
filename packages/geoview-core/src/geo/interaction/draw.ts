@@ -1,11 +1,12 @@
 import { Type as OLGeomType } from 'ol/geom/Geometry';
 import { Draw as OLDraw } from 'ol/interaction';
 import { DrawEvent as OLDrawEvent, Options as OLDrawOptions } from 'ol/interaction/Draw';
+import { FlatStyle } from 'ol/style/flat';
 import { Interaction, InteractionOptions } from './interaction';
 import { api } from '@/app';
 import { EVENT_NAMES } from '@/api/events/event-types';
 import { drawPayload } from '@/api/events/payloads';
-import { TypeFeatureStyle } from '../layer/vector/vector-types';
+import { TypeFeatureStyle } from '../layer/geometry/geometry-types';
 import { GeoUtilities } from '../utils/utilities';
 
 /**
@@ -14,7 +15,7 @@ import { GeoUtilities } from '../utils/utilities';
 export type DrawOptions = InteractionOptions & {
   geometryGroupKey: string;
   freehand?: boolean;
-  type?: string; // TODO: Refactoring - Utiliser un type dans vector-types comme TypeVectorKeys, en changeant ceux-ci pour s'assoir sur les types OL: https://openlayers.org/en/latest/apidoc/module-ol_geom_Geometry.html#~Type
+  type?: string; // TODO: Refactoring - Utiliser un type dans geometry-types comme TypeVectorKeys, en changeant ceux-ci pour s'assoir sur les types OL: https://openlayers.org/en/latest/apidoc/module-ol_geom_Geometry.html#~Type
   style?: TypeFeatureStyle;
 };
 
@@ -36,14 +37,14 @@ export class Draw extends Interaction {
     super(options);
 
     // Get the vector source for the geometry group or create one when not existing
-    const geomGroup = this.mapViewer.layer.vector?.createGeometryGroup(options.geometryGroupKey);
+    const geomGroup = this.mapViewer.layer.geometry?.createGeometryGroup(options.geometryGroupKey);
 
     // The OpenLayers Draw options
     // TODO: Enhancements - Add support for more drawing options
     const olOptions: OLDrawOptions = {
       source: geomGroup?.vectorSource,
       type: (options.type as OLGeomType) || 'Polygon',
-      style: new GeoUtilities().convertTypeFeatureStyleToOpenLayersStyle(options.style),
+      style: new GeoUtilities().convertTypeFeatureStyleToOpenLayersStyle(options.style) as FlatStyle,
       freehand: options.freehand,
     };
 

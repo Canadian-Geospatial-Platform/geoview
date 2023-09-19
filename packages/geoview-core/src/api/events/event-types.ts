@@ -6,6 +6,7 @@ import { FOOTERBAR } from './constants/footer-bar';
 import { FOOTER_TABS } from './constants/footer-tabs';
 import { GET_FEATURE_INFO } from './constants/get-feature-info';
 import { GET_LEGENDS } from './constants/get-legends';
+import { GEOMETRY } from './constants/geometry';
 import { GEOLOCATOR } from './constants/geolocator';
 import { INTERACTION } from './constants/interaction';
 import { LAYER_SET } from './constants/layer-set';
@@ -15,12 +16,11 @@ import { MARKER_ICON } from './constants/marker-icon';
 import { FEATURE_HIGHLIGHT } from './constants/feature-highlight';
 import { MODAL } from './constants/modal';
 import { NAVBAR } from './constants/nav-bar';
+import { NOTIFICATIONS } from './constants/notifications';
 import { OVERVIEW_MAP } from './constants/overview-map';
 import { PANEL } from './constants/panel';
 import { SLIDER } from './constants/slider';
 import { SNACKBAR } from './constants/snackbar';
-import { VECTOR } from './constants/vector';
-import { NOTIFICATIONS } from './constants/notifications';
 
 /**
  * constant contains event names
@@ -35,6 +35,7 @@ export const EVENT_NAMES = {
   GET_FEATURE_INFO,
   GET_LEGENDS,
   GEOLOCATOR,
+  GEOMETRY,
   INTERACTION,
   LAYER_SET,
   LAYER,
@@ -43,12 +44,11 @@ export const EVENT_NAMES = {
   FEATURE_HIGHLIGHT,
   MODAL,
   NAVBAR,
+  NOTIFICATIONS,
   OVERVIEW_MAP,
   PANEL,
   SLIDER,
   SNACKBAR,
-  VECTOR,
-  NOTIFICATIONS,
 };
 
 /**
@@ -67,6 +67,11 @@ export type EventStringId =
   | 'footer_tabs/tab_create'
   | 'footer_tabs/tab_remove'
   | 'footer_tabs/tab_select'
+  | 'geometry/add'
+  | 'geometry/added'
+  | 'geometry/off'
+  | 'geometry/on'
+  | 'geometry/remove'
   | 'get_feature_info/all_queries_done'
   | 'get_feature_info/hover_query_done'
   | 'get_feature_info/query_layer'
@@ -116,6 +121,8 @@ export type EventStringId =
   | 'navbar/button_panel_create'
   | 'navbar/button_panel_remove'
   | 'navbar/toggle_controls'
+  | 'notification/add'
+  | 'notification/remove'
   | 'overview_map/toggle'
   | 'panel/add_action'
   | 'panel/change_content'
@@ -126,11 +133,4 @@ export type EventStringId =
   | 'slider/on_change_value'
   | 'slider/set_min_max'
   | 'slider/set_values'
-  | 'snackbar/open'
-  | 'vector/add'
-  | 'vector/added'
-  | 'vector/off'
-  | 'vector/on'
-  | 'vector/remove'
-  | 'notification/add'
-  | 'notification/remove';
+  | 'snackbar/open';

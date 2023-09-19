@@ -21,6 +21,7 @@ import { API } from './api/api';
 
 import { Config } from './core/utils/config/config';
 import { payloadIsAmapFeaturesConfig } from './api/events/payloads';
+import { addGeoViewStore } from './core/stores/stores-managers';
 
 // The next export allow to import the cgpv-types from 'geoview-core' from outside of the geoview-core package.
 export * from './core/types/cgpv-types';
@@ -109,6 +110,7 @@ async function init(callback: () => void) {
 
     // if valid config was provided
     if (configObj) {
+      addGeoViewStore(configObj);
       // render the map with the config
       root = createRoot(mapElement!);
       root.render(<AppStart mapFeaturesConfig={configObj} />);

@@ -22,7 +22,7 @@
           <tr>
             <td><img class="header-logo" alt="logo" src="./img/Logo.png" /></td>
             <td class="header-title">
-              <h1><strong>Vector</strong></h1>
+              <h1><strong>Geometry</strong></h1>
             </td>
           </tr>
         </tbody>
@@ -37,7 +37,7 @@
       <table>
         <tbody>
           <tr>
-            <td>This page is used to showcase how the viewer may implement different vector functions</td>
+            <td>This page is used to showcase how the viewer may implement different geometry functions</td>
           </tr>
         </tbody>
       </table>
@@ -92,10 +92,10 @@
 
     <script src="codedoc.js"></script>
     <script>
-      // TODO: for layer.vector.add* add a optional param to specify the geometry group - UPDATE CODE AND SAMPLE
+      // TODO: for layer.graphic.add* add a optional param to specify the geometry group - UPDATE CODE AND SAMPLE
       function addPolyline(map) {
         // call an api function to draw a polyline with default styles
-        const polyline1 = cgpv.api.maps[map].layer.vector.addPolyline(
+        const polyline1 = cgpv.api.maps[map].layer.geometry.addPolyline(
           [
             [-120, 50],
             [-125, 55],
@@ -104,7 +104,7 @@
         );
 
         // call an api function to draw a polyline with only 1 style and rest default
-        const polyline2 = cgpv.api.maps[map].layer.vector.addPolyline(
+        const polyline2 = cgpv.api.maps[map].layer.geometry.addPolyline(
           [
             [-110, 50],
             [-115, 55],
@@ -117,7 +117,7 @@
         );
 
         // call an api function to draw a polyline with all styles
-        const polyline3 = cgpv.api.maps[map].layer.vector.addPolyline(
+        const polyline3 = cgpv.api.maps[map].layer.geometry.addPolyline(
           [
             [-100, 50],
             [-105, 55],
@@ -134,7 +134,7 @@
 
       function addPolygon(map) {
         // call an api function to draw a polygon with default styles
-        const polygon1 = cgpv.api.maps[map].layer.vector.addPolygon(
+        const polygon1 = cgpv.api.maps[map].layer.geometry.addPolygon(
           [
             [
               [-109.05, 50],
@@ -147,7 +147,7 @@
         );
 
         // call an api function to draw a polygon with 1 style and rest default
-        const polygon2 = cgpv.api.maps[map].layer.vector.addPolygon(
+        const polygon2 = cgpv.api.maps[map].layer.geometry.addPolygon(
           [
             [
               [-99.05, 50],
@@ -164,7 +164,7 @@
         );
 
         // call an api function to draw a polygon with all styles
-        const polygon3 = cgpv.api.maps[map].layer.vector.addPolygon(
+        const polygon3 = cgpv.api.maps[map].layer.geometry.addPolygon(
           [
             [
               [-89.05, 50],
@@ -185,27 +185,27 @@
 
       function addCircle(map) {
         // call an api function to draw a circle with default style
-        const circle1 = cgpv.api.maps[map].layer.vector.addCircle([-100, 50], undefined);
+        const circle1 = cgpv.api.maps[map].layer.geometry.addCircle([-100, 50], undefined);
 
         // call an api function to draw a circle with 1 style
-        const circle2 = cgpv.api.maps[map].layer.vector.addCircle([-90, 50], {
+        const circle2 = cgpv.api.maps[map].layer.geometry.addCircle([-90, 50], {
           style: {
             strokeColor: 'red',
-            radius: 5
+            radius: 5,
           },
         });
 
         // call an api function to draw a circle with some styles
-        const circle3 = cgpv.api.maps[map].layer.vector.addCircle([-80, 50], {
+        const circle3 = cgpv.api.maps[map].layer.geometry.addCircle([-80, 50], {
           style: {
             fillColor: 'orange',
             fillOpacity: 0.5,
-            radius: 2
+            radius: 2,
           },
         });
 
         // call an api function to draw a circle with all styles
-        const circle4 = cgpv.api.maps[map].layer.vector.addCircle([-60, 50], {
+        const circle4 = cgpv.api.maps[map].layer.geometry.addCircle([-60, 50], {
           style: {
             strokeColor: 'black',
             fillColor: 'orange',
@@ -216,10 +216,10 @@
 
       function addMarkerIcon(map) {
         // call an api function to draw a marker icon with default styles
-        const markerIcon1 = cgpv.api.maps[map].layer.vector.addMarkerIcon([-100, 60], undefined);
+        const markerIcon1 = cgpv.api.maps[map].layer.geometry.addMarkerIcon([-100, 60], undefined);
 
         // call an api function to draw a marker icon with specific style
-        const markerIcon2 = cgpv.api.maps[map].layer.vector.addMarkerIcon([-90, 60], {
+        const markerIcon2 = cgpv.api.maps[map].layer.geometry.addMarkerIcon([-90, 60], {
           style: {
             size: [200, 200],
             scale: 0.2,
@@ -228,7 +228,7 @@
         });
 
         // call an api function to draw a marker icon with specific style
-        const markerIcon3 = cgpv.api.maps[map].layer.vector.addMarkerIcon([-80, 60], {
+        const markerIcon3 = cgpv.api.maps[map].layer.geometry.addMarkerIcon([-80, 60], {
           style: {
             anchor: [0.5, 0.5],
             size: [200, 200],
@@ -274,8 +274,8 @@
         const optionSelect = document.getElementById('selectGroupsName');
         const optionList = optionSelect.options;
         optionSelect.addEventListener('change', function (e) {
-          console.log(optionList[optionList.selectedIndex].value)
-          cgpv.api.maps['mapWM'].layer.vector.setActiveGeometryGroup(optionList[optionList.selectedIndex].value);
+          console.log(optionList[optionList.selectedIndex].value);
+          cgpv.api.maps['mapWM'].layer.geometry.setActiveGeometryGroup(optionList[optionList.selectedIndex].value);
         });
 
         // get delete GeomtryGroup button element and add event handler
@@ -285,12 +285,12 @@
           const groupName = optionList[optionList.selectedIndex].value;
 
           if (groupName !== '') {
-            cgpv.api.maps['mapWM'].layer.vector.deleteGeometryGroup(groupName);
+            cgpv.api.maps['mapWM'].layer.geometry.deleteGeometryGroup(groupName);
             optionList.remove(optionList.selectedIndex);
-            cgpv.api.maps['mapWM'].layer.vector.setActiveGeometryGroup()
+            cgpv.api.maps['mapWM'].layer.geometry.setActiveGeometryGroup();
           } else {
-            cgpv.api.maps['mapWM'].layer.vector.setActiveGeometryGroup();
-            cgpv.api.maps['mapWM'].layer.vector.deleteGeometryGroup();
+            cgpv.api.maps['mapWM'].layer.geometry.setActiveGeometryGroup();
+            cgpv.api.maps['mapWM'].layer.geometry.deleteGeometryGroup();
           }
         });
 
@@ -300,10 +300,21 @@
           // create geometry group
           var name = document.getElementById('groupname').value ? document.getElementById('groupname').value : '';
           if (name !== '') {
-            cgpv.api.maps['mapWM'].layer.vector.createGeometryGroup(name);
+            cgpv.api.maps['mapWM'].layer.geometry.createGeometryGroup(name);
             optionList.add(new Option(name, name));
           }
         });
+
+        // listen to geometry added event
+        cgpv.api.event.on(
+          cgpv.api.eventNames.GEOMETRY.EVENT_GEOMETRY_ADDED,
+          (payload) => {
+            if (cgpv.types.cgpv.types.payloadIsAGeometry(payload)) {
+              console.log(`geometry added ${payload.type}`);
+            }
+          },
+          'mapWM'
+        );
       });
     </script>
   </body>
