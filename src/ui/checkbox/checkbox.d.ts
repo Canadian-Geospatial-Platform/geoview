@@ -1,4 +1,4 @@
-import React from 'react';
+/// <reference types="react" />
 import { CheckboxProps } from '@mui/material';
 /**
  * Custom MUI Checkbox properties
@@ -12,5 +12,5 @@ interface TypeCheckboxProps extends CheckboxProps {
  * @param {TypeCheckboxProps} props custom checkbox properties
  * @returns {JSX.Element} the auto complete ui component
  */
-export declare const Checkbox: React.ForwardRefExoticComponent<Omit<TypeCheckboxProps, "ref"> & React.RefAttributes<unknown>>;
+export declare const Checkbox: import("react").ForwardRefExoticComponent<Omit<TypeCheckboxProps, "ref"> & import("react").RefAttributes<unknown>>;
 export {};

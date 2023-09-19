@@ -1,5 +1,5 @@
 import { ReactNode } from 'react';
-import { BaseTextFieldProps } from '@mui/material/TextField';
+import { BaseTextFieldProps } from '@mui/material';
 /**
  * Customized Material UI Custom TextField Properties
  */

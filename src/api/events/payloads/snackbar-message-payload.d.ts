@@ -1,6 +1,5 @@
 import { PayloadBaseClass } from './payload-base-class';
 import { EventStringId } from '../event-types';
-import { TypeSnackbarMessage } from '@/ui/snackbar/snackbar-types';
 import { TypeJsonObject } from '@/core/types/global-types';
 /**
  * type guard function that redefines a PayloadBaseClass as a SnackbarMessagePayload
@@ -11,6 +10,7 @@ import { TypeJsonObject } from '@/core/types/global-types';
  * @returns {boolean} returns true if the payload is valid
  */
 export declare const payloadIsASnackbarMessage: (verifyIfPayload: PayloadBaseClass) => verifyIfPayload is SnackbarMessagePayload;
+export type SnackbarType = 'success' | 'error' | 'info' | 'warning';
 /**
  * Class definition for SnackbarMessagePayload
  *
@@ -18,19 +18,19 @@ export declare const payloadIsASnackbarMessage: (verifyIfPayload: PayloadBaseCla
  * @class SnackbarMessagePayload
  */
 export declare class SnackbarMessagePayload extends PayloadBaseClass {
-    message: TypeSnackbarMessage;
-    options?: TypeJsonObject;
+    snackbarType: SnackbarType;
+    message: string;
     button?: TypeJsonObject;
     /**
      * Constructor for the class
      *
      * @param {EventStringId} event the event identifier for which the payload is constructed
      * @param {string | null} handlerName the handler Name
-     * @param {TypeSnackbarMessage} message the snackbar message
-     * @param {TypeJsonObject} options optional snackbar options
+     * @param {SnackbarType} snackbarType the  type of snackbar
+     * @param {string} message the snackbar message
      * @param {TypeJsonObject} button optional snackbar button
      */
-    constructor(event: EventStringId, handlerName: string | null, message: TypeSnackbarMessage, options?: TypeJsonObject, button?: TypeJsonObject);
+    constructor(event: EventStringId, handlerName: string | null, snackbarType: SnackbarType, message: string, button?: TypeJsonObject);
 }
 /**
  * Helper function used to instanciate a SnackbarMessagePayload object. This function
@@ -38,10 +38,10 @@ export declare class SnackbarMessagePayload extends PayloadBaseClass {
  *
  * @param {EventStringId} event the event identifier for which the payload is constructed
  * @param {string | null} handlerName the handler Name
- * @param {TypeSnackbarMessage} message the snackbar message
- * @param {TypeJsonObject} options optional snackbar options
+ * @param {SnackbarType} snackbarType the  type of snackbar
+ * @param {string} message the snackbar message
  * @param {TypeJsonObject} button optional snackbar button
  *
  * @returns {SnackbarMessagePayload} the SnackbarMessagePayload object created
  */
-export declare const snackbarMessagePayload: (event: EventStringId, handlerName: string | null, message: TypeSnackbarMessage, options?: TypeJsonObject, button?: TypeJsonObject) => SnackbarMessagePayload;
+export declare const snackbarMessagePayload: (event: EventStringId, handlerName: string | null, snackbarType: SnackbarType, message: string, button?: TypeJsonObject) => SnackbarMessagePayload;

@@ -3,7 +3,7 @@ import { ModifyEvent as OLModifyEvent } from 'ol/interaction/Modify';
 import Collection from 'ol/Collection';
 import Feature from 'ol/Feature';
 import { Interaction, InteractionOptions } from './interaction';
-import { TypeFeatureStyle } from '../layer/vector/vector-types';
+import { TypeFeatureStyle } from '../layer/geometry/geometry-types';
 /**
  * Supported options for modify interactions
  */

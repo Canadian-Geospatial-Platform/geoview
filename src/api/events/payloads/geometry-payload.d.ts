@@ -1,16 +1,16 @@
 import { Feature } from 'ol';
 import { PayloadBaseClass } from './payload-base-class';
 import { EventStringId } from '../event-types';
-import { TypeOfVector } from '@/geo/layer/vector/vector-types';
+import { TypeOfGeometry } from '@/geo/layer/geometry/geometry-types';
 /**
- * type guard function that redefines a PayloadBaseClass as a VectorPayload
+ * type guard function that redefines a PayloadBaseClass as a GeometryPayload
  * if the event attribute of the verifyIfPayload parameter is valid. The type ascention
  * applies only to the true block of the if clause.
  *
  * @param {PayloadBaseClass} verifyIfPayload object to test in order to determine if the type ascention is valid
  * @returns {boolean} returns true if the payload is valid
  */
-export declare const payloadIsAVector: (verifyIfPayload: PayloadBaseClass) => verifyIfPayload is VectorPayload;
+export declare const payloadIsAGeometry: (verifyIfPayload: PayloadBaseClass) => verifyIfPayload is GeometryPayload;
 /**
  * type guard function that redefines a PayloadBaseClass as a CirclePayload
  * if the type attribute of the verifyIfPayload parameter is valid. The type ascention
@@ -23,7 +23,7 @@ export declare const payloadIsACircle: (verifyIfPayload: PayloadBaseClass) => ve
 /**
  * Additional attributes needed to define a CirclePayload
  */
-export interface CirclePayload extends VectorPayload {
+export interface CirclePayload extends GeometryPayload {
     circle: Feature;
 }
 /**
@@ -38,7 +38,7 @@ export declare const payloadIsAMarker: (verifyIfPayload: PayloadBaseClass) => ve
 /**
  * Additional attributes needed to define a MarkerPayload
  */
-export interface MarkerPayload extends VectorPayload {
+export interface MarkerPayload extends GeometryPayload {
     marker: Feature;
 }
 /**
@@ -53,7 +53,7 @@ export declare const payloadIsAPolygon: (verifyIfPayload: PayloadBaseClass) => v
 /**
  * Additional attributes needed to define a PolygonPayload
  */
-export interface PolygonPayload extends VectorPayload {
+export interface PolygonPayload extends GeometryPayload {
     polygon: Feature;
 }
 /**
@@ -68,25 +68,25 @@ export declare const payloadIsAPolyline: (verifyIfPayload: PayloadBaseClass) => 
 /**
  * Additional attributes needed to define a PolylinePayload
  */
-export interface PolylinePayload extends VectorPayload {
+export interface PolylinePayload extends GeometryPayload {
     polyline: Feature;
 }
 /**
- * Class definition for VectorPayload
+ * Class definition for GeometryPayload
  *
  * @exports
- * @class VectorPayload
+ * @class GeometryPayload
  */
-export declare class VectorPayload extends PayloadBaseClass {
-    type: TypeOfVector;
+export declare class GeometryPayload extends PayloadBaseClass {
+    type: TypeOfGeometry;
     /**
      * Constructor for the class
      *
      * @param {EventStringId} event the event identifier for which the payload is constructed
      * @param {string | null} handlerName the handler Name
-     * @param {TypeOfVector} type the type of vector object that makes up the payload
+     * @param {TypeOfGeometry} type the type of geometry object that makes up the payload
      */
-    constructor(event: EventStringId, handlerName: string | null, type: TypeOfVector);
+    constructor(event: EventStringId, handlerName: string | null, type: TypeOfGeometry);
     /**
      * Static method used to create a CirclePayload
      *
@@ -129,13 +129,13 @@ export declare class VectorPayload extends PayloadBaseClass {
     static forPolyline: (event: EventStringId, handlerName: string | null, polyline: Feature) => PolylinePayload;
 }
 /**
- * Helper function used to instanciate a VectorPayload object. This function
- * avoids the "new VectorPayload" syntax.
+ * Helper function used to instanciate a GeometryPayload object. This function
+ * avoids the "new GeometryPayload" syntax.
  *
  * @param {EventStringId} event the event identifier for which the payload is constructed
  * @param {string | null} handlerName the handler Name
- * @param {TypeOfVector} type the type of vector object that makes up the payload
+ * @param {TypeOfGeometry} type the type of geometry object that makes up the payload
  *
- * @returns {VectorPayload} the VectorPayload object created
+ * @returns {GeometryPayload} the GeometryPayload object created
  */
-export declare const vectorPayload: (event: EventStringId, handlerName: string | null, type: TypeOfVector) => VectorPayload;
+export declare const geometryPayload: (event: EventStringId, handlerName: string | null, type: TypeOfGeometry) => GeometryPayload;

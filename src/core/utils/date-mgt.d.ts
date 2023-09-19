@@ -53,6 +53,13 @@ export declare class DateMgt {
      */
     convertToLocal(date: Date | string): string;
     /**
+     * Format a date to specific format like 'YYYY-MM-DD'
+     * @param {Date | string} date date to use
+     * @param {string} format format of the date.
+     * @returns {string} formatted date
+     */
+    formatDate(date: Date | string, format: string): string;
+    /**
      * Convert a date local to a UTC date
      * @param {Date | string} date date to use
      * @returns {string} UTC date
