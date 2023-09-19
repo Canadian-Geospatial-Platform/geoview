@@ -1,9 +1,21 @@
-/* eslint-disable jsx-a11y/anchor-is-valid */
 /* eslint-disable react/require-default-props */
 import React, { useEffect, useState, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { getUid } from 'ol/util';
-import { ListItemText, ListItem, List, Tooltip, IconButton, KeyboardArrowRightIcon, Grid, Paper, Typography } from '@/ui';
+import {
+  ListItemText,
+  ListItem,
+  List,
+  Tooltip,
+  IconButton,
+  Grid,
+  Paper,
+  Typography,
+  Checkbox,
+  KeyboardArrowRightIcon,
+  ArrowForwardIosOutlinedIcon,
+  ArrowBackIosOutlinedIcon,
+} from '@/ui';
 import { TypeArrayOfLayerData, TypeLayerData } from './details';
 import { FeatureInfo } from './feature-info-new';
 import { PayloadBaseClass, api } from '@/app';
@@ -113,7 +125,10 @@ export function LayersListFooter(props: TypeLayersListProps): JSX.Element {
 
                   return (
                     <ListItem
-                      onClick={() => setLayerDataInfo(layerData)}
+                      onClick={() => {
+                        setLayerDataInfo(layerData);
+                        setCurrentFeatureIndex(0);
+                      }}
                       key={layerData.layerPath}
                       sx={{
                         padding: '8px 40px 8px 16px',
@@ -147,40 +162,39 @@ export function LayersListFooter(props: TypeLayersListProps): JSX.Element {
               <Typography component="div" sx={getSxClasses().panelHeaderSelectedFeature}>
                 {t('details.selectedFeature')}
               </Typography>
-              <div style={{ border: '2px solid #515BA5', borderRadius: '5px', marginRight: '20px' }}>
-                <Grid container sx={{ marginTop: '20px' }}>
+              <div style={{ border: '2px solid #515BA5', borderRadius: '5px', marginRight: '20px', backgroundColor: 'white' }}>
+                <Grid container sx={{ marginTop: '20px', marginBottom: '9px', boxShadow: '0px 12px 9px -13px #E0E0E0' }}>
                   <Grid item xs={6}>
                     <div style={{ marginLeft: '26px' }}>
-                      {/* Content for the left item */}
-                      Features 2 of 4, select all features
+                      Feature {currentFeatureIndex + 1} of {layerDataInfo?.features.length}, select all features
+                      <Checkbox />
                     </div>
                   </Grid>
                   <Grid item xs={6}>
                     <div style={{ textAlign: 'right', marginRight: '26px' }}>
-                      <a
-                        href="#"
-                        onClick={(e) => {
-                          e.preventDefault();
-                          setCurrentFeatureIndex((prevValue) => prevValue - 1);
-                        }}
+                      <IconButton
+                        aria-label="backward"
+                        tooltip="details.previousFeatureBtn"
+                        tooltipPlacement="top"
+                        onClick={() => setCurrentFeatureIndex((prevValue) => prevValue - 1)}
+                        disabled={currentFeatureIndex === 0}
                       >
-                        Prev
-                      </a>
-                      <a
-                        href="#"
-                        onClick={(e) => {
-                          e.preventDefault();
-                          setCurrentFeatureIndex((prevValue) => prevValue + 1);
-                        }}
+                        <ArrowBackIosOutlinedIcon />
+                      </IconButton>
+                      <IconButton
+                        sx={{ marginLeft: '20px' }}
+                        aria-label="forward"
+                        tooltip="details.nextFeatureBtn"
+                        tooltipPlacement="top"
+                        onClick={() => setCurrentFeatureIndex((prevValue) => prevValue + 1)}
+                        // eslint-disable-next-line no-unsafe-optional-chaining
+                        disabled={currentFeatureIndex === layerDataInfo?.features.length - 1}
                       >
-                        Next
-                      </a>
+                        <ArrowForwardIosOutlinedIcon />
+                      </IconButton>
                     </div>
                   </Grid>
                 </Grid>
-
-                {/* {layerDataInfo?.features.map((feature, index: number) => ( */}
-                {/* // eslint-disable-next-line react/jsx-key, react/no-array-index-key */}
                 <FeatureInfo
                   features={layerDataInfo?.features}
                   currentFeatureIndex={currentFeatureIndex}

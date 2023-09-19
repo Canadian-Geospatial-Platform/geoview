@@ -81,7 +81,7 @@ export function FeatureInfo({ mapId, features, currentFeatureIndex, selectedFeat
   }, [featureUid, selectedFeatures]);
 
   return (
-    <Paper sx={{ backgroundColor: checked ? '#FFFAD1' : 'initial', border: '1px solid blue' }}>
+    <Paper sx={{ boxShadow: 'none' }}>
       <List sx={{ paddingLeft: '25px', paddingTop: '25px' }}>
         <ListItem
           secondaryAction={

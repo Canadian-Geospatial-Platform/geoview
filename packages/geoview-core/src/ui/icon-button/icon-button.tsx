@@ -24,6 +24,7 @@ export function IconButton(props: TypeIconButtonProps): JSX.Element {
     tabIndex,
     iconRef,
     size,
+    disabled,
   } = props;
   const { t } = useTranslation<string>();
   return (
@@ -38,6 +39,7 @@ export function IconButton(props: TypeIconButtonProps): JSX.Element {
         tabIndex={tabIndex}
         size={size}
         ref={iconRef}
+        disabled={disabled}
       >
         {children && children}
       </MaterialIconButton>

@@ -68,7 +68,10 @@
     "availableLayers": "Available Layers",
     "selectedFeature": "Selected Feature",
     "feature": "feature",
-    "clickOnMap": "Click on map"
+    "clickOnMap": "Click on map",
+    "nextFeatureBtn": "Next feature",
+    "previousFeatureBtn": "Previous feature",
+    "selectAllfeature": "Select all features"
   },
   "lightbox": {
     "next": "Next",
