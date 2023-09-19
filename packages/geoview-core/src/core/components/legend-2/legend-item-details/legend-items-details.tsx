@@ -1,19 +1,36 @@
-import React from 'react';
 import { api } from '@/app';
-import { LegendItem } from './legend-item-details';
+import { LegendItemDetails } from './legend-item-details';
 import { List } from '@/ui';
-import { LegendItemsDetailsProps } from '../types';
+import { LegendItemsProps } from '../types';
+import { TypeLayerEntryConfig } from '@/geo/map/map-schema-types';
+import { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 
-export function LegendItemsDetails(props: LegendItemsDetailsProps): JSX.Element {
+interface LegendItemsDetailsProps {
+  layerId: string;
+  geoviewLayerInstance: AbstractGeoViewLayer;
+  subLayerId?: string;
+  layerConfigEntry?: TypeLayerEntryConfig;
+  isRemoveable?: boolean;
+  canSetOpacity?: boolean;
+  isParentVisible?: boolean;
+  toggleParentVisible?: () => void;
+  expandAll?: boolean;
+  hideAll?: boolean;
+  canZoomTo?: boolean;
+  mapId: string;
+}
+
+
+
+export function LegendItemsDetails(props: LegendItemsProps): JSX.Element {
   const { layerIds, isRemoveable, canSetOpacity, expandAll, hideAll, mapId } = props;
   const legendItems = layerIds
-    // const subLayerItems = subLayerId
     .filter((layerId) => api.maps[mapId].layer.geoviewLayers[layerId])
     .map((layerId) => {
       const geoviewLayerInstance = api.maps[mapId].layer.geoviewLayers[layerId];
 
       return (
-        <LegendItem
+        <LegendItemDetails
           key={`layerKey-${layerId}`}
           layerId={layerId}
           geoviewLayerInstance={geoviewLayerInstance}
@@ -28,9 +45,8 @@ export function LegendItemsDetails(props: LegendItemsDetailsProps): JSX.Element 
 
   return (
     <div>
-      {/* <List sx={{ width: '100%' }}>{subLayerItems}</List> */}
       <List sx={{ width: '100%' }}>{legendItems}</List>
-      <p> Right Pane</p>
+      <p>Right Pane</p>
     </div>
   );
 }

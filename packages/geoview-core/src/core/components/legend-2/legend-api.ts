@@ -1,6 +1,9 @@
 import { createElement } from 'react';
 import { LegendsLayerSet, api } from '@/app';
-import { LegendItem, TypeLegendItemProps } from './legend-items/legend-item';
+import { LegendItem } from './legend-items/legend-item';
+import {TypeLegendItemProps} from './types'
+import { LegendItemDetails, TypeLegendItemDetailsProps } from './legend-item-details/legend-item-details';
+// import { TypeLegendItemProps } from './types';
 import { TypeLegendProps } from './types';
 import { Legend2 } from './legend';
 
@@ -74,4 +77,10 @@ export class Legend2Api {
     const geoviewLayerInstance = api.maps[this.mapId].layer.geoviewLayers[layerId];
     return createElement(LegendItem, { layerId, geoviewLayerInstance, key: layerId });
   };
+
+  // createLegendItemDetails = (props: TypeLegendItemDetailsProps) => {
+  //   const { layerId } = props;
+  //   const geoviewLayerInstance = api.maps[this.mapId].layer.geoviewLayers[layerId];
+  //   return createElement(LegendItemDetails, { layerId, geoviewLayerInstance, key: layerId });
+  // };
 }
