@@ -49,6 +49,7 @@ import { generateId, parseJSONConfig, removeCommentsFromJSON } from '@/core/util
 import { TypeListOfGeoviewLayerConfig, TypeDisplayLanguage, TypeViewSettings } from './map-schema-types';
 import { TypeMapFeaturesConfig, TypeHTMLElement } from '@/core/types/global-types';
 import { layerConfigIsGeoCore } from '../layer/other/geocore';
+
 import { getGeoViewStore } from '@/core/stores/stores-managers';
 
 interface TypeDcoument extends Document {
@@ -122,8 +123,8 @@ export class MapViewer {
   // store current zoom level
   currentZoom: number;
 
-  // store current position
-  currentMapCenterPosition: Coordinate;
+  // store current map center coordinate
+  currentMapCenterCoordinates: Coordinate;
 
   // store last single click position
   singleClickedPosition: TypeMapMouseInfo;
@@ -161,7 +162,7 @@ export class MapViewer {
     this.currentProjection = mapFeaturesConfig.map.viewSettings.projection;
     this.i18nInstance = i18instance;
     this.currentZoom = mapFeaturesConfig.map.viewSettings.zoom;
-    this.currentMapCenterPosition = [mapFeaturesConfig.map.viewSettings.center[0], mapFeaturesConfig.map.viewSettings.center[1]];
+    this.currentMapCenterCoordinates = [mapFeaturesConfig.map.viewSettings.center[0], mapFeaturesConfig.map.viewSettings.center[1]];
     this.singleClickedPosition = { pixel: [], lnglat: [], projected: [], dragging: false };
     this.pointerPosition = { pixel: [], lnglat: [], projected: [], dragging: false };
 
@@ -400,9 +401,20 @@ export class MapViewer {
         });
         if (allGeoviewLayerReady) {
           const store = getGeoViewStore(this.mapId);
+
+          // initialize store OpenLayers events
+          this.map.on('moveend', store.getState().mapState.onMapMoveEnd);
+
+          // initialize map state
           store.setState({
-            mapState: { ...store.getState().mapState, mapLoaded: true, mapElement: this.map },
+            mapState: {
+              ...store.getState().mapState,
+              mapLoaded: true,
+              mapElement: this.map,
+              currentMapCenterCoordinates: this.map.getView().getCenter()!,
+            },
           });
+
           clearInterval(layerInterval);
         }
       }

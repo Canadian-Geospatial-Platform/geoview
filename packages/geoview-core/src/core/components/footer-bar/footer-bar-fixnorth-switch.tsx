@@ -2,6 +2,9 @@ import React, { useContext, useEffect, useState } from 'react';
 
 import { useTranslation } from 'react-i18next';
 
+import { useStore } from 'zustand';
+import { getGeoViewStore } from '@/core/stores/stores-managers';
+
 import { Switch } from '@/ui';
 
 import { api } from '@/app';
@@ -10,7 +13,7 @@ import { MapContext } from '@/core/app-start';
 import { PROJECTION_NAMES } from '@/geo/projection/projection';
 
 import { EVENT_NAMES } from '@/api/events/event-types';
-import { PayloadBaseClass, booleanPayload, payloadIsABoolean, payloadIsAMapViewProjection } from '@/api/events/payloads';
+import { PayloadBaseClass, booleanPayload, payloadIsAMapViewProjection } from '@/api/events/payloads';
 
 /**
  * Footerbar Fix North Switch component
@@ -23,10 +26,12 @@ export function FooterbarFixNorthSwitch(): JSX.Element {
 
   const { t } = useTranslation<string>();
 
-  const [expanded, setExpanded] = useState(false);
   const [mapProjection, setMapProjection] = useState(`EPSG:${api.maps[mapId].currentProjection}`);
   const [switchChecked, setSwitchChecked] = useState(false);
   const [isNorthEnable] = useState(api.maps[mapId].mapFeaturesConfig.components!.indexOf('north-arrow') > -1);
+
+  // get the expand or collapse from store
+  const expanded = useStore(getGeoViewStore(mapId), (state) => state.footerBarState.expanded);
 
   /**
    * Emit an event to specify the map to rotate to keep north straight
@@ -46,12 +51,6 @@ export function FooterbarFixNorthSwitch(): JSX.Element {
     }
   };
 
-  const footerBarExpandCollapseListenerFunction = (payload: PayloadBaseClass) => {
-    if (payloadIsABoolean(payload)) {
-      setExpanded(payload.status);
-    }
-  };
-
   const eventMapViewProjectionChangeListenerFunction = (payload: PayloadBaseClass) => {
     if (payloadIsAMapViewProjection(payload)) {
       setMapProjection(`EPSG:${payload.projection}`);
@@ -62,13 +61,10 @@ export function FooterbarFixNorthSwitch(): JSX.Element {
   };
 
   useEffect(() => {
-    api.event.on(EVENT_NAMES.FOOTERBAR.EVENT_FOOTERBAR_EXPAND_COLLAPSE, footerBarExpandCollapseListenerFunction, mapId);
-
     // listen to geoview-basemap-panel package change projection event
     api.event.on(EVENT_NAMES.MAP.EVENT_MAP_VIEW_PROJECTION_CHANGE, eventMapViewProjectionChangeListenerFunction, mapId);
 
     return () => {
-      api.event.off(EVENT_NAMES.FOOTERBAR.EVENT_FOOTERBAR_EXPAND_COLLAPSE, mapId, footerBarExpandCollapseListenerFunction);
       api.event.off(EVENT_NAMES.MAP.EVENT_MAP_VIEW_PROJECTION_CHANGE, mapId, eventMapViewProjectionChangeListenerFunction);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps

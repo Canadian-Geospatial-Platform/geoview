@@ -71,7 +71,7 @@ export function Footerbar(): JSX.Element {
       <FooterbarExpandButton />
       {deviceSizeMedUp && <Attribution />}
       <Box id="mouseAndScaleControls" sx={sxClasses.mouseScaleControlsContainer}>
-        {deviceSizeMedUp && mapIsDynamic && <MousePosition mousePositionMapId={mapId} />}
+        {deviceSizeMedUp && mapIsDynamic && <MousePosition />}
         <Scale />
       </Box>
       {mapIsDynamic && (
