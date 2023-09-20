@@ -92,13 +92,14 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 type NavbarProps = {
-  setActivetrap: Dispatch<SetStateAction<boolean>>;
+  activeTrap: boolean;
+  activeTrapSet: Dispatch<SetStateAction<boolean>>;
 };
 
 /**
  * Create a nav-bar with buttons that can call functions or open custom panels
  */
-export function Navbar({ setActivetrap }: NavbarProps): JSX.Element {
+export function Navbar({ activeTrap, activeTrapSet }: NavbarProps): JSX.Element {
   const [buttonPanelGroups, setButtonPanelGroups] = useState<Record<string, Record<string, TypeButtonPanel>>>({});
   const [ModalIsShown, setModalIsShown] = useState(false);
   const [footerBarExpanded, setFooterBarExpanded] = useState<boolean>(false);
@@ -108,6 +109,7 @@ export function Navbar({ setActivetrap }: NavbarProps): JSX.Element {
   const { t } = useTranslation<string>();
 
   const navBarRef = useRef<HTMLDivElement>(null);
+  const trapActive = useRef<boolean>(activeTrap);
 
   const mapConfig = useContext(MapContext);
 
@@ -144,12 +146,14 @@ export function Navbar({ setActivetrap }: NavbarProps): JSX.Element {
 
   const openModal = () => {
     setModalIsShown(true);
-    setActivetrap(false);
+    trapActive.current = activeTrap;
+    // this will remove the focus active trap from map and focus will be on export modal
+    activeTrapSet(false);
   };
 
   const closeModal = () => {
     setModalIsShown(false);
-    setActivetrap(true);
+    activeTrapSet(trapActive.current);
   };
 
   useEffect(() => {
