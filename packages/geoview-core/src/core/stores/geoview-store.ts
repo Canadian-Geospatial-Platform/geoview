@@ -1,12 +1,27 @@
 import { StoreApi } from 'zustand';
-import OLMap from 'ol/Map';
+
+// import OLMap from 'ol/map'; // TODO: When I use the import below instead of this one I have this TypeScript error
+/*
+Argument of type 'import("C:/Users/jolevesq/Sites/geoview/common/temp/node_modules/.pnpm/ol@7.5.2/node_modules/ol/Map").default' is not assignable to parameter of type 'import("C:/Users/jolevesq/Sites/geoview/common/temp/node_modules/.pnpm/ol@7.5.1/node_modules/ol/Map").default'.
+  Types of property 'on' are incompatible.
+*/
+import { Map as OLMap, MapEvent } from 'ol';
+import { Coordinate } from 'ol/coordinate';
+
 import { TypeMapFeaturesConfig } from '@/core/types/global-types';
 
 export interface IMapState {
   zoom?: number;
   currentCoordinates?: [number, number];
+  currentMapCenterCoordinates: Coordinate;
   mapLoaded: boolean;
   mapElement?: OLMap;
+
+  onMapMoveEnd: (event: MapEvent) => void;
+}
+
+export interface IFooterBarState {
+  expanded: boolean;
 }
 
 export interface IAppBarState {
@@ -32,6 +47,8 @@ export interface IGeoViewState {
   mapId: string;
   mapConfig: TypeMapFeaturesConfig | undefined;
   mapState: IMapState;
+
+  footerBarState: IFooterBarState;
   appBarState: IAppBarState;
 
   isCrosshairsActive: boolean;
@@ -55,6 +72,18 @@ export const geoViewStoreDefinition = (
     isCrosshairsActive: false,
     mapState: {
       mapLoaded: false,
+      currentMapCenterCoordinates: [0, 0] as Coordinate,
+      onMapMoveEnd: (event: MapEvent) => {
+        set({
+          mapState: {
+            ...get().mapState,
+            currentMapCenterCoordinates: event.map.getView().getCenter()!,
+          },
+        });
+      },
+    },
+    footerBarState: {
+      expanded: false,
     },
     appBarState: {
       geoLocatorActive: false,
