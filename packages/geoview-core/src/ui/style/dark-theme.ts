@@ -1,4 +1,4 @@
-// import { ThemeOptions } from '@mui/material';
+import { ThemeOptions } from '@mui/material';
 import { defaultThemeOptions, opacity } from './default';
 
 /**
@@ -115,10 +115,9 @@ const darkPanel = {
   activeBg: '#4f4f4f',
 };
 
-export const darkThemeOptions = {
+export const darkThemeOptions: ThemeOptions = {
   ...defaultThemeOptions,
   palette: darkPalette,
   appBar: darkAppBar,
   panel: darkPanel,
-  mode: 'dark',
 };
