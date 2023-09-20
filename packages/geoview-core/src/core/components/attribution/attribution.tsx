@@ -1,14 +1,16 @@
 /* eslint-disable no-underscore-dangle */
-import React, { useContext, useEffect, useState, useRef } from 'react';
+import React, { useContext, useEffect, useRef } from 'react';
 
 import OLAttribution, { Options } from 'ol/control/Attribution';
 
 import makeStyles from '@mui/styles/makeStyles';
 
+import { useStore } from 'zustand';
 import { MapContext } from '@/core/app-start';
 import { api } from '@/app';
 import { Tooltip, Box } from '@/ui';
-import { EVENT_NAMES, payloadIsABoolean } from '@/api/events';
+
+import { getGeoViewStore } from '@/core/stores/stores-managers';
 
 const useStyles = makeStyles((theme) => ({
   attributionContainer: {
@@ -139,13 +141,16 @@ class CustomAttribution extends OLAttribution {
  * @returns {JSX.Element} created attribution element
  */
 export function Attribution(): JSX.Element {
+  const mapConfig = useContext(MapContext);
+  const { mapId } = mapConfig;
+
+  // TODO: remove useStyle
   const classes = useStyles();
 
-  const mapConfig = useContext(MapContext);
   const attributionTextRef = useRef<Array<string>>([]);
-  const [attribtuionTextOpacity, setAttribtuionTextOpacity] = useState<boolean>(false);
 
-  const { mapId } = mapConfig;
+  // get the expand or collapse from store
+  const expanded = useStore(getGeoViewStore(mapId), (state) => state.footerBarState.expanded);
 
   useEffect(() => {
     const { map } = api.maps[mapId];
@@ -163,36 +168,28 @@ export function Attribution(): JSX.Element {
       mapId
     );
 
-    api.event.on(
-      EVENT_NAMES.FOOTERBAR.EVENT_FOOTERBAR_EXPAND_COLLAPSE,
-      (payload) => {
-        if (payloadIsABoolean(payload)) {
-          if (attributionTextElement) {
-            const liElements = attributionTextElement.getElementsByTagName('LI');
-            if (liElements && liElements.length > 0) {
-              for (let liElementIndex = 0; liElementIndex < liElements.length; liElementIndex++) {
-                const liElement = liElements[liElementIndex] as HTMLElement;
-                attributionTextRef.current.push(liElement.innerText);
-              }
-            }
-          }
-          if (payload.status) {
-            attributionControl.formatAttribution();
-          } else {
-            attributionTextRef.current.length = 0;
-          }
-          setAttribtuionTextOpacity(payload.status);
+    // TODO: put attribution in store from add layer events, solve toolip issue
+    if (attributionTextElement) {
+      const liElements = attributionTextElement.getElementsByTagName('LI');
+      if (liElements && liElements.length > 0) {
+        for (let liElementIndex = 0; liElementIndex < liElements.length; liElementIndex++) {
+          const liElement = liElements[liElementIndex] as HTMLElement;
+          attributionTextRef.current.push(liElement.innerText);
         }
-      },
-      mapId
-    );
+      }
+    }
+    attributionControl.formatAttribution();
 
     map.addControl(attributionControl);
+
+    return () => {
+      map.removeControl(attributionControl);
+    };
   }, [mapId]);
 
   return (
     <Tooltip title={!attributionTextRef.current?.length ? '' : attributionTextRef.current.join('\n')}>
-      <Box id={`${mapId}-attribution-text`} className={classes.attributionContainer} sx={{ opacity: attribtuionTextOpacity ? 1 : 0 }} />
+      <Box id={`${mapId}-attribution-text`} className={classes.attributionContainer} sx={{ opacity: expanded ? 1 : 0 }} />
     </Tooltip>
   );
 }

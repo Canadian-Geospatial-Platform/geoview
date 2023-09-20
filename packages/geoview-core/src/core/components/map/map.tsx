@@ -41,6 +41,8 @@ import {
 } from '@/api/events/payloads';
 import { TypeMapFeaturesConfig } from '../../types/global-types';
 
+import { getGeoViewStore } from '@/core/stores/stores-managers';
+
 const useStyles = makeStyles(() => ({
   mapContainer: {
     display: 'flex',
@@ -75,23 +77,6 @@ export function Map(mapFeaturesConfig: TypeMapFeaturesConfig): JSX.Element {
   const deviceSizeMedUp = useMediaQuery(defaultTheme.breakpoints.up('md'));
 
   /**
-   * Get the center position of the map when move / drag has ended
-   * then emit it as an api event
-   * @param {MapEvent} event Move end event container a reference to the map
-   */
-  function mapMoveEnd(event: MapEvent): void {
-    // get a map reference from the moveend event
-    const { map } = event;
-
-    const position = map.getView().getCenter()!;
-
-    api.maps[mapId].currentMapCenterPosition = position;
-
-    // emit the moveend event to the api
-    api.event.emit(lngLatPayload(EVENT_NAMES.MAP.EVENT_MAP_MOVE_END, mapId, position));
-  }
-
-  /**
    * Get the zoom level of the map when zoom in / out has ended
    * then emit it as an api event
    * @param {ObjectEvent} event Zoom end event container a reference to the map
@@ -104,6 +89,7 @@ export function Map(mapFeaturesConfig: TypeMapFeaturesConfig): JSX.Element {
 
     api.maps[mapId].currentZoom = currentZoom;
 
+    // TODO: do not deal with stuff not related to create the payload in the event, use the event on or store state to listen to change and do what is needed.
     Object.keys(layers).forEach((layer) => {
       if (layer.endsWith('-unclustered')) {
         const clusterLayerId = layer.replace('-unclustered', '');
@@ -186,10 +172,17 @@ export function Map(mapFeaturesConfig: TypeMapFeaturesConfig): JSX.Element {
         // emit the initial map position
         api.event.emit(lngLatPayload(EVENT_NAMES.MAP.EVENT_MAP_MOVE_END, mapId || '', cgpvMap.getView().getCenter()!));
 
-        cgpvMap.on('moveend', mapMoveEnd);
+        // cgpvMap.on('moveend', mapMoveEnd);
         cgpvMap.on('singleclick', mapSingleClick);
         cgpvMap.on('pointermove', mapPointerMove);
         cgpvMap.getView().on('change:resolution', mapZoomEnd);
+
+        // initialize store OpenLayers events
+        const store = getGeoViewStore(mapId);
+        cgpvMap.on('moveend', store.getState().mapState.onMapMoveEnd);
+        store.setState({
+          mapState: { ...store.getState().mapState, onMapMoveEnd: (fakeMapEvent) => fakeMapEvent },
+        });
 
         clearInterval(intervalMap);
         intervalMap = null;

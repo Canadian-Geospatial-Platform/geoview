@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 
 import makeStyles from '@mui/styles/makeStyles';
 
+import { useStore } from 'zustand';
 import ZoomIn from './buttons/zoom-in';
 import ZoomOut from './buttons/zoom-out';
 import Fullscreen from './buttons/fullscreen';
@@ -13,13 +14,15 @@ import Location from './buttons/location';
 
 import ExportModal from '../export/export-modal';
 
-import { api, payloadIsABoolean } from '@/app';
+import { api } from '@/app';
 import { Panel, ButtonGroup, IconButton, Box } from '@/ui';
 
 import { MapContext } from '@/core/app-start';
 import { EVENT_NAMES } from '@/api/events/event-types';
 import { payloadIsAButtonPanel, ButtonPanelPayload, PayloadBaseClass } from '@/api/events/payloads';
 import { TypeButtonPanel } from '@/ui/panel/panel-types';
+
+import { getGeoViewStore } from '@/core/stores/stores-managers';
 
 const navBtnWidth = '44px';
 const navBtnHeight = '44px';
@@ -99,20 +102,21 @@ type NavbarProps = {
  * Create a nav-bar with buttons that can call functions or open custom panels
  */
 export function Navbar({ setActivetrap }: NavbarProps): JSX.Element {
-  const [buttonPanelGroups, setButtonPanelGroups] = useState<Record<string, Record<string, TypeButtonPanel>>>({});
-  const [ModalIsShown, setModalIsShown] = useState(false);
-  const [footerBarExpanded, setFooterBarExpanded] = useState<boolean>(false);
-
-  const classes = useStyles();
+  const mapConfig = useContext(MapContext);
+  const { mapId } = mapConfig;
 
   const { t } = useTranslation<string>();
 
+  // TODO: remove useStyle
+  const classes = useStyles();
+
   const navBarRef = useRef<HTMLDivElement>(null);
-
-  const mapConfig = useContext(MapContext);
-
-  const { mapId } = mapConfig;
   const { navBar } = api.maps[mapId].mapFeaturesConfig;
+  const [buttonPanelGroups, setButtonPanelGroups] = useState<Record<string, Record<string, TypeButtonPanel>>>({});
+  const [ModalIsShown, setModalIsShown] = useState(false);
+
+  // get the expand or collapse from store
+  const footerBarExpanded = useStore(getGeoViewStore(mapId), (state) => state.footerBarState.expanded);
 
   const addButtonPanel = useCallback(
     (payload: ButtonPanelPayload) => {
@@ -165,16 +169,9 @@ export function Navbar({ setActivetrap }: NavbarProps): JSX.Element {
     // listen to new nav-bar panel removal
     api.event.on(EVENT_NAMES.NAVBAR.EVENT_NAVBAR_BUTTON_PANEL_REMOVE, navbarBtnPanelRemoveListenerFunction, mapId);
 
-    const footerbarExpandCollapseListenerFunction = (payload: PayloadBaseClass) => {
-      if (payloadIsABoolean(payload)) setFooterBarExpanded(payload.status);
-    };
-    // listen to footerbar expand/collapse event
-    api.event.on(EVENT_NAMES.FOOTERBAR.EVENT_FOOTERBAR_EXPAND_COLLAPSE, footerbarExpandCollapseListenerFunction, mapId);
-
     return () => {
       api.event.off(EVENT_NAMES.NAVBAR.EVENT_NAVBAR_BUTTON_PANEL_CREATE, mapId, navbarBtnPanelCreateListenerFunction);
       api.event.off(EVENT_NAMES.NAVBAR.EVENT_NAVBAR_BUTTON_PANEL_REMOVE, mapId, navbarBtnPanelRemoveListenerFunction);
-      api.event.off(EVENT_NAMES.FOOTERBAR.EVENT_FOOTERBAR_EXPAND_COLLAPSE, mapId, footerbarExpandCollapseListenerFunction);
     };
   }, [addButtonPanel, mapId, removeButtonPanel]);
 

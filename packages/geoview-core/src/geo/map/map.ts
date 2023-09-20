@@ -49,6 +49,7 @@ import { generateId, parseJSONConfig, removeCommentsFromJSON } from '@/core/util
 import { TypeListOfGeoviewLayerConfig, TypeDisplayLanguage, TypeViewSettings } from './map-schema-types';
 import { TypeMapFeaturesConfig, TypeHTMLElement } from '@/core/types/global-types';
 import { layerConfigIsGeoCore } from '../layer/other/geocore';
+
 import { getGeoViewStore } from '@/core/stores/stores-managers';
 
 interface TypeDcoument extends Document {
@@ -162,6 +163,7 @@ export class MapViewer {
     this.i18nInstance = i18instance;
     this.currentZoom = mapFeaturesConfig.map.viewSettings.zoom;
     this.currentMapCenterPosition = [mapFeaturesConfig.map.viewSettings.center[0], mapFeaturesConfig.map.viewSettings.center[1]];
+    // TODO: this is not working, set from map event processor... this.currentMapCenterPosition = useStore(getGeoViewStore(this.mapId), (state) => state.mapState.currentMapCenterCoordinates);
     this.singleClickedPosition = { pixel: [], lnglat: [], projected: [], dragging: false };
     this.pointerPosition = { pixel: [], lnglat: [], projected: [], dragging: false };
 

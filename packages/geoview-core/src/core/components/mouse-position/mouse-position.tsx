@@ -9,13 +9,13 @@ import { useTranslation } from 'react-i18next';
 
 import debounce from 'lodash/debounce';
 
+import { useStore } from 'zustand';
 import { api } from '@/app';
 import { MapContext } from '@/core/app-start';
 
-import { EVENT_NAMES } from '@/api/events/event-types';
-import { PayloadBaseClass, payloadIsABoolean } from '@/api/events/payloads';
-
 import { Box, CheckIcon, Tooltip } from '@/ui';
+
+import { getGeoViewStore } from '@/core/stores/stores-managers';
 
 const useStyles = makeStyles((theme) => ({
   mousePositionContainer: {
@@ -67,39 +67,26 @@ function coordFormnatDMS(value: number): string {
 }
 
 /**
- * Mouse position properties interface
- */
-interface MousePositionProps {
-  mousePositionMapId: string;
-}
-
-/**
  * Create the mouse position
- * @param {MousePositionProps} props the mouse position properties
  * @returns {JSX.Element} the mouse position component
  */
-export function MousePosition(props: MousePositionProps): JSX.Element {
+export function MousePosition(): JSX.Element {
   // TODO variable is not used, thus causing an error, commeting it out for later
   // const isCrosshairsActive = useGeoViewStore((state) => state.isCrosshairsActive);
 
-  const { mousePositionMapId } = props;
-
-  const [expanded, setExpanded] = useState(false);
-  const [mousePositionText, setMousePositionText] = useState<boolean>(false);
+  const mapConfig = useContext(MapContext);
+  const { mapId } = mapConfig;
 
   const { t } = useTranslation<string>();
 
+  // TODO: remove use style
   const classes = useStyles();
 
+  // get the expand or collapse from store
+  const expanded = useStore(getGeoViewStore(mapId), (state) => state.footerBarState.expanded);
+
   const [positions, setPositions] = useState<string[]>(['', '', '']);
-
-  // const [position, setPosition] = useState({ lng: '--', lat: '--' });
-
   const [positionMode, setPositionMode] = useState<number>(0);
-
-  const mapConfig = useContext(MapContext);
-
-  const { mapId } = mapConfig;
 
   /**
    * Format the coordinates output in lat long
@@ -192,33 +179,6 @@ export function MousePosition(props: MousePositionProps): JSX.Element {
     };
   }, [mapId, onMouseMove, onMoveEnd, positionMode]);
 
-  useEffect(() => {
-    let opacityTimeout: string | number | NodeJS.Timeout | undefined;
-
-    const footerbarExpandCollapseListenerFunction = (payload: PayloadBaseClass) => {
-      if (payloadIsABoolean(payload)) {
-        if (payload.handlerName!.includes(mousePositionMapId)) {
-          if (payload.status) {
-            opacityTimeout = setTimeout(() => setExpanded(payload.status), 300);
-          } else {
-            setExpanded(payload.status);
-          }
-          setMousePositionText(payload.status);
-        }
-      }
-    };
-
-    // on map crosshair enable\disable, set variable for WCAG mouse position
-    // TODO: On crosshaih, add crosshair center information to screen reader / mouse position component
-    api.event.on(EVENT_NAMES.FOOTERBAR.EVENT_FOOTERBAR_EXPAND_COLLAPSE, footerbarExpandCollapseListenerFunction, mapId);
-
-    return () => {
-      api.event.off(EVENT_NAMES.FOOTERBAR.EVENT_FOOTERBAR_EXPAND_COLLAPSE, mapId, footerbarExpandCollapseListenerFunction);
-      clearTimeout(opacityTimeout);
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
   return (
     <Tooltip title={t('mapnav.coordinates')!} placement="top">
       <button type="button" onClick={() => switchPositionMode()} className={classes.mousePositionContainer}>
@@ -234,7 +194,7 @@ export function MousePosition(props: MousePositionProps): JSX.Element {
               );
             })}
           </Box>
-          <Box component="span" className={classes.mousePositionText} sx={{ display: mousePositionText ? 'none' : 'block' }}>
+          <Box component="span" className={classes.mousePositionText} sx={{ display: expanded ? 'none' : 'block' }}>
             {positions[positionMode]}
           </Box>
         </Box>
