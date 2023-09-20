@@ -355,7 +355,7 @@ export abstract class AbstractGeoViewLayer {
     // Try to find an unprocessed layer. If you can, return false
     return !listOfLayerEntryConfig.find((layerEntryConfig: TypeLayerEntryConfig) => {
       if (layerEntryIsGroupLayer(layerEntryConfig)) return !this.allLayerEntryConfigProcessed(layerEntryConfig.listOfLayerEntryConfig);
-      return !['processed', 'error'].includes((layerEntryConfig as TypeBaseLayerEntryConfig).layerStatus || '');
+      return !['processed', 'error', 'loaded'].includes((layerEntryConfig as TypeBaseLayerEntryConfig).layerStatus || '');
     });
   }
 

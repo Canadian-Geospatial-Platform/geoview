@@ -1,18 +1,16 @@
 import { useContext, useEffect, useState } from 'react';
 
 import { ScaleLine } from 'ol/control';
-import { MapEvent } from 'ol';
 import { useTranslation } from 'react-i18next';
 
 import makeStyles from '@mui/styles/makeStyles';
 
+import { useStore } from 'zustand';
+import { getGeoViewStore } from '@/core/stores/stores-managers';
+
 import { api } from '@/app';
-
 import { MapContext } from '@/core/app-start';
-import { EVENT_NAMES } from '@/api/events/event-types';
-
 import { CheckIcon, Tooltip, Box } from '@/ui';
-import { PayloadBaseClass, payloadIsABoolean } from '@/api/events/payloads';
 
 const useStyles = makeStyles((theme) => ({
   scaleControl: {
@@ -69,26 +67,21 @@ interface TypeScale {
  * @returns {JSX.Element} created scale element
  */
 export function Scale(): JSX.Element {
-  const { t } = useTranslation<string>();
-  const [scaleMode, setScaleMode] = useState<number>(0);
-  const [scaleValues, setScaleValues] = useState<TypeScale[]>([
-    {
-      scaleId: '0',
-      label: '',
-      borderBottom: false,
-    },
-    {
-      scaleId: '1',
-      label: '',
-      borderBottom: false,
-    },
-  ]);
-  const [expanded, setExpanded] = useState<boolean>(false);
-
   const mapConfig = useContext(MapContext);
-
   const { mapId } = mapConfig;
 
+  const { t } = useTranslation<string>();
+
+  // internal component state
+  const [scaleMode, setScaleMode] = useState<number>(0);
+  const [lineWidth, setLineWidth] = useState<string>('');
+  const [scaleGraphic, setScaleGraphic] = useState<string>('');
+  const [scaleNumeric, setScaleNumeric] = useState<string>('');
+
+  // get the expand or collapse from store
+  const expanded = useStore(getGeoViewStore(mapId), (state) => state.footerBarState.expanded);
+
+  // TODO: remove make style
   const classes = useStyles();
 
   /**
@@ -98,24 +91,19 @@ export function Scale(): JSX.Element {
     setScaleMode((scaleMode + 1) % 2);
   };
 
-  const onMoveEnd = (e: MapEvent) => {
-    const { map } = e;
-
-    const eventMapId = map.get('mapId');
-
-    const scaleLineText = document.getElementById(`${eventMapId}-scaleControlLine`)?.querySelector('.ol-scale-line-inner')
-      ?.innerHTML as string;
-    const scaleBarText = document.getElementById(`${eventMapId}-scaleControlBar`)?.querySelector('.ol-scale-text')?.innerHTML as string;
-
-    setScaleValues([
-      { scaleId: '0', label: scaleLineText, borderBottom: true },
-      { scaleId: '1', label: scaleBarText, borderBottom: false },
-    ]);
-  };
-
-  const footerbarExpandCollapseListenerFunction = (payload: PayloadBaseClass) => {
-    if (payloadIsABoolean(payload)) setExpanded(payload.status);
-  };
+  // set the active (visible) or not active (hidden) from geolocator button click
+  const scaleValues: TypeScale[] = [
+    {
+      scaleId: '0',
+      label: scaleGraphic,
+      borderBottom: true,
+    },
+    {
+      scaleId: '1',
+      label: scaleNumeric,
+      borderBottom: false,
+    },
+  ];
 
   useEffect(() => {
     const { map } = api.maps[mapId];
@@ -135,20 +123,25 @@ export function Scale(): JSX.Element {
     map.addControl(scaleLine);
     map.addControl(scaleBar);
 
-    map.on('moveend', onMoveEnd);
-
-    // trigger the move end manually to load the map with the scale
-    setTimeout(() => onMoveEnd({ map: api.maps[mapId].map } as MapEvent), 0);
-
-    api.event.on(EVENT_NAMES.FOOTERBAR.EVENT_FOOTERBAR_EXPAND_COLLAPSE, footerbarExpandCollapseListenerFunction, mapId);
+    const unsub = getGeoViewStore(mapId).subscribe((curState, prevState) => {
+      // if currentMapCenterCoordinates changed, map move end event has been triggered
+      if (curState.mapState.currentMapCenterCoordinates !== prevState.mapState.currentMapCenterCoordinates) {
+        setLineWidth(
+          (document.getElementById(`${mapId}-scaleControlLine`)?.querySelector('.ol-scale-line-inner') as HTMLElement)?.style
+            .width as string
+        );
+        setScaleGraphic(document.getElementById(`${mapId}-scaleControlLine`)?.querySelector('.ol-scale-line-inner')?.innerHTML as string);
+        setScaleNumeric(document.getElementById(`${mapId}-scaleControlBar`)?.querySelector('.ol-scale-text')?.innerHTML as string);
+      }
+    });
 
     return () => {
       map.removeControl(scaleLine);
       map.removeControl(scaleBar);
-      map.un('moveend', onMoveEnd);
-      api.event.off(EVENT_NAMES.FOOTERBAR.EVENT_FOOTERBAR_EXPAND_COLLAPSE, mapId, footerbarExpandCollapseListenerFunction);
+      unsub();
     };
-  }, [mapId]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <Tooltip title={t('mapnav.scale')!} placement="top">
@@ -179,6 +172,7 @@ export function Scale(): JSX.Element {
               className={classes.scaleText}
               style={{
                 borderBottom: !scaleValues[scaleMode].borderBottom ? 'none' : '1px solid',
+                width: !scaleValues[scaleMode].borderBottom ? 'inherit' : lineWidth,
               }}
             >
               {scaleValues[scaleMode].label}
