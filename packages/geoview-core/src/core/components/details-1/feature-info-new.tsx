@@ -44,6 +44,13 @@ export function FeatureInfo({ mapId, features, currentFeatureIndex, selectedFeat
 
   const featureUid = getUid(feature.geometry);
 
+  console.log('----features ----', features);
+
+  console.log('seletcted features---', selectedFeatures);
+
+  selectedFeatures?.current.push('880');
+  selectedFeatures?.current.push('3893');
+
   const featureIconSrc = feature.featureIcon.toDataURL();
   const nameFieldValue = feature.fieldInfo[feature.nameField!]!.value as string;
   const featureInfoList: TypeFieldEntry[] = Object.keys(feature.fieldInfo).map((fieldName) => {

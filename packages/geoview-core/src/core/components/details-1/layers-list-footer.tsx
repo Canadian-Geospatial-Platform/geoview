@@ -20,7 +20,14 @@ import { TypeArrayOfLayerData, TypeLayerData } from './details';
 import { FeatureInfo } from './feature-info-new';
 import { PayloadBaseClass, api } from '@/app';
 import { EVENT_NAMES } from '@/api/events/event-types';
-import { payloadIsAFeatureHighlight, payloadIsAClearHighlights } from '@/api/events/payloads';
+import {
+  payloadIsAFeatureHighlight,
+  payloadIsAClearHighlights,
+  TypeArrayOfFeatureInfoEntries,
+  featureHighlightPayload,
+  clearHighlightsPayload,
+  TypeFeatureInfoEntry,
+} from '@/api/events/payloads';
 
 const getSxClasses = (isPanelHeaders = false) => {
   return {
@@ -58,6 +65,7 @@ export function LayersListFooter(props: TypeLayersListProps): JSX.Element {
   const { t } = useTranslation<string>();
   const [layerDataInfo, setLayerDataInfo] = useState<TypeLayerData | null>(null);
   const [currentFeatureIndex, setCurrentFeatureIndex] = useState<number>(0);
+  const [selectAllFeatures, setSelectAllFeatures] = useState<boolean>(false);
 
   const highlightCallbackFunction = (payload: PayloadBaseClass) => {
     if (payloadIsAFeatureHighlight(payload)) {
@@ -72,6 +80,20 @@ export function LayersListFooter(props: TypeLayersListProps): JSX.Element {
       }
       if (selectedFeatures.current.indexOf(payload.id) !== -1)
         selectedFeatures.current.splice(selectedFeatures.current.indexOf(payload.id), 1);
+    }
+  };
+
+  const handleSelectAllFeatures = (allFeatures: TypeArrayOfFeatureInfoEntries) => {
+    if (!selectAllFeatures) {
+      setSelectAllFeatures(true);
+      allFeatures.forEach((feature: TypeFeatureInfoEntry) => {
+        api.event.emit(featureHighlightPayload(EVENT_NAMES.FEATURE_HIGHLIGHT.EVENT_HIGHLIGHT_FEATURE, mapId, feature));
+      });
+    } else {
+      setSelectAllFeatures(false);
+      allFeatures.forEach((feature: TypeFeatureInfoEntry) => {
+        api.event.emit(clearHighlightsPayload(EVENT_NAMES.FEATURE_HIGHLIGHT.EVENT_HIGHLIGHT_CLEAR, mapId, getUid(feature.geometry)));
+      });
     }
   };
 
@@ -167,7 +189,9 @@ export function LayersListFooter(props: TypeLayersListProps): JSX.Element {
                   <Grid item xs={6}>
                     <div style={{ marginLeft: '26px' }}>
                       Feature {currentFeatureIndex + 1} of {layerDataInfo?.features.length}, select all features
-                      <Checkbox />
+                      <Tooltip title={t('details.highlightFeaturesOnMap')} placement="top" enterDelay={1000}>
+                        <Checkbox onChange={() => handleSelectAllFeatures(layerDataInfo?.features)} checked={selectAllFeatures} />
+                      </Tooltip>
                     </div>
                   </Grid>
                   <Grid item xs={6}>
@@ -201,7 +225,6 @@ export function LayersListFooter(props: TypeLayersListProps): JSX.Element {
                   selectedFeatures={selectedFeatures}
                   mapId={mapId}
                 />
-                {/* ))} */}
               </div>
             </>
           </Grid>

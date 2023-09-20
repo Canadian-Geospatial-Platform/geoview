@@ -71,7 +71,8 @@
     "clickOnMap": "Click on map",
     "nextFeatureBtn": "Next feature",
     "previousFeatureBtn": "Previous feature",
-    "selectAllfeature": "Select all features"
+    "selectAllfeature": "Select all features",
+    "highlightFeaturesOnMap": "Highlight features on map"
   },
   "lightbox": {
     "next": "Next",
