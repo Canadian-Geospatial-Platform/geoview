@@ -303,27 +303,41 @@ export class Layer {
           api.event.emit(GeoViewLayerPayload.createGeoviewLayerAddedPayload(`${this.mapId}/${geoviewLayer.geoviewLayerId}`, geoviewLayer));
         }
       });
-      geoviewLayer.gvLayers!.get('source').on('featuresloadend', () => {
-        if (geoviewLayer.getLayerConfig()) {
-          api.event.emit(
-            LayerSetPayload.createLayerSetChangeLayerStatusPayload(this.mapId, Layer.getLayerPath(geoviewLayer.getLayerConfig()!), 'loaded')
-          );
-        }
-      });
-      geoviewLayer.gvLayers!.get('source').on('imageloadend', () => {
-        if (geoviewLayer.getLayerConfig()) {
-          api.event.emit(
-            LayerSetPayload.createLayerSetChangeLayerStatusPayload(this.mapId, Layer.getLayerPath(geoviewLayer.getLayerConfig()!), 'loaded')
-          );
-        }
-      });
-      geoviewLayer.gvLayers!.get('source').on('tileloadend', () => {
-        if (geoviewLayer.getLayerConfig()) {
-          api.event.emit(
-            LayerSetPayload.createLayerSetChangeLayerStatusPayload(this.mapId, Layer.getLayerPath(geoviewLayer.getLayerConfig()!), 'loaded')
-          );
-        }
-      });
+      if (geoviewLayer.gvLayers!.get('source')) {
+        geoviewLayer.gvLayers!.get('source').on('featuresloadend', () => {
+          if (geoviewLayer.getLayerConfig()) {
+            api.event.emit(
+              LayerSetPayload.createLayerSetChangeLayerStatusPayload(
+                this.mapId,
+                Layer.getLayerPath(geoviewLayer.getLayerConfig()!),
+                'loaded'
+              )
+            );
+          }
+        });
+        geoviewLayer.gvLayers!.get('source').on('imageloadend', () => {
+          if (geoviewLayer.getLayerConfig()) {
+            api.event.emit(
+              LayerSetPayload.createLayerSetChangeLayerStatusPayload(
+                this.mapId,
+                Layer.getLayerPath(geoviewLayer.getLayerConfig()!),
+                'loaded'
+              )
+            );
+          }
+        });
+        geoviewLayer.gvLayers!.get('source').on('tileloadend', () => {
+          if (geoviewLayer.getLayerConfig()) {
+            api.event.emit(
+              LayerSetPayload.createLayerSetChangeLayerStatusPayload(
+                this.mapId,
+                Layer.getLayerPath(geoviewLayer.getLayerConfig()!),
+                'loaded'
+              )
+            );
+          }
+        });
+      }
       api.maps[this.mapId].map.addLayer(geoviewLayer.gvLayers!);
     }
   }
