@@ -1,5 +1,5 @@
 /* eslint-disable react/require-default-props */
-import React, { useEffect, useState, useRef, MutableRefObject, RefObject, Dispatch, SetStateAction } from 'react';
+import React, { useEffect, useState, useRef, MutableRefObject, RefObject } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useTheme, Theme } from '@mui/material/styles';
 import { transformExtent } from 'ol/proj';
@@ -7,26 +7,26 @@ import { Extent } from 'ol/extent';
 import {
   Box,
   Collapse,
-  ListItem,
-  ListItemButton,
+  // ListItem,
+  // ListItemButton,
   ListItemIcon,
   ListItemText,
   CloseIcon,
-  TodoIcon,
+  // TodoIcon,
   Tooltip,
-  VisibilityIcon,
-  VisibilityOffIcon,
+  // VisibilityIcon,
+  // VisibilityOffIcon,
   IconButton,
   Menu,
   MenuItem,
-  MoreVertIcon,
-  ExpandMoreIcon,
-  ExpandLessIcon,
+  // MoreVertIcon,
+  // ExpandMoreIcon,
+  // ExpandLessIcon,
   OpacityIcon,
   SliderBase,
   CheckIcon,
-  MoreHorizIcon,
-  BrowserNotSupportedIcon,
+  // MoreHorizIcon,
+  // BrowserNotSupportedIcon,
   Grid,
 } from '@/ui';
 import { api, EsriDynamic, payloadIsLegendInfo, NumberPayload, PayloadBaseClass } from '@/app';
@@ -37,14 +37,14 @@ import {
   isVectorLegend,
   isWmsLegend,
   isImageStaticLegend,
-  TypeWmsLegendStyle,
+  // TypeWmsLegendStyle,
 } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import {
   TypeClassBreakStyleConfig,
   TypeListOfLayerEntryConfig,
   TypeUniqueValueStyleConfig,
   TypeLayerEntryConfig,
-  TypeDisplayLanguage,
+  // TypeDisplayLanguage,
   TypeVectorLayerEntryConfig,
   TypeStyleGeometry,
   TypeVectorSourceInitialConfig,
@@ -54,7 +54,7 @@ import {
 } from '@/geo/map/map-schema-types';
 import { AbstractGeoViewVector } from '@/geo/layer/geoview-layers/vector/abstract-geoview-vector';
 import { disableScrolling } from '../../../utils/utilities';
-import { WMSStyleItem } from '../WMS-style-item';
+// import { WMSStyleItem } from '../WMS-style-item';
 
 const sxClasses = {
   expandableGroup: {
@@ -141,8 +141,8 @@ export interface TypeLegendItemDetailsProps {
   isRemoveable?: boolean;
   canSetOpacity?: boolean;
   isParentVisible?: boolean;
-  toggleParentVisible?: () => void;
-  expandAll?: boolean;
+  // toggleParentVisible?: () => void;
+  // expandAll?: boolean;
   hideAll?: boolean;
   canZoomTo?: boolean;
 }
@@ -161,13 +161,13 @@ export function LegendItemDetails(props: TypeLegendItemDetailsProps): JSX.Elemen
     isRemoveable,
     canSetOpacity,
     isParentVisible,
-    toggleParentVisible,
-    expandAll,
+    // toggleParentVisible,
+    // expandAll,
     hideAll,
     canZoomTo,
   } = props;
 
-  const { t, i18n } = useTranslation<string>();
+  const { t } = useTranslation<string>();
   const theme: Theme & {
     iconImg: React.CSSProperties;
   } = useTheme();
@@ -184,19 +184,19 @@ export function LegendItemDetails(props: TypeLegendItemDetailsProps): JSX.Elemen
     api.maps[mapId].layer.registeredLayers[clusterLayerPath]?.initialSettings?.visible !== 'no'
   );
   const [isOpacityOpen, setOpacityOpen] = useState(false);
-  const [isGroupOpen, setGroupOpen] = useState(true);
+  // const [isGroupOpen, setGroupOpen] = useState(true);
   const [isLegendOpen, setLegendOpen] = useState(true);
   const [groupItems, setGroupItems] = useState<TypeListOfLayerEntryConfig>([]);
-  const [WMSStyles, setWMSStyles] = useState<TypeWmsLegendStyle[]>([]);
-  const [currentWMSStyle, setCurrentWMSStyle] = useState<string>();
+  // const [WMSStyles, setWMSStyles] = useState<TypeWmsLegendStyle[]>([]);
+  // const [currentWMSStyle, setCurrentWMSStyle] = useState<string>();
   const [iconType, setIconType] = useState<string | null>(null);
   const [iconImg, setIconImg] = useState<string | null>(null);
-  const [iconImgStacked, setIconImgStacked] = useState<string | null>(null);
+  // const [iconImgStacked, setIconImgStacked] = useState<string | null>(null);
   const [iconList, setIconList] = useState<string[] | null>(null);
   const [labelList, setLabelList] = useState<string[] | null>(null);
   const [geometryLayerConfig, setLayerConfig] = useState<TypeLayerEntryConfig | null>(null);
   const [layerGeometryKey, setGeometryKey] = useState<TypeStyleGeometry | undefined>(undefined);
-  const [layerName, setLayerName] = useState<string>('');
+  // const [layerName, setLayerName] = useState<string>('');
   const [menuAnchorElement, setMenuAnchorElement] = useState<null | HTMLElement>(null);
   const [opacity, setOpacity] = useState<number>(1);
 
@@ -231,10 +231,10 @@ export function LegendItemDetails(props: TypeLegendItemDetailsProps): JSX.Elemen
       if (layerLegend.legend === null) setIconImg('no data');
       // WMS layers just return a string and get styles
       if (isWmsLegend(layerLegend) || isImageStaticLegend(layerLegend)) {
-        if (isWmsLegend(layerLegend) && layerLegend.styles) {
-          setWMSStyles(layerLegend.styles);
-          setCurrentWMSStyle(layerLegend.styles[0].name);
-        }
+        // if (isWmsLegend(layerLegend) && layerLegend.styles) {
+        // setWMSStyles(layerLegend.styles);
+        // setCurrentWMSStyle(layerLegend.styles[0].name);
+        // }
         setIconType('simple');
         if (layerLegend.legend) setIconImg(layerLegend.legend?.toDataURL());
       } else if (isVectorLegend(layerLegend) && layerLegend.legend) {
@@ -245,7 +245,7 @@ export function LegendItemDetails(props: TypeLegendItemDetailsProps): JSX.Elemen
               return canvas.toDataURL();
             });
             if (iconImageList.length > 0) setIconImg(iconImageList[0]);
-            if (iconImageList.length > 1) setIconImgStacked(iconImageList[1]);
+            // if (iconImageList.length > 1) setIconImgStacked(iconImageList[1]);
             if (styleRepresentation.defaultCanvas) iconImageList.push(styleRepresentation.defaultCanvas.toDataURL());
             if (styleRepresentation.clusterCanvas) iconImageList.push(styleRepresentation.clusterCanvas.toDataURL());
             setIconList(iconImageList);
@@ -303,22 +303,22 @@ export function LegendItemDetails(props: TypeLegendItemDetailsProps): JSX.Elemen
     }
   };
 
-  const getLayerName = () => {
-    if (layerConfigEntry) {
-      if (layerConfigEntry.layerName && layerConfigEntry.layerName[i18n.language as TypeDisplayLanguage]) {
-        setLayerName(layerConfigEntry.layerName[i18n.language as TypeDisplayLanguage] ?? '');
-      } else if (t('legend.unknown')) {
-        setLayerName(t('legend.unknown')!);
-      }
-    } else if (geoviewLayerInstance?.geoviewLayerName[i18n.language as TypeDisplayLanguage]) {
-      setLayerName(geoviewLayerInstance.geoviewLayerName[i18n.language as TypeDisplayLanguage] ?? '');
-    } else if (t('legend.unknown')) {
-      setLayerName(t('legend.unknown')!);
-    }
-  };
+  // const getLayerName = () => {
+  //   if (layerConfigEntry) {
+  //     if (layerConfigEntry.layerName && layerConfigEntry.layerName[i18n.language as TypeDisplayLanguage]) {
+  //       setLayerName(layerConfigEntry.layerName[i18n.language as TypeDisplayLanguage] ?? '');
+  //     } else if (t('legend.unknown')) {
+  //       setLayerName(t('legend.unknown')!);
+  //     }
+  //   } else if (geoviewLayerInstance?.geoviewLayerName[i18n.language as TypeDisplayLanguage]) {
+  //     setLayerName(geoviewLayerInstance.geoviewLayerName[i18n.language as TypeDisplayLanguage] ?? '');
+  //   } else if (t('legend.unknown')) {
+  //     setLayerName(t('legend.unknown')!);
+  //   }
+  // };
 
   useEffect(() => {
-    getLayerName();
+    // getLayerName();
     const isGroup = getGroupsDetails();
     if (!isGroup) {
       setOpacity(geoviewLayerInstance.getOpacity() ?? 1);
@@ -345,9 +345,9 @@ export function LegendItemDetails(props: TypeLegendItemDetailsProps): JSX.Elemen
     mapId
   );
 
-  useEffect(() => {
-    if (expandAll !== undefined) setGroupOpen(expandAll);
-  }, [expandAll]);
+  // useEffect(() => {
+  //   if (expandAll !== undefined) setGroupOpen(expandAll);
+  // }, [expandAll]);
 
   useEffect(() => {
     if (hideAll !== undefined) setChecked(!hideAll);
@@ -381,34 +381,34 @@ export function LegendItemDetails(props: TypeLegendItemDetailsProps): JSX.Elemen
   /**
    * Handle expand/shrink of layer groups.
    */
-  const handleExpandGroupClick = () => {
-    setGroupOpen(!isGroupOpen);
-  };
+  // const handleExpandGroupClick = () => {
+  //   setGroupOpen(!isGroupOpen);
+  // };
 
   /**
    * Handle expand/shrink of legends.
    */
-  const handleLegendClick = () => {
-    setLegendOpen(!isLegendOpen);
-  };
+  // const handleLegendClick = () => {
+  //   setLegendOpen(!isLegendOpen);
+  // };
 
   /**
    * Handle view/hide layers.
    */
-  const handleToggleLayer = () => {
-    if (isParentVisible !== undefined) {
-      if (toggleParentVisible !== undefined && isParentVisible === false) {
-        toggleParentVisible();
-        if (!isChecked) setChecked(!isChecked);
-        return;
-      }
-    }
-    setChecked(!isChecked);
-  };
+  // const handleToggleLayer = () => {
+  //   if (isParentVisible !== undefined) {
+  //     if (toggleParentVisible !== undefined && isParentVisible === false) {
+  //       toggleParentVisible();
+  //       if (!isChecked) setChecked(!isChecked);
+  //       return;
+  //     }
+  //   }
+  //   setChecked(!isChecked);
+  // };
 
-  const handleMoreClick = (event: React.MouseEvent<HTMLElement>) => {
-    setMenuAnchorElement(event.currentTarget);
-  };
+  // const handleMoreClick = (event: React.MouseEvent<HTMLElement>) => {
+  //   setMenuAnchorElement(event.currentTarget);
+  // };
 
   const handleCloseMenu = () => {
     setMenuAnchorElement(null);
@@ -447,11 +447,11 @@ export function LegendItemDetails(props: TypeLegendItemDetailsProps): JSX.Elemen
     handleCloseMenu();
   };
 
-  const handleStackIcon = (e: React.KeyboardEvent<HTMLElement>) => {
-    if (e.key === 'Enter') {
-      handleLegendClick();
-    }
-  };
+  // const handleStackIcon = (e: React.KeyboardEvent<HTMLElement>) => {
+  //   if (e.key === 'Enter') {
+  //     handleLegendClick();
+  //   }
+  // };
 
   const handleZoomTo = () => {
     let bounds = api.maps[mapId].layer.geoviewLayers[layerId].calculateBounds(path);

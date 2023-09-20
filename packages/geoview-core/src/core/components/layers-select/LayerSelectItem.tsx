@@ -59,7 +59,7 @@ import { AbstractGeoViewVector } from '@/geo/layer/geoview-layers/vector/abstrac
 import { disableScrolling } from '../../utils/utilities';
 import { WMSStyleItem } from './WMS-style-item';
 // import { TypeLegendItemProps } from '../legend-2/types';
-import {LayerSelectItemProps} from './types';
+import { LayerSelectItemProps } from './types';
 
 const sxClasses = {
   expandableGroup: {
@@ -170,7 +170,7 @@ export function LayerSelectItem(props: LayerSelectItemProps): JSX.Element {
 
   const [isClusterToggleEnabled, setIsClusterToggleEnabled] = useState(false);
   const [isChecked, setChecked] = useState<boolean>(
-    api.maps[mapId].layer.registeredLayers[clusterLayerPath]?.initialSettings?.visible !== 'no' //eric added
+    api.maps[mapId].layer.registeredLayers[clusterLayerPath]?.initialSettings?.visible !== 'no' // eric added
     // api.maps(mapId).layer.registeredLayers[clusterLayerPath]?.initialSettings?.visible !== false //original
   );
   // const [isOpacityOpen, setOpacityOpen] = useState(false); //eric added, have to uncomment
@@ -183,30 +183,28 @@ export function LayerSelectItem(props: LayerSelectItemProps): JSX.Element {
   const [iconImg, setIconImg] = useState<string | null>(null);
   const [iconImgStacked, setIconImgStacked] = useState<string | null>(null);
   const [iconList, setIconList] = useState<string[] | null>(null);
-  const [labelList, setLabelList] = useState<string[] | null>(null); //eric added, have to uncomment
+  const [labelList, setLabelList] = useState<string[] | null>(null); // eric added, have to uncomment
   // const [setLabelList] = useState<string[] | null>(null); //original
   // labelList,
-  const [geometryLayerConfig, setLayerConfig] = useState<TypeLayerEntryConfig | null>(null); //eric added, have to uncomment
+  const [geometryLayerConfig, setLayerConfig] = useState<TypeLayerEntryConfig | null>(null); // eric added, have to uncomment
   // const [setLayerConfig] = useState<TypeLayerEntryConfig | null>(null); //original
   // geometryLayerConfig,
-  const [layerGeometryKey, setGeometryKey] = useState<TypeStyleGeometry | undefined>(undefined); //eric added, have to uncomment
+  const [layerGeometryKey, setGeometryKey] = useState<TypeStyleGeometry | undefined>(undefined); // eric added, have to uncomment
   // const [setGeometryKey] = useState<TypeStyleGeometry | undefined>(undefined); //original
   // layerGeometryKey,
   const [layerName, setLayerName] = useState<string>('');
   const [menuAnchorElement, setMenuAnchorElement] = useState<null | HTMLElement>(null);
-  const [zoom, setZoom] = useState<number>(api.maps[mapId].currentZoom); //Eric added, need to uncomment, map(s)
+  const [zoom, setZoom] = useState<number>(api.maps[mapId].currentZoom); // Eric added, need to uncomment, map(s)
   // const [zoom, setZoom] = useState<number>(api.map(mapId).currentZoom); //original
   const splitZoom =
-    (api.maps[mapId].layer.registeredLayers[clusterLayerPath]?.source as TypeVectorSourceInitialConfig)?.cluster?.splitZoom || 7; //Eric added, need to uncomment, map(s)
-    // (api.map(mapId).layer.registeredLayers[clusterLayerPath]?.source as TypeVectorSourceInitialConfig)?.cluster?.splitZoom || 7; //original
+    (api.maps[mapId].layer.registeredLayers[clusterLayerPath]?.source as TypeVectorSourceInitialConfig)?.cluster?.splitZoom || 7; // Eric added, need to uncomment, map(s)
+  // (api.map(mapId).layer.registeredLayers[clusterLayerPath]?.source as TypeVectorSourceInitialConfig)?.cluster?.splitZoom || 7; //original
 
   const closeIconRef = useRef() as RefObject<HTMLButtonElement>;
   const stackIconRef = useRef() as MutableRefObject<HTMLDivElement | undefined>;
   const maxIconRef = useRef() as RefObject<HTMLButtonElement>;
   const menuOpen = Boolean(menuAnchorElement);
 
-
-  
   const getGroupsDetails = (): boolean => {
     let isGroup = false;
     if (layerConfigEntry) {
@@ -269,10 +267,11 @@ export function LayerSelectItem(props: LayerSelectItemProps): JSX.Element {
                   geometryKey = key as TypeStyleGeometry;
                 }
               });
-              Object.keys(api.maps[mapId].layer.registeredLayers).forEach((layerPath) => { // eric added
-              // Object.keys(api.map(mapId).layer.registeredLayers).forEach((layerPath) => { //original
+              Object.keys(api.maps[mapId].layer.registeredLayers).forEach((layerPath) => {
+                // eric added
+                // Object.keys(api.map(mapId).layer.registeredLayers).forEach((layerPath) => { //original
                 if (layerPath.startsWith(geoviewLayerId)) {
-                  const layerConfig = api.maps[mapId].layer.registeredLayers[layerPath] as TypeVectorLayerEntryConfig; //eric added
+                  const layerConfig = api.maps[mapId].layer.registeredLayers[layerPath] as TypeVectorLayerEntryConfig; // eric added
                   // const layerConfig = api.map(mapId).layer.registeredLayers[layerPath] as TypeVectorLayerEntryConfig; //original
                   if (layerConfig && layerConfig.style && geometryKey) {
                     const geometryStyle = layerConfig.style[geometryKey as TypeStyleGeometry];
@@ -325,6 +324,7 @@ export function LayerSelectItem(props: LayerSelectItemProps): JSX.Element {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
   api.event.on(
     api.eventNames.GET_LEGENDS.LEGEND_INFO,
     (payload) => {
@@ -406,12 +406,12 @@ export function LayerSelectItem(props: LayerSelectItemProps): JSX.Element {
     setMenuAnchorElement(null);
   };
   const handleRemoveLayer = () => {
-    api.maps[mapId].layer.removeGeoviewLayer(geoviewLayerInstance); //eric added
+    api.maps[mapId].layer.removeGeoviewLayer(geoviewLayerInstance); // eric added
     // api.map(mapId).layer.removeGeoviewLayer(geoviewLayerInstance); //original
     // NOTE: parent component needs to deal with removing this legend-item when recieving the layer remove event
     handleCloseMenu();
   };
-  //eric added
+  // eric added
   const handleClusterToggle = () => {
     if (api.maps[mapId].layer.registeredLayers[clusterLayerPath]?.gvLayer) {
       api.maps[mapId].layer.registeredLayers[clusterLayerPath]?.gvLayer!.setVisible(
@@ -421,21 +421,20 @@ export function LayerSelectItem(props: LayerSelectItemProps): JSX.Element {
         !api.maps[mapId].layer.registeredLayers[unclusterLayerPath]?.gvLayer!.getVisible()
       );
     }
-    //original
-  // const handleClusterToggle = () => {
-  //   if (api.map(mapId).layer.registeredLayers[clusterLayerPath]?.gvLayer) {
-  //     api
-  //       .map(mapId)
-  //       .layer.registeredLayers[clusterLayerPath]?.gvLayer!.setVisible(
-  //         !api.map(mapId).layer.registeredLayers[clusterLayerPath]?.gvLayer!.getVisible()
-  //       );
-  //     api
-  //       .map(mapId)
-  //       .layer.registeredLayers[unclusterLayerPath]?.gvLayer!.setVisible(
-  //         !api.map(mapId).layer.registeredLayers[unclusterLayerPath]?.gvLayer!.getVisible()
-  //       );
-  //   }
-  
+    // original
+    // const handleClusterToggle = () => {
+    //   if (api.map(mapId).layer.registeredLayers[clusterLayerPath]?.gvLayer) {
+    //     api
+    //       .map(mapId)
+    //       .layer.registeredLayers[clusterLayerPath]?.gvLayer!.setVisible(
+    //         !api.map(mapId).layer.registeredLayers[clusterLayerPath]?.gvLayer!.getVisible()
+    //       );
+    //     api
+    //       .map(mapId)
+    //       .layer.registeredLayers[unclusterLayerPath]?.gvLayer!.setVisible(
+    //         !api.map(mapId).layer.registeredLayers[unclusterLayerPath]?.gvLayer!.getVisible()
+    //       );
+    //   }
 
     setIsClusterToggleEnabled(!isClusterToggleEnabled);
     handleCloseMenu();
@@ -448,7 +447,7 @@ export function LayerSelectItem(props: LayerSelectItemProps): JSX.Element {
   const handleZoomTo = () => {
     let bounds = api.maps[mapId].layer.geoviewLayers[layerId].calculateBounds(path);
     let transformedBounds: Extent | undefined;
-    if (bounds) transformedBounds = transformExtent(bounds, `EPSG:${api.maps[mapId].currentProjection}`, `EPSG:4326`); //eric added
+    if (bounds) transformedBounds = transformExtent(bounds, `EPSG:${api.maps[mapId].currentProjection}`, `EPSG:4326`); // eric added
     // if (bounds) transformedBounds = transformExtent(bounds, `EPSG:${api.map(mapId).currentProjection}`, `EPSG:4326`); //original
     if (
       !bounds ||
@@ -458,7 +457,7 @@ export function LayerSelectItem(props: LayerSelectItemProps): JSX.Element {
         transformedBounds[2] === 180 &&
         transformedBounds[3] === 90)
     )
-      bounds = api.maps[mapId].getView().get('extent'); //eric added
+      bounds = api.maps[mapId].getView().get('extent'); // eric added
     if (bounds) api.maps[mapId].zoomToExtent(bounds);
     //   bounds = api.map(mapId).getView().get('extent'); //original
     // if (bounds) api.map(mapId).zoomToExtent(bounds);
@@ -486,9 +485,8 @@ export function LayerSelectItem(props: LayerSelectItemProps): JSX.Element {
     }
   }, [iconList, iconType]);
   useEffect(() => {
-    const source = (api.maps[mapId].layer.getGeoviewLayerById(layerId) as AbstractGeoViewVector)?.activeLayer //eric added
-    // const source = (api.map(mapId).layer.getGeoviewLayerById(layerId) as AbstractGeoViewVector)?.activeLayer //original
-      ?.source as TypeVectorSourceInitialConfig;
+    const source = // const source = (api.map(mapId).layer.getGeoviewLayerById(layerId) as AbstractGeoViewVector)?.activeLayer //original
+      (api.maps[mapId].layer.getGeoviewLayerById(layerId) as AbstractGeoViewVector)?.activeLayer?.source as TypeVectorSourceInitialConfig; // eric added
     setIsClusterToggleEnabled(source?.cluster?.enable ?? false);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

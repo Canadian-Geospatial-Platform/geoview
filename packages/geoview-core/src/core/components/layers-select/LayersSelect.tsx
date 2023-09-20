@@ -19,13 +19,13 @@ export interface LayersSelectProps {
 
 export function LayersSelect(props: LayersSelectProps): JSX.Element {
   const { layerIds, isRemoveable, canSetOpacity, expandAll, hideAll, mapId, canSort, onOpenDetails } = props;
-  // const [selectedLayer, setSelectedLayer] = useState<TypeLegendItemProps | null>(null);
+  // const [selectedLayer, setSelectedLayer] = useState<LayerSelectItemProps | null>(null);
 
   const legendItems = layerIds
-    .filter((layerId) => api.maps[mapId].layer.geoviewLayers[layerId]) //eric added
+    .filter((layerId) => api.maps[mapId].layer.geoviewLayers[layerId]) // eric added
     // .filter((layerId) => api.map(mapId).layer.geoviewLayers[layerId]) //original
     .map((layerId) => {
-      const geoviewLayerInstance = api.maps[mapId].layer.geoviewLayers[layerId]; //eric added
+      const geoviewLayerInstance = api.maps[mapId].layer.geoviewLayers[layerId]; // eric added
       // const geoviewLayerInstance = api.map(mapId).layer.geoviewLayers[layerId]; //original
 
       return (
