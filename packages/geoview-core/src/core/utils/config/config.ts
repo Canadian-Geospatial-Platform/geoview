@@ -37,6 +37,24 @@ export class Config {
 
     // Instanciate the configuration validator.
     this.configValidation = new ConfigValidation();
+
+    // get the id from the map element
+    const mapId = this.mapElement.getAttribute('id');
+
+    // update map id if provided in map element
+    if (mapId) this.mapId = mapId;
+
+    // get the triggerReadyCallback from the map element
+    const triggerReadyCallback = this.mapElement.getAttribute('triggerReadyCallback');
+
+    // update triggerReadyCallback if provided in map element
+    this.triggerReadyCallback = triggerReadyCallback ? triggerReadyCallback.toLowerCase() === 'true' : false;
+
+    // get the display language from the map element
+    const displayLanguage = this.mapElement.getAttribute('data-lang');
+
+    // update display language if provided in map element
+    this.displayLanguage = (displayLanguage && displayLanguage.toLowerCase() === 'fr' ? 'fr' : 'en') as TypeDisplayLanguage;
   }
 
   /** ***************************************************************************************************************************
@@ -91,31 +109,13 @@ export class Config {
   }
 
   /** ***************************************************************************************************************************
-   * Get map properties configuration from a function call.
+   * Get a valid map configuration.
    *
-   * @param {TypeMapFeaturesConfig} mapFeaturesConfig Config object passed in the function.
+   * @param {TypeMapFeaturesConfig} mapFeaturesConfig Config object to validate.
    *
    * @returns {TypeMapFeaturesConfig} A valid map config.
    */
-  getMapConfigFromFunc(mapFeaturesConfig: TypeMapFeaturesConfig): TypeMapFeaturesConfig | undefined {
-    // get the id from the map element
-    const mapId = this.mapElement.getAttribute('id');
-
-    // update map id if provided in map element
-    if (mapId) this.mapId = mapId;
-
-    // get the triggerReadyCallback from the map element
-    const triggerReadyCallback = this.mapElement.getAttribute('triggerReadyCallback');
-
-    // update triggerReadyCallback if provided in map element
-    if (triggerReadyCallback) this.triggerReadyCallback = triggerReadyCallback === 'true';
-
-    // get the display language from the map element
-    const displayLanguage = this.mapElement.getAttribute('data-lang');
-
-    // update display language if provided in map element
-    if (displayLanguage) this.displayLanguage = displayLanguage as TypeDisplayLanguage;
-
+  getValidMapConfig(mapFeaturesConfig: TypeMapFeaturesConfig): TypeMapFeaturesConfig {
     if (mapFeaturesConfig?.map?.listOfGeoviewLayerConfig) {
       mapFeaturesConfig.map.listOfGeoviewLayerConfig.forEach((geoviewLayerEntry) => {
         if (Object.keys(CONST_LAYER_ENTRY_TYPE).includes(geoviewLayerEntry.geoviewLayerType))
@@ -127,7 +127,7 @@ export class Config {
   }
 
   /** ***************************************************************************************************************************
-   * Initialize all layer entry type fields accordingly to the GeoView layer type..
+   * Initialize all layer entry type fields accordingly to the GeoView layer type.
    * @param {TypeListOfLayerEntryConfig} listOfLayerEntryConfig The list of layer entry configuration to adjust.
    * @param {TypeGeoviewLayerType} geoviewLayerType The GeoView layer type.
    */
@@ -149,24 +149,6 @@ export class Config {
    * @returns {Promise<TypeMapFeaturesConfig | undefined>} The initialized valid map config.
    */
   async initializeMapConfig(): Promise<TypeMapFeaturesConfig | undefined> {
-    // get the id from the map element
-    const mapId = this.mapElement.getAttribute('id');
-
-    // update map id if provided in map element
-    if (mapId) this.mapId = mapId;
-
-    // get the triggerReadyCallback from the map element
-    const triggerReadyCallback = this.mapElement.getAttribute('triggerReadyCallback');
-
-    // update triggerReadyCallback if provided in map element
-    if (triggerReadyCallback) this.triggerReadyCallback = triggerReadyCallback === 'true';
-
-    // get the display language from the map element
-    const displayLanguage = this.mapElement.getAttribute('data-lang');
-
-    // update display language if provided in map element
-    if (displayLanguage) this.displayLanguage = displayLanguage as TypeDisplayLanguage;
-
     // create a new config object to store provided config by user
     let mapFeaturesConfig: TypeMapFeaturesConfig | undefined;
 
@@ -192,16 +174,9 @@ export class Config {
 
     // NOTE: URL config has precedence on JSON file config that has precedence on inline config
     if (!mapFeaturesConfig) {
-      console.log(`- Map: ${mapId} - Empty JSON configuration object, using default -`);
+      console.log(`- Map: ${this.mapId} - Empty JSON configuration object, using default -`);
     }
 
-    if (mapFeaturesConfig?.map?.listOfGeoviewLayerConfig) {
-      mapFeaturesConfig.map.listOfGeoviewLayerConfig.forEach((geoviewLayerEntry) => {
-        if (Object.keys(CONST_LAYER_ENTRY_TYPE).includes(geoviewLayerEntry.geoviewLayerType))
-          this.setLayerEntryType(geoviewLayerEntry.listOfLayerEntryConfig!, geoviewLayerEntry.geoviewLayerType);
-        else throw new Error(`Invalid GeoView Layer Type ${geoviewLayerEntry.geoviewLayerType}`);
-      });
-    }
-    return this.configValidation.validateMapConfigAgainstSchema(mapFeaturesConfig);
+    return this.getValidMapConfig(mapFeaturesConfig!);
   }
 }

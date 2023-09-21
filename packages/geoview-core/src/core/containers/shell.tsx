@@ -1,5 +1,5 @@
 /* eslint-disable react/jsx-props-no-spreading */
-import { useEffect, useState, useCallback, Fragment } from 'react';
+import { useEffect, useState, useContext, useCallback, Fragment } from 'react';
 
 import { useTranslation } from 'react-i18next';
 
@@ -19,8 +19,14 @@ import { api } from '@/app';
 import { EVENT_NAMES } from '@/api/events/event-types';
 
 import { Modal, Snackbar } from '@/ui';
-import { PayloadBaseClass, payloadIsAMapComponent, payloadIsAModal } from '@/api/events/payloads';
-import { TypeMapFeaturesConfig } from '../types/global-types';
+import {
+  PayloadBaseClass,
+  mapConfigPayload,
+  payloadIsAMapComponent,
+  payloadIsAModal,
+  payloadIsAmapFeaturesConfig,
+} from '@/api/events/payloads';
+import { MapContext } from '@/core/app-start';
 
 const useStyles = makeStyles((theme) => {
   return {
@@ -66,7 +72,6 @@ const useStyles = makeStyles((theme) => {
  */
 interface ShellProps {
   shellId: string;
-  mapFeaturesConfig: TypeMapFeaturesConfig;
 }
 
 /**
@@ -75,7 +80,9 @@ interface ShellProps {
  * @returns {JSX.Element} the shell component
  */
 export function Shell(props: ShellProps): JSX.Element {
-  const { shellId, mapFeaturesConfig } = props;
+  const { shellId } = props;
+  const mapContext = useContext(MapContext);
+  const mapFeaturesConfig = mapContext.mapFeaturesConfig!;
 
   const classes = useStyles();
 
@@ -87,7 +94,7 @@ export function Shell(props: ShellProps): JSX.Element {
   // render additional components if added by api
   const [components, setComponents] = useState<Record<string, JSX.Element>>({});
 
-  const [, setUpdate] = useState<number>(0);
+  const [update, setUpdate] = useState<number>(0);
 
   /**
    * Set the focus trap
@@ -106,7 +113,7 @@ export function Shell(props: ShellProps): JSX.Element {
     });
   }, []);
 
-  const mapAddedComponentListenerFunction = (payload: PayloadBaseClass) => {
+  const mapAddComponentHandler = (payload: PayloadBaseClass) => {
     if (payloadIsAMapComponent(payload)) {
       setComponents((tempComponents) => ({
         ...tempComponents,
@@ -117,9 +124,9 @@ export function Shell(props: ShellProps): JSX.Element {
 
   useEffect(() => {
     // listen to adding a new component events
-    api.event.on(EVENT_NAMES.MAP.EVENT_MAP_ADD_COMPONENT, mapAddedComponentListenerFunction, shellId);
+    api.event.on(EVENT_NAMES.MAP.EVENT_MAP_ADD_COMPONENT, mapAddComponentHandler, shellId);
 
-    const mapRemoveComponentListenerFunction = (payload: PayloadBaseClass) => {
+    const mapRemoveComponentHandler = (payload: PayloadBaseClass) => {
       if (payloadIsAMapComponent(payload)) {
         const tempComponents: Record<string, JSX.Element> = { ...components };
         delete tempComponents[payload.mapComponentId];
@@ -131,25 +138,37 @@ export function Shell(props: ShellProps): JSX.Element {
     };
 
     // listen to removing a component events
-    api.event.on(EVENT_NAMES.MAP.EVENT_MAP_REMOVE_COMPONENT, mapRemoveComponentListenerFunction, shellId);
+    api.event.on(EVENT_NAMES.MAP.EVENT_MAP_REMOVE_COMPONENT, mapRemoveComponentHandler, shellId);
 
-    const modalCreateListenerFunction = (payload: PayloadBaseClass) => {
+    const modalCreateHandler = (payload: PayloadBaseClass) => {
       if (payloadIsAModal(payload)) updateShell();
     };
 
     // CHANGED
-    api.event.on(EVENT_NAMES.MODAL.EVENT_MODAL_CREATE, modalCreateListenerFunction, shellId);
+    api.event.on(EVENT_NAMES.MODAL.EVENT_MODAL_CREATE, modalCreateHandler, shellId);
+
+    // Reload
+    const mapReloadHandler = (payload: PayloadBaseClass) => {
+      if (payloadIsAmapFeaturesConfig(payload)) {
+        mapContext.mapFeaturesConfig = payload.mapFeaturesConfig;
+        api.event.emit(mapConfigPayload(EVENT_NAMES.MAP.EVENT_MAP_RELOAD, `${shellId}/delete_old_map`, payload.mapFeaturesConfig));
+        updateShell();
+      }
+    };
+
+    api.event.on(EVENT_NAMES.MAP.EVENT_MAP_RELOAD, mapReloadHandler, shellId);
 
     return () => {
-      api.event.off(EVENT_NAMES.MAP.EVENT_MAP_ADD_COMPONENT, shellId, mapAddedComponentListenerFunction);
-      api.event.off(EVENT_NAMES.MAP.EVENT_MAP_REMOVE_COMPONENT, shellId, mapRemoveComponentListenerFunction);
-      api.event.off(EVENT_NAMES.MODAL.EVENT_MODAL_CREATE, shellId, modalCreateListenerFunction);
+      api.event.off(EVENT_NAMES.MAP.EVENT_MAP_ADD_COMPONENT, shellId, mapAddComponentHandler);
+      api.event.off(EVENT_NAMES.MAP.EVENT_MAP_REMOVE_COMPONENT, shellId, mapRemoveComponentHandler);
+      api.event.off(EVENT_NAMES.MODAL.EVENT_MODAL_CREATE, shellId, modalCreateHandler);
+      api.event.off(EVENT_NAMES.MAP.EVENT_MAP_RELOAD, shellId, mapReloadHandler);
     };
-  }, [components, shellId, updateShell]);
+  }, [components, shellId, updateShell, mapContext, mapFeaturesConfig]);
 
   return (
     <FocusTrap active={activeTrap} focusTrapOptions={{ escapeDeactivates: false }}>
-      <div id={`shell-${shellId}`} className={classes.shell}>
+      <div id={`shell-${shellId}`} className={classes.shell} key={update}>
         <a id={`toplink-${shellId}`} href={`#bottomlink-${shellId}`} className={classes.skip} style={{ top: '0px' }}>
           {t('keyboardnav.start')}
         </a>
