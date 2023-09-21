@@ -127,26 +127,6 @@ export function Map(mapFeaturesConfig: TypeMapFeaturesConfig): JSX.Element {
     }
   }
 
-  /**
-   * Map pointer move handler
-   * @param {MapEvent} event the map pointer move event
-   */
-  function mapPointerMove(event: MapEvent): void {
-    if (mapInteraction !== 'static') {
-      const coordinates: TypeMapMouseInfo = {
-        projected: (event as MapBrowserEvent<UIEvent>).coordinate,
-        pixel: (event as MapBrowserEvent<UIEvent>).pixel,
-        lnglat: toLonLat((event as MapBrowserEvent<UIEvent>).coordinate, `EPSG:${api.maps[mapId].currentProjection}`),
-        dragging: (event as MapBrowserEvent<UIEvent>).dragging,
-      };
-
-      api.maps[mapId].pointerPosition = coordinates;
-
-      // emit the pointer move map position
-      api.event.emit(mapMouseEventPayload(EVENT_NAMES.MAP.EVENT_MAP_POINTER_MOVE, mapId, coordinates));
-    }
-  }
-
   const initCGPVMap = (cgpvMap: OLMap) => {
     cgpvMap.set('mapId', mapId);
 
@@ -167,7 +147,6 @@ export function Map(mapFeaturesConfig: TypeMapFeaturesConfig): JSX.Element {
     const setMapEvents = () => {
       if (api.maps[mapId] !== undefined) {
         cgpvMap.on('singleclick', mapSingleClick);
-        cgpvMap.on('pointermove', mapPointerMove);
         cgpvMap.getView().on('change:resolution', mapZoomEnd);
 
         clearInterval(intervalMap);

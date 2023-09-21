@@ -5,6 +5,8 @@ import { useTheme, Theme } from '@mui/material/styles';
 
 import { getUid } from 'ol/util';
 
+import { getGeoViewStore } from '@/core/stores/stores-managers';
+
 import { Box } from '@/ui';
 import { api, payloadIsAMapMouseEvent } from '@/app';
 import { MapContext } from '@/core/app-start';
@@ -52,8 +54,8 @@ export function HoverTooltip(): JSX.Element {
     iconImg: React.CSSProperties;
   } = useTheme();
 
+  // internal component state
   const [pixel, setPixel] = useState<[number, number]>([0, 0]);
-
   const [tooltipValue, setTooltipValue] = useState<string>('');
   const [tooltipIcon, setTooltipIcon] = useState<string>('');
   const [showTooltip, setShowTooltip] = useState<boolean>(false);
@@ -99,19 +101,6 @@ export function HoverTooltip(): JSX.Element {
     }
   };
 
-  const mapPointerMoveListenerFunction = (payload: PayloadBaseClass) => {
-    if (payloadIsAMapMouseEvent(payload)) {
-      if (payload.coordinates.dragging) {
-        setShowTooltip(false);
-        setTooltipValue('');
-      }
-
-      setPixel(payload.coordinates.pixel as [number, number]);
-    }
-    setShowTooltip(false);
-    setTooltipValue('');
-  };
-
   const mapSingleClickListenerFunction = (payload: PayloadBaseClass) => {
     if (payloadIsAMapMouseEvent(payload)) {
       selectedFeature.current = undefined;
@@ -121,8 +110,14 @@ export function HoverTooltip(): JSX.Element {
   };
 
   useEffect(() => {
-    // listen to pointer move on map events
-    api.event.on(EVENT_NAMES.MAP.EVENT_MAP_POINTER_MOVE, mapPointerMoveListenerFunction, mapId);
+    const unsubA = getGeoViewStore(mapId).subscribe((curState, prevState) => {
+      // if pointerPosition changed, pointer move event has been triggered
+      if (curState.mapState.pointerPosition !== prevState.mapState.pointerPosition) {
+        setShowTooltip(false);
+        setTooltipValue('');
+        setPixel(curState.mapState.pointerPosition!.pixel as [number, number]);
+      }
+    });
 
     // listen to hover query done event
     api.event.on(EVENT_NAMES.GET_FEATURE_INFO.HOVER_QUERY_DONE, hoverQueryDoneListenerFunction, `${mapId}/$FeatureInfoLayerSet$`);
@@ -136,8 +131,8 @@ export function HoverTooltip(): JSX.Element {
     return () => {
       api.event.off(EVENT_NAMES.GET_FEATURE_INFO.HOVER_QUERY_DONE, mapId, hoverQueryDoneListenerFunction);
       api.event.off(EVENT_NAMES.GET_FEATURE_INFO.ALL_QUERIES_DONE, mapId, allQueriesDoneListenerFunciton);
-      api.event.off(EVENT_NAMES.MAP.EVENT_MAP_POINTER_MOVE, mapId, mapPointerMoveListenerFunction);
       api.event.off(EVENT_NAMES.MAP.EVENT_MAP_SINGLE_CLICK, mapId, mapSingleClickListenerFunction);
+      unsubA();
     };
 
     // eslint-disable-next-line react-hooks/exhaustive-deps

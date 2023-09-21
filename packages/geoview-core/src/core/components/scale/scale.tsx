@@ -124,8 +124,8 @@ export function Scale(): JSX.Element {
     map.addControl(scaleBar);
 
     const unsub = getGeoViewStore(mapId).subscribe((curState, prevState) => {
-      // if currentMapCenterCoordinates changed, map move end event has been triggered
-      if (curState.mapState.currentMapCenterCoordinates !== prevState.mapState.currentMapCenterCoordinates) {
+      // if mapCenterCoordinates changed, map move end event has been triggered
+      if (curState.mapState.mapCenterCoordinates !== prevState.mapState.mapCenterCoordinates) {
         setLineWidth(
           (document.getElementById(`${mapId}-scaleControlLine`)?.querySelector('.ol-scale-line-inner') as HTMLElement)?.style
             .width as string
