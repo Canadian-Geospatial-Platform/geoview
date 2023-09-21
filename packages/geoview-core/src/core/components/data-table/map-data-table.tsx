@@ -78,11 +78,11 @@ const DATE_FILTER: Record<string, string> = {
 };
 
 const STRING_FILTER: Record<string, string> = {
-  contains: `upper(filterId) like upper('%value%')`,
-  startsWith: `upper(filterId) like upper('value%')`,
-  endsWith: `upper(filterId) like upper('%value')`,
-  empty: 'upper(filterId) is null',
-  notEmpty: 'upper(filterId) is not null',
+  contains: `(filterId) like ('%value%')`,
+  startsWith: `(filterId) like ('value%')`,
+  endsWith: `(filterId) like ('%value')`,
+  empty: '(filterId) is null',
+  notEmpty: '(filterId) is not null',
   equals: `filterId = 'value'`,
   notEquals: `filterId <> 'value'`,
 };
@@ -152,7 +152,7 @@ function MapDataTable({ data, layerId, mapId, layerKey, projectionConfig }: MapD
 
     if (!columnFilter.length) return [''];
     return columnFilter.map((filter) => {
-      const filterValue = filter.value as string;
+      const filterValue = filter.value;
       const filterId = filter.id;
       // Check if filterValue is of type array because columnfilters return array with min and max.
       if (Array.isArray(filterValue)) {
@@ -187,7 +187,7 @@ function MapDataTable({ data, layerId, mapId, layerKey, projectionConfig }: MapD
 
       const strFilter = STRING_FILTER[operator] as string;
 
-      return `${strFilter.replace('filterId', filterId).replace('value', filterValue)}`;
+      return `${strFilter.replace('filterId', filterId).replace('value', filterValue as string)}`;
     });
   }, []);
 
