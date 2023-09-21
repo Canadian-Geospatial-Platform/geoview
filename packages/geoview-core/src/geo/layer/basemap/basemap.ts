@@ -14,8 +14,8 @@ import { TypeJsonObject, toJsonObject, TypeJsonArray } from '@/core/types/global
 
 import { generateId, showMessage } from '@/core/utils/utilities';
 import { basemapLayerArrayPayload } from '@/api/events/payloads';
-import { TypeBasemapProps, TypeBasemapOptions, TypeBasemapLayer } from './basemap-types';
-import { TypeDisplayLanguage, TypeValidMapProjectionCodes, TypeLocalizedString } from '../../map/map-schema-types';
+import { TypeBasemapProps, TypeBasemapOptions, TypeBasemapLayer } from '@/geo/layer/basemap/basemap-types';
+import { TypeDisplayLanguage, TypeValidMapProjectionCodes, TypeLocalizedString } from '@/geo/map/map-schema-types';
 
 /**
  * A class to get a Basemap for a define projection and language. For the moment, a list maps are available and
@@ -136,13 +136,13 @@ export class Basemap {
 
   /**
    * Get projection from basemap url
-   * Because OpenLayers can reporject on the fly raster, some like Shaded and Simple even if only available in 3978
+   * Because OpenLayers can reproject on the fly raster, some like Shaded and Simple even if only available in 3978
    * can be use in 3857. For this we need to make a difference between map projection and url use for the basemap
    *
    * @param {string} url basemap url
    * @returns {number} projection code
    */
-  private getProjectionFromUrl = (url: string): number => {
+  private getProjectionFromUrl(url: string): number {
     let code = 0;
     const index = url.indexOf('/MapServer');
 
@@ -150,7 +150,7 @@ export class Basemap {
     else code = Number(url.substring(index - 4, index));
 
     return code;
-  };
+  }
 
   /**
    * Get basemap thumbnail url
@@ -161,11 +161,7 @@ export class Basemap {
    *
    * @returns {string[]} array of thumbnail urls
    */
-  private getThumbnailUrl = (
-    basemapTypes: string[],
-    projection: TypeValidMapProjectionCodes,
-    displayLanguage: TypeDisplayLanguage
-  ): string[] => {
+  private getThumbnailUrl(basemapTypes: string[], projection: TypeValidMapProjectionCodes, displayLanguage: TypeDisplayLanguage): string[] {
     const thumbnailUrls: string[] = [];
 
     for (let typeIndex = 0; typeIndex < basemapTypes.length; typeIndex++) {
@@ -218,7 +214,7 @@ export class Basemap {
     }
 
     return thumbnailUrls;
-  };
+  }
 
   /**
    * Get basemap information (name and description)
@@ -227,7 +223,7 @@ export class Basemap {
    * @param {TypeDisplayLanguage} displayLanguage basemap language
    * @returns {string} array with information [name, description]
    */
-  private getInfo = (basemapTypes: string[], displayLanguage: TypeDisplayLanguage): string[] => {
+  private getInfo(basemapTypes: string[], displayLanguage: TypeDisplayLanguage): string[] {
     let name = '';
     let description = '';
 
@@ -256,7 +252,7 @@ export class Basemap {
     if (basemapTypes.includes('label')) name = `${name} ${displayLanguage === 'en' ? 'with labels' : 'avec étiquettes'}`;
 
     return [name, description];
-  };
+  }
 
   /**
    * Check if the type of basemap already exist
@@ -264,29 +260,24 @@ export class Basemap {
    * @param {string} type basemap type
    * @returns {boolean} true if basemap exist, false otherwise
    */
-  isExisting = (type: string): boolean => {
+  isExisting(type: string): boolean {
     // check if basemap with provided type exists
     const exists = this.basemaps.length === 0 ? [] : this.basemaps.filter((basemap: TypeBasemapProps) => basemap.type === type);
 
     // return true if basemap exist
     return exists.length !== 0;
-  };
+  }
 
   /**
    * Create a basemap layer
    *
-   * @param {string} id the id of the layer
+   * @param {string} basemapId the id of the layer
    * @param {TypeJsonObject} basemapLayer the basemap layer url and json url
    * @param {number} opacity the opacity to use for this layer
    * @param {boolean} rest should we do a get request to get the info from the server
    * @returns {TypeBasemapLayer} return the created basemap layer
    */
-  createBasemapLayer = async (
-    basemapId: string,
-    basemapLayer: TypeJsonObject,
-    opacity: number,
-    rest: boolean
-  ): Promise<TypeBasemapLayer> => {
+  async createBasemapLayer(basemapId: string, basemapLayer: TypeJsonObject, opacity: number, rest: boolean): Promise<TypeBasemapLayer> {
     const resolutions: number[] = [];
     let minZoom = 0;
     let maxZoom = 17;
@@ -338,7 +329,7 @@ export class Basemap {
         // set extent for this layer
         extent = [fullExtent.xmin as number, fullExtent.ymin as number, fullExtent.xmax as number, fullExtent.ymax as number];
 
-        // Because OpenLayers can reporject on the fly raster, some like Shaded and Simple even if only available in 3978
+        // Because OpenLayers can reproject on the fly raster, some like Shaded and Simple even if only available in 3978
         // can be use in 3857. For this we need to make a difference between map projection and url use for the basemap
         urlProj = this.getProjectionFromUrl(basemapLayer.url as string);
       } catch (error) {
@@ -370,14 +361,14 @@ export class Basemap {
       minScale: minZoom, // ? is this use somewhere, modifying values has no effect. Issue 643
       maxScale: maxZoom, // ? is this use somewhere, modifying values has no effect. Issue 643
     };
-  };
+  }
 
   /**
    * Create the core basemap and add the layers to it
    *
    * @param {TypeBasemapOptions} basemapOptions basemap options
    */
-  createCoreBasemap = async (basemapOptions: TypeBasemapOptions, projection?: number): Promise<TypeBasemapProps | undefined> => {
+  async createCoreBasemap(basemapOptions: TypeBasemapOptions, projection?: number): Promise<TypeBasemapProps | undefined> {
     // eslint-disable-next-line no-async-promise-executor
     return new Promise(async (resolve) => {
       const basemapLayers: TypeBasemapLayer[] = [];
@@ -393,7 +384,7 @@ export class Basemap {
       // check if projection is provided for the basemap creation
       const projectionCode = projection === undefined ? this.projection : projection;
 
-      // check if basemap options are provided for the baemao creation
+      // check if basemap options are provided for the basemap creation
       const coreBasemapOptions = basemapOptions === undefined ? this.basemapOptions : basemapOptions;
 
       if (coreBasemapOptions) {
@@ -524,7 +515,7 @@ export class Basemap {
         resolve(undefined);
       }
     });
-  };
+  }
 
   /**
    * Create a custom basemap
@@ -532,7 +523,7 @@ export class Basemap {
    * @param {TypeBasemapProps} basemapProps basemap properties
    * @returns {TypeBasemapProps} the created custom basemap
    */
-  createCustomBasemap = (basemapProps: TypeBasemapProps): TypeBasemapProps => {
+  createCustomBasemap(basemapProps: TypeBasemapProps): TypeBasemapProps {
     interface bilingual {
       en: string;
       fr: string;
@@ -571,15 +562,15 @@ export class Basemap {
     formatProps.attribution = this.displayLanguage === 'en' ? attribution.en : attribution.fr;
 
     return this.createBasemap(formatProps);
-  };
+  }
 
   /**
    * Load the default basemap that was passed in the map config
    *
    * @returns {TypeBasemapProps | undefined} the default basemap
    */
-  loadDefaultBasemaps = async (): Promise<TypeBasemapProps | undefined> => {
-    const basemap = await this.createCoreBasemap(this.basemapOptions);
+  async loadDefaultBasemaps(): Promise<TypeBasemapProps | undefined> {
+    const basemap = await this.createCoreBasemap(api.maps[this.#mapId].mapFeaturesConfig.map.basemapOptions);
     const overviewBasemap = await this.createCoreBasemap({ basemapId: 'transport', shaded: false, labeled: false });
 
     this.activeBasemap = basemap;
@@ -590,14 +581,14 @@ export class Basemap {
     this.defaultExtent = basemap?.defaultExtent;
 
     return basemap;
-  };
+  }
 
   /**
    * Create a new basemap
    *
    * @param {TypeBasemapProps} basemapProps basemap properties
    */
-  private createBasemap = (basemapProps: TypeBasemapProps): TypeBasemapProps => {
+  private createBasemap(basemapProps: TypeBasemapProps): TypeBasemapProps {
     // generate an id if none provided
     // eslint-disable-next-line no-param-reassign
     if (!basemapProps.basemapId) basemapProps.basemapId = generateId(basemapProps.basemapId);
@@ -618,14 +609,14 @@ export class Basemap {
     this.basemaps.push(basemapProps);
 
     return basemapProps;
-  };
+  }
 
   /**
    * Set the current basemap and update the basemap layers on the map
    *
-   * @param {string} id the id of the basemap
+   * @param {string} basemapId the id of the basemap
    */
-  setBasemap = (basemapId: string): void => {
+  setBasemap(basemapId: string): void {
     // get basemap by id
     const basemap = this.basemaps.filter((basemapType: TypeBasemapProps) => basemapType.basemapId === basemapId)[0];
 
@@ -633,6 +624,7 @@ export class Basemap {
     this.activeBasemap = basemap;
 
     // emit an event to update the basemap layers on the map
-    api.event.emit(basemapLayerArrayPayload(EVENT_NAMES.BASEMAP.EVENT_BASEMAP_LAYERS_UPDATE, this.#mapId, basemap.layers));
-  };
+    if (basemap?.layers)
+      api.event.emit(basemapLayerArrayPayload(EVENT_NAMES.BASEMAP.EVENT_BASEMAP_LAYERS_UPDATE, this.#mapId, basemap.layers));
+  }
 }

@@ -5,11 +5,11 @@ import { MapEventProcessor } from './map';
 const mapEventProcessor = new MapEventProcessor();
 const appBarEventProcessor = new AppBarEventProcessor();
 
-export const initializeEventProcessors = function (store: GeoViewStoreType) {
+export function initializeEventProcessors(store: GeoViewStoreType) {
   mapEventProcessor.onInitialize(store);
   appBarEventProcessor.onInitialize(store);
-};
+}
 
-export const destroyEventProcessors = function () {
+export function destroyEventProcessors() {
   mapEventProcessor.onDestroy();
-};
+}

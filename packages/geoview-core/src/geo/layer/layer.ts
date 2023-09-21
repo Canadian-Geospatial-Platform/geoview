@@ -2,8 +2,8 @@
 import { EventTypes } from 'ol/Observable';
 import { indexOf } from 'lodash';
 import i18n from 'i18next';
-import { GeoCore, layerConfigIsGeoCore } from './other/geocore';
-import { Geometry } from './geometry/geometry';
+import { GeoCore, layerConfigIsGeoCore } from '@/geo/layer/other/geocore';
+import { Geometry } from '@/geo/layer/geometry/geometry';
 
 import { api } from '@/app';
 import { EVENT_NAMES } from '@/api/events/event-types';
@@ -16,6 +16,7 @@ import {
   GeoViewLayerPayload,
   payloadIsRemoveGeoViewLayer,
   LayerSetPayload,
+  PayloadBaseClass,
 } from '@/api/events/payloads';
 import { AbstractGeoViewLayer } from './geoview-layers/abstract-geoview-layers';
 import {
@@ -25,17 +26,22 @@ import {
   TypeLayerGroupEntryConfig,
   TypeListOfLayerEntryConfig,
   TypeListOfLocalizedLanguages,
-} from '../map/map-schema-types';
-import { GeoJSON, layerConfigIsGeoJSON } from './geoview-layers/vector/geojson';
-import { GeoPackage, layerConfigIsGeoPackage } from './geoview-layers/vector/geopackage';
-import { layerConfigIsWMS, WMS } from './geoview-layers/raster/wms';
-import { EsriDynamic, layerConfigIsEsriDynamic } from './geoview-layers/raster/esri-dynamic';
-import { EsriFeature, layerConfigIsEsriFeature } from './geoview-layers/vector/esri-feature';
-import { ImageStatic, layerConfigIsImageStatic } from './geoview-layers/raster/image-static';
-import { layerConfigIsWFS, WFS } from './geoview-layers/vector/wfs';
-import { layerConfigIsOgcFeature, OgcFeature } from './geoview-layers/vector/ogc-feature';
-import { layerConfigIsXYZTiles, XYZTiles } from './geoview-layers/raster/xyz-tiles';
-import { layerConfigIsVectorTiles, VectorTiles } from './geoview-layers/raster/vector-tiles';
+} from '@/geo/map/map-schema-types';
+import { GeoJSON, layerConfigIsGeoJSON } from '@/geo/layer/geoview-layers/vector/geojson';
+import { GeoPackage, layerConfigIsGeoPackage } from '@/geo/layer/geoview-layers/vector/geopackage';
+import { layerConfigIsWMS, WMS } from '@/geo/layer/geoview-layers/raster/wms';
+import { EsriDynamic, layerConfigIsEsriDynamic } from '@/geo/layer/geoview-layers/raster/esri-dynamic';
+import { EsriFeature, layerConfigIsEsriFeature } from '@/geo/layer/geoview-layers/vector/esri-feature';
+import { ImageStatic, layerConfigIsImageStatic } from '@/geo/layer/geoview-layers/raster/image-static';
+import { layerConfigIsWFS, WFS } from '@/geo/layer/geoview-layers/vector/wfs';
+import { layerConfigIsOgcFeature, OgcFeature } from '@/geo/layer/geoview-layers/vector/ogc-feature';
+import { layerConfigIsXYZTiles, XYZTiles } from '@/geo/layer/geoview-layers/raster/xyz-tiles';
+import { layerConfigIsVectorTiles, VectorTiles } from '@/geo/layer/geoview-layers/raster/vector-tiles';
+
+type TypeEventHandlerFunctions = {
+  addLayer: (payload: PayloadBaseClass) => void;
+  removeLayer: (payload: PayloadBaseClass) => void;
+};
 
 /**
  * A class to get the layer from layer type. Layer type can be esriFeature, esriDynamic and ogcWMS
@@ -59,6 +65,9 @@ export class Layer {
   /** used to reference the map id */
   private mapId: string;
 
+  /** used to keep a reference the Layer's event handler functions */
+  private eventHandlerFunctions: TypeEventHandlerFunctions;
+
   /**
    * Initialize layer types and listen to add/remove layer events from outside
    *
@@ -69,10 +78,8 @@ export class Layer {
 
     this.geometry = new Geometry(this.mapId);
 
-    // listen to outside events to add layers
-    api.event.on(
-      EVENT_NAMES.LAYER.EVENT_ADD_LAYER,
-      (payload) => {
+    this.eventHandlerFunctions = {
+      addLayer: (payload: PayloadBaseClass) => {
         if (payloadIsALayerConfig(payload)) {
           const { layerConfig } = payload;
 
@@ -138,49 +145,52 @@ export class Layer {
           }
         }
       },
-      this.mapId
-    );
-
-    // listen to outside events to remove layers
-    api.event.on(
-      EVENT_NAMES.LAYER.EVENT_REMOVE_LAYER,
-      (payload) => {
+      removeLayer: (payload: PayloadBaseClass) => {
         if (payloadIsRemoveGeoViewLayer(payload)) {
           // remove layer from outside
           this.removeLayersUsingPath(payload.geoviewLayer!.geoviewLayerId);
         }
       },
-      this.mapId
-    );
+    };
+
+    // listen to outside events to add layers
+    api.event.on(EVENT_NAMES.LAYER.EVENT_ADD_LAYER, this.eventHandlerFunctions.addLayer, this.mapId);
+
+    // listen to outside events to remove layers
+    api.event.on(EVENT_NAMES.LAYER.EVENT_REMOVE_LAYER, this.eventHandlerFunctions.removeLayer, this.mapId);
+  }
+
+  /**
+   * Delete the event handler functions associated to the Layer instance.
+   */
+  deleteEventHandlerFunctionsOfThisLayerInstance() {
+    api.event.off(EVENT_NAMES.LAYER.EVENT_ADD_LAYER, this.mapId, this.eventHandlerFunctions!.addLayer);
+    api.event.off(EVENT_NAMES.LAYER.EVENT_REMOVE_LAYER, this.mapId, this.eventHandlerFunctions.removeLayer);
   }
 
   /**
    * Load layers that was passed in with the map config
    *
-   * @param {TypeGeoviewLayerConfig[]} layersConfig an optional array containing layers passed within the map config
+   * @param {TypeGeoviewLayerConfig[]} geoviewLayerConfigs an optional array containing layers passed within the map config
    */
   loadListOfGeoviewLayer(geoviewLayerConfigs?: TypeGeoviewLayerConfig[]) {
     const validGeoviewLayerConfigs = this.deleteDuplicatGeoviewLayerConfig(geoviewLayerConfigs);
 
     // set order for layers to appear on the map according to config
     this.layerOrder = [];
-    validGeoviewLayerConfigs.forEach((layer) => {
-      if (layer.geoviewLayerId) {
+
+    validGeoviewLayerConfigs.forEach((geoviewLayerConfig) => {
+      if (geoviewLayerConfig.geoviewLayerId) {
         // layer order reversed so highest index is top layer
-        this.layerOrder.unshift(layer.geoviewLayerId);
+        this.layerOrder.unshift(geoviewLayerConfig.geoviewLayerId);
         // layers without id uses sublayer ids
-      } else if (layer.listOfLayerEntryConfig !== undefined) {
-        layer.listOfLayerEntryConfig.forEach((subLayer) => {
+      } else if (geoviewLayerConfig.listOfLayerEntryConfig !== undefined) {
+        geoviewLayerConfig.listOfLayerEntryConfig.forEach((subLayer) => {
           if (subLayer.layerId) this.layerOrder.unshift(subLayer.layerId);
         });
       }
+      api.event.emit(layerConfigPayload(EVENT_NAMES.LAYER.EVENT_ADD_LAYER, this.mapId, geoviewLayerConfig));
     });
-
-    if (validGeoviewLayerConfigs.length > 0) {
-      validGeoviewLayerConfigs.forEach((geoviewLayerConfig) =>
-        api.event.emit(layerConfigPayload(EVENT_NAMES.LAYER.EVENT_ADD_LAYER, this.mapId, geoviewLayerConfig))
-      );
-    }
   }
 
   /**
@@ -422,6 +432,17 @@ export class Layer {
     api.event.emit(GeoViewLayerPayload.createRemoveGeoviewLayerPayload(this.mapId, geoviewLayer));
 
     return geoviewLayer.geoviewLayerId;
+  };
+
+  /**
+   * Remove all geoview layers from the map
+   */
+  removeAllGeoviewLayers = () => {
+    Object.keys(this.geoviewLayers).forEach((layerId: string) => {
+      this.removeGeoviewLayer(this.geoviewLayers[layerId]);
+    });
+
+    return this.mapId;
   };
 
   /**

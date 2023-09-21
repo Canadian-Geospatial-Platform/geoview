@@ -8,78 +8,83 @@ import { useTheme } from '@mui/material/styles';
 import makeStyles from '@mui/styles/makeStyles';
 
 import 'ol/ol.css';
-import './ui/style/style.css';
-import './ui/style/vendor.css';
+import '@/ui/style/style.css';
+import '@/ui/style/vendor.css';
 
-import * as UI from './ui';
+import * as UI from '@/ui';
 
-import AppStart from './core/app-start';
-import * as types from './core/types/cgpv-types';
+import AppStart from '@/core/app-start';
+import * as types from '@/core/types/cgpv-types';
 
-import { EVENT_NAMES } from './api/events/event-types';
-import { API } from './api/api';
+import { EVENT_NAMES } from '@/api/events/event-types';
+import { API } from '@/api/api';
 
-import { Config } from './core/utils/config/config';
-import { payloadIsAmapFeaturesConfig } from './api/events/payloads';
-import { addGeoViewStore } from './core/stores/stores-managers';
+import { Config } from '@/core/utils/config/config';
+import { payloadIsAmapFeaturesConfig } from '@/api/events/payloads';
+import { addGeoViewStore } from '@/core/stores/stores-managers';
 
 // The next export allow to import the cgpv-types from 'geoview-core' from outside of the geoview-core package.
 export * from './core/types/cgpv-types';
 export const api = new API();
 
-// TODO look for a better place to put this when working on issue #8
-
 let root: Root | null = null;
 
-// listen to map reload event
-api.event.on(
-  EVENT_NAMES.MAP.EVENT_MAP_RELOAD,
-  (payload) => {
-    if (payloadIsAmapFeaturesConfig(payload)) {
-      if (payload.mapFeaturesConfig && payload.mapFeaturesConfig.mapId) {
-        // unsubscribe from all events registered on this map
-        api.event.offAll(payload.mapFeaturesConfig.mapId);
+/*
+ * Listen for map reload events. The map component is linked to a specific mapId. When we modify something on the map, the
+ * changes spread throughout the data structure. We therefore need to reload the entire map configuration to ensure that
+ * all changes made to the map are applied.
+ */
+export function addReloadListener(mapId: string) {
+  api.event.on(
+    EVENT_NAMES.MAP.EVENT_MAP_RELOAD,
+    (payload) => {
+      if (payloadIsAmapFeaturesConfig(payload)) {
+        const { mapFeaturesConfig } = payload;
+        if (mapFeaturesConfig) {
+          if (api.maps[mapId].layer) api.maps[mapId].layer.removeAllGeoviewLayers();
+          // unsubscribe from all remaining events registered on this map
+          api.event.offAll(mapId);
 
-        // unload all loaded plugins on the map
-        api.plugin.removePlugins(payload.mapFeaturesConfig.mapId);
+          // unload all loaded plugins on the map
+          api.plugin.removePlugins(mapId);
 
-        // get the map container
-        const map = document.getElementById(payload.mapFeaturesConfig.mapId);
+          // get the map container
+          const map = document.getElementById(mapId);
 
-        if (map) {
-          // TODO: As part of #1118 refactor, see if we can just rehydrate the App compoent or we still need the add and remove
-          // remove the dom element (remove rendered map)
-          // eslint-disable-next-line no-underscore-dangle
-          if (root !== null) root.unmount();
+          if (map) {
+            // remove the dom element (remove rendered map)
+            if (root !== null) root.unmount();
 
-          // recreate the map - crate e new div and remove the active one
-          const newDiv = document.createElement('div');
-          newDiv.setAttribute('id', payload.mapFeaturesConfig.mapId);
-          newDiv.setAttribute('class', 'llwp-map');
-          map!.parentNode!.insertBefore(newDiv, map);
-          map.remove();
+            // recreate the map - crate e new div and remove the active one
+            const newDiv = document.createElement('div');
+            newDiv.setAttribute('id', mapId);
+            newDiv.setAttribute('class', 'llwp-map');
+            map!.parentNode!.insertBefore(newDiv, map);
+            map.remove();
 
-          // create the new root
-          const newRoot = document.getElementById(payload.mapFeaturesConfig.mapId);
-          root = createRoot(newRoot!);
+            // create the new root
+            const newRoot = document.getElementById(mapId);
+            root = createRoot(newRoot!);
 
-          // delete the map instance from the maps array
-          delete api.maps[payload.mapFeaturesConfig.mapId];
+            // delete the map instance from the maps array
+            delete api.maps[mapId];
 
-          // delete plugins that were loaded on the map
-          delete api.plugin.plugins[payload.mapFeaturesConfig.mapId];
+            // delete plugins that were loaded on the map
+            delete api.plugin.plugins[mapId];
 
-          // set plugin's loaded to false
-          api.plugin.pluginsLoaded = false;
+            // set plugin's loaded to false
+            api.plugin.pluginsLoaded = false;
 
-          // re-render map with updated config keeping previous values if unchanged
-          root.render(<AppStart mapFeaturesConfig={payload.mapFeaturesConfig} />);
+            addReloadListener(mapId);
+            // re-render map with updated config keeping previous values if unchanged
+            root.render(<AppStart mapFeaturesConfig={mapFeaturesConfig} />);
+          }
         }
       }
-    }
-  },
-  'all'
-);
+    },
+    `${mapId}/delete_old_map`
+  );
+}
 
 /**
  * Initialize the cgpv and render it to root element
@@ -103,7 +108,7 @@ async function init(callback: () => void) {
     const config = new Config(mapElement);
 
     // initialize config
-    // if config provided (either by inline, url params) validate it with schema
+    // if a config is provided from either inline div, url params or json file, validate it with against the schema
     // otherwise return the default config
     // eslint-disable-next-line no-await-in-loop
     const configObj = await config.initializeMapConfig();
@@ -113,6 +118,7 @@ async function init(callback: () => void) {
       addGeoViewStore(configObj);
       // render the map with the config
       root = createRoot(mapElement!);
+      addReloadListener(configObj.mapId!);
       root.render(<AppStart mapFeaturesConfig={configObj} />);
     }
   }
@@ -136,10 +142,6 @@ export const cgpv: types.TypeCGPV = {
   },
   useTranslation,
   types,
-  // ? Do we realy need the constants attribute?
-  // constants: {
-  //   options: {},
-  // },
 };
 
 // freeze variable name so a variable with same name can't be defined from outside
