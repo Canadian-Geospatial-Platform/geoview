@@ -7,7 +7,7 @@ import { List, ListItem, Panel, IconButton } from '@/ui';
 import { api } from '@/app';
 import { EVENT_NAMES } from '@/api/events/event-types';
 
-import { MapContext } from '@/core/app-start';
+import { MapContext, TypeMapContext } from '@/core/app-start';
 
 import { payloadIsAButtonPanel, ButtonPanelPayload, PayloadBaseClass } from '@/api/events/payloads';
 import { TypeButtonPanel } from '@/ui/panel/panel-types';
@@ -106,10 +106,9 @@ export function Appbar({ activeTrap, activeTrapSet }: AppbarProps): JSX.Element 
 
   const appBar = useRef<HTMLDivElement>(null);
 
-  const mapConfig = useContext(MapContext);
+  const mapContext = useContext(MapContext);
 
-  const { mapId } = mapConfig;
-  const { mapFeaturesConfig } = api.maps[mapId];
+  const { mapFeaturesConfig, mapId } = mapContext as Required<TypeMapContext>;
   const trapActive = useRef<boolean>(activeTrap);
 
   const openModal = () => {

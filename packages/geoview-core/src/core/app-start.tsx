@@ -23,14 +23,16 @@ declare module '@mui/styles/defaultTheme' {
 export const MapContext = React.createContext<TypeMapContext>({
   mapId: '',
   interaction: 'dynamic',
+  mapFeaturesConfig: undefined,
 });
 
 /**
  * Type used for the map context
  */
-type TypeMapContext = {
+export type TypeMapContext = {
   mapId: string;
   interaction: TypeInteraction;
+  mapFeaturesConfig?: TypeMapFeaturesConfig;
 };
 
 /**
@@ -47,8 +49,8 @@ function AppStart(props: AppStartProps): JSX.Element {
   const { mapFeaturesConfig } = props;
 
   const mapContextValue = useMemo(() => {
-    return { mapId: mapFeaturesConfig.mapId as string, interaction: mapFeaturesConfig.map.interaction };
-  }, [mapFeaturesConfig.mapId, mapFeaturesConfig.map.interaction]);
+    return { mapId: mapFeaturesConfig.mapId as string, interaction: mapFeaturesConfig.map.interaction, mapFeaturesConfig };
+  }, [mapFeaturesConfig]);
 
   /**
    * Create maps from inline configs with class name llwp-map in index.html
@@ -67,7 +69,7 @@ function AppStart(props: AppStartProps): JSX.Element {
       <I18nextProvider i18n={i18nInstance}>
         <MapContext.Provider value={mapContextValue}>
           <ThemeProvider theme={getTheme(mapFeaturesConfig.theme)}>
-            <Shell shellId={mapFeaturesConfig.mapId as string} mapFeaturesConfig={mapFeaturesConfig} />
+            <Shell shellId={mapFeaturesConfig.mapId as string} />
           </ThemeProvider>
         </MapContext.Provider>
       </I18nextProvider>
