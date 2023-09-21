@@ -52,7 +52,11 @@
     "expand_legend": "Expand Legend",
     "toggle_cluster": "Toggle Clustering",
     "toggle_opacity": "Toggle Opacity",
-    "zoom_to": "Zoom to Layer"
+    "zoom_to": "Zoom to Layer",
+    "overview_title": "Legend Overview",
+    "add_layer": "Add Layer",
+    "selected_legend": "Selected Legend",
+    "sort_layers": "Sort Layers"
   },
   "details": {
     "zoom_to": "Zoom to feature",

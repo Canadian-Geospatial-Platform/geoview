@@ -1,6 +1,7 @@
 import { StoreApi } from 'zustand';
 import OLMap from 'ol/Map';
 import { TypeMapFeaturesConfig } from '@/core/types/global-types';
+import { TypeLegendItemProps } from '../components/legend-2/types';
 
 export interface IMapState {
   zoom?: number;
@@ -26,13 +27,16 @@ export interface IAppBarState {
 
 // export interface IFooterState {}
 
-// export interface ILegendState {}
+export interface ILegendState {
+  selectedItem?: TypeLegendItemProps;
+}
 
 export interface IGeoViewState {
   mapId: string;
   mapConfig: TypeMapFeaturesConfig | undefined;
   mapState: IMapState;
   appBarState: IAppBarState;
+  legendState: ILegendState;
 
   isCrosshairsActive: boolean;
 
@@ -58,6 +62,9 @@ export const geoViewStoreDefinition = (
     },
     appBarState: {
       geoLocatorActive: false,
+    },
+    legendState: {
+      selectedItem: undefined,
     },
 
     setMapConfig: (config: TypeMapFeaturesConfig) => {
