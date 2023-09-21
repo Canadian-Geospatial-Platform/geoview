@@ -12,6 +12,7 @@ import { Coordinate } from 'ol/coordinate';
 import { toLonLat } from 'ol/proj';
 
 import { TypeMapFeaturesConfig } from '@/core/types/global-types';
+import { TypeLegendItemProps } from '../components/legend-2/types';
 
 import { TypeMapMouseInfo } from '@/api/events/payloads';
 
@@ -48,7 +49,9 @@ export interface IAppBarState {
 
 // export interface IFooterState {}
 
-// export interface ILegendState {}
+export interface ILegendState {
+  selectedItem?: TypeLegendItemProps;
+}
 
 export interface IGeoViewState {
   mapId: string;
@@ -57,6 +60,7 @@ export interface IGeoViewState {
 
   footerBarState: IFooterBarState;
   appBarState: IAppBarState;
+  legendState: ILegendState;
 
   isCrosshairsActive: boolean;
 
@@ -109,6 +113,9 @@ export const geoViewStoreDefinition = (
     },
     appBarState: {
       geoLocatorActive: false,
+    },
+    legendState: {
+      selectedItem: undefined,
     },
 
     setMapConfig: (config: TypeMapFeaturesConfig) => {
