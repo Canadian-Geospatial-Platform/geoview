@@ -66,4 +66,5 @@ export {
   ZoomOut as ZoomOutSearchIcon,
   ArrowForwardIosOutlined as ArrowForwardIosOutlinedIcon,
   ArrowBackIosOutlined as ArrowBackIosOutlinedIcon,
+  LayersClearOutlined as LayersClearOutlinedIcon,
 } from '@mui/icons-material';
