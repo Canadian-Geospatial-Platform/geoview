@@ -11,23 +11,16 @@ import {
   Grid,
   Paper,
   Typography,
-  Checkbox,
   KeyboardArrowRightIcon,
   ArrowForwardIosOutlinedIcon,
   ArrowBackIosOutlinedIcon,
+  LayersClearOutlinedIcon,
 } from '@/ui';
 import { TypeArrayOfLayerData, TypeLayerData } from './details';
 import { FeatureInfo } from './feature-info-new';
 import { PayloadBaseClass, api } from '@/app';
 import { EVENT_NAMES } from '@/api/events/event-types';
-import {
-  payloadIsAFeatureHighlight,
-  payloadIsAClearHighlights,
-  TypeArrayOfFeatureInfoEntries,
-  featureHighlightPayload,
-  clearHighlightsPayload,
-  TypeFeatureInfoEntry,
-} from '@/api/events/payloads';
+import { payloadIsAFeatureHighlight, payloadIsAClearHighlights, clearHighlightsPayload, TypeFeatureInfoEntry } from '@/api/events/payloads';
 
 const getSxClasses = (isPanelHeaders = false) => {
   return {
@@ -65,7 +58,7 @@ export function LayersListFooter(props: TypeLayersListProps): JSX.Element {
   const { t } = useTranslation<string>();
   const [layerDataInfo, setLayerDataInfo] = useState<TypeLayerData | null>(null);
   const [currentFeatureIndex, setCurrentFeatureIndex] = useState<number>(0);
-  const [selectAllFeatures, setSelectAllFeatures] = useState<boolean>(false);
+  const [isClearFeature, setIsClearFeature] = useState<boolean>(false);
 
   const highlightCallbackFunction = (payload: PayloadBaseClass) => {
     if (payloadIsAFeatureHighlight(payload)) {
@@ -83,18 +76,13 @@ export function LayersListFooter(props: TypeLayersListProps): JSX.Element {
     }
   };
 
-  const handleSelectAllFeatures = (allFeatures: TypeArrayOfFeatureInfoEntries) => {
-    if (!selectAllFeatures) {
-      setSelectAllFeatures(true);
-      allFeatures.forEach((feature: TypeFeatureInfoEntry) => {
-        api.event.emit(featureHighlightPayload(EVENT_NAMES.FEATURE_HIGHLIGHT.EVENT_HIGHLIGHT_FEATURE, mapId, feature));
-      });
-    } else {
-      setSelectAllFeatures(false);
-      allFeatures.forEach((feature: TypeFeatureInfoEntry) => {
+  const handleClearAllFeatures = () => {
+    arrayOfLayerData.forEach((layer: TypeLayerData) => {
+      layer.features.forEach((feature: TypeFeatureInfoEntry) => {
         api.event.emit(clearHighlightsPayload(EVENT_NAMES.FEATURE_HIGHLIGHT.EVENT_HIGHLIGHT_CLEAR, mapId, getUid(feature.geometry)));
       });
-    }
+    });
+    setIsClearFeature(true);
   };
 
   useEffect(() => {
@@ -188,10 +176,16 @@ export function LayersListFooter(props: TypeLayersListProps): JSX.Element {
                 <Grid container sx={{ marginTop: '20px', marginBottom: '9px', boxShadow: '0px 12px 9px -13px #E0E0E0' }}>
                   <Grid item xs={6}>
                     <div style={{ marginLeft: '26px' }}>
-                      Feature {currentFeatureIndex + 1} of {layerDataInfo?.features.length}, select all features
-                      <Tooltip title={t('details.highlightFeaturesOnMap')} placement="top" enterDelay={1000}>
-                        <Checkbox onChange={() => handleSelectAllFeatures(layerDataInfo?.features)} checked={selectAllFeatures} />
-                      </Tooltip>
+                      Feature {currentFeatureIndex + 1} of {layerDataInfo?.features.length}
+                      <IconButton
+                        sx={{ marginLeft: '20px' }}
+                        aria-label="clear-all-features"
+                        tooltip="details.clearAllfeatures"
+                        tooltipPlacement="top"
+                        onClick={() => handleClearAllFeatures()}
+                      >
+                        <LayersClearOutlinedIcon />
+                      </IconButton>
                     </div>
                   </Grid>
                   <Grid item xs={6}>
@@ -224,6 +218,7 @@ export function LayersListFooter(props: TypeLayersListProps): JSX.Element {
                   currentFeatureIndex={currentFeatureIndex}
                   selectedFeatures={selectedFeatures}
                   mapId={mapId}
+                  isClearFeature={isClearFeature}
                 />
               </div>
             </>
