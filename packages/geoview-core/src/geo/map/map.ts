@@ -10,14 +10,12 @@ import { Extent } from 'ol/extent';
 
 import queryString from 'query-string';
 
-import { Basemap } from '../layer/basemap/basemap';
-import { Layer } from '../layer/layer';
-import { TypeFeatureStyle } from '../layer/geometry/geometry-types';
+import { Basemap } from '@/geo/layer/basemap/basemap';
+import { Layer } from '@/geo/layer/layer';
+import { TypeFeatureStyle } from '@/geo/layer/geometry/geometry-types';
 
 import { api } from '@/app';
 import { EVENT_NAMES } from '@/api/events/event-types';
-
-import { Config } from '@/core/utils/config/config';
 
 import { AppbarButtons } from '@/core/components/app-bar/app-bar-buttons';
 import { NavbarButtons } from '@/core/components/nav-bar/nav-bar-buttons';
@@ -30,12 +28,12 @@ import { DetailsAPI as DetailsAPIFooter } from '@/core/components/details-1/deta
 import { FeatureInfoAPI } from '@/core/components/feature-info/feature-info.api';
 import { DataGridAPI } from '@/core/components/data-grid/data-grid-api';
 import { DataTableApi } from '@/core/components/data-table/data-table-api';
-import { GeoviewRenderer } from '../renderer/geoview-renderer';
-import { Select } from '../interaction/select';
-import { Draw } from '../interaction/draw';
-import { Modify } from '../interaction/modify';
-import { Snap } from '../interaction/snap';
-import { Translate } from '../interaction/translate';
+import { GeoviewRenderer } from '@/geo/renderer/geoview-renderer';
+import { Select } from '@/geo/interaction/select';
+import { Draw } from '@/geo/interaction/draw';
+import { Modify } from '@/geo/interaction/modify';
+import { Snap } from '@/geo/interaction/snap';
+import { Translate } from '@/geo/interaction/translate';
 
 import { ModalApi } from '@/ui';
 import {
@@ -45,11 +43,10 @@ import {
   payloadIsGeoViewLayerAdded,
   TypeMapMouseInfo,
 } from '@/api/events/payloads';
-import { generateId, parseJSONConfig, removeCommentsFromJSON } from '@/core/utils/utilities';
-import { TypeListOfGeoviewLayerConfig, TypeDisplayLanguage, TypeViewSettings } from './map-schema-types';
+import { generateId, getValidConfigFromString } from '@/core/utils/utilities';
+import { TypeListOfGeoviewLayerConfig, TypeDisplayLanguage, TypeViewSettings } from '@/geo/map/map-schema-types';
 import { TypeMapFeaturesConfig, TypeHTMLElement } from '@/core/types/global-types';
-import { layerConfigIsGeoCore } from '../layer/other/geocore';
-
+import { layerConfigIsGeoCore } from '@/geo/layer/other/geocore';
 import { getGeoViewStore } from '@/core/stores/stores-managers';
 
 interface TypeDcoument extends Document {
@@ -65,6 +62,9 @@ interface TypeDcoument extends Document {
  * @class MapViewer
  */
 export class MapViewer {
+  // Function create-map-from-config has run
+  createMapConfigHasRun = false;
+
   // map config properties
   mapFeaturesConfig: TypeMapFeaturesConfig;
 
@@ -289,24 +289,24 @@ export class MapViewer {
    * @param {string} mapComponentId an id to the new component
    * @param {JSX.Element} component the component to add
    */
-  addComponent = (mapComponentId: string, component: JSX.Element): void => {
+  addComponent(mapComponentId: string, component: JSX.Element): void {
     if (mapComponentId && component) {
       // emit an event to add the component
       api.event.emit(mapComponentPayload(EVENT_NAMES.MAP.EVENT_MAP_ADD_COMPONENT, this.mapId, mapComponentId, component));
     }
-  };
+  }
 
   /**
    * Remove an existing custom component from the map
    *
    * @param imapComponentIdd the id of the component to remove
    */
-  removeComponent = (mapComponentId: string): void => {
+  removeComponent(mapComponentId: string): void {
     if (mapComponentId) {
       // emit an event to add the component
       api.event.emit(mapComponentPayload(EVENT_NAMES.MAP.EVENT_MAP_REMOVE_COMPONENT, this.mapId, mapComponentId));
     }
-  };
+  }
 
   /**
    * Toggle fullscreen / exit fullscreen function
@@ -314,7 +314,7 @@ export class MapViewer {
    * @param status toggle fullscreen or exit fullscreen status
    * @param {HTMLElement} element the element to toggle fullscreen on
    */
-  toggleFullscreen = (status: boolean, element: TypeHTMLElement): void => {
+  toggleFullscreen(status: boolean, element: TypeHTMLElement): void {
     // enter fullscreen
     if (status) {
       if (element.requestFullscreen) {
@@ -346,14 +346,14 @@ export class MapViewer {
         (document as TypeDcoument).mozCancelFullScreen();
       }
     }
-  };
+  }
 
   /**
    * Update the map viewSettings
    *
    * @param {TypeMapView} mapView map viewSettings object
    */
-  setView = (mapView: TypeViewSettings): void => {
+  setView(mapView: TypeViewSettings): void {
     const currentView = this.map.getView();
     const viewOptions: ViewOptions = {};
     viewOptions.projection = mapView.projection ? `EPSG:${mapView.projection}` : currentView.getProjection();
@@ -366,16 +366,16 @@ export class MapViewer {
     if (mapView.extent) viewOptions.extent = mapView.extent;
 
     this.map.setView(new View(viewOptions));
-  };
+  }
 
   /**
    * Get the map viewSettings
    *
    * @returns the map viewSettings
    */
-  getView = (): View => {
+  getView(): View {
     return this.map.getView();
-  };
+  }
 
   /**
    * Zoom to the specified extent.
@@ -390,7 +390,7 @@ export class MapViewer {
   /**
    * Function called when the map has been rendered and ready to be customized
    */
-  mapReady = (): void => {
+  mapReady(): void {
     const layerInterval = setInterval(() => {
       if (this.layer?.geoviewLayers) {
         const { geoviewLayers } = this.layer;
@@ -419,7 +419,7 @@ export class MapViewer {
         }
       }
     }, 250);
-  };
+  }
 
   /**
    * Change the display language of the map
@@ -427,57 +427,55 @@ export class MapViewer {
    * @param {TypeDisplayLanguage} displayLanguage the language to use (en, fr)
    * @param {TypeListOfGeoviewLayerConfig} listOfGeoviewLayerConfig optional new set of layers to apply (will override original set of layers)
    */
-  changeLanguage = (displayLanguage: TypeDisplayLanguage, listOfGeoviewLayerConfig?: TypeListOfGeoviewLayerConfig): void => {
-    const updatedMapConfig: TypeMapFeaturesConfig = { ...this.mapFeaturesConfig };
-
-    updatedMapConfig.displayLanguage = displayLanguage;
+  changeLanguage(displayLanguage: TypeDisplayLanguage, listOfGeoviewLayerConfig?: TypeListOfGeoviewLayerConfig): void {
+    this.mapFeaturesConfig.displayLanguage = displayLanguage;
 
     // if a list of geoview layers parameter is present, replace the one from the config
     // do not concat like updatedMapConfig.map.listOfGeoviewLayerConfig?.concat(listOfGeoviewLayerConfig) this
     // because it will keep layer in wrong languages if they are present.
     if (listOfGeoviewLayerConfig) {
-      updatedMapConfig.map.listOfGeoviewLayerConfig = listOfGeoviewLayerConfig;
+      this.mapFeaturesConfig.map.listOfGeoviewLayerConfig = listOfGeoviewLayerConfig;
     }
 
-    // emit an event to reload the map to change the language
-    api.event.emit(mapConfigPayload(EVENT_NAMES.MAP.EVENT_MAP_RELOAD, 'all', updatedMapConfig));
-  };
+    // reload the map to change the language
+    this.reloadMap(this.mapFeaturesConfig);
+  }
 
   /**
-   * Load a new map config from a function call
+   * Reload a map from a config object
+   *
+   * @param {TypeMapFeaturesConfig} mapFeaturesConfig a new config passed in from the function call
+   */
+  reloadMap(mapFeaturesConfig: TypeMapFeaturesConfig) {
+    api.maps[this.mapId].mapFeaturesConfig = mapFeaturesConfig;
+
+    // emit an event to reload the map with the new config
+    api.event.emit(mapConfigPayload(EVENT_NAMES.MAP.EVENT_MAP_RELOAD, this.mapId, mapFeaturesConfig));
+  }
+
+  /**
+   * Create a new config for this map element, validate an load it
    *
    * @param {string} mapConfig a new config passed in from the function call
    */
-  loadMapConfig = (mapConfig: string) => {
-    const targetDiv = this.map.getTargetElement().parentElement!.parentElement!.parentElement;
-
-    const configObjString = removeCommentsFromJSON(mapConfig);
-    const parsedMapConfig = parseJSONConfig(configObjString);
-
-    // create a new config for this map element
-    const config = new Config(targetDiv!);
-
-    const configObj = config.getMapConfigFromFunc(parsedMapConfig);
-    if (this.displayLanguage) {
-      configObj!.displayLanguage = this.displayLanguage;
-    }
-
-    // emit an event to reload the map with the new config
-    api.event.emit(mapConfigPayload(EVENT_NAMES.MAP.EVENT_MAP_RELOAD, 'all', configObj!));
-  };
+  loadMapFromJsonStringConfig(mapConfig: string) {
+    const targetDiv = document.getElementById(this.mapId);
+    // reload the map with the new config
+    this.reloadMap(getValidConfigFromString(mapConfig, targetDiv!));
+  }
 
   /**
    * Set map to either dynamic or static
    *
    * @param {string} interaction map interaction
    */
-  toggleMapInteraction = (interaction: string) => {
+  toggleMapInteraction(interaction: string) {
     if (interaction === 'dynamic' || !interaction) {
       this.map.getInteractions().forEach((x) => x.setActive(true));
     } else {
       this.map.getInteractions().forEach((x) => x.setActive(false));
     }
-  };
+  }
 
   /**
    * Fit the map to its boundaries. It is assumed that the boundaries use the map projection. If projectionCode is undefined,
@@ -487,7 +485,7 @@ export class MapViewer {
    * @param {string | number | undefined} projectionCode Optional projection code used by the bounds.
    * @returns the bounds
    */
-  fitBounds = (bounds?: Extent, projectionCode: string | number | undefined = undefined) => {
+  fitBounds(bounds?: Extent, projectionCode: string | number | undefined = undefined) {
     let mapBounds: Extent | undefined;
     if (bounds)
       mapBounds = projectionCode
@@ -524,7 +522,7 @@ export class MapViewer {
       this.map.getView().fit(mapBounds, { size: this.map.getSize() });
       this.map.getView().setZoom(this.map.getView().getZoom()! - 0.15);
     }
-  };
+  }
 
   /**
    * Transforms an extent from source projection to destination projection. This returns a new extent (and does not modify the
@@ -537,9 +535,9 @@ export class MapViewer {
    *
    * @returns The new extent transformed in the destination projection.
    */
-  transformExtent = (extent: Extent, source: ProjectionLike, destination: ProjectionLike, stops?: number | undefined): Extent => {
+  transformExtent(extent: Extent, source: ProjectionLike, destination: ProjectionLike, stops?: number | undefined): Extent {
     return olTransformExtent(extent, source, destination, stops);
-  };
+  }
 
   /**
    * Transforms an extent from source projection to destination projection. This returns a new extent (and does not modify the
@@ -552,7 +550,7 @@ export class MapViewer {
    *
    * @returns The densified extent transformed in the destination projection.
    */
-  transformAndDensifyExtent = (extent: Extent, source: ProjectionLike, destination: ProjectionLike, stops = 25): Coordinate[] => {
+  transformAndDensifyExtent(extent: Extent, source: ProjectionLike, destination: ProjectionLike, stops = 25): Coordinate[] {
     const coordinates: number[][] = [];
     const width: number = extent[2] - extent[0];
     const height: number = extent[3] - extent[1];
@@ -562,12 +560,12 @@ export class MapViewer {
     for (let i = 0; i < stops; ++i) coordinates.push([extent[0], extent[3] - (height * i) / stops]);
     for (let i = 0; i < coordinates.length; i++) coordinates[i] = olTransform(coordinates[i], source, destination);
     return coordinates;
-  };
+  }
 
   /**
    * Initializes selection interactions
    */
-  initSelectInteractions = () => {
+  initSelectInteractions() {
     // Create selecting capabilities
     const select = new Select({
       mapViewer: this,
@@ -575,12 +573,12 @@ export class MapViewer {
     });
     select.startInteraction();
     return select;
-  };
+  }
 
   /**
    * Initializes translation interactions
    */
-  initTranslateInteractions = () => {
+  initTranslateInteractions() {
     // Create selecting capabilities
     const features = this.initSelectInteractions().ol_select.getFeatures();
 
@@ -591,7 +589,7 @@ export class MapViewer {
     });
     translate.startInteraction();
     return translate;
-  };
+  }
 
   /**
    * Initializes drawing interactions on the given vector source
@@ -599,7 +597,7 @@ export class MapViewer {
    * @param type the type of geometry to draw (Polygon, LineString, Circle, etc)
    * @param styles the styles for the drawing
    */
-  initDrawInteractions = (geomGroupKey: string, type: string, style: TypeFeatureStyle) => {
+  initDrawInteractions(geomGroupKey: string, type: string, style: TypeFeatureStyle) {
     // Create the Draw component
     const draw = new Draw({
       mapViewer: this,
@@ -609,13 +607,13 @@ export class MapViewer {
     });
     draw.startInteraction();
     return draw;
-  };
+  }
 
   /**
    * Initializes modifying interactions on the given vector source
    * @param geomGroupKey the geometry group key in which to hold the geometries
    */
-  initModifyInteractions = (geomGroupKey: string) => {
+  initModifyInteractions(geomGroupKey: string) {
     // Create the modify component
     const modify = new Modify({
       mapViewer: this,
@@ -623,13 +621,13 @@ export class MapViewer {
     });
     modify.startInteraction();
     return modify;
-  };
+  }
 
   /**
    * Initializes snapping interactions on the given vector source
    * @param geomGroupKey the geometry group key in which to hold the geometries
    */
-  initSnapInteractions = (geomGroupKey: string) => {
+  initSnapInteractions(geomGroupKey: string) {
     // Create snapping capabilities
     const snap = new Snap({
       mapViewer: this,
@@ -637,5 +635,5 @@ export class MapViewer {
     });
     snap.startInteraction();
     return snap;
-  };
+  }
 }
