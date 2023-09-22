@@ -56,6 +56,8 @@ export class DataGridAPI {
     const { currentProjection } = api.maps[this.mapId];
     const projectionConfig = api.projection.projections[currentProjection];
 
+    console.log('groupValuesss', groupValues);
+    console.log('groupKeys', groupKeys);
     /**
      * Create a geometry json
      *

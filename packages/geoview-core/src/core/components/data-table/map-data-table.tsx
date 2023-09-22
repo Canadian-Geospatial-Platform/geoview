@@ -119,7 +119,6 @@ function MapDataTable({ data, layerId, mapId, layerKey, projectionConfig }: MapD
   const zoomColumn = { alias: t('dataTable.zoom'), dataType: 'string', id: t('dataTable.zoom') };
 
   const [mapFiltered, setMapFiltered] = useState<boolean>(false);
-  const [filteredData] = useState(data.features);
   const [columnFilters, setColumnFilters] = useState<MRTColumnFiltersState>([]);
 
   const [rowSelection, setRowSelection] = useState<Record<number, boolean>>({});
@@ -250,7 +249,7 @@ function MapDataTable({ data, layerId, mapId, layerKey, projectionConfig }: MapD
     const addAnimationRowIds = difference(selectedRows, rowSelectionRef.current);
 
     addAnimationRowIds.forEach((idx) => {
-      const row = filteredData[Number(idx)];
+      const row = data.features[Number(idx)];
       if (row) {
         api.event.emit(featureHighlightPayload(EVENT_NAMES.FEATURE_HIGHLIGHT.EVENT_HIGHLIGHT_FEATURE, mapId, row));
       }
@@ -258,7 +257,7 @@ function MapDataTable({ data, layerId, mapId, layerKey, projectionConfig }: MapD
 
     const removeAnimationRowIds = difference(rowSelectionRef.current, selectedRows);
     removeAnimationRowIds.forEach((id) => {
-      const feature = filteredData[Number(id)];
+      const feature = data.features[Number(id)];
       const featureUid = getUid(feature.geometry);
       api.event.emit(clearHighlightsPayload(EVENT_NAMES.FEATURE_HIGHLIGHT.EVENT_HIGHLIGHT_CLEAR, mapId, featureUid));
     });
@@ -384,7 +383,7 @@ function MapDataTable({ data, layerId, mapId, layerKey, projectionConfig }: MapD
 
     return columnList;
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [data.fieldAliases]);
 
   /**
    * featureinfo data grid Zoom in/out handling
@@ -403,7 +402,7 @@ function MapDataTable({ data, layerId, mapId, layerKey, projectionConfig }: MapD
    * @param {Features} features list of objects transform into rows.
    */
   const rows = useMemo(() => {
-    return filteredData.map((feature) => {
+    return data.features.map((feature) => {
       return {
         ICON: <img alt={feature.featureIcon.toDataURL().toString()} src={feature.featureIcon.toDataURL().toString()} style={iconImage} />,
         ZOOM: (
@@ -415,10 +414,10 @@ function MapDataTable({ data, layerId, mapId, layerKey, projectionConfig }: MapD
       };
     }) as unknown as ColumnsType[];
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [data.features]);
 
   return (
-    <Box sx={{ padding: '1rem 0' }}>
+    <Box>
       <MaterialReactTable
         columns={columns as MRTColumnDef[]}
         data={rows}
@@ -453,11 +452,11 @@ function MapDataTable({ data, layerId, mapId, layerKey, projectionConfig }: MapD
         enableColumnVirtualization
         enablePagination={false}
         enablePinning
-        enableRowVirtualization
+        // enableRowVirtualization
         muiTableContainerProps={{ sx: { maxHeight: '600px' } }}
         rowVirtualizerInstanceRef={rowVirtualizerInstanceRef}
-        rowVirtualizerProps={{ overscan: 5 }}
-        columnVirtualizerProps={{ overscan: 2 }}
+        // rowVirtualizerProps={{ overscan: 5 }}
+        // columnVirtualizerProps={{ overscan: 2 }}
         muiTableHeadCellFilterTextFieldProps={{
           sx: () => ({
             minWidth: '50px',

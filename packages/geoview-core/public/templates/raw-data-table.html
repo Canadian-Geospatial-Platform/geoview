@@ -53,6 +53,10 @@
       Create DataTable For Historical Floods
     </button>
 
+    <button onClick="renderDataTableFromMapForGeoJSON()">
+      Create DataTable For Geo JSON
+    </button>
+
     <div id="dataTable" style="margin: 1rem 0"></div>
   </div>
 
@@ -67,6 +71,22 @@
       //create snippets
       createConfigSnippet();
       createCodeSnippet();
+      console.log("scanned");
+      renderDataTableFromMapForGeoJSON = async () => {
+        try {
+          console.time("GeoJSONMapCreation")
+          const layerId = Object.keys(api.maps['mapWM1'].layer.geoviewLayers)[2];
+          const data = await cgpv.api.maps['mapWM1'].dataTable.createDataPanel({ layerId, mapId: "mapWM1" })
+          // console.log("data")
+          cgpv.api.addUiComponent(
+            "dataTable",
+            cgpv.react.createElement(cgpv.ui.elements.Box, {}, data)
+          );
+          console.timeEnd("GeoJSONMapCreation")
+        } catch (err) {
+          console.log("Errr", err)
+        }
+      };
 
       renderDataTableFromMap = async () => {
         console.time("MapTableCreation")
@@ -82,7 +102,7 @@
           cgpv.react.createElement(cgpv.ui.elements.Accordion, { items: [itemAcc] })
         );
         console.timeEnd("MapTableCreation")
-      }
+      };
 
       renderDataTableFromMapForHistoricalFlood = async () => {
         console.time("HistoricalFloodsMapTableCreation")
@@ -98,7 +118,7 @@
           cgpv.react.createElement(cgpv.ui.elements.Accordion, { items: [itemAcc] })
         );
         console.timeEnd("HistoricalFloodsMapTableCreation")
-      }
+      };
     });
   </script>
 </body>
