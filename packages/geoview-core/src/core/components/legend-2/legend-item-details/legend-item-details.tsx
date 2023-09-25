@@ -420,11 +420,9 @@ export function LegendItemDetails(props: TypeLegendItemDetailsProps): JSX.Elemen
               </>
             )}
             {groupItems.length === 0 && (
-              <Tooltip title={t('legend.expand_legend')!}>
-                <IconButton onClick={handleZoomTo}>
-                  <ZoomInSearchIcon />
-                </IconButton>
-              </Tooltip>
+              <IconButton onClick={handleZoomTo}>
+                <ZoomInSearchIcon />
+              </IconButton>
             )}
           </Stack>
         </ListItem>

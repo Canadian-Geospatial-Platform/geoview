@@ -197,4 +197,11 @@ export const defaultThemeOptions: ThemeOptions = {
     overlayHover: 'rgba(0,0,0,0.25)',
     overlayActive: 'transparent',
   },
+  footerPanel: {
+    contentBg: '#F1F2F5 0% 0% no-repeat padding-box',
+    contentShadow: 'inset 0px 3px 6px #00000029',
+    titleFont: 'normal normal 600 20px/27px Open Sans',
+    layerTitleFont: 'normal normal 600 18px/24px Open Sans',
+    highlightColor: '#515BA5',
+  },
 };
