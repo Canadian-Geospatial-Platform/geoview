@@ -12,9 +12,10 @@ export declare const MapContext: React.Context<TypeMapContext>;
 /**
  * Type used for the map context
  */
-type TypeMapContext = {
+export type TypeMapContext = {
     mapId: string;
     interaction: TypeInteraction;
+    mapFeaturesConfig?: TypeMapFeaturesConfig;
 };
 /**
  * interface used when passing map features configuration

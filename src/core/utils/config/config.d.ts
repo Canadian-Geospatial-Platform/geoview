@@ -55,15 +55,15 @@ export declare class Config {
      */
     set displayLanguage(displayLanguage: TypeDisplayLanguage);
     /** ***************************************************************************************************************************
-     * Get map properties configuration from a function call.
+     * Get a valid map configuration.
      *
-     * @param {TypeMapFeaturesConfig} mapFeaturesConfig Config object passed in the function.
+     * @param {TypeMapFeaturesConfig} mapFeaturesConfig Config object to validate.
      *
      * @returns {TypeMapFeaturesConfig} A valid map config.
      */
-    getMapConfigFromFunc(mapFeaturesConfig: TypeMapFeaturesConfig): TypeMapFeaturesConfig | undefined;
+    getValidMapConfig(mapFeaturesConfig: TypeMapFeaturesConfig): TypeMapFeaturesConfig;
     /** ***************************************************************************************************************************
-     * Initialize all layer entry type fields accordingly to the GeoView layer type..
+     * Initialize all layer entry type fields accordingly to the GeoView layer type.
      * @param {TypeListOfLayerEntryConfig} listOfLayerEntryConfig The list of layer entry configuration to adjust.
      * @param {TypeGeoviewLayerType} geoviewLayerType The GeoView layer type.
      */

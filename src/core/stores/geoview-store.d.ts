@@ -1,11 +1,20 @@
 import { StoreApi } from 'zustand';
-import OLMap from 'ol/Map';
+import { Map as OLMap, MapEvent } from 'ol';
+import { Coordinate } from 'ol/coordinate';
 import { TypeMapFeaturesConfig } from '@/core/types/global-types';
+import { TypeMapMouseInfo } from '@/api/events/payloads';
 export interface IMapState {
     zoom?: number;
-    currentCoordinates?: [number, number];
+    mapCenterCoordinates: Coordinate;
+    pointerPosition: TypeMapMouseInfo | undefined;
+    currentProjection: number;
     mapLoaded: boolean;
     mapElement?: OLMap;
+    onMapMoveEnd: (event: MapEvent) => void;
+    onMapPointerMove: (event: MapEvent) => void;
+}
+export interface IFooterBarState {
+    expanded: boolean;
 }
 export interface IAppBarState {
     geoLocatorActive: boolean;
@@ -14,6 +23,7 @@ export interface IGeoViewState {
     mapId: string;
     mapConfig: TypeMapFeaturesConfig | undefined;
     mapState: IMapState;
+    footerBarState: IFooterBarState;
     appBarState: IAppBarState;
     isCrosshairsActive: boolean;
     setMapConfig: (config: TypeMapFeaturesConfig) => void;
