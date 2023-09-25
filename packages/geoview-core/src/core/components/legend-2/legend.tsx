@@ -1,4 +1,4 @@
-import { Button, FormControlLabel, FormGroup, styled } from '@mui/material';
+import { Button, FormControlLabel, FormGroup, styled, useTheme } from '@mui/material';
 import React from 'react';
 import { useStore } from 'zustand';
 import { useTranslation } from 'react-i18next';
@@ -16,26 +16,27 @@ const Item = styled('div')(({ theme }) => ({
   borderRadius: 4,
 }));
 
-const sxClasses = {
-  legendContainer: {
-    background: '#F1F2F5 0% 0% no-repeat padding-box',
-    boxShadow: 'inset 0px 3px 6px #00000029',
-    padding: '40px 20px 20px 20px',
-    display: 'flex',
-    flexDirection: 'column',
-  },
-  legendTitle: {
-    textAlign: 'left',
-    font: 'normal normal 600 20px/27px Open Sans',
-    marginBottom: '10px',
-  },
-};
-
 export function Legend2(props: LegendItemsDetailsProps): JSX.Element {
   const { layerIds, isRemoveable, canSetOpacity, expandAll, hideAll, mapId } = props;
   api.event.emit({ handlerName: `${mapId}/$LegendsLayerSet$`, event: api.eventNames.GET_LEGENDS.TRIGGER });
 
   const { t } = useTranslation<string>();
+
+  const theme = useTheme();
+  const sxClasses = {
+    legendContainer: {
+      background: theme.footerPanel.contentBg,
+      boxShadow: theme.footerPanel.contentShadow,
+      padding: '40px 20px 20px 20px',
+      display: 'flex',
+      flexDirection: 'column',
+    },
+    legendTitle: {
+      textAlign: 'left',
+      font: theme.footerPanel.titleFont,
+      marginBottom: '10px',
+    },
+  };
 
   const store = getGeoViewStore(mapId);
   const selectedLegendItem = useStore(store, (state) => state.legendState.selectedItem);
