@@ -1,6 +1,6 @@
-import { Geometry } from './geometry/geometry';
+import { Geometry } from '@/geo/layer/geometry/geometry';
 import { AbstractGeoViewLayer } from './geoview-layers/abstract-geoview-layers';
-import { TypeGeoviewLayerConfig, TypeLayerEntryConfig, TypeListOfLayerEntryConfig, TypeListOfLocalizedLanguages } from '../map/map-schema-types';
+import { TypeGeoviewLayerConfig, TypeLayerEntryConfig, TypeListOfLayerEntryConfig, TypeListOfLocalizedLanguages } from '@/geo/map/map-schema-types';
 /**
  * A class to get the layer from layer type. Layer type can be esriFeature, esriDynamic and ogcWMS
  *
@@ -19,6 +19,8 @@ export declare class Layer {
     layerOrder: string[];
     /** used to reference the map id */
     private mapId;
+    /** used to keep a reference the Layer's event handler functions */
+    private eventHandlerFunctions;
     /**
      * Initialize layer types and listen to add/remove layer events from outside
      *
@@ -26,9 +28,13 @@ export declare class Layer {
      */
     constructor(mapId: string);
     /**
+     * Delete the event handler functions associated to the Layer instance.
+     */
+    deleteEventHandlerFunctionsOfThisLayerInstance(): void;
+    /**
      * Load layers that was passed in with the map config
      *
-     * @param {TypeGeoviewLayerConfig[]} layersConfig an optional array containing layers passed within the map config
+     * @param {TypeGeoviewLayerConfig[]} geoviewLayerConfigs an optional array containing layers passed within the map config
      */
     loadListOfGeoviewLayer(geoviewLayerConfigs?: TypeGeoviewLayerConfig[]): void;
     /**
@@ -90,6 +96,10 @@ export declare class Layer {
      * @param {TypeGeoviewLayerConfig} geoviewLayer the layer configuration to remove
      */
     removeGeoviewLayer: (geoviewLayer: AbstractGeoViewLayer) => string;
+    /**
+     * Remove all geoview layers from the map
+     */
+    removeAllGeoviewLayers: () => string;
     /**
      * Search for a layer using it's id and return the layer data
      *

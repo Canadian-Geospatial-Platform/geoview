@@ -3,7 +3,7 @@ import { Root } from 'react-dom/client';
 import { Extent } from 'ol/extent';
 import { AbstractGeoViewLayer } from '@/app';
 import { TypeLocalizedString } from '@/geo/map/map-schema-types';
-import { TypeJsonArray, TypeJsonObject, TypeJsonValue } from '../types/global-types';
+import { TypeJsonArray, TypeJsonObject, TypeJsonValue, TypeMapFeaturesConfig } from '@/core/types/global-types';
 /**
  * Get the string associated to the current display language.
  *
@@ -147,6 +147,13 @@ export declare function removeCommentsFromJSON(config: string): string;
  * @returns {any} cleaned and parsed config object
  */
 export declare function parseJSONConfig(configObjStr: string): any;
+/**
+ * Get a valid configuration from a string configuration
+ *
+ * @param {string} configString String configuration
+ * @returns {TypeMapFeaturesConfig} A valid configuration object
+ */
+export declare function getValidConfigFromString(configString: string, mapDiv: HTMLElement): TypeMapFeaturesConfig;
 /**
  * Export the map as a PNG
  * @param {string} mapId Id of map to export
