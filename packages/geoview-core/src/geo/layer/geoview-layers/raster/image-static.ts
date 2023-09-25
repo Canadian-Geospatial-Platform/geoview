@@ -252,9 +252,13 @@ export class ImageStatic extends AbstractGeoViewRaster {
   processOneLayerEntry(layerEntryConfig: TypeImageStaticLayerEntryConfig): Promise<TypeBaseRasterLayer | null> {
     const promisedVectorLayer = new Promise<TypeBaseRasterLayer | null>((resolve) => {
       api.event.emit(LayerSetPayload.createLayerSetChangeLayerPhasePayload(this.mapId, layerEntryConfig, 'processOneLayerEntry'));
+
+      if (!layerEntryConfig.source.extent) throw new Error('Parameter extent is not defined in source element of layerEntryConfig.');
       const sourceOptions: SourceOptions = {
         url: getLocalizedValue(layerEntryConfig.source.dataAccessPath, this.mapId) || '',
+        imageExtent: layerEntryConfig.source.extent,
       };
+
       if (layerEntryConfig.source.crossOrigin) {
         sourceOptions.crossOrigin = layerEntryConfig.source.crossOrigin;
       } else {
@@ -264,10 +268,6 @@ export class ImageStatic extends AbstractGeoViewRaster {
       if (layerEntryConfig.source.projection) {
         sourceOptions.projection = `EPSG:${layerEntryConfig.source.projection}`;
       } else throw new Error('Parameter projection is not define in source element of layerEntryConfig.');
-
-      if (layerEntryConfig.source.extent) {
-        sourceOptions.imageExtent = layerEntryConfig.source.extent;
-      } else throw new Error('Parameter extent is not define in source element of layerEntryConfig.');
 
       const staticImageOptions: ImageOptions<Static> = { source: new Static(sourceOptions) };
       // layerEntryConfig.initialSettings cannot be undefined because config-validation set it to {} if it is undefined.
