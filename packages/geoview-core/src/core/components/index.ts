@@ -35,8 +35,6 @@ export * from './geolocator/geo-list';
 export * from './geolocator/geolocator';
 export * from './geolocator/styles';
 export * from './hover-tooltip/hover-tooltip';
-export * from './layers-select/LayerSelectItem';
-export * from './layers-select/LayersSelect';
 export * from './legend-2/legend-api';
 export * from './legend/legend-api';
 export * from './legend/legend-icon-list';

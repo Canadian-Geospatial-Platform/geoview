@@ -757,9 +757,9 @@ import {
   layerEntryIsGroupLayer,
 } from '@/geo/map/map-schema-types';
 import { AbstractGeoViewVector } from '@/geo/layer/geoview-layers/vector/abstract-geoview-vector';
-import { disableScrolling } from '../../../utils/utilities';
-import { WMSStyleItem } from '../WMS-style-item';
-import { TypeLegendItemProps } from '../types';
+import { disableScrolling } from '../../utils/utilities';
+import { WMSStyleItem } from './WMS-style-item';
+import { TypeLegendItemProps } from './types';
 
 const sxClasses = {
   expandableGroup: {
