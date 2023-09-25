@@ -5,9 +5,7 @@ import { fromLonLat, toLonLat } from 'ol/proj';
 import OLMap from 'ol/Map';
 import View from 'ol/View';
 import TileLayer from 'ol/layer/Tile';
-import { ObjectEvent } from 'ol/Object';
-import MapBrowserEvent from 'ol/MapBrowserEvent';
-import { Collection, MapEvent } from 'ol';
+import { Collection } from 'ol';
 import BaseLayer from 'ol/layer/Base';
 import Source from 'ol/source/Source';
 
@@ -25,19 +23,12 @@ import { HoverTooltip } from '../hover-tooltip/hover-tooltip';
 
 import { disableScrolling, generateId } from '../../utils/utilities';
 
-import { TypeVectorSourceInitialConfig, api, inKeyfocusPayload, notificationPayload } from '@/app';
+import { api, inKeyfocusPayload, notificationPayload } from '@/app';
 import { EVENT_NAMES } from '@/api/events/event-types';
 
 import { MapViewer } from '@/geo/map/map';
 
-import {
-  payloadIsABasemapLayerArray,
-  payloadIsAMapViewProjection,
-  numberPayload,
-  TypeMapMouseInfo,
-  mapMouseEventPayload,
-  PayloadBaseClass,
-} from '@/api/events/payloads';
+import { payloadIsABasemapLayerArray, payloadIsAMapViewProjection, PayloadBaseClass } from '@/api/events/payloads';
 import { TypeMapFeaturesConfig } from '../../types/global-types';
 
 const useStyles = makeStyles(() => ({
@@ -55,9 +46,6 @@ export function Map(mapFeaturesConfig: TypeMapFeaturesConfig): JSX.Element {
   // make sure the id is not undefined
   // eslint-disable-next-line react/destructuring-assignment
   const mapId = mapFeaturesConfig.mapId ? mapFeaturesConfig.mapId : generateId('');
-  const {
-    map: { interaction: mapInteraction },
-  } = mapFeaturesConfig;
   const [isLoaded, setIsLoaded] = useState(false);
 
   const classes = useStyles();
@@ -73,59 +61,23 @@ export function Map(mapFeaturesConfig: TypeMapFeaturesConfig): JSX.Element {
   // if screen size is medium and up
   const deviceSizeMedUp = useMediaQuery(defaultTheme.breakpoints.up('md'));
 
-  /**
-   * Get the zoom level of the map when zoom in / out has ended
-   * then emit it as an api event
-   * @param {ObjectEvent} event Zoom end event container a reference to the map
-   */
-  function mapZoomEnd(event: ObjectEvent): void {
-    const prevZoom = api.maps[mapId].currentZoom;
-    const view: View = event.target;
-    const currentZoom = view.getZoom()!;
-    const layers = api.maps[mapId].layer.registeredLayers;
-
-    api.maps[mapId].currentZoom = currentZoom;
-
-    // TODO: do not deal with stuff not related to create the payload in the event, use the event on or store state to listen to change and do what is needed.
-    Object.keys(layers).forEach((layer) => {
-      if (layer.endsWith('-unclustered')) {
-        const clusterLayerId = layer.replace('-unclustered', '');
-        const splitZoom =
-          (api.maps[mapId].layer.registeredLayers[clusterLayerId].source as TypeVectorSourceInitialConfig)!.cluster!.splitZoom || 7;
-        if (prevZoom < splitZoom && currentZoom >= splitZoom) {
-          api.maps[mapId].layer.registeredLayers[clusterLayerId]?.gvLayer!.setVisible(false);
-          api.maps[mapId].layer.registeredLayers[layer]?.gvLayer!.setVisible(true);
-        }
-        if (prevZoom >= splitZoom && currentZoom < splitZoom) {
-          api.maps[mapId].layer.registeredLayers[clusterLayerId]?.gvLayer!.setVisible(true);
-          api.maps[mapId].layer.registeredLayers[layer]?.gvLayer!.setVisible(false);
-        }
-      }
-    });
-
-    // emit the moveend event to the api
-    api.event.emit(numberPayload(EVENT_NAMES.MAP.EVENT_MAP_ZOOM_END, mapId, currentZoom));
-  }
-
-  /**
-   * Map single click handler
-   * @param {MapEvent} event the map single click event
-   */
-  function mapSingleClick(event: MapEvent): void {
-    if (mapInteraction !== 'static') {
-      const coordinates: TypeMapMouseInfo = {
-        projected: (event as MapBrowserEvent<UIEvent>).coordinate,
-        pixel: (event as MapBrowserEvent<UIEvent>).pixel,
-        lnglat: toLonLat((event as MapBrowserEvent<UIEvent>).coordinate, `EPSG:${api.maps[mapId].currentProjection}`),
-        dragging: (event as MapBrowserEvent<UIEvent>).dragging,
-      };
-
-      api.maps[mapId].singleClickedPosition = coordinates;
-
-      // emit the singleclick map position
-      api.event.emit(mapMouseEventPayload(EVENT_NAMES.MAP.EVENT_MAP_SINGLE_CLICK, mapId, coordinates));
-    }
-  }
+  // TODO: do not deal with stuff not related to create the payload in the event, use the event on or store state to listen to change and do what is needed.
+  // !This was in mapZoomEnd event.... listen to the event in proper place
+  // Object.keys(layers).forEach((layer) => {
+  //   if (layer.endsWith('-unclustered')) {
+  //     const clusterLayerId = layer.replace('-unclustered', '');
+  //     const splitZoom =
+  //       (api.maps[mapId].layer.registeredLayers[clusterLayerId].source as TypeVectorSourceInitialConfig)!.cluster!.splitZoom || 7;
+  //     if (prevZoom < splitZoom && currentZoom >= splitZoom) {
+  //       api.maps[mapId].layer.registeredLayers[clusterLayerId]?.gvLayer!.setVisible(false);
+  //       api.maps[mapId].layer.registeredLayers[layer]?.gvLayer!.setVisible(true);
+  //     }
+  //     if (prevZoom >= splitZoom && currentZoom < splitZoom) {
+  //       api.maps[mapId].layer.registeredLayers[clusterLayerId]?.gvLayer!.setVisible(true);
+  //       api.maps[mapId].layer.registeredLayers[layer]?.gvLayer!.setVisible(false);
+  //     }
+  //   }
+  // });
 
   const initCGPVMap = (cgpvMap: OLMap) => {
     cgpvMap.set('mapId', mapId);
@@ -138,22 +90,6 @@ export function Map(mapFeaturesConfig: TypeMapFeaturesConfig): JSX.Element {
       // load plugins once all maps have rendered
       api.plugin.loadPlugins();
     });
-
-    // TODO: when map is loaded from function call, there is a first init with the empty config then an overwrite by the the function call.
-    // !Some of the reference are not set properly, so we have this work around. Even with this is it not 100% perfect. This needs to be refactor
-    // !so we do not have access before the api map is set. Related to language as well #1118
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    let intervalMap: any;
-    const setMapEvents = () => {
-      if (api.maps[mapId] !== undefined) {
-        cgpvMap.on('singleclick', mapSingleClick);
-        cgpvMap.getView().on('change:resolution', mapZoomEnd);
-
-        clearInterval(intervalMap);
-        intervalMap = null;
-      }
-    };
-    intervalMap = setInterval(setMapEvents, 500);
 
     viewer.toggleMapInteraction(mapConfig.interaction);
 

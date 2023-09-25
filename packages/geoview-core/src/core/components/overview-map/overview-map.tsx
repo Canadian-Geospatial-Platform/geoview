@@ -10,10 +10,11 @@ import makeStyles from '@mui/styles/makeStyles';
 import TileLayer from 'ol/layer/Tile';
 import { OverviewMap as OLOverviewMap } from 'ol/control';
 
+import { getGeoViewStore } from '@/core/stores/stores-managers';
 import { OverviewMapToggle } from './overview-map-toggle';
 
 import { EVENT_NAMES } from '@/api/events/event-types';
-import { PayloadBaseClass, api, payloadIsANumber } from '@/app';
+import { PayloadBaseClass, api } from '@/app';
 import { MapContext } from '@/core/app-start';
 
 import { payloadIsAMapViewProjection } from '@/api/events/payloads';
@@ -106,6 +107,7 @@ export function OverviewMap(): JSX.Element {
   const { map, mapFeaturesConfig } = api.maps[mapId];
   const hideOnZoom = mapFeaturesConfig.overviewMap?.hideOnZoom || 0;
 
+  // TODO: remove useStyle
   const classes = useStyles();
 
   const handleProjectionChange = (payload: PayloadBaseClass) => {
@@ -131,27 +133,30 @@ export function OverviewMap(): JSX.Element {
     }
   };
 
-  const hideBasedOnZoom = (payload: PayloadBaseClass) => {
-    if (payloadIsANumber(payload)) {
-      const overviewMap = map
-        .getControls()
-        .getArray()
-        .filter((item) => {
-          return item instanceof OLOverviewMap;
-        })[0] as OLOverviewMap;
-      if (payload.value < hideOnZoom) overviewMap.setMap(null);
-      else overviewMap.setMap(api.maps[mapId].map);
-    }
-  };
-
   useEffect(() => {
+    // if zoom changed, view change:resolution event has been triggered
+    const unsubMapZoom = getGeoViewStore(mapId).subscribe(
+      (state) => state.mapState.zoom,
+      (curZoom, prevZoom) => {
+        if (curZoom !== prevZoom) {
+          const overviewMap = map
+            .getControls()
+            .getArray()
+            .filter((item) => {
+              return item instanceof OLOverviewMap;
+            })[0] as OLOverviewMap;
+          if (curZoom! < hideOnZoom) overviewMap.setMap(null);
+          else overviewMap.setMap(api.maps[mapId].map);
+        }
+      }
+    );
+
     // listen to geoview-basemap-panel package change projection event
     api.event.on(EVENT_NAMES.MAP.EVENT_MAP_VIEW_PROJECTION_CHANGE, handleProjectionChange, mapId);
-    api.event.on(EVENT_NAMES.MAP.EVENT_MAP_ZOOM_END, hideBasedOnZoom, mapId);
 
     return () => {
+      unsubMapZoom();
       api.event.off(EVENT_NAMES.MAP.EVENT_MAP_VIEW_PROJECTION_CHANGE, mapId, handleProjectionChange);
-      api.event.off(EVENT_NAMES.MAP.EVENT_MAP_ZOOM_END, mapId, hideBasedOnZoom);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mapId]);

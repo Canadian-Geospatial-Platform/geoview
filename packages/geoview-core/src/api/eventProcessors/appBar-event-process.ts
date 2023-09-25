@@ -6,15 +6,16 @@ import { EVENT_NAMES } from '../events/event-types';
 
 export class AppBarEventProcessor extends AbstractEventProcessor {
   onInitialize(store: GeoViewStoreType) {
-    const unsub = store.subscribe((curState, prevState) => {
-      if (curState.appBarState.geoLocatorActive !== prevState.appBarState.geoLocatorActive) {
-        api.event.emit(
-          booleanPayload(EVENT_NAMES.GEOLOCATOR.EVENT_GEOLOCATOR_TOGGLE, curState.mapId, curState.appBarState.geoLocatorActive)
-        );
+    const { mapId } = store.getState();
+
+    const unsubGeolocatorToggle = store.subscribe(
+      (state) => state.appBarState.geoLocatorActive,
+      (cur, prev) => {
+        if (cur !== prev) api.event.emit(booleanPayload(EVENT_NAMES.GEOLOCATOR.EVENT_GEOLOCATOR_TOGGLE, mapId, cur));
       }
-    });
+    );
 
     // add to arr of subscriptions so it can be destroyed later
-    this.subscriptionArr.push(unsub);
+    this.subscriptionArr.push(unsubGeolocatorToggle);
   }
 }
