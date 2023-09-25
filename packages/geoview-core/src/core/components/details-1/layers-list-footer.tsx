@@ -219,6 +219,7 @@ export function LayersListFooter(props: TypeLayersListProps): JSX.Element {
                   selectedFeatures={selectedFeatures}
                   mapId={mapId}
                   isClearFeature={isClearFeature}
+                  onClearFeature={() => setIsClearFeature(false)}
                 />
               </div>
             </>
