@@ -124,7 +124,7 @@ export class MapViewer {
   currentZoom: number;
 
   // store current map center coordinate
-  currentMapCenterCoordinates: Coordinate;
+  mapCenterCoordinates: Coordinate;
 
   // store last single click position
   singleClickedPosition: TypeMapMouseInfo;
@@ -162,7 +162,7 @@ export class MapViewer {
     this.currentProjection = mapFeaturesConfig.map.viewSettings.projection;
     this.i18nInstance = i18instance;
     this.currentZoom = mapFeaturesConfig.map.viewSettings.zoom;
-    this.currentMapCenterCoordinates = [mapFeaturesConfig.map.viewSettings.center[0], mapFeaturesConfig.map.viewSettings.center[1]];
+    this.mapCenterCoordinates = [mapFeaturesConfig.map.viewSettings.center[0], mapFeaturesConfig.map.viewSettings.center[1]];
     this.singleClickedPosition = { pixel: [], lnglat: [], projected: [], dragging: false };
     this.pointerPosition = { pixel: [], lnglat: [], projected: [], dragging: false };
 
@@ -404,6 +404,7 @@ export class MapViewer {
 
           // initialize store OpenLayers events
           this.map.on('moveend', store.getState().mapState.onMapMoveEnd);
+          this.map.on('pointermove', store.getState().mapState.onMapPointerMove);
 
           // initialize map state
           store.setState({
@@ -411,7 +412,8 @@ export class MapViewer {
               ...store.getState().mapState,
               mapLoaded: true,
               mapElement: this.map,
-              currentMapCenterCoordinates: this.map.getView().getCenter()!,
+              mapCenterCoordinates: this.map.getView().getCenter()!,
+              currentProjection: this.currentProjection,
             },
           });
 
