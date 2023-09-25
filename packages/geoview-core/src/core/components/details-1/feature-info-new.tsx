@@ -29,6 +29,7 @@ export interface TypeFeatureInfoProps {
   currentFeatureIndex: number;
   selectedFeatures?: MutableRefObject<string[]>;
   isClearFeature?: boolean;
+  onClearFeature?: () => void;
 }
 
 /**
@@ -37,7 +38,14 @@ export interface TypeFeatureInfoProps {
  * @param {TypeFeatureInfoProps} Feature info propetties
  * @returns {JSX.Element} the feature info
  */
-export function FeatureInfo({ mapId, features, currentFeatureIndex, selectedFeatures, isClearFeature }: TypeFeatureInfoProps): JSX.Element {
+export function FeatureInfo({
+  mapId,
+  features,
+  currentFeatureIndex,
+  selectedFeatures,
+  isClearFeature,
+  onClearFeature,
+}: TypeFeatureInfoProps): JSX.Element {
   const { t } = useTranslation<string>();
   const [checked, setChecked] = useState<boolean>(false);
 
@@ -62,6 +70,7 @@ export function FeatureInfo({ mapId, features, currentFeatureIndex, selectedFeat
     if (!checked) {
       setChecked(true);
       api.event.emit(featureHighlightPayload(EVENT_NAMES.FEATURE_HIGHLIGHT.EVENT_HIGHLIGHT_FEATURE, mapId, feature));
+      onClearFeature?.();
     } else {
       setChecked(false);
       api.event.emit(clearHighlightsPayload(EVENT_NAMES.FEATURE_HIGHLIGHT.EVENT_HIGHLIGHT_CLEAR, mapId, featureUid));
@@ -84,7 +93,6 @@ export function FeatureInfo({ mapId, features, currentFeatureIndex, selectedFeat
   useEffect(() => {
     if (isClearFeature) {
       setChecked(false);
-      // api.event.emit(clearHighlightsPayload(EVENT_NAMES.FEATURE_HIGHLIGHT.EVENT_HIGHLIGHT_CLEAR, mapId, featureUid));
     }
   }, [isClearFeature]);
 
