@@ -91,6 +91,17 @@ export function FeatureInfo({
   }, [featureUid, selectedFeatures]);
 
   useEffect(() => {
+    api.event.emit(featureHighlightPayload(EVENT_NAMES.FEATURE_HIGHLIGHT.EVENT_HIGHLIGHT_FEATURE, mapId, feature));
+
+    // Clear the highlight from other features except the one we are currently visiting
+    features.forEach((singleFeature, index) => {
+      if (index !== currentFeatureIndex) {
+        api.event.emit(clearHighlightsPayload(EVENT_NAMES.FEATURE_HIGHLIGHT.EVENT_HIGHLIGHT_CLEAR, mapId, getUid(singleFeature.geometry)));
+      }
+    });
+  }, [feature]);
+
+  useEffect(() => {
     if (isClearFeature) {
       setChecked(false);
     }
@@ -103,7 +114,8 @@ export function FeatureInfo({
           secondaryAction={
             <>
               <Tooltip title={t('details.select')} placement="top" enterDelay={1000}>
-                <Checkbox onChange={(e) => handleSelect(e)} checked={checked} />
+                {/* Fix line below related to checked=false */}
+                <Checkbox onChange={(e) => handleSelect(e)} checked={false} />
               </Tooltip>
               <IconButton color="primary" onClick={(e) => handleZoomIn(e)}>
                 <Tooltip title={t('details.zoom_to')} placement="top" enterDelay={1000}>
