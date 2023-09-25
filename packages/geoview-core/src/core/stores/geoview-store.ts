@@ -1,5 +1,5 @@
-import { StoreApi } from 'zustand';
-
+import { create } from 'zustand';
+import { subscribeWithSelector } from 'zustand/middleware';
 import debounce from 'lodash/debounce';
 
 // import OLMap from 'ol/map'; // TODO: When I use the import below instead of this one I have this TypeScript error
@@ -68,8 +68,6 @@ export interface IGeoViewState {
   onMapLoaded: (mapElem: OLMap) => void;
 }
 
-export type GeoViewStoreType = StoreApi<IGeoViewState>;
-
 export const geoViewStoreDefinition = (
   set: (
     partial: IGeoViewState | Partial<IGeoViewState> | ((state: IGeoViewState) => IGeoViewState | Partial<IGeoViewState>),
@@ -132,3 +130,8 @@ export const geoViewStoreDefinition = (
       });
     },
   } as IGeoViewState);
+
+export const geoViewStoreDefinitionWithSubscribeSelector = subscribeWithSelector(geoViewStoreDefinition);
+
+const fakeStore = create<IGeoViewState>()(geoViewStoreDefinitionWithSubscribeSelector);
+export type GeoViewStoreType = typeof fakeStore;
