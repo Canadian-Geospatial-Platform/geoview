@@ -55,11 +55,11 @@ export {
   RadioButtonUnchecked as RadioButtonUncheckedIcon,
   Remove as ZoomOutIcon,
   Search as SearchIcon,
+  Send as SendIcon,
   Visibility as VisibilityIcon,
   VisibilityOff as VisibilityOffIcon,
   Warning as WarningIcon,
   WhereToVote as ClickMapMarker,
   ZoomIn as ZoomInSearchIcon,
   ZoomOut as ZoomOutSearchIcon,
-  Send as SendIcon,
 } from '@mui/icons-material';
