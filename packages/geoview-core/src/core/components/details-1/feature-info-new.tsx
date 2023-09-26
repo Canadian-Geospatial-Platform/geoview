@@ -30,6 +30,7 @@ export interface TypeFeatureInfoProps {
   selectedFeatures?: MutableRefObject<string[]>;
   isClearFeature?: boolean;
   onClearFeature?: () => void;
+  onLayerChanged?: () => void;
 }
 
 /**
@@ -45,6 +46,7 @@ export function FeatureInfo({
   selectedFeatures,
   isClearFeature,
   onClearFeature,
+  onLayerChanged,
 }: TypeFeatureInfoProps): JSX.Element {
   const { t } = useTranslation<string>();
   const [checked, setChecked] = useState<boolean>(false);
@@ -70,6 +72,7 @@ export function FeatureInfo({
     if (!checked) {
       setChecked(true);
       api.event.emit(featureHighlightPayload(EVENT_NAMES.FEATURE_HIGHLIGHT.EVENT_HIGHLIGHT_FEATURE, mapId, feature));
+      // reset clear all feature to its false state in parent component
       onClearFeature?.();
     } else {
       setChecked(false);
@@ -90,15 +93,18 @@ export function FeatureInfo({
     }
   }, [featureUid, selectedFeatures]);
 
+  // Keep track of current feature change, clear all layers, then highlight current feature
+  // this needs to be in condition that don't
   useEffect(() => {
+    onLayerChanged?.();
     api.event.emit(featureHighlightPayload(EVENT_NAMES.FEATURE_HIGHLIGHT.EVENT_HIGHLIGHT_FEATURE, mapId, feature));
 
     // Clear the highlight from other features except the one we are currently visiting
-    features.forEach((singleFeature, index) => {
-      if (index !== currentFeatureIndex) {
-        api.event.emit(clearHighlightsPayload(EVENT_NAMES.FEATURE_HIGHLIGHT.EVENT_HIGHLIGHT_CLEAR, mapId, getUid(singleFeature.geometry)));
-      }
-    });
+    // features.forEach((singleFeature, index) => {
+    //   if (index !== currentFeatureIndex) {
+    //     api.event.emit(clearHighlightsPayload(EVENT_NAMES.FEATURE_HIGHLIGHT.EVENT_HIGHLIGHT_CLEAR, mapId, getUid(singleFeature.geometry)));
+    //   }
+    // });
   }, [feature]);
 
   useEffect(() => {
