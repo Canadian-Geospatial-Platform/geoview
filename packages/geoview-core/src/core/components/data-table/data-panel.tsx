@@ -24,6 +24,21 @@ interface DatapanelProps {
   layerKeys: string[];
 }
 
+const sxClasses = {
+  list: {
+    color: 'text.primary',
+    marginLeft: '1rem',
+    width: '100%',
+    paddingRight: '2rem',
+  },
+  paper: { marginBottom: '1rem', height: '67px' },
+  borderWithIndex: '2px solid #515BA5',
+  borderNone: 'none',
+  headline: { fontSize: '1.125rem', fontWeight: 'bold' },
+  dataPanel: { backgroundColor: '#F1F2F5', marginTop: '1rem' },
+  gridContainer: { paddingLeft: '1rem', paddingRight: '1rem' },
+};
+
 /**
  * Build Data panel from map.
  * @param {MapDataTableProps} layerData map data which will be used to build data table.
@@ -50,10 +65,10 @@ export function Datapanel({ layerData, mapId, projectionConfig, layerKeys, layer
    */
   const renderList = useCallback(
     () => (
-      <List sx={{ color: 'text.primary', marginLeft: '1rem', width: '100%', paddingRight: '2rem' }}>
+      <List sx={sxClasses.list}>
         {layerKeys.map((layerKey, index) => (
           <Paper
-            sx={{ marginBottom: '1rem', height: '67px', border: selectedLayerIndex === index ? '2px solid #515BA5' : 'none' }}
+            sx={{ ...sxClasses.paper, border: selectedLayerIndex === index ? sxClasses.borderWithIndex : sxClasses.borderNone }}
             key={layerKey}
           >
             <ListItem
@@ -91,16 +106,16 @@ export function Datapanel({ layerData, mapId, projectionConfig, layerKeys, layer
   }, [selectedLayerIndex]);
 
   return (
-    <Box sx={{ backgroundColor: '#F1F2F5', marginTop: '1rem' }}>
-      <Grid container spacing={2} sx={{ paddingLeft: '1rem', paddingRight: '1rem' }}>
+    <Box sx={sxClasses.dataPanel}>
+      <Grid container spacing={2} sx={sxClasses.gridContainer}>
         <Grid item xs={3}>
-          <Typography component="p" sx={{ fontSize: '1.125rem', fontWeight: 'bold' }}>
+          <Typography component="p" sx={sxClasses.headline}>
             Available Categories
           </Typography>
         </Grid>
 
         <Grid item xs={9}>
-          <Typography component="p" sx={{ fontSize: '1.125rem', fontWeight: 'bold' }}>
+          <Typography component="p" sx={sxClasses.headline}>
             Selected Category
           </Typography>
         </Grid>
@@ -110,7 +125,7 @@ export function Datapanel({ layerData, mapId, projectionConfig, layerKeys, layer
           {renderList()}
         </Grid>
         <Grid item xs={9} sx={{ paddingLeft: '1rem' }}>
-          <Typography component="p" sx={{ fontSize: '1.125rem', fontWeight: 'bold' }}>
+          <Typography component="p" sx={sxClasses.headline}>
             {layerKeys[selectedLayerIndex]}
           </Typography>
 
