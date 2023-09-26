@@ -111,7 +111,6 @@ const NUMBER_FILTER: Record<string, string> = {
  */
 
 function MapDataTable({ data, layerId, mapId, layerKey, projectionConfig }: MapDataTableProps) {
-  const mountedRef = useRef(false);
   const tableInstanceRef = useRef<MRTTableInstance>(null);
   const FILTER_MAP_DELAY = 1000;
   const { t } = useTranslation<string>();
@@ -225,7 +224,7 @@ function MapDataTable({ data, layerId, mapId, layerKey, projectionConfig }: MapD
 
   // update map when column filters change
   useEffect(() => {
-    if (columnFilters && mountedRef.current && mapFiltered) {
+    if (columnFilters && mapFiltered) {
       debouncedColumnFilters(columnFilters);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -236,11 +235,6 @@ function MapDataTable({ data, layerId, mapId, layerKey, projectionConfig }: MapD
     filterMap(columnFilters);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mapFiltered]);
-
-  useEffect(() => {
-    // This is created to counter column filter that is fired when component is mounted.
-    mountedRef.current = true;
-  }, []);
 
   // add/remove hightlight feature when row is selected/unselected.
   useEffect(() => {
@@ -452,11 +446,11 @@ function MapDataTable({ data, layerId, mapId, layerKey, projectionConfig }: MapD
         enableColumnVirtualization
         enablePagination={false}
         enablePinning
-        // enableRowVirtualization
-        muiTableContainerProps={{ sx: { maxHeight: '600px' } }}
+        enableRowVirtualization
+        muiTableContainerProps={{ sx: { maxHeight: '500px' } }}
         rowVirtualizerInstanceRef={rowVirtualizerInstanceRef}
-        // rowVirtualizerProps={{ overscan: 5 }}
-        // columnVirtualizerProps={{ overscan: 2 }}
+        rowVirtualizerProps={{ overscan: 5 }}
+        columnVirtualizerProps={{ overscan: 2 }}
         muiTableHeadCellFilterTextFieldProps={{
           sx: () => ({
             minWidth: '50px',
