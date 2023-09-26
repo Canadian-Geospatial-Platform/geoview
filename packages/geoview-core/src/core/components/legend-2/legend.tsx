@@ -1,13 +1,14 @@
 import { Button, FormControlLabel, FormGroup, styled, useTheme } from '@mui/material';
-import React from 'react';
+import React, { useState } from 'react';
 import { useStore } from 'zustand';
 import { useTranslation } from 'react-i18next';
 import { api } from '@/app';
 import { LegendItemsDetailsProps } from './types';
-import { AddIcon, Box, Checkbox, Grid, List, Typography } from '@/ui';
+import { AddIcon, Box, Checkbox, Grid, List, Typography, ExpandMoreIcon } from '@/ui';
 import { LegendItemDetails } from './legend-item-details/legend-item-details';
 import { getGeoViewStore } from '@/core/stores/stores-managers';
 import { LegendItem } from './legend-item';
+import { ShowSelectedLayers } from './selected-layers/selected-layers-details';
 
 const Item = styled('div')(({ theme }) => ({
   backgroundColor: theme.palette.mode === 'dark' ? '#262B32' : '#fff',
@@ -40,6 +41,29 @@ export function Legend2(props: LegendItemsDetailsProps): JSX.Element {
 
   const store = getGeoViewStore(mapId);
   const selectedLegendItem = useStore(store, (state) => state.legendState.selectedItem);
+  const [isSelectedLayersClicked, setIsSelectedLayersClicked] = useState(false);
+
+  const handleBoxClick = () => {
+    setIsSelectedLayersClicked(!isSelectedLayersClicked);
+  };
+
+  function showSelectedLayersPanel() {
+    return (
+      <Box
+        onClick={handleBoxClick}
+        sx={{
+          display: 'flex',
+          flexDirection: 'row',
+          justifyContent: 'space-between',
+          margin: '20px',
+          cursor: 'pointer',
+        }}
+      >
+        Selected Layers
+        <ExpandMoreIcon sx={{ transform: 'rotate(270deg)' }} />
+      </Box>
+    );
+  }
 
   const leftPanel = () => {
     const legendItems = layerIds
@@ -62,10 +86,37 @@ export function Legend2(props: LegendItemsDetailsProps): JSX.Element {
 
     return (
       <div>
+        {showSelectedLayersPanel()}
         <List sx={{ width: '100%' }}>{legendItems}</List>
       </div>
     );
   };
+
+  function rightPanel() {
+    if (isSelectedLayersClicked) {
+      return <ShowSelectedLayers />;
+    }
+    if (selectedLegendItem) {
+      return (
+        <>
+          <Typography sx={sxClasses.legendTitle}>{t('legend.selected_legend')}</Typography>
+          <Item>
+            <LegendItemDetails
+              key={`layerKey-${selectedLegendItem.layerId}`}
+              layerId={selectedLegendItem.layerId}
+              geoviewLayerInstance={selectedLegendItem?.geoviewLayerInstance}
+              isRemoveable={selectedLegendItem.isRemoveable}
+              canSetOpacity={selectedLegendItem.canSetOpacity}
+              expandAll={selectedLegendItem.expandAll}
+              hideAll={selectedLegendItem?.hideAll}
+            />
+          </Item>
+        </>
+      );
+    }
+
+    return null;
+  }
 
   return (
     <Box sx={sxClasses.legendContainer}>
@@ -84,22 +135,7 @@ export function Legend2(props: LegendItemsDetailsProps): JSX.Element {
           </Button>
         </Grid>
         <Grid item xs={12} sm={6}>
-          {selectedLegendItem && (
-            <>
-              <Typography sx={sxClasses.legendTitle}>{t('legend.selected_legend')}</Typography>
-              <Item>
-                <LegendItemDetails
-                  key={`layerKey-${selectedLegendItem.layerId}`}
-                  layerId={selectedLegendItem.layerId}
-                  geoviewLayerInstance={selectedLegendItem?.geoviewLayerInstance}
-                  isRemoveable={selectedLegendItem.isRemoveable}
-                  canSetOpacity={selectedLegendItem.canSetOpacity}
-                  expandAll={selectedLegendItem.expandAll}
-                  hideAll={selectedLegendItem?.hideAll}
-                />
-              </Item>
-            </>
-          )}
+          {rightPanel()}
         </Grid>
       </Grid>
     </Box>
