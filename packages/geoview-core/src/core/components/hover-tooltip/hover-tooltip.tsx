@@ -110,14 +110,16 @@ export function HoverTooltip(): JSX.Element {
   };
 
   useEffect(() => {
-    const unsubA = getGeoViewStore(mapId).subscribe((curState, prevState) => {
-      // if pointerPosition changed, pointer move event has been triggered
-      if (curState.mapState.pointerPosition !== prevState.mapState.pointerPosition) {
-        setShowTooltip(false);
-        setTooltipValue('');
-        setPixel(curState.mapState.pointerPosition!.pixel as [number, number]);
+    const unsubA = getGeoViewStore(mapId).subscribe(
+      (state) => state.mapState.pointerPosition,
+      (curPos, prevPos) => {
+        if (curPos !== prevPos) {
+          setShowTooltip(false);
+          setTooltipValue('');
+          setPixel(curPos!.pixel as [number, number]);
+        }
       }
-    });
+    );
 
     // listen to hover query done event
     api.event.on(EVENT_NAMES.GET_FEATURE_INFO.HOVER_QUERY_DONE, hoverQueryDoneListenerFunction, `${mapId}/$FeatureInfoLayerSet$`);
