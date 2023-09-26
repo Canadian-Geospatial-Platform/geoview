@@ -1651,7 +1651,7 @@
           "$ref": "#/definitions/TypeMapConfig"
         },
         "theme": {
-          "enum": ["dark", "light"],
+          "enum": ["dark", "light", "royal"],
           "default": "dark",
           "description": "Theme style the viewer."
         },

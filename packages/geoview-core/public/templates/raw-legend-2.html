@@ -140,10 +140,58 @@
                 'listOfLayerEntryConfig': [
                   { 'layerId': '5' }
                 ]
+              },
+              {
+                'geoviewLayerId': 'geojsonLYR5',
+                'geoviewLayerName': {
+                  'en': 'GeoJSON Sample'
+                },
+                'metadataAccessPath': {
+                  'en': './geojson/metadata.json'
+                },
+                'geoviewLayerType': 'GeoJSON',
+                'initialSettings': { 'visible': 'yes' },
+                'listOfLayerEntryConfig': [
+                  {
+                    'layerId': 'polygons.json',
+                    'layerName': {
+                      'en': 'Polygons'
+                    }
+                  },
+                  {
+                    'layerId': 'lines.json',
+                    'layerName': {
+                      'en': 'Lines'
+                    }
+                  },
+                  {
+                    'entryType': 'group',
+                    'layerId': 'point-feature-group',
+                    'layerName': {
+                      'en': 'point-feature-group'
+                    },
+                    'listOfLayerEntryConfig': [
+                      {
+                        'layerId': 'icon_points.json',
+                        'initialSettings': { 'visible': 'no' },
+                        'layerName': {
+                          'en': 'Icons'
+                        }
+                      },
+                      {
+                        'layerId': 'points.json',
+                        'initialSettings': { 'visible': 'always' },
+                        'layerName': {
+                          'en': 'Points'
+                        }
+                      }
+                    ]
+                  }
+                ]
               }
             ]
           },
-          'theme': 'light',
+          'theme': 'royal',
           'components': [],
           'corePackages': ['footer-panel'],
           'suportedLanguages': ['en']
@@ -175,16 +223,15 @@
 
         const legendOne = api
           .maps[mapIdOne]
-          .legend2.createLegend({ layerIds: ['UC1-Layer1', 'UC1-Layer2', 'UC1-Layer3', 'UC1-Layer4', 'UC1-Layer5'] });
+          .legend2.createLegend({ layerIds: ['UC1-Layer1', 'UC1-Layer2', 'UC1-Layer3', 'UC1-Layer4', 'UC1-Layer5', 'geojsonLYR5'] });
 
         // create new tab and add the LegendComponent to the footer tab
         ft1.createFooterTab({
-          value: 0,
-          label: 'Legend',
+          value: 3,
+          label: 'New Legend',
           content: () => legendOne,
         });
 
-      
       });
     </script>
   </body>
