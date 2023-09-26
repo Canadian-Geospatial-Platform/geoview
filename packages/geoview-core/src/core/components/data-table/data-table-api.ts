@@ -10,11 +10,13 @@ import {
   TypeFieldEntry,
 } from '@/app';
 import MapDataTable from './map-data-table';
+import { Datapanel } from './data-panel';
 
 interface CreataDataTableProps {
   layerId: string;
   layerKey: string;
 }
+
 export class DataTableApi {
   mapId!: string;
 
@@ -128,10 +130,52 @@ export class DataTableApi {
             /* @ts-expect-error value prop is part of promise, filter function already filter fullfilled promise, still thrown type error. */
             return this.buildFeatureRows(result.value);
           });
-
         return createElement(MapDataTable, { data: data[0], layerId, mapId: this.mapId, layerKey, projectionConfig }, []);
       }
     }
     return null;
+  };
+
+  /**
+   * Create data panel for various layers.
+   *
+   * @returns {Promise<ReactElement | null>} Promise of ReactElement.
+   */
+  createDataPanel = async (): Promise<ReactElement | null> => {
+    let layerIds: string[] = [];
+    let layerKeys: string[] = [];
+
+    const { currentProjection } = api.maps[this.mapId];
+    const projectionConfig = api.projection.projections[currentProjection];
+    const geoLayers = Object.keys(api.maps[this.mapId].layer.geoviewLayers);
+
+    geoLayers.forEach((layerId: string) => {
+      const geoviewLayerInstance = api.maps[this.mapId].layer.geoviewLayers[layerId];
+      if (
+        geoviewLayerInstance.listOfLayerEntryConfig.length > 0 &&
+        (geoviewLayerInstance as AbstractGeoViewVector).getAllFeatureInfo !== undefined
+      ) {
+        const groupLayerKeys = this.getGroupKeys(geoviewLayerInstance.listOfLayerEntryConfig, layerId, []);
+        layerKeys = [...layerKeys, ...groupLayerKeys];
+        layerIds = [...layerIds, ...groupLayerKeys.fill(layerId)];
+      }
+    });
+
+    const requests = layerKeys.map((layerKey, index) => {
+      const layerId = layerIds[index];
+      const geoviewLayerInstance = api.maps[this.mapId].layer.geoviewLayers[layerId];
+      return (geoviewLayerInstance as AbstractGeoViewVector)?.getAllFeatureInfo(layerKey);
+    });
+
+    const response = await Promise.allSettled(requests);
+
+    const data = response
+      .filter((req) => req.status === 'fulfilled')
+      .map((result) => {
+        /* @ts-expect-error value prop is part of promise, filter function already filter fullfilled promise, still thrown type error. */
+        return this.buildFeatureRows(result.value);
+      });
+
+    return createElement(Datapanel, { layerData: data, layerIds, mapId: this.mapId, layerKeys, projectionConfig }, null);
   };
 }

@@ -45,15 +45,7 @@
   <div id="mapWM1" class="llwp-map" data-lang="en" data-config-url="./configs/raw-data-table.json"></div>
 
   <div>
-    <button onClick="renderDataTableFromMap()" id="createDataTableFromMapBtn">Create
-      DataTable From Map
-    </button>
-
-    <button onClick="renderDataTableFromMapForHistoricalFlood()">
-      Create DataTable For Historical Floods
-    </button>
-
-    <div id="dataTable" style="margin: 1rem 0"></div>
+    <div id="dataTable" style="margin: 2rem 0"></div>
   </div>
 
 
@@ -62,43 +54,30 @@
     // initialize cgpv and api events, a callback is optional, used if calling api's after the rendering is ready
     cgpv.init(function () {
       console.log('api is ready');
-      const { react, createRoot, api, ui } = cgpv;
+      const { api, ui, createRoot } = cgpv;
 
       //create snippets
       createConfigSnippet();
       createCodeSnippet();
 
       renderDataTableFromMap = async () => {
-        console.time("MapTableCreation")
-        const layers = Object.keys(api.maps['mapWM1'].layer.geoviewLayers);
+        console.time("renderDataTableFromMap")
+        const root = createRoot(document.getElementById("dataTable"));
 
-        const itemAcc = {
-          title: "Data Table",
-          content: await cgpv.api.maps['mapWM1'].dataTable.createDataTableByLayerId({ layerId: layers[0], layerKey: `${layers[0]}/8`, mapId: "mapWM1" })
-        }
+        root.render("Data is loading...")
 
-        cgpv.api.addUiComponent(
-          "dataTable",
-          cgpv.react.createElement(cgpv.ui.elements.Accordion, { items: [itemAcc] })
-        );
-        console.timeEnd("MapTableCreation")
-      }
+        const layerId = Object.keys(api.maps['mapWM1'].layer.geoviewLayers)[2];
+        const data = await cgpv.api.maps['mapWM1'].dataTable.createDataPanel({ layerId, mapId: "mapWM1" })
 
-      renderDataTableFromMapForHistoricalFlood = async () => {
-        console.time("HistoricalFloodsMapTableCreation")
-        const layers = Object.keys(api.maps['mapWM1'].layer.geoviewLayers);
+        root.render(data)
 
-        const itemAcc = {
-          title: "Data Table",
-          content: await cgpv.api.maps['mapWM1'].dataTable.createDataTableByLayerId({ layerId: layers[1], layerKey: `${layers[1]}/0`, mapId: "mapWM1" })
-        }
+        console.timeEnd("renderDataTableFromMap")
+      };
 
-        cgpv.api.addUiComponent(
-          "dataTable",
-          cgpv.react.createElement(cgpv.ui.elements.Accordion, { items: [itemAcc] })
-        );
-        console.timeEnd("HistoricalFloodsMapTableCreation")
-      }
+      cgpv.api.event.on(cgpv.api.eventNames.MAP.EVENT_MAP_LOADED, (payload) => {
+        renderDataTableFromMap();
+      }, 'mapWM1');
+
     });
   </script>
 </body>

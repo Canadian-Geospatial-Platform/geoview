@@ -111,7 +111,6 @@ const NUMBER_FILTER: Record<string, string> = {
  */
 
 function MapDataTable({ data, layerId, mapId, layerKey, projectionConfig }: MapDataTableProps) {
-  const mountedRef = useRef(false);
   const tableInstanceRef = useRef<MRTTableInstance>(null);
   const FILTER_MAP_DELAY = 1000;
   const { t } = useTranslation<string>();
@@ -119,7 +118,6 @@ function MapDataTable({ data, layerId, mapId, layerKey, projectionConfig }: MapD
   const zoomColumn = { alias: t('dataTable.zoom'), dataType: 'string', id: t('dataTable.zoom') };
 
   const [mapFiltered, setMapFiltered] = useState<boolean>(false);
-  const [filteredData] = useState(data.features);
   const [columnFilters, setColumnFilters] = useState<MRTColumnFiltersState>([]);
 
   const [rowSelection, setRowSelection] = useState<Record<number, boolean>>({});
@@ -226,7 +224,7 @@ function MapDataTable({ data, layerId, mapId, layerKey, projectionConfig }: MapD
 
   // update map when column filters change
   useEffect(() => {
-    if (columnFilters && mountedRef.current && mapFiltered) {
+    if (columnFilters && mapFiltered) {
       debouncedColumnFilters(columnFilters);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -238,11 +236,6 @@ function MapDataTable({ data, layerId, mapId, layerKey, projectionConfig }: MapD
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mapFiltered]);
 
-  useEffect(() => {
-    // This is created to counter column filter that is fired when component is mounted.
-    mountedRef.current = true;
-  }, []);
-
   // add/remove hightlight feature when row is selected/unselected.
   useEffect(() => {
     const selectedRows = Object.keys(rowSelection).map((key) => Number(key));
@@ -250,7 +243,7 @@ function MapDataTable({ data, layerId, mapId, layerKey, projectionConfig }: MapD
     const addAnimationRowIds = difference(selectedRows, rowSelectionRef.current);
 
     addAnimationRowIds.forEach((idx) => {
-      const row = filteredData[Number(idx)];
+      const row = data.features[Number(idx)];
       if (row) {
         api.event.emit(featureHighlightPayload(EVENT_NAMES.FEATURE_HIGHLIGHT.EVENT_HIGHLIGHT_FEATURE, mapId, row));
       }
@@ -258,7 +251,7 @@ function MapDataTable({ data, layerId, mapId, layerKey, projectionConfig }: MapD
 
     const removeAnimationRowIds = difference(rowSelectionRef.current, selectedRows);
     removeAnimationRowIds.forEach((id) => {
-      const feature = filteredData[Number(id)];
+      const feature = data.features[Number(id)];
       const featureUid = getUid(feature.geometry);
       api.event.emit(clearHighlightsPayload(EVENT_NAMES.FEATURE_HIGHLIGHT.EVENT_HIGHLIGHT_CLEAR, mapId, featureUid));
     });
@@ -384,7 +377,7 @@ function MapDataTable({ data, layerId, mapId, layerKey, projectionConfig }: MapD
 
     return columnList;
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [data.fieldAliases]);
 
   /**
    * featureinfo data grid Zoom in/out handling
@@ -403,7 +396,7 @@ function MapDataTable({ data, layerId, mapId, layerKey, projectionConfig }: MapD
    * @param {Features} features list of objects transform into rows.
    */
   const rows = useMemo(() => {
-    return filteredData.map((feature) => {
+    return data.features.map((feature) => {
       return {
         ICON: <img alt={feature.featureIcon.toDataURL().toString()} src={feature.featureIcon.toDataURL().toString()} style={iconImage} />,
         ZOOM: (
@@ -415,10 +408,10 @@ function MapDataTable({ data, layerId, mapId, layerKey, projectionConfig }: MapD
       };
     }) as unknown as ColumnsType[];
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [data.features]);
 
   return (
-    <Box sx={{ padding: '1rem 0' }}>
+    <Box>
       <MaterialReactTable
         columns={columns as MRTColumnDef[]}
         data={rows}
@@ -454,7 +447,7 @@ function MapDataTable({ data, layerId, mapId, layerKey, projectionConfig }: MapD
         enablePagination={false}
         enablePinning
         enableRowVirtualization
-        muiTableContainerProps={{ sx: { maxHeight: '600px' } }}
+        muiTableContainerProps={{ sx: { maxHeight: '500px' } }}
         rowVirtualizerInstanceRef={rowVirtualizerInstanceRef}
         rowVirtualizerProps={{ overscan: 5 }}
         columnVirtualizerProps={{ overscan: 2 }}

@@ -55,6 +55,7 @@ export {
   RadioButtonUnchecked as RadioButtonUncheckedIcon,
   Remove as ZoomOutIcon,
   Search as SearchIcon,
+  Send as SendIcon,
   Visibility as VisibilityIcon,
   VisibilityOff as VisibilityOffIcon,
   VisibilityOutlined as VisibilityOutlinedIcon,
