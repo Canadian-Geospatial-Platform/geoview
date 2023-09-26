@@ -13,9 +13,10 @@ import { AbstractGeoViewLayer, api } from '@/app';
 import { TypeLocalizedString } from '@/geo/map/map-schema-types';
 import { EVENT_NAMES } from '@/api/events/event-types';
 
-import { Cast, TypeJsonArray, TypeJsonObject, TypeJsonValue } from '../types/global-types';
+import { Cast, TypeJsonArray, TypeJsonObject, TypeJsonValue, TypeMapFeaturesConfig } from '@/core/types/global-types';
 import { SnackbarType, snackbarMessagePayload } from '@/api/events/payloads';
 import { NotificationType, notificationPayload } from '@/api/events/payloads/notification-payload';
+import { Config } from '@/core/utils/config/config';
 
 /**
  * Get the string associated to the current display language.
@@ -353,6 +354,20 @@ export function parseJSONConfig(configObjStr: string): any {
       // replace apostrophes preceded by a backslash with a single apostrophe
       .replace(/\\'/gm, "'")
   );
+}
+
+/**
+ * Get a valid configuration from a string configuration
+ *
+ * @param {string} configString String configuration
+ * @returns {TypeMapFeaturesConfig} A valid configuration object
+ */
+export function getValidConfigFromString(configString: string, mapDiv: HTMLElement): TypeMapFeaturesConfig {
+  const configObjString = removeCommentsFromJSON(configString);
+  const parsedMapConfig = parseJSONConfig(configObjString);
+  // create a new config for this map element
+  const config = new Config(mapDiv!);
+  return config.getValidMapConfig(parsedMapConfig);
 }
 
 /**

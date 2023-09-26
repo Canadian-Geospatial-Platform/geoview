@@ -254,7 +254,7 @@ export function Swiper(props: SwiperProps): JSX.Element {
   const setRenderEvents = (layer: string) => {
     const { geoviewLayers } = api.maps[mapId].layer;
     const olLayer = geoviewLayers[layer].gvLayers;
-    setOlLayers((prevArray: string[]) => [...prevArray, olLayer!]);
+    setOlLayers((prevArray: BaseLayer[]) => [...prevArray, olLayer!]);
     olLayer?.on(['precompose' as EventTypes, 'prerender' as EventTypes], prerender);
     olLayer?.on(['postcompose' as EventTypes, 'postrender' as EventTypes], postcompose);
     // force VectorImage to refresh

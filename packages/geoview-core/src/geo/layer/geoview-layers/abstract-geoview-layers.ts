@@ -993,6 +993,7 @@ export abstract class AbstractGeoViewLayer {
    */
   unregisterFromLayerSets(layerEntryConfig: TypeBaseLayerEntryConfig) {
     const layerPath = Layer.getLayerPath(layerEntryConfig);
+    api.event.emit(LayerSetPayload.createLayerRegistrationPayload(this.mapId, layerPath, 'remove'));
 
     if (this.registerToLayerSetListenerFunctions[layerPath].updateLayerStatus) {
       api.event.off(
@@ -1000,6 +1001,7 @@ export abstract class AbstractGeoViewLayer {
         `${this.mapId}/$LegendsLayerSet$/${layerPath}/status`,
         this.registerToLayerSetListenerFunctions[layerPath].updateLayerStatus
       );
+      delete this.registerToLayerSetListenerFunctions[layerPath].updateLayerStatus;
     }
 
     if (this.registerToLayerSetListenerFunctions[layerPath].updateLayerPhase) {
@@ -1008,6 +1010,7 @@ export abstract class AbstractGeoViewLayer {
         `${this.mapId}/$LegendsLayerSet$/${layerPath}/phase`,
         this.registerToLayerSetListenerFunctions[layerPath].updateLayerPhase
       );
+      delete this.registerToLayerSetListenerFunctions[layerPath].updateLayerPhase;
     }
 
     if (this.registerToLayerSetListenerFunctions[layerPath].requestLayerInventory) {
@@ -1016,6 +1019,7 @@ export abstract class AbstractGeoViewLayer {
         this.mapId,
         this.registerToLayerSetListenerFunctions[layerPath].requestLayerInventory
       );
+      delete this.registerToLayerSetListenerFunctions[layerPath].requestLayerInventory;
     }
 
     if (this.registerToLayerSetListenerFunctions[layerPath].queryLegend) {
@@ -1024,14 +1028,13 @@ export abstract class AbstractGeoViewLayer {
         `${this.mapId}/${layerPath}`,
         this.registerToLayerSetListenerFunctions[layerPath].queryLegend
       );
+      delete this.registerToLayerSetListenerFunctions[layerPath].queryLegend;
     }
 
     if (this.registerToLayerSetListenerFunctions[layerPath].queryLayer) {
       api.event.off(EVENT_NAMES.GET_FEATURE_INFO.QUERY_LAYER, this.mapId, this.registerToLayerSetListenerFunctions[layerPath].queryLayer);
+      delete this.registerToLayerSetListenerFunctions[layerPath].queryLayer;
     }
-
-    delete this.registerToLayerSetListenerFunctions[layerPath];
-    api.event.emit(LayerSetPayload.createLayerRegistrationPayload(this.mapId, layerPath, 'remove'));
   }
 
   /** ***************************************************************************************************************************

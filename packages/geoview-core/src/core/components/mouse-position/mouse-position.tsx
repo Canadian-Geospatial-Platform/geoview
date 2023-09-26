@@ -1,21 +1,17 @@
-import { useCallback, useState, useEffect, useContext } from 'react';
+import { useState, useEffect, useContext } from 'react';
 
 import { Coordinate } from 'ol/coordinate';
-import { fromLonLat, toLonLat } from 'ol/proj';
+import { toLonLat } from 'ol/proj';
 
 import makeStyles from '@mui/styles/makeStyles';
 
 import { useTranslation } from 'react-i18next';
 
-import debounce from 'lodash/debounce';
-
 import { useStore } from 'zustand';
-import { api } from '@/app';
-import { MapContext } from '@/core/app-start';
+import { getGeoViewStore } from '@/core/stores/stores-managers';
 
 import { Box, CheckIcon, Tooltip } from '@/ui';
-
-import { getGeoViewStore } from '@/core/stores/stores-managers';
+import { MapContext } from '@/core/app-start';
 
 const useStyles = makeStyles((theme) => ({
   mousePositionContainer: {
@@ -71,9 +67,6 @@ function coordFormnatDMS(value: number): string {
  * @returns {JSX.Element} the mouse position component
  */
 export function MousePosition(): JSX.Element {
-  // TODO variable is not used, thus causing an error, commeting it out for later
-  // const isCrosshairsActive = useGeoViewStore((state) => state.isCrosshairsActive);
-
   const mapConfig = useContext(MapContext);
   const { mapId } = mapConfig;
 
@@ -82,11 +75,12 @@ export function MousePosition(): JSX.Element {
   // TODO: remove use style
   const classes = useStyles();
 
-  // get the expand or collapse from store
-  const expanded = useStore(getGeoViewStore(mapId), (state) => state.footerBarState.expanded);
-
+  // internal component state
   const [positions, setPositions] = useState<string[]>(['', '', '']);
   const [positionMode, setPositionMode] = useState<number>(0);
+
+  // get the expand or collapse from store
+  const expanded = useStore(getGeoViewStore(mapId), (state) => state.footerBarState.expanded);
 
   /**
    * Format the coordinates output in lat long
@@ -94,7 +88,7 @@ export function MousePosition(): JSX.Element {
    * @param {boolean} DMS true if need to be formatted as Degree Minute Second, false otherwise
    * @returns {Object} an object containing formatted Longitude and Latitude values
    */
-  function formatCoordinates(lnglat: Coordinate, DMS: boolean) {
+  function formatCoordinates(lnglat: Coordinate, DMS: boolean): { lng: string; lat: string } {
     const labelX = lnglat[0] < 0 ? t('mapctrl.mouseposition.west') : t('mapctrl.mouseposition.east');
     const labelY = lnglat[1] < 0 ? t('mapctrl.mouseposition.south') : t('mapctrl.mouseposition.north');
 
@@ -105,79 +99,41 @@ export function MousePosition(): JSX.Element {
   }
 
   /**
-   * Get the formatted coordinate for Degree Minute Second, Decimal degree and projected values
-   * @param {Coordinate} coord coordinates array to process
-   * @returns {Object} the coordinates
-   */
-  function getCoordinates(coord: Coordinate) {
-    // TODO: when map is loaded from function call, there is a first init with the empty config then an overwrite by the the function call.
-    // !Some of the reference are not set properly, so we have this work around. EWven with this is it not 100% perfect. This needs to be refactor
-    // !so we do not have access before the api map is set
-    const projection = api.projection.projections[api.maps[mapId] !== undefined ? api.maps[mapId].currentProjection : 3978];
-    const coordinate = toLonLat(coord, projection);
-
-    const DMS = formatCoordinates(coordinate, true);
-    const DD = formatCoordinates(coordinate, false);
-    const projected = fromLonLat([coordinate[0], coordinate[1]], projection);
-
-    return { DMS, DD, projected };
-  }
-
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const onMouseMove = useCallback(
-    debounce((e) => {
-      const coord = getCoordinates(e.coordinate);
-
-      setPositions([
-        `${coord.DMS.lng} | ${coord.DMS.lat}`,
-        `${coord.DD.lng} | ${coord.DD.lat}`,
-        `${coord.projected[0].toFixed(4)}m E | ${coord.projected[1].toFixed(4)}m N`,
-      ]);
-    }, 10),
-    [t, positionMode]
-  );
-
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const onMoveEnd = useCallback(
-    debounce((e) => {
-      const coord = getCoordinates(e.map.getView().getCenter());
-
-      setPositions([
-        `${coord.DMS.lng} | ${coord.DMS.lat}`,
-        `${coord.DD.lng} | ${coord.DD.lat}`,
-        `${coord.projected[0].toFixed(4)}m E | ${coord.projected[1].toFixed(4)}m N`,
-      ]);
-    }, 10),
-    [t, positionMode]
-  );
-
-  /**
    * Switch position mode
    */
   const switchPositionMode = () => {
-    const { map } = api.maps[mapId];
-    const coord = getCoordinates(map.getView().getCenter()!);
-
-    setPositions([
-      `${coord.DMS.lng} | ${coord.DMS.lat}`,
-      `${coord.DD.lng} | ${coord.DD.lat}`,
-      `${coord.projected[0].toFixed(4)}m E | ${coord.projected[1].toFixed(4)}m N`,
-    ]);
-
     setPositionMode((positionMode + 1) % 3);
   };
 
   useEffect(() => {
-    const { map } = api.maps[mapId];
+    const unsubA = getGeoViewStore(mapId).subscribe((curState, prevState) => {
+      // if pointerPosition changed, pointer move event has been triggered
+      if (curState.mapState.pointerPosition !== prevState.mapState.pointerPosition) {
+        const { lnglat, projected } = curState.mapState.pointerPosition!;
+        const DMS = formatCoordinates(lnglat, true);
+        const DD = formatCoordinates(lnglat, false);
 
-    map.on('pointermove', onMouseMove);
-    map.on('moveend', onMoveEnd);
+        setPositions([`${DMS.lng} | ${DMS.lat}`, `${DD.lng} | ${DD.lat}`, `${projected[0].toFixed(4)}m E | ${projected[1].toFixed(4)}m N`]);
+      }
+    });
+
+    const unsubB = getGeoViewStore(mapId).subscribe((curState, prevState) => {
+      // if mapCenterCoordinates changed, map move end event has been triggered
+      // if the crosshair is active from the store, keyboard is used
+      if (curState.isCrosshairsActive && curState.mapState.mapCenterCoordinates !== prevState.mapState.mapCenterCoordinates) {
+        const projected = curState.mapState.mapCenterCoordinates;
+        const DMS = formatCoordinates(toLonLat(projected, `EPSG:${curState.mapState.currentProjection}`), true);
+        const DD = formatCoordinates(toLonLat(projected, `EPSG:${curState.mapState.currentProjection}`), false);
+        setPositions([`${DMS.lng} | ${DMS.lat}`, `${DD.lng} | ${DD.lat}`, `${projected[0].toFixed(4)}m E | ${projected[1].toFixed(4)}m N`]);
+      }
+    });
 
     return () => {
-      map.un('pointermove', onMouseMove);
-      map.un('moveend', onMoveEnd);
+      unsubA();
+      unsubB();
     };
-  }, [mapId, onMouseMove, onMoveEnd, positionMode]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <Tooltip title={t('mapnav.coordinates')!} placement="top">

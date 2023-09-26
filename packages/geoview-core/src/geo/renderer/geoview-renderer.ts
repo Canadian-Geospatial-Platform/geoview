@@ -1525,7 +1525,7 @@ export class GeoviewRenderer {
             }
           }
         else {
-          // Validate the UPPER and LOWER syntaxe (i.e.: must be followed by an opening parenthesis)
+          // Validate the UPPER and LOWER syntax (i.e.: must be followed by an opening parenthesis)
           if (
             ['upper', 'lower'].includes(filterEquation[i].nodeValue as string) &&
             (filterEquation.length === i + 1 ||
@@ -1672,11 +1672,11 @@ export class GeoviewRenderer {
               throw new Error(`like operator error`);
             else {
               const regularExpression = new RegExp(
-                operand2.nodeValue.replaceAll('.', '\\.').replaceAll('%', '.*').replaceAll('_', '.'),
+                operand2.nodeValue.toLowerCase().replaceAll('.', '\\.').replaceAll('%', '.*').replaceAll('_', '.'),
                 ''
               );
-              const match = operand1.nodeValue ? operand1.nodeValue.match(regularExpression) : null;
-              dataStack.push({ nodeType: NodeType.variable, nodeValue: match !== null && match[0] === operand1.nodeValue });
+              const match = operand1.nodeValue ? operand1.nodeValue.toLowerCase().match(regularExpression) : null;
+              dataStack.push({ nodeType: NodeType.variable, nodeValue: match !== null && match[0] === operand1.nodeValue?.toLowerCase() });
             }
             break;
           case ',':
@@ -1748,7 +1748,7 @@ export class GeoviewRenderer {
             else dataStack.push({ nodeType: NodeType.variable, nodeValue: operand.nodeValue.toLowerCase() });
             break;
           default:
-            throw new Error(`unknoown operator error`);
+            throw new Error(`unknown operator error`);
         }
       }
     }
