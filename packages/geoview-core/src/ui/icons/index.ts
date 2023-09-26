@@ -58,6 +58,8 @@ export {
   Send as SendIcon,
   Visibility as VisibilityIcon,
   VisibilityOff as VisibilityOffIcon,
+  VisibilityOutlined as VisibilityOutlinedIcon,
+  VisibilityOffOutlined as VisibilityOffOutlinedIcon,
   Warning as WarningIcon,
   WhereToVote as ClickMapMarker,
   ZoomIn as ZoomInSearchIcon,
