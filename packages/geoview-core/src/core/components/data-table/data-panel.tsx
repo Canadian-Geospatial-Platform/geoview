@@ -1,8 +1,19 @@
 import React, { useState, useRef, useCallback, useEffect } from 'react';
-import ChevronRightIcon from '@mui/icons-material/ChevronRight';
-import SendIcon from '@mui/icons-material/Send';
 import { Projection } from 'ol/proj';
-import { Box, Grid, Typography, Paper, List, ListItem, ListItemButton, ListItemText, IconButton, ListItemIcon } from '@/ui';
+import {
+  Box,
+  Grid,
+  Typography,
+  Paper,
+  List,
+  ListItem,
+  ListItemButton,
+  ListItemText,
+  IconButton,
+  ListItemIcon,
+  SendIcon,
+  ChevronRightIcon,
+} from '@/ui';
 import MapDataTable, { MapDataTableData as MapDataTableDataProps } from './map-data-table';
 
 interface DatapanelProps {

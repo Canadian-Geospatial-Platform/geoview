@@ -61,4 +61,5 @@ export {
   WhereToVote as ClickMapMarker,
   ZoomIn as ZoomInSearchIcon,
   ZoomOut as ZoomOutSearchIcon,
+  Send as SendIcon,
 } from '@mui/icons-material';
