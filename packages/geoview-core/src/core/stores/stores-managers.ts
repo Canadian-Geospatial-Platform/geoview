@@ -16,7 +16,6 @@ export const addGeoViewStore = (config: TypeMapFeaturesConfig) => {
   if (!config.mapId) {
     return;
   }
-  // const geoViewStore2 = createStore<IGeoViewState>(geoViewStoreDefinition);
   const geoViewStore = create<IGeoViewState>()(geoViewStoreDefinitionWithSubscribeSelector);
   geoViewStore.getState().setMapConfig(config);
   initializeEventProcessors(geoViewStore);
