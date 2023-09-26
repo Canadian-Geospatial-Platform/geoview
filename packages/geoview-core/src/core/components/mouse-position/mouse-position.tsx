@@ -106,16 +106,23 @@ export function MousePosition(): JSX.Element {
   };
 
   useEffect(() => {
-    const unsubA = getGeoViewStore(mapId).subscribe((curState, prevState) => {
-      // if pointerPosition changed, pointer move event has been triggered
-      if (curState.mapState.pointerPosition !== prevState.mapState.pointerPosition) {
-        const { lnglat, projected } = curState.mapState.pointerPosition!;
-        const DMS = formatCoordinates(lnglat, true);
-        const DD = formatCoordinates(lnglat, false);
+    const unsubA = getGeoViewStore(mapId).subscribe(
+      (state) => state.mapState.pointerPosition,
+      (curPos, prevPos) => {
+        // if pointerPosition changed, pointer move event has been triggered
+        if (curPos !== prevPos) {
+          const { lnglat, projected } = curPos!;
+          const DMS = formatCoordinates(lnglat, true);
+          const DD = formatCoordinates(lnglat, false);
 
-        setPositions([`${DMS.lng} | ${DMS.lat}`, `${DD.lng} | ${DD.lat}`, `${projected[0].toFixed(4)}m E | ${projected[1].toFixed(4)}m N`]);
+          setPositions([
+            `${DMS.lng} | ${DMS.lat}`,
+            `${DD.lng} | ${DD.lat}`,
+            `${projected[0].toFixed(4)}m E | ${projected[1].toFixed(4)}m N`,
+          ]);
+        }
       }
-    });
+    );
 
     const unsubB = getGeoViewStore(mapId).subscribe((curState, prevState) => {
       // if mapCenterCoordinates changed, map move end event has been triggered
