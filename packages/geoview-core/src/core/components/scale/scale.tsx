@@ -123,17 +123,20 @@ export function Scale(): JSX.Element {
     map.addControl(scaleLine);
     map.addControl(scaleBar);
 
-    const unsub = getGeoViewStore(mapId).subscribe((curState, prevState) => {
-      // if mapCenterCoordinates changed, map move end event has been triggered
-      if (curState.mapState.mapCenterCoordinates !== prevState.mapState.mapCenterCoordinates) {
-        setLineWidth(
-          (document.getElementById(`${mapId}-scaleControlLine`)?.querySelector('.ol-scale-line-inner') as HTMLElement)?.style
-            .width as string
-        );
-        setScaleGraphic(document.getElementById(`${mapId}-scaleControlLine`)?.querySelector('.ol-scale-line-inner')?.innerHTML as string);
-        setScaleNumeric(document.getElementById(`${mapId}-scaleControlBar`)?.querySelector('.ol-scale-text')?.innerHTML as string);
+    const unsub = getGeoViewStore(mapId).subscribe(
+      (state) => state.mapState.mapCenterCoordinates,
+      (curCoords, prevCoords) => {
+        // if mapCenterCoordinates changed, map move end event has been triggered
+        if (curCoords !== prevCoords) {
+          setLineWidth(
+            (document.getElementById(`${mapId}-scaleControlLine`)?.querySelector('.ol-scale-line-inner') as HTMLElement)?.style
+              .width as string
+          );
+          setScaleGraphic(document.getElementById(`${mapId}-scaleControlLine`)?.querySelector('.ol-scale-line-inner')?.innerHTML as string);
+          setScaleNumeric(document.getElementById(`${mapId}-scaleControlBar`)?.querySelector('.ol-scale-text')?.innerHTML as string);
+        }
       }
-    });
+    );
 
     return () => {
       map.removeControl(scaleLine);

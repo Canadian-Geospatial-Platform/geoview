@@ -1,8 +1,8 @@
 // src/store/index.ts
-import { createStore } from 'zustand';
+import { create, createStore } from 'zustand';
 import { initializeEventProcessors } from '@/api/eventProcessors';
 import { TypeMapFeaturesConfig } from '../types/global-types';
-import { IGeoViewState, geoViewStoreDefinition, GeoViewStoreType } from './geoview-store';
+import { IGeoViewState, GeoViewStoreType, geoViewStoreDefinitionWithSubscribeSelector } from './geoview-store';
 
 export interface StoresManagerState {
   stores: Record<string, GeoViewStoreType>;
@@ -16,7 +16,7 @@ export const addGeoViewStore = (config: TypeMapFeaturesConfig) => {
   if (!config.mapId) {
     return;
   }
-  const geoViewStore = createStore<IGeoViewState>(geoViewStoreDefinition);
+  const geoViewStore = create<IGeoViewState>()(geoViewStoreDefinitionWithSubscribeSelector);
   geoViewStore.getState().setMapConfig(config);
   initializeEventProcessors(geoViewStore);
 
