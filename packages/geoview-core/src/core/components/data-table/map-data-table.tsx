@@ -100,6 +100,20 @@ const NUMBER_FILTER: Record<string, string> = {
   notEquals: '<>',
 };
 
+const sxClasses = {
+  selectedRows: {
+    backgroundColor: '#fff',
+    transition: 'box-shadow 300ms cubic-bezier(0.4, 0, 0.2, 1) 0ms',
+    fontWeight: 400,
+    fontSize: '0.875rem',
+    linHeight: 1.43,
+    letterSpacing: '0.01071em',
+    display: 'flex',
+    padding: '6px',
+    color: 'rgb(1, 67, 97)',
+  },
+};
+
 /**
  * Build Data table from map.
  * @param {MapDataTableProps} data map data which will be used to build data table.
@@ -127,6 +141,8 @@ function MapDataTable({ data, layerId, mapId, layerKey, projectionConfig }: MapD
   const rowVirtualizerInstanceRef = useRef<MRTVirtualizer<HTMLDivElement, HTMLTableRowElement>>(null);
 
   const [sorting, setSorting] = useState<MRTSortingState>([]);
+
+  const [toolbarRowSelectedMessage, setToolbarRowSelectedMessage] = useState('');
 
   const iconImage = {
     padding: 3,
@@ -259,6 +275,30 @@ function MapDataTable({ data, layerId, mapId, layerKey, projectionConfig }: MapD
     rowSelectionRef.current = selectedRows;
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [rowSelection]);
+
+  // show row selected message in the toolbar.
+  useEffect(() => {
+    let message = '';
+    if (Object.keys(rowSelection).length && tableInstanceRef.current) {
+      message = `${Object.keys(rowSelection).length} of ${tableInstanceRef.current.getFilteredRowModel().rows.length} row(s) selected`;
+    } else if (tableInstanceRef.current && tableInstanceRef.current.getFilteredRowModel().rows.length !== data.features.length) {
+      message = `${tableInstanceRef.current.getFilteredRowModel().rows.length} of ${data.features.length} row(s) filtered`;
+    }
+    setToolbarRowSelectedMessage(message);
+  }, [rowSelection, data.features]);
+
+  // show row filtered message in the toolbar.
+  useEffect(() => {
+    let message = '';
+    if (tableInstanceRef.current) {
+      const rowsFiltered = tableInstanceRef.current.getFilteredRowModel();
+      if (rowsFiltered.rows.length !== data.features.length) {
+        message = `${rowsFiltered.rows.length} of ${data.features.length} row(s) filtered`;
+      }
+    }
+    setToolbarRowSelectedMessage(message);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [columnFilters, data.features]);
 
   /**
    * Create table header cell
@@ -427,6 +467,11 @@ function MapDataTable({ data, layerId, mapId, layerKey, projectionConfig }: MapD
         enableColumnFilterModes
         onSortingChange={setSorting}
         onColumnFiltersChange={setColumnFilters}
+        enableBottomToolbar={false}
+        positionToolbarAlertBanner="none" // hide existing row count
+        renderTopToolbarCustomActions={() => {
+          return <Box sx={sxClasses.selectedRows}>{toolbarRowSelectedMessage}</Box>;
+        }}
         renderToolbarInternalActions={({ table }) => (
           <Box>
             <MRTToggleFiltersButton table={table} />
@@ -441,13 +486,12 @@ function MapDataTable({ data, layerId, mapId, layerKey, projectionConfig }: MapD
         )}
         tableInstanceRef={tableInstanceRef}
         enableFilterMatchHighlighting
-        enableBottomToolbar={false}
         enableColumnResizing
         enableColumnVirtualization
         enablePagination={false}
         enablePinning
         enableRowVirtualization
-        muiTableContainerProps={{ sx: { maxHeight: '500px' } }}
+        muiTableContainerProps={{ sx: { maxHeight: '600px' } }}
         rowVirtualizerInstanceRef={rowVirtualizerInstanceRef}
         rowVirtualizerProps={{ overscan: 5 }}
         columnVirtualizerProps={{ overscan: 2 }}
