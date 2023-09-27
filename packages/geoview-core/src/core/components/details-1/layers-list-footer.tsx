@@ -20,7 +20,15 @@ import { TypeArrayOfLayerData, TypeLayerData } from './details';
 import { FeatureInfo } from './feature-info-new';
 import { PayloadBaseClass, api } from '@/app';
 import { EVENT_NAMES } from '@/api/events/event-types';
-import { payloadIsAFeatureHighlight, payloadIsAClearHighlights, clearHighlightsPayload, TypeFeatureInfoEntry } from '@/api/events/payloads';
+import {
+  payloadIsAFeatureHighlight,
+  payloadIsAClearHighlights,
+  clearHighlightsPayload,
+  featureHighlightPayload,
+  TypeFeatureInfoEntry,
+  TypeArrayOfFeatureInfoEntries,
+  TypeGeometry,
+} from '@/api/events/payloads';
 
 const getSxClasses = (isPanelHeaders = false) => {
   return {
@@ -58,7 +66,7 @@ export function LayersListFooter(props: TypeLayersListProps): JSX.Element {
   const { t } = useTranslation<string>();
   const [layerDataInfo, setLayerDataInfo] = useState<TypeLayerData | null>(null);
   const [currentFeatureIndex, setCurrentFeatureIndex] = useState<number>(0);
-  const [isClearFeature, setIsClearFeature] = useState<boolean>(false);
+  const [isClearAllCheckboxes, setIsClearAllCheckboxes] = useState<boolean>(false);
 
   const highlightCallbackFunction = (payload: PayloadBaseClass) => {
     if (payloadIsAFeatureHighlight(payload)) {
@@ -77,12 +85,43 @@ export function LayersListFooter(props: TypeLayersListProps): JSX.Element {
   };
 
   const handleClearAllFeatures = () => {
+    // clear all highlights from features on the map in all layers, except the current feature
     arrayOfLayerData.forEach((layer: TypeLayerData) => {
       layer.features.forEach((feature: TypeFeatureInfoEntry) => {
-        api.event.emit(clearHighlightsPayload(EVENT_NAMES.FEATURE_HIGHLIGHT.EVENT_HIGHLIGHT_CLEAR, mapId, getUid(feature.geometry)));
+        if (
+          ((layerDataInfo?.features[currentFeatureIndex] as TypeFeatureInfoEntry).geometry as TypeGeometry)?.ol_uid !==
+          (feature.geometry as TypeGeometry)?.ol_uid
+        ) {
+          api.event.emit(clearHighlightsPayload(EVENT_NAMES.FEATURE_HIGHLIGHT.EVENT_HIGHLIGHT_CLEAR, mapId, getUid(feature.geometry)));
+        }
       });
     });
-    setIsClearFeature(true);
+
+    setIsClearAllCheckboxes(true);
+  };
+
+  const allUncheckedFeatures = (checkedFeatures: TypeArrayOfFeatureInfoEntries, allFeatures: TypeArrayOfFeatureInfoEntries) => {
+    const uncheckedFeatures = allFeatures.filter(
+      (feature) =>
+        !checkedFeatures.some(
+          (checkedFeature) => (checkedFeature.geometry as TypeGeometry)?.ol_uid === (feature.geometry as TypeGeometry)?.ol_uid
+        )
+    );
+    return uncheckedFeatures;
+  };
+
+  const handleFeatureNavigateChange = (checkedFeatures: TypeArrayOfFeatureInfoEntries, currentFeature: TypeFeatureInfoEntry) => {
+    // remove the highlight for unchecked feature
+    arrayOfLayerData.forEach((layer: TypeLayerData) => {
+      const getAllUnCheckedFeatures = allUncheckedFeatures(checkedFeatures, layer.features);
+
+      getAllUnCheckedFeatures.forEach((obj: TypeFeatureInfoEntry) => {
+        api.event.emit(clearHighlightsPayload(EVENT_NAMES.FEATURE_HIGHLIGHT.EVENT_HIGHLIGHT_CLEAR, mapId, getUid(obj.geometry)));
+      });
+    });
+
+    // add highlight to current feature
+    api.event.emit(featureHighlightPayload(EVENT_NAMES.FEATURE_HIGHLIGHT.EVENT_HIGHLIGHT_FEATURE, mapId, currentFeature));
   };
 
   useEffect(() => {
@@ -101,8 +140,6 @@ export function LayersListFooter(props: TypeLayersListProps): JSX.Element {
       // load the first layer we clicked with its feature info in right panel
       // if there are multiple layers, we load the first one on the list with its feature info
       setLayerDataInfo(arrayOfLayerData[0]);
-      // select the first feature info (checks the checkbox of the first feature info)
-      selectedFeatures.current.push(getUid(arrayOfLayerData[0].features[0].geometry));
     }
   }, [arrayOfLayerData]);
 
@@ -218,9 +255,9 @@ export function LayersListFooter(props: TypeLayersListProps): JSX.Element {
                   currentFeatureIndex={currentFeatureIndex}
                   selectedFeatures={selectedFeatures}
                   mapId={mapId}
-                  isClearFeature={isClearFeature}
-                  onClearFeature={() => setIsClearFeature(false)}
-                  onLayerChanged={() => handleClearAllFeatures()}
+                  onClearCheckboxes={() => setIsClearAllCheckboxes(false)}
+                  onFeatureNavigateChange={handleFeatureNavigateChange}
+                  clearAllCheckboxes={isClearAllCheckboxes}
                 />
               </div>
             </>

@@ -5,7 +5,14 @@ import { Paper } from '@mui/material';
 import { getUid } from 'ol/util';
 import { List, ListItem, ListItemText, ZoomInSearchIcon, Tooltip, IconButton, Checkbox } from '@/ui';
 import { api } from '@/app';
-import { featureHighlightPayload, clearHighlightsPayload, TypeFieldEntry, TypeArrayOfFeatureInfoEntries } from '@/api/events/payloads';
+import {
+  featureHighlightPayload,
+  clearHighlightsPayload,
+  TypeFieldEntry,
+  TypeArrayOfFeatureInfoEntries,
+  TypeFeatureInfoEntry,
+  TypeGeometry,
+} from '@/api/events/payloads';
 import { EVENT_NAMES } from '@/api/events/event-types';
 import { FeatureInfoTable } from './feature-info-table';
 
@@ -27,10 +34,10 @@ export interface TypeFeatureInfoProps {
   mapId: string;
   features: TypeArrayOfFeatureInfoEntries;
   currentFeatureIndex: number;
+  onClearCheckboxes: () => void;
+  onFeatureNavigateChange: (checkedFeatures: TypeArrayOfFeatureInfoEntries, currentFeature: TypeFeatureInfoEntry) => void;
   selectedFeatures?: MutableRefObject<string[]>;
-  isClearFeature?: boolean;
-  onClearFeature?: () => void;
-  onLayerChanged?: () => void;
+  clearAllCheckboxes?: boolean;
 }
 
 /**
@@ -44,19 +51,18 @@ export function FeatureInfo({
   features,
   currentFeatureIndex,
   selectedFeatures,
-  isClearFeature,
-  onClearFeature,
-  onLayerChanged,
+  onClearCheckboxes,
+  onFeatureNavigateChange,
+  clearAllCheckboxes,
 }: TypeFeatureInfoProps): JSX.Element {
   const { t } = useTranslation<string>();
   const [checked, setChecked] = useState<boolean>(false);
-
+  const [checkedFeatures, setCheckedFeatures] = useState<TypeArrayOfFeatureInfoEntries>([]);
   const feature = features[currentFeatureIndex];
-
   const featureUid = getUid(feature.geometry);
-
   const featureIconSrc = feature.featureIcon.toDataURL();
   const nameFieldValue = feature.fieldInfo[feature.nameField!]!.value as string;
+
   const featureInfoList: TypeFieldEntry[] = Object.keys(feature.fieldInfo).map((fieldName) => {
     return {
       fieldKey: feature.fieldInfo[fieldName]!.fieldKey,
@@ -67,16 +73,21 @@ export function FeatureInfo({
     };
   });
 
+  const isFeatureInSelectedFeatures = checkedFeatures.some((obj) => {
+    return (obj.geometry as TypeGeometry)?.ol_uid === (feature.geometry as TypeGeometry)?.ol_uid;
+  });
+
   const handleSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     e.stopPropagation();
+
     if (!checked) {
       setChecked(true);
-      api.event.emit(featureHighlightPayload(EVENT_NAMES.FEATURE_HIGHLIGHT.EVENT_HIGHLIGHT_FEATURE, mapId, feature));
-      // reset clear all feature to its false state in parent component
-      onClearFeature?.();
+      setCheckedFeatures((prevValue) => [...prevValue, feature]);
     } else {
       setChecked(false);
-      api.event.emit(clearHighlightsPayload(EVENT_NAMES.FEATURE_HIGHLIGHT.EVENT_HIGHLIGHT_CLEAR, mapId, featureUid));
+      setCheckedFeatures((prevValue) =>
+        prevValue.filter((item) => (item.geometry as TypeGeometry)?.ol_uid !== (feature.geometry as TypeGeometry)?.ol_uid)
+      );
     }
   };
 
@@ -84,6 +95,15 @@ export function FeatureInfo({
     e.stopPropagation();
     api.maps[mapId].zoomToExtent(feature.extent);
   };
+
+  useEffect(() => {
+    if (checkedFeatures.length !== 0) {
+      checkedFeatures.forEach((checkedFeature: TypeFeatureInfoEntry) => {
+        api.event.emit(featureHighlightPayload(EVENT_NAMES.FEATURE_HIGHLIGHT.EVENT_HIGHLIGHT_FEATURE, mapId, checkedFeature));
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [checkedFeatures]);
 
   useEffect(() => {
     if (selectedFeatures?.current && selectedFeatures.current.indexOf(featureUid) !== -1) {
@@ -96,22 +116,32 @@ export function FeatureInfo({
   // Keep track of current feature change, clear all layers, then highlight current feature
   // this needs to be in condition that don't
   useEffect(() => {
-    onLayerChanged?.();
     api.event.emit(featureHighlightPayload(EVENT_NAMES.FEATURE_HIGHLIGHT.EVENT_HIGHLIGHT_FEATURE, mapId, feature));
-
-    // Clear the highlight from other features except the one we are currently visiting
-    // features.forEach((singleFeature, index) => {
-    //   if (index !== currentFeatureIndex) {
-    //     api.event.emit(clearHighlightsPayload(EVENT_NAMES.FEATURE_HIGHLIGHT.EVENT_HIGHLIGHT_CLEAR, mapId, getUid(singleFeature.geometry)));
-    //   }
-    // });
+    onFeatureNavigateChange(checkedFeatures, feature);
+    // to keep the checkbox checked if current feature is one of selected features
+    setChecked(isFeatureInSelectedFeatures);
+    // if we haven't checked any featuress, clear the highlight from other features except the one we are currently visiting
+    // once we are navigating next and previous feature
+    if (checkedFeatures.length === 0) {
+      features.forEach((singleFeature, index) => {
+        if (index !== currentFeatureIndex) {
+          api.event.emit(
+            clearHighlightsPayload(EVENT_NAMES.FEATURE_HIGHLIGHT.EVENT_HIGHLIGHT_CLEAR, mapId, getUid(singleFeature.geometry))
+          );
+        }
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [feature]);
 
   useEffect(() => {
-    if (isClearFeature) {
+    if (clearAllCheckboxes) {
+      setCheckedFeatures([]);
       setChecked(false);
+      onClearCheckboxes();
     }
-  }, [isClearFeature]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [clearAllCheckboxes]);
 
   return (
     <Paper sx={{ boxShadow: 'none' }}>
@@ -121,7 +151,7 @@ export function FeatureInfo({
             <>
               <Tooltip title={t('details.select')} placement="top" enterDelay={1000}>
                 {/* Fix line below related to checked=false */}
-                <Checkbox onChange={(e) => handleSelect(e)} checked={false} />
+                <Checkbox onChange={(e) => handleSelect(e)} checked={checked} />
               </Tooltip>
               <IconButton color="primary" onClick={(e) => handleZoomIn(e)}>
                 <Tooltip title={t('details.zoom_to')} placement="top" enterDelay={1000}>
