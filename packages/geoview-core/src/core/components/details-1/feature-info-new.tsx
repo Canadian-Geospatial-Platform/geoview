@@ -35,6 +35,7 @@ export interface TypeFeatureInfoProps {
   currentFeatureIndex: number;
   onClearCheckboxes: () => void;
   onFeatureNavigateChange: (checkedFeatures: TypeArrayOfFeatureInfoEntries, currentFeature: TypeFeatureInfoEntry) => void;
+  setDisableClearAllBtn: (isDisabled: boolean) => void;
   selectedFeatures?: MutableRefObject<string[]>;
   clearAllCheckboxes?: boolean;
 }
@@ -52,6 +53,7 @@ export function FeatureInfo({
   selectedFeatures,
   onClearCheckboxes,
   onFeatureNavigateChange,
+  setDisableClearAllBtn,
   clearAllCheckboxes,
 }: TypeFeatureInfoProps): JSX.Element {
   const { t } = useTranslation<string>();
@@ -101,6 +103,10 @@ export function FeatureInfo({
         api.event.emit(featureHighlightPayload(EVENT_NAMES.FEATURE_HIGHLIGHT.EVENT_HIGHLIGHT_FEATURE, mapId, checkedFeature));
       });
     }
+
+    // disable the clear all button once we don't have any selected features
+    setDisableClearAllBtn(checkedFeatures.length === 0);
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [checkedFeatures]);
 
@@ -144,7 +150,10 @@ export function FeatureInfo({
           secondaryAction={
             <>
               <Tooltip title={t('details.select')} placement="top" enterDelay={1000}>
-                <Checkbox onChange={(e) => handleSelect(e)} checked={checked} />
+                <>
+                  {t('details.keepFeatureSelected')}
+                  <Checkbox onChange={(e) => handleSelect(e)} checked={checked} />
+                </>
               </Tooltip>
               <IconButton color="primary" onClick={(e) => handleZoomIn(e)}>
                 <Tooltip title={t('details.zoom_to')} placement="top" enterDelay={1000}>

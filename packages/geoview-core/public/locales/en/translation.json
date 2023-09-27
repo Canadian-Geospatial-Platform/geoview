@@ -72,7 +72,8 @@
     "nextFeatureBtn": "Next feature",
     "previousFeatureBtn": "Previous feature",
     "clearAllfeatures": "Clear all feature highlights",
-    "highlightFeaturesOnMap": "Highlight features on map"
+    "highlightFeaturesOnMap": "Highlight features on map",
+    "keepFeatureSelected": "Keep feature selected"
   },
   "lightbox": {
     "next": "Next",

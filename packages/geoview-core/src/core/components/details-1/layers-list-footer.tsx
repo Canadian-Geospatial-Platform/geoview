@@ -67,6 +67,7 @@ export function LayersListFooter(props: TypeLayersListProps): JSX.Element {
   const [layerDataInfo, setLayerDataInfo] = useState<TypeLayerData | null>(null);
   const [currentFeatureIndex, setCurrentFeatureIndex] = useState<number>(0);
   const [isClearAllCheckboxes, setIsClearAllCheckboxes] = useState<boolean>(false);
+  const [disableClearAllBtn, setDisableClearAllBtn] = useState<boolean>(false);
 
   const highlightCallbackFunction = (payload: PayloadBaseClass) => {
     if (payloadIsAFeatureHighlight(payload)) {
@@ -219,6 +220,7 @@ export function LayersListFooter(props: TypeLayersListProps): JSX.Element {
                         tooltip="details.clearAllfeatures"
                         tooltipPlacement="top"
                         onClick={() => handleClearAllFeatures()}
+                        disabled={disableClearAllBtn}
                       >
                         <LayersClearOutlinedIcon />
                       </IconButton>
@@ -257,6 +259,7 @@ export function LayersListFooter(props: TypeLayersListProps): JSX.Element {
                   onClearCheckboxes={() => setIsClearAllCheckboxes(false)}
                   onFeatureNavigateChange={handleFeatureNavigateChange}
                   clearAllCheckboxes={isClearAllCheckboxes}
+                  setDisableClearAllBtn={setDisableClearAllBtn}
                 />
               </div>
             </>
