@@ -43,14 +43,14 @@ export function Legend2(props: LegendItemsDetailsProps): JSX.Element {
   const selectedLegendItem = useStore(store, (state) => state.legendState.selectedItem);
   const [isSelectedLayersClicked, setIsSelectedLayersClicked] = useState(false);
 
-  const handleBoxClick = () => {
+  const onSelectedLayersClick = () => {
     setIsSelectedLayersClicked(!isSelectedLayersClicked);
   };
 
   function showSelectedLayersPanel() {
     return (
       <Box
-        onClick={handleBoxClick}
+        onClick={onSelectedLayersClick}
         sx={{
           display: 'flex',
           flexDirection: 'row',
@@ -59,7 +59,7 @@ export function Legend2(props: LegendItemsDetailsProps): JSX.Element {
           cursor: 'pointer',
         }}
       >
-        Selected Layers
+        {t('legend.selected_Layers')}
         <ExpandMoreIcon sx={{ transform: 'rotate(270deg)' }} />
       </Box>
     );
