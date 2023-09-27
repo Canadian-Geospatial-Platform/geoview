@@ -85,17 +85,16 @@ export function LayersListFooter(props: TypeLayersListProps): JSX.Element {
   };
 
   const handleClearAllFeatures = () => {
-    // clear all highlights from features on the map in all layers, except the current feature
-    arrayOfLayerData.forEach((layer: TypeLayerData) => {
-      layer.features.forEach((feature: TypeFeatureInfoEntry) => {
-        if (
-          ((layerDataInfo?.features[currentFeatureIndex] as TypeFeatureInfoEntry).geometry as TypeGeometry)?.ol_uid !==
-          (feature.geometry as TypeGeometry)?.ol_uid
-        ) {
-          api.event.emit(clearHighlightsPayload(EVENT_NAMES.FEATURE_HIGHLIGHT.EVENT_HIGHLIGHT_CLEAR, mapId, getUid(feature.geometry)));
-        }
-      });
-    });
+    // clear all highlights from features on the map in all layers,
+    api.event.emit(clearHighlightsPayload(EVENT_NAMES.FEATURE_HIGHLIGHT.EVENT_HIGHLIGHT_CLEAR, mapId, 'all'));
+    // add the highlight to the current feature
+    api.event.emit(
+      featureHighlightPayload(
+        EVENT_NAMES.FEATURE_HIGHLIGHT.EVENT_HIGHLIGHT_FEATURE,
+        mapId,
+        layerDataInfo?.features[currentFeatureIndex] as TypeFeatureInfoEntry
+      )
+    );
 
     setIsClearAllCheckboxes(true);
   };

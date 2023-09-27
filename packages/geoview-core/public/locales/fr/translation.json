@@ -69,10 +69,10 @@
     "selectedFeature": "Fonctionnalité Item",
     "feature": "item",
     "clickOnMap": "Cliquer sur la carte",
-    "nextFeatureBtn": "Suivante item",
-    "previousFeatureBtn": "Précédent item",
+    "nextFeatureBtn": "Item suivant",
+    "previousFeatureBtn": "Item précédent",
     "clearAllfeatures": "Effacer toutes les fonctionnalités",
-    "highlightFeaturesOnMap": "Mettre en surbrillance les items sur la carte"
+    "highlightFeaturesOnMap": "Déselctionner tout les items"
   },
   "lightbox": {
     "next": "Prochaine",

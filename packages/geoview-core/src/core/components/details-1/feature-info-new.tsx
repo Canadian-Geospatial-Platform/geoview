@@ -1,9 +1,8 @@
 /* eslint-disable react/require-default-props */
 import React, { MutableRefObject, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Paper } from '@mui/material';
 import { getUid } from 'ol/util';
-import { List, ListItem, ListItemText, ZoomInSearchIcon, Tooltip, IconButton, Checkbox } from '@/ui';
+import { List, ListItem, ListItemText, ZoomInSearchIcon, Tooltip, IconButton, Checkbox, Paper } from '@/ui';
 import { api } from '@/app';
 import {
   featureHighlightPayload,
@@ -116,21 +115,16 @@ export function FeatureInfo({
   // Keep track of current feature change, clear all layers, then highlight current feature
   // this needs to be in condition that don't
   useEffect(() => {
+    if (checkedFeatures.length === 0) {
+      api.event.emit(clearHighlightsPayload(EVENT_NAMES.FEATURE_HIGHLIGHT.EVENT_HIGHLIGHT_CLEAR, mapId, 'all'));
+    }
     api.event.emit(featureHighlightPayload(EVENT_NAMES.FEATURE_HIGHLIGHT.EVENT_HIGHLIGHT_FEATURE, mapId, feature));
     onFeatureNavigateChange(checkedFeatures, feature);
     // to keep the checkbox checked if current feature is one of selected features
     setChecked(isFeatureInSelectedFeatures);
-    // if we haven't checked any featuress, clear the highlight from other features except the one we are currently visiting
+    // if we haven't checked any features, clear the highlight from other features except the one we are currently visiting
     // once we are navigating next and previous feature
-    if (checkedFeatures.length === 0) {
-      features.forEach((singleFeature, index) => {
-        if (index !== currentFeatureIndex) {
-          api.event.emit(
-            clearHighlightsPayload(EVENT_NAMES.FEATURE_HIGHLIGHT.EVENT_HIGHLIGHT_CLEAR, mapId, getUid(singleFeature.geometry))
-          );
-        }
-      });
-    }
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [feature]);
 
@@ -150,7 +144,6 @@ export function FeatureInfo({
           secondaryAction={
             <>
               <Tooltip title={t('details.select')} placement="top" enterDelay={1000}>
-                {/* Fix line below related to checked=false */}
                 <Checkbox onChange={(e) => handleSelect(e)} checked={checked} />
               </Tooltip>
               <IconButton color="primary" onClick={(e) => handleZoomIn(e)}>
