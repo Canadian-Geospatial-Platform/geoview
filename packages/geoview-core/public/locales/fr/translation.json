@@ -71,7 +71,7 @@
     "clickOnMap": "Cliquer sur la carte",
     "nextFeatureBtn": "Item suivant",
     "previousFeatureBtn": "Item précédent",
-    "clearAllfeatures": "Effacer toutes les fonctionnalités",
+    "clearAllfeatures": "Déselctionner tout les items",
     "highlightFeaturesOnMap": "Déselctionner tout les items"
   },
   "lightbox": {
