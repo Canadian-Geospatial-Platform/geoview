@@ -3,7 +3,7 @@ import { PayloadBaseClass } from './payload-base-class';
 import { EventStringId, EVENT_NAMES } from '../event-types';
 
 /** Valid events that can create NotificationPayload */
-const validEvents: EventStringId[] = [EVENT_NAMES.NOTIFICATIONS.NOTIFICATION_ADD, EVENT_NAMES.NOTIFICATIONS.NOTIFICATION_REMOVE];
+const validEvents: EventStringId[] = [EVENT_NAMES.NOTIFICATIONS.NOTIFICATION_ADD];
 
 /**
  * type guard function that redefines a PayloadBaseClass as a NotificationPayload

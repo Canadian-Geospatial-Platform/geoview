@@ -1,7 +1,6 @@
 export * from './app-bar/buttons/export';
 export * from './app-bar/buttons/geolocator';
 export * from './app-bar/buttons/help';
-export * from './app-bar/buttons/notifications';
 export * from './app-bar/buttons/version';
 export * from './app-bar/app-bar';
 export * from './app-bar/app-bar-buttons';
@@ -49,7 +48,7 @@ export * from './nav-bar/nav-bar-buttons';
 export * from './nav-bar/nav-bar';
 export * from './north-arrow/north-arrow-icon';
 export * from './north-arrow/north-arrow';
-export * from './notifications/notifications-api';
+export * from './notifications/notifications';
 export * from './overview-map/overview-map-toggle';
 export * from './overview-map/overview-map';
 export * from './scale/scale';
