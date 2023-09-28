@@ -106,10 +106,10 @@ export function MousePosition(): JSX.Element {
   };
 
   useEffect(() => {
-    const unsubA = getGeoViewStore(mapId).subscribe(
+    // if pointerPosition changed, map pointer event has been triggered
+    const unsubMapPointer = getGeoViewStore(mapId).subscribe(
       (state) => state.mapState.pointerPosition,
       (curPos, prevPos) => {
-        // if pointerPosition changed, pointer move event has been triggered
         if (curPos !== prevPos) {
           const { lnglat, projected } = curPos!;
           const DMS = formatCoordinates(lnglat, true);
@@ -124,20 +124,28 @@ export function MousePosition(): JSX.Element {
       }
     );
 
-    const unsubB = getGeoViewStore(mapId).subscribe((curState, prevState) => {
-      // if mapCenterCoordinates changed, map move end event has been triggered
-      // if the crosshair is active from the store, keyboard is used
-      if (curState.isCrosshairsActive && curState.mapState.mapCenterCoordinates !== prevState.mapState.mapCenterCoordinates) {
-        const projected = curState.mapState.mapCenterCoordinates;
-        const DMS = formatCoordinates(toLonLat(projected, `EPSG:${curState.mapState.currentProjection}`), true);
-        const DD = formatCoordinates(toLonLat(projected, `EPSG:${curState.mapState.currentProjection}`), false);
-        setPositions([`${DMS.lng} | ${DMS.lat}`, `${DD.lng} | ${DD.lat}`, `${projected[0].toFixed(4)}m E | ${projected[1].toFixed(4)}m N`]);
+    // if mapCenterCoordinates changed, map move end event has been triggered
+    // if the crosshair is active from the store, keyboard is used
+    const unsubMapCenterCoord = getGeoViewStore(mapId).subscribe(
+      (state) => state.mapState.mapCenterCoordinates,
+      (curCenterCoord, prevCenterCoord) => {
+        if (curCenterCoord !== prevCenterCoord && getGeoViewStore(mapId).getState().isCrosshairsActive) {
+          const projected = curCenterCoord;
+          const projection = getGeoViewStore(mapId).getState().mapState.currentProjection;
+          const DMS = formatCoordinates(toLonLat(projected, `EPSG:${projection}`), true);
+          const DD = formatCoordinates(toLonLat(projected, `EPSG:${projection}`), false);
+          setPositions([
+            `${DMS.lng} | ${DMS.lat}`,
+            `${DD.lng} | ${DD.lat}`,
+            `${projected[0].toFixed(4)}m E | ${projected[1].toFixed(4)}m N`,
+          ]);
+        }
       }
-    });
+    );
 
     return () => {
-      unsubA();
-      unsubB();
+      unsubMapPointer();
+      unsubMapCenterCoord();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

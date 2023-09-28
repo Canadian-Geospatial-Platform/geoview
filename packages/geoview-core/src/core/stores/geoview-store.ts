@@ -9,23 +9,28 @@ Argument of type 'import("C:/Users/jolevesq/Sites/geoview/common/temp/node_modul
 */
 import { Map as OLMap, MapEvent, MapBrowserEvent } from 'ol';
 import { Coordinate } from 'ol/coordinate';
+import { ObjectEvent } from 'ol/Object';
 import { toLonLat } from 'ol/proj';
 
 import { TypeMapFeaturesConfig } from '@/core/types/global-types';
 import { TypeLegendItemProps } from '../components/legend-2/types';
 
 import { TypeMapMouseInfo } from '@/api/events/payloads';
+import { TypeInteraction } from '@/geo/map/map-schema-types';
 
 export interface IMapState {
-  zoom?: number;
-  mapCenterCoordinates: Coordinate;
-  pointerPosition: TypeMapMouseInfo | undefined;
   currentProjection: number;
-  mapLoaded: boolean;
+  pointerPosition: TypeMapMouseInfo | undefined;
+  mapCenterCoordinates: Coordinate;
+  mapClickCoordinates: TypeMapMouseInfo | undefined;
   mapElement?: OLMap;
+  mapLoaded: boolean;
+  zoom?: number | undefined;
 
   onMapMoveEnd: (event: MapEvent) => void;
   onMapPointerMove: (event: MapEvent) => void;
+  onMapSingleClick: (event: MapEvent) => void;
+  onMapZoomEnd: (event: ObjectEvent) => void;
 }
 
 export interface IFooterBarState {
@@ -56,6 +61,7 @@ export interface ILegendState {
 export interface IGeoViewState {
   mapId: string;
   mapConfig: TypeMapFeaturesConfig | undefined;
+  interaction: TypeInteraction;
   mapState: IMapState;
 
   footerBarState: IFooterBarState;
@@ -78,6 +84,7 @@ export const geoViewStoreDefinition = (
   ({
     mapId: '',
     mapConfig: undefined,
+    interaction: 'dynamic',
     isCrosshairsActive: false,
     mapState: {
       mapLoaded: false,
@@ -105,6 +112,27 @@ export const geoViewStoreDefinition = (
           },
         });
       }, 10),
+      onMapSingleClick: (event: MapEvent) => {
+        set({
+          mapState: {
+            ...get().mapState,
+            mapClickCoordinates: {
+              projected: (event as MapBrowserEvent<UIEvent>).coordinate,
+              pixel: (event as MapBrowserEvent<UIEvent>).pixel,
+              lnglat: toLonLat((event as MapBrowserEvent<UIEvent>).coordinate, `EPSG:${get().mapState.currentProjection}`),
+              dragging: (event as MapBrowserEvent<UIEvent>).dragging,
+            },
+          },
+        });
+      },
+      onMapZoomEnd: (event: ObjectEvent) => {
+        set({
+          mapState: {
+            ...get().mapState,
+            zoom: event.target.getZoom()!,
+          },
+        });
+      },
     },
     footerBarState: {
       expanded: false,
@@ -129,7 +157,7 @@ export const geoViewStoreDefinition = (
         },
       });
     },
-  } as IGeoViewState);
+  } as unknown as IGeoViewState);
 
 export const geoViewStoreDefinitionWithSubscribeSelector = subscribeWithSelector(geoViewStoreDefinition);
 

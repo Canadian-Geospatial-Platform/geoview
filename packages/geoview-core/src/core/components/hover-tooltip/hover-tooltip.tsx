@@ -8,7 +8,7 @@ import { getUid } from 'ol/util';
 import { getGeoViewStore } from '@/core/stores/stores-managers';
 
 import { Box } from '@/ui';
-import { api, payloadIsAMapMouseEvent } from '@/app';
+import { api } from '@/app';
 import { MapContext } from '@/core/app-start';
 import { EVENT_NAMES } from '@/api/events/event-types';
 import { PayloadBaseClass, TypeFeatureInfoEntry, payloadIsAllQueriesDone, payloadIsHoverQueryDone } from '@/api/events/payloads';
@@ -101,16 +101,9 @@ export function HoverTooltip(): JSX.Element {
     }
   };
 
-  const mapSingleClickListenerFunction = (payload: PayloadBaseClass) => {
-    if (payloadIsAMapMouseEvent(payload)) {
-      selectedFeature.current = undefined;
-      setShowTooltip(false);
-      setTooltipValue('');
-    }
-  };
-
   useEffect(() => {
-    const unsubA = getGeoViewStore(mapId).subscribe(
+    // if pointerPosition changed, map pointer event has been triggered
+    const unsubMapPointer = getGeoViewStore(mapId).subscribe(
       (state) => state.mapState.pointerPosition,
       (curPos, prevPos) => {
         if (curPos !== prevPos) {
@@ -121,20 +114,29 @@ export function HoverTooltip(): JSX.Element {
       }
     );
 
+    // if mapClickCoordinates changed, single click event has been triggered
+    const unsubMapSingleClick = getGeoViewStore(mapId).subscribe(
+      (state) => state.mapState.mapClickCoordinates,
+      (curClick, prevClick) => {
+        if (curClick !== prevClick) {
+          selectedFeature.current = undefined;
+          setShowTooltip(false);
+          setTooltipValue('');
+        }
+      }
+    );
+
     // listen to hover query done event
     api.event.on(EVENT_NAMES.GET_FEATURE_INFO.HOVER_QUERY_DONE, hoverQueryDoneListenerFunction, `${mapId}/$FeatureInfoLayerSet$`);
 
     // Get a feature when it is selected
     api.event.on(EVENT_NAMES.GET_FEATURE_INFO.ALL_QUERIES_DONE, allQueriesDoneListenerFunciton, `${mapId}/$FeatureInfoLayerSet$`);
 
-    // Hide tooltip on map click, and clear selected feature
-    api.event.on(EVENT_NAMES.MAP.EVENT_MAP_SINGLE_CLICK, mapSingleClickListenerFunction, mapId);
-
     return () => {
       api.event.off(EVENT_NAMES.GET_FEATURE_INFO.HOVER_QUERY_DONE, mapId, hoverQueryDoneListenerFunction);
       api.event.off(EVENT_NAMES.GET_FEATURE_INFO.ALL_QUERIES_DONE, mapId, allQueriesDoneListenerFunciton);
-      api.event.off(EVENT_NAMES.MAP.EVENT_MAP_SINGLE_CLICK, mapId, mapSingleClickListenerFunction);
-      unsubA();
+      unsubMapPointer();
+      unsubMapSingleClick();
     };
 
     // eslint-disable-next-line react-hooks/exhaustive-deps

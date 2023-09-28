@@ -123,11 +123,11 @@ export function Scale(): JSX.Element {
     map.addControl(scaleLine);
     map.addControl(scaleBar);
 
-    const unsub = getGeoViewStore(mapId).subscribe(
+    // if mapCenterCoordinates changed, map move end event has been triggered
+    const unsubMapCenterCoord = getGeoViewStore(mapId).subscribe(
       (state) => state.mapState.mapCenterCoordinates,
-      (curCoords, prevCoords) => {
-        // if mapCenterCoordinates changed, map move end event has been triggered
-        if (curCoords !== prevCoords) {
+      (curCenterCoord, prevCenterCoord) => {
+        if (curCenterCoord !== prevCenterCoord) {
           setLineWidth(
             (document.getElementById(`${mapId}-scaleControlLine`)?.querySelector('.ol-scale-line-inner') as HTMLElement)?.style
               .width as string
@@ -141,7 +141,7 @@ export function Scale(): JSX.Element {
     return () => {
       map.removeControl(scaleLine);
       map.removeControl(scaleBar);
-      unsub();
+      unsubMapCenterCoord();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

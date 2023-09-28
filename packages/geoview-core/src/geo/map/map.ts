@@ -403,17 +403,21 @@ export class MapViewer {
           const store = getGeoViewStore(this.mapId);
 
           // initialize store OpenLayers events
+          // TODO: destroy events on map destruction
           this.map.on('moveend', store.getState().mapState.onMapMoveEnd);
           this.map.on('pointermove', store.getState().mapState.onMapPointerMove);
+          this.map.on('singleclick', store.getState().mapState.onMapSingleClick);
+          this.map.getView().on('change:resolution', store.getState().mapState.onMapZoomEnd);
 
           // initialize map state
           store.setState({
             mapState: {
               ...store.getState().mapState,
+              currentProjection: this.currentProjection,
+              mapCenterCoordinates: this.map.getView().getCenter()!,
               mapLoaded: true,
               mapElement: this.map,
-              mapCenterCoordinates: this.map.getView().getCenter()!,
-              currentProjection: this.currentProjection,
+              zoom: this.map.getView().getZoom(),
             },
           });
 

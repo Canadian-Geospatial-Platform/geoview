@@ -134,9 +134,9 @@
         cgpv.api.createMapFromConfig('LNG1', config);
 
         // loads config in blank map
-        // cgpv.api.maps['LNG2'].loadMapConfig(config);
+        // cgpv.api.maps['LNG2'].loadMapFromJsonStringConfig (config);
         // TODO: Investigate part of #1118, if we remove the calss on div it works by passing with getValidMapConfig
-        // if using the loadMapConfig (when cass exist) it fails for the second map. This whole start from function must be refactor.
+        // if using the loadMapFromJsonStringConfig  (when cass exist) it fails for the second map. This whole start from function must be refactor.
         setTimeout(() => {
           cgpv.api.createMapFromConfig('LNG2', config);
           cgpv.api.createMapFromConfig('LNG3', config)
