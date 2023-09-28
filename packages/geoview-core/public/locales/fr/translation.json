@@ -66,7 +66,14 @@
     "detailsView": "Vue détaillée",
     "selectVisbleLayer": "Sélectionnez n'importe quelle couche visible sur la carte pour commencer",
     "availableLayers": "Couche disponibles",
-    "selectedFeature": "Fonctionnalité Item"
+    "selectedFeature": "Fonctionnalité Item",
+    "feature": "item",
+    "clickOnMap": "Cliquer sur la carte",
+    "nextFeatureBtn": "Item suivant",
+    "previousFeatureBtn": "Item précédent",
+    "clearAllfeatures": "Déselctionner tout les items",
+    "highlightFeaturesOnMap": "Déselctionner tout les items",
+    "keepFeatureSelected": "Garder l'élément sélectionné"
   },
   "lightbox": {
     "next": "Prochaine",
