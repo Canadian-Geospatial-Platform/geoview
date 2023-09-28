@@ -9,7 +9,6 @@ import { useStore } from 'zustand';
 import { getGeoViewStore } from '@/core/stores/stores-managers';
 
 import { MapContext } from '@/core/app-start';
-import { api } from '@/app';
 import { Tooltip, Box } from '@/ui';
 
 const useStyles = makeStyles((theme) => ({
@@ -150,11 +149,10 @@ export function Attribution(): JSX.Element {
   const attributionTextRef = useRef<Array<string>>([]);
 
   // get the expand or collapse from store
+  const mapElement = useStore(getGeoViewStore(mapId), (state) => state.mapState.mapElement);
   const expanded = useStore(getGeoViewStore(mapId), (state) => state.footerBarState.expanded);
 
   useEffect(() => {
-    const { map } = api.maps[mapId];
-
     const attributionTextElement = document.getElementById(`${mapId}-attribution-text`) as HTMLElement;
 
     const attributionControl = new CustomAttribution(
@@ -180,12 +178,12 @@ export function Attribution(): JSX.Element {
     }
     attributionControl.formatAttribution();
 
-    map.addControl(attributionControl);
+    mapElement.addControl(attributionControl);
 
     return () => {
-      map.removeControl(attributionControl);
+      mapElement.removeControl(attributionControl);
     };
-  }, [mapId]);
+  }, [mapId, mapElement]);
 
   return (
     <Tooltip title={!attributionTextRef.current?.length ? '' : attributionTextRef.current.join('\n')}>

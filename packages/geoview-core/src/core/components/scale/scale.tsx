@@ -8,7 +8,6 @@ import makeStyles from '@mui/styles/makeStyles';
 import { useStore } from 'zustand';
 import { getGeoViewStore } from '@/core/stores/stores-managers';
 
-import { api } from '@/app';
 import { MapContext } from '@/core/app-start';
 import { CheckIcon, Tooltip, Box } from '@/ui';
 
@@ -78,8 +77,9 @@ export function Scale(): JSX.Element {
   const [scaleGraphic, setScaleGraphic] = useState<string>('');
   const [scaleNumeric, setScaleNumeric] = useState<string>('');
 
-  // get the expand or collapse from store
+  // get the values from store
   const expanded = useStore(getGeoViewStore(mapId), (state) => state.footerBarState.expanded);
+  const mapElement = useStore(getGeoViewStore(mapId), (state) => state.mapState.mapElement);
 
   // TODO: remove make style
   const classes = useStyles();
@@ -106,8 +106,6 @@ export function Scale(): JSX.Element {
   ];
 
   useEffect(() => {
-    const { map } = api.maps[mapId];
-
     const scaleBar = new ScaleLine({
       units: 'metric',
       target: document.getElementById(`${mapId}-scaleControlBar`) as HTMLElement,
@@ -120,14 +118,14 @@ export function Scale(): JSX.Element {
       target: document.getElementById(`${mapId}-scaleControlLine`) as HTMLElement,
     });
 
-    map.addControl(scaleLine);
-    map.addControl(scaleBar);
+    mapElement.addControl(scaleLine);
+    mapElement.addControl(scaleBar);
 
     // if mapCenterCoordinates changed, map move end event has been triggered
     const unsubMapCenterCoord = getGeoViewStore(mapId).subscribe(
       (state) => state.mapState.mapCenterCoordinates,
-      (curCenterCoord, prevCenterCoord) => {
-        if (curCenterCoord !== prevCenterCoord) {
+      (curCoords, prevCoords) => {
+        if (curCoords !== prevCoords) {
           setLineWidth(
             (document.getElementById(`${mapId}-scaleControlLine`)?.querySelector('.ol-scale-line-inner') as HTMLElement)?.style
               .width as string
@@ -135,12 +133,15 @@ export function Scale(): JSX.Element {
           setScaleGraphic(document.getElementById(`${mapId}-scaleControlLine`)?.querySelector('.ol-scale-line-inner')?.innerHTML as string);
           setScaleNumeric(document.getElementById(`${mapId}-scaleControlBar`)?.querySelector('.ol-scale-text')?.innerHTML as string);
         }
+      },
+      {
+        fireImmediately: true,
       }
     );
 
     return () => {
-      map.removeControl(scaleLine);
-      map.removeControl(scaleBar);
+      mapElement.removeControl(scaleLine);
+      mapElement.removeControl(scaleBar);
       unsubMapCenterCoord();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps

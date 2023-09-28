@@ -1,5 +1,5 @@
 /* eslint-disable react/jsx-props-no-spreading */
-import { useEffect, useState, useRef, MutableRefObject } from 'react';
+import { useEffect, useRef, MutableRefObject } from 'react';
 
 import { fromLonLat, toLonLat } from 'ol/proj';
 import OLMap from 'ol/Map';
@@ -13,7 +13,10 @@ import makeStyles from '@mui/styles/makeStyles';
 import { useMediaQuery } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 
+import { useStore } from 'zustand';
 import { Extent } from 'ol/extent';
+import { getGeoViewStore } from '@/core/stores/stores-managers';
+
 import { NorthArrow, NorthPoleFlag } from '../north-arrow/north-arrow';
 import { Crosshair } from '../crosshair/crosshair';
 import { Footerbar } from '../footer-bar/footer-bar';
@@ -21,9 +24,9 @@ import { OverviewMap } from '../overview-map/overview-map';
 import { ClickMarker } from '../click-marker/click-marker';
 import { HoverTooltip } from '../hover-tooltip/hover-tooltip';
 
-import { disableScrolling, generateId } from '../../utils/utilities';
+import { addNotificationWarning, disableScrolling, generateId } from '@/core/utils/utilities';
 
-import { api, inKeyfocusPayload, notificationPayload } from '@/app';
+import { api, inKeyfocusPayload } from '@/app';
 import { EVENT_NAMES } from '@/api/events/event-types';
 
 import { MapViewer } from '@/geo/map/map';
@@ -41,17 +44,19 @@ const useStyles = makeStyles(() => ({
 }));
 
 export function Map(mapFeaturesConfig: TypeMapFeaturesConfig): JSX.Element {
-  const { map: mapConfig, components } = mapFeaturesConfig;
+  const { map: mapConfig } = mapFeaturesConfig;
 
   // make sure the id is not undefined
   // eslint-disable-next-line react/destructuring-assignment
   const mapId = mapFeaturesConfig.mapId ? mapFeaturesConfig.mapId : generateId('');
-  const [isLoaded, setIsLoaded] = useState(false);
 
   const classes = useStyles();
 
   // get ref to div element
   const mapElement = useRef<HTMLDivElement | undefined>();
+
+  // get values from the store
+  const { mapLoaded, northArrow, overviewMap } = useStore(getGeoViewStore(mapId), (state) => state.mapState);
 
   // create a new map viewer instance
   const viewer: MapViewer = api.maps[mapId];
@@ -92,9 +97,6 @@ export function Map(mapFeaturesConfig: TypeMapFeaturesConfig): JSX.Element {
     });
 
     viewer.toggleMapInteraction(mapConfig.interaction);
-
-    // emit the map loaded event
-    setIsLoaded(true);
   };
 
   const initMap = async () => {
@@ -107,15 +109,17 @@ export function Map(mapFeaturesConfig: TypeMapFeaturesConfig): JSX.Element {
     if (mapConfig.viewSettings?.extent) {
       if (projection.getCode() === 'EPSG:3978') {
         // eslint-disable-next-line no-console
-        console.error('Extents not available for LLC projections (EPSG: 3978)');
-        api.event.emit(
-          notificationPayload(
-            EVENT_NAMES.NOTIFICATIONS.NOTIFICATION_ADD,
-            mapId,
-            'warning',
-            'Extents not available for LLC projections (EPSG: 3978)'
-          )
-        );
+        console.log('Extents not available for LLC projections (EPSG: 3978)');
+        addNotificationWarning(mapId, 'Extents not available for LLC projections (EPSG: 3978)');
+
+        // TODO: use store action to add and remove from within the viewer
+        //   116:9  error  React Hook "useStore" is called in function "initMap" that is neither a React function component nor a custom React Hook function. React component names must start with an uppercase letter. React Hook names must start with the word "use"  react-hooks/rules-of-hooks
+        // useStore(getGeoViewStore(mapId), (state) =>
+        //   state.notificationState.addNotification({
+        //     message: 'Extents not available for LLC projections (EPSG: 3978)',
+        //     notificationType: 'error',
+        //   })
+        // );
       } else {
         const mins = fromLonLat([mapConfig.viewSettings.extent[0], mapConfig.viewSettings.extent[1]], projection.getCode());
         const maxs = fromLonLat([mapConfig.viewSettings.extent[2], mapConfig.viewSettings.extent[3]], projection.getCode());
@@ -257,16 +261,14 @@ export function Map(mapFeaturesConfig: TypeMapFeaturesConfig): JSX.Element {
   return (
     /* eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex */
     <div id={`map-${mapId}`} ref={mapElement as MutableRefObject<HTMLDivElement>} className={classes.mapContainer} tabIndex={0}>
-      {isLoaded && (
+      {mapLoaded && (
         <>
-          {components !== undefined && components.indexOf('north-arrow') > -1 && (
-            <NorthArrow projection={api.projection.projections[api.maps[mapId].currentProjection].getCode()} />
-          )}
-          <NorthPoleFlag projection={api.projection.projections[api.maps[mapId].currentProjection].getCode()} />
+          {northArrow && <NorthArrow />}
+          <NorthPoleFlag />
           <Crosshair />
           <ClickMarker />
           <HoverTooltip />
-          {deviceSizeMedUp && components !== undefined && components.indexOf('overview-map') > -1 && <OverviewMap />}
+          {deviceSizeMedUp && overviewMap && <OverviewMap />}
           {deviceSizeMedUp && <Footerbar />}
         </>
       )}
