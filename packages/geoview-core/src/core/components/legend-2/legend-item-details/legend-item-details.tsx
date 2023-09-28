@@ -45,8 +45,8 @@ const sxClasses = {
     paddingLeft: 28,
   },
   expandableIconContainer: {
-    padding: '16px 17px 16px 23px',
-    margin: '20px 0',
+    paddingLeft: 10,
+    margin: '20px 0'
   },
   legendIcon: {
     display: 'flex',
@@ -113,7 +113,7 @@ const sxClasses = {
     display: 'flex',
     alignItems: 'center',
     gap: '15px',
-    padding: '8px 20px 7px 15px',
+    padding: '16px 62px 16px 62px',
     backgroundColor: '#F6F6F6',
   },
   menuListIcon: { justifyContent: 'right', 'min-width': '56px' },
@@ -165,6 +165,7 @@ export function LegendItemDetails(props: TypeLegendItemDetailsProps): JSX.Elemen
   const getGroupsDetails = (): boolean => {
     let isGroup = false;
     if (layerConfigEntry) {
+      
       if (layerEntryIsGroupLayer(layerConfigEntry)) {
         setGroupItems(layerConfigEntry.listOfLayerEntryConfig);
         isGroup = true;
@@ -176,8 +177,12 @@ export function LegendItemDetails(props: TypeLegendItemDetailsProps): JSX.Elemen
       setGroupItems(geoviewLayerInstance?.listOfLayerEntryConfig);
       isGroup = true;
     }
+    console.log("is GROUP", isGroup);
     return isGroup;
   };
+
+  console.log(groupItems);
+  
 
   const getLegendDetails = (layerLegend: TypeLegend) => {
     const { geoviewLayerId } = geoviewLayerInstance;
@@ -393,31 +398,33 @@ export function LegendItemDetails(props: TypeLegendItemDetailsProps): JSX.Elemen
     setIsClusterToggleEnabled(source?.cluster?.enable ?? false);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
+  
   return (
     <Grid item sm={12}>
-      <Stack sx={{ justifyContent: 'space-between', padding: '16px 17px 16px 23px' }} direction="row">
+      <Stack sx={{justifyContent: 'space-between', margin: '20px'}} direction="row" alignItems="center">
         <div>
           <Typography> {layerName} </Typography>
           <Typography sx={{ fontSize: '0.6em' }}> Layer quick overview info </Typography>
         </div>
         <div>
           {groupItems.length === 0 && (
-            <IconButton onClick={handleZoomTo} sx={{ backgroundColor: '#F6F6F6' }}>
+            <IconButton onClick={handleZoomTo} sx={{ backgroundColor: '#F6F6F6'}}>
               <ZoomInSearchIcon />
             </IconButton>
-          )}
+            )}
         </div>
       </Stack>
-      <div style={{ padding: '16px 17px 16px 23px' }}>
-        {opacity && groupItems.length === 0 && (
-          <Box sx={sxClasses.opacityMenu}>
+
+      {opacity && groupItems.length === 0 && (
+        <>
+          <Box sx={sxClasses.opacityMenu } >
             <Typography>{t('legend.opacity')}</Typography>
             <SliderBase min={0} max={100} value={opacity * 100} customOnChange={handleSetOpacity} />
           </Box>
-        )}
-      </div>
-      <List>
+        </>
+      )}
+
+       <List>
         <ListItem>
           {isRemoveable && (
             <Button variant="contained" onClick={handleRemoveLayer} type="text">

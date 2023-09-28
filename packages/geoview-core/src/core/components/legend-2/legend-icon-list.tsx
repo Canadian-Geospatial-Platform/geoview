@@ -1,9 +1,9 @@
-/* eslint-disable react/require-default-props */
 import React, { useState, useEffect } from 'react';
 import { useTheme, Theme } from '@mui/material/styles';
-import { Checkbox, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@mui/material';
+import { Checkbox } from '@mui/material';
 // import { IconButton, CheckBoxOutIcon, CheckBoxIcon } from '@/ui';
 import { api } from '@/app';
+import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@mui/material';
 import {
   TypeVectorLayerEntryConfig,
   TypeStyleGeometry,
@@ -23,7 +23,6 @@ const sxClasses = {
   table: {
     border: '1px solid #C1C1C1',
     borderRadius: '4px',
-    padding: '16px 17px 16px 23px',
   },
   tableHeader: {
     borderRight: '1px solid #C1C1C1',
@@ -31,7 +30,6 @@ const sxClasses = {
     '& th': {
       borderBottom: '1px solid #C1C1C1',
       backgroundColor: '#FFFFFF',
-      padding: '2px 4px 2px 4px',
     },
     '& th:first-child': {
       borderRight: '1px solid #C1C1C1',
@@ -42,7 +40,7 @@ const sxClasses = {
     borderBottom: '1px solid #C1C1C1',
     '& td': {
       margin: 0,
-      padding: '2px 4px 2px 4px',
+      padding: '8px',
       alignItems: 'center',
     },
     '& td:first-child': {
@@ -77,8 +75,6 @@ export function LegendIconList(props: TypeLegendIconListProps): JSX.Element {
   const initialChecked = isParentVisible ? allChecked : allUnChecked;
 
   const [isChecked, setChecked] = useState<boolean[]>(initialChecked);
-  const [countChildren, setCountChildren] = useState<number>(isParentVisible ? iconImages.length : 0);
-  const [initParentVisible, setInitParentVisible] = useState(isParentVisible);
   const [isAllChecked, setIsAllChecked] = useState(isParentVisible);
 
   const handleToggleAll = () => {
@@ -90,7 +86,6 @@ export function LegendIconList(props: TypeLegendIconListProps): JSX.Element {
     const checklist = isChecked.map((checked, i) => (i === index ? !checked : checked));
     const count = checklist.filter((f) => f === true).length;
     setChecked(checklist);
-    setCountChildren(count);
     setIsAllChecked(checklist.every((value) => value === true));
     if (isParentVisible !== undefined && toggleParentVisible !== undefined) {
       if ((count === 0 && isParentVisible === true) || (count > 0 && isParentVisible === false)) {
@@ -135,12 +130,6 @@ export function LegendIconList(props: TypeLegendIconListProps): JSX.Element {
       }
     };
 
-    if (isParentVisible !== initParentVisible) {
-      setChecked(isParentVisible === true ? allChecked : allUnChecked);
-      setCountChildren(isParentVisible === true ? allChecked.length : 0);
-      setInitParentVisible(isParentVisible);
-    }
-
     if (layerConfig && layerConfig.style !== undefined && geometryKey && mapId) {
       const layerPath = layerConfig.geoviewRootLayer
         ? `${layerConfig.geoviewRootLayer.geoviewLayerId}/${String(layerConfig.layerId).replace('-unclustered', '')}`
@@ -154,10 +143,6 @@ export function LegendIconList(props: TypeLegendIconListProps): JSX.Element {
     }
   }, [
     isParentVisible,
-    allChecked,
-    allUnChecked,
-    countChildren,
-    initParentVisible,
     isChecked,
     layerConfig,
     geometryKey,
@@ -175,7 +160,11 @@ export function LegendIconList(props: TypeLegendIconListProps): JSX.Element {
           <TableRow sx={sxClasses.tableHeader}>
             <TableCell>Name</TableCell>
             <TableCell>
-              <Checkbox color="primary" checked={isAllChecked} onChange={handleToggleAll} />
+              <Checkbox
+                color="primary"
+                checked={isAllChecked}
+                onChange={handleToggleAll}
+              />
             </TableCell>
           </TableRow>
         </TableHead>
@@ -187,7 +176,11 @@ export function LegendIconList(props: TypeLegendIconListProps): JSX.Element {
                 <span style={sxClasses.tableIconLabel}>{iconLabels[index]}</span>
               </TableCell>
               <TableCell>
-                <Checkbox color="primary" checked={isChecked[index]} onChange={() => handleToggleLayer(index)} />
+                <Checkbox
+                  color="primary"
+                  checked={isChecked[index]}
+                  onChange={() => handleToggleLayer(index)}
+                />
               </TableCell>
             </TableRow>
           ))}
@@ -196,3 +189,33 @@ export function LegendIconList(props: TypeLegendIconListProps): JSX.Element {
     </TableContainer>
   );
 }
+
+//     <List>
+//       {iconImages.map((icon, index) => {
+//         return (
+//           <Box key={iconLabels[index]}>
+//             <ListItem sx={sxClasses.listItem}>
+//               <ListItemButton>
+//                 <ListItemIcon>
+//                   <img alt={iconLabels[index]} src={icon} style={theme.iconImg} />
+//                 </ListItemIcon>
+//                 <Tooltip title={iconLabels[index]} placement="top" enterDelay={1000}>
+//                   <ListItemText
+//                     sx={sxClasses.listIconLabel}
+//                     primaryTypographyProps={{ fontSize: 14, noWrap: true }}
+//                     primary={iconLabels[index]}
+//                   />
+//                 </Tooltip>
+//                 <ListItemIcon>
+//                   {iconLabels[index] !== 'Cluster' && layerConfig?.initialSettings?.visible !== 'always' && (
+//                     <IconButton color="primary" onClick={() => handleToggleLayer(index)}>
+//                       {isChecked[index] === true ? <CheckBoxIcon /> : <CheckBoxOutIcon />}
+//                     </IconButton>
+//                   )}
+//                 </ListItemIcon>
+//               </ListItemButton>
+//             </ListItem>
+//           </Box>
+//         );
+//       })}
+//     </List>
