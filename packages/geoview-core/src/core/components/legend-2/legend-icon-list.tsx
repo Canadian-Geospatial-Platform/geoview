@@ -101,11 +101,9 @@ export function LegendIconList(props: TypeLegendIconListProps): JSX.Element {
   }
 
   const [isChecked, setChecked] = useState<boolean[]>(initialChecked);
-  const [checkedCount, setCheckCount] = useState<number>(isParentVisible ? iconImages.length : 0);
+  const [countChildren, setCountChildren] = useState<number>(isParentVisible ? iconImages.length : 0);
   const [initParentVisible, setInitParentVisible] = useState(isParentVisible);
   const [isAllChecked, setIsAllChecked] = useState(isParentVisible);
-
-  
 
   const handleToggleAll = () => {
     setIsAllChecked(!isAllChecked);
@@ -118,7 +116,7 @@ export function LegendIconList(props: TypeLegendIconListProps): JSX.Element {
     const checklist = isChecked.map((checked, i) => (i === index ? !checked : checked));
     const count = checklist.filter((f) => f === true).length;
     setChecked(checklist);
-    setCheckCount(count);
+    setCountChildren(count);
     setIsAllChecked(checklist.every((value) => value === true));
     if (isParentVisible !== undefined && toggleParentVisible !== undefined) {
       if ((count === 0 && isParentVisible === true) || (count > 0 && isParentVisible === false)) {
@@ -170,7 +168,7 @@ export function LegendIconList(props: TypeLegendIconListProps): JSX.Element {
 
     if (isParentVisible !== initParentVisible) {
       setChecked(isParentVisible === true ? allChecked : allUnChecked);
-      setCheckCount(isParentVisible === true ? allChecked.length : 0);
+      setCountChildren(isParentVisible === true ? allChecked.length : 0);
       setInitParentVisible(isParentVisible);
     }
 
@@ -189,7 +187,7 @@ export function LegendIconList(props: TypeLegendIconListProps): JSX.Element {
     isParentVisible,
     allChecked,
     allUnChecked,
-    checkedCount,
+    countChildren,
     initParentVisible,
     isChecked,
     layerConfig,
@@ -198,7 +196,7 @@ export function LegendIconList(props: TypeLegendIconListProps): JSX.Element {
     mapId,
   ]);
   
-  console.log("Check Count", checkedCount);
+  console.log("Check Count", countChildren);
 
   // eslint-disable-next-line no-console
   console.log('Check Count', countChildren);
@@ -239,33 +237,3 @@ export function LegendIconList(props: TypeLegendIconListProps): JSX.Element {
     </TableContainer>
   );
 }
-
-//     <List>
-//       {iconImages.map((icon, index) => {
-//         return (
-//           <Box key={iconLabels[index]}>
-//             <ListItem sx={sxClasses.listItem}>
-//               <ListItemButton>
-//                 <ListItemIcon>
-//                   <img alt={iconLabels[index]} src={icon} style={theme.iconImg} />
-//                 </ListItemIcon>
-//                 <Tooltip title={iconLabels[index]} placement="top" enterDelay={1000}>
-//                   <ListItemText
-//                     sx={sxClasses.listIconLabel}
-//                     primaryTypographyProps={{ fontSize: 14, noWrap: true }}
-//                     primary={iconLabels[index]}
-//                   />
-//                 </Tooltip>
-//                 <ListItemIcon>
-//                   {iconLabels[index] !== 'Cluster' && layerConfig?.initialSettings?.visible !== 'always' && (
-//                     <IconButton color="primary" onClick={() => handleToggleLayer(index)}>
-//                       {isChecked[index] === true ? <CheckBoxIcon /> : <CheckBoxOutIcon />}
-//                     </IconButton>
-//                   )}
-//                 </ListItemIcon>
-//               </ListItemButton>
-//             </ListItem>
-//           </Box>
-//         );
-//       })}
-//     </List>
