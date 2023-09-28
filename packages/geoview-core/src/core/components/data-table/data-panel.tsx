@@ -135,7 +135,7 @@ export function Datapanel({ layerData, mapId, projectionConfig, layerKeys, layer
             {layerKeys[selectedLayerIndex]}
           </Typography>
 
-          <CircularProgress isLoaded={isLoading} style={{ marginTop: '1rem' }} />
+          <CircularProgress isLoaded={!isLoading} style={{ marginTop: '1rem' }} />
 
           {!isLoading &&
             layerKeys.map((layerKey, index) => (

@@ -5,20 +5,22 @@ import { useTranslation } from 'react-i18next';
 
 import FocusTrap from 'focus-trap-react';
 
+import { useStore } from 'zustand';
 import makeStyles from '@mui/styles/makeStyles';
+import { getGeoViewStore } from '@/core/stores/stores-managers';
 
-import { Map } from '../components/map/map';
-import { Appbar } from '../components/app-bar/app-bar';
-import { Navbar } from '../components/nav-bar/nav-bar';
-import { FooterTabs } from '../components/footer-tabs/footer-tabs';
-import { Geolocator } from '../components/geolocator/geolocator';
+import { Map } from '@/core/components/map/map';
+import { Appbar } from '@/core/components/app-bar/app-bar';
+import { Navbar } from '@/core/components/nav-bar/nav-bar';
+import { FooterTabs } from '@/core/components/footer-tabs/footer-tabs';
+import { Geolocator } from '@/core/components/geolocator/geolocator';
 
 import { FocusTrapDialog } from './focus-trap';
 
 import { api } from '@/app';
 import { EVENT_NAMES } from '@/api/events/event-types';
 
-import { Modal, Snackbar } from '@/ui';
+import { CircularProgress, Modal, Snackbar } from '@/ui';
 import {
   PayloadBaseClass,
   mapConfigPayload,
@@ -96,6 +98,9 @@ export function Shell(props: ShellProps): JSX.Element {
 
   const [update, setUpdate] = useState<number>(0);
 
+  // get values from the store
+  const mapLoaded = useStore(getGeoViewStore(mapFeaturesConfig.mapId), (state) => state.mapState.mapLoaded);
+
   /**
    * Set the focus trap
    * @param {boolean} dialogTrap the callback value from dialog trap
@@ -169,6 +174,7 @@ export function Shell(props: ShellProps): JSX.Element {
   return (
     <FocusTrap active={activeTrap} focusTrapOptions={{ escapeDeactivates: false }}>
       <div id={`shell-${shellId}`} className={classes.shell} key={update}>
+        <CircularProgress isLoaded={mapLoaded} />
         <a id={`toplink-${shellId}`} href={`#bottomlink-${shellId}`} className={classes.skip} style={{ top: '0px' }}>
           {t('keyboardnav.start')}
         </a>

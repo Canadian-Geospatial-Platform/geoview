@@ -1,5 +1,5 @@
 /* eslint-disable react/jsx-props-no-spreading */
-import { useEffect, useState, useRef, MutableRefObject } from 'react';
+import { useEffect, useRef, MutableRefObject } from 'react';
 
 import { fromLonLat, toLonLat } from 'ol/proj';
 import OLMap from 'ol/Map';
@@ -8,22 +8,25 @@ import TileLayer from 'ol/layer/Tile';
 import { Collection } from 'ol';
 import BaseLayer from 'ol/layer/Base';
 import Source from 'ol/source/Source';
+import { Extent } from 'ol/extent';
 
 import makeStyles from '@mui/styles/makeStyles';
 import { useMediaQuery } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 
-import { Extent } from 'ol/extent';
-import { NorthArrow, NorthPoleFlag } from '../north-arrow/north-arrow';
-import { Crosshair } from '../crosshair/crosshair';
-import { Footerbar } from '../footer-bar/footer-bar';
-import { OverviewMap } from '../overview-map/overview-map';
-import { ClickMarker } from '../click-marker/click-marker';
-import { HoverTooltip } from '../hover-tooltip/hover-tooltip';
+import { useStore } from 'zustand';
+import { getGeoViewStore } from '@/core/stores/stores-managers';
 
-import { disableScrolling, generateId } from '../../utils/utilities';
+import { NorthArrow, NorthPoleFlag } from '@/core/components/north-arrow/north-arrow';
+import { Crosshair } from '@/core/components/crosshair/crosshair';
+import { Footerbar } from '@/core/components/footer-bar/footer-bar';
+import { OverviewMap } from '@/core/components/overview-map/overview-map';
+import { ClickMarker } from '@/core/components/click-marker/click-marker';
+import { HoverTooltip } from '@/core/components/hover-tooltip/hover-tooltip';
 
-import { api, inKeyfocusPayload, notificationPayload } from '@/app';
+import { addNotificationWarning, disableScrolling, generateId } from '@/core/utils/utilities';
+
+import { api, inKeyfocusPayload } from '@/app';
 import { EVENT_NAMES } from '@/api/events/event-types';
 
 import { MapViewer } from '@/geo/map/map';
@@ -41,17 +44,21 @@ const useStyles = makeStyles(() => ({
 }));
 
 export function Map(mapFeaturesConfig: TypeMapFeaturesConfig): JSX.Element {
-  const { map: mapConfig, components } = mapFeaturesConfig;
+  const { map: mapConfig } = mapFeaturesConfig;
 
   // make sure the id is not undefined
   // eslint-disable-next-line react/destructuring-assignment
   const mapId = mapFeaturesConfig.mapId ? mapFeaturesConfig.mapId : generateId('');
-  const [isLoaded, setIsLoaded] = useState(false);
 
   const classes = useStyles();
 
   // get ref to div element
   const mapElement = useRef<HTMLDivElement | undefined>();
+
+  // get values from the store
+  const overviewMap = useStore(getGeoViewStore(mapId), (state) => state.mapState.overviewMap);
+  const northArrow = useStore(getGeoViewStore(mapId), (state) => state.mapState.northArrow);
+  const mapLoaded = useStore(getGeoViewStore(mapId), (state) => state.mapState.mapLoaded);
 
   // create a new map viewer instance
   const viewer: MapViewer = api.maps[mapId];
@@ -92,9 +99,6 @@ export function Map(mapFeaturesConfig: TypeMapFeaturesConfig): JSX.Element {
     });
 
     viewer.toggleMapInteraction(mapConfig.interaction);
-
-    // emit the map loaded event
-    setIsLoaded(true);
   };
 
   const initMap = async () => {
@@ -107,15 +111,8 @@ export function Map(mapFeaturesConfig: TypeMapFeaturesConfig): JSX.Element {
     if (mapConfig.viewSettings?.extent) {
       if (projection.getCode() === 'EPSG:3978') {
         // eslint-disable-next-line no-console
-        console.error('Extents not available for LLC projections (EPSG: 3978)');
-        api.event.emit(
-          notificationPayload(
-            EVENT_NAMES.NOTIFICATIONS.NOTIFICATION_ADD,
-            mapId,
-            'warning',
-            'Extents not available for LLC projections (EPSG: 3978)'
-          )
-        );
+        console.log('Extents not available for LLC projections (EPSG: 3978)');
+        addNotificationWarning(mapId, 'Extents not available for LLC projections (EPSG: 3978)');
       } else {
         const mins = fromLonLat([mapConfig.viewSettings.extent[0], mapConfig.viewSettings.extent[1]], projection.getCode());
         const maxs = fromLonLat([mapConfig.viewSettings.extent[2], mapConfig.viewSettings.extent[3]], projection.getCode());
@@ -257,16 +254,14 @@ export function Map(mapFeaturesConfig: TypeMapFeaturesConfig): JSX.Element {
   return (
     /* eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex */
     <div id={`map-${mapId}`} ref={mapElement as MutableRefObject<HTMLDivElement>} className={classes.mapContainer} tabIndex={0}>
-      {isLoaded && (
+      {mapLoaded && (
         <>
-          {components !== undefined && components.indexOf('north-arrow') > -1 && (
-            <NorthArrow projection={api.projection.projections[api.maps[mapId].currentProjection].getCode()} />
-          )}
-          <NorthPoleFlag projection={api.projection.projections[api.maps[mapId].currentProjection].getCode()} />
+          {northArrow && <NorthArrow />}
+          <NorthPoleFlag />
           <Crosshair />
           <ClickMarker />
           <HoverTooltip />
-          {deviceSizeMedUp && components !== undefined && components.indexOf('overview-map') > -1 && <OverviewMap />}
+          {deviceSizeMedUp && overviewMap && <OverviewMap />}
           {deviceSizeMedUp && <Footerbar />}
         </>
       )}
