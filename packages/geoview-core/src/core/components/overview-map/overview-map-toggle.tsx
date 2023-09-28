@@ -54,6 +54,7 @@ export function OverviewMapToggle(props: OverviewMapToggleProps): JSX.Element {
 
   const divRef = useRef<HTMLDivElement>(null);
 
+  // TODO: Remove useStyle
   const classes = useStyles();
 
   useEffect(() => {

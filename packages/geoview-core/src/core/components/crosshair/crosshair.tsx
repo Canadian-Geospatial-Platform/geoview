@@ -10,7 +10,7 @@ import { KeyboardPan } from 'ol/interaction';
 import { useStore } from 'zustand';
 import { MapContext } from '@/core/app-start';
 
-import { api } from '@/app';
+import { TypeEventHandlerFunction, api } from '@/app';
 import { EVENT_NAMES } from '@/api/events/event-types';
 import { CrosshairIcon } from './crosshair-icon';
 
@@ -125,31 +125,39 @@ export function Crosshair(): JSX.Element {
   useEffect(() => {
     const { map } = api.maps[mapId];
 
-    const mapContainer = map.getTargetElement();
+    // TODO: repair using the store map element
+    //! came fromt he map creation on function call
+    let eventMapInKeyFocusListenerFunction: TypeEventHandlerFunction;
+    if (map !== undefined) {
+      const mapContainer = map.getTargetElement();
 
-    const eventMapInKeyFocusListenerFunction = (payload: PayloadBaseClass) => {
-      if (payloadIsAInKeyfocus(payload)) {
-        if (interaction !== 'static') {
-          store.setState({ isCrosshairsActive: true });
+      eventMapInKeyFocusListenerFunction = (payload: PayloadBaseClass) => {
+        if (payloadIsAInKeyfocus(payload)) {
+          if (interaction !== 'static') {
+            store.setState({ isCrosshairsActive: true });
 
-          mapContainer.addEventListener('keydown', simulateClick);
-          mapContainer.addEventListener('keydown', managePanDelta);
-          panelButtonId.current = 'detailsPanel';
+            mapContainer.addEventListener('keydown', simulateClick);
+            mapContainer.addEventListener('keydown', managePanDelta);
+            panelButtonId.current = 'detailsPanel';
+          }
         }
-      }
-    };
+      };
 
-    // on map keyboard focus, add crosshair
-    api.event.on(EVENT_NAMES.MAP.EVENT_MAP_IN_KEYFOCUS, eventMapInKeyFocusListenerFunction, mapId);
+      // on map keyboard focus, add crosshair
+      api.event.on(EVENT_NAMES.MAP.EVENT_MAP_IN_KEYFOCUS, eventMapInKeyFocusListenerFunction, mapId);
 
-    // when map blur, remove the crosshair and click event
-    mapContainer.addEventListener('blur', removeCrosshair);
+      // when map blur, remove the crosshair and click event
+      mapContainer.addEventListener('blur', removeCrosshair);
+    }
 
     return () => {
-      api.event.off(EVENT_NAMES.MAP.EVENT_MAP_IN_KEYFOCUS, mapId, eventMapInKeyFocusListenerFunction);
-      mapContainer.removeEventListener('keydown', simulateClick);
-      mapContainer.removeEventListener('keydown', managePanDelta);
-      mapContainer.removeEventListener('keydown', removeCrosshair);
+      if (map !== undefined) {
+        api.event.off(EVENT_NAMES.MAP.EVENT_MAP_IN_KEYFOCUS, mapId, eventMapInKeyFocusListenerFunction);
+        const mapContainer = map.getTargetElement();
+        mapContainer.removeEventListener('keydown', simulateClick);
+        mapContainer.removeEventListener('keydown', managePanDelta);
+        mapContainer.removeEventListener('keydown', removeCrosshair);
+      }
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

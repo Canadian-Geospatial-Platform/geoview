@@ -10,16 +10,13 @@ import makeStyles from '@mui/styles/makeStyles';
 import TileLayer from 'ol/layer/Tile';
 import { OverviewMap as OLOverviewMap } from 'ol/control';
 
+import { useStore } from 'zustand';
 import { getGeoViewStore } from '@/core/stores/stores-managers';
-import { OverviewMapToggle } from './overview-map-toggle';
 
-import { EVENT_NAMES } from '@/api/events/event-types';
-import { PayloadBaseClass, api } from '@/app';
 import { MapContext } from '@/core/app-start';
-
-import { payloadIsAMapViewProjection } from '@/api/events/payloads';
-
 import { cgpvTheme } from '@/ui/style/theme';
+import { OverviewMapToggle } from './overview-map-toggle';
+import { api } from '@/app';
 
 /**
  * Size of the overview map container
@@ -102,35 +99,27 @@ const useStyles = makeStyles((theme) => ({
  */
 export function OverviewMap(): JSX.Element {
   const mapConfig = useContext(MapContext);
-
   const { mapId } = mapConfig;
-  const { map, mapFeaturesConfig } = api.maps[mapId];
-  const hideOnZoom = mapFeaturesConfig.overviewMap?.hideOnZoom || 0;
+
+  // get the values from store
+  const mapElement = useStore(getGeoViewStore(mapId), (state) => state.mapState.mapElement);
+  const hideOnZoom = useStore(getGeoViewStore(mapId), (state) => state.mapState.overviewMapHideZoom);
+  const displayLanguage = useStore(getGeoViewStore(mapId), (state) => state.displayLanguage);
 
   // TODO: remove useStyle
   const classes = useStyles();
 
-  const handleProjectionChange = (payload: PayloadBaseClass) => {
-    if (payloadIsAMapViewProjection(payload)) {
-      const overviewMap = map
-        .getControls()
-        .getArray()
-        .filter((item) => {
-          return item instanceof OLOverviewMap;
-        })[0] as OLOverviewMap;
-
-      // collapse the overview map, if not projection throw an error
-      overviewMap.setCollapsed(true);
-      overviewMap.setMap(null);
-
-      // wait for the view change then set the map and open the overview
-      // TODO: look for better options then Timeout
-      setTimeout(() => {
-        overviewMap.setMap(api.maps[mapId].map);
-
-        setTimeout(() => overviewMap.setCollapsed(false), 500);
-      }, 2000);
-    }
+  /**
+   * Return the map ovberview map
+   * @returns {OLOverviewMap} the OL overview map
+   */
+  const getOverViewMap = (): OLOverviewMap => {
+    return mapElement
+      .getControls()
+      .getArray()
+      .filter((item) => {
+        return item instanceof OLOverviewMap;
+      })[0] as OLOverviewMap;
   };
 
   useEffect(() => {
@@ -139,30 +128,43 @@ export function OverviewMap(): JSX.Element {
       (state) => state.mapState.zoom,
       (curZoom, prevZoom) => {
         if (curZoom !== prevZoom) {
-          const overviewMap = map
-            .getControls()
-            .getArray()
-            .filter((item) => {
-              return item instanceof OLOverviewMap;
-            })[0] as OLOverviewMap;
-          if (curZoom! < hideOnZoom) overviewMap.setMap(null);
-          else overviewMap.setMap(api.maps[mapId].map);
+          if (curZoom! < hideOnZoom) getOverViewMap().setMap(null);
+          else getOverViewMap().setMap(mapElement);
         }
       }
     );
 
-    // listen to geoview-basemap-panel package change projection event
-    api.event.on(EVENT_NAMES.MAP.EVENT_MAP_VIEW_PROJECTION_CHANGE, handleProjectionChange, mapId);
+    // if projection change
+    const unsubMapCurrentProjection = getGeoViewStore(mapId).subscribe(
+      (state) => state.mapState.currentProjection,
+      (curProj, prevProj) => {
+        if (curProj !== prevProj) {
+          const overviewMap = getOverViewMap();
+
+          // collapse the overview map, if not projection throw an error
+          overviewMap.setCollapsed(true);
+          overviewMap.setMap(null);
+
+          // wait for the view change then set the map and open the overview
+          // TODO: look for better options then Timeout
+          setTimeout(() => {
+            overviewMap.setMap(mapElement);
+            setTimeout(() => overviewMap.setCollapsed(false), 500);
+          }, 2000);
+        }
+      }
+    );
 
     return () => {
       unsubMapZoom();
-      api.event.off(EVENT_NAMES.MAP.EVENT_MAP_VIEW_PROJECTION_CHANGE, mapId, handleProjectionChange);
+      unsubMapCurrentProjection();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mapId]);
 
   useEffect(() => {
     // get default overview map
+    // TODO: store basemap info in the store...
     const defaultBasemap = api.maps[mapId].basemap.overviewMap;
 
     const toggleButton = document.createElement('div');
@@ -188,13 +190,13 @@ export function OverviewMap(): JSX.Element {
       tipLabel: '',
     });
 
-    map.addControl(overviewMapControl);
-    if (api.maps[mapId].map.getView().getZoom() && api.maps[mapId].map.getView().getZoom()! < hideOnZoom) overviewMapControl.setMap(null);
+    mapElement.addControl(overviewMapControl);
+    if (mapElement.getView().getZoom() && mapElement.getView().getZoom()! < hideOnZoom) overviewMapControl.setMap(null);
 
     // need to recreate the i18n instance as the overviewmap is a new map inside the main map
     const i18nInstance = i18n.cloneInstance({
-      lng: mapFeaturesConfig.displayLanguage,
-      fallbackLng: mapFeaturesConfig.displayLanguage,
+      lng: displayLanguage,
+      fallbackLng: displayLanguage,
     });
 
     const root = createRoot(toggleButton!);

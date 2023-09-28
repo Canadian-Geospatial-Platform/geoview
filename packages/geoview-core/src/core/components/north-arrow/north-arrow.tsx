@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState, useContext } from 'react';
+import { useEffect, useRef, useState, useContext } from 'react';
 
 import OLMap from 'ol/Map';
 import Overlay from 'ol/Overlay';
@@ -8,16 +8,12 @@ import { toLonLat, fromLonLat } from 'ol/proj';
 import { useTheme } from '@mui/material/styles';
 import makeStyles from '@mui/styles/makeStyles';
 
-import debounce from 'lodash/debounce';
+import { useStore } from 'zustand';
+import { getGeoViewStore } from '@/core/stores/stores-managers';
 
 import { PROJECTION_NAMES } from '@/geo/projection/projection';
-
-import { NorthArrowIcon, NorthPoleIcon } from './north-arrow-icon';
-
 import { MapContext } from '@/core/app-start';
-import { api } from '@/app';
-import { EVENT_NAMES } from '@/api/events/event-types';
-import { payloadIsAMapViewProjection, payloadIsABoolean, PayloadBaseClass } from '@/api/events/payloads';
+import { NorthArrowIcon, NorthPoleIcon } from './north-arrow-icon';
 
 const useStyles = makeStyles((theme) => ({
   northArrowContainer: {
@@ -34,39 +30,38 @@ const useStyles = makeStyles((theme) => ({
 // north value (set longitude to be half of Canada extent (142° W, 52° W)) - projection central meridian is -95
 const northPolePosition: [number, number] = [90, -95];
 
-// interface used for NorthArrow props
-interface NorthArrowProps {
-  projection: string;
-}
-
 /**
  * Create a north arrow
  *
  * @returns {JSX.Element} the north arrow component
  */
-export function NorthArrow(props: NorthArrowProps): JSX.Element {
-  const { projection } = props;
+export function NorthArrow(): JSX.Element {
+  const mapConfig = useContext(MapContext);
+  const { mapId } = mapConfig;
 
+  // access transitions
+  const defaultTheme = useTheme();
+  // TODO: remove make style
   const classes = useStyles();
 
+  // do not use useState for item used inside function only without rendering... use useRef
+  const isNorthFixedValue = useRef(false);
   const northArrowRef = useRef<HTMLDivElement>(null);
-
-  const [rotationAngle, setRotationAngle] = useState({ angle: 0 });
-  const [isNorthVisible, setIsNorthVisible] = useState(false);
-  const [northOffset, setNorthOffset] = useState(0);
 
   // keep track of rotation angle for fix north
   let angle = 0;
 
-  // do not use useState for item used inside function only without rendering... use useRef
-  const isNorthFixedValue = useRef(false);
+  // internal component state
+  const [rotationAngle, setRotationAngle] = useState({ angle: 0 });
+  const [isNorthVisible, setIsNorthVisible] = useState(false);
+  const [northOffset, setNorthOffset] = useState(0);
 
-  // access transitions
-  const defaultTheme = useTheme();
-
-  const mapConfig = useContext(MapContext);
-
-  const { mapId } = mapConfig;
+  // get the values from store
+  const mapElement = useStore(getGeoViewStore(mapId), (state) => state.mapState.mapElement);
+  const mapProjection = useRef('');
+  const mapProjectionCode = useStore(getGeoViewStore(mapId), (state) => state.mapState.currentProjection);
+  mapProjection.current = `EPSG:${mapProjectionCode}`;
+  const fixNorth = useStore(getGeoViewStore(mapId), (state) => state.mapState.fixNorth);
 
   /**
    * Get north arrow bearing. Angle use to rotate north arrow for non Web Mercator projection
@@ -82,10 +77,7 @@ export function NorthArrow(props: NorthArrowProps): JSX.Element {
 
       // map center (we use botton parallel to introduce less distortion)
       const extent = map.getView().calculateExtent();
-      const center: Coordinate = toLonLat(
-        [(extent[0] + extent[2]) / 2, extent[1]],
-        api.projection.projections[api.maps[mapId].currentProjection]
-      );
+      const center: Coordinate = toLonLat([(extent[0] + extent[2]) / 2, extent[1]], mapProjection.current);
       const pointB = { x: center[0], y: center[1] };
 
       // set info on longitude and latitude
@@ -117,7 +109,7 @@ export function NorthArrow(props: NorthArrowProps): JSX.Element {
     // Check the container value for top middle of the screen
     // Convert this value to a lat long coordinate
     const pointXY = [map.getSize()![0] / 2, 1];
-    const pt = toLonLat(map.getCoordinateFromPixel(pointXY), api.projection.projections[api.maps[mapId].currentProjection]);
+    const pt = toLonLat(map.getCoordinateFromPixel(pointXY), mapProjection.current);
 
     // If user is pass north, long value will start to be positive (other side of the earth).
     // This will work only for LCC Canada.
@@ -182,7 +174,7 @@ export function NorthArrow(props: NorthArrowProps): JSX.Element {
    * @param {OLMap} map the map
    */
   function manageArrow(map: OLMap): void {
-    if (projection === PROJECTION_NAMES.LCC) {
+    if (mapProjection.current === PROJECTION_NAMES.LCC) {
       // Because of the projection, corners are wrapped and central value of the polygon may be higher then corners values.
       // There is no easy way to see if the user sees the north pole just by using bounding box. One of the solution may
       // be to use a debounce function to call on moveEnd where we
@@ -209,14 +201,14 @@ export function NorthArrow(props: NorthArrowProps): JSX.Element {
           angle = arrowAngle;
 
           // set map rotation to keep fix north
-          api.maps[mapId].map.getView().animate({
+          mapElement.getView().animate({
             rotation: ((180 - arrowAngle) * (2 * Math.PI)) / 360,
           });
 
           setRotationAngle({ angle: 0 });
         } else {
           // set arrow rotation
-          const mapRotation = map.getView().getRotation() * (180 / Math.PI);
+          const mapRotation = fixNorth ? map.getView().getRotation() * (180 / Math.PI) : 0;
           setRotationAngle({ angle: 90 - angleDegrees + mapRotation });
         }
 
@@ -226,45 +218,38 @@ export function NorthArrow(props: NorthArrowProps): JSX.Element {
     }
   }
 
-  /**
-   * Map moveend event callback
-   */
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const onMapMoveEnd = useCallback(
-    debounce((e) => {
-      const map = e.map as OLMap;
-      manageArrow(map);
-    }, 500),
-    []
-  );
-
-  const mapFixNorthListenerFunction = (payload: PayloadBaseClass) => {
-    if (payloadIsABoolean(payload)) {
-      isNorthFixedValue.current = payload.status;
-
-      // if north is fix, trigger the map rotation
-      if (payload.status) {
-        manageArrow(api.maps[mapId].map);
-      }
-    }
-  };
-
   useEffect(() => {
-    const { map } = api.maps[mapId];
+    // if mapCenterCoordinates changed, map move end event has been triggered
+    const unsubMapCenterCoord = getGeoViewStore(mapId).subscribe(
+      (state) => state.mapState.mapCenterCoordinates,
+      (curCoords, prevCoords) => {
+        if (curCoords !== prevCoords) {
+          manageArrow(mapElement);
+        }
+      },
+      {
+        fireImmediately: true,
+      }
+    );
 
-    // listen to map moveend event
-    map.on('moveend', onMapMoveEnd);
-
-    api.event.on(EVENT_NAMES.MAP.EVENT_MAP_FIX_NORTH, mapFixNorthListenerFunction, mapId);
+    const unsubMapFixNorth = getGeoViewStore(mapId).subscribe(
+      (state) => state.mapState.fixNorth,
+      (curNorth, prevNorth) => {
+        if (curNorth !== prevNorth) {
+          isNorthFixedValue.current = curNorth;
+          manageArrow(mapElement);
+        }
+      }
+    );
 
     return () => {
-      api.event.off(EVENT_NAMES.MAP.EVENT_MAP_FIX_NORTH, mapId);
-      map.un('moveend', onMapMoveEnd);
+      unsubMapCenterCoord();
+      unsubMapFixNorth();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [mapId]);
+  }, []);
 
-  return projection === PROJECTION_NAMES.LCC ? (
+  return mapProjection.current === PROJECTION_NAMES.LCC ? (
     <div
       ref={northArrowRef}
       className={classes.northArrowContainer}
@@ -287,30 +272,21 @@ export function NorthArrow(props: NorthArrowProps): JSX.Element {
 
 /**
  * Create a north pole flag icon
- * @param {NorthArrowProps} props north arrow icon props
  * @returns {JSX.Element} the north pole marker icon
  */
-export function NorthPoleFlag(props: NorthArrowProps): JSX.Element {
-  const { projection } = props;
+export function NorthPoleFlag(): JSX.Element {
+  const mapConfig = useContext(MapContext);
+  const { mapId } = mapConfig;
+
+  const northPoleId = `${mapId}-northpole`;
   const northPoleRef = useRef<HTMLDivElement>(null);
 
-  const mapConfig = useContext(MapContext);
-  const [mapProjection, setMapProjection] = useState(projection);
-  const { mapId } = mapConfig;
-  const northPoleId = `${mapId}-northpole`;
-
-  const mapviewProjectionChangeListenerFunction = (payload: PayloadBaseClass) => {
-    if (payloadIsAMapViewProjection(payload)) {
-      setMapProjection(`EPSG:${payload.projection}`);
-    }
-  };
+  // get the values from store
+  const mapElement = useStore(getGeoViewStore(mapId), (state) => state.mapState.mapElement);
+  const mapProjection = useStore(getGeoViewStore(mapId), (state) => state.mapState.currentProjection);
 
   useEffect(() => {
-    const { map } = api.maps[mapId];
-    const projectionPosition = fromLonLat(
-      [northPolePosition[1], northPolePosition[0]],
-      api.projection.projections[api.maps[mapId].currentProjection]
-    );
+    const projectionPosition = fromLonLat([northPolePosition[1], northPolePosition[0]], `EPSG:${mapProjection}`);
 
     // create overlay for north pole icon
     const northPoleMarker = new Overlay({
@@ -320,19 +296,16 @@ export function NorthPoleFlag(props: NorthArrowProps): JSX.Element {
       element: document.getElementById(northPoleId) as HTMLElement,
       stopEvent: false,
     });
-    map.addOverlay(northPoleMarker);
-
-    // listen to geoview-basemap-panel package change projection event
-    api.event.on(EVENT_NAMES.MAP.EVENT_MAP_VIEW_PROJECTION_CHANGE, mapviewProjectionChangeListenerFunction, mapId);
-
-    return () => {
-      api.event.off(EVENT_NAMES.MAP.EVENT_MAP_VIEW_PROJECTION_CHANGE, mapId, mapviewProjectionChangeListenerFunction);
-    };
+    mapElement.addOverlay(northPoleMarker);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
-    <div ref={northPoleRef} id={northPoleId} style={{ visibility: mapProjection === PROJECTION_NAMES.LCC ? 'visible' : 'hidden' }}>
+    <div
+      ref={northPoleRef}
+      id={northPoleId}
+      style={{ visibility: `EPSG:${mapProjection}` === PROJECTION_NAMES.LCC ? 'visible' : 'hidden' }}
+    >
       <NorthPoleIcon />
     </div>
   );

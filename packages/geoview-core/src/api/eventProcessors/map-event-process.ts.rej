@@ -1,0 +1,18 @@
+diff a/packages/geoview-core/src/api/eventProcessors/map-event-process.ts b/packages/geoview-core/src/api/eventProcessors/map-event-process.ts	(rejected hunks)
+@@ -35,12 +35,12 @@
+       }
+     );
+ 
+-    const unsubMapZoom = store.subscribe(
+-      (state) => state.mapState.zoom,
++    const unsubMapProjection = store.subscribe(
++      (state) => state.mapState.currentProjection,
+       (cur, prev) => {
+         if (cur !== prev) {
+-          api.maps[mapId].currentZoom = cur!;
+-          api.event.emit(numberPayload(EVENT_NAMES.MAP.EVENT_MAP_ZOOM_END, mapId, cur!));
++          api.maps[mapId].currentProjection = cur!;
++          api.event.emit(mapViewProjectionPayload(EVENT_NAMES.MAP.EVENT_MAP_VIEW_PROJECTION_CHANGE, mapId, cur!));
+         }
+       }
+     );

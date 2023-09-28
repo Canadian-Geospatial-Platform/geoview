@@ -1,5 +1,5 @@
 /* eslint-disable react/jsx-props-no-spreading */
-import { useEffect, useState, useRef, MutableRefObject } from 'react';
+import { useEffect, useRef, MutableRefObject } from 'react';
 
 import { fromLonLat, toLonLat } from 'ol/proj';
 import OLMap from 'ol/Map';
@@ -13,7 +13,10 @@ import makeStyles from '@mui/styles/makeStyles';
 import { useMediaQuery } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 
+import { useStore } from 'zustand';
 import { Extent } from 'ol/extent';
+import { getGeoViewStore } from '@/core/stores/stores-managers';
+
 import { NorthArrow, NorthPoleFlag } from '../north-arrow/north-arrow';
 import { Crosshair } from '../crosshair/crosshair';
 import { Footerbar } from '../footer-bar/footer-bar';
@@ -46,12 +49,14 @@ export function Map(mapFeaturesConfig: TypeMapFeaturesConfig): JSX.Element {
   // make sure the id is not undefined
   // eslint-disable-next-line react/destructuring-assignment
   const mapId = mapFeaturesConfig.mapId ? mapFeaturesConfig.mapId : generateId('');
-  const [isLoaded, setIsLoaded] = useState(false);
 
   const classes = useStyles();
 
   // get ref to div element
   const mapElement = useRef<HTMLDivElement | undefined>();
+
+  // get values from the store
+  const mapLoaded = useStore(getGeoViewStore(mapId), (state) => state.mapState.mapLoaded);
 
   // create a new map viewer instance
   const viewer: MapViewer = api.maps[mapId];
@@ -92,9 +97,6 @@ export function Map(mapFeaturesConfig: TypeMapFeaturesConfig): JSX.Element {
     });
 
     viewer.toggleMapInteraction(mapConfig.interaction);
-
-    // emit the map loaded event
-    setIsLoaded(true);
   };
 
   const initMap = async () => {
@@ -257,12 +259,10 @@ export function Map(mapFeaturesConfig: TypeMapFeaturesConfig): JSX.Element {
   return (
     /* eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex */
     <div id={`map-${mapId}`} ref={mapElement as MutableRefObject<HTMLDivElement>} className={classes.mapContainer} tabIndex={0}>
-      {isLoaded && (
+      {mapLoaded && (
         <>
-          {components !== undefined && components.indexOf('north-arrow') > -1 && (
-            <NorthArrow projection={api.projection.projections[api.maps[mapId].currentProjection].getCode()} />
-          )}
-          <NorthPoleFlag projection={api.projection.projections[api.maps[mapId].currentProjection].getCode()} />
+          {components !== undefined && components.indexOf('north-arrow') > -1 && <NorthArrow />}
+          <NorthPoleFlag />
           <Crosshair />
           <ClickMarker />
           <HoverTooltip />

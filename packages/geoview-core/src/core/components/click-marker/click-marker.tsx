@@ -51,7 +51,10 @@ export function ClickMarker(): JSX.Element {
     element: document.getElementById(clickMarkerId) as HTMLElement,
     stopEvent: false,
   });
-  api.maps[mapId].map.addOverlay(clickMarkerOverlay);
+
+  // TODO: repair using the store map element
+  //! came from the map creation on function call
+  if (api.maps[mapId].map !== undefined) api.maps[mapId].map.addOverlay(clickMarkerOverlay);
 
   // create resources to highlight features
   const animationSource = new VectorSource();
@@ -86,7 +89,7 @@ export function ClickMarker(): JSX.Element {
       api.maps[mapId].map
         .getOverlayById(`${mapId}-clickmarker`)
         .setPosition(fromLonLat(lnglat, `EPSG:${api.maps[mapId].currentProjection}`));
-    }, 0);
+    }, 100);
     setShowMarker(true);
   }
 
