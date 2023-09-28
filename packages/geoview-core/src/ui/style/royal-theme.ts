@@ -77,10 +77,10 @@ const royalPalette = {
     grey: '#eeeeee',
   },
   action: {
-    active: 'rgba(0, 0, 0, 0.54)',
-    hover: `rgba(0, 0, 0, ${opacity.hoverOpacity})`,
+    active: 'rgba(81,91,165, 0.94)',
+    hover: `rgba(81,91,165, ${opacity.hoverOpacity})`,
     hoverOpacity: opacity.hoverOpacity,
-    selected: `rgba(0, 0, 0, ${opacity.selectedOpacity})`,
+    selected: `rgba(81,91,165, ${opacity.selectedOpacity})`,
     selectedOpacity: opacity.selectedOpacity,
     hoverRow: `rgba(0, 255, 255, ${opacity.hoverOpacity})`,
     selectedRow: `rgba(0, 255, 255, ${opacity.selectedOpacity})`,
