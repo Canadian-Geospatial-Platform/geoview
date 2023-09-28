@@ -9,9 +9,7 @@ import {
   ListItem,
   ListItemIcon,
   ListItemText,
-  Tooltip,
   IconButton,
-  OpacityIcon,
   SliderBase,
   CheckIcon,
   Grid,
@@ -48,6 +46,7 @@ const sxClasses = {
   },
   expandableIconContainer: {
     paddingLeft: 10,
+    margin: '20px 0'
   },
   legendIcon: {
     display: 'flex',
@@ -109,11 +108,13 @@ const sxClasses = {
     boxShadow: 'rgb(0 0 0 / 20%) 0px 3px 1px -2px, rgb(0 0 0 / 14%) 0px 2px 2px 0px, rgb(0 0 0 / 12%) 0px 1px 5px 0px',
     background: '#fff',
   },
+
   opacityMenu: {
     display: 'flex',
     alignItems: 'center',
     gap: '15px',
-    padding: '0 62px 16px 62px',
+    padding: '16px 62px 16px 62px',
+    backgroundColor: '#F6F6F6',
   },
   menuListIcon: { justifyContent: 'right', 'min-width': '56px' },
 };
@@ -164,6 +165,7 @@ export function LegendItemDetails(props: TypeLegendItemDetailsProps): JSX.Elemen
   const getGroupsDetails = (): boolean => {
     let isGroup = false;
     if (layerConfigEntry) {
+      
       if (layerEntryIsGroupLayer(layerConfigEntry)) {
         setGroupItems(layerConfigEntry.listOfLayerEntryConfig);
         isGroup = true;
@@ -175,8 +177,12 @@ export function LegendItemDetails(props: TypeLegendItemDetailsProps): JSX.Elemen
       setGroupItems(geoviewLayerInstance?.listOfLayerEntryConfig);
       isGroup = true;
     }
+    console.log("is GROUP", isGroup);
     return isGroup;
   };
+
+  console.log(groupItems);
+  
 
   const getLegendDetails = (layerLegend: TypeLegend) => {
     const { geoviewLayerId } = geoviewLayerInstance;
@@ -392,39 +398,39 @@ export function LegendItemDetails(props: TypeLegendItemDetailsProps): JSX.Elemen
     setIsClusterToggleEnabled(source?.cluster?.enable ?? false);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
+  
   return (
     <Grid item sm={12}>
-      <Typography> {layerName} </Typography>
-      <Typography sx={{ fontSize: '0.6em' }}> Layer quick overview info </Typography>
-      <List>
+      <Stack sx={{justifyContent: 'space-between', margin: '20px'}} direction="row" alignItems="center">
+        <div>
+          <Typography> {layerName} </Typography>
+          <Typography sx={{ fontSize: '0.6em' }}> Layer quick overview info </Typography>
+        </div>
+        <div>
+          {groupItems.length === 0 && (
+            <IconButton onClick={handleZoomTo} sx={{ backgroundColor: '#F6F6F6'}}>
+              <ZoomInSearchIcon />
+            </IconButton>
+            )}
+        </div>
+      </Stack>
+
+      {opacity && groupItems.length === 0 && (
+        <>
+          <Box sx={sxClasses.opacityMenu } >
+            <Typography>{t('legend.opacity')}</Typography>
+            <SliderBase min={0} max={100} value={opacity * 100} customOnChange={handleSetOpacity} />
+          </Box>
+        </>
+      )}
+
+       <List>
         <ListItem>
           {isRemoveable && (
             <Button variant="contained" onClick={handleRemoveLayer} type="text">
               {t('legend.remove_layer')}
             </Button>
           )}
-        </ListItem>
-
-        <ListItem>
-          <Stack spacing={2} direction="row" alignItems="center">
-            {canSetOpacity && groupItems.length === 0 && (
-              <>
-                <Typography>{t('legend.opacity')}</Typography>
-                <Box sx={sxClasses.opacityMenu}>
-                  <Tooltip title={t('legend.opacity')}>
-                    <OpacityIcon />
-                  </Tooltip>
-                  <SliderBase min={0} max={100} value={opacity * 100} customOnChange={handleSetOpacity} />
-                </Box>
-              </>
-            )}
-            {groupItems.length === 0 && (
-              <IconButton onClick={handleZoomTo}>
-                <ZoomInSearchIcon />
-              </IconButton>
-            )}
-          </Stack>
         </ListItem>
 
         {zoom < splitZoom && canCluster && groupItems.length === 0 && (
