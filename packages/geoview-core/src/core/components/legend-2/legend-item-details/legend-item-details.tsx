@@ -1,5 +1,5 @@
 /* eslint-disable react/require-default-props */
-import React, { useEffect, useState, useRef, MutableRefObject, RefObject } from 'react';
+import React, { useEffect, useState, useRef, MutableRefObject, RefObject, useContext } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useTheme, Theme } from '@mui/material/styles';
 import { transformExtent } from 'ol/proj';
@@ -9,7 +9,9 @@ import {
   ListItem,
   ListItemIcon,
   ListItemText,
+  Tooltip,
   IconButton,
+  OpacityIcon,
   SliderBase,
   CheckIcon,
   Grid,
@@ -398,13 +400,19 @@ export function LegendItemDetails(props: TypeLegendItemDetailsProps): JSX.Elemen
     setIsClusterToggleEnabled(source?.cluster?.enable ?? false);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  function numberOfLayers() {
+    return (
+      <Typography sx={{ fontSize: '0.6em' }}> Layer quick overview info </Typography>
+    );
+  }
   
   return (
     <Grid item sm={12}>
       <Stack sx={{justifyContent: 'space-between', margin: '20px'}} direction="row" alignItems="center">
         <div>
           <Typography> {layerName} </Typography>
-          <Typography sx={{ fontSize: '0.6em' }}> Layer quick overview info </Typography>
+          {numberOfLayers()}
         </div>
         <div>
           {groupItems.length === 0 && (
@@ -432,7 +440,17 @@ export function LegendItemDetails(props: TypeLegendItemDetailsProps): JSX.Elemen
             </Button>
           )}
         </ListItem>
-
+          {canSetOpacity && groupItems.length === 0 && (
+                <>
+                  <Typography>{t('legend.opacity')}</Typography>
+                  <Box sx={sxClasses.opacityMenu}>
+                    <Tooltip title={t('legend.opacity')}>
+                      <OpacityIcon />
+                    </Tooltip>
+                    <SliderBase min={0} max={100} value={opacity * 100} customOnChange={handleSetOpacity} />
+                  </Box>
+                </>
+              )}
         {zoom < splitZoom && canCluster && groupItems.length === 0 && (
           <ListItem onClick={handleClusterToggle}>
             <ListItemText> {t('legend.toggle_cluster')}</ListItemText>
