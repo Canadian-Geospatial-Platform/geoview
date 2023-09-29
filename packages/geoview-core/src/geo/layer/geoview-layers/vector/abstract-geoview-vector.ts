@@ -24,7 +24,7 @@ import {
 } from '@/geo/map/map-schema-types';
 import { api } from '@/app';
 import { getLocalizedValue } from '@/core/utils/utilities';
-import { LayerSetPayload, TypeArrayOfFeatureInfoEntries } from '@/api/events/payloads';
+import { TypeArrayOfFeatureInfoEntries } from '@/api/events/payloads';
 import { NodeType } from '@/geo/renderer/geoview-renderer-types';
 
 /* *******************************************************************************************************************************
@@ -71,7 +71,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
   protected processOneLayerEntry(layerEntryConfig: TypeBaseLayerEntryConfig): Promise<BaseLayer | null> {
     layerEntryConfig.layerPhase = 'processOneLayerEntry';
     const promisedVectorLayer = new Promise<BaseLayer | null>((resolve) => {
-      api.event.emit(LayerSetPayload.createLayerSetChangeLayerPhasePayload(this.mapId, layerEntryConfig, 'processOneLayerEntry'));
+      this.changeLayerPhase('processOneLayerEntry', layerEntryConfig);
       const vectorSource = this.createVectorSource(layerEntryConfig);
       const vectorLayer = this.createVectorLayer(layerEntryConfig as TypeVectorLayerEntryConfig, vectorSource);
       resolve(vectorLayer);
@@ -172,11 +172,11 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
 
     let featuresLoadErrorHandler: () => void;
     const featuresLoadEndHandler = () => {
-      api.event.emit(LayerSetPayload.createLayerSetChangeLayerStatusPayload(this.mapId, layerEntryConfig, 'loaded'));
+      this.changeLayerStatus('loaded', layerEntryConfig);
       vectorSource.un('featuresloaderror', featuresLoadErrorHandler);
     };
     featuresLoadErrorHandler = () => {
-      api.event.emit(LayerSetPayload.createLayerSetChangeLayerStatusPayload(this.mapId, layerEntryConfig, 'error'));
+      this.changeLayerStatus('error', layerEntryConfig);
       vectorSource.un('featuresloadend', featuresLoadEndHandler);
     };
 
@@ -262,20 +262,17 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
   /** ***************************************************************************************************************************
    * Return feature information for all the features stored in the layer.
    *
-   * @param {string | TypeLayerEntryConfig | null} layerPathOrConfig Optional layer path or configuration.
+   * @param {TypeLayerEntryConfig} layerEntryConfig The layer configuration.
    *
    * @returns {TypeArrayOfFeatureInfoEntries} The feature info table.
    */
-  getAllFeatureInfo(
-    layerPathOrConfig: string | TypeLayerEntryConfig | null | undefined = this.activeLayer
-  ): Promise<TypeArrayOfFeatureInfoEntries> {
+  protected getAllFeatureInfo(layerEntryConfig: TypeLayerEntryConfig): Promise<TypeArrayOfFeatureInfoEntries> {
     const promisedQueryResult = new Promise<TypeArrayOfFeatureInfoEntries>((resolve) => {
-      const layerConfig = typeof layerPathOrConfig === 'string' ? this.getLayerConfig(layerPathOrConfig) : layerPathOrConfig;
-      if (!layerConfig?.gvLayer) resolve([]);
+      if (!layerEntryConfig?.gvLayer) resolve([]);
       else
         this.formatFeatureInfoResult(
-          (layerConfig.gvLayer as VectorLayer<VectorSource<Geometry>>).getSource()!.getFeatures(),
-          layerConfig as TypeVectorLayerEntryConfig
+          (layerEntryConfig.gvLayer as VectorLayer<VectorSource<Geometry>>).getSource()!.getFeatures(),
+          layerEntryConfig as TypeVectorLayerEntryConfig
         ).then((arrayOfFeatureInfoEntries) => {
           resolve(arrayOfFeatureInfoEntries);
         });

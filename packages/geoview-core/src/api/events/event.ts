@@ -83,11 +83,21 @@ export class Event {
    * Unregister all events whose handler names start with the string passed in parameter.
    *
    * @param {string} handlerNamePrefix the handler name prefix for which you need to unregister from the event
+   * @param {string} eventTypeToKeep the handler name prefix composed of handlerNamePrefix/eventTypeToKeep to keep
    */
-  offAll = (handlerNamePrefix: string): void => {
+  offAll = (handlerNamePrefix: string, eventTypeToKeep?: string): void => {
     (Object.keys(this.eventEmitter._events) as EventStringId[]).forEach((eventNameId) => {
       if (eventNameId.startsWith(handlerNamePrefix)) {
-        this.off(eventNameId);
+        if (eventTypeToKeep) {
+          if (Array.isArray(eventTypeToKeep)) {
+            if (
+              !eventTypeToKeep.find((eventType: string) => {
+                return eventNameId.startsWith(`${handlerNamePrefix}/${eventType}`);
+              })
+            )
+              this.off(eventNameId);
+          } else if (!eventNameId.startsWith(`${handlerNamePrefix}/${eventTypeToKeep}`)) this.off(eventNameId);
+        } else this.off(eventNameId);
       }
     });
   };

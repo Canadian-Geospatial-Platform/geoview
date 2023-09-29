@@ -3,7 +3,7 @@ import { Event } from './events/event';
 
 import { Projection, PROJECTION_NAMES } from '@/geo/projection/projection';
 
-import { MapViewer } from '@/geo/map/map';
+import { MapViewer } from '@/geo/map/map-viewer';
 
 import { Plugin } from './plugin/plugin';
 import { GeoUtilities } from '@/geo/utils/utilities';

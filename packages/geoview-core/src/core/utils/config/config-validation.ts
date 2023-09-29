@@ -64,6 +64,7 @@ export class ConfigValidation {
 
   /** default configuration if provided configuration is missing or wrong */
   private _defaultMapFeaturesConfig: TypeMapFeaturesConfig = {
+    mapId: '',
     map: {
       interaction: 'dynamic',
       viewSettings: {
@@ -128,6 +129,7 @@ export class ConfigValidation {
    */
   constructor() {
     this._mapId = generateId();
+    this._defaultMapFeaturesConfig.mapId = this.mapId;
     this._displayLanguage = this._defaultMapFeaturesConfig.displayLanguage!;
     this._triggerReadyCallback = this._defaultMapFeaturesConfig.triggerReadyCallback!;
   }
@@ -156,6 +158,7 @@ export class ConfigValidation {
    */
   set mapId(mapId: string) {
     this._mapId = mapId;
+    this._defaultMapFeaturesConfig.mapId = this.mapId;
   }
 
   /** ***************************************************************************************************************************
@@ -864,6 +867,7 @@ export class ConfigValidation {
 
     // recreate the prop object to remove unwanted items and check if same as original. Log the modifications
     const validMapFeaturesConfig: TypeMapFeaturesConfig = {
+      mapId: this.mapId,
       map: {
         basemapOptions,
         viewSettings: {

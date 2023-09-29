@@ -141,6 +141,8 @@
     </pre>
     <button type="button" class="collapsible">Get Feature Info</button>
     <pre style="height: 20pc; overflow-y: scroll" id="ResultSetId1" class="panel">Click on feature on the map</pre>
+    <button type="button" class="collapsible" id="AllFeatureInfo1">Get All Feature Info</button>
+    <pre style="height: 20pc; overflow-y: scroll" id="ResultSetId1-all" class="panel"></pre>
     <hr />
     <p>This map has a wms layer added from configuration.</p>
     <button type="button" class="collapsible">Configuration Snippet</button>
@@ -162,7 +164,7 @@
           createConfigSnippet();
 
           createTableOfFilter('LYR1');
-          cgpv.api.event.emit({ handlerName: 'LYR1/$LegendsLayerSet$', event: cgpv.api.eventNames.GET_LEGENDS.TRIGGER });
+          cgpv.api.event.emit({ handlerName: 'LYR1/LegendsLayerSet', event: cgpv.api.eventNames.GET_LEGENDS.TRIGGER });
         }
       });
 
@@ -226,14 +228,18 @@
       });
 
       // LYR1 ===================================================================================================================
-      const featureInfoLayerSet = cgpv.api.getFeatureInfoLayerSet('LYR1');
+      const getAllFeatureInfo1 = document.getElementById('AllFeatureInfo1');
+      getAllFeatureInfo1.addEventListener('click', function (e) {
+            cgpv.api.event.emit({ event: 'map/get_all_features', handlerName: 'LYR1' });
+          });
+
       cgpv.api.event.on(
         cgpv.api.eventNames.GET_FEATURE_INFO.ALL_QUERIES_DONE,
         (payload) => {
-          const { layerSetId, resultSets } = payload;
-          createInfoTable('LYR1', 'ResultSetId1', resultSets);
+          const { layerSetId, resultSets, queryType } = payload;
+          createInfoTable('LYR1', 'ResultSetId1', resultSets, queryType);
         },
-        'LYR1/$FeatureInfoLayerSet$'
+        'LYR1/FeatureInfoLayerSet'
       );
 
       const LegendLayerSet = cgpv.api.getLegendsLayerSet('LYR1');
@@ -243,7 +249,7 @@
           const { resultSets } = payload;
           displayLegend('LegendsId1', resultSets);
         },
-        'LYR1/$LegendsLayerSet$'
+        'LYR1/LegendsLayerSet'
       );
 
       window.setInterval(() => {
