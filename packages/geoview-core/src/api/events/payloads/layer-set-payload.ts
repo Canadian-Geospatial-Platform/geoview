@@ -238,7 +238,7 @@ export class LayerSetPayload extends PayloadBaseClass {
    * Static method used to create a layer set payload when we need to change a layer phase
    *
    * @param {string} handlerName the handler Name
-   * @param {string | TypeLayerEntryConfig} layerPathOrConfig the layer path affected by the change
+   * @param {string | TypeLayerEntryConfig | null} layerPathOrConfig the layer path affected by the change
    * @param {string} layerPhase the value to assign to the layerPhase property
    *
    * @returns {TypelayerSetUpdatedPayload} the requestLayerInventoryPayload object created

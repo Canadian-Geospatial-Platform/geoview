@@ -189,7 +189,7 @@
               const { layerSetId, resultSets } = payload;
               createInfoTable('LYR1', 'ResultSetId1', resultSets);
             },
-            'LYR1/$FeatureInfoLayerSet$'
+            'LYR1/FeatureInfoLayerSet'
           );
 
           // ========================================================================================================================
@@ -259,10 +259,10 @@
             });
           }
         },
-        'LYR1/$LegendsLayerSet$'
+        'LYR1/LegendsLayerSet'
       );
       // The GET_LEGENDS.TRIGGER event must be triggered after the GET_LEGENDS.LEGENDS_LAYERSET_UPDATED listener is created
-      cgpv.api.event.emit({ handlerName: 'LYR1/$LegendsLayerSet$', event: cgpv.api.eventNames.GET_LEGENDS.TRIGGER });
+      cgpv.api.event.emit({ handlerName: 'LYR1/LegendsLayerSet', event: cgpv.api.eventNames.GET_LEGENDS.TRIGGER });
     </script>
   </body>
 </html>

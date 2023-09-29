@@ -95,7 +95,7 @@ export class ImageStatic extends AbstractGeoViewRaster {
    * @returns {Promise<void>} A promise that the execution is completed.
    */
   protected getServiceMetadata(): Promise<void> {
-    api.event.emit(LayerSetPayload.createLayerSetChangeLayerPhasePayload(this.mapId, this.geoviewLayerId, 'getServiceMetadata'));
+    this.changeLayerPhase('getServiceMetadata');
     const promisedExecution = new Promise<void>((resolve) => {
       resolve();
     });
@@ -198,9 +198,7 @@ export class ImageStatic extends AbstractGeoViewRaster {
    * @returns {TypeListOfLayerEntryConfig} A new list of layer entries configuration with deleted error layers.
    */
   protected validateListOfLayerEntryConfig(listOfLayerEntryConfig: TypeListOfLayerEntryConfig) {
-    api.event.emit(
-      LayerSetPayload.createLayerSetChangeLayerPhasePayload(this.mapId, this.geoviewLayerId, 'validateListOfLayerEntryConfig')
-    );
+    this.changeLayerPhase('validateListOfLayerEntryConfig');
     listOfLayerEntryConfig.forEach((layerEntryConfig: TypeLayerEntryConfig) => {
       const layerPath = Layer.getLayerPath(layerEntryConfig);
       if (layerEntryIsGroupLayer(layerEntryConfig)) {
@@ -210,12 +208,12 @@ export class ImageStatic extends AbstractGeoViewRaster {
             layer: layerPath,
             consoleMessage: `Empty layer group (mapId:  ${this.mapId}, layerPath: ${layerPath})`,
           });
-          api.event.emit(LayerSetPayload.createLayerSetChangeLayerStatusPayload(this.mapId, layerPath, 'error'));
+          this.changeLayerStatus('error', layerEntryConfig);
           return;
         }
       }
 
-      api.event.emit(LayerSetPayload.createLayerSetChangeLayerStatusPayload(this.mapId, layerPath, 'loading'));
+      this.changeLayerStatus('loading', layerEntryConfig);
 
       // When no metadata are provided, all layers are considered valid.
       if (!this.metadata) return;
@@ -230,7 +228,7 @@ export class ImageStatic extends AbstractGeoViewRaster {
             layer: layerPath,
             consoleMessage: `GeoJSON layer not found (mapId:  ${this.mapId}, layerPath: ${layerPath})`,
           });
-          api.event.emit(LayerSetPayload.createLayerSetChangeLayerStatusPayload(this.mapId, layerPath, 'error'));
+          this.changeLayerStatus('error', layerEntryConfig);
           return;
         }
         return;
@@ -251,7 +249,7 @@ export class ImageStatic extends AbstractGeoViewRaster {
    */
   processOneLayerEntry(layerEntryConfig: TypeImageStaticLayerEntryConfig): Promise<TypeBaseRasterLayer | null> {
     const promisedVectorLayer = new Promise<TypeBaseRasterLayer | null>((resolve) => {
-      api.event.emit(LayerSetPayload.createLayerSetChangeLayerPhasePayload(this.mapId, layerEntryConfig, 'processOneLayerEntry'));
+      this.changeLayerPhase('processOneLayerEntry', layerEntryConfig);
 
       if (!layerEntryConfig.source.extent) throw new Error('Parameter extent is not defined in source element of layerEntryConfig.');
       const sourceOptions: SourceOptions = {

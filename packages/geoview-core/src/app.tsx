@@ -23,6 +23,8 @@ import { getValidConfigFromString } from '@/core/utils/utilities';
 import { Config } from '@/core/utils/config/config';
 import { payloadIsAmapFeaturesConfig } from '@/api/events/payloads';
 import { addGeoViewStore } from '@/core/stores/stores-managers';
+import { LegendsLayerSet } from '@/geo/utils/legends-layer-set';
+import { FeatureInfoLayerSet } from '@/geo/utils/feature-info-layer-set';
 
 // The next export allow to import the cgpv-types from 'geoview-core' from outside of the geoview-core package.
 export * from './core/types/cgpv-types';
@@ -36,55 +38,54 @@ const reactRoot: Record<string, Root> = {};
  * all changes made to the map are applied.
  */
 export function addReloadListener(mapId: string) {
-  api.event.on(
-    EVENT_NAMES.MAP.EVENT_MAP_RELOAD,
-    (payload) => {
-      if (payloadIsAmapFeaturesConfig(payload)) {
-        const { mapFeaturesConfig } = payload;
-        if (mapFeaturesConfig) {
-          if (api.maps[mapId].layer) api.maps[mapId].layer.removeAllGeoviewLayers();
-          // unsubscribe from all remaining events registered on this map
-          api.event.offAll(mapId);
+  const reloadHandler = (payload: types.PayloadBaseClass) => {
+    if (payloadIsAmapFeaturesConfig(payload)) {
+      const { mapFeaturesConfig } = payload;
+      if (mapFeaturesConfig) {
+        if (api.maps[mapId]?.layer) api.maps[mapId].layer.removeAllGeoviewLayers();
+        // unsubscribe from all remaining events registered on this map
+        api.event.offAll(mapId);
+        LegendsLayerSet.delete(mapId);
+        FeatureInfoLayerSet.delete(mapId);
 
-          // unload all loaded plugins on the map
-          api.plugin.removePlugins(mapId);
+        // unload all loaded plugins on the map
+        api.plugin.removePlugins(mapId);
 
-          // get the map container
-          const map = document.getElementById(mapId);
+        // get the map container
+        const map = document.getElementById(mapId);
 
-          if (map) {
-            // remove the dom element (remove rendered map)
-            if (reactRoot[mapId] !== null) reactRoot[mapId].unmount();
+        if (map) {
+          // remove the dom element (remove rendered map)
+          if (reactRoot[mapId] !== null) reactRoot[mapId].unmount();
 
-            // recreate the map - crate e new div and remove the active one
-            const newDiv = document.createElement('div');
-            newDiv.setAttribute('id', mapId);
-            newDiv.setAttribute('class', 'llwp-map');
-            map!.parentNode!.insertBefore(newDiv, map);
-            map.remove();
+          // recreate the map - crate e new div and remove the active one
+          const newDiv = document.createElement('div');
+          newDiv.setAttribute('id', mapId);
+          newDiv.setAttribute('class', 'llwp-map');
+          map!.parentNode!.insertBefore(newDiv, map);
+          map.remove();
 
-            // create the new root
-            const newRoot = document.getElementById(mapId);
-            reactRoot[mapId] = createRoot(newRoot!);
+          // create the new root
+          const newRoot = document.getElementById(mapId);
+          reactRoot[mapId] = createRoot(newRoot!);
 
-            // delete the map instance from the maps array
-            delete api.maps[mapId];
+          // delete the map instance from the maps array
+          delete api.maps[mapId];
 
-            // delete plugins that were loaded on the map
-            delete api.plugin.plugins[mapId];
+          // delete plugins that were loaded on the map
+          delete api.plugin.plugins[mapId];
 
-            // set plugin's loaded to false
-            api.plugin.pluginsLoaded = false;
+          // set plugin's loaded to false
+          api.plugin.pluginsLoaded = false;
 
-            addReloadListener(mapId);
-            // re-render map with updated config keeping previous values if unchanged
-            reactRoot[mapId].render(<AppStart mapFeaturesConfig={mapFeaturesConfig} />);
-          }
+          addReloadListener(mapId);
+          // re-render map with updated config keeping previous values if unchanged
+          reactRoot[mapId].render(<AppStart mapFeaturesConfig={mapFeaturesConfig} />);
         }
       }
-    },
-    `${mapId}/delete_old_map`
-  );
+    }
+  };
+  api.event.on(EVENT_NAMES.MAP.EVENT_MAP_RELOAD, reloadHandler, `${mapId}/delete_old_map`);
 }
 
 /**
@@ -134,9 +135,9 @@ async function init(callback: () => void) {
     if (configObj) {
       addGeoViewStore(configObj);
       // render the map with the config
-      reactRoot[configObj.mapId!] = createRoot(mapElement!);
-      addReloadListener(configObj.mapId!);
-      reactRoot[configObj.mapId!].render(<AppStart mapFeaturesConfig={configObj} />);
+      reactRoot[configObj.mapId] = createRoot(mapElement!);
+      addReloadListener(configObj.mapId);
+      reactRoot[configObj.mapId].render(<AppStart mapFeaturesConfig={configObj} />);
     }
   }
 }

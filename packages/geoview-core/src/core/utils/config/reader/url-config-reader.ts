@@ -149,6 +149,7 @@ export class URLmapConfigReader {
       }
 
       mapConfig = {
+        mapId,
         map: {
           interaction: urlParams.i as TypeInteraction,
           viewSettings: {

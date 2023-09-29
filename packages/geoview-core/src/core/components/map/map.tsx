@@ -26,7 +26,7 @@ import { disableScrolling, generateId } from '../../utils/utilities';
 import { api, inKeyfocusPayload, notificationPayload } from '@/app';
 import { EVENT_NAMES } from '@/api/events/event-types';
 
-import { MapViewer } from '@/geo/map/map';
+import { MapViewer } from '@/geo/map/map-viewer';
 
 import { payloadIsABasemapLayerArray, payloadIsAMapViewProjection, PayloadBaseClass } from '@/api/events/payloads';
 import { TypeMapFeaturesConfig } from '../../types/global-types';

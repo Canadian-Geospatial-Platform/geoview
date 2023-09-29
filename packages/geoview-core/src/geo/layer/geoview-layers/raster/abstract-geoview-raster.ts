@@ -39,11 +39,11 @@ export abstract class AbstractGeoViewRaster extends AbstractGeoViewLayer {
   addLoadendListener(layerEntryConfig: TypeLayerEntryConfig, layerType: 'tile' | 'image'): void {
     let loadErrorHandler: () => void;
     const loadEndHandler = () => {
-      api.event.emit(LayerSetPayload.createLayerSetChangeLayerStatusPayload(this.mapId, layerEntryConfig, 'loaded'));
+      this.changeLayerStatus('loaded', layerEntryConfig);
       layerEntryConfig.gvLayer!.get('source').un(`${layerType}loaderror`, loadErrorHandler);
     };
     loadErrorHandler = () => {
-      api.event.emit(LayerSetPayload.createLayerSetChangeLayerStatusPayload(this.mapId, layerEntryConfig, 'error'));
+      this.changeLayerStatus('error', layerEntryConfig);
       layerEntryConfig.gvLayer!.get('source').un(`${layerType}loadend`, loadEndHandler);
     };
 

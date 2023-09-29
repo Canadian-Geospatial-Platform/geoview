@@ -534,7 +534,7 @@
               const { layerSetId, resultSets } = payload;
               createInfoTable('LYR1', 'ResultSetId1', resultSets);
             },
-            'LYR1/$FeatureInfoLayerSet$'
+            'LYR1/FeatureInfoLayerSet'
           );
 
           const LegendsLayerSet1 = cgpv.api.getLegendsLayerSet('LYR1');
@@ -544,10 +544,10 @@
               const { resultSets } = payload;
               displayLegend('LegendsId1', resultSets);
             },
-            'LYR1/$LegendsLayerSet$'
+            'LYR1/LegendsLayerSet'
           );
           // The GET_LEGENDS.TRIGGER event must be triggered after the GET_LEGENDS.LEGENDS_LAYERSET_UPDATED listener is created
-          cgpv.api.event.emit({ handlerName: 'LYR1/$LegendsLayerSet$', event: cgpv.api.eventNames.GET_LEGENDS.TRIGGER });
+          cgpv.api.event.emit({ handlerName: 'LYR1/LegendsLayerSet', event: cgpv.api.eventNames.GET_LEGENDS.TRIGGER });
 
           // ========================================================================================================================
           // Test a refresh WMS from projection change
@@ -566,7 +566,7 @@
               const { layerSetId, resultSets } = payload;
               createInfoTable('LYR2', 'ResultSetId2', resultSets);
             },
-            'LYR2/$FeatureInfoLayerSet$'
+            'LYR2/FeatureInfoLayerSet'
           );
 
           const LegendsLayerSet2 = cgpv.api.getLegendsLayerSet('LYR2');
@@ -576,10 +576,10 @@
               const { resultSets } = payload;
               displayLegend('LegendsId2', resultSets);
             },
-            'LYR2/$LegendsLayerSet$'
+            'LYR2/LegendsLayerSet'
           );
           // The GET_LEGENDS.TRIGGER event must be triggered after the GET_LEGENDS.LEGENDS_LAYERSET_UPDATED listener is created
-          cgpv.api.event.emit({ handlerName: 'LYR2/$LegendsLayerSet$', event: cgpv.api.eventNames.GET_LEGENDS.TRIGGER });
+          cgpv.api.event.emit({ handlerName: 'LYR2/LegendsLayerSet', event: cgpv.api.eventNames.GET_LEGENDS.TRIGGER });
 
           // LYR3 ===================================================================================================================
           const featureInfoLayerSet3 = cgpv.api.getFeatureInfoLayerSet('LYR3');
@@ -589,7 +589,7 @@
               const { layerSetId, resultSets } = payload;
               createInfoTable('LYR3', 'ResultSetId3', resultSets);
             },
-            'LYR3/$FeatureInfoLayerSet$'
+            'LYR3/FeatureInfoLayerSet'
           );
 
           const LegendsLayerSet3 = cgpv.api.getLegendsLayerSet('LYR3');
@@ -599,10 +599,10 @@
               const { resultSets } = payload;
               displayLegend('LegendsId3', resultSets);
             },
-            'LYR3/$LegendsLayerSet$'
+            'LYR3/LegendsLayerSet'
           );
           // The GET_LEGENDS.TRIGGER event must be triggered after the GET_LEGENDS.LEGENDS_LAYERSET_UPDATED listener is created
-          cgpv.api.event.emit({ handlerName: 'LYR3/$LegendsLayerSet$', event: cgpv.api.eventNames.GET_LEGENDS.TRIGGER });
+          cgpv.api.event.emit({ handlerName: 'LYR3/LegendsLayerSet', event: cgpv.api.eventNames.GET_LEGENDS.TRIGGER });
 
           //LYR4 ===================================================================================================================
           const LegendsLayerSet4 = cgpv.api.getLegendsLayerSet('LYR4', 'LegendsId4');
@@ -612,10 +612,10 @@
               const { resultSets } = payload;
               displayLegend('LegendsId4', resultSets);
             },
-            'LYR4/$LegendsLayerSet$'
+            'LYR4/LegendsLayerSet'
           );
           // The GET_LEGENDS.TRIGGER event must be triggered after the GET_LEGENDS.LEGENDS_LAYERSET_UPDATED listener is created
-          cgpv.api.event.emit({ handlerName: 'LYR4/$LegendsLayerSet$', event: cgpv.api.eventNames.GET_LEGENDS.TRIGGER });
+          cgpv.api.event.emit({ handlerName: 'LYR4/LegendsLayerSet', event: cgpv.api.eventNames.GET_LEGENDS.TRIGGER });
 
           // ========================================================================================================================
           // Test a refresh WMS from projection change

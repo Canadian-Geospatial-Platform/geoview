@@ -498,6 +498,8 @@
     <pre style="height: 20pc; overflow-y: scroll" id="LegendsId1-table-pre" class="panel"></pre>
     <button type="button" class="collapsible">Get Feature Info</button>
     <pre style="height: 20pc; overflow-y: scroll" id="ResultSetId1" class="panel">Click on feature on the map</pre>
+    <button type="button" class="collapsible">Get All Feature Info</button>
+    <pre style="height: 20pc; overflow-y: scroll" id="ResultSetId2" class="panel">Comming soon!</pre>
     <hr />
     <button type="button" class="collapsible">Configuration Snippet</button>
     <pre id="LYR1CS" class="panel"></pre>
@@ -637,9 +639,9 @@
           createTableOfFilter('LYR1');
           createTableOfFilter('LYR2');
           createTableOfFilter('LYR3');
-          cgpv.api.event.emit({ handlerName: 'LYR1/$LegendsLayerSet$', event: cgpv.api.eventNames.GET_LEGENDS.TRIGGER });
-          cgpv.api.event.emit({ handlerName: 'LYR2/$LegendsLayerSet$', event: cgpv.api.eventNames.GET_LEGENDS.TRIGGER });
-          cgpv.api.event.emit({ handlerName: 'LYR3/$LegendsLayerSet$', event: cgpv.api.eventNames.GET_LEGENDS.TRIGGER });
+          cgpv.api.event.emit({ handlerName: 'LYR1/LegendsLayerSet', event: cgpv.api.eventNames.GET_LEGENDS.TRIGGER });
+          cgpv.api.event.emit({ handlerName: 'LYR2/LegendsLayerSet', event: cgpv.api.eventNames.GET_LEGENDS.TRIGGER });
+          cgpv.api.event.emit({ handlerName: 'LYR3/LegendsLayerSet', event: cgpv.api.eventNames.GET_LEGENDS.TRIGGER });
 
           const field2 = cgpv.api.maps.LYR2.layer.geoviewLayers['historical-flood'].layerTemporalDimension['historical-flood/0'].field;
           const LYR2_FILTERS = [`${field2} >= date '01/01/2018 05:00:00' and ${field2} <= date '12/31/2019 19:00:00-05:00'`,
@@ -705,17 +707,16 @@
           const { layerSetId, resultSets } = payload;
           createInfoTable('LYR1', 'ResultSetId1', resultSets);
         },
-        'LYR1/$FeatureInfoLayerSet$'
+        'LYR1/FeatureInfoLayerSet'
       );
 
-      const LegendsLayerSet1 = cgpv.api.getLegendsLayerSet('LYR1');
       cgpv.api.event.on(
         cgpv.api.eventNames.GET_LEGENDS.LEGENDS_LAYERSET_UPDATED,
         (payload) => {
           const { resultSets } = payload;
           displayLegend('LegendsId1', resultSets);
         },
-        'LYR1/$LegendsLayerSet$'
+        'LYR1/LegendsLayerSet'
       );
 
       // LYR2 ===================================================================================================================
@@ -726,17 +727,16 @@
           const { layerSetId, resultSets } = payload;
           createInfoTable('LYR2', 'ResultSetId2', resultSets);
         },
-        'LYR2/$FeatureInfoLayerSet$'
+        'LYR2/FeatureInfoLayerSet'
       );
 
-      const LegendsLayerSet2 = cgpv.api.getLegendsLayerSet('LYR2');
       cgpv.api.event.on(
         cgpv.api.eventNames.GET_LEGENDS.LEGENDS_LAYERSET_UPDATED,
         (payload) => {
           const { resultSets } = payload;
           displayLegend('LegendsId2', resultSets);
         },
-        'LYR2/$LegendsLayerSet$'
+        'LYR2/LegendsLayerSet'
       );
 
       // LYR3 ===================================================================================================================
@@ -747,19 +747,19 @@
           const { layerSetId, resultSets } = payload;
           createInfoTable('LYR3', 'ResultSetId3', resultSets);
         },
-        'LYR3/$FeatureInfoLayerSet$'
+        'LYR3/FeatureInfoLayerSet'
       );
 
-      const LegendsLayerSet3 = cgpv.api.getLegendsLayerSet('LYR3');
       cgpv.api.event.on(
         cgpv.api.eventNames.GET_LEGENDS.LEGENDS_LAYERSET_UPDATED,
         (payload) => {
           const { resultSets } = payload;
           displayLegend('LegendsId3', resultSets);
         },
-        'LYR3/$LegendsLayerSet$'
+        'LYR3/LegendsLayerSet'
       );
 
+      // Interval ===============================================================================================================
       window.setInterval(() => {
         const displayField1 = document.getElementById('HLYR1-state');
         const geoviewLayers = cgpv.api.getFeatureInfoLayerSet('LYR1').resultSets;

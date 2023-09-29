@@ -18,7 +18,7 @@ const Item = styled('div')(({ theme }) => ({
 
 export function Legend2(props: LegendItemsDetailsProps): JSX.Element {
   const { layerIds, isRemoveable, canSetOpacity, expandAll, hideAll, mapId } = props;
-  api.event.emit({ handlerName: `${mapId}/$LegendsLayerSet$`, event: api.eventNames.GET_LEGENDS.TRIGGER });
+  api.event.emit({ handlerName: `${mapId}/LegendsLayerSet`, event: api.eventNames.GET_LEGENDS.TRIGGER });
 
   const { t } = useTranslation<string>();
 

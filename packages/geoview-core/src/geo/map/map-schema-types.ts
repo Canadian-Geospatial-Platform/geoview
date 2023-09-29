@@ -615,7 +615,7 @@ export const layerEntryIsGeocore = (verifyIfLayer: TypeLayerEntryConfig): verify
 /** ******************************************************************************************************************************
  * Valid values for the LayerStatus property
  */
-export type TypeLayerStatus = 'newInstance' | 'loading' | 'processed' | 'loaded' | 'error' | undefined;
+export type TypeLayerStatus = 'newInstance' | 'loading' | 'processed' | 'loaded' | 'error';
 
 /** ******************************************************************************************************************************
  * Base type used to define a GeoView layer to display on the map.
