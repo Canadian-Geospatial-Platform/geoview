@@ -131,7 +131,7 @@ class FooterPanelPlugin extends AbstractPlugin {
               }
             }
           },
-          `${mapId}/$FeatureInfoLayerSet$`
+          `${mapId}/FeatureInfoLayerSet`
         );
       }
 

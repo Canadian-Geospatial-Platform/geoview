@@ -158,7 +158,7 @@
     <button class="collapsible">Get Legend</button>
     <pre style="height: 20pc; overflow-y: scroll" id="LegendsId1-table-pre" class="panel"></pre>
     <button type="button" class="collapsible">Get Feature Info</button>
-    <pre style="height: 20pc; overflow-y: scroll" id="ResultSetId1" class="panel">Click on feature on the map</pre>
+    <pre style="height: 20pc; overflow-y: scroll" id="ResultSetId1-at_long_lat" class="panel">Click on feature on the map</pre>
     <hr />
     <p>This map has a wms layer added from configuration.</p>
     <button type="button" class="collapsible">Configuration Snippet</button>
@@ -186,10 +186,10 @@
           cgpv.api.event.on(
             cgpv.api.eventNames.GET_FEATURE_INFO.ALL_QUERIES_DONE,
             (payload) => {
-              const { layerSetId, resultSets } = payload;
-              createInfoTable('LYR1', 'ResultSetId1', resultSets);
+              const { layerSetId, resultSets, queryType } = payload;
+              createInfoTable('LYR1', 'ResultSetId1', resultSets, queryType);
             },
-            'LYR1/$FeatureInfoLayerSet$'
+            'LYR1/FeatureInfoLayerSet'
           );
 
           // ========================================================================================================================
@@ -259,10 +259,10 @@
             });
           }
         },
-        'LYR1/$LegendsLayerSet$'
+        'LYR1/LegendsLayerSet'
       );
       // The GET_LEGENDS.TRIGGER event must be triggered after the GET_LEGENDS.LEGENDS_LAYERSET_UPDATED listener is created
-      cgpv.api.event.emit({ handlerName: 'LYR1/$LegendsLayerSet$', event: cgpv.api.eventNames.GET_LEGENDS.TRIGGER });
+      cgpv.api.event.emit({ handlerName: 'LYR1/LegendsLayerSet', event: cgpv.api.eventNames.GET_LEGENDS.TRIGGER });
     </script>
   </body>
 </html>

@@ -306,11 +306,11 @@ export function ClickMarker(): JSX.Element {
 
   const allQueriesDoneListenerFunction = (payload: PayloadBaseClass) => {
     if (payloadIsAllQueriesDone(payload)) {
-      const { resultSets } = payload;
+      const { queryType, resultSets } = payload;
       let feature: TypeFeatureInfoEntry | undefined;
 
       Object.keys(resultSets).every((layerPath) => {
-        const features = resultSets[layerPath]!.layerStatus === 'error' ? null : resultSets[layerPath]!.data;
+        const features = resultSets[layerPath]!.layerStatus === 'error' ? null : resultSets[layerPath]!.data[queryType];
         if (features && features.length > 0 && features[0].geoviewLayerType !== 'ogcWms') {
           [feature] = features;
           return false;
@@ -355,7 +355,7 @@ export function ClickMarker(): JSX.Element {
       }
     );
 
-    api.event.on(EVENT_NAMES.GET_FEATURE_INFO.ALL_QUERIES_DONE, allQueriesDoneListenerFunction, `${mapId}/$FeatureInfoLayerSet$`);
+    api.event.on(EVENT_NAMES.GET_FEATURE_INFO.ALL_QUERIES_DONE, allQueriesDoneListenerFunction, `${mapId}/FeatureInfoLayerSet`);
     api.event.on(EVENT_NAMES.MARKER_ICON.EVENT_MARKER_ICON_SHOW, eventMarkerIconShowListenerFunction, mapId);
     api.event.on(EVENT_NAMES.MARKER_ICON.EVENT_MARKER_ICON_HIDE, eventMarkerIconHideListenerFunction, mapId);
     api.event.on(EVENT_NAMES.FEATURE_HIGHLIGHT.EVENT_HIGHLIGHT_FEATURE, highlightCallbackFunction, mapId);
