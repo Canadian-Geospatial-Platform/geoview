@@ -142,13 +142,8 @@ export class MapViewer {
    * @param {i18n} i18instance language instance
    */
   constructor(mapFeaturesConfig: TypeMapFeaturesConfig, i18instance: i18n) {
-    this.mapId = mapFeaturesConfig.mapId!;
-
-    // add map viewer instance to api
-    api.maps[this.mapId] = this;
-
+    this.mapId = mapFeaturesConfig.mapId;
     this.mapFeaturesConfig = mapFeaturesConfig;
-
     this.displayLanguage = mapFeaturesConfig.displayLanguage!;
     this.currentProjection = mapFeaturesConfig.map.viewSettings.projection;
     this.i18nInstance = i18instance;
