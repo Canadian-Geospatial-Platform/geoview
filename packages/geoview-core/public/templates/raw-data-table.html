@@ -75,7 +75,7 @@
       };
 
       cgpv.api.event.on(cgpv.api.eventNames.MAP.EVENT_MAP_LOADED, (payload) => {
-        renderDataTableFromMap();
+        setTimeout(() => { renderDataTableFromMap(); }, 2000)
       }, 'mapWM1');
 
     });
