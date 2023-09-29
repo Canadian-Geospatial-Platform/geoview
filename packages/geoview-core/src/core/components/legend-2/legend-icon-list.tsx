@@ -1,9 +1,9 @@
+/* eslint-disable react/require-default-props */
 import React, { useState, useEffect } from 'react';
 import { useTheme, Theme } from '@mui/material/styles';
-import { Checkbox } from '@mui/material';
+import { Checkbox, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@mui/material';
 // import { IconButton, CheckBoxOutIcon, CheckBoxIcon } from '@/ui';
 import { api } from '@/app';
-import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@mui/material';
 import {
   TypeVectorLayerEntryConfig,
   TypeStyleGeometry,
@@ -40,7 +40,7 @@ const sxClasses = {
     borderBottom: '1px solid #C1C1C1',
     '& td': {
       margin: 0,
-      padding: '8px',
+      padding: '2px 4px 2px 4px',
       alignItems: 'center',
     },
     '& td:first-child': {
@@ -162,8 +162,8 @@ export function LegendIconList(props: TypeLegendIconListProps): JSX.Element {
     toggleMapVisible,
     mapId,
   ]);
-  
-  console.log("Check Count", countChildren);
+
+  console.log('Check Count', countChildren);
 
   // eslint-disable-next-line no-console
   console.log('Check Count', countChildren);
@@ -175,11 +175,7 @@ export function LegendIconList(props: TypeLegendIconListProps): JSX.Element {
           <TableRow sx={sxClasses.tableHeader}>
             <TableCell>Name</TableCell>
             <TableCell>
-              <Checkbox
-                color="primary"
-                checked={isAllChecked}
-                onChange={handleToggleAll}
-              />
+              <Checkbox color="primary" checked={isAllChecked} onChange={handleToggleAll} />
             </TableCell>
           </TableRow>
         </TableHead>
@@ -191,11 +187,7 @@ export function LegendIconList(props: TypeLegendIconListProps): JSX.Element {
                 <span style={sxClasses.tableIconLabel}>{iconLabels[index]}</span>
               </TableCell>
               <TableCell>
-                <Checkbox
-                  color="primary"
-                  checked={isChecked[index]}
-                  onChange={() => handleToggleLayer(index)}
-                />
+                <Checkbox color="primary" checked={isChecked[index]} onChange={() => handleToggleLayer(index)} />
               </TableCell>
             </TableRow>
           ))}
