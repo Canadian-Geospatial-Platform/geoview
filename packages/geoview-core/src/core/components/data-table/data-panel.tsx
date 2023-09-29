@@ -1,4 +1,4 @@
-import React, { useState, useRef, useCallback, useEffect } from 'react';
+import React, { useState, useCallback } from 'react';
 import { Projection } from 'ol/proj';
 import {
   Box,
@@ -50,8 +50,6 @@ const sxClasses = {
  */
 
 export function Datapanel({ layerData, mapId, projectionConfig, layerKeys, layerIds }: DatapanelProps) {
-  const [data, setData] = useState(layerData[0]);
-  const layerKeyRef = useRef<string>(layerKeys[0]);
   const [selectedLayerIndex, setSelectedLayerIndex] = useState(0);
 
   const handleListItemClick = useCallback((event: React.MouseEvent<HTMLDivElement, MouseEvent>, index: number) => {
@@ -99,12 +97,6 @@ export function Datapanel({ layerData, mapId, projectionConfig, layerKeys, layer
     [selectedLayerIndex]
   );
 
-  useEffect(() => {
-    layerKeyRef.current = layerKeys[selectedLayerIndex];
-    setData(layerData[selectedLayerIndex]);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedLayerIndex]);
-
   return (
     <Box sx={sxClasses.dataPanel}>
       <Grid container spacing={2} sx={sxClasses.gridContainer}>
@@ -129,17 +121,21 @@ export function Datapanel({ layerData, mapId, projectionConfig, layerKeys, layer
             {layerKeys[selectedLayerIndex]}
           </Typography>
 
-          {data.features.length ? (
-            <MapDataTable
-              data={data}
-              layerId={layerIds[selectedLayerIndex]}
-              mapId={mapId}
-              layerKey={layerKeyRef.current}
-              projectionConfig={projectionConfig}
-            />
-          ) : (
-            'No Data'
-          )}
+          {layerKeys.map((layerKey, index) => (
+            <Box key={layerKey} sx={{ display: index === selectedLayerIndex ? 'block' : 'none' }}>
+              {layerData[index].features.length ? (
+                <MapDataTable
+                  data={layerData[index]}
+                  layerId={layerIds[index]}
+                  mapId={mapId}
+                  layerKey={layerKey}
+                  projectionConfig={projectionConfig}
+                />
+              ) : (
+                'No Data'
+              )}
+            </Box>
+          ))}
         </Grid>
       </Grid>
     </Box>
