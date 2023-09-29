@@ -42,7 +42,18 @@ export class LegendsLayerSet {
       return true;
     };
     this.mapId = mapId;
-    this.layerSet = new LayerSet(mapId, `${mapId}/$LegendsLayerSet$`, this.resultSets, registrationConditionFunction);
+    this.layerSet = new LayerSet(mapId, `${mapId}/LegendsLayerSet`, this.resultSets, registrationConditionFunction);
+
+    api.event.on(
+      EVENT_NAMES.LAYER_SET.UPDATED,
+      (layerUpdatedPayload) => {
+        if (payloadIsLayerSetUpdated(layerUpdatedPayload)) {
+          const { resultSets } = layerUpdatedPayload;
+          api.event.emit(GetLegendsPayload.createLegendsLayersetUpdatedPayload(`${this.mapId}/LegendsLayerSet`, resultSets));
+        }
+      },
+      `${mapId}/LegendsLayerSetStatusOrPhaseChanged`
+    );
 
     // This listener receives the legend information returned by the layer's getLegend call and store it in the resultSets.
     // Every time a registered layer changes, an EVENT_NAMES.GET_LEGENDS.LEGENDS_LAYERSET_UPDATED event is triggered.
@@ -53,7 +64,7 @@ export class LegendsLayerSet {
           const { layerPath, legendInfo } = payload;
           if (layerPath in this.resultSets) {
             this.resultSets[layerPath].data = legendInfo;
-            api.event.emit(GetLegendsPayload.createLegendsLayersetUpdatedPayload(`${this.mapId}/$LegendsLayerSet$`, this.resultSets));
+            api.event.emit(GetLegendsPayload.createLegendsLayersetUpdatedPayload(`${this.mapId}/LegendsLayerSet`, this.resultSets));
           }
         }
       },
@@ -78,17 +89,17 @@ export class LegendsLayerSet {
             (layerUpdatedPayload) => {
               if (payloadIsLayerSetUpdated(layerUpdatedPayload)) {
                 queryUndefinedLegend();
-                api.event.emit(GetLegendsPayload.createLegendsLayersetUpdatedPayload(`${this.mapId}/$LegendsLayerSet$`, this.resultSets));
+                api.event.emit(GetLegendsPayload.createLegendsLayersetUpdatedPayload(`${this.mapId}/LegendsLayerSet`, this.resultSets));
               }
             },
-            `${mapId}/$LegendsLayerSet$`
+            `${mapId}/LegendsLayerSet`
           );
 
           queryUndefinedLegend();
-          api.event.emit(GetLegendsPayload.createLegendsLayersetUpdatedPayload(`${this.mapId}/$LegendsLayerSet$`, this.resultSets));
+          api.event.emit(GetLegendsPayload.createLegendsLayersetUpdatedPayload(`${this.mapId}/LegendsLayerSet`, this.resultSets));
         }
       },
-      `${mapId}/$LegendsLayerSet$`
+      `${mapId}/LegendsLayerSet`
     );
   }
 
@@ -103,5 +114,14 @@ export class LegendsLayerSet {
   static get(mapId: string): LegendsLayerSet {
     if (!LegendsLayerSet.legendsLayerSetInstance[mapId]) LegendsLayerSet.legendsLayerSetInstance[mapId] = new LegendsLayerSet(mapId);
     return LegendsLayerSet.legendsLayerSetInstance[mapId];
+  }
+
+  /**
+   * Function used to delete a LegendsLayerSet object associated to a mapId.
+   *
+   * @param {string} mapId The map identifier the layer set belongs to.
+   */
+  static delete(mapId: string) {
+    if (LegendsLayerSet.legendsLayerSetInstance[mapId]) delete LegendsLayerSet.legendsLayerSetInstance[mapId];
   }
 }

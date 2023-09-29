@@ -1,6 +1,26 @@
 /* eslint-disable no-undef */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 // ==========================================================================================================================
+function listenToLegendLayerSetChanges(elementId, handlerName) {
+  cgpv.api.event.on(
+    cgpv.api.eventNames.GET_LEGENDS.LEGENDS_LAYERSET_UPDATED,
+    (payload) => {
+      const outputHeader =
+        '<table class="state"><tr class="state"><th class="state">Name</th><th class="state">Phase</th><th class="state">Status</th></tr>';
+      const displayField = document.getElementById(elementId);
+      const { resultSets } = payload;
+      const output = Object.keys(resultSets).reduce((outputValue, layerPath) => {
+        const layerName = resultSets[layerPath]?.layerName?.en || resultSets[layerPath]?.layerName?.fr || '';
+        const { layerPhase, layerStatus } = resultSets[layerPath];
+        return `${outputValue}<tr class="state"><td class="state">${layerName}</td><td class="state">${layerPhase}</td><td class="state">${layerStatus}</td></tr>`;
+      }, outputHeader);
+      displayField.innerHTML = output && output !== outputHeader ? `${output}</table>` : '';
+    },
+    handlerName
+  );
+}
+
+// ==========================================================================================================================
 const addBoundsPolygon = (mapId, bbox) => {
   const newBbox = cgpv.api.maps[mapId].transformAndDensifyExtent(bbox, `EPSG:${cgpv.api.maps[mapId].currentProjection}`, `EPSG:4326`);
 
@@ -17,17 +37,18 @@ const addBoundsPolygon = (mapId, bbox) => {
   });
 };
 
-const createInfoTable = (mapId, resultSetsId, resultSets) => {
-  const infoTable = document.getElementById(resultSetsId);
+// ==========================================================================================================================
+const createInfoTable = (mapId, resultSetsId, resultSets, queryType) => {
+  const infoTable = document.getElementById(`${resultSetsId}-${queryType}`);
   infoTable.textContent = '';
-  const oldContent = document.getElementById(`layer${mapId.slice(-1)}-info`);
+  const oldContent = document.getElementById(`layer${mapId.slice(-1)}-${queryType}-info`);
   if (oldContent) oldContent.remove();
   const content = document.createElement('div');
-  content.id = `layer${mapId.slice(-1)}-info`;
+  content.id = `layer${mapId.slice(-1)}-${queryType}-info`;
   infoTable.appendChild(content);
   Object.keys(resultSets).forEach((layerPath) => {
     const activeResultSet = resultSets[layerPath];
-    const layerData = activeResultSet.data;
+    const layerData = activeResultSet.data[queryType];
 
     // Header of the layer
     const infoH1 = document.createElement('h1');
@@ -173,6 +194,7 @@ const createTableOfFilter = (mapId) => {
   tableElement.style.width = '100%';
   tableElement.border = '1px solid black';
   mapButtonsDiv.appendChild(tableElement);
+  if (!cgpv.api.maps?.[mapId]?.layer?.geoviewLayers) return;
   Object.keys(cgpv.api.maps[mapId].layer.geoviewLayers).forEach((geoviewLayerId) => {
     const geoviewLayer = cgpv.api.maps[mapId].layer.geoviewLayers[geoviewLayerId];
     Object.keys(cgpv.api.maps[mapId].layer.registeredLayers).forEach((layerPath) => {

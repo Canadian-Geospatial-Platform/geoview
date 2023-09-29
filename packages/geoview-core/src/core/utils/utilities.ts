@@ -345,15 +345,13 @@ export function removeCommentsFromJSON(config: string): string {
  * @returns {any} cleaned and parsed config object
  */
 export function parseJSONConfig(configObjStr: string): any {
-  return JSON.parse(
-    configObjStr
-      // remove CR and LF from the map config
-      .replace(/(\r\n|\n|\r)/gm, '')
-      // replace apostrophes not preceded by a backslash with quotes
-      .replace(/(?<!\\)'/gm, '"')
-      // replace apostrophes preceded by a backslash with a single apostrophe
-      .replace(/\\'/gm, "'")
-  );
+  // remove CR and LF from the map config
+  let jsonString = configObjStr.replace(/(\r\n|\n|\r)/gm, '');
+  // replace apostrophes not preceded by a backslash with quotes
+  jsonString = jsonString.replace(/(?<!\\)'/gm, '"');
+  // replace apostrophes preceded by a backslash with a single apostrophe
+  jsonString = jsonString.replace(/\\'/gm, "'");
+  return JSON.parse(jsonString);
 }
 
 /**

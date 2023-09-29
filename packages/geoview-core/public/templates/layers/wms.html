@@ -75,10 +75,9 @@
 
     <div class="map-title-holder">
       <h4 id="HLYR1">1. Many WMS Layers</h4>
-      &nbsp;
-      <h5 id="HLYR1-state">(undefined)</h5>
       <a class="ref-link" href="#top">Top</a>
     </div>
+    <div id="HLYR1-state" class="map-title-holder"></div>
     <button class="test-refresh-WMS-btn">Test Refresh WMS</button>
     <div
       id="LYR1"
@@ -178,7 +177,7 @@
     <button class="collapsible">Get Legend</button>
     <pre style="height: 20pc; overflow-y: scroll" id="LegendsId1-table-pre" class="panel"></pre>
     <button type="button" class="collapsible">Get Feature Info</button>
-    <pre style="height: 20pc; overflow-y: scroll" id="ResultSetId1" class="panel">Click on feature on the map</pre>
+    <pre style="height: 20pc; overflow-y: scroll" id="ResultSetId1-at_long_lat" class="panel">Click on feature on the map</pre>
     <hr />
     <p>This map has a wms layer added from configuration.</p>
     <button type="button" class="collapsible">Configuration Snippet</button>
@@ -189,10 +188,9 @@
 
     <div class="map-title-holder">
       <h4 id="HLYR2">2. All Styles of a WMS Layer</h4>
-      &nbsp;
-      <h5 id="HLYR2-state">(undefined)</h5>
       <a class="ref-link" href="#top">Top</a>
     </div>
+    <div id="HLYR2-state" class="map-title-holder"></div>
     <div
       id="LYR2"
       class="llwp-map"
@@ -366,7 +364,7 @@
     <button class="collapsible">Get Legend</button>
     <pre style="height: 20pc; overflow-y: scroll" id="LegendsId2-table-pre" class="panel"></pre>
     <button type="button" class="collapsible">Get Feature Info</button>
-    <pre style="height: 20pc; overflow-y: scroll" id="ResultSetId2" class="panel">Click on feature on the map</pre>
+    <pre style="height: 20pc; overflow-y: scroll" id="ResultSetId2-at_long_lat" class="panel">Click on feature on the map</pre>
     <hr />
     <p>This map has a wms layer added from configuration.</p>
     <button type="button" class="collapsible">Configuration Snippet</button>
@@ -375,10 +373,9 @@
 
     <div class="map-title-holder">
       <h4 id="HLYR3">3. All Styles of a WMS Layer</h4>
-      &nbsp;
-      <h5 id="HLYR3-state">(undefined)</h5>
       <a class="ref-link" href="#top">Top</a>
     </div>
+    <div id="HLYR3-state" class="map-title-holder"></div>
     <div
       id="LYR3"
       class="llwp-map"
@@ -425,7 +422,7 @@
     <button class="collapsible">Get Legend</button>
     <pre style="height: 20pc; overflow-y: scroll" id="LegendsId3-table-pre" class="panel"></pre>
     <button type="button" class="collapsible">Get Feature Info</button>
-    <pre style="height: 20pc; overflow-y: scroll" id="ResultSetId3" class="panel">Click on feature on the map</pre>
+    <pre style="height: 20pc; overflow-y: scroll" id="ResultSetId3-at_long_lat" class="panel">Click on feature on the map</pre>
     <hr />
     <p>This map has a wms layer added from configuration.</p>
     <button type="button" class="collapsible">Configuration Snippet</button>
@@ -434,10 +431,9 @@
 
     <div class="map-title-holder">
       <h4 id="HLYR4">4. Automatic group creation from metadata information</h4>
-      &nbsp;
-      <h5 id="HLYR4-state">(undefined)</h5>
       <a class="ref-link" href="#top">Top</a>
     </div>
+    <div id="HLYR4-state" class="map-title-holder"></div>
     <div
       id="LYR4"
       class="llwp-map"
@@ -526,106 +522,6 @@
             }
           }, 1000);
 
-          //LYR1 ===================================================================================================================
-          const featureInfoLayerSet1 = cgpv.api.getFeatureInfoLayerSet('LYR1');
-          cgpv.api.event.on(
-            cgpv.api.eventNames.GET_FEATURE_INFO.ALL_QUERIES_DONE,
-            (payload) => {
-              const { layerSetId, resultSets } = payload;
-              createInfoTable('LYR1', 'ResultSetId1', resultSets);
-            },
-            'LYR1/$FeatureInfoLayerSet$'
-          );
-
-          const LegendsLayerSet1 = cgpv.api.getLegendsLayerSet('LYR1');
-          cgpv.api.event.on(
-            cgpv.api.eventNames.GET_LEGENDS.LEGENDS_LAYERSET_UPDATED,
-            (payload) => {
-              const { resultSets } = payload;
-              displayLegend('LegendsId1', resultSets);
-            },
-            'LYR1/$LegendsLayerSet$'
-          );
-          // The GET_LEGENDS.TRIGGER event must be triggered after the GET_LEGENDS.LEGENDS_LAYERSET_UPDATED listener is created
-          cgpv.api.event.emit({ handlerName: 'LYR1/$LegendsLayerSet$', event: cgpv.api.eventNames.GET_LEGENDS.TRIGGER });
-
-          // ========================================================================================================================
-          // Test a refresh WMS from projection change
-          var testRefreshBtn = document.getElementsByClassName('test-refresh-WMS-btn')[0];
-          testRefreshBtn.addEventListener('click', function (e) {
-            cgpv.api.event.emit(
-              cgpv.types.mapViewProjectionPayload(cgpv.api.eventNames.MAP.EVENT_MAP_VIEW_PROJECTION_CHANGE, 'LYR1', 3978)
-            );
-          });
-
-          // LYR2 ===================================================================================================================
-          const featureInfoLayerSet2 = cgpv.api.getFeatureInfoLayerSet('LYR2');
-          cgpv.api.event.on(
-            cgpv.api.eventNames.GET_FEATURE_INFO.ALL_QUERIES_DONE,
-            (payload) => {
-              const { layerSetId, resultSets } = payload;
-              createInfoTable('LYR2', 'ResultSetId2', resultSets);
-            },
-            'LYR2/$FeatureInfoLayerSet$'
-          );
-
-          const LegendsLayerSet2 = cgpv.api.getLegendsLayerSet('LYR2');
-          cgpv.api.event.on(
-            cgpv.api.eventNames.GET_LEGENDS.LEGENDS_LAYERSET_UPDATED,
-            (payload) => {
-              const { resultSets } = payload;
-              displayLegend('LegendsId2', resultSets);
-            },
-            'LYR2/$LegendsLayerSet$'
-          );
-          // The GET_LEGENDS.TRIGGER event must be triggered after the GET_LEGENDS.LEGENDS_LAYERSET_UPDATED listener is created
-          cgpv.api.event.emit({ handlerName: 'LYR2/$LegendsLayerSet$', event: cgpv.api.eventNames.GET_LEGENDS.TRIGGER });
-
-          // LYR3 ===================================================================================================================
-          const featureInfoLayerSet3 = cgpv.api.getFeatureInfoLayerSet('LYR3');
-          cgpv.api.event.on(
-            cgpv.api.eventNames.GET_FEATURE_INFO.ALL_QUERIES_DONE,
-            (payload) => {
-              const { layerSetId, resultSets } = payload;
-              createInfoTable('LYR3', 'ResultSetId3', resultSets);
-            },
-            'LYR3/$FeatureInfoLayerSet$'
-          );
-
-          const LegendsLayerSet3 = cgpv.api.getLegendsLayerSet('LYR3');
-          cgpv.api.event.on(
-            cgpv.api.eventNames.GET_LEGENDS.LEGENDS_LAYERSET_UPDATED,
-            (payload) => {
-              const { resultSets } = payload;
-              displayLegend('LegendsId3', resultSets);
-            },
-            'LYR3/$LegendsLayerSet$'
-          );
-          // The GET_LEGENDS.TRIGGER event must be triggered after the GET_LEGENDS.LEGENDS_LAYERSET_UPDATED listener is created
-          cgpv.api.event.emit({ handlerName: 'LYR3/$LegendsLayerSet$', event: cgpv.api.eventNames.GET_LEGENDS.TRIGGER });
-
-          //LYR4 ===================================================================================================================
-          const LegendsLayerSet4 = cgpv.api.getLegendsLayerSet('LYR4', 'LegendsId4');
-          cgpv.api.event.on(
-            cgpv.api.eventNames.GET_LEGENDS.LEGENDS_LAYERSET_UPDATED,
-            (payload) => {
-              const { resultSets } = payload;
-              displayLegend('LegendsId4', resultSets);
-            },
-            'LYR4/$LegendsLayerSet$'
-          );
-          // The GET_LEGENDS.TRIGGER event must be triggered after the GET_LEGENDS.LEGENDS_LAYERSET_UPDATED listener is created
-          cgpv.api.event.emit({ handlerName: 'LYR4/$LegendsLayerSet$', event: cgpv.api.eventNames.GET_LEGENDS.TRIGGER });
-
-          // ========================================================================================================================
-          // Test a refresh WMS from projection change
-          var testRefreshBtn = document.getElementsByClassName('test-refresh-WMS-btn')[0];
-          testRefreshBtn.addEventListener('click', function (e) {
-            cgpv.api.event.emit(
-              cgpv.types.mapViewProjectionPayload(cgpv.api.eventNames.MAP.EVENT_MAP_VIEW_PROJECTION_CHANGE, 'LYR1', 3978)
-            );
-          });
-
           // ========================================================================================================================
           // Cycle through the temporal data
           let i = 0;
@@ -659,73 +555,113 @@
         }
       });
 
+      //LYR1 ===================================================================================================================
+      const featureInfoLayerSet1 = cgpv.api.getFeatureInfoLayerSet('LYR1');
+      cgpv.api.event.on(
+        cgpv.api.eventNames.GET_FEATURE_INFO.ALL_QUERIES_DONE,
+        (payload) => {
+          const { layerSetId, resultSets, queryType } = payload;
+          createInfoTable('LYR1', 'ResultSetId1', resultSets, queryType);
+        },
+        'LYR1/FeatureInfoLayerSet'
+      );
+
+      const LegendsLayerSet1 = cgpv.api.getLegendsLayerSet('LYR1');
+      cgpv.api.event.on(
+        cgpv.api.eventNames.GET_LEGENDS.LEGENDS_LAYERSET_UPDATED,
+        (payload) => {
+          const { resultSets } = payload;
+          displayLegend('LegendsId1', resultSets);
+        },
+        'LYR1/LegendsLayerSet'
+      );
+      // The GET_LEGENDS.TRIGGER event must be triggered after the GET_LEGENDS.LEGENDS_LAYERSET_UPDATED listener is created
+      cgpv.api.event.emit({ handlerName: 'LYR1/LegendsLayerSet', event: cgpv.api.eventNames.GET_LEGENDS.TRIGGER });
+
       // ========================================================================================================================
-      // Display layer state
-      window.setInterval(() => {
-        const displayField1 = document.getElementById('HLYR1-state');
-        const geoviewLayers = cgpv.api.getFeatureInfoLayerSet('LYR1').resultSets;
-        if (geoviewLayers) {
-          const output = Object.keys(geoviewLayers).reduce((outputValue, layerId) => {
-            const { layerPhase, layerStatus } = geoviewLayers[layerId];
-            const numberOfErrors = cgpv.api.maps?.LYR1?.layer?.geoviewLayers[layerId.split('/')[0]].countErrorStatus();
-            let errorIndicator = '';
-            if (numberOfErrors) errorIndicator = numberOfErrors === 1 ? ' (1 error)' : ` (${numberOfErrors} errors)`;
-            return `${outputValue}${
-              layerId.split('/')[layerId.split('/').length - 1]
-            } - status: ${layerStatus}, phase: ${layerPhase}${errorIndicator}, `;
-          }, '(');
-          displayField1.textContent = output && output !== '(' ? `${output.slice(0, -2)})` : '(undefined)';
-        } else displayField1.textContent = '(undefined)';
-      }, 250);
+      // Test a refresh WMS from projection change
+      var testRefreshBtn = document.getElementsByClassName('test-refresh-WMS-btn')[0];
+      testRefreshBtn.addEventListener('click', function (e) {
+        cgpv.api.event.emit(
+          cgpv.types.mapViewProjectionPayload(cgpv.api.eventNames.MAP.EVENT_MAP_VIEW_PROJECTION_CHANGE, 'LYR1', 3978)
+        );
+      });
 
-      window.setInterval(() => {
-        const displayField2 = document.getElementById('HLYR2-state');
-        const geoviewLayers = cgpv.api.getFeatureInfoLayerSet('LYR2').resultSets;
-        if (geoviewLayers) {
-          const output = Object.keys(geoviewLayers).reduce((outputValue, layerId) => {
-            const { layerPhase, layerStatus } = geoviewLayers[layerId];
-            const numberOfErrors = cgpv.api.maps?.LYR2?.layer?.geoviewLayers[layerId.split('/')[0]].countErrorStatus();
-            let errorIndicator = '';
-            if (numberOfErrors) errorIndicator = numberOfErrors === 1 ? ' (1 error)' : ` (${numberOfErrors} errors)`;
-            return `${outputValue}${
-              layerId.split('/')[layerId.split('/').length - 1]
-            } - status: ${layerStatus}, phase: ${layerPhase}${errorIndicator}, `;
-          }, '(');
-          displayField2.textContent = output && output !== '(' ? `${output.slice(0, -2)})` : '(undefined)';
-        } else displayField2.textContent = '(undefined)';
-      }, 250);
+      listenToLegendLayerSetChanges('HLYR1-state', 'LYR1/LegendsLayerSet');
 
-      window.setInterval(() => {
-        const displayField3 = document.getElementById('HLYR3-state');
-        const geoviewLayers = cgpv.api.getFeatureInfoLayerSet('LYR3').resultSets;
-        if (geoviewLayers) {
-          const output = Object.keys(geoviewLayers).reduce((outputValue, layerId) => {
-            const { layerPhase, layerStatus } = geoviewLayers[layerId];
-            const numberOfErrors = cgpv.api.maps?.LYR3?.layer?.geoviewLayers[layerId.split('/')[0]].countErrorStatus();
-            let errorIndicator = '';
-            if (numberOfErrors) errorIndicator = numberOfErrors === 1 ? ' (1 error)' : ` (${numberOfErrors} errors)`;
-            return `${outputValue}${
-              layerId.split('/')[layerId.split('/').length - 1]
-            } - status: ${layerStatus}, phase: ${layerPhase}${errorIndicator}, `;
-          }, '(');
-          displayField3.textContent = output && output !== '(' ? `${output.slice(0, -2)})` : '(undefined)';
-        } else displayField3.textContent = '(undefined)';
-      }, 250);
+      // LYR2 ===================================================================================================================
+      const featureInfoLayerSet2 = cgpv.api.getFeatureInfoLayerSet('LYR2');
+      cgpv.api.event.on(
+        cgpv.api.eventNames.GET_FEATURE_INFO.ALL_QUERIES_DONE,
+        (payload) => {
+          const { layerSetId, resultSets, queryType } = payload;
+          createInfoTable('LYR2', 'ResultSetId2', resultSets, queryType);
+        },
+        'LYR2/FeatureInfoLayerSet'
+      );
 
-      window.setInterval(() => {
-        const displayField4 = document.getElementById('HLYR4-state');
-        const geoviewLayers = cgpv.api.maps?.LYR4?.layer?.geoviewLayers;
-        if (geoviewLayers) {
-          const output = Object.keys(cgpv.api.maps?.LYR4?.layer?.geoviewLayers).reduce((outputValue, layerId) => {
-            const stateValue = cgpv.api.maps?.LYR4?.layer?.geoviewLayers[layerId].layerPhase;
-            const numberOfErrors = cgpv.api.maps?.LYR4?.layer?.geoviewLayers[layerId].countErrorStatus();
-            let errorIndicator = '';
-            if (numberOfErrors) errorIndicator = numberOfErrors === 1 ? ' (1 error)' : ` (${numberOfErrors} errors)`;
-            return `${outputValue}${layerId}: ${stateValue}${errorIndicator}, `;
-          }, '(');
-          displayField4.textContent = output ? `${output.slice(0, -2)})` : '(undefined)';
-        } else displayField4.textContent = '(undefined)';
-      }, 250);
+      const LegendsLayerSet2 = cgpv.api.getLegendsLayerSet('LYR2');
+      cgpv.api.event.on(
+        cgpv.api.eventNames.GET_LEGENDS.LEGENDS_LAYERSET_UPDATED,
+        (payload) => {
+          const { resultSets } = payload;
+          displayLegend('LegendsId2', resultSets);
+        },
+        'LYR2/LegendsLayerSet'
+      );
+      // The GET_LEGENDS.TRIGGER event must be triggered after the GET_LEGENDS.LEGENDS_LAYERSET_UPDATED listener is created
+      cgpv.api.event.emit({ handlerName: 'LYR2/LegendsLayerSet', event: cgpv.api.eventNames.GET_LEGENDS.TRIGGER });
+
+      listenToLegendLayerSetChanges('HLYR2-state', 'LYR2/LegendsLayerSet');
+
+      // LYR3 ===================================================================================================================
+      const featureInfoLayerSet3 = cgpv.api.getFeatureInfoLayerSet('LYR3');
+      cgpv.api.event.on(
+        cgpv.api.eventNames.GET_FEATURE_INFO.ALL_QUERIES_DONE,
+        (payload) => {
+          const { layerSetId, resultSets, queryType } = payload;
+          createInfoTable('LYR3', 'ResultSetId3', resultSets, queryType);
+        },
+        'LYR3/FeatureInfoLayerSet'
+      );
+
+      const LegendsLayerSet3 = cgpv.api.getLegendsLayerSet('LYR3');
+      cgpv.api.event.on(
+        cgpv.api.eventNames.GET_LEGENDS.LEGENDS_LAYERSET_UPDATED,
+        (payload) => {
+          const { resultSets } = payload;
+          displayLegend('LegendsId3', resultSets);
+        },
+        'LYR3/LegendsLayerSet'
+      );
+      // The GET_LEGENDS.TRIGGER event must be triggered after the GET_LEGENDS.LEGENDS_LAYERSET_UPDATED listener is created
+      cgpv.api.event.emit({ handlerName: 'LYR3/LegendsLayerSet', event: cgpv.api.eventNames.GET_LEGENDS.TRIGGER });
+
+      listenToLegendLayerSetChanges('HLYR3-state', 'LYR3/LegendsLayerSet');
+
+      //LYR4 ===================================================================================================================
+      const LegendsLayerSet4 = cgpv.api.getLegendsLayerSet('LYR4', 'LegendsId4');
+      cgpv.api.event.on(
+        cgpv.api.eventNames.GET_LEGENDS.LEGENDS_LAYERSET_UPDATED,
+        (payload) => {
+          const { resultSets } = payload;
+          displayLegend('LegendsId4', resultSets);
+        },
+        'LYR4/LegendsLayerSet'
+      );
+      // The GET_LEGENDS.TRIGGER event must be triggered after the GET_LEGENDS.LEGENDS_LAYERSET_UPDATED listener is created
+      cgpv.api.event.emit({ handlerName: 'LYR4/LegendsLayerSet', event: cgpv.api.eventNames.GET_LEGENDS.TRIGGER });
+
+      listenToLegendLayerSetChanges('HLYR4-state', 'LYR4/LegendsLayerSet');
+
+      // ========================================================================================================================
+      // Test a refresh WMS from projection change
+      var testRefreshBtn = document.getElementsByClassName('test-refresh-WMS-btn')[0];
+      testRefreshBtn.addEventListener('click', function (e) {
+        cgpv.api.event.emit(
+          cgpv.types.mapViewProjectionPayload(cgpv.api.eventNames.MAP.EVENT_MAP_VIEW_PROJECTION_CHANGE, 'LYR1', 3978)
+        );
+      });
     </script>
   </body>
 </html>

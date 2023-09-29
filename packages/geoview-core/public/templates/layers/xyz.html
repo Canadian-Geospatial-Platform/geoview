@@ -50,9 +50,9 @@
 
     <div class="map-title-holder">
       <h4 id="HLYR1">1. XYZ Tiles Layers</h4>
-      &nbsp;<h5 id="HLYR1-state">(undefined)</h5>
       <a class="ref-link" href="#top">Top</a>
     </div>
+    <div id="HLYR1-state" class="map-title-holder"></div>
     <div
       id="LYR1"
       class="llwp-map"
@@ -119,19 +119,7 @@
         }
       });
 
-      window.setInterval(() => {
-        const displayField1 = document.getElementById('HLYR1-state');
-        const geoviewLayers = cgpv.api.maps?.LYR1?.layer?.registeredLayers;
-        if (geoviewLayers) {
-          const output = Object.keys(geoviewLayers).reduce((outputValue, layerId) => {
-            const layerName = geoviewLayers[layerId].layerName?.en ? geoviewLayers[layerId].layerName?.en : layerId;
-            const { layerPhase, layerStatus } = geoviewLayers[layerId];
-            return `${outputValue}${layerName} - status: ${layerStatus}, phase: ${layerPhase}, `;
-          }, '(');
-          displayField1.textContent = output && output !== '(' ? `${output.slice(0, -2)})` : '(undefined)';
-        } else displayField1.textContent = '(undefined)';
-      }, 250)
-
+      listenToLegendLayerSetChanges('HLYR1-state', 'LYR1/LegendsLayerSet');
     </script>
   </body>
 </html>
