@@ -31,6 +31,9 @@ export class LayerSet {
   /** Function used to determine if the layerPath can be added to the layer set. */
   registrationConditionFunction: (layerPath: string) => boolean;
 
+  /** Function used to initialise the data property of the layer path entry. */
+  registrationUserDataInitialisation?: (layerPath: string) => void;
+
   /** ***************************************************************************************************************************
    * The class constructor that instanciate a set of layer.
    *
@@ -38,28 +41,30 @@ export class LayerSet {
    * @param {string} layerSetIdentifier The layer set identifier.
    * @param {TypeResultSets} resultSets An object that will contain the result sets indexed using the layer path.
    * @param {(layerPath: string) => boolean} registrationConditionFunction A function to decide if the layer can be added.
+   * @param {(layerPath: string) => void} registrationUserDataInitialisation A function to initialise the data property of the layer path entry.
    */
   constructor(
     mapId: string,
     layerSetIdentifier: string,
     resultSets: TypeResultSets,
-    registrationConditionFunction: (layerPath: string) => boolean
+    registrationConditionFunction: (layerPath: string) => boolean,
+    registrationUserDataInitialisation?: (layerPath: string) => void
   ) {
     this.mapId = mapId;
     this.layerSetId = layerSetIdentifier;
     this.resultSets = resultSets;
     this.registrationConditionFunction = registrationConditionFunction;
+    this.registrationUserDataInitialisation = registrationUserDataInitialisation;
 
     const changeLayerStatusListenerFunctions = (payload: PayloadBaseClass) => {
       if (payloadIsLayerSetChangeLayerStatus(payload)) {
         const { layerPath, layerStatus } = payload;
         if (this.resultSets[layerPath]) {
-          this.resultSets[layerPath].layerStatus = layerStatus;
-          if (layerStatus === 'processed') this.resultSets[layerPath].layerPhase = layerStatus;
-          api.event.emit(
-            LayerSetPayload.createLayerSetUpdatedPayload(`${this.layerSetId}/${layerPath}/status`, this.resultSets, layerPath)
-          );
-          api.event.emit(LayerSetPayload.createLayerSetUpdatedPayload(this.layerSetId, this.resultSets, layerPath));
+          if (this.resultSets[layerPath].layerStatus !== layerStatus) {
+            this.resultSets[layerPath].layerStatus = layerStatus;
+            if (layerStatus !== 'error') this.resultSets[layerPath].layerPhase = layerStatus;
+            api.event.emit(LayerSetPayload.createLayerSetUpdatedPayload(this.layerSetId, this.resultSets, layerPath));
+          }
         }
       }
     };
@@ -69,19 +74,10 @@ export class LayerSet {
       if (payloadIsLayerSetChangeLayerPhase(payload)) {
         const { layerPath, layerPhase } = payload;
         if (this.resultSets[layerPath] && this.resultSets[layerPath].layerStatus !== 'error') {
-          this.resultSets[layerPath].layerPhase = layerPhase;
-          api.event.emit(LayerSetPayload.createLayerSetUpdatedPayload(`${this.layerSetId}/${layerPath}/phase`, this.resultSets, layerPath));
-          api.event.emit(LayerSetPayload.createLayerSetUpdatedPayload(this.layerSetId, this.resultSets, layerPath));
-        } else {
-          Object.keys(this.resultSets).forEach((aLayerPath) => {
-            if (aLayerPath.startsWith(layerPath) && this.resultSets[aLayerPath].layerStatus !== 'error') {
-              this.resultSets[aLayerPath].layerPhase = layerPhase;
-              api.event.emit(
-                LayerSetPayload.createLayerSetUpdatedPayload(`${this.layerSetId}/${aLayerPath}/phase`, this.resultSets, layerPath)
-              );
-              api.event.emit(LayerSetPayload.createLayerSetUpdatedPayload(this.layerSetId, this.resultSets, layerPath));
-            }
-          });
+          if (this.resultSets[layerPath].layerPhase !== layerPhase) {
+            this.resultSets[layerPath].layerPhase = layerPhase;
+            api.event.emit(LayerSetPayload.createLayerSetUpdatedPayload(this.layerSetId, this.resultSets, layerPath));
+          }
         }
       }
     };
@@ -102,6 +98,7 @@ export class LayerSet {
                 layerPhase: 'newInstance',
                 layerName: api.maps[this.mapId].layer.registeredLayers[layerPath].layerName,
               };
+              if (this.registrationUserDataInitialisation) this.registrationUserDataInitialisation(layerPath);
               api.event.emit(LayerSetPayload.createLayerSetUpdatedPayload(this.layerSetId, this.resultSets, layerPath));
             } else if (action === 'remove' && layerPath in this.resultSets) {
               delete this.resultSets[layerPath];
