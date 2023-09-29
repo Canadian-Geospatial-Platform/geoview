@@ -26,7 +26,7 @@ export function DataItem({ mapId }: Props): JSX.Element {
 
   useEffect(() => {
     api.event.on(api.eventNames.MAP.EVENT_MAP_LOADED, updateLayers, mapId);
-    api.event.on(api.eventNames.LAYER_SET.UPDATED, updateLayers, `${mapId}/$LegendsLayerSet$`);
+    api.event.on(api.eventNames.LAYER_SET.UPDATED, updateLayers, `${mapId}/LegendsLayerSet`);
 
     return () => {
       api.event.off(api.eventNames.MAP.EVENT_MAP_LOADED, mapId, updateLayers);

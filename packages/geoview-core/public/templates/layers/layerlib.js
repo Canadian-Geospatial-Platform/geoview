@@ -17,17 +17,17 @@ const addBoundsPolygon = (mapId, bbox) => {
   });
 };
 
-const createInfoTable = (mapId, resultSetsId, resultSets) => {
-  const infoTable = document.getElementById(resultSetsId);
+const createInfoTable = (mapId, resultSetsId, resultSets, queryType) => {
+  const infoTable = document.getElementById(`${resultSetsId}-${queryType}`);
   infoTable.textContent = '';
-  const oldContent = document.getElementById(`layer${mapId.slice(-1)}-info`);
+  const oldContent = document.getElementById(`layer${mapId.slice(-1)}-${queryType}-info`);
   if (oldContent) oldContent.remove();
   const content = document.createElement('div');
-  content.id = `layer${mapId.slice(-1)}-info`;
+  content.id = `layer${mapId.slice(-1)}-${queryType}-info`;
   infoTable.appendChild(content);
   Object.keys(resultSets).forEach((layerPath) => {
     const activeResultSet = resultSets[layerPath];
-    const layerData = activeResultSet.data;
+    const layerData = activeResultSet.data[queryType];
 
     // Header of the layer
     const infoH1 = document.createElement('h1');
@@ -173,6 +173,7 @@ const createTableOfFilter = (mapId) => {
   tableElement.style.width = '100%';
   tableElement.border = '1px solid black';
   mapButtonsDiv.appendChild(tableElement);
+  if (!cgpv.api.maps?.[mapId]?.layer?.geoviewLayers) return;
   Object.keys(cgpv.api.maps[mapId].layer.geoviewLayers).forEach((geoviewLayerId) => {
     const geoviewLayer = cgpv.api.maps[mapId].layer.geoviewLayers[geoviewLayerId];
     Object.keys(cgpv.api.maps[mapId].layer.registeredLayers).forEach((layerPath) => {

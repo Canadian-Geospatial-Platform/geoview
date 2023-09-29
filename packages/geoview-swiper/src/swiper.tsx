@@ -295,7 +295,7 @@ export function Swiper(props: SwiperProps): JSX.Element {
         }
       }
     };
-    api.event.on(EVENT_NAMES.LAYER_SET.UPDATED, layerSetUpdatedHandler, `${mapId}/$LegendsLayerSet$`);
+    api.event.on(EVENT_NAMES.LAYER_SET.UPDATED, layerSetUpdatedHandler, `${mapId}/LegendsLayerSet`);
     return () => {
       api.event.off(EVENT_NAMES.LAYER_SET.UPDATED, mapId, layerSetUpdatedHandler);
     };

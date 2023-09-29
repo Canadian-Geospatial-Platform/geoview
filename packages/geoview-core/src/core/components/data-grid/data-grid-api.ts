@@ -5,14 +5,7 @@ import { createElement, ReactElement, useState, useEffect } from 'react';
 import { toLonLat } from 'ol/proj';
 import { Extent } from 'ol/extent';
 import { Geometry, Point, Polygon, LineString, MultiPoint } from 'ol/geom';
-import {
-  AbstractGeoViewVector,
-  api,
-  TypeArrayOfFeatureInfoEntries,
-  TypeDisplayLanguage,
-  TypeListOfLayerEntryConfig,
-  isVectorLayer,
-} from '@/app';
+import { api, TypeArrayOfFeatureInfoEntries, TypeDisplayLanguage, TypeListOfLayerEntryConfig, isVectorLayer } from '@/app';
 
 import LayerDataGrid from './layer-data-grid';
 
@@ -38,7 +31,7 @@ export class DataGridAPI {
    */
   constructor(mapId: string) {
     this.mapId = mapId;
-    this.displayLanguage = api.maps[mapId].displayLanguage;
+    this.displayLanguage = api.maps[mapId]?.displayLanguage || 'en';
   }
 
   /**
@@ -95,7 +88,7 @@ export class DataGridAPI {
      *
      */
     const buildFeatureRows = (arrayOfFeatureInfoEntries: TypeArrayOfFeatureInfoEntries) => {
-      return arrayOfFeatureInfoEntries.map((feature) => {
+      return arrayOfFeatureInfoEntries!.map((feature) => {
         const { featureKey, fieldInfo, geometry, featureIcon, extent } = feature;
         const featureInfo: Record<string, {}> = {};
         Object.entries(fieldInfo).forEach(([fieldKey, fieldInfoEntry]) => {
@@ -177,10 +170,7 @@ export class DataGridAPI {
     useEffect(() => {
       let isMounted = true;
       const geoviewLayerInstance = api.maps[this.mapId].layer.geoviewLayers[layerId];
-      if (
-        geoviewLayerInstance.listOfLayerEntryConfig.length > 0 &&
-        (geoviewLayerInstance as AbstractGeoViewVector).getAllFeatureInfo !== undefined
-      ) {
+      if (geoviewLayerInstance.listOfLayerEntryConfig.length > 0) {
         const grouplayerKeys: string[] = [];
         const grouplayerValues: { layerkey: string; layerValues: {}[] }[] = [];
         const getGroupKeys = (listOfLayerEntryConfig: TypeListOfLayerEntryConfig, parentLayerId: string) => {
@@ -203,8 +193,8 @@ export class DataGridAPI {
           grouplayerKeys.forEach((layerkey) => {
             // eslint-disable-next-line @typescript-eslint/ban-types
             let layerValues: {}[] = [];
-            (geoviewLayerInstance as AbstractGeoViewVector)?.getAllFeatureInfo(layerkey).then((arrayOfFeatureInfoEntries) => {
-              if (arrayOfFeatureInfoEntries?.length > 0) {
+            geoviewLayerInstance.getFeatureInfo('all', layerkey).then((arrayOfFeatureInfoEntries) => {
+              if (arrayOfFeatureInfoEntries && arrayOfFeatureInfoEntries.length > 0) {
                 // set values
                 count++;
                 layerValues = buildFeatureRows(arrayOfFeatureInfoEntries);

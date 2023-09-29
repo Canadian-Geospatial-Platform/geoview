@@ -100,7 +100,10 @@ export function LayersListFooter(props: TypeLayersListProps): JSX.Element {
     setIsClearAllCheckboxes(true);
   };
 
-  const allUncheckedFeatures = (checkedFeatures: TypeArrayOfFeatureInfoEntries, allFeatures: TypeArrayOfFeatureInfoEntries) => {
+  const allUncheckedFeatures = (
+    checkedFeatures: Exclude<TypeArrayOfFeatureInfoEntries, null | undefined>,
+    allFeatures: Exclude<TypeArrayOfFeatureInfoEntries, null | undefined>
+  ) => {
     const uncheckedFeatures = allFeatures.filter(
       (feature) =>
         !checkedFeatures.some(
@@ -110,7 +113,10 @@ export function LayersListFooter(props: TypeLayersListProps): JSX.Element {
     return uncheckedFeatures;
   };
 
-  const handleFeatureNavigateChange = (checkedFeatures: TypeArrayOfFeatureInfoEntries, currentFeature: TypeFeatureInfoEntry) => {
+  const handleFeatureNavigateChange = (
+    checkedFeatures: Exclude<TypeArrayOfFeatureInfoEntries, null | undefined>,
+    currentFeature: TypeFeatureInfoEntry
+  ) => {
     // remove the highlight for unchecked feature
     arrayOfLayerData.forEach((layer: TypeLayerData) => {
       const getAllUnCheckedFeatures = allUncheckedFeatures(checkedFeatures, layer.features);
