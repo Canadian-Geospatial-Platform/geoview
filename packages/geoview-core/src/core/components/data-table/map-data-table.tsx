@@ -472,7 +472,7 @@ function MapDataTable({ data, layerId, mapId, layerKey, projectionConfig }: MapD
           density: 'compact',
           pagination: { pageSize: 10, pageIndex: 0 },
         }}
-        state={{ sorting, columnFilters, rowSelection, showColumnFilters: true }}
+        state={{ sorting, columnFilters, rowSelection }}
         enableColumnFilterModes
         onSortingChange={setSorting}
         onColumnFiltersChange={setColumnFilters}

@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { Projection } from 'ol/proj';
 import {
   Box,
@@ -13,6 +13,7 @@ import {
   ListItemIcon,
   SendIcon,
   ChevronRightIcon,
+  CircularProgress,
 } from '@/ui';
 import MapDataTable, { MapDataTableData as MapDataTableDataProps } from './map-data-table';
 
@@ -51,9 +52,13 @@ const sxClasses = {
 
 export function Datapanel({ layerData, mapId, projectionConfig, layerKeys, layerIds }: DatapanelProps) {
   const [selectedLayerIndex, setSelectedLayerIndex] = useState(0);
+  const [isLoading, setisLoading] = useState(false);
+
+  // useEffect(() => {}, [isLoading]);
 
   const handleListItemClick = useCallback((event: React.MouseEvent<HTMLDivElement, MouseEvent>, index: number) => {
     setSelectedLayerIndex(index);
+    setisLoading(true);
   }, []);
 
   /**
@@ -97,6 +102,13 @@ export function Datapanel({ layerData, mapId, projectionConfig, layerKeys, layer
     [selectedLayerIndex]
   );
 
+  useEffect(() => {
+    const clearLoading = setTimeout(() => {
+      setisLoading(false);
+    }, 1000);
+    return () => clearTimeout(clearLoading);
+  }, [isLoading, selectedLayerIndex]);
+
   return (
     <Box sx={sxClasses.dataPanel}>
       <Grid container spacing={2} sx={sxClasses.gridContainer}>
@@ -121,21 +133,24 @@ export function Datapanel({ layerData, mapId, projectionConfig, layerKeys, layer
             {layerKeys[selectedLayerIndex]}
           </Typography>
 
-          {layerKeys.map((layerKey, index) => (
-            <Box key={layerKey} sx={{ display: index === selectedLayerIndex ? 'block' : 'none' }}>
-              {layerData[index].features.length ? (
-                <MapDataTable
-                  data={layerData[index]}
-                  layerId={layerIds[index]}
-                  mapId={mapId}
-                  layerKey={layerKey}
-                  projectionConfig={projectionConfig}
-                />
-              ) : (
-                'No Data'
-              )}
-            </Box>
-          ))}
+          <CircularProgress isLoaded={isLoading} style={{ marginTop: '1rem' }} />
+
+          {!isLoading &&
+            layerKeys.map((layerKey, index) => (
+              <Box key={layerKey} sx={{ display: index === selectedLayerIndex ? 'block' : 'none' }}>
+                {layerData[index].features.length ? (
+                  <MapDataTable
+                    data={layerData[index]}
+                    layerId={layerIds[index]}
+                    mapId={mapId}
+                    layerKey={layerKey}
+                    projectionConfig={projectionConfig}
+                  />
+                ) : (
+                  'No Data'
+                )}
+              </Box>
+            ))}
         </Grid>
       </Grid>
     </Box>
