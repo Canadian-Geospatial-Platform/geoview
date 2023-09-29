@@ -515,7 +515,7 @@
         const { layerSetId, resultSets } = payload;
         createInfoTable('LYR5', 'geoJsonResultSetId', resultSets);
       },
-      'LYR5/$FeatureInfoLayerSet$'
+      'LYR5/FeatureInfoLayerSet'
     );
 
     const LegendsGeoJsonLayerSet = cgpv.api.getLegendsLayerSet('LYR5');
@@ -525,7 +525,7 @@
         const { resultSets } = payload;
         displayLegend('geojsonLegendsId', resultSets);
       },
-      'LYR5/$LegendsLayerSet$'
+      'LYR5/LegendsLayerSet'
     );
 
     // ==========================================================================================================================
@@ -657,7 +657,7 @@
         createConfigSnippet();
 
         createTableOfFilter('LYR5');
-        cgpv.api.event.emit({ handlerName: 'LYR5/$LegendsLayerSet$', event: cgpv.api.eventNames.GET_LEGENDS.TRIGGER });
+        cgpv.api.event.emit({ handlerName: 'LYR5/LegendsLayerSet', event: cgpv.api.eventNames.GET_LEGENDS.TRIGGER });
       });
 
       // GeoMetButton============================================================================================================
