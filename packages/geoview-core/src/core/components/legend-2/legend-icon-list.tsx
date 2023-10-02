@@ -23,6 +23,7 @@ const sxClasses = {
   table: {
     border: '1px solid #C1C1C1',
     borderRadius: '4px',
+    padding: '16px 17px 16px 23px',
   },
   tableHeader: {
     borderRight: '1px solid #C1C1C1',
@@ -30,6 +31,7 @@ const sxClasses = {
     '& th': {
       borderBottom: '1px solid #C1C1C1',
       backgroundColor: '#FFFFFF',
+      padding: '2px 4px 2px 4px',
     },
     '& th:first-child': {
       borderRight: '1px solid #C1C1C1',

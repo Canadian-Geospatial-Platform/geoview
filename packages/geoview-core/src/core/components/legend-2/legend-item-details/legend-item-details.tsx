@@ -45,7 +45,7 @@ const sxClasses = {
     paddingLeft: 28,
   },
   expandableIconContainer: {
-    paddingLeft: 10,
+    padding: '16px 17px 16px 23px',
     margin: '20px 0',
   },
   legendIcon: {
@@ -113,7 +113,7 @@ const sxClasses = {
     display: 'flex',
     alignItems: 'center',
     gap: '15px',
-    padding: '16px 62px 16px 62px',
+    padding: '8px 20px 7px 15px',
     backgroundColor: '#F6F6F6',
   },
   menuListIcon: { justifyContent: 'right', 'min-width': '56px' },
@@ -399,7 +399,7 @@ export function LegendItemDetails(props: TypeLegendItemDetailsProps): JSX.Elemen
 
   return (
     <Grid item sm={12}>
-      <Stack sx={{ justifyContent: 'space-between', margin: '20px' }} direction="row" alignItems="center">
+      <Stack sx={{ justifyContent: 'space-between', padding: '16px 17px 16px 23px' }} direction="row">
         <div>
           <Typography> {layerName} </Typography>
           <Typography sx={{ fontSize: '0.6em' }}> Layer quick overview info </Typography>
@@ -412,14 +412,14 @@ export function LegendItemDetails(props: TypeLegendItemDetailsProps): JSX.Elemen
           )}
         </div>
       </Stack>
-
-      {opacity && groupItems.length === 0 && (
-        <Box sx={sxClasses.opacityMenu}>
-          <Typography>{t('legend.opacity')}</Typography>
-          <SliderBase min={0} max={100} value={opacity * 100} customOnChange={handleSetOpacity} />
-        </Box>
-      )}
-
+      <div style={{ padding: '16px 17px 16px 23px' }}>
+        {opacity && groupItems.length === 0 && (
+          <Box sx={sxClasses.opacityMenu}>
+            <Typography>{t('legend.opacity')}</Typography>
+            <SliderBase min={0} max={100} value={opacity * 100} customOnChange={handleSetOpacity} />
+          </Box>
+        )}
+      </div>
       <List>
         <ListItem>
           {isRemoveable && (
@@ -428,7 +428,6 @@ export function LegendItemDetails(props: TypeLegendItemDetailsProps): JSX.Elemen
             </Button>
           )}
         </ListItem>
-
         {zoom < splitZoom && canCluster && groupItems.length === 0 && (
           <ListItem onClick={handleClusterToggle}>
             <ListItemText> {t('legend.toggle_cluster')}</ListItemText>
