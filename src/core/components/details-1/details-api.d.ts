@@ -17,7 +17,7 @@ export declare class DetailsAPI {
      */
     constructor(mapId: string);
     /**
-     * Create a details as as an element
+     * Create a details as an element
      *
      * @param {string} mapId the map identifier
      * @param {TypeArrayOfLayerData} detailsElements the data to display in the Details element

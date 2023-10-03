@@ -1,3 +1,4 @@
+import { AbstractGeoViewLayer, TypeLayerEntryConfig } from '@/geo';
 export interface TypeLegendProps {
     layerIds: string[];
     isRemoveable?: boolean;
@@ -14,4 +15,27 @@ export interface LegendProps extends TypeLegendProps {
 }
 export interface LegendItemsDetailsProps extends TypeLegendProps {
     mapId: string;
+}
+export interface TypeLegendItemProps {
+    layerId: string;
+    geoviewLayerInstance: AbstractGeoViewLayer;
+    subLayerId?: string;
+    layerConfigEntry?: TypeLayerEntryConfig;
+    isRemoveable?: boolean;
+    canSetOpacity?: boolean;
+    isParentVisible?: boolean;
+    toggleParentVisible?: () => void;
+    expandAll?: boolean;
+    hideAll?: boolean;
+}
+export interface TypeLegendItemDetailsProps {
+    layerId: string;
+    geoviewLayerInstance: AbstractGeoViewLayer;
+    subLayerId?: string;
+    layerConfigEntry?: TypeLayerEntryConfig;
+    isRemoveable?: boolean;
+    canSetOpacity?: boolean;
+    isParentVisible?: boolean;
+    expandAll?: boolean;
+    hideAll?: boolean;
 }

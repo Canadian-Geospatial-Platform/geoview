@@ -6,6 +6,7 @@ interface FeatureInfoTableProps {
 /**
  * Feature info table that creates a table keys/values of the given feature info
  *
+ * @param {FeatureInfoTableProps} Feature info table properties
  * @returns {JSX.Element} the layers list
  */
 export declare function FeatureInfoTable({ featureInfoList }: FeatureInfoTableProps): JSX.Element;

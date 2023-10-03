@@ -1,7 +1,6 @@
 /// <reference types="react" />
 import { LegendsLayerSet } from '@/app';
-import { TypeLegendItemProps } from './legend-items/legend-item';
-import { TypeLegendProps } from './types';
+import { TypeLegendItemProps, TypeLegendProps } from './types';
 /**
  * API to manage legend component
  *

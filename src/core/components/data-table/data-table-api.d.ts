@@ -43,7 +43,7 @@ export declare class DataTableApi {
             featureKey: number;
             geoviewLayerType: import("@/app").TypeGeoviewLayerType;
             extent: import("ol/extent").Extent;
-            geometry: import("ol/Feature").FeatureLike | null;
+            geometry: import("@/app").TypeGeometry | import("ol/Feature").default<import("ol/geom/Geometry").default> | null;
             featureIcon: HTMLCanvasElement;
             fieldInfo: Partial<Record<string, TypeFieldEntry>>;
             nameField: string | null;
@@ -57,5 +57,11 @@ export declare class DataTableApi {
      * @returns {Promise<ReactElement | null>} Promise of ReactElement.
      */
     createDataTableByLayerId: ({ layerId, layerKey }: CreataDataTableProps) => Promise<ReactElement | null>;
+    /**
+     * Create data panel for various layers.
+     *
+     * @returns {Promise<ReactElement | null>} Promise of ReactElement.
+     */
+    createDataPanel: () => Promise<ReactElement | null>;
 }
 export {};
