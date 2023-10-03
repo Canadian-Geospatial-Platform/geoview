@@ -2,6 +2,15 @@ import EventEmitter from 'eventemitter3';
 import { EventStringId } from './event-types';
 import { PayloadBaseClass } from './payloads/payload-base-class';
 export type TypeEventHandlerFunction = (payload: PayloadBaseClass) => void;
+type TypeEventNode = {
+    context: EventEmitter;
+    fn: TypeEventHandlerFunction;
+    once: boolean;
+};
+interface TypeEventEmitter extends EventEmitter {
+    _events: Record<string, TypeEventNode | TypeEventNode[]>;
+    _eventsCount: number;
+}
 /**
  * Class used to handle event emitting and subscribing for the API
  *
@@ -9,8 +18,7 @@ export type TypeEventHandlerFunction = (payload: PayloadBaseClass) => void;
  * @class Event
  */
 export declare class Event {
-    eventEmitter: EventEmitter;
-    events: Record<string, string>;
+    eventEmitter: TypeEventEmitter;
     /**
      * Initiate the event emitter
      */
@@ -56,3 +64,4 @@ export declare class Event {
      */
     emit: (payload: PayloadBaseClass) => void;
 }
+export {};

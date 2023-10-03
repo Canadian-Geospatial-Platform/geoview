@@ -1,6 +1,8 @@
 import { Extent } from 'ol/extent';
 import { Coordinate } from 'ol/coordinate';
-import { FeatureLike } from 'ol/Feature';
+import Geometry from 'ol/geom/Geometry';
+import Feature from 'ol/Feature';
+import RenderFeature from 'ol/render/Feature';
 import { Pixel } from 'ol/pixel';
 import { PayloadBaseClass } from './payload-base-class';
 import { EventStringId } from '../event-types';
@@ -29,11 +31,14 @@ export type TypeFieldEntry = {
     alias: string;
     domain: null | codedValueType | rangeDomainType;
 };
+export interface TypeGeometry extends RenderFeature {
+    ol_uid: string;
+}
 export type TypeFeatureInfoEntry = {
     featureKey: number;
     geoviewLayerType: TypeGeoviewLayerType;
     extent: Extent;
-    geometry: FeatureLike | null;
+    geometry: TypeGeometry | Feature<Geometry> | null;
     featureIcon: HTMLCanvasElement;
     fieldInfo: Partial<Record<string, TypeFieldEntry>>;
     nameField: string | null;

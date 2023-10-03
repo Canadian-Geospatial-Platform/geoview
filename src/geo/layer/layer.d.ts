@@ -21,6 +21,8 @@ export declare class Layer {
     private mapId;
     /** used to keep a reference the Layer's event handler functions */
     private eventHandlerFunctions;
+    /** used to keep a reference of highlighted layer */
+    private highlightedLayer;
     /**
      * Initialize layer types and listen to add/remove layer events from outside
      *
@@ -127,4 +129,14 @@ export declare class Layer {
      * @param {string} parentLayerId ID of parent layer if layer is a sublayer
      */
     moveLayer: (layerId: string, destination: number, parentLayerId?: string) => void;
+    /**
+     * Highlight layer or sublayer on map
+     *
+     * @param {string} layerPath ID of layer to highlight
+     */
+    highlightLayer(layerPath: string): void;
+    /**
+     * Remove layer or sublayer highlight
+     */
+    removeHighlightLayer(): void;
 }

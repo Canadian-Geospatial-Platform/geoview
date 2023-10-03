@@ -30,4 +30,5 @@ interface MapDataTableProps {
  * @return {ReactElement} Data table as react element.
  */
 declare function MapDataTable({ data, layerId, mapId, layerKey, projectionConfig }: MapDataTableProps): React.JSX.Element;
-export default MapDataTable;
+declare const _default: React.MemoExoticComponent<typeof MapDataTable>;
+export default _default;
