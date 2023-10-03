@@ -169,6 +169,20 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
     };
 
     vectorSource = new VectorSource(sourceOptions);
+
+    let featuresLoadErrorHandler: () => void;
+    const featuresLoadEndHandler = () => {
+      api.event.emit(LayerSetPayload.createLayerSetChangeLayerStatusPayload(this.mapId, layerEntryConfig, 'loaded'));
+      vectorSource.un('featuresloaderror', featuresLoadErrorHandler);
+    };
+    featuresLoadErrorHandler = () => {
+      api.event.emit(LayerSetPayload.createLayerSetChangeLayerStatusPayload(this.mapId, layerEntryConfig, 'error'));
+      vectorSource.un('featuresloadend', featuresLoadEndHandler);
+    };
+
+    vectorSource.once('featuresloadend', featuresLoadEndHandler);
+    vectorSource.once('featuresloaderror', featuresLoadErrorHandler);
+
     return vectorSource;
   }
 
@@ -227,6 +241,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
     };
 
     layerEntryConfig.gvLayer = new VectorLayer(layerOptions);
+
     if (layerEntryConfig.initialSettings?.extent !== undefined) this.setExtent(layerEntryConfig.initialSettings?.extent, layerEntryConfig);
     if (layerEntryConfig.initialSettings?.maxZoom !== undefined)
       this.setMaxZoom(layerEntryConfig.initialSettings?.maxZoom, layerEntryConfig);

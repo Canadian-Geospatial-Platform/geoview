@@ -370,11 +370,10 @@ export class GeoPackage extends AbstractGeoViewVector {
               }
             }
 
-            var format = new FormatWKB();
+            const format = new FormatWKB();
 
             // Turn each table's geometries into a vector source
             for (let i = 0; i < tables.length; i++) {
-              const vectorSource = new VectorSource(sourceOptions);
               const table = tables[i];
               const tableName = table.table_name;
               const tableDataProjection = `EPSG:${table.srs_id}`;
@@ -397,12 +396,38 @@ export class GeoPackage extends AbstractGeoViewVector {
                 features.push(formattedFeature[0]);
               }
 
-              vectorSource.addFeatures(features);
+              const vectorSource = new VectorSource({
+                ...sourceOptions,
+                loader(extent, resolution, projection, success, failure) {
+                  if (features !== undefined) {
+                    vectorSource.addFeatures(features);
+                    success!(features);
+                  } else failure!();
+                },
+              });
+
               layersInfo.push({
                 name: tableName as string,
                 source: vectorSource,
                 properties,
               });
+
+              let featuresLoadErrorHandler: () => void;
+              const featuresLoadEndHandler = () => {
+                api.event.emit(
+                  LayerSetPayload.createLayerSetChangeLayerStatusPayload(this.mapId, Layer.getLayerPath(layerEntryConfig), 'loaded')
+                );
+                vectorSource.un('featuresloaderror', featuresLoadErrorHandler);
+              };
+              featuresLoadErrorHandler = () => {
+                api.event.emit(
+                  LayerSetPayload.createLayerSetChangeLayerStatusPayload(this.mapId, Layer.getLayerPath(layerEntryConfig), 'error')
+                );
+                vectorSource.un('featuresloadend', featuresLoadEndHandler);
+              };
+
+              vectorSource.once('featuresloadend', featuresLoadEndHandler);
+              vectorSource.once('featuresloaderror', featuresLoadErrorHandler);
             }
 
             db.close();

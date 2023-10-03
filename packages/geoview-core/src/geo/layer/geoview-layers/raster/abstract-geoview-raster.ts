@@ -4,6 +4,7 @@ import Feature from 'ol/Feature';
 import { Geometry } from 'ol/geom';
 
 import { AbstractGeoViewLayer } from '../abstract-geoview-layers';
+import { Layer, LayerSetPayload, TypeLayerEntryConfig, api } from '@/app';
 
 /** *****************************************************************************************************************************
  * AbstractGeoViewRaster types
@@ -19,7 +20,7 @@ export type TypeBaseRasterLayer = BaseLayer; // TypeRasterLayerGroup | TypeRaste
  * instanciate GeoView raster layers. In addition to the components of the parent class, there is an attribute named
  * gvLayers where the raster elements of the class will be kept.
  *
- * The gvLayers attribute has a hierarchical structure. Its data type is TypetBaseRasterLayer. Subclasses of this type
+ * The gvLayers attribute has a hierarchical structure. Its data type is TypeBaseRasterLayer. Subclasses of this type
  * are TypeRasterLayerGroup and TypeRasterLayer. The TypeRasterLayerGroup is a collection of TypetBaseRasterLayer. It is
  * important to note that a TypetBaseRasterLayer attribute can polymorphically refer to a TypeRasterLayerGroup or a
  * TypeRasterLayer. Here, we must not confuse instantiation and declaration of a polymorphic attribute.
@@ -28,4 +29,25 @@ export type TypeBaseRasterLayer = BaseLayer; // TypeRasterLayerGroup | TypeRaste
  * features are placed.
  */
 // ******************************************************************************************************************************
-export abstract class AbstractGeoViewRaster extends AbstractGeoViewLayer {}
+export abstract class AbstractGeoViewRaster extends AbstractGeoViewLayer {
+  /** ***************************************************************************************************************************
+   * This method adds listeners for openlayers loadend events, indicating that the layer is visible on the map
+   *
+   * @param {TypeLayerEntryConfig} layerEntryConfig The config of the layer to add the listener to.
+   * @param {'tile' | 'image'} layerType The type of raster layer)
+   */
+  addLoadendListener(layerEntryConfig: TypeLayerEntryConfig, layerType: 'tile' | 'image'): void {
+    let loadErrorHandler: () => void;
+    const loadEndHandler = () => {
+      api.event.emit(LayerSetPayload.createLayerSetChangeLayerStatusPayload(this.mapId, layerEntryConfig, 'loaded'));
+      layerEntryConfig.gvLayer!.get('source').un(`${layerType}loaderror`, loadErrorHandler);
+    };
+    loadErrorHandler = () => {
+      api.event.emit(LayerSetPayload.createLayerSetChangeLayerStatusPayload(this.mapId, layerEntryConfig, 'error'));
+      layerEntryConfig.gvLayer!.get('source').un(`${layerType}loadend`, loadEndHandler);
+    };
+
+    layerEntryConfig.gvLayer!.get('source').once(`${layerType}loadend`, loadEndHandler);
+    layerEntryConfig.gvLayer!.get('source').once(`${layerType}loaderror`, loadErrorHandler);
+  }
+}

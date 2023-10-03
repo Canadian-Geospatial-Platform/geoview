@@ -215,6 +215,9 @@ export class VectorTiles extends AbstractGeoViewRaster {
           layerEntryConfig.initialSettings?.visible === 'yes' || layerEntryConfig.initialSettings?.visible === 'always';
 
       layerEntryConfig.gvLayer = new VectorTileLayer(tileLayerOptions);
+
+      super.addLoadendListener(layerEntryConfig, 'tile');
+
       resolve(layerEntryConfig.gvLayer);
     });
     return promisedVectorLayer;

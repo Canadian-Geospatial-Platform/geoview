@@ -214,6 +214,9 @@ export class XYZTiles extends AbstractGeoViewRaster {
           layerEntryConfig.initialSettings?.visible === 'yes' || layerEntryConfig.initialSettings?.visible === 'always';
 
       layerEntryConfig.gvLayer = new TileLayer(tileLayerOptions);
+
+      super.addLoadendListener(layerEntryConfig, 'tile');
+
       resolve(layerEntryConfig.gvLayer);
     });
     return promisedVectorLayer;
