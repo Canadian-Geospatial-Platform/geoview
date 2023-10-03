@@ -582,6 +582,9 @@ export class WMS extends AbstractGeoViewRaster {
 
           layerEntryConfig.gvLayer = new ImageLayer(imageLayerOptions);
           this.applyViewFilter(layerEntryConfig, layerEntryConfig.layerFilter ? layerEntryConfig.layerFilter : '');
+
+          super.addLoadendListener(layerEntryConfig, 'image');
+
           resolve(layerEntryConfig.gvLayer);
         } else {
           const trans = i18n.getFixedT(api.maps[this.mapId].displayLanguage);

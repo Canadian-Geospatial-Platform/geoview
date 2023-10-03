@@ -280,8 +280,12 @@ export class ImageStatic extends AbstractGeoViewRaster {
           layerEntryConfig.initialSettings?.visible === 'yes' || layerEntryConfig.initialSettings?.visible === 'always';
 
       layerEntryConfig.gvLayer = new ImageLayer(staticImageOptions);
+
+      super.addLoadendListener(layerEntryConfig, 'image');
+
       resolve(layerEntryConfig.gvLayer);
     });
+
     return promisedVectorLayer;
   }
 
