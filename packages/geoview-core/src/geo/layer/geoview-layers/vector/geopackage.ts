@@ -370,11 +370,10 @@ export class GeoPackage extends AbstractGeoViewVector {
               }
             }
 
-            var format = new FormatWKB();
+            const format = new FormatWKB();
 
             // Turn each table's geometries into a vector source
             for (let i = 0; i < tables.length; i++) {
-              const vectorSource = new VectorSource(sourceOptions);
               const table = tables[i];
               const tableName = table.table_name;
               const tableDataProjection = `EPSG:${table.srs_id}`;
@@ -397,12 +396,38 @@ export class GeoPackage extends AbstractGeoViewVector {
                 features.push(formattedFeature[0]);
               }
 
-              vectorSource.addFeatures(features);
+              const vectorSource = new VectorSource({
+                ...sourceOptions,
+                loader(extent, resolution, projection, success, failure) {
+                  if (features !== undefined) {
+                    vectorSource.addFeatures(features);
+                    success!(features);
+                  } else failure!();
+                },
+              });
+
               layersInfo.push({
                 name: tableName as string,
                 source: vectorSource,
                 properties,
               });
+
+              let featuresLoadErrorHandler: () => void;
+              const featuresLoadEndHandler = () => {
+                api.event.emit(
+                  LayerSetPayload.createLayerSetChangeLayerStatusPayload(this.mapId, Layer.getLayerPath(layerEntryConfig), 'loaded')
+                );
+                vectorSource.un('featuresloaderror', featuresLoadErrorHandler);
+              };
+              featuresLoadErrorHandler = () => {
+                api.event.emit(
+                  LayerSetPayload.createLayerSetChangeLayerStatusPayload(this.mapId, Layer.getLayerPath(layerEntryConfig), 'error')
+                );
+                vectorSource.un('featuresloadend', featuresLoadEndHandler);
+              };
+
+              vectorSource.once('featuresloadend', featuresLoadEndHandler);
+              vectorSource.once('featuresloaderror', featuresLoadErrorHandler);
             }
 
             db.close();
@@ -574,6 +599,19 @@ export class GeoPackage extends AbstractGeoViewVector {
         const { properties } = layerInfo;
         this.processFeatureInfoConfig(properties as TypeJsonObject, layerEntryConfig as TypeVectorLayerEntryConfig);
       }
+
+      let loadErrorHandler: () => void;
+      const loadEndHandler = () => {
+        api.event.emit(LayerSetPayload.createLayerSetChangeLayerStatusPayload(this.mapId, layerEntryConfig, 'loaded'));
+        source.un('featuresloaderror', loadErrorHandler);
+      };
+      loadErrorHandler = () => {
+        api.event.emit(LayerSetPayload.createLayerSetChangeLayerStatusPayload(this.mapId, layerEntryConfig, 'error'));
+        source.un('featuresloadend', loadEndHandler);
+      };
+
+      source.once('featuresloadend', loadEndHandler);
+      source.once('featuresloaderror', loadErrorHandler);
 
       const vectorLayer = this.createVectorLayer(layerEntryConfig as TypeVectorLayerEntryConfig, source);
       api.event.emit(LayerSetPayload.createLayerSetChangeLayerStatusPayload(this.mapId, Layer.getLayerPath(layerEntryConfig), 'processed'));
