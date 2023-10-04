@@ -131,10 +131,10 @@ const sxClasses = {
  */
 
 function MapDataTable({ data, layerId, mapId, layerKey, projectionConfig }: MapDataTableProps) {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
+  const language = api.maps[mapId].displayLanguage;
 
-  const locale = i18n.language === 'fr' ? 'fr-ca' : 'en';
-  const dataTableLocalization = i18n.language === 'fr' ? MRTLocalizationFR : MRTLocalizationEN;
+  const dataTableLocalization = language === 'fr' ? MRTLocalizationFR : MRTLocalizationEN;
 
   const tableInstanceRef = useRef<MRTTableInstance>(null);
   const FILTER_MAP_DELAY = 1000;
@@ -360,15 +360,16 @@ function MapDataTable({ data, layerId, mapId, layerKey, projectionConfig }: MapD
     const filterFnKey = dataTableLocalization[key];
     const helperText = dataTableLocalization.filterMode.replace('{filterType}', filterFnKey);
     return (
-      <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale={locale}>
+      <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale={language}>
         <DatePicker
           timezone="UTC"
-          format={locale === 'fr-ca' ? 'DD/MM/YYYY' : 'YYYY-MM-DD'}
+          format="YYYY/MM/DD"
           onChange={(newValue) => {
             column.setFilterValue(newValue);
           }}
           slotProps={{
             textField: {
+              placeholder: language === 'fr' ? 'AAAA/MM/JJ' : 'YYYY/MM/DD',
               helperText,
               sx: { minWidth: '120px', width: '100%' },
               variant: 'standard',
