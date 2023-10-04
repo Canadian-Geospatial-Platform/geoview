@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState, memo } from 'react';
 import { useTranslation } from 'react-i18next';
 import debounce from 'lodash/debounce';
 import startCase from 'lodash/startCase';
@@ -417,7 +417,7 @@ function MapDataTable({ data, layerId, mapId, layerKey, projectionConfig }: MapD
 
     return columnList;
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [data.fieldAliases]);
+  }, []);
 
   /**
    * featureinfo data grid Zoom in/out handling
@@ -448,7 +448,16 @@ function MapDataTable({ data, layerId, mapId, layerKey, projectionConfig }: MapD
       };
     }) as unknown as ColumnsType[];
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [data.features]);
+  }, []);
+
+  // reset table features when layer changes.
+  useEffect(() => {
+    setSorting([]);
+    setColumnFilters([]);
+    setRowSelection({});
+    setMapFiltered(false);
+    setToolbarRowSelectedMessage('');
+  }, [layerId]);
 
   return (
     <Box>
@@ -519,4 +528,4 @@ function MapDataTable({ data, layerId, mapId, layerKey, projectionConfig }: MapD
   );
 }
 
-export default MapDataTable;
+export default memo(MapDataTable);

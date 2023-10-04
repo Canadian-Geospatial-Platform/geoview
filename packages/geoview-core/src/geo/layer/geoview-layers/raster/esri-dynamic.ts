@@ -298,8 +298,11 @@ export class EsriDynamic extends AbstractGeoViewRaster {
       layerEntryConfig.gvLayer = new ImageLayer(imageLayerOptions);
       this.applyViewFilter(layerEntryConfig, layerEntryConfig.layerFilter ? layerEntryConfig.layerFilter : '');
 
+      super.addLoadendListener(layerEntryConfig, 'image');
+
       resolve(layerEntryConfig.gvLayer);
     });
+
     return promisedVectorLayer;
   }
 
