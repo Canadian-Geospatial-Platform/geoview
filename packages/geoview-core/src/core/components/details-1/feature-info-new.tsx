@@ -1,5 +1,6 @@
 /* eslint-disable react/require-default-props */
 import React, { MutableRefObject, useEffect, useState } from 'react';
+import { useTheme } from '@mui/material/styles';
 import { useTranslation } from 'react-i18next';
 import { getUid } from 'ol/util';
 import { List, ListItem, ListItemText, ZoomInSearchIcon, Tooltip, IconButton, Checkbox, Paper } from '@/ui';
@@ -14,20 +15,7 @@ import {
 } from '@/api/events/payloads';
 import { EVENT_NAMES } from '@/api/events/event-types';
 import { FeatureInfoTable } from './feature-info-table';
-
-const sxClasses = {
-  itemText: {
-    fontSize: 14,
-    noWrap: true,
-    '& .MuiListItemText-primary': {
-      font: 'normal normal 600 20px/27px Roboto, Helvetica, Arial, sans-serif',
-    },
-    '& .MuiListItemText-secondary': {
-      font: 'normal normal 16px/22px Roboto, Helvetica, Arial, sans-serif',
-      color: '#000000',
-    },
-  },
-};
+import { getSxClasses } from './details-1.styles';
 
 export interface TypeFeatureInfoProps {
   mapId: string;
@@ -57,12 +45,15 @@ export function FeatureInfo({
   clearAllCheckboxes,
 }: TypeFeatureInfoProps): JSX.Element {
   const { t } = useTranslation<string>();
+  const theme = useTheme();
   const [checked, setChecked] = useState<boolean>(false);
   const [checkedFeatures, setCheckedFeatures] = useState<TypeArrayOfFeatureInfoEntries>([]);
   const feature = features[currentFeatureIndex];
   const featureUid = getUid(feature.geometry);
   const featureIconSrc = feature.featureIcon.toDataURL();
   const nameFieldValue = feature.fieldInfo[feature.nameField!]!.value as string;
+
+  const sxClasses = getSxClasses(theme);
 
   const featureInfoList: TypeFieldEntry[] = Object.keys(feature.fieldInfo).map((fieldName) => {
     return {
@@ -145,14 +136,15 @@ export function FeatureInfo({
 
   return (
     <Paper sx={{ boxShadow: 'none' }}>
-      <List sx={{ paddingLeft: '25px', paddingTop: '25px' }}>
+      <List>
         <ListItem
+          sx={{ marginBottom: '16px' }}
           secondaryAction={
             <>
               <Tooltip title={t('details.select')} placement="top" enterDelay={1000}>
                 <>
                   {t('details.keepFeatureSelected')}
-                  <Checkbox onChange={(e) => handleSelect(e)} checked={checked} />
+                  <Checkbox onChange={(e) => handleSelect(e)} checked={checked} sx={sxClasses.selectFeatureCheckbox} />
                 </>
               </Tooltip>
               <IconButton color="primary" onClick={(e) => handleZoomIn(e)}>
@@ -163,12 +155,12 @@ export function FeatureInfo({
             </>
           }
         >
-          <img src={featureIconSrc} alt={nameFieldValue} style={{ width: '35px', height: '35px' }} />
+          <img src={featureIconSrc} alt={nameFieldValue} style={sxClasses.featureInfoSingleImage} />
           <ListItemText sx={sxClasses.itemText} primary={nameFieldValue} />
         </ListItem>
       </List>
 
-      <List sx={{ paddingLeft: '25px', paddingRight: '25px', paddingBottom: '25px' }}>
+      <List sx={sxClasses.featureInfoListContainer}>
         <FeatureInfoTable featureInfoList={featureInfoList} />
       </List>
     </Paper>
