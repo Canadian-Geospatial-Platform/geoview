@@ -47,7 +47,12 @@
   <div>
     <div id="dataTable" style="margin: 2rem 0"></div>
   </div>
+  <div id="mapWM2" class="llwp-map" data-lang="fr" style="margin: 2rem 0"
+    data-config-url="./configs/raw-data-table.json"></div>
 
+  <div>
+    <div id="frDataTable" style="margin: 2rem 0"></div>
+  </div>
 
   <script src="codedoc.js"></script>
   <script>
@@ -55,29 +60,65 @@
     cgpv.init(function () {
       console.log('api is ready');
       const { api, ui, createRoot } = cgpv;
+      const mapId1 = "mapWM1";
+      const mapId2 = "mapWM2";
 
       //create snippets
       createConfigSnippet();
       createCodeSnippet();
 
       renderDataTableFromMap = async () => {
+        // import footerTabs from the core for the current map
+        const { footerTabs: ft1 } = api.maps[mapId1];
         console.time("renderDataTableFromMap")
         const root = createRoot(document.getElementById("dataTable"));
 
         root.render("Data is loading...")
 
-        const layerId = Object.keys(api.maps['mapWM1'].layer.geoviewLayers)[2];
-        const data = await cgpv.api.maps['mapWM1'].dataTable.createDataPanel({ layerId, mapId: "mapWM1" })
+        const layerId = Object.keys(api.maps[mapId1].layer.geoviewLayers)[2];
+        const data = await cgpv.api.maps[mapId1].dataTable.createDataPanel({ layerId, mapId: mapId1 })
 
-        root.render(data)
+        // create new tab and add the LegendComponent to the footer tab
+        ft1.createFooterTab({
+          value: 3,
+          label: 'Data Table',
+          content: () => data,
+        });
+
+        root.render("")
 
         console.timeEnd("renderDataTableFromMap")
       };
 
+      renderFrenchDataTableFromMap = async () => {
+        // import footerTabs from the core for the current map
+        const { footerTabs: ft1 } = api.maps[mapId2];
+        console.time("renderFrDataTableFromMap")
+        const root = createRoot(document.getElementById("frDataTable"));
+
+        root.render("Les données sont en cours de chargement...")
+
+        const layerId = Object.keys(api.maps[mapId2].layer.geoviewLayers)[2];
+        const data = await cgpv.api.maps[mapId2].dataTable.createDataPanel({ layerId, mapId: mapId2 })
+
+        // create new tab and add the LegendComponent to the footer tab
+        ft1.createFooterTab({
+          value: 3,
+          label: 'Nouveau Données',
+          content: () => data,
+        });
+        root.render("")
+
+        console.timeEnd("renderFrDataTableFromMap")
+      }
+
       cgpv.api.event.on(cgpv.api.eventNames.MAP.EVENT_MAP_LOADED, (payload) => {
-        setTimeout(() => { renderDataTableFromMap(); }, 2000)
+        renderDataTableFromMap();
       }, 'mapWM1');
 
+      cgpv.api.event.on(cgpv.api.eventNames.MAP.EVENT_MAP_LOADED, (payload) => {
+        renderFrenchDataTableFromMap();
+      }, 'mapWM2');
     });
   </script>
 </body>

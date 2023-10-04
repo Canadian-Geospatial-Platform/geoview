@@ -132,6 +132,7 @@ const sxClasses = {
 
 function MapDataTable({ data, layerId, mapId, layerKey, projectionConfig }: MapDataTableProps) {
   const { t, i18n } = useTranslation();
+
   const locale = i18n.language === 'fr' ? 'fr-ca' : 'en';
   const dataTableLocalization = i18n.language === 'fr' ? MRTLocalizationFR : MRTLocalizationEN;
 

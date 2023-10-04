@@ -130,9 +130,9 @@
     "downloadAsCSV": "Télécharger la CSV",
     "filterMap": "Filtrer la carte",
     "stopFilterMap": "Filtrer la carte d'arrêt",
-    "leftPanelHaeding": "Available Categories - FR",
-    "rightPanelHeading": "Selected Category - FR",
-    "rowsSelected": "{rowsSelected} of {totalRows} row(s) selected - FR",
-    "rowsFiltered": "{rowsFiltered} of {totalRows} row(s) filtered -FR"
+    "leftPanelHeading": "Tables disponible",
+    "rightPanelHeading": "Table sélectionnée",
+    "rowsSelected": "{rowsSelected} sur {totalRows} ligne(s) sélectionnée(s)",
+    "rowsFiltered": "{rowsFiltered} sur {totalRows} ligne(s) filtrée(s)"
   }
 }
