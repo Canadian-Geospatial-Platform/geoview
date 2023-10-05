@@ -15,8 +15,6 @@ import {
   VisibilityOutlinedIcon,
   VisibilityOffOutlinedIcon,
   IconButton,
-  ExpandMoreIcon,
-  ExpandLessIcon,
   MoreHorizIcon,
   BrowserNotSupportedIcon,
   KeyboardArrowDownIcon,
