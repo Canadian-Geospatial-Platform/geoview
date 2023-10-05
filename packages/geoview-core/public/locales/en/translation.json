@@ -65,11 +65,9 @@
     "zoom_to": "Zoom to feature",
     "select": "Highlight feature on map",
     "external_link": "External Link",
-    "mainDescription": "In order to start, select any visible layer on the map, if you do not see any layers on the map, please ensure to select them in the legend section",
     "detailsView": "Details View",
     "selectVisbleLayer": "Select any visible layer on the map to get started",
     "availableLayers": "Available Layers",
-    "selectedFeature": "Selected Feature",
     "feature": "feature",
     "clickOnMap": "Click on map",
     "nextFeatureBtn": "Next feature",
@@ -132,6 +130,10 @@
     "jsonExportBtn": "Download GeoJSON",
     "downloadAsCSV": "Download as CSV",
     "filterMap": "Filter Map",
-    "stopFilterMap": "Stop Filter Map"
+    "stopFilterMap": "Stop Filter Map",
+    "leftPanelHeading": "Available Categories",
+    "rightPanelHeading": "Selected Category",
+    "rowsSelected": "{rowsSelected} of {totalRows} row(s) selected",
+    "rowsFiltered": "{rowsFiltered} of {totalRows} row(s) filtered"
   }
 }

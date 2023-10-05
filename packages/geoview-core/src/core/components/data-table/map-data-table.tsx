@@ -6,6 +6,9 @@ import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 
+import { MRT_Localization_FR as MRTLocalizationFR } from 'material-react-table/locales/fr';
+import { MRT_Localization_EN as MRTLocalizationEN } from 'material-react-table/locales/en';
+
 import {
   MaterialReactTable,
   type MRT_ColumnDef as MRTColumnDef,
@@ -18,6 +21,8 @@ import {
   type MRT_ColumnFiltersState as MRTColumnFiltersState,
   type MRT_Column as MRTColumn,
   type MRT_TableInstance as MRTTableInstance,
+  type MRT_Localization as MRTLocalization,
+  type MRT_DensityState as MRTDensityState,
 } from 'material-react-table';
 import { Projection } from 'ol/proj';
 import { Extent } from 'ol/extent';
@@ -112,6 +117,7 @@ const sxClasses = {
     padding: '6px',
     color: 'rgb(1, 67, 97)',
   },
+  tableCell: { 'white-space': 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' },
 };
 
 /**
@@ -125,15 +131,20 @@ const sxClasses = {
  */
 
 function MapDataTable({ data, layerId, mapId, layerKey, projectionConfig }: MapDataTableProps) {
+  const { t } = useTranslation();
+  const language = api.maps[mapId].displayLanguage;
+
+  const dataTableLocalization = language === 'fr' ? MRTLocalizationFR : MRTLocalizationEN;
+
   const tableInstanceRef = useRef<MRTTableInstance>(null);
   const FILTER_MAP_DELAY = 1000;
-  const { t } = useTranslation<string>();
+
   const iconColumn = { alias: t('dataTable.icon'), dataType: 'string', id: t('dataTable.icon') };
   const zoomColumn = { alias: t('dataTable.zoom'), dataType: 'string', id: t('dataTable.zoom') };
 
   const [mapFiltered, setMapFiltered] = useState<boolean>(false);
   const [columnFilters, setColumnFilters] = useState<MRTColumnFiltersState>([]);
-
+  const [density, setDensity] = useState<MRTDensityState>('compact');
   const [rowSelection, setRowSelection] = useState<Record<number, boolean>>({});
   const rowSelectionRef = useRef<Array<number>>([]);
 
@@ -280,11 +291,16 @@ function MapDataTable({ data, layerId, mapId, layerKey, projectionConfig }: MapD
   useEffect(() => {
     let message = '';
     if (Object.keys(rowSelection).length && tableInstanceRef.current) {
-      message = `${Object.keys(rowSelection).length} of ${tableInstanceRef.current.getFilteredRowModel().rows.length} row(s) selected`;
+      message = t('dataTable.rowsSelected')
+        .replace('{rowsSelected}', Object.keys(rowSelection).length.toString())
+        .replace('{totalRows}', tableInstanceRef.current.getFilteredRowModel().rows.length.toString());
     } else if (tableInstanceRef.current && tableInstanceRef.current.getFilteredRowModel().rows.length !== data.features.length) {
-      message = `${tableInstanceRef.current.getFilteredRowModel().rows.length} of ${data.features.length} row(s) filtered`;
+      message = t('dataTable.rowsFiltered')
+        .replace('{rowsFiltered}', tableInstanceRef.current.getFilteredRowModel().rows.length.toString())
+        .replace('{totalRows}', data.features.length.toString());
     }
     setToolbarRowSelectedMessage(message);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [rowSelection, data.features]);
 
   // show row filtered message in the toolbar.
@@ -293,7 +309,9 @@ function MapDataTable({ data, layerId, mapId, layerKey, projectionConfig }: MapD
     if (tableInstanceRef.current) {
       const rowsFiltered = tableInstanceRef.current.getFilteredRowModel();
       if (rowsFiltered.rows.length !== data.features.length) {
-        message = `${rowsFiltered.rows.length} of ${data.features.length} row(s) filtered`;
+        message = t('dataTable.rowsFiltered')
+          .replace('{rowsFiltered}', rowsFiltered.rows.length.toString())
+          .replace('{totalRows}', data.features.length.toString());
       }
     }
     setToolbarRowSelectedMessage(message);
@@ -322,7 +340,7 @@ function MapDataTable({ data, layerId, mapId, layerKey, projectionConfig }: MapD
   const getCellValueWithTooltip = (cellValue: string) => {
     return (
       <Tooltip title={cellValue}>
-        <Box component="span" sx={{ 'white-space': 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>
+        <Box component="span" sx={density === 'compact' ? sxClasses.tableCell : {}}>
           {cellValue}
         </Box>
       </Tooltip>
@@ -336,19 +354,24 @@ function MapDataTable({ data, layerId, mapId, layerKey, projectionConfig }: MapD
    * @returns JSX.Element
    */
   const getDateFilter = (column: MRTColumn<ColumnsType>) => {
+    // eslint-disable-next-line no-underscore-dangle
+    const filterFn = startCase(column.columnDef._filterFn).replaceAll(' ', '');
+    const key = `filter${filterFn}` as keyof MRTLocalization;
+    const filterFnKey = dataTableLocalization[key];
+    const helperText = dataTableLocalization.filterMode.replace('{filterType}', filterFnKey);
     return (
-      <LocalizationProvider dateAdapter={AdapterDayjs}>
+      <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale={language}>
         <DatePicker
           timezone="UTC"
-          format="YYYY-MM-DD"
+          format="YYYY/MM/DD"
           onChange={(newValue) => {
             column.setFilterValue(newValue);
           }}
           slotProps={{
             textField: {
-              // eslint-disable-next-line no-underscore-dangle
-              helperText: `Filter Mode: ${startCase(column.columnDef._filterFn.replace(/([a-z0-9])([A-Z])/g, '$1 $2'))}`,
-              sx: { minWidth: '120px' },
+              placeholder: language === 'fr' ? 'AAAA/MM/JJ' : 'YYYY/MM/DD',
+              helperText,
+              sx: { minWidth: '120px', width: '100%' },
               variant: 'standard',
             },
           }}
@@ -417,7 +440,7 @@ function MapDataTable({ data, layerId, mapId, layerKey, projectionConfig }: MapD
 
     return columnList;
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [density]);
 
   /**
    * featureinfo data grid Zoom in/out handling
@@ -467,12 +490,13 @@ function MapDataTable({ data, layerId, mapId, layerKey, projectionConfig }: MapD
         enableGlobalFilter={false}
         enableRowSelection
         onRowSelectionChange={setRowSelection}
+        enableDensityToggle
+        onDensityChange={setDensity}
         initialState={{
           columnPinning: { left: [t('dataTable.icon'), t('dataTable.zoom')] },
-          density: 'compact',
           pagination: { pageSize: 10, pageIndex: 0 },
         }}
-        state={{ sorting, columnFilters, rowSelection }}
+        state={{ sorting, columnFilters, rowSelection, density }}
         enableColumnFilterModes
         onSortingChange={setSorting}
         onColumnFiltersChange={setColumnFilters}
@@ -504,6 +528,7 @@ function MapDataTable({ data, layerId, mapId, layerKey, projectionConfig }: MapD
         rowVirtualizerInstanceRef={rowVirtualizerInstanceRef}
         rowVirtualizerProps={{ overscan: 5 }}
         columnVirtualizerProps={{ overscan: 2 }}
+        localization={dataTableLocalization}
         muiTableHeadCellFilterTextFieldProps={{
           sx: () => ({
             minWidth: '50px',

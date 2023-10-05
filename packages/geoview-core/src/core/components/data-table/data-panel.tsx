@@ -1,5 +1,6 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { Projection } from 'ol/proj';
+import { useTranslation } from 'react-i18next';
 import {
   Box,
   Grid,
@@ -51,6 +52,7 @@ const sxClasses = {
  */
 
 export function Datapanel({ layerData, mapId, projectionConfig, layerKeys, layerIds }: DatapanelProps) {
+  const { t } = useTranslation();
   const [selectedLayerIndex, setSelectedLayerIndex] = useState(0);
   const [isLoading, setisLoading] = useState(false);
 
@@ -114,13 +116,13 @@ export function Datapanel({ layerData, mapId, projectionConfig, layerKeys, layer
       <Grid container spacing={2} sx={sxClasses.gridContainer}>
         <Grid item xs={3}>
           <Typography component="p" sx={sxClasses.headline}>
-            Available Categories
+            {t('dataTable.leftPanelHeading')}
           </Typography>
         </Grid>
 
         <Grid item xs={9}>
           <Typography component="p" sx={sxClasses.headline}>
-            Selected Category
+            {t('dataTable.rightPanelHeading')}
           </Typography>
         </Grid>
       </Grid>

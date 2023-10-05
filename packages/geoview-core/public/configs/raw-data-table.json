@@ -18,10 +18,12 @@
       {
         "geoviewLayerId": "esriFeatureLYR4",
         "geoviewLayerName": {
-          "en": "Water quality at monitoring sites"
+          "en": "Water quality at monitoring sites",
+          "fr": "Water quality at monitoring sites"
         },
         "metadataAccessPath": {
-          "en": "https://maps-cartes.ec.gc.ca/arcgis/rest/services/DMS/DEU_CSO_Volume/MapServer"
+          "en": "https://maps-cartes.ec.gc.ca/arcgis/rest/services/DMS/DEU_CSO_Volume/MapServer",
+          "fr": "https://maps-cartes.ec.gc.ca/arcgis/rest/services/DMS/DEU_CSO_Volume/MapServer"
         },
         "geoviewLayerType": "esriFeature",
         "initialSettings": {
@@ -37,10 +39,12 @@
         "geoviewLayerId": "historical-flood",
         "serviceDateFormat": "yyyy/mm/ddThh:mm:ssz",
         "geoviewLayerName": {
-          "en": "Historical Flood Events (HFE)"
+          "en": "Historical Flood Events (HFE)",
+          "fr": "Historical Flood Events (HFE)"
         },
         "metadataAccessPath": {
-          "en": "https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/historical_flood_event_en/MapServer"
+          "en": "https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/historical_flood_event_en/MapServer",
+          "fr": "https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/historical_flood_event_en/MapServer"
         },
         "geoviewLayerType": "esriFeature",
         "listOfLayerEntryConfig": [
@@ -52,10 +56,12 @@
       {
         "geoviewLayerId": "geojsonLYR5",
         "geoviewLayerName": {
-          "en": "GeoJSON Sample"
+          "en": "GeoJSON Sample",
+          "fr": "GeoJSON Sample"
         },
         "metadataAccessPath": {
-          "en": "./geojson/metadata.json"
+          "en": "./geojson/metadata.json",
+          "fr": "./geojson/metadata.json"
         },
         "geoviewLayerType": "GeoJSON",
         "initialSettings": {
@@ -65,20 +71,23 @@
           {
             "layerId": "polygons.json",
             "layerName": {
-              "en": "Polygons"
+              "en": "Polygons",
+              "fr": "Polygons"
             }
           },
           {
             "layerId": "lines.json",
             "layerName": {
-              "en": "Lines"
+              "en": "Lines",
+              "fr": "Lines"
             }
           },
           {
             "entryType": "group",
             "layerId": "point-feature-group",
             "layerName": {
-              "en": "point-feature-group"
+              "en": "point-feature-group",
+              "fr": "point-feature-group"
             },
             "listOfLayerEntryConfig": [
               {
@@ -87,7 +96,8 @@
                   "visible": "no"
                 },
                 "layerName": {
-                  "en": "Icons"
+                  "en": "Icons",
+                  "fr": "Icons"
                 }
               },
               {
@@ -96,7 +106,8 @@
                   "visible": "always"
                 },
                 "layerName": {
-                  "en": "Points"
+                  "en": "Points",
+                  "fr": "Points"
                 }
               }
             ]
@@ -105,7 +116,7 @@
       }
     ]
   },
-  "theme": "dark",
+  "theme": "light",
   "navBar": [
     "zoom",
     "fullscreen",
@@ -117,9 +128,12 @@
     "north-arrow",
     "overview-map"
   ],
-  "corePackages": [],
+  "corePackages": [
+    "footer-panel"
+  ],
   "externalPackages": [],
   "suportedLanguages": [
+    "fr",
     "en"
   ]
 }

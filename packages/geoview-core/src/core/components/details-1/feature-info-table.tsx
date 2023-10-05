@@ -1,34 +1,18 @@
 import React, { useState } from 'react';
+import { useTheme } from '@mui/material/styles';
 import linkifyHtml from 'linkify-html';
 import { useTranslation } from 'react-i18next';
 import { Table, TableBody, TableCell, TableContainer, TableRow } from '@mui/material';
 import { TypeFieldEntry } from '@/api/events/payloads';
 import { LightboxImg, LightBoxSlides } from '../lightbox/lightbox';
 import { CardMedia, Box } from '@/ui';
-
 import { isImage, stringify, generateId, sanitizeHtmlContent } from '../../utils/utilities';
 import { HtmlToReact } from '../../containers/html-to-react';
+import { getSxClasses } from './details-1.styles';
 
 interface FeatureInfoTableProps {
   featureInfoList: TypeFieldEntry[];
 }
-
-const getSxClasses = (isOdd = true, isFeatureImage = false) => {
-  return {
-    featureInfoItemValue: {
-      fontSize: '0.85em',
-      marginRight: 0,
-      marginTop: '5px',
-      wordBreak: 'break-word',
-      overflow: 'hidden',
-      textOverflow: 'ellipsis',
-      ...(isFeatureImage && { cursor: 'pointer' }),
-    },
-    featureTableRow: {
-      ...(isOdd && { backgroundColor: '#F1F2F5' }),
-    },
-  };
-};
 
 /**
  * Feature info table that creates a table keys/values of the given feature info
@@ -38,9 +22,12 @@ const getSxClasses = (isOdd = true, isFeatureImage = false) => {
  */
 export function FeatureInfoTable({ featureInfoList }: FeatureInfoTableProps): JSX.Element {
   const { t } = useTranslation<string>();
+  const theme = useTheme();
   const [isLightBoxOpen, setIsLightBoxOpen] = useState(false);
   const [slides, setSlides] = useState<LightBoxSlides[]>([]);
   const [slidesIndex, setSlidesIndex] = useState(0);
+
+  const sxClasses = getSxClasses(theme);
 
   // linkify options
   const linkifyOptions = {
@@ -69,7 +56,7 @@ export function FeatureInfoTable({ featureInfoList }: FeatureInfoTableProps): JS
         element = (
           <CardMedia
             key={generateId()}
-            sx={getSxClasses(true, true).featureInfoItemValue}
+            sx={{ ...sxClasses.featureInfoItemValue, cursor: 'pointer' }}
             alt={alias}
             src={item}
             tabIndex={0}
@@ -88,7 +75,7 @@ export function FeatureInfoTable({ featureInfoList }: FeatureInfoTableProps): JS
         );
       } else {
         element = (
-          <Box key={generateId()} sx={getSxClasses().featureInfoItemValue}>
+          <Box key={generateId()} sx={sxClasses.featureInfoItemValue}>
             <HtmlToReact htmlContent={sanitizeHtmlContent(linkifyHtml(item, linkifyOptions))} />
           </Box>
         );
@@ -108,7 +95,7 @@ export function FeatureInfoTable({ featureInfoList }: FeatureInfoTableProps): JS
   }
 
   return (
-    <TableContainer sx={{ backgroundColor: '#FFFFFF' }}>
+    <TableContainer>
       {isLightBoxOpen && (
         <LightboxImg
           open={isLightBoxOpen}
@@ -125,19 +112,20 @@ export function FeatureInfoTable({ featureInfoList }: FeatureInfoTableProps): JS
       )}
       <Table
         sx={{
-          border: '1px solid #BDBDBD',
+          border: 'none',
           minWidth: 300,
         }}
       >
-        <TableBody>
+        <TableBody sx={{ fontSize: '14px' }}>
           {featureInfoList.map((featureInfoItem, index) => (
             // eslint-disable-next-line react/no-array-index-key
-            <TableRow key={index} sx={getSxClasses(index % 2 > 0).featureTableRow}>
+            <TableRow key={index} sx={{ backgroundColor: index % 2 > 0 ? '#F1F2F5' : '' }}>
               <TableCell
                 sx={{
-                  borderRight: '1px solid #BDBDBD',
+                  borderRight: 'none',
                   p: '5px',
                   width: '70%',
+                  fontWeight: 'bold',
                 }}
               >
                 {featureInfoItem.alias}
@@ -146,6 +134,7 @@ export function FeatureInfoTable({ featureInfoList }: FeatureInfoTableProps): JS
                 sx={{
                   p: '5px',
                   textAlign: 'start',
+                  fontSize: '16px',
                 }}
               >
                 {setFeatureItem(featureInfoItem)}
