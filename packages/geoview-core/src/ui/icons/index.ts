@@ -31,6 +31,7 @@ export {
   GitHub as GitHubIcon,
   Group as GroupIcon,
   GroupWork as GroupWorkIcon,
+  GroupWorkOutlined as GroupWorkOutlinedIcon,
   Help as HelpIcon,
   Home as HomeIcon,
   ImportExport as ReorderIcon,
