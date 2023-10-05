@@ -54,8 +54,6 @@ export const defaultThemeOptions: ThemeOptions = {
       fontWeight: 500,
     },
   },
-  // based on recommendation - https://github.com/mui/material-ui/issues/29677
-  // will resolve the spacing issues of data grid
   spacing: (factor: number) => {
     const values = [0, 1, 2, 4, 5, 6, 8, 10, 12, 14, 15, 16, 18, 20, 30];
     const index = Math.floor(factor);

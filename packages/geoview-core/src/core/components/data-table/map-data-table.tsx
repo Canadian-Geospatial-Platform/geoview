@@ -443,7 +443,7 @@ function MapDataTable({ data, layerId, mapId, layerKey, projectionConfig }: MapD
   }, [density]);
 
   /**
-   * featureinfo data grid Zoom in/out handling
+   * featureinfo data table Zoom in/out handling
    *
    * @param {React.MouseEvent<HTMLButtonElement, MouseEvent>} e mouse clicking event
    * @param {Extent} extent feature exten

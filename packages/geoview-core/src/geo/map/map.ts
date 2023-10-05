@@ -26,7 +26,6 @@ import { Legend2Api } from '@/core/components/legend-2/legend-api';
 import { DetailsAPI } from '@/core/components/details/details-api';
 import { DetailsAPI as DetailsAPIFooter } from '@/core/components/details-1/details-api';
 import { FeatureInfoAPI } from '@/core/components/feature-info/feature-info.api';
-import { DataGridAPI } from '@/core/components/data-grid/data-grid-api';
 import { DataTableApi } from '@/core/components/data-table/data-table-api';
 import { GeoviewRenderer } from '@/geo/renderer/geoview-renderer';
 import { Select } from '@/geo/interaction/select';
@@ -101,10 +100,6 @@ export class MapViewer {
 
   featureInfo!: FeatureInfoAPI;
 
-  // used to access the footer tabs api
-  // TODO: To be removed once dataTable is done
-  dataGrid!: DataGridAPI;
-
   // used to access the data table api
   dataTable!: DataTableApi;
 
@@ -175,7 +170,6 @@ export class MapViewer {
     this.details = new DetailsAPI(this.mapId);
     this.detailsFooter = new DetailsAPIFooter(this.mapId);
     this.featureInfo = new FeatureInfoAPI(this.mapId);
-    this.dataGrid = new DataGridAPI(this.mapId);
     this.dataTable = new DataTableApi(this.mapId);
 
     this.modal = new ModalApi(this.mapId);

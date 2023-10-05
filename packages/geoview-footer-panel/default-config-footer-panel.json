@@ -1,7 +1,13 @@
 {
   "tabs": {
-    "defaultTabs": ["legend", "details", "data-grid"],
+    "defaultTabs": [
+      "legend",
+      "details"
+    ],
     "customTabs": []
   },
-  "suportedLanguages": ["en", "fr"]
+  "suportedLanguages": [
+    "en",
+    "fr"
+  ]
 }

@@ -16,7 +16,6 @@ import schema from '../schema.json';
 import defaultConfig from '../default-config-footer-panel.json';
 import { DetailsItem } from './details-item';
 import { LegendItem } from './legend-item';
-import { DataItem } from './data-item';
 
 const w = window as TypeWindow;
 
@@ -58,12 +57,12 @@ class FooterPanelPlugin extends AbstractPlugin {
     en: {
       legend: 'Legend',
       details: 'Details',
-      dataGrid: 'Data',
+      dataTable: 'Data',
     },
     fr: {
       legend: 'Légende',
       details: 'Détails',
-      dataGrid: 'Données',
+      dataTable: 'Données',
     },
   });
 
@@ -133,16 +132,6 @@ class FooterPanelPlugin extends AbstractPlugin {
           },
           `${mapId}/$FeatureInfoLayerSet$`
         );
-      }
-
-      if (defaultTabs.includes('data-grid')) {
-        /// create new tab and add the DataGridComponent to the footer tab
-        footerTabs.createFooterTab({
-          value: tabsCounter,
-          label: this.translations[displayLanguage].dataGrid as string,
-          content: () => <DataItem mapId={mapId} />,
-        });
-        tabsCounter++;
       }
 
       // TODO add custom detail reusable component when done
