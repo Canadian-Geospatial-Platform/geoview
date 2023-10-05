@@ -104,10 +104,46 @@
                 'layerId': '0'
               }
             ]
+          },
+          {
+            'geoviewLayerId': 'geojsonLYR1',
+            'geoviewLayerName': { 'en': 'GeoJSON Sample' },
+            'metadataAccessPath': { 'en': './geojson/metadata.json' },
+            'geoviewLayerType': 'GeoJSON',
+            'listOfLayerEntryConfig': [
+              {
+                'layerId': 'polygons.json',
+                'layerName': { 'en': 'Polygons' },
+                'layerFilter': 'creationDate >= date \'2020/02/15\''
+              },
+              {
+                'layerId': 'lines.json',
+                'layerName': { 'en': 'Lines' },
+                'layerFilter': 'creationDate >= date \'2020-05-28T12:00:00-05:00\''
+              },
+              {
+                'entryType': 'group',
+                'layerId': 'point-feature-group',
+                'layerName': { 'en': 'point-feature-group' },
+                'listOfLayerEntryConfig': [
+                  {
+                    'layerId': 'icon_points.json',
+                    'layerName': { 'en': 'Icons' },
+                    'initialSettings': { 'visible': 'yes' },
+                    'layerFilter': 'creationDate >= date \'2020-01-14T12:00:01-05:00\''
+                  },
+                  {
+                    'layerId': 'points.json',
+                    'layerName': { 'en': 'Points' },
+                    'layerFilter': 'creationDate >= date \'2019-02-15T22:00:00Z\''
+                  }
+                ]
+              }
+            ]
           }
         ]
       },
-      'theme': 'light',
+      'theme': 'royal',
       'navBar': ['zoom', 'fullscreen', 'home', 'location', 'export'],
       'components': ['north-arrow', 'overview-map'],
       'corePackages': ['footer-panel'],
@@ -116,102 +152,7 @@
     }"></div>
     <hr />
 
-    <div
-      id="LYR1"
-      class="llwp-map"
-      triggerReadyCallback="true"
-      data-lang="en"
-      data-config="{
-        'map': {
-          'interaction': 'dynamic',
-          'viewSettings': {
-            'zoom': 4,
-            'center': [-100, 60],
-            'projection': 3978
-          },
-          'basemapOptions': {
-            'basemapId': 'transport',
-            'shaded': true,
-            'labeled': false
-          },
-          'listOfGeoviewLayerConfig': [
-            {
-              'geoviewLayerId': 'geojsonLYR1',
-              'geoviewLayerName': { 'en': 'GeoJSON Sample' },
-              'metadataAccessPath': { 'en': './geojson/metadata.json' },
-              'geoviewLayerType': 'GeoJSON',
-              'listOfLayerEntryConfig': [
-                {
-                  'layerId': 'polygons.json',
-                  'layerName': { 'en': 'Polygons' },
-                  'layerFilter': 'creationDate >= date \'2020/02/15\''
-                },
-                {
-                  'layerId': 'lines.json',
-                  'layerName': { 'en': 'Lines' },
-                  'layerFilter': 'creationDate >= date \'2020-05-28T12:00:00-05:00\''
-                },
-                {
-                  'entryType': 'group',
-                  'layerId': 'point-feature-group',
-                  'layerName': { 'en': 'point-feature-group' },
-                  'listOfLayerEntryConfig': [
-                    {
-                      'layerId': 'icon_points.json',
-                      'layerName': { 'en': 'Icons' },
-                      'initialSettings': { 'visible': 'yes' },
-                      'layerFilter': 'creationDate >= date \'2020-01-14T12:00:01-05:00\''
-                    },
-                    {
-                      'layerId': 'points.json',
-                      'layerName': { 'en': 'Points' },
-                      'layerFilter': 'creationDate >= date \'2019-02-15T22:00:00Z\''
-                    }
-                  ]
-                }
-              ]
-            },
-            {
-              'geoviewLayerId': 'esriFeatureLYR5',
-              'geoviewLayerName': {
-                'en': 'Top Projects'
-              },
-              'metadataAccessPath': {
-                'en': 'https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/900A_and_top_100_en/MapServer/'
-              },
-              'geoviewLayerType': 'esriFeature',
-              'listOfLayerEntryConfig': [
-                {
-                  'layerId': '0'
-                }
-              ]
-            },
-            {
-              'geoviewLayerId': 'esriFeatureLYR4',
-              'geoviewLayerName': {
-                'en': 'Water quality at monitoring sites'
-              },
-              'metadataAccessPath': {
-                'en': 'https://maps-cartes.ec.gc.ca/arcgis/rest/services/DMS/DEU_CSO_Volume/MapServer'
-              },
-              'geoviewLayerType': 'esriFeature',
-              'listOfLayerEntryConfig': [
-                {
-                  'layerId': '8'
-                }
-              ]
-            }
-          ]
-        },
-        'components': ['overview-map'],
-        'overviewMap': {'hideOnZoom': 7},
-        'corePackages': ['footer-panel'],
-        'theme': 'light',
-        'suportedLanguages': ['en']
-        }"
-    ></div>
-
-    <div
+    <!-- <div
       id="LYR2"
       class="llwp-map"
       triggerReadyCallback="true"
@@ -304,7 +245,7 @@
         'theme': 'royal',
         'suportedLanguages': ['en']
         }"
-    ></div>
+    ></div> -->
 
     <div id="resultMap" style="margin-top: 20px; margin-left: 15px;">Click on a layer on the map</div>
 
@@ -319,31 +260,32 @@
         console.log('api is ready');
 
         // import react and api from the core
-        const { createRoot, api } = cgpv;
+        
+        // const { createRoot, api } = cgpv;
 
-        cgpv.api.event.on(
-          cgpv.api.eventNames.GET_FEATURE_INFO.ALL_QUERIES_DONE,
-            (payload) => {
-                const { resultSets } = payload;
-                const newDetails = [];
+        // cgpv.api.event.on(
+        //   cgpv.api.eventNames.GET_FEATURE_INFO.ALL_QUERIES_DONE,
+        //     (payload) => {
+        //         const { resultSets } = payload;
+        //         const newDetails = [];
 
-                Object.keys(resultSets).forEach((layerPath) => {
-                  const layerName = cgpv.api.utilities.getLocalizedValue(api.maps['LYR2'].layer.registeredLayers[layerPath].layerName, 'LYR2');
-                  const features = resultSets[layerPath]?.data;
-                  if (features?.length && features?.length > 0) {
-                    newDetails.push({ layerPath, layerName, features });
-                  }
-               });
+        //         Object.keys(resultSets).forEach((layerPath) => {
+        //           const layerName = cgpv.api.utilities.getLocalizedValue(api.maps['LYR2'].layer.registeredLayers[layerPath].layerName, 'LYR2');
+        //           const features = resultSets[layerPath]?.data;
+        //           if (features?.length && features?.length > 0) {
+        //             newDetails.push({ layerPath, layerName, features });
+        //           }
+        //        });
 
-               // detailsResult has React Element type
-               const detailsResult = api.maps['LYR2'].detailsFooter.createDetailsFooter('LYR2', newDetails);
+        //        // detailsResult has React Element type
+        //        const detailsResult = api.maps['LYR2'].detailsFooter.createDetailsFooter('LYR2', newDetails);
 
-               const root = createRoot(document.getElementById("resultMap"));
-               root.render(detailsResult);
+        //        const root = createRoot(document.getElementById("resultMap"));
+        //        root.render(detailsResult);
 
-              },
-              'LYR2/$FeatureInfoLayerSet$'
-            );
+        //       },
+        //       'LYR2/$FeatureInfoLayerSet$'
+        //     );
 
         //create snippets
         createConfigSnippet();

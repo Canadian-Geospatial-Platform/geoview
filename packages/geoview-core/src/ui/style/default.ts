@@ -200,8 +200,13 @@ export const defaultThemeOptions: ThemeOptions = {
   footerPanel: {
     contentBg: '#F1F2F5 0% 0% no-repeat padding-box',
     contentShadow: 'inset 0px 3px 6px #00000029',
-    titleFont: 'normal normal 600 20px/27px Open Sans',
-    layerTitleFont: 'normal normal 600 18px/24px Open Sans',
+    titleFont: `normal normal 600 20px/27px ${font}`,
+    layerTitleFont: `normal normal 600 18px/24px ${font}`,
+    layerSecondaryTitleFont: `normal normal normal 16px/22px ${font}`,
     highlightColor: '#515BA5',
+    featureNumbersFont: `normal normal normal 16px/22px ${font}`,
+    featureKeyFont: `normal normal medium 16px/19px ${font}`,
+    featureValueFont: `normal normal normal 16px/19px ${font}`,
+    chooseLayerFont: `normal normal 600 16px/24px ${font}`,
   },
 };
