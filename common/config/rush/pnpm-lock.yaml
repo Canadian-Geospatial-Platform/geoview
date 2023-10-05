@@ -120,7 +120,6 @@ importers:
       '@mui/material': ^5.14.6
       '@mui/styles': ^5.14.6
       '@mui/system': ^5.14.6
-      '@mui/x-data-grid': ^5.17.26
       '@mui/x-date-pickers': ^6.13.0
       '@nieuwlandgeo/sldreader': ^0.3.1
       '@types/create-react-class': ^15.6.3
@@ -208,7 +207,6 @@ importers:
       '@mui/material': 5.14.10_z3lur6ypmh5qwbjfxgrqu4qyca
       '@mui/styles': 5.14.10_dpmmhqj3uzrk25jjzo7arvivk4
       '@mui/system': 5.14.10_rfkbpnzsimr7lblgvywgowtdjy
-      '@mui/x-data-grid': 5.17.26_ck7kmcuxqrljrcmbd4xvj4hurm
       '@mui/x-date-pickers': 6.15.0_gnwipsnaj7gjrdstfphvpeudfi
       '@nieuwlandgeo/sldreader': 0.3.1_ol@8.1.0
       ajv: 8.12.0
@@ -2792,28 +2790,6 @@ packages:
       prop-types: 15.8.1
       react: 18.2.0
       react-is: 18.2.0
-    dev: false
-
-  /@mui/x-data-grid/5.17.26_ck7kmcuxqrljrcmbd4xvj4hurm:
-    resolution: {integrity: sha512-eGJq9J0g9cDGLFfMmugOadZx0mJeOd/yQpHwEa5gUXyONS6qF0OhXSWyDOhDdA3l2TOoQzotMN5dY/T4Wl1KYA==}
-    engines: {node: '>=12.0.0'}
-    peerDependencies:
-      '@mui/material': ^5.4.1
-      '@mui/system': ^5.4.1
-      react: ^17.0.2 || ^18.0.0
-      react-dom: ^17.0.2 || ^18.0.0
-    dependencies:
-      '@babel/runtime': 7.23.1
-      '@mui/material': 5.14.10_z3lur6ypmh5qwbjfxgrqu4qyca
-      '@mui/system': 5.14.10_rfkbpnzsimr7lblgvywgowtdjy
-      '@mui/utils': 5.14.10_dpmmhqj3uzrk25jjzo7arvivk4
-      clsx: 1.2.1
-      prop-types: 15.8.1
-      react: 18.2.0
-      react-dom: 18.2.0_react@18.2.0
-      reselect: 4.1.8
-    transitivePeerDependencies:
-      - '@types/react'
     dev: false
 
   /@mui/x-date-pickers/6.15.0_gnwipsnaj7gjrdstfphvpeudfi:
@@ -8419,10 +8395,6 @@ packages:
   /requires-port/1.0.0:
     resolution: {integrity: sha512-KigOCHcocU3XODJxsu8i/j8T9tzT4adHiecwORRQ0ZZFcp7ahwXuRU1m+yuO90C5ZUyGeGfocHDI14M3L3yDAQ==}
     dev: true
-
-  /reselect/4.1.8:
-    resolution: {integrity: sha512-ab9EmR80F/zQTMNeneUr4cv+jSwPJgIlvEmVwLerwrWVbpLlBuls9XHzIeTFy4cegU2NHBp3va0LKOzU5qFEYQ==}
-    dev: false
 
   /resolve-cwd/3.0.0:
     resolution: {integrity: sha512-OrZaX2Mb+rJCpH/6CpSqt9xFVpN++x01XnN2ie9g6P5/3xelLAkXWVADpdz1IHD/KFfEXyE6V0U01OQ3UO2rEg==}
