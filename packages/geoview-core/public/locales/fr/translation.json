@@ -53,10 +53,13 @@
     "toggle_cluster": "Basculer le groupement",
     "toggle_opacity": "Basculer le Opacité",
     "zoom_to": "Zoom sur la Couche",
-    "overview_title": "Legend Overview",
-    "add_layer": "Add Layer",
-    "selected_legend": "Selected Legend",
-    "sort_layers": "Sort Layers"
+    "overview_title": "Aperçu de la légende",
+    "add_layer": "Ajouter un calque",
+    "selected_legend": "Légende sélectionnée",
+    "sort_layers": "Trier les calques",
+    "selected_Layers": "Un aperçu des calques actuellement sélectionnés",
+    "re-arrange": "Réarranger",
+    "categories_title" : "Catégories"
   },
   "details": {
     "zoom_to": "Zoom à l'élément",
