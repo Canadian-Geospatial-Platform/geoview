@@ -16,13 +16,15 @@
             "type": "string",
             "enum": [
               "legend",
-              "details"
+              "details",
+              "data-table"
             ]
           },
           "minItems": 0,
           "default": [
             "legend",
-            "details"
+            "details",
+            "data-table"
           ],
           "uniqueItems": true,
           "description": "Defaut tabs of footer panel to use"

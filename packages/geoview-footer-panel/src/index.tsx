@@ -16,6 +16,7 @@ import schema from '../schema.json';
 import defaultConfig from '../default-config-footer-panel.json';
 import { DetailsItem } from './details-item';
 import { LegendItem } from './legend-item';
+import { DataTable } from './data-table';
 
 const w = window as TypeWindow;
 
@@ -57,7 +58,7 @@ class FooterPanelPlugin extends AbstractPlugin {
     en: {
       legend: 'Legend',
       details: 'Details',
-      dataTable: 'Data',
+      dataTable: 'DataTable',
     },
     fr: {
       legend: 'Légende',
@@ -132,6 +133,16 @@ class FooterPanelPlugin extends AbstractPlugin {
           },
           `${mapId}/$FeatureInfoLayerSet$`
         );
+      }
+
+      if (defaultTabs.includes('data-table')) {
+        /// create new tab and add the DataTable Component to the footer tab
+        footerTabs.createFooterTab({
+          value: tabsCounter,
+          label: this.translations[displayLanguage].dataTable as string,
+          content: () => <DataTable mapId={mapId} />,
+        });
+        tabsCounter++;
       }
 
       // TODO add custom detail reusable component when done

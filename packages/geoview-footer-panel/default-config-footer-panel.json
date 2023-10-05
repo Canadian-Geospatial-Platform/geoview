@@ -2,7 +2,8 @@
   "tabs": {
     "defaultTabs": [
       "legend",
-      "details"
+      "details",
+      "data-table"
     ],
     "customTabs": []
   },
