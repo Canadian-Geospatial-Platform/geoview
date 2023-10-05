@@ -56,7 +56,10 @@
     "overview_title": "Legend Overview",
     "add_layer": "Add Layer",
     "selected_legend": "Selected Legend",
-    "sort_layers": "Sort Layers"
+    "sort_layers": "Sort Layers",
+    "selected_Layers": "An overview of currrently selected layers",
+    "re-arrange": "re-arrange",
+    "categories_title" : "Categories"
   },
   "details": {
     "zoom_to": "Zoom to feature",

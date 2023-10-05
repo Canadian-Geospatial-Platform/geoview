@@ -9,9 +9,7 @@ import {
   ListItem,
   ListItemIcon,
   ListItemText,
-  Tooltip,
   IconButton,
-  OpacityIcon,
   SliderBase,
   CheckIcon,
   Grid,
@@ -47,7 +45,8 @@ const sxClasses = {
     paddingLeft: 28,
   },
   expandableIconContainer: {
-    paddingLeft: 10,
+    padding: '16px 17px 16px 23px',
+    margin: '20px 0',
   },
   legendIcon: {
     display: 'flex',
@@ -109,11 +108,13 @@ const sxClasses = {
     boxShadow: 'rgb(0 0 0 / 20%) 0px 3px 1px -2px, rgb(0 0 0 / 14%) 0px 2px 2px 0px, rgb(0 0 0 / 12%) 0px 1px 5px 0px',
     background: '#fff',
   },
+
   opacityMenu: {
     display: 'flex',
     alignItems: 'center',
     gap: '15px',
-    padding: '0 62px 16px 62px',
+    padding: '8px 20px 7px 15px',
+    backgroundColor: '#F6F6F6',
   },
   menuListIcon: { justifyContent: 'right', 'min-width': '56px' },
 };
@@ -124,7 +125,7 @@ const sxClasses = {
  * @returns {JSX.Element} the legend list item
  */
 export function LegendItemDetails(props: TypeLegendItemDetailsProps): JSX.Element {
-  const { layerId, geoviewLayerInstance, subLayerId, layerConfigEntry, isRemoveable, canSetOpacity, isParentVisible } = props;
+  const { layerId, geoviewLayerInstance, subLayerId, layerConfigEntry, isRemoveable, isParentVisible } = props;
 
   const { t, i18n } = useTranslation<string>();
   const theme: Theme & {
@@ -395,8 +396,27 @@ export function LegendItemDetails(props: TypeLegendItemDetailsProps): JSX.Elemen
 
   return (
     <Grid item sm={12}>
-      <Typography> {layerName} </Typography>
-      <Typography sx={{ fontSize: '0.6em' }}> Layer quick overview info </Typography>
+      <Stack sx={{ justifyContent: 'space-between', padding: '16px 17px 16px 23px' }} direction="row">
+        <div>
+          <Typography> {layerName} </Typography>
+          <Typography sx={{ fontSize: '0.6em' }}> Layer quick overview info </Typography>
+        </div>
+        <div>
+          {groupItems.length === 0 && (
+            <IconButton onClick={handleZoomTo} sx={{ backgroundColor: '#F6F6F6' }}>
+              <ZoomInSearchIcon />
+            </IconButton>
+          )}
+        </div>
+      </Stack>
+      <div style={{ padding: '16px 17px 16px 23px' }}>
+        {opacity && groupItems.length === 0 && (
+          <Box sx={sxClasses.opacityMenu}>
+            <Typography>{t('legend.opacity')}</Typography>
+            <SliderBase min={0} max={100} value={opacity * 100} customOnChange={handleSetOpacity} />
+          </Box>
+        )}
+      </div>
       <List>
         <ListItem>
           {isRemoveable && (
@@ -405,28 +425,6 @@ export function LegendItemDetails(props: TypeLegendItemDetailsProps): JSX.Elemen
             </Button>
           )}
         </ListItem>
-
-        <ListItem>
-          <Stack spacing={2} direction="row" alignItems="center">
-            {canSetOpacity && groupItems.length === 0 && (
-              <>
-                <Typography>{t('legend.opacity')}</Typography>
-                <Box sx={sxClasses.opacityMenu}>
-                  <Tooltip title={t('legend.opacity')}>
-                    <OpacityIcon />
-                  </Tooltip>
-                  <SliderBase min={0} max={100} value={opacity * 100} customOnChange={handleSetOpacity} />
-                </Box>
-              </>
-            )}
-            {groupItems.length === 0 && (
-              <IconButton onClick={handleZoomTo}>
-                <ZoomInSearchIcon />
-              </IconButton>
-            )}
-          </Stack>
-        </ListItem>
-
         {zoom < splitZoom && canCluster && groupItems.length === 0 && (
           <ListItem onClick={handleClusterToggle}>
             <ListItemText> {t('legend.toggle_cluster')}</ListItemText>
@@ -438,7 +436,6 @@ export function LegendItemDetails(props: TypeLegendItemDetailsProps): JSX.Elemen
           </ListItem>
         )}
       </List>
-
       <Box sx={sxClasses.expandableIconContainer}>
         {iconType === 'simple' && iconImg !== null && <img alt="" style={theme.iconImg} src={iconImg} />}
         {iconType === 'list' && iconList !== null && labelList !== null && (
