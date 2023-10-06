@@ -1,6 +1,7 @@
 import React from 'react';
 import { Root, createRoot } from 'react-dom/client';
 
+import { useStore } from 'zustand';
 import { useTranslation } from 'react-i18next';
 
 import { useMediaQuery } from '@mui/material';
@@ -157,6 +158,7 @@ export const cgpv: types.TypeCGPV = {
     elements: UI,
   },
   useTranslation,
+  useStore,
   types,
 };
 
