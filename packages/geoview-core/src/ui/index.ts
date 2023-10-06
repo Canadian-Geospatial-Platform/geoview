@@ -21,6 +21,7 @@ export * from './layout';
 export * from './linear-progress/linear-progress';
 export * from './list/checkbox-list/checkbox-list-api';
 export * from './list/checkbox-list/checkbox-list';
+export * from './list/checkbox-list/checkbox-list-enhanced';
 export * from './list';
 export * from './menu';
 export * from './modal';
