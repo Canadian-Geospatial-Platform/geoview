@@ -16,6 +16,28 @@ function createCodeSnippet() {
   }
 }
 
+function createCodeSnippet2() {
+  // Enhanced code snippet generator which allows to associate a script id with a code snippet script (og function is using indexes)
+  // and write down different code snippet spreaded in the dom tree (og function always reuses 'script' variable which is the last script tag found in the dom)
+  // Get all scripts on page which has an id
+  const scripts = Array.prototype.filter.call(document.getElementsByTagName('script'), (obj) => {
+    return obj.getAttribute('id') !== null;
+  });
+
+  // Loop on each script
+  for (let i = 0; i < scripts.length; i++) {
+    // Try to find a codeSnippet flag interested in that script
+    const script = scripts[i];
+    const el = document.getElementById(`${script.id}CS`);
+    if (el !== null) {
+      el.innerHTML = `<pre>${script.textContent
+        .replace('//create snippets\n', '')
+        .replace('createConfigSnippet();\n', '')
+        .replace('createCodeSnippet();\n', '')}</pre>`;
+    }
+  }
+}
+
 function createConfigSnippet() {
   let j = 0;
   // inject configuration snippet inside panel
