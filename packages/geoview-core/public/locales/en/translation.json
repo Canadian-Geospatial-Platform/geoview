@@ -82,11 +82,6 @@
     "close": "Close",
     "download": "Download"
   },
-  "datagrid": {
-    "exportJson": "Download GeoJSON",
-    "filterMap": "Filter Map",
-    "stopFilterMap": "Stop Map Filter"
-  },
   "keyboardnav": {
     "start": "Skip after map element",
     "end": "Skip before map element",
