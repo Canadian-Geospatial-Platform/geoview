@@ -1,0 +1,69 @@
+{
+  "suportedLanguages": ["en", "fr"],
+  "charts": [{
+    "layers": [{
+      "layerId": "geojsonLYR5/polygons.json"
+    }],
+    "chart": "line",
+    "geochart": {
+      "featuresUsePalette": true,
+      "labelsAreColors": true,
+      "xAxis": {
+        "property": "label"
+      },
+      "yAxis": {
+        "property": "data"
+      }
+    },
+    "datasources": [{
+      "display": "Feature",
+      "format": "compressed",
+      "items": [{
+        "data": "92;43.54;12.3;66;75",
+        "label": "Red;Green;Blue;Yellow;Orange"
+      },
+      {
+        "data": "553;54;32.553;5.43;55",
+        "label": "Red;Green;Blue;Yellow;Orange"
+      },
+      {
+        "data": "155;55;255",
+        "label": "Red;Green;Blue"
+      }]
+    }]
+  }, 
+  {
+    "layers": [{
+      "layerId": "geojsonLYR5/point-feature-group/points.json"
+    }, {
+      "layerId": "geojsonLYR5/lines.json"
+    }],
+    "chart": "bar",
+    "geochart": {
+      "featuresUsePalette": true,
+      "labelsAreColors": true,
+      "xAxis": {
+        "property": "label"
+      },
+      "yAxis": {
+        "property": "data"
+      }
+    },
+    "datasources": [{
+      "display": "Feature",
+      "format": "compressed",
+      "items": [{
+        "data": "92;43.54;12.3;66;75",
+        "label": "Red;Green;Blue;Yellow;Orange"
+      },
+      {
+        "data": "553;54;32.553;5.43;55",
+        "label": "Red;Green;Blue;Yellow;Orange"
+      },
+      {
+        "data": "155;55;255",
+        "label": "Red;Green;Blue"
+      }]
+    }]
+  }]
+}

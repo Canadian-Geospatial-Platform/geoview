@@ -1,0 +1,76 @@
+{
+  "map": {
+    "interaction": "dynamic",
+    "viewSettings": {
+      "zoom": 5,
+      "center": [-100, 55],
+      "projection": 3857
+    },
+    "basemapOptions": {
+      "basemapId": "transport",
+      "shaded": false,
+      "labeled": false
+    },
+    "listOfGeoviewLayerConfig": [
+      {
+        "geoviewLayerId": "airborne_radioactivity",
+        "geoviewLayerName": {
+          "en": "Airborne Radioactivity"
+        },
+        "metadataAccessPath": {
+          "en": "https://maps-cartes.services.geo.ca/server_serveur/rest/services/HC/airborne_radioactivity_en/MapServer"
+        },
+        "geoviewLayerType": "esriDynamic",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "1"
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "cesi",
+        "geoviewLayerName": {
+          "en": "CESI"
+        },
+        "metadataAccessPath": {
+          "en": "https://maps-cartes.ec.gc.ca/arcgis/rest/services/CESI/MapServer"
+        },
+        "geoviewLayerType": "esriFeature",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "1",
+            "layerFilter": "E_Province = 'Alberta' or E_Province = 'Manitoba'"
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "geojsonLYR5",
+        "geoviewLayerName": { "en": "GeoJSON Sample" },
+        "metadataAccessPath": { "en": "./geojson/metadata.json" },
+        "geoviewLayerType": "GeoJSON",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "polygons.json",
+            "layerName": { "en": "Polygons" }
+          },
+          {
+            "layerId": "lines.json",
+            "layerName": { "en": "Lines" }
+          },
+          {
+            "entryType": "group",
+            "layerId": "point-feature-group",
+            "layerName": { "en": "point-feature-group" },
+            "listOfLayerEntryConfig": [
+              { "layerId": "icon_points.json", "layerName": { "en": "Icons" } },
+              { "layerId": "points.json", "layerName": { "en": "Points" } }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "theme": "dark",
+  "corePackages": ["geochart"],
+  "suportedLanguages": ["en"]
+}

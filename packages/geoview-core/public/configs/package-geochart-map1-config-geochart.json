@@ -1,0 +1,96 @@
+
+{
+  "suportedLanguages": ["en", "fr"],
+  "charts": [{
+    "layers": [{
+      "layerId": "airborne_radioactivity/1",
+      "propertyValue": "OBJECTID",
+      "propertyDisplay": "Location_Emplacement",
+      "query": {
+        "url": "https://maps-cartes.services.geo.ca/server_serveur/rest/services/HC/airborne_radioactivity_en/MapServer/1/queryRelatedRecords?outFields=*&returnGeometry=false&maxAllowableOffset=&geometryPrecision=&outSR=&returnZ=false&returnM=false&gdbVersion=&datumTransformation=&f=json&relationshipId=0&definitionExpression=&objectIds=${id}"
+      }
+    }],
+    "chart": "line",
+    "category": "Radionuclide_Radionucleide",
+    "geochart": {
+      "featuresUsePalette": true,
+      "xAxis": {
+        "type": "time",
+        "property": "CollectionStart_DebutPrelevement"
+      },
+      "yAxis": {
+        "property": "Activity_Activite_mBqm3"
+      },
+      "xSlider": {
+      "display": true
+      },
+      "ySlider": {
+        "display": true
+      }
+    }
+  },
+  {
+    "layers": [{
+      "layerId": "geojsonLYR5/polygons.json"
+    }],
+    "chart": "line",
+    "geochart": {
+      "featuresUsePalette": true,
+      "labelsAreColors": true,
+      "xAxis": {
+        "property": "label"
+      },
+      "yAxis": {
+        "property": "data"
+      }
+    },
+    "datasources": [{
+      "display": "Feature",
+      "format": "compressed",
+      "items": [{
+        "data": "92;43.54;12.3;66;75",
+        "label": "Red;Green;Blue;Yellow;Orange"
+      },
+      {
+        "data": "553;54;32.553;5.43;55",
+        "label": "Red;Green;Blue;Yellow;Orange"
+      },
+      {
+        "data": "155;55;255",
+        "label": "Red;Green;Blue"
+      }]
+    }]
+  }, 
+  {
+    "layers": [{
+      "layerId": "geojsonLYR5/point-feature-group/points.json"
+    }],
+    "chart": "bar",
+    "geochart": {
+      "featuresUsePalette": true,
+      "labelsAreColors": true,
+      "xAxis": {
+        "property": "label"
+      },
+      "yAxis": {
+        "property": "data"
+      }
+    },
+    "datasources": [{
+      "display": "Feature",
+      "format": "compressed",
+      "items": [{
+        "data": "92;43.54;12.3;66;75",
+        "label": "Red;Green;Blue;Yellow;Orange"
+      },
+      {
+        "data": "553;54;32.553;5.43;55",
+        "label": "Red;Green;Blue;Yellow;Orange"
+      },
+      {
+        "data": "155;55;255",
+        "label": "Red;Green;Blue"
+      }]
+    }]
+  }]
+}
