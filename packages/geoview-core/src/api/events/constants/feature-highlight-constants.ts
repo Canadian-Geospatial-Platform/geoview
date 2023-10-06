@@ -6,7 +6,7 @@ import { EventStringId } from '../event-types';
  */
 
 /** Valid keys for the FEATURE_HIGHLIGHT category */
-export type FeatureHighlightEventKey = 'EVENT_HIGHLIGHT_FEATURE' | 'EVENT_HIGHLIGHT_CLEAR';
+export type FeatureHighlightEventKey = 'EVENT_HIGHLIGHT_FEATURE' | 'EVENT_HIGHLIGHT_CLEAR' | 'EVENT_HIGHLIGHT_BBOX';
 
 /** Record that associates FEATURE_HIGHLIGHT's event keys to their event string id */
 export const FEATURE_HIGHLIGHT: Record<FeatureHighlightEventKey, EventStringId> = {
@@ -19,4 +19,9 @@ export const FEATURE_HIGHLIGHT: Record<FeatureHighlightEventKey, EventStringId> 
    * Event is triggered when a call is made to clear highlighted features
    */
   EVENT_HIGHLIGHT_CLEAR: 'feature_highlight/clear',
+
+  /**
+   * Event is triggered when a call is made to highlight a bounding box on map
+   */
+  EVENT_HIGHLIGHT_BBOX: 'feature_highlight/highlightBBox',
 };
