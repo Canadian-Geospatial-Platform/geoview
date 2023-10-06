@@ -7,7 +7,7 @@ import { CheckboxListAPI } from '../list/checkbox-list/checkbox-list-api';
 
 import { PanelPayload, TypeActionButton } from '@/api/events/payloads';
 import { generateId } from '@/core/utils/utilities';
-import { PanelStyles, TypePanelProps } from './panel-types';
+import { PanelStyles, TypePanelProps, TRANSITION_PERIOD } from './panel-types';
 
 /**
  * Class used to handle creating a new panel
@@ -47,6 +47,8 @@ export class PanelApi {
 
   panelStyles?: PanelStyles;
 
+  handlePanelOpened?: () => void;
+
   /**
    * Initialize a new panel
    *
@@ -65,6 +67,7 @@ export class PanelApi {
     this.status = panel.status !== undefined && panel.status !== null ? panel.status : false;
     this.width = panel.width || 350;
     this.panelStyles = panel.panelStyles ?? {};
+    this.handlePanelOpened = panel.handlePanelOpened;
   }
 
   /**
@@ -79,6 +82,13 @@ export class PanelApi {
     api.event.emit(
       PanelPayload.withButtonIdAndType(EVENT_NAMES.PANEL.EVENT_PANEL_OPEN, `${this.mapId}/${this.buttonId}`, this.buttonId, this.type!)
     );
+
+    if (this.handlePanelOpened) {
+      // Wait the transition period (+50 ms just to be sure of shenanigans)
+      setTimeout(() => {
+        this.handlePanelOpened!();
+      }, TRANSITION_PERIOD + 50);
+    }
   };
 
   /**

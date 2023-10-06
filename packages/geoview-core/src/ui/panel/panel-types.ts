@@ -35,6 +35,8 @@ export type TypePanelProps = {
   content?: ReactNode;
   /** Custom panel styles */
   panelStyles?: PanelStyles;
+  /** Handler callback triggered when a panel is fully opened */
+  handlePanelOpened?: () => void;
 };
 
 export interface PanelStyles {
@@ -112,3 +114,5 @@ export const CONST_PANEL_TYPES = {
   APPBAR: 'app-bar',
   NAVBAR: 'nav-bar',
 };
+
+export const TRANSITION_PERIOD = 300;

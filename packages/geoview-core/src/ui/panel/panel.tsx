@@ -18,6 +18,7 @@ import { MapContext } from '@/core/app-start';
 
 import { api } from '@/app';
 import { EVENT_NAMES } from '@/api/events/event-types';
+import { TRANSITION_PERIOD } from './panel-types';
 
 import { IconButton, CloseIcon, PanelApi, Box } from '..';
 import {
@@ -111,7 +112,7 @@ export function Panel(props: TypePanelAppProps): JSX.Element {
   const panelContainerStyles = {
     ...(panelStyles?.panelContainer && { ...panelStyles.panelContainer }),
     width: panelStatus ? panelWidth : 0,
-    transition: 'width 300ms ease',
+    transition: `width ${TRANSITION_PERIOD}ms ease`,
   };
 
   const [actionButtons, setActionButtons] = useState<JSX.Element[] & ReactNode[]>([]);
