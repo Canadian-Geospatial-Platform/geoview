@@ -20,7 +20,6 @@ import { EVENT_NAMES } from '@/api/events/event-types';
 import { AppbarButtons } from '@/core/components/app-bar/app-bar-buttons';
 import { NavbarButtons } from '@/core/components/nav-bar/nav-bar-buttons';
 import { FooterTabsApi } from '@/core/components/footer-tabs/footer-tabs-api';
-import { NotificationsApi } from '@/core/components/notifications/notifications-api';
 import { LegendApi } from '@/core/components/legend/legend-api';
 import { Legend2Api } from '@/core/components/legend-2/legend-api';
 import { DetailsAPI } from '@/core/components/details/details-api';
@@ -81,9 +80,6 @@ export class MapViewer {
 
   // used to access the footer tabs api
   footerTabs!: FooterTabsApi;
-
-  // used to access the notifications api
-  notifications!: NotificationsApi;
 
   // used to access the legend api
   legend!: LegendApi;
@@ -157,7 +153,7 @@ export class MapViewer {
     this.currentProjection = mapFeaturesConfig.map.viewSettings.projection;
     this.i18nInstance = i18instance;
     this.currentZoom = mapFeaturesConfig.map.viewSettings.zoom;
-    this.mapCenterCoordinates = [mapFeaturesConfig.map.viewSettings.center[0], mapFeaturesConfig.map.viewSettings.center[1]];
+    this.mapCenterCoordinates = [0, 0]; // [mapFeaturesConfig.map.viewSettings.center[0], mapFeaturesConfig.map.viewSettings.center[1]];
     this.singleClickedPosition = { pixel: [], lnglat: [], projected: [], dragging: false };
     this.pointerPosition = { pixel: [], lnglat: [], projected: [], dragging: false };
 
@@ -402,18 +398,28 @@ export class MapViewer {
           this.map.on('pointermove', store.getState().mapState.onMapPointerMove);
           this.map.on('singleclick', store.getState().mapState.onMapSingleClick);
           this.map.getView().on('change:resolution', store.getState().mapState.onMapZoomEnd);
+          this.map.getView().on('change:rotation', store.getState().mapState.onMapRotation);
 
           // initialize map state
           store.setState({
             mapState: {
               ...store.getState().mapState,
-              currentProjection: this.currentProjection,
-              mapCenterCoordinates: this.map.getView().getCenter()!,
               mapLoaded: true,
               mapElement: this.map,
               zoom: this.map.getView().getZoom(),
             },
           });
+
+          // when map is just created, some controls (i.e. scale) are not fully initialized
+          // trigger the store component update after a small latency
+          setTimeout(() => {
+            store.setState({
+              mapState: {
+                ...store.getState().mapState,
+                mapCenterCoordinates: this.map.getView().getCenter()!,
+              },
+            });
+          }, 100);
 
           clearInterval(layerInterval);
         }
