@@ -51,6 +51,7 @@ type TypeEventHandlerFunctions = {
 export class Layer {
   /** Layers with valid configuration for this map. */
   registeredLayers: { [layerEntryConfigId: string]: TypeLayerEntryConfig } = {};
+  // TODO: Refactor - Export the custom type written above as an official type
 
   // variable used to store all added geoview layers
   geoviewLayers: { [geoviewLayerId: string]: AbstractGeoViewLayer } = {};
