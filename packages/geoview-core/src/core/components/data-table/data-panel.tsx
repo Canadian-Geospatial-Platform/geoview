@@ -1,4 +1,5 @@
 import React, { useState, useCallback, useEffect } from 'react';
+import { useTheme } from '@mui/material/styles';
 import { Projection } from 'ol/proj';
 import { useTranslation } from 'react-i18next';
 import {
@@ -15,8 +16,12 @@ import {
   SendIcon,
   ChevronRightIcon,
   CircularProgress,
+  Button,
+  ArrowForwardIcon,
+  ArrowBackIcon,
 } from '@/ui';
 import MapDataTable, { MapDataTableData as MapDataTableDataProps } from './map-data-table';
+import { getSxClasses } from './data-table.style';
 
 interface DatapanelProps {
   layerIds: string[];
@@ -25,21 +30,6 @@ interface DatapanelProps {
   projectionConfig: Projection;
   layerKeys: string[];
 }
-
-const sxClasses = {
-  list: {
-    color: 'text.primary',
-    marginLeft: '1rem',
-    width: '100%',
-    paddingRight: '2rem',
-  },
-  paper: { marginBottom: '1rem', height: '67px' },
-  borderWithIndex: '2px solid #515BA5',
-  borderNone: 'none',
-  headline: { fontSize: '1.125rem', fontWeight: 'bold' },
-  dataPanel: { backgroundColor: '#F1F2F5', marginTop: '1rem' },
-  gridContainer: { paddingLeft: '1rem', paddingRight: '1rem' },
-};
 
 /**
  * Build Data panel from map.
@@ -53,10 +43,12 @@ const sxClasses = {
 
 export function Datapanel({ layerData, mapId, projectionConfig, layerKeys, layerIds }: DatapanelProps) {
   const { t } = useTranslation();
+  const theme = useTheme();
+  const sxClasses = getSxClasses(theme);
+
   const [selectedLayerIndex, setSelectedLayerIndex] = useState(0);
   const [isLoading, setisLoading] = useState(false);
-
-  // useEffect(() => {}, [isLoading]);
+  const [isEnlargeDataTable, setIsEnlargeDataTable] = useState(false);
 
   const handleListItemClick = useCallback((event: React.MouseEvent<HTMLDivElement, MouseEvent>, index: number) => {
     setSelectedLayerIndex(index);
@@ -76,14 +68,7 @@ export function Datapanel({ layerData, mapId, projectionConfig, layerKeys, layer
             sx={{ ...sxClasses.paper, border: selectedLayerIndex === index ? sxClasses.borderWithIndex : sxClasses.borderNone }}
             key={layerKey}
           >
-            <ListItem
-              disablePadding
-              secondaryAction={
-                <IconButton edge="end" sx={{ color: '#515BA5', background: '#F1F2F5' }}>
-                  <ChevronRightIcon />
-                </IconButton>
-              }
-            >
+            <ListItem disablePadding>
               <ListItemButton
                 sx={{ height: '67px' }}
                 selected={selectedLayerIndex === index}
@@ -94,6 +79,17 @@ export function Datapanel({ layerData, mapId, projectionConfig, layerKeys, layer
                 </ListItemIcon>
 
                 <ListItemText primary={layerKey} secondary={`${layerData[index].features.length} features`} />
+                <Box
+                  sx={{
+                    background: isEnlargeDataTable ? 'white' : 'none',
+                    padding: isEnlargeDataTable ? '0.25rem' : '1rem',
+                    paddingRight: isEnlargeDataTable ? '0.25rem' : '1rem',
+                  }}
+                >
+                  <IconButton disabled edge="end" size="small" sx={{ color: '#515BA5 !important', background: '#F1F2F5 !important' }}>
+                    <ChevronRightIcon />
+                  </IconButton>
+                </Box>
               </ListItemButton>
             </ListItem>
           </Paper>
@@ -101,7 +97,7 @@ export function Datapanel({ layerData, mapId, projectionConfig, layerKeys, layer
       </List>
     ),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [selectedLayerIndex]
+    [selectedLayerIndex, isEnlargeDataTable]
   );
 
   useEffect(() => {
@@ -120,17 +116,23 @@ export function Datapanel({ layerData, mapId, projectionConfig, layerKeys, layer
           </Typography>
         </Grid>
 
-        <Grid item xs={9}>
+        <Grid item xs={7}>
           <Typography component="p" sx={sxClasses.headline}>
             {t('dataTable.rightPanelHeading')}
           </Typography>
         </Grid>
+        <Grid item xs={2} sx={{ display: 'flex', justifyContent: 'right' }}>
+          <Button type="text" size="small" sx={sxClasses.enlargeBtn} onClick={() => setIsEnlargeDataTable(!isEnlargeDataTable)}>
+            {isEnlargeDataTable ? <ArrowBackIcon sx={sxClasses.enlargeBtnIcon} /> : <ArrowForwardIcon sx={sxClasses.enlargeBtnIcon} />}
+            {isEnlargeDataTable ? t('dataTable.reduceBtn') : t('dataTable.enlargeBtn')}
+          </Button>
+        </Grid>
       </Grid>
       <Grid container sx={{ marginTop: '0.75rem' }}>
-        <Grid item xs={3}>
+        <Grid item xs={!isEnlargeDataTable ? 3 : 2}>
           {renderList()}
         </Grid>
-        <Grid item xs={9} sx={{ paddingLeft: '1rem' }}>
+        <Grid item xs={!isEnlargeDataTable ? 9 : 10} sx={{ paddingLeft: '1rem' }}>
           <Typography component="p" sx={sxClasses.headline}>
             {layerKeys[selectedLayerIndex]}
           </Typography>
