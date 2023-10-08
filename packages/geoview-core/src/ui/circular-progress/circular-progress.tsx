@@ -1,14 +1,13 @@
 /* eslint-disable react/require-default-props */
 import { CSSProperties } from 'react';
-import { CircularProgress as MaterialCircularProgress, CircularProgressProps, Box } from '@mui/material';
-
+import { CircularProgress as MaterialCircularProgress, CircularProgressProps, Box, useTheme } from '@mui/material';
+import { getSxClasses } from './circular-progress-style';
 /**
  * Circular Progress Properties
  */
 interface TypeCircularProgressProps extends CircularProgressProps {
-  className?: string;
-  style?: CSSProperties;
   isLoaded: boolean;
+  style?: CSSProperties;
 }
 
 /**
@@ -18,11 +17,14 @@ interface TypeCircularProgressProps extends CircularProgressProps {
  * @returns {JSX.Element} the created Circular Progress element
  */
 export function CircularProgress(props: TypeCircularProgressProps): JSX.Element {
-  const { className, style = {}, isLoaded } = props;
+  const { style = {}, isLoaded } = props;
 
-  return isLoaded ? (
-    <Box className={`${className !== undefined && className}`} style={{ ...style }}>
-      <MaterialCircularProgress />
+  const theme = useTheme();
+  const sxClasses = getSxClasses(theme);
+
+  return !isLoaded ? (
+    <Box sx={sxClasses.loading} style={{ ...style }}>
+      <MaterialCircularProgress sx={sxClasses.progress} />
     </Box>
   ) : (
     // eslint-disable-next-line react/jsx-no-useless-fragment

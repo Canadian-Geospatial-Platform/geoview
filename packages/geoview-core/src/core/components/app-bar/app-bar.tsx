@@ -14,7 +14,7 @@ import { TypeButtonPanel } from '@/ui/panel/panel-types';
 
 import Export from './buttons/export';
 import Geolocator from './buttons/geolocator';
-import Notifications from './buttons/notifications';
+import Notifications from '@/core/components/notifications/notifications';
 import Version from './buttons/version';
 import ExportModal from '../export/export-modal';
 
