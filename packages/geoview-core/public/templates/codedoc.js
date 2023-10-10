@@ -69,15 +69,14 @@ function createCollapsible() {
   let i;
 
   for (i = 0; i < coll.length; i++) {
+    const content = coll[i].nextElementSibling;
+    if (coll[i].classList.contains('active')) content.style.display = 'block';
+    else content.style.display = 'none';
     // eslint-disable-next-line func-names
     coll[i].addEventListener('click', function () {
       this.classList.toggle('active');
-      const content = this.nextElementSibling;
-      if (content.style.display === 'block') {
-        content.style.display = 'none';
-      } else {
-        content.style.display = 'block';
-      }
+      if (this.classList.contains('active')) content.style.display = 'block';
+      else content.style.display = 'none';
     });
   }
 }
@@ -112,6 +111,7 @@ function wireLogs(api, mapId, logsDomId) {
       (payload) => {
         // Log the event
         addLog(logsDomId, payload.event);
+        // eslint-disable-next-line no-console
         console.log(payload);
       },
       mapId

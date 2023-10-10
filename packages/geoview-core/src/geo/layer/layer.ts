@@ -268,7 +268,7 @@ export class Layer {
     const layerPath = Layer.getLayerPath(layerEntryConfig);
     if (this.registeredLayers[layerPath]) return false;
     this.registeredLayers[layerPath] = layerEntryConfig;
-    (this.registeredLayers[layerPath] as TypeBaseLayerEntryConfig).layerStatus = 'newInstance';
+    this.geoviewLayers[layerPath.split('/')[0]].changeLayerStatus('newInstance', layerEntryConfig);
     return true;
   }
 

@@ -22,7 +22,10 @@ export interface TypeFeatureInfoProps {
   features: TypeArrayOfFeatureInfoEntries;
   currentFeatureIndex: number;
   onClearCheckboxes: () => void;
-  onFeatureNavigateChange: (checkedFeatures: TypeArrayOfFeatureInfoEntries, currentFeature: TypeFeatureInfoEntry) => void;
+  onFeatureNavigateChange: (
+    checkedFeatures: Exclude<TypeArrayOfFeatureInfoEntries, null | undefined>,
+    currentFeature: TypeFeatureInfoEntry
+  ) => void;
   setDisableClearAllBtn: (isDisabled: boolean) => void;
   selectedFeatures?: MutableRefObject<string[]>;
   clearAllCheckboxes?: boolean;
@@ -47,8 +50,8 @@ export function FeatureInfo({
   const { t } = useTranslation<string>();
   const theme = useTheme();
   const [checked, setChecked] = useState<boolean>(false);
-  const [checkedFeatures, setCheckedFeatures] = useState<TypeArrayOfFeatureInfoEntries>([]);
-  const feature = features[currentFeatureIndex];
+  const [checkedFeatures, setCheckedFeatures] = useState<Exclude<TypeArrayOfFeatureInfoEntries, null | undefined>>([]);
+  const feature = features![currentFeatureIndex];
   const featureUid = getUid(feature.geometry);
   const featureIconSrc = feature.featureIcon.toDataURL();
   const nameFieldValue = feature.fieldInfo[feature.nameField!]!.value as string;

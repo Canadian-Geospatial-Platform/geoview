@@ -165,6 +165,7 @@ export function LegendIconList(props: TypeLegendIconListProps): JSX.Element {
     mapId,
   ]);
 
+  // eslint-disable-next-line no-console
   console.log('Check Count', countChildren);
 
   return (

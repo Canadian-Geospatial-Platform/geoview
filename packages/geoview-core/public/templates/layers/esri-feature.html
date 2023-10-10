@@ -66,9 +66,10 @@
 
     <div class="map-title-holder">
       <h4 id="HLYR1">1. Many Esri Feature Layers</h4>
-      &nbsp;<h5 id="HLYR1-state">(undefined)</h5>
       <a class="ref-link" href="#top">Top</a>
     </div>
+    <button class="collapsible active">Map Status Flags</button>
+    <pre style="height: 20pc; overflow-y: scroll" id="HLYR1-state" class="panel map-title-holder"></pre>
     <div
       id="LYR1"
       class="llwp-map"
@@ -140,7 +141,9 @@
     <button class="collapsible">Get Legend</button>
     <pre style="height: 20pc; overflow-y: scroll" id="LegendsId1-table-pre" class="panel"></pre>
     <button type="button" class="collapsible">Get Feature Info</button>
-    <pre style="height: 20pc; overflow-y: scroll" id="ResultSetId1" class="panel">Click on feature on the map</pre>
+    <pre style="height: 20pc; overflow-y: scroll" id="ResultSetId1-at_long_lat" class="panel">Click on feature on the map</pre>
+    <button type="button" class="collapsible" id="AllFeatureInfo1">Get All Feature Info</button>
+    <pre style="height: 20pc; overflow-y: scroll" id="ResultSetId1-all" class="panel"></pre>
     <hr />
     <p>This map has a wms layer added from configuration.</p>
     <button type="button" class="collapsible">Configuration Snippet</button>
@@ -151,9 +154,10 @@
 
     <div class="map-title-holder">
       <h4 id="HLYR2">2. Date filtering using time zone changed and non ISO date format</h4>
-      &nbsp;<h5 id="HLYR2-state">(undefined)</h5>
       <a class="ref-link" href="#top">Top</a>
     </div>
+    <button class="collapsible active">Map Status Flags</button>
+    <pre style="height: 20pc; overflow-y: scroll" id="HLYR2-state" class="panel map-title-holder"></pre>
     <div
       id="LYR2"
       class="llwp-map"
@@ -200,7 +204,9 @@
     <button class="collapsible">Get Legend</button>
     <pre style="height: 20pc; overflow-y: scroll" id="LegendsId2-table-pre" class="panel"></pre>
     <button type="button" class="collapsible" >Get Feature Info</button>
-    <pre style="height: 20pc; overflow-y: scroll" id="ResultSetId2" class="panel">Click on feature on the map</pre>
+    <pre style="height: 20pc; overflow-y: scroll" id="ResultSetId2-at_long_lat" class="panel">Click on feature on the map</pre>
+    <button type="button" class="collapsible" id="AllFeatureInfo2">Get All Feature Info</button>
+    <pre style="height: 20pc; overflow-y: scroll" id="ResultSetId2-all" class="panel"></pre>
     <hr />
     <button type="button" class="collapsible">Configuration Snippet</button>
     <pre id="LYR2CS" class="panel"></pre>
@@ -210,9 +216,10 @@
 
     <div class="map-title-holder">
       <h4 id="HLYR3">3. Date filtering using ISO UTC dates</h4>
-      &nbsp;<h5 id="HLYR3-state">(undefined)</h5>
       <a class="ref-link" href="#top">Top</a>
     </div>
+    <button class="collapsible active">Map Status Flags</button>
+    <pre style="height: 20pc; overflow-y: scroll" id="HLYR3-state" class="panel map-title-holder"></pre>
     <div
       id="LYR3"
       class="llwp-map"
@@ -258,7 +265,9 @@
     <button class="collapsible">Get Legend</button>
     <pre style="height: 20pc; overflow-y: scroll" id="LegendsId3-table-pre" class="panel"></pre>
     <button type="button" class="collapsible" >Get Feature Info</button>
-    <pre style="height: 20pc; overflow-y: scroll" id="ResultSetId3" class="panel">Click on feature on the map</pre>
+    <pre style="height: 20pc; overflow-y: scroll" id="ResultSetId3-at_long_lat" class="panel">Click on feature on the map</pre>
+    <button type="button" class="collapsible" id="AllFeatureInfo3">Get All Feature Info</button>
+    <pre style="height: 20pc; overflow-y: scroll" id="ResultSetId3-all" class="panel"></pre>
     <hr />
     <button type="button" class="collapsible">Configuration Snippet</button>
     <pre id="LYR3CS" class="panel"></pre>
@@ -274,16 +283,9 @@
         console.log(`api is ready for ${mapId}`);
 
         if (mapId === 'allMaps') {
-          //create snippets
-          createCodeSnippet();
-          createConfigSnippet();
-
           createTableOfFilter('LYR1');
           createTableOfFilter('LYR2');
           createTableOfFilter('LYR3');
-          cgpv.api.event.emit({ handlerName: 'LYR1/$LegendsLayerSet$', event: cgpv.api.eventNames.GET_LEGENDS.TRIGGER });
-          cgpv.api.event.emit({ handlerName: 'LYR2/$LegendsLayerSet$', event: cgpv.api.eventNames.GET_LEGENDS.TRIGGER });
-          cgpv.api.event.emit({ handlerName: 'LYR3/$LegendsLayerSet$', event: cgpv.api.eventNames.GET_LEGENDS.TRIGGER });
 
           const field2 = cgpv.api.maps.LYR2.layer.geoviewLayers['historical-flood'].layerTemporalDimension['historical-flood/0'].field;
           const LYR2_FILTERS = [`${field2} >= date '01/01/2018 05:00:00' and ${field2} <= date '12/31/2019 19:00:00-05:00'`,
@@ -342,107 +344,86 @@
       });
 
       // LYR1 ===================================================================================================================
-      const featureInfoLayerSet1 = cgpv.api.getFeatureInfoLayerSet('LYR1');
+      const getAllFeatureInfo1 = document.getElementById('AllFeatureInfo1');
+      getAllFeatureInfo1.addEventListener('click', function (e) {
+            cgpv.api.event.emit({ event: 'map/get_all_features', handlerName: 'LYR1' });
+          });
+
       cgpv.api.event.on(
         cgpv.api.eventNames.GET_FEATURE_INFO.ALL_QUERIES_DONE,
         (payload) => {
-          const { layerSetId, resultSets } = payload;
-          createInfoTable('LYR1', 'ResultSetId1', resultSets);
+          const { layerSetId, resultSets, queryType } = payload;
+          createInfoTable('LYR1', 'ResultSetId1', resultSets, queryType);
         },
-        'LYR1/$FeatureInfoLayerSet$'
+        'LYR1/FeatureInfoLayerSet'
       );
 
-      const LegendsLayerSet1 = cgpv.api.getLegendsLayerSet('LYR1');
       cgpv.api.event.on(
         cgpv.api.eventNames.GET_LEGENDS.LEGENDS_LAYERSET_UPDATED,
         (payload) => {
           const { resultSets } = payload;
           displayLegend('LegendsId1', resultSets);
         },
-        'LYR1/$LegendsLayerSet$'
+        'LYR1/LegendsLayerSet'
       );
 
+      listenToLegendLayerSetChanges('HLYR1-state', 'LYR1/LegendsLayerSet');
+
       // LYR2 ===================================================================================================================
-      const featureInfoLayerSet2 = cgpv.api.getFeatureInfoLayerSet('LYR2');
+      const getAllFeatureInfo2 = document.getElementById('AllFeatureInfo2');
+      getAllFeatureInfo2.addEventListener('click', function (e) {
+            cgpv.api.event.emit({ event: 'map/get_all_features', handlerName: 'LYR2' });
+          });
+
       cgpv.api.event.on(
         cgpv.api.eventNames.GET_FEATURE_INFO.ALL_QUERIES_DONE,
         (payload) => {
-          const { layerSetId, resultSets } = payload;
-          createInfoTable('LYR2', 'ResultSetId2', resultSets);
+          const { layerSetId, resultSets, queryType } = payload;
+          createInfoTable('LYR2', 'ResultSetId2', resultSets, queryType);
         },
-        'LYR2/$FeatureInfoLayerSet$'
+        'LYR2/FeatureInfoLayerSet'
       );
 
-      const LegendsLayerSet2 = cgpv.api.getLegendsLayerSet('LYR2');
       cgpv.api.event.on(
         cgpv.api.eventNames.GET_LEGENDS.LEGENDS_LAYERSET_UPDATED,
         (payload) => {
           const { resultSets } = payload;
           displayLegend('LegendsId2', resultSets);
         },
-        'LYR2/$LegendsLayerSet$'
+        'LYR2/LegendsLayerSet'
       );
 
+      listenToLegendLayerSetChanges('HLYR2-state', 'LYR2/LegendsLayerSet');
+
       // LYR3 ===================================================================================================================
-      const featureInfoLayerSet3 = cgpv.api.getFeatureInfoLayerSet('LYR3');
+      const getAllFeatureInfo3 = document.getElementById('AllFeatureInfo3');
+      getAllFeatureInfo3.addEventListener('click', function (e) {
+            cgpv.api.event.emit({ event: 'map/get_all_features', handlerName: 'LYR3' });
+          });
+
       cgpv.api.event.on(
         cgpv.api.eventNames.GET_FEATURE_INFO.ALL_QUERIES_DONE,
         (payload) => {
-          const { layerSetId, resultSets } = payload;
-          createInfoTable('LYR3', 'ResultSetId3', resultSets);
+          const { layerSetId, resultSets, queryType } = payload;
+          createInfoTable('LYR3', 'ResultSetId3', resultSets, queryType);
         },
-        'LYR3/$FeatureInfoLayerSet$'
+        'LYR3/FeatureInfoLayerSet'
       );
 
-      const LegendsLayerSet3 = cgpv.api.getLegendsLayerSet('LYR3');
       cgpv.api.event.on(
         cgpv.api.eventNames.GET_LEGENDS.LEGENDS_LAYERSET_UPDATED,
         (payload) => {
           const { resultSets } = payload;
           displayLegend('LegendsId3', resultSets);
         },
-        'LYR3/$LegendsLayerSet$'
+        'LYR3/LegendsLayerSet'
       );
 
-      window.setInterval(() => {
-        const displayField1 = document.getElementById('HLYR1-state');
-        const geoviewLayers = cgpv.api.getFeatureInfoLayerSet('LYR1').resultSets;
-        if (geoviewLayers) {
-          const output = Object.keys(geoviewLayers).reduce((outputValue, layerId) => {
-            const layerName = cgpv.api.maps.LYR1.layer.registeredLayers[layerId].layerName.en;
-            const { layerPhase, layerStatus } = geoviewLayers[layerId];
-            return `${outputValue}${layerName} - status: ${layerStatus}, phase: ${layerPhase}, `;
-          }, '(');
-          displayField1.textContent = output && output !== '(' ? `${output.slice(0, -2)})` : '(undefined)';
-        } else displayField1.textContent = '(undefined)';
-      }, 250)
+      listenToLegendLayerSetChanges('HLYR3-state', 'LYR3/LegendsLayerSet');
 
-      window.setInterval(() => {
-        const displayField2 = document.getElementById('HLYR2-state');
-        const geoviewLayers = cgpv.api.getFeatureInfoLayerSet('LYR2').resultSets;
-        if (geoviewLayers) {
-          const output = Object.keys(geoviewLayers).reduce((outputValue, layerId) => {
-            const layerName = cgpv.api.maps.LYR2.layer.registeredLayers[layerId].layerName.en;
-            const { layerPhase, layerStatus } = geoviewLayers[layerId];
-            return `${outputValue}${layerName} - status: ${layerStatus}, phase: ${layerPhase}, `;
-          }, '(');
-          displayField2.textContent = output && output !== '(' ? `${output.slice(0, -2)})` : '(undefined)';
-        } else displayField2.textContent = '(undefined)';
-      }, 250)
-
-      window.setInterval(() => {
-        const displayField3 = document.getElementById('HLYR3-state');
-        const geoviewLayers = cgpv.api.getFeatureInfoLayerSet('LYR3').resultSets;
-        if (geoviewLayers) {
-          const output = Object.keys(geoviewLayers).reduce((outputValue, layerId) => {
-            const layerName = cgpv.api.maps.LYR3.layer.registeredLayers[layerId].layerName.en;
-            const { layerPhase, layerStatus } = geoviewLayers[layerId];
-            return `${outputValue}${layerName} - status: ${layerStatus}, phase: ${layerPhase}, `;
-          }, '(');
-          displayField3.textContent = output && output !== '(' ? `${output.slice(0, -2)})` : '(undefined)';
-        } else displayField3.textContent = '(undefined)';
-      }, 250)
-
+      //create snippets
+      createCodeSnippet();
+      createConfigSnippet();
     </script>
   </body>
 </html>
