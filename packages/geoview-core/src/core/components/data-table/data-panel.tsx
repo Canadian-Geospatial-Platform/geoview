@@ -86,7 +86,12 @@ export function Datapanel({ layerData, mapId, projectionConfig, layerKeys, layer
                     paddingRight: isEnlargeDataTable ? '0.25rem' : '1rem',
                   }}
                 >
-                  <IconButton disabled edge="end" size="small" sx={{ color: '#515BA5 !important', background: '#F1F2F5 !important' }}>
+                  <IconButton
+                    disabled
+                    edge="end"
+                    size="small"
+                    sx={{ color: `${theme.palette.primary.main} !important`, background: `${theme.palette.grey.A100} !important` }}
+                  >
                     <ChevronRightIcon />
                   </IconButton>
                 </Box>

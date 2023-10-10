@@ -39,7 +39,7 @@ export const getSxClasses = (theme: Theme) => ({
     },
   },
   paper: { marginBottom: '1rem', height: '67px' },
-  borderWithIndex: '2px solid #515BA5',
+  borderWithIndex: `2px solid ${theme.palette.primary.main}`,
   borderNone: 'none',
   headline: { fontSize: '1.125rem', fontWeight: 'bold' },
   dataPanel: { backgroundColor: '#F1F2F5', marginTop: '1rem' },
@@ -52,22 +52,22 @@ export const getSxClasses = (theme: Theme) => ({
     marginTop: '0.25rem',
     background: '#F4F5FF !important',
     '>div': {
-      color: '#515BA5 !important',
+      color: `${theme.palette.primary.main} !important`,
     },
     '& svg': {
       marginRight: '0.25rem',
     },
     ':hover': {
-      backgroundColor: '#515BA5 !important',
+      backgroundColor: `${theme.palette.primary.main} !important`,
       '> div': {
-        color: '#FFF !important',
+        color: `${theme.palette.common.white} !important`,
       },
       '& svg': {
-        color: '#FFF !important',
+        color: `${theme.palette.common.white} !important`,
       },
     },
   },
   enlargeBtnIcon: {
-    color: '#515BA5',
+    color: theme.palette.primary.main,
   },
 });
