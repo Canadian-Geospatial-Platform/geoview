@@ -1,4 +1,4 @@
-import { Button, styled, useTheme, Table, TableBody, TableCell, TableRow } from '@mui/material';
+import { Button, styled, useTheme, Table, TableBody, TableCell, TableHead, TableRow } from '@mui/material';
 import React, { useState, useEffect } from 'react';
 import { useStore } from 'zustand';
 import { useTranslation } from 'react-i18next';
@@ -151,22 +151,29 @@ export function Legend2(props: LegendItemsDetailsProps): JSX.Element {
       ));
 
       return (
-        <Grid item sm={12}>
+        <Item sx={{ borderColor: 'primary.main', borderStyle: 'solid', borderWidth: '1px', paddingLeft: '10px' }}>
           <div>
-            <Typography> Selection: Legend Overview </Typography>
-            <Typography sx={{ fontSize: '0.6em' }}> {numItems} items available </Typography>
+            <Typography sx={sxClasses.legendTitle}>
+              <strong>{t('legend.bold_selection')}</strong> {t('legend.overview_title')}
+            </Typography>
+            <Typography sx={{ fontSize: '0.6em', textAlign: 'left' }}>
+              {' '}
+              {numItems} {t('legend.items_available')}
+            </Typography>
           </div>
           <div>
             <Table>
-              <TableBody>
+              <TableHead>
                 <TableRow>
                   <TableCell>Name</TableCell>
                 </TableRow>
+              </TableHead>
+              <TableBody sx={{textAlign: 'left'}}>
                 {selectedLayersList}
               </TableBody>
             </Table>
           </div>
-        </Grid>
+        </Item>
       );
     }
 
