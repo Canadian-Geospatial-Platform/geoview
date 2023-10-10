@@ -110,18 +110,15 @@ export function LegendIconList(props: TypeLegendIconListProps): JSX.Element {
       }
     }
 
-    // Store functionality - Add/remove items from selectedLayers
     const newSelectedLayers = iconLabels.filter((_, i) => isChecked[i]);
     setSelectedLayers(newSelectedLayers);
 
-    // // Update the store with selectedLayers and other properties if needed
-    // store.setState((prevState) => ({
-    //   legendState: {
-    //     ...prevState.legendState,
-    //     selectedLayers: newSelectedLayers,
-    //     // Add other properties in legendState if needed
-    //   },
-    // }));
+    store.setState((prevState) => ({
+      legendState: {
+        ...prevState.legendState,
+        selectedLayers: newSelectedLayers,
+      },
+    }));
     console.log('sel', selectedLayers);
   };
 
