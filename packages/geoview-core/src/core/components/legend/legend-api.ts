@@ -39,7 +39,6 @@ export class LegendApi {
    */
   createLegend = (props: TypeLegendProps) => {
     const { layerIds, isRemoveable, canSetOpacity, expandAll, hideAll } = props;
-    api.event.emit({ handlerName: `${this.mapId}/$LegendsLayerSet$`, event: api.eventNames.GET_LEGENDS.TRIGGER });
     const legendItems = layerIds.map((layerId) => {
       const geoviewLayerInstance = api.maps[this.mapId].layer.geoviewLayers[layerId];
       if (geoviewLayerInstance) {

@@ -152,3 +152,32 @@ td {
   text-align: center;
   font-size: smaller;
 }
+
+table.info, th.info, td.info, th.infoCol1, td.infoCol1 {
+  border: 1px solid black;
+}
+th.info, td.info, th.infoCol1, td.infoCol1 {
+  padding: 15px;
+  width: 15%;
+}
+th.info, th.infoCol1, td.infoCol1 {
+  text-align: left;
+  font-weight: bold;
+  font-size: 15px;
+}
+
+table.state {
+  font-family: arial, sans-serif;
+  border-collapse: collapse;
+  width: 100%;
+}
+
+td.state, th.state {
+  border: 1px solid #dddddd;
+  text-align: left;
+  padding: 8px;
+}
+
+table.state {
+  display: flex;
+}

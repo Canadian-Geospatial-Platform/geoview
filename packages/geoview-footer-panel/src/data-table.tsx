@@ -42,6 +42,7 @@ export function DataTable({ mapId }: DataTableProps) {
     return () => {
       api.event.off(api.eventNames.MAP.EVENT_MAP_LOADED, mapId, getDataTable);
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return <div>{table}</div>;

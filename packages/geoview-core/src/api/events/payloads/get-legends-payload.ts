@@ -9,7 +9,6 @@ const validEvents: EventStringId[] = [
   EVENT_NAMES.GET_LEGENDS.LEGENDS_LAYERSET_UPDATED,
   EVENT_NAMES.GET_LEGENDS.LEGEND_INFO,
   EVENT_NAMES.GET_LEGENDS.QUERY_LEGEND,
-  EVENT_NAMES.GET_LEGENDS.TRIGGER,
 ];
 
 /** The legend resultset type associate a layer path to a legend object. The undefined value indicate that the get legend query
@@ -86,18 +85,6 @@ export interface TypeQueryLegendPayload extends GetLegendsPayload {
   // The layer path on which the get legend will be executed.
   layerPath: string;
 }
-
-/**
- * type guard function that redefines a PayloadBaseClass as a TypeTriggerLegendsPayload
- * if the event attribute of the verifyIfPayload parameter is valid. The type ascention
- * applies only to the true block of the if clause.
- *
- * @param {PayloadBaseClass} verifyIfPayload object to test in order to determine if the type ascention is valid
- * @returns {boolean} returns true if the payload is valid
- */
-export const payloadIsTriggerLegend = (verifyIfPayload: PayloadBaseClass): verifyIfPayload is TypeTriggerLegendsPayload => {
-  return verifyIfPayload?.event === EVENT_NAMES.GET_LEGENDS.TRIGGER;
-};
 
 /**
  * Additional attributes needed to define a TypeTriggerLegendsPayload
@@ -182,18 +169,5 @@ export class GetLegendsPayload extends PayloadBaseClass {
     const queryLayerPayload = new GetLegendsPayload(EVENT_NAMES.GET_LEGENDS.QUERY_LEGEND, handlerName) as TypeQueryLegendPayload;
     queryLayerPayload.layerPath = layerPath;
     return queryLayerPayload;
-  };
-
-  /**
-   * Static method used to create a get legends payload that will trigger the get legends event processing to continuously keep
-   * the legends layer up to date.
-   *
-   * @param {string | null} handlerName the handler Name
-   *
-   * @returns {TypeTriggerLegendsPayload} the triggerLegendsPayload object created
-   */
-  static createTriggerLegendPayload = (handlerName: string): TypeTriggerLegendsPayload => {
-    const triggerLegendsPayload = new GetLegendsPayload(EVENT_NAMES.GET_LEGENDS.TRIGGER, handlerName) as TypeTriggerLegendsPayload;
-    return triggerLegendsPayload;
   };
 }

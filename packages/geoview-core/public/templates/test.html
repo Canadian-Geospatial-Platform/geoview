@@ -59,7 +59,8 @@
       <h4 id="HLYR1">1. Many WMS Layers</h4>
       <a class="ref-link" href="#top">Top</a>
     </div>
-    <div  class="header-table" id="HLYR1-state"></div>
+    <button class="collapsible active">Map Status Flags</button>
+    <pre style="height: 20pc; overflow-y: scroll" id="HLYR1-state" class="panel map-title-holder"></pre>
     <div
       id="LYR1"
       class="llwp-map"
@@ -158,7 +159,7 @@
     <button class="collapsible">Get Legend</button>
     <pre style="height: 20pc; overflow-y: scroll" id="LegendsId1-table-pre" class="panel"></pre>
     <button type="button" class="collapsible">Get Feature Info</button>
-    <pre style="height: 20pc; overflow-y: scroll" id="ResultSetId1" class="panel">Click on feature on the map</pre>
+    <pre style="height: 20pc; overflow-y: scroll" id="ResultSetId1-at_long_lat" class="panel">Click on feature on the map</pre>
     <hr />
     <p>This map has a wms layer added from configuration.</p>
     <button type="button" class="collapsible">Configuration Snippet</button>
@@ -186,10 +187,10 @@
           cgpv.api.event.on(
             cgpv.api.eventNames.GET_FEATURE_INFO.ALL_QUERIES_DONE,
             (payload) => {
-              const { layerSetId, resultSets } = payload;
-              createInfoTable('LYR1', 'ResultSetId1', resultSets);
+              const { layerSetId, resultSets, queryType } = payload;
+              createInfoTable('LYR1', 'ResultSetId1', resultSets, queryType);
             },
-            'LYR1/$FeatureInfoLayerSet$'
+            'LYR1/FeatureInfoLayerSet'
           );
 
           // ========================================================================================================================
@@ -217,52 +218,7 @@
         }
       });
 
-      console.log('Begin monitoring');
-      const LegendsLayerSet1 = cgpv.api.getLegendsLayerSet('LYR1');
-      cgpv.api.event.on(
-        cgpv.api.eventNames.GET_LEGENDS.LEGENDS_LAYERSET_UPDATED,
-        (payload) => {
-          const { resultSets } = payload;
-          displayLegend('LegendsId1', resultSets);
-
-          const displayField1 = document.getElementById('HLYR1-state');
-          if (resultSets) {
-            const oldData = document.getElementById(`HLYR1-state-data`);
-            if (oldData) oldData.parentNode.removeChild(oldData);
-            const data = document.createElement('div');
-            data.id = `HLYR1-state-data`;
-            displayField1.appendChild(data);
-
-            Object.keys(resultSets).forEach((key) => {
-              const addToTable = (field, value, table) => {
-                const tableRow = document.createElement('tr');
-                table.appendChild(tableRow);
-                let tableData = document.createElement('td');
-                tableData.style = 'width:50%';
-                tableData.innerText = field
-                tableRow.appendChild(tableData);
-                tableData = document.createElement('td');
-                tableData.style = 'width:50%';
-                tableData.innerText = value;
-                tableRow.appendChild(tableData);
-              }
-              const h4 = document.createElement('h4');
-              h4.innerText = key;
-              data.appendChild(h4);
-              const table = document.createElement('table');
-              table.border = '1';
-              table.style = 'width:50%';
-              data.appendChild(table);
-              addToTable('Layer Name', resultSets[key].layerName?.en, table);
-              addToTable('Layer Status', resultSets[key].layerStatus, table);
-              addToTable('Layer Phase', resultSets[key].layerPhase, table);
-            });
-          }
-        },
-        'LYR1/$LegendsLayerSet$'
-      );
-      // The GET_LEGENDS.TRIGGER event must be triggered after the GET_LEGENDS.LEGENDS_LAYERSET_UPDATED listener is created
-      cgpv.api.event.emit({ handlerName: 'LYR1/$LegendsLayerSet$', event: cgpv.api.eventNames.GET_LEGENDS.TRIGGER });
+      listenToLegendLayerSetChanges('HLYR1-state', 'LYR1/LegendsLayerSet');
     </script>
   </body>
 </html>
