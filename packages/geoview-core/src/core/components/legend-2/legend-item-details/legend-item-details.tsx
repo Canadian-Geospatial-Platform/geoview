@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { useTheme, Theme } from '@mui/material/styles';
 import { transformExtent } from 'ol/proj';
 import { Extent } from 'ol/extent';
+import { getGeoViewStore } from '@/core/stores/stores-managers';
 import {
   Box,
   ListItem,
@@ -124,6 +125,7 @@ const sxClasses = {
  *
  * @returns {JSX.Element} the legend list item
  */
+
 export function LegendItemDetails(props: TypeLegendItemDetailsProps): JSX.Element {
   const { layerId, geoviewLayerInstance, subLayerId, layerConfigEntry, isRemoveable, isParentVisible } = props;
 
@@ -161,6 +163,28 @@ export function LegendItemDetails(props: TypeLegendItemDetailsProps): JSX.Elemen
   const closeIconRef = useRef() as RefObject<HTMLButtonElement>;
   const stackIconRef = useRef() as MutableRefObject<HTMLDivElement | undefined>;
   const maxIconRef = useRef() as RefObject<HTMLButtonElement>;
+
+  const [checkedSublayerNames, setCheckedSublayerNames] = useState<string[]>([]);
+  const store = getGeoViewStore(mapId);
+
+  const updateSelectedLayers = (selectedLayers: string[]) => {
+    // Update selected layers in the store
+    store.setState((state) => ({
+      legendState: {
+        ...state.legendState,
+        selectedLayers,
+      },
+    }));
+  };
+
+  const handleGetCheckedSublayerNames = (names: string[]) => {
+    setCheckedSublayerNames(names);
+  };
+
+  useEffect(() => {
+    // Update selected layers when checkedSublayerNames change
+    updateSelectedLayers(checkedSublayerNames);
+  }, [checkedSublayerNames]);
 
   const getGroupsDetails = (): boolean => {
     let isGroup = false;
@@ -443,6 +467,7 @@ export function LegendItemDetails(props: TypeLegendItemDetailsProps): JSX.Elemen
             iconImages={iconList}
             iconLabels={labelList}
             isParentVisible={isChecked}
+            onGetCheckedSublayerNames={handleGetCheckedSublayerNames} // Pass the callback function
             toggleParentVisible={() => setChecked(!isChecked)}
             toggleMapVisible={(sublayerConfig) => {
               (geoviewLayerInstance as AbstractGeoViewVector | EsriDynamic).applyViewFilter(sublayerConfig);

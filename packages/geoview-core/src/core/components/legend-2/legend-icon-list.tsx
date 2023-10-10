@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { useTheme, Theme } from '@mui/material/styles';
 import { Checkbox, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@mui/material';
 // import { IconButton, CheckBoxOutIcon, CheckBoxIcon } from '@/ui';
+import { getGeoViewStore } from '@/core/stores/stores-managers';
 import { api } from '@/app';
 import {
   TypeVectorLayerEntryConfig,
@@ -64,10 +65,21 @@ export interface TypeLegendIconListProps {
   isParentVisible?: boolean;
   toggleParentVisible?: () => void;
   toggleMapVisible?: (layerConfig: TypeLayerEntryConfig) => void;
+  onGetCheckedSublayerNames?: (checkedSublayerNames: string[]) => void; // Add this prop
 }
 
 export function LegendIconList(props: TypeLegendIconListProps): JSX.Element {
-  const { iconImages, iconLabels, isParentVisible, toggleParentVisible, toggleMapVisible, geometryKey, layerConfig, mapId } = props;
+  const {
+    iconImages,
+    iconLabels,
+    isParentVisible,
+    toggleParentVisible,
+    toggleMapVisible,
+    geometryKey,
+    layerConfig,
+    mapId,
+    onGetCheckedSublayerNames,
+  } = props;
   const theme: Theme & {
     iconImg: React.CSSProperties;
   } = useTheme();
@@ -80,26 +92,50 @@ export function LegendIconList(props: TypeLegendIconListProps): JSX.Element {
   const [countChildren, setCountChildren] = useState<number>(isParentVisible ? iconImages.length : 0);
   const [initParentVisible, setInitParentVisible] = useState(isParentVisible);
   const [isAllChecked, setIsAllChecked] = useState(isParentVisible);
+  const store = getGeoViewStore(mapId);
+  const [selectedLayers, setSelectedLayers] = useState<string[]>([]);
+
+  const handleToggleLayer = (index: number) => {
+    setChecked((prevChecked) => {
+      const updatedChecked = [...prevChecked];
+      updatedChecked[index] = !updatedChecked[index];
+      return updatedChecked;
+    });
+
+    setCountChildren((prevCount) => (isChecked[index] ? prevCount - 1 : prevCount + 1));
+
+    if (isParentVisible !== undefined && toggleParentVisible !== undefined) {
+      if ((countChildren === 0 && isParentVisible === true) || (countChildren > 0 && isParentVisible === false)) {
+        toggleParentVisible();
+      }
+    }
+
+    // Store functionality - Add/remove items from selectedLayers
+    const newSelectedLayers = iconLabels.filter((_, i) => isChecked[i]);
+    setSelectedLayers(newSelectedLayers);
+
+    // // Update the store with selectedLayers and other properties if needed
+    // store.setState((prevState) => ({
+    //   legendState: {
+    //     ...prevState.legendState,
+    //     selectedLayers: newSelectedLayers,
+    //     // Add other properties in legendState if needed
+    //   },
+    // }));
+    console.log('sel', selectedLayers);
+  };
 
   const handleToggleAll = () => {
     setIsAllChecked(!isAllChecked);
     setChecked(iconImages.map(() => !isAllChecked));
   };
 
-  const handleToggleLayer = (index: number) => {
-    const checklist = isChecked.map((checked, i) => (i === index ? !checked : checked));
-    const count = checklist.filter((f) => f === true).length;
-    setChecked(checklist);
-    setCountChildren(count);
-    setIsAllChecked(checklist.every((value) => value === true));
-    if (isParentVisible !== undefined && toggleParentVisible !== undefined) {
-      if ((count === 0 && isParentVisible === true) || (count > 0 && isParentVisible === false)) {
-        toggleParentVisible();
-      }
-    }
-  };
-
   useEffect(() => {
+    if (onGetCheckedSublayerNames) {
+      const checkedSublayerNames = iconLabels.filter((_, index) => isChecked[index]);
+      onGetCheckedSublayerNames(checkedSublayerNames);
+    }
+
     const getStyleArraySize = (geometryStyle: TypeStyleSettings): number => {
       if (geometryStyle.styleType === 'uniqueValue') return (geometryStyle as TypeUniqueValueStyleConfig).uniqueValueStyleInfo.length;
       if (geometryStyle.styleType === 'classBreaks') return (geometryStyle as TypeClassBreakStyleConfig).classBreakStyleInfo.length;
@@ -163,6 +199,7 @@ export function LegendIconList(props: TypeLegendIconListProps): JSX.Element {
     geometryKey,
     toggleMapVisible,
     mapId,
+    store,
   ]);
 
   console.log('Check Count', countChildren);
