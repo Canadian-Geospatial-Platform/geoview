@@ -1,4 +1,4 @@
-import { Button, styled, useTheme } from '@mui/material';
+import { Button, styled, useTheme, Table, TableBody, TableCell, TableRow } from '@mui/material';
 import React, { useState, useEffect } from 'react';
 import { useStore } from 'zustand';
 import { useTranslation } from 'react-i18next';
@@ -8,7 +8,7 @@ import { AddIcon, Box, Grid, List, Typography, ExpandMoreIcon, Paper, Stack, Exp
 import { LegendItemDetails } from './legend-item-details/legend-item-details';
 import { getGeoViewStore } from '@/core/stores/stores-managers';
 import { LegendItem } from './legend-item';
-import { ShowSelectedLayers } from './selected-layers/selected-layers-details';
+// import { ShowSelectedLayers } from './selected-layers/selected-layers-details';
 
 const Item = styled('div')(({ theme }) => ({
   backgroundColor: theme.palette.mode === 'dark' ? '#262B32' : '#fff',
@@ -50,6 +50,7 @@ export function Legend2(props: LegendItemsDetailsProps): JSX.Element {
 
   const store = getGeoViewStore(mapId);
   const selectedLegendItem = useStore(store, (state) => state.legendState.selectedItem);
+  const selectedLayers = useStore(store, (state) => state.legendState.selectedLayers);
   const [isSelectedLayersClicked, setIsSelectedLayersClicked] = useState(false);
 
   function showSelectedLayersPanel() {
@@ -140,9 +141,35 @@ export function Legend2(props: LegendItemsDetailsProps): JSX.Element {
   }, [selectedLegendItem]);
 
   function rightPanel() {
-    if (isSelectedLayersClicked) {
-      return <ShowSelectedLayers />;
+    if (isSelectedLayersClicked && selectedLayers) {
+      // return <ShowSelectedLayers selectedLayers={selectedLayers} />;
+      const numItems = selectedLayers.length;
+      const selectedLayersList = selectedLayers.map((layer) => (
+        <tr key={layer}>
+          <td>{layer}</td>
+        </tr>
+      ));
+
+      return (
+        <Grid item sm={12}>
+          <div>
+            <Typography> Selection: Legend Overview </Typography>
+            <Typography sx={{ fontSize: '0.6em' }}> {numItems} items available </Typography>
+          </div>
+          <div>
+            <Table>
+              <TableBody>
+                <TableRow>
+                  <TableCell>Name</TableCell>
+                </TableRow>
+                {selectedLayersList}
+              </TableBody>
+            </Table>
+          </div>
+        </Grid>
+      );
     }
+
     if (selectedLegendItem) {
       return (
         <Item>
