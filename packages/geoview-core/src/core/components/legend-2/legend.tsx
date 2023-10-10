@@ -146,7 +146,7 @@ export function Legend2(props: LegendItemsDetailsProps): JSX.Element {
     }
     if (selectedLegendItem) {
       return (
-        <Item>
+        <Item id="legend-details-container" sx={{ borderColor: 'primary.main', borderStyle: 'solid', borderWidth: '1px' }}>
           <LegendItemDetails
             key={`layerKey-${selectedLegendItem.layerId}`}
             layerId={selectedLegendItem.layerId}

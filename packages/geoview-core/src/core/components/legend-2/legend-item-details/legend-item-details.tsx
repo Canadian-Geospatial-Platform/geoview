@@ -176,11 +176,8 @@ export function LegendItemDetails(props: TypeLegendItemDetailsProps): JSX.Elemen
       setGroupItems(geoviewLayerInstance?.listOfLayerEntryConfig);
       isGroup = true;
     }
-    console.log('is GROUP', isGroup);
     return isGroup;
   };
-
-  console.log(groupItems);
 
   const getLegendDetails = (layerLegend: TypeLegend) => {
     const { geoviewLayerId } = geoviewLayerInstance;

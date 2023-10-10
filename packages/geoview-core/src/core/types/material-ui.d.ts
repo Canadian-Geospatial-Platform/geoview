@@ -76,7 +76,12 @@ declare module '@mui/material/styles' {
       contentShadow: string;
       titleFont: string;
       layerTitleFont: string;
+      layerSecondaryTitleFont: string;
       highlightColor: string;
+      featureNumbersFont: string;
+      featureKeyFont: string;
+      featureValueFont: string;
+      chooseLayerFont: string;
     };
   }
   interface Theme {
@@ -132,7 +137,12 @@ declare module '@mui/material/styles' {
       contentShadow: string;
       titleFont: string;
       layerTitleFont: string;
+      layerSecondaryTitleFont: string;
       highlightColor: string;
+      featureNumbersFont: string;
+      featureKeyFont: string;
+      featureValueFont: string;
+      chooseLayerFont: string;
     };
   }
 }

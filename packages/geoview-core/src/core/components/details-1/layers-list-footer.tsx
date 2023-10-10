@@ -1,20 +1,23 @@
 /* eslint-disable react/require-default-props */
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef, useCallback } from 'react';
+import { useTheme } from '@mui/material/styles';
 import { useTranslation } from 'react-i18next';
 import { getUid } from 'ol/util';
 import {
   ListItemText,
   ListItem,
+  ListItemButton,
   List,
   Tooltip,
   IconButton,
   Grid,
   Paper,
   Typography,
-  KeyboardArrowRightIcon,
   ArrowForwardIosOutlinedIcon,
   ArrowBackIosOutlinedIcon,
   LayersClearOutlinedIcon,
+  ChevronRightIcon,
+  Box,
 } from '@/ui';
 import { TypeArrayOfLayerData, TypeLayerData } from './details';
 import { FeatureInfo } from './feature-info-new';
@@ -29,26 +32,8 @@ import {
   TypeArrayOfFeatureInfoEntries,
   TypeGeometry,
 } from '@/api/events/payloads';
+import { getSxClasses } from './details-1.styles';
 
-const getSxClasses = (isPanelHeaders = false) => {
-  return {
-    footerTopPanleSecondary: {
-      font: 'normal normal normal 16px/24px Roboto, Helvetica, Arial, sans-serif',
-    },
-    panelHeaders: {
-      font: 'normal normal normal 600 22px/30px Roboto, Helvetica, Arial, sans-serif',
-      marginBottom: '20px',
-      ...(isPanelHeaders && { paddingLeft: '20px' }),
-    },
-    panelHeaderSelectedFeature: {
-      font: 'normal normal normal 600 22px/30px Roboto, Helvetica, Arial, sans-serif',
-      marginBottom: '20px',
-    },
-    layerNamePrimary: {
-      font: 'normal normal normal 600 20px/27px Roboto, Helvetica, Arial, sans-serif',
-    },
-  };
-};
 interface TypeLayersListProps {
   arrayOfLayerData: TypeArrayOfLayerData;
   mapId: string;
@@ -62,12 +47,15 @@ interface TypeLayersListProps {
  */
 export function LayersListFooter(props: TypeLayersListProps): JSX.Element {
   const { arrayOfLayerData, mapId } = props;
-  const selectedFeatures = useRef<string[]>([]);
   const { t } = useTranslation<string>();
+  const theme = useTheme();
+  const selectedFeatures = useRef<string[]>([]);
   const [layerDataInfo, setLayerDataInfo] = useState<TypeLayerData | null>(null);
   const [currentFeatureIndex, setCurrentFeatureIndex] = useState<number>(0);
   const [isClearAllCheckboxes, setIsClearAllCheckboxes] = useState<boolean>(false);
   const [disableClearAllBtn, setDisableClearAllBtn] = useState<boolean>(false);
+
+  const sxClasses = getSxClasses(theme);
 
   const highlightCallbackFunction = (payload: PayloadBaseClass) => {
     if (payloadIsAFeatureHighlight(payload)) {
@@ -143,76 +131,76 @@ export function LayersListFooter(props: TypeLayersListProps): JSX.Element {
     }
   }, [arrayOfLayerData]);
 
-  return (
-    <Grid container spacing={2} sx={{ backgroundColor: '#F1F2F5' }}>
-      <div style={{ padding: '20px 28px 28px 28px' }}>
-        {layerDataInfo === null ? (
-          <Typography component="p" sx={getSxClasses().footerTopPanleSecondary}>
-            {t('details.selectVisbleLayer')}
-          </Typography>
-        ) : (
-          <Typography component="p" sx={getSxClasses().footerTopPanleSecondary}>
-            {t('details.mainDescription')}
-          </Typography>
-        )}
-      </div>
-      {layerDataInfo !== null && (
-        <Grid container spacing={12} sx={{ height: '300vh', overflow: 'hidden', display: 'flex' }}>
-          {/* ================= LEFT PANEL ================= */}
+  const renderLayerList = useCallback(() => {
+    return (
+      <List sx={sxClasses.list}>
+        {arrayOfLayerData.map((layerData) => {
+          const isSelectedBorder = layerData.layerPath === layerDataInfo?.layerPath;
+          const numOfFeatures = layerData.features.length;
 
-          <Grid item md={4} sx={{ flex: '1', overflow: 'auto' }}>
-            <Typography component="div" sx={getSxClasses(true).panelHeaders}>
-              {t('details.availableLayers')}
-            </Typography>
-            <Paper sx={{ marginLeft: '20px' }}>
-              <List sx={{ color: 'text.primary', width: '100%', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                {arrayOfLayerData.map((layerData) => {
-                  const isSelectedBorder = layerData.layerPath === layerDataInfo?.layerPath;
-                  const numOfFeatures = layerData.features.length;
-
-                  return (
-                    <ListItem
-                      onClick={() => {
-                        setLayerDataInfo(layerData);
-                        setCurrentFeatureIndex(0);
-                      }}
-                      key={layerData.layerPath}
-                      sx={{
-                        padding: '8px 40px 8px 16px',
-                        border: isSelectedBorder ? '2px solid #515BA5' : 'none',
-                        borderRadius: isSelectedBorder ? '5px' : 'none',
-                        cursor: 'pointer',
-                        height: '50px',
-                      }}
-                      secondaryAction={
-                        <IconButton edge="end" aria-label="expand">
-                          <KeyboardArrowRightIcon />
-                        </IconButton>
-                      }
-                    >
-                      <Tooltip title={layerData.layerName} placement="top" enterDelay={1000}>
-                        <ListItemText
-                          sx={getSxClasses().layerNamePrimary}
-                          primary={layerData.layerName ? layerData.layerName : t('details.clickOnMap')}
-                          secondary={`${numOfFeatures} ${t('details.feature')}${numOfFeatures > 1 ? 's' : ''}`}
-                        />
-                      </Tooltip>
-                    </ListItem>
-                  );
-                })}
-              </List>
+          return (
+            <Paper
+              sx={{ ...sxClasses.layerListPaper, border: isSelectedBorder ? `2px solid ${theme.palette.primary.main}` : 'none' }}
+              key={layerData.layerPath}
+            >
+              <ListItem
+                disablePadding
+                secondaryAction={
+                  <IconButton edge="end" aria-label="expand" sx={sxClasses.listItemIcon}>
+                    <ChevronRightIcon />
+                  </IconButton>
+                }
+              >
+                <ListItemButton
+                  onClick={() => {
+                    setLayerDataInfo(layerData);
+                    setCurrentFeatureIndex(0);
+                  }}
+                  sx={{ height: '67px' }}
+                >
+                  <Tooltip title={layerData.layerName} placement="top" enterDelay={1000}>
+                    <ListItemText
+                      sx={sxClasses.layerNamePrimary}
+                      primary={layerData.layerName ? layerData.layerName : t('details.clickOnMap')}
+                      secondary={`${numOfFeatures} ${t('details.feature')}${numOfFeatures > 1 ? 's' : ''}`}
+                    />
+                  </Tooltip>
+                </ListItemButton>
+              </ListItem>
             </Paper>
-          </Grid>
-          {/* ================= RIGHT PANEL ================= */}
-          <Grid item md={8} sx={{ paddingLeft: '40px' }}>
-            <>
-              <Typography component="div" sx={getSxClasses().panelHeaderSelectedFeature}>
-                {t('details.selectedFeature')}
+          );
+        })}
+      </List>
+    );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [layerDataInfo]);
+
+  return (
+    <Box sx={sxClasses.detailsContainer}>
+      <Grid container direction={{ xs: 'column', sm: 'row' }} spacing={{ xs: 1, sm: 4, md: 8 }}>
+        <div style={{ padding: '20px 28px 28px 28px' }}>
+          {layerDataInfo === null && (
+            <Typography component="p" sx={sxClasses.footerTopPanleSecondary}>
+              {t('details.selectVisbleLayer')}
+            </Typography>
+          )}
+        </div>
+        {layerDataInfo !== null && (
+          <Grid container>
+            {/* ================= LEFT PANEL ================= */}
+
+            <Grid item md={4}>
+              <Typography component="div" sx={{ ...sxClasses.panelHeaders, paddingLeft: '20px' }}>
+                {t('details.availableLayers')}
               </Typography>
-              <div style={{ border: '2px solid #515BA5', borderRadius: '5px', marginRight: '20px', backgroundColor: 'white' }}>
-                <Grid container sx={{ marginTop: '20px', marginBottom: '9px', boxShadow: '0px 12px 9px -13px #E0E0E0' }}>
+              {renderLayerList()}
+            </Grid>
+            {/* ================= RIGHT PANEL ================= */}
+            <Grid item md={8} sx={{ paddingLeft: '40px' }}>
+              <div style={sxClasses.rightPanleContainer}>
+                <Grid container sx={sxClasses.rightPanelBtnHolder}>
                   <Grid item xs={6}>
-                    <div style={{ marginLeft: '26px' }}>
+                    <div style={{ marginLeft: '22px' }}>
                       Feature {currentFeatureIndex + 1} of {layerDataInfo?.features.length}
                       <IconButton
                         sx={{ marginLeft: '20px' }}
@@ -262,10 +250,10 @@ export function LayersListFooter(props: TypeLayersListProps): JSX.Element {
                   setDisableClearAllBtn={setDisableClearAllBtn}
                 />
               </div>
-            </>
+            </Grid>
           </Grid>
-        </Grid>
-      )}
-    </Grid>
+        )}
+      </Grid>
+    </Box>
   );
 }

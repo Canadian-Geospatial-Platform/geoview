@@ -15,13 +15,12 @@ import {
   VisibilityOutlinedIcon,
   VisibilityOffOutlinedIcon,
   IconButton,
-  ExpandMoreIcon,
-  ExpandLessIcon,
   MoreHorizIcon,
   BrowserNotSupportedIcon,
   KeyboardArrowDownIcon,
   KeyboardArrowRightIcon,
   KeyboardArrowUpIcon,
+  GroupWorkOutlinedIcon,
   Grid,
 } from '@/ui';
 import { api, payloadIsLegendInfo } from '@/app';
@@ -316,6 +315,11 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
     store.setState({
       legendState: { ...store.getState().legendState, selectedItem: props },
     });
+
+    const legendDetails = document.querySelector('#legend-details-container');
+    if (legendDetails) {
+      legendDetails.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
   };
 
   /**
@@ -382,33 +386,21 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
   // <Grid item sm={12} md={subLayerId ? 12 : 6} lg={subLayerId ? 12 : 4}>
   return (
     <Grid item sm={12} sx={legendClass}>
-      <ListItem>
+      <ListItem onClick={handleLegendClick}>
         <ListItemButton>
           <ListItemIcon>
             {(groupItems.length > 0 || WMSStyles.length > 1) && (
-              <IconButton color="primary" onClick={handleExpandGroupClick}>
-                {isGroupOpen ? <ExpandMoreIcon /> : <ExpandLessIcon />}
+              <IconButton color="primary">
+                <GroupWorkOutlinedIcon />
               </IconButton>
             )}
             {groupItems.length === 0 && isLegendOpen && (
-              <IconButton
-                sx={sxClasses.iconPreview}
-                color="primary"
-                size="small"
-                onClick={iconImg === null ? undefined : handleLegendClick}
-                iconRef={closeIconRef}
-              >
+              <IconButton sx={sxClasses.iconPreview} color="primary" size="small" iconRef={closeIconRef}>
                 {iconList || iconImg !== null ? <CloseIcon /> : <MoreHorizIcon />}
               </IconButton>
             )}
             {iconType === 'simple' && iconImg !== null && !isLegendOpen && WMSStyles.length < 2 && (
-              <IconButton
-                sx={sxClasses.iconPreview}
-                color="primary"
-                size="small"
-                iconRef={maxIconRef}
-                onClick={iconImg === 'no data' ? undefined : handleLegendClick}
-              >
+              <IconButton sx={sxClasses.iconPreview} color="primary" size="small" iconRef={maxIconRef}>
                 {iconImg === 'no data' ? (
                   <BrowserNotSupportedIcon />
                 ) : (
