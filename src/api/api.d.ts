@@ -36,7 +36,7 @@ export declare class API {
         FEATURE_HIGHLIGHT: Record<import("./events").FeatureHighlightEventKey, import("./events/event-types").EventStringId>;
         MODAL: Record<import("./events").ModalEventKey, import("./events/event-types").EventStringId>;
         NAVBAR: Record<import("./events").NavbarEventKey, import("./events/event-types").EventStringId>;
-        NOTIFICATIONS: Record<import("./events").NotificationsEventKey, import("./events/event-types").EventStringId>;
+        NOTIFICATIONS: Record<"NOTIFICATION_ADD", import("./events/event-types").EventStringId>;
         OVERVIEW_MAP: Record<"EVENT_OVERVIEW_MAP_TOGGLE", import("./events/event-types").EventStringId>;
         PANEL: Record<import("./events").PanelEventKey, import("./events/event-types").EventStringId>;
         SLIDER: Record<import("./events").SliderEventKey, import("./events/event-types").EventStringId>;
