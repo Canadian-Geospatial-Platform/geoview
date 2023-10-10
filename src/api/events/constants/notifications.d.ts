@@ -4,6 +4,6 @@ import { EventStringId } from '../event-types';
  * in a record that associates an event key with its event string id for each event.
  */
 /** Valid keys for the NOTIFICATIONS */
-export type NotificationsEventKey = 'NOTIFICATION_ADD' | 'NOTIFICATION_REMOVE';
+export type NotificationsEventKey = 'NOTIFICATION_ADD';
 /** Record that associates NOTIFICATIONS event keys to their event string id */
 export declare const NOTIFICATIONS: Record<NotificationsEventKey, EventStringId>;

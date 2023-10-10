@@ -20,7 +20,7 @@ export declare const EVENT_NAMES: {
     FEATURE_HIGHLIGHT: Record<import("./constants/feature-highlight").FeatureHighlightEventKey, EventStringId>;
     MODAL: Record<import("./constants/modal").ModalEventKey, EventStringId>;
     NAVBAR: Record<import("./constants/nav-bar").NavbarEventKey, EventStringId>;
-    NOTIFICATIONS: Record<import("./constants/notifications").NotificationsEventKey, EventStringId>;
+    NOTIFICATIONS: Record<"NOTIFICATION_ADD", EventStringId>;
     OVERVIEW_MAP: Record<"EVENT_OVERVIEW_MAP_TOGGLE", EventStringId>;
     PANEL: Record<import("./constants/panel").PanelEventKey, EventStringId>;
     SLIDER: Record<import("./constants/slider").SliderEventKey, EventStringId>;

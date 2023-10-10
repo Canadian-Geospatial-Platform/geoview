@@ -1,20 +1,28 @@
 import { Map as OLMap, MapEvent } from 'ol';
 import { Coordinate } from 'ol/coordinate';
 import { ObjectEvent } from 'ol/Object';
-import { TypeMapFeaturesConfig } from '@/core/types/global-types';
+import { TypeMapFeaturesConfig, TypeValidMapProjectionCodes } from '@/core/types/global-types';
 import { TypeLegendItemProps } from '../components/legend-2/types';
 import { TypeMapMouseInfo } from '@/api/events/payloads';
-import { TypeInteraction } from '@/geo/map/map-schema-types';
+import { TypeDisplayLanguage, TypeInteraction } from '@/geo/map/map-schema-types';
+import { NotificationDetailsType } from '@/core/types/cgpv-types';
 export interface IMapState {
-    currentProjection: number;
+    currentProjection: TypeValidMapProjectionCodes;
+    fixNorth: boolean;
+    interaction: TypeInteraction;
     pointerPosition: TypeMapMouseInfo | undefined;
     mapCenterCoordinates: Coordinate;
     mapClickCoordinates: TypeMapMouseInfo | undefined;
-    mapElement?: OLMap;
+    mapElement: OLMap;
     mapLoaded: boolean;
+    mapRotation: number;
+    northArrow: boolean;
+    overviewMap: boolean;
+    overviewMapHideZoom: number;
     zoom?: number | undefined;
     onMapMoveEnd: (event: MapEvent) => void;
     onMapPointerMove: (event: MapEvent) => void;
+    onMapRotation: (event: ObjectEvent) => void;
     onMapSingleClick: (event: MapEvent) => void;
     onMapZoomEnd: (event: ObjectEvent) => void;
 }
@@ -24,18 +32,22 @@ export interface IFooterBarState {
 export interface IAppBarState {
     geoLocatorActive: boolean;
 }
+export interface INotificationsState {
+    notifications: Array<NotificationDetailsType>;
+}
 export interface ILegendState {
     selectedItem?: TypeLegendItemProps;
 }
 export interface IGeoViewState {
+    displayLanguage: TypeDisplayLanguage;
+    isCrosshairsActive: boolean;
     mapId: string;
     mapConfig: TypeMapFeaturesConfig | undefined;
-    interaction: TypeInteraction;
-    mapState: IMapState;
-    footerBarState: IFooterBarState;
     appBarState: IAppBarState;
+    footerBarState: IFooterBarState;
     legendState: ILegendState;
-    isCrosshairsActive: boolean;
+    mapState: IMapState;
+    notificationState: INotificationsState;
     setMapConfig: (config: TypeMapFeaturesConfig) => void;
     onMapLoaded: (mapElem: OLMap) => void;
 }
