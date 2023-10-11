@@ -61,7 +61,8 @@ export const getSxClasses = (theme: Theme) => ({
     paddingRight: '25px',
     paddingBottom: '25px',
     height: '410px',
-    overflow: 'scroll',
+    overflowY: 'scroll',
+    overflowX: 'hidden',
   },
   featureInfoSingleImage: {
     width: '35px',
@@ -77,7 +78,6 @@ export const getSxClasses = (theme: Theme) => ({
   featureInfoItemValue: {
     fontSize: '16px',
     marginRight: 0,
-    marginTop: '5px',
     wordBreak: 'break-word',
     overflow: 'hidden',
     textOverflow: 'ellipsis',
