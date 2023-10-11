@@ -130,7 +130,7 @@
     "rightPanelHeading": "Table sélectionnée",
     "rowsSelected": "{rowsSelected} sur {totalRows} ligne(s) sélectionnée(s)",
     "rowsFiltered": "{rowsFiltered} sur {totalRows} ligne(s) filtrée(s)",
-    "enlargeBtn": "Enlarge",
-    "reduceBtn": "Reduce"
+    "enlargeBtn": "Agrandir",
+    "reduceBtn": "Réduire"
   }
 }

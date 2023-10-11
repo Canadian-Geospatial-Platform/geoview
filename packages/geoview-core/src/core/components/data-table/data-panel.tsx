@@ -21,7 +21,7 @@ import {
   ArrowBackIcon,
 } from '@/ui';
 import MapDataTable, { MapDataTableData as MapDataTableDataProps } from './map-data-table';
-import { getSxClasses } from './data-table.style';
+import { getSxClasses } from './data-table-style';
 
 interface DatapanelProps {
   layerIds: string[];
@@ -134,10 +134,10 @@ export function Datapanel({ layerData, mapId, projectionConfig, layerKeys, layer
         </Grid>
       </Grid>
       <Grid container sx={{ marginTop: '0.75rem' }}>
-        <Grid item xs={!isEnlargeDataTable ? 3 : 2}>
+        <Grid item xs={!isEnlargeDataTable ? 3 : 1.5}>
           {renderList()}
         </Grid>
-        <Grid item xs={!isEnlargeDataTable ? 9 : 10} sx={{ paddingLeft: '1rem' }}>
+        <Grid item xs={!isEnlargeDataTable ? 9 : 10.5} sx={{ paddingLeft: '1rem' }}>
           <Typography component="p" sx={sxClasses.headline}>
             {layerKeys[selectedLayerIndex]}
           </Typography>
