@@ -259,7 +259,12 @@ export function Appbar({ activeTrap, activeTrapSet }: AppbarProps): JSX.Element 
             {Object.keys(buttonPanels).map((buttonPanelsKey) => {
               const buttonPanel = buttonPanels[buttonPanelsKey];
               return buttonPanel?.panel ? (
-                <Panel key={buttonPanel.panel.panelId} panel={buttonPanel.panel} button={buttonPanel.button} />
+                <Panel
+                  key={buttonPanel.panel.panelId}
+                  panel={buttonPanel.panel}
+                  button={buttonPanel.button}
+                  handlePanelOpened={buttonPanel.handlePanelOpened}
+                />
               ) : null;
             })}
           </Fragment>
