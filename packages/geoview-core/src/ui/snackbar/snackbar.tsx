@@ -110,7 +110,7 @@ export function Snackbar(props: SnackBarProps): JSX.Element {
     >
       <Alert onClose={handleClose} severity={snackbarType} sx={{ width: '100%' }}>
         {message}
-        {button}
+        {button !== undefined && button}
       </Alert>
     </MaterialSnackbar>
   );
