@@ -1,4 +1,4 @@
-import axios from 'axios';
+import axios, { AxiosResponse } from 'axios';
 
 import i18n from 'i18next';
 
@@ -12,7 +12,7 @@ import { EVENT_NAMES } from '@/api/events/event-types';
 
 import { TypeJsonObject, toJsonObject, TypeJsonArray } from '@/core/types/global-types';
 
-import { generateId, showMessage } from '@/core/utils/utilities';
+import { addNotificationWarning, generateId, showMessage } from '@/core/utils/utilities';
 import { basemapLayerArrayPayload } from '@/api/events/payloads';
 import { TypeBasemapProps, TypeBasemapOptions, TypeBasemapLayer } from '@/geo/layer/basemap/basemap-types';
 import { TypeDisplayLanguage, TypeValidMapProjectionCodes, TypeLocalizedString } from '@/geo/map/map-schema-types';
@@ -277,7 +277,12 @@ export class Basemap {
    * @param {boolean} rest should we do a get request to get the info from the server
    * @returns {TypeBasemapLayer} return the created basemap layer
    */
-  async createBasemapLayer(basemapId: string, basemapLayer: TypeJsonObject, opacity: number, rest: boolean): Promise<TypeBasemapLayer> {
+  async createBasemapLayer(
+    basemapId: string,
+    basemapLayer: TypeJsonObject,
+    opacity: number,
+    rest: boolean
+  ): Promise<null | TypeBasemapLayer> {
     const resolutions: number[] = [];
     let minZoom = 0;
     let maxZoom = 17;
@@ -285,82 +290,95 @@ export class Basemap {
     let origin: number[] = [];
     let urlProj = 0;
 
+    function requestBasemap(url: string, timeout: number) {
+      return new Promise((resolve, reject) => {
+        axios.get(url).then(resolve, reject);
+        setTimeout(reject, timeout);
+      });
+    }
+
     // should we do a get request to get the layer information from the server?
     if (rest && (basemapLayer.jsonUrl as string)) {
       try {
         // get info from server
-        const result = toJsonObject((await axios.get(basemapLayer.jsonUrl as string)).data);
+        const request = await requestBasemap(basemapLayer.jsonUrl as string, 3000);
 
-        // get minimum scale
-        const minScale = result.minScale as number;
+        if (request) {
+          const result = toJsonObject((request as AxiosResponse).data);
 
-        // get maximum scale
-        const maxScale = result.maxScale as number;
+          // get minimum scale
+          const minScale = result.minScale as number;
 
-        // get extent
-        const fullExtent = toJsonObject(result.fullExtent);
+          // get maximum scale
+          const maxScale = result.maxScale as number;
 
-        // get the tile grid info
-        const tileInfo = toJsonObject(result.tileInfo);
+          // get extent
+          const fullExtent = toJsonObject(result.fullExtent);
 
-        const lods: TypeJsonObject = {};
+          // get the tile grid info
+          const tileInfo = toJsonObject(result.tileInfo);
 
-        // get resolutions and scale from tile grid info
-        (tileInfo.lods as TypeJsonArray)?.forEach((lod) => {
-          const scale = lod.scale as number;
-          const resolution = lod.resolution as number;
+          const lods: TypeJsonObject = {};
 
-          if (scale <= minScale && scale >= maxScale) {
-            resolutions.push(resolution);
+          // get resolutions and scale from tile grid info
+          (tileInfo.lods as TypeJsonArray)?.forEach((lod) => {
+            const scale = lod.scale as number;
+            const resolution = lod.resolution as number;
 
-            lods[scale] = lod;
-          }
-        });
+            if (scale <= minScale && scale >= maxScale) {
+              resolutions.push(resolution);
 
-        // set layer origin
-        origin = [tileInfo?.origin?.x || 0, tileInfo?.origin?.y || 0] as number[];
+              lods[scale] = lod;
+            }
+          });
 
-        // set minimum zoom for this layer
-        minZoom = lods[minScale].level as number;
+          // set layer origin
+          origin = [tileInfo?.origin?.x || 0, tileInfo?.origin?.y || 0] as number[];
 
-        // set max zoom for this layer
-        maxZoom = lods[maxScale].level as number;
+          // set minimum zoom for this layer
+          minZoom = lods[minScale].level as number;
 
-        // set extent for this layer
-        extent = [fullExtent.xmin as number, fullExtent.ymin as number, fullExtent.xmax as number, fullExtent.ymax as number];
+          // set max zoom for this layer
+          maxZoom = lods[maxScale].level as number;
 
-        // Because OpenLayers can reproject on the fly raster, some like Shaded and Simple even if only available in 3978
-        // can be use in 3857. For this we need to make a difference between map projection and url use for the basemap
-        urlProj = this.getProjectionFromUrl(basemapLayer.url as string);
+          // set extent for this layer
+          extent = [fullExtent.xmin as number, fullExtent.ymin as number, fullExtent.xmax as number, fullExtent.ymax as number];
+
+          // Because OpenLayers can reproject on the fly raster, some like Shaded and Simple even if only available in 3978
+          // can be use in 3857. For this we need to make a difference between map projection and url use for the basemap
+          urlProj = this.getProjectionFromUrl(basemapLayer.url as string);
+
+          // return a basemap layer
+          return {
+            basemapId,
+            type: basemapId,
+            url: basemapLayer.url as string,
+            jsonUrl: basemapLayer.jsonUrl as string,
+            source: new XYZ({
+              attributions: this.attribution,
+              projection: api.projection.projections[urlProj],
+              url: basemapLayer.url as string,
+              crossOrigin: 'Anonymous',
+              tileGrid: new TileGrid({
+                extent,
+                origin,
+                resolutions,
+              }),
+            }),
+            opacity,
+            origin,
+            extent,
+            resolutions, // ? is this use somewhere, modifying values has no effect. Issue 643
+            minScale: minZoom, // ? is this use somewhere, modifying values has no effect. Issue 643
+            maxScale: maxZoom, // ? is this use somewhere, modifying values has no effect. Issue 643
+          };
+        }
       } catch (error) {
-        showMessage(this.#mapId, toJsonObject(error).toString());
+        showMessage(this.#mapId, error as string);
+        return null;
       }
     }
-
-    // return a basemap layer
-    return {
-      basemapId,
-      type: basemapId,
-      url: basemapLayer.url as string,
-      jsonUrl: basemapLayer.jsonUrl as string,
-      source: new XYZ({
-        attributions: this.attribution,
-        projection: api.projection.projections[urlProj],
-        url: basemapLayer.url as string,
-        crossOrigin: 'Anonymous',
-        tileGrid: new TileGrid({
-          extent,
-          origin,
-          resolutions,
-        }),
-      }),
-      opacity,
-      origin,
-      extent,
-      resolutions, // ? is this use somewhere, modifying values has no effect. Issue 643
-      minScale: minZoom, // ? is this use somewhere, modifying values has no effect. Issue 643
-      maxScale: maxZoom, // ? is this use somewhere, modifying values has no effect. Issue 643
-    };
+    return null;
   }
 
   /**
@@ -391,9 +409,14 @@ export class Basemap {
         // create shaded layer
         if (coreBasemapOptions.shaded && this.basemapsList[projectionCode].shaded) {
           const shadedLayer = await this.createBasemapLayer('shaded', this.basemapsList[projectionCode].shaded, defaultOpacity, true);
-
-          basemapLayers.push(shadedLayer);
-          basemaplayerTypes.push('shaded');
+          if (shadedLayer) {
+            basemapLayers.push(shadedLayer);
+            basemaplayerTypes.push('shaded');
+          } else {
+            // eslint-disable-next-line no-console
+            console.log('Error loading shaded basemap layer');
+            addNotificationWarning(this.#mapId, 'Error loading transport basemap layer');
+          }
         }
 
         // create transport layer
@@ -404,16 +427,21 @@ export class Basemap {
             coreBasemapOptions.shaded ? 0.75 : defaultOpacity,
             true
           );
+          if (transportLayer) {
+            basemapLayers.push(transportLayer);
+            basemaplayerTypes.push('transport');
 
-          basemapLayers.push(transportLayer);
-          basemaplayerTypes.push('transport');
-
-          // set default origin,extent,resolutions from layer
-          defaultOrigin = transportLayer.origin;
-          defaultExtent = transportLayer.extent;
-          defaultResolutions = transportLayer.resolutions;
-          minZoom = transportLayer.minScale;
-          maxZoom = transportLayer.maxScale;
+            // set default origin,extent,resolutions from layer
+            defaultOrigin = transportLayer.origin;
+            defaultExtent = transportLayer.extent;
+            defaultResolutions = transportLayer.resolutions;
+            minZoom = transportLayer.minScale;
+            maxZoom = transportLayer.maxScale;
+          } else {
+            // eslint-disable-next-line no-console
+            console.log('Error loading transport basemap');
+            addNotificationWarning(this.#mapId, 'Error loading transport basemap');
+          }
         }
 
         // create simple layer
@@ -425,15 +453,21 @@ export class Basemap {
             true
           );
 
-          basemapLayers.push(simpleLayer);
-          basemaplayerTypes.push('simple');
+          if (simpleLayer) {
+            basemapLayers.push(simpleLayer);
+            basemaplayerTypes.push('simple');
 
-          // set default origin,extent,resolutions from layer
-          defaultOrigin = simpleLayer.origin;
-          defaultExtent = simpleLayer.extent;
-          defaultResolutions = simpleLayer.resolutions;
-          minZoom = simpleLayer.minScale;
-          maxZoom = simpleLayer.maxScale;
+            // set default origin,extent,resolutions from layer
+            defaultOrigin = simpleLayer.origin;
+            defaultExtent = simpleLayer.extent;
+            defaultResolutions = simpleLayer.resolutions;
+            minZoom = simpleLayer.minScale;
+            maxZoom = simpleLayer.maxScale;
+          } else {
+            // eslint-disable-next-line no-console
+            console.log('Error loading simple basemap');
+            addNotificationWarning(this.#mapId, 'Error loading simple basemap');
+          }
         }
 
         // create open street maps layer
@@ -453,7 +487,7 @@ export class Basemap {
         }
 
         // no geometry basemap layer
-        if (coreBasemapOptions.basemapId === 'nogeom') {
+        if (coreBasemapOptions.basemapId === 'nogeom' || !basemaplayerTypes.includes(coreBasemapOptions.basemapId)) {
           basemaplayerTypes.push('nogeom');
         }
 
@@ -473,9 +507,14 @@ export class Basemap {
             0.8,
             true
           );
-
-          basemapLayers.push(labelLayer);
-          basemaplayerTypes.push('label');
+          if (labelLayer) {
+            basemapLayers.push(labelLayer);
+            basemaplayerTypes.push('label');
+          } else {
+            // eslint-disable-next-line no-console
+            console.log('Error loading labeled basemap layer');
+            addNotificationWarning(this.#mapId, 'Error loading labeled basemap layer');
+          }
         }
       }
 
