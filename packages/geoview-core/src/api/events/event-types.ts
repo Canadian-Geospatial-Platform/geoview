@@ -63,6 +63,7 @@ export type EventStringId =
   | 'drawer/open_close'
   | 'feature_highlight/highlight'
   | 'feature_highlight/clear'
+  | 'feature_highlight/highlightBBox'
   | 'footerbar/expand_collapse'
   | 'footer_tabs/tab_create'
   | 'footer_tabs/tab_remove'
