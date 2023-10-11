@@ -37,6 +37,9 @@ type TypePanelAppProps = {
   panel: PanelApi;
   //   panelOpen: boolean;
   button: TypeIconButtonProps;
+
+  // Callback when the panel has completed opened (and transitioned in)
+  handlePanelOpened?: () => void;
 };
 
 const useStyles = makeStyles((theme) => ({
@@ -96,13 +99,18 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 /**
+ * The transition period it takes for the panel to slide in
+ */
+const TRANSITION_PERIOD = 300;
+
+/**
  * Create a panel with a header title, icon and content
  * @param {TypePanelAppProps} props panel properties
  *
  * @returns {JSX.Element} the created Panel element
  */
 export function Panel(props: TypePanelAppProps): JSX.Element {
-  const { panel, button } = props;
+  const { panel, button, handlePanelOpened } = props;
   const { panelStyles } = panel;
   // set the active trap value for FocusTrap
   const [panelStatus, setPanelStatus] = useState(false);
@@ -111,7 +119,7 @@ export function Panel(props: TypePanelAppProps): JSX.Element {
   const panelContainerStyles = {
     ...(panelStyles?.panelContainer && { ...panelStyles.panelContainer }),
     width: panelStatus ? panelWidth : 0,
-    transition: 'width 300ms ease',
+    transition: `width ${TRANSITION_PERIOD}ms ease`,
   };
 
   const [actionButtons, setActionButtons] = useState<JSX.Element[] & ReactNode[]>([]);
@@ -180,6 +188,13 @@ export function Panel(props: TypePanelAppProps): JSX.Element {
     if (payloadHasAButtonIdAndType(payload)) {
       // set focus on close button on panel open
       setPanelStatus(true);
+
+      if (handlePanelOpened) {
+        // Wait the transition period (+50 ms just to be sure of shenanigans)
+        setTimeout(() => {
+          handlePanelOpened!();
+        }, TRANSITION_PERIOD + 50);
+      }
 
       if (closeBtnRef && closeBtnRef.current) {
         (closeBtnRef.current as HTMLElement).focus();
@@ -339,3 +354,10 @@ export function Panel(props: TypePanelAppProps): JSX.Element {
     </Box>
   );
 }
+
+/**
+ * React's default properties for the Panel
+ */
+Panel.defaultProps = {
+  handlePanelOpened: null,
+};
