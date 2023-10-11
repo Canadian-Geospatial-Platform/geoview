@@ -1,7 +1,7 @@
 /* eslint-disable react/jsx-props-no-spreading */
-import { useEffect, useRef, MutableRefObject } from 'react';
+import { useEffect, useRef, MutableRefObject, useState } from 'react';
 
-import { fromLonLat, toLonLat } from 'ol/proj';
+import { fromLonLat, toLonLat, transformExtent } from 'ol/proj';
 import OLMap from 'ol/Map';
 import View from 'ol/View';
 import TileLayer from 'ol/layer/Tile';
@@ -15,6 +15,7 @@ import { useMediaQuery } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 
 import { useStore } from 'zustand';
+import { XYZ } from 'ol/source';
 import { getGeoViewStore } from '@/core/stores/stores-managers';
 
 import { NorthArrow, NorthPoleFlag } from '@/core/components/north-arrow/north-arrow';
@@ -24,15 +25,15 @@ import { OverviewMap } from '@/core/components/overview-map/overview-map';
 import { ClickMarker } from '@/core/components/click-marker/click-marker';
 import { HoverTooltip } from '@/core/components/hover-tooltip/hover-tooltip';
 
-import { addNotificationWarning, disableScrolling, generateId } from '@/core/utils/utilities';
+import { disableScrolling, generateId } from '@/core/utils/utilities';
 
-import { api, inKeyfocusPayload } from '@/app';
+import { TypeBasemapLayer, api, inKeyfocusPayload } from '@/app';
 import { EVENT_NAMES } from '@/api/events/event-types';
 
 import { MapViewer } from '@/geo/map/map-viewer';
 
 import { payloadIsABasemapLayerArray, payloadIsAMapViewProjection, PayloadBaseClass } from '@/api/events/payloads';
-import { TypeMapFeaturesConfig } from '../../types/global-types';
+import { TypeBasemapProps, TypeMapFeaturesConfig } from '../../types/global-types';
 
 const useStyles = makeStyles(() => ({
   mapContainer: {
@@ -54,6 +55,8 @@ export function Map(mapFeaturesConfig: TypeMapFeaturesConfig): JSX.Element {
 
   // get ref to div element
   const mapElement = useRef<HTMLDivElement | undefined>();
+
+  const [overviewBaseMap, setOverviewBaseMap] = useState<TypeBasemapProps | undefined>(undefined);
 
   // get values from the store
   const overviewMap = useStore(getGeoViewStore(mapId), (state) => state.mapState.overviewMap);
@@ -92,6 +95,9 @@ export function Map(mapFeaturesConfig: TypeMapFeaturesConfig): JSX.Element {
     // initialize the map viewer and load plugins
     viewer.initMap(cgpvMap);
 
+    // load basemap(s)
+    api.maps[mapId].basemap.loadDefaultBasemaps();
+
     // call the ready function since rendering of this map instance is done
     api.ready(() => {
       // load plugins once all maps have rendered
@@ -105,42 +111,34 @@ export function Map(mapFeaturesConfig: TypeMapFeaturesConfig): JSX.Element {
     // create map
     const projection = api.projection.projections[mapConfig.viewSettings.projection];
 
-    const defaultBasemap = await api.maps[mapId].basemap.loadDefaultBasemaps();
+    // create empty tilelayer to use as initial basemap while we load basemap
+    const emptyBasemap: TypeBasemapLayer = {
+      basemapId: 'empty',
+      source: new XYZ(),
+      type: 'empty',
+      opacity: 0,
+      resolutions: [],
+      origin: [],
+      minScale: 0,
+      maxScale: 17,
+      extent: [0, 0, 0, 0],
+    };
+    const emptyLayer = new TileLayer(emptyBasemap);
+    emptyLayer.set('mapId', 'basemap');
 
     let extent: Extent | undefined;
-    if (mapConfig.viewSettings?.extent) {
-      if (projection.getCode() === 'EPSG:3978') {
-        // eslint-disable-next-line no-console
-        console.log('Extents not available for LLC projections (EPSG: 3978)');
-        addNotificationWarning(mapId, 'Extents not available for LLC projections (EPSG: 3978)');
-      } else {
-        const mins = fromLonLat([mapConfig.viewSettings.extent[0], mapConfig.viewSettings.extent[1]], projection.getCode());
-        const maxs = fromLonLat([mapConfig.viewSettings.extent[2], mapConfig.viewSettings.extent[3]], projection.getCode());
-        extent = [mins[0], mins[1], maxs[0], maxs[1]];
-      }
-    }
+    if (mapConfig.viewSettings?.extent) extent = transformExtent(mapConfig.viewSettings.extent, 'EPSG:4326', projection.getCode());
 
     const initialMap = new OLMap({
       target: mapElement.current as string | HTMLElement | undefined,
-      layers: defaultBasemap?.layers.map((layer) => {
-        // create a tile layer for this basemap layer
-        const tileLayer = new TileLayer({
-          opacity: layer.opacity,
-          source: layer.source,
-        });
-
-        // add this layer to the basemap group
-        tileLayer.set('mapId', 'basemap');
-
-        return tileLayer;
-      }),
+      layers: [emptyLayer],
       view: new View({
         projection,
         center: fromLonLat([mapConfig.viewSettings.center[0], mapConfig.viewSettings.center[1]], projection),
         zoom: mapConfig.viewSettings.zoom,
-        extent: extent || defaultBasemap?.defaultExtent || undefined,
-        minZoom: mapConfig.viewSettings.minZoom || defaultBasemap?.zoomLevels.min || 0,
-        maxZoom: mapConfig.viewSettings.maxZoom || defaultBasemap?.zoomLevels.max || 17,
+        extent: extent || undefined,
+        minZoom: mapConfig.viewSettings.minZoom || 0,
+        maxZoom: mapConfig.viewSettings.maxZoom || 17,
       }),
       controls: [],
       keyboardEventTarget: document.getElementById(`map-${mapId}`) as HTMLElement,
@@ -184,6 +182,9 @@ export function Map(mapFeaturesConfig: TypeMapFeaturesConfig): JSX.Element {
         // render the layer
         basemapLayer.changed();
       });
+
+      // update overview basemap
+      if (api.maps[mapId].basemap.overviewMap) setOverviewBaseMap(api.maps[mapId].basemap.overviewMap);
     }
   };
 
@@ -261,7 +262,7 @@ export function Map(mapFeaturesConfig: TypeMapFeaturesConfig): JSX.Element {
           <Crosshair />
           <ClickMarker />
           <HoverTooltip />
-          {deviceSizeMedUp && overviewMap && <OverviewMap />}
+          {deviceSizeMedUp && overviewMap && overviewBaseMap && <OverviewMap />}
           {deviceSizeMedUp && <Footerbar />}
         </>
       )}
