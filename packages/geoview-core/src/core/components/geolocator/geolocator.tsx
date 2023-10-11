@@ -6,7 +6,7 @@ import debounce from 'lodash/debounce';
 import { useStore } from 'zustand';
 import { CloseIcon, SearchIcon, AppBar, Box, Divider, IconButton, Paper, ProgressBar, Toolbar, Typography } from '@/ui';
 import GeoList from './geo-list';
-import { StyledInputField, sxClasses } from './styles';
+import { StyledInputField, sxClasses } from './geolocator-style';
 import { MapContext } from '@/core/app-start';
 import { api } from '@/app';
 import { getGeoViewStore } from '@/core/stores/stores-managers';

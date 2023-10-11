@@ -240,6 +240,7 @@ export class GeoUtilities {
         // Check if the focus element is a map. If so, emit the keyboard focus event with the map id
         if (activeEl?.className.match(/mapContainer*/g) !== null) {
           const mapId = activeEl?.getAttribute('id')?.split('-')[1];
+          console.log('focus utilities')
           api.event.emit(inKeyfocusPayload(EVENT_NAMES.MAP.EVENT_MAP_IN_KEYFOCUS, mapId!));
         }
       }
