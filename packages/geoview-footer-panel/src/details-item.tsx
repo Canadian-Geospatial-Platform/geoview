@@ -34,12 +34,12 @@ export function DetailsItem({ mapId }: Props): JSX.Element {
   const [handlerName, setHandlerName] = useState<string | null>(null);
 
   const allQueriesDoneListenerFunction = (payload: PayloadBaseClass) => {
-    if (payloadIsAllQueriesDone(payload)) {
+    if (payloadIsAllQueriesDone(payload) && (payload as TypeAllQueriesDonePayload).queryType === 'at_long_lat') {
       const { resultSets } = payload as TypeAllQueriesDonePayload;
       const newDetails: TypeArrayOfLayerData = [];
       Object.keys(resultSets).forEach((layerPath) => {
         const layerName = getLocalizedValue(api.maps[mapId].layer.registeredLayers[layerPath].layerName, mapId)!;
-        const features = resultSets[layerPath]?.data;
+        const features = resultSets[layerPath]?.data.at_long_lat;
         if (features?.length && features?.length > 0) {
           newDetails.push({ layerPath, layerName, features });
         }

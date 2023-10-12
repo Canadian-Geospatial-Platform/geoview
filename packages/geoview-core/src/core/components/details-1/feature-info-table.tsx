@@ -94,7 +94,7 @@ export function FeatureInfoTable({ featureInfoList }: FeatureInfoTableProps): JS
   }
 
   return (
-    <Box sx={{ wordWrap: 'break-word', fontSize: '14px' }}>
+    <Box sx={sxClasses.boxContainerFeatureInfo}>
       {isLightBoxOpen && (
         <LightboxImg
           open={isLightBoxOpen}
@@ -115,7 +115,7 @@ export function FeatureInfoTable({ featureInfoList }: FeatureInfoTableProps): JS
           <Grid item xs="auto" sx={{ fontWeight: 'bold' }}>
             {featureInfoItem.alias}
           </Grid>
-          <Grid item sx={{ ml: 'auto', wordWrap: 'break-word', fontSize: '16px' }}>
+          <Grid item sx={{ ml: 'auto', wordWrap: 'break-word' }}>
             {setFeatureItem(featureInfoItem)}
           </Grid>
         </Grid>

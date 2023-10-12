@@ -25,7 +25,9 @@ export const getSxClasses = (theme: Theme) => ({
     background: theme.footerPanel.contentBg,
   },
   layerNamePrimary: {
-    font: theme.footerPanel.titleFont,
+    '& .MuiListItemText-primary': {
+      font: theme.footerPanel.layerTitleFont,
+    },
     marginLeft: '10px',
   },
   list: {
@@ -46,21 +48,16 @@ export const getSxClasses = (theme: Theme) => ({
     boxShadow: '0px 12px 9px -13px #E0E0E0',
   },
   itemText: {
-    fontSize: 14,
-    noWrap: true,
     '& .MuiListItemText-primary': {
-      font: theme.footerPanel.titleFont,
-    },
-    '& .MuiListItemText-secondary': {
-      font: theme.footerPanel.layerSecondaryTitleFont,
-      color: theme.palette.common.black,
+      font: theme.footerPanel.layerTitleFont,
     },
   },
   featureInfoListContainer: {
     paddingLeft: '25px',
     paddingRight: '25px',
     paddingBottom: '25px',
-    height: '410px',
+    height: 'auto',
+    maxHeight: '80%',
     overflowY: 'scroll',
     overflowX: 'hidden',
   },
@@ -76,10 +73,14 @@ export const getSxClasses = (theme: Theme) => ({
     },
   },
   featureInfoItemValue: {
-    fontSize: '16px',
     marginRight: 0,
     wordBreak: 'break-word',
     overflow: 'hidden',
     textOverflow: 'ellipsis',
+  },
+  boxContainerFeatureInfo: {
+    wordWrap: 'break-word',
+    fontSize: '16px',
+    lineHeight: '19px',
   },
 });
