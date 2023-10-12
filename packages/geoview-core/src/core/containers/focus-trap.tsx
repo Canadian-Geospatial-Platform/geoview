@@ -47,27 +47,28 @@ export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
   const store = getGeoViewStore(mapId);
   const mapElementStore = useStore(store, (state) => state.mapState.mapElement);
   const mapElement = useRef<OLMap>();
-  mapElement.current = mapElementStore
+  mapElement.current = mapElementStore;
 
   /**
    * Exit the focus trap
    */
   function exitFocus(): void {
-    const mapHTMLElement = mapElement.current?.getTargetElement() as HTMLElement;
+    const mapHTMLElement = mapElement.current?.getTargetElement().parentElement as HTMLElement;
 
     // the user escape the trap, remove it, put back skip link in focus cycle and zoom to top link
     callback(false);
     mapHTMLElement.classList.remove('map-focus-trap');
 
-    mapHTMLElement.querySelectorAll(`a[id*="link-${focusTrapId}"]`).forEach((elem: Element) => elem.removeAttribute('tabindex'));
-    document.getElementById(`toplink-${focusTrapId}`)?.focus();
+    // mapHTMLElement.querySelectorAll(`a[id*="link-${focusTrapId}"]`).forEach((elem: Element) => elem.removeAttribute('tabindex'));
+    console.log('exit and focus')
+    setTimeout(() => document.getElementById(`toplink-${focusTrapId}`)?.focus(), 0);
   }
 
   /**
    * Set the focus trap
    */
   function setFocusTrap(): void {
-    const mapHTMLElement = mapElement.current?.getTargetElement() as HTMLElement;
+    const mapHTMLElement = mapElement.current?.getTargetElement().parentElement as HTMLElement;
 
     // add a class to specify the viewer is in focus trap mode
     mapHTMLElement.classList.add('map-focus-trap');
@@ -75,16 +76,21 @@ export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
     callback(true);
 
     // manage the exit of FocusTrap, remove the trap and focus the top link
+    console.log('set focus trap!!!!!!!')
     const manageExit = (evt2: KeyboardEvent) => {
+      console.log('caliss ' + evt2.code + evt2.ctrlKey)
       if (evt2.code === 'KeyQ' && evt2.ctrlKey) {
         exitFocus();
         mapHTMLElement.removeEventListener('keydown', manageExit);
+
+        store.setState({ isCrosshairsActive: false });
       }
     };
 
     mapHTMLElement.addEventListener('keydown', manageExit);
 
-    store.setState({isCrosshairsActive: true})
+    setTimeout(() => document.getElementById(`map-${focusTrapId}`)?.focus(), 0);
+    store.setState({ isCrosshairsActive: true });
   }
 
   const handleEnable = () => {
@@ -116,9 +122,9 @@ export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
       // when map element get focus and focus is not trap, show dialog window
       // if user move the mouse over the map, cancel the dialog
       // remove the top and bottom link from focus cycle and start the FocusTrap
-      const mapHTMLElement = mapElement.current?.getTargetElement() as HTMLElement;
+      const mapHTMLElement = mapElement.current?.getTargetElement().parentElement as HTMLElement;
 
-      mapHTMLElement.querySelectorAll(`a[id*="link-${focusTrapId}"]`).forEach((elem: Element) => elem.setAttribute('tabindex', '-1'));
+      // mapHTMLElement.querySelectorAll(`a[id*="link-${focusTrapId}"]`).forEach((elem: Element) => elem.setAttribute('tabindex', '-1'));
       mapHTMLElement.addEventListener(
         'mousemove',
         () => {
@@ -134,18 +140,19 @@ export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
     document.getElementById(`bottomlink-${focusTrapId}`)?.addEventListener('keydown', manageLinks);
     document.getElementById(`toplink-${focusTrapId}`)?.addEventListener('keydown', manageLinks);
 
-     // on map keyboard focus, show focus trap dialog
-     const unsubCrosshair = getGeoViewStore(mapId).subscribe(
-      (state) => state.isCrosshairsActive,
-      (curActive, prevActive) => {
-        if (curActive !== prevActive && curActive) {
-          setTimeout(() => document.getElementById(`map-${focusTrapId}`)?.focus(), 0);
-        }
-      }
-    );
+    // on map keyboard focus, show focus trap dialog
+    // const unsubCrosshair = getGeoViewStore(mapId).subscribe(
+    //   (state) => state.isCrosshairsActive,
+    //   (curActive, prevActive) => {
+    //     console.log(`trap ${curActive}`)
+    //     if (curActive !== prevActive && curActive) {
+    //       setTimeout(() => document.getElementById(`map-${focusTrapId}`)?.focus(), 0);
+    //     }
+    //   }
+    // );
 
     return () => {
-      unsubCrosshair();
+      // unsubCrosshair();
       document.getElementById(`bottomlink-${focusTrapId}`)?.removeEventListener('keydown', manageLinks);
       document.getElementById(`toplink-${focusTrapId}`)?.removeEventListener('keydown', manageLinks);
     };

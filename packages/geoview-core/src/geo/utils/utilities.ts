@@ -15,7 +15,7 @@ import { xmlToJson } from '@/core/utils/utilities';
 
 import { api } from '@/app';
 import { EVENT_NAMES } from '@/api/events/event-types';
-import { inKeyfocusPayload, LayerSetPayload } from '@/api/events/payloads';
+import { booleanPayload, LayerSetPayload } from '@/api/events/payloads';
 import { TypeLayerEntryConfig, TypeListOfLayerEntryConfig, layerEntryIsGroupLayer } from '../map/map-schema-types';
 import { AbstractGeoViewLayer } from '../layer/geoview-layers/abstract-geoview-layers';
 import { Layer } from '../layer/layer';
@@ -216,7 +216,6 @@ export class GeoUtilities {
    * Apply outline to elements when keyboard is use to navigate
    * Code from: https://github.com/MaxMaeder/keyboardFocus.js
    */
-  // TODO: Repair #335
   manageKeyboardFocus = (): void => {
     // Remove the 'keyboard-focused' class from any elements that have it
     function removeFocusedClass() {
@@ -238,10 +237,10 @@ export class GeoUtilities {
         activeEl?.classList.toggle('keyboard-focused');
 
         // Check if the focus element is a map. If so, emit the keyboard focus event with the map id
+        const mapId = activeEl?.getAttribute('id')?.split('-')[1];
         if (activeEl?.className.match(/mapContainer*/g) !== null) {
-          const mapId = activeEl?.getAttribute('id')?.split('-')[1];
-          console.log('focus utilities')
-          api.event.emit(inKeyfocusPayload(EVENT_NAMES.MAP.EVENT_MAP_IN_KEYFOCUS, mapId!));
+          console.log('focus utilities');
+          api.event.emit(booleanPayload(EVENT_NAMES.MAP.EVENT_MAP_IN_KEYFOCUS, mapId!, true));
         }
       }
     });

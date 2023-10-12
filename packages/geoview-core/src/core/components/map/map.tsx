@@ -27,7 +27,7 @@ import { HoverTooltip } from '@/core/components/hover-tooltip/hover-tooltip';
 
 import { disableScrolling, generateId } from '@/core/utils/utilities';
 
-import { TypeBasemapLayer, api, inKeyfocusPayload } from '@/app';
+import { TypeBasemapLayer, api } from '@/app';
 import { EVENT_NAMES } from '@/api/events/event-types';
 
 import { MapViewer } from '@/geo/map/map-viewer';

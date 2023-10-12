@@ -16,6 +16,10 @@ export const getFocusTrapSxClasses = (theme: Theme) => ({
 });
 
 export const getShellSxClasses = (theme: Theme) => ({
+  all: {
+    height: '100%',
+    width: '100%',
+  },
   shell: {
     display: 'flex',
     flexDirection: 'column',
@@ -35,15 +39,16 @@ export const getShellSxClasses = (theme: Theme) => ({
   },
   skip: {
     position: 'absolute',
-    left: -1000,
-    height: 1,
-    width: 1,
+    // left: -1000,
+    // height: '1px',
+    // width: '1px',
     textAlign: 'left',
     overflow: 'hidden',
     backgroundColor: '#FFFFFF',
+    zIndex: theme.zIndex.tooltip,
 
-    '&:active, &:focus, &:hover': {
-      left: theme.spacing(0),
+    '&:active, &:focus': {
+      // left: theme.spacing(0),
       zIndex: theme.zIndex.tooltip,
       width: 'auto',
       height: 'auto',
