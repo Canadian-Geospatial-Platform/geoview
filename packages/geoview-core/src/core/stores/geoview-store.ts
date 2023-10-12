@@ -56,7 +56,7 @@ export interface IAppBarState {
 
 export interface ILegendState {
   selectedItem?: TypeLegendItemProps;
-  selectedLayers: string[];
+  selectedLayers: Record<string, string[]>;
 }
 
 export interface IGeoViewState {
@@ -143,7 +143,7 @@ export const geoViewStoreDefinition = (
     },
     legendState: {
       selectedItem: undefined,
-      selectedLayers: [],
+      selectedLayers: {},
     },
 
     setMapConfig: (config: TypeMapFeaturesConfig) => {

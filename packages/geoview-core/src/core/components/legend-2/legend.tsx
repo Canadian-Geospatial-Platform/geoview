@@ -1,4 +1,4 @@
-import { Button, styled, useTheme, Table, TableBody, TableCell, TableHead, TableRow } from '@mui/material';
+import { Button, styled, useTheme } from '@mui/material';
 import React, { useState, useEffect } from 'react';
 import { useStore } from 'zustand';
 import { useTranslation } from 'react-i18next';
@@ -53,6 +53,14 @@ export function Legend2(props: LegendItemsDetailsProps): JSX.Element {
   const selectedLegendItem = useStore(store, (state) => state.legendState.selectedItem);
   const selectedLayers = useStore(store, (state) => state.legendState.selectedLayers);
   const [isSelectedLayersClicked, setIsSelectedLayersClicked] = useState(false);
+  const [collapsedParents, setCollapsedParents] = useState({});
+
+  const toggleCollapse = (parentLayer) => {
+    setCollapsedParents((prevCollapsedParents) => ({
+      ...prevCollapsedParents,
+      [parentLayer]: !prevCollapsedParents[parentLayer],
+    }));
+  };
 
   function showSelectedLayersPanel() {
     return (
@@ -141,39 +149,50 @@ export function Legend2(props: LegendItemsDetailsProps): JSX.Element {
     }
   }, [selectedLegendItem]);
 
-  function rightPanel() {
+  const rightPanel = () => {
+    //  <ShowSelectedLayers selectedLayers={selectedLayers} />;
+
     if (isSelectedLayersClicked && selectedLayers) {
-      // return <ShowSelectedLayers selectedLayers={selectedLayers} />;
       const numItems = selectedLayers.length;
-      const selectedLayersList = selectedLayers.map((layer) => (
-        <tr key={layer}>
-          <td>{layer}</td>
-        </tr>
+      const selectedLayersList = Object.entries(selectedLayers).map(([parentLayer, childLayers]) => (
+        <div
+          key={parentLayer}
+          role="button"
+          tabIndex={0}
+          onClick={() => toggleCollapse(parentLayer)}
+          onKeyDown={(event) => {
+            if (event.key === 'Enter') {
+              toggleCollapse(parentLayer);
+            }
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center' }}>
+            {parentLayer}
+            {collapsedParents[parentLayer] ? <ExpandMoreIcon sx={{ transform: 'rotate(180deg)' }} /> : <ExpandMoreIcon />}
+          </div>
+          <div>
+            {!collapsedParents[parentLayer] &&
+              childLayers.map((childLayer) => (
+                <div key={childLayer} style={{ paddingLeft: '20px' }}>
+                  {childLayer}
+                </div>
+              ))}
+          </div>
+        </div>
       ));
 
       return (
         <Item sx={{ borderColor: 'primary.main', borderStyle: 'solid', borderWidth: '1px', paddingLeft: '10px' }}>
-          <div>
-            <Typography sx={sxClasses.legendTitle}>
-              <strong>{t('legend.bold_selection')}</strong> {t('legend.overview_title')}
-            </Typography>
-            <Typography sx={{ fontSize: '0.6em', textAlign: 'left' }}>
-              {' '}
-              {numItems} {t('legend.items_available')}
-            </Typography>
-          </div>
-          <div>
-            <Table>
-              <TableHead>
-                <TableRow>
-                  <TableCell>Name</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody sx={{textAlign: 'left'}}>
-                {selectedLayersList}
-              </TableBody>
-            </Table>
-          </div>
+          <Typography sx={sxClasses.legendTitle}>
+            <strong>{t('legend.bold_selection')}</strong> {t('legend.overview_title')}
+          </Typography>
+          <Typography sx={{ fontSize: '0.6em', textAlign: 'left', marginBottom: '16.5px' }}>
+            {numItems} {t('legend.items_available')}
+          </Typography>
+          <Box sx={{ textAlign: 'left' }}>
+            <Grid sx={{ border: '1px solid #000', borderColor: '#C1C1C1', paddingLeft: '20px' }}>Name</Grid>
+            <List sx={{ marginTop: '11px' }}>{selectedLayersList}</List>
+          </Box>
         </Item>
       );
     }
@@ -195,7 +214,7 @@ export function Legend2(props: LegendItemsDetailsProps): JSX.Element {
     }
 
     return null;
-  }
+  };
 
   return (
     <Box sx={sxClasses.legendContainer}>
