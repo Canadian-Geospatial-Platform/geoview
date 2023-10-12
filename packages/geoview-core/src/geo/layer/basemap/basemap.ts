@@ -12,7 +12,7 @@ import { EVENT_NAMES } from '@/api/events/event-types';
 
 import { TypeJsonObject, toJsonObject, TypeJsonArray } from '@/core/types/global-types';
 
-import { addNotificationWarning, generateId, showMessage } from '@/core/utils/utilities';
+import { generateId, showError } from '@/core/utils/utilities';
 import { basemapLayerArrayPayload } from '@/api/events/payloads';
 import { TypeBasemapProps, TypeBasemapOptions, TypeBasemapLayer } from '@/geo/layer/basemap/basemap-types';
 import { TypeDisplayLanguage, TypeValidMapProjectionCodes, TypeLocalizedString } from '@/geo/map/map-schema-types';
@@ -374,7 +374,6 @@ export class Basemap {
           };
         }
       } catch (error) {
-        showMessage(this.#mapId, error as string);
         return null;
       }
     }
@@ -412,10 +411,6 @@ export class Basemap {
           if (shadedLayer) {
             basemapLayers.push(shadedLayer);
             basemaplayerTypes.push('shaded');
-          } else {
-            // eslint-disable-next-line no-console
-            console.log('Error loading shaded basemap layer');
-            addNotificationWarning(this.#mapId, 'Error loading transport basemap layer');
           }
         }
 
@@ -437,10 +432,6 @@ export class Basemap {
             defaultResolutions = transportLayer.resolutions;
             minZoom = transportLayer.minScale;
             maxZoom = transportLayer.maxScale;
-          } else {
-            // eslint-disable-next-line no-console
-            console.log('Error loading transport basemap');
-            addNotificationWarning(this.#mapId, 'Error loading transport basemap');
           }
         }
 
@@ -463,10 +454,6 @@ export class Basemap {
             defaultResolutions = simpleLayer.resolutions;
             minZoom = simpleLayer.minScale;
             maxZoom = simpleLayer.maxScale;
-          } else {
-            // eslint-disable-next-line no-console
-            console.log('Error loading simple basemap');
-            addNotificationWarning(this.#mapId, 'Error loading simple basemap');
           }
         }
 
@@ -487,7 +474,7 @@ export class Basemap {
         }
 
         // no geometry basemap layer
-        if (coreBasemapOptions.basemapId === 'nogeom' || !basemaplayerTypes.includes(coreBasemapOptions.basemapId)) {
+        if (coreBasemapOptions.basemapId === 'nogeom') {
           basemaplayerTypes.push('nogeom');
         }
 
@@ -510,10 +497,6 @@ export class Basemap {
           if (labelLayer) {
             basemapLayers.push(labelLayer);
             basemaplayerTypes.push('label');
-          } else {
-            // eslint-disable-next-line no-console
-            console.log('Error loading labeled basemap layer');
-            addNotificationWarning(this.#mapId, 'Error loading labeled basemap layer');
           }
         }
       }
@@ -549,6 +532,11 @@ export class Basemap {
         });
 
         resolve(basemap);
+      } else if (this.isExisting(basemaplayerTypes.join('-'))) {
+        const existingBasemap = this.basemaps.filter(
+          (basemapProps: TypeBasemapProps) => basemapProps.type === basemaplayerTypes.join('-')
+        )[0];
+        resolve(existingBasemap);
       } else {
         // if no basemap set, resolve to undefined
         resolve(undefined);
@@ -611,15 +599,22 @@ export class Basemap {
   async loadDefaultBasemaps(): Promise<TypeBasemapProps | undefined> {
     const basemap = await this.createCoreBasemap(api.maps[this.#mapId].mapFeaturesConfig.map.basemapOptions);
     const overviewBasemap = await this.createCoreBasemap({ basemapId: 'transport', shaded: false, labeled: false });
+    if (overviewBasemap) this.overviewMap = overviewBasemap;
+    else {
+      showError(this.#mapId, 'Error loading overview map');
+    }
 
-    this.activeBasemap = basemap;
-    this.overviewMap = overviewBasemap;
+    if (basemap) {
+      this.activeBasemap = basemap;
+      this.defaultOrigin = basemap?.defaultOrigin;
+      this.defaultResolutions = basemap?.defaultResolutions;
+      this.defaultExtent = basemap?.defaultExtent;
 
-    this.defaultOrigin = basemap?.defaultOrigin;
-    this.defaultResolutions = basemap?.defaultResolutions;
-    this.defaultExtent = basemap?.defaultExtent;
-
-    return basemap;
+      this.setBasemap(basemap.basemapId as string);
+      return basemap;
+    }
+    showError(this.#mapId, 'Error loading basemap');
+    return undefined;
   }
 
   /**
