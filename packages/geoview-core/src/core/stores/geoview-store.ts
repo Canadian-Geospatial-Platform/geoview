@@ -66,7 +66,7 @@ export interface INotificationsState {
 
 export interface ILegendState {
   selectedItem?: TypeLegendItemProps;
-  selectedLayers: string[];
+  selectedLayers: Record<string, string[]>;
 }
 
 export interface IGeoViewState {
@@ -165,7 +165,7 @@ export const geoViewStoreDefinition = (
     },
     legendState: {
       selectedItem: undefined,
-      selectedLayers: [],
+      selectedLayers: {},
     },
     notificationState: {
       notifications: [],

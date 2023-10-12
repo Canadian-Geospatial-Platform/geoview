@@ -167,25 +167,6 @@ export function LegendItemDetails(props: TypeLegendItemDetailsProps): JSX.Elemen
   const [checkedSublayerNames, setCheckedSublayerNames] = useState<string[]>([]);
   const store = getGeoViewStore(mapId);
 
-  const updateSelectedLayers = (selectedLayers: string[]) => {
-    // Update selected layers in the store
-    store.setState((state) => ({
-      legendState: {
-        ...state.legendState,
-        selectedLayers,
-      },
-    }));
-  };
-
-  const handleGetCheckedSublayerNames = (names: string[]) => {
-    setCheckedSublayerNames(names);
-  };
-
-  useEffect(() => {
-    // Update selected layers when checkedSublayerNames change
-    updateSelectedLayers(checkedSublayerNames);
-  }, [checkedSublayerNames]);
-
   const getGroupsDetails = (): boolean => {
     let isGroup = false;
     if (layerConfigEntry) {
@@ -320,6 +301,35 @@ export function LegendItemDetails(props: TypeLegendItemDetailsProps): JSX.Elemen
     },
     mapId
   );
+
+  const updateSelectedLayers = (selectedLayers) => {
+    const selectedLayersByLayerName = {};
+
+    selectedLayers.forEach((layer) => {
+      if (!selectedLayersByLayerName[layerName]) {
+        selectedLayersByLayerName[layerName] = [];
+      }
+      selectedLayersByLayerName[layerName].push(layer);
+    });
+
+    console.log('selectedLayersByLayerName', selectedLayersByLayerName);
+    // Update selected layers in the store
+    store.setState((state) => ({
+      legendState: {
+        ...state.legendState,
+        selectedLayers: selectedLayersByLayerName,
+      },
+    }));
+  };
+
+  const handleGetCheckedSublayerNames = (names: string[]) => {
+    setCheckedSublayerNames(names);
+  };
+
+  useEffect(() => {
+    // Update selected layers when checkedSublayerNames change
+    updateSelectedLayers(checkedSublayerNames);
+  }, [checkedSublayerNames]);
 
   useEffect(() => {
     if (layerConfigEntry) {
@@ -475,6 +485,7 @@ export function LegendItemDetails(props: TypeLegendItemDetailsProps): JSX.Elemen
             toggleMapVisible={(sublayerConfig) => {
               (geoviewLayerInstance as AbstractGeoViewVector | EsriDynamic).applyViewFilter(sublayerConfig);
             }}
+            isGroupLayer={groupItems.length > 0}
             layerConfig={geometryLayerConfig as TypeVectorLayerEntryConfig}
             mapId={mapId}
             geometryKey={layerGeometryKey!}
