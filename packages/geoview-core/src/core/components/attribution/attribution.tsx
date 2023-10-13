@@ -129,7 +129,17 @@ export function Attribution(): JSX.Element {
 
   return (
     <Tooltip title={attribution}>
-      <Box id={`${mapId}-attribution-text`} sx={[sxClasses.attributionContainer, { opacity: expanded ? 1 : 0 }]} tabIndex={0} />
+      <Box
+        onKeyDown={(evt) => {
+          if (evt.code === 'Space') {
+            evt.preventDefault(); // prevent space keydown to scroll the page
+            evt.stopPropagation();
+          }
+        }}
+        id={`${mapId}-attribution-text`}
+        sx={[sxClasses.attributionContainer, { visibility: expanded ? 'visible' : 'hidden' }]}
+        tabIndex={0}
+      />
     </Tooltip>
   );
 }

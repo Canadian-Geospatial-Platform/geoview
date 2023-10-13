@@ -5,14 +5,13 @@ import { useTranslation } from 'react-i18next';
 import { useTheme } from '@mui/material/styles';
 import useMediaQuery from '@mui/material/useMediaQuery';
 
-import { Map as OLMap } from 'ol';
-
 import { useStore } from 'zustand';
 import { getGeoViewStore } from '@/core/stores/stores-managers';
 
 import { Modal, Button } from '@/ui';
 import { HtmlToReact } from './html-to-react';
 import { getFocusTrapSxClasses } from './containers-style';
+import { disableScrolling } from '@/app';
 
 /**
  * Interface for the focus trap properties
@@ -46,53 +45,64 @@ export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
   // tracks if the last action was done through a keyboard (map navigation) or mouse (mouse movement)
   const store = getGeoViewStore(mapId);
   const mapElementStore = useStore(store, (state) => state.mapState.mapElement);
-  const mapElement = useRef<OLMap>();
-  mapElement.current = mapElementStore;
+
+  // ? useRef, if not mapElementStore is undefined - may be because this component is created before the mapElement
+  // TODO: Find what is going on with mapElement for focus-trap and crosshair
+  const mapElementRef = useRef(mapElementStore);
+  mapElementRef.current = mapElementStore;
+
+  // ? use reference HTML element to disable scrolling
+  const mapHTMLElementRef = useRef<HTMLElement>();
+  if (mapElementRef.current !== undefined) mapHTMLElementRef.current = mapElementRef.current.getTargetElement();
+
+  /**
+   * Disable scrolling on space keydown when focus-trap
+   *
+   * @param {KeyboardEvent} evt the keyboard event to trap
+   */
+  function handleScrolling(evt: KeyboardEvent): void {
+    disableScrolling(evt, mapHTMLElementRef);
+  }
 
   /**
    * Exit the focus trap
    */
   function exitFocus(): void {
-    const mapHTMLElement = mapElement.current?.getTargetElement().parentElement as HTMLElement;
+    const mapHTMLElement = mapHTMLElementRef.current!.parentElement as HTMLElement;
 
     // the user escape the trap, remove it, put back skip link in focus cycle and zoom to top link
     callback(false);
     mapHTMLElement.classList.remove('map-focus-trap');
+    // mapHTMLElement.removeEventListener('keydown',handleExit); //! can't remobe because of eslint @typescript-eslint/no-use-before-define
+    document.removeEventListener('keydown', handleScrolling);
 
-    // mapHTMLElement.querySelectorAll(`a[id*="link-${focusTrapId}"]`).forEach((elem: Element) => elem.removeAttribute('tabindex'));
-    console.log('exit and focus')
+    // update store and focus to top link
     setTimeout(() => document.getElementById(`toplink-${focusTrapId}`)?.focus(), 0);
+    getGeoViewStore(mapId).setState({ isCrosshairsActive: false });
   }
+
+  // handle FocusTrap states (Exit)
+  const handleExit = (evt: KeyboardEvent) => {
+    if (evt.code === 'KeyQ' && evt.ctrlKey) exitFocus();
+  };
 
   /**
    * Set the focus trap
    */
   function setFocusTrap(): void {
-    const mapHTMLElement = mapElement.current?.getTargetElement().parentElement as HTMLElement;
+    const mapHTMLElement = mapHTMLElementRef.current!.parentElement as HTMLElement;
 
     // add a class to specify the viewer is in focus trap mode
-    mapHTMLElement.classList.add('map-focus-trap');
-
     callback(true);
+    mapHTMLElement.classList.add('map-focus-trap');
+    mapHTMLElement.addEventListener('keydown', handleExit);
 
-    // manage the exit of FocusTrap, remove the trap and focus the top link
-    console.log('set focus trap!!!!!!!')
-    const manageExit = (evt2: KeyboardEvent) => {
-      console.log('caliss ' + evt2.code + evt2.ctrlKey)
-      if (evt2.code === 'KeyQ' && evt2.ctrlKey) {
-        exitFocus();
-        mapHTMLElement.removeEventListener('keydown', manageExit);
-
-        store.setState({ isCrosshairsActive: false });
-      }
-    };
-
-    mapHTMLElement.addEventListener('keydown', manageExit);
-
-    setTimeout(() => document.getElementById(`map-${focusTrapId}`)?.focus(), 0);
+    // update the store and focus to map
+    setTimeout(() => document.getElementById(`map-${mapId}`)?.focus(), 0);
     store.setState({ isCrosshairsActive: true });
   }
 
+  // handle FocusTrap states (Enable, Skip)
   const handleEnable = () => {
     setOpen(false);
     setFocusTrap();
@@ -122,10 +132,8 @@ export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
       // when map element get focus and focus is not trap, show dialog window
       // if user move the mouse over the map, cancel the dialog
       // remove the top and bottom link from focus cycle and start the FocusTrap
-      const mapHTMLElement = mapElement.current?.getTargetElement().parentElement as HTMLElement;
-
-      // mapHTMLElement.querySelectorAll(`a[id*="link-${focusTrapId}"]`).forEach((elem: Element) => elem.setAttribute('tabindex', '-1'));
-      mapHTMLElement.addEventListener(
+      document.addEventListener('keydown', handleScrolling);
+      mapHTMLElementRef.current!.addEventListener(
         'mousemove',
         () => {
           setOpen(false);
@@ -140,21 +148,10 @@ export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
     document.getElementById(`bottomlink-${focusTrapId}`)?.addEventListener('keydown', manageLinks);
     document.getElementById(`toplink-${focusTrapId}`)?.addEventListener('keydown', manageLinks);
 
-    // on map keyboard focus, show focus trap dialog
-    // const unsubCrosshair = getGeoViewStore(mapId).subscribe(
-    //   (state) => state.isCrosshairsActive,
-    //   (curActive, prevActive) => {
-    //     console.log(`trap ${curActive}`)
-    //     if (curActive !== prevActive && curActive) {
-    //       setTimeout(() => document.getElementById(`map-${focusTrapId}`)?.focus(), 0);
-    //     }
-    //   }
-    // );
-
     return () => {
-      // unsubCrosshair();
       document.getElementById(`bottomlink-${focusTrapId}`)?.removeEventListener('keydown', manageLinks);
       document.getElementById(`toplink-${focusTrapId}`)?.removeEventListener('keydown', manageLinks);
+      document.removeEventListener('keydown', handleScrolling);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

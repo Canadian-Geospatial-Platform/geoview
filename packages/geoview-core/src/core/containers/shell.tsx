@@ -140,9 +140,9 @@ export function Shell(props: ShellProps): JSX.Element {
         {t('keyboardnav.start')}
       </Link>
       <FocusTrap active={activeTrap} focusTrapOptions={{ escapeDeactivates: false }}>
-        <Box id={`shell-${shellId}`} sx={sxClasses.shell} key={update}>
+        <Box id={`shell-${shellId}`} sx={sxClasses.shell} className="geoview-shell" key={update}>
           <CircularProgress isLoaded={mapLoaded} />
-          <Box sx={sxClasses.mapContainer} className={'mapContainer'}>
+          <Box sx={sxClasses.mapContainer} className="mapContainer">
             <Appbar activeTrap={activeTrap} activeTrapSet={setActivetrap} />
             {/* load geolocator component if config includes in list of components in appBar */}
             {mapFeaturesConfig?.appBar?.includes('geolocator') && mapFeaturesConfig?.map.interaction === 'dynamic' && <Geolocator />}

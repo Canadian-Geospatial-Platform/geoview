@@ -39,16 +39,16 @@ export const getShellSxClasses = (theme: Theme) => ({
   },
   skip: {
     position: 'absolute',
-    // left: -1000,
-    // height: '1px',
-    // width: '1px',
+    left: -1000,
+    height: '1px',
+    width: '1px',
     textAlign: 'left',
     overflow: 'hidden',
     backgroundColor: '#FFFFFF',
     zIndex: theme.zIndex.tooltip,
 
     '&:active, &:focus': {
-      // left: theme.spacing(0),
+      left: theme.spacing(0),
       zIndex: theme.zIndex.tooltip,
       width: 'auto',
       height: 'auto',

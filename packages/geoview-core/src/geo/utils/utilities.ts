@@ -9,16 +9,17 @@ import { Style, Stroke, Fill, Circle } from 'ol/style';
 import { Color } from 'ol/color';
 import { getArea as getAreaOL } from 'ol/sphere';
 
+import { getGeoViewStore } from '@/core/stores/stores-managers';
+
 import { Cast, TypeJsonObject } from '@/core/types/global-types';
-import { TypeFeatureStyle } from '../layer/geometry/geometry-types';
+import { TypeFeatureStyle } from '@/geo/layer/geometry/geometry-types';
 import { xmlToJson } from '@/core/utils/utilities';
 
 import { api } from '@/app';
-import { EVENT_NAMES } from '@/api/events/event-types';
-import { booleanPayload, LayerSetPayload } from '@/api/events/payloads';
-import { TypeLayerEntryConfig, TypeListOfLayerEntryConfig, layerEntryIsGroupLayer } from '../map/map-schema-types';
-import { AbstractGeoViewLayer } from '../layer/geoview-layers/abstract-geoview-layers';
-import { Layer } from '../layer/layer';
+import { LayerSetPayload } from '@/api/events/payloads';
+import { TypeLayerEntryConfig, TypeListOfLayerEntryConfig, layerEntryIsGroupLayer } from '@/geo/map/map-schema-types';
+import { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
+import { Layer } from '@/geo/layer/layer';
 
 /**
  * Interface used for css style declarations
@@ -236,11 +237,12 @@ export class GeoUtilities {
         removeFocusedClass();
         activeEl?.classList.toggle('keyboard-focused');
 
-        // Check if the focus element is a map. If so, emit the keyboard focus event with the map id
-        const mapId = activeEl?.getAttribute('id')?.split('-')[1];
-        if (activeEl?.className.match(/mapContainer*/g) !== null) {
-          console.log('focus utilities');
-          api.event.emit(booleanPayload(EVENT_NAMES.MAP.EVENT_MAP_IN_KEYFOCUS, mapId!, true));
+        // Check if the focus element is a map and set store value for crosshair
+        const mapId =
+          activeEl?.closest('.geoview-shell') !== null ? activeEl?.closest('.geoview-shell')!.getAttribute('id')?.split('-')[1] : undefined;
+        if (mapId !== undefined) {
+          const mapFocus = activeEl?.className.match(/mapContainer*/g) !== null;
+          getGeoViewStore(mapId).setState({ isCrosshairsActive: mapFocus });
         }
       }
     });

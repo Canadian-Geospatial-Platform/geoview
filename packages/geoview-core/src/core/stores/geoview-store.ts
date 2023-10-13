@@ -106,6 +106,7 @@ export const geoViewStoreDefinition = (
       currentProjection: 3857,
       zoom: undefined,
       onMapMoveEnd: debounce((event: MapEvent) => {
+        console.log(event);
         set({
           mapState: {
             ...get().mapState,

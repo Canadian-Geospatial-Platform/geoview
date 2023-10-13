@@ -9,7 +9,6 @@ import {
   payloadIsAMapViewProjection,
   PayloadBaseClass,
   mapViewProjectionPayload,
-  payloadIsABoolean,
 } from '@/api/events/payloads';
 import { EVENT_NAMES } from '@/api/events/event-types';
 
@@ -85,18 +84,6 @@ export class MapEventProcessor extends AbstractEventProcessor {
           store.setState({
             mapState: { ...store.getState().mapState, currentProjection: payload.projection! },
           });
-        }
-      },
-      mapId
-    );
-
-    api.event.on(
-      EVENT_NAMES.MAP.EVENT_MAP_IN_KEYFOCUS,
-      (payload: PayloadBaseClass) => {
-        if (payloadIsABoolean(payload)) {
-          console.log(payload.status + ' crosshair active')
-          store.setState({ isCrosshairsActive: payload.status });
-          console.log(store.getState().isCrosshairsActive + ' store crosshair active')
         }
       },
       mapId
