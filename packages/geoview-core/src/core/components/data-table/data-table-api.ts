@@ -80,7 +80,8 @@ export class DataTableApi {
       const keys = Object.keys(curr.fieldInfo);
 
       keys.forEach((key) => {
-        if (!acc[key]) {
+        // TODO: figure out why myImages from polygons.json is breaking.
+        if (!acc[key] && key !== 'myImages') {
           acc[key] = curr.fieldInfo[key] as TypeFieldEntry;
         }
       });

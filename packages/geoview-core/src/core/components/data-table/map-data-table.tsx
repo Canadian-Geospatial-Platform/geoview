@@ -386,9 +386,7 @@ function MapDataTable({ data, layerId, mapId, layerKey, projectionConfig }: MapD
    * @param {object} data.fieldAliases object values transformed into required key value property of material react data table
    */
   const columns = useMemo<MRTColumnDef<ColumnsType>[]>(() => {
-    // TODO: figure out why myImages property throwing an error.
-    const { myImages, ...rest } = data.fieldAliases;
-    const entries = Object.entries({ ICON: iconColumn, ZOOM: zoomColumn, ...rest });
+    const entries = Object.entries({ ICON: iconColumn, ZOOM: zoomColumn, ...data.fieldAliases });
     const columnList = [] as MRTColumnDef<ColumnsType>[];
     entries.forEach(([key, value]) => {
       columnList.push({
