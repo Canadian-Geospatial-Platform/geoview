@@ -8,7 +8,6 @@ import { AddIcon, Box, Grid, List, Typography, ExpandMoreIcon, Paper, Stack, Exp
 import { LegendItemDetails } from './legend-item-details/legend-item-details';
 import { getGeoViewStore } from '@/core/stores/stores-managers';
 import { LegendItem } from './legend-item';
-// import { ShowSelectedLayers } from './selected-layers/selected-layers-details';
 
 const Item = styled('div')(({ theme }) => ({
   backgroundColor: theme.palette.mode === 'dark' ? '#262B32' : '#fff',
@@ -150,7 +149,6 @@ export function Legend2(props: LegendItemsDetailsProps): JSX.Element {
   }, [selectedLegendItem]);
 
   const rightPanel = () => {
-    //  <ShowSelectedLayers selectedLayers={selectedLayers} />;
 
     if (isSelectedLayersClicked && selectedLayers) {
       const numItems = selectedLayers.length;
