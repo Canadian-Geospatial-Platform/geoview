@@ -312,8 +312,6 @@ export function LegendItemDetails(props: TypeLegendItemDetailsProps): JSX.Elemen
       selectedLayersByLayerName[layerName].push(layer);
     });
 
-    console.log('selectedLayersByLayerName', selectedLayersByLayerName);
-    // Update selected layers in the store
     store.setState((state) => ({
       legendState: {
         ...state.legendState,

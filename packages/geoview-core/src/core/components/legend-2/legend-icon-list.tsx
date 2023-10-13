@@ -64,7 +64,7 @@ export interface TypeLegendIconListProps {
   isParentVisible?: boolean;
   toggleParentVisible?: () => void;
   toggleMapVisible?: (layerConfig: TypeLayerEntryConfig) => void;
-  onGetCheckedSublayerNames?: (checkedSublayerNames: string[]) => void; // Add this prop
+  onGetCheckedSublayerNames?: (checkedSublayerNames: string[]) => void;
 }
 
 export function LegendIconList(props: TypeLegendIconListProps): JSX.Element {
@@ -91,7 +91,6 @@ export function LegendIconList(props: TypeLegendIconListProps): JSX.Element {
   const [countChildren, setCountChildren] = useState<number>(isParentVisible ? iconImages.length : 0);
   const [initParentVisible, setInitParentVisible] = useState(isParentVisible);
 
-  // set initial visibility of layers according to metadata
   if (layerConfig && layerConfig.style !== undefined && geometryKey) {
     const itemStyle = layerConfig.style[geometryKey];
     if (itemStyle && itemStyle.styleType === 'uniqueValue' && (itemStyle as TypeUniqueValueStyleConfig).uniqueValueStyleInfo) {
@@ -131,7 +130,6 @@ export function LegendIconList(props: TypeLegendIconListProps): JSX.Element {
       }
     }
   };
-  console.log('countChildren', countChildren);
 
   const handleToggleAll = () => {
     setIsAllChecked(!isAllChecked);
@@ -232,7 +230,6 @@ export function LegendIconList(props: TypeLegendIconListProps): JSX.Element {
                   <IconButton color="primary" onClick={() => handleToggleLayer(index)}>
                     {isChecked[index] === true ? <CheckBoxIcon /> : <CheckBoxOutIcon />}
                   </IconButton>
-                  // <Checkbox color="primary" checked={isChecked[index]} onChange={() => handleToggleLayer(index)} />
                 )}
               </TableCell>
             </TableRow>
