@@ -1,0 +1,51 @@
+import { Theme } from '@mui/material/styles';
+
+export const getSxClasses = (theme: Theme) => ({
+  attributionContainer: {
+    display: 'flex',
+    padding: theme.spacing(0, 4),
+    overflow: 'hidden',
+    whiteSpace: 'nowrap',
+    textOverflow: 'ellipsis',
+    alignItems: 'center',
+    width: '100%',
+    transition: 'opacity 1ms ease-in 300ms',
+    '& .ol-attribution': {
+      display: 'flex !important',
+      flexDirection: 'row',
+      position: 'relative',
+      background: 'transparent !important',
+      backgroundColor: 'transparent !important',
+      borderRadius: 'initial',
+      padding: 'initial',
+      margin: 'initial',
+      left: 'auto',
+      top: 'auto',
+      right: 'auto',
+      bottom: 'auto',
+      maxWidth: 'initial',
+      textAlign: 'left',
+      overflow: 'hidden',
+      '& button:not(.expand-collapse-icon)': {
+        display: 'none',
+      },
+      '& ul': {
+        display: 'block',
+        maxWidth: '500px',
+        overflow: 'hidden',
+        margin: 'initial',
+        padding: 'initial',
+        color: theme.palette.primary.light,
+        textShadow: 'initial',
+        fontSize: 'initial',
+        '& li': {
+          display: 'block',
+          color: theme.palette.primary.light,
+          textOverflow: 'ellipsis',
+          whiteSpace: 'nowrap',
+          overflow: 'hidden',
+        },
+      },
+    },
+  },
+});

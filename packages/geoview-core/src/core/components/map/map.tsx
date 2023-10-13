@@ -25,9 +25,9 @@ import { OverviewMap } from '@/core/components/overview-map/overview-map';
 import { ClickMarker } from '@/core/components/click-marker/click-marker';
 import { HoverTooltip } from '@/core/components/hover-tooltip/hover-tooltip';
 
-import { disableScrolling, generateId } from '@/core/utils/utilities';
+import { generateId } from '@/core/utils/utilities';
 
-import { TypeBasemapLayer, api, inKeyfocusPayload } from '@/app';
+import { TypeBasemapLayer, api } from '@/app';
 import { EVENT_NAMES } from '@/api/events/event-types';
 
 import { MapViewer } from '@/geo/map/map-viewer';
@@ -233,24 +233,6 @@ export function Map(mapFeaturesConfig: TypeMapFeaturesConfig): JSX.Element {
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  useEffect(() => {
-    document.addEventListener('keydown', (e) => disableScrolling(e, mapElement));
-    return () => {
-      document.removeEventListener('keydown', (e) => disableScrolling(e, mapElement));
-    };
-  }, []);
-
-  useEffect(() => {
-    document.addEventListener('focusin', () => {
-      const mapContainer = document.getElementById(mapId);
-      if (mapElement.current === document.activeElement && mapContainer?.classList.contains('map-focus-trap')) {
-        (document.getElementById(`map-${mapId}`) as HTMLElement).focus();
-        api.event.emit(inKeyfocusPayload(EVENT_NAMES.MAP.EVENT_MAP_IN_KEYFOCUS, mapId));
-      }
-    });
-    return () => document.removeEventListener('focusin', () => []);
-  }, [mapId]);
 
   return (
     /* eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex */
