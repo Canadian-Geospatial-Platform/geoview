@@ -135,7 +135,7 @@ export function FeatureInfo(props: TypeFeatureProps): JSX.Element {
 
   function handleZoomIn(e: React.MouseEvent<HTMLButtonElement, MouseEvent>) {
     e.stopPropagation();
-    api.map(mapId).zoomToExtent(feature.extent);
+    api.maps[mapId].zoomToExtent(feature.extent);
     setOpen(true);
   }
 
@@ -162,12 +162,6 @@ export function FeatureInfo(props: TypeFeatureProps): JSX.Element {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  // todo keep the marker to be showing up
-  /*  useEffect(() => {
-    api.event.emit(markerDefinitionPayload(api.eventNames.MARKER_ICON.EVENT_MARKER_ICON_SHOW, handlerName, location, {} as TypeJsonObject));
-  }, [currentZoom, location, handlerName]);
-  */
 
   /**
    * Parse the content of the field to see if we need to create an image, a string element or a link

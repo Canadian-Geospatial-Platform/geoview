@@ -246,7 +246,7 @@
           var t0 = performance.now();
 
           for (j = 0; j < parseInt(document.getElementById('layerCount').value); j++) {
-            cgpv.api.map('mapWM').layer.addGeoviewLayer({
+            cgpv.api.maps['mapWM'].layer.addGeoviewLayer({
               geoviewLayerId: new Date().getTime().toString(),
               geoviewLayerName: {
                 en: 'test',
@@ -291,7 +291,7 @@
           const coord = generateRandomCoord();
 
           // call an api function to draw a polygon
-          const circle = cgpv.api.map('mapWM').layer.vector.addCircle([coord[0], coord[1]], {
+          const circle = cgpv.api.maps['mapWM'].layer.geometry.addCircle([coord[0], coord[1]], {
             style: {
               strokeColor: 'red',
               strokeOpacity: 0.15,
@@ -323,7 +323,7 @@
           line.push(ptEnd);
           line.unshift(ptStart);
 
-          const polyline = cgpv.api.map('mapWM').layer.vector.addPolyline(line, {
+          const polyline = cgpv.api.maps['mapWM'].layer.geometry.addPolyline(line, {
             style: {
               strokeColor: '#000',
               strokeWidth: 1,
@@ -339,7 +339,7 @@
           const factor = (Math.random() * 100 + 1) / 10;
 
           // call an api function to draw a polygon
-          const polygon = cgpv.api.map('mapWM').layer.vector.addPolygon(
+          const polygon = cgpv.api.maps['mapWM'].layer.geometry.addPolygon(
             [
               [
                 [center[0] + factor / 2, center[1] + factor],

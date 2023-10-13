@@ -75,7 +75,7 @@ export class GeoCore {
    */
   createLayers(geocoreLayerConfig: TypeGeoCoreLayerConfig): Promise<TypeListOfGeoviewLayerConfig[]> {
     const arrayOfListOfGeoviewLayerConfig = new Promise<TypeListOfGeoviewLayerConfig[]>((resolve) => {
-      const url = geocoreLayerConfig.metadataAccessPath || `${catalogUrl}/${api.map(this.mapId).displayLanguage}`;
+      const url = geocoreLayerConfig.metadataAccessPath || `${catalogUrl}/${api.maps[this.mapId].displayLanguage}`;
       const promiseOfLayerConfigs: Promise<TypeListOfGeoviewLayerConfig>[] = [];
       geocoreLayerConfig.listOfLayerEntryConfig.forEach((layerEntryConfig: TypeLayerEntryConfig) => {
         const requestUrl = `${url}/${layerEntryConfig.layerId}`;
@@ -87,7 +87,7 @@ export class GeoCore {
             this.copyConfigSettingsOverGeocoreSettings(geocoreLayerConfig.listOfLayerEntryConfig[index], geoviewLayerConfig);
           });
           this.configValidation.validateListOfGeoviewLayerConfig(
-            api.map(this.mapId).mapFeaturesConfig.suportedLanguages,
+            api.maps[this.mapId].mapFeaturesConfig.suportedLanguages,
             listOfGeoviewLayerConfig
           );
         });

@@ -8,11 +8,7 @@ import { ClassNameMap } from '@mui/styles';
 import withStyles from '@mui/styles/withStyles';
 import makeStyles from '@mui/styles/makeStyles';
 
-import Dialog from '@mui/material/Dialog';
-import { DialogProps } from '@mui/material';
-import DialogTitle from '@mui/material/DialogTitle';
-import DialogContent from '@mui/material/DialogContent';
-import DialogActions from '@mui/material/DialogActions';
+import { Dialog, DialogActions, DialogContent, DialogProps, DialogTitle } from '@mui/material';
 
 import { TypeJsonObject } from '@/core/types/global-types';
 import { HtmlToReact } from '@/core/containers/html-to-react';
@@ -239,7 +235,7 @@ export function Modal(props: TypeDialogProps): JSX.Element {
   const modalOpenListenerFunction = (payload: PayloadBaseClass) => {
     if (payloadIsAModal(payload)) {
       if (modalId === payload.modalId) {
-        const modal = api.map(mapId).modal.modals[payload.modalId] as TypeModalProps;
+        const modal = api.maps[mapId].modal.modals[payload.modalId] as TypeModalProps;
         openEvent = true;
 
         setCreatedModal(ceatedModalJSXReturner(modal));
@@ -250,7 +246,7 @@ export function Modal(props: TypeDialogProps): JSX.Element {
   const modalUpdateListenerFunction = (payload: PayloadBaseClass) => {
     if (payloadIsAModal(payload)) {
       if (modalId === payload.modalId) {
-        const modal = api.map(mapId).modal.modals[payload.modalId] as TypeModalProps;
+        const modal = api.maps[mapId].modal.modals[payload.modalId] as TypeModalProps;
 
         setCreatedModal(ceatedModalJSXReturner(modal));
       }
@@ -281,6 +277,7 @@ export function Modal(props: TypeDialogProps): JSX.Element {
       api.event.off(EVENT_NAMES.MODAL.EVENT_MODAL_CLOSE, mapId, modalCloseListenerFunction);
       api.event.off(EVENT_NAMES.MODAL.EVENT_MODAL_UPDATE, mapId, modalUpdateListenerFunction);
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [updateModal, createdModal]);
 
   return (

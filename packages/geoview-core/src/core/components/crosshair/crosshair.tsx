@@ -1,5 +1,5 @@
 /* eslint-disable react/no-danger */
-import { useEffect, useState, useRef, useContext } from 'react';
+import { useEffect, useRef, useContext } from 'react';
 
 import { useTranslation } from 'react-i18next';
 
@@ -7,14 +7,16 @@ import makeStyles from '@mui/styles/makeStyles';
 import { toLonLat } from 'ol/proj';
 import { KeyboardPan } from 'ol/interaction';
 
+import { useStore } from 'zustand';
 import { MapContext } from '@/core/app-start';
 
-import { api } from '@/app';
+import { TypeEventHandlerFunction, api } from '@/app';
 import { EVENT_NAMES } from '@/api/events/event-types';
 import { CrosshairIcon } from './crosshair-icon';
 
 import { Fade } from '@/ui';
-import { lngLatPayload, booleanPayload, payloadIsAInKeyfocus, PayloadBaseClass } from '@/api/events/payloads';
+import { lngLatPayload, payloadIsAInKeyfocus, PayloadBaseClass } from '@/api/events/payloads';
+import { getGeoViewStore } from '@/core/stores/stores-managers';
 
 const useStyles = makeStyles((theme) => ({
   crosshairContainer: {
@@ -58,13 +60,13 @@ export function Crosshair(): JSX.Element {
 
   const mapConfig = useContext(MapContext);
   const { mapId, interaction } = mapConfig;
-  const projection = api.projection.projections[api.map(mapId).currentProjection];
+  const projection = api.projection.projections[api.maps[mapId].currentProjection];
 
   // tracks if the last action was done through a keyboard (map navigation) or mouse (mouse movement)
-  const [isCrosshairsActive, setCrosshairsActive] = useState(false);
+  const store = getGeoViewStore(mapId);
+  const isCrosshairsActive = useStore(store, (state) => state.isCrosshairsActive);
 
   // do not use useState for item used inside function only without rendering... use useRef
-  const isCrosshairsActiveValue = useRef(false);
   const panelButtonId = useRef('');
 
   let panDelta = 128;
@@ -76,11 +78,11 @@ export function Crosshair(): JSX.Element {
    */
   function simulateClick(evt: KeyboardEvent): void {
     if (evt.key === 'Enter') {
-      const { map } = api.map(mapId);
+      const { map } = api.maps[mapId];
 
       const lnglatPoint = toLonLat(map.getView().getCenter()!, projection);
 
-      if (isCrosshairsActiveValue.current) {
+      if (isCrosshairsActive) {
         // emit an event with the lnglat point
         api.event.emit(lngLatPayload(EVENT_NAMES.MAP.EVENT_MAP_CROSSHAIR_ENTER, mapId, lnglatPoint));
       }
@@ -98,7 +100,7 @@ export function Crosshair(): JSX.Element {
       panDelta = panDelta < 10 ? 10 : panDelta; // minus panDelta reset the value so we need to trap
 
       // replace the KeyboardPan interraction by a new one
-      const { map } = api.map(mapId);
+      const { map } = api.maps[mapId];
       map.getInteractions().forEach((interactionItem) => {
         if (interactionItem instanceof KeyboardPan) {
           map.removeInteraction(interactionItem);
@@ -113,45 +115,49 @@ export function Crosshair(): JSX.Element {
    * @function removeCrosshair
    */
   function removeCrosshair(): void {
-    const { map } = api.map(mapId);
+    const { map } = api.maps[mapId];
 
     // remove simulate click event listener
     map.getTargetElement().removeEventListener('keydown', simulateClick);
-    setCrosshairsActive(false);
-    isCrosshairsActiveValue.current = false;
-    api.event.emit(booleanPayload(EVENT_NAMES.MAP.EVENT_MAP_CROSSHAIR_ENABLE_DISABLE, mapId, false));
+    store.setState({ isCrosshairsActive: false });
   }
 
   useEffect(() => {
-    const { map } = api.map(mapId);
+    const { map } = api.maps[mapId];
 
-    const mapContainer = map.getTargetElement();
+    // TODO: repair using the store map element
+    //! came fromt he map creation on function call
+    let eventMapInKeyFocusListenerFunction: TypeEventHandlerFunction;
+    if (map !== undefined) {
+      const mapContainer = map.getTargetElement();
 
-    const eventMapInKeyFocusListenerFunction = (payload: PayloadBaseClass) => {
-      if (payloadIsAInKeyfocus(payload)) {
-        if (interaction !== 'static') {
-          setCrosshairsActive(true);
-          isCrosshairsActiveValue.current = true;
-          api.event.emit(booleanPayload(EVENT_NAMES.MAP.EVENT_MAP_CROSSHAIR_ENABLE_DISABLE, mapId, true));
+      eventMapInKeyFocusListenerFunction = (payload: PayloadBaseClass) => {
+        if (payloadIsAInKeyfocus(payload)) {
+          if (interaction !== 'static') {
+            store.setState({ isCrosshairsActive: true });
 
-          mapContainer.addEventListener('keydown', simulateClick);
-          mapContainer.addEventListener('keydown', managePanDelta);
-          panelButtonId.current = 'detailsPanel';
+            mapContainer.addEventListener('keydown', simulateClick);
+            mapContainer.addEventListener('keydown', managePanDelta);
+            panelButtonId.current = 'detailsPanel';
+          }
         }
-      }
-    };
+      };
 
-    // on map keyboard focus, add crosshair
-    api.event.on(EVENT_NAMES.MAP.EVENT_MAP_IN_KEYFOCUS, eventMapInKeyFocusListenerFunction, mapId);
+      // on map keyboard focus, add crosshair
+      api.event.on(EVENT_NAMES.MAP.EVENT_MAP_IN_KEYFOCUS, eventMapInKeyFocusListenerFunction, mapId);
 
-    // when map blur, remove the crosshair and click event
-    mapContainer.addEventListener('blur', removeCrosshair);
+      // when map blur, remove the crosshair and click event
+      mapContainer.addEventListener('blur', removeCrosshair);
+    }
 
     return () => {
-      api.event.off(EVENT_NAMES.MAP.EVENT_MAP_IN_KEYFOCUS, mapId, eventMapInKeyFocusListenerFunction);
-      mapContainer.removeEventListener('keydown', simulateClick);
-      mapContainer.removeEventListener('keydown', managePanDelta);
-      mapContainer.removeEventListener('keydown', removeCrosshair);
+      if (map !== undefined) {
+        api.event.off(EVENT_NAMES.MAP.EVENT_MAP_IN_KEYFOCUS, mapId, eventMapInKeyFocusListenerFunction);
+        const mapContainer = map.getTargetElement();
+        mapContainer.removeEventListener('keydown', simulateClick);
+        mapContainer.removeEventListener('keydown', managePanDelta);
+        mapContainer.removeEventListener('keydown', removeCrosshair);
+      }
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

@@ -4,6 +4,7 @@ import {
   LayerSetPayload,
   payloadIsLayerRegistration,
   payloadIsLayerSetChangeLayerStatus,
+  payloadIsLayerSetChangeLayerPhase,
   TypeResultSets,
   PayloadBaseClass,
 } from '@/api/events/payloads';
@@ -30,6 +31,9 @@ export class LayerSet {
   /** Function used to determine if the layerPath can be added to the layer set. */
   registrationConditionFunction: (layerPath: string) => boolean;
 
+  /** Function used to initialise the data property of the layer path entry. */
+  registrationUserDataInitialisation?: (layerPath: string) => void;
+
   /** ***************************************************************************************************************************
    * The class constructor that instanciate a set of layer.
    *
@@ -37,28 +41,56 @@ export class LayerSet {
    * @param {string} layerSetIdentifier The layer set identifier.
    * @param {TypeResultSets} resultSets An object that will contain the result sets indexed using the layer path.
    * @param {(layerPath: string) => boolean} registrationConditionFunction A function to decide if the layer can be added.
+   * @param {(layerPath: string) => void} registrationUserDataInitialisation A function to initialise the data property of the layer path entry.
    */
   constructor(
     mapId: string,
     layerSetIdentifier: string,
     resultSets: TypeResultSets,
-    registrationConditionFunction: (layerPath: string) => boolean
+    registrationConditionFunction: (layerPath: string) => boolean,
+    registrationUserDataInitialisation?: (layerPath: string) => void
   ) {
     this.mapId = mapId;
     this.layerSetId = layerSetIdentifier;
     this.resultSets = resultSets;
     this.registrationConditionFunction = registrationConditionFunction;
+    this.registrationUserDataInitialisation = registrationUserDataInitialisation;
 
     const changeLayerStatusListenerFunctions = (payload: PayloadBaseClass) => {
       if (payloadIsLayerSetChangeLayerStatus(payload)) {
         const { layerPath, layerStatus } = payload;
         if (this.resultSets[layerPath]) {
-          this.resultSets[layerPath].layerStatus = layerStatus;
-          api.event.emit(LayerSetPayload.createLayerSetUpdatedPayload(`${this.layerSetId}/${layerPath}`, this.resultSets, layerPath));
+          if (this.resultSets[layerPath].layerStatus !== layerStatus) {
+            this.resultSets[layerPath].layerStatus = layerStatus;
+            api.event.emit(LayerSetPayload.createLayerSetUpdatedPayload(this.layerSetId, this.resultSets, layerPath));
+            if (this.layerSetId === `${mapId}/LegendsLayerSet`)
+              // LegendLayerSet is the absolute reference for finding out whether a layer has been loaded or is in error. Then, every
+              // time we modify a layerSet in the Legend family, we have to inform the system that a change has occurred.
+              api.event.emit(
+                LayerSetPayload.createLayerSetUpdatedPayload(`${mapId}/LegendsLayerSetStatusOrPhaseChanged`, this.resultSets, layerPath)
+              );
+          }
         }
       }
     };
     api.event.on(EVENT_NAMES.LAYER_SET.CHANGE_LAYER_STATUS, changeLayerStatusListenerFunctions, this.mapId);
+
+    const changeLayerPhaseListenerFunctions = (payload: PayloadBaseClass) => {
+      if (payloadIsLayerSetChangeLayerPhase(payload)) {
+        const { layerPath, layerPhase } = payload;
+        if (this.resultSets[layerPath] && this.resultSets[layerPath].layerStatus !== 'error') {
+          if (this.resultSets[layerPath].layerPhase !== layerPhase) {
+            this.resultSets[layerPath].layerPhase = layerPhase;
+            api.event.emit(LayerSetPayload.createLayerSetUpdatedPayload(this.layerSetId, this.resultSets, layerPath));
+            if (this.layerSetId === `${mapId}/LegendsLayerSet`)
+              api.event.emit(
+                LayerSetPayload.createLayerSetUpdatedPayload(`${mapId}/LegendsLayerSetStatusOrPhaseChanged`, this.resultSets, layerPath)
+              );
+          }
+        }
+      }
+    };
+    api.event.on(EVENT_NAMES.LAYER_SET.CHANGE_LAYER_PHASE, changeLayerPhaseListenerFunctions, this.mapId);
 
     // Register a layer to the layer set or unregister the layer when it is deleted from the map.
     api.event.on(
@@ -72,12 +104,18 @@ export class LayerSet {
               this.resultSets[layerPath] = {
                 data: undefined,
                 layerStatus: 'newInstance',
-                layerName: api.map(this.mapId).layer.registeredLayers[layerPath].layerName,
+                layerPhase: 'newInstance',
+                layerName: api.maps[this.mapId].layer.registeredLayers[layerPath].layerName,
               };
-              api.event.emit(LayerSetPayload.createLayerSetUpdatedPayload(`${this.mapId}/$LegendsLayerSet$`, this.resultSets, layerPath));
+              if (this.registrationUserDataInitialisation) this.registrationUserDataInitialisation(layerPath);
+              api.event.emit(LayerSetPayload.createLayerSetUpdatedPayload(this.layerSetId, this.resultSets, layerPath));
+              if (this.layerSetId === `${mapId}/LegendsLayerSet`)
+                api.event.emit(
+                  LayerSetPayload.createLayerSetUpdatedPayload(`${mapId}/LegendsLayerSetStatusOrPhaseChanged`, this.resultSets, layerPath)
+                );
             } else if (action === 'remove' && layerPath in this.resultSets) {
               delete this.resultSets[layerPath];
-              api.event.emit(LayerSetPayload.createLayerSetUpdatedPayload(`${this.mapId}/$LegendsLayerSet$`, this.resultSets, layerPath));
+              api.event.emit(LayerSetPayload.createLayerSetUpdatedPayload(this.layerSetId, this.resultSets, layerPath));
             }
           }
         }

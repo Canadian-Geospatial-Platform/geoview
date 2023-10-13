@@ -1,7 +1,10 @@
 import { MutableRefObject, useContext, useRef } from 'react';
 
+import { useStore } from 'zustand';
+
 import { useMediaQuery } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
+import { getGeoViewStore } from '@/core/stores/stores-managers';
 import { Box } from '@/ui';
 
 import { Attribution } from '../attribution/attribution';
@@ -13,38 +16,7 @@ import { FooterbarExpandButton } from './footer-bar-expand-button';
 import { FooterbarRotationButton } from './footer-bar-rotation-button';
 import { FooterbarFixNorthSwitch } from './footer-bar-fixnorth-switch';
 
-const sxClasses = {
-  footerBarContainer: {
-    display: 'flex',
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    width: 'calc(100%)',
-    minHeight: '35px',
-    maxHeight: '35px',
-    backdropFilter: 'blur(5px)',
-    backgroundColor: '#000000cc',
-    pointerEvents: 'all',
-    position: 'relative',
-    bottom: 0,
-    gap: 0.5,
-  },
-  mouseScaleControlsContainer: {
-    display: 'flex',
-    flexDirection: 'row',
-    gap: 20,
-    '& button': {
-      cursor: 'pointer',
-      margin: 'auto',
-    },
-  },
-  rotationControlsContainer: {
-    display: 'flex',
-    flexDirection: 'column',
-    marginLeft: 20,
-    alignItems: 'flex-end',
-  },
-};
+import { sxClassesFooterBar } from './footer-bar-style';
 
 /**
  * Create a footer bar element that contains attribtuion, mouse position and scale
@@ -53,28 +25,29 @@ const sxClasses = {
  */
 export function Footerbar(): JSX.Element {
   const mapConfig = useContext(MapContext);
-
-  const { mapId, interaction } = mapConfig;
+  const { mapId } = mapConfig;
 
   const footerBarRef = useRef<HTMLDivElement>();
 
   const defaultTheme = useTheme();
 
+  // get value from the store
+  // if map is static do not display mouse position or rotation controls
+  const interaction = useStore(getGeoViewStore(mapId), (state) => state.mapState.interaction);
+
   // if screen size is medium and up
   const deviceSizeMedUp = useMediaQuery(defaultTheme.breakpoints.up('sm'));
-  // If map is static do not display mouse position or rotation controls
-  const mapIsDynamic = interaction === 'dynamic';
 
   return (
-    <Box id={`${mapId}-footerBar`} sx={sxClasses.footerBarContainer} ref={footerBarRef as MutableRefObject<HTMLDivElement>}>
+    <Box id={`${mapId}-footerBar`} sx={sxClassesFooterBar.footerBarContainer} ref={footerBarRef as MutableRefObject<HTMLDivElement>}>
       <FooterbarExpandButton />
       {deviceSizeMedUp && <Attribution />}
-      <Box id="mouseAndScaleControls" sx={sxClasses.mouseScaleControlsContainer}>
-        {deviceSizeMedUp && mapIsDynamic && <MousePosition mousePositionMapId={mapId} />}
+      <Box id="mouseAndScaleControls" sx={sxClassesFooterBar.mouseScaleControlsContainer}>
+        {deviceSizeMedUp && interaction === 'dynamic' && <MousePosition />}
         <Scale />
       </Box>
-      {mapIsDynamic && (
-        <Box sx={sxClasses.rotationControlsContainer}>
+      {interaction === 'dynamic' && (
+        <Box sx={sxClassesFooterBar.rotationControlsContainer}>
           <FooterbarRotationButton />
           <FooterbarFixNorthSwitch />
         </Box>

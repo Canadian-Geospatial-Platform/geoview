@@ -52,23 +52,35 @@
     "expand_legend": "Expand Legend",
     "toggle_cluster": "Toggle Clustering",
     "toggle_opacity": "Toggle Opacity",
-    "zoom_to": "Zoom to Layer"
+    "zoom_to": "Zoom to Layer",
+    "overview_title": "Legend Overview",
+    "add_layer": "Add Layer",
+    "selected_legend": "Selected Legend",
+    "sort_layers": "Sort Layers",
+    "selected_Layers": "An overview of currrently selected layers",
+    "re-arrange": "re-arrange",
+    "categories_title" : "Categories"
   },
   "details": {
     "zoom_to": "Zoom to feature",
     "select": "Highlight feature on map",
-    "external_link": "External Link"
+    "external_link": "External Link",
+    "detailsView": "Details View",
+    "selectVisbleLayer": "Select any visible layer on the map to get started",
+    "availableLayers": "Available Layers",
+    "feature": "feature",
+    "clickOnMap": "Click on map",
+    "nextFeatureBtn": "Next feature",
+    "previousFeatureBtn": "Previous feature",
+    "clearAllfeatures": "Clear all feature highlights",
+    "highlightFeaturesOnMap": "Highlight features on map",
+    "keepFeatureSelected": "Keep feature selected"
   },
   "lightbox": {
     "next": "Next",
     "previous": "Previous",
     "close": "Close",
     "download": "Download"
-  },
-  "datagrid": {
-    "exportJson": "Download GeoJSON",
-    "filterMap": "Filter Map",
-    "stopFilterMap": "Stop Map Filter"
   },
   "keyboardnav": {
     "start": "Skip after map element",
@@ -88,6 +100,10 @@
       "notfound": "The sublayer __param__ of the GeoView layer __param__ does not exist on the server",
       "createtwice": "Can not execute twice the createGeoViewRasterLayers method for the map __param__",
       "usedtwice": "Duplicate use of geoview layer identifier [__param__] on map __param__"
+    },
+    "schema": {
+      "notFound": "A schema error was found, check the console to see what is wrong.",
+      "wrongPath": "Cannot find schema ([__param__])"
     }
   },
   "exportModal": {
@@ -109,6 +125,10 @@
     "jsonExportBtn": "Download GeoJSON",
     "downloadAsCSV": "Download as CSV",
     "filterMap": "Filter Map",
-    "stopFilterMap": "Stop Filter Map"
+    "stopFilterMap": "Stop Filter Map",
+    "leftPanelHeading": "Available Categories",
+    "rightPanelHeading": "Selected Category",
+    "rowsSelected": "{rowsSelected} of {totalRows} row(s) selected",
+    "rowsFiltered": "{rowsFiltered} of {totalRows} row(s) filtered"
   }
 }

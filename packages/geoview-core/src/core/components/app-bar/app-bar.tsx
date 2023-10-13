@@ -7,14 +7,14 @@ import { List, ListItem, Panel, IconButton } from '@/ui';
 import { api } from '@/app';
 import { EVENT_NAMES } from '@/api/events/event-types';
 
-import { MapContext } from '@/core/app-start';
+import { MapContext, TypeMapContext } from '@/core/app-start';
 
 import { payloadIsAButtonPanel, ButtonPanelPayload, PayloadBaseClass } from '@/api/events/payloads';
 import { TypeButtonPanel } from '@/ui/panel/panel-types';
 
 import Export from './buttons/export';
 import Geolocator from './buttons/geolocator';
-import Notifications from './buttons/notifications';
+import Notifications from '@/core/components/notifications/notifications';
 import Version from './buttons/version';
 import ExportModal from '../export/export-modal';
 
@@ -90,13 +90,14 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 type AppbarProps = {
-  setActivetrap: Dispatch<SetStateAction<boolean>>;
+  activeTrap: boolean;
+  activeTrapSet: Dispatch<SetStateAction<boolean>>;
 };
 
 /**
  * Create an app-bar with buttons that can open a panel
  */
-export function Appbar({ setActivetrap }: AppbarProps): JSX.Element {
+export function Appbar({ activeTrap, activeTrapSet }: AppbarProps): JSX.Element {
   const [buttonPanelGroups, setButtonPanelGroups] = useState<Record<string, Record<string, TypeButtonPanel>>>({});
   const [ModalIsShown, setModalIsShown] = useState(false);
   const [selectedAppBarButtonId, setSelectedAppbarButtonId] = useState<string>('');
@@ -105,21 +106,21 @@ export function Appbar({ setActivetrap }: AppbarProps): JSX.Element {
 
   const appBar = useRef<HTMLDivElement>(null);
 
-  const mapConfig = useContext(MapContext);
+  const mapContext = useContext(MapContext);
 
-  const { mapId } = mapConfig;
-  const { mapFeaturesConfig } = api.map(mapId);
+  const { mapFeaturesConfig, mapId } = mapContext as Required<TypeMapContext>;
+  const trapActive = useRef<boolean>(activeTrap);
 
   const openModal = () => {
     setModalIsShown(true);
+    trapActive.current = activeTrap;
     // this will remove the focus active trap from map and focus will be on export modal
-    setActivetrap(false);
+    activeTrapSet(false);
   };
 
   const closeModal = () => {
     setModalIsShown(false);
-    // this will add back focus active trap from map and focus will be on export modal
-    setActivetrap(true);
+    activeTrapSet(trapActive.current);
   };
 
   const addButtonPanel = useCallback(
@@ -150,19 +151,18 @@ export function Appbar({ setActivetrap }: AppbarProps): JSX.Element {
     [setButtonPanelGroups]
   );
 
-  const appBarPanelCreateListenerFunction = (payload: PayloadBaseClass) => {
-    if (payloadIsAButtonPanel(payload)) addButtonPanel(payload);
-  };
-
-  const appBarPanelRemoveListenerFunction = (payload: PayloadBaseClass) => {
-    if (payloadIsAButtonPanel(payload)) removeButtonPanel(payload);
-  };
-
   const appBarPanelCloseListenerFunction = () => setSelectedAppbarButtonId('');
 
   useEffect(() => {
+    const appBarPanelCreateListenerFunction = (payload: PayloadBaseClass) => {
+      if (payloadIsAButtonPanel(payload)) addButtonPanel(payload);
+    };
     // listen to new panel creation
     api.event.on(EVENT_NAMES.APPBAR.EVENT_APPBAR_PANEL_CREATE, appBarPanelCreateListenerFunction, mapId);
+
+    const appBarPanelRemoveListenerFunction = (payload: PayloadBaseClass) => {
+      if (payloadIsAButtonPanel(payload)) removeButtonPanel(payload);
+    };
 
     // listen on panel removal
     api.event.on(EVENT_NAMES.APPBAR.EVENT_APPBAR_PANEL_REMOVE, appBarPanelRemoveListenerFunction, mapId);
@@ -259,7 +259,12 @@ export function Appbar({ setActivetrap }: AppbarProps): JSX.Element {
             {Object.keys(buttonPanels).map((buttonPanelsKey) => {
               const buttonPanel = buttonPanels[buttonPanelsKey];
               return buttonPanel?.panel ? (
-                <Panel key={buttonPanel.panel.panelId} panel={buttonPanel.panel} button={buttonPanel.button} />
+                <Panel
+                  key={buttonPanel.panel.panelId}
+                  panel={buttonPanel.panel}
+                  button={buttonPanel.button}
+                  handlePanelOpened={buttonPanel.handlePanelOpened}
+                />
               ) : null;
             })}
           </Fragment>

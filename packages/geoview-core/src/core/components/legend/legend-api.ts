@@ -39,9 +39,8 @@ export class LegendApi {
    */
   createLegend = (props: TypeLegendProps) => {
     const { layerIds, isRemoveable, canSetOpacity, expandAll, hideAll } = props;
-    api.event.emit({ handlerName: `${this.mapId}/$LegendsLayerSet$`, event: api.eventNames.GET_LEGENDS.TRIGGER });
     const legendItems = layerIds.map((layerId) => {
-      const geoviewLayerInstance = api.map(this.mapId).layer.geoviewLayers[layerId];
+      const geoviewLayerInstance = api.maps[this.mapId].layer.geoviewLayers[layerId];
       if (geoviewLayerInstance) {
         return createElement(LegendItem, {
           key: `layerKey-${layerId}`,
@@ -65,7 +64,7 @@ export class LegendApi {
    */
   createLegendItem = (props: TypeLegendItemProps) => {
     const { layerId } = props;
-    const geoviewLayerInstance = api.map(this.mapId).layer.geoviewLayers[layerId];
+    const geoviewLayerInstance = api.maps[this.mapId].layer.geoviewLayers[layerId];
     return createElement(LegendItem, { layerId, geoviewLayerInstance, key: layerId });
   };
 }

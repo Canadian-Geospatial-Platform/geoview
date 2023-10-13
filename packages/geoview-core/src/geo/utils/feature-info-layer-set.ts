@@ -8,6 +8,7 @@ import {
   TypeFeatureInfoResultSets,
   payloadIsAMapMouseEvent,
   payloadIsALngLat,
+  ArrayOfQueryTypes,
 } from '@/api/events/payloads';
 import { api } from '@/app';
 import { LayerSet } from './layer-set';
@@ -40,15 +41,31 @@ export class FeatureInfoLayerSet {
    *
    */
   private constructor(mapId: string) {
+    // This function determines whether a layer can be registered.
     const registrationConditionFunction = (layerPath: string): boolean => {
-      const layerEntryConfig = api.map(this.mapId).layer.registeredLayers[layerPath];
+      const layerEntryConfig = api.maps[this.mapId].layer.registeredLayers[layerPath];
       if (layerEntryConfig?.source) {
         return 'featureInfo' in layerEntryConfig.source! && !!layerEntryConfig.source.featureInfo?.queryable;
       }
       return false;
     };
+
+    // This function is used to initialise the date property of the layer path entry.
+    const registrationUserDataInitialisation = (layerPath: string) => {
+      this.resultSets[layerPath].data = {};
+      ArrayOfQueryTypes.forEach((property) => {
+        this.resultSets[layerPath].data[property] = undefined;
+      });
+    };
+
     this.mapId = mapId;
-    this.layerSet = new LayerSet(mapId, `${mapId}/$FeatureInfoLayerSet$`, this.resultSets, registrationConditionFunction);
+    this.layerSet = new LayerSet(
+      mapId,
+      `${mapId}/FeatureInfoLayerSet`,
+      this.resultSets,
+      registrationConditionFunction,
+      registrationUserDataInitialisation
+    );
 
     // Listen to "map click"-"crosshair enter" and send a query layers event to queryable layers. These layers will return a result set of features.
     api.event.on(
@@ -56,9 +73,9 @@ export class FeatureInfoLayerSet {
       (payload) => {
         if (payloadIsAMapMouseEvent(payload)) {
           Object.keys(this.resultSets).forEach((layerPath) => {
-            this.resultSets[layerPath].data = undefined;
+            this.resultSets[layerPath].data.at_long_lat = undefined;
           });
-          api.event.emit(GetFeatureInfoPayload.createQueryLayerPayload(this.mapId, 'at long lat', payload.coordinates.lnglat, false));
+          api.event.emit(GetFeatureInfoPayload.createQueryLayerPayload(this.mapId, 'at_long_lat', payload.coordinates.lnglat, false));
         }
       },
       this.mapId
@@ -69,9 +86,9 @@ export class FeatureInfoLayerSet {
       (payload) => {
         if (payloadIsALngLat(payload)) {
           Object.keys(this.resultSets).forEach((layerPath) => {
-            this.resultSets[layerPath].data = undefined;
+            this.resultSets[layerPath].data.at_long_lat = undefined;
           });
-          api.event.emit(GetFeatureInfoPayload.createQueryLayerPayload(this.mapId, 'at long lat', payload.lnglat, false));
+          api.event.emit(GetFeatureInfoPayload.createQueryLayerPayload(this.mapId, 'at_long_lat', payload.lnglat, false));
         }
       },
       this.mapId
@@ -82,11 +99,22 @@ export class FeatureInfoLayerSet {
       debounce((payload) => {
         if (payloadIsAMapMouseEvent(payload)) {
           Object.keys(this.resultSets).forEach((layerPath) => {
-            this.resultSets[layerPath].data = undefined;
+            this.resultSets[layerPath].data.at_pixel = undefined;
           });
-          api.event.emit(GetFeatureInfoPayload.createQueryLayerPayload(this.mapId, 'at pixel', payload.coordinates.pixel, true));
+          api.event.emit(GetFeatureInfoPayload.createQueryLayerPayload(this.mapId, 'at_pixel', payload.coordinates.pixel, true));
         }
       }, 750),
+      this.mapId
+    );
+
+    api.event.on(
+      EVENT_NAMES.MAP.EVENT_MAP_GET_ALL_FEATURES,
+      () => {
+        Object.keys(this.resultSets).forEach((layerPath) => {
+          this.resultSets[layerPath].data.all = undefined;
+        });
+        api.event.emit(GetFeatureInfoPayload.createQueryLayerPayload(this.mapId, 'all'));
+      },
       this.mapId
     );
 
@@ -94,22 +122,32 @@ export class FeatureInfoLayerSet {
       EVENT_NAMES.GET_FEATURE_INFO.QUERY_RESULT,
       (payload) => {
         if (payloadIsQueryResult(payload)) {
-          const { layerPath, arrayOfRecords, isHover } = payload;
+          const { layerPath, queryType, arrayOfRecords, isHover } = payload;
           if (layerPath in this.resultSets) {
-            this.resultSets[layerPath].data = arrayOfRecords;
+            this.resultSets[layerPath].data[queryType] = arrayOfRecords;
           }
 
           const allDone = Object.keys(this.resultSets).reduce((doneFlag, layerPathToTest) => {
-            return doneFlag && this.resultSets[layerPathToTest].data !== undefined;
+            return doneFlag && this.resultSets[layerPathToTest].data[queryType] !== undefined;
           }, true);
 
           if (allDone && !isHover) {
             api.event.emit(
-              GetFeatureInfoPayload.createAllQueriesDonePayload(`${this.layerSet.layerSetId}`, this.layerSet.layerSetId, this.resultSets)
+              GetFeatureInfoPayload.createAllQueriesDonePayload(
+                `${this.layerSet.layerSetId}`,
+                queryType,
+                this.layerSet.layerSetId,
+                this.resultSets
+              )
             );
           } else if (allDone && isHover) {
             api.event.emit(
-              GetFeatureInfoPayload.createHoverQueryDonePayload(`${this.layerSet.layerSetId}`, this.layerSet.layerSetId, this.resultSets)
+              GetFeatureInfoPayload.createHoverQueryDonePayload(
+                `${this.layerSet.layerSetId}`,
+                queryType,
+                this.layerSet.layerSetId,
+                this.resultSets
+              )
             );
           }
         }
@@ -130,5 +168,14 @@ export class FeatureInfoLayerSet {
     if (!FeatureInfoLayerSet.featureInfoLayerSetInstance[mapId])
       FeatureInfoLayerSet.featureInfoLayerSetInstance[mapId] = new FeatureInfoLayerSet(mapId);
     return FeatureInfoLayerSet.featureInfoLayerSetInstance[mapId];
+  }
+
+  /**
+   * Function used to delete a FeatureInfoLayerSet object associated to a mapId.
+   *
+   * @param {string} mapId The map identifier the layer set belongs to.
+   */
+  static delete(mapId: string) {
+    if (FeatureInfoLayerSet.featureInfoLayerSetInstance[mapId]) delete FeatureInfoLayerSet.featureInfoLayerSetInstance[mapId];
   }
 }

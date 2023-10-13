@@ -71,6 +71,18 @@ declare module '@mui/material/styles' {
       overlayHover?: string;
       overlayActive?: string;
     };
+    footerPanel?: {
+      contentBg: string;
+      contentShadow: string;
+      titleFont: string;
+      layerTitleFont: string;
+      layerSecondaryTitleFont: string;
+      highlightColor: string;
+      featureNumbersFont: string;
+      featureKeyFont: string;
+      featureValueFont: string;
+      chooseLayerFont: string;
+    };
   }
   interface Theme {
     overrides: {
@@ -119,6 +131,18 @@ declare module '@mui/material/styles' {
       overlayDefault: string;
       overlayHover: string;
       overlayActive: string;
+    };
+    footerPanel: {
+      contentBg: string;
+      contentShadow: string;
+      titleFont: string;
+      layerTitleFont: string;
+      layerSecondaryTitleFont: string;
+      highlightColor: string;
+      featureNumbersFont: string;
+      featureKeyFont: string;
+      featureValueFont: string;
+      chooseLayerFont: string;
     };
   }
 }

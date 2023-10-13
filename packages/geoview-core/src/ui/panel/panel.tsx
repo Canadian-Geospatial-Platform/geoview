@@ -11,6 +11,7 @@ import makeStyles from '@mui/styles/makeStyles';
 import Card from '@mui/material/Card';
 import CardHeader from '@mui/material/CardHeader';
 import CardContent from '@mui/material/CardContent';
+import { useTheme } from '@mui/styles';
 
 import { Cast } from '@/core/types/global-types';
 import { HtmlToReact } from '@/core/containers/html-to-react';
@@ -37,6 +38,9 @@ type TypePanelAppProps = {
   panel: PanelApi;
   //   panelOpen: boolean;
   button: TypeIconButtonProps;
+
+  // Callback when the panel has completed opened (and transitioned in)
+  handlePanelOpened?: () => void;
 };
 
 const useStyles = makeStyles((theme) => ({
@@ -102,16 +106,19 @@ const useStyles = makeStyles((theme) => ({
  * @returns {JSX.Element} the created Panel element
  */
 export function Panel(props: TypePanelAppProps): JSX.Element {
-  const { panel, button } = props;
+  const { panel, button, handlePanelOpened } = props;
   const { panelStyles } = panel;
   // set the active trap value for FocusTrap
   const [panelStatus, setPanelStatus] = useState(false);
+
+  // Get the theme
+  const theme = useTheme();
 
   const panelWidth = panel?.width ?? 350;
   const panelContainerStyles = {
     ...(panelStyles?.panelContainer && { ...panelStyles.panelContainer }),
     width: panelStatus ? panelWidth : 0,
-    transition: 'width 300ms ease',
+    transition: `width ${theme.transitions.duration.standard}ms ease`,
   };
 
   const [actionButtons, setActionButtons] = useState<JSX.Element[] & ReactNode[]>([]);
@@ -147,7 +154,7 @@ export function Panel(props: TypePanelAppProps): JSX.Element {
       // put back focus on calling button
       document.getElementById(button.id!)?.focus();
     } else {
-      const mapCont = api.map(mapConfig.mapId).map.getTargetElement();
+      const mapCont = api.maps[mapConfig.mapId].map.getTargetElement();
       mapCont.focus();
 
       // if in focus trap mode, trigger the event
@@ -180,6 +187,13 @@ export function Panel(props: TypePanelAppProps): JSX.Element {
     if (payloadHasAButtonIdAndType(payload)) {
       // set focus on close button on panel open
       setPanelStatus(true);
+
+      if (handlePanelOpened) {
+        // Wait the transition period (+50 ms just to be sure of shenanigans)
+        setTimeout(() => {
+          handlePanelOpened!();
+        }, theme.transitions.duration.standard + 50);
+      }
 
       if (closeBtnRef && closeBtnRef.current) {
         (closeBtnRef.current as HTMLElement).focus();
@@ -339,3 +353,10 @@ export function Panel(props: TypePanelAppProps): JSX.Element {
     </Box>
   );
 }
+
+/**
+ * React's default properties for the Panel
+ */
+Panel.defaultProps = {
+  handlePanelOpened: null,
+};

@@ -123,7 +123,7 @@
 
     function btnClearGroup1(groupKey) {
       // Delete the geometries from the group
-      map1.layer.vector.deleteGeometriesFromGroup(groupKey);
+      map1.layer.geometry.deleteGeometriesFromGroup(groupKey);
     }
 
     function selDrawChanged1(groupKey) {
@@ -167,7 +167,7 @@
           cgpv.api.eventNames.MAP.EVENT_MAP_LOADED,
             (payload) => {
               // Init map
-              initMap1(cgpv.api.map(mapId1));
+              initMap1(cgpv.api.maps[mapId1]);
               // Wire the logs
               wireLogs(cgpv.api, mapId1, 'LOGS1');
             },

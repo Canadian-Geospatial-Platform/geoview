@@ -16,6 +16,28 @@ function createCodeSnippet() {
   }
 }
 
+function createCodeSnippetUsingIDs() {
+  // Enhanced code snippet generator which allows to associate a script id with a code snippet script (og function is using indexes)
+  // and write down different code snippet spreaded in the dom tree (og function always reuses 'script' variable which is the last script tag found in the dom)
+  // Get all scripts on page which has an id
+  const scripts = Array.prototype.filter.call(document.getElementsByTagName('script'), (obj) => {
+    return obj.getAttribute('id') !== null;
+  });
+
+  // Loop on each script
+  for (let i = 0; i < scripts.length; i++) {
+    // Try to find a codeSnippet flag interested in that script
+    const script = scripts[i];
+    const el = document.getElementById(`${script.id}CS`);
+    if (el !== null) {
+      el.innerHTML = `<pre>${script.textContent
+        .replace('//create snippets\n', '')
+        .replace('createConfigSnippet();\n', '')
+        .replace('createCodeSnippet();\n', '')}</pre>`;
+    }
+  }
+}
+
 function createConfigSnippet() {
   let j = 0;
   // inject configuration snippet inside panel
@@ -69,15 +91,14 @@ function createCollapsible() {
   let i;
 
   for (i = 0; i < coll.length; i++) {
+    const content = coll[i].nextElementSibling;
+    if (coll[i].classList.contains('active')) content.style.display = 'block';
+    else content.style.display = 'none';
     // eslint-disable-next-line func-names
     coll[i].addEventListener('click', function () {
       this.classList.toggle('active');
-      const content = this.nextElementSibling;
-      if (content.style.display === 'block') {
-        content.style.display = 'none';
-      } else {
-        content.style.display = 'block';
-      }
+      if (this.classList.contains('active')) content.style.display = 'block';
+      else content.style.display = 'none';
     });
   }
 }
@@ -112,6 +133,7 @@ function wireLogs(api, mapId, logsDomId) {
       (payload) => {
         // Log the event
         addLog(logsDomId, payload.event);
+        // eslint-disable-next-line no-console
         console.log(payload);
       },
       mapId
@@ -121,16 +143,16 @@ function wireLogs(api, mapId, logsDomId) {
 
 function addDefaultShapes(map, groupKey) {
   // Set active geometry group
-  map.layer.vector.setActiveGeometryGroup(groupKey);
+  map.layer.geometry.setActiveGeometryGroup(groupKey);
 
   // Add dummy shapes
-  map.layer.vector.addCircle([-98.94, 57.94], { style: { strokeColor: 'purple', strokeWidth: 2 } });
+  map.layer.geometry.addCircle([-98.94, 57.94], { style: { strokeColor: 'purple', strokeWidth: 2 } });
 
   // Add dummy shapes
-  map.layer.vector.addMarkerIcon([-105.78, 57.52]);
+  map.layer.geometry.addMarkerIcon([-105.78, 57.52]);
 
   // Add dummy shapes
-  map.layer.vector.addPolyline(
+  map.layer.geometry.addPolyline(
     [
       [-106.17, 63.99],
       [-104.46, 62.55],
@@ -140,7 +162,7 @@ function addDefaultShapes(map, groupKey) {
   );
 
   // Add dummy shapes
-  map.layer.vector.addPolygon(
+  map.layer.geometry.addPolygon(
     [
       [
         [-96.71, 64.41],
@@ -155,10 +177,10 @@ function addDefaultShapes(map, groupKey) {
 
 function addSpecialShapes(map, groupKey) {
   // Set active geometry group
-  map.layer.vector.setActiveGeometryGroup(groupKey);
+  map.layer.geometry.setActiveGeometryGroup(groupKey);
 
   // Add dummy shapes
-  map.layer.vector.addPolygon(
+  map.layer.geometry.addPolygon(
     [
       [
         [-86.06, 62.59],

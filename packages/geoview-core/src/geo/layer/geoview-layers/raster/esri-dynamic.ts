@@ -29,7 +29,7 @@ import {
   TypeFeatureInfoLayerConfig,
   layerEntryIsGroupLayer,
 } from '@/geo/map/map-schema-types';
-import { TypeArrayOfFeatureInfoEntries, codedValueType, rangeDomainType } from '@/api/events/payloads';
+import { LayerSetPayload, TypeArrayOfFeatureInfoEntries, codedValueType, rangeDomainType } from '@/api/events/payloads';
 import { api } from '@/app';
 import { Layer } from '../../layer';
 import { EVENT_NAMES } from '@/api/events/event-types';
@@ -255,6 +255,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
    */
   processOneLayerEntry(layerEntryConfig: TypeEsriDynamicLayerEntryConfig): Promise<TypeBaseRasterLayer | null> {
     const promisedVectorLayer = new Promise<TypeBaseRasterLayer | null>((resolve) => {
+      this.changeLayerPhase('processOneLayerEntry', layerEntryConfig);
       const sourceOptions: SourceOptions = {};
       sourceOptions.attributions = [(this.metadata!.copyrightText ? this.metadata!.copyrightText : '') as string];
       sourceOptions.url = getLocalizedValue(layerEntryConfig.source.dataAccessPath!, this.mapId);
@@ -297,8 +298,11 @@ export class EsriDynamic extends AbstractGeoViewRaster {
       layerEntryConfig.gvLayer = new ImageLayer(imageLayerOptions);
       this.applyViewFilter(layerEntryConfig, layerEntryConfig.layerFilter ? layerEntryConfig.layerFilter : '');
 
+      super.addLoadendListener(layerEntryConfig, 'image');
+
       resolve(layerEntryConfig.gvLayer);
     });
+
     return promisedVectorLayer;
   }
 
@@ -311,7 +315,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
    * @returns {Promise<TypeArrayOfFeatureInfoEntries>} The feature info table.
    */
   protected getFeatureInfoAtPixel(location: Pixel, layerConfig: TypeEsriDynamicLayerEntryConfig): Promise<TypeArrayOfFeatureInfoEntries> {
-    const { map } = api.map(this.mapId);
+    const { map } = api.maps[this.mapId];
     return this.getFeatureInfoAtCoordinate(map.getCoordinateFromPixel(location), layerConfig);
   }
 
@@ -327,7 +331,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
     location: Coordinate,
     layerConfig: TypeEsriDynamicLayerEntryConfig
   ): Promise<TypeArrayOfFeatureInfoEntries> {
-    const convertedLocation = transform(location, `EPSG:${api.map(this.mapId).currentProjection}`, 'EPSG:4326');
+    const convertedLocation = transform(location, `EPSG:${api.maps[this.mapId].currentProjection}`, 'EPSG:4326');
     return this.getFeatureInfoAtLongLat(convertedLocation, layerConfig);
   }
 
@@ -351,8 +355,8 @@ export class EsriDynamic extends AbstractGeoViewRaster {
         if (!identifyUrl) resolve([]);
         else {
           identifyUrl = identifyUrl.endsWith('/') ? identifyUrl : `${identifyUrl}/`;
-          const mapLayer = api.map(this.mapId).map;
-          const { currentProjection } = api.map(this.mapId);
+          const mapLayer = api.maps[this.mapId].map;
+          const { currentProjection } = api.maps[this.mapId];
           const size = mapLayer.getSize()!;
           let bounds = mapLayer.getView().calculateExtent();
           bounds = transformExtent(bounds, `EPSG:${currentProjection}`, 'EPSG:4326');
@@ -793,7 +797,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
    */
   getBounds(layerConfig: TypeLayerEntryConfig, bounds: Extent | undefined): Extent | undefined {
     const layerBounds = layerConfig!.initialSettings?.bounds || [];
-    const projection = this.metadata?.fullExtent.spatialReference.wkid || api.map(this.mapId).currentProjection;
+    const projection = this.metadata?.fullExtent.spatialReference.wkid || api.maps[this.mapId].currentProjection;
 
     if (this.metadata?.fullExtent) {
       layerBounds[0] = this.metadata?.fullExtent.xmin as number;

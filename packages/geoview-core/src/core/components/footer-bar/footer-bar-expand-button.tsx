@@ -1,23 +1,11 @@
-import { useContext, useState } from 'react';
+import { useContext } from 'react';
+
+import { useStore } from 'zustand';
+import { getGeoViewStore } from '@/core/stores/stores-managers';
 
 import { ExpandMoreIcon, ExpandLessIcon, IconButton, Box } from '@/ui';
 import { MapContext } from '@/core/app-start';
-import { api } from '@/app';
-
-import { booleanPayload } from '@/api/events/payloads';
-import { EVENT_NAMES } from '@/api/events/event-types';
-
-const sxClasses = {
-  expandbuttonContainer: {
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    color: 'primary.light',
-    height: '30px',
-    width: '30px',
-    marginLeft: '5px',
-  },
-};
+import { sxClassesExportButton } from './footer-bar-style';
 
 /**
  * Footerbar Expand Button component
@@ -25,10 +13,12 @@ const sxClasses = {
  * @returns {JSX.Element} the expand buttons
  */
 export function FooterbarExpandButton(): JSX.Element {
-  const [status, setStatus] = useState<boolean>(false);
-
   const mapConfig = useContext(MapContext);
   const { mapId } = mapConfig;
+
+  // get the expand or collapse from expand button click
+  const store = getGeoViewStore(mapId);
+  const expanded = useStore(getGeoViewStore(mapId), (state) => state.footerBarState.expanded);
 
   /**
    * Expand the footer bar
@@ -47,9 +37,10 @@ export function FooterbarExpandButton(): JSX.Element {
       }
     }
 
-    setStatus(true);
-
-    api.event.emit(booleanPayload(EVENT_NAMES.FOOTERBAR.EVENT_FOOTERBAR_EXPAND_COLLAPSE, mapId, true));
+    // footerbar expanded
+    store.setState({
+      footerBarState: { ...store.getState().footerBarState, expanded: true },
+    });
   };
 
   /**
@@ -69,15 +60,16 @@ export function FooterbarExpandButton(): JSX.Element {
       footerBar.style.maxHeight = '25px';
     }
 
-    setStatus(false);
-
-    api.event.emit(booleanPayload(EVENT_NAMES.FOOTERBAR.EVENT_FOOTERBAR_EXPAND_COLLAPSE, mapId, false));
+    // set footerbar collapsed
+    store.setState({
+      footerBarState: { ...store.getState().footerBarState, expanded: false },
+    });
   };
 
   return (
     <Box>
-      <IconButton sx={sxClasses.expandbuttonContainer} onClick={() => (status ? collapseFooterbar() : expandFooterbar())}>
-        {status ? <ExpandMoreIcon /> : <ExpandLessIcon />}
+      <IconButton sx={sxClassesExportButton.expandbuttonContainer} onClick={() => (expanded ? collapseFooterbar() : expandFooterbar())}>
+        {expanded ? <ExpandMoreIcon /> : <ExpandLessIcon />}
       </IconButton>
     </Box>
   );

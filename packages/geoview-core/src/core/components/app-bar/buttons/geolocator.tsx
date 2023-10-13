@@ -1,8 +1,6 @@
 import { useState } from 'react';
-
-import { api, booleanPayload } from '@/app';
-import { EVENT_NAMES } from '@/api/events/event-types';
 import { IconButton, SearchIcon } from '@/ui';
+import { getGeoViewStore } from '@/core/stores/stores-managers';
 
 /**
  * Interface used for geolocator button properties
@@ -27,10 +25,13 @@ const defaultProps = {
 export default function Geolocator(props: GeolocatorProps): JSX.Element {
   const { mapId, className } = props;
   const [active, setActive] = useState(true);
+  const store = getGeoViewStore(mapId);
 
   const click = () => {
     setActive(!active);
-    api.event.emit(booleanPayload(EVENT_NAMES.GEOLOCATOR.EVENT_GEOLOCATOR_TOGGLE, mapId, active));
+    store.setState({
+      appBarState: { ...store.getState().appBarState, geoLocatorActive: active },
+    });
   };
 
   return (

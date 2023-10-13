@@ -7,15 +7,13 @@ import Ajv from 'ajv';
 
 import makeStyles from '@mui/styles/makeStyles';
 
-import { MapViewer } from '@/geo/map/map';
+import { showError } from '@/core/utils/utilities';
+import { MapViewer } from '@/geo/map/map-viewer';
 
 import { api } from '@/app';
 import { AbstractPlugin } from './abstract-plugin';
 import { TypePluginStructure, TypeRecordOfPlugin } from './plugin-types';
 import { toJsonObject, TypeJsonObject, TypeJsonValue } from '@/core/types/global-types';
-
-import { EVENT_NAMES } from '../events/event-types';
-import { snackbarMessagePayload } from '../events/payloads';
 
 /**
  * Class to manage plugins
@@ -158,13 +156,7 @@ export class Plugin {
               const error = validate.errors[j];
 
               const errorMessage = `Plugin ${pluginId}: ${error.instancePath} ${error.message} - ${JSON.stringify(error.params)}`;
-
-              api.event.emit(
-                snackbarMessagePayload(EVENT_NAMES.SNACKBAR.EVENT_SNACKBAR_OPEN, mapId, {
-                  type: 'string',
-                  value: errorMessage,
-                })
-              );
+              showError(mapId, errorMessage);
             }
           }
         }

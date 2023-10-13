@@ -1,4 +1,4 @@
-import { Badge as BadgeElement, BadgeProps } from '@mui/material';
+import { Badge as MaterialBadge, BadgeProps } from '@mui/material';
 
 /**
  * Create a badge component
@@ -7,5 +7,5 @@ import { Badge as BadgeElement, BadgeProps } from '@mui/material';
  * @returns {JSX.Element} returns badge component
  */
 export function Badge(props: BadgeProps): JSX.Element {
-  return <BadgeElement {...props} />;
+  return <MaterialBadge {...props} />;
 }

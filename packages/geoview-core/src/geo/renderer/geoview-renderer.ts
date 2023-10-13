@@ -1525,7 +1525,7 @@ export class GeoviewRenderer {
             }
           }
         else {
-          // Validate the UPPER and LOWER syntaxe (i.e.: must be followed by an opening parenthesis)
+          // Validate the UPPER and LOWER syntax (i.e.: must be followed by an opening parenthesis)
           if (
             ['upper', 'lower'].includes(filterEquation[i].nodeValue as string) &&
             (filterEquation.length === i + 1 ||
@@ -1575,11 +1575,11 @@ export class GeoviewRenderer {
         let valueToPush;
         switch (operator.nodeValue) {
           case 'is not':
-            if (operand2.nodeValue !== null) throw new Error(`Invalid is not null operator syntaxe`);
+            if (operand2.nodeValue !== null) throw new Error(`Invalid is not null operator syntax`);
             dataStack.push({ nodeType: NodeType.variable, nodeValue: operand1.nodeValue !== null });
             break;
           case 'is':
-            if (operand2.nodeValue !== null) throw new Error(`Invalid is null operator syntaxe`);
+            if (operand2.nodeValue !== null) throw new Error(`Invalid is null operator syntax`);
             dataStack.push({ nodeType: NodeType.variable, nodeValue: operand1.nodeValue === null });
             break;
           case '=':
@@ -1659,18 +1659,24 @@ export class GeoviewRenderer {
             else dataStack.push({ nodeType: NodeType.variable, nodeValue: operand1.nodeValue / operand2.nodeValue });
             break;
           case '||':
-            if (typeof operand1.nodeValue !== 'string' || typeof operand2.nodeValue !== 'string') throw new Error(`|| operator error`);
-            else dataStack.push({ nodeType: NodeType.variable, nodeValue: `${operand1.nodeValue}${operand2.nodeValue}` });
+            if ((typeof operand1.nodeValue !== 'string' && operand1.nodeValue !== null) || typeof operand2.nodeValue !== 'string')
+              throw new Error(`|| operator error`);
+            else
+              dataStack.push({
+                nodeType: NodeType.variable,
+                nodeValue: operand1.nodeValue === null ? null : `${operand1.nodeValue}${operand2.nodeValue}`,
+              });
             break;
           case 'like':
-            if (typeof operand1.nodeValue !== 'string' || typeof operand2.nodeValue !== 'string') throw new Error(`like operator error`);
+            if ((typeof operand1.nodeValue !== 'string' && operand1.nodeValue !== null) || typeof operand2.nodeValue !== 'string')
+              throw new Error(`like operator error`);
             else {
               const regularExpression = new RegExp(
-                operand2.nodeValue.replaceAll('.', '\\.').replaceAll('%', '.*').replaceAll('_', '.'),
+                operand2.nodeValue.toLowerCase().replaceAll('.', '\\.').replaceAll('%', '.*').replaceAll('_', '.'),
                 ''
               );
-              const match = operand1.nodeValue.match(regularExpression);
-              dataStack.push({ nodeType: NodeType.variable, nodeValue: match !== null && match[0] === operand1.nodeValue });
+              const match = operand1.nodeValue ? operand1.nodeValue.toLowerCase().match(regularExpression) : null;
+              dataStack.push({ nodeType: NodeType.variable, nodeValue: match !== null && match[0] === operand1.nodeValue?.toLowerCase() });
             }
             break;
           case ',':
@@ -1698,7 +1704,6 @@ export class GeoviewRenderer {
             break;
           default:
             throw new Error(`unknown operator error`);
-            break;
         }
       }
       return;
@@ -1743,8 +1748,7 @@ export class GeoviewRenderer {
             else dataStack.push({ nodeType: NodeType.variable, nodeValue: operand.nodeValue.toLowerCase() });
             break;
           default:
-            throw new Error(`unknoown operator error`);
-            break;
+            throw new Error(`unknown operator error`);
         }
       }
     }

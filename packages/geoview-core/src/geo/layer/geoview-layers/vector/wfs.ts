@@ -24,7 +24,6 @@ import {
 import { getLocalizedValue, getXMLHttpRequest, xmlToJson, findPropertyNameByRegex } from '@/core/utils/utilities';
 import { api } from '@/app';
 import { Layer } from '../../layer';
-import { LayerSetPayload } from '@/api/events/payloads';
 
 export interface TypeSourceWFSVectorInitialConfig extends TypeVectorSourceInitialConfig {
   format: 'WFS';
@@ -125,7 +124,7 @@ export class WFS extends AbstractGeoViewVector {
    * @returns {Promise<void>} A promise that the execution is completed.
    */
   protected getServiceMetadata(): Promise<void> {
-    this.layerPhase = 'getServiceMetadata';
+    this.changeLayerPhase('getServiceMetadata');
     const promisedExecution = new Promise<void>((resolve) => {
       let metadataUrl = getLocalizedValue(this.metadataAccessPath, this.mapId) as string;
 
@@ -168,7 +167,7 @@ export class WFS extends AbstractGeoViewVector {
    * @param {TypeListOfLayerEntryConfig} listOfLayerEntryConfig The list of layer entries configuration to validate.
    */
   protected validateListOfLayerEntryConfig(listOfLayerEntryConfig: TypeListOfLayerEntryConfig) {
-    this.layerPhase = 'validateListOfLayerEntryConfig';
+    this.changeLayerPhase('validateListOfLayerEntryConfig');
     listOfLayerEntryConfig.forEach((layerEntryConfig: TypeLayerEntryConfig) => {
       const layerPath = Layer.getLayerPath(layerEntryConfig);
       if (layerEntryIsGroupLayer(layerEntryConfig)) {
@@ -178,12 +177,12 @@ export class WFS extends AbstractGeoViewVector {
             layer: layerPath,
             consoleMessage: `Empty layer group (mapId:  ${this.mapId}, layerPath: ${layerPath})`,
           });
-          api.event.emit(LayerSetPayload.createLayerSetChangeLayerStatusPayload(this.mapId, layerPath, 'error'));
+          this.changeLayerStatus('error', layerEntryConfig);
           return;
         }
       }
 
-      api.event.emit(LayerSetPayload.createLayerSetChangeLayerStatusPayload(this.mapId, layerPath, 'loading'));
+      this.changeLayerStatus('loading', layerEntryConfig);
 
       // Note that the code assumes wfs feature type list does not contains metadata layer group. If you need layer group,
       // you can define them in the configuration section.
@@ -203,7 +202,7 @@ export class WFS extends AbstractGeoViewVector {
             layer: layerPath,
             consoleMessage: `WFS feature layer not found (mapId:  ${this.mapId}, layerPath: ${layerPath})`,
           });
-          api.event.emit(LayerSetPayload.createLayerSetChangeLayerStatusPayload(this.mapId, layerPath, 'error'));
+          this.changeLayerStatus('error', layerEntryConfig);
           return;
         }
 
@@ -211,7 +210,7 @@ export class WFS extends AbstractGeoViewVector {
           layerEntryConfig.initialSettings.extent = transformExtent(
             layerEntryConfig.initialSettings.extent,
             'EPSG:4326',
-            `EPSG:${api.map(this.mapId).currentProjection}`
+            `EPSG:${api.maps[this.mapId].currentProjection}`
           );
 
         if (!layerEntryConfig.initialSettings?.bounds && foundMetadata['ows:WGS84BoundingBox']) {
@@ -219,7 +218,7 @@ export class WFS extends AbstractGeoViewVector {
           const upperCorner = (foundMetadata['ows:WGS84BoundingBox']['ows:UpperCorner']['#text'] as string).split(' ');
           const bounds = [Number(lowerCorner[0]), Number(lowerCorner[1]), Number(upperCorner[0]), Number(upperCorner[1])];
           // layerEntryConfig.initialSettings cannot be undefined because config-validation set it to {} if it is undefined.
-          layerEntryConfig.initialSettings!.bounds = transformExtent(bounds, 'EPSG:4326', `EPSG:${api.map(this.mapId).currentProjection}`);
+          layerEntryConfig.initialSettings!.bounds = transformExtent(bounds, 'EPSG:4326', `EPSG:${api.maps[this.mapId].currentProjection}`);
         }
       }
     });
@@ -379,7 +378,7 @@ export class WFS extends AbstractGeoViewVector {
       sourceUrl = `${sourceUrl}&typeName=${layerEntryConfig.layerId}`;
       // if an extent is provided, use it in the url
       if (sourceOptions.strategy === bbox && Number.isFinite(extent[0])) {
-        sourceUrl = `${sourceUrl}&bbox=${extent},EPSG:${api.map(this.mapId).currentProjection}`;
+        sourceUrl = `${sourceUrl}&bbox=${extent},EPSG:${api.maps[this.mapId].currentProjection}`;
       }
       return sourceUrl;
     };

@@ -130,14 +130,14 @@ Below is a simple example of a funcational component that will add a panel to th
             };
 
             // create a new button panel on the app-bar
-            this.panel = api.map(mapId).createAppbarPanel(button, panel, null);
+            this.panel = api.maps[mapId].createAppbarPanel(button, panel, null);
         };
 
         // removed is a function called when removing a package to cleanup
         removed = () => {
             const { mapId } = this.props;
 
-            this.api.map(mapId).removeAppbarPanel(this.panel.id);
+            this.api.maps[mapId].removeAppbarPanel(this.panel.id);
         };
     }
 

@@ -102,7 +102,7 @@
 
       // Create geometry group which will handle the drawing and set it as active
       const groupKey = 'selectGroup';
-      const geomGrp = map.layer.vector.createGeometryGroup(groupKey);
+      const geomGrp = map.layer.geometry.createGeometryGroup(groupKey);
 
       // Add dummy shapes
       addDefaultShapes(map, groupKey);
@@ -123,7 +123,7 @@
           cgpv.api.eventNames.MAP.EVENT_MAP_LOADED,
             (payload) => {
               // Init map
-              initMap1(cgpv.api.map(mapId1));
+              initMap1(cgpv.api.maps[mapId1]);
               // Wire the logs
               wireLogs(cgpv.api, mapId1, 'LOGS1');
             },

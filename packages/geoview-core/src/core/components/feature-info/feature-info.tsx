@@ -125,7 +125,7 @@ export function FeatureInfo(props: TypeFeatureInfoProps): JSX.Element {
 
   function handleZoomIn(e: React.MouseEvent<HTMLButtonElement, MouseEvent>) {
     e.stopPropagation();
-    api.map(mapId).zoomToExtent(feature.extent);
+    api.maps[mapId].zoomToExtent(feature.extent);
     setOpen(true);
   }
 

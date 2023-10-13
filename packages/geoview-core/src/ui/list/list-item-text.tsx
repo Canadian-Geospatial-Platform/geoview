@@ -1,6 +1,6 @@
-import React from 'react';
-import MaterialListItemText from '@mui/material/ListItemText';
-import { ListItemTextProps } from '@mui/material';
+import { forwardRef } from 'react';
+
+import { ListItemText as MaterialListItemText, ListItemTextProps } from '@mui/material';
 
 const typographyProps = {
   fontSize: 14,
@@ -14,6 +14,6 @@ const typographyProps = {
  * @returns {JSX.Element} the created List Item element
  */
 // eslint-disable-next-line react/display-name
-export const ListItemText = React.forwardRef((props: ListItemTextProps, ref): JSX.Element => {
+export const ListItemText = forwardRef((props: ListItemTextProps, ref): JSX.Element => {
   return <MaterialListItemText ref={ref} {...props} primaryTypographyProps={typographyProps} />;
 });

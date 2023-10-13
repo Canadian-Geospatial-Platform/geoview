@@ -4,8 +4,11 @@ import { Extent } from 'ol/extent';
 import Ajv from 'ajv';
 import { AnyValidateFunction } from 'ajv/dist/types';
 
+import i18n from 'i18next';
 import defaultsDeep from 'lodash/defaultsDeep';
-import { generateId } from '../utilities';
+import { api } from '@/app';
+
+import { generateId, replaceParams, showError } from '../utilities';
 
 import schema from '../../../../schema.json';
 import { TypeBasemapId, TypeBasemapOptions, VALID_BASEMAP_ID } from '@/geo/layer/basemap/basemap-types';
@@ -37,9 +40,7 @@ import {
   layerEntryIsVector,
 } from '@/geo/map/map-schema-types';
 import { Cast, toJsonObject, TypeJsonObject, TypeMapFeaturesConfig } from '../../types/global-types';
-import { api } from '@/app';
-import { snackbarMessagePayload } from '@/api/events/payloads';
-import { EVENT_NAMES } from '@/api/events/event-types';
+
 import { Layer } from '@/geo/layer/layer';
 import { CONST_GEOVIEW_SCHEMA_BY_TYPE, TypeGeoviewLayerType } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 
@@ -63,6 +64,7 @@ export class ConfigValidation {
 
   /** default configuration if provided configuration is missing or wrong */
   private _defaultMapFeaturesConfig: TypeMapFeaturesConfig = {
+    mapId: '',
     map: {
       interaction: 'dynamic',
       viewSettings: {
@@ -127,6 +129,7 @@ export class ConfigValidation {
    */
   constructor() {
     this._mapId = generateId();
+    this._defaultMapFeaturesConfig.mapId = this.mapId;
     this._displayLanguage = this._defaultMapFeaturesConfig.displayLanguage!;
     this._triggerReadyCallback = this._defaultMapFeaturesConfig.triggerReadyCallback!;
   }
@@ -155,6 +158,7 @@ export class ConfigValidation {
    */
   set mapId(mapId: string) {
     this._mapId = mapId;
+    this._defaultMapFeaturesConfig.mapId = this.mapId;
   }
 
   /** ***************************************************************************************************************************
@@ -354,14 +358,8 @@ export class ConfigValidation {
     }
 
     setTimeout(() => {
-      const errorMessage = `- Map ${this.mapId}: A schema error was found, check the console to see what is wrong.`;
-
-      api.event.emit(
-        snackbarMessagePayload(EVENT_NAMES.SNACKBAR.EVENT_SNACKBAR_OPEN, this.mapId, {
-          type: 'string',
-          value: errorMessage,
-        })
-      );
+      const trans = i18n.getFixedT(api.maps[this.mapId].displayLanguage);
+      showError(this.mapId, trans('validation.schema.notFound'));
     }, 2000);
   }
 
@@ -378,15 +376,10 @@ export class ConfigValidation {
 
     if (!validate) {
       setTimeout(() => {
-        const errorMessage = `- Map ${this.mapId}: Cannot find schema "${schemaPath}".`;
-        console.log(errorMessage);
-
-        api.event.emit(
-          snackbarMessagePayload(EVENT_NAMES.SNACKBAR.EVENT_SNACKBAR_OPEN, this.mapId, {
-            type: 'string',
-            value: errorMessage,
-          })
-        );
+        const trans = i18n.getFixedT(api.maps[this.mapId].displayLanguage);
+        const message = replaceParams([schemaPath], trans('validation.schema.wrongPath'));
+        console.log(`- Map ${this.mapId}: ${message}`);
+        showError(this.mapId, message);
       }, 2000);
       return false;
     }
@@ -423,15 +416,10 @@ export class ConfigValidation {
 
       if (!validate) {
         setTimeout(() => {
-          const errorMessage = `- Map ${this.mapId}: Cannot find schema "${schemaPath}".`;
-          console.log(errorMessage);
-
-          api.event.emit(
-            snackbarMessagePayload(EVENT_NAMES.SNACKBAR.EVENT_SNACKBAR_OPEN, this.mapId, {
-              type: 'string',
-              value: errorMessage,
-            })
-          );
+          const trans = i18n.getFixedT(api.maps[this.mapId].displayLanguage);
+          const message = replaceParams([schemaPath], trans('validation.schema.wrongPath'));
+          console.log(`- Map ${this.mapId}: ${message}`);
+          showError(this.mapId, message);
         }, 2000);
         return false;
       }
@@ -879,6 +867,7 @@ export class ConfigValidation {
 
     // recreate the prop object to remove unwanted items and check if same as original. Log the modifications
     const validMapFeaturesConfig: TypeMapFeaturesConfig = {
+      mapId: this.mapId,
       map: {
         basemapOptions,
         viewSettings: {

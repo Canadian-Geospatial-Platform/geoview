@@ -1,14 +1,34 @@
 /* eslint-disable no-undef */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 // ==========================================================================================================================
+function listenToLegendLayerSetChanges(elementId, handlerName) {
+  cgpv.api.event.on(
+    cgpv.api.eventNames.GET_LEGENDS.LEGENDS_LAYERSET_UPDATED,
+    (payload) => {
+      const outputHeader =
+        '<table class="state"><tr class="state"><th class="state">Name</th><th class="state">Phase</th><th class="state">Status</th></tr>';
+      const displayField = document.getElementById(elementId);
+      const { resultSets } = payload;
+      const output = Object.keys(resultSets).reduce((outputValue, layerPath) => {
+        const layerName = resultSets[layerPath]?.layerName?.en || resultSets[layerPath]?.layerName?.fr || '';
+        const { layerPhase, layerStatus } = resultSets[layerPath];
+        return `${outputValue}<tr class="state"><td class="state">${layerName}</td><td class="state">${layerPhase}</td><td class="state">${layerStatus}</td></tr>`;
+      }, outputHeader);
+      displayField.innerHTML = output && output !== outputHeader ? `${output}</table>` : '';
+    },
+    handlerName
+  );
+}
+
+// ==========================================================================================================================
 const addBoundsPolygon = (mapId, bbox) => {
-  const newBbox = cgpv.api.map(mapId).transformAndDensifyExtent(bbox, `EPSG:${cgpv.api.map(mapId).currentProjection}`, `EPSG:4326`);
+  const newBbox = cgpv.api.maps[mapId].transformAndDensifyExtent(bbox, `EPSG:${cgpv.api.maps[mapId].currentProjection}`, `EPSG:4326`);
 
-  const { vector } = cgpv.api.map(mapId).layer;
-  vector.setActiveGeometryGroup();
-  vector.deleteGeometriesFromGroup(0);
+  const { geometry } = cgpv.api.maps[mapId].layer;
+  geometry.setActiveGeometryGroup();
+  geometry.deleteGeometriesFromGroup(0);
 
-  const polygon = cgpv.api.map(mapId).layer.vector.addPolygon([newBbox], {
+  const polygon = cgpv.api.maps[mapId].layer.geometry.addPolygon([newBbox], {
     style: {
       strokeColor: '#000',
       strokeWidth: 5,
@@ -17,17 +37,18 @@ const addBoundsPolygon = (mapId, bbox) => {
   });
 };
 
-const createInfoTable = (mapId, resultSetsId, resultSets) => {
-  const infoTable = document.getElementById(resultSetsId);
+// ==========================================================================================================================
+const createInfoTable = (mapId, resultSetsId, resultSets, queryType) => {
+  const infoTable = document.getElementById(`${resultSetsId}-${queryType}`);
   infoTable.textContent = '';
-  const oldContent = document.getElementById(`layer${mapId.slice(-1)}-info`);
+  const oldContent = document.getElementById(`layer${mapId.slice(-1)}-${queryType}-info`);
   if (oldContent) oldContent.remove();
   const content = document.createElement('div');
-  content.id = `layer${mapId.slice(-1)}-info`;
+  content.id = `layer${mapId.slice(-1)}-${queryType}-info`;
   infoTable.appendChild(content);
   Object.keys(resultSets).forEach((layerPath) => {
     const activeResultSet = resultSets[layerPath];
-    const layerData = activeResultSet.data;
+    const layerData = activeResultSet.data[queryType];
 
     // Header of the layer
     const infoH1 = document.createElement('h1');
@@ -142,7 +163,7 @@ const createInfoTable = (mapId, resultSetsId, resultSets) => {
         tableZoomTo.innerText = 'Zoom To Feature';
         tableZoomTo.addEventListener('click', (e) => {
           // eslint-disable-next-line no-undef
-          cgpv.api.map(mapId).zoomToExtent(row.extent);
+          cgpv.api.maps[mapId].zoomToExtent(row.extent);
           addBoundsPolygon(mapId, row.extent);
         });
         tableData.appendChild(tableZoomTo);
@@ -173,6 +194,7 @@ const createTableOfFilter = (mapId) => {
   tableElement.style.width = '100%';
   tableElement.border = '1px solid black';
   mapButtonsDiv.appendChild(tableElement);
+  if (!cgpv.api.maps?.[mapId]?.layer?.geoviewLayers) return;
   Object.keys(cgpv.api.maps[mapId].layer.geoviewLayers).forEach((geoviewLayerId) => {
     const geoviewLayer = cgpv.api.maps[mapId].layer.geoviewLayers[geoviewLayerId];
     Object.keys(cgpv.api.maps[mapId].layer.registeredLayers).forEach((layerPath) => {
@@ -439,32 +461,28 @@ function displayLegend(layerSetId, resultSets) {
   let createHeader = true;
   Object.keys(resultSets).forEach((layerPath) => {
     const activeResultSet = resultSets[layerPath];
-    if (activeResultSet.layerStatus !== 'processed' || !activeResultSet?.data?.legend) {
-      if (createHeader) {
-        createHeader = false;
-        const tableRow1 = document.createElement('tr');
-        table.appendChild(tableRow1);
-        addHeader('Layer Path', tableRow1);
-        addHeader('Status', tableRow1);
-      }
+    if (createHeader) {
+      createHeader = false;
+      const tableRow1 = document.createElement('tr');
+      table.appendChild(tableRow1);
+      addHeader('Layer Path', tableRow1);
+      addHeader('Status/Label', tableRow1);
+      addHeader('Symbology', tableRow1);
+    }
+    if (!activeResultSet?.data?.legend) {
       const tableRow = document.createElement('tr');
       addData(layerPath, tableRow);
-      let legendValue = activeResultSet.data === undefined && activeResultSet.layerStatus === 'processed' ? '(waiting for legend)' : '';
-      legendValue = activeResultSet.data === null && activeResultSet.layerStatus === 'processed' ? '(legend fetch error)' : legendValue;
-      legendValue =
-        activeResultSet.data && !activeResultSet.data.legend && activeResultSet.layerStatus === 'processed' ? '(no legend)' : legendValue;
-      addData(`${activeResultSet.layerStatus} ${legendValue}`, tableRow);
+      let legendValue = '';
+      if (activeResultSet.data === undefined) legendValue = '(waiting for legend)';
+      if (activeResultSet.data === null) legendValue = '(legend fetch error)';
+      if (activeResultSet.data && !activeResultSet.data.legend && activeResultSet.layerStatus === 'loaded') legendValue = '(no legend)';
+      addData(activeResultSet.layerStatus, tableRow);
+      addData(legendValue, tableRow);
       table.appendChild(tableRow);
     } else if (activeResultSet.data?.type === 'ogcWms' || activeResultSet.data?.type === 'imageStatic') {
-      if (createHeader) {
-        createHeader = false;
-        const tableRow1 = document.createElement('tr');
-        table.appendChild(tableRow1);
-        addHeader('Layer Path', tableRow1);
-        addHeader('Symbology', tableRow1);
-      }
       const tableRow = document.createElement('tr');
       addData(activeResultSet.data.layerPath, tableRow);
+      addData(activeResultSet.layerStatus, tableRow);
       addData(activeResultSet.data.legend, tableRow);
       table.appendChild(tableRow);
     } else {
@@ -475,14 +493,6 @@ function displayLegend(layerSetId, resultSets) {
         addData(canvas, tableRow);
         table.appendChild(tableRow);
       };
-      if (createHeader) {
-        createHeader = false;
-        const tableRow1 = document.createElement('tr');
-        table.appendChild(tableRow1);
-        addHeader('Layer Path', tableRow1);
-        addHeader('Label', tableRow1);
-        addHeader('Symbology', tableRow1);
-      }
       if (activeResultSet.data?.legend) {
         Object.keys(activeResultSet.data.legend).forEach((geometryKey) => {
           if (geometryKey) {

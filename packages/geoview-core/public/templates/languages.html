@@ -34,6 +34,7 @@
               <a href="./index.html">Main</a><br />
               <a href="#HLNG1">1. French</a><br />
               <a href="#HLNG2">2. English</a><br />
+              <a href="#HLNG3">3. English</a><br />
             </td>
           </tr>
         </tbody>
@@ -50,7 +51,11 @@
       <h4 id="HLNG1">1. French</h4>
       <a class="ref-link" href="#top">Top</a>
     </div>
-    <div id="LNG1" class="llwp-map" data-lang="fr"></div>
+    <div
+      id="LNG1"
+      class="llwp-map"
+      data-lang="fr">
+    </div>
     <p>This map is in French.</p>
     <div>Set map to English and override layers <button id="Change-Lang-Button">Reset Lang</button></div>
     <hr />
@@ -59,7 +64,22 @@
       <h4 id="HLNG2">2. English</h4>
       <a class="ref-link" href="#top">Top</a>
     </div>
-    <div id="LNG2" class="llwp-map1" data-lang="en"></div>
+    <div
+      id="LNG2"
+      data-lang="en">
+    </div>
+    <p>This map is in English.</p>
+    <hr />
+
+    <div class="map-title-holder">
+      <h4 id="HLNG3">3. English</h4>
+      <a class="ref-link" href="#top">Top</a>
+    </div>
+    <div
+      id="LNG3"
+      class="llwp-map"
+      data-lang="en">
+    </div>
     <p>This map is in English.</p>
     <hr />
 
@@ -114,15 +134,19 @@
         cgpv.api.createMapFromConfig('LNG1', config);
 
         // loads config in blank map
-        // cgpv.api.map('LNG2').loadMapConfig(config);
-        // TODO: Investigate part of #1118, if we remove the calss on div it works by passing with getMapConfigFromFunc
-        // if using the loadMapConfig (when cass exist) it fails for the second map. This whole start from function must be refactor.
-        setTimeout(()=>cgpv.api.createMapFromConfig('LNG2', config), 5000);
+        // cgpv.api.maps['LNG2'].loadMapFromJsonStringConfig (config);
+        // TODO: Investigate part of #1118, if we remove the calss on div it works by passing with getValidMapConfig
+        // if using the loadMapFromJsonStringConfig  (when cass exist) it fails for the second map. This whole start from function must be refactor.
+        setTimeout(() => {
+          cgpv.api.createMapFromConfig('LNG2', config);
+          cgpv.api.createMapFromConfig('LNG3', config)
+        }, 4000);
 
         // change map language
         var mapLangButton = document.getElementById('Change-Lang-Button');
         mapLangButton.addEventListener('click', function (e) {
-          cgpv.api.map('LNG1').changeLanguage('en', [])
+          cgpv.api.maps['LNG1'].changeLanguage('en')
+          cgpv.api.maps['LNG2'].changeLanguage('fr')
         });
 
         //create snippet

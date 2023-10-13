@@ -9,13 +9,14 @@ import {
   AnySchemaObject,
   payloadIsAllQueriesDone,
   TypeArrayOfFeatureInfoEntries,
+  PayloadBaseClass,
 } from 'geoview-core';
 
 import schema from '../schema.json';
 import defaultConfig from '../default-config-footer-panel.json';
 import { DetailsItem } from './details-item';
 import { LegendItem } from './legend-item';
-import { DataItem } from './data-item';
+import { DataTable } from './data-table';
 
 const w = window as TypeWindow;
 
@@ -57,12 +58,12 @@ class FooterPanelPlugin extends AbstractPlugin {
     en: {
       legend: 'Legend',
       details: 'Details',
-      dataGrid: 'Data',
+      dataTable: 'DataTable',
     },
     fr: {
       legend: 'Légende',
       details: 'Détails',
-      dataGrid: 'Données',
+      dataTable: 'Données',
     },
   });
 
@@ -70,7 +71,7 @@ class FooterPanelPlugin extends AbstractPlugin {
    * Added function called after the plugin has been initialized
    */
   added = (): void => {
-    const { configObj, pluginProps } = this;
+    const { configObj, pluginProps } = this as AbstractPlugin;
 
     const { mapId } = pluginProps;
 
@@ -80,7 +81,7 @@ class FooterPanelPlugin extends AbstractPlugin {
     if (cgpv) {
       // access the api calls
       const { api } = cgpv;
-      const { displayLanguage, footerTabs, map } = api.map(mapId);
+      const { displayLanguage, footerTabs, map } = api.maps[mapId];
 
       const mapContainer = map.getTargetElement().parentElement;
       // Set size of map container based on whether footer-panel is collapsed or not
@@ -118,7 +119,7 @@ class FooterPanelPlugin extends AbstractPlugin {
         // select the details tab when map click queries are done
         api.event.on(
           api.eventNames.GET_FEATURE_INFO.ALL_QUERIES_DONE,
-          (payload) => {
+          (payload: PayloadBaseClass) => {
             if (payloadIsAllQueriesDone(payload)) {
               const { resultSets } = payload;
               let features: TypeArrayOfFeatureInfoEntries = [];
@@ -130,16 +131,16 @@ class FooterPanelPlugin extends AbstractPlugin {
               }
             }
           },
-          `${mapId}/$FeatureInfoLayerSet$`
+          `${mapId}/FeatureInfoLayerSet`
         );
       }
 
-      if (defaultTabs.includes('data-grid')) {
-        /// create new tab and add the DataGridComponent to the footer tab
+      if (defaultTabs.includes('data-table')) {
+        /// create new tab and add the DataTable Component to the footer tab
         footerTabs.createFooterTab({
           value: tabsCounter,
-          label: this.translations[displayLanguage].dataGrid as string,
-          content: () => <DataItem mapId={mapId} />,
+          label: this.translations[displayLanguage].dataTable as string,
+          content: () => <DataTable mapId={mapId} />,
         });
         tabsCounter++;
       }

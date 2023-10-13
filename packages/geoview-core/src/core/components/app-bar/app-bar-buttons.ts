@@ -101,6 +101,7 @@ export class AppbarButtons {
         panel: new PanelApi(panel, buttonId, this.mapId),
         button,
         groupName: group,
+        handlePanelOpened: panelProps.handlePanelOpened,
       };
 
       // add the new button panel to the correct group

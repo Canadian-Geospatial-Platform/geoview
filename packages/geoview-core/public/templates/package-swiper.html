@@ -56,11 +56,13 @@
       <a class="ref-link" href="#top">Top</a>
     </div>
     <div id="mapWM2" class="llwp-map" data-lang="en" data-config-url="./configs/package-swiper2-config.json"></div>
-    <p>Horizontal configuration with ESRI FEature and Dynamic layers</p>
+    <p>Horizontal configuration with ESRI Feature and Dynamic layers</p>
     <hr />
 
     <div class="map-title-holder">
       <h4 id="HUC3">3. Layers type Configuration</h4>
+      &nbsp;
+      <h5 id="HUC3-state">(undefined)</h5>
       <a class="ref-link" href="#top">Top</a>
     </div>
     <div id="mapWM3" class="llwp-map" data-lang="en" data-config-url="./configs/package-swiper3-config.json"></div>
@@ -77,6 +79,17 @@
         createConfigSnippet();
         createCodeSnippet();
       });
+      window.setInterval(() => {
+        const displayField1 = document.getElementById('HUC3-state');
+        const geoviewLayers = cgpv.api.getFeatureInfoLayerSet('mapWM3').resultSets;
+        if (geoviewLayers) {
+          const output = Object.keys(geoviewLayers).reduce((outputValue, layerId) => {
+            const { layerPhase, layerStatus } = geoviewLayers[layerId];
+            return `${outputValue}${layerId.split('/')[layerId.split('/').length - 1]} - status: ${layerStatus}, phase: ${layerPhase}, `;
+          }, '(');
+          displayField1.textContent = output && output !== '(' ? `${output.slice(0, -2)})` : '(undefined)';
+        } else displayField1.textContent = '(undefined)';
+      }, 250);
     </script>
   </body>
 </html>

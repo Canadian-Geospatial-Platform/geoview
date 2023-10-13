@@ -1,7 +1,7 @@
 /* eslint-disable react/require-default-props */
-import MaterialDivider from '@mui/material/Divider';
+import { Divider as MaterialDivider, DividerProps } from '@mui/material';
+
 import makeStyles from '@mui/styles/makeStyles';
-import { DividerProps } from '@mui/material';
 
 /**
  * Properties for the Divider

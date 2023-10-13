@@ -3,7 +3,7 @@ import { Event } from './events/event';
 
 import { Projection, PROJECTION_NAMES } from '@/geo/projection/projection';
 
-import { MapViewer } from '@/geo/map/map';
+import { MapViewer } from '@/geo/map/map-viewer';
 
 import { Plugin } from './plugin/plugin';
 import { GeoUtilities } from '@/geo/utils/utilities';
@@ -153,16 +153,5 @@ export class API {
   callInitCallback = () => {
     // run the map ready function on each map instance
     Object.keys(this.maps).forEach((mapKey) => this.maps[mapKey].mapReady());
-  };
-
-  /**
-   * Get the instance of a map by it's ID to access API functions
-   *
-   * @param {string} mapId the map id
-   *
-   * @returns map api functions
-   */
-  map = (mapId: string): MapViewer => {
-    return this.maps[mapId];
   };
 }

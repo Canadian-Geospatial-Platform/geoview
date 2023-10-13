@@ -52,9 +52,10 @@
 
     <div class="map-title-holder">
       <h4 id="HLYR1">1. Vector Tiles Layers (3978)</h4>
-      &nbsp;<h5 id="HLYR1-state">(undefined)</h5>
       <a class="ref-link" href="#top">Top</a>
     </div>
+    <button class="collapsible active">Map Status Flags</button>
+    <pre style="height: 20pc; overflow-y: scroll" id="HLYR1-state" class="panel map-title-holder"></pre>
     <div
       id="LYR1"
       class="llwp-map"
@@ -108,9 +109,10 @@
 
     <div class="map-title-holder">
       <h4 id="HLYR2">2. Vector Tiles Layers (3857)</h4>
-      &nbsp;<h5 id="HLYR2-state">(undefined)</h5>
       <a class="ref-link" href="#top">Top</a>
     </div>
+    <button class="collapsible active">Map Status Flags</button>
+    <pre style="height: 20pc; overflow-y: scroll" id="HLYR2-state" class="panel map-title-holder"></pre>
     <div
       id="LYR2"
       class="llwp-map"
@@ -164,9 +166,10 @@
 
     <div class="map-title-holder">
       <h4 id="HLYR3">3. Vector Tiles olms library no GeoView</h4>
-      &nbsp;<h5 id="HLYR3-state">(undefined)</h5>
       <a class="ref-link" href="#top">Top</a>
     </div>
+    <button class="collapsible active">Map Status Flags</button>
+    <pre style="height: 20pc; overflow-y: scroll" id="HLYR3-state" class="panel map-title-holder"></pre>
     <div id="LYR3" style="width: 100%; height:400px"></div>
     <p>This map has a Vector Tiles layer added from olms library automatically. No GeoView map involves and vector tile layers sources projection 3857 by default. This needs investigation</p>
     <hr />
@@ -182,10 +185,6 @@
         console.log(`api is ready for ${mapId}`);
 
         if (mapId === 'allMaps') {
-          //create snippets
-          createCodeSnippet();
-          createConfigSnippet();
-
           setTimeout(() => cgpv.api.maps['LYR1'].layer.geoviewLayers['vectorTilesLYR1'].addVectorTileLayer(), 2000);
 
           setStyle = (proj) => {
@@ -194,42 +193,12 @@
         }
       });
 
-      window.setInterval(() => {
-        const displayField1 = document.getElementById('HLYR1-state');
-        const geoviewLayers = cgpv.api.maps?.LYR1?.layer?.geoviewLayers;
-        if (geoviewLayers) {
-          const output = Object.keys(cgpv.api.maps?.LYR1?.layer?.geoviewLayers).reduce((outputValue, layerId) => {
-            const stateValue = cgpv.api.maps?.LYR1?.layer?.geoviewLayers[layerId].layerPhase;
-            return `${outputValue}${layerId}: ${stateValue}, `;
-          }, '(');
-          displayField1.textContent = output ? `${output.slice(0, -2)})` : '(undefined)';
-        } else displayField1.textContent = '(undefined)';
-      }, 250)
-
-      window.setInterval(() => {
-        const displayField2 = document.getElementById('HLYR2-state');
-        const geoviewLayers = cgpv.api.maps?.LYR2?.layer?.geoviewLayers;
-        if (geoviewLayers) {
-          const output = Object.keys(cgpv.api.maps?.LYR2?.layer?.geoviewLayers).reduce((outputValue, layerId) => {
-            const stateValue = cgpv.api.maps?.LYR2?.layer?.geoviewLayers[layerId].layerPhase;
-            return `${outputValue}${layerId}: ${stateValue}, `;
-          }, '(');
-          displayField2.textContent = output ? `${output.slice(0, -2)})` : '(undefined)';
-        } else displayField2.textContent = '(undefined)';
-      }, 250)
-
-      window.setInterval(() => {
-        const displayField3 = document.getElementById('HLYR3-state');
-        const geoviewLayers = cgpv.api.maps?.LYR3?.layer?.geoviewLayers;
-        if (geoviewLayers) {
-          const output = Object.keys(cgpv.api.maps?.LYR3?.layer?.geoviewLayers).reduce((outputValue, layerId) => {
-            const stateValue = cgpv.api.maps?.LYR3?.layer?.geoviewLayers[layerId].layerPhase;
-            return `${outputValue}${layerId}: ${stateValue}, `;
-          }, '(');
-          displayField3.textContent = output ? `${output.slice(0, -2)})` : '(undefined)';
-        } else displayField3.textContent = '(undefined)';
-      }, 250)
-
+      listenToLegendLayerSetChanges('HLYR1-state', 'LYR1/LegendsLayerSet');
+      listenToLegendLayerSetChanges('HLYR2-state', 'LYR2/LegendsLayerSet');
+      listenToLegendLayerSetChanges('HLYR3-state', 'LYR3/LegendsLayerSet');
+      //create snippets
+      createCodeSnippet();
+      createConfigSnippet();
     </script>
   </body>
 </html>

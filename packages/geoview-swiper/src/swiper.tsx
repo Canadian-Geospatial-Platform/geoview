@@ -1,4 +1,4 @@
-import { TypeJsonObject, TypeWindow } from 'geoview-core';
+import { TypeJsonObject, TypeWindow, RefObject } from 'geoview-core';
 
 import Draggable from 'react-draggable';
 
@@ -12,6 +12,8 @@ import { EventTypes } from 'ol/Observable';
 import BaseEvent from 'ol/events/Event';
 
 import debounce from 'lodash/debounce';
+import { EVENT_NAMES } from 'geoview-core/src/api/events/event-types';
+import { PayloadBaseClass, TypeResultSets, payloadIsLayerSetUpdated } from 'geoview-core/src/api/events/payloads';
 
 const sxClasses = {
   layerSwipe: {
@@ -106,15 +108,12 @@ export function Swiper(props: SwiperProps): JSX.Element {
 
   const { Box, Tooltip, HandleIcon } = ui.elements;
 
-  const { displayLanguage } = api.map(mapId!);
+  const { displayLanguage } = api.maps[mapId!];
 
-  const [map] = useState<Map>(api.map(mapId).map);
+  const [map] = useState<Map>(api.maps[mapId].map);
   const mapSize = useRef<number[]>(map?.getSize() || [0, 0]);
   const defaultX = mapSize.current[0] / 2;
   const defaultY = mapSize.current[1] / 2;
-
-  const [layersIds] = useState<string[]>(config.layers);
-  const [geoviewLayers] = useState(api.map(mapId).layer.geoviewLayers);
   const [olLayers, setOlLayers] = useState<BaseLayer[]>([]);
   const [offset, setOffset] = useState(0);
 
@@ -122,6 +121,22 @@ export function Swiper(props: SwiperProps): JSX.Element {
 
   const swiperValue = useRef(50);
   const swiperRef = useRef<HTMLElement>();
+
+  /**
+   * Sort layers to only include those that are loaded
+   * @param {TypeResultSets} resultsSets The resultSet from the layer set
+   *
+   * @returns {string[]} array of IDs for layers that are loaded on the map
+   */
+  function sortLayerIds(resultsSets: TypeResultSets) {
+    const layerIds: string[] = [];
+    Object.keys(resultsSets).forEach((result) => {
+      if (resultsSets[result].layerStatus === 'loaded') layerIds.push(result.split('/')[0]);
+    });
+    return layerIds;
+  }
+
+  const [layersIds, setLayersIds] = useState<string[]>(sortLayerIds(api.getLegendsLayerSet(mapId).resultSets));
 
   /**
    * Pre compose, Pre render event callback
@@ -232,13 +247,14 @@ export function Swiper(props: SwiperProps): JSX.Element {
   };
 
   /**
-   * Set the prerender and postremder events
+   * Set the prerender and postrender events
    *
    * @param {string} layer the layer name
    */
   const setRenderEvents = (layer: string) => {
-    const olLayer = geoviewLayers[`${layer}`].gvLayers;
-    setOlLayers((prevArray) => [...prevArray, olLayer!]);
+    const { geoviewLayers } = api.maps[mapId].layer;
+    const olLayer = geoviewLayers[layer].gvLayers;
+    setOlLayers((prevArray: BaseLayer[]) => [...prevArray, olLayer!]);
     olLayer?.on(['precompose' as EventTypes, 'prerender' as EventTypes], prerender);
     olLayer?.on(['postcompose' as EventTypes, 'postrender' as EventTypes], postcompose);
     // force VectorImage to refresh
@@ -247,39 +263,50 @@ export function Swiper(props: SwiperProps): JSX.Element {
 
   useEffect(() => {
     // set listener for layers in config array
+    const { geoviewLayers } = api.maps[mapId].layer;
     layersIds.forEach((layer: string) => {
-      if (geoviewLayers[`${layer}`] !== undefined) {
-        setRenderEvents(layer);
-      } else {
-        const layerName = layer;
-        const renderInterval = setInterval(() => {
-          if (geoviewLayers[`${layerName}`] !== undefined) {
-            setRenderEvents(layer);
-            clearInterval(renderInterval);
-          }
-        }, 1000);
-      }
+      setRenderEvents(layer);
     });
 
     return () => {
       layersIds.forEach((layer: string) => {
-        const olLayer = geoviewLayers[`${layer}`].gvLayers;
-        olLayer?.un(['precompose' as EventTypes, 'prerender' as EventTypes], prerender);
-        olLayer?.un(['postcompose' as EventTypes, 'postrender' as EventTypes], postcompose);
+        if (geoviewLayers[layer] !== undefined) {
+          const olLayer = geoviewLayers[layer].gvLayers;
+          olLayer?.un(['precompose' as EventTypes, 'prerender' as EventTypes], prerender);
+          olLayer?.un(['postcompose' as EventTypes, 'postrender' as EventTypes], postcompose);
 
-        // empty layers array
-        setOlLayers([]);
+          // empty layers array
+          setOlLayers([]);
+        }
       });
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [geoviewLayers]);
+  }, [layersIds]);
+
+  // Update layer list if a layer loads late
+  useEffect(() => {
+    const layerSetUpdatedHandler = (payload: PayloadBaseClass) => {
+      if (payloadIsLayerSetUpdated(payload) && payload.resultSets[payload.layerPath]?.layerStatus === 'loaded') {
+        const layerId = payload.layerPath.split('/')[0];
+        const ids = [...layersIds];
+        if (ids.indexOf(layerId) === -1) {
+          ids.push(layerId);
+          setLayersIds(ids);
+        }
+      }
+    };
+    api.event.on(EVENT_NAMES.LAYER_SET.UPDATED, layerSetUpdatedHandler, `${mapId}/LegendsLayerSet`);
+    return () => {
+      api.event.off(EVENT_NAMES.LAYER_SET.UPDATED, mapId, layerSetUpdatedHandler);
+    };
+  });
 
   /**
    * Update swiper and layers from keyboard CTRL + Arrow key
    * @param {KeyboardEvent} evt The keyboard event to calculate the swiper position
    */
   const updateSwiper = debounce((evt: KeyboardEvent): void => {
-    // * there is a know issue when stiching from keyboard to mouse swiper but we can live with it as we are not experctin to face this
+    // * there is a know issue when stiching from keyboard to mouse swiper but we can live with it as we are not expecting to face this
     // * offset from mouse method is not working properly anymore
 
     if (evt.ctrlKey && 'ArrowLeft ArrowRight ArrowUp ArrowDown'.includes(evt.key)) {
@@ -329,10 +356,10 @@ export function Swiper(props: SwiperProps): JSX.Element {
         onDrag={(e) => {
           onStop(e as MouseEvent);
         }}
-        nodeRef={swiperRef}
+        nodeRef={swiperRef as RefObject<HTMLElement>}
       >
         <Box sx={[orientation === 'vertical' ? sxClasses.vertical : sxClasses.horizontal, sxClasses.bar]} tabIndex={0} ref={swiperRef}>
-          <Tooltip title={translations[displayLanguage].tooltip}>
+          <Tooltip title={translations[displayLanguage].tooltip as string}>
             <Box className="handleContainer">
               <HandleIcon sx={sxClasses.handle} className="handleL" />
               <HandleIcon sx={sxClasses.handle} className="handleR" />

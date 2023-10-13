@@ -1,5 +1,5 @@
 import { ReactNode } from 'react';
-import { TooltipProps, ButtonProps } from '@mui/material';
+import { TooltipProps, ButtonProps, TextFieldProps } from '@mui/material';
 
 import { TypeJsonValue } from '@/core/types/global-types';
 import { TypeIconButtonProps } from '../icon-button/icon-button-types';
@@ -35,6 +35,8 @@ export type TypePanelProps = {
   content?: ReactNode;
   /** Custom panel styles */
   panelStyles?: PanelStyles;
+  /** Handler callback triggered when a panel is fully opened */
+  handlePanelOpened?: () => void;
 };
 
 export interface PanelStyles {
@@ -70,6 +72,16 @@ export interface TypeButtonProps extends Omit<ButtonProps, 'type'> {
   visible?: boolean;
 }
 
+/** ******************************************************************************************************************************
+ * Interface for the text properties used when creating a new text field.
+ */
+export interface TypeTextFieldProps extends Omit<TextFieldProps, 'type'> {
+  /** Text tooltip. */
+  tooltip?: string;
+  /** Location for tooltip. */
+  tooltipPlacement?: TooltipProps['placement'];
+}
+
 // ! Check if it must be deleted.
 // TODO: used in layer-panel packages... check if we can merge
 /** ******************************************************************************************************************************
@@ -93,6 +105,8 @@ export type TypeButtonPanel = {
   button: TypeIconButtonProps;
   /** Group name. */
   groupName?: string;
+  /** Handler callback triggered when a panel is fully opened */
+  handlePanelOpened?: () => void;
 };
 
 /** ******************************************************************************************************************************

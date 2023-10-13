@@ -7,11 +7,11 @@ import { I18nextProvider } from 'react-i18next';
 import { ThemeProvider, Theme, StyledEngineProvider } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 
-import { Shell } from './containers/shell';
-import { getTheme, cgpvTheme } from '../ui/style/theme';
-import { MapViewer } from '@/geo/map/map';
-import { TypeMapFeaturesConfig } from './types/global-types';
-import { TypeInteraction } from '../app';
+import { Shell } from '@/core/containers/shell';
+import { getTheme, cgpvTheme } from '@/ui/style/theme';
+import { MapViewer } from '@/geo/map/map-viewer';
+import { TypeMapFeaturesConfig } from '@/core/types/global-types';
+import { api, TypeInteraction } from '@/app';
 
 declare module '@mui/styles/defaultTheme' {
   // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -23,14 +23,16 @@ declare module '@mui/styles/defaultTheme' {
 export const MapContext = React.createContext<TypeMapContext>({
   mapId: '',
   interaction: 'dynamic',
+  mapFeaturesConfig: undefined,
 });
 
 /**
  * Type used for the map context
  */
-type TypeMapContext = {
+export type TypeMapContext = {
   mapId: string;
   interaction: TypeInteraction;
+  mapFeaturesConfig?: TypeMapFeaturesConfig;
 };
 
 /**
@@ -47,8 +49,8 @@ function AppStart(props: AppStartProps): JSX.Element {
   const { mapFeaturesConfig } = props;
 
   const mapContextValue = useMemo(() => {
-    return { mapId: mapFeaturesConfig.mapId as string, interaction: mapFeaturesConfig.map.interaction };
-  }, [mapFeaturesConfig.mapId, mapFeaturesConfig.map.interaction]);
+    return { mapId: mapFeaturesConfig.mapId as string, interaction: mapFeaturesConfig.map.interaction, mapFeaturesConfig };
+  }, [mapFeaturesConfig]);
 
   /**
    * Create maps from inline configs with class name llwp-map in index.html
@@ -59,15 +61,14 @@ function AppStart(props: AppStartProps): JSX.Element {
       fallbackLng: mapFeaturesConfig.displayLanguage,
     });
 
-    // create a new map instance
-    // eslint-disable-next-line no-new
-    new MapViewer(mapFeaturesConfig, i18nInstance);
+    // create a new map viewer instance and add it to the api
+    api.maps[mapFeaturesConfig.mapId] = new MapViewer(mapFeaturesConfig, i18nInstance);
 
     return (
       <I18nextProvider i18n={i18nInstance}>
         <MapContext.Provider value={mapContextValue}>
           <ThemeProvider theme={getTheme(mapFeaturesConfig.theme)}>
-            <Shell shellId={mapFeaturesConfig.mapId as string} mapFeaturesConfig={mapFeaturesConfig} />
+            <Shell shellId={mapFeaturesConfig.mapId as string} />
           </ThemeProvider>
         </MapContext.Provider>
       </I18nextProvider>

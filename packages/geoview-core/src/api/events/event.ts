@@ -1,9 +1,21 @@
+/* eslint-disable no-underscore-dangle */
 import EventEmitter from 'eventemitter3';
 
 import { EventStringId } from './event-types';
 import { PayloadBaseClass } from './payloads/payload-base-class';
 
 export type TypeEventHandlerFunction = (payload: PayloadBaseClass) => void;
+
+type TypeEventNode = {
+  context: EventEmitter;
+  fn: TypeEventHandlerFunction;
+  once: boolean;
+};
+
+interface TypeEventEmitter extends EventEmitter {
+  _events: Record<string, TypeEventNode | TypeEventNode[]>;
+  _eventsCount: number;
+}
 
 /**
  * Class used to handle event emitting and subscribing for the API
@@ -12,17 +24,14 @@ export type TypeEventHandlerFunction = (payload: PayloadBaseClass) => void;
  * @class Event
  */
 export class Event {
-  // eventemitter object, used to handle emitting/subscribing to events
-  eventEmitter: EventEmitter;
-
-  // events object containing all registered events
-  events: Record<string, string> = {};
+  // event emitter object, used to handle emitting/subscribing to events
+  eventEmitter: TypeEventEmitter;
 
   /**
    * Initiate the event emitter
    */
   constructor() {
-    this.eventEmitter = new EventEmitter();
+    this.eventEmitter = new EventEmitter() as TypeEventEmitter;
   }
 
   /**
@@ -35,8 +44,7 @@ export class Event {
    * @returns {TypeEventHandlerFunction} The event handler listener function associated to the event created.
    */
   on = (eventName: EventStringId, listener: TypeEventHandlerFunction, handlerName?: string): TypeEventHandlerFunction => {
-    const eventNameId = `${eventName}${handlerName ? `/${handlerName}` : ''}`;
-    if (!this.events[eventNameId]) this.events[eventNameId] = handlerName || '';
+    const eventNameId = `${handlerName ? `${handlerName}/` : ''}${eventName}`;
 
     this.eventEmitter.on(eventNameId, listener);
     return listener;
@@ -52,8 +60,7 @@ export class Event {
    * @returns {TypeEventHandlerFunction} The event handler listener function associated to the event created.
    */
   once = (eventName: EventStringId, listener: TypeEventHandlerFunction, handlerName?: string): TypeEventHandlerFunction => {
-    const eventNameId = `${eventName}${handlerName ? `/${handlerName}` : ''}`;
-    if (!this.events[eventNameId]) this.events[eventNameId] = handlerName || '';
+    const eventNameId = `${handlerName ? `${handlerName}/` : ''}${eventName}`;
 
     this.eventEmitter.once(eventNameId, listener);
     return listener;
@@ -67,22 +74,30 @@ export class Event {
    * @param {TypeEventHandlerFunction} listener The event handler listener function associated to the event created.
    */
   off = (eventName: EventStringId, handlerName?: string, listener?: TypeEventHandlerFunction): void => {
-    const eventNameId = `${eventName}${handlerName ? `/${handlerName}` : ''}`;
+    const eventNameId = `${handlerName ? `${handlerName}/` : ''}${eventName}`;
 
     this.eventEmitter.off(eventNameId, listener);
-
-    delete this.events[eventNameId];
   };
 
   /**
    * Unregister all events whose handler names start with the string passed in parameter.
    *
    * @param {string} handlerNamePrefix the handler name prefix for which you need to unregister from the event
+   * @param {string} eventTypeToKeep the handler name prefix composed of handlerNamePrefix/eventTypeToKeep to keep
    */
-  offAll = (handlerNamePrefix: string): void => {
-    Object.keys(this.events).forEach((eventNameId) => {
-      if (this.events[eventNameId].startsWith(handlerNamePrefix)) {
-        this.off(eventNameId as EventStringId);
+  offAll = (handlerNamePrefix: string, eventTypeToKeep?: string): void => {
+    (Object.keys(this.eventEmitter._events) as EventStringId[]).forEach((eventNameId) => {
+      if (eventNameId.startsWith(handlerNamePrefix)) {
+        if (eventTypeToKeep) {
+          if (Array.isArray(eventTypeToKeep)) {
+            if (
+              !eventTypeToKeep.find((eventType: string) => {
+                return eventNameId.startsWith(`${handlerNamePrefix}/${eventType}`);
+              })
+            )
+              this.off(eventNameId);
+          } else if (!eventNameId.startsWith(`${handlerNamePrefix}/${eventTypeToKeep}`)) this.off(eventNameId);
+        } else this.off(eventNameId);
       }
     });
   };
@@ -94,7 +109,7 @@ export class Event {
    */
   emit = (payload: PayloadBaseClass): void => {
     const { handlerName, event } = payload;
-    const eventName = `${event}${handlerName ? `/${handlerName}` : ''}`;
+    const eventName = `${handlerName ? `${handlerName}/` : ''}${event}`;
     this.eventEmitter.emit(eventName, { ...payload, handlerName }, handlerName);
   };
 }

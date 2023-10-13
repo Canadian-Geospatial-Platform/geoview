@@ -1,21 +1,17 @@
-import { useCallback, useState, useEffect, useRef, useContext } from 'react';
+import { useState, useEffect, useContext } from 'react';
 
 import { Coordinate } from 'ol/coordinate';
-import { fromLonLat, toLonLat } from 'ol/proj';
+import { toLonLat } from 'ol/proj';
 
 import makeStyles from '@mui/styles/makeStyles';
 
 import { useTranslation } from 'react-i18next';
 
-import debounce from 'lodash/debounce';
-
-import { api } from '@/app';
-import { MapContext } from '@/core/app-start';
-
-import { EVENT_NAMES } from '@/api/events/event-types';
-import { PayloadBaseClass, payloadIsABoolean } from '@/api/events/payloads';
+import { useStore } from 'zustand';
+import { getGeoViewStore } from '@/core/stores/stores-managers';
 
 import { Box, CheckIcon, Tooltip } from '@/ui';
+import { MapContext } from '@/core/app-start';
 
 const useStyles = makeStyles((theme) => ({
   mousePositionContainer: {
@@ -67,39 +63,24 @@ function coordFormnatDMS(value: number): string {
 }
 
 /**
- * Mouse position properties interface
- */
-interface MousePositionProps {
-  mousePositionMapId: string;
-}
-
-/**
  * Create the mouse position
- * @param {MousePositionProps} props the mouse position properties
  * @returns {JSX.Element} the mouse position component
  */
-export function MousePosition(props: MousePositionProps): JSX.Element {
-  const { mousePositionMapId } = props;
-
-  const [expanded, setExpanded] = useState(false);
-  const [mousePositionText, setMousePositionText] = useState<boolean>(false);
+export function MousePosition(): JSX.Element {
+  const mapConfig = useContext(MapContext);
+  const { mapId } = mapConfig;
 
   const { t } = useTranslation<string>();
 
+  // TODO: remove use style
   const classes = useStyles();
 
+  // internal component state
   const [positions, setPositions] = useState<string[]>(['', '', '']);
-
-  // const [position, setPosition] = useState({ lng: '--', lat: '--' });
-
   const [positionMode, setPositionMode] = useState<number>(0);
 
-  // keep track of crosshair status to know when update coord from keyboard navigation
-  const isCrosshairsActive = useRef(false);
-
-  const mapConfig = useContext(MapContext);
-
-  const { mapId } = mapConfig;
+  // get the expand or collapse from store
+  const expanded = useStore(getGeoViewStore(mapId), (state) => state.footerBarState.expanded);
 
   /**
    * Format the coordinates output in lat long
@@ -107,7 +88,7 @@ export function MousePosition(props: MousePositionProps): JSX.Element {
    * @param {boolean} DMS true if need to be formatted as Degree Minute Second, false otherwise
    * @returns {Object} an object containing formatted Longitude and Latitude values
    */
-  function formatCoordinates(lnglat: Coordinate, DMS: boolean) {
+  function formatCoordinates(lnglat: Coordinate, DMS: boolean): { lng: string; lat: string } {
     const labelX = lnglat[0] < 0 ? t('mapctrl.mouseposition.west') : t('mapctrl.mouseposition.east');
     const labelY = lnglat[1] < 0 ? t('mapctrl.mouseposition.south') : t('mapctrl.mouseposition.north');
 
@@ -118,113 +99,53 @@ export function MousePosition(props: MousePositionProps): JSX.Element {
   }
 
   /**
-   * Get the formatted coordinate for Degree Minute Second, Decimal degree and projected values
-   * @param {Coordinate} coord coordinates array to process
-   * @returns {Object} the coordinates
-   */
-  function getCoordinates(coord: Coordinate) {
-    // TODO: when map is loaded from function call, there is a first init with the empty config then an overwrite by the the function call.
-    // !Some of the reference are not set properly, so we have this work around. EWven with this is it not 100% perfect. This needs to be refactor
-    // !so we do not have access before the api map is set
-    const projection = api.projection.projections[api.map(mapId) !== undefined ? api.map(mapId).currentProjection : 3978];
-    const coordinate = toLonLat(coord, projection);
-
-    const DMS = formatCoordinates(coordinate, true);
-    const DD = formatCoordinates(coordinate, false);
-    const projected = fromLonLat([coordinate[0], coordinate[1]], projection);
-
-    return { DMS, DD, projected };
-  }
-
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const onMouseMove = useCallback(
-    debounce((e) => {
-      const coord = getCoordinates(e.coordinate);
-
-      setPositions([
-        `${coord.DMS.lng} | ${coord.DMS.lat}`,
-        `${coord.DD.lng} | ${coord.DD.lat}`,
-        `${coord.projected[0].toFixed(4)}m E | ${coord.projected[1].toFixed(4)}m N`,
-      ]);
-    }, 10),
-    [t, positionMode]
-  );
-
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const onMoveEnd = useCallback(
-    debounce((e) => {
-      const coord = getCoordinates(e.map.getView().getCenter());
-
-      setPositions([
-        `${coord.DMS.lng} | ${coord.DMS.lat}`,
-        `${coord.DD.lng} | ${coord.DD.lat}`,
-        `${coord.projected[0].toFixed(4)}m E | ${coord.projected[1].toFixed(4)}m N`,
-      ]);
-    }, 10),
-    [t, positionMode]
-  );
-
-  /**
    * Switch position mode
    */
   const switchPositionMode = () => {
-    const { map } = api.map(mapId);
-    const coord = getCoordinates(map.getView().getCenter()!);
-
-    setPositions([
-      `${coord.DMS.lng} | ${coord.DMS.lat}`,
-      `${coord.DD.lng} | ${coord.DD.lat}`,
-      `${coord.projected[0].toFixed(4)}m E | ${coord.projected[1].toFixed(4)}m N`,
-    ]);
-
     setPositionMode((positionMode + 1) % 3);
   };
 
   useEffect(() => {
-    const { map } = api.map(mapId);
+    // if pointerPosition changed, map pointer event has been triggered
+    const unsubMapPointer = getGeoViewStore(mapId).subscribe(
+      (state) => state.mapState.pointerPosition,
+      (curPos, prevPos) => {
+        if (curPos !== prevPos) {
+          const { lnglat, projected } = curPos!;
+          const DMS = formatCoordinates(lnglat, true);
+          const DD = formatCoordinates(lnglat, false);
 
-    map.on('pointermove', onMouseMove);
-    map.on('moveend', onMoveEnd);
-
-    return () => {
-      map.un('pointermove', onMouseMove);
-      map.un('moveend', onMoveEnd);
-    };
-  }, [mapId, onMouseMove, onMoveEnd, positionMode]);
-
-  useEffect(() => {
-    let opacityTimeout: string | number | NodeJS.Timeout | undefined;
-
-    const crossHairEnableDiableListenerFunction = (payload: PayloadBaseClass) => {
-      if (payloadIsABoolean(payload)) {
-        if (payload.handlerName!.includes(mousePositionMapId)) {
-          isCrosshairsActive.current = payload.status;
+          setPositions([
+            `${DMS.lng} | ${DMS.lat}`,
+            `${DD.lng} | ${DD.lat}`,
+            `${projected[0].toFixed(4)}m E | ${projected[1].toFixed(4)}m N`,
+          ]);
         }
       }
-    };
+    );
 
-    const footerbarExpandCollapseListenerFunction = (payload: PayloadBaseClass) => {
-      if (payloadIsABoolean(payload)) {
-        if (payload.handlerName!.includes(mousePositionMapId)) {
-          if (payload.status) {
-            opacityTimeout = setTimeout(() => setExpanded(payload.status), 300);
-          } else {
-            setExpanded(payload.status);
-          }
-          setMousePositionText(payload.status);
+    // if mapCenterCoordinates changed, map move end event has been triggered
+    // if the crosshair is active from the store, keyboard is used
+    const unsubMapCenterCoord = getGeoViewStore(mapId).subscribe(
+      (state) => state.mapState.mapCenterCoordinates,
+      (curCenterCoord, prevCenterCoord) => {
+        if (curCenterCoord !== prevCenterCoord && getGeoViewStore(mapId).getState().isCrosshairsActive) {
+          const projected = curCenterCoord;
+          const projection = getGeoViewStore(mapId).getState().mapState.currentProjection;
+          const DMS = formatCoordinates(toLonLat(projected, `EPSG:${projection}`), true);
+          const DD = formatCoordinates(toLonLat(projected, `EPSG:${projection}`), false);
+          setPositions([
+            `${DMS.lng} | ${DMS.lat}`,
+            `${DD.lng} | ${DD.lat}`,
+            `${projected[0].toFixed(4)}m E | ${projected[1].toFixed(4)}m N`,
+          ]);
         }
       }
-    };
-
-    // on map crosshair enable\disable, set variable for WCAG mouse position
-    // TODO: On crosshaih, add crosshair center information to screen reader / mouse position component
-    api.event.on(EVENT_NAMES.MAP.EVENT_MAP_CROSSHAIR_ENABLE_DISABLE, crossHairEnableDiableListenerFunction, mapId);
-    api.event.on(EVENT_NAMES.FOOTERBAR.EVENT_FOOTERBAR_EXPAND_COLLAPSE, footerbarExpandCollapseListenerFunction, mapId);
+    );
 
     return () => {
-      api.event.off(EVENT_NAMES.MAP.EVENT_MAP_CROSSHAIR_ENABLE_DISABLE, mapId, crossHairEnableDiableListenerFunction);
-      api.event.off(EVENT_NAMES.FOOTERBAR.EVENT_FOOTERBAR_EXPAND_COLLAPSE, mapId, footerbarExpandCollapseListenerFunction);
-      clearTimeout(opacityTimeout);
+      unsubMapPointer();
+      unsubMapCenterCoord();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -244,7 +165,7 @@ export function MousePosition(props: MousePositionProps): JSX.Element {
               );
             })}
           </Box>
-          <Box component="span" className={classes.mousePositionText} sx={{ display: mousePositionText ? 'none' : 'block' }}>
+          <Box component="span" className={classes.mousePositionText} sx={{ display: expanded ? 'none' : 'block' }}>
             {positions[positionMode]}
           </Box>
         </Box>

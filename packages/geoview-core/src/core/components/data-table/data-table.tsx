@@ -71,6 +71,7 @@ function DataTable({ data }: DataTableProps) {
     try {
       rowVirtualizerInstanceRef.current?.scrollToIndex?.(0);
     } catch (error) {
+      // eslint-disable-next-line no-console
       console.error(error);
     }
   }, [sorting]);

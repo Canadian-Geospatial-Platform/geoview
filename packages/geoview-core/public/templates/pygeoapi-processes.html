@@ -246,7 +246,7 @@
               tableZoomTo = document.createElement('button');
               tableZoomTo.innerText = 'Zoom To Feature';
               tableZoomTo.addEventListener('click', function (e) {
-                cgpv.api.map(mapId).zoomToExtent(row.extent, { padding: [100, 100, 100, 100], maxZoom: 20 });
+                cgpv.api.maps[mapId].zoomToExtent(row.extent, { padding: [100, 100, 100, 100], maxZoom: 20 });
                 addBoundsPolygon(mapId, row.extent);
               });
               tableData.appendChild(tableZoomTo);
@@ -515,7 +515,7 @@
         const { layerSetId, resultSets } = payload;
         createInfoTable('LYR5', 'geoJsonResultSetId', resultSets);
       },
-      'LYR5/$FeatureInfoLayerSet$'
+      'LYR5/FeatureInfoLayerSet'
     );
 
     const LegendsGeoJsonLayerSet = cgpv.api.getLegendsLayerSet('LYR5');
@@ -525,7 +525,7 @@
         const { resultSets } = payload;
         displayLegend('geojsonLegendsId', resultSets);
       },
-      'LYR5/$LegendsLayerSet$'
+      'LYR5/LegendsLayerSet'
     );
 
     // ==========================================================================================================================
@@ -630,13 +630,13 @@
     }
     // ==========================================================================================================================
     function addBoundsPolygon(mapId, bbox) {
-      const newBbox = cgpv.api.map(mapId).transformAndDensifyExtent(bbox, `EPSG:${cgpv.api.map(mapId).currentProjection}`, `EPSG:4326`);
+      const newBbox = cgpv.api.maps[mapId].transformAndDensifyExtent(bbox, `EPSG:${cgpv.api.maps[mapId].currentProjection}`, `EPSG:4326`);
 
-    const vector = cgpv.api.map(mapId).layer.vector;
-    vector.setActiveGeometryGroup();
-    vector.deleteGeometriesFromGroup(0);
+    const geometry = cgpv.api.maps[mapId].layer.geometry;
+    geometry.setActiveGeometryGroup();
+    geometry.deleteGeometriesFromGroup(0);
 
-      const polygon = cgpv.api.map(mapId).layer.vector.addPolygon(
+      const polygon = cgpv.api.maps[mapId].layer.geometry.addPolygon(
         [ newBbox ],
         {
           style: {
@@ -657,7 +657,6 @@
         createConfigSnippet();
 
         createTableOfFilter('LYR5');
-        cgpv.api.event.emit({ handlerName: 'LYR5/$LegendsLayerSet$', event: cgpv.api.eventNames.GET_LEGENDS.TRIGGER });
       });
 
       // GeoMetButton============================================================================================================
@@ -667,14 +666,14 @@
       // add an event listener when a button is clicked
       addGeoJSONButton.addEventListener('click', function (e) {
         const layerPath = document.getElementById('GeoMet-New-Layer-Id-Label').innerText;
-        if (layerPath) cgpv.api.map('LYR5').layer.removeLayersUsingPath(layerPath);
+        if (layerPath) cgpv.api.maps['LYR5'].layer.removeLayersUsingPath(layerPath);
         document.getElementById('GeoMet-New-Layer-Id-Label').innerText = '';
         createTableOfFilter('LYR5');
 
         // adding a geojson layer requires a type of geojson and url
         const lat = document.getElementById('GeoMet-Lat-Input').value;
         const long = document.getElementById('GeoMet-Long-Input').value;
-        const layerID = cgpv.api.map('LYR5').layer.addGeoviewLayer(
+        const layerID = cgpv.api.maps['LYR5'].layer.addGeoviewLayer(
           {
             geoviewLayerId: 'GeoMetGeoJsonProcess',
             metadataAccessPath: { 'en': './geojson/processes-metadata.json' },
@@ -718,14 +717,14 @@
       // add an event listener when a button is clicked
       addGeoJSONButton.addEventListener('click', function (e) {
         const layerPath = document.getElementById('Hydro-New-Layer-Id-Label').innerText;
-        if (layerPath) cgpv.api.map('LYR5').layer.removeLayersUsingPath(layerPath);
+        if (layerPath) cgpv.api.maps['LYR5'].layer.removeLayersUsingPath(layerPath);
         document.getElementById('Hydro-New-Layer-Id-Label').innerText = '';
         createTableOfFilter('LYR5');
 
         // adding a geojson layer requires a type of geojson and url
         const lat = document.getElementById('Hydro-Lat-Input').value;
         const long = document.getElementById('Hydro-Long-Input').value;
-        const layerID = cgpv.api.map('LYR5').layer.addGeoviewLayer(
+        const layerID = cgpv.api.maps['LYR5'].layer.addGeoviewLayer(
           {
             geoviewLayerId: 'HydroGeoJsonProcess',
             metadataAccessPath: { 'en': './geojson/hydro-metadata.json' },

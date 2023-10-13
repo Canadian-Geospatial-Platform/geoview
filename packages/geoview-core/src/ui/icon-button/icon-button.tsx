@@ -1,8 +1,7 @@
-import React from 'react';
 import { useTranslation } from 'react-i18next';
-import MaterialIconButton from '@mui/material/IconButton';
-import Tooltip from '@mui/material/Tooltip';
-import Fade from '@mui/material/Fade';
+
+import { Fade, IconButton as MaterialIconButton, Tooltip } from '@mui/material';
+
 import { TypeIconButtonProps } from './icon-button-types';
 
 /**
@@ -25,6 +24,7 @@ export function IconButton(props: TypeIconButtonProps): JSX.Element {
     tabIndex,
     iconRef,
     size,
+    disabled,
   } = props;
   const { t } = useTranslation<string>();
   return (
@@ -39,6 +39,7 @@ export function IconButton(props: TypeIconButtonProps): JSX.Element {
         tabIndex={tabIndex}
         size={size}
         ref={iconRef}
+        disabled={disabled}
       >
         {children && children}
       </MaterialIconButton>

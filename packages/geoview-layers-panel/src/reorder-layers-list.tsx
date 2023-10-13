@@ -23,7 +23,7 @@ function ReorderLayersList({ mapId, title, layerIds, setReorderLayersVisible, se
 
   const { List, ListItem, ListItemButton, ListItemIcon, HandleIcon, ListItemText, Box, IconButton, CloseIcon } = ui.elements;
 
-  const { displayLanguage } = api.map(mapId!);
+  const { displayLanguage } = api.maps[mapId!];
 
   const sxClasses = {
     titleBar: {
@@ -57,12 +57,12 @@ function ReorderLayersList({ mapId, title, layerIds, setReorderLayersVisible, se
     const reorderedLayerIds = [...layerIds];
     const [removed] = reorderedLayerIds.splice(source.index, 1);
     reorderedLayerIds.splice(destination.index, 0, removed);
-    api.map(mapId).layer.moveLayer(removed, destination.index);
+    api.maps[mapId].layer.moveLayer(removed, destination.index);
     setMapLayers(reorderedLayerIds);
   };
 
   const getLayerName = (layerId: string) => {
-    return api.map(mapId).layer.geoviewLayers[layerId].geoviewLayerName[displayLanguage];
+    return api.maps[mapId].layer.geoviewLayers[layerId].geoviewLayerName[displayLanguage];
   };
 
   return (

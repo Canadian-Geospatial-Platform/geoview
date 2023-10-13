@@ -1,5 +1,4 @@
-import MaterialMenu from '@mui/material/Menu';
-import { MenuProps } from '@mui/material';
+import { Menu as MaterialMenu, MenuProps } from '@mui/material';
 
 /**
  * Create a customized Material UI Menu

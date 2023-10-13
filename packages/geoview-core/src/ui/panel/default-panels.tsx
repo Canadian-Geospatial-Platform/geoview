@@ -1,5 +1,5 @@
-import Typography from '@mui/material/Typography';
-import HelpIcon from '@mui/icons-material/Help';
+import { Typography } from '@mui/material';
+import { HelpIcon } from '@/ui';
 import { TypeButtonPanelProps } from './panel-types';
 
 /**

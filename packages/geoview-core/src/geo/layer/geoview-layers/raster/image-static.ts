@@ -95,7 +95,7 @@ export class ImageStatic extends AbstractGeoViewRaster {
    * @returns {Promise<void>} A promise that the execution is completed.
    */
   protected getServiceMetadata(): Promise<void> {
-    this.layerPhase = 'getServiceMetadata';
+    this.changeLayerPhase('getServiceMetadata');
     const promisedExecution = new Promise<void>((resolve) => {
       resolve();
     });
@@ -161,31 +161,28 @@ export class ImageStatic extends AbstractGeoViewRaster {
             legend: null,
           });
         else {
-          api
-            .map(this.mapId)
-            .geoviewRenderer.loadImage(legendImage as string)
-            .then((image) => {
-              if (image) {
-                const drawingCanvas = document.createElement('canvas');
-                drawingCanvas.width = image.width;
-                drawingCanvas.height = image.height;
-                const drawingContext = drawingCanvas.getContext('2d')!;
-                drawingContext.drawImage(image, 0, 0);
-                const legend: TypeLegend = {
-                  type: this.type,
-                  layerPath: Layer.getLayerPath(layerConfig!),
-                  layerName: layerConfig!.layerName,
-                  legend: drawingCanvas,
-                };
-                resolve(legend);
-              } else
-                resolve({
-                  type: this.type,
-                  layerPath: Layer.getLayerPath(layerConfig!),
-                  layerName: layerConfig!.layerName,
-                  legend: null,
-                });
-            });
+          api.maps[this.mapId].geoviewRenderer.loadImage(legendImage as string).then((image) => {
+            if (image) {
+              const drawingCanvas = document.createElement('canvas');
+              drawingCanvas.width = image.width;
+              drawingCanvas.height = image.height;
+              const drawingContext = drawingCanvas.getContext('2d')!;
+              drawingContext.drawImage(image, 0, 0);
+              const legend: TypeLegend = {
+                type: this.type,
+                layerPath: Layer.getLayerPath(layerConfig!),
+                layerName: layerConfig!.layerName,
+                legend: drawingCanvas,
+              };
+              resolve(legend);
+            } else
+              resolve({
+                type: this.type,
+                layerPath: Layer.getLayerPath(layerConfig!),
+                layerName: layerConfig!.layerName,
+                legend: null,
+              });
+          });
         }
       });
     });
@@ -201,7 +198,7 @@ export class ImageStatic extends AbstractGeoViewRaster {
    * @returns {TypeListOfLayerEntryConfig} A new list of layer entries configuration with deleted error layers.
    */
   protected validateListOfLayerEntryConfig(listOfLayerEntryConfig: TypeListOfLayerEntryConfig) {
-    this.layerPhase = 'validateListOfLayerEntryConfig';
+    this.changeLayerPhase('validateListOfLayerEntryConfig');
     listOfLayerEntryConfig.forEach((layerEntryConfig: TypeLayerEntryConfig) => {
       const layerPath = Layer.getLayerPath(layerEntryConfig);
       if (layerEntryIsGroupLayer(layerEntryConfig)) {
@@ -211,12 +208,12 @@ export class ImageStatic extends AbstractGeoViewRaster {
             layer: layerPath,
             consoleMessage: `Empty layer group (mapId:  ${this.mapId}, layerPath: ${layerPath})`,
           });
-          api.event.emit(LayerSetPayload.createLayerSetChangeLayerStatusPayload(this.mapId, layerPath, 'error'));
+          this.changeLayerStatus('error', layerEntryConfig);
           return;
         }
       }
 
-      api.event.emit(LayerSetPayload.createLayerSetChangeLayerStatusPayload(this.mapId, layerPath, 'loading'));
+      this.changeLayerStatus('loading', layerEntryConfig);
 
       // When no metadata are provided, all layers are considered valid.
       if (!this.metadata) return;
@@ -231,7 +228,7 @@ export class ImageStatic extends AbstractGeoViewRaster {
             layer: layerPath,
             consoleMessage: `GeoJSON layer not found (mapId:  ${this.mapId}, layerPath: ${layerPath})`,
           });
-          api.event.emit(LayerSetPayload.createLayerSetChangeLayerStatusPayload(this.mapId, layerPath, 'error'));
+          this.changeLayerStatus('error', layerEntryConfig);
           return;
         }
         return;
@@ -252,9 +249,14 @@ export class ImageStatic extends AbstractGeoViewRaster {
    */
   processOneLayerEntry(layerEntryConfig: TypeImageStaticLayerEntryConfig): Promise<TypeBaseRasterLayer | null> {
     const promisedVectorLayer = new Promise<TypeBaseRasterLayer | null>((resolve) => {
+      this.changeLayerPhase('processOneLayerEntry', layerEntryConfig);
+
+      if (!layerEntryConfig.source.extent) throw new Error('Parameter extent is not defined in source element of layerEntryConfig.');
       const sourceOptions: SourceOptions = {
         url: getLocalizedValue(layerEntryConfig.source.dataAccessPath, this.mapId) || '',
+        imageExtent: layerEntryConfig.source.extent,
       };
+
       if (layerEntryConfig.source.crossOrigin) {
         sourceOptions.crossOrigin = layerEntryConfig.source.crossOrigin;
       } else {
@@ -264,10 +266,6 @@ export class ImageStatic extends AbstractGeoViewRaster {
       if (layerEntryConfig.source.projection) {
         sourceOptions.projection = `EPSG:${layerEntryConfig.source.projection}`;
       } else throw new Error('Parameter projection is not define in source element of layerEntryConfig.');
-
-      if (layerEntryConfig.source.extent) {
-        sourceOptions.imageExtent = layerEntryConfig.source.extent;
-      } else throw new Error('Parameter extent is not define in source element of layerEntryConfig.');
 
       const staticImageOptions: ImageOptions<Static> = { source: new Static(sourceOptions) };
       // layerEntryConfig.initialSettings cannot be undefined because config-validation set it to {} if it is undefined.
@@ -280,8 +278,12 @@ export class ImageStatic extends AbstractGeoViewRaster {
           layerEntryConfig.initialSettings?.visible === 'yes' || layerEntryConfig.initialSettings?.visible === 'always';
 
       layerEntryConfig.gvLayer = new ImageLayer(staticImageOptions);
+
+      super.addLoadendListener(layerEntryConfig, 'image');
+
       resolve(layerEntryConfig.gvLayer);
     });
+
     return promisedVectorLayer;
   }
 
@@ -297,7 +299,7 @@ export class ImageStatic extends AbstractGeoViewRaster {
     const layerBounds = (layerConfig.gvLayer as ImageLayer<Static>).getSource()?.getImageExtent();
     const projection =
       (layerConfig.gvLayer as ImageLayer<Static>).getSource()?.getProjection()?.getCode().replace('EPSG:', '') ||
-      api.map(this.mapId).currentProjection;
+      api.maps[this.mapId].currentProjection;
 
     if (layerBounds) {
       const transformedBounds = transformExtent(layerBounds, `EPSG:${projection}`, `EPSG:4326`);

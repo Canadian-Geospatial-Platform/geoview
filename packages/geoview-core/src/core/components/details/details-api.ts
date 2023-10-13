@@ -1,7 +1,6 @@
 import { createElement, ReactElement } from 'react';
 import { FeatureInfoLayerSet } from '@/geo/utils/feature-info-layer-set';
 import { api } from '@/app';
-
 import { Details, TypeArrayOfLayerData, DetailsProps } from './details';
 
 /**
@@ -26,7 +25,7 @@ export class DetailsAPI {
   }
 
   /**
-   * Create a details as as an element
+   * Create a details as an element
    *
    * @param {TypeLayerDetailsProps} mapId the map identifier
    * @param {TypeArrayOfLayerData} detailsElements the data to display in the Details element

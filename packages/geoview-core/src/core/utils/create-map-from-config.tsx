@@ -1,8 +1,4 @@
-import { createRoot } from 'react-dom/client';
-import { api } from '@/app';
-import AppStart from '../app-start';
-import { Config } from './config/config';
-import { parseJSONConfig, removeCommentsFromJSON } from './utilities';
+import { initMapDivFromFunctionCall, api } from '@/app';
 
 /**
  * Create a new map in a given div
@@ -13,24 +9,8 @@ import { parseJSONConfig, removeCommentsFromJSON } from './utilities';
 export function createMapFromConfig(divId: string, mapConfig: string) {
   const mapDiv = document.getElementById(divId);
   if (mapDiv) {
-    if (mapDiv.className === 'llwp-map') {
-      api.map(divId).loadMapConfig(mapConfig);
-    } else {
-      mapDiv.classList.add('llwp-map');
-
-      const configObjString = removeCommentsFromJSON(mapConfig);
-      const parsedMapConfig = parseJSONConfig(configObjString);
-
-      // create a new config for this map element
-      const config = new Config(mapDiv);
-      const configObj = config.getMapConfigFromFunc(parsedMapConfig);
-
-      if (configObj) {
-        // render the map with the config
-        const root = createRoot(mapDiv!);
-        root.render(<AppStart mapFeaturesConfig={configObj} />);
-      }
-    }
+    if (mapDiv.classList.contains('llwp-map')) api.maps[divId].loadMapFromJsonStringConfig(mapConfig);
+    else initMapDivFromFunctionCall(mapDiv!, mapConfig);
   } else {
     // eslint-disable-next-line no-console
     console.error(`Div with id ${divId} does not exist`);

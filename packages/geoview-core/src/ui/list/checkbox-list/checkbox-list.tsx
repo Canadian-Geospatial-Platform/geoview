@@ -1,12 +1,9 @@
 import { useState } from 'react';
 
+import { Checkbox, List, ListItem, ListItemIcon, Typography } from '@mui/material';
+
 import createStyles from '@mui/styles/createStyles';
 import makeStyles from '@mui/styles/makeStyles';
-import Typography from '@mui/material/Typography';
-import List from '@mui/material/List';
-import ListItem from '@mui/material/ListItem';
-import ListItemIcon from '@mui/material/ListItemIcon';
-import Checkbox from '@mui/material/Checkbox';
 
 const useStyles = makeStyles((theme) =>
   createStyles({
