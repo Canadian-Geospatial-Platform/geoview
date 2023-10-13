@@ -1,70 +1,52 @@
-/* eslint-disable react/no-danger */
 import { useEffect, useRef, useContext } from 'react';
+
+import { useTheme } from '@mui/material/styles';
 
 import { useTranslation } from 'react-i18next';
 
-import makeStyles from '@mui/styles/makeStyles';
 import { toLonLat } from 'ol/proj';
 import { KeyboardPan } from 'ol/interaction';
 
 import { useStore } from 'zustand';
-import { MapContext } from '@/core/app-start';
-
-import { TypeEventHandlerFunction, api } from '@/app';
-import { EVENT_NAMES } from '@/api/events/event-types';
-import { CrosshairIcon } from './crosshair-icon';
-
-import { Fade } from '@/ui';
-import { lngLatPayload, payloadIsAInKeyfocus, PayloadBaseClass } from '@/api/events/payloads';
 import { getGeoViewStore } from '@/core/stores/stores-managers';
 
-const useStyles = makeStyles((theme) => ({
-  crosshairContainer: {
-    position: 'absolute',
-    top: theme.spacing(0),
-    right: theme.spacing(0),
-    left: theme.spacing(0),
-    bottom: theme.spacing(0),
-    paddingBottom: theme.spacing(6),
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    'pointer-events': 'none !important',
-    zIndex: theme.zIndex.olControl,
-  },
-  crosshairInfo: {
-    position: 'absolute',
-    top: theme.spacing(0),
-    right: theme.spacing(0),
-    left: theme.spacing(0),
-    height: 'calc(1em + 8px)',
-    padding: theme.spacing(2, 1, 4, 1),
-    backgroundColor: 'rgba(228, 227, 227, 0.9)',
-    '& span': {
-      paddingLeft: 70,
-    },
-  },
-  crosshairIcon: {
-    width: theme.overrides.crosshairIcon.size.width,
-    height: theme.overrides.crosshairIcon?.size.height,
-  },
-}));
+import { MapContext } from '@/core/app-start';
+
+import { Box, Fade, Typography } from '@/ui';
+import { TypeMapMouseInfo } from '@/api/events/payloads';
+
+import { getSxClasses } from './crosshair-style';
+import { CrosshairIcon } from './crosshair-icon';
 
 /**
  * Create a Crosshair when map is focus with the keyboard so user can click on the map
  * @returns {JSX.Element} the crosshair component
  */
 export function Crosshair(): JSX.Element {
-  const classes = useStyles();
+  const mapConfig = useContext(MapContext);
+  const { mapId } = mapConfig;
+
   const { t } = useTranslation<string>();
 
-  const mapConfig = useContext(MapContext);
-  const { mapId, interaction } = mapConfig;
-  const projection = api.projection.projections[api.maps[mapId].currentProjection];
+  const theme = useTheme();
+  const sxClasses = getSxClasses(theme);
 
+  // get store values
   // tracks if the last action was done through a keyboard (map navigation) or mouse (mouse movement)
   const store = getGeoViewStore(mapId);
   const isCrosshairsActive = useStore(store, (state) => state.isCrosshairsActive);
+  const projection = useStore(store, (state) => state.mapState.currentProjection);
+  const mapCoord = useStore(store, (state) => state.mapState.mapCenterCoordinates);
+  const mapElementStore = useStore(store, (state) => state.mapState.mapElement);
+
+  // use reference as the mapElement from the store is undefined
+  // TODO: Find what is going on with mapElement for focus-trap and crosshair and crosshair + map coord for this component
+  const mapElementRef = useRef(mapElementStore);
+  mapElementRef.current = mapElementStore;
+  const isCrosshairsActiveRef = useRef(isCrosshairsActive);
+  isCrosshairsActiveRef.current = isCrosshairsActive;
+  const mapCoordRef = useRef(mapCoord);
+  mapCoordRef.current = mapCoord;
 
   // do not use useState for item used inside function only without rendering... use useRef
   const panelButtonId = useRef('');
@@ -78,13 +60,17 @@ export function Crosshair(): JSX.Element {
    */
   function simulateClick(evt: KeyboardEvent): void {
     if (evt.key === 'Enter') {
-      const { map } = api.maps[mapId];
-
-      const lnglatPoint = toLonLat(map.getView().getCenter()!, projection);
-
-      if (isCrosshairsActive) {
-        // emit an event with the lnglat point
-        api.event.emit(lngLatPayload(EVENT_NAMES.MAP.EVENT_MAP_CROSSHAIR_ENTER, mapId, lnglatPoint));
+      if (isCrosshairsActiveRef.current) {
+        // updater store with the lnglat point
+        const mapClickCoordinatesFetch: TypeMapMouseInfo = {
+          projected: [0, 0],
+          pixel: [0, 0],
+          lnglat: toLonLat(mapCoordRef.current, `EPSG:${projection}`),
+          dragging: false,
+        };
+        store.setState({
+          mapState: { ...store.getState().mapState, mapClickCoordinates: mapClickCoordinatesFetch },
+        });
       }
     }
   }
@@ -100,83 +86,61 @@ export function Crosshair(): JSX.Element {
       panDelta = panDelta < 10 ? 10 : panDelta; // minus panDelta reset the value so we need to trap
 
       // replace the KeyboardPan interraction by a new one
-      const { map } = api.maps[mapId];
-      map.getInteractions().forEach((interactionItem) => {
+      const mapElement = mapElementRef.current;
+      mapElement.getInteractions().forEach((interactionItem) => {
         if (interactionItem instanceof KeyboardPan) {
-          map.removeInteraction(interactionItem);
+          mapElement.removeInteraction(interactionItem);
         }
       });
-      map.addInteraction(new KeyboardPan({ pixelDelta: panDelta }));
+      mapElement.addInteraction(new KeyboardPan({ pixelDelta: panDelta }));
     }
-  }
-
-  /**
-   * Remove the crosshair for keyboard navigation on map mouse move or blur
-   * @function removeCrosshair
-   */
-  function removeCrosshair(): void {
-    const { map } = api.maps[mapId];
-
-    // remove simulate click event listener
-    map.getTargetElement().removeEventListener('keydown', simulateClick);
-    store.setState({ isCrosshairsActive: false });
   }
 
   useEffect(() => {
-    const { map } = api.maps[mapId];
-
-    // TODO: repair using the store map element
-    //! came fromt he map creation on function call
-    let eventMapInKeyFocusListenerFunction: TypeEventHandlerFunction;
-    if (map !== undefined) {
-      const mapContainer = map.getTargetElement();
-
-      eventMapInKeyFocusListenerFunction = (payload: PayloadBaseClass) => {
-        if (payloadIsAInKeyfocus(payload)) {
-          if (interaction !== 'static') {
-            store.setState({ isCrosshairsActive: true });
-
-            mapContainer.addEventListener('keydown', simulateClick);
-            mapContainer.addEventListener('keydown', managePanDelta);
+    const unsubIsCrosshair = getGeoViewStore(mapId).subscribe(
+      (state) => state.isCrosshairsActive,
+      (curCrosshair, prevCrosshair) => {
+        if (curCrosshair !== prevCrosshair) {
+          const mapHTMLElement = mapElementRef.current.getTargetElement();
+          if (curCrosshair) {
             panelButtonId.current = 'detailsPanel';
+
+            mapHTMLElement.addEventListener('keydown', simulateClick);
+            mapHTMLElement.addEventListener('keydown', managePanDelta);
+          } else {
+            mapHTMLElement.removeEventListener('keydown', simulateClick);
+            mapHTMLElement.removeEventListener('keydown', managePanDelta);
           }
         }
-      };
-
-      // on map keyboard focus, add crosshair
-      api.event.on(EVENT_NAMES.MAP.EVENT_MAP_IN_KEYFOCUS, eventMapInKeyFocusListenerFunction, mapId);
-
-      // when map blur, remove the crosshair and click event
-      mapContainer.addEventListener('blur', removeCrosshair);
-    }
+      }
+    );
 
     return () => {
-      if (map !== undefined) {
-        api.event.off(EVENT_NAMES.MAP.EVENT_MAP_IN_KEYFOCUS, mapId, eventMapInKeyFocusListenerFunction);
-        const mapContainer = map.getTargetElement();
-        mapContainer.removeEventListener('keydown', simulateClick);
-        mapContainer.removeEventListener('keydown', managePanDelta);
-        mapContainer.removeEventListener('keydown', removeCrosshair);
-      }
+      const mapHTMLElement = mapElementRef.current.getTargetElement();
+      unsubIsCrosshair();
+      mapHTMLElement.removeEventListener('keydown', simulateClick);
+      mapHTMLElement.removeEventListener('keydown', managePanDelta);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
-    <div
-      className={classes.crosshairContainer}
-      style={{
-        visibility: isCrosshairsActive ? 'visible' : 'hidden',
-      }}
+    <Box
+      sx={[
+        sxClasses.crosshairContainer,
+        {
+          visibility: isCrosshairsActiveRef.current ? 'visible' : 'hidden',
+        },
+      ]}
     >
       <Fade in={isCrosshairsActive}>
-        <div className={classes.crosshairIcon}>
+        <Box sx={sxClasses.crosshairIcon}>
           <CrosshairIcon />
-        </div>
+        </Box>
       </Fade>
-      <div className={classes.crosshairInfo}>
-        <span dangerouslySetInnerHTML={{ __html: t('mapctrl.crosshair')! }} />
-      </div>
-    </div>
+      <Box sx={sxClasses.crosshairInfo}>
+        <Typography dangerouslySetInnerHTML={{ __html: t('mapctrl.crosshair')! }} />
+      </Box>
+    </Box>
   );
 }

@@ -1,64 +1,16 @@
 /* eslint-disable no-underscore-dangle */
-import React, { useContext, useEffect, useRef } from 'react';
+import { useContext, useEffect, useState } from 'react';
+
+import { useTheme } from '@mui/material/styles';
 
 import OLAttribution, { Options } from 'ol/control/Attribution';
-
-import makeStyles from '@mui/styles/makeStyles';
 
 import { useStore } from 'zustand';
 import { getGeoViewStore } from '@/core/stores/stores-managers';
 
 import { MapContext } from '@/core/app-start';
 import { Tooltip, Box } from '@/ui';
-
-const useStyles = makeStyles((theme) => ({
-  attributionContainer: {
-    display: 'flex',
-    padding: theme.spacing(0, 4),
-    overflow: 'hidden',
-    whiteSpace: 'nowrap',
-    textOverflow: 'ellipsis',
-    alignItems: 'center',
-    width: '100%',
-    transition: 'opacity 1ms ease-in 300ms',
-    '& .ol-attribution': {
-      display: 'flex !important',
-      flexDirection: 'row',
-      position: 'relative',
-      backgroundColor: 'initial',
-      borderRadius: 'initial',
-      padding: 'initial',
-      margin: 'initial',
-      left: 'auto',
-      top: 'auto',
-      right: 'auto',
-      bottom: 'auto',
-      maxWidth: 'initial',
-      textAlign: 'left',
-      overflow: 'hidden',
-      '& button:not(.expand-collapse-icon)': {
-        display: 'none',
-      },
-      '& ul': {
-        display: 'block',
-        maxWidth: '500px',
-        overflow: 'hidden',
-        margin: 'initial',
-        padding: 'initial',
-        color: theme.palette.primary.light,
-        textShadow: 'initial',
-        fontSize: 'initial',
-        '& li': {
-          display: 'block',
-          color: theme.palette.primary.light,
-          textOverflow: 'ellipsis',
-          whiteSpace: 'nowrap',
-          overflow: 'hidden',
-        },
-      },
-    },
-  },
-}));
+import { getSxClasses } from './attribution-style';
 
 /**
  * Custom Attribution control that extends Openlayers Attribution control.
@@ -82,15 +34,6 @@ class CustomAttribution extends OLAttribution {
     super(options);
 
     this.mapId = mapId;
-  }
-
-  /**
-   * Return the attribution control element
-   *
-   * @returns {HTMLElement} the attribution control element
-   */
-  getTargetElement() {
-    return this.element;
   }
 
   /**
@@ -122,15 +65,6 @@ class CustomAttribution extends OLAttribution {
       }
     }
   }
-
-  /**
-   * Return all attributions.
-   *
-   * @returns {string[]} return attributions text
-   */
-  getAttributions(): string[] {
-    return this.attributions;
-  }
 }
 
 /**
@@ -143,12 +77,13 @@ export function Attribution(): JSX.Element {
   const mapConfig = useContext(MapContext);
   const { mapId } = mapConfig;
 
-  // TODO: remove useStyle
-  const classes = useStyles();
+  const theme = useTheme();
+  const sxClasses = getSxClasses(theme);
 
-  const attributionTextRef = useRef<Array<string>>([]);
+  // internal component state
+  const [attribution, setAttribution] = useState('');
 
-  // get the expand or collapse from store
+  // get store values
   const mapElement = useStore(getGeoViewStore(mapId), (state) => state.mapState.mapElement);
   const expanded = useStore(getGeoViewStore(mapId), (state) => state.footerBarState.expanded);
 
@@ -166,18 +101,7 @@ export function Attribution(): JSX.Element {
       mapId
     );
 
-    // TODO: put attribution in store from add layer events, solve toolip issue
-    if (attributionTextElement) {
-      const liElements = attributionTextElement.getElementsByTagName('LI');
-      if (liElements && liElements.length > 0) {
-        for (let liElementIndex = 0; liElementIndex < liElements.length; liElementIndex++) {
-          const liElement = liElements[liElementIndex] as HTMLElement;
-          attributionTextRef.current.push(liElement.innerText);
-        }
-      }
-    }
     attributionControl.formatAttribution();
-
     mapElement.addControl(attributionControl);
 
     return () => {
@@ -185,9 +109,37 @@ export function Attribution(): JSX.Element {
     };
   }, [mapId, mapElement]);
 
+  useEffect(() => {
+    const attributionTextElement = document.getElementById(`${mapId}-attribution-text`) as HTMLElement;
+
+    // TODO: put attribution in store from add layer events
+    const tooltipAttribution = [];
+    if (attributionTextElement && expanded) {
+      const liElements = attributionTextElement.getElementsByTagName('LI');
+      if (liElements && liElements.length > 0) {
+        for (let liElementIndex = 0; liElementIndex < liElements.length; liElementIndex++) {
+          const liElement = liElements[liElementIndex] as HTMLElement;
+          tooltipAttribution.push(liElement.innerText);
+        }
+      }
+    }
+
+    setAttribution(tooltipAttribution.join('\n'));
+  }, [expanded]);
+
   return (
-    <Tooltip title={!attributionTextRef.current?.length ? '' : attributionTextRef.current.join('\n')}>
-      <Box id={`${mapId}-attribution-text`} className={classes.attributionContainer} sx={{ opacity: expanded ? 1 : 0 }} />
+    <Tooltip title={attribution}>
+      <Box
+        onKeyDown={(evt) => {
+          if (evt.code === 'Space') {
+            evt.preventDefault(); // prevent space keydown to scroll the page
+            evt.stopPropagation();
+          }
+        }}
+        id={`${mapId}-attribution-text`}
+        sx={[sxClasses.attributionContainer, { visibility: expanded ? 'visible' : 'hidden' }]}
+        tabIndex={0}
+      />
     </Tooltip>
   );
 }

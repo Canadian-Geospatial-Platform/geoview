@@ -8,7 +8,7 @@ import { LightboxImg, LightBoxSlides } from '../lightbox/lightbox';
 import { CardMedia, Box } from '@/ui';
 import { isImage, stringify, generateId, sanitizeHtmlContent } from '../../utils/utilities';
 import { HtmlToReact } from '../../containers/html-to-react';
-import { getSxClasses } from './details-1.styles';
+import { getSxClasses } from './details-1-style';
 
 interface FeatureInfoTableProps {
   featureInfoList: TypeFieldEntry[];
