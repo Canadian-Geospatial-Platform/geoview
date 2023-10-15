@@ -46,11 +46,9 @@ export function Datapanel({ layerData, mapId, projectionConfig, layerKeys, layer
   const theme = useTheme();
   const sxClasses = getSxClasses(theme);
 
-  const [selectedLayerIndex, setSelectedLayerIndex] = useState(2);
+  const [selectedLayerIndex, setSelectedLayerIndex] = useState(0);
   const [isLoading, setisLoading] = useState(false);
   const [isEnlargeDataTable, setIsEnlargeDataTable] = useState(false);
-
-  // useEffect(() => {}, [isLoading]);
 
   const handleListItemClick = useCallback((event: React.MouseEvent<HTMLDivElement, MouseEvent>, index: number) => {
     setSelectedLayerIndex(index);
