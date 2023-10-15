@@ -432,7 +432,6 @@ function MapDataTable({ data, layerId, mapId, layerKey, projectionConfig }: MapD
             'empty',
             'notEmpty',
           ],
-          // size: 250,
         }),
         ...([t('dataTable.icon'), t('dataTable.zoom')].includes(value.alias) && { size: 100, enableColumnFilter: false }),
       });
