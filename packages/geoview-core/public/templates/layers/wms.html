@@ -13,29 +13,6 @@
     <link href="https://fonts.googleapis.com/css?family=Roboto|Montserrat:200,300,400,900|Merriweather" rel="stylesheet" />
     <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
     <link rel="stylesheet" href="css/style.css" />
-    <style>
-      table.info,
-      th.info,
-      td.info,
-      th.infoCol1,
-      td.infoCol1 {
-        border: 1px solid black;
-      }
-      th.info,
-      td.info,
-      th.infoCol1,
-      td.infoCol1 {
-        padding: 15px;
-        width: 15%;
-      }
-      th.info,
-      th.infoCol1,
-      td.infoCol1 {
-        text-align: left;
-        font-weight: bold;
-        font-size: 15px;
-      }
-    </style>
   </head>
 
   <body>
@@ -78,7 +55,7 @@
       <a class="ref-link" href="#top">Top</a>
     </div>
     <button class="collapsible active">Map Status Flags</button>
-    <pre style="height: 20pc; overflow-y: scroll" id="HLYR1-state" class="panel map-title-holder"></pre>
+    <pre id="HLYR1-state" class="panel map-title-holder"></pre>
     <button class="test-refresh-WMS-btn">Test Refresh WMS</button>
     <div
       id="LYR1"
@@ -174,11 +151,11 @@
           }"
     ></div>
     <button type="button" class="collapsible">Visibility and filters</button>
-    <pre style="height: 20pc; overflow-y: scroll" id="layer1-buttons-pre" class="panel"></pre>
+    <pre id="layer1-buttons-pre" class="panel"></pre>
     <button class="collapsible">Get Legend</button>
-    <pre style="height: 20pc; overflow-y: scroll" id="LegendsId1-table-pre" class="panel"></pre>
+    <pre id="LegendsId1-table-pre" class="panel"></pre>
     <button type="button" class="collapsible">Get Feature Info</button>
-    <pre style="height: 20pc; overflow-y: scroll" id="ResultSetId1-at_long_lat" class="panel">Click on feature on the map</pre>
+    <pre id="ResultSetId1-at_long_lat" class="panel">Click on feature on the map</pre>
     <hr />
     <p>This map has a wms layer added from configuration.</p>
     <button type="button" class="collapsible">Configuration Snippet</button>
@@ -192,7 +169,7 @@
       <a class="ref-link" href="#top">Top</a>
     </div>
     <button class="collapsible active">Map Status Flags</button>
-    <pre style="height: 20pc; overflow-y: scroll" id="HLYR2-state" class="panel map-title-holder"></pre>
+    <pre id="HLYR2-state" class="panel map-title-holder"></pre>
     <div
       id="LYR2"
       class="llwp-map"
@@ -362,11 +339,11 @@
     }"
     ></div>
     <button type="button" class="collapsible">Visibility and filters</button>
-    <pre style="height: 20pc; overflow-y: scroll" id="layer2-buttons-pre" class="panel"></pre>
+    <pre id="layer2-buttons-pre" class="panel"></pre>
     <button class="collapsible">Get Legend</button>
-    <pre style="height: 20pc; overflow-y: scroll" id="LegendsId2-table-pre" class="panel"></pre>
+    <pre id="LegendsId2-table-pre" class="panel"></pre>
     <button type="button" class="collapsible">Get Feature Info</button>
-    <pre style="height: 20pc; overflow-y: scroll" id="ResultSetId2-at_long_lat" class="panel">Click on feature on the map</pre>
+    <pre id="ResultSetId2-at_long_lat" class="panel">Click on feature on the map</pre>
     <hr />
     <p>This map has a wms layer added from configuration.</p>
     <button type="button" class="collapsible">Configuration Snippet</button>
@@ -378,7 +355,7 @@
       <a class="ref-link" href="#top">Top</a>
     </div>
     <button class="collapsible active">Map Status Flags</button>
-    <pre style="height: 20pc; overflow-y: scroll" id="HLYR3-state" class="panel map-title-holder"></pre>
+    <pre id="HLYR3-state" class="panel map-title-holder"></pre>
     <div
       id="LYR3"
       class="llwp-map"
@@ -423,9 +400,9 @@
     <label for="language">Select a layer style:</label>
     <select name="style" id="style"></select>
     <button class="collapsible">Get Legend</button>
-    <pre style="height: 20pc; overflow-y: scroll" id="LegendsId3-table-pre" class="panel"></pre>
+    <pre id="LegendsId3-table-pre" class="panel"></pre>
     <button type="button" class="collapsible">Get Feature Info</button>
-    <pre style="height: 20pc; overflow-y: scroll" id="ResultSetId3-at_long_lat" class="panel">Click on feature on the map</pre>
+    <pre id="ResultSetId3-at_long_lat" class="panel">Click on feature on the map</pre>
     <hr />
     <p>This map has a wms layer added from configuration.</p>
     <button type="button" class="collapsible">Configuration Snippet</button>
@@ -437,7 +414,7 @@
       <a class="ref-link" href="#top">Top</a>
     </div>
     <button class="collapsible active">Map Status Flags</button>
-    <pre style="height: 20pc; overflow-y: scroll" id="HLYR4-state" class="panel map-title-holder"></pre>
+    <pre id="HLYR4-state" class="panel map-title-holder"></pre>
     <div
       id="LYR4"
       class="llwp-map"
@@ -477,9 +454,9 @@
       }"
     ></div>
     <button type="button" class="collapsible">Visibility and filters</button>
-    <pre style="height: 20pc; overflow-y: scroll" id="layer4-buttons-pre" class="panel"></pre>
+    <pre id="layer4-buttons-pre" class="panel"></pre>
     <button class="collapsible">Get Legend</button>
-    <pre style="height: 20pc; overflow-y: scroll" id="LegendsId4-table-pre" class="panel"></pre>
+    <pre id="LegendsId4-table-pre" class="panel"></pre>
     <hr />
     <p>This map has a wms layer added from configuration.</p>
     <button type="button" class="collapsible">Configuration Snippet</button>
@@ -580,9 +557,7 @@
       // Test a refresh WMS from projection change
       var testRefreshBtn = document.getElementsByClassName('test-refresh-WMS-btn')[0];
       testRefreshBtn.addEventListener('click', function (e) {
-        cgpv.api.event.emit(
-          cgpv.types.mapViewProjectionPayload(cgpv.api.eventNames.MAP.EVENT_MAP_VIEW_PROJECTION_CHANGE, 'LYR1', 3978)
-        );
+        cgpv.api.event.emit(cgpv.types.mapViewProjectionPayload(cgpv.api.eventNames.MAP.EVENT_MAP_VIEW_PROJECTION_CHANGE, 'LYR1', 3978));
       });
 
       listenToLegendLayerSetChanges('HLYR1-state', 'LYR1/LegendsLayerSet');
@@ -650,9 +625,7 @@
       // Test a refresh WMS from projection change
       var testRefreshBtn = document.getElementsByClassName('test-refresh-WMS-btn')[0];
       testRefreshBtn.addEventListener('click', function (e) {
-        cgpv.api.event.emit(
-          cgpv.types.mapViewProjectionPayload(cgpv.api.eventNames.MAP.EVENT_MAP_VIEW_PROJECTION_CHANGE, 'LYR1', 3978)
-        );
+        cgpv.api.event.emit(cgpv.types.mapViewProjectionPayload(cgpv.api.eventNames.MAP.EVENT_MAP_VIEW_PROJECTION_CHANGE, 'LYR1', 3978));
       });
       //create snippets
       createCodeSnippet();

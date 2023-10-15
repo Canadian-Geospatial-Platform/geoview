@@ -48,6 +48,7 @@ td {
   padding: 10px;
   font-size: 12px;
   overflow: auto;
+  max-height: 400px;
 }
 
 .toolbar {

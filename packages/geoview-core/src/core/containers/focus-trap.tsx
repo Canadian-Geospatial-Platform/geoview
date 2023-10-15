@@ -3,38 +3,21 @@ import { useEffect, useState, useRef, MutableRefObject } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { useTheme } from '@mui/material/styles';
-
-import makeStyles from '@mui/styles/makeStyles';
-
 import useMediaQuery from '@mui/material/useMediaQuery';
 
-import { api } from '@/app';
-import { EVENT_NAMES } from '@/api/events/event-types';
-
-import { HtmlToReact } from './html-to-react';
+import { useStore } from 'zustand';
+import { getGeoViewStore } from '@/core/stores/stores-managers';
 
 import { Modal, Button } from '@/ui';
-import { inKeyfocusPayload, payloadIsAInKeyfocus } from '@/api/events/payloads';
-
-const useStyles = makeStyles((theme) => ({
-  trap: {
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
-    position: 'absolute',
-    top: theme.spacing(0),
-    left: theme.spacing(0),
-    width: '100%',
-    height: '100%',
-    zIndex: theme.zIndex.focusDialog,
-    overflow: 'hidden',
-  },
-}));
+import { HtmlToReact } from './html-to-react';
+import { getFocusTrapSxClasses } from './containers-style';
+import { disableScrolling } from '@/app';
 
 /**
  * Interface for the focus trap properties
  */
 interface FocusTrapProps {
+  mapId: string;
   focusTrapId: string;
   callback: (dialogTrap: boolean) => void;
 }
@@ -45,54 +28,81 @@ interface FocusTrapProps {
  * @returns {JSX.Element} the focus trap dialog component
  */
 export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
-  const { focusTrapId, callback } = props;
+  const { mapId, focusTrapId, callback } = props;
 
-  const defaultTheme = useTheme();
-  const classes = useStyles();
   const { t } = useTranslation<string>();
 
-  const fullScreen = useMediaQuery(defaultTheme.breakpoints.down('md'));
+  const theme = useTheme();
+  const sxClasses = getFocusTrapSxClasses(theme);
 
+  const fullScreen = useMediaQuery(theme.breakpoints.down('md'));
+
+  // internal component state
   const [open, setOpen] = useState(false);
   const navigationLinkRef = useRef() as MutableRefObject<string | undefined>;
+
+  // get store values
+  // tracks if the last action was done through a keyboard (map navigation) or mouse (mouse movement)
+  const store = getGeoViewStore(mapId);
+  const mapElementStore = useStore(store, (state) => state.mapState.mapElement);
+
+  // ? useRef, if not mapElementStore is undefined - may be because this component is created before the mapElement
+  // TODO: Find what is going on with mapElement for focus-trap and crosshair
+  const mapElementRef = useRef(mapElementStore);
+  mapElementRef.current = mapElementStore;
+
+  // ? use reference HTML element to disable scrolling
+  const mapHTMLElementRef = useRef<HTMLElement>();
+  if (mapElementRef.current !== undefined) mapHTMLElementRef.current = mapElementRef.current.getTargetElement();
+
+  /**
+   * Disable scrolling on space keydown when focus-trap
+   *
+   * @param {KeyboardEvent} evt the keyboard event to trap
+   */
+  function handleScrolling(evt: KeyboardEvent): void {
+    disableScrolling(evt, mapHTMLElementRef);
+  }
+
   /**
    * Exit the focus trap
    */
   function exitFocus(): void {
-    const mapElement = document.getElementById(focusTrapId);
+    const mapHTMLElement = mapHTMLElementRef.current!.parentElement as HTMLElement;
 
     // the user escape the trap, remove it, put back skip link in focus cycle and zoom to top link
     callback(false);
-    mapElement?.classList.remove('map-focus-trap');
+    mapHTMLElement.classList.remove('map-focus-trap');
+    // mapHTMLElement.removeEventListener('keydown',handleExit); //! can't remobe because of eslint @typescript-eslint/no-use-before-define
+    document.removeEventListener('keydown', handleScrolling);
 
-    mapElement?.querySelectorAll(`a[id*="link-${focusTrapId}"]`).forEach((elem) => elem.removeAttribute('tabindex'));
-    document.getElementById(`toplink-${focusTrapId}`)?.focus();
+    // update store and focus to top link
+    setTimeout(() => document.getElementById(`toplink-${focusTrapId}`)?.focus(), 0);
+    getGeoViewStore(mapId).setState({ isCrosshairsActive: false });
   }
+
+  // handle FocusTrap states (Exit)
+  const handleExit = (evt: KeyboardEvent) => {
+    if (evt.code === 'KeyQ' && evt.ctrlKey) exitFocus();
+  };
 
   /**
    * Set the focus trap
    */
   function setFocusTrap(): void {
-    const mapElement = document.getElementById(focusTrapId);
+    const mapHTMLElement = mapHTMLElementRef.current!.parentElement as HTMLElement;
 
     // add a class to specify the viewer is in focus trap mode
-    mapElement?.classList.add('map-focus-trap');
-
     callback(true);
+    mapHTMLElement.classList.add('map-focus-trap');
+    mapHTMLElement.addEventListener('keydown', handleExit);
 
-    // manage the exit of FocusTrap, remove the trap and focus the top link
-    const manageExit = (evt2: KeyboardEvent) => {
-      if (evt2.code === 'KeyQ' && evt2.ctrlKey) {
-        exitFocus();
-        mapElement?.removeEventListener('keydown', manageExit);
-      }
-    };
-
-    mapElement?.addEventListener('keydown', manageExit);
-
-    api.event.emit(inKeyfocusPayload(EVENT_NAMES.MAP.EVENT_MAP_IN_KEYFOCUS, focusTrapId));
+    // update the store and focus to map
+    setTimeout(() => document.getElementById(`map-${mapId}`)?.focus(), 0);
+    store.setState({ isCrosshairsActive: true });
   }
 
+  // handle FocusTrap states (Enable, Skip)
   const handleEnable = () => {
     setOpen(false);
     setFocusTrap();
@@ -120,12 +130,10 @@ export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
 
       setOpen(true);
       // when map element get focus and focus is not trap, show dialog window
-      const mapElement = document.getElementById(focusTrapId);
       // if user move the mouse over the map, cancel the dialog
-
       // remove the top and bottom link from focus cycle and start the FocusTrap
-      mapElement?.querySelectorAll(`a[id*="link-${focusTrapId}"]`).forEach((elem) => elem.setAttribute('tabindex', '-1'));
-      mapElement?.addEventListener(
+      document.addEventListener('keydown', handleScrolling);
+      mapHTMLElementRef.current!.addEventListener(
         'mousemove',
         () => {
           setOpen(false);
@@ -140,19 +148,10 @@ export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
     document.getElementById(`bottomlink-${focusTrapId}`)?.addEventListener('keydown', manageLinks);
     document.getElementById(`toplink-${focusTrapId}`)?.addEventListener('keydown', manageLinks);
 
-    // on map keyboard focus, show focus trap dialog
-    api.event.on(
-      EVENT_NAMES.MAP.EVENT_MAP_IN_KEYFOCUS,
-      (payload) => {
-        if (payloadIsAInKeyfocus(payload)) {
-          setTimeout(() => document.getElementById(`map-${focusTrapId}`)?.focus(), 0);
-        }
-      },
-      focusTrapId
-    );
     return () => {
       document.getElementById(`bottomlink-${focusTrapId}`)?.removeEventListener('keydown', manageLinks);
       document.getElementById(`toplink-${focusTrapId}`)?.removeEventListener('keydown', manageLinks);
+      document.removeEventListener('keydown', handleScrolling);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -165,7 +164,7 @@ export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
       aria-labelledby="wcag-dialog-title"
       aria-describedby="wcag-dialog-description"
       fullScreen={fullScreen}
-      className={classes.trap}
+      sx={sxClasses.trap}
       titleId="wcag-dialog-title"
       title={t('keyboardnav.focusdialog.title')}
       contentTextId="wcag-dialog-description"
