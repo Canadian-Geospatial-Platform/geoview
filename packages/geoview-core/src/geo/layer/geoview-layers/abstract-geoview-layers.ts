@@ -674,7 +674,7 @@ export abstract class AbstractGeoViewLayer {
           }
           this.processOneLayerEntry(listOfLayerEntryConfig[0] as TypeBaseLayerEntryConfig).then((baseLayer) => {
             if (baseLayer) {
-              baseLayer.setVisible(true);
+              baseLayer.setVisible(listOfLayerEntryConfig[0].initialSettings?.visible !== 'no');
               this.registerToLayerSets(listOfLayerEntryConfig[0] as TypeBaseLayerEntryConfig);
               if (layerGroup) layerGroup.getLayers().push(baseLayer);
               this.changeLayerStatus('processed', listOfLayerEntryConfig[0]);

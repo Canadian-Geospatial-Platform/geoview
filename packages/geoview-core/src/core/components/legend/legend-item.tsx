@@ -29,7 +29,7 @@ import {
   BrowserNotSupportedIcon,
   Grid,
 } from '@/ui';
-import { api, EsriDynamic, payloadIsLegendInfo, NumberPayload, PayloadBaseClass } from '@/app';
+import { api, payloadIsLegendInfo, NumberPayload, PayloadBaseClass, EsriDynamic } from '@/app';
 import { LegendIconList } from './legend-icon-list';
 import {
   AbstractGeoViewLayer,
@@ -646,12 +646,10 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
                 iconImages={iconList}
                 iconLabels={labelList}
                 isParentVisible={isChecked}
-                toggleParentVisible={() => setChecked(!isChecked)}
                 toggleMapVisible={(sublayerConfig) => {
                   (geoviewLayerInstance as AbstractGeoViewVector | EsriDynamic).applyViewFilter(sublayerConfig);
                 }}
                 layerConfig={geometryLayerConfig as TypeVectorLayerEntryConfig}
-                mapId={mapId}
                 geometryKey={layerGeometryKey!}
               />
             )}
