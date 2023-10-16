@@ -82,7 +82,7 @@ export declare class Basemap {
      * @param {boolean} rest should we do a get request to get the info from the server
      * @returns {TypeBasemapLayer} return the created basemap layer
      */
-    createBasemapLayer(basemapId: string, basemapLayer: TypeJsonObject, opacity: number, rest: boolean): Promise<TypeBasemapLayer>;
+    createBasemapLayer(basemapId: string, basemapLayer: TypeJsonObject, opacity: number, rest: boolean): Promise<null | TypeBasemapLayer>;
     /**
      * Create the core basemap and add the layers to it
      *

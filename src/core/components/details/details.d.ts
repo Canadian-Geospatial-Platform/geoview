@@ -15,7 +15,7 @@ export interface TypeDetailsProps {
 export interface TypeLayerData {
     layerPath: string;
     layerName: string;
-    features: TypeArrayOfFeatureInfoEntries;
+    features: Exclude<TypeArrayOfFeatureInfoEntries, null | undefined>;
 }
 export type TypeArrayOfLayerData = TypeLayerData[];
 /**

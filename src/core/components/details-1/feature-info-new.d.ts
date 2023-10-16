@@ -5,7 +5,7 @@ export interface TypeFeatureInfoProps {
     features: TypeArrayOfFeatureInfoEntries;
     currentFeatureIndex: number;
     onClearCheckboxes: () => void;
-    onFeatureNavigateChange: (checkedFeatures: TypeArrayOfFeatureInfoEntries, currentFeature: TypeFeatureInfoEntry) => void;
+    onFeatureNavigateChange: (checkedFeatures: Exclude<TypeArrayOfFeatureInfoEntries, null | undefined>, currentFeature: TypeFeatureInfoEntry) => void;
     setDisableClearAllBtn: (isDisabled: boolean) => void;
     selectedFeatures?: MutableRefObject<string[]>;
     clearAllCheckboxes?: boolean;

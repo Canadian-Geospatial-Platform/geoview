@@ -33,4 +33,10 @@ export declare class FeatureInfoLayerSet {
      * @returns {FeatureInfoLayerSet} the FeatureInfoLayerSet object created
      */
     static get(mapId: string): FeatureInfoLayerSet;
+    /**
+     * Function used to delete a FeatureInfoLayerSet object associated to a mapId.
+     *
+     * @param {string} mapId The map identifier the layer set belongs to.
+     */
+    static delete(mapId: string): void;
 }

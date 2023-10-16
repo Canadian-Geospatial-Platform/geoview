@@ -11,7 +11,7 @@ export declare class ModalModel {
     content: ReactNode | string;
     footer?: modalFooter;
     active?: boolean;
-    mapId?: string;
+    mapId: string;
     width?: string | number;
     height?: string | number;
     /**

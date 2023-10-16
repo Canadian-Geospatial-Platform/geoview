@@ -16,6 +16,8 @@ export declare class LayerSet {
     resultSets: TypeResultSets;
     /** Function used to determine if the layerPath can be added to the layer set. */
     registrationConditionFunction: (layerPath: string) => boolean;
+    /** Function used to initialise the data property of the layer path entry. */
+    registrationUserDataInitialisation?: (layerPath: string) => void;
     /** ***************************************************************************************************************************
      * The class constructor that instanciate a set of layer.
      *
@@ -23,8 +25,9 @@ export declare class LayerSet {
      * @param {string} layerSetIdentifier The layer set identifier.
      * @param {TypeResultSets} resultSets An object that will contain the result sets indexed using the layer path.
      * @param {(layerPath: string) => boolean} registrationConditionFunction A function to decide if the layer can be added.
+     * @param {(layerPath: string) => void} registrationUserDataInitialisation A function to initialise the data property of the layer path entry.
      */
-    constructor(mapId: string, layerSetIdentifier: string, resultSets: TypeResultSets, registrationConditionFunction: (layerPath: string) => boolean);
+    constructor(mapId: string, layerSetIdentifier: string, resultSets: TypeResultSets, registrationConditionFunction: (layerPath: string) => boolean, registrationUserDataInitialisation?: (layerPath: string) => void);
     /**
      * Helper function used to instanciate a LayerSet object. This function
      * avoids the "new LayerSet" syntax.

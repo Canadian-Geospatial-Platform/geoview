@@ -67,11 +67,11 @@ export declare abstract class AbstractGeoViewVector extends AbstractGeoViewLayer
     /** ***************************************************************************************************************************
      * Return feature information for all the features stored in the layer.
      *
-     * @param {string | TypeLayerEntryConfig | null} layerPathOrConfig Optional layer path or configuration.
+     * @param {TypeLayerEntryConfig} layerEntryConfig The layer configuration.
      *
      * @returns {TypeArrayOfFeatureInfoEntries} The feature info table.
      */
-    getAllFeatureInfo(layerPathOrConfig?: string | TypeLayerEntryConfig | null | undefined): Promise<TypeArrayOfFeatureInfoEntries>;
+    protected getAllFeatureInfo(layerEntryConfig: TypeLayerEntryConfig): Promise<TypeArrayOfFeatureInfoEntries>;
     /** ***************************************************************************************************************************
      * Return feature information for all the features around the provided Pixel.
      *
