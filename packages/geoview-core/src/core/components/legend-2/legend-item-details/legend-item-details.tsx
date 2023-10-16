@@ -125,7 +125,7 @@ const sxClasses = {
  * @returns {JSX.Element} the legend list item
  */
 export function LegendItemDetails(props: TypeLegendItemDetailsProps): JSX.Element {
-  const { layerId, geoviewLayerInstance, subLayerId, layerConfigEntry, isRemoveable, isParentVisible } = props;
+  const { layerId, geoviewLayerInstance, subLayerId, layerConfigEntry, isRemoveable } = props;
 
   const { t, i18n } = useTranslation<string>();
   const theme: Theme & {
@@ -140,9 +140,6 @@ export function LegendItemDetails(props: TypeLegendItemDetailsProps): JSX.Elemen
   const canCluster = !!api.maps[mapId].layer.registeredLayers[unclusterLayerPath];
 
   const [isClusterToggleEnabled, setIsClusterToggleEnabled] = useState(false);
-  const [isChecked, setChecked] = useState<boolean>(
-    api.maps[mapId].layer.registeredLayers[clusterLayerPath]?.initialSettings?.visible !== 'no'
-  );
 
   const [isLegendOpen, setLegendOpen] = useState(true);
   const [groupItems, setGroupItems] = useState<TypeListOfLayerEntryConfig>([]);
@@ -295,19 +292,6 @@ export function LegendItemDetails(props: TypeLegendItemDetailsProps): JSX.Elemen
   );
 
   useEffect(() => {
-    if (layerConfigEntry) {
-      if (isParentVisible && isChecked) {
-        geoviewLayerInstance.setVisible(true, layerConfigEntry);
-      } else {
-        geoviewLayerInstance.setVisible(false, layerConfigEntry);
-      }
-    } else {
-      // parent layer with no sub layers
-      geoviewLayerInstance.setVisible(isChecked, geoviewLayerInstance.listOfLayerEntryConfig[0]);
-    }
-  }, [isParentVisible, isChecked, layerConfigEntry, geoviewLayerInstance]);
-
-  useEffect(() => {
     const mapZoomHandler = (payload: PayloadBaseClass) => {
       if (canCluster) {
         setZoom((payload as NumberPayload).value);
@@ -441,13 +425,11 @@ export function LegendItemDetails(props: TypeLegendItemDetailsProps): JSX.Elemen
           <LegendIconList
             iconImages={iconList}
             iconLabels={labelList}
-            isParentVisible={isChecked}
-            toggleParentVisible={() => setChecked(!isChecked)}
+            mapId={mapId}
             toggleMapVisible={(sublayerConfig) => {
               (geoviewLayerInstance as AbstractGeoViewVector | EsriDynamic).applyViewFilter(sublayerConfig);
             }}
             layerConfig={geometryLayerConfig as TypeVectorLayerEntryConfig}
-            mapId={mapId}
             geometryKey={layerGeometryKey!}
           />
         )}
