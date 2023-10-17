@@ -23,7 +23,6 @@ const useStyles = makeStyles((theme) => ({
     display: 'flex',
     flexDirection: 'row',
     justifyContent: 'space-between',
-    height: '100%',
     minWidth: 64,
     zIndex: theme.zIndex.appBar,
     pointerEvents: 'all',
