@@ -1,5 +1,6 @@
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { useTheme } from '@mui/material/styles';
+import { useStore } from 'zustand';
 import { Projection } from 'ol/proj';
 import { useTranslation } from 'react-i18next';
 import {
@@ -22,6 +23,7 @@ import {
 } from '@/ui';
 import MapDataTable, { MapDataTableData as MapDataTableDataProps } from './map-data-table';
 import { getSxClasses } from './data-table-style';
+import { getGeoViewStore } from '@/core/stores/stores-managers';
 
 interface DatapanelProps {
   layerIds: string[];
@@ -45,14 +47,17 @@ export function Datapanel({ layerData, mapId, projectionConfig, layerKeys, layer
   const { t } = useTranslation();
   const theme = useTheme();
   const sxClasses = getSxClasses(theme);
+  const store = getGeoViewStore(mapId);
 
-  const [selectedLayerIndex, setSelectedLayerIndex] = useState(0);
-  const [isLoading, setisLoading] = useState(false);
-  const [isEnlargeDataTable, setIsEnlargeDataTable] = useState(false);
+  const { selectedLayerIndex, setSelectedLayerIndex, isLoading, setIsLoading, isEnlargeDataTable, setIsEnlargeDataTable } = useStore(
+    store,
+    (state) => state.dataTableState
+  );
 
   const handleListItemClick = useCallback((event: React.MouseEvent<HTMLDivElement, MouseEvent>, index: number) => {
     setSelectedLayerIndex(index);
-    setisLoading(true);
+    setIsLoading(true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   /**
@@ -107,7 +112,7 @@ export function Datapanel({ layerData, mapId, projectionConfig, layerKeys, layer
 
   useEffect(() => {
     const clearLoading = setTimeout(() => {
-      setisLoading(false);
+      setIsLoading(false);
     }, 1000);
     return () => clearTimeout(clearLoading);
   }, [isLoading, selectedLayerIndex]);

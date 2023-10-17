@@ -58,14 +58,27 @@ export interface INotificationsState {
   notifications: Array<NotificationDetailsType>;
 }
 
-// export interface IMapDataTableState {}
-
 // export interface ILayersState {}
 
 // export interface IFooterState {}
 
 export interface ILegendState {
   selectedItem?: TypeLegendItemProps;
+}
+
+export interface IMapDataTableState {
+  selectedLayerIndex: number;
+  isLoading: boolean;
+  isEnlargeDataTable: boolean;
+  mapFiltered: boolean;
+  FILTER_MAP_DELAY: number;
+  toolbarRowSelectedMessage: string;
+
+  setMapFiltered: (filtered: boolean) => void;
+  setIsEnlargeDataTable: (isEnlarge: boolean) => void;
+  setIsLoading: (loading: boolean) => void;
+  setSelectedLayerIndex: (idx: number) => void;
+  setToolbarRowSelectedMessage: (message: string) => void;
 }
 
 export interface IGeoViewState {
@@ -79,7 +92,7 @@ export interface IGeoViewState {
   legendState: ILegendState;
   mapState: IMapState;
   notificationState: INotificationsState;
-
+  dataTableState: IMapDataTableState;
   setMapConfig: (config: TypeMapFeaturesConfig) => void;
   onMapLoaded: (mapElem: OLMap) => void;
 }
@@ -168,7 +181,55 @@ export const geoViewStoreDefinition = (
     notificationState: {
       notifications: [],
     },
+    dataTableState: {
+      selectedLayerIndex: 0,
+      isLoading: false,
+      isEnlargeDataTable: false,
+      mapFiltered: false,
+      FILTER_MAP_DELAY: 1000,
+      toolbarRowSelectedMessage: '',
 
+      setToolbarRowSelectedMessage: (message: string) => {
+        set({
+          dataTableState: {
+            ...get().dataTableState,
+            toolbarRowSelectedMessage: message,
+          },
+        });
+      },
+      setMapFiltered: (filtered: boolean) => {
+        set({
+          dataTableState: {
+            ...get().dataTableState,
+            mapFiltered: filtered,
+          },
+        });
+      },
+      setIsEnlargeDataTable: (isEnlarge: boolean) => {
+        set({
+          dataTableState: {
+            ...get().dataTableState,
+            isEnlargeDataTable: isEnlarge,
+          },
+        });
+      },
+      setIsLoading: (loading: boolean) => {
+        set({
+          dataTableState: {
+            ...get().dataTableState,
+            isLoading: loading,
+          },
+        });
+      },
+      setSelectedLayerIndex: (idx: number) => {
+        set({
+          dataTableState: {
+            ...get().dataTableState,
+            selectedLayerIndex: idx,
+          },
+        });
+      },
+    },
     setMapConfig: (config: TypeMapFeaturesConfig) => {
       set({ mapConfig: config, mapId: config.mapId, displayLanguage: config.displayLanguage });
     },
