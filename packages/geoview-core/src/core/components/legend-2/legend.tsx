@@ -148,7 +148,6 @@ export function Legend2(props: LegendItemsDetailsProps): JSX.Element {
   }, [selectedLegendItem]);
 
   const rightPanel = () => {
-
     if (isSelectedLayersClicked && selectedLayers) {
       const numItems = selectedLayers.length;
       const selectedLayersList = Object.entries(selectedLayers).map(([parentLayer, childLayers]) => (
