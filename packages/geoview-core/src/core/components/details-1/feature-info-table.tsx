@@ -2,10 +2,9 @@ import React, { useState } from 'react';
 import { useTheme } from '@mui/material/styles';
 import linkifyHtml from 'linkify-html';
 import { useTranslation } from 'react-i18next';
-import { Table, TableBody, TableCell, TableContainer, TableRow } from '@mui/material';
 import { TypeFieldEntry } from '@/api/events/payloads';
 import { LightboxImg, LightBoxSlides } from '../lightbox/lightbox';
-import { CardMedia, Box } from '@/ui';
+import { CardMedia, Box, Grid } from '@/ui';
 import { isImage, stringify, generateId, sanitizeHtmlContent } from '../../utils/utilities';
 import { HtmlToReact } from '../../containers/html-to-react';
 import { getSxClasses } from './details-1-style';
@@ -95,7 +94,7 @@ export function FeatureInfoTable({ featureInfoList }: FeatureInfoTableProps): JS
   }
 
   return (
-    <TableContainer>
+    <Box sx={sxClasses.boxContainerFeatureInfo}>
       {isLightBoxOpen && (
         <LightboxImg
           open={isLightBoxOpen}
@@ -110,39 +109,17 @@ export function FeatureInfoTable({ featureInfoList }: FeatureInfoTableProps): JS
           }}
         />
       )}
-      <Table
-        sx={{
-          border: 'none',
-          minWidth: 300,
-        }}
-      >
-        <TableBody sx={{ fontSize: '14px' }}>
-          {featureInfoList.map((featureInfoItem, index) => (
-            // eslint-disable-next-line react/no-array-index-key
-            <TableRow key={index} sx={{ backgroundColor: index % 2 > 0 ? '#F1F2F5' : '' }}>
-              <TableCell
-                sx={{
-                  borderRight: 'none',
-                  p: '5px',
-                  width: '70%',
-                  fontWeight: 'bold',
-                }}
-              >
-                {featureInfoItem.alias}
-              </TableCell>
-              <TableCell
-                sx={{
-                  p: '5px',
-                  textAlign: 'start',
-                  fontSize: '16px',
-                }}
-              >
-                {setFeatureItem(featureInfoItem)}
-              </TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-    </TableContainer>
+      {featureInfoList.map((featureInfoItem, index) => (
+        // eslint-disable-next-line react/no-array-index-key
+        <Grid container spacing={5} sx={{ backgroundColor: index % 2 > 0 ? '#F1F2F5' : '', marginBottom: '20px' }} key={index}>
+          <Grid item xs="auto" sx={{ fontWeight: 'bold' }}>
+            {featureInfoItem.alias}
+          </Grid>
+          <Grid item sx={{ ml: 'auto', wordWrap: 'break-word' }}>
+            {setFeatureItem(featureInfoItem)}
+          </Grid>
+        </Grid>
+      ))}
+    </Box>
   );
 }
