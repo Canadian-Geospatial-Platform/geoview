@@ -101,7 +101,6 @@ const sxClasses = {
     },
   },
   iconPreviewStacked: {
-    // marginLeft: 8,
     padding: 0,
     borderRadius: 0,
     border: '1px solid',
@@ -302,14 +301,15 @@ export function LegendItemDetails(props: TypeLegendItemDetailsProps): JSX.Elemen
     mapId
   );
 
-  const updateSelectedLayers = (selectedLayers) => {
-    const selectedLayersByLayerName = {};
+  const updateSelectedLayers = (selectedLayers: string[]) => {
+    const selectedLayersByLayerName: Record<string, string[]> = {};
 
     selectedLayers.forEach((layer) => {
       if (!selectedLayersByLayerName[layerName]) {
-        selectedLayersByLayerName[layerName] = [];
+        selectedLayersByLayerName[layerName] = [layer];
+      } else {
+        selectedLayersByLayerName[layerName].push(layer);
       }
-      selectedLayersByLayerName[layerName].push(layer);
     });
 
     store.setState((state) => ({
@@ -483,7 +483,6 @@ export function LegendItemDetails(props: TypeLegendItemDetailsProps): JSX.Elemen
             toggleMapVisible={(sublayerConfig) => {
               (geoviewLayerInstance as AbstractGeoViewVector | EsriDynamic).applyViewFilter(sublayerConfig);
             }}
-            isGroupLayer={groupItems.length > 0}
             layerConfig={geometryLayerConfig as TypeVectorLayerEntryConfig}
             mapId={mapId}
             geometryKey={layerGeometryKey!}
