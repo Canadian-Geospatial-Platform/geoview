@@ -10,7 +10,6 @@ import { GeoUtilities } from '@/geo/utils/utilities';
 import { DateMgt } from '@/core/utils/date-mgt';
 
 import { CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
-import * as MarkerDefinitions from '../core/types/marker-definitions';
 import * as Utilities from '../core/utils/utilities';
 // TODO: Refactor - Remove this following import and the class attributes, now that we have the higher level utilities import :)
 import { generateId, addUiComponent, showMessage } from '@/core/utils/utilities';
@@ -61,9 +60,6 @@ export class API {
 
   // dates utilities object
   dateUtilities: DateMgt;
-
-  // used to access marker definitions
-  markerDefinitions = MarkerDefinitions;
 
   // generateId function
   generateId = generateId;

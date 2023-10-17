@@ -1,20 +1,16 @@
 import { MouseEventHandler } from 'react';
+
+import { useTheme } from '@mui/material/styles';
+
 import { IconButton, DownloadIcon } from '@/ui';
+import { getSxClasses } from '../nav-bar-style';
 
 /**
  * Interface used for home button properties
  */
 interface ExportProps {
-  className?: string | undefined;
   openModal: MouseEventHandler<HTMLButtonElement>;
 }
-
-/**
- * default properties values
- */
-const defaultProps = {
-  className: '',
-};
 
 /**
  * Export PNG Button component
@@ -22,13 +18,14 @@ const defaultProps = {
  * @returns {JSX.Element} the export button
  */
 export default function Export(props: ExportProps): JSX.Element {
-  const { className, openModal } = props;
+  const { openModal } = props;
+
+  const theme = useTheme();
+  const sxClasses = getSxClasses(theme);
 
   return (
-    <IconButton id="export" tooltip="mapnav.export" tooltipPlacement="left" onClick={openModal} className={className}>
+    <IconButton id="export" tooltip="mapnav.export" tooltipPlacement="left" onClick={openModal} sx={sxClasses.navButton}>
       <DownloadIcon />
     </IconButton>
   );
 }
-
-Export.defaultProps = defaultProps;

@@ -71,6 +71,7 @@ export interface ILegendState {
 export interface IGeoViewState {
   displayLanguage: TypeDisplayLanguage;
   isCrosshairsActive: boolean;
+  isFullScreen: boolean;
   mapId: string;
   mapConfig: TypeMapFeaturesConfig | undefined;
 
@@ -96,6 +97,7 @@ export const geoViewStoreDefinition = (
     mapId: '',
     mapConfig: undefined,
     isCrosshairsActive: false,
+    isFullScreen: false,
     mapState: {
       fixNorth: false,
       mapLoaded: false,
