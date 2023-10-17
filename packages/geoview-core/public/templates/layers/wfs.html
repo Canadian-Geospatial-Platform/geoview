@@ -13,20 +13,6 @@
     <link href="https://fonts.googleapis.com/css?family=Roboto|Montserrat:200,300,400,900|Merriweather" rel="stylesheet" />
     <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
     <link rel="stylesheet" href="css/style.css" />
-    <style>
-      table.info, th.info, td.info, th.infoCol1, td.infoCol1 {
-        border: 1px solid black;
-      }
-      th.info, td.info, th.infoCol1, td.infoCol1 {
-        padding: 15px;
-        width: 15%;
-      }
-      th.info, th.infoCol1, td.infoCol1 {
-        text-align: left;
-        font-weight: bold;
-        font-size: 15px;
-      }
-      </style>
   </head>
 
   <body>
@@ -64,9 +50,10 @@
 
     <div class="map-title-holder">
       <h4 id="HLYR1">1. WFS Layers</h4>
-      &nbsp;<h5 id="HLYR1-state">(undefined)</h5>
       <a class="ref-link" href="#top">Top</a>
     </div>
+    <button class="collapsible active">Map Status Flags</button>
+    <pre id="HLYR1-state" class="panel map-title-holder"></pre>
     <div
       id="LYR1"
       class="llwp-map"
@@ -128,11 +115,13 @@
       }"
     ></div>
     <button type="button" class="collapsible">Visibility and filters</button>
-    <pre style="height: 20pc; overflow-y: scroll" id="layer1-buttons-pre" class="panel"></pre>
+    <pre id="layer1-buttons-pre" class="panel"></pre>
     <button class="collapsible">Get Legend</button>
-    <pre style="height: 20pc; overflow-y: scroll" id="LegendsId1-table-pre" class="panel"></pre>
+    <pre id="LegendsId1-table-pre" class="panel"></pre>
     <button type="button" class="collapsible">Get Feature Info</button>
-    <pre style="height: 20pc; overflow-y: scroll" id="ResultSetId1" class="panel">Click on feature on the map</pre>
+    <pre id="ResultSetId1-at_long_lat" class="panel">Click on feature on the map</pre>
+    <button type="button" class="collapsible" id="AllFeatureInfo1">Get All Feature Info</button>
+    <pre id="ResultSetId1-all" class="panel"></pre>
     <hr />
     <p>This map has a wfs layer added from configuration.</p>
     <button type="button" class="collapsible">Configuration Snippet</button>
@@ -143,9 +132,10 @@
 
     <div class="map-title-holder">
       <h4 id="HLYR2">2. WFS Layers using bbox strategy</h4>
-      &nbsp;<h5 id="HLYR2-state">(undefined)</h5>
       <a class="ref-link" href="#top">Top</a>
     </div>
+    <button class="collapsible active">Map Status Flags</button>
+    <pre id="HLYR2-state" class="panel map-title-holder"></pre>
     <div
       id="LYR2"
       class="llwp-map"
@@ -191,11 +181,13 @@
       }"
     ></div>
     <button type="button" class="collapsible">Visibility and filters</button>
-    <pre style="height: 20pc; overflow-y: scroll" id="layer2-buttons-pre" class="panel"></pre>
+    <pre id="layer2-buttons-pre" class="panel"></pre>
     <button class="collapsible">Get Legend</button>
-    <pre style="height: 20pc; overflow-y: scroll" id="LegendsId2-table-pre" class="panel"></pre>
+    <pre id="LegendsId2-table-pre" class="panel"></pre>
     <button type="button" class="collapsible">Get Feature Info</button>
-    <pre style="height: 20pc; overflow-y: scroll" id="ResultSetId2" class="panel">Click on feature on the map</pre>
+    <pre id="ResultSetId2-at_long_lat" class="panel">Click on feature on the map</pre>
+    <button type="button" class="collapsible" id="AllFeatureInfo2">Get All Feature Info</button>
+    <pre id="ResultSetId2-all" class="panel"></pre>
     <hr />
     <p>This map has a wfs layer added from configuration.</p>
     <button type="button" class="collapsible">Configuration Snippet</button>
@@ -210,87 +202,69 @@
       // initialize cgpv and api events, a callback is optional, used if calling api's after the rendering is ready
       cgpv.init(function (mapId) {
         console.log(`api is ready for ${mapId}`);
-
         if (mapId === 'LYR1') {
-          //create snippets
-          createCodeSnippet();
-          createConfigSnippet();
-
           createTableOfFilter('LYR1');
+        }
+
+        if (mapId === 'LYR2') {
           createTableOfFilter('LYR2');
-          cgpv.api.event.emit({ handlerName: 'LYR1/$LegendsLayerSet$', event: cgpv.api.eventNames.GET_LEGENDS.TRIGGER });
-          cgpv.api.event.emit({ handlerName: 'LYR2/$LegendsLayerSet$', event: cgpv.api.eventNames.GET_LEGENDS.TRIGGER });
         }
       });
 
-      window.setInterval(() => {
-        const displayField1 = document.getElementById('HLYR1-state');
-        const geoviewLayers = cgpv.api.getFeatureInfoLayerSet('LYR1').resultSets;
-        if (geoviewLayers) {
-          const output = Object.keys(geoviewLayers).reduce((outputValue, layerId) => {
-            const layerName = cgpv.api.maps.LYR1.layer.registeredLayers[layerId].layerName.en;
-            const { layerPhase, layerStatus } = geoviewLayers[layerId];
-            return `${outputValue}${layerName} - status: ${layerStatus}, phase: ${layerPhase}, `;
-          }, '(');
-          displayField1.textContent = output && output !== '(' ? `${output.slice(0, -2)})` : '(undefined)';
-        } else displayField1.textContent = '(undefined)';
-      }, 250)
-
-      window.setInterval(() => {
-        const displayField2 = document.getElementById('HLYR2-state');
-        const geoviewLayers = cgpv.api.getFeatureInfoLayerSet('LYR2').resultSets;
-        if (geoviewLayers) {
-          const output = Object.keys(geoviewLayers).reduce((outputValue, layerId) => {
-            const layerName = cgpv.api.maps.LYR2.layer.registeredLayers[layerId].layerName.en;
-            const { layerPhase, layerStatus } = geoviewLayers[layerId];
-            return `${outputValue}${layerName} - status: ${layerStatus}, phase: ${layerPhase}, `;
-          }, '(');
-          displayField2.textContent = output && output !== '(' ? `${output.slice(0, -2)})` : '(undefined)';
-        } else displayField2.textContent = '(undefined)';
-      }, 250)
-
       // LYR1 ===================================================================================================================
-      const featureInfoLayerSet1 = cgpv.api.getFeatureInfoLayerSet('LYR1');
+      const getAllFeatureInfo1 = document.getElementById('AllFeatureInfo1');
+      getAllFeatureInfo1.addEventListener('click', function (e) {
+            cgpv.api.event.emit({ event: 'map/get_all_features', handlerName: 'LYR1' });
+          });
+
       cgpv.api.event.on(
         cgpv.api.eventNames.GET_FEATURE_INFO.ALL_QUERIES_DONE,
         (payload) => {
-          const { layerSetId, resultSets } = payload;
-          createInfoTable('LYR1', 'ResultSetId1', resultSets);
+          const { layerSetId, resultSets, queryType } = payload;
+          createInfoTable('LYR1', 'ResultSetId1', resultSets, queryType);
         },
-        'LYR1/$FeatureInfoLayerSet$'
+        'LYR1/FeatureInfoLayerSet'
       );
 
-      const LegendsLayerSet1 = cgpv.api.getLegendsLayerSet('LYR1');
       cgpv.api.event.on(
         cgpv.api.eventNames.GET_LEGENDS.LEGENDS_LAYERSET_UPDATED,
         (payload) => {
           const { resultSets } = payload;
           displayLegend('LegendsId1', resultSets);
         },
-        'LYR1/$LegendsLayerSet$'
+        'LYR1/LegendsLayerSet'
       );
 
+      listenToLegendLayerSetChanges('HLYR1-state', 'LYR1/LegendsLayerSet');
+
       // LYR2 ===================================================================================================================
-      const featureInfoLayerSet2 = cgpv.api.getFeatureInfoLayerSet('LYR2');
+      const getAllFeatureInfo2 = document.getElementById('AllFeatureInfo2');
+      getAllFeatureInfo2.addEventListener('click', function (e) {
+            cgpv.api.event.emit({ event: 'map/get_all_features', handlerName: 'LYR2' });
+          });
+
       cgpv.api.event.on(
         cgpv.api.eventNames.GET_FEATURE_INFO.ALL_QUERIES_DONE,
         (payload) => {
-          const { layerSetId, resultSets } = payload;
-          createInfoTable('LYR2', 'ResultSetId2', resultSets);
+          const { layerSetId, resultSets, queryType } = payload;
+          createInfoTable('LYR2', 'ResultSetId2', resultSets, queryType);
         },
-        'LYR2/$FeatureInfoLayerSet$'
+        'LYR2/FeatureInfoLayerSet'
       );
 
-      const LegendsLayerSet2 = cgpv.api.getLegendsLayerSet('LYR2');
       cgpv.api.event.on(
         cgpv.api.eventNames.GET_LEGENDS.LEGENDS_LAYERSET_UPDATED,
         (payload) => {
           const { resultSets } = payload;
           displayLegend('LegendsId2', resultSets);
         },
-        'LYR2/$LegendsLayerSet$'
+        'LYR2/LegendsLayerSet'
       );
 
+      listenToLegendLayerSetChanges('HLYR2-state', 'LYR2/LegendsLayerSet');
+      //create snippets
+      createCodeSnippet();
+      createConfigSnippet();
     </script>
   </body>
 </html>

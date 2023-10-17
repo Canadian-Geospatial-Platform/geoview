@@ -1,15 +1,8 @@
 import { createElement, ReactElement } from 'react';
 import DataTable, { DataTableData } from './data-table';
 
-import {
-  AbstractGeoViewVector,
-  api,
-  TypeListOfLayerEntryConfig,
-  isVectorLayer,
-  TypeArrayOfFeatureInfoEntries,
-  TypeFieldEntry,
-} from '@/app';
-import MapDataTable from './map-data-table';
+import { api, TypeListOfLayerEntryConfig, isVectorLayer, TypeArrayOfFeatureInfoEntries, TypeFieldEntry } from '@/app';
+import MapDataTable, { MapDataTableData as MapDataTableDataProps } from './map-data-table';
 import { Datapanel } from './data-panel';
 
 interface CreataDataTableProps {
@@ -71,7 +64,7 @@ export class DataTableApi {
    */
 
   buildFeatureRows = (arrayOfFeatureInfoEntries: TypeArrayOfFeatureInfoEntries) => {
-    const features = arrayOfFeatureInfoEntries.map((feature) => {
+    const features = arrayOfFeatureInfoEntries!.map((feature) => {
       return {
         ...feature,
         rows: Object.keys(feature.fieldInfo).reduce((acc, curr) => {
@@ -83,7 +76,7 @@ export class DataTableApi {
       };
     });
 
-    const columns = arrayOfFeatureInfoEntries.reduce((acc, curr) => {
+    const columns = arrayOfFeatureInfoEntries!.reduce((acc, curr) => {
       const keys = Object.keys(curr.fieldInfo);
 
       keys.forEach((key) => {
@@ -112,15 +105,12 @@ export class DataTableApi {
     const { currentProjection } = api.maps[this.mapId];
     const projectionConfig = api.projection.projections[currentProjection];
 
-    if (
-      geoviewLayerInstance.listOfLayerEntryConfig.length > 0 &&
-      (geoviewLayerInstance as AbstractGeoViewVector).getAllFeatureInfo !== undefined
-    ) {
+    if (geoviewLayerInstance.listOfLayerEntryConfig.length > 0) {
       const groupLayerKeys = this.getGroupKeys(geoviewLayerInstance.listOfLayerEntryConfig, layerId, []);
 
       if (isVectorLayer(geoviewLayerInstance)) {
         const requests = groupLayerKeys.map((groupLayerKey) => {
-          return (geoviewLayerInstance as AbstractGeoViewVector)?.getAllFeatureInfo(groupLayerKey);
+          return geoviewLayerInstance.getFeatureInfo('all', groupLayerKey);
         });
 
         const response = await Promise.allSettled(requests);
@@ -151,10 +141,7 @@ export class DataTableApi {
 
     geoLayers.forEach((layerId: string) => {
       const geoviewLayerInstance = api.maps[this.mapId].layer.geoviewLayers[layerId];
-      if (
-        geoviewLayerInstance.listOfLayerEntryConfig.length > 0 &&
-        (geoviewLayerInstance as AbstractGeoViewVector).getAllFeatureInfo !== undefined
-      ) {
+      if (geoviewLayerInstance.listOfLayerEntryConfig.length > 0) {
         const groupLayerKeys = this.getGroupKeys(geoviewLayerInstance.listOfLayerEntryConfig, layerId, []);
         layerKeys = [...layerKeys, ...groupLayerKeys];
         layerIds = [...layerIds, ...groupLayerKeys.fill(layerId)];
@@ -164,7 +151,7 @@ export class DataTableApi {
     const requests = layerKeys.map((layerKey, index) => {
       const layerId = layerIds[index];
       const geoviewLayerInstance = api.maps[this.mapId].layer.geoviewLayers[layerId];
-      return (geoviewLayerInstance as AbstractGeoViewVector)?.getAllFeatureInfo(layerKey);
+      return geoviewLayerInstance.getFeatureInfo('all', layerKey);
     });
 
     const response = await Promise.allSettled(requests);
@@ -176,6 +163,23 @@ export class DataTableApi {
         return this.buildFeatureRows(result.value);
       });
 
-    return createElement(Datapanel, { layerData: data, layerIds, mapId: this.mapId, layerKeys, projectionConfig }, null);
+    const filteredKeys: string[] = [];
+    const filteredIds: string[] = [];
+    const filteredData: MapDataTableDataProps[] = [];
+
+    // filter data based on features.
+    data.forEach((res, index) => {
+      if (res.features.length) {
+        filteredData.push(res);
+        filteredIds.push(layerIds[index]);
+        filteredKeys.push(layerKeys[index]);
+      }
+    });
+
+    return createElement(
+      Datapanel,
+      { layerData: filteredData, layerIds: filteredIds, mapId: this.mapId, layerKeys: filteredKeys, projectionConfig },
+      null
+    );
   };
 }

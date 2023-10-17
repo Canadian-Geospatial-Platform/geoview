@@ -7,28 +7,36 @@ import debounce from 'lodash/debounce';
 Argument of type 'import("C:/Users/jolevesq/Sites/geoview/common/temp/node_modules/.pnpm/ol@7.5.2/node_modules/ol/Map").default' is not assignable to parameter of type 'import("C:/Users/jolevesq/Sites/geoview/common/temp/node_modules/.pnpm/ol@7.5.1/node_modules/ol/Map").default'.
   Types of property 'on' are incompatible.
 */
-import { Map as OLMap, MapEvent, MapBrowserEvent } from 'ol';
+import { Map as OLMap, MapEvent, MapBrowserEvent, View } from 'ol';
 import { Coordinate } from 'ol/coordinate';
 import { ObjectEvent } from 'ol/Object';
 import { toLonLat } from 'ol/proj';
 
-import { TypeMapFeaturesConfig } from '@/core/types/global-types';
+import { TypeMapFeaturesConfig, TypeValidMapProjectionCodes } from '@/core/types/global-types';
 import { TypeLegendItemProps } from '../components/legend-2/types';
 
 import { TypeMapMouseInfo } from '@/api/events/payloads';
-import { TypeInteraction } from '@/geo/map/map-schema-types';
+import { TypeDisplayLanguage, TypeInteraction } from '@/geo/map/map-schema-types';
+import { NotificationDetailsType } from '@/core/types/cgpv-types';
 
 export interface IMapState {
-  currentProjection: number;
+  currentProjection: TypeValidMapProjectionCodes;
+  fixNorth: boolean;
+  interaction: TypeInteraction;
   pointerPosition: TypeMapMouseInfo | undefined;
   mapCenterCoordinates: Coordinate;
   mapClickCoordinates: TypeMapMouseInfo | undefined;
-  mapElement?: OLMap;
+  mapElement: OLMap;
   mapLoaded: boolean;
+  mapRotation: number;
+  northArrow: boolean;
+  overviewMap: boolean;
+  overviewMapHideZoom: number;
   zoom?: number | undefined;
 
   onMapMoveEnd: (event: MapEvent) => void;
   onMapPointerMove: (event: MapEvent) => void;
+  onMapRotation: (event: ObjectEvent) => void;
   onMapSingleClick: (event: MapEvent) => void;
   onMapZoomEnd: (event: ObjectEvent) => void;
 }
@@ -46,7 +54,9 @@ export interface IAppBarState {
 
 // export interface INavBarState {}
 
-// export interface INotificationsState {}
+export interface INotificationsState {
+  notifications: Array<NotificationDetailsType>;
+}
 
 // export interface IMapDataTableState {}
 
@@ -60,16 +70,16 @@ export interface ILegendState {
 }
 
 export interface IGeoViewState {
+  displayLanguage: TypeDisplayLanguage;
+  isCrosshairsActive: boolean;
   mapId: string;
   mapConfig: TypeMapFeaturesConfig | undefined;
-  interaction: TypeInteraction;
-  mapState: IMapState;
 
-  footerBarState: IFooterBarState;
   appBarState: IAppBarState;
+  footerBarState: IFooterBarState;
   legendState: ILegendState;
-
-  isCrosshairsActive: boolean;
+  mapState: IMapState;
+  notificationState: INotificationsState;
 
   setMapConfig: (config: TypeMapFeaturesConfig) => void;
   onMapLoaded: (mapElem: OLMap) => void;
@@ -83,23 +93,27 @@ export const geoViewStoreDefinition = (
   get: () => IGeoViewState
 ) =>
   ({
+    displayLanguage: 'en',
     mapId: '',
     mapConfig: undefined,
-    interaction: 'dynamic',
     isCrosshairsActive: false,
     mapState: {
+      fixNorth: false,
       mapLoaded: false,
       mapCenterCoordinates: [0, 0] as Coordinate,
+      mapRotation: 0,
+      overviewMapHideZoom: 0,
       pointerPosition: undefined,
       currentProjection: 3857,
-      onMapMoveEnd: (event: MapEvent) => {
+      zoom: undefined,
+      onMapMoveEnd: debounce((event: MapEvent) => {
         set({
           mapState: {
             ...get().mapState,
             mapCenterCoordinates: event.map.getView().getCenter()!,
           },
         });
-      },
+      }, 100),
       onMapPointerMove: debounce((event: MapEvent) => {
         set({
           mapState: {
@@ -113,6 +127,14 @@ export const geoViewStoreDefinition = (
           },
         });
       }, 10),
+      onMapRotation: debounce((event: ObjectEvent) => {
+        set({
+          mapState: {
+            ...get().mapState,
+            mapRotation: (event.target as View).getRotation(),
+          },
+        });
+      }, 100),
       onMapSingleClick: (event: MapEvent) => {
         set({
           mapState: {
@@ -126,14 +148,14 @@ export const geoViewStoreDefinition = (
           },
         });
       },
-      onMapZoomEnd: (event: ObjectEvent) => {
+      onMapZoomEnd: debounce((event: ObjectEvent) => {
         set({
           mapState: {
             ...get().mapState,
             zoom: event.target.getZoom()!,
           },
         });
-      },
+      }, 100),
     },
     footerBarState: {
       expanded: false,
@@ -145,9 +167,12 @@ export const geoViewStoreDefinition = (
       selectedItem: undefined,
       selectedLayers: {},
     },
+    notificationState: {
+      notifications: [],
+    },
 
     setMapConfig: (config: TypeMapFeaturesConfig) => {
-      set({ mapConfig: config, mapId: config.mapId });
+      set({ mapConfig: config, mapId: config.mapId, displayLanguage: config.displayLanguage });
     },
 
     onMapLoaded: (mapElem: OLMap) => {

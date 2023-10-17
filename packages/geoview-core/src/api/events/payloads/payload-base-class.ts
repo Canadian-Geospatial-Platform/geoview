@@ -6,9 +6,9 @@ import { EventStringId } from '../event-types';
  * @exports
  * @class PayloadBaseClass
  */
-export class PayloadBaseClass {
+export class PayloadBaseClass<T = EventStringId> {
   // Type of payload
-  event: EventStringId;
+  event: T;
 
   // the event handler name of the payload
   handlerName: string | null;
@@ -16,10 +16,10 @@ export class PayloadBaseClass {
   /**
    * Constructor for the class
    *
-   * @param {EventStringId} event the event identifier for which the payload is constructed
+   * @param {T} event the event identifier for which the payload is constructed
    * @param {string | null} handlerName the handler Name
    */
-  constructor(event: EventStringId, handlerName: string | null) {
+  constructor(event: T, handlerName: string | null) {
     this.event = event;
     this.handlerName = handlerName;
   }
@@ -29,11 +29,12 @@ export class PayloadBaseClass {
  * Helper function used to instanciate a PayloadBaseClass object. This function
  * avoids the "new PayloadBaseClass" syntax.
  *
- * @param {EventStringId} event the event identifier for which the payload is constructed
+ * @param {T} event the event identifier for which the payload is constructed
  * @param {string | null} handlerName the handler Name
  *
  * @returns {PayloadBaseClass} the PayloadBaseClass object created
  */
-export const payloadBaseClass = (event: EventStringId, handlerName: string | null): PayloadBaseClass => {
-  return new PayloadBaseClass(event, handlerName);
+type FunctionType<T = EventStringId> = (event: T, handlerName: string | null) => PayloadBaseClass;
+export const payloadBaseClass: FunctionType = <T = EventStringId>(event: T, handlerName: string | null) => {
+  return new PayloadBaseClass<T>(event, handlerName);
 };

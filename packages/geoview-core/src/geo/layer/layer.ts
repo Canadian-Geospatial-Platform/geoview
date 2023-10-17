@@ -9,7 +9,7 @@ import { api } from '@/app';
 import { EVENT_NAMES } from '@/api/events/event-types';
 
 import { Config } from '@/core/utils/config/config';
-import { generateId, showError, replaceParams } from '@/core/utils/utilities';
+import { generateId, showError, replaceParams, whenThisThenAsync } from '@/core/utils/utilities';
 import {
   layerConfigPayload,
   payloadIsALayerConfig,
@@ -268,7 +268,7 @@ export class Layer {
     const layerPath = Layer.getLayerPath(layerEntryConfig);
     if (this.registeredLayers[layerPath]) return false;
     this.registeredLayers[layerPath] = layerEntryConfig;
-    (this.registeredLayers[layerPath] as TypeBaseLayerEntryConfig).layerStatus = 'newInstance';
+    this.geoviewLayers[layerPath.split('/')[0]].changeLayerStatus('newInstance', layerEntryConfig);
     return true;
   }
 
@@ -423,6 +423,41 @@ export class Layer {
    */
   getGeoviewLayerById = (geoviewLayerId: string): AbstractGeoViewLayer | null => {
     return this.geoviewLayers?.[geoviewLayerId] || null;
+  };
+
+  /**
+   * Search asynchronously for a layer using it's id and return the layer data.
+   * If the layer we're searching for has to be loaded, set mustBeLoaded to true when awaiting on this method.
+   * This function waits the timeout period before abandonning (or uses the default timeout when not provided).
+   *
+   * @param {string} id the layer id to look for
+   * @param {string} mustBeLoaded indicate if the layer we're searching for must be found only once loaded
+   * @returns the found layer data object
+   */
+  getGeoviewLayerByIdAsync = async (
+    layerID: string,
+    mustBeLoaded: boolean,
+    checkFrequency?: number,
+    timeout?: number
+  ): Promise<AbstractGeoViewLayer | null> => {
+    // Get the layer
+    return whenThisThenAsync<AbstractGeoViewLayer | null>(
+      () => {
+        // Redirects
+        const lyr = this.getGeoviewLayerById(layerID);
+        if (lyr) {
+          // Layer was found, check if we wanted it straight away or in loaded state
+          if (!mustBeLoaded || (mustBeLoaded && lyr.layerPhase === 'processed')) {
+            return lyr;
+          }
+        }
+
+        // Not found yet
+        return null;
+      },
+      checkFrequency,
+      timeout
+    );
   };
 
   /**

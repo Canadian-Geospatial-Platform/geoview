@@ -14,7 +14,7 @@ import { TypeButtonPanel } from '@/ui/panel/panel-types';
 
 import Export from './buttons/export';
 import Geolocator from './buttons/geolocator';
-import Notifications from './buttons/notifications';
+import Notifications from '@/core/components/notifications/notifications';
 import Version from './buttons/version';
 import ExportModal from '../export/export-modal';
 
@@ -259,7 +259,12 @@ export function Appbar({ activeTrap, activeTrapSet }: AppbarProps): JSX.Element 
             {Object.keys(buttonPanels).map((buttonPanelsKey) => {
               const buttonPanel = buttonPanels[buttonPanelsKey];
               return buttonPanel?.panel ? (
-                <Panel key={buttonPanel.panel.panelId} panel={buttonPanel.panel} button={buttonPanel.button} />
+                <Panel
+                  key={buttonPanel.panel.panelId}
+                  panel={buttonPanel.panel}
+                  button={buttonPanel.button}
+                  handlePanelOpened={buttonPanel.handlePanelOpened}
+                />
               ) : null;
             })}
           </Fragment>

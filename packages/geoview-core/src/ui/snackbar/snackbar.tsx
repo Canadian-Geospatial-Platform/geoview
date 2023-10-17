@@ -60,7 +60,7 @@ export function Snackbar(props: SnackBarProps): JSX.Element {
   const snackBarOpenListenerFunction = (payload: PayloadBaseClass) => {
     if (payloadIsASnackbarMessage(payload)) {
       // apply function if provided
-      const myButton = payload.button
+      const myButton = payload.button?.label
         ? SnackButton({
             label: payload.button.label as string,
             action: Cast<() => void>(payload.button.action),
@@ -110,7 +110,7 @@ export function Snackbar(props: SnackBarProps): JSX.Element {
     >
       <Alert onClose={handleClose} severity={snackbarType} sx={{ width: '100%' }}>
         {message}
-        {button}
+        {button !== undefined && button}
       </Alert>
     </MaterialSnackbar>
   );

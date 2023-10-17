@@ -8,6 +8,8 @@ import {
   ListItem,
   ListItemButton,
   List,
+  ListItemIcon,
+  SendIcon,
   Tooltip,
   IconButton,
   Grid,
@@ -32,7 +34,7 @@ import {
   TypeArrayOfFeatureInfoEntries,
   TypeGeometry,
 } from '@/api/events/payloads';
-import { getSxClasses } from './details-1.styles';
+import { getSxClasses } from './details-1-style';
 
 interface TypeLayersListProps {
   arrayOfLayerData: TypeArrayOfLayerData;
@@ -88,7 +90,10 @@ export function LayersListFooter(props: TypeLayersListProps): JSX.Element {
     setIsClearAllCheckboxes(true);
   };
 
-  const allUncheckedFeatures = (checkedFeatures: TypeArrayOfFeatureInfoEntries, allFeatures: TypeArrayOfFeatureInfoEntries) => {
+  const allUncheckedFeatures = (
+    checkedFeatures: Exclude<TypeArrayOfFeatureInfoEntries, null | undefined>,
+    allFeatures: Exclude<TypeArrayOfFeatureInfoEntries, null | undefined>
+  ) => {
     const uncheckedFeatures = allFeatures.filter(
       (feature) =>
         !checkedFeatures.some(
@@ -98,7 +103,10 @@ export function LayersListFooter(props: TypeLayersListProps): JSX.Element {
     return uncheckedFeatures;
   };
 
-  const handleFeatureNavigateChange = (checkedFeatures: TypeArrayOfFeatureInfoEntries, currentFeature: TypeFeatureInfoEntry) => {
+  const handleFeatureNavigateChange = (
+    checkedFeatures: Exclude<TypeArrayOfFeatureInfoEntries, null | undefined>,
+    currentFeature: TypeFeatureInfoEntry
+  ) => {
     // remove the highlight for unchecked feature
     arrayOfLayerData.forEach((layer: TypeLayerData) => {
       const getAllUnCheckedFeatures = allUncheckedFeatures(checkedFeatures, layer.features);
@@ -128,6 +136,7 @@ export function LayersListFooter(props: TypeLayersListProps): JSX.Element {
       // load the first layer we clicked with its feature info in right panel
       // if there are multiple layers, we load the first one on the list with its feature info
       setLayerDataInfo(arrayOfLayerData[0]);
+      setCurrentFeatureIndex(0);
     }
   }, [arrayOfLayerData]);
 
@@ -158,6 +167,9 @@ export function LayersListFooter(props: TypeLayersListProps): JSX.Element {
                   }}
                   sx={{ height: '67px' }}
                 >
+                  <ListItemIcon>
+                    <SendIcon />
+                  </ListItemIcon>
                   <Tooltip title={layerData.layerName} placement="top" enterDelay={1000}>
                     <ListItemText
                       sx={sxClasses.layerNamePrimary}

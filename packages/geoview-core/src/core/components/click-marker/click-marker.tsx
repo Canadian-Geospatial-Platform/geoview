@@ -11,6 +11,7 @@ import { getCenter } from 'ol/extent';
 import { Fill, Stroke, Style } from 'ol/style';
 import CircleStyle from 'ol/style/Circle';
 import { getUid } from 'ol';
+import { fromExtent } from 'ol/geom/Polygon';
 import { MapContext } from '@/core/app-start';
 
 import { getGeoViewStore } from '@/core/stores/stores-managers';
@@ -26,6 +27,7 @@ import {
   clearHighlightsPayload,
   payloadIsAClearHighlights,
 } from '@/api/events/payloads';
+import { payloadIsABBoxHighlight } from '@/api/events/payloads/bbox-highlight-payload';
 
 /**
  * Create a react element to display a marker when a user clicks on
@@ -51,7 +53,10 @@ export function ClickMarker(): JSX.Element {
     element: document.getElementById(clickMarkerId) as HTMLElement,
     stopEvent: false,
   });
-  api.maps[mapId].map.addOverlay(clickMarkerOverlay);
+
+  // TODO: repair using the store map element
+  //! came from the map creation on function call
+  if (api.maps[mapId].map !== undefined) api.maps[mapId].map.addOverlay(clickMarkerOverlay);
 
   // create resources to highlight features
   const animationSource = new VectorSource();
@@ -86,7 +91,7 @@ export function ClickMarker(): JSX.Element {
       api.maps[mapId].map
         .getOverlayById(`${mapId}-clickmarker`)
         .setPosition(fromLonLat(lnglat, `EPSG:${api.maps[mapId].currentProjection}`));
-    }, 0);
+    }, 100);
     setShowMarker(true);
   }
 
@@ -292,6 +297,24 @@ export function ClickMarker(): JSX.Element {
     } else animateSelection(feature);
   }
 
+  let bboxTimeout: NodeJS.Timeout;
+  const highlightGeolocatorBBox = (payload: PayloadBaseClass) => {
+    if (payloadIsABBoxHighlight(payload)) {
+      if (animationSource.getFeatureById('geoLocatorFeature')) {
+        animationSource.removeFeature(animationSource.getFeatureById('geoLocatorFeature') as Feature);
+        clearTimeout(bboxTimeout);
+      }
+      const bboxFill = new Fill({ color: [0, 0, 0, 0.3] });
+      const bboxStyle = new Style({ stroke: new Stroke({ color: 'black', width: 1.25 }), fill: bboxFill });
+      const bboxPoly = fromExtent(payload.bbox);
+      const bboxFeature = new Feature(bboxPoly);
+      bboxFeature.setStyle(bboxStyle);
+      bboxFeature.setId('geoLocatorFeature');
+      animationSource.addFeature(bboxFeature);
+      bboxTimeout = setTimeout(() => animationSource.removeFeature(animationSource.getFeatureById('geoLocatorFeature') as Feature), 5000);
+    }
+  };
+
   const highlightCallbackFunction = (payload: PayloadBaseClass) => {
     if (payloadIsAFeatureHighlight(payload)) {
       highlightFeature(payload.feature);
@@ -306,11 +329,11 @@ export function ClickMarker(): JSX.Element {
 
   const allQueriesDoneListenerFunction = (payload: PayloadBaseClass) => {
     if (payloadIsAllQueriesDone(payload)) {
-      const { resultSets } = payload;
+      const { queryType, resultSets } = payload;
       let feature: TypeFeatureInfoEntry | undefined;
 
       Object.keys(resultSets).every((layerPath) => {
-        const features = resultSets[layerPath]!.layerStatus === 'error' ? null : resultSets[layerPath]!.data;
+        const features = resultSets[layerPath]!.layerStatus === 'error' ? null : resultSets[layerPath]!.data[queryType];
         if (features && features.length > 0 && features[0].geoviewLayerType !== 'ogcWms') {
           [feature] = features;
           return false;
@@ -355,11 +378,12 @@ export function ClickMarker(): JSX.Element {
       }
     );
 
-    api.event.on(EVENT_NAMES.GET_FEATURE_INFO.ALL_QUERIES_DONE, allQueriesDoneListenerFunction, `${mapId}/$FeatureInfoLayerSet$`);
+    api.event.on(EVENT_NAMES.GET_FEATURE_INFO.ALL_QUERIES_DONE, allQueriesDoneListenerFunction, `${mapId}/FeatureInfoLayerSet`);
     api.event.on(EVENT_NAMES.MARKER_ICON.EVENT_MARKER_ICON_SHOW, eventMarkerIconShowListenerFunction, mapId);
     api.event.on(EVENT_NAMES.MARKER_ICON.EVENT_MARKER_ICON_HIDE, eventMarkerIconHideListenerFunction, mapId);
     api.event.on(EVENT_NAMES.FEATURE_HIGHLIGHT.EVENT_HIGHLIGHT_FEATURE, highlightCallbackFunction, mapId);
     api.event.on(EVENT_NAMES.FEATURE_HIGHLIGHT.EVENT_HIGHLIGHT_CLEAR, clearHighlightCallbackFunction, mapId);
+    api.event.on(EVENT_NAMES.FEATURE_HIGHLIGHT.EVENT_HIGHLIGHT_BBOX, highlightGeolocatorBBox, mapId);
 
     return () => {
       unsubMapSingleClick();
@@ -369,6 +393,7 @@ export function ClickMarker(): JSX.Element {
       api.event.off(EVENT_NAMES.MARKER_ICON.EVENT_MARKER_ICON_HIDE, mapId, eventMarkerIconHideListenerFunction);
       api.event.off(EVENT_NAMES.FEATURE_HIGHLIGHT.EVENT_HIGHLIGHT_FEATURE, mapId, highlightCallbackFunction);
       api.event.off(EVENT_NAMES.FEATURE_HIGHLIGHT.EVENT_HIGHLIGHT_CLEAR, mapId, clearHighlightCallbackFunction);
+      api.event.off(EVENT_NAMES.FEATURE_HIGHLIGHT.EVENT_HIGHLIGHT_BBOX, mapId, highlightGeolocatorBBox);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

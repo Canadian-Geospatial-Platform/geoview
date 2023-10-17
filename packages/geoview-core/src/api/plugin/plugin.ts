@@ -8,7 +8,7 @@ import Ajv from 'ajv';
 import makeStyles from '@mui/styles/makeStyles';
 
 import { showError } from '@/core/utils/utilities';
-import { MapViewer } from '@/geo/map/map';
+import { MapViewer } from '@/geo/map/map-viewer';
 
 import { api } from '@/app';
 import { AbstractPlugin } from './abstract-plugin';

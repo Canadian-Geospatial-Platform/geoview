@@ -5,18 +5,7 @@ import { getGeoViewStore } from '@/core/stores/stores-managers';
 
 import { ExpandMoreIcon, ExpandLessIcon, IconButton, Box } from '@/ui';
 import { MapContext } from '@/core/app-start';
-
-const sxClasses = {
-  expandbuttonContainer: {
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    color: 'primary.light',
-    height: '30px',
-    width: '30px',
-    marginLeft: '5px',
-  },
-};
+import { sxClassesExportButton } from './footer-bar-style';
 
 /**
  * Footerbar Expand Button component
@@ -79,7 +68,7 @@ export function FooterbarExpandButton(): JSX.Element {
 
   return (
     <Box>
-      <IconButton sx={sxClasses.expandbuttonContainer} onClick={() => (expanded ? collapseFooterbar() : expandFooterbar())}>
+      <IconButton sx={sxClassesExportButton.expandbuttonContainer} onClick={() => (expanded ? collapseFooterbar() : expandFooterbar())}>
         {expanded ? <ExpandMoreIcon /> : <ExpandLessIcon />}
       </IconButton>
     </Box>

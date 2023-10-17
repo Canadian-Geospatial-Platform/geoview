@@ -52,7 +52,6 @@
     "@mui/material": "^5.14.6",
     "@mui/styles": "^5.14.6",
     "@mui/system": "^5.14.6",
-    "@mui/x-data-grid": "^5.17.26",
     "@nieuwlandgeo/sldreader": "^0.3.1",
     "@mui/x-date-pickers": "^6.13.0",
     "ajv": "^8.12.0",

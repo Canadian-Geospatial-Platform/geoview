@@ -95,7 +95,7 @@ function PanelContent(props: TypePanelContentProps): JSX.Element {
 
   useEffect(() => {
     api.event.on(api.eventNames.MAP.EVENT_MAP_LOADED, updateLayers, mapId);
-    api.event.on(api.eventNames.GET_LEGENDS.LEGENDS_LAYERSET_UPDATED, updateLayers, `${mapId}/$LegendsLayerSet$`);
+    api.event.on(api.eventNames.GET_LEGENDS.LEGENDS_LAYERSET_UPDATED, updateLayers, `${mapId}/LegendsLayerSet`);
 
     return () => {
       api.event.off(api.eventNames.MAP.EVENT_MAP_LOADED, mapId, updateLayers);

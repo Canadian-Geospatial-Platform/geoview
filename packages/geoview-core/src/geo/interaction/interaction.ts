@@ -1,6 +1,6 @@
 import { Interaction as OLInteraction } from 'ol/interaction';
 // import OLBaseEvent from 'ol/events/Event'; // TODO: Enhancements - Interaction - Uncomment to leverage the events further
-import { MapViewer } from '../map/map';
+import { MapViewer } from '../map/map-viewer';
 
 /**
  * Options for interactions

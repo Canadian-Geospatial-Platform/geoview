@@ -16,6 +16,25 @@ function createCodeSnippet() {
   }
 }
 
+function createCodeSnippetUsingIDs() {
+  // Enhanced code snippet generator which allows to associate a script id with a code snippet script (og function is using indexes)
+  // and write down different code snippet spreaded in the dom tree (og function always reuses 'script' variable which is the last script tag found in the dom)
+  // Get all scripts on page which has an id
+  const scripts = Array.prototype.filter.call(document.getElementsByTagName('script'), (obj) => {
+    return obj.getAttribute('id') !== null;
+  });
+
+  // Loop on each script
+  for (let i = 0; i < scripts.length; i++) {
+    // Try to find a codeSnippet flag interested in that script
+    const script = scripts[i];
+    document.querySelectorAll(`[id-script="${script.id}"]`).forEach((el) => {
+      // eslint-disable-next-line no-param-reassign
+      el.innerHTML = `<pre>${script.textContent}</pre>`;
+    });
+  }
+}
+
 function createConfigSnippet() {
   let j = 0;
   // inject configuration snippet inside panel
@@ -69,15 +88,14 @@ function createCollapsible() {
   let i;
 
   for (i = 0; i < coll.length; i++) {
+    const content = coll[i].nextElementSibling;
+    if (coll[i].classList.contains('active')) content.style.display = 'block';
+    else content.style.display = 'none';
     // eslint-disable-next-line func-names
     coll[i].addEventListener('click', function () {
       this.classList.toggle('active');
-      const content = this.nextElementSibling;
-      if (content.style.display === 'block') {
-        content.style.display = 'none';
-      } else {
-        content.style.display = 'block';
-      }
+      if (this.classList.contains('active')) content.style.display = 'block';
+      else content.style.display = 'none';
     });
   }
 }
@@ -112,6 +130,7 @@ function wireLogs(api, mapId, logsDomId) {
       (payload) => {
         // Log the event
         addLog(logsDomId, payload.event);
+        // eslint-disable-next-line no-console
         console.log(payload);
       },
       mapId

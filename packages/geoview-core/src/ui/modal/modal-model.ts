@@ -22,7 +22,7 @@ export class ModalModel {
 
   active?: boolean;
 
-  mapId?: string;
+  mapId!: string;
 
   width?: string | number;
 
@@ -43,7 +43,7 @@ export class ModalModel {
   open = (): void => {
     this.active = true;
 
-    api.event.emit(modalPayload(EVENT_NAMES.MODAL.EVENT_MODAL_OPEN, this.mapId!, this.modalModelId!, true));
+    api.event.emit(modalPayload(EVENT_NAMES.MODAL.EVENT_MODAL_OPEN, this.mapId, this.modalModelId!, true));
   };
 
   /**
@@ -52,7 +52,7 @@ export class ModalModel {
   close = (): void => {
     this.active = false;
 
-    api.event.emit(modalPayload(EVENT_NAMES.MODAL.EVENT_MODAL_CLOSE, this.mapId!, this.modalModelId!, false));
+    api.event.emit(modalPayload(EVENT_NAMES.MODAL.EVENT_MODAL_CLOSE, this.mapId, this.modalModelId!, false));
   };
 
   /**
@@ -139,6 +139,6 @@ export class ModalModel {
    * to update the modal as soon as a change is made to any content
    */
   reRender = (): void => {
-    api.event.emit(modalPayload(EVENT_NAMES.MODAL.EVENT_MODAL_UPDATE, this.mapId!, this.modalModelId!));
+    api.event.emit(modalPayload(EVENT_NAMES.MODAL.EVENT_MODAL_UPDATE, this.mapId, this.modalModelId!));
   };
 }

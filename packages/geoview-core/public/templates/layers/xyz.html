@@ -50,9 +50,10 @@
 
     <div class="map-title-holder">
       <h4 id="HLYR1">1. XYZ Tiles Layers</h4>
-      &nbsp;<h5 id="HLYR1-state">(undefined)</h5>
       <a class="ref-link" href="#top">Top</a>
     </div>
+    <button class="collapsible active">Map Status Flags</button>
+    <pre id="HLYR1-state" class="panel map-title-holder"></pre>
     <div
       id="LYR1"
       class="llwp-map"
@@ -110,28 +111,12 @@
       // initialize cgpv and api events, a callback is optional, used if calling api's after the rendering is ready
       cgpv.init(function (mapId) {
         console.log(`api is ready for ${mapId}`);
-
-        if (mapId === 'allMaps') {
-          //create snippets
-          createCodeSnippet();
-          createConfigSnippet();
-
-        }
       });
 
-      window.setInterval(() => {
-        const displayField1 = document.getElementById('HLYR1-state');
-        const geoviewLayers = cgpv.api.maps?.LYR1?.layer?.registeredLayers;
-        if (geoviewLayers) {
-          const output = Object.keys(geoviewLayers).reduce((outputValue, layerId) => {
-            const layerName = geoviewLayers[layerId].layerName?.en ? geoviewLayers[layerId].layerName?.en : layerId;
-            const { layerPhase, layerStatus } = geoviewLayers[layerId];
-            return `${outputValue}${layerName} - status: ${layerStatus}, phase: ${layerPhase}, `;
-          }, '(');
-          displayField1.textContent = output && output !== '(' ? `${output.slice(0, -2)})` : '(undefined)';
-        } else displayField1.textContent = '(undefined)';
-      }, 250)
-
+      listenToLegendLayerSetChanges('HLYR1-state', 'LYR1/LegendsLayerSet');
+      //create snippets
+      createCodeSnippet();
+      createConfigSnippet();
     </script>
   </body>
 </html>

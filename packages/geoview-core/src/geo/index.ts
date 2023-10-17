@@ -24,7 +24,7 @@ export * from './layer/geometry/geometry-types';
 export * from './layer/geometry/geometry';
 export * from './layer/layer';
 export * from './map/map-schema-types';
-export * from './map/map';
+export * from './map/map-viewer';
 export * from './projection/projection';
 export * from './renderer/esri-renderer';
 export * from './renderer/geoview-renderer-types';

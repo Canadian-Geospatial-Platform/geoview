@@ -34,12 +34,12 @@ export function DetailsItem({ mapId }: Props): JSX.Element {
   const [handlerName, setHandlerName] = useState<string | null>(null);
 
   const allQueriesDoneListenerFunction = (payload: PayloadBaseClass) => {
-    if (payloadIsAllQueriesDone(payload)) {
+    if (payloadIsAllQueriesDone(payload) && (payload as TypeAllQueriesDonePayload).queryType === 'at_long_lat') {
       const { resultSets } = payload as TypeAllQueriesDonePayload;
       const newDetails: TypeArrayOfLayerData = [];
       Object.keys(resultSets).forEach((layerPath) => {
         const layerName = getLocalizedValue(api.maps[mapId].layer.registeredLayers[layerPath].layerName, mapId)!;
-        const features = resultSets[layerPath]?.data;
+        const features = resultSets[layerPath]?.data.at_long_lat;
         if (features?.length && features?.length > 0) {
           newDetails.push({ layerPath, layerName, features });
         }
@@ -66,7 +66,7 @@ export function DetailsItem({ mapId }: Props): JSX.Element {
 
   useEffect(() => {
     // create the listener to return the details
-    api.event.on(api.eventNames.GET_FEATURE_INFO.ALL_QUERIES_DONE, allQueriesDoneListenerFunction, `${mapId}/$FeatureInfoLayerSet$`);
+    api.event.on(api.eventNames.GET_FEATURE_INFO.ALL_QUERIES_DONE, allQueriesDoneListenerFunction, `${mapId}/FeatureInfoLayerSet`);
     api.event.on(api.eventNames.MAP.EVENT_MAP_SINGLE_CLICK, eventMapSingleClickListenerFunction, mapId);
     return () => {
       api.event.off(api.eventNames.GET_FEATURE_INFO.ALL_QUERIES_DONE, mapId, allQueriesDoneListenerFunction);

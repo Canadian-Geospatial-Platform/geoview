@@ -84,11 +84,6 @@
     "close": "Close",
     "download": "Download"
   },
-  "datagrid": {
-    "exportJson": "Download GeoJSON",
-    "filterMap": "Filter Map",
-    "stopFilterMap": "Stop Map Filter"
-  },
   "keyboardnav": {
     "start": "Skip after map element",
     "end": "Skip before map element",
@@ -136,6 +131,8 @@
     "leftPanelHeading": "Available Categories",
     "rightPanelHeading": "Selected Category",
     "rowsSelected": "{rowsSelected} of {totalRows} row(s) selected",
-    "rowsFiltered": "{rowsFiltered} of {totalRows} row(s) filtered"
+    "rowsFiltered": "{rowsFiltered} of {totalRows} row(s) filtered",
+    "enlargeBtn": "Enlarge",
+    "reduceBtn": "Reduce"
   }
 }

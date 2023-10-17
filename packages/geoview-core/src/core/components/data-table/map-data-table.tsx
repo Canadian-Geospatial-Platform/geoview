@@ -432,7 +432,6 @@ function MapDataTable({ data, layerId, mapId, layerKey, projectionConfig }: MapD
             'empty',
             'notEmpty',
           ],
-          size: 250,
         }),
         ...([t('dataTable.icon'), t('dataTable.zoom')].includes(value.alias) && { size: 100, enableColumnFilter: false }),
       });
@@ -443,7 +442,7 @@ function MapDataTable({ data, layerId, mapId, layerKey, projectionConfig }: MapD
   }, [density]);
 
   /**
-   * featureinfo data grid Zoom in/out handling
+   * featureinfo data table Zoom in/out handling
    *
    * @param {React.MouseEvent<HTMLButtonElement, MouseEvent>} e mouse clicking event
    * @param {Extent} extent feature exten

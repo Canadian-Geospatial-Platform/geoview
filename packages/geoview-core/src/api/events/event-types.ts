@@ -1,26 +1,26 @@
-import { APPBAR } from './constants/app-bar';
-import { ATTRIBUTION } from './constants/attribution';
-import { BASEMAP } from './constants/basemap';
-import { DRAWER } from './constants/drawer';
-import { FOOTERBAR } from './constants/footer-bar';
-import { FOOTER_TABS } from './constants/footer-tabs';
-import { GET_FEATURE_INFO } from './constants/get-feature-info';
-import { GET_LEGENDS } from './constants/get-legends';
-import { GEOMETRY } from './constants/geometry';
-import { GEOLOCATOR } from './constants/geolocator';
-import { INTERACTION } from './constants/interaction';
-import { LAYER_SET } from './constants/layer-set';
-import { LAYER } from './constants/layer';
-import { MAP } from './constants/map';
-import { MARKER_ICON } from './constants/marker-icon';
-import { FEATURE_HIGHLIGHT } from './constants/feature-highlight';
-import { MODAL } from './constants/modal';
-import { NAVBAR } from './constants/nav-bar';
-import { NOTIFICATIONS } from './constants/notifications';
-import { OVERVIEW_MAP } from './constants/overview-map';
-import { PANEL } from './constants/panel';
-import { SLIDER } from './constants/slider';
-import { SNACKBAR } from './constants/snackbar';
+import { APPBAR } from './constants/app-bar-constants';
+import { ATTRIBUTION } from './constants/attribution-constants';
+import { BASEMAP } from './constants/basemap-constants';
+import { DRAWER } from './constants/drawer-constants';
+import { FOOTERBAR } from './constants/footer-bar-constants';
+import { FOOTER_TABS } from './constants/footer-tabs-constants';
+import { GET_FEATURE_INFO } from './constants/get-feature-info-constants';
+import { GET_LEGENDS } from './constants/get-legends-constants';
+import { GEOMETRY } from './constants/geometry-constants';
+import { GEOLOCATOR } from './constants/geolocator-constants';
+import { INTERACTION } from './constants/interaction-constants';
+import { LAYER_SET } from './constants/layer-set-constants';
+import { LAYER } from './constants/layer-constants';
+import { MAP } from './constants/map-constants';
+import { MARKER_ICON } from './constants/marker-icon-constants';
+import { FEATURE_HIGHLIGHT } from './constants/feature-highlight-constants';
+import { MODAL } from './constants/modal-constants';
+import { NAVBAR } from './constants/nav-bar-constants';
+import { NOTIFICATIONS } from './constants/notifications-constants';
+import { OVERVIEW_MAP } from './constants/overview-map-constants';
+import { PANEL } from './constants/panel-constants';
+import { SLIDER } from './constants/slider-constants';
+import { SNACKBAR } from './constants/snackbar-constants';
 
 /**
  * constant contains event names
@@ -63,6 +63,7 @@ export type EventStringId =
   | 'drawer/open_close'
   | 'feature_highlight/highlight'
   | 'feature_highlight/clear'
+  | 'feature_highlight/highlightBBox'
   | 'footerbar/expand_collapse'
   | 'footer_tabs/tab_create'
   | 'footer_tabs/tab_remove'
@@ -103,13 +104,14 @@ export type EventStringId =
   | 'map/crosshair_enable_disable'
   | 'map/crosshair_enter'
   | 'map/fix_north'
+  | 'map/get_all_features'
   | 'map/inkeyfocus'
   | 'map/loaded'
   | 'map/moveend'
+  | 'map/pointermove'
   | 'map/reload'
   | 'map/remove_component'
   | 'map/singleclick'
-  | 'map/pointermove'
   | 'map/view_projection_change'
   | 'map/zoomend'
   | 'marker_icon/hide'

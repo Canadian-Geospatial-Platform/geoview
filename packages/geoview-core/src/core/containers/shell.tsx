@@ -3,22 +3,25 @@ import { useEffect, useState, useContext, useCallback, Fragment } from 'react';
 
 import { useTranslation } from 'react-i18next';
 
+import { useTheme } from '@mui/material/styles';
+
 import FocusTrap from 'focus-trap-react';
 
-import makeStyles from '@mui/styles/makeStyles';
+import { useStore } from 'zustand';
+import { getGeoViewStore } from '@/core/stores/stores-managers';
 
-import { Map } from '../components/map/map';
-import { Appbar } from '../components/app-bar/app-bar';
-import { Navbar } from '../components/nav-bar/nav-bar';
-import { FooterTabs } from '../components/footer-tabs/footer-tabs';
-import { Geolocator } from '../components/geolocator/geolocator';
+import { Map } from '@/core/components/map/map';
+import { Appbar } from '@/core/components/app-bar/app-bar';
+import { Navbar } from '@/core/components/nav-bar/nav-bar';
+import { FooterTabs } from '@/core/components/footer-tabs/footer-tabs';
+import { Geolocator } from '@/core/components/geolocator/geolocator';
 
 import { FocusTrapDialog } from './focus-trap';
 
 import { api } from '@/app';
 import { EVENT_NAMES } from '@/api/events/event-types';
 
-import { Modal, Snackbar } from '@/ui';
+import { Box, CircularProgress, Link, Modal, Snackbar } from '@/ui';
 import {
   PayloadBaseClass,
   mapConfigPayload,
@@ -27,45 +30,7 @@ import {
   payloadIsAmapFeaturesConfig,
 } from '@/api/events/payloads';
 import { MapContext } from '@/core/app-start';
-
-const useStyles = makeStyles((theme) => {
-  return {
-    shell: {
-      display: 'flex',
-      flexDirection: 'column',
-      top: theme.spacing(0),
-      right: theme.spacing(0),
-      left: theme.spacing(0),
-      bottom: theme.spacing(0),
-      overflow: 'hidden',
-      zIndex: 0,
-      height: '100%',
-    },
-    mapContainer: {
-      display: 'flex',
-      flexDirection: 'row',
-      height: '100%',
-      position: 'relative',
-    },
-    skip: {
-      position: 'absolute',
-      left: -1000,
-      height: 1,
-      width: 1,
-      textAlign: 'left',
-      overflow: 'hidden',
-      backgroundColor: '#FFFFFF',
-
-      '&:active, &:focus, &:hover': {
-        left: theme.spacing(0),
-        zIndex: theme.zIndex.tooltip,
-        width: 'auto',
-        height: 'auto',
-        overflow: 'visible',
-      },
-    },
-  };
-});
+import { getShellSxClasses } from './containers-style';
 
 /**
  * Interface for the shell properties
@@ -84,17 +49,20 @@ export function Shell(props: ShellProps): JSX.Element {
   const mapContext = useContext(MapContext);
   const mapFeaturesConfig = mapContext.mapFeaturesConfig!;
 
-  const classes = useStyles();
-
   const { t } = useTranslation<string>();
 
+  const theme = useTheme();
+  const sxClasses = getShellSxClasses(theme);
+
+  // internal component state
   // set the active trap value for FocusTrap and pass the callback to the dialog window
   const [activeTrap, setActivetrap] = useState(false);
-
   // render additional components if added by api
   const [components, setComponents] = useState<Record<string, JSX.Element>>({});
-
   const [update, setUpdate] = useState<number>(0);
+
+  // get values from the store
+  const mapLoaded = useStore(getGeoViewStore(mapFeaturesConfig.mapId), (state) => state.mapState.mapLoaded);
 
   /**
    * Set the focus trap
@@ -167,31 +135,34 @@ export function Shell(props: ShellProps): JSX.Element {
   }, [components, shellId, updateShell, mapContext, mapFeaturesConfig]);
 
   return (
-    <FocusTrap active={activeTrap} focusTrapOptions={{ escapeDeactivates: false }}>
-      <div id={`shell-${shellId}`} className={classes.shell} key={update}>
-        <a id={`toplink-${shellId}`} href={`#bottomlink-${shellId}`} className={classes.skip} style={{ top: '0px' }}>
-          {t('keyboardnav.start')}
-        </a>
-        <div className={`${classes.mapContainer} mapContainer`}>
-          <Appbar activeTrap={activeTrap} activeTrapSet={setActivetrap} />
-          {/* load geolocator component if config includes in list of components in appBar */}
-          {mapFeaturesConfig?.appBar?.includes('geolocator') && mapFeaturesConfig?.map.interaction === 'dynamic' && <Geolocator />}
-          <Map {...mapFeaturesConfig} />
-          {mapFeaturesConfig?.map.interaction === 'dynamic' && <Navbar activeTrap={activeTrap} activeTrapSet={setActivetrap} />}
-        </div>
-        {mapFeaturesConfig?.corePackages && mapFeaturesConfig?.corePackages.includes('footer-panel') && <FooterTabs />}
-        {Object.keys(api.maps[shellId].modal.modals).map((modalId) => (
-          <Modal key={modalId} id={modalId} open={false} mapId={shellId} />
-        ))}
-        <FocusTrapDialog focusTrapId={shellId} callback={(isActive) => handleCallback(isActive)} />
-        <a id={`bottomlink-${shellId}`} href={`#toplink-${shellId}`} className={classes.skip} style={{ bottom: '0px' }}>
-          {t('keyboardnav.end')}
-        </a>
-        {Object.keys(components).map((key: string) => {
-          return <Fragment key={key}>{components[key]}</Fragment>;
-        })}
-        <Snackbar snackBarId={shellId} />
-      </div>
-    </FocusTrap>
+    <Box sx={sxClasses.all}>
+      <Link id={`toplink-${shellId}`} href={`#bottomlink-${shellId}`} tabIndex={0} sx={[sxClasses.skip, { top: '0px' }]}>
+        {t('keyboardnav.start')}
+      </Link>
+      <FocusTrap active={activeTrap} focusTrapOptions={{ escapeDeactivates: false }}>
+        <Box id={`shell-${shellId}`} sx={sxClasses.shell} className="geoview-shell" key={update}>
+          <CircularProgress isLoaded={mapLoaded} />
+          <Box sx={sxClasses.mapContainer} className="mapContainer">
+            <Appbar activeTrap={activeTrap} activeTrapSet={setActivetrap} />
+            {/* load geolocator component if config includes in list of components in appBar */}
+            {mapFeaturesConfig?.appBar?.includes('geolocator') && mapFeaturesConfig?.map.interaction === 'dynamic' && <Geolocator />}
+            <Map {...mapFeaturesConfig} />
+            {mapFeaturesConfig?.map.interaction === 'dynamic' && <Navbar activeTrap={activeTrap} activeTrapSet={setActivetrap} />}
+          </Box>
+          {mapFeaturesConfig?.corePackages && mapFeaturesConfig?.corePackages.includes('footer-panel') && <FooterTabs />}
+          {Object.keys(api.maps[shellId].modal.modals).map((modalId) => (
+            <Modal key={modalId} id={modalId} open={false} mapId={shellId} />
+          ))}
+          <FocusTrapDialog mapId={mapFeaturesConfig.mapId} focusTrapId={shellId} callback={(isActive) => handleCallback(isActive)} />
+          {Object.keys(components).map((key: string) => {
+            return <Fragment key={key}>{components[key]}</Fragment>;
+          })}
+          <Snackbar snackBarId={shellId} />
+        </Box>
+      </FocusTrap>
+      <Link id={`bottomlink-${shellId}`} href={`#toplink-${shellId}`} tabIndex={0} sx={[sxClasses.skip, { bottom: '0px' }]}>
+        {t('keyboardnav.end')}
+      </Link>
+    </Box>
   );
 }
