@@ -58,7 +58,7 @@ export const getSxClasses = (theme: Theme) => ({
     paddingBottom: '25px',
     height: 'auto',
     maxHeight: '80%',
-    overflowY: 'scroll',
+    overflowY: 'auto',
     overflowX: 'hidden',
   },
   featureInfoSingleImage: {
