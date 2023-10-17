@@ -110,6 +110,16 @@ export declare class Layer {
      */
     getGeoviewLayerById: (geoviewLayerId: string) => AbstractGeoViewLayer | null;
     /**
+     * Search asynchronously for a layer using it's id and return the layer data.
+     * If the layer we're searching for has to be loaded, set mustBeLoaded to true when awaiting on this method.
+     * This function waits the timeout period before abandonning (or uses the default timeout when not provided).
+     *
+     * @param {string} id the layer id to look for
+     * @param {string} mustBeLoaded indicate if the layer we're searching for must be found only once loaded
+     * @returns the found layer data object
+     */
+    getGeoviewLayerByIdAsync: (layerID: string, mustBeLoaded: boolean, checkFrequency?: number, timeout?: number) => Promise<AbstractGeoViewLayer | null>;
+    /**
      * Function used to order the sublayers based on their position in the config.
      *
      * @param {TypeListOfLayerEntryConfig} listOfLayerConfig List of layer configs to order

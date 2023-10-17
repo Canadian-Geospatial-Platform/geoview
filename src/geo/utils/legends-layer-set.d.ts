@@ -32,4 +32,10 @@ export declare class LegendsLayerSet {
      * @returns {LegendsLayerSet} the LegendsLayerSet object created
      */
     static get(mapId: string): LegendsLayerSet;
+    /**
+     * Function used to delete a LegendsLayerSet object associated to a mapId.
+     *
+     * @param {string} mapId The map identifier the layer set belongs to.
+     */
+    static delete(mapId: string): void;
 }

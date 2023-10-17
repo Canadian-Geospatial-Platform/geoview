@@ -39,7 +39,7 @@ export { AbstractPlugin } from '@/api/plugin/abstract-plugin';
  */
 export interface TypeMapFeaturesConfig extends TypeMapFeaturesInstance {
     /** This attribute is not part of the schema. It is placed here to keep the 'id' attribute of the HTML div of the map. */
-    mapId?: string;
+    mapId: string;
     /** This attribute is not part of the schema. It is placed here to keep the 'data-lang' attribute of the HTML div of the map. */
     displayLanguage?: TypeDisplayLanguage;
     /** If true, the ready callback 'cgpv.init(mapId)' is called with the mapId as a parameter when the map is ready */

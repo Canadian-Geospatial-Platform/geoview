@@ -59,15 +59,6 @@ export interface TypeQueryLegendPayload extends GetLegendsPayload {
     layerPath: string;
 }
 /**
- * type guard function that redefines a PayloadBaseClass as a TypeTriggerLegendsPayload
- * if the event attribute of the verifyIfPayload parameter is valid. The type ascention
- * applies only to the true block of the if clause.
- *
- * @param {PayloadBaseClass} verifyIfPayload object to test in order to determine if the type ascention is valid
- * @returns {boolean} returns true if the payload is valid
- */
-export declare const payloadIsTriggerLegend: (verifyIfPayload: PayloadBaseClass) => verifyIfPayload is GetLegendsPayload;
-/**
  * Additional attributes needed to define a TypeTriggerLegendsPayload
  */
 export type TypeTriggerLegendsPayload = GetLegendsPayload;
@@ -122,13 +113,4 @@ export declare class GetLegendsPayload extends PayloadBaseClass {
      * @returns {TypeQueryLegendPayload} the queryLegendPayload object created
      */
     static createQueryLegendPayload: (handlerName: string, layerPath: string) => TypeQueryLegendPayload;
-    /**
-     * Static method used to create a get legends payload that will trigger the get legends event processing to continuously keep
-     * the legends layer up to date.
-     *
-     * @param {string | null} handlerName the handler Name
-     *
-     * @returns {TypeTriggerLegendsPayload} the triggerLegendsPayload object created
-     */
-    static createTriggerLegendPayload: (handlerName: string) => TypeTriggerLegendsPayload;
 }

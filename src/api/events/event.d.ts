@@ -55,8 +55,9 @@ export declare class Event {
      * Unregister all events whose handler names start with the string passed in parameter.
      *
      * @param {string} handlerNamePrefix the handler name prefix for which you need to unregister from the event
+     * @param {string} eventTypeToKeep the handler name prefix composed of handlerNamePrefix/eventTypeToKeep to keep
      */
-    offAll: (handlerNamePrefix: string) => void;
+    offAll: (handlerNamePrefix: string, eventTypeToKeep?: string) => void;
     /**
      * Will emit the event on the event name with the @payload
      *

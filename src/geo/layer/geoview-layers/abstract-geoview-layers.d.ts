@@ -5,8 +5,8 @@ import { Extent } from 'ol/extent';
 import LayerGroup from 'ol/layer/Group';
 import Feature from 'ol/Feature';
 import Geometry from 'ol/geom/Geometry';
-import { TypeGeoviewLayerConfig, TypeListOfLayerEntryConfig, TypeLocalizedString, TypeLayerEntryConfig, TypeBaseLayerEntryConfig, TypeStyleConfig, TypeVectorLayerEntryConfig, TypeLayerEntryType, TypeOgcWmsLayerEntryConfig, TypeEsriDynamicLayerEntryConfig, TypeLayerInitialSettings } from '../../map/map-schema-types';
-import { codedValueType, rangeDomainType, TypeArrayOfFeatureInfoEntries, TypeQueryType } from '@/api/events/payloads';
+import { TypeGeoviewLayerConfig, TypeListOfLayerEntryConfig, TypeLocalizedString, TypeLayerEntryConfig, TypeBaseLayerEntryConfig, TypeStyleConfig, TypeVectorLayerEntryConfig, TypeLayerEntryType, TypeOgcWmsLayerEntryConfig, TypeEsriDynamicLayerEntryConfig, TypeLayerInitialSettings, TypeLayerStatus } from '../../map/map-schema-types';
+import { codedValueType, rangeDomainType, TypeArrayOfFeatureInfoEntries, TypeQueryType, TypeLocation } from '@/api/events/payloads';
 import { TypeJsonObject } from '@/core/types/global-types';
 import { TimeDimension, TypeDateFragments } from '@/core/utils/date-mgt';
 import { TypeEventHandlerFunction } from '@/api/events/event';
@@ -165,6 +165,20 @@ export declare abstract class AbstractGeoViewLayer {
      */
     constructor(type: TypeGeoviewLayerType, mapLayerConfig: TypeGeoviewLayerConfig, mapId: string);
     /** ***************************************************************************************************************************
+     * Change the layer phase property and emit an event to update existing layer sets.
+     *
+     * @param {string} layerPhase The value to assign to the layer phase property.
+     * @param {TypeLayerEntryConfig} layerEntryConfig The layer configuration affected by the change.
+     */
+    changeLayerPhase(layerPhase: string, layerEntryConfig?: TypeLayerEntryConfig): void;
+    /** ***************************************************************************************************************************
+     * Change the layer status property and emit an event to update existing layer sets.
+     *
+     * @param {TypeLayerStatus} layerStatus The value to assign to the layer status property.
+     * @param {TypeLayerEntryConfig} layerEntryConfig The layer configuration affected by the change.
+     */
+    changeLayerStatus(layerStatus: TypeLayerStatus, layerEntryConfig: TypeLayerEntryConfig): void;
+    /** ***************************************************************************************************************************
      * Process recursively the list of layer entries to see if all of them are processed.
      *
      * @param {TypeListOfLayerEntryConfig} listOfLayerEntryConfig The list of layer's configuration
@@ -288,13 +302,22 @@ export declare abstract class AbstractGeoViewLayer {
     /** ***************************************************************************************************************************
      * Return feature information for the layer specified. If layerPathOrConfig is undefined, this.activeLayer is used.
      *
-     * @param {Pixel | Coordinate | Coordinate[]} location A pixel, a coordinate or a polygon that will be used by the query.
+     * @param {TypeQueryType} queryType  The type of query to perform.
      * @param {string | TypeLayerEntryConfig | null} layerPathOrConfig Optional layer path or configuration.
-     * @param {TypeQueryType} queryType Optional query type, default value is 'at pixel'.
+     * @param {TypeLocation} location An optionsl pixel, coordinate or polygon that will be used by the query.
      *
      * @returns {Promise<TypeFeatureInfoResult>} The feature info table.
      */
-    getFeatureInfo(location: Pixel | Coordinate | Coordinate[], layerPathOrConfig?: string | TypeLayerEntryConfig | null, queryType?: TypeQueryType): Promise<TypeArrayOfFeatureInfoEntries>;
+    getFeatureInfo(queryType: TypeQueryType, layerPathOrConfig?: string | TypeLayerEntryConfig | null, location?: TypeLocation): Promise<TypeArrayOfFeatureInfoEntries>;
+    /** ***************************************************************************************************************************
+     * Return feature information for all the features on a layer. Returns an empty array [] when the layer is
+     * not queryable.
+     *
+     * @param {TypeLayerEntryConfig} layerConfig The layer configuration.
+     *
+     * @returns {Promise<TypeArrayOfFeatureInfoEntries>} The feature info table.
+     */
+    protected getAllFeatureInfo(layerConfig: TypeLayerEntryConfig): Promise<TypeArrayOfFeatureInfoEntries>;
     /** ***************************************************************************************************************************
      * Return feature information for all the features around the provided Pixel. Returns an empty array [] when the layer is
      * not queryable.
