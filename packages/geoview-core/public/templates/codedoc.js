@@ -28,13 +28,10 @@ function createCodeSnippetUsingIDs() {
   for (let i = 0; i < scripts.length; i++) {
     // Try to find a codeSnippet flag interested in that script
     const script = scripts[i];
-    const el = document.getElementById(`${script.id}CS`);
-    if (el !== null) {
-      el.innerHTML = `<pre>${script.textContent
-        .replace('//create snippets\n', '')
-        .replace('createConfigSnippet();\n', '')
-        .replace('createCodeSnippet();\n', '')}</pre>`;
-    }
+    document.querySelectorAll(`[id-script="${script.id}"]`).forEach((el) => {
+      // eslint-disable-next-line no-param-reassign
+      el.innerHTML = `<pre>${script.textContent}</pre>`;
+    });
   }
 }
 
