@@ -84,18 +84,18 @@ export function DetailsItem({ mapId, buttonId }: Props): JSX.Element {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  useEffect(() => {
-    setList(
-      api.maps[mapId].details.createDetails(mapId, details, {
-        mapId,
-        location: LngLat,
-        backgroundStyle: 'dark',
-        singleColumn: true,
-        handlerName,
-      })
-    );
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [details, LngLat]);
+  // useEffect(() => {
+  //   setList(
+  //     api.maps[mapId].details.createDetails(mapId, details, {
+  //       mapId,
+  //       location: LngLat,
+  //       backgroundStyle: 'dark',
+  //       singleColumn: true,
+  //       handlerName,
+  //     })
+  //   );
+  //   // eslint-disable-next-line react-hooks/exhaustive-deps
+  // }, [details, LngLat]);
 
-  return <div>{list}</div>;
+  return <div>This feature is deprecated.</div>;
 }
