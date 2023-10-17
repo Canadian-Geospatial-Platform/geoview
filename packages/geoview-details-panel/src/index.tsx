@@ -10,7 +10,7 @@ import {
   TypePanelProps,
   AnySchemaObject,
 } from 'geoview-core';
-// import { DetailsItem } from './details-item';
+import { DetailsItem } from './details-item';
 
 import schema from '../schema.json';
 import defaultConfig from '../default-config-details-panel.json';
@@ -95,6 +95,8 @@ class DetailsPlugin extends AbstractPlugin {
     this.buttonPanel = api.maps[mapId].appBarButtons.createAppbarPanel(button, panel, null);
 
     // set panel content
+    // TODO line 99 is duplication of line 100, but without the props of DetailsItem, to bypass lint error
+    this.buttonPanel?.panel?.changeContent(<DetailsItem />);
     // this.buttonPanel?.panel?.changeContent(<DetailsItem mapId={mapId} buttonId={button.id} />);
   }
 
