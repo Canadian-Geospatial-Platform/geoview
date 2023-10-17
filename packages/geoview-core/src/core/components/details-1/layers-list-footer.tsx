@@ -8,6 +8,8 @@ import {
   ListItem,
   ListItemButton,
   List,
+  ListItemIcon,
+  SendIcon,
   Tooltip,
   IconButton,
   Grid,
@@ -134,6 +136,7 @@ export function LayersListFooter(props: TypeLayersListProps): JSX.Element {
       // load the first layer we clicked with its feature info in right panel
       // if there are multiple layers, we load the first one on the list with its feature info
       setLayerDataInfo(arrayOfLayerData[0]);
+      setCurrentFeatureIndex(0);
     }
   }, [arrayOfLayerData]);
 
@@ -164,6 +167,9 @@ export function LayersListFooter(props: TypeLayersListProps): JSX.Element {
                   }}
                   sx={{ height: '67px' }}
                 >
+                  <ListItemIcon>
+                    <SendIcon />
+                  </ListItemIcon>
                   <Tooltip title={layerData.layerName} placement="top" enterDelay={1000}>
                     <ListItemText
                       sx={sxClasses.layerNamePrimary}

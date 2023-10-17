@@ -5,9 +5,9 @@
       "type": "Feature",
       "properties": {
         "Red": 92,
-        "Green": 43.54,
-        "Blue": 12.3,
-        "Yellow": 66,
+        "Green": "1 Start, this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text. END",
+        "Blue": "2 Start, this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text. END",
+        "Yellow": "3 Start, this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text. END",
         "Orange": 75,
         "creationDate": "15/02/2022T05:00:00-05:00"
       },
