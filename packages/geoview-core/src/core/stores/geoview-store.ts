@@ -66,7 +66,7 @@ export interface INotificationsState {
 
 export interface ILegendState {
   selectedItem?: TypeLegendItemProps;
-  selectedLayers: Record<string, string[]>;
+  selectedLayers: Record<string, { layer: string; icon: string }[]>;
 }
 
 export interface IGeoViewState {
