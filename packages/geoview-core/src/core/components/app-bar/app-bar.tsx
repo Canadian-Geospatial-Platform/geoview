@@ -20,11 +20,9 @@ import ExportModal from '../export/export-modal';
 
 const useStyles = makeStyles((theme) => ({
   appBar: {
-    position: 'absolute',
     display: 'flex',
     flexDirection: 'row',
     justifyContent: 'space-between',
-    height: '100%',
     minWidth: 64,
     zIndex: theme.zIndex.appBar,
     pointerEvents: 'all',
