@@ -13,6 +13,7 @@ export const sxClassesFooterBar = {
     backgroundColor: '#000000cc',
     pointerEvents: 'all',
     gap: 0.5,
+    order: 3,
   },
   mouseScaleControlsContainer: {
     display: 'flex',

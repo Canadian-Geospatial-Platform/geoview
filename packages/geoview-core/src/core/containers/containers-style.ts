@@ -36,7 +36,7 @@ export const getShellSxClasses = (theme: Theme) => ({
     flexDirection: 'row',
     height: '100%',
     position: 'relative',
-    alignItems: 'stretch'
+    alignItems: 'stretch',
   },
   skip: {
     position: 'absolute',
