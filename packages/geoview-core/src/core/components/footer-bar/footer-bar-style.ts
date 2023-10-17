@@ -12,7 +12,7 @@ export const sxClassesFooterBar = {
     backdropFilter: 'blur(5px)',
     backgroundColor: '#000000cc',
     pointerEvents: 'all',
-    gap: 0.5
+    gap: 0.5,
   },
   mouseScaleControlsContainer: {
     display: 'flex',
