@@ -59,7 +59,7 @@
     "sort_layers": "Trier les calques",
     "selected_Layers": "Un aperçu des calques actuellement sélectionnés",
     "re-arrange": "Réarranger",
-    "categories_title" : "Catégories"
+    "categories_title": "Catégories"
   },
   "details": {
     "zoom_to": "Zoom à l'élément",
@@ -129,6 +129,8 @@
     "leftPanelHeading": "Tables disponible",
     "rightPanelHeading": "Table sélectionnée",
     "rowsSelected": "{rowsSelected} sur {totalRows} ligne(s) sélectionnée(s)",
-    "rowsFiltered": "{rowsFiltered} sur {totalRows} ligne(s) filtrée(s)"
+    "rowsFiltered": "{rowsFiltered} sur {totalRows} ligne(s) filtrée(s)",
+    "enlargeBtn": "Agrandir",
+    "reduceBtn": "Réduire"
   }
 }

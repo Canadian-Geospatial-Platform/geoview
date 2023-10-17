@@ -59,7 +59,7 @@
     "sort_layers": "Sort Layers",
     "selected_Layers": "An overview of currrently selected layers",
     "re-arrange": "re-arrange",
-    "categories_title" : "Categories"
+    "categories_title": "Categories"
   },
   "details": {
     "zoom_to": "Zoom to feature",
@@ -129,6 +129,8 @@
     "leftPanelHeading": "Available Categories",
     "rightPanelHeading": "Selected Category",
     "rowsSelected": "{rowsSelected} of {totalRows} row(s) selected",
-    "rowsFiltered": "{rowsFiltered} of {totalRows} row(s) filtered"
+    "rowsFiltered": "{rowsFiltered} of {totalRows} row(s) filtered",
+    "enlargeBtn": "Enlarge",
+    "reduceBtn": "Reduce"
   }
 }

@@ -5,6 +5,7 @@ export {
   ArrowBack as ArrowBackIcon,
   ArrowBackIosOutlined as ArrowBackIosOutlinedIcon,
   ArrowDropDown as ArrowDownIcon,
+  ArrowForward as ArrowForwardIcon,
   ArrowForwardIosOutlined as ArrowForwardIosOutlinedIcon,
   ArrowLeft as ArrowLeftIcon,
   ArrowRight as ArrowRightIcon,
