@@ -35,14 +35,27 @@ export class LegendsLayerSet {
     const registrationConditionFunction = (layerPath: string): boolean => {
       return true;
     };
+
+    // This function is used to initialise the date property of the layer path entry.
+    const registrationUserDataInitialisation = (layerPath: string) => {
+      this.resultSets[layerPath].querySent = false;
+    };
+
     this.mapId = mapId;
-    this.layerSet = new LayerSet(mapId, `${mapId}/LegendsLayerSet`, this.resultSets, registrationConditionFunction);
+    this.layerSet = new LayerSet(
+      mapId,
+      `${mapId}/LegendsLayerSet`,
+      this.resultSets,
+      registrationConditionFunction,
+      registrationUserDataInitialisation
+    );
 
     api.event.on(
       EVENT_NAMES.LAYER_SET.UPDATED,
       (layerUpdatedPayload) => {
         if (payloadIsLayerSetUpdated(layerUpdatedPayload)) {
-          const { resultSets } = layerUpdatedPayload;
+          const { resultSets, layerPath } = layerUpdatedPayload;
+          resultSets[layerPath].layerName = api.maps[mapId].layer.registeredLayers[layerPath].layerName;
           api.event.emit(GetLegendsPayload.createLegendsLayersetUpdatedPayload(`${this.mapId}/LegendsLayerSet`, resultSets));
         }
       },
@@ -69,8 +82,10 @@ export class LegendsLayerSet {
     // legends of the deleted layers.
     const queryUndefinedLegend = () => {
       Object.keys(this.resultSets).forEach((layerPath) => {
-        if (this.resultSets[layerPath]?.layerStatus === 'processed' && this.resultSets[layerPath].data === undefined)
+        if (this.resultSets[layerPath]?.layerStatus === 'processed' && !this.resultSets[layerPath].querySent) {
           api.event.emit(GetLegendsPayload.createQueryLegendPayload(`${this.mapId}/${layerPath}`, layerPath));
+          this.resultSets[layerPath].querySent = true;
+        }
       });
     };
     queryUndefinedLegend();

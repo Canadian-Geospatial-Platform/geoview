@@ -40,15 +40,15 @@ export type TypeBaseVectorLayer = BaseLayer | TypeVectorLayerGroup | TypeVectorL
 // ******************************************************************************************************************************
 /** *****************************************************************************************************************************
  * The AbstractGeoViewVector class is a direct descendant of AbstractGeoViewLayer. As its name indicates, it is used to
- * instanciate GeoView vector layers. It inherits from its parent class an attribute named gvLayers where the vector elements
+ * instanciate GeoView vector layers. It inherits from its parent class an attribute named olLayers where the vector elements
  * of the class will be kept.
  *
- * The gvLayers attribute has a hierarchical structure. Its data type is TypeBaseVectorLayer. Subclasses of this type are
+ * The olLayers attribute has a hierarchical structure. Its data type is TypeBaseVectorLayer. Subclasses of this type are
  * BaseLayer, TypeVectorLayerGroup and TypeVectorLayer. The TypeVectorLayerGroup is a collection of TypeBaseVectorLayer. It is
  * important to note that a TypeBaseVectorLayer attribute can polymorphically refer to a TypeVectorLayerGroup or a
  * TypeVectorLayer. Here, we must not confuse instantiation and declaration of a polymorphic attribute.
  *
- * All leaves of the tree structure stored in the gvLayers attribute must be of type TypeVectorLayer. This is where the
+ * All leaves of the tree structure stored in the olLayers attribute must be of type TypeVectorLayer. This is where the
  * features are placed and can be considered as a feature group.
  */
 // ******************************************************************************************************************************
@@ -160,7 +160,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
           }
           vectorSource.addFeatures(features);
           if (success) success(features);
-          layerEntryConfig.gvLayer!.changed();
+          layerEntryConfig.olLayer!.changed();
         } else {
           onError();
         }
@@ -188,7 +188,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
 
   /** ***************************************************************************************************************************
    * Create a vector layer. The layer has in its properties a reference to the layer entry configuration used at creation time.
-   * The layer entry configuration keeps a reference to the layer in the gvLayer attribute. If clustering is enabled, creates a
+   * The layer entry configuration keeps a reference to the layer in the olLayer attribute. If clustering is enabled, creates a
    * cluster source and uses that to create the layer.
    *
    * @param {TypeBaseLayerEntryConfig} layerEntryConfig The layer entry configuration used by the source.
@@ -240,7 +240,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
       },
     };
 
-    layerEntryConfig.gvLayer = new VectorLayer(layerOptions);
+    layerEntryConfig.olLayer = new VectorLayer(layerOptions);
 
     if (layerEntryConfig.initialSettings?.extent !== undefined) this.setExtent(layerEntryConfig.initialSettings?.extent, layerEntryConfig);
     if (layerEntryConfig.initialSettings?.maxZoom !== undefined)
@@ -256,7 +256,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
       );
     this.applyViewFilter(layerEntryConfig, layerEntryConfig.layerFilter ? layerEntryConfig.layerFilter : '');
 
-    return layerEntryConfig.gvLayer as VectorLayer<VectorSource>;
+    return layerEntryConfig.olLayer as VectorLayer<VectorSource>;
   }
 
   /** ***************************************************************************************************************************
@@ -268,10 +268,10 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
    */
   protected getAllFeatureInfo(layerEntryConfig: TypeLayerEntryConfig): Promise<TypeArrayOfFeatureInfoEntries> {
     const promisedQueryResult = new Promise<TypeArrayOfFeatureInfoEntries>((resolve) => {
-      if (!layerEntryConfig?.gvLayer) resolve([]);
+      if (!layerEntryConfig?.olLayer) resolve([]);
       else
         this.formatFeatureInfoResult(
-          (layerEntryConfig.gvLayer as VectorLayer<VectorSource<Geometry>>).getSource()!.getFeatures(),
+          (layerEntryConfig.olLayer as VectorLayer<VectorSource<Geometry>>).getSource()!.getFeatures(),
           layerEntryConfig as TypeVectorLayerEntryConfig
         ).then((arrayOfFeatureInfoEntries) => {
           resolve(arrayOfFeatureInfoEntries);
@@ -344,8 +344,8 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
    *
    * @returns {Extent} The layer bounding box.
    */
-  getBounds(layerConfig: TypeLayerEntryConfig, bounds: Extent | undefined): Extent | undefined {
-    (layerConfig.gvLayer as VectorLayer<VectorSource<Geometry>>).getSource()?.forEachFeature((feature) => {
+  protected getBounds(layerConfig: TypeLayerEntryConfig, bounds: Extent | undefined): Extent | undefined {
+    (layerConfig.olLayer as VectorLayer<VectorSource<Geometry>>).getSource()?.forEachFeature((feature) => {
       const coordinates = feature.get('geometry').flatCoordinates;
       for (let i = 0; i < coordinates.length; i += 2) {
         const geographicCoordinate = transform(
@@ -375,17 +375,12 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
    * legend filters are derived from the uniqueValue or classBreaks style of the layer. When the layer config is invalid, nothing
    * is done.
    *
-   * @param {string | TypeLayerEntryConfig | null} layerPathOrConfig Optional layer path or configuration.
+   * @param {string | TypeLayerEntryConfig} layerPathOrConfig Layer path or configuration.
    * @param {string} filter An optional filter to be used in place of the getViewFilter value.
    * @param {boolean} CombineLegendFilter Flag used to combine the legend filter and the filter together (default: true)
    * @param {boolean} checkCluster An optional value to see if we check for clustered layers.
    */
-  applyViewFilter(
-    layerPathOrConfig: string | TypeLayerEntryConfig | null = this.activeLayer,
-    filter = '',
-    CombineLegendFilter = true,
-    checkCluster = true
-  ) {
+  applyViewFilter(layerPathOrConfig: string | TypeLayerEntryConfig, filter = '', CombineLegendFilter = true, checkCluster = true) {
     const layerEntryConfig = (
       typeof layerPathOrConfig === 'string' ? this.getLayerConfig(layerPathOrConfig) : layerPathOrConfig
     ) as TypeVectorLayerEntryConfig;
@@ -410,10 +405,10 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
         );
         return;
       }
-      if (!layerEntryConfig.gvLayer) return; // We must wait for the layer to be created.
+      if (!layerEntryConfig.olLayer) return; // We must wait for the layer to be created.
       let filterValueToUse = filter;
-      layerEntryConfig.gvLayer!.set('legendFilterIsOff', !CombineLegendFilter);
-      if (CombineLegendFilter) layerEntryConfig.gvLayer?.set('layerFilter', filter);
+      layerEntryConfig.olLayer!.set('legendFilterIsOff', !CombineLegendFilter);
+      if (CombineLegendFilter) layerEntryConfig.olLayer?.set('layerFilter', filter);
 
       // Convert date constants using the externalFragmentsOrder derived from the externalDateFormat
       const searchDateEntry = [
@@ -435,7 +430,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
         const filterEquation = api.maps[this.mapId].geoviewRenderer.analyzeLayerFilter([
           { nodeType: NodeType.unprocessedNode, nodeValue: filterValueToUse },
         ]);
-        layerEntryConfig.gvLayer?.set('filterEquation', filterEquation);
+        layerEntryConfig.olLayer?.set('filterEquation', filterEquation);
       } catch (error) {
         throw new Error(
           `Invalid vector layer filter (${(error as { message: string }).message}).\nfilter = ${this.getLayerFilter(
@@ -444,7 +439,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
         );
       }
 
-      layerEntryConfig.gvLayer?.changed();
+      layerEntryConfig.olLayer?.changed();
     }
   }
 }

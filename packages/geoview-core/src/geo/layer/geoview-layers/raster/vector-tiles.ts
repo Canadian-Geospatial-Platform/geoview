@@ -211,11 +211,11 @@ export class VectorTiles extends AbstractGeoViewRaster {
         tileLayerOptions.visible =
           layerEntryConfig.initialSettings?.visible === 'yes' || layerEntryConfig.initialSettings?.visible === 'always';
 
-      layerEntryConfig.gvLayer = new VectorTileLayer(tileLayerOptions);
+      layerEntryConfig.olLayer = new VectorTileLayer(tileLayerOptions);
 
       super.addLoadendListener(layerEntryConfig, 'tile');
 
-      resolve(layerEntryConfig.gvLayer);
+      resolve(layerEntryConfig.olLayer);
     });
     return promisedVectorLayer;
   }
@@ -272,9 +272,9 @@ export class VectorTiles extends AbstractGeoViewRaster {
    * @returns {Extent} The layer bounding box.
    */
   getBounds(layerConfig: TypeLayerEntryConfig, bounds: Extent | undefined): Extent | undefined {
-    const layerBounds = (layerConfig.gvLayer as TileLayer<VectorTileSource>).getSource()?.getTileGrid()?.getExtent();
+    const layerBounds = (layerConfig.olLayer as TileLayer<VectorTileSource>).getSource()?.getTileGrid()?.getExtent();
     const projection =
-      (layerConfig.gvLayer as TileLayer<VectorTileSource>).getSource()?.getProjection()?.getCode().replace('EPSG:', '') ||
+      (layerConfig.olLayer as TileLayer<VectorTileSource>).getSource()?.getProjection()?.getCode().replace('EPSG:', '') ||
       api.maps[this.mapId].currentProjection;
 
     if (layerBounds) {
