@@ -51,9 +51,9 @@ export function Legend2(props: LegendItemsDetailsProps): JSX.Element {
   const selectedLegendItem = useStore(store, (state) => state.legendState.selectedItem);
   const selectedLayers = useStore(store, (state) => state.legendState.selectedLayers);
   const [isSelectedLayersClicked, setIsSelectedLayersClicked] = useState(false);
-  const [collapsedParents, setCollapsedParents] = useState({});
+  const [collapsedParents, setCollapsedParents] = useState<{ [key: string]: boolean }>({});
 
-  const toggleCollapse = (parentLayer) => {
+  const toggleCollapse = (parentLayer: string) => {
     setCollapsedParents((prevCollapsedParents) => ({
       ...prevCollapsedParents,
       [parentLayer]: !prevCollapsedParents[parentLayer],
@@ -148,7 +148,6 @@ export function Legend2(props: LegendItemsDetailsProps): JSX.Element {
   }, [selectedLegendItem]);
 
   const rightPanel = () => {
-
     if (isSelectedLayersClicked && selectedLayers) {
       const numItems = selectedLayers.length;
       const selectedLayersList = Object.entries(selectedLayers).map(([parentLayer, childLayers]) => (
