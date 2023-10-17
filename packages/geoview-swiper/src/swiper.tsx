@@ -253,7 +253,7 @@ export function Swiper(props: SwiperProps): JSX.Element {
    */
   const setRenderEvents = (layer: string) => {
     const { geoviewLayers } = api.maps[mapId].layer;
-    const olLayer = geoviewLayers[layer].gvLayers;
+    const olLayer = geoviewLayers[layer].olLayers;
     setOlLayers((prevArray: BaseLayer[]) => [...prevArray, olLayer!]);
     olLayer?.on(['precompose' as EventTypes, 'prerender' as EventTypes], prerender);
     olLayer?.on(['postcompose' as EventTypes, 'postrender' as EventTypes], postcompose);
@@ -271,7 +271,7 @@ export function Swiper(props: SwiperProps): JSX.Element {
     return () => {
       layersIds.forEach((layer: string) => {
         if (geoviewLayers[layer] !== undefined) {
-          const olLayer = geoviewLayers[layer].gvLayers;
+          const olLayer = geoviewLayers[layer].olLayers;
           olLayer?.un(['precompose' as EventTypes, 'prerender' as EventTypes], prerender);
           olLayer?.un(['postcompose' as EventTypes, 'postrender' as EventTypes], postcompose);
 

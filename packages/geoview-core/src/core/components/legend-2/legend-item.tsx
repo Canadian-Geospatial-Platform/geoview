@@ -161,7 +161,7 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
   const legendClass = legendItemIsSelected ? { ...sxClasses.legendItem, ...sxClasses.selectedLegendItem } : sxClasses.legendItem;
 
   // check if layer is a clustered, so that clustering can be toggled
-  const path = subLayerId || `${layerId}/${geoviewLayerInstance.activeLayer?.layerId}`;
+  const path = subLayerId || `${layerId}/${geoviewLayerInstance.listOfLayerEntryConfig[0]?.layerId}`;
   const clusterLayerPath = path.replace('-unclustered', '');
 
   const [isChecked, setChecked] = useState<boolean>(
@@ -296,7 +296,7 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
       }
     } else {
       // parent layer with no sub layers
-      geoviewLayerInstance.setVisible(isChecked);
+      geoviewLayerInstance.setVisible(isChecked, geoviewLayerInstance.listOfLayerEntryConfig[0]);
     }
   }, [isParentVisible, isChecked, layerConfigEntry, geoviewLayerInstance]);
 
