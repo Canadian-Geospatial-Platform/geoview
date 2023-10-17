@@ -242,7 +242,7 @@ export class GeoUtilities {
           activeEl?.closest('.geoview-shell') !== null ? activeEl?.closest('.geoview-shell')!.getAttribute('id')?.split('-')[1] : undefined;
 
         if (mapId !== undefined) {
-          const mapFocus = activeEl?.className.match(/mapContainer*/g) !== null;
+          const mapFocus = activeEl?.getAttribute('id') === `map-${mapId}`;
           getGeoViewStore(mapId).setState({ isCrosshairsActive: mapFocus });
         }
       }

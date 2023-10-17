@@ -37,12 +37,11 @@ export function Crosshair(): JSX.Element {
   const isCrosshairsActive = useStore(store, (state) => state.isCrosshairsActive);
   const projection = useStore(store, (state) => state.mapState.currentProjection);
   const mapCoord = useStore(store, (state) => state.mapState.mapCenterCoordinates);
-  const mapElementStore = useStore(store, (state) => state.mapState.mapElement);
+  const mapElement = useStore(store, (state) => state.mapState.mapElement);
 
   // use reference as the mapElement from the store is undefined
   // TODO: Find what is going on with mapElement for focus-trap and crosshair and crosshair + map coord for this component
-  const mapElementRef = useRef(mapElementStore);
-  mapElementRef.current = mapElementStore;
+  // ? maybe because simulate click is in an event listener, it is best to use useRef
   const isCrosshairsActiveRef = useRef(isCrosshairsActive);
   isCrosshairsActiveRef.current = isCrosshairsActive;
   const mapCoordRef = useRef(mapCoord);
@@ -86,7 +85,7 @@ export function Crosshair(): JSX.Element {
       panDelta = panDelta < 10 ? 10 : panDelta; // minus panDelta reset the value so we need to trap
 
       // replace the KeyboardPan interraction by a new one
-      const mapElement = mapElementRef.current;
+      // const mapElement = mapElementRef.current;
       mapElement.getInteractions().forEach((interactionItem) => {
         if (interactionItem instanceof KeyboardPan) {
           mapElement.removeInteraction(interactionItem);
@@ -101,7 +100,8 @@ export function Crosshair(): JSX.Element {
       (state) => state.isCrosshairsActive,
       (curCrosshair, prevCrosshair) => {
         if (curCrosshair !== prevCrosshair) {
-          const mapHTMLElement = mapElementRef.current.getTargetElement();
+          const mapHTMLElement = mapElement.getTargetElement();
+
           if (curCrosshair) {
             panelButtonId.current = 'detailsPanel';
 
@@ -116,7 +116,7 @@ export function Crosshair(): JSX.Element {
     );
 
     return () => {
-      const mapHTMLElement = mapElementRef.current.getTargetElement();
+      const mapHTMLElement = mapElement.getTargetElement();
       unsubIsCrosshair();
       mapHTMLElement.removeEventListener('keydown', simulateClick);
       mapHTMLElement.removeEventListener('keydown', managePanDelta);
@@ -129,7 +129,7 @@ export function Crosshair(): JSX.Element {
       sx={[
         sxClasses.crosshairContainer,
         {
-          visibility: isCrosshairsActiveRef.current ? 'visible' : 'hidden',
+          visibility: isCrosshairsActive ? 'visible' : 'hidden',
         },
       ]}
     >
