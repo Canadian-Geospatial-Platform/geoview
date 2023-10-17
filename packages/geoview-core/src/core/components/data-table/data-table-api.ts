@@ -2,7 +2,7 @@ import { createElement, ReactElement } from 'react';
 import DataTable, { DataTableData } from './data-table';
 
 import { api, TypeListOfLayerEntryConfig, isVectorLayer, TypeArrayOfFeatureInfoEntries, TypeFieldEntry } from '@/app';
-import MapDataTable from './map-data-table';
+import MapDataTable, { MapDataTableData as MapDataTableDataProps } from './map-data-table';
 import { Datapanel } from './data-panel';
 
 interface CreataDataTableProps {
@@ -163,6 +163,23 @@ export class DataTableApi {
         return this.buildFeatureRows(result.value);
       });
 
-    return createElement(Datapanel, { layerData: data, layerIds, mapId: this.mapId, layerKeys, projectionConfig }, null);
+    const filteredKeys: string[] = [];
+    const filteredIds: string[] = [];
+    const filteredData: MapDataTableDataProps[] = [];
+
+    // filter data based on features.
+    data.forEach((res, index) => {
+      if (res.features.length) {
+        filteredData.push(res);
+        filteredIds.push(layerIds[index]);
+        filteredKeys.push(layerKeys[index]);
+      }
+    });
+
+    return createElement(
+      Datapanel,
+      { layerData: filteredData, layerIds: filteredIds, mapId: this.mapId, layerKeys: filteredKeys, projectionConfig },
+      null
+    );
   };
 }
