@@ -39,10 +39,10 @@ it doesn't take much longer to enter the code.
 ## 3- Avoid using existing names in third party libraries to declare elements of the GeoView code. ##
 
 The OpenLayers library has a base class named Layer. If we use the identifier Layer to define a class in our code and at the same
-time we use the Layer class of OpenLayers (`import { Layer as OLLayer } from 'ol/layer';`), it will be difficult to know at first
-sight the type of a variable named `layer`. On the other hand, if we define our class as `GVlayer` and we use the OpenLayers `Layer` class
-at the same time by associating the `layer` variable with the `Layer` type and `gvLayer` with the `GVlayer` type, the confusion is thus
-cleared up.
+time we use the Layer class of OpenLayers (`import { Layer } from 'ol/layer';`), it will be difficult to know at first sight the
+type of a variable named `layer`. On the other hand, if we define our class as `GVlayer` and we use the OpenLayers `Layer` class
+at the same time by associating the `layer` variable with the `Layer` type and `gvLayer` with the `GVlayer` type, the confusion
+is thus cleared up.
 
 ## 4- Use inheritance whenever possible. ##
 

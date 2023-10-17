@@ -550,8 +550,8 @@ export class GeoviewRenderer {
         this,
         styleSettings,
         feature,
-        layerEntryConfig.gvLayer!.get('filterEquation'),
-        layerEntryConfig.gvLayer!.get('legendFilterIsOff')
+        layerEntryConfig.olLayer!.get('filterEquation'),
+        layerEntryConfig.olLayer!.get('legendFilterIsOff')
       );
     }
     return undefined;
@@ -583,8 +583,8 @@ export class GeoviewRenderer {
               this,
               styleSettings,
               feature,
-              layerEntryConfig.gvLayer!.get('filterEquation'),
-              layerEntryConfig.gvLayer!.get('legendFilterIsOff')
+              layerEntryConfig.olLayer!.get('filterEquation'),
+              layerEntryConfig.olLayer!.get('legendFilterIsOff')
             );
         if (featureStyle) {
           if (geometryType === 'Point') {

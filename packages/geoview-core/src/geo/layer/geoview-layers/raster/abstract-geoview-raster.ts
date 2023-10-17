@@ -18,14 +18,14 @@ export type TypeBaseRasterLayer = BaseLayer; // TypeRasterLayerGroup | TypeRaste
 /** *****************************************************************************************************************************
  * The AbstractGeoViewRaster class is a direct descendant of AbstractGeoViewLayer. As its name indicates, it is used to
  * instanciate GeoView raster layers. In addition to the components of the parent class, there is an attribute named
- * gvLayers where the raster elements of the class will be kept.
+ * olLayers where the raster elements of the class will be kept.
  *
- * The gvLayers attribute has a hierarchical structure. Its data type is TypeBaseRasterLayer. Subclasses of this type
+ * The olLayers attribute has a hierarchical structure. Its data type is TypeBaseRasterLayer. Subclasses of this type
  * are TypeRasterLayerGroup and TypeRasterLayer. The TypeRasterLayerGroup is a collection of TypetBaseRasterLayer. It is
  * important to note that a TypetBaseRasterLayer attribute can polymorphically refer to a TypeRasterLayerGroup or a
  * TypeRasterLayer. Here, we must not confuse instantiation and declaration of a polymorphic attribute.
  *
- * All leaves of the structure stored in the gvLayers attribute must be of type TypeRasterLayer. This is where the
+ * All leaves of the structure stored in the olLayers attribute must be of type TypeRasterLayer. This is where the
  * features are placed.
  */
 // ******************************************************************************************************************************
@@ -40,14 +40,14 @@ export abstract class AbstractGeoViewRaster extends AbstractGeoViewLayer {
     let loadErrorHandler: () => void;
     const loadEndHandler = () => {
       this.changeLayerStatus('loaded', layerEntryConfig);
-      layerEntryConfig.gvLayer!.get('source').un(`${layerType}loaderror`, loadErrorHandler);
+      layerEntryConfig.olLayer!.get('source').un(`${layerType}loaderror`, loadErrorHandler);
     };
     loadErrorHandler = () => {
       this.changeLayerStatus('error', layerEntryConfig);
-      layerEntryConfig.gvLayer!.get('source').un(`${layerType}loadend`, loadEndHandler);
+      layerEntryConfig.olLayer!.get('source').un(`${layerType}loadend`, loadEndHandler);
     };
 
-    layerEntryConfig.gvLayer!.get('source').once(`${layerType}loadend`, loadEndHandler);
-    layerEntryConfig.gvLayer!.get('source').once(`${layerType}loaderror`, loadErrorHandler);
+    layerEntryConfig.olLayer!.get('source').once(`${layerType}loadend`, loadEndHandler);
+    layerEntryConfig.olLayer!.get('source').once(`${layerType}loaderror`, loadErrorHandler);
   }
 }
