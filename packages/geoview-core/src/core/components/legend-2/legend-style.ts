@@ -14,10 +14,10 @@ export const getSxClasses = (theme: Theme) => ({
     fontSize: '18px',
   },
   categoryTitleContainer: {
-    display: 'flex', 
-    alignItems: 'center', 
-    justifyContent: 'space-between', 
-    marginBottom: '15px' 
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: '15px',
   },
   categoryTitle: {
     textAlign: 'left',
@@ -38,4 +38,4 @@ export const getSxClasses = (theme: Theme) => ({
     color: '#515BA5',
     fontSize: '16px',
   },
-})
+});

@@ -147,7 +147,7 @@ export function Legend2(props: LegendItemsDetailsProps): JSX.Element {
           <div style={{ padding: '2px 5px 2px 4px' }}>
             {!collapsedParents[parentLayer] &&
               childLayers.map((childLayer) => (
-                <Table key={childLayer.layer} sx={sxClasses.table}>
+                <Table key={childLayer.layer} sx={{ border: '1px solid #C1C1C1', textAlign: 'left' }}>
                   {childLayer.icon ? <img src={childLayer.icon} alt="Layer Icon" /> : null}
                   {childLayer.layer}
                 </Table>

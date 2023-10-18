@@ -115,6 +115,7 @@ export function LegendIconList(props: TypeLegendIconListProps): JSX.Element {
       }
     }
   }
+
   const [isAllChecked, setIsAllChecked] = useState(initialChecked.every((checked) => checked));
   const handleToggleLayer = (index: number) => {
     const checklist = isChecked.map((checked, i) => (i === index ? !checked : checked));

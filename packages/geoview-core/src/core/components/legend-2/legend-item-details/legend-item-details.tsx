@@ -303,7 +303,6 @@ export function LegendItemDetails(props: TypeLegendItemDetailsProps): JSX.Elemen
 
   const updateSelectedLayers = (selectedLayers: string[]) => {
     const selectedLayersByLayerName: Record<string, { layer: string; icon: string }[]> = {};
-
     selectedLayers.forEach((layer) => {
       if (!selectedLayersByLayerName[layerName]) {
         selectedLayersByLayerName[layerName] = [{ layer, icon: iconImg ?? '' }];
