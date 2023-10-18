@@ -149,7 +149,7 @@ export function Legend2(props: LegendItemsDetailsProps): JSX.Element {
 
   const rightPanel = () => {
     if (isSelectedLayersClicked && selectedLayers) {
-      const numItems = selectedLayers.length;
+      const numItems = Object.values(selectedLayers).reduce((total, childLayers) => total + childLayers.length, 0);
       const selectedLayersList = Object.entries(selectedLayers).map(([parentLayer, childLayers]) => (
         <div
           key={parentLayer}
@@ -169,8 +169,9 @@ export function Legend2(props: LegendItemsDetailsProps): JSX.Element {
           <div>
             {!collapsedParents[parentLayer] &&
               childLayers.map((childLayer) => (
-                <div key={childLayer} style={{ paddingLeft: '20px' }}>
-                  {childLayer}
+                <div key={childLayer.layer} style={{ paddingLeft: '20px' }}>
+                  {childLayer.icon ? <img src={childLayer.icon} alt="Layer Icon" /> : null}
+                  {childLayer.layer}
                 </div>
               ))}
           </div>

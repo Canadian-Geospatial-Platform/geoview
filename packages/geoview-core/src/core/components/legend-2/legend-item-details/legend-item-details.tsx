@@ -302,13 +302,13 @@ export function LegendItemDetails(props: TypeLegendItemDetailsProps): JSX.Elemen
   );
 
   const updateSelectedLayers = (selectedLayers: string[]) => {
-    const selectedLayersByLayerName: Record<string, string[]> = {};
+    const selectedLayersByLayerName: Record<string, { layer: string; icon: string }[]> = {};
 
     selectedLayers.forEach((layer) => {
       if (!selectedLayersByLayerName[layerName]) {
-        selectedLayersByLayerName[layerName] = [layer];
+        selectedLayersByLayerName[layerName] = [{ layer, icon: iconImg ?? '' }];
       } else {
-        selectedLayersByLayerName[layerName].push(layer);
+        selectedLayersByLayerName[layerName].push({ layer, icon: iconImg ?? '' });
       }
     });
 
@@ -325,7 +325,6 @@ export function LegendItemDetails(props: TypeLegendItemDetailsProps): JSX.Elemen
   };
 
   useEffect(() => {
-    // Update selected layers when checkedSublayerNames change
     updateSelectedLayers(checkedSublayerNames);
   }, [checkedSublayerNames]);
 
