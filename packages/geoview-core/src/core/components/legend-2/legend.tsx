@@ -8,6 +8,7 @@ import { AddIcon, Box, Grid, List, Typography, ExpandMoreIcon, Paper, Stack, Exp
 import { LegendItemDetails } from './legend-item-details/legend-item-details';
 import { getGeoViewStore } from '@/core/stores/stores-managers';
 import { LegendItem } from './legend-item';
+import { getSxClasses } from './legend-style';
 
 const Item = styled('div')(({ theme }) => ({
   backgroundColor: theme.palette.mode === 'dark' ? '#262B32' : '#fff',
@@ -22,34 +23,7 @@ export function Legend2(props: LegendItemsDetailsProps): JSX.Element {
   const { t } = useTranslation<string>();
 
   const theme = useTheme();
-  const sxClasses = {
-    legendContainer: {
-      background: theme.footerPanel.contentBg,
-      boxShadow: theme.footerPanel.contentShadow,
-      padding: '40px 20px 20px 20px',
-      display: 'flex',
-      flexDirection: 'column',
-    },
-    legendTitle: {
-      textAlign: 'left',
-      fontFamily: 'Open Sans, Semibold',
-      fontSize: '18px',
-    },
-    categoryTitle: {
-      textAlign: 'left',
-      fontFamily: 'Open Sans, Semibold',
-      fontSize: '20px',
-    },
-    legendButtonText: {
-      fontFamily: 'Open Sans, Semibold',
-      color: '#515BA5',
-      fontSize: '16px',
-    },
-    table: {
-      border: '1px solid #C1C1C1',
-      textAlign: 'left',
-    },
-  };
+  const sxClasses = getSxClasses(theme);
 
   const store = getGeoViewStore(mapId);
   const selectedLegendItem = useStore(store, (state) => state.legendState.selectedItem);
