@@ -127,7 +127,6 @@
     "filterMap": "Filter Map",
     "stopFilterMap": "Stop Filter Map",
     "leftPanelHeading": "Available Categories",
-    "rightPanelHeading": "Selected Category",
     "rowsSelected": "{rowsSelected} of {totalRows} row(s) selected",
     "rowsFiltered": "{rowsFiltered} of {totalRows} row(s) filtered",
     "enlargeBtn": "Enlarge",

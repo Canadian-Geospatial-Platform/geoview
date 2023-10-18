@@ -1,5 +1,6 @@
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { useTheme } from '@mui/material/styles';
+import { useStore } from 'zustand';
 import { Projection } from 'ol/proj';
 import { useTranslation } from 'react-i18next';
 import {
@@ -22,6 +23,7 @@ import {
 } from '@/ui';
 import MapDataTable, { MapDataTableData as MapDataTableDataProps } from './map-data-table';
 import { getSxClasses } from './data-table-style';
+import { getGeoViewStore } from '@/core/stores/stores-managers';
 
 interface DatapanelProps {
   layerIds: string[];
@@ -45,14 +47,17 @@ export function Datapanel({ layerData, mapId, projectionConfig, layerKeys, layer
   const { t } = useTranslation();
   const theme = useTheme();
   const sxClasses = getSxClasses(theme);
+  const store = getGeoViewStore(mapId);
 
-  const [selectedLayerIndex, setSelectedLayerIndex] = useState(0);
-  const [isLoading, setisLoading] = useState(false);
-  const [isEnlargeDataTable, setIsEnlargeDataTable] = useState(false);
+  const { selectedLayerIndex, setSelectedLayerIndex, isLoading, setIsLoading, isEnlargeDataTable, setIsEnlargeDataTable } = useStore(
+    store,
+    (state) => state.dataTableState
+  );
 
   const handleListItemClick = useCallback((event: React.MouseEvent<HTMLDivElement, MouseEvent>, index: number) => {
     setSelectedLayerIndex(index);
-    setisLoading(true);
+    setIsLoading(true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   /**
@@ -107,9 +112,10 @@ export function Datapanel({ layerData, mapId, projectionConfig, layerKeys, layer
 
   useEffect(() => {
     const clearLoading = setTimeout(() => {
-      setisLoading(false);
+      setIsLoading(false);
     }, 1000);
     return () => clearTimeout(clearLoading);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isLoading, selectedLayerIndex]);
 
   return (
@@ -121,12 +127,7 @@ export function Datapanel({ layerData, mapId, projectionConfig, layerKeys, layer
           </Typography>
         </Grid>
 
-        <Grid item xs={7}>
-          <Typography component="p" sx={sxClasses.headline}>
-            {t('dataTable.rightPanelHeading')}
-          </Typography>
-        </Grid>
-        <Grid item xs={2} sx={{ display: 'flex', justifyContent: 'right' }}>
+        <Grid item xs={9} sx={{ display: 'flex', justifyContent: 'right' }}>
           <Button type="text" size="small" sx={sxClasses.enlargeBtn} onClick={() => setIsEnlargeDataTable(!isEnlargeDataTable)}>
             {isEnlargeDataTable ? <ArrowForwardIcon sx={sxClasses.enlargeBtnIcon} /> : <ArrowBackIcon sx={sxClasses.enlargeBtnIcon} />}
             {isEnlargeDataTable ? t('dataTable.reduceBtn') : t('dataTable.enlargeBtn')}

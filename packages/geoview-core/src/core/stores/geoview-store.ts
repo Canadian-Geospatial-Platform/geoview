@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { subscribeWithSelector } from 'zustand/middleware';
 import debounce from 'lodash/debounce';
-
+import { type MRT_ColumnFiltersState as MRTColumnFiltersState } from 'material-react-table';
 // import OLMap from 'ol/map'; // TODO: When I use the import below instead of this one I have this TypeScript error
 /*
 Argument of type 'import("C:/Users/jolevesq/Sites/geoview/common/temp/node_modules/.pnpm/ol@7.5.2/node_modules/ol/Map").default' is not assignable to parameter of type 'import("C:/Users/jolevesq/Sites/geoview/common/temp/node_modules/.pnpm/ol@7.5.1/node_modules/ol/Map").default'.
@@ -58,14 +58,32 @@ export interface INotificationsState {
   notifications: Array<NotificationDetailsType>;
 }
 
-// export interface IMapDataTableState {}
-
 // export interface ILayersState {}
 
 // export interface IFooterState {}
 
 export interface ILegendState {
   selectedItem?: TypeLegendItemProps;
+}
+
+export interface IMapDataTableState {
+  selectedLayerIndex: number;
+  isLoading: boolean;
+  isEnlargeDataTable: boolean;
+
+  FILTER_MAP_DELAY: number;
+  toolbarRowSelectedMessage: string;
+  storeColumnFilters: Record<string, MRTColumnFiltersState>;
+  storeRowSelections: Record<string, Record<number, boolean>>;
+  storeMapFiltered: Record<string, boolean>;
+
+  setStoreMapFiltered: (mapFiltered: boolean, layerKey: string) => void;
+  setStoreRowSelections: (rowSelection: Record<number, boolean>, layerKey: string) => void;
+  setStoreColumnFilters: (filtered: MRTColumnFiltersState, layerKey: string) => void;
+  setIsEnlargeDataTable: (isEnlarge: boolean) => void;
+  setIsLoading: (loading: boolean) => void;
+  setSelectedLayerIndex: (idx: number) => void;
+  setToolbarRowSelectedMessage: (message: string) => void;
 }
 
 export interface IGeoViewState {
@@ -79,7 +97,7 @@ export interface IGeoViewState {
   legendState: ILegendState;
   mapState: IMapState;
   notificationState: INotificationsState;
-
+  dataTableState: IMapDataTableState;
   setMapConfig: (config: TypeMapFeaturesConfig) => void;
   onMapLoaded: (mapElem: OLMap) => void;
 }
@@ -168,7 +186,73 @@ export const geoViewStoreDefinition = (
     notificationState: {
       notifications: [],
     },
-
+    dataTableState: {
+      selectedLayerIndex: 0,
+      isLoading: false,
+      isEnlargeDataTable: false,
+      mapFiltered: false,
+      FILTER_MAP_DELAY: 1000,
+      toolbarRowSelectedMessage: '',
+      storeRowSelections: {},
+      storeMapFiltered: {},
+      setStoreMapFiltered: (mapFiltered: boolean, layerKey: string) => {
+        set({
+          dataTableState: {
+            ...get().dataTableState,
+            storeMapFiltered: { ...get().dataTableState.storeMapFiltered, [layerKey]: mapFiltered },
+          },
+        });
+      },
+      setStoreRowSelections: (rowSelection: Record<number, boolean>, layerKey: string) => {
+        set({
+          dataTableState: {
+            ...get().dataTableState,
+            storeRowSelections: { ...get().dataTableState.storeRowSelections, [layerKey]: rowSelection },
+          },
+        });
+      },
+      storeColumnFilters: {},
+      setStoreColumnFilters: (filtered: MRTColumnFiltersState, layerKey: string) => {
+        set({
+          dataTableState: {
+            ...get().dataTableState,
+            storeColumnFilters: { ...get().dataTableState.storeColumnFilters, [layerKey]: filtered },
+          },
+        });
+      },
+      setToolbarRowSelectedMessage: (message: string) => {
+        set({
+          dataTableState: {
+            ...get().dataTableState,
+            toolbarRowSelectedMessage: message,
+          },
+        });
+      },
+      setIsEnlargeDataTable: (isEnlarge: boolean) => {
+        set({
+          dataTableState: {
+            ...get().dataTableState,
+            isEnlargeDataTable: isEnlarge,
+          },
+        });
+      },
+      setIsLoading: (loading: boolean) => {
+        set({
+          dataTableState: {
+            ...get().dataTableState,
+            isLoading: loading,
+          },
+        });
+      },
+      setSelectedLayerIndex: (idx: number) => {
+        set({
+          dataTableState: {
+            ...get().dataTableState,
+            selectedLayerIndex: idx,
+          },
+        });
+      },
+    },
     setMapConfig: (config: TypeMapFeaturesConfig) => {
       set({ mapConfig: config, mapId: config.mapId, displayLanguage: config.displayLanguage });
     },
