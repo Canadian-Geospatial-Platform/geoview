@@ -1,4 +1,4 @@
-import { Button, styled, useTheme } from '@mui/material';
+import { Button, styled, useTheme, Table } from '@mui/material';
 import React, { useState, useEffect } from 'react';
 import { useStore } from 'zustand';
 import { useTranslation } from 'react-i18next';
@@ -44,6 +44,10 @@ export function Legend2(props: LegendItemsDetailsProps): JSX.Element {
       fontFamily: 'Open Sans, Semibold',
       color: '#515BA5',
       fontSize: '16px',
+    },
+    table: {
+      border: '1px solid #C1C1C1',
+      textAlign: 'left',
     },
   };
 
@@ -162,17 +166,17 @@ export function Legend2(props: LegendItemsDetailsProps): JSX.Element {
             }
           }}
         >
-          <div style={{ display: 'flex', alignItems: 'center' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '2px 4px 2px 4px' }}>
             {parentLayer}
             {collapsedParents[parentLayer] ? <ExpandMoreIcon sx={{ transform: 'rotate(180deg)' }} /> : <ExpandMoreIcon />}
           </div>
-          <div>
+          <div style={{ padding: '2px 5px 2px 4px' }}>
             {!collapsedParents[parentLayer] &&
               childLayers.map((childLayer) => (
-                <div key={childLayer.layer} style={{ paddingLeft: '20px' }}>
+                <Table key={childLayer.layer} sx={sxClasses.table}>
                   {childLayer.icon ? <img src={childLayer.icon} alt="Layer Icon" /> : null}
                   {childLayer.layer}
-                </div>
+                </Table>
               ))}
           </div>
         </div>
@@ -186,10 +190,7 @@ export function Legend2(props: LegendItemsDetailsProps): JSX.Element {
           <Typography sx={{ fontSize: '0.6em', textAlign: 'left', marginBottom: '16.5px' }}>
             {numItems} {t('legend.items_available')}
           </Typography>
-          <Box sx={{ textAlign: 'left' }}>
-            <Grid sx={{ border: '1px solid #000', borderColor: '#C1C1C1', paddingLeft: '20px' }}>Name</Grid>
-            <List sx={{ marginTop: '11px' }}>{selectedLayersList}</List>
-          </Box>
+          {selectedLayersList}
         </Item>
       );
     }

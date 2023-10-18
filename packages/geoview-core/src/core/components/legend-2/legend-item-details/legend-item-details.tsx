@@ -477,7 +477,7 @@ export function LegendItemDetails(props: TypeLegendItemDetailsProps): JSX.Elemen
             iconImages={iconList}
             iconLabels={labelList}
             isParentVisible={isChecked}
-            onGetCheckedSublayerNames={handleGetCheckedSublayerNames} // Pass the callback function
+            onGetCheckedSublayerNames={handleGetCheckedSublayerNames}
             toggleParentVisible={() => setChecked(!isChecked)}
             toggleMapVisible={(sublayerConfig) => {
               (geoviewLayerInstance as AbstractGeoViewVector | EsriDynamic).applyViewFilter(sublayerConfig);
