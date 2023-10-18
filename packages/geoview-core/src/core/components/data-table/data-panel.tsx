@@ -24,26 +24,25 @@ import {
 import MapDataTable, { MapDataTableData as MapDataTableDataProps } from './map-data-table';
 import { getSxClasses } from './data-table-style';
 import { getGeoViewStore } from '@/core/stores/stores-managers';
+import { GroupLayers } from './data-table-api';
+import { TypeDisplayLanguage } from '@/geo/map/map-schema-types';
 
 interface DatapanelProps {
-  layerIds: string[];
-  layerData: MapDataTableDataProps[];
+  layerData: (MapDataTableDataProps & GroupLayers)[];
   mapId: string;
   projectionConfig: Projection;
-  layerKeys: string[];
+  language: TypeDisplayLanguage;
 }
 
 /**
  * Build Data panel from map.
  * @param {MapDataTableProps} layerData map data which will be used to build data table.
- * @param {string} layerId id of the layer
  * @param {string} mapId id of the map.
- * @param {string} layerKeys list of keys of the layer.
  * @param {Projection} projectionConfig projection config to transfer lat long.
  * @return {ReactElement} Data table as react element.
  */
 
-export function Datapanel({ layerData, mapId, projectionConfig, layerKeys, layerIds }: DatapanelProps) {
+export function Datapanel({ layerData, mapId, projectionConfig, language }: DatapanelProps) {
   const { t } = useTranslation();
   const theme = useTheme();
   const sxClasses = getSxClasses(theme);
@@ -68,7 +67,7 @@ export function Datapanel({ layerData, mapId, projectionConfig, layerKeys, layer
   const renderList = useCallback(
     () => (
       <List sx={sxClasses.list}>
-        {layerKeys.map((layerKey, index) => (
+        {layerData.map(({ layerKey, layerName }, index) => (
           <Paper
             sx={{ ...sxClasses.paper, border: selectedLayerIndex === index ? sxClasses.borderWithIndex : sxClasses.borderNone }}
             key={layerKey}
@@ -83,7 +82,7 @@ export function Datapanel({ layerData, mapId, projectionConfig, layerKeys, layer
                   <SendIcon />
                 </ListItemIcon>
 
-                <ListItemText primary={layerKey} secondary={`${layerData[index].features.length} features`} />
+                <ListItemText primary={layerName ? layerName[language] : 'en'} secondary={`${layerData[index].features.length} features`} />
                 <Box
                   sx={{
                     background: isEnlargeDataTable ? 'white' : 'none',
@@ -135,25 +134,21 @@ export function Datapanel({ layerData, mapId, projectionConfig, layerKeys, layer
         </Grid>
       </Grid>
       <Grid container sx={{ marginTop: '0.75rem' }}>
-        <Grid item xs={!isEnlargeDataTable ? 3 : 1.25}>
+        <Grid item xs={!isEnlargeDataTable ? 4 : 1.25}>
           {renderList()}
         </Grid>
-        <Grid item xs={!isEnlargeDataTable ? 9 : 10.75} sx={{ paddingLeft: '1rem' }}>
-          <Typography component="p" sx={sxClasses.headline}>
-            {layerKeys[selectedLayerIndex]}
-          </Typography>
-
+        <Grid item xs={!isEnlargeDataTable ? 8 : 10.75} sx={{ paddingLeft: '1rem' }}>
           <CircularProgress isLoaded={!isLoading} style={{ marginTop: '1rem' }} />
 
           {!isLoading &&
-            layerKeys.map((layerKey, index) => (
-              <Box key={layerKey}>
+            layerData.map(({ layerKey, layerId }, index) => (
+              <Box key={layerKey} sx={{ paddingLeft: '3.5rem' }}>
                 {index === selectedLayerIndex ? (
                   <Box>
                     {layerData[index].features.length ? (
                       <MapDataTable
                         data={layerData[index]}
-                        layerId={layerIds[index]}
+                        layerId={layerId}
                         mapId={mapId}
                         layerKey={layerKey}
                         projectionConfig={projectionConfig}

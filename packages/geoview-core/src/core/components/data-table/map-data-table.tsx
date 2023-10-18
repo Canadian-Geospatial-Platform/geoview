@@ -476,7 +476,7 @@ function MapDataTable({ data, layerId, mapId, layerKey, projectionConfig }: MapD
   }, []);
 
   return (
-    <Box>
+    <Box sx={sxClasses.dataTableWrapper}>
       <MaterialReactTable
         columns={columns as MRTColumnDef[]}
         data={rows}

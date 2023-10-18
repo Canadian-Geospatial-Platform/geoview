@@ -47,7 +47,7 @@ export const getSxClasses = (theme: Theme) => ({
   borderWithIndex: `2px solid ${theme.palette.primary.main}`,
   borderNone: 'none',
   headline: { fontSize: '1.125rem', fontWeight: 'bold' },
-  dataPanel: { backgroundColor: '#F1F2F5', marginTop: '1rem' },
+  dataPanel: { backgroundColor: '#F1F2F5', marginTop: '1rem', padding: '1.5rem' },
   gridContainer: { paddingLeft: '1rem', paddingRight: '1rem' },
   enlargeBtn: {
     width: '7rem !important',
@@ -98,4 +98,16 @@ export const getSxClasses = (theme: Theme) => ({
     color: 'rgb(1, 67, 97)',
   },
   tableCell: { 'white-space': 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' },
+  dataTableWrapper: {
+    '& .MuiPaper-root': {
+      border: `2px solid ${theme.palette.primary.main}`,
+      borderRadius: '6px',
+    },
+    '& .MuiTableContainer-root': {
+      borderRadius: '6px',
+    },
+    '& .MuiToolbar-root ': {
+      borderRadius: '6px',
+    },
+  },
 });
