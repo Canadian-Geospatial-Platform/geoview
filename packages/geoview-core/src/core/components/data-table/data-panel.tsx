@@ -115,6 +115,7 @@ export function Datapanel({ layerData, mapId, projectionConfig, layerKeys, layer
       setIsLoading(false);
     }, 1000);
     return () => clearTimeout(clearLoading);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isLoading, selectedLayerIndex]);
 
   return (
@@ -126,12 +127,7 @@ export function Datapanel({ layerData, mapId, projectionConfig, layerKeys, layer
           </Typography>
         </Grid>
 
-        <Grid item xs={7}>
-          <Typography component="p" sx={sxClasses.headline}>
-            {t('dataTable.rightPanelHeading')}
-          </Typography>
-        </Grid>
-        <Grid item xs={2} sx={{ display: 'flex', justifyContent: 'right' }}>
+        <Grid item xs={9} sx={{ display: 'flex', justifyContent: 'right' }}>
           <Button type="text" size="small" sx={sxClasses.enlargeBtn} onClick={() => setIsEnlargeDataTable(!isEnlargeDataTable)}>
             {isEnlargeDataTable ? <ArrowForwardIcon sx={sxClasses.enlargeBtnIcon} /> : <ArrowBackIcon sx={sxClasses.enlargeBtnIcon} />}
             {isEnlargeDataTable ? t('dataTable.reduceBtn') : t('dataTable.enlargeBtn')}

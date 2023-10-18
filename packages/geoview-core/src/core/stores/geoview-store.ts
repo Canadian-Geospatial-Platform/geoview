@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { subscribeWithSelector } from 'zustand/middleware';
 import debounce from 'lodash/debounce';
-
+import { type MRT_ColumnFiltersState as MRTColumnFiltersState } from 'material-react-table';
 // import OLMap from 'ol/map'; // TODO: When I use the import below instead of this one I have this TypeScript error
 /*
 Argument of type 'import("C:/Users/jolevesq/Sites/geoview/common/temp/node_modules/.pnpm/ol@7.5.2/node_modules/ol/Map").default' is not assignable to parameter of type 'import("C:/Users/jolevesq/Sites/geoview/common/temp/node_modules/.pnpm/ol@7.5.1/node_modules/ol/Map").default'.
@@ -70,11 +70,16 @@ export interface IMapDataTableState {
   selectedLayerIndex: number;
   isLoading: boolean;
   isEnlargeDataTable: boolean;
-  mapFiltered: boolean;
+
   FILTER_MAP_DELAY: number;
   toolbarRowSelectedMessage: string;
+  storeColumnFilters: Record<string, MRTColumnFiltersState>;
+  storeRowSelections: Record<string, Record<number, boolean>>;
+  storeMapFiltered: Record<string, boolean>;
 
-  setMapFiltered: (filtered: boolean) => void;
+  setStoreMapFiltered: (mapFiltered: boolean, layerKey: string) => void;
+  setStoreRowSelections: (rowSelection: Record<number, boolean>, layerKey: string) => void;
+  setStoreColumnFilters: (filtered: MRTColumnFiltersState, layerKey: string) => void;
   setIsEnlargeDataTable: (isEnlarge: boolean) => void;
   setIsLoading: (loading: boolean) => void;
   setSelectedLayerIndex: (idx: number) => void;
@@ -188,20 +193,38 @@ export const geoViewStoreDefinition = (
       mapFiltered: false,
       FILTER_MAP_DELAY: 1000,
       toolbarRowSelectedMessage: '',
-
+      storeRowSelections: {},
+      storeMapFiltered: {},
+      setStoreMapFiltered: (mapFiltered: boolean, layerKey: string) => {
+        set({
+          dataTableState: {
+            ...get().dataTableState,
+            storeMapFiltered: { ...get().dataTableState.storeMapFiltered, [layerKey]: mapFiltered },
+          },
+        });
+      },
+      setStoreRowSelections: (rowSelection: Record<number, boolean>, layerKey: string) => {
+        set({
+          dataTableState: {
+            ...get().dataTableState,
+            storeRowSelections: { ...get().dataTableState.storeRowSelections, [layerKey]: rowSelection },
+          },
+        });
+      },
+      storeColumnFilters: {},
+      setStoreColumnFilters: (filtered: MRTColumnFiltersState, layerKey: string) => {
+        set({
+          dataTableState: {
+            ...get().dataTableState,
+            storeColumnFilters: { ...get().dataTableState.storeColumnFilters, [layerKey]: filtered },
+          },
+        });
+      },
       setToolbarRowSelectedMessage: (message: string) => {
         set({
           dataTableState: {
             ...get().dataTableState,
             toolbarRowSelectedMessage: message,
-          },
-        });
-      },
-      setMapFiltered: (filtered: boolean) => {
-        set({
-          dataTableState: {
-            ...get().dataTableState,
-            mapFiltered: filtered,
           },
         });
       },

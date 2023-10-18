@@ -6,6 +6,11 @@ export const getSxClasses = (theme: Theme) => ({
     marginLeft: '1rem',
     width: '100%',
     paddingRight: '2rem',
+
+    '& .MuiListItemText-primary': {
+      font: theme.footerPanel.layerTitleFont,
+    },
+
     '& .MuiListItem-root': {
       height: '100%',
       '& .MuiListItemButton-root': {
