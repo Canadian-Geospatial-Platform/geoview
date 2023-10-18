@@ -134,7 +134,8 @@ export class DataTableApi {
       });
 
     const filteredData: (MapDataTableDataProps & GroupLayers)[] = [];
-    // // filter data based on features.
+
+    // filter data based on features.
     data.forEach((res, index) => {
       if (res.features.length) {
         const concatedData = { ...res, ...groupLayers[index] };
