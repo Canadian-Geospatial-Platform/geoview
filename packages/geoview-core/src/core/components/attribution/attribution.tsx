@@ -125,7 +125,7 @@ export function Attribution(): JSX.Element {
     }
 
     setAttribution(tooltipAttribution.join('\n'));
-  }, [expanded]);
+  }, [expanded, mapId]);
 
   return (
     <Tooltip title={attribution}>
