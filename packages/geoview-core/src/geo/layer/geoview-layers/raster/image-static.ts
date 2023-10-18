@@ -137,15 +137,14 @@ export class ImageStatic extends AbstractGeoViewRaster {
   }
 
   /** ***************************************************************************************************************************
-   * Return the legend of the layer. When layerPathOrConfig is undefined, the activeLayer of the class is used. This routine
-   * return null when the layerPath specified is not found or when the layerPathOrConfig is undefined and the active layer
-   * is null or the selected layerConfig is undefined or null.
+   * Return the legend of the layer.This routine return null when the layerPath specified is not found. If the legend can't be
+   * read, the legend property of the object returned will be null.
    *
-   * @param {string | TypeLayerEntryConfig | null} layerPathOrConfig Optional layer path or configuration.
+   * @param {string | TypeLayerEntryConfig} layerPathOrConfig Layer path or configuration.
    *
    * @returns {Promise<TypeLegend | null>} The legend of the layer.
    */
-  getLegend(layerPathOrConfig: string | TypeLayerEntryConfig | null = this.activeLayer): Promise<TypeLegend | null> {
+  getLegend(layerPathOrConfig: string | TypeLayerEntryConfig): Promise<TypeLegend | null> {
     const promisedLegend = new Promise<TypeLegend | null>((resolve) => {
       const layerConfig = Cast<TypeImageStaticLayerEntryConfig | undefined | null>(
         typeof layerPathOrConfig === 'string' ? this.getLayerConfig(layerPathOrConfig) : layerPathOrConfig
@@ -277,11 +276,11 @@ export class ImageStatic extends AbstractGeoViewRaster {
         staticImageOptions.visible =
           layerEntryConfig.initialSettings?.visible === 'yes' || layerEntryConfig.initialSettings?.visible === 'always';
 
-      layerEntryConfig.gvLayer = new ImageLayer(staticImageOptions);
+      layerEntryConfig.olLayer = new ImageLayer(staticImageOptions);
 
       super.addLoadendListener(layerEntryConfig, 'image');
 
-      resolve(layerEntryConfig.gvLayer);
+      resolve(layerEntryConfig.olLayer);
     });
 
     return promisedVectorLayer;
@@ -295,10 +294,10 @@ export class ImageStatic extends AbstractGeoViewRaster {
    *
    * @returns {Extent} The layer bounding box.
    */
-  getBounds(layerConfig: TypeLayerEntryConfig, bounds: Extent | undefined): Extent | undefined {
-    const layerBounds = (layerConfig.gvLayer as ImageLayer<Static>).getSource()?.getImageExtent();
+  protected getBounds(layerConfig: TypeLayerEntryConfig, bounds: Extent | undefined): Extent | undefined {
+    const layerBounds = (layerConfig.olLayer as ImageLayer<Static>).getSource()?.getImageExtent();
     const projection =
-      (layerConfig.gvLayer as ImageLayer<Static>).getSource()?.getProjection()?.getCode().replace('EPSG:', '') ||
+      (layerConfig.olLayer as ImageLayer<Static>).getSource()?.getProjection()?.getCode().replace('EPSG:', '') ||
       api.maps[this.mapId].currentProjection;
 
     if (layerBounds) {

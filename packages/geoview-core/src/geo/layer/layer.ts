@@ -306,19 +306,19 @@ export class Layer {
       // an empty geoview layer is created
       api.event.emit(GeoViewLayerPayload.createGeoviewLayerAddedPayload(`${this.mapId}/${geoviewLayer.geoviewLayerId}`, geoviewLayer));
     else {
-      geoviewLayer.gvLayers?.once('prerender' as EventTypes, () => {
+      geoviewLayer.olLayers?.once('prerender' as EventTypes, () => {
         if (geoviewLayer.layerPhase !== 'processed') {
           geoviewLayer.layerPhase = 'processed';
           api.event.emit(GeoViewLayerPayload.createGeoviewLayerAddedPayload(`${this.mapId}/${geoviewLayer.geoviewLayerId}`, geoviewLayer));
         }
       });
-      geoviewLayer.gvLayers?.once('change' as EventTypes, () => {
+      geoviewLayer.olLayers?.once('change' as EventTypes, () => {
         if (geoviewLayer.layerPhase !== 'processed') {
           geoviewLayer.layerPhase = 'processed';
           api.event.emit(GeoViewLayerPayload.createGeoviewLayerAddedPayload(`${this.mapId}/${geoviewLayer.geoviewLayerId}`, geoviewLayer));
         }
       });
-      api.maps[this.mapId].map.addLayer(geoviewLayer.gvLayers!);
+      api.maps[this.mapId].map.addLayer(geoviewLayer.olLayers!);
     }
   }
 
@@ -347,7 +347,7 @@ export class Layer {
       }, true);
       if (pathBeginningAreEqual) {
         const layerEntryConfigToRemove = this.registeredLayers[completeLayerPath];
-        layerEntryConfigToRemove.gvLayer?.dispose();
+        layerEntryConfigToRemove.olLayer?.dispose();
         if (layerEntryConfigToRemove.entryType !== 'group')
           this.geoviewLayers[partialLayerPathNodes[0]].unregisterFromLayerSets(layerEntryConfigToRemove as TypeBaseLayerEntryConfig);
         delete this.registeredLayers[completeLayerPath];
@@ -356,7 +356,7 @@ export class Layer {
     if (listOfLayerEntryConfigAffected) listOfLayerEntryConfigAffected.splice(indexToDelete!, 1);
 
     if (this.geoviewLayers[partialLayerPath]) {
-      this.geoviewLayers[partialLayerPath].gvLayers!.dispose();
+      this.geoviewLayers[partialLayerPath].olLayers!.dispose();
       delete this.geoviewLayers[partialLayerPath];
       const { mapFeaturesConfig } = api.maps[this.mapId];
       if (mapFeaturesConfig.map.listOfGeoviewLayerConfig)
@@ -485,15 +485,15 @@ export class Layer {
   setLayerZIndices = (geoviewLayer: AbstractGeoViewLayer) => {
     const zIndex =
       this.layerOrder.indexOf(geoviewLayer.geoviewLayerId) !== -1 ? this.layerOrder.indexOf(geoviewLayer.geoviewLayerId) * 100 : 0;
-    geoviewLayer.gvLayers!.setZIndex(zIndex);
+    geoviewLayer.olLayers!.setZIndex(zIndex);
     geoviewLayer.listOfLayerEntryConfig.forEach((subLayer) => {
       const subLayerZIndex =
         geoviewLayer.layerOrder.indexOf(subLayer.layerId) !== -1 ? geoviewLayer.layerOrder.indexOf(subLayer.layerId) : 0;
-      subLayer.gvLayer?.setZIndex(subLayerZIndex + zIndex);
+      subLayer.olLayer?.setZIndex(subLayerZIndex + zIndex);
       const unclusteredLayer =
         api.maps[this.mapId].layer.registeredLayers[`${geoviewLayer.geoviewLayerId}/${subLayer.layerId}-unclustered`];
       if (unclusteredLayer) {
-        unclusteredLayer.gvLayer?.setZIndex(subLayerZIndex + zIndex);
+        unclusteredLayer.olLayer?.setZIndex(subLayerZIndex + zIndex);
       }
     });
   };
@@ -533,45 +533,34 @@ export class Layer {
    */
   highlightLayer(layerPath: string): void {
     this.removeHighlightLayer();
-    this.highlightedLayer = { layerPath, originalOpacity: this.registeredLayers[layerPath].gvLayer!.getOpacity() };
-    this.registeredLayers[layerPath].gvLayer!.setOpacity(1);
+    this.highlightedLayer = { layerPath, originalOpacity: this.registeredLayers[layerPath].olLayer!.getOpacity() };
+    this.registeredLayers[layerPath].olLayer!.setOpacity(1);
     // If the layerPath is a sublayer of a group, avoid changing parent layer
-    if (
-      (this.registeredLayers[layerPath].parentLayerConfig as TypeLayerGroupEntryConfig).entryType &&
-      (this.registeredLayers[layerPath].parentLayerConfig as TypeLayerGroupEntryConfig).entryType === 'group'
-    ) {
-      const parentLayerId = (this.registeredLayers[layerPath].parentLayerConfig! as TypeLayerGroupEntryConfig).layerId;
+    if ((this.registeredLayers[layerPath].parentLayerConfig as TypeLayerGroupEntryConfig)?.entryType === 'group') {
       Object.keys(this.registeredLayers).forEach((geoviewLayerPath) => {
-        const splitGeoviewPath = geoviewLayerPath.split('/');
-        if (splitGeoviewPath[splitGeoviewPath.length - 1] !== parentLayerId && geoviewLayerPath !== layerPath) {
-          this.registeredLayers[geoviewLayerPath].gvLayer!.setOpacity(
-            (this.registeredLayers[geoviewLayerPath].gvLayer!.getOpacity() || 1) * 0.25
-          );
-        } else this.registeredLayers[layerPath].gvLayer!.setZIndex(999);
+        const otherOlLayer = this.registeredLayers?.[geoviewLayerPath].olLayer;
+        const up1LevelInLayerPath = geoviewLayerPath.split('/').slice(0, -1).join('/');
+        const up1LevelsInOtherLayerPath = geoviewLayerPath.split('/').slice(0, -1).join('/');
+        if (up1LevelInLayerPath === up1LevelsInOtherLayerPath) this.registeredLayers[layerPath].olLayer!.setZIndex(999);
+        else otherOlLayer!.setOpacity((otherOlLayer!.getOpacity() || 1) * 0.25);
       });
       // If it is a group layer, avoid changing sublayers
     } else if (this.registeredLayers[layerPath].entryType === 'group') {
       Object.keys(this.registeredLayers).forEach((geoviewLayerPath) => {
-        const splitGeoviewPath = geoviewLayerPath.split('/');
-        if (
-          geoviewLayerPath === layerPath ||
-          (splitGeoviewPath.length > 1 &&
-            splitGeoviewPath[splitGeoviewPath.length - 2] === layerPath.split('/')[layerPath.split('/').length - 1])
-        ) {
-          this.registeredLayers[layerPath].gvLayer!.setZIndex(999);
-        } else {
-          this.registeredLayers[geoviewLayerPath].gvLayer!.setOpacity(
-            (this.registeredLayers[geoviewLayerPath].gvLayer!.getOpacity() || 1) * 0.25
-          );
-        }
+        const otherOlLayer = this.registeredLayers?.[geoviewLayerPath].olLayer;
+        const splitGeoviewLayerPath = geoviewLayerPath.split('/');
+        const up1LevelInLayerPath = splitGeoviewLayerPath.slice(0, -1).join('/');
+        const up2LevelsInOtherLayerPath = geoviewLayerPath.split('/').slice(0, -2).join('/');
+        if (geoviewLayerPath === layerPath || (splitGeoviewLayerPath.length > 1 && up2LevelsInOtherLayerPath === up1LevelInLayerPath))
+          this.registeredLayers[layerPath].olLayer!.setZIndex(999);
+        else otherOlLayer!.setOpacity((otherOlLayer!.getOpacity() || 1) * 0.25);
       });
     } else {
       Object.keys(this.registeredLayers).forEach((geoviewLayerPath) => {
+        const otherOlLayer = this.registeredLayers?.[geoviewLayerPath].olLayer;
         if (geoviewLayerPath !== layerPath) {
-          this.registeredLayers[geoviewLayerPath].gvLayer!.setOpacity(
-            (this.registeredLayers[geoviewLayerPath].gvLayer!.getOpacity() || 1) * 0.25
-          );
-        } else this.registeredLayers[layerPath].gvLayer!.setZIndex(999);
+          otherOlLayer!.setOpacity((otherOlLayer!.getOpacity() || 1) * 0.25);
+        } else this.registeredLayers[layerPath].olLayer!.setZIndex(999);
       });
     }
   }
@@ -581,44 +570,32 @@ export class Layer {
    */
   removeHighlightLayer(): void {
     if (this.highlightedLayer.layerPath !== undefined) {
-      if (this.highlightedLayer.originalOpacity)
-        this.registeredLayers[this.highlightedLayer.layerPath].gvLayer!.setOpacity(this.highlightedLayer.originalOpacity);
-      if (
-        (this.registeredLayers[this.highlightedLayer.layerPath].parentLayerConfig as TypeLayerGroupEntryConfig).entryType &&
-        (this.registeredLayers[this.highlightedLayer.layerPath].parentLayerConfig as TypeLayerGroupEntryConfig).entryType === 'group'
-      ) {
-        const parentLayerId = (this.registeredLayers[this.highlightedLayer.layerPath].parentLayerConfig! as TypeLayerGroupEntryConfig)
-          .layerId;
+      const { layerPath } = this.highlightedLayer;
+      const { olLayer } = this.registeredLayers[this.highlightedLayer.layerPath];
+      if (this.highlightedLayer.originalOpacity) olLayer!.setOpacity(this.highlightedLayer.originalOpacity);
+      if ((this.registeredLayers[layerPath!].parentLayerConfig as TypeLayerGroupEntryConfig)?.entryType === 'group') {
         Object.keys(this.registeredLayers).forEach((geoviewLayerPath) => {
-          const splitGeoviewPath = geoviewLayerPath.split('/');
-          if (splitGeoviewPath[splitGeoviewPath.length - 1] !== parentLayerId && geoviewLayerPath !== this.highlightedLayer.layerPath) {
-            this.registeredLayers[geoviewLayerPath].gvLayer!.setOpacity(
-              (this.registeredLayers[geoviewLayerPath].gvLayer!.getOpacity() || 1) * 4
-            );
-          } else this.setLayerZIndices(this.geoviewLayers[geoviewLayerPath.split('/')[0]]);
+          const otherOlLayer = this.registeredLayers?.[geoviewLayerPath].olLayer;
+          const up1LevelInLayerPath = geoviewLayerPath.split('/').slice(0, -1).join('/');
+          const up1LevelsInOtherLayerPath = geoviewLayerPath.split('/').slice(0, -1).join('/');
+          if (up1LevelInLayerPath === up1LevelsInOtherLayerPath) this.setLayerZIndices(this.geoviewLayers[geoviewLayerPath.split('/')[0]]);
+          else otherOlLayer!.setOpacity((otherOlLayer!.getOpacity() || 1) * 4);
         });
-      } else if (this.registeredLayers[this.highlightedLayer.layerPath].entryType === 'group') {
+      } else if (this.registeredLayers[layerPath]?.entryType === 'group') {
         Object.keys(this.registeredLayers).forEach((geoviewLayerPath) => {
-          const splitGeoviewPath = geoviewLayerPath.split('/');
-          if (
-            geoviewLayerPath === this.highlightedLayer.layerPath ||
-            (splitGeoviewPath.length > 1 &&
-              splitGeoviewPath[splitGeoviewPath.length - 2] ===
-                this.highlightedLayer.layerPath!.split('/')[this.highlightedLayer.layerPath!.split('/').length - 1])
-          ) {
+          const otherOlLayer = this.registeredLayers?.[geoviewLayerPath].olLayer;
+          const splitGeoviewLayerPath = geoviewLayerPath.split('/');
+          const up1LevelInLayerPath = splitGeoviewLayerPath.slice(0, -1).join('/');
+          const up2LevelsInOtherLayerPath = geoviewLayerPath.split('/').slice(0, -2).join('/');
+          if (geoviewLayerPath === layerPath || (splitGeoviewLayerPath.length > 1 && up2LevelsInOtherLayerPath === up1LevelInLayerPath))
             this.setLayerZIndices(this.geoviewLayers[geoviewLayerPath.split('/')[0]]);
-          } else {
-            this.registeredLayers[geoviewLayerPath].gvLayer!.setOpacity(
-              (this.registeredLayers[geoviewLayerPath].gvLayer!.getOpacity() || 1) * 4
-            );
-          }
+          else otherOlLayer!.setOpacity((otherOlLayer!.getOpacity() || 1) * 4);
         });
       } else {
         Object.keys(this.registeredLayers).forEach((geoviewLayerPath) => {
-          if (geoviewLayerPath !== this.highlightedLayer.layerPath) {
-            this.registeredLayers[geoviewLayerPath].gvLayer!.setOpacity(
-              (this.registeredLayers[geoviewLayerPath].gvLayer!.getOpacity() || 1) * 4
-            );
+          const otherOlLayer = this.registeredLayers?.[geoviewLayerPath].olLayer;
+          if (geoviewLayerPath !== layerPath) {
+            otherOlLayer!.setOpacity((otherOlLayer!.getOpacity() || 1) * 4);
           } else this.setLayerZIndices(this.geoviewLayers[geoviewLayerPath.split('/')[0]]);
         });
       }

@@ -3,6 +3,7 @@ import { PayloadBaseClass } from './payload-base-class';
 import { EventStringId, EVENT_NAMES } from '../event-types';
 import { TypeLegend } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { TypeLayerStatus } from '@/geo/map/map-schema-types';
+import { TypeResultSets } from './layer-set-payload';
 
 /** Valid events that can create GetLegendsPayload */
 const validEvents: EventStringId[] = [
@@ -18,6 +19,7 @@ export type TypeLegendResultSets = {
   [layerPath: string]: {
     layerStatus: TypeLayerStatus;
     layerPhase: string;
+    querySent: boolean;
     data: TypeLegend | undefined | null;
   };
 };
@@ -40,7 +42,7 @@ export const payloadIsLegendsLayersetUpdated = (
  * Additional attributes needed to define a TypeAllLegendsDonePayload
  */
 export interface TypeLegendsLayersetUpdatedPayload extends GetLegendsPayload {
-  // The result set containing all the legends of the active layers on the map.
+  // The result set containing all the legends of the layers loaded on the map.
   resultSets: TypeLegendResultSets;
 }
 
@@ -125,18 +127,19 @@ export class GetLegendsPayload extends PayloadBaseClass {
    * Static method used to create a "legend updated" payload.
    *
    * @param {string | null} handlerName the handler Name
+   * @param {TypeResultSets | TypeLegendResultSets} resultSets the legend resultset
    *
    * @returns {TypeLegendsLayersetUpdatedPayload} the TypeLegendsLayersetUpdatedPayload object created
    */
   static createLegendsLayersetUpdatedPayload = (
     handlerName: string,
-    resultSets: TypeLegendResultSets
+    resultSets: TypeResultSets | TypeLegendResultSets
   ): TypeLegendsLayersetUpdatedPayload => {
     const legendsLayersetUpdatedPayload = new GetLegendsPayload(
       EVENT_NAMES.GET_LEGENDS.LEGENDS_LAYERSET_UPDATED,
       handlerName
     ) as TypeLegendsLayersetUpdatedPayload;
-    legendsLayersetUpdatedPayload.resultSets = resultSets;
+    legendsLayersetUpdatedPayload.resultSets = resultSets as TypeLegendResultSets;
     return legendsLayersetUpdatedPayload;
   };
 

@@ -1,5 +1,6 @@
 import { Extent } from 'ol/extent';
 import BaseLayer from 'ol/layer/Base';
+import LayerGroup from 'ol/layer/Group';
 import { TypeBasemapOptions } from '../layer/basemap/basemap-types';
 import { TypeGeoviewLayerType } from '../layer/geoview-layers/abstract-geoview-layers';
 
@@ -630,7 +631,7 @@ export type TypeBaseLayerEntryConfig = {
   /** This attribute is not part of the schema. It is used to link the layer entry config to the parent's layer config. */
   parentLayerConfig?: TypeGeoviewLayerConfig | TypeLayerGroupEntryConfig;
   /** This attribute is not part of the schema. It is used to link the displayed layer to its layer entry config. */
-  gvLayer?: BaseLayer;
+  olLayer?: BaseLayer | LayerGroup | null;
   /** This attribute is not part of the schema. It is used internally to distinguish layer groups derived from the
    * metadata. */
   isMetadataLayerGroup?: boolean;
@@ -886,7 +887,7 @@ export type TypeGeocoreLayerEntryConfig = {
   /** This attribute is not part of the schema. It is used to link the layer entry config to the parent's layer config. */
   parentLayerConfig?: TypeGeoviewLayerConfig | TypeLayerGroupEntryConfig;
   /** This attribute is not part of the schema. It is used to link the displayed layer to its layer entry config. */
-  gvLayer?: BaseLayer;
+  olLayer?: BaseLayer | LayerGroup | null;
   /** Tag used to link the entry to a specific schema. */
   schemaTag: 'geoCore';
   /** Layer entry data type. */
@@ -1046,7 +1047,7 @@ export type TypeListOfGeoviewLayerConfig = TypeGeoviewLayerConfig[];
  */
 export type TypeGeoviewLayerConfig = {
   /** This attribute is not part of the schema. It is used to link the displayed layer to its layer entry config. */
-  gvLayer?: BaseLayer;
+  olLayer?: Promise<BaseLayer>;
   /**
    * The GeoView layer identifier.
    */
