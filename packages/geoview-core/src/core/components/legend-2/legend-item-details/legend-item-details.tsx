@@ -139,6 +139,7 @@ export function LegendItemDetails(props: TypeLegendItemDetailsProps): JSX.Elemen
   const clusterLayerPath = path.replace('-unclustered', '');
   const unclusterLayerPath = `${clusterLayerPath}-unclustered`;
   const canCluster = !!api.maps[mapId].layer.registeredLayers[unclusterLayerPath];
+  const [checkIsGroup, setcheckIsGroup_] = useState(false);
 
   const [isClusterToggleEnabled, setIsClusterToggleEnabled] = useState(false);
   const [isChecked, setChecked] = useState<boolean>(
@@ -164,6 +165,7 @@ export function LegendItemDetails(props: TypeLegendItemDetailsProps): JSX.Elemen
   const maxIconRef = useRef() as RefObject<HTMLButtonElement>;
 
   const [checkedSublayerNames, setCheckedSublayerNames] = useState<string[]>([]);
+  const [nochildLayers, setnochildLayers] = useState<string[]>([]);
   const store = getGeoViewStore(mapId);
 
   const getGroupsDetails = (): boolean => {
@@ -172,6 +174,7 @@ export function LegendItemDetails(props: TypeLegendItemDetailsProps): JSX.Elemen
       if (layerEntryIsGroupLayer(layerConfigEntry)) {
         setGroupItems(layerConfigEntry.listOfLayerEntryConfig);
         isGroup = true;
+        setcheckIsGroup_(!setcheckIsGroup_);
       }
     } else if (
       geoviewLayerInstance?.listOfLayerEntryConfig &&
@@ -179,8 +182,11 @@ export function LegendItemDetails(props: TypeLegendItemDetailsProps): JSX.Elemen
     ) {
       setGroupItems(geoviewLayerInstance?.listOfLayerEntryConfig);
       isGroup = true;
+      setcheckIsGroup_(!setcheckIsGroup_);
     }
     console.log('is GROUP', isGroup);
+    console.log('checkIs GROUP', checkIsGroup);
+
     return isGroup;
   };
 
@@ -303,20 +309,22 @@ export function LegendItemDetails(props: TypeLegendItemDetailsProps): JSX.Elemen
 
   const updateSelectedLayers = (selectedLayers: string[]) => {
     const selectedLayersByLayerName: Record<string, { layer: string; icon: string }[]> = {};
-    selectedLayers.forEach((layer) => {
-      if (!selectedLayersByLayerName[layerName]) {
-        selectedLayersByLayerName[layerName] = [{ layer, icon: iconImg ?? '' }];
-      } else {
-        selectedLayersByLayerName[layerName].push({ layer, icon: iconImg ?? '' });
-      }
-    });
+    if (selectedLayers.length > 0) {
+      selectedLayers.forEach((layer) => {
+        if (!selectedLayersByLayerName[layerName]) {
+          selectedLayersByLayerName[layerName] = [{ layer, icon: iconImg ?? '' }];
+        } else {
+          selectedLayersByLayerName[layerName].push({ layer, icon: iconImg ?? '' });
+        }
+      });
+    } else {
+      console.log('layerName3', layerName);
+      selectedLayersByLayerName[layerName] = [];
+    }
 
-    store.setState((state) => ({
-      legendState: {
-        ...state.legendState,
-        selectedLayers: selectedLayersByLayerName,
-      },
-    }));
+    store.setState({
+      legendState: { ...store.getState().legendState, selectedLayers: selectedLayersByLayerName },
+    });
   };
 
   const handleGetCheckedSublayerNames = (names: string[]) => {
@@ -324,8 +332,13 @@ export function LegendItemDetails(props: TypeLegendItemDetailsProps): JSX.Elemen
   };
 
   useEffect(() => {
-    updateSelectedLayers(checkedSublayerNames);
-  }, [checkedSublayerNames]);
+    if (checkedSublayerNames.length > 0) {
+      updateSelectedLayers(checkedSublayerNames);
+    } else {
+      setnochildLayers([]);
+      updateSelectedLayers(nochildLayers);
+    }
+  }, [checkedSublayerNames, nochildLayers]);
 
   useEffect(() => {
     if (layerConfigEntry) {

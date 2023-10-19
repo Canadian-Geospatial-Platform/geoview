@@ -307,27 +307,6 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
     setGroupOpen(!isGroupOpen);
   };
 
-  const updateSelectedLayers = (selectedLayers: string[]) => {
-    const selectedLayersByLayerName: Record<string, { layer: string; icon: string }[]> = {};
-    if (selectedLayers.length > 0) {
-      selectedLayers.forEach((layer) => {
-        if (!selectedLayersByLayerName[layerName]) {
-          selectedLayersByLayerName[layerName] = [{ layer, icon: iconImg ?? '' }];
-        } else {
-          selectedLayersByLayerName[layerName].push({ layer, icon: iconImg ?? '' });
-        }
-      });
-    } else {
-      selectedLayersByLayerName[layerName] = [];
-    }
-
-    store.setState((state) => ({
-      legendState: {
-        ...state.legendState,
-        selectedLayers: selectedLayersByLayerName,
-      },
-    }));
-  };
   /**
    * Handle expand/shrink of legends.
    */
@@ -355,7 +334,6 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
       }
     }
     setChecked(!isChecked);
-    updateSelectedLayers([]);
   };
 
   const handleStackIcon = (e: React.KeyboardEvent<HTMLElement>) => {
