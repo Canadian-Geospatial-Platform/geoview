@@ -1,54 +1,39 @@
 import { useContext } from 'react';
 
+import { useTheme } from '@mui/material/styles';
+
+import { getGeoViewStore } from '@/core/stores/stores-managers';
+
 import { MapContext } from '@/core/app-start';
-
-import { api } from '@/app';
-
 import { IconButton, ZoomInIcon } from '@/ui';
-
-/**
- * Zoom in button properties
- */
-interface ZoomInProps {
-  className?: string;
-}
-
-/**
- * default properties values
- */
-const defaultProps = {
-  className: '',
-};
+import { getSxClasses } from '../nav-bar-style';
+import { OL_ZOOM_DURATION } from '@/core/utils/constant';
 
 /**
  * Create a zoom in button
  *
- * @param {ZoomInProps} props zoom in button properties
  * @returns {JSX.Element} return the created zoom in button
  */
-export default function ZoomIn(props: ZoomInProps): JSX.Element {
-  const { className } = props;
-
+export default function ZoomIn(): JSX.Element {
   const mapConfig = useContext(MapContext);
-
   const { mapId } = mapConfig;
+
+  const theme = useTheme();
+  const sxClasses = getSxClasses(theme);
 
   /**
    * Causes the map to zoom in
    */
   function zoomIn() {
-    const { map } = api.maps[mapId];
+    const currentZoom = getGeoViewStore(mapId).getState().mapState.zoom;
+    const { mapElement } = getGeoViewStore(mapId).getState().mapState;
 
-    const currentZoom = map.getView().getZoom();
-
-    if (currentZoom) map.getView().animate({ zoom: currentZoom + 0.5, duration: 500 });
+    if (currentZoom) mapElement.getView().animate({ zoom: currentZoom + 0.5, duration: OL_ZOOM_DURATION });
   }
 
   return (
-    <IconButton id="zoomIn" tooltip="mapnav.zoomIn" tooltipPlacement="left" onClick={() => zoomIn()} className={className}>
+    <IconButton id="zoomIn" tooltip="mapnav.zoomIn" tooltipPlacement="left" onClick={() => zoomIn()} sx={sxClasses.navButton}>
       <ZoomInIcon />
     </IconButton>
   );
 }
-
-ZoomIn.defaultProps = defaultProps;

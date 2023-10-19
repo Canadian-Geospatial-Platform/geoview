@@ -11,6 +11,7 @@ import { MapContext } from '@/core/app-start';
 import { EVENT_NAMES, api, markerDefinitionPayload } from '@/app';
 import { getGeoViewStore } from '@/core/stores/stores-managers';
 import { bboxHighlightPayload } from '@/api/events/payloads/bbox-highlight-payload';
+import { OL_ZOOM_DURATION } from '@/core/utils/constant';
 
 export interface GeoListItem {
   key: string;
@@ -24,7 +25,7 @@ export interface GeoListItem {
 
 export function Geolocator() {
   const { mapId } = useContext(MapContext);
-  const ANIMATION_DURATION = 1000;
+
   const {
     map,
     mapFeaturesConfig: { serviceUrls },
@@ -86,7 +87,7 @@ export function Geolocator() {
       api.maps[mapId].zoomToExtent(convertedExtent, {
         padding: [50, 50, 50, 50],
         maxZoom: 16,
-        duration: ANIMATION_DURATION,
+        duration: OL_ZOOM_DURATION,
       });
       api.event.emit(bboxHighlightPayload(EVENT_NAMES.FEATURE_HIGHLIGHT.EVENT_HIGHLIGHT_BBOX, mapId, convertedExtent));
       setTimeout(() => {
@@ -94,15 +95,15 @@ export function Geolocator() {
         for (let i = 0; i < indicatorBox.length; i++) {
           (indicatorBox[i] as HTMLElement).style.display = '';
         }
-      }, ANIMATION_DURATION + 150);
+      }, OL_ZOOM_DURATION + 150);
     } else {
-      map.getView().animate({ center: fromLonLat(coords, projectionConfig), duration: ANIMATION_DURATION, zoom: 16 });
+      map.getView().animate({ center: fromLonLat(coords, projectionConfig), duration: OL_ZOOM_DURATION, zoom: 16 });
       setTimeout(() => {
         api.event.emit(markerDefinitionPayload(EVENT_NAMES.MARKER_ICON.EVENT_MARKER_ICON_SHOW, mapId, coords));
         for (let i = 0; i < indicatorBox.length; i++) {
           (indicatorBox[i] as HTMLElement).style.display = '';
         }
-      }, ANIMATION_DURATION + 150);
+      }, OL_ZOOM_DURATION + 150);
     }
   };
 
@@ -122,7 +123,7 @@ export function Geolocator() {
    */
   const doRequest = debounce((searchTerm: string) => {
     getGeolocations(searchTerm);
-  }, ANIMATION_DURATION);
+  }, OL_ZOOM_DURATION);
 
   /**
    * Debounce the get geolocation service request

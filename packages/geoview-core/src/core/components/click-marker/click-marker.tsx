@@ -49,7 +49,7 @@ export function ClickMarker(): JSX.Element {
     id: clickMarkerId,
     position: [-1, -1],
     positioning: 'center-center',
-    offset: [-18, -32],
+    offset: [-18, -60],
     element: document.getElementById(clickMarkerId) as HTMLElement,
     stopEvent: false,
   });
