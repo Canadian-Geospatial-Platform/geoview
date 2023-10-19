@@ -34,7 +34,7 @@ import {
   TypeArrayOfFeatureInfoEntries,
   TypeGeometry,
 } from '@/api/events/payloads';
-import { getSxClasses } from './details-1-style';
+import { getSxClasses } from './details-style';
 
 interface TypeLayersListProps {
   arrayOfLayerData: TypeArrayOfLayerData;

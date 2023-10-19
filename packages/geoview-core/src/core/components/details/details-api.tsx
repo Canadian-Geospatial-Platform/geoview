@@ -9,7 +9,7 @@ import { DetailsFooter, TypeArrayOfLayerData } from './details';
  * @exports
  * @class DetailsAPI
  */
-export class DetailsAPI {
+export class DetailsApi {
   mapId!: string;
 
   featureInfoLayerSet!: FeatureInfoLayerSet;
