@@ -33,6 +33,7 @@ const useStyles = makeStyles((theme) => ({
     right: theme.spacing(5),
     top: theme.spacing(5),
     margin: 5,
+    order: 1,
     padding: 0,
     '& .ol-overviewmap-map': {
       border: 'none',

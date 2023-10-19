@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { useTheme, Theme } from '@mui/material/styles';
 import { Checkbox, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@mui/material';
-// import { IconButton, CheckBoxOutIcon, CheckBoxIcon } from '@/ui';
+import { IconButton, CheckBoxOutIcon, CheckBoxIcon } from '@/ui';
 import { api } from '@/app';
 import {
   TypeVectorLayerEntryConfig,
@@ -64,10 +64,21 @@ export interface TypeLegendIconListProps {
   isParentVisible?: boolean;
   toggleParentVisible?: () => void;
   toggleMapVisible?: (layerConfig: TypeLayerEntryConfig) => void;
+  onGetCheckedSublayerNames?: (checkedSublayerNames: { layer: string; icon: string }[]) => void;
 }
 
 export function LegendIconList(props: TypeLegendIconListProps): JSX.Element {
-  const { iconImages, iconLabels, isParentVisible, toggleParentVisible, toggleMapVisible, geometryKey, layerConfig, mapId } = props;
+  const {
+    iconImages,
+    iconLabels,
+    isParentVisible,
+    toggleParentVisible,
+    toggleMapVisible,
+    geometryKey,
+    layerConfig,
+    mapId,
+    onGetCheckedSublayerNames,
+  } = props;
   const theme: Theme & {
     iconImg: React.CSSProperties;
   } = useTheme();
@@ -79,27 +90,71 @@ export function LegendIconList(props: TypeLegendIconListProps): JSX.Element {
   const [isChecked, setChecked] = useState<boolean[]>(initialChecked);
   const [countChildren, setCountChildren] = useState<number>(isParentVisible ? iconImages.length : 0);
   const [initParentVisible, setInitParentVisible] = useState(isParentVisible);
-  const [isAllChecked, setIsAllChecked] = useState(isParentVisible);
+
+  if (layerConfig && layerConfig.style !== undefined && geometryKey) {
+    const itemStyle = layerConfig.style[geometryKey];
+    if (itemStyle && itemStyle.styleType === 'uniqueValue' && (itemStyle as TypeUniqueValueStyleConfig).uniqueValueStyleInfo) {
+      const uniqueItemStyles = (itemStyle as TypeUniqueValueStyleConfig).uniqueValueStyleInfo;
+      for (let i = 0; i < uniqueItemStyles.length; i++) {
+        if (
+          uniqueItemStyles[i].visible === 'no' ||
+          ((itemStyle as TypeUniqueValueStyleConfig).defaultVisible === 'no' && uniqueItemStyles[i].visible !== 'always')
+        ) {
+          initialChecked[iconLabels.indexOf(uniqueItemStyles[i].label)] = false;
+        }
+      }
+    } else if (itemStyle && itemStyle.styleType === 'classBreaks' && (itemStyle as TypeClassBreakStyleConfig).classBreakStyleInfo) {
+      const classbreakItemStyles = (itemStyle as TypeClassBreakStyleConfig).classBreakStyleInfo;
+      for (let i = 0; i < classbreakItemStyles.length; i++) {
+        if (
+          classbreakItemStyles[i].visible === 'no' ||
+          ((itemStyle as TypeClassBreakStyleConfig).defaultVisible === 'no' && classbreakItemStyles[i].visible !== 'always')
+        ) {
+          initialChecked[iconLabels.indexOf(classbreakItemStyles[i].label)] = false;
+        }
+      }
+    }
+  }
+
+  const [isAllChecked, setIsAllChecked] = useState(initialChecked.every((checked) => checked));
+  const handleToggleLayer = (index: number) => {
+    const checklist = isChecked.map((checked, i) => (i === index ? !checked : checked));
+    const count = checklist.filter((f) => f === true).length;
+    setChecked(checklist);
+    setCountChildren(count);
+    if (isParentVisible !== undefined && toggleParentVisible !== undefined) {
+      if ((count === 0 && isParentVisible === true) || (count > 0 && isParentVisible === false)) {
+        if (isParentVisible === false) {
+          setInitParentVisible(true);
+        }
+        toggleParentVisible();
+      }
+    }
+  };
 
   const handleToggleAll = () => {
     setIsAllChecked(!isAllChecked);
     setChecked(iconImages.map(() => !isAllChecked));
   };
 
-  const handleToggleLayer = (index: number) => {
-    const checklist = isChecked.map((checked, i) => (i === index ? !checked : checked));
-    const count = checklist.filter((f) => f === true).length;
-    setChecked(checklist);
-    setCountChildren(count);
-    setIsAllChecked(checklist.every((value) => value === true));
-    if (isParentVisible !== undefined && toggleParentVisible !== undefined) {
-      if ((count === 0 && isParentVisible === true) || (count > 0 && isParentVisible === false)) {
-        toggleParentVisible();
-      }
-    }
-  };
-
   useEffect(() => {
+    if (onGetCheckedSublayerNames) {
+      const checkedSublayerNamesAndIcons = iconLabels
+        .map((label, index) => {
+          if (isChecked[index]) {
+            return {
+              layer: label,
+              icon: iconImages[index] ?? '',
+            };
+          }
+          return null;
+        })
+        .filter((pair) => pair !== null) as { layer: string; icon: string }[];
+
+      onGetCheckedSublayerNames(checkedSublayerNamesAndIcons);
+      console.log('checkedSublayerPairs', checkedSublayerNamesAndIcons);
+    }
+
     const getStyleArraySize = (geometryStyle: TypeStyleSettings): number => {
       if (geometryStyle.styleType === 'uniqueValue') return (geometryStyle as TypeUniqueValueStyleConfig).uniqueValueStyleInfo.length;
       if (geometryStyle.styleType === 'classBreaks') return (geometryStyle as TypeClassBreakStyleConfig).classBreakStyleInfo.length;
@@ -163,10 +218,10 @@ export function LegendIconList(props: TypeLegendIconListProps): JSX.Element {
     geometryKey,
     toggleMapVisible,
     mapId,
+    iconLabels,
+    iconImages,
+    onGetCheckedSublayerNames,
   ]);
-
-  // eslint-disable-next-line no-console
-  console.log('Check Count', countChildren);
 
   return (
     <TableContainer>
@@ -187,7 +242,11 @@ export function LegendIconList(props: TypeLegendIconListProps): JSX.Element {
                 <span style={sxClasses.tableIconLabel}>{iconLabels[index]}</span>
               </TableCell>
               <TableCell>
-                <Checkbox color="primary" checked={isChecked[index]} onChange={() => handleToggleLayer(index)} />
+                {iconLabels[index] !== 'Cluster' && layerConfig?.initialSettings?.visible !== 'always' && (
+                  <IconButton color="primary" onClick={() => handleToggleLayer(index)}>
+                    {isChecked[index] === true ? <CheckBoxIcon /> : <CheckBoxOutIcon />}
+                  </IconButton>
+                )}
               </TableCell>
             </TableRow>
           ))}
