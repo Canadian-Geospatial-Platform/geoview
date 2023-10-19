@@ -64,7 +64,7 @@ export interface TypeLegendIconListProps {
   isParentVisible?: boolean;
   toggleParentVisible?: () => void;
   toggleMapVisible?: (layerConfig: TypeLayerEntryConfig) => void;
-  onGetCheckedSublayerNames?: (checkedSublayerNames: string[]) => void;
+  onGetCheckedSublayerNames?: (checkedSublayerNames: { layer: string; icon: string }[]) => void;
 }
 
 export function LegendIconList(props: TypeLegendIconListProps): JSX.Element {
@@ -139,8 +139,20 @@ export function LegendIconList(props: TypeLegendIconListProps): JSX.Element {
 
   useEffect(() => {
     if (onGetCheckedSublayerNames) {
-      const checkedSublayerNames = iconLabels.filter((_, index) => isChecked[index]);
-      onGetCheckedSublayerNames(checkedSublayerNames);
+      const checkedSublayerNamesAndIcons = iconLabels
+        .map((label, index) => {
+          if (isChecked[index]) {
+            return {
+              layer: label,
+              icon: iconImages[index] ?? '',
+            };
+          }
+          return null;
+        })
+        .filter((pair) => pair !== null) as { layer: string; icon: string }[];
+
+      onGetCheckedSublayerNames(checkedSublayerNamesAndIcons);
+      console.log('checkedSublayerPairs', checkedSublayerNamesAndIcons);
     }
 
     const getStyleArraySize = (geometryStyle: TypeStyleSettings): number => {
@@ -206,6 +218,9 @@ export function LegendIconList(props: TypeLegendIconListProps): JSX.Element {
     geometryKey,
     toggleMapVisible,
     mapId,
+    iconLabels,
+    iconImages,
+    onGetCheckedSublayerNames,
   ]);
 
   return (

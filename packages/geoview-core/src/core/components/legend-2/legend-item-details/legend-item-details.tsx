@@ -164,8 +164,8 @@ export function LegendItemDetails(props: TypeLegendItemDetailsProps): JSX.Elemen
   const stackIconRef = useRef() as MutableRefObject<HTMLDivElement | undefined>;
   const maxIconRef = useRef() as RefObject<HTMLButtonElement>;
 
-  const [checkedSublayerNames, setCheckedSublayerNames] = useState<string[]>([]);
-  const [nochildLayers, setnochildLayers] = useState<string[]>([]);
+  const [checkedSublayerNamesAndIcons, setCheckedSublayerNamesAndIcons] = useState<{ layer: string; icon: string }[]>([]);
+  const [nochildLayers, setnochildLayers] = useState<{ layer: string; icon: string }[]>([]);
   const store = getGeoViewStore(mapId);
 
   const getGroupsDetails = (): boolean => {
@@ -307,18 +307,17 @@ export function LegendItemDetails(props: TypeLegendItemDetailsProps): JSX.Elemen
     mapId
   );
 
-  const updateSelectedLayers = (selectedLayers: string[]) => {
+  const updateSelectedLayers = (selectedLayers: { layer: string; icon: string }[]) => {
     const selectedLayersByLayerName: Record<string, { layer: string; icon: string }[]> = {};
     if (selectedLayers.length > 0) {
-      selectedLayers.forEach((layer) => {
+      selectedLayers.forEach(({ layer, icon }) => {
         if (!selectedLayersByLayerName[layerName]) {
-          selectedLayersByLayerName[layerName] = [{ layer, icon: iconImg ?? '' }];
+          selectedLayersByLayerName[layerName] = [{ layer, icon: icon || '' }];
         } else {
-          selectedLayersByLayerName[layerName].push({ layer, icon: iconImg ?? '' });
+          selectedLayersByLayerName[layerName].push({ layer, icon: icon || '' });
         }
       });
     } else {
-      console.log('layerName3', layerName);
       selectedLayersByLayerName[layerName] = [];
     }
 
@@ -327,18 +326,18 @@ export function LegendItemDetails(props: TypeLegendItemDetailsProps): JSX.Elemen
     });
   };
 
-  const handleGetCheckedSublayerNames = (names: string[]) => {
-    setCheckedSublayerNames(names);
+  const handleGetCheckedSublayerNames = (namesAndIcons: { layer: string; icon: string }[]) => {
+    setCheckedSublayerNamesAndIcons(namesAndIcons);
   };
 
   useEffect(() => {
-    if (checkedSublayerNames.length > 0) {
-      updateSelectedLayers(checkedSublayerNames);
+    if (checkedSublayerNamesAndIcons.length > 0) {
+      updateSelectedLayers(checkedSublayerNamesAndIcons);
     } else {
       setnochildLayers([]);
       updateSelectedLayers(nochildLayers);
     }
-  }, [checkedSublayerNames, nochildLayers]);
+  }, [checkedSublayerNamesAndIcons, nochildLayers]);
 
   useEffect(() => {
     if (layerConfigEntry) {
