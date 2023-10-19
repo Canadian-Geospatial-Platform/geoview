@@ -32,10 +32,11 @@ import {
   TypeWmsLegendStyle,
 } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { TypeListOfLayerEntryConfig, TypeDisplayLanguage, layerEntryIsGroupLayer } from '@/geo/map/map-schema-types';
-import { disableScrolling } from '../../utils/utilities';
-import { WMSStyleItem } from './WMS-style-item';
-import { TypeLegendItemProps } from './types';
+import { disableScrolling } from '../../../utils/utilities';
+import { WMSStyleItem } from '../WMS-style-item';
+import { TypeLegendItemProps } from '../types';
 import { getGeoViewStore } from '@/core/stores/stores-managers';
+import  { useLegendHelpers } from '../helpers';
 
 const sxClasses = {
   expandableGroup: {
@@ -152,6 +153,7 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
   } = props;
 
   const { t, i18n } = useTranslation<string>();
+  const legendHelpers = useLegendHelpers();
 
   const { mapId } = geoviewLayerInstance;
   const store = getGeoViewStore(mapId);
@@ -238,22 +240,8 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
     }
   };
 
-  const getLayerName = () => {
-    if (layerConfigEntry) {
-      if (layerConfigEntry.layerName && layerConfigEntry.layerName[i18n.language as TypeDisplayLanguage]) {
-        setLayerName(layerConfigEntry.layerName[i18n.language as TypeDisplayLanguage] ?? '');
-      } else if (t('legend.unknown')) {
-        setLayerName(t('legend.unknown')!);
-      }
-    } else if (geoviewLayerInstance?.geoviewLayerName[i18n.language as TypeDisplayLanguage]) {
-      setLayerName(geoviewLayerInstance.geoviewLayerName[i18n.language as TypeDisplayLanguage] ?? '');
-    } else if (t('legend.unknown')) {
-      setLayerName(t('legend.unknown')!);
-    }
-  };
-
   useEffect(() => {
-    getLayerName();
+    setLayerName(legendHelpers.getLayerName(geoviewLayerInstance, layerConfigEntry));
     const isGroup = getGroupsDetails();
     if (!isGroup) {
       const legendInfo = api.maps[mapId].legend.legendLayerSet.resultSets?.[path]?.data;
@@ -313,7 +301,7 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
   const handleLegendClick = () => {
     setLegendOpen(!isLegendOpen);
     store.setState({
-      legendState: { ...store.getState().legendState, selectedItem: props },
+      legendState: { ...store.getState().legendState, currentRightPanelDisplay: 'layer-details', selectedItem: props },
     });
 
     const legendDetails = document.querySelector('#legend-details-container');

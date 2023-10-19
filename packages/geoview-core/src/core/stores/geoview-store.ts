@@ -66,6 +66,7 @@ export interface INotificationsState {
 
 export interface ILegendState {
   selectedItem?: TypeLegendItemProps;
+  currentRightPanelDisplay: 'overview' | 'layer-details' | 'none',
   selectedLayers: Record<string, { layer: string; icon: string }[]>;
 }
 
@@ -165,6 +166,7 @@ export const geoViewStoreDefinition = (
     },
     legendState: {
       selectedItem: undefined,
+      currentRightPanelDisplay: 'none',
       selectedLayers: {},
     },
     notificationState: {

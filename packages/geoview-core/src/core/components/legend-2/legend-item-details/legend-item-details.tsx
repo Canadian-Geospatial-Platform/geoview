@@ -190,8 +190,6 @@ export function LegendItemDetails(props: TypeLegendItemDetailsProps): JSX.Elemen
     return isGroup;
   };
 
-  console.log(groupItems);
-
   const getLegendDetails = (layerLegend: TypeLegend) => {
     const { geoviewLayerId } = geoviewLayerInstance;
     if (layerLegend) {
@@ -320,7 +318,7 @@ export function LegendItemDetails(props: TypeLegendItemDetailsProps): JSX.Elemen
     } else {
       selectedLayersByLayerName[layerName] = [];
     }
-
+    //console.log('setting it here');
     store.setState({
       legendState: { ...store.getState().legendState, selectedLayers: selectedLayersByLayerName },
     });

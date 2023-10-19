@@ -7,8 +7,10 @@ import { LegendItemsDetailsProps } from './types';
 import { AddIcon, Box, Grid, List, Typography, ExpandMoreIcon, Paper, Stack, ExpandIcon } from '@/ui';
 import { LegendItemDetails } from './legend-item-details/legend-item-details';
 import { getGeoViewStore } from '@/core/stores/stores-managers';
-import { LegendItem } from './legend-item';
 import { getSxClasses } from './legend-style';
+import { LegendOverview } from './legend-overview/legend-overview';
+import { LegendItems } from './legend-items/legend-items';
+import { LegendRightPanel } from './legend-right-panel';
 
 const Item = styled('div')(({ theme }) => ({
   backgroundColor: theme.palette.mode === 'dark' ? '#262B32' : '#fff',
@@ -16,6 +18,8 @@ const Item = styled('div')(({ theme }) => ({
   textAlign: 'center',
   borderRadius: 4,
 }));
+
+type RIGHTPANEL_DISPLAY = 'overview' | 'layer-details' | 'none';
 
 export function Legend2(props: LegendItemsDetailsProps): JSX.Element {
   const { layerIds, isRemoveable, canSetOpacity, expandAll, hideAll, mapId } = props;
@@ -25,10 +29,12 @@ export function Legend2(props: LegendItemsDetailsProps): JSX.Element {
   const theme = useTheme();
   const sxClasses = getSxClasses(theme);
 
+
   const store = getGeoViewStore(mapId);
+  //controls what is displayed on the right panel
+  const currentRightPanelDisplay = useStore(store, (state) => state.legendState.currentRightPanelDisplay);
   const selectedLegendItem = useStore(store, (state) => state.legendState.selectedItem);
   const selectedLayers = useStore(store, (state) => state.legendState.selectedLayers);
-  const [isSelectedLayersClicked, setIsSelectedLayersClicked] = useState(false);
   const [collapsedParents, setCollapsedParents] = useState<{ [key: string]: boolean }>({});
 
   const toggleCollapse = (parentLayer: string) => {
@@ -38,10 +44,17 @@ export function Legend2(props: LegendItemsDetailsProps): JSX.Element {
     }));
   };
 
+  const showLegendOverview = function() {
+
+    store.setState({
+      legendState: { ...store.getState().legendState, currentRightPanelDisplay: 'overview' },
+    });
+  }
+
   function showSelectedLayersPanel() {
     return (
       <Paper
-        onClick={() => setIsSelectedLayersClicked(!isSelectedLayersClicked)}
+        onClick={() => showLegendOverview()}
         sx={{
           justifyContent: 'space-between',
           padding: '9px 17px 10px 57px',
@@ -92,41 +105,17 @@ export function Legend2(props: LegendItemsDetailsProps): JSX.Element {
   }
 
   const leftPanel = () => {
-    const legendItems = layerIds
-      .filter((layerId) => api.maps[mapId].layer.geoviewLayers[layerId])
-      .map((layerId) => {
-        const geoviewLayerInstance = api.maps[mapId].layer.geoviewLayers[layerId];
-
-        return (
-          <LegendItem
-            key={`layerKey-${layerId}`}
-            layerId={layerId}
-            geoviewLayerInstance={geoviewLayerInstance}
-            isRemoveable={isRemoveable}
-            canSetOpacity={canSetOpacity}
-            expandAll={expandAll}
-            hideAll={hideAll}
-          />
-        );
-      });
-
     return (
       <div>
         {showSelectedLayersPanel()}
         {buttonsMenu()}
-        <List sx={{ width: '100%' }}>{legendItems}</List>
+        <LegendItems mapId={mapId} layerIds={layerIds} />
       </div>
     );
   };
 
-  useEffect(() => {
-    if (selectedLegendItem) {
-      setIsSelectedLayersClicked(false);
-    }
-  }, [selectedLegendItem]);
-
   const rightPanel = () => {
-    if (isSelectedLayersClicked && selectedLayers) {
+    if (currentRightPanelDisplay === 'overview' && selectedLayers) {
       const numItems = Object.values(selectedLayers).reduce((total, childLayers) => total + childLayers.length, 0);
       const selectedLayersList = Object.entries(selectedLayers).map(([parentLayer, childLayers]) => (
         <div
@@ -195,7 +184,7 @@ export function Legend2(props: LegendItemsDetailsProps): JSX.Element {
           {leftPanel()}
         </Grid>
         <Grid item xs={12} sm={6}>
-          {rightPanel()}
+          <LegendRightPanel mapId={mapId} layerIds={layerIds} />
         </Grid>
       </Grid>
     </Box>
