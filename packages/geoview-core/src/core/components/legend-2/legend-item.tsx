@@ -313,9 +313,8 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
   const handleLegendClick = () => {
     setLegendOpen(!isLegendOpen);
     store.setState({
-      legendState: { ...store.getState().legendState, selectedItem: props },
+      legendState: { ...store.getState().legendState, selectedItem: props, selectedIsVisible: isChecked },
     });
-
     const legendDetails = document.querySelector('#legend-details-container');
     if (legendDetails) {
       legendDetails.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -335,6 +334,14 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
     }
     setChecked(!isChecked);
   };
+
+  useEffect(() => {
+    if (isChecked !== store.getState().legendState.selectedIsVisible)
+      store.setState({
+        legendState: { ...store.getState().legendState, selectedIsVisible: isChecked },
+      });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isChecked]);
 
   const handleStackIcon = (e: React.KeyboardEvent<HTMLElement>) => {
     if (e.key === 'Enter') {
