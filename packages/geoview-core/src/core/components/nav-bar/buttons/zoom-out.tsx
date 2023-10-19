@@ -1,51 +1,39 @@
 import { useContext } from 'react';
-import { api } from '@/app';
+
+import { useTheme } from '@mui/material/styles';
+
+import { getGeoViewStore } from '@/core/stores/stores-managers';
+
 import { IconButton, ZoomOutIcon } from '@/ui';
 import { MapContext } from '@/core/app-start';
-
-/**
- * Zoom out button properties
- */
-interface ZoomOutProps {
-  className?: string;
-}
-
-/**
- * default properties values
- */
-const defaultProps = {
-  className: '',
-};
+import { getSxClasses } from '../nav-bar-style';
+import { OL_ZOOM_DURATION } from '@/core/utils/constant';
 
 /**
  * Create a zoom out button
  *
- * @param {ZoomOutProps} props the zoom out button properties
  * @returns {JSX.Element} return the new created zoom out button
  */
-export default function ZoomOut(props: ZoomOutProps): JSX.Element {
-  const { className } = props;
-
+export default function ZoomOut(): JSX.Element {
   const mapConfig = useContext(MapContext);
-
   const { mapId } = mapConfig;
+
+  const theme = useTheme();
+  const sxClasses = getSxClasses(theme);
 
   /**
    * Causes the map to zoom out
    */
   function zoomOut() {
-    const { map } = api.maps[mapId];
+    const currentZoom = getGeoViewStore(mapId).getState().mapState.zoom;
+    const { mapElement } = getGeoViewStore(mapId).getState().mapState;
 
-    const currentZoom = map.getView().getZoom();
-
-    if (currentZoom) map.getView().animate({ zoom: currentZoom - 0.5, duration: 500 });
+    if (currentZoom) mapElement.getView().animate({ zoom: currentZoom - 0.5, duration: OL_ZOOM_DURATION });
   }
 
   return (
-    <IconButton id="zoomOut" tooltip="mapnav.zoomOut" tooltipPlacement="left" onClick={() => zoomOut()} className={className}>
+    <IconButton id="zoomOut" tooltip="mapnav.zoomOut" tooltipPlacement="left" onClick={() => zoomOut()} sx={sxClasses.navButton}>
       <ZoomOutIcon />
     </IconButton>
   );
 }
-
-ZoomOut.defaultProps = defaultProps;

@@ -1,5 +1,4 @@
 export * from './global-types';
-export * from './marker-definitions';
 export * from '../app-start';
 
 export * from '../containers/focus-trap';

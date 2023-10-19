@@ -177,6 +177,8 @@ export const defaultThemeOptions: ThemeOptions = {
     btnDefaultColor: '#393939',
     btnFocusColor: '#393939',
     btnHoverColor: '#393939',
+    btnHeight: '44px',
+    btnWidth: '44px',
   },
   panel: {
     background: '#fff',
