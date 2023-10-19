@@ -79,12 +79,12 @@ export function Map(mapFeaturesConfig: TypeMapFeaturesConfig): JSX.Element {
   //     const splitZoom =
   //       (api.maps[mapId].layer.registeredLayers[clusterLayerId].source as TypeVectorSourceInitialConfig)!.cluster!.splitZoom || 7;
   //     if (prevZoom < splitZoom && currentZoom >= splitZoom) {
-  //       api.maps[mapId].layer.registeredLayers[clusterLayerId]?.gvLayer!.setVisible(false);
-  //       api.maps[mapId].layer.registeredLayers[layer]?.gvLayer!.setVisible(true);
+  //       api.maps[mapId].layer.registeredLayers[clusterLayerId]?.olLayer!.setVisible(false);
+  //       api.maps[mapId].layer.registeredLayers[layer]?.olLayer!.setVisible(true);
   //     }
   //     if (prevZoom >= splitZoom && currentZoom < splitZoom) {
-  //       api.maps[mapId].layer.registeredLayers[clusterLayerId]?.gvLayer!.setVisible(true);
-  //       api.maps[mapId].layer.registeredLayers[layer]?.gvLayer!.setVisible(false);
+  //       api.maps[mapId].layer.registeredLayers[clusterLayerId]?.olLayer!.setVisible(true);
+  //       api.maps[mapId].layer.registeredLayers[layer]?.olLayer!.setVisible(false);
   //     }
   //   }
   // });
@@ -213,7 +213,7 @@ export function Map(mapFeaturesConfig: TypeMapFeaturesConfig): JSX.Element {
             }
           }
         };
-        refreshBaseLayer(mapLayerEntry[1].gvLayers);
+        refreshBaseLayer(mapLayerEntry[1].olLayers);
       });
     }
   };

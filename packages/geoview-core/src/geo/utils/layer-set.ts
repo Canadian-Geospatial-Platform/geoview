@@ -8,7 +8,7 @@ import {
   TypeResultSets,
   PayloadBaseClass,
 } from '@/api/events/payloads';
-import { api } from '@/app';
+import { TypeLocalizedString, api } from '@/app';
 
 /** ***************************************************************************************************************************
  * A class to hold a set of layers associated with an value of any type. When this class is instantiated, all layers already
@@ -33,6 +33,9 @@ export class LayerSet {
 
   /** Function used to initialise the data property of the layer path entry. */
   registrationUserDataInitialisation?: (layerPath: string) => void;
+
+  /** Sequence number to append to the layer name when we declare a layer as anonymous. */
+  anonymousSequenceNumber = 1;
 
   /** ***************************************************************************************************************************
    * The class constructor that instanciate a set of layer.
@@ -62,10 +65,21 @@ export class LayerSet {
         if (this.resultSets[layerPath]) {
           if (this.resultSets[layerPath].layerStatus !== layerStatus) {
             this.resultSets[layerPath].layerStatus = layerStatus;
+            if (!this.resultSets[layerPath].layerName)
+              this.resultSets[layerPath].layerName = api.maps[mapId].layer.registeredLayers[layerPath].layerName
+                ? api.maps[mapId].layer.registeredLayers[layerPath].layerName
+                : ({
+                    en: `Anonymous Layer ${this.anonymousSequenceNumber}`,
+                    fr: `Couche Anonyme ${this.anonymousSequenceNumber++}`,
+                  } as TypeLocalizedString);
+            if (this.resultSets[layerPath].layerStatus === 'processed')
+              if (api.maps[mapId].layer.registeredLayers[layerPath].layerName)
+                this.resultSets[layerPath].layerName = api.maps[mapId].layer.registeredLayers[layerPath].layerName;
+              else api.maps[mapId].layer.registeredLayers[layerPath].layerName = this.resultSets[layerPath].layerName;
             api.event.emit(LayerSetPayload.createLayerSetUpdatedPayload(this.layerSetId, this.resultSets, layerPath));
             if (this.layerSetId === `${mapId}/LegendsLayerSet`)
               // LegendLayerSet is the absolute reference for finding out whether a layer has been loaded or is in error. Then, every
-              // time we modify a layerSet in the Legend family, we have to inform the system that a change has occurred.
+              // time we modify a layerSet in the Legend family, we have to inform the viewer that a change has occurred.
               api.event.emit(
                 LayerSetPayload.createLayerSetUpdatedPayload(`${mapId}/LegendsLayerSetStatusOrPhaseChanged`, this.resultSets, layerPath)
               );
@@ -81,6 +95,13 @@ export class LayerSet {
         if (this.resultSets[layerPath] && this.resultSets[layerPath].layerStatus !== 'error') {
           if (this.resultSets[layerPath].layerPhase !== layerPhase) {
             this.resultSets[layerPath].layerPhase = layerPhase;
+            if (!this.resultSets[layerPath].layerName)
+              this.resultSets[layerPath].layerName = api.maps[mapId].layer.registeredLayers[layerPath].layerName
+                ? api.maps[mapId].layer.registeredLayers[layerPath].layerName
+                : ({
+                    en: `Anonymous Layer ${this.anonymousSequenceNumber}`,
+                    fr: `Couche Anonyme ${this.anonymousSequenceNumber++}`,
+                  } as TypeLocalizedString);
             api.event.emit(LayerSetPayload.createLayerSetUpdatedPayload(this.layerSetId, this.resultSets, layerPath));
             if (this.layerSetId === `${mapId}/LegendsLayerSet`)
               api.event.emit(

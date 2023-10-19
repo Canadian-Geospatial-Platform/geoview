@@ -9,7 +9,7 @@ import { Options as ImageOptions } from 'ol/layer/BaseImage';
 import { ImageWMS } from 'ol/source';
 import { Options as SourceOptions } from 'ol/source/ImageWMS';
 import WMSCapabilities from 'ol/format/WMSCapabilities';
-import { Layer as gvLayer } from 'ol/layer';
+import { Layer as OlLayer } from 'ol/layer';
 import { Extent } from 'ol/extent';
 import { transform, transformExtent } from 'ol/proj';
 
@@ -569,12 +569,12 @@ export class WMS extends AbstractGeoViewRaster {
             imageLayerOptions.visible =
               layerEntryConfig.initialSettings?.visible === 'yes' || layerEntryConfig.initialSettings?.visible === 'always';
 
-          layerEntryConfig.gvLayer = new ImageLayer(imageLayerOptions);
+          layerEntryConfig.olLayer = new ImageLayer(imageLayerOptions);
           this.applyViewFilter(layerEntryConfig, layerEntryConfig.layerFilter ? layerEntryConfig.layerFilter : '');
 
           super.addLoadendListener(layerEntryConfig, 'image');
 
-          resolve(layerEntryConfig.gvLayer);
+          resolve(layerEntryConfig.olLayer);
         } else {
           const trans = i18n.getFixedT(api.maps[this.mapId].displayLanguage);
           const message = replaceParams([layerEntryConfig.layerId, this.geoviewLayerId], trans('validation.layer.notfound'));
@@ -685,7 +685,7 @@ export class WMS extends AbstractGeoViewRaster {
    */
   protected getFeatureInfoAtLongLat(lnglat: Coordinate, layerConfig: TypeOgcWmsLayerEntryConfig): Promise<TypeArrayOfFeatureInfoEntries> {
     const promisedQueryResult = new Promise<TypeArrayOfFeatureInfoEntries>((resolve) => {
-      if (!this.getVisible(layerConfig) || !layerConfig.gvLayer) resolve([]);
+      if (!this.getVisible(layerConfig) || !layerConfig.olLayer) resolve([]);
       else {
         const viewResolution = api.maps[this.mapId].getView().getResolution() as number;
         const crs = `EPSG:${api.maps[this.mapId].currentProjection}`;
@@ -698,7 +698,7 @@ export class WMS extends AbstractGeoViewRaster {
         )
           resolve([]);
         else {
-          const wmsSource = (layerConfig.gvLayer as gvLayer).getSource() as ImageWMS;
+          const wmsSource = (layerConfig.olLayer as OlLayer).getSource() as ImageWMS;
           let infoFormat = 'text/xml';
           if (!(this.metadata!.Capability.Request.GetFeatureInfo.Format as TypeJsonArray).includes('text/xml' as TypeJsonObject))
             if ((this.metadata!.Capability.Request.GetFeatureInfo.Format as TypeJsonArray).includes('text/plain' as TypeJsonObject))
@@ -880,15 +880,14 @@ export class WMS extends AbstractGeoViewRaster {
   }
 
   /** ***************************************************************************************************************************
-   * Return the legend of the layer. When layerPathOrConfig is undefined, the activeLayer of the class is used. This routine
-   * return null when the layerPath specified is not found or when the layerPathOrConfig is undefined and the active layer
-   * is null or the selected layerConfig is undefined or null.
+   * Return the legend of the layer. This routine return null when the layerPath specified is not found. If the legend can't be
+   * read, the legend property of the object returned will be null.
    *
-   * @param {string | TypeLayerEntryConfig | null} layerPathOrConfig Optional layer path or configuration.
+   * @param {string | TypeLayerEntryConfig} layerPathOrConfig Layer path or configuration.
    *
-   * @returns {Promise<TypeLegend | null>} The legend of the layer.
+   * @returns {Promise<TypeLegend | null>} The legend of the layer or null.
    */
-  getLegend(layerPathOrConfig: string | TypeLayerEntryConfig | null = this.activeLayer): Promise<TypeLegend | null> {
+  getLegend(layerPathOrConfig: string | TypeLayerEntryConfig): Promise<TypeLegend | null> {
     const promisedLegend = new Promise<TypeLegend | null>((resolve) => {
       const layerConfig = Cast<TypeOgcWmsLayerEntryConfig | undefined | null>(
         typeof layerPathOrConfig === 'string' ? this.getLayerConfig(layerPathOrConfig) : layerPathOrConfig
@@ -1034,18 +1033,16 @@ export class WMS extends AbstractGeoViewRaster {
   }
 
   /** ***************************************************************************************************************************
-   * Return the attribute of an object that ends with the specified ending string or null if not found.
+   * Set the style to be used by the wms layer. This methode does nothing if the layer path can't be found.
    *
-   * @param {TypeJsonObject} jsonObject The object that is supposed to have the needed attribute.
-   * @param {string} attribute The attribute searched.
-   *
-   * @returns {TypeJsonObject | undefined} The promised feature info table.
+   * @param {string} StyleId The style identifier that will be used.
+   * @param {string | TypeLayerEntryConfig} layerPathOrConfig The layer path to the layer config or a layer config.
    */
-  setStyle(StyleId: string, layerPathOrConfig: string | TypeLayerEntryConfig | null = this.activeLayer) {
+  setStyle(StyleId: string, layerPathOrConfig: string | TypeLayerEntryConfig) {
     const layerConfig = Cast<TypeOgcWmsLayerEntryConfig | undefined | null>(
       typeof layerPathOrConfig === 'string' ? this.getLayerConfig(layerPathOrConfig) : layerPathOrConfig
     );
-    if (layerConfig?.gvLayer) (layerConfig.gvLayer as ImageLayer<ImageWMS>).getSource()?.updateParams({ STYLES: StyleId });
+    if (layerConfig?.olLayer) (layerConfig.olLayer as ImageLayer<ImageWMS>).getSource()?.updateParams({ STYLES: StyleId });
   }
 
   /** ***************************************************************************************************************************
@@ -1055,19 +1052,19 @@ export class WMS extends AbstractGeoViewRaster {
    * is done.
    * TODO ! The combination of the legend filter and the dimension filter probably does not apply to WMS. The code can be simplified.
    *
-   * @param {string | TypeLayerEntryConfig | null} layerPathOrConfig Optional layer path or configuration.
+   * @param {string | TypeLayerEntryConfig} layerPathOrConfig Layer path or configuration.
    * @param {string} filter An optional filter to be used in place of the getViewFilter value.
    * @param {boolean} CombineLegendFilter Flag used to combine the legend filter and the filter together (default: true)
    */
-  applyViewFilter(layerPathOrConfig: string | TypeLayerEntryConfig | null = this.activeLayer, filter = '', CombineLegendFilter = true) {
+  applyViewFilter(layerPathOrConfig: string | TypeLayerEntryConfig, filter = '', CombineLegendFilter = true) {
     const layerEntryConfig = (
       typeof layerPathOrConfig === 'string' ? this.getLayerConfig(layerPathOrConfig) : layerPathOrConfig
     ) as TypeOgcWmsLayerEntryConfig;
-    const source = (layerEntryConfig.gvLayer as ImageLayer<ImageWMS>).getSource();
+    const source = (layerEntryConfig.olLayer as ImageLayer<ImageWMS>).getSource();
     if (source) {
       let filterValueToUse = filter;
-      layerEntryConfig.gvLayer!.set('legendFilterIsOff', !CombineLegendFilter);
-      if (CombineLegendFilter) layerEntryConfig.gvLayer?.set('layerFilter', filter);
+      layerEntryConfig.olLayer!.set('legendFilterIsOff', !CombineLegendFilter);
+      if (CombineLegendFilter) layerEntryConfig.olLayer?.set('layerFilter', filter);
 
       if (filterValueToUse) {
         filterValueToUse = filterValueToUse.replaceAll(/\s{2,}/g, ' ').trim();
@@ -1089,7 +1086,7 @@ export class WMS extends AbstractGeoViewRaster {
           )}`;
         });
         source.updateParams({ [dimension]: filterValueToUse.replace(/\s*/g, '') });
-        layerEntryConfig.gvLayer!.changed();
+        layerEntryConfig.olLayer!.changed();
       }
     }
   }
@@ -1102,7 +1099,7 @@ export class WMS extends AbstractGeoViewRaster {
    *
    * @returns {Extent} The layer bounding box.
    */
-  getBounds(layerConfig: TypeLayerEntryConfig, bounds: Extent | undefined): Extent | undefined {
+  protected getBounds(layerConfig: TypeLayerEntryConfig, bounds: Extent | undefined): Extent | undefined {
     let layerBounds = layerConfig!.initialSettings?.bounds || [];
     const boundingBoxes = this.metadata?.Capability.Layer.BoundingBox;
     let bbExtent: Extent | undefined;
