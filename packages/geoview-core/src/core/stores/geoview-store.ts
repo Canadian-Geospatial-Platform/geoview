@@ -65,6 +65,7 @@ export interface INotificationsState {
 export interface ILegendState {
   selectedItem?: TypeLegendItemProps;
   selectedIsVisible: boolean;
+  selectedLayers: Record<string, { layer: string; icon: string }[]>;
 }
 
 export interface IMapDataTableState {
@@ -186,6 +187,7 @@ export const geoViewStoreDefinition = (
     legendState: {
       selectedItem: undefined,
       selectedIsVisible: true,
+      selectedLayers: {}
     },
     notificationState: {
       notifications: [],

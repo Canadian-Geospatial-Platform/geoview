@@ -54,12 +54,14 @@
     "toggle_opacity": "Toggle Opacity",
     "zoom_to": "Zoom to Layer",
     "overview_title": "Legend Overview",
+    "bold_selection": "Selection: ",
     "add_layer": "Add Layer",
     "selected_legend": "Selected Legend",
     "sort_layers": "Sort Layers",
     "selected_Layers": "An overview of currrently selected layers",
     "re-arrange": "re-arrange",
-    "categories_title": "Categories"
+    "categories_title" : "Categories",
+    "items_available": "items available"
   },
   "details": {
     "zoom_to": "Zoom to feature",
