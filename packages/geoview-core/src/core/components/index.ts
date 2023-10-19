@@ -13,7 +13,7 @@ export * from './data-table/export-button';
 export * from './data-table/filter-map';
 export * from './data-table/json-export-button';
 export * from './data-table/map-data-table';
-export * from './details-1/details';
+export * from './details/details';
 export * from './export/export-modal';
 export * from './footer-bar/footer-bar-expand-button';
 export * from './footer-bar/footer-bar-fixnorth-switch';

@@ -134,7 +134,13 @@ export function Navbar({ activeTrap, activeTrapSet }: NavbarProps): JSX.Element 
           // if not an empty object, only then render any HTML
           if (Object.keys(buttonPanelGroup).length !== 0) {
             return (
-              <ButtonGroup key={groupName} orientation="vertical" aria-label={t('mapnav.arianavbar')!} variant="contained">
+              <ButtonGroup
+                key={groupName}
+                orientation="vertical"
+                aria-label={t('mapnav.arianavbar')!}
+                variant="contained"
+                sx={sxClasses.navBtnGroup}
+              >
                 {Object.keys(buttonPanelGroup).map((buttonPanelKey) => {
                   const buttonPanel: TypeButtonPanel = buttonPanelGroup[buttonPanelKey];
                   // eslint-disable-next-line no-nested-ternary
