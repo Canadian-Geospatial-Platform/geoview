@@ -137,8 +137,20 @@ export function Datapanel({ layerData, mapId, projectionConfig, language }: Data
         <Grid item xs={!isEnlargeDataTable ? 4 : 1.25}>
           {renderList()}
         </Grid>
-        <Grid item xs={!isEnlargeDataTable ? 8 : 10.75} sx={{ paddingLeft: '1rem' }}>
-          <CircularProgress isLoaded={!isLoading} style={{ marginTop: '1rem' }} />
+        <Grid item xs={!isEnlargeDataTable ? 8 : 10.75} sx={{ paddingLeft: '1rem', position: 'relative' }}>
+          <CircularProgress
+            isLoaded={!isLoading}
+            style={{
+              marginTop: '1rem',
+              position: 'absolute',
+              background: 'none',
+              top: '50%',
+              right: '50%',
+              transform: 'translate(50%,-100%)',
+              width: '40px !important',
+              height: '40px !important',
+            }}
+          />
 
           {!isLoading &&
             layerData.map(({ layerKey, layerId }, index) => (
