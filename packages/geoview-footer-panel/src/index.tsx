@@ -81,17 +81,7 @@ class FooterPanelPlugin extends AbstractPlugin {
     if (cgpv) {
       // access the api calls
       const { api } = cgpv;
-      const { displayLanguage, footerTabs, map } = api.maps[mapId];
-
-      const mapContainer = map.getTargetElement().parentElement;
-      // Set size of map container based on whether footer-panel is collapsed or not
-      if (mapContainer) {
-        if (configObj?.collapsed === false) {
-          mapContainer.style.height = 'calc( 100% - 300px )';
-        } else {
-          mapContainer.style.height = 'calc( 100% - 55px )';
-        }
-      }
+      const { displayLanguage, footerTabs } = api.maps[mapId];
 
       const defaultTabs = configObj?.tabs.defaultTabs as Array<string>;
       let tabsCounter = 0;
