@@ -31,10 +31,19 @@ export const getShellSxClasses = (theme: Theme) => ({
     zIndex: 0,
     height: '100%',
   },
-  mapContainer: {
+  mapShellContainer: {
     display: 'flex',
     flexDirection: 'row',
     height: '100%',
+    width: '100%',
+    position: 'relative',
+    alignItems: 'stretch',
+  },
+  mapFooterContainer: {
+    display: 'flex',
+    flexDirection: 'column',
+    height: '100%',
+    width: '100%',
     position: 'relative',
     alignItems: 'stretch',
   },

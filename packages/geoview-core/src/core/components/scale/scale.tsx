@@ -106,46 +106,57 @@ export function Scale(): JSX.Element {
   ];
 
   useEffect(() => {
-    const scaleBar = new ScaleLine({
-      units: 'metric',
-      target: document.getElementById(`${mapId}-scaleControlBar`) as HTMLElement,
-      bar: true,
-      text: true,
-    });
+    let scaleBar: ScaleLine;
+    let scaleLine: ScaleLine;
+    // eslint-disable-next-line @typescript-eslint/ban-types
+    let unsubMapCenterCoord: Function;
 
-    const scaleLine = new ScaleLine({
-      units: 'metric',
-      target: document.getElementById(`${mapId}-scaleControlLine`) as HTMLElement,
-    });
+    if (mapElement !== undefined) {
+      scaleBar = new ScaleLine({
+        units: 'metric',
+        target: document.getElementById(`${mapId}-scaleControlBar`) as HTMLElement,
+        bar: true,
+        text: true,
+      });
 
-    mapElement.addControl(scaleLine);
-    mapElement.addControl(scaleBar);
+      scaleLine = new ScaleLine({
+        units: 'metric',
+        target: document.getElementById(`${mapId}-scaleControlLine`) as HTMLElement,
+      });
 
-    // if mapCenterCoordinates changed, map move end event has been triggered
-    const unsubMapCenterCoord = getGeoViewStore(mapId).subscribe(
-      (state) => state.mapState.mapCenterCoordinates,
-      (curCoords, prevCoords) => {
-        if (curCoords !== prevCoords) {
-          setLineWidth(
-            (document.getElementById(`${mapId}-scaleControlLine`)?.querySelector('.ol-scale-line-inner') as HTMLElement)?.style
-              .width as string
-          );
-          setScaleGraphic(document.getElementById(`${mapId}-scaleControlLine`)?.querySelector('.ol-scale-line-inner')?.innerHTML as string);
-          setScaleNumeric(document.getElementById(`${mapId}-scaleControlBar`)?.querySelector('.ol-scale-text')?.innerHTML as string);
+      mapElement.addControl(scaleLine);
+      mapElement.addControl(scaleBar);
+
+      // if mapCenterCoordinates changed, map move end event has been triggered
+      unsubMapCenterCoord = getGeoViewStore(mapId).subscribe(
+        (state) => state.mapState.mapCenterCoordinates,
+        (curCoords, prevCoords) => {
+          if (curCoords !== prevCoords) {
+            setLineWidth(
+              (document.getElementById(`${mapId}-scaleControlLine`)?.querySelector('.ol-scale-line-inner') as HTMLElement)?.style
+                .width as string
+            );
+            setScaleGraphic(
+              document.getElementById(`${mapId}-scaleControlLine`)?.querySelector('.ol-scale-line-inner')?.innerHTML as string
+            );
+            setScaleNumeric(document.getElementById(`${mapId}-scaleControlBar`)?.querySelector('.ol-scale-text')?.innerHTML as string);
+          }
+        },
+        {
+          fireImmediately: true,
         }
-      },
-      {
-        fireImmediately: true,
-      }
-    );
+      );
+    }
 
     return () => {
-      mapElement.removeControl(scaleLine);
-      mapElement.removeControl(scaleBar);
-      unsubMapCenterCoord();
+      if (mapElement !== undefined) {
+        mapElement.removeControl(scaleLine);
+        mapElement.removeControl(scaleBar);
+        unsubMapCenterCoord();
+      }
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [mapElement]);
 
   return (
     <Tooltip title={t('mapnav.scale')!} placement="top">
