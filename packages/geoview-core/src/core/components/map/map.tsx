@@ -40,6 +40,7 @@ const useStyles = makeStyles(() => ({
     display: 'flex',
     flexDirection: 'column',
     width: '100%',
+    height: '100%',
     position: 'relative',
   },
 }));
@@ -105,6 +106,8 @@ export function Map(mapFeaturesConfig: TypeMapFeaturesConfig): JSX.Element {
     });
 
     viewer.toggleMapInteraction(mapConfig.interaction);
+
+    setTimeout(() => api.maps[mapId].map.updateSize(), 2000);
   };
 
   const initMap = async () => {
@@ -245,7 +248,7 @@ export function Map(mapFeaturesConfig: TypeMapFeaturesConfig): JSX.Element {
           <ClickMarker />
           <HoverTooltip />
           {deviceSizeMedUp && overviewMap && overviewBaseMap && <OverviewMap />}
-          {deviceSizeMedUp && <Footerbar />}
+          {/* {deviceSizeMedUp && <Footerbar />} */}
         </>
       )}
     </div>
