@@ -1,41 +1,29 @@
 import { useContext } from 'react';
 
+import { useTheme } from '@mui/material/styles';
+
 import { fromLonLat } from 'ol/proj';
 import { Extent } from 'ol/extent';
 import { FitOptions } from 'ol/View';
 
+// import { getGeoViewStore } from '@/core/stores/stores-managers';
+
 import { MapContext } from '@/core/app-start';
-
 import { IconButton, EmojiPeopleIcon } from '@/ui';
-
 import { Coordinate, api } from '@/app';
-
-/**
- * Interface used for location button properties
- */
-interface LocationProps {
-  className?: string | undefined;
-}
-
-/**
- * default properties values
- */
-const defaultProps = {
-  className: '',
-};
+import { getSxClasses } from '../nav-bar-style';
 
 /**
  * Create a location button to zoom to user location
  *
- * @param {LocationProps} props the location button properties
  * @returns {JSX.Element} the created location button
  */
-export default function Location(props: LocationProps): JSX.Element {
-  const { className } = props;
-
+export default function Location(): JSX.Element {
   const mapConfig = useContext(MapContext);
-
   const { mapId } = mapConfig;
+
+  const theme = useTheme();
+  const sxClasses = getSxClasses(theme);
 
   /**
    * Zoom to user location
@@ -65,10 +53,8 @@ export default function Location(props: LocationProps): JSX.Element {
   }
 
   return (
-    <IconButton id="location" tooltip="mapnav.location" tooltipPlacement="left" onClick={() => zoomToMe()} className={className}>
+    <IconButton id="location" tooltip="mapnav.location" tooltipPlacement="left" onClick={() => zoomToMe()} sx={sxClasses.navButton}>
       <EmojiPeopleIcon />
     </IconButton>
   );
 }
-
-Location.defaultProps = defaultProps;

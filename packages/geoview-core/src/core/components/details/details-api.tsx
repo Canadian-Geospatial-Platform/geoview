@@ -9,7 +9,7 @@ import { DetailsFooter, TypeArrayOfLayerData } from './details';
  * @exports
  * @class DetailsAPI
  */
-export class DetailsAPI {
+export class DetailsApi {
   mapId!: string;
 
   featureInfoLayerSet!: FeatureInfoLayerSet;
@@ -32,7 +32,7 @@ export class DetailsAPI {
    * @return {ReactElement} the details react element
    */
 
-  createDetailsFooter = (mapId: string, detailsElements: TypeArrayOfLayerData): ReactElement => {
+  createDetails = (mapId: string, detailsElements: TypeArrayOfLayerData): ReactElement => {
     return createElement('div', {}, [
       createElement(DetailsFooter, {
         key: `${mapId}-details-sets`,

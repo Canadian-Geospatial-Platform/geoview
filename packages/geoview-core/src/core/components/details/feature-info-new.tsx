@@ -15,7 +15,7 @@ import {
 } from '@/api/events/payloads';
 import { EVENT_NAMES } from '@/api/events/event-types';
 import { FeatureInfoTable } from './feature-info-table';
-import { getSxClasses } from './details-1-style';
+import { getSxClasses } from './details-style';
 
 export interface TypeFeatureInfoProps {
   mapId: string;
