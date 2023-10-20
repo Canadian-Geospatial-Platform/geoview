@@ -18,6 +18,8 @@ export declare class LayerSet {
     registrationConditionFunction: (layerPath: string) => boolean;
     /** Function used to initialise the data property of the layer path entry. */
     registrationUserDataInitialisation?: (layerPath: string) => void;
+    /** Sequence number to append to the layer name when we declare a layer as anonymous. */
+    anonymousSequenceNumber: number;
     /** ***************************************************************************************************************************
      * The class constructor that instanciate a set of layer.
      *

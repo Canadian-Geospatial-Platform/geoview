@@ -6,6 +6,7 @@ import { CircularProgressProps } from '@mui/material';
 interface TypeCircularProgressProps extends CircularProgressProps {
     isLoaded: boolean;
     style?: CSSProperties;
+    sx?: CSSProperties;
 }
 /**
  * Create a customized Material UI Circular Progress

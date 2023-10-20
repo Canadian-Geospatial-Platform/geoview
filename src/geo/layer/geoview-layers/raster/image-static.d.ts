@@ -65,15 +65,14 @@ export declare class ImageStatic extends AbstractGeoViewRaster {
      */
     private getLegendImage;
     /** ***************************************************************************************************************************
-     * Return the legend of the layer. When layerPathOrConfig is undefined, the activeLayer of the class is used. This routine
-     * return null when the layerPath specified is not found or when the layerPathOrConfig is undefined and the active layer
-     * is null or the selected layerConfig is undefined or null.
+     * Return the legend of the layer.This routine return null when the layerPath specified is not found. If the legend can't be
+     * read, the legend property of the object returned will be null.
      *
-     * @param {string | TypeLayerEntryConfig | null} layerPathOrConfig Optional layer path or configuration.
+     * @param {string | TypeLayerEntryConfig} layerPathOrConfig Layer path or configuration.
      *
      * @returns {Promise<TypeLegend | null>} The legend of the layer.
      */
-    getLegend(layerPathOrConfig?: string | TypeLayerEntryConfig | null): Promise<TypeLegend | null>;
+    getLegend(layerPathOrConfig: string | TypeLayerEntryConfig): Promise<TypeLegend | null>;
     /** ***************************************************************************************************************************
      * This method recursively validates the layer configuration entries by filtering and reporting invalid layers. If needed,
      * extra configuration may be done here.
@@ -99,5 +98,5 @@ export declare class ImageStatic extends AbstractGeoViewRaster {
      *
      * @returns {Extent} The layer bounding box.
      */
-    getBounds(layerConfig: TypeLayerEntryConfig, bounds: Extent | undefined): Extent | undefined;
+    protected getBounds(layerConfig: TypeLayerEntryConfig, bounds: Extent | undefined): Extent | undefined;
 }

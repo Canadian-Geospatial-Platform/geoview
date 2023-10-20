@@ -1,13 +1,13 @@
 import { ReactElement } from 'react';
 import { FeatureInfoLayerSet } from '@/geo/utils/feature-info-layer-set';
-import { TypeArrayOfLayerData, DetailsProps } from './details';
+import { TypeArrayOfLayerData } from './details';
 /**
  * API to manage details component
  *
  * @exports
  * @class DetailsAPI
  */
-export declare class DetailsAPI {
+export declare class DetailsApi {
     mapId: string;
     featureInfoLayerSet: FeatureInfoLayerSet;
     /**
@@ -19,12 +19,9 @@ export declare class DetailsAPI {
     /**
      * Create a details as an element
      *
-     * @param {TypeLayerDetailsProps} mapId the map identifier
+     * @param {string} mapId the map identifier
      * @param {TypeArrayOfLayerData} detailsElements the data to display in the Details element
-     * @param {detailsSettings} DetailsProps the properties of the details to be created
-     *
      * @return {ReactElement} the details react element
-     *
      */
-    createDetails: (mapId: string, detailsElements: TypeArrayOfLayerData, detailsSettings: DetailsProps) => ReactElement;
+    createDetails: (mapId: string, detailsElements: TypeArrayOfLayerData) => ReactElement;
 }

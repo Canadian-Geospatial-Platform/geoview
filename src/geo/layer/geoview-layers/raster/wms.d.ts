@@ -214,15 +214,14 @@ export declare class WMS extends AbstractGeoViewRaster {
      */
     private getStyleLegend;
     /** ***************************************************************************************************************************
-     * Return the legend of the layer. When layerPathOrConfig is undefined, the activeLayer of the class is used. This routine
-     * return null when the layerPath specified is not found or when the layerPathOrConfig is undefined and the active layer
-     * is null or the selected layerConfig is undefined or null.
+     * Return the legend of the layer. This routine return null when the layerPath specified is not found. If the legend can't be
+     * read, the legend property of the object returned will be null.
      *
-     * @param {string | TypeLayerEntryConfig | null} layerPathOrConfig Optional layer path or configuration.
+     * @param {string | TypeLayerEntryConfig} layerPathOrConfig Layer path or configuration.
      *
-     * @returns {Promise<TypeLegend | null>} The legend of the layer.
+     * @returns {Promise<TypeLegend | null>} The legend of the layer or null.
      */
-    getLegend(layerPathOrConfig?: string | TypeLayerEntryConfig | null): Promise<TypeLegend | null>;
+    getLegend(layerPathOrConfig: string | TypeLayerEntryConfig): Promise<TypeLegend | null>;
     /** ***************************************************************************************************************************
      * Translate the get feature information result set to the TypeArrayOfFeatureInfoEntries used by GeoView.
      *
@@ -243,14 +242,12 @@ export declare class WMS extends AbstractGeoViewRaster {
      */
     private getAttribute;
     /** ***************************************************************************************************************************
-     * Return the attribute of an object that ends with the specified ending string or null if not found.
+     * Set the style to be used by the wms layer. This methode does nothing if the layer path can't be found.
      *
-     * @param {TypeJsonObject} jsonObject The object that is supposed to have the needed attribute.
-     * @param {string} attribute The attribute searched.
-     *
-     * @returns {TypeJsonObject | undefined} The promised feature info table.
+     * @param {string} StyleId The style identifier that will be used.
+     * @param {string | TypeLayerEntryConfig} layerPathOrConfig The layer path to the layer config or a layer config.
      */
-    setStyle(StyleId: string, layerPathOrConfig?: string | TypeLayerEntryConfig | null): void;
+    setStyle(StyleId: string, layerPathOrConfig: string | TypeLayerEntryConfig): void;
     /** ***************************************************************************************************************************
      * Apply a view filter to the layer. When the CombineLegendFilter flag is false, the filter paramater is used alone to display
      * the features. Otherwise, the legend filter and the filter parameter are combined together to define the view filter. The
@@ -258,11 +255,11 @@ export declare class WMS extends AbstractGeoViewRaster {
      * is done.
      * TODO ! The combination of the legend filter and the dimension filter probably does not apply to WMS. The code can be simplified.
      *
-     * @param {string | TypeLayerEntryConfig | null} layerPathOrConfig Optional layer path or configuration.
+     * @param {string | TypeLayerEntryConfig} layerPathOrConfig Layer path or configuration.
      * @param {string} filter An optional filter to be used in place of the getViewFilter value.
      * @param {boolean} CombineLegendFilter Flag used to combine the legend filter and the filter together (default: true)
      */
-    applyViewFilter(layerPathOrConfig?: string | TypeLayerEntryConfig | null, filter?: string, CombineLegendFilter?: boolean): void;
+    applyViewFilter(layerPathOrConfig: string | TypeLayerEntryConfig, filter?: string, CombineLegendFilter?: boolean): void;
     /** ***************************************************************************************************************************
      * Get the bounds of the layer represented in the layerConfig, returns updated bounds
      *
@@ -271,5 +268,5 @@ export declare class WMS extends AbstractGeoViewRaster {
      *
      * @returns {Extent} The layer bounding box.
      */
-    getBounds(layerConfig: TypeLayerEntryConfig, bounds: Extent | undefined): Extent | undefined;
+    protected getBounds(layerConfig: TypeLayerEntryConfig, bounds: Extent | undefined): Extent | undefined;
 }

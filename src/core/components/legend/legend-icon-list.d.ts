@@ -4,11 +4,9 @@ export interface TypeLegendIconListProps {
     iconImages: string[];
     iconLabels: string[];
     layerConfig?: TypeVectorLayerEntryConfig;
-    mapId?: string;
     geometryKey?: TypeStyleGeometry;
     isParentVisible?: boolean;
-    toggleParentVisible?: () => void;
-    toggleMapVisible?: (layerConfig: TypeLayerEntryConfig) => void;
+    toggleMapVisible: (layerConfig: TypeLayerEntryConfig) => void;
 }
 /**
  * List of Icons to show in expanded Legend Item

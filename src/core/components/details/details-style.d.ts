@@ -24,7 +24,9 @@ export declare const getSxClasses: (theme: Theme) => {
         background: string;
     };
     layerNamePrimary: {
-        font: string;
+        '& .MuiListItemText-primary': {
+            font: string;
+        };
         marginLeft: string;
     };
     list: {
@@ -45,14 +47,8 @@ export declare const getSxClasses: (theme: Theme) => {
         boxShadow: string;
     };
     itemText: {
-        fontSize: number;
-        noWrap: boolean;
         '& .MuiListItemText-primary': {
             font: string;
-        };
-        '& .MuiListItemText-secondary': {
-            font: string;
-            color: string;
         };
     };
     featureInfoListContainer: {
@@ -60,7 +56,9 @@ export declare const getSxClasses: (theme: Theme) => {
         paddingRight: string;
         paddingBottom: string;
         height: string;
-        overflow: string;
+        maxHeight: string;
+        overflowY: string;
+        overflowX: string;
     };
     featureInfoSingleImage: {
         width: string;
@@ -74,11 +72,14 @@ export declare const getSxClasses: (theme: Theme) => {
         };
     };
     featureInfoItemValue: {
-        fontSize: string;
         marginRight: number;
-        marginTop: string;
         wordBreak: string;
         overflow: string;
         textOverflow: string;
+    };
+    boxContainerFeatureInfo: {
+        wordWrap: string;
+        fontSize: string;
+        lineHeight: string;
     };
 };
