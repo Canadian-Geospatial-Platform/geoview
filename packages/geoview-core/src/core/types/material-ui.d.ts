@@ -53,6 +53,8 @@ declare module '@mui/material/styles' {
       btnDefaultColor?: string;
       btnFocusColor?: string;
       btnHoverColor?: string;
+      btnHeight?: string;
+      btnWidth?: string;
     };
     panel?: {
       background?: string;
@@ -114,6 +116,8 @@ declare module '@mui/material/styles' {
       btnDefaultColor: string;
       btnFocusColor: string;
       btnHoverColor: string;
+      btnHeight: string;
+      btnWidth: string;
     };
     panel: {
       activeBg: string;

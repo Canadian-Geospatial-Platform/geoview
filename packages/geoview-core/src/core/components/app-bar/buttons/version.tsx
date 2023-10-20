@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Typography, Box, Link, Theme, SvgIcon } from '@mui/material';
 
-import { GITUHUB_REPO, GEO_URL_TEXT } from '@/core/utils/constant';
+import { GITHUB_REPO, GEO_URL_TEXT } from '@/core/utils/constant';
 import { GeoCaIcon, Popover, IconButton } from '@/ui';
 
 // eslint-disable-next-line no-underscore-dangle
@@ -80,7 +80,7 @@ export default function Version(): JSX.Element {
               </Link>
             </Typography>
             <Typography component="div">
-              <Link rel="noopener" href={GITUHUB_REPO} target="_black">
+              <Link rel="noopener" href={GITHUB_REPO} target="_black">
                 {t('appbar.repoLink')}
               </Link>
             </Typography>

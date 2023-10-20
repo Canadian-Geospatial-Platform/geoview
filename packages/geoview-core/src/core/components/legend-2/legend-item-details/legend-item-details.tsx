@@ -126,7 +126,7 @@ const sxClasses = {
  */
 
 export function LegendItemDetails(props: TypeLegendItemDetailsProps): JSX.Element {
-  const { layerId, geoviewLayerInstance, subLayerId, layerConfigEntry, isRemoveable, isParentVisible } = props;
+  const { layerId, geoviewLayerInstance, subLayerId, layerConfigEntry, isRemoveable } = props;
 
   const { t, i18n } = useTranslation<string>();
   const theme: Theme & {
@@ -135,16 +135,13 @@ export function LegendItemDetails(props: TypeLegendItemDetailsProps): JSX.Elemen
 
   const { mapId } = geoviewLayerInstance;
   // check if layer is a clustered, so that clustering can be toggled
-  const path = subLayerId || `${layerId}/${geoviewLayerInstance.activeLayer?.layerId}`;
+  const path = subLayerId || `${layerId}/${geoviewLayerInstance.listOfLayerEntryConfig[0]?.layerId}`;
   const clusterLayerPath = path.replace('-unclustered', '');
   const unclusterLayerPath = `${clusterLayerPath}-unclustered`;
   const canCluster = !!api.maps[mapId].layer.registeredLayers[unclusterLayerPath];
   const [checkIsGroup, setcheckIsGroup_] = useState(false);
 
   const [isClusterToggleEnabled, setIsClusterToggleEnabled] = useState(false);
-  const [isChecked, setChecked] = useState<boolean>(
-    api.maps[mapId].layer.registeredLayers[clusterLayerPath]?.initialSettings?.visible !== 'no'
-  );
 
   const [isLegendOpen, setLegendOpen] = useState(true);
   const [groupItems, setGroupItems] = useState<TypeListOfLayerEntryConfig>([]);
@@ -283,7 +280,7 @@ export function LegendItemDetails(props: TypeLegendItemDetailsProps): JSX.Elemen
     getLayerName();
     const isGroup = getGroupsDetails();
     if (!isGroup) {
-      setOpacity(geoviewLayerInstance.getOpacity() ?? 1);
+      setOpacity(geoviewLayerInstance.getOpacity(geoviewLayerInstance.listOfLayerEntryConfig[0]) ?? 1);
       const legendInfo = api.maps[mapId].legend.legendLayerSet.resultSets?.[path]?.data;
       if (legendInfo) {
         getLegendDetails(legendInfo);
@@ -340,19 +337,6 @@ export function LegendItemDetails(props: TypeLegendItemDetailsProps): JSX.Elemen
   }, [checkedSublayerNamesAndIcons, nochildLayers]);
 
   useEffect(() => {
-    if (layerConfigEntry) {
-      if (isParentVisible && isChecked) {
-        geoviewLayerInstance.setVisible(true, layerConfigEntry);
-      } else {
-        geoviewLayerInstance.setVisible(false, layerConfigEntry);
-      }
-    } else {
-      // parent layer with no sub layers
-      geoviewLayerInstance.setVisible(isChecked);
-    }
-  }, [isParentVisible, isChecked, layerConfigEntry, geoviewLayerInstance]);
-
-  useEffect(() => {
     const mapZoomHandler = (payload: PayloadBaseClass) => {
       if (canCluster) {
         setZoom((payload as NumberPayload).value);
@@ -375,23 +359,23 @@ export function LegendItemDetails(props: TypeLegendItemDetailsProps): JSX.Elemen
       geoviewLayerInstance.setOpacity((opacityValue as number) / 100, clusterLayerPath);
       geoviewLayerInstance.setOpacity((opacityValue as number) / 100, unclusterLayerPath);
     } else if (subLayerId) geoviewLayerInstance.setOpacity((opacityValue as number) / 100, subLayerId);
-    else geoviewLayerInstance.setOpacity((opacityValue as number) / 100);
+    else geoviewLayerInstance.setOpacity((opacityValue as number) / 100, geoviewLayerInstance.listOfLayerEntryConfig[0]);
   };
 
   const handleClusterToggle = () => {
-    if (api.maps[mapId].layer.registeredLayers[clusterLayerPath]?.gvLayer) {
-      api.maps[mapId].layer.registeredLayers[clusterLayerPath]?.gvLayer!.setVisible(
-        !api.maps[mapId].layer.registeredLayers[clusterLayerPath]?.gvLayer!.getVisible()
+    if (api.maps[mapId].layer.registeredLayers[clusterLayerPath]?.olLayer) {
+      api.maps[mapId].layer.registeredLayers[clusterLayerPath]?.olLayer!.setVisible(
+        !api.maps[mapId].layer.registeredLayers[clusterLayerPath]?.olLayer!.getVisible()
       );
-      api.maps[mapId].layer.registeredLayers[unclusterLayerPath]?.gvLayer!.setVisible(
-        !api.maps[mapId].layer.registeredLayers[unclusterLayerPath]?.gvLayer!.getVisible()
+      api.maps[mapId].layer.registeredLayers[unclusterLayerPath]?.olLayer!.setVisible(
+        !api.maps[mapId].layer.registeredLayers[unclusterLayerPath]?.olLayer!.getVisible()
       );
     }
     setIsClusterToggleEnabled(!isClusterToggleEnabled);
   };
 
-  const handleZoomTo = () => {
-    let bounds = api.maps[mapId].layer.geoviewLayers[layerId].calculateBounds(path);
+  const handleZoomTo = async () => {
+    let bounds = await api.maps[mapId].layer.geoviewLayers[layerId].calculateBounds(path);
     let transformedBounds: Extent | undefined;
     if (bounds) transformedBounds = transformExtent(bounds, `EPSG:${api.maps[mapId].currentProjection}`, `EPSG:4326`);
 
@@ -433,8 +417,7 @@ export function LegendItemDetails(props: TypeLegendItemDetailsProps): JSX.Elemen
   }, [iconList, iconType]);
 
   useEffect(() => {
-    const source = (api.maps[mapId].layer.getGeoviewLayerById(layerId) as AbstractGeoViewVector)?.activeLayer
-      ?.source as TypeVectorSourceInitialConfig;
+    const source = api.maps[mapId].layer.getGeoviewLayerById(layerId)?.listOfLayerEntryConfig[0]?.source as TypeVectorSourceInitialConfig;
     setIsClusterToggleEnabled(source?.cluster?.enable ?? false);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -490,11 +473,11 @@ export function LegendItemDetails(props: TypeLegendItemDetailsProps): JSX.Elemen
             isParentVisible={isChecked}
             onGetCheckedSublayerNames={handleGetCheckedSublayerNames}
             toggleParentVisible={() => setChecked(!isChecked)}
+            mapId={mapId}
             toggleMapVisible={(sublayerConfig) => {
               (geoviewLayerInstance as AbstractGeoViewVector | EsriDynamic).applyViewFilter(sublayerConfig);
             }}
             layerConfig={geometryLayerConfig as TypeVectorLayerEntryConfig}
-            mapId={mapId}
             geometryKey={layerGeometryKey!}
           />
         )}

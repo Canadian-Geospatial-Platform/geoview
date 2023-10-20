@@ -295,12 +295,12 @@ export class EsriDynamic extends AbstractGeoViewRaster {
         `${this.mapId}/visibilityTest`
       );
 
-      layerEntryConfig.gvLayer = new ImageLayer(imageLayerOptions);
+      layerEntryConfig.olLayer = new ImageLayer(imageLayerOptions);
       this.applyViewFilter(layerEntryConfig, layerEntryConfig.layerFilter ? layerEntryConfig.layerFilter : '');
 
       super.addLoadendListener(layerEntryConfig, 'image');
 
-      resolve(layerEntryConfig.gvLayer);
+      resolve(layerEntryConfig.olLayer);
     });
 
     return promisedVectorLayer;
@@ -348,7 +348,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
     layerConfig: TypeEsriDynamicLayerEntryConfig
   ): Promise<TypeArrayOfFeatureInfoEntries> {
     const promisedQueryResult = new Promise<TypeArrayOfFeatureInfoEntries>((resolve) => {
-      if (!this.getVisible(layerConfig) || !layerConfig.gvLayer) resolve([]);
+      if (!this.getVisible(layerConfig) || !layerConfig.olLayer) resolve([]);
       else {
         if (!(layerConfig as TypeEsriDynamicLayerEntryConfig).source.featureInfo?.queryable) resolve([]);
         let identifyUrl = getLocalizedValue(layerConfig.source?.dataAccessPath, this.mapId);
@@ -363,7 +363,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
 
           const extent = { xmin: bounds[0], ymin: bounds[1], xmax: bounds[2], ymax: bounds[3] };
 
-          const source = (layerConfig.gvLayer as ImageLayer<ImageArcGISRest>).getSource()!;
+          const source = (layerConfig.olLayer as ImageLayer<ImageArcGISRest>).getSource()!;
           const { layerDefs } = source.getParams();
 
           identifyUrl =
@@ -574,17 +574,17 @@ export class EsriDynamic extends AbstractGeoViewRaster {
    * Get the layer view filter. The filter is derived fron the uniqueValue or the classBreak visibility flags and a layerFilter
    * associated to the layer.
    *
-   * @param {string | TypeLayerEntryConfig | null} layerPathOrConfig Optional layer path or configuration.
+   * @param {string | TypeLayerEntryConfig} layerPathOrConfig Layer path or configuration.
    *
    * @returns {string} the filter associated to the layerPath
    */
-  getViewFilter(layerPathOrConfig: string | TypeLayerEntryConfig | null = this.activeLayer): string {
+  getViewFilter(layerPathOrConfig: string | TypeLayerEntryConfig): string {
     const layerEntryConfig = (
       typeof layerPathOrConfig === 'string' ? this.getLayerConfig(layerPathOrConfig) : layerPathOrConfig
     ) as TypeEsriDynamicLayerEntryConfig;
-    const layerFilter = layerEntryConfig.gvLayer?.get('layerFilter');
+    const layerFilter = layerEntryConfig.olLayer?.get('layerFilter');
 
-    if (layerEntryConfig.style) {
+    if (layerEntryConfig?.style) {
       const setAllUndefinedVisibilityFlagsToYes = (styleConfig: TypeUniqueValueStyleConfig | TypeClassBreakStyleConfig) => {
         // default value is true for all undefined visibility flags
         if (styleConfig.defaultVisible === undefined) styleConfig.defaultVisible = 'yes';
@@ -748,20 +748,20 @@ export class EsriDynamic extends AbstractGeoViewRaster {
    * legend filters are derived from the uniqueValue or classBreaks style of the layer. When the layer config is invalid, nothing
    * is done.
    *
-   * @param {string | TypeLayerEntryConfig | null} layerPathOrConfig Optional layer path or configuration.
+   * @param {string | TypeLayerEntryConfig} layerPathOrConfig Layer path or configuration.
    * @param {string} filter An optional filter to be used in place of the getViewFilter value.
    * @param {boolean} CombineLegendFilter Flag used to combine the legend filter and the filter together (default: true)
    */
-  applyViewFilter(layerPathOrConfig: string | TypeLayerEntryConfig | null = this.activeLayer, filter = '', CombineLegendFilter = true) {
+  applyViewFilter(layerPathOrConfig: string | TypeLayerEntryConfig, filter = '', CombineLegendFilter = true) {
     const layerEntryConfig = (
       typeof layerPathOrConfig === 'string' ? this.getLayerConfig(layerPathOrConfig) : layerPathOrConfig
     ) as TypeEsriDynamicLayerEntryConfig;
-    const source = (layerEntryConfig.gvLayer as ImageLayer<ImageArcGISRest>).getSource();
+    const source = (layerEntryConfig.olLayer as ImageLayer<ImageArcGISRest>).getSource();
     if (source) {
       let filterValueToUse = filter.replaceAll(/\s{2,}/g, ' ').trim();
-      layerEntryConfig.gvLayer!.set('legendFilterIsOff', !CombineLegendFilter);
+      layerEntryConfig.olLayer!.set('legendFilterIsOff', !CombineLegendFilter);
       if (CombineLegendFilter) {
-        layerEntryConfig.gvLayer?.set('layerFilter', filterValueToUse);
+        layerEntryConfig.olLayer?.set('layerFilter', filterValueToUse);
         filterValueToUse = this.getViewFilter(layerEntryConfig);
       }
 
@@ -783,7 +783,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
         )}`;
       });
       source.updateParams({ layerDefs: `{"${layerEntryConfig.layerId}": "${filterValueToUse}"}` });
-      layerEntryConfig.gvLayer!.changed();
+      layerEntryConfig.olLayer!.changed();
     }
   }
 
@@ -795,9 +795,9 @@ export class EsriDynamic extends AbstractGeoViewRaster {
    *
    * @returns {Extent} The layer bounding box.
    */
-  getBounds(layerConfig: TypeLayerEntryConfig, bounds: Extent | undefined): Extent | undefined {
+  protected getBounds(layerConfig: TypeLayerEntryConfig, bounds: Extent | undefined): Extent | undefined {
     const layerBounds = layerConfig!.initialSettings?.bounds || [];
-    const projection = this.metadata?.fullExtent.spatialReference.wkid || api.maps[this.mapId].currentProjection;
+    const projection = this.metadata?.fullExtent?.spatialReference?.wkid || api.maps[this.mapId].currentProjection;
 
     if (this.metadata?.fullExtent) {
       layerBounds[0] = this.metadata?.fullExtent.xmin as number;

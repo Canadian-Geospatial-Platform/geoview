@@ -180,6 +180,7 @@ export function Legend2(props: LegendItemsDetailsProps): JSX.Element {
             canSetOpacity={selectedLegendItem.canSetOpacity}
             expandAll={selectedLegendItem.expandAll}
             hideAll={selectedLegendItem?.hideAll}
+            isParentVisible={selectedLegendItem.geoviewLayerInstance.getVisible(selectedLegendItem.layerConfigEntry!)}
           />
         </Item>
       );

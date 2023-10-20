@@ -2,9 +2,11 @@ import { Dispatch, SetStateAction, useCallback, useContext, useEffect, useRef, u
 
 import { useTranslation } from 'react-i18next';
 
-import makeStyles from '@mui/styles/makeStyles';
+import { useTheme } from '@mui/material/styles';
 
 import { useStore } from 'zustand';
+import { getGeoViewStore } from '@/core/stores/stores-managers';
+
 import ZoomIn from './buttons/zoom-in';
 import ZoomOut from './buttons/zoom-out';
 import Fullscreen from './buttons/fullscreen';
@@ -12,87 +14,14 @@ import Home from './buttons/home';
 import Export from './buttons/export';
 import Location from './buttons/location';
 
-import ExportModal from '../export/export-modal';
-
+import ExportModal from '@/core/components/export/export-modal';
 import { api } from '@/app';
 import { Panel, ButtonGroup, IconButton, Box } from '@/ui';
-
 import { MapContext } from '@/core/app-start';
 import { EVENT_NAMES } from '@/api/events/event-types';
 import { payloadIsAButtonPanel, ButtonPanelPayload, PayloadBaseClass } from '@/api/events/payloads';
 import { TypeButtonPanel } from '@/ui/panel/panel-types';
-
-import { getGeoViewStore } from '@/core/stores/stores-managers';
-
-const navBtnWidth = '44px';
-const navBtnHeight = '44px';
-
-const useStyles = makeStyles((theme) => ({
-  navBarRef: {
-    position: 'absolute',
-    right: theme.spacing(5),
-    height: '600px',
-    maxHeight: 'calc( 100% - 200px)',
-    display: 'flex',
-    flexDirection: 'row',
-    marginRight: 0,
-    zIndex: theme.zIndex.appBar,
-    pointerEvents: 'all',
-    justifyContent: 'center',
-    backgroundColor: 'transparent',
-    transition: 'bottom 300ms ease-in-out',
-  },
-  navBtnGroupContainer: {
-    display: 'flex',
-    position: 'relative',
-    flexDirection: 'column',
-    pointerEvents: 'auto',
-    justifyContent: 'end',
-    overflowY: 'hidden',
-    padding: 5,
-  },
-  navBtnGroup: {
-    borderRadius: theme.spacing(5),
-    '&:not(:last-child)': {
-      marginBottom: theme.spacing(11),
-    },
-    '& .MuiButtonGroup-grouped:not(:last-child)': {
-      borderColor: theme.navBar.borderColor,
-    },
-  },
-  navBarButton: {
-    backgroundColor: theme.navBar.btnDefaultBg,
-    color: theme.navBar.btnDefaultColor,
-    borderRadius: theme.spacing(5),
-    width: navBtnWidth,
-    height: navBtnHeight,
-    maxWidth: navBtnWidth,
-    minWidth: navBtnWidth,
-    padding: 'initial',
-    transition: 'background-color 0.3s ease-in-out',
-    '&:not(:last-of-type)': {
-      borderBottomLeftRadius: 0,
-      borderBottomRightRadius: 0,
-      borderBottom: `1px solid ${theme.navBar.borderColor}`,
-    },
-    '&:not(:first-of-type)': {
-      borderTopLeftRadius: 0,
-      borderTopRightRadius: 0,
-    },
-    '&:hover': {
-      backgroundColor: theme.navBar.btnHoverBg,
-      color: theme.navBar.btnHoverColor,
-    },
-    '&:focus': {
-      backgroundColor: theme.navBar.btnFocusBg,
-      color: theme.navBar.btnFocusColor,
-    },
-    '&:active': {
-      backgroundColor: theme.navBar.btnFocusBg,
-      color: theme.navBar.btnActiveColor,
-    },
-  },
-}));
+import { getSxClasses } from './nav-bar-style';
 
 type NavbarProps = {
   activeTrap: boolean;
@@ -108,8 +37,8 @@ export function Navbar({ activeTrap, activeTrapSet }: NavbarProps): JSX.Element 
 
   const { t } = useTranslation<string>();
 
-  // TODO: remove useStyle
-  const classes = useStyles();
+  const theme = useTheme();
+  const sxClasses = getSxClasses(theme);
 
   const navBarRef = useRef<HTMLDivElement>(null);
   const trapActive = useRef<boolean>(activeTrap);
@@ -182,7 +111,7 @@ export function Navbar({ activeTrap, activeTrapSet }: NavbarProps): JSX.Element 
 
   return (
     /** TODO - KenChase Need to add styling for scenario when more buttons that can fit vertically occurs (or limit number of buttons that can be added) */
-    <Box ref={navBarRef} className={classes.navBarRef} sx={{ bottom: footerBarExpanded ? 80 : 40 }}>
+    <Box ref={navBarRef} sx={[sxClasses.navBarRef, { bottom: footerBarExpanded ? 80 : 40 }]}>
       {Object.keys(buttonPanelGroups).map((groupName) => {
         const buttonPanelGroup = buttonPanelGroups[groupName];
 
@@ -198,7 +127,7 @@ export function Navbar({ activeTrap, activeTrapSet }: NavbarProps): JSX.Element 
         }
         return null;
       })}
-      <div className={classes.navBtnGroupContainer}>
+      <Box sx={sxClasses.navBtnGroupContainer}>
         {Object.keys(buttonPanelGroups).map((groupName) => {
           const buttonPanelGroup = buttonPanelGroups[groupName];
 
@@ -210,7 +139,7 @@ export function Navbar({ activeTrap, activeTrapSet }: NavbarProps): JSX.Element 
                 orientation="vertical"
                 aria-label={t('mapnav.arianavbar')!}
                 variant="contained"
-                classes={{ root: classes.navBtnGroup }}
+                sx={sxClasses.navBtnGroup}
               >
                 {Object.keys(buttonPanelGroup).map((buttonPanelKey) => {
                   const buttonPanel: TypeButtonPanel = buttonPanelGroup[buttonPanelKey];
@@ -222,7 +151,7 @@ export function Navbar({ activeTrap, activeTrapSet }: NavbarProps): JSX.Element 
                         id={buttonPanel.button.id}
                         tooltip={buttonPanel.button.tooltip}
                         tooltipPlacement={buttonPanel.button.tooltipPlacement}
-                        className={classes.navBarButton}
+                        sx={sxClasses.navButton}
                         onClick={buttonPanel.button.onClick}
                       >
                         {buttonPanel.button.children}
@@ -233,7 +162,7 @@ export function Navbar({ activeTrap, activeTrapSet }: NavbarProps): JSX.Element 
                         id={buttonPanel.button.id}
                         tooltip={buttonPanel.button.tooltip}
                         tooltipPlacement={buttonPanel.button.tooltipPlacement}
-                        className={classes.navBarButton}
+                        sx={sxClasses.navButton}
                         onClick={() => {
                           if (!buttonPanel.panel?.status) {
                             buttonPanel.panel?.open();
@@ -252,28 +181,18 @@ export function Navbar({ activeTrap, activeTrapSet }: NavbarProps): JSX.Element 
           }
           return null;
         })}
-        <ButtonGroup
-          orientation="vertical"
-          aria-label={t('mapnav.arianavbar')!}
-          variant="contained"
-          classes={{ root: classes.navBtnGroup }}
-        >
-          <ZoomIn className={classes.navBarButton} />
-          <ZoomOut className={classes.navBarButton} />
+        <ButtonGroup orientation="vertical" aria-label={t('mapnav.arianavbar')!} variant="contained" sx={sxClasses.navBtnGroup}>
+          <ZoomIn />
+          <ZoomOut />
         </ButtonGroup>
-        <ButtonGroup
-          orientation="vertical"
-          aria-label={t('mapnav.arianavbar')!}
-          variant="contained"
-          classes={{ root: classes.navBtnGroup }}
-        >
-          {navBar?.includes('fullscreen') && <Fullscreen className={classes.navBarButton} />}
-          {navBar?.includes('location') && <Location className={classes.navBarButton} />}
-          {navBar?.includes('home') && <Home className={classes.navBarButton} />}
-          {navBar?.includes('export') && <Export className={classes.navBarButton} openModal={openModal} />}
+        <ButtonGroup orientation="vertical" aria-label={t('mapnav.arianavbar')!} variant="contained" sx={sxClasses.navBtnGroup}>
+          {navBar?.includes('fullscreen') && <Fullscreen />}
+          {navBar?.includes('location') && <Location />}
+          {navBar?.includes('home') && <Home />}
+          {navBar?.includes('export') && <Export openModal={openModal} />}
         </ButtonGroup>
         <ExportModal isShown={ModalIsShown} closeModal={closeModal} />
-      </div>
+      </Box>
     </Box>
   );
 }

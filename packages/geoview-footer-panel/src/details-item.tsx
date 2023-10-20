@@ -79,7 +79,7 @@ export function DetailsItem({ mapId }: Props): JSX.Element {
     // once page loads, details is empty array based on the useState we defined
     // we need to create details if we click on a map and single click event triggered, then we have array of layers that is details
     // if (details.length > 0) {
-    setList(api.maps[mapId].detailsFooter.createDetailsFooter(mapId, details, { mapId, location: lngLat, handlerName }));
+    setList(api.maps[mapId].details.createDetails(mapId, details, { mapId, location: lngLat, handlerName }));
     // }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [details, lngLat]);

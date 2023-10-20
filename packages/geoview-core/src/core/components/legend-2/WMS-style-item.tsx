@@ -14,7 +14,7 @@ import {
   Grid,
 } from '@/ui';
 import { TypeWmsLegendStyle } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
-import { api, WMS } from '@/app';
+import { api, Cast, WMS } from '@/app';
 
 const sxClasses = {
   legendIcon: {
@@ -75,7 +75,7 @@ export function WMSStyleItem(props: TypeWMSStyleProps): JSX.Element {
   }, [currentWMSStyle]);
 
   const handleWMSStyleToggle = () => {
-    (api.maps[mapId].layer.geoviewLayers[layerId] as WMS).setStyle(name, subLayerId);
+    Cast<WMS>(api.maps[mapId].layer.geoviewLayers[layerId]).setStyle(name, subLayerId!);
     setCurrentWMSStyle(name);
   };
 

@@ -6,7 +6,7 @@ export const sxClassesFooterBar = {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    width: 'calc(100% - 64px)',
+    width: 'calc(100%)',
     minHeight: '35px',
     maxHeight: '35px',
     backdropFilter: 'blur(5px)',
@@ -17,6 +17,7 @@ export const sxClassesFooterBar = {
     bottom: 0,
     order: 3,
     gap: 0.5,
+    order: 3,
   },
   mouseScaleControlsContainer: {
     display: 'flex',

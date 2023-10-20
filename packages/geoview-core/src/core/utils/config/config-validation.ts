@@ -531,7 +531,6 @@ export class ConfigValidation {
           case 'vectorTiles':
           case 'GeoPackage':
           case 'imageStatic':
-            // TODO: Why there is stuff here and not in the other cases?
             this.geoviewLayerIdIsMandatory(geoviewLayerConfig);
             this.processLayerEntryConfig(geoviewLayerConfig, geoviewLayerConfig, geoviewLayerConfig.listOfLayerEntryConfig);
             break;

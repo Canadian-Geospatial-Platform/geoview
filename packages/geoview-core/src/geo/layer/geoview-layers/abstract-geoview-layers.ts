@@ -290,10 +290,7 @@ export abstract class AbstractGeoViewLayer {
    * The vector or raster layer structure to be displayed for this GeoView class. Initial value is null indicating that the layers
    * have not been created.
    */
-  gvLayers: BaseLayer | null = null;
-
-  /** The layer Identifier that is used to get and set layer's settings. */
-  activeLayer: TypeLayerEntryConfig | null = null;
+  olLayers: BaseLayer | null = null;
 
   // The service metadata.
   metadata: TypeJsonObject | null = null;
@@ -465,7 +462,7 @@ export abstract class AbstractGeoViewLayer {
   /** ***************************************************************************************************************************
    * This method is used to create the layers specified in the listOfLayerEntryConfig attribute inherited from its parent.
    * Normally, it is the second method called in the life cycle of a GeoView layer, the first one being the constructor.
-   * Its code is the same for all child classes. It must first validate that the gvLayers attribute is null indicating
+   * Its code is the same for all child classes. It must first validate that the olLayers attribute is null indicating
    * that the method has never been called before for this layer. If this is not the case, an error message must be sent.
    * Then, it calls the abstract method getAdditionalServiceDefinition. For example, when the child is a WFS service, this
    * method executes the GetCapabilities request and saves the result in the metadata attribute of the class. It also process
@@ -483,12 +480,11 @@ export abstract class AbstractGeoViewLayer {
   createGeoViewLayers(): Promise<void> {
     const promisedExecution = new Promise<void>((resolve) => {
       this.changeLayerPhase('createGeoViewLayers');
-      if (this.gvLayers === null) {
+      if (this.olLayers === null) {
         this.getAdditionalServiceDefinition()
           .then(() => {
             this.processListOfLayerEntryConfig(this.listOfLayerEntryConfig).then((layersCreated) => {
-              this.gvLayers = layersCreated;
-              if (this.listOfLayerEntryConfig.length) this.setActiveLayer(this.listOfLayerEntryConfig[0]);
+              this.olLayers = layersCreated;
               resolve();
             });
           })
@@ -678,7 +674,7 @@ export abstract class AbstractGeoViewLayer {
           }
           this.processOneLayerEntry(listOfLayerEntryConfig[0] as TypeBaseLayerEntryConfig).then((baseLayer) => {
             if (baseLayer) {
-              baseLayer.setVisible(true);
+              baseLayer.setVisible(listOfLayerEntryConfig[0].initialSettings?.visible !== 'no');
               this.registerToLayerSets(listOfLayerEntryConfig[0] as TypeBaseLayerEntryConfig);
               if (layerGroup) layerGroup.getLayers().push(baseLayer);
               this.changeLayerStatus('processed', listOfLayerEntryConfig[0]);
@@ -775,7 +771,7 @@ export abstract class AbstractGeoViewLayer {
   protected abstract processOneLayerEntry(layerEntryConfig: TypeBaseLayerEntryConfig): Promise<BaseLayer | null>;
 
   /** ***************************************************************************************************************************
-   * Return feature information for the layer specified. If layerPathOrConfig is undefined, this.activeLayer is used.
+   * Return feature information for the layer specified.
    *
    * @param {TypeQueryType} queryType  The type of query to perform.
    * @param {string | TypeLayerEntryConfig | null} layerPathOrConfig Optional layer path or configuration.
@@ -785,7 +781,7 @@ export abstract class AbstractGeoViewLayer {
    */
   getFeatureInfo(
     queryType: TypeQueryType,
-    layerPathOrConfig: string | TypeLayerEntryConfig | null = this.activeLayer,
+    layerPathOrConfig: string | TypeLayerEntryConfig,
     location: TypeLocation = null
   ): Promise<TypeArrayOfFeatureInfoEntries> {
     const queryResult = new Promise<TypeArrayOfFeatureInfoEntries>((resolve) => {
@@ -1035,51 +1031,34 @@ export abstract class AbstractGeoViewLayer {
     if (layerEntryConfig.initialSettings?.visible !== undefined)
       layerGroupOptions.visible =
         layerEntryConfig.initialSettings?.visible === 'yes' || layerEntryConfig.initialSettings?.visible === 'always';
-    layerEntryConfig.gvLayer = new LayerGroup(layerGroupOptions);
-    return layerEntryConfig.gvLayer as LayerGroup;
+    layerEntryConfig.olLayer = new LayerGroup(layerGroupOptions);
+    return layerEntryConfig.olLayer as LayerGroup;
   }
 
   /** ***************************************************************************************************************************
-   * Set the active layer. It is the layer that will be used in some functions when the optional layer path is undefined.
-   * The parameter can be a layer path (string) or a layer configuration. When the parameter is a layer path that
-   * can not be found, the active layer remain unchanged.
-   *
-   * @param {string | TypeLayerEntryConfig} layerPathOrConfig The layer identifier.
-   */
-  setActiveLayer(layerPathOrConfig: string | TypeLayerEntryConfig) {
-    if (typeof layerPathOrConfig === 'string') {
-      const activeLayer = api.maps[this.mapId].layer.registeredLayers[layerPathOrConfig];
-      if (activeLayer !== undefined) this.activeLayer = activeLayer;
-    } else this.activeLayer = layerPathOrConfig as TypeLayerEntryConfig;
-  }
-
-  /** ***************************************************************************************************************************
-   * Get the layer configuration of the specified layer path. If the layer path is undefined, the active layer is returned.
+   * Get the layer configuration of the specified layer path.
    *
    * @param {string} layerPath The layer path.
    *
-   * @returns {TypeLayerEntryConfig | null} The layer configuration or null if not found.
+   * @returns {TypeLayerEntryConfig | undefined} The layer configuration or undefined if not found.
    */
-  getLayerConfig(layerPath?: string): TypeLayerEntryConfig | null | undefined {
-    if (layerPath === undefined) return this.activeLayer;
-    return api.maps[this.mapId].layer.registeredLayers[layerPath];
+  getLayerConfig(layerPath: string): TypeLayerEntryConfig | undefined {
+    return api.maps?.[this.mapId]?.layer?.registeredLayers?.[layerPath];
   }
 
   /** ***************************************************************************************************************************
-   * Returns the layer bounds or undefined if not defined in the layer configuration or the metadata. If layerPathOrConfig is
-   * undefined, the active layer is used. If projectionCode is defined, returns the bounds in the specified projection otherwise
-   * use the map projection. The bounds are different from the extent. They are mainly used for display purposes to show the
-   * bounding box in which the data resides and to zoom in on the entire layer data. It is not used by openlayer to limit the
-   * display of data on the map.
+   * Returns the layer bounds or undefined if not defined in the layer configuration or the metadata. If projectionCode is
+   * defined, returns the bounds in the specified projection otherwise use the map projection. The bounds are different from the
+   * extent. They are mainly used for display purposes to show the bounding box in which the data resides and to zoom in on the
+   * entire layer data. It is not used by openlayer to limit the display of data on the map.
    *
-   * @param {string | TypeLayerEntryConfig | TypeListOfLayerEntryConfig | null} layerPathOrConfig Optional layer path or
-   * configuration.
+   * @param {string | TypeLayerEntryConfig | TypeListOfLayerEntryConfig} layerPathOrConfig Layer path or configuration.
    * @param {string | number | undefined} projectionCode Optional projection code to use for the returned bounds.
    *
    * @returns {Extent} The layer bounding box.
    */
   getMetadataBounds(
-    layerPathOrConfig: string | TypeLayerEntryConfig | TypeListOfLayerEntryConfig | null = this.activeLayer,
+    layerPathOrConfig: string | TypeLayerEntryConfig | TypeListOfLayerEntryConfig,
     projectionCode: string | number | undefined = undefined
   ): Extent | undefined {
     let bounds: Extent | undefined;
@@ -1141,154 +1120,136 @@ export abstract class AbstractGeoViewLayer {
 
   /** ***************************************************************************************************************************
    * Return the extent of the layer or undefined if it will be visible regardless of extent. The layer extent is an array of
-   * numbers representing an extent: [minx, miny, maxx, maxy]. If layerPathOrConfig is undefined, the activeLayer of the class
-   * will be used. This routine return undefined when no layerPathOrConfig is specified and the active layer is null. The extent
-   * is used to clip the data displayed on the map.
+   * numbers representing an extent: [minx, miny, maxx, maxy]. This routine return undefined when the layer path can't be found.
+   * The extent is used to clip the data displayed on the map.
    *
-   * @param {string | TypeLayerEntryConfig | null} layerPathOrConfig Optional layer path or configuration.
+   * @param {string | TypeLayerEntryConfig} layerPathOrConfig Layer path or configuration.
    *
    * @returns {Extent} The layer extent.
    */
-  getExtent(layerPathOrConfig: string | TypeLayerEntryConfig | null = this.activeLayer): Extent | undefined {
-    const gvLayer = typeof layerPathOrConfig === 'string' ? this.getLayerConfig(layerPathOrConfig)?.gvLayer : layerPathOrConfig?.gvLayer;
-    return gvLayer ? gvLayer.getExtent() : undefined;
+  getExtent(layerPathOrConfig: string | TypeLayerEntryConfig): Extent | undefined {
+    const olLayer = typeof layerPathOrConfig === 'string' ? this.getLayerConfig(layerPathOrConfig)?.olLayer : layerPathOrConfig?.olLayer;
+    return olLayer ? olLayer.getExtent() : undefined;
   }
 
   /** ***************************************************************************************************************************
    * set the extent of the layer. Use undefined if it will be visible regardless of extent. The layer extent is an array of
-   * numbers representing an extent: [minx, miny, maxx, maxy]. If layerPathOrConfig is undefined, the activeLayer of the class
-   * will be used. This routine does nothing when no layerPathOrConfig is specified and the active layer is null.
+   * numbers representing an extent: [minx, miny, maxx, maxy]. This routine does nothing when the layerPath specified is not
+   * found.
    *
    * @param {Extent} layerExtent The extent to assign to the layer.
-   * @param {string | TypeLayerEntryConfig | null} layerPathOrConfig Optional layer path or configuration.
+   * @param {string | TypeLayerEntryConfig} layerPathOrConfig Layer path or configuration.
    */
-  setExtent(layerExtent: Extent, layerPathOrConfig: string | TypeLayerEntryConfig | null = this.activeLayer) {
-    const gvLayer = typeof layerPathOrConfig === 'string' ? this.getLayerConfig(layerPathOrConfig)?.gvLayer : layerPathOrConfig?.gvLayer;
-    if (gvLayer) gvLayer.setExtent(layerExtent);
+  setExtent(layerExtent: Extent, layerPathOrConfig: string | TypeLayerEntryConfig) {
+    const olLayer = typeof layerPathOrConfig === 'string' ? this.getLayerConfig(layerPathOrConfig)?.olLayer : layerPathOrConfig?.olLayer;
+    if (olLayer) olLayer.setExtent(layerExtent);
   }
 
   /** ***************************************************************************************************************************
-   * Return the opacity of the layer (between 0 and 1). When layerPathOrConfig is undefined, the activeLayer of the class is
-   * used. This routine return undefined when the layerPath specified is not found or when the layerPathOrConfig is undefined and
-   * the active layer is null.
+   * Return the opacity of the layer (between 0 and 1). This routine return undefined when the layerPath specified is not found.
    *
-   * @param {string | TypeLayerEntryConfig | null} layerPathOrConfig Optional layer path or configuration.
+   * @param {string | TypeLayerEntryConfig} layerPathOrConfig Layer path or configuration.
    *
    * @returns {number} The opacity of the layer.
    */
-  getOpacity(layerPathOrConfig: string | TypeLayerEntryConfig | null = this.activeLayer): number | undefined {
-    const gvLayer = typeof layerPathOrConfig === 'string' ? this.getLayerConfig(layerPathOrConfig)?.gvLayer : layerPathOrConfig?.gvLayer;
-    return gvLayer ? gvLayer.getOpacity() : undefined;
+  getOpacity(layerPathOrConfig: string | TypeLayerEntryConfig): number | undefined {
+    const olLayer = typeof layerPathOrConfig === 'string' ? this.getLayerConfig(layerPathOrConfig)?.olLayer : layerPathOrConfig?.olLayer;
+    return olLayer ? olLayer.getOpacity() : undefined;
   }
 
   /** ***************************************************************************************************************************
-   * Set the opacity of the layer (between 0 and 1). When layerPathOrConfig is undefined, the activeLayer of the class is used.
-   * This routine does nothing when the layerPath specified is not found or when the layerPathOrConfig is undefined and the
-   * active layer is null.
+   * Set the opacity of the layer (between 0 and 1). This routine does nothing when the layerPath specified is not found.
    *
    * @param {number} layerOpacity The opacity of the layer.
-   * @param {string | TypeLayerEntryConfig | null} layerPathOrConfig Optional layer path or configuration.
+   * @param {string | TypeLayerEntryConfig} layerPathOrConfig Layer path or configuration.
    *
    */
-  setOpacity(layerOpacity: number, layerPathOrConfig: string | TypeLayerEntryConfig | null = this.activeLayer) {
-    const gvLayer = typeof layerPathOrConfig === 'string' ? this.getLayerConfig(layerPathOrConfig)?.gvLayer : layerPathOrConfig?.gvLayer;
-    if (gvLayer) gvLayer.setOpacity(layerOpacity);
+  setOpacity(layerOpacity: number, layerPathOrConfig: string | TypeLayerEntryConfig) {
+    const olLayer = typeof layerPathOrConfig === 'string' ? this.getLayerConfig(layerPathOrConfig)?.olLayer : layerPathOrConfig?.olLayer;
+    if (olLayer) olLayer.setOpacity(layerOpacity);
   }
 
   /** ***************************************************************************************************************************
-   * Return the visibility of the layer (true or false). When layerPathOrConfig is undefined, the activeLayer of the class is
-   * used. This routine return undefined when the layerPath specified is not found or when the layerPathOrConfig is undefined and
-   * the active layer is null.
+   * Return the visibility of the layer (true or false). This routine return undefined when the layerPath specified is not found.
    *
-   * @param {string | TypeLayerEntryConfig | null} layerPathOrConfig Optional layer path or configuration.
+   * @param {string | TypeLayerEntryConfig} layerPathOrConfig Layer path or configuration.
    *
    * @returns {boolean} The visibility of the layer.
    */
-  getVisible(layerPathOrConfig: string | TypeLayerEntryConfig | null = this.activeLayer): boolean | undefined {
-    const gvLayer = typeof layerPathOrConfig === 'string' ? this.getLayerConfig(layerPathOrConfig)?.gvLayer : layerPathOrConfig?.gvLayer;
-    return gvLayer ? gvLayer.getVisible() : undefined;
+  getVisible(layerPathOrConfig: string | TypeLayerEntryConfig): boolean | undefined {
+    const olLayer = typeof layerPathOrConfig === 'string' ? this.getLayerConfig(layerPathOrConfig)?.olLayer : layerPathOrConfig?.olLayer;
+    return olLayer ? olLayer.getVisible() : undefined;
   }
 
   /** ***************************************************************************************************************************
-   * Set the visibility of the layer (true or false). When layerPathOrConfig is undefined, the activeLayer of the class is
-   * used. This routine does nothing when the layerPath specified is not found or when the layerPathOrConfig is undefined and the
-   * active layer is null.
+   * Set the visibility of the layer (true or false). This routine does nothing when the layerPath specified is not found.
    *
    * @param {boolean} layerVisibility The visibility of the layer.
-   * @param {string | TypeLayerEntryConfig | null} layerPathOrConfig Optional layer path or configuration.
+   * @param {string | TypeLayerEntryConfig} layerPathOrConfig Layer path or configuration.
    */
-  setVisible(layerVisibility: boolean, layerPathOrConfig: string | TypeLayerEntryConfig | null = this.activeLayer) {
-    const gvLayer = typeof layerPathOrConfig === 'string' ? this.getLayerConfig(layerPathOrConfig)?.gvLayer : layerPathOrConfig?.gvLayer;
-    if (gvLayer) {
-      gvLayer.setVisible(layerVisibility);
-      gvLayer.changed();
+  setVisible(layerVisibility: boolean, layerPathOrConfig: string | TypeLayerEntryConfig) {
+    const olLayer = typeof layerPathOrConfig === 'string' ? this.getLayerConfig(layerPathOrConfig)?.olLayer : layerPathOrConfig?.olLayer;
+    if (olLayer) {
+      olLayer.setVisible(layerVisibility);
+      olLayer.changed();
     }
   }
 
   /** ***************************************************************************************************************************
-   * Return the min zoom of the layer. When layerPathOrConfig is undefined, the activeLayer of the class is used. This routine
-   * return undefined when the layerPath specified is not found or when the layerPathOrConfig is undefined and the active layer
-   * is null.
+   * Return the min zoom of the layer. This routine return undefined when the layerPath specified is not found.
    *
-   * @param {string | TypeLayerEntryConfig | null} layerPathOrConfig Optional layer path or configuration.
+   * @param {string | TypeLayerEntryConfig} layerPathOrConfig Layer path or configuration.
    *
    * @returns {boolean} The visibility of the layer.
    */
-  getMinZoom(layerPathOrConfig: string | TypeLayerEntryConfig | null = this.activeLayer): number | undefined {
-    const gvLayer = typeof layerPathOrConfig === 'string' ? this.getLayerConfig(layerPathOrConfig)?.gvLayer : layerPathOrConfig?.gvLayer;
-    return gvLayer ? gvLayer.getMinZoom() : undefined;
+  getMinZoom(layerPathOrConfig: string | TypeLayerEntryConfig): number | undefined {
+    const olLayer = typeof layerPathOrConfig === 'string' ? this.getLayerConfig(layerPathOrConfig)?.olLayer : layerPathOrConfig?.olLayer;
+    return olLayer ? olLayer.getMinZoom() : undefined;
   }
 
   /** ***************************************************************************************************************************
-   * Set the min zoom of the layer. When layerPathOrConfig is undefined, the activeLayer of the class is used. This routine
-   * does nothing when the layerPath specified is not found or when the layerPathOrConfig is undefined and the active layer is
-   * null.
+   * Set the min zoom of the layer. This routine does nothing when the layerPath specified is not found.
    *
    * @param {boolean} layerVisibility The visibility of the layer.
-   * @param {string | TypeLayerEntryConfig | null} layerPathOrConfig Optional layer path or configuration.
+   * @param {string | TypeLayerEntryConfig} layerPathOrConfig Layer path or configuration.
    */
-  setMinZoom(minZoom: number, layerPathOrConfig: string | TypeLayerEntryConfig | null = this.activeLayer) {
-    const gvLayer = typeof layerPathOrConfig === 'string' ? this.getLayerConfig(layerPathOrConfig)?.gvLayer : layerPathOrConfig?.gvLayer;
-    if (gvLayer) gvLayer.setMinZoom(minZoom);
+  setMinZoom(minZoom: number, layerPathOrConfig: string | TypeLayerEntryConfig) {
+    const olLayer = typeof layerPathOrConfig === 'string' ? this.getLayerConfig(layerPathOrConfig)?.olLayer : layerPathOrConfig?.olLayer;
+    if (olLayer) olLayer.setMinZoom(minZoom);
   }
 
   /** ***************************************************************************************************************************
-   * Return the max zoom of the layer. When layerPathOrConfig is undefined, the activeLayer of the class is used. This routine
-   * return undefined when the layerPath specified is not found or when the layerPathOrConfig is undefined and the active layer
-   * is null.
+   * Return the max zoom of the layer. This routine return undefined when the layerPath specified is not found.
    *
-   * @param {string | TypeLayerEntryConfig | null} layerPathOrConfig Optional layer path or configuration.
+   * @param {string | TypeLayerEntryConfig} layerPathOrConfig Layer path or configuration.
    *
    * @returns {boolean} The visibility of the layer.
    */
-  getMaxZoom(layerPathOrConfig: string | TypeLayerEntryConfig | null = this.activeLayer): number | undefined {
-    const gvLayer = typeof layerPathOrConfig === 'string' ? this.getLayerConfig(layerPathOrConfig)?.gvLayer : layerPathOrConfig?.gvLayer;
-    return gvLayer ? gvLayer.getMaxZoom() : undefined;
+  getMaxZoom(layerPathOrConfig: string | TypeLayerEntryConfig): number | undefined {
+    const olLayer = typeof layerPathOrConfig === 'string' ? this.getLayerConfig(layerPathOrConfig)?.olLayer : layerPathOrConfig?.olLayer;
+    return olLayer ? olLayer.getMaxZoom() : undefined;
   }
 
   /** ***************************************************************************************************************************
-   * Set the max zoom of the layer. When layerPathOrConfig is undefined, the activeLayer of the class is used. This routine
-   * does nothing when the layerPath specified is not found or when the layerPathOrConfig is undefined and the active layer is
-   * null.
+   * Set the max zoom of the layer. This routine does nothing when the layerPath specified is not found.
    *
    * @param {boolean} layerVisibility The visibility of the layer.
-   * @param {string | TypeLayerEntryConfig | null} layerPathOrConfig Optional layer path or configuration.
+   * @param {string | TypeLayerEntryConfig} layerPathOrConfig Layer path or configuration.
    */
-  setMaxZoom(maxZoom: number, layerPathOrConfig: string | TypeLayerEntryConfig | null = this.activeLayer) {
-    const gvLayer = typeof layerPathOrConfig === 'string' ? this.getLayerConfig(layerPathOrConfig)?.gvLayer : layerPathOrConfig?.gvLayer;
-    if (gvLayer) gvLayer.setMaxZoom(maxZoom);
+  setMaxZoom(maxZoom: number, layerPathOrConfig: string | TypeLayerEntryConfig) {
+    const olLayer = typeof layerPathOrConfig === 'string' ? this.getLayerConfig(layerPathOrConfig)?.olLayer : layerPathOrConfig?.olLayer;
+    if (olLayer) olLayer.setMaxZoom(maxZoom);
   }
 
   /** ***************************************************************************************************************************
-   * Return the legend of the layer. When layerPathOrConfig is undefined, the activeLayer of the class is used. This routine
-   * return null when the layerPath specified is not found or when the layerPathOrConfig is undefined and the active layer
-   * is null or the layerConfig.style property is undefined.
+   * Return the legend of the layer. This routine returns null when the layerPath specified is not found. If the style property
+   * of the layerConfig object is undefined, the legend property of the object returned will be null.
    *
-   * @param {string | TypeLayerEntryConfig | null} layerPathOrConfig Optional layer path or configuration.
+   * @param {string | TypeLayerEntryConfig} layerPathOrConfig Layer path or configuration.
    *
    * @returns {Promise<TypeLegend | null>} The legend of the layer.
    */
-  getLegend(layerPathOrConfig: string | TypeLayerEntryConfig | null = this.activeLayer): Promise<TypeLegend | null> {
+  getLegend(layerPathOrConfig: string | TypeLayerEntryConfig): Promise<TypeLegend | null> {
     const promisedLegend = new Promise<TypeLegend | null>((resolve) => {
       const layerConfig = (
         typeof layerPathOrConfig === 'string' ? this.getLayerConfig(layerPathOrConfig) : layerPathOrConfig
@@ -1296,12 +1257,13 @@ export abstract class AbstractGeoViewLayer {
         style: TypeStyleConfig;
       };
 
-      if (!layerConfig?.style)
+      if (!layerConfig) resolve(null);
+      else if (!layerConfig.style)
         resolve({
           type: this.type,
           layerPath: Layer.getLayerPath(layerConfig),
           layerName: layerConfig.layerName!,
-          styleConfig: layerConfig?.style,
+          styleConfig: layerConfig.style,
           legend: null,
         } as TypeLegend);
       else {
@@ -1447,18 +1409,18 @@ export abstract class AbstractGeoViewLayer {
   }
 
   /** ***************************************************************************************************************************
-   * Get the layerFilter that is associated to the layer. Returns undefined when the layer config is invalid.
-   * If layerPathOrConfig is undefined, this.activeLayer is used.
+   * Get the layerFilter that is associated to the layer. Returns undefined when the layer config can't be found using the layer
+   * path.
    *
-   * @param {string | TypeLayerEntryConfig | null} layerPathOrConfig Optional layer path or configuration.
+   * @param {string | TypeLayerEntryConfig} layerPathOrConfig Layer path or configuration.
    *
    * @returns {string | undefined} The filter associated to the layer or undefined.
    */
-  getLayerFilter(layerPathOrConfig: string | TypeLayerEntryConfig | null = this.activeLayer): string | undefined {
+  getLayerFilter(layerPathOrConfig: string | TypeLayerEntryConfig): string | undefined {
     const layerEntryConfig = (
       typeof layerPathOrConfig === 'string' ? this.getLayerConfig(layerPathOrConfig) : layerPathOrConfig
     ) as TypeLayerEntryConfig;
-    if (layerEntryConfig) return layerEntryConfig.gvLayer?.get('layerFilter');
+    if (layerEntryConfig) return layerEntryConfig.olLayer?.get('layerFilter');
     return undefined;
   }
 
@@ -1470,25 +1432,22 @@ export abstract class AbstractGeoViewLayer {
    *
    * @returns {Extent} The layer bounding box.
    */
-  getBounds(layerConfig: TypeLayerEntryConfig, bounds: Extent | undefined): Extent | undefined {
-    return bounds;
-  }
+  protected abstract getBounds(layerConfig: TypeLayerEntryConfig, bounds: Extent | undefined): Extent | undefined;
 
   /** ***************************************************************************************************************************
    * Compute the layer bounds or undefined if the result can not be obtained from the feature extents that compose the layer. If
-   * layerPathOrConfig is undefined, the active layer is used. If projectionCode is defined, returns the bounds in the specified
-   * projection otherwise use the map projection. The bounds are different from the extent. They are mainly used for display
-   * purposes to show the bounding box in which the data resides and to zoom in on the entire layer data. It is not used by
-   * openlayer to limit the display of data on the map.
+   * projectionCode is defined, returns the bounds in the specified projection otherwise use the map projection. The bounds are
+   * different from the extent. They are mainly used for display purposes to show the bounding box in which the data resides and
+   * to zoom in on the entire layer data. It is not used by openlayer to limit the display of data on the map.
    *
-   * @param {string | TypeLayerEntryConfig | TypeListOfLayerEntryConfig | null} layerPathOrConfig Optional layer path or
-   * configuration.
-   * @param {string | number | undefined} projectionCode Optional projection code to use for the returned bounds.
+   * @param {string | TypeLayerEntryConfig | TypeListOfLayerEntryConfig} layerPathOrConfig Layer path or configuration.
+   * @param {string | number | undefined} projectionCode Optional projection code to use for the returned bounds. Default to
+   * current projection.
    *
    * @returns {Extent} The layer bounding box.
    */
   calculateBounds(
-    layerPathOrConfig: string | TypeLayerEntryConfig | TypeListOfLayerEntryConfig | null = this.activeLayer,
+    layerPathOrConfig: string | TypeLayerEntryConfig,
     projectionCode: string | number = api.maps[this.mapId].currentProjection
   ): Extent | undefined {
     let bounds: Extent | undefined;

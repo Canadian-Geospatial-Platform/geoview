@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState, memo } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useStore } from 'zustand';
 import debounce from 'lodash/debounce';
 import startCase from 'lodash/startCase';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
@@ -26,7 +27,7 @@ import {
 } from 'material-react-table';
 import { Projection } from 'ol/proj';
 import { Extent } from 'ol/extent';
-import { darken } from '@mui/material';
+import { darken, useTheme } from '@mui/material';
 import { difference } from 'lodash';
 import { getUid } from 'ol/util';
 import { Box, IconButton, Tooltip, ZoomInSearchIcon } from '@/ui';
@@ -45,6 +46,8 @@ import {
   EVENT_NAMES,
   clearHighlightsPayload,
 } from '@/app';
+import { getGeoViewStore } from '@/core/stores/stores-managers';
+import { getSxClasses } from './data-table-style';
 
 export interface MapDataTableDataEntrys extends TypeFeatureInfoEntry {
   rows: Record<string, string>;
@@ -105,21 +108,6 @@ const NUMBER_FILTER: Record<string, string> = {
   notEquals: '<>',
 };
 
-const sxClasses = {
-  selectedRows: {
-    backgroundColor: '#fff',
-    transition: 'box-shadow 300ms cubic-bezier(0.4, 0, 0.2, 1) 0ms',
-    fontWeight: 400,
-    fontSize: '0.875rem',
-    linHeight: 1.43,
-    letterSpacing: '0.01071em',
-    display: 'flex',
-    padding: '6px',
-    color: 'rgb(1, 67, 97)',
-  },
-  tableCell: { 'white-space': 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' },
-};
-
 /**
  * Build Data table from map.
  * @param {MapDataTableProps} data map data which will be used to build data table.
@@ -132,40 +120,37 @@ const sxClasses = {
 
 function MapDataTable({ data, layerId, mapId, layerKey, projectionConfig }: MapDataTableProps) {
   const { t } = useTranslation();
+  const sxtheme = useTheme();
+  const sxClasses = getSxClasses(sxtheme);
+
   const language = api.maps[mapId].displayLanguage;
 
   const dataTableLocalization = language === 'fr' ? MRTLocalizationFR : MRTLocalizationEN;
 
   const tableInstanceRef = useRef<MRTTableInstance>(null);
-  const FILTER_MAP_DELAY = 1000;
 
   const iconColumn = { alias: t('dataTable.icon'), dataType: 'string', id: t('dataTable.icon') };
   const zoomColumn = { alias: t('dataTable.zoom'), dataType: 'string', id: t('dataTable.zoom') };
 
-  const [mapFiltered, setMapFiltered] = useState<boolean>(false);
-  const [columnFilters, setColumnFilters] = useState<MRTColumnFiltersState>([]);
-  const [density, setDensity] = useState<MRTDensityState>('compact');
-  const [rowSelection, setRowSelection] = useState<Record<number, boolean>>({});
+  const store = getGeoViewStore(mapId);
+  const {
+    FILTER_MAP_DELAY,
+    toolbarRowSelectedMessage,
+    setToolbarRowSelectedMessage,
+    storeColumnFilters,
+    setStoreColumnFilters,
+    storeRowSelections,
+    setStoreRowSelections,
+    storeMapFiltered,
+  } = useStore(store, (state) => state.dataTableState);
   const rowSelectionRef = useRef<Array<number>>([]);
 
-  // optionally access the underlying virtualizer instance
+  const [columnFilters, setColumnFilters] = useState<MRTColumnFiltersState>(storeColumnFilters[layerKey] || []);
+
+  const [density, setDensity] = useState<MRTDensityState>('compact');
+  const [rowSelection, setRowSelection] = useState<Record<number, boolean>>(storeRowSelections[layerKey] ?? {});
   const rowVirtualizerInstanceRef = useRef<MRTVirtualizer<HTMLDivElement, HTMLTableRowElement>>(null);
-
   const [sorting, setSorting] = useState<MRTSortingState>([]);
-
-  const [toolbarRowSelectedMessage, setToolbarRowSelectedMessage] = useState('');
-
-  const iconImage = {
-    padding: 3,
-    borderRadius: 0,
-    border: '1px solid',
-    borderColor: '#757575',
-    boxShadow: 'rgb(0 0 0 / 20%) 0px 3px 1px -2px, rgb(0 0 0 / 14%) 0px 2px 2px 0px, rgb(0 0 0 / 12%) 0px 1px 5px 0px',
-    background: '#fff',
-    objectFit: 'scale-down',
-    width: '35px',
-    height: '35px',
-  } as React.CSSProperties;
 
   /**
    * Convert the filter list from the Column Filter
@@ -229,7 +214,7 @@ function MapDataTable({ data, layerId, mapId, layerKey, projectionConfig }: MapD
     const geoviewLayerInstance = api.maps[mapId].layer.geoviewLayers[layerId];
     const filterLayerConfig = api.maps[mapId].layer.registeredLayers[layerKey] as TypeLayerEntryConfig;
 
-    if (mapFiltered && geoviewLayerInstance !== undefined && filterLayerConfig !== undefined && filterStrings.length) {
+    if (storeMapFiltered[layerKey] && geoviewLayerInstance !== undefined && filterLayerConfig !== undefined && filterStrings.length) {
       (geoviewLayerInstance as AbstractGeoViewVector | EsriDynamic)?.applyViewFilter(filterLayerConfig, filterStrings);
     } else {
       (geoviewLayerInstance as AbstractGeoViewVector | EsriDynamic)?.applyViewFilter(filterLayerConfig, '');
@@ -237,7 +222,7 @@ function MapDataTable({ data, layerId, mapId, layerKey, projectionConfig }: MapD
   }, FILTER_MAP_DELAY);
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  const debouncedColumnFilters = useCallback((filters: MRTColumnFiltersState) => filterMap(filters), [mapFiltered]);
+  const debouncedColumnFilters = useCallback((filters: MRTColumnFiltersState) => filterMap(filters), [storeMapFiltered[layerKey]]);
 
   useEffect(() => {
     // scroll to the top of the table when the sorting changes
@@ -249,9 +234,21 @@ function MapDataTable({ data, layerId, mapId, layerKey, projectionConfig }: MapD
     }
   }, [sorting]);
 
+  // update store column filters
+  useEffect(() => {
+    setStoreColumnFilters(columnFilters, layerKey);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [columnFilters]);
+
+  // update store row selections.
+  useEffect(() => {
+    setStoreRowSelections(rowSelection, layerKey);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [rowSelection]);
+
   // update map when column filters change
   useEffect(() => {
-    if (columnFilters && mapFiltered) {
+    if (columnFilters && storeMapFiltered[layerKey]) {
       debouncedColumnFilters(columnFilters);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -261,7 +258,7 @@ function MapDataTable({ data, layerId, mapId, layerKey, projectionConfig }: MapD
   useEffect(() => {
     filterMap(columnFilters);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [mapFiltered]);
+  }, [storeMapFiltered[layerKey]]);
 
   // add/remove hightlight feature when row is selected/unselected.
   useEffect(() => {
@@ -460,7 +457,13 @@ function MapDataTable({ data, layerId, mapId, layerKey, projectionConfig }: MapD
   const rows = useMemo(() => {
     return data.features.map((feature) => {
       return {
-        ICON: <img alt={feature.featureIcon.toDataURL().toString()} src={feature.featureIcon.toDataURL().toString()} style={iconImage} />,
+        ICON: (
+          <img
+            alt={feature.featureIcon.toDataURL().toString()}
+            src={feature.featureIcon.toDataURL().toString()}
+            style={sxClasses.iconImage as React.CSSProperties}
+          />
+        ),
         ZOOM: (
           <IconButton color="primary" onClick={(e) => handleZoomIn(e, feature.extent!)}>
             <ZoomInSearchIcon />
@@ -471,15 +474,6 @@ function MapDataTable({ data, layerId, mapId, layerKey, projectionConfig }: MapD
     }) as unknown as ColumnsType[];
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  // reset table features when layer changes.
-  useEffect(() => {
-    setSorting([]);
-    setColumnFilters([]);
-    setRowSelection({});
-    setMapFiltered(false);
-    setToolbarRowSelectedMessage('');
-  }, [layerId]);
 
   return (
     <Box>
@@ -494,6 +488,7 @@ function MapDataTable({ data, layerId, mapId, layerKey, projectionConfig }: MapD
         initialState={{
           columnPinning: { left: [t('dataTable.icon'), t('dataTable.zoom')] },
           pagination: { pageSize: 10, pageIndex: 0 },
+          showColumnFilters: !!columnFilters.length,
         }}
         state={{ sorting, columnFilters, rowSelection, density }}
         enableColumnFilterModes
@@ -507,7 +502,7 @@ function MapDataTable({ data, layerId, mapId, layerKey, projectionConfig }: MapD
         renderToolbarInternalActions={({ table }) => (
           <Box>
             <MRTToggleFiltersButton table={table} />
-            <FilterMap mapFiltered={mapFiltered} setMapFiltered={setMapFiltered} />
+            <FilterMap layerKey={layerKey} mapId={mapId} />
             <MRTShowHideColumnsButton table={table} />
             <MRTToggleDensePaddingButton table={table} />
             <MRTFullScreenToggleButton table={table} />

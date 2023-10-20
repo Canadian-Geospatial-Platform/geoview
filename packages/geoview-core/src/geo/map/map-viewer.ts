@@ -22,9 +22,7 @@ import { NavbarButtons } from '@/core/components/nav-bar/nav-bar-buttons';
 import { FooterTabsApi } from '@/core/components/footer-tabs/footer-tabs-api';
 import { LegendApi } from '@/core/components/legend/legend-api';
 import { Legend2Api } from '@/core/components/legend-2/legend-api';
-import { DetailsAPI } from '@/core/components/details/details-api';
-import { DetailsAPI as DetailsAPIFooter } from '@/core/components/details-1/details-api';
-import { FeatureInfoAPI } from '@/core/components/feature-info/feature-info.api';
+import { DetailsApi } from '@/core/components/details/details-api';
 import { DataTableApi } from '@/core/components/data-table/data-table-api';
 import { GeoviewRenderer } from '@/geo/renderer/geoview-renderer';
 import { Select } from '@/geo/interaction/select';
@@ -86,15 +84,8 @@ export class MapViewer {
 
   legend2!: Legend2Api;
 
-  // used to access the footer tabs api
-  // TODO: Keep only FeatureInfo after refactor
-  // used to access the existing detials, will be shown in Details Panel in app bar
-  details!: DetailsAPI;
-
   // used to access the details in footer
-  detailsFooter!: DetailsAPIFooter;
-
-  featureInfo!: FeatureInfoAPI;
+  details!: DetailsApi;
 
   // used to access the data table api
   dataTable!: DataTableApi;
@@ -157,10 +148,7 @@ export class MapViewer {
     this.footerTabs = new FooterTabsApi(this.mapId);
     this.legend = new LegendApi(this.mapId);
     this.legend2 = new Legend2Api(this.mapId);
-    // Line below is related to the existing detials will be shown in Details Panel in app bar
-    this.details = new DetailsAPI(this.mapId);
-    this.detailsFooter = new DetailsAPIFooter(this.mapId);
-    this.featureInfo = new FeatureInfoAPI(this.mapId);
+    this.details = new DetailsApi(this.mapId);
     this.dataTable = new DataTableApi(this.mapId);
 
     this.modal = new ModalApi(this.mapId);

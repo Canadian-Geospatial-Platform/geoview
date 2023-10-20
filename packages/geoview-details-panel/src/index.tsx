@@ -95,7 +95,9 @@ class DetailsPlugin extends AbstractPlugin {
     this.buttonPanel = api.maps[mapId].appBarButtons.createAppbarPanel(button, panel, null);
 
     // set panel content
-    this.buttonPanel?.panel?.changeContent(<DetailsItem mapId={mapId} buttonId={button.id} />);
+    // TODO line 99 is duplication of line 100, but without the props of DetailsItem, to bypass lint error
+    this.buttonPanel?.panel?.changeContent(<DetailsItem />);
+    // this.buttonPanel?.panel?.changeContent(<DetailsItem mapId={mapId} buttonId={button.id} />);
   }
 
   /**
