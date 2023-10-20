@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable no-console */
 /* eslint-disable no-param-reassign */
 import BaseLayer from 'ol/layer/Base';
 import Collection from 'ol/Collection';
@@ -248,7 +250,7 @@ type TypeLayerSetHandlerFunctions = {
 // ******************************************************************************************************************************
 export abstract class AbstractGeoViewLayer {
   /** Flag used to indicate the layer's phase */
-  layerPhase = 'newInstance';
+  layerPhase = '';
 
   /** The unique identifier of the map on which the GeoView layer will be drawn. */
   mapId: string;
@@ -287,8 +289,9 @@ export abstract class AbstractGeoViewLayer {
   layerLoadError: { layer: string; consoleMessage: string }[] = [];
 
   /**
-   * The vector or raster layer structure to be displayed for this GeoView class. Initial value is null indicating that the layers
-   * have not been created.
+   * The structure of the vector or raster layers to be displayed for this GeoView class. This property points to the root of the layer tree,
+   * unlike the olLayer (singular) property stored in the layer configuration entries list, which points to a node or leaf in the tree.
+   * The initial value of olLayers is null, indicating that the layer tree has not been created.
    */
   olLayers: BaseLayer | null = null;
 
@@ -477,51 +480,41 @@ export abstract class AbstractGeoViewLayer {
    * to return the descriptive information of all the features in a tolerance radius. This information will be used to populate
    * the details-panel.
    */
-  createGeoViewLayers(): Promise<void> {
-    const promisedExecution = new Promise<void>((resolve) => {
-      this.changeLayerPhase('createGeoViewLayers');
-      if (this.olLayers === null) {
-        this.getAdditionalServiceDefinition()
-          .then(() => {
-            this.processListOfLayerEntryConfig(this.listOfLayerEntryConfig).then((layersCreated) => {
-              this.olLayers = layersCreated;
-              resolve();
-            });
-          })
-          .catch((reason) => {
-            // eslint-disable-next-line no-console
-            console.log(reason);
-            resolve();
-          });
-      } else {
-        const trans = i18n.getFixedT(api.maps[this.mapId].displayLanguage);
-        const message = replaceParams([this.mapId], trans('validation.layer.createtwice'));
-        showError(this.mapId, message);
-
-        // eslint-disable-next-line no-console
-        console.log(`Can not execute twice the createGeoViewLayers method for the map ${this.mapId}`);
-        resolve();
+  async createGeoViewLayers(): Promise<void> {
+    if (this.olLayers === null) {
+      try {
+        this.changeLayerPhase('createGeoViewLayers');
+        await this.getAdditionalServiceDefinition();
+        this.olLayers = await this.processListOfLayerEntryConfig(this.listOfLayerEntryConfig);
+      } catch (error) {
+        console.log(error);
       }
-    });
-    return promisedExecution;
+    } else {
+      const trans = i18n.getFixedT(api.maps[this.mapId].displayLanguage);
+      const message = replaceParams([this.mapId], trans('validation.layer.createtwice'));
+      showError(this.mapId, message);
+
+      // eslint-disable-next-line no-console
+      console.log(`Can not execute twice the createGeoViewLayers method for the map ${this.mapId}`);
+    }
   }
 
   /** ***************************************************************************************************************************
    * This method reads from the metadataAccessPath additional information to complete the GeoView layer configuration.
    * If the GeoView layer does not have a service definition, this method does nothing.
    */
-  protected getAdditionalServiceDefinition(): Promise<void> {
+  protected async getAdditionalServiceDefinition(): Promise<void> {
     this.changeLayerPhase('getAdditionalServiceDefinition');
-    const promisedExecution = new Promise<void>((resolve) => {
-      this.getServiceMetadata().then(() => {
-        if (this.listOfLayerEntryConfig.length) {
-          // Recursively process the configuration tree of layer entries by removing layers in error and processing valid layers.
-          this.validateListOfLayerEntryConfig(this.listOfLayerEntryConfig);
-          this.processListOfLayerEntryMetadata(this.listOfLayerEntryConfig).then(() => resolve());
-        } else resolve(); // no layer entry.
-      });
-    });
-    return promisedExecution;
+    try {
+      await this.getServiceMetadata();
+      if (this.listOfLayerEntryConfig.length) {
+        // Recursively process the configuration tree of layer entries by removing layers in error and processing valid layers.
+        this.validateListOfLayerEntryConfig(this.listOfLayerEntryConfig);
+        await this.processListOfLayerEntryMetadata(this.listOfLayerEntryConfig);
+      }
+    } catch (error) {
+      console.log(error);
+    }
   }
 
   /** ***************************************************************************************************************************
@@ -529,29 +522,24 @@ export abstract class AbstractGeoViewLayer {
    *
    * @returns {Promise<void>} A promise that the execution is completed.
    */
-  protected getServiceMetadata(): Promise<void> {
+  protected async getServiceMetadata(): Promise<void> {
     this.changeLayerPhase('getServiceMetadata');
-    const promisedExecution = new Promise<void>((resolve) => {
-      const metadataUrl = getLocalizedValue(this.metadataAccessPath, this.mapId);
-      if (metadataUrl) {
-        getXMLHttpRequest(`${metadataUrl}?f=json`)
-          .then((metadataString) => {
-            if (metadataString === '{}') {
-              api.geoUtilities.setAllLayerStatusToError(this, this.listOfLayerEntryConfig, 'Unable to read metadata');
-            } else {
-              this.metadata = toJsonObject(JSON.parse(metadataString));
-              const { copyrightText } = this.metadata;
-              if (copyrightText) this.attributions.push(copyrightText as string);
-              resolve();
-            }
-          })
-          // eslint-disable-next-line @typescript-eslint/no-unused-vars
-          .catch((reason) => {
-            api.geoUtilities.setAllLayerStatusToError(this, this.listOfLayerEntryConfig, 'Unable to read metadata');
-          });
-      } else resolve();
-    });
-    return promisedExecution;
+    const metadataUrl = getLocalizedValue(this.metadataAccessPath, this.mapId);
+    if (metadataUrl) {
+      try {
+        const metadataString = await getXMLHttpRequest(`${metadataUrl}?f=json`);
+        if (metadataString === '{}') {
+          api.geoUtilities.setAllLayerStatusToError(this, this.listOfLayerEntryConfig, 'Unable to read metadata');
+        } else {
+          this.metadata = toJsonObject(JSON.parse(metadataString));
+          const { copyrightText } = this.metadata;
+          if (copyrightText) this.attributions.push(copyrightText as string);
+        }
+      } catch (error) {
+        console.log(error);
+        api.geoUtilities.setAllLayerStatusToError(this, this.listOfLayerEntryConfig, 'Unable to read metadata');
+      }
+    }
   }
 
   /** ***************************************************************************************************************************
@@ -569,11 +557,9 @@ export abstract class AbstractGeoViewLayer {
    *
    * @returns {Promise<void>} A promise that the execution is completed.
    */
-  protected processListOfLayerEntryMetadata(
-    listOfLayerEntryConfig: TypeListOfLayerEntryConfig = this.listOfLayerEntryConfig
-  ): Promise<void> {
+  protected async processListOfLayerEntryMetadata(listOfLayerEntryConfig: TypeListOfLayerEntryConfig): Promise<void> {
     this.changeLayerPhase('processListOfLayerEntryMetadata');
-    const promisedListOfLayerEntryProcessed = new Promise<void>((resolve) => {
+    try {
       const promisedAllLayerDone: Promise<void>[] = [];
       listOfLayerEntryConfig.forEach((layerEntryConfig: TypeLayerEntryConfig) => {
         if (layerEntryIsGroupLayer(layerEntryConfig))
@@ -581,9 +567,10 @@ export abstract class AbstractGeoViewLayer {
           else promisedAllLayerDone.push(this.processListOfLayerEntryMetadata(layerEntryConfig.listOfLayerEntryConfig));
         else promisedAllLayerDone.push(this.processLayerMetadata(layerEntryConfig));
       });
-      Promise.all(promisedAllLayerDone).then(() => resolve());
-    });
-    return promisedListOfLayerEntryProcessed;
+      await Promise.all(promisedAllLayerDone);
+    } catch (error) {
+      console.log(error);
+    }
   }
 
   /** ***************************************************************************************************************************
@@ -595,13 +582,13 @@ export abstract class AbstractGeoViewLayer {
    *
    * @returns {Promise<void>} A promise that the vector layer configuration has its metadata and group layers processed.
    */
-  private processMetadataGroupLayer(layerEntryConfig: TypeLayerGroupEntryConfig): Promise<void> {
-    const promisedListOfLayerEntryProcessed = new Promise<void>((resolve) => {
-      this.processLayerMetadata(layerEntryConfig).then(() => {
-        this.processListOfLayerEntryMetadata(layerEntryConfig.listOfLayerEntryConfig!).then(() => resolve());
-      });
-    });
-    return promisedListOfLayerEntryProcessed;
+  private async processMetadataGroupLayer(layerEntryConfig: TypeLayerGroupEntryConfig): Promise<void> {
+    try {
+      await this.processLayerMetadata(layerEntryConfig);
+      await this.processListOfLayerEntryMetadata(layerEntryConfig.listOfLayerEntryConfig!);
+    } catch (error) {
+      console.log(error);
+    }
   }
 
   /** ***************************************************************************************************************************
@@ -612,13 +599,10 @@ export abstract class AbstractGeoViewLayer {
    *
    * @returns {Promise<void>} A promise that the vector layer configuration has its metadata processed.
    */
-  protected processLayerMetadata(layerEntryConfig: TypeLayerEntryConfig): Promise<void> {
-    const promiseOfExecution = new Promise<void>((resolve) => {
-      if (!layerEntryConfig.source) layerEntryConfig.source = {};
-      if (!layerEntryConfig.source.featureInfo) layerEntryConfig.source.featureInfo = { queryable: true };
-      resolve();
-    });
-    return promiseOfExecution;
+  protected async processLayerMetadata(layerEntryConfig: TypeLayerEntryConfig): Promise<void> {
+    if (!layerEntryConfig.source) layerEntryConfig.source = {};
+    if (!layerEntryConfig.source.featureInfo) layerEntryConfig.source.featureInfo = { queryable: true };
+    return Promise.resolve();
   }
 
   /** ***************************************************************************************************************************
@@ -630,135 +614,121 @@ export abstract class AbstractGeoViewLayer {
    *
    * @returns {Promise<BaseLayer | null>} The promise that the layers were processed.
    */
-  protected processListOfLayerEntryConfig(
+  protected async processListOfLayerEntryConfig(
     listOfLayerEntryConfig: TypeListOfLayerEntryConfig,
     layerGroup?: LayerGroup
   ): Promise<BaseLayer | null> {
     this.changeLayerPhase('processListOfLayerEntryConfig');
-    const promisedListOfLayerEntryProcessed = new Promise<BaseLayer | null>((resolve) => {
+    try {
       if (listOfLayerEntryConfig.length === 1) {
         if (layerEntryIsGroupLayer(listOfLayerEntryConfig[0])) {
           const newLayerGroup = this.createLayerGroup(listOfLayerEntryConfig[0]);
-          this.processListOfLayerEntryConfig(listOfLayerEntryConfig[0].listOfLayerEntryConfig!, newLayerGroup).then((groupReturned) => {
-            if (groupReturned) {
-              if (layerGroup) layerGroup.getLayers().push(groupReturned);
-              resolve(groupReturned);
-            } else {
-              this.layerLoadError.push({
-                layer: Layer.getLayerPath(listOfLayerEntryConfig[0]),
-                consoleMessage: `Unable to create group layer ${Layer.getLayerPath(listOfLayerEntryConfig[0])} on map ${this.mapId}`,
-              });
-              resolve(null);
-            }
+          const groupReturned = await this.processListOfLayerEntryConfig(listOfLayerEntryConfig[0].listOfLayerEntryConfig!, newLayerGroup);
+          if (groupReturned) {
+            if (layerGroup) layerGroup.getLayers().push(groupReturned);
+            return groupReturned;
+          }
+          this.layerLoadError.push({
+            layer: Layer.getLayerPath(listOfLayerEntryConfig[0]),
+            consoleMessage: `Unable to create group layer ${Layer.getLayerPath(listOfLayerEntryConfig[0])} on map ${this.mapId}`,
           });
-        } else if ((listOfLayerEntryConfig[0] as TypeBaseLayerEntryConfig).layerStatus === 'error') resolve(null);
+          return null;
+        }
+        if ((listOfLayerEntryConfig[0] as TypeBaseLayerEntryConfig).layerStatus === 'error') return null;
+        if (
+          listOfLayerEntryConfig[0].entryType === 'vector' &&
+          (listOfLayerEntryConfig[0].source as TypeBaseSourceVectorInitialConfig)?.cluster?.enable
+        ) {
+          const unclusteredLayerConfig = cloneDeep(listOfLayerEntryConfig[0]) as TypeVectorLayerEntryConfig;
+          unclusteredLayerConfig.layerId = `${listOfLayerEntryConfig[0].layerId}-unclustered`;
+          unclusteredLayerConfig.source!.cluster!.enable = false;
+          const baseLayer = await this.processOneLayerEntry(unclusteredLayerConfig as TypeBaseLayerEntryConfig);
+          if (baseLayer) {
+            baseLayer!.setVisible(false);
+            api.maps[this.mapId].layer.registerLayerConfig(unclusteredLayerConfig);
+            this.registerToLayerSets(unclusteredLayerConfig as TypeBaseLayerEntryConfig);
+            if (!layerGroup) layerGroup = this.createLayerGroup(unclusteredLayerConfig.parentLayerConfig as TypeLayerEntryConfig);
+            layerGroup!.getLayers().push(baseLayer!);
+          }
+          (listOfLayerEntryConfig[0].source as TypeBaseSourceVectorInitialConfig)!.cluster!.settings =
+            unclusteredLayerConfig.source!.cluster!.settings;
+        }
+        const baseLayer = await this.processOneLayerEntry(listOfLayerEntryConfig[0] as TypeBaseLayerEntryConfig);
+        if (baseLayer) {
+          baseLayer.setVisible(listOfLayerEntryConfig[0].initialSettings?.visible !== 'no');
+          this.registerToLayerSets(listOfLayerEntryConfig[0] as TypeBaseLayerEntryConfig);
+          if (layerGroup) layerGroup!.getLayers().push(baseLayer!);
+          this.changeLayerStatus('processed', listOfLayerEntryConfig[0]);
+          return layerGroup || baseLayer;
+        }
+        this.layerLoadError.push({
+          layer: Layer.getLayerPath(listOfLayerEntryConfig[0]),
+          consoleMessage: `Unable to create layer ${Layer.getLayerPath(listOfLayerEntryConfig[0])} on map ${this.mapId}`,
+        });
+        this.changeLayerStatus('error', listOfLayerEntryConfig[0]);
+        return null;
+      }
+      if (!layerGroup && listOfLayerEntryConfig.length > 0) {
+        // All children of this level in the tree have the same parent, so we use the first element of the array to retrieve the parent node.
+        layerGroup = this.createLayerGroup(listOfLayerEntryConfig[0].parentLayerConfig as TypeLayerEntryConfig);
+      }
+      const promiseOfLayerCreated: Promise<BaseLayer | LayerGroup | null>[] = [];
+      listOfLayerEntryConfig.forEach((layerEntryConfig, i) => {
+        if (layerEntryIsGroupLayer(layerEntryConfig)) {
+          const newLayerGroup = this.createLayerGroup(listOfLayerEntryConfig[i]);
+          promiseOfLayerCreated.push(this.processListOfLayerEntryConfig(layerEntryConfig.listOfLayerEntryConfig!, newLayerGroup));
+        } else if ((listOfLayerEntryConfig[i] as TypeBaseLayerEntryConfig).layerStatus === 'error')
+          promiseOfLayerCreated.push(Promise.resolve(null));
         else {
-          if (
-            listOfLayerEntryConfig[0].entryType === 'vector' &&
-            (listOfLayerEntryConfig[0].source as TypeBaseSourceVectorInitialConfig)?.cluster?.enable
-          ) {
-            const unclusteredLayerConfig = cloneDeep(listOfLayerEntryConfig[0]) as TypeVectorLayerEntryConfig;
-            unclusteredLayerConfig.layerId = `${listOfLayerEntryConfig[0].layerId}-unclustered`;
+          if (layerEntryConfig.entryType === 'vector' && (layerEntryConfig.source as TypeBaseSourceVectorInitialConfig)?.cluster?.enable) {
+            const unclusteredLayerConfig = cloneDeep(layerEntryConfig) as TypeVectorLayerEntryConfig;
+            unclusteredLayerConfig.layerId = `${layerEntryConfig.layerId}-unclustered`;
             unclusteredLayerConfig.source!.cluster!.enable = false;
-            this.processOneLayerEntry(unclusteredLayerConfig as TypeBaseLayerEntryConfig).then((baseLayer) => {
-              if (baseLayer) {
-                baseLayer.setVisible(false);
-                api.maps[this.mapId].layer.registerLayerConfig(unclusteredLayerConfig);
-                this.registerToLayerSets(unclusteredLayerConfig as TypeBaseLayerEntryConfig);
-                if (!layerGroup) layerGroup = this.createLayerGroup(unclusteredLayerConfig.parentLayerConfig as TypeLayerEntryConfig);
-                layerGroup.getLayers().push(baseLayer);
-              }
-            });
-            (listOfLayerEntryConfig[0].source as TypeBaseSourceVectorInitialConfig)!.cluster!.settings =
+            api.maps[this.mapId].layer.registerLayerConfig(unclusteredLayerConfig);
+            promiseOfLayerCreated.push(this.processOneLayerEntry(unclusteredLayerConfig as TypeBaseLayerEntryConfig));
+            (layerEntryConfig.source as TypeBaseSourceVectorInitialConfig)!.cluster!.settings =
               unclusteredLayerConfig.source!.cluster!.settings;
           }
-          this.processOneLayerEntry(listOfLayerEntryConfig[0] as TypeBaseLayerEntryConfig).then((baseLayer) => {
-            if (baseLayer) {
-              baseLayer.setVisible(listOfLayerEntryConfig[0].initialSettings?.visible !== 'no');
-              this.registerToLayerSets(listOfLayerEntryConfig[0] as TypeBaseLayerEntryConfig);
-              if (layerGroup) layerGroup.getLayers().push(baseLayer);
-              this.changeLayerStatus('processed', listOfLayerEntryConfig[0]);
-              resolve(layerGroup || baseLayer);
-            } else {
-              this.layerLoadError.push({
-                layer: Layer.getLayerPath(listOfLayerEntryConfig[0]),
-                consoleMessage: `Unable to create layer ${Layer.getLayerPath(listOfLayerEntryConfig[0])} on map ${this.mapId}`,
-              });
-              this.changeLayerStatus('error', listOfLayerEntryConfig[0]);
-              resolve(null);
-            }
-          });
+          promiseOfLayerCreated.push(this.processOneLayerEntry(layerEntryConfig as TypeBaseLayerEntryConfig));
         }
-      } else {
-        if (!layerGroup && listOfLayerEntryConfig.length > 0) {
-          // All children of this level in the tree have the same parent, so we use the first element of the array to retrieve the parent node.
-          layerGroup = this.createLayerGroup(listOfLayerEntryConfig[0].parentLayerConfig as TypeLayerEntryConfig);
-        }
-        const promiseOfLayerCreated: Promise<BaseLayer | LayerGroup | null>[] = [];
-        listOfLayerEntryConfig.forEach((layerEntryConfig, i) => {
-          if (layerEntryIsGroupLayer(layerEntryConfig)) {
-            const newLayerGroup = this.createLayerGroup(listOfLayerEntryConfig[i]);
-            promiseOfLayerCreated.push(this.processListOfLayerEntryConfig(layerEntryConfig.listOfLayerEntryConfig!, newLayerGroup));
-          } else if ((listOfLayerEntryConfig[i] as TypeBaseLayerEntryConfig).layerStatus === 'error')
-            promiseOfLayerCreated.push(Promise.resolve(null));
-          else {
-            if (
-              layerEntryConfig.entryType === 'vector' &&
-              (layerEntryConfig.source as TypeBaseSourceVectorInitialConfig)?.cluster?.enable
-            ) {
-              const unclusteredLayerConfig = cloneDeep(layerEntryConfig) as TypeVectorLayerEntryConfig;
-              unclusteredLayerConfig.layerId = `${layerEntryConfig.layerId}-unclustered`;
-              unclusteredLayerConfig.source!.cluster!.enable = false;
-              api.maps[this.mapId].layer.registerLayerConfig(unclusteredLayerConfig);
-              promiseOfLayerCreated.push(this.processOneLayerEntry(unclusteredLayerConfig as TypeBaseLayerEntryConfig));
-              (layerEntryConfig.source as TypeBaseSourceVectorInitialConfig)!.cluster!.settings =
-                unclusteredLayerConfig.source!.cluster!.settings;
-            }
-            promiseOfLayerCreated.push(this.processOneLayerEntry(layerEntryConfig as TypeBaseLayerEntryConfig));
-          }
-        });
-        Promise.all(promiseOfLayerCreated)
-          .then((listOfLayerCreated) => {
-            listOfLayerCreated.forEach((baseLayer, i) => {
-              if (baseLayer) {
-                const layerEntryConfig = baseLayer?.get('layerEntryConfig') as TypeBaseLayerEntryConfig;
-                if (layerEntryConfig) {
-                  if (layerEntryConfig.layerId.endsWith('-unclustered')) {
-                    this.registerToLayerSets(layerEntryConfig);
-                    baseLayer.setVisible(false);
-                  } else
-                    baseLayer.setVisible(
-                      layerEntryConfig.initialSettings?.visible === 'yes' ||
-                        layerEntryConfig.initialSettings?.visible === 'always' ||
-                        layerEntryConfig.initialSettings?.visible === undefined
-                    );
+      });
+      const listOfLayerCreated = await Promise.all(promiseOfLayerCreated);
+      listOfLayerCreated.forEach((baseLayer, i) => {
+        if (baseLayer) {
+          const layerEntryConfig = baseLayer?.get('layerEntryConfig') as TypeBaseLayerEntryConfig;
+          if (layerEntryConfig) {
+            if (layerEntryConfig.layerId.endsWith('-unclustered')) {
+              this.registerToLayerSets(layerEntryConfig);
+              baseLayer.setVisible(false);
+            } else
+              baseLayer.setVisible(
+                layerEntryConfig.initialSettings?.visible === 'yes' ||
+                  layerEntryConfig.initialSettings?.visible === 'always' ||
+                  layerEntryConfig.initialSettings?.visible === undefined
+              );
 
-                  if (!layerEntryIsGroupLayer(listOfLayerEntryConfig[i])) {
-                    this.registerToLayerSets(baseLayer.get('layerEntryConfig') as TypeBaseLayerEntryConfig);
-                    this.changeLayerStatus('processed', listOfLayerEntryConfig[i]);
-                  }
-                  layerGroup!.getLayers().push(baseLayer);
-                }
-              } else {
-                this.layerLoadError.push({
-                  layer: Layer.getLayerPath(listOfLayerEntryConfig[i]),
-                  consoleMessage: `Unable to create ${
-                    layerEntryIsGroupLayer(listOfLayerEntryConfig[i]) ? 'group' : ''
-                  } layer ${Layer.getLayerPath(listOfLayerEntryConfig[i])} on map ${this.mapId}`,
-                });
-                this.changeLayerStatus('error', listOfLayerEntryConfig[i]);
-              }
-            });
-            resolve(layerGroup!);
-          })
-          .catch((reason) => {
-            // eslint-disable-next-line no-console
-            console.log(reason);
-            resolve(null);
+            if (!layerEntryIsGroupLayer(listOfLayerEntryConfig[i])) {
+              this.registerToLayerSets(baseLayer.get('layerEntryConfig') as TypeBaseLayerEntryConfig);
+              this.changeLayerStatus('processed', listOfLayerEntryConfig[i]);
+            }
+            layerGroup!.getLayers().push(baseLayer);
+          }
+        } else {
+          this.layerLoadError.push({
+            layer: Layer.getLayerPath(listOfLayerEntryConfig[i]),
+            consoleMessage: `Unable to create ${
+              layerEntryIsGroupLayer(listOfLayerEntryConfig[i]) ? 'group' : ''
+            } layer ${Layer.getLayerPath(listOfLayerEntryConfig[i])} on map ${this.mapId}`,
           });
-      }
-    });
-    return promisedListOfLayerEntryProcessed;
+          this.changeLayerStatus('error', listOfLayerEntryConfig[i]);
+        }
+      });
+
+      return layerGroup!;
+    } catch (error) {
+      console.log(error);
+      return null;
+    }
   }
 
   /** ***************************************************************************************************************************
@@ -779,43 +749,44 @@ export abstract class AbstractGeoViewLayer {
    *
    * @returns {Promise<TypeFeatureInfoResult>} The feature info table.
    */
-  getFeatureInfo(
+  async getFeatureInfo(
     queryType: TypeQueryType,
     layerPathOrConfig: string | TypeLayerEntryConfig,
     location: TypeLocation = null
   ): Promise<TypeArrayOfFeatureInfoEntries> {
-    const queryResult = new Promise<TypeArrayOfFeatureInfoEntries>((resolve) => {
+    try {
       const layerConfig = (
         typeof layerPathOrConfig === 'string' ? this.getLayerConfig(layerPathOrConfig) : layerPathOrConfig
       ) as TypeLayerEntryConfig | null;
-      if (!layerConfig || !layerConfig.source?.featureInfo?.queryable) resolve([]);
+      if (!layerConfig || !layerConfig.source?.featureInfo?.queryable) return [];
 
       switch (queryType) {
         case 'all':
-          this.getAllFeatureInfo(layerConfig!).then((featureInfoResult) => resolve(featureInfoResult));
+          return await this.getAllFeatureInfo(layerConfig!);
           break;
         case 'at_pixel':
-          this.getFeatureInfoAtPixel(location as Pixel, layerConfig!).then((featureInfoResult) => resolve(featureInfoResult));
+          return await this.getFeatureInfoAtPixel(location as Pixel, layerConfig!);
           break;
         case 'at_coordinate':
-          this.getFeatureInfoAtCoordinate(location as Coordinate, layerConfig!).then((featureInfoResult) => resolve(featureInfoResult));
+          return await this.getFeatureInfoAtCoordinate(location as Coordinate, layerConfig!);
           break;
         case 'at_long_lat':
-          this.getFeatureInfoAtLongLat(location as Coordinate, layerConfig!).then((featureInfoResult) => resolve(featureInfoResult));
+          return await this.getFeatureInfoAtLongLat(location as Coordinate, layerConfig!);
           break;
         case 'using_a_bounding_box':
-          this.getFeatureInfoUsingBBox(location as Coordinate[], layerConfig!).then((featureInfoResult) => resolve(featureInfoResult));
+          return await this.getFeatureInfoUsingBBox(location as Coordinate[], layerConfig!);
           break;
         case 'using_a_polygon':
-          this.getFeatureInfoUsingPolygon(location as Coordinate[], layerConfig!).then((featureInfoResult) => resolve(featureInfoResult));
+          return await this.getFeatureInfoUsingPolygon(location as Coordinate[], layerConfig!);
           break;
         default:
-          // eslint-disable-next-line no-console
           console.log(`Queries using ${queryType} are invalid.`);
-          resolve([]);
+          return [];
       }
-    });
-    return queryResult;
+    } catch (error) {
+      console.log(error);
+      return [];
+    }
   }
 
   /** ***************************************************************************************************************************
@@ -826,12 +797,10 @@ export abstract class AbstractGeoViewLayer {
    *
    * @returns {Promise<TypeArrayOfFeatureInfoEntries>} The feature info table.
    */
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  protected getAllFeatureInfo(layerConfig: TypeLayerEntryConfig): Promise<TypeArrayOfFeatureInfoEntries> {
-    const promisedQueryResult = new Promise<TypeArrayOfFeatureInfoEntries>((resolve) => {
-      resolve([]);
-    });
-    return promisedQueryResult;
+
+  protected async getAllFeatureInfo(layerConfig: TypeLayerEntryConfig): Promise<TypeArrayOfFeatureInfoEntries> {
+    console.log('getAllFeatureInfo is not implemented!');
+    return [];
   }
 
   /** ***************************************************************************************************************************
@@ -843,12 +812,10 @@ export abstract class AbstractGeoViewLayer {
    *
    * @returns {Promise<TypeArrayOfFeatureInfoEntries>} The feature info table.
    */
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  protected getFeatureInfoAtPixel(location: Pixel, layerConfig: TypeLayerEntryConfig): Promise<TypeArrayOfFeatureInfoEntries> {
-    const promisedQueryResult = new Promise<TypeArrayOfFeatureInfoEntries>((resolve) => {
-      resolve([]);
-    });
-    return promisedQueryResult;
+
+  protected async getFeatureInfoAtPixel(location: Pixel, layerConfig: TypeLayerEntryConfig): Promise<TypeArrayOfFeatureInfoEntries> {
+    console.log('getFeatureInfoAtPixel is not implemented!');
+    return [];
   }
 
   /** ***************************************************************************************************************************
@@ -860,12 +827,13 @@ export abstract class AbstractGeoViewLayer {
    *
    * @returns {Promise<TypeArrayOfFeatureInfoEntries>} The feature info table.
    */
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  protected getFeatureInfoAtCoordinate(location: Coordinate, layerConfig: TypeLayerEntryConfig): Promise<TypeArrayOfFeatureInfoEntries> {
-    const promisedQueryResult = new Promise<TypeArrayOfFeatureInfoEntries>((resolve) => {
-      resolve([]);
-    });
-    return promisedQueryResult;
+
+  protected async getFeatureInfoAtCoordinate(
+    location: Coordinate,
+    layerConfig: TypeLayerEntryConfig
+  ): Promise<TypeArrayOfFeatureInfoEntries> {
+    console.log('getFeatureInfoAtCoordinate is not implemented!');
+    return [];
   }
 
   /** ***************************************************************************************************************************
@@ -877,12 +845,10 @@ export abstract class AbstractGeoViewLayer {
    *
    * @returns {Promise<TypeArrayOfFeatureInfoEntries>} The feature info table.
    */
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  protected getFeatureInfoAtLongLat(location: Coordinate, layerConfig: TypeLayerEntryConfig): Promise<TypeArrayOfFeatureInfoEntries> {
-    const promisedQueryResult = new Promise<TypeArrayOfFeatureInfoEntries>((resolve) => {
-      resolve([]);
-    });
-    return promisedQueryResult;
+
+  protected async getFeatureInfoAtLongLat(location: Coordinate, layerConfig: TypeLayerEntryConfig): Promise<TypeArrayOfFeatureInfoEntries> {
+    console.log('getFeatureInfoAtLongLat is not implemented!');
+    return [];
   }
 
   /** ***************************************************************************************************************************
@@ -894,12 +860,13 @@ export abstract class AbstractGeoViewLayer {
    *
    * @returns {Promise<TypeArrayOfFeatureInfoEntries>} The feature info table.
    */
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  protected getFeatureInfoUsingBBox(location: Coordinate[], layerConfig: TypeLayerEntryConfig): Promise<TypeArrayOfFeatureInfoEntries> {
-    const promisedQueryResult = new Promise<TypeArrayOfFeatureInfoEntries>((resolve) => {
-      resolve([]);
-    });
-    return promisedQueryResult;
+
+  protected async getFeatureInfoUsingBBox(
+    location: Coordinate[],
+    layerConfig: TypeLayerEntryConfig
+  ): Promise<TypeArrayOfFeatureInfoEntries> {
+    console.log('getFeatureInfoUsingBBox is not implemented!');
+    return [];
   }
 
   /** ***************************************************************************************************************************
@@ -911,12 +878,13 @@ export abstract class AbstractGeoViewLayer {
    *
    * @returns {Promise<TypeArrayOfFeatureInfoEntries>} The feature info table.
    */
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  protected getFeatureInfoUsingPolygon(location: Coordinate[], layerConfig: TypeLayerEntryConfig): Promise<TypeArrayOfFeatureInfoEntries> {
-    const promisedQueryResult = new Promise<TypeArrayOfFeatureInfoEntries>((resolve) => {
-      resolve([]);
-    });
-    return promisedQueryResult;
+
+  protected async getFeatureInfoUsingPolygon(
+    location: Coordinate[],
+    layerConfig: TypeLayerEntryConfig
+  ): Promise<TypeArrayOfFeatureInfoEntries> {
+    console.log('getFeatureInfoUsingPolygon is not implemented!');
+    return [];
   }
 
   /** ***************************************************************************************************************************
@@ -1100,7 +1068,7 @@ export abstract class AbstractGeoViewLayer {
    *
    * @returns {null | codedValueType | rangeDomainType} The domain of the field.
    */
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+
   protected getFieldDomain(fieldName: string, layerConfig: TypeLayerEntryConfig): null | codedValueType | rangeDomainType {
     return null;
   }
@@ -1113,7 +1081,7 @@ export abstract class AbstractGeoViewLayer {
    *
    * @returns {'string' | 'date' | 'number'} The type of the field.
    */
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+
   protected getFieldType(fieldName: string, layerConfig: TypeLayerEntryConfig): 'string' | 'date' | 'number' {
     return 'string';
   }
@@ -1293,7 +1261,6 @@ export abstract class AbstractGeoViewLayer {
    *
    * @returns {string | number | Date} The formatted value of the field.
    */
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   protected getFieldValue(feature: Feature<Geometry>, fieldName: string, fieldType: 'number' | 'string' | 'date'): string | number | Date {
     const fieldValue = feature.get(fieldName);
     let returnValue: string | number | Date;
@@ -1322,90 +1289,90 @@ export abstract class AbstractGeoViewLayer {
    *
    * @returns {TypeArrayOfFeatureInfoEntries} The Array of feature information.
    */
-  protected formatFeatureInfoResult(
+  protected async formatFeatureInfoResult(
     features: Feature<Geometry>[],
     layerEntryConfig: TypeOgcWmsLayerEntryConfig | TypeEsriDynamicLayerEntryConfig | TypeVectorLayerEntryConfig
   ): Promise<TypeArrayOfFeatureInfoEntries> {
-    const promisedArrayOfFeatureInfo = new Promise<TypeArrayOfFeatureInfoEntries>((resolve) => {
-      if (!features.length) resolve([]);
-      else {
-        const featureInfo = layerEntryConfig?.source?.featureInfo;
-        const fieldTypes = featureInfo?.fieldTypes?.split(',') as ('string' | 'number' | 'date')[];
-        const outfields = getLocalizedValue(featureInfo?.outfields, this.mapId)?.split(',');
-        const aliasFields = getLocalizedValue(featureInfo?.aliasFields, this.mapId)?.split(',');
-        const queryResult: TypeArrayOfFeatureInfoEntries = [];
-        let featureKeyCounter = 0;
-        let fieldKeyCounter = 0;
-        const promisedAllCanvasFound: Promise<{ feature: Feature<Geometry>; canvas: HTMLCanvasElement | undefined }>[] = [];
-        features.forEach((featureNeedingItsCanvas) => {
-          promisedAllCanvasFound.push(
-            new Promise<{ feature: Feature<Geometry>; canvas: HTMLCanvasElement | undefined }>((resolveCanvas) => {
-              api.maps[this.mapId].geoviewRenderer
-                .getFeatureCanvas(featureNeedingItsCanvas, layerEntryConfig as TypeVectorLayerEntryConfig)
-                .then((canvas) => {
-                  resolveCanvas({ feature: featureNeedingItsCanvas, canvas });
-                });
-            })
-          );
-        });
-        Promise.all(promisedAllCanvasFound).then((arrayOfFeatureInfo) => {
-          arrayOfFeatureInfo.forEach(({ canvas, feature }) => {
-            if (canvas) {
-              const extent =
-                layerEntryIsVector(layerEntryConfig) && layerEntryConfig.source?.cluster?.enable
-                  ? (feature.get('features') as Array<Feature<Geometry>>).reduce((resultingExtent, featureToProcess) => {
-                      const newExtent = featureToProcess.getGeometry()!.getExtent();
-                      return [
-                        Math.min(resultingExtent[0], newExtent[0]),
-                        Math.min(resultingExtent[1], newExtent[1]),
-                        Math.max(resultingExtent[2], newExtent[2]),
-                        Math.max(resultingExtent[3], newExtent[3]),
-                      ];
-                    }, feature.getGeometry()!.getExtent())
-                  : feature.getGeometry()!.getExtent();
+    try {
+      if (!features.length) return [];
 
-              const featureInfoEntry: TypeFeatureInfoEntry = {
-                // feature key for building the data-grid
-                featureKey: featureKeyCounter++,
-                geoviewLayerType: this.type,
-                extent,
-                geometry: feature,
-                featureIcon: canvas,
-                fieldInfo: {},
-                nameField: getLocalizedValue(layerEntryConfig?.source?.featureInfo?.nameField, this.mapId) || null,
-              };
-
-              const featureFields = feature.getKeys();
-              featureFields.forEach((fieldName) => {
-                if (fieldName !== 'geometry') {
-                  if (outfields?.includes(fieldName)) {
-                    const fieldIndex = outfields.indexOf(fieldName);
-                    featureInfoEntry.fieldInfo[fieldName] = {
-                      fieldKey: fieldKeyCounter++,
-                      value: this.getFieldValue(feature, fieldName, fieldTypes![fieldIndex]),
-                      dataType: fieldTypes![fieldIndex] as 'string' | 'date' | 'number',
-                      alias: aliasFields![fieldIndex],
-                      domain: this.getFieldDomain(fieldName, layerEntryConfig!),
-                    };
-                  } else if (!outfields) {
-                    featureInfoEntry.fieldInfo[fieldName] = {
-                      fieldKey: fieldKeyCounter++,
-                      value: this.getFieldValue(feature, fieldName, this.getFieldType(fieldName, layerEntryConfig!)),
-                      dataType: this.getFieldType(fieldName, layerEntryConfig!),
-                      alias: fieldName,
-                      domain: this.getFieldDomain(fieldName, layerEntryConfig!),
-                    };
-                  }
-                }
+      const featureInfo = layerEntryConfig?.source?.featureInfo;
+      const fieldTypes = featureInfo?.fieldTypes?.split(',') as ('string' | 'number' | 'date')[];
+      const outfields = getLocalizedValue(featureInfo?.outfields, this.mapId)?.split(',');
+      const aliasFields = getLocalizedValue(featureInfo?.aliasFields, this.mapId)?.split(',');
+      const queryResult: TypeArrayOfFeatureInfoEntries = [];
+      let featureKeyCounter = 0;
+      let fieldKeyCounter = 0;
+      const promisedAllCanvasFound: Promise<{ feature: Feature<Geometry>; canvas: HTMLCanvasElement | undefined }>[] = [];
+      features.forEach((featureNeedingItsCanvas) => {
+        promisedAllCanvasFound.push(
+          new Promise<{ feature: Feature<Geometry>; canvas: HTMLCanvasElement | undefined }>((resolveCanvas) => {
+            api.maps[this.mapId].geoviewRenderer
+              .getFeatureCanvas(featureNeedingItsCanvas, layerEntryConfig as TypeVectorLayerEntryConfig)
+              .then((canvas) => {
+                resolveCanvas({ feature: featureNeedingItsCanvas, canvas });
               });
-              queryResult.push(featureInfoEntry);
+          })
+        );
+      });
+      const arrayOfFeatureInfo = await Promise.all(promisedAllCanvasFound);
+      arrayOfFeatureInfo.forEach(({ canvas, feature }) => {
+        if (canvas) {
+          const extent =
+            layerEntryIsVector(layerEntryConfig) && layerEntryConfig.source?.cluster?.enable
+              ? (feature.get('features') as Array<Feature<Geometry>>).reduce((resultingExtent, featureToProcess) => {
+                  const newExtent = featureToProcess.getGeometry()!.getExtent();
+                  return [
+                    Math.min(resultingExtent[0], newExtent[0]),
+                    Math.min(resultingExtent[1], newExtent[1]),
+                    Math.max(resultingExtent[2], newExtent[2]),
+                    Math.max(resultingExtent[3], newExtent[3]),
+                  ];
+                }, feature.getGeometry()!.getExtent())
+              : feature.getGeometry()!.getExtent();
+
+          const featureInfoEntry: TypeFeatureInfoEntry = {
+            // feature key for building the data-grid
+            featureKey: featureKeyCounter++,
+            geoviewLayerType: this.type,
+            extent,
+            geometry: feature,
+            featureIcon: canvas,
+            fieldInfo: {},
+            nameField: getLocalizedValue(layerEntryConfig?.source?.featureInfo?.nameField, this.mapId) || null,
+          };
+
+          const featureFields = feature.getKeys();
+          featureFields.forEach((fieldName) => {
+            if (fieldName !== 'geometry') {
+              if (outfields?.includes(fieldName)) {
+                const fieldIndex = outfields.indexOf(fieldName);
+                featureInfoEntry.fieldInfo[fieldName] = {
+                  fieldKey: fieldKeyCounter++,
+                  value: this.getFieldValue(feature, fieldName, fieldTypes![fieldIndex]),
+                  dataType: fieldTypes![fieldIndex] as 'string' | 'date' | 'number',
+                  alias: aliasFields![fieldIndex],
+                  domain: this.getFieldDomain(fieldName, layerEntryConfig!),
+                };
+              } else if (!outfields) {
+                featureInfoEntry.fieldInfo[fieldName] = {
+                  fieldKey: fieldKeyCounter++,
+                  value: this.getFieldValue(feature, fieldName, this.getFieldType(fieldName, layerEntryConfig!)),
+                  dataType: this.getFieldType(fieldName, layerEntryConfig!),
+                  alias: fieldName,
+                  domain: this.getFieldDomain(fieldName, layerEntryConfig!),
+                };
+              }
             }
           });
-          resolve(queryResult);
-        });
-      }
-    });
-    return promisedArrayOfFeatureInfo;
+          queryResult.push(featureInfoEntry);
+        }
+      });
+      return queryResult;
+    } catch (error) {
+      console.log(error);
+    }
+    return [];
   }
 
   /** ***************************************************************************************************************************
