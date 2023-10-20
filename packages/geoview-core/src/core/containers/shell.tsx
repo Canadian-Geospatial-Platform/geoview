@@ -15,6 +15,7 @@ import { Appbar } from '@/core/components/app-bar/app-bar';
 import { Navbar } from '@/core/components/nav-bar/nav-bar';
 import { FooterTabs } from '@/core/components/footer-tabs/footer-tabs';
 import { Geolocator } from '@/core/components/geolocator/geolocator';
+import { Footerbar } from '@/core/components/footer-bar/footer-bar';
 
 import { FocusTrapDialog } from './focus-trap';
 
@@ -142,11 +143,14 @@ export function Shell(props: ShellProps): JSX.Element {
       <FocusTrap active={activeTrap} focusTrapOptions={{ escapeDeactivates: false }}>
         <Box id={`shell-${shellId}`} sx={sxClasses.shell} className="geoview-shell" key={update}>
           <CircularProgress isLoaded={mapLoaded} />
-          <Box sx={sxClasses.mapContainer} className="mapContainer">
+          <Box sx={sxClasses.mapShellContainer} className="mapContainer">
             <Appbar activeTrap={activeTrap} activeTrapSet={setActivetrap} />
             {/* load geolocator component if config includes in list of components in appBar */}
             {mapFeaturesConfig?.appBar?.includes('geolocator') && mapFeaturesConfig?.map.interaction === 'dynamic' && <Geolocator />}
-            <Map {...mapFeaturesConfig} />
+            <Box sx={sxClasses.mapContainer}>
+              <Map {...mapFeaturesConfig} />
+              <Footerbar />
+            </Box>
             {mapFeaturesConfig?.map.interaction === 'dynamic' && <Navbar activeTrap={activeTrap} activeTrapSet={setActivetrap} />}
           </Box>
           {mapFeaturesConfig?.corePackages && mapFeaturesConfig?.corePackages.includes('footer-panel') && <FooterTabs />}

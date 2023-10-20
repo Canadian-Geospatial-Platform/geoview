@@ -88,24 +88,29 @@ export function Attribution(): JSX.Element {
   const expanded = useStore(getGeoViewStore(mapId), (state) => state.footerBarState.expanded);
 
   useEffect(() => {
-    const attributionTextElement = document.getElementById(`${mapId}-attribution-text`) as HTMLElement;
+    let attributionControl: CustomAttribution;
 
-    const attributionControl = new CustomAttribution(
-      {
-        target: attributionTextElement,
-        collapsible: false,
-        collapsed: false,
-        label: document.createElement('div'),
-        collapseLabel: document.createElement('div'),
-      },
-      mapId
-    );
+    if (mapElement !== undefined) {
+      const attributionTextElement = document.getElementById(`${mapId}-attribution-text`) as HTMLElement;
 
-    attributionControl.formatAttribution();
-    mapElement.addControl(attributionControl);
+      attributionControl = new CustomAttribution(
+        {
+          target: attributionTextElement,
+          collapsible: false,
+          collapsed: false,
+          label: document.createElement('div'),
+          collapseLabel: document.createElement('div'),
+        },
+        mapId
+      );
 
+      attributionControl.formatAttribution();
+      mapElement.addControl(attributionControl);
+    }
     return () => {
-      mapElement.removeControl(attributionControl);
+      if (mapElement !== undefined) {
+        mapElement.removeControl(attributionControl);
+      }
     };
   }, [mapId, mapElement]);
 

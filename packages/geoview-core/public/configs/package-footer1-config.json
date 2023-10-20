@@ -118,7 +118,7 @@
       }
     ]
   },
-  "theme": "dark",
+  "theme": "royal",
   "navBar": ["zoom", "fullscreen", "home", "location", "export"],
   "components": ["north-arrow", "overview-map"],
   "corePackages": ["footer-panel"],
