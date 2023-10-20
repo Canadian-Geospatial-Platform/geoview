@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title><%= htmlWebpackPlugin.options.title %></title>
+    <link rel="shortcut icon" href="./favicon.ico" />
+    <meta name="msapplication-TileColor" content="#da532c" />
+    <meta name="msapplication-config" content="./img/browserconfig.xml" />
+    <meta name="theme-color" content="#ffffff" />
+    <meta name="msapplication-TileColor" content="#da532c" />
+    <meta name="theme-color" content="#ffffff" />
+    <link href="https://fonts.googleapis.com/css?family=Roboto|Montserrat:200,300,400,900|Merriweather" rel="stylesheet" type="text/css" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
+    <link rel="stylesheet" href="css/style.css" />
+  </head>
+  <body>
+    <div class="header-table">
+      <table>
+        <tbody>
+          <tr>
+            <td><img class="header-logo" alt="logo" src="./img/Logo.png" /></td>
+            <td class="header-title">
+              <h1><strong>Package - Range Slider</strong></h1>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <a href="./index.html">Main</a><br />
+              <a href="#HUC1">Range Slider</a><br />
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <table>
+        <tbody>
+          <tr>
+            <td>This page is used to showcase the range slider package.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="map-title-holder">
+      <h4 id="HUC1">Range Slider</h4>
+      <a class="ref-link" href="#top">Top</a>
+    </div>
+    <div id="mapWM1" class="llwp-map" data-lang="en" data-config-url="./configs/package-range-slider-config.json"></div>
+    <hr />
+
+    <script src="codedoc.js"></script>
+    <script>
+      // initialize cgpv and api events, a callback is optional, used if calling api's after the rendering is ready
+      cgpv.init(function () {
+        console.log('api is ready');
+
+        //create snippets
+        createConfigSnippet();
+        createCodeSnippet();
+        // import react and api from the core
+        const { react, createRoot, api, ui } = cgpv;
+
+        // define the map id
+        const mapIdOne = 'mapWM1';
+
+        // import footerTabs from the core for the current map
+        const { footerTabs: ft1 } = api.maps[mapIdOne];
+
+        const legendOne = api.maps[mapIdOne].legend2.createLegend({
+          layerIds: ['esriFeatureLYR4', 'historical-flood', 'geojsonLYR5'],
+        });
+
+        // create new tab and add the LegendComponent to the footer tab
+        ft1.createFooterTab({
+          value: 3,
+          label: 'New Legend',
+          content: () => legendOne,
+        });
+      });
+    </script>
+  </body>
+</html>

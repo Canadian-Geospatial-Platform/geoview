@@ -19,6 +19,7 @@ import { DetailsItem } from './details-item';
 import { LegendItem } from './legend-item';
 import { DataTable } from './data-table';
 import { Layers } from './layers';
+import { RangeSlider } from './range-slider';
 
 const w = window as TypeWindow;
 
@@ -62,12 +63,14 @@ class FooterPanelPlugin extends AbstractPlugin {
       layers: 'Layers',
       details: 'Details',
       dataTable: 'DataTable',
+      rangeSlider: 'Range Slider',
     },
     fr: {
       legend: 'Légende',
       layers: 'Couches',
       details: 'Détails',
       dataTable: 'Données',
+      rangeSlider: 'Curseur de Gamme',
     },
   });
 
@@ -100,7 +103,7 @@ class FooterPanelPlugin extends AbstractPlugin {
         });
         tabsCounter++;
       }
-      
+
       if (defaultTabs.includes('layers')) {
         // create new tab and add the LayersComponent to the footer tab
         footerTabs.createFooterTab({
@@ -149,6 +152,16 @@ class FooterPanelPlugin extends AbstractPlugin {
           label: this.translations[displayLanguage].dataTable as string,
           content: () => <DataTable mapId={mapId} />,
           icon: <StorageIcon />,
+        });
+        tabsCounter++;
+      }
+
+      if (defaultTabs.includes('range-slider')) {
+        /// create new tab and add the DataTable Component to the footer tab
+        footerTabs.createFooterTab({
+          value: tabsCounter,
+          label: this.translations[displayLanguage].rangeSlider as string,
+          content: () => <RangeSlider mapId={mapId} />,
         });
         tabsCounter++;
       }
