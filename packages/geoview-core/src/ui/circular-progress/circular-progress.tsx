@@ -8,6 +8,7 @@ import { getSxClasses } from './circular-progress-style';
 interface TypeCircularProgressProps extends CircularProgressProps {
   isLoaded: boolean;
   style?: CSSProperties;
+  sx?: CSSProperties;
 }
 
 /**
@@ -17,13 +18,13 @@ interface TypeCircularProgressProps extends CircularProgressProps {
  * @returns {JSX.Element} the created Circular Progress element
  */
 export function CircularProgress(props: TypeCircularProgressProps): JSX.Element {
-  const { style = {}, isLoaded } = props;
+  const { style = {}, isLoaded, sx = {} } = props;
 
   const theme = useTheme();
   const sxClasses = getSxClasses(theme);
 
   return !isLoaded ? (
-    <Box sx={sxClasses.loading} style={{ ...style }}>
+    <Box sx={{ ...sxClasses.loading, ...sx }} style={{ ...style }}>
       <MaterialCircularProgress sx={sxClasses.progress} />
     </Box>
   ) : (
