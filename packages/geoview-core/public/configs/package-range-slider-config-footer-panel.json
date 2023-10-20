@@ -1,0 +1,8 @@
+{
+  "tabs": {
+    "defaultTabs": ["legend", "details", "range-slider"],
+    "customTabs": []
+  },
+  "suportedLanguages": ["en", "fr"],
+  "collapsed": false
+}
