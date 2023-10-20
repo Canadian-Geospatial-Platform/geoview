@@ -47,7 +47,7 @@ export const getSxClasses = (theme: Theme) => ({
   borderWithIndex: `2px solid ${theme.palette.primary.main}`,
   borderNone: 'none',
   headline: { fontSize: '1.125rem', fontWeight: 'bold' },
-  dataPanel: { backgroundColor: '#F1F2F5', marginTop: '1rem', padding: '1.5rem' },
+  dataPanel: { backgroundColor: '#F1F2F5', padding: '1.5rem' },
   gridContainer: { paddingLeft: '1rem', paddingRight: '1rem' },
   enlargeBtn: {
     width: '7rem !important',
