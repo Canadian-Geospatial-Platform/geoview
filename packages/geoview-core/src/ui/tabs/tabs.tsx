@@ -108,7 +108,7 @@ export function Tabs(props: TypeTabsProps): JSX.Element {
       <Grid item xs={5} sm={2} sx={{ textAlign: 'right' }}>
         {rightButtons as ReactNode}
       </Grid>
-      <Grid item xs={12} sx={{ height: 'calc( 100% - 55px )', borderTop: 1, borderColor: 'divider', visibility: TabContentVisibilty }}>
+      <Grid item xs={12} sx={{ height: '100%', borderTop: 1, borderColor: 'divider', visibility: TabContentVisibilty }}>
         {tabs.map((tab, index) => {
           const TabContent = tab.content as React.ElementType;
           return (
