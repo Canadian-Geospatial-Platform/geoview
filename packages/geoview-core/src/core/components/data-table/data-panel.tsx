@@ -139,7 +139,7 @@ export function Datapanel({ layerData, mapId, projectionConfig, language }: Data
         </Grid>
         <Grid item xs={!isEnlargeDataTable ? 8 : 10.75} sx={{ paddingLeft: '1rem', position: 'relative' }}>
           <CircularProgress
-            isLoaded={isLoading}
+            isLoaded={!isLoading}
             sx={{
               backgroundColor: 'inherit',
             }}
