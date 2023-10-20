@@ -142,7 +142,6 @@ export function LegendItemDetails(props: TypeLegendItemDetailsProps): JSX.Elemen
   const [checkIsGroup, setcheckIsGroup_] = useState(false);
 
   const [isClusterToggleEnabled, setIsClusterToggleEnabled] = useState(false);
-
   const [isLegendOpen, setLegendOpen] = useState(true);
   const [groupItems, setGroupItems] = useState<TypeListOfLayerEntryConfig>([]);
   const [iconType, setIconType] = useState<string | null>(null);
@@ -470,9 +469,7 @@ export function LegendItemDetails(props: TypeLegendItemDetailsProps): JSX.Elemen
           <LegendIconList
             iconImages={iconList}
             iconLabels={labelList}
-            isParentVisible={isChecked}
             onGetCheckedSublayerNames={handleGetCheckedSublayerNames}
-            toggleParentVisible={() => setChecked(!isChecked)}
             mapId={mapId}
             toggleMapVisible={(sublayerConfig) => {
               (geoviewLayerInstance as AbstractGeoViewVector | EsriDynamic).applyViewFilter(sublayerConfig);

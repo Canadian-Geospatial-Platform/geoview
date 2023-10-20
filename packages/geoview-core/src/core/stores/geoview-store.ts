@@ -187,7 +187,7 @@ export const geoViewStoreDefinition = (
     legendState: {
       selectedItem: undefined,
       selectedIsVisible: true,
-      selectedLayers: {}
+      selectedLayers: {},
     },
     notificationState: {
       notifications: [],
