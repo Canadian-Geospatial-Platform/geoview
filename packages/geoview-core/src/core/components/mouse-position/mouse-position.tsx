@@ -41,6 +41,17 @@ export function MousePosition(): JSX.Element {
   const theme = useTheme();
   const classes = getSxClasses(theme);
 
+  const mousePosition = {
+    display: 'flex',
+    padding: theme.spacing(0, 4),
+    'text-overflow': 'ellipsis',
+    'white-space': 'nowrap',
+    overflow: 'hidden',
+    'align-items': 'center',
+    border: 'none',
+    'background-color': 'transparent',
+  };
+
   // internal component state
   const [positions, setPositions] = useState<string[]>(['', '', '']);
   const [positionMode, setPositionMode] = useState<number>(0);
@@ -117,8 +128,8 @@ export function MousePosition(): JSX.Element {
   }, []);
 
   return (
-    <Tooltip title={t('mapnav.coordinates')!} placement="top" sx={classes.mousePositionTooltip}>
-      <button type="button" onClick={() => switchPositionMode()}>
+    <Tooltip title={t('mapnav.coordinates')!} placement="top">
+      <button type="button" onClick={() => switchPositionMode()} style={mousePosition}>
         <Box sx={classes.mousePositionTextContainer}>
           <Box id="mousePositionWrapper" sx={{ display: !expanded ? 'none' : 'block', transition: 'display 1ms ease-in 300ms' }}>
             {positions.map((position, index) => {
