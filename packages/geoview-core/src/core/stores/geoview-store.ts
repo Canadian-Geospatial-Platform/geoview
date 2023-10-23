@@ -14,6 +14,7 @@ import { toLonLat } from 'ol/proj';
 
 import { TypeMapFeaturesConfig, TypeValidMapProjectionCodes } from '@/core/types/global-types';
 import { TypeLegendItemProps } from '../components/legend-2/types';
+import { TypeArrayOfLayerData } from '../components/details/details';
 
 import { TypeMapMouseInfo } from '@/api/events/payloads';
 import { TypeDisplayLanguage, TypeInteraction } from '@/geo/map/map-schema-types';
@@ -88,6 +89,13 @@ export interface IMapDataTableState {
   setToolbarRowSelectedMessage: (message: string) => void;
 }
 
+export interface IDetailsState {
+  storeCurrentFeatureIndex: number;
+  storeArrayOfLayerData: TypeArrayOfLayerData;
+  storeSelectedLayerPath: string;
+  setStoreCurrentFeatureIndex: (newFeatureIndex: number) => void;
+}
+
 export interface IGeoViewState {
   displayLanguage: TypeDisplayLanguage;
   isCrosshairsActive: boolean;
@@ -100,6 +108,7 @@ export interface IGeoViewState {
   legendState: ILegendState;
   mapState: IMapState;
   notificationState: INotificationsState;
+  detailsState: IDetailsState;
   dataTableState: IMapDataTableState;
   setMapConfig: (config: TypeMapFeaturesConfig) => void;
   onMapLoaded: (mapElem: OLMap) => void;
@@ -188,6 +197,19 @@ export const geoViewStoreDefinition = (
       selectedItem: undefined,
       selectedIsVisible: true,
       selectedLayers: {},
+    },
+    detailsState: {
+      storeCurrentFeatureIndex: 0,
+      storeArrayOfLayerData: [],
+      storeSelectedLayerPath: '',
+      setStoreCurrentFeatureIndex: (newFeatureIndex: number) => {
+        set({
+          detailsState: {
+            ...get().detailsState,
+            storeCurrentFeatureIndex: newFeatureIndex,
+          },
+        });
+      },
     },
     notificationState: {
       notifications: [],
