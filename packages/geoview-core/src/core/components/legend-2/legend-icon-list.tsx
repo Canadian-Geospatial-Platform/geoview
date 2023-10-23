@@ -1,9 +1,9 @@
 /* eslint-disable react/require-default-props */
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import { useTheme, Theme } from '@mui/material/styles';
 import { Checkbox, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@mui/material';
-// import { IconButton, CheckBoxOutIcon, CheckBoxIcon } from '@/ui';
 import { useStore } from 'zustand';
+import { IconButton, CheckBoxOutIcon, CheckBoxIcon } from '@/ui';
 import {
   TypeVectorLayerEntryConfig,
   TypeStyleGeometry,
@@ -59,43 +59,25 @@ export interface TypeLegendIconListProps {
   layerConfig?: TypeVectorLayerEntryConfig;
   geometryKey?: TypeStyleGeometry;
   toggleMapVisible: (layerConfig: TypeLayerEntryConfig) => void;
+  onGetCheckedSublayerNames?: (checkedSublayerNames: { layer: string; icon: string }[]) => void;
 }
 
 export function LegendIconList(props: TypeLegendIconListProps): JSX.Element {
-  const { iconImages, iconLabels, toggleMapVisible, geometryKey, layerConfig, mapId } = props;
+  const { iconImages, iconLabels, toggleMapVisible, geometryKey, layerConfig, mapId, onGetCheckedSublayerNames } = props;
   const theme: Theme & {
     iconImg: React.CSSProperties;
   } = useTheme();
 
   const allChecked = iconImages.map(() => true);
-  const [isChecked, setChecked] = useState<boolean[]>(allChecked);
-  const [isAllChecked, setIsAllChecked] = useState(true);
+  const allUnChecked = iconImages.map(() => false);
 
   const isParentVisible = useStore(getGeoViewStore(mapId), (state) => state.legendState.selectedIsVisible);
   const isParentVisibleRef = useRef(isParentVisible);
   isParentVisibleRef.current = isParentVisible;
 
-  const handleToggleAll = () => {
-    if (layerConfig && geometryKey) {
-      const geometryStyle = layerConfig.style![geometryKey];
-      if (geometryStyle !== undefined) {
-        if (geometryStyle.styleType === 'uniqueValue') {
-          for (let i = 0; i < (geometryStyle as TypeUniqueValueStyleConfig).uniqueValueStyleInfo.length; i++) {
-            if ((geometryStyle as TypeUniqueValueStyleConfig).uniqueValueStyleInfo[i].visible !== 'always')
-              (geometryStyle as TypeUniqueValueStyleConfig).uniqueValueStyleInfo[i].visible = isAllChecked ? 'no' : 'yes';
-          }
-        } else if (geometryStyle.styleType === 'classBreaks') {
-          for (let i = 0; i < (geometryStyle as TypeClassBreakStyleConfig).classBreakStyleInfo.length; i++) {
-            if ((geometryStyle as TypeClassBreakStyleConfig).classBreakStyleInfo[i].visible !== 'always')
-              (geometryStyle as TypeClassBreakStyleConfig).classBreakStyleInfo[i].visible = isAllChecked ? 'no' : 'yes';
-          }
-        }
-      }
-      toggleMapVisible(layerConfig);
-    }
-    setChecked(iconImages.map(() => !isAllChecked));
-    setIsAllChecked(!isAllChecked);
-  };
+  const initialChecked = isParentVisible ? allChecked : allUnChecked;
+  const [isChecked, setChecked] = useState<boolean[]>(initialChecked);
+  const [isAllChecked, setIsAllChecked] = useState(initialChecked.every((checked) => checked));
 
   const handleToggleLayer = (index: number) => {
     if (layerConfig && geometryKey) {
@@ -120,6 +102,58 @@ export function LegendIconList(props: TypeLegendIconListProps): JSX.Element {
     setIsAllChecked(checklist.every((value) => value === true));
   };
 
+  const handleToggleAll = () => {
+    if (layerConfig && geometryKey) {
+      const geometryStyle = layerConfig.style![geometryKey];
+      if (geometryStyle !== undefined) {
+        if (geometryStyle.styleType === 'uniqueValue') {
+          for (let i = 0; i < (geometryStyle as TypeUniqueValueStyleConfig).uniqueValueStyleInfo.length; i++) {
+            if ((geometryStyle as TypeUniqueValueStyleConfig).uniqueValueStyleInfo[i].visible !== 'always')
+              (geometryStyle as TypeUniqueValueStyleConfig).uniqueValueStyleInfo[i].visible = isAllChecked ? 'no' : 'yes';
+          }
+        } else if (geometryStyle.styleType === 'classBreaks') {
+          for (let i = 0; i < (geometryStyle as TypeClassBreakStyleConfig).classBreakStyleInfo.length; i++) {
+            if ((geometryStyle as TypeClassBreakStyleConfig).classBreakStyleInfo[i].visible !== 'always')
+              (geometryStyle as TypeClassBreakStyleConfig).classBreakStyleInfo[i].visible = isAllChecked ? 'no' : 'yes';
+          }
+        }
+      }
+      toggleMapVisible(layerConfig);
+    }
+    setChecked(iconImages.map(() => !isAllChecked));
+    setIsAllChecked(!isAllChecked);
+  };
+
+  useEffect(() => {
+    if (onGetCheckedSublayerNames) {
+      const checkedSublayerNamesAndIcons = iconLabels
+        .map((label, index) => {
+          if (isChecked[index]) {
+            return {
+              layer: label,
+              icon: iconImages[index] ?? '',
+            };
+          }
+          return null;
+        })
+        .filter((pair) => pair !== null) as { layer: string; icon: string }[];
+
+      onGetCheckedSublayerNames(checkedSublayerNamesAndIcons);
+    }
+  }, [
+    isParentVisible,
+    allChecked,
+    allUnChecked,
+    isChecked,
+    layerConfig,
+    geometryKey,
+    toggleMapVisible,
+    mapId,
+    iconLabels,
+    iconImages,
+    onGetCheckedSublayerNames,
+  ]);
+
   return (
     <TableContainer>
       <Table sx={sxClasses.table}>
@@ -140,11 +174,13 @@ export function LegendIconList(props: TypeLegendIconListProps): JSX.Element {
                 <img alt={iconLabels[index]} src={icon} style={theme.iconImg} />
                 <span style={sxClasses.tableIconLabel}>{iconLabels[index]}</span>
               </TableCell>
-              {isParentVisibleRef.current && (
-                <TableCell>
-                  <Checkbox color="primary" checked={isChecked[index]} onChange={() => handleToggleLayer(index)} />
-                </TableCell>
-              )}
+              <TableCell>
+                {iconLabels[index] !== 'Cluster' && layerConfig?.initialSettings?.visible !== 'always' && (
+                  <IconButton color="primary" onClick={() => handleToggleLayer(index)}>
+                    {isChecked[index] === true ? <CheckBoxIcon /> : <CheckBoxOutIcon />}
+                  </IconButton>
+                )}
+              </TableCell>
             </TableRow>
           ))}
         </TableBody>
