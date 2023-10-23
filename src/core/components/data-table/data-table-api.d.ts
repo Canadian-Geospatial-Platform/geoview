@@ -1,8 +1,9 @@
 import { ReactElement } from 'react';
 import { DataTableData } from './data-table';
-import { TypeListOfLayerEntryConfig, TypeArrayOfFeatureInfoEntries, TypeFieldEntry } from '@/app';
-interface CreataDataTableProps {
+import { TypeListOfLayerEntryConfig, TypeArrayOfFeatureInfoEntries, TypeFieldEntry, TypeLocalizedString } from '@/app';
+export interface GroupLayers {
     layerId: string;
+    layerName?: TypeLocalizedString;
     layerKey: string;
 }
 export declare class DataTableApi {
@@ -30,7 +31,7 @@ export declare class DataTableApi {
      * @param {string[]} grouplayerKeys list of keys already exists.
      * @returns {string[]} array of layer keys
      */
-    getGroupKeys: (listOfLayerEntryConfig: TypeListOfLayerEntryConfig, parentLayerId: string, grouplayerKeys: string[]) => string[];
+    getGroupKeys: (listOfLayerEntryConfig: TypeListOfLayerEntryConfig, parentLayerId: string, groupLayers: GroupLayers[]) => GroupLayers[];
     /**
      * Create a data table rows
      *
@@ -51,17 +52,9 @@ export declare class DataTableApi {
         fieldAliases: Record<string, TypeFieldEntry>;
     };
     /**
-     * Create data table based on layer id from map.
-     * @param {string} layerId layerId of the feature added on map.
-     * @param {string} layerKey layerKey of the feature added on map.
-     * @returns {Promise<ReactElement | null>} Promise of ReactElement.
-     */
-    createDataTableByLayerId: ({ layerId, layerKey }: CreataDataTableProps) => Promise<ReactElement | null>;
-    /**
      * Create data panel for various layers.
      *
      * @returns {Promise<ReactElement | null>} Promise of ReactElement.
      */
     createDataPanel: () => Promise<ReactElement | null>;
 }
-export {};

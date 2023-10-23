@@ -4,7 +4,6 @@ import { MapViewer } from '@/geo/map/map-viewer';
 import { Plugin } from './plugin/plugin';
 import { GeoUtilities } from '@/geo/utils/utilities';
 import { DateMgt } from '@/core/utils/date-mgt';
-import * as MarkerDefinitions from '../core/types/marker-definitions';
 import * as Utilities from '../core/utils/utilities';
 import { FeatureInfoLayerSet } from '@/geo/utils/feature-info-layer-set';
 import { LegendsLayerSet } from '@/geo/utils/legends-layer-set';
@@ -56,7 +55,6 @@ export declare class API {
     utilities: typeof Utilities;
     geoUtilities: GeoUtilities;
     dateUtilities: DateMgt;
-    markerDefinitions: typeof MarkerDefinitions;
     generateId: typeof Utilities.generateId;
     createMapFromConfig: typeof createMapFromConfig;
     addUiComponent: typeof Utilities.addUiComponent;

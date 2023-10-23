@@ -233,22 +233,22 @@ export declare class EsriDynamic extends AbstractGeoViewRaster {
      * Get the layer view filter. The filter is derived fron the uniqueValue or the classBreak visibility flags and a layerFilter
      * associated to the layer.
      *
-     * @param {string | TypeLayerEntryConfig | null} layerPathOrConfig Optional layer path or configuration.
+     * @param {string | TypeLayerEntryConfig} layerPathOrConfig Layer path or configuration.
      *
      * @returns {string} the filter associated to the layerPath
      */
-    getViewFilter(layerPathOrConfig?: string | TypeLayerEntryConfig | null): string;
+    getViewFilter(layerPathOrConfig: string | TypeLayerEntryConfig): string;
     /** ***************************************************************************************************************************
      * Apply a view filter to the layer. When the CombineLegendFilter flag is false, the filter paramater is used alone to display
      * the features. Otherwise, the legend filter and the filter parameter are combined together to define the view filter. The
      * legend filters are derived from the uniqueValue or classBreaks style of the layer. When the layer config is invalid, nothing
      * is done.
      *
-     * @param {string | TypeLayerEntryConfig | null} layerPathOrConfig Optional layer path or configuration.
+     * @param {string | TypeLayerEntryConfig} layerPathOrConfig Layer path or configuration.
      * @param {string} filter An optional filter to be used in place of the getViewFilter value.
      * @param {boolean} CombineLegendFilter Flag used to combine the legend filter and the filter together (default: true)
      */
-    applyViewFilter(layerPathOrConfig?: string | TypeLayerEntryConfig | null, filter?: string, CombineLegendFilter?: boolean): void;
+    applyViewFilter(layerPathOrConfig: string | TypeLayerEntryConfig, filter?: string, CombineLegendFilter?: boolean): void;
     /** ***************************************************************************************************************************
      * Get the bounds of the layer represented in the layerConfig, returns updated bounds
      *
@@ -257,5 +257,5 @@ export declare class EsriDynamic extends AbstractGeoViewRaster {
      *
      * @returns {Extent} The layer bounding box.
      */
-    getBounds(layerConfig: TypeLayerEntryConfig, bounds: Extent | undefined): Extent | undefined;
+    protected getBounds(layerConfig: TypeLayerEntryConfig, bounds: Extent | undefined): Extent | undefined;
 }

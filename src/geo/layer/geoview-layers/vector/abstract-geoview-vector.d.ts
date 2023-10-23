@@ -16,15 +16,15 @@ export type TypeVectorLayer = VectorSource<Geometry>;
 export type TypeBaseVectorLayer = BaseLayer | TypeVectorLayerGroup | TypeVectorLayer;
 /** *****************************************************************************************************************************
  * The AbstractGeoViewVector class is a direct descendant of AbstractGeoViewLayer. As its name indicates, it is used to
- * instanciate GeoView vector layers. It inherits from its parent class an attribute named gvLayers where the vector elements
+ * instanciate GeoView vector layers. It inherits from its parent class an attribute named olLayers where the vector elements
  * of the class will be kept.
  *
- * The gvLayers attribute has a hierarchical structure. Its data type is TypeBaseVectorLayer. Subclasses of this type are
+ * The olLayers attribute has a hierarchical structure. Its data type is TypeBaseVectorLayer. Subclasses of this type are
  * BaseLayer, TypeVectorLayerGroup and TypeVectorLayer. The TypeVectorLayerGroup is a collection of TypeBaseVectorLayer. It is
  * important to note that a TypeBaseVectorLayer attribute can polymorphically refer to a TypeVectorLayerGroup or a
  * TypeVectorLayer. Here, we must not confuse instantiation and declaration of a polymorphic attribute.
  *
- * All leaves of the tree structure stored in the gvLayers attribute must be of type TypeVectorLayer. This is where the
+ * All leaves of the tree structure stored in the olLayers attribute must be of type TypeVectorLayer. This is where the
  * features are placed and can be considered as a feature group.
  */
 export declare abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
@@ -55,7 +55,7 @@ export declare abstract class AbstractGeoViewVector extends AbstractGeoViewLayer
     protected createVectorSource(layerEntryConfig: TypeBaseLayerEntryConfig, sourceOptions?: SourceOptions, readOptions?: ReadOptions): VectorSource<Geometry>;
     /** ***************************************************************************************************************************
      * Create a vector layer. The layer has in its properties a reference to the layer entry configuration used at creation time.
-     * The layer entry configuration keeps a reference to the layer in the gvLayer attribute. If clustering is enabled, creates a
+     * The layer entry configuration keeps a reference to the layer in the olLayer attribute. If clustering is enabled, creates a
      * cluster source and uses that to create the layer.
      *
      * @param {TypeBaseLayerEntryConfig} layerEntryConfig The layer entry configuration used by the source.
@@ -107,17 +107,17 @@ export declare abstract class AbstractGeoViewVector extends AbstractGeoViewLayer
      *
      * @returns {Extent} The layer bounding box.
      */
-    getBounds(layerConfig: TypeLayerEntryConfig, bounds: Extent | undefined): Extent | undefined;
+    protected getBounds(layerConfig: TypeLayerEntryConfig, bounds: Extent | undefined): Extent | undefined;
     /** ***************************************************************************************************************************
      * Apply a view filter to the layer. When the CombineLegendFilter flag is false, the filter paramater is used alone to display
      * the features. Otherwise, the legend filter and the filter parameter are combined together to define the view filter. The
      * legend filters are derived from the uniqueValue or classBreaks style of the layer. When the layer config is invalid, nothing
      * is done.
      *
-     * @param {string | TypeLayerEntryConfig | null} layerPathOrConfig Optional layer path or configuration.
+     * @param {string | TypeLayerEntryConfig} layerPathOrConfig Layer path or configuration.
      * @param {string} filter An optional filter to be used in place of the getViewFilter value.
      * @param {boolean} CombineLegendFilter Flag used to combine the legend filter and the filter together (default: true)
      * @param {boolean} checkCluster An optional value to see if we check for clustered layers.
      */
-    applyViewFilter(layerPathOrConfig?: string | TypeLayerEntryConfig | null, filter?: string, CombineLegendFilter?: boolean, checkCluster?: boolean): void;
+    applyViewFilter(layerPathOrConfig: string | TypeLayerEntryConfig, filter?: string, CombineLegendFilter?: boolean, checkCluster?: boolean): void;
 }

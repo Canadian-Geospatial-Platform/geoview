@@ -4,9 +4,9 @@ import { Extent } from 'ol/extent';
 import { Style } from 'ol/style';
 import { Color } from 'ol/color';
 import { TypeJsonObject } from '@/core/types/global-types';
-import { TypeFeatureStyle } from '../layer/geometry/geometry-types';
-import { TypeListOfLayerEntryConfig } from '../map/map-schema-types';
-import { AbstractGeoViewLayer } from '../layer/geoview-layers/abstract-geoview-layers';
+import { TypeFeatureStyle } from '@/geo/layer/geometry/geometry-types';
+import { TypeListOfLayerEntryConfig } from '@/geo/map/map-schema-types';
+import { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 export declare class GeoUtilities {
     /**
      * Set the layerStatus code of all layers in the listOfLayerEntryConfig.

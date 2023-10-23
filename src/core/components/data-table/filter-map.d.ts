@@ -1,14 +1,14 @@
-import { Dispatch } from 'react';
+/// <reference types="react" />
 interface FilterMapProps {
-    setMapFiltered: Dispatch<boolean>;
-    mapFiltered: boolean;
+    layerKey: string;
+    mapId: string;
 }
 /**
- * Custom  GeoJson export button which will help to download data table data in geojson format.
- * @param {Features[]} features list of rows to be displayed in data table
- * @param {string} layerId id of the layer
- * @returns {JSX.Element} returns Menu Item
+ * Custom Filter map toggle button.
+ * @param {string} layerKey key of the layer displayed in the map.
+ * @param {string} mapid id of the map
+ * @returns {JSX.Element} returns Switch
  *
  */
-declare function FilterMap({ mapFiltered, setMapFiltered }: FilterMapProps): JSX.Element;
+declare function FilterMap({ layerKey, mapId }: FilterMapProps): JSX.Element;
 export default FilterMap;
