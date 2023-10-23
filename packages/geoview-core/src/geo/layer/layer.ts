@@ -483,6 +483,8 @@ export class Layer {
    * @param {AbstractGeoViewLayer} geoviewLayer layer to set Z index for
    */
   setLayerZIndices = (geoviewLayer: AbstractGeoViewLayer) => {
+    // if olLayers is null, the layer is in error and we return.
+    if (!geoviewLayer.olLayers) return;
     const zIndex =
       this.layerOrder.indexOf(geoviewLayer.geoviewLayerId) !== -1 ? this.layerOrder.indexOf(geoviewLayer.geoviewLayerId) * 100 : 0;
     geoviewLayer.olLayers!.setZIndex(zIndex);
