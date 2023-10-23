@@ -44,12 +44,12 @@ export function MousePosition(): JSX.Element {
   const mousePosition = {
     display: 'flex',
     padding: theme.spacing(0, 4),
-    'text-overflow': 'ellipsis',
-    'white-space': 'nowrap',
+    textOverflow: 'ellipsis',
+    WhiteSpace: 'nowrap',
     overflow: 'hidden',
-    'align-items': 'center',
+    alignItems: 'center',
     border: 'none',
-    'background-color': 'transparent',
+    backgroundColor: 'transparent',
   };
 
   // internal component state
