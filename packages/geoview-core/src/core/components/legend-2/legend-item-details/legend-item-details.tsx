@@ -419,7 +419,6 @@ export function LegendItemDetails(props: TypeLegendItemDetailsProps): JSX.Elemen
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  
   return (
     <Grid item sm={12}>
       <Stack sx={{ justifyContent: 'space-between', padding: '16px 17px 16px 23px' }} direction="row">

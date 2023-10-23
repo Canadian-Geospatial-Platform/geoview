@@ -12,11 +12,8 @@ export const sxClassesFooterBar = {
     backdropFilter: 'blur(5px)',
     backgroundColor: '#000000cc',
     pointerEvents: 'all',
-    position: 'absolute',
-    left: '64px',
-    bottom: 0,
-    order: 3,
     gap: 0.5,
+    order: 3,
   },
   mouseScaleControlsContainer: {
     display: 'flex',
@@ -34,7 +31,6 @@ export const sxClassesFooterBar = {
     alignItems: 'flex-end',
   },
 };
-
 
 // footer-bar-expand-button.tsx
 export const sxClassesExportButton = {
