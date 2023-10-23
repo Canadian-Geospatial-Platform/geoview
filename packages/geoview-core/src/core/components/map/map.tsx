@@ -20,7 +20,6 @@ import { getGeoViewStore } from '@/core/stores/stores-managers';
 
 import { NorthArrow, NorthPoleFlag } from '@/core/components/north-arrow/north-arrow';
 import { Crosshair } from '@/core/components/crosshair/crosshair';
-import { Footerbar } from '@/core/components/footer-bar/footer-bar';
 import { OverviewMap } from '@/core/components/overview-map/overview-map';
 import { ClickMarker } from '@/core/components/click-marker/click-marker';
 import { HoverTooltip } from '@/core/components/hover-tooltip/hover-tooltip';
@@ -40,6 +39,7 @@ const useStyles = makeStyles(() => ({
     display: 'flex',
     flexDirection: 'column',
     width: '100%',
+    height: '100%',
     position: 'relative',
   },
 }));
@@ -245,7 +245,6 @@ export function Map(mapFeaturesConfig: TypeMapFeaturesConfig): JSX.Element {
           <ClickMarker />
           <HoverTooltip />
           {deviceSizeMedUp && overviewMap && overviewBaseMap && <OverviewMap />}
-          {deviceSizeMedUp && <Footerbar />}
         </>
       )}
     </div>

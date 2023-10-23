@@ -86,15 +86,15 @@ export function FooterTabs(): JSX.Element | null {
     mapDiv.style.transition = 'height 0.2s ease-out 0.2s';
 
     // ol map container div
-    (mapDiv.querySelectorAll('[class*="mapContainer"]')[0] as HTMLElement).style.minHeight = `${origHeight - 55}px`;
+    (mapDiv.querySelectorAll('[class*="mapContainer"]')[0] as HTMLElement).style.minHeight = `${origHeight}px`;
 
     // tabs container div
     const tabs = mapDiv.querySelectorAll('[class*="tabsContainer"]') as NodeListOf<HTMLElement>;
     if (tabs.length > 0) {
       const tab: HTMLElement = tabs[0];
-      tab.style.height = isCollapsed ? '55px' : 'fit-content';
+      tab.style.height = 'fit-content';
       (tab.firstChild!.lastChild! as HTMLElement).style.overflow = isCollapsed ? 'unset' : 'auto';
-      (tab.firstChild!.lastChild! as HTMLElement).style.maxHeight = isCollapsed ? '0px' : `${origHeight - 55}px`;
+      (tab.firstChild!.lastChild! as HTMLElement).style.maxHeight = isCollapsed ? '0px' : `${origHeight}px`;
     }
   }, [isCollapsed, mapDiv, mapDiv.style, origHeight]);
 
@@ -108,8 +108,8 @@ export function FooterTabs(): JSX.Element | null {
     // ol map container div
     const olMapDiv: HTMLElement = mapDiv.querySelectorAll('[class*="mapContainer"]')[0] as HTMLElement;
     olMapDiv.style.visibility = isFullscreen ? 'hidden' : 'visible';
-    olMapDiv.style.minHeight = isFullscreen ? '0px' : `${origHeight - 55}px`;
-    olMapDiv.style.height = isFullscreen ? '0px' : `${origHeight - 55}px`;
+    olMapDiv.style.minHeight = isFullscreen ? '0px' : `${origHeight}px`;
+    olMapDiv.style.height = isFullscreen ? '0px' : `${origHeight}px`;
 
     // tabs container div
     if (isFullscreen) setIsCollapsed(false);
@@ -117,8 +117,8 @@ export function FooterTabs(): JSX.Element | null {
 
     if (tabs.length > 0) {
       const tab: HTMLElement = tabs[0];
-      tab.style.minHeight = isFullscreen ? `${2 * (origHeight - 55)}px` : '55px';
-      (tab.firstChild!.lastChild! as HTMLElement).style.maxHeight = isFullscreen ? '' : `${origHeight - 55}px`;
+      tab.style.minHeight = isFullscreen ? `${2 * origHeight}px` : '';
+      (tab.firstChild!.lastChild! as HTMLElement).style.maxHeight = isFullscreen ? '' : `${origHeight}px`;
     }
   }, [isFullscreen, mapDiv, origHeight]);
 

@@ -393,7 +393,6 @@ function MapDataTable({ data, layerId, mapId, layerKey, projectionConfig }: MapD
         filterFn: 'contains',
         columnFilterModeOptions: ['contains', 'startsWith', 'endsWith', 'empty', 'notEmpty'],
         ...(value.dataType === 'number' && {
-          size: 225,
           filterFn: 'between',
           columnFilterModeOptions: [
             'equals',
@@ -430,7 +429,7 @@ function MapDataTable({ data, layerId, mapId, layerKey, projectionConfig }: MapD
             'notEmpty',
           ],
         }),
-        ...([t('dataTable.icon'), t('dataTable.zoom')].includes(value.alias) && { size: 100, enableColumnFilter: false }),
+        ...([t('dataTable.icon'), t('dataTable.zoom')].includes(value.alias) ? { size: 100, enableColumnFilter: false } : {}),
       });
     });
 
@@ -476,7 +475,7 @@ function MapDataTable({ data, layerId, mapId, layerKey, projectionConfig }: MapD
   }, []);
 
   return (
-    <Box>
+    <Box sx={sxClasses.dataTableWrapper}>
       <MaterialReactTable
         columns={columns as MRTColumnDef[]}
         data={rows}
@@ -486,11 +485,9 @@ function MapDataTable({ data, layerId, mapId, layerKey, projectionConfig }: MapD
         enableDensityToggle
         onDensityChange={setDensity}
         initialState={{
-          columnPinning: { left: [t('dataTable.icon'), t('dataTable.zoom')] },
-          pagination: { pageSize: 10, pageIndex: 0 },
           showColumnFilters: !!columnFilters.length,
         }}
-        state={{ sorting, columnFilters, rowSelection, density }}
+        state={{ sorting, columnFilters, rowSelection, density, columnPinning: { left: ['ICON', 'ZOOM'] } }}
         enableColumnFilterModes
         onSortingChange={setSorting}
         onColumnFiltersChange={setColumnFilters}

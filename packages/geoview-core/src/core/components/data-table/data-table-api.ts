@@ -1,12 +1,13 @@
 import { createElement, ReactElement } from 'react';
 import DataTable, { DataTableData } from './data-table';
 
-import { api, TypeListOfLayerEntryConfig, isVectorLayer, TypeArrayOfFeatureInfoEntries, TypeFieldEntry } from '@/app';
-import MapDataTable, { MapDataTableData as MapDataTableDataProps } from './map-data-table';
+import { api, TypeListOfLayerEntryConfig, TypeArrayOfFeatureInfoEntries, TypeFieldEntry, TypeLocalizedString } from '@/app';
+import { MapDataTableData as MapDataTableDataProps } from './map-data-table';
 import { Datapanel } from './data-panel';
 
-interface CreataDataTableProps {
+export interface GroupLayers {
   layerId: string;
+  layerName?: TypeLocalizedString;
   layerKey: string;
 }
 
@@ -41,19 +42,24 @@ export class DataTableApi {
    * @returns {string[]} array of layer keys
    */
 
-  getGroupKeys = (listOfLayerEntryConfig: TypeListOfLayerEntryConfig, parentLayerId: string, grouplayerKeys: string[]) => {
+  getGroupKeys = (listOfLayerEntryConfig: TypeListOfLayerEntryConfig, parentLayerId: string, groupLayers: GroupLayers[]): GroupLayers[] => {
     listOfLayerEntryConfig.forEach((LayerEntryConfig) => {
       if (
         LayerEntryConfig.entryType === 'group' &&
         LayerEntryConfig.listOfLayerEntryConfig !== undefined &&
         LayerEntryConfig.listOfLayerEntryConfig.length > 1
       ) {
-        this.getGroupKeys(LayerEntryConfig.listOfLayerEntryConfig, `${parentLayerId}/${LayerEntryConfig.layerId}`, grouplayerKeys);
+        this.getGroupKeys(LayerEntryConfig.listOfLayerEntryConfig, parentLayerId, groupLayers);
       } else if (LayerEntryConfig.entryType !== 'group') {
-        grouplayerKeys.push(`${parentLayerId}/${LayerEntryConfig.layerId}`);
+        groupLayers.push({
+          layerId: parentLayerId,
+          layerName: LayerEntryConfig.layerName,
+          layerKey: `${parentLayerId}/${LayerEntryConfig.layerId}`,
+        });
       }
     });
-    return grouplayerKeys;
+
+    return groupLayers;
   };
 
   /**
@@ -94,47 +100,13 @@ export class DataTableApi {
   };
 
   /**
-   * Create data table based on layer id from map.
-   * @param {string} layerId layerId of the feature added on map.
-   * @param {string} layerKey layerKey of the feature added on map.
-   * @returns {Promise<ReactElement | null>} Promise of ReactElement.
-   */
-
-  createDataTableByLayerId = async ({ layerId, layerKey }: CreataDataTableProps): Promise<ReactElement | null> => {
-    const geoviewLayerInstance = api.maps[this.mapId].layer.geoviewLayers[layerId];
-    const { currentProjection } = api.maps[this.mapId];
-    const projectionConfig = api.projection.projections[currentProjection];
-
-    if (geoviewLayerInstance.listOfLayerEntryConfig.length > 0) {
-      const groupLayerKeys = this.getGroupKeys(geoviewLayerInstance.listOfLayerEntryConfig, layerId, []);
-
-      if (isVectorLayer(geoviewLayerInstance)) {
-        const requests = groupLayerKeys.map((groupLayerKey) => {
-          return geoviewLayerInstance.getFeatureInfo('all', groupLayerKey);
-        });
-
-        const response = await Promise.allSettled(requests);
-        const data = response
-          .filter((req) => req.status === 'fulfilled')
-          .map((result) => {
-            /* @ts-expect-error value prop is part of promise, filter function already filter fullfilled promise, still thrown type error. */
-            return this.buildFeatureRows(result.value);
-          });
-        return createElement(MapDataTable, { data: data[0], layerId, mapId: this.mapId, layerKey, projectionConfig }, []);
-      }
-    }
-    return null;
-  };
-
-  /**
    * Create data panel for various layers.
    *
    * @returns {Promise<ReactElement | null>} Promise of ReactElement.
    */
   createDataPanel = async (): Promise<ReactElement | null> => {
-    let layerIds: string[] = [];
-    let layerKeys: string[] = [];
-
+    let groupLayers: GroupLayers[] = [];
+    const language = api.maps[this.mapId].displayLanguage;
     const { currentProjection } = api.maps[this.mapId];
     const projectionConfig = api.projection.projections[currentProjection];
     const geoLayers = Object.keys(api.maps[this.mapId].layer.geoviewLayers);
@@ -142,16 +114,14 @@ export class DataTableApi {
     geoLayers.forEach((layerId: string) => {
       const geoviewLayerInstance = api.maps[this.mapId].layer.geoviewLayers[layerId];
       if (geoviewLayerInstance.listOfLayerEntryConfig.length > 0) {
-        const groupLayerKeys = this.getGroupKeys(geoviewLayerInstance.listOfLayerEntryConfig, layerId, []);
-        layerKeys = [...layerKeys, ...groupLayerKeys];
-        layerIds = [...layerIds, ...groupLayerKeys.fill(layerId)];
+        const layers = this.getGroupKeys(geoviewLayerInstance.listOfLayerEntryConfig, layerId, []);
+        groupLayers = [...groupLayers, ...layers];
       }
     });
 
-    const requests = layerKeys.map((layerKey, index) => {
-      const layerId = layerIds[index];
-      const geoviewLayerInstance = api.maps[this.mapId].layer.geoviewLayers[layerId];
-      return geoviewLayerInstance.getFeatureInfo('all', layerKey);
+    const requests = groupLayers.map((layer) => {
+      const geoviewLayerInstance = api.maps[this.mapId].layer.geoviewLayers[layer.layerId];
+      return geoviewLayerInstance.getFeatureInfo('all', layer.layerKey);
     });
 
     const response = await Promise.allSettled(requests);
@@ -163,23 +133,16 @@ export class DataTableApi {
         return this.buildFeatureRows(result.value);
       });
 
-    const filteredKeys: string[] = [];
-    const filteredIds: string[] = [];
-    const filteredData: MapDataTableDataProps[] = [];
+    const filteredData: (MapDataTableDataProps & GroupLayers)[] = [];
 
     // filter data based on features.
     data.forEach((res, index) => {
       if (res.features.length) {
-        filteredData.push(res);
-        filteredIds.push(layerIds[index]);
-        filteredKeys.push(layerKeys[index]);
+        const concatedData = { ...res, ...groupLayers[index] };
+        filteredData.push(concatedData);
       }
     });
 
-    return createElement(
-      Datapanel,
-      { layerData: filteredData, layerIds: filteredIds, mapId: this.mapId, layerKeys: filteredKeys, projectionConfig },
-      null
-    );
+    return createElement(Datapanel, { layerData: filteredData, mapId: this.mapId, projectionConfig, language }, null);
   };
 }
