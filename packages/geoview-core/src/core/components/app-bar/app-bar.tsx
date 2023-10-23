@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useCallback, Fragment, useContext, SetStateAction, Dispatch } from 'react';
-
-import makeStyles from '@mui/styles/makeStyles';
+import { Box, useTheme } from '@mui/material';
+// import makeStyles from '@mui/styles/makeStyles';
 
 import { List, ListItem, Panel, IconButton } from '@/ui';
 
@@ -17,75 +17,76 @@ import Geolocator from './buttons/geolocator';
 import Notifications from '@/core/components/notifications/notifications';
 import Version from './buttons/version';
 import ExportModal from '../export/export-modal';
+import { getSxClasses } from './app-bar-style';
 
-const useStyles = makeStyles((theme) => ({
-  appBar: {
-    display: 'flex',
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    minWidth: 64,
-    zIndex: theme.zIndex.appBar,
-    pointerEvents: 'all',
-    backgroundColor: theme.appBar.background,
-    border: theme.appBar.border,
-  },
-  appBarList: {
-    width: 60,
-    '& li': {
-      backgroundColor: 'transparent',
-      justifyContent: 'center',
-      margin: '16px 0',
-      padding: 0,
-      '&:hover': {
-        backgroundColor: 'transparent',
-        color: theme.palette.primary.light,
-      },
-    },
-    '& hr': {
-      width: '80%',
-      marginLeft: '7px',
-    },
-  },
+// const useStyles = makeStyles((theme) => ({
+//   appBar: {
+//     display: 'flex',
+//     flexDirection: 'row',
+//     justifyContent: 'space-between',
+//     minWidth: 64,
+//     zIndex: theme.zIndex.appBar,
+//     pointerEvents: 'all',
+//     backgroundColor: theme.appBar.background,
+//     border: theme.appBar.border,
+//   },
+//   appBarList: {
+//     width: 60,
+//     '& li': {
+//       backgroundColor: 'transparent',
+//       justifyContent: 'center',
+//       margin: '16px 0',
+//       padding: 0,
+//       '&:hover': {
+//         backgroundColor: 'transparent',
+//         color: theme.palette.primary.light,
+//       },
+//     },
+//     '& hr': {
+//       width: '80%',
+//       marginLeft: '7px',
+//     },
+//   },
 
-  appBarButtons: {
-    borderRightColor: theme.appBar.border,
-    borderRightWidth: 1,
-    borderRightStyle: 'solid',
-    width: 64,
-  },
-  appBarButton: {
-    backgroundColor: theme.appBar.btnDefaultBg,
-    color: theme.palette.primary.light,
-    height: 44,
-    width: 44,
-    transition: 'background-color 0.3s ease-in-out',
-    '&:hover': {
-      backgroundColor: theme.appBar.btnHoverBg,
-      color: theme.palette.primary.light,
-    },
-    '&:focus': {
-      backgroundColor: theme.appBar.btnFocusBg,
-      color: theme.palette.primary.light,
-    },
-    '&:active': {
-      backgroundColor: theme.appBar.btnActiveBg,
-      color: theme.palette.primary.light,
-    },
-    '&.active': {
-      backgroundColor: theme.appBar.btnActiveBg,
-      color: theme.palette.background.paper,
-    },
-    '& .MuiSvgIcon-root': {
-      height: 20,
-      width: 20,
-    },
-  },
-  versionButtonDiv: {
-    position: 'absolute',
-    bottom: 0,
-  },
-  appBarPanels: {},
-}));
+//   appBarButtons: {
+//     borderRightColor: theme.appBar.border,
+//     borderRightWidth: 1,
+//     borderRightStyle: 'solid',
+//     width: 64,
+//   },
+//   appBarButton: {
+//     backgroundColor: theme.appBar.btnDefaultBg,
+//     color: theme.palette.primary.light,
+//     height: 44,
+//     width: 44,
+//     transition: 'background-color 0.3s ease-in-out',
+//     '&:hover': {
+//       backgroundColor: theme.appBar.btnHoverBg,
+//       color: theme.palette.primary.light,
+//     },
+//     '&:focus': {
+//       backgroundColor: theme.appBar.btnFocusBg,
+//       color: theme.palette.primary.light,
+//     },
+//     '&:active': {
+//       backgroundColor: theme.appBar.btnActiveBg,
+//       color: theme.palette.primary.light,
+//     },
+//     '&.active': {
+//       backgroundColor: theme.appBar.btnActiveBg,
+//       color: theme.palette.background.paper,
+//     },
+//     '& .MuiSvgIcon-root': {
+//       height: 20,
+//       width: 20,
+//     },
+//   },
+//   versionButtonDiv: {
+//     position: 'absolute',
+//     bottom: 0,
+//   },
+//   appBarPanels: {},
+// }));
 
 type AppbarProps = {
   activeTrap: boolean;
@@ -96,11 +97,13 @@ type AppbarProps = {
  * Create an app-bar with buttons that can open a panel
  */
 export function Appbar({ activeTrap, activeTrapSet }: AppbarProps): JSX.Element {
+  const sxtheme = useTheme();
+  const classes = getSxClasses(sxtheme);
   const [buttonPanelGroups, setButtonPanelGroups] = useState<Record<string, Record<string, TypeButtonPanel>>>({});
   const [ModalIsShown, setModalIsShown] = useState(false);
   const [selectedAppBarButtonId, setSelectedAppbarButtonId] = useState<string>('');
 
-  const classes = useStyles();
+  // const classes = useStyles();
 
   const appBar = useRef<HTMLDivElement>(null);
 
@@ -176,16 +179,16 @@ export function Appbar({ activeTrap, activeTrapSet }: AppbarProps): JSX.Element 
   }, [addButtonPanel, mapId, removeButtonPanel, selectedAppBarButtonId]);
 
   return (
-    <div className={classes.appBar} ref={appBar}>
-      <div className={classes.appBarButtons}>
+    <Box sx={classes.appBar} ref={appBar}>
+      <Box sx={classes.appBarButtons}>
         {mapFeaturesConfig.appBar?.includes('geolocator') && mapFeaturesConfig?.map.interaction === 'dynamic' && (
-          <div>
-            <List className={classes.appBarList}>
+          <Box>
+            <List sx={classes.appBarList}>
               <ListItem>
-                <Geolocator className={classes.appBarButton} mapId={mapId} />
+                <Geolocator sx={classes.appBarButton} mapId={mapId} />
               </ListItem>
             </List>
-          </div>
+          </Box>
         )}
 
         {Object.keys(buttonPanelGroups).map((groupName: string) => {
@@ -194,7 +197,7 @@ export function Appbar({ activeTrap, activeTrapSet }: AppbarProps): JSX.Element 
 
           // display the button panels in the list
           return (
-            <List key={groupName} className={classes.appBarList}>
+            <List key={groupName} sx={classes.appBarList}>
               {Object.keys(buttonPanels).map((buttonPanelsKey) => {
                 const buttonPanel = buttonPanels[buttonPanelsKey];
                 return buttonPanel?.button.visible !== undefined && buttonPanel?.button.visible ? (
@@ -227,16 +230,16 @@ export function Appbar({ activeTrap, activeTrapSet }: AppbarProps): JSX.Element 
           );
         })}
         {mapFeaturesConfig.appBar?.includes('export') && (
-          <div>
-            <List className={classes.appBarList}>
+          <Box>
+            <List sx={classes.appBarList}>
               <ListItem>
                 <Export className={`${classes.appBarButton} ${ModalIsShown ? 'active' : ''}`} openModal={openModal} />
               </ListItem>
             </List>
-          </div>
+          </Box>
         )}
-        <div className={classes.versionButtonDiv}>
-          <List className={classes.appBarList}>
+        <Box sx={classes.versionButtonDiv}>
+          <List sx={classes.appBarList}>
             <hr />
             <ListItem>
               <Notifications />
@@ -245,8 +248,8 @@ export function Appbar({ activeTrap, activeTrapSet }: AppbarProps): JSX.Element 
               <Version />
             </ListItem>
           </List>
-        </div>
-      </div>
+        </Box>
+      </Box>
       {Object.keys(buttonPanelGroups).map((groupName: string) => {
         // get button panels from group
         const buttonPanels = buttonPanelGroups[groupName];
@@ -269,6 +272,6 @@ export function Appbar({ activeTrap, activeTrapSet }: AppbarProps): JSX.Element 
         );
       })}
       <ExportModal isShown={ModalIsShown} closeModal={closeModal} />
-    </div>
+    </Box>
   );
 }

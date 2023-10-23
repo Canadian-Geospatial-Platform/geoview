@@ -7,14 +7,14 @@ import { getGeoViewStore } from '@/core/stores/stores-managers';
  */
 interface GeolocatorProps {
   mapId: string;
-  className?: string | undefined;
+  sx?: React.CSSProperties;
 }
 
 /**
  * default properties values
  */
 const defaultProps = {
-  className: '',
+  sx: {},
 };
 
 /**
@@ -23,7 +23,7 @@ const defaultProps = {
  * @returns {JSX.Element} the geolocator button
  */
 export default function Geolocator(props: GeolocatorProps): JSX.Element {
-  const { mapId, className } = props;
+  const { mapId, sx = {} } = props;
   const [active, setActive] = useState(true);
   const store = getGeoViewStore(mapId);
 
@@ -40,7 +40,8 @@ export default function Geolocator(props: GeolocatorProps): JSX.Element {
       tooltip="appbar.geolocator"
       tooltipPlacement="bottom-end"
       onClick={click}
-      className={`${className} ${active ? 'active' : ''}`}
+      sx={sx}
+      className={`${active ? 'active' : ''}`}
     >
       <SearchIcon />
     </IconButton>
