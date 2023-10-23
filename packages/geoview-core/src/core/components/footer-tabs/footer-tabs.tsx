@@ -1,5 +1,5 @@
 import { MutableRefObject, useCallback, useContext, useEffect, useRef, useState } from 'react';
-import makeStyles from '@mui/styles/makeStyles';
+import { Box, useTheme } from '@mui/material';
 
 import { MapContext } from '@/core/app-start';
 import { api } from '@/app';
@@ -8,16 +8,7 @@ import { EVENT_NAMES } from '@/api/events/event-types';
 import { FooterTabPayload, PayloadBaseClass, payloadIsAFooterTab } from '@/api/events/payloads';
 
 import { ExpandLessIcon, ExpandMoreIcon, FullscreenIcon, FullscreenExitIcon, IconButton, Tabs, TypeTabs } from '@/ui';
-
-export const useStyles = makeStyles((theme) => ({
-  tabsContainer: {
-    position: 'relative',
-    backgroundColor: theme.palette.background.default,
-    width: '100%',
-    transition: 'height 0.2s ease-out',
-    height: '55px',
-  },
-}));
+import { getSxClasses } from './footer-tabs-style';
 
 /**
  * The FooterTabs component is used to display a list of tabs and their content.
@@ -30,8 +21,8 @@ export function FooterTabs(): JSX.Element | null {
   const [isCollapsed, setIsCollapsed] = useState(true);
 
   const [isFullscreen, setIsFullscreen] = useState(false);
-
-  const classes = useStyles();
+  const theme = useTheme();
+  const classes = getSxClasses(theme);
 
   const mapConfig = useContext(MapContext);
 
@@ -170,7 +161,7 @@ export function FooterTabs(): JSX.Element | null {
   }, [addTab, mapId, removeTab]);
 
   return api.maps[mapId].footerTabs.tabs.length > 0 ? (
-    <div ref={tabsContainerRef as MutableRefObject<HTMLDivElement>} className={`${classes.tabsContainer} tabsContainer`}>
+    <Box ref={tabsContainerRef as MutableRefObject<HTMLDivElement>} sx={classes.tabsContainer} className="tabsContainer">
       <Tabs
         isCollapsed={isCollapsed}
         handleCollapse={handleCollapse}
@@ -193,6 +184,6 @@ export function FooterTabs(): JSX.Element | null {
           </>
         }
       />
-    </div>
+    </Box>
   ) : null;
 }
