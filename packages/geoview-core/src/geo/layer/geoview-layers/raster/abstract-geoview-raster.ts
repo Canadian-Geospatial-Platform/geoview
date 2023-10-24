@@ -2,6 +2,7 @@
 import BaseLayer from 'ol/layer/Base';
 import Feature from 'ol/Feature';
 import { Geometry } from 'ol/geom';
+import LayerGroup from 'ol/layer/Group';
 
 import { AbstractGeoViewLayer } from '../abstract-geoview-layers';
 import { Layer, LayerSetPayload, TypeLayerEntryConfig, api } from '@/app';
@@ -11,7 +12,9 @@ import { Layer, LayerSetPayload, TypeLayerEntryConfig, api } from '@/app';
  */
 
 // Base type used to keep the layer's hierarchical structure. It is similar to ol/layer/Base~BaseLayer.
-export type TypeBaseRasterLayer = BaseLayer; // TypeRasterLayerGroup | TypeRasterLayer;
+export type TypeRasterLayerGroup = LayerGroup;
+export type TypeRasterLayer = BaseLayer;
+export type TypeBaseRasterLayer = BaseLayer | TypeRasterLayerGroup | TypeRasterLayer;
 
 // ******************************************************************************************************************************
 // ******************************************************************************************************************************
