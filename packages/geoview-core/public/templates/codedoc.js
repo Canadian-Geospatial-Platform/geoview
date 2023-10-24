@@ -107,6 +107,7 @@ function createCollapsible() {
 function getAllInteractionEvents(api) {
   return [
     api.eventNames.INTERACTION.EVENT_SELECTED,
+    api.eventNames.INTERACTION.EVENT_EXTENT,
     api.eventNames.INTERACTION.EVENT_DRAW_STARTED,
     api.eventNames.INTERACTION.EVENT_DRAW_ENDED,
     api.eventNames.INTERACTION.EVENT_MODIFY_STARTED,
