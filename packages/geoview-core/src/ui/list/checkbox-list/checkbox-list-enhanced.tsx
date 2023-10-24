@@ -1,9 +1,7 @@
 /* eslint-disable no-plusplus */
 import { useState, useEffect } from 'react';
 
-import { Typography } from '@mui/material';
-import createStyles from '@mui/styles/createStyles';
-import makeStyles from '@mui/styles/makeStyles';
+import { Typography, useTheme } from '@mui/material';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import ListItemIcon from '@mui/material/ListItemIcon';
@@ -11,32 +9,7 @@ import Checkbox from '@mui/material/Checkbox';
 import Box from '@mui/material/Box';
 
 import { HtmlToReact } from '../../../core/containers/html-to-react';
-
-const useStyles = makeStyles((theme) =>
-  createStyles({
-    list: {
-      padding: 0,
-    },
-    typography: {
-      padding: 0,
-    },
-    listItem: {
-      height: '28px',
-      padding: 0,
-      color: theme.palette.secondary.contrastText,
-      '&:hover': {
-        backgroundColor: '#dddddd',
-        color: theme.palette.primary.dark,
-      },
-    },
-    listItemIcon: {
-      minWidth: '0px',
-    },
-    boxcontent: {
-      padding: 0,
-    },
-  })
-);
+import { getSxClasses } from './checkbox-list-enhanced-style';
 
 /**
  * interface for CheckboxList basic properties
@@ -57,7 +30,8 @@ export type CheckboxListEnhancedItem = {
 export function CheckboxListEnhanced(props: CheckboxListEnhancedType): JSX.Element {
   const { listItems, checkedValues, multiselect, checkedCallback } = props;
 
-  const classes = useStyles();
+  const sxtheme = useTheme();
+  const classes = getSxClasses(sxtheme);
 
   const [checked, _setChecked] = useState([...checkedValues]);
 
@@ -89,13 +63,13 @@ export function CheckboxListEnhanced(props: CheckboxListEnhancedType): JSX.Eleme
   }, [checked, checkedValues]);
 
   return (
-    <List className={classes.list}>
+    <List sx={classes.list}>
       {listItems.map((item: CheckboxListEnhancedItem, idx: number) => {
         const labelId = `checkbox-list-label-${idx}`;
 
         return (
-          <ListItem className={classes.listItem} title={item.display} key={item.value} dense onClick={() => handleToggle(item.value)}>
-            <ListItemIcon className={classes.listItemIcon}>
+          <ListItem sx={classes.listItem} title={item.display} key={item.value} dense onClick={() => handleToggle(item.value)}>
+            <ListItemIcon sx={classes.listItemIcon}>
               <Checkbox
                 edge="start"
                 checked={checked.includes(item.value)}
@@ -104,10 +78,10 @@ export function CheckboxListEnhanced(props: CheckboxListEnhancedType): JSX.Eleme
                 inputProps={{ 'aria-labelledby': labelId }}
               />
             </ListItemIcon>
-            <Typography className={classes.typography} variant="body2" noWrap component="ul">
+            <Typography sx={classes.typography} variant="body2" noWrap component="ul">
               {item.display}
             </Typography>
-            <Box className={`Checkbox-content-root ${classes.boxcontent}`} onClick={(e) => handleClickContent(e)}>
+            <Box sx={classes.boxcontent} className="Checkbox-content-root" onClick={(e) => handleClickContent(e)}>
               {typeof item.content === 'string' ? <HtmlToReact htmlContent={item.content} /> : item.content}
             </Box>
           </ListItem>
