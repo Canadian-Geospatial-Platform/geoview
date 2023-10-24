@@ -31,6 +31,7 @@ export class LegendApi {
   constructor(mapId: string) {
     this.mapId = mapId;
     this.legendLayerSet = api.getLegendsLayerSet(mapId);
+    console.log('this.legendLayerSet ', this.legendLayerSet);
   }
 
   /**
