@@ -26,6 +26,8 @@ export function Legend2(props: LegendItemsDetailsProps): JSX.Element {
   const sxClasses = getSxClasses(theme);
 
   const store = getGeoViewStore(mapId);
+  //controls what is displayed on the right panel
+  const currentRightPanelDisplay = useStore(store, (state) => state.legendState.currentRightPanelDisplay);
   const selectedLegendItem = useStore(store, (state) => state.legendState.selectedItem);
   const selectedLayers = useStore(store, (state) => state.legendState.selectedLayers);
   const [isSelectedLayersClicked, setIsSelectedLayersClicked] = useState(false);

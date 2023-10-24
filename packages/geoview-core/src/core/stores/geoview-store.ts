@@ -19,6 +19,8 @@ import { TypeArrayOfLayerData } from '../components/details/details';
 import { TypeMapMouseInfo } from '@/api/events/payloads';
 import { TypeDisplayLanguage, TypeInteraction } from '@/geo/map/map-schema-types';
 import { NotificationDetailsType } from '@/core/types/cgpv-types';
+import { TypeLegend } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
+import { TypeLayerStatus } from '@/geo/map/map-schema-types';
 
 export interface IMapState {
   currentProjection: TypeValidMapProjectionCodes;
@@ -63,10 +65,19 @@ export interface INotificationsState {
 
 // export interface IFooterState {}
 
+export interface ILegendLayer {
+  layerStatus: TypeLayerStatus;
+  layerPhase: string;
+  querySent: boolean;
+  data: TypeLegend | undefined | null;
+  children?: ILegendLayer
+}
 export interface ILegendState {
   selectedItem?: TypeLegendItemProps;
   selectedIsVisible: boolean;
   selectedLayers: Record<string, { layer: string; icon: string }[]>;
+  currentRightPanelDisplay: 'overview' | 'layer-details' | 'none';
+  legendLayers: ILegendLayer[]
 }
 
 export interface IMapDataTableState {
@@ -193,8 +204,10 @@ export const geoViewStoreDefinition = (
     },
     legendState: {
       selectedItem: undefined,
+      currentRightPanelDisplay: 'none',
       selectedIsVisible: true,
       selectedLayers: {},
+      legendLayers: []
     },
     detailsState: {
       layerDataArray: [],
