@@ -841,7 +841,7 @@ export class WMS extends AbstractGeoViewRaster {
    *
    * @returns {Promise<TypeWmsLegendStylel>} The legend of the style.
    */
-  private async getStyleLegend(layerConfig: TypeOgcWmsLayerEntryConfig, position: number): Promise<TypeWmsLegendStyle> {
+  private getStyleLegend(layerConfig: TypeOgcWmsLayerEntryConfig, position: number): Promise<TypeWmsLegendStyle> {
     const promisedStyleLegend = new Promise<TypeWmsLegendStyle>((resolve) => {
       const chosenStyle: string | undefined = this.WMSStyles[position];
       let styleLegend: TypeWmsLegendStyle;
@@ -915,7 +915,7 @@ export class WMS extends AbstractGeoViewRaster {
           };
           resolve(legend);
         } else {
-          api.maps[this.mapId].geoviewRenderer.loadImage(legendImage as string).then(async (image) => {
+          api.maps[this.mapId].geoviewRenderer.loadImage(legendImage as string).then((image) => {
             if (image) {
               const drawingCanvas = document.createElement('canvas');
               drawingCanvas.width = image.width;
