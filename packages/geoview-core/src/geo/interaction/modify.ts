@@ -3,12 +3,13 @@ import { ModifyEvent as OLModifyEvent, Options as OLModifyOptions } from 'ol/int
 import Collection from 'ol/Collection';
 import Feature from 'ol/Feature';
 import { FlatStyle } from 'ol/style/flat';
+
 import { Interaction, InteractionOptions } from './interaction';
 import { api } from '@/app';
 import { EVENT_NAMES } from '@/api/events/event-types';
 import { modifyPayload } from '@/api/events/payloads';
-import { TypeFeatureStyle } from '../layer/geometry/geometry-types';
-import { GeoUtilities } from '../utils/utilities';
+import { TypeFeatureStyle } from '@/geo/layer/geometry/geometry-types';
+import { GeoUtilities } from '@/geo/utils/utilities';
 
 /**
  * Supported options for modify interactions
