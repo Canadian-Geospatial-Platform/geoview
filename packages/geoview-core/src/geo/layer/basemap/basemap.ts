@@ -385,7 +385,7 @@ export class Basemap {
    *
    * @param {TypeBasemapOptions} basemapOptions basemap options
    */
-  async createCoreBasemap(basemapOptions: TypeBasemapOptions, projection?: number): Promise<TypeBasemapProps | undefined> {
+  createCoreBasemap(basemapOptions: TypeBasemapOptions, projection?: number): Promise<TypeBasemapProps | undefined> {
     // eslint-disable-next-line no-async-promise-executor
     return new Promise(async (resolve) => {
       const basemapLayers: TypeBasemapLayer[] = [];

@@ -375,7 +375,7 @@ function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
    *
    * @returns {Promise<boolean>} True if layer passes validation
    */
-  const geocoreValidation = async (): Promise<boolean> => {
+  const geocoreValidation = (): boolean => {
     try {
       const isValid = layerURL.indexOf('/') === -1 && layerURL.replaceAll('-', '').length === 32;
       if (!isValid) throw new Error('err');
@@ -580,7 +580,7 @@ function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
     else if (layerType === ESRI_FEATURE) valid = await esriValidation(ESRI_FEATURE);
     else if (layerType === GEOJSON) valid = await geoJSONValidation();
     else if (layerType === GEOPACKAGE) valid = geoPackageValidation();
-    else if (layerType === GEOCORE) valid = await geocoreValidation();
+    else if (layerType === GEOCORE) valid = geocoreValidation();
     if (valid) {
       setIsLoading(false);
       setActiveStep(2);

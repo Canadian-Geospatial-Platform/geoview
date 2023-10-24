@@ -94,7 +94,7 @@ export function addReloadListener(mapId: string) {
  * @param {Element} mapDiv The ma div to initialise
  * @param {string} mapConfig a new config passed in from the function call
  */
-export async function initMapDivFromFunctionCall(mapDiv: HTMLElement, mapConfig: string) {
+export function initMapDivFromFunctionCall(mapDiv: HTMLElement, mapConfig: string): void {
   mapDiv.classList.add('llwp-map');
   // render the map with the config
   reactRoot[mapDiv.id] = createRoot(mapDiv!);
