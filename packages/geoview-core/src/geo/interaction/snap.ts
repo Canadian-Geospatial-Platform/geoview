@@ -2,6 +2,7 @@ import { Snap as OLSnap } from 'ol/interaction';
 import { Options as OLSnapOptions } from 'ol/interaction/Snap';
 import Collection from 'ol/Collection';
 import Feature from 'ol/Feature';
+
 import { Interaction, InteractionOptions } from './interaction';
 
 /**

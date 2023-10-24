@@ -2,12 +2,13 @@ import { Select as OLSelect } from 'ol/interaction';
 import { SelectEvent as OLSelectEvent, Options as OLSelectOptions } from 'ol/interaction/Select';
 import Collection from 'ol/Collection';
 import Feature from 'ol/Feature';
+
 import { Interaction, InteractionOptions } from './interaction';
 import { api } from '@/app';
 import { EVENT_NAMES } from '@/api/events/event-types';
 import { selectPayload } from '@/api/events/payloads';
-import { TypeFeatureStyle } from '../layer/geometry/geometry-types';
-import { GeoUtilities } from '../utils/utilities';
+import { TypeFeatureStyle } from '@/geo/layer/geometry/geometry-types';
+import { GeoUtilities } from '@/geo/utils/utilities';
 
 /**
  * Supported options for select interactions

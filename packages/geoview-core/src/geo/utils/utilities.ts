@@ -15,8 +15,6 @@ import { Cast, TypeJsonObject } from '@/core/types/global-types';
 import { TypeFeatureStyle } from '@/geo/layer/geometry/geometry-types';
 import { xmlToJson } from '@/core/utils/utilities';
 
-import { api } from '@/app';
-import { LayerSetPayload } from '@/api/events/payloads';
 import { TypeLayerEntryConfig, TypeListOfLayerEntryConfig, layerEntryIsGroupLayer } from '@/geo/map/map-schema-types';
 import { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { Layer } from '@/geo/layer/layer';
@@ -46,7 +44,7 @@ export class GeoUtilities {
         this.setAllLayerStatusToError(geoviewLayerInstance, layerEntryConfig.listOfLayerEntryConfig, errorMessage);
       else {
         const layerPath = Layer.getLayerPath(layerEntryConfig);
-        api.event.emit(LayerSetPayload.createLayerSetChangeLayerStatusPayload(geoviewLayerInstance.mapId, layerPath, 'error'));
+        geoviewLayerInstance.changeLayerStatus('error', layerEntryConfig);
         geoviewLayerInstance.layerLoadError.push({
           layer: layerPath,
           consoleMessage: `${errorMessage} for layer ${layerPath} of map ${geoviewLayerInstance.mapId}`,

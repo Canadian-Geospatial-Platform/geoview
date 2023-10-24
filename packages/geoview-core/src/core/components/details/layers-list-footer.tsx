@@ -1,5 +1,6 @@
 /* eslint-disable react/require-default-props */
 import React, { useEffect, useState, useRef, useCallback } from 'react';
+import { useStore } from 'zustand';
 import { useTheme } from '@mui/material/styles';
 import { useTranslation } from 'react-i18next';
 import { getUid } from 'ol/util';
@@ -35,6 +36,7 @@ import {
   TypeGeometry,
 } from '@/api/events/payloads';
 import { getSxClasses } from './details-style';
+import { getGeoViewStore } from '@/core/stores/stores-managers';
 
 interface TypeLayersListProps {
   arrayOfLayerData: TypeArrayOfLayerData;
@@ -52,12 +54,21 @@ export function LayersListFooter(props: TypeLayersListProps): JSX.Element {
   const { t } = useTranslation<string>();
   const theme = useTheme();
   const selectedFeatures = useRef<string[]>([]);
+
+  const store = getGeoViewStore(mapId);
+  const selectedLayerPath = useStore(store, (state) => state.detailsState.selectedLayerPath);
+
   const [layerDataInfo, setLayerDataInfo] = useState<TypeLayerData | null>(null);
   const [currentFeatureIndex, setCurrentFeatureIndex] = useState<number>(0);
   const [isClearAllCheckboxes, setIsClearAllCheckboxes] = useState<boolean>(false);
   const [disableClearAllBtn, setDisableClearAllBtn] = useState<boolean>(false);
 
   const sxClasses = getSxClasses(theme);
+
+  // Returns the index of matching layer based on the found layer path
+  const findLayerPathIndex = (layerDataArray: TypeArrayOfLayerData, layerPathSearch: string): number => {
+    return layerDataArray.findIndex((item) => item.layerPath === layerPathSearch);
+  };
 
   const highlightCallbackFunction = (payload: PayloadBaseClass) => {
     if (payloadIsAFeatureHighlight(payload)) {
@@ -133,11 +144,20 @@ export function LayersListFooter(props: TypeLayersListProps): JSX.Element {
 
   useEffect(() => {
     if (arrayOfLayerData.length > 0) {
-      // load the first layer we clicked with its feature info in right panel
-      // if there are multiple layers, we load the first one on the list with its feature info
-      setLayerDataInfo(arrayOfLayerData[0]);
+      // Check if have the previous selected layer path in incoming arrayOfLayerData
+      // if so, get the index of the found layer, we need to pass to setLayerDataInfo to load layer in left panel
+      const commonLayerPathIndex = findLayerPathIndex(arrayOfLayerData, selectedLayerPath);
+      setLayerDataInfo(arrayOfLayerData[commonLayerPathIndex > -1 ? commonLayerPathIndex : 0]);
+      store.setState({
+        detailsState: {
+          ...store.getState().detailsState,
+          selectedLayerPath: arrayOfLayerData[commonLayerPathIndex > -1 ? commonLayerPathIndex : 0].layerPath,
+        },
+      });
+
       setCurrentFeatureIndex(0);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [arrayOfLayerData]);
 
   const renderLayerList = useCallback(() => {
@@ -164,6 +184,9 @@ export function LayersListFooter(props: TypeLayersListProps): JSX.Element {
                   onClick={() => {
                     setLayerDataInfo(layerData);
                     setCurrentFeatureIndex(0);
+                    store.setState({
+                      detailsState: { ...store.getState().detailsState, selectedLayerPath: layerData.layerPath },
+                    });
                   }}
                   sx={{ height: '67px' }}
                 >
@@ -232,7 +255,7 @@ export function LayersListFooter(props: TypeLayersListProps): JSX.Element {
                         aria-label="backward"
                         tooltip="details.previousFeatureBtn"
                         tooltipPlacement="top"
-                        onClick={() => setCurrentFeatureIndex((prevValue) => prevValue - 1)}
+                        onClick={() => setCurrentFeatureIndex(currentFeatureIndex - 1)}
                         disabled={currentFeatureIndex === 0}
                       >
                         <ArrowBackIosOutlinedIcon />
@@ -242,7 +265,7 @@ export function LayersListFooter(props: TypeLayersListProps): JSX.Element {
                         aria-label="forward"
                         tooltip="details.nextFeatureBtn"
                         tooltipPlacement="top"
-                        onClick={() => setCurrentFeatureIndex((prevValue) => prevValue + 1)}
+                        onClick={() => setCurrentFeatureIndex(currentFeatureIndex + 1)}
                         // eslint-disable-next-line no-unsafe-optional-chaining
                         disabled={currentFeatureIndex === layerDataInfo?.features.length - 1}
                       >

@@ -97,7 +97,7 @@ export function Map(mapFeaturesConfig: TypeMapFeaturesConfig): JSX.Element {
     viewer.toggleMapInteraction(mapConfig.interaction);
   };
 
-  const initMap = async () => {
+  const initMap = (): void => {
     // create map
     const projection = api.projection.projections[mapConfig.viewSettings.projection];
 

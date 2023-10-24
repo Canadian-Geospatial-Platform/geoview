@@ -85,6 +85,7 @@ export type EventStringId =
   | 'interaction/draw_started'
   | 'interaction/draw_ended'
   | 'interaction/draw_aborted'
+  | 'interaction/extent_selected'
   | 'interaction/modify_started'
   | 'interaction/modify_ended'
   | 'interaction/select_selected'
