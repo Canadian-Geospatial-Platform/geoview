@@ -9,6 +9,8 @@ import { LegendItemDetails } from './legend-item-details/legend-item-details';
 import { getGeoViewStore } from '@/core/stores/stores-managers';
 import { LegendItem } from './legend-item';
 import { getSxClasses } from './legend-style';
+import { LegendOverview } from './legend-overview';
+import { useLegendHelpers } from './helpers';
 
 const Item = styled('div')(({ theme }) => ({
   backgroundColor: theme.palette.mode === 'dark' ? '#262B32' : '#fff',
@@ -25,22 +27,17 @@ export function Legend2(props: LegendItemsDetailsProps): JSX.Element {
   const theme = useTheme();
   const sxClasses = getSxClasses(theme);
 
+  //Populatig fake legend data
+  const helpers = useLegendHelpers(mapId);
+  helpers.populateLegendStoreWithFakeData();
+
   const store = getGeoViewStore(mapId);
   //controls what is displayed on the right panel
   const currentRightPanelDisplay = useStore(store, (state) => state.legendState.currentRightPanelDisplay);
   const selectedLegendItem = useStore(store, (state) => state.legendState.selectedItem);
   const selectedLayers = useStore(store, (state) => state.legendState.selectedLayers);
-  const [collapsedParents, setCollapsedParents] = useState<{ [key: string]: boolean }>({});
-
-  const toggleCollapse = (parentLayer: string) => {
-    setCollapsedParents((prevCollapsedParents) => ({
-      ...prevCollapsedParents,
-      [parentLayer]: !prevCollapsedParents[parentLayer],
-    }));
-  };
 
   const showLegendOverview = function() {
-
     store.setState({
       legendState: { ...store.getState().legendState, currentRightPanelDisplay: 'overview' },
     });
@@ -129,45 +126,8 @@ export function Legend2(props: LegendItemsDetailsProps): JSX.Element {
 
   const rightPanel = () => {
     if (currentRightPanelDisplay === 'overview' && selectedLayers) {
-      const numItems = Object.values(selectedLayers).reduce((total, childLayers) => total + childLayers.length, 0);
-      const selectedLayersList = Object.entries(selectedLayers).map(([parentLayer, childLayers]) => (
-        <div
-          key={parentLayer}
-          role="button"
-          tabIndex={0}
-          onClick={() => toggleCollapse(parentLayer)}
-          onKeyDown={(event) => {
-            if (event.key === 'Enter') {
-              toggleCollapse(parentLayer);
-            }
-          }}
-        >
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '2px 4px 2px 4px' }}>
-            {parentLayer}
-            {collapsedParents[parentLayer] ? <ExpandMoreIcon sx={{ transform: 'rotate(180deg)' }} /> : <ExpandMoreIcon />}
-          </div>
-          <div style={{ padding: '2px 5px 2px 4px' }}>
-            {!collapsedParents[parentLayer] &&
-              childLayers.map((childLayer) => (
-                <Table key={childLayer.layer} sx={{ border: '1px solid #C1C1C1', textAlign: 'left' }}>
-                  {childLayer.icon ? <img src={childLayer.icon} alt="Layer Icon" /> : null}
-                  {childLayer.layer}
-                </Table>
-              ))}
-          </div>
-        </div>
-      ));
-
       return (
-        <Item sx={{ borderColor: 'primary.main', borderStyle: 'solid', borderWidth: '1px', paddingLeft: '10px' }}>
-          <Typography sx={sxClasses.legendTitle}>
-            <strong>{t('legend.bold_selection')}</strong> {t('legend.overview_title')}
-          </Typography>
-          <Typography sx={{ fontSize: '0.6em', textAlign: 'left', marginBottom: '16.5px' }}>
-            {numItems} {t('legend.items_available')}
-          </Typography>
-          {selectedLayersList}
-        </Item>
+        <LegendOverview mapId={mapId}  layerIds={layerIds}/>
       );
     }
 

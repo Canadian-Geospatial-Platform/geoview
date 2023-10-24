@@ -13,14 +13,12 @@ import { ObjectEvent } from 'ol/Object';
 import { toLonLat } from 'ol/proj';
 
 import { TypeMapFeaturesConfig, TypeValidMapProjectionCodes } from '@/core/types/global-types';
-import { TypeLegendItemProps } from '../components/legend-2/types';
 import { TypeArrayOfLayerData } from '../components/details/details';
+import { TypeLegendItemProps, TypeLegendLayer } from '../components/legend-2/types';
 
 import { TypeMapMouseInfo } from '@/api/events/payloads';
 import { TypeDisplayLanguage, TypeInteraction } from '@/geo/map/map-schema-types';
 import { NotificationDetailsType } from '@/core/types/cgpv-types';
-import { TypeLegend } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
-import { TypeLayerStatus } from '@/geo/map/map-schema-types';
 
 export interface IMapState {
   currentProjection: TypeValidMapProjectionCodes;
@@ -65,19 +63,12 @@ export interface INotificationsState {
 
 // export interface IFooterState {}
 
-export interface ILegendLayer {
-  layerStatus: TypeLayerStatus;
-  layerPhase: string;
-  querySent: boolean;
-  data: TypeLegend | undefined | null;
-  children?: ILegendLayer
-}
 export interface ILegendState {
   selectedItem?: TypeLegendItemProps;
   selectedIsVisible: boolean;
   selectedLayers: Record<string, { layer: string; icon: string }[]>;
   currentRightPanelDisplay: 'overview' | 'layer-details' | 'none';
-  legendLayers: ILegendLayer[]
+  legendLayers: TypeLegendLayer[]
 }
 
 export interface IMapDataTableState {
