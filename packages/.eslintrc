@@ -74,6 +74,7 @@
       {
         "endOfLine": "auto"
       }
-    ]
+    ],
+    "require-await": "error"
   }
 }
