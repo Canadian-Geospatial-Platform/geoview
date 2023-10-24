@@ -1,6 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
+import { useStore } from 'zustand';
 import { TypeArrayOfFeatureInfoEntries } from '@/api/events/payloads';
 import { LayersListFooter } from './layers-list-footer';
+import { getGeoViewStore } from '@/core/stores/stores-managers';
 
 export interface TypeDetailsProps {
   arrayOfLayerData: TypeArrayOfLayerData;
@@ -20,11 +22,15 @@ export type TypeArrayOfLayerData = TypeLayerData[];
  * @returns {JSX.Element} returns the Details component
  */
 export function DetailsFooter({ arrayOfLayerData, mapId }: TypeDetailsProps): JSX.Element | null {
-  const [details, setDetails] = useState<TypeArrayOfLayerData>([]);
+  const store = getGeoViewStore(mapId);
+  const layerDataArray = useStore(store, (state) => state.detailsState.layerDataArray);
 
   useEffect(() => {
-    setDetails(arrayOfLayerData);
+    store.setState({
+      detailsState: { ...store.getState().detailsState, layerDataArray: arrayOfLayerData },
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [arrayOfLayerData]);
 
-  return <LayersListFooter arrayOfLayerData={details} mapId={mapId} />;
+  return <LayersListFooter arrayOfLayerData={layerDataArray} mapId={mapId} />;
 }
