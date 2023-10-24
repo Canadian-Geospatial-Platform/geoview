@@ -56,7 +56,7 @@ export function LayersListFooter(props: TypeLayersListProps): JSX.Element {
   const selectedFeatures = useRef<string[]>([]);
 
   const store = getGeoViewStore(mapId);
-  const storeSelectedLayerPath = useStore(store, (state) => state.detailsState.storeSelectedLayerPath);
+  const selectedLayerPath = useStore(store, (state) => state.detailsState.selectedLayerPath);
 
   const [layerDataInfo, setLayerDataInfo] = useState<TypeLayerData | null>(null);
   const [currentFeatureIndex, setCurrentFeatureIndex] = useState<number>(0);
@@ -146,12 +146,12 @@ export function LayersListFooter(props: TypeLayersListProps): JSX.Element {
     if (arrayOfLayerData.length > 0) {
       // Check if have the previouse selected layer path in incoming arrayOfLayerData
       // if so, get the index of the found layer, we need to pass to setLayerDataInfo to load layer in left panel
-      const commonLayerPathIndex = findLayerPathIndex(arrayOfLayerData, storeSelectedLayerPath);
+      const commonLayerPathIndex = findLayerPathIndex(arrayOfLayerData, selectedLayerPath);
       setLayerDataInfo(arrayOfLayerData[commonLayerPathIndex > -1 ? commonLayerPathIndex : 0]);
       store.setState({
         detailsState: {
           ...store.getState().detailsState,
-          storeSelectedLayerPath: arrayOfLayerData[commonLayerPathIndex > -1 ? commonLayerPathIndex : 0].layerPath,
+          selectedLayerPath: arrayOfLayerData[commonLayerPathIndex > -1 ? commonLayerPathIndex : 0].layerPath,
         },
       });
 
@@ -185,7 +185,7 @@ export function LayersListFooter(props: TypeLayersListProps): JSX.Element {
                     setLayerDataInfo(layerData);
                     setCurrentFeatureIndex(0);
                     store.setState({
-                      detailsState: { ...store.getState().detailsState, storeSelectedLayerPath: layerData.layerPath },
+                      detailsState: { ...store.getState().detailsState, selectedLayerPath: layerData.layerPath },
                     });
                   }}
                   sx={{ height: '67px' }}

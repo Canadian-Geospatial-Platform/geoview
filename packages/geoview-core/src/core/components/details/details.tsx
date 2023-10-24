@@ -23,14 +23,14 @@ export type TypeArrayOfLayerData = TypeLayerData[];
  */
 export function DetailsFooter({ arrayOfLayerData, mapId }: TypeDetailsProps): JSX.Element | null {
   const store = getGeoViewStore(mapId);
-  const storeArrayOfLayerData = useStore(store, (state) => state.detailsState.storeArrayOfLayerData);
+  const layerDataArray = useStore(store, (state) => state.detailsState.layerDataArray);
 
   useEffect(() => {
     store.setState({
-      detailsState: { ...store.getState().detailsState, storeArrayOfLayerData: arrayOfLayerData },
+      detailsState: { ...store.getState().detailsState, layerDataArray: arrayOfLayerData },
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [arrayOfLayerData]);
 
-  return <LayersListFooter arrayOfLayerData={storeArrayOfLayerData} mapId={mapId} />;
+  return <LayersListFooter arrayOfLayerData={layerDataArray} mapId={mapId} />;
 }

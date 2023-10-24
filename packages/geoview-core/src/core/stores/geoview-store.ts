@@ -90,8 +90,8 @@ export interface IMapDataTableState {
 }
 
 export interface IDetailsState {
-  storeArrayOfLayerData: TypeArrayOfLayerData;
-  storeSelectedLayerPath: string;
+  layerDataArray: TypeArrayOfLayerData;
+  selectedLayerPath: string;
 }
 
 export interface IGeoViewState {
@@ -197,8 +197,8 @@ export const geoViewStoreDefinition = (
       selectedLayers: {},
     },
     detailsState: {
-      storeArrayOfLayerData: [],
-      storeSelectedLayerPath: '',
+      layerDataArray: [],
+      selectedLayerPath: '',
     },
     notificationState: {
       notifications: [],
