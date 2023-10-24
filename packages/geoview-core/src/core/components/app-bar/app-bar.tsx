@@ -1,6 +1,5 @@
 import { useState, useRef, useEffect, useCallback, Fragment, useContext, SetStateAction, Dispatch } from 'react';
 import { Box, useTheme } from '@mui/material';
-// import makeStyles from '@mui/styles/makeStyles';
 
 import { List, ListItem, Panel, IconButton } from '@/ui';
 
@@ -18,75 +17,6 @@ import Notifications from '@/core/components/notifications/notifications';
 import Version from './buttons/version';
 import ExportModal from '../export/export-modal';
 import { getSxClasses } from './app-bar-style';
-
-// const useStyles = makeStyles((theme) => ({
-//   appBar: {
-//     display: 'flex',
-//     flexDirection: 'row',
-//     justifyContent: 'space-between',
-//     minWidth: 64,
-//     zIndex: theme.zIndex.appBar,
-//     pointerEvents: 'all',
-//     backgroundColor: theme.appBar.background,
-//     border: theme.appBar.border,
-//   },
-//   appBarList: {
-//     width: 60,
-//     '& li': {
-//       backgroundColor: 'transparent',
-//       justifyContent: 'center',
-//       margin: '16px 0',
-//       padding: 0,
-//       '&:hover': {
-//         backgroundColor: 'transparent',
-//         color: theme.palette.primary.light,
-//       },
-//     },
-//     '& hr': {
-//       width: '80%',
-//       marginLeft: '7px',
-//     },
-//   },
-
-//   appBarButtons: {
-//     borderRightColor: theme.appBar.border,
-//     borderRightWidth: 1,
-//     borderRightStyle: 'solid',
-//     width: 64,
-//   },
-//   appBarButton: {
-//     backgroundColor: theme.appBar.btnDefaultBg,
-//     color: theme.palette.primary.light,
-//     height: 44,
-//     width: 44,
-//     transition: 'background-color 0.3s ease-in-out',
-//     '&:hover': {
-//       backgroundColor: theme.appBar.btnHoverBg,
-//       color: theme.palette.primary.light,
-//     },
-//     '&:focus': {
-//       backgroundColor: theme.appBar.btnFocusBg,
-//       color: theme.palette.primary.light,
-//     },
-//     '&:active': {
-//       backgroundColor: theme.appBar.btnActiveBg,
-//       color: theme.palette.primary.light,
-//     },
-//     '&.active': {
-//       backgroundColor: theme.appBar.btnActiveBg,
-//       color: theme.palette.background.paper,
-//     },
-//     '& .MuiSvgIcon-root': {
-//       height: 20,
-//       width: 20,
-//     },
-//   },
-//   versionButtonDiv: {
-//     position: 'absolute',
-//     bottom: 0,
-//   },
-//   appBarPanels: {},
-// }));
 
 type AppbarProps = {
   activeTrap: boolean;
