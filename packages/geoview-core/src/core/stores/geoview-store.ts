@@ -90,10 +90,8 @@ export interface IMapDataTableState {
 }
 
 export interface IDetailsState {
-  storeCurrentFeatureIndex: number;
   storeArrayOfLayerData: TypeArrayOfLayerData;
   storeSelectedLayerPath: string;
-  setStoreCurrentFeatureIndex: (newFeatureIndex: number) => void;
 }
 
 export interface IGeoViewState {
@@ -199,17 +197,8 @@ export const geoViewStoreDefinition = (
       selectedLayers: {},
     },
     detailsState: {
-      storeCurrentFeatureIndex: 0,
       storeArrayOfLayerData: [],
       storeSelectedLayerPath: '',
-      setStoreCurrentFeatureIndex: (newFeatureIndex: number) => {
-        set({
-          detailsState: {
-            ...get().detailsState,
-            storeCurrentFeatureIndex: newFeatureIndex,
-          },
-        });
-      },
     },
     notificationState: {
       notifications: [],

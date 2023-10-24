@@ -23,7 +23,7 @@ export type TypeArrayOfLayerData = TypeLayerData[];
  */
 export function DetailsFooter({ arrayOfLayerData, mapId }: TypeDetailsProps): JSX.Element | null {
   const store = getGeoViewStore(mapId);
-  const { storeArrayOfLayerData } = useStore(store, (state) => state.detailsState);
+  const storeArrayOfLayerData = useStore(store, (state) => state.detailsState.storeArrayOfLayerData);
 
   useEffect(() => {
     store.setState({

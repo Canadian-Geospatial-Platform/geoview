@@ -56,9 +56,10 @@ export function LayersListFooter(props: TypeLayersListProps): JSX.Element {
   const selectedFeatures = useRef<string[]>([]);
 
   const store = getGeoViewStore(mapId);
-  const { storeCurrentFeatureIndex, storeSelectedLayerPath, setStoreCurrentFeatureIndex } = useStore(store, (state) => state.detailsState);
+  const storeSelectedLayerPath = useStore(store, (state) => state.detailsState.storeSelectedLayerPath);
 
   const [layerDataInfo, setLayerDataInfo] = useState<TypeLayerData | null>(null);
+  const [currentFeatureIndex, setCurrentFeatureIndex] = useState<number>(0);
   const [isClearAllCheckboxes, setIsClearAllCheckboxes] = useState<boolean>(false);
   const [disableClearAllBtn, setDisableClearAllBtn] = useState<boolean>(false);
 
@@ -93,7 +94,7 @@ export function LayersListFooter(props: TypeLayersListProps): JSX.Element {
       featureHighlightPayload(
         EVENT_NAMES.FEATURE_HIGHLIGHT.EVENT_HIGHLIGHT_FEATURE,
         mapId,
-        layerDataInfo?.features[storeCurrentFeatureIndex] as TypeFeatureInfoEntry
+        layerDataInfo?.features[currentFeatureIndex] as TypeFeatureInfoEntry
       )
     );
 
@@ -146,11 +147,15 @@ export function LayersListFooter(props: TypeLayersListProps): JSX.Element {
       // Check if have the previouse selected layer path in incoming arrayOfLayerData
       // if so, get the index of the found layer, we need to pass to setLayerDataInfo to load layer in left panel
       const commonLayerPathIndex = findLayerPathIndex(arrayOfLayerData, storeSelectedLayerPath);
-      setLayerDataInfo(commonLayerPathIndex > -1 ? arrayOfLayerData[commonLayerPathIndex] : arrayOfLayerData[0]);
-      setStoreCurrentFeatureIndex(0);
+      setLayerDataInfo(arrayOfLayerData[commonLayerPathIndex > -1 ? commonLayerPathIndex : 0]);
       store.setState({
-        detailsState: { ...store.getState().detailsState, storeSelectedLayerPath: arrayOfLayerData[0].layerPath },
+        detailsState: {
+          ...store.getState().detailsState,
+          storeSelectedLayerPath: arrayOfLayerData[commonLayerPathIndex > -1 ? commonLayerPathIndex : 0].layerPath,
+        },
       });
+
+      setCurrentFeatureIndex(0);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [arrayOfLayerData]);
@@ -178,7 +183,7 @@ export function LayersListFooter(props: TypeLayersListProps): JSX.Element {
                 <ListItemButton
                   onClick={() => {
                     setLayerDataInfo(layerData);
-                    setStoreCurrentFeatureIndex(0);
+                    setCurrentFeatureIndex(0);
                     store.setState({
                       detailsState: { ...store.getState().detailsState, storeSelectedLayerPath: layerData.layerPath },
                     });
@@ -231,7 +236,7 @@ export function LayersListFooter(props: TypeLayersListProps): JSX.Element {
                 <Grid container sx={sxClasses.rightPanelBtnHolder}>
                   <Grid item xs={6}>
                     <div style={{ marginLeft: '22px' }}>
-                      Feature {storeCurrentFeatureIndex + 1} of {layerDataInfo?.features.length}
+                      Feature {currentFeatureIndex + 1} of {layerDataInfo?.features.length}
                       <IconButton
                         sx={{ marginLeft: '20px' }}
                         aria-label="clear-all-features"
@@ -250,8 +255,8 @@ export function LayersListFooter(props: TypeLayersListProps): JSX.Element {
                         aria-label="backward"
                         tooltip="details.previousFeatureBtn"
                         tooltipPlacement="top"
-                        onClick={() => setStoreCurrentFeatureIndex(storeCurrentFeatureIndex - 1)}
-                        disabled={storeCurrentFeatureIndex === 0}
+                        onClick={() => setCurrentFeatureIndex(currentFeatureIndex - 1)}
+                        disabled={currentFeatureIndex === 0}
                       >
                         <ArrowBackIosOutlinedIcon />
                       </IconButton>
@@ -260,9 +265,9 @@ export function LayersListFooter(props: TypeLayersListProps): JSX.Element {
                         aria-label="forward"
                         tooltip="details.nextFeatureBtn"
                         tooltipPlacement="top"
-                        onClick={() => setStoreCurrentFeatureIndex(storeCurrentFeatureIndex + 1)}
+                        onClick={() => setCurrentFeatureIndex(currentFeatureIndex + 1)}
                         // eslint-disable-next-line no-unsafe-optional-chaining
-                        disabled={storeCurrentFeatureIndex === layerDataInfo?.features.length - 1}
+                        disabled={currentFeatureIndex === layerDataInfo?.features.length - 1}
                       >
                         <ArrowForwardIosOutlinedIcon />
                       </IconButton>
@@ -271,7 +276,7 @@ export function LayersListFooter(props: TypeLayersListProps): JSX.Element {
                 </Grid>
                 <FeatureInfo
                   features={layerDataInfo?.features}
-                  currentFeatureIndex={storeCurrentFeatureIndex}
+                  currentFeatureIndex={currentFeatureIndex}
                   selectedFeatures={selectedFeatures}
                   mapId={mapId}
                   onClearCheckboxes={() => setIsClearAllCheckboxes(false)}
