@@ -30,7 +30,6 @@ export function Legend2(props: LegendItemsDetailsProps): JSX.Element {
   const currentRightPanelDisplay = useStore(store, (state) => state.legendState.currentRightPanelDisplay);
   const selectedLegendItem = useStore(store, (state) => state.legendState.selectedItem);
   const selectedLayers = useStore(store, (state) => state.legendState.selectedLayers);
-  const [isSelectedLayersClicked, setIsSelectedLayersClicked] = useState(false);
   const [collapsedParents, setCollapsedParents] = useState<{ [key: string]: boolean }>({});
 
   const toggleCollapse = (parentLayer: string) => {
@@ -40,10 +39,17 @@ export function Legend2(props: LegendItemsDetailsProps): JSX.Element {
     }));
   };
 
+  const showLegendOverview = function() {
+
+    store.setState({
+      legendState: { ...store.getState().legendState, currentRightPanelDisplay: 'overview' },
+    });
+  }
+
   function showSelectedLayersPanel() {
     return (
       <Paper
-        onClick={() => setIsSelectedLayersClicked(!isSelectedLayersClicked)}
+        onClick={() => showLegendOverview()}
         sx={{
           justifyContent: 'space-between',
           padding: '9px 17px 10px 57px',
@@ -121,14 +127,8 @@ export function Legend2(props: LegendItemsDetailsProps): JSX.Element {
     );
   };
 
-  useEffect(() => {
-    if (selectedLegendItem) {
-      setIsSelectedLayersClicked(false);
-    }
-  }, [selectedLegendItem]);
-
   const rightPanel = () => {
-    if (isSelectedLayersClicked && selectedLayers) {
+    if (currentRightPanelDisplay === 'overview' && selectedLayers) {
       const numItems = Object.values(selectedLayers).reduce((total, childLayers) => total + childLayers.length, 0);
       const selectedLayersList = Object.entries(selectedLayers).map(([parentLayer, childLayers]) => (
         <div
@@ -171,7 +171,7 @@ export function Legend2(props: LegendItemsDetailsProps): JSX.Element {
       );
     }
 
-    if (selectedLegendItem) {
+    if (currentRightPanelDisplay === 'layer-details' && selectedLegendItem) {
       return (
         <Item>
           <LegendItemDetails

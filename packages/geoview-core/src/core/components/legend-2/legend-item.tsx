@@ -313,7 +313,7 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
   const handleLegendClick = () => {
     setLegendOpen(!isLegendOpen);
     store.setState({
-      legendState: { ...store.getState().legendState, selectedItem: props, selectedIsVisible: isChecked },
+      legendState: { ...store.getState().legendState, selectedItem: props, currentRightPanelDisplay: 'layer-details' },
     });
     const legendDetails = document.querySelector('#legend-details-container');
     if (legendDetails) {
