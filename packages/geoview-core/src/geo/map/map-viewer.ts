@@ -27,6 +27,7 @@ import { DataTableApi } from '@/core/components/data-table/data-table-api';
 import { GeoviewRenderer } from '@/geo/renderer/geoview-renderer';
 import { Select } from '@/geo/interaction/select';
 import { Draw } from '@/geo/interaction/draw';
+import { Extent as ExtentInteraction } from '@/geo/interaction/extent';
 import { Modify } from '@/geo/interaction/modify';
 import { Snap } from '@/geo/interaction/snap';
 import { Translate } from '@/geo/interaction/translate';
@@ -562,6 +563,19 @@ export class MapViewer {
     });
     select.startInteraction();
     return select;
+  }
+
+  /**
+   * Initializes extent interactions
+   */
+  initExtentInteractions() {
+    // Create selecting capabilities
+    const extent = new ExtentInteraction({
+      mapViewer: this,
+      pixelTolerance: 5,
+    });
+    extent.startInteraction();
+    return extent;
   }
 
   /**

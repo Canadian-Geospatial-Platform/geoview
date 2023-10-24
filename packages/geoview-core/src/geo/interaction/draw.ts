@@ -2,12 +2,13 @@ import { Type as OLGeomType } from 'ol/geom/Geometry';
 import { Draw as OLDraw } from 'ol/interaction';
 import { DrawEvent as OLDrawEvent, Options as OLDrawOptions } from 'ol/interaction/Draw';
 import { FlatStyle } from 'ol/style/flat';
+
 import { Interaction, InteractionOptions } from './interaction';
 import { api } from '@/app';
 import { EVENT_NAMES } from '@/api/events/event-types';
 import { drawPayload } from '@/api/events/payloads';
-import { TypeFeatureStyle } from '../layer/geometry/geometry-types';
-import { GeoUtilities } from '../utils/utilities';
+import { TypeFeatureStyle } from '@/geo/layer/geometry/geometry-types';
+import { GeoUtilities } from '@/geo//utils/utilities';
 
 /**
  * Supported options for drawing interactions
