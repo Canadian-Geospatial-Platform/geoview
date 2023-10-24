@@ -144,7 +144,7 @@ export function LayersListFooter(props: TypeLayersListProps): JSX.Element {
 
   useEffect(() => {
     if (arrayOfLayerData.length > 0) {
-      // Check if have the previouse selected layer path in incoming arrayOfLayerData
+      // Check if have the previous selected layer path in incoming arrayOfLayerData
       // if so, get the index of the found layer, we need to pass to setLayerDataInfo to load layer in left panel
       const commonLayerPathIndex = findLayerPathIndex(arrayOfLayerData, selectedLayerPath);
       setLayerDataInfo(arrayOfLayerData[commonLayerPathIndex > -1 ? commonLayerPathIndex : 0]);
