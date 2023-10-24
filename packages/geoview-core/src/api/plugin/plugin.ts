@@ -36,7 +36,7 @@ export class Plugin {
    * @param {string} pluginId the package id to load
    */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  loadScript = async (pluginId: string): Promise<any> => {
+  loadScript = (pluginId: string): Promise<any> => {
     return new Promise((resolve) => {
       const existingScript = document.getElementById(pluginId);
 

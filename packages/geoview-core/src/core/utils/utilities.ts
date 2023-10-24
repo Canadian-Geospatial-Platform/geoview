@@ -544,7 +544,7 @@ function _whenThisThenThat<T>(
   startDate: Date,
   checkFrequency: number,
   timeout: number
-) {
+): void {
   // Check if we're good
   const v = checkCallback();
   if (v) {
@@ -578,7 +578,7 @@ export function whenThisThenThat<T>(
   failCallback: (reason?: any) => void,
   checkFrequency?: number,
   timeout?: number
-) {
+): void {
   const startDate = new Date();
   if (!checkFrequency) checkFrequency = 100; // Check every 100 milliseconds by default
   if (!timeout) timeout = 10000; // Timeout after 10 seconds by default
@@ -592,7 +592,7 @@ export function whenThisThenThat<T>(
  * @param checkFrequency the frequency in milliseconds to check for an update (defaults to 100 milliseconds)
  * @param timeout the duration in milliseconds until the task is aborted (defaults to 10 seconds)
  */
-export async function whenThisThenAsync<T>(checkCallback: () => T, checkFrequency?: number, timeout?: number) {
+export function whenThisThen<T>(checkCallback: () => T, checkFrequency?: number, timeout?: number): Promise<T> {
   return new Promise<T>((resolve, reject) => {
     // Redirect
     whenThisThenThat(checkCallback, resolve, reject, checkFrequency, timeout);
