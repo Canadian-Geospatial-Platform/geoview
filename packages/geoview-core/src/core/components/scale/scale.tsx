@@ -3,56 +3,13 @@ import { useContext, useEffect, useState } from 'react';
 import { ScaleLine } from 'ol/control';
 import { useTranslation } from 'react-i18next';
 
-import makeStyles from '@mui/styles/makeStyles';
-
+import { useTheme } from '@mui/material';
 import { useStore } from 'zustand';
 import { getGeoViewStore } from '@/core/stores/stores-managers';
 
 import { MapContext } from '@/core/app-start';
 import { CheckIcon, Tooltip, Box } from '@/ui';
-
-const useStyles = makeStyles((theme) => ({
-  scaleControl: {
-    display: 'none',
-  },
-  scaleContainer: {
-    display: 'flex',
-    backgroundColor: 'transparent',
-    border: 'none',
-    height: '100%',
-  },
-  scaleExpandedContainer: {
-    display: 'flex',
-    flexDirection: 'column',
-    justifyContent: 'center',
-    height: '100%',
-    gap: theme.spacing(5),
-  },
-  scaleExpandedCheckmarkText: {
-    display: 'flex',
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    height: '18px',
-    maxHeight: '18px',
-  },
-  scaleText: {
-    fontSize: theme.typography.fontSize,
-    color: theme.palette.primary.light,
-    textOverflow: 'ellipsis',
-    whiteSpace: 'nowrap',
-    overflow: 'hidden',
-    border: '1px solid',
-    borderColor: theme.palette.primary.light,
-    borderTop: 'none',
-    borderLeft: 'none',
-    borderRight: 'none',
-  },
-  scaleCheckmark: {
-    paddingRight: 5,
-    color: theme.palette.primary.light,
-  },
-}));
+import { getSxClasses } from './scale-style';
 
 interface TypeScale {
   scaleId: string;
@@ -81,9 +38,15 @@ export function Scale(): JSX.Element {
   const expanded = useStore(getGeoViewStore(mapId), (state) => state.footerBarState.expanded);
   const mapElement = useStore(getGeoViewStore(mapId), (state) => state.mapState.mapElement);
 
-  // TODO: remove make style
-  const classes = useStyles();
+  const defaultTheme = useTheme();
 
+  const classes = getSxClasses(defaultTheme);
+  const scaleContainer = {
+    display: 'flex',
+    backgroundColor: 'transparent',
+    border: 'none',
+    height: '100%',
+  };
   /**
    * Switch the scale mode
    */
@@ -161,37 +124,33 @@ export function Scale(): JSX.Element {
   return (
     <Tooltip title={t('mapnav.scale')!} placement="top">
       <Box sx={{ minWidth: 120 }}>
-        <div id={`${mapId}-scaleControlBar`} className={classes.scaleControl} />
-        <div id={`${mapId}-scaleControlLine`} className={classes.scaleControl} />
-        <button type="button" onClick={() => switchScale()} className={classes.scaleContainer}>
+        <Box id={`${mapId}-scaleControlBar`} sx={classes.scaleControl} />
+        <Box id={`${mapId}-scaleControlLine`} sx={classes.scaleControl} />
+        <button type="button" onClick={() => switchScale()} style={scaleContainer}>
           {expanded ? (
-            <div className={classes.scaleExpandedContainer}>
+            <Box sx={classes.scaleExpandedContainer}>
               {scaleValues.map((value, index) => {
                 return (
-                  <div className={classes.scaleExpandedCheckmarkText} key={value.scaleId}>
-                    <CheckIcon sx={{ fontSize: 25, opacity: scaleMode === index ? 1 : 0 }} className={classes.scaleCheckmark} />
-                    <span
-                      className={classes.scaleText}
-                      style={{
-                        borderBottom: !value.borderBottom ? 'none' : '1px solid',
-                      }}
-                    >
+                  <Box sx={classes.scaleExpandedCheckmarkText} key={value.scaleId}>
+                    <CheckIcon sx={{ ...classes.scaleCheckmark, fontSize: 25, opacity: scaleMode === index ? 1 : 0 }} />
+                    <Box component="span" sx={{ ...classes.scaleText, borderBottom: !value.borderBottom ? 'none' : '1px solid' }}>
                       {value.label}
-                    </span>
-                  </div>
+                    </Box>
+                  </Box>
                 );
               })}
-            </div>
+            </Box>
           ) : (
-            <span
-              className={classes.scaleText}
-              style={{
+            <Box
+              component="span"
+              sx={{
+                ...classes.scaleText,
                 borderBottom: !scaleValues[scaleMode].borderBottom ? 'none' : '1px solid',
                 width: !scaleValues[scaleMode].borderBottom ? 'inherit' : lineWidth,
               }}
             >
               {scaleValues[scaleMode].label}
-            </span>
+            </Box>
           )}
         </button>
       </Box>
