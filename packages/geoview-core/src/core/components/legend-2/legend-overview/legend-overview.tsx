@@ -14,18 +14,19 @@ export function LegendOverview(props: LegendOverviewProps): JSX.Element {
   const { mapId } = props;
   const theme = useTheme();
   const sxClasses = getSxClasses(theme);
-  const { t, i18n } = useTranslation<string>();
+  const { t } = useTranslation<string>();
   const store = getGeoViewStore(mapId);
   const legendLayers = useStore(store, (state) => state.legendState.legendLayers);
 
   const numItems = 33;
   /* START fake store data here */
 
-
   function renderLegendLayersList() {
     return (
       <List sx={{ width: '100%', padding: '20px' }}>
-        {legendLayers.map((item) => <LegendLayer layer={item} /> )}
+        {legendLayers.map((item) => (
+          <LegendLayer layer={item} key={item.layerPath} />
+        ))}
       </List>
     );
   }

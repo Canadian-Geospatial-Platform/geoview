@@ -14,14 +14,14 @@ export const getSxClasses = (theme: Theme) => ({
     fontWeight: 'normal',
     fontSize: '0.9em',
     textAlign: 'left',
-    marginBottom: '15px'
+    marginBottom: '15px',
   },
   legendLayerListItem: {
-    padding: "6px 4px"
+    padding: '6px 4px',
   },
   collapsibleContainer: {
     width: '100%',
     padding: '10px 0',
-    margin: '0px 10px'
-  }
+    margin: '0px 10px',
+  },
 });
