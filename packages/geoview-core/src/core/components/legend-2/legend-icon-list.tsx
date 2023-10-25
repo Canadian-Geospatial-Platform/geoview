@@ -141,7 +141,6 @@ export function LegendIconList(props: TypeLegendIconListProps): JSX.Element {
             <TableRow key={iconLabels[index]} sx={sxClasses.tableRow}>
               <TableCell>
                 <img alt={iconLabels[index]} src={icon} style={theme.iconImg} />
-                <span>{icon}</span>
                 <span style={sxClasses.tableIconLabel}>{iconLabels[index]}</span>
               </TableCell>
               <TableCell>

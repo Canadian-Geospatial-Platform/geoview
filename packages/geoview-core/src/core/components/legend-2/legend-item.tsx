@@ -390,12 +390,9 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
     );
   }
 
-  // <Grid item sm={12} md={subLayerId ? 12 : 6} lg={subLayerId ? 12 : 4}>
-  return (
-    <Grid item sm={12} sx={legendClass}>
-      <ListItem onClick={handleLegendClick}>
-        <ListItemButton>
-          <ListItemIcon>
+  function renderLayerIcon() {
+    return (
+      <ListItemIcon>
             {(groupItems.length > 0 || WMSStyles.length > 1) && (
               <IconButton color="primary">
                 <GroupWorkOutlinedIcon />
@@ -443,8 +440,17 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
               </IconButton>
             )}
           </ListItemIcon>
+    );
+  }
+
+  // <Grid item sm={12} md={subLayerId ? 12 : 6} lg={subLayerId ? 12 : 4}>
+  return (
+    <Grid item sm={12} sx={legendClass}>
+      <ListItem onClick={handleLegendClick}>
+        <ListItemButton>
+          {renderLayerIcon()}
           <Tooltip title={layerName} placement="top" enterDelay={1000}>
-            <ListItemText primary={layerName} onClick={handleExpandGroupClick} />
+            <ListItemText primary={layerName} secondary="Secondary text will go here" onClick={handleExpandGroupClick} />
           </Tooltip>
           <ListItemIcon style={{ justifyContent: 'right' }}>
             {api.maps[mapId].layer.registeredLayers[clusterLayerPath]?.initialSettings?.visible !== 'always' && (

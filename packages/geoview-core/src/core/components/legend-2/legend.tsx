@@ -119,7 +119,7 @@ export function Legend2(props: LegendItemsDetailsProps): JSX.Element {
       <div>
         {showSelectedLayersPanel()}
         {buttonsMenu()}
-        <List sx={{ width: '100%' }}>{legendItems}</List>
+        <List sx={sxClasses.list}>{legendItems}</List>
       </div>
     );
   };
