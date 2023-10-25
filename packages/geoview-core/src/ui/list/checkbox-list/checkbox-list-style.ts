@@ -19,4 +19,7 @@ export const getSxClasses = (theme: Theme) => ({
   listItemIcon: {
     minWidth: '0px',
   },
+  boxcontent: {
+    padding: 0,
+  },
 });

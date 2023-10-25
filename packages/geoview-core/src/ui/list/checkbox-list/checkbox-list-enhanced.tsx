@@ -9,7 +9,7 @@ import Checkbox from '@mui/material/Checkbox';
 import Box from '@mui/material/Box';
 
 import { HtmlToReact } from '../../../core/containers/html-to-react';
-import { getSxClasses } from './checkbox-list-enhanced-style';
+import { getSxClasses } from './checkbox-list-style';
 
 /**
  * interface for CheckboxList basic properties
