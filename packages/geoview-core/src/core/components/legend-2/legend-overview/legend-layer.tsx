@@ -52,18 +52,25 @@ export function LegendLayer(props: LegendLayerProps): JSX.Element {
   }
 
   // renders the layers items if any
-  /* function renderItems() {
-    if (!layer.children?.length) {
+  function renderItems() {
+    if (!layer.items?.length) {
       return null;
     }
     return (
       <List sx={{ width: '100%' }}>
-        {layer.children.map((item) => (
-          <LegendLayer layer={item} key={item.layerPath} />
+        {layer.items.map((item) => (
+          <ListItem key={item.name}>
+            <ListItemIcon>
+              <img alt={item.name} src={item.icon} />
+            </ListItemIcon>
+            <Tooltip title={item.name} placement="top" enterDelay={1000}>
+              <ListItemText primary={item.name} />
+            </Tooltip>
+          </ListItem>
         ))}
       </List>
     );
-  } */
+  }
 
   function renderArrowButtons() {
     if (layer.children?.length || layer.items?.length) {
@@ -84,6 +91,7 @@ export function LegendLayer(props: LegendLayerProps): JSX.Element {
     return (
       <Collapse in={isGroupOpen} sx={sxClasses.collapsibleContainer} timeout="auto">
         {renderChildren()}
+        {renderItems()}
       </Collapse>
     );
   }

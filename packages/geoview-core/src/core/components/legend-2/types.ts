@@ -57,9 +57,9 @@ export type TypeLegendLayerIcon = {
   iconList?: string[];
 };
 
-export interface TypeLegendItem {
-  name: TypeLocalizedString;
-  isChecked: boolean;
+export interface TypeLegendLayerItem {
+  name: string;
+  isChecked?: boolean;
   icon: string;
 }
 
@@ -75,6 +75,6 @@ export interface TypeLegendLayer {
 
   icon?: TypeLegendLayerIcon;
   // data: TypeLegend | undefined | null;
-  items: TypeLegendItem[];
+  items: TypeLegendLayerItem[];
   children: TypeLegendLayer[];
 }

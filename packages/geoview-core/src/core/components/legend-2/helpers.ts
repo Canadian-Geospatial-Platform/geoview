@@ -2,7 +2,7 @@ import _ from 'lodash';
 import { isVectorLegend, isWmsLegend, isImageStaticLegend } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { api } from '@/app';
 import { TypeLocalizedString } from '@/geo/map/map-schema-types';
-import { TypeLegendLayer, TypeLegendLayerIcon } from './types';
+import { TypeLegendLayer, TypeLegendLayerIcon, TypeLegendLayerItem } from './types';
 import { getGeoViewStore } from '@/core/stores/stores-managers';
 
 export function useLegendHelpers(mapId: string) {
@@ -27,6 +27,12 @@ export function useLegendHelpers(mapId: string) {
 
     keys.forEach((i) => {
       const setData = legendInfo[i];
+      let items: TypeLegendLayerItem[] = [];
+      const itemCanvases = setData.data?.legend?.Point?.arrayOfCanvas;
+      if(itemCanvases) {
+        items = itemCanvases.map((r, ind) => ({ name: `Item name ${ind}`, isChecked: true, icon: r.toDataURL() }));
+      }
+
       const item: TypeLegendLayer = {
         layerPath: setData.data?.layerPath ?? '',
         layerName: setData.data?.layerName as TypeLocalizedString,
@@ -35,7 +41,7 @@ export function useLegendHelpers(mapId: string) {
         layerPhase: setData.layerPhase,
         querySent: setData.querySent,
         children: [],
-        items: [],
+        items,
       };
 
       if (i.startsWith('geojsonLYR5')) {
