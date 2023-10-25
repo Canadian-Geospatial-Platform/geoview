@@ -39,11 +39,11 @@ interface TypeStep {
 export function Stepper(props: TypeStepperProps): JSX.Element {
   const { steps, ...stepperProps } = props;
 
-  const sxtheme = useTheme();
-  const classes = getSxClasses(sxtheme);
+  const theme = useTheme();
+  const sxClasses = getSxClasses(theme);
 
   return (
-    <MaterialStepper sx={classes.stepper} {...stepperProps}>
+    <MaterialStepper sx={sxClasses.stepper} {...stepperProps}>
       {steps &&
         steps.map((step: TypeStep | null, index) => {
           if (step) {

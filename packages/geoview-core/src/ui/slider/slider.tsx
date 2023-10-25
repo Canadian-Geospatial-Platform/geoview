@@ -49,8 +49,8 @@ export function Slider(props: TypeSliderProps): JSX.Element {
   const { ...properties } = props;
   properties.sliderId = properties.id!;
 
-  const sxtheme = useTheme();
-  const classes = getSxClasses(sxtheme);
+  const theme = useTheme();
+  const sxClasses = getSxClasses(theme);
 
   const [min, setMin] = useState<number>(properties.min);
   const [max, setMax] = useState<number>(properties.max);
@@ -159,7 +159,7 @@ export function Slider(props: TypeSliderProps): JSX.Element {
   // TODO: better implement WCAG on slider
   return (
     <MaterialSlider
-      sx={{ ...(!properties.className ? classes.slider : {}) }}
+      sx={{ ...(!properties.className ? sxClasses.slider : {}) }}
       className={properties.className !== undefined ? properties.className : ''}
       style={properties.style}
       getAriaLabel={() => 'To implement with translation'}

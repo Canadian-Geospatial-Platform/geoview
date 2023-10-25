@@ -67,8 +67,8 @@ export function CustomStepper(props: TypeCustomStepperProps): JSX.Element {
   const [completed, setCompleted] = useState<any>({});
   const [isReset, setIsReset] = useState<any>(false);
 
-  const sxtheme = useTheme();
-  const classes = getSxClasses(sxtheme);
+  const theme = useTheme();
+  const sxClasses = getSxClasses(theme);
 
   const {
     className,
@@ -182,7 +182,7 @@ export function CustomStepper(props: TypeCustomStepperProps): JSX.Element {
   return (
     <Box>
       <MaterialStepper
-        className={`${classes.stepperContainer} ${className && className}`}
+        className={`${sxClasses.stepperContainer} ${className && className}`}
         style={style || undefined}
         id={stepperId || ''}
         orientation={stepsOrientation}
@@ -210,16 +210,16 @@ export function CustomStepper(props: TypeCustomStepperProps): JSX.Element {
             </Step>
           );
         })}
-        <Box sx={classes.actionContainer}>
+        <Box sx={sxClasses.actionContainer}>
           <>
             <Typography>{isReset ? 'Steps Completed' : `Step ${activeStep + 1}`}</Typography>
             {!isReset && (
               <>
-                <Button type="text" disabled={activeStep < 1} sx={activeStep < 1 ? classes.disabledButton : {}} onClick={handleBack}>
+                <Button type="text" disabled={activeStep < 1} sx={activeStep < 1 ? sxClasses.disabledButton : {}} onClick={handleBack}>
                   {backButtonText || 'Back'}
                 </Button>
 
-                <Button type="text" onClick={handleNext} disabled={stepIsDisabled} sx={stepIsDisabled ? classes.disabledButton : {}}>
+                <Button type="text" onClick={handleNext} disabled={stepIsDisabled} sx={stepIsDisabled ? sxClasses.disabledButton : {}}>
                   {nextButtonText || 'Next'}
                 </Button>
 

@@ -38,9 +38,9 @@ export function Scale(): JSX.Element {
   const expanded = useStore(getGeoViewStore(mapId), (state) => state.footerBarState.expanded);
   const mapElement = useStore(getGeoViewStore(mapId), (state) => state.mapState.mapElement);
 
-  const defaultTheme = useTheme();
+  const theme = useTheme();
 
-  const classes = getSxClasses(defaultTheme);
+  const sxClasses = getSxClasses(theme);
   const scaleContainer = {
     display: 'flex',
     backgroundColor: 'transparent',
@@ -124,16 +124,16 @@ export function Scale(): JSX.Element {
   return (
     <Tooltip title={t('mapnav.scale')!} placement="top">
       <Box sx={{ minWidth: 120 }}>
-        <Box id={`${mapId}-scaleControlBar`} sx={classes.scaleControl} />
-        <Box id={`${mapId}-scaleControlLine`} sx={classes.scaleControl} />
+        <Box id={`${mapId}-scaleControlBar`} sx={sxClasses.scaleControl} />
+        <Box id={`${mapId}-scaleControlLine`} sx={sxClasses.scaleControl} />
         <button type="button" onClick={() => switchScale()} style={scaleContainer}>
           {expanded ? (
-            <Box sx={classes.scaleExpandedContainer}>
+            <Box sx={sxClasses.scaleExpandedContainer}>
               {scaleValues.map((value, index) => {
                 return (
-                  <Box sx={classes.scaleExpandedCheckmarkText} key={value.scaleId}>
-                    <CheckIcon sx={{ ...classes.scaleCheckmark, fontSize: 25, opacity: scaleMode === index ? 1 : 0 }} />
-                    <Box component="span" sx={{ ...classes.scaleText, borderBottom: !value.borderBottom ? 'none' : '1px solid' }}>
+                  <Box sx={sxClasses.scaleExpandedCheckmarkText} key={value.scaleId}>
+                    <CheckIcon sx={{ ...sxClasses.scaleCheckmark, fontSize: 25, opacity: scaleMode === index ? 1 : 0 }} />
+                    <Box component="span" sx={{ ...sxClasses.scaleText, borderBottom: !value.borderBottom ? 'none' : '1px solid' }}>
                       {value.label}
                     </Box>
                   </Box>
@@ -144,7 +144,7 @@ export function Scale(): JSX.Element {
             <Box
               component="span"
               sx={{
-                ...classes.scaleText,
+                ...sxClasses.scaleText,
                 borderBottom: !scaleValues[scaleMode].borderBottom ? 'none' : '1px solid',
                 width: !scaleValues[scaleMode].borderBottom ? 'inherit' : lineWidth,
               }}

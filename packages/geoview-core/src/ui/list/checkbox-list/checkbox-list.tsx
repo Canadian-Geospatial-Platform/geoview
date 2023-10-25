@@ -14,8 +14,8 @@ interface CheckboxListType {
 }
 
 export function CheckboxList({ listItems, multiselect, checkedItems, setApiCheckedItems }: CheckboxListType): JSX.Element {
-  const sxtheme = useTheme();
-  const classes = getSxClasses(sxtheme);
+  const theme = useTheme();
+  const sxClasses = getSxClasses(theme);
 
   const [listOfItems] = useState(listItems);
   const [checked, setChecked] = useState(checkedItems);
@@ -41,13 +41,13 @@ export function CheckboxList({ listItems, multiselect, checkedItems, setApiCheck
   };
 
   return (
-    <List sx={classes.list}>
+    <List sx={sxClasses.list}>
       {listOfItems.map((value, index) => {
         const labelId = `checkbox-list-label-${index}`;
 
         return (
-          <ListItem sx={classes.listItem} title={value} key={keyValue++} dense onClick={handleToggle(index)}>
-            <ListItemIcon sx={classes.listItemIcon}>
+          <ListItem sx={sxClasses.listItem} title={value} key={keyValue++} dense onClick={handleToggle(index)}>
+            <ListItemIcon sx={sxClasses.listItemIcon}>
               <Checkbox
                 edge="start"
                 checked={checked.indexOf(index) !== -1}
@@ -56,7 +56,7 @@ export function CheckboxList({ listItems, multiselect, checkedItems, setApiCheck
                 inputProps={{ 'aria-labelledby': labelId }}
               />
             </ListItemIcon>
-            <Typography sx={classes.typography} variant="body2" noWrap component="ul">
+            <Typography sx={sxClasses.typography} variant="body2" noWrap component="ul">
               {value}
             </Typography>
           </ListItem>

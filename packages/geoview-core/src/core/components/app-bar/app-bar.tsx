@@ -27,13 +27,11 @@ type AppbarProps = {
  * Create an app-bar with buttons that can open a panel
  */
 export function Appbar({ activeTrap, activeTrapSet }: AppbarProps): JSX.Element {
-  const sxtheme = useTheme();
-  const classes = getSxClasses(sxtheme);
+  const theme = useTheme();
+  const sxClasses = getSxClasses(theme);
   const [buttonPanelGroups, setButtonPanelGroups] = useState<Record<string, Record<string, TypeButtonPanel>>>({});
   const [ModalIsShown, setModalIsShown] = useState(false);
   const [selectedAppBarButtonId, setSelectedAppbarButtonId] = useState<string>('');
-
-  // const classes = useStyles();
 
   const appBar = useRef<HTMLDivElement>(null);
 
@@ -109,13 +107,13 @@ export function Appbar({ activeTrap, activeTrapSet }: AppbarProps): JSX.Element 
   }, [addButtonPanel, mapId, removeButtonPanel, selectedAppBarButtonId]);
 
   return (
-    <Box sx={classes.appBar} ref={appBar}>
-      <Box sx={classes.appBarButtons}>
+    <Box sx={sxClasses.appBar} ref={appBar}>
+      <Box sx={sxClasses.appBarButtons}>
         {mapFeaturesConfig.appBar?.includes('geolocator') && mapFeaturesConfig?.map.interaction === 'dynamic' && (
           <Box>
-            <List sx={classes.appBarList}>
+            <List sx={sxClasses.appBarList}>
               <ListItem>
-                <Geolocator sx={classes.appBarButton} mapId={mapId} />
+                <Geolocator sx={sxClasses.appBarButton} mapId={mapId} />
               </ListItem>
             </List>
           </Box>
@@ -127,7 +125,7 @@ export function Appbar({ activeTrap, activeTrapSet }: AppbarProps): JSX.Element 
 
           // display the button panels in the list
           return (
-            <List key={groupName} sx={classes.appBarList}>
+            <List key={groupName} sx={sxClasses.appBarList}>
               {Object.keys(buttonPanels).map((buttonPanelsKey) => {
                 const buttonPanel = buttonPanels[buttonPanelsKey];
                 return buttonPanel?.button.visible !== undefined && buttonPanel?.button.visible ? (
@@ -138,7 +136,7 @@ export function Appbar({ activeTrap, activeTrapSet }: AppbarProps): JSX.Element 
                         aria-label={buttonPanel.button.tooltip}
                         tooltip={buttonPanel.button.tooltip}
                         tooltipPlacement="right"
-                        className={`${classes.appBarButton} ${selectedAppBarButtonId === buttonPanel.button.id ? 'active' : ''}`}
+                        className={`${sxClasses.appBarButton} ${selectedAppBarButtonId === buttonPanel.button.id ? 'active' : ''}`}
                         size="small"
                         onClick={() => {
                           if (!buttonPanel.panel?.status) {
@@ -161,15 +159,15 @@ export function Appbar({ activeTrap, activeTrapSet }: AppbarProps): JSX.Element 
         })}
         {mapFeaturesConfig.appBar?.includes('export') && (
           <Box>
-            <List sx={classes.appBarList}>
+            <List sx={sxClasses.appBarList}>
               <ListItem>
-                <Export className={`${classes.appBarButton} ${ModalIsShown ? 'active' : ''}`} openModal={openModal} />
+                <Export className={`${sxClasses.appBarButton} ${ModalIsShown ? 'active' : ''}`} openModal={openModal} />
               </ListItem>
             </List>
           </Box>
         )}
-        <Box sx={classes.versionButtonDiv}>
-          <List sx={classes.appBarList}>
+        <Box sx={sxClasses.versionButtonDiv}>
+          <List sx={sxClasses.appBarList}>
             <hr />
             <ListItem>
               <Notifications />

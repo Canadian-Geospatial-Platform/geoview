@@ -86,8 +86,8 @@ export function Modal(props: TypeDialogProps): JSX.Element {
 
   let openEvent = false;
 
-  const sxtheme = useTheme();
-  const dialogClasses = getSxClasses(sxtheme);
+  const theme = useTheme();
+  const sxClasses = getSxClasses(theme);
 
   /**
    * Causes the modal to re-render
@@ -117,7 +117,7 @@ export function Modal(props: TypeDialogProps): JSX.Element {
         open={openEvent}
         onClose={modal.close}
         container={document.querySelector(`#${modal.mapId}`)}
-        sx={dialogClasses.dialog}
+        sx={sxClasses.dialog}
         className={`${className && className}`}
         classes={{
           paper: classes.dialogContent,
@@ -126,11 +126,11 @@ export function Modal(props: TypeDialogProps): JSX.Element {
         aria-describedby={ariaDescribedBy}
         fullScreen={fullScreen}
       >
-        <Box sx={dialogClasses.modalTitleContainer}>
-          {modal.header?.title ? <DialogTitle sx={dialogClasses.modalTitleLabel}>{modal.header?.title}</DialogTitle> : null}
-          <Box sx={dialogClasses.modalTitleActions}>
+        <Box sx={sxClasses.modalTitleContainer}>
+          {modal.header?.title ? <DialogTitle sx={sxClasses.modalTitleLabel}>{modal.header?.title}</DialogTitle> : null}
+          <Box sx={sxClasses.modalTitleActions}>
             {modal.header?.actions !== undefined && modal.header?.actions.length >= 1 ? (
-              <Box sx={dialogClasses.headerActionsContainer}>
+              <Box sx={sxClasses.headerActionsContainer}>
                 {modal.header?.actions.map((action) => {
                   if (typeof action.content === 'string') {
                     return (
@@ -160,7 +160,7 @@ export function Modal(props: TypeDialogProps): JSX.Element {
         <DialogContent>
           <div
             id={contentTextId}
-            className={`${dialogClasses.content} ${contentTextClassName && contentTextClassName}`}
+            className={`${sxClasses.content} ${contentTextClassName && contentTextClassName}`}
             style={contentTextStyle}
           >
             {typeof modal.content === 'string' ? <HtmlToReact htmlContent={modal.content} /> : modal.content}
@@ -211,7 +211,7 @@ export function Modal(props: TypeDialogProps): JSX.Element {
     if (payloadIsAModal(payload)) {
       if (modalId === payload.modalId) {
         if (!payload.open) openEvent = false;
-        setCreatedModal(<Dialog open={openEvent} sx={dialogClasses.closedModal} />);
+        setCreatedModal(<Dialog open={openEvent} sx={sxClasses.closedModal} />);
       }
     }
   };
@@ -238,7 +238,7 @@ export function Modal(props: TypeDialogProps): JSX.Element {
     createdModal || (
       <Dialog
         open={open || openEvent}
-        sx={dialogClasses.dialog}
+        sx={sxClasses.dialog}
         className={`${className && className}`}
         style={{ ...style, position: 'absolute' }}
         aria-labelledby={ariaLabeledBy}
@@ -250,7 +250,7 @@ export function Modal(props: TypeDialogProps): JSX.Element {
         <DialogContent className={contentClassName} style={contentStyle}>
           <div
             id={contentTextId}
-            className={`${dialogClasses.content} ${contentTextClassName && contentTextClassName}`}
+            className={`${sxClasses.content} ${contentTextClassName && contentTextClassName}`}
             style={contentTextStyle}
           >
             {contentModal}

@@ -22,7 +22,7 @@ export function FooterTabs(): JSX.Element | null {
 
   const [isFullscreen, setIsFullscreen] = useState(false);
   const theme = useTheme();
-  const classes = getSxClasses(theme);
+  const sxClasses = getSxClasses(theme);
 
   const mapConfig = useContext(MapContext);
 
@@ -161,7 +161,7 @@ export function FooterTabs(): JSX.Element | null {
   }, [addTab, mapId, removeTab]);
 
   return api.maps[mapId].footerTabs.tabs.length > 0 ? (
-    <Box ref={tabsContainerRef as MutableRefObject<HTMLDivElement>} sx={classes.tabsContainer} className="tabsContainer">
+    <Box ref={tabsContainerRef as MutableRefObject<HTMLDivElement>} sx={sxClasses.tabsContainer} className="tabsContainer">
       <Tabs
         isCollapsed={isCollapsed}
         handleCollapse={handleCollapse}

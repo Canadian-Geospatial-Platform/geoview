@@ -39,7 +39,7 @@ export function MousePosition(): JSX.Element {
   const { t } = useTranslation<string>();
 
   const theme = useTheme();
-  const classes = getSxClasses(theme);
+  const sxClasses = getSxClasses(theme);
 
   const mousePosition = {
     display: 'flex',
@@ -130,19 +130,19 @@ export function MousePosition(): JSX.Element {
   return (
     <Tooltip title={t('mapnav.coordinates')!} placement="top">
       <button type="button" onClick={() => switchPositionMode()} style={mousePosition}>
-        <Box sx={classes.mousePositionTextContainer}>
+        <Box sx={sxClasses.mousePositionTextContainer}>
           <Box id="mousePositionWrapper" sx={{ display: !expanded ? 'none' : 'block', transition: 'display 1ms ease-in 300ms' }}>
             {positions.map((position, index) => {
               return (
                 // eslint-disable-next-line react/no-array-index-key
-                <Box sx={classes.mousePositionTextCheckmarkContainer} key={index}>
-                  <CheckIcon sx={{ fontSize: 25, opacity: index === positionMode ? 1 : 0, ...classes.mousePositionCheckmark }} />
+                <Box sx={sxClasses.mousePositionTextCheckmarkContainer} key={index}>
+                  <CheckIcon sx={{ fontSize: 25, opacity: index === positionMode ? 1 : 0, ...sxClasses.mousePositionCheckmark }} />
                   <span>{position}</span>
                 </Box>
               );
             })}
           </Box>
-          <Box component="span" sx={{ display: expanded ? 'none' : 'block', ...classes.mousePositionText }}>
+          <Box component="span" sx={{ display: expanded ? 'none' : 'block', ...sxClasses.mousePositionText }}>
             {positions[positionMode]}
           </Box>
         </Box>

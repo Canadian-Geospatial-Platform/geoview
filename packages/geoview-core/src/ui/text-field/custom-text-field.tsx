@@ -31,8 +31,8 @@ interface TypeCustomTextFieldProps extends Omit<BaseTextFieldProps, 'prefix'> {
  * @returns {JSX.Element} the created TextField element
  */
 export function CustomTextField(props: TypeCustomTextFieldProps): JSX.Element {
-  const sxtheme = useTheme();
-  const classes = getSxClasses(sxtheme);
+  const theme = useTheme();
+  const sxClasses = getSxClasses(theme);
 
   const {
     className,
@@ -51,7 +51,7 @@ export function CustomTextField(props: TypeCustomTextFieldProps): JSX.Element {
 
   return (
     <MaterialTextField
-      sx={classes.textField}
+      sx={sxClasses.textField}
       className={`${className && className}`}
       style={style}
       value={defaultValue ? undefined : value}

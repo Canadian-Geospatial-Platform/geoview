@@ -30,8 +30,8 @@ export type CheckboxListEnhancedItem = {
 export function CheckboxListEnhanced(props: CheckboxListEnhancedType): JSX.Element {
   const { listItems, checkedValues, multiselect, checkedCallback } = props;
 
-  const sxtheme = useTheme();
-  const classes = getSxClasses(sxtheme);
+  const theme = useTheme();
+  const sxClasses = getSxClasses(theme);
 
   const [checked, _setChecked] = useState([...checkedValues]);
 
@@ -63,13 +63,13 @@ export function CheckboxListEnhanced(props: CheckboxListEnhancedType): JSX.Eleme
   }, [checked, checkedValues]);
 
   return (
-    <List sx={classes.list}>
+    <List sx={sxClasses.list}>
       {listItems.map((item: CheckboxListEnhancedItem, idx: number) => {
         const labelId = `checkbox-list-label-${idx}`;
 
         return (
-          <ListItem sx={classes.listItem} title={item.display} key={item.value} dense onClick={() => handleToggle(item.value)}>
-            <ListItemIcon sx={classes.listItemIcon}>
+          <ListItem sx={sxClasses.listItem} title={item.display} key={item.value} dense onClick={() => handleToggle(item.value)}>
+            <ListItemIcon sx={sxClasses.listItemIcon}>
               <Checkbox
                 edge="start"
                 checked={checked.includes(item.value)}
@@ -78,10 +78,10 @@ export function CheckboxListEnhanced(props: CheckboxListEnhancedType): JSX.Eleme
                 inputProps={{ 'aria-labelledby': labelId }}
               />
             </ListItemIcon>
-            <Typography sx={classes.typography} variant="body2" noWrap component="ul">
+            <Typography sx={sxClasses.typography} variant="body2" noWrap component="ul">
               {item.display}
             </Typography>
-            <Box sx={classes.boxcontent} className="Checkbox-content-root" onClick={(e) => handleClickContent(e)}>
+            <Box sx={sxClasses.boxcontent} className="Checkbox-content-root" onClick={(e) => handleClickContent(e)}>
               {typeof item.content === 'string' ? <HtmlToReact htmlContent={item.content} /> : item.content}
             </Box>
           </ListItem>

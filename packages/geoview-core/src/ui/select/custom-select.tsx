@@ -63,8 +63,8 @@ export interface TypeItemProps {
  * @returns {JSX.Element} the created Select element
  */
 export function CustomSelect(props: TypeCustomSelectProps): JSX.Element {
-  const sxtheme = useTheme();
-  const classes = getSxClasses(sxtheme);
+  const theme = useTheme();
+  const sxClasses = getSxClasses(theme);
 
   const [value, setValue] = useState('');
   const [multipleValue, setMultipleValue] = useState([]);
@@ -112,12 +112,12 @@ export function CustomSelect(props: TypeCustomSelectProps): JSX.Element {
   }
 
   return (
-    <FormControl sx={classes.formControl} {...otherProps}>
-      <InputLabel sx={{ ...(isDefault ? classes.label : {}) }} id={labelId}>
+    <FormControl sx={sxClasses.formControl} {...otherProps}>
+      <InputLabel sx={{ ...(isDefault ? sxClasses.label : {}) }} id={labelId}>
         {label}
       </InputLabel>
       <MaterialSelect
-        sx={classes.select}
+        sx={sxClasses.select}
         className={`${className && className}`}
         style={style}
         labelId={labelId}

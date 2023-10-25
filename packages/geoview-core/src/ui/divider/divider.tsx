@@ -20,13 +20,13 @@ export function Divider(props: TypeDividerProps): JSX.Element {
   const { className, style, grow, orientation } = props;
 
   const sxtheme = useTheme();
-  const classes = getSxClasses(sxtheme);
+  const sxClasses = getSxClasses(sxtheme);
 
-  let dividerOrientation = classes.horizontal;
+  let dividerOrientation = sxClasses.horizontal;
 
   if (orientation) {
-    dividerOrientation = orientation === 'horizontal' ? classes.horizontal : classes.vertical;
+    dividerOrientation = orientation === 'horizontal' ? sxClasses.horizontal : sxClasses.vertical;
   }
 
-  return <MaterialDivider sx={{ ...(grow ? classes.grow : {}), ...dividerOrientation }} className={`${className ?? ''}`} style={style} />;
+  return <MaterialDivider sx={{ ...(grow ? sxClasses.grow : {}), ...dividerOrientation }} className={`${className ?? ''}`} style={style} />;
 }

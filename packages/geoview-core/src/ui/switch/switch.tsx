@@ -14,10 +14,10 @@ export type TypeSwitchProps = SwitchProps & { mapId?: string };
  * @returns {JSX.Element} the switch ui component
  */
 export function Switch(props: TypeSwitchProps): JSX.Element {
-  const sxtheme = useTheme();
-  const classes = getSxClasses(sxtheme);
+  const theme = useTheme();
+  const sxClasses = getSxClasses(theme);
 
   const { title, ...otherProps } = props;
 
-  return <MaterialFormControlLabel control={<MaterialSwitch {...otherProps} />} label={title} sx={classes.formControl} />;
+  return <MaterialFormControlLabel control={<MaterialSwitch {...otherProps} />} label={title} sx={sxClasses.formControl} />;
 }

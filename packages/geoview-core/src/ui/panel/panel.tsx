@@ -57,6 +57,7 @@ export function Panel(props: TypePanelAppProps): JSX.Element {
 
   // Get the theme
   const theme = useTheme();
+  const sxClasses = getSxClasses(theme);
 
   const panelWidth = panel?.width ?? 350;
   const panelContainerStyles = {
@@ -67,8 +68,6 @@ export function Panel(props: TypePanelAppProps): JSX.Element {
 
   const [actionButtons, setActionButtons] = useState<JSX.Element[] & ReactNode[]>([]);
   const [, updatePanelContent] = useState(0);
-
-  const classes = getSxClasses(theme);
 
   const { t } = useTranslation<string>();
 
@@ -247,7 +246,7 @@ export function Panel(props: TypePanelAppProps): JSX.Element {
       >
         <Card
           sx={{
-            ...classes.panelContainer,
+            ...sxClasses.panelContainer,
             display: panelStatus ? 'block' : 'none',
             ...(panelStyles?.panelCard && { ...panelStyles.panelCard }),
           }}
@@ -288,7 +287,7 @@ export function Panel(props: TypePanelAppProps): JSX.Element {
             }
           />
 
-          <CardContent sx={{ ...classes.panelContentContainer, ...(panelStyles ? panelStyles.panelCardContent : {}) }}>
+          <CardContent sx={{ ...sxClasses.panelContentContainer, ...(panelStyles ? panelStyles.panelCardContent : {}) }}>
             {typeof panel.content === 'string' ? <HtmlToReact htmlContent={panel.content} /> : panel.content}
           </CardContent>
         </Card>

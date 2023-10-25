@@ -40,15 +40,15 @@ interface TypeMenuItemProps {
 export function Select(props: TypeSelectProps): JSX.Element {
   const { fullWidth, inputLabel, menuItems, ...selectProps } = props;
 
-  const sxtheme = useTheme();
-  const classes = getSxClasses(sxtheme);
+  const theme = useTheme();
+  const sxClasses = getSxClasses(theme);
 
   return (
     <FormControl fullWidth={fullWidth}>
-      <InputLabel sx={classes.label} {...inputLabel}>
+      <InputLabel sx={sxClasses.label} {...inputLabel}>
         {selectProps.label}
       </InputLabel>
-      <MaterialSelect sx={classes.formControl} {...selectProps}>
+      <MaterialSelect sx={sxClasses.formControl} {...selectProps}>
         {menuItems.map((menuItem: TypeMenuItemProps, index) => {
           if (menuItem) {
             if (menuItem.type === 'header') {
@@ -57,7 +57,7 @@ export function Select(props: TypeSelectProps): JSX.Element {
             }
 
             // eslint-disable-next-line react/no-array-index-key
-            return <MenuItem key={index} {...(menuItem.item as MenuItemProps)} sx={classes.menuItem} />;
+            return <MenuItem key={index} {...(menuItem.item as MenuItemProps)} sx={sxClasses.menuItem} />;
           }
 
           return null;

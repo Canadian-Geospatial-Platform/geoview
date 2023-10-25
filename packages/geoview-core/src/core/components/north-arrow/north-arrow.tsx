@@ -29,10 +29,8 @@ export function NorthArrow(): JSX.Element {
   const mapConfig = useContext(MapContext);
   const { mapId } = mapConfig;
 
-  // access transitions
-  const defaultTheme = useTheme();
-
-  const classes = getSxClasses(defaultTheme);
+  const theme = useTheme();
+  const sxClasses = getSxClasses(theme);
 
   // do not use useState for item used inside function only without rendering... use useRef
   const isNorthFixedValue = useRef(false);
@@ -242,18 +240,18 @@ export function NorthArrow(): JSX.Element {
   return mapProjection.current === PROJECTION_NAMES.LCC ? (
     <Box
       ref={northArrowRef}
-      sx={classes.northArrowContainer}
+      sx={sxClasses.northArrowContainer}
       style={{
-        transition: defaultTheme.transitions.create(['all', 'transform'], {
-          duration: defaultTheme.transitions.duration.standard,
-          easing: defaultTheme.transitions.easing.easeOut,
+        transition: theme.transitions.create(['all', 'transform'], {
+          duration: theme.transitions.duration.standard,
+          easing: theme.transitions.easing.easeOut,
         }),
         transform: `rotate(${rotationAngle.angle}deg)`,
         visibility: isNorthVisible ? 'hidden' : 'visible',
         left: northOffset,
       }}
     >
-      <NorthArrowIcon width={classes.northArrow.width} height={classes.northArrow.height} />
+      <NorthArrowIcon width={sxClasses.northArrow.width} height={sxClasses.northArrow.height} />
     </Box>
   ) : (
     <Box />

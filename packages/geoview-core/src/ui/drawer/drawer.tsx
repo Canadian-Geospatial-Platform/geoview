@@ -33,8 +33,8 @@ export function Drawer(props: TypeDrawerProps): JSX.Element {
 
   const { t } = useTranslation<string>();
 
-  const sxtheme = useTheme();
-  const classes = getSxClasses(sxtheme);
+  const theme = useTheme();
+  const sxClasses = getSxClasses(theme);
 
   const mapConfig = useContext(MapContext);
 
@@ -73,13 +73,13 @@ export function Drawer(props: TypeDrawerProps): JSX.Element {
   return (
     <MaterialDrawer
       variant={variant || 'permanent'}
-      sx={open ? classes.drawerOpen : classes.drawerClose}
-      classes={{
+      sx={open ? sxClasses.drawerOpen : sxClasses.drawerClose}
+      sxClasses={{
         paper: className,
       }}
       style={style || undefined}
     >
-      <Box sx={classes.toolbar}>
+      <Box sx={sxClasses.toolbar}>
         <IconButton
           tooltip={open ? t('general.close')! : t('general.open')!}
           tooltipPlacement="right"

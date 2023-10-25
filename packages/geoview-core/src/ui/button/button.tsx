@@ -43,7 +43,7 @@ export function Button(props: TypeButtonProps): JSX.Element {
 
   const buttonRef = useRef<HTMLElement>(null);
   const theme = useTheme();
-  const classes = getSxClasses(theme);
+  const sxClasses = getSxClasses(theme);
 
   const sxProps = {
     ...sx,
@@ -84,7 +84,7 @@ export function Button(props: TypeButtonProps): JSX.Element {
       );
     } else {
       textContent = (
-        <Box sx={classes.text} className={`${textClassName}`} style={type === 'text' ? { marginLeft: 'initial' } : {}}>
+        <Box sx={sxClasses.text} className={`${textClassName}`} style={type === 'text' ? { marginLeft: 'initial' } : {}}>
           {children}
         </Box>
       );
@@ -92,7 +92,7 @@ export function Button(props: TypeButtonProps): JSX.Element {
 
     return textContent;
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [children, classes.text, textClassName, type]);
+  }, [children, sxClasses.text, textClassName, type]);
 
   /**
    * Get icon container with provided icon content
@@ -105,13 +105,13 @@ export function Button(props: TypeButtonProps): JSX.Element {
     if (icon === undefined) {
       iconContent = <div />;
     } else if (typeof icon === 'string') {
-      iconContent = <HtmlToReact className={`${classes.icon} ${iconClassName}`} htmlContent={icon} />;
+      iconContent = <HtmlToReact className={`${sxClasses.icon} ${iconClassName}`} htmlContent={icon} />;
     } else {
-      iconContent = <div className={`${classes.icon} ${iconClassName}`}>{icon}</div>;
+      iconContent = <div className={`${sxClasses.icon} ${iconClassName}`}>{icon}</div>;
     }
 
     return iconContent;
-  }, [classes.icon, icon, iconClassName]);
+  }, [sxClasses.icon, icon, iconClassName]);
 
   /**
    * Create a text only button
@@ -138,12 +138,12 @@ export function Button(props: TypeButtonProps): JSX.Element {
    */
   const createTextIconButton = useCallback((): ReactNode => {
     return (
-      <Box sx={classes.textIconContainer}>
+      <Box sx={sxClasses.textIconContainer}>
         {getIcon()}
         {state !== undefined && state === 'expanded' && getText()}
       </Box>
     );
-  }, [classes.textIconContainer, getIcon, getText, state]);
+  }, [sxClasses.textIconContainer, getIcon, getText, state]);
 
   useEffect(() => {
     // disable events on container
@@ -167,7 +167,7 @@ export function Button(props: TypeButtonProps): JSX.Element {
   return (
     <Tooltip title={t((tooltip as string) || '') as string} placement={tooltipPlacement} TransitionComponent={Fade} ref={buttonRef}>
       <MaterialButton
-        sx={{ ...classes.buttonClass, ...sxProps }}
+        sx={{ ...sxClasses.buttonClass, ...sxProps }}
         variant={variant || 'text'}
         className={`${className || ''}`}
         style={style}
