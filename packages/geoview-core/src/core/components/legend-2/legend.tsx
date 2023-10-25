@@ -1,5 +1,5 @@
-import { Button, styled, useTheme, Table } from '@mui/material';
-import React, { useState, useEffect } from 'react';
+import { Button, styled, useTheme } from '@mui/material';
+import React from 'react';
 import { useStore } from 'zustand';
 import { useTranslation } from 'react-i18next';
 import { api } from '@/app';
@@ -27,17 +27,17 @@ export function Legend2(props: LegendItemsDetailsProps): JSX.Element {
   const theme = useTheme();
   const sxClasses = getSxClasses(theme);
 
-  //Populatig fake legend data
+  // Populatig fake legend data
   const helpers = useLegendHelpers(mapId);
   helpers.populateLegendStoreWithFakeData();
 
   const store = getGeoViewStore(mapId);
-  //controls what is displayed on the right panel
+  // controls what is displayed on the right panel
   const currentRightPanelDisplay = useStore(store, (state) => state.legendState.currentRightPanelDisplay);
   const selectedLegendItem = useStore(store, (state) => state.legendState.selectedItem);
   const selectedLayers = useStore(store, (state) => state.legendState.selectedLayers);
 
-  const showLegendOverview = function() {
+  function showLegendOverview() {
     store.setState({
       legendState: { ...store.getState().legendState, currentRightPanelDisplay: 'overview' },
     });
@@ -126,9 +126,7 @@ export function Legend2(props: LegendItemsDetailsProps): JSX.Element {
 
   const rightPanel = () => {
     if (currentRightPanelDisplay === 'overview' && selectedLayers) {
-      return (
-        <LegendOverview mapId={mapId}  layerIds={layerIds}/>
-      );
+      return <LegendOverview mapId={mapId} />;
     }
 
     if (currentRightPanelDisplay === 'layer-details' && selectedLegendItem) {

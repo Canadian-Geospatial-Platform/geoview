@@ -1,21 +1,18 @@
-import { TypeDisplayLanguage, api } from '@/app';
-import { AddIcon, Box, Grid, List, Typography, ExpandMoreIcon, Paper, Stack, ExpandIcon, ListItem, Tooltip, ListItemText, ListItemIcon, IconButton, KeyboardArrowDownIcon } from '@/ui';
-import { getGeoViewStore } from '@/core/stores/stores-managers';
 import { useStore } from 'zustand';
-import { useState } from 'react';
-import { Table, useTheme } from '@mui/material';
-import { getSxClasses } from './legend-style';
+import { useTheme } from '@mui/material';
 import { useTranslation } from 'react-i18next';
-import { useLegendHelpers } from './helpers';
+import { TypeDisplayLanguage } from '@/app';
+import { Box, List, Typography, Paper, ListItem, Tooltip, ListItemText, ListItemIcon, IconButton, KeyboardArrowDownIcon } from '@/ui';
+import { getGeoViewStore } from '@/core/stores/stores-managers';
+import { getSxClasses } from './legend-style';
 import { TypeLegendLayer } from './types';
 
 export interface LegendOverviewProps {
-  layerIds: string[];
-  mapId: string
+  mapId: string;
 }
 
 export function LegendOverview(props: LegendOverviewProps): JSX.Element {
-  const { layerIds, mapId } = props;
+  const { mapId } = props;
   const theme = useTheme();
   const sxClasses = getSxClasses(theme);
   const { t, i18n } = useTranslation<string>();
@@ -39,7 +36,7 @@ export function LegendOverview(props: LegendOverviewProps): JSX.Element {
           </IconButton>
         </ListItemIcon>
       </ListItem>
-    )
+    );
   }
 
   return (
@@ -52,9 +49,7 @@ export function LegendOverview(props: LegendOverviewProps): JSX.Element {
           {numItems} {t('legend.items_available')}
         </Typography>
       </Box>
-      <List sx={{ width: '100%', padding: '20px' }}>
-        {legendLayers.map((item) => renderLegendLayer(item))}
-      </List>
+      <List sx={{ width: '100%', padding: '20px' }}>{legendLayers.map((item) => renderLegendLayer(item))}</List>
     </Paper>
   );
 }

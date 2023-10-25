@@ -4,7 +4,6 @@ import { useTranslation } from 'react-i18next';
 import { useTheme, Theme } from '@mui/material/styles';
 import { transformExtent } from 'ol/proj';
 import { Extent } from 'ol/extent';
-import { getGeoViewStore } from '@/core/stores/stores-managers';
 import {
   Box,
   ListItem,
@@ -139,7 +138,6 @@ export function LegendItemDetails(props: TypeLegendItemDetailsProps): JSX.Elemen
   const clusterLayerPath = path.replace('-unclustered', '');
   const unclusterLayerPath = `${clusterLayerPath}-unclustered`;
   const canCluster = !!api.maps[mapId].layer.registeredLayers[unclusterLayerPath];
-  const [checkIsGroup, setcheckIsGroup_] = useState(false);
 
   const [isClusterToggleEnabled, setIsClusterToggleEnabled] = useState(false);
   const [isLegendOpen, setLegendOpen] = useState(true);
@@ -160,17 +158,12 @@ export function LegendItemDetails(props: TypeLegendItemDetailsProps): JSX.Elemen
   const stackIconRef = useRef() as MutableRefObject<HTMLDivElement | undefined>;
   const maxIconRef = useRef() as RefObject<HTMLButtonElement>;
 
-  const [checkedSublayerNamesAndIcons, setCheckedSublayerNamesAndIcons] = useState<{ layer: string; icon: string }[]>([]);
-  const [nochildLayers, setnochildLayers] = useState<{ layer: string; icon: string }[]>([]);
-  const store = getGeoViewStore(mapId);
-
   const getGroupsDetails = (): boolean => {
     let isGroup = false;
     if (layerConfigEntry) {
       if (layerEntryIsGroupLayer(layerConfigEntry)) {
         setGroupItems(layerConfigEntry.listOfLayerEntryConfig);
         isGroup = true;
-        setcheckIsGroup_(!setcheckIsGroup_);
       }
     } else if (
       geoviewLayerInstance?.listOfLayerEntryConfig &&
@@ -178,10 +171,9 @@ export function LegendItemDetails(props: TypeLegendItemDetailsProps): JSX.Elemen
     ) {
       setGroupItems(geoviewLayerInstance?.listOfLayerEntryConfig);
       isGroup = true;
-      setcheckIsGroup_(!setcheckIsGroup_);
     }
-    console.log('is GROUP', isGroup);
-    console.log('checkIs GROUP', checkIsGroup);
+    // console.log('is GROUP', isGroup);
+    // console.log('checkIs GROUP', checkIsGroup);
 
     return isGroup;
   };
@@ -300,38 +292,6 @@ export function LegendItemDetails(props: TypeLegendItemDetailsProps): JSX.Elemen
     },
     mapId
   );
-
-  const updateSelectedLayers = (selectedLayers: { layer: string; icon: string }[]) => {
-    const selectedLayersByLayerName: Record<string, { layer: string; icon: string }[]> = {};
-    if (selectedLayers.length > 0) {
-      selectedLayers.forEach(({ layer, icon }) => {
-        if (!selectedLayersByLayerName[layerName]) {
-          selectedLayersByLayerName[layerName] = [{ layer, icon: icon || '' }];
-        } else {
-          selectedLayersByLayerName[layerName].push({ layer, icon: icon || '' });
-        }
-      });
-    } else {
-      selectedLayersByLayerName[layerName] = [];
-    }
-
-    store.setState({
-      legendState: { ...store.getState().legendState, selectedLayers: selectedLayersByLayerName },
-    });
-  };
-
-  const handleGetCheckedSublayerNames = (namesAndIcons: { layer: string; icon: string }[]) => {
-    setCheckedSublayerNamesAndIcons(namesAndIcons);
-  };
-
-  useEffect(() => {
-    if (checkedSublayerNamesAndIcons.length > 0) {
-      updateSelectedLayers(checkedSublayerNamesAndIcons);
-    } else {
-      setnochildLayers([]);
-      updateSelectedLayers(nochildLayers);
-    }
-  }, [checkedSublayerNamesAndIcons, nochildLayers]);
 
   useEffect(() => {
     const mapZoomHandler = (payload: PayloadBaseClass) => {
@@ -467,7 +427,6 @@ export function LegendItemDetails(props: TypeLegendItemDetailsProps): JSX.Elemen
           <LegendIconList
             iconImages={iconList}
             iconLabels={labelList}
-            onGetCheckedSublayerNames={handleGetCheckedSublayerNames}
             mapId={mapId}
             toggleMapVisible={(sublayerConfig) => {
               (geoviewLayerInstance as AbstractGeoViewVector | EsriDynamic).applyViewFilter(sublayerConfig);

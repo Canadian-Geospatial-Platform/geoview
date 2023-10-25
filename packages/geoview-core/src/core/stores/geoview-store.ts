@@ -68,7 +68,7 @@ export interface ILegendState {
   selectedIsVisible: boolean;
   selectedLayers: Record<string, { layer: string; icon: string }[]>;
   currentRightPanelDisplay: 'overview' | 'layer-details' | 'none';
-  legendLayers: TypeLegendLayer[]
+  legendLayers: TypeLegendLayer[];
 }
 
 export interface IMapDataTableState {
@@ -198,7 +198,7 @@ export const geoViewStoreDefinition = (
       currentRightPanelDisplay: 'none',
       selectedIsVisible: true,
       selectedLayers: {},
-      legendLayers: []
+      legendLayers: [],
     },
     detailsState: {
       layerDataArray: [],

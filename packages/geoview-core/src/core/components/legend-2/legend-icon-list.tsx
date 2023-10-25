@@ -1,5 +1,5 @@
 /* eslint-disable react/require-default-props */
-import React, { useRef, useState, useEffect } from 'react';
+import React, { useRef, useState } from 'react';
 import { useTheme, Theme } from '@mui/material/styles';
 import { Checkbox, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@mui/material';
 import { useStore } from 'zustand';
@@ -59,11 +59,10 @@ export interface TypeLegendIconListProps {
   layerConfig?: TypeVectorLayerEntryConfig;
   geometryKey?: TypeStyleGeometry;
   toggleMapVisible: (layerConfig: TypeLayerEntryConfig) => void;
-  onGetCheckedSublayerNames?: (checkedSublayerNames: { layer: string; icon: string }[]) => void;
 }
 
 export function LegendIconList(props: TypeLegendIconListProps): JSX.Element {
-  const { iconImages, iconLabels, toggleMapVisible, geometryKey, layerConfig, mapId, onGetCheckedSublayerNames } = props;
+  const { iconImages, iconLabels, toggleMapVisible, geometryKey, layerConfig, mapId } = props;
   const theme: Theme & {
     iconImg: React.CSSProperties;
   } = useTheme();
@@ -123,36 +122,6 @@ export function LegendIconList(props: TypeLegendIconListProps): JSX.Element {
     setChecked(iconImages.map(() => !isAllChecked));
     setIsAllChecked(!isAllChecked);
   };
-
-  useEffect(() => {
-    if (onGetCheckedSublayerNames) {
-      const checkedSublayerNamesAndIcons = iconLabels
-        .map((label, index) => {
-          if (isChecked[index]) {
-            return {
-              layer: label,
-              icon: iconImages[index] ?? '',
-            };
-          }
-          return null;
-        })
-        .filter((pair) => pair !== null) as { layer: string; icon: string }[];
-
-      onGetCheckedSublayerNames(checkedSublayerNamesAndIcons);
-    }
-  }, [
-    isParentVisible,
-    allChecked,
-    allUnChecked,
-    isChecked,
-    layerConfig,
-    geometryKey,
-    toggleMapVisible,
-    mapId,
-    iconLabels,
-    iconImages,
-    onGetCheckedSublayerNames,
-  ]);
 
   return (
     <TableContainer>
