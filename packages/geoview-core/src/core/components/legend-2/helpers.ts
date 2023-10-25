@@ -27,11 +27,15 @@ export function useLegendHelpers(mapId: string) {
 
     keys.forEach((i) => {
       const setData = legendInfo[i];
-      let items: TypeLegendLayerItem[] = [];
-      const legendData = setData.data?.legend ? setData.data.legend as TypeLayerStyles : undefined;
+      const items: TypeLegendLayerItem[] = [];
+      const legendData = setData.data?.legend ? (setData.data.legend as TypeLayerStyles) : undefined;
       const itemCanvases = legendData ? legendData.Point?.arrayOfCanvas : undefined;
       if (itemCanvases) {
-        items = itemCanvases.map((r, ind) => ({ name: `Item name ${ind}`, isChecked: true, icon: r.toDataURL() }));
+        itemCanvases.forEach((r, ind) => {
+          if (r) {
+            items.push({ name: `Item name ${ind}`, isChecked: true, icon: r.toDataURL() });
+          }
+        });
       }
 
       const item: TypeLegendLayer = {
