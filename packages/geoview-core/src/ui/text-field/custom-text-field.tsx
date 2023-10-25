@@ -2,9 +2,8 @@
 /* eslint-disable react/jsx-props-no-spreading */
 import React, { ReactNode } from 'react';
 
-import makeStyles from '@mui/styles/makeStyles';
-
-import { BaseTextFieldProps, InputAdornment, TextField as MaterialTextField } from '@mui/material';
+import { BaseTextFieldProps, InputAdornment, TextField as MaterialTextField, useTheme } from '@mui/material';
+import { getSxClasses } from './custom-text-field-style';
 
 /**
  * Customized Material UI Custom TextField Properties
@@ -25,20 +24,6 @@ interface TypeCustomTextFieldProps extends Omit<BaseTextFieldProps, 'prefix'> {
   changeHandler?: <T>(params: T) => void;
 }
 
-const useStyles = makeStyles((theme) => ({
-  textField: {
-    width: '50%',
-    margin: '10px 0',
-    '& .MuiFormLabel-root.Mui-focused': {
-      color: theme.palette.primary.contrastText,
-      background: theme.palette.primary.light,
-    },
-    '& .MuiOutlinedInput-root.Mui-focused': {
-      border: `1px solid ${theme.palette.primary.contrastText}`,
-    },
-  },
-}));
-
 /**
  * Create a customizable Material UI TextField
  *
@@ -46,7 +31,8 @@ const useStyles = makeStyles((theme) => ({
  * @returns {JSX.Element} the created TextField element
  */
 export function CustomTextField(props: TypeCustomTextFieldProps): JSX.Element {
-  const classes = useStyles();
+  const sxtheme = useTheme();
+  const classes = getSxClasses(sxtheme);
 
   const {
     className,
@@ -65,7 +51,8 @@ export function CustomTextField(props: TypeCustomTextFieldProps): JSX.Element {
 
   return (
     <MaterialTextField
-      className={`${classes.textField} ${className && className}`}
+      sx={classes.textField}
+      className={`${className && className}`}
       style={style}
       value={defaultValue ? undefined : value}
       onChange={changeHandler}
