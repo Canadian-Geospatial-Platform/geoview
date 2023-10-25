@@ -1,13 +1,12 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 /* eslint-disable react/jsx-no-useless-fragment */
 /* eslint-disable no-nested-ternary */
-import { useRef, useState, useEffect, useCallback, useContext, ReactNode } from 'react';
+import { useRef, useState, useEffect, useCallback, useContext, ReactNode, KeyboardEvent } from 'react';
 
 import { useTranslation } from 'react-i18next';
 
 import FocusTrap from 'focus-trap-react';
 
-import makeStyles from '@mui/styles/makeStyles';
 import Card from '@mui/material/Card';
 import CardHeader from '@mui/material/CardHeader';
 import CardContent from '@mui/material/CardContent';
@@ -30,6 +29,7 @@ import {
   PayloadBaseClass,
 } from '@/api/events/payloads';
 import { TypeIconButtonProps } from '../icon-button/icon-button-types';
+import { getSxClasses } from './panel-style';
 
 /**
  * Interface for panel properties
@@ -42,62 +42,6 @@ type TypePanelAppProps = {
   // Callback when the panel has completed opened (and transitioned in)
   handlePanelOpened?: () => void;
 };
-
-const useStyles = makeStyles((theme) => ({
-  panelContainer: {
-    backgroundColor: theme.panel.background,
-    height: 'calc(100% - 35px)',
-    borderRadius: 0,
-    flexDirection: 'column',
-    [theme.breakpoints.down('sm')]: {
-      width: '100%',
-      minWidth: '100%',
-    },
-  },
-  panelHeader: {
-    backgroundColor: theme.panel.background,
-    borderBottomColor: theme.panel.border,
-    borderBottomWidth: 1,
-    borderBottomStyle: 'solid',
-    height: 64,
-  },
-  panelHeaderTitle: {
-    fontSize: 15,
-    paddingTop: 8,
-    textTransform: 'uppercase',
-  },
-  panelHeaderAction: {
-    '& .MuiButtonBase-root': {
-      border: `1px solid ${theme.appBar.btnDefaultBg}`,
-      height: 44,
-      width: 44,
-      marginRight: 8,
-      transition: 'all 0.3s ease-in-out',
-      '& .MuiSvgIcon-root': {
-        width: 24,
-        height: 24,
-      },
-      '&:last-child': {
-        marginRight: 0,
-      },
-      '&:hover': {
-        backgroundColor: theme.appBar.btnHoverBg,
-      },
-    },
-  },
-  panelContentContainer: {
-    position: 'relative',
-    flexBasis: 'auto',
-    overflow: 'hidden',
-    overflowY: 'auto',
-    boxSizing: 'border-box',
-    marginBottom: 16,
-    '&:last-child': {
-      paddingBottom: 0,
-    },
-    height: 'calc(100% - 64px)',
-  },
-}));
 
 /**
  * Create a panel with a header title, icon and content
@@ -124,7 +68,8 @@ export function Panel(props: TypePanelAppProps): JSX.Element {
   const [actionButtons, setActionButtons] = useState<JSX.Element[] & ReactNode[]>([]);
   const [, updatePanelContent] = useState(0);
 
-  const classes = useStyles(props);
+  const classes = getSxClasses(theme);
+
   const { t } = useTranslation<string>();
 
   const mapConfig = useContext(MapContext)!;
@@ -301,10 +246,13 @@ export function Panel(props: TypePanelAppProps): JSX.Element {
         }}
       >
         <Card
-          sx={{ display: panelStatus ? 'block' : 'none', ...(panelStyles?.panelCard && { ...panelStyles.panelCard }) }}
+          sx={{
+            ...classes.panelContainer,
+            display: panelStatus ? 'block' : 'none',
+            ...(panelStyles?.panelCard && { ...panelStyles.panelCard }),
+          }}
           ref={panelRef as React.MutableRefObject<null>}
-          className={classes.panelContainer}
-          onKeyDown={(e) => {
+          onKeyDown={(e: KeyboardEvent) => {
             if (e.key === 'Escape') {
               panel.close();
             }
@@ -312,11 +260,6 @@ export function Panel(props: TypePanelAppProps): JSX.Element {
           {...{ 'data-id': button.id }}
         >
           <CardHeader
-            classes={{
-              root: classes.panelHeader,
-              title: classes.panelHeaderTitle,
-              action: classes.panelHeaderAction,
-            }}
             sx={panelStyles?.panelCardHeader ? { ...panelStyles.panelCardHeader } : {}}
             ref={panelHeader}
             title={t(panel.title)}
@@ -345,7 +288,7 @@ export function Panel(props: TypePanelAppProps): JSX.Element {
             }
           />
 
-          <CardContent className={classes.panelContentContainer} sx={panelStyles?.panelCardContent ?? {}}>
+          <CardContent sx={{ ...classes.panelContentContainer, ...(panelStyles ? panelStyles.panelCardContent : {}) }}>
             {typeof panel.content === 'string' ? <HtmlToReact htmlContent={panel.content} /> : panel.content}
           </CardContent>
         </Card>
