@@ -24,7 +24,7 @@ import { LegendApi } from '@/core/components/legend/legend-api';
 import { Legend2Api } from '@/core/components/legend-2/legend-api';
 import { DetailsApi } from '@/core/components/details/details-api';
 import { DataTableApi } from '@/core/components/data-table/data-table-api';
-import { RangeSliderApi } from '@/core/components/range-slider/range-slider-api';
+import { TimeSliderApi } from '@/core/components/time-slider/time-slider-api';
 import { GeoviewRenderer } from '@/geo/renderer/geoview-renderer';
 import { Select } from '@/geo/interaction/select';
 import { Draw } from '@/geo/interaction/draw';
@@ -93,7 +93,7 @@ export class MapViewer {
   dataTable!: DataTableApi;
 
   // used to access the range finder api
-  rangeSlider!: RangeSliderApi;
+  timeSlider!: TimeSliderApi;
 
   // used to access basemap functions
   basemap!: Basemap;
@@ -155,7 +155,7 @@ export class MapViewer {
     this.legend2 = new Legend2Api(this.mapId);
     this.details = new DetailsApi(this.mapId);
     this.dataTable = new DataTableApi(this.mapId);
-    this.rangeSlider = new RangeSliderApi(this.mapId);
+    this.timeSlider = new TimeSliderApi(this.mapId);
 
     this.modal = new ModalApi(this.mapId);
 

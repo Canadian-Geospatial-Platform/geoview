@@ -44,15 +44,4 @@ export const getSxClasses = (theme: Theme) => ({
     marginBottom: '9px',
     boxShadow: '0px 12px 9px -13px #E0E0E0',
   },
-  table: {
-    borderRadius: '4px',
-    padding: '16px 17px 16px 23px',
-  },
-  tableRow: {
-    '& td': {
-      margin: 0,
-      padding: '2px 4px 2px 4px',
-      alignItems: 'center',
-    },
-  },
 });
