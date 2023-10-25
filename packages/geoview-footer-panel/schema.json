@@ -14,7 +14,7 @@
           "type": "array",
           "items": {
             "type": "string",
-            "enum": ["legend", "layers", "details", "data-table", "range-slider"]
+            "enum": ["legend", "layers", "details", "data-table", "time-slider"]
           },
           "minItems": 0,
           "default": ["legend", "layers", "details", "data-table"],

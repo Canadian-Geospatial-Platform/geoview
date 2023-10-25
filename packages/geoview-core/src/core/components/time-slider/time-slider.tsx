@@ -17,45 +17,30 @@ import {
   Tooltip,
   Typography,
 } from '@/ui';
-import { getSxClasses } from './range-slider-style';
-import { RangeSliderPanel } from './range-slider-panel';
-import { TypeArrayOfFeatureInfoEntries, api, getLocalizedValue } from '@/app';
-import { SliderFilterProps } from './range-slider-api';
+import { getSxClasses } from './time-slider-style';
+import { TimeSliderPanel } from './time-slider-panel';
+import { api, getLocalizedValue } from '@/app';
+import { SliderFilterProps } from './time-slider-api';
 
-interface TypeRangeSliderProps {
+interface TypeTimeSliderProps {
   mapId: string;
-  rangeSliderData: {
-    [index: string]: {
-      fieldIndices: number[];
-      usedFieldTypes: string[];
-      usedAliasFields: string[];
-      usedOutFields: string[];
-      minsAndMaxes: number[][];
-      featureInfo: TypeArrayOfFeatureInfoEntries;
-      activeSliders: SliderFilterProps[];
-    };
-  };
+  layersList: string[];
+  timeSliderData: { [index: string]: SliderFilterProps };
 }
 
 /**
- * layers list
+ * Time slider tab
  *
- * @param {TypeRangeSliderProps} props The properties passed to RangeSlider
- * @returns {JSX.Element} the layers list
+ * @param {TypeTimeSliderProps} props The properties passed to slider
+ * @returns {JSX.Element} the time slider tab
  */
-export function RangeSlider(props: TypeRangeSliderProps): JSX.Element {
-  const { mapId, rangeSliderData } = props;
-  const layersList = Object.keys(rangeSliderData);
+export function TimeSlider(props: TypeTimeSliderProps): JSX.Element {
+  const { mapId, layersList, timeSliderData } = props;
   const theme = useTheme();
-
   const sxClasses = getSxClasses(theme);
 
-  const [selectedLayerIndex, setSelectedLayerIndex] = useState<number>(0);
-
-  const handleListItemClick = useCallback((index: number) => {
-    setSelectedLayerIndex(index);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  // First layer is initially selected
+  const [selectedLayer, setSelectedLayer] = useState<string>(layersList[0]);
 
   /**
    * Render group layers as list.
@@ -65,26 +50,20 @@ export function RangeSlider(props: TypeRangeSliderProps): JSX.Element {
   const renderLayerList = useCallback(() => {
     return (
       <List sx={sxClasses.list}>
-        {layersList.map((layerPath, i) => {
-          const isSelectedBorder = i === selectedLayerIndex;
+        {layersList.map((layerPath) => {
+          const isSelectedBorder = layerPath === selectedLayer;
           const layerName = getLocalizedValue(api.maps[mapId].layer.registeredLayers[layerPath].layerName, mapId);
+          // TODO use visible layers from store instead of this
           if (api.maps[mapId].layer.registeredLayers[layerPath].olLayer?.getVisible()) {
             return (
               <Paper
                 sx={{ ...sxClasses.layerListPaper, border: isSelectedBorder ? `2px solid ${theme.palette.primary.main}` : 'none' }}
                 key={layerPath}
               >
-                <ListItem
-                  disablePadding
-                  secondaryAction={
-                    <IconButton edge="end" aria-label="expand" sx={sxClasses.listItemIcon}>
-                      <ChevronRightIcon />
-                    </IconButton>
-                  }
-                >
+                <ListItem disablePadding>
                   <ListItemButton
                     onClick={() => {
-                      handleListItemClick(i);
+                      setSelectedLayer(layerPath);
                     }}
                     sx={{ height: '67px' }}
                   >
@@ -94,6 +73,9 @@ export function RangeSlider(props: TypeRangeSliderProps): JSX.Element {
                     <Tooltip title={layerName} placement="top" enterDelay={1000}>
                       <ListItemText sx={sxClasses.layerNamePrimary} primary={layerName || layerPath} />
                     </Tooltip>
+                    <IconButton edge="end" sx={sxClasses.listItemIcon}>
+                      <ChevronRightIcon />
+                    </IconButton>
                   </ListItemButton>
                 </ListItem>
               </Paper>
@@ -104,7 +86,7 @@ export function RangeSlider(props: TypeRangeSliderProps): JSX.Element {
       </List>
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [layersList, selectedLayerIndex]);
+  }, [layersList, selectedLayer]);
 
   return (
     <Box sx={sxClasses.detailsContainer}>
@@ -116,12 +98,7 @@ export function RangeSlider(props: TypeRangeSliderProps): JSX.Element {
             </Typography>
             {renderLayerList()}
           </Grid>
-          <RangeSliderPanel
-            mapId={mapId}
-            layerPath={layersList[selectedLayerIndex]}
-            sliderData={rangeSliderData[layersList[selectedLayerIndex]]}
-            key={selectedLayerIndex}
-          />
+          <TimeSliderPanel mapId={mapId} layerPath={selectedLayer} sliderFilterProps={timeSliderData[selectedLayer]} key={selectedLayer} />
         </Grid>
       </Grid>
     </Box>
