@@ -30,7 +30,7 @@ interface TypeSliderProps extends SliderProps {
   disabled?: boolean;
   marks?: Array<{ label?: string; value: number }>;
   orientation?: 'vertical' | 'horizontal' | undefined;
-  step?: number;
+  step?: number | null;
   size?: 'small' | 'medium';
   track?: 'inverted' | 'normal' | false;
   ariaLabelledby?: string;
@@ -86,6 +86,7 @@ export function Slider(props: TypeSliderProps): JSX.Element {
   const removeLabelOverlap = () => {
     // get slider labels
     const markers = document.getElementsByClassName('MuiSlider-markLabel');
+    for (let i = 0; i < markers.length; i++) markers[i].classList.remove('MuiSlider-markLabel-overlap');
 
     // loop until all labels are tested
     for (let curIndex = 0, testIndex = 1; testIndex < markers.length; testIndex++) {
@@ -140,14 +141,14 @@ export function Slider(props: TypeSliderProps): JSX.Element {
   };
 
   useEffect(() => {
-    // remove overlaping labels
-    removeLabelOverlap();
-
     // on set min/max, update slider
     api.event.on(EVENT_NAMES.SLIDER.EVENT_SLIDER_SET_MINMAX, sliderSetMinMaxListenerFunction, properties.id);
 
     // on set values update slider
     api.event.on(EVENT_NAMES.SLIDER.EVENT_SLIDER_SET_VALUES, sliderSetValuesListenerFunction, properties.id);
+
+    // remove overlaping labels
+    removeLabelOverlap();
 
     return () => {
       api.event.off(EVENT_NAMES.SLIDER.EVENT_SLIDER_SET_MINMAX, properties.id, sliderSetMinMaxListenerFunction);
@@ -178,6 +179,7 @@ export function Slider(props: TypeSliderProps): JSX.Element {
       size={properties.size}
       disableSwap={false}
       valueLabelDisplay="auto"
+      valueLabelFormat={properties.valueLabelFormat}
     />
   );
 }

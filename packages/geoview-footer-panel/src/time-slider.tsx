@@ -1,7 +1,7 @@
 import type React from 'react';
 import { TypeWindow } from 'geoview-core';
 
-interface RangeSliderProps {
+interface TimeSliderProps {
   mapId: string;
 }
 
@@ -13,7 +13,7 @@ const w = window as TypeWindow;
  * @returns {JSX.Element} created range slider component
  */
 
-export function RangeSlider({ mapId }: RangeSliderProps) {
+export function TimeSlider({ mapId }: TimeSliderProps) {
   const { cgpv } = w;
   const { api, react } = cgpv;
   const { useState, useEffect } = react;
@@ -21,26 +21,26 @@ export function RangeSlider({ mapId }: RangeSliderProps) {
   const [slider, setSlider] = useState(null);
 
   /**
-   * Create range slider from geo view layers.
+   * Create time slider from geo view layers.
    */
-  const createRangeSlider = async () => {
-    const data = await cgpv.api.maps[mapId].rangeSlider.createRangeSlider();
+  const createTimeSlider = async () => {
+    const data = await cgpv.api.maps[mapId].timeSlider.createTimeSlider();
     setSlider(data);
   };
 
   /**
-   * Get the range slider after map is loaded and timeout has passed.
+   * Get the time slider after map is loaded and timeout has passed.
    */
-  const getRangeSlider = () => {
+  const getTimeSlider = () => {
     setTimeout(() => {
-      createRangeSlider();
+      createTimeSlider();
     }, 1000);
   };
 
   useEffect(() => {
-    api.event.on(api.eventNames.MAP.EVENT_MAP_LOADED, getRangeSlider, mapId);
+    api.event.on(api.eventNames.MAP.EVENT_MAP_LOADED, getTimeSlider, mapId);
     return () => {
-      api.event.off(api.eventNames.MAP.EVENT_MAP_LOADED, mapId, getRangeSlider);
+      api.event.off(api.eventNames.MAP.EVENT_MAP_LOADED, mapId, getTimeSlider);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
