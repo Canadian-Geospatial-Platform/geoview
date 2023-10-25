@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import { isVectorLegend, isWmsLegend, isImageStaticLegend } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
+import { isVectorLegend, isWmsLegend, isImageStaticLegend, TypeLayerStyles } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { api } from '@/app';
 import { TypeLocalizedString } from '@/geo/map/map-schema-types';
 import { TypeLegendLayer, TypeLegendLayerIcon, TypeLegendLayerItem } from './types';
@@ -28,8 +28,9 @@ export function useLegendHelpers(mapId: string) {
     keys.forEach((i) => {
       const setData = legendInfo[i];
       let items: TypeLegendLayerItem[] = [];
-      const itemCanvases = setData.data?.legend?.Point?.arrayOfCanvas;
-      if(itemCanvases) {
+      const legendData = setData.data?.legend ? setData.data.legend as TypeLayerStyles : undefined;
+      const itemCanvases = legendData ? legendData.Point?.arrayOfCanvas : undefined;
+      if (itemCanvases) {
         items = itemCanvases.map((r, ind) => ({ name: `Item name ${ind}`, isChecked: true, icon: r.toDataURL() }));
       }
 

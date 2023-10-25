@@ -30,7 +30,7 @@ export const getSxClasses = (theme: Theme) => ({
 
     '& .MuiListItemIcon-root': {
       minWidth: '2.5rem',
-      marginRight: '20px'
+      marginRight: '20px',
     },
     '& .MuiListItemText-root': {
       '>span': {

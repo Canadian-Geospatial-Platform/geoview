@@ -393,53 +393,53 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
   function renderLayerIcon() {
     return (
       <ListItemIcon>
-            {(groupItems.length > 0 || WMSStyles.length > 1) && (
-              <IconButton color="primary">
-                <GroupWorkOutlinedIcon />
-              </IconButton>
+        {(groupItems.length > 0 || WMSStyles.length > 1) && (
+          <IconButton color="primary">
+            <GroupWorkOutlinedIcon />
+          </IconButton>
+        )}
+        {groupItems.length === 0 && isLegendOpen && (
+          <IconButton sx={sxClasses.iconPreview} color="primary" size="small" iconRef={closeIconRef}>
+            {iconList || iconImg !== null ? <CloseIcon /> : <MoreHorizIcon />}
+          </IconButton>
+        )}
+        {iconType === 'simple' && iconImg !== null && !isLegendOpen && WMSStyles.length < 2 && (
+          <IconButton sx={sxClasses.iconPreview} color="primary" size="small" iconRef={maxIconRef}>
+            {iconImg === 'no data' ? (
+              <BrowserNotSupportedIcon />
+            ) : (
+              <Box sx={sxClasses.legendIcon}>
+                <img alt="icon" src={iconImg} style={sxClasses.maxIconImg} />
+              </Box>
             )}
-            {groupItems.length === 0 && isLegendOpen && (
-              <IconButton sx={sxClasses.iconPreview} color="primary" size="small" iconRef={closeIconRef}>
-                {iconList || iconImg !== null ? <CloseIcon /> : <MoreHorizIcon />}
-              </IconButton>
-            )}
-            {iconType === 'simple' && iconImg !== null && !isLegendOpen && WMSStyles.length < 2 && (
-              <IconButton sx={sxClasses.iconPreview} color="primary" size="small" iconRef={maxIconRef}>
-                {iconImg === 'no data' ? (
-                  <BrowserNotSupportedIcon />
-                ) : (
-                  <Box sx={sxClasses.legendIcon}>
-                    <img alt="icon" src={iconImg} style={sxClasses.maxIconImg} />
-                  </Box>
-                )}
-              </IconButton>
-            )}
-            {iconType === 'list' && !isLegendOpen && (
-              <Tooltip title={t('legend.expand_legend')!} placement="top" enterDelay={1000}>
-                <Box
-                  tabIndex={0}
-                  onClick={handleLegendClick}
-                  sx={sxClasses.stackIconsBox}
-                  ref={stackIconRef}
-                  onKeyPress={(e) => handleStackIcon(e)}
-                >
-                  <IconButton sx={sxClasses.iconPreviewStacked} color="primary" size="small" tabIndex={-1}>
-                    <Box sx={sxClasses.legendIconTransparent}>
-                      {iconImgStacked && <img alt="icon" src={iconImgStacked} style={sxClasses.maxIconImg} />}
-                    </Box>
-                  </IconButton>
-                  <IconButton sx={sxClasses.iconPreviewHoverable} color="primary" size="small" tabIndex={-1}>
-                    <Box sx={sxClasses.legendIcon}>{iconImg && <img alt="icon" src={iconImg} style={sxClasses.maxIconImg} />}</Box>
-                  </IconButton>
+          </IconButton>
+        )}
+        {iconType === 'list' && !isLegendOpen && (
+          <Tooltip title={t('legend.expand_legend')!} placement="top" enterDelay={1000}>
+            <Box
+              tabIndex={0}
+              onClick={handleLegendClick}
+              sx={sxClasses.stackIconsBox}
+              ref={stackIconRef}
+              onKeyPress={(e) => handleStackIcon(e)}
+            >
+              <IconButton sx={sxClasses.iconPreviewStacked} color="primary" size="small" tabIndex={-1}>
+                <Box sx={sxClasses.legendIconTransparent}>
+                  {iconImgStacked && <img alt="icon" src={iconImgStacked} style={sxClasses.maxIconImg} />}
                 </Box>
-              </Tooltip>
-            )}
-            {groupItems.length === 0 && WMSStyles.length < 2 && !iconType && !isLegendOpen && (
-              <IconButton sx={sxClasses.iconPreview} color="primary" size="small" onClick={handleLegendClick}>
-                <TodoIcon />
               </IconButton>
-            )}
-          </ListItemIcon>
+              <IconButton sx={sxClasses.iconPreviewHoverable} color="primary" size="small" tabIndex={-1}>
+                <Box sx={sxClasses.legendIcon}>{iconImg && <img alt="icon" src={iconImg} style={sxClasses.maxIconImg} />}</Box>
+              </IconButton>
+            </Box>
+          </Tooltip>
+        )}
+        {groupItems.length === 0 && WMSStyles.length < 2 && !iconType && !isLegendOpen && (
+          <IconButton sx={sxClasses.iconPreview} color="primary" size="small" onClick={handleLegendClick}>
+            <TodoIcon />
+          </IconButton>
+        )}
+      </ListItemIcon>
     );
   }
 
