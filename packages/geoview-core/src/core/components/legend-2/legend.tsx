@@ -9,7 +9,7 @@ import { LegendItemDetails } from './legend-item-details/legend-item-details';
 import { getGeoViewStore } from '@/core/stores/stores-managers';
 import { LegendItem } from './legend-item';
 import { getSxClasses } from './legend-style';
-import { LegendOverview } from './legend-overview';
+import { LegendOverview } from './legend-overview/legend-overview';
 import { useLegendHelpers } from './helpers';
 
 const Item = styled('div')(({ theme }) => ({
