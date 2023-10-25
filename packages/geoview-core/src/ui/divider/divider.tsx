@@ -28,11 +28,5 @@ export function Divider(props: TypeDividerProps): JSX.Element {
     dividerOrientation = orientation === 'horizontal' ? classes.horizontal : classes.vertical;
   }
 
-  return (
-    <MaterialDivider
-      sx={{ ...dividerOrientation, ...(grow ? classes.grow : {}) }}
-      className={`${className !== undefined ? className : ''}`}
-      style={style}
-    />
-  );
+  return <MaterialDivider sx={{ ...(grow ? classes.grow : {}), ...dividerOrientation }} className={`${className ?? ''}`} style={style} />;
 }

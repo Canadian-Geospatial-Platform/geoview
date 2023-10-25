@@ -4,7 +4,7 @@ export const getSxClasses = (theme: Theme) => ({
   vertical: {
     alignSelf: 'center',
     height: 40,
-    width: 1,
+    width: '1px !important',
     backgroundColor: theme.palette.primary.contrastText,
   },
   horizontal: {
