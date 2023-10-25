@@ -7,15 +7,9 @@ import {
   StepLabelProps,
   StepContentProps,
   StepProps,
+  useTheme,
 } from '@mui/material';
-
-import makeStyles from '@mui/styles/makeStyles';
-
-const useStyles = makeStyles((theme) => ({
-  stepper: {
-    color: theme.palette.text.primary,
-  },
-}));
+import { getSxClasses } from './stepper-style';
 
 /**
  * Custom MUI Stepper Props
@@ -44,9 +38,12 @@ interface TypeStep {
  */
 export function Stepper(props: TypeStepperProps): JSX.Element {
   const { steps, ...stepperProps } = props;
-  const classes = useStyles();
+
+  const sxtheme = useTheme();
+  const classes = getSxClasses(sxtheme);
+
   return (
-    <MaterialStepper className={classes.stepper} {...stepperProps}>
+    <MaterialStepper sx={classes.stepper} {...stepperProps}>
       {steps &&
         steps.map((step: TypeStep | null, index) => {
           if (step) {
