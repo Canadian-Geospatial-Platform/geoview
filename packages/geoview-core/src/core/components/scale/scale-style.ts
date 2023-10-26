@@ -4,6 +4,16 @@ export const getSxClasses = (theme: Theme) => ({
   scaleControl: {
     display: 'none',
   },
+  scaleContainer: {
+    display: 'flex',
+    backgroundColor: 'transparent',
+    border: 'none',
+    height: '100%',
+    ':hover': {
+      backgroundColor: 'transparent',
+      color: theme.palette.common.white,
+    },
+  },
   scaleExpandedContainer: {
     display: 'flex',
     flexDirection: 'column',

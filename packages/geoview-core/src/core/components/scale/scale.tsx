@@ -8,7 +8,7 @@ import { useStore } from 'zustand';
 import { getGeoViewStore } from '@/core/stores/stores-managers';
 
 import { MapContext } from '@/core/app-start';
-import { CheckIcon, Tooltip, Box } from '@/ui';
+import { CheckIcon, Tooltip, Box, Button } from '@/ui';
 import { getSxClasses } from './scale-style';
 
 interface TypeScale {
@@ -41,12 +41,7 @@ export function Scale(): JSX.Element {
   const theme = useTheme();
 
   const sxClasses = getSxClasses(theme);
-  const scaleContainer = {
-    display: 'flex',
-    backgroundColor: 'transparent',
-    border: 'none',
-    height: '100%',
-  };
+
   /**
    * Switch the scale mode
    */
@@ -126,7 +121,7 @@ export function Scale(): JSX.Element {
       <Box sx={{ minWidth: 120 }}>
         <Box id={`${mapId}-scaleControlBar`} sx={sxClasses.scaleControl} />
         <Box id={`${mapId}-scaleControlLine`} sx={sxClasses.scaleControl} />
-        <button type="button" onClick={() => switchScale()} style={scaleContainer}>
+        <Button onClick={() => switchScale()} type="text" sx={sxClasses.scaleContainer} disableRipple>
           {expanded ? (
             <Box sx={sxClasses.scaleExpandedContainer}>
               {scaleValues.map((value, index) => {
@@ -152,7 +147,7 @@ export function Scale(): JSX.Element {
               {scaleValues[scaleMode].label}
             </Box>
           )}
-        </button>
+        </Button>
       </Box>
     </Tooltip>
   );
