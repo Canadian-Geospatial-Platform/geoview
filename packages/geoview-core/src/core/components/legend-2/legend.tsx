@@ -1,9 +1,9 @@
 import { Button, styled, useTheme } from '@mui/material';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useStore } from 'zustand';
 import { useTranslation } from 'react-i18next';
 import { api } from '@/app';
-import { LegendItemsDetailsProps } from './types';
+import { LegendItemsDetailsProps, TypeLegendItemProps } from './types';
 import { AddIcon, Box, Grid, List, Typography, ExpandMoreIcon, Paper, Stack, ExpandIcon } from '@/ui';
 import { LegendItemDetails } from './legend-item-details/legend-item-details';
 import { getGeoViewStore } from '@/core/stores/stores-managers';
@@ -37,11 +37,37 @@ export function Legend2(props: LegendItemsDetailsProps): JSX.Element {
   const selectedLegendItem = useStore(store, (state) => state.legendState.selectedItem);
   const selectedLayers = useStore(store, (state) => state.legendState.selectedLayers);
 
+  const legendLayers: TypeLegendItemProps[] = layerIds
+    .filter((layerId) => api.maps[mapId].layer.geoviewLayers[layerId])
+    .map((layerId) => {
+      const geoviewLayerInstance = api.maps[mapId].layer.geoviewLayers[layerId];
+
+      const propsForComponents: TypeLegendItemProps = {
+        layerId,
+        geoviewLayerInstance,
+        isRemoveable,
+        canSetOpacity,
+        expandAll,
+        hideAll,
+      };
+
+      return propsForComponents;
+    });
+
   function showLegendOverview() {
     store.setState({
       legendState: { ...store.getState().legendState, currentRightPanelDisplay: 'overview' },
     });
   }
+
+  useEffect(() => {
+    if (!selectedLegendItem && legendLayers) {
+      store.setState({
+        legendState: { ...store.getState().legendState, selectedItem: legendLayers[0], currentRightPanelDisplay: 'layer-details' },
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   function showSelectedLayersPanel() {
     return (
@@ -97,23 +123,19 @@ export function Legend2(props: LegendItemsDetailsProps): JSX.Element {
   }
 
   const leftPanel = () => {
-    const legendItems = layerIds
-      .filter((layerId) => api.maps[mapId].layer.geoviewLayers[layerId])
-      .map((layerId) => {
-        const geoviewLayerInstance = api.maps[mapId].layer.geoviewLayers[layerId];
-
-        return (
-          <LegendItem
-            key={`layerKey-${layerId}`}
-            layerId={layerId}
-            geoviewLayerInstance={geoviewLayerInstance}
-            isRemoveable={isRemoveable}
-            canSetOpacity={canSetOpacity}
-            expandAll={expandAll}
-            hideAll={hideAll}
-          />
-        );
-      });
+    const legendItems = legendLayers.map((details) => {
+      return (
+        <LegendItem
+          key={`layerKey-${details.layerId}`}
+          layerId={details.layerId}
+          geoviewLayerInstance={details.geoviewLayerInstance}
+          isRemoveable={details.isRemoveable}
+          canSetOpacity={details.canSetOpacity}
+          expandAll={details.expandAll}
+          hideAll={details.hideAll}
+        />
+      );
+    });
 
     return (
       <div>

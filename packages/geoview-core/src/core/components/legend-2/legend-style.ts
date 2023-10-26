@@ -81,4 +81,7 @@ export const getSxClasses = (theme: Theme) => ({
     color: '#515BA5',
     fontSize: '16px',
   },
+  legendItemContainer: {
+    border: '2px solid red',
+  },
 });

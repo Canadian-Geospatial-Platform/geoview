@@ -18,6 +18,7 @@ import {
   Stack,
   Typography,
   ZoomInSearchIcon,
+  Paper,
 } from '@/ui';
 import { api, EsriDynamic, payloadIsLegendInfo, NumberPayload, PayloadBaseClass } from '@/app';
 import { LegendIconList } from '../legend-icon-list';
@@ -114,6 +115,9 @@ const sxClasses = {
     gap: '15px',
     padding: '8px 20px 7px 15px',
     backgroundColor: '#F6F6F6',
+  },
+  legendItemContainer: {
+    border: '2px solid #515BA5',
   },
   menuListIcon: { justifyContent: 'right', 'min-width': '56px' },
 };
@@ -380,7 +384,7 @@ export function LegendItemDetails(props: TypeLegendItemDetailsProps): JSX.Elemen
   }, []);
 
   return (
-    <Grid item sm={12}>
+    <Paper sx={sxClasses.legendItemContainer}>
       <Stack sx={{ justifyContent: 'space-between', padding: '16px 17px 16px 23px' }} direction="row">
         <div>
           <Typography> {layerName} </Typography>
@@ -436,6 +440,6 @@ export function LegendItemDetails(props: TypeLegendItemDetailsProps): JSX.Elemen
           />
         )}
       </Box>
-    </Grid>
+    </Paper>
   );
 }
