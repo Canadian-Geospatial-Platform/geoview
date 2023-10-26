@@ -6,7 +6,7 @@ import { Coordinate } from 'ol/coordinate';
 import { toLonLat, fromLonLat } from 'ol/proj';
 
 import { useTheme } from '@mui/material/styles';
-import makeStyles from '@mui/styles/makeStyles';
+import { Box } from '@mui/material';
 
 import { useStore } from 'zustand';
 import { getGeoViewStore } from '@/core/stores/stores-managers';
@@ -14,17 +14,7 @@ import { getGeoViewStore } from '@/core/stores/stores-managers';
 import { PROJECTION_NAMES } from '@/geo/projection/projection';
 import { MapContext } from '@/core/app-start';
 import { NorthArrowIcon, NorthPoleIcon } from './north-arrow-icon';
-
-const useStyles = makeStyles((theme) => ({
-  northArrowContainer: {
-    left: '50%',
-    position: 'absolute',
-  },
-  northArrow: {
-    width: theme.overrides?.northArrow?.size.width,
-    height: theme.overrides?.northArrow?.size.height,
-  },
-}));
+import { getSxClasses } from './north-arrow-style';
 
 // The north pole position use for north arrow marker and get north arrow rotation angle
 // north value (set longitude to be half of Canada extent (142° W, 52° W)) - projection central meridian is -95
@@ -39,10 +29,8 @@ export function NorthArrow(): JSX.Element {
   const mapConfig = useContext(MapContext);
   const { mapId } = mapConfig;
 
-  // access transitions
-  const defaultTheme = useTheme();
-  // TODO: remove make style
-  const classes = useStyles();
+  const theme = useTheme();
+  const sxClasses = getSxClasses(theme);
 
   // do not use useState for item used inside function only without rendering... use useRef
   const isNorthFixedValue = useRef(false);
@@ -250,23 +238,23 @@ export function NorthArrow(): JSX.Element {
   }, []);
 
   return mapProjection.current === PROJECTION_NAMES.LCC ? (
-    <div
+    <Box
       ref={northArrowRef}
-      className={classes.northArrowContainer}
+      sx={sxClasses.northArrowContainer}
       style={{
-        transition: defaultTheme.transitions.create(['all', 'transform'], {
-          duration: defaultTheme.transitions.duration.standard,
-          easing: defaultTheme.transitions.easing.easeOut,
+        transition: theme.transitions.create(['all', 'transform'], {
+          duration: theme.transitions.duration.standard,
+          easing: theme.transitions.easing.easeOut,
         }),
         transform: `rotate(${rotationAngle.angle}deg)`,
         visibility: isNorthVisible ? 'hidden' : 'visible',
         left: northOffset,
       }}
     >
-      <NorthArrowIcon classes={classes} />
-    </div>
+      <NorthArrowIcon width={sxClasses.northArrow.width} height={sxClasses.northArrow.height} />
+    </Box>
   ) : (
-    <div />
+    <Box />
   );
 }
 

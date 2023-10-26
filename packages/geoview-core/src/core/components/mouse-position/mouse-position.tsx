@@ -3,49 +3,15 @@ import { useState, useEffect, useContext } from 'react';
 import { Coordinate } from 'ol/coordinate';
 import { toLonLat } from 'ol/proj';
 
-import makeStyles from '@mui/styles/makeStyles';
-
 import { useTranslation } from 'react-i18next';
+import { useTheme } from '@mui/material';
 
 import { useStore } from 'zustand';
 import { getGeoViewStore } from '@/core/stores/stores-managers';
 
-import { Box, CheckIcon, Tooltip } from '@/ui';
+import { Box, Button, CheckIcon } from '@/ui';
 import { MapContext } from '@/core/app-start';
-
-const useStyles = makeStyles((theme) => ({
-  mousePositionContainer: {
-    display: 'flex',
-    padding: theme.spacing(0, 4),
-    textOverflow: 'ellipsis',
-    whiteSpace: 'nowrap',
-    overflow: 'hidden',
-    alignItems: 'center',
-    border: 'none',
-    backgroundColor: 'transparent',
-  },
-  mousePositionTextContainer: {
-    display: 'flex',
-    flexDirection: 'column',
-  },
-  mousePositionTextCheckmarkContainer: {
-    display: 'flex',
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  mousePositionCheckmark: {
-    paddingRight: 5,
-    color: theme.palette.primary.light,
-  },
-  mousePositionText: {
-    fontSize: theme.typography.fontSize,
-    color: theme.palette.primary.light,
-    textOverflow: 'ellipsis',
-    whiteSpace: 'nowrap',
-    overflow: 'hidden',
-  },
-}));
+import { getSxClasses } from './mouse-position-style';
 
 // degree char
 const deg = String.fromCharCode(176);
@@ -72,8 +38,8 @@ export function MousePosition(): JSX.Element {
 
   const { t } = useTranslation<string>();
 
-  // TODO: remove use style
-  const classes = useStyles();
+  const theme = useTheme();
+  const sxClasses = getSxClasses(theme);
 
   // internal component state
   const [positions, setPositions] = useState<string[]>(['', '', '']);
@@ -151,25 +117,30 @@ export function MousePosition(): JSX.Element {
   }, []);
 
   return (
-    <Tooltip title={t('mapnav.coordinates')!} placement="top">
-      <button type="button" onClick={() => switchPositionMode()} className={classes.mousePositionContainer}>
-        <Box className={classes.mousePositionTextContainer}>
-          <Box id="mousePositionWrapper" sx={{ display: !expanded ? 'none' : 'block', transition: 'display 1ms ease-in 300ms' }}>
-            {positions.map((position, index) => {
-              return (
-                // eslint-disable-next-line react/no-array-index-key
-                <Box className={classes.mousePositionTextCheckmarkContainer} key={index}>
-                  <CheckIcon sx={{ fontSize: 25, opacity: index === positionMode ? 1 : 0 }} className={classes.mousePositionCheckmark} />
-                  <span className={classes.mousePositionText}>{position}</span>
-                </Box>
-              );
-            })}
-          </Box>
-          <Box component="span" className={classes.mousePositionText} sx={{ display: expanded ? 'none' : 'block' }}>
-            {positions[positionMode]}
-          </Box>
+    <Button
+      type="text"
+      onClick={() => switchPositionMode()}
+      sx={sxClasses.mousePosition}
+      tooltip="mapnav.coordinates"
+      tooltipPlacement="top"
+      disableRipple
+    >
+      <Box sx={sxClasses.mousePositionTextContainer}>
+        <Box id="mousePositionWrapper" sx={{ display: !expanded ? 'none' : 'block', transition: 'display 1ms ease-in 300ms' }}>
+          {positions.map((position, index) => {
+            return (
+              // eslint-disable-next-line react/no-array-index-key
+              <Box sx={sxClasses.mousePositionTextCheckmarkContainer} key={index}>
+                <CheckIcon sx={{ fontSize: 25, opacity: index === positionMode ? 1 : 0, ...sxClasses.mousePositionCheckmark }} />
+                <span>{position}</span>
+              </Box>
+            );
+          })}
         </Box>
-      </button>
-    </Tooltip>
+        <Box component="span" sx={{ display: expanded ? 'none' : 'block', ...sxClasses.mousePositionText }}>
+          {positions[positionMode]}
+        </Box>
+      </Box>
+    </Button>
   );
 }

@@ -1,10 +1,9 @@
-import { ClassNameMap } from '@mui/styles';
-
 /**
  * interface for north arrow icon properties
  */
 interface NorthArrowIconProps {
-  classes: ClassNameMap;
+  width: number;
+  height: number;
 }
 
 /**
@@ -13,7 +12,7 @@ interface NorthArrowIconProps {
  * @param {NorthArrowIconProps} props north arrow icon properties
  */
 export function NorthArrowIcon(props: NorthArrowIconProps): JSX.Element {
-  const { classes } = props;
+  const { width, height } = props;
 
   return (
     <svg
@@ -21,7 +20,7 @@ export function NorthArrowIcon(props: NorthArrowIconProps): JSX.Element {
       preserveAspectRatio="xMidYMid meet"
       viewBox="0 0 24 24"
       focusable="false"
-      className={classes.northArrow}
+      style={{ width, height }}
     >
       <g id="northarrow" transform="translate(-285.24 -142.234)">
         <path

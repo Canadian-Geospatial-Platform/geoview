@@ -1,6 +1,5 @@
 import { AnySchemaObject } from 'ajv';
 import React from 'react';
-import makeStyles from '@mui/styles/makeStyles';
 import { TypeJsonObject, TypeJsonValue } from '@/core/types/global-types';
 import { API } from '../api';
 
@@ -17,7 +16,6 @@ export type TypePluginStructure = {
   translate: TypeJsonValue;
   translations: TypeJsonObject;
   configObj: TypeJsonObject;
-  makeStyles: typeof makeStyles;
   schema?: () => AnySchemaObject;
   defaultConfig?: () => TypeJsonObject;
   added?: () => void;

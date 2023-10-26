@@ -1,7 +1,6 @@
 /* eslint-disable react/require-default-props */
-import { Divider as MaterialDivider, DividerProps } from '@mui/material';
-
-import makeStyles from '@mui/styles/makeStyles';
+import { Divider as MaterialDivider, DividerProps, useTheme } from '@mui/material';
+import { getSxClasses } from './divider-style';
 
 /**
  * Properties for the Divider
@@ -10,23 +9,6 @@ interface TypeDividerProps extends DividerProps {
   orientation?: 'horizontal' | 'vertical';
   grow?: boolean;
 }
-
-const useStyles = makeStyles((theme) => ({
-  vertical: {
-    alignSelf: 'center',
-    height: 40,
-    width: 1,
-    backgroundColor: theme.palette.primary.contrastText,
-  },
-  horizontal: {
-    height: 1,
-    backgroundColor: theme.palette.primary.contrastText,
-  },
-  grow: {
-    flexGrow: 1,
-    backgroundColor: theme.palette.primary.main,
-  },
-}));
 
 /**
  * Create a customized Material UI Divider
@@ -37,18 +19,14 @@ const useStyles = makeStyles((theme) => ({
 export function Divider(props: TypeDividerProps): JSX.Element {
   const { className, style, grow, orientation } = props;
 
-  const classes = useStyles();
+  const theme = useTheme();
+  const sxClasses = getSxClasses(theme);
 
-  let dividerOrientation = classes.horizontal;
+  let dividerOrientation = sxClasses.horizontal;
 
   if (orientation) {
-    dividerOrientation = orientation === 'horizontal' ? classes.horizontal : classes.vertical;
+    dividerOrientation = orientation === 'horizontal' ? sxClasses.horizontal : sxClasses.vertical;
   }
 
-  return (
-    <MaterialDivider
-      className={`${dividerOrientation} ${grow !== undefined && grow ? classes.grow : ''} ${className !== undefined ? className : ''}`}
-      style={style}
-    />
-  );
+  return <MaterialDivider sx={{ ...(grow ? sxClasses.grow : {}), ...dividerOrientation }} className={`${className ?? ''}`} style={style} />;
 }

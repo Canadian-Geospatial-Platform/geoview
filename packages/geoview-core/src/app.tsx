@@ -5,7 +5,6 @@ import { useTranslation } from 'react-i18next';
 
 import { useMediaQuery } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
-import makeStyles from '@mui/styles/makeStyles';
 
 import 'ol/ol.css';
 import '@/ui/style/style.css';
@@ -155,7 +154,6 @@ export const cgpv: types.TypeCGPV = {
   ui: {
     useTheme,
     useMediaQuery,
-    makeStyles,
     elements: UI,
   },
   useTranslation,

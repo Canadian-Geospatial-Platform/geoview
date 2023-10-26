@@ -10,9 +10,10 @@ import {
   MenuItem,
   Select as MaterialSelect,
   SelectChangeEvent,
+  useTheme,
 } from '@mui/material';
 
-import makeStyles from '@mui/styles/makeStyles';
+import { getSxClasses } from './custom-select-style';
 
 /**
  * Properties for the Custom Select component
@@ -55,30 +56,6 @@ export interface TypeItemProps {
   default?: boolean;
 }
 
-const useStyles = makeStyles((theme) => ({
-  formControl: {
-    width: '50%',
-    margin: '15px 0',
-    '& .MuiFormLabel-root.Mui-focused': {
-      color: theme.palette.primary.contrastText,
-      background: theme.palette.primary.light,
-    },
-    '& .MuiOutlinedInput-root.Mui-focused': {
-      border: `1px solid ${theme.palette.primary.contrastText}`,
-    },
-  },
-  label: {
-    position: 'absolute',
-    left: 0,
-    top: 0,
-    transform: 'translate(14px, -9px) scale(0.75)',
-    background: theme.palette.primary.light,
-  },
-  select: {
-    width: '100%',
-  },
-}));
-
 /**
  * Create a customizable Material UI Select
  *
@@ -86,7 +63,9 @@ const useStyles = makeStyles((theme) => ({
  * @returns {JSX.Element} the created Select element
  */
 export function CustomSelect(props: TypeCustomSelectProps): JSX.Element {
-  const classes = useStyles();
+  const theme = useTheme();
+  const sxClasses = getSxClasses(theme);
+
   const [value, setValue] = useState('');
   const [multipleValue, setMultipleValue] = useState([]);
   const { className, style, labelId, label, selectItems, callBack, helperText, multiple, ...otherProps } = props;
@@ -133,12 +112,13 @@ export function CustomSelect(props: TypeCustomSelectProps): JSX.Element {
   }
 
   return (
-    <FormControl className={classes.formControl} {...otherProps}>
-      <InputLabel className={(isDefault && classes.label) as string} id={labelId}>
+    <FormControl sx={sxClasses.formControl} {...otherProps}>
+      <InputLabel sx={{ ...(isDefault ? sxClasses.label : {}) }} id={labelId}>
         {label}
       </InputLabel>
       <MaterialSelect
-        className={`${classes.select} ${className && className}`}
+        sx={sxClasses.select}
+        className={`${className && className}`}
         style={style}
         labelId={labelId}
         id={`select-${labelId}`}

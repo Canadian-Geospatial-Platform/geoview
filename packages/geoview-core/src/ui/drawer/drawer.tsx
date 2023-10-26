@@ -2,9 +2,7 @@ import { useContext, useEffect, useState } from 'react';
 
 import { useTranslation } from 'react-i18next';
 
-import { Drawer as MaterialDrawer, DrawerProps } from '@mui/material';
-
-import makeStyles from '@mui/styles/makeStyles';
+import { Drawer as MaterialDrawer, DrawerProps, useTheme, Box } from '@mui/material';
 
 import { api } from '@/app';
 import { EVENT_NAMES } from '@/api/events/event-types';
@@ -12,6 +10,7 @@ import { EVENT_NAMES } from '@/api/events/event-types';
 import { IconButton, ChevronLeftIcon, ChevronRightIcon } from '..';
 import { MapContext } from '@/core/app-start';
 import { PayloadBaseClass, booleanPayload, payloadIsABoolean } from '@/api/events/payloads';
+import { getSxClasses } from './drawer-style';
 
 /**
  * Drawer Properties
@@ -20,42 +19,6 @@ export interface TypeDrawerProps extends DrawerProps {
   // eslint-disable-next-line react/require-default-props
   status?: boolean;
 }
-
-const drawerWidth = 200;
-const useStyles = makeStyles((theme) => ({
-  drawer: {
-    width: drawerWidth,
-    flexShrink: 0,
-    whiteSpace: 'nowrap',
-  },
-  drawerOpen: {
-    width: drawerWidth,
-    transition: theme.transitions.create('width', {
-      easing: theme.transitions.easing.sharp,
-      duration: theme.transitions.duration.enteringScreen,
-    }),
-    '& $toolbar': {
-      justifyContent: 'flex-end',
-    },
-  },
-  drawerClose: {
-    transition: theme.transitions.create('width', {
-      easing: theme.transitions.easing.sharp,
-      duration: theme.transitions.duration.leavingScreen,
-    }),
-    overflowX: 'hidden',
-    width: '61px',
-    '& $toolbar': {
-      justifyContent: 'center',
-    },
-  },
-  toolbar: {
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: theme.spacing(0, 1),
-  },
-}));
 
 /**
  * Create a customized Material UI Drawer
@@ -70,7 +33,8 @@ export function Drawer(props: TypeDrawerProps): JSX.Element {
 
   const { t } = useTranslation<string>();
 
-  const classes = useStyles();
+  const theme = useTheme();
+  const sxClasses = getSxClasses(theme);
 
   const mapConfig = useContext(MapContext);
 
@@ -109,13 +73,13 @@ export function Drawer(props: TypeDrawerProps): JSX.Element {
   return (
     <MaterialDrawer
       variant={variant || 'permanent'}
-      className={open ? classes.drawerOpen : classes.drawerClose}
+      sx={open ? sxClasses.drawerOpen : sxClasses.drawerClose}
       classes={{
-        paper: className || (open ? classes.drawerOpen : classes.drawerClose),
+        paper: className,
       }}
       style={style || undefined}
     >
-      <div className={classes.toolbar}>
+      <Box sx={sxClasses.toolbar}>
         <IconButton
           tooltip={open ? t('general.close')! : t('general.open')!}
           tooltipPlacement="right"
@@ -126,7 +90,7 @@ export function Drawer(props: TypeDrawerProps): JSX.Element {
         >
           {!open ? <ChevronRightIcon /> : <ChevronLeftIcon />}
         </IconButton>
-      </div>
+      </Box>
       {children !== undefined && children}
     </MaterialDrawer>
   );

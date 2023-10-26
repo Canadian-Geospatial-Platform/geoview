@@ -10,8 +10,7 @@ import BaseLayer from 'ol/layer/Base';
 import Source from 'ol/source/Source';
 import { Extent } from 'ol/extent';
 
-import makeStyles from '@mui/styles/makeStyles';
-import { useMediaQuery } from '@mui/material';
+import { Box, useMediaQuery } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 
 import { useStore } from 'zustand';
@@ -33,16 +32,7 @@ import { MapViewer } from '@/geo/map/map-viewer';
 
 import { payloadIsABasemapLayerArray, payloadIsAMapViewProjection, PayloadBaseClass } from '@/api/events/payloads';
 import { TypeBasemapProps, TypeMapFeaturesConfig } from '../../types/global-types';
-
-const useStyles = makeStyles(() => ({
-  mapContainer: {
-    display: 'flex',
-    flexDirection: 'column',
-    width: '100%',
-    height: '100%',
-    position: 'relative',
-  },
-}));
+import { sxClasses } from './map-style';
 
 export function Map(mapFeaturesConfig: TypeMapFeaturesConfig): JSX.Element {
   const { map: mapConfig } = mapFeaturesConfig;
@@ -50,8 +40,6 @@ export function Map(mapFeaturesConfig: TypeMapFeaturesConfig): JSX.Element {
   // make sure the id is not undefined
   // eslint-disable-next-line react/destructuring-assignment
   const mapId = mapFeaturesConfig.mapId ? mapFeaturesConfig.mapId : generateId('');
-
-  const classes = useStyles();
 
   // get ref to div element
   const mapElement = useRef<HTMLDivElement | undefined>();
@@ -236,7 +224,7 @@ export function Map(mapFeaturesConfig: TypeMapFeaturesConfig): JSX.Element {
 
   return (
     /* eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex */
-    <div id={`map-${mapId}`} ref={mapElement as MutableRefObject<HTMLDivElement>} className={classes.mapContainer} tabIndex={0}>
+    <Box id={`map-${mapId}`} ref={mapElement as MutableRefObject<HTMLDivElement>} sx={sxClasses.mapContainer} tabIndex={0}>
       {mapLoaded && (
         <>
           {northArrow && <NorthArrow />}
@@ -247,6 +235,6 @@ export function Map(mapFeaturesConfig: TypeMapFeaturesConfig): JSX.Element {
           {deviceSizeMedUp && overviewMap && overviewBaseMap && <OverviewMap />}
         </>
       )}
-    </div>
+    </Box>
   );
 }

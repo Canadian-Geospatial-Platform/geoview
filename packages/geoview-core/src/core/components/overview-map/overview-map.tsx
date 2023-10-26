@@ -26,6 +26,7 @@ export const MINIMAP_SIZE = {
   height: '150px',
 };
 
+// TODO: We need to find solution to remove makeStyles with either plain css or material ui.
 const useStyles = makeStyles((theme) => ({
   overviewMap: {
     bottom: 'auto',

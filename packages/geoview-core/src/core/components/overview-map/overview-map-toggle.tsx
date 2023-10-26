@@ -7,6 +7,7 @@ import makeStyles from '@mui/styles/makeStyles';
 
 import { ChevronLeftIcon, Tooltip } from '@/ui';
 
+// TODO: We need to find solution to remove makeStyles with either plain css or material ui.
 const useStyles = makeStyles((theme) => ({
   toggleBtn: {
     transform: 'rotate(45deg)',
