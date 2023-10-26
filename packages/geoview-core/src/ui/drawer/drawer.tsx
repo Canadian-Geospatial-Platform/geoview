@@ -74,7 +74,7 @@ export function Drawer(props: TypeDrawerProps): JSX.Element {
     <MaterialDrawer
       variant={variant || 'permanent'}
       sx={open ? sxClasses.drawerOpen : sxClasses.drawerClose}
-      sxClasses={{
+      classes={{
         paper: className,
       }}
       style={style || undefined}
