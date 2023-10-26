@@ -1,14 +1,16 @@
-import { Button, styled, useTheme, Table } from '@mui/material';
-import React, { useState, useEffect } from 'react';
+import { Button, styled, useTheme } from '@mui/material';
+import React, { useEffect } from 'react';
 import { useStore } from 'zustand';
 import { useTranslation } from 'react-i18next';
 import { api } from '@/app';
-import { LegendItemsDetailsProps } from './types';
+import { LegendItemsDetailsProps, TypeLegendItemProps } from './types';
 import { AddIcon, Box, Grid, List, Typography, ExpandMoreIcon, Paper, Stack, ExpandIcon } from '@/ui';
 import { LegendItemDetails } from './legend-item-details/legend-item-details';
 import { getGeoViewStore } from '@/core/stores/stores-managers';
 import { LegendItem } from './legend-item';
 import { getSxClasses } from './legend-style';
+import { LegendOverview } from './legend-overview/legend-overview';
+import { useLegendHelpers } from './helpers';
 
 const Item = styled('div')(({ theme }) => ({
   backgroundColor: theme.palette.mode === 'dark' ? '#262B32' : '#fff',
@@ -25,23 +27,52 @@ export function Legend2(props: LegendItemsDetailsProps): JSX.Element {
   const theme = useTheme();
   const sxClasses = getSxClasses(theme);
 
+  // Populatig fake legend data
+  const helpers = useLegendHelpers(mapId);
+  helpers.populateLegendStoreWithFakeData();
+
   const store = getGeoViewStore(mapId);
+  // controls what is displayed on the right panel
+  const currentRightPanelDisplay = useStore(store, (state) => state.legendState.currentRightPanelDisplay);
   const selectedLegendItem = useStore(store, (state) => state.legendState.selectedItem);
   const selectedLayers = useStore(store, (state) => state.legendState.selectedLayers);
-  const [isSelectedLayersClicked, setIsSelectedLayersClicked] = useState(false);
-  const [collapsedParents, setCollapsedParents] = useState<{ [key: string]: boolean }>({});
 
-  const toggleCollapse = (parentLayer: string) => {
-    setCollapsedParents((prevCollapsedParents) => ({
-      ...prevCollapsedParents,
-      [parentLayer]: !prevCollapsedParents[parentLayer],
-    }));
-  };
+  const legendLayers: TypeLegendItemProps[] = layerIds
+    .filter((layerId) => api.maps[mapId].layer.geoviewLayers[layerId])
+    .map((layerId) => {
+      const geoviewLayerInstance = api.maps[mapId].layer.geoviewLayers[layerId];
+
+      const propsForComponents: TypeLegendItemProps = {
+        layerId,
+        geoviewLayerInstance,
+        isRemoveable,
+        canSetOpacity,
+        expandAll,
+        hideAll,
+      };
+
+      return propsForComponents;
+    });
+
+  function showLegendOverview() {
+    store.setState({
+      legendState: { ...store.getState().legendState, currentRightPanelDisplay: 'overview' },
+    });
+  }
+
+  useEffect(() => {
+    if (!selectedLegendItem && legendLayers) {
+      store.setState({
+        legendState: { ...store.getState().legendState, selectedItem: legendLayers[0], currentRightPanelDisplay: 'layer-details' },
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   function showSelectedLayersPanel() {
     return (
       <Paper
-        onClick={() => setIsSelectedLayersClicked(!isSelectedLayersClicked)}
+        onClick={() => showLegendOverview()}
         sx={{
           justifyContent: 'space-between',
           padding: '9px 17px 10px 57px',
@@ -92,84 +123,35 @@ export function Legend2(props: LegendItemsDetailsProps): JSX.Element {
   }
 
   const leftPanel = () => {
-    const legendItems = layerIds
-      .filter((layerId) => api.maps[mapId].layer.geoviewLayers[layerId])
-      .map((layerId) => {
-        const geoviewLayerInstance = api.maps[mapId].layer.geoviewLayers[layerId];
-
-        return (
-          <LegendItem
-            key={`layerKey-${layerId}`}
-            layerId={layerId}
-            geoviewLayerInstance={geoviewLayerInstance}
-            isRemoveable={isRemoveable}
-            canSetOpacity={canSetOpacity}
-            expandAll={expandAll}
-            hideAll={hideAll}
-          />
-        );
-      });
+    const legendItems = legendLayers.map((details) => {
+      return (
+        <LegendItem
+          key={`layerKey-${details.layerId}`}
+          layerId={details.layerId}
+          geoviewLayerInstance={details.geoviewLayerInstance}
+          isRemoveable={details.isRemoveable}
+          canSetOpacity={details.canSetOpacity}
+          expandAll={details.expandAll}
+          hideAll={details.hideAll}
+        />
+      );
+    });
 
     return (
       <div>
         {showSelectedLayersPanel()}
         {buttonsMenu()}
-        <List sx={{ width: '100%' }}>{legendItems}</List>
+        <List sx={sxClasses.list}>{legendItems}</List>
       </div>
     );
   };
 
-  useEffect(() => {
-    if (selectedLegendItem) {
-      setIsSelectedLayersClicked(false);
-    }
-  }, [selectedLegendItem]);
-
   const rightPanel = () => {
-    if (isSelectedLayersClicked && selectedLayers) {
-      const numItems = Object.values(selectedLayers).reduce((total, childLayers) => total + childLayers.length, 0);
-      const selectedLayersList = Object.entries(selectedLayers).map(([parentLayer, childLayers]) => (
-        <div
-          key={parentLayer}
-          role="button"
-          tabIndex={0}
-          onClick={() => toggleCollapse(parentLayer)}
-          onKeyDown={(event) => {
-            if (event.key === 'Enter') {
-              toggleCollapse(parentLayer);
-            }
-          }}
-        >
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '2px 4px 2px 4px' }}>
-            {parentLayer}
-            {collapsedParents[parentLayer] ? <ExpandMoreIcon sx={{ transform: 'rotate(180deg)' }} /> : <ExpandMoreIcon />}
-          </div>
-          <div style={{ padding: '2px 5px 2px 4px' }}>
-            {!collapsedParents[parentLayer] &&
-              childLayers.map((childLayer) => (
-                <Table key={childLayer.layer} sx={{ border: '1px solid #C1C1C1', textAlign: 'left' }}>
-                  {childLayer.icon ? <img src={childLayer.icon} alt="Layer Icon" /> : null}
-                  {childLayer.layer}
-                </Table>
-              ))}
-          </div>
-        </div>
-      ));
-
-      return (
-        <Item sx={{ borderColor: 'primary.main', borderStyle: 'solid', borderWidth: '1px', paddingLeft: '10px' }}>
-          <Typography sx={sxClasses.legendTitle}>
-            <strong>{t('legend.bold_selection')}</strong> {t('legend.overview_title')}
-          </Typography>
-          <Typography sx={{ fontSize: '0.6em', textAlign: 'left', marginBottom: '16.5px' }}>
-            {numItems} {t('legend.items_available')}
-          </Typography>
-          {selectedLayersList}
-        </Item>
-      );
+    if (currentRightPanelDisplay === 'overview' && selectedLayers) {
+      return <LegendOverview mapId={mapId} />;
     }
 
-    if (selectedLegendItem) {
+    if (currentRightPanelDisplay === 'layer-details' && selectedLegendItem) {
       return (
         <Item>
           <LegendItemDetails

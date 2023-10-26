@@ -1,4 +1,5 @@
-import { AbstractGeoViewLayer, TypeLayerEntryConfig } from '@/geo';
+import { AbstractGeoViewLayer, TypeGeoviewLayerType, TypeLayerEntryConfig, TypeLocalizedString, TypeStyleConfig } from '@/geo';
+import { TypeLayerStatus } from '@/geo/map/map-schema-types';
 
 export interface TypeLegendProps {
   layerIds: string[];
@@ -45,4 +46,35 @@ export interface TypeLegendItemDetailsProps {
   isParentVisible?: boolean;
   expandAll?: boolean;
   hideAll?: boolean;
+}
+
+/// //////////////////////////////////////////////////
+
+export type TypeLegendLayerIcon = {
+  iconType?: string;
+  iconImg?: string;
+  iconImgStacked?: string;
+  iconList?: string[];
+};
+
+export interface TypeLegendLayerItem {
+  name: string;
+  isChecked?: boolean;
+  icon: string;
+}
+
+export interface TypeLegendLayer {
+  layerPath: string;
+  order?: number; // useful for ordering layers
+  layerName: TypeLocalizedString;
+  type: TypeGeoviewLayerType;
+  styleConfig?: TypeStyleConfig;
+  layerStatus: TypeLayerStatus;
+  layerPhase: string;
+  querySent: boolean;
+
+  icon?: TypeLegendLayerIcon;
+  // data: TypeLegend | undefined | null;
+  items: TypeLegendLayerItem[];
+  children: TypeLegendLayer[];
 }

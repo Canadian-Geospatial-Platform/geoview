@@ -13,8 +13,8 @@ import { ObjectEvent } from 'ol/Object';
 import { toLonLat } from 'ol/proj';
 
 import { TypeMapFeaturesConfig, TypeValidMapProjectionCodes } from '@/core/types/global-types';
-import { TypeLegendItemProps } from '../components/legend-2/types';
 import { TypeArrayOfLayerData } from '../components/details/details';
+import { TypeLegendItemProps, TypeLegendLayer } from '../components/legend-2/types';
 
 import { TypeMapMouseInfo } from '@/api/events/payloads';
 import { TypeDisplayLanguage, TypeInteraction } from '@/geo/map/map-schema-types';
@@ -67,6 +67,8 @@ export interface ILegendState {
   selectedItem?: TypeLegendItemProps;
   selectedIsVisible: boolean;
   selectedLayers: Record<string, { layer: string; icon: string }[]>;
+  currentRightPanelDisplay: 'overview' | 'layer-details' | 'none';
+  legendLayers: TypeLegendLayer[];
 }
 
 export interface IMapDataTableState {
@@ -193,8 +195,10 @@ export const geoViewStoreDefinition = (
     },
     legendState: {
       selectedItem: undefined,
+      currentRightPanelDisplay: 'none',
       selectedIsVisible: true,
       selectedLayers: {},
+      legendLayers: [],
     },
     detailsState: {
       layerDataArray: [],
