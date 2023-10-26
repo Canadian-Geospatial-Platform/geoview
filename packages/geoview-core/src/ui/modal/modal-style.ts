@@ -6,6 +6,9 @@ export const getSxClasses = (theme: Theme) => ({
     "& ~ & > div[class*='backdrop']": {
       backgroundColor: 'transparent',
     },
+    '& .MuiPaper-root': {
+      width: 450,
+    },
   },
   backdrop: {
     position: 'absolute',

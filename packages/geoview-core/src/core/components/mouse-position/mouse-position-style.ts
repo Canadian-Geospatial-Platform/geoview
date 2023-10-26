@@ -1,16 +1,22 @@
 import { Theme } from '@mui/material/styles';
 
 export const getSxClasses = (theme: Theme) => ({
-  mousePositionTooltip: {
-    '> button': {
-      display: 'flex',
-      padding: theme.spacing(0, 4),
-      textOverflow: 'ellipsis',
-      whiteSpace: 'nowrap',
-      overflow: 'hidden',
-      alignItems: 'center',
-      border: 'none',
-      backgroundColor: 'transparent',
+  mousePosition: {
+    display: 'flex',
+    padding: theme.spacing(0, 4),
+    textOverflow: 'ellipsis',
+    whiteSpace: 'nowrap',
+    overflow: 'hidden',
+    alignItems: 'center',
+    border: 'none',
+    width: 'auto',
+    backgroundColor: 'transparent !important',
+    height: 'inherit !important',
+    color: theme.palette.common.white,
+    lineHeight: 1.5,
+    ':hover': {
+      backgroundColor: 'transparent !important',
+      color: theme.palette.common.white,
     },
   },
   mousePositionTextContainer: {

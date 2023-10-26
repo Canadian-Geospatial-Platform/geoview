@@ -9,7 +9,7 @@ import { useTheme } from '@mui/material';
 import { useStore } from 'zustand';
 import { getGeoViewStore } from '@/core/stores/stores-managers';
 
-import { Box, CheckIcon, Tooltip } from '@/ui';
+import { Box, Button, CheckIcon } from '@/ui';
 import { MapContext } from '@/core/app-start';
 import { getSxClasses } from './mouse-position-style';
 
@@ -40,17 +40,6 @@ export function MousePosition(): JSX.Element {
 
   const theme = useTheme();
   const sxClasses = getSxClasses(theme);
-
-  const mousePosition = {
-    display: 'flex',
-    padding: theme.spacing(0, 4),
-    textOverflow: 'ellipsis',
-    WhiteSpace: 'nowrap',
-    overflow: 'hidden',
-    alignItems: 'center',
-    border: 'none',
-    backgroundColor: 'transparent',
-  };
 
   // internal component state
   const [positions, setPositions] = useState<string[]>(['', '', '']);
@@ -128,25 +117,30 @@ export function MousePosition(): JSX.Element {
   }, []);
 
   return (
-    <Tooltip title={t('mapnav.coordinates')!} placement="top">
-      <button type="button" onClick={() => switchPositionMode()} style={mousePosition}>
-        <Box sx={sxClasses.mousePositionTextContainer}>
-          <Box id="mousePositionWrapper" sx={{ display: !expanded ? 'none' : 'block', transition: 'display 1ms ease-in 300ms' }}>
-            {positions.map((position, index) => {
-              return (
-                // eslint-disable-next-line react/no-array-index-key
-                <Box sx={sxClasses.mousePositionTextCheckmarkContainer} key={index}>
-                  <CheckIcon sx={{ fontSize: 25, opacity: index === positionMode ? 1 : 0, ...sxClasses.mousePositionCheckmark }} />
-                  <span>{position}</span>
-                </Box>
-              );
-            })}
-          </Box>
-          <Box component="span" sx={{ display: expanded ? 'none' : 'block', ...sxClasses.mousePositionText }}>
-            {positions[positionMode]}
-          </Box>
+    <Button
+      type="text"
+      onClick={() => switchPositionMode()}
+      sx={sxClasses.mousePosition}
+      tooltip="mapnav.coordinates"
+      tooltipPlacement="top"
+      disableRipple
+    >
+      <Box sx={sxClasses.mousePositionTextContainer}>
+        <Box id="mousePositionWrapper" sx={{ display: !expanded ? 'none' : 'block', transition: 'display 1ms ease-in 300ms' }}>
+          {positions.map((position, index) => {
+            return (
+              // eslint-disable-next-line react/no-array-index-key
+              <Box sx={sxClasses.mousePositionTextCheckmarkContainer} key={index}>
+                <CheckIcon sx={{ fontSize: 25, opacity: index === positionMode ? 1 : 0, ...sxClasses.mousePositionCheckmark }} />
+                <span>{position}</span>
+              </Box>
+            );
+          })}
         </Box>
-      </button>
-    </Tooltip>
+        <Box component="span" sx={{ display: expanded ? 'none' : 'block', ...sxClasses.mousePositionText }}>
+          {positions[positionMode]}
+        </Box>
+      </Box>
+    </Button>
   );
 }

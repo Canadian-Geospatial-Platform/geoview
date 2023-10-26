@@ -27,8 +27,8 @@ export const getSxClasses = (theme: Theme) => ({
   buttonClass: {
     display: 'flex',
     fontSize: theme.typography.fontSize,
-    paddingLeft: 18,
-    paddingRight: 20,
+    paddingLeft: '16px',
+    paddingRight: '16px',
     justifyContent: 'center',
     width: '100%',
     height: 50,

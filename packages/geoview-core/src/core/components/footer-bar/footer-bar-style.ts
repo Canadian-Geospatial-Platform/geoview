@@ -18,7 +18,6 @@ export const sxClassesFooterBar = {
   mouseScaleControlsContainer: {
     display: 'flex',
     flexDirection: 'row',
-    gap: 20,
     '& button': {
       cursor: 'pointer',
       margin: 'auto',
