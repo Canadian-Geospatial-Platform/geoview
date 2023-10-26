@@ -12,6 +12,7 @@ import {
   getLocalizedValue,
 } from 'geoview-core';
 
+import { sxClasses } from './layers-list.style';
 /**
  * interface for the layers list properties in layers panel
  */
@@ -52,7 +53,7 @@ function LayersList(props: TypeLayersPanelListProps): JSX.Element {
   const [layerVisibility, setLayerVisibility] = useState<Record<string, boolean>>({});
   const [subLayerVisibility, setSubLayerVisibility] = useState<TypeSubLayerVisibility>({});
 
-  const { Button, Slider, Tooltip, Checkbox } = ui.elements;
+  const { Button, Slider, Tooltip, Checkbox, Box } = ui.elements;
 
   const translations: TypeJsonObject = toJsonObject({
     en: {
@@ -70,73 +71,6 @@ function LayersList(props: TypeLayersPanelListProps): JSX.Element {
       visibility: 'Basculer la Visibilité',
     },
   });
-
-  const useStyles = ui.makeStyles(() => ({
-    layersContainer: {
-      overflow: 'hidden',
-      overflowY: 'auto',
-      width: '100%',
-    },
-    layerItem: {
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'space-between',
-      margin: '5px 0',
-      padding: '10px 5px',
-      boxSizing: 'content-box',
-      '&:hover': {
-        cursor: 'pointer',
-        backgroundColor: '#c9c9c9',
-      },
-      zIndex: 1000,
-      border: 'none',
-      width: '100%',
-    },
-    layerParentText: {
-      fontSize: '16px',
-      fontWeight: 'bold',
-    },
-    layerCountTextContainer: {
-      display: 'flex',
-      alignItems: 'center',
-      width: '100%',
-      height: '32px',
-    },
-    layerItemText: {
-      fontSize: '14px',
-      whiteSpace: 'nowrap',
-      textOverflow: 'ellipsis',
-      overflow: 'hidden',
-      marginLeft: '10px',
-      display: 'flex',
-      alignItems: 'center',
-      gap: 6,
-    },
-    flexGroup: {
-      display: 'flex',
-      justifyContent: 'flex-end',
-      alignItems: 'baseline',
-      gap: 12,
-    },
-    flexGroupButton: {
-      height: 38,
-      minHeight: 38,
-      width: 25,
-      minWidth: 25,
-      '& > div': {
-        textAlign: 'center',
-      },
-    },
-    slider: {
-      width: '100%',
-      paddingLeft: 20,
-      paddingRight: 20,
-    },
-    legendSubLayerGroup: {
-      display: 'flex',
-      justifyContent: 'space-between',
-    },
-  }));
 
   /**
    * Calls setLayerLegend for all layers
@@ -188,8 +122,6 @@ function LayersList(props: TypeLayersPanelListProps): JSX.Element {
     setSubLayerVisibility((state) => ({ ...defaultSubVisibility, ...state }));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [layers]);
-
-  const classes = useStyles();
 
   /**
    * Sets the currently selected layer,
@@ -349,21 +281,21 @@ function LayersList(props: TypeLayersPanelListProps): JSX.Element {
   };
 
   return (
-    <div className={classes.layersContainer}>
+    <Box sx={sxClasses.layersContainer}>
       {Object.values(layers).map((layer) => (
-        <div key={layer.geoviewLayerId}>
-          <button type="button" className={classes.layerItem} onClick={() => onClick(layer.geoviewLayerId)}>
-            <div className={classes.layerCountTextContainer}>
-              <div className={classes.layerItemText} title={layer.geoviewLayerName}>
+        <Box key={layer.geoviewLayerId}>
+          <Button type="text" sx={sxClasses.layerItem} onClick={() => onClick(layer.geoviewLayerId)} disableRipple>
+            <Box sx={sxClasses.layerCountTextContainer}>
+              <Box sx={sxClasses.layerItemText} title={layer.geoviewLayerName}>
                 {layer.geoviewLayerName}
-              </div>
-            </div>
-          </button>
+              </Box>
+            </Box>
+          </Button>
           {selectedLayer === layer.geoviewLayerId && (
             <>
-              <div className={classes.flexGroup}>
+              <Box sx={sxClasses.flexGroup}>
                 <Button
-                  className={classes.flexGroupButton}
+                  sx={sxClasses.flexGroupButton}
                   tooltip={translations[displayLanguage].zoom as string}
                   tooltipPlacement="top"
                   variant="contained"
@@ -372,7 +304,7 @@ function LayersList(props: TypeLayersPanelListProps): JSX.Element {
                   onClick={() => onZoom(layer)}
                 />
                 <Button
-                  className={classes.flexGroupButton}
+                  sx={sxClasses.flexGroupButton}
                   tooltip={translations[displayLanguage].bounds as string}
                   tooltipPlacement="top"
                   variant="contained"
@@ -381,7 +313,7 @@ function LayersList(props: TypeLayersPanelListProps): JSX.Element {
                   onClick={() => onBounds(layer)}
                 />
                 <Button
-                  className={classes.flexGroupButton}
+                  sx={sxClasses.flexGroupButton}
                   tooltip={translations[displayLanguage].remove as string}
                   tooltipPlacement="top"
                   variant="contained"
@@ -389,12 +321,12 @@ function LayersList(props: TypeLayersPanelListProps): JSX.Element {
                   icon='<i class="material-icons">remove</i>'
                   onClick={() => onRemove(layer)}
                 />
-              </div>
-              <div className={classes.flexGroup}>
+              </Box>
+              <Box sx={sxClasses.flexGroup}>
                 <Tooltip title={translations[displayLanguage].opacity as string}>
                   <i className="material-icons">contrast</i>
                 </Tooltip>
-                <div className={classes.slider}>
+                <Box sx={sxClasses.slider}>
                   <Slider
                     sliderId={api.generateId()}
                     min={0}
@@ -404,63 +336,63 @@ function LayersList(props: TypeLayersPanelListProps): JSX.Element {
                     valueLabelDisplay="auto"
                     customOnChange={(value) => onSliderChange(value as number, layer)}
                   />
-                </div>
+                </Box>
                 <Tooltip title={translations[displayLanguage].visibility as string}>
                   <Checkbox checked={layerVisibility[layer.geoviewLayerId]} onChange={(e) => onVisibilityChange(e.target.checked, layer)} />
                 </Tooltip>
-              </div>
+              </Box>
               {(layerLegend[layer.geoviewLayerId] as TypeJsonArray).map((subLayer, index: number) => (
-                <div key={index}>
+                <Box key={index}>
                   {subLayer!.legend && (
-                    <div className={classes.legendSubLayerGroup}>
-                      <div className={classes.layerItemText} title={subLayer.layerName as string}>
+                    <Box sx={sxClasses.legendSubLayerGroup}>
+                      <Box sx={sxClasses.layerItemText} title={subLayer.layerName as string}>
                         {subLayer.layerName as string}
-                      </div>
+                      </Box>
                       <Tooltip title={translations[displayLanguage].visibility as string}>
                         <Checkbox
                           checked={subLayerVisibility[layer.geoviewLayerId].includes(subLayer.layerId as number)}
                           onChange={(e) => onSubVisibilityChange(e.target.checked, layer, subLayer.layerId as number)}
                         />
                       </Tooltip>
-                    </div>
+                    </Box>
                   )}
                   {(subLayer.drawingInfo?.renderer.type as string) === 'simple' && subLayer.drawingInfo?.renderer.symbol.imageData && (
-                    <div className={classes.layerItemText}>
+                    <Box sx={sxClasses.layerItemText}>
                       <img
                         alt="Layer Legend"
                         src={`data:${subLayer.drawingInfo?.renderer.symbol.contentType};base64,${subLayer.drawingInfo?.renderer.symbol.imageData}`}
                       />
                       {(subLayer.drawingInfo?.renderer.label || subLayer.name) as string}
-                    </div>
+                    </Box>
                   )}
                   {subLayer.drawingInfo?.renderer.type === 'uniqueValue' &&
                     subLayer.drawingInfo.renderer.uniqueValueInfos[0].symbol.imageData &&
                     (subLayer.drawingInfo.renderer.uniqueValueInfos as TypeJsonArray).map((uniqueValue, i: number) => (
-                      <div key={i} className={classes.layerItemText}>
+                      <Box key={i} sx={sxClasses.layerItemText}>
                         <img alt="Layer Legend" src={`data:${uniqueValue.symbol.contentType};base64,${uniqueValue.symbol.imageData}`} />
                         {uniqueValue.label as string}
-                      </div>
+                      </Box>
                     ))}
                   {subLayer.legend &&
                     (subLayer.legend as TypeJsonArray).map((uniqueValue, i: number) => (
-                      <div key={i} className={classes.layerItemText}>
+                      <Box key={i} sx={sxClasses.layerItemText}>
                         <img alt="Layer Legend" src={`data:${uniqueValue.contentType};base64,${uniqueValue.imageData}`} />
                         {(uniqueValue.label || subLayer.layerName) as string}
-                      </div>
+                      </Box>
                     ))}
                   {subLayer.dataUrl && (
-                    <div className={classes.layerItemText}>
+                    <Box sx={sxClasses.layerItemText}>
                       <img alt="Layer Legend" src={subLayer.dataUrl as string} />
                       {subLayer.name as string}
-                    </div>
+                    </Box>
                   )}
-                </div>
+                </Box>
               ))}
             </>
           )}
-        </div>
+        </Box>
       ))}
-    </div>
+    </Box>
   );
 }
 
