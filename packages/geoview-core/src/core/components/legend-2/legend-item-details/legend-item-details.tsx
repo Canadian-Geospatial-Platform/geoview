@@ -12,7 +12,6 @@ import {
   IconButton,
   SliderBase,
   CheckIcon,
-  Grid,
   List,
   Button,
   Stack,
