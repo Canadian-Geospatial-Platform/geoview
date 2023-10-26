@@ -1,13 +1,12 @@
 /* eslint-disable react/require-default-props */
 import { useState, useEffect, CSSProperties } from 'react';
 
-import { Slider as MaterialSlider, SliderProps } from '@mui/material';
-
-import makeStyles from '@mui/styles/makeStyles';
+import { Slider as MaterialSlider, SliderProps, useTheme } from '@mui/material';
 
 import { api } from '@/app';
 import { EVENT_NAMES } from '@/api/events/event-types';
 import { sliderPayload, payloadIsASlider, SliderTypePayload, PayloadBaseClass } from '@/api/events/payloads';
+import { getSxClasses } from './slider-style';
 
 /**
  * Properties for the Slider
@@ -40,45 +39,6 @@ interface TypeSliderProps extends SliderProps {
   mapId?: string;
 }
 
-const useStyles = makeStyles(() => ({
-  slider: {
-    '& .MuiSlider-root': {
-      color: '#fff',
-    },
-    '& .MuiSlider-thumb': {
-      width: 15,
-      height: 15,
-      color: '#000',
-      transition: '0.3s cubic-bezier(.47,1.64,.41,.8)',
-      '&:before': {
-        boxShadow: '0 2px 12px 0 rgba(0,0,0,0.4)',
-      },
-      '&:hover, &.Mui-focusVisible': {
-        boxShadow: `0px 0px 0px 8px ${'rgb(255 255 255 / 16%)'}`,
-      },
-      '&.Mui-active': {
-        width: 30,
-        height: 30,
-      },
-    },
-    '& .MuiSlider-rail': {
-      opacity: 0.35,
-      color: 'rgba(0,0,0,0.87)',
-    },
-    '& .MuiSlider-track': {
-      color: '#000',
-    },
-    '& .MuiSlider-mark': {
-      height: 4,
-      width: 4,
-      color: '#000',
-    },
-    '& .MuiSlider-markLabel-overlap': {
-      display: 'none',
-    },
-  },
-}));
-
 /**
  * Create a customized Material UI Slider (https://mui.com/material-ui/api/slider/)
  *
@@ -89,7 +49,8 @@ export function Slider(props: TypeSliderProps): JSX.Element {
   const { ...properties } = props;
   properties.sliderId = properties.id!;
 
-  const classes = useStyles();
+  const theme = useTheme();
+  const sxClasses = getSxClasses(theme);
 
   const [min, setMin] = useState<number>(properties.min);
   const [max, setMax] = useState<number>(properties.max);
@@ -198,7 +159,8 @@ export function Slider(props: TypeSliderProps): JSX.Element {
   // TODO: better implement WCAG on slider
   return (
     <MaterialSlider
-      className={properties.className !== undefined ? properties.className : classes.slider}
+      sx={{ ...(!properties.className ? sxClasses.slider : {}) }}
+      className={properties.className !== undefined ? properties.className : ''}
       style={properties.style}
       getAriaLabel={() => 'To implement with translation'}
       getAriaValueText={() => 'To implement with translation'}

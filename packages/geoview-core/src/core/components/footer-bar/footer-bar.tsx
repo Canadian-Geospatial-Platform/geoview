@@ -28,14 +28,14 @@ export function Footerbar(): JSX.Element {
 
   const footerBarRef = useRef<HTMLDivElement>();
 
-  const defaultTheme = useTheme();
+  const theme = useTheme();
 
   // get value from the store
   // if map is static do not display mouse position or rotation controls
   const interaction = useStore(getGeoViewStore(mapId), (state) => state.mapState.interaction);
 
   // if screen size is medium and up
-  const deviceSizeMedUp = useMediaQuery(defaultTheme.breakpoints.up('sm'));
+  const deviceSizeMedUp = useMediaQuery(theme.breakpoints.up('sm'));
 
   return (
     <Box id={`${mapId}-footerBar`} sx={sxClassesFooterBar.footerBarContainer} ref={footerBarRef as MutableRefObject<HTMLDivElement>}>

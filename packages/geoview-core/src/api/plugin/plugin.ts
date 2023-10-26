@@ -1,11 +1,10 @@
+import { useTheme } from '@mui/material/styles';
 import React from 'react';
 
 import i18next from 'i18next';
 import * as translate from 'react-i18next';
 
 import Ajv from 'ajv';
-
-import makeStyles from '@mui/styles/makeStyles';
 
 import { showError } from '@/core/utils/utilities';
 import { MapViewer } from '@/geo/map/map-viewer';
@@ -180,7 +179,7 @@ export class Plugin {
           react: { value: React },
           props: { value: props !== undefined && props !== null ? props : {} },
           translate: { value: translate },
-          makeStyles: { value: makeStyles },
+          useTheme: { value: useTheme },
           configObj: { value: pluginConfigObj },
         });
 

@@ -1,13 +1,12 @@
 /* eslint-disable react/require-default-props */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState, CSSProperties } from 'react';
-import { Box, Stepper as MaterialStepper, Step, StepButton, StepContent, StepLabel, Typography } from '@mui/material';
-
-import makeStyles from '@mui/styles/makeStyles';
+import { Box, Stepper as MaterialStepper, Step, StepButton, StepContent, StepLabel, Typography, useTheme } from '@mui/material';
 
 import { Button } from '../button/button';
 
 import { HtmlToReact } from '@/core/containers/html-to-react';
+import { getSxClasses } from './custom-stepper-style';
 
 /**
  * Properties for the Custom Stepper
@@ -57,43 +56,6 @@ export interface TypeStepperSteps {
   disableStepMovement?: boolean;
 }
 
-const useStyles = makeStyles((theme) => ({
-  stepperContainer: {
-    padding: 15,
-    width: 500,
-    minWidth: 150,
-    border: '0.5px solid grey',
-    flexWrap: 'wrap',
-    '& .MuiSvgIcon-root.Mui-active': {
-      color: '#90caf9',
-    },
-    '& .MuiSvgIcon-root.Mui-completed': {
-      color: '#666666',
-    },
-  },
-  actionContainer: {
-    marginTop: 20,
-    width: '100%',
-    display: 'flex',
-    flexWrap: 'wrap',
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    '&>*:first-child': {
-      width: '100%',
-      marginBottom: 8,
-    },
-    '& > button': {
-      width: '30%',
-    },
-    '& > button > *': {
-      textAlign: 'center',
-    },
-  },
-  disabledButton: {
-    color: `${theme.palette.primary.contrastText}!important`,
-  },
-}));
-
 /**
  * Create a customizable Material UI Stepper
  *
@@ -104,7 +66,10 @@ export function CustomStepper(props: TypeCustomStepperProps): JSX.Element {
   const [activeStep, setActiveStep] = useState(0);
   const [completed, setCompleted] = useState<any>({});
   const [isReset, setIsReset] = useState<any>(false);
-  const classes = useStyles();
+
+  const theme = useTheme();
+  const sxClasses = getSxClasses(theme);
+
   const {
     className,
     style,
@@ -217,7 +182,7 @@ export function CustomStepper(props: TypeCustomStepperProps): JSX.Element {
   return (
     <Box>
       <MaterialStepper
-        className={`${classes.stepperContainer} ${className && className}`}
+        className={`${sxClasses.stepperContainer} ${className && className}`}
         style={style || undefined}
         id={stepperId || ''}
         orientation={stepsOrientation}
@@ -245,16 +210,16 @@ export function CustomStepper(props: TypeCustomStepperProps): JSX.Element {
             </Step>
           );
         })}
-        <Box className={classes.actionContainer}>
+        <Box sx={sxClasses.actionContainer}>
           <>
             <Typography>{isReset ? 'Steps Completed' : `Step ${activeStep + 1}`}</Typography>
             {!isReset && (
               <>
-                <Button type="text" disabled={activeStep < 1} className={activeStep < 1 ? classes.disabledButton : ''} onClick={handleBack}>
+                <Button type="text" disabled={activeStep < 1} sx={activeStep < 1 ? sxClasses.disabledButton : {}} onClick={handleBack}>
                   {backButtonText || 'Back'}
                 </Button>
 
-                <Button type="text" onClick={handleNext} disabled={stepIsDisabled} className={stepIsDisabled ? classes.disabledButton : ''}>
+                <Button type="text" onClick={handleNext} disabled={stepIsDisabled} sx={stepIsDisabled ? sxClasses.disabledButton : {}}>
                   {nextButtonText || 'Next'}
                 </Button>
 

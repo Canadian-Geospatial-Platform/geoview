@@ -9,9 +9,9 @@ import {
   MenuItemProps,
   Select as MaterialSelect,
   SelectProps,
+  useTheme,
 } from '@mui/material';
-
-import makeStyles from '@mui/styles/makeStyles';
+import { getSxClasses } from './select-style';
 
 /**
  * Custom MUI Select properties
@@ -31,43 +31,6 @@ interface TypeMenuItemProps {
   item: MenuItemProps | ListSubheaderProps | null;
 }
 
-const useStyles = makeStyles((theme) => ({
-  formControl: {
-    fontSize: 14,
-    width: '100%',
-    marginBottom: 16,
-    color: theme.palette.text.primary,
-    '& .MuiOutlinedInput-notchedOutline': {
-      border: `1px solid ${theme.palette.border.primary}`,
-      padding: '0 12px 0 8px',
-      '&[aria-hidden="true"]': {
-        border: `1px solid ${theme.palette.border.primary}`,
-      },
-    },
-    '&:hover': {
-      '& .MuiOutlinedInput-notchedOutline': {
-        border: `1px solid ${theme.palette.border.primary}`,
-      },
-    },
-    '& .MuiFormLabel-root.Mui-focused': {
-      color: theme.palette.primary.contrastText,
-      background: theme.palette.primary.light,
-    },
-    '& .MuiSelect-select': {
-      padding: '16px 12px',
-    },
-    '& .MuiSvgIcon-root': {
-      color: theme.palette.text.primary,
-    },
-  },
-  label: {
-    color: theme.palette.text.primary,
-    fontSize: 16,
-  },
-  menuItem: {
-    fontSize: 14,
-  },
-}));
 /**
  * Create a Material UI Select component
  *
@@ -76,14 +39,16 @@ const useStyles = makeStyles((theme) => ({
  */
 export function Select(props: TypeSelectProps): JSX.Element {
   const { fullWidth, inputLabel, menuItems, ...selectProps } = props;
-  const classes = useStyles();
+
+  const theme = useTheme();
+  const sxClasses = getSxClasses(theme);
 
   return (
     <FormControl fullWidth={fullWidth}>
-      <InputLabel className={classes.label} {...inputLabel}>
+      <InputLabel sx={sxClasses.label} {...inputLabel}>
         {selectProps.label}
       </InputLabel>
-      <MaterialSelect className={classes.formControl} {...selectProps}>
+      <MaterialSelect sx={sxClasses.formControl} {...selectProps}>
         {menuItems.map((menuItem: TypeMenuItemProps, index) => {
           if (menuItem) {
             if (menuItem.type === 'header') {
@@ -92,7 +57,7 @@ export function Select(props: TypeSelectProps): JSX.Element {
             }
 
             // eslint-disable-next-line react/no-array-index-key
-            return <MenuItem key={index} {...(menuItem.item as MenuItemProps)} className={classes.menuItem} />;
+            return <MenuItem key={index} {...(menuItem.item as MenuItemProps)} sx={sxClasses.menuItem} />;
           }
 
           return null;

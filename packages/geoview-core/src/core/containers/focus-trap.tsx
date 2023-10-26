@@ -178,8 +178,9 @@ export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
             autoFocus
             onClick={handleEnable}
             type="text"
-            style={{
+            sx={{
               width: 'initial',
+              textTransform: 'none',
             }}
           >
             {t('keyboardnav.focusdialog.button.enable')}
@@ -190,8 +191,9 @@ export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
             tooltipPlacement="top-end"
             onClick={handleSkip}
             type="text"
-            style={{
+            sx={{
               width: 'initial',
+              textTransform: 'none',
             }}
           >
             {t('keyboardnav.focusdialog.button.skip')}
