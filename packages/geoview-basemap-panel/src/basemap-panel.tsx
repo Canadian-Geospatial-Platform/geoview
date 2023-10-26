@@ -10,6 +10,7 @@ import {
   TypeBasemapOptions,
   TypeValidMapProjectionCodes,
 } from 'geoview-core';
+import { getSxClasses } from './basemap-panel-style';
 
 const w = window as TypeWindow;
 
@@ -25,7 +26,7 @@ export function BasemapPanel(props: BaseMapPanelProps): JSX.Element {
   const myMap = cgpv.api.maps[mapId];
 
   const { api, ui, react } = cgpv;
-  const { Select, Card } = ui.elements;
+  const { Select, Card, Box } = ui.elements;
 
   const { useState, useEffect } = react;
 
@@ -33,85 +34,9 @@ export function BasemapPanel(props: BaseMapPanelProps): JSX.Element {
   const [activeBasemapId, setActiveBasemapId] = useState<string>('');
   const [canSwichProjection] = useState(config.canSwichProjection);
 
-  const useStyles = ui.makeStyles((theme) => ({
-    basemapCard: {
-      backgroundColor: theme.palette.grey.A700,
-      color: theme.palette.primary.light,
-      display: 'flex',
-      flexDirection: 'column',
-      backgroundClip: 'padding-box',
-      border: `1px solid ${theme.basemapPanel.borderDefault}`,
-      borderRadius: 6,
-      boxShadow: 'none',
-      marginBottom: 16,
-      transition: 'all 0.3s ease-in-out',
-      '&:last-child': {
-        marginBottom: 0,
-      },
-      '& .MuiCardHeader-root': {
-        backgroundColor: theme.palette.grey.A700,
-        color: theme.basemapPanel.header,
-        fontSize: 14,
-        fontWeight: 400,
-        margin: 0,
-        padding: '0 12px',
-        height: 60,
-        width: '100%',
-        order: 2,
-      },
-      '& .MuiCardContent-root': {
-        order: 1,
-        height: 190,
-        position: 'relative',
-        padding: 0,
-        '&:last-child': {
-          padding: 0,
-        },
-        '& .basemapCardThumbnail': {
-          position: 'absolute',
-          height: '100%',
-          width: '100%',
-          objectFit: 'cover',
-          top: 0,
-          left: 0,
-        },
-        '& .basemapCardThumbnailOverlay': {
-          display: 'block',
-          height: '100%',
-          width: '100%',
-          position: 'absolute',
-          backgroundColor: theme.basemapPanel.overlayDefault,
-          transition: 'all 0.3s ease-in-out',
-        },
-      },
-      '&:hover': {
-        cursor: 'pointer',
-        borderColor: theme.basemapPanel.borderHover,
-        '& .MuiCardContent-root': {
-          '& .basemapCardThumbnailOverlay': {
-            backgroundColor: theme.basemapPanel.overlayHover,
-          },
-        },
-      },
-      '&.active': {
-        borderColor: theme.basemapPanel.borderActive,
-        '& .MuiCardContent-root': {
-          '& .basemapCardThumbnailOverlay': {
-            backgroundColor: theme.basemapPanel.overlayActive,
-          },
-        },
-        '&:hover': {
-          borderColor: 'rgba(255,255,255,0.75)',
-          '& .MuiCardContent-root': {
-            '& .basemapCardThumbnailOverlay': {
-              backgroundColor: 'rgba(0,0,0,0)',
-            },
-          },
-        },
-      },
-    },
-  }));
-  const classes = useStyles();
+  const theme = ui.useTheme();
+
+  const sxClasses = getSxClasses(theme);
 
   // TODO: change the path for getting projection on schema refactor
   const projections: number[] =
@@ -220,7 +145,7 @@ export function BasemapPanel(props: BaseMapPanelProps): JSX.Element {
   }, []);
 
   return (
-    <div>
+    <Box sx={sxClasses.basemapCard}>
       {canSwichProjection && (
         <Select
           fullWidth
@@ -247,7 +172,6 @@ export function BasemapPanel(props: BaseMapPanelProps): JSX.Element {
         return (
           <Card
             tabIndex={0}
-            classes={{ root: classes.basemapCard }}
             className={basemap.basemapId === activeBasemapId ? 'active' : ''}
             onClick={() => setBasemap(basemap.basemapId as string)}
             onKeyPress={() => setBasemap(basemap.basemapId as string)}
@@ -269,6 +193,6 @@ export function BasemapPanel(props: BaseMapPanelProps): JSX.Element {
           />
         );
       })}
-    </div>
+    </Box>
   );
 }
