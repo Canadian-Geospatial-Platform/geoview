@@ -19,8 +19,8 @@ interface TypeDividerProps extends DividerProps {
 export function Divider(props: TypeDividerProps): JSX.Element {
   const { className, style, grow, orientation } = props;
 
-  const sxtheme = useTheme();
-  const sxClasses = getSxClasses(sxtheme);
+  const theme = useTheme();
+  const sxClasses = getSxClasses(theme);
 
   let dividerOrientation = sxClasses.horizontal;
 
