@@ -13,8 +13,8 @@ import { ObjectEvent } from 'ol/Object';
 import { toLonLat } from 'ol/proj';
 
 import { TypeMapFeaturesConfig, TypeValidMapProjectionCodes } from '@/core/types/global-types';
-import { TypeArrayOfLayerData } from '../components/details/details';
-import { TypeLegendItemProps, TypeLegendLayer } from '../components/layers/types';
+import { TypeArrayOfLayerData } from '@/core/components/details/details';
+import { TypeLegendItemProps, TypeLegendLayer } from '@/core/components/layers/types';
 
 import { TypeMapMouseInfo } from '@/api/events/payloads';
 import { TypeDisplayLanguage, TypeInteraction } from '@/geo/map/map-schema-types';

@@ -100,7 +100,7 @@ class FooterPanelPlugin extends AbstractPlugin {
         });
         tabsCounter++;
       }
-      console.log('defaultTabs ', defaultTabs);
+      
       if (defaultTabs.includes('layers')) {
         // create new tab and add the LayersComponent to the footer tab
         footerTabs.createFooterTab({

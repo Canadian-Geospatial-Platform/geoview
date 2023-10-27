@@ -35,6 +35,7 @@ export {
   GroupWorkOutlined as GroupWorkOutlinedIcon,
   Help as HelpIcon,
   Home as HomeIcon,
+  HubOutlined as HubOutlinedIcon,
   ImportExport as ReorderIcon,
   Info as InfoIcon,
   InfoOutlined as InfoOutlinedIcon,
@@ -62,6 +63,7 @@ export {
   Remove as ZoomOutIcon,
   Search as SearchIcon,
   Send as SendIcon,
+  Storage as StorageIcon,
   Visibility as VisibilityIcon,
   VisibilityOff as VisibilityOffIcon,
   VisibilityOutlined as VisibilityOutlinedIcon,
@@ -70,6 +72,4 @@ export {
   WhereToVote as ClickMapMarker,
   ZoomIn as ZoomInSearchIcon,
   ZoomOut as ZoomOutSearchIcon,
-  HubOutlined as HubOutlinedIcon,
-  Storage as StorageIcon,
 } from '@mui/icons-material';

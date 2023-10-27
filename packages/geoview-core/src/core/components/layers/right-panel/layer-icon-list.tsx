@@ -10,7 +10,7 @@ import {
   TypeLayerEntryConfig,
   TypeUniqueValueStyleConfig,
   TypeClassBreakStyleConfig,
-} from '../../../types/cgpv-types';
+} from '@/geo/map/map-schema-types';
 import { getGeoViewStore } from '@/core/stores/stores-managers';
 
 const sxClasses = {

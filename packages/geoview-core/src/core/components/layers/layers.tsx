@@ -26,7 +26,7 @@ export function Layers(props: LegendItemsDetailsProps): JSX.Element {
   const theme = useTheme();
   const sxClasses = getSxClasses(theme);
 
-  // Populatig fake legend data
+  // Populating fake legend data
   const helpers = useLegendHelpers(mapId);
   helpers.populateLegendStoreWithFakeData();
 
