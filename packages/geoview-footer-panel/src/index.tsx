@@ -12,6 +12,7 @@ import {
   PayloadBaseClass,
 } from 'geoview-core';
 
+import { HubOutlinedIcon, InfoOutlinedIcon, LayersOutlinedIcon, StorageIcon } from 'geoview-core/src/ui';
 import schema from '../schema.json';
 import defaultConfig from '../default-config-footer-panel.json';
 import { DetailsItem } from './details-item';
@@ -95,6 +96,7 @@ class FooterPanelPlugin extends AbstractPlugin {
           value: tabsCounter,
           label: this.translations[displayLanguage].legend as string,
           content: () => <LegendItem mapId={mapId} />,
+          icon: <HubOutlinedIcon />,
         });
         tabsCounter++;
       }
@@ -105,6 +107,7 @@ class FooterPanelPlugin extends AbstractPlugin {
           value: tabsCounter,
           label: this.translations[displayLanguage].layers as string,
           content: () => <Layers mapId={mapId} />,
+          icon: <LayersOutlinedIcon />,
         });
         tabsCounter++;
       }
@@ -117,6 +120,7 @@ class FooterPanelPlugin extends AbstractPlugin {
           value: detailsTabValue,
           label: this.translations[displayLanguage].details as string,
           content: () => <DetailsItem mapId={mapId} />,
+          icon: <InfoOutlinedIcon />,
         });
         tabsCounter++;
         // select the details tab when map click queries are done
@@ -144,6 +148,7 @@ class FooterPanelPlugin extends AbstractPlugin {
           value: tabsCounter,
           label: this.translations[displayLanguage].dataTable as string,
           content: () => <DataTable mapId={mapId} />,
+          icon: <StorageIcon />,
         });
         tabsCounter++;
       }

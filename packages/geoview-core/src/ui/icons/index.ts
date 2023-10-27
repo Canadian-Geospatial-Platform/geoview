@@ -37,6 +37,7 @@ export {
   Home as HomeIcon,
   ImportExport as ReorderIcon,
   Info as InfoIcon,
+  InfoOutlined as InfoOutlinedIcon,
   KeyboardArrowDown as KeyboardArrowDownIcon,
   KeyboardArrowUp as KeyboardArrowUpIcon,
   KeyboardArrowRight as KeyboardArrowRightIcon,
@@ -69,4 +70,6 @@ export {
   WhereToVote as ClickMapMarker,
   ZoomIn as ZoomInSearchIcon,
   ZoomOut as ZoomOutSearchIcon,
+  HubOutlined as HubOutlinedIcon,
+  Storage as StorageIcon,
 } from '@mui/icons-material';
