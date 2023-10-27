@@ -14,7 +14,7 @@ import { toLonLat } from 'ol/proj';
 
 import { TypeMapFeaturesConfig, TypeValidMapProjectionCodes } from '@/core/types/global-types';
 import { TypeArrayOfLayerData } from '../components/details/details';
-import { TypeLegendItemProps, TypeLegendLayer } from '../components/legend-2/types';
+import { TypeLegendItemProps, TypeLegendLayer } from '../components/layers/types';
 
 import { TypeMapMouseInfo } from '@/api/events/payloads';
 import { TypeDisplayLanguage, TypeInteraction } from '@/geo/map/map-schema-types';

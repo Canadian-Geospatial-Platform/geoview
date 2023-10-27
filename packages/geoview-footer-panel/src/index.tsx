@@ -17,6 +17,7 @@ import defaultConfig from '../default-config-footer-panel.json';
 import { DetailsItem } from './details-item';
 import { LegendItem } from './legend-item';
 import { DataTable } from './data-table';
+import { Layers } from './layers';
 
 const w = window as TypeWindow;
 
@@ -57,11 +58,13 @@ class FooterPanelPlugin extends AbstractPlugin {
   translations = toJsonObject({
     en: {
       legend: 'Legend',
+      layers: 'Layers',
       details: 'Details',
       dataTable: 'DataTable',
     },
     fr: {
       legend: 'Légende',
+      layers: 'Couches',
       details: 'Détails',
       dataTable: 'Données',
     },
@@ -92,6 +95,16 @@ class FooterPanelPlugin extends AbstractPlugin {
           value: tabsCounter,
           label: this.translations[displayLanguage].legend as string,
           content: () => <LegendItem mapId={mapId} />,
+        });
+        tabsCounter++;
+      }
+      console.log('defaultTabs ', defaultTabs);
+      if (defaultTabs.includes('layers')) {
+        // create new tab and add the LayersComponent to the footer tab
+        footerTabs.createFooterTab({
+          value: tabsCounter,
+          label: this.translations[displayLanguage].layers as string,
+          content: () => <Layers mapId={mapId} />,
         });
         tabsCounter++;
       }

@@ -20,7 +20,7 @@ import {
   Paper,
 } from '@/ui';
 import { api, EsriDynamic, payloadIsLegendInfo, NumberPayload, PayloadBaseClass } from '@/app';
-import { LegendIconList } from '../legend-icon-list';
+import { LayerIconList } from './layer-icon-list';
 import { TypeLegend, isVectorLegend, isWmsLegend, isImageStaticLegend } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import {
   TypeClassBreakStyleConfig,
@@ -127,7 +127,7 @@ const sxClasses = {
  * @returns {JSX.Element} the legend list item
  */
 
-export function LegendItemDetails(props: TypeLegendItemDetailsProps): JSX.Element {
+export function LayerDetails(props: TypeLegendItemDetailsProps): JSX.Element {
   const { layerId, geoviewLayerInstance, subLayerId, layerConfigEntry, isRemoveable } = props;
 
   const { t, i18n } = useTranslation<string>();
@@ -427,7 +427,7 @@ export function LegendItemDetails(props: TypeLegendItemDetailsProps): JSX.Elemen
       <Box sx={sxClasses.expandableIconContainer}>
         {iconType === 'simple' && iconImg !== null && <img alt="" style={theme.iconImg} src={iconImg} />}
         {iconType === 'list' && iconList !== null && labelList !== null && (
-          <LegendIconList
+          <LayerIconList
             iconImages={iconList}
             iconLabels={labelList}
             mapId={mapId}

@@ -10,7 +10,7 @@ import {
   TypeLayerEntryConfig,
   TypeUniqueValueStyleConfig,
   TypeClassBreakStyleConfig,
-} from '../../types/cgpv-types';
+} from '../../../types/cgpv-types';
 import { getGeoViewStore } from '@/core/stores/stores-managers';
 
 const sxClasses = {
@@ -61,7 +61,7 @@ export interface TypeLegendIconListProps {
   toggleMapVisible: (layerConfig: TypeLayerEntryConfig) => void;
 }
 
-export function LegendIconList(props: TypeLegendIconListProps): JSX.Element {
+export function LayerIconList(props: TypeLegendIconListProps): JSX.Element {
   const { iconImages, iconLabels, toggleMapVisible, geometryKey, layerConfig, mapId } = props;
   const theme: Theme & {
     iconImg: React.CSSProperties;
