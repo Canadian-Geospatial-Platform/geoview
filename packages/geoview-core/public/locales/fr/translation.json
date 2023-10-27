@@ -1,7 +1,8 @@
 {
   "general": {
     "close": "Fermer",
-    "open": "Ouvrir"
+    "open": "Ouvrir",
+    "layers": "Couches"
   },
   "mapnav": {
     "arianavbar": "groupe de buttons vertical pour navigation sur la carte",

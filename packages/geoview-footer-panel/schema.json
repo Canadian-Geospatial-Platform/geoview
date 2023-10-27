@@ -16,6 +16,7 @@
             "type": "string",
             "enum": [
               "legend",
+              "layers",
               "details",
               "data-table"
             ]
@@ -23,6 +24,7 @@
           "minItems": 0,
           "default": [
             "legend",
+            "layers",
             "details",
             "data-table"
           ],

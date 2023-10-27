@@ -14,8 +14,8 @@ import {
   List,
   KeyboardArrowUpIcon,
 } from '@/ui';
-import { TypeLegendLayer } from '../types';
-import { getSxClasses } from './legend-overview-styles';
+import { TypeLegendLayer } from '@/core/components/layers/types';
+import { getSxClasses } from './legend-styles';
 
 interface LegendLayerProps {
   layer: TypeLegendLayer;

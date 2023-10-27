@@ -12,11 +12,13 @@ import {
   PayloadBaseClass,
 } from 'geoview-core';
 
+import { HubOutlinedIcon, InfoOutlinedIcon, LayersOutlinedIcon, StorageIcon } from 'geoview-core/src/ui';
 import schema from '../schema.json';
 import defaultConfig from '../default-config-footer-panel.json';
 import { DetailsItem } from './details-item';
 import { LegendItem } from './legend-item';
 import { DataTable } from './data-table';
+import { Layers } from './layers';
 
 const w = window as TypeWindow;
 
@@ -57,11 +59,13 @@ class FooterPanelPlugin extends AbstractPlugin {
   translations = toJsonObject({
     en: {
       legend: 'Legend',
+      layers: 'Layers',
       details: 'Details',
       dataTable: 'DataTable',
     },
     fr: {
       legend: 'Légende',
+      layers: 'Couches',
       details: 'Détails',
       dataTable: 'Données',
     },
@@ -92,6 +96,18 @@ class FooterPanelPlugin extends AbstractPlugin {
           value: tabsCounter,
           label: this.translations[displayLanguage].legend as string,
           content: () => <LegendItem mapId={mapId} />,
+          icon: <HubOutlinedIcon />,
+        });
+        tabsCounter++;
+      }
+      
+      if (defaultTabs.includes('layers')) {
+        // create new tab and add the LayersComponent to the footer tab
+        footerTabs.createFooterTab({
+          value: tabsCounter,
+          label: this.translations[displayLanguage].layers as string,
+          content: () => <Layers mapId={mapId} />,
+          icon: <LayersOutlinedIcon />,
         });
         tabsCounter++;
       }
@@ -104,6 +120,7 @@ class FooterPanelPlugin extends AbstractPlugin {
           value: detailsTabValue,
           label: this.translations[displayLanguage].details as string,
           content: () => <DetailsItem mapId={mapId} />,
+          icon: <InfoOutlinedIcon />,
         });
         tabsCounter++;
         // select the details tab when map click queries are done
@@ -131,6 +148,7 @@ class FooterPanelPlugin extends AbstractPlugin {
           value: tabsCounter,
           label: this.translations[displayLanguage].dataTable as string,
           content: () => <DataTable mapId={mapId} />,
+          icon: <StorageIcon />,
         });
         tabsCounter++;
       }

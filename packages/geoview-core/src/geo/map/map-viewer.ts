@@ -22,6 +22,7 @@ import { NavbarButtons } from '@/core/components/nav-bar/nav-bar-buttons';
 import { FooterTabsApi } from '@/core/components/footer-tabs/footer-tabs-api';
 import { LegendApi } from '@/core/components/legend/legend-api';
 import { Legend2Api } from '@/core/components/legend-2/legend-api';
+import { LayersApi } from '@/core/components/layers/layers-api';
 import { DetailsApi } from '@/core/components/details/details-api';
 import { DataTableApi } from '@/core/components/data-table/data-table-api';
 import { GeoviewRenderer } from '@/geo/renderer/geoview-renderer';
@@ -84,6 +85,9 @@ export class MapViewer {
   legend!: LegendApi;
 
   legend2!: Legend2Api;
+
+  // used to access the layers in the footer
+  layers!: LayersApi;
 
   // used to access the details in footer
   details!: DetailsApi;
@@ -149,6 +153,7 @@ export class MapViewer {
     this.footerTabs = new FooterTabsApi(this.mapId);
     this.legend = new LegendApi(this.mapId);
     this.legend2 = new Legend2Api(this.mapId);
+    this.layers = new LayersApi(this.mapId);
     this.details = new DetailsApi(this.mapId);
     this.dataTable = new DataTableApi(this.mapId);
 
