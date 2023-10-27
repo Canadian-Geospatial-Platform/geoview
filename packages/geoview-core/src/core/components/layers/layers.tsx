@@ -4,7 +4,7 @@ import { useStore } from 'zustand';
 import { useTranslation } from 'react-i18next';
 import { api } from '@/app';
 import { LegendItemsDetailsProps, TypeLegendItemProps } from './types';
-import { AddIcon, Box, Grid, List, Typography, ExpandMoreIcon, Paper, Stack, ExpandIcon } from '@/ui';
+import { AddIcon, Box, Grid, List, Typography, Stack, ExpandIcon } from '@/ui';
 import { LayerDetails } from './right-panel/layer-details';
 import { getGeoViewStore } from '@/core/stores/stores-managers';
 import { SingleLayer } from './left-panel/single-layer';

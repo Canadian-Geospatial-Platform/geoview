@@ -1,7 +1,7 @@
 import { useStore } from 'zustand';
 import { useTheme } from '@mui/material';
 import { useTranslation } from 'react-i18next';
-import { Box, List, Typography, Paper } from '@/ui';
+import { Box, List, Typography } from '@/ui';
 import { getGeoViewStore } from '@/core/stores/stores-managers';
 import { getSxClasses } from './legend-styles';
 import { LegendLayer } from './legend-layer';
