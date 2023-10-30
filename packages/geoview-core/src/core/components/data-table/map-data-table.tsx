@@ -322,9 +322,11 @@ function MapDataTable({ data, layerId, mapId, layerKey, projectionConfig }: MapD
    */
   const getTableHeader = useCallback((header: string) => {
     return (
-      <Box component="span" sx={{ 'white-space': 'nowrap' }}>
-        {header}
-      </Box>
+      <Tooltip title={header} placement="top" arrow>
+        <Box component="span" sx={{ 'white-space': 'nowrap' }}>
+          {header}
+        </Box>
+      </Tooltip>
     );
   }, []);
 
@@ -336,7 +338,7 @@ function MapDataTable({ data, layerId, mapId, layerKey, projectionConfig }: MapD
    */
   const getCellValueWithTooltip = (cellValue: string | number | ReactNode) => {
     return typeof cellValue === 'string' || typeof cellValue === 'number' ? (
-      <Tooltip title={cellValue}>
+      <Tooltip title={cellValue} placement="top" arrow>
         <Box component="span" sx={density === 'compact' ? sxClasses.tableCell : {}}>
           {cellValue}
         </Box>
@@ -388,7 +390,7 @@ function MapDataTable({ data, layerId, mapId, layerKey, projectionConfig }: MapD
    */
   const getDateColumnTooltip = (date: Date) => {
     return (
-      <Tooltip title={api.dateUtilities.formatDate(date, 'YYYY-MM-DDThh:mm:ss')}>
+      <Tooltip title={api.dateUtilities.formatDate(date, 'YYYY-MM-DDThh:mm:ss')} arrow>
         <Box>{api.dateUtilities.formatDate(date, 'YYYY-MM-DDThh:mm:ss')}</Box>
       </Tooltip>
     );

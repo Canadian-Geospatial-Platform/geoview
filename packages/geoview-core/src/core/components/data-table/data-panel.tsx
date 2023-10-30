@@ -114,7 +114,7 @@ export function Datapanel({ layerData, mapId, projectionConfig, language }: Data
                 <ListItemIcon>
                   <SendIcon sx={{ width: '0.75em', height: '0.75em' }} />
                 </ListItemIcon>
-                <Tooltip title={getLayerTooltip(layerName!, layerKey, index)} placement="top">
+                <Tooltip title={getLayerTooltip(layerName!, layerKey, index)} placement="top" arrow>
                   <Box sx={sxClasses.listPrimaryText}>
                     <Typography component="p">{layerName![language]}</Typography>
                     <Box sx={{ display: 'flex', alignContent: 'center' }}>
