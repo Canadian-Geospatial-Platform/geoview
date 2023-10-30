@@ -242,7 +242,6 @@ function MapDataTable({ data, layerId, mapId, layerKey, projectionConfig }: MapD
 
   // update store row selections.
   useEffect(() => {
-    console.log('fired in useeffect', rowSelection);
     setRowSelectionsMap(rowSelection, layerKey);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [rowSelection]);
@@ -430,7 +429,9 @@ function MapDataTable({ data, layerId, mapId, layerKey, projectionConfig }: MapD
             'notEmpty',
           ],
         }),
-        ...([t('dataTable.icon'), t('dataTable.zoom')].includes(value.alias) ? { size: 100, enableColumnFilter: false } : {}),
+        ...([t('dataTable.icon'), t('dataTable.zoom')].includes(value.alias)
+          ? { size: 100, enableColumnFilter: false, enableColumnActions: false }
+          : {}),
       });
     });
 
