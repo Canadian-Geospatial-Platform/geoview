@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState, memo } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState, memo, ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useStore } from 'zustand';
 import debounce from 'lodash/debounce';
@@ -331,16 +331,20 @@ function MapDataTable({ data, layerId, mapId, layerKey, projectionConfig }: MapD
   /**
    * Create data table body cell with tooltip
    *
-   * @param {string} cellValue cell value to be displayed in cell
+   * @param {string | number | ReactNode} cellValue cell value to be displayed in cell
    * @returns JSX.Element
    */
-  const getCellValueWithTooltip = (cellValue: string) => {
-    return (
+  const getCellValueWithTooltip = (cellValue: string | number | ReactNode) => {
+    return typeof cellValue === 'string' || typeof cellValue === 'number' ? (
       <Tooltip title={cellValue}>
         <Box component="span" sx={density === 'compact' ? sxClasses.tableCell : {}}>
           {cellValue}
         </Box>
       </Tooltip>
+    ) : (
+      <Box component="span" sx={density === 'compact' ? sxClasses.tableCell : {}}>
+        {cellValue}
+      </Box>
     );
   };
 
@@ -378,6 +382,19 @@ function MapDataTable({ data, layerId, mapId, layerKey, projectionConfig }: MapD
   };
 
   /**
+   * Custom date type Column tooltip
+   * @param {Date} date value to be shown in column.
+   * @returns JSX.Element
+   */
+  const getDateColumnTooltip = (date: Date) => {
+    return (
+      <Tooltip title={api.dateUtilities.formatDate(date, 'YYYY-MM-DDThh:mm:ss')}>
+        <Box>{api.dateUtilities.formatDate(date, 'YYYY-MM-DDThh:mm:ss')}</Box>
+      </Tooltip>
+    );
+  };
+
+  /**
    * Build material react data table column header.
    *
    * @param {object} data.fieldAliases object values transformed into required key value property of material react data table
@@ -409,11 +426,11 @@ function MapDataTable({ data, layerId, mapId, layerKey, projectionConfig }: MapD
         }),
 
         Header: ({ column }) => getTableHeader(column.columnDef.header),
-        Cell: ({ cell }) => getCellValueWithTooltip(cell.getValue() as string),
+        Cell: ({ cell }) => getCellValueWithTooltip(cell.getValue() as string | number | ReactNode),
         ...(value.dataType === 'date' && {
           accessorFn: (row) => new Date(row[key]),
           sortingFn: 'datetime',
-          Cell: ({ cell }) => api.dateUtilities.formatDate(cell.getValue<Date>(), 'YYYY-MM-DDThh:mm:ss'),
+          Cell: ({ cell }) => getDateColumnTooltip(cell.getValue<Date>()),
           Filter: ({ column }) => getDateFilter(column),
           filterFn: 'equals',
           columnFilterModeOptions: [
