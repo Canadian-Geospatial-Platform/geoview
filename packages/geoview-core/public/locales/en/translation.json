@@ -60,7 +60,7 @@
     "sort_layers": "Sort Layers",
     "selected_Layers": "An overview of currrently selected layers",
     "re-arrange": "re-arrange",
-    "categories_title" : "Categories",
+    "categories_title": "Categories",
     "items_available": "items available"
   },
   "details": {
@@ -128,7 +128,7 @@
     "downloadAsCSV": "Download as CSV",
     "filterMap": "Filter Map",
     "stopFilterMap": "Stop Filter Map",
-    "leftPanelHeading": "Available Categories",
+    "leftPanelHeading": "Layers",
     "rowsSelected": "{rowsSelected} of {totalRows} row(s) selected",
     "rowsFiltered": "{rowsFiltered} of {totalRows} row(s) filtered",
     "enlargeBtn": "Enlarge",
