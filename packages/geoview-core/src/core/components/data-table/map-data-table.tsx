@@ -137,18 +137,18 @@ function MapDataTable({ data, layerId, mapId, layerKey, projectionConfig }: MapD
     FILTER_MAP_DELAY,
     toolbarRowSelectedMessage,
     setToolbarRowSelectedMessage,
-    storeColumnFilters,
-    setStoreColumnFilters,
-    storeRowSelections,
-    setStoreRowSelections,
-    storeMapFiltered,
+    columnFiltersMap,
+    setColumnFiltersMap,
+    rowSelectionsMap,
+    setRowSelectionsMap,
+    mapFilteredMap,
   } = useStore(store, (state) => state.dataTableState);
   const rowSelectionRef = useRef<Array<number>>([]);
 
-  const [columnFilters, setColumnFilters] = useState<MRTColumnFiltersState>(storeColumnFilters[layerKey] || []);
+  const [columnFilters, setColumnFilters] = useState<MRTColumnFiltersState>(columnFiltersMap[layerKey] || []);
 
   const [density, setDensity] = useState<MRTDensityState>('compact');
-  const [rowSelection, setRowSelection] = useState<Record<number, boolean>>(storeRowSelections[layerKey] ?? {});
+  const [rowSelection, setRowSelection] = useState<Record<number, boolean>>(rowSelectionsMap[layerKey] ?? {});
   const rowVirtualizerInstanceRef = useRef<MRTVirtualizer<HTMLDivElement, HTMLTableRowElement>>(null);
   const [sorting, setSorting] = useState<MRTSortingState>([]);
 
@@ -214,7 +214,7 @@ function MapDataTable({ data, layerId, mapId, layerKey, projectionConfig }: MapD
     const geoviewLayerInstance = api.maps[mapId].layer.geoviewLayers[layerId];
     const filterLayerConfig = api.maps[mapId].layer.registeredLayers[layerKey] as TypeLayerEntryConfig;
 
-    if (storeMapFiltered[layerKey] && geoviewLayerInstance !== undefined && filterLayerConfig !== undefined && filterStrings.length) {
+    if (mapFilteredMap[layerKey] && geoviewLayerInstance !== undefined && filterLayerConfig !== undefined && filterStrings.length) {
       (geoviewLayerInstance as AbstractGeoViewVector | EsriDynamic)?.applyViewFilter(filterLayerConfig, filterStrings);
     } else {
       (geoviewLayerInstance as AbstractGeoViewVector | EsriDynamic)?.applyViewFilter(filterLayerConfig, '');
@@ -222,7 +222,7 @@ function MapDataTable({ data, layerId, mapId, layerKey, projectionConfig }: MapD
   }, FILTER_MAP_DELAY);
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  const debouncedColumnFilters = useCallback((filters: MRTColumnFiltersState) => filterMap(filters), [storeMapFiltered[layerKey]]);
+  const debouncedColumnFilters = useCallback((filters: MRTColumnFiltersState) => filterMap(filters), [mapFilteredMap[layerKey]]);
 
   useEffect(() => {
     // scroll to the top of the table when the sorting changes
@@ -236,19 +236,20 @@ function MapDataTable({ data, layerId, mapId, layerKey, projectionConfig }: MapD
 
   // update store column filters
   useEffect(() => {
-    setStoreColumnFilters(columnFilters, layerKey);
+    setColumnFiltersMap(columnFilters, layerKey);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [columnFilters]);
 
   // update store row selections.
   useEffect(() => {
-    setStoreRowSelections(rowSelection, layerKey);
+    console.log('fired in useeffect', rowSelection);
+    setRowSelectionsMap(rowSelection, layerKey);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [rowSelection]);
 
   // update map when column filters change
   useEffect(() => {
-    if (columnFilters && storeMapFiltered[layerKey]) {
+    if (columnFilters && mapFilteredMap[layerKey]) {
       debouncedColumnFilters(columnFilters);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -258,7 +259,7 @@ function MapDataTable({ data, layerId, mapId, layerKey, projectionConfig }: MapD
   useEffect(() => {
     filterMap(columnFilters);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [storeMapFiltered[layerKey]]);
+  }, [mapFilteredMap[layerKey]]);
 
   // add/remove hightlight feature when row is selected/unselected.
   useEffect(() => {

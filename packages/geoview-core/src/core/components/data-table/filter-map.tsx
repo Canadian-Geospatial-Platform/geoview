@@ -19,15 +19,15 @@ interface FilterMapProps {
  */
 function FilterMap({ layerKey, mapId }: FilterMapProps): JSX.Element {
   const store = getGeoViewStore(mapId);
-  const { setStoreMapFiltered, storeMapFiltered } = useStore(store, (state) => state.dataTableState);
+  const { mapFilteredMap, setMapFilteredMap } = useStore(store, (state) => state.dataTableState);
 
   const { t } = useTranslation();
   return (
-    <Tooltip title={storeMapFiltered[layerKey] ? t('dataTable.stopFilterMap') : t('dataTable.filterMap')}>
+    <Tooltip title={mapFilteredMap[layerKey] ? t('dataTable.stopFilterMap') : t('dataTable.filterMap')}>
       <Switch
         size="small"
-        onChange={() => setStoreMapFiltered(!storeMapFiltered[layerKey], layerKey)}
-        checked={storeMapFiltered[layerKey]}
+        onChange={() => setMapFilteredMap(!mapFilteredMap[layerKey] ?? true, layerKey)}
+        checked={!!mapFilteredMap[layerKey]}
       />
     </Tooltip>
   );

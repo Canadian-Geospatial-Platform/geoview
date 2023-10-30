@@ -1,8 +1,9 @@
-import React, { useCallback, useEffect } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useTheme } from '@mui/material/styles';
 import { useStore } from 'zustand';
 import { Projection } from 'ol/proj';
 import { useTranslation } from 'react-i18next';
+import { isEmpty } from 'lodash';
 import {
   Box,
   Grid,
@@ -11,7 +12,6 @@ import {
   List,
   ListItem,
   ListItemButton,
-  ListItemText,
   IconButton,
   ListItemIcon,
   SendIcon,
@@ -20,12 +20,14 @@ import {
   Button,
   ArrowForwardIcon,
   ArrowBackIcon,
+  Tooltip,
+  FilterAltIcon,
 } from '@/ui';
 import MapDataTable, { MapDataTableData as MapDataTableDataProps } from './map-data-table';
-import { getSxClasses } from './data-table-style';
+import { StyledLeftPanelDirBtn, getSxClasses } from './data-table-style';
 import { getGeoViewStore } from '@/core/stores/stores-managers';
 import { GroupLayers } from './data-table-api';
-import { TypeDisplayLanguage } from '@/geo/map/map-schema-types';
+import { TypeDisplayLanguage, TypeLocalizedString } from '@/geo/map/map-schema-types';
 
 interface DatapanelProps {
   layerData: (MapDataTableDataProps & GroupLayers)[];
@@ -48,16 +50,47 @@ export function Datapanel({ layerData, mapId, projectionConfig, language }: Data
   const sxClasses = getSxClasses(theme);
   const store = getGeoViewStore(mapId);
 
-  const { selectedLayerIndex, setSelectedLayerIndex, isLoading, setIsLoading, isEnlargeDataTable, setIsEnlargeDataTable } = useStore(
-    store,
-    (state) => state.dataTableState
-  );
+  const [isLoading, setIsLoading] = useState(false);
+
+  const {
+    selectedLayerIndex,
+    setSelectedLayerIndex,
+    isEnlargeDataTable,
+    setIsEnlargeDataTable,
+    mapFilteredMap,
+    columnFiltersMap,
+    rowSelectionsMap,
+  } = useStore(store, (state) => state.dataTableState);
 
   const handleListItemClick = useCallback((event: React.MouseEvent<HTMLDivElement, MouseEvent>, index: number) => {
     setSelectedLayerIndex(index);
     setIsLoading(true);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  /**
+   * Check if filtered are being set for each layer.
+   * @param {string} layerKey The key of the layer
+   * @returns boolean
+   */
+  const isFilteredSelectedForLayer = (layerKey: string): boolean =>
+    !isEmpty(columnFiltersMap[layerKey]) || !isEmpty(rowSelectionsMap[layerKey]) || !!mapFilteredMap[layerKey];
+
+  /**
+   * Create layer tooltip
+   * @param {TypeLocalizedString} layerName en/fr layer name
+   * @param {string} layerKey the key of the layer.
+   * @param {number} index an index of the layer in the array.
+   * @returns
+   */
+  const getLayerTooltip = (layerName: TypeLocalizedString, layerKey: string, index: number): React.ReactNode => {
+    return (
+      <Box sx={{ display: 'flex', alignContent: 'center', '& svg ': { width: '0.75em', height: '0.75em' } }}>
+        {`${layerName[language]}, ${layerData[index].features.length} features`}
+        {isFilteredSelectedForLayer(layerKey) && <FilterAltIcon />}
+      </Box>
+    );
+  };
 
   /**
    * Render group layers as list.
@@ -79,17 +112,20 @@ export function Datapanel({ layerData, mapId, projectionConfig, language }: Data
                 onClick={(event) => handleListItemClick(event, index)}
               >
                 <ListItemIcon>
-                  <SendIcon />
+                  <SendIcon sx={{ width: '0.75em', height: '0.75em' }} />
                 </ListItemIcon>
-
-                <ListItemText primary={layerName ? layerName[language] : 'en'} secondary={`${layerData[index].features.length} features`} />
-                <Box
-                  sx={{
-                    background: isEnlargeDataTable ? 'white' : 'none',
-                    padding: isEnlargeDataTable ? '0.25rem' : '1rem',
-                    paddingRight: isEnlargeDataTable ? '0.25rem' : '1rem',
-                  }}
-                >
+                <Tooltip title={getLayerTooltip(layerName!, layerKey, index)} placement="top">
+                  <Box sx={sxClasses.listPrimaryText}>
+                    <Typography component="p">{layerName![language]}</Typography>
+                    <Box sx={{ display: 'flex', alignContent: 'center' }}>
+                      <Typography component="p" variant="subtitle1" noWrap>
+                        {`${layerData[index].features.length} features`}
+                      </Typography>
+                      {isFilteredSelectedForLayer(layerKey) && <FilterAltIcon />}
+                    </Box>
+                  </Box>
+                </Tooltip>
+                <StyledLeftPanelDirBtn theme={theme} isenlargedatatable={isEnlargeDataTable}>
                   <IconButton
                     disabled
                     edge="end"
@@ -98,7 +134,7 @@ export function Datapanel({ layerData, mapId, projectionConfig, language }: Data
                   >
                     <ChevronRightIcon />
                   </IconButton>
-                </Box>
+                </StyledLeftPanelDirBtn>
               </ListItemButton>
             </ListItem>
           </Paper>
@@ -106,7 +142,7 @@ export function Datapanel({ layerData, mapId, projectionConfig, language }: Data
       </List>
     ),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [selectedLayerIndex, isEnlargeDataTable]
+    [layerData, selectedLayerIndex, isFilteredSelectedForLayer, isEnlargeDataTable]
   );
 
   useEffect(() => {
