@@ -70,12 +70,21 @@ export type TypeFeatureInfoEntry = {
   nameField: string | null;
 };
 
+/**
+ * Partial definition of a TypeFeatureInfoEntry for simpler use case queries.
+ * Purposely linking this simpler type to the main TypeFeatureInfoEntry type here, in case, for future we want
+ * to add more information on one or the other and keep things loosely linked together.
+ */
+export type TypeFeatureInfoEntryPartial = Pick<TypeFeatureInfoEntry, 'fieldInfo'>;
+
 export type TypeArrayOfFeatureInfoEntries = TypeFeatureInfoEntry[] | undefined | null;
 
 export type TypeFeatureInfoByQueryTypes = {
   [K in TypeQueryType]?: TypeArrayOfFeatureInfoEntries;
 };
 
+// TODO: Refactor - Should probably call this a 'ResultsSet' instead of 'ResultSets' to avoid confusion, because it's a single set of results, not multiple sets of result(s).
+// https://www.totaltypescript.com/tips/how-to-name-your-types
 export type TypeFeatureInfoResultSets = {
   [layerPath: string]: {
     layerStatus: TypeLayerStatus;
