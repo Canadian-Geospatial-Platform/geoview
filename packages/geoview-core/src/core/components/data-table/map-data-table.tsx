@@ -541,6 +541,9 @@ function MapDataTable({ data, layerId, mapId, layerKey, projectionConfig }: MapD
         rowVirtualizerProps={{ overscan: 5 }}
         columnVirtualizerProps={{ overscan: 2 }}
         localization={dataTableLocalization}
+        muiTableHeadCellProps={{
+          sx: () => sxClasses.tableHeadCell,
+        }}
         muiTableHeadCellFilterTextFieldProps={{
           sx: () => ({
             minWidth: '50px',

@@ -25,7 +25,7 @@ function FilterMap({ layerKey, mapId }: FilterMapProps): JSX.Element {
   return (
     <Tooltip title={mapFilteredMap[layerKey] ? t('dataTable.stopFilterMap') : t('dataTable.filterMap')}>
       <Switch
-        size="small"
+        size="medium"
         onChange={() => setMapFilteredMap(!mapFilteredMap[layerKey] ?? true, layerKey)}
         checked={!!mapFilteredMap[layerKey]}
       />
