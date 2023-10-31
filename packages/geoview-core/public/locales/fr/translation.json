@@ -126,7 +126,7 @@
     "downloadAsCSV": "Télécharger la CSV",
     "filterMap": "Filtrer la carte",
     "stopFilterMap": "Filtrer la carte d'arrêt",
-    "leftPanelHeading": "Calques",
+    "leftPanelHeading": "Couches",
     "rowsSelected": "{rowsSelected} sur {totalRows} ligne(s) sélectionnée(s)",
     "rowsFiltered": "{rowsFiltered} sur {totalRows} ligne(s) filtrée(s)",
     "enlargeBtn": "Agrandir",
