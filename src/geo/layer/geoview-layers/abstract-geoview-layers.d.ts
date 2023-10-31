@@ -137,8 +137,9 @@ export declare abstract class AbstractGeoViewLayer {
         consoleMessage: string;
     }[];
     /**
-     * The vector or raster layer structure to be displayed for this GeoView class. Initial value is null indicating that the layers
-     * have not been created.
+     * The structure of the vector or raster layers to be displayed for this GeoView class. This property points to the root of the layer tree,
+     * unlike the olLayer (singular) property stored in the layer configuration entries list, which points to a node or leaf in the tree.
+     * The initial value of olLayers is null, indicating that the layer tree has not been created.
      */
     olLayers: BaseLayer | null;
     metadata: TypeJsonObject | null;
@@ -259,7 +260,7 @@ export declare abstract class AbstractGeoViewLayer {
      *
      * @returns {Promise<void>} A promise that the execution is completed.
      */
-    protected processListOfLayerEntryMetadata(listOfLayerEntryConfig?: TypeListOfLayerEntryConfig): Promise<void>;
+    protected processListOfLayerEntryMetadata(listOfLayerEntryConfig: TypeListOfLayerEntryConfig): Promise<void>;
     /** ***************************************************************************************************************************
      * This method is used to process metadata group layer entries. These layers behave as a GeoView group layer and also as a data
      * layer (i.e. they have extent, visibility and query flag definition). Metadata group layers can be identified by

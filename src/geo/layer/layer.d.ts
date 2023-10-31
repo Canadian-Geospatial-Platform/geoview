@@ -113,9 +113,12 @@ export declare class Layer {
      * Search asynchronously for a layer using it's id and return the layer data.
      * If the layer we're searching for has to be loaded, set mustBeLoaded to true when awaiting on this method.
      * This function waits the timeout period before abandonning (or uses the default timeout when not provided).
+     * Note this function uses 'Async' suffix only to differentiate it from 'getGeoviewLayerById'.
      *
-     * @param {string} id the layer id to look for
+     * @param {string} layerID the layer id to look for
      * @param {string} mustBeLoaded indicate if the layer we're searching for must be found only once loaded
+     * @param {string} checkFrequency optionally indicate the frequency at which to check for the condition on the layer
+     * @param {string} timeout optionally indicate the timeout after which time to abandon the promise
      * @returns the found layer data object
      */
     getGeoviewLayerByIdAsync: (layerID: string, mustBeLoaded: boolean, checkFrequency?: number, timeout?: number) => Promise<AbstractGeoViewLayer | null>;

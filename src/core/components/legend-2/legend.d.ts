@@ -1,3 +1,5 @@
 /// <reference types="react" />
-import { LegendItemsDetailsProps } from './types';
-export declare function Legend2(props: LegendItemsDetailsProps): JSX.Element;
+export interface LegendOverviewProps {
+    mapId: string;
+}
+export declare function Legend(props: LegendOverviewProps): JSX.Element;

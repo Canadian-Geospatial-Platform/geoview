@@ -5,4 +5,4 @@ import { TypeLegendItemDetailsProps } from '../types';
  *
  * @returns {JSX.Element} the legend list item
  */
-export declare function LegendItemDetails(props: TypeLegendItemDetailsProps): JSX.Element;
+export declare function LayerDetails(props: TypeLegendItemDetailsProps): JSX.Element;

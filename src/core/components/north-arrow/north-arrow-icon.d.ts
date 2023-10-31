@@ -1,10 +1,10 @@
 /// <reference types="react" />
-import { ClassNameMap } from '@mui/styles';
 /**
  * interface for north arrow icon properties
  */
 interface NorthArrowIconProps {
-    classes: ClassNameMap;
+    width: number;
+    height: number;
 }
 /**
  * Create a north arrow icon

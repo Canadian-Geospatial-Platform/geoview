@@ -1,4 +1,5 @@
 export * from './interaction/draw';
+export * from './interaction/extent';
 export * from './interaction/interaction';
 export * from './interaction/modify';
 export * from './interaction/snap';

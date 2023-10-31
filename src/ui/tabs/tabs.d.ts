@@ -8,6 +8,7 @@ export type TypeTabs = {
     value: number;
     label: string;
     content: TypeChildren | string;
+    icon?: JSX.Element;
 };
 /**
  * Tabs ui properties

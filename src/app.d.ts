@@ -11,5 +11,5 @@ export declare function addReloadListener(mapId: string): void;
  * @param {Element} mapDiv The ma div to initialise
  * @param {string} mapConfig a new config passed in from the function call
  */
-export declare function initMapDivFromFunctionCall(mapDiv: HTMLElement, mapConfig: string): Promise<void>;
+export declare function initMapDivFromFunctionCall(mapDiv: HTMLElement, mapConfig: string): void;
 export declare const cgpv: types.TypeCGPV;
