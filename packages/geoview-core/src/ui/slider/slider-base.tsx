@@ -1,5 +1,5 @@
 /* eslint-disable react/require-default-props */
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Slider as MaterialSlider, SliderProps } from '@mui/material';
 
 /**
@@ -9,10 +9,12 @@ interface TypeSliderProps extends SliderProps {
   // default values (min, max, range)
   min: number;
   max: number;
-  value: Array<number> | number;
+  value: number | number[];
 
   // custom onChange callback
   customOnChange?: (value: number[] | number) => void;
+  onValueDisplay?: (value: number, index: number) => string;
+  onValueDisplayAriaLabel?: (value: number, index: number) => string;
 }
 
 /**
@@ -22,9 +24,8 @@ interface TypeSliderProps extends SliderProps {
  * @returns {JSX.Element} the created Slider element
  */
 export function SliderBase(props: TypeSliderProps): JSX.Element {
-  const { ...properties } = props;
-
-  const [sliderValue, setValue] = useState<number[] | number | undefined>(properties.value);
+  const { min, max, value: parentValue, orientation, customOnChange, onValueDisplay, onValueDisplayAriaLabel } = props;
+  const [sliderValue, setValue] = useState<number[] | number>(parentValue);
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [activeThumb, setActiveThumb] = useState<number>(0);
 
@@ -38,18 +39,27 @@ export function SliderBase(props: TypeSliderProps): JSX.Element {
   const handleChangeCommitted = (event: React.SyntheticEvent | Event, newValue: number | number[]) => {
     setValue(newValue);
 
-    // run the custon onChange function
-    if (properties.customOnChange !== undefined) properties.customOnChange(newValue);
+    // Callback
+    // TODO: Refactor - change the name of this callback to 'onCustonChange' to follow standards
+    customOnChange?.(newValue);
   };
+
+  // Effect used to listen on the value state coming from the parent element.
+  useEffect(() => {
+    setValue(parentValue); // Update child's value state when the parent's value prop changes
+  }, [parentValue]);
 
   return (
     <MaterialSlider
       value={sliderValue}
-      min={properties.min}
-      max={properties.max}
+      min={min}
+      max={max}
+      orientation={orientation}
       onChange={handleChange}
       onChangeCommitted={handleChangeCommitted}
       valueLabelDisplay="auto"
+      valueLabelFormat={onValueDisplay}
+      getAriaValueText={onValueDisplayAriaLabel}
     />
   );
 }

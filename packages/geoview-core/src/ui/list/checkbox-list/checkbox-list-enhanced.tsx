@@ -8,7 +8,6 @@ import ListItemIcon from '@mui/material/ListItemIcon';
 import Checkbox from '@mui/material/Checkbox';
 import Box from '@mui/material/Box';
 
-import { HtmlToReact } from '../../../core/containers/html-to-react';
 import { getSxClasses } from './checkbox-list-style';
 
 /**
@@ -24,7 +23,7 @@ export interface CheckboxListEnhancedType {
 export type CheckboxListEnhancedItem = {
   display: string;
   value: string;
-  content: JSX.Element;
+  contentRight: JSX.Element;
 };
 
 export function CheckboxListEnhanced(props: CheckboxListEnhancedType): JSX.Element {
@@ -82,7 +81,7 @@ export function CheckboxListEnhanced(props: CheckboxListEnhancedType): JSX.Eleme
               {item.display}
             </Typography>
             <Box sx={sxClasses.boxcontent} className="Checkbox-content-root" onClick={(e) => handleClickContent(e)}>
-              {typeof item.content === 'string' ? <HtmlToReact htmlContent={item.content} /> : item.content}
+              {item.contentRight}
             </Box>
           </ListItem>
         );
