@@ -1,5 +1,5 @@
 /// <reference types="react" />
-import { TypeVectorLayerEntryConfig, TypeStyleGeometry, TypeLayerEntryConfig } from '../../types/cgpv-types';
+import { TypeVectorLayerEntryConfig, TypeStyleGeometry, TypeLayerEntryConfig } from '@/geo/map/map-schema-types';
 export interface TypeLegendIconListProps {
     iconImages: string[];
     iconLabels: string[];
@@ -8,4 +8,4 @@ export interface TypeLegendIconListProps {
     geometryKey?: TypeStyleGeometry;
     toggleMapVisible: (layerConfig: TypeLayerEntryConfig) => void;
 }
-export declare function LegendIconList(props: TypeLegendIconListProps): JSX.Element;
+export declare function LayerIconList(props: TypeLegendIconListProps): JSX.Element;

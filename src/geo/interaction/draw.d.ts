@@ -1,7 +1,7 @@
 import { Draw as OLDraw } from 'ol/interaction';
 import { DrawEvent as OLDrawEvent } from 'ol/interaction/Draw';
 import { Interaction, InteractionOptions } from './interaction';
-import { TypeFeatureStyle } from '../layer/geometry/geometry-types';
+import { TypeFeatureStyle } from '@/geo/layer/geometry/geometry-types';
 /**
  * Supported options for drawing interactions
  */

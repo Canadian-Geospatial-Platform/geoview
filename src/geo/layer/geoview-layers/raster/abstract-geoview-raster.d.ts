@@ -1,10 +1,13 @@
 import BaseLayer from 'ol/layer/Base';
+import LayerGroup from 'ol/layer/Group';
 import { AbstractGeoViewLayer } from '../abstract-geoview-layers';
 import { TypeLayerEntryConfig } from '@/app';
 /** *****************************************************************************************************************************
  * AbstractGeoViewRaster types
  */
-export type TypeBaseRasterLayer = BaseLayer;
+export type TypeRasterLayerGroup = LayerGroup;
+export type TypeRasterLayer = BaseLayer;
+export type TypeBaseRasterLayer = BaseLayer | TypeRasterLayerGroup | TypeRasterLayer;
 /** *****************************************************************************************************************************
  * The AbstractGeoViewRaster class is a direct descendant of AbstractGeoViewLayer. As its name indicates, it is used to
  * instanciate GeoView raster layers. In addition to the components of the parent class, there is an attribute named

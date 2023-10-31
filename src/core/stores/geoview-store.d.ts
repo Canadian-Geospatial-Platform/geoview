@@ -3,7 +3,8 @@ import { Map as OLMap, MapEvent } from 'ol';
 import { Coordinate } from 'ol/coordinate';
 import { ObjectEvent } from 'ol/Object';
 import { TypeMapFeaturesConfig, TypeValidMapProjectionCodes } from '@/core/types/global-types';
-import { TypeLegendItemProps } from '../components/legend-2/types';
+import { TypeArrayOfLayerData } from '@/core/components/details/details';
+import { TypeLegendItemProps, TypeLegendLayer } from '@/core/components/layers/types';
 import { TypeMapMouseInfo } from '@/api/events/payloads';
 import { TypeDisplayLanguage, TypeInteraction } from '@/geo/map/map-schema-types';
 import { NotificationDetailsType } from '@/core/types/cgpv-types';
@@ -39,6 +40,12 @@ export interface INotificationsState {
 export interface ILegendState {
     selectedItem?: TypeLegendItemProps;
     selectedIsVisible: boolean;
+    selectedLayers: Record<string, {
+        layer: string;
+        icon: string;
+    }[]>;
+    currentRightPanelDisplay: 'overview' | 'layer-details' | 'none';
+    legendLayers: TypeLegendLayer[];
 }
 export interface IMapDataTableState {
     selectedLayerIndex: number;
@@ -57,6 +64,10 @@ export interface IMapDataTableState {
     setSelectedLayerIndex: (idx: number) => void;
     setToolbarRowSelectedMessage: (message: string) => void;
 }
+export interface IDetailsState {
+    layerDataArray: TypeArrayOfLayerData;
+    selectedLayerPath: string;
+}
 export interface IGeoViewState {
     displayLanguage: TypeDisplayLanguage;
     isCrosshairsActive: boolean;
@@ -68,6 +79,7 @@ export interface IGeoViewState {
     legendState: ILegendState;
     mapState: IMapState;
     notificationState: INotificationsState;
+    detailsState: IDetailsState;
     dataTableState: IMapDataTableState;
     setMapConfig: (config: TypeMapFeaturesConfig) => void;
     onMapLoaded: (mapElem: OLMap) => void;

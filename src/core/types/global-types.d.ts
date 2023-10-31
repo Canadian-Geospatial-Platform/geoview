@@ -3,7 +3,6 @@ import { createRoot } from 'react-dom/client';
 import { useTheme } from '@mui/material/styles';
 import { useTranslation } from 'react-i18next';
 import { useMediaQuery } from '@mui/material';
-import makeStyles from '@mui/styles/makeStyles';
 import { API } from '@/api/api';
 import * as UI from '../../ui';
 import { AbstractPlugin } from '@/api/plugin/abstract-plugin';
@@ -87,7 +86,6 @@ export type TypeCallback = (callback: () => void) => void;
 export type TypeCGPVUI = {
     useTheme: typeof useTheme;
     useMediaQuery: typeof useMediaQuery;
-    makeStyles: typeof makeStyles;
     elements: typeof UI;
 };
 /** ******************************************************************************************************************************

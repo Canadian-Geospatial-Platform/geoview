@@ -17,7 +17,7 @@ interface TypeSliderProps extends SliderProps {
         value: number;
     }>;
     orientation?: 'vertical' | 'horizontal' | undefined;
-    step?: number;
+    step?: number | null;
     size?: 'small' | 'medium';
     track?: 'inverted' | 'normal' | false;
     ariaLabelledby?: string;

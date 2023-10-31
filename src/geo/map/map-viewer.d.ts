@@ -13,11 +13,14 @@ import { NavbarButtons } from '@/core/components/nav-bar/nav-bar-buttons';
 import { FooterTabsApi } from '@/core/components/footer-tabs/footer-tabs-api';
 import { LegendApi } from '@/core/components/legend/legend-api';
 import { Legend2Api } from '@/core/components/legend-2/legend-api';
+import { LayersApi } from '@/core/components/layers/layers-api';
 import { DetailsApi } from '@/core/components/details/details-api';
 import { DataTableApi } from '@/core/components/data-table/data-table-api';
+import { TimeSliderApi } from '@/core/components/time-slider/time-slider-api';
 import { GeoviewRenderer } from '@/geo/renderer/geoview-renderer';
 import { Select } from '@/geo/interaction/select';
 import { Draw } from '@/geo/interaction/draw';
+import { Extent as ExtentInteraction } from '@/geo/interaction/extent';
 import { Modify } from '@/geo/interaction/modify';
 import { Snap } from '@/geo/interaction/snap';
 import { Translate } from '@/geo/interaction/translate';
@@ -41,8 +44,10 @@ export declare class MapViewer {
     footerTabs: FooterTabsApi;
     legend: LegendApi;
     legend2: Legend2Api;
+    layers: LayersApi;
     details: DetailsApi;
     dataTable: DataTableApi;
+    timeSlider: TimeSliderApi;
     basemap: Basemap;
     layer: Layer;
     displayLanguage: TypeDisplayLanguage;
@@ -189,6 +194,10 @@ export declare class MapViewer {
      * Initializes selection interactions
      */
     initSelectInteractions(): Select;
+    /**
+     * Initializes extent interactions
+     */
+    initExtentInteractions(): ExtentInteraction;
     /**
      * Initializes translation interactions
      */

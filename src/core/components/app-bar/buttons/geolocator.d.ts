@@ -4,7 +4,7 @@
  */
 interface GeolocatorProps {
     mapId: string;
-    className?: string | undefined;
+    sx?: React.CSSProperties;
 }
 /**
  * Geolocator Button component
@@ -14,7 +14,7 @@ interface GeolocatorProps {
 declare function Geolocator(props: GeolocatorProps): JSX.Element;
 declare namespace Geolocator {
     var defaultProps: {
-        className: string;
+        sx: {};
     };
 }
 export default Geolocator;

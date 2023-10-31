@@ -222,4 +222,4 @@ export declare function whenThisThenThat<T>(checkCallback: () => T, doCallback: 
  * @param checkFrequency the frequency in milliseconds to check for an update (defaults to 100 milliseconds)
  * @param timeout the duration in milliseconds until the task is aborted (defaults to 10 seconds)
  */
-export declare function whenThisThenAsync<T>(checkCallback: () => T, checkFrequency?: number, timeout?: number): Promise<T>;
+export declare function whenThisThen<T>(checkCallback: () => T, checkFrequency?: number, timeout?: number): Promise<T>;
