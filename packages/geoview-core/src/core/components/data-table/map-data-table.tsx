@@ -142,6 +142,7 @@ function MapDataTable({ data, layerId, mapId, layerKey, projectionConfig }: MapD
     rowSelectionsMap,
     setRowSelectionsMap,
     mapFilteredMap,
+    setRowsFilteredMap,
   } = useStore(store, (state) => state.dataTableState);
   const rowSelectionRef = useRef<Array<number>>([]);
 
@@ -286,7 +287,7 @@ function MapDataTable({ data, layerId, mapId, layerKey, projectionConfig }: MapD
 
   // show row selected message in the toolbar.
   useEffect(() => {
-    let message = '';
+    let message = toolbarRowSelectedMessage[layerKey] ?? '';
     if (Object.keys(rowSelection).length && tableInstanceRef.current) {
       message = t('dataTable.rowsSelected')
         .replace('{rowsSelected}', Object.keys(rowSelection).length.toString())
@@ -295,23 +296,34 @@ function MapDataTable({ data, layerId, mapId, layerKey, projectionConfig }: MapD
       message = t('dataTable.rowsFiltered')
         .replace('{rowsFiltered}', tableInstanceRef.current.getFilteredRowModel().rows.length.toString())
         .replace('{totalRows}', data.features.length.toString());
+    } else {
+      message = '';
     }
-    setToolbarRowSelectedMessage(message);
+
+    setToolbarRowSelectedMessage(message, layerKey);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [rowSelection, data.features]);
 
   // show row filtered message in the toolbar.
   useEffect(() => {
-    let message = '';
+    let message = toolbarRowSelectedMessage[layerKey] ?? '';
+    let length = 0;
     if (tableInstanceRef.current) {
       const rowsFiltered = tableInstanceRef.current.getFilteredRowModel();
       if (rowsFiltered.rows.length !== data.features.length) {
+        length = rowsFiltered.rows.length;
         message = t('dataTable.rowsFiltered')
           .replace('{rowsFiltered}', rowsFiltered.rows.length.toString())
           .replace('{totalRows}', data.features.length.toString());
+      } else {
+        message = '';
+        length = 0;
       }
+      setRowsFilteredMap(length, layerKey);
     }
-    setToolbarRowSelectedMessage(message);
+
+    setToolbarRowSelectedMessage(message, layerKey);
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [columnFilters, data.features]);
 
@@ -426,7 +438,6 @@ function MapDataTable({ data, layerId, mapId, layerKey, projectionConfig }: MapD
             'notEmpty',
           ],
         }),
-
         Header: ({ column }) => getTableHeader(column.columnDef.header),
         Cell: ({ cell }) => getCellValueWithTooltip(cell.getValue() as string | number | ReactNode),
         ...(value.dataType === 'date' && {
@@ -515,7 +526,7 @@ function MapDataTable({ data, layerId, mapId, layerKey, projectionConfig }: MapD
         enableBottomToolbar={false}
         positionToolbarAlertBanner="none" // hide existing row count
         renderTopToolbarCustomActions={() => {
-          return <Box sx={sxClasses.selectedRows}>{toolbarRowSelectedMessage}</Box>;
+          return <Box sx={sxClasses.selectedRows}>{toolbarRowSelectedMessage[layerKey]}</Box>;
         }}
         renderToolbarInternalActions={({ table }) => (
           <Box>

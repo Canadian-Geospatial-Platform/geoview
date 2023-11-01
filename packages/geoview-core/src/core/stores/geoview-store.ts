@@ -76,17 +76,18 @@ export interface IMapDataTableState {
   isEnlargeDataTable: boolean;
 
   FILTER_MAP_DELAY: number;
-  toolbarRowSelectedMessage: string;
+  toolbarRowSelectedMessage: Record<string, string>;
   columnFiltersMap: Record<string, MRTColumnFiltersState>;
   rowSelectionsMap: Record<string, Record<number, boolean>>;
   mapFilteredMap: Record<string, boolean>;
-
+  rowsFilteredMap: Record<string, number>;
+  setRowsFilteredMap: (rows: number, layerKey: string) => void;
   setMapFilteredMap: (mapFiltered: boolean, layerKey: string) => void;
   setRowSelectionsMap: (rowSelection: Record<number, boolean>, layerKey: string) => void;
   setColumnFiltersMap: (filtered: MRTColumnFiltersState, layerKey: string) => void;
   setIsEnlargeDataTable: (isEnlarge: boolean) => void;
   setSelectedLayerIndex: (idx: number) => void;
-  setToolbarRowSelectedMessage: (message: string) => void;
+  setToolbarRowSelectedMessage: (message: string, layerKey: string) => void;
 }
 
 export interface IDetailsState {
@@ -210,10 +211,19 @@ export const geoViewStoreDefinition = (
       isEnlargeDataTable: false,
       mapFiltered: false,
       FILTER_MAP_DELAY: 1000,
-      toolbarRowSelectedMessage: '',
+      toolbarRowSelectedMessage: {},
       rowSelectionsMap: {},
       mapFilteredMap: {},
       columnFiltersMap: {},
+      rowsFilteredMap: {},
+      setRowsFilteredMap: (rows: number, layerKey: string) => {
+        set({
+          dataTableState: {
+            ...get().dataTableState,
+            rowsFilteredMap: { ...get().dataTableState.rowsFilteredMap, [layerKey]: rows },
+          },
+        });
+      },
       setMapFilteredMap: (mapFiltered: boolean, layerKey: string) => {
         set({
           dataTableState: {
@@ -239,11 +249,11 @@ export const geoViewStoreDefinition = (
           },
         });
       },
-      setToolbarRowSelectedMessage: (message: string) => {
+      setToolbarRowSelectedMessage: (message: string, layerKey: string) => {
         set({
           dataTableState: {
             ...get().dataTableState,
-            toolbarRowSelectedMessage: message,
+            toolbarRowSelectedMessage: { ...get().dataTableState.toolbarRowSelectedMessage, [layerKey]: message },
           },
         });
       },

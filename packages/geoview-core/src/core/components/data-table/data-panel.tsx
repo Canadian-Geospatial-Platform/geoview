@@ -3,7 +3,6 @@ import { useTheme } from '@mui/material/styles';
 import { useStore } from 'zustand';
 import { Projection } from 'ol/proj';
 import { useTranslation } from 'react-i18next';
-import { isEmpty } from 'lodash';
 import {
   Box,
   Grid,
@@ -52,15 +51,8 @@ export function Datapanel({ layerData, mapId, projectionConfig, language }: Data
 
   const [isLoading, setIsLoading] = useState(false);
 
-  const {
-    selectedLayerIndex,
-    setSelectedLayerIndex,
-    isEnlargeDataTable,
-    setIsEnlargeDataTable,
-    mapFilteredMap,
-    columnFiltersMap,
-    rowSelectionsMap,
-  } = useStore(store, (state) => state.dataTableState);
+  const { selectedLayerIndex, setSelectedLayerIndex, isEnlargeDataTable, setIsEnlargeDataTable, mapFilteredMap, rowsFilteredMap } =
+    useStore(store, (state) => state.dataTableState);
 
   const handleListItemClick = useCallback((event: React.MouseEvent<HTMLDivElement, MouseEvent>, index: number) => {
     setSelectedLayerIndex(index);
@@ -73,8 +65,17 @@ export function Datapanel({ layerData, mapId, projectionConfig, language }: Data
    * @param {string} layerKey The key of the layer
    * @returns boolean
    */
-  const isFilteredSelectedForLayer = (layerKey: string): boolean =>
-    !isEmpty(columnFiltersMap[layerKey]) || !isEmpty(rowSelectionsMap[layerKey]) || !!mapFilteredMap[layerKey];
+  const isMapFilteredSelectedForLayer = (layerKey: string): boolean => !!mapFilteredMap[layerKey];
+
+  /**
+   * Get number of features of a layer with filtered or selected layer.
+   * @param layerKey
+   * @param index
+   * @returns
+   */
+  const getFeaturesOfLayer = (layerKey: string, index: number): string => {
+    return rowsFilteredMap[layerKey] ? `${rowsFilteredMap[layerKey]} features filtered` : `${layerData[index].features.length} features`;
+  };
 
   /**
    * Create layer tooltip
@@ -86,8 +87,8 @@ export function Datapanel({ layerData, mapId, projectionConfig, language }: Data
   const getLayerTooltip = (layerName: TypeLocalizedString, layerKey: string, index: number): React.ReactNode => {
     return (
       <Box sx={{ display: 'flex', alignContent: 'center', '& svg ': { width: '0.75em', height: '0.75em' } }}>
-        {`${layerName[language]}, ${layerData[index].features.length} features`}
-        {isFilteredSelectedForLayer(layerKey) && <FilterAltIcon />}
+        {`${layerName[language]}, ${getFeaturesOfLayer(layerKey, index)}`}
+        {isMapFilteredSelectedForLayer(layerKey) && <FilterAltIcon />}
       </Box>
     );
   };
@@ -119,9 +120,9 @@ export function Datapanel({ layerData, mapId, projectionConfig, language }: Data
                     <Typography component="p">{layerName![language]}</Typography>
                     <Box sx={{ display: 'flex', alignContent: 'center' }}>
                       <Typography component="p" variant="subtitle1" noWrap>
-                        {`${layerData[index].features.length} features`}
+                        {getFeaturesOfLayer(layerKey, index)}
                       </Typography>
-                      {isFilteredSelectedForLayer(layerKey) && <FilterAltIcon />}
+                      {isMapFilteredSelectedForLayer(layerKey) && <FilterAltIcon sx={{ color: theme.palette.grey['500'] }} />}
                     </Box>
                   </Box>
                 </Tooltip>
@@ -129,7 +130,7 @@ export function Datapanel({ layerData, mapId, projectionConfig, language }: Data
                   sx={{
                     padding: isEnlargeDataTable ? '0.25rem' : '1rem',
                     paddingRight: isEnlargeDataTable ? '0.25rem' : '1rem',
-                    [theme.breakpoints.down('lg')]: {
+                    [theme.breakpoints.down('xl')]: {
                       display: isEnlargeDataTable ? 'none !important' : 'block',
                     },
                     [theme.breakpoints.down('sm')]: {
@@ -153,7 +154,7 @@ export function Datapanel({ layerData, mapId, projectionConfig, language }: Data
       </List>
     ),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [layerData, selectedLayerIndex, isFilteredSelectedForLayer, isEnlargeDataTable]
+    [layerData, selectedLayerIndex, isMapFilteredSelectedForLayer, isEnlargeDataTable]
   );
 
   useEffect(() => {

@@ -142,11 +142,9 @@ export const getSxClasses = (theme: Theme) => ({
     },
   },
   tableHeadCell: {
-    [theme.breakpoints.down('lg')]: {
-      '& .MuiCollapse-wrapperInner': {
-        '& .MuiBox-root': {
-          gridTemplateColumns: '1fr',
-        },
+    '& .MuiCollapse-wrapperInner': {
+      '& .MuiBox-root': {
+        gridTemplateColumns: '1fr',
       },
     },
     '& .MuiInput-root': { fontSize: '0.875rem', '& .MuiSvgIcon-root': { width: '0.75em', height: '0.75em' } },
