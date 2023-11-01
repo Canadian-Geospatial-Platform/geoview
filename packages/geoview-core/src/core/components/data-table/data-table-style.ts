@@ -1,4 +1,4 @@
-import { Theme, styled, Box } from '@mui/material';
+import { Theme } from '@mui/material';
 
 export const getSxClasses = (theme: Theme) => ({
   list: {
@@ -170,13 +170,3 @@ export const getSxClasses = (theme: Theme) => ({
     },
   },
 });
-
-type LeftPanelProps = { theme: Theme; isenlargedatatable: boolean };
-
-export const StyledLeftPanelDirBtn = styled(Box)((props: LeftPanelProps) => ({
-  padding: props.isenlargedatatable ? '0.25rem' : '1rem',
-  paddingRight: props.isenlargedatatable ? '0.25rem' : '1rem',
-  [props.theme.breakpoints.down('lg')]: {
-    display: props.isenlargedatatable ? 'none !important' : 'block',
-  },
-}));

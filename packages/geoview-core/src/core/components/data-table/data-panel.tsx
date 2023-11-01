@@ -24,7 +24,7 @@ import {
   FilterAltIcon,
 } from '@/ui';
 import MapDataTable, { MapDataTableData as MapDataTableDataProps } from './map-data-table';
-import { StyledLeftPanelDirBtn, getSxClasses } from './data-table-style';
+import { getSxClasses } from './data-table-style';
 import { getGeoViewStore } from '@/core/stores/stores-managers';
 import { GroupLayers } from './data-table-api';
 import { TypeDisplayLanguage, TypeLocalizedString } from '@/geo/map/map-schema-types';
@@ -125,7 +125,18 @@ export function Datapanel({ layerData, mapId, projectionConfig, language }: Data
                     </Box>
                   </Box>
                 </Tooltip>
-                <StyledLeftPanelDirBtn theme={theme} isenlargedatatable={isEnlargeDataTable}>
+                <Box
+                  sx={{
+                    padding: isEnlargeDataTable ? '0.25rem' : '1rem',
+                    paddingRight: isEnlargeDataTable ? '0.25rem' : '1rem',
+                    [theme.breakpoints.down('lg')]: {
+                      display: isEnlargeDataTable ? 'none !important' : 'block',
+                    },
+                    [theme.breakpoints.down('sm')]: {
+                      display: 'none',
+                    },
+                  }}
+                >
                   <IconButton
                     disabled
                     edge="end"
@@ -134,7 +145,7 @@ export function Datapanel({ layerData, mapId, projectionConfig, language }: Data
                   >
                     <ChevronRightIcon />
                   </IconButton>
-                </StyledLeftPanelDirBtn>
+                </Box>
               </ListItemButton>
             </ListItem>
           </Paper>
