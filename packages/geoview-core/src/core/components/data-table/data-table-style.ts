@@ -150,6 +150,24 @@ export const getSxClasses = (theme: Theme) => ({
       },
     },
     '& .MuiInput-root': { fontSize: '0.875rem', '& .MuiSvgIcon-root': { width: '0.75em', height: '0.75em' } },
+    '& .MuiBadge-root': {
+      marginLeft: '0.5rem',
+      '>span': {
+        width: '100%',
+      },
+      svg: {
+        marginTop: '0.25rem',
+        marginBottom: '0.25rem',
+      },
+      '& .keyboard-focused': {
+        backgroundColor: 'rgba(81, 91, 165, 0.08)',
+        borderRadius: '50%',
+        border: `1px solid black !important`,
+        '> svg': {
+          opacity: 1,
+        },
+      },
+    },
   },
 });
 
