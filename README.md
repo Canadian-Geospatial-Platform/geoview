@@ -40,6 +40,9 @@ Our developers use [Visual Studio Code](https://code.visualstudio.com/) with a f
 
 - Better Comments
 
+- We are using [React Dev Tools](https://chrome.google.com/webstore/detail/react-developer-tools/fmkadmapgofadopljbjfkapdkoienihi)
+
+
 ### Documentation for GeoView
 
 - [click here](https://canadian-geospatial-platform.github.io/geoview/public/docs/) to view generated typedoc for the GeoView core.

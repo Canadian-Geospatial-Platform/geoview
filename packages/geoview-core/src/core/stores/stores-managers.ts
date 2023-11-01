@@ -1,5 +1,6 @@
 // src/store/index.ts
 import { create, createStore } from 'zustand';
+import { mountStoreDevtool } from 'simple-zustand-devtools';
 import { initializeEventProcessors } from '@/api/eventProcessors';
 import { TypeMapFeaturesConfig } from '../types/global-types';
 import { IGeoViewState, GeoViewStoreType, geoViewStoreDefinitionWithSubscribeSelector } from './geoview-store';
@@ -39,6 +40,10 @@ export const addGeoViewStore = (config: TypeMapFeaturesConfig) => {
       [config.mapId ?? 'unknown']: geoViewStore,
     },
   }));
+
+  if (process.env.NODE_ENV === 'development') {
+    mountStoreDevtool(`getViewStore-${config.mapId}`, geoViewStore);
+  }
 };
 
 export const getGeoViewStore = (id: string | undefined) => {
