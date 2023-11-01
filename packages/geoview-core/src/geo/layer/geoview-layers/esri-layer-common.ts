@@ -21,7 +21,14 @@ import { EsriDynamic, geoviewEntryIsEsriDynamic } from './raster/esri-dynamic';
 import { EsriFeature, geoviewEntryIsEsriFeature, TypeEsriFeatureLayerEntryConfig } from './vector/esri-feature';
 import { EsriBaseRenderer, getStyleFromEsriRenderer } from '../../renderer/esri-renderer';
 import { TimeDimensionESRI } from '@/core/utils/date-mgt';
-import { codedValueType, rangeDomainType, LayerSetPayload } from '@/api/events/payloads';
+import {
+  codedValueType,
+  rangeDomainType,
+  LayerSetPayload,
+  TypeFeatureInfoEntry,
+  TypeFeatureInfoEntryPartial,
+  TypeFieldEntry,
+} from '@/api/events/payloads';
 
 /** ***************************************************************************************************************************
  * This method reads the service metadata from the metadataAccessPath.
@@ -353,4 +360,47 @@ export function commonProcessLayerMetadata(
       });
     } else resolve();
   }
+}
+
+/**
+ * Transforms the query results of an Esri service response - when not querying on the Layers themselves (giving a 'reduced' FeatureInfoEntry).
+ * The transformation reads the Esri formatted information and return a list of `TypeFeatureInfoEntryPartial` records.
+ * In a similar fashion and response object as the "Query Feature Infos" functionalities done via the Layers.
+ * @param results TypeJsonObject The Json Object representing the data from Esri.
+ * @returns TypeFeatureInfoEntryPartial[] an array of relared records of type TypeFeatureInfoEntryPartial
+ */
+export function parseFeatureInfoEntries(results: TypeJsonObject[]): TypeFeatureInfoEntryPartial[] {
+  // Loop on the Esri results
+  return results.map((x) => {
+    // Prep the TypeFeatureInfoEntryPartial
+    const featInfo: TypeFeatureInfoEntryPartial = {
+      fieldInfo: {},
+    };
+
+    // Loop on the Esri attributes
+    Object.entries(x.attributes).forEach((v: [string, unknown]) => {
+      featInfo.fieldInfo[v[0]] = { value: v[1] } as TypeFieldEntry;
+    });
+
+    // Return the TypeFeatureInfoEntryPartial
+    return featInfo;
+  });
+}
+
+/**
+ * Asynchronously queries an Esri relationship table given the url and returns an array of `TypeFeatureInfoEntryPartial` records.
+ * @param url string An Esri url indicating a relationship table to query
+ * @param recordGroupIndex number The group index of the relationship layer on which to read the related records
+ * @returns TypeFeatureInfoEntryPartial[] An array of relared records of type TypeFeatureInfoEntryPartial, or an empty array.
+ */
+export async function queryRelatedRecordsByUrl(url: string, recordGroupIndex: number): Promise<TypeFeatureInfoEntryPartial[]> {
+  // Query the data
+  const response = await fetch(url);
+  const respJson = await response.json();
+
+  // If any related record groups found
+  if (respJson.relatedRecordGroups.length > 0)
+    // Return the array of TypeFeatureInfoEntryPartial
+    return parseFeatureInfoEntries(respJson.relatedRecordGroups[recordGroupIndex].relatedRecords);
+  return Promise.resolve([]);
 }
