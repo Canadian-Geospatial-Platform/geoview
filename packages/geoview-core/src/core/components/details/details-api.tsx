@@ -1,7 +1,8 @@
 import { createElement, ReactElement } from 'react';
 import { FeatureInfoLayerSet } from '@/geo/utils/feature-info-layer-set';
 import { api } from '@/app';
-import { DetailsFooter, TypeArrayOfLayerData } from './details';
+import { DetailsFooter } from './details';
+import { TypeArrayOfLayerData } from '@/api/events/payloads/get-feature-info-payload';
 
 /**
  * API to manage details component

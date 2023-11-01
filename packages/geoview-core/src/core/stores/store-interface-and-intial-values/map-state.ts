@@ -27,15 +27,15 @@ interface TypeScaleInfo {
 
 export interface IMapState {
   centerCoordinates: Coordinate;
-  clickCoordinates: TypeMapMouseInfo | undefined;
+  clickCoordinates?: TypeMapMouseInfo;
   currentProjection: TypeValidMapProjectionCodes;
   fixNorth: boolean;
   interaction: TypeInteraction;
-  pointerPosition: TypeMapMouseInfo | undefined;
-  mapElement: OLMap;
+  pointerPosition?: TypeMapMouseInfo;
+  mapElement?: OLMap;
   mapLoaded: boolean;
   northArrow: boolean;
-  overlayNorthMarker: Overlay;
+  overlayNorthMarker?: Overlay;
   overviewMap: boolean;
   overviewMapHideZoom: number;
   rotation: number;
@@ -71,17 +71,20 @@ function setScale(mapId: string): TypeScaleInfo {
   return { lineWidth, labelGraphic, labelNumeric };
 }
 
-export function initializeMapState(set: TypeSetStore, get: TypeGetStore) {
+export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapState {
   const init = {
     centerCoordinates: [0, 0] as Coordinate,
-    currentProjection: 3857,
+    currentProjection: 3857 as TypeValidMapProjectionCodes,
     fixNorth: false,
     mapLoaded: false,
     overviewMapHideZoom: 0,
     pointerPosition: undefined,
     rotation: 0,
-    scale: { lineWidth: '', labelGraphic: '', labelNumeric: '' },
+    scale: { lineWidth: '', labelGraphic: '', labelNumeric: '' } as TypeScaleInfo,
     zoom: 0,
+    interaction: 'static' as TypeInteraction,
+    northArrow: false,
+    overviewMap: false,
 
     onMapMoveEnd: debounce((event: MapEvent) => {
       const coords = event.map.getView().getCenter()!;
@@ -108,7 +111,7 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore) {
             ...get().mapState,
             pointerPosition: {
               projected: coords,
-              pixel: get().mapState.mapElement.getPixelFromCoordinate(coords),
+              pixel: get().mapState.mapElement!.getPixelFromCoordinate(coords),
               lnglat: toLonLat(coords, `EPSG:${get().mapState.currentProjection}`),
               dragging: false,
             },
@@ -192,12 +195,12 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore) {
 
         // replace the KeyboardPan interraction by a new one
         // const mapElement = mapElementRef.current;
-        mapElement.getInteractions().forEach((interactionItem) => {
+        mapElement!.getInteractions().forEach((interactionItem) => {
           if (interactionItem instanceof KeyboardPan) {
-            mapElement.removeInteraction(interactionItem);
+            mapElement!.removeInteraction(interactionItem);
           }
         });
-        mapElement.addInteraction(new KeyboardPan({ pixelDelta: panDelta }));
+        mapElement!.addInteraction(new KeyboardPan({ pixelDelta: panDelta }));
       },
       setOverlayNorthMarker: (overlay: Overlay) => {
         set({
@@ -220,7 +223,7 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore) {
         });
 
         // set ol map rotation
-        get().mapState.mapElement.getView().animate({ rotation: degree });
+        get().mapState.mapElement!.getView().animate({ rotation: degree });
       },
       setZoom: (zoom: number) => {
         set({
@@ -230,7 +233,7 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore) {
           },
         });
 
-        get().mapState.mapElement.getView().animate({ zoom, duration: OL_ZOOM_DURATION });
+        get().mapState.mapElement!.getView().animate({ zoom, duration: OL_ZOOM_DURATION });
       },
       zoomToInitialExtent: () => {
         const { center, zoom } = get().mapConfig!.map.viewSettings;
