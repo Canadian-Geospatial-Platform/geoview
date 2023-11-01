@@ -1,8 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { useTheme } from '@mui/material/styles';
-
-import { useStore } from 'zustand';
-
 import { Projection } from 'ol/proj';
 import { useTranslation } from 'react-i18next';
 import {
@@ -26,9 +23,15 @@ import {
 } from '@/ui';
 import MapDataTable, { MapDataTableData as MapDataTableDataProps } from './map-data-table';
 import { getSxClasses } from './data-table-style';
-import { getGeoViewStore } from '@/core/stores/stores-managers';
 import { GroupLayers } from './data-table-api';
 import { TypeDisplayLanguage, TypeLocalizedString } from '@/geo/map/map-schema-types';
+import {
+  useDataTableStoreActions,
+  useDataTableStoreIsEnlargeDataTable,
+  useDataTableStoreMapFilteredRecord,
+  useDataTableStoreRowsFiltered,
+  useDataTableStoreSelectedLayerIndex,
+} from '@/core/stores/store-interface-and-intial-values/data-table-state';
 
 interface DatapanelProps {
   layerData: (MapDataTableDataProps & GroupLayers)[];
@@ -49,12 +52,14 @@ export function Datapanel({ layerData, mapId, projectionConfig, language }: Data
   const { t } = useTranslation();
   const theme = useTheme();
   const sxClasses = getSxClasses(theme);
-  const store = getGeoViewStore(mapId);
 
   const [isLoading, setIsLoading] = useState(false);
 
-  const { selectedLayerIndex, setSelectedLayerIndex, isEnlargeDataTable, setIsEnlargeDataTable, mapFilteredMap, rowsFilteredMap } =
-    useStore(store, (state) => state.dataTableState);
+  const selectedLayerIndex = useDataTableStoreSelectedLayerIndex();
+  const isEnlargeDataTable = useDataTableStoreIsEnlargeDataTable();
+  const mapFiltered = useDataTableStoreMapFilteredRecord();
+  const rowsFiltered = useDataTableStoreRowsFiltered();
+  const { setSelectedLayerIndex, setIsEnlargeDataTable } = useDataTableStoreActions();
 
   const handleListItemClick = useCallback((event: React.MouseEvent<HTMLDivElement, MouseEvent>, index: number) => {
     setSelectedLayerIndex(index);
@@ -67,7 +72,7 @@ export function Datapanel({ layerData, mapId, projectionConfig, language }: Data
    * @param {string} layerKey The key of the layer
    * @returns boolean
    */
-  const isMapFilteredSelectedForLayer = (layerKey: string): boolean => !!mapFilteredMap[layerKey];
+  const isMapFilteredSelectedForLayer = (layerKey: string): boolean => !!mapFiltered[layerKey];
 
   /**
    * Get number of features of a layer with filtered or selected layer.
@@ -76,8 +81,8 @@ export function Datapanel({ layerData, mapId, projectionConfig, language }: Data
    * @returns
    */
   const getFeaturesOfLayer = (layerKey: string, index: number): string => {
-    return rowsFilteredMap[layerKey]
-      ? `${rowsFilteredMap[layerKey]} ${t('dataTable.featureFiltered')}`
+    return rowsFiltered[layerKey]
+      ? `${rowsFiltered[layerKey]} ${t('dataTable.featureFiltered')}`
       : `${layerData[index].features.length} ${t('dataTable.features')}`;
   };
 

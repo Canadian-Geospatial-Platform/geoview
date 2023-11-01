@@ -1,14 +1,15 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { useStore } from 'zustand';
 import { Switch, useTheme } from '@mui/material';
 import { Tooltip } from '@/ui';
-import { getGeoViewStore } from '@/core/stores/stores-managers';
 import { getSxClasses } from './data-table-style';
+import {
+  useDataTableStoreActions,
+  useDataTableStoreMapFilteredRecord,
+} from '@/core/stores/store-interface-and-intial-values/data-table-state';
 
 interface FilterMapProps {
   layerKey: string;
-  mapId: string;
 }
 
 /**
@@ -18,20 +19,20 @@ interface FilterMapProps {
  * @returns {JSX.Element} returns Switch
  *
  */
-function FilterMap({ layerKey, mapId }: FilterMapProps): JSX.Element {
-  const store = getGeoViewStore(mapId);
+function FilterMap({ layerKey }: FilterMapProps): JSX.Element {
   const theme = useTheme();
   const sxClasses = getSxClasses(theme);
 
-  const { mapFilteredMap, setMapFilteredMap } = useStore(store, (state) => state.dataTableState);
+  const mapFiltered = useDataTableStoreMapFilteredRecord();
+  const { setMapFilteredEntry } = useDataTableStoreActions();
 
   const { t } = useTranslation();
   return (
-    <Tooltip title={mapFilteredMap[layerKey] ? t('dataTable.stopFilterMap') : t('dataTable.filterMap')}>
+    <Tooltip title={mapFiltered[layerKey] ? t('dataTable.stopFilterMap') : t('dataTable.filterMap')}>
       <Switch
         size="medium"
-        onChange={() => setMapFilteredMap(!mapFilteredMap[layerKey] ?? true, layerKey)}
-        checked={!!mapFilteredMap[layerKey]}
+        onChange={() => setMapFilteredEntry(!mapFiltered[layerKey] ?? true, layerKey)}
+        checked={!!mapFiltered[layerKey]}
         sx={sxClasses.filterMap}
       />
     </Tooltip>

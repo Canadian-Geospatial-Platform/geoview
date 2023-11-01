@@ -41,7 +41,7 @@ import {
   rangeDomainType,
   TypeArrayOfFeatureInfoEntries,
   TypeFeatureInfoEntry,
-  TypeQueryType,
+  QueryType,
   LayerSetPayload,
   payloadIsRequestLayerInventory,
   GetLegendsPayload,
@@ -743,14 +743,14 @@ export abstract class AbstractGeoViewLayer {
   /** ***************************************************************************************************************************
    * Return feature information for the layer specified.
    *
-   * @param {TypeQueryType} queryType  The type of query to perform.
+   * @param {QueryType} queryType  The type of query to perform.
    * @param {string | TypeLayerEntryConfig | null} layerPathOrConfig Optional layer path or configuration.
    * @param {TypeLocation} location An optionsl pixel, coordinate or polygon that will be used by the query.
    *
    * @returns {Promise<TypeFeatureInfoResult>} The feature info table.
    */
   async getFeatureInfo(
-    queryType: TypeQueryType,
+    queryType: QueryType,
     layerPathOrConfig: string | TypeLayerEntryConfig,
     location: TypeLocation = null
   ): Promise<TypeArrayOfFeatureInfoEntries> {
@@ -798,9 +798,9 @@ export abstract class AbstractGeoViewLayer {
    * @returns {Promise<TypeArrayOfFeatureInfoEntries>} The feature info table.
    */
 
-  protected async getAllFeatureInfo(layerConfig: TypeLayerEntryConfig): Promise<TypeArrayOfFeatureInfoEntries> {
+  protected getAllFeatureInfo(layerConfig: TypeLayerEntryConfig): Promise<TypeArrayOfFeatureInfoEntries> {
     console.log('getAllFeatureInfo is not implemented!');
-    return [];
+    return Promise.resolve([]);
   }
 
   /** ***************************************************************************************************************************
@@ -813,9 +813,9 @@ export abstract class AbstractGeoViewLayer {
    * @returns {Promise<TypeArrayOfFeatureInfoEntries>} The feature info table.
    */
 
-  protected async getFeatureInfoAtPixel(location: Pixel, layerConfig: TypeLayerEntryConfig): Promise<TypeArrayOfFeatureInfoEntries> {
+  protected getFeatureInfoAtPixel(location: Pixel, layerConfig: TypeLayerEntryConfig): Promise<TypeArrayOfFeatureInfoEntries> {
     console.log('getFeatureInfoAtPixel is not implemented!');
-    return [];
+    return Promise.resolve([]);
   }
 
   /** ***************************************************************************************************************************
@@ -828,12 +828,9 @@ export abstract class AbstractGeoViewLayer {
    * @returns {Promise<TypeArrayOfFeatureInfoEntries>} The feature info table.
    */
 
-  protected async getFeatureInfoAtCoordinate(
-    location: Coordinate,
-    layerConfig: TypeLayerEntryConfig
-  ): Promise<TypeArrayOfFeatureInfoEntries> {
+  protected getFeatureInfoAtCoordinate(location: Coordinate, layerConfig: TypeLayerEntryConfig): Promise<TypeArrayOfFeatureInfoEntries> {
     console.log('getFeatureInfoAtCoordinate is not implemented!');
-    return [];
+    return Promise.resolve([]);
   }
 
   /** ***************************************************************************************************************************
@@ -846,9 +843,9 @@ export abstract class AbstractGeoViewLayer {
    * @returns {Promise<TypeArrayOfFeatureInfoEntries>} The feature info table.
    */
 
-  protected async getFeatureInfoAtLongLat(location: Coordinate, layerConfig: TypeLayerEntryConfig): Promise<TypeArrayOfFeatureInfoEntries> {
+  protected getFeatureInfoAtLongLat(location: Coordinate, layerConfig: TypeLayerEntryConfig): Promise<TypeArrayOfFeatureInfoEntries> {
     console.log('getFeatureInfoAtLongLat is not implemented!');
-    return [];
+    return Promise.resolve([]);
   }
 
   /** ***************************************************************************************************************************
@@ -861,12 +858,9 @@ export abstract class AbstractGeoViewLayer {
    * @returns {Promise<TypeArrayOfFeatureInfoEntries>} The feature info table.
    */
 
-  protected async getFeatureInfoUsingBBox(
-    location: Coordinate[],
-    layerConfig: TypeLayerEntryConfig
-  ): Promise<TypeArrayOfFeatureInfoEntries> {
+  protected getFeatureInfoUsingBBox(location: Coordinate[], layerConfig: TypeLayerEntryConfig): Promise<TypeArrayOfFeatureInfoEntries> {
     console.log('getFeatureInfoUsingBBox is not implemented!');
-    return [];
+    return Promise.resolve([]);
   }
 
   /** ***************************************************************************************************************************
@@ -879,12 +873,9 @@ export abstract class AbstractGeoViewLayer {
    * @returns {Promise<TypeArrayOfFeatureInfoEntries>} The feature info table.
    */
 
-  protected async getFeatureInfoUsingPolygon(
-    location: Coordinate[],
-    layerConfig: TypeLayerEntryConfig
-  ): Promise<TypeArrayOfFeatureInfoEntries> {
+  protected getFeatureInfoUsingPolygon(location: Coordinate[], layerConfig: TypeLayerEntryConfig): Promise<TypeArrayOfFeatureInfoEntries> {
     console.log('getFeatureInfoUsingPolygon is not implemented!');
-    return [];
+    return Promise.resolve([]);
   }
 
   /** ***************************************************************************************************************************
@@ -934,9 +925,9 @@ export abstract class AbstractGeoViewLayer {
         // Listen to events that request to query a layer and return the resultset to the requester.
         this.registerToLayerSetListenerFunctions[layerPath].queryLayer = (payload) => {
           if (payloadIsQueryLayer(payload)) {
-            const { queryType, location, isHover } = payload;
+            const { queryType, location, eventType } = payload;
             this.getFeatureInfo(queryType, layerPath, location).then((queryResult) => {
-              api.event.emit(GetFeatureInfoPayload.createQueryResultPayload(this.mapId, layerPath, queryType, queryResult, isHover));
+              api.event.emit(GetFeatureInfoPayload.createQueryResultPayload(this.mapId, layerPath, queryType, queryResult, eventType));
             });
           }
         };

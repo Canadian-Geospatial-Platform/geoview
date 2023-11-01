@@ -11,18 +11,15 @@ import { MapContext } from '@/core/app-start';
 export interface StoresManagerState {
   stores: Record<string, GeoViewStoreType>;
 }
-
 export const useStoresManager = createStore<StoresManagerState>(() => ({
   stores: {},
 }));
-
 export const addGeoViewStore = (config: TypeMapFeaturesConfig) => {
   if (!config.mapId) {
     return;
   }
   const geoViewStore = create<IGeoViewState>()(geoViewStoreDefinitionWithSubscribeSelector);
   geoViewStore.getState().setMapConfig(config);
-
   // initialize static initial value from config before the event processor (config has been validated already)
   geoViewStore.setState({
     mapState: {
@@ -34,21 +31,17 @@ export const addGeoViewStore = (config: TypeMapFeaturesConfig) => {
       overviewMapHideZoom: config.overviewMap !== undefined ? config.overviewMap.hideOnZoom : 0,
     },
   });
-
   initializeEventProcessors(geoViewStore);
-
   useStoresManager.setState((state) => ({
     stores: {
       ...state.stores,
       [config.mapId ?? 'unknown']: geoViewStore,
     },
   }));
-
   if (process.env.NODE_ENV === 'development') {
     mountStoreDevtool(`getViewStore-${config.mapId}`, geoViewStore);
   }
 };
-
 export const getGeoViewStore = (id: string | undefined) => {
   return useStoresManager.getState().stores[id ?? 'unknown'];
 };

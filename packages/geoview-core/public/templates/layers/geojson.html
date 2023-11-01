@@ -127,7 +127,7 @@
       <label> Added Layer ID : </label> <label id="new-layer-id-label"></label>
     </pre>
     <button type="button" class="collapsible">Get Feature Info</button>
-    <pre id="ResultSetId1-at_long_lat" class="panel">Click on feature on the map</pre>
+    <pre id="ResultSetId1-click" class="panel">Click on feature on the map</pre>
     <button type="button" class="collapsible" id="AllFeatureInfo1">Get All Feature Info</button>
     <pre id="ResultSetId1-all" class="panel"></pre>
     <hr />
@@ -218,8 +218,8 @@
       cgpv.api.event.on(
         cgpv.api.eventNames.GET_FEATURE_INFO.ALL_QUERIES_DONE,
         (payload) => {
-          const { layerSetId, resultSets, queryType } = payload;
-          createInfoTable('LYR1', 'ResultSetId1', resultSets, queryType);
+          const { layerSetId, resultSets, eventType } = payload;
+          createInfoTable('LYR1', 'ResultSetId1', resultSets, eventType);
         },
         'LYR1/FeatureInfoLayerSet'
       );
