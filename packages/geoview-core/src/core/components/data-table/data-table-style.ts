@@ -131,6 +131,16 @@ export const getSxClasses = (theme: Theme) => ({
       borderRadius: '6px',
     },
   },
+  filterMap: {
+    '& .Mui-checked': {
+      '& .MuiTouchRipple-root': {
+        color: theme.palette.action.active,
+      },
+    },
+    '& .MuiTouchRipple-root': {
+      color: theme.palette.grey['900'],
+    },
+  },
   tableHeadCell: {
     [theme.breakpoints.down('lg')]: {
       '& .MuiCollapse-wrapperInner': {

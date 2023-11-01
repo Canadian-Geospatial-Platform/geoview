@@ -1,9 +1,10 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useStore } from 'zustand';
-import { Switch } from '@mui/material';
+import { Switch, useTheme } from '@mui/material';
 import { Tooltip } from '@/ui';
 import { getGeoViewStore } from '@/core/stores/stores-managers';
+import { getSxClasses } from './data-table-style';
 
 interface FilterMapProps {
   layerKey: string;
@@ -19,6 +20,9 @@ interface FilterMapProps {
  */
 function FilterMap({ layerKey, mapId }: FilterMapProps): JSX.Element {
   const store = getGeoViewStore(mapId);
+  const theme = useTheme();
+  const sxClasses = getSxClasses(theme);
+
   const { mapFilteredMap, setMapFilteredMap } = useStore(store, (state) => state.dataTableState);
 
   const { t } = useTranslation();
@@ -28,6 +32,7 @@ function FilterMap({ layerKey, mapId }: FilterMapProps): JSX.Element {
         size="medium"
         onChange={() => setMapFilteredMap(!mapFilteredMap[layerKey] ?? true, layerKey)}
         checked={!!mapFilteredMap[layerKey]}
+        sx={sxClasses.filterMap}
       />
     </Tooltip>
   );
