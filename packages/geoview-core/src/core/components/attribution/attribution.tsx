@@ -11,6 +11,7 @@ import { getGeoViewStore } from '@/core/stores/stores-managers';
 import { MapContext } from '@/core/app-start';
 import { Tooltip, Box } from '@/ui';
 import { getSxClasses } from './attribution-style';
+import { useUIFooterBarExpanded } from '@/core/stores/ui-state';
 
 /**
  * Custom Attribution control that extends Openlayers Attribution control.
@@ -85,7 +86,7 @@ export function Attribution(): JSX.Element {
 
   // get store values
   const mapElement = useStore(getGeoViewStore(mapId), (state) => state.mapState.mapElement);
-  const expanded = useStore(getGeoViewStore(mapId), (state) => state.footerBarState.expanded);
+  const expanded = useUIFooterBarExpanded(mapId);
 
   useEffect(() => {
     let attributionControl: CustomAttribution;

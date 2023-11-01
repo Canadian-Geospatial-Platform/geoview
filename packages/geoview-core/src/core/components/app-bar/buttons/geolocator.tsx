@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { IconButton, SearchIcon } from '@/ui';
-import { getGeoViewStore } from '@/core/stores/stores-managers';
+import { useUIStoreActions } from '@/core/stores/ui-state';
 
 /**
  * Interface used for geolocator button properties
@@ -25,13 +25,16 @@ const defaultProps = {
 export default function Geolocator(props: GeolocatorProps): JSX.Element {
   const { mapId, sx = {} } = props;
   const [active, setActive] = useState(true);
-  const store = getGeoViewStore(mapId);
+
+  const { setGeolocatorActive } = useUIStoreActions(mapId);
 
   const click = () => {
     setActive(!active);
-    store.setState({
-      appBarState: { ...store.getState().appBarState, geoLocatorActive: active },
-    });
+
+    setGeolocatorActive(active);
+    // store.setState({
+    //   appBarState: { ...store.getState().appBarState, geoLocatorActive: active },
+    // });
   };
 
   return (

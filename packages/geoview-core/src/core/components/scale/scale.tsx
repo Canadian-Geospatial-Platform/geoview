@@ -4,12 +4,13 @@ import { ScaleLine } from 'ol/control';
 import { useTranslation } from 'react-i18next';
 
 import { useTheme } from '@mui/material';
-import { useStore } from 'zustand';
 import { getGeoViewStore } from '@/core/stores/stores-managers';
 
 import { MapContext } from '@/core/app-start';
 import { CheckIcon, Tooltip, Box, Button } from '@/ui';
 import { getSxClasses } from './scale-style';
+import { useMapElement, useMapStoreActions } from '@/core/stores/map-state';
+import { useUIFooterBarExpanded } from '@/core/stores/ui-state';
 
 interface TypeScale {
   scaleId: string;
@@ -35,8 +36,11 @@ export function Scale(): JSX.Element {
   const [scaleNumeric, setScaleNumeric] = useState<string>('');
 
   // get the values from store
-  const expanded = useStore(getGeoViewStore(mapId), (state) => state.footerBarState.expanded);
-  const mapElement = useStore(getGeoViewStore(mapId), (state) => state.mapState.mapElement);
+  const expanded = useUIFooterBarExpanded(mapId);
+
+  const mapElement = useMapElement(mapId); // useStore(getGeoViewStore(mapId), (state) => state.mapState.mapElement);
+  const { setMessage } = useMapStoreActions(mapId);
+  setMessage();
 
   const theme = useTheme();
 

@@ -337,4 +337,19 @@ export class GeoUtilities {
 
     return values;
   };
+
+  /**
+   * Format the coordinates for degrees - minutes - seconds (lat, long)
+   * @param {number} value the value to format
+   * @returns {string} the formatted value
+   */
+  coordFormnatDMS(value: number): string {
+    // degree char
+    const deg = String.fromCharCode(176);
+
+    const d = Math.floor(Math.abs(value)) * (value < 0 ? -1 : 1);
+    const m = Math.floor(Math.abs((value - d) * 60));
+    const s = Math.round((Math.abs(value) - Math.abs(d) - m / 60) * 3600);
+    return `${Math.abs(d)}${deg} ${m >= 10 ? `${m}` : `0${m}`}' ${s >= 10 ? `${s}` : `0${s}`}"`;
+  }
 }
