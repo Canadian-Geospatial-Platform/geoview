@@ -1,7 +1,8 @@
 {
   "general": {
     "close": "Close",
-    "open": "Open"
+    "open": "Open",
+    "layers": "Layers"
   },
   "mapnav": {
     "arianavbar": "vertical button group for map navigation",

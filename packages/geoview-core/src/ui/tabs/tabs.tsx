@@ -17,6 +17,7 @@ export type TypeTabs = {
   value: number;
   label: string;
   content: TypeChildren | string;
+  icon?: JSX.Element;
 };
 
 /**
@@ -88,16 +89,23 @@ export function Tabs(props: TypeTabsProps): JSX.Element {
               <MaterialTab
                 label={tab.label}
                 key={index}
+                icon={tab.icon}
+                iconPosition="start"
                 {...props.tabProps}
                 id={`tab-${index}`}
                 onClick={() => handleClick(index)}
                 sx={{
                   fontSize: 16,
+                  fontWeight: 'bold',
                   minWidth: 'min(4vw, 24px)',
                   padding: '16px 2%',
                   textTransform: 'capitalize',
                   '&.Mui-selected': {
                     color: 'secondary.main',
+                  },
+                  '.MuiTab-iconWrapper': {
+                    marginRight: '7px',
+                    maxWidth: '18px',
                   },
                 }}
               />

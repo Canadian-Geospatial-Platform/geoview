@@ -32,9 +32,9 @@ import {
   TypeWmsLegendStyle,
 } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { TypeListOfLayerEntryConfig, TypeDisplayLanguage, layerEntryIsGroupLayer } from '@/geo/map/map-schema-types';
-import { disableScrolling } from '../../utils/utilities';
-import { WMSStyleItem } from './WMS-style-item';
-import { TypeLegendItemProps } from './types';
+import { disableScrolling } from '../../../utils/utilities';
+import { WMSStyleItem } from '../right-panel/WMS-style-item';
+import { TypeLegendItemProps } from '../types';
 import { getGeoViewStore } from '@/core/stores/stores-managers';
 
 const sxClasses = {
@@ -137,7 +137,7 @@ const sxClasses = {
  *
  * @returns {JSX.Element} the legend list item
  */
-export function LegendItem(props: TypeLegendItemProps): JSX.Element {
+export function SingleLayer(props: TypeLegendItemProps): JSX.Element {
   const {
     layerId,
     geoviewLayerInstance,
@@ -313,7 +313,7 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
   const handleLegendClick = () => {
     setLegendOpen(!isLegendOpen);
     store.setState({
-      legendState: { ...store.getState().legendState, selectedItem: props, currentRightPanelDisplay: 'layer-details' },
+      legendState: { ...store.getState().legendState, selectedItem: props },
     });
     const legendDetails = document.querySelector('#legend-details-container');
     if (legendDetails) {
@@ -472,7 +472,7 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
           {groupItems.length > 0 && (
             <Box sx={sxClasses.subLegendItemsContainer}>
               {groupItems.map((subItem) => (
-                <LegendItem
+                <SingleLayer
                   key={subItem.layerId}
                   layerId={layerId}
                   geoviewLayerInstance={geoviewLayerInstance}

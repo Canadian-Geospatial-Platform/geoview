@@ -2,7 +2,11 @@ import { Theme } from '@mui/material/styles';
 
 export const getSxClasses = (theme: Theme) => ({
   container: {
-    padding: '10px 0px 20px 0px',
+    background: theme.footerPanel.contentBg,
+    boxShadow: theme.footerPanel.contentShadow,
+    padding: '20px',
+    display: 'flex',
+    flexDirection: 'column',
   },
   title: {
     textAlign: 'left',

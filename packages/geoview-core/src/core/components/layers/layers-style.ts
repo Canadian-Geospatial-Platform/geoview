@@ -47,7 +47,7 @@ export const getSxClasses = (theme: Theme) => ({
   legendContainer: {
     background: theme.footerPanel.contentBg,
     boxShadow: theme.footerPanel.contentShadow,
-    padding: '40px 20px 20px 20px',
+    padding: '20px',
     display: 'flex',
     flexDirection: 'column',
   },
@@ -83,5 +83,6 @@ export const getSxClasses = (theme: Theme) => ({
   },
   legendItemContainer: {
     border: '2px solid red',
+    width: '100%',
   },
 });

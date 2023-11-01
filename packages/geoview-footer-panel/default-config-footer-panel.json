@@ -2,6 +2,7 @@
   "tabs": {
     "defaultTabs": [
       "legend",
+      "layers",
       "details",
       "data-table"
     ],

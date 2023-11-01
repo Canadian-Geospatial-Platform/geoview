@@ -22,8 +22,10 @@ import { NavbarButtons } from '@/core/components/nav-bar/nav-bar-buttons';
 import { FooterTabsApi } from '@/core/components/footer-tabs/footer-tabs-api';
 import { LegendApi } from '@/core/components/legend/legend-api';
 import { Legend2Api } from '@/core/components/legend-2/legend-api';
+import { LayersApi } from '@/core/components/layers/layers-api';
 import { DetailsApi } from '@/core/components/details/details-api';
 import { DataTableApi } from '@/core/components/data-table/data-table-api';
+import { TimeSliderApi } from '@/core/components/time-slider/time-slider-api';
 import { GeoviewRenderer } from '@/geo/renderer/geoview-renderer';
 import { Select } from '@/geo/interaction/select';
 import { Draw } from '@/geo/interaction/draw';
@@ -85,11 +87,17 @@ export class MapViewer {
 
   legend2!: Legend2Api;
 
+  // used to access the layers in the footer
+  layers!: LayersApi;
+
   // used to access the details in footer
   details!: DetailsApi;
 
   // used to access the data table api
   dataTable!: DataTableApi;
+
+  // used to access the range finder api
+  timeSlider!: TimeSliderApi;
 
   // used to access basemap functions
   basemap!: Basemap;
@@ -149,8 +157,10 @@ export class MapViewer {
     this.footerTabs = new FooterTabsApi(this.mapId);
     this.legend = new LegendApi(this.mapId);
     this.legend2 = new Legend2Api(this.mapId);
+    this.layers = new LayersApi(this.mapId);
     this.details = new DetailsApi(this.mapId);
     this.dataTable = new DataTableApi(this.mapId);
+    this.timeSlider = new TimeSliderApi(this.mapId);
 
     this.modal = new ModalApi(this.mapId);
 

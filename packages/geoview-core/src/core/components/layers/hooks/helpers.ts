@@ -2,7 +2,7 @@ import _ from 'lodash';
 import { isVectorLegend, isWmsLegend, isImageStaticLegend, TypeLayerStyles } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { api } from '@/app';
 import { TypeLocalizedString } from '@/geo/map/map-schema-types';
-import { TypeLegendLayer, TypeLegendLayerIcon, TypeLegendLayerItem } from './types';
+import { TypeLegendLayer, TypeLegendLayerIcon, TypeLegendLayerItem } from '../types';
 import { getGeoViewStore } from '@/core/stores/stores-managers';
 
 export function useLegendHelpers(mapId: string) {
