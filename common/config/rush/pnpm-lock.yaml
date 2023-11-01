@@ -187,6 +187,7 @@ importers:
       sanitize-html: ^2.7.3
       sass: ^1.49.7
       sass-loader: ^12.4.0
+      simple-zustand-devtools: ^1.1.0
       sql.js: ^1.8.0
       style-loader: ^3.3.1
       terser-webpack-plugin: ^5.3.1
@@ -304,6 +305,7 @@ importers:
       prettier: 2.8.8
       sass: 1.69.4
       sass-loader: 12.6.0_sass@1.69.4+webpack@5.89.0
+      simple-zustand-devtools: 1.1.0_zr5dtsu56lipaouzgk56lvyhmy
       style-loader: 3.3.3_webpack@5.89.0
       terser-webpack-plugin: 5.3.9_webpack@5.89.0
       typedoc: 0.23.28_typescript@4.9.5
@@ -8754,6 +8756,22 @@ packages:
     resolution: {integrity: sha512-wnD2ZE+l+SPC/uoS0vXeE9L1+0wuaMqKlfz9AMUo38JsyLSBWSFcHR1Rri62LZc12vLr1gb3jl7iwQhgwpAbGQ==}
     dev: true
 
+  /simple-zustand-devtools/1.1.0_zr5dtsu56lipaouzgk56lvyhmy:
+    resolution: {integrity: sha512-Axfcfr9L3YL3kto7aschCQLY2VUlXXMnIVtaTe9Y0qWbNmPsX/y7KsNprmxBZoB0pww5ZGs1u/ohcrvQ3tE6jA==}
+    peerDependencies:
+      '@types/react': '>=18.0.0'
+      '@types/react-dom': '>=18.0.0'
+      react: '>=18.0.0'
+      react-dom: '>=18.0.0'
+      zustand: '>=1.0.2'
+    dependencies:
+      '@types/react': 18.2.31
+      '@types/react-dom': 18.2.14
+      react: 18.2.0
+      react-dom: 18.2.0_react@18.2.0
+      zustand: 4.4.4_uruz7wj5nvbintwsrh6fwqb4ri
+    dev: true
+
   /sirv/2.0.3:
     resolution: {integrity: sha512-O9jm9BsID1P+0HOi81VpXPoDxYP374pkOLzACAoyUQ/3OUVndNpsz6wMnY2z+yOxzbllCKZrM+9QrWsv4THnyA==}
     engines: {node: '>= 10'}
@@ -9401,7 +9419,6 @@ packages:
       react: ^16.8.0 || ^17.0.0 || ^18.0.0
     dependencies:
       react: 18.2.0
-    dev: false
 
   /util-deprecate/1.0.2:
     resolution: {integrity: sha512-EPD5q1uXyFxJpCrLnCc1nHnq3gOa6DZBocAIiI2TaSCA7VCJ1UJDMagCzIkXNsUYfD1daK//LTEQ8xiIbrHtcw==}
@@ -9926,4 +9943,3 @@ packages:
       '@types/react': 18.2.31
       react: 18.2.0
       use-sync-external-store: 1.2.0_react@18.2.0
-    dev: false
