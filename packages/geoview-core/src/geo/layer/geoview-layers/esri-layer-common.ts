@@ -373,17 +373,17 @@ export function parseFeatureInfoEntries(results: TypeJsonObject[]): TypeFeatureI
   // Loop on the Esri results
   return results.map((x) => {
     // Prep the TypeFeatureInfoEntryPartial
-    const fi: TypeFeatureInfoEntryPartial = {
+    const featInfo: TypeFeatureInfoEntryPartial = {
       fieldInfo: {},
     };
 
     // Loop on the Esri attributes
     Object.entries(x.attributes).forEach((v: [string, unknown]) => {
-      fi.fieldInfo[v[0]] = { value: v[1] } as TypeFieldEntry;
+      featInfo.fieldInfo[v[0]] = { value: v[1] } as TypeFieldEntry;
     });
 
     // Return the TypeFeatureInfoEntryPartial
-    return fi;
+    return featInfo;
   });
 }
 

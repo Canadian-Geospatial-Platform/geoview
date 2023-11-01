@@ -84,6 +84,7 @@ export type TypeFeatureInfoByQueryTypes = {
 };
 
 // TODO: Refactor - Should probably call this a 'ResultsSet' instead of 'ResultSets' to avoid confusion, because it's a single set of results, not multiple sets of result(s).
+// https://www.totaltypescript.com/tips/how-to-name-your-types
 export type TypeFeatureInfoResultSets = {
   [layerPath: string]: {
     layerStatus: TypeLayerStatus;
