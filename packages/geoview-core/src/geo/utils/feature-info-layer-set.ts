@@ -8,10 +8,11 @@ import {
   TypeFeatureInfoResultSets,
   payloadIsAMapMouseEvent,
   payloadIsALngLat,
-  ArrayOfQueryTypes,
+  ArrayOfEventTypes,
 } from '@/api/events/payloads';
-import { api } from '@/app';
+import { api, getLocalizedValue } from '@/app';
 import { LayerSet } from './layer-set';
+import { FeatureInfoEventProcessor } from '@/api/eventProcessors/feature-info-event-processor';
 
 /** ***************************************************************************************************************************
  * A class to hold a set of layers associated with an array of TypeArrayOfFeatureInfoEntries. When this class is instantiated,
@@ -53,8 +54,8 @@ export class FeatureInfoLayerSet {
     // This function is used to initialise the date property of the layer path entry.
     const registrationUserDataInitialisation = (layerPath: string) => {
       this.resultSets[layerPath].data = {};
-      ArrayOfQueryTypes.forEach((property) => {
-        this.resultSets[layerPath].data[property] = undefined;
+      ArrayOfEventTypes.forEach((eventType) => {
+        this.resultSets[layerPath].data[eventType] = undefined;
       });
     };
 
@@ -73,9 +74,9 @@ export class FeatureInfoLayerSet {
       (payload) => {
         if (payloadIsAMapMouseEvent(payload)) {
           Object.keys(this.resultSets).forEach((layerPath) => {
-            this.resultSets[layerPath].data.at_long_lat = undefined;
+            this.resultSets[layerPath].data.click = undefined;
           });
-          api.event.emit(GetFeatureInfoPayload.createQueryLayerPayload(this.mapId, 'at_long_lat', payload.coordinates.lnglat, false));
+          api.event.emit(GetFeatureInfoPayload.createQueryLayerPayload(this.mapId, 'at_long_lat', payload.coordinates.lnglat, 'click'));
         }
       },
       this.mapId
@@ -86,9 +87,9 @@ export class FeatureInfoLayerSet {
       (payload) => {
         if (payloadIsALngLat(payload)) {
           Object.keys(this.resultSets).forEach((layerPath) => {
-            this.resultSets[layerPath].data.at_long_lat = undefined;
+            this.resultSets[layerPath].data['crosshaire-enter'] = undefined;
           });
-          api.event.emit(GetFeatureInfoPayload.createQueryLayerPayload(this.mapId, 'at_long_lat', payload.lnglat, false));
+          api.event.emit(GetFeatureInfoPayload.createQueryLayerPayload(this.mapId, 'at_long_lat', payload.lnglat, 'crosshaire-enter'));
         }
       },
       this.mapId
@@ -99,9 +100,9 @@ export class FeatureInfoLayerSet {
       debounce((payload) => {
         if (payloadIsAMapMouseEvent(payload)) {
           Object.keys(this.resultSets).forEach((layerPath) => {
-            this.resultSets[layerPath].data.at_pixel = undefined;
+            this.resultSets[layerPath].data['pointer-move'] = undefined;
           });
-          api.event.emit(GetFeatureInfoPayload.createQueryLayerPayload(this.mapId, 'at_pixel', payload.coordinates.pixel, true));
+          api.event.emit(GetFeatureInfoPayload.createQueryLayerPayload(this.mapId, 'at_pixel', payload.coordinates.pixel, 'pointer-move'));
         }
       }, 750),
       this.mapId
@@ -111,7 +112,7 @@ export class FeatureInfoLayerSet {
       EVENT_NAMES.MAP.EVENT_MAP_GET_ALL_FEATURES,
       () => {
         Object.keys(this.resultSets).forEach((layerPath) => {
-          this.resultSets[layerPath].data.all = undefined;
+          this.resultSets[layerPath].data['all-features'] = undefined;
         });
         api.event.emit(GetFeatureInfoPayload.createQueryLayerPayload(this.mapId, 'all'));
       },
@@ -122,28 +123,27 @@ export class FeatureInfoLayerSet {
       EVENT_NAMES.GET_FEATURE_INFO.QUERY_RESULT,
       (payload) => {
         if (payloadIsQueryResult(payload)) {
-          const { layerPath, queryType, arrayOfRecords, isHover } = payload;
-          if (layerPath in this.resultSets) {
-            this.resultSets[layerPath].data[queryType] = arrayOfRecords;
+          const { layerPath, queryType, arrayOfRecords, eventType } = payload;
+          if (this.resultSets?.[layerPath]?.data) {
+            this.resultSets[layerPath].data[eventType] = {
+              features: arrayOfRecords,
+              layerPath,
+              layerName: getLocalizedValue(api.maps[mapId].layer.registeredLayers[layerPath].layerName, mapId)!,
+              layerFlags: this.resultSets[layerPath],
+            };
+            FeatureInfoEventProcessor.propagateResultSetInfo(mapId, layerPath, eventType, this.resultSets);
           }
 
           const allDone = Object.keys(this.resultSets).reduce((doneFlag, layerPathToTest) => {
-            return doneFlag && this.resultSets[layerPathToTest].data[queryType] !== undefined;
+            return doneFlag && this.resultSets[layerPathToTest].data[eventType] !== undefined;
           }, true);
 
-          if (allDone && !isHover) {
+          if (allDone) {
             api.event.emit(
               GetFeatureInfoPayload.createAllQueriesDonePayload(
-                `${this.layerSet.layerSetId}`,
-                queryType,
                 this.layerSet.layerSetId,
-                this.resultSets
-              )
-            );
-          } else if (allDone && isHover) {
-            api.event.emit(
-              GetFeatureInfoPayload.createHoverQueryDonePayload(
-                `${this.layerSet.layerSetId}`,
+                eventType,
+                layerPath,
                 queryType,
                 this.layerSet.layerSetId,
                 this.resultSets

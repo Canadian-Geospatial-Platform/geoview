@@ -12,16 +12,18 @@ const validEvents: EventStringId[] = [
   EVENT_NAMES.GET_LEGENDS.QUERY_LEGEND,
 ];
 
+export type TypeLegendResultSetsEntry = {
+  layerStatus: TypeLayerStatus;
+  layerPhase: string;
+  querySent: boolean;
+  data: TypeLegend | undefined | null;
+};
+
 /** The legend resultset type associate a layer path to a legend object. The undefined value indicate that the get legend query
  * hasn't been run and the null value indicate that there was a get legend error.
  */
 export type TypeLegendResultSets = {
-  [layerPath: string]: {
-    layerStatus: TypeLayerStatus;
-    layerPhase: string;
-    querySent: boolean;
-    data: TypeLegend | undefined | null;
-  };
+  [layerPath: string]: TypeLegendResultSetsEntry;
 };
 
 /**
@@ -42,6 +44,8 @@ export const payloadIsLegendsLayersetUpdated = (
  * Additional attributes needed to define a TypeAllLegendsDonePayload
  */
 export interface TypeLegendsLayersetUpdatedPayload extends GetLegendsPayload {
+  // the layer path updated
+  layerPath: string;
   // The result set containing all the legends of the layers loaded on the map.
   resultSets: TypeLegendResultSets;
 }
@@ -127,18 +131,21 @@ export class GetLegendsPayload extends PayloadBaseClass {
    * Static method used to create a "legend updated" payload.
    *
    * @param {string | null} handlerName the handler Name
+   * @param {string} layerPath the layer path updated
    * @param {TypeResultSets | TypeLegendResultSets} resultSets the legend resultset
    *
    * @returns {TypeLegendsLayersetUpdatedPayload} the TypeLegendsLayersetUpdatedPayload object created
    */
   static createLegendsLayersetUpdatedPayload = (
     handlerName: string,
+    layerPath: string,
     resultSets: TypeResultSets | TypeLegendResultSets
   ): TypeLegendsLayersetUpdatedPayload => {
     const legendsLayersetUpdatedPayload = new GetLegendsPayload(
       EVENT_NAMES.GET_LEGENDS.LEGENDS_LAYERSET_UPDATED,
       handlerName
     ) as TypeLegendsLayersetUpdatedPayload;
+    legendsLayersetUpdatedPayload.layerPath = layerPath;
     legendsLayersetUpdatedPayload.resultSets = resultSets as TypeLegendResultSets;
     return legendsLayersetUpdatedPayload;
   };

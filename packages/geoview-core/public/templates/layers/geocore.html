@@ -136,7 +136,7 @@
     <button class="collapsible">Get Legend</button>
     <pre id="LegendsId1-table-pre" class="panel"></pre>
     <button type="button" class="collapsible">Get Feature Info</button>
-    <pre id="ResultSetId1-at_long_lat" class="panel">Click on feature on the map</pre>
+    <pre id="ResultSetId1-click" class="panel">Click on feature on the map</pre>
     <hr />
     <p>This map has a wms layer added from configuration.</p>
     <button type="button" class="collapsible">Configuration Snippet</button>
@@ -161,8 +161,8 @@
       cgpv.api.event.on(
         cgpv.api.eventNames.GET_FEATURE_INFO.ALL_QUERIES_DONE,
         (payload) => {
-          const { layerSetId, resultSets, queryType } = payload;
-          createInfoTable('LYR1', 'ResultSetId1', resultSets, queryType);
+          const { layerSetId, resultSets, eventType } = payload;
+          createInfoTable('LYR1', 'ResultSetId1', resultSets, eventType);
         },
         'LYR1/FeatureInfoLayerSet'
       );

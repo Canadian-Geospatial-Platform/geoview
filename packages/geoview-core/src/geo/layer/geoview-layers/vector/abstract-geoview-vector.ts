@@ -1,4 +1,4 @@
-/* eslint-disable no-param-reassign, no-var */
+/* eslint-disable no-console, no-param-reassign, no-var */
 import Feature from 'ol/Feature';
 import { Cluster, Vector as VectorSource } from 'ol/source';
 import { Options as SourceOptions } from 'ol/source/Vector';
@@ -289,8 +289,8 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
    * @returns {Promise<TypeArrayOfFeatureInfoEntries>} The feature info table.
    */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  protected getFeatureInfoAtPixel(location: Pixel, layerConfig: TypeLayerEntryConfig): Promise<TypeArrayOfFeatureInfoEntries> {
-    const promisedQueryResult = new Promise<TypeArrayOfFeatureInfoEntries>((resolve) => {
+  protected async getFeatureInfoAtPixel(location: Pixel, layerConfig: TypeLayerEntryConfig): Promise<TypeArrayOfFeatureInfoEntries> {
+    try {
       const layerFilter = (layer: BaseLayer) => {
         const layerSource = layer.get('layerEntryConfig')?.source;
         const configSource = layerConfig?.source;
@@ -298,13 +298,11 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
       };
       const { map } = api.maps[this.mapId];
       const features = map.getFeaturesAtPixel(location, { hitTolerance: 4, layerFilter });
-      this.formatFeatureInfoResult(features as Feature<Geometry>[], layerConfig as TypeVectorLayerEntryConfig).then(
-        (arrayOfFeatureInfoEntries) => {
-          resolve(arrayOfFeatureInfoEntries);
-        }
-      );
-    });
-    return promisedQueryResult;
+      return await this.formatFeatureInfoResult(features as Feature<Geometry>[], layerConfig as TypeVectorLayerEntryConfig);
+    } catch (error) {
+      console.log('abstract-geoview-vector.getFeatureInfoAtPixel\n', error);
+      return null;
+    }
   }
 
   /** ***************************************************************************************************************************

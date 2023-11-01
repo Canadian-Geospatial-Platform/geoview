@@ -9,9 +9,11 @@ import * as UI from '../../ui';
 import { AbstractPlugin } from '@/api/plugin/abstract-plugin';
 import { TypeDisplayLanguage, TypeMapFeaturesInstance } from '@/geo/map/map-schema-types';
 
+export * from 'zustand';
+export { getGeoViewStore } from '@/core/stores/stores-managers';
 export { isEqual } from 'lodash';
 export type { MutableRefObject, RefObject, Dispatch, SetStateAction } from 'react';
-export type { TypeArrayOfLayerData } from '@/core/components';
+export type { TypeArrayOfLayerData } from '@/api/events/payloads';
 export type { ButtonPropsLayerPanel } from '@/ui/panel/panel-types';
 export type { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 export type { AbstractGeoViewRaster } from '@/geo/layer/geoview-layers/raster/abstract-geoview-raster';

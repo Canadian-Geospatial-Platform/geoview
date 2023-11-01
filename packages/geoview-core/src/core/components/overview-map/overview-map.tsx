@@ -116,7 +116,7 @@ export function OverviewMap(): JSX.Element {
    * @returns {OLOverviewMap} the OL overview map
    */
   const getOverViewMap = (): OLOverviewMap => {
-    return mapElement
+    return mapElement!
       .getControls()
       .getArray()
       .filter((item) => {
@@ -131,7 +131,7 @@ export function OverviewMap(): JSX.Element {
       (curZoom, prevZoom) => {
         if (curZoom !== prevZoom) {
           if (curZoom! < hideOnZoom) getOverViewMap().setMap(null);
-          else getOverViewMap().setMap(mapElement);
+          else getOverViewMap().setMap(mapElement!);
         }
       }
     );
@@ -150,7 +150,7 @@ export function OverviewMap(): JSX.Element {
           // wait for the view change then set the map and open the overview
           // TODO: look for better options then Timeout
           setTimeout(() => {
-            overviewMap.setMap(mapElement);
+            overviewMap.setMap(mapElement!);
             setTimeout(() => overviewMap.setCollapsed(false), 500);
           }, 2000);
         }
@@ -192,8 +192,8 @@ export function OverviewMap(): JSX.Element {
       tipLabel: '',
     });
 
-    mapElement.addControl(overviewMapControl);
-    if (mapElement.getView().getZoom() && mapElement.getView().getZoom()! < hideOnZoom) overviewMapControl.setMap(null);
+    mapElement!.addControl(overviewMapControl);
+    if (mapElement!.getView().getZoom() && mapElement!.getView().getZoom()! < hideOnZoom) overviewMapControl.setMap(null);
 
     // need to recreate the i18n instance as the overviewmap is a new map inside the main map
     const i18nInstance = i18n.cloneInstance({

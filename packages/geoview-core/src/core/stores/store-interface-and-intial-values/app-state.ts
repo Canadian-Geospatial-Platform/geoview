@@ -18,10 +18,10 @@ export interface IAppState {
   };
 }
 
-export function initializeAppState(set: TypeSetStore, get: TypeGetStore) {
-  const init = {
+export function initializeAppState(set: TypeSetStore, get: TypeGetStore): IAppState {
+  return {
     isCrosshairsActive: false,
-    isFullScreen: false,
+    isFullscreenActive: false,
     notifications: [],
 
     actions: {
@@ -33,7 +33,7 @@ export function initializeAppState(set: TypeSetStore, get: TypeGetStore) {
           },
         });
       },
-      setFullScreenActive: (active: boolean, element?: undefined) => {
+      setFullScreenActive: (active: boolean, element?: TypeHTMLElement) => {
         set({
           appState: {
             ...get().appState,
@@ -64,9 +64,7 @@ export function initializeAppState(set: TypeSetStore, get: TypeGetStore) {
         });
       },
     },
-  };
-
-  return init;
+  } as IAppState;
 }
 
 // **********************************************************

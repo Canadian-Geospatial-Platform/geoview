@@ -329,23 +329,25 @@ export function ClickMarker(): JSX.Element {
 
   const allQueriesDoneListenerFunction = (payload: PayloadBaseClass) => {
     if (payloadIsAllQueriesDone(payload)) {
-      const { queryType, resultSets } = payload;
-      let feature: TypeFeatureInfoEntry | undefined;
+      const { eventType, resultSets } = payload;
+      if (eventType === 'click') {
+        let feature: TypeFeatureInfoEntry | undefined;
 
-      Object.keys(resultSets).every((layerPath) => {
-        const features = resultSets[layerPath]!.layerStatus === 'error' ? null : resultSets[layerPath]!.data[queryType];
-        if (features && features.length > 0 && features[0].geoviewLayerType !== 'ogcWms') {
-          [feature] = features;
-          return false;
-        }
+        Object.keys(resultSets).every((layerPath) => {
+          const features = resultSets[layerPath]!.layerStatus === 'error' ? null : resultSets[layerPath]!.data.click?.features;
+          if (features && features.length > 0 && features[0].geoviewLayerType !== 'ogcWms') {
+            [feature] = features;
+            return false;
+          }
 
-        return true;
-      });
+          return true;
+        });
 
-      if (feature) {
-        api.event.emit(featureHighlightPayload(EVENT_NAMES.FEATURE_HIGHLIGHT.EVENT_HIGHLIGHT_FEATURE, mapId, feature));
-        setShowMarker(false);
-      } else showMarkerIcon(markerCoordinates.current!);
+        if (feature) {
+          api.event.emit(featureHighlightPayload(EVENT_NAMES.FEATURE_HIGHLIGHT.EVENT_HIGHLIGHT_FEATURE, mapId, feature));
+          setShowMarker(false);
+        } else showMarkerIcon(markerCoordinates.current!);
+      }
     }
   };
 
