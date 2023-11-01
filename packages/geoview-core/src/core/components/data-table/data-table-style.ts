@@ -1,4 +1,4 @@
-import { Theme } from '@mui/material/styles';
+import { Theme } from '@mui/material';
 
 export const getSxClasses = (theme: Theme) => ({
   list: {
@@ -17,19 +17,10 @@ export const getSxClasses = (theme: Theme) => ({
         padding: '0 0 0 16px',
         height: '100%',
       },
-      '& .MuiBox-root': {
-        height: '100%',
-        borderTopRightRadius: '4px',
-        borderBottomRightRadius: '4px',
-        position: 'relative',
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-      },
     },
 
     '& .MuiListItemIcon-root': {
-      minWidth: '2.5rem',
+      minWidth: '2rem',
     },
     '& .MuiListItemText-root': {
       '>span': {
@@ -40,6 +31,36 @@ export const getSxClasses = (theme: Theme) => ({
         overflow: 'hidden',
         textOverflow: 'ellipsis',
         whiteSpace: 'nowrap',
+      },
+    },
+  },
+  listPrimaryText: {
+    minWidth: '0',
+    marginTop: '0.5rem',
+    marginBottom: '0.5rem',
+    flex: '1 1 auto',
+    display: 'flex',
+    flexDirection: 'column',
+    '& p': {
+      fontSize: '1rem',
+      font: '600 18px / 24px Roboto, Helvetica, Arial, sans-serif;',
+      fontWeight: 400,
+      lineHeight: 1.5,
+      overflow: 'hidden',
+      textOverflow: 'ellipsis',
+      whiteSpace: 'nowrap',
+    },
+    '>div': {
+      display: 'flex',
+      alignItems: 'center',
+      marginTop: '4px',
+      '>p': {
+        fontSize: '0.875rem !important',
+        color: theme.palette.text.secondary,
+      },
+      ' svg': {
+        width: '0.75em',
+        height: '0.75em',
       },
     },
   },
@@ -108,6 +129,42 @@ export const getSxClasses = (theme: Theme) => ({
     },
     '& .MuiToolbar-root ': {
       borderRadius: '6px',
+    },
+  },
+  filterMap: {
+    '& .Mui-checked': {
+      '& .MuiTouchRipple-root': {
+        color: theme.palette.action.active,
+      },
+    },
+    '& .MuiTouchRipple-root': {
+      color: theme.palette.grey['900'],
+    },
+  },
+  tableHeadCell: {
+    '& .MuiCollapse-wrapperInner': {
+      '& .MuiBox-root': {
+        gridTemplateColumns: '1fr',
+      },
+    },
+    '& .MuiInput-root': { fontSize: '0.875rem', '& .MuiSvgIcon-root': { width: '0.75em', height: '0.75em' } },
+    '& .MuiBadge-root': {
+      marginLeft: '0.5rem',
+      '>span': {
+        width: '100%',
+      },
+      svg: {
+        marginTop: '0.25rem',
+        marginBottom: '0.25rem',
+      },
+      '& .keyboard-focused': {
+        backgroundColor: 'rgba(81, 91, 165, 0.08)',
+        borderRadius: '50%',
+        border: `1px solid black !important`,
+        '> svg': {
+          opacity: 1,
+        },
+      },
     },
   },
 });

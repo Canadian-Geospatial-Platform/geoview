@@ -27,6 +27,7 @@ export {
   ExpandLess as ExpandLessIcon,
   ExpandMore as ExpandMoreIcon,
   FileUpload as FileUploadIcon,
+  FilterAlt as FilterAltIcon,
   Fullscreen as FullscreenIcon,
   FullscreenExit as FullscreenExitIcon,
   GitHub as GitHubIcon,

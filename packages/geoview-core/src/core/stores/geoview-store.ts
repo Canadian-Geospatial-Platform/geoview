@@ -73,22 +73,21 @@ export interface ILegendState {
 
 export interface IMapDataTableState {
   selectedLayerIndex: number;
-  isLoading: boolean;
   isEnlargeDataTable: boolean;
 
   FILTER_MAP_DELAY: number;
-  toolbarRowSelectedMessage: string;
-  storeColumnFilters: Record<string, MRTColumnFiltersState>;
-  storeRowSelections: Record<string, Record<number, boolean>>;
-  storeMapFiltered: Record<string, boolean>;
-
-  setStoreMapFiltered: (mapFiltered: boolean, layerKey: string) => void;
-  setStoreRowSelections: (rowSelection: Record<number, boolean>, layerKey: string) => void;
-  setStoreColumnFilters: (filtered: MRTColumnFiltersState, layerKey: string) => void;
+  toolbarRowSelectedMessage: Record<string, string>;
+  columnFiltersMap: Record<string, MRTColumnFiltersState>;
+  rowSelectionsMap: Record<string, Record<number, boolean>>;
+  mapFilteredMap: Record<string, boolean>;
+  rowsFilteredMap: Record<string, number>;
+  setRowsFilteredMap: (rows: number, layerKey: string) => void;
+  setMapFilteredMap: (mapFiltered: boolean, layerKey: string) => void;
+  setRowSelectionsMap: (rowSelection: Record<number, boolean>, layerKey: string) => void;
+  setColumnFiltersMap: (filtered: MRTColumnFiltersState, layerKey: string) => void;
   setIsEnlargeDataTable: (isEnlarge: boolean) => void;
-  setIsLoading: (loading: boolean) => void;
   setSelectedLayerIndex: (idx: number) => void;
-  setToolbarRowSelectedMessage: (message: string) => void;
+  setToolbarRowSelectedMessage: (message: string, layerKey: string) => void;
 }
 
 export interface IDetailsState {
@@ -209,43 +208,52 @@ export const geoViewStoreDefinition = (
     },
     dataTableState: {
       selectedLayerIndex: 0,
-      isLoading: false,
       isEnlargeDataTable: false,
       mapFiltered: false,
       FILTER_MAP_DELAY: 1000,
-      toolbarRowSelectedMessage: '',
-      storeRowSelections: {},
-      storeMapFiltered: {},
-      setStoreMapFiltered: (mapFiltered: boolean, layerKey: string) => {
+      toolbarRowSelectedMessage: {},
+      rowSelectionsMap: {},
+      mapFilteredMap: {},
+      columnFiltersMap: {},
+      rowsFilteredMap: {},
+      setRowsFilteredMap: (rows: number, layerKey: string) => {
         set({
           dataTableState: {
             ...get().dataTableState,
-            storeMapFiltered: { ...get().dataTableState.storeMapFiltered, [layerKey]: mapFiltered },
+            rowsFilteredMap: { ...get().dataTableState.rowsFilteredMap, [layerKey]: rows },
           },
         });
       },
-      setStoreRowSelections: (rowSelection: Record<number, boolean>, layerKey: string) => {
+      setMapFilteredMap: (mapFiltered: boolean, layerKey: string) => {
         set({
           dataTableState: {
             ...get().dataTableState,
-            storeRowSelections: { ...get().dataTableState.storeRowSelections, [layerKey]: rowSelection },
+            mapFilteredMap: { ...get().dataTableState.mapFilteredMap, [layerKey]: mapFiltered },
           },
         });
       },
-      storeColumnFilters: {},
-      setStoreColumnFilters: (filtered: MRTColumnFiltersState, layerKey: string) => {
+      setRowSelectionsMap: (rowSelection: Record<number, boolean>, layerKey: string) => {
         set({
           dataTableState: {
             ...get().dataTableState,
-            storeColumnFilters: { ...get().dataTableState.storeColumnFilters, [layerKey]: filtered },
+            rowSelectionsMap: { ...get().dataTableState.rowSelectionsMap, [layerKey]: rowSelection },
           },
         });
       },
-      setToolbarRowSelectedMessage: (message: string) => {
+
+      setColumnFiltersMap: (filtered: MRTColumnFiltersState, layerKey: string) => {
         set({
           dataTableState: {
             ...get().dataTableState,
-            toolbarRowSelectedMessage: message,
+            columnFiltersMap: { ...get().dataTableState.columnFiltersMap, [layerKey]: filtered },
+          },
+        });
+      },
+      setToolbarRowSelectedMessage: (message: string, layerKey: string) => {
+        set({
+          dataTableState: {
+            ...get().dataTableState,
+            toolbarRowSelectedMessage: { ...get().dataTableState.toolbarRowSelectedMessage, [layerKey]: message },
           },
         });
       },
@@ -254,14 +262,6 @@ export const geoViewStoreDefinition = (
           dataTableState: {
             ...get().dataTableState,
             isEnlargeDataTable: isEnlarge,
-          },
-        });
-      },
-      setIsLoading: (loading: boolean) => {
-        set({
-          dataTableState: {
-            ...get().dataTableState,
-            isLoading: loading,
           },
         });
       },
