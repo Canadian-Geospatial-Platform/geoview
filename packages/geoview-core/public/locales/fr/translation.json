@@ -131,6 +131,8 @@
     "rowsSelected": "{rowsSelected} sur {totalRows} ligne(s) sélectionnée(s)",
     "rowsFiltered": "{rowsFiltered} sur {totalRows} ligne(s) filtrée(s)",
     "enlargeBtn": "Agrandir",
-    "reduceBtn": "Réduire"
+    "reduceBtn": "Réduire",
+    "features": "Item(s)",
+    "featureFiltered": "Item filtrée(s)"
   }
 }

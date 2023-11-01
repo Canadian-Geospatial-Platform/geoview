@@ -74,7 +74,9 @@ export function Datapanel({ layerData, mapId, projectionConfig, language }: Data
    * @returns
    */
   const getFeaturesOfLayer = (layerKey: string, index: number): string => {
-    return rowsFilteredMap[layerKey] ? `${rowsFilteredMap[layerKey]} features filtered` : `${layerData[index].features.length} features`;
+    return rowsFilteredMap[layerKey]
+      ? `${rowsFilteredMap[layerKey]} ${t('dataTable.featureFiltered')}`
+      : `${layerData[index].features.length} ${t('dataTable.features')}`;
   };
 
   /**

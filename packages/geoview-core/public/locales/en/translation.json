@@ -133,6 +133,8 @@
     "rowsSelected": "{rowsSelected} of {totalRows} row(s) selected",
     "rowsFiltered": "{rowsFiltered} of {totalRows} row(s) filtered",
     "enlargeBtn": "Enlarge",
-    "reduceBtn": "Reduce"
+    "reduceBtn": "Reduce",
+    "features": "feature(s)",
+    "featureFiltered": "features filtered"
   }
 }
