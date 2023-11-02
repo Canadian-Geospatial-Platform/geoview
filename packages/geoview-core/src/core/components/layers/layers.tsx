@@ -9,7 +9,7 @@ import { LayerDetails } from './right-panel/layer-details';
 import { getGeoViewStore } from '@/core/stores/stores-managers';
 import { SingleLayer } from './left-panel/single-layer';
 import { getSxClasses } from './layers-style';
-import { useLegendHelpers } from './hooks/helpers';
+// import { useLegendHelpers } from './hooks/helpers';
 
 const Item = styled('div')(({ theme }) => ({
   backgroundColor: theme.palette.mode === 'dark' ? '#262B32' : '#fff',
@@ -27,8 +27,8 @@ export function Layers(props: LegendItemsDetailsProps): JSX.Element {
   const sxClasses = getSxClasses(theme);
 
   // Populating fake legend data
-  const helpers = useLegendHelpers(mapId);
-  helpers.populateLegendStoreWithFakeData();
+  // const helpers = useLegendHelpers(mapId);
+  // helpers.populateLegendStoreWithFakeData();
 
   const store = getGeoViewStore(mapId);
   // controls what is displayed on the right panel

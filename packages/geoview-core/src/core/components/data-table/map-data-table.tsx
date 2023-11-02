@@ -335,7 +335,7 @@ function MapDataTable({ data, layerId, mapId, layerKey, projectionConfig }: MapD
   const getTableHeader = useCallback((header: string) => {
     return (
       <Tooltip title={header} placement="top" arrow>
-        <Box component="span" sx={{ 'white-space': 'nowrap' }}>
+        <Box component="span" sx={{ whiteSpace: 'nowrap' }}>
           {header}
         </Box>
       </Tooltip>
