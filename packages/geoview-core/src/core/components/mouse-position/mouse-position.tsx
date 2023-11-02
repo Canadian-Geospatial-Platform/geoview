@@ -3,7 +3,7 @@ import { useState, useEffect, useContext } from 'react';
 import { Coordinate } from 'ol/coordinate';
 
 import { useTranslation } from 'react-i18next';
-import { useTheme } from '@mui/material';
+import { useTheme } from '@mui/material/styles';
 
 import { Box, Button, CheckIcon } from '@/ui';
 import { MapContext } from '@/core/app-start';

@@ -4,9 +4,6 @@ import { useTranslation } from 'react-i18next';
 
 import { useTheme } from '@mui/material/styles';
 
-import { useStore } from 'zustand';
-import { getGeoViewStore } from '@/core/stores/stores-managers';
-
 import ZoomIn from './buttons/zoom-in';
 import ZoomOut from './buttons/zoom-out';
 import Fullscreen from './buttons/fullscreen';

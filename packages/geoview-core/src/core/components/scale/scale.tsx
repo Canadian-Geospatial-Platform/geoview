@@ -3,7 +3,7 @@ import { useContext, useEffect, useState } from 'react';
 import { ScaleLine } from 'ol/control';
 import { useTranslation } from 'react-i18next';
 
-import { useTheme } from '@mui/material';
+import { useTheme } from '@mui/material/styles';
 import { getGeoViewStore } from '@/core/stores/stores-managers';
 
 import { MapContext } from '@/core/app-start';
