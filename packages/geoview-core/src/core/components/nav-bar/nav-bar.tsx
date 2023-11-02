@@ -7,6 +7,7 @@ import { useTheme } from '@mui/material/styles';
 import { useStore } from 'zustand';
 import { getGeoViewStore } from '@/core/stores/stores-managers';
 
+import Focus from './buttons/fucos';
 import ZoomIn from './buttons/zoom-in';
 import ZoomOut from './buttons/zoom-out';
 import Fullscreen from './buttons/fullscreen';
@@ -190,6 +191,8 @@ export function Navbar({ activeTrap, activeTrapSet }: NavbarProps): JSX.Element 
           {navBar?.includes('location') && <Location />}
           {navBar?.includes('home') && <Home />}
           {navBar?.includes('export') && <Export openModal={openModal} />}
+          {/* // TODO We might need to refactor code below based on the best solution, issue #1448 */}
+          {navBar?.includes('focus') && <Focus />}
         </ButtonGroup>
         <ExportModal isShown={ModalIsShown} closeModal={closeModal} />
       </Box>
