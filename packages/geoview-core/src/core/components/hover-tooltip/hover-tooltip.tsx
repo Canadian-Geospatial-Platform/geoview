@@ -116,7 +116,7 @@ export function HoverTooltip(): JSX.Element {
 
     // if mapClickCoordinates changed, single click event has been triggered
     const unsubMapSingleClick = getGeoViewStore(mapId).subscribe(
-      (state) => state.mapState.mapClickCoordinates,
+      (state) => state.mapState.clickCoordinates,
       (curClick, prevClick) => {
         if (curClick !== prevClick) {
           selectedFeature.current = undefined;

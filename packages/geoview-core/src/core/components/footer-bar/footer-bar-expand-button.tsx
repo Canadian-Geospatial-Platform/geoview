@@ -15,8 +15,8 @@ export function FooterbarExpandButton(): JSX.Element {
   const { mapId } = mapConfig;
 
   // get the expand or collapse from expand button click
-  const expanded = useUIFooterBarExpanded(mapId);
-  const { setFooterBarExpanded } = useUIStoreActions(mapId);
+  const expanded = useUIFooterBarExpanded();
+  const { setFooterBarExpanded } = useUIStoreActions();
 
   /**
    * Expand the footer bar

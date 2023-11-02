@@ -9,8 +9,6 @@ import { Style, Stroke, Fill, Circle } from 'ol/style';
 import { Color } from 'ol/color';
 import { getArea as getAreaOL } from 'ol/sphere';
 
-import { getGeoViewStore } from '@/core/stores/stores-managers';
-
 import { Cast, TypeJsonObject } from '@/core/types/global-types';
 import { TypeFeatureStyle } from '@/geo/layer/geometry/geometry-types';
 import { xmlToJson } from '@/core/utils/utilities';
@@ -18,6 +16,7 @@ import { xmlToJson } from '@/core/utils/utilities';
 import { TypeLayerEntryConfig, TypeListOfLayerEntryConfig, layerEntryIsGroupLayer } from '@/geo/map/map-schema-types';
 import { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { Layer } from '@/geo/layer/layer';
+import { AppEventProcessor } from '@/api/eventProcessors/app-event-processor';
 
 /**
  * Interface used for css style declarations
@@ -241,7 +240,7 @@ export class GeoUtilities {
 
         if (mapId !== undefined) {
           const mapFocus = activeEl?.getAttribute('id') === `map-${mapId}`;
-          getGeoViewStore(mapId).setState({ isCrosshairsActive: mapFocus });
+          AppEventProcessor.setAppIsCrosshairActive(mapId, mapFocus);
         }
       }
     });

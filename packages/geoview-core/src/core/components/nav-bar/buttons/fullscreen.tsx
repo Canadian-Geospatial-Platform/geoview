@@ -2,14 +2,12 @@ import { useContext } from 'react';
 
 import { useTheme } from '@mui/material/styles';
 
-import { useStore } from 'zustand';
-import { getGeoViewStore } from '@/core/stores/stores-managers';
-
 import { MapContext } from '@/core/app-start';
 import { api } from '@/app';
 import { IconButton, FullscreenIcon, FullscreenExitIcon } from '@/ui';
 import { TypeHTMLElement } from '@/core/types/global-types';
 import { getSxClasses } from '../nav-bar-style';
+import { useAppStoreActions, useFullscreenActive } from '@/core/stores/app-state';
 
 /**
  * Create a toggle button to toggle between fullscreen
@@ -24,7 +22,8 @@ export default function Fullscreen(): JSX.Element {
   const sxClasses = getSxClasses(theme);
 
   // get the values from store
-  const isFullScreen = useStore(getGeoViewStore(mapId), (state) => state.isFullScreen);
+  const isFullScreen = useFullscreenActive();
+  const { setFullScreenActive } = useAppStoreActions();
 
   /**
    * Exit fullscreen with ESC key
@@ -36,7 +35,7 @@ export default function Fullscreen(): JSX.Element {
         : undefined;
 
     if (mapIdFS !== undefined) {
-      getGeoViewStore(mapIdFS).setState({ isFullScreen: false });
+      setFullScreenActive(false);
       document.removeEventListener('fullscreenchange', handleExit);
       document.removeEventListener('webkitfullscreenchange', handleExit);
       document.removeEventListener('mozfullscreenchange', handleExit);
@@ -49,15 +48,14 @@ export default function Fullscreen(): JSX.Element {
    */
   function setFullscreen() {
     const element = document.getElementById(`shell-${mapId}`);
-    const fsState = getGeoViewStore(mapId).getState().isFullScreen;
 
     if (element) {
-      getGeoViewStore(mapId).setState({ isFullScreen: !fsState });
-      api.maps[mapId].toggleFullscreen(!fsState, element as TypeHTMLElement);
+      setFullScreenActive(!isFullScreen);
+      api.maps[mapId].toggleFullscreen(!isFullScreen, element as TypeHTMLElement);
 
       // if state will become fullscreen, add event listerner to trap exit by ESC key
       // put a timeout for the toggle to fullscreen to happen
-      if (!fsState) {
+      if (!isFullScreen) {
         setTimeout(() => {
           document.addEventListener('fullscreenchange', handleExit);
           document.addEventListener('webkitfullscreenchange', handleExit);

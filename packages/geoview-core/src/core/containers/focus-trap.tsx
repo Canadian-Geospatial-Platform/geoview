@@ -12,6 +12,7 @@ import { Modal, Button } from '@/ui';
 import { HtmlToReact } from './html-to-react';
 import { getFocusTrapSxClasses } from './containers-style';
 import { disableScrolling } from '@/app';
+import { useAppStoreActions } from '../stores/app-state';
 
 /**
  * Interface for the focus trap properties
@@ -44,6 +45,7 @@ export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
   // get store values
   // tracks if the last action was done through a keyboard (map navigation) or mouse (mouse movement)
   const store = getGeoViewStore(mapId);
+  const { setCrosshairActive } = useAppStoreActions();
   const mapElementStore = useStore(store, (state) => state.mapState.mapElement);
 
   // ? useRef, if not mapElementStore is undefined - may be because this component is created before the mapElement
@@ -78,7 +80,7 @@ export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
 
     // update store and focus to top link
     setTimeout(() => document.getElementById(`toplink-${focusTrapId}`)?.focus(), 0);
-    getGeoViewStore(mapId).setState({ isCrosshairsActive: false });
+    setCrosshairActive(false);
   }
 
   // handle FocusTrap states (Exit)
@@ -99,7 +101,7 @@ export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
 
     // update the store and focus to map
     setTimeout(() => document.getElementById(`map-${mapId}`)?.focus(), 0);
-    store.setState({ isCrosshairsActive: true });
+    setCrosshairActive(true);
   }
 
   // handle FocusTrap states (Enable, Skip)
