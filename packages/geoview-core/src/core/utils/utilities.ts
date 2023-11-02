@@ -9,14 +9,17 @@ import { Extent } from 'ol/extent';
 
 import sanitizeHtml from 'sanitize-html';
 
+import { AppEventProcessor } from '@/api/eventProcessors/app-event-processor';
+
 import { AbstractGeoViewLayer, api } from '@/app';
 import { TypeLocalizedString } from '@/geo/map/map-schema-types';
 import { EVENT_NAMES } from '@/api/events/event-types';
 
 import { Cast, TypeJsonArray, TypeJsonObject, TypeJsonValue, TypeMapFeaturesConfig } from '@/core/types/global-types';
 import { SnackbarType, snackbarMessagePayload } from '@/api/events/payloads';
-import { NotificationType, notificationPayload } from '@/api/events/payloads/notification-payload';
+import { NotificationType } from '@/api/events/payloads/notification-payload';
 import { Config } from '@/core/utils/config/config';
+
 
 /**
  * Get the string associated to the current display language.
@@ -32,6 +35,17 @@ export function getLocalizedValue(localizedString: TypeLocalizedString | undefin
 }
 
 /**
+ * Generate a unique id if an id was not provided
+ * @param {string} id an id to return if it was already passed
+ * @returns {string} the generated id
+ */
+export function generateId(id?: string | null): string {
+  return id !== null && id !== undefined && id.length > 0
+    ? id
+    : (Date.now().toString(36) + Math.random().toString(36).substr(2, 5)).toUpperCase();
+}
+
+/**
  * Reusable utility function to send event to add a notification in the notifications manager
  *
  * @param {string} mapId the map to show the message for
@@ -39,7 +53,14 @@ export function getLocalizedValue(localizedString: TypeLocalizedString | undefin
  * @param {string} message optional, the message string
  */
 function _addNotification(mapId: string, type: NotificationType = 'info', message = '') {
-  api.event.emit(notificationPayload(EVENT_NAMES.NOTIFICATIONS.NOTIFICATION_ADD, mapId, type, message));
+  const notification = {
+    key: generateId(),
+    notificationType: type,
+    message,
+  };
+
+  //? Need to to lazy import, if not viewer crashes = AppEventProcessor.addAppNotification(mapId, notification);
+  import('@/api/eventProcessors/app-event-processor').then((mod) => mod.AppEventProcessor.addAppNotification(mapId, notification));
 }
 
 /**
@@ -167,17 +188,6 @@ export function replaceParams(params: TypeJsonValue[] | TypeJsonArray | string[]
   });
 
   return tmpMess;
-}
-
-/**
- * Generate a unique id if an id was not provided
- * @param {string} id an id to return if it was already passed
- * @returns {string} the generated id
- */
-export function generateId(id?: string | null): string {
-  return id !== null && id !== undefined && id.length > 0
-    ? id
-    : (Date.now().toString(36) + Math.random().toString(36).substr(2, 5)).toUpperCase();
 }
 
 /**

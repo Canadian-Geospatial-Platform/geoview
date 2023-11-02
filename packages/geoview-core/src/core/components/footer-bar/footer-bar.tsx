@@ -30,7 +30,7 @@ export function Footerbar(): JSX.Element {
 
   // get value from the store
   // if map is static do not display mouse position or rotation controls
-  const interaction = useMapInteraction(mapId);
+  const interaction = useMapInteraction();
 
   // if screen size is medium and up
   const deviceSizeMedUp = useMediaQuery(theme.breakpoints.up('sm'));

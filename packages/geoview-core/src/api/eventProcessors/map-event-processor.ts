@@ -1,6 +1,10 @@
+import { ScaleLine } from 'ol/control';
+import Overlay from 'ol/Overlay';
+import { fromLonLat } from 'ol/proj';
+
 import { GeoViewStoreType } from '@/core/stores/geoview-store';
 import { AbstractEventProcessor } from './abstract-event-processor';
-import { api } from '@/app';
+import { api, NORTH_POLE_POSITION } from '@/app';
 import {
   mapPayload,
   lngLatPayload,
@@ -25,7 +29,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
     );
 
     const unsubMapCenterCoord = store.subscribe(
-      (state) => state.mapState.mapCenterCoordinates,
+      (state) => state.mapState.centerCoordinates,
       (cur, prev) => {
         if (cur !== prev) {
           api.maps[mapId].mapCenterCoordinates = cur;
@@ -66,7 +70,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
     );
 
     const unsubMapSingleClick = store.subscribe(
-      (state) => state.mapState.mapClickCoordinates,
+      (state) => state.mapState.clickCoordinates,
       (cur, prev) => {
         if (cur !== prev) {
           api.maps[mapId].singleClickedPosition = cur!;
@@ -116,24 +120,41 @@ export class MapEventProcessor extends AbstractEventProcessor {
     map.getView().on('change:resolution', store.getState().mapState.onMapZoomEnd);
     map.getView().on('change:rotation', store.getState().mapState.onMapRotation);
 
-    store.setState({
-      mapState: {
-        ...store.getState().mapState,
-        mapLoaded: true,
-        mapElement: map,
-        zoom: map.getView().getZoom(),
-      },
+    // add map controls
+    const scaleBar = new ScaleLine({
+      units: 'metric',
+      target: document.getElementById(`${mapId}-scaleControlBar`) as HTMLElement,
+      bar: true,
+      text: true,
     });
 
-    // when map is just created, some controls (i.e. scale) are not fully initialized
-    // trigger the store component update after a small latency
-    setTimeout(() => {
-      store.setState({
-        mapState: {
-          ...store.getState().mapState,
-          mapCenterCoordinates: map.getView().getCenter()!,
-        },
-      });
-    }, 100);
+    const scaleLine = new ScaleLine({
+      units: 'metric',
+      target: document.getElementById(`${mapId}-scaleControlLine`) as HTMLElement,
+    });
+    map.addControl(scaleLine);
+    map.addControl(scaleBar);
+
+    // add map overlays
+    // create overlay for north pole icon
+
+    const northPoleId = `${mapId}-northpole`;
+    const projectionPosition = fromLonLat(
+      [NORTH_POLE_POSITION[1], NORTH_POLE_POSITION[0]],
+      `EPSG:${store.getState().mapState.currentProjection}`
+    );
+
+    const northPoleMarker = new Overlay({
+      id: northPoleId,
+      position: projectionPosition,
+      positioning: 'center-center',
+      element: document.getElementById(northPoleId) as HTMLElement,
+      stopEvent: false,
+    });
+    map.addOverlay(northPoleMarker);
+
+    // set store
+    setTimeout(() => store.getState().mapState.actions.setMapElement(map), 250);
+    setTimeout(() => store.getState().mapState.actions.setOverlayNorthMarker(northPoleMarker), 250);
   }
 }

@@ -1,5 +1,5 @@
 import { useStore } from 'zustand';
-import { getGeoViewStore } from './stores-managers';
+import { useGeoViewStore } from './stores-managers';
 
 export interface IUIState {
   footerBarExpanded: boolean;
@@ -43,7 +43,7 @@ export function initializeUIState(set: any, get: any) {
 // **********************************************************
 // UI state selectors
 // **********************************************************
-export const useUIFooterBarExpanded = (mapId: string) => useStore(getGeoViewStore(mapId), (state) => state.uiState.footerBarExpanded);
-export const useUIappbarGeolocatorActive = (mapId: string) => useStore(getGeoViewStore(mapId), (state) => state.uiState.geoLocatorActive);
+export const useUIFooterBarExpanded = () => useStore(useGeoViewStore(), (state) => state.uiState.footerBarExpanded);
+export const useUIappbarGeolocatorActive = () => useStore(useGeoViewStore(), (state) => state.uiState.geoLocatorActive);
 
-export const useUIStoreActions = (mapId: string) => useStore(getGeoViewStore(mapId), (state) => state.uiState.actions);
+export const useUIStoreActions = () => useStore(useGeoViewStore(), (state) => state.uiState.actions);

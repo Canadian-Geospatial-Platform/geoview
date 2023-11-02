@@ -46,7 +46,7 @@ export function Navbar({ activeTrap, activeTrapSet }: NavbarProps): JSX.Element 
   const { navBar } = api.maps[mapId].mapFeaturesConfig;
 
   // get the expand or collapse from store
-  const footerBarExpanded = useUIFooterBarExpanded(mapId);
+  const footerBarExpanded = useUIFooterBarExpanded();
 
   const addButtonPanel = useCallback(
     (payload: ButtonPanelPayload) => {

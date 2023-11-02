@@ -43,7 +43,7 @@ export function Geolocator() {
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
   // set the active (visible) or not active (hidden) from geolocator button click
-  const active = useUIappbarGeolocatorActive(mapId);
+  const active = useUIappbarGeolocatorActive();
 
   /**
    * Send fetch call to the service for given search term.

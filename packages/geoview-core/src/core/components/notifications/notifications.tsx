@@ -1,10 +1,6 @@
-import { useContext, useState } from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { useStore } from 'zustand';
-import { getGeoViewStore } from '@/core/stores/stores-managers';
-
-import { MapContext } from '@/core/app-start';
 import { NotificationType } from '@/api/events/payloads';
 import {
   Box,
@@ -20,6 +16,7 @@ import {
   Typography,
 } from '@/ui';
 import { sxClasses } from './notifications-style';
+import { useAppNotifications, useAppStoreActions } from '@/core/stores/app-state';
 
 export type NotificationDetailsType = {
   key: string;
@@ -34,16 +31,14 @@ export type NotificationDetailsType = {
  * @returns {JSX.Element} the notification button
  */
 export default function Notifications(): JSX.Element {
-  const mapConfig = useContext(MapContext);
-  const { mapId } = mapConfig;
-
   const { t } = useTranslation<string>();
 
   // internal state
   const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
 
   // get values from the store
-  const notifications = useStore(getGeoViewStore(mapId), (state) => state.notificationState.notifications);
+  const notifications = useAppNotifications();
+  const { removeNotification } = useAppStoreActions();
   const notificationsCount = notifications.length;
 
   // handle open/close
@@ -59,16 +54,7 @@ export default function Notifications(): JSX.Element {
    * Remove a notification
    */
   const handleRemoveNotificationClick = (notification: NotificationDetailsType) => {
-    const origNotifications = [...notifications];
-    const index = origNotifications.findIndex((notif) => notif.key === notification.key);
-    if (index > -1) {
-      origNotifications.splice(index, 1);
-      getGeoViewStore(mapId).setState(() => ({
-        notificationState: {
-          notifications: origNotifications,
-        },
-      }));
-    }
+    removeNotification(notification.key)
   };
 
   function getNotificationIcon(notification: NotificationDetailsType) {

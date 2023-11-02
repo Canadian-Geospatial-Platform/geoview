@@ -7,19 +7,20 @@ import { TypeArrayOfLayerData } from '@/core/components/details/details';
 import { TypeLegendItemProps, TypeLegendLayer } from '@/core/components/layers/types';
 
 import { TypeDisplayLanguage } from '@/geo/map/map-schema-types';
-import { NotificationDetailsType } from '@/core/types/cgpv-types';
 
 import { IMapState, initializeMapState } from './map-state';
 import { IUIState, initializeUIState } from './ui-state';
 import { IAppState, initializeAppState } from './app-state';
 
-export interface INotificationsState {
-  notifications: Array<NotificationDetailsType>;
-}
-
 // export interface ILayersState {}
 
 // export interface IFooterState {}
+
+export type TypeSetStore = (
+  partial: IGeoViewState | Partial<IGeoViewState> | ((state: IGeoViewState) => IGeoViewState | Partial<IGeoViewState>),
+  replace?: boolean | undefined
+) => void;
+export type TypeGetStore = () => IGeoViewState;
 
 export interface ILegendState {
   selectedItem?: TypeLegendItemProps;
@@ -63,18 +64,11 @@ export interface IGeoViewState {
   legendState: ILegendState;
   mapState: IMapState;
   uiState: IUIState;
-  notificationState: INotificationsState;
   detailsState: IDetailsState;
   dataTableState: IMapDataTableState;
 }
 
-export const geoViewStoreDefinition = (
-  set: (
-    partial: IGeoViewState | Partial<IGeoViewState> | ((state: IGeoViewState) => IGeoViewState | Partial<IGeoViewState>),
-    replace?: boolean | undefined
-  ) => void,
-  get: () => IGeoViewState
-) =>
+export const geoViewStoreDefinition = (set: TypeSetStore, get: TypeGetStore) =>
   ({
     displayLanguage: 'en',
     mapId: '',
@@ -95,9 +89,6 @@ export const geoViewStoreDefinition = (
     detailsState: {
       layerDataArray: [],
       selectedLayerPath: '',
-    },
-    notificationState: {
-      notifications: [],
     },
     dataTableState: {
       selectedLayerIndex: 0,

@@ -86,7 +86,7 @@ export function Attribution(): JSX.Element {
 
   // get store values
   const mapElement = useStore(getGeoViewStore(mapId), (state) => state.mapState.mapElement);
-  const expanded = useUIFooterBarExpanded(mapId);
+  const expanded = useUIFooterBarExpanded();
 
   useEffect(() => {
     let attributionControl: CustomAttribution;
