@@ -1,6 +1,6 @@
 /* eslint-disable react/require-default-props */
 import React, { MutableRefObject, useEffect, useState } from 'react';
-import { useTheme } from '@mui/material/styles';
+import { useTheme, Theme } from '@mui/material/styles';
 import { useTranslation } from 'react-i18next';
 import { getUid } from 'ol/util';
 import { List, ListItem, ListItemText, ZoomInSearchIcon, Tooltip, IconButton, Checkbox, Paper } from '@/ui';
@@ -48,7 +48,9 @@ export function FeatureInfo({
   clearAllCheckboxes,
 }: TypeFeatureInfoProps): JSX.Element {
   const { t } = useTranslation<string>();
-  const theme = useTheme();
+  const theme: Theme & {
+    iconImg: React.CSSProperties;
+  } = useTheme();
   const [checked, setChecked] = useState<boolean>(false);
   const [checkedFeatures, setCheckedFeatures] = useState<Exclude<TypeArrayOfFeatureInfoEntries, null | undefined>>([]);
   const feature = features![currentFeatureIndex];
@@ -158,7 +160,7 @@ export function FeatureInfo({
             </>
           }
         >
-          <img src={featureIconSrc} alt={nameFieldValue} style={sxClasses.featureInfoSingleImage} />
+          <img src={featureIconSrc} alt={nameFieldValue} style={{ ...theme.iconImg, marginRight: '10px', width: '35px', height: '35px' }} />
           <ListItemText sx={sxClasses.itemText} primary={nameFieldValue} />
         </ListItem>
       </List>
