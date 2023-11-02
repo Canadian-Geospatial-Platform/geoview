@@ -1539,7 +1539,7 @@
       "type": "array",
       "uniqueItems": true,
       "items": {
-        "enum": ["zoom", "fullscreen", "home", "location", "export"]
+        "enum": ["zoom", "fullscreen", "home", "location", "export", "focus"]
       },
       "default": ["zoom", "fullscreen", "home"],
       "description": "Controls availalbe on the navigation bar.",

@@ -169,17 +169,14 @@ export function LayersListFooter(props: TypeLayersListProps): JSX.Element {
 
           return (
             <Paper
-              sx={{ ...sxClasses.layerListPaper, border: isSelectedBorder ? `2px solid ${theme.palette.primary.main}` : 'none' }}
+              sx={{
+                ...sxClasses.layerListPaper,
+                border: isSelectedBorder ? `2px solid ${theme.palette.primary.main}` : 'none',
+                backgroundColor: isSelectedBorder ? `#E5E6F1` : 'none',
+              }}
               key={layerData.layerPath}
             >
-              <ListItem
-                disablePadding
-                secondaryAction={
-                  <IconButton edge="end" aria-label="expand" sx={sxClasses.listItemIcon}>
-                    <ChevronRightIcon />
-                  </IconButton>
-                }
-              >
+              <ListItem disablePadding>
                 <ListItemButton
                   onClick={() => {
                     setLayerDataInfo(layerData);
@@ -194,11 +191,16 @@ export function LayersListFooter(props: TypeLayersListProps): JSX.Element {
                     <SendIcon />
                   </ListItemIcon>
                   <Tooltip title={layerData.layerName} placement="top" enterDelay={1000}>
-                    <ListItemText
-                      sx={sxClasses.layerNamePrimary}
-                      primary={layerData.layerName ? layerData.layerName : t('details.clickOnMap')}
-                      secondary={`${numOfFeatures} ${t('details.feature')}${numOfFeatures > 1 ? 's' : ''}`}
-                    />
+                    <>
+                      <ListItemText
+                        sx={sxClasses.layerNamePrimary}
+                        primary={layerData.layerName ? layerData.layerName : t('details.clickOnMap')}
+                        secondary={`${numOfFeatures} ${t('details.feature')}${numOfFeatures > 1 ? 's' : ''}`}
+                      />
+                      <IconButton edge="end" aria-label="expand" sx={sxClasses.listItemIcon}>
+                        <ChevronRightIcon />
+                      </IconButton>
+                    </>
                   </Tooltip>
                 </ListItemButton>
               </ListItem>
