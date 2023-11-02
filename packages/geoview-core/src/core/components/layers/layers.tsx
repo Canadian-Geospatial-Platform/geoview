@@ -28,7 +28,7 @@ export function Layers(props: LegendItemsDetailsProps): JSX.Element {
 
   // Populating fake legend data
   const helpers = useLegendHelpers(mapId);
-  helpers.populateLegendStoreWithFakeData();
+ //helpers.populateLegendStoreWithFakeData();
 
   const store = getGeoViewStore(mapId);
   // controls what is displayed on the right panel

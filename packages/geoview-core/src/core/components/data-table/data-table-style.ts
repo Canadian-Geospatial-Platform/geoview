@@ -118,7 +118,7 @@ export const getSxClasses = (theme: Theme) => ({
     padding: '6px',
     color: 'rgb(1, 67, 97)',
   },
-  tableCell: { 'white-space': 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' },
+  tableCell: { whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' },
   dataTableWrapper: {
     '& .MuiPaper-root': {
       border: `2px solid ${theme.palette.primary.main}`,
