@@ -357,8 +357,8 @@ function MapDataTable({ data, layerId, mapId, layerKey, projectionConfig }: MapD
    */
   const initLightBox = (images: string, cellId: string) => {
     setIsLightBoxOpen(true);
-    const slides = images.split(';').map((item) => ({ src: item, alt: cellId, downloadUrl: item }));
-    setSlides(slides);
+    const slidesList = images.split(';').map((item) => ({ src: item, alt: cellId, downloadUrl: item }));
+    setSlides(slidesList);
   };
 
   /**
