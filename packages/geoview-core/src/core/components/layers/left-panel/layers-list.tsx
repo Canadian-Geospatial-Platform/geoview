@@ -1,5 +1,4 @@
-import React from 'react';
-import { useTheme } from '@mui/material';
+import { useTheme } from '@mui/material/styles';
 import { SingleLayer } from './single-layer';
 import { getSxClasses } from '../layers-style';
 import { List } from '@/ui';
@@ -8,7 +7,7 @@ import { useLayersList } from '@/core/stores/store-interface-and-intial-values/l
 export function LayersList(): JSX.Element {
   const theme = useTheme();
   const sxClasses = getSxClasses(theme);
-  const legendLayers = useLayersList();
+  const legendLayers = useLayersList(); // get store value(s)
 
   const legendItems = legendLayers.map((details) => {
     return <SingleLayer key={`layerKey-${details.layerPath}-${details.layerPath}`} depth={0} layer={details} />;

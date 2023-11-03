@@ -1,7 +1,6 @@
-import { Button, useTheme } from '@mui/material';
-import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { Box, Typography, Stack, ExpandIcon, RemoveCircleOutlineIcon, AddCircleOutlineIcon } from '@/ui';
+import { useTheme } from '@mui/material/styles';
+import { Box, Typography, Stack, ExpandIcon, RemoveCircleOutlineIcon, AddCircleOutlineIcon, Button } from '@/ui';
 import { getSxClasses } from '../layers-style';
 
 export function LayersActions(): JSX.Element {
@@ -17,6 +16,7 @@ export function LayersActions(): JSX.Element {
       </div>
       <Stack style={{ alignItems: 'center', gap: '15px' }} direction="row">
         <Button
+         type="textWithIcon"
           variant="contained"
           size="small"
           sx={{ backgroundColor: '#F4F5FF', borderRadius: '20px' }}
@@ -25,6 +25,7 @@ export function LayersActions(): JSX.Element {
           <Typography sx={sxClasses.legendButtonText}>{t('legend.re-arrange')}</Typography>
         </Button>
         <Button
+          type="textWithIcon"
           variant="contained"
           size="small"
           sx={{ backgroundColor: '#F4F5FF', borderRadius: '20px' }}
@@ -33,6 +34,7 @@ export function LayersActions(): JSX.Element {
           <Typography sx={sxClasses.legendButtonText}>{t('general.add')}</Typography>
         </Button>
         <Button
+          type="textWithIcon"
           variant="contained"
           size="small"
           sx={{ backgroundColor: '#F4F5FF', borderRadius: '20px' }}

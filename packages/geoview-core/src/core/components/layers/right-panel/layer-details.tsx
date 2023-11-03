@@ -1,5 +1,6 @@
-import { useTheme, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@mui/material';
 import { useTranslation } from 'react-i18next';
+import { useTheme } from '@mui/material/styles';
+import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@mui/material';
 import { TypeLegendLayer } from '../types';
 import { getSxClasses } from '../layers-style';
 import { Box, CheckBoxIcon, CheckBoxOutIcon, IconButton, Paper, SliderBase, Typography, ZoomInSearchIcon } from '@/ui';
@@ -14,7 +15,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
   const sxClasses = getSxClasses(theme);
   const { t } = useTranslation<string>();
   const { layerDetails } = props;
-  const { setAllItemsVisibility, toggleItemVisibility, setLayerOpacity } = useLayerStoreActions();
+  const { setAllItemsVisibility, toggleItemVisibility, setLayerOpacity } = useLayerStoreActions(); // get store actions
 
   const handleZoomTo = async () => {
     /* let bounds = await api.maps[mapId].layer.geoviewLayers[layerId].calculateBounds(path);

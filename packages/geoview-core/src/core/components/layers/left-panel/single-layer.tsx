@@ -1,24 +1,24 @@
 import { useState } from 'react';
-import { useTheme } from '@mui/material';
+import { useTheme } from '@mui/material/styles';
 import {
   Box,
-  ListItem,
-  Tooltip,
-  ListItemText,
-  ListItemIcon,
+  Collapse,
+  DownloadingIcon,
+  ErrorIcon,
+  GroupWorkOutlinedIcon,
   IconButton,
   KeyboardArrowDownIcon,
-  Collapse,
-  List,
-  KeyboardArrowUpIcon,
-  GroupWorkOutlinedIcon,
   KeyboardArrowRightIcon,
-  VisibilityOffOutlinedIcon,
-  VisibilityOutlinedIcon,
-  ListAltIcon,
+  KeyboardArrowUpIcon,
+  List,
+  ListItem,
   ListItemButton,
-  ErrorIcon,
-  DownloadingIcon,
+  ListItemIcon,
+  ListItemText,
+  ListAltIcon,
+  Tooltip,
+  VisibilityOffOutlinedIcon,
+  VisibilityOutlinedIcon
 } from '@/ui';
 import { TypeLegendLayer } from '../types';
 import { getSxClasses } from './layerslist-style';
@@ -36,9 +36,9 @@ export function SingleLayer(props: SingleLayerProps): JSX.Element {
   const theme = useTheme();
   const sxClasses = getSxClasses(theme);
 
-  const { toggleLayerVisibility, setSelectedLayerPath } = useLayerStoreActions();
+  const { toggleLayerVisibility, setSelectedLayerPath } = useLayerStoreActions(); // get store actions
 
-  const selectedLayerPath = useSelectedLayerPath();
+  const selectedLayerPath = useSelectedLayerPath(); // get store value
 
   const layerIsSelected = layer.layerPath === selectedLayerPath;
   const legendClass = layerIsSelected ? { ...sxClasses.layersList.selectedLayerItem } : null;

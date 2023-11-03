@@ -1,5 +1,6 @@
-import { styled, useTheme } from '@mui/material';
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
+import { useTheme } from '@mui/material/styles';
+import { styled } from '@mui/material';
 import { LegendItemsDetailsProps } from './types';
 import { Box, Grid } from '@/ui';
 import { getSxClasses } from './layers-style';
@@ -25,7 +26,7 @@ export function Layers(props: LegendItemsDetailsProps): JSX.Element {
   // Populating fake legend data
   const helpers = useLegendHelpers(mapId);
 
-  const selectedLayer = useSelectedLayer();
+  const selectedLayer = useSelectedLayer(); // get store value
 
   useEffect(() => {
     helpers.populateLegendStoreWithFakeData();

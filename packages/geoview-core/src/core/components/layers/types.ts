@@ -82,7 +82,7 @@ export interface TypeLegendLayer {
   items: TypeLegendLayerItem[];
   children: TypeLegendLayer[];
 
-  opacity?: number; // Does every layer have opacity?
+  opacity?: number;
   zoom?: number;
 
   isRemovable?: boolean;
