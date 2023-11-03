@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { TypeLegendLayer } from '../types';
 import { getSxClasses } from '../layers-style';
 import { Box, CheckBoxIcon, CheckBoxOutIcon, IconButton, Paper, SliderBase, Typography, ZoomInSearchIcon } from '@/ui';
-import { useLayerStoreActions } from '@/core/stores/layer-state';
+import { useLayerStoreActions } from '@/core/stores/store-interface-and-intial-values/layer-state';
 
 interface LayerDetailsProps {
   layerDetails: TypeLegendLayer;

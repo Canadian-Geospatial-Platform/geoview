@@ -7,7 +7,7 @@ import { useLegendHelpers } from './hooks/helpers';
 import { LayersActions } from './left-panel/layers-actions';
 import { LayersList } from './left-panel/layers-list';
 import { LayerDetails } from './right-panel/layer-details';
-import { useSelectedLayer } from '@/core/stores/layer-state';
+import { useSelectedLayer } from '@/core/stores/store-interface-and-intial-values/layer-state';
 
 const Item = styled('div')(({ theme }) => ({
   backgroundColor: theme.palette.mode === 'dark' ? '#262B32' : '#fff',

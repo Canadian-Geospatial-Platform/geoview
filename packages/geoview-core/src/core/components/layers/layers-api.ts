@@ -1,7 +1,6 @@
 import { createElement } from 'react';
 import { LegendsLayerSet, api } from '@/app';
-import { SingleLayer } from './left-panel/single-layer';
-import { TypeLegendItemProps, TypeLegendProps } from './types';
+import { TypeLegendProps } from './types';
 import { Layers } from './layers';
 
 /**
@@ -51,15 +50,5 @@ export class LayersApi {
       mapId: this.mapId,
     });
     // return createElement('div', {}, createElement(List, { sx: { width: '100%' } }, legendItems));
-  };
-
-  /**
-   * Create an individual legend item
-   *
-   */
-  createSingleLayer = (props: TypeLegendItemProps) => {
-    const { layerId } = props;
-    const geoviewLayerInstance = api.maps[this.mapId].layer.geoviewLayers[layerId];
-    return createElement(SingleLayer, { layerId, geoviewLayerInstance, key: layerId });
   };
 }

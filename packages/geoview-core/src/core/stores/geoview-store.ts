@@ -6,7 +6,7 @@ import { TypeMapFeaturesConfig } from '@/core/types/global-types';
 import { TypeArrayOfLayerData } from '@/core/components/details/details';
 
 import { TypeDisplayLanguage } from '@/geo/map/map-schema-types';
-import { ILayerState, initializeLayerState } from './layer-state';
+import { ILayerState, initializeLayerState } from './store-interface-and-intial-values/layer-state';
 
 import { IMapState, initializeMapState } from './store-interface-and-intial-values/map-state';
 import { IUIState, initializeUIState } from './store-interface-and-intial-values/ui-state';

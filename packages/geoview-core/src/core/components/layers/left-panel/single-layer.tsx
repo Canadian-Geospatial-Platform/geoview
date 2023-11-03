@@ -22,7 +22,7 @@ import {
 } from '@/ui';
 import { TypeLegendLayer } from '../types';
 import { getSxClasses } from './layerslist-style';
-import { useLayerStoreActions, useSelectedLayerPath } from '@/core/stores/layer-state';
+import { useLayerStoreActions, useSelectedLayerPath } from '@/core/stores/store-interface-and-intial-values/layer-state';
 
 interface SingleLayerProps {
   layer: TypeLegendLayer;

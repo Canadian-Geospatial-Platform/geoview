@@ -2,9 +2,9 @@
 /* eslint-disable no-restricted-syntax */
 import { useStore } from 'zustand';
 import _ from 'lodash';
-import { useGeoViewStore } from './stores-managers';
-import { TypeLegendLayer } from '../components/layers/types';
-import { IGeoViewState } from './geoview-store';
+import { useGeoViewStore } from '../stores-managers';
+import { TypeLegendLayer } from '../../components/layers/types';
+import { IGeoViewState } from '../geoview-store';
 
 export interface ILayerState {
   selectedItem?: TypeLegendLayer;

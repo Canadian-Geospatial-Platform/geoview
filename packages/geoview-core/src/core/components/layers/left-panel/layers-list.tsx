@@ -3,7 +3,7 @@ import { useTheme } from '@mui/material';
 import { SingleLayer } from './single-layer';
 import { getSxClasses } from '../layers-style';
 import { List } from '@/ui';
-import { useLayersList } from '@/core/stores/layer-state';
+import { useLayersList } from '@/core/stores/store-interface-and-intial-values/layer-state';
 
 export function LayersList(): JSX.Element {
   const theme = useTheme();
