@@ -44,9 +44,11 @@ export interface IMapState {
   onMapZoomEnd: (event: ObjectEvent) => void;
 
   actions: {
+    setFixNorth: (ifFix: boolean) => void;
     setMapElement: (mapElem: OLMap) => void;
     setOverlayNorthMarker: (overlay: Overlay) => void;
     setOverlayNorthMarkerRef: (htmlRef: HTMLElement) => void;
+    setRotation: (degree: number) => void;
   };
 }
 
@@ -148,6 +150,14 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore) {
     }, 100),
 
     actions: {
+      setFixNorth: (isFix: boolean) => {
+        set({
+          mapState: {
+            ...get().mapState,
+            fixNorth: isFix,
+          },
+        });
+      },
       setMapElement: (mapElem: OLMap) => {
         set({
           mapState: {
@@ -171,6 +181,17 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore) {
         const overlay = get().mapState.overlayNorthMarker;
         if (overlay !== undefined) overlay.setElement(htmlRef);
       },
+      setRotation: (degree: number) => {
+        set({
+          mapState: {
+            ...get().mapState,
+            rotation: degree,
+          },
+        });
+
+        // set ol map rotation
+        get().mapState.mapElement.getView().animate({ rotation: 0 });
+      },
     },
   };
 
@@ -183,9 +204,12 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore) {
 export const useMapCenterCoordinates = () => useStore(useGeoViewStore(), (state) => state.mapState.centerCoordinates);
 export const useMapProjection = () => useStore(useGeoViewStore(), (state) => state.mapState.currentProjection);
 export const useMapElement = () => useStore(useGeoViewStore(), (state) => state.mapState.mapElement);
+export const useMapFixNorth = () => useStore(useGeoViewStore(), (state) => state.mapState.fixNorth);
 export const useMapInteraction = () => useStore(useGeoViewStore(), (state) => state.mapState.interaction);
+export const useMapNorthArrow = () => useStore(useGeoViewStore(), (state) => state.mapState.northArrow);
 export const useMapOverlayNorthMarker = () => useStore(useGeoViewStore(), (state) => state.mapState.overlayNorthMarker);
 export const useMapPointerPosition = () => useStore(useGeoViewStore(), (state) => state.mapState.pointerPosition);
+export const useMapRotation = () => useStore(useGeoViewStore(), (state) => state.mapState.rotation);
 export const useMapScale = () => useStore(useGeoViewStore(), (state) => state.mapState.scale);
 
 export const useMapStoreActions = () => useStore(useGeoViewStore(), (state) => state.mapState.actions);

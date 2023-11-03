@@ -5,6 +5,7 @@ import { fromLonLat } from 'ol/proj';
 import { GeoViewStoreType } from '@/core/stores/geoview-store';
 import { AbstractEventProcessor } from './abstract-event-processor';
 import { api, NORTH_POLE_POSITION } from '@/app';
+import { CustomAttribution } from '@/geo/utils/custom-attribution';
 import {
   mapPayload,
   lngLatPayload,
@@ -120,7 +121,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
     map.getView().on('change:resolution', store.getState().mapState.onMapZoomEnd);
     map.getView().on('change:rotation', store.getState().mapState.onMapRotation);
 
-    // add map controls
+    // add map controls (scale)
     const scaleBar = new ScaleLine({
       units: 'metric',
       target: document.getElementById(`${mapId}-scaleControlBar`) as HTMLElement,
@@ -134,6 +135,22 @@ export class MapEventProcessor extends AbstractEventProcessor {
     });
     map.addControl(scaleLine);
     map.addControl(scaleBar);
+
+    // add map controls (attribution)
+    const attributionTextElement = document.getElementById(`${mapId}-attribution-text`) as HTMLElement;
+    const attributionControl = new CustomAttribution(
+      {
+        target: attributionTextElement,
+        collapsible: false,
+        collapsed: false,
+        label: document.createElement('div'),
+        collapseLabel: document.createElement('div'),
+      },
+      mapId
+    );
+
+    attributionControl.formatAttribution();
+    map.addControl(attributionControl);
 
     // add map overlays
     // create overlay for north pole icon
