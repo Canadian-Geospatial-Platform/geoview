@@ -1,15 +1,13 @@
-import { Button, styled, useTheme } from '@mui/material';
+import { styled, useTheme } from '@mui/material';
 import React, { useEffect } from 'react';
-import { useStore } from 'zustand';
-import { useTranslation } from 'react-i18next';
-import { api } from '@/app';
-import { LegendItemsDetailsProps, TypeLegendItemProps } from './types';
-import { AddIcon, Box, Grid, List, Typography, Stack, ExpandIcon } from '@/ui';
-import { LayerDetails } from './right-panel/layer-details';
-import { getGeoViewStore } from '@/core/stores/stores-managers';
-import { SingleLayer } from './left-panel/single-layer';
+import { LegendItemsDetailsProps } from './types';
+import { Box, Grid } from '@/ui';
 import { getSxClasses } from './layers-style';
-// import { useLegendHelpers } from './hooks/helpers';
+import { useLegendHelpers } from './hooks/helpers';
+import { LayersActions } from './left-panel/layers-actions';
+import { LayersList } from './left-panel/layers-list';
+import { LayerDetails } from './right-panel/layer-details';
+import { useSelectedLayer } from '@/core/stores/layer-state';
 
 const Item = styled('div')(({ theme }) => ({
   backgroundColor: theme.palette.mode === 'dark' ? '#262B32' : '#fff',
@@ -19,112 +17,34 @@ const Item = styled('div')(({ theme }) => ({
 }));
 
 export function Layers(props: LegendItemsDetailsProps): JSX.Element {
-  const { layerIds, isRemoveable, canSetOpacity, expandAll, hideAll, mapId } = props;
-
-  const { t } = useTranslation<string>();
+  const { mapId } = props;
 
   const theme = useTheme();
   const sxClasses = getSxClasses(theme);
 
   // Populating fake legend data
-  // const helpers = useLegendHelpers(mapId);
-  // helpers.populateLegendStoreWithFakeData();
+  const helpers = useLegendHelpers(mapId);
 
-  const store = getGeoViewStore(mapId);
-  // controls what is displayed on the right panel
-  const selectedLegendItem = useStore(store, (state) => state.legendState.selectedItem);
-
-  const legendLayers: TypeLegendItemProps[] = layerIds
-    .filter((layerId) => api.maps[mapId].layer.geoviewLayers[layerId])
-    .map((layerId) => {
-      const geoviewLayerInstance = api.maps[mapId].layer.geoviewLayers[layerId];
-
-      const propsForComponents: TypeLegendItemProps = {
-        layerId,
-        geoviewLayerInstance,
-        isRemoveable,
-        canSetOpacity,
-        expandAll,
-        hideAll,
-      };
-
-      return propsForComponents;
-    });
+  const selectedLayer = useSelectedLayer();
 
   useEffect(() => {
-    if (!selectedLegendItem && legendLayers) {
-      store.setState({
-        legendState: { ...store.getState().legendState, selectedItem: legendLayers[0] },
-      });
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  function buttonsMenu() {
-    return (
-      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '15px' }}>
-        <div>
-          <Typography sx={sxClasses.categoryTitle}>{t('general.layers')}</Typography>
-        </div>
-        <Stack style={{ alignItems: 'center', gap: '15px' }} direction="row">
-          <Button
-            variant="contained"
-            size="small"
-            sx={{ backgroundColor: '#F4F5FF' }}
-            startIcon={<ExpandIcon fontSize="small" sx={{ color: '#515BA5' }} />}
-          >
-            <Typography sx={sxClasses.legendButtonText}>{t('legend.re-arrange')}</Typography>
-          </Button>
-          <Button
-            variant="contained"
-            size="small"
-            sx={{ backgroundColor: '#F4F5FF' }}
-            startIcon={<AddIcon fontSize="small" sx={{ color: '#515BA5' }} />}
-          >
-            <Typography sx={sxClasses.legendButtonText}>{t('legend.add_layer')}</Typography>
-          </Button>
-        </Stack>
-      </Box>
-    );
-  }
+    helpers.populateLegendStoreWithFakeData();
+  }, [helpers]);
 
   const leftPanel = () => {
-    const legendItems = legendLayers.map((details) => {
-      return (
-        <SingleLayer
-          key={`layerKey-${details.layerId}`}
-          layerId={details.layerId}
-          geoviewLayerInstance={details.geoviewLayerInstance}
-          isRemoveable={details.isRemoveable}
-          canSetOpacity={details.canSetOpacity}
-          expandAll={details.expandAll}
-          hideAll={details.hideAll}
-        />
-      );
-    });
-
     return (
       <div>
-        {buttonsMenu()}
-        <List sx={sxClasses.list}>{legendItems}</List>
+        <LayersActions />
+        <LayersList />
       </div>
     );
   };
 
   const rightPanel = () => {
-    if (selectedLegendItem) {
+    if (selectedLayer) {
       return (
         <Item>
-          <LayerDetails
-            key={`layerKey-${selectedLegendItem.layerId}`}
-            layerId={selectedLegendItem.layerId}
-            geoviewLayerInstance={selectedLegendItem?.geoviewLayerInstance}
-            isRemoveable={selectedLegendItem.isRemoveable}
-            canSetOpacity={selectedLegendItem.canSetOpacity}
-            expandAll={selectedLegendItem.expandAll}
-            hideAll={selectedLegendItem?.hideAll}
-            isParentVisible={selectedLegendItem.geoviewLayerInstance.getVisible(selectedLegendItem.layerConfigEntry!)}
-          />
+          <LayerDetails layerDetails={selectedLayer} />
         </Item>
       );
     }

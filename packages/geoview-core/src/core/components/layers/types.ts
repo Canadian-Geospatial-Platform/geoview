@@ -1,4 +1,4 @@
-import { AbstractGeoViewLayer, TypeGeoviewLayerType, TypeLayerEntryConfig, TypeLocalizedString, TypeStyleConfig } from '@/geo';
+import { AbstractGeoViewLayer, TypeGeoviewLayerType, TypeLayerEntryConfig, TypeStyleConfig } from '@/geo';
 import { TypeLayerStatus } from '@/geo/map/map-schema-types';
 
 export interface TypeLegendProps {
@@ -64,17 +64,27 @@ export interface TypeLegendLayerItem {
 }
 
 export interface TypeLegendLayer {
+  layerId: string;
   layerPath: string;
   order?: number; // useful for ordering layers
-  layerName: TypeLocalizedString;
+  layerName: string;
   type: TypeGeoviewLayerType;
   styleConfig?: TypeStyleConfig;
   layerStatus: TypeLayerStatus;
   layerPhase: string;
   querySent: boolean;
 
+  isVisible: boolean; // is layer is visible
+
   icon?: TypeLegendLayerIcon;
   // data: TypeLegend | undefined | null;
+  allItemsChecked?: boolean; // if all items in this layer are visible
   items: TypeLegendLayerItem[];
   children: TypeLegendLayer[];
+
+  opacity?: number; // Does every layer have opacity?
+  zoom?: number;
+
+  isRemovable?: boolean;
+  canSetOpacity?: boolean;
 }
