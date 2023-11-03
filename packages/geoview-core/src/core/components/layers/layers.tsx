@@ -29,7 +29,7 @@ export function Layers(props: LegendItemsDetailsProps): JSX.Element {
 
   useEffect(() => {
     helpers.populateLegendStoreWithFakeData();
-  }, [helpers]);
+  }, []);
 
   const leftPanel = () => {
     return (
