@@ -3,68 +3,10 @@ import { useContext, useEffect, useState } from 'react';
 
 import { useTheme } from '@mui/material/styles';
 
-import OLAttribution, { Options } from 'ol/control/Attribution';
-
 import { MapContext } from '@/core/app-start';
 import { Tooltip, Box } from '@/ui';
 import { getSxClasses } from './attribution-style';
 import { useUIFooterBarExpanded } from '@/core/stores/store-interface-and-intial-values/ui-state';
-import { useMapElement } from '@/core/stores/store-interface-and-intial-values/map-state';
-
-/**
- * Custom Attribution control that extends Openlayers Attribution control.
- * Class adds title to attribution text to show a tooltip when mouse is over it.
- *
- * @class CustomAttribution
- */
-class CustomAttribution extends OLAttribution {
-  attributions: string[] = [];
-
-  mapId: string;
-
-  /**
-   * Constructor that enables attribution text tooltip.
-   *
-   * @param {Options} optOptions control options
-   */
-  constructor(optOptions: Options, mapId: string) {
-    const options = optOptions || {};
-
-    super(options);
-
-    this.mapId = mapId;
-  }
-
-  /**
-   * Format the attribution element by removing duplicate
-   */
-  formatAttribution() {
-    // find ul element in attribution control
-    const ulElement = this.element.getElementsByTagName('UL')[0];
-    const compAttribution: string[] = [];
-
-    if (ulElement) {
-      // find li elements in ul element
-      const liElements = ulElement.getElementsByTagName('LI');
-
-      if (liElements && liElements.length > 0) {
-        // add title attribute to li elements
-        for (let liElementIndex = 0; liElementIndex < liElements.length; liElementIndex++) {
-          const liElement = liElements[liElementIndex] as HTMLElement;
-          const attributionText = liElement.innerText;
-
-          // if elemetn doat not exist, add. Otherwise remove
-          if (!compAttribution.includes(attributionText.toLowerCase().replaceAll(' ', ''))) {
-            this.attributions.push(attributionText);
-            compAttribution.push(attributionText.toLowerCase().replaceAll(' ', ''));
-          } else {
-            liElement.remove();
-          }
-        }
-      }
-    }
-  }
-}
 
 /**
  * Create an Attribution component that will display an attribution box
@@ -82,36 +24,8 @@ export function Attribution(): JSX.Element {
   // internal component state
   const [attribution, setAttribution] = useState('');
 
-  // get store values
-  const mapElement = useMapElement();
+  // get store value
   const expanded = useUIFooterBarExpanded();
-
-  useEffect(() => {
-    let attributionControl: CustomAttribution;
-
-    if (mapElement !== undefined) {
-      const attributionTextElement = document.getElementById(`${mapId}-attribution-text`) as HTMLElement;
-
-      attributionControl = new CustomAttribution(
-        {
-          target: attributionTextElement,
-          collapsible: false,
-          collapsed: false,
-          label: document.createElement('div'),
-          collapseLabel: document.createElement('div'),
-        },
-        mapId
-      );
-
-      attributionControl.formatAttribution();
-      mapElement.addControl(attributionControl);
-    }
-    return () => {
-      if (mapElement !== undefined) {
-        mapElement.removeControl(attributionControl);
-      }
-    };
-  }, [mapId, mapElement]);
 
   useEffect(() => {
     const attributionTextElement = document.getElementById(`${mapId}-attribution-text`) as HTMLElement;
