@@ -360,7 +360,7 @@ export function ClickMarker(): JSX.Element {
   useEffect(() => {
     // if mapClickCoordinates changed, single click event has been triggered
     const unsubMapSingleClick = getGeoViewStore(mapId).subscribe(
-      (state) => state.mapState.mapClickCoordinates,
+      (state) => state.mapState.clickCoordinates,
       (curClick, prevClick) => {
         if (curClick !== prevClick) {
           showMarkerIcon(curClick!.lnglat);
@@ -372,7 +372,7 @@ export function ClickMarker(): JSX.Element {
 
     // if mapCenterCoordinates changed, map move end event has been triggered
     const unsubMapCenterCoord = getGeoViewStore(mapId).subscribe(
-      (state) => state.mapState.mapCenterCoordinates,
+      (state) => state.mapState.centerCoordinates,
       (curCenterCoord, prevCenterCoord) => {
         if (curCenterCoord !== prevCenterCoord) setShowMarker(false);
       }

@@ -23,7 +23,7 @@ export function FooterbarRotationButton(): JSX.Element {
   const iconRef = useRef(null);
 
   // get the values from store
-  const mapRotation = useStore(getGeoViewStore(mapId), (state) => state.mapState.mapRotation);
+  const mapRotation = useStore(getGeoViewStore(mapId), (state) => state.mapState.rotation);
   const mapElement = useStore(getGeoViewStore(mapId), (state) => state.mapState.mapElement);
 
   return (

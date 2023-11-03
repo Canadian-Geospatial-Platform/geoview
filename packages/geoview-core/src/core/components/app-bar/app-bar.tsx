@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect, useCallback, Fragment, useContext, SetStateAction, Dispatch } from 'react';
-import { Box, useTheme } from '@mui/material';
 
-import { List, ListItem, Panel, IconButton } from '@/ui';
+import { useTheme } from '@mui/material/styles';
+import { Box, List, ListItem, Panel, IconButton } from '@/ui';
 
 import { api } from '@/app';
 import { EVENT_NAMES } from '@/api/events/event-types';
@@ -29,6 +29,8 @@ type AppbarProps = {
 export function Appbar({ activeTrap, activeTrapSet }: AppbarProps): JSX.Element {
   const theme = useTheme();
   const sxClasses = getSxClasses(theme);
+
+  // internal component state
   const [buttonPanelGroups, setButtonPanelGroups] = useState<Record<string, Record<string, TypeButtonPanel>>>({});
   const [ModalIsShown, setModalIsShown] = useState(false);
   const [selectedAppBarButtonId, setSelectedAppbarButtonId] = useState<string>('');
@@ -113,7 +115,7 @@ export function Appbar({ activeTrap, activeTrapSet }: AppbarProps): JSX.Element 
           <Box>
             <List sx={sxClasses.appBarList}>
               <ListItem>
-                <Geolocator sx={sxClasses.appBarButton} mapId={mapId} />
+                <Geolocator sx={sxClasses.appBarButton} />
               </ListItem>
             </List>
           </Box>
