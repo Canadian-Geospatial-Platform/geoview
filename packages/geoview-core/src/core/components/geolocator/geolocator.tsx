@@ -38,6 +38,7 @@ export function Geolocator() {
 
   const urlRef = useRef<string>(`${serviceUrls!.geolocator}&lang=${i18n.language}`);
 
+  // internal state
   const [data, setData] = useState<GeoListItem[]>();
   const [error, setError] = useState<Error>();
   const [isLoading, setIsLoading] = useState<boolean>(false);

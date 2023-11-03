@@ -1,25 +1,11 @@
 import { ListItem } from '@mui/material'; // TODO because of forward ref problem we can't use it inside the tooltip if provided by UI
 import { ListItemButton, Grid, Tooltip, Typography } from '@/ui';
 import { GeoListItem } from './geolocator';
+import { sxClassesList } from './geolocator-style';
 
 type GeoListProps = {
   geoListItems: GeoListItem[];
   zoomToLocation: (coords: [number, number], bbox: [number, number, number, number]) => void;
-};
-
-const sxClasses = {
-  main: {
-    whiteSpace: 'nowrap',
-    overflow: 'hidden',
-    textOverflow: 'ellipsis',
-    '& span': {
-      fontSize: '0.75rem',
-      ':first-of-type': {
-        fontWeight: 'bold',
-        fontSize: '0.875rem',
-      },
-    },
-  },
 };
 
 type tooltipProp = Pick<GeoListItem, 'name' | 'tag' | 'province'>;
@@ -70,7 +56,7 @@ export default function GeoList({ geoListItems, zoomToLocation }: GeoListProps) 
             <ListItemButton onClick={() => zoomToLocation([geoListItem.lng, geoListItem.lat], geoListItem.bbox)}>
               <Grid container>
                 <Grid item xs={12} sm={8}>
-                  <Typography component="p" sx={sxClasses.main}>
+                  <Typography component="p" sx={sxClassesList.main}>
                     <Typography component="span">{geoListItem.name}</Typography>
                     {!!geoListItem.tag && geoListItem.tag.length && !!geoListItem.tag[0] && (
                       <Typography component="span">{`, ${geoListItem.tag[0]}`}</Typography>
@@ -82,7 +68,7 @@ export default function GeoList({ geoListItems, zoomToLocation }: GeoListProps) 
                 </Grid>
                 <Grid item xs={12} sm={4} sx={{ textAlign: 'right' }}>
                   {!!geoListItem.tag && geoListItem.tag.length > 1 && !!geoListItem.tag[1] && (
-                    <Typography component="p" sx={sxClasses.main}>
+                    <Typography component="p" sx={sxClassesList.main}>
                       <Typography component="span"> {geoListItem.tag[1]}</Typography>
                     </Typography>
                   )}

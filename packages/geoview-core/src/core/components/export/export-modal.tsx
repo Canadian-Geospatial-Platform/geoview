@@ -1,9 +1,9 @@
 import { MouseEventHandler, useContext } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Button, Dialog, DialogActions, DialogTitle } from '@mui/material';
+import { Button, Dialog, DialogActions, DialogTitle } from '@mui/material'; // TODO: refactor to use UI
 
 import { MapContext } from '@/core/app-start';
-import { exportPNG } from '../../utils/utilities';
+import { exportPNG } from '@/core/utils/utilities';
 
 /**
  * Interface used for home button properties
@@ -28,9 +28,11 @@ const defaultProps = {
  */
 export default function ExportModal(props: ExportModalProps): JSX.Element {
   const { className, isShown, closeModal } = props;
-  const { t } = useTranslation();
+
   const mapConfig = useContext(MapContext);
   const { mapId } = mapConfig;
+
+  const { t } = useTranslation();
 
   return (
     <Dialog open={isShown} onClose={closeModal} className={className}>
