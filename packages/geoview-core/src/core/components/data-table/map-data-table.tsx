@@ -501,7 +501,7 @@ function MapDataTable({ data, layerId, mapId, layerKey, projectionConfig }: MapD
           ],
         }),
         ...([t('dataTable.icon'), t('dataTable.zoom')].includes(value.alias)
-          ? { enableColumnFilter: false, enableColumnActions: false, enableSorting: false }
+          ? { size: 100, enableColumnFilter: false, enableColumnActions: false, enableSorting: false, enableResizing: false }
           : {}),
       });
     });
