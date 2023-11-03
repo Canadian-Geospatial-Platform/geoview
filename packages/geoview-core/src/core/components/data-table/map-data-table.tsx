@@ -30,7 +30,7 @@ import { Extent } from 'ol/extent';
 import { darken, useTheme } from '@mui/material';
 import { difference } from 'lodash';
 import { getUid } from 'ol/util';
-import { Box, IconButton, Tooltip, ZoomInSearchIcon } from '@/ui';
+import { Box, Button, IconButton, Tooltip, ZoomInSearchIcon } from '@/ui';
 import ExportButton from './export-button';
 import JSONExportButton from './json-export-button';
 import FilterMap from './filter-map';
@@ -45,6 +45,9 @@ import {
   featureHighlightPayload,
   EVENT_NAMES,
   clearHighlightsPayload,
+  LightboxImg,
+  LightBoxSlides,
+  isImage,
 } from '@/app';
 import { getGeoViewStore } from '@/core/stores/stores-managers';
 import { getSxClasses } from './data-table-style';
@@ -144,6 +147,11 @@ function MapDataTable({ data, layerId, mapId, layerKey, projectionConfig }: MapD
     mapFilteredMap,
     setRowsFilteredMap,
   } = useStore(store, (state) => state.dataTableState);
+
+  const [isLightBoxOpen, setIsLightBoxOpen] = useState(false);
+  const [slides, setSlides] = useState<LightBoxSlides[]>([]);
+  const [slidesIndex, setSlidesIndex] = useState(0);
+
   const rowSelectionRef = useRef<Array<number>>([]);
 
   const [columnFilters, setColumnFilters] = useState<MRTColumnFiltersState>(columnFiltersMap[layerKey] || []);
@@ -343,16 +351,49 @@ function MapDataTable({ data, layerId, mapId, layerKey, projectionConfig }: MapD
   }, []);
 
   /**
+   * Initialize lightbox with state.
+   * @param {string} images images url formatted as string and joined with ';' identifier.
+   * @param {string} cellId id of the cell.
+   */
+  const initLightBox = (images: string, cellId: string) => {
+    setIsLightBoxOpen(true);
+    const slidesList = images.split(';').map((item) => ({ src: item, alt: cellId, downloadUrl: item }));
+    setSlides(slidesList);
+  };
+
+  /**
+   * Create image button which will trigger lightbox.
+   * @param {string | number | ReactNode} cellValue value to be rendered in cell.
+   * @param {string} cellId id of the column.
+   * @returns
+   */
+  const createLightBoxButton = (cellValue: string | number | ReactNode, cellId: string) => {
+    if (typeof cellValue === 'string' && isImage(cellValue)) {
+      return (
+        <Button
+          type="text"
+          size="small"
+          onClick={() => initLightBox(cellValue, cellId)}
+          sx={{ height: '2.5rem', paddingLeft: '0.5rem', paddingRight: '0.5rem', textTransform: 'none' }}
+        >
+          {t('dataTable.images')}
+        </Button>
+      );
+    }
+    return cellValue;
+  };
+
+  /**
    * Create data table body cell with tooltip
    *
    * @param {string | number | ReactNode} cellValue cell value to be displayed in cell
    * @returns JSX.Element
    */
-  const getCellValueWithTooltip = (cellValue: string | number | ReactNode) => {
+  const getCellValueWithTooltip = (cellValue: string | number | ReactNode, cellId: string) => {
     return typeof cellValue === 'string' || typeof cellValue === 'number' ? (
       <Tooltip title={cellValue} placement="top" arrow>
         <Box component="span" sx={density === 'compact' ? sxClasses.tableCell : {}}>
-          {cellValue}
+          {createLightBoxButton(cellValue, cellId)}
         </Box>
       </Tooltip>
     ) : (
@@ -439,7 +480,7 @@ function MapDataTable({ data, layerId, mapId, layerKey, projectionConfig }: MapD
           ],
         }),
         Header: ({ column }) => getTableHeader(column.columnDef.header),
-        Cell: ({ cell }) => getCellValueWithTooltip(cell.getValue() as string | number | ReactNode),
+        Cell: ({ cell }) => getCellValueWithTooltip(cell.getValue() as string | number | ReactNode, cell.id),
         ...(value.dataType === 'date' && {
           accessorFn: (row) => new Date(row[key]),
           sortingFn: 'datetime',
@@ -460,7 +501,7 @@ function MapDataTable({ data, layerId, mapId, layerKey, projectionConfig }: MapD
           ],
         }),
         ...([t('dataTable.icon'), t('dataTable.zoom')].includes(value.alias)
-          ? { size: 100, enableColumnFilter: false, enableColumnActions: false, enableSorting: false }
+          ? { size: 100, enableColumnFilter: false, enableColumnActions: false, enableSorting: false, enableResizing: false }
           : {}),
       });
     });
@@ -575,6 +616,18 @@ function MapDataTable({ data, layerId, mapId, layerKey, projectionConfig }: MapD
           }),
         }}
       />
+      {isLightBoxOpen && (
+        <LightboxImg
+          open={isLightBoxOpen}
+          slides={slides}
+          index={slidesIndex}
+          exited={() => {
+            setIsLightBoxOpen(false);
+            setSlides([]);
+            setSlidesIndex(0);
+          }}
+        />
+      )}
     </Box>
   );
 }
