@@ -135,6 +135,7 @@
     "enlargeBtn": "Enlarge",
     "reduceBtn": "Reduce",
     "features": "feature(s)",
-    "featureFiltered": "features filtered"
+    "featureFiltered": "features filtered",
+    "images": "Images"
   }
 }

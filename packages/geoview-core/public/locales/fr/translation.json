@@ -133,6 +133,7 @@
     "enlargeBtn": "Agrandir",
     "reduceBtn": "Réduire",
     "features": "Item(s)",
-    "featureFiltered": "Item filtrée(s)"
+    "featureFiltered": "Item filtrée(s)",
+    "images": "Images"
   }
 }

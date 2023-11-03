@@ -376,7 +376,7 @@ function MapDataTable({ data, layerId, mapId, layerKey, projectionConfig }: MapD
           onClick={() => initLightBox(cellValue, cellId)}
           sx={{ height: '2.5rem', paddingLeft: '0.5rem', paddingRight: '0.5rem', textTransform: 'none' }}
         >
-          Images
+          {t('dataTable.images')}
         </Button>
       );
     }
@@ -390,15 +390,15 @@ function MapDataTable({ data, layerId, mapId, layerKey, projectionConfig }: MapD
    * @returns JSX.Element
    */
   const getCellValueWithTooltip = (cellValue: string | number | ReactNode, cellId: string) => {
-    return (typeof cellValue === 'string' && !isImage(cellValue)) || typeof cellValue === 'number' ? (
+    return typeof cellValue === 'string' || typeof cellValue === 'number' ? (
       <Tooltip title={cellValue} placement="top" arrow>
         <Box component="span" sx={density === 'compact' ? sxClasses.tableCell : {}}>
-          {cellValue}
+          {createLightBoxButton(cellValue, cellId)}
         </Box>
       </Tooltip>
     ) : (
       <Box component="span" sx={density === 'compact' ? sxClasses.tableCell : {}}>
-        {createLightBoxButton(cellValue, cellId)}
+        {cellValue}
       </Box>
     );
   };
