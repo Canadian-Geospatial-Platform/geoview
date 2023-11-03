@@ -35,7 +35,8 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
   };
 
   const handleSetOpacity = (opacityValue: number | number[]) => {
-    setLayerOpacity(layerDetails.layerPath, Array.isArray(opacityValue) ? opacityValue[0] : opacityValue);
+    const val = Array.isArray(opacityValue) ? opacityValue[0] : opacityValue;
+    setLayerOpacity(layerDetails.layerPath, val / 100);
   };
 
   function renderOpacityControl() {
