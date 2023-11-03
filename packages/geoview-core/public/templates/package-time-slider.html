@@ -58,24 +58,6 @@
         createConfigSnippet();
         createCodeSnippet();
         // import react and api from the core
-        const { react, createRoot, api, ui } = cgpv;
-
-        // define the map id
-        const mapIdOne = 'mapWM1';
-
-        // import footerTabs from the core for the current map
-        const { footerTabs: ft1 } = api.maps[mapIdOne];
-
-        const legendOne = api.maps[mapIdOne].legend2.createLegend({
-          layerIds: ['esriFeatureLYR4', 'historical-flood', 'geojsonLYR5'],
-        });
-
-        // create new tab and add the LegendComponent to the footer tab
-        ft1.createFooterTab({
-          value: 3,
-          label: 'New Legend',
-          content: () => legendOne,
-        });
       });
     </script>
   </body>
