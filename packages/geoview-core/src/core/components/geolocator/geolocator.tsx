@@ -3,15 +3,15 @@ import { ChangeEvent, useCallback, useContext, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { fromLonLat, transformExtent } from 'ol/proj';
 import debounce from 'lodash/debounce';
-import { useStore } from 'zustand';
+
 import { CloseIcon, SearchIcon, AppBar, Box, Divider, IconButton, Paper, ProgressBar, Toolbar, Typography } from '@/ui';
 import GeoList from './geo-list';
 import { StyledInputField, sxClasses } from './geolocator-style';
 import { MapContext } from '@/core/app-start';
 import { EVENT_NAMES, api, markerDefinitionPayload } from '@/app';
-import { getGeoViewStore } from '@/core/stores/stores-managers';
 import { bboxHighlightPayload } from '@/api/events/payloads/bbox-highlight-payload';
 import { OL_ZOOM_DURATION } from '@/core/utils/constant';
+import { useUIappbarGeolocatorActive } from '@/core/stores/ui-state';
 
 export interface GeoListItem {
   key: string;
@@ -43,7 +43,7 @@ export function Geolocator() {
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
   // set the active (visible) or not active (hidden) from geolocator button click
-  const active = useStore(getGeoViewStore(mapId), (state) => state.appBarState.geoLocatorActive);
+  const active = useUIappbarGeolocatorActive();
 
   /**
    * Send fetch call to the service for given search term.

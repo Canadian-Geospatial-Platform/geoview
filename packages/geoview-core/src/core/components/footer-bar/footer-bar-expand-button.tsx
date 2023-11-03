@@ -1,11 +1,9 @@
 import { useContext } from 'react';
 
-import { useStore } from 'zustand';
-import { getGeoViewStore } from '@/core/stores/stores-managers';
-
 import { ExpandMoreIcon, ExpandLessIcon, IconButton, Box } from '@/ui';
 import { MapContext } from '@/core/app-start';
 import { sxClassesExportButton } from './footer-bar-style';
+import { useUIStoreActions, useUIFooterBarExpanded } from '@/core/stores/ui-state';
 
 /**
  * Footerbar Expand Button component
@@ -17,8 +15,8 @@ export function FooterbarExpandButton(): JSX.Element {
   const { mapId } = mapConfig;
 
   // get the expand or collapse from expand button click
-  const store = getGeoViewStore(mapId);
-  const expanded = useStore(getGeoViewStore(mapId), (state) => state.footerBarState.expanded);
+  const expanded = useUIFooterBarExpanded();
+  const { setFooterBarExpanded } = useUIStoreActions();
 
   /**
    * Expand the footer bar
@@ -38,9 +36,7 @@ export function FooterbarExpandButton(): JSX.Element {
     }
 
     // footerbar expanded
-    store.setState({
-      footerBarState: { ...store.getState().footerBarState, expanded: true },
-    });
+    setFooterBarExpanded(true);
   };
 
   /**
@@ -61,9 +57,7 @@ export function FooterbarExpandButton(): JSX.Element {
     }
 
     // set footerbar collapsed
-    store.setState({
-      footerBarState: { ...store.getState().footerBarState, expanded: false },
-    });
+    setFooterBarExpanded(false);
   };
 
   return (

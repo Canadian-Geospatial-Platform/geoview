@@ -46,7 +46,7 @@ import { generateId, getValidConfigFromString } from '@/core/utils/utilities';
 import { TypeListOfGeoviewLayerConfig, TypeDisplayLanguage, TypeViewSettings } from '@/geo/map/map-schema-types';
 import { TypeMapFeaturesConfig, TypeHTMLElement } from '@/core/types/global-types';
 import { layerConfigIsGeoCore } from '@/geo/layer/other/geocore';
-import { getGeoViewStore } from '@/core/stores/stores-managers';
+import { MapEventProcessor } from '@/api/eventProcessors/map-event-processor';
 
 interface TypeDcoument extends Document {
   webkitExitFullscreen: () => void;
@@ -384,37 +384,7 @@ export class MapViewer {
           allGeoviewLayerReady &&= geoviewLayers[geoviewLayerId].allLayerEntryConfigProcessed();
         });
         if (allGeoviewLayerReady) {
-          const store = getGeoViewStore(this.mapId);
-
-          // initialize store OpenLayers events
-          // TODO: destroy events on map destruction
-          this.map.on('moveend', store.getState().mapState.onMapMoveEnd);
-          this.map.on('pointermove', store.getState().mapState.onMapPointerMove);
-          this.map.on('singleclick', store.getState().mapState.onMapSingleClick);
-          this.map.getView().on('change:resolution', store.getState().mapState.onMapZoomEnd);
-          this.map.getView().on('change:rotation', store.getState().mapState.onMapRotation);
-
-          // initialize map state
-          store.setState({
-            mapState: {
-              ...store.getState().mapState,
-              mapLoaded: true,
-              mapElement: this.map,
-              zoom: this.map.getView().getZoom(),
-            },
-          });
-
-          // when map is just created, some controls (i.e. scale) are not fully initialized
-          // trigger the store component update after a small latency
-          setTimeout(() => {
-            store.setState({
-              mapState: {
-                ...store.getState().mapState,
-                mapCenterCoordinates: this.map.getView().getCenter()!,
-              },
-            });
-          }, 100);
-
+          MapEventProcessor.setMapLoaded(this.mapId);
           clearInterval(layerInterval);
         }
       }

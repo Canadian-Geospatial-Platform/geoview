@@ -1,6 +1,10 @@
+import { ScaleLine } from 'ol/control';
+import Overlay from 'ol/Overlay';
+import { fromLonLat } from 'ol/proj';
+
 import { GeoViewStoreType } from '@/core/stores/geoview-store';
 import { AbstractEventProcessor } from './abstract-event-processor';
-import { api } from '@/app';
+import { api, NORTH_POLE_POSITION } from '@/app';
 import {
   mapPayload,
   lngLatPayload,
@@ -11,6 +15,7 @@ import {
   mapViewProjectionPayload,
 } from '@/api/events/payloads';
 import { EVENT_NAMES } from '@/api/events/event-types';
+import { getGeoViewStore } from '@/core/stores/stores-managers';
 
 export class MapEventProcessor extends AbstractEventProcessor {
   onInitialize(store: GeoViewStoreType) {
@@ -24,7 +29,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
     );
 
     const unsubMapCenterCoord = store.subscribe(
-      (state) => state.mapState.mapCenterCoordinates,
+      (state) => state.mapState.centerCoordinates,
       (cur, prev) => {
         if (cur !== prev) {
           api.maps[mapId].mapCenterCoordinates = cur;
@@ -65,7 +70,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
     );
 
     const unsubMapSingleClick = store.subscribe(
-      (state) => state.mapState.mapClickCoordinates,
+      (state) => state.mapState.clickCoordinates,
       (cur, prev) => {
         if (cur !== prev) {
           api.maps[mapId].singleClickedPosition = cur!;
@@ -98,5 +103,57 @@ export class MapEventProcessor extends AbstractEventProcessor {
       unsubMapZoom,
       unsubMapSingleClick
     );
+  }
+
+  // **********************************************************
+  // Static functions for Typescript files to set store values
+  // **********************************************************
+  static setMapLoaded(mapId: string) {
+    const { map } = api.maps[mapId];
+    const store = getGeoViewStore(mapId);
+
+    // initialize store OpenLayers events
+    // TODO: destroy events on map destruction
+    map.on('moveend', store.getState().mapState.onMapMoveEnd);
+    map.on('pointermove', store.getState().mapState.onMapPointerMove);
+    map.on('singleclick', store.getState().mapState.onMapSingleClick);
+    map.getView().on('change:resolution', store.getState().mapState.onMapZoomEnd);
+    map.getView().on('change:rotation', store.getState().mapState.onMapRotation);
+
+    // add map controls
+    const scaleBar = new ScaleLine({
+      units: 'metric',
+      target: document.getElementById(`${mapId}-scaleControlBar`) as HTMLElement,
+      bar: true,
+      text: true,
+    });
+
+    const scaleLine = new ScaleLine({
+      units: 'metric',
+      target: document.getElementById(`${mapId}-scaleControlLine`) as HTMLElement,
+    });
+    map.addControl(scaleLine);
+    map.addControl(scaleBar);
+
+    // add map overlays
+    // create overlay for north pole icon
+    const northPoleId = `${mapId}-northpole`;
+    const projectionPosition = fromLonLat(
+      [NORTH_POLE_POSITION[1], NORTH_POLE_POSITION[0]],
+      `EPSG:${store.getState().mapState.currentProjection}`
+    );
+
+    const northPoleMarker = new Overlay({
+      id: northPoleId,
+      position: projectionPosition,
+      positioning: 'center-center',
+      element: document.getElementById(northPoleId) as HTMLElement,
+      stopEvent: false,
+    });
+    map.addOverlay(northPoleMarker);
+
+    // set store
+    setTimeout(() => store.getState().mapState.actions.setMapElement(map), 250);
+    setTimeout(() => store.getState().mapState.actions.setOverlayNorthMarker(northPoleMarker), 250);
   }
 }

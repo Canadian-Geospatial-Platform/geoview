@@ -7,7 +7,6 @@ import { useTranslation } from 'react-i18next';
 import { toLonLat } from 'ol/proj';
 import { KeyboardPan } from 'ol/interaction';
 
-import { useStore } from 'zustand';
 import { getGeoViewStore } from '@/core/stores/stores-managers';
 
 import { MapContext } from '@/core/app-start';
@@ -17,6 +16,8 @@ import { TypeMapMouseInfo } from '@/api/events/payloads';
 
 import { getSxClasses } from './crosshair-style';
 import { CrosshairIcon } from './crosshair-icon';
+import { useAppCrosshairsActive } from '@/core/stores/app-state';
+import { useMapCenterCoordinates, useMapElement, useMapProjection } from '@/core/stores/map-state';
 
 /**
  * Create a Crosshair when map is focus with the keyboard so user can click on the map
@@ -34,10 +35,10 @@ export function Crosshair(): JSX.Element {
   // get store values
   // tracks if the last action was done through a keyboard (map navigation) or mouse (mouse movement)
   const store = getGeoViewStore(mapId);
-  const isCrosshairsActive = useStore(store, (state) => state.isCrosshairsActive);
-  const projection = useStore(store, (state) => state.mapState.currentProjection);
-  const mapCoord = useStore(store, (state) => state.mapState.mapCenterCoordinates);
-  const mapElement = useStore(store, (state) => state.mapState.mapElement);
+  const isCrosshairsActive = useAppCrosshairsActive();
+  const projection = useMapProjection();
+  const mapCoord = useMapCenterCoordinates();
+  const mapElement = useMapElement();
 
   // use reference as the mapElement from the store is undefined
   // TODO: Find what is going on with mapElement for focus-trap and crosshair and crosshair + map coord for this component
@@ -68,7 +69,7 @@ export function Crosshair(): JSX.Element {
           dragging: false,
         };
         store.setState({
-          mapState: { ...store.getState().mapState, mapClickCoordinates: mapClickCoordinatesFetch },
+          mapState: { ...store.getState().mapState, clickCoordinates: mapClickCoordinatesFetch },
         });
       }
     }
@@ -97,7 +98,7 @@ export function Crosshair(): JSX.Element {
 
   useEffect(() => {
     const unsubIsCrosshair = getGeoViewStore(mapId).subscribe(
-      (state) => state.isCrosshairsActive,
+      (state) => state.appState.isCrosshairsActive,
       (curCrosshair, prevCrosshair) => {
         if (curCrosshair !== prevCrosshair) {
           const mapHTMLElement = mapElement.getTargetElement();

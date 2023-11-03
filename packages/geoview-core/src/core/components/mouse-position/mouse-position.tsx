@@ -1,41 +1,21 @@
-import { useState, useEffect, useContext } from 'react';
+import { useState, useEffect } from 'react';
 
 import { Coordinate } from 'ol/coordinate';
-import { toLonLat } from 'ol/proj';
 
 import { useTranslation } from 'react-i18next';
-import { useTheme } from '@mui/material';
-
-import { useStore } from 'zustand';
-import { getGeoViewStore } from '@/core/stores/stores-managers';
+import { useTheme } from '@mui/material/styles';
 
 import { Box, Button, CheckIcon } from '@/ui';
-import { MapContext } from '@/core/app-start';
 import { getSxClasses } from './mouse-position-style';
-
-// degree char
-const deg = String.fromCharCode(176);
-
-/**
- * Format the coordinates for degrees - minutes - seconds (lat, long)
- * @param {number} value the value to format
- * @returns {string} the formatted value
- */
-function coordFormnatDMS(value: number): string {
-  const d = Math.floor(Math.abs(value)) * (value < 0 ? -1 : 1);
-  const m = Math.floor(Math.abs((value - d) * 60));
-  const s = Math.round((Math.abs(value) - Math.abs(d) - m / 60) * 3600);
-  return `${Math.abs(d)}${deg} ${m >= 10 ? `${m}` : `0${m}`}' ${s >= 10 ? `${s}` : `0${s}`}"`;
-}
+import { useUIFooterBarExpanded } from '@/core/stores/ui-state';
+import { useMapPointerPosition } from '@/core/stores/map-state';
+import { api } from '@/app';
 
 /**
  * Create the mouse position
  * @returns {JSX.Element} the mouse position component
  */
 export function MousePosition(): JSX.Element {
-  const mapConfig = useContext(MapContext);
-  const { mapId } = mapConfig;
-
   const { t } = useTranslation<string>();
 
   const theme = useTheme();
@@ -45,24 +25,9 @@ export function MousePosition(): JSX.Element {
   const [positions, setPositions] = useState<string[]>(['', '', '']);
   const [positionMode, setPositionMode] = useState<number>(0);
 
-  // get the expand or collapse from store
-  const expanded = useStore(getGeoViewStore(mapId), (state) => state.footerBarState.expanded);
-
-  /**
-   * Format the coordinates output in lat long
-   * @param {Coordinate} lnglat the Lng and Lat value to format
-   * @param {boolean} DMS true if need to be formatted as Degree Minute Second, false otherwise
-   * @returns {Object} an object containing formatted Longitude and Latitude values
-   */
-  function formatCoordinates(lnglat: Coordinate, DMS: boolean): { lng: string; lat: string } {
-    const labelX = lnglat[0] < 0 ? t('mapctrl.mouseposition.west') : t('mapctrl.mouseposition.east');
-    const labelY = lnglat[1] < 0 ? t('mapctrl.mouseposition.south') : t('mapctrl.mouseposition.north');
-
-    const lng = `${DMS ? coordFormnatDMS(lnglat[0]) : Math.abs(lnglat[0]).toFixed(4)} ${labelX}`;
-    const lat = `${DMS ? coordFormnatDMS(lnglat[1]) : Math.abs(lnglat[1]).toFixed(4)} ${labelY}`;
-
-    return { lng, lat };
-  }
+  // get store values
+  const expanded = useUIFooterBarExpanded();
+  const pointerPosition = useMapPointerPosition();
 
   /**
    * Switch position mode
@@ -72,49 +37,30 @@ export function MousePosition(): JSX.Element {
   };
 
   useEffect(() => {
-    // if pointerPosition changed, map pointer event has been triggered
-    const unsubMapPointer = getGeoViewStore(mapId).subscribe(
-      (state) => state.mapState.pointerPosition,
-      (curPos, prevPos) => {
-        if (curPos !== prevPos) {
-          const { lnglat, projected } = curPos!;
-          const DMS = formatCoordinates(lnglat, true);
-          const DD = formatCoordinates(lnglat, false);
+    /**
+     * Format the coordinates output in lat long
+     * @param {Coordinate} lnglat the Lng and Lat value to format
+     * @param {boolean} DMS true if need to be formatted as Degree Minute Second, false otherwise
+     * @returns {Object} an object containing formatted Longitude and Latitude values
+     */
+    function formatCoordinates(lnglat: Coordinate, DMS: boolean): { lng: string; lat: string } {
+      const labelX = lnglat[0] < 0 ? t('mapctrl.mouseposition.west') : t('mapctrl.mouseposition.east');
+      const labelY = lnglat[1] < 0 ? t('mapctrl.mouseposition.south') : t('mapctrl.mouseposition.north');
 
-          setPositions([
-            `${DMS.lng} | ${DMS.lat}`,
-            `${DD.lng} | ${DD.lat}`,
-            `${projected[0].toFixed(4)}m E | ${projected[1].toFixed(4)}m N`,
-          ]);
-        }
-      }
-    );
+      const lng = `${DMS ? api.geoUtilities.coordFormnatDMS(lnglat[0]) : Math.abs(lnglat[0]).toFixed(4)} ${labelX}`;
+      const lat = `${DMS ? api.geoUtilities.coordFormnatDMS(lnglat[1]) : Math.abs(lnglat[1]).toFixed(4)} ${labelY}`;
 
-    // if mapCenterCoordinates changed, map move end event has been triggered
-    // if the crosshair is active from the store, keyboard is used
-    const unsubMapCenterCoord = getGeoViewStore(mapId).subscribe(
-      (state) => state.mapState.mapCenterCoordinates,
-      (curCenterCoord, prevCenterCoord) => {
-        if (curCenterCoord !== prevCenterCoord && getGeoViewStore(mapId).getState().isCrosshairsActive) {
-          const projected = curCenterCoord;
-          const projection = getGeoViewStore(mapId).getState().mapState.currentProjection;
-          const DMS = formatCoordinates(toLonLat(projected, `EPSG:${projection}`), true);
-          const DD = formatCoordinates(toLonLat(projected, `EPSG:${projection}`), false);
-          setPositions([
-            `${DMS.lng} | ${DMS.lat}`,
-            `${DD.lng} | ${DD.lat}`,
-            `${projected[0].toFixed(4)}m E | ${projected[1].toFixed(4)}m N`,
-          ]);
-        }
-      }
-    );
+      return { lng, lat };
+    }
 
-    return () => {
-      unsubMapPointer();
-      unsubMapCenterCoord();
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    if (pointerPosition !== undefined) {
+      const { lnglat, projected } = pointerPosition;
+      const DMS = formatCoordinates(lnglat, true);
+      const DD = formatCoordinates(lnglat, false);
+
+      setPositions([`${DMS.lng} | ${DMS.lat}`, `${DD.lng} | ${DD.lat}`, `${projected[0].toFixed(4)}m E | ${projected[1].toFixed(4)}m N`]);
+    }
+  }, [pointerPosition, t]);
 
   return (
     <Button
