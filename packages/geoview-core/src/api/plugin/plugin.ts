@@ -1,5 +1,6 @@
-import { useTheme } from '@mui/material/styles';
 import React from 'react';
+
+import { useTheme } from '@mui/material/styles';
 
 import i18next from 'i18next';
 import * as translate from 'react-i18next';

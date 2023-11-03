@@ -4,10 +4,7 @@ import { useTranslation } from 'react-i18next';
 
 import { useTheme } from '@mui/material/styles';
 
-import { useStore } from 'zustand';
-import { getGeoViewStore } from '@/core/stores/stores-managers';
-
-import Focus from './buttons/fucos';
+import Focus from './buttons/focus';
 import ZoomIn from './buttons/zoom-in';
 import ZoomOut from './buttons/zoom-out';
 import Fullscreen from './buttons/fullscreen';
@@ -23,6 +20,7 @@ import { EVENT_NAMES } from '@/api/events/event-types';
 import { payloadIsAButtonPanel, ButtonPanelPayload, PayloadBaseClass } from '@/api/events/payloads';
 import { TypeButtonPanel } from '@/ui/panel/panel-types';
 import { getSxClasses } from './nav-bar-style';
+import { useUIFooterBarExpanded } from '@/core/stores/store-interface-and-intial-values/ui-state';
 
 type NavbarProps = {
   activeTrap: boolean;
@@ -49,7 +47,7 @@ export function Navbar({ activeTrap, activeTrapSet }: NavbarProps): JSX.Element 
   const { navBar } = api.maps[mapId].mapFeaturesConfig;
 
   // get the expand or collapse from store
-  const footerBarExpanded = useStore(getGeoViewStore(mapId), (state) => state.footerBarState.expanded);
+  const footerBarExpanded = useUIFooterBarExpanded();
 
   const addButtonPanel = useCallback(
     (payload: ButtonPanelPayload) => {
