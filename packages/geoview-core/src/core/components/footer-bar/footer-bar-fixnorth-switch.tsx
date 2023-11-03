@@ -8,6 +8,8 @@ import { getGeoViewStore } from '@/core/stores/stores-managers';
 import { Switch } from '@/ui';
 import { MapContext } from '@/core/app-start';
 import { PROJECTION_NAMES } from '@/geo/projection/projection';
+import { useUIFooterBarExpanded } from '@/core/stores/store-interface-and-intial-values/ui-state';
+import { useMapElement, useMapProjection } from '@/core/stores/store-interface-and-intial-values/map-state';
 
 /**
  * Footerbar Fix North Switch component
@@ -21,11 +23,11 @@ export function FooterbarFixNorthSwitch(): JSX.Element {
   const { t } = useTranslation<string>();
 
   // get the expand or collapse from store
-  const expanded = useStore(getGeoViewStore(mapId), (state) => state.footerBarState.expanded);
-  const mapElement = useStore(getGeoViewStore(mapId), (state) => state.mapState.mapElement);
+  const expanded = useUIFooterBarExpanded();
+  const mapElement = useMapElement();
   const isNorthEnable = useStore(getGeoViewStore(mapId), (state) => state.mapState.northArrow);
   const isFixNorth = useStore(getGeoViewStore(mapId), (state) => state.mapState.fixNorth);
-  const mapProjection = `EPSG:${useStore(getGeoViewStore(mapId), (state) => state.mapState.currentProjection)}`;
+  const mapProjection = `EPSG:${useMapProjection()}`;
 
   /**
    * Emit an event to specify the map to rotate to keep north straight

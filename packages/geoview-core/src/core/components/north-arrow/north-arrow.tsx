@@ -1,9 +1,8 @@
 import { useEffect, useRef, useState, useContext } from 'react';
 
 import OLMap from 'ol/Map';
-import Overlay from 'ol/Overlay';
 import { Coordinate } from 'ol/coordinate';
-import { toLonLat, fromLonLat } from 'ol/proj';
+import { toLonLat } from 'ol/proj';
 
 import { useTheme } from '@mui/material/styles';
 import { Box } from '@mui/material';
@@ -15,6 +14,7 @@ import { PROJECTION_NAMES } from '@/geo/projection/projection';
 import { MapContext } from '@/core/app-start';
 import { NorthArrowIcon, NorthPoleIcon } from './north-arrow-icon';
 import { getSxClasses } from './north-arrow-style';
+import { useMapProjection, useMapStoreActions } from '@/core/stores/store-interface-and-intial-values/map-state';
 
 // The north pole position use for north arrow marker and get north arrow rotation angle
 // north value (set longitude to be half of Canada extent (142° W, 52° W)) - projection central meridian is -95
@@ -209,7 +209,7 @@ export function NorthArrow(): JSX.Element {
   useEffect(() => {
     // if mapCenterCoordinates changed, map move end event has been triggered
     const unsubMapCenterCoord = getGeoViewStore(mapId).subscribe(
-      (state) => state.mapState.mapCenterCoordinates,
+      (state) => state.mapState.centerCoordinates,
       (curCoords, prevCoords) => {
         if (curCoords !== prevCoords) {
           manageArrow(mapElement);
@@ -266,27 +266,13 @@ export function NorthPoleFlag(): JSX.Element {
   const mapConfig = useContext(MapContext);
   const { mapId } = mapConfig;
 
-  const northPoleId = `${mapId}-northpole`;
-  const northPoleRef = useRef<HTMLDivElement>(null);
-
   // get the values from store
-  const mapElement = useStore(getGeoViewStore(mapId), (state) => state.mapState.mapElement);
-  const mapProjection = useStore(getGeoViewStore(mapId), (state) => state.mapState.currentProjection);
+  const mapProjection = useMapProjection();
+  const { setOverlayNorthMarkerRef } = useMapStoreActions();
 
-  useEffect(() => {
-    const projectionPosition = fromLonLat([northPolePosition[1], northPolePosition[0]], `EPSG:${mapProjection}`);
-
-    // create overlay for north pole icon
-    const northPoleMarker = new Overlay({
-      id: northPoleId,
-      position: projectionPosition,
-      positioning: 'center-center',
-      element: document.getElementById(northPoleId) as HTMLElement,
-      stopEvent: false,
-    });
-    mapElement.addOverlay(northPoleMarker);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  const northPoleId = `${mapId}-northpole`;
+  const northPoleRef = useRef<HTMLDivElement | null>(null);
+  setTimeout(() => setOverlayNorthMarkerRef(northPoleRef.current as HTMLElement), 0);
 
   return (
     <div
