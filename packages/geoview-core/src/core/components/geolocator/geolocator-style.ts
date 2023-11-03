@@ -40,6 +40,21 @@ export const sxClasses = {
   },
 };
 
+export const sxClassesList = {
+  main: {
+    whiteSpace: 'nowrap',
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    '& span': {
+      fontSize: '0.75rem',
+      ':first-of-type': {
+        fontWeight: 'bold',
+        fontSize: '0.875rem',
+      },
+    },
+  },
+};
+
 export const StyledInputField = styled(Input)(({ theme }) => ({
   color: 'inherit',
   width: '100%',

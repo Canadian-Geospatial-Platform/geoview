@@ -1,13 +1,9 @@
 import { MutableRefObject, useCallback, useContext, useEffect, useRef, useState } from 'react';
-import { Box, useTheme } from '@mui/material';
 
-import { MapContext } from '@/core/app-start';
-import { api } from '@/app';
-
-import { EVENT_NAMES } from '@/api/events/event-types';
-import { FooterTabPayload, PayloadBaseClass, payloadIsAFooterTab } from '@/api/events/payloads';
+import { useTheme } from '@mui/material/styles';
 
 import {
+  Box,
   ExpandLessIcon,
   ExpandMoreIcon,
   FullscreenIcon,
@@ -19,6 +15,10 @@ import {
   MoveUpRoundedIcon,
   ArrowUpIcon,
 } from '@/ui';
+import { MapContext } from '@/core/app-start';
+import { api } from '@/app';
+import { EVENT_NAMES } from '@/api/events/event-types';
+import { FooterTabPayload, PayloadBaseClass, payloadIsAFooterTab } from '@/api/events/payloads';
 import { getSxClasses } from './footer-tabs-style';
 
 /**

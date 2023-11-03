@@ -2,7 +2,8 @@ import { useStore } from 'zustand';
 import { useGeoViewStore } from '@/core/stores/stores-managers';
 import { TypeSetStore, TypeGetStore } from '@/core/stores/geoview-store';
 
-import { NotificationDetailsType } from '@/core/types/cgpv-types';
+import { NotificationDetailsType, TypeHTMLElement } from '@/core/types/cgpv-types';
+import { api } from '@/app';
 
 export interface IAppState {
   isCrosshairsActive: boolean;
@@ -11,7 +12,7 @@ export interface IAppState {
 
   actions: {
     setCrosshairActive: (active: boolean) => void;
-    setFullScreenActive: (active: boolean) => void;
+    setFullScreenActive: (active: boolean, element?: TypeHTMLElement) => void;
     addNotification: (notif: NotificationDetailsType) => void;
     removeNotification: (key: string) => void;
   };
@@ -24,21 +25,24 @@ export function initializeAppState(set: TypeSetStore, get: TypeGetStore) {
     notifications: [],
 
     actions: {
-      setCrosshairActive: (isCrosshairsActive: boolean) => {
+      setCrosshairActive: (active: boolean) => {
         set({
           appState: {
             ...get().appState,
-            isCrosshairsActive,
+            isCrosshairsActive: active,
           },
         });
       },
-      setFullScreenActive: (isFullscreenActive: boolean) => {
+      setFullScreenActive: (active: boolean, element?: undefined) => {
         set({
           appState: {
             ...get().appState,
-            isFullscreenActive,
+            isFullscreenActive: active,
           },
         });
+
+        // TODO: keep reference to geoview map instance in the store or keep accessing with api - discussion
+        if (element !== undefined) api.maps[get().mapId].toggleFullscreen(active, element);
       },
       addNotification: (notif: NotificationDetailsType) => {
         set({

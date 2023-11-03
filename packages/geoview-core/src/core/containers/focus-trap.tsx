@@ -5,14 +5,12 @@ import { useTranslation } from 'react-i18next';
 import { useTheme } from '@mui/material/styles';
 import useMediaQuery from '@mui/material/useMediaQuery';
 
-import { useStore } from 'zustand';
-import { getGeoViewStore } from '@/core/stores/stores-managers';
-
 import { Modal, Button } from '@/ui';
 import { HtmlToReact } from './html-to-react';
 import { getFocusTrapSxClasses } from './containers-style';
 import { disableScrolling } from '@/app';
 import { useAppStoreActions } from '../stores/store-interface-and-intial-values/app-state';
+import { useMapElement } from '../stores/store-interface-and-intial-values/map-state';
 
 /**
  * Interface for the focus trap properties
@@ -44,12 +42,10 @@ export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
 
   // get store values
   // tracks if the last action was done through a keyboard (map navigation) or mouse (mouse movement)
-  const store = getGeoViewStore(mapId);
   const { setCrosshairActive } = useAppStoreActions();
-  const mapElementStore = useStore(store, (state) => state.mapState.mapElement);
+  const mapElementStore = useMapElement();
 
-  // ? useRef, if not mapElementStore is undefined - may be because this component is created before the mapElement
-  // TODO: Find what is going on with mapElement for focus-trap and crosshair
+  // ? useRef, if not mapElementStore is undefined - happen because the value is used inside a event listener
   const mapElementRef = useRef(mapElementStore);
   mapElementRef.current = mapElementStore;
 
