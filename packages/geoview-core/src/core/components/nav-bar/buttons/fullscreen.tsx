@@ -3,7 +3,6 @@ import { useContext } from 'react';
 import { useTheme } from '@mui/material/styles';
 
 import { MapContext } from '@/core/app-start';
-import { api } from '@/app';
 import { IconButton, FullscreenIcon, FullscreenExitIcon } from '@/ui';
 import { TypeHTMLElement } from '@/core/types/global-types';
 import { getSxClasses } from '../nav-bar-style';
@@ -50,8 +49,7 @@ export default function Fullscreen(): JSX.Element {
     const element = document.getElementById(`shell-${mapId}`);
 
     if (element) {
-      setFullScreenActive(!isFullScreen);
-      api.maps[mapId].toggleFullscreen(!isFullScreen, element as TypeHTMLElement);
+      setFullScreenActive(!isFullScreen, element as TypeHTMLElement);
 
       // if state will become fullscreen, add event listerner to trap exit by ESC key
       // put a timeout for the toggle to fullscreen to happen

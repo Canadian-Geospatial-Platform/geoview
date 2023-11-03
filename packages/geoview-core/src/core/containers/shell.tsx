@@ -7,9 +7,6 @@ import { useTheme } from '@mui/material/styles';
 
 import FocusTrap from 'focus-trap-react';
 
-import { useStore } from 'zustand';
-import { getGeoViewStore } from '@/core/stores/stores-managers';
-
 import { Map } from '@/core/components/map/map';
 import { Appbar } from '@/core/components/app-bar/app-bar';
 import { Navbar } from '@/core/components/nav-bar/nav-bar';
@@ -32,6 +29,7 @@ import {
 } from '@/api/events/payloads';
 import { MapContext } from '@/core/app-start';
 import { getShellSxClasses } from './containers-style';
+import { useMapLoaded } from '../stores/store-interface-and-intial-values/map-state';
 
 /**
  * Interface for the shell properties
@@ -58,12 +56,13 @@ export function Shell(props: ShellProps): JSX.Element {
   // internal component state
   // set the active trap value for FocusTrap and pass the callback to the dialog window
   const [activeTrap, setActivetrap] = useState(false);
+
   // render additional components if added by api
   const [components, setComponents] = useState<Record<string, JSX.Element>>({});
   const [update, setUpdate] = useState<number>(0);
 
   // get values from the store
-  const mapLoaded = useStore(getGeoViewStore(mapFeaturesConfig.mapId), (state) => state.mapState.mapLoaded);
+  const mapLoaded = useMapLoaded();
 
   /**
    * Set the focus trap
