@@ -144,7 +144,7 @@ export const useSelectedLayerPath = () => useStore(useGeoViewStore(), (state) =>
 
 export const useLayerStoreActions = () => useStore(useGeoViewStore(), (state) => state.legendState.actions);
 
-//computed gets
+// computed gets
 export const useSelectedLayer = () => {
   const layers = useStore(useGeoViewStore(), (state) => state.legendState.legendLayers);
   const selectedLayerPath = useStore(useGeoViewStore(), (state) => state.legendState.selectedLayerPath);
@@ -157,8 +157,8 @@ export const useSelectedLayer = () => {
 export const useIconLayerSet = (layerPath: string) => {
   const layers = useStore(useGeoViewStore(), (state) => state.legendState.legendLayers);
   const layer = findLayerByPath(layers, layerPath);
-  if(layer) {
-    return layer.items.map(item => item.icon);
+  if (layer) {
+    return layer.items.map((item) => item.icon);
   }
   return [];
 };
