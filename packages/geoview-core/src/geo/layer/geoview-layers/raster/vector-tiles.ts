@@ -26,7 +26,7 @@ import {
   TypeLocalizedString,
   TypeTileGrid,
 } from '@/geo/map/map-schema-types';
-import { getLocalizedValue, getMinOrMaxExtents, getXMLHttpRequest } from '@/core/utils/utilities';
+import { getLocalizedValue, getMinOrMaxExtents, getXMLHttpRequest, showError } from '@/core/utils/utilities';
 import { Cast, TypeJsonObject, toJsonObject } from '@/core/types/global-types';
 import { api } from '@/app';
 import { Layer } from '../../layer';
@@ -147,15 +147,6 @@ export class VectorTiles extends AbstractGeoViewRaster {
       }
 
       this.changeLayerStatus('loading', layerEntryConfig);
-      // When no metadata are provided, all layers are considered valid.
-      if (!this.metadata) return;
-
-      // TODO: Decide what to do when there is metadata
-      return;
-
-      throw new Error(
-        `Invalid GeoJSON metadata (listOfLayerEntryConfig) prevent loading of layer (mapId:  ${this.mapId}, layerPath: ${layerPath})`
-      );
     });
   }
 
@@ -172,8 +163,13 @@ export class VectorTiles extends AbstractGeoViewRaster {
       const sourceOptions: SourceOptions = {
         url: getLocalizedValue(layerEntryConfig.source.dataAccessPath, this.mapId),
       };
-      // if (layerEntryConfig.source.crossOrigin) sourceOptions.crossOrigin = layerEntryConfig.source.crossOrigin;
-      if (layerEntryConfig.source.projection) sourceOptions.projection = `EPSG:${layerEntryConfig.source.projection}`;
+      if (this.metadata?.tileinfo?.wkid && api.maps[this.mapId].currentProjection !== this.metadata.tileinfo.wkid) {
+        showError(this.mapId, `Error: vector tile layer (${layerEntryConfig.layerId}) projection does not match map projection`);
+        // eslint-disable-next-line no-console
+        console.log(`Error: vector tile layer (${layerEntryConfig.layerId}) projection does not match map projection`);
+        this.changeLayerStatus('error', layerEntryConfig);
+        resolve(null);
+      } else if (layerEntryConfig.source.projection) sourceOptions.projection = `EPSG:${layerEntryConfig.source.projection}`;
       if (layerEntryConfig.source.tileGrid) {
         const tileGridOptions: TileGridOptions = {
           origin: layerEntryConfig.source.tileGrid?.origin,
@@ -184,21 +180,9 @@ export class VectorTiles extends AbstractGeoViewRaster {
         sourceOptions.tileGrid = new TileGrid(tileGridOptions);
       }
 
-      // TODO: Clean this up from testing
       sourceOptions.format = new MVT();
-      const proj = api.maps[this.mapId].currentProjection;
-      if (proj === 3978) sourceOptions.projection = `EPSG:${api.maps[this.mapId].currentProjection}`; // 'EPSG:3978';
-
-      // const tileGrid = new TileGrid({
-      //   tileSize: 512,
-      //   extent: [-2750565.340500001, -936703.1849000007, 3583872.5053000003, 4659267.001500003],
-      //   origin: [-3.465561347869982e7, 3.847494464475933e7],
-      //   resolutions: [135373.49015117117, 67686.74507558558, 33843.37253779279, 16921.686268896396, 8460.843134448198, 4230.421567224099,2115.2107836120495, 1057.6053918060247, 528.8026959030124, 264.4013479515062, 132.2006739757531, 66.10033698787655,33.05016849393827, 16.525084246969136, 8.262542123484568, 4.131271061742284],
-      // });
-
-      // eslint-disable-next-line @typescript-eslint/no-non-null-asserted-optional-chain
-      sourceOptions.tileGrid = new TileGrid(layerEntryConfig.source?.tileGrid!);
-      // sourceOptions.tileGrid = tileGrid;
+      sourceOptions.projection = `EPSG:${api.maps[this.mapId].currentProjection}`;
+      sourceOptions.tileGrid = new TileGrid(layerEntryConfig.source!.tileGrid!);
       const tileLayerOptions: TileOptions<VectorTileSource> = { source: new VectorTileSource(sourceOptions) };
       // layerEntryConfig.initialSettings cannot be undefined because config-validation set it to {} if it is undefined.
       if (layerEntryConfig.initialSettings?.className !== undefined)
@@ -208,10 +192,16 @@ export class VectorTiles extends AbstractGeoViewRaster {
       if (layerEntryConfig.initialSettings?.minZoom !== undefined) tileLayerOptions.minZoom = layerEntryConfig.initialSettings?.minZoom;
       if (layerEntryConfig.initialSettings?.opacity !== undefined) tileLayerOptions.opacity = layerEntryConfig.initialSettings?.opacity;
       if (layerEntryConfig.initialSettings?.visible !== undefined)
-        tileLayerOptions.visible =
-          layerEntryConfig.initialSettings?.visible === 'yes' || layerEntryConfig.initialSettings?.visible === 'always';
+        tileLayerOptions.visible = layerEntryConfig.initialSettings?.visible !== 'no';
 
-      layerEntryConfig.olLayer = new VectorTileLayer(tileLayerOptions);
+      // TODO remove after demoing
+      const declutter = this.mapId !== 'LYR2';
+      layerEntryConfig.olLayer = new VectorTileLayer({ ...tileLayerOptions, declutter });
+      if (this.metadata?.defaultStyles)
+        applyStyle(
+          layerEntryConfig.olLayer as VectorTileLayer,
+          `${getLocalizedValue(this.metadataAccessPath, this.mapId)}${this.metadata.defaultStyles}/root.json`
+        );
 
       super.addLoadendListener(layerEntryConfig, 'tile');
 
@@ -232,20 +222,12 @@ export class VectorTiles extends AbstractGeoViewRaster {
     const promiseOfExecution = new Promise<void>((resolve) => {
       if (!this.metadata) resolve();
       else {
-        // TODO: Clean this up from testing
-        // const metadataLayerConfigFound = Cast<TypeVectorTilesLayerEntryConfig[]>(this.metadata?.listOfLayerEntryConfig).find(
-        //   (metadataLayerConfig) => metadataLayerConfig.layerId === layerEntryConfig.layerId
-        // );
-        // metadataLayerConfigFound can not be undefined because we have already validated the config exist
-        // this.layerMetadata[Layer.getLayerPath(layerEntryConfig)] = toJsonObject(metadataLayerConfigFound);
-        // layerEntryConfig.source = defaultsDeep(layerEntryConfig.source, metadataLayerConfigFound!.source);
-        // layerEntryConfig.initialSettings = defaultsDeep(layerEntryConfig.initialSettings, metadataLayerConfigFound!.initialSettings);
         const { tileInfo } = this.metadata;
-        const extent = this.metadata.initialExtent as TypeJsonObject;
+        const extent = this.metadata.fullExtent;
         const newTileGrid: TypeTileGrid = {
           extent: [extent.xmin as number, extent.ymin as number, extent.xmax as number, extent.ymax as number],
           origin: [tileInfo.origin.x as number, tileInfo.origin.y as number],
-          resolutions: (tileInfo.lods as Array<TypeJsonObject>).map(({ resolution }) => resolution as number), // Array(tileInfo.lods).map((item: TypeJsonObject): number => item.resolution as number),
+          resolutions: (tileInfo.lods as Array<TypeJsonObject>).map(({ resolution }) => resolution as number),
           tileSize: [tileInfo.rows as number, tileInfo.cols as number],
         };
         layerEntryConfig.source!.tileGrid = newTileGrid;
@@ -293,40 +275,6 @@ export class VectorTiles extends AbstractGeoViewRaster {
       'LYR3',
       'https://tiles.arcgis.com/tiles/HsjBaDykC1mjhXz9/arcgis/rest/services/CBMT3978_v11/VectorTileServer/resources/styles/root.json?f=json'
     ).then((map) => {
-      const tileGrid = new TileGrid({
-        tileSize: 512,
-        extent: [-2750565.340500001, -936703.1849000007, 3583872.5053000003, 4659267.001500003],
-        origin: [-3.465561347869982e7, 3.847494464475933e7],
-        resolutions: [
-          135373.49015117117, 67686.74507558558, 33843.37253779279, 16921.686268896396, 8460.843134448198, 4230.421567224099,
-          2115.2107836120495, 1057.6053918060247, 528.8026959030124, 264.4013479515062, 132.2006739757531, 66.10033698787655,
-          33.05016849393827, 16.525084246969136, 8.262542123484568, 4.131271061742284, 2.065635530871142,
-        ],
-      });
-      const tileGridIn = tileGrid;
-      const mapboxStyle = map.get('mapbox-style');
-
-      // Replace the source with a EPSG:3978 projection source for each vector tile layer
-      // ! by default the value is 3857. This seems wrong as it is 3978 in metadata
-      map.getLayers().forEach((layer) => {
-        const mapboxSource = layer.get('mapbox-source');
-        // eslint-disable-next-line no-console
-        console.log(mapboxStyle.sources[mapboxSource]);
-        if (mapboxSource && mapboxStyle.sources[mapboxSource].type === 'vector') {
-          const source = (layer as VectorTileLayer).getSource();
-          // eslint-disable-next-line no-console
-          console.log(source);
-          // layer.setSource(
-          //   new VectorTileSource({
-          //     format: new MVT(),
-          //     projection: 'EPSG:3978',
-          //     urls: source.getUrls(),
-          //     tileGrid: tileGridIn,
-          //   })
-          // );
-        }
-      });
-
       // Configure the map with a view with EPSG:3978 projection
       (map as Map).setView(
         new View({
@@ -338,28 +286,13 @@ export class VectorTiles extends AbstractGeoViewRaster {
     });
   }
 
-  // TODO: Improve from test #1105
   /**
    * Set Vector Tile style
+   *
+   * @param {string} layerPath Path of layer to style.
+   * @param {string} styleUrl The url of the styles to apply.
    */
-  setStyle(proj: number) {
-    if (proj === 3857) {
-      // ! If we put 3857 as projection for map and tile it render fuzzy at first but then there is no problem.
-      apply(
-        api.maps.LYR2.map,
-        'https://tiles.arcgis.com/tiles/HsjBaDykC1mjhXz9/arcgis/rest/services/CBMT3978_v11/VectorTileServer/resources/styles/root.json'
-      );
-    } else if (proj === 3978) {
-      const layers1 = api.maps.LYR1.map.getLayers();
-      // ! when we use default projection from service, zome resolutions are bad and label are overlapping
-      // ! we can't use apply because the map seems to be 3857... there is a mistmacht between tiles and service. If we set 3978 in apply coordinates is wrong
-      applyStyle(
-        layers1.item(1) as VectorTileLayer,
-        'https://tiles.arcgis.com/tiles/HsjBaDykC1mjhXz9/arcgis/rest/services/CBMT3978_v11/VectorTileServer/resources/styles/root.json',
-        {
-          updateSource: true,
-        }
-      );
-    }
+  setVectorTileStyle(layerPath: string, styleUrl: string) {
+    applyStyle(api.maps[this.mapId].layer.registeredLayers[layerPath].olLayer as VectorTileLayer, styleUrl);
   }
 }
