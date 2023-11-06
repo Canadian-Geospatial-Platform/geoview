@@ -61,9 +61,15 @@ export declare const getSxClasses: (theme: Theme) => {
         overflowX: string;
     };
     featureInfoSingleImage: {
+        padding: number;
+        borderRadius: number;
+        border: string;
+        borderColor: string;
+        boxShadow: string;
+        background: string;
+        objectFit: string;
         width: string;
         height: string;
-        marginRight: string;
     };
     selectFeatureCheckbox: {
         color: string;

@@ -14,3 +14,12 @@ export declare const getGeoViewStore: (id: string | undefined) => import("zustan
         } | undefined): () => void;
     };
 }>;
+export declare const useGeoViewStore: () => import("zustand").UseBoundStore<Omit<import("zustand").StoreApi<IGeoViewState>, "subscribe"> & {
+    subscribe: {
+        (listener: (selectedState: IGeoViewState, previousSelectedState: IGeoViewState) => void): () => void;
+        <U>(selector: (state: IGeoViewState) => U, listener: (selectedState: U, previousSelectedState: U) => void, options?: {
+            equalityFn?: ((a: U, b: U) => boolean) | undefined;
+            fireImmediately?: boolean | undefined;
+        } | undefined): () => void;
+    };
+}>;

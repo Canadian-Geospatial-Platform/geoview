@@ -1,4 +1,4 @@
-import { Theme } from '@mui/material/styles';
+import { Theme } from '@mui/material';
 export declare const getSxClasses: (theme: Theme) => {
     list: {
         color: string;
@@ -14,15 +14,6 @@ export declare const getSxClasses: (theme: Theme) => {
                 padding: string;
                 height: string;
             };
-            '& .MuiBox-root': {
-                height: string;
-                borderTopRightRadius: string;
-                borderBottomRightRadius: string;
-                position: string;
-                display: string;
-                justifyContent: string;
-                alignItems: string;
-            };
         };
         '& .MuiListItemIcon-root': {
             minWidth: string;
@@ -36,6 +27,36 @@ export declare const getSxClasses: (theme: Theme) => {
                 overflow: string;
                 textOverflow: string;
                 whiteSpace: string;
+            };
+        };
+    };
+    listPrimaryText: {
+        minWidth: string;
+        marginTop: string;
+        marginBottom: string;
+        flex: string;
+        display: string;
+        flexDirection: string;
+        '& p': {
+            fontSize: string;
+            font: string;
+            fontWeight: number;
+            lineHeight: number;
+            overflow: string;
+            textOverflow: string;
+            whiteSpace: string;
+        };
+        '>div': {
+            display: string;
+            alignItems: string;
+            marginTop: string;
+            '>p': {
+                fontSize: string;
+                color: string;
+            };
+            ' svg': {
+                width: string;
+                height: string;
             };
         };
     };
@@ -106,7 +127,7 @@ export declare const getSxClasses: (theme: Theme) => {
         color: string;
     };
     tableCell: {
-        'white-space': string;
+        whiteSpace: string;
         textOverflow: string;
         overflow: string;
     };
@@ -120,6 +141,48 @@ export declare const getSxClasses: (theme: Theme) => {
         };
         '& .MuiToolbar-root ': {
             borderRadius: string;
+        };
+    };
+    filterMap: {
+        '& .Mui-checked': {
+            '& .MuiTouchRipple-root': {
+                color: string;
+            };
+        };
+        '& .MuiTouchRipple-root': {
+            color: string;
+        };
+    };
+    tableHeadCell: {
+        '& .MuiCollapse-wrapperInner': {
+            '& .MuiBox-root': {
+                gridTemplateColumns: string;
+            };
+        };
+        '& .MuiInput-root': {
+            fontSize: string;
+            '& .MuiSvgIcon-root': {
+                width: string;
+                height: string;
+            };
+        };
+        '& .MuiBadge-root': {
+            marginLeft: string;
+            '>span': {
+                width: string;
+            };
+            svg: {
+                marginTop: string;
+                marginBottom: string;
+            };
+            '& .keyboard-focused': {
+                backgroundColor: string;
+                borderRadius: string;
+                border: string;
+                '> svg': {
+                    opacity: number;
+                };
+            };
         };
     };
 };

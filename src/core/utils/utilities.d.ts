@@ -14,6 +14,12 @@ import { TypeJsonArray, TypeJsonObject, TypeJsonValue, TypeMapFeaturesConfig } f
  */
 export declare function getLocalizedValue(localizedString: TypeLocalizedString | undefined, mapId: string): string | undefined;
 /**
+ * Generate a unique id if an id was not provided
+ * @param {string} id an id to return if it was already passed
+ * @returns {string} the generated id
+ */
+export declare function generateId(id?: string | null): string;
+/**
  * Add a notification message
  *
  * @param {string} mapId the map to show the message for
@@ -84,12 +90,6 @@ export declare function showError(mapId: string, message: string, withNotificati
  * @returns {string} message with values replaced
  */
 export declare function replaceParams(params: TypeJsonValue[] | TypeJsonArray | string[], message: string): string;
-/**
- * Generate a unique id if an id was not provided
- * @param {string} id an id to return if it was already passed
- * @returns {string} the generated id
- */
-export declare function generateId(id?: string | null): string;
 /**
  * Set alpha for a color
  * @param {number[]} colorArray the array of color numbers

@@ -6,8 +6,10 @@ import { SliderProps } from '@mui/material';
 interface TypeSliderProps extends SliderProps {
     min: number;
     max: number;
-    value: Array<number> | number;
+    value: number | number[];
     customOnChange?: (value: number[] | number) => void;
+    onValueDisplay?: (value: number, index: number) => string;
+    onValueDisplayAriaLabel?: (value: number, index: number) => string;
 }
 /**
  * Create a customized Material UI Slider

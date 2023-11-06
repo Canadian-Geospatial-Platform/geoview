@@ -3,7 +3,6 @@
  * Interface used for geolocator button properties
  */
 interface GeolocatorProps {
-    mapId: string;
     sx?: React.CSSProperties;
 }
 /**
