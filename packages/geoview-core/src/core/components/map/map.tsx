@@ -13,9 +13,7 @@ import { Extent } from 'ol/extent';
 import { Box, useMediaQuery } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 
-import { useStore } from 'zustand';
 import { XYZ } from 'ol/source';
-import { getGeoViewStore } from '@/core/stores/stores-managers';
 
 import { NorthArrow, NorthPoleFlag } from '@/core/components/north-arrow/north-arrow';
 import { Crosshair } from '@/core/components/crosshair/crosshair';
@@ -33,6 +31,7 @@ import { MapViewer } from '@/geo/map/map-viewer';
 import { payloadIsABasemapLayerArray, payloadIsAMapViewProjection, PayloadBaseClass } from '@/api/events/payloads';
 import { TypeBasemapProps, TypeMapFeaturesConfig } from '../../types/global-types';
 import { sxClasses } from './map-style';
+import { useMapLoaded, useMapNorthArrow, useMapOverviewMap } from '@/core/stores/store-interface-and-intial-values/map-state';
 
 export function Map(mapFeaturesConfig: TypeMapFeaturesConfig): JSX.Element {
   const { map: mapConfig } = mapFeaturesConfig;
@@ -47,9 +46,9 @@ export function Map(mapFeaturesConfig: TypeMapFeaturesConfig): JSX.Element {
   const [overviewBaseMap, setOverviewBaseMap] = useState<TypeBasemapProps | undefined>(undefined);
 
   // get values from the store
-  const overviewMap = useStore(getGeoViewStore(mapId), (state) => state.mapState.overviewMap);
-  const northArrow = useStore(getGeoViewStore(mapId), (state) => state.mapState.northArrow);
-  const mapLoaded = useStore(getGeoViewStore(mapId), (state) => state.mapState.mapLoaded);
+  const overviewMap = useMapOverviewMap();
+  const northArrow = useMapNorthArrow();
+  const mapLoaded = useMapLoaded();
 
   // create a new map viewer instance
   const viewer: MapViewer = api.maps[mapId];
@@ -58,24 +57,6 @@ export function Map(mapFeaturesConfig: TypeMapFeaturesConfig): JSX.Element {
 
   // if screen size is medium and up
   const deviceSizeMedUp = useMediaQuery(defaultTheme.breakpoints.up('md'));
-
-  // TODO: do not deal with stuff not related to create the payload in the event, use the event on or store state to listen to change and do what is needed.
-  // !This was in mapZoomEnd event.... listen to the event in proper place
-  // Object.keys(layers).forEach((layer) => {
-  //   if (layer.endsWith('-unclustered')) {
-  //     const clusterLayerId = layer.replace('-unclustered', '');
-  //     const splitZoom =
-  //       (api.maps[mapId].layer.registeredLayers[clusterLayerId].source as TypeVectorSourceInitialConfig)!.cluster!.splitZoom || 7;
-  //     if (prevZoom < splitZoom && currentZoom >= splitZoom) {
-  //       api.maps[mapId].layer.registeredLayers[clusterLayerId]?.olLayer!.setVisible(false);
-  //       api.maps[mapId].layer.registeredLayers[layer]?.olLayer!.setVisible(true);
-  //     }
-  //     if (prevZoom >= splitZoom && currentZoom < splitZoom) {
-  //       api.maps[mapId].layer.registeredLayers[clusterLayerId]?.olLayer!.setVisible(true);
-  //       api.maps[mapId].layer.registeredLayers[layer]?.olLayer!.setVisible(false);
-  //     }
-  //   }
-  // });
 
   const initCGPVMap = (cgpvMap: OLMap) => {
     cgpvMap.set('mapId', mapId);
