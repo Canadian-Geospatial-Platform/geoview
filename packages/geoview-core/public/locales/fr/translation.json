@@ -2,7 +2,10 @@
   "general": {
     "close": "Fermer",
     "open": "Ouvrir",
-    "layers": "Couches"
+    "layers": "Couches",
+    "add": "Ajouter",
+    "remove": "Retirer",
+    "name": "Nom"
   },
   "mapnav": {
     "arianavbar": "groupe de buttons vertical pour navigation sur la carte",

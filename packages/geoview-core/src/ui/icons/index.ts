@@ -1,6 +1,7 @@
 export {
   Add as ZoomInIcon,
   Add as AddIcon,
+  AddCircleOutline as AddCircleOutlineIcon,
   Apps as AppsIcon,
   ArrowBack as ArrowBackIcon,
   ArrowBackIosOutlined as ArrowBackIosOutlinedIcon,
@@ -20,6 +21,7 @@ export {
   Close as CloseIcon,
   Details as DetailsIcon,
   Download as DownloadIcon,
+  Downloading as DownloadingIcon,
   DragHandle as HandleIcon,
   EmojiPeople as EmojiPeopleIcon,
   Error as ErrorIcon,
@@ -64,6 +66,7 @@ export {
   RadioButtonChecked as RadioButtonCheckedIcon,
   RadioButtonUnchecked as RadioButtonUncheckedIcon,
   Remove as ZoomOutIcon,
+  RemoveCircleOutline as RemoveCircleOutlineIcon,
   Search as SearchIcon,
   Send as SendIcon,
   Storage as StorageIcon,

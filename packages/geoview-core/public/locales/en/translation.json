@@ -2,7 +2,10 @@
   "general": {
     "close": "Close",
     "open": "Open",
-    "layers": "Layers"
+    "layers": "Layers",
+    "add": "Add",
+    "remove": "Remove",
+    "name": "Name"
   },
   "mapnav": {
     "arianavbar": "vertical button group for map navigation",

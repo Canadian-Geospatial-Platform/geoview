@@ -14,7 +14,20 @@ import { getSxClasses } from './button-style';
  * @returns {JSX.Element} the new UI element
  */
 export function Button(props: TypeButtonProps): JSX.Element {
-  const { sx, variant, tooltip, tooltipPlacement, onClick, className, children, autoFocus, disabled, disableRipple = false } = props;
+  const {
+    sx,
+    variant,
+    tooltip,
+    tooltipPlacement,
+    onClick,
+    className,
+    children,
+    autoFocus,
+    disabled,
+    disableRipple = false,
+    startIcon,
+    endIcon,
+  } = props;
 
   const { t } = useTranslation<string>();
 
@@ -40,6 +53,8 @@ export function Button(props: TypeButtonProps): JSX.Element {
         autoFocus={autoFocus}
         disabled={disabled}
         disableRipple={disableRipple}
+        startIcon={startIcon}
+        endIcon={endIcon}
       >
         {children}
       </MaterialButton>

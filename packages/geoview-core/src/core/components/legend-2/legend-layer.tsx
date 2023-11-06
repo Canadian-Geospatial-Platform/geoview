@@ -1,7 +1,5 @@
-import { useTranslation } from 'react-i18next';
 import { useState } from 'react';
 import { useTheme } from '@mui/material';
-import { TypeDisplayLanguage } from '@/app';
 import {
   Box,
   ListItem,
@@ -23,10 +21,10 @@ interface LegendLayerProps {
 
 export function LegendLayer(props: LegendLayerProps): JSX.Element {
   const { layer } = props;
-  const { i18n } = useTranslation<string>();
-  const layerName = layer.layerName[i18n.language as TypeDisplayLanguage];
+
   const theme = useTheme();
   const sxClasses = getSxClasses(theme);
+
   const [isGroupOpen, setGroupOpen] = useState(true);
 
   /**
@@ -98,9 +96,9 @@ export function LegendLayer(props: LegendLayerProps): JSX.Element {
 
   return (
     <Box>
-      <ListItem key={layerName} sx={sxClasses.legendLayerListItem} divider onClick={handleExpandGroupClick}>
-        <Tooltip title={layerName} placement="top" enterDelay={1000}>
-          <ListItemText primary={layerName} />
+      <ListItem key={layer.layerName} sx={sxClasses.legendLayerListItem} divider onClick={handleExpandGroupClick}>
+        <Tooltip title={layer.layerName} placement="top" enterDelay={1000}>
+          <ListItemText primary={layer.layerName} />
         </Tooltip>
         {renderArrowButtons()}
       </ListItem>

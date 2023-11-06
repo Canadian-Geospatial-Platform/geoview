@@ -3,9 +3,13 @@ import { Theme } from '@mui/material/styles';
 export const getSxClasses = (theme: Theme) => ({
   list: {
     color: 'text.primary',
-    marginLeft: '1rem',
     width: '100%',
-    paddingRight: '2rem',
+
+    '& .layerItemContainer': {
+      background: '#FFFFFF 0% 0% no-repeat padding-box',
+      borderRadius: '5px',
+      marginBottom: '5px',
+    },
 
     '& .MuiListItemText-primary': {
       font: theme.footerPanel.layerTitleFont,
@@ -84,5 +88,71 @@ export const getSxClasses = (theme: Theme) => ({
   legendItemContainer: {
     border: '2px solid red',
     width: '100%',
+  },
+  layersList: {
+    layerItem: {
+      background: '#FFFFFF 0% 0% no-repeat padding-box',
+      borderRadius: '5px',
+      marginBottom: '5px',
+    },
+    selectedLayerItem: {
+      border: '2px solid #515BA5',
+    },
+  },
+  rightPanel: {
+    layerDetails: {
+      border: '2px solid #515BA5',
+      padding: '20px',
+    },
+    opacityMenu: {
+      display: 'flex',
+      alignItems: 'center',
+      gap: '15px',
+      padding: '8px 20px 7px 15px',
+      backgroundColor: '#F6F6F6',
+    },
+    tableIconLabel: {
+      color: 'text.primary',
+      fontSize: 16,
+      noWrap: true,
+      marginLeft: 20,
+    },
+    table: {
+      border: '1px solid #C1C1C1',
+      borderRadius: '4px',
+      padding: '16px 17px 16px 23px',
+    },
+    tableHeader: {
+      '& th': {
+        borderBottom: '1px solid #C1C1C1',
+        height: 40,
+        backgroundColor: '#FFFFFF',
+        padding: '2px 4px 2px 4px',
+        borderRight: '1px solid #C1C1C1',
+        fontWeight: 'bold',
+      },
+      '& th:first-child': {
+        width: '80px',
+      },
+      '& th:nth-child(2)': {
+        padding: '2px 4px 2px 20px',
+      },
+    },
+    tableRow: {
+      '& td': {
+        borderBottom: '1px solid #C1C1C1',
+        height: 40,
+        margin: 0,
+        padding: '2px 4px 2px 4px',
+        alignItems: 'center',
+        borderRight: '1px solid #C1C1C1',
+      },
+      '& td:first-child': {
+        width: '80px',
+      },
+      '& td:nth-child(2)': {
+        padding: '2px 4px 2px 20px',
+      },
+    },
   },
 });

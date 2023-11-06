@@ -4,15 +4,13 @@ import { type MRT_ColumnFiltersState as MRTColumnFiltersState } from 'material-r
 
 import { TypeMapFeaturesConfig } from '@/core/types/global-types';
 import { TypeArrayOfLayerData } from '@/core/components/details/details';
-import { TypeLegendItemProps, TypeLegendLayer } from '@/core/components/layers/types';
 
 import { TypeDisplayLanguage } from '@/geo/map/map-schema-types';
+import { ILayerState, initializeLayerState } from './store-interface-and-intial-values/layer-state';
 
 import { IMapState, initializeMapState } from './store-interface-and-intial-values/map-state';
 import { IUIState, initializeUIState } from './store-interface-and-intial-values/ui-state';
 import { IAppState, initializeAppState } from './store-interface-and-intial-values/app-state';
-
-// export interface ILayersState {}
 
 // export interface IFooterState {}
 
@@ -21,14 +19,6 @@ export type TypeSetStore = (
   replace?: boolean | undefined
 ) => void;
 export type TypeGetStore = () => IGeoViewState;
-
-export interface ILegendState {
-  selectedItem?: TypeLegendItemProps;
-  selectedIsVisible: boolean;
-  selectedLayers: Record<string, { layer: string; icon: string }[]>;
-  currentRightPanelDisplay: 'overview' | 'layer-details' | 'none';
-  legendLayers: TypeLegendLayer[];
-}
 
 export interface IMapDataTableState {
   selectedLayerIndex: number;
@@ -59,9 +49,8 @@ export interface IGeoViewState {
   mapId: string;
   mapConfig: TypeMapFeaturesConfig | undefined;
   setMapConfig: (config: TypeMapFeaturesConfig) => void;
-
   appState: IAppState;
-  legendState: ILegendState;
+  legendState: ILayerState;
   mapState: IMapState;
   uiState: IUIState;
   detailsState: IDetailsState;
@@ -77,15 +66,9 @@ export const geoViewStoreDefinition = (set: TypeSetStore, get: TypeGetStore) =>
       set({ mapConfig: config, mapId: config.mapId, displayLanguage: config.displayLanguage });
     },
     appState: initializeAppState(set, get),
+    legendState: initializeLayerState(set, get),
     mapState: initializeMapState(set, get),
     uiState: initializeUIState(set, get),
-    legendState: {
-      selectedItem: undefined,
-      currentRightPanelDisplay: 'none',
-      selectedIsVisible: true,
-      selectedLayers: {},
-      legendLayers: [],
-    },
     detailsState: {
       layerDataArray: [],
       selectedLayerPath: '',
