@@ -4,7 +4,7 @@ import { useStore } from 'zustand';
 import _ from 'lodash';
 import { useGeoViewStore } from '../stores-managers';
 import { TypeLegendLayer } from '../../components/layers/types';
-import { IGeoViewState } from '../geoview-store';
+import { TypeGetStore, TypeSetStore } from '../geoview-store';
 
 export interface ILayerState {
   selectedItem?: TypeLegendLayer;
@@ -22,13 +22,7 @@ export interface ILayerState {
   };
 }
 
-export function initializeLayerState(
-  set: (
-    partial: IGeoViewState | Partial<IGeoViewState> | ((state: IGeoViewState) => IGeoViewState | Partial<IGeoViewState>),
-    replace?: boolean | undefined
-  ) => void,
-  get: () => IGeoViewState
-) {
+export function initializeLayerState(set: TypeSetStore, get: TypeGetStore) {
   const init = {
     selectedLayerPath: null,
     legendLayers: [],

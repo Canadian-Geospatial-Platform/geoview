@@ -18,7 +18,7 @@ import {
   ListAltIcon,
   Tooltip,
   VisibilityOffOutlinedIcon,
-  VisibilityOutlinedIcon
+  VisibilityOutlinedIcon,
 } from '@/ui';
 import { TypeLegendLayer } from '../types';
 import { getSxClasses } from './layerslist-style';

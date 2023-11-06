@@ -16,7 +16,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
   const { t } = useTranslation<string>();
   const theme = useTheme();
   const sxClasses = getSxClasses(theme);
-  
+
   const handleZoomTo = async () => {
     /* let bounds = await api.maps[mapId].layer.geoviewLayers[layerId].calculateBounds(path);
     let transformedBounds: Extent | undefined;

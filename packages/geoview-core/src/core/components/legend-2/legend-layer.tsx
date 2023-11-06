@@ -24,7 +24,7 @@ export function LegendLayer(props: LegendLayerProps): JSX.Element {
 
   const theme = useTheme();
   const sxClasses = getSxClasses(theme);
-  
+
   const [isGroupOpen, setGroupOpen] = useState(true);
 
   /**
