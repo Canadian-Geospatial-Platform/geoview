@@ -7,8 +7,9 @@ import {
   StepLabelProps,
   StepContentProps,
   StepProps,
-  useTheme,
 } from '@mui/material';
+import { useTheme } from '@mui/material/styles';
+
 import { getSxClasses } from './stepper-style';
 
 /**

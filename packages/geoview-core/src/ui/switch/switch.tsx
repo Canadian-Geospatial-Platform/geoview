@@ -1,4 +1,6 @@
-import { FormControlLabel as MaterialFormControlLabel, Switch as MaterialSwitch, SwitchProps, useTheme } from '@mui/material';
+import { FormControlLabel as MaterialFormControlLabel, Switch as MaterialSwitch, SwitchProps } from '@mui/material';
+import { useTheme } from '@mui/material/styles';
+
 import { getSxClasses } from './switch-style';
 
 /**
@@ -14,10 +16,10 @@ export type TypeSwitchProps = SwitchProps & { mapId?: string };
  * @returns {JSX.Element} the switch ui component
  */
 export function Switch(props: TypeSwitchProps): JSX.Element {
+  const { title, ...otherProps } = props;
+
   const theme = useTheme();
   const sxClasses = getSxClasses(theme);
-
-  const { title, ...otherProps } = props;
 
   return <MaterialFormControlLabel control={<MaterialSwitch {...otherProps} />} label={title} sx={sxClasses.formControl} />;
 }

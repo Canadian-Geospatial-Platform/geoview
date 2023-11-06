@@ -1,6 +1,8 @@
 import { useState } from 'react';
 
-import { Checkbox, List, ListItem, ListItemIcon, Typography, useTheme } from '@mui/material';
+import { useTheme } from '@mui/material/styles';
+import { Checkbox, List, ListItem, ListItemIcon, Typography } from '@mui/material';
+
 import { getSxClasses } from './checkbox-list-style';
 
 /**
@@ -17,6 +19,7 @@ export function CheckboxList({ listItems, multiselect, checkedItems, setApiCheck
   const theme = useTheme();
   const sxClasses = getSxClasses(theme);
 
+  // internal state
   const [listOfItems] = useState(listItems);
   const [checked, setChecked] = useState(checkedItems);
   let keyValue = 0;

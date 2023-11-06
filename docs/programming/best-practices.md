@@ -124,7 +124,7 @@ We do the import statement in the following order
 * other project dependecies
 
 We add an empty line between each group of import from different category
-```
+``` ts
 import { useRef, useEffect } from 'react';
 import { createRoot } from 'react-dom/client';
 
@@ -135,4 +135,33 @@ import { Card, CardHeader, CardContent, Divider, IconButton } from '@material-ui
 import CloseIcon from '@material-ui/icons/Close';
 
 import View, { ViewOptions } from 'ol/View';
+```
+
+## 8- How we order code at the beginning of a component
+
+We should follow a standard order when we create a component so it is easy to find the needed piece of code
+* Props assignement
+* Get context
+* Translation
+* Theme and style
+* Internal state
+* Store
+
+``` ts
+const { myScale } = ...props
+
+const mapConfig = useContext(MapContext);
+const { mapId } = mapConfig;
+
+const { t } = useTranslation<string>();
+
+const theme = useTheme();
+const sxClasses = getSxClasses(theme);
+
+// internal component state
+const [scaleMode, setScaleMode] = useState<number>(0);
+
+// get the values from store
+const expanded = useUIFooterBarExpanded();
+const scale = useMapScale();
 ```

@@ -1,5 +1,7 @@
 /* eslint-disable react/require-default-props */
-import { Divider as MaterialDivider, DividerProps, useTheme } from '@mui/material';
+import { useTheme } from '@mui/material/styles';
+import { Divider as MaterialDivider, DividerProps } from '@mui/material';
+
 import { getSxClasses } from './divider-style';
 
 /**

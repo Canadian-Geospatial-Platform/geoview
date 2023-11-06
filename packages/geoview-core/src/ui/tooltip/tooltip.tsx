@@ -15,5 +15,5 @@ interface TypeTooltipProps extends TooltipProps {
  * @returns {JSX.Element} the tooltip ui component
  */
 export function Tooltip(props: TypeTooltipProps): JSX.Element {
-  return <MaterialTooltip enterDelay={500} leaveDelay={200} {...props} />;
+  return <MaterialTooltip enterDelay={1000} leaveDelay={200} {...props} />;
 }

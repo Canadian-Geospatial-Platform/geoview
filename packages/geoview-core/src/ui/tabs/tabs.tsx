@@ -6,7 +6,6 @@ import { SyntheticEvent, useEffect, useState, ReactNode } from 'react';
 import { Grid, Tab as MaterialTab, Tabs as MaterialTabs, TabsProps, TabProps, BoxProps } from '@mui/material';
 
 import { HtmlToReact } from '@/core/containers/html-to-react';
-
 import { TabPanel } from './tab-panel';
 
 type TypeChildren = ReactNode;
@@ -44,6 +43,8 @@ export interface TypeTabsProps {
  */
 export function Tabs(props: TypeTabsProps): JSX.Element {
   const { tabs, rightButtons, selectedTab, isCollapsed, handleCollapse, TabContentVisibilty = 'inherit' } = props;
+
+  // internal state
   const [value, setValue] = useState(0);
 
   /**
