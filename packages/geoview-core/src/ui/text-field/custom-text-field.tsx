@@ -2,7 +2,9 @@
 /* eslint-disable react/jsx-props-no-spreading */
 import React, { ReactNode } from 'react';
 
-import { BaseTextFieldProps, InputAdornment, TextField as MaterialTextField, useTheme } from '@mui/material';
+import { useTheme } from '@mui/material/styles';
+import { BaseTextFieldProps, InputAdornment, TextField as MaterialTextField } from '@mui/material';
+
 import { getSxClasses } from './custom-text-field-style';
 
 /**
@@ -31,9 +33,6 @@ interface TypeCustomTextFieldProps extends Omit<BaseTextFieldProps, 'prefix'> {
  * @returns {JSX.Element} the created TextField element
  */
 export function CustomTextField(props: TypeCustomTextFieldProps): JSX.Element {
-  const theme = useTheme();
-  const sxClasses = getSxClasses(theme);
-
   const {
     className,
     style,
@@ -48,6 +47,9 @@ export function CustomTextField(props: TypeCustomTextFieldProps): JSX.Element {
     changeHandler,
     ...otherProps
   } = props;
+
+  const theme = useTheme();
+  const sxClasses = getSxClasses(theme);
 
   return (
     <MaterialTextField

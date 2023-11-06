@@ -49,9 +49,9 @@ export function Snackbar(props: SnackBarProps): JSX.Element {
   const { snackBarId } = props;
 
   const mapConfig = useContext(MapContext);
-
   const { mapId } = mapConfig;
 
+  // internal state
   const [open, setOpen] = useState(false);
   const [message, setMessage] = useState('');
   const [snackbarType, setSnackbarType] = useState<SnackbarType>('info');

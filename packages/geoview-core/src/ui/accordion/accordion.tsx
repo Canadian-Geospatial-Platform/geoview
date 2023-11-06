@@ -1,4 +1,5 @@
 import { useState, useCallback, ReactNode } from 'react';
+
 import {
   Accordion as MaterialAccordion,
   AccordionSummary as MaterialAccordionSummary,
@@ -46,6 +47,7 @@ const sxClasses = {
 export function Accordion(props: AccordionProps): ReactNode {
   const { id, items, className, defaultExpanded = false, showLoadingIcon = false } = props;
 
+  // internal state
   const [expandedStates, setExpandedStates] = useState<boolean[]>(Array(items.length).fill(defaultExpanded));
   const [transitionStates, setTransitionStates] = useState<boolean[]>(Array(items.length).fill(false));
 

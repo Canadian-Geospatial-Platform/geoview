@@ -1,7 +1,9 @@
 /* eslint-disable react/require-default-props */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState, CSSProperties } from 'react';
-import { Box, Stepper as MaterialStepper, Step, StepButton, StepContent, StepLabel, Typography, useTheme } from '@mui/material';
+
+import { useTheme } from '@mui/material/styles';
+import { Box, Stepper as MaterialStepper, Step, StepButton, StepContent, StepLabel, Typography } from '@mui/material';
 
 import { Button } from '../button/button';
 
@@ -63,13 +65,6 @@ export interface TypeStepperSteps {
  * @returns {JSX.Element} the created Stepper element
  */
 export function CustomStepper(props: TypeCustomStepperProps): JSX.Element {
-  const [activeStep, setActiveStep] = useState(0);
-  const [completed, setCompleted] = useState<any>({});
-  const [isReset, setIsReset] = useState<any>(false);
-
-  const theme = useTheme();
-  const sxClasses = getSxClasses(theme);
-
   const {
     className,
     style,
@@ -83,6 +78,14 @@ export function CustomStepper(props: TypeCustomStepperProps): JSX.Element {
     nextButtonText,
     resetButtonText,
   } = props;
+
+  const theme = useTheme();
+  const sxClasses = getSxClasses(theme);
+
+  // internal state
+  const [activeStep, setActiveStep] = useState(0);
+  const [completed, setCompleted] = useState<any>({});
+  const [isReset, setIsReset] = useState<boolean>(false);
 
   /**
    * Gets the total number of steps in the stepper

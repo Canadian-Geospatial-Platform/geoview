@@ -6,8 +6,8 @@ import { useTranslation } from 'react-i18next';
 
 import { ClassNameMap } from '@mui/styles';
 import withStyles from '@mui/styles/withStyles';
-
-import { Box, Dialog, DialogActions, DialogContent, DialogProps, DialogTitle, useTheme } from '@mui/material';
+import { useTheme } from '@mui/material/styles';
+import { Box, Dialog, DialogActions, DialogContent, DialogProps, DialogTitle } from '@mui/material';
 
 import { TypeJsonObject } from '@/core/types/global-types';
 import { HtmlToReact } from '@/core/containers/html-to-react';
@@ -79,15 +79,15 @@ export function Modal(props: TypeDialogProps): JSX.Element {
     'aria-describedby': ariaDescribedBy,
   } = props;
 
-  const [createdModal, setCreatedModal] = useState<JSX.Element>();
-  const [, setUpdate] = useState<number>(0);
-
   const { t } = useTranslation();
-
-  let openEvent = false;
 
   const theme = useTheme();
   const sxClasses = getSxClasses(theme);
+
+  // internal state
+  const [createdModal, setCreatedModal] = useState<JSX.Element>();
+  const [, setUpdate] = useState<number>(0);
+  let openEvent = false;
 
   /**
    * Causes the modal to re-render

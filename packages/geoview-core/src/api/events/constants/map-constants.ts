@@ -10,7 +10,6 @@ import { EventStringId } from '../event-types';
 export type MapEventKey =
   | 'EVENT_MAP_ADD_COMPONENT'
   | 'EVENT_MAP_CROSSHAIR_ENTER'
-  | 'EVENT_MAP_FIX_NORTH'
   | 'EVENT_MAP_GET_ALL_FEATURES'
   | 'EVENT_MAP_IN_KEYFOCUS'
   | 'EVENT_MAP_LOADED'
@@ -33,11 +32,6 @@ export const MAP: Record<MapEventKey, EventStringId> = {
    * Event triggered to crosshair enable and enter pressed
    */
   EVENT_MAP_CROSSHAIR_ENTER: 'map/crosshair_enter',
-
-  /**
-   * Event triggered when user fix north to stay straight
-   */
-  EVENT_MAP_FIX_NORTH: 'map/fix_north',
 
   /**
    * Event triggered when a user needs to get all features information for a map

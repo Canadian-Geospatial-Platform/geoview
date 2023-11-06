@@ -24,6 +24,7 @@ interface ProgressbarProps {
  */
 export function ProgressBar(props: ProgressbarProps): JSX.Element {
   const { className, variant, value } = props;
+
   return <LinearProgressBar variant={variant} value={value} className={className} />;
 }
 

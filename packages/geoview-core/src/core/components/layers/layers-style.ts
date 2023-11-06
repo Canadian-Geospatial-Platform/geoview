@@ -131,10 +131,11 @@ export const getSxClasses = (theme: Theme) => ({
         borderRight: '1px solid #C1C1C1',
         fontWeight: 'bold',
       },
-      '& th:first-child': {
+      '& th:first-of-type': {
+        // The pseudo class ":x-child" is potentially unsafe when doing server-side rendering. Try changing it to ":x-of-type".
         width: '80px',
       },
-      '& th:nth-child(2)': {
+      '& th:nth-of-type(2)': {
         padding: '2px 4px 2px 20px',
       },
     },
@@ -147,10 +148,11 @@ export const getSxClasses = (theme: Theme) => ({
         alignItems: 'center',
         borderRight: '1px solid #C1C1C1',
       },
-      '& td:first-child': {
+      '& td:first-of-type': {
+        // The pseudo class ":x-child" is potentially unsafe when doing server-side rendering. Try changing it to ":x-of-type".
         width: '80px',
       },
-      '& td:nth-child(2)': {
+      '& td:nth-of-type(2)': {
         padding: '2px 4px 2px 20px',
       },
     },

@@ -9,8 +9,9 @@ import {
   MenuItemProps,
   Select as MaterialSelect,
   SelectProps,
-  useTheme,
 } from '@mui/material';
+import { useTheme } from '@mui/material/styles';
+
 import { getSxClasses } from './select-style';
 
 /**
