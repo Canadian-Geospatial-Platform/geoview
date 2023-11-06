@@ -3,13 +3,7 @@ import { PayloadBaseClass } from './payload-base-class';
 import { EventStringId, EVENT_NAMES } from '../event-types';
 
 /** Valid events that can create BooleanPayload */
-const validEvents: EventStringId[] = [
-  EVENT_NAMES.OVERVIEW_MAP.EVENT_OVERVIEW_MAP_TOGGLE,
-  EVENT_NAMES.FOOTERBAR.EVENT_FOOTERBAR_EXPAND_COLLAPSE, // TODO: EVENTS - check if we keep this payload
-  EVENT_NAMES.MAP.EVENT_MAP_FIX_NORTH,
-  EVENT_NAMES.GEOLOCATOR.EVENT_GEOLOCATOR_TOGGLE,
-  EVENT_NAMES.MAP.EVENT_MAP_IN_KEYFOCUS,
-];
+const validEvents: EventStringId[] = [EVENT_NAMES.MAP.EVENT_MAP_IN_KEYFOCUS];
 
 /**
  * type guard function that redefines a PayloadBaseClass as a BooleanPayload

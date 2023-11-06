@@ -26,7 +26,9 @@ export function IconButton(props: TypeIconButtonProps): JSX.Element {
     size,
     disabled,
   } = props;
+
   const { t } = useTranslation<string>();
+
   return (
     <Tooltip title={t((tooltip as string) || '') as string} placement={tooltipPlacement} TransitionComponent={Fade}>
       <span>

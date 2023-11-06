@@ -10,8 +10,8 @@ import {
   MenuItem,
   Select as MaterialSelect,
   SelectChangeEvent,
-  useTheme,
 } from '@mui/material';
+import { useTheme } from '@mui/material/styles';
 
 import { getSxClasses } from './custom-select-style';
 
@@ -63,12 +63,14 @@ export interface TypeItemProps {
  * @returns {JSX.Element} the created Select element
  */
 export function CustomSelect(props: TypeCustomSelectProps): JSX.Element {
+  const { className, style, labelId, label, selectItems, callBack, helperText, multiple, ...otherProps } = props;
+
   const theme = useTheme();
   const sxClasses = getSxClasses(theme);
 
+  // internal state
   const [value, setValue] = useState('');
   const [multipleValue, setMultipleValue] = useState([]);
-  const { className, style, labelId, label, selectItems, callBack, helperText, multiple, ...otherProps } = props;
 
   /**
    * Runs when a selection is changed

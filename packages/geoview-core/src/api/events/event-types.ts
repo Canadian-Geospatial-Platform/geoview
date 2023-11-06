@@ -1,23 +1,16 @@
 import { APPBAR } from './constants/app-bar-constants';
-import { ATTRIBUTION } from './constants/attribution-constants';
 import { BASEMAP } from './constants/basemap-constants';
-import { DRAWER } from './constants/drawer-constants';
-import { FOOTERBAR } from './constants/footer-bar-constants';
 import { FOOTER_TABS } from './constants/footer-tabs-constants';
 import { GET_FEATURE_INFO } from './constants/get-feature-info-constants';
 import { GET_LEGENDS } from './constants/get-legends-constants';
 import { GEOMETRY } from './constants/geometry-constants';
-import { GEOLOCATOR } from './constants/geolocator-constants';
 import { INTERACTION } from './constants/interaction-constants';
 import { LAYER_SET } from './constants/layer-set-constants';
 import { LAYER } from './constants/layer-constants';
 import { MAP } from './constants/map-constants';
-import { MARKER_ICON } from './constants/marker-icon-constants';
 import { FEATURE_HIGHLIGHT } from './constants/feature-highlight-constants';
 import { MODAL } from './constants/modal-constants';
 import { NAVBAR } from './constants/nav-bar-constants';
-import { NOTIFICATIONS } from './constants/notifications-constants';
-import { OVERVIEW_MAP } from './constants/overview-map-constants';
 import { PANEL } from './constants/panel-constants';
 import { SLIDER } from './constants/slider-constants';
 import { SNACKBAR } from './constants/snackbar-constants';
@@ -27,25 +20,18 @@ import { SNACKBAR } from './constants/snackbar-constants';
  */
 export const EVENT_NAMES = {
   APPBAR,
-  ATTRIBUTION,
   BASEMAP,
-  DRAWER,
-  FOOTERBAR,
   FOOTER_TABS,
   GET_FEATURE_INFO,
   GET_LEGENDS,
-  GEOLOCATOR,
   GEOMETRY,
   INTERACTION,
   LAYER_SET,
   LAYER,
   MAP,
-  MARKER_ICON,
   FEATURE_HIGHLIGHT,
   MODAL,
   NAVBAR,
-  NOTIFICATIONS,
-  OVERVIEW_MAP,
   PANEL,
   SLIDER,
   SNACKBAR,
@@ -57,14 +43,11 @@ export const EVENT_NAMES = {
 export type EventStringId =
   | 'appbar/panel_create'
   | 'appbar/panel_remove'
-  | 'attribution/update'
   | 'basemap/layers_update'
   | 'details_panel/crosshair_enter'
-  | 'drawer/open_close'
   | 'feature_highlight/highlight'
   | 'feature_highlight/clear'
   | 'feature_highlight/highlightBBox'
-  | 'footerbar/expand_collapse'
   | 'footer_tabs/tab_create'
   | 'footer_tabs/tab_remove'
   | 'footer_tabs/tab_select'
@@ -81,7 +64,6 @@ export type EventStringId =
   | 'get_legends/legend_info'
   | 'get_legends/query_legends'
   | 'get_legends/trigger'
-  | 'geolocator/toggle'
   | 'interaction/draw_started'
   | 'interaction/draw_ended'
   | 'interaction/draw_aborted'
@@ -102,9 +84,7 @@ export type EventStringId =
   | 'layer/remove'
   | 'layer/if_condition'
   | 'map/add_component'
-  | 'map/crosshair_enable_disable'
   | 'map/crosshair_enter'
-  | 'map/fix_north'
   | 'map/get_all_features'
   | 'map/inkeyfocus'
   | 'map/loaded'
@@ -115,18 +95,12 @@ export type EventStringId =
   | 'map/singleclick'
   | 'map/view_projection_change'
   | 'map/zoomend'
-  | 'marker_icon/hide'
-  | 'marker_icon/show'
   | 'modal/close'
   | 'modal/create'
   | 'modal/open'
   | 'modal/update'
   | 'navbar/button_panel_create'
   | 'navbar/button_panel_remove'
-  | 'navbar/toggle_controls'
-  | 'notification/add'
-  | 'notification/remove'
-  | 'overview_map/toggle'
   | 'panel/add_action'
   | 'panel/change_content'
   | 'panel/close'

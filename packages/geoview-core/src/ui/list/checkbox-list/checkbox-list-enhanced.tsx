@@ -1,7 +1,8 @@
 /* eslint-disable no-plusplus */
 import { useState, useEffect } from 'react';
 
-import { Typography, useTheme } from '@mui/material';
+import { useTheme } from '@mui/material/styles';
+import { Typography } from '@mui/material';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import ListItemIcon from '@mui/material/ListItemIcon';
@@ -32,6 +33,7 @@ export function CheckboxListEnhanced(props: CheckboxListEnhancedType): JSX.Eleme
   const theme = useTheme();
   const sxClasses = getSxClasses(theme);
 
+  // internal state
   const [checked, _setChecked] = useState([...checkedValues]);
 
   const handleToggle = (value: string) => {

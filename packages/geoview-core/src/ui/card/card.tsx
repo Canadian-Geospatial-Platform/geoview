@@ -1,5 +1,6 @@
 /* eslint-disable react/require-default-props */
 import { ReactNode } from 'react';
+
 import { Card as MaterialCard, CardContent as MaterialCardContent, CardHeader as MaterialCardHeader, CardProps } from '@mui/material';
 
 export interface TypeCardProps extends CardProps {

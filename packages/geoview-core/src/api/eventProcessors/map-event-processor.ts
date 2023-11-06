@@ -4,7 +4,7 @@ import { fromLonLat } from 'ol/proj';
 
 import { GeoViewStoreType } from '@/core/stores/geoview-store';
 import { AbstractEventProcessor } from './abstract-event-processor';
-import { api, NORTH_POLE_POSITION } from '@/app';
+import { api, NORTH_POLE_POSITION, TypeClickMarker } from '@/app';
 import { CustomAttribution } from '@/geo/utils/custom-attribution';
 import {
   mapPayload,
@@ -169,8 +169,31 @@ export class MapEventProcessor extends AbstractEventProcessor {
     });
     map.addOverlay(northPoleMarker);
 
+    // create overlay for click marker icon
+    const clickMarkerId = `${mapId}-clickmarker`;
+    const clickMarkerOverlay = new Overlay({
+      id: clickMarkerId,
+      position: [-1, -1],
+      positioning: 'center-center',
+      offset: [-18, -35],
+      element: document.getElementById(clickMarkerId) as HTMLElement,
+      stopEvent: false,
+    });
+    map.addOverlay(clickMarkerOverlay);
+
     // set store
     setTimeout(() => store.getState().mapState.actions.setMapElement(map), 250);
     setTimeout(() => store.getState().mapState.actions.setOverlayNorthMarker(northPoleMarker), 250);
+    setTimeout(() => store.getState().mapState.actions.setOverlayClickMarker(clickMarkerOverlay), 250);
+  }
+
+  static clickMarkerIconHide(mapId: string) {
+    const store = getGeoViewStore(mapId);
+    store.getState().mapState.actions.hideClickMarker();
+  }
+
+  static clickMarkerIconShow(mapId: string, marker: TypeClickMarker) {
+    const store = getGeoViewStore(mapId);
+    store.getState().mapState.actions.showClickMarker(marker);
   }
 }

@@ -1,5 +1,6 @@
 /* eslint-disable react/require-default-props */
 import { useState, useEffect } from 'react';
+
 import { Slider as MaterialSlider, SliderProps } from '@mui/material';
 
 /**
@@ -25,6 +26,8 @@ interface TypeSliderProps extends SliderProps {
  */
 export function SliderBase(props: TypeSliderProps): JSX.Element {
   const { min, max, value: parentValue, orientation, customOnChange, onValueDisplay, onValueDisplayAriaLabel } = props;
+
+  // internal state
   const [sliderValue, setValue] = useState<number[] | number>(parentValue);
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [activeThumb, setActiveThumb] = useState<number>(0);
@@ -40,7 +43,7 @@ export function SliderBase(props: TypeSliderProps): JSX.Element {
     setValue(newValue);
 
     // Callback
-    // TODO: Refactor - change the name of this callback to 'onCustonChange' to follow standards
+    // TODO: Refactor - change the name of this callback to 'onCustomChange' to follow standards
     customOnChange?.(newValue);
   };
 
