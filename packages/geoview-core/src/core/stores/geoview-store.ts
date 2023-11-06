@@ -66,9 +66,9 @@ export const geoViewStoreDefinition = (set: TypeSetStore, get: TypeGetStore) =>
       set({ mapConfig: config, mapId: config.mapId, displayLanguage: config.displayLanguage });
     },
     appState: initializeAppState(set, get),
+    legendState: initializeLayerState(set, get),
     mapState: initializeMapState(set, get),
     uiState: initializeUIState(set, get),
-    legendState: initializeLayerState(set, get),
     detailsState: {
       layerDataArray: [],
       selectedLayerPath: '',

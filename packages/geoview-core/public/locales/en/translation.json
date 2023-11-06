@@ -4,7 +4,8 @@
     "open": "Open",
     "layers": "Layers",
     "add": "Add",
-    "remove": "Remove"
+    "remove": "Remove",
+    "name": "Name"
   },
   "mapnav": {
     "arianavbar": "vertical button group for map navigation",

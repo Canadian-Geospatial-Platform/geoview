@@ -11,12 +11,12 @@ interface LayerDetailsProps {
 }
 
 export function LayerDetails(props: LayerDetailsProps): JSX.Element {
-  const theme = useTheme();
-  const sxClasses = getSxClasses(theme);
-  const { t } = useTranslation<string>();
   const { layerDetails } = props;
   const { setAllItemsVisibility, toggleItemVisibility, setLayerOpacity } = useLayerStoreActions(); // get store actions
-
+  const { t } = useTranslation<string>();
+  const theme = useTheme();
+  const sxClasses = getSxClasses(theme);
+  
   const handleZoomTo = async () => {
     /* let bounds = await api.maps[mapId].layer.geoviewLayers[layerId].calculateBounds(path);
     let transformedBounds: Extent | undefined;
@@ -62,7 +62,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
                   {layerDetails.allItemsChecked ? <CheckBoxIcon /> : <CheckBoxOutIcon />}
                 </IconButton>
               </TableCell>
-              <TableCell>Name</TableCell>
+              <TableCell>{t('general.name')}</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>

@@ -111,6 +111,7 @@ export function initializeLayerState(
       },
     },
   };
+
   return init;
 }
 
@@ -142,10 +143,11 @@ function findLayerByPath(layers: TypeLegendLayer[], layerPath: string): TypeLege
 }
 
 // **********************************************************
-// UI state selectors
+// Layer state selectors
 // **********************************************************
 export const useLayersList = () => useStore(useGeoViewStore(), (state) => state.legendState.legendLayers);
 export const useSelectedLayerPath = () => useStore(useGeoViewStore(), (state) => state.legendState.selectedLayerPath);
+
 export const useLayerStoreActions = () => useStore(useGeoViewStore(), (state) => state.legendState.actions);
 
 export const useSelectedLayer = () => {

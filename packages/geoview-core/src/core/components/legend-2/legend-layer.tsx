@@ -21,8 +21,10 @@ interface LegendLayerProps {
 
 export function LegendLayer(props: LegendLayerProps): JSX.Element {
   const { layer } = props;
+
   const theme = useTheme();
   const sxClasses = getSxClasses(theme);
+  
   const [isGroupOpen, setGroupOpen] = useState(true);
 
   /**
