@@ -71,7 +71,7 @@ export function LayersListFooter(props: TypeLayersListProps): JSX.Element {
   };
 
   const highlightCallbackFunction = (payload: PayloadBaseClass) => {
-    if (payloadIsAFeatureHighlight(payload)) {
+    if (payloadIsAFeatureHighlight(payload) && payload.feature.geometry) {
       selectedFeatures.current.push(getUid(payload.feature.geometry));
     }
   };
@@ -123,7 +123,8 @@ export function LayersListFooter(props: TypeLayersListProps): JSX.Element {
       const getAllUnCheckedFeatures = allUncheckedFeatures(checkedFeatures, layer.features);
 
       getAllUnCheckedFeatures.forEach((obj: TypeFeatureInfoEntry) => {
-        api.event.emit(clearHighlightsPayload(EVENT_NAMES.FEATURE_HIGHLIGHT.EVENT_HIGHLIGHT_CLEAR, mapId, getUid(obj.geometry)));
+        if (obj.geometry)
+          api.event.emit(clearHighlightsPayload(EVENT_NAMES.FEATURE_HIGHLIGHT.EVENT_HIGHLIGHT_CLEAR, mapId, getUid(obj.geometry)));
       });
     });
 

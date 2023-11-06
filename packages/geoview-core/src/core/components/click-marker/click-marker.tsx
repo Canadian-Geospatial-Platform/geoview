@@ -316,7 +316,7 @@ export function ClickMarker(): JSX.Element {
   };
 
   const highlightCallbackFunction = (payload: PayloadBaseClass) => {
-    if (payloadIsAFeatureHighlight(payload)) {
+    if (payloadIsAFeatureHighlight(payload) && payload.feature.geometry) {
       highlightFeature(payload.feature);
     }
   };
