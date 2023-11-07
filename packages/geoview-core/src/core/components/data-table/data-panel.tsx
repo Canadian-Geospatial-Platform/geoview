@@ -175,12 +175,17 @@ export function Datapanel({ layerData, mapId, projectionConfig, language }: Data
   return (
     <Box sx={sxClasses.dataPanel}>
       <DataTableGrid.Root spacing={2} sx={sxClasses.gridContainer}>
-        <DataTableGrid.Left sm={3} xs={isLayersPanelVisible ? 12 : 0}>
+        <DataTableGrid.Left sm={3} xs={isLayersPanelVisible ? 12 : 0} isLayersPanelVisible={isLayersPanelVisible}>
           <Typography component="p" sx={sxClasses.headline}>
             {t('dataTable.leftPanelHeading')}
           </Typography>
         </DataTableGrid.Left>
-        <DataTableGrid.Right sm={9} xs={!isLayersPanelVisible ? 12 : 0} sx={{ display: 'flex', justifyContent: 'right' }}>
+        <DataTableGrid.Right
+          sm={9}
+          xs={!isLayersPanelVisible ? 12 : 0}
+          sx={{ display: 'flex', justifyContent: 'right' }}
+          isLayersPanelVisible={isLayersPanelVisible}
+        >
           <Button
             type="text"
             size="small"

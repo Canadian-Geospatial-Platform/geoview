@@ -1,4 +1,4 @@
-import React, { ReactNode, useState } from 'react';
+import React, { ReactNode } from 'react';
 import { Grid } from '@/ui';
 import { GridProps, useTheme } from '@mui/material';
 
@@ -8,7 +8,7 @@ interface DataTableGridProps extends GridProps {
 
 interface DataTableGridPanelProps extends GridProps {
   children: ReactNode;
-  isLayersPanelVisible?: boolean;
+  isLayersPanelVisible: boolean;
 }
 
 /**
@@ -30,7 +30,7 @@ function DataTableGridRoot({ children, ...rest }: DataTableGridProps) {
  * @param {boolean} isLayersPanelVisible panel visibility
  * @returns JSX.Element
  */
-function DataTableGridLeftPanel({ children, isLayersPanelVisible, ...rest }: DataTableGridPanelProps) {
+function DataTableGridLeftPanel({ children, isLayersPanelVisible = false, ...rest }: DataTableGridPanelProps) {
   const theme = useTheme();
 
   return (
@@ -46,7 +46,7 @@ function DataTableGridLeftPanel({ children, isLayersPanelVisible, ...rest }: Dat
  * @param {boolean} isLayersPanelVisible panel visibility
  * @returns JSX.Element
  */
-function DataTableGridRightPanel({ children, isLayersPanelVisible, ...rest }: DataTableGridPanelProps) {
+function DataTableGridRightPanel({ children, isLayersPanelVisible = false, ...rest }: DataTableGridPanelProps) {
   const theme = useTheme();
   return (
     <Grid
