@@ -116,4 +116,10 @@ export declare class GeoUtilities {
         y: number;
         z: number;
     };
+    /**
+     * Format the coordinates for degrees - minutes - seconds (lat, long)
+     * @param {number} value the value to format
+     * @returns {string} the formatted value
+     */
+    coordFormnatDMS(value: number): string;
 }

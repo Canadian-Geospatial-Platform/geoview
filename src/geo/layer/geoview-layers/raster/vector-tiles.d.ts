@@ -101,6 +101,9 @@ export declare class VectorTiles extends AbstractGeoViewRaster {
     addVectorTileLayer(): void;
     /**
      * Set Vector Tile style
+     *
+     * @param {string} layerPath Path of layer to style.
+     * @param {string} styleUrl The url of the styles to apply.
      */
-    setStyle(proj: number): void;
+    setVectorTileStyle(layerPath: string, styleUrl: string): void;
 }

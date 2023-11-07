@@ -2,7 +2,7 @@ import { TypeJsonArray, TypeJsonObject } from '@/core/types/global-types';
 import { TypeEsriDynamicLayerEntryConfig, TypeLayerEntryConfig, TypeListOfLayerEntryConfig } from '../../map/map-schema-types';
 import { EsriDynamic } from './raster/esri-dynamic';
 import { EsriFeature, TypeEsriFeatureLayerEntryConfig } from './vector/esri-feature';
-import { codedValueType, rangeDomainType } from '@/api/events/payloads';
+import { codedValueType, rangeDomainType, TypeFeatureInfoEntryPartial } from '@/api/events/payloads';
 /** ***************************************************************************************************************************
  * This method reads the service metadata from the metadataAccessPath.
  *
@@ -71,3 +71,18 @@ export declare function commonProcessInitialSettings(this: EsriDynamic | EsriFea
  * @returns {Promise<void>} A promise that the layer configuration has its metadata processed.
  */
 export declare function commonProcessLayerMetadata(this: EsriDynamic | EsriFeature, resolve: (value: void | PromiseLike<void>) => void, layerEntryConfig: TypeLayerEntryConfig): void;
+/**
+ * Transforms the query results of an Esri service response - when not querying on the Layers themselves (giving a 'reduced' FeatureInfoEntry).
+ * The transformation reads the Esri formatted information and return a list of `TypeFeatureInfoEntryPartial` records.
+ * In a similar fashion and response object as the "Query Feature Infos" functionalities done via the Layers.
+ * @param results TypeJsonObject The Json Object representing the data from Esri.
+ * @returns TypeFeatureInfoEntryPartial[] an array of relared records of type TypeFeatureInfoEntryPartial
+ */
+export declare function parseFeatureInfoEntries(results: TypeJsonObject[]): TypeFeatureInfoEntryPartial[];
+/**
+ * Asynchronously queries an Esri relationship table given the url and returns an array of `TypeFeatureInfoEntryPartial` records.
+ * @param url string An Esri url indicating a relationship table to query
+ * @param recordGroupIndex number The group index of the relationship layer on which to read the related records
+ * @returns TypeFeatureInfoEntryPartial[] An array of relared records of type TypeFeatureInfoEntryPartial, or an empty array.
+ */
+export declare function queryRelatedRecordsByUrl(url: string, recordGroupIndex: number): Promise<TypeFeatureInfoEntryPartial[]>;

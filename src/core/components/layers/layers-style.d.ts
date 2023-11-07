@@ -2,9 +2,12 @@ import { Theme } from '@mui/material/styles';
 export declare const getSxClasses: (theme: Theme) => {
     list: {
         color: string;
-        marginLeft: string;
         width: string;
-        paddingRight: string;
+        '& .layerItemContainer': {
+            background: string;
+            borderRadius: string;
+            marginBottom: string;
+        };
         '& .MuiListItemText-primary': {
             font: string;
         };
@@ -80,5 +83,71 @@ export declare const getSxClasses: (theme: Theme) => {
     legendItemContainer: {
         border: string;
         width: string;
+    };
+    layersList: {
+        layerItem: {
+            background: string;
+            borderRadius: string;
+            marginBottom: string;
+        };
+        selectedLayerItem: {
+            border: string;
+        };
+    };
+    rightPanel: {
+        layerDetails: {
+            border: string;
+            padding: string;
+        };
+        opacityMenu: {
+            display: string;
+            alignItems: string;
+            gap: string;
+            padding: string;
+            backgroundColor: string;
+        };
+        tableIconLabel: {
+            color: string;
+            fontSize: number;
+            noWrap: boolean;
+            marginLeft: number;
+        };
+        table: {
+            border: string;
+            borderRadius: string;
+            padding: string;
+        };
+        tableHeader: {
+            '& th': {
+                borderBottom: string;
+                height: number;
+                backgroundColor: string;
+                padding: string;
+                borderRight: string;
+                fontWeight: string;
+            };
+            '& th:first-child': {
+                width: string;
+            };
+            '& th:nth-child(2)': {
+                padding: string;
+            };
+        };
+        tableRow: {
+            '& td': {
+                borderBottom: string;
+                height: number;
+                margin: number;
+                padding: string;
+                alignItems: string;
+                borderRight: string;
+            };
+            '& td:first-child': {
+                width: string;
+            };
+            '& td:nth-child(2)': {
+                padding: string;
+            };
+        };
     };
 };

@@ -1,6 +1,6 @@
 /// <reference types="react" />
 import { LegendsLayerSet } from '@/app';
-import { TypeLegendItemProps, TypeLegendProps } from './types';
+import { TypeLegendProps } from './types';
 /**
  * API to manage legend component
  *
@@ -21,9 +21,4 @@ export declare class LayersApi {
      *
      */
     createLayers: (props: TypeLegendProps) => import("react").FunctionComponentElement<import("./types").LegendItemsDetailsProps>;
-    /**
-     * Create an individual legend item
-     *
-     */
-    createSingleLayer: (props: TypeLegendItemProps) => import("react").FunctionComponentElement<TypeLegendItemProps>;
 }

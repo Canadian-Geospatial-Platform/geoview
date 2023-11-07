@@ -11,6 +11,6 @@ export interface CheckboxListEnhancedType {
 export type CheckboxListEnhancedItem = {
     display: string;
     value: string;
-    content: JSX.Element;
+    contentRight: JSX.Element;
 };
 export declare function CheckboxListEnhanced(props: CheckboxListEnhancedType): JSX.Element;

@@ -45,6 +45,12 @@ export type TypeFeatureInfoEntry = {
     fieldInfo: Partial<Record<string, TypeFieldEntry>>;
     nameField: string | null;
 };
+/**
+ * Partial definition of a TypeFeatureInfoEntry for simpler use case queries.
+ * Purposely linking this simpler type to the main TypeFeatureInfoEntry type here, in case, for future we want
+ * to add more information on one or the other and keep things loosely linked together.
+ */
+export type TypeFeatureInfoEntryPartial = Pick<TypeFeatureInfoEntry, 'fieldInfo'>;
 export type TypeArrayOfFeatureInfoEntries = TypeFeatureInfoEntry[] | undefined | null;
 export type TypeFeatureInfoByQueryTypes = {
     [K in TypeQueryType]?: TypeArrayOfFeatureInfoEntries;
