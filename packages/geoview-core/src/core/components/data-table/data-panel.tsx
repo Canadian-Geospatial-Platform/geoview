@@ -7,7 +7,6 @@ import { Projection } from 'ol/proj';
 import { useTranslation } from 'react-i18next';
 import {
   Box,
-  Grid,
   Typography,
   Paper,
   List,
@@ -29,6 +28,7 @@ import { getSxClasses } from './data-table-style';
 import { getGeoViewStore } from '@/core/stores/stores-managers';
 import { GroupLayers } from './data-table-api';
 import { TypeDisplayLanguage, TypeLocalizedString } from '@/geo/map/map-schema-types';
+import { DataTableGrid } from './data-table-grid';
 
 interface DatapanelProps {
   layerData: (MapDataTableDataProps & GroupLayers)[];
@@ -48,10 +48,12 @@ interface DatapanelProps {
 export function Datapanel({ layerData, mapId, projectionConfig, language }: DatapanelProps) {
   const { t } = useTranslation();
   const theme = useTheme();
+
   const sxClasses = getSxClasses(theme);
   const store = getGeoViewStore(mapId);
 
   const [isLoading, setIsLoading] = useState(false);
+  const [isLayersPanelVisible, setIsLayersPanelVisible] = useState(false);
 
   const { selectedLayerIndex, setSelectedLayerIndex, isEnlargeDataTable, setIsEnlargeDataTable, mapFilteredMap, rowsFilteredMap } =
     useStore(store, (state) => state.dataTableState);
@@ -59,6 +61,7 @@ export function Datapanel({ layerData, mapId, projectionConfig, language }: Data
   const handleListItemClick = useCallback((event: React.MouseEvent<HTMLDivElement, MouseEvent>, index: number) => {
     setSelectedLayerIndex(index);
     setIsLoading(true);
+    setIsLayersPanelVisible(false);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -171,25 +174,53 @@ export function Datapanel({ layerData, mapId, projectionConfig, language }: Data
 
   return (
     <Box sx={sxClasses.dataPanel}>
-      <Grid container spacing={2} sx={sxClasses.gridContainer}>
-        <Grid item xs={3}>
+      <DataTableGrid.Root spacing={2} sx={sxClasses.gridContainer}>
+        <DataTableGrid.Left sm={3} xs={isLayersPanelVisible ? 12 : 0}>
           <Typography component="p" sx={sxClasses.headline}>
             {t('dataTable.leftPanelHeading')}
           </Typography>
-        </Grid>
-
-        <Grid item xs={9} sx={{ display: 'flex', justifyContent: 'right' }}>
-          <Button type="text" size="small" sx={sxClasses.enlargeBtn} onClick={() => setIsEnlargeDataTable(!isEnlargeDataTable)}>
+        </DataTableGrid.Left>
+        <DataTableGrid.Right sm={9} xs={!isLayersPanelVisible ? 12 : 0} sx={{ display: 'flex', justifyContent: 'right' }}>
+          <Button
+            type="text"
+            size="small"
+            sx={{ ...sxClasses.enlargeBtn, [theme.breakpoints.down('sm')]: { display: 'none' } }}
+            onClick={() => setIsEnlargeDataTable(!isEnlargeDataTable)}
+          >
             {isEnlargeDataTable ? <ArrowForwardIcon sx={sxClasses.enlargeBtnIcon} /> : <ArrowBackIcon sx={sxClasses.enlargeBtnIcon} />}
             {isEnlargeDataTable ? t('dataTable.reduceBtn') : t('dataTable.enlargeBtn')}
           </Button>
-        </Grid>
-      </Grid>
-      <Grid container sx={{ marginTop: '0.75rem' }}>
-        <Grid item xs={!isEnlargeDataTable ? 4 : 1.25}>
+          {!isLoading && (
+            <Button
+              type="text"
+              size="small"
+              sx={{
+                ...sxClasses.enlargeBtn,
+                marginLeft: '1rem',
+                [theme.breakpoints.up('sm')]: { display: 'none' },
+                [theme.breakpoints.down('sm')]: { display: !isLayersPanelVisible ? 'block' : 'none' },
+              }}
+              onClick={() => setIsLayersPanelVisible(true)}
+            >
+              Close
+            </Button>
+          )}
+        </DataTableGrid.Right>
+      </DataTableGrid.Root>
+
+      <DataTableGrid.Root sx={{ marginTop: '0.75rem' }}>
+        <DataTableGrid.Left
+          isLayersPanelVisible={isLayersPanelVisible}
+          sm={!isEnlargeDataTable ? 4 : 1.25}
+          xs={isLayersPanelVisible ? 12 : 0}
+        >
           {renderList()}
-        </Grid>
-        <Grid item xs={!isEnlargeDataTable ? 8 : 10.75} sx={{ paddingLeft: '1rem', position: 'relative' }}>
+        </DataTableGrid.Left>
+        <DataTableGrid.Right
+          sm={!isEnlargeDataTable ? 8 : 10.75}
+          xs={!isLayersPanelVisible ? 12 : 0}
+          isLayersPanelVisible={isLayersPanelVisible}
+        >
           <CircularProgress
             isLoaded={!isLoading}
             sx={{
@@ -199,7 +230,7 @@ export function Datapanel({ layerData, mapId, projectionConfig, language }: Data
 
           {!isLoading &&
             layerData.map(({ layerKey, layerId }, index) => (
-              <Box key={layerKey} sx={{ paddingLeft: '3.5rem' }}>
+              <Box key={layerKey} sx={{ [theme.breakpoints.up('sm')]: { paddingLeft: '3.5rem' } }}>
                 {index === selectedLayerIndex ? (
                   <Box>
                     {layerData[index].features.length ? (
@@ -219,8 +250,8 @@ export function Datapanel({ layerData, mapId, projectionConfig, language }: Data
                 )}
               </Box>
             ))}
-        </Grid>
-      </Grid>
+        </DataTableGrid.Right>
+      </DataTableGrid.Root>
     </Box>
   );
 }
