@@ -163,7 +163,10 @@ export class VectorTiles extends AbstractGeoViewRaster {
       const sourceOptions: SourceOptions = {
         url: getLocalizedValue(layerEntryConfig.source.dataAccessPath, this.mapId),
       };
-      if (this.metadata?.tileinfo?.wkid && api.maps[this.mapId].currentProjection !== this.metadata.tileinfo.wkid) {
+      if (
+        this.metadata?.tileInfo?.spatialReference?.wkid &&
+        api.maps[this.mapId].currentProjection !== this.metadata.tileInfo.spatialReference.wkid
+      ) {
         showError(this.mapId, `Error: vector tile layer (${layerEntryConfig.layerId}) projection does not match map projection`);
         // eslint-disable-next-line no-console
         console.log(`Error: vector tile layer (${layerEntryConfig.layerId}) projection does not match map projection`);

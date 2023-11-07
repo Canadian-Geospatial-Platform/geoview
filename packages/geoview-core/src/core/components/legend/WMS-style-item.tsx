@@ -84,12 +84,12 @@ export function WMSStyleItem(props: TypeWMSStyleProps): JSX.Element {
       <ListItem>
         <ListItemButton>
           <IconButton sx={sxClasses.iconPreview} color="primary" size="small" onClick={() => setIsOpen(!isOpen)}>
-            {legend!.toDataURL() === 'no data' ? (
-              <BrowserNotSupportedIcon />
-            ) : (
+            {legend !== null && legend.toDataURL() !== 'no data' ? (
               <Box sx={sxClasses.legendIcon}>
                 <img alt="icon" src={legend!.toDataURL()} style={sxClasses.maxIconImg} />
               </Box>
+            ) : (
+              <BrowserNotSupportedIcon />
             )}
           </IconButton>
           <Tooltip title={name} placement="top" enterDelay={1000}>
@@ -103,7 +103,7 @@ export function WMSStyleItem(props: TypeWMSStyleProps): JSX.Element {
       <Collapse in={isOpen} timeout="auto">
         <Box>
           <Box sx={sxClasses.expandableIconContainer}>
-            {legend!.toDataURL() && <img alt="" style={theme.iconImg} src={legend!.toDataURL()} />}
+            {legend && legend!.toDataURL() && <img alt="" style={theme.iconImg} src={legend!.toDataURL()} />}
           </Box>
         </Box>
       </Collapse>

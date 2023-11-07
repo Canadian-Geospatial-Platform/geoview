@@ -34,7 +34,7 @@ export interface TypeFeatureInfoProps {
 /**
  * feature info for a layer list
  *
- * @param {TypeFeatureInfoProps} Feature info propetties
+ * @param {TypeFeatureInfoProps} Feature info properties
  * @returns {JSX.Element} the feature info
  */
 export function FeatureInfo({
@@ -54,9 +54,9 @@ export function FeatureInfo({
   const [checked, setChecked] = useState<boolean>(false);
   const [checkedFeatures, setCheckedFeatures] = useState<Exclude<TypeArrayOfFeatureInfoEntries, null | undefined>>([]);
   const feature = features![currentFeatureIndex];
-  const featureUid = getUid(feature.geometry);
+  const featureUid = feature.geometry ? getUid(feature.geometry) : null;
   const featureIconSrc = feature.featureIcon.toDataURL();
-  const nameFieldValue = feature.fieldInfo[feature.nameField!]!.value as string;
+  const nameFieldValue = feature.nameField ? (feature.fieldInfo[feature.nameField!]!.value as string) : 'No name';
 
   const sxClasses = getSxClasses(theme);
 
@@ -107,7 +107,7 @@ export function FeatureInfo({
   }, [checkedFeatures]);
 
   useEffect(() => {
-    if (selectedFeatures?.current && selectedFeatures.current.indexOf(featureUid) !== -1) {
+    if (featureUid && selectedFeatures?.current && selectedFeatures.current.indexOf(featureUid) !== -1) {
       setChecked(true);
     } else {
       setChecked(false);
