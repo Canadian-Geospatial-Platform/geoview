@@ -29,20 +29,22 @@ export function IconButton(props: TypeIconButtonProps): JSX.Element {
   const { t } = useTranslation<string>();
   return (
     <Tooltip title={t((tooltip as string) || '') as string} placement={tooltipPlacement} TransitionComponent={Fade}>
-      <MaterialIconButton
-        id={id}
-        sx={sx}
-        aria-label={ariaLabel}
-        style={style}
-        className={className}
-        onClick={onClick}
-        tabIndex={tabIndex}
-        size={size}
-        ref={iconRef}
-        disabled={disabled}
-      >
-        {children && children}
-      </MaterialIconButton>
+      <span>
+        <MaterialIconButton
+          id={id}
+          sx={sx}
+          aria-label={ariaLabel}
+          style={style}
+          className={className}
+          onClick={onClick}
+          tabIndex={tabIndex}
+          size={size}
+          ref={iconRef}
+          disabled={disabled}
+        >
+          {children && children}
+        </MaterialIconButton>
+      </span>
     </Tooltip>
   );
 }
