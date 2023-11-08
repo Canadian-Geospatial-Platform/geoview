@@ -1,20 +1,12 @@
 import React, { useEffect } from 'react';
-import { useStore } from 'zustand';
-import { TypeArrayOfFeatureInfoEntries } from '@/api/events/payloads';
 import { LayersListFooter } from './layers-list-footer';
-import { getGeoViewStore } from '@/core/stores/stores-managers';
+import { TypeArrayOfLayerData } from '@/api/events/payloads/get-feature-info-payload';
+import { useDetailsStoreActions, useDetailsStoreLayerDataArray } from '@/core/stores/store-interface-and-intial-values/details-state';
 
 export interface TypeDetailsProps {
   arrayOfLayerData: TypeArrayOfLayerData;
   mapId: string;
 }
-
-export interface TypeLayerData {
-  layerPath: string;
-  layerName: string;
-  features: Exclude<TypeArrayOfFeatureInfoEntries, null | undefined>;
-}
-export type TypeArrayOfLayerData = TypeLayerData[];
 
 /**
  * The Details component is used to display the list of layers in footer that have selected features. It allows to show the list of features found in the click tolerance of the getFeatureInfo when you click on the expand icon.
@@ -22,13 +14,11 @@ export type TypeArrayOfLayerData = TypeLayerData[];
  * @returns {JSX.Element} returns the Details component
  */
 export function DetailsFooter({ arrayOfLayerData, mapId }: TypeDetailsProps): JSX.Element | null {
-  const store = getGeoViewStore(mapId);
-  const layerDataArray = useStore(store, (state) => state.detailsState.layerDataArray);
+  const layerDataArray = useDetailsStoreLayerDataArray();
+  const { setLayerDataArray } = useDetailsStoreActions();
 
   useEffect(() => {
-    store.setState({
-      detailsState: { ...store.getState().detailsState, layerDataArray: arrayOfLayerData },
-    });
+    setLayerDataArray(arrayOfLayerData);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [arrayOfLayerData]);
 

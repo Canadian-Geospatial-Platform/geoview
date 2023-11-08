@@ -15,7 +15,7 @@ import { EVENT_NAMES } from '@/api/events/event-types';
 
 import { Cast, TypeJsonArray, TypeJsonObject, TypeJsonValue, TypeMapFeaturesConfig } from '@/core/types/global-types';
 import { SnackbarType, snackbarMessagePayload } from '@/api/events/payloads';
-import { NotificationType } from '@/api/events/payloads/notification-payload';
+import { NotificationType } from '@/core/components/notifications/notifications';
 import { Config } from '@/core/utils/config/config';
 
 /**

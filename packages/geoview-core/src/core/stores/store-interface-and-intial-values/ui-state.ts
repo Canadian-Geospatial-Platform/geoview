@@ -12,7 +12,7 @@ export interface IUIState {
   };
 }
 
-export function initializeUIState(set: TypeSetStore, get: TypeGetStore) {
+export function initializeUIState(set: TypeSetStore, get: TypeGetStore): IUIState {
   const init = {
     footerBarExpanded: false,
     geoLocatorActive: false,

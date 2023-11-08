@@ -111,48 +111,36 @@ export const getSxClasses = (theme: Theme) => ({
       padding: '8px 20px 7px 15px',
       backgroundColor: '#F6F6F6',
     },
+
+    itemsGrid: {
+      width: '100%',
+      '& .MuiGrid-container': {
+        '&:first-child': {
+          fontWeight: 'bold',
+          borderTop: '1px solid #ccc',
+          borderBottom: '2px solid #ccc',
+        },
+        '& .MuiGrid-item': {
+          padding: '3px 6px',
+
+          '&:first-child': {
+            width: '80px',
+          },
+          '&:nth-child(2)': {
+            flexGrow: 1,
+            textAlign: 'left',
+            display: 'flex',
+            flexDirection: 'row',
+            alignItems: 'center',
+          },
+        },
+      },
+    },
     tableIconLabel: {
       color: 'text.primary',
       fontSize: 16,
       noWrap: true,
       marginLeft: 20,
-    },
-    table: {
-      border: '1px solid #C1C1C1',
-      borderRadius: '4px',
-      padding: '16px 17px 16px 23px',
-    },
-    tableHeader: {
-      '& th': {
-        borderBottom: '1px solid #C1C1C1',
-        height: 40,
-        backgroundColor: '#FFFFFF',
-        padding: '2px 4px 2px 4px',
-        borderRight: '1px solid #C1C1C1',
-        fontWeight: 'bold',
-      },
-      '& th:first-child': {
-        width: '80px',
-      },
-      '& th:nth-child(2)': {
-        padding: '2px 4px 2px 20px',
-      },
-    },
-    tableRow: {
-      '& td': {
-        borderBottom: '1px solid #C1C1C1',
-        height: 40,
-        margin: 0,
-        padding: '2px 4px 2px 4px',
-        alignItems: 'center',
-        borderRight: '1px solid #C1C1C1',
-      },
-      '& td:first-child': {
-        width: '80px',
-      },
-      '& td:nth-child(2)': {
-        padding: '2px 4px 2px 20px',
-      },
-    },
-  },
+    }
+  }
 });

@@ -1,9 +1,8 @@
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '@mui/material/styles';
-import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@mui/material';
 import { TypeLegendLayer } from '../types';
 import { getSxClasses } from '../layers-style';
-import { Box, CheckBoxIcon, CheckBoxOutIcon, IconButton, Paper, SliderBase, Typography, ZoomInSearchIcon } from '@/ui';
+import { Box, CheckBoxIcon, CheckBoxOutIcon, IconButton, Paper, SliderBase, Typography, ZoomInSearchIcon, Grid } from '@/ui';
 import { useLayerStoreActions } from '@/core/stores/store-interface-and-intial-values/layer-state';
 
 interface LayerDetailsProps {
@@ -53,35 +52,31 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
 
   function renderItems() {
     return (
-      <TableContainer>
-        <Table sx={sxClasses.rightPanel.table}>
-          <TableHead>
-            <TableRow sx={sxClasses.rightPanel.tableHeader}>
-              <TableCell>
-                <IconButton color="primary" onClick={() => setAllItemsVisibility(layerDetails.layerPath, !layerDetails.allItemsChecked)}>
-                  {layerDetails.allItemsChecked ? <CheckBoxIcon /> : <CheckBoxOutIcon />}
-                </IconButton>
-              </TableCell>
-              <TableCell>{t('general.name')}</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {layerDetails.items.map((item) => (
-              <TableRow key={item.name} sx={sxClasses.rightPanel.tableRow}>
-                <TableCell>
-                  <IconButton color="primary" onClick={() => toggleItemVisibility(layerDetails.layerPath, item.name)}>
-                    {item.isChecked ? <CheckBoxIcon /> : <CheckBoxOutIcon />}
-                  </IconButton>
-                </TableCell>
-                <TableCell>
-                  <img alt={item.name} src={item.icon} />
-                  <span style={sxClasses.rightPanel.tableIconLabel}>{item.name}</span>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
+      <Grid container direction="column" spacing={0} sx={sxClasses.rightPanel.itemsGrid} justifyContent="left" justifyItems="stretch">
+        <Grid container direction="row" justifyContent="center" alignItems="stretch" justifyItems="stretch">
+          <Grid item xs="auto">
+            <IconButton color="primary" onClick={() => setAllItemsVisibility(layerDetails.layerPath, !layerDetails.allItemsChecked)}>
+              {layerDetails.allItemsChecked ? <CheckBoxIcon /> : <CheckBoxOutIcon />}
+            </IconButton>
+          </Grid>
+          <Grid item xs="auto">
+            <span>{t('general.name')}</span>
+          </Grid>
+        </Grid>
+        {layerDetails.items.map((item) => (
+          <Grid container direction="row" key={item.name} justifyContent="center" alignItems="stretch">
+            <Grid item xs="auto">
+              <IconButton color="primary" onClick={() => toggleItemVisibility(layerDetails.layerPath, item.name)}>
+                {item.isChecked ? <CheckBoxIcon /> : <CheckBoxOutIcon />}
+              </IconButton>
+            </Grid>
+            <Grid item xs="auto">
+              <img alt={item.name} src={item.icon} />
+              <span style={sxClasses.rightPanel.tableIconLabel}>{item.name}</span>
+            </Grid>
+          </Grid>
+        ))}
+      </Grid>
     );
   }
 

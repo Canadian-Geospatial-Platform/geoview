@@ -131,13 +131,15 @@ class FooterPanelPlugin extends AbstractPlugin {
           api.eventNames.GET_FEATURE_INFO.ALL_QUERIES_DONE,
           (payload: PayloadBaseClass) => {
             if (payloadIsAllQueriesDone(payload)) {
-              const { resultSets } = payload;
-              let features: TypeArrayOfFeatureInfoEntries = [];
-              Object.keys(resultSets).forEach((layerPath) => {
-                features = features.concat(resultSets[layerPath]!);
-              });
-              if (features.length > 0) {
-                footerTabs.selectFooterTab(detailsTabValue);
+              const { eventType, resultSets } = payload;
+              if (eventType === 'click') {
+                let features: TypeArrayOfFeatureInfoEntries = [];
+                Object.keys(resultSets).forEach((layerPath) => {
+                  features = features.concat(resultSets[layerPath]!);
+                });
+                if (features.length > 0) {
+                  footerTabs.selectFooterTab(detailsTabValue);
+                }
               }
             }
           },

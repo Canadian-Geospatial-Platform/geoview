@@ -5,7 +5,6 @@ export const getSxClasses = (theme: Theme) => ({
   formControl: {
     fontSize: 14,
     width: '100%',
-    marginBottom: '16px',
     color: theme.palette?.text.primary,
     '& .MuiOutlinedInput-notchedOutline': {
       border: `1px solid ${theme.palette?.border?.primary}`,

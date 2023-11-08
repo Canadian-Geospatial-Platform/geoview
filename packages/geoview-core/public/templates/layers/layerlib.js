@@ -38,17 +38,18 @@ const addBoundsPolygon = (mapId, bbox) => {
 };
 
 // ==========================================================================================================================
-const createInfoTable = (mapId, resultSetsId, resultSets, queryType) => {
-  const infoTable = document.getElementById(`${resultSetsId}-${queryType}`);
+const createInfoTable = (mapId, resultSetsId, resultSets, eventType) => {
+  if (eventType !== 'click') return;
+  const infoTable = document.getElementById(`${resultSetsId}-${eventType}`);
   infoTable.textContent = '';
-  const oldContent = document.getElementById(`layer${mapId.slice(-1)}-${queryType}-info`);
+  const oldContent = document.getElementById(`layer${mapId.slice(-1)}-${eventType}-info`);
   if (oldContent) oldContent.remove();
   const content = document.createElement('div');
-  content.id = `layer${mapId.slice(-1)}-${queryType}-info`;
+  content.id = `layer${mapId.slice(-1)}-${eventType}-info`;
   infoTable.appendChild(content);
   Object.keys(resultSets).forEach((layerPath) => {
     const activeResultSet = resultSets[layerPath];
-    const layerData = activeResultSet.data[queryType];
+    const layerData = activeResultSet.data[eventType].features;
 
     // Header of the layer
     const infoH1 = document.createElement('h1');

@@ -124,7 +124,7 @@ We do the import statement in the following order
 * other project dependecies
 
 We add an empty line between each group of import from different category
-```
+``` ts
 import { useRef, useEffect } from 'react';
 import { createRoot } from 'react-dom/client';
 
@@ -136,3 +136,40 @@ import CloseIcon from '@material-ui/icons/Close';
 
 import View, { ViewOptions } from 'ol/View';
 ```
+
+## 8- How we order code at the beginning of a component
+
+We should follow a standard order when we create a component so it is easy to find the needed piece of code
+* Props assignement
+* Get context
+* Translation
+* Theme and style
+* Internal state
+* Store
+
+``` ts
+const { myScale } = ...props
+
+const mapConfig = useContext(MapContext);
+const { mapId } = mapConfig;
+
+const { t } = useTranslation<string>();
+
+const theme = useTheme();
+const sxClasses = getSxClasses(theme);
+
+// internal component state
+const [scaleMode, setScaleMode] = useState<number>(0);
+
+// get the values from store
+const expanded = useUIFooterBarExpanded();
+const scale = useMapScale();
+```
+
+## 9- How we order functions in component
+
+After preivous section, code in the component should follow this order:
+- Core functions that are reusable without dependencies;
+- Event handlers functions that may change the states and raise events/callbacks;
+- Hooks section where we have the useEffect, useCallback methods grouped together (as the other those are defined is actually important - best to group them)
+- Rendering methods used for rendering the JSX

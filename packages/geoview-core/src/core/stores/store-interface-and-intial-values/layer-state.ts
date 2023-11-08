@@ -13,7 +13,6 @@ export interface ILayerState {
   selectedLayerPath: string | undefined | null;
   legendLayers: TypeLegendLayer[];
   actions: {
-    setSelectedLayer: (layer: TypeLegendLayer) => void;
     setSelectedLayerPath: (layerPath: string) => void;
     setLayerOpacity: (layerPath: string, opacity: number) => void;
     toggleLayerVisibility: (layerPath: string) => void;
@@ -22,10 +21,12 @@ export interface ILayerState {
   };
 }
 
-export function initializeLayerState(set: TypeSetStore, get: TypeGetStore) {
+export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILayerState {
   const init = {
+    selectedIsVisible: false,
+    selectedLayers: {} as Record<string, { layer: string; icon: string }[]>,
+    legendLayers: [] as TypeLegendLayer[],
     selectedLayerPath: null,
-    legendLayers: [],
 
     actions: {
       setSelectedLayerPath: (layerPath: string) => {

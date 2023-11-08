@@ -1,6 +1,5 @@
 /* eslint-disable react/require-default-props */
 import React, { useEffect, useState, useRef, useCallback } from 'react';
-import { useStore } from 'zustand';
 import { useTheme } from '@mui/material/styles';
 import { useTranslation } from 'react-i18next';
 import { getUid } from 'ol/util';
@@ -22,7 +21,6 @@ import {
   ChevronRightIcon,
   Box,
 } from '@/ui';
-import { TypeArrayOfLayerData, TypeLayerData } from './details';
 import { FeatureInfo } from './feature-info-new';
 import { PayloadBaseClass, api } from '@/app';
 import { EVENT_NAMES } from '@/api/events/event-types';
@@ -34,9 +32,11 @@ import {
   TypeFeatureInfoEntry,
   TypeArrayOfFeatureInfoEntries,
   TypeGeometry,
+  TypeArrayOfLayerData,
+  TypeLayerData,
 } from '@/api/events/payloads';
 import { getSxClasses } from './details-style';
-import { getGeoViewStore } from '@/core/stores/stores-managers';
+import { useDetailsStoreActions, useDetailsStoreSelectedLayerPath } from '@/core/stores/store-interface-and-intial-values/details-state';
 
 interface TypeLayersListProps {
   arrayOfLayerData: TypeArrayOfLayerData;
@@ -55,8 +55,8 @@ export function LayersListFooter(props: TypeLayersListProps): JSX.Element {
   const theme = useTheme();
   const selectedFeatures = useRef<string[]>([]);
 
-  const store = getGeoViewStore(mapId);
-  const selectedLayerPath = useStore(store, (state) => state.detailsState.selectedLayerPath);
+  const selectedLayerPath = useDetailsStoreSelectedLayerPath();
+  const { setSelectedLayerPath } = useDetailsStoreActions();
 
   const [layerDataInfo, setLayerDataInfo] = useState<TypeLayerData | null>(null);
   const [currentFeatureIndex, setCurrentFeatureIndex] = useState<number>(0);
@@ -94,7 +94,7 @@ export function LayersListFooter(props: TypeLayersListProps): JSX.Element {
       featureHighlightPayload(
         EVENT_NAMES.FEATURE_HIGHLIGHT.EVENT_HIGHLIGHT_FEATURE,
         mapId,
-        layerDataInfo?.features[currentFeatureIndex] as TypeFeatureInfoEntry
+        layerDataInfo?.features![currentFeatureIndex] as TypeFeatureInfoEntry
       )
     );
 
@@ -120,7 +120,7 @@ export function LayersListFooter(props: TypeLayersListProps): JSX.Element {
   ) => {
     // remove the highlight for unchecked feature
     arrayOfLayerData.forEach((layer: TypeLayerData) => {
-      const getAllUnCheckedFeatures = allUncheckedFeatures(checkedFeatures, layer.features);
+      const getAllUnCheckedFeatures = allUncheckedFeatures(checkedFeatures, layer.features!);
 
       getAllUnCheckedFeatures.forEach((obj: TypeFeatureInfoEntry) => {
         if (obj.geometry)
@@ -149,13 +149,7 @@ export function LayersListFooter(props: TypeLayersListProps): JSX.Element {
       // if so, get the index of the found layer, we need to pass to setLayerDataInfo to load layer in left panel
       const commonLayerPathIndex = findLayerPathIndex(arrayOfLayerData, selectedLayerPath);
       setLayerDataInfo(arrayOfLayerData[commonLayerPathIndex > -1 ? commonLayerPathIndex : 0]);
-      store.setState({
-        detailsState: {
-          ...store.getState().detailsState,
-          selectedLayerPath: arrayOfLayerData[commonLayerPathIndex > -1 ? commonLayerPathIndex : 0].layerPath,
-        },
-      });
-
+      setSelectedLayerPath(arrayOfLayerData[commonLayerPathIndex > -1 ? commonLayerPathIndex : 0].layerPath);
       setCurrentFeatureIndex(0);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -166,7 +160,7 @@ export function LayersListFooter(props: TypeLayersListProps): JSX.Element {
       <List sx={sxClasses.list}>
         {arrayOfLayerData.map((layerData) => {
           const isSelectedBorder = layerData.layerPath === layerDataInfo?.layerPath;
-          const numOfFeatures = layerData.features.length;
+          const numOfFeatures = layerData.features!.length;
 
           return (
             <Paper
@@ -182,9 +176,7 @@ export function LayersListFooter(props: TypeLayersListProps): JSX.Element {
                   onClick={() => {
                     setLayerDataInfo(layerData);
                     setCurrentFeatureIndex(0);
-                    store.setState({
-                      detailsState: { ...store.getState().detailsState, selectedLayerPath: layerData.layerPath },
-                    });
+                    setSelectedLayerPath(layerData.layerPath);
                   }}
                   sx={{ height: '67px' }}
                 >
@@ -239,7 +231,7 @@ export function LayersListFooter(props: TypeLayersListProps): JSX.Element {
                 <Grid container sx={sxClasses.rightPanelBtnHolder}>
                   <Grid item xs={6}>
                     <div style={{ marginLeft: '22px' }}>
-                      Feature {currentFeatureIndex + 1} of {layerDataInfo?.features.length}
+                      Feature {currentFeatureIndex + 1} of {layerDataInfo?.features!.length}
                       <IconButton
                         sx={{ marginLeft: '20px' }}
                         aria-label="clear-all-features"
@@ -270,7 +262,7 @@ export function LayersListFooter(props: TypeLayersListProps): JSX.Element {
                         tooltipPlacement="top"
                         onClick={() => setCurrentFeatureIndex(currentFeatureIndex + 1)}
                         // eslint-disable-next-line no-unsafe-optional-chaining
-                        disabled={currentFeatureIndex === layerDataInfo?.features.length - 1}
+                        disabled={currentFeatureIndex === layerDataInfo?.features!.length - 1}
                       >
                         <ArrowForwardIosOutlinedIcon />
                       </IconButton>

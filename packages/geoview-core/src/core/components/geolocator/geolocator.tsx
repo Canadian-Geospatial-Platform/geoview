@@ -8,10 +8,11 @@ import { CloseIcon, SearchIcon, AppBar, Box, Divider, IconButton, Paper, Progres
 import GeoList from './geo-list';
 import { StyledInputField, sxClasses } from './geolocator-style';
 import { MapContext } from '@/core/app-start';
-import { EVENT_NAMES, api, markerDefinitionPayload } from '@/app';
+import { EVENT_NAMES, api } from '@/app';
 import { bboxHighlightPayload } from '@/api/events/payloads/bbox-highlight-payload';
 import { OL_ZOOM_DURATION } from '@/core/utils/constant';
 import { useUIappbarGeolocatorActive } from '@/core/stores/store-interface-and-intial-values/ui-state';
+import { useMapStoreActions } from '@/core/stores/store-interface-and-intial-values/map-state';
 
 export interface GeoListItem {
   key: string;
@@ -45,6 +46,7 @@ export function Geolocator() {
 
   // set the active (visible) or not active (hidden) from geolocator button click
   const active = useUIappbarGeolocatorActive();
+  const { showClickMarker } = useMapStoreActions();
 
   /**
    * Send fetch call to the service for given search term.
@@ -92,7 +94,7 @@ export function Geolocator() {
       });
       api.event.emit(bboxHighlightPayload(EVENT_NAMES.FEATURE_HIGHLIGHT.EVENT_HIGHLIGHT_BBOX, mapId, convertedExtent));
       setTimeout(() => {
-        api.event.emit(markerDefinitionPayload(EVENT_NAMES.MARKER_ICON.EVENT_MARKER_ICON_SHOW, mapId, coords));
+        showClickMarker({ lnglat: coords });
         for (let i = 0; i < indicatorBox.length; i++) {
           (indicatorBox[i] as HTMLElement).style.display = '';
         }
@@ -100,7 +102,7 @@ export function Geolocator() {
     } else {
       map.getView().animate({ center: fromLonLat(coords, projectionConfig), duration: OL_ZOOM_DURATION, zoom: 16 });
       setTimeout(() => {
-        api.event.emit(markerDefinitionPayload(EVENT_NAMES.MARKER_ICON.EVENT_MARKER_ICON_SHOW, mapId, coords));
+        showClickMarker({ lnglat: coords });
         for (let i = 0; i < indicatorBox.length; i++) {
           (indicatorBox[i] as HTMLElement).style.display = '';
         }

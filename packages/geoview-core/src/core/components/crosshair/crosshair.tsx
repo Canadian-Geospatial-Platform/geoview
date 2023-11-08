@@ -57,7 +57,7 @@ export function Crosshair(): JSX.Element {
   }, []);
 
   useEffect(() => {
-    const mapHTMLElement = mapElement.getTargetElement();
+    const mapHTMLElement = mapElement!.getTargetElement();
     if (isCrosshairsActive) {
       panelButtonId.current = 'detailsPanel';
       mapHTMLElement.addEventListener('keydown', simulateClick);

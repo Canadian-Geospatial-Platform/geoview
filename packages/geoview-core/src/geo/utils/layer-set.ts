@@ -6,6 +6,7 @@ import {
   payloadIsLayerSetChangeLayerStatus,
   payloadIsLayerSetChangeLayerPhase,
   TypeResultSets,
+  GetLegendsPayload,
   PayloadBaseClass,
 } from '@/api/events/payloads';
 import { TypeLocalizedString, api } from '@/app';
@@ -80,9 +81,7 @@ export class LayerSet {
             if (this.layerSetId === `${mapId}/LegendsLayerSet`)
               // LegendLayerSet is the absolute reference for finding out whether a layer has been loaded or is in error. Then, every
               // time we modify a layerSet in the Legend family, we have to inform the viewer that a change has occurred.
-              api.event.emit(
-                LayerSetPayload.createLayerSetUpdatedPayload(`${mapId}/LegendsLayerSetStatusOrPhaseChanged`, this.resultSets, layerPath)
-              );
+              api.event.emit(GetLegendsPayload.createLegendsLayersetUpdatedPayload(`${this.mapId}/LegendsLayerSet`, layerPath, resultSets));
           }
         }
       }
@@ -104,9 +103,7 @@ export class LayerSet {
                   } as TypeLocalizedString);
             api.event.emit(LayerSetPayload.createLayerSetUpdatedPayload(this.layerSetId, this.resultSets, layerPath));
             if (this.layerSetId === `${mapId}/LegendsLayerSet`)
-              api.event.emit(
-                LayerSetPayload.createLayerSetUpdatedPayload(`${mapId}/LegendsLayerSetStatusOrPhaseChanged`, this.resultSets, layerPath)
-              );
+              api.event.emit(GetLegendsPayload.createLegendsLayersetUpdatedPayload(`${this.mapId}/LegendsLayerSet`, layerPath, resultSets));
           }
         }
       }
