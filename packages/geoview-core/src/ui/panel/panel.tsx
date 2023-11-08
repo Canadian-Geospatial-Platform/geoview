@@ -10,7 +10,7 @@ import FocusTrap from 'focus-trap-react';
 import Card from '@mui/material/Card';
 import CardHeader from '@mui/material/CardHeader';
 import CardContent from '@mui/material/CardContent';
-import { useTheme } from '@mui/styles';
+import { useTheme } from '@mui/material/styles';
 
 import { Cast } from '@/core/types/global-types';
 import { HtmlToReact } from '@/core/containers/html-to-react';
@@ -21,7 +21,6 @@ import { EVENT_NAMES } from '@/api/events/event-types';
 
 import { IconButton, CloseIcon, PanelApi, Box } from '..';
 import {
-  payloadBaseClass,
   payloadIsAPanelAction,
   payloadIsAPanelContent,
   payloadHasAButtonIdAndType,
@@ -30,6 +29,7 @@ import {
 } from '@/api/events/payloads';
 import { TypeIconButtonProps } from '../icon-button/icon-button-types';
 import { getSxClasses } from './panel-style';
+import { useMapStoreActions } from '@/core/stores/store-interface-and-intial-values/map-state';
 
 /**
  * Interface for panel properties
@@ -52,13 +52,24 @@ type TypePanelAppProps = {
 export function Panel(props: TypePanelAppProps): JSX.Element {
   const { panel, button, handlePanelOpened } = props;
   const { panelStyles } = panel;
-  // set the active trap value for FocusTrap
-  const [panelStatus, setPanelStatus] = useState(false);
+
+  const mapConfig = useContext(MapContext)!;
+  const { mapId } = mapConfig;
+
+  const { t } = useTranslation<string>();
 
   // Get the theme
   const theme = useTheme();
   const sxClasses = getSxClasses(theme);
 
+  // internal state
+  // set the active trap value for FocusTrap
+  const [panelStatus, setPanelStatus] = useState(false);
+  const [actionButtons, setActionButtons] = useState<JSX.Element[] & ReactNode[]>([]);
+  const [, updatePanelContent] = useState(0);
+  const panelRef = useRef<HTMLButtonElement>(null);
+  const panelHeader = useRef<HTMLButtonElement>(null);
+  const closeBtnRef = useRef<HTMLButtonElement>(null);
   const panelWidth = panel?.width ?? 350;
   const panelContainerStyles = {
     ...(panelStyles?.panelContainer && { ...panelStyles.panelContainer }),
@@ -66,17 +77,8 @@ export function Panel(props: TypePanelAppProps): JSX.Element {
     transition: `width ${theme.transitions.duration.standard}ms ease`,
   };
 
-  const [actionButtons, setActionButtons] = useState<JSX.Element[] & ReactNode[]>([]);
-  const [, updatePanelContent] = useState(0);
-
-  const { t } = useTranslation<string>();
-
-  const mapConfig = useContext(MapContext)!;
-  const { mapId } = mapConfig;
-
-  const panelRef = useRef<HTMLButtonElement>(null);
-  const panelHeader = useRef<HTMLButtonElement>(null);
-  const closeBtnRef = useRef<HTMLButtonElement>(null);
+  // get store values and actions
+  const { hideClickMarker } = useMapStoreActions();
 
   /**
    * function that causes rerender when changing panel content
@@ -90,7 +92,7 @@ export function Panel(props: TypePanelAppProps): JSX.Element {
    */
   const closePanel = (): void => {
     // emit an event to hide the marker when using the details panel
-    api.event.emit(payloadBaseClass(EVENT_NAMES.MARKER_ICON.EVENT_MARKER_ICON_HIDE, mapId));
+    hideClickMarker();
 
     const buttonElement = document.getElementById(mapId)?.querySelector(`#${button.id}`);
 

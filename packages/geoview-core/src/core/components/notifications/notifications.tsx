@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { NotificationType } from '@/api/events/payloads';
 import {
   Box,
   Popover,
@@ -24,6 +23,8 @@ export type NotificationDetailsType = {
   message: string;
   description?: string;
 };
+
+export type NotificationType = 'success' | 'error' | 'info' | 'warning';
 
 /**
  * Notification PNG Button component

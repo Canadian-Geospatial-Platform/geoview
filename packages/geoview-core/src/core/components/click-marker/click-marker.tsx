@@ -1,12 +1,10 @@
-import React, { useCallback, useContext, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useRef } from 'react';
 
-import Overlay from 'ol/Overlay';
 import { Coordinate } from 'ol/coordinate';
 import { Geometry, LineString, MultiLineString, MultiPoint, MultiPolygon, Point, Polygon } from 'ol/geom';
 import Feature from 'ol/Feature';
 import VectorSource from 'ol/source/Vector';
 import { Vector as VectorLayer } from 'ol/layer';
-import { fromLonLat } from 'ol/proj';
 import { getCenter } from 'ol/extent';
 import { Fill, Stroke, Style } from 'ol/style';
 import CircleStyle from 'ol/style/Circle';
@@ -16,47 +14,43 @@ import { MapContext } from '@/core/app-start';
 
 import { getGeoViewStore } from '@/core/stores/stores-managers';
 
-import { PayloadBaseClass, TypeFeatureInfoEntry, api, payloadIsAllQueriesDone } from '@/app';
+import { PayloadBaseClass, TypeFeatureInfoEntry, TypeJsonObject, api, payloadIsAllQueriesDone } from '@/app';
 import { EVENT_NAMES } from '@/api/events/event-types';
-import { ClickMapMarker } from '@/ui';
+import { Box, ClickMapMarker } from '@/ui';
 
 import {
-  payloadIsAMarkerDefinition,
   featureHighlightPayload,
   payloadIsAFeatureHighlight,
   clearHighlightsPayload,
   payloadIsAClearHighlights,
 } from '@/api/events/payloads';
 import { payloadIsABBoxHighlight } from '@/api/events/payloads/bbox-highlight-payload';
+import { useMapClickMarker, useMapStoreActions } from '@/core/stores/store-interface-and-intial-values/map-state';
+
+export type TypeClickMarker = {
+  lnglat: Coordinate;
+  symbology?: TypeJsonObject;
+};
 
 /**
- * Create a react element to display a marker when a user clicks on
- * the map at the click location
+ * Create a react element to display a marker ( at the click location) when a user clicks on
+ * the map
  *
  * @returns {JSX.Element} the react element with a marker on click
  */
 export function ClickMarker(): JSX.Element {
-  const [showMarker, setShowMarker] = useState(false);
-  const markerCoordinates = useRef<Coordinate>();
-  const clickMarkerRef = useRef<HTMLDivElement>(null);
-
   const mapConfig = useContext(MapContext);
   const { mapId } = mapConfig;
+
+  // internal state
+  const markerCoordinates = useRef<Coordinate>();
+  const clickMarkerRef = useRef<HTMLDivElement>(null);
   const clickMarkerId = `${mapId}-clickmarker`;
 
-  // create overlay for map click marker icon
-  const clickMarkerOverlay = new Overlay({
-    id: clickMarkerId,
-    position: [-1, -1],
-    positioning: 'center-center',
-    offset: [-18, -35],
-    element: document.getElementById(clickMarkerId) as HTMLElement,
-    stopEvent: false,
-  });
-
-  // TODO: repair using the store map element
-  //! came from the map creation on function call
-  if (api.maps[mapId].map !== undefined) api.maps[mapId].map.addOverlay(clickMarkerOverlay);
+  // get values from the store
+  const clickMarker = useMapClickMarker();
+  const { hideClickMarker, setOverlayClickMarkerRef, showClickMarker } = useMapStoreActions();
+  setTimeout(() => setOverlayClickMarkerRef(clickMarkerRef.current as HTMLElement), 0);
 
   // create resources to highlight features
   const animationSource = new VectorSource();
@@ -76,24 +70,9 @@ export function ClickMarker(): JSX.Element {
    * Remove the marker icon
    */
   const removeIcon = useCallback(() => {
-    setShowMarker(false);
+    hideClickMarker();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  /**
-   * Show the marker icon
-   * @param {Coordinate} lnglat the coordinate where to show the marker
-   */
-  function showMarkerIcon(lnglat: Coordinate) {
-    setShowMarker(false); // to restart the opacity animation
-    // if not in timeout, it is always set back to center
-    setTimeout(() => {
-      api.maps[mapId].map
-        .getOverlayById(`${mapId}-clickmarker`)
-        .setPosition(fromLonLat(lnglat, `EPSG:${api.maps[mapId].currentProjection}`));
-    }, 100);
-    setShowMarker(true);
-  }
 
   /**
    * Set animation for points
@@ -345,17 +324,9 @@ export function ClickMarker(): JSX.Element {
 
         if (feature) {
           api.event.emit(featureHighlightPayload(EVENT_NAMES.FEATURE_HIGHLIGHT.EVENT_HIGHLIGHT_FEATURE, mapId, feature));
-          setShowMarker(false);
-        } else showMarkerIcon(markerCoordinates.current!);
+          hideClickMarker();
+        } else showClickMarker({ lnglat: markerCoordinates.current! });
       }
-    }
-  };
-
-  const eventMarkerIconHideListenerFunction = () => setShowMarker(false);
-  const eventMarkerIconShowListenerFunction = (payload: PayloadBaseClass) => {
-    if (payloadIsAMarkerDefinition(payload)) {
-      // TODO: Also implement a symbology define by the payload for feature details item selection.
-      showMarkerIcon(payload.lnglat);
     }
   };
 
@@ -365,34 +336,21 @@ export function ClickMarker(): JSX.Element {
       (state) => state.mapState.clickCoordinates,
       (curClick, prevClick) => {
         if (curClick !== prevClick) {
-          showMarkerIcon(curClick!.lnglat);
+          showClickMarker({ lnglat: curClick!.lnglat });
           markerCoordinates.current = curClick!.lnglat;
           api.event.emit(clearHighlightsPayload(EVENT_NAMES.FEATURE_HIGHLIGHT.EVENT_HIGHLIGHT_CLEAR, mapId, 'all'));
         }
       }
     );
 
-    // if mapCenterCoordinates changed, map move end event has been triggered
-    const unsubMapCenterCoord = getGeoViewStore(mapId).subscribe(
-      (state) => state.mapState.centerCoordinates,
-      (curCenterCoord, prevCenterCoord) => {
-        if (curCenterCoord !== prevCenterCoord) setShowMarker(false);
-      }
-    );
-
     api.event.on(EVENT_NAMES.GET_FEATURE_INFO.ALL_QUERIES_DONE, allQueriesDoneListenerFunction, `${mapId}/FeatureInfoLayerSet`);
-    api.event.on(EVENT_NAMES.MARKER_ICON.EVENT_MARKER_ICON_SHOW, eventMarkerIconShowListenerFunction, mapId);
-    api.event.on(EVENT_NAMES.MARKER_ICON.EVENT_MARKER_ICON_HIDE, eventMarkerIconHideListenerFunction, mapId);
     api.event.on(EVENT_NAMES.FEATURE_HIGHLIGHT.EVENT_HIGHLIGHT_FEATURE, highlightCallbackFunction, mapId);
     api.event.on(EVENT_NAMES.FEATURE_HIGHLIGHT.EVENT_HIGHLIGHT_CLEAR, clearHighlightCallbackFunction, mapId);
     api.event.on(EVENT_NAMES.FEATURE_HIGHLIGHT.EVENT_HIGHLIGHT_BBOX, highlightGeolocatorBBox, mapId);
 
     return () => {
       unsubMapSingleClick();
-      unsubMapCenterCoord();
       api.event.off(EVENT_NAMES.GET_FEATURE_INFO.ALL_QUERIES_DONE, mapId, allQueriesDoneListenerFunction);
-      api.event.off(EVENT_NAMES.MARKER_ICON.EVENT_MARKER_ICON_SHOW, mapId, eventMarkerIconShowListenerFunction);
-      api.event.off(EVENT_NAMES.MARKER_ICON.EVENT_MARKER_ICON_HIDE, mapId, eventMarkerIconHideListenerFunction);
       api.event.off(EVENT_NAMES.FEATURE_HIGHLIGHT.EVENT_HIGHLIGHT_FEATURE, mapId, highlightCallbackFunction);
       api.event.off(EVENT_NAMES.FEATURE_HIGHLIGHT.EVENT_HIGHLIGHT_CLEAR, mapId, clearHighlightCallbackFunction);
       api.event.off(EVENT_NAMES.FEATURE_HIGHLIGHT.EVENT_HIGHLIGHT_BBOX, mapId, highlightGeolocatorBBox);
@@ -401,7 +359,11 @@ export function ClickMarker(): JSX.Element {
   }, []);
 
   return (
-    <div ref={clickMarkerRef} id={clickMarkerId} style={{ position: 'absolute', visibility: showMarker ? 'visible' : 'hidden' }}>
+    <Box
+      ref={clickMarkerRef}
+      id={clickMarkerId}
+      sx={{ position: 'absolute', visibility: clickMarker !== undefined ? 'visible' : 'hidden' }}
+    >
       <ClickMapMarker
         sx={{
           animation: 'opacity 1s ease-in',
@@ -417,6 +379,6 @@ export function ClickMarker(): JSX.Element {
         fontSize="large"
         color="warning"
       />
-    </div>
+    </Box>
   );
 }

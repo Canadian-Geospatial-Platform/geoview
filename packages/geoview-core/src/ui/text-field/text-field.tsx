@@ -17,6 +17,7 @@ export function TextField(props: TypeTextFieldProps): JSX.Element {
 
   const { t } = useTranslation<string>();
 
+  // internal state
   const textRef = useRef<HTMLElement>(null);
 
   return (

@@ -14,7 +14,7 @@ import { Basemap } from '@/geo/layer/basemap/basemap';
 import { Layer } from '@/geo/layer/layer';
 import { TypeFeatureStyle } from '@/geo/layer/geometry/geometry-types';
 
-import { api } from '@/app';
+import { TypeClickMarker, api } from '@/app';
 import { EVENT_NAMES } from '@/api/events/event-types';
 
 import { AppbarButtons } from '@/core/components/app-bar/app-bar-buttons';
@@ -530,6 +530,21 @@ export class MapViewer {
     for (let i = 0; i < stops; ++i) coordinates.push([extent[0], extent[3] - (height * i) / stops]);
     for (let i = 0; i < coordinates.length; i++) coordinates[i] = olTransform(coordinates[i], source, destination);
     return coordinates;
+  }
+
+  /**
+   * Hide a click marker from the map
+   */
+  clickMarkerIconHide(): void {
+    MapEventProcessor.clickMarkerIconHide(this.mapId);
+  }
+
+  /**
+   * Show a marker on the map
+   * @param {TypeClickMarker} marker the marker to add
+   */
+  clickMarkerIconShow(marker: TypeClickMarker): void {
+    MapEventProcessor.clickMarkerIconShow(this.mapId, marker);
   }
 
   /**

@@ -1,7 +1,8 @@
 /* eslint-disable react/require-default-props */
 import { useState, useEffect, CSSProperties } from 'react';
 
-import { Slider as MaterialSlider, SliderProps, useTheme } from '@mui/material';
+import { useTheme } from '@mui/material/styles';
+import { Slider as MaterialSlider, SliderProps } from '@mui/material';
 
 import { api } from '@/app';
 import { EVENT_NAMES } from '@/api/events/event-types';
@@ -52,6 +53,7 @@ export function Slider(props: TypeSliderProps): JSX.Element {
   const theme = useTheme();
   const sxClasses = getSxClasses(theme);
 
+  // internal state
   const [min, setMin] = useState<number>(properties.min);
   const [max, setMax] = useState<number>(properties.max);
   const [value, setValue] = useState<number[] | number>(properties.value);

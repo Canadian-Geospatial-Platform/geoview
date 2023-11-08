@@ -14,10 +14,10 @@ import { useGeoViewStore } from '@/core/stores/stores-managers';
 import { TypeSetStore, TypeGetStore } from '@/core/stores/geoview-store';
 
 import { TypeValidMapProjectionCodes } from '@/core/types/global-types';
-import { TypeMapMouseInfo } from '@/api/events/payloads';
+import { TypeFeatureInfoEntry, TypeMapMouseInfo } from '@/api/events/payloads';
 import { TypeInteraction } from '@/geo/map/map-schema-types';
 import { OL_ZOOM_DURATION, OL_ZOOM_PADDING } from '@/core/utils/constant';
-import { api } from '@/app';
+import { TypeClickMarker, api } from '@/app';
 
 interface TypeScaleInfo {
   lineWidth: string;
@@ -28,6 +28,8 @@ interface TypeScaleInfo {
 export interface IMapState {
   centerCoordinates: Coordinate;
   clickCoordinates?: TypeMapMouseInfo;
+  // clickCoordinates: TypeMapMouseInfo | undefined;
+  clickMarker: TypeClickMarker | undefined;
   currentProjection: TypeValidMapProjectionCodes;
   fixNorth: boolean;
   interaction: TypeInteraction;
@@ -35,11 +37,13 @@ export interface IMapState {
   mapElement?: OLMap;
   mapLoaded: boolean;
   northArrow: boolean;
+  overlayClickMarker?: Overlay;
   overlayNorthMarker?: Overlay;
   overviewMap: boolean;
   overviewMapHideZoom: number;
   rotation: number;
   scale: TypeScaleInfo;
+  selectedFeatures: Array<TypeFeatureInfoEntry>;
   zoom: number;
 
   onMapMoveEnd: (event: MapEvent) => void;
@@ -49,14 +53,18 @@ export interface IMapState {
   onMapZoomEnd: (event: ObjectEvent) => void;
 
   actions: {
+    hideClickMarker: () => void;
     setClickCoordinates: () => void;
     setFixNorth: (ifFix: boolean) => void;
     setMapElement: (mapElem: OLMap) => void;
     setMapKeyboardPanInteractions: (panDelta: number) => void;
+    setOverlayClickMarker: (overlay: Overlay) => void;
+    setOverlayClickMarkerRef: (htmlRef: HTMLElement) => void;
     setOverlayNorthMarker: (overlay: Overlay) => void;
     setOverlayNorthMarkerRef: (htmlRef: HTMLElement) => void;
     setRotation: (degree: number) => void;
     setZoom: (zoom: number) => void;
+    showClickMarker: (marker: TypeClickMarker) => void;
     zoomToInitialExtent: () => void;
     zoomToMyLocation: (position: GeolocationPosition) => void;
   };
@@ -74,6 +82,7 @@ function setScale(mapId: string): TypeScaleInfo {
 export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapState {
   const init = {
     centerCoordinates: [0, 0] as Coordinate,
+    clickMarker: undefined,
     currentProjection: 3857 as TypeValidMapProjectionCodes,
     fixNorth: false,
     mapLoaded: false,
@@ -81,6 +90,7 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
     pointerPosition: undefined,
     rotation: 0,
     scale: { lineWidth: '', labelGraphic: '', labelNumeric: '' } as TypeScaleInfo,
+    selectedFeatures: [],
     zoom: 0,
     interaction: 'static' as TypeInteraction,
     northArrow: false,
@@ -100,6 +110,14 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
         mapState: {
           ...get().mapState,
           scale: setScale(get().mapId),
+        },
+      });
+
+      // on map center coord change, hide click marker
+      set({
+        mapState: {
+          ...get().mapState,
+          clickMarker: undefined,
         },
       });
 
@@ -163,6 +181,11 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
     }, 100),
 
     actions: {
+      hideClickMarker: () => {
+        set({
+          mapState: { ...get().mapState, clickMarker: undefined },
+        });
+      },
       setClickCoordinates: () => {
         set({
           mapState: {
@@ -202,6 +225,18 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
         });
         mapElement!.addInteraction(new KeyboardPan({ pixelDelta: panDelta }));
       },
+      setOverlayClickMarker: (overlay: Overlay) => {
+        set({
+          mapState: {
+            ...get().mapState,
+            overlayClickMarker: overlay,
+          },
+        });
+      },
+      setOverlayClickMarkerRef: (htmlRef: HTMLElement) => {
+        const overlay = get().mapState.overlayClickMarker;
+        if (overlay !== undefined) overlay.setElement(htmlRef);
+      },
       setOverlayNorthMarker: (overlay: Overlay) => {
         set({
           mapState: {
@@ -235,6 +270,15 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
 
         get().mapState.mapElement!.getView().animate({ zoom, duration: OL_ZOOM_DURATION });
       },
+      showClickMarker: (marker: TypeClickMarker) => {
+        const projectedCoords = fromLonLat(marker.lnglat, `EPSG:${get().mapState.currentProjection}`);
+
+        get().mapState.mapElement!.getOverlayById(`${get().mapId}-clickmarker`).setPosition(projectedCoords);
+
+        set({
+          mapState: { ...get().mapState, clickMarker: { lnglat: projectedCoords } },
+        });
+      },
       zoomToInitialExtent: () => {
         const { center, zoom } = get().mapConfig!.map.viewSettings;
         const projectedCoords = fromLonLat(center, `EPSG:${get().mapState.currentProjection}`);
@@ -265,13 +309,13 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
 // Map state selectors
 // **********************************************************
 export const useMapCenterCoordinates = () => useStore(useGeoViewStore(), (state) => state.mapState.centerCoordinates);
+export const useMapClickMarker = () => useStore(useGeoViewStore(), (state) => state.mapState.clickMarker);
 export const useMapProjection = () => useStore(useGeoViewStore(), (state) => state.mapState.currentProjection);
 export const useMapElement = () => useStore(useGeoViewStore(), (state) => state.mapState.mapElement);
 export const useMapFixNorth = () => useStore(useGeoViewStore(), (state) => state.mapState.fixNorth);
 export const useMapInteraction = () => useStore(useGeoViewStore(), (state) => state.mapState.interaction);
 export const useMapLoaded = () => useStore(useGeoViewStore(), (state) => state.mapState.mapLoaded);
 export const useMapNorthArrow = () => useStore(useGeoViewStore(), (state) => state.mapState.northArrow);
-export const useMapOverlayNorthMarker = () => useStore(useGeoViewStore(), (state) => state.mapState.overlayNorthMarker);
 export const useMapOverviewMap = () => useStore(useGeoViewStore(), (state) => state.mapState.overviewMap);
 export const useMapPointerPosition = () => useStore(useGeoViewStore(), (state) => state.mapState.pointerPosition);
 export const useMapRotation = () => useStore(useGeoViewStore(), (state) => state.mapState.rotation);

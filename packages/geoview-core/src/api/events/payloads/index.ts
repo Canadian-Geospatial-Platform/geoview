@@ -1,4 +1,3 @@
-export * from './attribution-payload';
 export * from './basemap-layers-payload';
 export * from './boolean-payload';
 export * from './button-panel-payload';
@@ -24,9 +23,7 @@ export * from './map-config-payload';
 export * from './map-mouse-event-payload';
 export * from './map-payload';
 export * from './map-view-projection-payload';
-export * from './marker-definition-payload';
 export * from './modal-payload';
-export * from './notification-payload';
 export * from './number-payload';
 export * from './panel-payload';
 export * from './payload-base-class';
