@@ -1,8 +1,8 @@
 import { createElement, ReactElement } from 'react';
+
 import { FeatureInfoLayerSet } from '@/geo/utils/feature-info-layer-set';
 import { api } from '@/app';
-import { DetailsFooter } from './details';
-import { TypeArrayOfLayerData } from '@/api/events/payloads/get-feature-info-payload';
+import { Details } from './details';
 
 /**
  * API to manage details component
@@ -22,24 +22,16 @@ export class DetailsApi {
    */
   constructor(mapId: string) {
     this.mapId = mapId;
-    this.featureInfoLayerSet = api.getFeatureInfoLayerSet(mapId);
+    this.featureInfoLayerSet = api.getFeatureInfoLayerSet(mapId); //! This triggers the creation of feature info layer set
   }
 
   /**
    * Create a details as an element
    *
    * @param {string} mapId the map identifier
-   * @param {TypeArrayOfLayerData} detailsElements the data to display in the Details element
    * @return {ReactElement} the details react element
    */
-
-  createDetails = (mapId: string, detailsElements: TypeArrayOfLayerData): ReactElement => {
-    return createElement('div', {}, [
-      createElement(DetailsFooter, {
-        key: `${mapId}-details-sets`,
-        arrayOfLayerData: detailsElements,
-        mapId,
-      }),
-    ]);
+  createDetails = (mapId: string): ReactElement => {
+    return createElement(Details, mapId);
   };
 }

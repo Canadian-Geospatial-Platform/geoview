@@ -115,11 +115,11 @@ export class MapEventProcessor extends AbstractEventProcessor {
 
     // initialize store OpenLayers events
     // TODO: destroy events on map destruction
-    map.on('moveend', store.getState().mapState.onMapMoveEnd);
-    map.on('pointermove', store.getState().mapState.onMapPointerMove);
-    map.on('singleclick', store.getState().mapState.onMapSingleClick);
-    map.getView().on('change:resolution', store.getState().mapState.onMapZoomEnd);
-    map.getView().on('change:rotation', store.getState().mapState.onMapRotation);
+    map.on('moveend', store.getState().mapState.events.onMapMoveEnd);
+    map.on('pointermove', store.getState().mapState.events.onMapPointerMove);
+    map.on('singleclick', store.getState().mapState.events.onMapSingleClick);
+    map.getView().on('change:resolution', store.getState().mapState.events.onMapZoomEnd);
+    map.getView().on('change:rotation', store.getState().mapState.events.onMapRotation);
 
     // add map controls (scale)
     const scaleBar = new ScaleLine({

@@ -11,9 +11,9 @@ export interface IAppState {
   notifications: Array<NotificationDetailsType>;
 
   actions: {
+    addNotification: (notif: NotificationDetailsType) => void;
     setCrosshairActive: (active: boolean) => void;
     setFullScreenActive: (active: boolean, element?: TypeHTMLElement) => void;
-    addNotification: (notif: NotificationDetailsType) => void;
     removeNotification: (key: string) => void;
   };
 }
@@ -25,6 +25,17 @@ export function initializeAppState(set: TypeSetStore, get: TypeGetStore): IAppSt
     notifications: [],
 
     actions: {
+      addNotification: (notif: NotificationDetailsType) => {
+        set({
+          appState: {
+            ...get().appState,
+            notifications: [
+              ...get().appState.notifications,
+              { key: notif.key, notificationType: notif.notificationType, message: notif.message },
+            ],
+          },
+        });
+      },
       setCrosshairActive: (active: boolean) => {
         set({
           appState: {
@@ -44,17 +55,6 @@ export function initializeAppState(set: TypeSetStore, get: TypeGetStore): IAppSt
         // TODO: keep reference to geoview map instance in the store or keep accessing with api - discussion
         if (element !== undefined) api.maps[get().mapId].toggleFullscreen(active, element);
       },
-      addNotification: (notif: NotificationDetailsType) => {
-        set({
-          appState: {
-            ...get().appState,
-            notifications: [
-              ...get().appState.notifications,
-              { key: notif.key, notificationType: notif.notificationType, message: notif.message },
-            ],
-          },
-        });
-      },
       removeNotification: (key: string) => {
         set({
           appState: {
@@ -71,7 +71,7 @@ export function initializeAppState(set: TypeSetStore, get: TypeGetStore): IAppSt
 // App state selectors
 // **********************************************************
 export const useAppCrosshairsActive = () => useStore(useGeoViewStore(), (state) => state.appState.isCrosshairsActive);
-export const useFullscreenActive = () => useStore(useGeoViewStore(), (state) => state.appState.isFullscreenActive);
 export const useAppNotifications = () => useStore(useGeoViewStore(), (state) => state.appState.notifications);
+export const useFullscreenActive = () => useStore(useGeoViewStore(), (state) => state.appState.isFullscreenActive);
 
 export const useAppStoreActions = () => useStore(useGeoViewStore(), (state) => state.appState.actions);

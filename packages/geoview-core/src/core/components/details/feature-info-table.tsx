@@ -1,12 +1,16 @@
-import React, { useState } from 'react';
-import { useTheme } from '@mui/material/styles';
-import linkifyHtml from 'linkify-html';
+import { useState } from 'react';
+
 import { useTranslation } from 'react-i18next';
+
+import { useTheme } from '@mui/material/styles';
+
+import linkifyHtml from 'linkify-html';
+
 import { TypeFieldEntry } from '@/api/events/payloads';
-import { LightboxImg, LightBoxSlides } from '../lightbox/lightbox';
+import { LightboxImg, LightBoxSlides } from '@/core/components/lightbox/lightbox';
 import { CardMedia, Box, Grid } from '@/ui';
-import { isImage, stringify, generateId, sanitizeHtmlContent } from '../../utils/utilities';
-import { HtmlToReact } from '../../containers/html-to-react';
+import { isImage, stringify, generateId, sanitizeHtmlContent } from '@/core/utils/utilities';
+import { HtmlToReact } from '@/core/containers/html-to-react';
 import { getSxClasses } from './details-style';
 
 interface FeatureInfoTableProps {
@@ -21,12 +25,14 @@ interface FeatureInfoTableProps {
  */
 export function FeatureInfoTable({ featureInfoList }: FeatureInfoTableProps): JSX.Element {
   const { t } = useTranslation<string>();
+
   const theme = useTheme();
+  const sxClasses = getSxClasses(theme);
+
+  // internal state
   const [isLightBoxOpen, setIsLightBoxOpen] = useState(false);
   const [slides, setSlides] = useState<LightBoxSlides[]>([]);
   const [slidesIndex, setSlidesIndex] = useState(0);
-
-  const sxClasses = getSxClasses(theme);
 
   // linkify options
   const linkifyOptions = {
@@ -40,6 +46,7 @@ export function FeatureInfoTable({ featureInfoList }: FeatureInfoTableProps): JS
     ignoreTags: ['script', 'style', 'img'],
     target: '_blank',
   };
+
   /**
    * Parse the content of the field to see if we need to create an image, a string element or a link
    * @param {TypeFieldEntry} featureInfoItem the field item

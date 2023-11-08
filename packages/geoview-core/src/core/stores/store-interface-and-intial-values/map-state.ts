@@ -25,10 +25,14 @@ interface TypeScaleInfo {
   labelNumeric: string;
 }
 
+export interface TypeNorthArrow {
+  degreeRotation: string;
+  isNorthVisible: boolean;
+}
+
 export interface IMapState {
   centerCoordinates: Coordinate;
   clickCoordinates?: TypeMapMouseInfo;
-  // clickCoordinates: TypeMapMouseInfo | undefined;
   clickMarker: TypeClickMarker | undefined;
   currentProjection: TypeValidMapProjectionCodes;
   fixNorth: boolean;
@@ -37,6 +41,7 @@ export interface IMapState {
   mapElement?: OLMap;
   mapLoaded: boolean;
   northArrow: boolean;
+  northArrowElement: TypeNorthArrow;
   overlayClickMarker?: Overlay;
   overlayNorthMarker?: Overlay;
   overviewMap: boolean;
@@ -44,15 +49,20 @@ export interface IMapState {
   rotation: number;
   scale: TypeScaleInfo;
   selectedFeatures: Array<TypeFeatureInfoEntry>;
+  size: [number, number];
   zoom: number;
 
-  onMapMoveEnd: (event: MapEvent) => void;
-  onMapPointerMove: (event: MapEvent) => void;
-  onMapRotation: (event: ObjectEvent) => void;
-  onMapSingleClick: (event: MapEvent) => void;
-  onMapZoomEnd: (event: ObjectEvent) => void;
+  events: {
+    onMapMoveEnd: (event: MapEvent) => void;
+    onMapPointerMove: (event: MapEvent) => void;
+    onMapRotation: (event: ObjectEvent) => void;
+    onMapSingleClick: (event: MapEvent) => void;
+    onMapZoomEnd: (event: ObjectEvent) => void;
+  };
 
   actions: {
+    getPixelFromCoordinate: (coord: Coordinate) => [number, number];
+    getSize: () => [number, number];
     hideClickMarker: () => void;
     setClickCoordinates: () => void;
     setFixNorth: (ifFix: boolean) => void;
@@ -86,101 +96,129 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
     currentProjection: 3857 as TypeValidMapProjectionCodes,
     fixNorth: false,
     mapLoaded: false,
+    northArrow: false,
+    northArrowElement: { degreeRotation: '180.0', isNorthVisible: true },
+    overviewMap: false,
     overviewMapHideZoom: 0,
     pointerPosition: undefined,
     rotation: 0,
     scale: { lineWidth: '', labelGraphic: '', labelNumeric: '' } as TypeScaleInfo,
     selectedFeatures: [],
+    size: [0, 0] as [number, number],
     zoom: 0,
     interaction: 'static' as TypeInteraction,
-    northArrow: false,
-    overviewMap: false,
 
-    onMapMoveEnd: debounce((event: MapEvent) => {
-      const coords = event.map.getView().getCenter()!;
-      set({
-        mapState: {
-          ...get().mapState,
-          centerCoordinates: coords,
-        },
-      });
+    events: {
+      onMapMoveEnd: debounce((event: MapEvent) => {
+        const coords = event.map.getView().getCenter()!;
+        set({
+          mapState: {
+            ...get().mapState,
+            centerCoordinates: coords,
+          },
+        });
 
-      // on map center coord change, set the scale values
-      set({
-        mapState: {
-          ...get().mapState,
-          scale: setScale(get().mapId),
-        },
-      });
+        // on map center coord change, set the scale values
+        set({
+          mapState: {
+            ...get().mapState,
+            scale: setScale(get().mapId),
+          },
+        });
 
-      // on map center coord change, hide click marker
-      set({
-        mapState: {
-          ...get().mapState,
-          clickMarker: undefined,
-        },
-      });
+        // on map center coord change, hide click marker
+        set({
+          mapState: {
+            ...get().mapState,
+            clickMarker: undefined,
+          },
+        });
 
-      // if crosshair is active and user use keyboard, update pointer position
-      // this will enable mouse position and hover tooltip
-      if (get().appState.isCrosshairsActive) {
+        // on map center coord change, update north arrow parameters
+        set({
+          mapState: {
+            ...get().mapState,
+            northArrowElement: {
+              degreeRotation: api.geoUtilities.getNorthArrowAngle(get().mapState.mapElement!),
+              isNorthVisible: api.geoUtilities.checkNorth(get().mapState.mapElement!),
+            },
+          },
+        });
+
+        // if crosshair is active and user use keyboard, update pointer position
+        // this will enable mouse position and hover tooltip
+        if (get().appState.isCrosshairsActive) {
+          set({
+            mapState: {
+              ...get().mapState,
+              pointerPosition: {
+                projected: coords,
+                pixel: get().mapState.mapElement!.getPixelFromCoordinate(coords),
+                lnglat: toLonLat(coords, `EPSG:${get().mapState.currentProjection}`),
+                dragging: false,
+              },
+            },
+          });
+        }
+      }, 100),
+      onMapPointerMove: debounce((event: MapEvent) => {
         set({
           mapState: {
             ...get().mapState,
             pointerPosition: {
-              projected: coords,
-              pixel: get().mapState.mapElement!.getPixelFromCoordinate(coords),
-              lnglat: toLonLat(coords, `EPSG:${get().mapState.currentProjection}`),
-              dragging: false,
+              projected: (event as MapBrowserEvent<UIEvent>).coordinate,
+              pixel: (event as MapBrowserEvent<UIEvent>).pixel,
+              lnglat: toLonLat((event as MapBrowserEvent<UIEvent>).coordinate, `EPSG:${get().mapState.currentProjection}`),
+              dragging: (event as MapBrowserEvent<UIEvent>).dragging,
             },
           },
         });
-      }
-    }, 100),
-    onMapPointerMove: debounce((event: MapEvent) => {
-      set({
-        mapState: {
-          ...get().mapState,
-          pointerPosition: {
-            projected: (event as MapBrowserEvent<UIEvent>).coordinate,
-            pixel: (event as MapBrowserEvent<UIEvent>).pixel,
-            lnglat: toLonLat((event as MapBrowserEvent<UIEvent>).coordinate, `EPSG:${get().mapState.currentProjection}`),
-            dragging: (event as MapBrowserEvent<UIEvent>).dragging,
+      }, 10),
+      onMapRotation: debounce((event: ObjectEvent) => {
+        set({
+          mapState: {
+            ...get().mapState,
+            rotation: (event.target as View).getRotation(),
           },
-        },
-      });
-    }, 10),
-    onMapRotation: debounce((event: ObjectEvent) => {
-      set({
-        mapState: {
-          ...get().mapState,
-          rotation: (event.target as View).getRotation(),
-        },
-      });
-    }, 100),
-    onMapSingleClick: (event: MapEvent) => {
-      set({
-        mapState: {
-          ...get().mapState,
-          clickCoordinates: {
-            projected: (event as MapBrowserEvent<UIEvent>).coordinate,
-            pixel: (event as MapBrowserEvent<UIEvent>).pixel,
-            lnglat: toLonLat((event as MapBrowserEvent<UIEvent>).coordinate, `EPSG:${get().mapState.currentProjection}`),
-            dragging: (event as MapBrowserEvent<UIEvent>).dragging,
+        });
+      }, 100),
+      onMapSingleClick: (event: MapEvent) => {
+        set({
+          mapState: {
+            ...get().mapState,
+            clickCoordinates: {
+              projected: (event as MapBrowserEvent<UIEvent>).coordinate,
+              pixel: (event as MapBrowserEvent<UIEvent>).pixel,
+              lnglat: toLonLat((event as MapBrowserEvent<UIEvent>).coordinate, `EPSG:${get().mapState.currentProjection}`),
+              dragging: (event as MapBrowserEvent<UIEvent>).dragging,
+            },
           },
-        },
-      });
+        });
+      },
+      onMapZoomEnd: debounce((event: ObjectEvent) => {
+        set({
+          mapState: {
+            ...get().mapState,
+            zoom: event.target.getZoom()!,
+          },
+        });
+      }, 100),
     },
-    onMapZoomEnd: debounce((event: ObjectEvent) => {
-      set({
-        mapState: {
-          ...get().mapState,
-          zoom: event.target.getZoom()!,
-        },
-      });
-    }, 100),
 
     actions: {
+      getPixelFromCoordinate: (coord: Coordinate): [number, number] => {
+        return get().mapState.mapElement!.getPixelFromCoordinate(coord) as unknown as [number, number];
+      },
+      getSize: (): [number, number] => {
+        const size = get().mapState.mapElement?.getSize() as unknown as [number, number];
+        set({
+          mapState: {
+            ...get().mapState,
+            size,
+          },
+        });
+        return size;
+      },
       hideClickMarker: () => {
         set({
           mapState: { ...get().mapState, clickMarker: undefined },
@@ -316,6 +354,7 @@ export const useMapFixNorth = () => useStore(useGeoViewStore(), (state) => state
 export const useMapInteraction = () => useStore(useGeoViewStore(), (state) => state.mapState.interaction);
 export const useMapLoaded = () => useStore(useGeoViewStore(), (state) => state.mapState.mapLoaded);
 export const useMapNorthArrow = () => useStore(useGeoViewStore(), (state) => state.mapState.northArrow);
+export const useMapNorthArrowElement = () => useStore(useGeoViewStore(), (state) => state.mapState.northArrowElement);
 export const useMapOverviewMap = () => useStore(useGeoViewStore(), (state) => state.mapState.overviewMap);
 export const useMapPointerPosition = () => useStore(useGeoViewStore(), (state) => state.mapState.pointerPosition);
 export const useMapRotation = () => useStore(useGeoViewStore(), (state) => state.mapState.rotation);

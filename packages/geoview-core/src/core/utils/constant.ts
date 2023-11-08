@@ -15,3 +15,8 @@ export const OL_ZOOM_DURATION = 500;
 export const NORTH_POLE_POSITION: [number, number] = [90, -95];
 
 export const OL_ZOOM_PADDING: [number, number, number, number] = [100, 100, 100, 100];
+
+export const OL_OVERVIEWMAP_SIZE = {
+  width: '150px',
+  height: '150px',
+};
