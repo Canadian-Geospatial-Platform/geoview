@@ -194,7 +194,7 @@ export function Datapanel({ layerData, mapId, projectionConfig, language }: Data
           <Button
             type="text"
             size="small"
-            sx={{ ...sxClasses.enlargeBtn, [theme.breakpoints.down('sm')]: { display: 'none' } }}
+            sx={{ ...sxClasses.enlargeBtn, [theme.breakpoints.down('md')]: { display: 'none' } }}
             onClick={() => setIsEnlargeDataTable(!isEnlargeDataTable)}
           >
             {isEnlargeDataTable ? <ArrowForwardIcon sx={sxClasses.enlargeBtnIcon} /> : <ArrowBackIcon sx={sxClasses.enlargeBtnIcon} />}
@@ -240,7 +240,7 @@ export function Datapanel({ layerData, mapId, projectionConfig, language }: Data
 
           {!isLoading &&
             layerData.map(({ layerKey, layerId }, index) => (
-              <Box key={layerKey} sx={{ [theme.breakpoints.up('sm')]: { paddingLeft: '3.5rem' } }}>
+              <Box key={layerKey} sx={{ [theme.breakpoints.up('lg')]: { paddingLeft: '3.5rem' } }}>
                 {index === selectedLayerIndex ? (
                   <Box>
                     {layerData[index].features.length ? (

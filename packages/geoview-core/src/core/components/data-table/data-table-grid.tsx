@@ -1,6 +1,6 @@
 import React, { ReactNode } from 'react';
-import { Grid } from '@/ui';
 import { GridProps, useTheme } from '@mui/material';
+import { Grid } from '@/ui';
 
 interface DataTableGridProps extends GridProps {
   children: ReactNode;
