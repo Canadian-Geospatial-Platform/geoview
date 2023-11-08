@@ -118,49 +118,52 @@ export function Datapanel({ layerData, mapId, projectionConfig, language }: Data
             sx={{ ...sxClasses.paper, border: selectedLayerIndex === index ? sxClasses.borderWithIndex : sxClasses.borderNone }}
             key={layerKey}
           >
-            <ListItem disablePadding>
-              <ListItemButton
-                sx={{ height: '67px' }}
-                selected={selectedLayerIndex === index}
-                onClick={(event) => handleListItemClick(event, index)}
-              >
-                <ListItemIcon>
-                  <SendIcon sx={{ width: '0.75em', height: '0.75em' }} />
-                </ListItemIcon>
-                <Tooltip title={getLayerTooltip(layerName!, layerKey, index)} placement="top" arrow>
-                  <Box sx={sxClasses.listPrimaryText}>
-                    <Typography component="p">{layerName![language]}</Typography>
-                    <Box sx={{ display: 'flex', alignContent: 'center' }}>
-                      <Typography component="p" variant="subtitle1" noWrap>
-                        {getFeaturesOfLayer(layerKey, index)}
-                      </Typography>
-                      {isMapFilteredSelectedForLayer(layerKey) && <FilterAltIcon sx={{ color: theme.palette.grey['500'] }} />}
-                    </Box>
-                  </Box>
-                </Tooltip>
-                <Box
-                  sx={{
-                    padding: isEnlargeDataTable ? '0.25rem' : '1rem',
-                    paddingRight: isEnlargeDataTable ? '0.25rem' : '1rem',
-                    [theme.breakpoints.down('xl')]: {
-                      display: isEnlargeDataTable ? 'none !important' : 'block',
-                    },
-                    [theme.breakpoints.down('sm')]: {
-                      display: 'none',
-                    },
-                  }}
-                >
-                  <IconButton
-                    disabled
-                    edge="end"
-                    size="small"
-                    sx={{ color: `${theme.palette.primary.main} !important`, background: `${theme.palette.grey.A100} !important` }}
+            <Tooltip title={getLayerTooltip(layerName!, layerKey, index)} placement="top" arrow>
+              <Box>
+                <ListItem disablePadding>
+                  <ListItemButton
+                    sx={{ height: '67px' }}
+                    selected={selectedLayerIndex === index}
+                    onClick={(event) => handleListItemClick(event, index)}
                   >
-                    <ChevronRightIcon />
-                  </IconButton>
-                </Box>
-              </ListItemButton>
-            </ListItem>
+                    <ListItemIcon>
+                      <SendIcon sx={{ width: '0.75em', height: '0.75em' }} />
+                    </ListItemIcon>
+                    <Box sx={sxClasses.listPrimaryText}>
+                      <Typography component="p">{layerName![language]}</Typography>
+                      <Box sx={{ display: 'flex', alignContent: 'center' }}>
+                        <Typography component="p" variant="subtitle1" noWrap>
+                          {getFeaturesOfLayer(layerKey, index)}
+                        </Typography>
+                        {isMapFilteredSelectedForLayer(layerKey) && <FilterAltIcon sx={{ color: theme.palette.grey['500'] }} />}
+                      </Box>
+                    </Box>
+
+                    <Box
+                      sx={{
+                        padding: isEnlargeDataTable ? '0.25rem' : '1rem',
+                        paddingRight: isEnlargeDataTable ? '0.25rem' : '1rem',
+                        [theme.breakpoints.down('xl')]: {
+                          display: isEnlargeDataTable ? 'none !important' : 'block',
+                        },
+                        [theme.breakpoints.down('sm')]: {
+                          display: 'none',
+                        },
+                      }}
+                    >
+                      <IconButton
+                        disabled
+                        edge="end"
+                        size="small"
+                        sx={{ color: `${theme.palette.primary.main} !important`, background: `${theme.palette.grey.A100} !important` }}
+                      >
+                        <ChevronRightIcon />
+                      </IconButton>
+                    </Box>
+                  </ListItemButton>
+                </ListItem>
+              </Box>
+            </Tooltip>
           </Paper>
         ))}
       </List>
