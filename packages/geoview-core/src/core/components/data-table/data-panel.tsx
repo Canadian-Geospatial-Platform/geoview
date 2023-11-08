@@ -196,6 +196,8 @@ export function Datapanel({ layerData, mapId, projectionConfig, language }: Data
             size="small"
             sx={{ ...sxClasses.enlargeBtn, [theme.breakpoints.down('md')]: { display: 'none' } }}
             onClick={() => setIsEnlargeDataTable(!isEnlargeDataTable)}
+            tooltip={isEnlargeDataTable ? t('dataTable.reduceBtn')! : t('dataTable.enlargeBtn')!}
+            tooltipPlacement="top"
           >
             {isEnlargeDataTable ? <ArrowForwardIcon sx={sxClasses.enlargeBtnIcon} /> : <ArrowBackIcon sx={sxClasses.enlargeBtnIcon} />}
             {isEnlargeDataTable ? t('dataTable.reduceBtn') : t('dataTable.enlargeBtn')}
@@ -211,8 +213,10 @@ export function Datapanel({ layerData, mapId, projectionConfig, language }: Data
                 [theme.breakpoints.down('sm')]: { display: !isLayersPanelVisible ? 'block' : 'none' },
               }}
               onClick={() => setIsLayersPanelVisible(true)}
+              tooltip={t('dataTable.close') ?? ''}
+              tooltipPlacement="top"
             >
-              Close
+              {t('dataTable.close')}
             </Button>
           )}
         </DataTableGrid.Right>
