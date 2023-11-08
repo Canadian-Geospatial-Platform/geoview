@@ -7,6 +7,7 @@ export interface SliderFilterProps {
   defaultValue: string;
   minAndMax: number[];
   field: string;
+  singleHandle: boolean;
   values: number[];
   filtering: boolean;
 }
@@ -39,10 +40,10 @@ export class TimeSliderApi {
       const { range } = temporalDimensionInfo.range;
       const defaultValue = temporalDimensionInfo.default;
       const minAndMax: number[] = [new Date(range[0]).getTime(), new Date(range[range.length - 1]).getTime()];
-      const { field } = temporalDimensionInfo;
-      const values = temporalDimensionInfo.singleHandle ? [new Date(temporalDimensionInfo.default).getTime()] : [...minAndMax];
+      const { field, singleHandle } = temporalDimensionInfo;
+      const values = singleHandle ? [new Date(temporalDimensionInfo.default).getTime()] : [...minAndMax];
       const filtering = true;
-      const sliderData = { [layerPath]: { range, defaultValue, minAndMax, field, filtering, values } };
+      const sliderData = { [layerPath]: { range, defaultValue, minAndMax, field, singleHandle, filtering, values } };
       timeSliderData = { ...timeSliderData, ...sliderData };
     });
     return timeSliderData;
