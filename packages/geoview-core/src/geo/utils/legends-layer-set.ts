@@ -54,8 +54,8 @@ export class LegendsLayerSet {
       EVENT_NAMES.LAYER_SET.UPDATED,
       (layerUpdatedPayload) => {
         if (payloadIsLayerSetUpdated(layerUpdatedPayload)) {
-          const { resultSets } = layerUpdatedPayload;
-          api.event.emit(GetLegendsPayload.createLegendsLayersetUpdatedPayload(`${this.mapId}/LegendsLayerSet`, resultSets));
+          const { layerPath, resultSets } = layerUpdatedPayload;
+          api.event.emit(GetLegendsPayload.createLegendsLayersetUpdatedPayload(`${this.mapId}/LegendsLayerSet`, layerPath, resultSets));
         }
       },
       `${mapId}/LegendsLayerSetStatusOrPhaseChanged`
@@ -70,31 +70,24 @@ export class LegendsLayerSet {
           const { layerPath, legendInfo } = payload;
           if (layerPath in this.resultSets) {
             this.resultSets[layerPath].data = legendInfo;
-            api.event.emit(GetLegendsPayload.createLegendsLayersetUpdatedPayload(`${this.mapId}/LegendsLayerSet`, this.resultSets));
+            api.event.emit(
+              GetLegendsPayload.createLegendsLayersetUpdatedPayload(`${this.mapId}/LegendsLayerSet`, layerPath, this.resultSets)
+            );
           }
         }
       },
       this.mapId
     );
 
-    // First queries the legend of all known layers. Then, activate a listener to query the layers added afterwards or to delete the
-    // legends of the deleted layers.
-    const queryUndefinedLegend = () => {
-      Object.keys(this.resultSets).forEach((layerPath) => {
-        if (this.resultSets[layerPath]?.layerStatus === 'processed' && !this.resultSets[layerPath].querySent) {
-          api.event.emit(GetLegendsPayload.createQueryLegendPayload(`${this.mapId}/${layerPath}`, layerPath));
-          this.resultSets[layerPath].querySent = true;
-        }
-      });
-    };
-    queryUndefinedLegend();
-
     api.event.on(
       EVENT_NAMES.LAYER_SET.UPDATED,
       (layerUpdatedPayload) => {
         if (payloadIsLayerSetUpdated(layerUpdatedPayload)) {
-          queryUndefinedLegend();
-          api.event.emit(GetLegendsPayload.createLegendsLayersetUpdatedPayload(`${this.mapId}/LegendsLayerSet`, this.resultSets));
+          const { layerPath, resultSets } = layerUpdatedPayload;
+          if (resultSets[layerPath]?.layerStatus === 'processed' && !(resultSets as TypeLegendResultSets)[layerPath].querySent) {
+            api.event.emit(GetLegendsPayload.createQueryLegendPayload(`${this.mapId}/${layerPath}`, layerPath));
+            this.resultSets[layerPath].querySent = true;
+          }
         }
       },
       `${mapId}/LegendsLayerSet`

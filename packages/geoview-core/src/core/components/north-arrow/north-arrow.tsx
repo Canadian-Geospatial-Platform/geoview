@@ -189,7 +189,7 @@ export function NorthArrow(): JSX.Element {
           angle = arrowAngle;
 
           // set map rotation to keep fix north
-          mapElement.getView().animate({
+          mapElement!.getView().animate({
             rotation: ((180 - arrowAngle) * (2 * Math.PI)) / 360,
           });
 
@@ -212,7 +212,7 @@ export function NorthArrow(): JSX.Element {
       (state) => state.mapState.centerCoordinates,
       (curCoords, prevCoords) => {
         if (curCoords !== prevCoords) {
-          manageArrow(mapElement);
+          manageArrow(mapElement!);
         }
       },
       {
@@ -225,7 +225,7 @@ export function NorthArrow(): JSX.Element {
       (curNorth, prevNorth) => {
         if (curNorth !== prevNorth) {
           isNorthFixedValue.current = curNorth;
-          manageArrow(mapElement);
+          manageArrow(mapElement!);
         }
       }
     );

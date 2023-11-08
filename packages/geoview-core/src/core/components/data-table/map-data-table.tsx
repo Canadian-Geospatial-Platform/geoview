@@ -1,6 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState, memo, ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useStore } from 'zustand';
 import debounce from 'lodash/debounce';
 import startCase from 'lodash/startCase';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
@@ -49,8 +48,15 @@ import {
   LightBoxSlides,
   isImage,
 } from '@/app';
-import { getGeoViewStore } from '@/core/stores/stores-managers';
 import { getSxClasses } from './data-table-style';
+import {
+  useDataTableStoreActions,
+  useDataTableStoreColumnFiltersRecord,
+  useDataTableStoreFilterMapDelay,
+  useDataTableStoreMapFilteredRecord,
+  useDataTableStoreRowSelectionsRecord,
+  useDataTableStoreToolbarRowSelectedMessageRecord,
+} from '@/core/stores/store-interface-and-intial-values/data-table-state';
 
 export interface MapDataTableDataEntrys extends TypeFeatureInfoEntry {
   rows: Record<string, string>;
@@ -135,18 +141,15 @@ function MapDataTable({ data, layerId, mapId, layerKey, projectionConfig }: MapD
   const iconColumn = { alias: t('dataTable.icon'), dataType: 'string', id: t('dataTable.icon') };
   const zoomColumn = { alias: t('dataTable.zoom'), dataType: 'string', id: t('dataTable.zoom') };
 
-  const store = getGeoViewStore(mapId);
-  const {
-    FILTER_MAP_DELAY,
-    toolbarRowSelectedMessage,
-    setToolbarRowSelectedMessage,
-    columnFiltersMap,
-    setColumnFiltersMap,
-    rowSelectionsMap,
-    setRowSelectionsMap,
-    mapFilteredMap,
-    setRowsFilteredMap,
-  } = useStore(store, (state) => state.dataTableState);
+  // TODO: Move constant outside the store.
+  const FILTER_MAP_DELAY = useDataTableStoreFilterMapDelay();
+  const toolbarRowSelectedMessageRecord = useDataTableStoreToolbarRowSelectedMessageRecord();
+  const columnFiltersRecord = useDataTableStoreColumnFiltersRecord();
+  const rowSelectionsRecord = useDataTableStoreRowSelectionsRecord();
+  const mapFilteredRecord = useDataTableStoreMapFilteredRecord();
+
+  const { setColumnFiltersEntry, setToolbarRowSelectedMessageEntry, setRowsFilteredEntry, setRowSelectionsEntry } =
+    useDataTableStoreActions();
 
   const [isLightBoxOpen, setIsLightBoxOpen] = useState(false);
   const [slides, setSlides] = useState<LightBoxSlides[]>([]);
@@ -154,10 +157,10 @@ function MapDataTable({ data, layerId, mapId, layerKey, projectionConfig }: MapD
 
   const rowSelectionRef = useRef<Array<number>>([]);
 
-  const [columnFilters, setColumnFilters] = useState<MRTColumnFiltersState>(columnFiltersMap[layerKey] || []);
+  const [columnFilters, setColumnFilters] = useState<MRTColumnFiltersState>(columnFiltersRecord[layerKey] || []);
 
   const [density, setDensity] = useState<MRTDensityState>('compact');
-  const [rowSelection, setRowSelection] = useState<Record<number, boolean>>(rowSelectionsMap[layerKey] ?? {});
+  const [rowSelection, setRowSelection] = useState<Record<number, boolean>>(rowSelectionsRecord[layerKey] ?? {});
   const rowVirtualizerInstanceRef = useRef<MRTVirtualizer<HTMLDivElement, HTMLTableRowElement>>(null);
   const [sorting, setSorting] = useState<MRTSortingState>([]);
 
@@ -223,7 +226,7 @@ function MapDataTable({ data, layerId, mapId, layerKey, projectionConfig }: MapD
     const geoviewLayerInstance = api.maps[mapId].layer.geoviewLayers[layerId];
     const filterLayerConfig = api.maps[mapId].layer.registeredLayers[layerKey] as TypeLayerEntryConfig;
 
-    if (mapFilteredMap[layerKey] && geoviewLayerInstance !== undefined && filterLayerConfig !== undefined && filterStrings.length) {
+    if (mapFilteredRecord[layerKey] && geoviewLayerInstance !== undefined && filterLayerConfig !== undefined && filterStrings.length) {
       (geoviewLayerInstance as AbstractGeoViewVector | EsriDynamic)?.applyViewFilter(filterLayerConfig, filterStrings);
     } else {
       (geoviewLayerInstance as AbstractGeoViewVector | EsriDynamic)?.applyViewFilter(filterLayerConfig, '');
@@ -231,7 +234,7 @@ function MapDataTable({ data, layerId, mapId, layerKey, projectionConfig }: MapD
   }, FILTER_MAP_DELAY);
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  const debouncedColumnFilters = useCallback((filters: MRTColumnFiltersState) => filterMap(filters), [mapFilteredMap[layerKey]]);
+  const debouncedColumnFilters = useCallback((filters: MRTColumnFiltersState) => filterMap(filters), [mapFilteredRecord[layerKey]]);
 
   useEffect(() => {
     // scroll to the top of the table when the sorting changes
@@ -245,19 +248,19 @@ function MapDataTable({ data, layerId, mapId, layerKey, projectionConfig }: MapD
 
   // update store column filters
   useEffect(() => {
-    setColumnFiltersMap(columnFilters, layerKey);
+    setColumnFiltersEntry(columnFilters, layerKey);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [columnFilters]);
 
   // update store row selections.
   useEffect(() => {
-    setRowSelectionsMap(rowSelection, layerKey);
+    setRowSelectionsEntry(rowSelection, layerKey);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [rowSelection]);
 
   // update map when column filters change
   useEffect(() => {
-    if (columnFilters && mapFilteredMap[layerKey]) {
+    if (columnFilters && mapFilteredRecord[layerKey]) {
       debouncedColumnFilters(columnFilters);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -267,7 +270,7 @@ function MapDataTable({ data, layerId, mapId, layerKey, projectionConfig }: MapD
   useEffect(() => {
     filterMap(columnFilters);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [mapFilteredMap[layerKey]]);
+  }, [mapFilteredRecord[layerKey]]);
 
   // add/remove hightlight feature when row is selected/unselected.
   useEffect(() => {
@@ -295,7 +298,7 @@ function MapDataTable({ data, layerId, mapId, layerKey, projectionConfig }: MapD
 
   // show row selected message in the toolbar.
   useEffect(() => {
-    let message = toolbarRowSelectedMessage[layerKey] ?? '';
+    let message = toolbarRowSelectedMessageRecord[layerKey] ?? '';
     if (Object.keys(rowSelection).length && tableInstanceRef.current) {
       message = t('dataTable.rowsSelected')
         .replace('{rowsSelected}', Object.keys(rowSelection).length.toString())
@@ -308,13 +311,13 @@ function MapDataTable({ data, layerId, mapId, layerKey, projectionConfig }: MapD
       message = '';
     }
 
-    setToolbarRowSelectedMessage(message, layerKey);
+    setToolbarRowSelectedMessageEntry(message, layerKey);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [rowSelection, data.features]);
 
   // show row filtered message in the toolbar.
   useEffect(() => {
-    let message = toolbarRowSelectedMessage[layerKey] ?? '';
+    let message = toolbarRowSelectedMessageRecord[layerKey] ?? '';
     let length = 0;
     if (tableInstanceRef.current) {
       const rowsFiltered = tableInstanceRef.current.getFilteredRowModel();
@@ -327,10 +330,10 @@ function MapDataTable({ data, layerId, mapId, layerKey, projectionConfig }: MapD
         message = '';
         length = 0;
       }
-      setRowsFilteredMap(length, layerKey);
+      setRowsFilteredEntry(length, layerKey);
     }
 
-    setToolbarRowSelectedMessage(message, layerKey);
+    setToolbarRowSelectedMessageEntry(message, layerKey);
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [columnFilters, data.features]);
@@ -567,12 +570,12 @@ function MapDataTable({ data, layerId, mapId, layerKey, projectionConfig }: MapD
         enableBottomToolbar={false}
         positionToolbarAlertBanner="none" // hide existing row count
         renderTopToolbarCustomActions={() => {
-          return <Box sx={sxClasses.selectedRows}>{toolbarRowSelectedMessage[layerKey]}</Box>;
+          return <Box sx={sxClasses.selectedRows}>{toolbarRowSelectedMessageRecord[layerKey]}</Box>;
         }}
         renderToolbarInternalActions={({ table }) => (
           <Box>
             <MRTToggleFiltersButton table={table} />
-            <FilterMap layerKey={layerKey} mapId={mapId} />
+            <FilterMap layerKey={layerKey} />
             <MRTShowHideColumnsButton table={table} />
             <MRTToggleDensePaddingButton table={table} />
             <MRTFullScreenToggleButton table={table} />
