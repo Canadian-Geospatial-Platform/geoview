@@ -113,27 +113,28 @@ export const getSxClasses = (theme: Theme) => ({
     },
 
     itemsGrid: {
-      width: "100%",
+      width: '100%',
       '& .MuiGrid-container': {
         '&:first-child': {
-          fontWeight: 'bold'
+          fontWeight: 'bold',
+          borderTop: '1px solid #ccc',
+          borderBottom: '2px solid #ccc',
         },
         '& .MuiGrid-item': {
-          border: "1px solid #ccc",
-          padding: "3px 6px",
-          
-          '&:first-child' : {
-            width: '80px'
+          padding: '3px 6px',
+
+          '&:first-child': {
+            width: '80px',
           },
-          '&:nth-child(2)' : {
+          '&:nth-child(2)': {
             flexGrow: 1,
             textAlign: 'left',
             display: 'flex',
             flexDirection: 'row',
-            alignItems: 'center'
-          }
-        }
-      }
+            alignItems: 'center',
+          },
+        },
+      },
     },
     tableIconLabel: {
       color: 'text.primary',
