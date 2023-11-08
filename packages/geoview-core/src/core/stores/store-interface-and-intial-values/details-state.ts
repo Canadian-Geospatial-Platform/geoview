@@ -36,9 +36,13 @@ export function initialDetailsState(set: TypeSetStore, get: TypeGetStore): IDeta
         });
       },
     },
-  };
+  } as IDetailsState;
 }
 
+// **********************************************************
+// Details state selectors
+// **********************************************************
 export const useDetailsStoreLayerDataArray = () => useStore(useGeoViewStore(), (state) => state.detailsState.layerDataArray);
 export const useDetailsStoreSelectedLayerPath = () => useStore(useGeoViewStore(), (state) => state.detailsState.selectedLayerPath);
+
 export const useDetailsStoreActions = () => useStore(useGeoViewStore(), (state) => state.detailsState.actions);

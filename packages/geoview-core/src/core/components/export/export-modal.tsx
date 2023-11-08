@@ -1,7 +1,8 @@
 import { MouseEventHandler, useContext } from 'react';
-import { useTranslation } from 'react-i18next';
-import { Button, Dialog, DialogActions, DialogTitle } from '@mui/material'; // TODO: refactor to use UI
 
+import { useTranslation } from 'react-i18next';
+
+import { Button, Dialog, DialogActions, DialogTitle } from '@/ui';
 import { MapContext } from '@/core/app-start';
 import { exportPNG } from '@/core/utils/utilities';
 
@@ -34,24 +35,24 @@ export default function ExportModal(props: ExportModalProps): JSX.Element {
 
   const { t } = useTranslation();
 
+  // TODO: fix any type
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const exportMap = (event: any): void => {
+    exportPNG(mapId);
+    closeModal(event);
+  };
+
   return (
     <Dialog open={isShown} onClose={closeModal} className={className}>
-      <form
-        onSubmit={(e) => {
-          e.preventDefault();
-          exportPNG(mapId);
-        }}
-      >
-        <DialogTitle>{t('exportModal.title')}</DialogTitle>
-        <DialogActions>
-          <Button onClick={closeModal} size="small" autoFocus>
-            {t('exportModal.cancelBtn')}
-          </Button>
-          <Button type="submit" onClick={closeModal} size="small">
-            {t('exportModal.exportBtn')}
-          </Button>
-        </DialogActions>
-      </form>
+      <DialogTitle>{t('exportModal.title')}</DialogTitle>
+      <DialogActions>
+        <Button onClick={closeModal} type="text" size="small" autoFocus>
+          {t('exportModal.cancelBtn')}
+        </Button>
+        <Button type="text" onClick={exportMap} size="small">
+          {t('exportModal.exportBtn')}
+        </Button>
+      </DialogActions>
     </Dialog>
   );
 }

@@ -1,8 +1,12 @@
 /* eslint-disable react/require-default-props */
-import React, { MutableRefObject, useEffect, useState } from 'react';
-import { useTheme, Theme } from '@mui/material/styles';
+import { MutableRefObject, useEffect, useState } from 'react';
+
 import { useTranslation } from 'react-i18next';
-import { getUid } from 'ol/util';
+
+import { useTheme, Theme } from '@mui/material/styles';
+
+import { getUid } from 'ol/util'; // TODO no ol in component
+
 import { List, ListItem, ListItemText, ZoomInSearchIcon, Tooltip, IconButton, Checkbox, Paper } from '@/ui';
 import { api } from '@/app';
 import {
@@ -48,17 +52,19 @@ export function FeatureInfo({
   clearAllCheckboxes,
 }: TypeFeatureInfoProps): JSX.Element {
   const { t } = useTranslation<string>();
+
   const theme: Theme & {
     iconImg: React.CSSProperties;
   } = useTheme();
+  const sxClasses = getSxClasses(theme);
+
+  // internal state
   const [checked, setChecked] = useState<boolean>(false);
   const [checkedFeatures, setCheckedFeatures] = useState<Exclude<TypeArrayOfFeatureInfoEntries, null | undefined>>([]);
   const feature = features![currentFeatureIndex];
   const featureUid = feature.geometry ? getUid(feature.geometry) : null;
   const featureIconSrc = feature.featureIcon.toDataURL();
   const nameFieldValue = feature.nameField ? (feature.fieldInfo[feature.nameField!]!.value as string) : 'No name';
-
-  const sxClasses = getSxClasses(theme);
 
   const featureInfoList: TypeFieldEntry[] = Object.keys(feature.fieldInfo).map((fieldName) => {
     return {

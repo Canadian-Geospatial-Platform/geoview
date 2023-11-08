@@ -1,5 +1,7 @@
 import { useContext } from 'react';
+
 import { useTheme } from '@mui/material/styles';
+
 import { MapContext } from '@/core/app-start';
 import { IconButton, MoveDownRoundedIcon } from '@/ui';
 import { getSxClasses } from '../nav-bar-style';
