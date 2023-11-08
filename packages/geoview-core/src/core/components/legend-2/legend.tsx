@@ -1,7 +1,7 @@
 import { useStore } from 'zustand';
 import { useTheme } from '@mui/material';
 import { useTranslation } from 'react-i18next';
-import { Box, List, Typography } from '@/ui';
+import { Box, Typography, Grid } from '@/ui';
 import { getGeoViewStore } from '@/core/stores/stores-managers';
 import { getSxClasses } from './legend-styles';
 import { LegendLayer } from './legend-layer';
@@ -23,11 +23,13 @@ export function Legend(props: LegendOverviewProps): JSX.Element {
 
   function renderLegendLayersList() {
     return (
-      <List sx={{ width: '100%', padding: '20px' }}>
+      <Grid container spacing={4} sx={{ width: '100%', padding: '20px' }}>
         {legendLayers.map((item) => (
-          <LegendLayer layer={item} key={item.layerPath} />
+          <Grid item xs={12} md={6} lg={4} key={item.layerPath}>
+            <LegendLayer layer={item} key={item.layerPath} />
+          </Grid>
         ))}
-      </List>
+      </Grid>
     );
   }
 
