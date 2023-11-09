@@ -30,6 +30,7 @@ export function Layers(props: LegendItemsDetailsProps): JSX.Element {
 
   useEffect(() => {
     helpers.populateLegendStoreWithFakeData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const leftPanel = () => {

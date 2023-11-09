@@ -40,10 +40,12 @@ export function Map(mapFeaturesConfig: TypeMapFeaturesConfig): JSX.Element {
   // eslint-disable-next-line react/destructuring-assignment
   const mapId = mapFeaturesConfig.mapId ? mapFeaturesConfig.mapId : generateId('');
 
-  // get ref to div element
-  const mapElement = useRef<HTMLDivElement | undefined>();
+  const defaultTheme = useTheme();
 
+  // internal state - get ref to div element
+  const mapElement = useRef<HTMLDivElement | undefined>();
   const [overviewBaseMap, setOverviewBaseMap] = useState<TypeBasemapProps | undefined>(undefined);
+  const deviceSizeMedUp = useMediaQuery(defaultTheme.breakpoints.up('md')); // if screen size is medium and up
 
   // get values from the store
   const overviewMap = useMapOverviewMap();
@@ -52,11 +54,6 @@ export function Map(mapFeaturesConfig: TypeMapFeaturesConfig): JSX.Element {
 
   // create a new map viewer instance
   const viewer: MapViewer = api.maps[mapId];
-
-  const defaultTheme = useTheme();
-
-  // if screen size is medium and up
-  const deviceSizeMedUp = useMediaQuery(defaultTheme.breakpoints.up('md'));
 
   const initCGPVMap = (cgpvMap: OLMap) => {
     cgpvMap.set('mapId', mapId);

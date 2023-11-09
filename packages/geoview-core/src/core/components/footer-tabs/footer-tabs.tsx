@@ -27,6 +27,13 @@ import { getSxClasses } from './footer-tabs-style';
  * @returns {JSX.Element} returns the Footer Tabs component
  */
 export function FooterTabs(): JSX.Element | null {
+  const mapConfig = useContext(MapContext);
+  const { mapId } = mapConfig;
+
+  const theme = useTheme();
+  const sxClasses = getSxClasses(theme);
+
+  // internal state
   const [selectedTab, setSelectedTab] = useState<number | undefined>();
   const [footerTabs, setFooterTabs] = useState<TypeTabs[]>([]);
   const [isCollapsed, setIsCollapsed] = useState(true);
@@ -35,13 +42,7 @@ export function FooterTabs(): JSX.Element | null {
   // TODO We might need to refactor code below based on the best solution, issue #1448
   const [isFocusToMap, setIsFocusToMap] = useState<boolean>(true);
 
-  const theme = useTheme();
-  const sxClasses = getSxClasses(theme);
-
-  const mapConfig = useContext(MapContext);
   const tabsContainerRef = useRef<HTMLDivElement>();
-
-  const { mapId } = mapConfig;
 
   // get map div and follow state of original map height
   const mapDiv = document.getElementById(mapId)!;

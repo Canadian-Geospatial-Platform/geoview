@@ -14,6 +14,7 @@ import { useMapRotation, useMapStoreActions } from '@/core/stores/store-interfac
 export function FooterbarRotationButton(): JSX.Element {
   const { t } = useTranslation<string>();
 
+  // internal state
   const iconRef = useRef(null);
 
   // get the values from store

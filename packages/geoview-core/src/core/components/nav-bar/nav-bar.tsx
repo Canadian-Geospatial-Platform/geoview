@@ -39,6 +39,7 @@ export function Navbar({ activeTrap, activeTrapSet }: NavbarProps): JSX.Element 
   const theme = useTheme();
   const sxClasses = getSxClasses(theme);
 
+  // internal state
   const navBarRef = useRef<HTMLDivElement>(null);
   const trapActive = useRef<boolean>(activeTrap);
 

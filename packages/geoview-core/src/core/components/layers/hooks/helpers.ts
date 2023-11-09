@@ -3,6 +3,7 @@ import { isVectorLegend, isWmsLegend, isImageStaticLegend, TypeLayerStyles } fro
 import { api } from '@/app';
 import { TypeLegendLayer, TypeLegendLayerIcon, TypeLegendLayerItem } from '../types';
 import { getGeoViewStore } from '@/core/stores/stores-managers';
+import { generateId } from '@/core/utils/utilities';
 
 export function useLegendHelpers(mapId: string) {
   const store = getGeoViewStore(mapId);
@@ -172,7 +173,7 @@ export function useLegendHelpers(mapId: string) {
 
       const item: TypeLegendLayer = {
         layerId: setData.data?.layerPath ?? `layer${i}`,
-        layerPath: setData.data?.layerPath ?? 'fdfsdfas',
+        layerPath: setData.data?.layerPath ?? generateId(),
         layerName: setData.data?.layerName?.en ?? 'Uknown Laer name',
         type: setData.data?.type ?? 'imageStatic',
         layerStatus: setData.layerStatus,

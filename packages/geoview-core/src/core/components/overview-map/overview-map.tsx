@@ -18,14 +18,6 @@ import { cgpvTheme } from '@/ui/style/theme';
 import { OverviewMapToggle } from './overview-map-toggle';
 import { api } from '@/app';
 
-/**
- * Size of the overview map container
- */
-export const MINIMAP_SIZE = {
-  width: '150px',
-  height: '150px',
-};
-
 // TODO: We need to find solution to remove makeStyles with either plain css or material ui.
 const useStyles = makeStyles((theme) => ({
   overviewMap: {

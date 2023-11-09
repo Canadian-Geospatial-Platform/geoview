@@ -45,6 +45,7 @@ interface ShellProps {
  */
 export function Shell(props: ShellProps): JSX.Element {
   const { shellId } = props;
+
   const mapContext = useContext(MapContext);
   const mapFeaturesConfig = mapContext.mapFeaturesConfig!;
 

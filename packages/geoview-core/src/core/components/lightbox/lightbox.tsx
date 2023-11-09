@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+
 import { useTranslation } from 'react-i18next';
 
 // eslint-disable-next-line import/no-extraneous-dependencies
@@ -32,9 +33,11 @@ export interface LightBoxSlides {
  * @returns {JSX.Element} created lightbox element
  */
 export function LightboxImg(props: LightboxProps): JSX.Element {
-  const { t } = useTranslation<string>();
   const { open, slides, index, exited } = props;
 
+  const { t } = useTranslation<string>();
+
+  // internal state
   const [isOpen, setIsOpen] = useState(open);
   const [closeOnPullDown] = useState(true);
   const [closeOnBackdropClick] = useState(true);

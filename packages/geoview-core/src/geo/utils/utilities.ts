@@ -4,10 +4,12 @@ import { WMSCapabilities, WKT, GeoJSON } from 'ol/format';
 import { ReadOptions } from 'ol/format/Feature';
 import { Geometry } from 'ol/geom';
 import { Extent } from 'ol/extent';
-import { transformExtent } from 'ol/proj';
+import { transformExtent, toLonLat } from 'ol/proj';
 import { Style, Stroke, Fill, Circle } from 'ol/style';
 import { Color } from 'ol/color';
 import { getArea as getAreaOL } from 'ol/sphere';
+import OLMap from 'ol/Map';
+import { Coordinate } from 'ol/coordinate';
 
 import { Cast, TypeJsonObject } from '@/core/types/global-types';
 import { TypeFeatureStyle } from '@/geo/layer/geometry/geometry-types';
@@ -17,6 +19,7 @@ import { TypeLayerEntryConfig, TypeListOfLayerEntryConfig, layerEntryIsGroupLaye
 import { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { Layer } from '@/geo/layer/layer';
 import { AppEventProcessor } from '@/api/eventProcessors/app-event-processor';
+import { NORTH_POLE_POSITION } from '@/core/utils/constant';
 
 /**
  * Interface used for css style declarations
@@ -350,5 +353,56 @@ export class GeoUtilities {
     const m = Math.floor(Math.abs((value - d) * 60));
     const s = Math.round((Math.abs(value) - Math.abs(d) - m / 60) * 3600);
     return `${Math.abs(d)}${deg} ${m >= 10 ? `${m}` : `0${m}`}' ${s >= 10 ? `${s}` : `0${s}`}"`;
+  }
+
+  /**
+   * Check if north is visible. This is not a perfect solution and is more a work around
+   * @param {OLMap} map the map
+   *
+   * @returns {boolean} true if visible, false otherwise
+   */
+  checkNorth(map: OLMap): boolean {
+    // Check the container value for top middle of the screen
+    // Convert this value to a lat long coordinate
+    const pointXY = [map.getSize()![0] / 2, 1];
+    const pt = toLonLat(map.getCoordinateFromPixel(pointXY), map.getView().getProjection());
+
+    // If user is pass north, long value will start to be positive (other side of the earth).
+    // This will work only for LCC Canada.
+    return pt ? pt[0] > 0 : true;
+  }
+
+  /**
+   * Get north arrow bearing. Angle use to rotate north arrow for non Web Mercator projection
+   * https://www.movable-type.co.uk/scripts/latlong.html
+   * @param {OLMap} map the map
+   *
+   * @returns {string} the arrow angle
+   */
+  getNorthArrowAngle(map: OLMap): string {
+    try {
+      // north value
+      const pointA = { x: NORTH_POLE_POSITION[1], y: NORTH_POLE_POSITION[0] };
+
+      // map center (we use botton parallel to introduce less distortion)
+      const extent = map.getView().calculateExtent();
+      const center: Coordinate = toLonLat([(extent[0] + extent[2]) / 2, extent[1]], map.getView().getProjection());
+      const pointB = { x: center[0], y: center[1] };
+
+      // set info on longitude and latitude
+      const dLon = ((pointB.x - pointA.x) * Math.PI) / 180;
+      const lat1 = (pointA.y * Math.PI) / 180;
+      const lat2 = (pointB.y * Math.PI) / 180;
+
+      // calculate bearing
+      const y = Math.sin(dLon) * Math.cos(lat2);
+      const x = Math.cos(lat1) * Math.sin(lat2) - Math.sin(lat1) * Math.cos(lat2) * Math.cos(dLon);
+      const bearing = (Math.atan2(y, x) * 180) / Math.PI;
+
+      // return angle (180 is pointing north)
+      return ((bearing + 360) % 360).toFixed(1);
+    } catch (error) {
+      return '180.0';
+    }
   }
 }

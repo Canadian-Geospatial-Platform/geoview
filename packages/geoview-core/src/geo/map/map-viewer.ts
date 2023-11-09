@@ -87,10 +87,10 @@ export class MapViewer {
 
   legend2!: Legend2Api;
 
-  // used to access the layers in the footer
+  // used to access the layers
   layers!: LayersApi;
 
-  // used to access the details in footer
+  // used to access the details
   details!: DetailsApi;
 
   // used to access the data table api
