@@ -210,7 +210,7 @@ export function LayersListFooter(props: TypeLayersListProps): JSX.Element {
       </List>
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [layerDataInfo]);
+  }, [layerDataInfo, arrayOfLayerData]);
 
   return (
     <Box sx={sxClasses.detailsContainer}>
