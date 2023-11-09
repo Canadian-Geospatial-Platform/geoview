@@ -183,24 +183,16 @@ export function Datapanel({ layerData, mapId, projectionConfig, language }: Data
   return (
     <Box sx={sxClasses.dataPanel}>
       <DataTableGrid.Root spacing={2} sx={sxClasses.gridContainer}>
-        <DataTableGrid.Left
-          xs={isLayersPanelVisible ? 12 : 0}
-          sm={isEnlargeDataTable ? 0 : 3}
-          md={3}
-          isLayersPanelVisible={isLayersPanelVisible}
-          isEnlargeDataTable={isEnlargeDataTable}
-        >
+        <DataTableGrid.Left xs={isLayersPanelVisible ? 12 : 0} md={3} isLayersPanelVisible={isLayersPanelVisible}>
           <Typography component="p" sx={sxClasses.headline}>
             {t('dataTable.leftPanelHeading')}
           </Typography>
         </DataTableGrid.Left>
         <DataTableGrid.Right
           xs={!isLayersPanelVisible ? 12 : 0}
-          sm={isEnlargeDataTable ? 12 : 9}
           md={9}
           sx={{ display: 'flex', justifyContent: 'right' }}
           isLayersPanelVisible={isLayersPanelVisible}
-          isEnlargeDataTable={isEnlargeDataTable}
         >
           <Button
             type="text"
@@ -221,8 +213,8 @@ export function Datapanel({ layerData, mapId, projectionConfig, language }: Data
                 ...sxClasses.enlargeBtn,
                 marginLeft: '1rem',
                 [theme.breakpoints.up('md')]: { display: 'none' },
-                [theme.breakpoints.between('sm', 'md')]: { display: isEnlargeDataTable && !isLayersPanelVisible ? 'block' : 'none' },
-                [theme.breakpoints.down('sm')]: { display: !isLayersPanelVisible ? 'block' : 'none' },
+                [theme.breakpoints.between('sm', 'md')]: { display: !isLayersPanelVisible ? 'block' : 'none' },
+                [theme.breakpoints.down('md')]: { display: !isLayersPanelVisible ? 'block' : 'none' },
               }}
               onClick={() => setIsLayersPanelVisible(true)}
               tooltip={t('dataTable.close') ?? ''}
@@ -237,19 +229,15 @@ export function Datapanel({ layerData, mapId, projectionConfig, language }: Data
       <DataTableGrid.Root sx={{ marginTop: '0.75rem' }}>
         <DataTableGrid.Left
           isLayersPanelVisible={isLayersPanelVisible}
-          isEnlargeDataTable={isEnlargeDataTable}
           xs={isLayersPanelVisible ? 12 : 0}
-          sm={isEnlargeDataTable ? 0 : 4}
           md={!isEnlargeDataTable ? 4 : 1.25}
         >
           {renderList()}
         </DataTableGrid.Left>
         <DataTableGrid.Right
           xs={!isLayersPanelVisible ? 12 : 0}
-          sm={isEnlargeDataTable ? 12 : 8}
           md={!isEnlargeDataTable ? 8 : 10.75}
           isLayersPanelVisible={isLayersPanelVisible}
-          isEnlargeDataTable={isEnlargeDataTable}
         >
           <CircularProgress
             isLoaded={!isLoading}
