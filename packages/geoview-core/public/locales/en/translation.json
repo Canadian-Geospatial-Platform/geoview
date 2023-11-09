@@ -139,6 +139,7 @@
     "reduceBtn": "Reduce",
     "features": "feature(s)",
     "featureFiltered": "features filtered",
-    "images": "Images"
+    "images": "Images",
+    "close": "Close"
   }
 }

@@ -1,6 +1,6 @@
-import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { Switch, useTheme } from '@mui/material';
+import { Switch } from '@mui/material';
+import { useTheme } from '@mui/material/styles';
 import { Tooltip } from '@/ui';
 import { getSxClasses } from './data-table-style';
 import {

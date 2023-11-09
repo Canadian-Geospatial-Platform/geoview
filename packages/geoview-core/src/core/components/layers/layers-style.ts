@@ -141,6 +141,6 @@ export const getSxClasses = (theme: Theme) => ({
       fontSize: 16,
       noWrap: true,
       marginLeft: 20,
-    }
-  }
+    },
+  },
 });

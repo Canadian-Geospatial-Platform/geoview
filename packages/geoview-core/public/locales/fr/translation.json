@@ -137,6 +137,7 @@
     "reduceBtn": "Réduire",
     "features": "Item(s)",
     "featureFiltered": "Item filtrée(s)",
-    "images": "Images"
+    "images": "Images",
+    "close": "Fermer"
   }
 }

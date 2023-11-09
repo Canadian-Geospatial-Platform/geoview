@@ -1,4 +1,4 @@
-import React, { ReactElement } from 'react';
+import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ExportToCsv } from 'export-to-csv';
 import { type MRT_ColumnDef as MRTColumnDef } from 'material-react-table';
@@ -22,7 +22,7 @@ interface ExportButtonProps {
  */
 function ExportButton({ rows, columns, children }: ExportButtonProps): JSX.Element {
   const { t } = useTranslation<string>();
-  const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
 
   /**
