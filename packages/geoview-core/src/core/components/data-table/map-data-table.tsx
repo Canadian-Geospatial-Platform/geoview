@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState, memo, ReactNode } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, memo, ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import debounce from 'lodash/debounce';
 import startCase from 'lodash/startCase';
@@ -26,7 +26,8 @@ import {
 } from 'material-react-table';
 import { Projection } from 'ol/proj';
 import { Extent } from 'ol/extent';
-import { darken, useTheme } from '@mui/material';
+import { darken } from '@mui/material';
+import { useTheme } from '@mui/material/styles';
 import { difference } from 'lodash';
 import { getUid } from 'ol/util';
 import { Box, Button, IconButton, Tooltip, ZoomInSearchIcon } from '@/ui';
