@@ -39,10 +39,15 @@ export class FeatureInfoEventProcessor extends AbstractEventProcessor {
   static propagateResultSetInfo(mapId: string, layerPath: string, eventType: EventType, resultSets: TypeFeatureInfoResultSets) {
     const store = getGeoViewStore(mapId);
     const layerPathInResultSets = Object.keys(resultSets);
-    const newDetails: TypeArrayOfLayerData = [];
-    layerPathInResultSets.forEach((existingLayerPath) => {
-      if (resultSets[existingLayerPath].data[eventType]?.features?.length) newDetails.push(resultSets[existingLayerPath].data[eventType]!);
-    });
-    if (newDetails.length) store.getState().detailsState.actions.setLayerDataArray(newDetails);
+    if (eventType === 'click') {
+      const newDetails: TypeArrayOfLayerData = [];
+      layerPathInResultSets.forEach((existingLayerPath) => {
+        if (resultSets[existingLayerPath].data[eventType]?.features?.length)
+          newDetails.push(resultSets[existingLayerPath].data[eventType]!);
+      });
+      const storeDetails = store.getState().detailsState.layerDataArray;
+      if (storeDetails.length !== newDetails.length || storeDetails.findIndex((layerData, i) => layerData !== newDetails[i]) !== -1)
+        store.getState().detailsState.actions.setLayerDataArray(newDetails);
+    }
   }
 }
