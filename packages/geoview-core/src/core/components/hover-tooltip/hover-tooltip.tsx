@@ -86,7 +86,7 @@ export function HoverTooltip(): JSX.Element {
         }
       } else if (eventType === 'click') {
         Object.keys(resultSets).every((layerPath) => {
-          const features = resultSets[layerPath]!.data.hover?.features;
+          const features = resultSets[layerPath]!.data.click?.features;
           if (features && features.length > 0 && features[0].geoviewLayerType !== 'ogcWms') {
             [selectedFeature.current] = features;
             return false;
