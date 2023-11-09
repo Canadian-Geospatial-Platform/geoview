@@ -11,7 +11,7 @@ import { MapContext } from '@/core/app-start';
 import { EVENT_NAMES, api } from '@/app';
 import { bboxHighlightPayload } from '@/api/events/payloads/bbox-highlight-payload';
 import { OL_ZOOM_DURATION } from '@/core/utils/constant';
-import { useUIappbarGeolocatorActive } from '@/core/stores/store-interface-and-intial-values/ui-state';
+import { useUIAppbarGeolocatorActive } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import { useMapStoreActions } from '@/core/stores/store-interface-and-intial-values/map-state';
 
 export interface GeoListItem {
@@ -45,7 +45,7 @@ export function Geolocator() {
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
   // set the active (visible) or not active (hidden) from geolocator button click
-  const active = useUIappbarGeolocatorActive();
+  const active = useUIAppbarGeolocatorActive();
   const { showClickMarker } = useMapStoreActions();
 
   /**

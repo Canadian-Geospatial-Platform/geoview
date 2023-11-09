@@ -91,23 +91,23 @@ importers:
       '@babel/cli': ^7.17.0
       '@babel/core': ^7.17.0
       '@babel/eslint-parser': ^7.17.0
-      '@babel/plugin-proposal-class-properties': ^7.16.7
       '@babel/plugin-proposal-decorators': ^7.17.0
       '@babel/plugin-proposal-do-expressions': ^7.16.7
       '@babel/plugin-proposal-export-default-from': ^7.16.7
-      '@babel/plugin-proposal-export-namespace-from': ^7.16.7
       '@babel/plugin-proposal-function-bind': ^7.16.7
       '@babel/plugin-proposal-function-sent': ^7.16.7
-      '@babel/plugin-proposal-json-strings': ^7.16.7
-      '@babel/plugin-proposal-logical-assignment-operators': ^7.16.7
-      '@babel/plugin-proposal-nullish-coalescing-operator': ^7.16.7
-      '@babel/plugin-proposal-numeric-separator': ^7.16.7
-      '@babel/plugin-proposal-optional-chaining': ^7.16.7
       '@babel/plugin-proposal-pipeline-operator': ^7.16.7
-      '@babel/plugin-proposal-private-methods': ^7.16.11
       '@babel/plugin-proposal-throw-expressions': ^7.16.7
       '@babel/plugin-syntax-dynamic-import': ^7.8.3
       '@babel/plugin-syntax-import-meta': ^7.10.4
+      '@babel/plugin-transform-class-properties': ^7.22.0
+      '@babel/plugin-transform-export-namespace-from': ^7.22.0
+      '@babel/plugin-transform-json-strings': ^7.22.0
+      '@babel/plugin-transform-logical-assignment-operators': ^7.22.0
+      '@babel/plugin-transform-nullish-coalescing-operator': ^7.22.0
+      '@babel/plugin-transform-numeric-separator': ^7.22.0
+      '@babel/plugin-transform-optional-chaining': ^7.22.0
+      '@babel/plugin-transform-private-methods': ^7.22.0
       '@babel/plugin-transform-runtime': ^7.17.0
       '@babel/preset-env': ^7.16.11
       '@babel/preset-react': ^7.16.7
@@ -128,7 +128,6 @@ importers:
       '@types/jest': ^27.4.0
       '@types/lodash': ^4.14.188
       '@types/lodash-webpack-plugin': ^0.11.6
-      '@types/ol': ^7.0.0
       '@types/proj4': ^2.5.2
       '@types/react': ^18.2.0
       '@types/react-dom': ^18.2.0
@@ -211,7 +210,7 @@ importers:
       '@mui/x-date-pickers': 6.18.0_i2dqwi6ey3powvrqceld3ydqja
       '@nieuwlandgeo/sldreader': 0.3.1_ol@8.1.0
       ajv: 8.12.0
-      axios: 1.6.0
+      axios: 1.6.1
       dayjs: 1.11.10
       domhandler: 4.3.1
       eventemitter3: 4.0.7
@@ -242,23 +241,23 @@ importers:
       '@babel/cli': 7.23.0_@babel+core@7.23.2
       '@babel/core': 7.23.2
       '@babel/eslint-parser': 7.22.15_7tqviwslgl2c353yttptk2vsmi
-      '@babel/plugin-proposal-class-properties': 7.18.6_@babel+core@7.23.2
       '@babel/plugin-proposal-decorators': 7.23.2_@babel+core@7.23.2
       '@babel/plugin-proposal-do-expressions': 7.22.5_@babel+core@7.23.2
       '@babel/plugin-proposal-export-default-from': 7.22.17_@babel+core@7.23.2
-      '@babel/plugin-proposal-export-namespace-from': 7.18.9_@babel+core@7.23.2
       '@babel/plugin-proposal-function-bind': 7.22.5_@babel+core@7.23.2
       '@babel/plugin-proposal-function-sent': 7.22.5_@babel+core@7.23.2
-      '@babel/plugin-proposal-json-strings': 7.18.6_@babel+core@7.23.2
-      '@babel/plugin-proposal-logical-assignment-operators': 7.20.7_@babel+core@7.23.2
-      '@babel/plugin-proposal-nullish-coalescing-operator': 7.18.6_@babel+core@7.23.2
-      '@babel/plugin-proposal-numeric-separator': 7.18.6_@babel+core@7.23.2
-      '@babel/plugin-proposal-optional-chaining': 7.21.0_@babel+core@7.23.2
       '@babel/plugin-proposal-pipeline-operator': 7.22.15_@babel+core@7.23.2
-      '@babel/plugin-proposal-private-methods': 7.18.6_@babel+core@7.23.2
       '@babel/plugin-proposal-throw-expressions': 7.22.5_@babel+core@7.23.2
       '@babel/plugin-syntax-dynamic-import': 7.8.3_@babel+core@7.23.2
       '@babel/plugin-syntax-import-meta': 7.10.4_@babel+core@7.23.2
+      '@babel/plugin-transform-class-properties': 7.22.5_@babel+core@7.23.2
+      '@babel/plugin-transform-export-namespace-from': 7.22.11_@babel+core@7.23.2
+      '@babel/plugin-transform-json-strings': 7.22.11_@babel+core@7.23.2
+      '@babel/plugin-transform-logical-assignment-operators': 7.22.11_@babel+core@7.23.2
+      '@babel/plugin-transform-nullish-coalescing-operator': 7.22.11_@babel+core@7.23.2
+      '@babel/plugin-transform-numeric-separator': 7.22.11_@babel+core@7.23.2
+      '@babel/plugin-transform-optional-chaining': 7.23.0_@babel+core@7.23.2
+      '@babel/plugin-transform-private-methods': 7.22.5_@babel+core@7.23.2
       '@babel/plugin-transform-runtime': 7.23.2_@babel+core@7.23.2
       '@babel/preset-env': 7.23.2_@babel+core@7.23.2
       '@babel/preset-react': 7.22.15_@babel+core@7.23.2
@@ -271,7 +270,6 @@ importers:
       '@types/jest': 27.5.2
       '@types/lodash': 4.14.201
       '@types/lodash-webpack-plugin': 0.11.9
-      '@types/ol': 7.0.0
       '@types/proj4': 2.5.5
       '@types/react': 18.2.37
       '@types/react-dom': 18.2.15
@@ -468,7 +466,6 @@ importers:
       '@babel/eslint-parser': ^7.17.0
       '@babel/runtime': ^7.17.0
       '@types/lodash': ^4.14.188
-      '@types/ol': ^7.0.0
       '@typescript-eslint/eslint-plugin': ^5.10.2
       '@typescript-eslint/parser': ^5.10.2
       eslint: ^8.8.0
@@ -492,15 +489,12 @@ importers:
       geoview-core: link:../geoview-core
       lodash: 4.17.21
       ol: 8.1.0
-      react: 18.2.0
-      react-dom: 18.2.0_react@18.2.0
       react-draggable: 4.4.6_biqbaboplfbrettd7655fr4n2y
     devDependencies:
       '@babel/core': 7.23.2
       '@babel/eslint-parser': 7.22.15_7tqviwslgl2c353yttptk2vsmi
       '@babel/runtime': 7.23.2
       '@types/lodash': 4.14.201
-      '@types/ol': 7.0.0
       '@typescript-eslint/eslint-plugin': 5.62.0_mpikbcve4trf6prkkx6wylmjya
       '@typescript-eslint/parser': 5.62.0_bdjfo4nt5w6vivygtrkrhl46dy
       eslint: 8.53.0
@@ -513,6 +507,8 @@ importers:
       eslint-plugin-react: 7.33.2_eslint@8.53.0
       eslint-plugin-react-hooks: 4.6.0_eslint@8.53.0
       prettier: 2.8.8
+      react: 18.2.0
+      react-dom: 18.2.0_react@18.2.0
       typescript: 4.9.5
 
 packages:
@@ -854,18 +850,6 @@ packages:
       '@babel/plugin-transform-optional-chaining': 7.23.0_@babel+core@7.23.2
     dev: true
 
-  /@babel/plugin-proposal-class-properties/7.18.6_@babel+core@7.23.2:
-    resolution: {integrity: sha512-cumfXOF0+nzZrrN8Rf0t7M+tF6sZc7vhQwYQck9q1/5w2OExlD+b4v4RpMJFaV1Z7WcDRgO6FqvxqxGlwo+RHQ==}
-    engines: {node: '>=6.9.0'}
-    deprecated: This proposal has been merged to the ECMAScript standard and thus this plugin is no longer maintained. Please use @babel/plugin-transform-class-properties instead.
-    peerDependencies:
-      '@babel/core': ^7.0.0-0
-    dependencies:
-      '@babel/core': 7.23.2
-      '@babel/helper-create-class-features-plugin': 7.22.15_@babel+core@7.23.2
-      '@babel/helper-plugin-utils': 7.22.5
-    dev: true
-
   /@babel/plugin-proposal-decorators/7.23.2_@babel+core@7.23.2:
     resolution: {integrity: sha512-eR0gJQc830fJVGz37oKLvt9W9uUIQSAovUl0e9sJ3YeO09dlcoBVYD3CLrjCj4qHdXmfiyTyFt8yeQYSN5fxLg==}
     engines: {node: '>=6.9.0'}
@@ -902,18 +886,6 @@ packages:
       '@babel/plugin-syntax-export-default-from': 7.22.5_@babel+core@7.23.2
     dev: true
 
-  /@babel/plugin-proposal-export-namespace-from/7.18.9_@babel+core@7.23.2:
-    resolution: {integrity: sha512-k1NtHyOMvlDDFeb9G5PhUXuGj8m/wiwojgQVEhJ/fsVsMCpLyOP4h0uGEjYJKrRI+EVPlb5Jk+Gt9P97lOGwtA==}
-    engines: {node: '>=6.9.0'}
-    deprecated: This proposal has been merged to the ECMAScript standard and thus this plugin is no longer maintained. Please use @babel/plugin-transform-export-namespace-from instead.
-    peerDependencies:
-      '@babel/core': ^7.0.0-0
-    dependencies:
-      '@babel/core': 7.23.2
-      '@babel/helper-plugin-utils': 7.22.5
-      '@babel/plugin-syntax-export-namespace-from': 7.8.3_@babel+core@7.23.2
-    dev: true
-
   /@babel/plugin-proposal-function-bind/7.22.5_@babel+core@7.23.2:
     resolution: {integrity: sha512-ckAugfDtdcrXKP49z7K7JI7QkA8SRidmsKxLizH8mg0UWOvcmvEd9/VDLzFcWlZqchvLDPUYpwuXNGAYjsscrw==}
     engines: {node: '>=6.9.0'}
@@ -937,67 +909,6 @@ packages:
       '@babel/plugin-syntax-function-sent': 7.22.5_@babel+core@7.23.2
     dev: true
 
-  /@babel/plugin-proposal-json-strings/7.18.6_@babel+core@7.23.2:
-    resolution: {integrity: sha512-lr1peyn9kOdbYc0xr0OdHTZ5FMqS6Di+H0Fz2I/JwMzGmzJETNeOFq2pBySw6X/KFL5EWDjlJuMsUGRFb8fQgQ==}
-    engines: {node: '>=6.9.0'}
-    deprecated: This proposal has been merged to the ECMAScript standard and thus this plugin is no longer maintained. Please use @babel/plugin-transform-json-strings instead.
-    peerDependencies:
-      '@babel/core': ^7.0.0-0
-    dependencies:
-      '@babel/core': 7.23.2
-      '@babel/helper-plugin-utils': 7.22.5
-      '@babel/plugin-syntax-json-strings': 7.8.3_@babel+core@7.23.2
-    dev: true
-
-  /@babel/plugin-proposal-logical-assignment-operators/7.20.7_@babel+core@7.23.2:
-    resolution: {integrity: sha512-y7C7cZgpMIjWlKE5T7eJwp+tnRYM89HmRvWM5EQuB5BoHEONjmQ8lSNmBUwOyy/GFRsohJED51YBF79hE1djug==}
-    engines: {node: '>=6.9.0'}
-    deprecated: This proposal has been merged to the ECMAScript standard and thus this plugin is no longer maintained. Please use @babel/plugin-transform-logical-assignment-operators instead.
-    peerDependencies:
-      '@babel/core': ^7.0.0-0
-    dependencies:
-      '@babel/core': 7.23.2
-      '@babel/helper-plugin-utils': 7.22.5
-      '@babel/plugin-syntax-logical-assignment-operators': 7.10.4_@babel+core@7.23.2
-    dev: true
-
-  /@babel/plugin-proposal-nullish-coalescing-operator/7.18.6_@babel+core@7.23.2:
-    resolution: {integrity: sha512-wQxQzxYeJqHcfppzBDnm1yAY0jSRkUXR2z8RePZYrKwMKgMlE8+Z6LUno+bd6LvbGh8Gltvy74+9pIYkr+XkKA==}
-    engines: {node: '>=6.9.0'}
-    deprecated: This proposal has been merged to the ECMAScript standard and thus this plugin is no longer maintained. Please use @babel/plugin-transform-nullish-coalescing-operator instead.
-    peerDependencies:
-      '@babel/core': ^7.0.0-0
-    dependencies:
-      '@babel/core': 7.23.2
-      '@babel/helper-plugin-utils': 7.22.5
-      '@babel/plugin-syntax-nullish-coalescing-operator': 7.8.3_@babel+core@7.23.2
-    dev: true
-
-  /@babel/plugin-proposal-numeric-separator/7.18.6_@babel+core@7.23.2:
-    resolution: {integrity: sha512-ozlZFogPqoLm8WBr5Z8UckIoE4YQ5KESVcNudyXOR8uqIkliTEgJ3RoketfG6pmzLdeZF0H/wjE9/cCEitBl7Q==}
-    engines: {node: '>=6.9.0'}
-    deprecated: This proposal has been merged to the ECMAScript standard and thus this plugin is no longer maintained. Please use @babel/plugin-transform-numeric-separator instead.
-    peerDependencies:
-      '@babel/core': ^7.0.0-0
-    dependencies:
-      '@babel/core': 7.23.2
-      '@babel/helper-plugin-utils': 7.22.5
-      '@babel/plugin-syntax-numeric-separator': 7.10.4_@babel+core@7.23.2
-    dev: true
-
-  /@babel/plugin-proposal-optional-chaining/7.21.0_@babel+core@7.23.2:
-    resolution: {integrity: sha512-p4zeefM72gpmEe2fkUr/OnOXpWEf8nAgk7ZYVqqfFiyIG7oFfVZcCrU64hWn5xp4tQ9LkV4bTIa5rD0KANpKNA==}
-    engines: {node: '>=6.9.0'}
-    deprecated: This proposal has been merged to the ECMAScript standard and thus this plugin is no longer maintained. Please use @babel/plugin-transform-optional-chaining instead.
-    peerDependencies:
-      '@babel/core': ^7.0.0-0
-    dependencies:
-      '@babel/core': 7.23.2
-      '@babel/helper-plugin-utils': 7.22.5
-      '@babel/helper-skip-transparent-expression-wrappers': 7.22.5
-      '@babel/plugin-syntax-optional-chaining': 7.8.3_@babel+core@7.23.2
-    dev: true
-
   /@babel/plugin-proposal-pipeline-operator/7.22.15_@babel+core@7.23.2:
     resolution: {integrity: sha512-tk81rXNA4T/AQc4zFhIIJp9OSmY8rmy46G7LXiPm4+/X8A0A0f9ri6yjEIj3fYqZQYrQnX9uuWXppPGsEesYtg==}
     engines: {node: '>=6.9.0'}
@@ -1007,18 +918,6 @@ packages:
       '@babel/core': 7.23.2
       '@babel/helper-plugin-utils': 7.22.5
       '@babel/plugin-syntax-pipeline-operator': 7.22.5_@babel+core@7.23.2
-    dev: true
-
-  /@babel/plugin-proposal-private-methods/7.18.6_@babel+core@7.23.2:
-    resolution: {integrity: sha512-nutsvktDItsNn4rpGItSNV2sz1XwS+nfU0Rg8aCx3W3NOKVzdMjJRu0O5OkgDp3ZGICSTbgRpxZoWsxoKRvbeA==}
-    engines: {node: '>=6.9.0'}
-    deprecated: This proposal has been merged to the ECMAScript standard and thus this plugin is no longer maintained. Please use @babel/plugin-transform-private-methods instead.
-    peerDependencies:
-      '@babel/core': ^7.0.0-0
-    dependencies:
-      '@babel/core': 7.23.2
-      '@babel/helper-create-class-features-plugin': 7.22.15_@babel+core@7.23.2
-      '@babel/helper-plugin-utils': 7.22.5
     dev: true
 
   /@babel/plugin-proposal-private-property-in-object/7.21.0-placeholder-for-preset-env.2_@babel+core@7.23.2:
@@ -2892,6 +2791,7 @@ packages:
 
   /@petamoriken/float16/3.8.4:
     resolution: {integrity: sha512-kB+NJ5Br56ZhElKsf0pM7/PQfrDdDVMRz8f0JM6eVOGE+L89z9hwcst9QvWBBnazzuqGTGtPsJNZoQ1JdNiGSQ==}
+    dev: false
 
   /@polka/url/1.0.0-next.23:
     resolution: {integrity: sha512-C16M+IYz0rgRhWZdCmK+h58JMv8vijAA61gmz2rspCSwKwzBebpdcsiUmwrtJRdphuY30i6BSLEOP8ppbNLyLg==}
@@ -3168,13 +3068,6 @@ packages:
     resolution: {integrity: sha512-nekiGu2NDb1BcVofVcEKMIwzlx4NjHlcjhoxxKBNLtz15Y1z7MYf549DFvkHSId02Ax6kGwWntIBPC3l/JZcmw==}
     dependencies:
       undici-types: 5.26.5
-    dev: true
-
-  /@types/ol/7.0.0:
-    resolution: {integrity: sha512-JKNA4FYdgBz1GidTsrHu4PPPbCCpddXRG0qDpX8Cz08n2RxJ5PZIQaiAGQKO0y2pNuy7qBQqgOu/rQwttj+L3w==}
-    deprecated: This is a stub types definition. ol provides its own type definitions, so you do not need this installed.
-    dependencies:
-      ol: 8.1.0
     dev: true
 
   /@types/parse-json/4.0.2:
@@ -3939,8 +3832,8 @@ packages:
     engines: {node: '>=4'}
     dev: true
 
-  /axios/1.6.0:
-    resolution: {integrity: sha512-EZ1DYihju9pwVB+jg67ogm+Tmqc6JmhamRN6I4Zt8DfZu5lbcQGw3ozH9lFejSJgs/ibaef3A9PMXPLeefFGJg==}
+  /axios/1.6.1:
+    resolution: {integrity: sha512-vfBmhDpKafglh0EldBEbVuoe7DyAavGSLWhuSm5ZSEKQnHhBf0xAAwybbNH1IkrJNGnS/VG4I5yxig1pCEXE4g==}
     dependencies:
       follow-redirects: 1.15.3
       form-data: 4.0.0
@@ -4840,6 +4733,7 @@ packages:
 
   /earcut/2.2.4:
     resolution: {integrity: sha512-/pjZsA1b4RPHbeWZQn66SWS8nZZWLQQ23oE3Eam7aroEFGEvwKAsJfZ9ytiEMycfzXWpca4FA9QIOehf7PocBQ==}
+    dev: false
 
   /ee-first/1.1.1:
     resolution: {integrity: sha512-WMwm9LhRUo+WUaRN+vRuETqG89IgZphVSNkdFgeb6sS/E4OrDIN7t48CAewSHXc6C8lefD8KKfr5vY61brQlow==}
@@ -5760,6 +5654,7 @@ packages:
       web-worker: 1.2.0
       xml-utils: 1.7.0
       zstddec: 0.1.0
+    dev: false
 
   /get-caller-file/2.0.5:
     resolution: {integrity: sha512-DyFP3BM/3YHTQOCUL/w0OZHR0lpKeGrxotcHWcqNEdnltqFwXVfhEBQ94eIo34AfQpo0rGki4cyIiftY06h2Fg==}
@@ -6201,6 +6096,7 @@ packages:
 
   /ieee754/1.2.1:
     resolution: {integrity: sha512-dcyqhDvX1C46lXZcVqCpK+FtMRQVdIMN6/Df5js2zouUsqG7I6sFxitIC+7KYK29KdXOLHdu9zL4sFnoVQnqaA==}
+    dev: false
 
   /ignore/5.2.4:
     resolution: {integrity: sha512-MAb38BcSbH0eHNBxn7ql2NH/kX33OkB3lZ1BNdh7ENeRChHTYsTvWrMubiIAMNS2llXEEgZ1MUOBtXChP3kaFQ==}
@@ -7261,6 +7157,7 @@ packages:
 
   /lerc/3.0.0:
     resolution: {integrity: sha512-Rm4J/WaHhRa93nCN2mwWDZFoRVF18G1f47C+kvQWyHGEZxFpTUi73p7lMVSAndyxGt6lJ2/CFbOcf9ra5p8aww==}
+    dev: false
 
   /leven/3.1.0:
     resolution: {integrity: sha512-qsda+H8jTaUaN/x5vzW2rzc+8Rw4TAQ/4KjB46IwK5VH+IlVeeeje/EoZRpiXvIqjFgK84QffqPztGI3VBLG1A==}
@@ -7723,6 +7620,7 @@ packages:
       geotiff: 2.1.0
       pbf: 3.2.1
       rbush: 3.0.1
+    dev: false
 
   /on-finished/2.4.1:
     resolution: {integrity: sha512-oVlzkg3ENAhCk2zdv7IJwd/QUD4z2RxRwpkcGY8psCVcCYZNq4wYnVWALHM+brtuJjePWiYF/ClmuDr8Ch5+kg==}
@@ -7818,6 +7716,7 @@ packages:
 
   /pako/2.1.0:
     resolution: {integrity: sha512-w+eufiZ1WuJYgPXbV/PO3NCMEc3xqylkKHzp8bxp1uW4qaSNQUkwmLLEc3kKsfz8lpV1F8Ht3U1Cm+9Srog2ug==}
+    dev: false
 
   /param-case/3.0.4:
     resolution: {integrity: sha512-RXlj7zCYokReqWpOPH9oYivUzLYZ5vAPIfEmCTNViosC78F8F0H9y7T7gG2M39ymgutxF5gcFEsyZQSph9Bp3A==}
@@ -7834,6 +7733,7 @@ packages:
 
   /parse-headers/2.0.5:
     resolution: {integrity: sha512-ft3iAoLOB/MlwbNXgzy43SWGP6sQki2jQvAyBg/zDFAgr9bfNWZIUj42Kw2eJIl8kEi4PbgE6U1Zau/HwI75HA==}
+    dev: false
 
   /parse-json/5.2.0:
     resolution: {integrity: sha512-ayCKvm/phCGxOkYRSCM82iDwct8/EonSEgCSxWxD7ve6jHggsFl4fZVQBPRNgQoKiuV/odhFrGzQXZwbifC8Rg==}
@@ -7896,6 +7796,7 @@ packages:
     dependencies:
       ieee754: 1.2.1
       resolve-protobuf-schema: 2.1.0
+    dev: false
 
   /picocolors/1.0.0:
     resolution: {integrity: sha512-1fygroTLlHu66zi26VoTDv8yRgm0Fccecssto+MhsZ0D/DGW2sm8E8AjW7NU5VVTRt5GxbeZ5qBuJr+HyLYkjQ==}
@@ -8062,6 +7963,7 @@ packages:
 
   /protocol-buffers-schema/3.6.0:
     resolution: {integrity: sha512-TdDRD+/QNdrCGCE7v8340QyuXd4kIWIgapsE2+n/SaGiSSbomYl4TjHlvIoCWRpE7wFt02EpB35VVA2ImcBVqw==}
+    dev: false
 
   /proxy-addr/2.0.7:
     resolution: {integrity: sha512-llQsMLSUDUPT44jdrU/O37qlnifitDP+ZwrmmZcoSKyLKvtZxpyV0n2/bD/N4tBAAZ/gJEdZU7KMraoK1+XYAg==}
@@ -8111,9 +8013,11 @@ packages:
   /quick-lru/6.1.2:
     resolution: {integrity: sha512-AAFUA5O1d83pIHEhJwWCq/RQcRukCkn/NSm2QsTEMle5f2hP0ChI2+3Xb051PZCkLryI/Ir1MVKviT2FIloaTQ==}
     engines: {node: '>=12'}
+    dev: false
 
   /quickselect/2.0.0:
     resolution: {integrity: sha512-RKJ22hX8mHe3Y6wH/N3wCM6BWtjaxIyyUIkpHOvfFnxdI4yD4tBXEBKSbriGujF6jnSVkJrffuo6vxACiSSxIw==}
+    dev: false
 
   /raf-schd/4.0.3:
     resolution: {integrity: sha512-tQkJl2GRWh83ui2DiPTJz9wEiMN20syf+5oKfB03yYP7ioZcJwsIK8FjrtLwH1m7C7e+Tt2yYBlrOpdT+dyeIQ==}
@@ -8144,6 +8048,7 @@ packages:
     resolution: {integrity: sha512-XRaVO0YecOpEuIvbhbpTrZgoiI6xBlz6hnlr6EHhd+0x9ase6EmeN+hdwwUaJvLcsFFQ8iWVF1GAK1yB0BWi0w==}
     dependencies:
       quickselect: 2.0.0
+    dev: false
 
   /react-beautiful-dnd/13.1.1_biqbaboplfbrettd7655fr4n2y:
     resolution: {integrity: sha512-0Lvs4tq2VcrEjEgDXHjT98r+63drkKEgqyxdA7qD3mvKwga6a5SscbdLPO2IExotU1jW8L0Ksdl0Cj2AF67nPQ==}
@@ -8439,6 +8344,7 @@ packages:
     resolution: {integrity: sha512-kI5ffTiZWmJaS/huM8wZfEMer1eRd7oJQhDuxeCLe3t7N7mX3z94CN0xPxBQxFYQTSNz9T0i+v6inKqSdK8xrQ==}
     dependencies:
       protocol-buffers-schema: 3.6.0
+    dev: false
 
   /resolve.exports/1.1.1:
     resolution: {integrity: sha512-/NtpHNDN7jWhAaQ9BvBUYZ6YTXsRBgfqWFWP7BZBaoMJO/I3G5OFzvTuWNlZC3aPjins1F+TNrLKsGbH4rfsRQ==}
@@ -9505,6 +9411,7 @@ packages:
 
   /web-worker/1.2.0:
     resolution: {integrity: sha512-PgF341avzqyx60neE9DD+XS26MMNMoUQRz9NOZwW32nPQrF6p77f1htcnjBSEV8BGMKZ16choqUG4hyI0Hx7mA==}
+    dev: false
 
   /webidl-conversions/3.0.1:
     resolution: {integrity: sha512-2JAn3z8AR6rjK8Sm8orRC0h/bcl/DqL7tRPdGZ4I1CjdF+EaMLmYxBHyXuKL849eucPFhvBoxMsflfOb8kxaeQ==}
@@ -9872,6 +9779,7 @@ packages:
 
   /xml-utils/1.7.0:
     resolution: {integrity: sha512-bWB489+RQQclC7A9OW8e5BzbT8Tu//jtAOvkYwewFr+Q9T9KDGvfzC1lp0pYPEQPEoPQLDkmxkepSC/2gIAZGw==}
+    dev: false
 
   /xmlchars/2.2.0:
     resolution: {integrity: sha512-JZnDKK8B0RCDw84FNdDAIpZK+JuJw+s7Lz8nksI7SIuU3UXJJslUthsi+uWBUYOwPFwW7W7PRLRfUKpxjtjFCw==}
@@ -9931,6 +9839,7 @@ packages:
 
   /zstddec/0.1.0:
     resolution: {integrity: sha512-w2NTI8+3l3eeltKAdK8QpiLo/flRAr2p8AGeakfMZOXBxOg9HIu4LVDxBi81sYgVhFhdJjv1OrB5ssI8uFPoLg==}
+    dev: false
 
   /zustand/4.4.6_u5zja476buyywzbvglb2fbhaii:
     resolution: {integrity: sha512-Rb16eW55gqL4W2XZpJh0fnrATxYEG3Apl2gfHTyDSE965x/zxslTikpNch0JgNjJA9zK6gEFW8Fl6d1rTZaqgg==}

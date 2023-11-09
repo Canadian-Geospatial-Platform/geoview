@@ -7,8 +7,8 @@ export interface IUIState {
   geoLocatorActive: boolean;
 
   actions: {
-    setGeolocatorActive: (active: boolean) => void;
     setFooterBarExpanded: (expanded: boolean) => void;
+    setGeolocatorActive: (active: boolean) => void;
   };
 }
 
@@ -43,7 +43,7 @@ export function initializeUIState(set: TypeSetStore, get: TypeGetStore): IUIStat
 // **********************************************************
 // UI state selectors
 // **********************************************************
+export const useUIAppbarGeolocatorActive = () => useStore(useGeoViewStore(), (state) => state.uiState.geoLocatorActive);
 export const useUIFooterBarExpanded = () => useStore(useGeoViewStore(), (state) => state.uiState.footerBarExpanded);
-export const useUIappbarGeolocatorActive = () => useStore(useGeoViewStore(), (state) => state.uiState.geoLocatorActive);
 
 export const useUIStoreActions = () => useStore(useGeoViewStore(), (state) => state.uiState.actions);

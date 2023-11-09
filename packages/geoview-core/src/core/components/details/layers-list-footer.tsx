@@ -1,8 +1,12 @@
 /* eslint-disable react/require-default-props */
 import React, { useEffect, useState, useRef, useCallback } from 'react';
-import { useTheme } from '@mui/material/styles';
+
 import { useTranslation } from 'react-i18next';
-import { getUid } from 'ol/util';
+
+import { useTheme } from '@mui/material/styles';
+
+import { getUid } from 'ol/util'; // TODO no ol in component
+
 import {
   ListItemText,
   ListItem,
@@ -51,19 +55,22 @@ interface TypeLayersListProps {
  */
 export function LayersListFooter(props: TypeLayersListProps): JSX.Element {
   const { arrayOfLayerData, mapId } = props;
+
   const { t } = useTranslation<string>();
+
   const theme = useTheme();
+  const sxClasses = getSxClasses(theme);
+
+  // internal state
   const selectedFeatures = useRef<string[]>([]);
-
-  const selectedLayerPath = useDetailsStoreSelectedLayerPath();
-  const { setSelectedLayerPath } = useDetailsStoreActions();
-
   const [layerDataInfo, setLayerDataInfo] = useState<TypeLayerData | null>(null);
   const [currentFeatureIndex, setCurrentFeatureIndex] = useState<number>(0);
   const [isClearAllCheckboxes, setIsClearAllCheckboxes] = useState<boolean>(false);
   const [disableClearAllBtn, setDisableClearAllBtn] = useState<boolean>(false);
 
-  const sxClasses = getSxClasses(theme);
+  // get values from store
+  const selectedLayerPath = useDetailsStoreSelectedLayerPath();
+  const { setSelectedLayerPath } = useDetailsStoreActions();
 
   // Returns the index of matching layer based on the found layer path
   const findLayerPathIndex = (layerDataArray: TypeArrayOfLayerData, layerPathSearch: string): number => {

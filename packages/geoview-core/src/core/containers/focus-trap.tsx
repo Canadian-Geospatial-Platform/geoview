@@ -45,11 +45,11 @@ export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
   const { setCrosshairActive } = useAppStoreActions();
   const mapElementStore = useMapElement();
 
-  // ? useRef, if not mapElementStore is undefined - happen because the value is used inside a event listener
+  // ? useRef, if not mapElementStore is undefined - happen because the value is used inside an event listener
   const mapElementRef = useRef(mapElementStore);
   mapElementRef.current = mapElementStore;
 
-  // ? use reference HTML element to disable scrolling
+  // ? use reference HTML element to disable scrolling - happen because the value is used inside an event listener
   const mapHTMLElementRef = useRef<HTMLElement>();
   if (mapElementRef.current !== undefined) mapHTMLElementRef.current = mapElementRef.current.getTargetElement();
 

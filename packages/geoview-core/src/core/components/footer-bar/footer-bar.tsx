@@ -24,16 +24,16 @@ export function Footerbar(): JSX.Element {
   const mapConfig = useContext(MapContext);
   const { mapId } = mapConfig;
 
-  const footerBarRef = useRef<HTMLDivElement>();
-
   const theme = useTheme();
+
+  // internal state
+  const footerBarRef = useRef<HTMLDivElement>();
+  // if screen size is medium and up
+  const deviceSizeMedUp = useMediaQuery(theme.breakpoints.up('sm'));
 
   // get value from the store
   // if map is static do not display mouse position or rotation controls
   const interaction = useMapInteraction();
-
-  // if screen size is medium and up
-  const deviceSizeMedUp = useMediaQuery(theme.breakpoints.up('sm'));
 
   return (
     <Box id={`${mapId}-footerBar`} sx={sxClassesFooterBar.footerBarContainer} ref={footerBarRef as MutableRefObject<HTMLDivElement>}>

@@ -50,9 +50,10 @@ interface OverviewMapToggleProps {
 export function OverviewMapToggle(props: OverviewMapToggleProps): JSX.Element {
   const { overviewMap } = props;
 
-  const [status, setStatus] = useState(true);
   const { t } = useTranslation<string>();
 
+  // internal state
+  const [status, setStatus] = useState(true);
   const divRef = useRef<HTMLDivElement>(null);
 
   // TODO: Remove useStyle
