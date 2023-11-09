@@ -9,6 +9,7 @@ interface DataTableGridProps extends GridProps {
 interface DataTableGridPanelProps extends GridProps {
   children: ReactNode;
   isLayersPanelVisible: boolean;
+  isEnlargeDataTable: boolean;
 }
 
 /**
@@ -30,11 +31,18 @@ function DataTableGridRoot({ children, ...rest }: DataTableGridProps) {
  * @param {boolean} isLayersPanelVisible panel visibility
  * @returns JSX.Element
  */
-function DataTableGridLeftPanel({ children, isLayersPanelVisible = false, ...rest }: DataTableGridPanelProps) {
+function DataTableGridLeftPanel({ children, isLayersPanelVisible = false, isEnlargeDataTable = false, ...rest }: DataTableGridPanelProps) {
   const theme = useTheme();
 
   return (
-    <Grid item sx={{ [theme.breakpoints.down('sm')]: { display: isLayersPanelVisible ? 'block' : 'none' } }} {...rest}>
+    <Grid
+      item
+      sx={{
+        [theme.breakpoints.down('md')]: { display: isLayersPanelVisible ? 'block !important' : 'none' },
+        [theme.breakpoints.between('sm', 'md')]: { display: isEnlargeDataTable ? 'none' : 'block' },
+      }}
+      {...rest}
+    >
       {children}
     </Grid>
   );
@@ -54,7 +62,7 @@ function DataTableGridRightPanel({ children, isLayersPanelVisible = false, ...re
       sx={{
         paddingLeft: '1rem',
         position: 'relative',
-        [theme.breakpoints.down('sm')]: { display: !isLayersPanelVisible ? 'block' : 'none', minHeight: '250px' },
+        [theme.breakpoints.down('md')]: { display: !isLayersPanelVisible ? 'block' : 'none', minHeight: '250px' },
       }}
       {...rest}
     >

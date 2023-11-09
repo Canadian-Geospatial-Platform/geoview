@@ -183,16 +183,24 @@ export function Datapanel({ layerData, mapId, projectionConfig, language }: Data
   return (
     <Box sx={sxClasses.dataPanel}>
       <DataTableGrid.Root spacing={2} sx={sxClasses.gridContainer}>
-        <DataTableGrid.Left sm={3} xs={isLayersPanelVisible ? 12 : 0} isLayersPanelVisible={isLayersPanelVisible}>
+        <DataTableGrid.Left
+          xs={isLayersPanelVisible ? 12 : 0}
+          sm={isEnlargeDataTable ? 0 : 3}
+          md={3}
+          isLayersPanelVisible={isLayersPanelVisible}
+          isEnlargeDataTable={isEnlargeDataTable}
+        >
           <Typography component="p" sx={sxClasses.headline}>
             {t('dataTable.leftPanelHeading')}
           </Typography>
         </DataTableGrid.Left>
         <DataTableGrid.Right
-          sm={9}
           xs={!isLayersPanelVisible ? 12 : 0}
+          sm={isEnlargeDataTable ? 12 : 9}
+          md={9}
           sx={{ display: 'flex', justifyContent: 'right' }}
           isLayersPanelVisible={isLayersPanelVisible}
+          isEnlargeDataTable={isEnlargeDataTable}
         >
           <Button
             type="text"
@@ -212,7 +220,8 @@ export function Datapanel({ layerData, mapId, projectionConfig, language }: Data
               sx={{
                 ...sxClasses.enlargeBtn,
                 marginLeft: '1rem',
-                [theme.breakpoints.up('sm')]: { display: 'none' },
+                [theme.breakpoints.up('md')]: { display: 'none' },
+                [theme.breakpoints.between('sm', 'md')]: { display: isEnlargeDataTable && !isLayersPanelVisible ? 'block' : 'none' },
                 [theme.breakpoints.down('sm')]: { display: !isLayersPanelVisible ? 'block' : 'none' },
               }}
               onClick={() => setIsLayersPanelVisible(true)}
@@ -228,15 +237,19 @@ export function Datapanel({ layerData, mapId, projectionConfig, language }: Data
       <DataTableGrid.Root sx={{ marginTop: '0.75rem' }}>
         <DataTableGrid.Left
           isLayersPanelVisible={isLayersPanelVisible}
-          sm={!isEnlargeDataTable ? 4 : 1.25}
+          isEnlargeDataTable={isEnlargeDataTable}
           xs={isLayersPanelVisible ? 12 : 0}
+          sm={isEnlargeDataTable ? 0 : 4}
+          md={!isEnlargeDataTable ? 4 : 1.25}
         >
           {renderList()}
         </DataTableGrid.Left>
         <DataTableGrid.Right
-          sm={!isEnlargeDataTable ? 8 : 10.75}
           xs={!isLayersPanelVisible ? 12 : 0}
+          sm={isEnlargeDataTable ? 12 : 8}
+          md={!isEnlargeDataTable ? 8 : 10.75}
           isLayersPanelVisible={isLayersPanelVisible}
+          isEnlargeDataTable={isEnlargeDataTable}
         >
           <CircularProgress
             isLoaded={!isLoading}
