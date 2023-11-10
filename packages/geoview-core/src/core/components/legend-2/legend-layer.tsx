@@ -7,10 +7,8 @@ import {
   ListItemText,
   ListItemIcon,
   IconButton,
-  KeyboardArrowDownIcon,
   Collapse,
   List,
-  KeyboardArrowUpIcon,
   GroupWorkOutlinedIcon,
   ErrorIcon,
   DownloadingIcon,
@@ -46,9 +44,11 @@ export function LegendLayer(props: LegendLayerProps): JSX.Element {
 
     return (
       <List sx={{ width: '100%', padding: '20px', margin: '20px 0px' }}>
-        {layer.children.filter(d => d.isVisible).map((item) => (
-          <LegendLayer layer={item} key={item.layerPath} />
-        ))}
+        {layer.children
+          .filter((d) => d.isVisible)
+          .map((item) => (
+            <LegendLayer layer={item} key={item.layerPath} />
+          ))}
       </List>
     );
   }
@@ -61,7 +61,7 @@ export function LegendLayer(props: LegendLayerProps): JSX.Element {
     return (
       <List sx={{ width: '100%' }}>
         {layer.items.map((item) => (
-          <ListItem key={item.name} className={ !item.isChecked ? 'unchecked': ''}>
+          <ListItem key={item.name} className={!item.isChecked ? 'unchecked' : ''}>
             <ListItemIcon>
               <img alt={item.name} src={item.icon} />
             </ListItemIcon>
@@ -80,7 +80,7 @@ export function LegendLayer(props: LegendLayerProps): JSX.Element {
     }
 
     return (
-      <Collapse in={true} sx={sxClasses.collapsibleContainer} timeout="auto">
+      <Collapse in sx={sxClasses.collapsibleContainer} timeout="auto">
         {renderChildren()}
         {renderItems()}
       </Collapse>
@@ -118,10 +118,10 @@ export function LegendLayer(props: LegendLayerProps): JSX.Element {
 
   return (
     <Box sx={sxClasses.legendLayerListItem}>
-      <ListItem key={layer.layerName}  divider onClick={handleExpandGroupClick}>
+      <ListItem key={layer.layerName} divider onClick={handleExpandGroupClick}>
         {renderLayerIcon()}
         <Tooltip title={layer.layerName} placement="top" enterDelay={1000}>
-          <ListItemText primary={layer.layerName} className='layerTitle' />
+          <ListItemText primary={layer.layerName} className="layerTitle" />
         </Tooltip>
       </ListItem>
       {renderCollapsible()}

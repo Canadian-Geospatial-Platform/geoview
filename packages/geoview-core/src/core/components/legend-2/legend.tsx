@@ -5,7 +5,6 @@ import { Box, Typography } from '@/ui';
 import { getGeoViewStore } from '@/core/stores/stores-managers';
 import { getSxClasses } from './legend-styles';
 import { LegendLayer } from './legend-layer';
-import _ from 'lodash';
 
 export interface LegendOverviewProps {
   mapId: string;
@@ -17,23 +16,15 @@ export function Legend(props: LegendOverviewProps): JSX.Element {
   const sxClasses = getSxClasses(theme);
   const { t } = useTranslation<string>();
   const store = getGeoViewStore(mapId);
-  const legendLayers = useStore(store, (state) => state.legendState.legendLayers.filter(f => f.isVisible));
+  const legendLayers = useStore(store, (state) => state.legendState.legendLayers.filter((f) => f.isVisible));
 
   /* START fake store data here */
 
   function renderLegendLayersList() {
-
     return (
-      <Box
-        display="flex"
-        flexDirection="column"
-        flexWrap="wrap"
-        style={{ height: 600, overflow: 'auto' }}
-      >
+      <Box display="flex" flexDirection="column" flexWrap="wrap" style={{ height: 600, overflow: 'auto' }}>
         {legendLayers.map((item) => (
-          <Box key={item.layerPath} width={{ xs: '100%', sm: '50%', md: '33.33%', lg: '25%', xl: '25%' }}
-            style={{ minHeight: 0 }}
-            p={2}>
+          <Box key={item.layerPath} width={{ xs: '100%', sm: '50%', md: '33.33%', lg: '25%', xl: '25%' }} style={{ minHeight: 0 }} p={2}>
             <LegendLayer layer={item} key={item.layerPath} />
           </Box>
         ))}
@@ -44,11 +35,8 @@ export function Legend(props: LegendOverviewProps): JSX.Element {
   return (
     <Box sx={sxClasses.container}>
       <Box>
-        <Typography sx={sxClasses.title}>
-           {t('legend.overview_title')}
-        </Typography>
-        <Typography sx={sxClasses.subtitle}>
-        </Typography>
+        <Typography sx={sxClasses.title}>{t('legend.overview_title')}</Typography>
+        <Typography sx={sxClasses.subtitle} />
       </Box>
       {renderLegendLayersList()}
     </Box>
