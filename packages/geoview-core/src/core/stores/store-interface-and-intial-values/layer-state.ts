@@ -85,6 +85,10 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
             }
           });
           layer.allItemsChecked = _.every(layer.items, (i) => i.isChecked);
+          const allItemsUnchecked = _.every(layer.items, (i) => !i.isChecked);
+          if(allItemsUnchecked) {
+            layer.isVisible = false;
+          }
         }
         set({
           legendState: {
@@ -102,6 +106,9 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
             item.isChecked = visibility; // eslint-disable-line no-param-reassign
           });
           layer.allItemsChecked = visibility;
+          if(visibility === false) {
+            layer.isVisible = false;
+          }
         }
         set({
           legendState: {
