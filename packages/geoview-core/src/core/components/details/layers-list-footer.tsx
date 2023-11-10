@@ -154,11 +154,10 @@ export function LayersListFooter(props: TypeLayersListProps): JSX.Element {
     if (arrayOfLayerData.length > 0) {
       // Check if have the previous selected layer path in incoming arrayOfLayerData
       // if so, get the index of the found layer, we need to pass to setLayerDataInfo to load layer in left panel
-      const commonLayerPathIndex = findLayerPathIndex(arrayOfLayerData, selectedLayerPath);
+      const commonLayerPathIndex = selectedLayerPath ? findLayerPathIndex(arrayOfLayerData, selectedLayerPath) : -1;
       setLayerDataInfo(arrayOfLayerData[commonLayerPathIndex > -1 ? commonLayerPathIndex : 0]);
-      setSelectedLayerPath(arrayOfLayerData[commonLayerPathIndex > -1 ? commonLayerPathIndex : 0].layerPath);
       setCurrentFeatureIndex(0);
-    }
+    } else setLayerDataInfo(null);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [arrayOfLayerData]);
 
