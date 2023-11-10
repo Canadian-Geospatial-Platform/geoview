@@ -56,10 +56,6 @@ export function SingleLayer(props: SingleLayerProps): JSX.Element {
     if (layer.children.length === 0) {
       // setSelectedLayer(layer);
       setSelectedLayerPath(layer.layerPath);
-      const legendDetails = document.querySelector('#legend-details-container');
-      if (legendDetails) {
-        legendDetails.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      }
     } else {
       setGroupOpen(!isGroupOpen);
     }
