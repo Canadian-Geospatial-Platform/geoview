@@ -158,7 +158,7 @@ export function LayersListFooter(props: TypeLayersListProps): JSX.Element {
       setLayerDataInfo(arrayOfLayerData[commonLayerPathIndex > -1 ? commonLayerPathIndex : 0]);
       setSelectedLayerPath(arrayOfLayerData[commonLayerPathIndex > -1 ? commonLayerPathIndex : 0].layerPath);
       setCurrentFeatureIndex(0);
-    }
+    } else setLayerDataInfo(null);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [arrayOfLayerData]);
 
