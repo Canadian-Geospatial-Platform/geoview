@@ -1,10 +1,11 @@
 import { useStore } from 'zustand';
 import { useTheme } from '@mui/material';
 import { useTranslation } from 'react-i18next';
-import { Box, Typography, Grid } from '@/ui';
+import { Box, Typography } from '@/ui';
 import { getGeoViewStore } from '@/core/stores/stores-managers';
 import { getSxClasses } from './legend-styles';
 import { LegendLayer } from './legend-layer';
+import _ from 'lodash';
 
 export interface LegendOverviewProps {
   mapId: string;
@@ -16,20 +17,27 @@ export function Legend(props: LegendOverviewProps): JSX.Element {
   const sxClasses = getSxClasses(theme);
   const { t } = useTranslation<string>();
   const store = getGeoViewStore(mapId);
-  const legendLayers = useStore(store, (state) => state.legendState.legendLayers);
+  const legendLayers = useStore(store, (state) => state.legendState.legendLayers.filter(f => f.isVisible));
 
-  const numItems = 33;
   /* START fake store data here */
 
   function renderLegendLayersList() {
+
     return (
-      <Grid container spacing={4} sx={{ width: '100%', padding: '20px' }}>
+      <Box
+        display="flex"
+        flexDirection="column"
+        flexWrap="wrap"
+        style={{ height: 600, overflow: 'auto' }}
+      >
         {legendLayers.map((item) => (
-          <Grid item xs={12} md={6} lg={4} key={item.layerPath}>
+          <Box key={item.layerPath} width={{ xs: '100%', sm: '50%', md: '33.33%', lg: '25%', xl: '25%' }}
+            style={{ minHeight: 0 }}
+            p={2}>
             <LegendLayer layer={item} key={item.layerPath} />
-          </Grid>
+          </Box>
         ))}
-      </Grid>
+      </Box>
     );
   }
 
@@ -37,10 +45,9 @@ export function Legend(props: LegendOverviewProps): JSX.Element {
     <Box sx={sxClasses.container}>
       <Box>
         <Typography sx={sxClasses.title}>
-          <strong>{t('legend.bold_selection')}</strong> {t('legend.overview_title')}
+           {t('legend.overview_title')}
         </Typography>
         <Typography sx={sxClasses.subtitle}>
-          {numItems} {t('legend.items_available')}
         </Typography>
       </Box>
       {renderLegendLayersList()}
