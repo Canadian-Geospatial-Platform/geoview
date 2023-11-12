@@ -36,6 +36,7 @@ export const getSxClasses = (theme: Theme) => ({
   listPrimaryText: {
     minWidth: '0',
     marginTop: '0.5rem',
+    marginLeft: '10px',
     marginBottom: '0.5rem',
     flex: '1 1 auto',
     display: 'flex',
