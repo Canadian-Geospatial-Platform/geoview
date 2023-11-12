@@ -13,7 +13,6 @@ import {
   ListItemButton,
   List,
   ListItemIcon,
-  SendIcon,
   Tooltip,
   IconButton,
   Grid,
@@ -26,7 +25,7 @@ import {
   Box,
 } from '@/ui';
 import { FeatureInfo } from './feature-info-new';
-import { PayloadBaseClass, api } from '@/app';
+import { PayloadBaseClass, api, IconStack } from '@/app';
 import { EVENT_NAMES } from '@/api/events/event-types';
 import {
   payloadIsAFeatureHighlight,
@@ -187,7 +186,7 @@ export function LayersListFooter(props: TypeLayersListProps): JSX.Element {
                   sx={{ height: '67px' }}
                 >
                   <ListItemIcon>
-                    <SendIcon />
+                    <IconStack layerPath={layerData.layerPath} />
                   </ListItemIcon>
                   <Tooltip title={layerData.layerName} placement="top" enterDelay={1000}>
                     <>
