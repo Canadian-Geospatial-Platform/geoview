@@ -69,6 +69,11 @@ const config = {
       dependOn: 'cgpv-main',
       filename: 'corePackages/[name].js',
     },
+    'geoview-geochart': {
+      import: '../geoview-geochart/src/index.tsx',
+      dependOn: 'cgpv-main',
+      filename: 'corePackages/[name].js',
+    },
   },
   output: {
     path: path.resolve(__dirname, 'dist'),
@@ -105,8 +110,20 @@ const config = {
         ],
       },
       {
-        test: /.(ts|tsx|js|jsx)$/,
+        test: /\.(ts|tsx|js|jsx)$/,
         exclude: /node_modules/,
+        use: [
+          {
+            loader: 'babel-loader',
+            options: {
+              plugins: ['lodash', '@babel/transform-runtime'],
+              presets: ['@babel/preset-env', ['@babel/preset-react', { runtime: 'automatic' }], '@babel/preset-typescript'],
+            },
+          },
+        ],
+      },
+      {
+        test: /github.com\+Canadian-Geospatial-Platform\+geochart(.*)\.(ts|tsx|js|jsx)$/,
         use: [
           {
             loader: 'babel-loader',
