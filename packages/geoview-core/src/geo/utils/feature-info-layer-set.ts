@@ -12,7 +12,7 @@ import {
 } from '@/api/events/payloads';
 import { api, getLocalizedValue } from '@/app';
 import { LayerSet } from './layer-set';
-import { FeatureInfoEventProcessor } from '@/api/eventProcessors/feature-info-event-processor';
+import { FeatureInfoEventProcessor } from '@/api/event-processors/event-processor-children/feature-info-event-processor';
 
 /** ***************************************************************************************************************************
  * A class to hold a set of layers associated with an array of TypeArrayOfFeatureInfoEntries. When this class is instantiated,
