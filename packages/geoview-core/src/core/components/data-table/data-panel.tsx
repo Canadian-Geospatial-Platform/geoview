@@ -24,7 +24,7 @@ import MapDataTable, { MapDataTableData as MapDataTableDataProps } from './map-d
 import { getSxClasses } from './data-table-style';
 import { GroupLayers } from './data-table-api';
 import { TypeDisplayLanguage, TypeLocalizedString } from '@/geo/map/map-schema-types';
-import { DataTableGrid } from './data-table-grid';
+
 import {
   useDataTableStoreActions,
   useDataTableStoreIsEnlargeDataTable,
@@ -32,6 +32,7 @@ import {
   useDataTableStoreRowsFiltered,
   useDataTableStoreSelectedLayerIndex,
 } from '@/core/stores/store-interface-and-intial-values/data-table-state';
+import { ResponsiveGrid } from '../responsive-grid/responsive-grid';
 
 interface DatapanelProps {
   layerData: (MapDataTableDataProps & GroupLayers)[];
@@ -121,11 +122,7 @@ export function Datapanel({ layerData, mapId, projectionConfig, language }: Data
             <Tooltip title={getLayerTooltip(layerName!, layerKey, index)} placement="top" arrow>
               <Box>
                 <ListItem disablePadding>
-                  <ListItemButton
-                    sx={{ height: '67px' }}
-                    selected={selectedLayerIndex === index}
-                    onClick={(event) => handleListItemClick(event, index)}
-                  >
+                  <ListItemButton selected={selectedLayerIndex === index} onClick={(event) => handleListItemClick(event, index)}>
                     <ListItemIcon>
                       <SendIcon sx={{ width: '0.75em', height: '0.75em' }} />
                     </ListItemIcon>
@@ -182,13 +179,13 @@ export function Datapanel({ layerData, mapId, projectionConfig, language }: Data
 
   return (
     <Box sx={sxClasses.dataPanel}>
-      <DataTableGrid.Root spacing={2} sx={sxClasses.gridContainer}>
-        <DataTableGrid.Left xs={isLayersPanelVisible ? 12 : 0} md={3} isLayersPanelVisible={isLayersPanelVisible}>
+      <ResponsiveGrid.Root spacing={2} sx={sxClasses.gridContainer}>
+        <ResponsiveGrid.Left xs={isLayersPanelVisible ? 12 : 0} md={3} isLayersPanelVisible={isLayersPanelVisible}>
           <Typography component="p" sx={sxClasses.headline}>
             {t('dataTable.leftPanelHeading')}
           </Typography>
-        </DataTableGrid.Left>
-        <DataTableGrid.Right
+        </ResponsiveGrid.Left>
+        <ResponsiveGrid.Right
           xs={!isLayersPanelVisible ? 12 : 0}
           md={9}
           sx={{ display: 'flex', justifyContent: 'right' }}
@@ -223,18 +220,17 @@ export function Datapanel({ layerData, mapId, projectionConfig, language }: Data
               {t('dataTable.close')}
             </Button>
           )}
-        </DataTableGrid.Right>
-      </DataTableGrid.Root>
-
-      <DataTableGrid.Root sx={{ marginTop: '0.75rem' }}>
-        <DataTableGrid.Left
+        </ResponsiveGrid.Right>
+      </ResponsiveGrid.Root>
+      <ResponsiveGrid.Root sx={{ marginTop: '0.75rem' }}>
+        <ResponsiveGrid.Left
           isLayersPanelVisible={isLayersPanelVisible}
           xs={isLayersPanelVisible ? 12 : 0}
           md={!isEnlargeDataTable ? 4 : 1.25}
         >
           {renderList()}
-        </DataTableGrid.Left>
-        <DataTableGrid.Right
+        </ResponsiveGrid.Left>
+        <ResponsiveGrid.Right
           xs={!isLayersPanelVisible ? 12 : 0}
           md={!isEnlargeDataTable ? 8 : 10.75}
           isLayersPanelVisible={isLayersPanelVisible}
@@ -268,8 +264,8 @@ export function Datapanel({ layerData, mapId, projectionConfig, language }: Data
                 )}
               </Box>
             ))}
-        </DataTableGrid.Right>
-      </DataTableGrid.Root>
+        </ResponsiveGrid.Right>
+      </ResponsiveGrid.Root>
     </Box>
   );
 }

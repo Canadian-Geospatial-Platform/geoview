@@ -8,7 +8,6 @@ import { useTheme } from '@mui/material/styles';
 import { getUid } from 'ol/util'; // TODO no ol in component
 
 import {
-  ListItemText,
   ListItem,
   ListItemButton,
   List,
@@ -24,6 +23,9 @@ import {
   LayersClearOutlinedIcon,
   ChevronRightIcon,
   Box,
+  Button,
+  ArrowForwardIcon,
+  ArrowBackIcon,
 } from '@/ui';
 import { FeatureInfo } from './feature-info-new';
 import { PayloadBaseClass, api } from '@/app';
@@ -41,6 +43,7 @@ import {
 } from '@/api/events/payloads';
 import { getSxClasses } from './details-style';
 import { useDetailsStoreActions, useDetailsStoreSelectedLayerPath } from '@/core/stores/store-interface-and-intial-values/details-state';
+import { ResponsiveGrid } from '../responsive-grid/responsive-grid';
 
 interface TypeLayersListProps {
   arrayOfLayerData: TypeArrayOfLayerData;
@@ -67,6 +70,8 @@ export function LayersListFooter(props: TypeLayersListProps): JSX.Element {
   const [currentFeatureIndex, setCurrentFeatureIndex] = useState<number>(0);
   const [isClearAllCheckboxes, setIsClearAllCheckboxes] = useState<boolean>(false);
   const [disableClearAllBtn, setDisableClearAllBtn] = useState<boolean>(false);
+  const [isLayersPanelVisible, setIsLayersPanelVisible] = useState(false);
+  const [isEnlargeDataTable, setIsEnlargeDataTable] = useState(false);
 
   // get values from store
   const selectedLayerPath = useDetailsStoreSelectedLayerPath();
@@ -162,6 +167,16 @@ export function LayersListFooter(props: TypeLayersListProps): JSX.Element {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [arrayOfLayerData]);
 
+  /**
+   * Create layer tooltip
+   * @param {string} layerName en/fr layer name
+   * @param {number} numOfFeatures number of features for a layer.
+   * @returns
+   */
+  const getLayerTooltip = (layerName: string, numOfFeatures: number): React.ReactNode => {
+    return `${layerName ?? t('details.clickOnMap')}, ${numOfFeatures} ${t('details.feature')}${numOfFeatures > 1 ? 's' : ''}`;
+  };
+
   const renderLayerList = useCallback(() => {
     return (
       <List sx={sxClasses.list}>
@@ -171,73 +186,133 @@ export function LayersListFooter(props: TypeLayersListProps): JSX.Element {
 
           return (
             <Paper
-              sx={{
-                ...sxClasses.layerListPaper,
-                border: isSelectedBorder ? `2px solid ${theme.palette.primary.main}` : 'none',
-                backgroundColor: isSelectedBorder ? `#E5E6F1` : 'none',
-              }}
+              sx={{ ...sxClasses.paper, border: isSelectedBorder ? sxClasses.borderWithIndex : sxClasses.borderNone }}
               key={layerData.layerPath}
             >
-              <ListItem disablePadding>
-                <ListItemButton
-                  onClick={() => {
-                    setLayerDataInfo(layerData);
-                    setCurrentFeatureIndex(0);
-                    setSelectedLayerPath(layerData.layerPath);
-                  }}
-                  sx={{ height: '67px' }}
-                >
-                  <ListItemIcon>
-                    <SendIcon />
-                  </ListItemIcon>
-                  <Tooltip title={layerData.layerName} placement="top" enterDelay={1000}>
-                    <>
-                      <ListItemText
-                        sx={sxClasses.layerNamePrimary}
-                        primary={layerData.layerName ? layerData.layerName : t('details.clickOnMap')}
-                        secondary={`${numOfFeatures} ${t('details.feature')}${numOfFeatures > 1 ? 's' : ''}`}
-                      />
-                      <IconButton edge="end" aria-label="expand" sx={sxClasses.listItemIcon}>
-                        <ChevronRightIcon />
-                      </IconButton>
-                    </>
-                  </Tooltip>
-                </ListItemButton>
-              </ListItem>
+              <Tooltip title={getLayerTooltip(layerData.layerName, numOfFeatures)} placement="top" arrow>
+                <Box>
+                  <ListItem disablePadding>
+                    <ListItemButton
+                      onClick={() => {
+                        setLayerDataInfo(layerData);
+                        setCurrentFeatureIndex(0);
+                        setSelectedLayerPath(layerData.layerPath);
+                        setIsLayersPanelVisible(false);
+                      }}
+                    >
+                      <ListItemIcon>
+                        <SendIcon sx={{ width: '0.75em', height: '0.75em' }} />
+                      </ListItemIcon>
+                      <Box sx={sxClasses.listPrimaryText}>
+                        <Typography component="p">{layerData.layerName ? layerData.layerName : t('details.clickOnMap')}</Typography>
+                        <Box sx={{ display: 'flex', alignContent: 'center' }}>
+                          <Typography component="p" variant="subtitle1" noWrap>
+                            {`${numOfFeatures} ${t('details.feature')}${numOfFeatures > 1 ? 's' : ''}`}
+                          </Typography>
+                        </Box>
+                      </Box>
+                      <Box
+                        sx={{
+                          padding: isEnlargeDataTable ? '0.25rem' : '1rem',
+                          paddingRight: isEnlargeDataTable ? '0.25rem' : '1rem',
+                          [theme.breakpoints.down('xl')]: {
+                            display: isEnlargeDataTable ? 'none !important' : 'block',
+                          },
+                          [theme.breakpoints.down('sm')]: {
+                            display: 'none',
+                          },
+                        }}
+                      >
+                        <IconButton
+                          disabled
+                          edge="end"
+                          size="small"
+                          sx={{ color: `${theme.palette.primary.main} !important`, background: `${theme.palette.grey.A100} !important` }}
+                        >
+                          <ChevronRightIcon />
+                        </IconButton>
+                      </Box>
+                    </ListItemButton>
+                  </ListItem>
+                </Box>
+              </Tooltip>
             </Paper>
           );
         })}
       </List>
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [layerDataInfo, arrayOfLayerData]);
+  }, [layerDataInfo, arrayOfLayerData, isEnlargeDataTable]);
 
   return (
     <Box sx={sxClasses.detailsContainer}>
-      <Grid container direction={{ xs: 'column', sm: 'row' }} spacing={{ xs: 1, sm: 4, md: 8 }}>
-        <div style={{ padding: '20px 28px 28px 28px' }}>
-          {layerDataInfo === null && (
-            <Typography component="p" sx={sxClasses.footerTopPanleSecondary}>
-              {t('details.selectVisbleLayer')}
-            </Typography>
-          )}
-        </div>
-        {layerDataInfo !== null && (
-          <Grid container>
-            {/* ================= LEFT PANEL ================= */}
-
-            <Grid item md={4}>
-              <Typography component="div" sx={{ ...sxClasses.panelHeaders, paddingLeft: '20px' }}>
+      {!layerDataInfo && (
+        <ResponsiveGrid.Root>
+          <ResponsiveGrid.Left xs={12} isLayersPanelVisible={isLayersPanelVisible}>
+            <Typography component="p">{t('details.selectVisbleLayer')}</Typography>
+          </ResponsiveGrid.Left>
+        </ResponsiveGrid.Root>
+      )}
+      {layerDataInfo && (
+        <>
+          <ResponsiveGrid.Root>
+            <ResponsiveGrid.Left xs={isLayersPanelVisible ? 12 : 0} md={3} isLayersPanelVisible={isLayersPanelVisible}>
+              <Typography component="div" sx={sxClasses.panelHeaders}>
                 {t('details.availableLayers')}
               </Typography>
+            </ResponsiveGrid.Left>
+            <ResponsiveGrid.Right
+              isLayersPanelVisible={false}
+              xs={!isLayersPanelVisible ? 12 : 0}
+              md={9}
+              sx={{ display: 'flex', justifyContent: 'right' }}
+            >
+              <Button
+                type="text"
+                size="small"
+                sx={{ ...sxClasses.enlargeBtn, [theme.breakpoints.down('md')]: { display: 'none' } }}
+                onClick={() => setIsEnlargeDataTable(!isEnlargeDataTable)}
+                tooltip={isEnlargeDataTable ? t('dataTable.reduceBtn')! : t('dataTable.enlargeBtn')!}
+                tooltipPlacement="top"
+              >
+                {isEnlargeDataTable ? <ArrowForwardIcon sx={sxClasses.enlargeBtnIcon} /> : <ArrowBackIcon sx={sxClasses.enlargeBtnIcon} />}
+                {isEnlargeDataTable ? t('dataTable.reduceBtn') : t('dataTable.enlargeBtn')}
+              </Button>
+              <Button
+                type="text"
+                size="small"
+                sx={{
+                  ...sxClasses.enlargeBtn,
+                  marginLeft: '1rem',
+                  [theme.breakpoints.up('md')]: { display: 'none' },
+                  [theme.breakpoints.between('sm', 'md')]: { display: !isLayersPanelVisible ? 'block' : 'none' },
+                  [theme.breakpoints.down('md')]: { display: !isLayersPanelVisible ? 'block' : 'none' },
+                }}
+                onClick={() => setIsLayersPanelVisible(true)}
+                tooltip={t('dataTable.close') ?? ''}
+                tooltipPlacement="top"
+              >
+                {t('dataTable.close')}
+              </Button>
+            </ResponsiveGrid.Right>
+          </ResponsiveGrid.Root>
+          <ResponsiveGrid.Root sx={{ marginTop: '1rem' }}>
+            <ResponsiveGrid.Left
+              isLayersPanelVisible={isLayersPanelVisible}
+              xs={isLayersPanelVisible ? 12 : 0}
+              md={!isEnlargeDataTable ? 4 : 1.25}
+            >
               {renderLayerList()}
-            </Grid>
-            {/* ================= RIGHT PANEL ================= */}
-            <Grid item md={8} sx={{ paddingLeft: '40px' }}>
-              <div style={sxClasses.rightPanleContainer}>
+            </ResponsiveGrid.Left>
+            <ResponsiveGrid.Right
+              xs={!isLayersPanelVisible ? 12 : 0}
+              md={!isEnlargeDataTable ? 8 : 10.75}
+              isLayersPanelVisible={isLayersPanelVisible}
+            >
+              <Box sx={sxClasses.rightPanleContainer}>
                 <Grid container sx={sxClasses.rightPanelBtnHolder}>
                   <Grid item xs={6}>
-                    <div style={{ marginLeft: '22px' }}>
+                    <Box style={{ marginLeft: '22px' }}>
                       Feature {currentFeatureIndex + 1} of {layerDataInfo?.features!.length}
                       <IconButton
                         sx={{ marginLeft: '20px' }}
@@ -249,10 +324,10 @@ export function LayersListFooter(props: TypeLayersListProps): JSX.Element {
                       >
                         <LayersClearOutlinedIcon />
                       </IconButton>
-                    </div>
+                    </Box>
                   </Grid>
                   <Grid item xs={6}>
-                    <div style={{ textAlign: 'right', marginRight: '26px' }}>
+                    <Box sx={{ textAlign: 'right', marginRight: '26px' }}>
                       <IconButton
                         aria-label="backward"
                         tooltip="details.previousFeatureBtn"
@@ -273,7 +348,7 @@ export function LayersListFooter(props: TypeLayersListProps): JSX.Element {
                       >
                         <ArrowForwardIosOutlinedIcon />
                       </IconButton>
-                    </div>
+                    </Box>
                   </Grid>
                 </Grid>
                 <FeatureInfo
@@ -286,11 +361,11 @@ export function LayersListFooter(props: TypeLayersListProps): JSX.Element {
                   clearAllCheckboxes={isClearAllCheckboxes}
                   setDisableClearAllBtn={setDisableClearAllBtn}
                 />
-              </div>
-            </Grid>
-          </Grid>
-        )}
-      </Grid>
+              </Box>
+            </ResponsiveGrid.Right>
+          </ResponsiveGrid.Root>
+        </>
+      )}
     </Box>
   );
 }

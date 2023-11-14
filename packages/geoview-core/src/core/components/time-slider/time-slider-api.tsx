@@ -1,5 +1,5 @@
 import { createElement, ReactElement } from 'react';
-import { TimeSlider } from './time-slider';
+import { TimeSliderPanel } from './time-slider-panel';
 import { api } from '@/app';
 
 export interface SliderFilterProps {
@@ -56,6 +56,6 @@ export class TimeSliderApi {
   createTimeSlider = (): ReactElement => {
     const layersList = this.createLayersList();
     const timeSliderData = this.createTimeSliderData(layersList);
-    return createElement(TimeSlider, { mapId: this.mapId, layersList, timeSliderData }, []);
+    return createElement(TimeSliderPanel, { mapId: this.mapId, layersList, timeSliderData }, []);
   };
 }
