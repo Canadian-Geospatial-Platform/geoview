@@ -3,7 +3,7 @@ import Overlay from 'ol/Overlay';
 import { fromLonLat } from 'ol/proj';
 
 import { GeoViewStoreType } from '@/core/stores/geoview-store';
-import { AbstractEventProcessor } from './abstract-event-processor';
+import { AbstractEventProcessor } from '../abstract-event-processor';
 import { api, NORTH_POLE_POSITION, TypeClickMarker } from '@/app';
 import { CustomAttribution } from '@/geo/utils/custom-attribution';
 import {
