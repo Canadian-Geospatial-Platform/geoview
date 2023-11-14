@@ -63,7 +63,9 @@
     "sort_layers": "Trier les calques",
     "selected_Layers": "Un aperçu des calques actuellement sélectionnés",
     "re-arrange": "Réarranger",
-    "categories_title": "Catégories"
+    "categories_title": "Catégories",
+    "layer_has_error": "La couche a une erreur...",
+    "layer_is_loading": "La couche se charge..."
   },
   "details": {
     "zoom_to": "Zoom à l'élément",

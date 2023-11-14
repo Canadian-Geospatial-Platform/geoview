@@ -3,7 +3,6 @@ import { useTheme } from '@mui/material/styles';
 import {
   Box,
   Collapse,
-  DownloadingIcon,
   ErrorIcon,
   GroupWorkOutlinedIcon,
   IconButton,
@@ -19,10 +18,16 @@ import {
   Tooltip,
   VisibilityOffOutlinedIcon,
   VisibilityOutlinedIcon,
+  RestartAltIcon,
+  Divider,
+  TableViewIcon,
+  CircularProgressBase,
+  Typography,
 } from '@/ui';
 import { TypeLegendLayer } from '../types';
 import { getSxClasses } from './layerslist-style';
 import { useLayerStoreActions, useSelectedLayerPath } from '@/core/stores/store-interface-and-intial-values/layer-state';
+import { useTranslation } from 'react-i18next';
 
 interface SingleLayerProps {
   layer: TypeLegendLayer;
@@ -32,9 +37,10 @@ interface SingleLayerProps {
 export function SingleLayer(props: SingleLayerProps): JSX.Element {
   const { layer, depth } = props;
 
-  const layerDescription = layer.children.length ? `${layer.children.length} layers` : `${layer.items.length} items`;
   const theme = useTheme();
   const sxClasses = getSxClasses(theme);
+
+  const { t } = useTranslation<string>();
 
   const { toggleLayerVisibility, setSelectedLayerPath } = useLayerStoreActions(); // get store actions
 
@@ -44,6 +50,22 @@ export function SingleLayer(props: SingleLayerProps): JSX.Element {
   const legendClass = layerIsSelected ? { ...sxClasses.layersList.selectedLayerItem } : null;
 
   const [isGroupOpen, setGroupOpen] = useState(layerIsSelected);
+
+  //get layer description  
+  const getLayerDescription = () => {
+    if(layer.layerStatus === 'error') {
+      return t('legend.layer_has_error');
+    }
+    if(layer.layerStatus === 'loading') {
+      return t('legend.layer_is_loading');
+    }
+    if(layer.children.length) {
+      return `${layer.children.length} layers`;
+    }
+    else {
+      return `${layer.items.length} items`;
+    }
+  }
 
   /**
    * Handle expand/shrink of layer groups.
@@ -65,6 +87,14 @@ export function SingleLayer(props: SingleLayerProps): JSX.Element {
     toggleLayerVisibility(layer.layerPath);
   };
 
+  const handleReloadLayer = () => {
+    console.log('reloading layer');
+  }
+
+  const handleOpenTable = () => {
+    console.log('handle open table');
+  }
+
   // renders the layers children, if any
   function renderChildren() {
     if (!layer.children?.length) {
@@ -81,17 +111,37 @@ export function SingleLayer(props: SingleLayerProps): JSX.Element {
   }
 
   function renderMoreLayerButtons() {
+    if(layer.layerStatus === 'loading') {
+      return null;
+    }
+    if(layer.layerStatus === 'error') {
+      return (
+        <IconButton onClick={handleReloadLayer}>
+          <RestartAltIcon />
+        </IconButton>
+      );
+    }
+    
     return (
-      <IconButton color="primary" onClick={() => handleToggleVisibility()}>
-        {(() => {
-          if (layer.isVisible === false) return <VisibilityOffOutlinedIcon />;
-          return <VisibilityOutlinedIcon />;
-        })()}
-      </IconButton>
+      <>
+        <IconButton onClick={handleOpenTable}>
+          <TableViewIcon  style={{fill: '#363636'}}/>
+        </IconButton>
+        <Divider orientation="vertical" variant="middle" flexItem style={{margin: '0px 15px', border: '1px solid #ccc', height: '28px'}} />
+        <IconButton color="primary" onClick={() => handleToggleVisibility()}>
+          {(() => {
+            if (layer.isVisible === false) return <VisibilityOffOutlinedIcon />;
+            return <VisibilityOutlinedIcon />;
+          })()}
+        </IconButton>
+      </>
     );
   }
 
   function renderArrowButtons() {
+    if(!['processed', 'loaded'].includes(layer.layerStatus)) {
+      return null;
+    }
     if (layer.children?.length) {
       return (
         <IconButton color="primary" onClick={handleExpandGroupClick}>
@@ -99,11 +149,13 @@ export function SingleLayer(props: SingleLayerProps): JSX.Element {
         </IconButton>
       );
     }
-    return (
-      <IconButton onClick={handleLayerClick}>
-        <KeyboardArrowRightIcon />
-      </IconButton>
-    );
+    else if(layer.items?.length) {
+      return (
+        <IconButton onClick={handleLayerClick}>
+          <KeyboardArrowRightIcon />
+        </IconButton>
+      );
+    }
   }
 
   function renderCollapsible() {
@@ -128,9 +180,9 @@ export function SingleLayer(props: SingleLayerProps): JSX.Element {
     }
     if (layer.layerStatus === 'loading') {
       return (
-        <IconButton sx={{ color: 'gray' }}>
-          <DownloadingIcon />
-        </IconButton>
+        <Box sx={{padding: "5px", marginRight: '10px'}}>
+          <CircularProgressBase size={20}  />
+        </Box>
       );
     }
     if (layer?.children.length) {
@@ -148,12 +200,12 @@ export function SingleLayer(props: SingleLayerProps): JSX.Element {
   }
 
   return (
-    <Box sx={legendClass} className="layerItemContainer">
+    <Box sx={legendClass} className={`layerItemContainer ${layer.layerStatus}`}>
       <ListItem key={layer.layerName} divider>
         <ListItemButton>
           {renderLayerIcon()}
           <Tooltip title={layer.layerName} placement="top" enterDelay={1000}>
-            <ListItemText primary={layer.layerName} secondary={layerDescription} onClick={handleLayerClick} />
+            <ListItemText primary={layer.layerName} secondary={getLayerDescription()} onClick={handleLayerClick} />
           </Tooltip>
           <ListItemIcon style={{ justifyContent: 'right' }}>
             {renderMoreLayerButtons()}

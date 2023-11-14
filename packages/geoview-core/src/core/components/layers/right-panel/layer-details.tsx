@@ -2,7 +2,20 @@ import { useTranslation } from 'react-i18next';
 import { useTheme } from '@mui/material/styles';
 import { TypeLegendLayer } from '../types';
 import { getSxClasses } from '../layers-style';
-import { Box, CheckBoxIcon, CheckBoxOutIcon, IconButton, Paper, SliderBase, Typography, ZoomInSearchIcon, Grid } from '@/ui';
+import {
+  Box,
+  CheckBoxIcon,
+  CheckBoxOutIcon,
+  IconButton,
+  Paper,
+  SliderBase,
+  Typography,
+  ZoomInSearchIcon,
+  Grid,
+  TableChartOutlinedIcon,
+  RestartAltIcon,
+  HighlightOutlinedIcon,
+} from '@/ui';
 import { useLayerStoreActions } from '@/core/stores/store-interface-and-intial-values/layer-state';
 
 interface LayerDetailsProps {
@@ -80,6 +93,25 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
     );
   }
 
+  function renderLayerButtons() {
+    return (
+      <Box sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
+        <IconButton sx={{ backgroundColor: '#F6F6F6' }}>
+          <TableChartOutlinedIcon />
+        </IconButton>
+        <IconButton sx={{ backgroundColor: '#F6F6F6' }}>
+          <RestartAltIcon />
+        </IconButton>
+        <IconButton sx={{ backgroundColor: '#F6F6F6' }}>
+          <HighlightOutlinedIcon />
+        </IconButton>
+        <IconButton onClick={handleZoomTo} sx={{ backgroundColor: '#F6F6F6' }}>
+          <ZoomInSearchIcon />
+        </IconButton>
+      </Box>
+    );
+  }
+
   // function renderItems
 
   return (
@@ -89,11 +121,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
           <Typography sx={sxClasses.categoryTitle}> {layerDetails.layerName} </Typography>
           <Typography sx={{ fontSize: '0.8em' }}> {`${layerDetails.items.length} items available`} </Typography>
         </Box>
-        <div>
-          <IconButton onClick={handleZoomTo} sx={{ backgroundColor: '#F6F6F6' }}>
-            <ZoomInSearchIcon />
-          </IconButton>
-        </div>
+        {renderLayerButtons()}
       </Box>
       {renderOpacityControl()}
       <Box sx={{ marginTop: '20px' }}>{renderItems()}</Box>
