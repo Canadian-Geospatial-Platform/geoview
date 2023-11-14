@@ -13,6 +13,7 @@ export interface ILayerState {
   selectedLayerPath: string | undefined | null;
   legendLayers: TypeLegendLayer[];
   actions: {
+    getLayer: (layerPath: string) => TypeLegendLayer | undefined;
     setSelectedLayerPath: (layerPath: string) => void;
     setLayerOpacity: (layerPath: string, opacity: number) => void;
     toggleLayerVisibility: (layerPath: string) => void;
@@ -29,6 +30,11 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
     selectedLayerPath: null,
 
     actions: {
+      getLayer: (layerPath: string) => {
+        const curLayers = get().legendState.legendLayers;
+        const layer = findLayerByPath(curLayers, layerPath);
+        return layer;
+      },
       setSelectedLayerPath: (layerPath: string) => {
         set({
           legendState: {
@@ -79,6 +85,10 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
             }
           });
           layer.allItemsChecked = _.every(layer.items, (i) => i.isChecked);
+          const allItemsUnchecked = _.every(layer.items, (i) => !i.isChecked);
+          if (allItemsUnchecked) {
+            layer.isVisible = false;
+          }
         }
         set({
           legendState: {
@@ -96,6 +106,8 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
             item.isChecked = visibility; // eslint-disable-line no-param-reassign
           });
           layer.allItemsChecked = visibility;
+          layer.isVisible = visibility;
+          
         }
         set({
           legendState: {

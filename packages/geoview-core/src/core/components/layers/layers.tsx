@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { useTheme } from '@mui/material/styles';
 import { styled } from '@mui/material';
 import { LegendItemsDetailsProps } from './types';
@@ -23,6 +23,8 @@ export function Layers(props: LegendItemsDetailsProps): JSX.Element {
   const theme = useTheme();
   const sxClasses = getSxClasses(theme);
 
+  const layerDetailsRef = useRef<HTMLDivElement>(null);
+
   // Populating fake legend data
   const helpers = useLegendHelpers(mapId);
 
@@ -32,6 +34,12 @@ export function Layers(props: LegendItemsDetailsProps): JSX.Element {
     helpers.populateLegendStoreWithFakeData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  useEffect(() => {
+    if (layerDetailsRef.current) {
+      layerDetailsRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [selectedLayer]);
 
   const leftPanel = () => {
     return (
@@ -45,7 +53,7 @@ export function Layers(props: LegendItemsDetailsProps): JSX.Element {
   const rightPanel = () => {
     if (selectedLayer) {
       return (
-        <Item>
+        <Item ref={layerDetailsRef}>
           <LayerDetails layerDetails={selectedLayer} />
         </Item>
       );
