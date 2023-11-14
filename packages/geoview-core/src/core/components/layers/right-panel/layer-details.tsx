@@ -12,7 +12,6 @@ import {
   Typography,
   ZoomInSearchIcon,
   Grid,
-  TableChartOutlinedIcon,
   RestartAltIcon,
   HighlightOutlinedIcon,
   TableViewIcon,

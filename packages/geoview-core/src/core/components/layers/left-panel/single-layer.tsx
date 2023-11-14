@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useTheme } from '@mui/material/styles';
+import { useTranslation } from 'react-i18next';
 import {
   Box,
   Collapse,
@@ -22,12 +23,10 @@ import {
   Divider,
   TableViewIcon,
   CircularProgressBase,
-  Typography,
 } from '@/ui';
 import { TypeLegendLayer } from '../types';
 import { getSxClasses } from './layerslist-style';
 import { useLayerStoreActions, useSelectedLayerPath } from '@/core/stores/store-interface-and-intial-values/layer-state';
-import { useTranslation } from 'react-i18next';
 
 interface SingleLayerProps {
   layer: TypeLegendLayer;
@@ -51,21 +50,19 @@ export function SingleLayer(props: SingleLayerProps): JSX.Element {
 
   const [isGroupOpen, setGroupOpen] = useState(layerIsSelected);
 
-  //get layer description  
+  // get layer description
   const getLayerDescription = () => {
-    if(layer.layerStatus === 'error') {
+    if (layer.layerStatus === 'error') {
       return t('legend.layer_has_error');
     }
-    if(layer.layerStatus === 'loading') {
+    if (layer.layerStatus === 'loading') {
       return t('legend.layer_is_loading');
     }
-    if(layer.children.length) {
+    if (layer.children.length) {
       return `${layer.children.length} layers`;
     }
-    else {
-      return `${layer.items.length} items`;
-    }
-  }
+    return `${layer.items.length} items`;
+  };
 
   /**
    * Handle expand/shrink of layer groups.
@@ -89,11 +86,11 @@ export function SingleLayer(props: SingleLayerProps): JSX.Element {
 
   const handleReloadLayer = () => {
     console.log('reloading layer');
-  }
+  };
 
   const handleOpenTable = () => {
     console.log('handle open table');
-  }
+  };
 
   // renders the layers children, if any
   function renderChildren() {
@@ -111,23 +108,28 @@ export function SingleLayer(props: SingleLayerProps): JSX.Element {
   }
 
   function renderMoreLayerButtons() {
-    if(layer.layerStatus === 'loading') {
+    if (layer.layerStatus === 'loading') {
       return null;
     }
-    if(layer.layerStatus === 'error') {
+    if (layer.layerStatus === 'error') {
       return (
         <IconButton onClick={handleReloadLayer}>
           <RestartAltIcon />
         </IconButton>
       );
     }
-    
+
     return (
       <>
         <IconButton onClick={handleOpenTable}>
-          <TableViewIcon  style={{fill: '#363636'}}/>
+          <TableViewIcon style={{ fill: '#363636' }} />
         </IconButton>
-        <Divider orientation="vertical" variant="middle" flexItem style={{margin: '0px 15px', border: '1px solid #ccc', height: '28px'}} />
+        <Divider
+          orientation="vertical"
+          variant="middle"
+          flexItem
+          style={{ margin: '0px 15px', border: '1px solid #ccc', height: '28px' }}
+        />
         <IconButton color="primary" onClick={() => handleToggleVisibility()}>
           {(() => {
             if (layer.isVisible === false) return <VisibilityOffOutlinedIcon />;
@@ -139,7 +141,7 @@ export function SingleLayer(props: SingleLayerProps): JSX.Element {
   }
 
   function renderArrowButtons() {
-    if(!['processed', 'loaded'].includes(layer.layerStatus)) {
+    if (!['processed', 'loaded'].includes(layer.layerStatus)) {
       return null;
     }
     if (layer.children?.length) {
@@ -149,13 +151,14 @@ export function SingleLayer(props: SingleLayerProps): JSX.Element {
         </IconButton>
       );
     }
-    else if(layer.items?.length) {
+    if (layer.items?.length) {
       return (
         <IconButton onClick={handleLayerClick}>
           <KeyboardArrowRightIcon />
         </IconButton>
       );
     }
+    return null;
   }
 
   function renderCollapsible() {
@@ -180,8 +183,8 @@ export function SingleLayer(props: SingleLayerProps): JSX.Element {
     }
     if (layer.layerStatus === 'loading') {
       return (
-        <Box sx={{padding: "5px", marginRight: '10px'}}>
-          <CircularProgressBase size={20}  />
+        <Box sx={{ padding: '5px', marginRight: '10px' }}>
+          <CircularProgressBase size={20} />
         </Box>
       );
     }

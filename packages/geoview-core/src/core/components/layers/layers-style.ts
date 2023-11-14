@@ -11,19 +11,19 @@ export const getSxClasses = (theme: Theme) => ({
       marginBottom: '5px',
     },
 
-    '& .layerItemContainer.error' : {
+    '& .layerItemContainer.error': {
       background: '#ffdcdb 0% 0% no-repeat padding-box',
       '& .MuiListItemText-secondary': {
         fontWeight: 'bold',
-        color: 'error.main'
-      }
+        color: 'error.main',
+      },
     },
-    '& .layerItemContainer.loading' : {
+    '& .layerItemContainer.loading': {
       background: '#e5efff 0% 0% no-repeat padding-box',
       '& .MuiListItemText-secondary': {
         fontWeight: 'bold',
-        color: 'info.main'
-      }
+        color: 'info.main',
+      },
     },
 
     '& .MuiListItemText-primary': {
