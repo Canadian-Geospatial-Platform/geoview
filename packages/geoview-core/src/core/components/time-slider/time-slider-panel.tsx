@@ -1,154 +1,181 @@
-import React, { useEffect, useState } from 'react';
+/* eslint-disable react/require-default-props */
+import React, { useCallback, useState } from 'react';
 import { useTheme } from '@mui/material/styles';
-import { Grid, Slider, Typography, Checkbox } from '@/ui';
+import { t } from 'i18next';
+import {
+  Button,
+  Box,
+  ChevronRightIcon,
+  IconButton,
+  List,
+  ListItem,
+  ListItemButton,
+  ListItemIcon,
+  Paper,
+  SendIcon,
+  Tooltip,
+  Typography,
+  ArrowForwardIcon,
+  ArrowBackIcon,
+} from '@/ui';
 import { getSxClasses } from './time-slider-style';
-import { AbstractGeoViewVector, EsriDynamic, TypeFeatureInfoLayerConfig, api, getLocalizedValue } from '@/app';
+import { TimeSlider } from './time-slider';
+import { api, getLocalizedValue } from '@/app';
 import { SliderFilterProps } from './time-slider-api';
+import { ResponsiveGrid } from '../responsive-grid/responsive-grid';
 
-interface TimeSliderPanelProps {
+interface TypeTimeSliderProps {
   mapId: string;
-  layerPath: string;
-  sliderFilterProps: SliderFilterProps;
+  layersList: string[];
+  timeSliderData: { [index: string]: SliderFilterProps };
 }
 
 /**
- * Creates a panel with time sliders
+ * Time slider tab
  *
- * @param {TimeSliderPanelProps} TimeSliderPanelProps time slider panel properties
- * @returns {JSX.Element} the slider panel
+ * @param {TypeTimeSliderProps} props The properties passed to slider
+ * @returns {JSX.Element} the time slider tab
  */
-export function TimeSliderPanel(TimeSliderPanelProps: TimeSliderPanelProps) {
-  const { mapId, layerPath, sliderFilterProps } = TimeSliderPanelProps;
-  const { range, defaultValue, minAndMax, field, values, filtering } = sliderFilterProps;
+export function TimeSliderPanel(props: TypeTimeSliderProps): JSX.Element {
+  const { mapId, layersList, timeSliderData } = props;
   const theme = useTheme();
   const sxClasses = getSxClasses(theme);
-  const [checked, setChecked] = useState<boolean>(filtering);
-  const layerSchemaTag = api.maps[mapId].layer.registeredLayers[layerPath].schemaTag;
-  const [sliderValues, setSliderValues] = useState<number[]>(layerSchemaTag === 'ogcWms' ? [new Date(defaultValue).getTime()] : values);
 
-  let fieldAlias = field;
-  const { featureInfo } = api.maps[mapId].layer.registeredLayers[layerPath].source!;
-  const { aliasFields, outfields } = featureInfo as TypeFeatureInfoLayerConfig;
-  const localizedOutFields = getLocalizedValue(outfields, mapId)?.split(',');
-  const localizedAliasFields = getLocalizedValue(aliasFields, mapId)?.split(',');
-  const fieldIndex = localizedOutFields ? localizedOutFields.indexOf(field) : -1;
-  if (fieldIndex !== -1 && localizedAliasFields?.length === localizedOutFields?.length) fieldAlias = localizedAliasFields![fieldIndex];
+  // First layer is initially selected
+  const [selectedLayer, setSelectedLayer] = useState<string>(layersList[0]);
+  const [isLayersPanelVisible, setIsLayersPanelVisible] = useState(false);
+  const [isEnlargeDataTable, setIsEnlargeDataTable] = useState(false);
 
-  const timeDelta = minAndMax[1] - minAndMax[0];
-  const dayDelta = new Date(minAndMax[1]).getDate() - new Date(minAndMax[0]).getDate();
-  const yearDelta = new Date(minAndMax[1]).getFullYear() - new Date(minAndMax[0]).getFullYear();
-  let timeframe: string | undefined;
-  if (dayDelta === 0 && timeDelta < 86400000) timeframe = 'day';
-  else if (yearDelta === 0) timeframe = 'year';
+  /**
+   * Render group layers as list.
+   *
+   * @returns JSX.Element
+   */
+  const renderLayerList = useCallback(() => {
+    return (
+      <List sx={sxClasses.list}>
+        {layersList.map((layerPath) => {
+          const isSelectedBorder = layerPath === selectedLayer;
+          const layerName = getLocalizedValue(api.maps[mapId].layer.registeredLayers[layerPath].layerName, mapId);
+          // TODO use visible layers from store instead of this
+          if (api.maps[mapId].layer.registeredLayers[layerPath].olLayer?.getVisible()) {
+            return (
+              <Paper
+                sx={{ ...sxClasses.layerListPaper, border: isSelectedBorder ? `2px solid ${theme.palette.primary.main}` : 'none' }}
+                key={layerPath}
+              >
+                <Tooltip title={layerName} placement="top" enterDelay={1000}>
+                  <Box>
+                    <ListItem disablePadding>
+                      <ListItemButton
+                        onClick={() => {
+                          setSelectedLayer(layerPath);
+                          setIsLayersPanelVisible(false);
+                        }}
+                        sx={{ height: '67px' }}
+                      >
+                        <ListItemIcon>
+                          <SendIcon sx={{ width: '0.75em', height: '0.75em' }} />
+                        </ListItemIcon>
 
-  let timeMarks: number[] = [];
-  if (range.length < 6) timeMarks = [...minAndMax];
-  else if (layerSchemaTag === 'ogcWms') {
-    timeMarks = range.map((entry) => new Date(entry).getTime());
-  } else {
-    timeMarks = [
-      minAndMax[0],
-      new Date(range[Math.round(range.length / 4)]).getTime(),
-      new Date(range[Math.round(range.length / 2)]).getTime(),
-      new Date(range[Math.round((3 * range.length) / 4)]).getTime(),
-      minAndMax[1],
-    ];
-  }
+                        <Box sx={sxClasses.listPrimaryText}>
+                          <Typography component="p">{layerName}</Typography>
+                        </Box>
 
-  const sliderMarks = [];
-  for (let i = 0; i < timeMarks.length; i++) {
-    sliderMarks.push({
-      value: timeMarks[i],
-      label: timeframe
-        ? `${
-            timeframe === 'day'
-              ? new Date(timeMarks[i]).toTimeString().split(' ')[0].replace(/^0/, '')
-              : new Date(timeMarks[i]).toISOString().slice(5, 10)
-          }`
-        : new Date(timeMarks[i]).toISOString().slice(0, 10),
-    });
-  }
-
-  useEffect(() => {
-    if (layerSchemaTag === 'ogcWms') {
-      if (checked) {
-        const newValue = `${new Date(sliderValues[0]).toISOString().slice(0, new Date(sliderValues[0]).toISOString().length - 5)}Z`;
-        const filter = `${field}=date '${newValue}'`;
-        (api.maps[mapId].layer.geoviewLayers[layerPath.split('/')[0]] as AbstractGeoViewVector | EsriDynamic).applyViewFilter(
-          layerPath,
-          filter
-        );
-      } else {
-        const filter = `${field}=date '${defaultValue}'`;
-        (api.maps[mapId].layer.geoviewLayers[layerPath.split('/')[0]] as AbstractGeoViewVector | EsriDynamic).applyViewFilter(
-          layerPath,
-          filter
-        );
-      }
-    } else if (checked) {
-      let filter = `${field} >= date '${new Date(sliderValues[0]).toISOString()}'`;
-      if (sliderValues.length > 1) {
-        filter += ` and ${field} <= date '${new Date(sliderValues[1]).toISOString()}'`;
-      }
-      (api.maps[mapId].layer.geoviewLayers[layerPath.split('/')[0]] as AbstractGeoViewVector | EsriDynamic).applyViewFilter(
-        layerPath,
-        filter
-      );
-    } else {
-      let filter = `${field} >= date '${new Date(minAndMax[0]).toISOString()}'`;
-      if (sliderValues.length > 1) {
-        filter += `and ${field} <= date '${new Date(minAndMax[1]).toISOString()}'`;
-      }
-      (api.maps[mapId].layer.geoviewLayers[layerPath.split('/')[0]] as AbstractGeoViewVector | EsriDynamic).applyViewFilter(
-        layerPath,
-        filter
-      );
-    }
-    sliderFilterProps.values = sliderValues;
+                        <Box
+                          sx={{
+                            padding: isEnlargeDataTable ? '0.25rem' : '1rem',
+                            paddingRight: isEnlargeDataTable ? '0.25rem' : '1rem',
+                            [theme.breakpoints.down('xl')]: {
+                              display: isEnlargeDataTable ? 'none !important' : 'block',
+                            },
+                            [theme.breakpoints.down('sm')]: {
+                              display: 'none',
+                            },
+                          }}
+                        >
+                          <IconButton
+                            disabled
+                            edge="end"
+                            size="small"
+                            sx={{ color: `${theme.palette.primary.main} !important`, background: `${theme.palette.grey.A100} !important` }}
+                          >
+                            <ChevronRightIcon />
+                          </IconButton>
+                        </Box>
+                      </ListItemButton>
+                    </ListItem>
+                  </Box>
+                </Tooltip>
+              </Paper>
+            );
+          }
+          return null;
+        })}
+      </List>
+    );
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [sliderValues, checked]);
-
-  function valueLabelFormat(value: number): string {
-    if (timeframe === 'day') return new Date(value).toTimeString().split(' ')[0].replace(/^0/, '');
-    if (timeframe === 'year') return new Date(value).toISOString().slice(5, 10);
-    return new Date(value).toISOString().slice(0, 10);
-  }
+  }, [layersList, selectedLayer, isEnlargeDataTable]);
 
   return (
-    <Grid item md={8} sx={{ paddingLeft: '40px', paddingTop: '47px' }}>
-      <div style={sxClasses.rightPanelContainer}>
-        <Grid container sx={sxClasses.rightPanelBtnHolder}>
-          <Grid item xs={9}>
-            <Typography component="div" sx={{ ...sxClasses.panelHeaders, paddingLeft: '20px', textAlign: 'center', paddingTop: '10px' }}>
-              {timeframe !== undefined
-                ? `${fieldAlias} (${
-                    timeframe === 'day' ? new Date(defaultValue).toLocaleDateString() : new Date(defaultValue).getFullYear()
-                  })`
-                : fieldAlias}
-            </Typography>
-          </Grid>
-          <Grid item xs={3}>
-            <div style={{ textAlign: 'right', marginRight: '25px' }}>
-              <Checkbox checked={checked} onChange={(event, child) => setChecked(child)} />
-            </div>
-          </Grid>
-        </Grid>
-        <Grid item xs={12}>
-          <div style={{ textAlign: 'center', paddingTop: '20px' }}>
-            <Slider
-              sliderId={layerPath}
-              style={{ width: '80%', color: 'primary' }}
-              min={minAndMax[0]}
-              max={minAndMax[1]}
-              value={sliderValues}
-              valueLabelFormat={(value) => valueLabelFormat(value)}
-              marks={sliderMarks}
-              step={layerSchemaTag === 'ogcWms' ? null : 0.1}
-              customOnChange={(event) => setSliderValues(event as number[])}
-            />
-          </div>
-        </Grid>
-      </div>
-    </Grid>
+    <Box sx={sxClasses.detailsContainer}>
+      <ResponsiveGrid.Root>
+        <ResponsiveGrid.Left xs={isLayersPanelVisible ? 12 : 0} md={3} isLayersPanelVisible={isLayersPanelVisible}>
+          <Typography component="p" sx={sxClasses.panelHeaders}>
+            {t('details.availableLayers')}
+          </Typography>
+        </ResponsiveGrid.Left>
+        <ResponsiveGrid.Right
+          isLayersPanelVisible={false}
+          xs={!isLayersPanelVisible ? 12 : 0}
+          md={9}
+          sx={{ display: 'flex', justifyContent: 'right' }}
+        >
+          <Button
+            type="text"
+            size="small"
+            sx={{ ...sxClasses.enlargeBtn, [theme.breakpoints.down('md')]: { display: 'none' } }}
+            onClick={() => setIsEnlargeDataTable(!isEnlargeDataTable)}
+            tooltip={isEnlargeDataTable ? t('dataTable.reduceBtn')! : t('dataTable.enlargeBtn')!}
+            tooltipPlacement="top"
+          >
+            {isEnlargeDataTable ? <ArrowForwardIcon sx={sxClasses.enlargeBtnIcon} /> : <ArrowBackIcon sx={sxClasses.enlargeBtnIcon} />}
+            {isEnlargeDataTable ? t('dataTable.reduceBtn') : t('dataTable.enlargeBtn')}
+          </Button>
+          <Button
+            type="text"
+            size="small"
+            sx={{
+              ...sxClasses.enlargeBtn,
+              marginLeft: '1rem',
+              [theme.breakpoints.up('md')]: { display: 'none' },
+              [theme.breakpoints.between('sm', 'md')]: { display: !isLayersPanelVisible ? 'block' : 'none' },
+              [theme.breakpoints.down('md')]: { display: !isLayersPanelVisible ? 'block' : 'none' },
+            }}
+            onClick={() => setIsLayersPanelVisible(true)}
+            tooltip={t('dataTable.close') ?? ''}
+            tooltipPlacement="top"
+          >
+            {t('dataTable.close')}
+          </Button>
+        </ResponsiveGrid.Right>
+      </ResponsiveGrid.Root>
+      <ResponsiveGrid.Root sx={{ marginTop: '1rem' }}>
+        <ResponsiveGrid.Left
+          isLayersPanelVisible={isLayersPanelVisible}
+          xs={isLayersPanelVisible ? 12 : 0}
+          md={!isEnlargeDataTable ? 4 : 1.25}
+        >
+          {renderLayerList()}
+        </ResponsiveGrid.Left>
+        <ResponsiveGrid.Right
+          xs={!isLayersPanelVisible ? 12 : 0}
+          md={!isEnlargeDataTable ? 8 : 10.75}
+          isLayersPanelVisible={isLayersPanelVisible}
+        >
+          <TimeSlider mapId={mapId} layerPath={selectedLayer} sliderFilterProps={timeSliderData[selectedLayer]} key={selectedLayer} />
+        </ResponsiveGrid.Right>
+      </ResponsiveGrid.Root>
+    </Box>
   );
 }

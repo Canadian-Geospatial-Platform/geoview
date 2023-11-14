@@ -3,35 +3,35 @@ import { GridProps } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import { Grid } from '@/ui';
 
-interface DataTableGridProps extends GridProps {
+interface ResponsiveGridProps extends GridProps {
   children: ReactNode;
 }
 
-interface DataTableGridPanelProps extends GridProps {
+interface ResponsiveGridPanelProps extends GridProps {
   children: ReactNode;
   isLayersPanelVisible: boolean;
 }
 
 /**
- * Create Grid Container
+ * Create Responsive Grid Container
  * @param {ReactNode} children children to be renderer
  * @returns JSX.Element
  */
-function DataTableGridRoot({ children, ...rest }: DataTableGridProps) {
+function ResponsiveGridRoot({ children, ...rest }: ResponsiveGridProps) {
   return (
-    <Grid container {...rest}>
+    <Grid container {...rest} paddingLeft={12} paddingRight={12}>
       {children}
     </Grid>
   );
 }
 
 /**
- * Create Left Panel for Data table grid.
+ * Create Left Panel for responsive grid.
  * @param {ReactNode} children child elements to be rendered
  * @param {boolean} isLayersPanelVisible panel visibility
  * @returns JSX.Element
  */
-function DataTableGridLeftPanel({ children, isLayersPanelVisible = false, ...rest }: DataTableGridPanelProps) {
+function ResponsiveGridLeftPanel({ children, isLayersPanelVisible = false, ...rest }: ResponsiveGridPanelProps) {
   const theme = useTheme();
 
   return (
@@ -48,12 +48,12 @@ function DataTableGridLeftPanel({ children, isLayersPanelVisible = false, ...res
 }
 
 /**
- * Create Right Panel for Data table grid.
+ * Create Right Panel for responsive grid.
  * @param {ReactNode} children child elements to be rendered
  * @param {boolean} isLayersPanelVisible panel visibility
  * @returns JSX.Element
  */
-function DataTableGridRightPanel({ children, isLayersPanelVisible = false, ...rest }: DataTableGridPanelProps) {
+function ResponsiveGridRightPanel({ children, isLayersPanelVisible = false, ...rest }: ResponsiveGridPanelProps) {
   const theme = useTheme();
   return (
     <Grid
@@ -70,8 +70,8 @@ function DataTableGridRightPanel({ children, isLayersPanelVisible = false, ...re
   );
 }
 
-export const DataTableGrid = {
-  Root: DataTableGridRoot,
-  Left: DataTableGridLeftPanel,
-  Right: DataTableGridRightPanel,
+export const ResponsiveGrid = {
+  Root: ResponsiveGridRoot,
+  Left: ResponsiveGridLeftPanel,
+  Right: ResponsiveGridRightPanel,
 };

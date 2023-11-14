@@ -3,7 +3,6 @@ import { Theme } from '@mui/material';
 export const getSxClasses = (theme: Theme) => ({
   list: {
     color: 'text.primary',
-    marginLeft: '1rem',
     width: '100%',
     paddingRight: '2rem',
 
