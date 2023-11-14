@@ -58,5 +58,13 @@ export function IconStack({ layerPath, onIconClick, onStackIconClick }: TypeIcon
         <Box sx={sxClasses.legendIcon}>{iconImg && <img alt="icon" src={iconImg} style={sxClasses.maxIconImg} />}</Box>
       </IconButton>
     </Box>
-  ) : null;
+  ) : (
+    <Box tabIndex={0} onClick={onIconClick} sx={sxClasses.stackIconsBox} onKeyPress={(e) => onStackIconClick?.(e)}>
+      <IconButton sx={sxClasses.iconPreviewStacked} color="primary" size="small" tabIndex={-1}>
+        <Box sx={sxClasses.legendIconTransparent}>
+          <BrowserNotSupportedIcon />
+        </Box>
+      </IconButton>
+    </Box>
+  );
 }

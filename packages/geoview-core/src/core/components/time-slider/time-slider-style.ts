@@ -96,6 +96,7 @@ export const getSxClasses = (theme: Theme) => ({
   },
   gridContainer: { paddingLeft: '1rem', paddingRight: '1rem' },
   listPrimaryText: {
+    marginLeft: '0.62rem',
     minWidth: '0',
     padding: '1.3rem 0',
     flex: '1 1 auto',
