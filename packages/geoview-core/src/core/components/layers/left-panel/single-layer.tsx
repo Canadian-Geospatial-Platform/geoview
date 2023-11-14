@@ -21,10 +21,12 @@ import {
   VisibilityOutlinedIcon,
   RestartAltIcon,
   CircularProgressBase,
+  TableViewIcon,
 } from '@/ui';
 import { TypeLegendLayer } from '../types';
 import { getSxClasses } from './layerslist-style';
 import { useLayerStoreActions, useSelectedLayerPath } from '@/core/stores/store-interface-and-intial-values/layer-state';
+import { useDataTableStoreMapFilteredRecord } from '@/core/stores/store-interface-and-intial-values/data-table-state';
 
 interface SingleLayerProps {
   layer: TypeLegendLayer;
@@ -42,6 +44,7 @@ export function SingleLayer(props: SingleLayerProps): JSX.Element {
   const { toggleLayerVisibility, setSelectedLayerPath } = useLayerStoreActions(); // get store actions
 
   const selectedLayerPath = useSelectedLayerPath(); // get store value
+  const mapFiltered = useDataTableStoreMapFilteredRecord();
 
   const layerIsSelected = layer.layerPath === selectedLayerPath;
   const legendClass = layerIsSelected ? { ...sxClasses.layersList.selectedLayerItem } : null;
@@ -58,6 +61,14 @@ export function SingleLayer(props: SingleLayerProps): JSX.Element {
     }
     if (layer.children.length) {
       return `${layer.children.length} layers`;
+    }
+    if (mapFiltered[layer.layerPath]) {
+      return (
+        <Box sx={{ display: 'flex', flexDirection: 'row',alignItems:'center', justifyContent: 'flex-start', gap: 1 }}>
+          <span>{layer.items.length} items </span>
+          <TableViewIcon />
+        </Box>
+      );
     }
     return `${layer.items.length} items`;
   };
