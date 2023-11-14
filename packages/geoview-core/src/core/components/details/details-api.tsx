@@ -2,7 +2,7 @@ import { createElement, ReactElement } from 'react';
 
 import { FeatureInfoLayerSet } from '@/geo/utils/feature-info-layer-set';
 import { api } from '@/app';
-import { Details } from './details';
+import { Detailspanel } from './details-panel';
 
 /**
  * API to manage details component
@@ -32,6 +32,6 @@ export class DetailsApi {
    * @return {ReactElement} the details react element
    */
   createDetails = (mapId: string): ReactElement => {
-    return createElement(Details, mapId);
+    return createElement(Detailspanel, { mapId });
   };
 }

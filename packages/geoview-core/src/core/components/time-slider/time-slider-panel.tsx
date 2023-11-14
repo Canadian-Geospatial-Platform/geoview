@@ -3,7 +3,6 @@ import React, { useCallback, useState } from 'react';
 import { useTheme } from '@mui/material/styles';
 import { t } from 'i18next';
 import {
-  Button,
   Box,
   ChevronRightIcon,
   IconButton,
@@ -15,14 +14,12 @@ import {
   SendIcon,
   Tooltip,
   Typography,
-  ArrowForwardIcon,
-  ArrowBackIcon,
 } from '@/ui';
 import { getSxClasses } from './time-slider-style';
 import { TimeSlider } from './time-slider';
 import { api, getLocalizedValue } from '@/app';
 import { SliderFilterProps } from './time-slider-api';
-import { ResponsiveGrid } from '../responsive-grid/responsive-grid';
+import { CloseButton, EnlargeButton, ResponsiveGrid } from '../common';
 
 interface TypeTimeSliderProps {
   mapId: string;
@@ -131,33 +128,8 @@ export function TimeSliderPanel(props: TypeTimeSliderProps): JSX.Element {
           md={9}
           sx={{ display: 'flex', justifyContent: 'right' }}
         >
-          <Button
-            type="text"
-            size="small"
-            sx={{ ...sxClasses.enlargeBtn, [theme.breakpoints.down('md')]: { display: 'none' } }}
-            onClick={() => setIsEnlargeDataTable(!isEnlargeDataTable)}
-            tooltip={isEnlargeDataTable ? t('dataTable.reduceBtn')! : t('dataTable.enlargeBtn')!}
-            tooltipPlacement="top"
-          >
-            {isEnlargeDataTable ? <ArrowForwardIcon sx={sxClasses.enlargeBtnIcon} /> : <ArrowBackIcon sx={sxClasses.enlargeBtnIcon} />}
-            {isEnlargeDataTable ? t('dataTable.reduceBtn') : t('dataTable.enlargeBtn')}
-          </Button>
-          <Button
-            type="text"
-            size="small"
-            sx={{
-              ...sxClasses.enlargeBtn,
-              marginLeft: '1rem',
-              [theme.breakpoints.up('md')]: { display: 'none' },
-              [theme.breakpoints.between('sm', 'md')]: { display: !isLayersPanelVisible ? 'block' : 'none' },
-              [theme.breakpoints.down('md')]: { display: !isLayersPanelVisible ? 'block' : 'none' },
-            }}
-            onClick={() => setIsLayersPanelVisible(true)}
-            tooltip={t('dataTable.close') ?? ''}
-            tooltipPlacement="top"
-          >
-            {t('dataTable.close')}
-          </Button>
+          <EnlargeButton isEnlargeDataTable={isEnlargeDataTable} setIsEnlargeDataTable={setIsEnlargeDataTable} />
+          <CloseButton isLayersPanelVisible={isLayersPanelVisible} setIsLayersPanelVisible={setIsLayersPanelVisible} />
         </ResponsiveGrid.Right>
       </ResponsiveGrid.Root>
       <ResponsiveGrid.Root sx={{ marginTop: '1rem' }}>

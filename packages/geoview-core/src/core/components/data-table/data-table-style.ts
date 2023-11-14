@@ -4,8 +4,9 @@ export const getSxClasses = (theme: Theme) => ({
   list: {
     color: 'text.primary',
     width: '100%',
-    paddingRight: '2rem',
-
+    [theme.breakpoints.up('md')]: {
+      paddingRight: '2rem',
+    },
     '& .MuiListItemText-primary': {
       font: theme.footerPanel.layerTitleFont,
     },
@@ -69,32 +70,6 @@ export const getSxClasses = (theme: Theme) => ({
   headline: { fontSize: '1.125rem', fontWeight: 'bold' },
   dataPanel: { backgroundColor: '#F1F2F5', padding: '1.5rem' },
   gridContainer: { paddingLeft: '1rem', paddingRight: '1rem' },
-  enlargeBtn: {
-    width: '7rem !important',
-    height: '2.5rem !important',
-    borderRadius: '1.5rem',
-    boxShadow: '0px 3px 6px #00000029',
-    marginTop: '0.25rem',
-    background: '#F4F5FF !important',
-    '>div': {
-      color: `${theme.palette.primary.main} !important`,
-    },
-    '& svg': {
-      marginRight: '0.25rem',
-    },
-    ':hover': {
-      backgroundColor: `${theme.palette.primary.main} !important`,
-      '> div': {
-        color: `${theme.palette.common.white} !important`,
-      },
-      '& svg': {
-        color: `${theme.palette.common.white} !important`,
-      },
-    },
-  },
-  enlargeBtnIcon: {
-    color: theme.palette.primary.main,
-  },
   iconImage: {
     padding: 3,
     borderRadius: 0,

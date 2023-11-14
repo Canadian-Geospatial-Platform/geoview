@@ -14,9 +14,6 @@ import {
   SendIcon,
   ChevronRightIcon,
   CircularProgress,
-  Button,
-  ArrowForwardIcon,
-  ArrowBackIcon,
   Tooltip,
   FilterAltIcon,
 } from '@/ui';
@@ -32,7 +29,8 @@ import {
   useDataTableStoreRowsFiltered,
   useDataTableStoreSelectedLayerIndex,
 } from '@/core/stores/store-interface-and-intial-values/data-table-state';
-import { ResponsiveGrid } from '../responsive-grid/responsive-grid';
+
+import { ResponsiveGrid, EnlargeButton, CloseButton } from '../common';
 
 interface DatapanelProps {
   layerData: (MapDataTableDataProps & GroupLayers)[];
@@ -191,35 +189,8 @@ export function Datapanel({ layerData, mapId, projectionConfig, language }: Data
           sx={{ display: 'flex', justifyContent: 'right' }}
           isLayersPanelVisible={isLayersPanelVisible}
         >
-          <Button
-            type="text"
-            size="small"
-            sx={{ ...sxClasses.enlargeBtn, [theme.breakpoints.down('md')]: { display: 'none' } }}
-            onClick={() => setIsEnlargeDataTable(!isEnlargeDataTable)}
-            tooltip={isEnlargeDataTable ? t('dataTable.reduceBtn')! : t('dataTable.enlargeBtn')!}
-            tooltipPlacement="top"
-          >
-            {isEnlargeDataTable ? <ArrowForwardIcon sx={sxClasses.enlargeBtnIcon} /> : <ArrowBackIcon sx={sxClasses.enlargeBtnIcon} />}
-            {isEnlargeDataTable ? t('dataTable.reduceBtn') : t('dataTable.enlargeBtn')}
-          </Button>
-          {!isLoading && (
-            <Button
-              type="text"
-              size="small"
-              sx={{
-                ...sxClasses.enlargeBtn,
-                marginLeft: '1rem',
-                [theme.breakpoints.up('md')]: { display: 'none' },
-                [theme.breakpoints.between('sm', 'md')]: { display: !isLayersPanelVisible ? 'block' : 'none' },
-                [theme.breakpoints.down('md')]: { display: !isLayersPanelVisible ? 'block' : 'none' },
-              }}
-              onClick={() => setIsLayersPanelVisible(true)}
-              tooltip={t('dataTable.close') ?? ''}
-              tooltipPlacement="top"
-            >
-              {t('dataTable.close')}
-            </Button>
-          )}
+          <EnlargeButton isEnlargeDataTable={isEnlargeDataTable} setIsEnlargeDataTable={setIsEnlargeDataTable} />
+          {!isLoading && <CloseButton setIsLayersPanelVisible={setIsLayersPanelVisible} isLayersPanelVisible={isLayersPanelVisible} />}
         </ResponsiveGrid.Right>
       </ResponsiveGrid.Root>
       <ResponsiveGrid.Root sx={{ marginTop: '0.75rem' }}>

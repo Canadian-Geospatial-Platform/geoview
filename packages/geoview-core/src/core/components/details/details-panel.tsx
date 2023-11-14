@@ -23,9 +23,6 @@ import {
   LayersClearOutlinedIcon,
   ChevronRightIcon,
   Box,
-  Button,
-  ArrowForwardIcon,
-  ArrowBackIcon,
 } from '@/ui';
 import { FeatureInfo } from './feature-info-new';
 import { PayloadBaseClass, api } from '@/app';
@@ -42,23 +39,24 @@ import {
   TypeLayerData,
 } from '@/api/events/payloads';
 import { getSxClasses } from './details-style';
-import { useDetailsStoreActions, useDetailsStoreSelectedLayerPath } from '@/core/stores/store-interface-and-intial-values/details-state';
-import { ResponsiveGrid } from '../responsive-grid/responsive-grid';
+import {
+  useDetailsStoreActions,
+  useDetailsStoreLayerDataArray,
+  useDetailsStoreSelectedLayerPath,
+} from '@/core/stores/store-interface-and-intial-values/details-state';
+import { ResponsiveGrid, CloseButton, EnlargeButton } from '../common';
 
-interface TypeLayersListProps {
-  arrayOfLayerData: TypeArrayOfLayerData;
+interface DetailsPanelProps {
   mapId: string;
 }
 
 /**
  * layers list
  *
- * @param {TypeLayersListProps} props The properties passed to LayersListFooter
+ * @param {DetailsPanelProps} props The properties passed to LayersListFooter
  * @returns {JSX.Element} the layers list
  */
-export function LayersListFooter(props: TypeLayersListProps): JSX.Element {
-  const { arrayOfLayerData, mapId } = props;
-
+export function Detailspanel({ mapId }: DetailsPanelProps): JSX.Element {
   const { t } = useTranslation<string>();
 
   const theme = useTheme();
@@ -76,6 +74,7 @@ export function LayersListFooter(props: TypeLayersListProps): JSX.Element {
   // get values from store
   const selectedLayerPath = useDetailsStoreSelectedLayerPath();
   const { setSelectedLayerPath } = useDetailsStoreActions();
+  const arrayOfLayerData = useDetailsStoreLayerDataArray();
 
   // Returns the index of matching layer based on the found layer path
   const findLayerPathIndex = (layerDataArray: TypeArrayOfLayerData, layerPathSearch: string): number => {
@@ -266,33 +265,8 @@ export function LayersListFooter(props: TypeLayersListProps): JSX.Element {
               md={9}
               sx={{ display: 'flex', justifyContent: 'right' }}
             >
-              <Button
-                type="text"
-                size="small"
-                sx={{ ...sxClasses.enlargeBtn, [theme.breakpoints.down('md')]: { display: 'none' } }}
-                onClick={() => setIsEnlargeDataTable(!isEnlargeDataTable)}
-                tooltip={isEnlargeDataTable ? t('dataTable.reduceBtn')! : t('dataTable.enlargeBtn')!}
-                tooltipPlacement="top"
-              >
-                {isEnlargeDataTable ? <ArrowForwardIcon sx={sxClasses.enlargeBtnIcon} /> : <ArrowBackIcon sx={sxClasses.enlargeBtnIcon} />}
-                {isEnlargeDataTable ? t('dataTable.reduceBtn') : t('dataTable.enlargeBtn')}
-              </Button>
-              <Button
-                type="text"
-                size="small"
-                sx={{
-                  ...sxClasses.enlargeBtn,
-                  marginLeft: '1rem',
-                  [theme.breakpoints.up('md')]: { display: 'none' },
-                  [theme.breakpoints.between('sm', 'md')]: { display: !isLayersPanelVisible ? 'block' : 'none' },
-                  [theme.breakpoints.down('md')]: { display: !isLayersPanelVisible ? 'block' : 'none' },
-                }}
-                onClick={() => setIsLayersPanelVisible(true)}
-                tooltip={t('dataTable.close') ?? ''}
-                tooltipPlacement="top"
-              >
-                {t('dataTable.close')}
-              </Button>
+              <EnlargeButton isEnlargeDataTable={isEnlargeDataTable} setIsEnlargeDataTable={setIsEnlargeDataTable} />
+              <CloseButton isLayersPanelVisible={isLayersPanelVisible} setIsLayersPanelVisible={setIsLayersPanelVisible} />
             </ResponsiveGrid.Right>
           </ResponsiveGrid.Root>
           <ResponsiveGrid.Root sx={{ marginTop: '1rem' }}>
