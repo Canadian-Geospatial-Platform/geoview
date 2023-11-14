@@ -71,7 +71,7 @@ export function SingleLayer(props: SingleLayerProps): JSX.Element {
 
   const handleLayerClick = () => {
     if (!['processed', 'loaded'].includes(layer.layerStatus)) {
-      return null;
+      return;
     }
     if (layer.children.length === 0) {
       // setSelectedLayer(layer);
@@ -117,14 +117,12 @@ export function SingleLayer(props: SingleLayerProps): JSX.Element {
     }
 
     return (
-      <>
-        <IconButton color="primary" onClick={() => handleToggleVisibility()}>
-          {(() => {
-            if (layer.isVisible === false) return <VisibilityOffOutlinedIcon />;
-            return <VisibilityOutlinedIcon />;
-          })()}
-        </IconButton>
-      </>
+      <IconButton color="primary" onClick={() => handleToggleVisibility()}>
+        {(() => {
+          if (layer.isVisible === false) return <VisibilityOffOutlinedIcon />;
+          return <VisibilityOutlinedIcon />;
+        })()}
+      </IconButton>
     );
   }
 
