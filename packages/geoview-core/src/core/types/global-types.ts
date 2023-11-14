@@ -2,6 +2,7 @@ import React from 'react';
 import { createRoot } from 'react-dom/client';
 
 import { useTheme } from '@mui/material/styles';
+import { useStore } from 'zustand';
 import { useTranslation } from 'react-i18next';
 import { useMediaQuery } from '@mui/material';
 import { API } from '@/api/api';
@@ -90,6 +91,7 @@ export type TypeCGPV = {
   createRoot: typeof createRoot;
   ui: TypeCGPVUI;
   useTranslation: typeof useTranslation;
+  useStore: typeof useStore;
   types: typeof import('./cgpv-types');
 };
 

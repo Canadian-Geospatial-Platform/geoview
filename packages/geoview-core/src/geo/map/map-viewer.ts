@@ -46,7 +46,7 @@ import { generateId, getValidConfigFromString } from '@/core/utils/utilities';
 import { TypeListOfGeoviewLayerConfig, TypeDisplayLanguage, TypeViewSettings } from '@/geo/map/map-schema-types';
 import { TypeMapFeaturesConfig, TypeHTMLElement } from '@/core/types/global-types';
 import { layerConfigIsGeoCore } from '@/geo/layer/other/geocore';
-import { MapEventProcessor } from '@/api/eventProcessors/map-event-processor';
+import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 
 interface TypeDcoument extends Document {
   webkitExitFullscreen: () => void;

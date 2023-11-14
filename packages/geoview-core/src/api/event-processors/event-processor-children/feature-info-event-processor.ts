@@ -1,5 +1,5 @@
 import { GeoViewStoreType } from '@/core/stores/geoview-store';
-import { AbstractEventProcessor } from './abstract-event-processor';
+import { AbstractEventProcessor } from '../abstract-event-processor';
 import { EVENT_NAMES } from '@/api/events/event-types';
 import {
   TypeFeatureInfoResultSets,

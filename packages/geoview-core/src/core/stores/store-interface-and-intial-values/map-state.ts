@@ -97,7 +97,7 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
     fixNorth: false,
     mapLoaded: false,
     northArrow: false,
-    northArrowElement: { degreeRotation: '180.0', isNorthVisible: true },
+    northArrowElement: { degreeRotation: '180.0', isNorthVisible: true } as TypeNorthArrow,
     overviewMap: false,
     overviewMapHideZoom: 0,
     pointerPosition: undefined,
@@ -338,7 +338,7 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
         api.maps[get().mapId].zoomToExtent(extent, options);
       },
     },
-  };
+  } as IMapState;
 
   return init;
 }
