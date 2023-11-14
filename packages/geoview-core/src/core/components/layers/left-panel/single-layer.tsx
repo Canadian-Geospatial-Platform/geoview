@@ -20,8 +20,6 @@ import {
   VisibilityOffOutlinedIcon,
   VisibilityOutlinedIcon,
   RestartAltIcon,
-  Divider,
-  TableViewIcon,
   CircularProgressBase,
 } from '@/ui';
 import { TypeLegendLayer } from '../types';
@@ -72,6 +70,9 @@ export function SingleLayer(props: SingleLayerProps): JSX.Element {
   };
 
   const handleLayerClick = () => {
+    if (!['processed', 'loaded'].includes(layer.layerStatus)) {
+      return null;
+    }
     if (layer.children.length === 0) {
       // setSelectedLayer(layer);
       setSelectedLayerPath(layer.layerPath);
@@ -86,10 +87,6 @@ export function SingleLayer(props: SingleLayerProps): JSX.Element {
 
   const handleReloadLayer = () => {
     console.log('reloading layer');
-  };
-
-  const handleOpenTable = () => {
-    console.log('handle open table');
   };
 
   // renders the layers children, if any
@@ -121,15 +118,6 @@ export function SingleLayer(props: SingleLayerProps): JSX.Element {
 
     return (
       <>
-        <IconButton onClick={handleOpenTable}>
-          <TableViewIcon style={{ fill: '#363636' }} />
-        </IconButton>
-        <Divider
-          orientation="vertical"
-          variant="middle"
-          flexItem
-          style={{ margin: '0px 15px', border: '1px solid #ccc', height: '28px' }}
-        />
         <IconButton color="primary" onClick={() => handleToggleVisibility()}>
           {(() => {
             if (layer.isVisible === false) return <VisibilityOffOutlinedIcon />;
