@@ -61,7 +61,8 @@ class SwiperPlugin extends AbstractPlugin {
       // create the swiper container and insert it after top link
       const el = document.createElement('div');
       el.setAttribute('id', `${mapId}-swiper`);
-      document.getElementById(`toplink-${mapId}`)?.after(el);
+      const mapElement = document.getElementById(`map-${mapId}`);
+      mapElement?.insertBefore(el, mapElement.firstChild);
 
       // create the swiper component and render
       const node = createElement(Swiper, { mapId, config: configObj!, translations: this.translations });
