@@ -68,32 +68,6 @@ export const getSxClasses = (theme: Theme) => ({
     marginBottom: '9px',
     boxShadow: '0px 12px 9px -13px #E0E0E0',
   },
-  enlargeBtn: {
-    width: '7rem !important',
-    height: '2.5rem !important',
-    borderRadius: '1.5rem',
-    boxShadow: '0px 3px 6px #00000029',
-    marginTop: '0.25rem',
-    background: '#F4F5FF !important',
-    '>div': {
-      color: `${theme.palette.primary.main} !important`,
-    },
-    '& svg': {
-      marginRight: '0.25rem',
-    },
-    ':hover': {
-      backgroundColor: `${theme.palette.primary.main} !important`,
-      '> div': {
-        color: `${theme.palette.common.white} !important`,
-      },
-      '& svg': {
-        color: `${theme.palette.common.white} !important`,
-      },
-    },
-  },
-  enlargeBtnIcon: {
-    color: theme.palette.primary.main,
-  },
   gridContainer: { paddingLeft: '1rem', paddingRight: '1rem' },
   listPrimaryText: {
     minWidth: '0',
