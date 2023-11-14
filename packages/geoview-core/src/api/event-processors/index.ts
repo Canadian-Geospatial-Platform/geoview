@@ -1,8 +1,8 @@
-import { AppEventProcessor } from '@/api/eventProcessors/app-event-processor';
-import { FeatureInfoEventProcessor } from '@/api/eventProcessors/feature-info-event-processor';
+import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
+import { FeatureInfoEventProcessor } from '@/api/event-processors/event-processor-children/feature-info-event-processor';
 import { GeoViewStoreType } from '@/core/stores/geoview-store';
-import { LegendEventProcessor } from '@/api/eventProcessors/legend-event-processor';
-import { MapEventProcessor } from '@/api/eventProcessors/map-event-processor';
+import { LegendEventProcessor } from '@/api/event-processors/event-processor-children/legend-event-processor';
+import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 
 const appEventProcessor = new AppEventProcessor();
 const featureInfoEventProcessor = new FeatureInfoEventProcessor();
