@@ -1,6 +1,7 @@
 import React from 'react';
 import { Root, createRoot } from 'react-dom/client';
 
+// TODO: Refactor - 'useStore' should be replaced for a list of atomic selectors coming from a specific export list
 import { useStore } from 'zustand';
 import { useTranslation } from 'react-i18next';
 

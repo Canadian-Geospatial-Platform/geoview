@@ -176,6 +176,7 @@ export const fetchItemsViaQueryForDatasource = async (
 
   // Depending on the type of query
   let entries: TypeFeatureInfoEntryPartial[];
+  // TODO: Refactor - Issue #1497
   if (query.type === 'esriRelatedRecords') {
     // The options
     const urlOptions = query.urlOptions as GeoViewGeoChartConfigLayerQueryOptions<'esriRelatedRecords'>;

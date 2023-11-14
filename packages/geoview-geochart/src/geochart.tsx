@@ -78,6 +78,7 @@ export function GeoChart(props: GeoChartProps): JSX.Element {
   const [isLoadingDatasource, setIsLoadingDatasource] = useState<boolean>();
 
   // Use Store
+  // TODO: Refactor - use the atomic selector, instead of 'useStore', when we have figured the way to expose each one to the plugins
   const storeLayerDataArray = useStore(getGeoViewStore(mapId), (state) => state.detailsState.layerDataArray);
 
   /** ****************************************** USE STATE SECTION END ************************************************** */
@@ -271,6 +272,7 @@ export function GeoChart(props: GeoChartProps): JSX.Element {
 
     return () => {
       // Unwire handlers on component unmount
+      // TODO: Refactor - The store should say when the query has started (state). An issue is being created for this already. For now, this works.
       cgpv.api.event.off(cgpv.api.eventNames.GET_FEATURE_INFO.QUERY_LAYER, `${mapId}`, handleQueryStarted);
       cgpv.api.event.off(EVENT_CHART_REDRAW, mapId, handleChartRedraw);
       cgpv.api.event.off(EVENT_CHART_LOAD, mapId, handleChartLoad);
