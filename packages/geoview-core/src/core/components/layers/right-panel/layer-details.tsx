@@ -15,6 +15,7 @@ import {
   TableChartOutlinedIcon,
   RestartAltIcon,
   HighlightOutlinedIcon,
+  TableViewIcon,
 } from '@/ui';
 import { useLayerStoreActions } from '@/core/stores/store-interface-and-intial-values/layer-state';
 
@@ -97,7 +98,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
     return (
       <Box sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
         <IconButton sx={{ backgroundColor: '#F6F6F6' }}>
-          <TableChartOutlinedIcon />
+          <TableViewIcon />
         </IconButton>
         <IconButton sx={{ backgroundColor: '#F6F6F6' }}>
           <RestartAltIcon />
