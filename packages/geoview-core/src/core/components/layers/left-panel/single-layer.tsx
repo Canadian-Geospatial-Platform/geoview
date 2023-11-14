@@ -64,7 +64,7 @@ export function SingleLayer(props: SingleLayerProps): JSX.Element {
     }
     if (mapFiltered[layer.layerPath]) {
       return (
-        <Box sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'left', gap: 1 }}>
+        <Box style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'left', gap: 1 }}>
           <span>{layer.items.length} items </span>
           <TableViewIcon />
         </Box>
