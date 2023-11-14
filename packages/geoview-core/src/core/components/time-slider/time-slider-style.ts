@@ -28,8 +28,9 @@ export const getSxClasses = (theme: Theme) => ({
   list: {
     color: 'text.primary',
     width: '100%',
-    paddingRight: '2rem',
-
+    [theme.breakpoints.up('md')]: {
+      paddingRight: '2rem',
+    },
     '& .MuiListItemText-primary': {
       font: theme.footerPanel.layerTitleFont,
     },
