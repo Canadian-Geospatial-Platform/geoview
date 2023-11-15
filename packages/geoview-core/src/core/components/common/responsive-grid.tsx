@@ -1,5 +1,5 @@
 import { ReactNode } from 'react';
-import { GridProps } from '@mui/material';
+import { GridProps, SxProps } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import { Grid } from '@/ui';
 
@@ -10,6 +10,7 @@ interface ResponsiveGridProps extends GridProps {
 interface ResponsiveGridPanelProps extends GridProps {
   children: ReactNode;
   isLayersPanelVisible: boolean;
+  sxProps?: SxProps;
 }
 
 /**
@@ -53,7 +54,7 @@ function ResponsiveGridLeftPanel({ children, isLayersPanelVisible = false, ...re
  * @param {boolean} isLayersPanelVisible panel visibility
  * @returns JSX.Element
  */
-function ResponsiveGridRightPanel({ children, isLayersPanelVisible = false, ...rest }: ResponsiveGridPanelProps) {
+function ResponsiveGridRightPanel({ children, isLayersPanelVisible = false, sxProps = {}, ...rest }: ResponsiveGridPanelProps) {
   const theme = useTheme();
   return (
     <Grid
@@ -61,7 +62,8 @@ function ResponsiveGridRightPanel({ children, isLayersPanelVisible = false, ...r
       sx={{
         position: 'relative',
         [theme.breakpoints.up('md')]: { paddingLeft: '1rem' },
-        [theme.breakpoints.down('md')]: { display: !isLayersPanelVisible ? 'block' : 'none', minHeight: '250px' },
+        [theme.breakpoints.down('md')]: { display: !isLayersPanelVisible ? 'block' : 'none' },
+        ...sxProps,
       }}
       {...rest}
     >

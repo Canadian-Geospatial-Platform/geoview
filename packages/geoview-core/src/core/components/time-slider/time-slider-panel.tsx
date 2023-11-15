@@ -53,19 +53,28 @@ export function TimeSliderPanel(props: TypeTimeSliderProps): JSX.Element {
   return (
     <Box sx={sxClasses.detailsContainer}>
       <ResponsiveGrid.Root>
-        <ResponsiveGrid.Left xs={isLayersPanelVisible ? 12 : 0} md={3} isLayersPanelVisible={isLayersPanelVisible}>
+        <ResponsiveGrid.Left xs={isLayersPanelVisible ? 12 : 0} md={4} isLayersPanelVisible={isLayersPanelVisible}>
           <Typography component="p" sx={sxClasses.panelHeaders}>
             {t('details.availableLayers')}
           </Typography>
         </ResponsiveGrid.Left>
-        <ResponsiveGrid.Right
-          isLayersPanelVisible={false}
-          xs={!isLayersPanelVisible ? 12 : 0}
-          md={9}
-          sx={{ display: 'flex', justifyContent: 'right' }}
-        >
-          <EnlargeButton isEnlargeDataTable={isEnlargeDataTable} setIsEnlargeDataTable={setIsEnlargeDataTable} />
-          <CloseButton isLayersPanelVisible={isLayersPanelVisible} setIsLayersPanelVisible={setIsLayersPanelVisible} />
+        <ResponsiveGrid.Right isLayersPanelVisible={isLayersPanelVisible} xs={!isLayersPanelVisible ? 12 : 0} md={8}>
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              [theme.breakpoints.up('md')]: { justifyContent: 'right' },
+              [theme.breakpoints.down('md')]: { justifyContent: 'space-between' },
+            }}
+          >
+            <Box sx={{ [theme.breakpoints.up('md')]: { display: 'none' } }}>
+              <Typography component="span">{selectedLayer}</Typography>
+            </Box>
+            <Box>
+              <EnlargeButton isEnlargeDataTable={isEnlargeDataTable} setIsEnlargeDataTable={setIsEnlargeDataTable} />
+              <CloseButton isLayersPanelVisible={isLayersPanelVisible} setIsLayersPanelVisible={setIsLayersPanelVisible} />
+            </Box>
+          </Box>
         </ResponsiveGrid.Right>
       </ResponsiveGrid.Root>
       <ResponsiveGrid.Root sx={{ marginTop: '1rem' }}>
