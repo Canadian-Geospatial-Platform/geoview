@@ -18,6 +18,7 @@ export const getSxClasses = (theme: Theme) => ({
     textOverflow: 'ellipsis',
   },
   listPrimaryText: {
+    marginLeft: '0.62rem',
     minWidth: '0',
     marginTop: '0.5rem',
     marginBottom: '0.5rem',

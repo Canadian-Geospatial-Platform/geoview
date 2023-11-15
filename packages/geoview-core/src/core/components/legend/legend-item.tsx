@@ -29,7 +29,7 @@ import {
   BrowserNotSupportedIcon,
   Grid,
 } from '@/ui';
-import { api, payloadIsLegendInfo, NumberPayload, PayloadBaseClass, EsriDynamic } from '@/app';
+import { api, payloadIsLegendInfo, NumberPayload, PayloadBaseClass, EsriDynamic, IconStack } from '@/app';
 import { LegendIconList } from './legend-icon-list';
 import {
   AbstractGeoViewLayer,
@@ -191,7 +191,7 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
   const [currentWMSStyle, setCurrentWMSStyle] = useState<string>();
   const [iconType, setIconType] = useState<string | null>(null);
   const [iconImg, setIconImg] = useState<string | null>(null);
-  const [iconImgStacked, setIconImgStacked] = useState<string | null>(null);
+  const [, setIconImgStacked] = useState<string | null>(null);
   const [iconList, setIconList] = useState<string[] | null>(null);
   const [labelList, setLabelList] = useState<string[] | null>(null);
   const [geometryLayerConfig, setLayerConfig] = useState<TypeLayerEntryConfig | null>(null);
@@ -541,26 +541,10 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
                 )}
               </IconButton>
             )}
-            {iconType === 'list' && !isLegendOpen && (
-              <Tooltip title={t('legend.expand_legend')!} placement="top" enterDelay={1000}>
-                <Box
-                  tabIndex={0}
-                  onClick={handleLegendClick}
-                  sx={sxClasses.stackIconsBox}
-                  ref={stackIconRef}
-                  onKeyPress={(e) => handleStackIcon(e)}
-                >
-                  <IconButton sx={sxClasses.iconPreviewStacked} color="primary" size="small" tabIndex={-1}>
-                    <Box sx={sxClasses.legendIconTransparent}>
-                      {iconImgStacked && <img alt="icon" src={iconImgStacked} style={sxClasses.maxIconImg} />}
-                    </Box>
-                  </IconButton>
-                  <IconButton sx={sxClasses.iconPreviewHoverable} color="primary" size="small" tabIndex={-1}>
-                    <Box sx={sxClasses.legendIcon}>{iconImg && <img alt="icon" src={iconImg} style={sxClasses.maxIconImg} />}</Box>
-                  </IconButton>
-                </Box>
-              </Tooltip>
+            {!isLegendOpen && (
+              <IconStack layerPath="esriFeatureLYR4/8" onIconClick={handleLegendClick} onStackIconClick={(e) => handleStackIcon(e)} />
             )}
+
             {groupItems.length === 0 && WMSStyles.length < 2 && !iconType && !isLegendOpen && (
               <IconButton sx={sxClasses.iconPreview} color="primary" size="small" onClick={handleLegendClick}>
                 <TodoIcon />

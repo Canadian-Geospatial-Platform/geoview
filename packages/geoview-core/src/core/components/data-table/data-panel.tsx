@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { useTheme } from '@mui/material/styles';
 import { Projection } from 'ol/proj';
 import { useTranslation } from 'react-i18next';
+import { IconStack } from '@/app';
 import {
   Box,
   Typography,
@@ -11,7 +12,6 @@ import {
   ListItemButton,
   IconButton,
   ListItemIcon,
-  SendIcon,
   ChevronRightIcon,
   CircularProgress,
   Button,
@@ -124,7 +124,7 @@ export function Datapanel({ layerData, mapId, projectionConfig, language }: Data
                 <ListItem disablePadding>
                   <ListItemButton selected={selectedLayerIndex === index} onClick={(event) => handleListItemClick(event, index)}>
                     <ListItemIcon>
-                      <SendIcon sx={{ width: '0.75em', height: '0.75em' }} />
+                      <IconStack layerPath={layerKey} />
                     </ListItemIcon>
                     <Box sx={sxClasses.listPrimaryText}>
                       <Typography component="p">{layerName![language]}</Typography>

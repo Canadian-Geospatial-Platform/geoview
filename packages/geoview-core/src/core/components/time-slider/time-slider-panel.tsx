@@ -12,7 +12,6 @@ import {
   ListItemButton,
   ListItemIcon,
   Paper,
-  SendIcon,
   Tooltip,
   Typography,
   ArrowForwardIcon,
@@ -20,7 +19,7 @@ import {
 } from '@/ui';
 import { getSxClasses } from './time-slider-style';
 import { TimeSlider } from './time-slider';
-import { api, getLocalizedValue } from '@/app';
+import { api, getLocalizedValue, IconStack } from '@/app';
 import { SliderFilterProps } from './time-slider-api';
 import { ResponsiveGrid } from '../responsive-grid/responsive-grid';
 
@@ -75,7 +74,7 @@ export function TimeSliderPanel(props: TypeTimeSliderProps): JSX.Element {
                         sx={{ height: '67px' }}
                       >
                         <ListItemIcon>
-                          <SendIcon sx={{ width: '0.75em', height: '0.75em' }} />
+                          <IconStack layerPath={layerPath} />
                         </ListItemIcon>
 
                         <Box sx={sxClasses.listPrimaryText}>
