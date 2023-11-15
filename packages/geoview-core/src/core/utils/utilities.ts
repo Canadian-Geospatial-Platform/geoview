@@ -57,7 +57,9 @@ function _addNotification(mapId: string, type: NotificationType = 'info', messag
   };
 
   // ? Need to do lazy import, if not viewer crashes (AppEventProcessor.addAppNotification(mapId, notification));
-  import('@/api/eventProcessors/app-event-processor').then((mod) => mod.AppEventProcessor.addAppNotification(mapId, notification));
+  import('@/api/event-processors/event-processor-children/app-event-processor').then((mod) =>
+    mod.AppEventProcessor.addAppNotification(mapId, notification)
+  );
 }
 
 /**

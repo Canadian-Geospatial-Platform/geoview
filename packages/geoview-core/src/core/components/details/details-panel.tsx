@@ -12,7 +12,6 @@ import {
   ListItemButton,
   List,
   ListItemIcon,
-  SendIcon,
   Tooltip,
   IconButton,
   Grid,
@@ -25,7 +24,7 @@ import {
   Box,
 } from '@/ui';
 import { FeatureInfo } from './feature-info-new';
-import { PayloadBaseClass, api } from '@/app';
+import { PayloadBaseClass, api, IconStack } from '@/app';
 import { EVENT_NAMES } from '@/api/events/event-types';
 import {
   payloadIsAFeatureHighlight,
@@ -199,7 +198,7 @@ export function Detailspanel({ mapId }: DetailsPanelProps): JSX.Element {
                       }}
                     >
                       <ListItemIcon>
-                        <SendIcon sx={{ width: '0.75em', height: '0.75em' }} />
+                        <IconStack layerPath={layerData.layerPath} />
                       </ListItemIcon>
                       <Box sx={sxClasses.listPrimaryText}>
                         <Typography component="p">{layerData.layerName ? layerData.layerName : t('details.clickOnMap')}</Typography>

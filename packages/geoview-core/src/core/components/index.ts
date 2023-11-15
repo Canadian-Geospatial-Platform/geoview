@@ -25,6 +25,7 @@ export * from './geolocator/geo-list';
 export * from './geolocator/geolocator';
 export * from './geolocator/geolocator-style';
 export * from './hover-tooltip/hover-tooltip';
+export * from './icon-stack/icon-stack';
 export * from './legend-2/legend-api';
 export * from './legend/legend-api';
 export * from './legend/legend-icon-list';

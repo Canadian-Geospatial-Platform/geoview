@@ -108,6 +108,7 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
           layer.allItemsChecked = visibility;
           layer.isVisible = visibility;
         }
+
         set({
           legendState: {
             ...get().legendState,
@@ -116,7 +117,7 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
         });
       },
     },
-  };
+  } as ILayerState;
 
   return init;
 }

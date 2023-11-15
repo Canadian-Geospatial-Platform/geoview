@@ -18,7 +18,7 @@ import { xmlToJson } from '@/core/utils/utilities';
 import { TypeLayerEntryConfig, TypeListOfLayerEntryConfig, layerEntryIsGroupLayer } from '@/geo/map/map-schema-types';
 import { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { Layer } from '@/geo/layer/layer';
-import { AppEventProcessor } from '@/api/eventProcessors/app-event-processor';
+import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
 import { NORTH_POLE_POSITION } from '@/core/utils/constant';
 
 /**
