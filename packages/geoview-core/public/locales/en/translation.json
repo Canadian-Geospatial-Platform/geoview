@@ -65,7 +65,9 @@
     "selected_Layers": "An overview of currrently selected layers",
     "re-arrange": "re-arrange",
     "categories_title": "Categories",
-    "items_available": "items available"
+    "items_available": "items available",
+    "layer_has_error": "Layer has an error...",
+    "layer_is_loading": "Layer is loading..."
   },
   "details": {
     "zoom_to": "Zoom to feature",

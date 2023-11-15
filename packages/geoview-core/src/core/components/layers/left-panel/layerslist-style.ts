@@ -11,6 +11,7 @@ export const getSxClasses = (theme: Theme) => ({
       background: '#FFFFFF 0% 0% no-repeat padding-box',
       borderRadius: '5px',
       marginBottom: '5px',
+      border: '10px solid red',
     },
 
     '& .MuiListItemText-primary': {
@@ -77,7 +78,6 @@ export const getSxClasses = (theme: Theme) => ({
   layersList: {
     selectedLayerItem: {
       border: '2px solid #515BA5',
-      backgroundColor: 'white !important',
     },
   },
 });

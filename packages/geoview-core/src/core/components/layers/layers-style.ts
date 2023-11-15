@@ -11,6 +11,21 @@ export const getSxClasses = (theme: Theme) => ({
       marginBottom: '5px',
     },
 
+    '& .layerItemContainer.error': {
+      background: '#ffdcdb 0% 0% no-repeat padding-box',
+      '& .MuiListItemText-secondary': {
+        fontWeight: 'bold',
+        color: 'error.main',
+      },
+    },
+    '& .layerItemContainer.loading': {
+      background: '#e5efff 0% 0% no-repeat padding-box',
+      '& .MuiListItemText-secondary': {
+        fontWeight: 'bold',
+        color: 'info.main',
+      },
+    },
+
     '& .MuiListItemText-primary': {
       font: theme.footerPanel.layerTitleFont,
     },
