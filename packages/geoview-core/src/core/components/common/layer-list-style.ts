@@ -5,6 +5,9 @@ export const getSxClasses = (theme: Theme) => ({
     color: 'text.primary',
     width: '100%',
     [theme.breakpoints.up('md')]: {
+      paddingRight: '1rem',
+    },
+    [theme.breakpoints.up('lg')]: {
       paddingRight: '2rem',
     },
     '& .MuiListItemText-primary': {
@@ -18,7 +21,9 @@ export const getSxClasses = (theme: Theme) => ({
         height: '100%',
       },
     },
-
+    '& .MuiListItemButton-root': {
+      minHeight: '73px',
+    },
     '& .MuiListItemIcon-root': {
       minWidth: '2rem',
     },
