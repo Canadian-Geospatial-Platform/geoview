@@ -16,14 +16,22 @@ import {
   Typography,
 } from '@/ui';
 import { getSxClasses } from './layer-list-style';
+import { IconStack } from '@/app';
+
+export interface LayerListEntry {
+  layerName: string;
+  numOffeatures: number;
+  layerId: string;
+  layerPath: string;
+}
 
 interface LayerListProps {
   isEnlargeDataTable: boolean;
-  layerList: Array<{ layerName: string; numOffeatures: number; layerId: string; layerPath: string }>;
+  layerList: LayerListEntry[];
   selectedLayerIndex: number;
-  handleListItemClick: (event: React.MouseEvent<HTMLDivElement, MouseEvent>, index: number) => void;
-  rowsFiltered: Record<string, number> | undefined;
-  mapFiltered: Record<string, boolean> | undefined;
+  handleListItemClick: (layer: LayerListEntry, index: number) => void;
+  rowsFiltered?: Record<string, number> | undefined;
+  mapFiltered?: Record<string, boolean> | undefined;
 }
 
 export function LayerList({
@@ -76,28 +84,27 @@ export function LayerList({
 
   return (
     <List sx={sxClasses.list}>
-      {layerList.map(({ layerPath, layerName }, index) => (
+      {layerList.map((layer, index) => (
         <Paper
           sx={{ ...sxClasses.paper, border: selectedLayerIndex === index ? sxClasses.borderWithIndex : sxClasses.borderNone }}
-          key={layerPath}
+          key={layer.layerPath}
         >
-          <Tooltip title={getLayerTooltip(layerName, layerPath, index)} placement="top" arrow>
+          <Tooltip title={getLayerTooltip(layer.layerName, layer.layerPath, index)} placement="top" arrow>
             <Box>
               <ListItem disablePadding>
-                <ListItemButton selected={selectedLayerIndex === index} onClick={(event) => handleListItemClick(event, index)}>
+                <ListItemButton selected={selectedLayerIndex === index} onClick={() => handleListItemClick(layer, index)}>
                   <ListItemIcon>
-                    <SendIcon sx={{ width: '0.75em', height: '0.75em' }} />
+                    <IconStack layerPath={layer.layerPath} />
                   </ListItemIcon>
                   <Box sx={sxClasses.listPrimaryText}>
-                    <Typography component="p">{layerName}</Typography>
+                    <Typography component="p">{layer.layerName}</Typography>
                     <Box sx={{ display: 'flex', alignContent: 'center' }}>
                       <Typography component="p" variant="subtitle1" noWrap>
-                        {getFeaturesOfLayer(layerPath, index)}
+                        {getFeaturesOfLayer(layer.layerPath, index)}
                       </Typography>
-                      {isMapFilteredSelectedForLayer(layerPath) && <FilterAltIcon sx={{ color: theme.palette.grey['500'] }} />}
+                      {isMapFilteredSelectedForLayer(layer.layerPath) && <FilterAltIcon sx={{ color: theme.palette.grey['500'] }} />}
                     </Box>
                   </Box>
-
                   <Box
                     sx={{
                       padding: isEnlargeDataTable ? '0.25rem' : '1rem',

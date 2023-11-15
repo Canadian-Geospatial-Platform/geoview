@@ -43,7 +43,7 @@ import {
   useDetailsStoreLayerDataArray,
   useDetailsStoreSelectedLayerPath,
 } from '@/core/stores/store-interface-and-intial-values/details-state';
-import { ResponsiveGrid, CloseButton, EnlargeButton } from '../common';
+import { ResponsiveGrid, CloseButton, EnlargeButton, LayerList } from '../common';
 
 interface DetailsPanelProps {
   mapId: string;
@@ -164,79 +164,24 @@ export function Detailspanel({ mapId }: DetailsPanelProps): JSX.Element {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [arrayOfLayerData]);
 
-  /**
-   * Create layer tooltip
-   * @param {string} layerName en/fr layer name
-   * @param {number} numOfFeatures number of features for a layer.
-   * @returns
-   */
-  const getLayerTooltip = (layerName: string, numOfFeatures: number): React.ReactNode => {
-    return `${layerName ?? t('details.clickOnMap')}, ${numOfFeatures} ${t('details.feature')}${numOfFeatures > 1 ? 's' : ''}`;
-  };
-
   const renderLayerList = useCallback(() => {
     return (
-      <List sx={sxClasses.list}>
-        {arrayOfLayerData.map((layerData) => {
-          const isSelectedBorder = layerData.layerPath === layerDataInfo?.layerPath;
-          const numOfFeatures = layerData.features!.length;
-
-          return (
-            <Paper
-              sx={{ ...sxClasses.paper, border: isSelectedBorder ? sxClasses.borderWithIndex : sxClasses.borderNone }}
-              key={layerData.layerPath}
-            >
-              <Tooltip title={getLayerTooltip(layerData.layerName, numOfFeatures)} placement="top" arrow>
-                <Box>
-                  <ListItem disablePadding>
-                    <ListItemButton
-                      onClick={() => {
-                        setLayerDataInfo(layerData);
-                        setCurrentFeatureIndex(0);
-                        setSelectedLayerPath(layerData.layerPath);
-                        setIsLayersPanelVisible(false);
-                      }}
-                    >
-                      <ListItemIcon>
-                        <IconStack layerPath={layerData.layerPath} />
-                      </ListItemIcon>
-                      <Box sx={sxClasses.listPrimaryText}>
-                        <Typography component="p">{layerData.layerName ? layerData.layerName : t('details.clickOnMap')}</Typography>
-                        <Box sx={{ display: 'flex', alignContent: 'center' }}>
-                          <Typography component="p" variant="subtitle1" noWrap>
-                            {`${numOfFeatures} ${t('details.feature')}${numOfFeatures > 1 ? 's' : ''}`}
-                          </Typography>
-                        </Box>
-                      </Box>
-                      <Box
-                        sx={{
-                          padding: isEnlargeDataTable ? '0.25rem' : '1rem',
-                          paddingRight: isEnlargeDataTable ? '0.25rem' : '1rem',
-                          [theme.breakpoints.down('xl')]: {
-                            display: isEnlargeDataTable ? 'none !important' : 'block',
-                          },
-                          [theme.breakpoints.down('sm')]: {
-                            display: 'none',
-                          },
-                        }}
-                      >
-                        <IconButton
-                          disabled
-                          edge="end"
-                          size="small"
-                          sx={{ color: `${theme.palette.primary.main} !important`, background: `${theme.palette.grey.A100} !important` }}
-                        >
-                          <ChevronRightIcon />
-                        </IconButton>
-                      </Box>
-                    </ListItemButton>
-                  </ListItem>
-                </Box>
-              </Tooltip>
-            </Paper>
-          );
-        })}
-      </List>
+      <LayerList
+        layerList={arrayOfLayerData.map((layer) => ({
+          layerId: layer.layerName,
+          layerName: layer.layerName ?? '',
+          layerPath: layer.layerPath,
+          numOffeatures: layer.features?.length ?? 0,
+        }))}
+        isEnlargeDataTable={isEnlargeDataTable}
+        selectedLayerIndex={arrayOfLayerData.findIndex((layer) => layer.layerPath === layerDataInfo?.layerPath)}
+        handleListItemClick={(layer, index: number) => {
+          setLayerDataInfo(arrayOfLayerData[index]);
+          setCurrentFeatureIndex(0);
+          setSelectedLayerPath(arrayOfLayerData[index].layerPath);
+          setIsLayersPanelVisible(false);
+        }}
+      />
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [layerDataInfo, arrayOfLayerData, isEnlargeDataTable]);

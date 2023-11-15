@@ -16,7 +16,7 @@ import {
   useDataTableStoreSelectedLayerIndex,
 } from '@/core/stores/store-interface-and-intial-values/data-table-state';
 
-import { ResponsiveGrid, EnlargeButton, CloseButton, LayerList } from '../common';
+import { ResponsiveGrid, EnlargeButton, CloseButton, LayerList, LayerListEntry } from '../common';
 
 interface DatapanelProps {
   layerData: (MapDataTableDataProps & GroupLayers)[];
@@ -48,7 +48,7 @@ export function Datapanel({ layerData, mapId, projectionConfig, language }: Data
   const rowsFiltered = useDataTableStoreRowsFiltered();
   const { setSelectedLayerIndex, setIsEnlargeDataTable } = useDataTableStoreActions();
 
-  const handleListItemClick = useCallback((event: React.MouseEvent<HTMLDivElement, MouseEvent>, index: number) => {
+  const handleListItemClick = useCallback((layer: LayerListEntry, index: number) => {
     setSelectedLayerIndex(index);
     setIsLoading(true);
     setIsLayersPanelVisible(false);
@@ -128,7 +128,7 @@ export function Datapanel({ layerData, mapId, projectionConfig, language }: Data
 
           {!isLoading &&
             layerData.map(({ layerKey, layerId }, index) => (
-              <Box key={layerKey} sx={{ [theme.breakpoints.up('lg')]: { paddingLeft: '3.5rem' } }}>
+              <Box key={layerKey}>
                 {index === selectedLayerIndex ? (
                   <Box>
                     {layerData[index].features.length ? (

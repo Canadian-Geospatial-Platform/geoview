@@ -2,18 +2,7 @@
 import React, { useCallback, useState } from 'react';
 import { useTheme } from '@mui/material/styles';
 import { t } from 'i18next';
-import {
-  Box,
-  ChevronRightIcon,
-  IconButton,
-  List,
-  ListItem,
-  ListItemButton,
-  ListItemIcon,
-  Paper,
-  Tooltip,
-  Typography,
-} from '@/ui';
+import { Box, ChevronRightIcon, IconButton, List, ListItem, ListItemButton, ListItemIcon, Paper, Tooltip, Typography } from '@/ui';
 import { getSxClasses } from './time-slider-style';
 import { TimeSlider } from './time-slider';
 import { api, getLocalizedValue, IconStack } from '@/app';

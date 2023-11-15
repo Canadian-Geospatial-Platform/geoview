@@ -38,6 +38,7 @@ export const getSxClasses = (theme: Theme) => ({
     minWidth: '0',
     marginTop: '0.5rem',
     marginBottom: '0.5rem',
+    marginLeft: '10px',
     flex: '1 1 auto',
     display: 'flex',
     flexDirection: 'column',
