@@ -44,7 +44,7 @@ export function TimeSliderPanel(props: TypeTimeSliderProps): JSX.Element {
           setSelectedLayer(layer.layerPath);
           setIsLayersPanelVisible(false);
         }}
-        layerList={layersList.map((layer, index) => ({ layerName: layer, layerPath: layer }))}
+        layerList={layersList.map((layer) => ({ layerName: layer, layerPath: layer }))}
       />
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps

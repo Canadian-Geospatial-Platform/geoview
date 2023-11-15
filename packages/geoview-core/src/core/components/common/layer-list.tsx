@@ -74,7 +74,7 @@ export function LayerList({
   const getLayerTooltip = (layerName: string, layerPath: string, index: number): React.ReactNode => {
     return (
       <Box sx={{ display: 'flex', alignContent: 'center', '& svg ': { width: '0.75em', height: '0.75em' } }}>
-        {`${layerName}${!!layerList[index].numOffeatures ? ', ' + getFeaturesOfLayer(layerPath, index) : ''}`}
+        {`${layerName}${layerList[index].numOffeatures ? `, ${getFeaturesOfLayer(layerPath, index)}` : ''}`}
         {isMapFilteredSelectedForLayer(layerPath) && <FilterAltIcon />}
       </Box>
     );
