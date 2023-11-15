@@ -35,7 +35,7 @@ export function initializeUIState(set: TypeSetStore, get: TypeGetStore): IUIStat
         });
       },
     },
-  };
+  } as IUIState;
 
   return init;
 }

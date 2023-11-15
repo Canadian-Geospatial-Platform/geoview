@@ -369,22 +369,38 @@ export function commonProcessLayerMetadata(
  * @param results TypeJsonObject The Json Object representing the data from Esri.
  * @returns TypeFeatureInfoEntryPartial[] an array of relared records of type TypeFeatureInfoEntryPartial
  */
-export function parseFeatureInfoEntries(results: TypeJsonObject[]): TypeFeatureInfoEntryPartial[] {
+export function parseFeatureInfoEntries(records: TypeJsonObject[]): TypeFeatureInfoEntryPartial[] {
   // Loop on the Esri results
-  return results.map((x) => {
+  return records.map((rec: TypeJsonObject) => {
     // Prep the TypeFeatureInfoEntryPartial
     const featInfo: TypeFeatureInfoEntryPartial = {
       fieldInfo: {},
     };
 
     // Loop on the Esri attributes
-    Object.entries(x.attributes).forEach((v: [string, unknown]) => {
-      featInfo.fieldInfo[v[0]] = { value: v[1] } as TypeFieldEntry;
+    Object.entries(rec.attributes).forEach((tupleAttrValue: [string, unknown]) => {
+      featInfo.fieldInfo[tupleAttrValue[0]] = { value: tupleAttrValue[1] } as TypeFieldEntry;
     });
 
     // Return the TypeFeatureInfoEntryPartial
     return featInfo;
   });
+}
+
+/**
+ * Asynchronously queries an Esri feature layer given the url and returns an array of `TypeFeatureInfoEntryPartial` records.
+ * @param url string An Esri url indicating a feature layer to query
+ * @returns TypeFeatureInfoEntryPartial[] An array of relared records of type TypeFeatureInfoEntryPartial, or an empty array.
+ */
+export async function queryRecordsByUrl(url: string): Promise<TypeFeatureInfoEntryPartial[]> {
+  // TODO: Refactor - Suggestion to rework this function and the one in EsriDynamic.getFeatureInfoAtLongLat(), making
+  // TO.DO.CONT: the latter redirect to this one here and merge some logic between the 2 functions ideally making this one here return a TypeFeatureInfoEntry[] with options to have returnGeometry=true or false and such.
+  // Query the data
+  const response = await fetch(url);
+  const respJson = await response.json();
+
+  // Return the array of TypeFeatureInfoEntryPartial
+  return parseFeatureInfoEntries(respJson.features);
 }
 
 /**

@@ -12,7 +12,7 @@ import {
 } from '@/api/events/payloads';
 import { api, getLocalizedValue } from '@/app';
 import { LayerSet } from './layer-set';
-import { FeatureInfoEventProcessor } from '@/api/eventProcessors/feature-info-event-processor';
+import { FeatureInfoEventProcessor } from '@/api/event-processors/event-processor-children/feature-info-event-processor';
 
 /** ***************************************************************************************************************************
  * A class to hold a set of layers associated with an array of TypeArrayOfFeatureInfoEntries. When this class is instantiated,
@@ -76,6 +76,12 @@ export class FeatureInfoLayerSet {
           Object.keys(this.resultSets).forEach((layerPath) => {
             this.resultSets[layerPath].data.click = undefined;
           });
+          // TODO: Suggestion - Implement a "loading state" between query events. Via new function in FeatureInfoEventProcessor?
+          // TO.DO.CONT: It'd be great to have a "store state" that indicates when a query is
+          // in progress (that is between this event (and its siblings) and the GET_FEATURE_INFO.QUERY_RESULT).
+          // Because otherwise, we have to attach to both events in our Component to determine the status of the query and
+          // it might potentially unsynch between event calls.
+          // Doing so would also be nicer, because we'd have both ways work with store instead of having one working with api.event GET_FEATURE_INFO.QUERY_LAYER and one with store.
           api.event.emit(GetFeatureInfoPayload.createQueryLayerPayload(this.mapId, 'at_long_lat', payload.coordinates.lnglat, 'click'));
         }
       },

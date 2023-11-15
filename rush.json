@@ -43,6 +43,10 @@
       "projectFolder": "packages/geoview-swiper"
     },
     {
+      "packageName": "geoview-geochart",
+      "projectFolder": "packages/geoview-geochart"
+    },
+    {
       "packageName": "eslint-and-prettier-config",
       "projectFolder": "packages"
     }

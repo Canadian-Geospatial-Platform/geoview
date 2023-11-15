@@ -98,14 +98,24 @@ export type TypeFeatureInfoResultSets = {
 
 /**
  * type guard function that redefines a PayloadBaseClass as a TypeQueryLayerPayload
- * if the event attribute of the verifyIfPayload parameter is valid. The type ascention
+ * if the event attribute of the verifyIfPayload parameter is valid. The type assertion
  * applies only to the true block of the if clause.
  *
- * @param {PayloadBaseClass} verifyIfPayload object to test in order to determine if the type ascention is valid
+ * @param {PayloadBaseClass} verifyIfPayload object to test in order to determine if the type assertion is valid
  * @returns {boolean} returns true if the payload is valid
  */
 export const payloadIsQueryLayer = (verifyIfPayload: PayloadBaseClass): verifyIfPayload is TypeQueryLayerPayload => {
   return verifyIfPayload?.event === EVENT_NAMES.GET_FEATURE_INFO.QUERY_LAYER;
+};
+
+/**
+ * Returns true if the payload is a TypeQueryLayerPayload with queryType equal to 'at_long_lat'.
+ *
+ * @param {PayloadBaseClass} verifyIfPayload object to test in order to determine if the type assertion and property are valid
+ * @returns {boolean} returns true if the payload is valid
+ */
+export const payloadIsQueryLayerQueryTypeAtLongLat = (verifyIfPayload: PayloadBaseClass): verifyIfPayload is TypeQueryLayerPayload => {
+  return payloadIsQueryLayer(verifyIfPayload) && verifyIfPayload.queryType === 'at_long_lat';
 };
 
 /**
@@ -122,14 +132,24 @@ export interface TypeQueryLayerPayload extends GetFeatureInfoPayload {
 
 /**
  * type guard function that redefines a PayloadBaseClass as a TypeAllQueriesDonePayload
- * if the event attribute of the verifyIfPayload parameter is valid. The type ascention
+ * if the event attribute of the verifyIfPayload parameter is valid. The type assertion
  * applies only to the true block of the if clause.
  *
- * @param {PayloadBaseClass} verifyIfPayload object to test in order to determine if the type ascention is valid
+ * @param {PayloadBaseClass} verifyIfPayload object to test in order to determine if the type assertion is valid
  * @returns {boolean} returns true if the payload is valid
  */
 export const payloadIsAllQueriesDone = (verifyIfPayload: PayloadBaseClass): verifyIfPayload is TypeAllQueriesDonePayload => {
   return verifyIfPayload?.event === EVENT_NAMES.GET_FEATURE_INFO.ALL_QUERIES_DONE;
+};
+
+/**
+ * Returns true if the payload is a TypeAllQueriesDonePayload with eventType equal to 'click'.
+ *
+ * @param {PayloadBaseClass} verifyIfPayload object to test in order to determine if the type assertion and property are valid
+ * @returns {boolean} returns true if the payload is valid
+ */
+export const payloadIsAllQueriesDoneEventClick = (verifyIfPayload: PayloadBaseClass): verifyIfPayload is TypeAllQueriesDonePayload => {
+  return payloadIsAllQueriesDone(verifyIfPayload) && verifyIfPayload.eventType === 'click';
 };
 
 /**
@@ -150,10 +170,10 @@ export interface TypeAllQueriesDonePayload extends GetFeatureInfoPayload {
 
 /**
  * type guard function that redefines a PayloadBaseClass as a TypeQueryResultPayload
- * if the event attribute of the verifyIfPayload parameter is valid. The type ascention
+ * if the event attribute of the verifyIfPayload parameter is valid. The type assertion
  * applies only to the true block of the if clause.
  *
- * @param {PayloadBaseClass} verifyIfPayload object to test in order to determine if the type ascention is valid
+ * @param {PayloadBaseClass} verifyIfPayload object to test in order to determine if the type assertion is valid
  * @returns {boolean} returns true if the payload is valid
  */
 export const payloadIsQueryResult = (verifyIfPayload: PayloadBaseClass): verifyIfPayload is TypeQueryResultPayload => {
@@ -176,10 +196,10 @@ export interface TypeQueryResultPayload extends GetFeatureInfoPayload {
 
 /**
  * type guard function that redefines a PayloadBaseClass as a GetFeatureInfoPayload
- * if the event attribute of the verifyIfPayload parameter is valid. The type ascention
+ * if the event attribute of the verifyIfPayload parameter is valid. The type assertion
  * applies only to the true block of the if clause.
  *
- * @param {PayloadBaseClass} verifyIfPayload object to test in order to determine if the type ascention is valid
+ * @param {PayloadBaseClass} verifyIfPayload object to test in order to determine if the type assertion is valid
  * @returns {boolean} returns true if the payload is valid
  */
 export const payloadIsGetFeatureInfo = (verifyIfPayload: PayloadBaseClass): verifyIfPayload is GetFeatureInfoPayload => {
