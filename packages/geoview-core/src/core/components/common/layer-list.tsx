@@ -19,8 +19,7 @@ import { IconStack } from '@/app';
 
 export interface LayerListEntry {
   layerName: string;
-  numOffeatures: number;
-  layerId: string;
+  numOffeatures?: number;
   layerPath: string;
 }
 
@@ -75,7 +74,7 @@ export function LayerList({
   const getLayerTooltip = (layerName: string, layerPath: string, index: number): React.ReactNode => {
     return (
       <Box sx={{ display: 'flex', alignContent: 'center', '& svg ': { width: '0.75em', height: '0.75em' } }}>
-        {`${layerName}, ${getFeaturesOfLayer(layerPath, index)}`}
+        {`${layerName}${!!layerList[index].numOffeatures ? ', ' + getFeaturesOfLayer(layerPath, index) : ''}`}
         {isMapFilteredSelectedForLayer(layerPath) && <FilterAltIcon />}
       </Box>
     );
@@ -97,12 +96,15 @@ export function LayerList({
                   </ListItemIcon>
                   <Box sx={sxClasses.listPrimaryText}>
                     <Typography component="p">{layer.layerName}</Typography>
-                    <Box sx={{ display: 'flex', alignContent: 'center' }}>
-                      <Typography component="p" variant="subtitle1" noWrap>
-                        {getFeaturesOfLayer(layer.layerPath, index)}
-                      </Typography>
-                      {isMapFilteredSelectedForLayer(layer.layerPath) && <FilterAltIcon sx={{ color: theme.palette.grey['500'] }} />}
-                    </Box>
+                    {!!layer?.numOffeatures && (
+                      <Box sx={{ display: 'flex', alignContent: 'center' }}>
+                        <Typography component="p" variant="subtitle1" noWrap>
+                          {getFeaturesOfLayer(layer.layerPath, index)}
+                        </Typography>
+
+                        {isMapFilteredSelectedForLayer(layer.layerPath) && <FilterAltIcon sx={{ color: theme.palette.grey['500'] }} />}
+                      </Box>
+                    )}
                   </Box>
                   <Box
                     sx={{

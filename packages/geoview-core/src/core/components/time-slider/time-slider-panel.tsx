@@ -2,12 +2,11 @@
 import React, { useCallback, useState } from 'react';
 import { useTheme } from '@mui/material/styles';
 import { t } from 'i18next';
-import { Box, ChevronRightIcon, IconButton, List, ListItem, ListItemButton, ListItemIcon, Paper, Tooltip, Typography } from '@/ui';
+import { Box, Typography } from '@/ui';
 import { getSxClasses } from './time-slider-style';
 import { TimeSlider } from './time-slider';
-import { api, getLocalizedValue, IconStack } from '@/app';
 import { SliderFilterProps } from './time-slider-api';
-import { CloseButton, EnlargeButton, ResponsiveGrid } from '../common';
+import { CloseButton, EnlargeButton, LayerList, ResponsiveGrid } from '../common';
 
 interface TypeTimeSliderProps {
   mapId: string;
@@ -38,66 +37,15 @@ export function TimeSliderPanel(props: TypeTimeSliderProps): JSX.Element {
    */
   const renderLayerList = useCallback(() => {
     return (
-      <List sx={sxClasses.list}>
-        {layersList.map((layerPath) => {
-          const isSelectedBorder = layerPath === selectedLayer;
-          const layerName = getLocalizedValue(api.maps[mapId].layer.registeredLayers[layerPath].layerName, mapId);
-          // TODO use visible layers from store instead of this
-          if (api.maps[mapId].layer.registeredLayers[layerPath].olLayer?.getVisible()) {
-            return (
-              <Paper
-                sx={{ ...sxClasses.layerListPaper, border: isSelectedBorder ? `2px solid ${theme.palette.primary.main}` : 'none' }}
-                key={layerPath}
-              >
-                <Tooltip title={layerName} placement="top" enterDelay={1000}>
-                  <Box>
-                    <ListItem disablePadding>
-                      <ListItemButton
-                        onClick={() => {
-                          setSelectedLayer(layerPath);
-                          setIsLayersPanelVisible(false);
-                        }}
-                        sx={{ height: '67px' }}
-                      >
-                        <ListItemIcon>
-                          <IconStack layerPath={layerPath} />
-                        </ListItemIcon>
-
-                        <Box sx={sxClasses.listPrimaryText}>
-                          <Typography component="p">{layerName}</Typography>
-                        </Box>
-
-                        <Box
-                          sx={{
-                            padding: isEnlargeDataTable ? '0.25rem' : '1rem',
-                            paddingRight: isEnlargeDataTable ? '0.25rem' : '1rem',
-                            [theme.breakpoints.down('xl')]: {
-                              display: isEnlargeDataTable ? 'none !important' : 'block',
-                            },
-                            [theme.breakpoints.down('sm')]: {
-                              display: 'none',
-                            },
-                          }}
-                        >
-                          <IconButton
-                            disabled
-                            edge="end"
-                            size="small"
-                            sx={{ color: `${theme.palette.primary.main} !important`, background: `${theme.palette.grey.A100} !important` }}
-                          >
-                            <ChevronRightIcon />
-                          </IconButton>
-                        </Box>
-                      </ListItemButton>
-                    </ListItem>
-                  </Box>
-                </Tooltip>
-              </Paper>
-            );
-          }
-          return null;
-        })}
-      </List>
+      <LayerList
+        isEnlargeDataTable={isEnlargeDataTable}
+        selectedLayerIndex={layersList.indexOf(selectedLayer)}
+        handleListItemClick={(layer) => {
+          setSelectedLayer(layer.layerPath);
+          setIsLayersPanelVisible(false);
+        }}
+        layerList={layersList.map((layer, index) => ({ layerName: layer, layerPath: layer }))}
+      />
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [layersList, selectedLayer, isEnlargeDataTable]);

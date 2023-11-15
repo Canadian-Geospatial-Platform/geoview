@@ -64,7 +64,6 @@ export function Datapanel({ layerData, mapId, projectionConfig, language }: Data
     () => (
       <LayerList
         layerList={layerData.map((layer) => ({
-          layerId: layer.layerId,
           layerName: layer.layerName![language] ?? '',
           layerPath: layer.layerKey,
           numOffeatures: layer.features.length,

@@ -153,7 +153,6 @@ export function Detailspanel({ mapId }: DetailsPanelProps): JSX.Element {
     return (
       <LayerList
         layerList={arrayOfLayerData.map((layer) => ({
-          layerId: layer.layerName,
           layerName: layer.layerName ?? '',
           layerPath: layer.layerPath,
           numOffeatures: layer.features?.length ?? 0,
