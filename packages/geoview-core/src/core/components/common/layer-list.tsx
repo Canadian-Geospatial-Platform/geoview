@@ -11,7 +11,6 @@ import {
   ListItemButton,
   ListItemIcon,
   Paper,
-  SendIcon,
   Tooltip,
   Typography,
 } from '@/ui';

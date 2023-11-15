@@ -7,24 +7,9 @@ import { useTheme } from '@mui/material/styles';
 
 import { getUid } from 'ol/util'; // TODO no ol in component
 
-import {
-  ListItem,
-  ListItemButton,
-  List,
-  ListItemIcon,
-  Tooltip,
-  IconButton,
-  Grid,
-  Paper,
-  Typography,
-  ArrowForwardIosOutlinedIcon,
-  ArrowBackIosOutlinedIcon,
-  LayersClearOutlinedIcon,
-  ChevronRightIcon,
-  Box,
-} from '@/ui';
+import { IconButton, Grid, Typography, ArrowForwardIosOutlinedIcon, ArrowBackIosOutlinedIcon, LayersClearOutlinedIcon, Box } from '@/ui';
 import { FeatureInfo } from './feature-info-new';
-import { PayloadBaseClass, api, IconStack } from '@/app';
+import { PayloadBaseClass, api } from '@/app';
 import { EVENT_NAMES } from '@/api/events/event-types';
 import {
   payloadIsAFeatureHighlight,
