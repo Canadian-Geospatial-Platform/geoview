@@ -1,4 +1,4 @@
-import React from 'react';
+/// <reference types="react" />
 import { Projection } from 'ol/proj';
 import { MapDataTableData as MapDataTableDataProps } from './map-data-table';
 import { GroupLayers } from './data-table-api';
@@ -16,5 +16,5 @@ interface DatapanelProps {
  * @param {Projection} projectionConfig projection config to transfer lat long.
  * @return {ReactElement} Data table as react element.
  */
-export declare function Datapanel({ layerData, mapId, projectionConfig, language }: DatapanelProps): React.JSX.Element;
+export declare function Datapanel({ layerData, mapId, projectionConfig, language }: DatapanelProps): import("react").JSX.Element;
 export {};

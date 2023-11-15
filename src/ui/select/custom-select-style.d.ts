@@ -2,7 +2,6 @@ import { Theme } from '@mui/material/styles';
 export declare const getSxClasses: (theme: Theme) => {
     formControl: {
         width: string;
-        margin: string;
         '& .MuiFormLabel-root.Mui-focused': {
             color: string;
             background: string;

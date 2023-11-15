@@ -9,6 +9,7 @@ export declare const getSxClasses: (theme: Theme) => {
             background: string;
             borderRadius: string;
             marginBottom: string;
+            border: string;
         };
         '& .MuiListItemText-primary': {
             font: string;
@@ -72,7 +73,6 @@ export declare const getSxClasses: (theme: Theme) => {
     layersList: {
         selectedLayerItem: {
             border: string;
-            backgroundColor: string;
         };
     };
 };

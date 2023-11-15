@@ -1,45 +1,28 @@
-import { type MRT_ColumnFiltersState as MRTColumnFiltersState } from 'material-react-table';
-import { TypeMapFeaturesConfig } from '@/core/types/global-types';
-import { TypeArrayOfLayerData } from '@/core/components/details/details';
-import { TypeDisplayLanguage } from '@/geo/map/map-schema-types';
+import { IAppState } from './store-interface-and-intial-values/app-state';
+import { IDetailsState } from './store-interface-and-intial-values/details-state';
 import { ILayerState } from './store-interface-and-intial-values/layer-state';
 import { IMapState } from './store-interface-and-intial-values/map-state';
+import { IMapDataTableState } from './store-interface-and-intial-values/data-table-state';
 import { IUIState } from './store-interface-and-intial-values/ui-state';
-import { IAppState } from './store-interface-and-intial-values/app-state';
+import { TypeDisplayLanguage } from '@/geo/map/map-schema-types';
+import { TypeLegendResultSets } from '@/api/events/payloads/get-legends-payload';
+import { TypeFeatureInfoResultSets } from '@/api/events/payloads/get-feature-info-payload';
+import { TypeMapFeaturesConfig } from '@/core/types/global-types';
 export type TypeSetStore = (partial: IGeoViewState | Partial<IGeoViewState> | ((state: IGeoViewState) => IGeoViewState | Partial<IGeoViewState>), replace?: boolean | undefined) => void;
 export type TypeGetStore = () => IGeoViewState;
-export interface IMapDataTableState {
-    selectedLayerIndex: number;
-    isEnlargeDataTable: boolean;
-    FILTER_MAP_DELAY: number;
-    toolbarRowSelectedMessage: Record<string, string>;
-    columnFiltersMap: Record<string, MRTColumnFiltersState>;
-    rowSelectionsMap: Record<string, Record<number, boolean>>;
-    mapFilteredMap: Record<string, boolean>;
-    rowsFilteredMap: Record<string, number>;
-    setRowsFilteredMap: (rows: number, layerKey: string) => void;
-    setMapFilteredMap: (mapFiltered: boolean, layerKey: string) => void;
-    setRowSelectionsMap: (rowSelection: Record<number, boolean>, layerKey: string) => void;
-    setColumnFiltersMap: (filtered: MRTColumnFiltersState, layerKey: string) => void;
-    setIsEnlargeDataTable: (isEnlarge: boolean) => void;
-    setSelectedLayerIndex: (idx: number) => void;
-    setToolbarRowSelectedMessage: (message: string, layerKey: string) => void;
-}
-export interface IDetailsState {
-    layerDataArray: TypeArrayOfLayerData;
-    selectedLayerPath: string;
-}
 export interface IGeoViewState {
     displayLanguage: TypeDisplayLanguage;
     mapId: string;
     mapConfig: TypeMapFeaturesConfig | undefined;
     setMapConfig: (config: TypeMapFeaturesConfig) => void;
     appState: IAppState;
+    detailsState: IDetailsState;
+    dataTableState: IMapDataTableState;
     legendState: ILayerState;
     mapState: IMapState;
     uiState: IUIState;
-    detailsState: IDetailsState;
-    dataTableState: IMapDataTableState;
+    featureInfoResultSets: TypeFeatureInfoResultSets;
+    legendResultSets: TypeLegendResultSets;
 }
 export declare const geoViewStoreDefinition: (set: TypeSetStore, get: TypeGetStore) => IGeoViewState;
 export declare const geoViewStoreDefinitionWithSubscribeSelector: import("zustand").StateCreator<IGeoViewState, [], [["zustand/subscribeWithSelector", never]], IGeoViewState>;

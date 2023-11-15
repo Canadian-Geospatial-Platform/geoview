@@ -78,7 +78,13 @@ export declare function commonProcessLayerMetadata(this: EsriDynamic | EsriFeatu
  * @param results TypeJsonObject The Json Object representing the data from Esri.
  * @returns TypeFeatureInfoEntryPartial[] an array of relared records of type TypeFeatureInfoEntryPartial
  */
-export declare function parseFeatureInfoEntries(results: TypeJsonObject[]): TypeFeatureInfoEntryPartial[];
+export declare function parseFeatureInfoEntries(records: TypeJsonObject[]): TypeFeatureInfoEntryPartial[];
+/**
+ * Asynchronously queries an Esri feature layer given the url and returns an array of `TypeFeatureInfoEntryPartial` records.
+ * @param url string An Esri url indicating a feature layer to query
+ * @returns TypeFeatureInfoEntryPartial[] An array of relared records of type TypeFeatureInfoEntryPartial, or an empty array.
+ */
+export declare function queryRecordsByUrl(url: string): Promise<TypeFeatureInfoEntryPartial[]>;
 /**
  * Asynchronously queries an Esri relationship table given the url and returns an array of `TypeFeatureInfoEntryPartial` records.
  * @param url string An Esri url indicating a relationship table to query

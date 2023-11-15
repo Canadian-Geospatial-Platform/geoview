@@ -1,15 +1,18 @@
 import React from 'react';
 import { createRoot } from 'react-dom/client';
 import { useTheme } from '@mui/material/styles';
+import { useStore } from 'zustand';
 import { useTranslation } from 'react-i18next';
 import { useMediaQuery } from '@mui/material';
 import { API } from '@/api/api';
 import * as UI from '../../ui';
 import { AbstractPlugin } from '@/api/plugin/abstract-plugin';
 import { TypeDisplayLanguage, TypeMapFeaturesInstance } from '@/geo/map/map-schema-types';
+export * from 'zustand';
+export { getGeoViewStore } from '@/core/stores/stores-managers';
 export { isEqual } from 'lodash';
 export type { MutableRefObject, RefObject, Dispatch, SetStateAction } from 'react';
-export type { TypeArrayOfLayerData } from '@/core/components';
+export type { TypeArrayOfLayerData } from '@/api/events/payloads';
 export type { ButtonPropsLayerPanel } from '@/ui/panel/panel-types';
 export type { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 export type { AbstractGeoViewRaster } from '@/geo/layer/geoview-layers/raster/abstract-geoview-raster';
@@ -74,6 +77,7 @@ export type TypeCGPV = {
     createRoot: typeof createRoot;
     ui: TypeCGPVUI;
     useTranslation: typeof useTranslation;
+    useStore: typeof useStore;
     types: typeof import('./cgpv-types');
 };
 /** ******************************************************************************************************************************

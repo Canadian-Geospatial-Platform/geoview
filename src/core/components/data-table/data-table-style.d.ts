@@ -2,7 +2,6 @@ import { Theme } from '@mui/material';
 export declare const getSxClasses: (theme: Theme) => {
     list: {
         color: string;
-        marginLeft: string;
         width: string;
         paddingRight: string;
         '& .MuiListItemText-primary': {
@@ -33,6 +32,7 @@ export declare const getSxClasses: (theme: Theme) => {
     listPrimaryText: {
         minWidth: string;
         marginTop: string;
+        marginLeft: string;
         marginBottom: string;
         flex: string;
         display: string;

@@ -3,7 +3,6 @@ export declare const getSxClasses: (theme: Theme) => {
     formControl: {
         fontSize: number;
         width: string;
-        marginBottom: string;
         color: string;
         '& .MuiOutlinedInput-notchedOutline': {
             border: string;

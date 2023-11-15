@@ -1,4 +1,4 @@
-import React from 'react';
+/// <reference types="react" />
 import { Extent } from 'ol/extent';
 import { Geometry } from 'ol/geom';
 export interface Features {
@@ -42,5 +42,5 @@ export interface Rows {
     featureIcon?: string;
     featureActions?: unknown;
 }
-declare function DataTable({ data }: DataTableProps): React.JSX.Element;
+declare function DataTable({ data }: DataTableProps): import("react").JSX.Element;
 export default DataTable;

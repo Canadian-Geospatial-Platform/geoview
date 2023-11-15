@@ -1,15 +1,17 @@
-import React from 'react';
+/// <reference types="react" />
 import { SliderFilterProps } from './time-slider-api';
-interface TimeSliderPanelProps {
+interface TypeTimeSliderProps {
     mapId: string;
-    layerPath: string;
-    sliderFilterProps: SliderFilterProps;
+    layersList: string[];
+    timeSliderData: {
+        [index: string]: SliderFilterProps;
+    };
 }
 /**
- * Creates a panel with time sliders
+ * Time slider tab
  *
- * @param {TimeSliderPanelProps} TimeSliderPanelProps time slider panel properties
- * @returns {JSX.Element} the slider panel
+ * @param {TypeTimeSliderProps} props The properties passed to slider
+ * @returns {JSX.Element} the time slider tab
  */
-export declare function TimeSliderPanel(TimeSliderPanelProps: TimeSliderPanelProps): React.JSX.Element;
+export declare function TimeSliderPanel(props: TypeTimeSliderProps): JSX.Element;
 export {};

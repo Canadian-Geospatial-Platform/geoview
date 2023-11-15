@@ -8,6 +8,20 @@ export declare const getSxClasses: (theme: Theme) => {
             borderRadius: string;
             marginBottom: string;
         };
+        '& .layerItemContainer.error': {
+            background: string;
+            '& .MuiListItemText-secondary': {
+                fontWeight: string;
+                color: string;
+            };
+        };
+        '& .layerItemContainer.loading': {
+            background: string;
+            '& .MuiListItemText-secondary': {
+                fontWeight: string;
+                color: string;
+            };
+        };
         '& .MuiListItemText-primary': {
             font: string;
         };
@@ -106,48 +120,34 @@ export declare const getSxClasses: (theme: Theme) => {
             padding: string;
             backgroundColor: string;
         };
+        itemsGrid: {
+            width: string;
+            '& .MuiGrid-container': {
+                '&:first-child': {
+                    fontWeight: string;
+                    borderTop: string;
+                    borderBottom: string;
+                };
+                '& .MuiGrid-item': {
+                    padding: string;
+                    '&:first-child': {
+                        width: string;
+                    };
+                    '&:nth-child(2)': {
+                        flexGrow: number;
+                        textAlign: string;
+                        display: string;
+                        flexDirection: string;
+                        alignItems: string;
+                    };
+                };
+            };
+        };
         tableIconLabel: {
             color: string;
             fontSize: number;
             noWrap: boolean;
             marginLeft: number;
-        };
-        table: {
-            border: string;
-            borderRadius: string;
-            padding: string;
-        };
-        tableHeader: {
-            '& th': {
-                borderBottom: string;
-                height: number;
-                backgroundColor: string;
-                padding: string;
-                borderRight: string;
-                fontWeight: string;
-            };
-            '& th:first-child': {
-                width: string;
-            };
-            '& th:nth-child(2)': {
-                padding: string;
-            };
-        };
-        tableRow: {
-            '& td': {
-                borderBottom: string;
-                height: number;
-                margin: number;
-                padding: string;
-                alignItems: string;
-                borderRight: string;
-            };
-            '& td:first-child': {
-                width: string;
-            };
-            '& td:nth-child(2)': {
-                padding: string;
-            };
         };
     };
 };

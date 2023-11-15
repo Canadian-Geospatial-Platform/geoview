@@ -1,11 +1,11 @@
 /// <reference types="react" />
-import { NotificationType } from '@/api/events/payloads';
 export type NotificationDetailsType = {
     key: string;
     notificationType: NotificationType;
     message: string;
     description?: string;
 };
+export type NotificationType = 'success' | 'error' | 'info' | 'warning';
 /**
  * Notification PNG Button component
  *
