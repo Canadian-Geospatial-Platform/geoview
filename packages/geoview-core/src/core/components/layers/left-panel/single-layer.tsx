@@ -85,7 +85,6 @@ export function SingleLayer(props: SingleLayerProps): JSX.Element {
       return;
     }
     if (layer.children.length === 0) {
-      // setSelectedLayer(layer);
       setSelectedLayerPath(layer.layerPath);
     } else {
       setGroupOpen(!isGroupOpen);
