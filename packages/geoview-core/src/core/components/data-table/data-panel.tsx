@@ -2,25 +2,11 @@ import { useCallback, useEffect, useState } from 'react';
 import { useTheme } from '@mui/material/styles';
 import { Projection } from 'ol/proj';
 import { useTranslation } from 'react-i18next';
-import {
-  Box,
-  Typography,
-  Paper,
-  List,
-  ListItem,
-  ListItemButton,
-  IconButton,
-  ListItemIcon,
-  SendIcon,
-  ChevronRightIcon,
-  CircularProgress,
-  Tooltip,
-  FilterAltIcon,
-} from '@/ui';
+import { Box, Typography, CircularProgress } from '@/ui';
 import MapDataTable, { MapDataTableData as MapDataTableDataProps } from './map-data-table';
 import { getSxClasses } from './data-table-style';
 import { GroupLayers } from './data-table-api';
-import { TypeDisplayLanguage, TypeLocalizedString } from '@/geo/map/map-schema-types';
+import { TypeDisplayLanguage } from '@/geo/map/map-schema-types';
 
 import {
   useDataTableStoreActions,
@@ -30,7 +16,7 @@ import {
   useDataTableStoreSelectedLayerIndex,
 } from '@/core/stores/store-interface-and-intial-values/data-table-state';
 
-import { ResponsiveGrid, EnlargeButton, CloseButton } from '../common';
+import { ResponsiveGrid, EnlargeButton, CloseButton, LayerList } from '../common';
 
 interface DatapanelProps {
   layerData: (MapDataTableDataProps & GroupLayers)[];
@@ -70,101 +56,28 @@ export function Datapanel({ layerData, mapId, projectionConfig, language }: Data
   }, []);
 
   /**
-   * Check if filtered are being set for each layer.
-   * @param {string} layerKey The key of the layer
-   * @returns boolean
-   */
-  const isMapFilteredSelectedForLayer = (layerKey: string): boolean => !!mapFiltered[layerKey];
-
-  /**
-   * Get number of features of a layer with filtered or selected layer.
-   * @param layerKey
-   * @param index
-   * @returns
-   */
-  const getFeaturesOfLayer = (layerKey: string, index: number): string => {
-    return rowsFiltered[layerKey]
-      ? `${rowsFiltered[layerKey]} ${t('dataTable.featureFiltered')}`
-      : `${layerData[index].features.length} ${t('dataTable.features')}`;
-  };
-
-  /**
-   * Create layer tooltip
-   * @param {TypeLocalizedString} layerName en/fr layer name
-   * @param {string} layerKey the key of the layer.
-   * @param {number} index an index of the layer in the array.
-   * @returns
-   */
-  const getLayerTooltip = (layerName: TypeLocalizedString, layerKey: string, index: number): React.ReactNode => {
-    return (
-      <Box sx={{ display: 'flex', alignContent: 'center', '& svg ': { width: '0.75em', height: '0.75em' } }}>
-        {`${layerName[language]}, ${getFeaturesOfLayer(layerKey, index)}`}
-        {isMapFilteredSelectedForLayer(layerKey) && <FilterAltIcon />}
-      </Box>
-    );
-  };
-
-  /**
    * Render group layers as list.
    *
    * @returns JSX.Element
    */
   const renderList = useCallback(
     () => (
-      <List sx={sxClasses.list}>
-        {layerData.map(({ layerKey, layerName }, index) => (
-          <Paper
-            sx={{ ...sxClasses.paper, border: selectedLayerIndex === index ? sxClasses.borderWithIndex : sxClasses.borderNone }}
-            key={layerKey}
-          >
-            <Tooltip title={getLayerTooltip(layerName!, layerKey, index)} placement="top" arrow>
-              <Box>
-                <ListItem disablePadding>
-                  <ListItemButton selected={selectedLayerIndex === index} onClick={(event) => handleListItemClick(event, index)}>
-                    <ListItemIcon>
-                      <SendIcon sx={{ width: '0.75em', height: '0.75em' }} />
-                    </ListItemIcon>
-                    <Box sx={sxClasses.listPrimaryText}>
-                      <Typography component="p">{layerName![language]}</Typography>
-                      <Box sx={{ display: 'flex', alignContent: 'center' }}>
-                        <Typography component="p" variant="subtitle1" noWrap>
-                          {getFeaturesOfLayer(layerKey, index)}
-                        </Typography>
-                        {isMapFilteredSelectedForLayer(layerKey) && <FilterAltIcon sx={{ color: theme.palette.grey['500'] }} />}
-                      </Box>
-                    </Box>
-
-                    <Box
-                      sx={{
-                        padding: isEnlargeDataTable ? '0.25rem' : '1rem',
-                        paddingRight: isEnlargeDataTable ? '0.25rem' : '1rem',
-                        [theme.breakpoints.down('xl')]: {
-                          display: isEnlargeDataTable ? 'none !important' : 'block',
-                        },
-                        [theme.breakpoints.down('sm')]: {
-                          display: 'none',
-                        },
-                      }}
-                    >
-                      <IconButton
-                        disabled
-                        edge="end"
-                        size="small"
-                        sx={{ color: `${theme.palette.primary.main} !important`, background: `${theme.palette.grey.A100} !important` }}
-                      >
-                        <ChevronRightIcon />
-                      </IconButton>
-                    </Box>
-                  </ListItemButton>
-                </ListItem>
-              </Box>
-            </Tooltip>
-          </Paper>
-        ))}
-      </List>
+      <LayerList
+        layerList={layerData.map((layer) => ({
+          layerId: layer.layerId,
+          layerName: layer.layerName![language] ?? '',
+          layerPath: layer.layerKey,
+          numOffeatures: layer.features.length,
+        }))}
+        isEnlargeDataTable={isEnlargeDataTable}
+        selectedLayerIndex={selectedLayerIndex}
+        handleListItemClick={handleListItemClick}
+        rowsFiltered={rowsFiltered}
+        mapFiltered={mapFiltered}
+      />
     ),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [layerData, selectedLayerIndex, isMapFilteredSelectedForLayer, isEnlargeDataTable]
+    [layerData, selectedLayerIndex, isEnlargeDataTable, mapFiltered, rowsFiltered]
   );
 
   useEffect(() => {
