@@ -6,14 +6,18 @@ import { useGeoViewStore } from '../stores-managers';
 import { TypeLegendLayer } from '../../components/layers/types';
 import { TypeGetStore, TypeSetStore } from '../geoview-store';
 
+type TypeLayersViewDisplayState = 'remove' | 'add' | 'order' | 'view'
+
 export interface ILayerState {
   selectedItem?: TypeLegendLayer;
   selectedIsVisible: boolean;
   selectedLayers: Record<string, { layer: string; icon: string }[]>;
   selectedLayerPath: string | undefined | null;
   legendLayers: TypeLegendLayer[];
+  displayState: TypeLayersViewDisplayState;
   actions: {
     getLayer: (layerPath: string) => TypeLegendLayer | undefined;
+    setDisplayState: (newDisplayState:TypeLayersViewDisplayState) => void;
     setSelectedLayerPath: (layerPath: string) => void;
     setLayerOpacity: (layerPath: string, opacity: number) => void;
     toggleLayerVisibility: (layerPath: string) => void;
@@ -28,12 +32,22 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
     selectedLayers: {} as Record<string, { layer: string; icon: string }[]>,
     legendLayers: [] as TypeLegendLayer[],
     selectedLayerPath: null,
+    displayState: 'view',
 
     actions: {
       getLayer: (layerPath: string) => {
         const curLayers = get().legendState.legendLayers;
         const layer = findLayerByPath(curLayers, layerPath);
         return layer;
+      },
+      setDisplayState: (newDisplayState:TypeLayersViewDisplayState) => {
+        const curState = get().legendState.displayState;
+        set({
+          legendState: {
+            ...get().legendState,
+            displayState: curState === newDisplayState ? 'view' : newDisplayState,
+          },
+        });
       },
       setSelectedLayerPath: (layerPath: string) => {
         set({
@@ -154,6 +168,7 @@ function findLayerByPath(layers: TypeLegendLayer[], layerPath: string): TypeLege
 // **********************************************************
 export const useLayersList = () => useStore(useGeoViewStore(), (state) => state.legendState.legendLayers);
 export const useSelectedLayerPath = () => useStore(useGeoViewStore(), (state) => state.legendState.selectedLayerPath);
+export const useLayersDisplayState = () => useStore(useGeoViewStore(), (state) => state.legendState.displayState);
 
 export const useLayerStoreActions = () => useStore(useGeoViewStore(), (state) => state.legendState.actions);
 
