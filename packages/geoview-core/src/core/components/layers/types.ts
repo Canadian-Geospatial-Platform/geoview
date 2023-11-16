@@ -50,6 +50,8 @@ export interface TypeLegendItemDetailsProps {
 
 /// //////////////////////////////////////////////////
 
+export type TypeLayersViewDisplayState = 'remove' | 'add' | 'order' | 'view';
+
 export type TypeLegendLayerIcon = {
   iconType?: string;
   iconImg?: string;
