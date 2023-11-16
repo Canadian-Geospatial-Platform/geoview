@@ -22,10 +22,12 @@ import {
   RestartAltIcon,
   CircularProgressBase,
   TableViewIcon,
+  DeleteIcon,
+  HandleIcon,
 } from '@/ui';
 import { TypeLegendLayer } from '../types';
 import { getSxClasses } from './layerslist-style';
-import { useLayerStoreActions, useSelectedLayerPath } from '@/core/stores/store-interface-and-intial-values/layer-state';
+import { useLayerStoreActions, useLayersDisplayState, useSelectedLayerPath } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { useDataTableStoreMapFilteredRecord } from '@/core/stores/store-interface-and-intial-values/data-table-state';
 
 interface SingleLayerProps {
@@ -44,6 +46,7 @@ export function SingleLayer(props: SingleLayerProps): JSX.Element {
   const { toggleLayerVisibility, setSelectedLayerPath } = useLayerStoreActions(); // get store actions
 
   const selectedLayerPath = useSelectedLayerPath(); // get store value
+  const displayState = useLayersDisplayState();
   const mapFiltered = useDataTableStoreMapFilteredRecord();
 
   const layerIsSelected = layer.layerPath === selectedLayerPath;
@@ -99,6 +102,15 @@ export function SingleLayer(props: SingleLayerProps): JSX.Element {
     console.log('reloading layer');
   };
 
+  const handleRemoveLayer = () => {
+    console.log('removing layer');
+  };
+
+  const handleReArrangeLayer = () => {
+    console.log('re-arrange layer');
+  };
+  
+
   // renders the layers children, if any
   function renderChildren() {
     if (!layer.children?.length) {
@@ -114,8 +126,26 @@ export function SingleLayer(props: SingleLayerProps): JSX.Element {
     );
   }
 
+  function renderEditModeButtons() {
+    if(displayState === 'remove') {
+      return (
+        <IconButton onClick={handleRemoveLayer}>
+          <DeleteIcon style={{ fill: "#a9a9a9"}}/>
+        </IconButton>
+      );
+    }
+    if(displayState === 'order') {
+      return (
+        <IconButton onClick={handleReArrangeLayer}>
+          <HandleIcon style={{ fill: "#a9a9a9"}}/>
+        </IconButton>
+      );
+    }
+    return null;
+  }
+
   function renderMoreLayerButtons() {
-    if (layer.layerStatus === 'loading') {
+    if (layer.layerStatus === 'loading' || displayState !== 'view') {
       return null;
     }
     if (layer.layerStatus === 'error') {
@@ -209,6 +239,7 @@ export function SingleLayer(props: SingleLayerProps): JSX.Element {
           <ListItemIcon style={{ justifyContent: 'right' }}>
             {renderMoreLayerButtons()}
             {renderArrowButtons()}
+            {renderEditModeButtons()}
           </ListItemIcon>
         </ListItemButton>
       </ListItem>

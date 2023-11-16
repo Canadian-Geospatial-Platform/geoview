@@ -8,7 +8,8 @@ import { useLegendHelpers } from './hooks/helpers';
 import { LayersActions } from './left-panel/layers-actions';
 import { LayersList } from './left-panel/layers-list';
 import { LayerDetails } from './right-panel/layer-details';
-import { useSelectedLayer } from '@/core/stores/store-interface-and-intial-values/layer-state';
+import { useLayersDisplayState, useSelectedLayer } from '@/core/stores/store-interface-and-intial-values/layer-state';
+import { AddNewLayer } from './left-panel/add-new-layer';
 
 const Item = styled('div')(({ theme }) => ({
   backgroundColor: theme.palette.mode === 'dark' ? '#262B32' : '#fff',
@@ -29,6 +30,7 @@ export function Layers(props: LegendItemsDetailsProps): JSX.Element {
   const helpers = useLegendHelpers(mapId);
 
   const selectedLayer = useSelectedLayer(); // get store value
+  const displayState = useLayersDisplayState();
 
   useEffect(() => {
     helpers.populateLegendStoreWithFakeData();
@@ -45,13 +47,13 @@ export function Layers(props: LegendItemsDetailsProps): JSX.Element {
     return (
       <div>
         <LayersActions />
-        <LayersList />
+        { displayState === 'add' ? <AddNewLayer/> : <LayersList /> }
       </div>
     );
   };
 
   const rightPanel = () => {
-    if (selectedLayer) {
+    if (selectedLayer && displayState === 'view') {
       return (
         <Item ref={layerDetailsRef}>
           <LayerDetails layerDetails={selectedLayer} />
