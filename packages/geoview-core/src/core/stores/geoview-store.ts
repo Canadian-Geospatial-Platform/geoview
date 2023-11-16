@@ -29,7 +29,7 @@ export interface IGeoViewState {
   appState: IAppState;
   detailsState: IDetailsState;
   dataTableState: IMapDataTableState;
-  legendState: ILayerState;
+  layerState: ILayerState;
   mapState: IMapState;
   uiState: IUIState;
 
@@ -50,7 +50,7 @@ export const geoViewStoreDefinition = (set: TypeSetStore, get: TypeGetStore) =>
     appState: initializeAppState(set, get),
     detailsState: initialDetailsState(set, get),
     dataTableState: initialDataTableState(set, get),
-    legendState: initializeLayerState(set, get),
+    layerState: initializeLayerState(set, get),
     mapState: initializeMapState(set, get),
     uiState: initializeUIState(set, get),
 

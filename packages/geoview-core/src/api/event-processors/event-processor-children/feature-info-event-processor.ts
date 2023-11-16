@@ -18,12 +18,7 @@ export class FeatureInfoEventProcessor extends AbstractEventProcessor {
       EVENT_NAMES.GET_FEATURE_INFO.ALL_QUERIES_DONE,
       (allQueriesPayload) => {
         if (payloadIsAllQueriesDone(allQueriesPayload)) {
-          const { layerPath, resultSets } = allQueriesPayload;
-          const storeResultSets = store.getState().featureInfoResultSets;
-          if (!(layerPath in storeResultSets)) {
-            storeResultSets[layerPath] = resultSets[layerPath];
-            store.setState({ featureInfoResultSets: storeResultSets });
-          }
+          store.setState({ featureInfoResultSets: allQueriesPayload.resultSets });
         }
       },
       `${mapId}/FeatureInfoLayerSet`
@@ -36,7 +31,7 @@ export class FeatureInfoEventProcessor extends AbstractEventProcessor {
   // **********************************************************
   // Static functions for Typescript files to set store values
   // **********************************************************
-  static propagateResultSetInfo(mapId: string, layerPath: string, eventType: EventType, resultSets: TypeFeatureInfoResultSets) {
+  static propagateFeatureInfoToStore(mapId: string, layerPath: string, eventType: EventType, resultSets: TypeFeatureInfoResultSets) {
     const store = getGeoViewStore(mapId);
     const layerPathInResultSets = Object.keys(resultSets);
     if (eventType === 'click') {

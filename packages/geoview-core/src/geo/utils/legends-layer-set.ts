@@ -3,6 +3,7 @@ import { EVENT_NAMES } from '@/api/events/event-types';
 import { GetLegendsPayload, payloadIsLegendInfo, TypeLegendResultSets, payloadIsLayerSetUpdated } from '@/api/events/payloads';
 import { api } from '@/app';
 import { LayerSet } from './layer-set';
+import { LegendEventProcessor } from '@/api/event-processors/event-processor-children/legend-event-processor';
 
 /** *****************************************************************************************************************************
  * A class to hold a set of layers associated with an array of TypeLegend. When this class is instantiated, all layers already
@@ -39,6 +40,7 @@ export class LegendsLayerSet {
     // This function is used to initialise the date property of the layer path entry.
     const registrationUserDataInitialisation = (layerPath: string) => {
       this.resultSets[layerPath].querySent = false;
+      this.resultSets[layerPath].data = undefined;
     };
 
     this.mapId = mapId;
@@ -70,6 +72,7 @@ export class LegendsLayerSet {
           const { layerPath, legendInfo } = payload;
           if (layerPath in this.resultSets) {
             this.resultSets[layerPath].data = legendInfo;
+            LegendEventProcessor.propagateLegendToStore(this.mapId, layerPath, this.resultSets[layerPath]);
             api.event.emit(
               GetLegendsPayload.createLegendsLayersetUpdatedPayload(`${this.mapId}/LegendsLayerSet`, layerPath, this.resultSets)
             );
