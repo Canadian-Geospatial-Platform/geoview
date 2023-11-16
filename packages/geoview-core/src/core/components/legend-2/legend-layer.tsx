@@ -61,7 +61,7 @@ export function LegendLayer(props: LegendLayerProps): JSX.Element {
     return (
       <List sx={{ width: '100%' }}>
         {layer.items.map((item) => (
-          <ListItem key={item.name} className={!item.isChecked ? 'unchecked' : ''}>
+          <ListItem key={item.name} className={!item.isVisible ? 'unchecked' : ''}>
             <ListItemIcon>
               <img alt={item.name} src={item.icon} />
             </ListItemIcon>

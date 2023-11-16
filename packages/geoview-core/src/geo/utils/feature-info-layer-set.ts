@@ -137,7 +137,7 @@ export class FeatureInfoLayerSet {
               layerName: getLocalizedValue(api.maps[mapId].layer.registeredLayers[layerPath].layerName, mapId)!,
               layerFlags: this.resultSets[layerPath],
             };
-            FeatureInfoEventProcessor.propagateResultSetInfo(mapId, layerPath, eventType, this.resultSets);
+            FeatureInfoEventProcessor.propagateFeatureInfoToStore(mapId, layerPath, eventType, this.resultSets);
           }
 
           const allDone = Object.keys(this.resultSets).reduce((doneFlag, layerPathToTest) => {

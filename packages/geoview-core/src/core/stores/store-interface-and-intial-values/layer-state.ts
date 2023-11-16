@@ -18,7 +18,7 @@ export interface ILayerState {
     setLayerOpacity: (layerPath: string, opacity: number) => void;
     toggleLayerVisibility: (layerPath: string) => void;
     toggleItemVisibility: (layerPath: string, itemName: string) => void;
-    setAllItemsVisibility: (layerPath: string, visibility: boolean) => void;
+    setAllItemsVisibility: (layerPath: string, visibility: 'yes' | 'no') => void;
   };
 }
 
@@ -31,20 +31,20 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
 
     actions: {
       getLayer: (layerPath: string) => {
-        const curLayers = get().legendState.legendLayers;
+        const curLayers = get().layerState.legendLayers;
         const layer = findLayerByPath(curLayers, layerPath);
         return layer;
       },
       setSelectedLayerPath: (layerPath: string) => {
         set({
-          legendState: {
-            ...get().legendState,
+          layerState: {
+            ...get().layerState,
             selectedLayerPath: layerPath,
           },
         });
       },
       setLayerOpacity: (layerPath: string, opacity: number) => {
-        const curLayers = get().legendState.legendLayers;
+        const curLayers = get().layerState.legendLayers;
         const layer = findLayerByPath(curLayers, layerPath);
         if (layer) {
           layer.opacity = opacity;
@@ -52,66 +52,67 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
 
         // now update store
         set({
-          legendState: {
-            ...get().legendState,
+          layerState: {
+            ...get().layerState,
             legendLayers: [...curLayers],
           },
         });
       },
       toggleLayerVisibility: (layerPath: string) => {
-        const curLayers = get().legendState.legendLayers;
+        const curLayers = get().layerState.legendLayers;
         const layer = findLayerByPath(curLayers, layerPath);
-        if (layer) {
-          layer.isVisible = !layer.isVisible;
+        if (layer && layer.isVisible !== 'always') {
+          layer.isVisible = layer.isVisible === 'no' ? 'yes' : 'no';
           setPropInChildLayers(layer.children, 'isVisible', layer.isVisible);
         }
 
         // now update store
         set({
-          legendState: {
-            ...get().legendState,
+          layerState: {
+            ...get().layerState,
             legendLayers: [...curLayers],
           },
         });
       },
       toggleItemVisibility: (layerPath: string, itemName: string) => {
-        const curLayers = get().legendState.legendLayers;
+        const curLayers = get().layerState.legendLayers;
 
         const layer = findLayerByPath(curLayers, layerPath);
         if (layer) {
           _.each(layer.items, (item) => {
-            if (item.name === itemName) {
-              item.isChecked = !item.isChecked; // eslint-disable-line no-param-reassign
+            if (item.name === itemName && item.isVisible !== 'always') {
+              item.isVisible = item.isVisible === 'no' ? 'yes' : 'no'; // eslint-disable-line no-param-reassign
             }
           });
-          layer.allItemsChecked = _.every(layer.items, (i) => i.isChecked);
-          const allItemsUnchecked = _.every(layer.items, (i) => !i.isChecked);
-          if (allItemsUnchecked) {
-            layer.isVisible = false;
+          // 'always' is neither 'yes', nor 'no'.
+          layer.allItemsChecked = _.every(layer.items, (i) => ['yes', 'always'].includes(i.isVisible!));
+          const allItemsUnchecked = _.every(layer.items, (i) => ['no', 'always'].includes(i.isVisible!));
+          if (allItemsUnchecked && layer.isVisible !== 'always') {
+            layer.isVisible = 'no';
           }
         }
         set({
-          legendState: {
-            ...get().legendState,
+          layerState: {
+            ...get().layerState,
             legendLayers: [...curLayers],
           },
         });
       },
-      setAllItemsVisibility: (layerPath: string, visibility: boolean) => {
-        const curLayers = get().legendState.legendLayers;
+      setAllItemsVisibility: (layerPath: string, visibility: 'yes' | 'no') => {
+        const curLayers = get().layerState.legendLayers;
 
         const layer = findLayerByPath(curLayers, layerPath);
         if (layer) {
           _.each(layer.items, (item) => {
-            item.isChecked = visibility; // eslint-disable-line no-param-reassign
+            if (item.isVisible !== 'always') item.isVisible = visibility; // eslint-disable-line no-param-reassign
           });
-          layer.allItemsChecked = visibility;
+          layer.allItemsChecked = visibility === 'yes';
           layer.isVisible = visibility;
         }
 
         set({
-          legendState: {
-            ...get().legendState,
+          layerState: {
+            ...get().layerState,
             legendLayers: [...curLayers],
           },
         });
@@ -122,7 +123,7 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
   return init;
 }
 
-/// private functions
+// private functions
 function setPropInChildLayers(children: TypeLegendLayer[], propName: string, val: unknown) {
   _.each(children, (child) => {
     _.set(child, propName, val);
@@ -134,11 +135,10 @@ function setPropInChildLayers(children: TypeLegendLayer[], propName: string, val
 
 function findLayerByPath(layers: TypeLegendLayer[], layerPath: string): TypeLegendLayer | undefined {
   for (const l of layers) {
-    if (l.layerPath === layerPath) {
+    if (layerPath === l.layerPath) {
       return l;
     }
-
-    if (l.children && l.children.length > 0) {
+    if (layerPath.startsWith(l.layerPath) && l.children?.length > 0) {
       const result: TypeLegendLayer | undefined = findLayerByPath(l.children, layerPath);
       if (result) {
         return result;
@@ -152,15 +152,15 @@ function findLayerByPath(layers: TypeLegendLayer[], layerPath: string): TypeLege
 // **********************************************************
 // Layer state selectors
 // **********************************************************
-export const useLayersList = () => useStore(useGeoViewStore(), (state) => state.legendState.legendLayers);
-export const useSelectedLayerPath = () => useStore(useGeoViewStore(), (state) => state.legendState.selectedLayerPath);
+export const useLayersList = () => useStore(useGeoViewStore(), (state) => state.layerState.legendLayers);
+export const useSelectedLayerPath = () => useStore(useGeoViewStore(), (state) => state.layerState.selectedLayerPath);
 
-export const useLayerStoreActions = () => useStore(useGeoViewStore(), (state) => state.legendState.actions);
+export const useLayerStoreActions = () => useStore(useGeoViewStore(), (state) => state.layerState.actions);
 
 // computed gets
 export const useSelectedLayer = () => {
-  const layers = useStore(useGeoViewStore(), (state) => state.legendState.legendLayers);
-  const selectedLayerPath = useStore(useGeoViewStore(), (state) => state.legendState.selectedLayerPath);
+  const layers = useStore(useGeoViewStore(), (state) => state.layerState.legendLayers);
+  const selectedLayerPath = useStore(useGeoViewStore(), (state) => state.layerState.selectedLayerPath);
   if (selectedLayerPath) {
     return findLayerByPath(layers, selectedLayerPath);
   }
@@ -168,7 +168,7 @@ export const useSelectedLayer = () => {
 };
 
 export const useIconLayerSet = (layerPath: string) => {
-  const layers = useStore(useGeoViewStore(), (state) => state.legendState.legendLayers);
+  const layers = useStore(useGeoViewStore(), (state) => state.layerState.legendLayers);
   const layer = findLayerByPath(layers, layerPath);
   if (layer) {
     return layer.items.map((item) => item.icon);
