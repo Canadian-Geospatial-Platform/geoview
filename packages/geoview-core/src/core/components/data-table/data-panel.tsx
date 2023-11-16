@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { useTheme } from '@mui/material/styles';
 import { Projection } from 'ol/proj';
 import { useTranslation } from 'react-i18next';
-import { Box, Typography, CircularProgress } from '@/ui';
+import { Box, Typography, CircularProgress, FilterAltIcon } from '@/ui';
 import MapDataTable, { MapDataTableData as MapDataTableDataProps } from './map-data-table';
 import { getSxClasses } from './data-table-style';
 import { GroupLayers } from './data-table-api';
@@ -56,6 +56,41 @@ export function Datapanel({ layerData, mapId, projectionConfig, language }: Data
   }, []);
 
   /**
+   * Check if filtered are being set for each layer.
+   * @param {string} layerPath The path of the layer
+   * @returns boolean
+   */
+  const isMapFilteredSelectedForLayer = (layerPath: string): boolean => !!mapFiltered[layerPath];
+
+  /**
+   * Get number of features of a layer with filtered or selected layer.
+   * @param {string} layerPath the path of the layer
+   * @param {number} index index of layer in the list
+   * @returns
+   */
+  const getFeaturesOfLayer = (layerPath: string, index: number): string => {
+    return rowsFiltered && rowsFiltered[layerPath]
+      ? `${rowsFiltered[layerPath]} ${t('dataTable.featureFiltered')}`
+      : `${layerData[index].features.length} ${t('dataTable.features')}`;
+  };
+
+  /**
+   * Create layer tooltip
+   * @param {TypeLocalizedString} layerName en/fr layer name
+   * @param {string} layerPath the path of the layer.
+   * @param {number} index an index of the layer in the array.
+   * @returns
+   */
+  const getLayerTooltip = (layerName: string, layerPath: string, index: number): React.ReactNode => {
+    return (
+      <Box sx={{ display: 'flex', alignContent: 'center', '& svg ': { width: '0.75em', height: '0.75em' } }}>
+        {`${layerName}, ${getFeaturesOfLayer(layerPath, index)}`}
+        {isMapFilteredSelectedForLayer(layerPath) && <FilterAltIcon />}
+      </Box>
+    );
+  };
+
+  /**
    * Render group layers as list.
    *
    * @returns JSX.Element
@@ -63,16 +98,16 @@ export function Datapanel({ layerData, mapId, projectionConfig, language }: Data
   const renderList = useCallback(
     () => (
       <LayerList
-        layerList={layerData.map((layer) => ({
+        layerList={layerData.map((layer, index) => ({
           layerName: layer.layerName![language] ?? '',
           layerPath: layer.layerKey,
-          numOffeatures: layer.features.length,
+          layerFeatures: getFeaturesOfLayer(layer.layerKey, index),
+          tooltip: getLayerTooltip(layer.layerName![language] ?? '', layer.layerKey, index),
+          mapFilteredIcon: isMapFilteredSelectedForLayer(layer.layerKey) && <FilterAltIcon sx={{ color: theme.palette.grey['500'] }} />,
         }))}
         isEnlargeDataTable={isEnlargeDataTable}
         selectedLayerIndex={selectedLayerIndex}
         handleListItemClick={handleListItemClick}
-        rowsFiltered={rowsFiltered}
-        mapFiltered={mapFiltered}
       />
     ),
     // eslint-disable-next-line react-hooks/exhaustive-deps

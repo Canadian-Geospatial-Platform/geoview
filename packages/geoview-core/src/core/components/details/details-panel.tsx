@@ -149,13 +149,24 @@ export function Detailspanel({ mapId }: DetailsPanelProps): JSX.Element {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [arrayOfLayerData]);
 
+  /**
+   * Get number of features of a layer.
+   * @returns string
+   */
+  const getFeaturesOfLayer = (): string => {
+    const numOfFeatures = layerDataInfo?.features?.length ?? 0;
+    return `${numOfFeatures} ${t('details.feature')}${numOfFeatures > 1 ? 's' : ''}`;
+  };
+
   const renderLayerList = useCallback(() => {
     return (
       <LayerList
-        layerList={arrayOfLayerData.map((layer) => ({
+        layerList={arrayOfLayerData.map((layer, index) => ({
           layerName: layer.layerName ?? '',
           layerPath: layer.layerPath,
           numOffeatures: layer.features?.length ?? 0,
+          layerFeatures: getFeaturesOfLayer(),
+          tooltip: `${layer.layerName}, ${getFeaturesOfLayer()}`,
         }))}
         isEnlargeDataTable={isEnlargeDataTable}
         selectedLayerIndex={arrayOfLayerData.findIndex((layer) => layer.layerPath === layerDataInfo?.layerPath)}

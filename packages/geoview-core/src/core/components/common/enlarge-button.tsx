@@ -16,10 +16,11 @@ interface EnlargeButtonProps {
  * @returns JSX.element
  */
 export function EnlargeButton({ isEnlargeDataTable, setIsEnlargeDataTable }: EnlargeButtonProps) {
-  const { t } = useTranslation();
-  const theme = useTheme();
+  const { t } = useTranslation<string>();
 
+  const theme = useTheme();
   const sxClasses = getSxClasses(theme);
+
   return (
     <Button
       type="text"

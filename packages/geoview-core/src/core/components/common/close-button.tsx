@@ -16,10 +16,11 @@ interface CloseButtonProps {
  * @returns JSX.element
  */
 export function CloseButton({ isLayersPanelVisible, setIsLayersPanelVisible }: CloseButtonProps) {
-  const { t } = useTranslation();
-  const theme = useTheme();
+  const { t } = useTranslation<string>();
 
+  const theme = useTheme();
   const sxClasses = getSxClasses(theme);
+
   return (
     <Button
       type="text"
