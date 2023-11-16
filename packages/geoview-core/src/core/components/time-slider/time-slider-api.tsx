@@ -7,8 +7,12 @@ export interface SliderFilterProps {
   defaultValue: string;
   minAndMax: number[];
   field: string;
+  singleHandle: boolean;
   values: number[];
   filtering: boolean;
+  delay: number;
+  locked: boolean;
+  reversed: boolean;
 }
 
 export class TimeSliderApi {
@@ -24,6 +28,7 @@ export class TimeSliderApi {
   }
 
   // Create list of layers that have a temporal dimension
+  // TODO use list of visible layers from store
   createLayersList(): string[] {
     return Object.keys(api.maps[this.mapId].layer.registeredLayers).filter(
       (layerPath) =>
@@ -39,10 +44,23 @@ export class TimeSliderApi {
       const { range } = temporalDimensionInfo.range;
       const defaultValue = temporalDimensionInfo.default;
       const minAndMax: number[] = [new Date(range[0]).getTime(), new Date(range[range.length - 1]).getTime()];
-      const { field } = temporalDimensionInfo;
-      const values = temporalDimensionInfo.singleHandle ? [new Date(temporalDimensionInfo.default).getTime()] : [...minAndMax];
+      const { field, singleHandle } = temporalDimensionInfo;
+      const values = singleHandle ? [new Date(temporalDimensionInfo.default).getTime()] : [...minAndMax];
       const filtering = true;
-      const sliderData = { [layerPath]: { range, defaultValue, minAndMax, field, filtering, values } };
+      const sliderData = {
+        [layerPath]: {
+          range,
+          defaultValue,
+          minAndMax,
+          field,
+          singleHandle,
+          filtering,
+          values,
+          delay: 1000,
+          locked: false,
+          reversed: false,
+        },
+      };
       timeSliderData = { ...timeSliderData, ...sliderData };
     });
     return timeSliderData;
