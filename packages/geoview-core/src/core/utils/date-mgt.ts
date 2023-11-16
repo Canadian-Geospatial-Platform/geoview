@@ -338,7 +338,7 @@ export class DateMgt {
       unitSymbol: dimensionObject.unitSymbol || '',
       range: this.createRangeOGC(dimensionObject.values),
       nearestValues: dimensionObject.nearestValues ? 'absolute' : 'discrete',
-      singleHandle: false,
+      singleHandle: true,
     };
 
     return timeDimension;
