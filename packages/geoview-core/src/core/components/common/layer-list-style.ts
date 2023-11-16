@@ -7,7 +7,7 @@ export const getSxClasses = (theme: Theme) => ({
     [theme.breakpoints.up('md')]: {
       paddingRight: '1rem',
     },
-    [theme.breakpoints.up('lg')]: {
+    [theme.breakpoints.up('xl')]: {
       paddingRight: '2rem',
     },
     '& .MuiListItemText-primary': {

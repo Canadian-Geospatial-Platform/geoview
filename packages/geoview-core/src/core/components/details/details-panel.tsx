@@ -221,13 +221,15 @@ export function Detailspanel({ mapId }: DetailsPanelProps): JSX.Element {
             <ResponsiveGrid.Left
               isLayersPanelVisible={isLayersPanelVisible}
               xs={isLayersPanelVisible ? 12 : 0}
-              md={!isEnlargeDataTable ? 4 : 1.25}
+              md={!isEnlargeDataTable ? 4 : 2}
+              lg={!isEnlargeDataTable ? 4 : 1.25}
             >
               {renderLayerList()}
             </ResponsiveGrid.Left>
             <ResponsiveGrid.Right
               xs={!isLayersPanelVisible ? 12 : 0}
-              md={!isEnlargeDataTable ? 8 : 10.75}
+              md={!isEnlargeDataTable ? 8 : 10}
+              lg={!isEnlargeDataTable ? 8 : 10.75}
               isLayersPanelVisible={isLayersPanelVisible}
             >
               <Box sx={sxClasses.rightPanleContainer}>
