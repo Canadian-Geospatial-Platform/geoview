@@ -6,7 +6,7 @@ import { useGeoViewStore } from '../stores-managers';
 import { TypeLegendLayer } from '../../components/layers/types';
 import { TypeGetStore, TypeSetStore } from '../geoview-store';
 
-type TypeLayersViewDisplayState = 'remove' | 'add' | 'order' | 'view'
+type TypeLayersViewDisplayState = 'remove' | 'add' | 'order' | 'view';
 
 export interface ILayerState {
   selectedItem?: TypeLegendLayer;
@@ -17,7 +17,7 @@ export interface ILayerState {
   displayState: TypeLayersViewDisplayState;
   actions: {
     getLayer: (layerPath: string) => TypeLegendLayer | undefined;
-    setDisplayState: (newDisplayState:TypeLayersViewDisplayState) => void;
+    setDisplayState: (newDisplayState: TypeLayersViewDisplayState) => void;
     setSelectedLayerPath: (layerPath: string) => void;
     setLayerOpacity: (layerPath: string, opacity: number) => void;
     toggleLayerVisibility: (layerPath: string) => void;
@@ -40,7 +40,7 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
         const layer = findLayerByPath(curLayers, layerPath);
         return layer;
       },
-      setDisplayState: (newDisplayState:TypeLayersViewDisplayState) => {
+      setDisplayState: (newDisplayState: TypeLayersViewDisplayState) => {
         const curState = get().legendState.displayState;
         set({
           legendState: {

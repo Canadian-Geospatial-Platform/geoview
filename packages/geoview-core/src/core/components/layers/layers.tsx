@@ -47,7 +47,7 @@ export function Layers(props: LegendItemsDetailsProps): JSX.Element {
     return (
       <div>
         <LayersActions />
-        { displayState === 'add' ? <AddNewLayer/> : <LayersList /> }
+        {displayState === 'add' ? <AddNewLayer /> : <LayersList />}
       </div>
     );
   };
