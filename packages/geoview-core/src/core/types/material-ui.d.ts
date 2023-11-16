@@ -24,7 +24,7 @@ declare module '@mui/material/styles' {
         size: { width: string | number; height: string | number };
       };
     };
-    iconImg?: {
+    iconImage?: {
       padding: number | string;
       borderRadius: number | string;
       border: string;

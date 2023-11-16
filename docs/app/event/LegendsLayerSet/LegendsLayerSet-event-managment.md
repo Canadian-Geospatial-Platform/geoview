@@ -8,11 +8,11 @@ export type TypeLegend = {
   layerName?: TypeLocalizedString;
   type: TypeGeoviewLayerType;
   styleConfig?: TypeStyleConfig;
-  legend: TypeLayerStyles | HTMLCanvasElement | null;
+  legend: TypeVectorLayerStyles | HTMLCanvasElement | null;
 };
 ```
 
-The `layerPath` parameter is used to link the legend to the layer entry configuration in the map. The `layerName` is a bilingual string for display information. The `type` tells us how to handle the legend. The `styleConfig` parameter contains the configuration settings that describe the style of the legend. This can be a simple, a unique value, or a class break configuration. Finally, we have the `legend`, whose null value indicates that it is impossible to get a legend for the layer. When the type is `ogcWms`, the legend is a `HTMLCanvasElement`. Otherwise, it is a `TypeLayerStyles`.
+The `layerPath` parameter is used to link the legend to the layer entry configuration in the map. The `layerName` is a bilingual string for display information. The `type` tells us how to handle the legend. The `styleConfig` parameter contains the configuration settings that describe the style of the legend. This can be a simple, a unique value, or a class break configuration. Finally, we have the `legend`, whose null value indicates that it is impossible to get a legend for the layer. When the type is `ogcWms`, the legend is a `HTMLCanvasElement`. Otherwise, it is a `TypeVectorLayerStyles`.
 <p>&nbsp;</p>
 <p align="center">
   <img src="./draw.io/LegendsLayerSet-class.drawio.svg" />

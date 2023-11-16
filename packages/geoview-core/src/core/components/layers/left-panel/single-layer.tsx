@@ -110,6 +110,7 @@ export function SingleLayer(props: SingleLayerProps): JSX.Element {
   };
 
   const handleReArrangeLayer = () => {
+    // eslint-disable-next-line no-console
     console.log('re-arrange layer');
   };
 

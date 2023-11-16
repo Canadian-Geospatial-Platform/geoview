@@ -186,6 +186,7 @@ const createInfoTable = (mapId, resultSetsId, resultSets, eventType) => {
   });
 };
 
+// ==========================================================================================================================
 const createTableOfFilter = (mapId) => {
   let mapButtonsDiv = document.getElementById(`layer${mapId.slice(-1)}-buttons-pre`);
   const oldTable = document.getElementById(`layer${mapId.slice(-1)}-buttons-table`);

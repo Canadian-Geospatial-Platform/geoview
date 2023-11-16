@@ -33,6 +33,7 @@ import {
   TypeBaseSourceVectorInitialConfig,
   TypeLayerInitialSettings,
   TypeLayerStatus,
+  TypeStyleGeometry,
 } from '../../map/map-schema-types';
 import {
   codedValueType,
@@ -60,7 +61,8 @@ export type TypeLegend = {
   layerName?: TypeLocalizedString;
   type: TypeGeoviewLayerType;
   styleConfig?: TypeStyleConfig | null;
-  legend: TypeLayerStyles | HTMLCanvasElement | null;
+  // Layers other than vector layers use the HTMLCanvasElement type for their legend.
+  legend: TypeVectorLayerStyles | HTMLCanvasElement | null;
 };
 
 /**
@@ -98,7 +100,7 @@ export const isImageStaticLegend = (verifyIfLegend: TypeLegend): verifyIfLegend 
 };
 
 export interface TypeImageStaticLegend extends Omit<TypeLegend, 'styleConfig'> {
-  legend: HTMLCanvasElement;
+  legend: HTMLCanvasElement | null;
 }
 
 const validVectorLayerLegendTypes: TypeGeoviewLayerType[] = ['GeoJSON', 'esriDynamic', 'esriFeature', 'ogcFeature', 'ogcWfs', 'GeoPackage'];
@@ -115,11 +117,11 @@ export const isVectorLegend = (verifyIfLegend: TypeLegend): verifyIfLegend is Ty
 };
 
 export interface TypeVectorLegend extends TypeLegend {
-  legend: TypeLayerStyles;
+  legend: TypeVectorLayerStyles;
 }
 
 export type TypeStyleRepresentation = {
-  /** The defaultCanvas property is used by WMS legends, Simple styles and default styles when defined in unique value and class
+  /** The defaultCanvas property is used by Simple styles and default styles when defined in unique value and class
    * break styles.
    */
   defaultCanvas?: HTMLCanvasElement | null;
@@ -128,7 +130,7 @@ export type TypeStyleRepresentation = {
   /** The arrayOfCanvas property is used by unique value and class break styles. */
   arrayOfCanvas?: (HTMLCanvasElement | null)[];
 };
-export type TypeLayerStyles = { Point?: TypeStyleRepresentation; LineString?: TypeStyleRepresentation; Polygon?: TypeStyleRepresentation };
+export type TypeVectorLayerStyles = Partial<Record<TypeStyleGeometry, TypeStyleRepresentation>>;
 
 /** ******************************************************************************************************************************
  * GeoViewAbstractLayers types
@@ -1337,7 +1339,7 @@ export abstract class AbstractGeoViewLayer {
             nameField: getLocalizedValue(layerEntryConfig?.source?.featureInfo?.nameField, this.mapId) || null,
           };
 
-          const featureFields = feature.getKeys();
+          const featureFields = (feature as Feature<Geometry>).getKeys();
           featureFields.forEach((fieldName) => {
             if (fieldName !== 'geometry') {
               if (outfields?.includes(fieldName)) {

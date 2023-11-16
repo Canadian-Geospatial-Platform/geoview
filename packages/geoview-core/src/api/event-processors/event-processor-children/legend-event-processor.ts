@@ -2,9 +2,20 @@ import { GeoViewStoreType } from '@/core/stores/geoview-store';
 import { AbstractEventProcessor } from '../abstract-event-processor';
 import { EVENT_NAMES } from '@/api/events/event-types';
 import { payloadIsLegendsLayersetUpdated, TypeLegendResultSetsEntry } from '@/api/events/payloads';
-import { isImageStaticLegend, isVectorLegend, isWmsLegend, layerEntryIsGroupLayer, TypeGeoviewLayerType, TypeLegend } from '@/geo';
+import {
+  isClassBreakStyleConfig,
+  isImageStaticLegend,
+  isSimpleStyleConfig,
+  isUniqueValueStyleConfig,
+  isVectorLegend,
+  isWmsLegend,
+  layerEntryIsGroupLayer,
+  TypeGeoviewLayerType,
+  TypeLegend,
+  TypeStyleGeometry,
+} from '@/geo';
 import { getGeoViewStore } from '@/core/stores/stores-managers';
-import { TypeLegendLayer, TypeLegendLayerIcon, TypeLegendLayerItem } from '@/core/components/layers/types';
+import { TypeLegendLayer, TypeLegendLayerIcons, TypeLegendLayerItem, TypeLegendLayerListItem } from '@/core/components/layers/types';
 import { api, getLocalizedValue } from '@/app';
 
 export class LegendEventProcessor extends AbstractEventProcessor {
@@ -31,36 +42,65 @@ export class LegendEventProcessor extends AbstractEventProcessor {
   // **********************************************************
   // Static functions for Typescript files to set store values
   // **********************************************************
-  private static getLayerIconImage(mapId: string, layerPath: string, layerLegend: TypeLegend | null): TypeLegendLayerIcon | undefined {
-    let iconDetails: TypeLegendLayerIcon = {};
+  private static getLayerIconImage(mapId: string, layerPath: string, layerLegend: TypeLegend | null): TypeLegendLayerIcons | undefined {
+    const iconDetails: TypeLegendLayerIcons = [];
     if (layerLegend) {
       if (layerLegend.legend === null) {
-        if (layerLegend.styleConfig === null) iconDetails.iconImg = 'config not found';
-        else if (layerLegend.styleConfig === undefined) iconDetails.iconImg = 'undefined style';
-      } else if (Object.keys(layerLegend.legend).length === 0) iconDetails.iconImg = 'no data';
+        if (layerLegend.styleConfig === null) iconDetails[0].iconImage = 'config not found';
+        else if (layerLegend.styleConfig === undefined) iconDetails[0].iconImage = 'undefined style config';
+      } else if (Object.keys(layerLegend.legend).length === 0) iconDetails[0].iconImage = 'no data';
       else if (isWmsLegend(layerLegend) || isImageStaticLegend(layerLegend)) {
-        iconDetails.iconType = 'simple';
-        if (layerLegend.legend) iconDetails.iconImg = layerLegend.legend?.toDataURL();
-        // YC if (layerLegend.)
-      } else if (isVectorLegend(layerLegend) && layerLegend.legend) {
-        Object.entries(layerLegend.legend).forEach(([, styleRepresentation]) => {
-          if (styleRepresentation.arrayOfCanvas) {
-            iconDetails.iconType = 'list';
-            const iconImageList = (styleRepresentation.arrayOfCanvas as HTMLCanvasElement[]).map((canvas) => {
-              return canvas.toDataURL();
-            });
-            if (iconImageList.length > 0) iconDetails = { ...iconDetails, iconImg: iconImageList[0] };
-            if (iconImageList.length > 1) iconDetails = { ...iconDetails, iconImgStacked: iconImageList[1] };
-            if (styleRepresentation.defaultCanvas) {
-              iconImageList.push(styleRepresentation.defaultCanvas.toDataURL());
-            }
-            if (styleRepresentation.clusterCanvas) {
-              iconImageList.push(styleRepresentation.clusterCanvas.toDataURL());
-            }
-            iconDetails.iconList = iconImageList;
+        iconDetails[0].iconType = 'simple';
+        iconDetails[0].iconImage = layerLegend.legend ? layerLegend.legend.toDataURL() : '';
+      } else if (isVectorLegend(layerLegend)) {
+        Object.entries(layerLegend.legend).forEach(([key, styleRepresentation]) => {
+          const geometryType = key as TypeStyleGeometry;
+          const styleSettings = layerLegend.styleConfig![geometryType]!;
+          const iconDetailsEntry: TypeLegendLayerItem = {};
+          iconDetailsEntry.geometryType = geometryType;
+          if (isSimpleStyleConfig(styleSettings)) {
+            iconDetailsEntry.iconType = 'simple';
+            iconDetailsEntry.iconImage = (styleRepresentation.defaultCanvas as HTMLCanvasElement).toDataURL();
+            iconDetailsEntry.name = styleSettings.label;
           } else {
-            iconDetails.iconType = 'simple';
-            iconDetails.iconImg = (styleRepresentation.defaultCanvas as HTMLCanvasElement).toDataURL();
+            iconDetailsEntry.iconType = 'list';
+            if (isClassBreakStyleConfig(styleSettings)) {
+              iconDetailsEntry.iconList = styleRepresentation.arrayOfCanvas!.map((canvas, i) => {
+                return {
+                  icon: canvas ? canvas.toDataURL() : null,
+                  name: styleSettings.classBreakStyleInfo[i].label,
+                  isVisible: styleSettings.classBreakStyleInfo[i].visible!,
+                  default: false,
+                } as TypeLegendLayerListItem;
+              });
+              if (styleRepresentation.defaultCanvas)
+                iconDetailsEntry.iconList.push({
+                  icon: styleRepresentation.defaultCanvas.toDataURL(),
+                  name: styleSettings.defaultLabel!,
+                  isVisible: styleSettings.defaultVisible!,
+                  default: true,
+                } as TypeLegendLayerListItem);
+            } else if (isUniqueValueStyleConfig(styleSettings)) {
+              iconDetailsEntry.iconList = styleRepresentation.arrayOfCanvas!.map((canvas, i) => {
+                return {
+                  icon: canvas ? canvas.toDataURL() : null,
+                  name: styleSettings.uniqueValueStyleInfo[i].label,
+                  isVisible: styleSettings.uniqueValueStyleInfo[i].visible!,
+                  default: false,
+                } as TypeLegendLayerListItem;
+              });
+              if (styleRepresentation.defaultCanvas)
+                iconDetailsEntry.iconList.push({
+                  icon: styleRepresentation.defaultCanvas.toDataURL(),
+                  name: styleSettings.defaultLabel!,
+                  isVisible: styleSettings.defaultVisible!,
+                  default: true,
+                } as TypeLegendLayerListItem);
+            }
+            if (iconDetailsEntry.iconList?.length) iconDetailsEntry.iconImage = iconDetailsEntry.iconList[0].icon;
+            if (iconDetailsEntry.iconList && iconDetailsEntry.iconList.length > 1)
+              iconDetailsEntry.iconImgStacked = iconDetailsEntry.iconList[1].icon;
+            iconDetails.push(iconDetailsEntry);
           }
         });
       }
@@ -105,9 +145,14 @@ export class LegendEventProcessor extends AbstractEventProcessor {
           isVisible: layerConfig.initialSettings?.visible ? layerConfig.initialSettings.visible : 'yes',
           opacity: layerConfig.initialSettings?.opacity ? layerConfig.initialSettings.opacity : 1,
           children: [] as TypeLegendLayer[],
-          icon: LegendEventProcessor.getLayerIconImage(mapId, layerPath, legendResultSetsEntry.data!),
+          icons: LegendEventProcessor.getLayerIconImage(mapId, layerPath, legendResultSetsEntry.data!),
         } as TypeLegendLayer;
-        // YC newLegendLayer.items =
+        newLegendLayer.items = [];
+        newLegendLayer.icons?.forEach((legendLayerItem) => {
+          legendLayerItem.iconList!.forEach((legendLayerListItem) => {
+            newLegendLayer.items.push(legendLayerListItem);
+          });
+        });
         if (entryIndex === -1) existingEntries.push(newLegendLayer);
         // eslint-disable-next-line no-param-reassign
         else existingEntries[entryIndex] = newLegendLayer;
