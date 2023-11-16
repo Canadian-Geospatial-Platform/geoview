@@ -37,6 +37,7 @@ function ResponsiveGridLeftPanel({ children, isLayersPanelVisible = false, ...re
   return (
     <Grid
       item
+      xs={isLayersPanelVisible ? 12 : 0}
       sx={{
         [theme.breakpoints.down('md')]: { display: isLayersPanelVisible ? 'block' : 'none' },
       }}
@@ -58,6 +59,7 @@ function ResponsiveGridRightPanel({ children, isLayersPanelVisible = false, sxPr
   return (
     <Grid
       item
+      xs={!isLayersPanelVisible ? 12 : 0}
       sx={{
         position: 'relative',
         [theme.breakpoints.up('md')]: { paddingLeft: '1rem' },

@@ -16,7 +16,7 @@ import {
   useDataTableStoreSelectedLayerIndex,
 } from '@/core/stores/store-interface-and-intial-values/data-table-state';
 
-import { ResponsiveGrid, EnlargeButton, CloseButton, LayerList, LayerListEntry } from '../common';
+import { ResponsiveGrid, EnlargeButton, CloseButton, LayerList, LayerListEntry, LayerTitle } from '../common';
 
 interface DatapanelProps {
   layerData: (MapDataTableDataProps & GroupLayers)[];
@@ -125,12 +125,12 @@ export function Datapanel({ layerData, mapId, projectionConfig, language }: Data
   return (
     <Box sx={sxClasses.dataPanel}>
       <ResponsiveGrid.Root spacing={2} sx={sxClasses.gridContainer}>
-        <ResponsiveGrid.Left xs={isLayersPanelVisible ? 12 : 0} md={4} isLayersPanelVisible={isLayersPanelVisible}>
+        <ResponsiveGrid.Left md={4} isLayersPanelVisible={isLayersPanelVisible}>
           <Typography component="p" sx={sxClasses.headline}>
             {t('dataTable.leftPanelHeading')}
           </Typography>
         </ResponsiveGrid.Left>
-        <ResponsiveGrid.Right xs={!isLayersPanelVisible ? 12 : 0} md={8} isLayersPanelVisible={isLayersPanelVisible}>
+        <ResponsiveGrid.Right md={8} isLayersPanelVisible={isLayersPanelVisible}>
           <Box
             sx={{
               display: 'flex',
@@ -139,9 +139,8 @@ export function Datapanel({ layerData, mapId, projectionConfig, language }: Data
               [theme.breakpoints.down('md')]: { justifyContent: 'space-between' },
             }}
           >
-            <Box sx={{ [theme.breakpoints.up('md')]: { display: 'none' } }}>
-              {!isLoading && <Typography component="span">{layerData![selectedLayerIndex]?.layerName![language] ?? ''}</Typography>}
-            </Box>
+            {!isLoading && <LayerTitle>{layerData![selectedLayerIndex]?.layerName![language] ?? ''}</LayerTitle>}
+
             <Box>
               <EnlargeButton isEnlargeDataTable={isEnlargeDataTable} setIsEnlargeDataTable={setIsEnlargeDataTable} />
               {!isLoading && <CloseButton setIsLayersPanelVisible={setIsLayersPanelVisible} isLayersPanelVisible={isLayersPanelVisible} />}
@@ -152,14 +151,12 @@ export function Datapanel({ layerData, mapId, projectionConfig, language }: Data
       <ResponsiveGrid.Root sx={{ marginTop: '0.75rem' }}>
         <ResponsiveGrid.Left
           isLayersPanelVisible={isLayersPanelVisible}
-          xs={isLayersPanelVisible ? 12 : 0}
           md={!isEnlargeDataTable ? 4 : 2}
           lg={!isEnlargeDataTable ? 4 : 1.25}
         >
           {renderList()}
         </ResponsiveGrid.Left>
         <ResponsiveGrid.Right
-          xs={!isLayersPanelVisible ? 12 : 0}
           md={!isEnlargeDataTable ? 8 : 10}
           lg={!isEnlargeDataTable ? 8 : 10.75}
           isLayersPanelVisible={isLayersPanelVisible}

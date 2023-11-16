@@ -47,7 +47,6 @@ export const getSxClasses = () => ({
     },
   },
   iconPreview: {
-    marginLeft: 8,
     padding: 0,
     borderRadius: 0,
     border: '1px solid',
