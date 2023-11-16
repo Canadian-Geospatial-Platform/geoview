@@ -2,28 +2,11 @@ import { useCallback, useEffect, useState } from 'react';
 import { useTheme } from '@mui/material/styles';
 import { Projection } from 'ol/proj';
 import { useTranslation } from 'react-i18next';
-import { IconStack } from '@/app';
-import {
-  Box,
-  Typography,
-  Paper,
-  List,
-  ListItem,
-  ListItemButton,
-  IconButton,
-  ListItemIcon,
-  ChevronRightIcon,
-  CircularProgress,
-  Button,
-  ArrowForwardIcon,
-  ArrowBackIcon,
-  Tooltip,
-  FilterAltIcon,
-} from '@/ui';
+import { Box, Typography, CircularProgress, FilterAltIcon } from '@/ui';
 import MapDataTable, { MapDataTableData as MapDataTableDataProps } from './map-data-table';
 import { getSxClasses } from './data-table-style';
 import { GroupLayers } from './data-table-api';
-import { TypeDisplayLanguage, TypeLocalizedString } from '@/geo/map/map-schema-types';
+import { TypeDisplayLanguage } from '@/geo/map/map-schema-types';
 
 import {
   useDataTableStoreActions,
@@ -32,7 +15,8 @@ import {
   useDataTableStoreRowsFiltered,
   useDataTableStoreSelectedLayerIndex,
 } from '@/core/stores/store-interface-and-intial-values/data-table-state';
-import { ResponsiveGrid } from '../responsive-grid/responsive-grid';
+
+import { ResponsiveGrid, EnlargeButton, CloseButton, LayerList, LayerListEntry, LayerTitle } from '../common';
 
 interface DatapanelProps {
   layerData: (MapDataTableDataProps & GroupLayers)[];
@@ -64,7 +48,7 @@ export function Datapanel({ layerData, mapId, projectionConfig, language }: Data
   const rowsFiltered = useDataTableStoreRowsFiltered();
   const { setSelectedLayerIndex, setIsEnlargeDataTable } = useDataTableStoreActions();
 
-  const handleListItemClick = useCallback((event: React.MouseEvent<HTMLDivElement, MouseEvent>, index: number) => {
+  const handleListItemClick = useCallback((layer: LayerListEntry, index: number) => {
     setSelectedLayerIndex(index);
     setIsLoading(true);
     setIsLayersPanelVisible(false);
@@ -73,35 +57,35 @@ export function Datapanel({ layerData, mapId, projectionConfig, language }: Data
 
   /**
    * Check if filtered are being set for each layer.
-   * @param {string} layerKey The key of the layer
+   * @param {string} layerPath The path of the layer
    * @returns boolean
    */
-  const isMapFilteredSelectedForLayer = (layerKey: string): boolean => !!mapFiltered[layerKey];
+  const isMapFilteredSelectedForLayer = (layerPath: string): boolean => !!mapFiltered[layerPath];
 
   /**
    * Get number of features of a layer with filtered or selected layer.
-   * @param layerKey
-   * @param index
+   * @param {string} layerPath the path of the layer
+   * @param {number} index index of layer in the list
    * @returns
    */
-  const getFeaturesOfLayer = (layerKey: string, index: number): string => {
-    return rowsFiltered[layerKey]
-      ? `${rowsFiltered[layerKey]} ${t('dataTable.featureFiltered')}`
+  const getFeaturesOfLayer = (layerPath: string, index: number): string => {
+    return rowsFiltered && rowsFiltered[layerPath]
+      ? `${rowsFiltered[layerPath]} ${t('dataTable.featureFiltered')}`
       : `${layerData[index].features.length} ${t('dataTable.features')}`;
   };
 
   /**
    * Create layer tooltip
    * @param {TypeLocalizedString} layerName en/fr layer name
-   * @param {string} layerKey the key of the layer.
+   * @param {string} layerPath the path of the layer.
    * @param {number} index an index of the layer in the array.
    * @returns
    */
-  const getLayerTooltip = (layerName: TypeLocalizedString, layerKey: string, index: number): React.ReactNode => {
+  const getLayerTooltip = (layerName: string, layerPath: string, index: number): React.ReactNode => {
     return (
       <Box sx={{ display: 'flex', alignContent: 'center', '& svg ': { width: '0.75em', height: '0.75em' } }}>
-        {`${layerName[language]}, ${getFeaturesOfLayer(layerKey, index)}`}
-        {isMapFilteredSelectedForLayer(layerKey) && <FilterAltIcon />}
+        {`${layerName}, ${getFeaturesOfLayer(layerPath, index)}`}
+        {isMapFilteredSelectedForLayer(layerPath) && <FilterAltIcon />}
       </Box>
     );
   };
@@ -113,60 +97,21 @@ export function Datapanel({ layerData, mapId, projectionConfig, language }: Data
    */
   const renderList = useCallback(
     () => (
-      <List sx={sxClasses.list}>
-        {layerData.map(({ layerKey, layerName }, index) => (
-          <Paper
-            sx={{ ...sxClasses.paper, border: selectedLayerIndex === index ? sxClasses.borderWithIndex : sxClasses.borderNone }}
-            key={layerKey}
-          >
-            <Tooltip title={getLayerTooltip(layerName!, layerKey, index)} placement="top" arrow>
-              <Box>
-                <ListItem disablePadding>
-                  <ListItemButton selected={selectedLayerIndex === index} onClick={(event) => handleListItemClick(event, index)}>
-                    <ListItemIcon>
-                      <IconStack layerPath={layerKey} />
-                    </ListItemIcon>
-                    <Box sx={sxClasses.listPrimaryText}>
-                      <Typography component="p">{layerName![language]}</Typography>
-                      <Box sx={{ display: 'flex', alignContent: 'center' }}>
-                        <Typography component="p" variant="subtitle1" noWrap>
-                          {getFeaturesOfLayer(layerKey, index)}
-                        </Typography>
-                        {isMapFilteredSelectedForLayer(layerKey) && <FilterAltIcon sx={{ color: theme.palette.grey['500'] }} />}
-                      </Box>
-                    </Box>
-
-                    <Box
-                      sx={{
-                        padding: isEnlargeDataTable ? '0.25rem' : '1rem',
-                        paddingRight: isEnlargeDataTable ? '0.25rem' : '1rem',
-                        [theme.breakpoints.down('xl')]: {
-                          display: isEnlargeDataTable ? 'none !important' : 'block',
-                        },
-                        [theme.breakpoints.down('sm')]: {
-                          display: 'none',
-                        },
-                      }}
-                    >
-                      <IconButton
-                        disabled
-                        edge="end"
-                        size="small"
-                        sx={{ color: `${theme.palette.primary.main} !important`, background: `${theme.palette.grey.A100} !important` }}
-                      >
-                        <ChevronRightIcon />
-                      </IconButton>
-                    </Box>
-                  </ListItemButton>
-                </ListItem>
-              </Box>
-            </Tooltip>
-          </Paper>
-        ))}
-      </List>
+      <LayerList
+        layerList={layerData.map((layer, index) => ({
+          layerName: layer.layerName![language] ?? '',
+          layerPath: layer.layerKey,
+          layerFeatures: getFeaturesOfLayer(layer.layerKey, index),
+          tooltip: getLayerTooltip(layer.layerName![language] ?? '', layer.layerKey, index),
+          mapFilteredIcon: isMapFilteredSelectedForLayer(layer.layerKey) && <FilterAltIcon sx={{ color: theme.palette.grey['500'] }} />,
+        }))}
+        isEnlargeDataTable={isEnlargeDataTable}
+        selectedLayerIndex={selectedLayerIndex}
+        handleListItemClick={handleListItemClick}
+      />
     ),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [layerData, selectedLayerIndex, isMapFilteredSelectedForLayer, isEnlargeDataTable]
+    [layerData, selectedLayerIndex, isEnlargeDataTable, mapFiltered, rowsFiltered]
   );
 
   useEffect(() => {
@@ -180,60 +125,42 @@ export function Datapanel({ layerData, mapId, projectionConfig, language }: Data
   return (
     <Box sx={sxClasses.dataPanel}>
       <ResponsiveGrid.Root spacing={2} sx={sxClasses.gridContainer}>
-        <ResponsiveGrid.Left xs={isLayersPanelVisible ? 12 : 0} md={3} isLayersPanelVisible={isLayersPanelVisible}>
+        <ResponsiveGrid.Left md={4} isLayersPanelVisible={isLayersPanelVisible}>
           <Typography component="p" sx={sxClasses.headline}>
             {t('dataTable.leftPanelHeading')}
           </Typography>
         </ResponsiveGrid.Left>
-        <ResponsiveGrid.Right
-          xs={!isLayersPanelVisible ? 12 : 0}
-          md={9}
-          sx={{ display: 'flex', justifyContent: 'right' }}
-          isLayersPanelVisible={isLayersPanelVisible}
-        >
-          <Button
-            type="text"
-            size="small"
-            sx={{ ...sxClasses.enlargeBtn, [theme.breakpoints.down('md')]: { display: 'none' } }}
-            onClick={() => setIsEnlargeDataTable(!isEnlargeDataTable)}
-            tooltip={isEnlargeDataTable ? t('dataTable.reduceBtn')! : t('dataTable.enlargeBtn')!}
-            tooltipPlacement="top"
+        <ResponsiveGrid.Right md={8} isLayersPanelVisible={isLayersPanelVisible}>
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              [theme.breakpoints.up('md')]: { justifyContent: 'right' },
+              [theme.breakpoints.down('md')]: { justifyContent: 'space-between' },
+            }}
           >
-            {isEnlargeDataTable ? <ArrowForwardIcon sx={sxClasses.enlargeBtnIcon} /> : <ArrowBackIcon sx={sxClasses.enlargeBtnIcon} />}
-            {isEnlargeDataTable ? t('dataTable.reduceBtn') : t('dataTable.enlargeBtn')}
-          </Button>
-          {!isLoading && (
-            <Button
-              type="text"
-              size="small"
-              sx={{
-                ...sxClasses.enlargeBtn,
-                marginLeft: '1rem',
-                [theme.breakpoints.up('md')]: { display: 'none' },
-                [theme.breakpoints.between('sm', 'md')]: { display: !isLayersPanelVisible ? 'block' : 'none' },
-                [theme.breakpoints.down('md')]: { display: !isLayersPanelVisible ? 'block' : 'none' },
-              }}
-              onClick={() => setIsLayersPanelVisible(true)}
-              tooltip={t('dataTable.close') ?? ''}
-              tooltipPlacement="top"
-            >
-              {t('dataTable.close')}
-            </Button>
-          )}
+            {!isLoading && <LayerTitle>{layerData![selectedLayerIndex]?.layerName![language] ?? ''}</LayerTitle>}
+
+            <Box>
+              <EnlargeButton isEnlargeDataTable={isEnlargeDataTable} setIsEnlargeDataTable={setIsEnlargeDataTable} />
+              {!isLoading && <CloseButton setIsLayersPanelVisible={setIsLayersPanelVisible} isLayersPanelVisible={isLayersPanelVisible} />}
+            </Box>
+          </Box>
         </ResponsiveGrid.Right>
       </ResponsiveGrid.Root>
       <ResponsiveGrid.Root sx={{ marginTop: '0.75rem' }}>
         <ResponsiveGrid.Left
           isLayersPanelVisible={isLayersPanelVisible}
-          xs={isLayersPanelVisible ? 12 : 0}
-          md={!isEnlargeDataTable ? 4 : 1.25}
+          md={!isEnlargeDataTable ? 4 : 2}
+          lg={!isEnlargeDataTable ? 4 : 1.25}
         >
           {renderList()}
         </ResponsiveGrid.Left>
         <ResponsiveGrid.Right
-          xs={!isLayersPanelVisible ? 12 : 0}
-          md={!isEnlargeDataTable ? 8 : 10.75}
+          md={!isEnlargeDataTable ? 8 : 10}
+          lg={!isEnlargeDataTable ? 8 : 10.75}
           isLayersPanelVisible={isLayersPanelVisible}
+          sxProps={{ minHeight: '250px' }}
         >
           <CircularProgress
             isLoaded={!isLoading}
@@ -244,7 +171,7 @@ export function Datapanel({ layerData, mapId, projectionConfig, language }: Data
 
           {!isLoading &&
             layerData.map(({ layerKey, layerId }, index) => (
-              <Box key={layerKey} sx={{ [theme.breakpoints.up('lg')]: { paddingLeft: '3.5rem' } }}>
+              <Box key={layerKey}>
                 {index === selectedLayerIndex ? (
                   <Box>
                     {layerData[index].features.length ? (

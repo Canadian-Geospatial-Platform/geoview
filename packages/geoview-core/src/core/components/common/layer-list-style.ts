@@ -1,34 +1,13 @@
-import { Theme } from '@mui/material/styles';
+import { Theme } from '@mui/material';
 
 export const getSxClasses = (theme: Theme) => ({
-  detailsContainer: {
-    background: theme.footerPanel.contentBg,
-    boxShadow: theme.footerPanel.contentShadow,
-    padding: '1.5rem',
-  },
-  panelHeaders: {
-    font: theme.footerPanel.titleFont,
-    marginBottom: '20px',
-  },
-  layerListPaper: {
-    marginBottom: '1rem',
-    cursor: 'pointer',
-    textOverflow: 'ellipsis',
-  },
-  listItemIcon: {
-    color: theme.palette.primary.main,
-    background: theme.footerPanel.contentBg,
-  },
-  layerNamePrimary: {
-    '& .MuiListItemText-primary': {
-      font: theme.footerPanel.layerTitleFont,
-    },
-    marginLeft: '10px',
-  },
   list: {
     color: 'text.primary',
     width: '100%',
     [theme.breakpoints.up('md')]: {
+      paddingRight: '1rem',
+    },
+    [theme.breakpoints.up('xl')]: {
       paddingRight: '2rem',
     },
     '& .MuiListItemText-primary': {
@@ -42,7 +21,9 @@ export const getSxClasses = (theme: Theme) => ({
         height: '100%',
       },
     },
-
+    '& .MuiListItemButton-root': {
+      minHeight: '73px',
+    },
     '& .MuiListItemIcon-root': {
       minWidth: '2rem',
     },
@@ -58,21 +39,11 @@ export const getSxClasses = (theme: Theme) => ({
       },
     },
   },
-  rightPanelContainer: {
-    border: `2px solid ${theme.palette.primary.main}`,
-    borderRadius: '5px',
-    backgroundColor: theme.palette.common.white,
-  },
-  rightPanelBtnHolder: {
-    marginTop: '20px',
-    marginBottom: '9px',
-    boxShadow: '0px 12px 9px -13px #E0E0E0',
-  },
-  gridContainer: { paddingLeft: '1rem', paddingRight: '1rem' },
   listPrimaryText: {
-    marginLeft: '0.62rem',
     minWidth: '0',
-    padding: '1.3rem 0',
+    marginTop: '0.5rem',
+    marginBottom: '0.5rem',
+    marginLeft: '10px',
     flex: '1 1 auto',
     display: 'flex',
     flexDirection: 'column',
@@ -99,4 +70,8 @@ export const getSxClasses = (theme: Theme) => ({
       },
     },
   },
+  paper: { marginBottom: '1rem' },
+  borderWithIndex: `2px solid ${theme.palette.primary.main}`,
+  borderNone: 'none',
+  headline: { fontSize: '1.125rem', fontWeight: 'bold' },
 });
