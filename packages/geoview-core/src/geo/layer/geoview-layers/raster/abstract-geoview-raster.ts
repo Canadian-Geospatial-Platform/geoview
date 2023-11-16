@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import BaseLayer from 'ol/layer/Base';
 import Feature from 'ol/Feature';
-import { Geometry } from 'ol/geom';
+import Geometry from 'ol/geom/Geometry';
 import LayerGroup from 'ol/layer/Group';
 
 import { AbstractGeoViewLayer } from '../abstract-geoview-layers';

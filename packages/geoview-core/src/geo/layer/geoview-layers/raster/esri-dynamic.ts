@@ -14,7 +14,7 @@ import Geometry from 'ol/geom/Geometry';
 
 import cloneDeep from 'lodash/cloneDeep';
 import { getLocalizedValue, getMinOrMaxExtents } from '@/core/utils/utilities';
-import { AbstractGeoViewLayer, CONST_LAYER_TYPES, TypeLayerStyles } from '../abstract-geoview-layers';
+import { AbstractGeoViewLayer, CONST_LAYER_TYPES, TypeVectorLayerStyles } from '../abstract-geoview-layers';
 import { AbstractGeoViewRaster, TypeBaseRasterLayer } from './abstract-geoview-raster';
 import {
   TypeLayerEntryConfig,

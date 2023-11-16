@@ -3,7 +3,8 @@ import { Vector as VectorSource } from 'ol/source';
 import { Options as SourceOptions } from 'ol/source/Vector';
 import { EsriJSON } from 'ol/format';
 import { ReadOptions } from 'ol/format/Feature';
-import { FeatureLike } from 'ol/Feature';
+import Feature from 'ol/Feature';
+import Geometry from 'ol/geom/Geometry';
 
 import { AbstractGeoViewLayer, CONST_LAYER_TYPES } from '../abstract-geoview-layers';
 
@@ -251,10 +252,10 @@ export class EsriFeature extends AbstractGeoViewVector {
     layerEntryConfig: TypeBaseLayerEntryConfig,
     sourceOptions: SourceOptions = {},
     readOptions: ReadOptions = {}
-  ): VectorSource<FeatureLike> {
+  ): VectorSource<Feature<Geometry>> {
     // The line below uses var because a var declaration has a wider scope than a let declaration.
     // eslint-disable-next-line no-var
-    var vectorSource: VectorSource<FeatureLike>;
+    var vectorSource: VectorSource<Feature<Geometry>>;
     sourceOptions.url = getLocalizedValue(layerEntryConfig.source!.dataAccessPath!, this.mapId);
     sourceOptions.url = `${sourceOptions.url}/${String(layerEntryConfig.layerId).replace(
       '-unclustered',

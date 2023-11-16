@@ -150,7 +150,7 @@ export const defaultThemeOptions: ThemeOptions = {
       size: { width: 275, height: 275 },
     },
   },
-  iconImg: {
+  iconImage: {
     padding: 3,
     borderRadius: 0,
     border: '1px solid',
