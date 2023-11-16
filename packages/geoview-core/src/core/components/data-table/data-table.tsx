@@ -11,7 +11,7 @@ import {
   type MRT_Virtualizer as MRTVirtualizer,
 } from 'material-react-table';
 import { Extent } from 'ol/extent';
-import { Geometry } from 'ol/geom';
+import Geometry from 'ol/geom/Geometry';
 import { darken } from '@mui/material';
 import { Box, IconButton, Switch, ZoomInSearchIcon } from '@/ui';
 import ExportButton from './export-button';

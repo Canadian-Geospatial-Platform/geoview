@@ -41,7 +41,7 @@ export interface TypeLegendIconListProps {
 export function LegendIconList(props: TypeLegendIconListProps): JSX.Element {
   const { iconImages, iconLabels, isParentVisible, geometryKey, layerConfig, toggleMapVisible } = props;
   const theme: Theme & {
-    iconImg: React.CSSProperties;
+    iconImage: React.CSSProperties;
   } = useTheme();
 
   const allChecked = iconImages.map(() => true);
@@ -102,7 +102,7 @@ export function LegendIconList(props: TypeLegendIconListProps): JSX.Element {
             <ListItem sx={sxClasses.listItem}>
               <ListItemButton>
                 <ListItemIcon>
-                  <img alt={iconLabels[index]} src={icon} style={theme.iconImg} />
+                  <img alt={iconLabels[index]} src={icon} style={theme.iconImage} />
                 </ListItemIcon>
                 <Tooltip title={iconLabels[index]} placement="top" enterDelay={1000}>
                   <ListItemText

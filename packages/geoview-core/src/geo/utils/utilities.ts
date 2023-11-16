@@ -2,7 +2,7 @@ import axios from 'axios';
 
 import { WMSCapabilities, WKT, GeoJSON } from 'ol/format';
 import { ReadOptions } from 'ol/format/Feature';
-import { Geometry } from 'ol/geom';
+import Geometry from 'ol/geom/Geometry';
 import { Extent } from 'ol/extent';
 import { transformExtent, toLonLat } from 'ol/proj';
 import { Style, Stroke, Fill, Circle } from 'ol/style';
