@@ -1,5 +1,5 @@
 /// <reference types="react" />
-import { TypeArrayOfLayerData } from './details';
+import { TypeArrayOfLayerData } from '@/api/events/payloads';
 interface TypeLayersListProps {
     arrayOfLayerData: TypeArrayOfLayerData;
     mapId: string;

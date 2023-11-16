@@ -10,7 +10,7 @@ export interface ILayerState {
     selectedLayerPath: string | undefined | null;
     legendLayers: TypeLegendLayer[];
     actions: {
-        setSelectedLayer: (layer: TypeLegendLayer) => void;
+        getLayer: (layerPath: string) => TypeLegendLayer | undefined;
         setSelectedLayerPath: (layerPath: string) => void;
         setLayerOpacity: (layerPath: string, opacity: number) => void;
         toggleLayerVisibility: (layerPath: string) => void;
@@ -18,21 +18,11 @@ export interface ILayerState {
         setAllItemsVisibility: (layerPath: string, visibility: boolean) => void;
     };
 }
-export declare function initializeLayerState(set: TypeSetStore, get: TypeGetStore): {
-    selectedLayerPath: null;
-    legendLayers: never[];
-    actions: {
-        setSelectedLayerPath: (layerPath: string) => void;
-        setLayerOpacity: (layerPath: string, opacity: number) => void;
-        toggleLayerVisibility: (layerPath: string) => void;
-        toggleItemVisibility: (layerPath: string, itemName: string) => void;
-        setAllItemsVisibility: (layerPath: string, visibility: boolean) => void;
-    };
-};
+export declare function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILayerState;
 export declare const useLayersList: () => TypeLegendLayer[];
 export declare const useSelectedLayerPath: () => string | null | undefined;
 export declare const useLayerStoreActions: () => {
-    setSelectedLayer: (layer: TypeLegendLayer) => void;
+    getLayer: (layerPath: string) => TypeLegendLayer | undefined;
     setSelectedLayerPath: (layerPath: string) => void;
     setLayerOpacity: (layerPath: string, opacity: number) => void;
     toggleLayerVisibility: (layerPath: string) => void;

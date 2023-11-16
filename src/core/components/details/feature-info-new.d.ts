@@ -13,7 +13,7 @@ export interface TypeFeatureInfoProps {
 /**
  * feature info for a layer list
  *
- * @param {TypeFeatureInfoProps} Feature info propetties
+ * @param {TypeFeatureInfoProps} Feature info properties
  * @returns {JSX.Element} the feature info
  */
 export declare function FeatureInfo({ mapId, features, currentFeatureIndex, selectedFeatures, onClearCheckboxes, onFeatureNavigateChange, setDisableClearAllBtn, clearAllCheckboxes, }: TypeFeatureInfoProps): JSX.Element;

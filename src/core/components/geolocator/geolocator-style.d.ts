@@ -38,6 +38,20 @@ export declare const sxClasses: {
         marginTop: number;
     };
 };
+export declare const sxClassesList: {
+    main: {
+        whiteSpace: string;
+        overflow: string;
+        textOverflow: string;
+        '& span': {
+            fontSize: string;
+            ':first-of-type': {
+                fontWeight: string;
+                fontSize: string;
+            };
+        };
+    };
+};
 export declare const StyledInputField: ((props: import("@mui/material").InputProps) => JSX.Element) & {
     muiName: string;
 };

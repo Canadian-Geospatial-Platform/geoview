@@ -3,6 +3,7 @@ import { Geometry } from 'ol/geom';
 import { Extent } from 'ol/extent';
 import { Style } from 'ol/style';
 import { Color } from 'ol/color';
+import OLMap from 'ol/Map';
 import { TypeJsonObject } from '@/core/types/global-types';
 import { TypeFeatureStyle } from '@/geo/layer/geometry/geometry-types';
 import { TypeListOfLayerEntryConfig } from '@/geo/map/map-schema-types';
@@ -122,4 +123,19 @@ export declare class GeoUtilities {
      * @returns {string} the formatted value
      */
     coordFormnatDMS(value: number): string;
+    /**
+     * Check if north is visible. This is not a perfect solution and is more a work around
+     * @param {OLMap} map the map
+     *
+     * @returns {boolean} true if visible, false otherwise
+     */
+    checkNorth(map: OLMap): boolean;
+    /**
+     * Get north arrow bearing. Angle use to rotate north arrow for non Web Mercator projection
+     * https://www.movable-type.co.uk/scripts/latlong.html
+     * @param {OLMap} map the map
+     *
+     * @returns {string} the arrow angle
+     */
+    getNorthArrowAngle(map: OLMap): string;
 }

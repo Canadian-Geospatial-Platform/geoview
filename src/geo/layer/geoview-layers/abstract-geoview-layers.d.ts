@@ -6,7 +6,7 @@ import LayerGroup from 'ol/layer/Group';
 import Feature from 'ol/Feature';
 import Geometry from 'ol/geom/Geometry';
 import { TypeGeoviewLayerConfig, TypeListOfLayerEntryConfig, TypeLocalizedString, TypeLayerEntryConfig, TypeBaseLayerEntryConfig, TypeStyleConfig, TypeVectorLayerEntryConfig, TypeLayerEntryType, TypeOgcWmsLayerEntryConfig, TypeEsriDynamicLayerEntryConfig, TypeLayerInitialSettings, TypeLayerStatus } from '../../map/map-schema-types';
-import { codedValueType, rangeDomainType, TypeArrayOfFeatureInfoEntries, TypeQueryType, TypeLocation } from '@/api/events/payloads';
+import { codedValueType, rangeDomainType, TypeArrayOfFeatureInfoEntries, QueryType, TypeLocation } from '@/api/events/payloads';
 import { TypeJsonObject } from '@/core/types/global-types';
 import { TimeDimension, TypeDateFragments } from '@/core/utils/date-mgt';
 import { TypeEventHandlerFunction } from '@/api/events/event';
@@ -36,7 +36,7 @@ export interface TypeWmsLegend extends Omit<TypeLegend, 'styleConfig'> {
 }
 /**
  * type guard function that redefines a TypeLegend as a TypeImageStaticLegend
- * if the event attribute of the verifyIfPayload parameter is valid. The type ascention
+ * if the type attribute of the verifyIfLegend parameter is valid. The type ascention
  * applies only to the true block of the if clause.
  *
  * @param {TypeLegend} verifyIfLegend object to test in order to determine if the type ascention is valid
@@ -48,7 +48,7 @@ export interface TypeImageStaticLegend extends Omit<TypeLegend, 'styleConfig'> {
 }
 /**
  * type guard function that redefines a TypeLegend as a TypeVectorLegend
- * if the event attribute of the verifyIfPayload parameter is valid. The type ascention
+ * if the type attribute of the verifyIfLegend parameter is valid. The type ascention
  * applies only to the true block of the if clause.
  *
  * @param {TypeLegend} verifyIfLegend object to test in order to determine if the type ascention is valid
@@ -301,13 +301,13 @@ export declare abstract class AbstractGeoViewLayer {
     /** ***************************************************************************************************************************
      * Return feature information for the layer specified.
      *
-     * @param {TypeQueryType} queryType  The type of query to perform.
+     * @param {QueryType} queryType  The type of query to perform.
      * @param {string | TypeLayerEntryConfig | null} layerPathOrConfig Optional layer path or configuration.
      * @param {TypeLocation} location An optionsl pixel, coordinate or polygon that will be used by the query.
      *
      * @returns {Promise<TypeFeatureInfoResult>} The feature info table.
      */
-    getFeatureInfo(queryType: TypeQueryType, layerPathOrConfig: string | TypeLayerEntryConfig, location?: TypeLocation): Promise<TypeArrayOfFeatureInfoEntries>;
+    getFeatureInfo(queryType: QueryType, layerPathOrConfig: string | TypeLayerEntryConfig, location?: TypeLocation): Promise<TypeArrayOfFeatureInfoEntries>;
     /** ***************************************************************************************************************************
      * Return feature information for all the features on a layer. Returns an empty array [] when the layer is
      * not queryable.

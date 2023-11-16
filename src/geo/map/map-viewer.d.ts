@@ -8,6 +8,7 @@ import { Extent } from 'ol/extent';
 import { Basemap } from '@/geo/layer/basemap/basemap';
 import { Layer } from '@/geo/layer/layer';
 import { TypeFeatureStyle } from '@/geo/layer/geometry/geometry-types';
+import { TypeClickMarker } from '@/app';
 import { AppbarButtons } from '@/core/components/app-bar/app-bar-buttons';
 import { NavbarButtons } from '@/core/components/nav-bar/nav-bar-buttons';
 import { FooterTabsApi } from '@/core/components/footer-tabs/footer-tabs-api';
@@ -190,6 +191,15 @@ export declare class MapViewer {
      * @returns The densified extent transformed in the destination projection.
      */
     transformAndDensifyExtent(extent: Extent, source: ProjectionLike, destination: ProjectionLike, stops?: number): Coordinate[];
+    /**
+     * Hide a click marker from the map
+     */
+    clickMarkerIconHide(): void;
+    /**
+     * Show a marker on the map
+     * @param {TypeClickMarker} marker the marker to add
+     */
+    clickMarkerIconShow(marker: TypeClickMarker): void;
     /**
      * Initializes selection interactions
      */
