@@ -1,5 +1,5 @@
 /* eslint-disable no-console, no-param-reassign, no-var */
-import Feature from 'ol/Feature';
+import Feature, { FeatureLike } from 'ol/Feature';
 import { Cluster, Vector as VectorSource } from 'ol/source';
 import { Options as SourceOptions } from 'ol/source/Vector';
 import { VectorImage as VectorLayer } from 'ol/layer';
@@ -33,7 +33,7 @@ import { NodeType } from '@/geo/renderer/geoview-renderer-types';
 
 // Base type used to keep the layer's hierarchical structure. It is similar to ol/layer/Base~BaseLayer.
 export type TypeVectorLayerGroup = LayerGroup;
-export type TypeVectorLayer = VectorSource<Geometry>;
+export type TypeVectorLayer = VectorSource<FeatureLike>;
 export type TypeBaseVectorLayer = BaseLayer | TypeVectorLayerGroup | TypeVectorLayer;
 
 // ******************************************************************************************************************************
@@ -92,9 +92,9 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
     layerEntryConfig: TypeBaseLayerEntryConfig,
     sourceOptions: SourceOptions = {},
     readOptions: ReadOptions = {}
-  ): VectorSource<Geometry> {
+  ): VectorSource<FeatureLike> {
     // The line below uses var because a var declaration has a wider scope than a let declaration.
-    var vectorSource: VectorSource<Geometry>;
+    var vectorSource: VectorSource<Feature<Geometry>>;
     layerEntryConfig.layerPhase = 'createVectorSource';
     if (this.attributions.length !== 0) sourceOptions.attributions = this.attributions;
 
@@ -196,7 +196,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
    *
    * @returns {VectorLayer<VectorSource>} The vector layer created.
    */
-  createVectorLayer(layerEntryConfig: TypeVectorLayerEntryConfig, vectorSource: VectorSource<Geometry>): VectorLayer<VectorSource> {
+  createVectorLayer(layerEntryConfig: TypeVectorLayerEntryConfig, vectorSource: VectorSource<FeatureLike>): VectorLayer<VectorSource> {
     layerEntryConfig.layerPhase = 'createVectorLayer';
     let configSource: TypeBaseSourceVectorInitialConfig = {};
     if (layerEntryConfig.source !== undefined) {
@@ -212,7 +212,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
       properties: { layerEntryConfig },
       source: configSource.cluster!.enable
         ? new Cluster({
-            source: vectorSource,
+            source: vectorSource as VectorSource<Feature<Geometry>>,
             distance: configSource.cluster!.distance,
             minDistance: configSource.cluster!.minDistance,
             geometryFunction: ((feature): Point | null => {
@@ -224,7 +224,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
               return null;
             }) as (arg0: Feature<Geometry>) => Point,
           })
-        : vectorSource,
+        : (vectorSource as VectorSource<Feature<Geometry>>),
       style: (feature) => {
         const { geoviewRenderer } = api.maps[this.mapId];
 
@@ -271,7 +271,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
       if (!layerEntryConfig?.olLayer) resolve([]);
       else
         this.formatFeatureInfoResult(
-          (layerEntryConfig.olLayer as VectorLayer<VectorSource<Geometry>>).getSource()!.getFeatures(),
+          (layerEntryConfig.olLayer as VectorLayer<VectorSource<Feature<Geometry>>>).getSource()!.getFeatures(),
           layerEntryConfig as TypeVectorLayerEntryConfig
         ).then((arrayOfFeatureInfoEntries) => {
           resolve(arrayOfFeatureInfoEntries);
@@ -343,7 +343,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
    * @returns {Extent} The layer bounding box.
    */
   protected getBounds(layerConfig: TypeLayerEntryConfig, bounds: Extent | undefined): Extent | undefined {
-    (layerConfig.olLayer as VectorLayer<VectorSource<Geometry>>).getSource()?.forEachFeature((feature) => {
+    (layerConfig.olLayer as VectorLayer<VectorSource<Feature<Geometry>>>).getSource()?.forEachFeature((feature) => {
       const coordinates = feature.get('geometry').flatCoordinates;
       for (let i = 0; i < coordinates.length; i += 2) {
         const geographicCoordinate = transform(

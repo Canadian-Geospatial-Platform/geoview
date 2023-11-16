@@ -41,7 +41,7 @@ export function LegendLayer(props: LegendLayerProps): JSX.Element {
       return `${layer.children.length} sub-layers`;
     }
     if (layer.items.length) {
-      return `${layer.items.filter((d) => d.isChecked).length} of ${layer.items.length} items`;
+      return `${layer.items.filter((d) => d.isVisible).length} of ${layer.items.length} items`;
     }
 
     return '';
@@ -72,9 +72,9 @@ export function LegendLayer(props: LegendLayerProps): JSX.Element {
     return (
       <List sx={{ width: '100%' }}>
         {layer.items
-          .filter((d) => d.isChecked)
+          .filter((d) => d.isVisible)
           .map((item) => (
-            <ListItem key={item.name} className={!item.isChecked ? 'unchecked' : ''}>
+            <ListItem key={item.name} className={!item.isVisible ? 'unchecked' : ''}>
               <ListItemIcon>
                 <img alt={item.name} src={item.icon} />
               </ListItemIcon>

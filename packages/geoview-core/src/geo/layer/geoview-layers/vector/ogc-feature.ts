@@ -6,7 +6,7 @@ import { Options as SourceOptions } from 'ol/source/Vector';
 import { GeoJSON as FormatGeoJSON } from 'ol/format';
 import { ReadOptions } from 'ol/format/Feature';
 import { Vector as VectorSource } from 'ol/source';
-import { Geometry } from 'ol/geom';
+import { FeatureLike } from 'ol/Feature';
 
 import { TypeJsonObject } from '@/core/types/global-types';
 import { AbstractGeoViewLayer, CONST_LAYER_TYPES } from '../abstract-geoview-layers';
@@ -303,7 +303,7 @@ export class OgcFeature extends AbstractGeoViewVector {
     layerEntryConfig: TypeBaseLayerEntryConfig,
     sourceOptions: SourceOptions = {},
     readOptions: ReadOptions = {}
-  ): VectorSource<Geometry> {
+  ): VectorSource<FeatureLike> {
     readOptions.dataProjection = (layerEntryConfig.source as TypeBaseSourceVectorInitialConfig).dataProjection;
     sourceOptions.url = getLocalizedValue(layerEntryConfig.source!.dataAccessPath!, this.mapId);
     sourceOptions.url = `${sourceOptions.url}/collections/${layerEntryConfig.layerId}/items?f=json`;

@@ -4,7 +4,7 @@ import { Options as SourceOptions } from 'ol/source/Vector';
 import { WFS as FormatWFS } from 'ol/format';
 import { ReadOptions } from 'ol/format/Feature';
 import { Vector as VectorSource } from 'ol/source';
-import { Geometry } from 'ol/geom';
+import { FeatureLike } from 'ol/Feature';
 import { bbox } from 'ol/loadingstrategy';
 
 import { TypeJsonArray, TypeJsonObject } from '@/core/types/global-types';
@@ -367,7 +367,7 @@ export class WFS extends AbstractGeoViewVector {
     layerEntryConfig: TypeBaseLayerEntryConfig,
     sourceOptions: SourceOptions = {},
     readOptions: ReadOptions = {}
-  ): VectorSource<Geometry> {
+  ): VectorSource<FeatureLike> {
     readOptions.dataProjection = (layerEntryConfig.source as TypeBaseSourceVectorInitialConfig).dataProjection;
 
     sourceOptions.url = (extent): string => {

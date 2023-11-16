@@ -59,7 +59,7 @@ export type TypeLegend = {
   layerPath: string;
   layerName?: TypeLocalizedString;
   type: TypeGeoviewLayerType;
-  styleConfig?: TypeStyleConfig;
+  styleConfig?: TypeStyleConfig | null;
   legend: TypeLayerStyles | HTMLCanvasElement | null;
 };
 
@@ -1208,38 +1208,42 @@ export abstract class AbstractGeoViewLayer {
    *
    * @returns {Promise<TypeLegend | null>} The legend of the layer.
    */
-  getLegend(layerPathOrConfig: string | TypeLayerEntryConfig): Promise<TypeLegend | null> {
-    const promisedLegend = new Promise<TypeLegend | null>((resolve) => {
+  async getLegend(layerPathOrConfig: string | TypeLayerEntryConfig): Promise<TypeLegend | null> {
+    try {
       const layerConfig = (
         typeof layerPathOrConfig === 'string' ? this.getLayerConfig(layerPathOrConfig) : layerPathOrConfig
       ) as TypeBaseLayerEntryConfig & {
         style: TypeStyleConfig;
       };
 
-      if (!layerConfig) resolve(null);
-      else if (!layerConfig.style)
-        resolve({
+      if (!layerConfig)
+        return {
+          type: this.type,
+          layerPath: 'error',
+          layerName: { en: 'config not found', fr: 'config inexistante' } as TypeLocalizedString,
+          styleConfig: null,
+          legend: null,
+        } as TypeLegend;
+
+      if (!layerConfig.style)
+        return {
           type: this.type,
           layerPath: Layer.getLayerPath(layerConfig),
           layerName: layerConfig.layerName!,
           styleConfig: layerConfig.style,
           legend: null,
-        } as TypeLegend);
-      else {
-        const { geoviewRenderer } = api.maps[this.mapId];
-        geoviewRenderer.getLegendStyles(layerConfig).then((legendStyle) => {
-          const legend: TypeLegend = {
-            type: this.type,
-            layerPath: Layer.getLayerPath(layerConfig),
-            layerName: layerConfig.layerName!,
-            styleConfig: layerConfig?.style,
-            legend: legendStyle,
-          };
-          resolve(legend);
-        });
-      }
-    });
-    return promisedLegend;
+        } as TypeLegend;
+
+      return {
+        type: this.type,
+        layerPath: Layer.getLayerPath(layerConfig),
+        layerName: layerConfig.layerName!,
+        styleConfig: layerConfig?.style,
+        legend: await api.maps[this.mapId].geoviewRenderer.getLegendStyles(layerConfig),
+      } as TypeLegend;
+    } catch (error) {
+      return null;
+    }
   }
 
   /** ***************************************************************************************************************************

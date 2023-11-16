@@ -257,7 +257,7 @@ export class GeoviewRenderer {
    * @returns {Promise<HTMLCanvasElement>} A promise that the canvas is created.
    */
   private createPointCanvas(pointStyle?: Style): HTMLCanvasElement {
-    const size = pointStyle?.getImage().getSize() as Size;
+    const size = pointStyle?.getImage()?.getSize() as Size;
     const [width, height] = Array.isArray(size) ? size : [this.LEGEND_CANVAS_WIDTH, this.LEGEND_CANVAS_HEIGHT];
     const drawingCanvas = document.createElement('canvas');
     drawingCanvas.width = width + 4;
@@ -423,14 +423,14 @@ export class GeoviewRenderer {
    *
    * @returns {Promise<TypeLayerStyles>} A promise that the layer styles are processed.
    */
-  getLegendStyles(
+  async getLegendStyles(
     layerEntryConfig: TypeBaseLayerEntryConfig & {
       style: TypeStyleConfig;
     }
   ): Promise<TypeLayerStyles> {
-    const promisedLayerStyle = new Promise<TypeLayerStyles>((resolve) => {
+    try {
       const styleConfig: TypeStyleConfig = layerEntryConfig.style;
-      if (!styleConfig) resolve({});
+      if (!styleConfig) return {};
 
       const clusterCanvas =
         layerEntryIsVector(layerEntryConfig) && (layerEntryConfig.source as TypeBaseSourceVectorInitialConfig).cluster?.enable
@@ -441,26 +441,27 @@ export class GeoviewRenderer {
         // ======================================================================================================================
         // Point style configuration ============================================================================================
         if (isSimpleStyleConfig(styleConfig.Point)) {
-          this.getPointStyleSubRoutine(styleConfig.Point.settings).then((layerStyles) => {
-            layerStyles.Point!.clusterCanvas = clusterCanvas;
-            resolve(layerStyles);
-          });
-        } else if (isUniqueValueStyleConfig(styleConfig.Point)) {
-          this.getPointStyleSubRoutine(
+          const layerStyles = await this.getPointStyleSubRoutine(styleConfig.Point.settings);
+          layerStyles.Point!.clusterCanvas = clusterCanvas;
+          return layerStyles;
+        }
+
+        if (isUniqueValueStyleConfig(styleConfig.Point)) {
+          const layerStyles = await this.getPointStyleSubRoutine(
             styleConfig.Point.defaultSettings,
             (styleConfig.Point as TypeUniqueValueStyleConfig).uniqueValueStyleInfo
-          ).then((layerStyles) => {
-            layerStyles.Point!.clusterCanvas = clusterCanvas;
-            resolve(layerStyles);
-          });
-        } else if (isClassBreakStyleConfig(styleConfig.Point)) {
-          this.getPointStyleSubRoutine(
+          );
+          layerStyles.Point!.clusterCanvas = clusterCanvas;
+          return layerStyles;
+        }
+
+        if (isClassBreakStyleConfig(styleConfig.Point)) {
+          const layerStyles = await this.getPointStyleSubRoutine(
             styleConfig.Point.defaultSettings,
             (styleConfig.Point as TypeClassBreakStyleConfig).classBreakStyleInfo
-          ).then((layerStyles) => {
-            layerStyles.Point!.clusterCanvas = clusterCanvas;
-            resolve(layerStyles);
-          });
+          );
+          layerStyles.Point!.clusterCanvas = clusterCanvas;
+          return layerStyles;
         }
       }
 
@@ -491,7 +492,7 @@ export class GeoviewRenderer {
           });
           layerStyles.LineString!.arrayOfCanvas = styleArray;
         }
-        resolve(layerStyles);
+        return layerStyles;
       }
 
       if (styleConfig.Polygon) {
@@ -517,10 +518,12 @@ export class GeoviewRenderer {
           });
           layerStyles.Polygon!.arrayOfCanvas = styleArray;
         }
-        resolve(layerStyles);
+        return layerStyles;
       }
-    });
-    return promisedLayerStyle;
+    } catch (error) {
+      return {};
+    }
+    return {};
   }
 
   /** ***************************************************************************************************************************
@@ -654,7 +657,7 @@ export class GeoviewRenderer {
       }
 
       const pointStyle = this.processClusterSymbol(layerEntryConfig, feature);
-      if (pointStyle?.getText().getText() !== '1') return pointStyle;
+      if (pointStyle?.getText()?.getText() !== '1') return pointStyle;
       let styleFound: Style | undefined;
       const theUniqueVisibleFeature = (feature!.get('features') as Array<Feature<Geometry>>).find((featureToTest) => {
         styleFound = this.getFeatureStyle(featureToTest, layerEntryConfig);
@@ -1806,7 +1809,7 @@ export class GeoviewRenderer {
   }
 
   /** ***************************************************************************************************************************
-   * Extract the specified keyword and associate a node type their nodes. In some cases, the extraction uses an optionally
+   * Extract the specified keyword and associate a node type to their nodes. In some cases, the extraction uses an optionally
    * regular expression.
    *
    * @param {FilterNodeArrayType} FilterNodeArrayType the array of keywords to process.

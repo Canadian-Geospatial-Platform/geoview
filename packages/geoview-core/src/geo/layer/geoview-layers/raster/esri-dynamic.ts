@@ -9,6 +9,8 @@ import { Pixel } from 'ol/pixel';
 import { transform, transformExtent } from 'ol/proj';
 import { EsriJSON } from 'ol/format';
 import { Extent } from 'ol/extent';
+import Feature from 'ol/Feature';
+import Geometry from 'ol/geom/Geometry';
 
 import cloneDeep from 'lodash/cloneDeep';
 import { getLocalizedValue, getMinOrMaxExtents } from '@/core/utils/utilities';
@@ -28,6 +30,7 @@ import {
   TypeUniqueValueStyleInfo,
   TypeFeatureInfoLayerConfig,
   layerEntryIsGroupLayer,
+  TypeVisibilityFlags,
 } from '@/geo/map/map-schema-types';
 import { LayerSetPayload, TypeArrayOfFeatureInfoEntries, codedValueType, rangeDomainType } from '@/api/events/payloads';
 import { api } from '@/app';
@@ -380,7 +383,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
               const features = new EsriJSON().readFeatures(
                 { features: jsonResponse.results },
                 { dataProjection: 'EPSG:4326', featureProjection: `EPSG:${currentProjection}` }
-              );
+              ) as Feature<Geometry>[];
               this.formatFeatureInfoResult(features, layerConfig).then((arrayOfFeatureInfoEntries) => {
                 resolve(arrayOfFeatureInfoEntries);
               });
@@ -592,10 +595,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
         for (let i = 0; i < settings.length; i++) if (settings[i].visible === undefined) settings[i].visible = 'yes';
       };
 
-      const featuresAreAllVisible = (
-        defaultVisibility: 'yes' | 'no' | 'always',
-        settings: { visible: 'yes' | 'no' | 'always' }[]
-      ): boolean => {
+      const featuresAreAllVisible = (defaultVisibility: TypeVisibilityFlags, settings: { visible: TypeVisibilityFlags }[]): boolean => {
         let allVisible = defaultVisibility !== 'no';
         for (let i = 0; i < settings.length; i++) {
           allVisible &&= settings[i].visible !== 'no';
@@ -610,9 +610,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
       }
       if (isUniqueValueStyleConfig(styleSettings)) {
         setAllUndefinedVisibilityFlagsToYes(styleSettings);
-        if (
-          featuresAreAllVisible(styleSettings.defaultVisible!, styleSettings.uniqueValueStyleInfo as { visible: 'yes' | 'no' | 'always' }[])
-        )
+        if (featuresAreAllVisible(styleSettings.defaultVisible!, styleSettings.uniqueValueStyleInfo as { visible: TypeVisibilityFlags }[]))
           return `(1=1)${layerFilter ? ` and (${layerFilter})` : ''}`;
 
         // This section of code optimize the query to reduce it at it shortest expression.
@@ -625,9 +623,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
 
       if (isClassBreakStyleConfig(styleSettings)) {
         setAllUndefinedVisibilityFlagsToYes(styleSettings);
-        if (
-          featuresAreAllVisible(styleSettings.defaultVisible!, styleSettings.classBreakStyleInfo as { visible: 'yes' | 'no' | 'always' }[])
-        )
+        if (featuresAreAllVisible(styleSettings.defaultVisible!, styleSettings.classBreakStyleInfo as { visible: TypeVisibilityFlags }[]))
           return `(1=1)${layerFilter ? ` and (${layerFilter})` : ''}`;
 
         const filterArray: string[] = [];

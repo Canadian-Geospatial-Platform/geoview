@@ -13,7 +13,7 @@ const w = window as TypeWindow;
  *
  * @returns {JSX.Element} created legend component
  */
-export function LegendItem({ mapId }: Props): JSX.Element {
+export function FooterPanelLegendItem({ mapId }: Props): JSX.Element {
   const { cgpv } = w;
   const { api, react } = cgpv;
 

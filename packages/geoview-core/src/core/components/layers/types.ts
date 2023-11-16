@@ -1,4 +1,4 @@
-import { AbstractGeoViewLayer, TypeGeoviewLayerType, TypeLayerEntryConfig, TypeStyleConfig } from '@/geo';
+import { AbstractGeoViewLayer, TypeGeoviewLayerType, TypeLayerEntryConfig, TypeStyleConfig, TypeVisibilityFlags } from '@/geo';
 import { TypeLayerStatus } from '@/geo/map/map-schema-types';
 
 export interface TypeLegendProps {
@@ -61,7 +61,7 @@ export type TypeLegendLayerIcon = {
 
 export interface TypeLegendLayerItem {
   name: string;
-  isChecked?: boolean;
+  isVisible?: string;
   icon: string;
 }
 
@@ -72,11 +72,11 @@ export interface TypeLegendLayer {
   layerName: string;
   type: TypeGeoviewLayerType;
   styleConfig?: TypeStyleConfig;
-  layerStatus: TypeLayerStatus;
-  layerPhase: string;
-  querySent: boolean;
+  layerStatus?: TypeLayerStatus;
+  layerPhase?: string;
+  querySent?: boolean;
 
-  isVisible: boolean; // is layer is visible
+  isVisible: TypeVisibilityFlags; // is layer is visible
 
   icon?: TypeLegendLayerIcon;
   // data: TypeLegend | undefined | null;

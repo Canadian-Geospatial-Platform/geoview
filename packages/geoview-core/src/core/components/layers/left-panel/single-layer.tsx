@@ -88,7 +88,7 @@ export function SingleLayer(props: SingleLayerProps): JSX.Element {
   };
 
   const handleLayerClick = () => {
-    if (!['processed', 'loaded'].includes(layer.layerStatus)) {
+    if (!['processed', 'loaded'].includes(layer.layerStatus!)) {
       return;
     }
     if (layer.children.length === 0) {
@@ -103,6 +103,7 @@ export function SingleLayer(props: SingleLayerProps): JSX.Element {
   };
 
   const handleReloadLayer = () => {
+    // eslint-disable-next-line no-console
     console.log('reloading layer');
   };
 
@@ -154,7 +155,7 @@ export function SingleLayer(props: SingleLayerProps): JSX.Element {
     return (
       <IconButton color="primary" onClick={() => handleToggleVisibility()}>
         {(() => {
-          if (layer.isVisible === false) return <VisibilityOffOutlinedIcon />;
+          if (layer.isVisible === 'no') return <VisibilityOffOutlinedIcon />;
           return <VisibilityOutlinedIcon />;
         })()}
       </IconButton>
@@ -162,7 +163,7 @@ export function SingleLayer(props: SingleLayerProps): JSX.Element {
   }
 
   function renderArrowButtons() {
-    if (!['processed', 'loaded'].includes(layer.layerStatus)) {
+    if (!['processed', 'loaded'].includes(layer.layerStatus!)) {
       return null;
     }
     if (layer.children?.length) {

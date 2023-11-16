@@ -15,7 +15,7 @@ import {
 import { HubOutlinedIcon, InfoOutlinedIcon, LayersOutlinedIcon, StorageIcon } from 'geoview-core/src/ui';
 import schema from '../schema.json';
 import defaultConfig from '../default-config-footer-panel.json';
-import { LegendItem } from './legend-item';
+import { FooterPanelLegendItem } from './footer-panel-legend-item';
 import { DataTable } from './data-table';
 import { Layers } from './layers';
 import { TimeSlider } from './time-slider';
@@ -97,7 +97,7 @@ class FooterPanelPlugin extends AbstractPlugin {
         footerTabs.createFooterTab({
           value: tabsCounter,
           label: this.translations[displayLanguage].legend as string,
-          content: () => <LegendItem mapId={mapId} />,
+          content: () => <FooterPanelLegendItem mapId={mapId} />,
           icon: <HubOutlinedIcon />,
         });
         tabsCounter++;
