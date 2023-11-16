@@ -46,9 +46,9 @@ export class LegendEventProcessor extends AbstractEventProcessor {
     const iconDetails: TypeLegendLayerIcons = [];
     if (layerLegend) {
       if (layerLegend.legend === null) {
-        if (layerLegend.styleConfig === null) iconDetails[0].iconImage = 'config not found';
-        else if (layerLegend.styleConfig === undefined) iconDetails[0].iconImage = 'undefined style config';
-      } else if (Object.keys(layerLegend.legend).length === 0) iconDetails[0].iconImage = 'no data';
+        if (layerLegend.styleConfig === null) iconDetails[0] = { iconImage: 'config not found' };
+        else if (layerLegend.styleConfig === undefined) iconDetails[0] = { iconImage: 'undefined style config' };
+      } else if (Object.keys(layerLegend.legend).length === 0) iconDetails[0] = { iconImage: 'no data' };
       else if (isWmsLegend(layerLegend) || isImageStaticLegend(layerLegend)) {
         iconDetails[0].iconType = 'simple';
         iconDetails[0].iconImage = layerLegend.legend ? layerLegend.legend.toDataURL() : '';
@@ -149,16 +149,14 @@ export class LegendEventProcessor extends AbstractEventProcessor {
         } as TypeLegendLayer;
         newLegendLayer.items = [];
         newLegendLayer.icons?.forEach((legendLayerItem) => {
-          legendLayerItem.iconList!.forEach((legendLayerListItem) => {
-            newLegendLayer.items.push(legendLayerListItem);
-          });
+          if (legendLayerItem.iconList)
+            legendLayerItem.iconList.forEach((legendLayerListItem) => {
+              newLegendLayer.items.push(legendLayerListItem);
+            });
         });
         if (entryIndex === -1) existingEntries.push(newLegendLayer);
         // eslint-disable-next-line no-param-reassign
         else existingEntries[entryIndex] = newLegendLayer;
-        /*
-            icon?: TypeLegendLayerIcon;
-          */
       }
     };
     createNewLegendEntries(layerPathNodes[0], 1, getGeoViewStore(mapId).getState().layerState.legendLayers);
