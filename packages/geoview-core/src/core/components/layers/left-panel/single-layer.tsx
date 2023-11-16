@@ -27,7 +27,11 @@ import {
 } from '@/ui';
 import { TypeLegendLayer } from '../types';
 import { getSxClasses } from './layerslist-style';
-import { useLayerStoreActions, useLayersDisplayState, useSelectedLayerPath } from '@/core/stores/store-interface-and-intial-values/layer-state';
+import {
+  useLayerStoreActions,
+  useLayersDisplayState,
+  useSelectedLayerPath,
+} from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { useDataTableStoreMapFilteredRecord } from '@/core/stores/store-interface-and-intial-values/data-table-state';
 
 interface SingleLayerProps {
@@ -109,7 +113,6 @@ export function SingleLayer(props: SingleLayerProps): JSX.Element {
   const handleReArrangeLayer = () => {
     console.log('re-arrange layer');
   };
-  
 
   // renders the layers children, if any
   function renderChildren() {
@@ -127,17 +130,17 @@ export function SingleLayer(props: SingleLayerProps): JSX.Element {
   }
 
   function renderEditModeButtons() {
-    if(displayState === 'remove') {
+    if (displayState === 'remove') {
       return (
         <IconButton onClick={handleRemoveLayer}>
-          <DeleteIcon style={{ fill: "#a9a9a9"}}/>
+          <DeleteIcon style={{ fill: '#a9a9a9' }} />
         </IconButton>
       );
     }
-    if(displayState === 'order') {
+    if (displayState === 'order') {
       return (
         <IconButton onClick={handleReArrangeLayer}>
-          <HandleIcon style={{ fill: "#a9a9a9"}}/>
+          <HandleIcon style={{ fill: '#a9a9a9' }} />
         </IconButton>
       );
     }
