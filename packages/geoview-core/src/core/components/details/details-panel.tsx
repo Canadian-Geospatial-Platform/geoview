@@ -161,7 +161,7 @@ export function Detailspanel({ mapId }: DetailsPanelProps): JSX.Element {
   const renderLayerList = useCallback(() => {
     return (
       <LayerList
-        layerList={arrayOfLayerData.map((layer, index) => ({
+        layerList={arrayOfLayerData.map((layer) => ({
           layerName: layer.layerName ?? '',
           layerPath: layer.layerPath,
           numOffeatures: layer.features?.length ?? 0,
