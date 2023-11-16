@@ -31,19 +31,19 @@ export function IconStack({ layerPath, onIconClick, onStackIconClick }: TypeIcon
   };
   const iconData = findIconsData(layerPath);
 
-  const iconImg: string = iconData && iconData.length > 0 ? iconData[0] : '';
+  const iconImage: string = iconData && iconData.length > 0 ? iconData[0] : '';
   const iconImgStacked: string = iconData && iconData.length > 1 ? iconData[1] : '';
   const numOfIcons: number | undefined = iconData?.length;
 
   // TODO for now just use 2 icons
   // eslint-disable-next-line no-nested-ternary
   return numOfIcons === 1 ? (
-    <IconButton sx={sxClasses.iconPreview} color="primary" size="small" onClick={iconImg === 'no data' ? undefined : onIconClick}>
-      {iconImg === 'no data' ? (
+    <IconButton sx={sxClasses.iconPreview} color="primary" size="small" onClick={iconImage === 'no data' ? undefined : onIconClick}>
+      {iconImage === 'no data' ? (
         <BrowserNotSupportedIcon />
       ) : (
         <Box sx={sxClasses.legendIcon}>
-          <img alt="icon" src={iconImg} style={sxClasses.maxIconImg} />
+          <img alt="icon" src={iconImage} style={sxClasses.maxIconImg} />
         </Box>
       )}
     </IconButton>
@@ -55,7 +55,7 @@ export function IconStack({ layerPath, onIconClick, onStackIconClick }: TypeIcon
         </Box>
       </IconButton>
       <IconButton sx={sxClasses.iconPreviewHoverable} color="primary" size="small" tabIndex={-1}>
-        <Box sx={sxClasses.legendIcon}>{iconImg && <img alt="icon" src={iconImg} style={sxClasses.maxIconImg} />}</Box>
+        <Box sx={sxClasses.legendIcon}>{iconImage && <img alt="icon" src={iconImage} style={sxClasses.maxIconImg} />}</Box>
       </IconButton>
     </Box>
   ) : (

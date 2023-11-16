@@ -841,42 +841,43 @@ export class WMS extends AbstractGeoViewRaster {
    *
    * @returns {Promise<TypeWmsLegendStylel>} The legend of the style.
    */
-  private getStyleLegend(layerConfig: TypeOgcWmsLayerEntryConfig, position: number): Promise<TypeWmsLegendStyle> {
-    const promisedStyleLegend = new Promise<TypeWmsLegendStyle>((resolve) => {
+  private async getStyleLegend(layerConfig: TypeOgcWmsLayerEntryConfig, position: number): Promise<TypeWmsLegendStyle> {
+    try {
       const chosenStyle: string | undefined = this.WMSStyles[position];
       let styleLegend: TypeWmsLegendStyle;
-      this.getLegendImage(layerConfig!, chosenStyle).then((styleLegendImage) => {
-        if (!styleLegendImage) {
-          styleLegend = {
-            name: this.WMSStyles[position],
-            legend: null,
-          };
-          resolve(styleLegend);
-        } else {
-          api.maps[this.mapId].geoviewRenderer.loadImage(styleLegendImage as string).then((styleImage) => {
-            if (styleImage) {
-              const drawingCanvas = document.createElement('canvas');
-              drawingCanvas.width = styleImage.width;
-              drawingCanvas.height = styleImage.height;
-              const drawingContext = drawingCanvas.getContext('2d')!;
-              drawingContext.drawImage(styleImage, 0, 0);
-              styleLegend = {
-                name: this.WMSStyles[position],
-                legend: drawingCanvas,
-              };
-              resolve(styleLegend);
-            } else {
-              styleLegend = {
-                name: this.WMSStyles[position],
-                legend: null,
-              };
-              resolve(styleLegend);
-            }
-          });
-        }
-      });
-    });
-    return promisedStyleLegend;
+      const styleLegendImage = await this.getLegendImage(layerConfig!, chosenStyle);
+      if (!styleLegendImage) {
+        styleLegend = {
+          name: this.WMSStyles[position],
+          legend: null,
+        };
+        return styleLegend;
+      }
+
+      const styleImage = await api.maps[this.mapId].geoviewRenderer.loadImage(styleLegendImage as string);
+      if (styleImage) {
+        const drawingCanvas = document.createElement('canvas');
+        drawingCanvas.width = styleImage.width;
+        drawingCanvas.height = styleImage.height;
+        const drawingContext = drawingCanvas.getContext('2d')!;
+        drawingContext.drawImage(styleImage, 0, 0);
+        styleLegend = {
+          name: this.WMSStyles[position],
+          legend: drawingCanvas,
+        };
+        return styleLegend;
+      }
+
+      return {
+        name: this.WMSStyles[position],
+        legend: null,
+      } as TypeWmsLegendStyle;
+    } catch (error) {
+      return {
+        name: this.WMSStyles[position],
+        legend: null,
+      } as TypeWmsLegendStyle;
+    }
   }
 
   /** ***************************************************************************************************************************
@@ -887,63 +888,54 @@ export class WMS extends AbstractGeoViewRaster {
    *
    * @returns {Promise<TypeLegend | null>} The legend of the layer or null.
    */
-  getLegend(layerPathOrConfig: string | TypeLayerEntryConfig): Promise<TypeLegend | null> {
-    const promisedLegend = new Promise<TypeLegend | null>((resolve) => {
+  async getLegend(layerPathOrConfig: string | TypeLayerEntryConfig): Promise<TypeLegend | null> {
+    try {
       const layerConfig = Cast<TypeOgcWmsLayerEntryConfig | undefined | null>(
         typeof layerPathOrConfig === 'string' ? this.getLayerConfig(layerPathOrConfig) : layerPathOrConfig
       );
-      if (!layerConfig) resolve(null);
+      if (!layerConfig) return null;
 
       let legend: TypeWmsLegend;
-      this.getLegendImage(layerConfig!).then(async (legendImage) => {
-        const styleLegends: TypeWmsLegendStyle[] = [];
-        if (this.WMSStyles.length > 1) {
-          for (let i = 0; i < this.WMSStyles.length; i++) {
-            // eslint-disable-next-line no-await-in-loop
-            const styleLegend = await this.getStyleLegend(layerConfig!, i);
-            styleLegends.push(styleLegend);
-          }
+      const legendImage = await this.getLegendImage(layerConfig!);
+      const styleLegends: TypeWmsLegendStyle[] = [];
+      if (this.WMSStyles.length > 1) {
+        for (let i = 0; i < this.WMSStyles.length; i++) {
+          // eslint-disable-next-line no-await-in-loop
+          const styleLegend = await this.getStyleLegend(layerConfig!, i);
+          styleLegends.push(styleLegend);
         }
+      }
 
-        if (!legendImage) {
+      if (legendImage) {
+        const image = await api.maps[this.mapId].geoviewRenderer.loadImage(legendImage as string);
+        if (image) {
+          const drawingCanvas = document.createElement('canvas');
+          drawingCanvas.width = image.width;
+          drawingCanvas.height = image.height;
+          const drawingContext = drawingCanvas.getContext('2d')!;
+          drawingContext.drawImage(image, 0, 0);
           legend = {
             type: this.type,
             layerPath: Layer.getLayerPath(layerConfig!),
             layerName: layerConfig!.layerName,
-            legend: null,
-            styles: styleLegends.length > 1 ? styleLegends : undefined,
+            legend: drawingCanvas,
+            styles: styleLegends.length ? styleLegends : undefined,
           };
-          resolve(legend);
-        } else {
-          api.maps[this.mapId].geoviewRenderer.loadImage(legendImage as string).then((image) => {
-            if (image) {
-              const drawingCanvas = document.createElement('canvas');
-              drawingCanvas.width = image.width;
-              drawingCanvas.height = image.height;
-              const drawingContext = drawingCanvas.getContext('2d')!;
-              drawingContext.drawImage(image, 0, 0);
-              legend = {
-                type: this.type,
-                layerPath: Layer.getLayerPath(layerConfig!),
-                layerName: layerConfig!.layerName,
-                legend: drawingCanvas,
-                styles: styleLegends.length > 1 ? styleLegends : undefined,
-              };
-              resolve(legend);
-            } else
-              legend = {
-                type: this.type,
-                layerPath: Layer.getLayerPath(layerConfig!),
-                layerName: layerConfig!.layerName,
-                legend: null,
-                styles: styleLegends.length > 1 ? styleLegends : undefined,
-              };
-            resolve(legend);
-          });
+          return legend;
         }
-      });
-    });
-    return promisedLegend;
+      }
+
+      legend = {
+        type: this.type,
+        layerPath: Layer.getLayerPath(layerConfig!),
+        layerName: layerConfig!.layerName,
+        legend: null,
+        styles: styleLegends.length > 1 ? styleLegends : undefined,
+      };
+      return legend;
+    } catch (error) {
+      return null;
+    }
   }
 
   /** ***************************************************************************************************************************

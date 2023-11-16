@@ -1,5 +1,5 @@
 /* eslint-disable no-console, no-param-reassign, no-var */
-import Feature, { FeatureLike } from 'ol/Feature';
+import Feature from 'ol/Feature';
 import { Cluster, Vector as VectorSource } from 'ol/source';
 import { Options as SourceOptions } from 'ol/source/Vector';
 import { VectorImage as VectorLayer } from 'ol/layer';
@@ -33,7 +33,7 @@ import { NodeType } from '@/geo/renderer/geoview-renderer-types';
 
 // Base type used to keep the layer's hierarchical structure. It is similar to ol/layer/Base~BaseLayer.
 export type TypeVectorLayerGroup = LayerGroup;
-export type TypeVectorLayer = VectorSource<FeatureLike>;
+export type TypeVectorLayer = VectorSource<Feature<Geometry>>;
 export type TypeBaseVectorLayer = BaseLayer | TypeVectorLayerGroup | TypeVectorLayer;
 
 // ******************************************************************************************************************************
@@ -92,7 +92,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
     layerEntryConfig: TypeBaseLayerEntryConfig,
     sourceOptions: SourceOptions = {},
     readOptions: ReadOptions = {}
-  ): VectorSource<FeatureLike> {
+  ): VectorSource<Feature<Geometry>> {
     // The line below uses var because a var declaration has a wider scope than a let declaration.
     var vectorSource: VectorSource<Feature<Geometry>>;
     layerEntryConfig.layerPhase = 'createVectorSource';
@@ -145,21 +145,21 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
                   if (typeof fieldValue === 'number') {
                     let dateString = api.dateUtilities.convertMilisecondsToDate(fieldValue);
                     dateString = api.dateUtilities.applyInputDateFormat(dateString, this.serverDateFragmentsOrder);
-                    feature.set(fieldName, api.dateUtilities.convertToMilliseconds(dateString), true);
+                    (feature as Feature<Geometry>).set(fieldName, api.dateUtilities.convertToMilliseconds(dateString), true);
                   } else {
                     if (!this.serverDateFragmentsOrder)
                       this.serverDateFragmentsOrder = api.dateUtilities.getDateFragmentsOrder(
                         api.dateUtilities.deduceDateFormat(fieldValue)
                       );
                     fieldValue = api.dateUtilities.applyInputDateFormat(fieldValue, this.serverDateFragmentsOrder);
-                    feature.set(fieldName, api.dateUtilities.convertToMilliseconds(fieldValue), true);
+                    (feature as Feature<Geometry>).set(fieldName, api.dateUtilities.convertToMilliseconds(fieldValue), true);
                   }
                 });
               });
             }
           }
           vectorSource.addFeatures(features);
-          if (success) success(features);
+          if (success) success(features as Feature<Geometry>[]);
           layerEntryConfig.olLayer!.changed();
         } else {
           onError();
@@ -192,11 +192,14 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
    * cluster source and uses that to create the layer.
    *
    * @param {TypeBaseLayerEntryConfig} layerEntryConfig The layer entry configuration used by the source.
-   * @param {VectorSource<Geometry>} vectorSource The source configuration for the vector layer.
+   * @param {VectorSource<Feature<Geometry>>} vectorSource The source configuration for the vector layer.
    *
    * @returns {VectorLayer<VectorSource>} The vector layer created.
    */
-  createVectorLayer(layerEntryConfig: TypeVectorLayerEntryConfig, vectorSource: VectorSource<FeatureLike>): VectorLayer<VectorSource> {
+  createVectorLayer(
+    layerEntryConfig: TypeVectorLayerEntryConfig,
+    vectorSource: VectorSource<Feature<Geometry>>
+  ): VectorLayer<VectorSource> {
     layerEntryConfig.layerPhase = 'createVectorLayer';
     let configSource: TypeBaseSourceVectorInitialConfig = {};
     if (layerEntryConfig.source !== undefined) {
@@ -229,11 +232,11 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
         const { geoviewRenderer } = api.maps[this.mapId];
 
         if (configSource.cluster!.enable) {
-          return geoviewRenderer.getClusterStyle(layerEntryConfig, feature);
+          return geoviewRenderer.getClusterStyle(layerEntryConfig, feature as Feature<Geometry>);
         }
 
         if ('style' in layerEntryConfig) {
-          return geoviewRenderer.getFeatureStyle(feature, layerEntryConfig);
+          return geoviewRenderer.getFeatureStyle(feature as Feature<Geometry>, layerEntryConfig);
         }
 
         return undefined;

@@ -169,7 +169,7 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
 
   const { t, i18n } = useTranslation<string>();
   const theme: Theme & {
-    iconImg: React.CSSProperties;
+    iconImage: React.CSSProperties;
   } = useTheme();
 
   const { mapId } = geoviewLayerInstance;
@@ -190,7 +190,7 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
   const [WMSStyles, setWMSStyles] = useState<TypeWmsLegendStyle[]>([]);
   const [currentWMSStyle, setCurrentWMSStyle] = useState<string>();
   const [iconType, setIconType] = useState<string | null>(null);
-  const [iconImg, setIconImg] = useState<string | null>(null);
+  const [iconImage, setIconImg] = useState<string | null>(null);
   const [, setIconImgStacked] = useState<string | null>(null);
   const [iconList, setIconList] = useState<string[] | null>(null);
   const [labelList, setLabelList] = useState<string[] | null>(null);
@@ -518,25 +518,25 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
                 sx={sxClasses.iconPreview}
                 color="primary"
                 size="small"
-                onClick={iconImg === null ? undefined : handleLegendClick}
+                onClick={iconImage === null ? undefined : handleLegendClick}
                 iconRef={closeIconRef}
               >
-                {iconList || iconImg !== null ? <CloseIcon /> : <MoreHorizIcon />}
+                {iconList || iconImage !== null ? <CloseIcon /> : <MoreHorizIcon />}
               </IconButton>
             )}
-            {iconType === 'simple' && iconImg !== null && !isLegendOpen && WMSStyles.length < 2 && (
+            {iconType === 'simple' && iconImage !== null && !isLegendOpen && WMSStyles.length < 2 && (
               <IconButton
                 sx={sxClasses.iconPreview}
                 color="primary"
                 size="small"
                 iconRef={maxIconRef}
-                onClick={iconImg === 'no data' ? undefined : handleLegendClick}
+                onClick={iconImage === 'no data' ? undefined : handleLegendClick}
               >
-                {iconImg === 'no data' ? (
+                {iconImage === 'no data' ? (
                   <BrowserNotSupportedIcon />
                 ) : (
                   <Box sx={sxClasses.legendIcon}>
-                    <img alt="icon" src={iconImg} style={sxClasses.maxIconImg} />
+                    <img alt="icon" src={iconImage} style={sxClasses.maxIconImg} />
                   </Box>
                 )}
               </IconButton>
@@ -624,7 +624,7 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
       <Collapse in={isLegendOpen} timeout={iconType === 'list' ? { enter: 800, exit: 800 } : 'auto'}>
         <Box>
           <Box sx={sxClasses.expandableIconContainer}>
-            {iconType === 'simple' && iconImg !== null && <img alt="" style={theme.iconImg} src={iconImg} />}
+            {iconType === 'simple' && iconImage !== null && <img alt="" style={theme.iconImage} src={iconImage} />}
             {iconType === 'list' && iconList !== null && labelList !== null && (
               <LegendIconList
                 iconImages={iconList}

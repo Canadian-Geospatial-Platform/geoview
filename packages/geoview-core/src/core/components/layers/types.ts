@@ -1,4 +1,11 @@
-import { AbstractGeoViewLayer, TypeGeoviewLayerType, TypeLayerEntryConfig, TypeStyleConfig, TypeVisibilityFlags } from '@/geo';
+import {
+  AbstractGeoViewLayer,
+  TypeGeoviewLayerType,
+  TypeLayerEntryConfig,
+  TypeStyleConfig,
+  TypeStyleGeometry,
+  TypeVisibilityFlags,
+} from '@/geo';
 import { TypeLayerStatus } from '@/geo/map/map-schema-types';
 
 export interface TypeLegendProps {
@@ -50,17 +57,22 @@ export interface TypeLegendItemDetailsProps {
 
 /// //////////////////////////////////////////////////
 
-export type TypeLegendLayerIcon = {
-  iconType?: string;
-  iconImg?: string;
+export type TypeLegendLayerIcons = TypeLegendLayerItem[];
+
+export type TypeLegendLayerItem = {
+  geometryType?: TypeStyleGeometry;
+  iconType?: 'simple' | 'list';
+  name?: string;
+  iconImage?: string;
   iconImgStacked?: string;
-  iconList?: string[];
+  iconList?: TypeLegendLayerListItem[];
 };
 
-export interface TypeLegendLayerItem {
+export interface TypeLegendLayerListItem {
   name: string;
-  isVisible?: string;
+  isVisible: TypeVisibilityFlags;
   icon: string;
+  default: boolean;
 }
 
 export interface TypeLegendLayer {
@@ -76,10 +88,10 @@ export interface TypeLegendLayer {
 
   isVisible: TypeVisibilityFlags; // is layer is visible
 
-  icon?: TypeLegendLayerIcon;
+  icons?: TypeLegendLayerIcons;
   // data: TypeLegend | undefined | null;
   allItemsChecked?: boolean; // if all items in this layer are visible
-  items: TypeLegendLayerItem[];
+  items: TypeLegendLayerListItem[];
   children: TypeLegendLayer[];
 
   opacity?: number;
