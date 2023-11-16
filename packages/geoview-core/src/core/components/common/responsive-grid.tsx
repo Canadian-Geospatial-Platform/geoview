@@ -9,7 +9,7 @@ interface ResponsiveGridProps extends GridProps {
 interface ResponsiveGridPanelProps extends GridProps {
   children: ReactNode;
   isLayersPanelVisible: boolean;
-  sxProps?: SxProps;
+  sxProps?: SxProps | undefined;
 }
 
 /**
