@@ -42,7 +42,6 @@ export const getSxClasses = () => ({
   },
   stackIconsBox: {
     position: 'relative',
-    marginLeft: '0.5rem',
     '&:focus': {
       outlineColor: 'grey',
     },
