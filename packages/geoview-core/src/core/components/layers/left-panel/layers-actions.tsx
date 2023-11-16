@@ -4,6 +4,7 @@ import { Button } from '@mui/material';
 import { Box, Typography, ExpandIcon, RemoveCircleOutlineIcon, AddCircleOutlineIcon, ButtonGroup } from '@/ui';
 import { getSxClasses } from '../layers-style';
 import { useLayerStoreActions, useLayersDisplayState } from '@/core/stores/store-interface-and-intial-values/layer-state';
+import { TypeLayersViewDisplayState } from '../types';
 
 export function LayersActions(): JSX.Element {
   const { t } = useTranslation<string>();
@@ -15,7 +16,7 @@ export function LayersActions(): JSX.Element {
   const displayState = useLayersDisplayState();
   const { setDisplayState } = useLayerStoreActions();
 
-  const handleSetDisplayState = function (newState: string) {
+  const handleSetDisplayState = function (newState: TypeLayersViewDisplayState) {
     setDisplayState(newState);
   };
 

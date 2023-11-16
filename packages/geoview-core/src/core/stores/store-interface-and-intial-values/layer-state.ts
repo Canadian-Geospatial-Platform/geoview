@@ -3,10 +3,8 @@
 import { useStore } from 'zustand';
 import _ from 'lodash';
 import { useGeoViewStore } from '../stores-managers';
-import { TypeLegendLayer } from '../../components/layers/types';
+import { TypeLayersViewDisplayState, TypeLegendLayer } from '../../components/layers/types';
 import { TypeGetStore, TypeSetStore } from '../geoview-store';
-
-type TypeLayersViewDisplayState = 'remove' | 'add' | 'order' | 'view';
 
 export interface ILayerState {
   selectedItem?: TypeLegendLayer;
