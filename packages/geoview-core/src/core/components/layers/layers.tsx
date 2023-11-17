@@ -2,7 +2,7 @@ import { useEffect, useRef } from 'react';
 import { useTheme } from '@mui/material/styles';
 import { styled } from '@mui/material';
 import { LegendItemsDetailsProps } from './types';
-import { Box, Grid } from '@/ui';
+import { Box, Grid, Paper } from '@/ui';
 import { getSxClasses } from './layers-style';
 import { useLegendHelpers } from './hooks/helpers';
 import { LayersActions } from './left-panel/layers-actions';
@@ -59,6 +59,18 @@ export function Layers(props: LegendItemsDetailsProps): JSX.Element {
           <LayerDetails layerDetails={selectedLayer} />
         </Item>
       );
+    }
+    else if(displayState === 'remove') {
+      return (<Paper sx={{padding: "20px"}}>
+          <h3>Removing layers</h3>
+          <p>Lorem, ipsum dolor sit amet consectetur adipisicing elit. Praesentium animi, perferendis nemo quas sequi totam minima ad labore, ipsum perspiciatis doloribus veritatis iste? Quae alias praesentium, delectus reprehenderit itaque voluptatibus!</p>
+      </Paper>)
+    }
+    else if(displayState === 'order') {
+      return (<Paper sx={{padding: "20px"}}>
+          <h3>Re-ordering layers</h3>
+          <p>Lorem, ipsum dolor sit amet consectetur adipisicing elit. Praesentium animi, perferendis nemo quas sequi totam minima ad labore, ipsum perspiciatis doloribus veritatis iste? Quae alias praesentium, delectus reprehenderit itaque voluptatibus!</p>
+      </Paper>);
     }
 
     return null;

@@ -53,7 +53,7 @@ export function SingleLayer(props: SingleLayerProps): JSX.Element {
   const displayState = useLayersDisplayState();
   const mapFiltered = useDataTableStoreMapFilteredRecord();
 
-  const layerIsSelected = layer.layerPath === selectedLayerPath;
+  const layerIsSelected = layer.layerPath === selectedLayerPath && displayState === 'view';
   const legendClass = layerIsSelected ? { ...sxClasses.layersList.selectedLayerItem } : null;
 
   const [isGroupOpen, setGroupOpen] = useState(layerIsSelected);
