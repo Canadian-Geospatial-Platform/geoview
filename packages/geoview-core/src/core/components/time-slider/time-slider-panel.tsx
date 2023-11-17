@@ -2,7 +2,7 @@
 import React, { useCallback, useState } from 'react';
 import { useTheme } from '@mui/material/styles';
 import { t } from 'i18next';
-import { Box, Typography } from '@/ui';
+import { Box } from '@/ui';
 import { getSxClasses } from './time-slider-style';
 import { TimeSlider } from './time-slider';
 import { SliderFilterProps } from './time-slider-api';
@@ -53,12 +53,10 @@ export function TimeSliderPanel(props: TypeTimeSliderProps): JSX.Element {
   return (
     <Box sx={sxClasses.detailsContainer}>
       <ResponsiveGrid.Root>
-        <ResponsiveGrid.Left md={4} isLayersPanelVisible={isLayersPanelVisible}>
-          <Typography component="p" sx={sxClasses.panelHeaders}>
-            {t('details.availableLayers')}
-          </Typography>
+        <ResponsiveGrid.Left isLayersPanelVisible={isLayersPanelVisible} isEnlargeDataTable={isEnlargeDataTable}>
+          <LayerTitle>{t('details.availableLayers')}</LayerTitle>
         </ResponsiveGrid.Left>
-        <ResponsiveGrid.Right isLayersPanelVisible={isLayersPanelVisible} md={8}>
+        <ResponsiveGrid.Right isLayersPanelVisible={isLayersPanelVisible} isEnlargeDataTable={isEnlargeDataTable}>
           <Box
             sx={{
               display: 'flex',
@@ -67,8 +65,7 @@ export function TimeSliderPanel(props: TypeTimeSliderProps): JSX.Element {
               [theme.breakpoints.down('md')]: { justifyContent: 'space-between' },
             }}
           >
-            <LayerTitle>{selectedLayer}</LayerTitle>
-
+            <LayerTitle hideTitle>{selectedLayer}</LayerTitle>
             <Box>
               <EnlargeButton isEnlargeDataTable={isEnlargeDataTable} setIsEnlargeDataTable={setIsEnlargeDataTable} />
               <CloseButton isLayersPanelVisible={isLayersPanelVisible} setIsLayersPanelVisible={setIsLayersPanelVisible} />
@@ -77,18 +74,10 @@ export function TimeSliderPanel(props: TypeTimeSliderProps): JSX.Element {
         </ResponsiveGrid.Right>
       </ResponsiveGrid.Root>
       <ResponsiveGrid.Root sx={{ marginTop: '1rem' }}>
-        <ResponsiveGrid.Left
-          isLayersPanelVisible={isLayersPanelVisible}
-          md={!isEnlargeDataTable ? 4 : 2}
-          lg={!isEnlargeDataTable ? 4 : 1.25}
-        >
+        <ResponsiveGrid.Left isLayersPanelVisible={isLayersPanelVisible} isEnlargeDataTable={isEnlargeDataTable}>
           {renderLayerList()}
         </ResponsiveGrid.Left>
-        <ResponsiveGrid.Right
-          md={!isEnlargeDataTable ? 8 : 10}
-          lg={!isEnlargeDataTable ? 8 : 10.75}
-          isLayersPanelVisible={isLayersPanelVisible}
-        >
+        <ResponsiveGrid.Right isEnlargeDataTable={isEnlargeDataTable} isLayersPanelVisible={isLayersPanelVisible}>
           <TimeSlider mapId={mapId} layerPath={selectedLayer} sliderFilterProps={timeSliderData[selectedLayer]} key={selectedLayer} />
         </ResponsiveGrid.Right>
       </ResponsiveGrid.Root>

@@ -185,7 +185,7 @@ export function Detailspanel({ mapId }: DetailsPanelProps): JSX.Element {
     <Box sx={sxClasses.detailsContainer}>
       {!layerDataInfo && (
         <ResponsiveGrid.Root>
-          <ResponsiveGrid.Left xs={12} isLayersPanelVisible={isLayersPanelVisible}>
+          <ResponsiveGrid.Left isLayersPanelVisible={isLayersPanelVisible} isEnlargeDataTable={isEnlargeDataTable}>
             <Typography component="p">{t('details.selectVisbleLayer')}</Typography>
           </ResponsiveGrid.Left>
         </ResponsiveGrid.Root>
@@ -193,12 +193,10 @@ export function Detailspanel({ mapId }: DetailsPanelProps): JSX.Element {
       {layerDataInfo && (
         <>
           <ResponsiveGrid.Root>
-            <ResponsiveGrid.Left md={4} isLayersPanelVisible={isLayersPanelVisible}>
-              <Typography component="div" sx={sxClasses.panelHeaders}>
-                {t('details.availableLayers')}
-              </Typography>
+            <ResponsiveGrid.Left isEnlargeDataTable={isEnlargeDataTable} isLayersPanelVisible={isLayersPanelVisible}>
+              <LayerTitle>{t('details.availableLayers')}</LayerTitle>
             </ResponsiveGrid.Left>
-            <ResponsiveGrid.Right isLayersPanelVisible={isLayersPanelVisible} md={8}>
+            <ResponsiveGrid.Right isEnlargeDataTable={isEnlargeDataTable} isLayersPanelVisible={isLayersPanelVisible}>
               <Box
                 sx={{
                   display: 'flex',
@@ -207,7 +205,7 @@ export function Detailspanel({ mapId }: DetailsPanelProps): JSX.Element {
                   [theme.breakpoints.down('md')]: { justifyContent: 'space-between' },
                 }}
               >
-                <LayerTitle>{layerDataInfo.layerName}</LayerTitle>
+                <LayerTitle hideTitle>{layerDataInfo.layerName}</LayerTitle>
 
                 <Box>
                   <EnlargeButton isEnlargeDataTable={isEnlargeDataTable} setIsEnlargeDataTable={setIsEnlargeDataTable} />
@@ -217,18 +215,10 @@ export function Detailspanel({ mapId }: DetailsPanelProps): JSX.Element {
             </ResponsiveGrid.Right>
           </ResponsiveGrid.Root>
           <ResponsiveGrid.Root sx={{ marginTop: '1rem' }}>
-            <ResponsiveGrid.Left
-              isLayersPanelVisible={isLayersPanelVisible}
-              md={!isEnlargeDataTable ? 4 : 2}
-              lg={!isEnlargeDataTable ? 4 : 1.25}
-            >
+            <ResponsiveGrid.Left isEnlargeDataTable={isEnlargeDataTable} isLayersPanelVisible={isLayersPanelVisible}>
               {renderLayerList()}
             </ResponsiveGrid.Left>
-            <ResponsiveGrid.Right
-              md={!isEnlargeDataTable ? 8 : 10}
-              lg={!isEnlargeDataTable ? 8 : 10.75}
-              isLayersPanelVisible={isLayersPanelVisible}
-            >
+            <ResponsiveGrid.Right isEnlargeDataTable={isEnlargeDataTable} isLayersPanelVisible={isLayersPanelVisible}>
               <Box sx={sxClasses.rightPanleContainer}>
                 <Grid container sx={sxClasses.rightPanelBtnHolder}>
                   <Grid item xs={6}>
