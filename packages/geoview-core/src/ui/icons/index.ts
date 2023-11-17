@@ -81,6 +81,7 @@ export {
   SwitchLeft as SwitchLeftIcon,
   TableView as TableViewIcon,
   TableChartOutlined as TableChartOutlinedIcon,
+  Undo as UndoIcon,
   Visibility as VisibilityIcon,
   VisibilityOff as VisibilityOffIcon,
   VisibilityOutlined as VisibilityOutlinedIcon,

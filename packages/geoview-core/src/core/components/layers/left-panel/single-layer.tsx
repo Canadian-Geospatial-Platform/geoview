@@ -24,6 +24,7 @@ import {
   TableViewIcon,
   DeleteIcon,
   HandleIcon,
+  UndoIcon,
 } from '@/ui';
 import { TypeLegendLayer } from '../types';
 import { getSxClasses } from './layerslist-style';
@@ -57,6 +58,7 @@ export function SingleLayer(props: SingleLayerProps): JSX.Element {
   const legendClass = layerIsSelected ? { ...sxClasses.layersList.selectedLayerItem } : null;
 
   const [isGroupOpen, setGroupOpen] = useState(layerIsSelected);
+  const [inUndoState, setInUndoState] = useState(false);
 
   // get layer description
   const getLayerDescription = () => {
@@ -108,6 +110,19 @@ export function SingleLayer(props: SingleLayerProps): JSX.Element {
 
   const handleRemoveLayer = () => {
     console.log('removing layer');
+    setInUndoState(true);
+    const removeTimeoutId = setTimeout(() => {
+      console.log('finished timeout...', inUndoState);
+      if(inUndoState) {
+        console.log('proceeed with delete');
+        setInUndoState(false);
+      }
+    }, 2000);
+  };
+
+  const handleUndoRemove = () =>{
+    console.log('cancel undo..');
+    setInUndoState(false);
   };
 
   const handleReArrangeLayer = () => {
@@ -130,10 +145,17 @@ export function SingleLayer(props: SingleLayerProps): JSX.Element {
   }
 
   function renderEditModeButtons() {
-    if (displayState === 'remove') {
+    if (displayState === 'remove' && !inUndoState) {
       return (
         <IconButton onClick={handleRemoveLayer}>
           <DeleteIcon style={{ fill: '#a9a9a9' }} />
+        </IconButton>
+      );
+    }
+    if (displayState === 'remove' && inUndoState) {
+      return (
+        <IconButton onClick={handleUndoRemove}>
+          <UndoIcon style={{ fill: '#a9a9a9' }} />
         </IconButton>
       );
     }
