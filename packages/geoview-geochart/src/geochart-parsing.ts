@@ -6,14 +6,7 @@ import {
   TypeFeatureInfoEntry,
   TypeFeatureInfoEntryPartial,
 } from 'geoview-core/src/api/events/payloads';
-import { queryRecordsByUrl, queryRelatedRecordsByUrl } from 'geoview-core/src/geo/layer/geoview-layers/esri-layer-common';
-import {
-  PluginGeoChartConfig,
-  GeoViewGeoChartConfig,
-  GeoViewGeoChartConfigLayer,
-  GeoViewGeoChartConfigLayerQueryOptions,
-  GeoViewGeoChartConfigLayerQueryOptionClause,
-} from './geochart-types';
+import { PluginGeoChartConfig, GeoViewGeoChartConfig, GeoViewGeoChartConfigLayer } from './geochart-types';
 
 /**
  * Finds, if any, the layer configuration in the plugin configuration that's associated with the layer id given.
@@ -60,7 +53,7 @@ const findLayerConfig = (
  * @param entries TypeFeatureInfoEntryPartial[] The FeatureInfoEntries to simplify
  * @return TypeJsonObject[] The simplified JsonObject of the attributes
  */
-const simplifyAttributes = (entries: TypeFeatureInfoEntryPartial[]): TypeJsonObject[] => {
+const simplifyTypeFeatureInfoEntries = (entries: TypeFeatureInfoEntryPartial[]): TypeJsonObject[] => {
   // Simplify attributes
   return entries.map((entry: TypeFeatureInfoEntryPartial) => {
     // Return simplified object
@@ -125,104 +118,6 @@ export const findLayerDataAndConfigFromQueryResults = (
 };
 
 /**
- * Builds a where clause string, to be used in an url, given the array of GeoViewGeoChartConfigLayerQueryOptionClauses.
- * @param whereClauses GeoViewGeoChartConfigLayerQueryOptionClauses[] The array of where clauses objects.
- * @param source TypeFeatureInfoEntryPartial The source to read the information from when building the clause.
- * @returns string Returns the where clause string
- */
-const buildQueryWhereClause = (
-  whereClauses: GeoViewGeoChartConfigLayerQueryOptionClause[],
-  source: TypeFeatureInfoEntryPartial
-): string => {
-  // Loop on each url options
-  let theWhereClause = '';
-  if (whereClauses) {
-    whereClauses.forEach((urlOpt: GeoViewGeoChartConfigLayerQueryOptionClause) => {
-      // Read the value we want
-      let val;
-      if (urlOpt.literal) {
-        // As-is replace
-        val = urlOpt.literal;
-      } else if (urlOpt.valueFrom) {
-        // Value comes from the record object
-        val = source.fieldInfo[urlOpt.valueFrom]?.value as string;
-      }
-      // If value was read, concatenate to the where clause
-      if (val) {
-        val = `${urlOpt.prefix || ''}${val}${urlOpt.suffix || ''}`;
-        val = encodeURIComponent(val);
-        theWhereClause += `${urlOpt.field}=${val} AND `;
-      }
-    });
-    theWhereClause = theWhereClause.replace(/ AND $/, '');
-  }
-
-  // Return the where clause
-  return theWhereClause;
-};
-
-/**
- * Fetches the items that should be attached to the given Datasource.
- * @param layerConfig GeoViewGeoChartConfigLayer The layer configuration we're currently using.
- * @param datasource GeoChartDatasource The Datasource to grab items for
- * @returns TypeJsonObject[] Returns the items that should be attached to the Datasource
- */
-export const fetchItemsViaQueryForDatasource = async (
-  layerConfig: GeoViewGeoChartConfigLayer,
-  datasource: GeoChartDatasource
-): Promise<TypeJsonObject[]> => {
-  // The query
-  const query = layerConfig.query!;
-
-  // Depending on the type of query
-  let entries: TypeFeatureInfoEntryPartial[];
-  // TODO: Refactor - Issue #1497
-  if (query.type === 'esriRelatedRecords') {
-    // The options
-    const urlOptions = query.urlOptions as GeoViewGeoChartConfigLayerQueryOptions<'esriRelatedRecords'>;
-
-    // Base query url
-    let { url } = query;
-
-    // Append the mandatory params
-    url +=
-      '/queryRelatedRecords?outFields=*&returnGeometry=false&maxAllowableOffset=&geometryPrecision=&outSR=&returnZ=false&returnM=false&gdbVersion=&datumTransformation=&definitionExpression=&f=json';
-
-    // Build the relationshipId
-    url += `&relationshipId=${urlOptions.relationshipId}`;
-
-    // Build the object ids
-    url += `&objectIds=${(datasource.sourceItem as TypeFeatureInfoEntryPartial).fieldInfo[urlOptions.objectIdField]?.value as string}`;
-
-    // Query an Esri related table
-    entries = await queryRelatedRecordsByUrl(url, 0);
-  } else if (query.type === 'esriRegular') {
-    // The options
-    const urlOptions = query.urlOptions as GeoViewGeoChartConfigLayerQueryOptions<'esriRegular'>;
-
-    // Base query url
-    let { url } = query;
-
-    // Append the mandatory params
-    url += '/query?outFields=*&f=json';
-
-    // Build the where clause of the url
-    url += `&where=${buildQueryWhereClause(urlOptions.whereClauses, datasource.sourceItem as TypeFeatureInfoEntryPartial)}`;
-
-    // Build the order by clause of the url
-    url += `&orderByFields=${urlOptions.orderByField}`;
-
-    // Query an Esri layer/table regular method
-    entries = await queryRecordsByUrl(url);
-  } else {
-    throw Error('Unsupported query type to fetch the Datasource items.');
-  }
-
-  // Simplify for the GeoChart
-  return simplifyAttributes(entries);
-};
-
-/**
  * Reads the configChart, configChartLayer and layerData information to determine a course of action to do to build a Datasource.
  * The config might already have a Datasource attached to it, but most cases this function will fetch data from
  * somewhere to build a Datasource and attach it to the configChart.
@@ -232,11 +127,11 @@ export const fetchItemsViaQueryForDatasource = async (
  * @return Promise<GeoViewGeoChartConfig<ChartType>> An promise to return a GeoViewGeoChartConfig<ChartType> with the
  * final Datasource to send to GeoChart.
  */
-export const checkForDatasources = async (
+export const loadDatasources = (
   configChart: GeoViewGeoChartConfig<ChartType>,
   configChartLayer: GeoViewGeoChartConfigLayer,
   layerData: TypeFeatureInfoEntryPartial[]
-): Promise<GeoViewGeoChartConfig<ChartType>> => {
+): GeoViewGeoChartConfig<ChartType> => {
   // The new Plugin input to be returned
   // Cloning it in the process to make sure we're detaching ourselves from the configuration plugin object
   const retConfigChart: GeoViewGeoChartConfig<ChartType> = { ...configChart };
@@ -246,48 +141,35 @@ export const checkForDatasources = async (
     // Create the datasources
     retConfigChart.datasources = [];
 
-    // If there's a query property to indicate how to query the data, we're altering the datasources
-    if (configChartLayer?.query) {
-      // The list of promises that will be returning the final values
-      const promises: Promise<TypeJsonObject[]>[] = [];
+    // The layer data simplified
+    const layerDataSimplified = simplifyTypeFeatureInfoEntries(layerData);
 
+    // If there's a query property to indicate how to query the data, we're altering the datasources
+    if (configChart?.query) {
       // For each previously found data
-      layerData.forEach(async (lyrData) => {
+      layerDataSimplified.forEach((lyrDataSimp: TypeJsonObject) => {
         // Read the id and from the found data
-        const id = lyrData.fieldInfo[configChartLayer.propertyValue]?.value;
+        const id = lyrDataSimp[configChartLayer.propertyValue];
         let display: string | undefined;
-        if (configChartLayer.propertyDisplay) display = lyrData.fieldInfo[configChartLayer.propertyDisplay]?.value as string;
+        if (configChartLayer.propertyDisplay) display = lyrDataSimp[configChartLayer.propertyDisplay] as string;
 
         // Add a datasource
         const ds: GeoChartDatasource = {
           value: id as string,
           display: display as string,
-          sourceItem: lyrData,
+          sourceItem: lyrDataSimp,
         };
 
         // Add it to the list
         retConfigChart.datasources.push(ds);
-
-        // If not lazy loading, fetch now
-        if (!configChartLayer.query!.lazyLoading) {
-          // Create a promise for the fetch and add to the list
-          const promise = fetchItemsViaQueryForDatasource(configChartLayer, ds);
-          promises.push(promise);
-
-          // Await for results to come in and update the datasource
-          ds.items = await promise;
-        }
       });
-
-      // Await all promises, because of the forEach()
-      await Promise.all(promises);
     } else {
       // Use the data as is
       // Add a datasource
       retConfigChart.datasources.push({
         display: 'Feature',
-        sourceItem: layerData,
-        items: simplifyAttributes(layerData),
+        sourceItem: layerDataSimplified[0],
+        items: layerDataSimplified,
       });
     }
   }

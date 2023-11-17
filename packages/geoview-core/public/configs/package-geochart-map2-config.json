@@ -20,7 +20,7 @@
         },
         "metadataAccessPath": {
           "en": "https://maps-cartes.services.geo.ca/server_serveur/rest/services/HC/airborne_radioactivity_en/MapServer",
-          "fr": "https://maps-cartes.services.geo.ca/server_serveur/rest/services/HC/airborne_radioactivity_en/MapServer"
+          "fr": "https://maps-cartes.services.geo.ca/server_serveur/rest/services/HC/airborne_radioactivity_fr/MapServer"
         },
         "geoviewLayerType": "esriDynamic",
         "listOfLayerEntryConfig": [
@@ -43,6 +43,24 @@
         "listOfLayerEntryConfig": [
           {
             "layerId": "1"
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "ogcFeatureLakes",
+        "geoviewLayerName": {
+          "en": "Large Lakes",
+          "fr": "Grands lacs"
+        },
+        "metadataAccessPath": {
+          "en": "https://b6ryuvakk5.execute-api.us-east-1.amazonaws.com/dev",
+          "fr": "https://b6ryuvakk5.execute-api.us-east-1.amazonaws.com/dev"
+        },
+        "geoviewLayerType": "ogcFeature",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "lakes",
+            "layerFilter": "name in ('Lake Victoria', 'Lake Superior', 'L. Erie', 'L. Ontario')"
           }
         ]
       },
