@@ -29,7 +29,6 @@ interface TypeSelectProps extends SelectProps {
  */
 interface TypeMenuItemProps {
   type?: 'item' | 'header';
-  content?: JSX.Element;
   item: MenuItemProps | ListSubheaderProps | null;
 }
 
@@ -58,12 +57,8 @@ export function Select(props: TypeSelectProps): JSX.Element {
               return <ListSubheader key={index} {...(menuItem.item as ListSubheaderProps)} />;
             }
 
-            return (
-              // eslint-disable-next-line react/no-array-index-key
-              <MenuItem key={index} {...(menuItem.item as MenuItemProps)} sx={sxClasses.menuItem}>
-                {menuItem.content}
-              </MenuItem>
-            );
+            // eslint-disable-next-line react/no-array-index-key
+            return <MenuItem key={index} {...(menuItem.item as MenuItemProps)} sx={sxClasses.menuItem} />;
           }
 
           return null;
