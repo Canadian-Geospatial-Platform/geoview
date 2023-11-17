@@ -38,7 +38,7 @@ export function LegendLayer(props: LegendLayerProps): JSX.Element {
 
   const getSecondaryText = () => {
     if (layer.children.length) {
-      return `${layer.children.length} sub-layers.`;
+      return `${layer.children.length} sub-layers`;
     }
     if (layer.items.length) {
       return `${layer.items.filter((d) => d.isChecked).length} of ${layer.items.length} items`;
