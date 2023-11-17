@@ -1,6 +1,7 @@
-import { useState, useCallback, ReactNode } from 'react';
+import { useState, useCallback, ReactNode, CSSProperties } from 'react';
 
 import {
+  Box,
   Accordion as MaterialAccordion,
   AccordionSummary as MaterialAccordionSummary,
   AccordionDetails as MaterialAccordionDetails,
@@ -13,6 +14,7 @@ import { generateId } from '@/core/utils/utilities';
  */
 interface AccordionProps {
   id: string;
+  sx: CSSProperties;
   items: Array<AccordionItem>;
   className: string;
   defaultExpanded: boolean;
@@ -45,7 +47,7 @@ const sxClasses = {
  * @returns {JSX.Element} the created Fade element
  */
 export function Accordion(props: AccordionProps): ReactNode {
-  const { id, items, className, defaultExpanded = false, showLoadingIcon = false } = props;
+  const { id, sx, items, className, defaultExpanded = false, showLoadingIcon = false } = props;
 
   // internal state
   const [expandedStates, setExpandedStates] = useState<boolean[]>(Array(items.length).fill(defaultExpanded));
@@ -75,7 +77,7 @@ export function Accordion(props: AccordionProps): ReactNode {
   );
 
   return (
-    <div id={generateId(id)} className="accordion-group">
+    <Box id={generateId(id)} sx={sx} className="accordion-group">
       {items.map((item: AccordionItem, idx: number) => (
         <MaterialAccordion
           // eslint-disable-next-line react/no-array-index-key
@@ -94,14 +96,13 @@ export function Accordion(props: AccordionProps): ReactNode {
           <MaterialAccordionDetails>{item.content}</MaterialAccordionDetails>
         </MaterialAccordion>
       ))}
-    </div>
+    </Box>
   );
 }
 
 /**
  * Example of usage
  * <Accordion
-      className="accordion-theme"
       items={Object.values(items).map((item: AccordionItem) => (
           {
               title: writeTitle(item),
