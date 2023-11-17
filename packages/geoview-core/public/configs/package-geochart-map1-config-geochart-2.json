@@ -69,7 +69,7 @@
         "location": "Montreal"
       }]
     }]
-  }, 
+  },
   {
     "layers": [{
       "layerId": "geojsonLYR5/point-feature-group/points.json"

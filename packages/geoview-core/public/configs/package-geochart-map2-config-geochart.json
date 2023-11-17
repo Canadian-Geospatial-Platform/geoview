@@ -5,71 +5,106 @@
     "layers": [{
       "layerId": "airborne_radioactivity/1",
       "propertyValue": "OBJECTID",
-      "propertyDisplay": "Location_Emplacement",
-      "query": {
-        "type": "esriRelatedRecords",
-        "lazyLoading": false,
-        "url": "https://maps-cartes.services.geo.ca/server_serveur/rest/services/HC/airborne_radioactivity_en/MapServer/1",
-        "urlOptions": {
-          "relationshipId": 0,
-          "objectIdField": "OBJECTID"
-        }
-      }
+      "propertyDisplay": "Location_Emplacement"
     }],
+    "query": {
+      "type": "esriRegular",
+      "url": "https://maps-cartes.services.geo.ca/server_serveur/rest/services/HC/airborne_radioactivity_en/MapServer/3",
+      "queryOptions": {
+        "whereClauses": [
+          {
+            "field": "Location_Emplacement",
+            "prefix": "'",
+            "valueFrom": "Location_Emplacement",
+            "suffix": "'"
+          }],
+          "orderByField": "CollectionStart_DebutPrelevement"
+      }
+    },
     "chart": "line",
+    "query": {
+      "type": "esriRegular",
+      "url": "https://maps-cartes.services.geo.ca/server_serveur/rest/services/HC/airborne_radioactivity_en/MapServer/3",
+      "queryOptions": {
+        "whereClauses": [
+          {
+            "field": "Location_Emplacement",
+            "prefix": "'",
+            "valueFrom": "Location_Emplacement",
+            "suffix": "'"
+          }],
+          "orderByField": "CollectionStart_DebutPrelevement"
+      }
+    },
+    "geochart": {
+      "xAxis": {
+        "type": "time",
+        "property": "CollectionStart_DebutPrelevement",
+        "label": "Collected date"
+      },
+      "yAxis": {
+        "type": "linear",
+        "property": "Activity_Activite_mBqm3",
+        "label": "Activity (mBqm3)",
+        "tooltipSuffix": "mBqm3"
+      },
+      "borderWidth": 1
+    },
     "category": {
       "property": "Radionuclide_Radionucleide",
       "usePalette": false
     },
     "ui": {
-      "stepsSwitcher": true
-    },
-    "geochart": {
-      "borderWidth": 1,
-      "xAxis": {
-        "type": "time",
-        "property": "CollectionStart_DebutPrelevement"
-      },
-      "yAxis": {
-        "type": "linear",
-        "property": "Activity_Activite_mBqm3"
-      },
       "xSlider": {
         "display": true
       },
       "ySlider": {
         "display": true
-      }
+      },
+      "stepsSwitcher": true,
+      "resetStates": true,
+      "description": "This is a description text",
+      "download": true
     }
   },
   {
     "layers": [{
       "layerId": "shellfish_sites/1",
       "propertyValue": "OBJECTID",
-      "propertyDisplay": "Site",
-      "query": {
-        "type": "esriRegular",
-        "lazyLoading": true,
-        "url": "https://maps-cartes.ec.gc.ca/arcgis/rest/services/Shellfish_Sites_Samples_Mollusques_Echantillons/MapServer/9",
-        "urlOptions": {
-          "whereClauses": [
-          {
-            "field": "Site",
-            "prefix": "'",
-            "valueFrom": "Site",
-            "suffix": "'"
-          }],
-          "orderByField": "Date"
-        }
-      }
+      "propertyDisplay": "Site"
     }],
+    "query": {
+      "type": "esriRegular",
+      "url": "https://maps-cartes.ec.gc.ca/arcgis/rest/services/Shellfish_Sites_Samples_Mollusques_Echantillons/MapServer/9",
+      "queryOptions": {
+        "whereClauses": [
+        {
+          "field": "Site",
+          "prefix": "'",
+          "valueFrom": "Site",
+          "suffix": "'"
+        }],
+        "orderByField": "Date"
+      }
+    },
     "chart": "line",
-    "ui": {
-      "stepsSwitcher": true
+    "query": {
+      "type": "esriRegular",
+      "url": "https://maps-cartes.ec.gc.ca/arcgis/rest/services/Shellfish_Sites_Samples_Mollusques_Echantillons/MapServer/9",
+      "queryOptions": {
+        "whereClauses": [
+        {
+          "field": "Site",
+          "prefix": "'",
+          "valueFrom": "Site",
+          "suffix": "'"
+        }],
+        "orderByField": "Date"
+      }
     },
     "geochart": {
       "borderWidth": 1,
-      "useSteps": false,
+      "useSteps": "after",
       "tension": 0.2,
       "xAxis": {
         "type": "time",
@@ -78,12 +113,71 @@
       "yAxis": {
         "type": "logarithmic",
         "property": "FC_MPN_CF_NPP_100_mL"
-      },
+      }
+    },
+    "ui": {
       "xSlider": {
         "display": true
       },
       "ySlider": {
         "display": true
+      },
+      "stepsSwitcher": true,
+      "resetStates": true,
+      "download": true
+    }
+  },
+  {
+    "layers": [{
+      "layerId": "ogcFeatureLakes/lakes",
+      "propertyValue": "name",
+      "propertyDisplay": "name"
+    }],
+    "chart": "bar",
+    "query": {
+      "type": "ogcAPIFeatures",
+      "url": "https://demo.pygeoapi.io/master/collections/lakes"
+    },
+    "geochart": {
+      "xAxis": {
+        "property": "name"
+      },
+      "yAxis": {
+        "property": "id"
+      }
+    },
+    "ui": {
+      "resetStates": true,
+      "download": true
+    }
+  },
+  {
+    "layers": [{
+      "layerId": "ogcFeatureLakes/lakes",
+      "propertyValue": "name",
+      "propertyDisplay": "name"
+    }],
+    "query": {
+      "type": "ogcAPIFeatures",
+      "url": "https://demo.pygeoapi.io/master/collections/lakes",
+      "queryOptionsFAKE": {
+        "whereClauses": [
+          {
+            "field": "name",
+            "prefix": "'",
+            "valueFrom": "id",
+            "suffix": "'"
+          }],
+          "orderByField": "CollectionStart_DebutPrelevement"
+      }
+    },
+    "chart": "line",
+    "geochart": {
+      "xAxis": {
+        "property": "name"
+      },
+      "yAxis": {
+        "property": "id"
       }
     }
   },
@@ -103,6 +197,9 @@
     "category": {
       "property": "location",
       "usePalette": false
+    },
+    "ui": {
+      "resetStates": true
     },
     "datasources": [{
       "display": "Feature",
@@ -177,6 +274,9 @@
     "category": {
       "property": "location",
       "usePalette": false
+    },
+    "ui": {
+      "resetStates": true
     },
     "datasources": [{
       "display": "Feature",
