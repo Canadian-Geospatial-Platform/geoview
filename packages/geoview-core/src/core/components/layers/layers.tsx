@@ -60,26 +60,37 @@ export function Layers(props: LegendItemsDetailsProps): JSX.Element {
         </Item>
       );
     }
-    else if(displayState === 'remove') {
-      return (<Paper sx={{padding: "20px"}}>
+    if (displayState === 'remove') {
+      return (
+        <Paper sx={{ padding: '20px' }}>
           <h3>Removing layers</h3>
-          <Box sx={{display: "flex", flexDirection: "row", alignItems: "center" }}>
+          <Box sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
             <IconButton>
               <DeleteIcon style={{ fill: '#a9a9a9' }} />
             </IconButton>
-            <p>Lorem, ipsum dolor sit amet consectetur adipisicing elit. Ipsum perspiciatis doloribus veritatis iste? Quae alias praesentium, delectus reprehenderit itaque voluptatibus!</p>
+            <p>
+              Lorem, ipsum dolor sit amet consectetur adipisicing elit. Ipsum perspiciatis doloribus veritatis iste? Quae alias praesentium,
+              delectus reprehenderit itaque voluptatibus!
+            </p>
           </Box>
-          
-      </Paper>)
+        </Paper>
+      );
     }
-    else if(displayState === 'order') {
-      return (<Paper sx={{padding: "20px"}}>
+    if (displayState === 'order') {
+      return (
+        <Paper sx={{ padding: '20px' }}>
           <h3>Re-ordering layers</h3>
-          <Box  sx={{display: "flex", flexDirection: "row", alignItems: "center" }}>
-            <IconButton><HandleIcon style={{ fill: '#a9a9a9' }} /></IconButton>
-            <p>Lorem, ipsum dolor sit amet consectetur adipisicing elit. Praesentium animi, perferendis nemo quas sequi totam minima ad labore.</p>
+          <Box sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
+            <IconButton>
+              <HandleIcon style={{ fill: '#a9a9a9' }} />
+            </IconButton>
+            <p>
+              Lorem, ipsum dolor sit amet consectetur adipisicing elit. Praesentium animi, perferendis nemo quas sequi totam minima ad
+              labore.
+            </p>
           </Box>
-      </Paper>);
+        </Paper>
+      );
     }
 
     return null;
