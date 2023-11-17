@@ -12,10 +12,10 @@ import {
   GroupWorkOutlinedIcon,
   ErrorIcon,
   DownloadingIcon,
-  ListAltIcon,
 } from '@/ui';
 import { TypeLegendLayer } from '@/core/components/layers/types';
 import { getSxClasses } from './legend-styles';
+import { IconStack } from '../icon-stack/icon-stack';
 
 interface LegendLayerProps {
   layer: TypeLegendLayer;
@@ -124,7 +124,7 @@ export function LegendLayer(props: LegendLayerProps): JSX.Element {
     }
     return (
       <IconButton color="success">
-        <ListAltIcon />
+        <IconStack layerPath={layer.layerPath} />
       </IconButton>
     );
   }

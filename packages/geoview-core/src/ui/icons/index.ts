@@ -20,6 +20,7 @@ export {
   ChevronRight as ChevronRightIcon,
   Close as CloseIcon,
   Delete as DeleteIcon,
+  DeleteOutline as DeleteOutlineIcon,
   Details as DetailsIcon,
   Download as DownloadIcon,
   Downloading as DownloadingIcon,

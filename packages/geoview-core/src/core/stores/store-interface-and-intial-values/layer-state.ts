@@ -21,6 +21,7 @@ export interface ILayerState {
     toggleLayerVisibility: (layerPath: string) => void;
     toggleItemVisibility: (layerPath: string, itemName: string) => void;
     setAllItemsVisibility: (layerPath: string, visibility: boolean) => void;
+    deleteLayer: (layerPath: string) => void;
   };
 }
 
@@ -128,6 +129,16 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
           },
         });
       },
+      deleteLayer: (layerPath: string) => {
+        const curLayers = get().legendState.legendLayers;
+        deleteSingleLayer(curLayers, layerPath);
+        set({
+          legendState: {
+            ...get().legendState,
+            legendLayers: [...curLayers],
+          },
+        });
+      },
     },
   } as ILayerState;
 
@@ -159,6 +170,19 @@ function findLayerByPath(layers: TypeLegendLayer[], layerPath: string): TypeLege
   }
 
   return undefined;
+}
+
+function deleteSingleLayer(layers: TypeLegendLayer[], layerPath: string) {
+  const indToDelete = layers.findIndex((l) => l.layerPath === layerPath);
+  if (indToDelete >= 0) {
+    layers.splice(indToDelete, 1);
+  } else {
+    for (const l of layers) {
+      if (l.children && l.children.length > 0) {
+        deleteSingleLayer(l.children, layerPath);
+      }
+    }
+  }
 }
 
 // **********************************************************
