@@ -4,7 +4,7 @@ export const getSxClasses = (theme: Theme) => ({
   detailsContainer: {
     background: theme.footerPanel.contentBg,
     boxShadow: theme.footerPanel.contentShadow,
-    padding: '1.5rem',
+    padding: '1rem 0',
   },
   panelHeaders: {
     font: theme.footerPanel.titleFont,

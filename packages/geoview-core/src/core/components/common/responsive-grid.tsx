@@ -10,6 +10,7 @@ interface ResponsiveGridPanelProps extends GridProps {
   children: ReactNode;
   isLayersPanelVisible: boolean;
   sxProps?: SxProps | undefined;
+  isEnlargeDataTable: boolean;
 }
 
 /**
@@ -29,15 +30,18 @@ function ResponsiveGridRoot({ children, ...rest }: ResponsiveGridProps) {
  * Create Left Panel for responsive grid.
  * @param {ReactNode} children child elements to be rendered
  * @param {boolean} isLayersPanelVisible panel visibility
+ * @param {boolean} isEnlargeDataTable panel is enlarge
  * @returns JSX.Element
  */
-function ResponsiveGridLeftPanel({ children, isLayersPanelVisible = false, ...rest }: ResponsiveGridPanelProps) {
+function ResponsiveGridLeftPanel({ children, isLayersPanelVisible = false, isEnlargeDataTable, ...rest }: ResponsiveGridPanelProps) {
   const theme = useTheme();
 
   return (
     <Grid
       item
       xs={isLayersPanelVisible ? 12 : 0}
+      md={!isEnlargeDataTable ? 4 : 2}
+      lg={!isEnlargeDataTable ? 4 : 1.25}
       sx={{
         [theme.breakpoints.down('md')]: { display: isLayersPanelVisible ? 'block' : 'none' },
       }}
@@ -52,14 +56,24 @@ function ResponsiveGridLeftPanel({ children, isLayersPanelVisible = false, ...re
  * Create Right Panel for responsive grid.
  * @param {ReactNode} children child elements to be rendered
  * @param {boolean} isLayersPanelVisible panel visibility
+ * @param {boolean} isEnlargeDataTable panel is enlarge
+ * @param {object} sxProps Optional sx props
  * @returns JSX.Element
  */
-function ResponsiveGridRightPanel({ children, isLayersPanelVisible = false, sxProps = {}, ...rest }: ResponsiveGridPanelProps) {
+function ResponsiveGridRightPanel({
+  children,
+  isLayersPanelVisible = false,
+  sxProps = {},
+  isEnlargeDataTable,
+  ...rest
+}: ResponsiveGridPanelProps) {
   const theme = useTheme();
   return (
     <Grid
       item
       xs={!isLayersPanelVisible ? 12 : 0}
+      md={!isEnlargeDataTable ? 8 : 10}
+      lg={!isEnlargeDataTable ? 8 : 10.75}
       sx={{
         position: 'relative',
         [theme.breakpoints.up('md')]: { paddingLeft: '1rem' },
