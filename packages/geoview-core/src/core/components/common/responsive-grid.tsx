@@ -30,6 +30,7 @@ function ResponsiveGridRoot({ children, ...rest }: ResponsiveGridProps) {
  * Create Left Panel for responsive grid.
  * @param {ReactNode} children child elements to be rendered
  * @param {boolean} isLayersPanelVisible panel visibility
+ * @param {boolean} isEnlargeDataTable panel is enlarge
  * @returns JSX.Element
  */
 function ResponsiveGridLeftPanel({ children, isLayersPanelVisible = false, isEnlargeDataTable, ...rest }: ResponsiveGridPanelProps) {
@@ -55,6 +56,8 @@ function ResponsiveGridLeftPanel({ children, isLayersPanelVisible = false, isEnl
  * Create Right Panel for responsive grid.
  * @param {ReactNode} children child elements to be rendered
  * @param {boolean} isLayersPanelVisible panel visibility
+ * @param {boolean} isEnlargeDataTable panel is enlarge
+ * @param {object} sxProps Optional sx props
  * @returns JSX.Element
  */
 function ResponsiveGridRightPanel({
