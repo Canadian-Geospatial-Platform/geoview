@@ -2,8 +2,8 @@
   "map": {
     "interaction": "dynamic",
     "viewSettings": {
-      "zoom": 3,
-      "center": [-100, 50],
+      "zoom": 4,
+      "center": [-100, 60],
       "projection": 3978
     },
     "basemapOptions": {

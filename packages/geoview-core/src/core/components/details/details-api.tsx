@@ -28,10 +28,9 @@ export class DetailsApi {
   /**
    * Create a details as an element
    *
-   * @param {string} mapId the map identifier
    * @return {ReactElement} the details react element
    */
-  createDetails = (mapId: string): ReactElement => {
-    return createElement(Detailspanel, { mapId });
+  createDetails = (): ReactElement => {
+    return createElement(Detailspanel);
   };
 }
