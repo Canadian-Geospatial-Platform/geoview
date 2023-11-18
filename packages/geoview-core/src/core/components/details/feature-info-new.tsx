@@ -1,38 +1,20 @@
 /* eslint-disable react/require-default-props */
-import { MutableRefObject, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import { useTranslation } from 'react-i18next';
 
 import { useTheme, Theme } from '@mui/material/styles';
 
-import { getUid } from 'ol/util'; // TODO no ol in component
-
 import { List, ListItem, ListItemText, ZoomInSearchIcon, Tooltip, IconButton, Checkbox, Paper } from '@/ui';
-import { api } from '@/app';
-import {
-  featureHighlightPayload,
-  clearHighlightsPayload,
-  TypeFieldEntry,
-  TypeArrayOfFeatureInfoEntries,
-  TypeFeatureInfoEntry,
-  TypeGeometry,
-} from '@/api/events/payloads';
-import { EVENT_NAMES } from '@/api/events/event-types';
+import { TypeFieldEntry, TypeArrayOfFeatureInfoEntries, TypeGeometry } from '@/api/events/payloads';
 import { FeatureInfoTable } from './feature-info-table';
 import { getSxClasses } from './details-style';
+import { useDetailsStoreCheckedFeatures, useDetailsStoreActions } from '@/core/stores/store-interface-and-intial-values/details-state';
+import { useMapStoreActions } from '@/core/stores/store-interface-and-intial-values/map-state';
 
 export interface TypeFeatureInfoProps {
-  mapId: string;
   features: TypeArrayOfFeatureInfoEntries;
   currentFeatureIndex: number;
-  onClearCheckboxes: () => void;
-  onFeatureNavigateChange: (
-    checkedFeatures: Exclude<TypeArrayOfFeatureInfoEntries, null | undefined>,
-    currentFeature: TypeFeatureInfoEntry
-  ) => void;
-  setDisableClearAllBtn: (isDisabled: boolean) => void;
-  selectedFeatures?: MutableRefObject<string[]>;
-  clearAllCheckboxes?: boolean;
 }
 
 /**
@@ -41,16 +23,7 @@ export interface TypeFeatureInfoProps {
  * @param {TypeFeatureInfoProps} Feature info properties
  * @returns {JSX.Element} the feature info
  */
-export function FeatureInfo({
-  mapId,
-  features,
-  currentFeatureIndex,
-  selectedFeatures,
-  onClearCheckboxes,
-  onFeatureNavigateChange,
-  setDisableClearAllBtn,
-  clearAllCheckboxes,
-}: TypeFeatureInfoProps): JSX.Element {
+export function FeatureInfo({ features, currentFeatureIndex }: TypeFeatureInfoProps): JSX.Element {
   const { t } = useTranslation<string>();
 
   const theme: Theme & {
@@ -60,11 +33,15 @@ export function FeatureInfo({
 
   // internal state
   const [checked, setChecked] = useState<boolean>(false);
-  const [checkedFeatures, setCheckedFeatures] = useState<Exclude<TypeArrayOfFeatureInfoEntries, null | undefined>>([]);
   const feature = features![currentFeatureIndex];
-  const featureUid = feature.geometry ? getUid(feature.geometry) : null;
+  const featureUid = feature.geometry ? (feature.geometry as TypeGeometry).ol_uid : null;
   const featureIconSrc = feature.featureIcon.toDataURL();
   const nameFieldValue = feature.nameField ? (feature.fieldInfo[feature.nameField!]!.value as string) : 'No name';
+
+  // states from store
+  const checkedFeatures = useDetailsStoreCheckedFeatures();
+  const { addCheckedFeature, removeCheckedFeature } = useDetailsStoreActions();
+  const { zoomToExtent } = useMapStoreActions();
 
   const featureInfoList: TypeFieldEntry[] = Object.keys(feature.fieldInfo).map((fieldName) => {
     return {
@@ -76,74 +53,29 @@ export function FeatureInfo({
     };
   });
 
-  const isFeatureInSelectedFeatures = checkedFeatures.some((obj) => {
-    return (obj.geometry as TypeGeometry)?.ol_uid === (feature.geometry as TypeGeometry)?.ol_uid;
-  });
-
   const handleSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     e.stopPropagation();
 
     if (!checked) {
-      setChecked(true);
-      setCheckedFeatures((prevValue) => [...prevValue, feature]);
+      addCheckedFeature(feature);
     } else {
-      setChecked(false);
-      setCheckedFeatures((prevValue) =>
-        prevValue.filter((item) => (item.geometry as TypeGeometry)?.ol_uid !== (feature.geometry as TypeGeometry)?.ol_uid)
-      );
+      removeCheckedFeature(feature);
     }
   };
 
   const handleZoomIn = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
     e.stopPropagation();
-    api.maps[mapId].zoomToExtent(feature.extent);
+    zoomToExtent(feature.extent);
   };
 
   useEffect(() => {
-    if (checkedFeatures.length !== 0) {
-      checkedFeatures.forEach((checkedFeature: TypeFeatureInfoEntry) => {
-        api.event.emit(featureHighlightPayload(EVENT_NAMES.FEATURE_HIGHLIGHT.EVENT_HIGHLIGHT_FEATURE, mapId, checkedFeature));
-      });
-    }
-
-    // disable the clear all button once we don't have any selected features
-    setDisableClearAllBtn(checkedFeatures.length === 0);
-
+    setChecked(
+      checkedFeatures.some((checkedFeature) => {
+        return (checkedFeature.geometry as TypeGeometry)?.ol_uid === featureUid;
+      })
+    );
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [checkedFeatures]);
-
-  useEffect(() => {
-    if (featureUid && selectedFeatures?.current && selectedFeatures.current.indexOf(featureUid) !== -1) {
-      setChecked(true);
-    } else {
-      setChecked(false);
-    }
-  }, [featureUid, selectedFeatures]);
-
-  // Keep track of current feature change, clear all layers, then highlight current feature
-  // this needs to be in condition that don't
-  useEffect(() => {
-    if (checkedFeatures.length === 0) {
-      api.event.emit(clearHighlightsPayload(EVENT_NAMES.FEATURE_HIGHLIGHT.EVENT_HIGHLIGHT_CLEAR, mapId, 'all'));
-    }
-    api.event.emit(featureHighlightPayload(EVENT_NAMES.FEATURE_HIGHLIGHT.EVENT_HIGHLIGHT_FEATURE, mapId, feature));
-    onFeatureNavigateChange(checkedFeatures, feature);
-    // to keep the checkbox checked if current feature is one of selected features
-    setChecked(isFeatureInSelectedFeatures);
-    // if we haven't checked any features, clear the highlight from other features except the one we are currently visiting
-    // once we are navigating next and previous feature
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [feature]);
-
-  useEffect(() => {
-    if (clearAllCheckboxes) {
-      setCheckedFeatures([]);
-      setChecked(false);
-      onClearCheckboxes();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [clearAllCheckboxes]);
+  }, [checkedFeatures, feature]);
 
   return (
     <Paper sx={{ boxShadow: 'none' }}>
