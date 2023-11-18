@@ -8,8 +8,7 @@ import { CloseIcon, SearchIcon, AppBar, Box, Divider, IconButton, Paper, Progres
 import GeoList from './geo-list';
 import { StyledInputField, sxClasses } from './geolocator-style';
 import { MapContext } from '@/core/app-start';
-import { EVENT_NAMES, api } from '@/app';
-import { bboxHighlightPayload } from '@/api/events/payloads/bbox-highlight-payload';
+import { api } from '@/app';
 import { OL_ZOOM_DURATION } from '@/core/utils/constant';
 import { useUIAppbarGeolocatorActive } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import { useMapStoreActions } from '@/core/stores/store-interface-and-intial-values/map-state';
@@ -92,7 +91,7 @@ export function Geolocator() {
         maxZoom: 16,
         duration: OL_ZOOM_DURATION,
       });
-      api.event.emit(bboxHighlightPayload(EVENT_NAMES.FEATURE_HIGHLIGHT.EVENT_HIGHLIGHT_BBOX, mapId, convertedExtent));
+      api.maps[mapId].layer.featureHighlight.highlightGeolocatorBBox(convertedExtent);
       setTimeout(() => {
         showClickMarker({ lnglat: coords });
         for (let i = 0; i < indicatorBox.length; i++) {

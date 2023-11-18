@@ -14,7 +14,7 @@ import { useGeoViewStore } from '@/core/stores/stores-managers';
 import { TypeSetStore, TypeGetStore } from '@/core/stores/geoview-store';
 
 import { TypeValidMapProjectionCodes } from '@/core/types/global-types';
-import { TypeFeatureInfoEntry, TypeMapMouseInfo } from '@/api/events/payloads';
+import { TypeFeatureInfoEntry, TypeGeometry, TypeMapMouseInfo } from '@/api/events/payloads';
 import { TypeInteraction } from '@/geo/map/map-schema-types';
 import { OL_ZOOM_DURATION, OL_ZOOM_PADDING } from '@/core/utils/constant';
 import { TypeClickMarker, api } from '@/app';
@@ -61,9 +61,11 @@ export interface IMapState {
   };
 
   actions: {
+    addSelectedFeature: (feature: TypeFeatureInfoEntry) => void;
     getPixelFromCoordinate: (coord: Coordinate) => [number, number];
     getSize: () => [number, number];
     hideClickMarker: () => void;
+    removeSelectedFeature: (feature: TypeFeatureInfoEntry | 'all') => void;
     setClickCoordinates: () => void;
     setFixNorth: (ifFix: boolean) => void;
     setMapElement: (mapElem: OLMap) => void;
@@ -206,6 +208,14 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
     },
 
     actions: {
+      addSelectedFeature: (feature: TypeFeatureInfoEntry) => {
+        set({
+          mapState: {
+            ...get().mapState,
+            selectedFeatures: [...get().mapState.selectedFeatures, feature],
+          },
+        });
+      },
       getPixelFromCoordinate: (coord: Coordinate): [number, number] => {
         return get().mapState.mapElement!.getPixelFromCoordinate(coord) as unknown as [number, number];
       },
@@ -222,6 +232,20 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
       hideClickMarker: () => {
         set({
           mapState: { ...get().mapState, clickMarker: undefined },
+        });
+      },
+      removeSelectedFeature: (feature: TypeFeatureInfoEntry | 'all') => {
+        set({
+          mapState: {
+            ...get().mapState,
+            selectedFeatures:
+              feature === 'all'
+                ? []
+                : get().mapState.selectedFeatures.filter(
+                    (featureInfoEntry: TypeFeatureInfoEntry) =>
+                      (featureInfoEntry.geometry as TypeGeometry).ol_uid !== (feature.geometry as TypeGeometry).ol_uid
+                  ),
+          },
         });
       },
       setClickCoordinates: () => {
@@ -358,6 +382,7 @@ export const useMapNorthArrowElement = () => useStore(useGeoViewStore(), (state)
 export const useMapOverviewMap = () => useStore(useGeoViewStore(), (state) => state.mapState.overviewMap);
 export const useMapPointerPosition = () => useStore(useGeoViewStore(), (state) => state.mapState.pointerPosition);
 export const useMapRotation = () => useStore(useGeoViewStore(), (state) => state.mapState.rotation);
+export const useMapSelectedFeatures = () => useStore(useGeoViewStore(), (state) => state.mapState.selectedFeatures);
 export const useMapScale = () => useStore(useGeoViewStore(), (state) => state.mapState.scale);
 export const useMapZoom = () => useStore(useGeoViewStore(), (state) => state.mapState.zoom);
 

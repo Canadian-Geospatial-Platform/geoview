@@ -4,6 +4,7 @@ import { indexOf } from 'lodash';
 import i18n from 'i18next';
 import { GeoCore, layerConfigIsGeoCore } from '@/geo/layer/other/geocore';
 import { Geometry } from '@/geo/layer/geometry/geometry';
+import { FeatureHighlight } from '@/geo/utils/feature-highlight';
 
 import { api } from '@/app';
 import { EVENT_NAMES } from '@/api/events/event-types';
@@ -74,6 +75,9 @@ export class Layer {
     originalOpacity: undefined,
   };
 
+  // used to access feature and bounding box highlighting
+  featureHighlight: FeatureHighlight;
+
   /**
    * Initialize layer types and listen to add/remove layer events from outside
    *
@@ -83,6 +87,7 @@ export class Layer {
     this.mapId = mapId;
 
     this.geometry = new Geometry(this.mapId);
+    this.featureHighlight = new FeatureHighlight(this.mapId);
 
     this.eventHandlerFunctions = {
       addLayer: (payload: PayloadBaseClass) => {

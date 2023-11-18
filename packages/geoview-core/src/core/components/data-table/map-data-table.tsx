@@ -29,7 +29,6 @@ import { Extent } from 'ol/extent';
 import { darken } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import { difference } from 'lodash';
-import { getUid } from 'ol/util';
 import { Box, Button, IconButton, Tooltip, ZoomInSearchIcon } from '@/ui';
 import ExportButton from './export-button';
 import JSONExportButton from './json-export-button';
@@ -42,14 +41,12 @@ import {
   api,
   TypeFieldEntry,
   TypeFeatureInfoEntry,
-  featureHighlightPayload,
-  EVENT_NAMES,
-  clearHighlightsPayload,
   LightboxImg,
   LightBoxSlides,
   isImage,
 } from '@/app';
 import { getSxClasses } from './data-table-style';
+import { useMapStoreActions } from '@/core/stores/store-interface-and-intial-values/map-state';
 import {
   useDataTableStoreActions,
   useDataTableStoreColumnFiltersRecord,
@@ -132,6 +129,7 @@ function MapDataTable({ data, layerId, mapId, layerKey, projectionConfig }: MapD
   const { t } = useTranslation();
   const sxtheme = useTheme();
   const sxClasses = getSxClasses(sxtheme);
+  const { addSelectedFeature, removeSelectedFeature } = useMapStoreActions();
 
   const language = api.maps[mapId].displayLanguage;
 
@@ -282,15 +280,14 @@ function MapDataTable({ data, layerId, mapId, layerKey, projectionConfig }: MapD
     addAnimationRowIds.forEach((idx) => {
       const row = data.features[Number(idx)];
       if (row) {
-        api.event.emit(featureHighlightPayload(EVENT_NAMES.FEATURE_HIGHLIGHT.EVENT_HIGHLIGHT_FEATURE, mapId, row));
+        addSelectedFeature(row);
       }
     });
 
     const removeAnimationRowIds = difference(rowSelectionRef.current, selectedRows);
     removeAnimationRowIds.forEach((id) => {
       const feature = data.features[Number(id)];
-      const featureUid = getUid(feature.geometry);
-      api.event.emit(clearHighlightsPayload(EVENT_NAMES.FEATURE_HIGHLIGHT.EVENT_HIGHLIGHT_CLEAR, mapId, featureUid));
+      removeSelectedFeature(feature);
     });
 
     rowSelectionRef.current = selectedRows;

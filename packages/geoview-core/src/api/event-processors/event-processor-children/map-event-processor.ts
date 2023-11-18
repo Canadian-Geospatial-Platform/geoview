@@ -14,6 +14,8 @@ import {
   payloadIsAMapViewProjection,
   PayloadBaseClass,
   mapViewProjectionPayload,
+  TypeGeometry,
+  TypeFeatureInfoEntry,
 } from '@/api/events/payloads';
 import { EVENT_NAMES } from '@/api/events/event-types';
 import { getGeoViewStore } from '@/core/stores/stores-managers';
@@ -60,6 +62,30 @@ export class MapEventProcessor extends AbstractEventProcessor {
       }
     );
 
+    // Checks for changes to selected features and updates highlights
+    const unsubMapSelectedFeatures = store.subscribe(
+      (state) => state.mapState.selectedFeatures,
+      (curFeatures, prevFeatures) => {
+        if (curFeatures.length === 0) api.maps[mapId].layer.featureHighlight.resetAnimation('all');
+        // If features have been added, highlight them
+        else if (curFeatures.length > prevFeatures.length) {
+          const prevFeatureUids = prevFeatures.map((feature) => (feature.geometry as TypeGeometry).ol_uid);
+          const newFeatures = curFeatures.filter(
+            (feature: TypeFeatureInfoEntry) => !prevFeatureUids.includes((feature.geometry as TypeGeometry).ol_uid)
+          );
+          for (let i = 0; i < newFeatures.length; i++) api.maps[mapId].layer.featureHighlight.highlightFeature(newFeatures[i]);
+        } else if (curFeatures.length < prevFeatures.length) {
+          // Remove highlights from features that have been removed from list
+          const curFeatureUids = curFeatures.map((feature) => (feature.geometry as TypeGeometry).ol_uid);
+          const removedFeatures = prevFeatures.filter(
+            (feature: TypeFeatureInfoEntry) => !curFeatureUids.includes((feature.geometry as TypeGeometry).ol_uid)
+          );
+          for (let i = 0; i < removedFeatures.length; i++)
+            api.maps[mapId].layer.featureHighlight.resetAnimation((removedFeatures[i].geometry as TypeGeometry).ol_uid);
+        }
+      }
+    );
+
     const unsubMapZoom = store.subscribe(
       (state) => state.mapState.zoom,
       (cur, prev) => {
@@ -101,6 +127,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
       unsubMapCenterCoord,
       unsubMapPointerPosition,
       unsubMapProjection,
+      unsubMapSelectedFeatures,
       unsubMapZoom,
       unsubMapSingleClick
     );

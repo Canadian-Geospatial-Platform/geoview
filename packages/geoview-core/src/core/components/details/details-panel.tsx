@@ -1,33 +1,21 @@
 /* eslint-disable react/require-default-props */
-import React, { useEffect, useState, useRef, useCallback } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 
 import { useTranslation } from 'react-i18next';
 
 import { useTheme } from '@mui/material/styles';
 
-import { getUid } from 'ol/util'; // TODO no ol in component
-
 import { IconButton, Grid, Typography, ArrowForwardIosOutlinedIcon, ArrowBackIosOutlinedIcon, LayersClearOutlinedIcon, Box } from '@/ui';
 import { FeatureInfo } from './feature-info-new';
-import { PayloadBaseClass, api } from '@/app';
-import { EVENT_NAMES } from '@/api/events/event-types';
-import {
-  payloadIsAFeatureHighlight,
-  payloadIsAClearHighlights,
-  clearHighlightsPayload,
-  featureHighlightPayload,
-  TypeFeatureInfoEntry,
-  TypeArrayOfFeatureInfoEntries,
-  TypeGeometry,
-  TypeArrayOfLayerData,
-  TypeLayerData,
-} from '@/api/events/payloads';
+import { TypeFeatureInfoEntry, TypeArrayOfLayerData, TypeLayerData, TypeGeometry } from '@/api/events/payloads';
 import { getSxClasses } from './details-style';
 import {
   useDetailsStoreActions,
+  useDetailsStoreCheckedFeatures,
   useDetailsStoreLayerDataArray,
   useDetailsStoreSelectedLayerPath,
 } from '@/core/stores/store-interface-and-intial-values/details-state';
+import { useMapStoreActions } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { ResponsiveGrid, CloseButton, EnlargeButton, LayerList, LayerTitle } from '../common';
 
 interface DetailsPanelProps {
@@ -47,96 +35,43 @@ export function Detailspanel({ mapId }: DetailsPanelProps): JSX.Element {
   const sxClasses = getSxClasses(theme);
 
   // internal state
-  const selectedFeatures = useRef<string[]>([]);
   const [layerDataInfo, setLayerDataInfo] = useState<TypeLayerData | null>(null);
   const [currentFeatureIndex, setCurrentFeatureIndex] = useState<number>(0);
-  const [isClearAllCheckboxes, setIsClearAllCheckboxes] = useState<boolean>(false);
-  const [disableClearAllBtn, setDisableClearAllBtn] = useState<boolean>(false);
   const [isLayersPanelVisible, setIsLayersPanelVisible] = useState(false);
   const [isEnlargeDataTable, setIsEnlargeDataTable] = useState(false);
 
   // get values from store
   const selectedLayerPath = useDetailsStoreSelectedLayerPath();
-  const { setSelectedLayerPath } = useDetailsStoreActions();
   const arrayOfLayerData = useDetailsStoreLayerDataArray();
+  const checkedFeatures = useDetailsStoreCheckedFeatures();
+  const { setSelectedLayerPath, removeCheckedFeature } = useDetailsStoreActions();
+  const { addSelectedFeature, removeSelectedFeature } = useMapStoreActions();
 
   // Returns the index of matching layer based on the found layer path
   const findLayerPathIndex = (layerDataArray: TypeArrayOfLayerData, layerPathSearch: string): number => {
     return layerDataArray.findIndex((item) => item.layerPath === layerPathSearch);
   };
 
-  const highlightCallbackFunction = (payload: PayloadBaseClass) => {
-    if (payloadIsAFeatureHighlight(payload) && payload.feature.geometry) {
-      selectedFeatures.current.push(getUid(payload.feature.geometry));
-    }
-  };
-
-  const clearHighlightCallbackFunction = (payload: PayloadBaseClass) => {
-    if (payloadIsAClearHighlights(payload)) {
-      if (payload.id === 'all') {
-        selectedFeatures.current = [];
-      }
-      if (selectedFeatures.current.indexOf(payload.id) !== -1)
-        selectedFeatures.current.splice(selectedFeatures.current.indexOf(payload.id), 1);
-    }
+  /**
+   * Check if feature is in the store checkedFeatures array
+   *
+   * @param {TypeFeatureInfoEntry} feature The feature to check
+   * @returns {boolean} true if feature is in checkedFeatures
+   */
+  const isFeatureInCheckedFeatures = (feature: TypeFeatureInfoEntry): boolean => {
+    return checkedFeatures.some((checkedFeature) => {
+      return (checkedFeature.geometry as TypeGeometry).ol_uid === (feature.geometry as TypeGeometry).ol_uid;
+    });
   };
 
   const handleClearAllFeatures = () => {
-    // clear all highlights from features on the map in all layers,
-    api.event.emit(clearHighlightsPayload(EVENT_NAMES.FEATURE_HIGHLIGHT.EVENT_HIGHLIGHT_CLEAR, mapId, 'all'));
+    // clear all highlights from features on the map in all layers
+    removeSelectedFeature('all');
+    // clear checked features array
+    removeCheckedFeature('all');
     // add the highlight to the current feature
-    api.event.emit(
-      featureHighlightPayload(
-        EVENT_NAMES.FEATURE_HIGHLIGHT.EVENT_HIGHLIGHT_FEATURE,
-        mapId,
-        layerDataInfo?.features![currentFeatureIndex] as TypeFeatureInfoEntry
-      )
-    );
-
-    setIsClearAllCheckboxes(true);
+    addSelectedFeature(layerDataInfo?.features![currentFeatureIndex] as TypeFeatureInfoEntry);
   };
-
-  const allUncheckedFeatures = (
-    checkedFeatures: Exclude<TypeArrayOfFeatureInfoEntries, null | undefined>,
-    allFeatures: Exclude<TypeArrayOfFeatureInfoEntries, null | undefined>
-  ) => {
-    const uncheckedFeatures = allFeatures.filter(
-      (feature) =>
-        !checkedFeatures.some(
-          (checkedFeature) => (checkedFeature.geometry as TypeGeometry)?.ol_uid === (feature.geometry as TypeGeometry)?.ol_uid
-        )
-    );
-    return uncheckedFeatures;
-  };
-
-  const handleFeatureNavigateChange = (
-    checkedFeatures: Exclude<TypeArrayOfFeatureInfoEntries, null | undefined>,
-    currentFeature: TypeFeatureInfoEntry
-  ) => {
-    // remove the highlight for unchecked feature
-    arrayOfLayerData.forEach((layer: TypeLayerData) => {
-      const getAllUnCheckedFeatures = allUncheckedFeatures(checkedFeatures, layer.features!);
-
-      getAllUnCheckedFeatures.forEach((obj: TypeFeatureInfoEntry) => {
-        if (obj.geometry)
-          api.event.emit(clearHighlightsPayload(EVENT_NAMES.FEATURE_HIGHLIGHT.EVENT_HIGHLIGHT_CLEAR, mapId, getUid(obj.geometry)));
-      });
-    });
-
-    // add highlight to current feature
-    api.event.emit(featureHighlightPayload(EVENT_NAMES.FEATURE_HIGHLIGHT.EVENT_HIGHLIGHT_FEATURE, mapId, currentFeature));
-  };
-
-  useEffect(() => {
-    api.event.on(EVENT_NAMES.FEATURE_HIGHLIGHT.EVENT_HIGHLIGHT_FEATURE, highlightCallbackFunction, mapId);
-    api.event.on(EVENT_NAMES.FEATURE_HIGHLIGHT.EVENT_HIGHLIGHT_CLEAR, clearHighlightCallbackFunction, mapId);
-
-    return () => {
-      api.event.off(EVENT_NAMES.FEATURE_HIGHLIGHT.EVENT_HIGHLIGHT_FEATURE, mapId, highlightCallbackFunction);
-      api.event.off(EVENT_NAMES.FEATURE_HIGHLIGHT.EVENT_HIGHLIGHT_CLEAR, mapId, clearHighlightCallbackFunction);
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   useEffect(() => {
     if (arrayOfLayerData.length > 0) {
@@ -153,9 +88,39 @@ export function Detailspanel({ mapId }: DetailsPanelProps): JSX.Element {
    * Get number of features of a layer.
    * @returns string
    */
-  const getFeaturesOfLayer = (): string => {
-    const numOfFeatures = layerDataInfo?.features?.length ?? 0;
+  const getFeaturesOfLayer = (layer: TypeLayerData): string => {
+    const numOfFeatures = layer.features?.length ?? 0;
     return `${numOfFeatures} ${t('details.feature')}${numOfFeatures > 1 ? 's' : ''}`;
+  };
+
+  /**
+   * Handles clicks to forward and back arrows in right panel.
+   * Removes previous feature from selectedFeatures store if it is not checked, and adds new feature.
+   *
+   * @param {-1 | 1} change The change to index number (-1 for back, 1 for forward)
+   */
+  const handleFeatureNavigateChange = (change: -1 | 1): void => {
+    const currentFeature = layerDataInfo!.features![currentFeatureIndex];
+    const nextFeature = layerDataInfo!.features![currentFeatureIndex + change];
+    if (!isFeatureInCheckedFeatures(currentFeature)) removeSelectedFeature(currentFeature);
+    addSelectedFeature(nextFeature);
+    setCurrentFeatureIndex(currentFeatureIndex + change);
+  };
+
+  /**
+   * Handles clicks to layers in left panel. Removes highlight from previous layers feature if it is not checked,
+   * before updating current layer and highlighting first feature.
+   *
+   * @param {TypeLayerData} layerData The data of the selected layer
+   */
+  const handleLayerChange = (layerData: TypeLayerData): void => {
+    const currentFeature = layerDataInfo!.features![currentFeatureIndex];
+    if (!isFeatureInCheckedFeatures(currentFeature)) removeSelectedFeature(currentFeature);
+    setLayerDataInfo(layerData);
+    setCurrentFeatureIndex(0);
+    setSelectedLayerPath(layerData.layerPath);
+    setIsLayersPanelVisible(false);
+    addSelectedFeature(layerData.features![0]);
   };
 
   const renderLayerList = useCallback(() => {
@@ -165,21 +130,18 @@ export function Detailspanel({ mapId }: DetailsPanelProps): JSX.Element {
           layerName: layer.layerName ?? '',
           layerPath: layer.layerPath,
           numOffeatures: layer.features?.length ?? 0,
-          layerFeatures: getFeaturesOfLayer(),
-          tooltip: `${layer.layerName}, ${getFeaturesOfLayer()}`,
+          layerFeatures: getFeaturesOfLayer(layer),
+          tooltip: `${layer.layerName}, ${getFeaturesOfLayer(layer)}`,
         }))}
         isEnlargeDataTable={isEnlargeDataTable}
         selectedLayerIndex={arrayOfLayerData.findIndex((layer) => layer.layerPath === layerDataInfo?.layerPath)}
         handleListItemClick={(layer, index: number) => {
-          setLayerDataInfo(arrayOfLayerData[index]);
-          setCurrentFeatureIndex(0);
-          setSelectedLayerPath(arrayOfLayerData[index].layerPath);
-          setIsLayersPanelVisible(false);
+          handleLayerChange(arrayOfLayerData[index]);
         }}
       />
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [layerDataInfo, arrayOfLayerData, isEnlargeDataTable]);
+  }, [layerDataInfo, arrayOfLayerData, isEnlargeDataTable, checkedFeatures]);
 
   return (
     <Box sx={sxClasses.detailsContainer}>
@@ -230,7 +192,7 @@ export function Detailspanel({ mapId }: DetailsPanelProps): JSX.Element {
                         tooltip="details.clearAllfeatures"
                         tooltipPlacement="top"
                         onClick={() => handleClearAllFeatures()}
-                        disabled={disableClearAllBtn}
+                        disabled={checkedFeatures.length === 0}
                       >
                         <LayersClearOutlinedIcon />
                       </IconButton>
@@ -242,7 +204,7 @@ export function Detailspanel({ mapId }: DetailsPanelProps): JSX.Element {
                         aria-label="backward"
                         tooltip="details.previousFeatureBtn"
                         tooltipPlacement="top"
-                        onClick={() => setCurrentFeatureIndex(currentFeatureIndex - 1)}
+                        onClick={() => handleFeatureNavigateChange(-1)}
                         disabled={currentFeatureIndex === 0}
                       >
                         <ArrowBackIosOutlinedIcon />
@@ -252,7 +214,7 @@ export function Detailspanel({ mapId }: DetailsPanelProps): JSX.Element {
                         aria-label="forward"
                         tooltip="details.nextFeatureBtn"
                         tooltipPlacement="top"
-                        onClick={() => setCurrentFeatureIndex(currentFeatureIndex + 1)}
+                        onClick={() => handleFeatureNavigateChange(1)}
                         // eslint-disable-next-line no-unsafe-optional-chaining
                         disabled={currentFeatureIndex === layerDataInfo?.features!.length - 1}
                       >
@@ -261,16 +223,7 @@ export function Detailspanel({ mapId }: DetailsPanelProps): JSX.Element {
                     </Box>
                   </Grid>
                 </Grid>
-                <FeatureInfo
-                  features={layerDataInfo?.features}
-                  currentFeatureIndex={currentFeatureIndex}
-                  selectedFeatures={selectedFeatures}
-                  mapId={mapId}
-                  onClearCheckboxes={() => setIsClearAllCheckboxes(false)}
-                  onFeatureNavigateChange={handleFeatureNavigateChange}
-                  clearAllCheckboxes={isClearAllCheckboxes}
-                  setDisableClearAllBtn={setDisableClearAllBtn}
-                />
+                <FeatureInfo features={layerDataInfo?.features} currentFeatureIndex={currentFeatureIndex} mapId={mapId} />
               </Box>
             </ResponsiveGrid.Right>
           </ResponsiveGrid.Root>
