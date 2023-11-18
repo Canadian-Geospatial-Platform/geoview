@@ -92,3 +92,11 @@ export const ResponsiveGrid = {
   Left: ResponsiveGridLeftPanel,
   Right: ResponsiveGridRightPanel,
 };
+
+ResponsiveGridLeftPanel.defaultProps = {
+  sxProps: undefined,
+};
+
+ResponsiveGridRightPanel.defaultProps = {
+  sxProps: undefined,
+};

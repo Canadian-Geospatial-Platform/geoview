@@ -11,7 +11,7 @@ export function LayersActions(): JSX.Element {
   const displayState = useLayersDisplayState();
   const { setDisplayState } = useLayerStoreActions();
 
-  const handleSetDisplayState = function (newState: TypeLayersViewDisplayState) {
+  const handleSetDisplayState = (newState: TypeLayersViewDisplayState): void => {
     setDisplayState(newState);
   };
 
