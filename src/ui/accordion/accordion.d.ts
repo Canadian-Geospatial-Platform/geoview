@@ -1,9 +1,10 @@
-import { ReactNode } from 'react';
+import { ReactNode, CSSProperties } from 'react';
 /**
  * Properties for the Accordion element
  */
 interface AccordionProps {
     id: string;
+    sx: CSSProperties;
     items: Array<AccordionItem>;
     className: string;
     defaultExpanded: boolean;
@@ -24,7 +25,6 @@ export {};
 /**
  * Example of usage
  * <Accordion
-      className="accordion-theme"
       items={Object.values(items).map((item: AccordionItem) => (
           {
               title: writeTitle(item),

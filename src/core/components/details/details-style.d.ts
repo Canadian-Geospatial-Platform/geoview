@@ -139,32 +139,6 @@ export declare const getSxClasses: (theme: Theme) => {
             };
         };
     };
-    enlargeBtn: {
-        width: string;
-        height: string;
-        borderRadius: string;
-        boxShadow: string;
-        marginTop: string;
-        background: string;
-        '>div': {
-            color: string;
-        };
-        '& svg': {
-            marginRight: string;
-        };
-        ':hover': {
-            backgroundColor: string;
-            '> div': {
-                color: string;
-            };
-            '& svg': {
-                color: string;
-            };
-        };
-    };
-    enlargeBtnIcon: {
-        color: string;
-    };
     borderWithIndex: string;
     borderNone: string;
     headline: {

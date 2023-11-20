@@ -14,7 +14,6 @@ interface TypeSelectProps extends SelectProps {
  */
 interface TypeMenuItemProps {
     type?: 'item' | 'header';
-    content?: JSX.Element;
     item: MenuItemProps | ListSubheaderProps | null;
 }
 /**

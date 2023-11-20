@@ -4,8 +4,12 @@ export interface SliderFilterProps {
     defaultValue: string;
     minAndMax: number[];
     field: string;
+    singleHandle: boolean;
     values: number[];
     filtering: boolean;
+    delay: number;
+    locked: boolean;
+    reversed: boolean;
 }
 export declare class TimeSliderApi {
     mapId: string;

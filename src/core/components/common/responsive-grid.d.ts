@@ -1,11 +1,13 @@
 import { ReactNode } from 'react';
-import { GridProps } from '@mui/material';
+import { GridProps, SxProps } from '@/ui';
 interface ResponsiveGridProps extends GridProps {
     children: ReactNode;
 }
 interface ResponsiveGridPanelProps extends GridProps {
     children: ReactNode;
     isLayersPanelVisible: boolean;
+    sxProps?: SxProps | undefined;
+    isEnlargeDataTable: boolean;
 }
 /**
  * Create Responsive Grid Container
@@ -17,16 +19,19 @@ declare function ResponsiveGridRoot({ children, ...rest }: ResponsiveGridProps):
  * Create Left Panel for responsive grid.
  * @param {ReactNode} children child elements to be rendered
  * @param {boolean} isLayersPanelVisible panel visibility
+ * @param {boolean} isEnlargeDataTable panel is enlarge
  * @returns JSX.Element
  */
-declare function ResponsiveGridLeftPanel({ children, isLayersPanelVisible, ...rest }: ResponsiveGridPanelProps): import("react").JSX.Element;
+declare function ResponsiveGridLeftPanel({ children, isLayersPanelVisible, isEnlargeDataTable, ...rest }: ResponsiveGridPanelProps): import("react").JSX.Element;
 /**
  * Create Right Panel for responsive grid.
  * @param {ReactNode} children child elements to be rendered
  * @param {boolean} isLayersPanelVisible panel visibility
+ * @param {boolean} isEnlargeDataTable panel is enlarge
+ * @param {object} sxProps Optional sx props
  * @returns JSX.Element
  */
-declare function ResponsiveGridRightPanel({ children, isLayersPanelVisible, ...rest }: ResponsiveGridPanelProps): import("react").JSX.Element;
+declare function ResponsiveGridRightPanel({ children, isLayersPanelVisible, sxProps, isEnlargeDataTable, ...rest }: ResponsiveGridPanelProps): import("react").JSX.Element;
 export declare const ResponsiveGrid: {
     Root: typeof ResponsiveGridRoot;
     Left: typeof ResponsiveGridLeftPanel;
