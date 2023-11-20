@@ -51,7 +51,7 @@ export function Datapanel({ layerData, mapId, projectionConfig, language }: Data
   const handleListItemClick = useCallback((layer: LayerListEntry, index: number) => {
     setSelectedLayerIndex(index);
     setIsLoading(true);
-    setIsLayersPanelVisible(false);
+    setIsLayersPanelVisible(true);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

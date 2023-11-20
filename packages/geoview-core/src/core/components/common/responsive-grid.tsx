@@ -39,11 +39,11 @@ function ResponsiveGridLeftPanel({ children, isLayersPanelVisible = false, isEnl
   return (
     <Grid
       item
-      xs={isLayersPanelVisible ? 12 : 0}
+      xs={isLayersPanelVisible ? 0 : 12}
       md={!isEnlargeDataTable ? 4 : 2}
       lg={!isEnlargeDataTable ? 4 : 1.25}
       sx={{
-        [theme.breakpoints.down('md')]: { display: isLayersPanelVisible ? 'block' : 'none' },
+        [theme.breakpoints.down('md')]: { display: isLayersPanelVisible ? 'none' : 'block' },
       }}
       {...rest}
     >
@@ -71,13 +71,13 @@ function ResponsiveGridRightPanel({
   return (
     <Grid
       item
-      xs={!isLayersPanelVisible ? 12 : 0}
+      xs={!isLayersPanelVisible ? 0 : 12}
       md={!isEnlargeDataTable ? 8 : 10}
       lg={!isEnlargeDataTable ? 8 : 10.75}
       sx={{
         position: 'relative',
         [theme.breakpoints.up('md')]: { paddingLeft: '1rem' },
-        [theme.breakpoints.down('md')]: { display: !isLayersPanelVisible ? 'block' : 'none' },
+        [theme.breakpoints.down('md')]: { display: !isLayersPanelVisible ? 'none' : 'block' },
         ...sxProps,
       }}
       {...rest}

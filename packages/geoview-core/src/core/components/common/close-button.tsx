@@ -29,10 +29,10 @@ export function CloseButton({ isLayersPanelVisible, setIsLayersPanelVisible }: C
         ...sxClasses.enlargeBtn,
         marginLeft: '1rem',
         [theme.breakpoints.up('md')]: { display: 'none' },
-        [theme.breakpoints.between('sm', 'md')]: { display: !isLayersPanelVisible ? 'block' : 'none' },
-        [theme.breakpoints.down('md')]: { display: !isLayersPanelVisible ? 'block' : 'none' },
+        [theme.breakpoints.between('sm', 'md')]: { display: !isLayersPanelVisible ? 'none' : 'block' },
+        [theme.breakpoints.down('md')]: { display: !isLayersPanelVisible ? 'none' : 'block' },
       }}
-      onClick={() => setIsLayersPanelVisible(true)}
+      onClick={() => setIsLayersPanelVisible(false)}
       tooltip={t('dataTable.close') ?? ''}
       tooltipPlacement="top"
     >

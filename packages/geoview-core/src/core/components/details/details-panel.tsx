@@ -174,7 +174,7 @@ export function Detailspanel({ mapId }: DetailsPanelProps): JSX.Element {
           setLayerDataInfo(arrayOfLayerData[index]);
           setCurrentFeatureIndex(0);
           setSelectedLayerPath(arrayOfLayerData[index].layerPath);
-          setIsLayersPanelVisible(false);
+          setIsLayersPanelVisible(true);
         }}
       />
     );
