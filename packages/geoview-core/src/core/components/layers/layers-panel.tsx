@@ -116,10 +116,7 @@ export function LayersPanel({ mapId }: LegendItemsDetailsProps) {
               [theme.breakpoints.down('md')]: { justifyContent: 'space-between' },
             }}
           >
-            <Box>
-              <EnlargeButton isEnlargeDataTable={isEnlargeDataTable} setIsEnlargeDataTable={setIsEnlargeDataTable} />
-              <CloseButton isLayersPanelVisible={isLayersPanelVisible} setIsLayersPanelVisible={setIsLayersPanelVisible} />
-            </Box>
+            <CloseButton isLayersPanelVisible={isLayersPanelVisible} setIsLayersPanelVisible={setIsLayersPanelVisible} />
           </Box>
         </ResponsiveGrid.Right>
       </ResponsiveGrid.Root>
