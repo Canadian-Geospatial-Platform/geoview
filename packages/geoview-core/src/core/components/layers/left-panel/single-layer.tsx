@@ -132,7 +132,7 @@ export function SingleLayer(props: SingleLayerProps): JSX.Element {
     if (displayState === 'order') {
       return (
         <IconButton onClick={handleReArrangeLayer}>
-          <HandleIcon style={{ fill: '#a9a9a9' }} />
+          <HandleIcon style={{ fill: '#c51e3a' }} />
         </IconButton>
       );
     }
@@ -162,7 +162,7 @@ export function SingleLayer(props: SingleLayerProps): JSX.Element {
   }
 
   function renderArrowButtons() {
-    if (!['processed', 'loaded'].includes(layer.layerStatus)) {
+    if (!['processed', 'loaded'].includes(layer.layerStatus) || displayState !== 'view') {
       return null;
     }
     if (layer.children?.length) {
