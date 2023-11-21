@@ -7,7 +7,7 @@ import { ButtonGroup as MaterialButtonGroup, ButtonGroupProps } from '@mui/mater
  * @returns {JSX.Element} the created Button Group element
  */
 export function ButtonGroup(props: ButtonGroupProps): JSX.Element {
-  const { sx, className, classes, style, children, 'aria-label': ariaLabel, variant, orientation } = props;
+  const { sx, className, classes, style, children, 'aria-label': ariaLabel, variant, orientation, size } = props;
 
   return (
     <MaterialButtonGroup
@@ -18,6 +18,7 @@ export function ButtonGroup(props: ButtonGroupProps): JSX.Element {
       style={style}
       className={className}
       classes={classes}
+      size={size}
     >
       {children && children}
     </MaterialButtonGroup>
