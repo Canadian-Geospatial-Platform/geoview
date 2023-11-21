@@ -42,7 +42,7 @@ export function TimeSliderPanel(props: TypeTimeSliderProps): JSX.Element {
         selectedLayerIndex={layersList.indexOf(selectedLayer)}
         handleListItemClick={(layer) => {
           setSelectedLayer(layer.layerPath);
-          setIsLayersPanelVisible(false);
+          setIsLayersPanelVisible(true);
         }}
         layerList={layersList.map((layer) => ({ layerName: layer, layerPath: layer, tooltip: layer as string }))}
       />
