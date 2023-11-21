@@ -1,43 +1,45 @@
 import { useTranslation } from 'react-i18next';
-import { useTheme } from '@mui/material/styles';
 import { Button } from '@mui/material';
-import { Box, Typography, Stack, ExpandIcon, RemoveCircleOutlineIcon, AddCircleOutlineIcon } from '@/ui';
-import { getSxClasses } from '../layers-style';
+import { Box, AddCircleOutlineIcon, ButtonGroup, DeleteOutlineIcon, HandleIcon } from '@/ui';
+import { useLayerStoreActions, useLayersDisplayState } from '@/core/stores/store-interface-and-intial-values/layer-state';
+import { TypeLayersViewDisplayState } from '../types';
 
 export function LayersActions(): JSX.Element {
   const { t } = useTranslation<string>();
 
-  const theme = useTheme();
-  const sxClasses = getSxClasses(theme);
+  // access store
+  const displayState = useLayersDisplayState();
+  const { setDisplayState } = useLayerStoreActions();
+
+  const handleSetDisplayState = function (newState: TypeLayersViewDisplayState) {
+    setDisplayState(newState);
+  };
 
   return (
     <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'right', marginBottom: '15px' }}>
-      <Stack style={{ alignItems: 'center', gap: '15px' }} direction="row">
+      <ButtonGroup size="small" variant="outlined" aria-label="outlined button group">
         <Button
-          variant="contained"
-          size="small"
-          sx={{ backgroundColor: '#F4F5FF', borderRadius: '20px' }}
-          startIcon={<ExpandIcon fontSize="small" sx={{ color: '#515BA5' }} />}
+          variant={displayState === 'add' ? 'contained' : 'outlined'}
+          startIcon={<AddCircleOutlineIcon fontSize="small" />}
+          onClick={() => handleSetDisplayState('add')}
         >
-          <Typography sx={sxClasses.legendButtonText}>{t('legend.re-arrange')}</Typography>
+          {t('general.add')}
         </Button>
         <Button
-          variant="contained"
-          size="small"
-          sx={{ backgroundColor: '#F4F5FF', borderRadius: '20px' }}
-          startIcon={<AddCircleOutlineIcon fontSize="small" sx={{ color: '#515BA5' }} />}
+          variant={displayState === 'order' ? 'contained' : 'outlined'}
+          startIcon={<HandleIcon fontSize="small" />}
+          onClick={() => handleSetDisplayState('order')}
         >
-          <Typography sx={sxClasses.legendButtonText}>{t('general.add')}</Typography>
+          {t('legend.re-arrange')}
         </Button>
         <Button
-          variant="contained"
-          size="small"
-          sx={{ backgroundColor: '#F4F5FF', borderRadius: '20px' }}
-          startIcon={<RemoveCircleOutlineIcon fontSize="small" sx={{ color: '#515BA5' }} />}
+          variant={displayState === 'remove' ? 'contained' : 'outlined'}
+          startIcon={<DeleteOutlineIcon fontSize="small" />}
+          onClick={() => handleSetDisplayState('remove')}
         >
-          <Typography sx={sxClasses.legendButtonText}>{t('general.remove')}</Typography>
+          {t('general.remove')}
         </Button>
-      </Stack>
+      </ButtonGroup>
     </Box>
   );
 }

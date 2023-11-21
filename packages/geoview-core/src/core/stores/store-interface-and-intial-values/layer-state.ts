@@ -3,7 +3,7 @@
 import { useStore } from 'zustand';
 import _ from 'lodash';
 import { useGeoViewStore } from '../stores-managers';
-import { TypeLegendLayer } from '../../components/layers/types';
+import { TypeLayersViewDisplayState, TypeLegendLayer } from '../../components/layers/types';
 import { TypeGetStore, TypeSetStore } from '../geoview-store';
 
 export interface ILayerState {
@@ -12,13 +12,16 @@ export interface ILayerState {
   selectedLayers: Record<string, { layer: string; icon: string }[]>;
   selectedLayerPath: string | undefined | null;
   legendLayers: TypeLegendLayer[];
+  displayState: TypeLayersViewDisplayState;
   actions: {
     getLayer: (layerPath: string) => TypeLegendLayer | undefined;
+    setDisplayState: (newDisplayState: TypeLayersViewDisplayState) => void;
     setSelectedLayerPath: (layerPath: string) => void;
     setLayerOpacity: (layerPath: string, opacity: number) => void;
     toggleLayerVisibility: (layerPath: string) => void;
     toggleItemVisibility: (layerPath: string, itemName: string) => void;
     setAllItemsVisibility: (layerPath: string, visibility: boolean) => void;
+    deleteLayer: (layerPath: string) => void;
   };
 }
 
@@ -28,12 +31,22 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
     selectedLayers: {} as Record<string, { layer: string; icon: string }[]>,
     legendLayers: [] as TypeLegendLayer[],
     selectedLayerPath: null,
+    displayState: 'view',
 
     actions: {
       getLayer: (layerPath: string) => {
         const curLayers = get().legendState.legendLayers;
         const layer = findLayerByPath(curLayers, layerPath);
         return layer;
+      },
+      setDisplayState: (newDisplayState: TypeLayersViewDisplayState) => {
+        const curState = get().legendState.displayState;
+        set({
+          legendState: {
+            ...get().legendState,
+            displayState: curState === newDisplayState ? 'view' : newDisplayState,
+          },
+        });
       },
       setSelectedLayerPath: (layerPath: string) => {
         set({
@@ -116,6 +129,16 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
           },
         });
       },
+      deleteLayer: (layerPath: string) => {
+        const curLayers = get().legendState.legendLayers;
+        deleteSingleLayer(curLayers, layerPath);
+        set({
+          legendState: {
+            ...get().legendState,
+            legendLayers: [...curLayers],
+          },
+        });
+      },
     },
   } as ILayerState;
 
@@ -149,11 +172,25 @@ function findLayerByPath(layers: TypeLegendLayer[], layerPath: string): TypeLege
   return undefined;
 }
 
+function deleteSingleLayer(layers: TypeLegendLayer[], layerPath: string) {
+  const indToDelete = layers.findIndex((l) => l.layerPath === layerPath);
+  if (indToDelete >= 0) {
+    layers.splice(indToDelete, 1);
+  } else {
+    for (const l of layers) {
+      if (l.children && l.children.length > 0) {
+        deleteSingleLayer(l.children, layerPath);
+      }
+    }
+  }
+}
+
 // **********************************************************
 // Layer state selectors
 // **********************************************************
 export const useLayersList = () => useStore(useGeoViewStore(), (state) => state.legendState.legendLayers);
 export const useSelectedLayerPath = () => useStore(useGeoViewStore(), (state) => state.legendState.selectedLayerPath);
+export const useLayersDisplayState = () => useStore(useGeoViewStore(), (state) => state.legendState.displayState);
 
 export const useLayerStoreActions = () => useStore(useGeoViewStore(), (state) => state.legendState.actions);
 

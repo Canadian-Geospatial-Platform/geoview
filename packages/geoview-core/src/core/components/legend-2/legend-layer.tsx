@@ -12,10 +12,10 @@ import {
   GroupWorkOutlinedIcon,
   ErrorIcon,
   DownloadingIcon,
-  ListAltIcon,
 } from '@/ui';
 import { TypeLegendLayer } from '@/core/components/layers/types';
 import { getSxClasses } from './legend-styles';
+import { IconStack } from '../icon-stack/icon-stack';
 
 interface LegendLayerProps {
   layer: TypeLegendLayer;
@@ -34,6 +34,17 @@ export function LegendLayer(props: LegendLayerProps): JSX.Element {
    */
   const handleExpandGroupClick = () => {
     setGroupOpen(!isGroupOpen);
+  };
+
+  const getSecondaryText = () => {
+    if (layer.children.length) {
+      return `${layer.children.length} sub-layers`;
+    }
+    if (layer.items.length) {
+      return `${layer.items.filter((d) => d.isChecked).length} of ${layer.items.length} items`;
+    }
+
+    return '';
   };
 
   // renders the layers children, if any
@@ -60,16 +71,18 @@ export function LegendLayer(props: LegendLayerProps): JSX.Element {
     }
     return (
       <List sx={{ width: '100%' }}>
-        {layer.items.map((item) => (
-          <ListItem key={item.name} className={!item.isChecked ? 'unchecked' : ''}>
-            <ListItemIcon>
-              <img alt={item.name} src={item.icon} />
-            </ListItemIcon>
-            <Tooltip title={item.name} placement="top" enterDelay={1000}>
-              <ListItemText primary={item.name} />
-            </Tooltip>
-          </ListItem>
-        ))}
+        {layer.items
+          .filter((d) => d.isChecked)
+          .map((item) => (
+            <ListItem key={item.name} className={!item.isChecked ? 'unchecked' : ''}>
+              <ListItemIcon>
+                <img alt={item.name} src={item.icon} />
+              </ListItemIcon>
+              <Tooltip title={item.name} placement="top" enterDelay={1000}>
+                <ListItemText primary={item.name} />
+              </Tooltip>
+            </ListItem>
+          ))}
       </List>
     );
   }
@@ -111,7 +124,7 @@ export function LegendLayer(props: LegendLayerProps): JSX.Element {
     }
     return (
       <IconButton color="success">
-        <ListAltIcon />
+        <IconStack layerPath={layer.layerPath} />
       </IconButton>
     );
   }
@@ -121,7 +134,7 @@ export function LegendLayer(props: LegendLayerProps): JSX.Element {
       <ListItem key={layer.layerName} divider onClick={handleExpandGroupClick}>
         {renderLayerIcon()}
         <Tooltip title={layer.layerName} placement="top" enterDelay={1000}>
-          <ListItemText primary={layer.layerName} className="layerTitle" />
+          <ListItemText primary={layer.layerName} className="layerTitle" secondary={getSecondaryText()} />
         </Tooltip>
       </ListItem>
       {renderCollapsible()}
