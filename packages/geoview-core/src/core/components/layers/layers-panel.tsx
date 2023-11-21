@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '@mui/material/styles';
 import { styled } from '@mui/material';
-import { CloseButton, EnlargeButton, LayerTitle, ResponsiveGrid } from '../common';
+import { CloseButton, LayerTitle, ResponsiveGrid } from '../common';
 import { Box, DeleteIcon, HandleIcon, IconButton, Paper } from '@/ui';
 import { getSxClasses } from './layers-style';
 import { LegendItemsDetailsProps } from './types';
@@ -27,7 +27,7 @@ export function LayersPanel({ mapId }: LegendItemsDetailsProps) {
   const sxClasses = getSxClasses(theme);
 
   const [isLayersPanelVisible, setIsLayersPanelVisible] = useState(false);
-  const [isEnlargeDataTable, setIsEnlargeDataTable] = useState(false);
+  // const [isEnlargeDataTable, setIsEnlargeDataTable] = useState(false);
 
   const layerDetailsRef = useRef<HTMLDivElement>(null);
 
@@ -104,10 +104,10 @@ export function LayersPanel({ mapId }: LegendItemsDetailsProps) {
   return (
     <Box sx={sxClasses.layersPanelContainer}>
       <ResponsiveGrid.Root>
-        <ResponsiveGrid.Left isEnlargeDataTable={isEnlargeDataTable} isLayersPanelVisible={isLayersPanelVisible}>
+        <ResponsiveGrid.Left isEnlargeDataTable={false} isLayersPanelVisible={isLayersPanelVisible}>
           <LayerTitle>{t('general.layers')}</LayerTitle>
         </ResponsiveGrid.Left>
-        <ResponsiveGrid.Right isEnlargeDataTable={isEnlargeDataTable} isLayersPanelVisible={isLayersPanelVisible}>
+        <ResponsiveGrid.Right isEnlargeDataTable={false} isLayersPanelVisible={isLayersPanelVisible}>
           <Box
             sx={{
               display: 'flex',
@@ -121,11 +121,11 @@ export function LayersPanel({ mapId }: LegendItemsDetailsProps) {
         </ResponsiveGrid.Right>
       </ResponsiveGrid.Root>
       <ResponsiveGrid.Root sx={{ mt: 8 }}>
-        <ResponsiveGrid.Left isEnlargeDataTable={isEnlargeDataTable} isLayersPanelVisible={isLayersPanelVisible}>
+        <ResponsiveGrid.Left isEnlargeDataTable={false} isLayersPanelVisible={isLayersPanelVisible}>
           {leftPanel()}
         </ResponsiveGrid.Left>
 
-        <ResponsiveGrid.Right isEnlargeDataTable={isEnlargeDataTable} isLayersPanelVisible={isLayersPanelVisible}>
+        <ResponsiveGrid.Right isEnlargeDataTable={false} isLayersPanelVisible={isLayersPanelVisible}>
           {rightPanel()}
         </ResponsiveGrid.Right>
       </ResponsiveGrid.Root>
