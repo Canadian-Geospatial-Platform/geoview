@@ -1,35 +1,12 @@
-import { Theme } from '@mui/material/styles';
+import { Theme } from '@mui/material';
 export declare const getSxClasses: (theme: Theme) => {
-    detailsContainer: {
-        background: string;
-        boxShadow: string;
-        padding: string;
-    };
-    panelHeaders: {
-        font: string;
-        marginBottom: string;
-    };
-    layerListPaper: {
-        marginBottom: string;
-        cursor: string;
-        textOverflow: string;
-    };
-    listItemIcon: {
-        color: string;
-        background: string;
-    };
-    layerNamePrimary: {
-        '& .MuiListItemText-primary': {
-            font: string;
-        };
-        marginLeft: string;
-    };
     list: {
         [x: string]: string | {
             paddingRight: string;
             font?: undefined;
             height?: undefined;
             '& .MuiListItemButton-root'?: undefined;
+            minHeight?: undefined;
             minWidth?: undefined;
             '>span'?: undefined;
             '> p'?: undefined;
@@ -38,6 +15,7 @@ export declare const getSxClasses: (theme: Theme) => {
             paddingRight?: undefined;
             height?: undefined;
             '& .MuiListItemButton-root'?: undefined;
+            minHeight?: undefined;
             minWidth?: undefined;
             '>span'?: undefined;
             '> p'?: undefined;
@@ -49,6 +27,16 @@ export declare const getSxClasses: (theme: Theme) => {
             };
             paddingRight?: undefined;
             font?: undefined;
+            minHeight?: undefined;
+            minWidth?: undefined;
+            '>span'?: undefined;
+            '> p'?: undefined;
+        } | {
+            minHeight: string;
+            paddingRight?: undefined;
+            font?: undefined;
+            height?: undefined;
+            '& .MuiListItemButton-root'?: undefined;
             minWidth?: undefined;
             '>span'?: undefined;
             '> p'?: undefined;
@@ -58,6 +46,7 @@ export declare const getSxClasses: (theme: Theme) => {
             font?: undefined;
             height?: undefined;
             '& .MuiListItemButton-root'?: undefined;
+            minHeight?: undefined;
             '>span'?: undefined;
             '> p'?: undefined;
         } | {
@@ -74,6 +63,7 @@ export declare const getSxClasses: (theme: Theme) => {
             font?: undefined;
             height?: undefined;
             '& .MuiListItemButton-root'?: undefined;
+            minHeight?: undefined;
             minWidth?: undefined;
         };
         color: string;
@@ -87,6 +77,9 @@ export declare const getSxClasses: (theme: Theme) => {
                 padding: string;
                 height: string;
             };
+        };
+        '& .MuiListItemButton-root': {
+            minHeight: string;
         };
         '& .MuiListItemIcon-root': {
             minWidth: string;
@@ -103,24 +96,11 @@ export declare const getSxClasses: (theme: Theme) => {
             };
         };
     };
-    rightPanelContainer: {
-        border: string;
-        borderRadius: string;
-        backgroundColor: string;
-    };
-    rightPanelBtnHolder: {
+    listPrimaryText: {
+        minWidth: string;
         marginTop: string;
         marginBottom: string;
-        boxShadow: string;
-    };
-    gridContainer: {
-        paddingLeft: string;
-        paddingRight: string;
-    };
-    listPrimaryText: {
         marginLeft: string;
-        minWidth: string;
-        padding: string;
         flex: string;
         display: string;
         flexDirection: string;
@@ -146,5 +126,14 @@ export declare const getSxClasses: (theme: Theme) => {
                 height: string;
             };
         };
+    };
+    paper: {
+        marginBottom: string;
+    };
+    borderWithIndex: string;
+    borderNone: string;
+    headline: {
+        fontSize: string;
+        fontWeight: string;
     };
 };

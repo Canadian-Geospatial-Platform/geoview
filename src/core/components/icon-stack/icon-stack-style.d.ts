@@ -42,13 +42,11 @@ export declare const getSxClasses: () => {
     };
     stackIconsBox: {
         position: string;
-        marginLeft: number;
         '&:focus': {
             outlineColor: string;
         };
     };
     iconPreview: {
-        marginLeft: number;
         padding: number;
         borderRadius: number;
         border: string;

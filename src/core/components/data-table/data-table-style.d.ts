@@ -1,71 +1,5 @@
 import { Theme } from '@mui/material';
 export declare const getSxClasses: (theme: Theme) => {
-    list: {
-        color: string;
-        width: string;
-        paddingRight: string;
-        '& .MuiListItemText-primary': {
-            font: string;
-        };
-        '& .MuiListItem-root': {
-            height: string;
-            '& .MuiListItemButton-root': {
-                padding: string;
-                height: string;
-            };
-        };
-        '& .MuiListItemIcon-root': {
-            minWidth: string;
-        };
-        '& .MuiListItemText-root': {
-            '>span': {
-                fontSize: string;
-            };
-            '> p': {
-                fontSize: string;
-                overflow: string;
-                textOverflow: string;
-                whiteSpace: string;
-            };
-        };
-    };
-    listPrimaryText: {
-        minWidth: string;
-        marginTop: string;
-        marginLeft: string;
-        marginBottom: string;
-        flex: string;
-        display: string;
-        flexDirection: string;
-        '& p': {
-            fontSize: string;
-            font: string;
-            fontWeight: number;
-            lineHeight: number;
-            overflow: string;
-            textOverflow: string;
-            whiteSpace: string;
-        };
-        '>div': {
-            display: string;
-            alignItems: string;
-            marginTop: string;
-            '>p': {
-                fontSize: string;
-                color: string;
-            };
-            ' svg': {
-                width: string;
-                height: string;
-            };
-        };
-    };
-    paper: {
-        marginBottom: string;
-        height: string;
-    };
-    borderWithIndex: string;
-    borderNone: string;
     headline: {
         fontSize: string;
         fontWeight: string;
@@ -77,32 +11,6 @@ export declare const getSxClasses: (theme: Theme) => {
     gridContainer: {
         paddingLeft: string;
         paddingRight: string;
-    };
-    enlargeBtn: {
-        width: string;
-        height: string;
-        borderRadius: string;
-        boxShadow: string;
-        marginTop: string;
-        background: string;
-        '>div': {
-            color: string;
-        };
-        '& svg': {
-            marginRight: string;
-        };
-        ':hover': {
-            backgroundColor: string;
-            '> div': {
-                color: string;
-            };
-            '& svg': {
-                color: string;
-            };
-        };
-    };
-    enlargeBtnIcon: {
-        color: string;
     };
     iconImage: {
         padding: number;
