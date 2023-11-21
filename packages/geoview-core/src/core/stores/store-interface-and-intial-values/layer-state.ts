@@ -3,10 +3,8 @@
 import { useStore } from 'zustand';
 import _ from 'lodash';
 import { useGeoViewStore } from '../stores-managers';
-import { TypeLegendLayer } from '../../components/layers/types';
+import { TypeLayersViewDisplayState, TypeLegendLayer } from '../../components/layers/types';
 import { TypeGetStore, TypeSetStore } from '../geoview-store';
-
-type TypeLayersViewDisplayState = 'remove' | 'add' | 'order' | 'view'
 
 export interface ILayerState {
   selectedItem?: TypeLegendLayer;
@@ -17,12 +15,13 @@ export interface ILayerState {
   displayState: TypeLayersViewDisplayState;
   actions: {
     getLayer: (layerPath: string) => TypeLegendLayer | undefined;
-    setDisplayState: (newDisplayState:TypeLayersViewDisplayState) => void;
+    setDisplayState: (newDisplayState: TypeLayersViewDisplayState) => void;
     setSelectedLayerPath: (layerPath: string) => void;
     setLayerOpacity: (layerPath: string, opacity: number) => void;
     toggleLayerVisibility: (layerPath: string) => void;
     toggleItemVisibility: (layerPath: string, itemName: string) => void;
     setAllItemsVisibility: (layerPath: string, visibility: boolean) => void;
+    deleteLayer: (layerPath: string) => void;
   };
 }
 
@@ -40,7 +39,7 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
         const layer = findLayerByPath(curLayers, layerPath);
         return layer;
       },
-      setDisplayState: (newDisplayState:TypeLayersViewDisplayState) => {
+      setDisplayState: (newDisplayState: TypeLayersViewDisplayState) => {
         const curState = get().legendState.displayState;
         set({
           legendState: {
@@ -130,6 +129,16 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
           },
         });
       },
+      deleteLayer: (layerPath: string) => {
+        const curLayers = get().legendState.legendLayers;
+        deleteSingleLayer(curLayers, layerPath);
+        set({
+          legendState: {
+            ...get().legendState,
+            legendLayers: [...curLayers],
+          },
+        });
+      },
     },
   } as ILayerState;
 
@@ -161,6 +170,19 @@ function findLayerByPath(layers: TypeLegendLayer[], layerPath: string): TypeLege
   }
 
   return undefined;
+}
+
+function deleteSingleLayer(layers: TypeLegendLayer[], layerPath: string) {
+  const indToDelete = layers.findIndex((l) => l.layerPath === layerPath);
+  if (indToDelete >= 0) {
+    layers.splice(indToDelete, 1);
+  } else {
+    for (const l of layers) {
+      if (l.children && l.children.length > 0) {
+        deleteSingleLayer(l.children, layerPath);
+      }
+    }
+  }
 }
 
 // **********************************************************

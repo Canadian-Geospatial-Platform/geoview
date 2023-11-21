@@ -15,20 +15,24 @@ import {
   ListItemButton,
   ListItemIcon,
   ListItemText,
-  ListAltIcon,
   Tooltip,
   VisibilityOffOutlinedIcon,
   VisibilityOutlinedIcon,
   RestartAltIcon,
   CircularProgressBase,
   TableViewIcon,
-  DeleteIcon,
   HandleIcon,
 } from '@/ui';
 import { TypeLegendLayer } from '../types';
 import { getSxClasses } from './layerslist-style';
-import { useLayerStoreActions, useLayersDisplayState, useSelectedLayerPath } from '@/core/stores/store-interface-and-intial-values/layer-state';
+import {
+  useLayerStoreActions,
+  useLayersDisplayState,
+  useSelectedLayerPath,
+} from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { useDataTableStoreMapFilteredRecord } from '@/core/stores/store-interface-and-intial-values/data-table-state';
+import { IconStack } from '../../icon-stack/icon-stack';
+import { DeleteUndoButton } from './delete-undo-button';
 
 interface SingleLayerProps {
   layer: TypeLegendLayer;
@@ -49,7 +53,7 @@ export function SingleLayer(props: SingleLayerProps): JSX.Element {
   const displayState = useLayersDisplayState();
   const mapFiltered = useDataTableStoreMapFilteredRecord();
 
-  const layerIsSelected = layer.layerPath === selectedLayerPath;
+  const layerIsSelected = layer.layerPath === selectedLayerPath && displayState === 'view';
   const legendClass = layerIsSelected ? { ...sxClasses.layersList.selectedLayerItem } : null;
 
   const [isGroupOpen, setGroupOpen] = useState(layerIsSelected);
@@ -102,14 +106,9 @@ export function SingleLayer(props: SingleLayerProps): JSX.Element {
     console.log('reloading layer');
   };
 
-  const handleRemoveLayer = () => {
-    console.log('removing layer');
-  };
-
   const handleReArrangeLayer = () => {
     console.log('re-arrange layer');
   };
-  
 
   // renders the layers children, if any
   function renderChildren() {
@@ -127,17 +126,13 @@ export function SingleLayer(props: SingleLayerProps): JSX.Element {
   }
 
   function renderEditModeButtons() {
-    if(displayState === 'remove') {
-      return (
-        <IconButton onClick={handleRemoveLayer}>
-          <DeleteIcon style={{ fill: "#a9a9a9"}}/>
-        </IconButton>
-      );
+    if (displayState === 'remove') {
+      return <DeleteUndoButton layer={layer} />;
     }
-    if(displayState === 'order') {
+    if (displayState === 'order') {
       return (
         <IconButton onClick={handleReArrangeLayer}>
-          <HandleIcon style={{ fill: "#a9a9a9"}}/>
+          <HandleIcon color="error" />
         </IconButton>
       );
     }
@@ -177,7 +172,7 @@ export function SingleLayer(props: SingleLayerProps): JSX.Element {
         </IconButton>
       );
     }
-    if (layer.items?.length) {
+    if (displayState === 'view' && layer.items?.length) {
       return (
         <IconButton onClick={handleLayerClick}>
           <KeyboardArrowRightIcon />
@@ -223,7 +218,7 @@ export function SingleLayer(props: SingleLayerProps): JSX.Element {
     }
     return (
       <IconButton color="success">
-        <ListAltIcon />
+        <IconStack layerPath={layer.layerPath} />
       </IconButton>
     );
   }
