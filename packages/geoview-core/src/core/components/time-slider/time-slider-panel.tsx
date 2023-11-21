@@ -54,7 +54,7 @@ export function TimeSliderPanel(props: TypeTimeSliderProps): JSX.Element {
     <Box sx={sxClasses.detailsContainer}>
       <ResponsiveGrid.Root>
         <ResponsiveGrid.Left isLayersPanelVisible={isLayersPanelVisible} isEnlargeDataTable={isEnlargeDataTable}>
-          <LayerTitle>{t('details.availableLayers')}</LayerTitle>
+          <LayerTitle>{t('general.layers')}</LayerTitle>
         </ResponsiveGrid.Left>
         <ResponsiveGrid.Right isLayersPanelVisible={isLayersPanelVisible} isEnlargeDataTable={isEnlargeDataTable}>
           <Box

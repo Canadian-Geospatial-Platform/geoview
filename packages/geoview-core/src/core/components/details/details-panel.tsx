@@ -186,7 +186,7 @@ export function Detailspanel({ mapId }: DetailsPanelProps): JSX.Element {
       {!layerDataInfo && (
         <ResponsiveGrid.Root>
           <ResponsiveGrid.Left isLayersPanelVisible={isLayersPanelVisible} isEnlargeDataTable={isEnlargeDataTable}>
-            <Typography component="p">{t('details.selectVisbleLayer')}</Typography>
+            <Typography component="p">{t('general.layers')}</Typography>
           </ResponsiveGrid.Left>
         </ResponsiveGrid.Root>
       )}

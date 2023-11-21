@@ -11,10 +11,7 @@ export function LayersActions(): JSX.Element {
   const sxClasses = getSxClasses(theme);
 
   return (
-    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '15px' }}>
-      <div>
-        <Typography sx={sxClasses.categoryTitle}>{t('general.layers')}</Typography>
-      </div>
+    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'right', marginBottom: '15px' }}>
       <Stack style={{ alignItems: 'center', gap: '15px' }} direction="row">
         <Button
           variant="contained"
