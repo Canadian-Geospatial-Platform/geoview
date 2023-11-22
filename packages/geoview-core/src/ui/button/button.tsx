@@ -14,6 +14,7 @@ import { getSxClasses } from './button-style';
  */
 export function Button(props: TypeButtonProps): JSX.Element {
   const {
+    id,
     sx,
     variant,
     tooltip,
@@ -45,6 +46,7 @@ export function Button(props: TypeButtonProps): JSX.Element {
   return (
     <Tooltip title={t(tooltip || '')} placement={tooltipPlacement || 'bottom'} TransitionComponent={Fade}>
       <MaterialButton
+        id={id}
         sx={{ ...sxClasses.buttonClass, ...sxProps }}
         variant={variant || 'text'}
         className={`${className || ''}`}

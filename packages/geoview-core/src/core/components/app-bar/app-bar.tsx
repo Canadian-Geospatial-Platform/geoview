@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useCallback, Fragment, useContext, SetStateAction, Dispatch } from 'react';
+import { useState, useRef, useEffect, useCallback, Fragment, useContext } from 'react';
 
 import { useTheme } from '@mui/material/styles';
 import { Box, List, ListItem, Panel, IconButton } from '@/ui';
@@ -11,49 +11,34 @@ import { MapContext, TypeMapContext } from '@/core/app-start';
 import { payloadIsAButtonPanel, ButtonPanelPayload, PayloadBaseClass } from '@/api/events/payloads';
 import { TypeButtonPanel } from '@/ui/panel/panel-types';
 
-import Export from './buttons/export';
+import Export from '@/core/components/export/export-modal-button';
 import Geolocator from './buttons/geolocator';
 import Notifications from '@/core/components/notifications/notifications';
 import Version from './buttons/version';
-import ExportModal from '../export/export-modal';
 import { getSxClasses } from './app-bar-style';
-
-type AppbarProps = {
-  activeTrap: boolean;
-  activeTrapSet: Dispatch<SetStateAction<boolean>>;
-};
+import { useUIActiveFocusItem } from '@/core/stores/store-interface-and-intial-values/ui-state';
 
 /**
  * Create an app-bar with buttons that can open a panel
  */
-export function Appbar({ activeTrap, activeTrapSet }: AppbarProps): JSX.Element {
+export function Appbar(): JSX.Element {
+  const mapContext = useContext(MapContext);
+  const { mapFeaturesConfig, mapId } = mapContext as Required<TypeMapContext>;
+
   const theme = useTheme();
   const sxClasses = getSxClasses(theme);
 
   // internal component state
   const [buttonPanelGroups, setButtonPanelGroups] = useState<Record<string, Record<string, TypeButtonPanel>>>({});
-  const [ModalIsShown, setModalIsShown] = useState(false);
   const [selectedAppBarButtonId, setSelectedAppbarButtonId] = useState<string>('');
-
   const appBar = useRef<HTMLDivElement>(null);
 
-  const mapContext = useContext(MapContext);
+  // get store values and action
+  const activeModalId = useUIActiveFocusItem().activeElementId;
 
-  const { mapFeaturesConfig, mapId } = mapContext as Required<TypeMapContext>;
-  const trapActive = useRef<boolean>(activeTrap);
+  const appBarPanelCloseListenerFunction = () => setSelectedAppbarButtonId('');
 
-  const openModal = () => {
-    setModalIsShown(true);
-    trapActive.current = activeTrap;
-    // this will remove the focus active trap from map and focus will be on export modal
-    activeTrapSet(false);
-  };
-
-  const closeModal = () => {
-    setModalIsShown(false);
-    activeTrapSet(trapActive.current);
-  };
-
+  // #region REACT HOOKS
   const addButtonPanel = useCallback(
     (payload: ButtonPanelPayload) => {
       setButtonPanelGroups({
@@ -82,8 +67,6 @@ export function Appbar({ activeTrap, activeTrapSet }: AppbarProps): JSX.Element 
     [setButtonPanelGroups]
   );
 
-  const appBarPanelCloseListenerFunction = () => setSelectedAppbarButtonId('');
-
   useEffect(() => {
     const appBarPanelCreateListenerFunction = (payload: PayloadBaseClass) => {
       if (payloadIsAButtonPanel(payload)) addButtonPanel(payload);
@@ -107,6 +90,7 @@ export function Appbar({ activeTrap, activeTrapSet }: AppbarProps): JSX.Element 
       api.event.off(EVENT_NAMES.PANEL.EVENT_PANEL_CLOSE, mapId, appBarPanelCloseListenerFunction);
     };
   }, [addButtonPanel, mapId, removeButtonPanel, selectedAppBarButtonId]);
+  // #endregion
 
   return (
     <Box sx={sxClasses.appBar} ref={appBar}>
@@ -163,7 +147,7 @@ export function Appbar({ activeTrap, activeTrapSet }: AppbarProps): JSX.Element 
           <Box>
             <List sx={sxClasses.appBarList}>
               <ListItem>
-                <Export className={`${sxClasses.appBarButton} ${ModalIsShown ? 'active' : ''}`} openModal={openModal} />
+                <Export className={`${sxClasses.appBarButton} ${activeModalId ? 'export' : ''}`} />
               </ListItem>
             </List>
           </Box>
@@ -201,7 +185,6 @@ export function Appbar({ activeTrap, activeTrapSet }: AppbarProps): JSX.Element 
           </Fragment>
         );
       })}
-      <ExportModal isShown={ModalIsShown} closeModal={closeModal} />
     </Box>
   );
 }

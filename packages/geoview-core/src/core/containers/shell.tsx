@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 
 import { useTheme } from '@mui/material/styles';
 
-import FocusTrap from 'focus-trap-react';
+import { FocusTrap } from '@mui/base/FocusTrap';
 
 import { Map } from '@/core/components/map/map';
 import { Appbar } from '@/core/components/app-bar/app-bar';
@@ -29,7 +29,9 @@ import {
 } from '@/api/events/payloads';
 import { MapContext } from '@/core/app-start';
 import { getShellSxClasses } from './containers-style';
-import { useMapLoaded } from '../stores/store-interface-and-intial-values/map-state';
+import { useMapLoaded } from '@/core/stores/store-interface-and-intial-values/map-state';
+import { useUIActiveTrapGeoView } from '@/core/stores/store-interface-and-intial-values/ui-state';
+import ExportModal from '@/core/components/export/export-modal';
 
 /**
  * Interface for the shell properties
@@ -54,24 +56,13 @@ export function Shell(props: ShellProps): JSX.Element {
   const theme = useTheme();
   const sxClasses = getShellSxClasses(theme);
 
-  // internal component state
-  // set the active trap value for FocusTrap and pass the callback to the dialog window
-  const [activeTrap, setActivetrap] = useState(false);
-
   // render additional components if added by api
   const [components, setComponents] = useState<Record<string, JSX.Element>>({});
   const [update, setUpdate] = useState<number>(0);
 
   // get values from the store
   const mapLoaded = useMapLoaded();
-
-  /**
-   * Set the focus trap
-   * @param {boolean} dialogTrap the callback value from dialog trap
-   */
-  function handleCallback(dialogTrap: boolean): void {
-    setActivetrap(dialogTrap);
-  }
+  const activeTrapGeoView = useUIActiveTrapGeoView();
 
   /**
    * Causes the shell to re-render
@@ -140,24 +131,26 @@ export function Shell(props: ShellProps): JSX.Element {
       <Link id={`toplink-${shellId}`} href={`#bottomlink-${shellId}`} tabIndex={0} sx={[sxClasses.skip, { top: '0px' }]}>
         {t('keyboardnav.start')}
       </Link>
-      <FocusTrap active={activeTrap} focusTrapOptions={{ escapeDeactivates: false }}>
-        <Box id={`shell-${shellId}`} sx={sxClasses.shell} className="geoview-shell" key={update}>
+      <FocusTrap open={activeTrapGeoView}>
+        <Box id={`shell-${shellId}`} sx={sxClasses.shell} className="geoview-shell" key={update} tabIndex={-1}>
           <CircularProgress isLoaded={mapLoaded} />
           <Box sx={sxClasses.mapShellContainer} className="mapContainer">
-            <Appbar activeTrap={activeTrap} activeTrapSet={setActivetrap} />
+            <Appbar />
             {/* load geolocator component if config includes in list of components in appBar */}
             {mapFeaturesConfig?.appBar?.includes('geolocator') && mapFeaturesConfig?.map.interaction === 'dynamic' && <Geolocator />}
             <Box sx={sxClasses.mapContainer}>
               <Map {...mapFeaturesConfig} />
               <Footerbar />
             </Box>
-            {mapFeaturesConfig?.map.interaction === 'dynamic' && <Navbar activeTrap={activeTrap} activeTrapSet={setActivetrap} />}
+            {mapFeaturesConfig?.map.interaction === 'dynamic' && <Navbar />}
           </Box>
           {mapFeaturesConfig?.corePackages && mapFeaturesConfig?.corePackages.includes('footer-panel') && <FooterTabs />}
           {Object.keys(api.maps[shellId].modal.modals).map((modalId) => (
             <Modal key={modalId} id={modalId} open={false} mapId={shellId} />
           ))}
-          <FocusTrapDialog mapId={mapFeaturesConfig.mapId} focusTrapId={shellId} callback={(isActive) => handleCallback(isActive)} />
+          {/* modal section */}
+          <FocusTrapDialog mapId={mapFeaturesConfig.mapId} focusTrapId={shellId} />
+          <ExportModal />
           {Object.keys(components).map((key: string) => {
             return <Fragment key={key}>{components[key]}</Fragment>;
           })}
