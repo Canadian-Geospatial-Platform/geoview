@@ -1,6 +1,11 @@
 import { Theme } from '@mui/material/styles';
 
 export const getSxClasses = (theme: Theme) => ({
+  layersPanelContainer: {
+    background: theme.footerPanel.contentBg,
+    boxShadow: theme.footerPanel.contentShadow,
+    padding: '1rem 0',
+  },
   list: {
     color: 'text.primary',
     width: '100%',
@@ -120,9 +125,9 @@ export const getSxClasses = (theme: Theme) => ({
       padding: '20px',
     },
     buttonDescriptionContainer: {
-      display: 'flex', 
-      flexDirection: 'row', 
-      alignItems: 'center'
+      display: 'flex',
+      flexDirection: 'row',
+      alignItems: 'center',
     },
     opacityMenu: {
       display: 'flex',

@@ -1,16 +1,11 @@
 import { useTranslation } from 'react-i18next';
-import { useTheme } from '@mui/material/styles';
 import { Button } from '@mui/material';
-import { Box, Typography, AddCircleOutlineIcon, ButtonGroup, DeleteOutlineIcon, HandleIcon } from '@/ui';
-import { getSxClasses } from '../layers-style';
+import { Box, AddCircleOutlineIcon, ButtonGroup, DeleteOutlineIcon, HandleIcon } from '@/ui';
 import { useLayerStoreActions, useLayersDisplayState } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { TypeLayersViewDisplayState } from '../types';
 
 export function LayersActions(): JSX.Element {
   const { t } = useTranslation<string>();
-
-  const theme = useTheme();
-  const sxClasses = getSxClasses(theme);
 
   // access store
   const displayState = useLayersDisplayState();
@@ -21,11 +16,7 @@ export function LayersActions(): JSX.Element {
   };
 
   return (
-    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '15px' }}>
-      <div>
-        <Typography sx={sxClasses.categoryTitle}>{t('general.layers')}</Typography>
-      </div>
-
+    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'right', marginBottom: '15px' }}>
       <ButtonGroup size="small" variant="outlined" aria-label="outlined button group">
         <Button
           variant={displayState === 'add' ? 'contained' : 'outlined'}

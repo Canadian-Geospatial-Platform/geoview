@@ -49,8 +49,7 @@ export const getSxClasses = (theme: Theme) => ({
     flexDirection: 'column',
     '& p': {
       fontSize: '1rem',
-      font: '600 18px / 24px Roboto, Helvetica, Arial, sans-serif;',
-      fontWeight: 400,
+      font: theme.footerPanel.layerTitleFont,
       lineHeight: 1.5,
       overflow: 'hidden',
       textOverflow: 'ellipsis',
@@ -63,6 +62,7 @@ export const getSxClasses = (theme: Theme) => ({
       '>p': {
         fontSize: '0.875rem !important',
         color: theme.palette.text.secondary,
+        fontWeight: 400,
       },
       ' svg': {
         width: '0.75em',

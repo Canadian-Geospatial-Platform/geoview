@@ -194,7 +194,7 @@ export function Detailspanel({ mapId }: DetailsPanelProps): JSX.Element {
         <>
           <ResponsiveGrid.Root>
             <ResponsiveGrid.Left isEnlargeDataTable={isEnlargeDataTable} isLayersPanelVisible={isLayersPanelVisible}>
-              <LayerTitle>{t('details.availableLayers')}</LayerTitle>
+              <LayerTitle>{t('general.layers')}</LayerTitle>
             </ResponsiveGrid.Left>
             <ResponsiveGrid.Right isEnlargeDataTable={isEnlargeDataTable} isLayersPanelVisible={isLayersPanelVisible}>
               <Box
@@ -214,12 +214,12 @@ export function Detailspanel({ mapId }: DetailsPanelProps): JSX.Element {
               </Box>
             </ResponsiveGrid.Right>
           </ResponsiveGrid.Root>
-          <ResponsiveGrid.Root sx={{ marginTop: '1rem' }}>
+          <ResponsiveGrid.Root sx={{ mt: 8 }}>
             <ResponsiveGrid.Left isEnlargeDataTable={isEnlargeDataTable} isLayersPanelVisible={isLayersPanelVisible}>
               {renderLayerList()}
             </ResponsiveGrid.Left>
             <ResponsiveGrid.Right isEnlargeDataTable={isEnlargeDataTable} isLayersPanelVisible={isLayersPanelVisible}>
-              <Box sx={sxClasses.rightPanleContainer}>
+              <Box sx={sxClasses.rightPanelContainer}>
                 <Grid container sx={sxClasses.rightPanelBtnHolder}>
                   <Grid item xs={6}>
                     <Box style={{ marginLeft: '22px' }}>

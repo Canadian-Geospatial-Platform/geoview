@@ -124,9 +124,9 @@ export function Datapanel({ layerData, mapId, projectionConfig, language }: Data
 
   return (
     <Box sx={sxClasses.dataPanel}>
-      <ResponsiveGrid.Root spacing={2} sx={sxClasses.gridContainer}>
+      <ResponsiveGrid.Root>
         <ResponsiveGrid.Left isLayersPanelVisible={isLayersPanelVisible} isEnlargeDataTable={isEnlargeDataTable}>
-          <LayerTitle>{t('dataTable.leftPanelHeading')}</LayerTitle>
+          <LayerTitle>{t('general.layers')}</LayerTitle>
         </ResponsiveGrid.Left>
         <ResponsiveGrid.Right isLayersPanelVisible={isLayersPanelVisible} isEnlargeDataTable={isEnlargeDataTable}>
           <Box
@@ -146,7 +146,7 @@ export function Datapanel({ layerData, mapId, projectionConfig, language }: Data
           </Box>
         </ResponsiveGrid.Right>
       </ResponsiveGrid.Root>
-      <ResponsiveGrid.Root sx={{ marginTop: '0.75rem' }}>
+      <ResponsiveGrid.Root sx={{ mt: 8 }}>
         <ResponsiveGrid.Left isLayersPanelVisible={isLayersPanelVisible} isEnlargeDataTable={isEnlargeDataTable}>
           {renderList()}
         </ResponsiveGrid.Left>

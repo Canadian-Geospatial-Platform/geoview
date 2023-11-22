@@ -1,8 +1,7 @@
 import { Theme } from '@mui/material';
 
 export const getSxClasses = (theme: Theme) => ({
-  headline: { fontSize: '1.125rem', fontWeight: 'bold' },
-  dataPanel: { backgroundColor: '#F1F2F5', padding: '1rem 0' },
+  dataPanel: { background: theme.footerPanel.contentBg, boxShadow: theme.footerPanel.contentShadow, padding: '1rem 0' },
   gridContainer: { paddingLeft: '1rem', paddingRight: '1rem' },
   iconImage: {
     padding: 3,
