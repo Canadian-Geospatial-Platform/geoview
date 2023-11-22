@@ -6,7 +6,7 @@ import { Box } from '@/ui';
 import { getSxClasses } from './time-slider-style';
 import { TimeSlider } from './time-slider';
 import { SliderFilterProps } from './time-slider-api';
-import { CloseButton, EnlargeButton, LayerList, LayerTitle, ResponsiveGrid } from '../common';
+import { CloseButton, EnlargeButton, LayerList, LayerListEntry, LayerTitle, ResponsiveGrid } from '../common';
 
 interface TypeTimeSliderProps {
   mapId: string;
@@ -26,9 +26,19 @@ export function TimeSliderPanel(props: TypeTimeSliderProps): JSX.Element {
   const sxClasses = getSxClasses(theme);
 
   // First layer is initially selected
-  const [selectedLayer, setSelectedLayer] = useState<string>(layersList[0]);
+  const [selectedLayerPath, setSelectedLayerPath] = useState<string>(layersList[0]);
   const [isLayersPanelVisible, setIsLayersPanelVisible] = useState(false);
   const [isEnlargeDataTable, setIsEnlargeDataTable] = useState(false);
+
+  /**
+   * Handles clicks to layers in left panel. Sets selected layer.
+   *
+   * @param {LayerListEntry} layer The data of the selected layer
+   */
+  const handleLayerChange = (layer: LayerListEntry): void => {
+    setSelectedLayerPath(layer.layerPath);
+    setIsLayersPanelVisible(true);
+  };
 
   /**
    * Render group layers as list.
@@ -39,16 +49,13 @@ export function TimeSliderPanel(props: TypeTimeSliderProps): JSX.Element {
     return (
       <LayerList
         isEnlargeDataTable={isEnlargeDataTable}
-        selectedLayerIndex={layersList.indexOf(selectedLayer)}
-        handleListItemClick={(layer) => {
-          setSelectedLayer(layer.layerPath);
-          setIsLayersPanelVisible(true);
-        }}
+        selectedLayerIndex={layersList.indexOf(selectedLayerPath)}
+        handleListItemClick={(layer) => handleLayerChange(layer)}
         layerList={layersList.map((layer) => ({ layerName: layer, layerPath: layer, tooltip: layer as string }))}
       />
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [layersList, selectedLayer, isEnlargeDataTable]);
+  }, [layersList, selectedLayerPath, isEnlargeDataTable]);
 
   return (
     <Box sx={sxClasses.detailsContainer}>
@@ -65,7 +72,7 @@ export function TimeSliderPanel(props: TypeTimeSliderProps): JSX.Element {
               [theme.breakpoints.down('md')]: { justifyContent: 'space-between' },
             }}
           >
-            <LayerTitle hideTitle>{selectedLayer}</LayerTitle>
+            <LayerTitle hideTitle>{selectedLayerPath}</LayerTitle>
             <Box>
               <EnlargeButton isEnlargeDataTable={isEnlargeDataTable} setIsEnlargeDataTable={setIsEnlargeDataTable} />
               <CloseButton isLayersPanelVisible={isLayersPanelVisible} setIsLayersPanelVisible={setIsLayersPanelVisible} />
@@ -78,7 +85,12 @@ export function TimeSliderPanel(props: TypeTimeSliderProps): JSX.Element {
           {renderLayerList()}
         </ResponsiveGrid.Left>
         <ResponsiveGrid.Right isEnlargeDataTable={isEnlargeDataTable} isLayersPanelVisible={isLayersPanelVisible}>
-          <TimeSlider mapId={mapId} layerPath={selectedLayer} sliderFilterProps={timeSliderData[selectedLayer]} key={selectedLayer} />
+          <TimeSlider
+            mapId={mapId}
+            layerPath={selectedLayerPath}
+            sliderFilterProps={timeSliderData[selectedLayerPath]}
+            key={selectedLayerPath}
+          />
         </ResponsiveGrid.Right>
       </ResponsiveGrid.Root>
     </Box>

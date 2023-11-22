@@ -14,6 +14,8 @@ import {
   payloadIsAMapViewProjection,
   PayloadBaseClass,
   mapViewProjectionPayload,
+  TypeGeometry,
+  TypeFeatureInfoEntry,
 } from '@/api/events/payloads';
 import { EVENT_NAMES } from '@/api/events/event-types';
 import { getGeoViewStore } from '@/core/stores/stores-managers';
@@ -21,6 +23,27 @@ import { getGeoViewStore } from '@/core/stores/stores-managers';
 export class MapEventProcessor extends AbstractEventProcessor {
   onInitialize(store: GeoViewStoreType) {
     const { mapId } = store.getState();
+
+    // Checks for changes to highlighted features and updates highlights
+    const unsubMapHighlightedFeatures = store.subscribe(
+      (state) => state.mapState.highlightedFeatures,
+      (curFeatures, prevFeatures) => {
+        if (curFeatures.length === 0) api.maps[mapId].layer.featureHighlight.removeHighlight('all');
+        else {
+          const curFeatureUids = curFeatures.map((feature) => (feature.geometry as TypeGeometry).ol_uid);
+          const prevFeatureUids = prevFeatures.map((feature) => (feature.geometry as TypeGeometry).ol_uid);
+          const newFeatures = curFeatures.filter(
+            (feature: TypeFeatureInfoEntry) => !prevFeatureUids.includes((feature.geometry as TypeGeometry).ol_uid)
+          );
+          const removedFeatures = prevFeatures.filter(
+            (feature: TypeFeatureInfoEntry) => !curFeatureUids.includes((feature.geometry as TypeGeometry).ol_uid)
+          );
+          for (let i = 0; i < newFeatures.length; i++) api.maps[mapId].layer.featureHighlight.highlightFeature(newFeatures[i]);
+          for (let i = 0; i < removedFeatures.length; i++)
+            api.maps[mapId].layer.featureHighlight.removeHighlight((removedFeatures[i].geometry as TypeGeometry).ol_uid);
+        }
+      }
+    );
 
     const unsubMapLoaded = store.subscribe(
       (state) => state.mapState.mapLoaded,
@@ -56,6 +79,27 @@ export class MapEventProcessor extends AbstractEventProcessor {
         if (cur !== prev && api.maps[mapId].currentProjection !== cur!) {
           api.maps[mapId].currentProjection = cur!;
           api.event.emit(mapViewProjectionPayload(EVENT_NAMES.MAP.EVENT_MAP_VIEW_PROJECTION_CHANGE, mapId, cur!));
+        }
+      }
+    );
+
+    // Checks for changes to selected features and updates highlights
+    const unsubMapSelectedFeatures = store.subscribe(
+      (state) => state.mapState.selectedFeatures,
+      (curFeatures, prevFeatures) => {
+        if (curFeatures.length === 0) api.maps[mapId].layer.featureHighlight.resetAnimation('all');
+        else {
+          const curFeatureUids = curFeatures.map((feature) => (feature.geometry as TypeGeometry).ol_uid);
+          const prevFeatureUids = prevFeatures.map((feature) => (feature.geometry as TypeGeometry).ol_uid);
+          const newFeatures = curFeatures.filter(
+            (feature: TypeFeatureInfoEntry) => !prevFeatureUids.includes((feature.geometry as TypeGeometry).ol_uid)
+          );
+          const removedFeatures = prevFeatures.filter(
+            (feature: TypeFeatureInfoEntry) => !curFeatureUids.includes((feature.geometry as TypeGeometry).ol_uid)
+          );
+          for (let i = 0; i < newFeatures.length; i++) api.maps[mapId].layer.featureHighlight.selectFeature(newFeatures[i]);
+          for (let i = 0; i < removedFeatures.length; i++)
+            api.maps[mapId].layer.featureHighlight.resetAnimation((removedFeatures[i].geometry as TypeGeometry).ol_uid);
         }
       }
     );
@@ -97,10 +141,12 @@ export class MapEventProcessor extends AbstractEventProcessor {
 
     // add to arr of subscriptions so it can be destroyed later
     this.subscriptionArr.push(
+      unsubMapHighlightedFeatures,
       unsubMapLoaded,
       unsubMapCenterCoord,
       unsubMapPointerPosition,
       unsubMapProjection,
+      unsubMapSelectedFeatures,
       unsubMapZoom,
       unsubMapSingleClick
     );

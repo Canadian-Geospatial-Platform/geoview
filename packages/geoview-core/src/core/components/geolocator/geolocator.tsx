@@ -1,15 +1,13 @@
 import { ChangeEvent, useCallback, useContext, useRef, useState } from 'react';
 
 import { useTranslation } from 'react-i18next';
-import { fromLonLat, transformExtent } from 'ol/proj';
 import debounce from 'lodash/debounce';
 
 import { CloseIcon, SearchIcon, AppBar, Box, Divider, IconButton, Paper, ProgressBar, Toolbar, Typography } from '@/ui';
 import GeoList from './geo-list';
 import { StyledInputField, sxClasses } from './geolocator-style';
 import { MapContext } from '@/core/app-start';
-import { EVENT_NAMES, api } from '@/app';
-import { bboxHighlightPayload } from '@/api/events/payloads/bbox-highlight-payload';
+import { api } from '@/app';
 import { OL_ZOOM_DURATION } from '@/core/utils/constant';
 import { useUIAppbarGeolocatorActive } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import { useMapStoreActions } from '@/core/stores/store-interface-and-intial-values/map-state';
@@ -46,7 +44,7 @@ export function Geolocator() {
 
   // set the active (visible) or not active (hidden) from geolocator button click
   const active = useUIAppbarGeolocatorActive();
-  const { showClickMarker } = useMapStoreActions();
+  const { zoomToGeoLocatorLocation } = useMapStoreActions();
 
   /**
    * Send fetch call to the service for given search term.
@@ -66,47 +64,6 @@ export function Geolocator() {
     } catch (err) {
       setIsLoading(false);
       setError(err as Error);
-    }
-  };
-
-  /**
-   * Update the map zoom and location with given coordinates
-   * @param {[number, number]} coords coordinates [lng, lat] where we want to zoom
-   * @param {[number, number, number, number]} bbox bounding box to zoom to
-   * @returns void
-   */
-  const zoomToLocation = (coords: [number, number], bbox?: [number, number, number, number]): void => {
-    const { currentProjection } = api.maps[mapId];
-    const indicatorBox = document.getElementsByClassName('ol-overviewmap-box') as HTMLCollectionOf<Element>;
-    for (let i = 0; i < indicatorBox.length; i++) {
-      (indicatorBox[i] as HTMLElement).style.display = 'none';
-    }
-    const projectionConfig = api.projection.projections[currentProjection];
-    if (bbox) {
-      //! There were issues with fromLonLat in rare cases in LCC projections, transformExtent seems to solve them.
-      //! fromLonLat and transformExtent give differing results in many cases, fromLonLat had issues with the first
-      //! three results from a geolocator search for "vancouver river"
-      const convertedExtent = transformExtent(bbox, 'EPSG:4326', projectionConfig);
-      api.maps[mapId].zoomToExtent(convertedExtent, {
-        padding: [50, 50, 50, 50],
-        maxZoom: 16,
-        duration: OL_ZOOM_DURATION,
-      });
-      api.event.emit(bboxHighlightPayload(EVENT_NAMES.FEATURE_HIGHLIGHT.EVENT_HIGHLIGHT_BBOX, mapId, convertedExtent));
-      setTimeout(() => {
-        showClickMarker({ lnglat: coords });
-        for (let i = 0; i < indicatorBox.length; i++) {
-          (indicatorBox[i] as HTMLElement).style.display = '';
-        }
-      }, OL_ZOOM_DURATION + 150);
-    } else {
-      map.getView().animate({ center: fromLonLat(coords, projectionConfig), duration: OL_ZOOM_DURATION, zoom: 16 });
-      setTimeout(() => {
-        showClickMarker({ lnglat: coords });
-        for (let i = 0; i < indicatorBox.length; i++) {
-          (indicatorBox[i] as HTMLElement).style.display = '';
-        }
-      }, OL_ZOOM_DURATION + 150);
     }
   };
 
@@ -219,7 +176,7 @@ export function Geolocator() {
             elevation={4}
             sx={{ width: 400, height: mapSize[1] - 80, maxHeight: mapSize[1] - 80, overflowY: 'auto' }}
           >
-            {!!data.length && <GeoList geoListItems={data} zoomToLocation={zoomToLocation} />}
+            {!!data.length && <GeoList geoListItems={data} zoomToLocation={zoomToGeoLocatorLocation} />}
             {(!data.length || error) && (
               <Typography component="p" sx={{ fontSize: 14, p: 10 }}>
                 {t('geolocator.errorMessage')} {searchValue}

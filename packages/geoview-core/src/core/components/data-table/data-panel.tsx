@@ -48,7 +48,7 @@ export function Datapanel({ layerData, mapId, projectionConfig, language }: Data
   const rowsFiltered = useDataTableStoreRowsFiltered();
   const { setSelectedLayerIndex, setIsEnlargeDataTable } = useDataTableStoreActions();
 
-  const handleListItemClick = useCallback((layer: LayerListEntry, index: number) => {
+  const handleLayerChange = useCallback((_layer: LayerListEntry, index: number) => {
     setSelectedLayerIndex(index);
     setIsLoading(true);
     setIsLayersPanelVisible(true);
@@ -107,7 +107,7 @@ export function Datapanel({ layerData, mapId, projectionConfig, language }: Data
         }))}
         isEnlargeDataTable={isEnlargeDataTable}
         selectedLayerIndex={selectedLayerIndex}
-        handleListItemClick={handleListItemClick}
+        handleListItemClick={handleLayerChange}
       />
     ),
     // eslint-disable-next-line react-hooks/exhaustive-deps

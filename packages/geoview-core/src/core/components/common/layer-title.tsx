@@ -3,7 +3,7 @@ import { Typography } from '@/ui';
 
 interface LayerTitleProp {
   children: React.ReactNode;
-  hideTitle?: boolean | undefined;
+  hideTitle?: boolean;
 }
 
 /**
@@ -12,7 +12,7 @@ interface LayerTitleProp {
  * @param {boolean} hideTitle hide the layer title for desktop view.
  * @returns JSX.Element
  */
-export function LayerTitle({ children, hideTitle = false }: LayerTitleProp) {
+export function LayerTitle({ children, hideTitle }: LayerTitleProp) {
   const theme = useTheme();
 
   return (
@@ -28,3 +28,7 @@ export function LayerTitle({ children, hideTitle = false }: LayerTitleProp) {
     </Typography>
   );
 }
+
+LayerTitle.defaultProps = {
+  hideTitle: false,
+};

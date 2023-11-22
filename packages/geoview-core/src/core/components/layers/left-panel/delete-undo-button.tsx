@@ -60,6 +60,7 @@ export function DeleteUndoButton(props: DeleteUndoButtonProps): JSX.Element {
       setInUndoState(false);
     }
     return undefined;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [progress]);
 
   useEffect(() => {
