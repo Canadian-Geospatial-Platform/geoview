@@ -214,7 +214,7 @@ export function Detailspanel({ mapId }: DetailsPanelProps): JSX.Element {
               </Box>
             </ResponsiveGrid.Right>
           </ResponsiveGrid.Root>
-          <ResponsiveGrid.Root sx={{ marginTop: '1rem' }}>
+          <ResponsiveGrid.Root sx={{ mt: 8 }}>
             <ResponsiveGrid.Left isEnlargeDataTable={isEnlargeDataTable} isLayersPanelVisible={isLayersPanelVisible}>
               {renderLayerList()}
             </ResponsiveGrid.Left>

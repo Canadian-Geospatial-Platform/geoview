@@ -50,7 +50,6 @@ export const getSxClasses = (theme: Theme) => ({
     '& p': {
       fontSize: '1rem',
       font: theme.footerPanel.layerTitleFont,
-      fontWeight: 400,
       lineHeight: 1.5,
       overflow: 'hidden',
       textOverflow: 'ellipsis',
@@ -63,6 +62,7 @@ export const getSxClasses = (theme: Theme) => ({
       '>p': {
         fontSize: '0.875rem !important',
         color: theme.palette.text.secondary,
+        fontWeight: 400,
       },
       ' svg': {
         width: '0.75em',

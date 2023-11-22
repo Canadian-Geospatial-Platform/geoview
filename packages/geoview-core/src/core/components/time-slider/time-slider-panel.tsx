@@ -73,7 +73,7 @@ export function TimeSliderPanel(props: TypeTimeSliderProps): JSX.Element {
           </Box>
         </ResponsiveGrid.Right>
       </ResponsiveGrid.Root>
-      <ResponsiveGrid.Root sx={{ marginTop: '1rem' }}>
+      <ResponsiveGrid.Root sx={{ mt: 8 }}>
         <ResponsiveGrid.Left isLayersPanelVisible={isLayersPanelVisible} isEnlargeDataTable={isEnlargeDataTable}>
           {renderLayerList()}
         </ResponsiveGrid.Left>
