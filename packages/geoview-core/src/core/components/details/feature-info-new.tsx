@@ -166,7 +166,11 @@ export function FeatureInfo({
             </>
           }
         >
-          <img src={featureIconSrc} alt={nameFieldValue} style={{ ...theme.iconImage, marginRight: '10px', width: '35px', height: '35px' }} />
+          <img
+            src={featureIconSrc}
+            alt={nameFieldValue}
+            style={{ ...theme.iconImage, marginRight: '10px', width: '35px', height: '35px' }}
+          />
           <ListItemText sx={sxClasses.itemText} primary={nameFieldValue} />
         </ListItem>
       </List>
