@@ -99,7 +99,8 @@
         "enable": "Enable",
         "skip": "Skip"
       }
-    }
+    },
+    "exitFocus": "Exit"
   },
   "validation": {
     "layer": {
