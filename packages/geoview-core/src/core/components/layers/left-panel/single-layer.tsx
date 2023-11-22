@@ -121,7 +121,7 @@ export function SingleLayer(props: SingleLayerProps): JSX.Element {
     return (
       <List sx={depth % 2 ? sxClasses.evenDepthList : sxClasses.oddDepthList}>
         {layer.children.map((item) => (
-          <SingleLayer depth={1 + depth} layer={item} key={item.layerPath} />
+          <SingleLayer depth={1 + depth} layer={item} key={item.layerPath} setIsLayersListPanelVisible={setIsLayersListPanelVisible} />
         ))}
       </List>
     );
