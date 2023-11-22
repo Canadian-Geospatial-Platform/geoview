@@ -97,7 +97,8 @@
         "enable": "Activer",
         "skip": "Sauter"
       }
-    }
+    },
+    "exitFocus": "Sortir"
   },
   "validation": {
     "layer": {

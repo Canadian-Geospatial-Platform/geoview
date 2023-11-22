@@ -1,4 +1,4 @@
-import { Dispatch, SetStateAction, useCallback, useContext, useEffect, useRef, useState } from 'react';
+import { useCallback, useContext, useEffect, useRef, useState } from 'react';
 
 import { useTranslation } from 'react-i18next';
 
@@ -9,10 +9,9 @@ import ZoomIn from './buttons/zoom-in';
 import ZoomOut from './buttons/zoom-out';
 import Fullscreen from './buttons/fullscreen';
 import Home from './buttons/home';
-import Export from './buttons/export';
+import Export from '@/core/components/export/export-modal-button';
 import Location from './buttons/location';
 
-import ExportModal from '@/core/components/export/export-modal';
 import { api } from '@/app';
 import { Panel, ButtonGroup, IconButton, Box } from '@/ui';
 import { MapContext } from '@/core/app-start';
@@ -20,19 +19,14 @@ import { EVENT_NAMES } from '@/api/events/event-types';
 import { payloadIsAButtonPanel, ButtonPanelPayload, PayloadBaseClass } from '@/api/events/payloads';
 import { TypeButtonPanel } from '@/ui/panel/panel-types';
 import { getSxClasses } from './nav-bar-style';
-import { useUIFooterBarExpanded } from '@/core/stores/store-interface-and-intial-values/ui-state';
-
-type NavbarProps = {
-  activeTrap: boolean;
-  activeTrapSet: Dispatch<SetStateAction<boolean>>;
-};
+import { useUIActiveFocusItem, useUIFooterBarExpanded } from '@/core/stores/store-interface-and-intial-values/ui-state';
 
 /**
  * Create a nav-bar with buttons that can call functions or open custom panels
  */
-export function Navbar({ activeTrap, activeTrapSet }: NavbarProps): JSX.Element {
+export function Navbar(): JSX.Element {
   const mapConfig = useContext(MapContext);
-  const { mapId } = mapConfig;
+  const { mapId, mapFeaturesConfig } = mapConfig;
 
   const { t } = useTranslation<string>();
 
@@ -41,15 +35,14 @@ export function Navbar({ activeTrap, activeTrapSet }: NavbarProps): JSX.Element 
 
   // internal state
   const navBarRef = useRef<HTMLDivElement>(null);
-  const trapActive = useRef<boolean>(activeTrap);
-
   const [buttonPanelGroups, setButtonPanelGroups] = useState<Record<string, Record<string, TypeButtonPanel>>>({});
-  const [ModalIsShown, setModalIsShown] = useState(false);
-  const { navBar } = api.maps[mapId].mapFeaturesConfig;
+  const navBar = mapFeaturesConfig!.navBar || [];
 
   // get the expand or collapse from store
   const footerBarExpanded = useUIFooterBarExpanded();
+  const activeModalId = useUIActiveFocusItem().activeElementId;
 
+  // #region REACT HOOKS
   const addButtonPanel = useCallback(
     (payload: ButtonPanelPayload) => {
       setButtonPanelGroups({
@@ -67,7 +60,6 @@ export function Navbar({ activeTrap, activeTrapSet }: NavbarProps): JSX.Element 
     (payload: ButtonPanelPayload) => {
       setButtonPanelGroups((prevState) => {
         const state = { ...prevState };
-
         const group = state[payload.appBarGroupName];
 
         delete group[payload.appBarId];
@@ -77,18 +69,6 @@ export function Navbar({ activeTrap, activeTrapSet }: NavbarProps): JSX.Element 
     },
     [setButtonPanelGroups]
   );
-
-  const openModal = () => {
-    setModalIsShown(true);
-    trapActive.current = activeTrap;
-    // this will remove the focus active trap from map and focus will be on export modal
-    activeTrapSet(false);
-  };
-
-  const closeModal = () => {
-    setModalIsShown(false);
-    activeTrapSet(trapActive.current);
-  };
 
   useEffect(() => {
     const navbarBtnPanelCreateListenerFunction = (payload: PayloadBaseClass) => {
@@ -108,6 +88,7 @@ export function Navbar({ activeTrap, activeTrapSet }: NavbarProps): JSX.Element 
       api.event.off(EVENT_NAMES.NAVBAR.EVENT_NAVBAR_BUTTON_PANEL_REMOVE, mapId, navbarBtnPanelRemoveListenerFunction);
     };
   }, [addButtonPanel, mapId, removeButtonPanel]);
+  // #endregion
 
   return (
     /** TODO - KenChase Need to add styling for scenario when more buttons that can fit vertically occurs (or limit number of buttons that can be added) */
@@ -189,11 +170,10 @@ export function Navbar({ activeTrap, activeTrapSet }: NavbarProps): JSX.Element 
           {navBar?.includes('fullscreen') && <Fullscreen />}
           {navBar?.includes('location') && <Location />}
           {navBar?.includes('home') && <Home />}
-          {navBar?.includes('export') && <Export openModal={openModal} />}
+          {navBar?.includes('export') && <Export className={`${sxClasses.navButton} ${activeModalId ? 'export' : ''}`} />}
           {/* // TODO We might need to refactor code below based on the best solution, issue #1448 */}
           {navBar?.includes('focus') && <Focus />}
         </ButtonGroup>
-        <ExportModal isShown={ModalIsShown} closeModal={closeModal} />
       </Box>
     </Box>
   );
