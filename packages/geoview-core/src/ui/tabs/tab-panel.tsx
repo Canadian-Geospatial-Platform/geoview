@@ -1,5 +1,7 @@
 /* eslint-disable react/require-default-props */
 import { ReactNode } from 'react';
+import { Box } from '@/ui';
+import { FocusTrapElement } from '@/core/components/common/focus-trap-element';
 
 type TypeChildren = ReactNode;
 
@@ -22,7 +24,7 @@ export function TabPanel(props: TypeTabPanelProps): JSX.Element {
   const { children, value, index, ...other } = props;
 
   return (
-    <div
+    <Box
       role="tabpanel"
       hidden={value !== index}
       id={`${`simple-tabpanel`}-${index}`}
@@ -30,7 +32,7 @@ export function TabPanel(props: TypeTabPanelProps): JSX.Element {
       {...other}
       style={{ height: '100%', overflow: 'auto' }}
     >
-      {children}
-    </div>
+      <FocusTrapElement id={`panel-${index}`} content={children} />
+    </Box>
   );
 }

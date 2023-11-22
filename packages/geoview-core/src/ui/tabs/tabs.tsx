@@ -7,6 +7,7 @@ import { Grid, Tab as MaterialTab, Tabs as MaterialTabs, TabsProps, TabProps, Bo
 
 import { HtmlToReact } from '@/core/containers/html-to-react';
 import { TabPanel } from './tab-panel';
+import { useUIActiveTrapGeoView, useUIStoreActions } from '@/core/stores/store-interface-and-intial-values/ui-state';
 
 type TypeChildren = ReactNode;
 /**
@@ -47,6 +48,10 @@ export function Tabs(props: TypeTabsProps): JSX.Element {
   // internal state
   const [value, setValue] = useState(0);
 
+  // get store values and actions
+  const activeTrapGeoView = useUIActiveTrapGeoView();
+  const { closeModal, openModal } = useUIStoreActions();
+
   /**
    * Handle a tab change
    *
@@ -63,6 +68,10 @@ export function Tabs(props: TypeTabsProps): JSX.Element {
    */
   const handleClick = (index: number) => {
     if (handleCollapse !== undefined && (isCollapsed || value === index)) handleCollapse();
+
+    // WCAG - if keyboard navigation is on and the tabs gets expanded, set the trap store info to open, close otherwise
+    if (activeTrapGeoView) openModal({ activeElementId: `panel-${index}`, callbackElementId: `tab-${index}` });
+    else closeModal();
   };
 
   useEffect(() => {

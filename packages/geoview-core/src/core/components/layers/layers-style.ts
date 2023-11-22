@@ -140,7 +140,7 @@ export const getSxClasses = (theme: Theme) => ({
     itemsGrid: {
       width: '100%',
       '& .MuiGrid-container': {
-        '&:first-child': {
+        '&:first-of-type': {
           fontWeight: 'bold',
           borderTop: '1px solid #ccc',
           borderBottom: '2px solid #ccc',
@@ -148,10 +148,10 @@ export const getSxClasses = (theme: Theme) => ({
         '& .MuiGrid-item': {
           padding: '3px 6px',
 
-          '&:first-child': {
+          '&:first-of-type': {
             width: '80px',
           },
-          '&:nth-child(2)': {
+          '&:nth-of-type(2)': {
             flexGrow: 1,
             textAlign: 'left',
             display: 'flex',

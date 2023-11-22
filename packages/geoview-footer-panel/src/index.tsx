@@ -126,6 +126,7 @@ class FooterPanelPlugin extends AbstractPlugin {
         });
         tabsCounter++;
         // select the details tab when map click queries are done
+        // TODO: This info should be kept in the store cause we do notlisten to layerset directly anymore
         api.event.on(
           api.eventNames.GET_FEATURE_INFO.ALL_QUERIES_DONE,
           (payload: PayloadBaseClass) => {
