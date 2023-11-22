@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { Dispatch, SetStateAction, useState } from 'react';
 import { useTheme } from '@mui/material/styles';
 import { useTranslation } from 'react-i18next';
 import {
@@ -37,10 +37,11 @@ import { DeleteUndoButton } from './delete-undo-button';
 interface SingleLayerProps {
   layer: TypeLegendLayer;
   depth: number;
+  setIsLayersListPanelVisible?: Dispatch<SetStateAction<boolean>> | undefined;
 }
 
 export function SingleLayer(props: SingleLayerProps): JSX.Element {
-  const { layer, depth } = props;
+  const { layer, depth, setIsLayersListPanelVisible } = props;
 
   const theme = useTheme();
   const sxClasses = getSxClasses(theme);
@@ -93,6 +94,7 @@ export function SingleLayer(props: SingleLayerProps): JSX.Element {
     }
     if (layer.children.length === 0) {
       setSelectedLayerPath(layer.layerPath);
+      if (setIsLayersListPanelVisible) setIsLayersListPanelVisible(true);
     } else {
       setGroupOpen(!isGroupOpen);
     }
