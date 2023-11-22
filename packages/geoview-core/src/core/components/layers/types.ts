@@ -57,13 +57,8 @@ export interface TypeLegendItemDetailsProps {
 
 /// //////////////////////////////////////////////////
 
-<<<<<<< HEAD
 export type TypeLayersViewDisplayState = 'remove' | 'add' | 'order' | 'view';
 
-export type TypeLegendLayerIcon = {
-  iconType?: string;
-  iconImg?: string;
-=======
 export type TypeLegendLayerIcons = TypeLegendLayerItem[];
 
 export type TypeLegendLayerItem = {
@@ -71,7 +66,6 @@ export type TypeLegendLayerItem = {
   iconType?: 'simple' | 'list';
   name?: string;
   iconImage?: string;
->>>>>>> b450ce2d8 (Add-legend-to-store)
   iconImgStacked?: string;
   iconList?: TypeLegendLayerListItem[];
 };
