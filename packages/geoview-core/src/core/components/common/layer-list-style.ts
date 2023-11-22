@@ -49,7 +49,7 @@ export const getSxClasses = (theme: Theme) => ({
     flexDirection: 'column',
     '& p': {
       fontSize: '1rem',
-      font: '600 18px / 24px Roboto, Helvetica, Arial, sans-serif;',
+      font: theme.footerPanel.layerTitleFont,
       fontWeight: 400,
       lineHeight: 1.5,
       overflow: 'hidden',
