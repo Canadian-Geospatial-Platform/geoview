@@ -33,6 +33,7 @@ import {
   TypeBaseSourceVectorInitialConfig,
   TypeLayerInitialSettings,
   TypeLayerStatus,
+  TypeStyleGeometry,
 } from '../../map/map-schema-types';
 import {
   codedValueType,
@@ -59,8 +60,9 @@ export type TypeLegend = {
   layerPath: string;
   layerName?: TypeLocalizedString;
   type: TypeGeoviewLayerType;
-  styleConfig?: TypeStyleConfig;
-  legend: TypeLayerStyles | HTMLCanvasElement | null;
+  styleConfig?: TypeStyleConfig | null;
+  // Layers other than vector layers use the HTMLCanvasElement type for their legend.
+  legend: TypeVectorLayerStyles | HTMLCanvasElement | null;
 };
 
 /**
@@ -98,7 +100,7 @@ export const isImageStaticLegend = (verifyIfLegend: TypeLegend): verifyIfLegend 
 };
 
 export interface TypeImageStaticLegend extends Omit<TypeLegend, 'styleConfig'> {
-  legend: HTMLCanvasElement;
+  legend: HTMLCanvasElement | null;
 }
 
 const validVectorLayerLegendTypes: TypeGeoviewLayerType[] = ['GeoJSON', 'esriDynamic', 'esriFeature', 'ogcFeature', 'ogcWfs', 'GeoPackage'];
@@ -115,11 +117,11 @@ export const isVectorLegend = (verifyIfLegend: TypeLegend): verifyIfLegend is Ty
 };
 
 export interface TypeVectorLegend extends TypeLegend {
-  legend: TypeLayerStyles;
+  legend: TypeVectorLayerStyles;
 }
 
 export type TypeStyleRepresentation = {
-  /** The defaultCanvas property is used by WMS legends, Simple styles and default styles when defined in unique value and class
+  /** The defaultCanvas property is used by Simple styles and default styles when defined in unique value and class
    * break styles.
    */
   defaultCanvas?: HTMLCanvasElement | null;
@@ -128,7 +130,7 @@ export type TypeStyleRepresentation = {
   /** The arrayOfCanvas property is used by unique value and class break styles. */
   arrayOfCanvas?: (HTMLCanvasElement | null)[];
 };
-export type TypeLayerStyles = { Point?: TypeStyleRepresentation; LineString?: TypeStyleRepresentation; Polygon?: TypeStyleRepresentation };
+export type TypeVectorLayerStyles = Partial<Record<TypeStyleGeometry, TypeStyleRepresentation>>;
 
 /** ******************************************************************************************************************************
  * GeoViewAbstractLayers types
@@ -1208,38 +1210,42 @@ export abstract class AbstractGeoViewLayer {
    *
    * @returns {Promise<TypeLegend | null>} The legend of the layer.
    */
-  getLegend(layerPathOrConfig: string | TypeLayerEntryConfig): Promise<TypeLegend | null> {
-    const promisedLegend = new Promise<TypeLegend | null>((resolve) => {
+  async getLegend(layerPathOrConfig: string | TypeLayerEntryConfig): Promise<TypeLegend | null> {
+    try {
       const layerConfig = (
         typeof layerPathOrConfig === 'string' ? this.getLayerConfig(layerPathOrConfig) : layerPathOrConfig
       ) as TypeBaseLayerEntryConfig & {
         style: TypeStyleConfig;
       };
 
-      if (!layerConfig) resolve(null);
-      else if (!layerConfig.style)
-        resolve({
+      if (!layerConfig)
+        return {
+          type: this.type,
+          layerPath: 'error',
+          layerName: { en: 'config not found', fr: 'config inexistante' } as TypeLocalizedString,
+          styleConfig: null,
+          legend: null,
+        } as TypeLegend;
+
+      if (!layerConfig.style)
+        return {
           type: this.type,
           layerPath: Layer.getLayerPath(layerConfig),
           layerName: layerConfig.layerName!,
           styleConfig: layerConfig.style,
           legend: null,
-        } as TypeLegend);
-      else {
-        const { geoviewRenderer } = api.maps[this.mapId];
-        geoviewRenderer.getLegendStyles(layerConfig).then((legendStyle) => {
-          const legend: TypeLegend = {
-            type: this.type,
-            layerPath: Layer.getLayerPath(layerConfig),
-            layerName: layerConfig.layerName!,
-            styleConfig: layerConfig?.style,
-            legend: legendStyle,
-          };
-          resolve(legend);
-        });
-      }
-    });
-    return promisedLegend;
+        } as TypeLegend;
+
+      return {
+        type: this.type,
+        layerPath: Layer.getLayerPath(layerConfig),
+        layerName: layerConfig.layerName!,
+        styleConfig: layerConfig?.style,
+        legend: await api.maps[this.mapId].geoviewRenderer.getLegendStyles(layerConfig),
+      } as TypeLegend;
+    } catch (error) {
+      return null;
+    }
   }
 
   /** ***************************************************************************************************************************
@@ -1333,7 +1339,7 @@ export abstract class AbstractGeoViewLayer {
             nameField: getLocalizedValue(layerEntryConfig?.source?.featureInfo?.nameField, this.mapId) || null,
           };
 
-          const featureFields = feature.getKeys();
+          const featureFields = (feature as Feature<Geometry>).getKeys();
           featureFields.forEach((fieldName) => {
             if (fieldName !== 'geometry') {
               if (outfields?.includes(fieldName)) {

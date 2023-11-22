@@ -15,6 +15,7 @@ import {
   RestartAltIcon,
   HighlightOutlinedIcon,
   TableViewIcon,
+  BrowserNotSupportedIcon,
 } from '@/ui';
 import { useLayerStoreActions } from '@/core/stores/store-interface-and-intial-values/layer-state';
 
@@ -68,7 +69,10 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
       <Grid container direction="column" spacing={0} sx={sxClasses.rightPanel.itemsGrid} justifyContent="left" justifyItems="stretch">
         <Grid container direction="row" justifyContent="center" alignItems="stretch" justifyItems="stretch">
           <Grid item xs="auto">
-            <IconButton color="primary" onClick={() => setAllItemsVisibility(layerDetails.layerPath, !layerDetails.allItemsChecked)}>
+            <IconButton
+              color="primary"
+              onClick={() => setAllItemsVisibility(layerDetails.layerPath, !layerDetails.allItemsChecked ? 'yes' : 'no')}
+            >
               {layerDetails.allItemsChecked ? <CheckBoxIcon /> : <CheckBoxOutIcon />}
             </IconButton>
           </Grid>
@@ -79,12 +83,12 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
         {layerDetails.items.map((item) => (
           <Grid container direction="row" key={item.name} justifyContent="center" alignItems="stretch">
             <Grid item xs="auto">
-              <IconButton color="primary" onClick={() => toggleItemVisibility(layerDetails.layerPath, item.name)}>
-                {item.isChecked ? <CheckBoxIcon /> : <CheckBoxOutIcon />}
+              <IconButton color="primary" onClick={() => toggleItemVisibility(layerDetails.layerPath, item.geometryType, item.name)}>
+                {item.isVisible ? <CheckBoxIcon /> : <CheckBoxOutIcon />}
               </IconButton>
             </Grid>
             <Grid item xs="auto">
-              <img alt={item.name} src={item.icon} />
+              {item.icon ? <img alt={item.name} src={item.icon} /> : <BrowserNotSupportedIcon />}
               <span style={sxClasses.rightPanel.tableIconLabel}>{item.name}</span>
             </Grid>
           </Grid>

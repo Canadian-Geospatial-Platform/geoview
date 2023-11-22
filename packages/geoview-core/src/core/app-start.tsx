@@ -16,7 +16,7 @@ import { api, TypeInteraction } from '@/app';
 declare module '@mui/styles/defaultTheme' {
   // eslint-disable-next-line @typescript-eslint/no-empty-interface
   interface DefaultTheme extends Theme {
-    iconImg: React.CSSProperties;
+    iconImage: React.CSSProperties;
   }
 }
 // create a state that will hold map config information

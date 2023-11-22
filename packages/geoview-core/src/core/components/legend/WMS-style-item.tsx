@@ -64,7 +64,7 @@ export function WMSStyleItem(props: TypeWMSStyleProps): JSX.Element {
   const { name, legend } = style;
 
   const theme: Theme & {
-    iconImg: React.CSSProperties;
+    iconImage: React.CSSProperties;
   } = useTheme();
 
   const [isOpen, setIsOpen] = useState<boolean>(false);
@@ -103,7 +103,7 @@ export function WMSStyleItem(props: TypeWMSStyleProps): JSX.Element {
       <Collapse in={isOpen} timeout="auto">
         <Box>
           <Box sx={sxClasses.expandableIconContainer}>
-            {legend && legend!.toDataURL() && <img alt="" style={theme.iconImg} src={legend!.toDataURL()} />}
+            {legend && legend!.toDataURL() && <img alt="" style={theme.iconImage} src={legend!.toDataURL()} />}
           </Box>
         </Box>
       </Collapse>

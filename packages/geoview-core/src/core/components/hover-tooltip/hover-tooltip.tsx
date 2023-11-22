@@ -51,7 +51,7 @@ export function HoverTooltip(): JSX.Element {
   const { t } = useTranslation<string>();
 
   const theme: Theme & {
-    iconImg: React.CSSProperties;
+    iconImage: React.CSSProperties;
   } = useTheme();
 
   // internal component state
@@ -142,7 +142,7 @@ export function HoverTooltip(): JSX.Element {
         visibility: showTooltip ? 'visible' : 'hidden',
       }}
     >
-      <img alt={t('hovertooltip.alticon')!} src={tooltipIcon} style={{ ...theme.iconImg, width: '35px', height: '35px' }} />
+      <img alt={t('hovertooltip.alticon')!} src={tooltipIcon} style={{ ...theme.iconImage, width: '35px', height: '35px' }} />
       <Box sx={sxClasses.tooltipText}>{tooltipValue}</Box>
     </Box>
   );

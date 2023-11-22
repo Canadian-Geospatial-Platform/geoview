@@ -5,10 +5,10 @@ import { WKB as FormatWKB } from 'ol/format';
 
 import { ReadOptions } from 'ol/format/Feature';
 import { Vector as VectorSource } from 'ol/source';
-import { Geometry } from 'ol/geom';
 import BaseLayer from 'ol/layer/Base';
 import LayerGroup from 'ol/layer/Group';
 import { Feature } from 'ol';
+import Geometry from 'ol/geom/Geometry';
 
 import initSqlJs, { SqlValue } from 'sql.js';
 import * as SLDReader from '@nieuwlandgeo/sldreader';
@@ -58,7 +58,7 @@ interface sldsInterface {
 
 interface layerData {
   name: string;
-  source: VectorSource<Geometry>;
+  source: VectorSource<Feature<Geometry>>;
   properties: initSqlJs.ParamsObject | undefined;
 }
 

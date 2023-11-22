@@ -27,7 +27,7 @@ export function FeatureInfo({ features, currentFeatureIndex }: TypeFeatureInfoPr
   const { t } = useTranslation<string>();
 
   const theme: Theme & {
-    iconImg: React.CSSProperties;
+    iconImage: React.CSSProperties;
   } = useTheme();
   const sxClasses = getSxClasses(theme);
 
@@ -98,7 +98,11 @@ export function FeatureInfo({ features, currentFeatureIndex }: TypeFeatureInfoPr
             </>
           }
         >
-          <img src={featureIconSrc} alt={nameFieldValue} style={{ ...theme.iconImg, marginRight: '10px', width: '35px', height: '35px' }} />
+          <img
+            src={featureIconSrc}
+            alt={nameFieldValue}
+            style={{ ...theme.iconImage, marginRight: '10px', width: '35px', height: '35px' }}
+          />
           <ListItemText sx={sxClasses.itemText} primary={nameFieldValue} />
         </ListItem>
       </List>

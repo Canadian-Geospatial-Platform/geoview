@@ -9,7 +9,7 @@ export type TypeFeatureInfoEntry = {
   featureKey: number,
   geoviewLayerType: TypeGeoviewLayerType,
   extent: Extent,
-  geometry: FeatureLike | null,
+  geometry: Feature<Geometry> | null,
   featureIcon: HTMLCanvasElement,
   fieldInfo: Partial<Record<string, TypeFieldEntry>>,
   nameField: string | null,

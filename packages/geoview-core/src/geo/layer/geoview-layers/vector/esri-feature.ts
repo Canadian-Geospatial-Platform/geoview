@@ -1,9 +1,10 @@
 /* eslint-disable no-param-reassign */
 import { Vector as VectorSource } from 'ol/source';
-import { Geometry } from 'ol/geom';
 import { Options as SourceOptions } from 'ol/source/Vector';
 import { EsriJSON } from 'ol/format';
 import { ReadOptions } from 'ol/format/Feature';
+import Feature from 'ol/Feature';
+import Geometry from 'ol/geom/Geometry';
 
 import { AbstractGeoViewLayer, CONST_LAYER_TYPES } from '../abstract-geoview-layers';
 
@@ -14,6 +15,7 @@ import {
   TypeGeoviewLayerConfig,
   TypeListOfLayerEntryConfig,
   TypeEsriDynamicLayerEntryConfig,
+  TypeBaseLayerEntryConfig,
 } from '@/geo/map/map-schema-types';
 
 import { getLocalizedValue } from '@/core/utils/utilities';
@@ -247,13 +249,13 @@ export class EsriFeature extends AbstractGeoViewVector {
    * @returns {VectorSource<Geometry>} The source configuration that will be used to create the vector layer.
    */
   protected createVectorSource(
-    layerEntryConfig: TypeEsriFeatureLayerEntryConfig,
+    layerEntryConfig: TypeBaseLayerEntryConfig,
     sourceOptions: SourceOptions = {},
     readOptions: ReadOptions = {}
-  ): VectorSource<Geometry> {
+  ): VectorSource<Feature<Geometry>> {
     // The line below uses var because a var declaration has a wider scope than a let declaration.
     // eslint-disable-next-line no-var
-    var vectorSource: VectorSource<Geometry>;
+    var vectorSource: VectorSource<Feature<Geometry>>;
     sourceOptions.url = getLocalizedValue(layerEntryConfig.source!.dataAccessPath!, this.mapId);
     sourceOptions.url = `${sourceOptions.url}/${String(layerEntryConfig.layerId).replace(
       '-unclustered',
