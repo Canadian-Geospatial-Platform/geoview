@@ -57,21 +57,24 @@ export interface TypeLegendItemDetailsProps {
 
 /// //////////////////////////////////////////////////
 
+export type TypeLayersViewDisplayState = 'remove' | 'add' | 'order' | 'view';
+
 export type TypeLegendLayerIcons = TypeLegendLayerItem[];
 
 export type TypeLegendLayerItem = {
   geometryType?: TypeStyleGeometry;
   iconType?: 'simple' | 'list';
   name?: string;
-  iconImage?: string;
-  iconImgStacked?: string;
+  iconImage?: string | null;
+  iconImgStacked?: string | null;
   iconList?: TypeLegendLayerListItem[];
 };
 
 export interface TypeLegendLayerListItem {
+  geometryType: TypeStyleGeometry;
   name: string;
   isVisible: TypeVisibilityFlags;
-  icon: string;
+  icon: string | null;
   default: boolean;
 }
 

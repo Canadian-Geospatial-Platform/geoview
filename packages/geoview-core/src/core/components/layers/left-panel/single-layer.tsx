@@ -15,18 +15,24 @@ import {
   ListItemButton,
   ListItemIcon,
   ListItemText,
-  ListAltIcon,
   Tooltip,
   VisibilityOffOutlinedIcon,
   VisibilityOutlinedIcon,
   RestartAltIcon,
   CircularProgressBase,
   TableViewIcon,
+  HandleIcon,
 } from '@/ui';
 import { TypeLegendLayer } from '../types';
 import { getSxClasses } from './layerslist-style';
-import { useLayerStoreActions, useSelectedLayerPath } from '@/core/stores/store-interface-and-intial-values/layer-state';
+import {
+  useLayerStoreActions,
+  useLayersDisplayState,
+  useSelectedLayerPath,
+} from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { useDataTableStoreMapFilteredRecord } from '@/core/stores/store-interface-and-intial-values/data-table-state';
+import { IconStack } from '../../icon-stack/icon-stack';
+import { DeleteUndoButton } from './delete-undo-button';
 
 interface SingleLayerProps {
   layer: TypeLegendLayer;
@@ -44,9 +50,10 @@ export function SingleLayer(props: SingleLayerProps): JSX.Element {
   const { toggleLayerVisibility, setSelectedLayerPath } = useLayerStoreActions(); // get store actions
 
   const selectedLayerPath = useSelectedLayerPath(); // get store value
+  const displayState = useLayersDisplayState();
   const mapFiltered = useDataTableStoreMapFilteredRecord();
 
-  const layerIsSelected = layer.layerPath === selectedLayerPath;
+  const layerIsSelected = layer.layerPath === selectedLayerPath && displayState === 'view';
   const legendClass = layerIsSelected ? { ...sxClasses.layersList.selectedLayerItem } : null;
 
   const [isGroupOpen, setGroupOpen] = useState(layerIsSelected);
@@ -100,6 +107,10 @@ export function SingleLayer(props: SingleLayerProps): JSX.Element {
     console.log('reloading layer');
   };
 
+  const handleReArrangeLayer = () => {
+    console.log('re-arrange layer');
+  };
+
   // renders the layers children, if any
   function renderChildren() {
     if (!layer.children?.length) {
@@ -115,8 +126,22 @@ export function SingleLayer(props: SingleLayerProps): JSX.Element {
     );
   }
 
+  function renderEditModeButtons() {
+    if (displayState === 'remove') {
+      return <DeleteUndoButton layer={layer} />;
+    }
+    if (displayState === 'order') {
+      return (
+        <IconButton onClick={handleReArrangeLayer}>
+          <HandleIcon color="error" />
+        </IconButton>
+      );
+    }
+    return null;
+  }
+
   function renderMoreLayerButtons() {
-    if (layer.layerStatus === 'loading') {
+    if (layer.layerStatus === 'loading' || displayState !== 'view') {
       return null;
     }
     if (layer.layerStatus === 'error') {
@@ -148,7 +173,7 @@ export function SingleLayer(props: SingleLayerProps): JSX.Element {
         </IconButton>
       );
     }
-    if (layer.items?.length) {
+    if (displayState === 'view' && layer.items?.length) {
       return (
         <IconButton onClick={handleLayerClick}>
           <KeyboardArrowRightIcon />
@@ -194,7 +219,7 @@ export function SingleLayer(props: SingleLayerProps): JSX.Element {
     }
     return (
       <IconButton color="success">
-        <ListAltIcon />
+        <IconStack layerPath={layer.layerPath} />
       </IconButton>
     );
   }
@@ -210,6 +235,7 @@ export function SingleLayer(props: SingleLayerProps): JSX.Element {
           <ListItemIcon style={{ justifyContent: 'right' }}>
             {renderMoreLayerButtons()}
             {renderArrowButtons()}
+            {renderEditModeButtons()}
           </ListItemIcon>
         </ListItemButton>
       </ListItem>
