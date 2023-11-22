@@ -66,36 +66,46 @@ export class LegendEventProcessor extends AbstractEventProcessor {
             iconDetailsEntry.iconType = 'list';
             if (isClassBreakStyleConfig(styleSettings)) {
               iconDetailsEntry.iconList = styleRepresentation.arrayOfCanvas!.map((canvas, i) => {
-                return {
+                const legendLayerListItem: TypeLegendLayerListItem = {
+                  geometryType,
                   icon: canvas ? canvas.toDataURL() : null,
                   name: styleSettings.classBreakStyleInfo[i].label,
                   isVisible: styleSettings.classBreakStyleInfo[i].visible!,
                   default: false,
-                } as TypeLegendLayerListItem;
+                };
+                return legendLayerListItem;
               });
-              if (styleRepresentation.defaultCanvas)
-                iconDetailsEntry.iconList.push({
+              if (styleRepresentation.defaultCanvas) {
+                const legendLayerListItem: TypeLegendLayerListItem = {
+                  geometryType,
                   icon: styleRepresentation.defaultCanvas.toDataURL(),
                   name: styleSettings.defaultLabel!,
                   isVisible: styleSettings.defaultVisible!,
                   default: true,
-                } as TypeLegendLayerListItem);
+                };
+                iconDetailsEntry.iconList.push(legendLayerListItem);
+              }
             } else if (isUniqueValueStyleConfig(styleSettings)) {
               iconDetailsEntry.iconList = styleRepresentation.arrayOfCanvas!.map((canvas, i) => {
-                return {
+                const legendLayerListItem: TypeLegendLayerListItem = {
+                  geometryType,
                   icon: canvas ? canvas.toDataURL() : null,
                   name: styleSettings.uniqueValueStyleInfo[i].label,
                   isVisible: styleSettings.uniqueValueStyleInfo[i].visible!,
                   default: false,
-                } as TypeLegendLayerListItem;
+                };
+                return legendLayerListItem;
               });
-              if (styleRepresentation.defaultCanvas)
-                iconDetailsEntry.iconList.push({
+              if (styleRepresentation.defaultCanvas) {
+                const legendLayerListItem: TypeLegendLayerListItem = {
+                  geometryType,
                   icon: styleRepresentation.defaultCanvas.toDataURL(),
                   name: styleSettings.defaultLabel!,
                   isVisible: styleSettings.defaultVisible!,
                   default: true,
-                } as TypeLegendLayerListItem);
+                };
+                iconDetailsEntry.iconList.push(legendLayerListItem);
+              }
             }
             if (iconDetailsEntry.iconList?.length) iconDetailsEntry.iconImage = iconDetailsEntry.iconList[0].icon;
             if (iconDetailsEntry.iconList && iconDetailsEntry.iconList.length > 1)
