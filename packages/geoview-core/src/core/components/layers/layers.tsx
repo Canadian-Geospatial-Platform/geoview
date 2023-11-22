@@ -1,10 +1,10 @@
 import { useEffect, useRef } from 'react';
 import { useTheme } from '@mui/material/styles';
 import { styled } from '@mui/material';
-import { LegendItemsDetailsProps } from './types';
+// YC import { LegendItemsDetailsProps } from './types';
 import { Box, DeleteIcon, Grid, HandleIcon, IconButton, Paper } from '@/ui';
 import { getSxClasses } from './layers-style';
-import { useLegendHelpers } from './hooks/helpers';
+// YC import { useLegendHelpers } from './hooks/helpers';
 import { LayersActions } from './left-panel/layers-actions';
 import { LayersList } from './left-panel/layers-list';
 import { LayerDetails } from './right-panel/layer-details';
@@ -18,8 +18,8 @@ const Item = styled('div')(({ theme }) => ({
   borderRadius: 4,
 }));
 
-export function Layers(props: LegendItemsDetailsProps): JSX.Element {
-  const { mapId } = props;
+export function Layers(/* // YC props: LegendItemsDetailsProps */): JSX.Element {
+  // const { mapId } = props;
 
   const theme = useTheme();
   const sxClasses = getSxClasses(theme);
@@ -27,13 +27,13 @@ export function Layers(props: LegendItemsDetailsProps): JSX.Element {
   const layerDetailsRef = useRef<HTMLDivElement>(null);
 
   // Populating fake legend data
-  const helpers = useLegendHelpers(mapId);
+  // YC const helpers = useLegendHelpers(mapId);
 
   const selectedLayer = useSelectedLayer(); // get store value
   const displayState = useLayersDisplayState();
 
   useEffect(() => {
-    helpers.populateLegendStoreWithFakeData();
+    // YC helpers.populateLegendStoreWithFakeData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

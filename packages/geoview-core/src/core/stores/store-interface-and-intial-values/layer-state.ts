@@ -5,6 +5,7 @@ import _ from 'lodash';
 import { useGeoViewStore } from '../stores-managers';
 import { TypeLayersViewDisplayState, TypeLegendLayer } from '../../components/layers/types';
 import { TypeGetStore, TypeSetStore } from '../geoview-store';
+import { TypeStyleGeometry } from '@/geo/map/map-schema-types';
 
 export interface ILayerState {
   selectedItem?: TypeLegendLayer;
@@ -19,7 +20,7 @@ export interface ILayerState {
     setSelectedLayerPath: (layerPath: string) => void;
     setLayerOpacity: (layerPath: string, opacity: number) => void;
     toggleLayerVisibility: (layerPath: string) => void;
-    toggleItemVisibility: (layerPath: string, itemName: string) => void;
+    toggleItemVisibility: (layerPath: string, geometryType: TypeStyleGeometry, itemName: string) => void;
     setAllItemsVisibility: (layerPath: string, visibility: 'yes' | 'no') => void;
     deleteLayer: (layerPath: string) => void;
   };
@@ -87,13 +88,13 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
           },
         });
       },
-      toggleItemVisibility: (layerPath: string, itemName: string) => {
+      toggleItemVisibility: (layerPath: string, geometryType: TypeStyleGeometry, itemName: string) => {
         const curLayers = get().layerState.legendLayers;
 
         const layer = findLayerByPath(curLayers, layerPath);
         if (layer) {
           _.each(layer.items, (item) => {
-            if (item.name === itemName && item.isVisible !== 'always') {
+            if (item.geometryType === geometryType && item.name === itemName && item.isVisible !== 'always') {
               item.isVisible = item.isVisible === 'no' ? 'yes' : 'no'; // eslint-disable-line no-param-reassign
             }
           });
@@ -173,9 +174,9 @@ function findLayerByPath(layers: TypeLegendLayer[], layerPath: string): TypeLege
 }
 
 function deleteSingleLayer(layers: TypeLegendLayer[], layerPath: string) {
-  const indToDelete = layers.findIndex((l) => l.layerPath === layerPath);
-  if (indToDelete >= 0) {
-    layers.splice(indToDelete, 1);
+  const indexToDelete = layers.findIndex((l) => l.layerPath === layerPath);
+  if (indexToDelete >= 0) {
+    layers.splice(indexToDelete, 1);
   } else {
     for (const l of layers) {
       if (l.children && l.children.length > 0) {

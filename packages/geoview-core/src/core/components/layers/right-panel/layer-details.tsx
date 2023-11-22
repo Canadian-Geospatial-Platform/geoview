@@ -15,6 +15,7 @@ import {
   RestartAltIcon,
   HighlightOutlinedIcon,
   TableViewIcon,
+  BrowserNotSupportedIcon,
 } from '@/ui';
 import { useLayerStoreActions } from '@/core/stores/store-interface-and-intial-values/layer-state';
 
@@ -82,12 +83,12 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
         {layerDetails.items.map((item) => (
           <Grid container direction="row" key={item.name} justifyContent="center" alignItems="stretch">
             <Grid item xs="auto">
-              <IconButton color="primary" onClick={() => toggleItemVisibility(layerDetails.layerPath, item.name)}>
+              <IconButton color="primary" onClick={() => toggleItemVisibility(layerDetails.layerPath, item.geometryType, item.name)}>
                 {item.isVisible ? <CheckBoxIcon /> : <CheckBoxOutIcon />}
               </IconButton>
             </Grid>
             <Grid item xs="auto">
-              <img alt={item.name} src={item.icon} />
+              {item.icon ? <img alt={item.name} src={item.icon} /> : <BrowserNotSupportedIcon />}
               <span style={sxClasses.rightPanel.tableIconLabel}>{item.name}</span>
             </Grid>
           </Grid>

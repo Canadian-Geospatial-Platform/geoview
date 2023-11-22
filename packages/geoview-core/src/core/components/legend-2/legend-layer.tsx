@@ -12,6 +12,7 @@ import {
   GroupWorkOutlinedIcon,
   ErrorIcon,
   DownloadingIcon,
+  BrowserNotSupportedIcon,
 } from '@/ui';
 import { TypeLegendLayer } from '@/core/components/layers/types';
 import { getSxClasses } from './legend-styles';
@@ -75,9 +76,7 @@ export function LegendLayer(props: LegendLayerProps): JSX.Element {
           .filter((d) => d.isVisible)
           .map((item) => (
             <ListItem key={item.name} className={!item.isVisible ? 'unchecked' : ''}>
-              <ListItemIcon>
-                <img alt={item.name} src={item.icon} />
-              </ListItemIcon>
+              <ListItemIcon>{item.icon ? <img alt={item.name} src={item.icon} /> : <BrowserNotSupportedIcon />}</ListItemIcon>
               <Tooltip title={item.name} placement="top" enterDelay={1000}>
                 <ListItemText primary={item.name} />
               </Tooltip>
