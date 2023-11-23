@@ -1,6 +1,7 @@
 // footer-bar.tsx
 export const sxClassesFooterBar = {
   footerBarContainer: {
+    flexGrow: 1,
     zIndex: 50,
     display: 'flex',
     flexDirection: 'row',
@@ -20,7 +21,7 @@ export const sxClassesFooterBar = {
     flexDirection: 'row',
     '& button': {
       cursor: 'pointer',
-      margin: 'auto',
+      margin: 'auto 0 auto auto',
     },
   },
   rotationControlsContainer: {
