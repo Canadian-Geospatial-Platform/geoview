@@ -37,7 +37,7 @@ export function LayersPanel({ mapId }: LegendItemsDetailsProps) {
   const displayState = useLayersDisplayState();
 
   useEffect(() => {
-    helpers.populateLegendStoreWithFakeData();
+    // helpers.populateLegendStoreWithFakeData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
