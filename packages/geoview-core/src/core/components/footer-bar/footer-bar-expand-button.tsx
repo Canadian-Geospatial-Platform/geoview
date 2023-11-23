@@ -1,4 +1,4 @@
-import { useContext } from 'react';
+import { useContext, useEffect } from 'react';
 
 import { ExpandMoreIcon, ExpandLessIcon, IconButton, Box } from '@/ui';
 import { MapContext } from '@/core/app-start';
@@ -18,6 +18,10 @@ export function FooterbarExpandButton(): JSX.Element {
   const expanded = useUIFooterBarExpanded();
   const { setFooterBarExpanded } = useUIStoreActions();
 
+  const handleTransitionEnd = () => {
+    setFooterBarExpanded(true);
+  };
+
   /**
    * Expand the footer bar
    */
@@ -33,10 +37,10 @@ export function FooterbarExpandButton(): JSX.Element {
       if (ulElement) {
         ulElement.style.width = '100%';
       }
-    }
 
-    // footerbar expanded
-    setFooterBarExpanded(true);
+      // event listener for transitionend
+      footerBar.addEventListener('transitionend', handleTransitionEnd, { once: true });
+    }
   };
 
   /**
@@ -59,6 +63,16 @@ export function FooterbarExpandButton(): JSX.Element {
     // set footerbar collapsed
     setFooterBarExpanded(false);
   };
+
+  useEffect(() => {
+    return () => {
+      const footerBar = document.getElementById(`${mapId}-footerBar`);
+      if (footerBar) {
+        footerBar.removeEventListener('transitionend', handleTransitionEnd);
+      }
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <Box>

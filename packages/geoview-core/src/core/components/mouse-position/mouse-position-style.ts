@@ -8,7 +8,6 @@ export const getSxClasses = (theme: Theme) => ({
     whiteSpace: 'nowrap',
     overflow: 'hidden',
     alignItems: 'center',
-    border: 'none',
     width: 'auto',
     backgroundColor: 'transparent !important',
     height: 'inherit !important',
@@ -22,6 +21,9 @@ export const getSxClasses = (theme: Theme) => ({
   mousePositionTextContainer: {
     display: 'flex',
     flexDirection: 'column',
+    [theme.breakpoints.down('md')]: {
+      display: 'none',
+    },
   },
   mousePositionTextCheckmarkContainer: {
     display: 'flex',
