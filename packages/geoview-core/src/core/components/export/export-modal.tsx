@@ -5,43 +5,30 @@ import { useTranslation } from 'react-i18next';
 import { Button, Dialog, DialogActions, DialogTitle } from '@/ui';
 import { MapContext } from '@/core/app-start';
 import { exportPNG } from '@/core/utils/utilities';
-
-/**
- * Interface used for home button properties
- */
-interface ExportModalProps {
-  className?: string | undefined;
-  isShown: boolean;
-  closeModal: MouseEventHandler<HTMLElement>;
-}
-
-/**
- * default properties values
- */
-const defaultProps = {
-  className: '',
-};
+import { useUIActiveFocusItem, useUIStoreActions } from '@/core/stores/store-interface-and-intial-values/ui-state';
 
 /**
  * Export PNG Button component
  *
  * @returns {JSX.Element} the export button
  */
-export default function ExportModal(props: ExportModalProps): JSX.Element {
-  const { className, isShown, closeModal } = props;
-
+export default function ExportModal(): JSX.Element {
   const mapConfig = useContext(MapContext);
   const { mapId } = mapConfig;
 
   const { t } = useTranslation();
 
-  const exportMap = ((event): void => {
+  // get store function
+  const { closeModal } = useUIStoreActions();
+  const activeModalId = useUIActiveFocusItem().activeElementId;
+
+  const exportMap = ((): void => {
     exportPNG(mapId);
-    closeModal(event);
+    closeModal();
   }) as MouseEventHandler<HTMLButtonElement>;
 
   return (
-    <Dialog open={isShown} onClose={closeModal} className={className}>
+    <Dialog open={activeModalId === 'export'} onClose={closeModal}>
       <DialogTitle>{t('exportModal.title')}</DialogTitle>
       <DialogActions>
         <Button onClick={closeModal} type="text" size="small" autoFocus>
@@ -54,5 +41,3 @@ export default function ExportModal(props: ExportModalProps): JSX.Element {
     </Dialog>
   );
 }
-
-ExportModal.defaultProps = defaultProps;
