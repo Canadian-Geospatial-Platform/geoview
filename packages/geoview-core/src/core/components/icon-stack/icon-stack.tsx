@@ -4,7 +4,7 @@ import { Box, IconButton, BrowserNotSupportedIcon } from '@/ui';
 import { getSxClasses } from './icon-stack-style';
 import { layerInfo, TypeLayerInfo } from './helper';
 // TODO uncomment line below when you have layers and icons in the store
-// import { useIconLayerSet } from '@/core/stores/store-interface-and-intial-values/layer-state';
+import { useIconLayerSet } from '@/core/stores/store-interface-and-intial-values/layer-state';
 
 export interface TypeIconStackProps {
   layerPath: string;
@@ -26,8 +26,10 @@ export function IconStack({ layerPath, onIconClick, onStackIconClick }: TypeIcon
 
   // TODO function below is using the fake data, remove it once you have layers and icons in the store
   const findIconsData = (layerPathStr: string): string[] | undefined => {
-    const foundMatchedLayerPath: TypeLayerInfo | undefined = layerInfo.find((layer: TypeLayerInfo) => layer.layerPath === layerPathStr);
-    return foundMatchedLayerPath?.iconData;
+    //const foundMatchedLayerPath: TypeLayerInfo | undefined = layerInfo.find((layer: TypeLayerInfo) => layer.layerPath === layerPathStr);
+    //return foundMatchedLayerPath?.iconData;
+    const t = useIconLayerSet(layerPathStr);
+    return t;
   };
   const iconData = findIconsData(layerPath);
 
