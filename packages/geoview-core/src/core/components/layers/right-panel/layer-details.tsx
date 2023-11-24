@@ -48,17 +48,17 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
     if (bounds) api.maps[mapId].zoomToExtent(bounds); */
   };
 
-  const handleOpenTable = async() => {
+  const handleOpenTable = async () => {
     console.log('opening table');
-  }
+  };
 
-  const handleRefreshLayer = async() => {
+  const handleRefreshLayer = async () => {
     console.log('refresh layer');
-  }
+  };
 
-  const handleHighlightLayer = async() => {
+  const handleHighlightLayer = async () => {
     console.log('refresh layer');
-  }
+  };
 
   const handleSetOpacity = (opacityValue: number | number[]) => {
     const val = Array.isArray(opacityValue) ? opacityValue[0] : opacityValue;
