@@ -2,13 +2,17 @@ import { Theme } from '@mui/material/styles';
 
 export const getSxClasses = (theme: Theme) => ({
   attributionContainer: {
-    display: 'flex',
+    [theme.breakpoints.down('md')]: {
+      display: 'none',
+    },
+    p: '15px',
+    marginTop: '10px',
+    width: '300px',
     padding: theme.spacing(0, 4),
     overflow: 'hidden',
     whiteSpace: 'nowrap',
     textOverflow: 'ellipsis',
     alignItems: 'center',
-    width: '100%',
     transition: 'opacity 1ms ease-in 300ms',
     '& .ol-attribution': {
       display: 'flex !important',
