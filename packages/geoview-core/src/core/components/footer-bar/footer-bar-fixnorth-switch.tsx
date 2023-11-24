@@ -1,6 +1,9 @@
+import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useTheme } from '@mui/material/styles';
+import { useMediaQuery } from '@mui/material';
 
-import { Switch } from '@/ui';
+import { Switch, Box } from '@/ui';
 import { PROJECTION_NAMES } from '@/geo/projection/projection';
 import { useUIFooterBarExpanded } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import {
@@ -17,6 +20,8 @@ import {
  */
 export function FooterbarFixNorthSwitch(): JSX.Element {
   const { t } = useTranslation<string>();
+  const theme = useTheme();
+  const deviceSizeMedUp = useMediaQuery(theme.breakpoints.down('md'));
 
   // get store values
   const expanded = useUIFooterBarExpanded();
@@ -38,11 +43,23 @@ export function FooterbarFixNorthSwitch(): JSX.Element {
     }
   };
 
+  useEffect(() => {
+    if (deviceSizeMedUp) {
+      setFixNorth(false);
+    }
+  }, [deviceSizeMedUp]);
+
   return (
-    <div>
+    <Box
+      sx={{
+        [theme.breakpoints.down('md')]: {
+          display: 'none',
+        },
+      }}
+    >
       {expanded && `EPSG:${mapProjection}` === PROJECTION_NAMES.LCC && isNorthEnable ? (
         <Switch size="small" onChange={fixNorth} title={t('mapctrl.rotation.fixedNorth')!} checked={isFixNorth} />
       ) : null}
-    </div>
+    </Box>
   );
 }

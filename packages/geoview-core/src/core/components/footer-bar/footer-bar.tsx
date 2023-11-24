@@ -56,8 +56,9 @@ export function Footerbar(): JSX.Element {
                 <Box
                   sx={{
                     ...sxClassesFooterBar.rotationControlsContainer,
-                    [theme.breakpoints.up('md')]: {
-                      marginTop: !expanded ? '10px' : 'none',
+                    marginTop: !expanded ? '5px' : 'none',
+                    [theme.breakpoints.down('md')]: {
+                      marginTop: expanded ? '10px' : 'none',
                     },
                   }}
                 >

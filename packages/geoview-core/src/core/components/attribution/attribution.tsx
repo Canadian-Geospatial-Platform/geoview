@@ -2,10 +2,9 @@
 import { useContext, useEffect, useState } from 'react';
 
 import { useTheme } from '@mui/material/styles';
-import { useMediaQuery } from '@mui/material';
 
 import { MapContext } from '@/core/app-start';
-import { Tooltip, Box, MoreHorizIcon, Popover, IconButton } from '@/ui';
+import { Box, MoreHorizIcon, Popover, IconButton } from '@/ui';
 import { getSxClasses } from './attribution-style';
 import { useUIFooterBarExpanded } from '@/core/stores/store-interface-and-intial-values/ui-state';
 
@@ -20,13 +19,12 @@ export function Attribution(): JSX.Element {
   const { mapId } = mapConfig;
 
   const theme = useTheme();
+  // TODO for now keep the sxClasses, need to make sure we don't need any of those styles when we add back the attribution
+  // TODO if we don't need any of styles, please remove the style file and remove line below
   const sxClasses = getSxClasses(theme);
-
-  const deviceSizeMedUp = useMediaQuery(theme.breakpoints.up('md'));
 
   // internal state
   const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
-
   const open = Boolean(anchorEl);
 
   const handleOpenPopover = (event: React.MouseEvent<HTMLButtonElement>) => {
@@ -42,13 +40,6 @@ export function Attribution(): JSX.Element {
 
   // get store value
   const expanded = useUIFooterBarExpanded();
-
-  // close the popover attribution when page size is medium or larger if popover is open
-  useEffect(() => {
-    if (deviceSizeMedUp && open) {
-      handleClosePopover();
-    }
-  }, [deviceSizeMedUp, open]);
 
   useEffect(() => {
     const attributionTextElement = document.getElementById(`${mapId}-attribution-text`) as HTMLElement;
@@ -75,11 +66,11 @@ export function Attribution(): JSX.Element {
         onClick={handleOpenPopover}
         className={open ? 'active' : ''}
         sx={{
-          [theme.breakpoints.up('md')]: {
-            display: 'none',
-          },
           color: 'primary.light',
           marginTop: expanded ? '12px' : '4px',
+          [theme.breakpoints.up('md')]: {
+            marginTop: expanded ? '23px' : 'none',
+          },
           width: '30px',
           height: '30px',
         }}
@@ -101,36 +92,13 @@ export function Attribution(): JSX.Element {
       >
         <Box
           sx={{
-            [theme.breakpoints.up('md')]: {
-              display: 'none',
-            },
             p: '15px',
             width: '300px',
           }}
         >
-          {attribution}
+          Attribution content
         </Box>
       </Popover>
-      <Tooltip
-        title={attribution}
-        sx={{
-          [theme.breakpoints.up('md')]: {
-            display: 'none',
-          },
-        }}
-      >
-        <Box
-          onKeyDown={(evt) => {
-            if (evt.code === 'Space') {
-              evt.preventDefault(); // prevent space keydown to scroll the page
-              evt.stopPropagation();
-            }
-          }}
-          id={`${mapId}-attribution-text`}
-          sx={[sxClasses.attributionContainer, { visibility: expanded ? 'visible' : 'hidden' }]}
-          tabIndex={0}
-        />
-      </Tooltip>
     </>
   );
 }
