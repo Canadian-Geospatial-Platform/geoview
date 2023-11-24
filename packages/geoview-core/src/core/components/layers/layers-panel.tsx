@@ -5,7 +5,6 @@ import { styled } from '@mui/material';
 import { CloseButton, LayerTitle, ResponsiveGrid } from '../common';
 import { Box, DeleteIcon, HandleIcon, IconButton, Paper } from '@/ui';
 import { getSxClasses } from './layers-style';
-import { LegendItemsDetailsProps } from './types';
 import { useLayersDisplayState, useSelectedLayer } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { LayersActions } from './left-panel/layers-actions';
 import { LayersList } from './left-panel/layers-list';
@@ -19,7 +18,7 @@ const Item = styled('div')(({ theme }) => ({
   borderRadius: 4,
 }));
 
-export function LayersPanel({ mapId }: LegendItemsDetailsProps) {
+export function LayersPanel() {
   const { t } = useTranslation<string>();
 
   const theme = useTheme();
