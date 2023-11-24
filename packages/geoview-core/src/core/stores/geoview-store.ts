@@ -1,5 +1,6 @@
-import { create } from 'zustand';
+import { create, useStore } from 'zustand';
 import { subscribeWithSelector } from 'zustand/middleware';
+import { useGeoViewStore } from '@/core/stores/stores-managers';
 
 import { IAppState, initializeAppState } from './store-interface-and-intial-values/app-state';
 import { IDetailsState, initialDetailsState } from './store-interface-and-intial-values/details-state';
@@ -62,3 +63,8 @@ export const geoViewStoreDefinitionWithSubscribeSelector = subscribeWithSelector
 
 const fakeStore = create<IGeoViewState>()(geoViewStoreDefinitionWithSubscribeSelector);
 export type GeoViewStoreType = typeof fakeStore;
+
+// **********************************************************
+// GeoView state selectors
+// **********************************************************
+export const useGeoviewMapId = () => useStore(useGeoViewStore(), (state) => state.mapId);

@@ -1,18 +1,16 @@
-/* eslint-disable react/require-default-props */
-import React, { useCallback, useState } from 'react';
-import { useTheme } from '@mui/material/styles';
-import { t } from 'i18next';
-import { Box } from '@/ui';
+import { TypeWindow } from 'geoview-core';
+import { CloseButton, EnlargeButton, LayerList, LayerListEntry, LayerTitle, ResponsiveGrid } from 'geoview-core/src/core/components/common';
 import { getSxClasses } from './time-slider-style';
 import { TimeSlider } from './time-slider';
-import { SliderFilterProps } from './time-slider-api';
-import { CloseButton, EnlargeButton, LayerList, LayerListEntry, LayerTitle, ResponsiveGrid } from '../common';
+import { SliderFilterProps } from './index';
 
 interface TypeTimeSliderProps {
   mapId: string;
   layersList: string[];
   timeSliderData: { [index: string]: SliderFilterProps };
 }
+
+const { cgpv } = window as TypeWindow;
 
 /**
  * Time slider tab
@@ -22,6 +20,11 @@ interface TypeTimeSliderProps {
  */
 export function TimeSliderPanel(props: TypeTimeSliderProps): JSX.Element {
   const { mapId, layersList, timeSliderData } = props;
+  const { react, ui, useTranslation } = cgpv;
+  const { useCallback, useState } = react;
+  const { Box } = ui.elements;
+  const { useTheme } = ui;
+  const { t } = useTranslation<string>();
   const theme = useTheme();
   const sxClasses = getSxClasses(theme);
 
@@ -50,7 +53,9 @@ export function TimeSliderPanel(props: TypeTimeSliderProps): JSX.Element {
       <LayerList
         isEnlargeDataTable={isEnlargeDataTable}
         selectedLayerIndex={layersList.indexOf(selectedLayerPath)}
-        handleListItemClick={(layer) => handleLayerChange(layer)}
+        handleListItemClick={(layer) => {
+          handleLayerChange(layer);
+        }}
         layerList={layersList.map((layer) => ({ layerName: layer, layerPath: layer, tooltip: layer as string }))}
       />
     );
@@ -80,7 +85,7 @@ export function TimeSliderPanel(props: TypeTimeSliderProps): JSX.Element {
           </Box>
         </ResponsiveGrid.Right>
       </ResponsiveGrid.Root>
-      <ResponsiveGrid.Root sx={{ mt: 8 }}>
+      <ResponsiveGrid.Root>
         <ResponsiveGrid.Left isLayersPanelVisible={isLayersPanelVisible} isEnlargeDataTable={isEnlargeDataTable}>
           {renderLayerList()}
         </ResponsiveGrid.Left>

@@ -1,11 +1,12 @@
 {
   "general": {
-    "close": "Close",
-    "open": "Open",
-    "layers": "Layers",
     "add": "Add",
-    "remove": "Remove",
-    "name": "Name"
+    "close": "Close",
+    "exit": "Exit",
+    "layers": "Layers",
+    "name": "Name",
+    "open": "Open",
+    "remove": "Remove"
   },
   "mapnav": {
     "arianavbar": "vertical button group for map navigation",

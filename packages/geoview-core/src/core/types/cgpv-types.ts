@@ -19,6 +19,7 @@ export * from '../stores/store-interface-and-intial-values/ui-state';
 export * from '@/api';
 
 export * from '@/core/components';
+export * from '@/core/stores';
 export * from '@/app';
 export * from '@/geo';
 export * from '@/ui';

@@ -10,6 +10,7 @@ import {
   payloadIsAllQueriesDone,
   TypeArrayOfFeatureInfoEntries,
   PayloadBaseClass,
+  TypeJsonValue,
 } from 'geoview-core';
 
 import { HubOutlinedIcon, InfoOutlinedIcon, LayersOutlinedIcon, StorageIcon } from 'geoview-core/src/ui';
@@ -18,7 +19,6 @@ import defaultConfig from '../default-config-footer-panel.json';
 import { FooterPanelLegendItem } from './footer-panel-legend-item';
 import { DataTable } from './data-table';
 import { Layers } from './layers';
-import { TimeSlider } from './time-slider';
 
 const w = window as TypeWindow;
 
@@ -126,6 +126,7 @@ class FooterPanelPlugin extends AbstractPlugin {
         });
         tabsCounter++;
         // select the details tab when map click queries are done
+        // TODO: This info should be kept in the store cause we do notlisten to layerset directly anymore
         api.event.on(
           api.eventNames.GET_FEATURE_INFO.ALL_QUERIES_DONE,
           (payload: PayloadBaseClass) => {
@@ -158,13 +159,19 @@ class FooterPanelPlugin extends AbstractPlugin {
       }
 
       if (defaultTabs.includes('time-slider')) {
-        /// create new tab and add the DataTable Component to the footer tab
-        footerTabs.createFooterTab({
-          value: tabsCounter,
-          label: this.translations[displayLanguage].timeSlider as string,
-          content: () => <TimeSlider mapId={mapId} />,
-        });
-        tabsCounter++;
+        /// create a new tab by loading the time-slider plugin
+        api.plugin
+          .loadScript('time-slider')
+          .then((constructor: AbstractPlugin | ((pluginId: string, props: TypeJsonObject) => TypeJsonValue)) => {
+            api.plugin.addPlugin(
+              'time-slider',
+              mapId,
+              constructor,
+              toJsonObject({
+                mapId,
+              })
+            );
+          });
       }
 
       // TODO add custom detail reusable component when done

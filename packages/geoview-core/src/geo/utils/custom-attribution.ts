@@ -42,7 +42,7 @@ export class CustomAttribution extends OLAttribution {
           const liElement = liElements[liElementIndex] as HTMLElement;
           const attributionText = liElement.innerText;
 
-          // if elemetn doat not exist, add. Otherwise remove
+          // if element doat not exist, add. Otherwise remove
           if (!compAttribution.includes(attributionText.toLowerCase().replaceAll(' ', ''))) {
             this.attributions.push(attributionText);
             compAttribution.push(attributionText.toLowerCase().replaceAll(' ', ''));
