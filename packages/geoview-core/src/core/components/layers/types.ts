@@ -25,11 +25,6 @@ export interface LegendProps extends TypeLegendProps {
   mapId: string;
 }
 
-export interface LegendItemsDetailsProps extends TypeLegendProps {
-  mapId: string;
-  // subLayerId: string[];
-}
-
 export interface TypeLegendItemProps {
   layerId: string;
   geoviewLayerInstance: AbstractGeoViewLayer;
