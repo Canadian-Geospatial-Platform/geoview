@@ -112,16 +112,16 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
   function renderLayerButtons() {
     return (
       <Box sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
-        <IconButton tooltip='legend.table_details' sx={{ backgroundColor: '#F6F6F6' }} onClick={handleOpenTable}>
+        <IconButton tooltip="legend.table_details" sx={{ backgroundColor: '#F6F6F6' }} onClick={handleOpenTable}>
           <TableViewIcon />
         </IconButton>
-        <IconButton tooltip='legend.refresh_layer' sx={{ backgroundColor: '#F6F6F6' }} onClick={handleRefreshLayer}>
+        <IconButton tooltip="legend.refresh_layer" sx={{ backgroundColor: '#F6F6F6' }} onClick={handleRefreshLayer}>
           <RestartAltIcon />
         </IconButton>
-        <IconButton tooltip='legend.highlight_layer' sx={{ backgroundColor: '#F6F6F6' }} onClick={handleHighlightLayer}>
+        <IconButton tooltip="legend.highlight_layer" sx={{ backgroundColor: '#F6F6F6' }} onClick={handleHighlightLayer}>
           <HighlightOutlinedIcon />
         </IconButton>
-        <IconButton tooltip='legend.zoom_to' onClick={handleZoomTo} sx={{ backgroundColor: '#F6F6F6' }}>
+        <IconButton tooltip="legend.zoom_to" onClick={handleZoomTo} sx={{ backgroundColor: '#F6F6F6' }}>
           <ZoomInSearchIcon />
         </IconButton>
       </Box>
