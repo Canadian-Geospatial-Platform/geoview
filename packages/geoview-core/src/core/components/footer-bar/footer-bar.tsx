@@ -22,13 +22,14 @@ import { useUIFooterBarExpanded } from '@/core/stores/store-interface-and-intial
 export function Footerbar(): JSX.Element {
   const mapConfig = useContext(MapContext);
   const { mapId } = mapConfig;
-  const theme = useTheme();
 
-  // get store values
-  const expanded = useUIFooterBarExpanded();
+  const theme = useTheme();
 
   // internal state
   const footerBarRef = useRef<HTMLDivElement>();
+
+  // get store values
+  const expanded = useUIFooterBarExpanded();
 
   // get value from the store
   // if map is static do not display mouse position or rotation controls
@@ -56,7 +57,7 @@ export function Footerbar(): JSX.Element {
                 <Box
                   sx={{
                     ...sxClassesFooterBar.rotationControlsContainer,
-                    marginTop: !expanded ? '5px' : 'none',
+                    marginTop: !expanded ? '5px' : '10px',
                     [theme.breakpoints.down('md')]: {
                       marginTop: expanded ? '10px' : 'none',
                     },

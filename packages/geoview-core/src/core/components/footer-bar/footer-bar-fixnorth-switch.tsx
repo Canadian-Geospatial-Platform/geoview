@@ -20,6 +20,7 @@ import {
  */
 export function FooterbarFixNorthSwitch(): JSX.Element {
   const { t } = useTranslation<string>();
+
   const theme = useTheme();
   const deviceSizeMedUp = useMediaQuery(theme.breakpoints.down('md'));
 
