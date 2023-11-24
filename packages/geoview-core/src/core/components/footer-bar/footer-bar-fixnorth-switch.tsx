@@ -48,7 +48,7 @@ export function FooterbarFixNorthSwitch(): JSX.Element {
     if (deviceSizeMedUp) {
       setFixNorth(false);
     }
-  }, [deviceSizeMedUp]);
+  }, [deviceSizeMedUp, setFixNorth]);
 
   return (
     <Box

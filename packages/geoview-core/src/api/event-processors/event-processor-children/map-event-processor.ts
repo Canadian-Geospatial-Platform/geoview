@@ -5,7 +5,6 @@ import { fromLonLat } from 'ol/proj';
 import { GeoViewStoreType } from '@/core/stores/geoview-store';
 import { AbstractEventProcessor } from '../abstract-event-processor';
 import { api, NORTH_POLE_POSITION, TypeClickMarker } from '@/app';
-import { CustomAttribution } from '@/geo/utils/custom-attribution';
 import {
   mapPayload,
   lngLatPayload,
@@ -182,22 +181,6 @@ export class MapEventProcessor extends AbstractEventProcessor {
     map.addControl(scaleLine);
     map.addControl(scaleBar);
 
-    // add map controls (attribution)
-    const attributionTextElement = document.getElementById(`${mapId}-attribution-text`) as HTMLElement;
-    const attributionControl = new CustomAttribution(
-      {
-        target: attributionTextElement,
-        collapsible: false,
-        collapsed: false,
-        label: document.createElement('div'),
-        collapseLabel: document.createElement('div'),
-      },
-      mapId
-    );
-
-    attributionControl.formatAttribution();
-    map.addControl(attributionControl);
-
     // add map overlays
     // create overlay for north pole icon
     const northPoleId = `${mapId}-northpole`;
@@ -241,5 +224,12 @@ export class MapEventProcessor extends AbstractEventProcessor {
   static clickMarkerIconShow(mapId: string, marker: TypeClickMarker) {
     const store = getGeoViewStore(mapId);
     store.getState().mapState.actions.showClickMarker(marker);
+  }
+
+  static setMapAttribution(mapId: string, attribution: string[]) {
+    const store = getGeoViewStore(mapId);
+    store.setState({
+      mapState: { ...store.getState().mapState, attribution },
+    });
   }
 }

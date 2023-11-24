@@ -35,7 +35,7 @@ export type TypeBasemapProps = {
   altText: string;
   thumbnailUrl: string | Array<string>;
   layers: TypeBasemapLayer[];
-  attribution: string;
+  attribution: string[];
   zoomLevels: { min: number; max: number };
   defaultOrigin?: number[];
   defaultExtent?: Extent;
