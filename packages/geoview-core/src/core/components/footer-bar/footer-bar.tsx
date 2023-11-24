@@ -39,21 +39,20 @@ export function Footerbar(): JSX.Element {
     <Box id={`${mapId}-footerBar`} sx={sxClassesFooterBar.footerBarContainer} ref={footerBarRef as MutableRefObject<HTMLDivElement>}>
       <FooterbarExpandButton />
       <Grid container justifyContent="space-between">
-        <Grid item md={4}>
+        <Grid item md={1}>
           <Attribution />
         </Grid>
 
-        <Grid item md={8}>
+        <Grid item md={11} spacing={2}>
           <Grid container justifyContent="flex-end">
-            <Grid item md={9}>
+            <Grid item md={10}>
               <Box id="mouseAndScaleControls" sx={sxClassesFooterBar.mouseScaleControlsContainer}>
                 {interaction === 'dynamic' && <MousePosition />}
                 <Scale />
               </Box>
             </Grid>
-
             {interaction === 'dynamic' && (
-              <Grid item md={3}>
+              <Grid item md={2}>
                 <Box
                   sx={{
                     ...sxClassesFooterBar.rotationControlsContainer,
