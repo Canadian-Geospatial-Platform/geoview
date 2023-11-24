@@ -3,6 +3,7 @@ import { Theme } from '@mui/material/styles';
 export const getSxClasses = (theme: Theme) => ({
   mousePosition: {
     display: 'flex',
+    minWidth: 'fit-content',
     padding: theme.spacing(0, 4),
     textOverflow: 'ellipsis',
     whiteSpace: 'nowrap',
