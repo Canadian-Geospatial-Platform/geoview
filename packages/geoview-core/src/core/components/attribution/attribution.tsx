@@ -1,11 +1,9 @@
 /* eslint-disable no-underscore-dangle */
-import { useContext, useEffect, useState } from 'react';
-
+import { useState } from 'react';
 import { useTheme } from '@mui/material/styles';
-
-import { MapContext } from '@/core/app-start';
 import { Box, MoreHorizIcon, Popover, IconButton } from '@/ui';
-import { getSxClasses } from './attribution-style';
+// TODO remove import below if we are sure we don't need any of its styles for attribution
+// import { getSxClasses } from './attribution-style';
 import { useUIFooterBarExpanded } from '@/core/stores/store-interface-and-intial-values/ui-state';
 
 /**
@@ -15,13 +13,10 @@ import { useUIFooterBarExpanded } from '@/core/stores/store-interface-and-intial
  * @returns {JSX.Element} created attribution element
  */
 export function Attribution(): JSX.Element {
-  const mapConfig = useContext(MapContext);
-  const { mapId } = mapConfig;
-
   const theme = useTheme();
   // TODO for now keep the sxClasses, need to make sure we don't need any of those styles when we add back the attribution
   // TODO if we don't need any of styles, please remove the style file and remove line below
-  const sxClasses = getSxClasses(theme);
+  // const sxClasses = getSxClasses(theme);
 
   // internal state
   const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
@@ -35,29 +30,8 @@ export function Attribution(): JSX.Element {
     setAnchorEl(null);
   };
 
-  // internal component state
-  const [attribution, setAttribution] = useState('');
-
   // get store value
   const expanded = useUIFooterBarExpanded();
-
-  useEffect(() => {
-    const attributionTextElement = document.getElementById(`${mapId}-attribution-text`) as HTMLElement;
-
-    // TODO: put attribution in store from add layer events
-    const tooltipAttribution = [];
-    if (attributionTextElement) {
-      const liElements = attributionTextElement.getElementsByTagName('LI');
-      if (liElements && liElements.length > 0) {
-        for (let liElementIndex = 0; liElementIndex < liElements.length; liElementIndex++) {
-          const liElement = liElements[liElementIndex] as HTMLElement;
-          tooltipAttribution.push(liElement.innerText);
-        }
-      }
-    }
-
-    setAttribution(tooltipAttribution.join('\n'));
-  }, [mapId, open]);
 
   return (
     <>
