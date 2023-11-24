@@ -6,7 +6,7 @@ import { TooltipProps, IconButtonProps } from '@mui/material';
  */
 export interface TypeIconButtonProps extends IconButtonProps {
   children?: ReactNode;
-  tooltip?: string;
+  tooltip?: string | null;
   tooltipPlacement?: TooltipProps['placement'];
   tabIndex?: number;
   iconRef?: RefObject<HTMLButtonElement>;

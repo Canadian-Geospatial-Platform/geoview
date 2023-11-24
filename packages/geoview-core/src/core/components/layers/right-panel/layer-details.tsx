@@ -48,6 +48,18 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
     if (bounds) api.maps[mapId].zoomToExtent(bounds); */
   };
 
+  const handleOpenTable = async() => {
+    console.log('opening table');
+  }
+
+  const handleRefreshLayer = async() => {
+    console.log('refresh layer');
+  }
+
+  const handleHighlightLayer = async() => {
+    console.log('refresh layer');
+  }
+
   const handleSetOpacity = (opacityValue: number | number[]) => {
     const val = Array.isArray(opacityValue) ? opacityValue[0] : opacityValue;
     setLayerOpacity(layerDetails.layerPath, val / 100);
@@ -100,16 +112,16 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
   function renderLayerButtons() {
     return (
       <Box sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
-        <IconButton sx={{ backgroundColor: '#F6F6F6' }}>
+        <IconButton tooltip={t('legend.table_details')} sx={{ backgroundColor: '#F6F6F6' }} onClick={handleOpenTable}>
           <TableViewIcon />
         </IconButton>
-        <IconButton sx={{ backgroundColor: '#F6F6F6' }}>
+        <IconButton tooltip={t('legend.refresh_layer')} sx={{ backgroundColor: '#F6F6F6' }} onClick={handleRefreshLayer}>
           <RestartAltIcon />
         </IconButton>
-        <IconButton sx={{ backgroundColor: '#F6F6F6' }}>
+        <IconButton tooltip={t('legend.highlight_layer')} sx={{ backgroundColor: '#F6F6F6' }} onClick={handleHighlightLayer}>
           <HighlightOutlinedIcon />
         </IconButton>
-        <IconButton onClick={handleZoomTo} sx={{ backgroundColor: '#F6F6F6' }}>
+        <IconButton tooltip={t('legend.zoom_to')} onClick={handleZoomTo} sx={{ backgroundColor: '#F6F6F6' }}>
           <ZoomInSearchIcon />
         </IconButton>
       </Box>
