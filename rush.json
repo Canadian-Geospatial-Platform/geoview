@@ -19,6 +19,10 @@
   },
   "projects": [
     {
+      "packageName": "geoview-basemap-panel",
+      "projectFolder": "packages/geoview-basemap-panel"
+    },
+    {
       "packageName": "geoview-core",
       "projectFolder": "packages/geoview-core"
     },
@@ -27,24 +31,24 @@
       "projectFolder": "packages/geoview-details-panel"
     },
     {
-      "packageName": "geoview-basemap-panel",
-      "projectFolder": "packages/geoview-basemap-panel"
+      "packageName": "geoview-footer-panel",
+      "projectFolder": "packages/geoview-footer-panel"
+    },
+    {
+      "packageName": "geoview-geochart",
+      "projectFolder": "packages/geoview-geochart"
     },
     {
       "packageName": "geoview-layers-panel",
       "projectFolder": "packages/geoview-layers-panel"
     },
     {
-      "packageName": "geoview-footer-panel",
-      "projectFolder": "packages/geoview-footer-panel"
-    },
-    {
       "packageName": "geoview-swiper",
       "projectFolder": "packages/geoview-swiper"
     },
     {
-      "packageName": "geoview-geochart",
-      "projectFolder": "packages/geoview-geochart"
+      "packageName": "geoview-time-slider",
+      "projectFolder": "packages/geoview-time-slider"
     },
     {
       "packageName": "eslint-and-prettier-config",

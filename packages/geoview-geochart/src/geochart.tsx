@@ -1,6 +1,7 @@
 /* eslint-disable no-console */
 // TODO: Remove the no-console eslint above when component development stabilizes
 import { TypeWindow, TypeLayerEntryConfig } from 'geoview-core';
+import { useDetailsStoreLayerDataArray } from 'geoview-core/src/core/stores/store-interface-and-intial-values/details-state';
 import {
   GeoChart as GeoChartComponent,
   GeoChartConfig,
@@ -20,7 +21,6 @@ import {
   TypeArrayOfLayerData,
   TypeFeatureInfoEntry,
 } from 'geoview-core/src/api/events/payloads';
-import { getGeoViewStore } from 'geoview-core/src/core/stores/stores-managers';
 import { findLayerDataAndConfigFromQueryResults, checkForDatasources, fetchItemsViaQueryForDatasource } from './geochart-parsing';
 import { PluginGeoChartConfig, GeoViewGeoChartConfig, GeoViewGeoChartConfigLayer } from './geochart-types';
 import { PayloadBaseClassChart, EVENT_CHART_CONFIG, EVENT_CHART_LOAD, EVENT_CHART_REDRAW } from './geochart-event-base';
@@ -45,7 +45,7 @@ export function GeoChart(props: GeoChartProps): JSX.Element {
   // Fetch cgpv
   const w = window as TypeWindow;
   const { cgpv } = w;
-  const { useTranslation, useStore } = cgpv;
+  const { useTranslation } = cgpv;
   const { useTheme } = cgpv.ui;
   const { Box } = cgpv.ui.elements;
   const { useEffect, useState, useCallback } = cgpv.react;
@@ -78,8 +78,7 @@ export function GeoChart(props: GeoChartProps): JSX.Element {
   const [isLoadingDatasource, setIsLoadingDatasource] = useState<boolean>();
 
   // Use Store
-  // TODO: Refactor - use the atomic selector, instead of 'useStore', when we have figured the way to expose each one to the plugins
-  const storeLayerDataArray = useStore(getGeoViewStore(mapId), (state) => state.detailsState.layerDataArray);
+  const storeLayerDataArray = useDetailsStoreLayerDataArray();
 
   /** ****************************************** USE STATE SECTION END ************************************************** */
   /** ******************************************* CORE FUNCTIONS START ************************************************** */

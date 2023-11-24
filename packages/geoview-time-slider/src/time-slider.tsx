@@ -1,30 +1,14 @@
-import React, { ChangeEvent, useEffect, useRef, useState } from 'react';
 import { useTheme } from '@mui/material/styles';
 import { FormControl, InputLabel, NativeSelect } from '@mui/material';
-import {
-  Grid,
-  Slider,
-  Typography,
-  Checkbox,
-  Tooltip,
-  IconButton,
-  LockIcon,
-  LockOpenIcon,
-  ArrowLeftIcon,
-  PlayArrowIcon,
-  PauseIcon,
-  ArrowRightIcon,
-  SwitchRightIcon,
-  SwitchLeftIcon,
-} from '@/ui';
+import { AbstractGeoViewVector, TypeWindow, getLocalizedValue } from 'geoview-core';
+import { EsriDynamic, TypeFeatureInfoLayerConfig } from 'geoview-core/src/geo/';
 import { getSxClasses } from './time-slider-style';
-import { AbstractGeoViewVector, EsriDynamic, TypeFeatureInfoLayerConfig, api, getLocalizedValue } from '@/app';
-import { SliderFilterProps } from './time-slider-api';
+import { SliderFilterProps } from './index';
 
 /**
  * translations object to inject to the viewer translations
  */
-const translations = {
+const translations: { [index: string]: { [index: string]: string } } = {
   en: {
     unlockRight: 'Unlock right handle',
     unlockLeft: 'Unlock left handle',
@@ -61,6 +45,8 @@ interface TimeSliderPanelProps {
   sliderFilterProps: SliderFilterProps;
 }
 
+const { cgpv } = window as TypeWindow;
+
 /**
  * Creates a panel with time sliders
  *
@@ -69,6 +55,24 @@ interface TimeSliderPanelProps {
  */
 export function TimeSlider(TimeSliderPanelProps: TimeSliderPanelProps) {
   const { mapId, layerPath, sliderFilterProps } = TimeSliderPanelProps;
+  const { api, react, ui } = cgpv;
+  const { useState, useRef, useEffect } = react;
+  const {
+    Grid,
+    Slider,
+    Typography,
+    Checkbox,
+    Tooltip,
+    IconButton,
+    LockIcon,
+    LockOpenIcon,
+    ArrowLeftIcon,
+    PlayArrowIcon,
+    PauseIcon,
+    ArrowRightIcon,
+    SwitchRightIcon,
+    SwitchLeftIcon,
+  } = ui.elements;
   const { displayLanguage } = api.maps[mapId];
   const { range, defaultValue, minAndMax, field, singleHandle, values, filtering, delay, locked, reversed } = sliderFilterProps;
   const timeStampRange = range.map((entry) => new Date(entry).getTime());
@@ -76,7 +80,7 @@ export function TimeSlider(TimeSliderPanelProps: TimeSliderPanelProps) {
   const sxClasses = getSxClasses(theme);
   const [checked, setChecked] = useState<boolean>(filtering);
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
-  const playIntervalRef = useRef<NodeJS.Timeout>();
+  const playIntervalRef = useRef<number>();
   const [isReversed, setIsReversed] = useState<boolean>(reversed);
   const [isLocked, setIsLocked] = useState<boolean>(locked);
   const layerSchemaTag = api.maps[mapId].layer.registeredLayers[layerPath].schemaTag;
@@ -87,7 +91,7 @@ export function TimeSlider(TimeSliderPanelProps: TimeSliderPanelProps) {
 
   const [timeDelay, setTimeDelay] = useState<number>(delay);
 
-  // If the field type has an alias, use that as a lable
+  // If the field type has an alias, use that as a label
   let fieldAlias = field;
   const { featureInfo } = api.maps[mapId].layer.registeredLayers[layerPath].source!;
   const { aliasFields, outfields } = featureInfo as TypeFeatureInfoLayerConfig;
@@ -264,8 +268,8 @@ export function TimeSlider(TimeSliderPanelProps: TimeSliderPanelProps) {
 
     // If slider cycle is active, pause before advancing to next increment
     if (isPlaying) {
-      if (isReversed) playIntervalRef.current = setTimeout(() => moveBack(), timeDelay);
-      else playIntervalRef.current = setTimeout(() => moveForward(), timeDelay);
+      if (isReversed) playIntervalRef.current = window.setTimeout(() => moveBack(), timeDelay);
+      else playIntervalRef.current = window.setTimeout(() => moveForward(), timeDelay);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sliderValues, checked, isReversed, isLocked]);
@@ -313,7 +317,7 @@ export function TimeSlider(TimeSliderPanelProps: TimeSliderPanelProps) {
     setSliderValues(event as number[]);
   }
 
-  function handleTimeChange(event: ChangeEvent<HTMLSelectElement>): void {
+  function handleTimeChange(event: React.ChangeEvent<HTMLSelectElement>): void {
     sliderFilterProps.delay = event.target.value as unknown as number;
     setTimeDelay(event.target.value as unknown as number);
   }
