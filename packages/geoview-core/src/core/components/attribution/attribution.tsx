@@ -1,10 +1,14 @@
 /* eslint-disable no-underscore-dangle */
 import { useState } from 'react';
+
+import { useTranslation } from 'react-i18next';
+
 import { useTheme } from '@mui/material/styles';
-import { Box, MoreHorizIcon, Popover, IconButton } from '@/ui';
-// TODO remove import below if we are sure we don't need any of its styles for attribution
-// import { getSxClasses } from './attribution-style';
+
+import { Box, MoreHorizIcon, Popover, IconButton, Typography } from '@/ui';
 import { useUIFooterBarExpanded } from '@/core/stores/store-interface-and-intial-values/ui-state';
+import { useMapAttribution } from '@/core/stores/store-interface-and-intial-values/map-state';
+import { generateId } from '@/core/utils/utilities';
 
 /**
  * Create an Attribution component that will display an attribution box
@@ -13,14 +17,16 @@ import { useUIFooterBarExpanded } from '@/core/stores/store-interface-and-intial
  * @returns {JSX.Element} created attribution element
  */
 export function Attribution(): JSX.Element {
+  const { t } = useTranslation<string>();
+
   const theme = useTheme();
-  // TODO for now keep the sxClasses, need to make sure we don't need any of those styles when we add back the attribution
-  // TODO if we don't need any of styles, please remove the style file and remove line below
-  // const sxClasses = getSxClasses(theme);
 
   // internal state
   const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
   const open = Boolean(anchorEl);
+
+  // getStore value
+  const mapAttribution = useMapAttribution();
 
   const handleOpenPopover = (event: React.MouseEvent<HTMLButtonElement>) => {
     setAnchorEl(event.currentTarget);
@@ -39,6 +45,8 @@ export function Attribution(): JSX.Element {
         id="attribution"
         onClick={handleOpenPopover}
         className={open ? 'active' : ''}
+        tooltipPlacement="top"
+        tooltip={t('mapctrl.attribution.tooltip')!}
         sx={{
           color: 'primary.light',
           marginTop: expanded ? '12px' : '4px',
@@ -64,13 +72,10 @@ export function Attribution(): JSX.Element {
         }}
         onClose={handleClosePopover}
       >
-        <Box
-          sx={{
-            p: '15px',
-            width: '300px',
-          }}
-        >
-          Attribution content
+        <Box sx={{ padding: '15px' }}>
+          {mapAttribution.map((attribution) => {
+            return <Typography key={generateId()}>{attribution}</Typography>;
+          })}
         </Box>
       </Popover>
     </>

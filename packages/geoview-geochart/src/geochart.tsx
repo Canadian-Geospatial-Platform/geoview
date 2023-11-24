@@ -225,7 +225,7 @@ export function GeoChart(props: GeoChartProps): JSX.Element {
   );
 
   /**
-   * Temporary handle to help debugging. Will get removed when the bypass for esling console.log() gets lifted
+   * Temporary handle to help debugging. Will get removed when the bypass for eslint console.log() gets lifted
    * @param chart ChartType The chart type result
    * @param options ChartOptions<ChartType> The chart options parsed results
    * @param data ChartData<ChartType, GeoDefaultDataPoint<ChartType>> The chart data parsed results

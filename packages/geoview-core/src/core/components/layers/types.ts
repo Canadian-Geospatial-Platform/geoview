@@ -81,6 +81,7 @@ export interface TypeLegendLayerListItem {
 export interface TypeLegendLayer {
   layerId: string;
   layerPath: string;
+  layerAttribution?: string[];
   order?: number; // useful for ordering layers
   layerName: string;
   type: TypeGeoviewLayerType;

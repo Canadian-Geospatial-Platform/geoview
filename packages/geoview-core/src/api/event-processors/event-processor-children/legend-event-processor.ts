@@ -146,6 +146,7 @@ export class LegendEventProcessor extends AbstractEventProcessor {
         const newLegendLayer = {
           layerId: layerPathNodes[currentLevel],
           layerPath: entryLayerPath,
+          layerAttribution: api.maps[mapId].layer.geoviewLayers[layerPathNodes[0]].attributions,
           layerName: getLocalizedValue(legendResultSetsEntry.data?.layerName, mapId)!,
           layerStatus: legendResultSetsEntry.layerStatus,
           layerPhase: legendResultSetsEntry.layerPhase,

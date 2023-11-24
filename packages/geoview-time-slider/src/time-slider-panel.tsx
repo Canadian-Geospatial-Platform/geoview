@@ -56,7 +56,11 @@ export function TimeSliderPanel(props: TypeTimeSliderProps): JSX.Element {
         handleListItemClick={(layer) => {
           handleLayerChange(layer);
         }}
-        layerList={layersList.map(({ layerPath, layerName }) => ({ layerName: layerName, layerPath: layerPath, tooltip: layerName as string }))}
+        layerList={layersList.map(({ layerPath, layerName }) => ({
+          layerName,
+          layerPath,
+          tooltip: layerName as string,
+        }))}
       />
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps

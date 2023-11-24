@@ -23,11 +23,13 @@ interface UseSelectedRowMessageProps {
  */
 export function useSelectedRowMessage({ data, layerKey, tableInstanceRef }: UseSelectedRowMessageProps) {
   const { t } = useTranslation();
+
+  // get store values
   const rowSelectionsRecord = useDataTableStoreRowSelectionsRecord();
   const toolbarRowSelectedMessageRecord = useDataTableStoreToolbarRowSelectedMessageRecord();
-  console.log(rowSelectionsRecord);
-  const [rowSelection, setRowSelection] = useState<Record<number, boolean>>(rowSelectionsRecord[layerKey] ?? {});
 
+  // internal state
+  const [rowSelection, setRowSelection] = useState<Record<number, boolean>>(rowSelectionsRecord[layerKey] ?? {});
   const { setRowSelectionsEntry, setToolbarRowSelectedMessageEntry } = useDataTableStoreActions();
 
   // update store row selections.
