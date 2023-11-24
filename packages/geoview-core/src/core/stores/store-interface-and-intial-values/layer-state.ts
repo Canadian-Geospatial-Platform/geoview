@@ -205,11 +205,11 @@ export const useSelectedLayer = () => {
   return undefined;
 };
 
-export const useIconLayerSet = (layerPath: string) => {
+export const useIconLayerSet = (layerPath: string): string[] => {
   const layers = useStore(useGeoViewStore(), (state) => state.layerState.legendLayers);
   const layer = findLayerByPath(layers, layerPath);
   if (layer) {
-    return layer.items.map((item) => item.icon).filter(d => d !== null);
+    return layer.items.map((item) => item.icon).filter((d) => d !== null) as string[];
   }
   return [];
 };

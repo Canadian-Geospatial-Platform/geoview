@@ -6,7 +6,6 @@ import { CloseButton, LayerTitle, ResponsiveGrid } from '../common';
 import { Box, DeleteIcon, HandleIcon, IconButton, Paper } from '@/ui';
 import { getSxClasses } from './layers-style';
 import { LegendItemsDetailsProps } from './types';
-import { useLegendHelpers } from './hooks/helpers';
 import { useLayersDisplayState, useSelectedLayer } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { LayersActions } from './left-panel/layers-actions';
 import { LayersList } from './left-panel/layers-list';
@@ -30,17 +29,16 @@ export function LayersPanel({ mapId }: LegendItemsDetailsProps) {
 
   const layerDetailsRef = useRef<HTMLDivElement>(null);
 
-  // Populating fake legend data
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const helpers = useLegendHelpers(mapId);
-
   const selectedLayer = useSelectedLayer(); // get store value
   const displayState = useLayersDisplayState();
 
+  /*
+  const helpers = useLegendHelpers(mapId);
   useEffect(() => {
-    // helpers.populateLegendStoreWithFakeData();
+    helpers.populateLegendStoreWithFakeData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+  */
 
   useEffect(() => {
     if (layerDetailsRef.current) {
