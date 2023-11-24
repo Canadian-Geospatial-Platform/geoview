@@ -28,13 +28,12 @@ export function LayersPanel() {
 
   const layerDetailsRef = useRef<HTMLDivElement>(null);
 
-  // Populating fake legend data
-  // const helpers = useLegendHelpers(mapId);
-
   const selectedLayer = useSelectedLayer(); // get store value
   const displayState = useLayersDisplayState();
 
   /*
+  // Using helpers
+  const helpers = useLegendHelpers(mapId);
   useEffect(() => {
     helpers.populateLegendStoreWithFakeData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
