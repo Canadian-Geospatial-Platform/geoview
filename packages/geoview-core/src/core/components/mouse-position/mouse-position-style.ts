@@ -3,12 +3,12 @@ import { Theme } from '@mui/material/styles';
 export const getSxClasses = (theme: Theme) => ({
   mousePosition: {
     display: 'flex',
+    minWidth: 'fit-content',
     padding: theme.spacing(0, 4),
     textOverflow: 'ellipsis',
     whiteSpace: 'nowrap',
     overflow: 'hidden',
     alignItems: 'center',
-    border: 'none',
     width: 'auto',
     backgroundColor: 'transparent !important',
     height: 'inherit !important',
@@ -22,6 +22,9 @@ export const getSxClasses = (theme: Theme) => ({
   mousePositionTextContainer: {
     display: 'flex',
     flexDirection: 'column',
+    [theme.breakpoints.down('md')]: {
+      display: 'none',
+    },
   },
   mousePositionTextCheckmarkContainer: {
     display: 'flex',
