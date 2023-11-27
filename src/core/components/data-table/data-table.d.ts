@@ -1,6 +1,6 @@
 /// <reference types="react" />
 import { Extent } from 'ol/extent';
-import { Geometry } from 'ol/geom';
+import Geometry from 'ol/geom/Geometry';
 export interface Features {
     attributes: {
         [key: string]: string;

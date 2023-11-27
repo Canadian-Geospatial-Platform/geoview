@@ -1,5 +1,6 @@
 export declare const sxClassesFooterBar: {
     footerBarContainer: {
+        flexGrow: number;
         zIndex: number;
         display: string;
         flexDirection: string;

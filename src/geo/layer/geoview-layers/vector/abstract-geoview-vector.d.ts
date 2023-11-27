@@ -1,3 +1,4 @@
+import Feature from 'ol/Feature';
 import { Vector as VectorSource } from 'ol/source';
 import { Options as SourceOptions } from 'ol/source/Vector';
 import { VectorImage as VectorLayer } from 'ol/layer';
@@ -12,7 +13,7 @@ import { AbstractGeoViewLayer } from '../abstract-geoview-layers';
 import { TypeBaseLayerEntryConfig, TypeLayerEntryConfig, TypeListOfLayerEntryConfig, TypeVectorLayerEntryConfig } from '@/geo/map/map-schema-types';
 import { TypeArrayOfFeatureInfoEntries } from '@/api/events/payloads';
 export type TypeVectorLayerGroup = LayerGroup;
-export type TypeVectorLayer = VectorSource<Geometry>;
+export type TypeVectorLayer = VectorSource<Feature<Geometry>>;
 export type TypeBaseVectorLayer = BaseLayer | TypeVectorLayerGroup | TypeVectorLayer;
 /** *****************************************************************************************************************************
  * The AbstractGeoViewVector class is a direct descendant of AbstractGeoViewLayer. As its name indicates, it is used to
@@ -52,18 +53,18 @@ export declare abstract class AbstractGeoViewVector extends AbstractGeoViewLayer
      *
      * @returns {VectorSource<Geometry>} The source configuration that will be used to create the vector layer.
      */
-    protected createVectorSource(layerEntryConfig: TypeBaseLayerEntryConfig, sourceOptions?: SourceOptions, readOptions?: ReadOptions): VectorSource<Geometry>;
+    protected createVectorSource(layerEntryConfig: TypeBaseLayerEntryConfig, sourceOptions?: SourceOptions, readOptions?: ReadOptions): VectorSource<Feature<Geometry>>;
     /** ***************************************************************************************************************************
      * Create a vector layer. The layer has in its properties a reference to the layer entry configuration used at creation time.
      * The layer entry configuration keeps a reference to the layer in the olLayer attribute. If clustering is enabled, creates a
      * cluster source and uses that to create the layer.
      *
      * @param {TypeBaseLayerEntryConfig} layerEntryConfig The layer entry configuration used by the source.
-     * @param {VectorSource<Geometry>} vectorSource The source configuration for the vector layer.
+     * @param {VectorSource<Feature<Geometry>>} vectorSource The source configuration for the vector layer.
      *
      * @returns {VectorLayer<VectorSource>} The vector layer created.
      */
-    createVectorLayer(layerEntryConfig: TypeVectorLayerEntryConfig, vectorSource: VectorSource<Geometry>): VectorLayer<VectorSource>;
+    createVectorLayer(layerEntryConfig: TypeVectorLayerEntryConfig, vectorSource: VectorSource<Feature<Geometry>>): VectorLayer<VectorSource>;
     /** ***************************************************************************************************************************
      * Return feature information for all the features stored in the layer.
      *

@@ -1,10 +1,5 @@
-import { Dispatch, SetStateAction } from 'react';
-type NavbarProps = {
-    activeTrap: boolean;
-    activeTrapSet: Dispatch<SetStateAction<boolean>>;
-};
+/// <reference types="react" />
 /**
  * Create a nav-bar with buttons that can call functions or open custom panels
  */
-export declare function Navbar({ activeTrap, activeTrapSet }: NavbarProps): JSX.Element;
-export {};
+export declare function Navbar(): JSX.Element;

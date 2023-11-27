@@ -1,5 +1,5 @@
 import { ReadOptions } from 'ol/format/Feature';
-import { Geometry } from 'ol/geom';
+import Geometry from 'ol/geom/Geometry';
 import { Extent } from 'ol/extent';
 import { Style } from 'ol/style';
 import { Color } from 'ol/color';

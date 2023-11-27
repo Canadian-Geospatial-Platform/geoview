@@ -2,6 +2,8 @@ import { Map as OLMap, MapEvent } from 'ol';
 import { Coordinate } from 'ol/coordinate';
 import { ObjectEvent } from 'ol/Object';
 import Overlay from 'ol/Overlay';
+import { Extent } from 'ol/extent';
+import { FitOptions } from 'ol/View';
 import { TypeSetStore, TypeGetStore } from '@/core/stores/geoview-store';
 import { TypeValidMapProjectionCodes } from '@/core/types/global-types';
 import { TypeFeatureInfoEntry, TypeMapMouseInfo } from '@/api/events/payloads';
@@ -22,6 +24,7 @@ export interface IMapState {
     clickMarker: TypeClickMarker | undefined;
     currentProjection: TypeValidMapProjectionCodes;
     fixNorth: boolean;
+    highlightedFeatures: Array<TypeFeatureInfoEntry>;
     interaction: TypeInteraction;
     pointerPosition?: TypeMapMouseInfo;
     mapElement?: OLMap;
@@ -45,9 +48,14 @@ export interface IMapState {
         onMapZoomEnd: (event: ObjectEvent) => void;
     };
     actions: {
+        addHighlightedFeature: (feature: TypeFeatureInfoEntry) => void;
+        addSelectedFeature: (feature: TypeFeatureInfoEntry) => void;
         getPixelFromCoordinate: (coord: Coordinate) => [number, number];
         getSize: () => [number, number];
         hideClickMarker: () => void;
+        highlightBBox: (extent: Extent) => void;
+        removeHighlightedFeature: (feature: TypeFeatureInfoEntry | 'all') => void;
+        removeSelectedFeature: (feature: TypeFeatureInfoEntry | 'all') => void;
         setClickCoordinates: () => void;
         setFixNorth: (ifFix: boolean) => void;
         setMapElement: (mapElem: OLMap) => void;
@@ -59,7 +67,9 @@ export interface IMapState {
         setRotation: (degree: number) => void;
         setZoom: (zoom: number) => void;
         showClickMarker: (marker: TypeClickMarker) => void;
+        zoomToExtent: (extent: Extent, options?: FitOptions) => void;
         zoomToInitialExtent: () => void;
+        zoomToGeoLocatorLocation: (coords: [number, number], bbox?: [number, number, number, number]) => void;
         zoomToMyLocation: (position: GeolocationPosition) => void;
     };
 }
@@ -76,12 +86,18 @@ export declare const useMapNorthArrowElement: () => TypeNorthArrow;
 export declare const useMapOverviewMap: () => boolean;
 export declare const useMapPointerPosition: () => TypeMapMouseInfo | undefined;
 export declare const useMapRotation: () => number;
+export declare const useMapSelectedFeatures: () => TypeFeatureInfoEntry[];
 export declare const useMapScale: () => TypeScaleInfo;
 export declare const useMapZoom: () => number;
 export declare const useMapStoreActions: () => {
+    addHighlightedFeature: (feature: TypeFeatureInfoEntry) => void;
+    addSelectedFeature: (feature: TypeFeatureInfoEntry) => void;
     getPixelFromCoordinate: (coord: Coordinate) => [number, number];
     getSize: () => [number, number];
     hideClickMarker: () => void;
+    highlightBBox: (extent: Extent) => void;
+    removeHighlightedFeature: (feature: TypeFeatureInfoEntry | 'all') => void;
+    removeSelectedFeature: (feature: TypeFeatureInfoEntry | 'all') => void;
     setClickCoordinates: () => void;
     setFixNorth: (ifFix: boolean) => void;
     setMapElement: (mapElem: OLMap) => void;
@@ -93,7 +109,9 @@ export declare const useMapStoreActions: () => {
     setRotation: (degree: number) => void;
     setZoom: (zoom: number) => void;
     showClickMarker: (marker: TypeClickMarker) => void;
+    zoomToExtent: (extent: Extent, options?: FitOptions) => void;
     zoomToInitialExtent: () => void;
+    zoomToGeoLocatorLocation: (coords: [number, number], bbox?: [number, number, number, number]) => void;
     zoomToMyLocation: (position: GeolocationPosition) => void;
 };
 export {};

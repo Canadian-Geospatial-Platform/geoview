@@ -23,6 +23,11 @@ declare function ResponsiveGridRoot({ children, ...rest }: ResponsiveGridProps):
  * @returns JSX.Element
  */
 declare function ResponsiveGridLeftPanel({ children, isLayersPanelVisible, isEnlargeDataTable, ...rest }: ResponsiveGridPanelProps): import("react").JSX.Element;
+declare namespace ResponsiveGridLeftPanel {
+    var defaultProps: {
+        sxProps: undefined;
+    };
+}
 /**
  * Create Right Panel for responsive grid.
  * @param {ReactNode} children child elements to be rendered
@@ -32,6 +37,11 @@ declare function ResponsiveGridLeftPanel({ children, isLayersPanelVisible, isEnl
  * @returns JSX.Element
  */
 declare function ResponsiveGridRightPanel({ children, isLayersPanelVisible, sxProps, isEnlargeDataTable, ...rest }: ResponsiveGridPanelProps): import("react").JSX.Element;
+declare namespace ResponsiveGridRightPanel {
+    var defaultProps: {
+        sxProps: undefined;
+    };
+}
 export declare const ResponsiveGrid: {
     Root: typeof ResponsiveGridRoot;
     Left: typeof ResponsiveGridLeftPanel;

@@ -1,4 +1,4 @@
-import { AbstractGeoViewLayer, TypeGeoviewLayerType, TypeLayerEntryConfig, TypeStyleConfig } from '@/geo';
+import { AbstractGeoViewLayer, TypeGeoviewLayerType, TypeLayerEntryConfig, TypeStyleConfig, TypeStyleGeometry, TypeVisibilityFlags } from '@/geo';
 import { TypeLayerStatus } from '@/geo/map/map-schema-types';
 export interface TypeLegendProps {
     layerIds: string[];
@@ -40,16 +40,22 @@ export interface TypeLegendItemDetailsProps {
     expandAll?: boolean;
     hideAll?: boolean;
 }
-export type TypeLegendLayerIcon = {
-    iconType?: string;
-    iconImg?: string;
-    iconImgStacked?: string;
-    iconList?: string[];
+export type TypeLayersViewDisplayState = 'remove' | 'add' | 'order' | 'view';
+export type TypeLegendLayerIcons = TypeLegendLayerItem[];
+export type TypeLegendLayerItem = {
+    geometryType?: TypeStyleGeometry;
+    iconType?: 'simple' | 'list';
+    name?: string;
+    iconImage?: string | null;
+    iconImgStacked?: string | null;
+    iconList?: TypeLegendLayerListItem[];
 };
-export interface TypeLegendLayerItem {
+export interface TypeLegendLayerListItem {
+    geometryType: TypeStyleGeometry;
     name: string;
-    isChecked?: boolean;
-    icon: string;
+    isVisible: TypeVisibilityFlags;
+    icon: string | null;
+    default: boolean;
 }
 export interface TypeLegendLayer {
     layerId: string;
@@ -58,13 +64,13 @@ export interface TypeLegendLayer {
     layerName: string;
     type: TypeGeoviewLayerType;
     styleConfig?: TypeStyleConfig;
-    layerStatus: TypeLayerStatus;
-    layerPhase: string;
-    querySent: boolean;
-    isVisible: boolean;
-    icon?: TypeLegendLayerIcon;
+    layerStatus?: TypeLayerStatus;
+    layerPhase?: string;
+    querySent?: boolean;
+    isVisible: TypeVisibilityFlags;
+    icons?: TypeLegendLayerIcons;
     allItemsChecked?: boolean;
-    items: TypeLegendLayerItem[];
+    items: TypeLegendLayerListItem[];
     children: TypeLegendLayer[];
     opacity?: number;
     zoom?: number;

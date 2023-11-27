@@ -1,7 +1,7 @@
 /// <reference types="react" />
 interface LayerTitleProp {
     children: React.ReactNode;
-    hideTitle?: boolean | undefined;
+    hideTitle?: boolean;
 }
 /**
  * Create Layer Title.
@@ -10,4 +10,9 @@ interface LayerTitleProp {
  * @returns JSX.Element
  */
 export declare function LayerTitle({ children, hideTitle }: LayerTitleProp): import("react").JSX.Element;
+export declare namespace LayerTitle {
+    var defaultProps: {
+        hideTitle: boolean;
+    };
+}
 export {};

@@ -18,7 +18,7 @@ export interface IGeoViewState {
     appState: IAppState;
     detailsState: IDetailsState;
     dataTableState: IMapDataTableState;
-    legendState: ILayerState;
+    layerState: ILayerState;
     mapState: IMapState;
     uiState: IUIState;
     featureInfoResultSets: TypeFeatureInfoResultSets;
@@ -36,4 +36,5 @@ declare const fakeStore: import("zustand").UseBoundStore<Omit<import("zustand").
     };
 }>;
 export type GeoViewStoreType = typeof fakeStore;
+export declare const useGeoviewMapId: () => string;
 export {};

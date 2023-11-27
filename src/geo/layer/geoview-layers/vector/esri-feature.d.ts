@@ -1,9 +1,10 @@
 import { Vector as VectorSource } from 'ol/source';
-import { Geometry } from 'ol/geom';
 import { Options as SourceOptions } from 'ol/source/Vector';
 import { ReadOptions } from 'ol/format/Feature';
+import Feature from 'ol/Feature';
+import Geometry from 'ol/geom/Geometry';
 import { AbstractGeoViewLayer } from '../abstract-geoview-layers';
-import { TypeLayerEntryConfig, TypeVectorLayerEntryConfig, TypeVectorSourceInitialConfig, TypeGeoviewLayerConfig, TypeListOfLayerEntryConfig, TypeEsriDynamicLayerEntryConfig } from '@/geo/map/map-schema-types';
+import { TypeLayerEntryConfig, TypeVectorLayerEntryConfig, TypeVectorSourceInitialConfig, TypeGeoviewLayerConfig, TypeListOfLayerEntryConfig, TypeEsriDynamicLayerEntryConfig, TypeBaseLayerEntryConfig } from '@/geo/map/map-schema-types';
 import { AbstractGeoViewVector } from './abstract-geoview-vector';
 import { TypeJsonArray, TypeJsonObject } from '@/core/types/global-types';
 import { codedValueType, rangeDomainType } from '@/api/events/payloads';
@@ -146,5 +147,5 @@ export declare class EsriFeature extends AbstractGeoViewVector {
      *
      * @returns {VectorSource<Geometry>} The source configuration that will be used to create the vector layer.
      */
-    protected createVectorSource(layerEntryConfig: TypeEsriFeatureLayerEntryConfig, sourceOptions?: SourceOptions, readOptions?: ReadOptions): VectorSource<Geometry>;
+    protected createVectorSource(layerEntryConfig: TypeBaseLayerEntryConfig, sourceOptions?: SourceOptions, readOptions?: ReadOptions): VectorSource<Feature<Geometry>>;
 }

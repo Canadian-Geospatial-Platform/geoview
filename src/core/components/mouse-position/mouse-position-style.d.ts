@@ -2,12 +2,12 @@ import { Theme } from '@mui/material/styles';
 export declare const getSxClasses: (theme: Theme) => {
     mousePosition: {
         display: string;
+        minWidth: string;
         padding: string;
         textOverflow: string;
         whiteSpace: string;
         overflow: string;
         alignItems: string;
-        border: string;
         width: string;
         backgroundColor: string;
         height: string;
@@ -19,6 +19,9 @@ export declare const getSxClasses: (theme: Theme) => {
         };
     };
     mousePositionTextContainer: {
+        [x: string]: string | {
+            display: string;
+        };
         display: string;
         flexDirection: string;
     };

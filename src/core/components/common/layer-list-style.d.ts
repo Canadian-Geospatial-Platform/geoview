@@ -107,7 +107,6 @@ export declare const getSxClasses: (theme: Theme) => {
         '& p': {
             fontSize: string;
             font: string;
-            fontWeight: number;
             lineHeight: number;
             overflow: string;
             textOverflow: string;
@@ -120,6 +119,7 @@ export declare const getSxClasses: (theme: Theme) => {
             '>p': {
                 fontSize: string;
                 color: string;
+                fontWeight: number;
             };
             ' svg': {
                 width: string;
