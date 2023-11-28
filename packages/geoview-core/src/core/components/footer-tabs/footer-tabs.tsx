@@ -91,17 +91,23 @@ export function FooterTabs(): JSX.Element | null {
     mapDiv.style.transition = 'height 0.2s ease-out 0.2s';
 
     // ol map container div
-    (mapDiv.querySelectorAll('[class*="mapContainer"]')[0] as HTMLElement).style.minHeight = `${origHeight}px`;
+    const mapContainer = mapDiv.querySelector('.mapContainer') as HTMLElement | null;
+    if (mapContainer) {
+      mapContainer.style.minHeight = `${origHeight}px`;
+    }
 
     // tabs container div
-    const tabs = mapDiv.querySelectorAll('[class*="tabsContainer"]') as NodeListOf<HTMLElement>;
-    if (tabs.length > 0) {
-      const tab: HTMLElement = tabs[0];
-      tab.style.height = 'fit-content';
-      (tab.firstChild!.lastChild! as HTMLElement).style.overflow = isCollapsed ? 'unset' : 'auto';
-      (tab.firstChild!.lastChild! as HTMLElement).style.maxHeight = isCollapsed ? '0px' : `${origHeight}px`;
+    const tabsContainers = mapDiv.querySelectorAll('.tabsContainer') as NodeListOf<HTMLElement>;
+    if (tabsContainers.length > 0) {
+      const tabsContainer = tabsContainers[0];
+      tabsContainer.style.height = 'fit-content';
+      const lastChild = tabsContainer.firstElementChild?.lastElementChild as HTMLElement | null;
+      if (lastChild) {
+        lastChild.style.overflow = isCollapsed ? 'unset' : 'auto';
+        lastChild.style.maxHeight = isCollapsed ? '0px' : `${origHeight}px`;
+      }
     }
-  }, [isCollapsed, mapDiv, mapDiv.style, origHeight]);
+  }, [isCollapsed, mapDiv, origHeight]);
 
   // TODO: need a refactor to use proper sx classes and style.
   // TODO: maybe this component should all be in the package-footer-panel.
@@ -111,19 +117,22 @@ export function FooterTabs(): JSX.Element | null {
    */
   useEffect(() => {
     // ol map container div
-    const olMapDiv: HTMLElement = mapDiv.querySelectorAll('[class*="mapContainer"]')[0] as HTMLElement;
-    olMapDiv.style.visibility = isFullscreen ? 'hidden' : 'visible';
-    olMapDiv.style.minHeight = isFullscreen ? '0px' : `${origHeight}px`;
-    olMapDiv.style.height = isFullscreen ? '0px' : `${origHeight}px`;
-
+    const olMapContainer: HTMLElement | null = mapDiv.querySelector('.mapContainer');
+    if (olMapContainer) {
+      olMapContainer.style.visibility = isFullscreen ? 'hidden' : 'visible';
+      olMapContainer.style.minHeight = isFullscreen ? '0px' : `${origHeight}px`;
+      olMapContainer.style.height = isFullscreen ? '0px' : `${origHeight}px`;
+    }
     // tabs container div
     if (isFullscreen) setIsCollapsed(false);
-    const tabs = mapDiv.querySelectorAll('[class*="tabsContainer"]') as NodeListOf<HTMLElement>;
-
-    if (tabs.length > 0) {
-      const tab: HTMLElement = tabs[0];
-      tab.style.minHeight = isFullscreen ? `${2 * origHeight}px` : '';
-      (tab.firstChild!.lastChild! as HTMLElement).style.maxHeight = isFullscreen ? '' : `${origHeight}px`;
+    const tabsContainers: NodeListOf<HTMLElement> = mapDiv.querySelectorAll('.tabsContainer');
+    if (tabsContainers.length > 0) {
+      const tabsContainer: HTMLElement = tabsContainers[0];
+      tabsContainer.style.minHeight = isFullscreen ? `${2 * origHeight}px` : '';
+      const lastChild = tabsContainer.firstElementChild?.lastElementChild as HTMLElement | null;
+      if (lastChild) {
+        lastChild.style.maxHeight = isFullscreen ? '' : `${origHeight}px`;
+      }
     }
   }, [isFullscreen, mapDiv, origHeight]);
 
@@ -216,6 +225,8 @@ export function FooterTabs(): JSX.Element | null {
       });
     }
   };
+
+  console.log(api.maps[mapId].footerTabs.tabs);
 
   return api.maps[mapId].footerTabs.tabs.length > 0 ? (
     <Box ref={tabsContainerRef as MutableRefObject<HTMLDivElement>} sx={sxClasses.tabsContainer} className="tabsContainer">
