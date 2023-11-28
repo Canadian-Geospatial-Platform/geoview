@@ -5,7 +5,7 @@ import { Extent } from 'ol/extent';
 import LayerGroup from 'ol/layer/Group';
 import Feature from 'ol/Feature';
 import Geometry from 'ol/geom/Geometry';
-import { TypeGeoviewLayerConfig, TypeListOfLayerEntryConfig, TypeLocalizedString, TypeLayerEntryConfig, TypeBaseLayerEntryConfig, TypeStyleConfig, TypeVectorLayerEntryConfig, TypeLayerEntryType, TypeOgcWmsLayerEntryConfig, TypeEsriDynamicLayerEntryConfig, TypeLayerInitialSettings, TypeLayerStatus } from '../../map/map-schema-types';
+import { TypeGeoviewLayerConfig, TypeListOfLayerEntryConfig, TypeLocalizedString, TypeLayerEntryConfig, TypeBaseLayerEntryConfig, TypeStyleConfig, TypeVectorLayerEntryConfig, TypeLayerEntryType, TypeOgcWmsLayerEntryConfig, TypeEsriDynamicLayerEntryConfig, TypeLayerInitialSettings, TypeLayerStatus, TypeStyleGeometry } from '../../map/map-schema-types';
 import { codedValueType, rangeDomainType, TypeArrayOfFeatureInfoEntries, QueryType, TypeLocation } from '@/api/events/payloads';
 import { TypeJsonObject } from '@/core/types/global-types';
 import { TimeDimension, TypeDateFragments } from '@/core/utils/date-mgt';
@@ -14,8 +14,8 @@ export type TypeLegend = {
     layerPath: string;
     layerName?: TypeLocalizedString;
     type: TypeGeoviewLayerType;
-    styleConfig?: TypeStyleConfig;
-    legend: TypeLayerStyles | HTMLCanvasElement | null;
+    styleConfig?: TypeStyleConfig | null;
+    legend: TypeVectorLayerStyles | HTMLCanvasElement | null;
 };
 /**
  * type guard function that redefines a TypeLegend as a TypeWmsLegend
@@ -44,7 +44,7 @@ export interface TypeWmsLegend extends Omit<TypeLegend, 'styleConfig'> {
  */
 export declare const isImageStaticLegend: (verifyIfLegend: TypeLegend) => verifyIfLegend is TypeImageStaticLegend;
 export interface TypeImageStaticLegend extends Omit<TypeLegend, 'styleConfig'> {
-    legend: HTMLCanvasElement;
+    legend: HTMLCanvasElement | null;
 }
 /**
  * type guard function that redefines a TypeLegend as a TypeVectorLegend
@@ -56,10 +56,10 @@ export interface TypeImageStaticLegend extends Omit<TypeLegend, 'styleConfig'> {
  */
 export declare const isVectorLegend: (verifyIfLegend: TypeLegend) => verifyIfLegend is TypeVectorLegend;
 export interface TypeVectorLegend extends TypeLegend {
-    legend: TypeLayerStyles;
+    legend: TypeVectorLayerStyles;
 }
 export type TypeStyleRepresentation = {
-    /** The defaultCanvas property is used by WMS legends, Simple styles and default styles when defined in unique value and class
+    /** The defaultCanvas property is used by Simple styles and default styles when defined in unique value and class
      * break styles.
      */
     defaultCanvas?: HTMLCanvasElement | null;
@@ -68,11 +68,7 @@ export type TypeStyleRepresentation = {
     /** The arrayOfCanvas property is used by unique value and class break styles. */
     arrayOfCanvas?: (HTMLCanvasElement | null)[];
 };
-export type TypeLayerStyles = {
-    Point?: TypeStyleRepresentation;
-    LineString?: TypeStyleRepresentation;
-    Polygon?: TypeStyleRepresentation;
-};
+export type TypeVectorLayerStyles = Partial<Record<TypeStyleGeometry, TypeStyleRepresentation>>;
 type LayerTypesKey = 'ESRI_DYNAMIC' | 'ESRI_FEATURE' | 'IMAGE_STATIC' | 'GEOJSON' | 'GEOCORE' | 'GEOPACKAGE' | 'XYZ_TILES' | 'VECTOR_TILES' | 'OGC_FEATURE' | 'WFS' | 'WMS';
 /**
  * Type of GeoView layers

@@ -57,6 +57,8 @@ export interface PanelStyles {
  * Interface for the button properties used when creating a new button.
  */
 export interface TypeButtonProps extends Omit<ButtonProps, 'type'> {
+    /** Button id */
+    id?: string;
     /** Button tooltip. */
     tooltip?: string;
     /** Location for tooltip. */

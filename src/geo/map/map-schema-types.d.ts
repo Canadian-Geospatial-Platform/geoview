@@ -29,11 +29,12 @@ export type TypeLocalizedStringEnAndFr = Required<Record<TypeDisplayLanguage, st
 /** ******************************************************************************************************************************
  * Initial settings to apply to the GeoView layer at creation time.
  */
+export type TypeVisibilityFlags = 'yes' | 'no' | 'always';
 export type TypeLayerInitialSettings = {
     /** Initial opacity setting. Domain = [0..1] and default = 1. */
     opacity?: number;
     /** Initial visibility setting. Default = yes. */
-    visible?: 'yes' | 'no' | 'always';
+    visible?: TypeVisibilityFlags;
     /** The geographic bounding box that contains all the layer's features. */
     bounds?: Extent;
     /** The extent that constrains the view. Called with [minX, minY, maxX, maxY] extent coordinates. */
@@ -318,7 +319,7 @@ export type TypeUniqueValueStyleInfo = {
     /** Values associated to the style. */
     values: (string | number | Date)[];
     /** Flag used to show/hide features associated to the label (default: yes). */
-    visible?: 'yes' | 'no' | 'always';
+    visible?: TypeVisibilityFlags;
     /** options associated to the style. */
     settings: TypeKindOfVectorSettings;
 };
@@ -347,7 +348,7 @@ export interface TypeUniqueValueStyleConfig extends TypeBaseStyleConfig {
     defaultSettings?: TypeKindOfVectorSettings;
     /** Flag used to show/hide features associated to the default label
      *  (default: no if ESRI renderer in the metadata has no default symbol defined). */
-    defaultVisible?: 'yes' | 'no' | 'always';
+    defaultVisible?: TypeVisibilityFlags;
     /** Fields used by the style. */
     fields: string[];
     /** Unique value style information configuration. */
@@ -362,7 +363,7 @@ export type TypeClassBreakStyleInfo = {
     /** Minimum values associated to the style. */
     minValue: number | string | Date | undefined | null;
     /** Flag used to show/hide features associated to the label (default: yes). */
-    visible?: 'yes' | 'no' | 'always';
+    visible?: TypeVisibilityFlags;
     /** Maximum values associated to the style. */
     maxValue: number | string | Date;
     /** options associated to the style. */
@@ -390,7 +391,7 @@ export interface TypeClassBreakStyleConfig extends TypeBaseStyleConfig {
     /** Label used if field/value association is not found. */
     defaultLabel?: string;
     /** Options used if field/value association is not found. */
-    defaultVisible?: 'yes' | 'no' | 'always';
+    defaultVisible?: TypeVisibilityFlags;
     /** Flag used to show/hide features associated to the default label (default: yes). */
     defaultSettings?: TypeKindOfVectorSettings;
     /** Field used by the style. */

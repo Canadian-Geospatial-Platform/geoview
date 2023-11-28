@@ -30,6 +30,7 @@ export * from './projection/projection';
 export * from './renderer/esri-renderer';
 export * from './renderer/geoview-renderer-types';
 export * from './renderer/geoview-renderer';
+export * from './utils/feature-highlight';
 export * from './utils/feature-info-layer-set';
 export * from './utils/legends-layer-set';
 export * from './utils/utilities';

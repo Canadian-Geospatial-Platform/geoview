@@ -1,5 +1,10 @@
 import { Theme } from '@mui/material/styles';
 export declare const getSxClasses: (theme: Theme) => {
+    layersPanelContainer: {
+        background: string;
+        boxShadow: string;
+        padding: string;
+    };
     list: {
         color: string;
         width: string;
@@ -113,6 +118,11 @@ export declare const getSxClasses: (theme: Theme) => {
             border: string;
             padding: string;
         };
+        buttonDescriptionContainer: {
+            display: string;
+            flexDirection: string;
+            alignItems: string;
+        };
         opacityMenu: {
             display: string;
             alignItems: string;
@@ -123,17 +133,17 @@ export declare const getSxClasses: (theme: Theme) => {
         itemsGrid: {
             width: string;
             '& .MuiGrid-container': {
-                '&:first-child': {
+                '&:first-of-type': {
                     fontWeight: string;
                     borderTop: string;
                     borderBottom: string;
                 };
                 '& .MuiGrid-item': {
                     padding: string;
-                    '&:first-child': {
+                    '&:first-of-type': {
                         width: string;
                     };
-                    '&:nth-child(2)': {
+                    '&:nth-of-type(2)': {
                         flexGrow: number;
                         textAlign: string;
                         display: string;

@@ -17,7 +17,6 @@ import { Legend2Api } from '@/core/components/legend-2/legend-api';
 import { LayersApi } from '@/core/components/layers/layers-api';
 import { DetailsApi } from '@/core/components/details/details-api';
 import { DataTableApi } from '@/core/components/data-table/data-table-api';
-import { TimeSliderApi } from '@/core/components/time-slider/time-slider-api';
 import { GeoviewRenderer } from '@/geo/renderer/geoview-renderer';
 import { Select } from '@/geo/interaction/select';
 import { Draw } from '@/geo/interaction/draw';
@@ -48,7 +47,6 @@ export declare class MapViewer {
     layers: LayersApi;
     details: DetailsApi;
     dataTable: DataTableApi;
-    timeSlider: TimeSliderApi;
     basemap: Basemap;
     layer: Layer;
     displayLanguage: TypeDisplayLanguage;

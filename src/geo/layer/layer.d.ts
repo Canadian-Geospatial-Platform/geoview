@@ -1,4 +1,5 @@
 import { Geometry } from '@/geo/layer/geometry/geometry';
+import { FeatureHighlight } from '@/geo/utils/feature-highlight';
 import { AbstractGeoViewLayer } from './geoview-layers/abstract-geoview-layers';
 import { TypeGeoviewLayerConfig, TypeLayerEntryConfig, TypeListOfLayerEntryConfig, TypeListOfLocalizedLanguages } from '@/geo/map/map-schema-types';
 /**
@@ -23,6 +24,7 @@ export declare class Layer {
     private eventHandlerFunctions;
     /** used to keep a reference of highlighted layer */
     private highlightedLayer;
+    featureHighlight: FeatureHighlight;
     /**
      * Initialize layer types and listen to add/remove layer events from outside
      *

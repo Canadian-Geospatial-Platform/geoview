@@ -1,9 +1,10 @@
 import { Options as SourceOptions } from 'ol/source/Vector';
 import { ReadOptions } from 'ol/format/Feature';
 import { Vector as VectorSource } from 'ol/source';
-import { Geometry } from 'ol/geom';
 import BaseLayer from 'ol/layer/Base';
 import LayerGroup from 'ol/layer/Group';
+import { Feature } from 'ol';
+import Geometry from 'ol/geom/Geometry';
 import initSqlJs from 'sql.js';
 import { AbstractGeoViewLayer } from '../abstract-geoview-layers';
 import { AbstractGeoViewVector } from './abstract-geoview-vector';
@@ -23,7 +24,7 @@ interface sldsInterface {
 }
 interface layerData {
     name: string;
-    source: VectorSource<Geometry>;
+    source: VectorSource<Feature<Geometry>>;
     properties: initSqlJs.ParamsObject | undefined;
 }
 /** *****************************************************************************************************************************
