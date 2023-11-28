@@ -77,6 +77,7 @@ export interface TypeLegendLayer {
   layerId: string;
   layerPath: string;
   layerAttribution?: string[];
+  metadataAccessPath?: string;
   order?: number; // useful for ordering layers
   layerName: string;
   type: TypeGeoviewLayerType;

@@ -32,6 +32,7 @@ export function LayersPanel() {
   const displayState = useLayersDisplayState();
 
   /*
+  // Using helpers
   const helpers = useLegendHelpers(mapId);
   useEffect(() => {
     helpers.populateLegendStoreWithFakeData();

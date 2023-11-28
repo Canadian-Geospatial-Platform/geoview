@@ -130,7 +130,7 @@ export function SingleLayer(props: SingleLayerProps): JSX.Element {
   }
 
   function renderEditModeButtons() {
-    if (displayState === 'remove') {
+    if (displayState === 'remove' || layer.layerStatus === 'error') {
       return <DeleteUndoButton layer={layer} />;
     }
     if (displayState === 'order') {
@@ -176,7 +176,7 @@ export function SingleLayer(props: SingleLayerProps): JSX.Element {
         </IconButton>
       );
     }
-    if (displayState === 'view' && layer.items?.length) {
+    if (displayState === 'view') {
       return (
         <IconButton onClick={handleLayerClick}>
           <KeyboardArrowRightIcon />
@@ -233,7 +233,11 @@ export function SingleLayer(props: SingleLayerProps): JSX.Element {
         <ListItemButton>
           {renderLayerIcon()}
           <Tooltip title={layer.layerName} placement="top" enterDelay={1000}>
-            <ListItemText primary={layer.layerName} secondary={getLayerDescription()} onClick={handleLayerClick} />
+            <ListItemText
+              primary={layer.layerName !== undefined ? layer.layerName : layer.metadataAccessPath}
+              secondary={getLayerDescription()}
+              onClick={handleLayerClick}
+            />
           </Tooltip>
           <ListItemIcon style={{ justifyContent: 'right' }}>
             {renderMoreLayerButtons()}

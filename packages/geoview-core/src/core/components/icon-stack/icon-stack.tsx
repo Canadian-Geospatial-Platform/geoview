@@ -2,7 +2,6 @@
 import React from 'react';
 import { Box, IconButton, BrowserNotSupportedIcon } from '@/ui';
 import { getSxClasses } from './icon-stack-style';
-// TODO uncomment line below when you have layers and icons in the store
 import { useIconLayerSet } from '@/core/stores/store-interface-and-intial-values/layer-state';
 
 export interface TypeIconStackProps {
