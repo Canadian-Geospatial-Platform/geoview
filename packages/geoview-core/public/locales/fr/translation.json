@@ -64,10 +64,13 @@
     "selected_legend": "Légende sélectionnée",
     "sort_layers": "Trier les calques",
     "selected_Layers": "Un aperçu des calques actuellement sélectionnés",
-    "re-arrange": "Réarranger",
+    "sort": "Trier",
     "categories_title": "Catégories",
     "layer_has_error": "La couche a une erreur...",
-    "layer_is_loading": "La couche se charge..."
+    "layer_is_loading": "La couche se charge...",
+    "table_details": "Détails du tableau",
+    "refresh_layer": "Rafraîchir la couche",
+    "highlight_layer": "Couche de mise en évidence"
   },
   "details": {
     "zoom_to": "Zoom à l'élément",

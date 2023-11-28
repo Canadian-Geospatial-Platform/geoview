@@ -129,6 +129,7 @@ export class LegendEventProcessor extends AbstractEventProcessor {
         if (entryIndex === -1) {
           existingEntries.push({
             layerId: layerConfig.layerId,
+            metadataAccessPath: getLocalizedValue(layerConfig.geoviewRootLayer?.metadataAccessPath, mapId),
             layerPath: entryLayerPath,
             layerName: legendResultSetsEntry.data?.layerName ? getLocalizedValue(legendResultSetsEntry.data.layerName, mapId)! : '',
             type: layerConfig.entryType as TypeGeoviewLayerType,
@@ -147,6 +148,7 @@ export class LegendEventProcessor extends AbstractEventProcessor {
           layerId: layerPathNodes[currentLevel],
           layerPath: entryLayerPath,
           layerAttribution: api.maps[mapId].layer.geoviewLayers[layerPathNodes[0]].attributions,
+          metadataAccessPath: getLocalizedValue(layerConfig.geoviewRootLayer?.metadataAccessPath, mapId),
           layerName: getLocalizedValue(legendResultSetsEntry.data?.layerName, mapId)!,
           layerStatus: legendResultSetsEntry.layerStatus,
           layerPhase: legendResultSetsEntry.layerPhase,

@@ -65,11 +65,14 @@
     "selected_legend": "Selected Legend",
     "sort_layers": "Sort Layers",
     "selected_Layers": "An overview of currrently selected layers",
-    "re-arrange": "re-arrange",
+    "sort": "Sort",
     "categories_title": "Categories",
     "items_available": "items available",
     "layer_has_error": "Layer has an error...",
-    "layer_is_loading": "Layer is loading..."
+    "layer_is_loading": "Layer is loading...",
+    "table_details": "Table details",
+    "refresh_layer": "Refresh layer",
+    "highlight_layer": "Highlight layer"
   },
   "details": {
     "zoom_to": "Zoom to feature",
