@@ -1,11 +1,11 @@
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '@mui/material/styles';
-import { TypeLegendLayer } from '../types';
+import { TypeLegendLayer, TypeLegendLayerListItem } from '../types';
 import { getSxClasses } from '../layers-style';
 import {
   Box,
   CheckBoxIcon,
-  CheckBoxOutIcon,
+  CheckBoxOutineBlankIcon,
   IconButton,
   Paper,
   SliderBase,
@@ -78,6 +78,18 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
     );
   }
 
+  function renderItemCheckbox(item: TypeLegendLayerListItem) {
+    if(item.isVisible ==='always') {
+      return null;
+    }
+    
+    return (
+      <IconButton color="primary" onClick={() => toggleItemVisibility(layerDetails.layerPath, item.geometryType, item.name)}>
+        {item.isVisible === 'yes'? <CheckBoxIcon /> : <CheckBoxOutineBlankIcon />}
+      </IconButton>
+    );
+  }
+
   function renderItems() {
     return (
       <Grid container direction="column" spacing={0} sx={sxClasses.rightPanel.itemsGrid} justifyContent="left" justifyItems="stretch">
@@ -87,7 +99,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
               color="primary"
               onClick={() => setAllItemsVisibility(layerDetails.layerPath, !layerDetails.allItemsChecked ? 'yes' : 'no')}
             >
-              {layerDetails.allItemsChecked ? <CheckBoxIcon /> : <CheckBoxOutIcon />}
+              {layerDetails.allItemsChecked ? <CheckBoxIcon /> : <CheckBoxOutineBlankIcon />}
             </IconButton>
           </Grid>
           <Grid item xs="auto">
@@ -97,13 +109,11 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
         {layerDetails.items.map((item) => (
           <Grid container direction="row" key={item.name} justifyContent="center" alignItems="stretch">
             <Grid item xs="auto">
-              <IconButton color="primary" onClick={() => toggleItemVisibility(layerDetails.layerPath, item.geometryType, item.name)}>
-                {item.isVisible ? <CheckBoxIcon /> : <CheckBoxOutIcon />}
-              </IconButton>
+              {renderItemCheckbox(item)}
             </Grid>
             <Grid item xs="auto">
               {item.icon ? <img alt={item.name} src={item.icon} /> : <BrowserNotSupportedIcon />}
-              <span style={sxClasses.rightPanel.tableIconLabel}>{item.name}</span>
+              <span style={sxClasses.rightPanel.tableIconLabel}>{item.name}  {item.isVisible}</span>
             </Grid>
           </Grid>
         ))}

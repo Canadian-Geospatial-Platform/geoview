@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { useTheme, Theme } from '@mui/material/styles';
 import Box from '@mui/material/Box';
-import { List, ListItem, ListItemButton, ListItemIcon, ListItemText, Tooltip, IconButton, CheckBoxOutIcon, CheckBoxIcon } from '@/ui';
+import { List, ListItem, ListItemButton, ListItemIcon, ListItemText, Tooltip, IconButton, CheckBoxOutineBlankIcon, CheckBoxIcon } from '@/ui';
 import {
   TypeClassBreakStyleConfig,
   TypeLayerEntryConfig,
@@ -114,7 +114,7 @@ export function LegendIconList(props: TypeLegendIconListProps): JSX.Element {
                 <ListItemIcon>
                   {iconLabels[index] !== 'Cluster' && layerConfig?.initialSettings?.visible !== 'always' && isParentVisible && (
                     <IconButton color="primary" onClick={() => handleToggleLayer(index)}>
-                      {isChecked[index] === true ? <CheckBoxIcon /> : <CheckBoxOutIcon />}
+                      {isChecked[index] === true ? <CheckBoxIcon /> : <CheckBoxOutineBlankIcon />}
                     </IconButton>
                   )}
                 </ListItemIcon>
