@@ -18,19 +18,24 @@ export type ButtonDropDownProps = ButtonGroupProps & { options: string[]; onButt
  * @returns {JSX.Element} the created Button Drop Down element
  */
 export function ButtonDropDown(props: ButtonDropDownProps): JSX.Element {
+  // #region PROPS ****************************************************************************************************
+
   const { options, onButtonClick } = props;
 
   const theme = useTheme();
   const sxClasses = getSxClasses(theme);
 
-  /** ****************************************** USE STATE SECTION START ************************************************ */
+  // #endregion
+
+  // #region USE STATE SECTION ****************************************************************************************
 
   const [open, setOpen] = useState<boolean>(false);
   const [selectedIndex, setSelectedIndex] = useState<number>(0);
   const anchorRef = useRef<HTMLDivElement>(null);
 
-  /** ****************************************** USE STATE SECTION END ************************************************** */
-  /** *************************************** EVENT HANDLERS SECTION START ********************************************** */
+  // #endregion
+
+  // #region EVENT HANDLERS SECTION ***********************************************************************************
 
   /**
    * Handles a click on the button itself
@@ -66,8 +71,9 @@ export function ButtonDropDown(props: ButtonDropDownProps): JSX.Element {
     setOpen(false);
   };
 
-  /** **************************************** EVENT HANDLERS SECTION END *********************************************** */
-  /** ******************************************** RENDER SECTION START ************************************************* */
+  // #endregion
+
+  // #region RENDER SECTION *******************************************************************************************
 
   // Renders
   return (
@@ -114,5 +120,5 @@ export function ButtonDropDown(props: ButtonDropDownProps): JSX.Element {
     </>
   );
 
-  /** ******************************************** RENDER SECTION END ************************************************* */
+  // #endregion
 }
