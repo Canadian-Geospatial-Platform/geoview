@@ -32,6 +32,7 @@ export interface TypeNorthArrow {
 }
 
 export interface IMapState {
+  attribution: string[];
   centerCoordinates: Coordinate;
   clickCoordinates?: TypeMapMouseInfo;
   clickMarker: TypeClickMarker | undefined;
@@ -100,6 +101,7 @@ function setScale(mapId: string): TypeScaleInfo {
 
 export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapState {
   const init = {
+    attribution: [],
     centerCoordinates: [0, 0] as Coordinate,
     clickMarker: undefined,
     currentProjection: 3857 as TypeValidMapProjectionCodes,
@@ -440,6 +442,7 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
 // **********************************************************
 // Map state selectors
 // **********************************************************
+export const useMapAttribution = () => useStore(useGeoViewStore(), (state) => state.mapState.attribution);
 export const useMapCenterCoordinates = () => useStore(useGeoViewStore(), (state) => state.mapState.centerCoordinates);
 export const useMapClickMarker = () => useStore(useGeoViewStore(), (state) => state.mapState.clickMarker);
 export const useMapProjection = () => useStore(useGeoViewStore(), (state) => state.mapState.currentProjection);

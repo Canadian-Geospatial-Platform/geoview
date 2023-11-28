@@ -19,7 +19,7 @@ interface TypeDividerProps extends DividerProps {
  * @returns {JSX.Element} the created Divider element
  */
 export function Divider(props: TypeDividerProps): JSX.Element {
-  const { className, style, grow, orientation } = props;
+  const { className, style, grow, orientation, sx } = props;
 
   const theme = useTheme();
   const sxClasses = getSxClasses(theme);
@@ -30,5 +30,11 @@ export function Divider(props: TypeDividerProps): JSX.Element {
     dividerOrientation = orientation === 'horizontal' ? sxClasses.horizontal : sxClasses.vertical;
   }
 
-  return <MaterialDivider sx={{ ...(grow ? sxClasses.grow : {}), ...dividerOrientation }} className={`${className ?? ''}`} style={style} />;
+  return (
+    <MaterialDivider
+      sx={{ ...(grow ? sxClasses.grow : {}), ...dividerOrientation, ...sx }}
+      className={`${className ?? ''}`}
+      style={style}
+    />
+  );
 }

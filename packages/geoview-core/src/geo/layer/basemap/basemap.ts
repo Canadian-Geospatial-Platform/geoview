@@ -16,6 +16,7 @@ import { generateId, showError } from '@/core/utils/utilities';
 import { basemapLayerArrayPayload } from '@/api/events/payloads';
 import { TypeBasemapProps, TypeBasemapOptions, TypeBasemapLayer } from '@/geo/layer/basemap/basemap-types';
 import { TypeDisplayLanguage, TypeValidMapProjectionCodes, TypeLocalizedString } from '@/geo/map/map-schema-types';
+import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 
 /**
  * A class to get a Basemap for a define projection and language. For the moment, a list maps are available and
@@ -57,7 +58,7 @@ export class Basemap {
   private projection: TypeValidMapProjectionCodes;
 
   // the map id to be used in events
-  #mapId: string;
+  mapId: string;
 
   /**
    * initialize basemap
@@ -73,7 +74,7 @@ export class Basemap {
     projection: TypeValidMapProjectionCodes,
     mapId: string
   ) {
-    this.#mapId = mapId;
+    this.mapId = mapId;
 
     this.basemapOptions = basemapOptions;
 
@@ -521,7 +522,7 @@ export class Basemap {
             projectionCode as TypeValidMapProjectionCodes,
             this.displayLanguage as TypeDisplayLanguage
           ),
-          attribution: this.attribution,
+          attribution: coreBasemapOptions.basemapId === 'osm' ? ['© OpenStreetMap', `${this.attribution}`] : [this.attribution],
           zoomLevels: {
             min: minZoom,
             max: maxZoom,
@@ -586,7 +587,7 @@ export class Basemap {
     formatProps.description = this.displayLanguage === 'en' ? description.en : description.fr;
     formatProps.altText = this.displayLanguage === 'en' ? description.en : description.fr;
     formatProps.thumbnailUrl = this.displayLanguage === 'en' ? thumbnailUrl.en : thumbnailUrl.fr;
-    formatProps.attribution = this.displayLanguage === 'en' ? attribution.en : attribution.fr;
+    formatProps.attribution = this.displayLanguage === 'en' ? [attribution.en] : [attribution.fr];
 
     return this.createBasemap(formatProps);
   }
@@ -597,11 +598,11 @@ export class Basemap {
    * @returns {TypeBasemapProps | undefined} the default basemap
    */
   async loadDefaultBasemaps(): Promise<TypeBasemapProps | undefined> {
-    const basemap = await this.createCoreBasemap(api.maps[this.#mapId].mapFeaturesConfig.map.basemapOptions);
+    const basemap = await this.createCoreBasemap(api.maps[this.mapId].mapFeaturesConfig.map.basemapOptions);
     const overviewBasemap = await this.createCoreBasemap({ basemapId: 'transport', shaded: false, labeled: false });
     if (overviewBasemap) this.overviewMap = overviewBasemap;
     else {
-      showError(this.#mapId, 'Error loading overview map');
+      showError(this.mapId, 'Error loading overview map');
     }
 
     if (basemap) {
@@ -613,7 +614,7 @@ export class Basemap {
       this.setBasemap(basemap.basemapId as string);
       return basemap;
     }
-    showError(this.#mapId, 'Error loading basemap');
+    showError(this.mapId, 'Error loading basemap');
     return undefined;
   }
 
@@ -657,8 +658,11 @@ export class Basemap {
     // set active basemap
     this.activeBasemap = basemap;
 
+    // set store attribution for the selected basemap
+    MapEventProcessor.setMapAttribution(this.mapId, basemap.attribution);
+
     // emit an event to update the basemap layers on the map
     if (basemap?.layers)
-      api.event.emit(basemapLayerArrayPayload(EVENT_NAMES.BASEMAP.EVENT_BASEMAP_LAYERS_UPDATE, this.#mapId, basemap.layers));
+      api.event.emit(basemapLayerArrayPayload(EVENT_NAMES.BASEMAP.EVENT_BASEMAP_LAYERS_UPDATE, this.mapId, basemap.layers));
   }
 }
