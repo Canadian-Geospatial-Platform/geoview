@@ -101,6 +101,7 @@ class GeoChartPlugin extends AbstractPlugin {
 
       // Create a new button panel on the app-bar
       this.buttonPanel = api.maps[mapId].appBarButtons.createAppbarPanel(button, panel, null);
+
       // Set panel content
       this.buttonPanel?.panel?.changeContent(<GeoChart mapId={mapId} config={configObj || {}} schemaValidator={new SchemaValidator()} />);
     }
