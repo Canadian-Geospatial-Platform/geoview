@@ -13,7 +13,6 @@ import {
   SchemaValidator,
   ValidatorResult,
   GeoChartAction,
-  GeoChartDatasource,
 } from 'geochart';
 import {
   PayloadBaseClass,
@@ -21,7 +20,7 @@ import {
   TypeArrayOfLayerData,
   TypeFeatureInfoEntry,
 } from 'geoview-core/src/api/events/payloads';
-import { findLayerDataAndConfigFromQueryResults, checkForDatasources, fetchItemsViaQueryForDatasource } from './geochart-parsing';
+import { findLayerDataAndConfigFromQueryResults, loadDatasources } from './geochart-parsing';
 import { PluginGeoChartConfig, GeoViewGeoChartConfig, GeoViewGeoChartConfigLayer } from './geochart-types';
 import { PayloadBaseClassChart, EVENT_CHART_CONFIG, EVENT_CHART_LOAD, EVENT_CHART_REDRAW } from './geochart-event-base';
 import { PayloadChartConfig } from './geochart-event-config';
@@ -66,22 +65,20 @@ export function GeoChart(props: GeoChartProps): JSX.Element {
     color: theme.palette.primary.main,
   };
 
-  /** ****************************************** USE STATE SECTION START ************************************************ */
+  // #region USE STATE SECTION ****************************************************************************************
 
   // Use State
   const [config, setConfig] = useState<PluginGeoChartConfig<ChartType>>(parentConfig);
-  const [configChartLayer, setConfigChartLayer] = useState<GeoViewGeoChartConfigLayer>();
   const [action, setAction] = useState<GeoChartAction>();
   const [inputs, setInputs] = useState<GeoChartConfig<ChartType>>();
-  const [selectedDatasource, setSelectedDatasource] = useState<GeoChartDatasource>();
   const [isLoadingChart, setIsLoadingChart] = useState<boolean>();
-  const [isLoadingDatasource, setIsLoadingDatasource] = useState<boolean>();
 
   // Use Store
   const storeLayerDataArray = useDetailsStoreLayerDataArray();
 
-  /** ****************************************** USE STATE SECTION END ************************************************** */
-  /** ******************************************* CORE FUNCTIONS START ************************************************** */
+  // #endregion
+
+  // #region CORE FUNCTIONS *******************************************************************************************
 
   /**
    * Loads the chart with new inputs
@@ -98,30 +95,9 @@ export function GeoChart(props: GeoChartProps): JSX.Element {
     setAction({ shouldRedraw: true });
   };
 
-  /**
-   * Fetches the items to associated to the given Datasource and then sets the Datasource in GeoChart
-   * @param chartConfigLayer GeoViewGeoChartConfigLayer The chart layer configuration being used
-   * @param ds GeoChartDatasource The Datasource to fetch the items for
-   */
-  const setDatasourceByFetchingItems = async (chartConfigLayer: GeoViewGeoChartConfigLayer, ds: GeoChartDatasource): Promise<void> => {
-    try {
-      // Loading
-      setIsLoadingDatasource(true);
+  // #endregion
 
-      // Fetch the items for the data source in question
-      const newDs = { ...ds };
-      newDs.items = await fetchItemsViaQueryForDatasource(chartConfigLayer, ds);
-
-      // Set the selected datasource
-      setSelectedDatasource(newDs);
-    } finally {
-      // Done
-      setIsLoadingDatasource(false);
-    }
-  };
-
-  /** ******************************************** CORE FUNCTIONS END *************************************************** */
-  /** *************************************** EVENT HANDLERS SECTION START ********************************************** */
+  // # region EVENT HANDLERS SECTION **********************************************************************************
 
   /**
    * Handles when the chart must be redrawn.
@@ -142,8 +118,9 @@ export function GeoChart(props: GeoChartProps): JSX.Element {
     setConfig(e.config);
   };
 
-  /** **************************************** EVENT HANDLERS SECTION END *********************************************** */
-  /** ******************************************* HOOKS SECTION START *************************************************** */
+  // #endregion
+
+  // #region HOOKS SECTION ********************************************************************************************
 
   /**
    * Handles when GeoChart must be loaded with new inputs.
@@ -167,26 +144,11 @@ export function GeoChart(props: GeoChartProps): JSX.Element {
   }, []);
 
   /**
-   * Handles when the GeoChart Datasource is changed. This is helpful for the lazy loading of the charts.
-   * @param ds GeoChartDatasource The Datasource that was selected (or none).
-   */
-  const handleDatasourceChanged = useCallback<(ds: GeoChartDatasource | undefined) => void>(
-    async (ds: GeoChartDatasource | undefined) => {
-      // If a Datasource is selected and has no items
-      if (configChartLayer && ds && !ds!.items) {
-        // Fetch datasource items and set the selected datasource
-        await setDatasourceByFetchingItems(configChartLayer, ds);
-      }
-    },
-    [configChartLayer]
-  );
-
-  /**
    * Fetches the datasources given the updated list of results.
    * @param layerDataArray TypeArrayOfLayerData The array of layer data results from the store.
    */
-  const fetchDatasources = useCallback<(layerDataArray: TypeArrayOfLayerData) => Promise<void>>(
-    async (layerDataArray: TypeArrayOfLayerData): Promise<void> => {
+  const fetchDatasources = useCallback<(layerDataArray: TypeArrayOfLayerData) => void>(
+    (layerDataArray: TypeArrayOfLayerData): void => {
       try {
         // Find the right config/layer/data for what we want based on the layerDataArray
         const [foundConfigChart, foundConfigChartLyr, foundLayerEntry, foundData]: [
@@ -198,23 +160,14 @@ export function GeoChart(props: GeoChartProps): JSX.Element {
 
         // If found a chart for the layer
         if (foundData) {
-          // Set the config chart layer
-          setConfigChartLayer(foundConfigChartLyr!);
-
           // Check and attach datasources to the Chart config
-          const chartConfig = await checkForDatasources(foundConfigChart!, foundConfigChartLyr!, foundData!);
+          const chartConfig = loadDatasources(foundConfigChart!, foundConfigChartLyr!, foundData!);
 
           // Set the title
           chartConfig.title = foundLayerEntry.layerName![i18n.language];
 
           // Load the chart
           setChart(chartConfig);
-
-          // If lazy loading and at least 1 datasource
-          if (foundConfigChartLyr?.query?.lazyLoading && chartConfig.datasources.length > 0) {
-            // Fetch the first datasource result off the bat
-            await setDatasourceByFetchingItems(foundConfigChartLyr!, chartConfig.datasources[0]);
-          }
         }
       } finally {
         // Loading
@@ -279,24 +232,24 @@ export function GeoChart(props: GeoChartProps): JSX.Element {
     };
   }, [cgpv.api.event, cgpv.api.eventNames.GET_FEATURE_INFO.QUERY_LAYER, handleChartLoad, handleQueryStarted, mapId]);
 
-  /** ********************************************* HOOKS SECTION END *************************************************** */
-  /** ******************************************** RENDER SECTION START ************************************************* */
+  // #endregion
+
+  // region RENDER SECTION ********************************************************************************************
 
   return (
     <Box>
       <GeoChartComponent
         sx={{ backgroundColor: defaultColors.backgroundColor }}
         inputs={inputs}
-        datasource={selectedDatasource}
         schemaValidator={schemaValidator}
         defaultColors={defaultColors}
         isLoadingChart={isLoadingChart}
-        isLoadingDatasource={isLoadingDatasource}
         action={action}
         onParsed={handleParsed}
-        onDatasourceChanged={handleDatasourceChanged}
         onError={handleError}
       />
     </Box>
   );
+
+  // #endregion
 }
