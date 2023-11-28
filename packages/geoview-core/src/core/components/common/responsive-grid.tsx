@@ -33,7 +33,13 @@ function ResponsiveGridRoot({ children, ...rest }: ResponsiveGridProps) {
  * @param {boolean} isEnlargeDataTable panel is enlarge
  * @returns JSX.Element
  */
-function ResponsiveGridLeftPanel({ children, isLayersPanelVisible = false, isEnlargeDataTable, ...rest }: ResponsiveGridPanelProps) {
+function ResponsiveGridLeftPanel({
+  children,
+  isLayersPanelVisible = false,
+  sxProps = {},
+  isEnlargeDataTable,
+  ...rest
+}: ResponsiveGridPanelProps) {
   const theme = useTheme();
 
   return (
@@ -44,6 +50,7 @@ function ResponsiveGridLeftPanel({ children, isLayersPanelVisible = false, isEnl
       lg={!isEnlargeDataTable ? 4 : 1.25}
       sx={{
         [theme.breakpoints.down('md')]: { display: isLayersPanelVisible ? 'none' : 'block' },
+        ...sxProps,
       }}
       {...rest}
     >

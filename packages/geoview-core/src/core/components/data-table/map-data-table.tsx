@@ -34,27 +34,15 @@ import ExportButton from './export-button';
 import JSONExportButton from './json-export-button';
 import FilterMap from './filter-map';
 
-import {
-  AbstractGeoViewVector,
-  TypeLayerEntryConfig,
-  EsriDynamic,
-  api,
-  TypeFieldEntry,
-  TypeFeatureInfoEntry,
-  LightboxImg,
-  LightBoxSlides,
-  isImage,
-} from '@/app';
+import { AbstractGeoViewVector, TypeLayerEntryConfig, EsriDynamic, api, TypeFieldEntry, TypeFeatureInfoEntry, isImage } from '@/app';
 import { getSxClasses } from './data-table-style';
 import { useMapStoreActions } from '@/core/stores/store-interface-and-intial-values/map-state';
 import {
-  useDataTableStoreActions,
-  useDataTableStoreColumnFiltersRecord,
   useDataTableStoreFilterMapDelay,
   useDataTableStoreMapFilteredRecord,
-  useDataTableStoreRowSelectionsRecord,
   useDataTableStoreToolbarRowSelectedMessageRecord,
 } from '@/core/stores/store-interface-and-intial-values/data-table-state';
+import { useLightBox, useSelectedRowMessage, useFilteredRowMessage } from './hooks';
 
 export interface MapDataTableDataEntrys extends TypeFeatureInfoEntry {
   rows: Record<string, string>;
@@ -143,25 +131,22 @@ function MapDataTable({ data, layerId, mapId, layerKey, projectionConfig }: MapD
   // TODO: Move constant outside the store.
   const FILTER_MAP_DELAY = useDataTableStoreFilterMapDelay();
   const toolbarRowSelectedMessageRecord = useDataTableStoreToolbarRowSelectedMessageRecord();
-  const columnFiltersRecord = useDataTableStoreColumnFiltersRecord();
-  const rowSelectionsRecord = useDataTableStoreRowSelectionsRecord();
+
   const mapFilteredRecord = useDataTableStoreMapFilteredRecord();
 
-  const { setColumnFiltersEntry, setToolbarRowSelectedMessageEntry, setRowsFilteredEntry, setRowSelectionsEntry } =
-    useDataTableStoreActions();
+  const [density, setDensity] = useState<MRTDensityState>('compact');
 
-  const [isLightBoxOpen, setIsLightBoxOpen] = useState(false);
-  const [slides, setSlides] = useState<LightBoxSlides[]>([]);
-  const [slidesIndex, setSlidesIndex] = useState(0);
+  const rowVirtualizerInstanceRef = useRef<MRTVirtualizer<HTMLDivElement, HTMLTableRowElement>>(null);
+  const [sorting, setSorting] = useState<MRTSortingState>([]);
 
   const rowSelectionRef = useRef<Array<number>>([]);
 
-  const [columnFilters, setColumnFilters] = useState<MRTColumnFiltersState>(columnFiltersRecord[layerKey] || []);
+  // #region REACT CUSTOM HOOKS
+  const { initLightBox, LightBoxComponent } = useLightBox();
+  const { rowSelection, setRowSelection } = useSelectedRowMessage({ data, layerKey, tableInstanceRef });
+  const { columnFilters, setColumnFilters } = useFilteredRowMessage({ data, layerKey, tableInstanceRef });
 
-  const [density, setDensity] = useState<MRTDensityState>('compact');
-  const [rowSelection, setRowSelection] = useState<Record<number, boolean>>(rowSelectionsRecord[layerKey] ?? {});
-  const rowVirtualizerInstanceRef = useRef<MRTVirtualizer<HTMLDivElement, HTMLTableRowElement>>(null);
-  const [sorting, setSorting] = useState<MRTSortingState>([]);
+  // #endregion
 
   /**
    * Convert the filter list from the Column Filter
@@ -245,18 +230,6 @@ function MapDataTable({ data, layerId, mapId, layerKey, projectionConfig }: MapD
     }
   }, [sorting]);
 
-  // update store column filters
-  useEffect(() => {
-    setColumnFiltersEntry(columnFilters, layerKey);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [columnFilters]);
-
-  // update store row selections.
-  useEffect(() => {
-    setRowSelectionsEntry(rowSelection, layerKey);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [rowSelection]);
-
   // update map when column filters change
   useEffect(() => {
     if (columnFilters && mapFilteredRecord[layerKey]) {
@@ -294,48 +267,6 @@ function MapDataTable({ data, layerId, mapId, layerKey, projectionConfig }: MapD
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [rowSelection]);
 
-  // show row selected message in the toolbar.
-  useEffect(() => {
-    let message = toolbarRowSelectedMessageRecord[layerKey] ?? '';
-    if (Object.keys(rowSelection).length && tableInstanceRef.current) {
-      message = t('dataTable.rowsSelected')
-        .replace('{rowsSelected}', Object.keys(rowSelection).length.toString())
-        .replace('{totalRows}', tableInstanceRef.current.getFilteredRowModel().rows.length.toString());
-    } else if (tableInstanceRef.current && tableInstanceRef.current.getFilteredRowModel().rows.length !== data.features.length) {
-      message = t('dataTable.rowsFiltered')
-        .replace('{rowsFiltered}', tableInstanceRef.current.getFilteredRowModel().rows.length.toString())
-        .replace('{totalRows}', data.features.length.toString());
-    } else {
-      message = '';
-    }
-
-    setToolbarRowSelectedMessageEntry(message, layerKey);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [rowSelection, data.features]);
-
-  // show row filtered message in the toolbar.
-  useEffect(() => {
-    let message = toolbarRowSelectedMessageRecord[layerKey] ?? '';
-    let length = 0;
-    if (tableInstanceRef.current) {
-      const rowsFiltered = tableInstanceRef.current.getFilteredRowModel();
-      if (rowsFiltered.rows.length !== data.features.length) {
-        length = rowsFiltered.rows.length;
-        message = t('dataTable.rowsFiltered')
-          .replace('{rowsFiltered}', rowsFiltered.rows.length.toString())
-          .replace('{totalRows}', data.features.length.toString());
-      } else {
-        message = '';
-        length = 0;
-      }
-      setRowsFilteredEntry(length, layerKey);
-    }
-
-    setToolbarRowSelectedMessageEntry(message, layerKey);
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [columnFilters, data.features]);
-
   /**
    * Create table header cell
    * @param {string} header value to be displayed in cell
@@ -350,17 +281,6 @@ function MapDataTable({ data, layerId, mapId, layerKey, projectionConfig }: MapD
       </Tooltip>
     );
   }, []);
-
-  /**
-   * Initialize lightbox with state.
-   * @param {string} images images url formatted as string and joined with ';' identifier.
-   * @param {string} cellId id of the cell.
-   */
-  const initLightBox = (images: string, cellId: string) => {
-    setIsLightBoxOpen(true);
-    const slidesList = images.split(';').map((item) => ({ src: item, alt: cellId, downloadUrl: item }));
-    setSlides(slidesList);
-  };
 
   /**
    * Create image button which will trigger lightbox.
@@ -547,7 +467,7 @@ function MapDataTable({ data, layerId, mapId, layerKey, projectionConfig }: MapD
     }) as unknown as ColumnsType[];
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
+  console.log('toolbar', toolbarRowSelectedMessageRecord);
   return (
     <Box sx={sxClasses.dataTableWrapper}>
       <MaterialReactTable
@@ -617,18 +537,8 @@ function MapDataTable({ data, layerId, mapId, layerKey, projectionConfig }: MapD
           }),
         }}
       />
-      {isLightBoxOpen && (
-        <LightboxImg
-          open={isLightBoxOpen}
-          slides={slides}
-          index={slidesIndex}
-          exited={() => {
-            setIsLightBoxOpen(false);
-            setSlides([]);
-            setSlidesIndex(0);
-          }}
-        />
-      )}
+
+      <LightBoxComponent />
     </Box>
   );
 }
