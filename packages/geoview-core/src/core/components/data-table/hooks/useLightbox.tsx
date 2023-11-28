@@ -1,6 +1,6 @@
-import { LightBoxSlides, LightboxImg } from '@/app';
 import { useState } from 'react';
-
+import { LightBoxSlides, LightboxImg } from '@/app';
+import { Box } from '@/ui';
 /**
  * Custom Lightbox hook which handle rendering of the lightbox.
  * @returns {Object}
@@ -25,7 +25,7 @@ export function useLightBox() {
    * Create LightBox Component based on lightbox is opened or not.
    * @returns JSX.Element
    */
-  const LightBoxComponent = () => {
+  function LightBoxComponent() {
     return isLightBoxOpen ? (
       <LightboxImg
         open={isLightBoxOpen}
@@ -38,8 +38,8 @@ export function useLightBox() {
         }}
       />
     ) : (
-      ''
+      <Box />
     );
-  };
+  }
   return { initLightBox, LightBoxComponent };
 }

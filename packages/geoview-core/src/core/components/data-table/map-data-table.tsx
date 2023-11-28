@@ -467,7 +467,7 @@ function MapDataTable({ data, layerId, mapId, layerKey, projectionConfig }: MapD
     }) as unknown as ColumnsType[];
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-  console.log('toolbar', toolbarRowSelectedMessageRecord);
+
   return (
     <Box sx={sxClasses.dataTableWrapper}>
       <MaterialReactTable

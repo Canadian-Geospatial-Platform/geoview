@@ -1,12 +1,12 @@
 import { RefObject, useEffect, useState } from 'react';
+import { type MRT_TableInstance as MRTTableInstance } from 'material-react-table';
+import { useTranslation } from 'react-i18next';
 import {
   useDataTableStoreActions,
   useDataTableStoreRowSelectionsRecord,
   useDataTableStoreToolbarRowSelectedMessageRecord,
 } from '@/core/stores/store-interface-and-intial-values/data-table-state';
 import { MapDataTableData } from '../map-data-table';
-import { type MRT_TableInstance as MRTTableInstance } from 'material-react-table';
-import { useTranslation } from 'react-i18next';
 
 interface UseSelectedRowMessageProps {
   data: MapDataTableData;
