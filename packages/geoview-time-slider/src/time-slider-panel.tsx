@@ -2,11 +2,11 @@ import { TypeWindow } from 'geoview-core';
 import { CloseButton, EnlargeButton, LayerList, LayerListEntry, LayerTitle, ResponsiveGrid } from 'geoview-core/src/core/components/common';
 import { getSxClasses } from './time-slider-style';
 import { TimeSlider } from './time-slider';
-import { SliderFilterProps } from './index';
+import { LayerProps, SliderFilterProps } from './index';
 
 interface TypeTimeSliderProps {
   mapId: string;
-  layersList: string[];
+  layersList: LayerProps[];
   timeSliderData: { [index: string]: SliderFilterProps };
 }
 
@@ -29,7 +29,7 @@ export function TimeSliderPanel(props: TypeTimeSliderProps): JSX.Element {
   const sxClasses = getSxClasses(theme);
 
   // First layer is initially selected
-  const [selectedLayerPath, setSelectedLayerPath] = useState<string>(layersList[0]);
+  const [selectedLayerPath, setSelectedLayerPath] = useState<string>(layersList[0]?.layerPath);
   const [isLayersPanelVisible, setIsLayersPanelVisible] = useState(false);
   const [isEnlargeDataTable, setIsEnlargeDataTable] = useState(false);
 
@@ -52,11 +52,11 @@ export function TimeSliderPanel(props: TypeTimeSliderProps): JSX.Element {
     return (
       <LayerList
         isEnlargeDataTable={isEnlargeDataTable}
-        selectedLayerIndex={layersList.indexOf(selectedLayerPath)}
+        selectedLayerIndex={layersList.findIndex(({ layerPath }) => layerPath === selectedLayerPath)}
         handleListItemClick={(layer) => {
           handleLayerChange(layer);
         }}
-        layerList={layersList.map((layer) => ({ layerName: layer, layerPath: layer, tooltip: layer as string }))}
+        layerList={layersList.map(({ layerPath, layerName }) => ({ layerName: layerName, layerPath: layerPath, tooltip: layerName as string }))}
       />
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
