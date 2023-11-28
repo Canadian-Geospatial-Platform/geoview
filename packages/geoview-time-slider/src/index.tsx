@@ -1,6 +1,10 @@
-import { Cast, AbstractPlugin, TypeWindow, toJsonObject, TypePluginOptions, TypeButtonPanel } from 'geoview-core';
+import { Cast, AbstractPlugin, TypeWindow, toJsonObject, TypePluginOptions, TypeButtonPanel, getLocalizedValue } from 'geoview-core';
 import { TimeSliderPanel } from './time-slider-panel';
 
+export interface LayerProps {
+  layerPath: string;
+  layerName: string;
+}
 export interface SliderFilterProps {
   range: string[];
   defaultValue: string;
@@ -58,15 +62,21 @@ class TimeSliderPlugin extends AbstractPlugin {
 
       // Create list of layers that have a temporal dimension
       // TODO use list of visible layers from store
-      const layersList = Object.keys(api.maps[mapId].layer.registeredLayers).filter(
+      const layerPaths = Object.keys(api.maps[mapId].layer.registeredLayers).filter(
         (layerPath) =>
           api.maps[mapId].layer.registeredLayers[layerPath].entryType !== 'group' &&
           api.maps[mapId].layer.geoviewLayers[layerPath.split('/')[0]].layerTemporalDimension[layerPath]
       );
+      const layersList: LayerProps[] = layerPaths.map((layerPath) => {
+        return {
+          layerPath,
+          layerName: getLocalizedValue(api.maps[mapId].layer.registeredLayers[layerPath]?.layerName, mapId) || '',
+        };
+      });
 
       // Collect data needed for slider
       let timeSliderData: { [index: string]: SliderFilterProps } = {};
-      layersList.forEach((layerPath) => {
+      layersList.forEach(({ layerPath }) => {
         const temporalDimensionInfo = api.maps[mapId].layer.geoviewLayers[layerPath.split('/')[0]].layerTemporalDimension[layerPath];
         const { range } = temporalDimensionInfo.range;
         const defaultValue = temporalDimensionInfo.default;
