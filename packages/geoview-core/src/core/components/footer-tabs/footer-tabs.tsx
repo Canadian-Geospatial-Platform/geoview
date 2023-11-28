@@ -226,8 +226,6 @@ export function FooterTabs(): JSX.Element | null {
     }
   };
 
-  console.log(api.maps[mapId].footerTabs.tabs);
-
   return api.maps[mapId].footerTabs.tabs.length > 0 ? (
     <Box ref={tabsContainerRef as MutableRefObject<HTMLDivElement>} sx={sxClasses.tabsContainer} className="tabsContainer">
       <Tabs
