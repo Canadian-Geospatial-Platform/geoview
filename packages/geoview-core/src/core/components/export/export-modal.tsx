@@ -8,9 +8,9 @@ import { exportPNG } from '@/core/utils/utilities';
 import { useUIActiveFocusItem, useUIStoreActions } from '@/core/stores/store-interface-and-intial-values/ui-state';
 
 /**
- * Export PNG Button component
+ * Export modal window component to export the viewer information in a PNG file
  *
- * @returns {JSX.Element} the export button
+ * @returns {JSX.Element} the export modal component
  */
 export default function ExportModal(): JSX.Element {
   const mapConfig = useContext(MapContext);
