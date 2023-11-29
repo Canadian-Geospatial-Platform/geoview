@@ -2,7 +2,17 @@
 import React, { useState } from 'react';
 import { useTheme, Theme } from '@mui/material/styles';
 import Box from '@mui/material/Box';
-import { List, ListItem, ListItemButton, ListItemIcon, ListItemText, Tooltip, IconButton, CheckBoxOutineBlankIcon, CheckBoxIcon } from '@/ui';
+import {
+  List,
+  ListItem,
+  ListItemButton,
+  ListItemIcon,
+  ListItemText,
+  Tooltip,
+  IconButton,
+  CheckBoxOutineBlankIcon,
+  CheckBoxIcon,
+} from '@/ui';
 import {
   TypeClassBreakStyleConfig,
   TypeLayerEntryConfig,

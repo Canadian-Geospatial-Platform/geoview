@@ -79,13 +79,13 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
   }
 
   function renderItemCheckbox(item: TypeLegendLayerListItem) {
-    if(item.isVisible ==='always') {
+    if (item.isVisible === 'always') {
       return null;
     }
-    
+
     return (
       <IconButton color="primary" onClick={() => toggleItemVisibility(layerDetails.layerPath, item.geometryType, item.name)}>
-        {item.isVisible === 'yes'? <CheckBoxIcon /> : <CheckBoxOutineBlankIcon />}
+        {item.isVisible === 'yes' ? <CheckBoxIcon /> : <CheckBoxOutineBlankIcon />}
       </IconButton>
     );
   }
@@ -113,7 +113,9 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
             </Grid>
             <Grid item xs="auto">
               {item.icon ? <img alt={item.name} src={item.icon} /> : <BrowserNotSupportedIcon />}
-              <span style={sxClasses.rightPanel.tableIconLabel}>{item.name}  {item.isVisible}</span>
+              <span style={sxClasses.rightPanel.tableIconLabel}>
+                {item.name} {item.isVisible}
+              </span>
             </Grid>
           </Grid>
         ))}
