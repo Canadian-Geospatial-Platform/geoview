@@ -71,7 +71,7 @@ export function Scale(): JSX.Element {
                   <Box sx={sxClasses.scaleExpandedCheckmarkText} key={value.scaleId}>
                     <CheckIcon sx={{ ...sxClasses.scaleCheckmark, fontSize: 25, opacity: scaleMode === index ? 1 : 0 }} />
                     <Box component="span" sx={{ ...sxClasses.scaleText, borderBottom: !value.borderBottom ? 'none' : '1px solid' }}>
-                      {value.label}
+                      {value.label.replace('KM', 'km')}
                     </Box>
                   </Box>
                 );
@@ -86,7 +86,7 @@ export function Scale(): JSX.Element {
                 width: !scaleValues[scaleMode].borderBottom ? 'inherit' : scale.lineWidth,
               }}
             >
-              {scaleValues[scaleMode].label}
+              {scaleValues[scaleMode].label.replace('KM', 'km')}
             </Box>
           )}
         </Button>
