@@ -1,5 +1,5 @@
 /* eslint-disable react/require-default-props */
-import { useState, useEffect, CSSProperties } from 'react';
+import { useState, useEffect, CSSProperties, useLayoutEffect } from 'react';
 
 import { useTheme } from '@mui/material/styles';
 import { Slider as MaterialSlider, SliderProps } from '@mui/material';
@@ -142,15 +142,17 @@ export function Slider(props: TypeSliderProps): JSX.Element {
     }
   };
 
+  useLayoutEffect(() => {
+    // remove overlaping labels
+    removeLabelOverlap();
+  }, []);
+
   useEffect(() => {
     // on set min/max, update slider
     api.event.on(EVENT_NAMES.SLIDER.EVENT_SLIDER_SET_MINMAX, sliderSetMinMaxListenerFunction, properties.id);
 
     // on set values update slider
     api.event.on(EVENT_NAMES.SLIDER.EVENT_SLIDER_SET_VALUES, sliderSetValuesListenerFunction, properties.id);
-
-    // remove overlaping labels
-    removeLabelOverlap();
 
     return () => {
       api.event.off(EVENT_NAMES.SLIDER.EVENT_SLIDER_SET_MINMAX, properties.id, sliderSetMinMaxListenerFunction);
