@@ -40,6 +40,7 @@ export const getSxClasses = (theme: Theme) => ({
     borderTop: 'none',
     borderLeft: 'none',
     borderRight: 'none',
+    textTransform: 'lowercase',
   },
   scaleCheckmark: {
     paddingRight: 5,

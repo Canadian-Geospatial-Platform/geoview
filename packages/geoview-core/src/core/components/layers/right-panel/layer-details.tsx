@@ -18,7 +18,8 @@ import {
   BrowserNotSupportedIcon,
   Divider,
 } from '@/ui';
-import { useLayerStoreActions } from '@/core/stores/store-interface-and-intial-values/layer-state';
+import { useLayerHighlightedLayer, useLayerStoreActions } from '@/core/stores/store-interface-and-intial-values/layer-state';
+import { useUIStoreActions } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import { generateId } from '@/core/utils/utilities';
 
 interface LayerDetailsProps {
@@ -27,39 +28,31 @@ interface LayerDetailsProps {
 
 export function LayerDetails(props: LayerDetailsProps): JSX.Element {
   const { layerDetails } = props;
-  const { setAllItemsVisibility, toggleItemVisibility, setLayerOpacity } = useLayerStoreActions(); // get store actions
+
   const { t } = useTranslation<string>();
+
   const theme = useTheme();
   const sxClasses = getSxClasses(theme);
 
-  const handleZoomTo = async () => {
-    /* let bounds = await api.maps[mapId].layer.geoviewLayers[layerId].calculateBounds(path);
-    let transformedBounds: Extent | undefined;
-    if (bounds) transformedBounds = transformExtent(bounds, `EPSG:${api.maps[mapId].currentProjection}`, `EPSG:4326`);
+  // get store actions
+  const highlightedLayer = useLayerHighlightedLayer();
+  const { setAllItemsVisibility, toggleItemVisibility, setLayerOpacity, setHighlightLayer, zoomToLayerExtent } = useLayerStoreActions();
+  const { openModal } = useUIStoreActions();
 
-    if (
-      !bounds ||
-      (transformedBounds &&
-        transformedBounds[0] === -180 &&
-        transformedBounds[1] === -90 &&
-        transformedBounds[2] === 180 &&
-        transformedBounds[3] === 90)
-    )
-      bounds = api.maps[mapId].getView().get('extent');
-
-    if (bounds) api.maps[mapId].zoomToExtent(bounds); */
+  const handleZoomTo = () => {
+    zoomToLayerExtent(layerDetails.layerPath);
   };
 
-  const handleOpenTable = async () => {
-    console.log('opening table');
+  const handleOpenTable = () => {
+    openModal({ activeElementId: 'layerDatatable', callbackElementId: `table-details` });
   };
 
-  const handleRefreshLayer = async () => {
+  const handleRefreshLayer = () => {
     console.log('refresh layer');
   };
 
-  const handleHighlightLayer = async () => {
-    console.log('refresh layer');
+  const handleHighlightLayer = () => {
+    setHighlightLayer(layerDetails.layerPath);
   };
 
   const handleSetOpacity = (opacityValue: number | number[]) => {
@@ -125,17 +118,21 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
 
   function renderLayerButtons() {
     return (
-      <Box sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
-        <IconButton tooltip="legend.table_details" sx={{ backgroundColor: '#F6F6F6' }} onClick={handleOpenTable}>
+      <Box sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '15px' }}>
+        <IconButton id="table-details" tooltip="legend.tableDetails" sx={{ backgroundColor: '#F6F6F6' }} onClick={handleOpenTable}>
           <TableViewIcon />
         </IconButton>
-        <IconButton tooltip="legend.refresh_layer" sx={{ backgroundColor: '#F6F6F6' }} onClick={handleRefreshLayer}>
+        <IconButton tooltip="legend.refreshLayer" sx={{ backgroundColor: '#F6F6F6' }} onClick={handleRefreshLayer}>
           <RestartAltIcon />
         </IconButton>
-        <IconButton tooltip="legend.highlight_layer" sx={{ backgroundColor: '#F6F6F6' }} onClick={handleHighlightLayer}>
+        <IconButton
+          tooltip="legend.highlightLayer"
+          sx={{ backgroundColor: layerDetails.layerPath !== highlightedLayer ? '#F6F6F6' : theme.palette.action.active }}
+          onClick={handleHighlightLayer}
+        >
           <HighlightOutlinedIcon />
         </IconButton>
-        <IconButton tooltip="legend.zoom_to" onClick={handleZoomTo} sx={{ backgroundColor: '#F6F6F6' }}>
+        <IconButton tooltip="legend.zoomTo" onClick={handleZoomTo} sx={{ backgroundColor: '#F6F6F6' }}>
           <ZoomInSearchIcon />
         </IconButton>
       </Box>

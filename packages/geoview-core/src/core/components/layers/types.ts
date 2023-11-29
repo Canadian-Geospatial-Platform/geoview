@@ -1,3 +1,5 @@
+import { Extent } from 'ol/extent';
+
 import {
   AbstractGeoViewLayer,
   TypeGeoviewLayerType,
@@ -74,6 +76,7 @@ export interface TypeLegendLayerListItem {
 }
 
 export interface TypeLegendLayer {
+  bounds: Extent | undefined;
   layerId: string;
   layerPath: string;
   layerAttribution?: string[];

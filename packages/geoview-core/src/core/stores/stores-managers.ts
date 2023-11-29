@@ -39,7 +39,7 @@ export const addGeoViewStore = (config: TypeMapFeaturesConfig) => {
     },
   }));
 
-  //TODO Revert back this code and delete line before. Issue #1559
+  // TODO Revert back this code and delete line before. Issue #1559
   /*
   if (process.env.NODE_ENV === 'development') {
     mountStoreDevtool(`getViewStore-${config.mapId}`, geoViewStore);
