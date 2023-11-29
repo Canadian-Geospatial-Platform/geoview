@@ -15,7 +15,7 @@ import { generateId } from '@/core/utils/utilities';
  * @returns {JSX.Element} created attribution element
  */
 export function Attribution(): JSX.Element {
-   const theme = useTheme();
+  const theme = useTheme();
 
   // internal state
   const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
