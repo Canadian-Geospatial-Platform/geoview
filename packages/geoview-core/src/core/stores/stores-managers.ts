@@ -38,6 +38,8 @@ export const addGeoViewStore = (config: TypeMapFeaturesConfig) => {
       [config.mapId ?? 'unknown']: geoViewStore,
     },
   }));
+
+  //TODO Revert back this code and delete line before. Issue #1559
   /*
   if (process.env.NODE_ENV === 'development') {
     mountStoreDevtool(`getViewStore-${config.mapId}`, geoViewStore);
