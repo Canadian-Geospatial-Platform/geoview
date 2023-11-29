@@ -5,8 +5,6 @@ import {
   TypePluginOptions,
   TypeWindow,
   TypeButtonPanel,
-  TypeIconButtonProps,
-  TypePanelProps,
   toJsonObject,
   TypeJsonObject,
 } from 'geoview-core';
@@ -25,6 +23,9 @@ import defaultConfig from '../default-config-geochart.json';
 class GeoChartPlugin extends AbstractPlugin {
   // Store the created button panel object
   buttonPanel?: TypeButtonPanel;
+
+  // store index of tab
+  value: number | null = null;
 
   /**
    * Constructor
@@ -55,7 +56,7 @@ class GeoChartPlugin extends AbstractPlugin {
    */
   translations = toJsonObject({
     en: {
-      chartPanel: 'Chart',
+      chartPanel: 'Geo Chart',
     },
     fr: {
       chartPanel: 'Graphique',
@@ -68,42 +69,20 @@ class GeoChartPlugin extends AbstractPlugin {
   added = (): void => {
     // Fetch cgpv
     const { cgpv } = window as TypeWindow;
+    const { createElement } = cgpv.react;
     const { configObj, pluginProps } = this as AbstractPlugin;
     const { mapId } = pluginProps;
 
     // If cgpv exists
     if (cgpv) {
       // Access the api calls
-      const { api, ui } = cgpv;
-      const { MapIcon } = ui.elements;
-      const { displayLanguage } = api.maps[mapId];
-
-      // Button props
-      const button: TypeIconButtonProps = {
-        id: 'geoChartPanelButton',
-        tooltip: this.translations[displayLanguage].chartPanel as string,
-        tooltipPlacement: 'right',
-        children: <MapIcon />,
-        visible: true,
-      };
-
-      // Panel props
-      const panel: TypePanelProps = {
-        title: this.translations[displayLanguage].chartPanel,
-        icon: '<i class="material-icons">map</i>',
-        width: '80vw',
-        status: configObj?.isOpen as boolean,
-        handlePanelOpened: () => {
-          // Redraw the chart, because of the canvas rendering
-          this.redrawChart();
-        },
-      };
-
-      // Create a new button panel on the app-bar
-      this.buttonPanel = api.maps[mapId].appBarButtons.createAppbarPanel(button, panel, null);
-
-      // Set panel content
-      this.buttonPanel?.panel?.changeContent(<GeoChart mapId={mapId} config={configObj || {}} schemaValidator={new SchemaValidator()} />);
+      const { api } = cgpv;
+      this.value = api.maps[mapId].footerTabs.tabs.length;
+      api.maps[mapId].footerTabs.createFooterTab({
+        value: this.value,
+        label: this.translations[api.maps[mapId].displayLanguage].chartPanel as string,
+        content: () => createElement(GeoChart, { mapId, config: configObj, schemaValidator: new SchemaValidator() }, []),
+      });
     }
   };
 
@@ -118,11 +97,8 @@ class GeoChartPlugin extends AbstractPlugin {
 
     // If cgpv exists
     if (cgpv) {
-      // If there is a button panel
-      if (this.buttonPanel) {
-        // Remove the app bar panel
-        cgpv.api.maps[mapId].appBarButtons.removeAppbarPanel(this.buttonPanel.buttonPanelId);
-      }
+      // Remove the footer tab
+      if (this.value) cgpv.api.maps[mapId].footerTabs.removeFooterTab(this.value);
     }
   };
 

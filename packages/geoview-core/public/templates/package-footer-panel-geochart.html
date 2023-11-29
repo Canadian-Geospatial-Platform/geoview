@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>
+    <%= htmlWebpackPlugin.options.title %>
+  </title>
+  <link rel="shortcut icon" href="./favicon.ico" />
+  <meta name="msapplication-TileColor" content="#da532c" />
+  <meta name="msapplication-config" content="./img/browserconfig.xml" />
+  <meta name="theme-color" content="#ffffff" />
+  <meta name="msapplication-TileColor" content="#da532c" />
+  <meta name="theme-color" content="#ffffff" />
+  <link href="https://fonts.googleapis.com/css?family=Roboto|Montserrat:200,300,400,900|Merriweather" rel="stylesheet"
+    type="text/css" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
+  <link rel="stylesheet" href="css/style.css" />
+  <script src="codedoc.js"></script>
+</head>
+
+<body>
+  <div class="header-table">
+    <table>
+      <tbody>
+        <tr>
+          <td><img class="header-logo" alt="logo" src="./img/Logo.png" /></td>
+          <td class="header-title">
+            <h1><strong>Package Footer Panel With Geo-Chart</strong></h1>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <table>
+      <tbody>
+        <tr>
+          <td>
+            <a href="./index.html">Main</a><br />
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <hr />
+
+  <div id="UIM10" class="llwp-map" data-lang="en" data-config-url="./configs/package-footer-panel-geochart.json"></div>
+
+  <script>
+
+    // initialize cgpv and api events, a callback is optional, used if calling api's after the rendering is ready
+    cgpv.init(async function () {
+      console.log('api is ready');
+
+      //create snippets
+      createConfigSnippet();
+      createCodeSnippetUsingIDs();
+    });
+  </script>
+</body>
+
+</html>

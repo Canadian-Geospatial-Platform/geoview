@@ -14,10 +14,22 @@
           "type": "array",
           "items": {
             "type": "string",
-            "enum": ["legend", "layers", "details", "data-table", "time-slider"]
+            "enum": [
+              "legend",
+              "layers",
+              "details",
+              "data-table",
+              "time-slider",
+              "geoChart"
+            ]
           },
           "minItems": 0,
-          "default": ["legend", "layers", "details", "data-table"],
+          "default": [
+            "legend",
+            "layers",
+            "details",
+            "data-table"
+          ],
           "uniqueItems": true,
           "description": "Defaut tabs of footer panel to use"
         },
@@ -47,15 +59,23 @@
       "uniqueItems": true,
       "items": {
         "type": "string",
-        "enum": ["en", "fr"]
+        "enum": [
+          "en",
+          "fr"
+        ]
       },
-      "default": ["en", "fr"],
+      "default": [
+        "en",
+        "fr"
+      ],
       "description": "ISO 639-1 code indicating the languages supported by the configuration file.",
       "minItems": 1
     },
     "version": {
       "type": "string",
-      "enum": ["1.0"],
+      "enum": [
+        "1.0"
+      ],
       "description": "The schema version used to validate the configuration file. The schema should enumerate the list of versions accepted by this version of the viewer."
     },
     "collapsed": {
@@ -64,5 +84,8 @@
       "description": "State of footer panel when map is loaded"
     }
   },
-  "required": ["suportedLanguages", "tabs"]
+  "required": [
+    "suportedLanguages",
+    "tabs"
+  ]
 }
