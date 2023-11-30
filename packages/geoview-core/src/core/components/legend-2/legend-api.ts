@@ -1,6 +1,5 @@
 import { createElement } from 'react';
 import { LegendsLayerSet, api } from '@/app';
-import { TypeLegendProps } from '@/core/components/layers/types';
 import { Legend } from './legend';
 
 /**
@@ -28,10 +27,7 @@ export class Legend2Api {
    * Create a legend as an element
    *
    */
-  createLegend = (props: TypeLegendProps) => {
-    return createElement(Legend, {
-      ...props,
-      mapId: this.mapId,
-    });
+  createLegend = () => {
+    return createElement(Legend);
   };
 }
