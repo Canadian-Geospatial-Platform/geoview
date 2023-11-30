@@ -20,11 +20,13 @@ export function Legend(): JSX.Element {
   function renderLegendLayersList() {
     return (
       <Box display="flex" flexDirection="column" flexWrap="wrap" style={{ height: 600, overflow: 'auto' }}>
-        {legendLayers.filter(item => item.isVisible !== 'no').map((item) => (
-          <Box key={item.layerPath} width={{ xs: '100%', sm: '50%', md: '33.33%', lg: '25%', xl: '25%' }} style={{ minHeight: 0 }} p={2}>
-            <LegendLayer layer={item} key={item.layerPath} />
-          </Box>
-        ))}
+        {legendLayers
+          .filter((item) => item.isVisible !== 'no')
+          .map((item) => (
+            <Box key={item.layerPath} width={{ xs: '100%', sm: '50%', md: '33.33%', lg: '25%', xl: '25%' }} style={{ minHeight: 0 }} p={2}>
+              <LegendLayer layer={item} key={item.layerPath} />
+            </Box>
+          ))}
       </Box>
     );
   }
