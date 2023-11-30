@@ -61,10 +61,10 @@ export function SingleLayer(props: SingleLayerProps): JSX.Element {
   // get layer description
   const getLayerDescription = () => {
     if (layer.layerStatus === 'error') {
-      return t('legend.layer_has_error');
+      return t('legend.layerError');
     }
     if (layer.layerStatus === 'loading') {
-      return t('legend.layer_is_loading');
+      return t('legend.layerLoading');
     }
     if (layer.children.length) {
       return `${layer.children.length} layers`;

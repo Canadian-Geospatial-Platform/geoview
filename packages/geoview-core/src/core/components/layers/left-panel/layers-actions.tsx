@@ -18,7 +18,7 @@ export function LayersActions(): JSX.Element {
   return (
     <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'right', marginBottom: '15px' }}>
       <ButtonGroup size="small" variant="outlined" aria-label="outlined button group">
-        <Tooltip title={t('legend.add_layer')} placement="top" enterDelay={1000}>
+        <Tooltip title={t('legend.addLayer')} placement="top" enterDelay={1000}>
           <Button
             variant={displayState === 'add' ? 'contained' : 'outlined'}
             startIcon={<AddCircleOutlineIcon fontSize="small" />}
@@ -27,7 +27,7 @@ export function LayersActions(): JSX.Element {
             {t('general.add')}
           </Button>
         </Tooltip>
-        <Tooltip title={t('legend.sort_layers')} placement="top" enterDelay={1000}>
+        <Tooltip title={t('legend.sortLayers')} placement="top" enterDelay={1000}>
           <Button
             variant={displayState === 'order' ? 'contained' : 'outlined'}
             startIcon={<HandleIcon fontSize="small" />}
@@ -36,7 +36,7 @@ export function LayersActions(): JSX.Element {
             {t('legend.sort')}
           </Button>
         </Tooltip>
-        <Tooltip title={t('legend.remove_layer')} placement="top" enterDelay={1000}>
+        <Tooltip title={t('legend.removeLayer')} placement="top" enterDelay={1000}>
           <Button
             variant={displayState === 'remove' ? 'contained' : 'outlined'}
             startIcon={<DeleteOutlineIcon fontSize="small" />}

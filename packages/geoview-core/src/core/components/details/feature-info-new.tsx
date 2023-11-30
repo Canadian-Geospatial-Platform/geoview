@@ -91,7 +91,7 @@ export function FeatureInfo({ features, currentFeatureIndex }: TypeFeatureInfoPr
                 </>
               </Tooltip>
               <IconButton color="primary" onClick={(e) => handleZoomIn(e)}>
-                <Tooltip title={t('details.zoom_to')} placement="top" enterDelay={1000}>
+                <Tooltip title={t('details.zoomTo')} placement="top" enterDelay={1000}>
                   <ZoomInSearchIcon />
                 </Tooltip>
               </IconButton>

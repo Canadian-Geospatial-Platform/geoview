@@ -32,7 +32,7 @@ export function Legend(): JSX.Element {
   return (
     <Box sx={sxClasses.container}>
       <Box>
-        <Typography sx={sxClasses.title}>{t('legend.overview_title')}</Typography>
+        <Typography sx={sxClasses.title}>{t('legend.overviewTitle')}</Typography>
         <Typography sx={sxClasses.subtitle} />
       </Box>
       {renderLegendLayersList()}

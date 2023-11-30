@@ -1,5 +1,6 @@
 import { Dispatch, SetStateAction, useEffect } from 'react';
 import { useTheme } from '@mui/material/styles';
+
 import { SingleLayer } from './single-layer';
 import { getSxClasses } from '../layers-style';
 import { List } from '@/ui';
@@ -25,6 +26,7 @@ export function LayersList({ setIsLayersListPanelVisible }: LayerListProps): JSX
         setSelectedLayerPath(validFirstLayer.layerPath);
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const legendItems = legendLayers.map((details) => {
