@@ -29,7 +29,7 @@ function UndoButtonWithProgress(props: UndoButtonProps): JSX.Element {
           justifyContent: 'center',
         }}
       >
-        <IconButton  edge="end" size="small">
+        <IconButton edge="end" size="small">
           <UndoIcon />
         </IconButton>
       </Box>
@@ -78,7 +78,7 @@ export function DeleteUndoButton(props: DeleteUndoButtonProps): JSX.Element {
 
   if (!inUndoState) {
     return (
-      <IconButton onClick={handleDeleteClick}  edge="end" size="small">
+      <IconButton onClick={handleDeleteClick} edge="end" size="small">
         <DeleteOutlineIcon color="error" />
       </IconButton>
     );

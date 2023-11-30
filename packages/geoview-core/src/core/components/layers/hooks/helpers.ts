@@ -1,20 +1,15 @@
 import _ from 'lodash';
-import {
-  isVectorLegend,
-  isWmsLegend,
-  isImageStaticLegend,
-  TypeVectorLayerStyles,
-} from '@/geo/layer/geoview-layers/abstract-geoview-layers';
+import { TypeVectorLayerStyles } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { api } from '@/app';
-import { TypeLegendLayer, TypeLegendLayerIcons, TypeLegendLayerItem, TypeLegendLayerListItem } from '../types';
-import { getGeoViewStore, useGeoViewStore } from '@/core/stores/stores-managers';
+import { TypeLegendLayer, TypeLegendLayerListItem } from '../types';
+import { useGeoViewStore } from '@/core/stores/stores-managers';
 import { generateId } from '@/core/utils/utilities';
-import { TypeStyleGeometry, TypeVisibilityFlags, isClassBreakStyleConfig, isSimpleStyleConfig, isUniqueValueStyleConfig } from '@/geo';
+import { TypeVisibilityFlags } from '@/geo';
 
 export function useLegendHelpers() {
   const store = useGeoViewStore();
 
-  const mapId = store.getState().mapId;
+  const { mapId } = store.getState();
 
   function populateLegendStoreWithFakeData() {
     const legendInfo = api.maps[mapId].legend.legendLayerSet.resultSets;
@@ -200,7 +195,7 @@ export function useLegendHelpers() {
       const item: TypeLegendLayer = {
         layerId: setData.data?.layerPath ?? `layer${i}`,
         layerPath: setData.data?.layerPath ?? generateId(),
-        layerName: `TEST---` + (setData.data?.layerName?.en ?? 'Uknown Laer name'),
+        layerName: `TEST---${setData.data?.layerName?.en ?? 'Uknown Laer name'}`,
         type: setData.data?.type ?? 'imageStatic',
         layerStatus: setData.layerStatus,
         layerPhase: setData.layerPhase,
@@ -219,14 +214,14 @@ export function useLegendHelpers() {
 
     // adding to store
     store.setState({
-      layerState: { 
-        ...store.getState().layerState, 
-        legendLayers: [...store.getState().layerState.legendLayers, ...legendLayers]
+      layerState: {
+        ...store.getState().layerState,
+        legendLayers: [...store.getState().layerState.legendLayers, ...legendLayers],
       },
     });
   }
 
   return {
-    populateLegendStoreWithFakeData
+    populateLegendStoreWithFakeData,
   };
 }

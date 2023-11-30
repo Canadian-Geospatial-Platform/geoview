@@ -3,7 +3,6 @@ import { useTheme } from '@mui/material/styles';
 import { Box, ChevronRightIcon, IconButton, List, ListItem, ListItemButton, ListItemIcon, Paper, Tooltip, Typography } from '@/ui';
 import { getSxClasses } from './layer-list-style';
 import { IconStack } from '@/app';
-import { ListItemText } from '@mui/material';
 
 export interface LayerListEntry {
   layerName: string;
@@ -47,7 +46,7 @@ export function LayerList({ layerList, isEnlargeDataTable, selectedLayerIndex, h
                     <IconStack layerPath={layer.layerPath} />
                   </ListItemIcon>
                   <Box sx={sxClasses.listPrimaryText}>
-                    <Typography className='layerTitle'>{layer.layerName}</Typography>
+                    <Typography className="layerTitle">{layer.layerName}</Typography>
                     {!!layer?.layerFeatures && (
                       <Box sx={{ display: 'flex', alignContent: 'center' }}>
                         <Typography component="p" variant="subtitle1" noWrap>

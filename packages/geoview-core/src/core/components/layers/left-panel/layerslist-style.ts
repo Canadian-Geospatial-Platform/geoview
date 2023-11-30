@@ -1,7 +1,6 @@
 import { Theme } from '@mui/material/styles';
 
 export const getSxClasses = (theme: Theme) => ({
-  
   oddDepthList: {
     background: theme.footerPanel.contentBg,
     boxShadow: theme.footerPanel.contentShadow,

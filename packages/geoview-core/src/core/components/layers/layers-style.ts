@@ -13,7 +13,7 @@ export const getSxClasses = (theme: Theme) => ({
     // layer title
     '& .MuiListItemText-primary': {
       font: theme.footerPanel.layerTitleFont,
-      padding:'5px 5px',
+      padding: '5px 5px',
       fontSize: '1.15rem !important',
       lineHeight: 1.5,
       overflow: 'hidden',
@@ -26,7 +26,7 @@ export const getSxClasses = (theme: Theme) => ({
       borderRadius: '5px',
       marginBottom: '5px',
 
-      //for handling layer status
+      // for handling layer status
       '&.error': {
         background: '#ffdcdb 0% 0% no-repeat padding-box',
         '& .MuiListItemText-secondary': {
@@ -42,7 +42,7 @@ export const getSxClasses = (theme: Theme) => ({
         },
       },
 
-      //styling right icons
+      // styling right icons
       '& .rightIcons-container': {
         display: 'flex',
         flexDirection: 'row',
@@ -50,14 +50,12 @@ export const getSxClasses = (theme: Theme) => ({
         alignItems: 'center',
 
         '& .MuiIconButton-root': {
-            color: `${theme.palette.primary.main} !important`, 
-            background: `${theme.palette.grey.A100} !important`,
-            margin: '0px 5px'
-        }
-      }
+          color: `${theme.palette.primary.main} !important`,
+          background: `${theme.palette.grey.A100} !important`,
+          margin: '0px 5px',
+        },
+      },
     },
-
-  
 
     '& .MuiListItem-root': {
       height: '100%',
