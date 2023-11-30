@@ -10,6 +10,7 @@ import { LayersActions } from './left-panel/layers-actions';
 import { LayersList } from './left-panel/layers-list';
 import { LayerDetails } from './right-panel/layer-details';
 import { AddNewLayer } from './left-panel/add-new-layer';
+import { useLegendHelpers } from './hooks/helpers';
 
 const Item = styled('div')(({ theme }) => ({
   backgroundColor: theme.palette.mode === 'dark' ? '#262B32' : '#fff',
@@ -31,14 +32,15 @@ export function LayersPanel() {
   const selectedLayer = useSelectedLayer(); // get store value
   const displayState = useLayersDisplayState();
 
-  /*
+  
   // Using helpers
-  const helpers = useLegendHelpers(mapId);
+  const helpers = useLegendHelpers();
+
   useEffect(() => {
     helpers.populateLegendStoreWithFakeData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-  */
+  
 
   useEffect(() => {
     if (layerDetailsRef.current) {

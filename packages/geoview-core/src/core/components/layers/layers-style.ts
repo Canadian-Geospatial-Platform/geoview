@@ -10,30 +10,54 @@ export const getSxClasses = (theme: Theme) => ({
     color: 'text.primary',
     width: '100%',
 
+    // layer title
+    '& .MuiListItemText-primary': {
+      font: theme.footerPanel.layerTitleFont,
+      padding:'5px 5px',
+      fontSize: '1.15rem !important',
+      lineHeight: 1.5,
+      overflow: 'hidden',
+      textOverflow: 'ellipsis',
+      whiteSpace: 'nowrap',
+    },
+
     '& .layerItemContainer': {
       background: '#FFFFFF 0% 0% no-repeat padding-box',
       borderRadius: '5px',
       marginBottom: '5px',
+
+      //for handling layer status
+      '&.error': {
+        background: '#ffdcdb 0% 0% no-repeat padding-box',
+        '& .MuiListItemText-secondary': {
+          fontWeight: 'bold',
+          color: 'error.main',
+        },
+      },
+      '&.loading': {
+        background: '#e5efff 0% 0% no-repeat padding-box',
+        '& .MuiListItemText-secondary': {
+          fontWeight: 'bold',
+          color: 'info.main',
+        },
+      },
+
+      //styling right icons
+      '& .rightIcons-container': {
+        display: 'flex',
+        flexDirection: 'row',
+        justifyContent: 'right',
+        alignItems: 'center',
+
+        '& .MuiIconButton-root': {
+            color: `${theme.palette.primary.main} !important`, 
+            background: `${theme.palette.grey.A100} !important`,
+            margin: '0px 5px'
+        }
+      }
     },
 
-    '& .layerItemContainer.error': {
-      background: '#ffdcdb 0% 0% no-repeat padding-box',
-      '& .MuiListItemText-secondary': {
-        fontWeight: 'bold',
-        color: 'error.main',
-      },
-    },
-    '& .layerItemContainer.loading': {
-      background: '#e5efff 0% 0% no-repeat padding-box',
-      '& .MuiListItemText-secondary': {
-        fontWeight: 'bold',
-        color: 'info.main',
-      },
-    },
-
-    '& .MuiListItemText-primary': {
-      font: theme.footerPanel.layerTitleFont,
-    },
+  
 
     '& .MuiListItem-root': {
       height: '100%',
