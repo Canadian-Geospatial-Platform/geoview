@@ -1,5 +1,4 @@
 import { Dispatch, SetStateAction, useEffect } from 'react';
-
 import { useTheme } from '@mui/material/styles';
 
 import { SingleLayer } from './single-layer';

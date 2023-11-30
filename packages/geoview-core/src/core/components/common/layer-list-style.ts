@@ -47,7 +47,7 @@ export const getSxClasses = (theme: Theme) => ({
     flex: '1 1 auto',
     display: 'flex',
     flexDirection: 'column',
-    '& p': {
+    '& .layerTitle': {
       fontSize: '1rem',
       font: theme.footerPanel.layerTitleFont,
       lineHeight: 1.5,

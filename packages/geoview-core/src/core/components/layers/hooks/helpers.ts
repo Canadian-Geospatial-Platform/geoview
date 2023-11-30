@@ -1,18 +1,15 @@
 import _ from 'lodash';
-import {
-  isVectorLegend,
-  isWmsLegend,
-  isImageStaticLegend,
-  TypeVectorLayerStyles,
-} from '@/geo/layer/geoview-layers/abstract-geoview-layers';
+import { TypeVectorLayerStyles } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { api } from '@/app';
-import { TypeLegendLayer, TypeLegendLayerIcons, TypeLegendLayerItem, TypeLegendLayerListItem } from '../types';
-import { getGeoViewStore } from '@/core/stores/stores-managers';
+import { TypeLegendLayer, TypeLegendLayerListItem } from '../types';
+import { useGeoViewStore } from '@/core/stores/stores-managers';
 import { generateId } from '@/core/utils/utilities';
-import { TypeStyleGeometry, TypeVisibilityFlags, isClassBreakStyleConfig, isSimpleStyleConfig, isUniqueValueStyleConfig } from '@/geo';
+import { TypeVisibilityFlags } from '@/geo';
 
-export function useLegendHelpers(mapId: string) {
-  const store = getGeoViewStore(mapId);
+export function useLegendHelpers() {
+  const store = useGeoViewStore();
+
+  const { mapId } = store.getState();
 
   function populateLegendStoreWithFakeData() {
     const legendInfo = api.maps[mapId].legend.legendLayerSet.resultSets;
@@ -66,9 +63,9 @@ export function useLegendHelpers(mapId: string) {
     const legendLayers: TypeLegendLayer[] = [
       {
         bounds: undefined,
-        layerId: 'testLayerId',
+        layerId: 'test_testLayerId',
         layerPath: 'testLayerPath',
-        layerName: 'TestLayer1',
+        layerName: 'TEST--TestLayer1',
         type: 'GeoJSON',
         layerStatus: 'loaded',
         layerPhase: 'processed',
@@ -79,9 +76,9 @@ export function useLegendHelpers(mapId: string) {
       },
       {
         bounds: undefined,
-        layerId: 'geojsonLYR5',
+        layerId: 'test_geojsonLYR5',
         layerPath: 'geojsonLYR5',
-        layerName: 'Layer with groups',
+        layerName: 'TEST--Layer with groups',
         type: 'GeoJSON',
         layerStatus: 'loaded',
         layerPhase: 'processed',
@@ -92,9 +89,9 @@ export function useLegendHelpers(mapId: string) {
       },
       {
         bounds: undefined,
-        layerId: 'chrisLayr1',
+        layerId: 'test_chrisLayr1',
         layerPath: 'Chris Sample Parent1',
-        layerName: 'chrisparentlayer1',
+        layerName: 'TEST--chrisparentlayer1',
         type: 'GeoJSON',
         layerStatus: 'loaded',
         layerPhase: 'processed',
@@ -103,9 +100,9 @@ export function useLegendHelpers(mapId: string) {
         children: [
           {
             bounds: undefined,
-            layerId: 'chrisChildLayer1',
+            layerId: 'test_chrisChildLayer1',
             layerPath: 'ChrisSampleC3',
-            layerName: 'chrisparentchild1',
+            layerName: 'TEST--chrisparentchild1',
             type: 'GeoJSON',
             layerStatus: 'loaded',
             layerPhase: 'processed',
@@ -114,9 +111,9 @@ export function useLegendHelpers(mapId: string) {
             children: [
               {
                 bounds: undefined,
-                layerId: 'chrisGrandChild1',
+                layerId: 'test_chrisGrandChild1',
                 layerPath: 'Gran ChildChidl2',
-                layerName: 'chris parent child2',
+                layerName: 'TEST--chris parent child2',
                 type: 'GeoJSON',
                 layerStatus: 'error',
                 layerPhase: 'processed',
@@ -127,9 +124,9 @@ export function useLegendHelpers(mapId: string) {
               },
               {
                 bounds: undefined,
-                layerId: 'chrisGrandChild5',
+                layerId: 'test_chrisGrandChild5',
                 layerPath: 'Gran ChildChidl555',
-                layerName: 'chris parent child25555',
+                layerName: 'TEST--chris parent child25555',
                 type: 'GeoJSON',
                 layerStatus: 'loading',
                 layerPhase: 'processed',
@@ -140,9 +137,9 @@ export function useLegendHelpers(mapId: string) {
               },
               {
                 bounds: undefined,
-                layerId: 'chrisGrandChild2',
+                layerId: 'test_chrisGrandChild2',
                 layerPath: 'Grand Child Chidl3',
-                layerName: 'chris parent child3',
+                layerName: 'TEST--chris parent child3',
                 type: 'GeoJSON',
                 layerStatus: 'newInstance',
                 layerPhase: 'processed',
@@ -156,9 +153,9 @@ export function useLegendHelpers(mapId: string) {
           },
           {
             bounds: undefined,
-            layerId: 'chrisChild2',
+            layerId: 'test_chrisChild2',
             layerPath: 'Chris Sample Chidl2',
-            layerName: 'chirslyerss',
+            layerName: 'TEST--chirslyerss',
             type: 'GeoJSON',
             layerStatus: 'loaded',
             layerPhase: 'processed',
@@ -169,9 +166,9 @@ export function useLegendHelpers(mapId: string) {
           },
           {
             bounds: undefined,
-            layerId: 'chrisChild3',
+            layerId: 'test_chrisChild3',
             layerPath: 'Chris Sample Chidl3',
-            layerName: 'chris-child32edd',
+            layerName: 'TEST--chris-child32edd',
             type: 'GeoJSON',
             layerStatus: 'loaded',
             layerPhase: 'processed',
@@ -195,7 +192,7 @@ export function useLegendHelpers(mapId: string) {
           if (r) {
             items.push({
               geometryType: 'Point',
-              name: `Item name ${ind}`,
+              name: `TEST--Item name ${ind}`,
               isVisible: 'yes' as TypeVisibilityFlags,
               icon: r.toDataURL(),
               default: false,
@@ -207,8 +204,8 @@ export function useLegendHelpers(mapId: string) {
       const item: TypeLegendLayer = {
         bounds: undefined,
         layerId: setData.data?.layerPath ?? `layer${i}`,
-        layerPath: setData.data?.layerPath ?? generateId(),
-        layerName: setData.data?.layerName?.en ?? 'Uknown Laer name',
+        layerPath: `test_${setData.data?.layerPath ?? generateId()}`,
+        layerName: `TEST---${setData.data?.layerName?.en ?? 'Uknown Laer name'}`,
         type: setData.data?.type ?? 'imageStatic',
         layerStatus: setData.layerStatus,
         layerPhase: setData.layerPhase,
@@ -227,79 +224,14 @@ export function useLegendHelpers(mapId: string) {
 
     // adding to store
     store.setState({
-      layerState: { ...store.getState().layerState, legendLayers, selectedLayerPath: legendLayers[0].layerPath },
+      layerState: {
+        ...store.getState().layerState,
+        legendLayers: [...store.getState().layerState.legendLayers, ...legendLayers],
+      },
     });
-  }
-
-  function getLayerIconImage(path: string): TypeLegendLayerIcons | undefined {
-    const layerLegend = api.maps[mapId].legend.legendLayerSet.resultSets?.[path]?.data;
-    const iconDetails: TypeLegendLayerIcons = [];
-    if (layerLegend) {
-      if (layerLegend.legend === null) iconDetails[0].iconImage = 'no data';
-      if (isWmsLegend(layerLegend) || isImageStaticLegend(layerLegend)) {
-        iconDetails[0].iconType = 'simple';
-        if (layerLegend.legend) {
-          iconDetails[0].iconImage = layerLegend.legend?.toDataURL();
-        }
-      } else if (isVectorLegend(layerLegend)) {
-        Object.entries(layerLegend.legend).forEach(([key, styleRepresentation]) => {
-          const geometryType = key as TypeStyleGeometry;
-          const styleSettings = layerLegend.styleConfig![geometryType]!;
-          const iconDetailsEntry: TypeLegendLayerItem = {};
-          iconDetailsEntry.geometryType = geometryType;
-          if (isSimpleStyleConfig(styleSettings)) {
-            iconDetailsEntry.iconType = 'simple';
-            iconDetailsEntry.iconImage = (styleRepresentation.defaultCanvas as HTMLCanvasElement).toDataURL();
-            iconDetailsEntry.name = styleSettings.label;
-          } else {
-            iconDetailsEntry.iconType = 'list';
-            if (isClassBreakStyleConfig(styleSettings)) {
-              iconDetailsEntry.iconList = styleRepresentation.arrayOfCanvas!.map((canvas, i) => {
-                return {
-                  icon: canvas ? canvas.toDataURL() : null,
-                  name: styleSettings.classBreakStyleInfo[i].label,
-                  isVisible: styleSettings.classBreakStyleInfo[i].visible!,
-                  default: false,
-                } as TypeLegendLayerListItem;
-              });
-              if (styleRepresentation.defaultCanvas)
-                iconDetailsEntry.iconList.push({
-                  icon: styleRepresentation.defaultCanvas.toDataURL(),
-                  name: styleSettings.defaultLabel!,
-                  isVisible: styleSettings.defaultVisible!,
-                  default: true,
-                } as TypeLegendLayerListItem);
-            } else if (isUniqueValueStyleConfig(styleSettings)) {
-              iconDetailsEntry.iconList = styleRepresentation.arrayOfCanvas!.map((canvas, i) => {
-                return {
-                  icon: canvas ? canvas.toDataURL() : null,
-                  name: styleSettings.uniqueValueStyleInfo[i].label,
-                  isVisible: styleSettings.uniqueValueStyleInfo[i].visible!,
-                  default: false,
-                } as TypeLegendLayerListItem;
-              });
-              if (styleRepresentation.defaultCanvas)
-                iconDetailsEntry.iconList.push({
-                  icon: styleRepresentation.defaultCanvas.toDataURL(),
-                  name: styleSettings.defaultLabel!,
-                  isVisible: styleSettings.defaultVisible!,
-                  default: true,
-                } as TypeLegendLayerListItem);
-            }
-            if (iconDetailsEntry.iconList?.length) iconDetailsEntry.iconImage = iconDetailsEntry.iconList[0].icon;
-            if (iconDetailsEntry.iconList && iconDetailsEntry.iconList.length > 1)
-              iconDetailsEntry.iconImgStacked = iconDetailsEntry.iconList[1].icon;
-            iconDetails.push(iconDetailsEntry);
-          }
-        });
-      }
-      return iconDetails;
-    }
-    return undefined;
   }
 
   return {
     populateLegendStoreWithFakeData,
-    getLayerIconImage,
   };
 }

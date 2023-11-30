@@ -55,7 +55,6 @@ export function SingleLayer(props: SingleLayerProps): JSX.Element {
   const mapFiltered = useDataTableStoreMapFilteredRecord();
 
   const layerIsSelected = layer.layerPath === selectedLayerPath && displayState === 'view';
-  const legendClass = layerIsSelected ? { ...sxClasses.layersList.selectedLayerItem } : null;
 
   const [isGroupOpen, setGroupOpen] = useState(layerIsSelected);
 
@@ -135,7 +134,7 @@ export function SingleLayer(props: SingleLayerProps): JSX.Element {
     }
     if (displayState === 'order') {
       return (
-        <IconButton onClick={handleReArrangeLayer}>
+        <IconButton edge="end" size="small" onClick={handleReArrangeLayer}>
           <HandleIcon color="error" />
         </IconButton>
       );
@@ -149,14 +148,18 @@ export function SingleLayer(props: SingleLayerProps): JSX.Element {
     }
     if (layer.layerStatus === 'error') {
       return (
-        <IconButton onClick={handleReloadLayer}>
+        <IconButton edge="end" size="small" onClick={handleReloadLayer}>
           <RestartAltIcon />
         </IconButton>
       );
     }
 
+    if (layer.isVisible === 'always') {
+      return null;
+    }
+
     return (
-      <IconButton color="primary" onClick={() => handleToggleVisibility()}>
+      <IconButton color="primary" edge="end" size="small" onClick={() => handleToggleVisibility()}>
         {(() => {
           if (layer.isVisible === 'no') return <VisibilityOffOutlinedIcon />;
           return <VisibilityOutlinedIcon />;
@@ -171,14 +174,14 @@ export function SingleLayer(props: SingleLayerProps): JSX.Element {
     }
     if (layer.children?.length) {
       return (
-        <IconButton color="primary" onClick={handleExpandGroupClick}>
+        <IconButton color="primary" edge="end" size="small" onClick={handleExpandGroupClick}>
           {isGroupOpen ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
         </IconButton>
       );
     }
     if (displayState === 'view') {
       return (
-        <IconButton onClick={handleLayerClick}>
+        <IconButton edge="end" size="small" onClick={handleLayerClick}>
           <KeyboardArrowRightIcon />
         </IconButton>
       );
@@ -220,17 +223,13 @@ export function SingleLayer(props: SingleLayerProps): JSX.Element {
         </IconButton>
       );
     }
-    return (
-      <IconButton color="success">
-        <IconStack layerPath={layer.layerPath} />
-      </IconButton>
-    );
+    return <IconStack layerPath={layer.layerPath} />;
   }
 
   return (
-    <Box sx={legendClass} className={`layerItemContainer ${layer.layerStatus}`}>
+    <Box className={`layerItemContainer ${layer.layerStatus} ${layerIsSelected ? 'selectedLayer' : ''}`}>
       <ListItem key={layer.layerName} divider>
-        <ListItemButton>
+        <ListItemButton selected={layerIsSelected}>
           {renderLayerIcon()}
           <Tooltip title={layer.layerName} placement="top" enterDelay={1000}>
             <ListItemText
@@ -239,7 +238,7 @@ export function SingleLayer(props: SingleLayerProps): JSX.Element {
               onClick={handleLayerClick}
             />
           </Tooltip>
-          <ListItemIcon style={{ justifyContent: 'right' }}>
+          <ListItemIcon className="rightIcons-container">
             {renderMoreLayerButtons()}
             {renderArrowButtons()}
             {renderEditModeButtons()}

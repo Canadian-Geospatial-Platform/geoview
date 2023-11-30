@@ -45,6 +45,10 @@ export const getSxClasses = (theme: Theme) => ({
       overflow: 'hidden',
     },
 
+    '& .MuiListItemText-root': {
+      marginLeft: '12px',
+    },
+
     '& .MuiCollapse-vertical': {
       marginLeft: '6px',
 

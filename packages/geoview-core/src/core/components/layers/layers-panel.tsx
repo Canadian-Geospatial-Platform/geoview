@@ -33,7 +33,7 @@ export function LayersPanel() {
 
   /*
   // Using helpers
-  const helpers = useLegendHelpers(mapId);
+  const helpers = useLegendHelpers();
   useEffect(() => {
     helpers.populateLegendStoreWithFakeData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -67,7 +67,7 @@ export function LayersPanel() {
       return (
         <Paper sx={{ padding: '20px' }}>
           <h3>Removing layers</h3>
-          <Box sx={sxClasses.rightPanel.buttonDescriptionContainer}>
+          <Box sx={sxClasses.buttonDescriptionContainer}>
             <IconButton>
               <DeleteIcon style={{ fill: '#a9a9a9' }} />
             </IconButton>
@@ -83,7 +83,7 @@ export function LayersPanel() {
       return (
         <Paper sx={{ padding: '20px' }}>
           <h3>Re-ordering layers</h3>
-          <Box sx={sxClasses.rightPanel.buttonDescriptionContainer}>
+          <Box sx={sxClasses.buttonDescriptionContainer}>
             <IconButton>
               <HandleIcon style={{ fill: '#a9a9a9' }} />
             </IconButton>

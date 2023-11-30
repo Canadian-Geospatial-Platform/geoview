@@ -46,7 +46,7 @@ export function LayerList({ layerList, isEnlargeDataTable, selectedLayerIndex, h
                     <IconStack layerPath={layer.layerPath} />
                   </ListItemIcon>
                   <Box sx={sxClasses.listPrimaryText}>
-                    <Typography component="p">{layer.layerName}</Typography>
+                    <Typography className="layerTitle">{layer.layerName}</Typography>
                     {!!layer?.layerFeatures && (
                       <Box sx={{ display: 'flex', alignContent: 'center' }}>
                         <Typography component="p" variant="subtitle1" noWrap>
