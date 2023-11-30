@@ -194,7 +194,7 @@ export function useLegendHelpers() {
 
       const item: TypeLegendLayer = {
         layerId: setData.data?.layerPath ?? `layer${i}`,
-        layerPath: setData.data?.layerPath ?? generateId(),
+        layerPath: `test_${setData.data?.layerPath ?? generateId()}`,
         layerName: `TEST---${setData.data?.layerName?.en ?? 'Uknown Laer name'}`,
         type: setData.data?.type ?? 'imageStatic',
         layerStatus: setData.layerStatus,

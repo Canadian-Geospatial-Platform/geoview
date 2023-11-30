@@ -43,7 +43,7 @@ export function Footerbar(): JSX.Element {
           <Attribution />
         </Grid>
 
-        <Grid item md={11} spacing={2}>
+        <Grid item md={11}>
           <Grid container justifyContent="flex-end">
             <Grid item md={10}>
               <Box id="mouseAndScaleControls" sx={sxClassesFooterBar.mouseScaleControlsContainer}>

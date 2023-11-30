@@ -1,4 +1,4 @@
-import { Dispatch, SetStateAction } from 'react';
+import { Dispatch, SetStateAction, useEffect } from 'react';
 import { useTheme } from '@mui/material/styles';
 import { SingleLayer } from './single-layer';
 import { getSxClasses } from '../layers-style';
@@ -18,12 +18,14 @@ export function LayersList({ setIsLayersListPanelVisible }: LayerListProps): JSX
   const { setSelectedLayerPath } = useLayerStoreActions();
   const selectedLayer = useSelectedLayer(); // get store value
 
-  if (!selectedLayer) {
-    const validFirstLayer = legendLayers.find((layer) => !(layer.layerStatus === 'error' || layer.layerStatus === 'loading'));
-    if (validFirstLayer) {
-      setSelectedLayerPath(validFirstLayer.layerPath);
+  useEffect(() => {
+    if (!selectedLayer) {
+      const validFirstLayer = legendLayers.find((layer) => !(layer.layerStatus === 'error' || layer.layerStatus === 'loading'));
+      if (validFirstLayer) {
+        setSelectedLayerPath(validFirstLayer.layerPath);
+      }
     }
-  }
+  }, []);
 
   const legendItems = legendLayers.map((details) => {
     return (

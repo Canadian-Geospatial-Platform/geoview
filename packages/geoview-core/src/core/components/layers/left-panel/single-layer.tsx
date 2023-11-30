@@ -219,11 +219,7 @@ export function SingleLayer(props: SingleLayerProps): JSX.Element {
         </IconButton>
       );
     }
-    return (
-      <IconButton color="success">
-        <IconStack layerPath={layer.layerPath} />
-      </IconButton>
-    );
+    return <IconStack layerPath={layer.layerPath} />;
   }
 
   return (

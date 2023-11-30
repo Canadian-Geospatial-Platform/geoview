@@ -24,7 +24,7 @@ export const getSxClasses = (theme: Theme) => ({
     '& .layerItemContainer': {
       background: '#FFFFFF 0% 0% no-repeat padding-box',
       borderRadius: '5px',
-      marginBottom: '5px',
+      marginBottom: '1rem',
 
       // for selected layer
       '&.selectedLayer': {
