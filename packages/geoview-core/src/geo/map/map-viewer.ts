@@ -153,7 +153,7 @@ export class MapViewer {
     this.footerTabs = new FooterTabsApi(this.mapId);
     this.legend = new LegendApi(this.mapId);
     this.legend2 = new Legend2Api(this.mapId);
-    this.layers = new LayersApi(this.mapId);
+    this.layers = new LayersApi();
     this.details = new DetailsApi(this.mapId);
     this.dataTable = new DataTableApi(this.mapId);
 
