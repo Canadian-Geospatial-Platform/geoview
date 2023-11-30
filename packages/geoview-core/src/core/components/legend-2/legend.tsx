@@ -11,7 +11,9 @@ export function Legend(): JSX.Element {
   const sxClasses = getSxClasses(theme);
   const { t } = useTranslation<string>();
   const store = useGeoViewStore();
-  const legendLayers = useStore(store, (state) => state.layerState.legendLayers.filter((f) => f.isVisible));
+  const legendLayers = useStore(store, (state) =>
+    state.layerState.legendLayers.filter((f) => f.isVisible && !['error', 'loading'].includes(f.layerStatus ?? ''))
+  );
 
   /* START fake store data here */
 

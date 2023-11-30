@@ -55,7 +55,6 @@ export function SingleLayer(props: SingleLayerProps): JSX.Element {
   const mapFiltered = useDataTableStoreMapFilteredRecord();
 
   const layerIsSelected = layer.layerPath === selectedLayerPath && displayState === 'view';
-  const legendClass = layerIsSelected ? { ...sxClasses.layersList.selectedLayerItem } : null;
 
   const [isGroupOpen, setGroupOpen] = useState(layerIsSelected);
 
@@ -228,7 +227,7 @@ export function SingleLayer(props: SingleLayerProps): JSX.Element {
   }
 
   return (
-    <Box sx={legendClass} className={`layerItemContainer ${layer.layerStatus}`}>
+    <Box className={`layerItemContainer ${layer.layerStatus} ${layerIsSelected ? 'selectedLayer' : ''}`}>
       <ListItem key={layer.layerName} divider>
         <ListItemButton selected={layerIsSelected}>
           {renderLayerIcon()}

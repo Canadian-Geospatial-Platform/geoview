@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '@mui/material/styles';
 import { TypeLegendLayer, TypeLegendLayerListItem } from '../types';
-import { getSxClasses } from '../layers-style';
+import { getSxClasses } from './layer-details-style';
 import {
   Box,
   CheckBoxIcon,
@@ -70,7 +70,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
   function renderOpacityControl() {
     return (
       <div style={{ padding: '16px 17px 16px 23px' }}>
-        <Box sx={sxClasses.rightPanel.opacityMenu}>
+        <Box sx={sxClasses.opacityMenu}>
           <Typography sx={{ fontWeight: 'bold' }}>{t('legend.opacity')}</Typography>
           <SliderBase min={0} max={100} value={(layerDetails.opacity ? layerDetails.opacity : 1) * 100} customOnChange={handleSetOpacity} />
         </Box>
@@ -92,7 +92,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
 
   function renderItems() {
     return (
-      <Grid container direction="column" spacing={0} sx={sxClasses.rightPanel.itemsGrid} justifyContent="left" justifyItems="stretch">
+      <Grid container direction="column" spacing={0} sx={sxClasses.itemsGrid} justifyContent="left" justifyItems="stretch">
         <Grid container direction="row" justifyContent="center" alignItems="stretch" justifyItems="stretch">
           <Grid item xs="auto">
             <IconButton
@@ -113,7 +113,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
             </Grid>
             <Grid item xs="auto">
               {item.icon ? <img alt={item.name} src={item.icon} /> : <BrowserNotSupportedIcon />}
-              <span style={sxClasses.rightPanel.tableIconLabel}>
+              <span style={sxClasses.tableIconLabel}>
                 {item.name} {item.isVisible}
               </span>
             </Grid>
@@ -145,7 +145,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
   // function renderItems
 
   return (
-    <Paper sx={sxClasses.rightPanel.layerDetails}>
+    <Paper sx={sxClasses.layerDetails}>
       <Box sx={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between' }}>
         <Box sx={{ textAlign: 'left' }}>
           <Typography sx={sxClasses.categoryTitle}> {layerDetails.layerName} </Typography>

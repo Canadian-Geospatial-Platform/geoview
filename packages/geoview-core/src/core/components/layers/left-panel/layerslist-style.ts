@@ -25,9 +25,4 @@ export const getSxClasses = (theme: Theme) => ({
       marginBottom: '0px',
     },
   },
-  layersList: {
-    selectedLayerItem: {
-      border: '2px solid #515BA5',
-    },
-  },
 });
