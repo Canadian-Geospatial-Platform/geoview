@@ -582,7 +582,7 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
         disablePortal
       >
         {/* Add more layer options here - zoom to, reorder */}
-        {isRemoveable && <MenuItem onClick={handleRemoveLayer}>{t('legend.remove_layer')}</MenuItem>}
+        {isRemoveable && <MenuItem onClick={handleRemoveLayer}>{t('legend.removeLayer')}</MenuItem>}
         {canSetOpacity && groupItems.length === 0 && (
           <MenuItem onClick={handleOpacityOpen}>
             <ListItemText>{t('legend.toggle_opacity')}</ListItemText>
@@ -606,7 +606,7 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
 
         {canZoomTo && groupItems.length === 0 && (
           <MenuItem onClick={handleZoomTo}>
-            <ListItemText>{t('legend.zoom_to')}</ListItemText>
+            <ListItemText>{t('legend.zoomTo')}</ListItemText>
           </MenuItem>
         )}
       </Menu>
