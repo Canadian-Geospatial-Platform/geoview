@@ -8,14 +8,14 @@ import {
   toJsonObject,
   TypeJsonObject,
 } from 'geoview-core';
-import { ChartType, SchemaValidator } from 'geochart';
+import { ChartType } from 'geochart';
 
 import { PayloadBaseClassChart, EVENT_CHART_REDRAW } from './geochart-event-base';
 import { PayloadChartConfig } from './geochart-event-config';
 import { PluginGeoChartConfig } from './geochart-types';
-import { GeoChart } from './geochart';
 import schema from '../schema.json';
 import defaultConfig from '../default-config-geochart.json';
+import { GeoChartPanel } from './geochart-panel';
 
 /**
  * The Chart Plugin which will be automatically instanciated during GeoView's initialization.
@@ -81,7 +81,7 @@ class GeoChartPlugin extends AbstractPlugin {
       api.maps[mapId].footerTabs.createFooterTab({
         value: this.value,
         label: this.translations[api.maps[mapId].displayLanguage].chartPanel as string,
-        content: () => createElement(GeoChart, { mapId, config: configObj, schemaValidator: new SchemaValidator() }, []),
+        content: () => createElement(GeoChartPanel, { mapId, configObj }, []),
       });
     }
   };
