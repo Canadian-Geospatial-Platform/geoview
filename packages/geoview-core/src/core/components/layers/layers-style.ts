@@ -26,6 +26,10 @@ export const getSxClasses = (theme: Theme) => ({
       borderRadius: '5px',
       marginBottom: '1rem',
 
+      '& .MuiListItemText-root': {
+        marginLeft: '12px',
+      },
+
       // for selected layer
       '&.selectedLayer': {
         border: '2px solid #515BA5',

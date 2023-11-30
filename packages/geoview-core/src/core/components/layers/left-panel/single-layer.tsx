@@ -154,6 +154,10 @@ export function SingleLayer(props: SingleLayerProps): JSX.Element {
       );
     }
 
+    if (layer.isVisible === 'always') {
+      return null;
+    }
+
     return (
       <IconButton color="primary" edge="end" size="small" onClick={() => handleToggleVisibility()}>
         {(() => {
