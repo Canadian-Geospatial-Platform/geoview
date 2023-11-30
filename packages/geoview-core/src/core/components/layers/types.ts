@@ -1,13 +1,6 @@
 import { Extent } from 'ol/extent';
 
-import {
-  AbstractGeoViewLayer,
-  TypeGeoviewLayerType,
-  TypeLayerEntryConfig,
-  TypeStyleConfig,
-  TypeStyleGeometry,
-  TypeVisibilityFlags,
-} from '@/geo';
+import { TypeGeoviewLayerType, TypeStyleConfig, TypeStyleGeometry, TypeVisibilityFlags } from '@/geo';
 import { TypeLayerStatus } from '@/geo/map/map-schema-types';
 
 export type TypeLayersViewDisplayState = 'remove' | 'add' | 'order' | 'view';
