@@ -82,7 +82,9 @@
     "sanitize-html": "^2.7.3",
     "sql.js": "^1.8.0",
     "yet-another-react-lightbox": "^3.11.3",
-    "zustand": "~4.4.1"
+    "zustand": "~4.4.1",
+    "react-dnd": "^16.0.1",
+    "react-dnd-html5-backend": "^16.0.1"
   },
   "devDependencies": {
     "@babel/cli": "^7.17.0",

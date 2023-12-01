@@ -1,44 +1,40 @@
-import { Dispatch, SetStateAction, useEffect } from 'react';
+import { Dispatch, SetStateAction } from 'react';
 import { useTheme } from '@mui/material/styles';
 
 import { SingleLayer } from './single-layer';
-import { getSxClasses } from '../layers-style';
+import { getSxClasses } from './left-panel-styles';
 import { List } from '@/ui';
-import { useLayerStoreActions, useLayersList, useSelectedLayer } from '@/core/stores/store-interface-and-intial-values/layer-state';
+import { DndProvider } from 'react-dnd';
+import { HTML5Backend } from 'react-dnd-html5-backend';
+import { TypeLegendLayer } from '../types';
 
 interface LayerListProps {
+  depth: number,
+  layersList: TypeLegendLayer[],
   setIsLayersListPanelVisible: Dispatch<SetStateAction<boolean>>;
 }
 
-export function LayersList({ setIsLayersListPanelVisible }: LayerListProps): JSX.Element {
+export function LayersList({ layersList, setIsLayersListPanelVisible, depth }: LayerListProps): JSX.Element {
   const theme = useTheme();
   const sxClasses = getSxClasses(theme);
 
-  // get from the store
-  const legendLayers = useLayersList(); // get store value(s)
-  const { setSelectedLayerPath } = useLayerStoreActions();
-  const selectedLayer = useSelectedLayer(); // get store value
+  const listSxClass = depth === 0 ? sxClasses.list : (depth % 2 ? sxClasses.evenDepthList : sxClasses.oddDepthList);
 
-  useEffect(() => {
-    if (!selectedLayer) {
-      const validFirstLayer = legendLayers.find((layer) => !(layer.layerStatus === 'error' || layer.layerStatus === 'loading'));
-      if (validFirstLayer) {
-        setSelectedLayerPath(validFirstLayer.layerPath);
-      }
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
-  const legendItems = legendLayers.map((details) => {
+  const legendItems = layersList.map((details) => {
     return (
       <SingleLayer
         key={`layerKey-${details.layerPath}-${details.layerPath}`}
-        depth={0}
+        depth={depth}
         layer={details}
         setIsLayersListPanelVisible={setIsLayersListPanelVisible}
       />
     );
   });
 
-  return <List sx={sxClasses.list}>{legendItems}</List>;
+  return (
+    <DndProvider backend={HTML5Backend}>
+      <List sx={listSxClass}>{legendItems}</List>
+    </DndProvider>
+  );
 }

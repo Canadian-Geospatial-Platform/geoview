@@ -1,6 +1,6 @@
 import { Dispatch, SetStateAction, useState } from 'react';
-import { useTheme } from '@mui/material/styles';
 import { useTranslation } from 'react-i18next';
+import { useDrag } from 'react-dnd';
 import {
   Box,
   Collapse,
@@ -24,7 +24,6 @@ import {
   HandleIcon,
 } from '@/ui';
 import { TypeLegendLayer } from '../types';
-import { getSxClasses } from './layerslist-style';
 import {
   useLayerStoreActions,
   useLayersDisplayState,
@@ -33,18 +32,16 @@ import {
 import { useDataTableStoreMapFilteredRecord } from '@/core/stores/store-interface-and-intial-values/data-table-state';
 import { IconStack } from '../../icon-stack/icon-stack';
 import { DeleteUndoButton } from './delete-undo-button';
+import { LayersList } from './layers-list';
 
 interface SingleLayerProps {
   layer: TypeLegendLayer;
   depth: number;
-  setIsLayersListPanelVisible: Dispatch<SetStateAction<boolean>> | undefined;
+  setIsLayersListPanelVisible: Dispatch<SetStateAction<boolean>>;
 }
 
 export function SingleLayer(props: SingleLayerProps): JSX.Element {
   const { layer, depth, setIsLayersListPanelVisible } = props;
-
-  const theme = useTheme();
-  const sxClasses = getSxClasses(theme);
 
   const { t } = useTranslation<string>();
 
@@ -57,6 +54,17 @@ export function SingleLayer(props: SingleLayerProps): JSX.Element {
   const layerIsSelected = layer.layerPath === selectedLayerPath && displayState === 'view';
 
   const [isGroupOpen, setGroupOpen] = useState(layerIsSelected);
+
+  const [{ opacity }, dragRef] = useDrag(
+    () => ({
+      type: 'SINGLE_LAYER',
+      item: { layerIndex: layer.order },
+      collect: (monitor) => ({
+        opacity: monitor.isDragging() ? 0.5 : 1,
+      }),
+    }),
+    []
+  );
 
   // get layer description
   const getLayerDescription = () => {
@@ -112,21 +120,6 @@ export function SingleLayer(props: SingleLayerProps): JSX.Element {
     // eslint-disable-next-line no-console
     console.log('re-arrange layer');
   };
-
-  // renders the layers children, if any
-  function renderChildren() {
-    if (!layer.children?.length) {
-      return null;
-    }
-
-    return (
-      <List sx={depth % 2 ? sxClasses.evenDepthList : sxClasses.oddDepthList}>
-        {layer.children.map((item) => (
-          <SingleLayer depth={1 + depth} layer={item} key={item.layerPath} setIsLayersListPanelVisible={setIsLayersListPanelVisible} />
-        ))}
-      </List>
-    );
-  }
 
   function renderEditModeButtons() {
     if (displayState === 'remove' || layer.layerStatus === 'error') {
@@ -190,13 +183,13 @@ export function SingleLayer(props: SingleLayerProps): JSX.Element {
   }
 
   function renderCollapsible() {
-    if (!(layer.children?.length || layer.items?.length)) {
+    if (!(layer.children?.length || layer.items?.length || layer.children.length === 0)) {
       return null;
     }
 
     return (
       <Collapse in={isGroupOpen} timeout="auto">
-        {renderChildren()}
+        <LayersList depth={1 + depth} layersList={layer.children} setIsLayersListPanelVisible={setIsLayersListPanelVisible} />
       </Collapse>
     );
   }
@@ -227,7 +220,7 @@ export function SingleLayer(props: SingleLayerProps): JSX.Element {
   }
 
   return (
-    <Box className={`layerItemContainer ${layer.layerStatus} ${layerIsSelected ? 'selectedLayer' : ''}`}>
+    <Box className={`layerItemContainer ${layer.layerStatus} ${layerIsSelected ? 'selectedLayer' : ''}`} ref={dragRef} style={{ opacity }}>
       <ListItem key={layer.layerName} divider>
         <ListItemButton selected={layerIsSelected}>
           {renderLayerIcon()}

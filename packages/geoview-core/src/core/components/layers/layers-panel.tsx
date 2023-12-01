@@ -7,9 +7,10 @@ import { Box, DeleteIcon, HandleIcon, IconButton, Paper } from '@/ui';
 import { getSxClasses } from './layers-style';
 import { useLayersDisplayState, useSelectedLayer } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { LayersActions } from './left-panel/layers-actions';
-import { LayersList } from './left-panel/layers-list';
 import { LayerDetails } from './right-panel/layer-details';
 import { AddNewLayer } from './left-panel/add-new-layer';
+import { LeftPanel } from './left-panel/left-panel';
+import { useLegendHelpers } from './hooks/helpers';
 
 const Item = styled('div')(({ theme }) => ({
   backgroundColor: theme.palette.mode === 'dark' ? '#262B32' : '#fff',
@@ -31,14 +32,13 @@ export function LayersPanel() {
   const selectedLayer = useSelectedLayer(); // get store value
   const displayState = useLayersDisplayState();
 
-  /*
+  
   // Using helpers
   const helpers = useLegendHelpers();
   useEffect(() => {
     helpers.populateLegendStoreWithFakeData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-  */
 
   useEffect(() => {
     if (layerDetailsRef.current) {
@@ -50,7 +50,7 @@ export function LayersPanel() {
     return (
       <div>
         <LayersActions />
-        {displayState === 'add' ? <AddNewLayer /> : <LayersList setIsLayersListPanelVisible={setIsLayersListPanelVisible} />}
+        {displayState === 'add' ? <AddNewLayer /> : <LeftPanel setIsLayersListPanelVisible={setIsLayersListPanelVisible} />}
       </div>
     );
   };
