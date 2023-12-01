@@ -38,6 +38,7 @@ import { getLocalizedValue } from '@/core/utils/utilities';
 
 import { api } from '@/app';
 import { Layer } from '../../layer';
+import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 
 export interface TypeSourceGeoPackageInitialConfig extends TypeVectorSourceInitialConfig {
   format: 'GeoPackage';
@@ -190,11 +191,12 @@ export class GeoPackage extends AbstractGeoViewVector {
             fr: foundCollection.description as string,
           };
 
+        const { currentProjection } = MapEventProcessor.getMapState(this.mapId);
         if (layerEntryConfig.initialSettings?.extent)
           layerEntryConfig.initialSettings.extent = transformExtent(
             layerEntryConfig.initialSettings.extent,
             'EPSG:4326',
-            `EPSG:${api.maps[this.mapId].currentProjection}`
+            `EPSG:${currentProjection}`
           );
 
         if (!layerEntryConfig.initialSettings?.bounds && foundCollection.extent?.spatial?.bbox && foundCollection.extent?.spatial?.crs) {
@@ -202,7 +204,7 @@ export class GeoPackage extends AbstractGeoViewVector {
           layerEntryConfig.initialSettings!.bounds = transformExtent(
             foundCollection.extent.spatial.bbox[0] as number[],
             get(foundCollection.extent.spatial.crs as string)!,
-            `EPSG:${api.maps[this.mapId].currentProjection}`
+            `EPSG:${currentProjection}`
           );
         }
         return;
@@ -379,7 +381,7 @@ export class GeoPackage extends AbstractGeoViewVector {
                 const formattedFeature = format.readFeatures(feature, {
                   ...readOptions,
                   dataProjection: tableDataProjection,
-                  featureProjection: `EPSG:${api.maps[this.mapId].currentProjection}`,
+                  featureProjection: `EPSG:${MapEventProcessor.getMapState(this.mapId).currentProjection}`,
                 });
                 formattedFeature[0].setProperties(properties);
                 features.push(formattedFeature[0]);

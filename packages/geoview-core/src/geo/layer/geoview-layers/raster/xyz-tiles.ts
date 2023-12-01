@@ -24,6 +24,7 @@ import { Cast, toJsonObject } from '@/core/types/global-types';
 import { api } from '@/app';
 import { Layer } from '../../layer';
 import { LayerSetPayload } from '@/api/events/payloads';
+import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 
 // ? Do we keep this TODO ? Dynamic parameters can be placed on the dataAccessPath and initial settings can be used on xyz-tiles.
 // TODO: Implement method to validate XYZ tile service
@@ -244,7 +245,7 @@ export class XYZTiles extends AbstractGeoViewRaster {
           layerEntryConfig.initialSettings.extent = transformExtent(
             layerEntryConfig.initialSettings.extent,
             'EPSG:4326',
-            `EPSG:${api.maps[this.mapId].currentProjection}`
+            `EPSG:${MapEventProcessor.getMapState(this.mapId).currentProjection}`
           );
 
         resolve();
@@ -265,7 +266,7 @@ export class XYZTiles extends AbstractGeoViewRaster {
     const layerBounds = (layerConfig.olLayer as TileLayer<XYZ>).getSource()?.getTileGrid()?.getExtent();
     const projection =
       (layerConfig.olLayer as TileLayer<XYZ>).getSource()?.getProjection()?.getCode().replace('EPSG:', '') ||
-      api.maps[this.mapId].currentProjection;
+      MapEventProcessor.getMapState(this.mapId).currentProjection;
 
     if (layerBounds) {
       const transformedBounds = transformExtent(layerBounds, `EPSG:${projection}`, `EPSG:4326`);

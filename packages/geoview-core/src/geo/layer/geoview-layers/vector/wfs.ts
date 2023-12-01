@@ -25,6 +25,7 @@ import {
 import { getLocalizedValue, getXMLHttpRequest, xmlToJson, findPropertyNameByRegex } from '@/core/utils/utilities';
 import { api } from '@/app';
 import { Layer } from '../../layer';
+import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 
 export interface TypeSourceWFSVectorInitialConfig extends TypeVectorSourceInitialConfig {
   format: 'WFS';
@@ -207,11 +208,12 @@ export class WFS extends AbstractGeoViewVector {
           return;
         }
 
+        const { currentProjection } = MapEventProcessor.getMapState(this.mapId);
         if (layerEntryConfig.initialSettings?.extent)
           layerEntryConfig.initialSettings.extent = transformExtent(
             layerEntryConfig.initialSettings.extent,
             'EPSG:4326',
-            `EPSG:${api.maps[this.mapId].currentProjection}`
+            `EPSG:${currentProjection}`
           );
 
         if (!layerEntryConfig.initialSettings?.bounds && foundMetadata['ows:WGS84BoundingBox']) {
@@ -219,7 +221,7 @@ export class WFS extends AbstractGeoViewVector {
           const upperCorner = (foundMetadata['ows:WGS84BoundingBox']['ows:UpperCorner']['#text'] as string).split(' ');
           const bounds = [Number(lowerCorner[0]), Number(lowerCorner[1]), Number(upperCorner[0]), Number(upperCorner[1])];
           // layerEntryConfig.initialSettings cannot be undefined because config-validation set it to {} if it is undefined.
-          layerEntryConfig.initialSettings!.bounds = transformExtent(bounds, 'EPSG:4326', `EPSG:${api.maps[this.mapId].currentProjection}`);
+          layerEntryConfig.initialSettings!.bounds = transformExtent(bounds, 'EPSG:4326', `EPSG:${currentProjection}`);
         }
       }
     });
@@ -379,7 +381,7 @@ export class WFS extends AbstractGeoViewVector {
       sourceUrl = `${sourceUrl}&typeName=${layerEntryConfig.layerId}`;
       // if an extent is provided, use it in the url
       if (sourceOptions.strategy === bbox && Number.isFinite(extent[0])) {
-        sourceUrl = `${sourceUrl}&bbox=${extent},EPSG:${api.maps[this.mapId].currentProjection}`;
+        sourceUrl = `${sourceUrl}&bbox=${extent},EPSG:${MapEventProcessor.getMapState(this.mapId).currentProjection}`;
       }
       return sourceUrl;
     };

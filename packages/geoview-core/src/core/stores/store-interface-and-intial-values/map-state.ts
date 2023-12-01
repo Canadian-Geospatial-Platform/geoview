@@ -1,25 +1,25 @@
 import debounce from 'lodash/debounce';
 
 import { Map as OLMap, MapEvent, MapBrowserEvent, View } from 'ol';
-import { Coordinate } from 'ol/coordinate';
+import { Coordinate } from 'ol/coordinate'; // only for typing
 import { ObjectEvent } from 'ol/Object';
-import { fromLonLat, toLonLat, transformExtent } from 'ol/proj';
+import { fromLonLat, toLonLat } from 'ol/proj';
 import Overlay from 'ol/Overlay';
-import { KeyboardPan } from 'ol/interaction';
-import { Extent } from 'ol/extent';
-import { FitOptions } from 'ol/View';
+import { KeyboardPan } from 'ol/interaction'; // only for Typing
+import { Extent } from 'ol/extent'; // only for Typing
+import { FitOptions } from 'ol/View'; // only for typing
 
 import { useStore } from 'zustand';
 import { useGeoViewStore } from '@/core/stores/stores-managers';
 import { TypeSetStore, TypeGetStore } from '@/core/stores/geoview-store';
 
-import { TypeValidMapProjectionCodes } from '@/core/types/global-types';
+import { TypeMapFeaturesConfig, TypeValidMapProjectionCodes } from '@/core/types/global-types';
 import { TypeFeatureInfoEntry, TypeGeometry, TypeMapMouseInfo } from '@/api/events/payloads';
 import { TypeInteraction } from '@/geo/map/map-schema-types';
-import { OL_ZOOM_DURATION, OL_ZOOM_PADDING } from '@/core/utils/constant';
 import { TypeClickMarker, api } from '@/app';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 
+// #region INTERFACES
 interface TypeScaleInfo {
   lineWidth: string;
   labelGraphic: string;
@@ -55,6 +55,8 @@ export interface IMapState {
   size: [number, number];
   zoom: number;
 
+  setDefaultConfigValues: (config: TypeMapFeaturesConfig) => void;
+
   events: {
     onMapMoveEnd: (event: MapEvent) => void;
     onMapPointerMove: (event: MapEvent) => void;
@@ -72,6 +74,7 @@ export interface IMapState {
     highlightBBox: (extent: Extent) => void;
     removeHighlightedFeature: (feature: TypeFeatureInfoEntry | 'all') => void;
     removeSelectedFeature: (feature: TypeFeatureInfoEntry | 'all') => void;
+    setAttribution: (attribution: string[]) => void;
     setClickCoordinates: () => void;
     setFixNorth: (ifFix: boolean) => void;
     setMapElement: (mapElem: OLMap) => void;
@@ -81,7 +84,7 @@ export interface IMapState {
     setOverlayNorthMarker: (overlay: Overlay) => void;
     setOverlayNorthMarkerRef: (htmlRef: HTMLElement) => void;
     setRotation: (degree: number) => void;
-    setZoom: (zoom: number) => void;
+    setZoom: (zoom: number, duration?: number) => void;
     showClickMarker: (marker: TypeClickMarker) => void;
     zoomToExtent: (extent: Extent, options?: FitOptions) => void;
     zoomToInitialExtent: () => void;
@@ -89,6 +92,7 @@ export interface IMapState {
     zoomToMyLocation: (position: GeolocationPosition) => void;
   };
 }
+// #endregion INTERFACES
 
 function setScale(mapId: string): TypeScaleInfo {
   const lineWidth = (document.getElementById(`${mapId}-scaleControlLine`)?.querySelector('.ol-scale-line-inner') as HTMLElement)?.style
@@ -107,6 +111,7 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
     currentProjection: 3857 as TypeValidMapProjectionCodes,
     fixNorth: false,
     highlightedFeatures: [],
+    interaction: 'static',
     mapLoaded: false,
     northArrow: false,
     northArrowElement: { degreeRotation: '180.0', isNorthVisible: true } as TypeNorthArrow,
@@ -118,8 +123,25 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
     selectedFeatures: [],
     size: [0, 0] as [number, number],
     zoom: 0,
-    interaction: 'static' as TypeInteraction,
 
+    // initialize default stores section from config information when store receive configuration file
+    setDefaultConfigValues: (geoviewConfig: TypeMapFeaturesConfig) => {
+      set({
+        mapState: {
+          ...get().mapState,
+          centerCoordinates: geoviewConfig.map.viewSettings.center as Coordinate,
+          currentProjection: geoviewConfig.map.viewSettings.projection as TypeValidMapProjectionCodes,
+          interaction: geoviewConfig.map.interaction || 'dynamic',
+          northArrow: geoviewConfig.components!.indexOf('north-arrow') > -1 || false,
+          overviewMap: geoviewConfig.components!.indexOf('overview-map') > -1 || false,
+          overviewMapHideZoom: geoviewConfig.overviewMap !== undefined ? geoviewConfig.overviewMap.hideOnZoom : 0,
+          rotation: geoviewConfig.map.viewSettings.rotation || 0,
+          zoom: geoviewConfig.map.viewSettings.zoom,
+        },
+      });
+    },
+
+    // #region EVENTS
     events: {
       onMapMoveEnd: debounce((event: MapEvent) => {
         const coords = event.map.getView().getCenter()!;
@@ -216,7 +238,9 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
         });
       }, 100),
     },
+    // #endregion EVENTS
 
+    // #region ACTIONS
     actions: {
       addHighlightedFeature: (feature: TypeFeatureInfoEntry) => {
         set({
@@ -238,6 +262,7 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
         return get().mapState.mapElement!.getPixelFromCoordinate(coord) as unknown as [number, number];
       },
       getSize: (): [number, number] => {
+        // TODO: use store see if we can have onResize event to keep tract and do like rotate
         const size = get().mapState.mapElement?.getSize() as unknown as [number, number];
         set({
           mapState: {
@@ -283,6 +308,14 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
           },
         });
       },
+      setAttribution: (attribution: string[]) => {
+        set({
+          mapState: {
+            ...get().mapState,
+            attribution,
+          },
+        });
+      },
       setClickCoordinates: () => {
         set({
           mapState: {
@@ -311,6 +344,7 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
         });
       },
       setMapKeyboardPanInteractions: (panDelta: number) => {
+        // TODO: use store (map event processor... no set state)
         const { mapElement } = get().mapState;
 
         // replace the KeyboardPan interraction by a new one
@@ -347,29 +381,20 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
         if (overlay !== undefined) overlay.setElement(htmlRef);
       },
       setRotation: (degree: number) => {
-        set({
-          mapState: {
-            ...get().mapState,
-            rotation: degree,
-          },
-        });
-
         // set ol map rotation
+        // State is set by the map state store event does it
         get().mapState.mapElement!.getView().animate({ rotation: degree });
       },
-      setZoom: (zoom: number) => {
-        set({
-          mapState: {
-            ...get().mapState,
-            zoom,
-          },
-        });
-
-        get().mapState.mapElement!.getView().animate({ zoom, duration: OL_ZOOM_DURATION });
+      setZoom: (zoom: number, duration?: number) => {
+        // set ol map zoom
+        // State is set by the map state store event does it
+        get().mapState.mapElement!.getView().animate({ zoom, duration });
       },
       showClickMarker: (marker: TypeClickMarker) => {
+        // TODO: use store use api.projections
         const projectedCoords = fromLonLat(marker.lnglat, `EPSG:${get().mapState.currentProjection}`);
 
+        //! (need to use state because it changes store and do action at the same time)
         get().mapState.mapElement!.getOverlayById(`${get().mapId}-clickmarker`).setPosition(projectedCoords);
 
         set({
@@ -377,62 +402,18 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
         });
       },
       zoomToExtent: (extent: Extent, options?: FitOptions) => {
-        // TODO: keep reference to geoview map instance in the store or keep accessing with api - discussion
-        api.maps[get().mapId].zoomToExtent(extent, options);
+        MapEventProcessor.zoomToExtent(get().mapId, extent, options);
       },
       zoomToInitialExtent: () => {
-        const { center, zoom } = get().mapConfig!.map.viewSettings;
-        const projectedCoords = fromLonLat(center, `EPSG:${get().mapState.currentProjection}`);
-        const extent: Extent = [...projectedCoords, ...projectedCoords];
-        const options: FitOptions = { padding: OL_ZOOM_PADDING, maxZoom: zoom, duration: OL_ZOOM_DURATION };
-
-        // TODO: keep reference to geoview map instance in the store or keep accessing with api - discussion
-        api.maps[get().mapId].zoomToExtent(extent, options);
+        MapEventProcessor.zoomToInitialExtent(get().mapId);
       },
-      zoomToGeoLocatorLocation: (coords: [number, number], bbox?: [number, number, number, number]): void => {
-        const indicatorBox = document.getElementsByClassName('ol-overviewmap-box') as HTMLCollectionOf<Element>;
-        for (let i = 0; i < indicatorBox.length; i++) {
-          (indicatorBox[i] as HTMLElement).style.display = 'none';
-        }
-        const projectionConfig = api.projection.projections[get().mapState.currentProjection];
-        if (bbox) {
-          //! There were issues with fromLonLat in rare cases in LCC projections, transformExtent seems to solve them.
-          //! fromLonLat and transformExtent give differing results in many cases, fromLonLat had issues with the first
-          //! three results from a geolocator search for "vancouver river"
-          const convertedExtent = transformExtent(bbox, 'EPSG:4326', projectionConfig);
-          api.maps[get().mapId].zoomToExtent(convertedExtent, {
-            padding: [50, 50, 50, 50],
-            maxZoom: 16,
-            duration: OL_ZOOM_DURATION,
-          });
-          api.maps[get().mapId].layer.featureHighlight.highlightGeolocatorBBox(convertedExtent);
-          setTimeout(() => {
-            MapEventProcessor.clickMarkerIconShow(get().mapId, { lnglat: coords });
-            for (let i = 0; i < indicatorBox.length; i++) {
-              (indicatorBox[i] as HTMLElement).style.display = '';
-            }
-          }, OL_ZOOM_DURATION + 150);
-        } else {
-          api.maps[get().mapId].getView().animate({ center: fromLonLat(coords, projectionConfig), duration: OL_ZOOM_DURATION, zoom: 16 });
-          setTimeout(() => {
-            MapEventProcessor.clickMarkerIconShow(get().mapId, { lnglat: coords });
-            for (let i = 0; i < indicatorBox.length; i++) {
-              (indicatorBox[i] as HTMLElement).style.display = '';
-            }
-          }, OL_ZOOM_DURATION + 150);
-        }
+      zoomToGeoLocatorLocation: (coords: Coordinate, bbox?: Extent): void => {
+        MapEventProcessor.zoomToGeoLocatorLocation(get().mapId, coords, bbox);
       },
       zoomToMyLocation: (position: GeolocationPosition) => {
-        const projectedCoords = fromLonLat(
-          [position.coords.longitude, position.coords.latitude],
-          `EPSG:${get().mapState.currentProjection}`
-        );
-        const extent: Extent = [...projectedCoords, ...projectedCoords];
-        const options: FitOptions = { padding: OL_ZOOM_PADDING, maxZoom: 13, duration: OL_ZOOM_DURATION };
-
-        // TODO: keep reference to geoview map instance in the store or keep accessing with api - discussion
-        api.maps[get().mapId].zoomToExtent(extent, options);
+        MapEventProcessor.zoomToMyLocation(get().mapId, position);
       },
+      // #endregion ACTIONS
     },
   } as IMapState;
 

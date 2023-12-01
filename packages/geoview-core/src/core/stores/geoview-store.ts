@@ -46,6 +46,10 @@ export const geoViewStoreDefinition = (set: TypeSetStore, get: TypeGetStore) =>
     mapConfig: undefined,
     setMapConfig: (config: TypeMapFeaturesConfig) => {
       set({ mapConfig: config, mapId: config.mapId, displayLanguage: config.displayLanguage });
+
+      // initialize default stores section from config information
+      get().appState.setDefaultConfigValues(config);
+      get().mapState.setDefaultConfigValues(config);
     },
 
     appState: initializeAppState(set, get),
@@ -68,3 +72,4 @@ export type GeoViewStoreType = typeof fakeStore;
 // GeoView state selectors
 // **********************************************************
 export const useGeoviewMapId = () => useStore(useGeoViewStore(), (state) => state.mapId);
+export const useGeoviewDisplayLanguage = () => useStore(useGeoViewStore(), (state) => state.displayLanguage);

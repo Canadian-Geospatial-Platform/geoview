@@ -34,15 +34,9 @@ import { Snap } from '@/geo/interaction/snap';
 import { Translate } from '@/geo/interaction/translate';
 
 import { ModalApi } from '@/ui';
-import {
-  mapComponentPayload,
-  mapConfigPayload,
-  GeoViewLayerPayload,
-  payloadIsGeoViewLayerAdded,
-  TypeMapMouseInfo,
-} from '@/api/events/payloads';
+import { mapComponentPayload, mapConfigPayload, GeoViewLayerPayload, payloadIsGeoViewLayerAdded } from '@/api/events/payloads';
 import { generateId, getValidConfigFromString } from '@/core/utils/utilities';
-import { TypeListOfGeoviewLayerConfig, TypeDisplayLanguage, TypeViewSettings } from '@/geo/map/map-schema-types';
+import { TypeListOfGeoviewLayerConfig, TypeDisplayLanguage, TypeViewSettings, TypeMapState } from '@/geo/map/map-schema-types';
 import { TypeMapFeaturesConfig, TypeHTMLElement } from '@/core/types/global-types';
 import { layerConfigIsGeoCore } from '@/geo/layer/other/geocore';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
@@ -71,6 +65,12 @@ export class MapViewer {
 
   // the openlayer map
   map!: OLMap;
+
+  // the display language
+  displayLanguage: TypeDisplayLanguage;
+
+  // the map state
+  mapState: TypeMapState;
 
   // used to access button panel API to create buttons and button panels on the app-bar
   appBarButtons!: AppbarButtons;
@@ -101,24 +101,6 @@ export class MapViewer {
   // used to access layers functions
   layer!: Layer;
 
-  // get used language
-  displayLanguage: TypeDisplayLanguage;
-
-  // get used projection
-  currentProjection: number;
-
-  // store current zoom level
-  currentZoom: number;
-
-  // store current map center coordinate
-  mapCenterCoordinates: Coordinate;
-
-  // store last single click position
-  singleClickedPosition: TypeMapMouseInfo;
-
-  // store live pointer position
-  pointerPosition: TypeMapMouseInfo;
-
   // i18n instance
   i18nInstance!: i18n;
 
@@ -140,13 +122,13 @@ export class MapViewer {
   constructor(mapFeaturesConfig: TypeMapFeaturesConfig, i18instance: i18n) {
     this.mapId = mapFeaturesConfig.mapId;
     this.mapFeaturesConfig = mapFeaturesConfig;
-    this.displayLanguage = mapFeaturesConfig.displayLanguage!;
-    this.currentProjection = mapFeaturesConfig.map.viewSettings.projection;
+    this.displayLanguage = 'en';
+
+    // map state initialize with store data coming from configuration file/object.
+    // updated values will be added by store subscription in map-event-processor
+    this.mapState = MapEventProcessor.getMapState(this.mapId);
+
     this.i18nInstance = i18instance;
-    this.currentZoom = mapFeaturesConfig.map.viewSettings.zoom;
-    this.mapCenterCoordinates = [0, 0]; // [mapFeaturesConfig.map.viewSettings.center[0], mapFeaturesConfig.map.viewSettings.center[1]];
-    this.singleClickedPosition = { pixel: [], lnglat: [], projected: [], dragging: false };
-    this.pointerPosition = { pixel: [], lnglat: [], projected: [], dragging: false };
 
     this.appBarButtons = new AppbarButtons(this.mapId);
     this.navBarButtons = new NavbarButtons(this.mapId);
@@ -363,6 +345,9 @@ export class MapViewer {
    * @param {FitOptions} options The options to configure the zoomToExtent (default: { padding: [100, 100, 100, 100], maxZoom: 11 }).
    */
   zoomToExtent(extent: Extent, options: FitOptions = { padding: [100, 100, 100, 100], maxZoom: 11, duration: 1000 }) {
+    // TODO: use store do same thing as rotation.... do this for other function in mapviewer
+    // keep function here but it is using map processor
+    //! if we do this we need to bring bac other function that use map action
     this.map.getView().fit(extent, options);
   }
 
@@ -454,11 +439,11 @@ export class MapViewer {
     let mapBounds: Extent | undefined;
     if (bounds)
       mapBounds = projectionCode
-        ? olTransformExtent(bounds, `EPSG:${projectionCode}`, api.projection.projections[this.currentProjection], 20)
+        ? olTransformExtent(bounds, `EPSG:${projectionCode}`, api.projection.projections[this.mapState.currentProjection], 20)
         : olTransformExtent(
             bounds,
-            api.projection.projections[this.currentProjection],
-            api.projection.projections[this.currentProjection],
+            api.projection.projections[this.mapState.currentProjection],
+            api.projection.projections[this.mapState.currentProjection],
             25
           );
     else {

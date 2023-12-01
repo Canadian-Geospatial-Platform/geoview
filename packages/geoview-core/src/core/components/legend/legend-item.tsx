@@ -55,6 +55,7 @@ import {
 import { AbstractGeoViewVector } from '@/geo/layer/geoview-layers/vector/abstract-geoview-vector';
 import { disableScrolling } from '../../utils/utilities';
 import { WMSStyleItem } from './WMS-style-item';
+import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 
 const sxClasses = {
   expandableGroup: {
@@ -200,7 +201,7 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
   const [menuAnchorElement, setMenuAnchorElement] = useState<null | HTMLElement>(null);
   const [opacity, setOpacity] = useState<number>(1);
 
-  const [zoom, setZoom] = useState<number>(api.maps[mapId].currentZoom);
+  const [zoom, setZoom] = useState<number>(MapEventProcessor.getMapState(mapId).currentZoom);
   const splitZoom =
     (api.maps[mapId].layer.registeredLayers[clusterLayerPath]?.source as TypeVectorSourceInitialConfig)?.cluster?.splitZoom || 7;
   const closeIconRef = useRef() as RefObject<HTMLButtonElement>;
@@ -456,7 +457,7 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
   const handleZoomTo = () => {
     let bounds = api.maps[mapId].layer.geoviewLayers[layerId].calculateBounds(path);
     let transformedBounds: Extent | undefined;
-    if (bounds) transformedBounds = transformExtent(bounds, `EPSG:${api.maps[mapId].currentProjection}`, `EPSG:4326`);
+    if (bounds) transformedBounds = transformExtent(bounds, `EPSG:${MapEventProcessor.getMapState(mapId).currentProjection}`, `EPSG:4326`);
 
     if (
       !bounds ||

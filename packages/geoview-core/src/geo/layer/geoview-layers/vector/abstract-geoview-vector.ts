@@ -26,6 +26,7 @@ import { api } from '@/app';
 import { getLocalizedValue } from '@/core/utils/utilities';
 import { TypeArrayOfFeatureInfoEntries } from '@/api/events/payloads';
 import { NodeType } from '@/geo/renderer/geoview-renderer-types';
+import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 
 /* *******************************************************************************************************************************
  * AbstractGeoViewVector types
@@ -333,7 +334,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   protected getFeatureInfoAtLongLat(location: Coordinate, layerConfig: TypeLayerEntryConfig): Promise<TypeArrayOfFeatureInfoEntries> {
     const { map } = api.maps[this.mapId];
-    const convertedLocation = transform(location, 'EPSG:4326', `EPSG:${api.maps[this.mapId].currentProjection}`);
+    const convertedLocation = transform(location, 'EPSG:4326', `EPSG:${MapEventProcessor.getMapState(this.mapId).currentProjection}`);
     return this.getFeatureInfoAtPixel(map.getPixelFromCoordinate(convertedLocation as Coordinate), layerConfig);
   }
 
@@ -351,7 +352,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
       for (let i = 0; i < coordinates.length; i += 2) {
         const geographicCoordinate = transform(
           [coordinates[i], coordinates[i + 1]],
-          `EPSG:${api.maps[this.mapId].currentProjection}`,
+          `EPSG:${MapEventProcessor.getMapState(this.mapId).currentProjection}`,
           `EPSG:4326`
         );
         if (geographicCoordinate) {

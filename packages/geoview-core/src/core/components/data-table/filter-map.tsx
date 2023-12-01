@@ -1,6 +1,8 @@
 import { useTranslation } from 'react-i18next';
+
 import { Switch } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
+
 import { Tooltip } from '@/ui';
 import { getSxClasses } from './data-table-style';
 import {

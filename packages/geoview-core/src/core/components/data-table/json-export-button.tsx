@@ -1,25 +1,30 @@
 import { useTranslation } from 'react-i18next';
-import { toLonLat, Projection } from 'ol/proj';
+
+import { toLonLat } from 'ol/proj';
 import { Geometry, Point, Polygon, LineString, MultiPoint } from 'ol/geom';
+
 import { MenuItem } from '@/ui';
 import { MapDataTableDataEntrys } from './map-data-table';
+import { useMapProjection } from '@/app';
 
 interface JSONExportButtonProps {
   features: MapDataTableDataEntrys[];
   layerId: string;
-  projectionConfig: Projection;
 }
 
 /**
  * Custom  GeoJson export button which will help to download data table data in geojson format.
  * @param {MapDataTableDataEntrys[]} features list of rows to be displayed in data table
  * @param {string} layerId id of the layer
- * @param {Projection} projectionConfig projection config to transfer lat long.
  * @returns {JSX.Element} returns Menu Item
  *
  */
-function JSONExportButton({ features, layerId, projectionConfig }: JSONExportButtonProps): JSX.Element {
+function JSONExportButton({ features, layerId }: JSONExportButtonProps): JSX.Element {
   const { t } = useTranslation<string>();
+
+  // get store value - projection config to transfer lat long.
+  // TODO: move ol function to store
+  const projection = useMapProjection();
 
   /**
    * Create a geometry json
@@ -35,15 +40,15 @@ function JSONExportButton({ features, layerId, projectionConfig }: JSONExportBut
       builtGeometry = {
         type: 'Polygon',
         coordinates: geometry.getCoordinates().map((coords) => {
-          return coords.map((coord) => toLonLat(coord, projectionConfig));
+          return coords.map((coord) => toLonLat(coord, `EPSG: ${projection}`));
         }),
       };
     } else if (geometry instanceof LineString) {
-      builtGeometry = { type: 'LineString', coordinates: geometry.getCoordinates().map((coord) => toLonLat(coord, projectionConfig)) };
+      builtGeometry = { type: 'LineString', coordinates: geometry.getCoordinates().map((coord) => toLonLat(coord, `EPSG: ${projection}`)) };
     } else if (geometry instanceof Point) {
-      builtGeometry = { type: 'Point', coordinates: toLonLat(geometry.getCoordinates(), projectionConfig) };
+      builtGeometry = { type: 'Point', coordinates: toLonLat(geometry.getCoordinates(), `EPSG: ${projection}`) };
     } else if (geometry instanceof MultiPoint) {
-      builtGeometry = { type: 'MultiPoint', coordinates: geometry.getCoordinates().map((coord) => toLonLat(coord, projectionConfig)) };
+      builtGeometry = { type: 'MultiPoint', coordinates: geometry.getCoordinates().map((coord) => toLonLat(coord, `EPSG: ${projection}`)) };
     }
 
     return builtGeometry;
