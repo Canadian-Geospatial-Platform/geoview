@@ -1,7 +1,9 @@
 import { useCallback, useEffect, useState } from 'react';
-import { useTheme } from '@mui/material/styles';
-import { Projection } from 'ol/proj';
+
 import { useTranslation } from 'react-i18next';
+
+import { useTheme } from '@mui/material/styles';
+
 import { Box, CircularProgress, FilterAltIcon } from '@/ui';
 import MapDataTable, { MapDataTableData as MapDataTableDataProps } from './map-data-table';
 import { getSxClasses } from './data-table-style';
@@ -21,7 +23,6 @@ import { ResponsiveGrid, EnlargeButton, CloseButton, LayerList, LayerListEntry, 
 interface DatapanelProps {
   layerData: (MapDataTableDataProps & GroupLayers)[];
   mapId: string;
-  projectionConfig: Projection;
   language: TypeDisplayLanguage;
 }
 
@@ -29,11 +30,10 @@ interface DatapanelProps {
  * Build Data panel from map.
  * @param {MapDataTableProps} layerData map data which will be used to build data table.
  * @param {string} mapId id of the map.
- * @param {Projection} projectionConfig projection config to transfer lat long.
  * @return {ReactElement} Data table as react element.
  */
 
-export function Datapanel({ layerData, mapId, projectionConfig, language }: DatapanelProps) {
+export function Datapanel({ layerData, mapId, language }: DatapanelProps) {
   const { t } = useTranslation();
   const theme = useTheme();
 
@@ -168,13 +168,7 @@ export function Datapanel({ layerData, mapId, projectionConfig, language }: Data
                 {index === selectedLayerIndex ? (
                   <Box>
                     {layerData[index].features.length ? (
-                      <MapDataTable
-                        data={layerData[index]}
-                        layerId={layerId}
-                        mapId={mapId}
-                        layerKey={layerKey}
-                        projectionConfig={projectionConfig}
-                      />
+                      <MapDataTable data={layerData[index]} layerId={layerId} mapId={mapId} layerKey={layerKey} />
                     ) : (
                       'No Data'
                     )}

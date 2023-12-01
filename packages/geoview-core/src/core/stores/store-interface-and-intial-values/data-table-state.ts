@@ -35,6 +35,7 @@ export function initialDataTableState(set: TypeSetStore, get: TypeGetStore): IMa
     selectedLayerIndex: 0,
     toolbarRowSelectedMessageRecord: {},
 
+    // #region ACTIONS
     actions: {
       setMapFilteredEntry: (mapFiltered: boolean, layerKey: string) => {
         set({
@@ -43,7 +44,7 @@ export function initialDataTableState(set: TypeSetStore, get: TypeGetStore): IMa
             mapFilteredRecord: { ...get().dataTableState.mapFilteredRecord, [layerKey]: mapFiltered },
           },
         });
-        // TODO: Apply the filter to the layer
+        // TODO: Apply the filter to the layer in map event processor
       },
       setColumnFiltersEntry: (filtered: MRTColumnFiltersState, layerKey: string) => {
         set({
@@ -94,6 +95,7 @@ export function initialDataTableState(set: TypeSetStore, get: TypeGetStore): IMa
         });
       },
     },
+    // #endregion ACTIONS
   } as IMapDataTableState;
 }
 

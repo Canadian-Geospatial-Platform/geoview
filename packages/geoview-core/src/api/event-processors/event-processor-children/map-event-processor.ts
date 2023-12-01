@@ -1,10 +1,14 @@
 import { ScaleLine } from 'ol/control';
 import Overlay from 'ol/Overlay';
-import { fromLonLat } from 'ol/proj';
+import { fromLonLat, transformExtent } from 'ol/proj';
+import { Extent } from 'ol/extent';
+import { FitOptions } from 'ol/View';
+import { KeyboardPan } from 'ol/interaction';
 
 import { GeoViewStoreType } from '@/core/stores/geoview-store';
 import { AbstractEventProcessor } from '../abstract-event-processor';
-import { api, NORTH_POLE_POSITION, TypeClickMarker } from '@/app';
+import { api, Coordinate, NORTH_POLE_POSITION, TypeClickMarker } from '@/app';
+import { TypeMapState } from '@/geo/map/map-schema-types';
 import {
   mapPayload,
   lngLatPayload,
@@ -18,11 +22,73 @@ import {
 } from '@/api/events/payloads';
 import { EVENT_NAMES } from '@/api/events/event-types';
 import { getGeoViewStore } from '@/core/stores/stores-managers';
+import { OL_ZOOM_DURATION, OL_ZOOM_PADDING } from '@/core/utils/constant';
 
 export class MapEventProcessor extends AbstractEventProcessor {
   onInitialize(store: GeoViewStoreType) {
     const { mapId } = store.getState();
 
+    const unsubMapLoaded = store.subscribe(
+      (state) => state.mapState.mapLoaded,
+      (cur, prev) => {
+        if (cur !== prev) api.event.emit(mapPayload(EVENT_NAMES.MAP.EVENT_MAP_LOADED, mapId, store.getState().mapState.mapElement!));
+      }
+    );
+
+    // #region MAP STATE
+    const unsubMapCenterCoord = store.subscribe(
+      (state) => state.mapState.centerCoordinates,
+      (cur, prev) => {
+        if (cur !== prev) {
+          api.maps[mapId].mapState.mapCenterCoordinates = cur;
+          api.event.emit(lngLatPayload(EVENT_NAMES.MAP.EVENT_MAP_MOVE_END, mapId, cur));
+        }
+      }
+    );
+
+    const unsubMapPointerPosition = store.subscribe(
+      (state) => state.mapState.pointerPosition,
+      (cur, prev) => {
+        if (cur! && cur !== prev) {
+          api.maps[mapId].mapState.pointerPosition = cur;
+          api.event.emit(mapMouseEventPayload(EVENT_NAMES.MAP.EVENT_MAP_POINTER_MOVE, mapId, cur));
+        }
+      }
+    );
+
+    const unsubMapProjection = store.subscribe(
+      (state) => state.mapState.currentProjection,
+      (cur, prev) => {
+        // because emit and on from api events can be trigger in loop, compare also the api value
+        if (cur !== prev && api.maps[mapId].mapState.currentProjection !== cur!) {
+          api.maps[mapId].mapState.currentProjection = cur;
+          api.event.emit(mapViewProjectionPayload(EVENT_NAMES.MAP.EVENT_MAP_VIEW_PROJECTION_CHANGE, mapId, cur!));
+        }
+      }
+    );
+
+    const unsubMapSingleClick = store.subscribe(
+      (state) => state.mapState.clickCoordinates,
+      (cur, prev) => {
+        if (cur! && cur !== prev) {
+          api.maps[mapId].mapState.singleClickedPosition = cur;
+          api.event.emit(mapMouseEventPayload(EVENT_NAMES.MAP.EVENT_MAP_SINGLE_CLICK, mapId, cur));
+        }
+      }
+    );
+
+    const unsubMapZoom = store.subscribe(
+      (state) => state.mapState.zoom,
+      (cur, prev) => {
+        if (cur! && cur !== prev) {
+          api.maps[mapId].mapState.currentZoom = cur;
+          api.event.emit(numberPayload(EVENT_NAMES.MAP.EVENT_MAP_ZOOM_END, mapId, cur));
+        }
+      }
+    );
+    // #endregion MAP STATE
+
+    // #region FEATURE SELECTION
     // Checks for changes to highlighted features and updates highlights
     const unsubMapHighlightedFeatures = store.subscribe(
       (state) => state.mapState.highlightedFeatures,
@@ -40,44 +106,6 @@ export class MapEventProcessor extends AbstractEventProcessor {
           for (let i = 0; i < newFeatures.length; i++) api.maps[mapId].layer.featureHighlight.highlightFeature(newFeatures[i]);
           for (let i = 0; i < removedFeatures.length; i++)
             api.maps[mapId].layer.featureHighlight.removeHighlight((removedFeatures[i].geometry as TypeGeometry).ol_uid);
-        }
-      }
-    );
-
-    const unsubMapLoaded = store.subscribe(
-      (state) => state.mapState.mapLoaded,
-      (cur, prev) => {
-        if (cur !== prev) api.event.emit(mapPayload(EVENT_NAMES.MAP.EVENT_MAP_LOADED, mapId, store.getState().mapState.mapElement!));
-      }
-    );
-
-    const unsubMapCenterCoord = store.subscribe(
-      (state) => state.mapState.centerCoordinates,
-      (cur, prev) => {
-        if (cur !== prev) {
-          api.maps[mapId].mapCenterCoordinates = cur;
-          api.event.emit(lngLatPayload(EVENT_NAMES.MAP.EVENT_MAP_MOVE_END, mapId, cur));
-        }
-      }
-    );
-
-    const unsubMapPointerPosition = store.subscribe(
-      (state) => state.mapState.pointerPosition,
-      (cur, prev) => {
-        if (cur !== prev) {
-          api.maps[mapId].pointerPosition = cur!;
-          api.event.emit(mapMouseEventPayload(EVENT_NAMES.MAP.EVENT_MAP_POINTER_MOVE, mapId, cur!));
-        }
-      }
-    );
-
-    const unsubMapProjection = store.subscribe(
-      (state) => state.mapState.currentProjection,
-      (cur, prev) => {
-        // because emit and on from api events can be trigger in loop, compare also the api value
-        if (cur !== prev && api.maps[mapId].currentProjection !== cur!) {
-          api.maps[mapId].currentProjection = cur!;
-          api.event.emit(mapViewProjectionPayload(EVENT_NAMES.MAP.EVENT_MAP_VIEW_PROJECTION_CHANGE, mapId, cur!));
         }
       }
     );
@@ -102,34 +130,15 @@ export class MapEventProcessor extends AbstractEventProcessor {
         }
       }
     );
-
-    const unsubMapZoom = store.subscribe(
-      (state) => state.mapState.zoom,
-      (cur, prev) => {
-        if (cur !== prev) {
-          api.maps[mapId].currentZoom = cur!;
-          api.event.emit(numberPayload(EVENT_NAMES.MAP.EVENT_MAP_ZOOM_END, mapId, cur!));
-        }
-      }
-    );
-
-    const unsubMapSingleClick = store.subscribe(
-      (state) => state.mapState.clickCoordinates,
-      (cur, prev) => {
-        if (cur !== prev) {
-          api.maps[mapId].singleClickedPosition = cur!;
-          api.event.emit(mapMouseEventPayload(EVENT_NAMES.MAP.EVENT_MAP_SINGLE_CLICK, mapId, cur!));
-        }
-      }
-    );
+    // #endregion FEATURE SELECTION
 
     // TODO: add a destroy events on store/map destroy
     api.event.on(
       EVENT_NAMES.MAP.EVENT_MAP_VIEW_PROJECTION_CHANGE,
       (payload: PayloadBaseClass) => {
         // because emit and on from api events can be trigger in loop, compare also the api value
-        if (payloadIsAMapViewProjection(payload) && api.maps[mapId].currentProjection !== payload.projection!) {
-          api.maps[mapId].currentProjection = payload.projection!;
+        if (payloadIsAMapViewProjection(payload) && api.maps[mapId].mapState.currentProjection !== payload.projection!) {
+          api.maps[mapId].mapState.currentProjection = payload.projection!;
           store.setState({
             mapState: { ...store.getState().mapState, currentProjection: payload.projection! },
           });
@@ -151,15 +160,15 @@ export class MapEventProcessor extends AbstractEventProcessor {
     );
   }
 
-  // **********************************************************
-  // Static functions for Typescript files to set store values
-  // **********************************************************
-  static setMapLoaded(mapId: string) {
+  //! THIS IS THE ONLY FUNCTION TO SET STORE DIRECTLY
+  static setMapLoaded(mapId: string): void {
+    // use api to access map because this function will set map element in store
     const { map } = api.maps[mapId];
     const store = getGeoViewStore(mapId);
 
     // initialize store OpenLayers events
     // TODO: destroy events on map destruction
+    map.on('change:size', store.getState().mapState.events.onMapChangeSize);
     map.on('moveend', store.getState().mapState.events.onMapMoveEnd);
     map.on('pointermove', store.getState().mapState.events.onMapPointerMove);
     map.on('singleclick', store.getState().mapState.events.onMapSingleClick);
@@ -211,25 +220,147 @@ export class MapEventProcessor extends AbstractEventProcessor {
     map.addOverlay(clickMarkerOverlay);
 
     // set store
+    // TODO: evaluate if still needed OR use another approach
     setTimeout(() => store.getState().mapState.actions.setMapElement(map), 250);
     setTimeout(() => store.getState().mapState.actions.setOverlayNorthMarker(northPoleMarker), 250);
     setTimeout(() => store.getState().mapState.actions.setOverlayClickMarker(clickMarkerOverlay), 250);
+    setTimeout(() => map.dispatchEvent('change:size'), 500); // dispatch event to set initial value
   }
 
-  static clickMarkerIconHide(mapId: string) {
-    const store = getGeoViewStore(mapId);
-    store.getState().mapState.actions.hideClickMarker();
+  // **********************************************************
+  // Static functions for Typescript files to access store actions
+  // **********************************************************
+  //! Typescript MUST always use storte action to modify store - NEVER use setState!
+  //! Some action does state modfication AND map actions.
+  //! ALWAYS use map event processor when an action modify store and IS NOT trap by map state event handler
+  // #region
+  static clickMarkerIconHide(mapId: string): void {
+    getGeoViewStore(mapId).getState().mapState.actions.hideClickMarker();
   }
 
-  static clickMarkerIconShow(mapId: string, marker: TypeClickMarker) {
-    const store = getGeoViewStore(mapId);
-    store.getState().mapState.actions.showClickMarker(marker);
+  static clickMarkerIconShow(mapId: string, marker: TypeClickMarker): void {
+    getGeoViewStore(mapId).getState().mapState.actions.showClickMarker(marker);
   }
 
-  static setMapAttribution(mapId: string, attribution: string[]) {
-    const store = getGeoViewStore(mapId);
-    store.setState({
-      mapState: { ...store.getState().mapState, attribution },
+  static getMapState(mapId: string): TypeMapState {
+    return {
+      currentProjection: getGeoViewStore(mapId).getState().mapState.currentProjection,
+      currentZoom: getGeoViewStore(mapId).getState().mapState.zoom,
+      mapCenterCoordinates: getGeoViewStore(mapId).getState().mapState.centerCoordinates,
+      pointerPosition: getGeoViewStore(mapId).getState().mapState.pointerPosition || {
+        pixel: [],
+        lnglat: [],
+        projected: [],
+        dragging: false,
+      },
+      singleClickedPosition: getGeoViewStore(mapId).getState().mapState.clickCoordinates || {
+        pixel: [],
+        lnglat: [],
+        projected: [],
+        dragging: false,
+      },
+    };
+  }
+
+  static setMapAttribution(mapId: string, attribution: string[]): void {
+    getGeoViewStore(mapId).getState().mapState.actions.setAttribution(attribution);
+  }
+
+  static rotate(mapId: string, rotation: number): void {
+    getGeoViewStore(mapId).getState().mapState.actions.setRotation(rotation);
+  }
+
+  static zoom(mapId: string, zoom: number): void {
+    getGeoViewStore(mapId).getState().mapState.actions.setZoom(zoom, OL_ZOOM_DURATION);
+  }
+  // #endregion
+
+  // **********************************************************
+  // Static functions for Store Map State to action on API
+  // **********************************************************
+  //! NEVER add a store action who does set state AND map action at a same time.
+  //! Review the action in store state to make sure
+  // #region
+  static setMapKeyboardPanInteractions(mapId: string, panDelta: number): void {
+    const mapElement = api.maps[mapId].map;
+
+    // replace the KeyboardPan interraction by a new one
+    mapElement!.getInteractions().forEach((interactionItem) => {
+      if (interactionItem instanceof KeyboardPan) {
+        mapElement!.removeInteraction(interactionItem);
+      }
     });
+    mapElement!.addInteraction(new KeyboardPan({ pixelDelta: panDelta }));
   }
+
+  // TODO: use store because it is one line in map viewer, move and use same as rotate because state is handle in event
+  // OPEN for discussion
+  static zoomToExtent(mapId: string, extent: Extent, options?: FitOptions): void {
+    api.maps[mapId].zoomToExtent(extent, options);
+  }
+
+  static zoomToGeoLocatorLocation(mapId: string, coords: Coordinate, bbox?: Extent): void {
+    const indicatorBox = document.getElementsByClassName('ol-overviewmap-box') as HTMLCollectionOf<Element>;
+    for (let i = 0; i < indicatorBox.length; i++) {
+      (indicatorBox[i] as HTMLElement).style.display = 'none';
+    }
+
+    const projectionConfig = api.projection.projections[MapEventProcessor.getMapState(mapId).currentProjection];
+    if (bbox) {
+      //! There were issues with fromLonLat in rare cases in LCC projections, transformExtent seems to solve them.
+      //! fromLonLat and transformExtent give differing results in many cases, fromLonLat had issues with the first
+      //! three results from a geolocator search for "vancouver river"
+      const convertedExtent = transformExtent(bbox, 'EPSG:4326', projectionConfig);
+      MapEventProcessor.zoomToExtent(mapId, convertedExtent, {
+        padding: [50, 50, 50, 50],
+        maxZoom: 16,
+        duration: OL_ZOOM_DURATION,
+      });
+
+      // TODO: use proper function
+      api.maps[mapId].layer.featureHighlight.highlightGeolocatorBBox(convertedExtent);
+      setTimeout(() => {
+        MapEventProcessor.clickMarkerIconShow(mapId, { lnglat: coords });
+        for (let i = 0; i < indicatorBox.length; i++) {
+          (indicatorBox[i] as HTMLElement).style.display = '';
+        }
+      }, OL_ZOOM_DURATION + 150);
+    } else {
+      MapEventProcessor.zoomToExtent(mapId, fromLonLat(coords, projectionConfig), { maxZoom: 16, duration: OL_ZOOM_DURATION });
+      setTimeout(() => {
+        MapEventProcessor.clickMarkerIconShow(mapId, { lnglat: coords });
+        for (let i = 0; i < indicatorBox.length; i++) {
+          (indicatorBox[i] as HTMLElement).style.display = '';
+        }
+      }, OL_ZOOM_DURATION + 150);
+    }
+  }
+
+  static zoomToInitialExtent(mapId: string): void {
+    const { center, zoom } = getGeoViewStore(mapId).getState().mapConfig!.map.viewSettings;
+    const projectedCoords = api.projection.transformPoints(
+      [center],
+      `EPSG:4326`,
+      `EPSG:${getGeoViewStore(mapId).getState().mapState.currentProjection}`
+    );
+    const extent: Extent = [...projectedCoords[0], ...projectedCoords[0]];
+    const options: FitOptions = { padding: OL_ZOOM_PADDING, maxZoom: zoom, duration: OL_ZOOM_DURATION };
+
+    MapEventProcessor.zoomToExtent(mapId, extent, options);
+  }
+
+  static zoomToMyLocation(mapId: string, position: GeolocationPosition): void {
+    const coord: Coordinate = [position.coords.longitude, position.coords.latitude];
+    const projectedCoords = api.projection.transformPoints(
+      [coord],
+      `EPSG:4326`,
+      `EPSG:${getGeoViewStore(mapId).getState().mapState.currentProjection}`
+    );
+
+    const extent: Extent = [...projectedCoords[0], ...projectedCoords[0]];
+    const options: FitOptions = { padding: OL_ZOOM_PADDING, maxZoom: 13, duration: OL_ZOOM_DURATION };
+
+    MapEventProcessor.zoomToExtent(mapId, extent, options);
+  }
+  // #endregion
 }

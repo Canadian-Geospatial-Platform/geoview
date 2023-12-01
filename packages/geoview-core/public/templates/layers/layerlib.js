@@ -22,7 +22,11 @@ function listenToLegendLayerSetChanges(elementId, handlerName) {
 
 // ==========================================================================================================================
 const addBoundsPolygon = (mapId, bbox) => {
-  const newBbox = cgpv.api.maps[mapId].transformAndDensifyExtent(bbox, `EPSG:${cgpv.api.maps[mapId].currentProjection}`, `EPSG:4326`);
+  const newBbox = cgpv.api.maps[mapId].transformAndDensifyExtent(
+    bbox,
+    `EPSG:${cgpv.api.maps[mapId].mapState.currentProjection}`,
+    `EPSG:4326`
+  );
 
   const { geometry } = cgpv.api.maps[mapId].layer;
   geometry.setActiveGeometryGroup();

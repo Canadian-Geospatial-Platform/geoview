@@ -238,7 +238,7 @@ function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
    * @returns {Promise<boolean>} True if layer passes validation
    */
   const wmsValidation = async (): Promise<boolean> => {
-    const proj = api.projection.projections[api.maps[mapId].currentProjection].getCode();
+    const proj = api.projection.projections[api.maps[mapId].mapState.currentProjection].getCode();
     let supportedProj: string[] = [];
 
     try {

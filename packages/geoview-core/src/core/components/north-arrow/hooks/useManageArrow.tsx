@@ -7,6 +7,7 @@ import {
   useMapNorthArrowElement,
   useMapProjection,
   useMapRotation,
+  useMapSize,
   useMapStoreActions,
   useMapZoom,
 } from '@/core/stores/store-interface-and-intial-values/map-state';
@@ -27,7 +28,8 @@ const useManageArrow = () => {
   const mapZoom = useMapZoom();
   const mapRotation = useMapRotation();
   const mapCenterCoord = useMapCenterCoordinates();
-  const { getPixelFromCoordinate, getSize, setRotation } = useMapStoreActions();
+  const mapSize = useMapSize();
+  const { getPixelFromCoordinate, setRotation } = useMapStoreActions();
 
   /**
    * Calculate the north arrow offset
@@ -35,7 +37,7 @@ const useManageArrow = () => {
    * @param {number} angleDegrees north arrow rotation
    */
   function setOffset(angleDegrees: number): void {
-    const mapWidth = getSize()[0] / 2;
+    const mapWidth = mapSize[0] / 2;
     const arrowWidth = 24;
     const offsetX = mapWidth - arrowWidth / 2;
 

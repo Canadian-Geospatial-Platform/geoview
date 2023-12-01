@@ -2,13 +2,16 @@ import { useStore } from 'zustand';
 import { useGeoViewStore } from '@/core/stores/stores-managers';
 import { TypeSetStore, TypeGetStore } from '@/core/stores/geoview-store';
 
-import { NotificationDetailsType, TypeHTMLElement } from '@/core/types/cgpv-types';
+import { NotificationDetailsType, TypeHTMLElement, TypeMapFeaturesConfig } from '@/core/types/cgpv-types';
 import { api } from '@/app';
 
 export interface IAppState {
   isCrosshairsActive: boolean;
   isFullscreenActive: boolean;
   notifications: Array<NotificationDetailsType>;
+  geolocatorServiceURL: string | undefined;
+
+  setDefaultConfigValues: (geoviewConfig: TypeMapFeaturesConfig) => void;
 
   actions: {
     addNotification: (notif: NotificationDetailsType) => void;
@@ -23,6 +26,17 @@ export function initializeAppState(set: TypeSetStore, get: TypeGetStore): IAppSt
     isCrosshairsActive: false,
     isFullscreenActive: false,
     notifications: [],
+    geolocatorServiceURL: '',
+
+    // initialize default stores section from config information when store receive configuration file
+    setDefaultConfigValues: (geoviewConfig: TypeMapFeaturesConfig) => {
+      set({
+        appState: {
+          ...get().appState,
+          geolocatorServiceURL: geoviewConfig.serviceUrls?.geolocator,
+        },
+      });
+    },
 
     actions: {
       addNotification: (notif: NotificationDetailsType) => {
@@ -73,5 +87,6 @@ export function initializeAppState(set: TypeSetStore, get: TypeGetStore): IAppSt
 export const useAppCrosshairsActive = () => useStore(useGeoViewStore(), (state) => state.appState.isCrosshairsActive);
 export const useAppNotifications = () => useStore(useGeoViewStore(), (state) => state.appState.notifications);
 export const useFullscreenActive = () => useStore(useGeoViewStore(), (state) => state.appState.isFullscreenActive);
+export const useGeolocatorServiceURL = () => useStore(useGeoViewStore(), (state) => state.appState.geolocatorServiceURL);
 
 export const useAppStoreActions = () => useStore(useGeoViewStore(), (state) => state.appState.actions);

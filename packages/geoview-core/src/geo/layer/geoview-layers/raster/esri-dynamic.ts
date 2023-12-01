@@ -48,6 +48,7 @@ import {
 } from '../esri-layer-common';
 import { TypeJsonArray, TypeJsonObject } from '@/core/types/global-types';
 import { TypeEsriFeatureLayerEntryConfig } from '../vector/esri-feature';
+import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 
 export interface TypeEsriDynamicLayerConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig'> {
   geoviewLayerType: 'esriDynamic';
@@ -334,7 +335,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
     location: Coordinate,
     layerConfig: TypeEsriDynamicLayerEntryConfig
   ): Promise<TypeArrayOfFeatureInfoEntries> {
-    const convertedLocation = transform(location, `EPSG:${api.maps[this.mapId].currentProjection}`, 'EPSG:4326');
+    const convertedLocation = transform(location, `EPSG:${MapEventProcessor.getMapState(this.mapId).currentProjection}`, 'EPSG:4326');
     return this.getFeatureInfoAtLongLat(convertedLocation, layerConfig);
   }
 
@@ -359,7 +360,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
         else {
           identifyUrl = identifyUrl.endsWith('/') ? identifyUrl : `${identifyUrl}/`;
           const mapLayer = api.maps[this.mapId].map;
-          const { currentProjection } = api.maps[this.mapId];
+          const { currentProjection } = MapEventProcessor.getMapState(this.mapId);
           const size = mapLayer.getSize()!;
           let bounds = mapLayer.getView().calculateExtent();
           bounds = transformExtent(bounds, `EPSG:${currentProjection}`, 'EPSG:4326');
@@ -793,7 +794,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
    */
   protected getBounds(layerConfig: TypeLayerEntryConfig, bounds: Extent | undefined): Extent | undefined {
     const layerBounds = layerConfig!.initialSettings?.bounds || [];
-    const projection = this.metadata?.fullExtent?.spatialReference?.wkid || api.maps[this.mapId].currentProjection;
+    const projection = this.metadata?.fullExtent?.spatialReference?.wkid || MapEventProcessor.getMapState(this.mapId).currentProjection;
 
     if (this.metadata?.fullExtent) {
       layerBounds[0] = this.metadata?.fullExtent.xmin as number;

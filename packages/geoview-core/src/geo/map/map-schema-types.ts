@@ -1,8 +1,22 @@
 import { Extent } from 'ol/extent';
 import BaseLayer from 'ol/layer/Base';
 import LayerGroup from 'ol/layer/Group';
-import { TypeBasemapOptions } from '../layer/basemap/basemap-types';
-import { TypeGeoviewLayerType } from '../layer/geoview-layers/abstract-geoview-layers';
+import { Coordinate } from 'ol/coordinate';
+
+import { TypeBasemapOptions } from '@/geo/layer/basemap/basemap-types';
+import { TypeGeoviewLayerType } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
+import { TypeMapMouseInfo } from '@/api/events/payloads';
+
+/** ******************************************************************************************************************************
+ *  Definition of map state to attach to the map object for reference.
+ */
+export type TypeMapState = {
+  currentProjection: number;
+  currentZoom: number;
+  mapCenterCoordinates: Coordinate;
+  singleClickedPosition: TypeMapMouseInfo;
+  pointerPosition: TypeMapMouseInfo;
+};
 
 /** ******************************************************************************************************************************
  *  Definition of the post settings type needed when the GeoView GeoJSON layers need to use a POST instead of a GET.

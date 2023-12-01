@@ -22,6 +22,7 @@ export function initialDetailsState(set: TypeSetStore, get: TypeGetStore): IDeta
     layerDataArray: [],
     selectedLayerPath: '',
 
+    // #region ACTIONS
     actions: {
       addCheckedFeature: (feature: TypeFeatureInfoEntry) => {
         set({
@@ -62,6 +63,7 @@ export function initialDetailsState(set: TypeSetStore, get: TypeGetStore): IDeta
         });
       },
     },
+    // #endregion ACTIONS
   } as IDetailsState;
 }
 
