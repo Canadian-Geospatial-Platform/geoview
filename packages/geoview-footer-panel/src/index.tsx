@@ -63,7 +63,7 @@ class FooterPanelPlugin extends AbstractPlugin {
       details: 'Details',
       dataTable: 'DataTable',
       timeSlider: 'Time Slider',
-      geochart: 'Geo Chart',
+      geochart: 'Chart',
     },
     fr: {
       legend: 'Légende',
@@ -71,7 +71,7 @@ class FooterPanelPlugin extends AbstractPlugin {
       details: 'Détails',
       dataTable: 'Données',
       timeSlider: 'Curseur Temporel',
-      geochart: 'Geo Chart',
+      geochart: 'Graphique',
     },
   });
 
@@ -93,7 +93,6 @@ class FooterPanelPlugin extends AbstractPlugin {
 
       const defaultTabs = configObj?.tabs.defaultTabs as Array<string>;
       let tabsCounter = 0;
-      // console.log('deafult tals', configObj.tabs);
       if (defaultTabs.includes('legend')) {
         // create new tab and add the LegendComponent to the footer tab
         footerTabs.createFooterTab({
