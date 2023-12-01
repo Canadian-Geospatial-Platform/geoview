@@ -1,7 +1,7 @@
 /// <reference types="react" />
 /**
- * Export PNG Button component
+ * Export modal window component to export the viewer information in a PNG file
  *
- * @returns {JSX.Element} the export button
+ * @returns {JSX.Element} the export modal component
  */
 export default function ExportModal(): JSX.Element;

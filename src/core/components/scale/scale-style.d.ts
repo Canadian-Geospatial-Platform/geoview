@@ -39,6 +39,7 @@ export declare const getSxClasses: (theme: Theme) => {
         borderTop: string;
         borderLeft: string;
         borderRight: string;
+        textTransform: string;
     };
     scaleCheckmark: {
         paddingRight: number;

@@ -36,6 +36,9 @@ export declare const getSxClasses: (theme: Theme) => {
             whiteSpace: string;
             overflow: string;
         };
+        '& .MuiListItemText-root': {
+            marginLeft: string;
+        };
         '& .MuiCollapse-vertical': {
             marginLeft: string;
             '& ul': {

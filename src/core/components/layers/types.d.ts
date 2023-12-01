@@ -1,45 +1,6 @@
-import { AbstractGeoViewLayer, TypeGeoviewLayerType, TypeLayerEntryConfig, TypeStyleConfig, TypeStyleGeometry, TypeVisibilityFlags } from '@/geo';
+import { Extent } from 'ol/extent';
+import { TypeGeoviewLayerType, TypeStyleConfig, TypeStyleGeometry, TypeVisibilityFlags } from '@/geo';
 import { TypeLayerStatus } from '@/geo/map/map-schema-types';
-export interface TypeLegendProps {
-    layerIds: string[];
-    isRemoveable?: boolean;
-    canSetOpacity?: boolean;
-    expandAll?: boolean;
-    hideAll?: boolean;
-    canZoomTo?: boolean;
-}
-export interface LegendItemsProps extends TypeLegendProps {
-    mapId: string;
-}
-export interface LegendProps extends TypeLegendProps {
-    mapId: string;
-}
-export interface LegendItemsDetailsProps extends TypeLegendProps {
-    mapId: string;
-}
-export interface TypeLegendItemProps {
-    layerId: string;
-    geoviewLayerInstance: AbstractGeoViewLayer;
-    subLayerId?: string;
-    layerConfigEntry?: TypeLayerEntryConfig;
-    isRemoveable?: boolean;
-    canSetOpacity?: boolean;
-    isParentVisible?: boolean;
-    toggleParentVisible?: () => void;
-    expandAll?: boolean;
-    hideAll?: boolean;
-}
-export interface TypeLegendItemDetailsProps {
-    layerId: string;
-    geoviewLayerInstance: AbstractGeoViewLayer;
-    subLayerId?: string;
-    layerConfigEntry?: TypeLayerEntryConfig;
-    isRemoveable?: boolean;
-    canSetOpacity?: boolean;
-    isParentVisible?: boolean;
-    expandAll?: boolean;
-    hideAll?: boolean;
-}
 export type TypeLayersViewDisplayState = 'remove' | 'add' | 'order' | 'view';
 export type TypeLegendLayerIcons = TypeLegendLayerItem[];
 export type TypeLegendLayerItem = {
@@ -58,8 +19,11 @@ export interface TypeLegendLayerListItem {
     default: boolean;
 }
 export interface TypeLegendLayer {
+    bounds: Extent | undefined;
     layerId: string;
     layerPath: string;
+    layerAttribution?: string[];
+    metadataAccessPath?: string;
     order?: number;
     layerName: string;
     type: TypeGeoviewLayerType;

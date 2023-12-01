@@ -44,7 +44,7 @@ export declare class DataTableApi {
             featureKey: number;
             geoviewLayerType: import("@/app").TypeGeoviewLayerType;
             extent: import("ol/extent").Extent;
-            geometry: import("@/app").TypeGeometry | import("ol/Feature").default<import("ol/geom/Geometry").default> | null;
+            geometry: import("ol/Feature").default<import("ol/geom/Geometry").default> | import("@/app").TypeGeometry | null;
             featureIcon: HTMLCanvasElement;
             fieldInfo: Partial<Record<string, TypeFieldEntry>>;
             nameField: string | null;

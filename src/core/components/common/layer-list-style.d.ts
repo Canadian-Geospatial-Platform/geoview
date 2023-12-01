@@ -104,7 +104,7 @@ export declare const getSxClasses: (theme: Theme) => {
         flex: string;
         display: string;
         flexDirection: string;
-        '& p': {
+        '& .layerTitle': {
             fontSize: string;
             font: string;
             lineHeight: number;
