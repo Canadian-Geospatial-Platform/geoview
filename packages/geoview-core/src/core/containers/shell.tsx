@@ -32,6 +32,7 @@ import { getShellSxClasses } from './containers-style';
 import { useMapLoaded } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { useUIActiveTrapGeoView } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import ExportModal from '@/core/components/export/export-modal';
+import DataTableModal from '@/core/components/data-table/data-table-modal';
 
 /**
  * Interface for the shell properties
@@ -148,9 +149,11 @@ export function Shell(props: ShellProps): JSX.Element {
           {Object.keys(api.maps[shellId].modal.modals).map((modalId) => (
             <Modal key={modalId} id={modalId} open={false} mapId={shellId} />
           ))}
-          {/* modal section */}
+          {/* modal section start */}
           <FocusTrapDialog mapId={mapFeaturesConfig.mapId} focusTrapId={shellId} />
           <ExportModal />
+          <DataTableModal />
+          {/* modal section end */}
           {Object.keys(components).map((key: string) => {
             return <Fragment key={key}>{components[key]}</Fragment>;
           })}

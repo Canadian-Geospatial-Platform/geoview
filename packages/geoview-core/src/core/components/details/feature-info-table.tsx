@@ -37,7 +37,7 @@ export function FeatureInfoTable({ featureInfoList }: FeatureInfoTableProps): JS
   // linkify options
   const linkifyOptions = {
     attributes: {
-      title: t('details.external_link'),
+      title: t('details.externalLink'),
     },
     defaultProtocol: 'https',
     format: {

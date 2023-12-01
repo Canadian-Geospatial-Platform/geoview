@@ -11,8 +11,8 @@ import {
   List,
   GroupWorkOutlinedIcon,
   ErrorIcon,
-  DownloadingIcon,
   BrowserNotSupportedIcon,
+  CircularProgressBase,
 } from '@/ui';
 import { TypeLegendLayer } from '@/core/components/layers/types';
 import { getSxClasses } from './legend-styles';
@@ -57,7 +57,7 @@ export function LegendLayer(props: LegendLayerProps): JSX.Element {
     return (
       <List sx={{ width: '100%', padding: '20px', margin: '20px 0px' }}>
         {layer.children
-          .filter((d) => d.isVisible)
+          .filter((d) => d.isVisible && !['error', 'loading'].includes(d.layerStatus ?? ''))
           .map((item) => (
             <LegendLayer layer={item} key={item.layerPath} />
           ))}
@@ -73,7 +73,7 @@ export function LegendLayer(props: LegendLayerProps): JSX.Element {
     return (
       <List sx={{ width: '100%' }}>
         {layer.items
-          .filter((d) => d.isVisible)
+          .filter((d) => d.isVisible !== 'no')
           .map((item) => (
             <ListItem key={item.name} className={!item.isVisible ? 'unchecked' : ''}>
               <ListItemIcon>{item.icon ? <img alt={item.name} src={item.icon} /> : <BrowserNotSupportedIcon />}</ListItemIcon>
@@ -109,9 +109,9 @@ export function LegendLayer(props: LegendLayerProps): JSX.Element {
     }
     if (layer.layerStatus === 'loading') {
       return (
-        <IconButton sx={{ color: 'gray' }}>
-          <DownloadingIcon />
-        </IconButton>
+        <Box sx={{ padding: '5px', marginRight: '10px' }}>
+          <CircularProgressBase size={20} />
+        </Box>
       );
     }
     if (layer?.children.length) {
@@ -121,11 +121,7 @@ export function LegendLayer(props: LegendLayerProps): JSX.Element {
         </IconButton>
       );
     }
-    return (
-      <IconButton color="success">
-        <IconStack layerPath={layer.layerPath} />
-      </IconButton>
-    );
+    return <IconStack layerPath={layer.layerPath} />;
   }
 
   return (
