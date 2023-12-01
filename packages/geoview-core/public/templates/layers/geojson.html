@@ -42,6 +42,7 @@
           <tr>
             <td>
               <a href="#HLYR1">1. Many GeoJSON Layers</a><br />
+              <a href="#HLYR2">2. Many GeoJSON Layers - with footer panel</a><br />
             </td>
           </tr>
         </tbody>
@@ -137,6 +138,74 @@
     <hr />
     <button type="button" class="collapsible">Code Snippet</button>
     <pre id="codeSnippet" class="panel"></pre>
+
+    <div class="map-title-holder">
+      <h4 id="HLYR2">2. Many GeoJSON Layers - with footer panel</h4>
+      <a class="ref-link" href="#top">Top</a>
+    </div>
+    <button class="collapsible active">Map Status Flags</button>
+    <pre id="HLYR2-state" class="panel map-title-holder"></pre>
+    <div
+      id="LYR2"
+      class="llwp-map"
+      triggerReadyCallback="true"
+      data-lang="en"
+      data-config="{
+        'map': {
+          'interaction': 'dynamic',
+          'viewSettings': {
+            'zoom': 4,
+            'center': [-100, 60],
+            'projection': 3978
+          },
+          'basemapOptions': {
+            'basemapId': 'transport',
+            'shaded': true,
+            'labeled': false
+          },
+          'listOfGeoviewLayerConfig': [
+            {
+              'geoviewLayerId': 'geojsonLYR1',
+              'geoviewLayerName': { 'en': 'GeoJSON Sample' },
+              'metadataAccessPath': { 'en': './geojson/metadata.json' },
+              'geoviewLayerType': 'GeoJSON',
+              'initialSettings': { 'visible': 'yes' },
+              'listOfLayerEntryConfig': [
+                {
+                  'layerId': 'polygons.json',
+                  'layerName': { 'en': 'Polygons' }
+                },
+                {
+                  'layerId': 'lines.json',
+                  'layerName': { 'en': 'Lines' }
+                },
+                {
+                  'entryType': 'group',
+                  'layerId': 'point-feature-group',
+                  'layerName': { 'en': 'point-feature-group' },
+                  'listOfLayerEntryConfig': [
+                    {
+                      'layerId': 'icon_points.json',
+                      'layerName': { 'en': 'Icons' },
+                      'initialSettings': { 'visible': 'no' }
+                    },
+                    {
+                      'layerId': 'points.json',
+                      'layerName': { 'en': 'Points' }
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        'components': ['overview-map'],
+        'overviewMap': {'hideOnZoom': 7},
+        'corePackages': ['footer-panel'],
+        'theme': 'royal',
+        'suportedLanguages': ['en']
+        }"
+    ></div>
 
     <script src="codedoc.js"></script>
     <script src="layerlib.js"></script>

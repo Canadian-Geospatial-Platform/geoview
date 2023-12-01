@@ -7,6 +7,7 @@ import { IDetailsState, initialDetailsState } from './store-interface-and-intial
 import { ILayerState, initializeLayerState } from './store-interface-and-intial-values/layer-state';
 import { IMapState, initializeMapState } from './store-interface-and-intial-values/map-state';
 import { IMapDataTableState, initialDataTableState } from './store-interface-and-intial-values/data-table-state';
+import { ITimeSliderState, initializeTimeSliderState } from './store-interface-and-intial-values/time-slider-state';
 import { IUIState, initializeUIState } from './store-interface-and-intial-values/ui-state';
 
 import { TypeDisplayLanguage } from '@/geo/map/map-schema-types';
@@ -32,6 +33,7 @@ export interface IGeoViewState {
   dataTableState: IMapDataTableState;
   layerState: ILayerState;
   mapState: IMapState;
+  timeSliderState: ITimeSliderState;
   uiState: IUIState;
 
   // results set
@@ -57,6 +59,7 @@ export const geoViewStoreDefinition = (set: TypeSetStore, get: TypeGetStore) =>
     dataTableState: initialDataTableState(set, get),
     layerState: initializeLayerState(set, get),
     mapState: initializeMapState(set, get),
+    timeSliderState: initializeTimeSliderState(set, get),
     uiState: initializeUIState(set, get),
 
     featureInfoResultSets: {} as TypeFeatureInfoResultSets,
