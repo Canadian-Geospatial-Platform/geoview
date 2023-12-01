@@ -42,6 +42,7 @@
           <tr>
             <td>
               <a href="#HLYR1">1. XYZ Layers</a><br />
+              <a href="#HLYR2">2. XYZ Layers - with footer panel</a><br />
             </td>
           </tr>
         </tbody>
@@ -104,6 +105,57 @@
     <hr />
     <button type="button" class="collapsible">Code Snippet</button>
     <pre id="codeSnippet" class="panel"></pre>
+
+    <div class="map-title-holder">
+      <h4 id="HLYR2">2. XYZ Tiles Layers - with footer panel</h4>
+      <a class="ref-link" href="#top">Top</a>
+    </div>
+    <button class="collapsible active">Map Status Flags</button>
+    <pre id="HLYR2-state" class="panel map-title-holder"></pre>
+    <div
+      id="LYR2"
+      class="llwp-map"
+      data-lang="en"
+      data-config="{
+          'map': {
+            'interaction': 'dynamic',
+            'viewSettings': {
+              'zoom': 4,
+              'center': [-100, 60],
+              'projection': 3857
+            },
+            'basemapOptions': {
+              'basemapId': 'transport',
+              'shaded': false,
+              'labeled': true
+            },
+            'listOfGeoviewLayerConfig': [
+              {
+                'geoviewLayerId': 'xyzTilesLYR1',
+                'geoviewLayerName': {
+                  'en': 'statmen toner'
+                },
+                'geoviewLayerType': 'xyzTiles',
+                'listOfLayerEntryConfig': [
+                  {
+                    'layerId': 'toner',
+                    'initialSettings': { 'minZoom': 3, 'maxZoom': 8 },
+                    'source': {
+                      'dataAccessPath': {
+                        'en': 'https://stamen-tiles.a.ssl.fastly.net/toner/{z}/{x}/{y}.png'
+                      }
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          'components': ['overview-map'],
+          'corePackages': ['footer-panel'],
+          'theme': 'royal',
+          'suportedLanguages': ['en']
+        }"
+    ></div>
 
     <script src="codedoc.js"></script>
     <script src="layerlib.js"></script>

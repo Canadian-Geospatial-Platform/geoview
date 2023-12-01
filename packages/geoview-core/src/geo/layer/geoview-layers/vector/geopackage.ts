@@ -319,7 +319,7 @@ export class GeoPackage extends AbstractGeoViewVector {
       xhr.responseType = 'arraybuffer';
 
       initSqlJs({
-        locateFile: (file) => `https://sql.js.org/dist/${file}`,
+        locateFile: (file) => `https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/${file}`,
       }).then((SQL) => {
         xhr.open('GET', url as string);
         xhr.onload = () => {
@@ -660,6 +660,7 @@ export class GeoPackage extends AbstractGeoViewVector {
             const newLayerEntryConfig = cloneDeep(layerEntryConfig) as TypeBaseLayerEntryConfig;
             newLayerEntryConfig.layerId = layers[i].name;
             newLayerEntryConfig.layerName = { en: layers[i].name, fr: layers[i].name };
+            newLayerEntryConfig.entryType = 'vector';
             newLayerEntryConfig.parentLayerConfig = Cast<TypeLayerGroupEntryConfig>(layerEntryConfig);
             if ((newLayerEntryConfig.source as TypeBaseSourceVectorInitialConfig)?.cluster?.enable) {
               const unclusteredLayerConfig = cloneDeep(newLayerEntryConfig) as TypeVectorLayerEntryConfig;

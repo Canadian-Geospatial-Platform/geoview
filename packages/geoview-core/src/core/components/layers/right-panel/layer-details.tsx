@@ -153,9 +153,10 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
       {renderOpacityControl()}
       <Box sx={{ marginTop: '20px' }}>{renderItems()}</Box>
       <Divider sx={{ marginTop: '50px' }} variant="middle" />
-      {layerDetails.layerAttribution!.map((attribution) => {
-        return <Typography key={generateId()}>{attribution.indexOf('©') === -1 ? `© ${attribution}` : attribution}</Typography>;
-      })}
+      {layerDetails.layerAttribution &&
+        layerDetails.layerAttribution!.map((attribution) => {
+          return <Typography key={generateId()}>{attribution.indexOf('©') === -1 ? `© ${attribution}` : attribution}</Typography>;
+        })}
     </Paper>
   );
 }
