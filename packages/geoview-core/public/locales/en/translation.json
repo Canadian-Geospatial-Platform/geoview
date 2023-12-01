@@ -146,5 +146,8 @@
     "featureFiltered": "features filtered",
     "images": "Images",
     "close": "Close"
+  },
+  "geoChart": {
+    "noChartAvailable": "Click on the map layer with chart"
   }
 }

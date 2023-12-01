@@ -9,7 +9,7 @@ import {
   TypeJsonObject,
 } from 'geoview-core';
 import { ChartType } from 'geochart';
-
+import { LayerListEntry } from 'geoview-core/src/core/components/common';
 import { PayloadBaseClassChart, EVENT_CHART_REDRAW } from './geochart-event-base';
 import { PayloadChartConfig } from './geochart-event-config';
 import { PluginGeoChartConfig } from './geochart-types';
@@ -78,10 +78,36 @@ class GeoChartPlugin extends AbstractPlugin {
       // Access the api calls
       const { api } = cgpv;
       this.value = api.maps[mapId].footerTabs.tabs.length;
+      const language = api.maps[mapId].displayLanguage;
+
+      const layerList = (configObj as PluginGeoChartConfig<ChartType>).charts
+        .map((chart) => {
+          const layerIds =
+            chart.layers?.map((layer) => {
+              return layer.layerId;
+            }) ?? [];
+
+          return layerIds;
+        })
+        .flat()
+        .reduce((acc, curr) => {
+          if (api.maps[mapId].layer.registeredLayers[curr]) {
+            const currLayer = api.maps[mapId].layer.registeredLayers[curr];
+            const layerData = {
+              layerName: currLayer.layerName[language],
+              layerPath: curr,
+              tooltip: currLayer.layerName[language] as string,
+            };
+            acc.push(layerData);
+          }
+
+          return acc;
+        }, [] as LayerListEntry[]);
+
       api.maps[mapId].footerTabs.createFooterTab({
         value: this.value,
         label: this.translations[api.maps[mapId].displayLanguage].chartPanel as string,
-        content: () => createElement(GeoChartPanel, { mapId, configObj }, []),
+        content: () => createElement(GeoChartPanel, { mapId, configObj, layerList }, []),
       });
     }
   };

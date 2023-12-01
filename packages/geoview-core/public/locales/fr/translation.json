@@ -144,5 +144,8 @@
     "featureFiltered": "Item filtrée(s)",
     "images": "Images",
     "close": "Fermer"
+  },
+  "geochart": {
+    "noChartAvailable": "Cliquez sur la couche de carte avec le graphique"
   }
 }

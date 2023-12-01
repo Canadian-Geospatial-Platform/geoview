@@ -12,6 +12,7 @@
           "propertyDisplay": "Location_Emplacement"
         }
       ],
+      "chart": "line",
       "query": {
         "type": "esriRegular",
         "url": "https://maps-cartes.services.geo.ca/server_serveur/rest/services/HC/airborne_radioactivity_en/MapServer/3",
@@ -27,7 +28,6 @@
           "orderByField": "CollectionStart_DebutPrelevement"
         }
       },
-      "chart": "line",
       "geochart": {
         "xAxis": {
           "type": "time",
@@ -67,21 +67,6 @@
           "propertyDisplay": "Site"
         }
       ],
-      "query": {
-        "type": "esriRegular",
-        "url": "https://maps-cartes.ec.gc.ca/arcgis/rest/services/Shellfish_Sites_Samples_Mollusques_Echantillons/MapServer/9",
-        "queryOptions": {
-          "whereClauses": [
-            {
-              "field": "Site",
-              "prefix": "'",
-              "valueFrom": "Site",
-              "suffix": "'"
-            }
-          ],
-          "orderByField": "Date"
-        }
-      },
       "chart": "line",
       "query": {
         "type": "esriRegular",

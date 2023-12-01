@@ -1,8 +1,6 @@
 import { TypeWindow } from 'geoview-core';
 import { ChartType, SchemaValidator } from 'geochart';
-import { CloseButton, EnlargeButton, LayerList, LayerTitle, ResponsiveGrid } from 'geoview-core/src/core/components/common';
-import { TypeArrayOfLayerData, TypeLayerData } from 'geoview-core/src/api/events/payloads';
-import { useDetailsStoreLayerDataArray } from 'geoview-core/src/core/stores/store-interface-and-intial-values/details-state';
+import { CloseButton, EnlargeButton, LayerList, LayerTitle, ResponsiveGrid, LayerListEntry } from 'geoview-core/src/core/components/common';
 import { getSxClasses } from './geochart-style';
 import { GeoChart } from './geochart';
 import { PluginGeoChartConfig } from './geochart-types';
@@ -10,6 +8,7 @@ import { PluginGeoChartConfig } from './geochart-types';
 interface GeoChartPanelProps {
   mapId: string;
   configObj: PluginGeoChartConfig<ChartType>;
+  layerList: LayerListEntry[];
 }
 
 const { cgpv } = window as TypeWindow;
@@ -21,7 +20,7 @@ const { cgpv } = window as TypeWindow;
  * @returns {JSX.Element} the time slider tab
  */
 export function GeoChartPanel(props: GeoChartPanelProps): JSX.Element {
-  const { mapId, configObj } = props;
+  const { mapId, configObj, layerList } = props;
   const { react, ui, useTranslation } = cgpv;
   const { useCallback, useState } = react;
   const { Box, Typography } = ui.elements;
@@ -31,10 +30,8 @@ export function GeoChartPanel(props: GeoChartPanelProps): JSX.Element {
   const theme = useTheme();
   const sxClasses = getSxClasses(theme);
 
-  const storeLayerDataArray: TypeArrayOfLayerData = useDetailsStoreLayerDataArray();
-
   // First layer is initially selected
-  const [selectedLayerData, setSelectedLayerData] = useState<TypeLayerData>(storeLayerDataArray[0]);
+  const [selectedLayerData, setSelectedLayerData] = useState<LayerListEntry>(layerList[0] ?? null);
   const [isLayersPanelVisible, setIsLayersPanelVisible] = useState(false);
   const [isEnlargeDataTable, setIsEnlargeDataTable] = useState(false);
 
@@ -43,18 +40,9 @@ export function GeoChartPanel(props: GeoChartPanelProps): JSX.Element {
    *
    * @param {LayerListEntry} layer The data of the selected layer
    */
-  const handleLayerChange = (layer: TypeLayerData): void => {
+  const handleLayerChange = (layer: LayerListEntry): void => {
     setSelectedLayerData(layer);
     setIsLayersPanelVisible(true);
-  };
-
-  /**
-   * Get number of features of a layer.
-   * @returns string
-   */
-  const getFeaturesOfLayer = (layer: TypeLayerData): string => {
-    const numOfFeatures = layer.features?.length ?? 0;
-    return `${numOfFeatures} ${t('details.feature')}${numOfFeatures > 1 ? 's' : ''}`;
   };
 
   /**
@@ -66,31 +54,26 @@ export function GeoChartPanel(props: GeoChartPanelProps): JSX.Element {
     return (
       <LayerList
         isEnlargeDataTable={isEnlargeDataTable}
-        selectedLayerIndex={storeLayerDataArray.findIndex(({ layerPath }) => layerPath === selectedLayerData?.layerPath)}
+        selectedLayerIndex={layerList.findIndex(({ layerPath }) => layerPath === selectedLayerData?.layerPath)}
         handleListItemClick={(layer) => {
-          handleLayerChange(layer as TypeLayerData);
+          handleLayerChange(layer);
         }}
-        layerList={storeLayerDataArray.map((layer) => ({
-          layerName: layer.layerName,
-          layerPath: layer.layerPath,
-          tooltip: layer.layerName as string,
-          layerFeatures: getFeaturesOfLayer(layer),
-        }))}
+        layerList={layerList}
       />
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [storeLayerDataArray, selectedLayerData, isEnlargeDataTable]);
+  }, [layerList, selectedLayerData, isEnlargeDataTable]);
 
   return (
     <Box sx={sxClasses.detailsContainer}>
-      {!storeLayerDataArray.length && (
+      {!layerList.length && (
         <ResponsiveGrid.Root>
           <ResponsiveGrid.Left isLayersPanelVisible={isLayersPanelVisible} isEnlargeDataTable={isEnlargeDataTable}>
-            <Typography component="p">{t('details.selectVisbleLayer')}</Typography>
+            <Typography component="p">{t('geoChart.noChartAvailable')}</Typography>
           </ResponsiveGrid.Left>
         </ResponsiveGrid.Root>
       )}
-      {!!storeLayerDataArray.length && (
+      {!!layerList.length && (
         <>
           <ResponsiveGrid.Root>
             <ResponsiveGrid.Left isLayersPanelVisible={isLayersPanelVisible} isEnlargeDataTable={isEnlargeDataTable}>
@@ -105,7 +88,7 @@ export function GeoChartPanel(props: GeoChartPanelProps): JSX.Element {
                   [theme.breakpoints.down('md')]: { justifyContent: 'space-between' },
                 }}
               >
-                <LayerTitle hideTitle>{selectedLayerData?.layerName ?? storeLayerDataArray[0].layerName}</LayerTitle>
+                <LayerTitle hideTitle>{selectedLayerData?.layerName ?? layerList[0].layerName}</LayerTitle>
                 <Box>
                   <EnlargeButton isEnlargeDataTable={isEnlargeDataTable} setIsEnlargeDataTable={setIsEnlargeDataTable} />
                   <CloseButton isLayersPanelVisible={isLayersPanelVisible} setIsLayersPanelVisible={setIsLayersPanelVisible} />
