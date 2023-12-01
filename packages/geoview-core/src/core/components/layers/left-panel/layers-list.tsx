@@ -1,10 +1,10 @@
 import { Dispatch, SetStateAction } from 'react';
 import { useTheme } from '@mui/material/styles';
-import { SingleLayer } from './single-layer';
+import { DragDropContext, Droppable, Draggable, DropResult } from 'react-beautiful-dnd';
+import SingleLayer from './single-layer';
 import { getSxClasses } from './left-panel-styles';
 import { List } from '@/ui';
 import { TypeLegendLayer } from '../types';
-import { DragDropContext, Droppable, Draggable, DropResult } from 'react-beautiful-dnd';
 
 interface LayerListProps {
   depth: number;
@@ -16,14 +16,12 @@ export function LayersList({ layersList, setIsLayersListPanelVisible, depth }: L
   const theme = useTheme();
   const sxClasses = getSxClasses(theme);
 
-
-  const onDragEnd = (result: DropResult) {
+  const onDragEnd = (result: DropResult) => {
     // dropped outside the list
     if (!result.destination) {
-      return;
     }
 
-    /*const items = reorder(
+    /* const items = reorder(
       this.state.items,
       result.source.index,
       result.destination.index
@@ -31,8 +29,8 @@ export function LayersList({ layersList, setIsLayersListPanelVisible, depth }: L
 
     this.setState({
       items
-    });*/
-  }
+    }); */
+  };
 
   const getListClass = () => {
     if (depth === 0) {
@@ -53,7 +51,8 @@ export function LayersList({ layersList, setIsLayersListPanelVisible, depth }: L
             depth={depth}
             layer={details}
             setIsLayersListPanelVisible={setIsLayersListPanelVisible}
-            ref={provided.innerRef} {...provided.draggableProps}
+            ref={provided.innerRef}
+            {...provided.draggableProps}
           />
         )}
       </Draggable>
@@ -69,7 +68,6 @@ export function LayersList({ layersList, setIsLayersListPanelVisible, depth }: L
             {provided.placeholder}
           </List>
         )}
-
       </Droppable>
     </DragDropContext>
   );

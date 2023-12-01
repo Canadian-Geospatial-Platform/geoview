@@ -1,4 +1,4 @@
-import { CSSProperties, Dispatch, SetStateAction, useState } from 'react';
+import { CSSProperties, forwardRef, ForwardedRef, Dispatch, SetStateAction, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   Box,
@@ -39,9 +39,10 @@ interface SingleLayerProps {
   style?: CSSProperties; // Style prop
 }
 
-export function SingleLayer(props: SingleLayerProps): JSX.Element {
-  const { layer, depth, setIsLayersListPanelVisible, style } = props;
-
+const SingleLayer: React.ForwardRefRenderFunction<HTMLDivElement, SingleLayerProps> = (
+  { depth, layer, setIsLayersListPanelVisible, style },
+  ref
+) => {
   const { t } = useTranslation<string>();
 
   const { toggleLayerVisibility, setSelectedLayerPath } = useLayerStoreActions(); // get store actions
@@ -208,7 +209,7 @@ export function SingleLayer(props: SingleLayerProps): JSX.Element {
   }
 
   return (
-    <Box className={`layerItemContainer ${layer.layerStatus} ${layerIsSelected ? 'selectedLayer' : ''}`}>
+    <Box className={`layerItemContainer ${layer.layerStatus} ${layerIsSelected ? 'selectedLayer' : ''}`} ref={ref}>
       <ListItem key={layer.layerName} divider>
         <ListItemButton selected={layerIsSelected}>
           {renderLayerIcon()}
@@ -229,4 +230,6 @@ export function SingleLayer(props: SingleLayerProps): JSX.Element {
       {renderCollapsible()}
     </Box>
   );
-}
+};
+
+export default forwardRef(SingleLayer);
