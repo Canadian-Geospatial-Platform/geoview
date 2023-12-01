@@ -1,4 +1,4 @@
-import { Cast, AbstractPlugin, TypeWindow, toJsonObject, TypePluginOptions, TypeButtonPanel, getLocalizedValue } from 'geoview-core';
+import { Cast, AbstractPlugin, TypeWindow, toJsonObject, TypePluginOptions, TypeButtonPanel } from 'geoview-core';
 import { TimeSliderPanel } from './time-slider-panel';
 
 export interface LayerProps {
@@ -60,51 +60,11 @@ class TimeSliderPlugin extends AbstractPlugin {
       // Access the api calls
       const { api } = cgpv;
 
-      // Create list of layers that have a temporal dimension
-      // TODO use list of visible layers from store
-      const layerPaths = Object.keys(api.maps[mapId].layer.registeredLayers).filter(
-        (layerPath) =>
-          api.maps[mapId].layer.registeredLayers[layerPath].entryType !== 'group' &&
-          api.maps[mapId].layer.geoviewLayers[layerPath.split('/')[0]].layerTemporalDimension[layerPath]
-      );
-      const layersList: LayerProps[] = layerPaths.map((layerPath) => {
-        return {
-          layerPath,
-          layerName: getLocalizedValue(api.maps[mapId].layer.registeredLayers[layerPath]?.layerName, mapId) || '',
-        };
-      });
-
-      // Collect data needed for slider
-      let timeSliderData: { [index: string]: SliderFilterProps } = {};
-      layersList.forEach(({ layerPath }) => {
-        const temporalDimensionInfo = api.maps[mapId].layer.geoviewLayers[layerPath.split('/')[0]].layerTemporalDimension[layerPath];
-        const { range } = temporalDimensionInfo.range;
-        const defaultValue = temporalDimensionInfo.default;
-        const minAndMax: number[] = [new Date(range[0]).getTime(), new Date(range[range.length - 1]).getTime()];
-        const { field, singleHandle } = temporalDimensionInfo;
-        const values = singleHandle ? [new Date(temporalDimensionInfo.default).getTime()] : [...minAndMax];
-        const filtering = true;
-        const sliderData = {
-          [layerPath]: {
-            range,
-            defaultValue,
-            minAndMax,
-            field,
-            singleHandle,
-            filtering,
-            values,
-            delay: 1000,
-            locked: false,
-            reversed: false,
-          },
-        };
-        timeSliderData = { ...timeSliderData, ...sliderData };
-      });
       this.value = api.maps[mapId].footerTabs.tabs.length;
       api.maps[mapId].footerTabs.createFooterTab({
         value: this.value,
         label: this.translations[api.maps[mapId].displayLanguage].timeSlider as string,
-        content: () => createElement(TimeSliderPanel, { mapId, layersList, timeSliderData }, []),
+        content: () => createElement(TimeSliderPanel, { mapId }, []),
       });
     }
   };

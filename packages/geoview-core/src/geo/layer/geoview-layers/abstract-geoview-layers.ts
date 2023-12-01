@@ -1431,7 +1431,7 @@ export abstract class AbstractGeoViewLayer {
       else processGroupLayerBounds([rootLayerConfig]);
     }
 
-    if (bounds) {
+    if (bounds && bounds[0] !== undefined) {
       bounds = transformExtent(bounds, `EPSG:4326`, `EPSG:${projectionCode}`);
     }
 
