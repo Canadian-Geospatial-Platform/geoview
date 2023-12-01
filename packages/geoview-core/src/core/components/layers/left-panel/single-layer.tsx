@@ -1,6 +1,5 @@
-import { Dispatch, SetStateAction, useState } from 'react';
+import { CSSProperties, Dispatch, SetStateAction, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useDrag } from 'react-dnd';
 import {
   Box,
   Collapse,
@@ -10,7 +9,6 @@ import {
   KeyboardArrowDownIcon,
   KeyboardArrowRightIcon,
   KeyboardArrowUpIcon,
-  List,
   ListItem,
   ListItemButton,
   ListItemIcon,
@@ -38,10 +36,11 @@ interface SingleLayerProps {
   layer: TypeLegendLayer;
   depth: number;
   setIsLayersListPanelVisible: Dispatch<SetStateAction<boolean>>;
+  style?: CSSProperties; // Style prop
 }
 
 export function SingleLayer(props: SingleLayerProps): JSX.Element {
-  const { layer, depth, setIsLayersListPanelVisible } = props;
+  const { layer, depth, setIsLayersListPanelVisible, style } = props;
 
   const { t } = useTranslation<string>();
 
@@ -54,17 +53,6 @@ export function SingleLayer(props: SingleLayerProps): JSX.Element {
   const layerIsSelected = layer.layerPath === selectedLayerPath && displayState === 'view';
 
   const [isGroupOpen, setGroupOpen] = useState(layerIsSelected);
-
-  const [{ opacity }, dragRef] = useDrag(
-    () => ({
-      type: 'SINGLE_LAYER',
-      item: { layerIndex: layer.order },
-      collect: (monitor) => ({
-        opacity: monitor.isDragging() ? 0.5 : 1,
-      }),
-    }),
-    []
-  );
 
   // get layer description
   const getLayerDescription = () => {
@@ -79,7 +67,7 @@ export function SingleLayer(props: SingleLayerProps): JSX.Element {
     }
     if (mapFiltered[layer.layerPath]) {
       return (
-        <Box style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'left', gap: 1 }}>
+        <Box style={{ ...style, display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'left', gap: 1 }}>
           <span>{layer.items.length} items </span>
           <TableViewIcon />
         </Box>
@@ -220,7 +208,7 @@ export function SingleLayer(props: SingleLayerProps): JSX.Element {
   }
 
   return (
-    <Box className={`layerItemContainer ${layer.layerStatus} ${layerIsSelected ? 'selectedLayer' : ''}`} ref={dragRef} style={{ opacity }}>
+    <Box className={`layerItemContainer ${layer.layerStatus} ${layerIsSelected ? 'selectedLayer' : ''}`}>
       <ListItem key={layer.layerName} divider>
         <ListItemButton selected={layerIsSelected}>
           {renderLayerIcon()}

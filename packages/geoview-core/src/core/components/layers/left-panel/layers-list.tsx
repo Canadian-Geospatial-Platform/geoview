@@ -1,16 +1,14 @@
 import { Dispatch, SetStateAction } from 'react';
 import { useTheme } from '@mui/material/styles';
-
 import { SingleLayer } from './single-layer';
 import { getSxClasses } from './left-panel-styles';
 import { List } from '@/ui';
-import { DndProvider } from 'react-dnd';
-import { HTML5Backend } from 'react-dnd-html5-backend';
 import { TypeLegendLayer } from '../types';
+import { DragDropContext, Droppable, Draggable, DropResult } from 'react-beautiful-dnd';
 
 interface LayerListProps {
-  depth: number,
-  layersList: TypeLegendLayer[],
+  depth: number;
+  layersList: TypeLegendLayer[];
   setIsLayersListPanelVisible: Dispatch<SetStateAction<boolean>>;
 }
 
@@ -18,23 +16,61 @@ export function LayersList({ layersList, setIsLayersListPanelVisible, depth }: L
   const theme = useTheme();
   const sxClasses = getSxClasses(theme);
 
-  const listSxClass = depth === 0 ? sxClasses.list : (depth % 2 ? sxClasses.evenDepthList : sxClasses.oddDepthList);
 
+  const onDragEnd = (result: DropResult) {
+    // dropped outside the list
+    if (!result.destination) {
+      return;
+    }
 
-  const legendItems = layersList.map((details) => {
+    /*const items = reorder(
+      this.state.items,
+      result.source.index,
+      result.destination.index
+    );
+
+    this.setState({
+      items
+    });*/
+  }
+
+  const getListClass = () => {
+    if (depth === 0) {
+      return sxClasses.list;
+    }
+    if (depth % 2) {
+      return sxClasses.evenDepthList;
+    }
+    return sxClasses.oddDepthList;
+  };
+
+  const legendItems = layersList.map((details, index) => {
     return (
-      <SingleLayer
-        key={`layerKey-${details.layerPath}-${details.layerPath}`}
-        depth={depth}
-        layer={details}
-        setIsLayersListPanelVisible={setIsLayersListPanelVisible}
-      />
+      <Draggable key={details.layerId} draggableId={details.layerPath} index={index}>
+        {(provided) => (
+          <SingleLayer
+            key={`layerKey-${details.layerPath}-${details.layerPath}`}
+            depth={depth}
+            layer={details}
+            setIsLayersListPanelVisible={setIsLayersListPanelVisible}
+            ref={provided.innerRef} {...provided.draggableProps}
+          />
+        )}
+      </Draggable>
     );
   });
 
   return (
-    <DndProvider backend={HTML5Backend}>
-      <List sx={listSxClass}>{legendItems}</List>
-    </DndProvider>
+    <DragDropContext onDragEnd={onDragEnd}>
+      <Droppable droppableId="list">
+        {(provided) => (
+          <List sx={getListClass()} {...provided.droppableProps} ref={provided.innerRef}>
+            {legendItems}
+            {provided.placeholder}
+          </List>
+        )}
+
+      </Droppable>
+    </DragDropContext>
   );
 }

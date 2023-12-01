@@ -32,7 +32,6 @@ export function LayersPanel() {
   const selectedLayer = useSelectedLayer(); // get store value
   const displayState = useLayersDisplayState();
 
-  
   // Using helpers
   const helpers = useLegendHelpers();
   useEffect(() => {
