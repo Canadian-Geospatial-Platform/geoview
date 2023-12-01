@@ -29,6 +29,7 @@ export function initializeUIState(set: TypeSetStore, get: TypeGetStore): IUIStat
     footerBarExpanded: false,
     geoLocatorActive: false,
 
+    // #region ACTIONS
     actions: {
       closeModal: () => {
         document.getElementById(get().uiState.focusITem.callbackElementId as string)?.focus();
@@ -72,6 +73,7 @@ export function initializeUIState(set: TypeSetStore, get: TypeGetStore): IUIStat
         });
       },
     },
+    // #endregion ACTIONS
   } as IUIState;
 
   return init;

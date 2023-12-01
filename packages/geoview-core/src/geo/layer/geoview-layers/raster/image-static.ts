@@ -22,6 +22,7 @@ import { getLocalizedValue, getMinOrMaxExtents } from '@/core/utils/utilities';
 import { api } from '@/app';
 import { Layer } from '../../layer';
 import { LayerSetPayload } from '@/api/events/payloads';
+import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 
 export interface TypeImageStaticLayerConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig'> {
   geoviewLayerType: 'imageStatic';
@@ -298,7 +299,7 @@ export class ImageStatic extends AbstractGeoViewRaster {
     const layerBounds = (layerConfig.olLayer as ImageLayer<Static>).getSource()?.getImageExtent();
     const projection =
       (layerConfig.olLayer as ImageLayer<Static>).getSource()?.getProjection()?.getCode().replace('EPSG:', '') ||
-      api.maps[this.mapId].currentProjection;
+      MapEventProcessor.getMapState(this.mapId).currentProjection;
 
     if (layerBounds) {
       const transformedBounds = transformExtent(layerBounds, `EPSG:${projection}`, `EPSG:4326`);
