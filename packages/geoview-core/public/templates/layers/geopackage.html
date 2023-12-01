@@ -42,11 +42,8 @@
           <tr>
             <td>
               <a href="#HLYR1">1. Geopackage Layers</a><br />
-            </td>
-          </tr>
-          <tr>
-            <td>
               <a href="#HLYR2">2. Multiple GeoPackage Layers - one with multiple layers</a><br />
+              <a href="#HLYR3">3. Geopackage Layers - with footer panel</a><br />
             </td>
           </tr>
         </tbody>
@@ -181,6 +178,59 @@
     <hr />
     <button type="button" class="collapsible">Code Snippet</button>
     <pre id="codeSnippet" class="panel"></pre>
+
+    <div class="map-title-holder">
+      <h4 id="HLYR3">1. GeoPackage Layers</h4>
+      <a class="ref-link" href="#top">Top</a>
+    </div>
+    <button class="collapsible active">Map Status Flags</button>
+    <pre id="HLYR3-state" class="panel map-title-holder"></pre>
+    <hr />
+    <div
+      id="LYR3"
+      class="llwp-map"
+      triggerReadyCallback="true"
+      data-lang="en"
+      data-config="{
+        'map': {
+          'interaction': 'dynamic',
+          'viewSettings': {
+            'zoom': 4,
+            'center': [-100, 60],
+            'projection': 3857
+          },
+          'basemapOptions': {
+            'basemapId': 'transport',
+            'shaded': false,
+            'labeled': true
+          },
+          'listOfGeoviewLayerConfig': [
+            {
+              'geoviewLayerId': 'GeoPackageLYR1',
+              'geoviewLayerName': {
+                'en': 'Natural Earth'
+              },
+              'geoviewLayerType': 'GeoPackage',
+              'listOfLayerEntryConfig': [
+                {
+                  'layerId': 'Natural_Earth_QGIS_layers_and_styles.gpkg',
+                  'layerName': { 'en': 'Natural Earth' },
+                  'source': {
+                    'dataAccessPath': {
+                      'en': './geojson'
+                    }
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        'components': ['overview-map'],
+        'corePackages': ['footer-panel'],
+        'theme': 'royal',
+        'suportedLanguages': ['en']
+      }"
+    ></div>
 
     <script src="codedoc.js"></script>
     <script src="layerlib.js"></script>

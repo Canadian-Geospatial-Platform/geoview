@@ -1,9 +1,9 @@
 import { useTheme } from '@mui/material/styles';
 import { FormControl, InputLabel, NativeSelect } from '@mui/material';
-import { AbstractGeoViewVector, TypeWindow, getLocalizedValue } from 'geoview-core';
-import { EsriDynamic, TypeFeatureInfoLayerConfig } from 'geoview-core/src/geo/';
+import { TypeWindow, useStore } from 'geoview-core';
+import { useTimeSliderStoreActions } from 'geoview-core/src/core/stores';
+import { useGeoViewStore } from 'geoview-core/src/core/stores/stores-managers';
 import { getSxClasses } from './time-slider-style';
-import { SliderFilterProps } from './index';
 
 /**
  * translations object to inject to the viewer translations
@@ -42,7 +42,6 @@ const translations: { [index: string]: { [index: string]: string } } = {
 interface TimeSliderPanelProps {
   mapId: string;
   layerPath: string;
-  sliderFilterProps: SliderFilterProps;
 }
 
 const { cgpv } = window as TypeWindow;
@@ -54,7 +53,7 @@ const { cgpv } = window as TypeWindow;
  * @returns {JSX.Element} the slider panel
  */
 export function TimeSlider(TimeSliderPanelProps: TimeSliderPanelProps) {
-  const { mapId, layerPath, sliderFilterProps } = TimeSliderPanelProps;
+  const { mapId, layerPath } = TimeSliderPanelProps;
   const { api, react, ui } = cgpv;
   const { useState, useRef, useEffect } = react;
   const {
@@ -74,32 +73,31 @@ export function TimeSlider(TimeSliderPanelProps: TimeSliderPanelProps) {
     SwitchLeftIcon,
   } = ui.elements;
   const { displayLanguage } = api.maps[mapId];
-  const { range, defaultValue, minAndMax, field, singleHandle, values, filtering, delay, locked, reversed } = sliderFilterProps;
-  const timeStampRange = range.map((entry) => new Date(entry).getTime());
+
   const theme = useTheme();
   const sxClasses = getSxClasses(theme);
-  const [checked, setChecked] = useState<boolean>(filtering);
+
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
   const playIntervalRef = useRef<number>();
-  const [isReversed, setIsReversed] = useState<boolean>(reversed);
-  const [isLocked, setIsLocked] = useState<boolean>(locked);
-  const layerSchemaTag = api.maps[mapId].layer.registeredLayers[layerPath].schemaTag;
-  const [sliderValues, setSliderValues] = useState<number[]>(values);
+
   // References for play button
   const sliderValueRef = useRef<number>();
   const sliderDeltaRef = useRef<number>();
 
-  const [timeDelay, setTimeDelay] = useState<number>(delay);
+  // Get actions and states from store
+  const { applyFilters, setValues, setLocked, setReversed, setDelay, setFiltering } = useTimeSliderStoreActions();
+  const range = useStore(useGeoViewStore(), (state) => state.timeSliderState.timeSliderLayers[layerPath].range);
+  const defaultValue = useStore(useGeoViewStore(), (state) => state.timeSliderState.timeSliderLayers[layerPath].defaultValue);
+  const minAndMax = useStore(useGeoViewStore(), (state) => state.timeSliderState.timeSliderLayers[layerPath].minAndMax);
+  const fieldAlias = useStore(useGeoViewStore(), (state) => state.timeSliderState.timeSliderLayers[layerPath].fieldAlias);
+  const singleHandle = useStore(useGeoViewStore(), (state) => state.timeSliderState.timeSliderLayers[layerPath].singleHandle);
+  const values = useStore(useGeoViewStore(), (state) => state.timeSliderState.timeSliderLayers[layerPath].values);
+  const filtering = useStore(useGeoViewStore(), (state) => state.timeSliderState.timeSliderLayers[layerPath].filtering);
+  const delay = useStore(useGeoViewStore(), (state) => state.timeSliderState.timeSliderLayers[layerPath].delay);
+  const locked = useStore(useGeoViewStore(), (state) => state.timeSliderState.timeSliderLayers[layerPath].locked);
+  const reversed = useStore(useGeoViewStore(), (state) => state.timeSliderState.timeSliderLayers[layerPath].reversed);
 
-  // If the field type has an alias, use that as a label
-  let fieldAlias = field;
-  const { featureInfo } = api.maps[mapId].layer.registeredLayers[layerPath].source!;
-  const { aliasFields, outfields } = featureInfo as TypeFeatureInfoLayerConfig;
-  const localizedOutFields = getLocalizedValue(outfields, mapId)?.split(',');
-  const localizedAliasFields = getLocalizedValue(aliasFields, mapId)?.split(',');
-  const fieldIndex = localizedOutFields ? localizedOutFields.indexOf(field) : -1;
-  if (fieldIndex !== -1 && localizedAliasFields?.length === localizedOutFields?.length) fieldAlias = localizedAliasFields![fieldIndex];
-
+  const timeStampRange = range.map((entry) => new Date(entry).getTime());
   // Check if range occurs in a single day or year
   const timeDelta = minAndMax[1] - minAndMax[0];
   const dayDelta = new Date(minAndMax[1]).getDate() - new Date(minAndMax[0]).getDate();
@@ -149,26 +147,30 @@ export function TimeSlider(TimeSliderPanelProps: TimeSliderPanelProps) {
    */
   function moveBack(): void {
     if (singleHandle) {
-      const currentIndex = timeStampRange.indexOf(sliderValues[0]);
+      const currentIndex = timeStampRange.indexOf(values[0]);
       let newIndex: number;
       if (timeStampRange[currentIndex] === minAndMax[0]) newIndex = timeStampRange.length - 1;
       else newIndex = currentIndex - 1;
-      setSliderValues([timeStampRange[newIndex]]);
+      setValues(layerPath, [timeStampRange[newIndex]]);
+      applyFilters(layerPath, [timeStampRange[newIndex]]);
     } else {
-      let [leftHandle, rightHandle] = sliderValues;
+      let [leftHandle, rightHandle] = values;
       // If the current distance between slider handles is more than 1/5th of the range, reduce the difference to 1/5th range
       if (!sliderDeltaRef.current) {
         if (rightHandle - leftHandle > (minAndMax[1] - minAndMax[0]) / 5) {
           sliderDeltaRef.current = (minAndMax[1] - minAndMax[0]) / 5;
-          setSliderValues([rightHandle - sliderDeltaRef.current, rightHandle]);
-        } else sliderDeltaRef.current = rightHandle - leftHandle;
+          setValues(layerPath, [rightHandle - sliderDeltaRef.current, rightHandle]);
+          applyFilters(layerPath, [rightHandle - sliderDeltaRef.current, rightHandle]);
+          return;
+        }
+        sliderDeltaRef.current = rightHandle - leftHandle;
       }
       // Check for edge cases and then set new slider values
-      if (isLocked && isReversed) {
+      if (locked && reversed) {
         if (leftHandle === minAndMax[0]) leftHandle = rightHandle;
         leftHandle -= sliderDeltaRef.current;
         if (leftHandle < minAndMax[0]) [leftHandle] = minAndMax;
-      } else if (isLocked) {
+      } else if (locked) {
         rightHandle -= sliderDeltaRef.current!;
         if (rightHandle < leftHandle) rightHandle = leftHandle;
         if (rightHandle === leftHandle) [, rightHandle] = minAndMax;
@@ -180,7 +182,8 @@ export function TimeSlider(TimeSliderPanelProps: TimeSliderPanelProps) {
         if (leftHandle < minAndMax[0]) [leftHandle] = minAndMax;
         if (leftHandle < sliderValueRef.current! && rightHandle > sliderValueRef.current!) leftHandle = sliderValueRef.current as number;
       }
-      setSliderValues([leftHandle, rightHandle]);
+      setValues(layerPath, [leftHandle, rightHandle]);
+      applyFilters(layerPath, [leftHandle, rightHandle]);
     }
   }
 
@@ -189,25 +192,29 @@ export function TimeSlider(TimeSliderPanelProps: TimeSliderPanelProps) {
    */
   function moveForward(): void {
     if (singleHandle) {
-      const currentIndex = timeStampRange.indexOf(sliderValues[0]);
+      const currentIndex = timeStampRange.indexOf(values[0]);
       let newIndex: number;
       if (timeStampRange[currentIndex] === minAndMax[1]) newIndex = 0;
       else newIndex = currentIndex + 1;
-      setSliderValues([timeStampRange[newIndex]]);
+      setValues(layerPath, [timeStampRange[newIndex]]);
+      applyFilters(layerPath, [timeStampRange[newIndex]]);
     } else {
-      let [leftHandle, rightHandle] = sliderValues;
+      let [leftHandle, rightHandle] = values;
       // If the current distance between slider handles is more than 1/5th of the range, reduce the difference to 1/5th range
       if (!sliderDeltaRef.current) {
         if (rightHandle - leftHandle > (minAndMax[1] - minAndMax[0]) / 5) {
           sliderDeltaRef.current = (minAndMax[1] - minAndMax[0]) / 5;
-          setSliderValues([leftHandle, leftHandle + sliderDeltaRef.current]);
-        } else sliderDeltaRef.current = rightHandle - leftHandle;
+          setValues(layerPath, [leftHandle, leftHandle + sliderDeltaRef.current]);
+          applyFilters(layerPath, [leftHandle, leftHandle + sliderDeltaRef.current]);
+          return;
+        }
+        sliderDeltaRef.current = rightHandle - leftHandle;
       }
       // Check for edge cases and then set new slider values
-      if (isLocked && isReversed) {
+      if (locked && reversed) {
         leftHandle += sliderDeltaRef.current!;
         if (leftHandle >= rightHandle) [leftHandle] = minAndMax;
-      } else if (isLocked) {
+      } else if (locked) {
         if (rightHandle === minAndMax[1]) rightHandle = leftHandle;
         rightHandle += sliderDeltaRef.current!;
         if (rightHandle > minAndMax[1]) [, rightHandle] = minAndMax;
@@ -219,111 +226,85 @@ export function TimeSlider(TimeSliderPanelProps: TimeSliderPanelProps) {
         if (rightHandle > minAndMax[1]) [, rightHandle] = minAndMax;
         if (rightHandle > sliderValueRef.current! && leftHandle < sliderValueRef.current!) rightHandle = sliderValueRef.current as number;
       }
-      setSliderValues([leftHandle, rightHandle]);
+      setValues(layerPath, [leftHandle, rightHandle]);
+      applyFilters(layerPath, [leftHandle, rightHandle]);
     }
   }
 
   useEffect(() => {
-    // TODO move api calls out and handle with store
-    // Apply filter to map if active, otherwise use default
-    if (layerSchemaTag === 'ogcWms') {
-      if (checked) {
-        const newValue = `${new Date(sliderValues[0]).toISOString().slice(0, new Date(sliderValues[0]).toISOString().length - 5)}Z`;
-        const filter = `${field}=date '${newValue}'`;
-        (api.maps[mapId].layer.geoviewLayers[layerPath.split('/')[0]] as AbstractGeoViewVector | EsriDynamic).applyViewFilter(
-          layerPath,
-          filter
-        );
-      } else {
-        const filter = `${field}=date '${defaultValue}'`;
-        (api.maps[mapId].layer.geoviewLayers[layerPath.split('/')[0]] as AbstractGeoViewVector | EsriDynamic).applyViewFilter(
-          layerPath,
-          filter
-        );
-      }
-    } else if (checked) {
-      let filter = `${field} >= date '${new Date(sliderValues[0]).toISOString()}'`;
-      if (sliderValues.length > 1) {
-        filter += ` and ${field} <= date '${new Date(sliderValues[1]).toISOString()}'`;
-      }
-      (api.maps[mapId].layer.geoviewLayers[layerPath.split('/')[0]] as AbstractGeoViewVector | EsriDynamic).applyViewFilter(
-        layerPath,
-        filter
-      );
-    } else {
-      let filter = `${field} >= date '${new Date(minAndMax[0]).toISOString()}'`;
-      if (sliderValues.length > 1) {
-        filter += `and ${field} <= date '${new Date(minAndMax[1]).toISOString()}'`;
-      }
-      (api.maps[mapId].layer.geoviewLayers[layerPath.split('/')[0]] as AbstractGeoViewVector | EsriDynamic).applyViewFilter(
-        layerPath,
-        filter
-      );
-    }
-    sliderFilterProps.values = sliderValues;
-
     // If slider cycle is active, pause before advancing to next increment
     if (isPlaying) {
-      if (isReversed) playIntervalRef.current = window.setTimeout(() => moveBack(), timeDelay);
-      else playIntervalRef.current = window.setTimeout(() => moveForward(), timeDelay);
+      if (reversed) playIntervalRef.current = window.setTimeout(() => moveBack(), delay);
+      else playIntervalRef.current = window.setTimeout(() => moveForward(), delay);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [sliderValues, checked, isReversed, isLocked]);
+  }, [values, filtering, reversed, locked]);
 
   // When slider cycle is activated, advance to first increment without delay
   useEffect(() => {
     if (isPlaying) {
-      if (isReversed) moveBack();
+      if (reversed) moveBack();
       else moveForward();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isPlaying]);
 
   function handleBack(): void {
-    sliderValueRef.current = isReversed ? sliderValues[1] : sliderValues[0];
+    sliderValueRef.current = reversed ? values[1] : values[0];
     moveBack();
   }
 
   function handleForward(): void {
-    [sliderValueRef.current] = sliderValues;
+    [sliderValueRef.current] = values;
     moveForward();
   }
 
   function handleLock(): void {
     clearTimeout(playIntervalRef.current);
-    sliderFilterProps.locked = !isLocked;
-    setIsLocked(!isLocked);
+    setLocked(layerPath, !locked);
   }
 
   function handlePlay(): void {
     clearTimeout(playIntervalRef.current);
-    sliderValueRef.current = isReversed ? sliderValues[1] : sliderValues[0];
+    sliderValueRef.current = reversed ? values[1] : values[0];
     setIsPlaying(!isPlaying);
   }
 
   function handleReverse(): void {
     clearTimeout(playIntervalRef.current);
-    sliderFilterProps.reversed = !isReversed;
-    setIsReversed(!isReversed);
+    setReversed(layerPath, !reversed);
+    if (isPlaying) {
+      if (reversed) moveBack();
+      else moveForward();
+    }
   }
 
   function handleSliderChange(event: number | number[]): void {
     clearTimeout(playIntervalRef.current);
+    setIsPlaying(false);
     sliderDeltaRef.current = undefined;
-    setSliderValues(event as number[]);
+    setValues(layerPath, event as number[]);
+    applyFilters(layerPath, event as number[]);
   }
 
   function handleTimeChange(event: React.ChangeEvent<HTMLSelectElement>): void {
-    sliderFilterProps.delay = event.target.value as unknown as number;
-    setTimeDelay(event.target.value as unknown as number);
+    setDelay(layerPath, event.target.value as unknown as number);
+  }
+
+  function handleCheckbox(newValue: boolean): void {
+    setFiltering(layerPath, newValue);
+    if (!newValue) {
+      clearInterval(playIntervalRef.current);
+      setIsPlaying(false);
+    }
   }
 
   function returnLockTooltip(): string {
-    if (isReversed) {
-      const text = isLocked ? translations[displayLanguage].unlockRight : translations[displayLanguage].lockRight;
+    if (reversed) {
+      const text = locked ? translations[displayLanguage].unlockRight : translations[displayLanguage].lockRight;
       return text;
     }
-    const text = isLocked ? translations[displayLanguage].unlockLeft : translations[displayLanguage].lockLeft;
+    const text = locked ? translations[displayLanguage].unlockLeft : translations[displayLanguage].lockLeft;
     return text;
   }
 
@@ -343,21 +324,11 @@ export function TimeSlider(TimeSliderPanelProps: TimeSliderPanelProps) {
           <Grid item xs={3}>
             <div style={{ textAlign: 'right', marginRight: '25px' }}>
               <Tooltip
-                title={checked ? translations[displayLanguage].disableFilter : translations[displayLanguage].enableFilter}
+                title={filtering ? translations[displayLanguage].disableFilter : translations[displayLanguage].enableFilter}
                 placement="top"
                 enterDelay={1000}
               >
-                <Checkbox
-                  checked={checked}
-                  onChange={(event, child) => {
-                    setChecked(child);
-                    sliderFilterProps.filtering = child;
-                    if (!child) {
-                      clearInterval(playIntervalRef.current);
-                      setIsPlaying(false);
-                    }
-                  }}
-                />
+                <Checkbox checked={filtering} onChange={(event, child) => handleCheckbox(child)} />
               </Tooltip>
             </div>
           </Grid>
@@ -369,12 +340,12 @@ export function TimeSlider(TimeSliderPanelProps: TimeSliderPanelProps) {
               style={{ width: '80%', color: 'primary' }}
               min={minAndMax[0]}
               max={minAndMax[1]}
-              value={sliderValues}
+              value={values}
               valueLabelFormat={(value) => valueLabelFormat(value)}
               marks={sliderMarks}
               step={singleHandle ? null : 0.1}
               customOnChange={(event) => handleSliderChange(event)}
-              key={sliderValues[1] ? sliderValues[1] + sliderValues[0] : sliderValues[0]}
+              key={values[1] ? values[1] + values[0] : values[0]}
             />
           </div>
         </Grid>
@@ -387,14 +358,14 @@ export function TimeSlider(TimeSliderPanelProps: TimeSliderPanelProps) {
                 tooltipPlacement="top"
                 onClick={() => handleLock()}
               >
-                {isLocked ? <LockIcon /> : <LockOpenIcon />}
+                {locked ? <LockIcon /> : <LockOpenIcon />}
               </IconButton>
             )}
             <IconButton
               aria-label="Back"
               tooltip="Back"
               tooltipPlacement="top"
-              disabled={isPlaying || !checked}
+              disabled={isPlaying || !filtering}
               onClick={() => handleBack()}
             >
               <ArrowLeftIcon />
@@ -403,7 +374,7 @@ export function TimeSlider(TimeSliderPanelProps: TimeSliderPanelProps) {
               aria-label={isPlaying ? translations[displayLanguage].pauseAnimation : translations[displayLanguage].playAnimation}
               tooltip={isPlaying ? translations[displayLanguage].pauseAnimation : translations[displayLanguage].playAnimation}
               tooltipPlacement="top"
-              disabled={!checked}
+              disabled={!filtering}
               onClick={() => handlePlay()}
             >
               {!isPlaying ? <PlayArrowIcon /> : <PauseIcon />}
@@ -412,7 +383,7 @@ export function TimeSlider(TimeSliderPanelProps: TimeSliderPanelProps) {
               aria-label={translations[displayLanguage].forward}
               tooltip={translations[displayLanguage].forward}
               tooltipPlacement="top"
-              disabled={isPlaying || !checked}
+              disabled={isPlaying || !filtering}
               onClick={() => handleForward()}
             >
               <ArrowRightIcon />
@@ -423,12 +394,12 @@ export function TimeSlider(TimeSliderPanelProps: TimeSliderPanelProps) {
               tooltipPlacement="top"
               onClick={() => handleReverse()}
             >
-              {isReversed ? <SwitchRightIcon /> : <SwitchLeftIcon />}
+              {reversed ? <SwitchRightIcon /> : <SwitchLeftIcon />}
             </IconButton>
             <FormControl sx={{ width: '150px' }}>
               <InputLabel variant="standard">{translations[displayLanguage].timeDelay}</InputLabel>
               <NativeSelect
-                defaultValue={timeDelay}
+                defaultValue={delay}
                 inputProps={{
                   name: 'timeDelay',
                   onChange: (event) => handleTimeChange(event),
