@@ -84,31 +84,6 @@ export function Slider(props: TypeSliderProps): JSX.Element {
     api.event.emit(sliderPayload(EVENT_NAMES.SLIDER.EVENT_SLIDER_CHANGE, properties.sliderId, sliderValues));
   };
 
-  // remove overlapping labels
-  const removeLabelOverlap = () => {
-    const labelPadding = 10;
-    // get slider labels
-    const markers = document.getElementsByClassName('MuiSlider-markLabel');
-    for (let i = 0; i < markers.length; i++) markers[i].classList.remove('MuiSlider-markLabel-overlap');
-
-    // loop until all labels are tested
-    for (let curIndex = 0, testIndex = 1; testIndex < markers.length; testIndex++) {
-      // get div rectangle and check for collision
-      const d1 = markers[curIndex].getBoundingClientRect();
-      const d2 = markers[testIndex].getBoundingClientRect();
-      const ox = Math.abs(d1.x - d2.x) < (d1.x < d2.x ? d2.width + labelPadding : d1.width + labelPadding);
-      const oy = Math.abs(d1.y - d2.y) < (d1.y < d2.y ? d2.height : d1.height);
-
-      // if there is a collision, set classname and test with the next pips
-      if (ox && oy) {
-        markers[testIndex].classList.add('MuiSlider-markLabel-overlap');
-      } else {
-        // if there is no  collision and reset the curIndex to be the one before the testIndex
-        curIndex = testIndex - curIndex !== 1 ? testIndex : curIndex + 1;
-      }
-    }
-  };
-
   const sliderSetMinMaxListenerFunction = (payload: PayloadBaseClass) => {
     if (payloadIsASlider(payload)) {
       setMin(payload.sliderValues.min);
@@ -143,13 +118,86 @@ export function Slider(props: TypeSliderProps): JSX.Element {
     }
   };
 
+  const checkOverlap = (prev: Element | null, curr: Element, next: Element | null, orientation: string | undefined = 'horizontal') => {
+    const labelPadding = 10;
+    const prevDim = prev ? prev.getBoundingClientRect() : null;
+    const currDim = curr.getBoundingClientRect();
+    const nextDim = next ? next.getBoundingClientRect() : null;
+
+    let hasPrevOverlap = false;
+    let hasNextOverlap = false;
+
+    if (prevDim) {
+      hasPrevOverlap =
+        orientation === 'vertical' ? prevDim.bottom + labelPadding > currDim.top : prevDim.right + labelPadding > currDim.left;
+    }
+    if (nextDim) {
+      hasNextOverlap =
+        orientation === 'vertical' ? currDim.bottom + labelPadding > nextDim.top : currDim.right + labelPadding > nextDim.left;
+    }
+
+    return hasPrevOverlap || hasNextOverlap;
+  };
+
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const removeLabelOverlap = () => {
+    // get slider labels
+    const markers = document.getElementsByClassName('MuiSlider-markLabel');
+    for (let i = 0; i < markers.length; i++) markers[i].classList.remove('MuiSlider-markLabel-overlap');
+
+    let middleIndices = markers.length % 2 === 0 ? [markers.length / 2, markers.length / 2 + 1] : [Math.floor(markers.length / 2)];
+    let lastVisibleInFirstHalf = 0;
+    let firstVisibleInSecondHalf = markers.length - 1;
+
+    // Check first half
+    for (let prevIdx = 0, currIdx = 1; currIdx < markers.length / 2; currIdx++) {
+      // if there is a collision, set classname and test with the next pips
+      if (checkOverlap(markers[prevIdx], markers[currIdx], null)) {
+        markers[currIdx].classList.add('MuiSlider-markLabel-overlap');
+      } else {
+        // if there is no collision and reset the startIdx to be the one before the fwdIdx
+        prevIdx = currIdx - prevIdx !== 1 ? currIdx : prevIdx + 1;
+        lastVisibleInFirstHalf = currIdx;
+      }
+    }
+
+    // Check second half
+    for (let nextIdx = markers.length - 1, currIdx = markers.length - 2; currIdx > markers.length / 2; currIdx--) {
+      if (checkOverlap(null, markers[currIdx], markers[nextIdx])) {
+        markers[currIdx].classList.add('MuiSlider-markLabel-overlap');
+      } else {
+        // if there is no  collision and reset the curIndex to be the one before the testIndex
+        nextIdx = nextIdx - currIdx !== 1 ? currIdx : nextIdx - 1;
+        firstVisibleInSecondHalf = currIdx;
+      }
+    }
+
+    middleIndices.push(lastVisibleInFirstHalf, firstVisibleInSecondHalf);
+    middleIndices = [...new Set(middleIndices)].sort((a, b) => a - b);
+
+    // Check middle elements
+    for (let testIdx = 0, currIdx = 1; currIdx < middleIndices.length; currIdx++) {
+      if (
+        checkOverlap(
+          markers[middleIndices[testIdx]],
+          markers[middleIndices[currIdx]],
+          currIdx === middleIndices.length - 1 ? null : markers[middleIndices[currIdx + 1]]
+        )
+      ) {
+        markers[middleIndices[currIdx]].classList.add('MuiSlider-markLabel-overlap');
+      } else {
+        testIdx = currIdx - testIdx !== 1 ? currIdx : testIdx + 1;
+      }
+    }
+  };
+
   useLayoutEffect(() => {
     // remove overlaping labels
     removeLabelOverlap();
 
     window.addEventListener('resize', removeLabelOverlap);
     return () => window.removeEventListener('resize', removeLabelOverlap);
-  }, []);
+  }, [removeLabelOverlap]);
 
   useEffect(() => {
     // on set min/max, update slider
