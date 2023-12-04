@@ -23,11 +23,12 @@ export const sxClassesFooterBar = {
       cursor: 'pointer',
       margin: 'auto 0 auto auto',
     },
+    justifyContent: 'end',
   },
   rotationControlsContainer: {
     display: 'flex',
     flexDirection: 'column',
-    marginLeft: 20,
+    marginLeft: '20px',
     alignItems: 'flex-end',
   },
 };

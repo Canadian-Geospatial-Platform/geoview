@@ -1647,6 +1647,7 @@
       "additionalProperties": false,
       "type": "object",
       "properties": {
+        "mapId": { "type": "string" },
         "map": {
           "$ref": "#/definitions/TypeMapConfig"
         },

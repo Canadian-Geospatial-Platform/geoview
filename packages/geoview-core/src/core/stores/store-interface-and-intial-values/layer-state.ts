@@ -11,12 +11,13 @@ import { TypeGetStore, TypeSetStore } from '../geoview-store';
 import { TypeStyleGeometry, TypeUniqueValueStyleConfig, TypeVectorLayerEntryConfig } from '@/geo/map/map-schema-types';
 import { AbstractGeoViewVector, EsriDynamic, api } from '@/app';
 import { OL_ZOOM_DURATION, OL_ZOOM_PADDING } from '@/core/utils/constant';
+import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 
 export interface ILayerState {
   highlightedLayer: string;
   selectedItem?: TypeLegendLayer;
   selectedIsVisible: boolean;
-  selectedLayers: Record<string, { layer: string; icon: string }[]>;
+  selectedLayer: TypeLegendLayer;
   selectedLayerPath: string | undefined | null;
   legendLayers: TypeLegendLayer[];
   displayState: TypeLayersViewDisplayState;
@@ -38,7 +39,6 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
   const init = {
     highlightedLayer: '',
     selectedIsVisible: false,
-    selectedLayers: {} as Record<string, { layer: string; icon: string }[]>,
     legendLayers: [] as TypeLegendLayer[],
     selectedLayerPath: null,
     displayState: 'view',
@@ -79,10 +79,13 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
         });
       },
       setSelectedLayerPath: (layerPath: string) => {
+        const curLayers = get().layerState.legendLayers;
+        const layer = findLayerByPath(curLayers, layerPath);
         set({
           layerState: {
             ...get().layerState,
             selectedLayerPath: layerPath,
+            selectedLayer: layer as TypeLegendLayer,
           },
         });
       },
@@ -211,11 +214,10 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
         api.maps[get().mapId].layer.removeLayersUsingPath(layerPath);
       },
       zoomToLayerExtent: (layerPath: string) => {
-        // TODO: keep reference to geoview map instance in the store or keep accessing with api - discussion
         const options: FitOptions = { padding: OL_ZOOM_PADDING, duration: OL_ZOOM_DURATION };
         const layer = findLayerByPath(get().layerState.legendLayers, layerPath);
         const { bounds } = layer as TypeLegendLayer;
-        if (bounds) api.maps[get().mapId].zoomToExtent(bounds, options);
+        if (bounds) MapEventProcessor.zoomToExtent(get().mapId, bounds, options);
       },
     },
   } as ILayerState;
@@ -265,8 +267,10 @@ function deleteSingleLayer(layers: TypeLegendLayer[], layerPath: string) {
 // **********************************************************
 // Layer state selectors
 // **********************************************************
+export const useLayerBounds = () => useStore(useGeoViewStore(), (state) => state.layerState.legendLayers);
 export const useLayerHighlightedLayer = () => useStore(useGeoViewStore(), (state) => state.layerState.highlightedLayer);
 export const useLayersList = () => useStore(useGeoViewStore(), (state) => state.layerState.legendLayers);
+export const useLayerSelectedLayer = () => useStore(useGeoViewStore(), (state) => state.layerState.selectedLayer);
 export const useSelectedLayerPath = () => useStore(useGeoViewStore(), (state) => state.layerState.selectedLayerPath);
 export const useLayersDisplayState = () => useStore(useGeoViewStore(), (state) => state.layerState.displayState);
 

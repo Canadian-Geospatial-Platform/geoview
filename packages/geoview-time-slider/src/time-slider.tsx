@@ -1,8 +1,7 @@
 import { useTheme } from '@mui/material/styles';
 import { FormControl, InputLabel, NativeSelect } from '@mui/material';
-import { TypeWindow, useStore } from 'geoview-core';
-import { useTimeSliderStoreActions } from 'geoview-core/src/core/stores';
-import { useGeoViewStore } from 'geoview-core/src/core/stores/stores-managers';
+import { TypeWindow } from 'geoview-core';
+import { useTimeSliderLayers, useTimeSliderStoreActions } from 'geoview-core/src/core/stores';
 import { getSxClasses } from './time-slider-style';
 
 /**
@@ -85,17 +84,18 @@ export function TimeSlider(TimeSliderPanelProps: TimeSliderPanelProps) {
   const sliderDeltaRef = useRef<number>();
 
   // Get actions and states from store
+  // TODO: evaluate best option to set value by layer path.... trough a getter?
   const { setValues, setLocked, setReversed, setDelay, setFiltering } = useTimeSliderStoreActions();
-  const range = useStore(useGeoViewStore(), (state) => state.timeSliderState.timeSliderLayers[layerPath].range);
-  const defaultValue = useStore(useGeoViewStore(), (state) => state.timeSliderState.timeSliderLayers[layerPath].defaultValue);
-  const minAndMax = useStore(useGeoViewStore(), (state) => state.timeSliderState.timeSliderLayers[layerPath].minAndMax);
-  const fieldAlias = useStore(useGeoViewStore(), (state) => state.timeSliderState.timeSliderLayers[layerPath].fieldAlias);
-  const singleHandle = useStore(useGeoViewStore(), (state) => state.timeSliderState.timeSliderLayers[layerPath].singleHandle);
-  const values = useStore(useGeoViewStore(), (state) => state.timeSliderState.timeSliderLayers[layerPath].values);
-  const filtering = useStore(useGeoViewStore(), (state) => state.timeSliderState.timeSliderLayers[layerPath].filtering);
-  const delay = useStore(useGeoViewStore(), (state) => state.timeSliderState.timeSliderLayers[layerPath].delay);
-  const locked = useStore(useGeoViewStore(), (state) => state.timeSliderState.timeSliderLayers[layerPath].locked);
-  const reversed = useStore(useGeoViewStore(), (state) => state.timeSliderState.timeSliderLayers[layerPath].reversed);
+  const { range } = useTimeSliderLayers()[layerPath];
+  const { defaultValue } = useTimeSliderLayers()[layerPath];
+  const { minAndMax } = useTimeSliderLayers()[layerPath];
+  const { fieldAlias } = useTimeSliderLayers()[layerPath];
+  const { singleHandle } = useTimeSliderLayers()[layerPath];
+  const { values } = useTimeSliderLayers()[layerPath];
+  const { filtering } = useTimeSliderLayers()[layerPath];
+  const { delay } = useTimeSliderLayers()[layerPath];
+  const { locked } = useTimeSliderLayers()[layerPath];
+  const { reversed } = useTimeSliderLayers()[layerPath];
 
   const timeStampRange = range.map((entry) => new Date(entry).getTime());
   // Check if range occurs in a single day or year

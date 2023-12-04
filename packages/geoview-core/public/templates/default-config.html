@@ -207,7 +207,7 @@
       <a class="ref-link" href="#top">Top</a>
     </div>
     <div id="CONF7" class="llwp-map" data-lang="fr"></div>
-    <p>This map loads it's configurations from a function call</p>
+    <p>This map loads it's configurations from a function call (after 10 seconds). Configuration error with double layer id.</p>
     <hr />
 
     <button type="button" class="collapsible">Code Snippet</button>
@@ -219,62 +219,64 @@
       cgpv.init(function (mapId) {
         console.log('api is ready');
 
-        if (cgpv.api.maps['CONF7']) {
-          setTimeout(() => {
-            cgpv.api.maps['CONF7'].loadMapFromJsonStringConfig (`{
-              'map': {
-                'interaction': 'dynamic',
-                'viewSettings': {
-                  'zoom': 7,
-                  'center': [-110, 70],
-                  'projection': 3978
+        // TODO: init is not call for individual maps, onlly for all aps but in facts all maps are not created yet
+        //! bug
+        setTimeout(() => {
+          if (cgpv.api.maps['CONF7']) {
+              cgpv.api.maps['CONF7'].loadMapFromJsonStringConfig (`{
+                'map': {
+                  'interaction': 'dynamic',
+                  'viewSettings': {
+                    'zoom': 10,
+                    'center': [-110, 70],
+                    'projection': 3978
+                  },
+                  'basemapOptions': {
+                    'basemapId': 'transport',
+                    'shaded': false,
+                    'labeled': true
+                  },
+                  'listOfGeoviewLayerConfig': [{
+                    'geoviewLayerId': 'wmsLYR1',
+                    'geoviewLayerName': {
+                      'en': 'earthquakes',
+                      'fr': 'earthquakes'
+                    },
+                    'metadataAccessPath': {
+                      'en': 'https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/earthquakes_en/MapServer/',
+                      'fr': 'https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/earthquakes_en/MapServer/'
+                    },
+                    'geoviewLayerType': 'esriDynamic',
+                    'listOfLayerEntryConfig': [
+                      {
+                        'layerId': '0'
+                      }
+                    ]
+                  }, {
+                    'geoviewLayerId': 'wmsLYR1',
+                    'geoviewLayerName': {
+                      'en': 'earthquakes',
+                      'fr': 'earthquakes'
+                    },
+                    'metadataAccessPath': {
+                      'en': 'https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/earthquakes_en/MapServer/',
+                      'fr': 'https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/earthquakes_en/MapServer/'
+                    },
+                    'geoviewLayerType': 'esriDynamic',
+                    'listOfLayerEntryConfig': [
+                      {
+                        'layerId': '0'
+                      }
+                    ]
+                  }]
                 },
-                'basemapOptions': {
-                  'basemapId': 'transport',
-                  'shaded': false,
-                  'labeled': true
-                },
-                'listOfGeoviewLayerConfig': [{
-                  'geoviewLayerId': 'wmsLYR1',
-                  'geoviewLayerName': {
-                    'en': 'earthquakes',
-                    'fr': 'earthquakes'
-                  },
-                  'metadataAccessPath': {
-                    'en': 'https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/earthquakes_en/MapServer/',
-                    'fr': 'https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/earthquakes_en/MapServer/'
-                  },
-                  'geoviewLayerType': 'esriDynamic',
-                  'listOfLayerEntryConfig': [
-                    {
-                      'layerId': '0'
-                    }
-                  ]
-                }, {
-                  'geoviewLayerId': 'wmsLYR1',
-                  'geoviewLayerName': {
-                    'en': 'earthquakes',
-                    'fr': 'earthquakes'
-                  },
-                  'metadataAccessPath': {
-                    'en': 'https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/earthquakes_en/MapServer/',
-                    'fr': 'https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/earthquakes_en/MapServer/'
-                  },
-                  'geoviewLayerType': 'esriDynamic',
-                  'listOfLayerEntryConfig': [
-                    {
-                      'layerId': '0'
-                    }
-                  ]
-                }]
-              },
-              'components': ['overview-map', 'nav-bar'],
-              'corePackages': [],
-              'theme': 'dark',
-              'suportedLanguages': ['en']
-            }`);
-          }, 2000);
-        }
+                'components': ['overview-map'],
+                'corePackages': [],
+                'theme': 'dark',
+                'suportedLanguages': ['en']
+              }`);
+          }
+        }, 10000);
 
         //create snippets
         createCodeSnippet();

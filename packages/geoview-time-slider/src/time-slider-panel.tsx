@@ -1,6 +1,6 @@
 import { TypeWindow } from 'geoview-core';
 import { CloseButton, EnlargeButton, LayerList, LayerListEntry, LayerTitle, ResponsiveGrid } from 'geoview-core/src/core/components/common';
-import { useVisibleTimeSliderLayers, useTimeSliderLayers, useGeoviewDisplayLanguage } from 'geoview-core/src/core/stores';
+import { useVisibleTimeSliderLayers, useTimeSliderLayers, useAppDisplayLanguage } from 'geoview-core/src/core/stores';
 import { getSxClasses } from './time-slider-style';
 import { TimeSlider } from './time-slider';
 
@@ -42,7 +42,7 @@ export function TimeSliderPanel(props: TypeTimeSliderProps): JSX.Element {
   const [isLayersPanelVisible, setIsLayersPanelVisible] = useState(false);
   const [isEnlargeDataTable, setIsEnlargeDataTable] = useState(false);
 
-  const displayLanguage = useGeoviewDisplayLanguage();
+  const displayLanguage = useAppDisplayLanguage();
   const visibleTimeSliderLayers = useVisibleTimeSliderLayers();
   const timeSliderLayers = useTimeSliderLayers();
 
