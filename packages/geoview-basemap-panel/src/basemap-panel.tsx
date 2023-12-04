@@ -117,7 +117,7 @@ export function BasemapPanel(props: BaseMapPanelProps): JSX.Element {
     const currentView = myMap.getView();
     const currentCenter = currentView.getCenter();
     const currentProjection = currentView.getProjection().getCode();
-    const newCenter = api.projection.transformPoints(currentCenter, currentProjection, 'EPSG:4326')[0];
+    const newCenter = api.projection.transformPoints([currentCenter], currentProjection, 'EPSG:4326')[0];
     const newProjection = event.target.value as TypeValidMapProjectionCodes;
 
     const newView: TypeViewSettings = {

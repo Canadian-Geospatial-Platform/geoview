@@ -55,6 +55,7 @@ import { TypeJsonObject, toJsonObject } from '@/core/types/global-types';
 import { Layer } from '../layer';
 import { TimeDimension, TypeDateFragments } from '@/core/utils/date-mgt';
 import { TypeEventHandlerFunction } from '@/api/events/event';
+import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 
 export type TypeLegend = {
   layerPath: string;
@@ -1412,7 +1413,7 @@ export abstract class AbstractGeoViewLayer {
    */
   calculateBounds(
     layerPathOrConfig: string | TypeLayerEntryConfig,
-    projectionCode: string | number = api.maps[this.mapId].currentProjection
+    projectionCode: string | number = MapEventProcessor.getMapState(this.mapId).currentProjection
   ): Extent | undefined {
     let bounds: Extent | undefined;
     const processGroupLayerBounds = (listOfLayerEntryConfig: TypeListOfLayerEntryConfig) => {

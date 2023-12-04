@@ -158,7 +158,7 @@ export function OverviewMap(): JSX.Element {
 
   useEffect(() => {
     // get default overview map
-    // TODO: store basemap info in the store...
+    // TODO: use store basemap info in the store...
     const defaultBasemap = api.maps[mapId].basemap.overviewMap;
 
     const toggleButton = document.createElement('div');

@@ -1,16 +1,17 @@
-import { ChangeEvent, useCallback, useContext, useRef, useState } from 'react';
+import { ChangeEvent, useCallback, useRef, useState } from 'react';
 
 import { useTranslation } from 'react-i18next';
+
 import debounce from 'lodash/debounce';
 
 import { CloseIcon, SearchIcon, AppBar, Box, Divider, IconButton, Paper, ProgressBar, Toolbar, Typography } from '@/ui';
 import GeoList from './geo-list';
 import { StyledInputField, sxClasses } from './geolocator-style';
-import { MapContext } from '@/core/app-start';
-import { api } from '@/app';
 import { OL_ZOOM_DURATION } from '@/core/utils/constant';
 import { useUIAppbarGeolocatorActive } from '@/core/stores/store-interface-and-intial-values/ui-state';
-import { useMapStoreActions } from '@/core/stores/store-interface-and-intial-values/map-state';
+import { useMapSize, useMapStoreActions } from '@/core/stores/store-interface-and-intial-values/map-state';
+import { useGeolocatorServiceURL } from '@/core/stores/store-interface-and-intial-values/app-state';
+import { useGeoviewDisplayLanguage } from '@/core/stores/geoview-store';
 
 export interface GeoListItem {
   key: string;
@@ -23,28 +24,25 @@ export interface GeoListItem {
 }
 
 export function Geolocator() {
-  const { mapId } = useContext(MapContext);
-
-  const {
-    map,
-    mapFeaturesConfig: { serviceUrls },
-  } = api.maps[mapId];
-  const mapSize = map?.getSize() || [0, 0];
-  const { i18n, t } = useTranslation<string>();
-
-  const [searchValue, setSearchValue] = useState<string>('');
-  const [isSearchInputVisible, setIsSearchInputVisible] = useState<boolean>(false);
-
-  const urlRef = useRef<string>(`${serviceUrls!.geolocator}&lang=${i18n.language}`);
+  const { t } = useTranslation();
 
   // internal state
   const [data, setData] = useState<GeoListItem[]>();
   const [error, setError] = useState<Error>();
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [searchValue, setSearchValue] = useState<string>('');
+  const [isSearchInputVisible, setIsSearchInputVisible] = useState<boolean>(false);
+
+  // get store values
+  const displayLanguage = useGeoviewDisplayLanguage();
+  const geolocatorServiceURL = useGeolocatorServiceURL();
+  const mapSize = useMapSize();
 
   // set the active (visible) or not active (hidden) from geolocator button click
   const active = useUIAppbarGeolocatorActive();
   const { zoomToGeoLocatorLocation } = useMapStoreActions();
+
+  const urlRef = useRef<string>(`${geolocatorServiceURL}&lang=${displayLanguage}`);
 
   /**
    * Send fetch call to the service for given search term.
@@ -174,7 +172,7 @@ export function Geolocator() {
             component="div"
             square
             elevation={4}
-            sx={{ width: 400, height: mapSize[1] - 80, maxHeight: mapSize[1] - 80, overflowY: 'auto' }}
+            sx={{ width: 400, height: mapSize![1] - 80, maxHeight: mapSize![1] - 80, overflowY: 'auto' }}
           >
             {!!data.length && <GeoList geoListItems={data} zoomToLocation={zoomToGeoLocatorLocation} />}
             {(!data.length || error) && (

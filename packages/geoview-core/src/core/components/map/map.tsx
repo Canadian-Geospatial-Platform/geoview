@@ -53,6 +53,7 @@ export function Map(mapFeaturesConfig: TypeMapFeaturesConfig): JSX.Element {
   const mapLoaded = useMapLoaded();
 
   // create a new map viewer instance
+  // TODO: use store
   const viewer: MapViewer = api.maps[mapId];
 
   const initCGPVMap = (cgpvMap: OLMap) => {

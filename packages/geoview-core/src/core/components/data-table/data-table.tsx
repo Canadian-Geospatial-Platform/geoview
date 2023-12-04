@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
+
 import { useTranslation } from 'react-i18next';
+
 import {
   MaterialReactTable,
   type MRT_ColumnDef as MRTColumnDef,
@@ -10,9 +12,12 @@ import {
   type MRT_SortingState as MRTSortingState,
   type MRT_Virtualizer as MRTVirtualizer,
 } from 'material-react-table';
-import { Extent } from 'ol/extent';
-import Geometry from 'ol/geom/Geometry';
+
+import { Extent } from 'ol/extent'; // only use for typing
+import Geometry from 'ol/geom/Geometry'; // only use for typing
+
 import { darken } from '@mui/material';
+
 import { Box, IconButton, Switch, ZoomInSearchIcon } from '@/ui';
 import ExportButton from './export-button';
 
@@ -63,7 +68,6 @@ function DataTable({ data }: DataTableProps) {
 
   // optionally access the underlying virtualizer instance
   const rowVirtualizerInstanceRef = useRef<MRTVirtualizer<HTMLDivElement, HTMLTableRowElement>>(null);
-
   const [sorting, setSorting] = useState<MRTSortingState>([]);
 
   useEffect(() => {
