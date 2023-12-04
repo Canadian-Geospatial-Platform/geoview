@@ -31,6 +31,8 @@ export declare const getSxClasses: () => {
     maxIconImg: {
         maxWidth: number;
         maxHeight: number;
+        width: number;
+        height: number;
     };
     legendIcon: {
         display: string;

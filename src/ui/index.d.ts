@@ -4,6 +4,7 @@ export * from './autocomplete/autocomplete';
 export * from './avatar/avatar';
 export * from './badge/badge';
 export * from './button/button';
+export * from './button-drop-down/button-drop-down';
 export * from './button-group/button-group';
 export * from './card/card';
 export * from './card-media/card-media';

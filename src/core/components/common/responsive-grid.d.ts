@@ -22,7 +22,7 @@ declare function ResponsiveGridRoot({ children, ...rest }: ResponsiveGridProps):
  * @param {boolean} isEnlargeDataTable panel is enlarge
  * @returns JSX.Element
  */
-declare function ResponsiveGridLeftPanel({ children, isLayersPanelVisible, isEnlargeDataTable, ...rest }: ResponsiveGridPanelProps): import("react").JSX.Element;
+declare function ResponsiveGridLeftPanel({ children, isLayersPanelVisible, sxProps, isEnlargeDataTable, ...rest }: ResponsiveGridPanelProps): import("react").JSX.Element;
 declare namespace ResponsiveGridLeftPanel {
     var defaultProps: {
         sxProps: undefined;

@@ -11,7 +11,6 @@ import { TypeDisplayLanguage, TypeValidMapProjectionCodes } from '@/geo/map/map-
  * @class Basemap
  */
 export declare class Basemap {
-    #private;
     basemaps: TypeBasemapProps[];
     activeBasemap?: TypeBasemapProps;
     defaultOrigin?: number[];
@@ -22,6 +21,7 @@ export declare class Basemap {
     displayLanguage: TypeDisplayLanguage;
     basemapOptions: TypeBasemapOptions;
     private projection;
+    mapId: string;
     /**
      * initialize basemap
      *

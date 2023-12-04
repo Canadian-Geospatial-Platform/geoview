@@ -8,27 +8,50 @@ export declare const getSxClasses: (theme: Theme) => {
     list: {
         color: string;
         width: string;
+        '& .MuiListItemText-primary': {
+            font: string;
+            padding: string;
+            fontSize: string;
+            lineHeight: number;
+            overflow: string;
+            textOverflow: string;
+            whiteSpace: string;
+        };
         '& .layerItemContainer': {
             background: string;
             borderRadius: string;
             marginBottom: string;
-        };
-        '& .layerItemContainer.error': {
-            background: string;
-            '& .MuiListItemText-secondary': {
-                fontWeight: string;
-                color: string;
+            '& .MuiListItemText-root': {
+                marginLeft: string;
             };
-        };
-        '& .layerItemContainer.loading': {
-            background: string;
-            '& .MuiListItemText-secondary': {
-                fontWeight: string;
-                color: string;
+            '&.selectedLayer': {
+                border: string;
             };
-        };
-        '& .MuiListItemText-primary': {
-            font: string;
+            '&.error': {
+                background: string;
+                '& .MuiListItemText-secondary': {
+                    fontWeight: string;
+                    color: string;
+                };
+            };
+            '&.loading': {
+                background: string;
+                '& .MuiListItemText-secondary': {
+                    fontWeight: string;
+                    color: string;
+                };
+            };
+            '& .rightIcons-container': {
+                display: string;
+                flexDirection: string;
+                justifyContent: string;
+                alignItems: string;
+                '& .MuiIconButton-root': {
+                    color: string;
+                    background: string;
+                    margin: string;
+                };
+            };
         };
         '& .MuiListItem-root': {
             height: string;
@@ -62,102 +85,9 @@ export declare const getSxClasses: (theme: Theme) => {
             };
         };
     };
-    legendContainer: {
-        background: string;
-        boxShadow: string;
-        padding: string;
+    buttonDescriptionContainer: {
         display: string;
         flexDirection: string;
-    };
-    legendTitle: {
-        textAlign: string;
-        fontFamily: string;
-        fontSize: string;
-    };
-    categoryTitleContainer: {
-        display: string;
         alignItems: string;
-        justifyContent: string;
-        marginBottom: string;
-    };
-    categoryTitle: {
-        textAlign: string;
-        font: string;
-        fontSize: string;
-    };
-    legendButton: {
-        font: string;
-        color: string;
-        backgroundColor: string;
-        fontWeight: string;
-        fontSize: string;
-    };
-    legendButtonText: {
-        font: string;
-        textTransform: string;
-        fontWeight: string;
-        color: string;
-        fontSize: string;
-    };
-    legendItemContainer: {
-        border: string;
-        width: string;
-    };
-    layersList: {
-        layerItem: {
-            background: string;
-            borderRadius: string;
-            marginBottom: string;
-        };
-        selectedLayerItem: {
-            border: string;
-        };
-    };
-    rightPanel: {
-        layerDetails: {
-            border: string;
-            padding: string;
-        };
-        buttonDescriptionContainer: {
-            display: string;
-            flexDirection: string;
-            alignItems: string;
-        };
-        opacityMenu: {
-            display: string;
-            alignItems: string;
-            gap: string;
-            padding: string;
-            backgroundColor: string;
-        };
-        itemsGrid: {
-            width: string;
-            '& .MuiGrid-container': {
-                '&:first-of-type': {
-                    fontWeight: string;
-                    borderTop: string;
-                    borderBottom: string;
-                };
-                '& .MuiGrid-item': {
-                    padding: string;
-                    '&:first-of-type': {
-                        width: string;
-                    };
-                    '&:nth-of-type(2)': {
-                        flexGrow: number;
-                        textAlign: string;
-                        display: string;
-                        flexDirection: string;
-                        alignItems: string;
-                    };
-                };
-            };
-        };
-        tableIconLabel: {
-            color: string;
-            fontSize: number;
-            noWrap: boolean;
-            marginLeft: number;
-        };
     };
 };

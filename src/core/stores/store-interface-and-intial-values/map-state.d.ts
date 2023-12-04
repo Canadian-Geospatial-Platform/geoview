@@ -19,6 +19,7 @@ export interface TypeNorthArrow {
     isNorthVisible: boolean;
 }
 export interface IMapState {
+    attribution: string[];
     centerCoordinates: Coordinate;
     clickCoordinates?: TypeMapMouseInfo;
     clickMarker: TypeClickMarker | undefined;
@@ -74,6 +75,7 @@ export interface IMapState {
     };
 }
 export declare function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapState;
+export declare const useMapAttribution: () => string[];
 export declare const useMapCenterCoordinates: () => Coordinate;
 export declare const useMapClickMarker: () => TypeClickMarker | undefined;
 export declare const useMapProjection: () => TypeValidMapProjectionCodes;

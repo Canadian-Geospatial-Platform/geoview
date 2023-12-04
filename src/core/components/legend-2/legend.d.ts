@@ -1,5 +1,2 @@
 /// <reference types="react" />
-export interface LegendOverviewProps {
-    mapId: string;
-}
-export declare function Legend(props: LegendOverviewProps): JSX.Element;
+export declare function Legend(): JSX.Element;

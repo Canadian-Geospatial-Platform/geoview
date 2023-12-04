@@ -6,4 +6,5 @@ export declare class MapEventProcessor extends AbstractEventProcessor {
     static setMapLoaded(mapId: string): void;
     static clickMarkerIconHide(mapId: string): void;
     static clickMarkerIconShow(mapId: string, marker: TypeClickMarker): void;
+    static setMapAttribution(mapId: string, attribution: string[]): void;
 }

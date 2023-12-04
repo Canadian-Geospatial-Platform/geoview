@@ -1,6 +1,5 @@
 /// <reference types="react" />
 import { LegendsLayerSet } from '@/app';
-import { TypeLegendProps } from '@/core/components/layers/types';
 /**
  * API to manage legend component
  *
@@ -20,5 +19,5 @@ export declare class Legend2Api {
      * Create a legend as an element
      *
      */
-    createLegend: (props: TypeLegendProps) => import("react").FunctionComponentElement<import("./legend").LegendOverviewProps>;
+    createLegend: () => import("react").FunctionComponentElement<{}>;
 }
