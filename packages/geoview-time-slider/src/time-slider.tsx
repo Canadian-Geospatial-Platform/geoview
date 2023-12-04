@@ -126,11 +126,7 @@ export function TimeSlider(TimeSliderPanelProps: TimeSliderPanelProps) {
       value: timeMarks[i],
       // If timeframe is a single day, use time. If it is a single year, drop year from dates.
       label: timeframe
-        ? `${
-            timeframe === 'day'
-              ? new Date(timeMarks[i]).toTimeString().split(' ')[0].replace(/^0/, '')
-              : new Date(timeMarks[i]).toISOString().slice(5, 10)
-          }`
+        ? `${timeframe === 'day' ? new Date(timeMarks[i]).toTimeString().split(' ')[0] : new Date(timeMarks[i]).toISOString().slice(5, 10)}`
         : new Date(timeMarks[i]).toISOString().slice(0, 10),
     });
   }
