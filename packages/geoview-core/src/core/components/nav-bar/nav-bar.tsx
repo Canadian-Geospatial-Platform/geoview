@@ -19,14 +19,18 @@ import { EVENT_NAMES } from '@/api/events/event-types';
 import { payloadIsAButtonPanel, ButtonPanelPayload, PayloadBaseClass } from '@/api/events/payloads';
 import { TypeButtonPanel } from '@/ui/panel/panel-types';
 import { getSxClasses } from './nav-bar-style';
-import { useUIActiveFocusItem, useUIFooterBarExpanded } from '@/core/stores/store-interface-and-intial-values/ui-state';
+import {
+  useUIActiveFocusItem,
+  useUIFooterBarExpanded,
+  useUINavbarComponents,
+} from '@/core/stores/store-interface-and-intial-values/ui-state';
 
 /**
  * Create a nav-bar with buttons that can call functions or open custom panels
  */
 export function Navbar(): JSX.Element {
   const mapConfig = useContext(MapContext);
-  const { mapId, mapFeaturesConfig } = mapConfig;
+  const { mapId } = mapConfig;
 
   const { t } = useTranslation<string>();
 
@@ -36,11 +40,11 @@ export function Navbar(): JSX.Element {
   // internal state
   const navBarRef = useRef<HTMLDivElement>(null);
   const [buttonPanelGroups, setButtonPanelGroups] = useState<Record<string, Record<string, TypeButtonPanel>>>({});
-  const navBar = mapFeaturesConfig!.navBar || [];
 
   // get the expand or collapse from store
   const footerBarExpanded = useUIFooterBarExpanded();
   const activeModalId = useUIActiveFocusItem().activeElementId;
+  const navBarComponents = useUINavbarComponents();
 
   // #region REACT HOOKS
   const addButtonPanel = useCallback(
@@ -167,12 +171,12 @@ export function Navbar(): JSX.Element {
           <ZoomOut />
         </ButtonGroup>
         <ButtonGroup orientation="vertical" aria-label={t('mapnav.arianavbar')!} variant="contained" sx={sxClasses.navBtnGroup}>
-          {navBar?.includes('fullscreen') && <Fullscreen />}
-          {navBar?.includes('location') && <Location />}
-          {navBar?.includes('home') && <Home />}
-          {navBar?.includes('export') && <ExportButton className={`${sxClasses.navButton} ${activeModalId ? 'export' : ''}`} />}
+          {navBarComponents.includes('fullscreen') && <Fullscreen />}
+          {navBarComponents.includes('location') && <Location />}
+          {navBarComponents.includes('home') && <Home />}
+          {navBarComponents.includes('export') && <ExportButton className={`${sxClasses.navButton} ${activeModalId ? 'export' : ''}`} />}
           {/* // TODO We might need to refactor code below based on the best solution, issue #1448 */}
-          {navBar?.includes('focus') && <Focus />}
+          {navBarComponents.includes('focus') && <Focus />}
         </ButtonGroup>
       </Box>
     </Box>

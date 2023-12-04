@@ -4,6 +4,7 @@ import DataTable, { DataTableData } from './data-table';
 import { api, TypeListOfLayerEntryConfig, TypeArrayOfFeatureInfoEntries, TypeFieldEntry, TypeLocalizedString } from '@/app';
 import { MapDataTableData as MapDataTableDataProps } from './map-data-table';
 import { Datapanel } from './data-panel';
+import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
 
 export interface GroupLayers {
   layerId: string;
@@ -107,7 +108,7 @@ export class DataTableApi {
   createDataPanel = async (): Promise<ReactElement | null> => {
     let groupLayers: GroupLayers[] = [];
     // TODO: use Store event processor
-    const language = api.maps[this.mapId].displayLanguage;
+    const language = AppEventProcessor.getDisplayLanguage(this.mapId);
     const geoLayers = Object.keys(api.maps[this.mapId].layer.geoviewLayers);
 
     geoLayers.forEach((layerId: string) => {
