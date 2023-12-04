@@ -46,6 +46,7 @@ interface AppStartProps {
  * Initialize the app with maps from inline html configs, url params
  */
 function AppStart(props: AppStartProps): JSX.Element {
+  //! store is not finilize yet so we setup the map with the configuration object instead
   const { mapFeaturesConfig } = props;
 
   const mapContextValue = useMemo(() => {

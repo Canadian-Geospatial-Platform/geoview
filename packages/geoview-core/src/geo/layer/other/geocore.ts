@@ -14,6 +14,7 @@ import {
 import { CONST_LAYER_TYPES } from '../geoview-layers/abstract-geoview-layers';
 import { UUIDmapConfigReader } from '@/core/utils/config/reader/uuid-config-reader';
 import { ConfigValidation } from '@/core/utils/config/config-validation';
+import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
 
 export interface TypeGeoCoreLayerConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig'> {
   geoviewLayerType: 'geoCore';
@@ -87,7 +88,7 @@ export class GeoCore {
             this.copyConfigSettingsOverGeocoreSettings(geocoreLayerConfig.listOfLayerEntryConfig[index], geoviewLayerConfig);
           });
           this.configValidation.validateListOfGeoviewLayerConfig(
-            api.maps[this.mapId].mapFeaturesConfig.suportedLanguages,
+            AppEventProcessor.getSupportedLanguages(this.mapId),
             listOfGeoviewLayerConfig
           );
         });

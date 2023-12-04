@@ -362,6 +362,8 @@ export class GeoUtilities {
    * @returns {boolean} true if visible, false otherwise
    */
   checkNorth(map: OLMap): boolean {
+    if (map === undefined) return false;
+
     // Check the container value for top middle of the screen
     // Convert this value to a lat long coordinate
     const pointXY = [map.getSize()![0] / 2, 1];

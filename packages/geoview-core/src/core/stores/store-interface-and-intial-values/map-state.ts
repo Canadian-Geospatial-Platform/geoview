@@ -11,7 +11,7 @@ import { useStore } from 'zustand';
 import { useGeoViewStore } from '@/core/stores/stores-managers';
 import { TypeSetStore, TypeGetStore } from '@/core/stores/geoview-store';
 
-import { TypeMapFeaturesConfig, TypeValidMapProjectionCodes } from '@/core/types/global-types';
+import { TypeBasemapOptions, TypeMapFeaturesConfig, TypeValidMapProjectionCodes } from '@/core/types/global-types';
 import { TypeFeatureInfoEntry, TypeGeometry, TypeMapMouseInfo } from '@/api/events/payloads';
 import { TypeInteraction } from '@/geo/map/map-schema-types';
 import { TypeClickMarker, api } from '@/app';
@@ -31,6 +31,7 @@ export interface TypeNorthArrow {
 
 export interface IMapState {
   attribution: string[];
+  basemapOptions: TypeBasemapOptions;
   centerCoordinates: Coordinate;
   clickCoordinates?: TypeMapMouseInfo;
   clickMarker: TypeClickMarker | undefined;
@@ -40,6 +41,7 @@ export interface IMapState {
   interaction: TypeInteraction;
   pointerPosition?: TypeMapMouseInfo;
   mapElement?: OLMap;
+  mapExtent: Extent | undefined;
   mapLoaded: boolean;
   northArrow: boolean;
   northArrowElement: TypeNorthArrow;
@@ -105,12 +107,14 @@ function setScale(mapId: string): TypeScaleInfo {
 export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapState {
   const init = {
     attribution: [],
+    basemapOptions: { basemapId: 'transport', shaded: true, labeled: true },
     centerCoordinates: [0, 0] as Coordinate,
     clickMarker: undefined,
     currentProjection: 3857 as TypeValidMapProjectionCodes,
     fixNorth: false,
     highlightedFeatures: [],
     interaction: 'static',
+    mapExtent: undefined,
     mapLoaded: false,
     northArrow: false,
     northArrowElement: { degreeRotation: '180.0', isNorthVisible: true } as TypeNorthArrow,
@@ -128,9 +132,11 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
       set({
         mapState: {
           ...get().mapState,
+          basemapOptions: geoviewConfig.map.basemapOptions,
           centerCoordinates: geoviewConfig.map.viewSettings.center as Coordinate,
           currentProjection: geoviewConfig.map.viewSettings.projection as TypeValidMapProjectionCodes,
           interaction: geoviewConfig.map.interaction || 'dynamic',
+          mapExtent: geoviewConfig.map.viewSettings.extent,
           northArrow: geoviewConfig.components!.indexOf('north-arrow') > -1 || false,
           overviewMap: geoviewConfig.components!.indexOf('overview-map') > -1 || false,
           overviewMapHideZoom: geoviewConfig.overviewMap !== undefined ? geoviewConfig.overviewMap.hideOnZoom : 0,
@@ -420,17 +426,20 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
 // Map state selectors
 // **********************************************************
 export const useMapAttribution = () => useStore(useGeoViewStore(), (state) => state.mapState.attribution);
+export const useMapBasemapOptions = () => useStore(useGeoViewStore(), (state) => state.mapState.basemapOptions);
 export const useMapCenterCoordinates = () => useStore(useGeoViewStore(), (state) => state.mapState.centerCoordinates);
 export const useMapClickMarker = () => useStore(useGeoViewStore(), (state) => state.mapState.clickMarker);
-export const useMapProjection = () => useStore(useGeoViewStore(), (state) => state.mapState.currentProjection);
 export const useMapElement = () => useStore(useGeoViewStore(), (state) => state.mapState.mapElement);
+export const useMapExtent = () => useStore(useGeoViewStore(), (state) => state.mapState.mapExtent);
 export const useMapFixNorth = () => useStore(useGeoViewStore(), (state) => state.mapState.fixNorth);
 export const useMapInteraction = () => useStore(useGeoViewStore(), (state) => state.mapState.interaction);
 export const useMapLoaded = () => useStore(useGeoViewStore(), (state) => state.mapState.mapLoaded);
 export const useMapNorthArrow = () => useStore(useGeoViewStore(), (state) => state.mapState.northArrow);
 export const useMapNorthArrowElement = () => useStore(useGeoViewStore(), (state) => state.mapState.northArrowElement);
 export const useMapOverviewMap = () => useStore(useGeoViewStore(), (state) => state.mapState.overviewMap);
+export const useMapOverviewMapHideZoom = () => useStore(useGeoViewStore(), (state) => state.mapState.overviewMapHideZoom);
 export const useMapPointerPosition = () => useStore(useGeoViewStore(), (state) => state.mapState.pointerPosition);
+export const useMapProjection = () => useStore(useGeoViewStore(), (state) => state.mapState.currentProjection);
 export const useMapRotation = () => useStore(useGeoViewStore(), (state) => state.mapState.rotation);
 export const useMapSelectedFeatures = () => useStore(useGeoViewStore(), (state) => state.mapState.selectedFeatures);
 export const useMapScale = () => useStore(useGeoViewStore(), (state) => state.mapState.scale);

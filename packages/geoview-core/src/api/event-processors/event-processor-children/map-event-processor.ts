@@ -7,8 +7,8 @@ import { KeyboardPan } from 'ol/interaction';
 
 import { GeoViewStoreType } from '@/core/stores/geoview-store';
 import { AbstractEventProcessor } from '../abstract-event-processor';
-import { api, Coordinate, NORTH_POLE_POSITION, TypeClickMarker } from '@/app';
-import { TypeMapState } from '@/geo/map/map-schema-types';
+import { api, Coordinate, NORTH_POLE_POSITION, TypeBasemapOptions, TypeClickMarker } from '@/app';
+import { TypeMapState, TypeValidMapProjectionCodes } from '@/geo/map/map-schema-types';
 import {
   mapPayload,
   lngLatPayload,
@@ -114,7 +114,8 @@ export class MapEventProcessor extends AbstractEventProcessor {
     const unsubMapSelectedFeatures = store.subscribe(
       (state) => state.mapState.selectedFeatures,
       (curFeatures, prevFeatures) => {
-        if (curFeatures.length === 0) api.maps[mapId].layer.featureHighlight.resetAnimation('all');
+        // TODO: on reload, layer object is undefined, need to test for now and solve in #1580
+        if (curFeatures.length === 0 && api.maps[mapId].layer !== undefined) api.maps[mapId].layer.featureHighlight.resetAnimation('all');
         else {
           const curFeatureUids = curFeatures.map((feature) => (feature.geometry as TypeGeometry).ol_uid);
           const prevFeatureUids = prevFeatures.map((feature) => (feature.geometry as TypeGeometry).ol_uid);
@@ -234,6 +235,10 @@ export class MapEventProcessor extends AbstractEventProcessor {
   //! Some action does state modfication AND map actions.
   //! ALWAYS use map event processor when an action modify store and IS NOT trap by map state event handler
   // #region
+  static getBasemapOptions(mapId: string): TypeBasemapOptions {
+    return getGeoViewStore(mapId).getState().mapState.basemapOptions;
+  }
+
   static clickMarkerIconHide(mapId: string): void {
     getGeoViewStore(mapId).getState().mapState.actions.hideClickMarker();
   }
@@ -244,7 +249,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
 
   static getMapState(mapId: string): TypeMapState {
     return {
-      currentProjection: getGeoViewStore(mapId).getState().mapState.currentProjection,
+      currentProjection: getGeoViewStore(mapId).getState().mapState.currentProjection as TypeValidMapProjectionCodes,
       currentZoom: getGeoViewStore(mapId).getState().mapState.zoom,
       mapCenterCoordinates: getGeoViewStore(mapId).getState().mapState.centerCoordinates,
       pointerPosition: getGeoViewStore(mapId).getState().mapState.pointerPosition || {
@@ -293,10 +298,16 @@ export class MapEventProcessor extends AbstractEventProcessor {
     mapElement!.addInteraction(new KeyboardPan({ pixelDelta: panDelta }));
   }
 
-  // TODO: use store because it is one line in map viewer, move and use same as rotate because state is handle in event
-  // OPEN for discussion
-  static zoomToExtent(mapId: string, extent: Extent, options?: FitOptions): void {
-    api.maps[mapId].zoomToExtent(extent, options);
+  /**
+   * Zoom to the specified extent.
+   *
+   * @param {string} mapId The map id.
+   * @param {Extent} extent The extent to zoom to.
+   * @param {FitOptions} options The options to configure the zoomToExtent (default: { padding: [100, 100, 100, 100], maxZoom: 11 }).
+   */
+  static zoomToExtent(mapId: string, extent: Extent, options: FitOptions = { padding: [100, 100, 100, 100], maxZoom: 11, duration: 1000 }) {
+    // store state will be updated by map event
+    api.maps[mapId].getView().fit(extent, options);
   }
 
   static zoomToGeoLocatorLocation(mapId: string, coords: Coordinate, bbox?: Extent): void {

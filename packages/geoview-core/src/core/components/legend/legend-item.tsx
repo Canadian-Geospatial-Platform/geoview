@@ -469,7 +469,7 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
     )
       bounds = api.maps[mapId].getView().get('extent');
 
-    if (bounds) api.maps[mapId].zoomToExtent(bounds);
+    if (bounds) MapEventProcessor.zoomToExtent(mapId, bounds);
     handleCloseMenu();
   };
 

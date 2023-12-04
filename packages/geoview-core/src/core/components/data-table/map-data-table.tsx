@@ -46,7 +46,7 @@ import {
   useDataTableStoreToolbarRowSelectedMessageRecord,
 } from '@/core/stores/store-interface-and-intial-values/data-table-state';
 import { useLightBox, useSelectedRowMessage, useFilteredRowMessage } from './hooks';
-import { useGeoviewDisplayLanguage } from '@/core/stores/geoview-store';
+import { useAppDisplayLanguage } from '@/core/stores/store-interface-and-intial-values/app-state';
 
 export interface MapDataTableDataEntrys extends TypeFeatureInfoEntry {
   rows: Record<string, string>;
@@ -124,7 +124,7 @@ function MapDataTable({ data, layerId, mapId, layerKey }: MapDataTableProps) {
   // get store actions and values
   const { addHighlightedFeature, removeHighlightedFeature, zoomToExtent } = useMapStoreActions();
 
-  const language = useGeoviewDisplayLanguage();
+  const language = useAppDisplayLanguage();
 
   const dataTableLocalization = language === 'fr' ? MRTLocalizationFR : MRTLocalizationEN;
 

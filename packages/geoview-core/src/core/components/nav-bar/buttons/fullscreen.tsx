@@ -6,7 +6,7 @@ import { MapContext } from '@/core/app-start';
 import { IconButton, FullscreenIcon, FullscreenExitIcon } from '@/ui';
 import { TypeHTMLElement } from '@/core/types/global-types';
 import { getSxClasses } from '../nav-bar-style';
-import { useAppStoreActions, useFullscreenActive } from '@/core/stores/store-interface-and-intial-values/app-state';
+import { useAppStoreActions, useAppFullscreenActive } from '@/core/stores/store-interface-and-intial-values/app-state';
 
 /**
  * Create a toggle button to toggle between fullscreen
@@ -21,7 +21,7 @@ export default function Fullscreen(): JSX.Element {
   const sxClasses = getSxClasses(theme);
 
   // get the values from store
-  const isFullScreen = useFullscreenActive();
+  const isFullScreen = useAppFullscreenActive();
   const { setFullScreenActive } = useAppStoreActions();
 
   /**

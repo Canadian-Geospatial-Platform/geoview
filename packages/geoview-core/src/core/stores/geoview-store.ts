@@ -9,10 +9,10 @@ import { IMapState, initializeMapState } from './store-interface-and-intial-valu
 import { IMapDataTableState, initialDataTableState } from './store-interface-and-intial-values/data-table-state';
 import { IUIState, initializeUIState } from './store-interface-and-intial-values/ui-state';
 
-import { TypeDisplayLanguage } from '@/geo/map/map-schema-types';
 import { TypeLegendResultSets } from '@/api/events/payloads/get-legends-payload';
 import { TypeFeatureInfoResultSets } from '@/api/events/payloads/get-feature-info-payload';
 import { TypeMapFeaturesConfig } from '@/core/types/global-types';
+import { generateId } from '@/core/utils/utilities';
 
 export type TypeSetStore = (
   partial: IGeoViewState | Partial<IGeoViewState> | ((state: IGeoViewState) => IGeoViewState | Partial<IGeoViewState>),
@@ -21,9 +21,8 @@ export type TypeSetStore = (
 export type TypeGetStore = () => IGeoViewState;
 
 export interface IGeoViewState {
-  displayLanguage: TypeDisplayLanguage;
-  mapId: string;
   mapConfig: TypeMapFeaturesConfig | undefined;
+  mapId: string;
   setMapConfig: (config: TypeMapFeaturesConfig) => void;
 
   // state interfaces
@@ -41,15 +40,14 @@ export interface IGeoViewState {
 
 export const geoViewStoreDefinition = (set: TypeSetStore, get: TypeGetStore) =>
   ({
-    displayLanguage: 'en' as TypeDisplayLanguage,
-    mapId: '',
     mapConfig: undefined,
     setMapConfig: (config: TypeMapFeaturesConfig) => {
-      set({ mapConfig: config, mapId: config.mapId, displayLanguage: config.displayLanguage });
+      set({ mapConfig: config, mapId: config.mapId || generateId('') });
 
       // initialize default stores section from config information
       get().appState.setDefaultConfigValues(config);
       get().mapState.setDefaultConfigValues(config);
+      get().uiState.setDefaultConfigValues(config);
     },
 
     appState: initializeAppState(set, get),
@@ -71,5 +69,5 @@ export type GeoViewStoreType = typeof fakeStore;
 // **********************************************************
 // GeoView state selectors
 // **********************************************************
-export const useGeoviewMapId = () => useStore(useGeoViewStore(), (state) => state.mapId);
-export const useGeoviewDisplayLanguage = () => useStore(useGeoViewStore(), (state) => state.displayLanguage);
+export const useGeoViewMapId = () => useStore(useGeoViewStore(), (state) => state.mapId);
+export const useGeoViewConfig = () => useStore(useGeoViewStore(), (state) => state.mapConfig);
