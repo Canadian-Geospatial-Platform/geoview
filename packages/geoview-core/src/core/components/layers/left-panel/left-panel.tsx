@@ -22,5 +22,5 @@ export function LeftPanel({ setIsLayersListPanelVisible }: LeftPanelProps): JSX.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  return <LayersList layersList={legendLayers} depth={0} setIsLayersListPanelVisible={setIsLayersListPanelVisible} />;
+  return <LayersList parentLayerPath='none' layersList={legendLayers} depth={0} setIsLayersListPanelVisible={setIsLayersListPanelVisible} />;
 }

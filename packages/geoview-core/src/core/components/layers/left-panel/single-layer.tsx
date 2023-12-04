@@ -1,4 +1,4 @@
-import { CSSProperties, forwardRef, ForwardedRef, Dispatch, SetStateAction, useState } from 'react';
+import { CSSProperties, forwardRef, Dispatch, SetStateAction, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   Box,
@@ -39,10 +39,11 @@ interface SingleLayerProps {
   style?: CSSProperties; // Style prop
 }
 
-const SingleLayer: React.ForwardRefRenderFunction<HTMLDivElement, SingleLayerProps> = (
+function SingleLayer({ depth, layer, setIsLayersListPanelVisible, style }: SingleLayerProps): JSX.Element {
+  /*const SingleLayer: React.ForwardRefRenderFunction<HTMLDivElement, SingleLayerProps> = (
   { depth, layer, setIsLayersListPanelVisible, style },
   ref
-) => {
+) => {*/
   const { t } = useTranslation<string>();
 
   const { toggleLayerVisibility, setSelectedLayerPath } = useLayerStoreActions(); // get store actions
@@ -178,7 +179,7 @@ const SingleLayer: React.ForwardRefRenderFunction<HTMLDivElement, SingleLayerPro
 
     return (
       <Collapse in={isGroupOpen} timeout="auto">
-        <LayersList depth={1 + depth} layersList={layer.children} setIsLayersListPanelVisible={setIsLayersListPanelVisible} />
+        <LayersList parentLayerPath={layer.layerPath} depth={1 + depth} layersList={layer.children} setIsLayersListPanelVisible={setIsLayersListPanelVisible} />
       </Collapse>
     );
   }
@@ -209,7 +210,7 @@ const SingleLayer: React.ForwardRefRenderFunction<HTMLDivElement, SingleLayerPro
   }
 
   return (
-    <Box className={`layerItemContainer ${layer.layerStatus} ${layerIsSelected ? 'selectedLayer' : ''}`} ref={ref}>
+    <Box className={`layerItemContainer ${layer.layerStatus} ${layerIsSelected ? 'selectedLayer' : ''}`}>
       <ListItem key={layer.layerName} divider>
         <ListItemButton selected={layerIsSelected}>
           {renderLayerIcon()}
@@ -230,6 +231,7 @@ const SingleLayer: React.ForwardRefRenderFunction<HTMLDivElement, SingleLayerPro
       {renderCollapsible()}
     </Box>
   );
-};
+}
 
-export default forwardRef(SingleLayer);
+// export default forwardRef(SingleLayer);
+export default SingleLayer;
