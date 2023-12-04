@@ -98,7 +98,7 @@ export function OverviewMap(): JSX.Element {
   // get the values from store
   const mapElement = useStore(getGeoViewStore(mapId), (state) => state.mapState.mapElement);
   const hideOnZoom = useStore(getGeoViewStore(mapId), (state) => state.mapState.overviewMapHideZoom);
-  const displayLanguage = useStore(getGeoViewStore(mapId), (state) => state.displayLanguage);
+  const displayLanguage = useStore(getGeoViewStore(mapId), (state) => state.appState.displayLanguage);
 
   // TODO: remove useStyle
   const classes = useStyles();

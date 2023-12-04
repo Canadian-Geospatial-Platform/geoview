@@ -598,7 +598,7 @@ export class Basemap {
    * @returns {TypeBasemapProps | undefined} the default basemap
    */
   async loadDefaultBasemaps(): Promise<TypeBasemapProps | undefined> {
-    const basemap = await this.createCoreBasemap(api.maps[this.mapId].mapFeaturesConfig.map.basemapOptions);
+    const basemap = await this.createCoreBasemap(MapEventProcessor.getBasemapOptions(this.mapId));
     const overviewBasemap = await this.createCoreBasemap({ basemapId: 'transport', shaded: false, labeled: false });
     if (overviewBasemap) this.overviewMap = overviewBasemap;
     else {

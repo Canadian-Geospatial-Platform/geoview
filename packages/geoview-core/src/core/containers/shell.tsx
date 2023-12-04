@@ -29,10 +29,15 @@ import {
 } from '@/api/events/payloads';
 import { MapContext } from '@/core/app-start';
 import { getShellSxClasses } from './containers-style';
-import { useMapLoaded } from '@/core/stores/store-interface-and-intial-values/map-state';
-import { useUIActiveTrapGeoView } from '@/core/stores/store-interface-and-intial-values/ui-state';
+import { useMapInteraction, useMapLoaded } from '@/core/stores/store-interface-and-intial-values/map-state';
+import {
+  useUIActiveTrapGeoView,
+  useUIAppbarComponents,
+  useUICorePackagesComponents,
+} from '@/core/stores/store-interface-and-intial-values/ui-state';
 import ExportModal from '@/core/components/export/export-modal';
 import DataTableModal from '@/core/components/data-table/data-table-modal';
+import { useGeoViewMapId } from '@/core/stores/geoview-store';
 
 /**
  * Interface for the shell properties
@@ -64,6 +69,10 @@ export function Shell(props: ShellProps): JSX.Element {
   // get values from the store
   const mapLoaded = useMapLoaded();
   const activeTrapGeoView = useUIActiveTrapGeoView();
+  const mapId = useGeoViewMapId();
+  const interaction = useMapInteraction();
+  const appBarComponents = useUIAppbarComponents();
+  const corePackagesComponents = useUICorePackagesComponents();
 
   /**
    * Causes the shell to re-render
@@ -138,19 +147,19 @@ export function Shell(props: ShellProps): JSX.Element {
           <Box sx={sxClasses.mapShellContainer} className="mapContainer">
             <Appbar />
             {/* load geolocator component if config includes in list of components in appBar */}
-            {mapFeaturesConfig?.appBar?.includes('geolocator') && mapFeaturesConfig?.map.interaction === 'dynamic' && <Geolocator />}
+            {appBarComponents.includes('geolocator') && interaction === 'dynamic' && <Geolocator />}
             <Box sx={sxClasses.mapContainer}>
-              <Map {...mapFeaturesConfig} />
+              <Map />
               <Footerbar />
             </Box>
-            {mapFeaturesConfig?.map.interaction === 'dynamic' && <Navbar />}
+            {interaction === 'dynamic' && <Navbar />}
           </Box>
-          {mapFeaturesConfig?.corePackages && mapFeaturesConfig?.corePackages.includes('footer-panel') && <FooterTabs />}
+          {corePackagesComponents.includes('footer-panel') && <FooterTabs />}
           {Object.keys(api.maps[shellId].modal.modals).map((modalId) => (
             <Modal key={modalId} id={modalId} open={false} mapId={shellId} />
           ))}
           {/* modal section start */}
-          <FocusTrapDialog mapId={mapFeaturesConfig.mapId} focusTrapId={shellId} />
+          <FocusTrapDialog mapId={mapId} focusTrapId={shellId} />
           <ExportModal />
           <DataTableModal />
           {/* modal section end */}

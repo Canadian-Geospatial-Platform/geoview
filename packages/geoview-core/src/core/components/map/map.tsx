@@ -21,25 +21,24 @@ import { OverviewMap } from '@/core/components/overview-map/overview-map';
 import { ClickMarker } from '@/core/components/click-marker/click-marker';
 import { HoverTooltip } from '@/core/components/hover-tooltip/hover-tooltip';
 
-import { generateId } from '@/core/utils/utilities';
-
 import { TypeBasemapLayer, api } from '@/app';
 import { EVENT_NAMES } from '@/api/events/event-types';
 
 import { MapViewer } from '@/geo/map/map-viewer';
 
 import { payloadIsABasemapLayerArray, payloadIsAMapViewProjection, PayloadBaseClass } from '@/api/events/payloads';
-import { TypeBasemapProps, TypeMapFeaturesConfig } from '../../types/global-types';
+import { TypeBasemapProps } from '../../types/global-types';
 import { sxClasses } from './map-style';
-import { useMapLoaded, useMapNorthArrow, useMapOverviewMap } from '@/core/stores/store-interface-and-intial-values/map-state';
+import {
+  useMapInteraction,
+  useMapLoaded,
+  useMapNorthArrow,
+  useMapOverviewMap,
+  useMapProjection,
+} from '@/core/stores/store-interface-and-intial-values/map-state';
+import { useGeoViewConfig, useGeoViewMapId } from '@/core/stores/geoview-store';
 
-export function Map(mapFeaturesConfig: TypeMapFeaturesConfig): JSX.Element {
-  const { map: mapConfig } = mapFeaturesConfig;
-
-  // make sure the id is not undefined
-  // eslint-disable-next-line react/destructuring-assignment
-  const mapId = mapFeaturesConfig.mapId ? mapFeaturesConfig.mapId : generateId('');
-
+export function Map(): JSX.Element {
   const defaultTheme = useTheme();
 
   // internal state - get ref to div element
@@ -48,9 +47,13 @@ export function Map(mapFeaturesConfig: TypeMapFeaturesConfig): JSX.Element {
   const deviceSizeMedUp = useMediaQuery(defaultTheme.breakpoints.up('md')); // if screen size is medium and up
 
   // get values from the store
+  const mapId = useGeoViewMapId();
   const overviewMap = useMapOverviewMap();
   const northArrow = useMapNorthArrow();
   const mapLoaded = useMapLoaded();
+  const interaction = useMapInteraction();
+  const mapProjection = useMapProjection();
+  const mapStoreConfig = useGeoViewConfig();
 
   // create a new map viewer instance
   // TODO: use store
@@ -71,12 +74,12 @@ export function Map(mapFeaturesConfig: TypeMapFeaturesConfig): JSX.Element {
       api.plugin.loadPlugins();
     });
 
-    viewer.toggleMapInteraction(mapConfig.interaction);
+    viewer.toggleMapInteraction(interaction);
   };
 
   const initMap = (): void => {
     // create map
-    const projection = api.projection.projections[mapConfig.viewSettings.projection];
+    const projection = api.projection.projections[mapProjection];
 
     // create empty tilelayer to use as initial basemap while we load basemap
     const emptyBasemap: TypeBasemapLayer = {
@@ -93,19 +96,23 @@ export function Map(mapFeaturesConfig: TypeMapFeaturesConfig): JSX.Element {
     const emptyLayer = new TileLayer(emptyBasemap);
     emptyLayer.set('mapId', 'basemap');
 
-    let extent: Extent | undefined;
-    if (mapConfig.viewSettings?.extent) extent = transformExtent(mapConfig.viewSettings.extent, 'EPSG:4326', projection.getCode());
+    let extentProjected: Extent | undefined;
+    if (mapStoreConfig?.map.viewSettings.extent)
+      extentProjected = transformExtent(mapStoreConfig?.map.viewSettings.extent, 'EPSG:4326', projection.getCode());
 
     const initialMap = new OLMap({
       target: mapElement.current as string | HTMLElement | undefined,
       layers: [emptyLayer],
       view: new View({
         projection,
-        center: fromLonLat([mapConfig.viewSettings.center[0], mapConfig.viewSettings.center[1]], projection),
-        zoom: mapConfig.viewSettings.zoom,
-        extent: extent || undefined,
-        minZoom: mapConfig.viewSettings.minZoom || 0,
-        maxZoom: mapConfig.viewSettings.maxZoom || 17,
+        center: fromLonLat(
+          [mapStoreConfig?.map.viewSettings.center[0] || -105, mapStoreConfig?.map.viewSettings.center[1] || 60],
+          projection
+        ),
+        zoom: mapStoreConfig?.map.viewSettings.zoom,
+        extent: extentProjected || undefined,
+        minZoom: mapStoreConfig?.map.viewSettings.minZoom || 0,
+        maxZoom: mapStoreConfig?.map.viewSettings.maxZoom || 17,
       }),
       controls: [],
       keyboardEventTarget: document.getElementById(`map-${mapId}`) as HTMLElement,

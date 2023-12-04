@@ -4,7 +4,7 @@ import { create, createStore } from 'zustand';
 import { mountStoreDevtool } from 'simple-zustand-devtools';
 
 import { initializeEventProcessors } from '@/api/event-processors';
-import { TypeMapFeaturesConfig } from '../types/global-types';
+import { TypeMapFeaturesConfig } from '@/core/types/global-types';
 import { IGeoViewState, GeoViewStoreType, geoViewStoreDefinitionWithSubscribeSelector } from './geoview-store';
 import { MapContext } from '@/core/app-start';
 
