@@ -1,14 +1,24 @@
 import { TypeWindow } from 'geoview-core';
 import { CloseButton, EnlargeButton, LayerList, LayerListEntry, LayerTitle, ResponsiveGrid } from 'geoview-core/src/core/components/common';
+import { useVisibleTimeSliderLayers, useTimeSliderLayers, useGeoviewDisplayLanguage } from 'geoview-core/src/core/stores';
 import { getSxClasses } from './time-slider-style';
 import { TimeSlider } from './time-slider';
-import { LayerProps, SliderFilterProps } from './index';
 
 interface TypeTimeSliderProps {
   mapId: string;
-  layersList: LayerProps[];
-  timeSliderData: { [index: string]: SliderFilterProps };
 }
+
+/**
+ * translations object to inject to the viewer translations
+ */
+const translations: { [index: string]: { [index: string]: string } } = {
+  en: {
+    noLayers: 'No layers with temporal data',
+  },
+  fr: {
+    noLayers: 'Pas de couches avec des données temporelles',
+  },
+};
 
 const { cgpv } = window as TypeWindow;
 
@@ -19,19 +29,27 @@ const { cgpv } = window as TypeWindow;
  * @returns {JSX.Element} the time slider tab
  */
 export function TimeSliderPanel(props: TypeTimeSliderProps): JSX.Element {
-  const { mapId, layersList, timeSliderData } = props;
+  const { mapId } = props;
   const { react, ui, useTranslation } = cgpv;
-  const { useCallback, useState } = react;
+  const { useCallback, useState, useEffect } = react;
   const { Box } = ui.elements;
   const { useTheme } = ui;
   const { t } = useTranslation<string>();
   const theme = useTheme();
   const sxClasses = getSxClasses(theme);
 
-  // First layer is initially selected
-  const [selectedLayerPath, setSelectedLayerPath] = useState<string>(layersList[0]?.layerPath);
+  const [selectedLayerPath, setSelectedLayerPath] = useState<string>();
   const [isLayersPanelVisible, setIsLayersPanelVisible] = useState(false);
   const [isEnlargeDataTable, setIsEnlargeDataTable] = useState(false);
+
+  const displayLanguage = useGeoviewDisplayLanguage();
+  const visibleTimeSliderLayers = useVisibleTimeSliderLayers();
+  const timeSliderLayers = useTimeSliderLayers();
+
+  useEffect(() => {
+    if (!selectedLayerPath) setSelectedLayerPath(visibleTimeSliderLayers[0]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [visibleTimeSliderLayers]);
 
   /**
    * Handles clicks to layers in left panel. Sets selected layer.
@@ -49,22 +67,24 @@ export function TimeSliderPanel(props: TypeTimeSliderProps): JSX.Element {
    * @returns JSX.Element
    */
   const renderLayerList = useCallback(() => {
-    return (
-      <LayerList
-        isEnlargeDataTable={isEnlargeDataTable}
-        selectedLayerIndex={layersList.findIndex(({ layerPath }) => layerPath === selectedLayerPath)}
-        handleListItemClick={(layer) => {
-          handleLayerChange(layer);
-        }}
-        layerList={layersList.map(({ layerPath, layerName }) => ({
-          layerName,
-          layerPath,
-          tooltip: layerName as string,
-        }))}
-      />
-    );
+    if (visibleTimeSliderLayers.length)
+      return (
+        <LayerList
+          isEnlargeDataTable={isEnlargeDataTable}
+          selectedLayerIndex={selectedLayerPath ? visibleTimeSliderLayers.indexOf(selectedLayerPath) : 0}
+          handleListItemClick={(layer) => {
+            handleLayerChange(layer);
+          }}
+          layerList={visibleTimeSliderLayers.map((layer) => ({
+            layerName: timeSliderLayers[layer].name,
+            layerPath: layer,
+            tooltip: layer as string,
+          }))}
+        />
+      );
+    return <span>{translations[displayLanguage].noLayers}</span>;
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [layersList, selectedLayerPath, isEnlargeDataTable]);
+  }, [visibleTimeSliderLayers, selectedLayerPath, isEnlargeDataTable]);
 
   return (
     <Box sx={sxClasses.detailsContainer}>
@@ -94,12 +114,7 @@ export function TimeSliderPanel(props: TypeTimeSliderProps): JSX.Element {
           {renderLayerList()}
         </ResponsiveGrid.Left>
         <ResponsiveGrid.Right isEnlargeDataTable={isEnlargeDataTable} isLayersPanelVisible={isLayersPanelVisible}>
-          <TimeSlider
-            mapId={mapId}
-            layerPath={selectedLayerPath}
-            sliderFilterProps={timeSliderData[selectedLayerPath]}
-            key={selectedLayerPath}
-          />
+          {selectedLayerPath && <TimeSlider mapId={mapId} layerPath={selectedLayerPath} key={selectedLayerPath} />}
         </ResponsiveGrid.Right>
       </ResponsiveGrid.Root>
     </Box>

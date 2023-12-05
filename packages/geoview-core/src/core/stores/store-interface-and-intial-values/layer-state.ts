@@ -171,7 +171,7 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
             if (item.isVisible !== 'always') {
               item.isVisible = visibility; // eslint-disable-line no-param-reassign
 
-              // assign value to registered layer. Thisis use by applyFilter function to set visibility
+              // assign value to registered layer. This is use by applyFilter function to set visibility
               // TODO: check if we need to refactor to centralize attribute setting....
               (registeredLayer.style![item.geometryType]! as TypeUniqueValueStyleConfig).uniqueValueStyleInfo[index].visible =
                 item.isVisible;
