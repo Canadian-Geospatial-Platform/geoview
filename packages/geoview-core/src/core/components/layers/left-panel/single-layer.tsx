@@ -39,7 +39,6 @@ interface SingleLayerProps {
 }
 
 export function SingleLayer({ depth, layer, setIsLayersListPanelVisible }: SingleLayerProps): JSX.Element {
-
   const { t } = useTranslation<string>();
 
   const { toggleLayerVisibility, setSelectedLayerPath } = useLayerStoreActions(); // get store actions

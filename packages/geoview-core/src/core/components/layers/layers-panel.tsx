@@ -10,7 +10,6 @@ import { LayersActions } from './left-panel/layers-actions';
 import { LayerDetails } from './right-panel/layer-details';
 import { AddNewLayer } from './left-panel/add-new-layer';
 import { LeftPanel } from './left-panel/left-panel';
-import { useLegendHelpers } from './hooks/helpers';
 
 const Item = styled('div')(({ theme }) => ({
   backgroundColor: theme.palette.mode === 'dark' ? '#262B32' : '#fff',

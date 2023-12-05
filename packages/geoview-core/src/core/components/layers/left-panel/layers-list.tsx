@@ -1,6 +1,6 @@
 import { Dispatch, SetStateAction } from 'react';
 import { useTheme } from '@mui/material/styles';
-import { DragDropContext, Droppable, Draggable, DropResult } from 'react-beautiful-dnd';
+import { DragDropContext, Droppable, Draggable, DropResult, DraggingStyle, NotDraggingStyle } from 'react-beautiful-dnd';
 import _ from 'lodash';
 import { SingleLayer } from './single-layer';
 import { getSxClasses } from './left-panel-styles';
@@ -23,14 +23,15 @@ export function LayersList({ layersList, setIsLayersListPanelVisible, parentLaye
 
   const isDragEnabled = displayState === 'order';
 
-  const sortedLayers = _(layersList)
+  const sortedLayers = _.chain(layersList)
     .filter((layer) => layer.isVisible !== 'no')
-    .sort((ly) => ly.order)
+    .sortBy(['order'])
     .value();
 
   const onDragEnd = (result: DropResult) => {
     // dropped outside the list
     if (!result.destination) {
+      return;
     }
 
     console.log(result);
@@ -52,7 +53,7 @@ export function LayersList({ layersList, setIsLayersListPanelVisible, parentLaye
       .replace(/\s+/g, '-'); // Replace spaces with hyphens
   };
 
-  const getItemStyle = (isDragging: boolean, draggableStyle: any) => {
+  const getItemStyle = (isDragging: boolean, draggableStyle: DraggingStyle | NotDraggingStyle | undefined) => {
     if (isDragging) {
       return {
         userSelect: 'none',
@@ -88,9 +89,9 @@ export function LayersList({ layersList, setIsLayersListPanelVisible, parentLaye
     return (
       <Draggable
         isDragDisabled={!isDragEnabled}
-        key={textToSlug(`${index}${details.layerId}`)}
-        draggableId={textToSlug(`${index}${details.layerId}`)}
-        index={index}
+        key={textToSlug(`${index}${details.layerPath}`)}
+        draggableId={textToSlug(`${index}${details.layerPath}`)}
+        index={details.order ?? index}
       >
         {(provided, snapshot) => (
           <div
@@ -100,7 +101,7 @@ export function LayersList({ layersList, setIsLayersListPanelVisible, parentLaye
             style={getItemStyle(snapshot.isDragging, provided.draggableProps.style)}
           >
             <SingleLayer
-              key={`layerKey-${index}-${details.layerPath}`}
+              key={textToSlug(`layerKey-${index}-${details.layerPath}`)}
               depth={depth}
               layer={details}
               setIsLayersListPanelVisible={setIsLayersListPanelVisible}
