@@ -1,7 +1,6 @@
 import { Dispatch, SetStateAction } from 'react';
 import { useTheme } from '@mui/material/styles';
 import { DragDropContext, Droppable, Draggable, DropResult, DraggingStyle, NotDraggingStyle } from 'react-beautiful-dnd';
-import _ from 'lodash';
 import { SingleLayer } from './single-layer';
 import { getSxClasses } from './left-panel-styles';
 import { Box } from '@/ui';
@@ -23,10 +22,9 @@ export function LayersList({ layersList, setIsLayersListPanelVisible, parentLaye
 
   const isDragEnabled = displayState === 'order';
 
-  const sortedLayers = _.chain(layersList)
+  const sortedLayers = layersList
     .filter((layer) => layer.isVisible !== 'no')
-    .sortBy(['order'])
-    .value();
+    .sort((a, b) => (a.order && b.order && a.order > b.order ? 1 : -1));
 
   const onDragEnd = (result: DropResult) => {
     // dropped outside the list
