@@ -1,4 +1,4 @@
-import { CSSProperties, forwardRef, Dispatch, SetStateAction, useState } from 'react';
+import { Dispatch, SetStateAction, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   Box,
@@ -36,14 +36,10 @@ interface SingleLayerProps {
   layer: TypeLegendLayer;
   depth: number;
   setIsLayersListPanelVisible: Dispatch<SetStateAction<boolean>>;
-  style?: CSSProperties; // Style prop
 }
 
-function SingleLayer({ depth, layer, setIsLayersListPanelVisible, style }: SingleLayerProps): JSX.Element {
-  /*const SingleLayer: React.ForwardRefRenderFunction<HTMLDivElement, SingleLayerProps> = (
-  { depth, layer, setIsLayersListPanelVisible, style },
-  ref
-) => {*/
+export function SingleLayer({ depth, layer, setIsLayersListPanelVisible }: SingleLayerProps): JSX.Element {
+
   const { t } = useTranslation<string>();
 
   const { toggleLayerVisibility, setSelectedLayerPath } = useLayerStoreActions(); // get store actions
@@ -69,7 +65,7 @@ function SingleLayer({ depth, layer, setIsLayersListPanelVisible, style }: Singl
     }
     if (mapFiltered[layer.layerPath]) {
       return (
-        <Box style={{ ...style, display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'left', gap: 1 }}>
+        <Box style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'left', gap: 1 }}>
           <span>{layer.items.length} items </span>
           <TableViewIcon />
         </Box>
@@ -179,7 +175,12 @@ function SingleLayer({ depth, layer, setIsLayersListPanelVisible, style }: Singl
 
     return (
       <Collapse in={isGroupOpen} timeout="auto">
-        <LayersList parentLayerPath={layer.layerPath} depth={1 + depth} layersList={layer.children} setIsLayersListPanelVisible={setIsLayersListPanelVisible} />
+        <LayersList
+          parentLayerPath={layer.layerPath}
+          depth={1 + depth}
+          layersList={layer.children}
+          setIsLayersListPanelVisible={setIsLayersListPanelVisible}
+        />
       </Collapse>
     );
   }
@@ -232,6 +233,3 @@ function SingleLayer({ depth, layer, setIsLayersListPanelVisible, style }: Singl
     </Box>
   );
 }
-
-// export default forwardRef(SingleLayer);
-export default SingleLayer;

@@ -1,15 +1,16 @@
 import { Dispatch, SetStateAction } from 'react';
 import { useTheme } from '@mui/material/styles';
 import { DragDropContext, Droppable, Draggable, DropResult } from 'react-beautiful-dnd';
-import SingleLayer from './single-layer';
+import _ from 'lodash';
+import { SingleLayer } from './single-layer';
 import { getSxClasses } from './left-panel-styles';
-import { Box, List } from '@/ui';
+import { Box } from '@/ui';
 import { TypeLegendLayer } from '../types';
 import { useLayersDisplayState } from '@/core/stores/store-interface-and-intial-values/layer-state';
 
 interface LayerListProps {
   depth: number;
-  parentLayerPath: string,
+  parentLayerPath: string;
   layersList: TypeLegendLayer[];
   setIsLayersListPanelVisible: Dispatch<SetStateAction<boolean>>;
 }
@@ -21,6 +22,11 @@ export function LayersList({ layersList, setIsLayersListPanelVisible, parentLaye
   const displayState = useLayersDisplayState();
 
   const isDragEnabled = displayState === 'order';
+
+  const sortedLayers = _(layersList)
+    .filter((layer) => layer.isVisible !== 'no')
+    .sort((ly) => ly.order)
+    .value();
 
   const onDragEnd = (result: DropResult) => {
     // dropped outside the list
@@ -42,31 +48,30 @@ export function LayersList({ layersList, setIsLayersListPanelVisible, parentLaye
   const textToSlug = (text: string): string => {
     return text
       .toLowerCase()
-      .replace(/[^a-z0-9 -]/g, "") // Remove non-alphanumeric characters except spaces and hyphens
-      .replace(/\s+/g, "-"); // Replace spaces with hyphens
+      .replace(/[^a-z0-9 -]/g, '') // Remove non-alphanumeric characters except spaces and hyphens
+      .replace(/\s+/g, '-'); // Replace spaces with hyphens
   };
 
   const getItemStyle = (isDragging: boolean, draggableStyle: any) => {
-    if(isDragging) {
+    if (isDragging) {
       return {
-        userSelect: "none",
-        //border: '2px dashed green',
+        userSelect: 'none',
+        // border: '2px dashed green',
         padding: '8px !important',
-        ...draggableStyle
-      }
+        ...draggableStyle,
+      };
     }
     return {};
   };
-  
+
   const getListStyle = (isDraggingOver: boolean) => {
-    if(isDraggingOver) {
+    if (isDraggingOver) {
       return {
         border: '2px dashed #ccc',
-        padding: '8px !important'
-      }
+        padding: '8px !important',
+      };
     }
     return {};
-    
   };
 
   const getListClass = () => {
@@ -79,21 +84,21 @@ export function LayersList({ layersList, setIsLayersListPanelVisible, parentLaye
     return sxClasses.oddDepthList;
   };
 
-  const legendItems = layersList.map((details, index) => {
+  const legendItems = sortedLayers.map((details, index) => {
     return (
       <Draggable
-      isDragDisabled={!isDragEnabled}
-      key={textToSlug(`${index}${details.layerId}`)} 
-      draggableId={textToSlug(`${index}${details.layerId}`)} 
-      index={index}>
+        isDragDisabled={!isDragEnabled}
+        key={textToSlug(`${index}${details.layerId}`)}
+        draggableId={textToSlug(`${index}${details.layerId}`)}
+        index={index}
+      >
         {(provided, snapshot) => (
-          <div ref={provided.innerRef}
-          {...provided.draggableProps}
-          {...provided.dragHandleProps}
-          style={getItemStyle(
-            snapshot.isDragging,
-            provided.draggableProps.style
-          )}>
+          <div
+            ref={provided.innerRef}
+            {...provided.draggableProps}
+            {...provided.dragHandleProps}
+            style={getItemStyle(snapshot.isDragging, provided.draggableProps.style)}
+          >
             <SingleLayer
               key={`layerKey-${index}-${details.layerPath}`}
               depth={depth}
@@ -110,12 +115,7 @@ export function LayersList({ layersList, setIsLayersListPanelVisible, parentLaye
     <DragDropContext onDragEnd={onDragEnd}>
       <Droppable droppableId={textToSlug(`${parentLayerPath}_${depth}`)}>
         {(provided, snapshot) => (
-          <Box 
-          sx={getListClass()}
-           {...provided.droppableProps} 
-           ref={provided.innerRef}
-           style={getListStyle(snapshot.isDraggingOver)}
-           >
+          <Box sx={getListClass()} {...provided.droppableProps} ref={provided.innerRef} style={getListStyle(snapshot.isDraggingOver)}>
             {legendItems}
             {provided.placeholder}
           </Box>

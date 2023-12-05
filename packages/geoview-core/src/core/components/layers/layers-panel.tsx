@@ -32,12 +32,14 @@ export function LayersPanel() {
   const selectedLayer = useSelectedLayer(); // get store value
   const displayState = useLayersDisplayState();
 
+  /*
   // Using helpers
   const helpers = useLegendHelpers();
   useEffect(() => {
     helpers.populateLegendStoreWithFakeData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+  */
 
   useEffect(() => {
     if (layerDetailsRef.current) {
