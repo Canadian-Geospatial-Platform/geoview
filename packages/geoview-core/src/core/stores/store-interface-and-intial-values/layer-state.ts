@@ -31,6 +31,7 @@ export interface ILayerState {
     setAllItemsVisibility: (layerPath: string, visibility: 'yes' | 'no') => void;
     deleteLayer: (layerPath: string) => void;
     zoomToLayerExtent: (layerPath: string) => void;
+    reOrderLayers: (startIndex: number, endIndex: number) => void;
   };
 }
 
@@ -216,6 +217,10 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
         const layer = findLayerByPath(get().layerState.legendLayers, layerPath);
         const { bounds } = layer as TypeLegendLayer;
         if (bounds) api.maps[get().mapId].zoomToExtent(bounds, options);
+      },
+      reOrderLayers: (startIndex: number, endIndex: number) => {
+        // TODO implement re-order layers
+        console.log('reorder layers', startIndex, endIndex);
       },
     },
   } as ILayerState;

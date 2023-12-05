@@ -5,7 +5,7 @@ import { SingleLayer } from './single-layer';
 import { getSxClasses } from './left-panel-styles';
 import { Box } from '@/ui';
 import { TypeLegendLayer } from '../types';
-import { useLayersDisplayState } from '@/core/stores/store-interface-and-intial-values/layer-state';
+import { useLayerStoreActions, useLayersDisplayState } from '@/core/stores/store-interface-and-intial-values/layer-state';
 
 interface LayerListProps {
   depth: number;
@@ -19,6 +19,7 @@ export function LayersList({ layersList, setIsLayersListPanelVisible, parentLaye
   const sxClasses = getSxClasses(theme);
 
   const displayState = useLayersDisplayState();
+  const { reOrderLayers } = useLayerStoreActions(); // get store actions
 
   const isDragEnabled = displayState === 'order';
 
@@ -32,16 +33,9 @@ export function LayersList({ layersList, setIsLayersListPanelVisible, parentLaye
       return;
     }
 
-    console.log(result);
-    /* const items = reorder(
-      this.state.items,
-      result.source.index,
-      result.destination.index
-    );
+    reOrderLayers(result.source.index, result.destination.index);
 
-    this.setState({
-      items
-    }); */
+    console.log(result);
   };
 
   const textToSlug = (text: string): string => {
