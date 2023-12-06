@@ -1,15 +1,15 @@
-import { useRef, useContext } from 'react';
+import { useRef } from 'react';
 
 import { useTheme } from '@mui/material/styles';
 
 import { Box } from '@/ui';
 import { PROJECTION_NAMES } from '@/geo/projection/projection';
-import { MapContext } from '@/core/app-start';
 import { NorthArrowIcon, NorthPoleIcon } from './north-arrow-icon';
 import { getSxClasses } from './north-arrow-style';
 import { useMapNorthArrowElement, useMapProjection, useMapStoreActions } from '@/core/stores/store-interface-and-intial-values/map-state';
 
 import useManageArrow from './hooks/useManageArrow';
+import { useGeoViewMapId } from '@/app';
 
 /**
  * Create a north arrow
@@ -55,8 +55,7 @@ export function NorthArrow(): JSX.Element {
  * @returns {JSX.Element} the north pole marker icon
  */
 export function NorthPoleFlag(): JSX.Element {
-  const mapConfig = useContext(MapContext);
-  const { mapId } = mapConfig;
+  const mapId = useGeoViewMapId();
 
   // internal state
   const northPoleId = `${mapId}-northpole`;

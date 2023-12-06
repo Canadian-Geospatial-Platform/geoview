@@ -1,12 +1,10 @@
-import { useContext } from 'react';
-
 import { useTheme } from '@mui/material/styles';
 
-import { MapContext } from '@/core/app-start';
 import { IconButton, FullscreenIcon, FullscreenExitIcon } from '@/ui';
 import { TypeHTMLElement } from '@/core/types/global-types';
 import { getSxClasses } from '../nav-bar-style';
 import { useAppStoreActions, useAppFullscreenActive } from '@/core/stores/store-interface-and-intial-values/app-state';
+import { useGeoViewMapId } from '@/app';
 
 /**
  * Create a toggle button to toggle between fullscreen
@@ -14,8 +12,7 @@ import { useAppStoreActions, useAppFullscreenActive } from '@/core/stores/store-
  * @returns {JSX.Element} the fullscreen toggle button
  */
 export default function Fullscreen(): JSX.Element {
-  const mapConfig = useContext(MapContext);
-  const { mapId } = mapConfig;
+  const mapId = useGeoViewMapId();
 
   const theme = useTheme();
   const sxClasses = getSxClasses(theme);
