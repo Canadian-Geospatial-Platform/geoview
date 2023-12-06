@@ -88,8 +88,6 @@
     </table>
   </div>
   <div class="toolbar">
-    <button id="load-details-panel-btn">Load Details Panel</button>
-    <button id="unload-details-panel-btn">Unload Details Panel</button>
     <button id="load-basemap-panel-btn">Load Basemap Panel</button>
     <button id="unload-basemap-panel-btn">Unload Basemap Panel</button>
     <button id="load-layers-panel-btn">Load Layers Panel</button>
@@ -111,24 +109,6 @@
 
       createCodeSnippet();
       createConfigSnippet();
-
-      // get load details panel button element
-      var loadDetailsPanelBtn = document.getElementById('load-details-panel-btn');
-
-      // add event handler to the load details panel button
-      loadDetailsPanelBtn.addEventListener('click', function (e) {
-        cgpv.api.addPlugin('details-panel', 'mapWM', window.plugins['details-panel'], {
-          mapId: 'mapWM',
-        });
-      });
-
-      // get unload details panel button element
-      var unloadDetailsPanelBtn = document.getElementById('unload-details-panel-btn');
-
-      // add event handler to the unload details panel button
-      unloadDetailsPanelBtn.addEventListener('click', function (e) {
-        cgpv.api.removePlugin('details-panel');
-      });
 
       // get load basemap panel button element
       var loadBasemapPanelBtn = document.getElementById('load-basemap-panel-btn');
