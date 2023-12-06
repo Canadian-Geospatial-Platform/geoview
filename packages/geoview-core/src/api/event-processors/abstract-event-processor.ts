@@ -9,7 +9,11 @@ export abstract class AbstractEventProcessor {
     this.subscriptionArr = [];
   }
 
-  abstract onInitialize(store: GeoViewStoreType): void;
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  onInitialize(store: GeoViewStoreType): void {
+    // add to arr of subscriptions so it can be destroyed later
+    this.subscriptionArr.push();
+  }
 
   onDestroy() {
     // destroying all subscriptions

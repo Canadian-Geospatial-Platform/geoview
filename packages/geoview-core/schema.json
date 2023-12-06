@@ -498,44 +498,10 @@
         "featureInfo": {
           "$ref": "#/definitions/TypeFeatureInfoLayerConfig"
         },
-        "cluster": {
-          "$ref": "#/definitions/TypeSourceVectorClusterConfig"
-        },
         "strategy": {
           "enum": ["all", "bbox"],
           "default": "all",
           "description": "The loading strategy to use. By default an all strategy is used, a one-off strategy which loads all features at once."
-        }
-      }
-    },
-    "TypeSourceVectorClusterConfig": {
-      "additionalProperties": false,
-      "type": "object",
-      "description": "Cluster vector data on vector layer. Works out of the box with point geometries. If another geometry is provided, it will be converted to points geometry.",
-      "properties": {
-        "enable": {
-          "type": "boolean",
-          "default": false
-        },
-        "distance": {
-          "type": "integer",
-          "description": "Distance in pixels within which features will be clustered together (default 20px)."
-        },
-        "minDistance": {
-          "type": "integer",
-          "description": "Minimum distance in pixels between clusters. Will be capped at the configured distance. By default no minimum distance is guaranteed. This config can be used to avoid overlapping icons. As a tradoff, the cluster feature's position will no longer be the center of all its features."
-        },
-        "splitZoom": {
-          "type": "integer",
-          "description": "Zoom level at which all clusters will split (default 7)."
-        },
-        "textColor": {
-          "type": "string",
-          "description": "Color for the text showing the number of points in a cluster"
-        },
-        "settings": {
-          "$ref": "#/definitions/TypeSimpleSymbolVectorConfig",
-          "description": "settings for the cluster symbol and clustered geometries"
         }
       }
     },
