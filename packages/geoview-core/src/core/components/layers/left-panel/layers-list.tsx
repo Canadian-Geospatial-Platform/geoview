@@ -19,7 +19,7 @@ export function LayersList({ layersList, setIsLayersListPanelVisible, parentLaye
   const sxClasses = getSxClasses(theme);
 
   const displayState = useLayersDisplayState();
-  const { reOrderLayers } = useLayerStoreActions(); // get store actions
+  const { reOrderLayer } = useLayerStoreActions(); // get store actions
 
   const isDragEnabled = displayState === 'order';
 
@@ -32,10 +32,7 @@ export function LayersList({ layersList, setIsLayersListPanelVisible, parentLaye
     if (!result.destination) {
       return;
     }
-
-    reOrderLayers(result.source.index, result.destination.index);
-
-    console.log(result);
+    reOrderLayer(result.source.index, result.destination.index, result.draggableId);
   };
 
   const textToSlug = (text: string): string => {
@@ -82,8 +79,8 @@ export function LayersList({ layersList, setIsLayersListPanelVisible, parentLaye
       <Draggable
         isDragDisabled={!isDragEnabled}
         key={textToSlug(`${index}${details.layerPath}`)}
-        draggableId={textToSlug(`${index}${details.layerPath}`)}
-        index={details.order ?? index}
+        draggableId={details.layerPath}
+        index={index} //TODO Change to details.order
       >
         {(provided, snapshot) => (
           <div
@@ -106,7 +103,7 @@ export function LayersList({ layersList, setIsLayersListPanelVisible, parentLaye
 
   return (
     <DragDropContext onDragEnd={onDragEnd}>
-      <Droppable droppableId={textToSlug(`${parentLayerPath}_${depth}`)}>
+      <Droppable droppableId={textToSlug(`${parentLayerPath}_${depth}`)} direction='vertical'>
         {(provided, snapshot) => (
           <Box sx={getListClass()} {...provided.droppableProps} ref={provided.innerRef} style={getListStyle(snapshot.isDraggingOver)}>
             {legendItems}

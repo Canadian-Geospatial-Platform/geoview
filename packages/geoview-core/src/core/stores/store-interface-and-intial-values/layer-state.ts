@@ -9,7 +9,7 @@ import { useGeoViewStore } from '../stores-managers';
 import { TypeLayersViewDisplayState, TypeLegendLayer } from '@/core/components/layers/types';
 import { TypeGetStore, TypeSetStore } from '../geoview-store';
 import { TypeStyleGeometry, TypeUniqueValueStyleConfig, TypeVectorLayerEntryConfig } from '@/geo/map/map-schema-types';
-import { AbstractGeoViewVector, EsriDynamic, api } from '@/app';
+import { AbstractGeoViewVector, EsriDynamic, TypeLegend, api } from '@/app';
 import { OL_ZOOM_DURATION, OL_ZOOM_PADDING } from '@/core/utils/constant';
 
 export interface ILayerState {
@@ -31,7 +31,7 @@ export interface ILayerState {
     setAllItemsVisibility: (layerPath: string, visibility: 'yes' | 'no') => void;
     deleteLayer: (layerPath: string) => void;
     zoomToLayerExtent: (layerPath: string) => void;
-    reOrderLayers: (startIndex: number, endIndex: number) => void;
+    reOrderLayer: (startIndex: number, endIndex: number, layerPath: string) => void;
   };
 }
 
@@ -218,9 +218,17 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
         const { bounds } = layer as TypeLegendLayer;
         if (bounds) api.maps[get().mapId].zoomToExtent(bounds, options);
       },
-      reOrderLayers: (startIndex: number, endIndex: number) => {
+      reOrderLayer: (startIndex: number, endIndex: number, layerPath: string) => {
         // TODO implement re-order layers
-        console.log('reorder layers', startIndex, endIndex);
+        const curLayers = get().layerState.legendLayers;
+        const reOrderedLayers = reOrderSingleLayer(curLayers, startIndex, endIndex, layerPath);
+        set({
+          layerState: {
+            ...get().layerState,
+            legendLayers: [...reOrderedLayers],
+          },
+        });
+        // console.log('reorder layers', startIndex, endIndex, curLayers);
       },
     },
   } as ILayerState;
@@ -266,6 +274,46 @@ function deleteSingleLayer(layers: TypeLegendLayer[], layerPath: string) {
     }
   }
 }
+
+
+function reOrderSingleLayer(
+  collection: TypeLegendLayer[],
+  startIndex: number,
+  endIndex: number,
+  layerPath: string
+): TypeLegendLayer[] {
+
+  let layerFound = false;
+
+  function findLayerAndSortIt(startingCollection: TypeLegendLayer[]) {
+    if(layerFound) { return; }
+    layerFound = startingCollection.find(lyr => lyr.layerPath === layerPath) !== undefined;
+
+    if(layerFound) {
+      const [removed] = startingCollection.splice(startIndex, 1);
+      startingCollection.splice(endIndex, 0, removed);
+
+      startingCollection.forEach((lyr, index)=> {
+        lyr.order = index + 1;
+      });
+      
+      return;
+    }
+    
+    //if not found at this level, lets find it in children
+    for(var i = 0; i <  startingCollection.length; i++) {
+      if(startingCollection[i].children.length > 0) {
+        findLayerAndSortIt(startingCollection[i].children);
+      }
+    }
+  }
+
+  findLayerAndSortIt(collection);
+
+  return collection;
+
+}
+
 
 // **********************************************************
 // Layer state selectors
