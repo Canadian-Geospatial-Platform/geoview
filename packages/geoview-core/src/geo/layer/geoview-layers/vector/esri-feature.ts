@@ -257,10 +257,7 @@ export class EsriFeature extends AbstractGeoViewVector {
     // eslint-disable-next-line no-var
     var vectorSource: VectorSource<Feature<Geometry>>;
     sourceOptions.url = getLocalizedValue(layerEntryConfig.source!.dataAccessPath!, this.mapId);
-    sourceOptions.url = `${sourceOptions.url}/${String(layerEntryConfig.layerId).replace(
-      '-unclustered',
-      ''
-    )}/query?f=pjson&outfields=*&where=1%3D1`;
+    sourceOptions.url = `${sourceOptions.url}/${String(layerEntryConfig.layerId)}/query?f=pjson&outfields=*&where=1%3D1`;
     sourceOptions.format = new EsriJSON();
 
     vectorSource = super.createVectorSource(layerEntryConfig, sourceOptions, readOptions);

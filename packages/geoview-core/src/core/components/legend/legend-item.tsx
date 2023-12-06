@@ -29,7 +29,7 @@ import {
   BrowserNotSupportedIcon,
   Grid,
 } from '@/ui';
-import { api, payloadIsLegendInfo, NumberPayload, PayloadBaseClass, EsriDynamic, IconStack } from '@/app';
+import { api, payloadIsLegendInfo, EsriDynamic, IconStack } from '@/app';
 import { LegendIconList } from './legend-icon-list';
 import {
   AbstractGeoViewLayer,
@@ -47,7 +47,6 @@ import {
   TypeDisplayLanguage,
   TypeVectorLayerEntryConfig,
   TypeStyleGeometry,
-  TypeVectorSourceInitialConfig,
   isClassBreakStyleConfig,
   isUniqueValueStyleConfig,
   layerEntryIsGroupLayer,
@@ -174,16 +173,8 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
   } = useTheme();
 
   const { mapId } = geoviewLayerInstance;
-  // check if layer is a clustered, so that clustering can be toggled
   const path = subLayerId || `${layerId}/${geoviewLayerInstance.listOfLayerEntryConfig[0]?.layerId}`;
-  const clusterLayerPath = path.replace('-unclustered', '');
-  const unclusterLayerPath = `${clusterLayerPath}-unclustered`;
-  const canCluster = !!api.maps[mapId].layer.registeredLayers[unclusterLayerPath];
-
-  const [isClusterToggleEnabled, setIsClusterToggleEnabled] = useState(false);
-  const [isChecked, setChecked] = useState<boolean>(
-    api.maps[mapId].layer.registeredLayers[clusterLayerPath]?.initialSettings?.visible !== 'no'
-  );
+  const [isChecked, setChecked] = useState<boolean>(api.maps[mapId].layer.registeredLayers[path]?.initialSettings?.visible !== 'no');
   const [isOpacityOpen, setOpacityOpen] = useState(false);
   const [isGroupOpen, setGroupOpen] = useState(true);
   const [isLegendOpen, setLegendOpen] = useState(true);
@@ -201,9 +192,6 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
   const [menuAnchorElement, setMenuAnchorElement] = useState<null | HTMLElement>(null);
   const [opacity, setOpacity] = useState<number>(1);
 
-  const [zoom, setZoom] = useState<number>(MapEventProcessor.getMapState(mapId).currentZoom);
-  const splitZoom =
-    (api.maps[mapId].layer.registeredLayers[clusterLayerPath]?.source as TypeVectorSourceInitialConfig)?.cluster?.splitZoom || 7;
   const closeIconRef = useRef() as RefObject<HTMLButtonElement>;
   const stackIconRef = useRef() as MutableRefObject<HTMLDivElement | undefined>;
   const maxIconRef = useRef() as RefObject<HTMLButtonElement>;
@@ -248,7 +236,6 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
             if (iconImageList.length > 0) setIconImg(iconImageList[0]);
             if (iconImageList.length > 1) setIconImgStacked(iconImageList[1]);
             if (styleRepresentation.defaultCanvas) iconImageList.push(styleRepresentation.defaultCanvas.toDataURL());
-            if (styleRepresentation.clusterCanvas) iconImageList.push(styleRepresentation.clusterCanvas.toDataURL());
             setIconList(iconImageList);
             if (layerLegend.styleConfig) {
               let geometryKey: TypeStyleGeometry | null = null;
@@ -258,7 +245,6 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
                     return styleInfo.label;
                   });
                   if (styleRepresentation.defaultCanvas) iconLabelList.push((styleSettings as TypeClassBreakStyleConfig).defaultLabel!);
-                  if (styleRepresentation.clusterCanvas) iconLabelList.push('Cluster');
                   setLabelList(iconLabelList);
                   geometryKey = key as TypeStyleGeometry;
                 }
@@ -267,7 +253,6 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
                     return styleInfo.label;
                   });
                   if (styleRepresentation.defaultCanvas) iconLabelList.push((styleSettings as TypeUniqueValueStyleConfig).defaultLabel!);
-                  if (styleRepresentation.clusterCanvas) iconLabelList.push('Cluster');
                   setLabelList(iconLabelList);
                   geometryKey = key as TypeStyleGeometry;
                 }
@@ -367,18 +352,6 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
     }
   }, [isParentVisible, isChecked, layerConfigEntry, geoviewLayerInstance]);
 
-  useEffect(() => {
-    const mapZoomHandler = (payload: PayloadBaseClass) => {
-      if (canCluster) {
-        setZoom((payload as NumberPayload).value);
-      }
-    };
-    api.event.on(api.eventNames.MAP.EVENT_MAP_ZOOM_END, mapZoomHandler, mapId);
-    return () => {
-      api.event.off(api.eventNames.MAP.EVENT_MAP_ZOOM_END, mapId, mapZoomHandler);
-    };
-  }, [canCluster, mapId]);
-
   /**
    * Handle expand/shrink of layer groups.
    */
@@ -428,24 +401,8 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
 
   const handleSetOpacity = (opacityValue: number | number[]) => {
     if (!geoviewLayerInstance) return;
-    if (canCluster) {
-      geoviewLayerInstance.setOpacity((opacityValue as number) / 100, clusterLayerPath);
-      geoviewLayerInstance.setOpacity((opacityValue as number) / 100, unclusterLayerPath);
-    } else if (subLayerId) geoviewLayerInstance.setOpacity((opacityValue as number) / 100, subLayerId);
+    if (subLayerId) geoviewLayerInstance.setOpacity((opacityValue as number) / 100, subLayerId);
     else geoviewLayerInstance.setOpacity((opacityValue as number) / 100, geoviewLayerInstance.listOfLayerEntryConfig[0]);
-  };
-
-  const handleClusterToggle = () => {
-    if (api.maps[mapId].layer.registeredLayers[clusterLayerPath]?.olLayer) {
-      api.maps[mapId].layer.registeredLayers[clusterLayerPath]?.olLayer!.setVisible(
-        !api.maps[mapId].layer.registeredLayers[clusterLayerPath]?.olLayer!.getVisible()
-      );
-      api.maps[mapId].layer.registeredLayers[unclusterLayerPath]?.olLayer!.setVisible(
-        !api.maps[mapId].layer.registeredLayers[unclusterLayerPath]?.olLayer!.getVisible()
-      );
-    }
-    setIsClusterToggleEnabled(!isClusterToggleEnabled);
-    handleCloseMenu();
   };
 
   const handleStackIcon = (e: React.KeyboardEvent<HTMLElement>) => {
@@ -496,13 +453,6 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
       setLegendOpen(false);
     }
   }, [iconList, iconType]);
-
-  useEffect(() => {
-    const source = (api.maps[mapId].layer.getGeoviewLayerById(layerId) as AbstractGeoViewVector)?.listOfLayerEntryConfig[0]
-      ?.source as TypeVectorSourceInitialConfig;
-    setIsClusterToggleEnabled(source?.cluster?.enable ?? false);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   return (
     <Grid item sm={12} md={subLayerId ? 12 : 6} lg={subLayerId ? 12 : 4}>
@@ -561,7 +511,7 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
                 <MoreVertIcon />
               </IconButton>
             )}
-            {api.maps[mapId].layer.registeredLayers[clusterLayerPath]?.initialSettings?.visible !== 'always' && (
+            {api.maps[mapId].layer.registeredLayers[path]?.initialSettings?.visible !== 'always' && (
               <IconButton color="primary" onClick={() => handleToggleLayer()}>
                 {(() => {
                   if (isParentVisible === false) return <VisibilityOffIcon />;
@@ -594,17 +544,6 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
             )}
           </MenuItem>
         )}
-        {zoom < splitZoom && canCluster && groupItems.length === 0 && (
-          <MenuItem onClick={handleClusterToggle}>
-            <ListItemText> {t('legend.toggle_cluster')}</ListItemText>
-            {isClusterToggleEnabled && (
-              <ListItemIcon sx={sxClasses.menuListIcon}>
-                <CheckIcon fontSize="small" />
-              </ListItemIcon>
-            )}
-          </MenuItem>
-        )}
-
         {canZoomTo && groupItems.length === 0 && (
           <MenuItem onClick={handleZoomTo}>
             <ListItemText>{t('legend.zoomTo')}</ListItemText>
