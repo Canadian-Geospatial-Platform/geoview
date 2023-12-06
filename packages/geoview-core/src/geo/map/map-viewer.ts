@@ -3,7 +3,7 @@ import { i18n } from 'i18next';
 /* eslint-disable @typescript-eslint/no-var-requires */
 
 import OLMap from 'ol/Map';
-import View, { FitOptions, ViewOptions } from 'ol/View';
+import View, { ViewOptions } from 'ol/View';
 import { fromLonLat, ProjectionLike, toLonLat, transform as olTransform, transformExtent as olTransformExtent } from 'ol/proj';
 import { Coordinate } from 'ol/coordinate';
 import { Extent } from 'ol/extent';
@@ -37,9 +37,10 @@ import { ModalApi } from '@/ui';
 import { mapComponentPayload, mapConfigPayload, GeoViewLayerPayload, payloadIsGeoViewLayerAdded } from '@/api/events/payloads';
 import { generateId, getValidConfigFromString } from '@/core/utils/utilities';
 import { TypeListOfGeoviewLayerConfig, TypeDisplayLanguage, TypeViewSettings, TypeMapState } from '@/geo/map/map-schema-types';
-import { TypeMapFeaturesConfig, TypeHTMLElement } from '@/core/types/global-types';
+import { TypeMapFeaturesConfig, TypeHTMLElement, TypeValidMapProjectionCodes } from '@/core/types/global-types';
 import { layerConfigIsGeoCore } from '@/geo/layer/other/geocore';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
+import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
 
 interface TypeDcoument extends Document {
   webkitExitFullscreen: () => void;
@@ -122,7 +123,7 @@ export class MapViewer {
   constructor(mapFeaturesConfig: TypeMapFeaturesConfig, i18instance: i18n) {
     this.mapId = mapFeaturesConfig.mapId;
     this.mapFeaturesConfig = mapFeaturesConfig;
-    this.displayLanguage = 'en';
+    this.displayLanguage = AppEventProcessor.getDisplayLanguage(this.mapId);
 
     // map state initialize with store data coming from configuration file/object.
     // updated values will be added by store subscription in map-event-processor
@@ -145,9 +146,9 @@ export class MapViewer {
 
     // create basemap and pass in the map id to be able to access the map instance
     this.basemap = new Basemap(
-      this.mapFeaturesConfig.map.basemapOptions,
-      this.mapFeaturesConfig.displayLanguage!,
-      this.mapFeaturesConfig.map.viewSettings.projection,
+      MapEventProcessor.getBasemapOptions(this.mapId),
+      this.displayLanguage,
+      this.mapState.currentProjection as TypeValidMapProjectionCodes,
       this.mapId
     );
 
@@ -339,19 +340,6 @@ export class MapViewer {
   }
 
   /**
-   * Zoom to the specified extent.
-   *
-   * @param {Extent} extent The extent to zoom to.
-   * @param {FitOptions} options The options to configure the zoomToExtent (default: { padding: [100, 100, 100, 100], maxZoom: 11 }).
-   */
-  zoomToExtent(extent: Extent, options: FitOptions = { padding: [100, 100, 100, 100], maxZoom: 11, duration: 1000 }) {
-    // TODO: use store do same thing as rotation.... do this for other function in mapviewer
-    // keep function here but it is using map processor
-    //! if we do this we need to bring bac other function that use map action
-    this.map.getView().fit(extent, options);
-  }
-
-  /**
    * Function called when the map has been rendered and ready to be customized
    */
   mapReady(): void {
@@ -378,7 +366,7 @@ export class MapViewer {
    * @param {TypeListOfGeoviewLayerConfig} listOfGeoviewLayerConfig optional new set of layers to apply (will override original set of layers)
    */
   changeLanguage(displayLanguage: TypeDisplayLanguage, listOfGeoviewLayerConfig?: TypeListOfGeoviewLayerConfig): void {
-    this.mapFeaturesConfig.displayLanguage = displayLanguage;
+    AppEventProcessor.setDisplayLanguage(this.mapId, displayLanguage);
 
     // if a list of geoview layers parameter is present, replace the one from the config
     // do not concat like updatedMapConfig.map.listOfGeoviewLayerConfig?.concat(listOfGeoviewLayerConfig) this
@@ -388,6 +376,7 @@ export class MapViewer {
     }
 
     // reload the map to change the language
+    // TODO: use store
     this.reloadMap(this.mapFeaturesConfig);
   }
 
@@ -397,6 +386,7 @@ export class MapViewer {
    * @param {TypeMapFeaturesConfig} mapFeaturesConfig a new config passed in from the function call
    */
   reloadMap(mapFeaturesConfig: TypeMapFeaturesConfig) {
+    // TODO: use store
     api.maps[this.mapId].mapFeaturesConfig = mapFeaturesConfig;
 
     // emit an event to reload the map with the new config

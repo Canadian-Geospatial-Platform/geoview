@@ -8,12 +8,12 @@ import * as translate from 'react-i18next';
 import Ajv from 'ajv';
 
 import { showError } from '@/core/utils/utilities';
-import { MapViewer } from '@/geo/map/map-viewer';
 
 import { api } from '@/app';
 import { AbstractPlugin } from './abstract-plugin';
 import { TypePluginStructure, TypeRecordOfPlugin } from './plugin-types';
 import { toJsonObject, TypeJsonObject, TypeJsonValue } from '@/core/types/global-types';
+import { UIEventProcessor } from '../event-processors/event-processor-children/ui-event-processor';
 
 /**
  * Class to manage plugins
@@ -281,11 +281,11 @@ export class Plugin {
    */
   loadPlugin = (mapIndex: number, pluginIndex: number) => {
     const mapId = Object.keys(api.maps)[mapIndex];
-    const map = api.maps[mapId] as MapViewer;
 
     // check if the map at this index have core packages and if there is a package at the plugin index
-    if (map.mapFeaturesConfig.corePackages && map.mapFeaturesConfig.corePackages[pluginIndex]) {
-      const pluginId = map.mapFeaturesConfig.corePackages[pluginIndex];
+    const corePackages = UIEventProcessor.getCorePackageComponents(mapId);
+    if (corePackages[pluginIndex]) {
+      const pluginId = corePackages[pluginIndex];
 
       // load the plugin from the script tag or create it
       this.loadScript(pluginId).then((constructor) => {
@@ -300,7 +300,7 @@ export class Plugin {
         );
 
         // check if there is a next plugin at the current map index
-        if (map.mapFeaturesConfig.corePackages && map.mapFeaturesConfig.corePackages[pluginIndex + 1]) {
+        if (corePackages[pluginIndex + 1]) {
           // load next plugin at the same map index
           this.loadPlugin(mapIndex, pluginIndex + 1);
           // if no more plugins at current map index then check if there is another map

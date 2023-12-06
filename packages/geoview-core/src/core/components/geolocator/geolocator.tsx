@@ -10,8 +10,7 @@ import { StyledInputField, sxClasses } from './geolocator-style';
 import { OL_ZOOM_DURATION } from '@/core/utils/constant';
 import { useUIAppbarGeolocatorActive } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import { useMapSize, useMapStoreActions } from '@/core/stores/store-interface-and-intial-values/map-state';
-import { useGeolocatorServiceURL } from '@/core/stores/store-interface-and-intial-values/app-state';
-import { useGeoviewDisplayLanguage } from '@/core/stores/geoview-store';
+import { useAppGeolocatorServiceURL, useAppDisplayLanguage } from '@/core/stores/store-interface-and-intial-values/app-state';
 
 export interface GeoListItem {
   key: string;
@@ -34,8 +33,8 @@ export function Geolocator() {
   const [isSearchInputVisible, setIsSearchInputVisible] = useState<boolean>(false);
 
   // get store values
-  const displayLanguage = useGeoviewDisplayLanguage();
-  const geolocatorServiceURL = useGeolocatorServiceURL();
+  const displayLanguage = useAppDisplayLanguage();
+  const geolocatorServiceURL = useAppGeolocatorServiceURL();
   const mapSize = useMapSize();
 
   // set the active (visible) or not active (hidden) from geolocator button click

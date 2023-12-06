@@ -16,14 +16,15 @@ import Geolocator from './buttons/geolocator';
 import Notifications from '@/core/components/notifications/notifications';
 import Version from './buttons/version';
 import { getSxClasses } from './app-bar-style';
-import { useUIActiveFocusItem } from '@/core/stores/store-interface-and-intial-values/ui-state';
+import { useUIActiveFocusItem, useUIAppbarComponents } from '@/core/stores/store-interface-and-intial-values/ui-state';
+import { useMapInteraction } from '@/core/stores/store-interface-and-intial-values/map-state';
 
 /**
  * Create an app-bar with buttons that can open a panel
  */
 export function Appbar(): JSX.Element {
   const mapContext = useContext(MapContext);
-  const { mapFeaturesConfig, mapId } = mapContext as Required<TypeMapContext>;
+  const { mapId } = mapContext as Required<TypeMapContext>;
 
   const theme = useTheme();
   const sxClasses = getSxClasses(theme);
@@ -35,6 +36,8 @@ export function Appbar(): JSX.Element {
 
   // get store values and action
   const activeModalId = useUIActiveFocusItem().activeElementId;
+  const interaction = useMapInteraction();
+  const appBarComponents = useUIAppbarComponents();
 
   const appBarPanelCloseListenerFunction = () => setSelectedAppbarButtonId('');
 
@@ -95,7 +98,7 @@ export function Appbar(): JSX.Element {
   return (
     <Box sx={sxClasses.appBar} ref={appBar}>
       <Box sx={sxClasses.appBarButtons}>
-        {mapFeaturesConfig.appBar?.includes('geolocator') && mapFeaturesConfig?.map.interaction === 'dynamic' && (
+        {appBarComponents.includes('geolocator') && interaction === 'dynamic' && (
           <Box>
             <List sx={sxClasses.appBarList}>
               <ListItem>
@@ -143,7 +146,7 @@ export function Appbar(): JSX.Element {
             </List>
           );
         })}
-        {mapFeaturesConfig.appBar?.includes('export') && (
+        {appBarComponents.includes('export') && (
           <Box>
             <List sx={sxClasses.appBarList}>
               <ListItem>

@@ -1,6 +1,8 @@
 import { useStore } from 'zustand';
 import { useGeoViewStore } from '@/core/stores/stores-managers';
 import { TypeSetStore, TypeGetStore } from '@/core/stores/geoview-store';
+import { TypeAppBarProps, TypeMapCorePackages, TypeNavBarProps } from '@/geo';
+import { TypeMapFeaturesConfig } from '@/core/types/cgpv-types';
 
 type focusItemProps = {
   activeElementId: string | false;
@@ -9,9 +11,14 @@ type focusItemProps = {
 
 export interface IUIState {
   activeTrapGeoView: boolean;
+  appBarComponents: TypeAppBarProps;
+  corePackagesComponents: TypeMapCorePackages;
   focusITem: focusItemProps;
   footerBarExpanded: boolean;
   geoLocatorActive: boolean;
+  navBarComponents: TypeNavBarProps;
+
+  setDefaultConfigValues: (geoviewConfig: TypeMapFeaturesConfig) => void;
 
   actions: {
     closeModal: () => void;
@@ -24,10 +31,25 @@ export interface IUIState {
 
 export function initializeUIState(set: TypeSetStore, get: TypeGetStore): IUIState {
   const init = {
+    appBarComponents: ['geolocator', 'export'],
     activeTrapGeoView: false,
+    corePackagesComponents: [],
     focusITem: { activeElementId: false, callbackElementId: false },
     footerBarExpanded: false,
     geoLocatorActive: false,
+    navBarComponents: [],
+
+    // initialize default stores section from config information when store receive configuration file
+    setDefaultConfigValues: (geoviewConfig: TypeMapFeaturesConfig) => {
+      set({
+        uiState: {
+          ...get().uiState,
+          appBarComponents: geoviewConfig.appBar || [],
+          corePackagesComponents: geoviewConfig.corePackages || [],
+          navBarComponents: geoviewConfig.navBar || [],
+        },
+      });
+    },
 
     // #region ACTIONS
     actions: {
@@ -84,7 +106,10 @@ export function initializeUIState(set: TypeSetStore, get: TypeGetStore): IUIStat
 // **********************************************************
 export const useUIActiveFocusItem = () => useStore(useGeoViewStore(), (state) => state.uiState.focusITem);
 export const useUIActiveTrapGeoView = () => useStore(useGeoViewStore(), (state) => state.uiState.activeTrapGeoView);
+export const useUIAppbarComponents = () => useStore(useGeoViewStore(), (state) => state.uiState.appBarComponents);
 export const useUIAppbarGeolocatorActive = () => useStore(useGeoViewStore(), (state) => state.uiState.geoLocatorActive);
+export const useUICorePackagesComponents = () => useStore(useGeoViewStore(), (state) => state.uiState.corePackagesComponents);
 export const useUIFooterBarExpanded = () => useStore(useGeoViewStore(), (state) => state.uiState.footerBarExpanded);
+export const useUINavbarComponents = () => useStore(useGeoViewStore(), (state) => state.uiState.navBarComponents);
 
 export const useUIStoreActions = () => useStore(useGeoViewStore(), (state) => state.uiState.actions);
