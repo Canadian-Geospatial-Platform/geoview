@@ -27,10 +27,6 @@
       "projectFolder": "packages/geoview-core"
     },
     {
-      "packageName": "geoview-details-panel",
-      "projectFolder": "packages/geoview-details-panel"
-    },
-    {
       "packageName": "geoview-footer-panel",
       "projectFolder": "packages/geoview-footer-panel"
     },
