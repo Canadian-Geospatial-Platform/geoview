@@ -126,8 +126,6 @@ export type TypeStyleRepresentation = {
    * break styles.
    */
   defaultCanvas?: HTMLCanvasElement | null;
-  /** The clusterCanvas property is used when the layer clustering is active (layerConfig.source.cluster.enable = true). */
-  clusterCanvas?: HTMLCanvasElement | null;
   /** The arrayOfCanvas property is used by unique value and class break styles. */
   arrayOfCanvas?: (HTMLCanvasElement | null)[];
 };
@@ -638,24 +636,6 @@ export abstract class AbstractGeoViewLayer {
           return null;
         }
         if ((listOfLayerEntryConfig[0] as TypeBaseLayerEntryConfig).layerStatus === 'error') return null;
-        if (
-          listOfLayerEntryConfig[0].entryType === 'vector' &&
-          (listOfLayerEntryConfig[0].source as TypeBaseSourceVectorInitialConfig)?.cluster?.enable
-        ) {
-          const unclusteredLayerConfig = cloneDeep(listOfLayerEntryConfig[0]) as TypeVectorLayerEntryConfig;
-          unclusteredLayerConfig.layerId = `${listOfLayerEntryConfig[0].layerId}-unclustered`;
-          unclusteredLayerConfig.source!.cluster!.enable = false;
-          const baseLayer = await this.processOneLayerEntry(unclusteredLayerConfig as TypeBaseLayerEntryConfig);
-          if (baseLayer) {
-            baseLayer!.setVisible(false);
-            api.maps[this.mapId].layer.registerLayerConfig(unclusteredLayerConfig);
-            this.registerToLayerSets(unclusteredLayerConfig as TypeBaseLayerEntryConfig);
-            if (!layerGroup) layerGroup = this.createLayerGroup(unclusteredLayerConfig.parentLayerConfig as TypeLayerEntryConfig);
-            layerGroup!.getLayers().push(baseLayer!);
-          }
-          (listOfLayerEntryConfig[0].source as TypeBaseSourceVectorInitialConfig)!.cluster!.settings =
-            unclusteredLayerConfig.source!.cluster!.settings;
-        }
         const baseLayer = await this.processOneLayerEntry(listOfLayerEntryConfig[0] as TypeBaseLayerEntryConfig);
         if (baseLayer) {
           baseLayer.setVisible(listOfLayerEntryConfig[0].initialSettings?.visible !== 'no');
@@ -683,15 +663,6 @@ export abstract class AbstractGeoViewLayer {
         } else if ((listOfLayerEntryConfig[i] as TypeBaseLayerEntryConfig).layerStatus === 'error')
           promiseOfLayerCreated.push(Promise.resolve(null));
         else {
-          if (layerEntryConfig.entryType === 'vector' && (layerEntryConfig.source as TypeBaseSourceVectorInitialConfig)?.cluster?.enable) {
-            const unclusteredLayerConfig = cloneDeep(layerEntryConfig) as TypeVectorLayerEntryConfig;
-            unclusteredLayerConfig.layerId = `${layerEntryConfig.layerId}-unclustered`;
-            unclusteredLayerConfig.source!.cluster!.enable = false;
-            api.maps[this.mapId].layer.registerLayerConfig(unclusteredLayerConfig);
-            promiseOfLayerCreated.push(this.processOneLayerEntry(unclusteredLayerConfig as TypeBaseLayerEntryConfig));
-            (layerEntryConfig.source as TypeBaseSourceVectorInitialConfig)!.cluster!.settings =
-              unclusteredLayerConfig.source!.cluster!.settings;
-          }
           promiseOfLayerCreated.push(this.processOneLayerEntry(layerEntryConfig as TypeBaseLayerEntryConfig));
         }
       });
@@ -700,15 +671,11 @@ export abstract class AbstractGeoViewLayer {
         if (baseLayer) {
           const layerEntryConfig = baseLayer?.get('layerEntryConfig') as TypeBaseLayerEntryConfig;
           if (layerEntryConfig) {
-            if (layerEntryConfig.layerId.endsWith('-unclustered')) {
-              this.registerToLayerSets(layerEntryConfig);
-              baseLayer.setVisible(false);
-            } else
-              baseLayer.setVisible(
-                layerEntryConfig.initialSettings?.visible === 'yes' ||
-                  layerEntryConfig.initialSettings?.visible === 'always' ||
-                  layerEntryConfig.initialSettings?.visible === undefined
-              );
+            baseLayer.setVisible(
+              layerEntryConfig.initialSettings?.visible === 'yes' ||
+                layerEntryConfig.initialSettings?.visible === 'always' ||
+                layerEntryConfig.initialSettings?.visible === undefined
+            );
 
             if (!layerEntryIsGroupLayer(listOfLayerEntryConfig[i])) {
               this.registerToLayerSets(baseLayer.get('layerEntryConfig') as TypeBaseLayerEntryConfig);
@@ -1316,18 +1283,7 @@ export abstract class AbstractGeoViewLayer {
       const arrayOfFeatureInfo = await Promise.all(promisedAllCanvasFound);
       arrayOfFeatureInfo.forEach(({ canvas, feature }) => {
         if (canvas) {
-          const extent =
-            layerEntryIsVector(layerEntryConfig) && layerEntryConfig.source?.cluster?.enable
-              ? (feature.get('features') as Array<Feature<Geometry>>).reduce((resultingExtent, featureToProcess) => {
-                  const newExtent = featureToProcess.getGeometry()!.getExtent();
-                  return [
-                    Math.min(resultingExtent[0], newExtent[0]),
-                    Math.min(resultingExtent[1], newExtent[1]),
-                    Math.max(resultingExtent[2], newExtent[2]),
-                    Math.max(resultingExtent[3], newExtent[3]),
-                  ];
-                }, feature.getGeometry()!.getExtent())
-              : feature.getGeometry()!.getExtent();
+          const extent = feature.getGeometry()!.getExtent();
 
           const featureInfoEntry: TypeFeatureInfoEntry = {
             // feature key for building the data-grid

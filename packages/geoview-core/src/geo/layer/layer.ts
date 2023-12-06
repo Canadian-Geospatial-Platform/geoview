@@ -501,11 +501,6 @@ export class Layer {
       const subLayerZIndex =
         geoviewLayer.layerOrder.indexOf(subLayer.layerId) !== -1 ? geoviewLayer.layerOrder.indexOf(subLayer.layerId) : 0;
       subLayer.olLayer?.setZIndex(subLayerZIndex + zIndex);
-      const unclusteredLayer =
-        api.maps[this.mapId].layer.registeredLayers[`${geoviewLayer.geoviewLayerId}/${subLayer.layerId}-unclustered`];
-      if (unclusteredLayer) {
-        unclusteredLayer.olLayer?.setZIndex(subLayerZIndex + zIndex);
-      }
     });
   };
 
