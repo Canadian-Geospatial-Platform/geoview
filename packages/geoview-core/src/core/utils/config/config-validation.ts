@@ -37,7 +37,6 @@ import {
   VALID_VERSIONS,
   TypeListOfGeoviewLayerConfig,
   TypeListOfLocalizedLanguages,
-  layerEntryIsVector,
 } from '@/geo/map/map-schema-types';
 import { Cast, toJsonObject, TypeJsonObject, TypeMapFeaturesConfig } from '../../types/global-types';
 
@@ -743,21 +742,6 @@ export class ConfigValidation {
             : `${layerEntryConfig.source.dataAccessPath!.fr}/${layerEntryConfig.layerId}`;
         }
         if (!layerEntryConfig?.source?.dataProjection) layerEntryConfig.source.dataProjection = 'EPSG:4326';
-      }
-      // Set default value for clusters on vector layers
-      if (layerEntryIsVector(layerEntryConfig) && layerEntryConfig.source!.cluster?.enable) {
-        if (!layerEntryConfig.source!.cluster.settings)
-          layerEntryConfig.source!.cluster.settings = {
-            type: 'simpleSymbol',
-            symbol: 'circle',
-            stroke: { lineStyle: 'solid', width: 1 },
-          };
-        if (!layerEntryConfig.source!.cluster.settings.type) layerEntryConfig.source!.cluster.settings.type = 'simpleSymbol';
-        if (!layerEntryConfig.source!.cluster.settings.symbol) layerEntryConfig.source!.cluster.settings.symbol = 'circle';
-        if (!layerEntryConfig.source!.cluster.settings.stroke) layerEntryConfig.source!.cluster.settings.stroke = {};
-        if (!layerEntryConfig.source!.cluster.settings.stroke.lineStyle)
-          layerEntryConfig.source!.cluster.settings.stroke.lineStyle = 'solid';
-        if (!layerEntryConfig.source!.cluster.settings.stroke.width) layerEntryConfig.source!.cluster.settings.stroke.width = 1;
       }
     });
   }

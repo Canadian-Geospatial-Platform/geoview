@@ -1,16 +1,16 @@
 /* eslint-disable no-console, no-param-reassign, no-var */
 import Feature from 'ol/Feature';
-import { Cluster, Vector as VectorSource } from 'ol/source';
+import { Vector as VectorSource } from 'ol/source';
 import { Options as SourceOptions } from 'ol/source/Vector';
 import { VectorImage as VectorLayer } from 'ol/layer';
 import { Options as VectorLayerOptions } from 'ol/layer/VectorImage';
-import { Geometry, Point } from 'ol/geom';
+import { Geometry } from 'ol/geom';
 import { all, bbox } from 'ol/loadingstrategy';
 import { ReadOptions } from 'ol/format/Feature';
 import BaseLayer from 'ol/layer/Base';
 import LayerGroup from 'ol/layer/Group';
 import { Coordinate } from 'ol/coordinate';
-import { getCenter, Extent } from 'ol/extent';
+import { Extent } from 'ol/extent';
 import { Pixel } from 'ol/pixel';
 import { transform } from 'ol/proj';
 
@@ -189,8 +189,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
 
   /** ***************************************************************************************************************************
    * Create a vector layer. The layer has in its properties a reference to the layer entry configuration used at creation time.
-   * The layer entry configuration keeps a reference to the layer in the olLayer attribute. If clustering is enabled, creates a
-   * cluster source and uses that to create the layer.
+   * The layer entry configuration keeps a reference to the layer in the olLayer attribute.
    *
    * @param {TypeBaseLayerEntryConfig} layerEntryConfig The layer entry configuration used by the source.
    * @param {VectorSource<Feature<Geometry>>} vectorSource The source configuration for the vector layer.
@@ -202,41 +201,13 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
     vectorSource: VectorSource<Feature<Geometry>>
   ): VectorLayer<VectorSource> {
     layerEntryConfig.layerPhase = 'createVectorLayer';
-    let configSource: TypeBaseSourceVectorInitialConfig = {};
-    if (layerEntryConfig.source !== undefined) {
-      configSource = layerEntryConfig.source as TypeBaseSourceVectorInitialConfig;
-      if (configSource.cluster === undefined) {
-        configSource.cluster = { enable: false };
-      }
-    } else {
-      configSource = { cluster: { enable: false } };
-    }
 
     const layerOptions: VectorLayerOptions<VectorSource> = {
       properties: { layerEntryConfig },
-      source: configSource.cluster!.enable
-        ? new Cluster({
-            source: vectorSource as VectorSource<Feature<Geometry>>,
-            distance: configSource.cluster!.distance,
-            minDistance: configSource.cluster!.minDistance,
-            geometryFunction: ((feature): Point | null => {
-              const geometryExtent = feature.getGeometry()?.getExtent();
-              if (geometryExtent) {
-                const center = getCenter(geometryExtent) as Coordinate;
-                return new Point(center);
-              }
-              return null;
-            }) as (arg0: Feature<Geometry>) => Point,
-          })
-        : (vectorSource as VectorSource<Feature<Geometry>>),
+      source: vectorSource as VectorSource<Feature<Geometry>>,
       style: (feature) => {
-        const { geoviewRenderer } = api.maps[this.mapId];
-
-        if (configSource.cluster!.enable) {
-          return geoviewRenderer.getClusterStyle(layerEntryConfig, feature as Feature<Geometry>);
-        }
-
         if ('style' in layerEntryConfig) {
+          const { geoviewRenderer } = api.maps[this.mapId];
           return geoviewRenderer.getFeatureStyle(feature as Feature<Geometry>, layerEntryConfig);
         }
 
@@ -347,28 +318,33 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
    * @returns {Extent} The layer bounding box.
    */
   protected getBounds(layerConfig: TypeLayerEntryConfig, bounds: Extent | undefined): Extent | undefined {
-    (layerConfig.olLayer as VectorLayer<VectorSource<Feature<Geometry>>>).getSource()?.forEachFeature((feature) => {
-      const coordinates = feature.get('geometry').flatCoordinates;
-      for (let i = 0; i < coordinates.length; i += 2) {
-        const geographicCoordinate = transform(
-          [coordinates[i], coordinates[i + 1]],
-          `EPSG:${MapEventProcessor.getMapState(this.mapId).currentProjection}`,
-          `EPSG:4326`
-        );
-        if (geographicCoordinate) {
-          if (!bounds) bounds = [geographicCoordinate[0], geographicCoordinate[1], geographicCoordinate[0], geographicCoordinate[1]];
-          else {
-            bounds = [
-              Math.min(geographicCoordinate[0], bounds[0]),
-              Math.min(geographicCoordinate[1], bounds[1]),
-              Math.max(geographicCoordinate[0], bounds[2]),
-              Math.max(geographicCoordinate[1], bounds[3]),
-            ];
+    if (layerConfig.olLayer) {
+      (layerConfig.olLayer as VectorLayer<VectorSource<Feature<Geometry>>>).getSource()?.forEachFeature((feature) => {
+        const coordinates = feature.get('geometry')?.flatCoordinates || feature.get('the_geom')?.flatCoordinates;
+        if (coordinates) {
+          for (let i = 0; i < coordinates.length; i += 2) {
+            const geographicCoordinate = transform(
+              [coordinates[i], coordinates[i + 1]],
+              `EPSG:${MapEventProcessor.getMapState(this.mapId).currentProjection}`,
+              `EPSG:4326`
+            );
+            if (geographicCoordinate) {
+              if (!bounds) bounds = [geographicCoordinate[0], geographicCoordinate[1], geographicCoordinate[0], geographicCoordinate[1]];
+              else {
+                bounds = [
+                  Math.min(geographicCoordinate[0], bounds[0]),
+                  Math.min(geographicCoordinate[1], bounds[1]),
+                  Math.max(geographicCoordinate[0], bounds[2]),
+                  Math.max(geographicCoordinate[1], bounds[3]),
+                ];
+              }
+            }
           }
         }
-      }
-    });
-    return bounds;
+      });
+      if (bounds) return bounds;
+    }
+    return undefined;
   }
 
   /** ***************************************************************************************************************************
@@ -380,33 +356,12 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
    * @param {string | TypeLayerEntryConfig} layerPathOrConfig Layer path or configuration.
    * @param {string} filter An optional filter to be used in place of the getViewFilter value.
    * @param {boolean} CombineLegendFilter Flag used to combine the legend filter and the filter together (default: true)
-   * @param {boolean} checkCluster An optional value to see if we check for clustered layers.
    */
-  applyViewFilter(layerPathOrConfig: string | TypeLayerEntryConfig, filter = '', CombineLegendFilter = true, checkCluster = true) {
+  applyViewFilter(layerPathOrConfig: string | TypeLayerEntryConfig, filter = '', CombineLegendFilter = true) {
     const layerEntryConfig = (
       typeof layerPathOrConfig === 'string' ? this.getLayerConfig(layerPathOrConfig) : layerPathOrConfig
     ) as TypeVectorLayerEntryConfig;
     if (layerEntryConfig) {
-      const layerPath = layerEntryConfig.geoviewRootLayer
-        ? `${layerEntryConfig.geoviewRootLayer.geoviewLayerId}/${String(layerEntryConfig.layerId).replace('-unclustered', '')}`
-        : String(layerEntryConfig.layerId).replace('-unclustered', '');
-      const unclusteredLayerPath = `${layerPath}-unclustered`;
-      const cluster = !!api.maps[this.mapId].layer.registeredLayers[unclusteredLayerPath];
-      if (cluster && checkCluster) {
-        this.applyViewFilter(
-          api.maps[this.mapId].layer.registeredLayers[layerPath] as TypeVectorLayerEntryConfig,
-          filter,
-          CombineLegendFilter,
-          false
-        );
-        this.applyViewFilter(
-          api.maps[this.mapId].layer.registeredLayers[unclusteredLayerPath] as TypeVectorLayerEntryConfig,
-          filter,
-          CombineLegendFilter,
-          false
-        );
-        return;
-      }
       if (!layerEntryConfig.olLayer) return; // We must wait for the layer to be created.
       let filterValueToUse = filter;
       layerEntryConfig.olLayer!.set('legendFilterIsOff', !CombineLegendFilter);

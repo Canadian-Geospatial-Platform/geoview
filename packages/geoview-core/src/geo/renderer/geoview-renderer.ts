@@ -1,14 +1,13 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable no-param-reassign */
 import { asArray, asString } from 'ol/color';
-import { Text, Style, Stroke, Fill, RegularShape, Circle as StyleCircle, Icon as StyleIcon } from 'ol/style';
-import { Geometry, LineString, MultiLineString, Point, MultiPoint, Polygon, MultiPolygon } from 'ol/geom';
+import { Style, Stroke, Fill, RegularShape, Circle as StyleCircle, Icon as StyleIcon } from 'ol/style';
+import { Geometry, LineString, Point, Polygon } from 'ol/geom';
 import Icon, { Options as IconOptions } from 'ol/style/Icon';
 import { Options as CircleOptions } from 'ol/style/Circle';
 import { Options as RegularShapeOptions } from 'ol/style/RegularShape';
 import { Options as StrokeOptions } from 'ol/style/Stroke';
 import { Options as FillOptions } from 'ol/style/Fill';
-import { Options as TextOptions } from 'ol/style/Text';
 import Feature from 'ol/Feature';
 import { toContext } from 'ol/render';
 import { Size } from 'ol/size';
@@ -42,8 +41,6 @@ import {
   isClassBreakStyleConfig,
   TypeUniqueValueStyleConfig,
   TypeClassBreakStyleConfig,
-  TypeBaseSourceVectorInitialConfig,
-  layerEntryIsVector,
 } from '../map/map-schema-types';
 import {
   binaryKeywors,
@@ -432,17 +429,11 @@ export class GeoviewRenderer {
       const styleConfig: TypeStyleConfig = layerEntryConfig.style;
       if (!styleConfig) return {};
 
-      const clusterCanvas =
-        layerEntryIsVector(layerEntryConfig) && (layerEntryConfig.source as TypeBaseSourceVectorInitialConfig).cluster?.enable
-          ? this.createPointCanvas(this.getClusterStyle(layerEntryConfig))
-          : undefined;
-
       if (styleConfig.Point) {
         // ======================================================================================================================
         // Point style configuration ============================================================================================
         if (isSimpleStyleConfig(styleConfig.Point)) {
           const layerStyles = await this.getPointStyleSubRoutine(styleConfig.Point.settings);
-          layerStyles.Point!.clusterCanvas = clusterCanvas;
           return layerStyles;
         }
 
@@ -451,7 +442,6 @@ export class GeoviewRenderer {
             styleConfig.Point.defaultSettings,
             (styleConfig.Point as TypeUniqueValueStyleConfig).uniqueValueStyleInfo
           );
-          layerStyles.Point!.clusterCanvas = clusterCanvas;
           return layerStyles;
         }
 
@@ -460,7 +450,6 @@ export class GeoviewRenderer {
             styleConfig.Point.defaultSettings,
             (styleConfig.Point as TypeClassBreakStyleConfig).classBreakStyleInfo
           );
-          layerStyles.Point!.clusterCanvas = clusterCanvas;
           return layerStyles;
         }
       }
@@ -580,15 +569,13 @@ export class GeoviewRenderer {
       if (style![geometryType] !== undefined) {
         const styleSettings = style![geometryType]!;
         const { styleType } = styleSettings;
-        const featureStyle = source?.cluster?.enable
-          ? this.getClusterStyle(layerEntryConfig as TypeVectorLayerEntryConfig, feature)
-          : this.processStyle[styleType][geometryType].call(
-              this,
-              styleSettings,
-              feature,
-              layerEntryConfig.olLayer!.get('filterEquation'),
-              layerEntryConfig.olLayer!.get('legendFilterIsOff')
-            );
+        const featureStyle = this.processStyle[styleType][geometryType].call(
+          this,
+          styleSettings,
+          feature,
+          layerEntryConfig.olLayer!.get('filterEquation'),
+          layerEntryConfig.olLayer!.get('legendFilterIsOff')
+        );
         if (featureStyle) {
           if (geometryType === 'Point') {
             if (
@@ -596,8 +583,7 @@ export class GeoviewRenderer {
               (isUniqueValueStyleConfig(styleSettings) &&
                 isSimpleSymbolVectorConfig((styleSettings as TypeUniqueValueStyleConfig).uniqueValueStyleInfo[0].settings)) ||
               (isClassBreakStyleConfig(styleSettings) &&
-                isSimpleSymbolVectorConfig((styleSettings as TypeClassBreakStyleConfig).classBreakStyleInfo[0].settings)) ||
-              (layerEntryConfig.source as TypeBaseSourceVectorInitialConfig).cluster?.enable
+                isSimpleSymbolVectorConfig((styleSettings as TypeClassBreakStyleConfig).classBreakStyleInfo[0].settings))
             )
               resolve(this.createPointCanvas(featureStyle));
             else
@@ -610,71 +596,6 @@ export class GeoviewRenderer {
       } else resolve(undefined);
     });
     return promisedCanvas;
-  }
-
-  /** ***************************************************************************************************************************
-   * This method gets the style of the cluster feature using the layer entry config. If the style does not exist, create it using
-   * the default style strategy.
-   *
-   * @param {TypeBaseLayerEntryConfig | TypeVectorLayerEntryConfig} layerEntryConfig The layer entry config that may have a style
-   * configuration for the feature. If style does not exist for the geometryType, create it.
-   * @param {Feature<Geometry>} feature The feature that need its style to be defined. When undefined, it's because we fetch the styles
-   * for the legend.
-   *
-   * @returns {Style | undefined} The style applied to the feature or undefined if not found.
-   */
-  getClusterStyle(layerEntryConfig: TypeVectorLayerEntryConfig, feature?: Feature<Geometry>): Style | undefined {
-    const configSource = layerEntryConfig.source as TypeBaseSourceVectorInitialConfig;
-    if (!configSource.cluster?.textColor) configSource.cluster!.textColor = '';
-
-    const clusterSize = feature?.get('features')
-      ? (feature!.get('features') as Array<Feature<Geometry>>).reduce((numberOfFeatures, featureToTest) => {
-          const geometryType = featureToTest.getGeometry()?.getType();
-          if (geometryType === 'MultiPoint') return numberOfFeatures + (featureToTest.getGeometry() as MultiPoint).getPoints().length;
-          if (geometryType === 'MultiLineString')
-            return numberOfFeatures + (featureToTest.getGeometry() as MultiLineString).getLineStrings().length;
-          if (geometryType === 'MultiPolygon') return numberOfFeatures + (featureToTest.getGeometry() as MultiPolygon).getPolygons().length;
-          return numberOfFeatures + 1;
-        }, 0)
-      : 0;
-
-    // Get the cluster point style to use when the features are clustered.
-    if (feature === undefined || clusterSize > 1) {
-      const styleSettings = layerEntryConfig.source!.cluster!.settings!;
-      if (!styleSettings.color || !styleSettings.stroke?.color) {
-        const { style } = layerEntryConfig;
-        let geoColor: string | null = null;
-        const geoStyle = style?.Point || style?.Polygon || style?.LineString || null;
-        if (geoStyle) {
-          const geoStyleSettings = (isSimpleStyleConfig(geoStyle) ? geoStyle.settings : geoStyle) as TypeSimpleSymbolVectorConfig;
-          geoColor = geoStyleSettings.stroke?.color || null;
-        }
-        const color = geoColor ? asString(setAlphaColor(asArray(geoColor), 0.45)) : this.getDefaultColor(0.45);
-        const strokeColor = geoColor || this.getDefaultColorAndIncrementIndex(1);
-        if (!styleSettings.color) styleSettings.color = color;
-        if (!styleSettings.stroke) styleSettings.stroke = {};
-        if (!styleSettings.stroke.color) styleSettings.stroke.color = strokeColor;
-      }
-
-      const pointStyle = this.processClusterSymbol(layerEntryConfig, feature);
-      if (pointStyle!.getText()!.getText() !== '1') return pointStyle;
-      let styleFound: Style | undefined;
-      const theUniqueVisibleFeature = (feature!.get('features') as Array<Feature<Geometry>>).find((featureToTest) => {
-        styleFound = this.getFeatureStyle(featureToTest, layerEntryConfig);
-        return styleFound;
-      });
-      return styleFound;
-    }
-
-    // When there is only a single feature left, use that features original geometry
-    if (clusterSize < 2) {
-      const originalFeature = clusterSize ? feature!.get('features')[0] : feature;
-
-      // If style does not exist for the geometryType, getFeatureStyle will create it.
-      return this.getFeatureStyle(originalFeature, layerEntryConfig);
-    }
-
-    return undefined;
   }
 
   /** ***************************************************************************************************************************
@@ -901,55 +822,6 @@ export class GeoviewRenderer {
     if (settings.opacity !== undefined) iconOptions.opacity = settings.opacity;
     return new Style({
       image: new StyleIcon(iconOptions),
-    });
-  }
-
-  /** ***************************************************************************************************************************
-   * Process a cluster circle symbol using the settings.
-   *
-   * @param {TypeBaseLayerEntryConfig | TypeVectorLayerEntryConfig} layerEntryConfig The layer configuration.
-   * @param {Feature<Geometry>} feature The feature that need its style to be defined. When undefined, it's because we fetch the styles
-   * for the legend.
-   *
-   * @returns {Style | undefined} The Style created. Undefined if unable to create it.
-   */
-  private processClusterSymbol(layerEntryConfig: TypeVectorLayerEntryConfig, feature?: Feature<Geometry>): Style | undefined {
-    const { settings } = layerEntryConfig.source!.cluster!;
-    const fillOptions: FillOptions = { color: settings!.color };
-    const strokeOptions: StrokeOptions = this.createStrokeOptions(settings!);
-    const circleOptions: CircleOptions = { radius: settings!.size !== undefined ? settings!.size + 10 : 14 };
-    circleOptions.stroke = new Stroke(strokeOptions);
-    circleOptions.fill = new Fill(fillOptions);
-    if (settings!.offset !== undefined) circleOptions.displacement = settings!.offset;
-    if (settings!.rotation !== undefined) circleOptions.rotation = settings!.rotation;
-    const text = feature
-      ? (feature.get('features') as Array<Feature<Geometry>>)
-          .reduce((numberOfVisibleFeature, featureToTest) => {
-            if (this.getFeatureStyle(featureToTest, layerEntryConfig)) {
-              const geometryType = featureToTest.getGeometry()?.getType();
-              let numberOfEmbededFeatures = 1;
-              if (geometryType === 'MultiPoint') numberOfEmbededFeatures = (featureToTest.getGeometry() as MultiPoint).getPoints().length;
-              else if (geometryType === 'MultiLineString')
-                numberOfEmbededFeatures = (featureToTest.getGeometry() as MultiLineString).getLineStrings().length;
-              else if (geometryType === 'MultiPolygon')
-                numberOfEmbededFeatures = (featureToTest.getGeometry() as MultiPolygon).getPolygons().length;
-              return numberOfVisibleFeature + numberOfEmbededFeatures;
-            }
-            return numberOfVisibleFeature;
-          }, 0)
-          .toString()
-      : 'num';
-    if (text === '0') return undefined;
-    const textOptions: TextOptions = { text, font: '12px sans-serif' };
-    const textFillOptions: FillOptions = {
-      color: layerEntryConfig.source?.cluster?.textColor !== '' ? layerEntryConfig.source!.cluster!.textColor : '#fff',
-    };
-    textOptions.fill = new Fill(textFillOptions);
-    const textStrokeOptions: StrokeOptions = { color: '#000', width: 2 };
-    textOptions.stroke = new Stroke(textStrokeOptions);
-    return new Style({
-      image: new StyleCircle(circleOptions),
-      text: new Text(textOptions),
     });
   }
 
@@ -1449,9 +1321,9 @@ export class GeoviewRenderer {
     if (geometryType === 'Point') {
       const settings: TypeSimpleSymbolVectorConfig = {
         type: 'simpleSymbol',
-        color: layerEntryConfig.source?.cluster?.settings?.color || this.getDefaultColor(0.25),
+        color: this.getDefaultColor(0.25),
         stroke: {
-          color: layerEntryConfig.source?.cluster?.settings?.stroke?.color || this.getDefaultColorAndIncrementIndex(1),
+          color: this.getDefaultColorAndIncrementIndex(1),
           lineStyle: 'solid',
           width: 1,
         },
@@ -1464,7 +1336,7 @@ export class GeoviewRenderer {
     if (geometryType === 'LineString') {
       const settings: TypeLineStringVectorConfig = {
         type: 'lineString',
-        stroke: { color: layerEntryConfig.source?.cluster?.settings?.stroke?.color || this.getDefaultColorAndIncrementIndex(1) },
+        stroke: { color: this.getDefaultColorAndIncrementIndex(1) },
       };
       const styleSettings: TypeSimpleStyleConfig = { styleId, styleType: 'simple', label, settings };
       layerEntryConfig.style[geometryType] = styleSettings;
@@ -1473,8 +1345,8 @@ export class GeoviewRenderer {
     if (geometryType === 'Polygon') {
       const settings: TypePolygonVectorConfig = {
         type: 'filledPolygon',
-        color: layerEntryConfig.source?.cluster?.settings?.color || this.getDefaultColor(0.25),
-        stroke: { color: layerEntryConfig.source?.cluster?.settings?.stroke?.color || this.getDefaultColorAndIncrementIndex(1) },
+        color: this.getDefaultColor(0.25),
+        stroke: { color: this.getDefaultColorAndIncrementIndex(1) },
         fillStyle: 'solid',
       };
       const styleSettings: TypeSimpleStyleConfig = { styleId, styleType: 'simple', label, settings };
