@@ -44,18 +44,13 @@ const multipleHtmlPlugins2 = glob.sync('./public/templates/layers/*.html').map((
 const config = {
   entry: {
     'cgpv-main': './src/app.tsx',
-    'geoview-details-panel': {
-      import: '../geoview-details-panel/src/index.tsx',
-      dependOn: 'cgpv-main',
-      filename: 'corePackages/[name].js',
-    },
     'geoview-basemap-panel': {
       import: '../geoview-basemap-panel/src/index.tsx',
       dependOn: 'cgpv-main',
       filename: 'corePackages/[name].js',
     },
-    'geoview-layers-panel': {
-      import: '../geoview-layers-panel/src/index.tsx',
+    'geoview-geochart': {
+      import: '../geoview-geochart/src/index.tsx',
       dependOn: 'cgpv-main',
       filename: 'corePackages/[name].js',
     },
@@ -69,13 +64,13 @@ const config = {
       dependOn: 'cgpv-main',
       filename: 'corePackages/[name].js',
     },
-    'geoview-time-slider': {
-      import: '../geoview-time-slider/src/index.tsx',
+    'geoview-layers-panel': {
+      import: '../geoview-layers-panel/src/index.tsx',
       dependOn: 'cgpv-main',
       filename: 'corePackages/[name].js',
     },
-    'geoview-geochart': {
-      import: '../geoview-geochart/src/index.tsx',
+    'geoview-time-slider': {
+      import: '../geoview-time-slider/src/index.tsx',
       dependOn: 'cgpv-main',
       filename: 'corePackages/[name].js',
     },

@@ -7,7 +7,7 @@ The main difference between a component and a package is their level of customiz
 Components are part of the geoview-core package where we find the basic functionality of GeoView (api, events, translation, ...).
 Some components, like legends and data table can be reused in another package or directly from the GeoView API as we can see in these demos:
 
-- [legend](https://canadian-geospatial-platform.github.io/geoview/public/legend.html)
+- [legend](https://canadian-geospatial-platform.github.io/geoview/public/package-footer-panel.html)
 
 Other components can be added to the map from the configuration via the following line:
 
