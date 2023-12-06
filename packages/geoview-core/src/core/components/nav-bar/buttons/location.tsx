@@ -1,10 +1,7 @@
-import { useContext } from 'react';
-
 import { useTheme } from '@mui/material/styles';
 
-import { MapContext } from '@/core/app-start';
 import { IconButton, EmojiPeopleIcon } from '@/ui';
-import { api } from '@/app';
+import { api, useGeoViewMapId } from '@/app';
 import { getSxClasses } from '../nav-bar-style';
 import { useMapStoreActions } from '@/core/stores/store-interface-and-intial-values/map-state';
 
@@ -14,8 +11,7 @@ import { useMapStoreActions } from '@/core/stores/store-interface-and-intial-val
  * @returns {JSX.Element} the created location button
  */
 export default function Location(): JSX.Element {
-  const mapConfig = useContext(MapContext);
-  const { mapId } = mapConfig;
+  const mapId = useGeoViewMapId();
 
   const theme = useTheme();
   const sxClasses = getSxClasses(theme);

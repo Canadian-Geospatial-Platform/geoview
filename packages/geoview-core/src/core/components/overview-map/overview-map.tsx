@@ -1,4 +1,5 @@
-import { useContext, useEffect } from 'react';
+import { useEffect } from 'react';
+
 import { createRoot } from 'react-dom/client';
 
 import i18n from 'i18next';
@@ -12,10 +13,9 @@ import { OverviewMap as OLOverviewMap } from 'ol/control';
 
 import { getGeoViewStore } from '@/core/stores/stores-managers';
 
-import { MapContext } from '@/core/app-start';
 import { cgpvTheme } from '@/ui/style/theme';
 import { OverviewMapToggle } from './overview-map-toggle';
-import { api } from '@/app';
+import { api, useGeoViewMapId } from '@/app';
 import { useAppDisplayLanguage } from '@/core/stores/store-interface-and-intial-values/app-state';
 import { useMapElement, useMapOverviewMapHideZoom } from '@/core/stores/store-interface-and-intial-values/map-state';
 
@@ -93,8 +93,7 @@ const useStyles = makeStyles((theme) => ({
  * @returns {JSX.Element} returns empty container
  */
 export function OverviewMap(): JSX.Element {
-  const mapConfig = useContext(MapContext);
-  const { mapId } = mapConfig;
+  const mapId = useGeoViewMapId();
 
   // get the values from store
   const mapElement = useMapElement();

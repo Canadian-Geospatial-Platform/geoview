@@ -1,10 +1,8 @@
-import { useEffect, useContext, forwardRef, useState } from 'react';
+import { useEffect, forwardRef, useState } from 'react';
 
 import { Alert as MaterialAlert, AlertProps, Snackbar as MaterialSnackbar, Button } from '@mui/material';
 
-import { MapContext } from '@/core/app-start';
-
-import { api } from '@/app';
+import { api, useGeoViewMapId } from '@/app';
 import { EVENT_NAMES } from '@/api/events/event-types';
 
 import { Cast } from '@/core/types/global-types';
@@ -48,8 +46,7 @@ const Alert = forwardRef<HTMLDivElement, AlertProps>(function Alert(props, ref) 
 export function Snackbar(props: SnackBarProps): JSX.Element {
   const { snackBarId } = props;
 
-  const mapConfig = useContext(MapContext);
-  const { mapId } = mapConfig;
+  const mapId = useGeoViewMapId();
 
   // internal state
   const [open, setOpen] = useState(false);

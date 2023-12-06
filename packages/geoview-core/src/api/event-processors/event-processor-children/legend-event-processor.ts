@@ -125,7 +125,11 @@ export class LegendEventProcessor extends AbstractEventProcessor {
 
   static propagateLegendToStore(mapId: string, layerPath: string, legendResultSetsEntry: TypeLegendResultSetsEntry) {
     const layerPathNodes = layerPath.split('/');
-    const createNewLegendEntries = (layerPathBeginning: string, currentLevel: number, existingEntries: TypeLegendLayer[]) => {
+    const createNewLegendEntries = async (
+      layerPathBeginning: string,
+      currentLevel: number,
+      existingEntries: TypeLegendLayer[]
+    ): Promise<void> => {
       const entryLayerPath = `${layerPathBeginning}/${layerPathNodes[currentLevel]}`;
       const layerConfig = api.maps[mapId].layer.registeredLayers[entryLayerPath];
       let entryIndex = existingEntries.findIndex((entry) => entry.layerPath === entryLayerPath);
@@ -166,11 +170,6 @@ export class LegendEventProcessor extends AbstractEventProcessor {
           icons: LegendEventProcessor.getLayerIconImage(mapId, layerPath, legendResultSetsEntry.data!),
         } as TypeLegendLayer;
 
-        // TODO: find the best place to calculate layers item and assign https://github.com/Canadian-Geospatial-Platform/geoview/issues/1566
-        setTimeout(() => {
-          newLegendLayer.bounds = api.maps[mapId].layer.geoviewLayers[layerPathNodes[0]].calculateBounds(layerPath);
-        }, 2000);
-
         newLegendLayer.items = [];
         newLegendLayer.icons?.forEach((legendLayerItem) => {
           if (legendLayerItem.iconList)
@@ -181,6 +180,15 @@ export class LegendEventProcessor extends AbstractEventProcessor {
         if (entryIndex === -1) existingEntries.push(newLegendLayer);
         // eslint-disable-next-line no-param-reassign
         else existingEntries[entryIndex] = newLegendLayer;
+
+        // TODO: find the best place to calculate layers item and assign https://github.com/Canadian-Geospatial-Platform/geoview/issues/1566
+        // listen to layer status with the whenthisthat async utility function
+        try {
+          const myLayer = await api.maps[mapId].layer.getGeoviewLayerByIdAsync(layerPathNodes[0], true);
+          newLegendLayer.bounds = myLayer?.calculateBounds(layerPath);
+        } catch {
+          newLegendLayer.bounds = undefined;
+        }
       }
     };
     createNewLegendEntries(layerPathNodes[0], 1, getGeoViewStore(mapId).getState().layerState.legendLayers);

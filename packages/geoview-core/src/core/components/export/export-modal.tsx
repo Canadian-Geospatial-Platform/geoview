@@ -1,11 +1,11 @@
-import { MouseEventHandler, useContext } from 'react';
+import { MouseEventHandler } from 'react';
 
 import { useTranslation } from 'react-i18next';
 
 import { Button, Dialog, DialogActions, DialogTitle } from '@/ui';
-import { MapContext } from '@/core/app-start';
 import { exportPNG } from '@/core/utils/utilities';
 import { useUIActiveFocusItem, useUIStoreActions } from '@/core/stores/store-interface-and-intial-values/ui-state';
+import { useGeoViewMapId } from '@/app';
 
 /**
  * Export modal window component to export the viewer information in a PNG file
@@ -13,8 +13,7 @@ import { useUIActiveFocusItem, useUIStoreActions } from '@/core/stores/store-int
  * @returns {JSX.Element} the export modal component
  */
 export default function ExportModal(): JSX.Element {
-  const mapConfig = useContext(MapContext);
-  const { mapId } = mapConfig;
+  const mapId = useGeoViewMapId();
 
   const { t } = useTranslation();
 
