@@ -21,7 +21,6 @@ import { AppbarButtons } from '@/core/components/app-bar/app-bar-buttons';
 import { NavbarButtons } from '@/core/components/nav-bar/nav-bar-buttons';
 import { FooterTabsApi } from '@/core/components/footer-tabs/footer-tabs-api';
 import { LegendApi } from '@/core/components/legend/legend-api';
-import { Legend2Api } from '@/core/components/legend-2/legend-api';
 import { LayersApi } from '@/core/components/layers/layers-api';
 import { DetailsApi } from '@/core/components/details/details-api';
 import { DataTableApi } from '@/core/components/data-table/data-table-api';
@@ -82,10 +81,7 @@ export class MapViewer {
   // used to access the footer tabs api
   footerTabs!: FooterTabsApi;
 
-  // used to access the legend api
   legend!: LegendApi;
-
-  legend2!: Legend2Api;
 
   // used to access the layers
   layers!: LayersApi;
@@ -135,7 +131,6 @@ export class MapViewer {
     this.navBarButtons = new NavbarButtons(this.mapId);
     this.footerTabs = new FooterTabsApi(this.mapId);
     this.legend = new LegendApi(this.mapId);
-    this.legend2 = new Legend2Api(this.mapId);
     this.layers = new LayersApi();
     this.details = new DetailsApi(this.mapId);
     this.dataTable = new DataTableApi(this.mapId);

@@ -42,7 +42,7 @@ export function LegendLayer(props: LegendLayerProps): JSX.Element {
       return `${layer.children.length} sub-layers`;
     }
     if (layer.items.length) {
-      return `${layer.items.filter((d) => d.isVisible).length} of ${layer.items.length} items`;
+      return `${layer.items.filter((d) => d.isVisible !== 'no').length} of ${layer.items.length} items`;
     }
 
     return '';
@@ -57,7 +57,7 @@ export function LegendLayer(props: LegendLayerProps): JSX.Element {
     return (
       <List sx={{ width: '100%', padding: '20px', margin: '20px 0px' }}>
         {layer.children
-          .filter((d) => d.isVisible && !['error', 'loading'].includes(d.layerStatus ?? ''))
+          .filter((d) => d.isVisible !== 'no' && !['error', 'loading'].includes(d.layerStatus ?? ''))
           .map((item) => (
             <LegendLayer layer={item} key={item.layerPath} />
           ))}
