@@ -40,8 +40,12 @@ export class LegendEventProcessor extends AbstractEventProcessor {
   }
 
   // **********************************************************
-  // Static functions for Typescript files to set store values
+  // Static functions for Typescript files to access store actions
   // **********************************************************
+  //! Typescript MUST always use store action to modify store - NEVER use setState!
+  //! Some action does state modifications AND map actions.
+  //! ALWAYS use map event processor when an action modify store and IS NOT trap by map state event handler
+  // #region
   private static getLayerIconImage(mapId: string, layerPath: string, layerLegend: TypeLegend | null): TypeLegendLayerIcons | undefined {
     const iconDetails: TypeLegendLayerIcons = [];
     if (layerLegend) {
@@ -183,4 +187,11 @@ export class LegendEventProcessor extends AbstractEventProcessor {
     };
     createNewLegendEntries(layerPathNodes[0], 1, getGeoViewStore(mapId).getState().layerState.legendLayers);
   }
+  // #endregion
+
+  // **********************************************************
+  // Static functions for Store Map State to action on API
+  // **********************************************************
+  //! NEVER add a store action who does set state AND map action at a same time.
+  //! Review the action in store state to make sure
 }
