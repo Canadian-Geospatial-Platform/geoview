@@ -420,6 +420,7 @@ importers:
       '@babel/core': ^7.17.0
       '@babel/eslint-parser': ^7.17.0
       '@babel/runtime': ^7.17.0
+      '@mui/material': ^5.14.6
       '@types/lodash': ^4.14.188
       '@types/react': ^18.2.0
       '@types/react-dom': ^18.2.0

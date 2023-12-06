@@ -31,6 +31,7 @@ import { Cast, TypeJsonObject, toJsonObject } from '@/core/types/global-types';
 import { api } from '@/app';
 import { Layer } from '../../layer';
 import { LayerSetPayload } from '@/api/events/payloads';
+import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 
 // TODO: Implement method to validate Vector Tiles service
 // TODO: Add more customization (minZoom, maxZoom, TMS)
@@ -165,7 +166,7 @@ export class VectorTiles extends AbstractGeoViewRaster {
       };
       if (
         this.metadata?.tileInfo?.spatialReference?.wkid &&
-        api.maps[this.mapId].currentProjection !== this.metadata.tileInfo.spatialReference.wkid
+        MapEventProcessor.getMapState(this.mapId).currentProjection !== this.metadata.tileInfo.spatialReference.wkid
       ) {
         showError(this.mapId, `Error: vector tile layer (${layerEntryConfig.layerId}) projection does not match map projection`);
         // eslint-disable-next-line no-console
@@ -184,7 +185,7 @@ export class VectorTiles extends AbstractGeoViewRaster {
       }
 
       sourceOptions.format = new MVT();
-      sourceOptions.projection = `EPSG:${api.maps[this.mapId].currentProjection}`;
+      sourceOptions.projection = `EPSG:${MapEventProcessor.getMapState(this.mapId).currentProjection}`;
       sourceOptions.tileGrid = new TileGrid(layerEntryConfig.source!.tileGrid!);
       const tileLayerOptions: TileOptions<VectorTileSource> = { source: new VectorTileSource(sourceOptions) };
       // layerEntryConfig.initialSettings cannot be undefined because config-validation set it to {} if it is undefined.
@@ -239,7 +240,7 @@ export class VectorTiles extends AbstractGeoViewRaster {
           layerEntryConfig.initialSettings.extent = transformExtent(
             layerEntryConfig.initialSettings.extent,
             'EPSG:4326',
-            `EPSG:${api.maps[this.mapId].currentProjection}`
+            `EPSG:${MapEventProcessor.getMapState(this.mapId).currentProjection}`
           );
 
         resolve();
@@ -260,7 +261,7 @@ export class VectorTiles extends AbstractGeoViewRaster {
     const layerBounds = (layerConfig.olLayer as TileLayer<VectorTileSource>).getSource()?.getTileGrid()?.getExtent();
     const projection =
       (layerConfig.olLayer as TileLayer<VectorTileSource>).getSource()?.getProjection()?.getCode().replace('EPSG:', '') ||
-      api.maps[this.mapId].currentProjection;
+      MapEventProcessor.getMapState(this.mapId).currentProjection;
 
     if (layerBounds) {
       const transformedBounds = transformExtent(layerBounds, `EPSG:${projection}`, `EPSG:4326`);

@@ -4,7 +4,7 @@ import { create, createStore } from 'zustand';
 import { mountStoreDevtool } from 'simple-zustand-devtools';
 
 import { initializeEventProcessors } from '@/api/event-processors';
-import { TypeMapFeaturesConfig } from '../types/global-types';
+import { TypeMapFeaturesConfig } from '@/core/types/global-types';
 import { IGeoViewState, GeoViewStoreType, geoViewStoreDefinitionWithSubscribeSelector } from './geoview-store';
 import { MapContext } from '@/core/app-start';
 
@@ -20,17 +20,8 @@ export const addGeoViewStore = (config: TypeMapFeaturesConfig) => {
   }
   const geoViewStore = create<IGeoViewState>()(geoViewStoreDefinitionWithSubscribeSelector);
   geoViewStore.getState().setMapConfig(config);
-  // initialize static initial value from config before the event processor (config has been validated already)
-  geoViewStore.setState({
-    mapState: {
-      ...geoViewStore.getState().mapState,
-      currentProjection: config.map.viewSettings.projection,
-      interaction: config.map.interaction,
-      northArrow: config.components!.indexOf('north-arrow') > -1,
-      overviewMap: config.components!.indexOf('overview-map') > -1,
-      overviewMapHideZoom: config.overviewMap !== undefined ? config.overviewMap.hideOnZoom : 0,
-    },
-  });
+
+  // intialize event processor to make links between ui/store and back end/api
   initializeEventProcessors(geoViewStore);
   useStoresManager.setState((state) => ({
     stores: {

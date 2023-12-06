@@ -18,7 +18,11 @@ import {
   BrowserNotSupportedIcon,
   Divider,
 } from '@/ui';
-import { useLayerHighlightedLayer, useLayerStoreActions } from '@/core/stores/store-interface-and-intial-values/layer-state';
+import {
+  useLayerHighlightedLayer,
+  useLayerSelectedLayer,
+  useLayerStoreActions,
+} from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { useUIStoreActions } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import { generateId } from '@/core/utils/utilities';
 
@@ -38,6 +42,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
   const highlightedLayer = useLayerHighlightedLayer();
   const { setAllItemsVisibility, toggleItemVisibility, setLayerOpacity, setHighlightLayer, zoomToLayerExtent } = useLayerStoreActions();
   const { openModal } = useUIStoreActions();
+  const selectedLayer = useLayerSelectedLayer();
 
   const handleZoomTo = () => {
     zoomToLayerExtent(layerDetails.layerPath);
@@ -48,6 +53,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
   };
 
   const handleRefreshLayer = () => {
+    // eslint-disable-next-line no-console
     console.log('refresh layer');
   };
 
@@ -132,7 +138,12 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
         >
           <HighlightOutlinedIcon />
         </IconButton>
-        <IconButton tooltip="legend.zoomTo" onClick={handleZoomTo} sx={{ backgroundColor: '#F6F6F6' }}>
+        <IconButton
+          tooltip="legend.zoomTo"
+          onClick={handleZoomTo}
+          sx={{ backgroundColor: '#F6F6F6' }}
+          disabled={selectedLayer.bounds === undefined}
+        >
           <ZoomInSearchIcon />
         </IconButton>
       </Box>
@@ -153,9 +164,10 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
       {renderOpacityControl()}
       <Box sx={{ marginTop: '20px' }}>{renderItems()}</Box>
       <Divider sx={{ marginTop: '50px' }} variant="middle" />
-      {layerDetails.layerAttribution!.map((attribution) => {
-        return <Typography key={generateId()}>{attribution.indexOf('©') === -1 ? `© ${attribution}` : attribution}</Typography>;
-      })}
+      {layerDetails.layerAttribution &&
+        layerDetails.layerAttribution!.map((attribution) => {
+          return <Typography key={generateId()}>{attribution.indexOf('©') === -1 ? `© ${attribution}` : attribution}</Typography>;
+        })}
     </Paper>
   );
 }

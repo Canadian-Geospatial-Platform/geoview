@@ -5,19 +5,17 @@ import {
   TypePluginOptions,
   TypeWindow,
   TypeButtonPanel,
-  TypeIconButtonProps,
-  TypePanelProps,
   toJsonObject,
   TypeJsonObject,
 } from 'geoview-core';
-import { ChartType, SchemaValidator } from 'geochart';
-
+import { ChartType } from 'geochart';
+import { LayerListEntry } from 'geoview-core/src/core/components/common';
 import { PayloadBaseClassChart, EVENT_CHART_REDRAW } from './geochart-event-base';
 import { PayloadChartConfig } from './geochart-event-config';
 import { PluginGeoChartConfig } from './geochart-types';
-import { GeoChart } from './geochart';
 import schema from '../schema.json';
 import defaultConfig from '../default-config-geochart.json';
+import { GeoChartPanel } from './geochart-panel';
 
 /**
  * The Chart Plugin which will be automatically instanciated during GeoView's initialization.
@@ -25,6 +23,9 @@ import defaultConfig from '../default-config-geochart.json';
 class GeoChartPlugin extends AbstractPlugin {
   // Store the created button panel object
   buttonPanel?: TypeButtonPanel;
+
+  // store index of tab
+  value: number | null = null;
 
   /**
    * Constructor
@@ -68,42 +69,46 @@ class GeoChartPlugin extends AbstractPlugin {
   added = (): void => {
     // Fetch cgpv
     const { cgpv } = window as TypeWindow;
+    const { createElement } = cgpv.react;
     const { configObj, pluginProps } = this as AbstractPlugin;
     const { mapId } = pluginProps;
 
     // If cgpv exists
     if (cgpv) {
       // Access the api calls
-      const { api, ui } = cgpv;
-      const { MapIcon } = ui.elements;
-      const { displayLanguage } = api.maps[mapId];
+      const { api } = cgpv;
+      this.value = api.maps[mapId].footerTabs.tabs.length;
+      const language = api.maps[mapId].displayLanguage;
 
-      // Button props
-      const button: TypeIconButtonProps = {
-        id: 'geoChartPanelButton',
-        tooltip: this.translations[displayLanguage].chartPanel as string,
-        tooltipPlacement: 'right',
-        children: <MapIcon />,
-        visible: true,
-      };
+      const layerList = (configObj as PluginGeoChartConfig<ChartType>).charts
+        .map((chart) => {
+          const layerIds =
+            chart.layers?.map((layer) => {
+              return layer.layerId;
+            }) ?? [];
 
-      // Panel props
-      const panel: TypePanelProps = {
-        title: this.translations[displayLanguage].chartPanel,
-        icon: '<i class="material-icons">map</i>',
-        width: '80vw',
-        status: configObj?.isOpen as boolean,
-        handlePanelOpened: () => {
-          // Redraw the chart, because of the canvas rendering
-          this.redrawChart();
-        },
-      };
+          return layerIds;
+        })
+        .flat()
+        .reduce((acc, curr) => {
+          if (api.maps[mapId].layer.registeredLayers[curr]) {
+            const currLayer = api.maps[mapId].layer.registeredLayers[curr];
+            const layerData = {
+              layerName: currLayer.layerName[language],
+              layerPath: curr,
+              tooltip: currLayer.layerName[language] as string,
+            };
+            acc.push(layerData);
+          }
 
-      // Create a new button panel on the app-bar
-      this.buttonPanel = api.maps[mapId].appBarButtons.createAppbarPanel(button, panel, null);
+          return acc;
+        }, [] as LayerListEntry[]);
 
-      // Set panel content
-      this.buttonPanel?.panel?.changeContent(<GeoChart mapId={mapId} config={configObj || {}} schemaValidator={new SchemaValidator()} />);
+      api.maps[mapId].footerTabs.createFooterTab({
+        value: this.value,
+        label: this.translations[api.maps[mapId].displayLanguage].chartPanel as string,
+        content: () => createElement(GeoChartPanel, { mapId, configObj, layerList }, []),
+      });
     }
   };
 
@@ -118,11 +123,8 @@ class GeoChartPlugin extends AbstractPlugin {
 
     // If cgpv exists
     if (cgpv) {
-      // If there is a button panel
-      if (this.buttonPanel) {
-        // Remove the app bar panel
-        cgpv.api.maps[mapId].appBarButtons.removeAppbarPanel(this.buttonPanel.buttonPanelId);
-      }
+      // Remove the footer tab
+      if (this.value) cgpv.api.maps[mapId].footerTabs.removeFooterTab(this.value);
     }
   };
 

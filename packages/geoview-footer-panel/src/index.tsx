@@ -63,6 +63,7 @@ class FooterPanelPlugin extends AbstractPlugin {
       details: 'Details',
       dataTable: 'DataTable',
       timeSlider: 'Time Slider',
+      geochart: 'Chart',
     },
     fr: {
       legend: 'Légende',
@@ -70,6 +71,7 @@ class FooterPanelPlugin extends AbstractPlugin {
       details: 'Détails',
       dataTable: 'Données',
       timeSlider: 'Curseur Temporel',
+      geochart: 'Graphique',
     },
   });
 
@@ -91,7 +93,6 @@ class FooterPanelPlugin extends AbstractPlugin {
 
       const defaultTabs = configObj?.tabs.defaultTabs as Array<string>;
       let tabsCounter = 0;
-
       if (defaultTabs.includes('legend')) {
         // create new tab and add the LegendComponent to the footer tab
         footerTabs.createFooterTab({
@@ -165,6 +166,22 @@ class FooterPanelPlugin extends AbstractPlugin {
           .then((constructor: AbstractPlugin | ((pluginId: string, props: TypeJsonObject) => TypeJsonValue)) => {
             api.plugin.addPlugin(
               'time-slider',
+              mapId,
+              constructor,
+              toJsonObject({
+                mapId,
+              })
+            );
+          });
+      }
+
+      if (defaultTabs.includes('geoChart')) {
+        /// create a new tab by loading the geo chart plugin
+        api.plugin
+          .loadScript('geochart')
+          .then((constructor: AbstractPlugin | ((pluginId: string, props: TypeJsonObject) => TypeJsonValue)) => {
+            api.plugin.addPlugin(
+              'geochart',
               mapId,
               constructor,
               toJsonObject({

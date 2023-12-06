@@ -3,7 +3,7 @@ import { i18n } from 'i18next';
 /* eslint-disable @typescript-eslint/no-var-requires */
 
 import OLMap from 'ol/Map';
-import View, { FitOptions, ViewOptions } from 'ol/View';
+import View, { ViewOptions } from 'ol/View';
 import { fromLonLat, ProjectionLike, toLonLat, transform as olTransform, transformExtent as olTransformExtent } from 'ol/proj';
 import { Coordinate } from 'ol/coordinate';
 import { Extent } from 'ol/extent';
@@ -34,18 +34,13 @@ import { Snap } from '@/geo/interaction/snap';
 import { Translate } from '@/geo/interaction/translate';
 
 import { ModalApi } from '@/ui';
-import {
-  mapComponentPayload,
-  mapConfigPayload,
-  GeoViewLayerPayload,
-  payloadIsGeoViewLayerAdded,
-  TypeMapMouseInfo,
-} from '@/api/events/payloads';
+import { mapComponentPayload, mapConfigPayload, GeoViewLayerPayload, payloadIsGeoViewLayerAdded } from '@/api/events/payloads';
 import { generateId, getValidConfigFromString } from '@/core/utils/utilities';
-import { TypeListOfGeoviewLayerConfig, TypeDisplayLanguage, TypeViewSettings } from '@/geo/map/map-schema-types';
-import { TypeMapFeaturesConfig, TypeHTMLElement } from '@/core/types/global-types';
+import { TypeListOfGeoviewLayerConfig, TypeDisplayLanguage, TypeViewSettings, TypeMapState } from '@/geo/map/map-schema-types';
+import { TypeMapFeaturesConfig, TypeHTMLElement, TypeValidMapProjectionCodes } from '@/core/types/global-types';
 import { layerConfigIsGeoCore } from '@/geo/layer/other/geocore';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
+import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
 
 interface TypeDcoument extends Document {
   webkitExitFullscreen: () => void;
@@ -71,6 +66,12 @@ export class MapViewer {
 
   // the openlayer map
   map!: OLMap;
+
+  // the display language
+  displayLanguage: TypeDisplayLanguage;
+
+  // the map state
+  mapState: TypeMapState;
 
   // used to access button panel API to create buttons and button panels on the app-bar
   appBarButtons!: AppbarButtons;
@@ -101,24 +102,6 @@ export class MapViewer {
   // used to access layers functions
   layer!: Layer;
 
-  // get used language
-  displayLanguage: TypeDisplayLanguage;
-
-  // get used projection
-  currentProjection: number;
-
-  // store current zoom level
-  currentZoom: number;
-
-  // store current map center coordinate
-  mapCenterCoordinates: Coordinate;
-
-  // store last single click position
-  singleClickedPosition: TypeMapMouseInfo;
-
-  // store live pointer position
-  pointerPosition: TypeMapMouseInfo;
-
   // i18n instance
   i18nInstance!: i18n;
 
@@ -140,13 +123,13 @@ export class MapViewer {
   constructor(mapFeaturesConfig: TypeMapFeaturesConfig, i18instance: i18n) {
     this.mapId = mapFeaturesConfig.mapId;
     this.mapFeaturesConfig = mapFeaturesConfig;
-    this.displayLanguage = mapFeaturesConfig.displayLanguage!;
-    this.currentProjection = mapFeaturesConfig.map.viewSettings.projection;
+    this.displayLanguage = AppEventProcessor.getDisplayLanguage(this.mapId);
+
+    // map state initialize with store data coming from configuration file/object.
+    // updated values will be added by store subscription in map-event-processor
+    this.mapState = MapEventProcessor.getMapState(this.mapId);
+
     this.i18nInstance = i18instance;
-    this.currentZoom = mapFeaturesConfig.map.viewSettings.zoom;
-    this.mapCenterCoordinates = [0, 0]; // [mapFeaturesConfig.map.viewSettings.center[0], mapFeaturesConfig.map.viewSettings.center[1]];
-    this.singleClickedPosition = { pixel: [], lnglat: [], projected: [], dragging: false };
-    this.pointerPosition = { pixel: [], lnglat: [], projected: [], dragging: false };
 
     this.appBarButtons = new AppbarButtons(this.mapId);
     this.navBarButtons = new NavbarButtons(this.mapId);
@@ -163,9 +146,9 @@ export class MapViewer {
 
     // create basemap and pass in the map id to be able to access the map instance
     this.basemap = new Basemap(
-      this.mapFeaturesConfig.map.basemapOptions,
-      this.mapFeaturesConfig.displayLanguage!,
-      this.mapFeaturesConfig.map.viewSettings.projection,
+      MapEventProcessor.getBasemapOptions(this.mapId),
+      this.displayLanguage,
+      this.mapState.currentProjection as TypeValidMapProjectionCodes,
       this.mapId
     );
 
@@ -357,16 +340,6 @@ export class MapViewer {
   }
 
   /**
-   * Zoom to the specified extent.
-   *
-   * @param {Extent} extent The extent to zoom to.
-   * @param {FitOptions} options The options to configure the zoomToExtent (default: { padding: [100, 100, 100, 100], maxZoom: 11 }).
-   */
-  zoomToExtent(extent: Extent, options: FitOptions = { padding: [100, 100, 100, 100], maxZoom: 11, duration: 1000 }) {
-    this.map.getView().fit(extent, options);
-  }
-
-  /**
    * Function called when the map has been rendered and ready to be customized
    */
   mapReady(): void {
@@ -393,7 +366,7 @@ export class MapViewer {
    * @param {TypeListOfGeoviewLayerConfig} listOfGeoviewLayerConfig optional new set of layers to apply (will override original set of layers)
    */
   changeLanguage(displayLanguage: TypeDisplayLanguage, listOfGeoviewLayerConfig?: TypeListOfGeoviewLayerConfig): void {
-    this.mapFeaturesConfig.displayLanguage = displayLanguage;
+    AppEventProcessor.setDisplayLanguage(this.mapId, displayLanguage);
 
     // if a list of geoview layers parameter is present, replace the one from the config
     // do not concat like updatedMapConfig.map.listOfGeoviewLayerConfig?.concat(listOfGeoviewLayerConfig) this
@@ -403,6 +376,7 @@ export class MapViewer {
     }
 
     // reload the map to change the language
+    // TODO: use store
     this.reloadMap(this.mapFeaturesConfig);
   }
 
@@ -412,6 +386,7 @@ export class MapViewer {
    * @param {TypeMapFeaturesConfig} mapFeaturesConfig a new config passed in from the function call
    */
   reloadMap(mapFeaturesConfig: TypeMapFeaturesConfig) {
+    // TODO: use store
     api.maps[this.mapId].mapFeaturesConfig = mapFeaturesConfig;
 
     // emit an event to reload the map with the new config
@@ -454,11 +429,11 @@ export class MapViewer {
     let mapBounds: Extent | undefined;
     if (bounds)
       mapBounds = projectionCode
-        ? olTransformExtent(bounds, `EPSG:${projectionCode}`, api.projection.projections[this.currentProjection], 20)
+        ? olTransformExtent(bounds, `EPSG:${projectionCode}`, api.projection.projections[this.mapState.currentProjection], 20)
         : olTransformExtent(
             bounds,
-            api.projection.projections[this.currentProjection],
-            api.projection.projections[this.currentProjection],
+            api.projection.projections[this.mapState.currentProjection],
+            api.projection.projections[this.mapState.currentProjection],
             25
           );
     else {

@@ -1,9 +1,10 @@
 import { createElement, ReactElement } from 'react';
-import DataTable, { DataTableData } from './data-table';
 
+import DataTable, { DataTableData } from './data-table';
 import { api, TypeListOfLayerEntryConfig, TypeArrayOfFeatureInfoEntries, TypeFieldEntry, TypeLocalizedString } from '@/app';
 import { MapDataTableData as MapDataTableDataProps } from './map-data-table';
 import { Datapanel } from './data-panel';
+import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
 
 export interface GroupLayers {
   layerId: string;
@@ -106,9 +107,8 @@ export class DataTableApi {
    */
   createDataPanel = async (): Promise<ReactElement | null> => {
     let groupLayers: GroupLayers[] = [];
-    const language = api.maps[this.mapId].displayLanguage;
-    const { currentProjection } = api.maps[this.mapId];
-    const projectionConfig = api.projection.projections[currentProjection];
+    // TODO: use Store event processor
+    const language = AppEventProcessor.getDisplayLanguage(this.mapId);
     const geoLayers = Object.keys(api.maps[this.mapId].layer.geoviewLayers);
 
     geoLayers.forEach((layerId: string) => {
@@ -143,6 +143,6 @@ export class DataTableApi {
       }
     });
 
-    return createElement(Datapanel, { layerData: filteredData, mapId: this.mapId, projectionConfig, language }, null);
+    return createElement(Datapanel, { layerData: filteredData, mapId: this.mapId, language }, null);
   };
 }

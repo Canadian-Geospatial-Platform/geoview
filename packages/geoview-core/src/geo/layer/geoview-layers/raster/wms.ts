@@ -41,6 +41,7 @@ import { getLocalizedValue, getMinOrMaxExtents, xmlToJson, showError, replacePar
 import { EVENT_NAMES } from '@/api/events/event-types';
 import { api } from '@/app';
 import { Layer } from '../../layer';
+import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 
 export interface TypeWMSLayerConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig'> {
   geoviewLayerType: 'ogcWms';
@@ -612,7 +613,7 @@ export class WMS extends AbstractGeoViewRaster {
             layerEntryConfig.initialSettings.extent = transformExtent(
               layerEntryConfig.initialSettings.extent,
               'EPSG:4326',
-              `EPSG:${api.maps[this.mapId].currentProjection}`
+              `EPSG:${MapEventProcessor.getMapState(this.mapId).currentProjection}`
             );
 
           if (!layerEntryConfig.initialSettings?.bounds && layerCapabilities.EX_GeographicBoundingBox) {
@@ -671,7 +672,7 @@ export class WMS extends AbstractGeoViewRaster {
     location: Coordinate,
     layerConfig: TypeOgcWmsLayerEntryConfig
   ): Promise<TypeArrayOfFeatureInfoEntries> {
-    const convertedLocation = transform(location, `EPSG:${api.maps[this.mapId].currentProjection}`, 'EPSG:4326');
+    const convertedLocation = transform(location, `EPSG:${MapEventProcessor.getMapState(this.mapId).currentProjection}`, 'EPSG:4326');
     return this.getFeatureInfoAtLongLat(convertedLocation, layerConfig);
   }
 
@@ -688,7 +689,7 @@ export class WMS extends AbstractGeoViewRaster {
       if (!this.getVisible(layerConfig) || !layerConfig.olLayer) resolve([]);
       else {
         const viewResolution = api.maps[this.mapId].getView().getResolution() as number;
-        const crs = `EPSG:${api.maps[this.mapId].currentProjection}`;
+        const crs = `EPSG:${MapEventProcessor.getMapState(this.mapId).currentProjection}`;
         const clickCoordinate = transform(lnglat, 'EPSG:4326', crs);
         if (
           lnglat[0] < layerConfig.initialSettings!.bounds![0] ||

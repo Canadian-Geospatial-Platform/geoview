@@ -20,6 +20,7 @@ import {
   GeometryPayload,
 } from '@/api/events/payloads';
 import { TypeFeatureCircleStyle, TypeFeatureStyle, TypeIconStyle } from './geometry-types';
+import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 
 /**
  * Store a group of features
@@ -137,7 +138,7 @@ export class Geometry {
     const polyline = new Feature({
       geometry: new LineString(points, polylineOptions.geometryLayout).transform(
         `EPSG:${options?.projection || 4326}`,
-        api.projection.projections[api.maps[this.#mapId].currentProjection]
+        api.projection.projections[MapEventProcessor.getMapState(this.#mapId).currentProjection]
       ),
     });
 
@@ -209,7 +210,7 @@ export class Geometry {
     const polygon = new Feature({
       geometry: new Polygon(points, polygonOptions.geometryLayout).transform(
         `EPSG:${options?.projection || 4326}`,
-        api.projection.projections[api.maps[this.#mapId].currentProjection]
+        api.projection.projections[MapEventProcessor.getMapState(this.#mapId).currentProjection]
       ),
     });
 
@@ -284,7 +285,7 @@ export class Geometry {
     const circle = new Feature({
       geometry: new Circle(coordinate, radius, circleOptions.geometryLayout).transform(
         `EPSG:${options?.projection || 4326}`,
-        api.projection.projections[api.maps[this.#mapId].currentProjection]
+        api.projection.projections[MapEventProcessor.getMapState(this.#mapId).currentProjection]
       ),
     });
 
@@ -366,7 +367,7 @@ export class Geometry {
     const marker = new Feature({
       geometry: new Point(coordinate, markerOptions.geometryLayout).transform(
         `EPSG:${options?.projection || 4326}`,
-        api.projection.projections[api.maps[this.#mapId].currentProjection]
+        api.projection.projections[MapEventProcessor.getMapState(this.#mapId).currentProjection]
       ),
     });
 

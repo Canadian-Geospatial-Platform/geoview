@@ -29,6 +29,7 @@ import {
   TypeFeatureInfoEntryPartial,
   TypeFieldEntry,
 } from '@/api/events/payloads';
+import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 
 /** ***************************************************************************************************************************
  * This method reads the service metadata from the metadataAccessPath.
@@ -301,7 +302,7 @@ export function commonProcessInitialSettings(
     layerEntryConfig.initialSettings.extent = transformExtent(
       layerEntryConfig.initialSettings.extent,
       'EPSG:4326',
-      `EPSG:${api.maps[this.mapId].currentProjection}`
+      `EPSG:${MapEventProcessor.getMapState(this.mapId).currentProjection}`
     );
 
   if (!layerEntryConfig.initialSettings?.bounds) {

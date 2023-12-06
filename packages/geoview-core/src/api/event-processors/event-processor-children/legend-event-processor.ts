@@ -167,7 +167,7 @@ export class LegendEventProcessor extends AbstractEventProcessor {
         // TODO: find the best place to calculate layers item and assign https://github.com/Canadian-Geospatial-Platform/geoview/issues/1566
         setTimeout(() => {
           newLegendLayer.bounds = api.maps[mapId].layer.geoviewLayers[layerPathNodes[0]].calculateBounds(layerPath);
-        }, 1000);
+        }, 2000);
 
         newLegendLayer.items = [];
         newLegendLayer.icons?.forEach((legendLayerItem) => {

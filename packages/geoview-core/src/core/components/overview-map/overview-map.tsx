@@ -10,13 +10,14 @@ import makeStyles from '@mui/styles/makeStyles';
 import TileLayer from 'ol/layer/Tile';
 import { OverviewMap as OLOverviewMap } from 'ol/control';
 
-import { useStore } from 'zustand';
 import { getGeoViewStore } from '@/core/stores/stores-managers';
 
 import { MapContext } from '@/core/app-start';
 import { cgpvTheme } from '@/ui/style/theme';
 import { OverviewMapToggle } from './overview-map-toggle';
 import { api } from '@/app';
+import { useAppDisplayLanguage } from '@/core/stores/store-interface-and-intial-values/app-state';
+import { useMapElement, useMapOverviewMapHideZoom } from '@/core/stores/store-interface-and-intial-values/map-state';
 
 // TODO: We need to find solution to remove makeStyles with either plain css or material ui.
 const useStyles = makeStyles((theme) => ({
@@ -96,9 +97,9 @@ export function OverviewMap(): JSX.Element {
   const { mapId } = mapConfig;
 
   // get the values from store
-  const mapElement = useStore(getGeoViewStore(mapId), (state) => state.mapState.mapElement);
-  const hideOnZoom = useStore(getGeoViewStore(mapId), (state) => state.mapState.overviewMapHideZoom);
-  const displayLanguage = useStore(getGeoViewStore(mapId), (state) => state.displayLanguage);
+  const mapElement = useMapElement();
+  const hideOnZoom = useMapOverviewMapHideZoom();
+  const displayLanguage = useAppDisplayLanguage();
 
   // TODO: remove useStyle
   const classes = useStyles();
@@ -158,7 +159,7 @@ export function OverviewMap(): JSX.Element {
 
   useEffect(() => {
     // get default overview map
-    // TODO: store basemap info in the store...
+    // TODO: use store basemap info in the store...
     const defaultBasemap = api.maps[mapId].basemap.overviewMap;
 
     const toggleButton = document.createElement('div');

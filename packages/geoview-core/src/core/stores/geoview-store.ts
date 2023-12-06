@@ -7,12 +7,13 @@ import { IDetailsState, initialDetailsState } from './store-interface-and-intial
 import { ILayerState, initializeLayerState } from './store-interface-and-intial-values/layer-state';
 import { IMapState, initializeMapState } from './store-interface-and-intial-values/map-state';
 import { IMapDataTableState, initialDataTableState } from './store-interface-and-intial-values/data-table-state';
+import { ITimeSliderState, initializeTimeSliderState } from './store-interface-and-intial-values/time-slider-state';
 import { IUIState, initializeUIState } from './store-interface-and-intial-values/ui-state';
 
-import { TypeDisplayLanguage } from '@/geo/map/map-schema-types';
 import { TypeLegendResultSets } from '@/api/events/payloads/get-legends-payload';
 import { TypeFeatureInfoResultSets } from '@/api/events/payloads/get-feature-info-payload';
 import { TypeMapFeaturesConfig } from '@/core/types/global-types';
+import { generateId } from '@/core/utils/utilities';
 
 export type TypeSetStore = (
   partial: IGeoViewState | Partial<IGeoViewState> | ((state: IGeoViewState) => IGeoViewState | Partial<IGeoViewState>),
@@ -21,9 +22,8 @@ export type TypeSetStore = (
 export type TypeGetStore = () => IGeoViewState;
 
 export interface IGeoViewState {
-  displayLanguage: TypeDisplayLanguage;
-  mapId: string;
   mapConfig: TypeMapFeaturesConfig | undefined;
+  mapId: string;
   setMapConfig: (config: TypeMapFeaturesConfig) => void;
 
   // state interfaces
@@ -32,6 +32,7 @@ export interface IGeoViewState {
   dataTableState: IMapDataTableState;
   layerState: ILayerState;
   mapState: IMapState;
+  timeSliderState: ITimeSliderState;
   uiState: IUIState;
 
   // results set
@@ -41,11 +42,14 @@ export interface IGeoViewState {
 
 export const geoViewStoreDefinition = (set: TypeSetStore, get: TypeGetStore) =>
   ({
-    displayLanguage: 'en' as TypeDisplayLanguage,
-    mapId: '',
     mapConfig: undefined,
     setMapConfig: (config: TypeMapFeaturesConfig) => {
-      set({ mapConfig: config, mapId: config.mapId, displayLanguage: config.displayLanguage });
+      set({ mapConfig: config, mapId: config.mapId || generateId('') });
+
+      // initialize default stores section from config information
+      get().appState.setDefaultConfigValues(config);
+      get().mapState.setDefaultConfigValues(config);
+      get().uiState.setDefaultConfigValues(config);
     },
 
     appState: initializeAppState(set, get),
@@ -53,6 +57,7 @@ export const geoViewStoreDefinition = (set: TypeSetStore, get: TypeGetStore) =>
     dataTableState: initialDataTableState(set, get),
     layerState: initializeLayerState(set, get),
     mapState: initializeMapState(set, get),
+    timeSliderState: initializeTimeSliderState(set, get),
     uiState: initializeUIState(set, get),
 
     featureInfoResultSets: {} as TypeFeatureInfoResultSets,
@@ -67,4 +72,5 @@ export type GeoViewStoreType = typeof fakeStore;
 // **********************************************************
 // GeoView state selectors
 // **********************************************************
-export const useGeoviewMapId = () => useStore(useGeoViewStore(), (state) => state.mapId);
+export const useGeoViewMapId = () => useStore(useGeoViewStore(), (state) => state.mapId);
+export const useGeoViewConfig = () => useStore(useGeoViewStore(), (state) => state.mapConfig);

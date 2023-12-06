@@ -1,14 +1,17 @@
 import { useCallback, useEffect, useMemo, useRef, useState, memo, ReactNode } from 'react';
+
 import { useTranslation } from 'react-i18next';
+
 import debounce from 'lodash/debounce';
 import startCase from 'lodash/startCase';
+import { difference } from 'lodash';
+
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 
 import { MRT_Localization_FR as MRTLocalizationFR } from 'material-react-table/locales/fr';
 import { MRT_Localization_EN as MRTLocalizationEN } from 'material-react-table/locales/en';
-
 import {
   MaterialReactTable,
   type MRT_ColumnDef as MRTColumnDef,
@@ -24,16 +27,16 @@ import {
   type MRT_Localization as MRTLocalization,
   type MRT_DensityState as MRTDensityState,
 } from 'material-react-table';
-import { Projection } from 'ol/proj';
-import { Extent } from 'ol/extent';
+
+import { Extent } from 'ol/extent'; // only for typing
+
 import { darken } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
-import { difference } from 'lodash';
+
 import { Box, Button, IconButton, Tooltip, ZoomInSearchIcon } from '@/ui';
 import ExportButton from './export-button';
 import JSONExportButton from './json-export-button';
 import FilterMap from './filter-map';
-
 import { AbstractGeoViewVector, TypeLayerEntryConfig, EsriDynamic, api, TypeFieldEntry, TypeFeatureInfoEntry, isImage } from '@/app';
 import { getSxClasses } from './data-table-style';
 import { useMapStoreActions } from '@/core/stores/store-interface-and-intial-values/map-state';
@@ -43,6 +46,7 @@ import {
   useDataTableStoreToolbarRowSelectedMessageRecord,
 } from '@/core/stores/store-interface-and-intial-values/data-table-state';
 import { useLightBox, useSelectedRowMessage, useFilteredRowMessage } from './hooks';
+import { useAppDisplayLanguage } from '@/core/stores/store-interface-and-intial-values/app-state';
 
 export interface MapDataTableDataEntrys extends TypeFeatureInfoEntry {
   rows: Record<string, string>;
@@ -64,7 +68,6 @@ interface MapDataTableProps {
   layerId: string;
   mapId: string;
   layerKey: string;
-  projectionConfig: Projection;
 }
 
 const DATE_FILTER: Record<string, string> = {
@@ -109,17 +112,19 @@ const NUMBER_FILTER: Record<string, string> = {
  * @param {string} layerId id of the layer
  * @param {string} mapId id of the map.
  * @param {string} layerKey key of the layer.
- * @param {Projection} projectionConfig projection config to transfer lat long.
  * @return {ReactElement} Data table as react element.
  */
 
-function MapDataTable({ data, layerId, mapId, layerKey, projectionConfig }: MapDataTableProps) {
+function MapDataTable({ data, layerId, mapId, layerKey }: MapDataTableProps) {
   const { t } = useTranslation();
+
   const sxtheme = useTheme();
   const sxClasses = getSxClasses(sxtheme);
-  const { addHighlightedFeature, removeHighlightedFeature } = useMapStoreActions();
 
-  const language = api.maps[mapId].displayLanguage;
+  // get store actions and values
+  const { addHighlightedFeature, removeHighlightedFeature, zoomToExtent } = useMapStoreActions();
+
+  const language = useAppDisplayLanguage();
 
   const dataTableLocalization = language === 'fr' ? MRTLocalizationFR : MRTLocalizationEN;
 
@@ -145,7 +150,6 @@ function MapDataTable({ data, layerId, mapId, layerKey, projectionConfig }: MapD
   const { initLightBox, LightBoxComponent } = useLightBox();
   const { rowSelection, setRowSelection } = useSelectedRowMessage({ data, layerKey, tableInstanceRef });
   const { columnFilters, setColumnFilters } = useFilteredRowMessage({ data, layerKey, tableInstanceRef });
-
   // #endregion
 
   /**
@@ -207,6 +211,7 @@ function MapDataTable({ data, layerId, mapId, layerKey, projectionConfig }: MapD
       .filter((filterValue) => filterValue.length)
       .join(' and ');
 
+    // TODO: use Store
     const geoviewLayerInstance = api.maps[mapId].layer.geoviewLayers[layerId];
     const filterLayerConfig = api.maps[mapId].layer.registeredLayers[layerKey] as TypeLayerEntryConfig;
 
@@ -439,7 +444,7 @@ function MapDataTable({ data, layerId, mapId, layerKey, projectionConfig }: MapD
    *
    */
   const handleZoomIn = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>, extent: Extent) => {
-    api.maps[mapId].zoomToExtent(extent);
+    zoomToExtent(extent);
   };
 
   /**
@@ -498,7 +503,7 @@ function MapDataTable({ data, layerId, mapId, layerKey, projectionConfig }: MapD
             <MRTToggleDensePaddingButton table={table} />
             <MRTFullScreenToggleButton table={table} />
             <ExportButton rows={rows} columns={columns}>
-              <JSONExportButton features={data.features} layerId={layerId} projectionConfig={projectionConfig} />
+              <JSONExportButton features={data.features} layerId={layerId} />
             </ExportButton>
           </Box>
         )}

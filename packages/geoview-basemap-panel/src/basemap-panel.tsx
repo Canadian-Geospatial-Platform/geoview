@@ -10,6 +10,7 @@ import {
   TypeBasemapOptions,
   TypeValidMapProjectionCodes,
 } from 'geoview-core';
+import { useMapProjection } from 'geoview-core/src/core/stores/store-interface-and-intial-values/map-state';
 import { getSxClasses } from './basemap-panel-style';
 
 const w = window as TypeWindow;
@@ -30,18 +31,17 @@ export function BasemapPanel(props: BaseMapPanelProps): JSX.Element {
 
   const { useState, useEffect } = react;
 
+  const theme = ui.useTheme();
+  const sxClasses = getSxClasses(theme);
+
+  // internal state and store values
   const [basemapList, setBasemapList] = useState<TypeBasemapProps[]>([]);
   const [activeBasemapId, setActiveBasemapId] = useState<string>('');
   const [canSwichProjection] = useState(config.canSwichProjection);
-
-  const theme = ui.useTheme();
-
-  const sxClasses = getSxClasses(theme);
-
-  // TODO: change the path for getting projection on schema refactor
   const projections: number[] =
     (config.supportedProjections as TypeJsonArray).map((obj: TypeJsonObject) => obj?.projectionCode as number) || [];
-  const [mapProjection, setMapProjection] = useState(myMap.mapFeaturesConfig.map.viewSettings.projection);
+  const storeProjection = useMapProjection();
+  const [mapProjection, setMapProjection] = useState(storeProjection);
 
   /**
    * Update the basemap with the layers on the map
@@ -117,7 +117,7 @@ export function BasemapPanel(props: BaseMapPanelProps): JSX.Element {
     const currentView = myMap.getView();
     const currentCenter = currentView.getCenter();
     const currentProjection = currentView.getProjection().getCode();
-    const newCenter = api.projection.transformPoints(currentCenter, currentProjection, 'EPSG:4326')[0];
+    const newCenter = api.projection.transformPoints([currentCenter], currentProjection, 'EPSG:4326')[0];
     const newProjection = event.target.value as TypeValidMapProjectionCodes;
 
     const newView: TypeViewSettings = {

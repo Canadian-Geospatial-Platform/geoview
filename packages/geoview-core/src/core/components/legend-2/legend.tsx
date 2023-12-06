@@ -7,9 +7,12 @@ import { getSxClasses } from './legend-styles';
 import { LegendLayer } from './legend-layer';
 
 export function Legend(): JSX.Element {
+  const { t } = useTranslation<string>();
+
   const theme = useTheme();
   const sxClasses = getSxClasses(theme);
-  const { t } = useTranslation<string>();
+
+  // TODO: use store use atomic selector
   const store = useGeoViewStore();
   const legendLayers = useStore(store, (state) =>
     state.layerState.legendLayers.filter((f) => f.isVisible && !['error', 'loading'].includes(f.layerStatus ?? ''))
