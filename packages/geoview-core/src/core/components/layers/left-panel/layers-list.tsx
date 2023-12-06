@@ -80,7 +80,7 @@ export function LayersList({ layersList, setIsLayersListPanelVisible, parentLaye
         isDragDisabled={!isDragEnabled}
         key={textToSlug(`${index}${details.layerPath}`)}
         draggableId={details.layerPath}
-        index={index} //TODO Change to details.order
+        index={index} // TODO Change to details.order
       >
         {(provided, snapshot) => (
           <div
@@ -103,7 +103,7 @@ export function LayersList({ layersList, setIsLayersListPanelVisible, parentLaye
 
   return (
     <DragDropContext onDragEnd={onDragEnd}>
-      <Droppable droppableId={textToSlug(`${parentLayerPath}_${depth}`)} direction='vertical'>
+      <Droppable droppableId={textToSlug(`${parentLayerPath}_${depth}`)} direction="vertical">
         {(provided, snapshot) => (
           <Box sx={getListClass()} {...provided.droppableProps} ref={provided.innerRef} style={getListStyle(snapshot.isDraggingOver)}>
             {legendItems}

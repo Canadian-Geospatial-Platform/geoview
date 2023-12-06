@@ -9,7 +9,7 @@ import { useGeoViewStore } from '../stores-managers';
 import { TypeLayersViewDisplayState, TypeLegendLayer } from '@/core/components/layers/types';
 import { TypeGetStore, TypeSetStore } from '../geoview-store';
 import { TypeStyleGeometry, TypeUniqueValueStyleConfig, TypeVectorLayerEntryConfig } from '@/geo/map/map-schema-types';
-import { AbstractGeoViewVector, EsriDynamic, TypeLegend, api } from '@/app';
+import { AbstractGeoViewVector, EsriDynamic, api } from '@/app';
 import { OL_ZOOM_DURATION, OL_ZOOM_PADDING } from '@/core/utils/constant';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 
@@ -277,34 +277,29 @@ function deleteSingleLayer(layers: TypeLegendLayer[], layerPath: string) {
   }
 }
 
-
-function reOrderSingleLayer(
-  collection: TypeLegendLayer[],
-  startIndex: number,
-  endIndex: number,
-  layerPath: string
-): TypeLegendLayer[] {
-
+function reOrderSingleLayer(collection: TypeLegendLayer[], startIndex: number, endIndex: number, layerPath: string): TypeLegendLayer[] {
   let layerFound = false;
 
   function findLayerAndSortIt(startingCollection: TypeLegendLayer[]) {
-    if(layerFound) { return; }
-    layerFound = startingCollection.find(lyr => lyr.layerPath === layerPath) !== undefined;
+    if (layerFound) {
+      return;
+    }
+    layerFound = startingCollection.find((lyr) => lyr.layerPath === layerPath) !== undefined;
 
-    if(layerFound) {
+    if (layerFound) {
       const [removed] = startingCollection.splice(startIndex, 1);
       startingCollection.splice(endIndex, 0, removed);
 
-      startingCollection.forEach((lyr, index)=> {
-        lyr.order = index + 1;
-      });
-      
+      for(var i = 0; i < startingCollection.length; i++) {
+        startingCollection[i].order = i + 1;
+      }
+
       return;
     }
-    
-    //if not found at this level, lets find it in children
-    for(var i = 0; i <  startingCollection.length; i++) {
-      if(startingCollection[i].children.length > 0) {
+
+    // if not found at this level, lets find it in children
+    for (let i = 0; i < startingCollection.length; i++) {
+      if (startingCollection[i].children.length > 0) {
         findLayerAndSortIt(startingCollection[i].children);
       }
     }
@@ -313,9 +308,7 @@ function reOrderSingleLayer(
   findLayerAndSortIt(collection);
 
   return collection;
-
 }
-
 
 // **********************************************************
 // Layer state selectors
