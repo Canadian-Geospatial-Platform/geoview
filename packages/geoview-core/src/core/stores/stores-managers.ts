@@ -11,10 +11,12 @@ import { MapContext } from '@/core/app-start';
 export interface StoresManagerState {
   stores: Record<string, GeoViewStoreType>;
 }
+
 export const useStoresManager = createStore<StoresManagerState>(() => ({
   stores: {},
 }));
-export const addGeoViewStore = (config: TypeMapFeaturesConfig) => {
+
+export const addGeoViewStore = (config: TypeMapFeaturesConfig): void => {
   if (!config.mapId) {
     return;
   }
@@ -37,13 +39,13 @@ export const addGeoViewStore = (config: TypeMapFeaturesConfig) => {
   } */
   mountStoreDevtool(`getViewStore-${config.mapId}`, geoViewStore);
 };
+
 export const getGeoViewStore = (id: string | undefined) => {
   return useStoresManager.getState().stores[id ?? 'unknown'];
 };
 
 export const useGeoViewStore = () => {
-  const mapConfig = useContext(MapContext);
-  const { mapId } = mapConfig;
+  const { mapId } = useContext(MapContext);
 
   return useStoresManager.getState().stores[mapId ?? 'unknown'];
 };

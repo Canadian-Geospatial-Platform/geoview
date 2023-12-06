@@ -18,7 +18,6 @@ import * as types from '@/core/types/cgpv-types';
 import { EVENT_NAMES } from '@/api/events/event-types';
 import { API } from '@/api/api';
 
-import { getValidConfigFromString } from '@/core/utils/utilities';
 import { Config } from '@/core/utils/config/config';
 import { payloadIsAmapFeaturesConfig } from '@/api/events/payloads';
 import { addGeoViewStore } from '@/core/stores/stores-managers';
@@ -88,19 +87,45 @@ export function addReloadListener(mapId: string) {
 }
 
 /**
- * Initialize the map div from a function call
+ * Function render the map for inline map and map create from a function call
  *
- * @param {Element} mapDiv The ma div to initialise
- * @param {string} mapConfig a new config passed in from the function call
+ * @param mapElement {Element} The htlm element div who will contain the map
+ */
+async function renderMap(mapElement: Element): Promise<void> {
+  // create a new config for this map element
+  const config = new Config(mapElement);
+
+  // initialize config
+  // if a config is provided from either inline div, url params or json file, validate it with against the schema
+  // otherwise return the default config
+  const configObj = await config.initializeMapConfig();
+
+  // if valid config was provided - mapId is now part of config
+  if (configObj) {
+    const { mapId } = configObj;
+    addGeoViewStore(configObj);
+    // render the map with the config
+    reactRoot[mapId] = createRoot(mapElement!);
+    addReloadListener(mapId);
+    reactRoot[mapId].render(<AppStart mapFeaturesConfig={configObj} />);
+  }
+}
+
+/**
+ * Initialize a basic div from a function call. The div MUST not have llwp-map class.
+ * If is present, the div will be created with a default config
+ *
+ * @param {Element} mapDiv The basic div to initialise
+ * @param {string} mapConfig the new config passed in from the function call
  */
 export function initMapDivFromFunctionCall(mapDiv: HTMLElement, mapConfig: string): void {
+  // Create a data-config attribute and set config value
+  const att = document.createAttribute('data-config');
+  att.value = mapConfig;
+  mapDiv.setAttributeNode(att);
+
   mapDiv.classList.add('llwp-map');
-  // render the map with the config
-  reactRoot[mapDiv.id] = createRoot(mapDiv!);
-  const configObj = getValidConfigFromString(mapConfig, mapDiv);
-  addGeoViewStore(configObj);
-  addReloadListener(mapDiv.id);
-  reactRoot[mapDiv.id].render(<AppStart mapFeaturesConfig={configObj} />);
+  renderMap(mapDiv);
 }
 
 /**
@@ -108,12 +133,10 @@ export function initMapDivFromFunctionCall(mapDiv: HTMLElement, mapConfig: strin
  *
  * @param {Function} callback optional callback function to run once the rendering is ready
  */
+// eslint-disable-next-line require-await
 async function init(callback: () => void) {
   // set the API callback if a callback is provided
   if (callback) api.readyCallback = callback;
-
-  // apply focus to element when keyboard navigation is use
-  api.geoUtilities.manageKeyboardFocus();
 
   const mapElements = document.getElementsByClassName('llwp-map');
 
@@ -121,23 +144,8 @@ async function init(callback: () => void) {
   for (let i = 0; i < mapElements.length; i += 1) {
     const mapElement = mapElements[i] as Element;
 
-    // create a new config for this map element
-    const config = new Config(mapElement);
-
-    // initialize config
-    // if a config is provided from either inline div, url params or json file, validate it with against the schema
-    // otherwise return the default config
     // eslint-disable-next-line no-await-in-loop
-    const configObj = await config.initializeMapConfig();
-
-    // if valid config was provided
-    if (configObj) {
-      addGeoViewStore(configObj);
-      // render the map with the config
-      reactRoot[configObj.mapId] = createRoot(mapElement!);
-      addReloadListener(configObj.mapId);
-      reactRoot[configObj.mapId].render(<AppStart mapFeaturesConfig={configObj} />);
-    }
+    await renderMap(mapElement);
   }
 }
 

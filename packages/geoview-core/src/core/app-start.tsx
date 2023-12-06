@@ -11,7 +11,8 @@ import { Shell } from '@/core/containers/shell';
 import { getTheme, cgpvTheme } from '@/ui/style/theme';
 import { MapViewer } from '@/geo/map/map-viewer';
 import { TypeMapFeaturesConfig } from '@/core/types/global-types';
-import { api, TypeInteraction } from '@/app';
+import { api } from '@/app';
+import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
 
 declare module '@mui/styles/defaultTheme' {
   // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -20,9 +21,9 @@ declare module '@mui/styles/defaultTheme' {
   }
 }
 // create a state that will hold map config information
+// TODO: use store, only keep map id on context for store manager to gather right store on hooks
 export const MapContext = React.createContext<TypeMapContext>({
   mapId: '',
-  interaction: 'dynamic',
   mapFeaturesConfig: undefined,
 });
 
@@ -31,7 +32,6 @@ export const MapContext = React.createContext<TypeMapContext>({
  */
 export type TypeMapContext = {
   mapId: string;
-  interaction: TypeInteraction;
   mapFeaturesConfig?: TypeMapFeaturesConfig;
 };
 
@@ -46,30 +46,31 @@ interface AppStartProps {
  * Initialize the app with maps from inline html configs, url params
  */
 function AppStart(props: AppStartProps): JSX.Element {
-  //! store is not finilize yet so we setup the map with the configuration object instead
   const { mapFeaturesConfig } = props;
+  const { mapId } = mapFeaturesConfig;
 
   const mapContextValue = useMemo(() => {
-    return { mapId: mapFeaturesConfig.mapId as string, interaction: mapFeaturesConfig.map.interaction, mapFeaturesConfig };
-  }, [mapFeaturesConfig]);
+    return { mapId: mapId as string };
+  }, [mapId]);
 
   /**
-   * Create maps from inline configs with class name llwp-map in index.html
+   * Create maps from inline configs with class name llwp-map
    */
   function getInlineMaps() {
     const i18nInstance = i18n.cloneInstance({
-      lng: mapFeaturesConfig.displayLanguage,
-      fallbackLng: mapFeaturesConfig.displayLanguage,
+      lng: AppEventProcessor.getDisplayLanguage(mapId),
+      fallbackLng: AppEventProcessor.getDisplayLanguage(mapId),
     });
 
     // create a new map viewer instance and add it to the api
-    api.maps[mapFeaturesConfig.mapId] = new MapViewer(mapFeaturesConfig, i18nInstance);
+    // TODO: use store, remove the use of feature by viewer class and use state to gather values
+    api.maps[mapId] = new MapViewer(mapFeaturesConfig, i18nInstance);
 
     return (
       <I18nextProvider i18n={i18nInstance}>
         <MapContext.Provider value={mapContextValue}>
-          <ThemeProvider theme={getTheme(mapFeaturesConfig.theme)}>
-            <Shell shellId={mapFeaturesConfig.mapId as string} />
+          <ThemeProvider theme={getTheme(AppEventProcessor.getTheme(mapId))}>
+            <Shell shellId={mapId as string} />
           </ThemeProvider>
         </MapContext.Provider>
       </I18nextProvider>

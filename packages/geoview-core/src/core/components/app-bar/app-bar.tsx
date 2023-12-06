@@ -1,12 +1,10 @@
-import { useState, useRef, useEffect, useCallback, Fragment, useContext } from 'react';
+import { useState, useRef, useEffect, useCallback, Fragment } from 'react';
 
 import { useTheme } from '@mui/material/styles';
 import { Box, List, ListItem, Panel, IconButton } from '@/ui';
 
-import { api } from '@/app';
+import { api, useGeoViewMapId } from '@/app';
 import { EVENT_NAMES } from '@/api/events/event-types';
-
-import { MapContext, TypeMapContext } from '@/core/app-start';
 
 import { payloadIsAButtonPanel, ButtonPanelPayload, PayloadBaseClass } from '@/api/events/payloads';
 import { TypeButtonPanel } from '@/ui/panel/panel-types';
@@ -23,8 +21,7 @@ import { useMapInteraction } from '@/core/stores/store-interface-and-intial-valu
  * Create an app-bar with buttons that can open a panel
  */
 export function Appbar(): JSX.Element {
-  const mapContext = useContext(MapContext);
-  const { mapId } = mapContext as Required<TypeMapContext>;
+  const mapId = useGeoViewMapId();
 
   const theme = useTheme();
   const sxClasses = getSxClasses(theme);

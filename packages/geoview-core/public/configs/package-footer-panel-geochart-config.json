@@ -139,7 +139,7 @@
       }
     ]
   },
-  "theme": "royal",
+  "theme": "geoca",
   "corePackages": [
     "footer-panel"
   ],
