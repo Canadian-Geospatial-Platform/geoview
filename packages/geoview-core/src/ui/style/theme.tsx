@@ -1,7 +1,8 @@
 import { createTheme } from '@mui/material/styles';
 import { lightThemeOptions } from './light-theme';
 import { darkThemeOptions } from './dark-theme';
-import { royalThemeOptions } from './royal-theme';
+import { geoCaThemeOptions } from './geo-ca-theme';
+import { TypeSupportedTheme } from '@/geo/map/map-schema-types';
 
 declare module '@mui/material/styles/createPalette' {
   interface Palette {
@@ -11,21 +12,21 @@ declare module '@mui/material/styles/createPalette' {
   }
 }
 
-function getThemeOptions(mode: string | undefined) {
+function getThemeOptions(mode: TypeSupportedTheme) {
   switch (mode) {
     case 'dark':
       return darkThemeOptions;
-    case 'royal':
-      return royalThemeOptions;
+    case 'geo.ca':
+      return geoCaThemeOptions;
     default:
       return lightThemeOptions;
   }
 }
 
-export const getTheme = (mode: 'light' | 'dark' | 'royal' | undefined) => {
+export const getTheme = (mode: TypeSupportedTheme) => {
   const optionClone = getThemeOptions(mode);
 
   return createTheme(optionClone);
 };
 
-export const cgpvTheme = createTheme(getThemeOptions(undefined));
+export const cgpvTheme = createTheme(getThemeOptions('geo.ca'));
