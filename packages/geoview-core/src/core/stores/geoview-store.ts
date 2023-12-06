@@ -13,7 +13,6 @@ import { IUIState, initializeUIState } from './store-interface-and-intial-values
 import { TypeLegendResultSets } from '@/api/events/payloads/get-legends-payload';
 import { TypeFeatureInfoResultSets } from '@/api/events/payloads/get-feature-info-payload';
 import { TypeMapFeaturesConfig } from '@/core/types/global-types';
-import { generateId } from '@/core/utils/utilities';
 
 export type TypeSetStore = (
   partial: IGeoViewState | Partial<IGeoViewState> | ((state: IGeoViewState) => IGeoViewState | Partial<IGeoViewState>),
@@ -44,7 +43,7 @@ export const geoViewStoreDefinition = (set: TypeSetStore, get: TypeGetStore) =>
   ({
     mapConfig: undefined,
     setMapConfig: (config: TypeMapFeaturesConfig) => {
-      set({ mapConfig: config, mapId: config.mapId || generateId('') });
+      set({ mapConfig: config, mapId: config.mapId });
 
       // initialize default stores section from config information
       get().appState.setDefaultConfigValues(config);

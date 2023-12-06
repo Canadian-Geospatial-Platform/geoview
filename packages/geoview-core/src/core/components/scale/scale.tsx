@@ -1,14 +1,14 @@
-import { useContext, useState } from 'react';
+import { useState } from 'react';
 
 import { useTranslation } from 'react-i18next';
 
 import { useTheme } from '@mui/material/styles';
 
-import { MapContext } from '@/core/app-start';
 import { CheckIcon, Tooltip, Box, Button } from '@/ui';
 import { getSxClasses } from './scale-style';
 import { useMapScale } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { useUIFooterBarExpanded } from '@/core/stores/store-interface-and-intial-values/ui-state';
+import { useGeoViewMapId } from '@/app';
 
 interface TypeScale {
   scaleId: string;
@@ -22,8 +22,7 @@ interface TypeScale {
  * @returns {JSX.Element} created scale element
  */
 export function Scale(): JSX.Element {
-  const mapConfig = useContext(MapContext);
-  const { mapId } = mapConfig;
+  const mapId = useGeoViewMapId();
 
   const { t } = useTranslation<string>();
 
