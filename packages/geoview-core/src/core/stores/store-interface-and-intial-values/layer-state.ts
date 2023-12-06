@@ -290,7 +290,8 @@ function reOrderSingleLayer(collection: TypeLegendLayer[], startIndex: number, e
       const [removed] = startingCollection.splice(startIndex, 1);
       startingCollection.splice(endIndex, 0, removed);
 
-      for(var i = 0; i < startingCollection.length; i++) {
+      /* eslint-disable no-param-reassign */
+      for (let i = 0; i < startingCollection.length; i++) {
         startingCollection[i].order = i + 1;
       }
 
