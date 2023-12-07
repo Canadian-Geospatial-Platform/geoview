@@ -1,11 +1,25 @@
-import { Cast, AbstractPlugin, TypeWindow, toJsonObject, TypePluginOptions, TypeButtonPanel } from 'geoview-core';
+import {
+  Cast,
+  AbstractPlugin,
+  TypeWindow,
+  toJsonObject,
+  TypePluginOptions,
+  TypeButtonPanel,
+  getLocalizedValue,
+  TypeJsonObject,
+  AnySchemaObject,
+} from 'geoview-core';
 import { TimeSliderPanel } from './time-slider-panel';
+import schema from '../schema.json';
+import defaultConfig from '../default-config-time-slider-panel.json';
 
 export interface LayerProps {
   layerPath: string;
   layerName: string;
 }
 export interface SliderFilterProps {
+  title: string;
+  description: string;
   range: string[];
   defaultValue: string;
   minAndMax: number[];
@@ -46,25 +60,38 @@ class TimeSliderPlugin extends AbstractPlugin {
   });
 
   /**
+   * Return the schema that is defined for this package
+   *
+   * @returns {AnySchemaObject} returns the schema for this package
+   */
+  schema = (): AnySchemaObject => schema;
+
+  /**
+   * Return the default config for this package
+   *
+   * @returns {TypeJsonObject} the default config
+   */
+  defaultConfig = (): TypeJsonObject => toJsonObject(defaultConfig);
+
+  /**
    * Added function called after the plugin has been initialized
    */
   added = (): void => {
     // Fetch cgpv
     const { cgpv } = window as TypeWindow;
     const { createElement } = cgpv.react;
-    const { pluginProps } = this as AbstractPlugin;
+    const { configObj, pluginProps } = this as AbstractPlugin;
     const { mapId } = pluginProps;
 
     // If cgpv exists
     if (cgpv) {
       // Access the api calls
       const { api } = cgpv;
-
       this.value = api.maps[mapId].footerTabs.tabs.length;
       api.maps[mapId].footerTabs.createFooterTab({
         value: this.value,
-        label: this.translations[api.maps[mapId].getDisplayLanguage()].timeSlider as string,
-        content: () => createElement(TimeSliderPanel, { mapId }, []),
+        label: this.translations[api.maps[mapId].displayLanguage].timeSlider as string,
+        content: () => createElement(TimeSliderPanel, { mapId, configObj }, []),
       });
     }
   };
