@@ -38,7 +38,7 @@ import {
   TypeListOfGeoviewLayerConfig,
   TypeListOfLocalizedLanguages,
 } from '@/geo/map/map-schema-types';
-import { Cast, toJsonObject, TypeJsonObject, TypeMapFeaturesConfig } from '../../types/global-types';
+import { Cast, toJsonObject, TypeJsonObject, TypeMapFeaturesConfig } from '@/core/types/global-types';
 
 import { Layer } from '@/geo/layer/layer';
 import { CONST_GEOVIEW_SCHEMA_BY_TYPE, TypeGeoviewLayerType } from '@/geo/layer/geoview-layers/abstract-geoview-layers';

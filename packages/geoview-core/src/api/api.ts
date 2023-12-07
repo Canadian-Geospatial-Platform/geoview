@@ -11,12 +11,10 @@ import { DateMgt } from '@/core/utils/date-mgt';
 
 import { CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import * as Utilities from '../core/utils/utilities';
-// TODO: Refactor - Remove this following import and the class attributes, now that we have the higher level utilities import :)
-import { generateId, addUiComponent, showMessage } from '@/core/utils/utilities';
 import { FeatureInfoLayerSet } from '@/geo/utils/feature-info-layer-set';
 import { LegendsLayerSet } from '@/geo/utils/legends-layer-set';
 import { GeoViewLayerPayload, payloadIsTestGeoViewLayers } from './events/payloads/geoview-layer-payload';
-import { createMapFromConfig } from '@/core/utils/create-map-from-config';
+import { initMapDivFromFunctionCall } from '@/app';
 
 /**
  * Class used to handle api calls (events, functions etc...)
@@ -61,18 +59,6 @@ export class API {
   // dates utilities object
   dateUtilities: DateMgt;
 
-  // generateId function
-  generateId = generateId;
-
-  // create map in a chosen div
-  createMapFromConfig = createMapFromConfig;
-
-  // add ui component to a custom div
-  addUiComponent = addUiComponent;
-
-  // show message function
-  showMessage = showMessage;
-
   // FeatureInfo layer set instanciator
   getFeatureInfoLayerSet = FeatureInfoLayerSet.get;
 
@@ -88,6 +74,9 @@ export class API {
     this.plugin = new Plugin();
     this.geoUtilities = new GeoUtilities();
     this.dateUtilities = new DateMgt();
+
+    // apply focus to element when keyboard navigation is use
+    this.geoUtilities.manageKeyboardFocus();
 
     // Run the callback for maps that have the triggerReadyCallback set to true and when all the maps are ready
     this.event.once(
@@ -149,5 +138,23 @@ export class API {
   callInitCallback = () => {
     // run the map ready function on each map instance
     Object.keys(this.maps).forEach((mapKey) => this.maps[mapKey].mapReady());
+  };
+
+  /**
+   * Create a new map in a given div
+   * !MUST not be a map div with llwp-map class
+   * If is present, the div will be created with a default config
+   *
+   * @param {string} divId the id of the div to create map in
+   * @param {string} mapConfig the config passed in from the function call
+   */
+  createMapFromConfig = (divId: string, mapConfig: string): void => {
+    const mapDiv = document.getElementById(divId);
+    if (mapDiv && !mapDiv.classList.contains('llwp-map')) {
+      initMapDivFromFunctionCall(mapDiv!, mapConfig);
+    } else {
+      // eslint-disable-next-line no-console
+      console.error(`Div with id ${divId} does not exist`);
+    }
   };
 }

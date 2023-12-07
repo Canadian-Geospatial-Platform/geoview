@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import { useTranslation } from 'react-i18next';
 
@@ -6,8 +6,8 @@ import { useTheme } from '@mui/material/styles';
 import { Drawer as MaterialDrawer, DrawerProps, Box } from '@mui/material';
 
 import { IconButton, ChevronLeftIcon, ChevronRightIcon } from '..';
-import { MapContext } from '@/core/app-start';
 import { getSxClasses } from './drawer-style';
+import { useGeoViewMapId } from '@/app';
 
 /**
  * Drawer Properties
@@ -26,8 +26,7 @@ export interface TypeDrawerProps extends DrawerProps {
 export function Drawer(props: TypeDrawerProps): JSX.Element {
   const { variant, status, className, style, children } = props;
 
-  const mapConfig = useContext(MapContext);
-  const { mapId } = mapConfig;
+  const mapId = useGeoViewMapId();
 
   const { t } = useTranslation<string>();
 
