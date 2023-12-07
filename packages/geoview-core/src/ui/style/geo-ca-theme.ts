@@ -5,7 +5,7 @@ import { defaultThemeOptions, opacity } from './default';
  * Make changes to MUI default LIGHT theme/mode here
  * see https://mui.com/material-ui/customization/palette/
  */
-const royalPalette = {
+const geoCaPalette = {
   primary: {
     light: '#c8cde4',
     main: '#515BA5',
@@ -96,7 +96,7 @@ const royalPalette = {
   },
 };
 
-export const royalThemeOptions: ThemeOptions = {
+export const geoCaThemeOptions: ThemeOptions = {
   ...defaultThemeOptions,
-  palette: royalPalette,
+  palette: geoCaPalette,
 };

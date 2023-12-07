@@ -53,7 +53,7 @@
     </div>
     <div
       id="LNG1"
-      class="llwp-map"
+      class=""
       data-lang="fr">
     </div>
     <p>This map is in French.</p>
@@ -88,11 +88,7 @@
 
     <script src="codedoc.js"></script>
     <script>
-      // initialize cgpv and api events, a callback is optional, used if calling api's after the rendering is ready
-      cgpv.init(function () {
-        console.log('api is ready');
-
-        const config = `{
+      const config = `{
           'map': {
             'interaction': 'dynamic',
             'viewSettings': {
@@ -125,34 +121,47 @@
           'navBar': ['zoom', 'fullscreen', 'home', 'location', 'export'],
           'appBar': ['geolocator', 'export'],
           'components': ['overview-map', 'north-arrow'],
-          'corePackages': ['layers-panel', 'details-panel', 'basemap-panel', 'footer-panel'],
+          'corePackages': ['layers-panel', 'basemap-panel', 'footer-panel'],
           'theme': 'dark',
           'suportedLanguages': ['fr', 'en']
         }`;
 
-        // creates map in empty div
+      // creates map in empty div
+      // TODO: make the function createMapFromConfig async with api is ready
+      setTimeout(() => {
         cgpv.api.createMapFromConfig('LNG1', config);
+        cgpv.api.createMapFromConfig('LNG2', config);
+      }, 1000);
 
-        // loads config in blank map
-        // cgpv.api.maps['LNG2'].loadMapFromJsonStringConfig (config);
-        // TODO: Investigate part of #1118, if we remove the calss on div it works by passing with getValidMapConfig
-        // if using the loadMapFromJsonStringConfig  (when cass exist) it fails for the second map. This whole start from function must be refactor.
-        setTimeout(() => {
-          cgpv.api.createMapFromConfig('LNG2', config);
-          cgpv.api.createMapFromConfig('LNG3', config)
-        }, 4000);
+      // initialize cgpv and api events, a callback is optional, used if calling api's after the rendering is ready
+      // we need a least one map to trigger callback
+      // TODO: we can have the callback after one map has been trigger from outside, I put a timeout of 1000 so init goes first
+      // TODO make the function async
+        cgpv.init(function () {
+          console.log('api is ready');
 
-        // change map language
-        var mapLangButton = document.getElementById('Change-Lang-Button');
-        mapLangButton.addEventListener('click', function (e) {
-          cgpv.api.maps['LNG1'].changeLanguage('en')
-          cgpv.api.maps['LNG2'].changeLanguage('fr')
+          // loads config in blank map
+          // cgpv.api.maps['LNG2'].loadMapFromJsonStringConfig (config);
+          // TODO: Investigate part of #1118, if we remove the calss on div it works by passing with getValidMapConfig
+          // if using the loadMapFromJsonStringConfig  (when cass exist) it fails for the second map. This whole start from function must be refactor.
+          // because of class llwp-map, the map is created from default config.
+          // We should not let injection of new config in created map... only reload
+          // See if we remove loadMapFromJsonStringConfig.. use change language and chage theme to switch....
+          setTimeout(() => {
+            cgpv.api.createMapFromConfig('LNG3', config)
+          }, 4000);
+
+          // change map language
+          var mapLangButton = document.getElementById('Change-Lang-Button');
+          mapLangButton.addEventListener('click', function (e) {
+            cgpv.api.maps['LNG1'].changeLanguage('en')
+            cgpv.api.maps['LNG2'].changeLanguage('fr')
+          });
+
+          //create snippet
+          createConfigSnippet();
+          createCodeSnippet();
         });
-
-        //create snippet
-        createConfigSnippet();
-        createCodeSnippet();
-      });
     </script>
   </body>
 </html>

@@ -1,4 +1,4 @@
-import { useCallback, useContext, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { useTranslation } from 'react-i18next';
 
@@ -12,9 +12,8 @@ import Home from './buttons/home';
 import ExportButton from '@/core/components/export/export-modal-button';
 import Location from './buttons/location';
 
-import { api } from '@/app';
+import { api, useGeoViewMapId } from '@/app';
 import { Panel, ButtonGroup, IconButton, Box } from '@/ui';
-import { MapContext } from '@/core/app-start';
 import { EVENT_NAMES } from '@/api/events/event-types';
 import { payloadIsAButtonPanel, ButtonPanelPayload, PayloadBaseClass } from '@/api/events/payloads';
 import { TypeButtonPanel } from '@/ui/panel/panel-types';
@@ -29,8 +28,7 @@ import {
  * Create a nav-bar with buttons that can call functions or open custom panels
  */
 export function Navbar(): JSX.Element {
-  const mapConfig = useContext(MapContext);
-  const { mapId } = mapConfig;
+  const mapId = useGeoViewMapId();
 
   const { t } = useTranslation<string>();
 

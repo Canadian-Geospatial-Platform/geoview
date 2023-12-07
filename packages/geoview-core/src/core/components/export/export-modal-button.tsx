@@ -1,7 +1,6 @@
-import { useContext } from 'react';
 import { IconButton, DownloadIcon } from '@/ui';
 import { useUIStoreActions } from '@/core/stores/store-interface-and-intial-values/ui-state';
-import { MapContext } from '@/core/app-start';
+import { useGeoViewMapId } from '@/app';
 
 /**
  * Interface used for export button properties
@@ -18,10 +17,8 @@ interface ExportProps {
 export default function ExportButton(props: ExportProps): JSX.Element {
   const { className } = props;
 
-  const mapConfig = useContext(MapContext);
-  const { mapId } = mapConfig;
-
   // get store function
+  const mapId = useGeoViewMapId();
   const { openModal } = useUIStoreActions();
 
   return (

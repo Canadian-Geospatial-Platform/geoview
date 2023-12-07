@@ -1,4 +1,4 @@
-import { MutableRefObject, useCallback, useContext, useEffect, useRef, useState } from 'react';
+import { MutableRefObject, useCallback, useEffect, useRef, useState } from 'react';
 
 import { useTheme } from '@mui/material/styles';
 
@@ -15,8 +15,7 @@ import {
   MoveUpRoundedIcon,
   ArrowUpIcon,
 } from '@/ui';
-import { MapContext } from '@/core/app-start';
-import { api } from '@/app';
+import { api, useGeoViewMapId } from '@/app';
 import { EVENT_NAMES } from '@/api/events/event-types';
 import { FooterTabPayload, PayloadBaseClass, payloadIsAFooterTab } from '@/api/events/payloads';
 import { getSxClasses } from './footer-tabs-style';
@@ -27,8 +26,7 @@ import { getSxClasses } from './footer-tabs-style';
  * @returns {JSX.Element} returns the Footer Tabs component
  */
 export function FooterTabs(): JSX.Element | null {
-  const mapConfig = useContext(MapContext);
-  const { mapId } = mapConfig;
+  const mapId = useGeoViewMapId();
 
   const theme = useTheme();
   const sxClasses = getSxClasses(theme);

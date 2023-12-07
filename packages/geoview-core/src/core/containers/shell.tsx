@@ -1,5 +1,5 @@
 /* eslint-disable react/jsx-props-no-spreading */
-import { useEffect, useState, useContext, useCallback, Fragment } from 'react';
+import { useEffect, useState, useCallback, Fragment } from 'react';
 
 import { useTranslation } from 'react-i18next';
 
@@ -27,7 +27,6 @@ import {
   payloadIsAModal,
   payloadIsAmapFeaturesConfig,
 } from '@/api/events/payloads';
-import { MapContext } from '@/core/app-start';
 import { getShellSxClasses } from './containers-style';
 import { useMapInteraction, useMapLoaded } from '@/core/stores/store-interface-and-intial-values/map-state';
 import {
@@ -37,7 +36,7 @@ import {
 } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import ExportModal from '@/core/components/export/export-modal';
 import DataTableModal from '@/core/components/data-table/data-table-modal';
-import { useGeoViewMapId } from '@/core/stores/geoview-store';
+import { useGeoViewConfig, useGeoViewMapId } from '@/core/stores/geoview-store';
 
 /**
  * Interface for the shell properties
@@ -53,9 +52,6 @@ interface ShellProps {
  */
 export function Shell(props: ShellProps): JSX.Element {
   const { shellId } = props;
-
-  const mapContext = useContext(MapContext);
-  const mapFeaturesConfig = mapContext.mapFeaturesConfig!;
 
   const { t } = useTranslation<string>();
 
@@ -73,6 +69,7 @@ export function Shell(props: ShellProps): JSX.Element {
   const interaction = useMapInteraction();
   const appBarComponents = useUIAppbarComponents();
   const corePackagesComponents = useUICorePackagesComponents();
+  const geoviewConfig = useGeoViewConfig();
 
   /**
    * Causes the shell to re-render
@@ -118,10 +115,10 @@ export function Shell(props: ShellProps): JSX.Element {
     api.event.on(EVENT_NAMES.MODAL.EVENT_MODAL_CREATE, modalCreateHandler, shellId);
 
     // Reload
+    // TODO: use store config when we relaod the map
     const mapReloadHandler = (payload: PayloadBaseClass) => {
       if (payloadIsAmapFeaturesConfig(payload)) {
-        mapContext.mapFeaturesConfig = payload.mapFeaturesConfig;
-        api.event.emit(mapConfigPayload(EVENT_NAMES.MAP.EVENT_MAP_RELOAD, `${shellId}/delete_old_map`, payload.mapFeaturesConfig));
+        api.event.emit(mapConfigPayload(EVENT_NAMES.MAP.EVENT_MAP_RELOAD, `${shellId}/delete_old_map`, geoviewConfig!));
         updateShell();
       }
     };
@@ -134,7 +131,7 @@ export function Shell(props: ShellProps): JSX.Element {
       api.event.off(EVENT_NAMES.MODAL.EVENT_MODAL_CREATE, shellId, modalCreateHandler);
       api.event.off(EVENT_NAMES.MAP.EVENT_MAP_RELOAD, shellId, mapReloadHandler);
     };
-  }, [components, shellId, updateShell, mapContext, mapFeaturesConfig]);
+  }, [components, shellId, updateShell, geoviewConfig]);
 
   return (
     <Box sx={sxClasses.all}>

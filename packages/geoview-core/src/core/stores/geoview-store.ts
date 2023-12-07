@@ -11,7 +11,6 @@ import { ITimeSliderState, initializeTimeSliderState } from './store-interface-a
 import { IUIState, initializeUIState } from './store-interface-and-intial-values/ui-state';
 
 import { TypeMapFeaturesConfig } from '@/core/types/global-types';
-import { generateId } from '@/core/utils/utilities';
 
 export type TypeSetStore = (
   partial: IGeoViewState | Partial<IGeoViewState> | ((state: IGeoViewState) => IGeoViewState | Partial<IGeoViewState>),
@@ -38,7 +37,7 @@ export const geoViewStoreDefinition = (set: TypeSetStore, get: TypeGetStore) =>
   ({
     mapConfig: undefined,
     setMapConfig: (config: TypeMapFeaturesConfig) => {
-      set({ mapConfig: config, mapId: config.mapId || generateId('') });
+      set({ mapConfig: config, mapId: config.mapId });
 
       // initialize default stores section from config information
       get().appState.setDefaultConfigValues(config);

@@ -1618,7 +1618,7 @@
           "$ref": "#/definitions/TypeMapConfig"
         },
         "theme": {
-          "enum": ["dark", "light", "royal"],
+          "enum": ["dark", "light", "geo.ca"],
           "default": "dark",
           "description": "Theme style the viewer."
         },

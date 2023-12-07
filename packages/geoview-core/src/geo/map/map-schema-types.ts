@@ -948,13 +948,18 @@ export type TypeLayerEntryConfig =
 export type TypeListOfLayerEntryConfig = TypeLayerEntryConfig[];
 
 /** ******************************************************************************************************************************
+ * List of supported geoview theme.
+ */
+export type TypeSupportedTheme = 'dark' | 'light' | 'geo.ca';
+
+/** ******************************************************************************************************************************
  *  Definition of the map feature instance according to what is specified in the schema.
  */
 export type TypeMapFeaturesInstance = {
   /** map configuration. */
   map: TypeMapConfig;
-  /** Display theme, default = dark. */
-  theme?: 'dark' | 'light';
+  /** Display theme, default = geo.ca. */
+  theme?: TypeSupportedTheme;
   /** App bar properties. */
   appBar?: TypeAppBarProps;
   /** Nav bar properies. */
