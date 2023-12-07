@@ -396,10 +396,10 @@ export function TimeSlider(TimeSliderPanelProps: TimeSliderPanelProps) {
             </FormControl>
           </div>
         </Grid>
-        {true && (
+        {sliderDesc && (
           <Grid item xs={12}>
             <Typography component="div" sx={{ px: '20px', py: '5px' }}>
-              sliderDesc
+              {sliderDesc}
             </Typography>
           </Grid>
         )}
