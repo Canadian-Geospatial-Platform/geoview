@@ -45,11 +45,16 @@ export function LayersList({ layersList, setIsLayersListPanelVisible, parentLaye
   const getItemStyle = (isDragging: boolean, draggableStyle: DraggingStyle | NotDraggingStyle | undefined) => {
     if (isDragging) {
       return {
+        cursor: 'grab',
         userSelect: 'none',
-        // border: '2px dashed green',
-        padding: '8px !important',
+        border: '3px dashed #ccc',
         ...draggableStyle,
       };
+    } else if(isDragEnabled) {
+      return {
+        cursor: 'grab',
+        userSelect: 'none',
+      }
     }
     return {};
   };
@@ -57,8 +62,8 @@ export function LayersList({ layersList, setIsLayersListPanelVisible, parentLaye
   const getListStyle = (isDraggingOver: boolean) => {
     if (isDraggingOver) {
       return {
-        border: '2px dashed #ccc',
-        padding: '8px !important',
+        border: '3px dashed #ccc',
+        padding: '8px',
       };
     }
     return {};

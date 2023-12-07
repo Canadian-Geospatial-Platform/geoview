@@ -80,17 +80,12 @@ export function LayersPanel() {
       );
     }
     if (displayState === 'order') {
+      const markup = { __html: t('layers.sortingDescription') };
       return (
         <Paper sx={{ padding: '20px' }}>
           <h3>Re-ordering layers</h3>
           <Box sx={sxClasses.buttonDescriptionContainer}>
-            <IconButton>
-              <HandleIcon style={{ fill: '#a9a9a9' }} />
-            </IconButton>
-            <p>
-              Lorem, ipsum dolor sit amet consectetur adipisicing elit. Praesentium animi, perferendis nemo quas sequi totam minima ad
-              labore.
-            </p>
+            <div dangerouslySetInnerHTML={markup} />
           </Box>
         </Paper>
       );
