@@ -1,0 +1,55 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "GeoView Time Slider Config Schema",
+  "type": "object",
+  "version": 1.0,
+  "comments": "Configuration for GeoView time slider package.",
+  "additionalProperties": false,
+  "properties": {
+    "layers": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "default": "Default Time Slider Title",
+            "description": "Title of the time slider panel."
+          },
+          "description": {
+            "type": "string",
+            "default": "Default Time Slider Title",
+            "description": "Description of the time slider panel."
+          },
+          "locked": {
+            "type": "boolean",
+            "default": false,
+            "description": "Lock handle"
+          },
+          "reversed": {
+            "type": "boolean",
+            "default": false,
+            "description": "Reverse direction of the slider animation"
+          },
+          "defaultValue": {
+            "type": "string",
+            "default": false,
+            "description": "Initial value on slider"
+          }
+        }
+      }
+    },
+    "suportedLanguages": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "enum": ["en", "fr"]
+      },
+      "default": ["en", "fr"],
+      "description": "ISO 639-1 code indicating the languages supported by the configuration file.",
+      "minItems": 1
+    }
+  },
+  "required": ["layers", "suportedLanguages"]
+}

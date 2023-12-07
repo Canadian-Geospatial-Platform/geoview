@@ -1,14 +1,18 @@
-import { Cast, toJsonObject, TypeTabs } from 'geoview-core';
+import { AnySchemaObject, Cast, toJsonObject, TypeJsonObject, TypeTabs } from 'geoview-core';
 import { TimeSliderIcon } from 'geoview-core/src/ui';
 import { FooterPlugin } from 'geoview-core/src/api/plugin/footer-plugin';
 
 import { TimeSliderPanel } from './time-slider-panel';
+import schema from '../schema.json';
+import defaultConfig from '../default-config-time-slider-panel.json';
 
 export interface LayerProps {
   layerPath: string;
   layerName: string;
 }
 export interface SliderFilterProps {
+  title: string;
+  description: string;
   range: string[];
   defaultValue: string;
   minAndMax: number[];
@@ -25,6 +29,20 @@ export interface SliderFilterProps {
  * Time slider plugin
  */
 class TimeSliderPlugin extends FooterPlugin {
+  /**
+   * Return the schema that is defined for this package
+   *
+   * @returns {AnySchemaObject} returns the schema for this package
+   */
+  schema = (): AnySchemaObject => schema;
+
+  /**
+   * Return the default config for this package
+   *
+   * @returns {TypeJsonObject} the default config
+   */
+  defaultConfig = (): TypeJsonObject => toJsonObject(defaultConfig);
+
   /**
    * Translations object to inject to the viewer translations
    */
@@ -81,7 +99,7 @@ class TimeSliderPlugin extends FooterPlugin {
       value: this.value!,
       label: 'timeSlider.title',
       icon: <TimeSliderIcon />,
-      content: () => <TimeSliderPanel mapId={this.pluginProps.mapId} />,
+      content: () => <TimeSliderPanel mapId={this.pluginProps.mapId} configObj={this.configObj} />,
     };
   };
 }
