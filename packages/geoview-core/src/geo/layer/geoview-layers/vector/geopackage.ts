@@ -25,7 +25,6 @@ import {
   TypeListOfLayerEntryConfig,
   layerEntryIsGroupLayer,
   TypeBaseLayerEntryConfig,
-  TypeBaseSourceVectorInitialConfig,
   TypeLayerGroupEntryConfig,
   TypeSimpleSymbolVectorConfig,
   TypeStrokeSymbolConfig,
@@ -622,24 +621,6 @@ export class GeoPackage extends AbstractGeoViewVector {
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       this.extractGeopackageData(layerEntryConfig).then(([layers, slds]) => {
         if (layers.length === 1) {
-          if ((layerEntryConfig.source as TypeBaseSourceVectorInitialConfig)?.cluster?.enable) {
-            const unclusteredLayerConfig = cloneDeep(layerEntryConfig) as TypeVectorLayerEntryConfig;
-            unclusteredLayerConfig.layerId = `${layerEntryConfig.layerId}-unclustered`;
-            unclusteredLayerConfig.source!.cluster!.enable = false;
-
-            this.processOneGeopackageLayer(unclusteredLayerConfig as TypeBaseLayerEntryConfig, layers[0], slds).then((baseLayer) => {
-              if (baseLayer) {
-                baseLayer.setVisible(false);
-                if (!layerGroup) layerGroup = this.createLayerGroup(unclusteredLayerConfig.parentLayerConfig as TypeLayerEntryConfig);
-                layerGroup.getLayers().push(baseLayer);
-                this.changeLayerStatus('processed', unclusteredLayerConfig);
-              }
-            });
-
-            (layerEntryConfig.source as TypeBaseSourceVectorInitialConfig)!.cluster!.settings =
-              unclusteredLayerConfig.source!.cluster!.settings;
-          }
-
           this.processOneGeopackageLayer(layerEntryConfig, layers[0], slds).then((baseLayer) => {
             if (baseLayer) {
               this.changeLayerStatus('processed', layerEntryConfig);
@@ -664,22 +645,6 @@ export class GeoPackage extends AbstractGeoViewVector {
             newLayerEntryConfig.layerName = { en: layers[i].name, fr: layers[i].name };
             newLayerEntryConfig.entryType = 'vector';
             newLayerEntryConfig.parentLayerConfig = Cast<TypeLayerGroupEntryConfig>(layerEntryConfig);
-            if ((newLayerEntryConfig.source as TypeBaseSourceVectorInitialConfig)?.cluster?.enable) {
-              const unclusteredLayerConfig = cloneDeep(newLayerEntryConfig) as TypeVectorLayerEntryConfig;
-              unclusteredLayerConfig.layerId = `${layerEntryConfig.layerId}-unclustered`;
-              unclusteredLayerConfig.source!.cluster!.enable = false;
-
-              this.processOneGeopackageLayer(unclusteredLayerConfig as TypeBaseLayerEntryConfig, layers[0], slds).then((baseLayer) => {
-                if (baseLayer) {
-                  baseLayer.setVisible(false);
-                  newLayerGroup.getLayers().push(baseLayer);
-                  this.changeLayerStatus('processed', unclusteredLayerConfig);
-                }
-              });
-
-              (newLayerEntryConfig.source as TypeBaseSourceVectorInitialConfig)!.cluster!.settings =
-                unclusteredLayerConfig.source!.cluster!.settings;
-            }
 
             this.processOneGeopackageLayer(newLayerEntryConfig, layers[i], slds).then((baseLayer) => {
               if (baseLayer) {
