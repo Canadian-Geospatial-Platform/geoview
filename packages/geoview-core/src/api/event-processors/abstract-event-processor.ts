@@ -15,7 +15,8 @@ export abstract class AbstractEventProcessor {
     this.subscriptionArr.push();
   }
 
-  onDestroy() {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  onDestroy(store: GeoViewStoreType) {
     // destroying all subscriptions
     this.subscriptionArr.forEach((unsub) => unsub());
   }

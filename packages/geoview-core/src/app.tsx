@@ -53,7 +53,8 @@ export function addReloadListener(mapId: string) {
         const map = document.getElementById(mapId);
 
         if (map) {
-          // remove the dom element (remove rendered map)
+          // remove the dom element (remove rendered map and overview map)
+          if (api.maps[mapId].overviewRoot) api.maps[mapId].overviewRoot?.unmount();
           if (reactRoot[mapId] !== null) reactRoot[mapId].unmount();
 
           // recreate the map - crate e new div and remove the active one
@@ -75,6 +76,24 @@ export function addReloadListener(mapId: string) {
 
           // set plugin's loaded to false
           api.plugin.pluginsLoaded = false;
+
+          // eslint-disable-next-line dot-notation
+          delete mapFeaturesConfig['triggerReadyCallback'];
+
+          // Create a data-config attribute and set config value
+          const att = document.createAttribute('data-config');
+          att.value = JSON.stringify(mapFeaturesConfig);
+
+          newDiv.setAttributeNode(att);
+
+          // TODO: use store when we reload a map from scratch... delete and recreate
+          // follow same recipe so we ahve one wauy of loading
+          // create a new config for this map element
+          // const config = new Config(newDiv);
+
+          // const configObj = await config.initializeMapConfig();
+          // TODO: remove store before
+          // addGeoViewStore(mapFeaturesConfig!);
 
           addReloadListener(mapId);
           // re-render map with updated config keeping previous values if unchanged

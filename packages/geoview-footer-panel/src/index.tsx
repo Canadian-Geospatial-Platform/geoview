@@ -89,7 +89,8 @@ class FooterPanelPlugin extends AbstractPlugin {
     if (cgpv) {
       // access the api calls
       const { api } = cgpv;
-      const { displayLanguage, footerTabs } = api.maps[mapId];
+      const { footerTabs } = api.maps[mapId];
+      const displayLanguage = api.maps[mapId].getDisplayLanguage();
 
       const defaultTabs = configObj?.tabs.defaultTabs as Array<string>;
       let tabsCounter = 0;

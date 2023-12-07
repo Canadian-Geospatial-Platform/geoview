@@ -206,7 +206,7 @@
       <h4 id="HLCONF7">7. Load config from function call</h4>
       <a class="ref-link" href="#top">Top</a>
     </div>
-    <div id="CONF7" class="llwp-map" data-lang="fr"></div>
+    <div id="CONF7" class="" data-lang="fr"></div>
     <p>This map loads it's configurations from a function call (after 10 seconds). Configuration error with double layer id.</p>
     <hr />
 
@@ -215,15 +215,8 @@
 
     <script src="codedoc.js"></script>
     <script>
-      // initialize cgpv and api events, a callback is optional, used if calling api's after the rendering is ready
-      cgpv.init(function (mapId) {
-        console.log('api is ready');
-
-        // TODO: init is not call for individual maps, onlly for all aps but in facts all maps are not created yet
-        //! bug
-        setTimeout(() => {
-          if (cgpv.api.maps['CONF7']) {
-              cgpv.api.maps['CONF7'].loadMapFromJsonStringConfig (`{
+      setTimeout(() => {
+        cgpv.api.createMapFromConfig('CONF7', `{
                 'map': {
                   'interaction': 'dynamic',
                   'viewSettings': {
@@ -275,8 +268,11 @@
                 'theme': 'dark',
                 'suportedLanguages': ['en']
               }`);
-          }
-        }, 10000);
+      }, 1000);
+  
+      // initialize cgpv and api events, a callback is optional, used if calling api's after the rendering is ready
+      cgpv.init(function (mapId) {
+        console.log('api is ready');
 
         //create snippets
         createCodeSnippet();

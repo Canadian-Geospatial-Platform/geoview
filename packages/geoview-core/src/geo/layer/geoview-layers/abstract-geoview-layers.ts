@@ -13,9 +13,7 @@ import Geometry from 'ol/geom/Geometry';
 
 import cloneDeep from 'lodash/cloneDeep';
 
-import i18n from 'i18next';
-
-import { generateId, getLocalizedValue, getXMLHttpRequest, showError, replaceParams } from '@/core/utils/utilities';
+import { generateId, getLocalizedValue, getXMLHttpRequest, showError, replaceParams, getLocalizedMessage } from '@/core/utils/utilities';
 import {
   TypeGeoviewLayerConfig,
   TypeListOfLayerEntryConfig,
@@ -491,8 +489,7 @@ export abstract class AbstractGeoViewLayer {
         console.log(error);
       }
     } else {
-      const trans = i18n.getFixedT(api.maps[this.mapId].displayLanguage);
-      const message = replaceParams([this.mapId], trans('validation.layer.createtwice'));
+      const message = replaceParams([this.mapId], getLocalizedMessage(this.mapId, 'validation.layer.createtwice'));
       showError(this.mapId, message);
 
       // eslint-disable-next-line no-console
