@@ -7,12 +7,14 @@ export interface IDetailsState {
   checkedFeatures: Array<TypeFeatureInfoEntry>;
   layerDataArray: TypeArrayOfLayerData;
   selectedLayerPath: string;
+  selectedLayerIndex: number;
 
   actions: {
     addCheckedFeature: (feature: TypeFeatureInfoEntry) => void;
     removeCheckedFeature: (feature: TypeFeatureInfoEntry | 'all') => void;
     setLayerDataArray: (layerDataArray: TypeArrayOfLayerData) => void;
     setSelectedLayerPath: (selectedLayerPath: string) => void;
+    setSelectedLayerIndex: (selectedLayerIndex: number) => void;
   };
 }
 
@@ -21,6 +23,7 @@ export function initialDetailsState(set: TypeSetStore, get: TypeGetStore): IDeta
     checkedFeatures: [],
     layerDataArray: [],
     selectedLayerPath: '',
+    selectedLayerIndex: 0,
 
     // #region ACTIONS
     actions: {
@@ -62,6 +65,14 @@ export function initialDetailsState(set: TypeSetStore, get: TypeGetStore): IDeta
           },
         });
       },
+      setSelectedLayerIndex(selectedLayerIndex: number) {
+        set({
+          detailsState: {
+            ...get().detailsState,
+            selectedLayerIndex,
+          },
+        });
+      },
     },
     // #endregion ACTIONS
   } as IDetailsState;
@@ -73,5 +84,6 @@ export function initialDetailsState(set: TypeSetStore, get: TypeGetStore): IDeta
 export const useDetailsStoreCheckedFeatures = () => useStore(useGeoViewStore(), (state) => state.detailsState.checkedFeatures);
 export const useDetailsStoreLayerDataArray = () => useStore(useGeoViewStore(), (state) => state.detailsState.layerDataArray);
 export const useDetailsStoreSelectedLayerPath = () => useStore(useGeoViewStore(), (state) => state.detailsState.selectedLayerPath);
+export const useDetailsStoreSelectedLayerIndex = () => useStore(useGeoViewStore(), (state) => state.detailsState.selectedLayerIndex);
 
 export const useDetailsStoreActions = () => useStore(useGeoViewStore(), (state) => state.detailsState.actions);

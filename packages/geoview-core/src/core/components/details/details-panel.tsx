@@ -14,6 +14,7 @@ import {
   useDetailsStoreCheckedFeatures,
   useDetailsStoreLayerDataArray,
   useDetailsStoreSelectedLayerPath,
+  useDetailsStoreSelectedLayerIndex,
 } from '@/core/stores/store-interface-and-intial-values/details-state';
 import { useMapStoreActions } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { ResponsiveGrid, CloseButton, EnlargeButton, LayerList, LayerTitle } from '../common';
@@ -38,9 +39,10 @@ export function Detailspanel(): JSX.Element {
 
   // get values from store
   const selectedLayerPath = useDetailsStoreSelectedLayerPath();
+  const selectedLayerIndex = useDetailsStoreSelectedLayerIndex();
   const arrayOfLayerData = useDetailsStoreLayerDataArray();
   const checkedFeatures = useDetailsStoreCheckedFeatures();
-  const { setSelectedLayerPath, removeCheckedFeature } = useDetailsStoreActions();
+  const { setSelectedLayerPath, setSelectedLayerIndex, removeCheckedFeature } = useDetailsStoreActions();
   const { addSelectedFeature, removeSelectedFeature } = useMapStoreActions();
 
   // Returns the index of matching layer based on the found layer path
@@ -69,23 +71,54 @@ export function Detailspanel(): JSX.Element {
     addSelectedFeature(layerDataInfo?.features![currentFeatureIndex] as TypeFeatureInfoEntry);
   };
 
+  const findFirstNonEmptyFeatureLayer = (layerDataArray: TypeArrayOfLayerData): number => {
+    if (layerDataArray.length > 0) {
+      return layerDataArray.findIndex((layer: TypeLayerData) => layer.features && layer.features.length > 0);
+    }
+    return 0;
+  };
+
+  console.log('Before useEffect arrayOfLayerData', arrayOfLayerData);
+
   useEffect(() => {
     if (arrayOfLayerData.length > 0) {
       // Check if have the previous selected layer path in incoming arrayOfLayerData
       // if so, get the index of the found layer, we need to pass to setLayerDataInfo to load layer in left panel
       const commonLayerPathIndex = selectedLayerPath ? findLayerPathIndex(arrayOfLayerData, selectedLayerPath) : -1;
-      setLayerDataInfo(arrayOfLayerData[commonLayerPathIndex > -1 ? commonLayerPathIndex : 0]);
+
+      // console.log('commonLayerPathIndex-->', commonLayerPathIndex);
+      setLayerDataInfo(
+        arrayOfLayerData[commonLayerPathIndex > -1 ? commonLayerPathIndex : findFirstNonEmptyFeatureLayer(arrayOfLayerData)]
+      );
       setCurrentFeatureIndex(0);
+
+      console.log('Inside useEffect arrayOfLayerData ', arrayOfLayerData);
+
+      // If we already selected layer from left panel, so we have layer path
+      if (arrayOfLayerData) {
+        // Check if previously selected path has feature, then select the layer
+        // TODO logic below doesn't work properly because of re rendering and getting different number of elements in arrayOfLayerData
+        if (arrayOfLayerData[selectedLayerIndex]?.features?.length !== 0) {
+          setSelectedLayerPath(selectedLayerPath);
+          setSelectedLayerIndex(selectedLayerIndex);
+        } else {
+          // Previously selected layer has zero features, so select the first layer that has features
+          setSelectedLayerIndex(findFirstNonEmptyFeatureLayer(arrayOfLayerData));
+          setSelectedLayerPath(arrayOfLayerData[findFirstNonEmptyFeatureLayer(arrayOfLayerData)]?.layerPath);
+        }
+      }
     } else setLayerDataInfo(null);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [arrayOfLayerData]);
+
+  console.log('After uesEffect arrayOfLayerData', arrayOfLayerData);
 
   /**
    * Get number of features of a layer.
    * @returns string
    */
   const getFeaturesOfLayer = (layer: TypeLayerData): string => {
-    const numOfFeatures = layer.features?.length ?? 0;
+    const numOfFeatures = layer?.features?.length ?? 0;
     return `${numOfFeatures} ${t('details.feature')}${numOfFeatures > 1 ? 's' : ''}`;
   };
 
@@ -115,22 +148,28 @@ export function Detailspanel(): JSX.Element {
     setLayerDataInfo(layerData);
     setCurrentFeatureIndex(0);
     setSelectedLayerPath(layerData.layerPath);
+    setSelectedLayerIndex(findLayerPathIndex(arrayOfLayerData, layerData.layerPath));
     setIsLayersPanelVisible(true);
     addSelectedFeature(layerData.features![0]);
   };
+
+  // console.log('--In Details: selected layer index ->', selectedLayerIndex);
+  // console.log('--In Details: selectedLayerPath ->', selectedLayerPath);
+  // console.log('+++findFirstNonEmptyFeatureLayer++', findFirstNonEmptyFeatureLayer(arrayOfLayerData));
 
   const renderLayerList = useCallback(() => {
     return (
       <LayerList
         layerList={arrayOfLayerData.map((layer) => ({
-          layerName: layer.layerName ?? '',
-          layerPath: layer.layerPath,
-          numOffeatures: layer.features?.length ?? 0,
-          layerFeatures: getFeaturesOfLayer(layer),
-          tooltip: `${layer.layerName}, ${getFeaturesOfLayer(layer)}`,
+          layerName: layer?.layerName ?? '',
+          layerPath: layer?.layerPath,
+          numOffeatures: layer?.features?.length ?? 0,
+          layerFeatures: getFeaturesOfLayer(layer!),
+          tooltip: `${layer?.layerName}, ${getFeaturesOfLayer(layer!)}`,
+          layerFlags: layer?.layerFlags,
         }))}
         isEnlargeDataTable={isEnlargeDataTable}
-        selectedLayerIndex={arrayOfLayerData.findIndex((layer) => layer.layerPath === layerDataInfo?.layerPath)}
+        selectedLayerIndex={selectedLayerIndex}
         handleListItemClick={(_layer, index: number) => {
           handleLayerChange(arrayOfLayerData[index]);
         }}
@@ -219,7 +258,12 @@ export function Detailspanel(): JSX.Element {
                     </Box>
                   </Grid>
                 </Grid>
-                <FeatureInfo features={layerDataInfo?.features} currentFeatureIndex={currentFeatureIndex} />
+                {layerDataInfo?.features?.length !== 0 ? (
+                  <FeatureInfo features={layerDataInfo?.features} currentFeatureIndex={currentFeatureIndex} />
+                ) : (
+                  <div style={{ paddingLeft: '21px' }}>There is no feature in this layer.</div>
+                )}
+                {/* <FeatureInfo features={layerDataInfo?.features} currentFeatureIndex={currentFeatureIndex} /> */}
               </Box>
             </ResponsiveGrid.Right>
           </ResponsiveGrid.Root>

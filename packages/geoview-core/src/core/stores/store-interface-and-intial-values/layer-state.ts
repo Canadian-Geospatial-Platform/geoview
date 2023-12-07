@@ -240,7 +240,7 @@ function findLayerByPath(layers: TypeLegendLayer[], layerPath: string): TypeLege
     if (layerPath === l.layerPath) {
       return l;
     }
-    if (layerPath.startsWith(l.layerPath) && l.children?.length > 0) {
+    if (layerPath?.startsWith(l.layerPath) && l.children?.length > 0) {
       const result: TypeLegendLayer | undefined = findLayerByPath(l.children, layerPath);
       if (result) {
         return result;

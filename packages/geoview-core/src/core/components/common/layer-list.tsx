@@ -1,6 +1,18 @@
 import { ReactNode } from 'react';
 import { useTheme } from '@mui/material/styles';
-import { Box, ChevronRightIcon, IconButton, List, ListItem, ListItemButton, ListItemIcon, Paper, Tooltip, Typography } from '@/ui';
+import {
+  Box,
+  ChevronRightIcon,
+  IconButton,
+  List,
+  ListItem,
+  ListItemButton,
+  ListItemIcon,
+  Paper,
+  Tooltip,
+  Typography,
+  CircularProgressBase,
+} from '@/ui';
 import { getSxClasses } from './layer-list-style';
 import { IconStack } from '@/app';
 
@@ -10,6 +22,8 @@ export interface LayerListEntry {
   layerFeatures?: ReactNode | undefined;
   mapFilteredIcon?: ReactNode | undefined;
   tooltip?: ReactNode | undefined;
+  layerFlags?: { layerStatus: string };
+  numOffeatures?: number;
 }
 
 interface LayerListProps {
@@ -35,15 +49,27 @@ export function LayerList({ layerList, isEnlargeDataTable, selectedLayerIndex, h
     <List sx={sxClasses.list}>
       {layerList.map((layer, index) => (
         <Paper
-          sx={{ ...sxClasses.paper, border: selectedLayerIndex === index ? sxClasses.borderWithIndex : sxClasses.borderNone }}
+          sx={{
+            ...sxClasses.paper,
+            border: selectedLayerIndex === index && layer.numOffeatures !== 0 ? sxClasses.borderWithIndex : sxClasses.borderNone,
+          }}
           key={layer.layerPath}
         >
           <Tooltip title={layer.tooltip} placement="top" arrow>
             <Box>
               <ListItem disablePadding>
-                <ListItemButton selected={selectedLayerIndex === index} onClick={() => handleListItemClick(layer, index)}>
+                <ListItemButton
+                  disabled={layer.numOffeatures === 0}
+                  selected={selectedLayerIndex === index && layer.numOffeatures !== 0}
+                  onClick={() => handleListItemClick(layer, index)}
+                >
                   <ListItemIcon>
-                    <IconStack layerPath={layer.layerPath} />
+                    {/* // TODO line below might need to be reviewd related to getting layer status correctly  */}
+                    {layer.layerFlags?.layerStatus === 'loading' ? (
+                      <CircularProgressBase size={20} />
+                    ) : (
+                      <IconStack layerPath={layer.layerPath} />
+                    )}
                   </ListItemIcon>
                   <Box sx={sxClasses.listPrimaryText}>
                     <Typography className="layerTitle">{layer.layerName}</Typography>

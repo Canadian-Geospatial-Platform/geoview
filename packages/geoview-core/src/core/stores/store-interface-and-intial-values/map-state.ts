@@ -313,7 +313,7 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
                 ? []
                 : get().mapState.selectedFeatures.filter(
                     (featureInfoEntry: TypeFeatureInfoEntry) =>
-                      (featureInfoEntry.geometry as TypeGeometry).ol_uid !== (feature.geometry as TypeGeometry).ol_uid
+                      (featureInfoEntry.geometry as TypeGeometry).ol_uid !== (feature?.geometry as TypeGeometry)?.ol_uid
                   ),
           },
         });

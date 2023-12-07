@@ -246,7 +246,7 @@ export class FeatureHighlight {
    * @param {TypeFeatureInfoEntry} feature the feature to highlight
    */
   selectFeature(feature: TypeFeatureInfoEntry) {
-    const geometry = feature.geometry!.getGeometry();
+    const geometry = feature?.geometry!.getGeometry();
     if (geometry instanceof Polygon) {
       this.animatePolygon(feature);
     } else if (geometry instanceof LineString || geometry instanceof MultiLineString) {

@@ -18,7 +18,8 @@ import { XYZ } from 'ol/source';
 import { NorthArrow, NorthPoleFlag } from '@/core/components/north-arrow/north-arrow';
 import { Crosshair } from '@/core/components/crosshair/crosshair';
 import { OverviewMap } from '@/core/components/overview-map/overview-map';
-import { ClickMarker } from '@/core/components/click-marker/click-marker';
+// TODO: Repair commented line below, needs to fix click marker
+// import { ClickMarker } from '@/core/components/click-marker/click-marker';
 import { HoverTooltip } from '@/core/components/hover-tooltip/hover-tooltip';
 
 import { TypeBasemapLayer, api } from '@/app';
@@ -208,7 +209,8 @@ export function Map(): JSX.Element {
           {northArrow && <NorthArrow />}
           <NorthPoleFlag />
           <Crosshair />
-          <ClickMarker />
+          {/* // TODO: Repair commented out line below, needs to fix click marker */}
+          {/* <ClickMarker /> */}
           <HoverTooltip />
           {deviceSizeMedUp && overviewMap && overviewBaseMap && <OverviewMap />}
         </>
