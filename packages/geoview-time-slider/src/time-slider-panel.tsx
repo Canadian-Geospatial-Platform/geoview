@@ -5,6 +5,7 @@ import { getSxClasses } from './time-slider-style';
 import { TimeSlider } from './time-slider';
 
 interface TypeTimeSliderProps {
+  configObj: unknown;
   mapId: string;
 }
 
@@ -29,7 +30,7 @@ const { cgpv } = window as TypeWindow;
  * @returns {JSX.Element} the time slider tab
  */
 export function TimeSliderPanel(props: TypeTimeSliderProps): JSX.Element {
-  const { mapId } = props;
+  const { configObj, mapId } = props;
   const { react, ui, useTranslation } = cgpv;
   const { useCallback, useState, useEffect } = react;
   const { Box } = ui.elements;
@@ -109,12 +110,12 @@ export function TimeSliderPanel(props: TypeTimeSliderProps): JSX.Element {
           </Box>
         </ResponsiveGrid.Right>
       </ResponsiveGrid.Root>
-      <ResponsiveGrid.Root>
+      <ResponsiveGrid.Root sx={{ mt: 8 }}>
         <ResponsiveGrid.Left isLayersPanelVisible={isLayersPanelVisible} isEnlargeDataTable={isEnlargeDataTable}>
           {renderLayerList()}
         </ResponsiveGrid.Left>
         <ResponsiveGrid.Right isEnlargeDataTable={isEnlargeDataTable} isLayersPanelVisible={isLayersPanelVisible}>
-          {selectedLayerPath && <TimeSlider mapId={mapId} layerPath={selectedLayerPath} key={selectedLayerPath} />}
+          {selectedLayerPath && <TimeSlider config={configObj} mapId={mapId} layerPath={selectedLayerPath} key={selectedLayerPath} />}
         </ResponsiveGrid.Right>
       </ResponsiveGrid.Root>
     </Box>
