@@ -211,13 +211,13 @@ export function SingleLayer({ isDragging, depth, layer, setIsLayersListPanelVisi
   }
 
   function getContainerClass() {
-    let result: string[] = ["layerItemContainer", layer.layerStatus ?? ''];
+    let result: string[] = ['layerItemContainer', layer.layerStatus ?? ''];
 
-    if(layerIsSelected) {
+    if (layerIsSelected) {
       result.push('selectedLayer');
     }
 
-    if(isDragging) {
+    if (isDragging) {
       result.push('dragging');
     }
 
