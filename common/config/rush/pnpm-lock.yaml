@@ -321,53 +321,6 @@ importers:
       webpack-dev-server: 4.15.1_xufw7vsm4hgw2efzchq5tzqpge
       webpack-merge: 5.10.0
 
-  ../../packages/geoview-details-panel:
-    specifiers:
-      '@babel/core': ^7.17.0
-      '@babel/eslint-parser': ^7.17.0
-      '@babel/runtime': ^7.17.0
-      '@types/react': ^18.2.0
-      '@types/react-dom': ^18.2.0
-      '@typescript-eslint/eslint-plugin': ^5.10.2
-      '@typescript-eslint/parser': ^5.10.2
-      eslint: ^8.8.0
-      eslint-config-airbnb: ^19.0.4
-      eslint-config-prettier: ^8.3.0
-      eslint-plugin-import: ^2.25.4
-      eslint-plugin-jest: ^26.0.0
-      eslint-plugin-jsx-a11y: ^6.5.1
-      eslint-plugin-prettier: ^4.0.0
-      eslint-plugin-react: ^7.28.0
-      eslint-plugin-react-hooks: ^4.3.0
-      geoview-core: workspace:~0.1.0
-      prettier: ^2.6.0
-      react: ^18.2.0
-      react-dom: ^18.2.0
-      typescript: ^4.5.5
-    dependencies:
-      geoview-core: link:../geoview-core
-    devDependencies:
-      '@babel/core': 7.23.5
-      '@babel/eslint-parser': 7.23.3_oqiedczmxzk7oajf4yu3k57bim
-      '@babel/runtime': 7.23.5
-      '@types/react': 18.2.39
-      '@types/react-dom': 18.2.17
-      '@typescript-eslint/eslint-plugin': 5.62.0_mnedyn4jnvusybp6vtysly27t4
-      '@typescript-eslint/parser': 5.62.0_tpmd5btwisapvfle77wdvjenui
-      eslint: 8.54.0
-      eslint-config-airbnb: 19.0.4_col47ebdyca3744buifmak4urq
-      eslint-config-prettier: 8.10.0_eslint@8.54.0
-      eslint-plugin-import: 2.29.0_yz4cpurkeqz3bobzoou4je5mpa
-      eslint-plugin-jest: 26.9.0_6ckfwd7j7qkrrkpcmfmvbbmd54
-      eslint-plugin-jsx-a11y: 6.8.0_eslint@8.54.0
-      eslint-plugin-prettier: 4.2.1_gpykmyejmlalemimawo4xcptki
-      eslint-plugin-react: 7.33.2_eslint@8.54.0
-      eslint-plugin-react-hooks: 4.6.0_eslint@8.54.0
-      prettier: 2.8.8
-      react: 18.2.0
-      react-dom: 18.2.0_react@18.2.0
-      typescript: 4.9.5
-
   ../../packages/geoview-footer-panel:
     specifiers:
       '@babel/core': ^7.17.0
@@ -443,6 +396,7 @@ importers:
       react-dom: ^18.2.0
       typescript: ^4.5.5
     dependencies:
+      '@mui/material': 5.14.19_dkfbrx5dbnqck2dtpdwvtytcpu
       geochart: github.com/Canadian-Geospatial-Platform/geochart/7348c5c0778df4fd346fba293e77ce4410900c98_@types+react@18.2.39
       geoview-core: link:../geoview-core
       lodash: 4.17.21
