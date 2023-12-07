@@ -5,7 +5,6 @@ import {
   toJsonObject,
   TypePluginOptions,
   TypeButtonPanel,
-  getLocalizedValue,
   TypeJsonObject,
   AnySchemaObject,
 } from 'geoview-core';
