@@ -134,21 +134,21 @@ export class XYZTiles extends AbstractGeoViewRaster {
    */
   protected validateListOfLayerEntryConfig(listOfLayerEntryConfig: TypeListOfLayerEntryConfig) {
     this.changeLayerPhase('validateListOfLayerEntryConfig');
-    listOfLayerEntryConfig.forEach((layerEntryConfig: TypeLayerEntryConfig) => {
-      const layerPath = Layer.getLayerPath(layerEntryConfig);
-      if (layerEntryIsGroupLayer(layerEntryConfig)) {
-        this.validateListOfLayerEntryConfig(layerEntryConfig.listOfLayerEntryConfig!);
-        if (!layerEntryConfig.listOfLayerEntryConfig.length) {
+    listOfLayerEntryConfig.forEach((layerConfig: TypeLayerEntryConfig) => {
+      const layerPath = Layer.getLayerPath(layerConfig);
+      if (layerEntryIsGroupLayer(layerConfig)) {
+        this.validateListOfLayerEntryConfig(layerConfig.listOfLayerEntryConfig!);
+        if (!layerConfig.listOfLayerEntryConfig.length) {
           this.layerLoadError.push({
             layer: layerPath,
             consoleMessage: `Empty layer group (mapId:  ${this.mapId}, layerPath: ${layerPath})`,
           });
-          this.changeLayerStatus('error', layerEntryConfig);
+          this.changeLayerStatus('error', layerConfig);
           return;
         }
       }
 
-      this.changeLayerStatus('loading', layerEntryConfig);
+      this.changeLayerStatus('loading', layerConfig);
 
       // When no metadata are provided, all layers are considered valid.
       if (!this.metadata) return;
@@ -157,13 +157,13 @@ export class XYZTiles extends AbstractGeoViewRaster {
       // you can define them in the configuration section.
       if (Array.isArray(this.metadata?.listOfLayerEntryConfig)) {
         const metadataLayerList = Cast<TypeLayerEntryConfig[]>(this.metadata?.listOfLayerEntryConfig);
-        const foundEntry = metadataLayerList.find((layerMetadata) => layerMetadata.layerId === layerEntryConfig.layerId);
+        const foundEntry = metadataLayerList.find((layerMetadata) => layerMetadata.layerId === layerConfig.layerId);
         if (!foundEntry) {
           this.layerLoadError.push({
             layer: layerPath,
             consoleMessage: `XYZ layer not found (mapId:  ${this.mapId}, layerPath: ${layerPath})`,
           });
-          this.changeLayerStatus('error', layerEntryConfig);
+          this.changeLayerStatus('error', layerConfig);
           return;
         }
         return;
@@ -176,47 +176,45 @@ export class XYZTiles extends AbstractGeoViewRaster {
   }
 
   /** ****************************************************************************************************************************
-   * This method creates a GeoView XYZTiles layer using the definition provided in the layerEntryConfig parameter.
+   * This method creates a GeoView XYZTiles layer using the definition provided in the layerConfig parameter.
    *
-   * @param {TypeXYZTilesLayerEntryConfig} layerEntryConfig Information needed to create the GeoView layer.
+   * @param {TypeXYZTilesLayerEntryConfig} layerConfig Information needed to create the GeoView layer.
    *
    * @returns {TypeBaseRasterLayer} The GeoView raster layer that has been created.
    */
-  processOneLayerEntry(layerEntryConfig: TypeXYZTilesLayerEntryConfig): Promise<TypeBaseRasterLayer | null> {
+  processOneLayerEntry(layerConfig: TypeXYZTilesLayerEntryConfig): Promise<TypeBaseRasterLayer | null> {
     const promisedVectorLayer = new Promise<TypeBaseRasterLayer | null>((resolve) => {
-      this.changeLayerPhase('processOneLayerEntry', layerEntryConfig);
+      this.changeLayerPhase('processOneLayerEntry', layerConfig);
       const sourceOptions: SourceOptions = {
-        url: getLocalizedValue(layerEntryConfig.source.dataAccessPath, this.mapId),
+        url: getLocalizedValue(layerConfig.source.dataAccessPath, this.mapId),
       };
-      if (layerEntryConfig.source.crossOrigin) sourceOptions.crossOrigin = layerEntryConfig.source.crossOrigin;
-      if (layerEntryConfig.source.projection) sourceOptions.projection = `EPSG:${layerEntryConfig.source.projection}`;
-      if (layerEntryConfig.source.tileGrid) {
+      if (layerConfig.source.crossOrigin) sourceOptions.crossOrigin = layerConfig.source.crossOrigin;
+      if (layerConfig.source.projection) sourceOptions.projection = `EPSG:${layerConfig.source.projection}`;
+      if (layerConfig.source.tileGrid) {
         const tileGridOptions: TileGridOptions = {
-          origin: layerEntryConfig.source.tileGrid?.origin,
-          resolutions: layerEntryConfig.source.tileGrid?.resolutions as number[],
+          origin: layerConfig.source.tileGrid?.origin,
+          resolutions: layerConfig.source.tileGrid?.resolutions as number[],
         };
-        if (layerEntryConfig.source.tileGrid?.tileSize) tileGridOptions.tileSize = layerEntryConfig.source.tileGrid?.tileSize;
-        if (layerEntryConfig.source.tileGrid?.extent) tileGridOptions.extent = layerEntryConfig.source.tileGrid?.extent;
+        if (layerConfig.source.tileGrid?.tileSize) tileGridOptions.tileSize = layerConfig.source.tileGrid?.tileSize;
+        if (layerConfig.source.tileGrid?.extent) tileGridOptions.extent = layerConfig.source.tileGrid?.extent;
         sourceOptions.tileGrid = new TileGrid(tileGridOptions);
       }
 
       const tileLayerOptions: TileOptions<XYZ> = { source: new XYZ(sourceOptions) };
-      // layerEntryConfig.initialSettings cannot be undefined because config-validation set it to {} if it is undefined.
-      if (layerEntryConfig.initialSettings?.className !== undefined)
-        tileLayerOptions.className = layerEntryConfig.initialSettings?.className;
-      if (layerEntryConfig.initialSettings?.extent !== undefined) tileLayerOptions.extent = layerEntryConfig.initialSettings?.extent;
-      if (layerEntryConfig.initialSettings?.maxZoom !== undefined) tileLayerOptions.maxZoom = layerEntryConfig.initialSettings?.maxZoom;
-      if (layerEntryConfig.initialSettings?.minZoom !== undefined) tileLayerOptions.minZoom = layerEntryConfig.initialSettings?.minZoom;
-      if (layerEntryConfig.initialSettings?.opacity !== undefined) tileLayerOptions.opacity = layerEntryConfig.initialSettings?.opacity;
-      if (layerEntryConfig.initialSettings?.visible !== undefined)
-        tileLayerOptions.visible =
-          layerEntryConfig.initialSettings?.visible === 'yes' || layerEntryConfig.initialSettings?.visible === 'always';
+      // layerConfig.initialSettings cannot be undefined because config-validation set it to {} if it is undefined.
+      if (layerConfig.initialSettings?.className !== undefined) tileLayerOptions.className = layerConfig.initialSettings?.className;
+      if (layerConfig.initialSettings?.extent !== undefined) tileLayerOptions.extent = layerConfig.initialSettings?.extent;
+      if (layerConfig.initialSettings?.maxZoom !== undefined) tileLayerOptions.maxZoom = layerConfig.initialSettings?.maxZoom;
+      if (layerConfig.initialSettings?.minZoom !== undefined) tileLayerOptions.minZoom = layerConfig.initialSettings?.minZoom;
+      if (layerConfig.initialSettings?.opacity !== undefined) tileLayerOptions.opacity = layerConfig.initialSettings?.opacity;
+      if (layerConfig.initialSettings?.visible !== undefined)
+        tileLayerOptions.visible = layerConfig.initialSettings?.visible === 'yes' || layerConfig.initialSettings?.visible === 'always';
 
-      layerEntryConfig.olLayer = new TileLayer(tileLayerOptions);
+      layerConfig.olLayer = new TileLayer(tileLayerOptions);
 
-      super.addLoadendListener(layerEntryConfig, 'tile');
+      super.addLoadendListener(layerConfig, 'tile');
 
-      resolve(layerEntryConfig.olLayer);
+      resolve(layerConfig.olLayer);
     });
     return promisedVectorLayer;
   }
@@ -225,25 +223,25 @@ export class XYZTiles extends AbstractGeoViewRaster {
    * This method is used to process the layer's metadata. It will fill the empty fields of the layer's configuration (renderer,
    * initial settings, fields and aliases).
    *
-   * @param {TypeVectorLaTypeLayerEntryConfigyerEntryConfig} layerEntryConfig The layer entry configuration to process.
+   * @param {TypeVectorLaTypeLayerEntryConfigyerEntryConfig} layerConfig The layer entry configuration to process.
    *
    * @returns {Promise<void>} A promise that the vector layer configuration has its metadata processed.
    */
-  protected processLayerMetadata(layerEntryConfig: TypeLayerEntryConfig): Promise<void> {
+  protected processLayerMetadata(layerConfig: TypeLayerEntryConfig): Promise<void> {
     const promiseOfExecution = new Promise<void>((resolve) => {
       if (!this.metadata) resolve();
       else {
         const metadataLayerConfigFound = Cast<TypeXYZTilesLayerEntryConfig[]>(this.metadata?.listOfLayerEntryConfig).find(
-          (metadataLayerConfig) => metadataLayerConfig.layerId === layerEntryConfig.layerId
+          (metadataLayerConfig) => metadataLayerConfig.layerId === layerConfig.layerId
         );
         // metadataLayerConfigFound can not be undefined because we have already validated the config exist
-        this.layerMetadata[Layer.getLayerPath(layerEntryConfig)] = toJsonObject(metadataLayerConfigFound);
-        layerEntryConfig.source = defaultsDeep(layerEntryConfig.source, metadataLayerConfigFound!.source);
-        layerEntryConfig.initialSettings = defaultsDeep(layerEntryConfig.initialSettings, metadataLayerConfigFound!.initialSettings);
+        this.layerMetadata[Layer.getLayerPath(layerConfig)] = toJsonObject(metadataLayerConfigFound);
+        layerConfig.source = defaultsDeep(layerConfig.source, metadataLayerConfigFound!.source);
+        layerConfig.initialSettings = defaultsDeep(layerConfig.initialSettings, metadataLayerConfigFound!.initialSettings);
 
-        if (layerEntryConfig.initialSettings?.extent)
-          layerEntryConfig.initialSettings.extent = transformExtent(
-            layerEntryConfig.initialSettings.extent,
+        if (layerConfig.initialSettings?.extent)
+          layerConfig.initialSettings.extent = transformExtent(
+            layerConfig.initialSettings.extent,
             'EPSG:4326',
             `EPSG:${MapEventProcessor.getMapState(this.mapId).currentProjection}`
           );

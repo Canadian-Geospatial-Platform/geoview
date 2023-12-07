@@ -564,17 +564,17 @@ function processClassBreakRenderer(styleId: string, EsriRenderer: EsriClassBreak
  * Get GeoView style from Esri renderer.
  *
  * @param {string} mapId The map identifier of the ESRI layer.
- * @param {TypeLayerEntryConfig} layerEntryConfig The layer configuration object.
+ * @param {TypeLayerEntryConfig} layerConfig The layer configuration object.
  * @param {EsriBaseRenderer} renderer The ESRI renderer to convert.
  *
  * @returns {TypeStyleConfig | undefined} The Geoview style or undefined if it can not be created.
  */
 export function getStyleFromEsriRenderer(
   mapId: string,
-  layerEntryConfig: TypeLayerEntryConfig,
+  layerConfig: TypeLayerEntryConfig,
   renderer: EsriBaseRenderer
 ): TypeStyleConfig | undefined {
-  const id = `${mapId}/${Layer.getLayerPath(layerEntryConfig)}`;
+  const id = `${mapId}/${Layer.getLayerPath(layerConfig)}`;
   if (esriRendererIsUniqueValue(renderer)) return processUniqueValueRenderer(id, renderer);
   if (esriRendererIsSimple(renderer)) return processSimpleRenderer(id, renderer);
   if (esriRendererIsClassBreaks(renderer)) return processClassBreakRenderer(id, renderer);

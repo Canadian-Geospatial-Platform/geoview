@@ -112,19 +112,19 @@
 
 // packages\geoview-core\src\core\utils\config\config-validation.ts - processLayerEntryConfig
 // Set default value for clusters on vector layers
-// if (layerEntryIsVector(layerEntryConfig) && layerEntryConfig.source!.cluster?.enable) {
-//   if (!layerEntryConfig.source!.cluster.settings)
-//     layerEntryConfig.source!.cluster.settings = {
+// if (layerEntryIsVector(layerConfig) && layerConfig.source!.cluster?.enable) {
+//   if (!layerConfig.source!.cluster.settings)
+//     layerConfig.source!.cluster.settings = {
 //       type: 'simpleSymbol',
 //       symbol: 'circle',
 //       stroke: { lineStyle: 'solid', width: 1 },
 //     };
-//   if (!layerEntryConfig.source!.cluster.settings.type) layerEntryConfig.source!.cluster.settings.type = 'simpleSymbol';
-//   if (!layerEntryConfig.source!.cluster.settings.symbol) layerEntryConfig.source!.cluster.settings.symbol = 'circle';
-//   if (!layerEntryConfig.source!.cluster.settings.stroke) layerEntryConfig.source!.cluster.settings.stroke = {};
-//   if (!layerEntryConfig.source!.cluster.settings.stroke.lineStyle)
-//     layerEntryConfig.source!.cluster.settings.stroke.lineStyle = 'solid';
-//   if (!layerEntryConfig.source!.cluster.settings.stroke.width) layerEntryConfig.source!.cluster.settings.stroke.width = 1;
+//   if (!layerConfig.source!.cluster.settings.type) layerConfig.source!.cluster.settings.type = 'simpleSymbol';
+//   if (!layerConfig.source!.cluster.settings.symbol) layerConfig.source!.cluster.settings.symbol = 'circle';
+//   if (!layerConfig.source!.cluster.settings.stroke) layerConfig.source!.cluster.settings.stroke = {};
+//   if (!layerConfig.source!.cluster.settings.stroke.lineStyle)
+//     layerConfig.source!.cluster.settings.stroke.lineStyle = 'solid';
+//   if (!layerConfig.source!.cluster.settings.stroke.width) layerConfig.source!.cluster.settings.stroke.width = 1;
 // }
 
 // packages\geoview-core\src\geo\layer\layer.ts - setLayerZIndices
@@ -158,25 +158,25 @@
 //     unclusteredLayerConfig.source!.cluster!.settings;
 // }
 
-// if (layerEntryConfig.entryType === 'vector' && (layerEntryConfig.source as TypeBaseSourceVectorInitialConfig)?.cluster?.enable) {
-//   const unclusteredLayerConfig = cloneDeep(layerEntryConfig) as TypeVectorLayerEntryConfig;
-//   unclusteredLayerConfig.layerId = `${layerEntryConfig.layerId}-unclustered`;
+// if (layerConfig.entryType === 'vector' && (layerConfig.source as TypeBaseSourceVectorInitialConfig)?.cluster?.enable) {
+//   const unclusteredLayerConfig = cloneDeep(layerConfig) as TypeVectorLayerEntryConfig;
+//   unclusteredLayerConfig.layerId = `${layerConfig.layerId}-unclustered`;
 //   unclusteredLayerConfig.source!.cluster!.enable = false;
 //   api.maps[this.mapId].layer.registerLayerConfig(unclusteredLayerConfig);
 //   promiseOfLayerCreated.push(this.processOneLayerEntry(unclusteredLayerConfig as TypeBaseLayerEntryConfig));
-//   (layerEntryConfig.source as TypeBaseSourceVectorInitialConfig)!.cluster!.settings =
+//   (layerConfig.source as TypeBaseSourceVectorInitialConfig)!.cluster!.settings =
 //     unclusteredLayerConfig.source!.cluster!.settings;
 // }
 
 // packages\geoview-core\src\geo\layer\geoview-layers\vector\abstract-geoview-vector.ts
 // createVectorLayer(
-//   layerEntryConfig: TypeVectorLayerEntryConfig,
+//   layerConfig: TypeVectorLayerEntryConfig,
 //   vectorSource: VectorSource<Feature<Geometry>>
 // ): VectorLayer<VectorSource> {
-//   layerEntryConfig.layerPhase = 'createVectorLayer';
+//   layerConfig.layerPhase = 'createVectorLayer';
 //   let configSource: TypeBaseSourceVectorInitialConfig = {};
-//   if (layerEntryConfig.source !== undefined) {
-//     configSource = layerEntryConfig.source as TypeBaseSourceVectorInitialConfig;
+//   if (layerConfig.source !== undefined) {
+//     configSource = layerConfig.source as TypeBaseSourceVectorInitialConfig;
 //     if (configSource.cluster === undefined) {
 //       configSource.cluster = { enable: false };
 //     }
@@ -185,7 +185,7 @@
 //   }
 
 //   const layerOptions: VectorLayerOptions<VectorSource> = {
-//     properties: { layerEntryConfig },
+//     properties: { layerConfig },
 //     source: configSource.cluster!.enable
 //       ? new Cluster({
 //           source: vectorSource as VectorSource<Feature<Geometry>>,
@@ -205,44 +205,44 @@
 //       const { geoviewRenderer } = api.maps[this.mapId];
 
 //       if (configSource.cluster!.enable) {
-//         return geoviewRenderer.getClusterStyle(layerEntryConfig, feature as Feature<Geometry>);
+//         return geoviewRenderer.getClusterStyle(layerConfig, feature as Feature<Geometry>);
 //       }
 
-//       if ('style' in layerEntryConfig) {
-//         return geoviewRenderer.getFeatureStyle(feature as Feature<Geometry>, layerEntryConfig);
+//       if ('style' in layerConfig) {
+//         return geoviewRenderer.getFeatureStyle(feature as Feature<Geometry>, layerConfig);
 //       }
 
 //       return undefined;
 //     },
 //   };
 
-//   layerEntryConfig.olLayer = new VectorLayer(layerOptions);
+//   layerConfig.olLayer = new VectorLayer(layerOptions);
 
-//   if (layerEntryConfig.initialSettings?.extent !== undefined) this.setExtent(layerEntryConfig.initialSettings?.extent, layerEntryConfig);
-//   if (layerEntryConfig.initialSettings?.maxZoom !== undefined)
-//     this.setMaxZoom(layerEntryConfig.initialSettings?.maxZoom, layerEntryConfig);
-//   if (layerEntryConfig.initialSettings?.minZoom !== undefined)
-//     this.setMinZoom(layerEntryConfig.initialSettings?.minZoom, layerEntryConfig);
-//   if (layerEntryConfig.initialSettings?.opacity !== undefined)
-//     this.setOpacity(layerEntryConfig.initialSettings?.opacity, layerEntryConfig);
-//   if (layerEntryConfig.initialSettings?.visible !== undefined)
+//   if (layerConfig.initialSettings?.extent !== undefined) this.setExtent(layerConfig.initialSettings?.extent, layerConfig);
+//   if (layerConfig.initialSettings?.maxZoom !== undefined)
+//     this.setMaxZoom(layerConfig.initialSettings?.maxZoom, layerConfig);
+//   if (layerConfig.initialSettings?.minZoom !== undefined)
+//     this.setMinZoom(layerConfig.initialSettings?.minZoom, layerConfig);
+//   if (layerConfig.initialSettings?.opacity !== undefined)
+//     this.setOpacity(layerConfig.initialSettings?.opacity, layerConfig);
+//   if (layerConfig.initialSettings?.visible !== undefined)
 //     this.setVisible(
-//       !!(layerEntryConfig.initialSettings?.visible === 'yes' || layerEntryConfig.initialSettings?.visible === 'always'),
-//       layerEntryConfig
+//       !!(layerConfig.initialSettings?.visible === 'yes' || layerConfig.initialSettings?.visible === 'always'),
+//       layerConfig
 //     );
-//   this.applyViewFilter(layerEntryConfig, layerEntryConfig.layerFilter ? layerEntryConfig.layerFilter : '');
+//   this.applyViewFilter(layerConfig, layerConfig.layerFilter ? layerConfig.layerFilter : '');
 
-//   return layerEntryConfig.olLayer as VectorLayer<VectorSource>;
+//   return layerConfig.olLayer as VectorLayer<VectorSource>;
 // }
 
 // applyViewFilter(layerPathOrConfig: string | TypeLayerEntryConfig, filter = '', CombineLegendFilter = true, checkCluster = true) {
-//   const layerEntryConfig = (
+//   const layerConfig = (
 //     typeof layerPathOrConfig === 'string' ? this.getLayerConfig(layerPathOrConfig) : layerPathOrConfig
 //   ) as TypeVectorLayerEntryConfig;
-//   if (layerEntryConfig) {
-//     const layerPath = layerEntryConfig.geoviewRootLayer
-//       ? `${layerEntryConfig.geoviewRootLayer.geoviewLayerId}/${String(layerEntryConfig.layerId).replace('-unclustered', '')}`
-//       : String(layerEntryConfig.layerId).replace('-unclustered', '');
+//   if (layerConfig) {
+//     const layerPath = layerConfig.geoviewRootLayer
+//       ? `${layerConfig.geoviewRootLayer.geoviewLayerId}/${String(layerConfig.layerId).replace('-unclustered', '')}`
+//       : String(layerConfig.layerId).replace('-unclustered', '');
 //     const unclusteredLayerPath = `${layerPath}-unclustered`;
 //     const cluster = !!api.maps[this.mapId].layer.registeredLayers[unclusteredLayerPath];
 //     if (cluster && checkCluster) {
@@ -262,14 +262,14 @@
 //     }
 
 // packages\geoview-core\src\geo\layer\geoview-layers\vector\geopackage.ts - processOneGeopackage
-// protected processOneGeopackage(layerEntryConfig: TypeBaseLayerEntryConfig, layerGroup?: LayerGroup): Promise<BaseLayer | null> {
+// protected processOneGeopackage(layerConfig: TypeBaseLayerEntryConfig, layerGroup?: LayerGroup): Promise<BaseLayer | null> {
 //   const promisedLayers = new Promise<BaseLayer | LayerGroup | null>((resolve) => {
 //     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-//     this.extractGeopackageData(layerEntryConfig).then(([layers, slds]) => {
+//     this.extractGeopackageData(layerConfig).then(([layers, slds]) => {
 //       if (layers.length === 1) {
-//         if ((layerEntryConfig.source as TypeBaseSourceVectorInitialConfig)?.cluster?.enable) {
-//           const unclusteredLayerConfig = cloneDeep(layerEntryConfig) as TypeVectorLayerEntryConfig;
-//           unclusteredLayerConfig.layerId = `${layerEntryConfig.layerId}-unclustered`;
+//         if ((layerConfig.source as TypeBaseSourceVectorInitialConfig)?.cluster?.enable) {
+//           const unclusteredLayerConfig = cloneDeep(layerConfig) as TypeVectorLayerEntryConfig;
+//           unclusteredLayerConfig.layerId = `${layerConfig.layerId}-unclustered`;
 //           unclusteredLayerConfig.source!.cluster!.enable = false;
 
 //           this.processOneGeopackageLayer(unclusteredLayerConfig as TypeBaseLayerEntryConfig, layers[0], slds).then((baseLayer) => {
@@ -281,37 +281,37 @@
 //             }
 //           });
 
-//           (layerEntryConfig.source as TypeBaseSourceVectorInitialConfig)!.cluster!.settings =
+//           (layerConfig.source as TypeBaseSourceVectorInitialConfig)!.cluster!.settings =
 //             unclusteredLayerConfig.source!.cluster!.settings;
 //         }
 
-//         this.processOneGeopackageLayer(layerEntryConfig, layers[0], slds).then((baseLayer) => {
+//         this.processOneGeopackageLayer(layerConfig, layers[0], slds).then((baseLayer) => {
 //           if (baseLayer) {
-//             this.changeLayerStatus('processed', layerEntryConfig);
+//             this.changeLayerStatus('processed', layerConfig);
 //             if (layerGroup) layerGroup.getLayers().push(baseLayer);
 //             resolve(layerGroup || baseLayer);
 //           } else {
 //             this.layerLoadError.push({
-//               layer: Layer.getLayerPath(layerEntryConfig),
-//               consoleMessage: `Unable to create layer ${Layer.getLayerPath(layerEntryConfig)} on map ${this.mapId}`,
+//               layer: Layer.getLayerPath(layerConfig),
+//               consoleMessage: `Unable to create layer ${Layer.getLayerPath(layerConfig)} on map ${this.mapId}`,
 //             });
-//             this.changeLayerStatus('error', layerEntryConfig);
+//             this.changeLayerStatus('error', layerConfig);
 //             resolve(null);
 //           }
 //         });
 //       } else {
-//         layerEntryConfig.entryType = 'group';
-//         (layerEntryConfig as TypeLayerEntryConfig).listOfLayerEntryConfig = [];
-//         const newLayerGroup = this.createLayerGroup(layerEntryConfig);
+//         layerConfig.entryType = 'group';
+//         (layerConfig as TypeLayerEntryConfig).listOfLayerEntryConfig = [];
+//         const newLayerGroup = this.createLayerGroup(layerConfig);
 //         for (let i = 0; i < layers.length; i++) {
-//           const newLayerEntryConfig = cloneDeep(layerEntryConfig) as TypeBaseLayerEntryConfig;
+//           const newLayerEntryConfig = cloneDeep(layerConfig) as TypeBaseLayerEntryConfig;
 //           newLayerEntryConfig.layerId = layers[i].name;
 //           newLayerEntryConfig.layerName = { en: layers[i].name, fr: layers[i].name };
 //           newLayerEntryConfig.entryType = 'vector';
-//           newLayerEntryConfig.parentLayerConfig = Cast<TypeLayerGroupEntryConfig>(layerEntryConfig);
+//           newLayerEntryConfig.parentLayerConfig = Cast<TypeLayerGroupEntryConfig>(layerConfig);
 //           if ((newLayerEntryConfig.source as TypeBaseSourceVectorInitialConfig)?.cluster?.enable) {
 //             const unclusteredLayerConfig = cloneDeep(newLayerEntryConfig) as TypeVectorLayerEntryConfig;
-//             unclusteredLayerConfig.layerId = `${layerEntryConfig.layerId}-unclustered`;
+//             unclusteredLayerConfig.layerId = `${layerConfig.layerId}-unclustered`;
 //             unclusteredLayerConfig.source!.cluster!.enable = false;
 
 //             this.processOneGeopackageLayer(unclusteredLayerConfig as TypeBaseLayerEntryConfig, layers[0], slds).then((baseLayer) => {
@@ -328,13 +328,13 @@
 
 //           this.processOneGeopackageLayer(newLayerEntryConfig, layers[i], slds).then((baseLayer) => {
 //             if (baseLayer) {
-//               (layerEntryConfig as unknown as TypeLayerGroupEntryConfig).listOfLayerEntryConfig!.push(newLayerEntryConfig);
+//               (layerConfig as unknown as TypeLayerGroupEntryConfig).listOfLayerEntryConfig!.push(newLayerEntryConfig);
 //               newLayerGroup.getLayers().push(baseLayer);
 //               this.changeLayerStatus('processed', newLayerEntryConfig);
 //             } else {
 //               this.layerLoadError.push({
-//                 layer: Layer.getLayerPath(layerEntryConfig),
-//                 consoleMessage: `Unable to create layer ${Layer.getLayerPath(layerEntryConfig)} on map ${this.mapId}`,
+//                 layer: Layer.getLayerPath(layerConfig),
+//                 consoleMessage: `Unable to create layer ${Layer.getLayerPath(layerConfig)} on map ${this.mapId}`,
 //               });
 //               this.changeLayerStatus('error', newLayerEntryConfig);
 //               resolve(null);
@@ -381,17 +381,17 @@
 
 // packages\geoview-core\src\geo\renderer\geoview-renderer.ts
 // async getLegendStyles(
-//   layerEntryConfig: TypeBaseLayerEntryConfig & {
+//   layerConfig: TypeBaseLayerEntryConfig & {
 //     style: TypeStyleConfig;
 //   }
 // ): Promise<TypeVectorLayerStyles> {
 //   try {
-//     const styleConfig: TypeStyleConfig = layerEntryConfig.style;
+//     const styleConfig: TypeStyleConfig = layerConfig.style;
 //     if (!styleConfig) return {};
 
 //     const clusterCanvas =
-//       layerEntryIsVector(layerEntryConfig) && (layerEntryConfig.source as TypeBaseSourceVectorInitialConfig).cluster?.enable
-//         ? this.createPointCanvas(this.getClusterStyle(layerEntryConfig))
+//       layerEntryIsVector(layerConfig) && (layerConfig.source as TypeBaseSourceVectorInitialConfig).cluster?.enable
+//         ? this.createPointCanvas(this.getClusterStyle(layerConfig))
 //         : undefined;
 
 //     if (styleConfig.Point) {
@@ -424,23 +424,23 @@
 
 // getFeatureCanvas(
 //   feature: Feature<Geometry>,
-//   layerEntryConfig: TypeBaseLayerEntryConfig | TypeVectorTileLayerEntryConfig | TypeVectorLayerEntryConfig
+//   layerConfig: TypeBaseLayerEntryConfig | TypeVectorTileLayerEntryConfig | TypeVectorLayerEntryConfig
 // ): Promise<HTMLCanvasElement | undefined> {
 //   const promisedCanvas = new Promise<HTMLCanvasElement | undefined>((resolve) => {
 //     const geometryType = getGeometryType(feature);
-//     const { style, source } = layerEntryConfig as TypeVectorLayerEntryConfig;
+//     const { style, source } = layerConfig as TypeVectorLayerEntryConfig;
 //     // Get the style accordingly to its type and geometry.
 //     if (style![geometryType] !== undefined) {
 //       const styleSettings = style![geometryType]!;
 //       const { styleType } = styleSettings;
 //       const featureStyle = source?.cluster?.enable
-//         ? this.getClusterStyle(layerEntryConfig as TypeVectorLayerEntryConfig, feature)
+//         ? this.getClusterStyle(layerConfig as TypeVectorLayerEntryConfig, feature)
 //         : this.processStyle[styleType][geometryType].call(
 //             this,
 //             styleSettings,
 //             feature,
-//             layerEntryConfig.olLayer!.get('filterEquation'),
-//             layerEntryConfig.olLayer!.get('legendFilterIsOff')
+//             layerConfig.olLayer!.get('filterEquation'),
+//             layerConfig.olLayer!.get('legendFilterIsOff')
 //           );
 //       if (featureStyle) {
 //         if (geometryType === 'Point') {
@@ -450,7 +450,7 @@
 //               isSimpleSymbolVectorConfig((styleSettings as TypeUniqueValueStyleConfig).uniqueValueStyleInfo[0].settings)) ||
 //             (isClassBreakStyleConfig(styleSettings) &&
 //               isSimpleSymbolVectorConfig((styleSettings as TypeClassBreakStyleConfig).classBreakStyleInfo[0].settings)) ||
-//             (layerEntryConfig.source as TypeBaseSourceVectorInitialConfig).cluster?.enable
+//             (layerConfig.source as TypeBaseSourceVectorInitialConfig).cluster?.enable
 //           )
 //             resolve(this.createPointCanvas(featureStyle));
 //           else
@@ -469,15 +469,15 @@
  * This method gets the style of the cluster feature using the layer entry config. If the style does not exist, create it using
  * the default style strategy.
  *
- * @param {TypeBaseLayerEntryConfig | TypeVectorLayerEntryConfig} layerEntryConfig The layer entry config that may have a style
+ * @param {TypeBaseLayerEntryConfig | TypeVectorLayerEntryConfig} layerConfig The layer entry config that may have a style
  * configuration for the feature. If style does not exist for the geometryType, create it.
  * @param {Feature<Geometry>} feature The feature that need its style to be defined. When undefined, it's because we fetch the styles
  * for the legend.
  *
  * @returns {Style | undefined} The style applied to the feature or undefined if not found.
  */
-// getClusterStyle(layerEntryConfig: TypeVectorLayerEntryConfig, feature?: Feature<Geometry>): Style | undefined {
-//   const configSource = layerEntryConfig.source as TypeBaseSourceVectorInitialConfig;
+// getClusterStyle(layerConfig: TypeVectorLayerEntryConfig, feature?: Feature<Geometry>): Style | undefined {
+//   const configSource = layerConfig.source as TypeBaseSourceVectorInitialConfig;
 //   if (!configSource.cluster?.textColor) configSource.cluster!.textColor = '';
 
 //   const clusterSize = feature?.get('features')
@@ -493,9 +493,9 @@
 
 //   // Get the cluster point style to use when the features are clustered.
 //   if (feature === undefined || clusterSize > 1) {
-//     const styleSettings = layerEntryConfig.source!.cluster!.settings!;
+//     const styleSettings = layerConfig.source!.cluster!.settings!;
 //     if (!styleSettings.color || !styleSettings.stroke?.color) {
-//       const { style } = layerEntryConfig;
+//       const { style } = layerConfig;
 //       let geoColor: string | null = null;
 //       const geoStyle = style?.Point || style?.Polygon || style?.LineString || null;
 //       if (geoStyle) {
@@ -509,11 +509,11 @@
 //       if (!styleSettings.stroke.color) styleSettings.stroke.color = strokeColor;
 //     }
 
-//     const pointStyle = this.processClusterSymbol(layerEntryConfig, feature);
+//     const pointStyle = this.processClusterSymbol(layerConfig, feature);
 //     if (pointStyle!.getText()!.getText() !== '1') return pointStyle;
 //     let styleFound: Style | undefined;
 //     const theUniqueVisibleFeature = (feature!.get('features') as Array<Feature<Geometry>>).find((featureToTest) => {
-//       styleFound = this.getFeatureStyle(featureToTest, layerEntryConfig);
+//       styleFound = this.getFeatureStyle(featureToTest, layerConfig);
 //       return styleFound;
 //     });
 //     return styleFound;
@@ -524,7 +524,7 @@
 //     const originalFeature = clusterSize ? feature!.get('features')[0] : feature;
 
 //     // If style does not exist for the geometryType, getFeatureStyle will create it.
-//     return this.getFeatureStyle(originalFeature, layerEntryConfig);
+//     return this.getFeatureStyle(originalFeature, layerConfig);
 //   }
 
 //   return undefined;
@@ -533,14 +533,14 @@
 /** ***************************************************************************************************************************
  * Process a cluster circle symbol using the settings.
  *
- * @param {TypeBaseLayerEntryConfig | TypeVectorLayerEntryConfig} layerEntryConfig The layer configuration.
+ * @param {TypeBaseLayerEntryConfig | TypeVectorLayerEntryConfig} layerConfig The layer configuration.
  * @param {Feature<Geometry>} feature The feature that need its style to be defined. When undefined, it's because we fetch the styles
  * for the legend.
  *
  * @returns {Style | undefined} The Style created. Undefined if unable to create it.
  */
-// private processClusterSymbol(layerEntryConfig: TypeVectorLayerEntryConfig, feature?: Feature<Geometry>): Style | undefined {
-//   const { settings } = layerEntryConfig.source!.cluster!;
+// private processClusterSymbol(layerConfig: TypeVectorLayerEntryConfig, feature?: Feature<Geometry>): Style | undefined {
+//   const { settings } = layerConfig.source!.cluster!;
 //   const fillOptions: FillOptions = { color: settings!.color };
 //   const strokeOptions: StrokeOptions = this.createStrokeOptions(settings!);
 //   const circleOptions: CircleOptions = { radius: settings!.size !== undefined ? settings!.size + 10 : 14 };
@@ -551,7 +551,7 @@
 //   const text = feature
 //     ? (feature.get('features') as Array<Feature<Geometry>>)
 //         .reduce((numberOfVisibleFeature, featureToTest) => {
-//           if (this.getFeatureStyle(featureToTest, layerEntryConfig)) {
+//           if (this.getFeatureStyle(featureToTest, layerConfig)) {
 //             const geometryType = featureToTest.getGeometry()?.getType();
 //             let numberOfEmbededFeatures = 1;
 //             if (geometryType === 'MultiPoint') numberOfEmbededFeatures = (featureToTest.getGeometry() as MultiPoint).getPoints().length;
@@ -568,7 +568,7 @@
 //   if (text === '0') return undefined;
 //   const textOptions: TextOptions = { text, font: '12px sans-serif' };
 //   const textFillOptions: FillOptions = {
-//     color: layerEntryConfig.source?.cluster?.textColor !== '' ? layerEntryConfig.source!.cluster!.textColor : '#fff',
+//     color: layerConfig.source?.cluster?.textColor !== '' ? layerConfig.source!.cluster!.textColor : '#fff',
 //   };
 //   textOptions.fill = new Fill(textFillOptions);
 //   const textStrokeOptions: StrokeOptions = { color: '#000', width: 2 };
@@ -581,46 +581,46 @@
 
 // private createDefaultStyle(
 //   geometryType: TypeStyleGeometry,
-//   layerEntryConfig: TypeVectorTileLayerEntryConfig | TypeVectorLayerEntryConfig
+//   layerConfig: TypeVectorTileLayerEntryConfig | TypeVectorLayerEntryConfig
 // ): TypeStyleConfig | undefined {
-//   if (layerEntryConfig.style === undefined) layerEntryConfig.style = {};
-//   const styleId = `${this.mapId}/${Layer.getLayerPath(layerEntryConfig)}`;
-//   let label = getLocalizedValue(layerEntryConfig.layerName, this.mapId);
+//   if (layerConfig.style === undefined) layerConfig.style = {};
+//   const styleId = `${this.mapId}/${Layer.getLayerPath(layerConfig)}`;
+//   let label = getLocalizedValue(layerConfig.layerName, this.mapId);
 //   label = label !== undefined ? label : styleId;
 //   if (geometryType === 'Point') {
 //     const settings: TypeSimpleSymbolVectorConfig = {
 //       type: 'simpleSymbol',
-//       color: layerEntryConfig.source?.cluster?.settings?.color || this.getDefaultColor(0.25),
+//       color: layerConfig.source?.cluster?.settings?.color || this.getDefaultColor(0.25),
 //       stroke: {
-//         color: layerEntryConfig.source?.cluster?.settings?.stroke?.color || this.getDefaultColorAndIncrementIndex(1),
+//         color: layerConfig.source?.cluster?.settings?.stroke?.color || this.getDefaultColorAndIncrementIndex(1),
 //         lineStyle: 'solid',
 //         width: 1,
 //       },
 //       symbol: 'circle',
 //     };
 //     const styleSettings: TypeSimpleStyleConfig = { styleId, styleType: 'simple', label, settings };
-//     layerEntryConfig.style[geometryType] = styleSettings;
-//     return layerEntryConfig.style;
+//     layerConfig.style[geometryType] = styleSettings;
+//     return layerConfig.style;
 //   }
 //   if (geometryType === 'LineString') {
 //     const settings: TypeLineStringVectorConfig = {
 //       type: 'lineString',
-//       stroke: { color: layerEntryConfig.source?.cluster?.settings?.stroke?.color || this.getDefaultColorAndIncrementIndex(1) },
+//       stroke: { color: layerConfig.source?.cluster?.settings?.stroke?.color || this.getDefaultColorAndIncrementIndex(1) },
 //     };
 //     const styleSettings: TypeSimpleStyleConfig = { styleId, styleType: 'simple', label, settings };
-//     layerEntryConfig.style[geometryType] = styleSettings;
-//     return layerEntryConfig.style;
+//     layerConfig.style[geometryType] = styleSettings;
+//     return layerConfig.style;
 //   }
 //   if (geometryType === 'Polygon') {
 //     const settings: TypePolygonVectorConfig = {
 //       type: 'filledPolygon',
-//       color: layerEntryConfig.source?.cluster?.settings?.color || this.getDefaultColor(0.25),
-//       stroke: { color: layerEntryConfig.source?.cluster?.settings?.stroke?.color || this.getDefaultColorAndIncrementIndex(1) },
+//       color: layerConfig.source?.cluster?.settings?.color || this.getDefaultColor(0.25),
+//       stroke: { color: layerConfig.source?.cluster?.settings?.stroke?.color || this.getDefaultColorAndIncrementIndex(1) },
 //       fillStyle: 'solid',
 //     };
 //     const styleSettings: TypeSimpleStyleConfig = { styleId, styleType: 'simple', label, settings };
-//     layerEntryConfig.style[geometryType] = styleSettings;
-//     return layerEntryConfig.style;
+//     layerConfig.style[geometryType] = styleSettings;
+//     return layerConfig.style;
 //   }
 //   // eslint-disable-next-line no-console
 //   console.log(`Geometry type ${geometryType} is not supported by the GeoView viewer.`);
