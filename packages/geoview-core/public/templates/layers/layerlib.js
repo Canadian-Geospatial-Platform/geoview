@@ -24,7 +24,7 @@ function listenToLegendLayerSetChanges(elementId, handlerName) {
 const addBoundsPolygon = (mapId, bbox) => {
   const newBbox = cgpv.api.maps[mapId].transformAndDensifyExtent(
     bbox,
-    `EPSG:${cgpv.api.maps[mapId].mapState.currentProjection}`,
+    `EPSG:${cgpv.api.maps[mapId].getMapState().currentProjection}`,
     `EPSG:4326`
   );
 

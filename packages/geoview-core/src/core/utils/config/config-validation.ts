@@ -4,11 +4,9 @@ import { Extent } from 'ol/extent';
 import Ajv from 'ajv';
 import { AnyValidateFunction } from 'ajv/dist/types';
 
-import i18n from 'i18next';
 import defaultsDeep from 'lodash/defaultsDeep';
-import { api } from '@/app';
 
-import { generateId, replaceParams, showError } from '../utilities';
+import { generateId, replaceParams, getLocalizedMessage, showError } from '../utilities';
 
 import schema from '../../../../schema.json';
 import { TypeBasemapId, TypeBasemapOptions, VALID_BASEMAP_ID } from '@/geo/layer/basemap/basemap-types';
@@ -357,8 +355,7 @@ export class ConfigValidation {
     }
 
     setTimeout(() => {
-      const trans = i18n.getFixedT(api.maps[this.mapId].displayLanguage);
-      showError(this.mapId, trans('validation.schema.notFound'));
+      showError(this.mapId, getLocalizedMessage(this.mapId, 'validation.schema.notFound'));
     }, 2000);
   }
 
@@ -375,8 +372,7 @@ export class ConfigValidation {
 
     if (!validate) {
       setTimeout(() => {
-        const trans = i18n.getFixedT(api.maps[this.mapId].displayLanguage);
-        const message = replaceParams([schemaPath], trans('validation.schema.wrongPath'));
+        const message = replaceParams([schemaPath], getLocalizedMessage(this.mapId, 'validation.schema.wrongPath'));
         console.log(`- Map ${this.mapId}: ${message}`);
         showError(this.mapId, message);
       }, 2000);
@@ -415,8 +411,7 @@ export class ConfigValidation {
 
       if (!validate) {
         setTimeout(() => {
-          const trans = i18n.getFixedT(api.maps[this.mapId].displayLanguage);
-          const message = replaceParams([schemaPath], trans('validation.schema.wrongPath'));
+          const message = replaceParams([schemaPath], getLocalizedMessage(this.mapId, 'validation.schema.wrongPath'));
           console.log(`- Map ${this.mapId}: ${message}`);
           showError(this.mapId, message);
         }, 2000);

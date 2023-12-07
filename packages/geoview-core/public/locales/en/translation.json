@@ -112,7 +112,10 @@
     "schema": {
       "notFound": "A schema error was found, check the console to see what is wrong.",
       "wrongPath": "Cannot find schema ([__param__])"
-    }
+    },
+    "changeDisplayLanguageLayers": "Layers can not be relaoded because the configuration does not support this language",
+    "changeDisplayLanguage": "Only 'en' and 'fr' are supported",
+    "changeDisplayTheme": "Theme unsuported"
   },
   "exportModal": {
     "title": "Export Map as PNG",

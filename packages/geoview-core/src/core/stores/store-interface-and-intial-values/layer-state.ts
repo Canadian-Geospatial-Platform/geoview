@@ -213,6 +213,10 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
 
         // TODO: keep reference to geoview map instance in the store or keep accessing with api - discussion
         api.maps[get().mapId].layer.removeLayersUsingPath(layerPath);
+
+        // TODO: keep reference to geoview map instance in the store or keep accessing with api - discussion
+        // Set back if undo click
+        get().layerState.actions.toggleLayerVisibility(layerPath);
       },
       zoomToLayerExtent: (layerPath: string) => {
         const options: FitOptions = { padding: OL_ZOOM_PADDING, duration: OL_ZOOM_DURATION };

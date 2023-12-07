@@ -112,7 +112,10 @@
     "schema": {
       "notFound": "Une erreur de schéma a été trouvée, vérifiez la console pour voir ce qui ne va pas.",
       "wrongPath": "Impossible de trouver le schéma ([__param__])"
-    }
+    },
+    "changeDisplayLanguageLayers": "Les couches ne peuvent être chargée(s) de nouveau car la configuration ne supporte pas ce langage",
+    "changeDisplayLanguage": "Seulement 'en' et 'fr' sont supporées",
+    "changeDisplayTheme": "Theme non supporé"
   },
   "exportModal": {
     "title": "Exporter la carte en PNG",

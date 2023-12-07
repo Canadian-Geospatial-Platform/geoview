@@ -33,8 +33,7 @@
             <td>
               <a href="./index.html">Main</a><br />
               <a href="#HLNG1">1. French</a><br />
-              <a href="#HLNG2">2. English</a><br />
-              <a href="#HLNG3">3. English</a><br />
+              <a href="#HLNG3">2. English</a><br />
             </td>
           </tr>
         </tbody>
@@ -56,23 +55,21 @@
       class=""
       data-lang="fr">
     </div>
-    <p>This map is in French.</p>
-    <div>Set map to English and override layers <button id="Change-Lang-Button">Reset Lang</button></div>
+    <div style="display: flex;">
+      <p>This map display language is:   </p>
+      <div class="theme-selector">
+        <select name="Switch Language" id="switchLang">
+          <option value="fr">French</option>
+          <option value="en">English</option>
+          <option value="sp">Spanish</option>
+        </select>
+      </div>
+    </div>
+    <div>Switch between French and English and override layers <button id="Change-Lang-Button">Reset Lang</button>   !!! not yet supported</div>
     <hr />
 
     <div class="map-title-holder">
-      <h4 id="HLNG2">2. English</h4>
-      <a class="ref-link" href="#top">Top</a>
-    </div>
-    <div
-      id="LNG2"
-      data-lang="en">
-    </div>
-    <p>This map is in English.</p>
-    <hr />
-
-    <div class="map-title-holder">
-      <h4 id="HLNG3">3. English</h4>
+      <h4 id="HLNG3">2. English</h4>
       <a class="ref-link" href="#top">Top</a>
     </div>
     <div
@@ -122,7 +119,7 @@
           'appBar': ['geolocator', 'export'],
           'components': ['overview-map', 'north-arrow'],
           'corePackages': ['layers-panel', 'basemap-panel', 'footer-panel'],
-          'theme': 'dark',
+          'theme': 'geo.ca',
           'suportedLanguages': ['fr', 'en']
         }`;
 
@@ -130,8 +127,20 @@
       // TODO: make the function createMapFromConfig async with api is ready
       setTimeout(() => {
         cgpv.api.createMapFromConfig('LNG1', config);
-        cgpv.api.createMapFromConfig('LNG2', config);
+        // cgpv.api.createMapFromConfig('LNG2', config);
       }, 1000);
+
+      const switchLang = document.getElementById("switchLang");
+      switchLang.addEventListener("change", (e) => {
+        cgpv.api.maps['LNG1'].changeLanguage(e.target.value)
+      });
+
+      // change map language and reset layers
+      var mapLangButton = document.getElementById('Change-Lang-Button');
+      mapLangButton.addEventListener('click', function (e) {
+        const lang = cgpv.api.maps['LNG1'].getDisplayLanguage() === 'en' ? 'fr' : 'en';
+        cgpv.api.maps['LNG1'].changeLanguage(lang, true)
+      });
 
       // initialize cgpv and api events, a callback is optional, used if calling api's after the rendering is ready
       // we need a least one map to trigger callback
@@ -147,16 +156,9 @@
           // because of class llwp-map, the map is created from default config.
           // We should not let injection of new config in created map... only reload
           // See if we remove loadMapFromJsonStringConfig.. use change language and chage theme to switch....
-          setTimeout(() => {
-            cgpv.api.createMapFromConfig('LNG3', config)
-          }, 4000);
-
-          // change map language
-          var mapLangButton = document.getElementById('Change-Lang-Button');
-          mapLangButton.addEventListener('click', function (e) {
-            cgpv.api.maps['LNG1'].changeLanguage('en')
-            cgpv.api.maps['LNG2'].changeLanguage('fr')
-          });
+          // setTimeout(() => {
+          //   cgpv.api.createMapFromConfig('LNG3', config)
+          // }, 4000);
 
           //create snippet
           createConfigSnippet();

@@ -1,9 +1,6 @@
 import axios, { AxiosResponse } from 'axios';
 
-import i18n from 'i18next';
 import { TypeJsonObject, TypeJsonArray, TypeJsonValue } from '@/core/types/global-types';
-
-import { api } from '@/app';
 
 import {
   TypeEsriDynamicLayerEntryConfig,
@@ -25,7 +22,7 @@ import { TypeGeoPackageLayerConfig, TypeGeoPackageLayerEntryConfig } from '@/geo
 import { TypeXYZTilesConfig, TypeXYZTilesLayerEntryConfig } from '@/geo/layer/geoview-layers/raster/xyz-tiles';
 import { TypeVectorTilesConfig, TypeVectorTilesLayerEntryConfig } from '@/geo/layer/geoview-layers/raster/vector-tiles';
 
-import { showError, replaceParams } from '@/core/utils/utilities';
+import { showError, replaceParams, getLocalizedMessage } from '@/core/utils/utilities';
 
 // ******************************************************************************************************************************
 // ******************************************************************************************************************************
@@ -401,8 +398,7 @@ export class UUIDmapConfigReader {
 
       return this.getLayerConfigFromResponse(result);
     } catch (error: unknown) {
-      const trans = i18n.getFixedT(api.maps[mapId].displayLanguage);
-      const message = replaceParams([error as TypeJsonValue, mapId], trans('validation.layer.loadfailed'));
+      const message = replaceParams([error as TypeJsonValue, mapId], getLocalizedMessage(mapId, 'validation.layer.loadfailed'));
       showError(mapId, message);
     }
     return [];
