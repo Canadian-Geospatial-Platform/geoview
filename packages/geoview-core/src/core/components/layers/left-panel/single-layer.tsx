@@ -35,10 +35,11 @@ import { LayersList } from './layers-list';
 interface SingleLayerProps {
   layer: TypeLegendLayer;
   depth: number;
+  isDragging: boolean;
   setIsLayersListPanelVisible: Dispatch<SetStateAction<boolean>>;
 }
 
-export function SingleLayer({ depth, layer, setIsLayersListPanelVisible }: SingleLayerProps): JSX.Element {
+export function SingleLayer({ isDragging, depth, layer, setIsLayersListPanelVisible }: SingleLayerProps): JSX.Element {
   const { t } = useTranslation<string>();
 
   const { toggleLayerVisibility, setSelectedLayerPath } = useLayerStoreActions(); // get store actions
@@ -209,8 +210,22 @@ export function SingleLayer({ depth, layer, setIsLayersListPanelVisible }: Singl
     return <IconStack layerPath={layer.layerPath} />;
   }
 
+  function getContainerClass() {
+    let result: string[] = ["layerItemContainer", layer.layerStatus ?? ''];
+
+    if(layerIsSelected) {
+      result.push('selectedLayer');
+    }
+
+    if(isDragging) {
+      result.push('dragging');
+    }
+
+    return result.join(' ');
+  }
+
   return (
-    <Box className={`layerItemContainer ${layer.layerStatus} ${layerIsSelected ? 'selectedLayer' : ''}`}>
+    <Box className={getContainerClass()}>
       <ListItem key={layer.layerName} divider>
         <ListItemButton selected={layerIsSelected}>
           {renderLayerIcon()}

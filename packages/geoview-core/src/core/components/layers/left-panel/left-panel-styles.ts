@@ -30,6 +30,12 @@ export const getSxClasses = (theme: Theme) => ({
         border: '2px solid #515BA5',
       },
 
+      '&.dragging': {
+        backgroundColor: 'primary.light',
+        cursor: 'grab',
+        userSelect: 'none',
+      },
+
       // for handling layer status
       '&.error': {
         background: '#ffdcdb 0% 0% no-repeat padding-box',

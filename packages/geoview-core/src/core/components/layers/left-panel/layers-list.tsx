@@ -47,7 +47,6 @@ export function LayersList({ layersList, setIsLayersListPanelVisible, parentLaye
       return {
         cursor: 'grab',
         userSelect: 'none',
-        border: '3px dashed #ccc',
         ...draggableStyle,
       };
     }
@@ -91,6 +90,7 @@ export function LayersList({ layersList, setIsLayersListPanelVisible, parentLaye
           >
             <SingleLayer
               key={textToSlug(`layerKey-${index}-${details.layerPath}`)}
+              isDragging={snapshot.isDragging}
               depth={depth}
               layer={details}
               setIsLayersListPanelVisible={setIsLayersListPanelVisible}
