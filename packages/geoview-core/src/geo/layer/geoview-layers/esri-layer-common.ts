@@ -68,29 +68,29 @@ export function commonGetServiceMetadata(this: EsriDynamic | EsriFeature, resolv
  */
 export function commonValidateListOfLayerEntryConfig(this: EsriDynamic | EsriFeature, listOfLayerEntryConfig: TypeListOfLayerEntryConfig) {
   this.changeLayerPhase('validateListOfLayerEntryConfig');
-  listOfLayerEntryConfig.forEach((layerEntryConfig: TypeLayerEntryConfig) => {
-    const layerPath = Layer.getLayerPath(layerEntryConfig);
-    if (layerEntryIsGroupLayer(layerEntryConfig)) {
-      this.validateListOfLayerEntryConfig(layerEntryConfig.listOfLayerEntryConfig!);
-      if (!layerEntryConfig.listOfLayerEntryConfig.length) {
+  listOfLayerEntryConfig.forEach((layerConfig: TypeLayerEntryConfig) => {
+    const layerPath = Layer.getLayerPath(layerConfig);
+    if (layerEntryIsGroupLayer(layerConfig)) {
+      this.validateListOfLayerEntryConfig(layerConfig.listOfLayerEntryConfig!);
+      if (!layerConfig.listOfLayerEntryConfig.length) {
         this.layerLoadError.push({
           layer: layerPath,
           consoleMessage: `Empty layer group (mapId:  ${this.mapId}, layerPath: ${layerPath})`,
         });
-        this.changeLayerStatus('error', layerEntryConfig);
+        this.changeLayerStatus('error', layerConfig);
         return;
       }
     }
 
-    this.changeLayerStatus('loading', layerEntryConfig);
+    this.changeLayerStatus('loading', layerConfig);
 
-    let esriIndex = Number(layerEntryConfig.layerId);
+    let esriIndex = Number(layerConfig.layerId);
     if (Number.isNaN(esriIndex)) {
       this.layerLoadError.push({
         layer: layerPath,
         consoleMessage: `ESRI layerId must be a number (mapId:  ${this.mapId}, layerPath: ${layerPath})`,
       });
-      this.changeLayerStatus('error', layerEntryConfig);
+      this.changeLayerStatus('error', layerConfig);
       return;
     }
 
@@ -103,15 +103,15 @@ export function commonValidateListOfLayerEntryConfig(this: EsriDynamic | EsriFea
         layer: layerPath,
         consoleMessage: `ESRI layerId not found (mapId:  ${this.mapId}, layerPath: ${layerPath})`,
       });
-      this.changeLayerStatus('error', layerEntryConfig);
+      this.changeLayerStatus('error', layerConfig);
       return;
     }
 
     if (this.metadata!.layers[esriIndex].type === 'Group Layer') {
       const newListOfLayerEntryConfig: TypeListOfLayerEntryConfig = [];
       (this.metadata!.layers[esriIndex].subLayerIds as TypeJsonArray).forEach((layerId) => {
-        const subLayerEntryConfig: TypeLayerEntryConfig = cloneDeep(layerEntryConfig);
-        subLayerEntryConfig.parentLayerConfig = Cast<TypeLayerGroupEntryConfig>(layerEntryConfig);
+        const subLayerEntryConfig: TypeLayerEntryConfig = cloneDeep(layerConfig);
+        subLayerEntryConfig.parentLayerConfig = Cast<TypeLayerGroupEntryConfig>(layerConfig);
         subLayerEntryConfig.layerId = `${layerId}`;
         subLayerEntryConfig.layerName = {
           en: this.metadata!.layers[layerId as number].name as string,
@@ -121,10 +121,10 @@ export function commonValidateListOfLayerEntryConfig(this: EsriDynamic | EsriFea
         api.maps[this.mapId].layer.registerLayerConfig(subLayerEntryConfig);
       });
 
-      if (this.registerToLayerSetListenerFunctions[Layer.getLayerPath(layerEntryConfig)])
-        this.unregisterFromLayerSets(layerEntryConfig as TypeBaseLayerEntryConfig);
-      const switchToGroupLayer = Cast<TypeLayerGroupEntryConfig>(layerEntryConfig);
-      delete (layerEntryConfig as TypeBaseLayerEntryConfig).layerStatus;
+      if (this.registerToLayerSetListenerFunctions[Layer.getLayerPath(layerConfig)])
+        this.unregisterFromLayerSets(layerConfig as TypeBaseLayerEntryConfig);
+      const switchToGroupLayer = Cast<TypeLayerGroupEntryConfig>(layerConfig);
+      delete (layerConfig as TypeBaseLayerEntryConfig).layerStatus;
       switchToGroupLayer.entryType = 'group';
       switchToGroupLayer.layerName = {
         en: this.metadata!.layers[esriIndex].name as string,
@@ -136,13 +136,13 @@ export function commonValidateListOfLayerEntryConfig(this: EsriDynamic | EsriFea
       return;
     }
 
-    if (this.esriChildHasDetectedAnError(layerEntryConfig, esriIndex)) {
-      this.changeLayerStatus('error', layerEntryConfig);
+    if (this.esriChildHasDetectedAnError(layerConfig, esriIndex)) {
+      this.changeLayerStatus('error', layerConfig);
       return;
     }
 
-    if (!layerEntryConfig.layerName)
-      layerEntryConfig.layerName = {
+    if (!layerConfig.layerName)
+      layerConfig.layerName = {
         en: this.metadata!.layers[esriIndex].name as string,
         fr: this.metadata!.layers[esriIndex].name as string,
       };
@@ -197,15 +197,15 @@ export function commonGetFieldDomain(
 /** ***************************************************************************************************************************
  * This method will create a Geoview temporal dimension if it exist in the service metadata
  * @param {TypeJsonObject} esriTimeDimension The ESRI time dimension object
- * @param {TypeEsriFeatureLayerEntryConfig | TypeEsriDynamicLayerEntryConfig} layerEntryConfig The layer entry to configure
+ * @param {TypeEsriFeatureLayerEntryConfig | TypeEsriDynamicLayerEntryConfig} layerConfig The layer entry to configure
  */
 export function commonProcessTemporalDimension(
   this: EsriDynamic | EsriFeature,
   esriTimeDimension: TypeJsonObject,
-  layerEntryConfig: TypeEsriFeatureLayerEntryConfig | TypeEsriDynamicLayerEntryConfig
+  layerConfig: TypeEsriFeatureLayerEntryConfig | TypeEsriDynamicLayerEntryConfig
 ) {
   if (esriTimeDimension !== undefined) {
-    this.layerTemporalDimension[Layer.getLayerPath(layerEntryConfig)] = api.dateUtilities.createDimensionFromESRI(
+    this.layerTemporalDimension[Layer.getLayerPath(layerConfig)] = api.dateUtilities.createDimensionFromESRI(
       Cast<TimeDimensionESRI>(esriTimeDimension)
     );
   }
@@ -218,7 +218,7 @@ export function commonProcessTemporalDimension(
  * @param {string} nameField The display field associated to the layer.
  * @param {string} geometryFieldName The field name of the geometry property.
  * @param {TypeJsonArray} fields An array of field names and its aliases.
- * @param {TypeEsriFeatureLayerEntryConfig | TypeEsriDynamicLayerEntryConfig} layerEntryConfig The layer entry to configure.
+ * @param {TypeEsriFeatureLayerEntryConfig | TypeEsriDynamicLayerEntryConfig} layerConfig The layer entry to configure.
  */
 export function commonProcessFeatureInfoConfig(
   this: EsriDynamic | EsriFeature,
@@ -226,51 +226,50 @@ export function commonProcessFeatureInfoConfig(
   nameField: string,
   geometryFieldName: string,
   fields: TypeJsonArray,
-  layerEntryConfig: TypeEsriFeatureLayerEntryConfig | TypeEsriDynamicLayerEntryConfig
+  layerConfig: TypeEsriFeatureLayerEntryConfig | TypeEsriDynamicLayerEntryConfig
 ) {
-  if (!layerEntryConfig.source.featureInfo) layerEntryConfig.source.featureInfo = { queryable: capabilities.includes('Query') };
+  if (!layerConfig.source.featureInfo) layerConfig.source.featureInfo = { queryable: capabilities.includes('Query') };
   // dynamic group layer doesn't have fields definition
-  if (!layerEntryConfig.isMetadataLayerGroup) {
+  if (!layerConfig.isMetadataLayerGroup) {
     // Process undefined outfields or aliasFields ('' = false and !'' = true). Also, if en is undefined, then fr is also undefined.
     // when en and fr are undefined, we set both en and fr to the same value.
-    if (!layerEntryConfig.source.featureInfo.outfields?.en || !layerEntryConfig.source.featureInfo.aliasFields?.en) {
-      const processOutField = !layerEntryConfig.source.featureInfo.outfields?.en;
-      const processAliasFields = !layerEntryConfig.source.featureInfo.aliasFields?.en;
+    if (!layerConfig.source.featureInfo.outfields?.en || !layerConfig.source.featureInfo.aliasFields?.en) {
+      const processOutField = !layerConfig.source.featureInfo.outfields?.en;
+      const processAliasFields = !layerConfig.source.featureInfo.aliasFields?.en;
       if (processOutField) {
-        layerEntryConfig.source.featureInfo.outfields = { en: '' };
-        layerEntryConfig.source.featureInfo.fieldTypes = '';
+        layerConfig.source.featureInfo.outfields = { en: '' };
+        layerConfig.source.featureInfo.fieldTypes = '';
       }
-      if (processAliasFields) layerEntryConfig.source.featureInfo.aliasFields = { en: '' };
+      if (processAliasFields) layerConfig.source.featureInfo.aliasFields = { en: '' };
       fields.forEach((fieldEntry) => {
         if (fieldEntry.name === geometryFieldName) return;
         if (processOutField) {
-          layerEntryConfig.source.featureInfo!.outfields!.en = `${layerEntryConfig.source.featureInfo!.outfields!.en}${fieldEntry.name},`;
-          const fieldType = this.getFieldType(fieldEntry.name as string, layerEntryConfig);
-          layerEntryConfig.source.featureInfo!.fieldTypes = `${layerEntryConfig.source.featureInfo!.fieldTypes}${fieldType},`;
+          layerConfig.source.featureInfo!.outfields!.en = `${layerConfig.source.featureInfo!.outfields!.en}${fieldEntry.name},`;
+          const fieldType = this.getFieldType(fieldEntry.name as string, layerConfig);
+          layerConfig.source.featureInfo!.fieldTypes = `${layerConfig.source.featureInfo!.fieldTypes}${fieldType},`;
         }
         if (processAliasFields)
-          layerEntryConfig.source.featureInfo!.aliasFields!.en = `${layerEntryConfig.source.featureInfo!.aliasFields!.en}${
+          layerConfig.source.featureInfo!.aliasFields!.en = `${layerConfig.source.featureInfo!.aliasFields!.en}${
             fieldEntry.alias ? fieldEntry.alias : fieldEntry.name
           },`;
       });
-      layerEntryConfig.source.featureInfo!.outfields!.en = layerEntryConfig.source.featureInfo!.outfields?.en?.slice(0, -1);
-      layerEntryConfig.source.featureInfo!.fieldTypes = layerEntryConfig.source.featureInfo!.fieldTypes?.slice(0, -1);
-      layerEntryConfig.source.featureInfo!.aliasFields!.en = layerEntryConfig.source.featureInfo!.aliasFields?.en?.slice(0, -1);
-      layerEntryConfig.source.featureInfo!.outfields!.fr = layerEntryConfig.source.featureInfo!.outfields?.en;
-      layerEntryConfig.source.featureInfo!.aliasFields!.fr = layerEntryConfig.source.featureInfo!.aliasFields?.en;
+      layerConfig.source.featureInfo!.outfields!.en = layerConfig.source.featureInfo!.outfields?.en?.slice(0, -1);
+      layerConfig.source.featureInfo!.fieldTypes = layerConfig.source.featureInfo!.fieldTypes?.slice(0, -1);
+      layerConfig.source.featureInfo!.aliasFields!.en = layerConfig.source.featureInfo!.aliasFields?.en?.slice(0, -1);
+      layerConfig.source.featureInfo!.outfields!.fr = layerConfig.source.featureInfo!.outfields?.en;
+      layerConfig.source.featureInfo!.aliasFields!.fr = layerConfig.source.featureInfo!.aliasFields?.en;
     }
-    if (!layerEntryConfig.source.featureInfo.nameField)
+    if (!layerConfig.source.featureInfo.nameField)
       if (nameField)
-        layerEntryConfig.source.featureInfo.nameField = {
+        layerConfig.source.featureInfo.nameField = {
           en: nameField,
           fr: nameField,
         };
       else {
         const en =
-          layerEntryConfig.source.featureInfo!.outfields!.en?.split(',')[0] ||
-          layerEntryConfig.source.featureInfo!.outfields!.fr?.split(',')[0];
+          layerConfig.source.featureInfo!.outfields!.en?.split(',')[0] || layerConfig.source.featureInfo!.outfields!.fr?.split(',')[0];
         const fr = en;
-        if (en) layerEntryConfig.source.featureInfo.nameField = { en, fr };
+        if (en) layerConfig.source.featureInfo.nameField = { en, fr };
       }
   }
 }
@@ -283,7 +282,7 @@ export function commonProcessFeatureInfoConfig(
  * @param {number} minScale The metadata minScale of the layer.
  * @param {number} maxScale The metadata maxScale of the layer.
  * @param {TypeJsonObject} extent The metadata layer extent.
- * @param {TypeEsriFeatureLayerEntryConfig | TypeEsriDynamicLayerEntryConfig} layerEntryConfig The layer entry to configure.
+ * @param {TypeEsriFeatureLayerEntryConfig | TypeEsriDynamicLayerEntryConfig} layerConfig The layer entry to configure.
  */
 export function commonProcessInitialSettings(
   this: EsriDynamic | EsriFeature,
@@ -291,23 +290,23 @@ export function commonProcessInitialSettings(
   minScale: number,
   maxScale: number,
   extent: TypeJsonObject,
-  layerEntryConfig: TypeEsriFeatureLayerEntryConfig | TypeEsriDynamicLayerEntryConfig
+  layerConfig: TypeEsriFeatureLayerEntryConfig | TypeEsriDynamicLayerEntryConfig
 ) {
-  // layerEntryConfig.initialSettings cannot be undefined because config-validation set it to {} if it is undefined.
-  if (layerEntryConfig.initialSettings?.visible === undefined) layerEntryConfig.initialSettings!.visible = visibility ? 'yes' : 'no';
+  // layerConfig.initialSettings cannot be undefined because config-validation set it to {} if it is undefined.
+  if (layerConfig.initialSettings?.visible === undefined) layerConfig.initialSettings!.visible = visibility ? 'yes' : 'no';
   // ! TODO: The solution implemented in the following two lines is not right. scale and zoom are not the same things.
-  // ! if (layerEntryConfig.initialSettings?.minZoom === undefined && minScale !== 0) layerEntryConfig.initialSettings.minZoom = minScale;
-  // ! if (layerEntryConfig.initialSettings?.maxZoom === undefined && maxScale !== 0) layerEntryConfig.initialSettings.maxZoom = maxScale;
-  if (layerEntryConfig.initialSettings?.extent)
-    layerEntryConfig.initialSettings.extent = transformExtent(
-      layerEntryConfig.initialSettings.extent,
+  // ! if (layerConfig.initialSettings?.minZoom === undefined && minScale !== 0) layerConfig.initialSettings.minZoom = minScale;
+  // ! if (layerConfig.initialSettings?.maxZoom === undefined && maxScale !== 0) layerConfig.initialSettings.maxZoom = maxScale;
+  if (layerConfig.initialSettings?.extent)
+    layerConfig.initialSettings.extent = transformExtent(
+      layerConfig.initialSettings.extent,
       'EPSG:4326',
       `EPSG:${MapEventProcessor.getMapState(this.mapId).currentProjection}`
     );
 
-  if (!layerEntryConfig.initialSettings?.bounds) {
+  if (!layerConfig.initialSettings?.bounds) {
     const layerExtent = [extent.xmin, extent.ymin, extent.xmax, extent.ymax] as Extent;
-    layerEntryConfig.initialSettings!.bounds = layerExtent;
+    layerConfig.initialSettings!.bounds = layerExtent;
   }
 }
 
@@ -315,47 +314,47 @@ export function commonProcessInitialSettings(
  * This method is used to process the layer's metadata. It will fill the empty fields of the layer's configuration (renderer,
  * initial settings, fields and aliases).
  *
- * @param {TypeLayerEntryConfig} layerEntryConfig The layer entry configuration to process.
+ * @param {TypeLayerEntryConfig} layerConfig The layer entry configuration to process.
  *
  * @returns {Promise<void>} A promise that the layer configuration has its metadata processed.
  */
 export function commonProcessLayerMetadata(
   this: EsriDynamic | EsriFeature,
   resolve: (value: void | PromiseLike<void>) => void,
-  layerEntryConfig: TypeLayerEntryConfig
+  layerConfig: TypeLayerEntryConfig
 ) {
   // User-defined groups do not have metadata provided by the service endpoint.
-  if (layerEntryIsGroupLayer(layerEntryConfig) && !layerEntryConfig.isMetadataLayerGroup) resolve();
+  if (layerEntryIsGroupLayer(layerConfig) && !layerConfig.isMetadataLayerGroup) resolve();
   else {
     let queryUrl = getLocalizedValue(this.metadataAccessPath, this.mapId);
     if (queryUrl) {
-      queryUrl = queryUrl.endsWith('/') ? `${queryUrl}${layerEntryConfig.layerId}` : `${queryUrl}/${layerEntryConfig.layerId}`;
+      queryUrl = queryUrl.endsWith('/') ? `${queryUrl}${layerConfig.layerId}` : `${queryUrl}/${layerConfig.layerId}`;
       const queryResult = axios.get<TypeJsonObject>(`${queryUrl}?f=pjson`);
       queryResult.then((response) => {
         // layers must have a fields attribute except if it is an metadata layer group.
-        if (!response.data.fields && !(layerEntryConfig as TypeLayerGroupEntryConfig).isMetadataLayerGroup)
+        if (!response.data.fields && !(layerConfig as TypeLayerGroupEntryConfig).isMetadataLayerGroup)
           throw new Error(`Despite a return code of 200, an error was detected with this query (${queryUrl}?f=pjson)`);
-        this.layerMetadata[Layer.getLayerPath(layerEntryConfig)] = response.data;
-        if (geoviewEntryIsEsriDynamic(layerEntryConfig) || geoviewEntryIsEsriFeature(layerEntryConfig)) {
-          if (!layerEntryConfig.style) {
+        this.layerMetadata[Layer.getLayerPath(layerConfig)] = response.data;
+        if (geoviewEntryIsEsriDynamic(layerConfig) || geoviewEntryIsEsriFeature(layerConfig)) {
+          if (!layerConfig.style) {
             const renderer = Cast<EsriBaseRenderer>(response.data.drawingInfo?.renderer);
-            if (renderer) layerEntryConfig.style = getStyleFromEsriRenderer(this.mapId, layerEntryConfig, renderer);
+            if (renderer) layerConfig.style = getStyleFromEsriRenderer(this.mapId, layerConfig, renderer);
           }
           this.processFeatureInfoConfig(
             response.data.capabilities as string,
             response.data.displayField as string,
             response.data.geometryField.name as string,
             response.data.fields as TypeJsonArray,
-            layerEntryConfig
+            layerConfig
           );
           this.processInitialSettings(
             response.data.defaultVisibility as boolean,
             response.data.minScale as number,
             response.data.maxScale as number,
             response.data.extent,
-            layerEntryConfig
+            layerConfig
           );
-          this.processTemporalDimension(response.data.timeInfo as TypeJsonObject, layerEntryConfig);
+          this.processTemporalDimension(response.data.timeInfo as TypeJsonObject, layerConfig);
         }
         resolve();
       });

@@ -242,11 +242,11 @@ export class WMS extends AbstractGeoViewRaster {
               this.metadataAccessPath.fr = metadataAccessPath;
               const dataAccessPath = this.metadata.Capability.Request.GetMap.DCPType[0].HTTP.Get.OnlineResource as string;
               const setDataAccessPath = (listOfLayerEntryConfig: TypeListOfLayerEntryConfig) => {
-                listOfLayerEntryConfig.forEach((layerEntryConfig) => {
-                  if (layerEntryIsGroupLayer(layerEntryConfig)) setDataAccessPath(layerEntryConfig.listOfLayerEntryConfig);
+                listOfLayerEntryConfig.forEach((layerConfig) => {
+                  if (layerEntryIsGroupLayer(layerConfig)) setDataAccessPath(layerConfig.listOfLayerEntryConfig);
                   else {
-                    layerEntryConfig.source!.dataAccessPath!.en = dataAccessPath;
-                    layerEntryConfig.source!.dataAccessPath!.fr = dataAccessPath;
+                    layerConfig.source!.dataAccessPath!.en = dataAccessPath;
+                    layerConfig.source!.dataAccessPath!.fr = dataAccessPath;
                   }
                 });
               };
@@ -339,9 +339,9 @@ export class WMS extends AbstractGeoViewRaster {
     const arrayOfLayerIds: TypeLayerEntryConfig[] = [];
     const gatherLayerIds = (listOfLayerEntryConfig = this.listOfLayerEntryConfig) => {
       if (listOfLayerEntryConfig.length) {
-        listOfLayerEntryConfig.forEach((layerEntryConfig) => {
-          if (layerEntryIsGroupLayer(layerEntryConfig)) gatherLayerIds(layerEntryConfig.listOfLayerEntryConfig);
-          else arrayOfLayerIds.push(layerEntryConfig);
+        listOfLayerEntryConfig.forEach((layerConfig) => {
+          if (layerEntryIsGroupLayer(layerConfig)) gatherLayerIds(layerConfig.listOfLayerEntryConfig);
+          else arrayOfLayerIds.push(layerConfig);
         });
       }
     };
@@ -399,40 +399,40 @@ export class WMS extends AbstractGeoViewRaster {
    */
   protected validateListOfLayerEntryConfig(listOfLayerEntryConfig: TypeListOfLayerEntryConfig) {
     this.changeLayerPhase('validateListOfLayerEntryConfig');
-    listOfLayerEntryConfig.forEach((layerEntryConfig: TypeLayerEntryConfig) => {
-      const layerPath = Layer.getLayerPath(layerEntryConfig);
-      if (layerEntryIsGroupLayer(layerEntryConfig)) {
-        this.validateListOfLayerEntryConfig(layerEntryConfig.listOfLayerEntryConfig!);
-        if (!layerEntryConfig.listOfLayerEntryConfig.length) {
+    listOfLayerEntryConfig.forEach((layerConfig: TypeLayerEntryConfig) => {
+      const layerPath = Layer.getLayerPath(layerConfig);
+      if (layerEntryIsGroupLayer(layerConfig)) {
+        this.validateListOfLayerEntryConfig(layerConfig.listOfLayerEntryConfig!);
+        if (!layerConfig.listOfLayerEntryConfig.length) {
           this.layerLoadError.push({
             layer: layerPath,
             consoleMessage: `Empty layer group (mapId:  ${this.mapId}, layerPath: ${layerPath})`,
           });
-          this.changeLayerStatus('error', layerEntryConfig);
+          this.changeLayerStatus('error', layerConfig);
         }
         return;
       }
 
-      if ((layerEntryConfig as TypeBaseLayerEntryConfig).layerStatus !== 'error') {
-        this.changeLayerStatus('loading', layerEntryConfig);
+      if ((layerConfig as TypeBaseLayerEntryConfig).layerStatus !== 'error') {
+        this.changeLayerStatus('loading', layerConfig);
 
-        const layerFound = this.getLayerMetadataEntry(layerEntryConfig.layerId);
+        const layerFound = this.getLayerMetadataEntry(layerConfig.layerId);
         if (!layerFound) {
           this.layerLoadError.push({
             layer: layerPath,
             consoleMessage: `Layer metadata not found (mapId:  ${this.mapId}, layerPath: ${layerPath})`,
           });
-          this.changeLayerStatus('error', layerEntryConfig);
+          this.changeLayerStatus('error', layerConfig);
           return;
         }
 
         if ('Layer' in layerFound) {
-          this.createGroupLayer(layerFound, layerEntryConfig);
+          this.createGroupLayer(layerFound, layerConfig);
           return;
         }
 
-        if (!layerEntryConfig.layerName)
-          layerEntryConfig.layerName = {
+        if (!layerConfig.layerName)
+          layerConfig.layerName = {
             en: layerFound.Title as string,
             fr: layerFound.Title as string,
           };
@@ -444,15 +444,15 @@ export class WMS extends AbstractGeoViewRaster {
    * This method create recursively dynamic group layers from the service metadata.
    *
    * @param {TypeJsonObject} layer The dynamic group layer metadata.
-   * @param {TypeLayerEntryConfig} layerEntryConfig The layer configurstion associated to the dynamic group.
+   * @param {TypeLayerEntryConfig} layerConfig The layer configurstion associated to the dynamic group.
    */
-  private createGroupLayer(layer: TypeJsonObject, layerEntryConfig: TypeLayerEntryConfig) {
+  private createGroupLayer(layer: TypeJsonObject, layerConfig: TypeLayerEntryConfig) {
     const newListOfLayerEntryConfig: TypeListOfLayerEntryConfig = [];
     const arrayOfLayerMetadata = Array.isArray(layer.Layer) ? layer.Layer : ([layer.Layer] as TypeJsonArray);
 
     arrayOfLayerMetadata.forEach((subLayer) => {
-      const subLayerEntryConfig: TypeLayerEntryConfig = cloneDeep(layerEntryConfig);
-      subLayerEntryConfig.parentLayerConfig = Cast<TypeLayerGroupEntryConfig>(layerEntryConfig);
+      const subLayerEntryConfig: TypeLayerEntryConfig = cloneDeep(layerConfig);
+      subLayerEntryConfig.parentLayerConfig = Cast<TypeLayerGroupEntryConfig>(layerConfig);
       subLayerEntryConfig.layerId = subLayer.Name as string;
       subLayerEntryConfig.layerName = {
         en: subLayer.Title as string,
@@ -462,10 +462,10 @@ export class WMS extends AbstractGeoViewRaster {
       api.maps[this.mapId].layer.registerLayerConfig(subLayerEntryConfig);
     });
 
-    if (this.registerToLayerSetListenerFunctions[Layer.getLayerPath(layerEntryConfig)])
-      this.unregisterFromLayerSets(layerEntryConfig as TypeBaseLayerEntryConfig);
-    const switchToGroupLayer = Cast<TypeLayerGroupEntryConfig>(layerEntryConfig);
-    delete (layerEntryConfig as TypeBaseLayerEntryConfig).layerStatus;
+    if (this.registerToLayerSetListenerFunctions[Layer.getLayerPath(layerConfig)])
+      this.unregisterFromLayerSets(layerConfig as TypeBaseLayerEntryConfig);
+    const switchToGroupLayer = Cast<TypeLayerGroupEntryConfig>(layerConfig);
+    delete (layerConfig as TypeBaseLayerEntryConfig).layerStatus;
     switchToGroupLayer.entryType = 'group';
     switchToGroupLayer.layerName = {
       en: layer.Title as string,
@@ -504,31 +504,31 @@ export class WMS extends AbstractGeoViewRaster {
   }
 
   /** ****************************************************************************************************************************
-   * This method creates a GeoView WMS layer using the definition provided in the layerEntryConfig parameter.
+   * This method creates a GeoView WMS layer using the definition provided in the layerConfig parameter.
    *
-   * @param {TypeBaseLayerEntryConfig} layerEntryConfig Information needed to create the GeoView layer.
+   * @param {TypeBaseLayerEntryConfig} layerConfig Information needed to create the GeoView layer.
    *
    * @returns {TypeBaseRasterLayer | null} The GeoView raster layer that has been created.
    */
-  processOneLayerEntry(layerEntryConfig: TypeBaseLayerEntryConfig): Promise<TypeBaseRasterLayer | null> {
+  processOneLayerEntry(layerConfig: TypeBaseLayerEntryConfig): Promise<TypeBaseRasterLayer | null> {
     const promisedVectorLayer = new Promise<TypeBaseRasterLayer | null>((resolve) => {
-      this.changeLayerPhase('processOneLayerEntry', layerEntryConfig);
-      if (geoviewEntryIsWMS(layerEntryConfig)) {
-        const layerCapabilities = this.getLayerMetadataEntry(layerEntryConfig.layerId);
+      this.changeLayerPhase('processOneLayerEntry', layerConfig);
+      if (geoviewEntryIsWMS(layerConfig)) {
+        const layerCapabilities = this.getLayerMetadataEntry(layerConfig.layerId);
         if (layerCapabilities) {
-          const dataAccessPath = getLocalizedValue(layerEntryConfig.source.dataAccessPath, this.mapId)!;
+          const dataAccessPath = getLocalizedValue(layerConfig.source.dataAccessPath, this.mapId)!;
 
           let styleToUse = '';
-          if (Array.isArray(layerEntryConfig.source?.style) && layerEntryConfig.source?.style) {
-            styleToUse = layerEntryConfig.source?.style[0];
-          } else if (layerEntryConfig.source.style) {
-            styleToUse = layerEntryConfig.source?.style as string;
+          if (Array.isArray(layerConfig.source?.style) && layerConfig.source?.style) {
+            styleToUse = layerConfig.source?.style[0];
+          } else if (layerConfig.source.style) {
+            styleToUse = layerConfig.source?.style as string;
           } else if (layerCapabilities.Style) {
             styleToUse = layerCapabilities.Style[0].Name as string;
           }
 
-          if (Array.isArray(layerEntryConfig.source?.style)) {
-            this.WMSStyles = layerEntryConfig.source.style;
+          if (Array.isArray(layerConfig.source?.style)) {
+            this.WMSStyles = layerConfig.source.style;
           } else if ((layerCapabilities.Style.length as number) > 1) {
             this.WMSStyles = [];
             for (let i = 0; i < (layerCapabilities.Style.length as number); i++) {
@@ -538,45 +538,40 @@ export class WMS extends AbstractGeoViewRaster {
 
           const sourceOptions: SourceOptions = {
             url: dataAccessPath.endsWith('?') ? dataAccessPath : `${dataAccessPath}?`,
-            params: { LAYERS: layerEntryConfig.layerId, STYLES: styleToUse },
+            params: { LAYERS: layerConfig.layerId, STYLES: styleToUse },
           };
 
           sourceOptions.attributions = this.attributions;
-          sourceOptions.serverType = layerEntryConfig.source.serverType;
-          if (layerEntryConfig.source.crossOrigin) {
-            sourceOptions.crossOrigin = layerEntryConfig.source.crossOrigin;
+          sourceOptions.serverType = layerConfig.source.serverType;
+          if (layerConfig.source.crossOrigin) {
+            sourceOptions.crossOrigin = layerConfig.source.crossOrigin;
           } else {
             sourceOptions.crossOrigin = 'Anonymous';
           }
-          if (layerEntryConfig.source.projection) sourceOptions.projection = `EPSG:${layerEntryConfig.source.projection}`;
+          if (layerConfig.source.projection) sourceOptions.projection = `EPSG:${layerConfig.source.projection}`;
 
           const imageLayerOptions: ImageOptions<ImageWMS> = {
             source: new ImageWMS(sourceOptions),
-            properties: { layerCapabilities, layerEntryConfig },
+            properties: { layerCapabilities, layerConfig },
           };
-          // layerEntryConfig.initialSettings cannot be undefined because config-validation set it to {} if it is undefined.
-          if (layerEntryConfig.initialSettings?.className !== undefined)
-            imageLayerOptions.className = layerEntryConfig.initialSettings?.className;
-          if (layerEntryConfig.initialSettings?.extent !== undefined) imageLayerOptions.extent = layerEntryConfig.initialSettings?.extent;
-          if (layerEntryConfig.initialSettings?.maxZoom !== undefined)
-            imageLayerOptions.maxZoom = layerEntryConfig.initialSettings?.maxZoom;
-          if (layerEntryConfig.initialSettings?.minZoom !== undefined)
-            imageLayerOptions.minZoom = layerEntryConfig.initialSettings?.minZoom;
-          if (layerEntryConfig.initialSettings?.opacity !== undefined)
-            imageLayerOptions.opacity = layerEntryConfig.initialSettings?.opacity;
-          if (layerEntryConfig.initialSettings?.visible !== undefined)
-            imageLayerOptions.visible =
-              layerEntryConfig.initialSettings?.visible === 'yes' || layerEntryConfig.initialSettings?.visible === 'always';
+          // layerConfig.initialSettings cannot be undefined because config-validation set it to {} if it is undefined.
+          if (layerConfig.initialSettings?.className !== undefined) imageLayerOptions.className = layerConfig.initialSettings?.className;
+          if (layerConfig.initialSettings?.extent !== undefined) imageLayerOptions.extent = layerConfig.initialSettings?.extent;
+          if (layerConfig.initialSettings?.maxZoom !== undefined) imageLayerOptions.maxZoom = layerConfig.initialSettings?.maxZoom;
+          if (layerConfig.initialSettings?.minZoom !== undefined) imageLayerOptions.minZoom = layerConfig.initialSettings?.minZoom;
+          if (layerConfig.initialSettings?.opacity !== undefined) imageLayerOptions.opacity = layerConfig.initialSettings?.opacity;
+          if (layerConfig.initialSettings?.visible !== undefined)
+            imageLayerOptions.visible = layerConfig.initialSettings?.visible === 'yes' || layerConfig.initialSettings?.visible === 'always';
 
-          layerEntryConfig.olLayer = new ImageLayer(imageLayerOptions);
-          this.applyViewFilter(layerEntryConfig, layerEntryConfig.layerFilter ? layerEntryConfig.layerFilter : '');
+          layerConfig.olLayer = new ImageLayer(imageLayerOptions);
+          this.applyViewFilter(layerConfig, layerConfig.layerFilter ? layerConfig.layerFilter : '');
 
-          super.addLoadendListener(layerEntryConfig, 'image');
+          super.addLoadendListener(layerConfig, 'image');
 
-          resolve(layerEntryConfig.olLayer);
+          resolve(layerConfig.olLayer);
         } else {
           const message = replaceParams(
-            [layerEntryConfig.layerId, this.geoviewLayerId],
+            [layerConfig.layerId, this.geoviewLayerId],
             getLocalizedMessage(this.mapId, 'validation.layer.notfound')
           );
           showError(this.mapId, message);
@@ -592,39 +587,39 @@ export class WMS extends AbstractGeoViewRaster {
    * This method is used to process the layer's metadata. It will fill the empty fields of the layer's configuration (renderer,
    * initial settings, fields and aliases).
    *
-   * @param {TypeLayerEntryConfig} layerEntryConfig The layer entry configuration to process.
+   * @param {TypeLayerEntryConfig} layerConfig The layer entry configuration to process.
    *
    * @returns {Promise<void>} A promise that the layer configuration has its metadata processed.
    */
-  protected processLayerMetadata(layerEntryConfig: TypeLayerEntryConfig): Promise<void> {
+  protected processLayerMetadata(layerConfig: TypeLayerEntryConfig): Promise<void> {
     const promiseOfExecution = new Promise<void>((resolve) => {
-      if (geoviewEntryIsWMS(layerEntryConfig)) {
-        const layerCapabilities = this.getLayerMetadataEntry(layerEntryConfig.layerId)!;
-        this.layerMetadata[Layer.getLayerPath(layerEntryConfig)] = layerCapabilities;
+      if (geoviewEntryIsWMS(layerConfig)) {
+        const layerCapabilities = this.getLayerMetadataEntry(layerConfig.layerId)!;
+        this.layerMetadata[Layer.getLayerPath(layerConfig)] = layerCapabilities;
         if (layerCapabilities) {
           if (layerCapabilities.Attribution) this.attributions.push(layerCapabilities.Attribution.Title as string);
-          if (!layerEntryConfig.source.featureInfo) layerEntryConfig.source.featureInfo = { queryable: !!layerCapabilities.queryable };
+          if (!layerConfig.source.featureInfo) layerConfig.source.featureInfo = { queryable: !!layerCapabilities.queryable };
           // ! TODO: The solution implemented in the following lines is not right. scale and zoom are not the same things.
-          // if (layerEntryConfig.initialSettings?.minZoom === undefined && layerCapabilities.MinScaleDenominator !== undefined)
-          //   layerEntryConfig.initialSettings.minZoom = layerCapabilities.MinScaleDenominator as number;
-          // if (layerEntryConfig.initialSettings?.maxZoom === undefined && layerCapabilities.MaxScaleDenominator !== undefined)
-          //   layerEntryConfig.initialSettings.maxZoom = layerCapabilities.MaxScaleDenominator as number;
-          if (layerEntryConfig.initialSettings?.extent)
-            layerEntryConfig.initialSettings.extent = transformExtent(
-              layerEntryConfig.initialSettings.extent,
+          // if (layerConfig.initialSettings?.minZoom === undefined && layerCapabilities.MinScaleDenominator !== undefined)
+          //   layerConfig.initialSettings.minZoom = layerCapabilities.MinScaleDenominator as number;
+          // if (layerConfig.initialSettings?.maxZoom === undefined && layerCapabilities.MaxScaleDenominator !== undefined)
+          //   layerConfig.initialSettings.maxZoom = layerCapabilities.MaxScaleDenominator as number;
+          if (layerConfig.initialSettings?.extent)
+            layerConfig.initialSettings.extent = transformExtent(
+              layerConfig.initialSettings.extent,
               'EPSG:4326',
               `EPSG:${MapEventProcessor.getMapState(this.mapId).currentProjection}`
             );
 
-          if (!layerEntryConfig.initialSettings?.bounds && layerCapabilities.EX_GeographicBoundingBox) {
-            layerEntryConfig.initialSettings!.bounds = layerCapabilities.EX_GeographicBoundingBox as Extent;
+          if (!layerConfig.initialSettings?.bounds && layerCapabilities.EX_GeographicBoundingBox) {
+            layerConfig.initialSettings!.bounds = layerCapabilities.EX_GeographicBoundingBox as Extent;
           }
 
           if (layerCapabilities.Dimension) {
             const temporalDimension: TypeJsonObject | undefined = (layerCapabilities.Dimension as TypeJsonArray).find(
               (dimension) => dimension.name === 'time'
             );
-            if (temporalDimension) this.processTemporalDimension(temporalDimension, layerEntryConfig);
+            if (temporalDimension) this.processTemporalDimension(temporalDimension, layerConfig);
           }
         }
       }
@@ -636,11 +631,11 @@ export class WMS extends AbstractGeoViewRaster {
   /** ***************************************************************************************************************************
    * This method will create a Geoview temporal dimension if it existds in the service metadata
    * @param {TypeJsonObject} wmsTimeDimension The WMS time dimension object
-   * @param {TypeOgcWmsLayerEntryConfig} layerEntryConfig The layer entry to configure
+   * @param {TypeOgcWmsLayerEntryConfig} layerConfig The layer entry to configure
    */
-  private processTemporalDimension(wmsTimeDimension: TypeJsonObject, layerEntryConfig: TypeOgcWmsLayerEntryConfig) {
+  private processTemporalDimension(wmsTimeDimension: TypeJsonObject, layerConfig: TypeOgcWmsLayerEntryConfig) {
     if (wmsTimeDimension !== undefined) {
-      this.layerTemporalDimension[Layer.getLayerPath(layerEntryConfig)] = api.dateUtilities.createDimensionFromOGC(wmsTimeDimension);
+      this.layerTemporalDimension[Layer.getLayerPath(layerConfig)] = api.dateUtilities.createDimensionFromOGC(wmsTimeDimension);
     }
   }
 
@@ -943,17 +938,17 @@ export class WMS extends AbstractGeoViewRaster {
    * Translate the get feature information result set to the TypeArrayOfFeatureInfoEntries used by GeoView.
    *
    * @param {TypeJsonObject} featureMember An object formatted using the query syntax.
-   * @param {TypeOgcWmsLayerEntryConfig} layerEntryConfig The layer configuration.
+   * @param {TypeOgcWmsLayerEntryConfig} layerConfig The layer configuration.
    * @param {Coordinate} clickCoordinate The coordinate where the user has clicked.
    *
    * @returns {TypeArrayOfFeatureInfoEntries} The feature info table.
    */
   formatWmsFeatureInfoResult(
     featureMember: TypeJsonObject,
-    layerEntryConfig: TypeOgcWmsLayerEntryConfig,
+    layerConfig: TypeOgcWmsLayerEntryConfig,
     clickCoordinate: Coordinate
   ): TypeArrayOfFeatureInfoEntries {
-    const featureInfo = layerEntryConfig?.source?.featureInfo;
+    const featureInfo = layerConfig?.source?.featureInfo;
     const outfields = getLocalizedValue(featureInfo?.outfields, this.mapId)?.split(',');
     const fieldTypes = featureInfo?.fieldTypes?.split(',');
     const aliasFields = getLocalizedValue(featureInfo?.aliasFields, this.mapId)?.split(',');
@@ -1050,14 +1045,14 @@ export class WMS extends AbstractGeoViewRaster {
    * @param {boolean} CombineLegendFilter Flag used to combine the legend filter and the filter together (default: true)
    */
   applyViewFilter(layerPathOrConfig: string | TypeLayerEntryConfig, filter = '', CombineLegendFilter = true) {
-    const layerEntryConfig = (
+    const layerConfig = (
       typeof layerPathOrConfig === 'string' ? this.getLayerConfig(layerPathOrConfig) : layerPathOrConfig
     ) as TypeOgcWmsLayerEntryConfig;
-    const source = (layerEntryConfig.olLayer as ImageLayer<ImageWMS>).getSource();
+    const source = (layerConfig.olLayer as ImageLayer<ImageWMS>).getSource();
     if (source) {
       let filterValueToUse = filter;
-      layerEntryConfig.olLayer!.set('legendFilterIsOff', !CombineLegendFilter);
-      if (CombineLegendFilter) layerEntryConfig.olLayer?.set('layerFilter', filter);
+      layerConfig.olLayer!.set('legendFilterIsOff', !CombineLegendFilter);
+      if (CombineLegendFilter) layerConfig.olLayer?.set('layerFilter', filter);
 
       if (filterValueToUse) {
         filterValueToUse = filterValueToUse.replaceAll(/\s{2,}/g, ' ').trim();
@@ -1079,7 +1074,7 @@ export class WMS extends AbstractGeoViewRaster {
           )}`;
         });
         source.updateParams({ [dimension]: filterValueToUse.replace(/\s*/g, '') });
-        layerEntryConfig.olLayer!.changed();
+        layerConfig.olLayer!.changed();
       }
     }
   }

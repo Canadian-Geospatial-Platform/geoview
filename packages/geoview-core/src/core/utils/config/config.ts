@@ -132,13 +132,13 @@ export class Config {
    * @param {TypeGeoviewLayerType} geoviewLayerType The GeoView layer type.
    */
   private setLayerEntryType(listOfLayerEntryConfig: TypeListOfLayerEntryConfig, geoviewLayerType: TypeGeoviewLayerType): void {
-    listOfLayerEntryConfig?.forEach((layerEntryConfig) => {
-      if (layerEntryConfig.entryType === 'group') this.setLayerEntryType(layerEntryConfig.listOfLayerEntryConfig!, geoviewLayerType);
+    listOfLayerEntryConfig?.forEach((layerConfig) => {
+      if (layerConfig.entryType === 'group') this.setLayerEntryType(layerConfig.listOfLayerEntryConfig!, geoviewLayerType);
       else {
         // eslint-disable-next-line no-param-reassign
-        layerEntryConfig.schemaTag = geoviewLayerType;
+        layerConfig.schemaTag = geoviewLayerType;
         // eslint-disable-next-line no-param-reassign
-        layerEntryConfig.entryType = CONST_LAYER_ENTRY_TYPE[geoviewLayerType];
+        layerConfig.entryType = CONST_LAYER_ENTRY_TYPE[geoviewLayerType];
       }
     });
   }

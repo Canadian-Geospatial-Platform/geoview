@@ -41,12 +41,12 @@ export class GeoUtilities {
     listOfLayerEntryConfig: TypeListOfLayerEntryConfig,
     errorMessage: string
   ) {
-    listOfLayerEntryConfig.forEach((layerEntryConfig: TypeLayerEntryConfig) => {
-      if (layerEntryIsGroupLayer(layerEntryConfig))
-        this.setAllLayerStatusToError(geoviewLayerInstance, layerEntryConfig.listOfLayerEntryConfig, errorMessage);
+    listOfLayerEntryConfig.forEach((layerConfig: TypeLayerEntryConfig) => {
+      if (layerEntryIsGroupLayer(layerConfig))
+        this.setAllLayerStatusToError(geoviewLayerInstance, layerConfig.listOfLayerEntryConfig, errorMessage);
       else {
-        const layerPath = Layer.getLayerPath(layerEntryConfig);
-        geoviewLayerInstance.changeLayerStatus('error', layerEntryConfig);
+        const layerPath = Layer.getLayerPath(layerConfig);
+        geoviewLayerInstance.changeLayerStatus('error', layerConfig);
         geoviewLayerInstance.layerLoadError.push({
           layer: layerPath,
           consoleMessage: `${errorMessage} for layer ${layerPath} of map ${geoviewLayerInstance.mapId}`,
