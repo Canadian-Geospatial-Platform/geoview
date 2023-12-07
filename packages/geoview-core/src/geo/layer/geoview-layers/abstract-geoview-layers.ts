@@ -347,17 +347,21 @@ export abstract class AbstractGeoViewLayer {
    * Change the layer phase property and emit an event to update existing layer sets.
    *
    * @param {string} layerPhase The value to assign to the layer phase property.
-   * @param {TypeLayerEntryConfig} layerEntryConfig The layer configuration affected by the change.
+   * @param {TypeLayerEntryConfig} layerConfig The layer configuration affected by the change.
    */
-  changeLayerPhase(layerPhase: string, layerEntryConfig?: TypeLayerEntryConfig) {
-    if (layerEntryConfig) {
-      (layerEntryConfig as TypeBaseLayerEntryConfig).layerPhase = layerPhase;
-      api.event.emit(LayerSetPayload.createLayerSetChangeLayerPhasePayload(this.mapId, layerEntryConfig, layerPhase));
+  changeLayerPhase(layerPhase: string, layerConfig?: TypeLayerEntryConfig) {
+    if (layerConfig) {
+      (layerConfig as TypeBaseLayerEntryConfig).layerPhase = layerPhase;
+      api.event.emit(LayerSetPayload.createLayerSetChangeLayerPhasePayload(this.mapId, layerConfig, layerPhase));
     } else {
       this.layerPhase = layerPhase;
-      this.listOfLayerEntryConfig.forEach((layerConfig) => {
-        api.event.emit(LayerSetPayload.createLayerSetChangeLayerPhasePayload(this.mapId, layerConfig, layerPhase));
-      });
+      const changeAllSublayerPhase = (listOfLayerEntryConfig = this.listOfLayerEntryConfig) => {
+        listOfLayerEntryConfig.forEach((subLayerConfig) => {
+          if (layerEntryIsGroupLayer(subLayerConfig)) changeAllSublayerPhase(subLayerConfig.listOfLayerEntryConfig);
+          else api.event.emit(LayerSetPayload.createLayerSetChangeLayerPhasePayload(this.mapId, subLayerConfig, layerPhase));
+        });
+      };
+      changeAllSublayerPhase();
     }
   }
 
@@ -365,12 +369,12 @@ export abstract class AbstractGeoViewLayer {
    * Change the layer status property and emit an event to update existing layer sets.
    *
    * @param {TypeLayerStatus} layerStatus The value to assign to the layer status property.
-   * @param {TypeLayerEntryConfig} layerEntryConfig The layer configuration affected by the change.
+   * @param {TypeLayerEntryConfig} layerConfig The layer configuration affected by the change.
    */
-  changeLayerStatus(layerStatus: TypeLayerStatus, layerEntryConfig: TypeLayerEntryConfig) {
-    (layerEntryConfig as TypeBaseLayerEntryConfig).layerStatus = layerStatus;
-    api.event.emit(LayerSetPayload.createLayerSetChangeLayerStatusPayload(this.mapId, layerEntryConfig, layerStatus!));
-    if (layerStatus === 'processed') this.changeLayerPhase(layerStatus, layerEntryConfig);
+  changeLayerStatus(layerStatus: TypeLayerStatus, layerConfig: TypeLayerEntryConfig) {
+    (layerConfig as TypeBaseLayerEntryConfig).layerStatus = layerStatus;
+    api.event.emit(LayerSetPayload.createLayerSetChangeLayerStatusPayload(this.mapId, layerConfig, layerStatus!));
+    if (layerStatus === 'processed') this.changeLayerPhase(layerStatus, layerConfig);
   }
 
   /** ***************************************************************************************************************************
@@ -383,9 +387,9 @@ export abstract class AbstractGeoViewLayer {
    */
   allLayerEntryConfigProcessed(listOfLayerEntryConfig: TypeListOfLayerEntryConfig = this.listOfLayerEntryConfig): boolean {
     // Try to find an unprocessed layer. If you can, return false
-    return !listOfLayerEntryConfig.find((layerEntryConfig: TypeLayerEntryConfig) => {
-      if (layerEntryIsGroupLayer(layerEntryConfig)) return !this.allLayerEntryConfigProcessed(layerEntryConfig.listOfLayerEntryConfig);
-      return !['processed', 'error', 'loaded'].includes((layerEntryConfig as TypeBaseLayerEntryConfig).layerStatus || '');
+    return !listOfLayerEntryConfig.find((layerConfig: TypeLayerEntryConfig) => {
+      if (layerEntryIsGroupLayer(layerConfig)) return !this.allLayerEntryConfigProcessed(layerConfig.listOfLayerEntryConfig);
+      return !['processed', 'error', 'loaded'].includes((layerConfig as TypeBaseLayerEntryConfig).layerStatus || '');
     });
   }
 
@@ -399,9 +403,9 @@ export abstract class AbstractGeoViewLayer {
    */
   allLayerEntryConfigAreInError(listOfLayerEntryConfig: TypeListOfLayerEntryConfig = this.listOfLayerEntryConfig): boolean {
     // Try to find a layer not in error. If you can, return false
-    return !listOfLayerEntryConfig.find((layerEntryConfig: TypeLayerEntryConfig) => {
-      if (layerEntryIsGroupLayer(layerEntryConfig)) return !this.allLayerEntryConfigAreInError(layerEntryConfig.listOfLayerEntryConfig);
-      return (layerEntryConfig as TypeBaseLayerEntryConfig).layerStatus !== 'error';
+    return !listOfLayerEntryConfig.find((layerConfig: TypeLayerEntryConfig) => {
+      if (layerEntryIsGroupLayer(layerConfig)) return !this.allLayerEntryConfigAreInError(layerConfig.listOfLayerEntryConfig);
+      return (layerConfig as TypeBaseLayerEntryConfig).layerStatus !== 'error';
     });
   }
 
@@ -414,9 +418,9 @@ export abstract class AbstractGeoViewLayer {
    * @returns {number} The number of layers in error.
    */
   countErrorStatus(listOfLayerEntryConfig: TypeListOfLayerEntryConfig = this.listOfLayerEntryConfig): number {
-    return listOfLayerEntryConfig.reduce((counter: number, layerEntryConfig: TypeLayerEntryConfig) => {
-      if (layerEntryIsGroupLayer(layerEntryConfig)) return counter + this.countErrorStatus(layerEntryConfig.listOfLayerEntryConfig);
-      if ((layerEntryConfig as TypeBaseLayerEntryConfig).layerStatus === 'error') return counter + 1;
+    return listOfLayerEntryConfig.reduce((counter: number, layerConfig: TypeLayerEntryConfig) => {
+      if (layerEntryIsGroupLayer(layerConfig)) return counter + this.countErrorStatus(layerConfig.listOfLayerEntryConfig);
+      if ((layerConfig as TypeBaseLayerEntryConfig).layerStatus === 'error') return counter + 1;
       return counter;
     }, 0);
   }
@@ -428,16 +432,16 @@ export abstract class AbstractGeoViewLayer {
    */
   private initRegisteredLayers(listOfLayerEntryConfig: TypeListOfLayerEntryConfig = this.listOfLayerEntryConfig) {
     const { layer } = api.maps[this.mapId];
-    listOfLayerEntryConfig.forEach((layerEntryConfig: TypeLayerEntryConfig, i) => {
-      if (layer.isRegistered(layerEntryConfig)) {
+    listOfLayerEntryConfig.forEach((layerConfig: TypeLayerEntryConfig, i) => {
+      if (layer.isRegistered(layerConfig)) {
         this.layerLoadError.push({
-          layer: Layer.getLayerPath(layerEntryConfig),
-          consoleMessage: `Duplicate layerPath (mapId:  ${this.mapId}, layerPath: ${Layer.getLayerPath(layerEntryConfig)})`,
+          layer: Layer.getLayerPath(layerConfig),
+          consoleMessage: `Duplicate layerPath (mapId:  ${this.mapId}, layerPath: ${Layer.getLayerPath(layerConfig)})`,
         });
         // Duplicat layer can't be kept because it has the same layer path than the first encontered layer.
         delete listOfLayerEntryConfig[i];
-      } else layer.registerLayerConfig(layerEntryConfig);
-      if (layerEntryIsGroupLayer(layerEntryConfig)) this.initRegisteredLayers(layerEntryConfig.listOfLayerEntryConfig);
+      } else layer.registerLayerConfig(layerConfig);
+      if (layerEntryIsGroupLayer(layerConfig)) this.initRegisteredLayers(layerConfig.listOfLayerEntryConfig);
     });
   }
 
@@ -452,11 +456,11 @@ export abstract class AbstractGeoViewLayer {
         this.registerAllLayersToLayerSets(listOfLayerEntryConfig[0].listOfLayerEntryConfig!);
       else this.registerToLayerSets(listOfLayerEntryConfig[0] as TypeBaseLayerEntryConfig);
     else if (listOfLayerEntryConfig.length > 0)
-      listOfLayerEntryConfig.forEach((layerEntryConfig) => {
-        if (layerEntryIsGroupLayer(layerEntryConfig)) this.registerAllLayersToLayerSets(layerEntryConfig.listOfLayerEntryConfig!);
+      listOfLayerEntryConfig.forEach((layerConfig) => {
+        if (layerEntryIsGroupLayer(layerConfig)) this.registerAllLayersToLayerSets(layerConfig.listOfLayerEntryConfig!);
         else {
-          this.registerToLayerSets(layerEntryConfig as TypeBaseLayerEntryConfig);
-          this.changeLayerPhase('newInstance', layerEntryConfig);
+          this.registerToLayerSets(layerConfig as TypeBaseLayerEntryConfig);
+          this.changeLayerPhase('newInstance', layerConfig);
         }
       });
   }
@@ -559,11 +563,11 @@ export abstract class AbstractGeoViewLayer {
     this.changeLayerPhase('processListOfLayerEntryMetadata');
     try {
       const promisedAllLayerDone: Promise<void>[] = [];
-      listOfLayerEntryConfig.forEach((layerEntryConfig: TypeLayerEntryConfig) => {
-        if (layerEntryIsGroupLayer(layerEntryConfig))
-          if (layerEntryConfig.isMetadataLayerGroup) promisedAllLayerDone.push(this.processMetadataGroupLayer(layerEntryConfig));
-          else promisedAllLayerDone.push(this.processListOfLayerEntryMetadata(layerEntryConfig.listOfLayerEntryConfig));
-        else promisedAllLayerDone.push(this.processLayerMetadata(layerEntryConfig));
+      listOfLayerEntryConfig.forEach((layerConfig: TypeLayerEntryConfig) => {
+        if (layerEntryIsGroupLayer(layerConfig))
+          if (layerConfig.isMetadataLayerGroup) promisedAllLayerDone.push(this.processMetadataGroupLayer(layerConfig));
+          else promisedAllLayerDone.push(this.processListOfLayerEntryMetadata(layerConfig.listOfLayerEntryConfig));
+        else promisedAllLayerDone.push(this.processLayerMetadata(layerConfig));
       });
       await Promise.all(promisedAllLayerDone);
     } catch (error) {
@@ -576,14 +580,14 @@ export abstract class AbstractGeoViewLayer {
    * layer (i.e. they have extent, visibility and query flag definition). Metadata group layers can be identified by
    * the presence of an isMetadataLayerGroup attribute set to true.
    *
-   * @param {TypeLayerGroupEntryConfig} layerEntryConfig The layer entry configuration to process.
+   * @param {TypeLayerGroupEntryConfig} layerConfig The layer entry configuration to process.
    *
    * @returns {Promise<void>} A promise that the vector layer configuration has its metadata and group layers processed.
    */
-  private async processMetadataGroupLayer(layerEntryConfig: TypeLayerGroupEntryConfig): Promise<void> {
+  private async processMetadataGroupLayer(layerConfig: TypeLayerGroupEntryConfig): Promise<void> {
     try {
-      await this.processLayerMetadata(layerEntryConfig);
-      await this.processListOfLayerEntryMetadata(layerEntryConfig.listOfLayerEntryConfig!);
+      await this.processLayerMetadata(layerConfig);
+      await this.processListOfLayerEntryMetadata(layerConfig.listOfLayerEntryConfig!);
     } catch (error) {
       console.log(error);
     }
@@ -593,13 +597,13 @@ export abstract class AbstractGeoViewLayer {
    * This method is used to process the layer's metadata. It will fill the empty outfields and aliasFields properties of the
    * layer's configuration when applicable.
    *
-   * @param {TypeLayerEntryConfig} layerEntryConfig The layer entry configuration to process.
+   * @param {TypeLayerEntryConfig} layerConfig The layer entry configuration to process.
    *
    * @returns {Promise<void>} A promise that the vector layer configuration has its metadata processed.
    */
-  protected processLayerMetadata(layerEntryConfig: TypeLayerEntryConfig): Promise<void> {
-    if (!layerEntryConfig.source) layerEntryConfig.source = {};
-    if (!layerEntryConfig.source.featureInfo) layerEntryConfig.source.featureInfo = { queryable: true };
+  protected processLayerMetadata(layerConfig: TypeLayerEntryConfig): Promise<void> {
+    if (!layerConfig.source) layerConfig.source = {};
+    if (!layerConfig.source.featureInfo) layerConfig.source.featureInfo = { queryable: true };
     return Promise.resolve();
   }
 
@@ -653,29 +657,29 @@ export abstract class AbstractGeoViewLayer {
         layerGroup = this.createLayerGroup(listOfLayerEntryConfig[0].parentLayerConfig as TypeLayerEntryConfig);
       }
       const promiseOfLayerCreated: Promise<BaseLayer | LayerGroup | null>[] = [];
-      listOfLayerEntryConfig.forEach((layerEntryConfig, i) => {
-        if (layerEntryIsGroupLayer(layerEntryConfig)) {
+      listOfLayerEntryConfig.forEach((layerConfig, i) => {
+        if (layerEntryIsGroupLayer(layerConfig)) {
           const newLayerGroup = this.createLayerGroup(listOfLayerEntryConfig[i]);
-          promiseOfLayerCreated.push(this.processListOfLayerEntryConfig(layerEntryConfig.listOfLayerEntryConfig!, newLayerGroup));
+          promiseOfLayerCreated.push(this.processListOfLayerEntryConfig(layerConfig.listOfLayerEntryConfig!, newLayerGroup));
         } else if ((listOfLayerEntryConfig[i] as TypeBaseLayerEntryConfig).layerStatus === 'error')
           promiseOfLayerCreated.push(Promise.resolve(null));
         else {
-          promiseOfLayerCreated.push(this.processOneLayerEntry(layerEntryConfig as TypeBaseLayerEntryConfig));
+          promiseOfLayerCreated.push(this.processOneLayerEntry(layerConfig as TypeBaseLayerEntryConfig));
         }
       });
       const listOfLayerCreated = await Promise.all(promiseOfLayerCreated);
       listOfLayerCreated.forEach((baseLayer, i) => {
         if (baseLayer) {
-          const layerEntryConfig = baseLayer?.get('layerEntryConfig') as TypeBaseLayerEntryConfig;
-          if (layerEntryConfig) {
+          const layerConfig = baseLayer?.get('layerConfig') as TypeBaseLayerEntryConfig;
+          if (layerConfig) {
             baseLayer.setVisible(
-              layerEntryConfig.initialSettings?.visible === 'yes' ||
-                layerEntryConfig.initialSettings?.visible === 'always' ||
-                layerEntryConfig.initialSettings?.visible === undefined
+              layerConfig.initialSettings?.visible === 'yes' ||
+                layerConfig.initialSettings?.visible === 'always' ||
+                layerConfig.initialSettings?.visible === undefined
             );
 
             if (!layerEntryIsGroupLayer(listOfLayerEntryConfig[i])) {
-              this.registerToLayerSets(baseLayer.get('layerEntryConfig') as TypeBaseLayerEntryConfig);
+              this.registerToLayerSets(baseLayer.get('layerConfig') as TypeBaseLayerEntryConfig);
               this.changeLayerStatus('processed', listOfLayerEntryConfig[i]);
             }
             layerGroup!.getLayers().push(baseLayer);
@@ -699,13 +703,13 @@ export abstract class AbstractGeoViewLayer {
   }
 
   /** ***************************************************************************************************************************
-   * This method creates a GeoView layer using the definition provided in the layerEntryConfig parameter.
+   * This method creates a GeoView layer using the definition provided in the layerConfig parameter.
    *
-   * @param {TypeLayerEntryConfig} layerEntryConfig Information needed to create the GeoView layer.
+   * @param {TypeLayerEntryConfig} layerConfig Information needed to create the GeoView layer.
    *
    * @returns {Promise<BaseLayer | null>} The GeoView layer that has been created.
    */
-  protected abstract processOneLayerEntry(layerEntryConfig: TypeBaseLayerEntryConfig): Promise<BaseLayer | null>;
+  protected abstract processOneLayerEntry(layerConfig: TypeBaseLayerEntryConfig): Promise<BaseLayer | null>;
 
   /** ***************************************************************************************************************************
    * Return feature information for the layer specified.
@@ -848,10 +852,10 @@ export abstract class AbstractGeoViewLayer {
   /** ***************************************************************************************************************************
    * This method register the layer entry to layer sets. Nothing is done if the registration is already done.
    *
-   * @param {TypeBaseLayerEntryConfig} layerEntryConfig The layer entry to register.
+   * @param {TypeBaseLayerEntryConfig} layerConfig The layer entry to register.
    */
-  protected registerToLayerSets(layerEntryConfig: TypeBaseLayerEntryConfig) {
-    const layerPath = Layer.getLayerPath(layerEntryConfig);
+  protected registerToLayerSets(layerConfig: TypeBaseLayerEntryConfig) {
+    const layerPath = Layer.getLayerPath(layerConfig);
     if (!this.registerToLayerSetListenerFunctions[layerPath]) this.registerToLayerSetListenerFunctions[layerPath] = {};
 
     if (!this.registerToLayerSetListenerFunctions[layerPath].requestLayerInventory) {
@@ -888,7 +892,7 @@ export abstract class AbstractGeoViewLayer {
     }
 
     if (!this.registerToLayerSetListenerFunctions[layerPath].queryLayer) {
-      if ('featureInfo' in layerEntryConfig.source! && layerEntryConfig.source.featureInfo?.queryable) {
+      if ('featureInfo' in layerConfig.source! && layerConfig.source.featureInfo?.queryable) {
         // Listen to events that request to query a layer and return the resultset to the requester.
         this.registerToLayerSetListenerFunctions[layerPath].queryLayer = (payload) => {
           if (payloadIsQueryLayer(payload)) {
@@ -910,10 +914,10 @@ export abstract class AbstractGeoViewLayer {
   /** ***************************************************************************************************************************
    * This method unregisters the layer from the layer sets.
    *
-   * @param {TypeBaseLayerEntryConfig} layerEntryConfig The layer entry to register.
+   * @param {TypeBaseLayerEntryConfig} layerConfig The layer entry to register.
    */
-  unregisterFromLayerSets(layerEntryConfig: TypeBaseLayerEntryConfig) {
-    const layerPath = Layer.getLayerPath(layerEntryConfig);
+  unregisterFromLayerSets(layerConfig: TypeBaseLayerEntryConfig) {
+    const layerPath = Layer.getLayerPath(layerConfig);
     api.event.emit(LayerSetPayload.createLayerRegistrationPayload(this.mapId, layerPath, 'remove'));
 
     if (this.registerToLayerSetListenerFunctions[layerPath].requestLayerInventory) {
@@ -942,23 +946,22 @@ export abstract class AbstractGeoViewLayer {
 
   /** ***************************************************************************************************************************
    * This method create a layer group.
-   * @param {TypeLayerEntryConfig | TypeGeoviewLayerConfig} layerEntryConfig The layer configuration.
+   * @param {TypeLayerEntryConfig | TypeGeoviewLayerConfig} layerConfig The layer configuration.
    * @returns {LayerGroup} A new layer group.
    */
-  createLayerGroup(layerEntryConfig: TypeLayerEntryConfig | TypeGeoviewLayerConfig): LayerGroup {
+  createLayerGroup(layerConfig: TypeLayerEntryConfig | TypeGeoviewLayerConfig): LayerGroup {
     const layerGroupOptions: LayerGroupOptions = {
       layers: new Collection(),
-      properties: { layerEntryConfig },
+      properties: { layerConfig },
     };
-    if (layerEntryConfig.initialSettings?.extent !== undefined) layerGroupOptions.extent = layerEntryConfig.initialSettings?.extent;
-    if (layerEntryConfig.initialSettings?.maxZoom !== undefined) layerGroupOptions.maxZoom = layerEntryConfig.initialSettings?.maxZoom;
-    if (layerEntryConfig.initialSettings?.minZoom !== undefined) layerGroupOptions.minZoom = layerEntryConfig.initialSettings?.minZoom;
-    if (layerEntryConfig.initialSettings?.opacity !== undefined) layerGroupOptions.opacity = layerEntryConfig.initialSettings?.opacity;
-    if (layerEntryConfig.initialSettings?.visible !== undefined)
-      layerGroupOptions.visible =
-        layerEntryConfig.initialSettings?.visible === 'yes' || layerEntryConfig.initialSettings?.visible === 'always';
-    layerEntryConfig.olLayer = new LayerGroup(layerGroupOptions);
-    return layerEntryConfig.olLayer as LayerGroup;
+    if (layerConfig.initialSettings?.extent !== undefined) layerGroupOptions.extent = layerConfig.initialSettings?.extent;
+    if (layerConfig.initialSettings?.maxZoom !== undefined) layerGroupOptions.maxZoom = layerConfig.initialSettings?.maxZoom;
+    if (layerConfig.initialSettings?.minZoom !== undefined) layerGroupOptions.minZoom = layerConfig.initialSettings?.minZoom;
+    if (layerConfig.initialSettings?.opacity !== undefined) layerGroupOptions.opacity = layerConfig.initialSettings?.opacity;
+    if (layerConfig.initialSettings?.visible !== undefined)
+      layerGroupOptions.visible = layerConfig.initialSettings?.visible === 'yes' || layerConfig.initialSettings?.visible === 'always';
+    layerConfig.olLayer = new LayerGroup(layerGroupOptions);
+    return layerConfig.olLayer as LayerGroup;
   }
 
   /** ***************************************************************************************************************************
@@ -1247,18 +1250,18 @@ export abstract class AbstractGeoViewLayer {
    * Convert the feature information to an array of TypeArrayOfFeatureInfoEntries.
    *
    * @param {Feature<Geometry>[]} features The array of features to convert.
-   * @param {TypeImageLayerEntryConfig | TypeVectorLayerEntryConfig} layerEntryConfig The layer configuration.
+   * @param {TypeImageLayerEntryConfig | TypeVectorLayerEntryConfig} layerConfig The layer configuration.
    *
    * @returns {TypeArrayOfFeatureInfoEntries} The Array of feature information.
    */
   protected async formatFeatureInfoResult(
     features: Feature<Geometry>[],
-    layerEntryConfig: TypeOgcWmsLayerEntryConfig | TypeEsriDynamicLayerEntryConfig | TypeVectorLayerEntryConfig
+    layerConfig: TypeOgcWmsLayerEntryConfig | TypeEsriDynamicLayerEntryConfig | TypeVectorLayerEntryConfig
   ): Promise<TypeArrayOfFeatureInfoEntries> {
     try {
       if (!features.length) return [];
 
-      const featureInfo = layerEntryConfig?.source?.featureInfo;
+      const featureInfo = layerConfig?.source?.featureInfo;
       const fieldTypes = featureInfo?.fieldTypes?.split(',') as ('string' | 'number' | 'date')[];
       const outfields = getLocalizedValue(featureInfo?.outfields, this.mapId)?.split(',');
       const aliasFields = getLocalizedValue(featureInfo?.aliasFields, this.mapId)?.split(',');
@@ -1270,7 +1273,7 @@ export abstract class AbstractGeoViewLayer {
         promisedAllCanvasFound.push(
           new Promise<{ feature: Feature<Geometry>; canvas: HTMLCanvasElement | undefined }>((resolveCanvas) => {
             api.maps[this.mapId].geoviewRenderer
-              .getFeatureCanvas(featureNeedingItsCanvas, layerEntryConfig as TypeVectorLayerEntryConfig)
+              .getFeatureCanvas(featureNeedingItsCanvas, layerConfig as TypeVectorLayerEntryConfig)
               .then((canvas) => {
                 resolveCanvas({ feature: featureNeedingItsCanvas, canvas });
               });
@@ -1290,7 +1293,7 @@ export abstract class AbstractGeoViewLayer {
             geometry: feature,
             featureIcon: canvas,
             fieldInfo: {},
-            nameField: getLocalizedValue(layerEntryConfig?.source?.featureInfo?.nameField, this.mapId) || null,
+            nameField: getLocalizedValue(layerConfig?.source?.featureInfo?.nameField, this.mapId) || null,
           };
 
           const featureFields = (feature as Feature<Geometry>).getKeys();
@@ -1303,15 +1306,15 @@ export abstract class AbstractGeoViewLayer {
                   value: this.getFieldValue(feature, fieldName, fieldTypes![fieldIndex]),
                   dataType: fieldTypes![fieldIndex] as 'string' | 'date' | 'number',
                   alias: aliasFields![fieldIndex],
-                  domain: this.getFieldDomain(fieldName, layerEntryConfig!),
+                  domain: this.getFieldDomain(fieldName, layerConfig!),
                 };
               } else if (!outfields) {
                 featureInfoEntry.fieldInfo[fieldName] = {
                   fieldKey: fieldKeyCounter++,
-                  value: this.getFieldValue(feature, fieldName, this.getFieldType(fieldName, layerEntryConfig!)),
-                  dataType: this.getFieldType(fieldName, layerEntryConfig!),
+                  value: this.getFieldValue(feature, fieldName, this.getFieldType(fieldName, layerConfig!)),
+                  dataType: this.getFieldType(fieldName, layerConfig!),
                   alias: fieldName,
-                  domain: this.getFieldDomain(fieldName, layerEntryConfig!),
+                  domain: this.getFieldDomain(fieldName, layerConfig!),
                 };
               }
             }
@@ -1335,10 +1338,10 @@ export abstract class AbstractGeoViewLayer {
    * @returns {string | undefined} The filter associated to the layer or undefined.
    */
   getLayerFilter(layerPathOrConfig: string | TypeLayerEntryConfig): string | undefined {
-    const layerEntryConfig = (
+    const layerConfig = (
       typeof layerPathOrConfig === 'string' ? this.getLayerConfig(layerPathOrConfig) : layerPathOrConfig
     ) as TypeLayerEntryConfig;
-    if (layerEntryConfig) return layerEntryConfig.olLayer?.get('layerFilter');
+    if (layerConfig) return layerConfig.olLayer?.get('layerFilter');
     return undefined;
   }
 

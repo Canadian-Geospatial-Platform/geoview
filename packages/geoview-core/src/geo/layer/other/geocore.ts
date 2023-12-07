@@ -78,8 +78,8 @@ export class GeoCore {
     const arrayOfListOfGeoviewLayerConfig = new Promise<TypeListOfGeoviewLayerConfig[]>((resolve) => {
       const url = geocoreLayerConfig.metadataAccessPath || `${catalogUrl}/${api.maps[this.mapId].getDisplayLanguage()}`;
       const promiseOfLayerConfigs: Promise<TypeListOfGeoviewLayerConfig>[] = [];
-      geocoreLayerConfig.listOfLayerEntryConfig.forEach((layerEntryConfig: TypeLayerEntryConfig) => {
-        const requestUrl = `${url}/${layerEntryConfig.layerId}`;
+      geocoreLayerConfig.listOfLayerEntryConfig.forEach((layerConfig: TypeLayerEntryConfig) => {
+        const requestUrl = `${url}/${layerConfig.layerId}`;
         promiseOfLayerConfigs.push(UUIDmapConfigReader.getGVlayersConfigFromUUID(this.mapId, requestUrl));
       });
       Promise.all(promiseOfLayerConfigs).then((listOfLayerCreated) => {
