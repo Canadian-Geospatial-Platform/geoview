@@ -22,7 +22,7 @@ export function IconStack({ layerPath, onIconClick, onStackIconClick }: TypeIcon
   const iconData = useIconLayerSet(layerPath);
 
   const iconImage: string = iconData && iconData.length > 0 ? iconData[0] : '';
-  const iconImgStacked: string = iconData && iconData.length > 1 ? iconData[1] : '';
+  const iconImageStacked: string = iconData && iconData.length > 1 ? iconData[1] : '';
   const numOfIcons: number | undefined = iconData?.length;
 
   // TODO for now just use 2 icons
@@ -41,7 +41,7 @@ export function IconStack({ layerPath, onIconClick, onStackIconClick }: TypeIcon
     <Box tabIndex={0} onClick={onIconClick} sx={sxClasses.stackIconsBox} onKeyPress={(e) => onStackIconClick?.(e)}>
       <IconButton sx={sxClasses.iconPreviewStacked} color="primary" size="small" tabIndex={-1}>
         <Box sx={sxClasses.legendIconTransparent}>
-          {iconImgStacked && <img alt="icon" src={iconImgStacked} style={sxClasses.maxIconImg} />}
+          {iconImageStacked && <img alt="icon" src={iconImageStacked} style={sxClasses.maxIconImg} />}
         </Box>
       </IconButton>
       <IconButton sx={sxClasses.iconPreviewHoverable} color="primary" size="small" tabIndex={-1}>
