@@ -70,14 +70,10 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
    * @returns {Promise<BaseLayer | null>} The GeoView base layer that has been created.
    */
   protected processOneLayerEntry(layerConfig: TypeBaseLayerEntryConfig): Promise<BaseLayer | null> {
-    this.changeLayerPhase('processOneLayerEntry');
-    const promisedVectorLayer = new Promise<BaseLayer | null>((resolve) => {
-      this.changeLayerPhase('processOneLayerEntry', layerConfig);
-      const vectorSource = this.createVectorSource(layerConfig);
-      const vectorLayer = this.createVectorLayer(layerConfig as TypeVectorLayerEntryConfig, vectorSource);
-      resolve(vectorLayer);
-    });
-    return promisedVectorLayer;
+    this.changeLayerPhase('processOneLayerEntry', layerConfig);
+    const vectorSource = this.createVectorSource(layerConfig);
+    const vectorLayer = this.createVectorLayer(layerConfig as TypeVectorLayerEntryConfig, vectorSource);
+    return Promise.resolve(vectorLayer);
   }
 
   /** ***************************************************************************************************************************
@@ -96,7 +92,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
   ): VectorSource<Feature<Geometry>> {
     // The line below uses var because a var declaration has a wider scope than a let declaration.
     var vectorSource: VectorSource<Feature<Geometry>>;
-    this.changeLayerPhase('createVectorSource');
+    this.changeLayerPhase('createVectorSource', layerConfig);
     if (this.attributions.length !== 0) sourceOptions.attributions = this.attributions;
 
     // set loading strategy option
@@ -196,8 +192,8 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
    *
    * @returns {VectorLayer<VectorSource>} The vector layer created.
    */
-  createVectorLayer(layerConfig: TypeVectorLayerEntryConfig, vectorSource: VectorSource<Feature<Geometry>>): VectorLayer<VectorSource> {
-    this.changeLayerPhase('createVectorLayer');
+  createVectorLayer(layerConfig: TypeVectorLayerEntryConfig, vectorSource: VectorSource<Feature>): VectorLayer<VectorSource> {
+    this.changeLayerPhase('createVectorLayer', layerConfig);
 
     const layerOptions: VectorLayerOptions<VectorSource> = {
       properties: { layerConfig },
