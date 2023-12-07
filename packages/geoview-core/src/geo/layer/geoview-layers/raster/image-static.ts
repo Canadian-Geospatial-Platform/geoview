@@ -199,21 +199,21 @@ export class ImageStatic extends AbstractGeoViewRaster {
    */
   protected validateListOfLayerEntryConfig(listOfLayerEntryConfig: TypeListOfLayerEntryConfig) {
     this.changeLayerPhase('validateListOfLayerEntryConfig');
-    listOfLayerEntryConfig.forEach((layerEntryConfig: TypeLayerEntryConfig) => {
-      const layerPath = Layer.getLayerPath(layerEntryConfig);
-      if (layerEntryIsGroupLayer(layerEntryConfig)) {
-        this.validateListOfLayerEntryConfig(layerEntryConfig.listOfLayerEntryConfig!);
-        if (!layerEntryConfig.listOfLayerEntryConfig.length) {
+    listOfLayerEntryConfig.forEach((layerConfig: TypeLayerEntryConfig) => {
+      const layerPath = Layer.getLayerPath(layerConfig);
+      if (layerEntryIsGroupLayer(layerConfig)) {
+        this.validateListOfLayerEntryConfig(layerConfig.listOfLayerEntryConfig!);
+        if (!layerConfig.listOfLayerEntryConfig.length) {
           this.layerLoadError.push({
             layer: layerPath,
             consoleMessage: `Empty layer group (mapId:  ${this.mapId}, layerPath: ${layerPath})`,
           });
-          this.changeLayerStatus('error', layerEntryConfig);
+          this.changeLayerStatus('error', layerConfig);
           return;
         }
       }
 
-      this.changeLayerStatus('loading', layerEntryConfig);
+      this.changeLayerStatus('loading', layerConfig);
 
       // When no metadata are provided, all layers are considered valid.
       if (!this.metadata) return;
@@ -222,13 +222,13 @@ export class ImageStatic extends AbstractGeoViewRaster {
       // you can define them in the configuration section.
       if (Array.isArray(this.metadata?.listOfLayerEntryConfig)) {
         const metadataLayerList = Cast<TypeLayerEntryConfig[]>(this.metadata?.listOfLayerEntryConfig);
-        const foundEntry = metadataLayerList.find((layerMetadata) => layerMetadata.layerId === layerEntryConfig.layerId);
+        const foundEntry = metadataLayerList.find((layerMetadata) => layerMetadata.layerId === layerConfig.layerId);
         if (!foundEntry) {
           this.layerLoadError.push({
             layer: layerPath,
             consoleMessage: `GeoJSON layer not found (mapId:  ${this.mapId}, layerPath: ${layerPath})`,
           });
-          this.changeLayerStatus('error', layerEntryConfig);
+          this.changeLayerStatus('error', layerConfig);
           return;
         }
         return;
@@ -241,47 +241,46 @@ export class ImageStatic extends AbstractGeoViewRaster {
   }
 
   /** ****************************************************************************************************************************
-   * This method creates a GeoView Image Static layer using the definition provided in the layerEntryConfig parameter.
+   * This method creates a GeoView Image Static layer using the definition provided in the layerConfig parameter.
    *
-   * @param {TypeImageStaticLayerEntryConfig} layerEntryConfig Information needed to create the GeoView layer.
+   * @param {TypeImageStaticLayerEntryConfig} layerConfig Information needed to create the GeoView layer.
    *
    * @returns {TypeBaseRasterLayer} The GeoView raster layer that has been created.
    */
-  processOneLayerEntry(layerEntryConfig: TypeImageStaticLayerEntryConfig): Promise<TypeBaseRasterLayer | null> {
+  processOneLayerEntry(layerConfig: TypeImageStaticLayerEntryConfig): Promise<TypeBaseRasterLayer | null> {
     const promisedVectorLayer = new Promise<TypeBaseRasterLayer | null>((resolve) => {
-      this.changeLayerPhase('processOneLayerEntry', layerEntryConfig);
+      this.changeLayerPhase('processOneLayerEntry', layerConfig);
 
-      if (!layerEntryConfig.source.extent) throw new Error('Parameter extent is not defined in source element of layerEntryConfig.');
+      if (!layerConfig.source.extent) throw new Error('Parameter extent is not defined in source element of layerConfig.');
       const sourceOptions: SourceOptions = {
-        url: getLocalizedValue(layerEntryConfig.source.dataAccessPath, this.mapId) || '',
-        imageExtent: layerEntryConfig.source.extent,
+        url: getLocalizedValue(layerConfig.source.dataAccessPath, this.mapId) || '',
+        imageExtent: layerConfig.source.extent,
       };
 
-      if (layerEntryConfig.source.crossOrigin) {
-        sourceOptions.crossOrigin = layerEntryConfig.source.crossOrigin;
+      if (layerConfig.source.crossOrigin) {
+        sourceOptions.crossOrigin = layerConfig.source.crossOrigin;
       } else {
         sourceOptions.crossOrigin = 'Anonymous';
       }
 
-      if (layerEntryConfig.source.projection) {
-        sourceOptions.projection = `EPSG:${layerEntryConfig.source.projection}`;
-      } else throw new Error('Parameter projection is not define in source element of layerEntryConfig.');
+      if (layerConfig.source.projection) {
+        sourceOptions.projection = `EPSG:${layerConfig.source.projection}`;
+      } else throw new Error('Parameter projection is not define in source element of layerConfig.');
 
       const staticImageOptions: ImageOptions<Static> = { source: new Static(sourceOptions) };
-      // layerEntryConfig.initialSettings cannot be undefined because config-validation set it to {} if it is undefined.
-      if (layerEntryConfig.initialSettings?.extent !== undefined) staticImageOptions.extent = layerEntryConfig.initialSettings?.extent;
-      if (layerEntryConfig.initialSettings?.maxZoom !== undefined) staticImageOptions.maxZoom = layerEntryConfig.initialSettings?.maxZoom;
-      if (layerEntryConfig.initialSettings?.minZoom !== undefined) staticImageOptions.minZoom = layerEntryConfig.initialSettings?.minZoom;
-      if (layerEntryConfig.initialSettings?.opacity !== undefined) staticImageOptions.opacity = layerEntryConfig.initialSettings?.opacity;
-      if (layerEntryConfig.initialSettings?.visible !== undefined)
-        staticImageOptions.visible =
-          layerEntryConfig.initialSettings?.visible === 'yes' || layerEntryConfig.initialSettings?.visible === 'always';
+      // layerConfig.initialSettings cannot be undefined because config-validation set it to {} if it is undefined.
+      if (layerConfig.initialSettings?.extent !== undefined) staticImageOptions.extent = layerConfig.initialSettings?.extent;
+      if (layerConfig.initialSettings?.maxZoom !== undefined) staticImageOptions.maxZoom = layerConfig.initialSettings?.maxZoom;
+      if (layerConfig.initialSettings?.minZoom !== undefined) staticImageOptions.minZoom = layerConfig.initialSettings?.minZoom;
+      if (layerConfig.initialSettings?.opacity !== undefined) staticImageOptions.opacity = layerConfig.initialSettings?.opacity;
+      if (layerConfig.initialSettings?.visible !== undefined)
+        staticImageOptions.visible = layerConfig.initialSettings?.visible === 'yes' || layerConfig.initialSettings?.visible === 'always';
 
-      layerEntryConfig.olLayer = new ImageLayer(staticImageOptions);
+      layerConfig.olLayer = new ImageLayer(staticImageOptions);
 
-      super.addLoadendListener(layerEntryConfig, 'image');
+      super.addLoadendListener(layerConfig, 'image');
 
-      resolve(layerEntryConfig.olLayer);
+      resolve(layerConfig.olLayer);
     });
 
     return promisedVectorLayer;
