@@ -10,10 +10,10 @@ export const getSxClasses = (theme: Theme) => ({
   buttonDescriptionContainer: {
     display: 'flex',
     flexDirection: 'column',
-    //alignItems: 'center',
+    // alignItems: 'center',
 
-    '& p' : {
-      margin: '0 3px'
-    }
+    '& p': {
+      margin: '0 3px',
+    },
   },
 });

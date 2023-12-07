@@ -50,11 +50,6 @@ export function LayersList({ layersList, setIsLayersListPanelVisible, parentLaye
         border: '3px dashed #ccc',
         ...draggableStyle,
       };
-    } else if(isDragEnabled) {
-      return {
-        cursor: 'grab',
-        userSelect: 'none',
-      }
     }
     return {};
   };

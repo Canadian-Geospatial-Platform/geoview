@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useTheme } from '@mui/material/styles';
 import { styled } from '@mui/material';
 import { CloseButton, LayerTitle, ResponsiveGrid } from '../common';
-import { Box, DeleteIcon, HandleIcon, IconButton, Paper } from '@/ui';
+import { Box, DeleteIcon, IconButton, Paper } from '@/ui';
 import { getSxClasses } from './layers-style';
 import { useLayersDisplayState, useSelectedLayer } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { LayersActions } from './left-panel/layers-actions';
@@ -81,6 +81,7 @@ export function LayersPanel() {
     }
     if (displayState === 'order') {
       const markup = { __html: t('layers.sortingDescription') };
+      /* eslint-disable react/no-danger */
       return (
         <Paper sx={{ padding: '20px' }}>
           <h3>Re-ordering layers</h3>
@@ -89,6 +90,7 @@ export function LayersPanel() {
           </Box>
         </Paper>
       );
+      /* eslint-enable react/no-danger */
     }
 
     return null;
