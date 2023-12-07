@@ -39,6 +39,7 @@ const translations: { [index: string]: { [index: string]: string } } = {
 };
 
 interface TimeSliderPanelProps {
+  config: unknown;
   mapId: string;
   layerPath: string;
 }
@@ -52,7 +53,7 @@ const { cgpv } = window as TypeWindow;
  * @returns {JSX.Element} the slider panel
  */
 export function TimeSlider(TimeSliderPanelProps: TimeSliderPanelProps) {
-  const { layerPath } = TimeSliderPanelProps;
+  const { layerPath, config } = TimeSliderPanelProps;
   const { react, ui } = cgpv;
   const { useState, useRef, useEffect } = react;
   const {
@@ -86,16 +87,39 @@ export function TimeSlider(TimeSliderPanelProps: TimeSliderPanelProps) {
   // Get actions and states from store
   // TODO: evaluate best option to set value by layer path.... trough a getter?
   const { setValues, setLocked, setReversed, setDelay, setFiltering } = useTimeSliderStoreActions();
-  const { range } = useTimeSliderLayers()[layerPath];
-  const { defaultValue } = useTimeSliderLayers()[layerPath];
-  const { minAndMax } = useTimeSliderLayers()[layerPath];
-  const { fieldAlias } = useTimeSliderLayers()[layerPath];
-  const { singleHandle } = useTimeSliderLayers()[layerPath];
-  const { values } = useTimeSliderLayers()[layerPath];
-  const { filtering } = useTimeSliderLayers()[layerPath];
-  const { delay } = useTimeSliderLayers()[layerPath];
-  const { locked } = useTimeSliderLayers()[layerPath];
-  const { reversed } = useTimeSliderLayers()[layerPath];
+
+  // slider default config
+  const sliderConfig = config?.layers?.find((o: { layerPath: string }) => o.layerPath === layerPath);
+  const configValues = {
+    title: sliderConfig?.title || '',
+    description: sliderConfig?.description || '',
+    defaultValue: sliderConfig?.defaultValue || '',
+    locked: sliderConfig?.locked || false,
+    reversed: sliderConfig?.reversed || false,
+  };
+
+  const {
+    title,
+    description,
+    name,
+    defaultValue,
+    range,
+    minAndMax,
+    field,
+    fieldAlias,
+    filtering,
+    singleHandle,
+    values,
+    delay,
+    locked,
+    reversed,
+  } = useTimeSliderLayers()[layerPath];
+
+  const sliderTitle = configValues?.title || title || name;
+  const sliderDesc = configValues?.description || description;
+  // const sliderDefaultValue = configValues?.defaultValue || defaultValue;
+  // const sliderLocked = configValues?.locked !== undefined ? configValues?.locked : locked;
+  // const sliderReversed = configValues?.reversed !== undefined ? configValues?.reversed : reversed;
 
   const timeStampRange = range.map((entry) => new Date(entry).getTime());
   // Check if range occurs in a single day or year
@@ -306,12 +330,8 @@ export function TimeSlider(TimeSliderPanelProps: TimeSliderPanelProps) {
       <div style={sxClasses.rightPanelContainer}>
         <Grid container sx={sxClasses.rightPanelBtnHolder}>
           <Grid item xs={9}>
-            <Typography component="div" sx={{ ...sxClasses.panelHeaders, paddingLeft: '20px', textAlign: 'center', paddingTop: '10px' }}>
-              {timeframe !== undefined
-                ? `${fieldAlias} (${
-                    timeframe === 'day' ? new Date(defaultValue).toLocaleDateString() : new Date(defaultValue).getFullYear()
-                  })`
-                : fieldAlias}
+            <Typography component="div" sx={{ ...sxClasses.panelHeaders, paddingLeft: '20px', paddingTop: '10px' }}>
+              {sliderTitle}
             </Typography>
           </Grid>
           <Grid item xs={3}>
@@ -333,6 +353,7 @@ export function TimeSlider(TimeSliderPanelProps: TimeSliderPanelProps) {
               style={{ width: '80%', color: 'primary' }}
               min={minAndMax[0]}
               max={minAndMax[1]}
+              defaultValue={Number(defaultValue)}
               value={values}
               valueLabelFormat={(value) => valueLabelFormat(value)}
               marks={sliderMarks}
@@ -409,6 +430,20 @@ export function TimeSlider(TimeSliderPanelProps: TimeSliderPanelProps) {
             </FormControl>
           </div>
         </Grid>
+        {true && (
+          <Grid item xs={12}>
+            <Typography component="div" sx={{ px: '20px', py: '5px' }}>
+              sliderDesc
+            </Typography>
+          </Grid>
+        )}
+        {fieldAlias && (
+          <Grid item xs={12}>
+            <Typography component="div" sx={{ px: '20px', py: '5px' }}>
+              {`${fieldAlias} (${field})`}
+            </Typography>
+          </Grid>
+        )}
       </div>
     </Grid>
   );
