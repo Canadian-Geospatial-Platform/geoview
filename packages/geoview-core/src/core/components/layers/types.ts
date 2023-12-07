@@ -12,11 +12,11 @@ export type TypeLegendLayerItem = {
   iconType?: 'simple' | 'list';
   name?: string;
   iconImage?: string | null;
-  iconImgStacked?: string | null;
-  iconList?: TypeLegendLayerListItem[];
+  iconImageStacked?: string | null;
+  iconList?: TypeLegendItem[];
 };
 
-export interface TypeLegendLayerListItem {
+export interface TypeLegendItem {
   geometryType: TypeStyleGeometry;
   name: string;
   isVisible: TypeVisibilityFlags;
@@ -32,8 +32,8 @@ export interface TypeLegendLayer {
   metadataAccessPath?: string;
   order?: number; // useful for ordering layers
   layerName: string;
-  type: TypeGeoviewLayerType;
-  styleConfig?: TypeStyleConfig;
+  type?: TypeGeoviewLayerType;
+  styleConfig?: TypeStyleConfig | null;
   layerStatus?: TypeLayerStatus;
   layerPhase?: string;
   querySent?: boolean;
@@ -43,7 +43,7 @@ export interface TypeLegendLayer {
   icons?: TypeLegendLayerIcons;
   // data: TypeLegend | undefined | null;
   allItemsChecked?: boolean; // if all items in this layer are visible
-  items: TypeLegendLayerListItem[];
+  items: TypeLegendItem[];
   children: TypeLegendLayer[];
 
   opacity?: number;
