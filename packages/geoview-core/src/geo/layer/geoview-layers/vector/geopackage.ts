@@ -152,21 +152,21 @@ export class GeoPackage extends AbstractGeoViewVector {
    */
   protected validateListOfLayerEntryConfig(listOfLayerEntryConfig: TypeListOfLayerEntryConfig) {
     this.changeLayerPhase('validateListOfLayerEntryConfig');
-    return listOfLayerEntryConfig.forEach((layerEntryConfig: TypeLayerEntryConfig) => {
-      const layerPath = Layer.getLayerPath(layerEntryConfig);
-      if (layerEntryIsGroupLayer(layerEntryConfig)) {
-        this.validateListOfLayerEntryConfig(layerEntryConfig.listOfLayerEntryConfig!);
-        if (!layerEntryConfig.listOfLayerEntryConfig.length) {
+    return listOfLayerEntryConfig.forEach((layerConfig: TypeLayerEntryConfig) => {
+      const layerPath = Layer.getLayerPath(layerConfig);
+      if (layerEntryIsGroupLayer(layerConfig)) {
+        this.validateListOfLayerEntryConfig(layerConfig.listOfLayerEntryConfig!);
+        if (!layerConfig.listOfLayerEntryConfig.length) {
           this.layerLoadError.push({
             layer: layerPath,
             consoleMessage: `Empty layer group (mapId:  ${this.mapId}, layerPath: ${layerPath})`,
           });
-          this.changeLayerStatus('error', layerEntryConfig);
+          this.changeLayerStatus('error', layerConfig);
           return;
         }
       }
 
-      this.changeLayerStatus('loading', layerEntryConfig);
+      this.changeLayerStatus('loading', layerConfig);
 
       // When no metadata are provided, all layers are considered valid.
       if (!this.metadata) return;
@@ -174,33 +174,33 @@ export class GeoPackage extends AbstractGeoViewVector {
       // Note that the code assumes geopackage does not contains metadata layer group. If you need layer group,
       // you can define them in the configuration section.
       if (Array.isArray(this.metadata!.collections)) {
-        const foundCollection = this.metadata!.collections.find((layerMetadata) => layerMetadata.id === layerEntryConfig.layerId);
+        const foundCollection = this.metadata!.collections.find((layerMetadata) => layerMetadata.id === layerConfig.layerId);
         if (!foundCollection) {
           this.layerLoadError.push({
             layer: layerPath,
             consoleMessage: `GeoPackage feature layer not found (mapId:  ${this.mapId}, layerPath: ${layerPath})`,
           });
-          this.changeLayerStatus('error', layerEntryConfig);
+          this.changeLayerStatus('error', layerConfig);
           return;
         }
 
         if (foundCollection.description)
-          layerEntryConfig.layerName = {
+          layerConfig.layerName = {
             en: foundCollection.description as string,
             fr: foundCollection.description as string,
           };
 
         const { currentProjection } = MapEventProcessor.getMapState(this.mapId);
-        if (layerEntryConfig.initialSettings?.extent)
-          layerEntryConfig.initialSettings.extent = transformExtent(
-            layerEntryConfig.initialSettings.extent,
+        if (layerConfig.initialSettings?.extent)
+          layerConfig.initialSettings.extent = transformExtent(
+            layerConfig.initialSettings.extent,
             'EPSG:4326',
             `EPSG:${currentProjection}`
           );
 
-        if (!layerEntryConfig.initialSettings?.bounds && foundCollection.extent?.spatial?.bbox && foundCollection.extent?.spatial?.crs) {
-          // layerEntryConfig.initialSettings cannot be undefined because config-validation set it to {} if it is undefined.
-          layerEntryConfig.initialSettings!.bounds = transformExtent(
+        if (!layerConfig.initialSettings?.bounds && foundCollection.extent?.spatial?.bbox && foundCollection.extent?.spatial?.crs) {
+          // layerConfig.initialSettings cannot be undefined because config-validation set it to {} if it is undefined.
+          layerConfig.initialSettings!.bounds = transformExtent(
             foundCollection.extent.spatial.bbox[0] as number[],
             get(foundCollection.extent.spatial.crs as string)!,
             `EPSG:${currentProjection}`
@@ -248,31 +248,31 @@ export class GeoPackage extends AbstractGeoViewVector {
       } else if (listOfLayerEntryConfig.length > 1) {
         if (!layerGroup) layerGroup = this.createLayerGroup(listOfLayerEntryConfig[0].parentLayerConfig as TypeLayerEntryConfig);
 
-        listOfLayerEntryConfig.forEach((layerEntryConfig) => {
-          if (layerEntryIsGroupLayer(layerEntryConfig)) {
-            const newLayerGroup = this.createLayerGroup(layerEntryConfig);
-            this.processListOfLayerEntryConfig(layerEntryConfig.listOfLayerEntryConfig!, newLayerGroup).then((groupReturned) => {
+        listOfLayerEntryConfig.forEach((layerConfig) => {
+          if (layerEntryIsGroupLayer(layerConfig)) {
+            const newLayerGroup = this.createLayerGroup(layerConfig);
+            this.processListOfLayerEntryConfig(layerConfig.listOfLayerEntryConfig!, newLayerGroup).then((groupReturned) => {
               if (groupReturned) {
                 layerGroup!.getLayers().push(groupReturned);
               } else {
                 this.layerLoadError.push({
                   layer: Layer.getLayerPath(listOfLayerEntryConfig[0]),
-                  consoleMessage: `Unable to create group layer ${Layer.getLayerPath(layerEntryConfig)} on map ${this.mapId}`,
+                  consoleMessage: `Unable to create group layer ${Layer.getLayerPath(layerConfig)} on map ${this.mapId}`,
                 });
                 resolve(null);
               }
             });
           } else {
-            this.processOneGeopackage(layerEntryConfig as TypeBaseLayerEntryConfig).then((layers) => {
+            this.processOneGeopackage(layerConfig as TypeBaseLayerEntryConfig).then((layers) => {
               if (layers) {
                 layerGroup!.getLayers().push(layers);
-                this.changeLayerStatus('processed', layerEntryConfig);
+                this.changeLayerStatus('processed', layerConfig);
               } else {
                 this.layerLoadError.push({
                   layer: Layer.getLayerPath(listOfLayerEntryConfig[0]),
-                  consoleMessage: `Unable to create layer ${Layer.getLayerPath(layerEntryConfig)} on map ${this.mapId}`,
+                  consoleMessage: `Unable to create layer ${Layer.getLayerPath(layerConfig)} on map ${this.mapId}`,
                 });
-                this.changeLayerStatus('error', layerEntryConfig);
+                this.changeLayerStatus('error', layerConfig);
               }
             });
           }
@@ -301,17 +301,17 @@ export class GeoPackage extends AbstractGeoViewVector {
   /** ***************************************************************************************************************************
    * Create a source configuration for the vector layer.
    *
-   * @param {TypeBaseLayerEntryConfig} layerEntryConfig The layer entry configuration.
+   * @param {TypeBaseLayerEntryConfig} layerConfig The layer entry configuration.
    * @param {SourceOptions} sourceOptions The source options (default: {}).
    * @param {ReadOptions} readOptions The read options (default: {}).
    */
   protected extractGeopackageData(
-    layerEntryConfig: TypeBaseLayerEntryConfig,
+    layerConfig: TypeBaseLayerEntryConfig,
     sourceOptions: SourceOptions = {},
     readOptions: ReadOptions = {}
   ): Promise<[layerData[], sldsInterface]> {
     const promisedGeopackageData = new Promise<[layerData[], sldsInterface]>((resolve) => {
-      const url = getLocalizedValue(layerEntryConfig.source!.dataAccessPath!, this.mapId);
+      const url = getLocalizedValue(layerConfig.source!.dataAccessPath!, this.mapId);
       if (this.attributions.length !== 0) sourceOptions.attributions = this.attributions;
       const layersInfo: layerData[] = [];
       const styleSlds: sldsInterface = {};
@@ -404,11 +404,11 @@ export class GeoPackage extends AbstractGeoViewVector {
 
               let featuresLoadErrorHandler: () => void;
               const featuresLoadEndHandler = () => {
-                this.changeLayerStatus('loaded', layerEntryConfig);
+                this.changeLayerStatus('loaded', layerConfig);
                 vectorSource.un('featuresloaderror', featuresLoadErrorHandler);
               };
               featuresLoadErrorHandler = () => {
-                this.changeLayerStatus('error', layerEntryConfig);
+                this.changeLayerStatus('error', layerConfig);
                 vectorSource.un('featuresloadend', featuresLoadEndHandler);
               };
 
@@ -428,36 +428,35 @@ export class GeoPackage extends AbstractGeoViewVector {
   }
 
   /** ***************************************************************************************************************************
-   * This method creates a GeoView layer using the definition provided in the layerEntryConfig parameter.
+   * This method creates a GeoView layer using the definition provided in the layerConfig parameter.
    *
-   * @param {TypeLayerEntryConfig} layerEntryConfig Information needed to create the GeoView layer.
+   * @param {TypeLayerEntryConfig} layerConfig Information needed to create the GeoView layer.
    * @param {sldsInterface} sld The SLD style associated with the layers geopackage, if any
    *
    * @returns {Promise<BaseLayer | null>} The GeoView base layer that has been created.
    */
   protected processOneGeopackageLayer(
-    layerEntryConfig: TypeBaseLayerEntryConfig,
+    layerConfig: TypeBaseLayerEntryConfig,
     layerInfo: layerData,
     sld?: sldsInterface
   ): Promise<BaseLayer | null> {
     const promisedVectorLayer = new Promise<BaseLayer | null>((resolve) => {
-      api.maps[this.mapId].layer.registerLayerConfig(layerEntryConfig);
-      this.registerToLayerSets(layerEntryConfig);
+      api.maps[this.mapId].layer.registerLayerConfig(layerConfig);
+      this.registerToLayerSets(layerConfig);
 
       const { name, source } = layerInfo;
       // entryType will be group if copied from group parent
-      layerEntryConfig.entryType = 'vector';
+      layerConfig.entryType = 'vector';
 
       // Extract layer styles if they exist
       if (sld && sld[name]) {
         const { rules } = SLDReader.Reader(sld[name]).layers[0].styles[0].featuretypestyles[0];
-        if ((layerEntryConfig as TypeVectorLayerEntryConfig).style === undefined)
-          (layerEntryConfig as TypeVectorLayerEntryConfig).style = {};
+        if ((layerConfig as TypeVectorLayerEntryConfig).style === undefined) (layerConfig as TypeVectorLayerEntryConfig).style = {};
 
         for (let i = 0; i < rules.length; i++) {
           Object.keys(rules[i]).forEach((key) => {
             // Polygon style
-            if (key.toLowerCase() === 'polygonsymbolizer' && !(layerEntryConfig as TypeVectorLayerEntryConfig).style!.Polygon) {
+            if (key.toLowerCase() === 'polygonsymbolizer' && !(layerConfig as TypeVectorLayerEntryConfig).style!.Polygon) {
               const polyStyles = rules[i].polygonsymbolizer[0];
               let color: string | undefined;
               let graphicSize: number | undefined;
@@ -521,9 +520,9 @@ export class GeoPackage extends AbstractGeoViewVector {
                 paternWidth: patternWidth || 1,
                 fillStyle: fillStyle || 'solid',
               };
-              (layerEntryConfig as TypeVectorLayerEntryConfig).style!.Polygon = { styleType: 'simple', settings: styles };
+              (layerConfig as TypeVectorLayerEntryConfig).style!.Polygon = { styleType: 'simple', settings: styles };
               // LineString style
-            } else if (key.toLowerCase() === 'linesymbolizer' && !(layerEntryConfig as TypeVectorLayerEntryConfig).style!.LineString) {
+            } else if (key.toLowerCase() === 'linesymbolizer' && !(layerConfig as TypeVectorLayerEntryConfig).style!.LineString) {
               const lineStyles = rules[i].linesymbolizer[0];
 
               const stroke: TypeStrokeSymbolConfig = {};
@@ -533,9 +532,9 @@ export class GeoPackage extends AbstractGeoViewVector {
               }
 
               const styles: TypeLineStringVectorConfig = { type: 'lineString', stroke };
-              (layerEntryConfig as TypeVectorLayerEntryConfig).style!.LineString = { styleType: 'simple', settings: styles };
+              (layerConfig as TypeVectorLayerEntryConfig).style!.LineString = { styleType: 'simple', settings: styles };
               // Point style
-            } else if (key.toLowerCase() === 'pointsymbolizer' && !(layerEntryConfig as TypeVectorLayerEntryConfig).style!.Point) {
+            } else if (key.toLowerCase() === 'pointsymbolizer' && !(layerConfig as TypeVectorLayerEntryConfig).style!.Point) {
               const { graphic } = rules[i].pointsymbolizer[0];
 
               let offset: [number, number] | null = null;
@@ -573,7 +572,7 @@ export class GeoPackage extends AbstractGeoViewVector {
                     if (graphic.mark.stroke.styling?.strokeWidth) stroke.width = graphic.mark.stroke.styling.strokeWidth;
                   }
 
-                  (layerEntryConfig as TypeVectorLayerEntryConfig).style!.Point = { styleType: 'simple', settings: styles };
+                  (layerConfig as TypeVectorLayerEntryConfig).style!.Point = { styleType: 'simple', settings: styles };
                 }
               }
             }
@@ -583,24 +582,24 @@ export class GeoPackage extends AbstractGeoViewVector {
 
       if (layerInfo.properties) {
         const { properties } = layerInfo;
-        this.processFeatureInfoConfig(properties as TypeJsonObject, layerEntryConfig as TypeVectorLayerEntryConfig);
+        this.processFeatureInfoConfig(properties as TypeJsonObject, layerConfig as TypeVectorLayerEntryConfig);
       }
 
       let loadErrorHandler: () => void;
       const loadEndHandler = () => {
-        this.changeLayerStatus('loaded', layerEntryConfig);
+        this.changeLayerStatus('loaded', layerConfig);
         source.un('featuresloaderror', loadErrorHandler);
       };
       loadErrorHandler = () => {
-        this.changeLayerStatus('error', layerEntryConfig);
+        this.changeLayerStatus('error', layerConfig);
         source.un('featuresloadend', loadEndHandler);
       };
 
       source.once('featuresloadend', loadEndHandler);
       source.once('featuresloaderror', loadErrorHandler);
 
-      const vectorLayer = this.createVectorLayer(layerEntryConfig as TypeVectorLayerEntryConfig, source);
-      this.changeLayerStatus('processed', layerEntryConfig);
+      const vectorLayer = this.createVectorLayer(layerConfig as TypeVectorLayerEntryConfig, source);
+      this.changeLayerStatus('processed', layerConfig);
 
       resolve(vectorLayer);
     });
@@ -611,50 +610,50 @@ export class GeoPackage extends AbstractGeoViewVector {
   /** ***************************************************************************************************************************
    * This method creates all layers from a single geopackage
    *
-   * @param {TypeLayerEntryConfig} layerEntryConfig Information needed to create the GeoView layer.
+   * @param {TypeLayerEntryConfig} layerConfig Information needed to create the GeoView layer.
    * @param {LayerGroup} layerGroup Optional layer group for multiple layers.
    *
    * @returns {Promise<BaseLayer | null>} The GeoView base layer that has been created.
    */
-  protected processOneGeopackage(layerEntryConfig: TypeBaseLayerEntryConfig, layerGroup?: LayerGroup): Promise<BaseLayer | null> {
+  protected processOneGeopackage(layerConfig: TypeBaseLayerEntryConfig, layerGroup?: LayerGroup): Promise<BaseLayer | null> {
     const promisedLayers = new Promise<BaseLayer | LayerGroup | null>((resolve) => {
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      this.extractGeopackageData(layerEntryConfig).then(([layers, slds]) => {
+      this.extractGeopackageData(layerConfig).then(([layers, slds]) => {
         if (layers.length === 1) {
-          this.processOneGeopackageLayer(layerEntryConfig, layers[0], slds).then((baseLayer) => {
+          this.processOneGeopackageLayer(layerConfig, layers[0], slds).then((baseLayer) => {
             if (baseLayer) {
-              this.changeLayerStatus('processed', layerEntryConfig);
+              this.changeLayerStatus('processed', layerConfig);
               if (layerGroup) layerGroup.getLayers().push(baseLayer);
               resolve(layerGroup || baseLayer);
             } else {
               this.layerLoadError.push({
-                layer: Layer.getLayerPath(layerEntryConfig),
-                consoleMessage: `Unable to create layer ${Layer.getLayerPath(layerEntryConfig)} on map ${this.mapId}`,
+                layer: Layer.getLayerPath(layerConfig),
+                consoleMessage: `Unable to create layer ${Layer.getLayerPath(layerConfig)} on map ${this.mapId}`,
               });
-              this.changeLayerStatus('error', layerEntryConfig);
+              this.changeLayerStatus('error', layerConfig);
               resolve(null);
             }
           });
         } else {
-          layerEntryConfig.entryType = 'group';
-          (layerEntryConfig as TypeLayerEntryConfig).listOfLayerEntryConfig = [];
-          const newLayerGroup = this.createLayerGroup(layerEntryConfig);
+          layerConfig.entryType = 'group';
+          (layerConfig as TypeLayerEntryConfig).listOfLayerEntryConfig = [];
+          const newLayerGroup = this.createLayerGroup(layerConfig);
           for (let i = 0; i < layers.length; i++) {
-            const newLayerEntryConfig = cloneDeep(layerEntryConfig) as TypeBaseLayerEntryConfig;
+            const newLayerEntryConfig = cloneDeep(layerConfig) as TypeBaseLayerEntryConfig;
             newLayerEntryConfig.layerId = layers[i].name;
             newLayerEntryConfig.layerName = { en: layers[i].name, fr: layers[i].name };
             newLayerEntryConfig.entryType = 'vector';
-            newLayerEntryConfig.parentLayerConfig = Cast<TypeLayerGroupEntryConfig>(layerEntryConfig);
+            newLayerEntryConfig.parentLayerConfig = Cast<TypeLayerGroupEntryConfig>(layerConfig);
 
             this.processOneGeopackageLayer(newLayerEntryConfig, layers[i], slds).then((baseLayer) => {
               if (baseLayer) {
-                (layerEntryConfig as unknown as TypeLayerGroupEntryConfig).listOfLayerEntryConfig!.push(newLayerEntryConfig);
+                (layerConfig as unknown as TypeLayerGroupEntryConfig).listOfLayerEntryConfig!.push(newLayerEntryConfig);
                 newLayerGroup.getLayers().push(baseLayer);
                 this.changeLayerStatus('processed', newLayerEntryConfig);
               } else {
                 this.layerLoadError.push({
-                  layer: Layer.getLayerPath(layerEntryConfig),
-                  consoleMessage: `Unable to create layer ${Layer.getLayerPath(layerEntryConfig)} on map ${this.mapId}`,
+                  layer: Layer.getLayerPath(layerConfig),
+                  consoleMessage: `Unable to create layer ${Layer.getLayerPath(layerConfig)} on map ${this.mapId}`,
                 });
                 this.changeLayerStatus('error', newLayerEntryConfig);
                 resolve(null);
@@ -672,47 +671,46 @@ export class GeoPackage extends AbstractGeoViewVector {
    * This method sets the outfields and aliasFields of the source feature info.
    *
    * @param {TypeJsonArray} fields An array of field names and its aliases.
-   * @param {TypeVectorLayerEntryConfig} layerEntryConfig The vector layer entry to configure.
+   * @param {TypeVectorLayerEntryConfig} layerConfig The vector layer entry to configure.
    */
-  private processFeatureInfoConfig(fields: TypeJsonObject, layerEntryConfig: TypeVectorLayerEntryConfig) {
-    if (!layerEntryConfig.source) layerEntryConfig.source = {};
-    if (!layerEntryConfig.source.featureInfo) layerEntryConfig.source.featureInfo = { queryable: true };
+  private processFeatureInfoConfig(fields: TypeJsonObject, layerConfig: TypeVectorLayerEntryConfig) {
+    if (!layerConfig.source) layerConfig.source = {};
+    if (!layerConfig.source.featureInfo) layerConfig.source.featureInfo = { queryable: true };
     // Process undefined outfields or aliasFields ('' = false and !'' = true). Also, if en is undefined, then fr is also undefined.
     // when en and fr are undefined, we set both en and fr to the same value.
-    if (!layerEntryConfig.source.featureInfo.outfields?.en || !layerEntryConfig.source.featureInfo.aliasFields?.en) {
-      const processOutField = !layerEntryConfig.source.featureInfo.outfields?.en;
-      const processAliasFields = !layerEntryConfig.source.featureInfo.aliasFields?.en;
+    if (!layerConfig.source.featureInfo.outfields?.en || !layerConfig.source.featureInfo.aliasFields?.en) {
+      const processOutField = !layerConfig.source.featureInfo.outfields?.en;
+      const processAliasFields = !layerConfig.source.featureInfo.aliasFields?.en;
       if (processOutField) {
-        layerEntryConfig.source.featureInfo.outfields = { en: '' };
-        layerEntryConfig.source.featureInfo.fieldTypes = '';
+        layerConfig.source.featureInfo.outfields = { en: '' };
+        layerConfig.source.featureInfo.fieldTypes = '';
       }
-      if (processAliasFields) layerEntryConfig.source.featureInfo.aliasFields = { en: '' };
+      if (processAliasFields) layerConfig.source.featureInfo.aliasFields = { en: '' };
 
       Object.keys(fields).forEach((fieldEntry) => {
         if (!fields[fieldEntry]) return;
         if (fields[fieldEntry].type === 'Geometry') return;
         if (processOutField) {
-          layerEntryConfig.source!.featureInfo!.outfields!.en = `${layerEntryConfig.source!.featureInfo!.outfields!.en}${fieldEntry},`;
+          layerConfig.source!.featureInfo!.outfields!.en = `${layerConfig.source!.featureInfo!.outfields!.en}${fieldEntry},`;
           let fieldType: 'string' | 'date' | 'number';
           if (fields[fieldEntry].type === 'date') fieldType = 'date';
           else if (['int', 'number'].includes(fields[fieldEntry].type as string)) fieldType = 'number';
           else fieldType = 'string';
-          layerEntryConfig.source!.featureInfo!.fieldTypes = `${layerEntryConfig.source!.featureInfo!.fieldTypes}${fieldType},`;
+          layerConfig.source!.featureInfo!.fieldTypes = `${layerConfig.source!.featureInfo!.fieldTypes}${fieldType},`;
         }
-        layerEntryConfig.source!.featureInfo!.aliasFields!.en = `${layerEntryConfig.source!.featureInfo!.aliasFields!.en}${fieldEntry},`;
+        layerConfig.source!.featureInfo!.aliasFields!.en = `${layerConfig.source!.featureInfo!.aliasFields!.en}${fieldEntry},`;
       });
-      layerEntryConfig.source.featureInfo!.outfields!.en = layerEntryConfig.source.featureInfo!.outfields?.en?.slice(0, -1);
-      layerEntryConfig.source.featureInfo!.fieldTypes = layerEntryConfig.source.featureInfo!.fieldTypes?.slice(0, -1);
-      layerEntryConfig.source.featureInfo!.aliasFields!.en = layerEntryConfig.source.featureInfo!.aliasFields?.en?.slice(0, -1);
-      layerEntryConfig.source!.featureInfo!.outfields!.fr = layerEntryConfig.source!.featureInfo!.outfields?.en;
-      layerEntryConfig.source!.featureInfo!.aliasFields!.fr = layerEntryConfig.source!.featureInfo!.aliasFields?.en;
+      layerConfig.source.featureInfo!.outfields!.en = layerConfig.source.featureInfo!.outfields?.en?.slice(0, -1);
+      layerConfig.source.featureInfo!.fieldTypes = layerConfig.source.featureInfo!.fieldTypes?.slice(0, -1);
+      layerConfig.source.featureInfo!.aliasFields!.en = layerConfig.source.featureInfo!.aliasFields?.en?.slice(0, -1);
+      layerConfig.source!.featureInfo!.outfields!.fr = layerConfig.source!.featureInfo!.outfields?.en;
+      layerConfig.source!.featureInfo!.aliasFields!.fr = layerConfig.source!.featureInfo!.aliasFields?.en;
     }
-    if (!layerEntryConfig.source.featureInfo.nameField) {
+    if (!layerConfig.source.featureInfo.nameField) {
       const en =
-        layerEntryConfig.source.featureInfo!.outfields!.en?.split(',')[0] ||
-        layerEntryConfig.source.featureInfo!.outfields!.fr?.split(',')[0];
+        layerConfig.source.featureInfo!.outfields!.en?.split(',')[0] || layerConfig.source.featureInfo!.outfields!.fr?.split(',')[0];
       const fr = en;
-      if (en) layerEntryConfig.source.featureInfo.nameField = { en, fr };
+      if (en) layerConfig.source.featureInfo.nameField = { en, fr };
     }
   }
 

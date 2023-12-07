@@ -244,48 +244,46 @@ export class Layer {
 
   /**
    * Get the layer Path of the layer configuration parameter.
-   * @param {TypeLayerEntryConfig} layerEntryConfig The layer configuration for wich we want to get the layer path.
+   * @param {TypeLayerEntryConfig} layerConfig The layer configuration for wich we want to get the layer path.
    * @param {string} layerPath Internal parameter used to build the layer path (should not be used by the user).
    *
    * @returns {string} Returns the layer path.
    */
-  static getLayerPath(layerEntryConfig: TypeLayerEntryConfig, layerPath?: string): string {
+  static getLayerPath(layerConfig: TypeLayerEntryConfig, layerPath?: string): string {
     let pathEnding = layerPath;
     if (pathEnding === undefined)
       pathEnding =
-        layerEntryConfig.layerPathEnding === undefined
-          ? layerEntryConfig.layerId
-          : `${layerEntryConfig.layerId}.${layerEntryConfig.layerPathEnding}`;
-    if (layerEntryConfig.geoviewRootLayer === layerEntryConfig.parentLayerConfig)
-      return `${layerEntryConfig.geoviewRootLayer!.geoviewLayerId!}/${pathEnding}`;
+        layerConfig.layerPathEnding === undefined ? layerConfig.layerId : `${layerConfig.layerId}.${layerConfig.layerPathEnding}`;
+    if (layerConfig.geoviewRootLayer === layerConfig.parentLayerConfig)
+      return `${layerConfig.geoviewRootLayer!.geoviewLayerId!}/${pathEnding}`;
     return this.getLayerPath(
-      layerEntryConfig.parentLayerConfig as TypeLayerGroupEntryConfig,
-      `${(layerEntryConfig.parentLayerConfig as TypeLayerGroupEntryConfig).layerId}/${pathEnding}`
+      layerConfig.parentLayerConfig as TypeLayerGroupEntryConfig,
+      `${(layerConfig.parentLayerConfig as TypeLayerGroupEntryConfig).layerId}/${pathEnding}`
     );
   }
 
   /**
    * Register the layer identifier. Duplicate identifier are not allowed.
-   * @param {TypeLayerEntryConfig} layerEntryConfig The layer configuration to register.
+   * @param {TypeLayerEntryConfig} layerConfig The layer configuration to register.
    *
    * @returns {boolean} Returns false if the layer configuration can't be registered.
    */
-  registerLayerConfig(layerEntryConfig: TypeLayerEntryConfig): boolean {
-    const layerPath = Layer.getLayerPath(layerEntryConfig);
+  registerLayerConfig(layerConfig: TypeLayerEntryConfig): boolean {
+    const layerPath = Layer.getLayerPath(layerConfig);
     if (this.registeredLayers[layerPath]) return false;
-    this.registeredLayers[layerPath] = layerEntryConfig;
-    this.geoviewLayers[layerPath.split('/')[0]].changeLayerStatus('newInstance', layerEntryConfig);
+    this.registeredLayers[layerPath] = layerConfig;
+    this.geoviewLayers[layerPath.split('/')[0]].changeLayerStatus('newInstance', layerConfig);
     return true;
   }
 
   /**
    * Method used to verify if a layer is registered. Returns true if registered.
-   * @param {TypeLayerEntryConfig} layerEntryConfig The layer configuration to test.
+   * @param {TypeLayerEntryConfig} layerConfig The layer configuration to test.
    *
    * @returns {boolean} Returns true if the layer configuration is registered.
    */
-  isRegistered(layerEntryConfig: TypeLayerEntryConfig): boolean {
-    const layerPath = Layer.getLayerPath(layerEntryConfig);
+  isRegistered(layerConfig: TypeLayerEntryConfig): boolean {
+    const layerPath = Layer.getLayerPath(layerConfig);
     return this.registeredLayers[layerPath] !== undefined;
   }
 
@@ -341,7 +339,7 @@ export class Layer {
     // initialize these two constant now because we will delete the information use to get their values.
     const indexToDelete = this.registeredLayers[partialLayerPath]
       ? this.registeredLayers[partialLayerPath].parentLayerConfig?.listOfLayerEntryConfig.findIndex(
-          (layerEntryConfig) => layerEntryConfig === this.registeredLayers?.[partialLayerPath]
+          (layerConfig) => layerConfig === this.registeredLayers?.[partialLayerPath]
         )
       : undefined;
     const listOfLayerEntryConfigAffected = this.registeredLayers[partialLayerPath]?.parentLayerConfig?.listOfLayerEntryConfig;
