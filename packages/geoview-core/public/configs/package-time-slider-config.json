@@ -57,7 +57,7 @@
       }
     ]
   },
-  "theme": "royal",
+  "theme": "geo.ca",
   "components": ["north-arrow", "overview-map"],
   "corePackages": ["footer-panel"],
   "externalPackages": [],

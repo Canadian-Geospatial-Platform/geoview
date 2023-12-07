@@ -8,7 +8,7 @@ import { KeyboardPan } from 'ol/interaction';
 import { GeoViewStoreType } from '@/core/stores/geoview-store';
 import { AbstractEventProcessor } from '../abstract-event-processor';
 import { api, Coordinate, NORTH_POLE_POSITION, TypeBasemapOptions, TypeClickMarker } from '@/app';
-import { TypeMapState, TypeValidMapProjectionCodes } from '@/geo/map/map-schema-types';
+import { TypeInteraction, TypeMapState, TypeValidMapProjectionCodes } from '@/geo/map/map-schema-types';
 import {
   mapPayload,
   lngLatPayload,
@@ -220,8 +220,13 @@ export class MapEventProcessor extends AbstractEventProcessor {
     });
     map.addOverlay(clickMarkerOverlay);
 
+    // trigger the creation of feature info layer set and legend layer set
+    // We always trigger creation because outside package may rely on them
+    api.getFeatureInfoLayerSet(mapId);
+    api.getLegendsLayerSet(mapId);
+
     // set store
-    // TODO: evaluate if still needed OR use another approach
+    // TODO: try async, evaluate if still needed OR use another approach
     setTimeout(() => store.getState().mapState.actions.setMapElement(map), 250);
     setTimeout(() => store.getState().mapState.actions.setOverlayNorthMarker(northPoleMarker), 250);
     setTimeout(() => store.getState().mapState.actions.setOverlayClickMarker(clickMarkerOverlay), 250);
@@ -245,6 +250,10 @@ export class MapEventProcessor extends AbstractEventProcessor {
 
   static clickMarkerIconShow(mapId: string, marker: TypeClickMarker): void {
     getGeoViewStore(mapId).getState().mapState.actions.showClickMarker(marker);
+  }
+
+  static getMapInteraction(mapId: string): TypeInteraction {
+    return getGeoViewStore(mapId).getState().mapState.interaction;
   }
 
   static getMapState(mapId: string): TypeMapState {

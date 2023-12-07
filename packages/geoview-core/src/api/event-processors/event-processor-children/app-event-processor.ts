@@ -1,7 +1,7 @@
 import { GeoViewStoreType } from '@/core/stores/geoview-store';
 import { AbstractEventProcessor } from '../abstract-event-processor';
 import { getGeoViewStore } from '@/core/stores/stores-managers';
-import { NotificationDetailsType, TypeDisplayLanguage, TypeHTMLElement } from '@/core/types/cgpv-types';
+import { NotificationDetailsType, TypeDisplayLanguage, TypeHTMLElement, TypeSupportedTheme } from '@/core/types/cgpv-types';
 
 export class AppEventProcessor extends AbstractEventProcessor {
   onInitialize(store: GeoViewStoreType) {
@@ -25,6 +25,10 @@ export class AppEventProcessor extends AbstractEventProcessor {
 
   static getDisplayLanguage(mapId: string): TypeDisplayLanguage {
     return getGeoViewStore(mapId).getState().appState.displayLanguage;
+  }
+
+  static getTheme(mapId: string): TypeSupportedTheme {
+    return getGeoViewStore(mapId).getState().appState.theme;
   }
 
   static getSupportedLanguages(mapId: string): TypeDisplayLanguage[] {

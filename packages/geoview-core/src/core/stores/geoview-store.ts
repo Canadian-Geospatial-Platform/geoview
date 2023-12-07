@@ -10,10 +10,7 @@ import { IMapDataTableState, initialDataTableState } from './store-interface-and
 import { ITimeSliderState, initializeTimeSliderState } from './store-interface-and-intial-values/time-slider-state';
 import { IUIState, initializeUIState } from './store-interface-and-intial-values/ui-state';
 
-import { TypeLegendResultSets } from '@/api/events/payloads/get-legends-payload';
-import { TypeFeatureInfoResultSets } from '@/api/events/payloads/get-feature-info-payload';
 import { TypeMapFeaturesConfig } from '@/core/types/global-types';
-import { generateId } from '@/core/utils/utilities';
 
 export type TypeSetStore = (
   partial: IGeoViewState | Partial<IGeoViewState> | ((state: IGeoViewState) => IGeoViewState | Partial<IGeoViewState>),
@@ -34,17 +31,13 @@ export interface IGeoViewState {
   mapState: IMapState;
   timeSliderState: ITimeSliderState;
   uiState: IUIState;
-
-  // results set
-  featureInfoResultSets: TypeFeatureInfoResultSets;
-  legendResultSets: TypeLegendResultSets;
 }
 
 export const geoViewStoreDefinition = (set: TypeSetStore, get: TypeGetStore) =>
   ({
     mapConfig: undefined,
     setMapConfig: (config: TypeMapFeaturesConfig) => {
-      set({ mapConfig: config, mapId: config.mapId || generateId('') });
+      set({ mapConfig: config, mapId: config.mapId });
 
       // initialize default stores section from config information
       get().appState.setDefaultConfigValues(config);
@@ -59,9 +52,6 @@ export const geoViewStoreDefinition = (set: TypeSetStore, get: TypeGetStore) =>
     mapState: initializeMapState(set, get),
     timeSliderState: initializeTimeSliderState(set, get),
     uiState: initializeUIState(set, get),
-
-    featureInfoResultSets: {} as TypeFeatureInfoResultSets,
-    legendResultSets: {} as TypeLegendResultSets,
   } as IGeoViewState);
 
 export const geoViewStoreDefinitionWithSubscribeSelector = subscribeWithSelector(geoViewStoreDefinition);

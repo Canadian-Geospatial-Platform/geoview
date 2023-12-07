@@ -150,8 +150,7 @@ We should follow a standard order when we create a component so it is easy to fi
 ``` ts
 const { myScale } = ...props
 
-const mapConfig = useContext(MapContext);
-const { mapId } = mapConfig;
+const mapId = useGeoViewMapId();
 
 const { t } = useTranslation<string>();
 

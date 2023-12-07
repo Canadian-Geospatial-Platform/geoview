@@ -1,33 +1,8 @@
-import { GeoViewStoreType } from '@/core/stores/geoview-store';
 import { AbstractEventProcessor } from '../abstract-event-processor';
-import { EVENT_NAMES } from '@/api/events/event-types';
-import {
-  TypeFeatureInfoResultSets,
-  TypeArrayOfLayerData,
-  payloadIsAllQueriesDone,
-  EventType,
-} from '@/api/events/payloads/get-feature-info-payload';
-import { api } from '@/app';
+import { TypeFeatureInfoResultSets, TypeArrayOfLayerData, EventType } from '@/api/events/payloads/get-feature-info-payload';
 import { getGeoViewStore } from '@/core/stores/stores-managers';
 
 export class FeatureInfoEventProcessor extends AbstractEventProcessor {
-  onInitialize(store: GeoViewStoreType) {
-    const { mapId } = store.getState();
-
-    api.event.on(
-      EVENT_NAMES.GET_FEATURE_INFO.ALL_QUERIES_DONE,
-      (allQueriesPayload) => {
-        if (payloadIsAllQueriesDone(allQueriesPayload)) {
-          store.setState({ featureInfoResultSets: allQueriesPayload.resultSets });
-        }
-      },
-      `${mapId}/FeatureInfoLayerSet`
-    );
-
-    // add to arr of subscriptions so it can be destroyed later
-    this.subscriptionArr.push();
-  }
-
   // **********************************************************
   // Static functions for Typescript files to access store actions
   // **********************************************************
@@ -41,8 +16,7 @@ export class FeatureInfoEventProcessor extends AbstractEventProcessor {
     if (eventType === 'click') {
       const newDetails: TypeArrayOfLayerData = [];
       layerPathInResultSets.forEach((existingLayerPath) => {
-        if (resultSets[existingLayerPath].data[eventType]?.features?.length)
-          newDetails.push(resultSets[existingLayerPath].data[eventType]!);
+        if (resultSets[existingLayerPath].data[eventType]?.features) newDetails.push(resultSets[existingLayerPath].data[eventType]!);
       });
       const storeDetails = store.getState().detailsState.layerDataArray;
       if (storeDetails.length !== newDetails.length || storeDetails.findIndex((layerData, i) => layerData !== newDetails[i]) !== -1)

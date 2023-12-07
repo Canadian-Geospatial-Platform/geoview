@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import { TypeVectorLayerStyles } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { api } from '@/app';
-import { TypeLegendLayer, TypeLegendLayerListItem } from '../types';
+import { TypeLegendLayer, TypeLegendItem } from '../types';
 import { useGeoViewStore } from '@/core/stores/stores-managers';
 import { generateId } from '@/core/utils/utilities';
 import { TypeVisibilityFlags } from '@/geo';
@@ -16,7 +16,7 @@ export function useLegendHelpers() {
     // console.log('I got here ', legendInfo, _.keys(legendInfo));
     const keys = _.keys(legendInfo);
 
-    const layerItems: TypeLegendLayerListItem[] = [
+    const layerItems: TypeLegendItem[] = [
       {
         geometryType: 'Point',
         default: false,
@@ -193,7 +193,7 @@ export function useLegendHelpers() {
 
     keys.forEach((i, index) => {
       const setData = legendInfo[i];
-      const items: TypeLegendLayerListItem[] = [];
+      const items: TypeLegendItem[] = [];
       const legendData = setData.data?.legend ? (setData.data.legend as TypeVectorLayerStyles) : undefined;
       const itemCanvases = legendData ? legendData.Point?.arrayOfCanvas : undefined;
       if (itemCanvases) {
