@@ -1,19 +1,6 @@
-/* eslint-disable no-console */
-// TODO: Remove the no-console eslint above when component development stabilizes
 import { TypeWindow, TypeLayerEntryConfig } from 'geoview-core';
 import { useDetailsStoreLayerDataArray } from 'geoview-core/src/core/stores/store-interface-and-intial-values/details-state';
-import {
-  GeoChart as GeoChartComponent,
-  GeoChartConfig,
-  ChartType,
-  ChartOptions,
-  ChartData,
-  GeoChartDefaultColors,
-  GeoDefaultDataPoint,
-  SchemaValidator,
-  ValidatorResult,
-  GeoChartAction,
-} from 'geochart';
+import { GeoChart as GeoChartComponent, GeoChartConfig, ChartType, GeoChartDefaultColors, SchemaValidator, GeoChartAction } from 'geochart';
 import {
   PayloadBaseClass,
   payloadIsQueryLayerQueryTypeAtLongLat,
@@ -33,6 +20,8 @@ interface GeoChartProps {
   mapId: string;
   config: PluginGeoChartConfig<ChartType>;
   schemaValidator: SchemaValidator;
+  // eslint-disable-next-line react/require-default-props
+  sx?: React.CSSProperties;
 }
 
 /**
@@ -46,17 +35,16 @@ export function GeoChart(props: GeoChartProps): JSX.Element {
   const { cgpv } = w;
   const { useTranslation } = cgpv;
   const { useTheme } = cgpv.ui;
-  const { Box } = cgpv.ui.elements;
   const { useEffect, useState, useCallback } = cgpv.react;
 
   // Read props
-  const { mapId, config: parentConfig, schemaValidator } = props;
+  const { mapId, config: parentConfig, schemaValidator, sx } = props;
 
   // Get the theme
   const theme = useTheme();
 
   // Get the translations
-  const { t, i18n } = useTranslation<string>();
+  const { i18n } = useTranslation<string>();
 
   // Tweak the default colors based on the theme
   const defaultColors: GeoChartDefaultColors = {
@@ -69,8 +57,8 @@ export function GeoChart(props: GeoChartProps): JSX.Element {
 
   // Use State
   const [config, setConfig] = useState<PluginGeoChartConfig<ChartType>>(parentConfig);
-  const [action, setAction] = useState<GeoChartAction>();
   const [inputs, setInputs] = useState<GeoChartConfig<ChartType>>();
+  const [action, setAction] = useState<GeoChartAction>();
   const [isLoadingChart, setIsLoadingChart] = useState<boolean>();
 
   // Use Store
@@ -178,37 +166,21 @@ export function GeoChart(props: GeoChartProps): JSX.Element {
   );
 
   /**
-   * Temporary handle to help debugging. Will get removed when the bypass for eslint console.log() gets lifted
-   * @param chart ChartType The chart type result
-   * @param options ChartOptions<ChartType> The chart options parsed results
-   * @param data ChartData<ChartType, GeoDefaultDataPoint<ChartType>> The chart data parsed results
-   */
-  const handleParsed = useCallback<
-    (chart: ChartType, options: ChartOptions<ChartType>, data: ChartData<ChartType, GeoDefaultDataPoint<ChartType>>) => void
-  >(
-    (chart: ChartType, options: ChartOptions<ChartType>, data: ChartData<ChartType, GeoDefaultDataPoint<ChartType>>) => {
-      console.log(`${t('Parsed to ChartJS')}: `, chart, options, data);
-    },
-    [t]
-  );
-
-  /**
    * Handles when an error happened with GeoChart.
-   * @param validators (ValidatorResult | undefined)[] The validator results which produced the error.
+   * @param error string The error.
+   * @param exception unknown The exception if any
    */
-  const handleError = useCallback<(validators: (ValidatorResult | undefined)[]) => void>(
-    (validators: (ValidatorResult | undefined)[]): void => {
-      // Gather all error messages
-      const msgAll = SchemaValidator.parseValidatorResultsMessages(validators);
-
-      // Show errors
-      if (msgAll.length > 0) cgpv.api.utilities.showError(mapId, msgAll);
+  const handleError = useCallback<(error: string, exception: unknown | undefined) => void>(
+    (error: string): void => {
+      // Show error
+      cgpv.api.utilities.showError(mapId, error);
     },
     [cgpv.api.utilities, mapId]
   );
 
   // Effect hook when the storeLayerDataArray changes - coming from the store.
   useEffect(() => {
+    // eslint-disable-next-line no-console
     console.log('USE EFFECT storeLayerDataArray', storeLayerDataArray);
     // Fetches the datasources associated with the layerDataArray coming from the store - reloading the Chart in the process
     fetchDatasources(storeLayerDataArray);
@@ -224,7 +196,7 @@ export function GeoChart(props: GeoChartProps): JSX.Element {
 
     return () => {
       // Unwire handlers on component unmount
-      // TODO: Refactor - The store should say when the query has started (state). An issue is being created for this already. For now, this works.
+      // TODO: Refactor - The store should have a 'loading features clicked state (with abortion mechanisms)'. An issue is being created for this already. For now, this works.
       cgpv.api.event.off(cgpv.api.eventNames.GET_FEATURE_INFO.QUERY_LAYER, `${mapId}`, handleQueryStarted);
       cgpv.api.event.off(EVENT_CHART_REDRAW, mapId, handleChartRedraw);
       cgpv.api.event.off(EVENT_CHART_LOAD, mapId, handleChartLoad);
@@ -237,18 +209,15 @@ export function GeoChart(props: GeoChartProps): JSX.Element {
   // region RENDER SECTION ********************************************************************************************
 
   return (
-    <Box>
-      <GeoChartComponent
-        sx={{ backgroundColor: defaultColors.backgroundColor }}
-        inputs={inputs}
-        schemaValidator={schemaValidator}
-        defaultColors={defaultColors}
-        isLoadingChart={isLoadingChart}
-        action={action}
-        onParsed={handleParsed}
-        onError={handleError}
-      />
-    </Box>
+    <GeoChartComponent
+      schemaValidator={schemaValidator}
+      sx={{ ...sx, ...{ backgroundColor: defaultColors.backgroundColor } }}
+      inputs={inputs}
+      defaultColors={defaultColors}
+      isLoadingChart={isLoadingChart}
+      action={action}
+      onError={handleError}
+    />
   );
 
   // #endregion
