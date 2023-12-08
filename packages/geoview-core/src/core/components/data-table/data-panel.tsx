@@ -16,7 +16,8 @@ import {
   useDataTableStoreMapFilteredRecord,
   useDataTableStoreRowsFiltered,
   useDataTableStoreSelectedLayerIndex,
-} from '@/core/stores/store-interface-and-intial-values/data-table-state';
+  useMapVisibleLayers,
+} from '@/core/stores';
 
 import { ResponsiveGrid, EnlargeButton, CloseButton, LayerList, LayerListEntry, LayerTitle } from '../common';
 
@@ -48,6 +49,7 @@ export function Datapanel({ layerData, mapId, language }: DatapanelProps) {
   const isEnlargeDataTable = useDataTableStoreIsEnlargeDataTable();
   const mapFiltered = useDataTableStoreMapFilteredRecord();
   const rowsFiltered = useDataTableStoreRowsFiltered();
+  const visibleLayers = useMapVisibleLayers();
   const { setSelectedLayerIndex, setIsEnlargeDataTable, setLayersData } = useDataTableStoreActions();
 
   const handleLayerChange = useCallback((_layer: LayerListEntry, index: number) => {
@@ -100,20 +102,23 @@ export function Datapanel({ layerData, mapId, language }: DatapanelProps) {
   const renderList = useCallback(
     () => (
       <LayerList
-        layerList={layerData.map((layer, index) => ({
-          layerName: layer.layerName![language] ?? '',
-          layerPath: layer.layerKey,
-          layerFeatures: getFeaturesOfLayer(layer.layerKey, index),
-          tooltip: getLayerTooltip(layer.layerName![language] ?? '', layer.layerKey, index),
-          mapFilteredIcon: isMapFilteredSelectedForLayer(layer.layerKey) && <FilterAltIcon sx={{ color: theme.palette.grey['500'] }} />,
-        }))}
+        layerList={visibleLayers
+          .map((layerPath) => layerData.filter((data) => data.layerKey === layerPath)[0])
+          .filter((layer) => layer !== undefined)
+          .map((layer, index) => ({
+            layerName: layer.layerName![language] ?? '',
+            layerPath: layer.layerKey,
+            layerFeatures: getFeaturesOfLayer(layer.layerKey, index),
+            tooltip: getLayerTooltip(layer.layerName![language] ?? '', layer.layerKey, index),
+            mapFilteredIcon: isMapFilteredSelectedForLayer(layer.layerKey) && <FilterAltIcon sx={{ color: theme.palette.grey['500'] }} />,
+          }))}
         isEnlargeDataTable={isEnlargeDataTable}
         selectedLayerIndex={selectedLayerIndex}
         handleListItemClick={handleLayerChange}
       />
     ),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [layerData, selectedLayerIndex, isEnlargeDataTable, mapFiltered, rowsFiltered]
+    [layerData, selectedLayerIndex, isEnlargeDataTable, mapFiltered, rowsFiltered, visibleLayers]
   );
 
   useEffect(() => {

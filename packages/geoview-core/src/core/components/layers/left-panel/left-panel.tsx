@@ -1,5 +1,5 @@
 import { Dispatch, SetStateAction, useEffect } from 'react';
-import { useLayerStoreActions, useLayersList, useSelectedLayer } from '@/core/stores/store-interface-and-intial-values/layer-state';
+import { useLayerStoreActions, useLayersList, useSelectedLayer } from '@/core/stores/';
 import { LayersList } from './layers-list';
 
 interface LeftPanelProps {
@@ -8,9 +8,9 @@ interface LeftPanelProps {
 
 export function LeftPanel({ setIsLayersListPanelVisible }: LeftPanelProps): JSX.Element {
   // get from the store
-  const legendLayers = useLayersList(); // get store value(s)
+  const legendLayers = useLayersList();
   const { setSelectedLayerPath } = useLayerStoreActions();
-  const selectedLayer = useSelectedLayer(); // get store value
+  const selectedLayer = useSelectedLayer();
 
   useEffect(() => {
     if (!selectedLayer) {
