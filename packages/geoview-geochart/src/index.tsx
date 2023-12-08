@@ -98,10 +98,11 @@ class GeoChartPlugin extends AbstractPlugin {
         .reduce((acc, curr) => {
           if (api.maps[mapId].layer.registeredLayers[curr]) {
             const currLayer = api.maps[mapId].layer.registeredLayers[curr];
+            const layerName = currLayer.layerName && language in currLayer.layerName ? currLayer.layerName[language] : currLayer.layerName;
             const layerData = {
-              layerName: currLayer.layerName[language],
+              layerName,
               layerPath: curr,
-              tooltip: currLayer.layerName[language] as string,
+              tooltip: layerName,
             };
             acc.push(layerData);
           }
