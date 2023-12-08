@@ -170,7 +170,7 @@ export class MapViewer {
               if (payloadIsGeoViewLayerAdded(payload)) {
                 const { geoviewLayer } = payload;
                 geoviewLayer.layerOrder = this.layer.orderSubLayers(geoviewLayer.listOfLayerEntryConfig);
-                this.layer.setLayerZIndices(geoviewLayer);
+                MapEventProcessor.setLayerZIndices(this.mapId);
                 if (geoviewLayer.allLayerEntryConfigProcessed()) {
                   api.event.emit(GeoViewLayerPayload.createTestGeoviewLayersPayload('run cgpv.init callback?'));
                 }

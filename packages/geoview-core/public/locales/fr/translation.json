@@ -80,7 +80,7 @@
     "select": "Sélectionner l'élément sur la carte",
     "externalLink": "Lien externe",
     "detailsView": "Vue détaillée",
-    "selectVisbleLayer": "Sélectionnez n'importe quelle couche visible sur la carte pour commencer",
+    "selectVisbleLayer": "Cliquez sur un élément de la carte pour en voir les détails.",
     "feature": "item",
     "clickOnMap": "Cliquer sur la carte",
     "nextFeatureBtn": "Item suivant",

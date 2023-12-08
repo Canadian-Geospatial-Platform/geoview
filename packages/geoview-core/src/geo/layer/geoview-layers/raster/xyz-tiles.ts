@@ -189,7 +189,11 @@ export class XYZTiles extends AbstractGeoViewRaster {
       const sourceOptions: SourceOptions = {
         url: getLocalizedValue(layerConfig.source.dataAccessPath, this.mapId),
       };
-      if (layerConfig.source.crossOrigin) sourceOptions.crossOrigin = layerConfig.source.crossOrigin;
+      if (layerConfig.source.crossOrigin) {
+        sourceOptions.crossOrigin = layerConfig.source.crossOrigin;
+      } else {
+        sourceOptions.crossOrigin = 'Anonymous';
+      }
       if (layerConfig.source.projection) sourceOptions.projection = `EPSG:${layerConfig.source.projection}`;
       if (layerConfig.source.tileGrid) {
         const tileGridOptions: TileGridOptions = {

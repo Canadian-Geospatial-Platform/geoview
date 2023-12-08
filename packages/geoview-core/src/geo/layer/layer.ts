@@ -1,5 +1,4 @@
 /* eslint-disable no-param-reassign */
-import { indexOf } from 'lodash';
 
 import { GeoCore, layerConfigIsGeoCore } from '@/geo/layer/other/geocore';
 import { Geometry } from '@/geo/layer/geometry/geometry';
@@ -7,6 +6,7 @@ import { FeatureHighlight } from '@/geo/utils/feature-highlight';
 
 import { api } from '@/app';
 import { EVENT_NAMES } from '@/api/events/event-types';
+import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 
 import { Config } from '@/core/utils/config/config';
 import { generateId, showError, replaceParams, getLocalizedMessage, whenThisThen } from '@/core/utils/utilities';
@@ -64,7 +64,7 @@ export class Layer {
   geometry: Geometry | undefined;
 
   // order to load layers
-  layerOrder: string[] = [];
+  initialLayerOrder: string[] = [];
 
   /** used to reference the map id */
   private mapId: string;
@@ -191,18 +191,14 @@ export class Layer {
     const validGeoviewLayerConfigs = this.deleteDuplicatGeoviewLayerConfig(geoviewLayerConfigs);
 
     // set order for layers to appear on the map according to config
-    this.layerOrder = [];
+    this.initialLayerOrder = [];
 
     validGeoviewLayerConfigs.forEach((geoviewLayerConfig) => {
-      if (geoviewLayerConfig.geoviewLayerId) {
-        // layer order reversed so highest index is top layer
-        this.layerOrder.unshift(geoviewLayerConfig.geoviewLayerId);
-        // layers without id uses sublayer ids
-      } else if (geoviewLayerConfig.listOfLayerEntryConfig !== undefined) {
-        geoviewLayerConfig.listOfLayerEntryConfig.forEach((subLayer) => {
-          if (subLayer.layerId) this.layerOrder.unshift(subLayer.layerId);
-        });
-      }
+      const layerPath =
+        geoviewLayerConfig.listOfLayerEntryConfig.length > 1
+          ? geoviewLayerConfig.geoviewLayerId
+          : `${geoviewLayerConfig.geoviewLayerId}/${geoviewLayerConfig.listOfLayerEntryConfig[0].layerId}`;
+      this.initialLayerOrder.push(layerPath);
       api.event.emit(layerConfigPayload(EVENT_NAMES.LAYER.EVENT_ADD_LAYER, this.mapId, geoviewLayerConfig));
     });
   }
@@ -249,7 +245,7 @@ export class Layer {
 
   /**
    * Get the layer Path of the layer configuration parameter.
-   * @param {TypeLayerEntryConfig} layerConfig The layer configuration for wich we want to get the layer path.
+   * @param {TypeLayerEntryConfig} layerConfig The layer configuration for which we want to get the layer path.
    * @param {string} layerPath Internal parameter used to build the layer path (should not be used by the user).
    *
    * @returns {string} Returns the layer path.
@@ -401,7 +397,6 @@ export class Layer {
    * @param {TypeGeoviewLayerConfig} geoviewLayer the layer configuration to remove
    */
   removeGeoviewLayer = (geoviewLayer: AbstractGeoViewLayer): string => {
-    this.layerOrder.splice(indexOf(api.maps[this.mapId].layer.layerOrder, geoviewLayer.geoviewLayerId), 1);
     api.event.emit(GeoViewLayerPayload.createRemoveGeoviewLayerPayload(this.mapId, geoviewLayer));
 
     return geoviewLayer.geoviewLayerId;
@@ -484,52 +479,6 @@ export class Layer {
   }
 
   /**
-   * Set Z index for layer and it's sublayers
-   *
-   * @param {AbstractGeoViewLayer} geoviewLayer layer to set Z index for
-   */
-  setLayerZIndices = (geoviewLayer: AbstractGeoViewLayer) => {
-    // if olLayers is null, the layer is in error and we return.
-    if (!geoviewLayer.olLayers) return;
-    const zIndex =
-      this.layerOrder.indexOf(geoviewLayer.geoviewLayerId) !== -1 ? this.layerOrder.indexOf(geoviewLayer.geoviewLayerId) * 100 : 0;
-    geoviewLayer.olLayers!.setZIndex(zIndex);
-    geoviewLayer.listOfLayerEntryConfig.forEach((subLayer) => {
-      const subLayerZIndex =
-        geoviewLayer.layerOrder.indexOf(subLayer.layerId) !== -1 ? geoviewLayer.layerOrder.indexOf(subLayer.layerId) : 0;
-      subLayer.olLayer?.setZIndex(subLayerZIndex + zIndex);
-    });
-  };
-
-  /**
-   * Move layer to new spot.
-   *
-   * @param {string} layerId ID of layer to be moved
-   * @param {number} destination index that layer is to move to
-   * @param {string} parentLayerId ID of parent layer if layer is a sublayer
-   */
-  moveLayer = (layerId: string, destination: number, parentLayerId?: string) => {
-    const orderOfLayers: string[] = parentLayerId
-      ? api.maps[this.mapId].layer.getGeoviewLayerById(parentLayerId)!.layerOrder
-      : this.layerOrder;
-    orderOfLayers.reverse(); // layer order in legend is reversed from layerOrder
-    const location = orderOfLayers.indexOf(layerId);
-    const [removed] = orderOfLayers.splice(location, 1);
-    orderOfLayers.splice(destination, 0, removed);
-    orderOfLayers.reverse();
-
-    if (!parentLayerId) {
-      orderOfLayers.forEach((movedLayerId) => {
-        const movedLayer = api.maps[this.mapId].layer.getGeoviewLayerById(movedLayerId);
-        if (movedLayer) this.setLayerZIndices(movedLayer);
-      });
-    } else {
-      const parentLayer = api.maps[this.mapId].layer.getGeoviewLayerById(parentLayerId);
-      if (parentLayer) this.setLayerZIndices(parentLayer);
-    }
-  };
-
-  /**
    * Highlight layer or sublayer on map
    *
    * @param {string} layerPath ID of layer to highlight
@@ -586,8 +535,7 @@ export class Layer {
         Object.keys(this.registeredLayers).forEach((registeredLayerPath) => {
           const up1LevelInLayerPath = layerPath.split('/').slice(0, -1).join('/');
           const up1LevelsInOtherLayerPath = registeredLayerPath.split('/').slice(0, -1).join('/');
-          if (up1LevelInLayerPath === up1LevelsInOtherLayerPath)
-            this.setLayerZIndices(this.geoviewLayers[registeredLayerPath.split('/')[0]]);
+          if (up1LevelInLayerPath === up1LevelsInOtherLayerPath) MapEventProcessor.setLayerZIndices(this.mapId);
           else {
             const otherOpacity = this.geoviewLayer(registeredLayerPath).getOpacity();
             this.geoviewLayer(registeredLayerPath).setOpacity((otherOpacity || 1) * 4);
@@ -599,7 +547,7 @@ export class Layer {
           const up1LevelInLayerPath = splitLayerPath.slice(0, -1).join('/');
           const up2LevelsInOtherLayerPath = registeredLayerPath.split('/').slice(0, -2).join('/');
           if (registeredLayerPath === layerPath || (registeredLayerPath.length > 1 && up2LevelsInOtherLayerPath === up1LevelInLayerPath))
-            this.setLayerZIndices(this.geoviewLayers[registeredLayerPath.split('/')[0]]);
+            MapEventProcessor.setLayerZIndices(this.mapId);
           else {
             const otherOpacity = this.geoviewLayer(registeredLayerPath).getOpacity();
             this.geoviewLayer(registeredLayerPath).setOpacity((otherOpacity || 1) * 4);
@@ -611,7 +559,7 @@ export class Layer {
           if (registeredLayerPath !== layerPath) {
             const otherOpacity = this.geoviewLayer(registeredLayerPath).getOpacity();
             this.geoviewLayer(registeredLayerPath).setOpacity((otherOpacity || 1) * 4);
-          } else this.setLayerZIndices(this.geoviewLayers[registeredLayerPath.split('/')[0]]);
+          } else MapEventProcessor.setLayerZIndices(this.mapId);
         });
       }
       this.highlightedLayer.layerPath = undefined;

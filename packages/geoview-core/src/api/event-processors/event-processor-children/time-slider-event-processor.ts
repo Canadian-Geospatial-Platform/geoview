@@ -1,7 +1,6 @@
 import { GeoviewStoreType } from '@/core/stores/geoview-store';
 import { AbstractEventProcessor } from '../abstract-event-processor';
 import { AbstractGeoViewVector, EsriDynamic, TypeFeatureInfoLayerConfig, TypeTimeSliderValues, WMS, api, getLocalizedValue } from '@/app';
-import { TypeLegendLayer } from '@/core/components/layers/types';
 
 export class TimeSliderEventProcessor extends AbstractEventProcessor {
   onInitialize(store: GeoviewStoreType) {
@@ -10,26 +9,27 @@ export class TimeSliderEventProcessor extends AbstractEventProcessor {
     api.event.once(
       api.eventNames.MAP.EVENT_MAP_LOADED,
       () => {
-        const initialLegends = store.getState().layerState.legendLayers;
-        const initialTimeSliderLayerPaths = TimeSliderEventProcessor.filterTimeSliderLayers(mapId, initialLegends);
+        const orderedLayers = store.getState().mapState.layerOrder;
+        const initialTimeSliderLayerPaths = TimeSliderEventProcessor.filterTimeSliderLayers(mapId, orderedLayers);
         if (initialTimeSliderLayerPaths) {
           initialTimeSliderLayerPaths.forEach((layerPath) => {
             const timeSliderLayer = TimeSliderEventProcessor.getInitialTimeSliderValues(mapId, layerPath);
             store.getState().timeSliderState.actions.addTimeSliderLayer(timeSliderLayer);
           });
         }
-        const initialVisibleLayers = TimeSliderEventProcessor.filterVisibleTimeSliderLayers(mapId, initialLegends);
+        const { visibleLayers } = store.getState().mapState;
+        const initialVisibleLayers = TimeSliderEventProcessor.filterTimeSliderLayers(mapId, visibleLayers);
         store.getState().timeSliderState.actions.setVisibleTimeSliderLayers(initialVisibleLayers);
       },
       mapId
     );
 
-    // Checks for added and removed layers with time dimension and changes in layer visibility
-    const unsubLayerLegendLayers = store.subscribe(
-      (state) => state.layerState.legendLayers,
-      (curLegendLayers, prevLegendLayers) => {
-        const newTimeSliderLayerPaths = TimeSliderEventProcessor.filterTimeSliderLayers(mapId, curLegendLayers);
-        const oldTimeSliderLayerPaths = TimeSliderEventProcessor.filterTimeSliderLayers(mapId, prevLegendLayers);
+    // Checks for added and removed layers with time dimension
+    const unsubLayerOrder = store.subscribe(
+      (state) => state.mapState.layerOrder,
+      (cur, prev) => {
+        const newTimeSliderLayerPaths = TimeSliderEventProcessor.filterTimeSliderLayers(mapId, cur);
+        const oldTimeSliderLayerPaths = TimeSliderEventProcessor.filterTimeSliderLayers(mapId, prev);
         const addedLayers = newTimeSliderLayerPaths.filter((layerPath) => !oldTimeSliderLayerPaths.includes(layerPath));
         const removedLayers = oldTimeSliderLayerPaths.filter((layerPath) => !newTimeSliderLayerPaths.includes(layerPath));
         if (addedLayers.length) {
@@ -40,13 +40,21 @@ export class TimeSliderEventProcessor extends AbstractEventProcessor {
         }
         if (removedLayers.length)
           removedLayers.forEach((layerPath) => store.getState().timeSliderState.actions.removeTimeSliderLayer(layerPath));
-        const visibleLayers = TimeSliderEventProcessor.filterVisibleTimeSliderLayers(mapId, curLegendLayers);
-        store.getState().timeSliderState.actions.setVisibleTimeSliderLayers(visibleLayers);
+      }
+    );
+
+    const unsubVisibleLayers = store.subscribe(
+      (state) => state.mapState.visibleLayers,
+      (cur) => {
+        const visibleLayers = TimeSliderEventProcessor.filterTimeSliderLayers(mapId, cur);
+        const prevVisibleTimeLayers = [...store.getState().timeSliderState.visibleTimeSliderLayers];
+        if (JSON.stringify(prevVisibleTimeLayers) !== JSON.stringify(visibleLayers))
+          store.getState().timeSliderState.actions.setVisibleTimeSliderLayers(visibleLayers);
       }
     );
 
     // add to arr of subscriptions so it can be destroyed later
-    this.subscriptionArr.push(unsubLayerLegendLayers);
+    this.subscriptionArr.push(unsubLayerOrder, unsubVisibleLayers);
   }
 
   // **********************************************************
@@ -63,29 +71,10 @@ export class TimeSliderEventProcessor extends AbstractEventProcessor {
    * @param {TypeLegendLayer[]} legendLayers Array of legend layers to filter
    * @returns {string[]} A list of usable layer paths
    */
-  private static filterTimeSliderLayers(mapId: string, legendLayers: TypeLegendLayer[]): string[] {
-    const filteredLayerPaths = legendLayers
-      .filter((legendLayer) => api.maps[mapId].layer.geoviewLayer(legendLayer.layerPath).getTemporalDimension())
-      .map((legendLayer) => legendLayer.layerPath);
-    return filteredLayerPaths;
-  }
-
-  /**
-   * Filter array of legend layers to get visible time slider layer paths
-   *
-   * @param {string} mapId The id of the map
-   * @param {TypeLegendLayer[]} legendLayers Array of legend layers to filter
-   * @returns {string[]} A list of usable layer paths
-   */
-  private static filterVisibleTimeSliderLayers(mapId: string, legendLayers: TypeLegendLayer[]): string[] {
-    const filteredLayerPaths = legendLayers
-      .filter((legendLayer) => {
-        return (
-          (api.maps[mapId].layer.geoviewLayer(legendLayer.layerPath).getTemporalDimension() && legendLayer.isVisible === 'always') ||
-          legendLayer.isVisible === 'yes'
-        );
-      })
-      .map((legendLayer) => legendLayer.layerPath);
+  private static filterTimeSliderLayers(mapId: string, layerPaths: string[]): string[] {
+    const filteredLayerPaths = layerPaths.filter(
+      (layerPath) => api.maps[mapId].layer.geoviewLayers[layerPath.split('/')[0]].layerTemporalDimension[layerPath]
+    );
     return filteredLayerPaths;
   }
 

@@ -80,7 +80,7 @@
     "select": "Highlight feature on map",
     "externalLink": "External Link",
     "detailsView": "Details View",
-    "selectVisbleLayer": "Select any visible layer on the map to get started",
+    "selectVisbleLayer": "Click on a feature on the map to view it's details",
     "feature": "feature",
     "clickOnMap": "Click on map",
     "nextFeatureBtn": "Next feature",
