@@ -607,3 +607,15 @@ export function whenThisThen<T>(checkCallback: () => T, checkFrequency?: number,
     whenThisThenThat(checkCallback, resolve, reject, checkFrequency, timeout);
   });
 }
+
+/**
+ * Delay helper function.
+ * @param ms number Number of milliseconds to wait for.
+ * @returns Promise<void> resolves when the delay timeout expires.
+ */
+export const delay = (ms: number): Promise<void> => {
+  return new Promise((resolve) => {
+    // Wait
+    setTimeout(resolve, ms);
+  });
+};

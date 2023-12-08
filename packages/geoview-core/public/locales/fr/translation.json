@@ -67,6 +67,9 @@
     "refreshLayer": "Rafraîchir la couche",
     "highlightLayer": "Couche de mise en évidence"
   },
+  "layers": {
+    "sortingDescription": "<p>Pour trier les calques, vous pouvez simplement faire glisser et déposer chaque panneau de calque.</p><h4>Utilisation du clavier pour faire glisser et déposer</h4><p>Si vous utilisez le clavier pour trier les calques, suivez les instructions suivantes :</p><ul><li>Lorsque le panneau de calque est en focus, utilisez la barre d'espace pour soulever le panneau. Cela lancera le glisser-déposer.</li><li>Une fois le glisser-déposer commencé, vous pouvez utiliser les flèches haut et bas pour déplacer le panneau.</li><li>Vous pouvez utiliser la barre d'espace pour déposer le panneau.</li><li>Utilisez la touche ÉCHAP pour annuler le glisser-déposer.</li></ul>"
+  },
   "details": {
     "zoomTo": "Zoom à l'élément",
     "select": "Sélectionner l'élément sur la carte",
