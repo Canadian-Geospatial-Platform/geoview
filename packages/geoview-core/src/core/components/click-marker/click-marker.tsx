@@ -1,11 +1,16 @@
-import React, { useContext, useEffect, useRef } from 'react';
+import React, { useEffect, useRef } from 'react';
 
-import { Coordinate } from 'ol/coordinate';
-import { MapContext } from '@/core/app-start';
+import { Coordinate } from 'ol/coordinate'; // For typing only
 
 import { getGeoViewStore } from '@/core/stores/stores-managers';
 
-import { TypeFeatureInfoEntry, TypeJsonObject, useDetailsStoreLayerDataArray, useDetailsStoreSelectedLayerPath } from '@/app';
+import {
+  TypeFeatureInfoEntry,
+  TypeJsonObject,
+  useDetailsStoreLayerDataArray,
+  useDetailsStoreSelectedLayerPath,
+  useGeoViewMapId,
+} from '@/app';
 import { Box, ClickMapMarker } from '@/ui';
 
 import { useMapClickMarker, useMapStoreActions } from '@/core/stores/store-interface-and-intial-values/map-state';
@@ -22,8 +27,7 @@ export type TypeClickMarker = {
  * @returns {JSX.Element} the react element with a marker on click
  */
 export function ClickMarker(): JSX.Element {
-  const mapConfig = useContext(MapContext);
-  const { mapId } = mapConfig;
+  const mapId = useGeoViewMapId();
 
   // internal state
   const markerCoordinates = useRef<Coordinate>();

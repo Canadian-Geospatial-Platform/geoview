@@ -51,7 +51,7 @@
   },
   "theme": "dark",
   "components": ["north-arrow", "overview-map"],
-  "corePackages": [],
+  "corePackages": ["footer-panel"],
   "externalPackages": [],
   "suportedLanguages": ["en"]
 }

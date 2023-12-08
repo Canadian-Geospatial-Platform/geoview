@@ -1,7 +1,5 @@
-import { GeoViewStoreType } from '@/core/stores/geoview-store';
 import { AbstractEventProcessor } from '../abstract-event-processor';
-import { EVENT_NAMES } from '@/api/events/event-types';
-import { payloadIsLegendsLayersetUpdated, TypeLegendResultSetsEntry } from '@/api/events/payloads';
+import { TypeLegendResultSetsEntry } from '@/api/events/payloads';
 import {
   isClassBreakStyleConfig,
   isImageStaticLegend,
@@ -15,33 +13,17 @@ import {
   TypeStyleGeometry,
 } from '@/geo';
 import { getGeoViewStore } from '@/core/stores/stores-managers';
-import { TypeLegendLayer, TypeLegendLayerIcons, TypeLegendLayerItem, TypeLegendLayerListItem } from '@/core/components/layers/types';
+import { TypeLegendLayer, TypeLegendLayerIcons, TypeLegendLayerItem, TypeLegendItem } from '@/core/components/layers/types';
 import { api, getLocalizedValue } from '@/app';
 
 export class LegendEventProcessor extends AbstractEventProcessor {
-  onInitialize(store: GeoViewStoreType) {
-    const { mapId } = store.getState();
-
-    api.event.on(
-      EVENT_NAMES.GET_LEGENDS.LEGENDS_LAYERSET_UPDATED,
-      (layerUpdatedPayload) => {
-        if (payloadIsLegendsLayersetUpdated(layerUpdatedPayload)) {
-          const { layerPath, resultSets } = layerUpdatedPayload;
-          const storeResultSets = store.getState().legendResultSets;
-          storeResultSets[layerPath] = resultSets[layerPath];
-          store.setState({ legendResultSets: storeResultSets });
-          LegendEventProcessor.propagateLegendToStore(mapId, layerPath, resultSets[layerPath]);
-        }
-      },
-      `${mapId}/LegendsLayerSet`
-    );
-    // add to arr of subscriptions so it can be destroyed later
-    this.subscriptionArr.push();
-  }
-
   // **********************************************************
-  // Static functions for Typescript files to set store values
+  // Static functions for Typescript files to access store actions
   // **********************************************************
+  //! Typescript MUST always use store action to modify store - NEVER use setState!
+  //! Some action does state modifications AND map actions.
+  //! ALWAYS use map event processor when an action modify store and IS NOT trap by map state event handler
+  // #region
   private static getLayerIconImage(mapId: string, layerPath: string, layerLegend: TypeLegend | null): TypeLegendLayerIcons | undefined {
     const iconDetails: TypeLegendLayerIcons = [];
     if (layerLegend) {
@@ -66,7 +48,7 @@ export class LegendEventProcessor extends AbstractEventProcessor {
             iconDetailsEntry.iconType = 'list';
             if (isClassBreakStyleConfig(styleSettings)) {
               iconDetailsEntry.iconList = styleRepresentation.arrayOfCanvas!.map((canvas, i) => {
-                const legendLayerListItem: TypeLegendLayerListItem = {
+                const legendLayerListItem: TypeLegendItem = {
                   geometryType,
                   icon: canvas ? canvas.toDataURL() : null,
                   name: styleSettings.classBreakStyleInfo[i].label,
@@ -76,7 +58,7 @@ export class LegendEventProcessor extends AbstractEventProcessor {
                 return legendLayerListItem;
               });
               if (styleRepresentation.defaultCanvas) {
-                const legendLayerListItem: TypeLegendLayerListItem = {
+                const legendLayerListItem: TypeLegendItem = {
                   geometryType,
                   icon: styleRepresentation.defaultCanvas.toDataURL(),
                   name: styleSettings.defaultLabel!,
@@ -87,7 +69,7 @@ export class LegendEventProcessor extends AbstractEventProcessor {
               }
             } else if (isUniqueValueStyleConfig(styleSettings)) {
               iconDetailsEntry.iconList = styleRepresentation.arrayOfCanvas!.map((canvas, i) => {
-                const legendLayerListItem: TypeLegendLayerListItem = {
+                const legendLayerListItem: TypeLegendItem = {
                   geometryType,
                   icon: canvas ? canvas.toDataURL() : null,
                   name: styleSettings.uniqueValueStyleInfo[i].label,
@@ -97,7 +79,7 @@ export class LegendEventProcessor extends AbstractEventProcessor {
                 return legendLayerListItem;
               });
               if (styleRepresentation.defaultCanvas) {
-                const legendLayerListItem: TypeLegendLayerListItem = {
+                const legendLayerListItem: TypeLegendItem = {
                   geometryType,
                   icon: styleRepresentation.defaultCanvas.toDataURL(),
                   name: styleSettings.defaultLabel!,
@@ -109,7 +91,7 @@ export class LegendEventProcessor extends AbstractEventProcessor {
             }
             if (iconDetailsEntry.iconList?.length) iconDetailsEntry.iconImage = iconDetailsEntry.iconList[0].icon;
             if (iconDetailsEntry.iconList && iconDetailsEntry.iconList.length > 1)
-              iconDetailsEntry.iconImgStacked = iconDetailsEntry.iconList[1].icon;
+              iconDetailsEntry.iconImageStacked = iconDetailsEntry.iconList[1].icon;
             iconDetails.push(iconDetailsEntry);
           }
         });
@@ -121,34 +103,44 @@ export class LegendEventProcessor extends AbstractEventProcessor {
 
   static propagateLegendToStore(mapId: string, layerPath: string, legendResultSetsEntry: TypeLegendResultSetsEntry) {
     const layerPathNodes = layerPath.split('/');
-    const createNewLegendEntries = (layerPathBeginning: string, currentLevel: number, existingEntries: TypeLegendLayer[]) => {
+    const createNewLegendEntries = async (
+      layerPathBeginning: string,
+      currentLevel: number,
+      existingEntries: TypeLegendLayer[]
+    ): Promise<void> => {
       const entryLayerPath = `${layerPathBeginning}/${layerPathNodes[currentLevel]}`;
       const layerConfig = api.maps[mapId].layer.registeredLayers[entryLayerPath];
       let entryIndex = existingEntries.findIndex((entry) => entry.layerPath === entryLayerPath);
       if (layerEntryIsGroupLayer(layerConfig)) {
         if (entryIndex === -1) {
-          existingEntries.push({
+          const legendLayerEntry: TypeLegendLayer = {
+            bounds: undefined,
             layerId: layerConfig.layerId,
+            order: existingEntries.length,
+            // TODO: Why do we have the following line in the store? Do we have to fetch the metadata again since the GeoView layer read and keep them?
             metadataAccessPath: getLocalizedValue(layerConfig.geoviewRootLayer?.metadataAccessPath, mapId),
             layerPath: entryLayerPath,
             layerName: legendResultSetsEntry.data?.layerName ? getLocalizedValue(legendResultSetsEntry.data.layerName, mapId)! : '',
             type: layerConfig.entryType as TypeGeoviewLayerType,
             isVisible: layerConfig.initialSettings?.visible ? layerConfig.initialSettings.visible : 'yes',
             opacity: layerConfig.initialSettings?.opacity ? layerConfig.initialSettings.opacity : 1,
-            items: [] as TypeLegendLayerItem[],
+            items: [] as TypeLegendItem[],
             children: [] as TypeLegendLayer[],
-          } as TypeLegendLayer);
+          };
+          existingEntries.push(legendLayerEntry);
           entryIndex = existingEntries.length - 1;
         } // else
         // We don't need to update it because basic information of a group node is not supposed to change after its creation.
         // Only the children may change and this is handled by the following call.
         createNewLegendEntries(entryLayerPath, currentLevel + 1, existingEntries[entryIndex].children);
       } else {
-        const newLegendLayer = {
+        const newLegendLayer: TypeLegendLayer = {
           bounds: undefined,
           layerId: layerPathNodes[currentLevel],
+          order: existingEntries.length,
           layerPath: entryLayerPath,
           layerAttribution: api.maps[mapId].layer.geoviewLayers[layerPathNodes[0]].attributions,
+          // ! Why do wee have metadataAccessPath here? Do we need to fetch the metadata again? The GeoView layer fetch them and store them in this.metadata.
           metadataAccessPath: getLocalizedValue(layerConfig.geoviewRootLayer?.metadataAccessPath, mapId),
           layerName: getLocalizedValue(legendResultSetsEntry.data?.layerName, mapId)!,
           layerStatus: legendResultSetsEntry.layerStatus,
@@ -156,16 +148,12 @@ export class LegendEventProcessor extends AbstractEventProcessor {
           querySent: legendResultSetsEntry.querySent,
           styleConfig: legendResultSetsEntry.data?.styleConfig,
           type: legendResultSetsEntry.data?.type,
-          isVisible: layerConfig.initialSettings?.visible ? layerConfig.initialSettings.visible : 'yes',
-          opacity: layerConfig.initialSettings?.opacity ? layerConfig.initialSettings.opacity : 1,
+          isVisible: layerConfig.initialSettings?.visible || 'yes',
+          opacity: layerConfig.initialSettings?.opacity || 1,
+          items: [] as TypeLegendItem[],
           children: [] as TypeLegendLayer[],
           icons: LegendEventProcessor.getLayerIconImage(mapId, layerPath, legendResultSetsEntry.data!),
-        } as TypeLegendLayer;
-
-        // TODO: find the best place to calculate layers item and assign https://github.com/Canadian-Geospatial-Platform/geoview/issues/1566
-        setTimeout(() => {
-          newLegendLayer.bounds = api.maps[mapId].layer.geoviewLayers[layerPathNodes[0]].calculateBounds(layerPath);
-        }, 2000);
+        };
 
         newLegendLayer.items = [];
         newLegendLayer.icons?.forEach((legendLayerItem) => {
@@ -177,8 +165,24 @@ export class LegendEventProcessor extends AbstractEventProcessor {
         if (entryIndex === -1) existingEntries.push(newLegendLayer);
         // eslint-disable-next-line no-param-reassign
         else existingEntries[entryIndex] = newLegendLayer;
+
+        // TODO: find the best place to calculate layers item and assign https://github.com/Canadian-Geospatial-Platform/geoview/issues/1566
+        // listen to layer status with the whenthisthat async utility function
+        try {
+          const myLayer = await api.maps[mapId].layer.getGeoviewLayerByIdAsync(layerPathNodes[0], true);
+          newLegendLayer.bounds = myLayer?.calculateBounds(layerPath);
+        } catch {
+          newLegendLayer.bounds = undefined;
+        }
       }
     };
     createNewLegendEntries(layerPathNodes[0], 1, getGeoViewStore(mapId).getState().layerState.legendLayers);
   }
+  // #endregion
+
+  // **********************************************************
+  // Static functions for Store Map State to action on API
+  // **********************************************************
+  //! NEVER add a store action who does set state AND map action at a same time.
+  //! Review the action in store state to make sure
 }

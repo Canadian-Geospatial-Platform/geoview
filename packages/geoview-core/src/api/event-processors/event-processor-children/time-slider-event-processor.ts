@@ -50,9 +50,12 @@ export class TimeSliderEventProcessor extends AbstractEventProcessor {
   }
 
   // **********************************************************
-  // Static functions for Typescript files to set store values
+  // Static functions for Typescript files to access store actions
   // **********************************************************
-
+  //! Typescript MUST always use store action to modify store - NEVER use setState!
+  //! Some action does state modifications AND map actions.
+  //! ALWAYS use map event processor when an action modify store and IS NOT trap by map state event handler
+  // #region
   /**
    * Filter array of legend layers to get usable time slider layer paths
    *
@@ -132,7 +135,13 @@ export class TimeSliderEventProcessor extends AbstractEventProcessor {
     };
     return sliderData;
   }
+  // #endregion
 
+  // **********************************************************
+  // Static functions for Store Map State to action on API
+  // **********************************************************
+  //! NEVER add a store action who does set state AND map action at a same time.
+  //! Review the action in store state to make sure
   /**
    * Filter the layer provided in the layerPath variable according to current states (filtering and values)
    *

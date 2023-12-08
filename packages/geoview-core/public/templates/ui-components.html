@@ -94,7 +94,7 @@
     <hr />
 
     <!-- SLIDER SECTION START -->
-    <h4 style="padding-top: 10px; width: 90%; padding-left: 10%">Filter EsriDynamic from slider</h4>
+    <h4 style="padding-top: 10px; width: 90%; padding-left: 10%">Filter EsriDynamic from slider (Bug - Need to zoom the map to see the layer filtered)</h4>
     <div id="UI1-rangeslider1" class="Panel" style="padding-top: 20px; width: 90%; padding-left: 10%"></div>
     <hr />
 
@@ -145,7 +145,7 @@
             track: 'normal',
             customOnChange: (dates) => {
               const field = cgpv.api.maps.UI1.layer.geoviewLayers['historical-flood'].layerTemporalDimension['historical-flood/0'].field;
-              cgpv.api.maps.UI1.layer.geoviewLayers['historical-flood'].applyViewFilter(undefined, `${field} >= date '${dates[0]}-01-01' and ${field} <= date '${dates[1]}-12-31'`);
+              cgpv.api.maps.UI1.layer.geoviewLayers['historical-flood'].applyViewFilter('historical-flood/0', `${field} >= date '${dates[0]}-01-01' and ${field} <= date '${dates[1]}-12-31'`);
             },
           })
         );

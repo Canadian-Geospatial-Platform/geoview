@@ -1,9 +1,9 @@
-import { useContext, useEffect } from 'react';
+import { useEffect } from 'react';
 
 import { ExpandMoreIcon, ExpandLessIcon, IconButton, Box } from '@/ui';
-import { MapContext } from '@/core/app-start';
 import { sxClassesExportButton } from './footer-bar-style';
 import { useUIStoreActions, useUIFooterBarExpanded } from '@/core/stores/store-interface-and-intial-values/ui-state';
+import { useGeoViewMapId } from '@/app';
 
 /**
  * Footerbar Expand Button component
@@ -11,10 +11,8 @@ import { useUIStoreActions, useUIFooterBarExpanded } from '@/core/stores/store-i
  * @returns {JSX.Element} the expand buttons
  */
 export function FooterbarExpandButton(): JSX.Element {
-  const mapConfig = useContext(MapContext);
-  const { mapId } = mapConfig;
-
   // get the expand or collapse from expand button click
+  const mapId = useGeoViewMapId();
   const expanded = useUIFooterBarExpanded();
   const { setFooterBarExpanded } = useUIStoreActions();
 

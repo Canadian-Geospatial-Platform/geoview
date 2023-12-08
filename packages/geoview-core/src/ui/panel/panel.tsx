@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 /* eslint-disable react/jsx-no-useless-fragment */
 /* eslint-disable no-nested-ternary */
-import { useRef, useState, useEffect, useCallback, useContext, ReactNode, KeyboardEvent } from 'react';
+import { useRef, useState, useEffect, useCallback, ReactNode, KeyboardEvent } from 'react';
 
 import { useTranslation } from 'react-i18next';
 
@@ -14,9 +14,8 @@ import { useTheme } from '@mui/material/styles';
 
 import { Cast } from '@/core/types/global-types';
 import { HtmlToReact } from '@/core/containers/html-to-react';
-import { MapContext } from '@/core/app-start';
 
-import { api } from '@/app';
+import { api, useGeoViewMapId } from '@/app';
 import { EVENT_NAMES } from '@/api/events/event-types';
 
 import { IconButton, CloseIcon, PanelApi, Box } from '..';
@@ -53,8 +52,7 @@ export function Panel(props: TypePanelAppProps): JSX.Element {
   const { panel, button, handlePanelOpened } = props;
   const { panelStyles } = panel;
 
-  const mapConfig = useContext(MapContext)!;
-  const { mapId } = mapConfig;
+  const mapId = useGeoViewMapId();
 
   const { t } = useTranslation<string>();
 
@@ -100,7 +98,7 @@ export function Panel(props: TypePanelAppProps): JSX.Element {
       // put back focus on calling button
       document.getElementById(button.id!)?.focus();
     } else {
-      const mapCont = api.maps[mapConfig.mapId].map.getTargetElement();
+      const mapCont = api.maps[mapId].map.getTargetElement();
       mapCont.focus();
 
       // if in focus trap mode, trigger the event

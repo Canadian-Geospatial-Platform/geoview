@@ -1,5 +1,5 @@
 /* eslint-disable react/require-default-props */
-import React, { useEffect, useContext, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useTheme, Theme } from '@mui/material/styles';
 
@@ -8,8 +8,7 @@ import { getUid } from 'ol/util';
 import { getGeoViewStore } from '@/core/stores/stores-managers';
 
 import { Box } from '@/ui';
-import { api } from '@/app';
-import { MapContext } from '@/core/app-start';
+import { api, useGeoViewMapId } from '@/app';
 import { EVENT_NAMES } from '@/api/events/event-types';
 import { PayloadBaseClass, TypeFeatureInfoEntry, payloadIsAllQueriesDone } from '@/api/events/payloads';
 
@@ -45,8 +44,7 @@ const sxClasses = {
  * @returns {JSX.Element} the hover tooltip component
  */
 export function HoverTooltip(): JSX.Element {
-  const mapConfig = useContext(MapContext);
-  const { mapId } = mapConfig;
+  const mapId = useGeoViewMapId();
 
   const { t } = useTranslation<string>();
 

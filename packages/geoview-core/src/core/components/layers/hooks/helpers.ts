@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import { TypeVectorLayerStyles } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { api } from '@/app';
-import { TypeLegendLayer, TypeLegendLayerListItem } from '../types';
+import { TypeLegendLayer, TypeLegendItem } from '../types';
 import { useGeoViewStore } from '@/core/stores/stores-managers';
 import { generateId } from '@/core/utils/utilities';
 import { TypeVisibilityFlags } from '@/geo';
@@ -16,7 +16,7 @@ export function useLegendHelpers() {
     // console.log('I got here ', legendInfo, _.keys(legendInfo));
     const keys = _.keys(legendInfo);
 
-    const layerItems: TypeLegendLayerListItem[] = [
+    const layerItems: TypeLegendItem[] = [
       {
         geometryType: 'Point',
         default: false,
@@ -66,6 +66,7 @@ export function useLegendHelpers() {
         layerId: 'test_testLayerId',
         layerPath: 'testLayerPath',
         layerName: 'TEST--TestLayer1',
+        order: 20,
         type: 'GeoJSON',
         layerStatus: 'loaded',
         layerPhase: 'processed',
@@ -79,6 +80,7 @@ export function useLegendHelpers() {
         layerId: 'test_geojsonLYR5',
         layerPath: 'geojsonLYR5',
         layerName: 'TEST--Layer with groups',
+        order: 21,
         type: 'GeoJSON',
         layerStatus: 'loaded',
         layerPhase: 'processed',
@@ -93,6 +95,7 @@ export function useLegendHelpers() {
         layerPath: 'Chris Sample Parent1',
         layerName: 'TEST--chrisparentlayer1',
         type: 'GeoJSON',
+        order: 22,
         layerStatus: 'loaded',
         layerPhase: 'processed',
         isVisible: 'yes',
@@ -103,6 +106,7 @@ export function useLegendHelpers() {
             layerId: 'test_chrisChildLayer1',
             layerPath: 'ChrisSampleC3',
             layerName: 'TEST--chrisparentchild1',
+            order: 2,
             type: 'GeoJSON',
             layerStatus: 'loaded',
             layerPhase: 'processed',
@@ -115,6 +119,7 @@ export function useLegendHelpers() {
                 layerPath: 'Gran ChildChidl2',
                 layerName: 'TEST--chris parent child2',
                 type: 'GeoJSON',
+                order: 1,
                 layerStatus: 'error',
                 layerPhase: 'processed',
                 isVisible: 'no',
@@ -128,6 +133,7 @@ export function useLegendHelpers() {
                 layerPath: 'Gran ChildChidl555',
                 layerName: 'TEST--chris parent child25555',
                 type: 'GeoJSON',
+                order: 2,
                 layerStatus: 'loading',
                 layerPhase: 'processed',
                 isVisible: 'no',
@@ -141,6 +147,7 @@ export function useLegendHelpers() {
                 layerPath: 'Grand Child Chidl3',
                 layerName: 'TEST--chris parent child3',
                 type: 'GeoJSON',
+                order: 3,
                 layerStatus: 'newInstance',
                 layerPhase: 'processed',
                 isVisible: 'yes',
@@ -157,6 +164,7 @@ export function useLegendHelpers() {
             layerPath: 'Chris Sample Chidl2',
             layerName: 'TEST--chirslyerss',
             type: 'GeoJSON',
+            order: 24,
             layerStatus: 'loaded',
             layerPhase: 'processed',
             isVisible: 'no',
@@ -170,6 +178,7 @@ export function useLegendHelpers() {
             layerPath: 'Chris Sample Chidl3',
             layerName: 'TEST--chris-child32edd',
             type: 'GeoJSON',
+            order: 25,
             layerStatus: 'loaded',
             layerPhase: 'processed',
             isVisible: 'yes',
@@ -182,9 +191,9 @@ export function useLegendHelpers() {
       },
     ];
 
-    keys.forEach((i) => {
+    keys.forEach((i, index) => {
       const setData = legendInfo[i];
-      const items: TypeLegendLayerListItem[] = [];
+      const items: TypeLegendItem[] = [];
       const legendData = setData.data?.legend ? (setData.data.legend as TypeVectorLayerStyles) : undefined;
       const itemCanvases = legendData ? legendData.Point?.arrayOfCanvas : undefined;
       if (itemCanvases) {
@@ -207,6 +216,7 @@ export function useLegendHelpers() {
         layerPath: `test_${setData.data?.layerPath ?? generateId()}`,
         layerName: `TEST---${setData.data?.layerName?.en ?? 'Uknown Laer name'}`,
         type: setData.data?.type ?? 'imageStatic',
+        order: 27 + index,
         layerStatus: setData.layerStatus,
         layerPhase: setData.layerPhase,
         querySent: setData.querySent,

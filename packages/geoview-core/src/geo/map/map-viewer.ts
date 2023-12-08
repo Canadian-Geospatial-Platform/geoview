@@ -131,8 +131,9 @@ export class MapViewer {
     this.navBarButtons = new NavbarButtons(this.mapId);
     this.footerTabs = new FooterTabsApi(this.mapId);
     this.legend = new LegendApi(this.mapId);
+
     this.layers = new LayersApi();
-    this.details = new DetailsApi(this.mapId);
+    this.details = new DetailsApi();
     this.dataTable = new DataTableApi(this.mapId);
 
     this.modal = new ModalApi(this.mapId);

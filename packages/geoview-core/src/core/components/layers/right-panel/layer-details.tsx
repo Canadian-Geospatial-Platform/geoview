@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '@mui/material/styles';
-import { TypeLegendLayer, TypeLegendLayerListItem } from '../types';
+import { TypeLegendLayer, TypeLegendItem } from '../types';
 import { getSxClasses } from './layer-details-style';
 import {
   Box,
@@ -77,7 +77,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
     );
   }
 
-  function renderItemCheckbox(item: TypeLegendLayerListItem) {
+  function renderItemCheckbox(item: TypeLegendItem) {
     if (item.isVisible === 'always') {
       return null;
     }

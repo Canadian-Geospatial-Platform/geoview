@@ -1,10 +1,8 @@
-import { useContext } from 'react';
-
 import { useTheme } from '@mui/material/styles';
 
-import { MapContext } from '@/core/app-start';
 import { IconButton, MoveDownRoundedIcon } from '@/ui';
 import { getSxClasses } from '../nav-bar-style';
+import { useGeoViewMapId } from '@/app';
 
 /**
  * Create a focus button to the footer
@@ -12,8 +10,7 @@ import { getSxClasses } from '../nav-bar-style';
  * @returns {JSX.Element} return the created zoom in button
  */
 export default function Focus(): JSX.Element {
-  const mapConfig = useContext(MapContext);
-  const { mapId } = mapConfig;
+  const mapId = useGeoViewMapId();
 
   const theme = useTheme();
   const sxClasses = getSxClasses(theme);
