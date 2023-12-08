@@ -19,12 +19,13 @@ import { FeatureInfo } from './feature-info-new';
 import { TypeFeatureInfoEntry, TypeArrayOfLayerData, TypeLayerData, TypeGeometry } from '@/api/events/payloads';
 import { getSxClasses } from './details-style';
 import {
+  useMapStoreActions,
+  useMapVisibleLayers,
   useDetailsStoreActions,
   useDetailsStoreCheckedFeatures,
   useDetailsStoreLayerDataArray,
   useDetailsStoreSelectedLayerPath,
-} from '@/core/stores/store-interface-and-intial-values/details-state';
-import { useMapStoreActions } from '@/core/stores/store-interface-and-intial-values/map-state';
+} from '@/core/stores';
 import { ResponsiveGrid, CloseButton, EnlargeButton, LayerList, LayerTitle } from '../common';
 import { useUIStoreActions } from '@/app';
 
@@ -44,6 +45,7 @@ export function Detailspanel(): JSX.Element {
   const selectedLayerPath = useDetailsStoreSelectedLayerPath();
   const arrayOfLayerData = useDetailsStoreLayerDataArray();
   const checkedFeatures = useDetailsStoreCheckedFeatures();
+  const visibleLayers = useMapVisibleLayers();
   const { setSelectedLayerPath, removeCheckedFeature } = useDetailsStoreActions();
   const { addSelectedFeature, removeSelectedFeature } = useMapStoreActions();
   const { setActiveFooterTab } = useUIStoreActions();
@@ -155,13 +157,16 @@ export function Detailspanel(): JSX.Element {
   const renderLayerList = useCallback(() => {
     return (
       <LayerList
-        layerList={arrayOfLayerData.map((layer) => ({
-          layerName: layer.layerName ?? '',
-          layerPath: layer.layerPath,
-          numOffeatures: layer.features?.length ?? 0,
-          layerFeatures: getFeaturesOfLayer(layer),
-          tooltip: `${layer.layerName}, ${getFeaturesOfLayer(layer)}`,
-        }))}
+        layerList={visibleLayers
+          .map((layerPath) => arrayOfLayerData.filter((layerData) => layerData.layerPath === layerPath)[0])
+          .filter((layer) => layer !== undefined)
+          .map((layer) => ({
+            layerName: layer.layerName ?? '',
+            layerPath: layer.layerPath,
+            numOffeatures: layer.features?.length ?? 0,
+            layerFeatures: getFeaturesOfLayer(layer),
+            tooltip: `${layer.layerName}, ${getFeaturesOfLayer(layer)}`,
+          }))}
         isEnlargeDataTable={isEnlargeDataTable}
         selectedLayerIndex={arrayOfLayerData.findIndex((layer) => layer.layerPath === layerDataInfo?.layerPath)}
         handleListItemClick={(_layer, index: number) => {
@@ -170,7 +175,7 @@ export function Detailspanel(): JSX.Element {
       />
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [layerDataInfo, arrayOfLayerData, isEnlargeDataTable, checkedFeatures]);
+  }, [layerDataInfo, arrayOfLayerData, isEnlargeDataTable, checkedFeatures, visibleLayers]);
 
   return (
     <Box sx={sxClasses.detailsContainer}>
