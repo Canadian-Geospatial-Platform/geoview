@@ -3,13 +3,13 @@ import { useTranslation } from 'react-i18next';
 import { useTheme } from '@mui/material/styles';
 import { styled } from '@mui/material';
 import { CloseButton, LayerTitle, ResponsiveGrid } from '../common';
-import { Box, DeleteIcon, HandleIcon, IconButton, Paper } from '@/ui';
+import { Box, DeleteIcon, IconButton, Paper } from '@/ui';
 import { getSxClasses } from './layers-style';
 import { useLayersDisplayState, useSelectedLayer } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { LayersActions } from './left-panel/layers-actions';
-import { LayersList } from './left-panel/layers-list';
 import { LayerDetails } from './right-panel/layer-details';
 import { AddNewLayer } from './left-panel/add-new-layer';
+import { LeftPanel } from './left-panel/left-panel';
 
 const Item = styled('div')(({ theme }) => ({
   backgroundColor: theme.palette.mode === 'dark' ? '#262B32' : '#fff',
@@ -50,7 +50,7 @@ export function LayersPanel() {
     return (
       <div>
         <LayersActions />
-        {displayState === 'add' ? <AddNewLayer /> : <LayersList setIsLayersListPanelVisible={setIsLayersListPanelVisible} />}
+        {displayState === 'add' ? <AddNewLayer /> : <LeftPanel setIsLayersListPanelVisible={setIsLayersListPanelVisible} />}
       </div>
     );
   };
@@ -80,20 +80,17 @@ export function LayersPanel() {
       );
     }
     if (displayState === 'order') {
+      const markup = { __html: t('layers.sortingDescription') };
+      /* eslint-disable react/no-danger */
       return (
         <Paper sx={{ padding: '20px' }}>
           <h3>Re-ordering layers</h3>
           <Box sx={sxClasses.buttonDescriptionContainer}>
-            <IconButton>
-              <HandleIcon style={{ fill: '#a9a9a9' }} />
-            </IconButton>
-            <p>
-              Lorem, ipsum dolor sit amet consectetur adipisicing elit. Praesentium animi, perferendis nemo quas sequi totam minima ad
-              labore.
-            </p>
+            <div dangerouslySetInnerHTML={markup} />
           </Box>
         </Paper>
       );
+      /* eslint-enable react/no-danger */
     }
 
     return null;

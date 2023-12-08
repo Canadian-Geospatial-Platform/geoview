@@ -116,6 +116,7 @@ export class LegendEventProcessor extends AbstractEventProcessor {
           const legendLayerEntry: TypeLegendLayer = {
             bounds: undefined,
             layerId: layerConfig.layerId,
+            order: existingEntries.length,
             // TODO: Why do we have the following line in the store? Do we have to fetch the metadata again since the GeoView layer read and keep them?
             metadataAccessPath: getLocalizedValue(layerConfig.geoviewRootLayer?.metadataAccessPath, mapId),
             layerPath: entryLayerPath,
@@ -136,6 +137,7 @@ export class LegendEventProcessor extends AbstractEventProcessor {
         const newLegendLayer: TypeLegendLayer = {
           bounds: undefined,
           layerId: layerPathNodes[currentLevel],
+          order: existingEntries.length,
           layerPath: entryLayerPath,
           layerAttribution: api.maps[mapId].layer.geoviewLayers[layerPathNodes[0]].attributions,
           // ! Why do wee have metadataAccessPath here? Do we need to fetch the metadata again? The GeoView layer fetch them and store them in this.metadata.

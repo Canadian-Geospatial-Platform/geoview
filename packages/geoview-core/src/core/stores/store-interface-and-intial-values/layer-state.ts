@@ -32,6 +32,7 @@ export interface ILayerState {
     setAllItemsVisibility: (layerPath: string, visibility: 'yes' | 'no') => void;
     deleteLayer: (layerPath: string) => void;
     zoomToLayerExtent: (layerPath: string) => void;
+    reOrderLayer: (startIndex: number, endIndex: number, layerPath: string) => void;
   };
 }
 
@@ -219,6 +220,17 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
         const { bounds } = layer as TypeLegendLayer;
         if (bounds) MapEventProcessor.zoomToExtent(get().mapId, bounds, options);
       },
+      reOrderLayer: (startIndex: number, endIndex: number, layerPath: string) => {
+        const curLayers = get().layerState.legendLayers;
+        const reOrderedLayers = reOrderSingleLayer(curLayers, startIndex, endIndex, layerPath);
+        set({
+          layerState: {
+            ...get().layerState,
+            legendLayers: [...reOrderedLayers],
+          },
+        });
+        // TODO implement re-order layers in the map
+      },
     },
   } as ILayerState;
 
@@ -262,6 +274,40 @@ function deleteSingleLayer(layers: TypeLegendLayer[], layerPath: string) {
       }
     }
   }
+}
+
+function reOrderSingleLayer(collection: TypeLegendLayer[], startIndex: number, endIndex: number, layerPath: string): TypeLegendLayer[] {
+  let layerFound = false;
+
+  function findLayerAndSortIt(startingCollection: TypeLegendLayer[]) {
+    if (layerFound) {
+      return;
+    }
+    layerFound = startingCollection.find((lyr) => lyr.layerPath === layerPath) !== undefined;
+
+    if (layerFound) {
+      const [removed] = startingCollection.splice(startIndex, 1);
+      startingCollection.splice(endIndex, 0, removed);
+
+      /* eslint-disable no-param-reassign */
+      for (let i = 0; i < startingCollection.length; i++) {
+        startingCollection[i].order = i + 1;
+      }
+
+      return;
+    }
+
+    // if not found at this level, lets find it in children
+    for (let i = 0; i < startingCollection.length; i++) {
+      if (startingCollection[i].children.length > 0) {
+        findLayerAndSortIt(startingCollection[i].children);
+      }
+    }
+  }
+
+  findLayerAndSortIt(collection);
+
+  return collection;
 }
 
 // **********************************************************
