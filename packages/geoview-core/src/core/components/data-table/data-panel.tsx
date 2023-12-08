@@ -16,7 +16,8 @@ import {
   useDataTableStoreMapFilteredRecord,
   useDataTableStoreRowsFiltered,
   useDataTableStoreSelectedLayerIndex,
-} from '@/core/stores/store-interface-and-intial-values/data-table-state';
+  useMapVisibleLayers,
+} from '@/core/stores';
 
 import { ResponsiveGrid, EnlargeButton, CloseButton, LayerList, LayerListEntry, LayerTitle } from '../common';
 
@@ -30,7 +31,7 @@ interface DatapanelProps {
 
 /**
  * Build Data panel from map.
- * @param {LayersDataType} layerData map data which will be used to build data table.
+ * @param {LayersDataType[]} layerData map data which will be used to build data table.
  * @param {string} mapId id of the map.
  * @return {ReactElement} Data table as react element.
  */
@@ -43,11 +44,13 @@ export function Datapanel({ layerData, mapId, language }: DatapanelProps) {
 
   const [isLoading, setIsLoading] = useState(false);
   const [isLayersPanelVisible, setIsLayersPanelVisible] = useState(false);
+  const [orderedLayerData, setOrderedLayerData] = useState<LayersDataType[]>([]);
 
   const selectedLayerIndex = useDataTableStoreSelectedLayerIndex();
   const isEnlargeDataTable = useDataTableStoreIsEnlargeDataTable();
   const mapFiltered = useDataTableStoreMapFilteredRecord();
   const rowsFiltered = useDataTableStoreRowsFiltered();
+  const visibleLayers = useMapVisibleLayers();
   const { setSelectedLayerIndex, setIsEnlargeDataTable, setLayersData } = useDataTableStoreActions();
 
   const handleLayerChange = useCallback((_layer: LayerListEntry, index: number) => {
@@ -73,7 +76,7 @@ export function Datapanel({ layerData, mapId, language }: DatapanelProps) {
   const getFeaturesOfLayer = (layerPath: string, index: number): string => {
     return rowsFiltered && rowsFiltered[layerPath]
       ? `${rowsFiltered[layerPath]} ${t('dataTable.featureFiltered')}`
-      : `${layerData[index].features.length} ${t('dataTable.features')}`;
+      : `${orderedLayerData[index].features.length} ${t('dataTable.features')}`;
   };
 
   /**
@@ -92,6 +95,14 @@ export function Datapanel({ layerData, mapId, language }: DatapanelProps) {
     );
   };
 
+  useEffect(() => {
+    const updatedLayerData = visibleLayers
+      .map((layerPath) => layerData.filter((data) => data.layerKey === layerPath)[0])
+      .filter((layer) => layer !== undefined);
+    setOrderedLayerData(updatedLayerData);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [visibleLayers, layerData]);
+
   /**
    * Render group layers as list.
    *
@@ -100,7 +111,7 @@ export function Datapanel({ layerData, mapId, language }: DatapanelProps) {
   const renderList = useCallback(
     () => (
       <LayerList
-        layerList={layerData.map((layer, index) => ({
+        layerList={orderedLayerData.map((layer, index) => ({
           layerName: layer.layerName![language] ?? '',
           layerPath: layer.layerKey,
           layerFeatures: getFeaturesOfLayer(layer.layerKey, index),
@@ -113,7 +124,7 @@ export function Datapanel({ layerData, mapId, language }: DatapanelProps) {
       />
     ),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [layerData, selectedLayerIndex, isEnlargeDataTable, mapFiltered, rowsFiltered]
+    [selectedLayerIndex, isEnlargeDataTable, mapFiltered, rowsFiltered, orderedLayerData]
   );
 
   useEffect(() => {
@@ -169,12 +180,12 @@ export function Datapanel({ layerData, mapId, language }: DatapanelProps) {
           />
 
           {!isLoading &&
-            layerData.map(({ layerKey, layerId }, index) => (
+            orderedLayerData.map(({ layerKey, layerId }, index) => (
               <Box key={layerKey}>
                 {index === selectedLayerIndex ? (
                   <Box>
-                    {layerData[index].features.length ? (
-                      <MapDataTable data={layerData[index]} layerId={layerId} mapId={mapId} layerKey={layerKey} />
+                    {orderedLayerData[index]?.features.length ? (
+                      <MapDataTable data={orderedLayerData[index]} layerId={layerId} mapId={mapId} layerKey={layerKey} />
                     ) : (
                       'No Data'
                     )}

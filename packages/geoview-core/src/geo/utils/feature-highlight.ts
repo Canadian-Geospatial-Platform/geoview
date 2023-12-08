@@ -39,6 +39,9 @@ export class FeatureHighlight {
   /** The style for the highlight */
   private darkStyle = new Style({ stroke: new Stroke({ color: 'black', width: 1.25 }), fill: this.darkFill });
 
+  /** The style for the highlight */
+  private darkOutlineStyle = new Style({ stroke: new Stroke({ color: 'black', width: 1.25 }) });
+
   /** The ID's of currently animated features */
   private selectedFeatureIds: string[] = [];
 
@@ -363,20 +366,30 @@ export class FeatureHighlight {
    * Highlight a bounding box
    *
    * @param {Extent} extent the extent to highlight
+   * @param {boolean} isLayerHighlight optional if it is a layer highlight
    */
-  highlightGeolocatorBBox(extent: Extent) {
+  highlightGeolocatorBBox(extent: Extent, isLayerHighlight = false) {
     if (this.animationSource.getFeatureById('geoLocatorFeature')) {
       this.animationSource.removeFeature(this.animationSource.getFeatureById('geoLocatorFeature') as Feature);
       clearTimeout(this.bboxTimeout as NodeJS.Timeout);
     }
     const bboxPoly = fromExtent(extent);
     const bboxFeature = new Feature(bboxPoly);
-    bboxFeature.setStyle(this.darkStyle);
+    const style = isLayerHighlight ? this.darkOutlineStyle : this.darkStyle;
+    bboxFeature.setStyle(style);
     bboxFeature.setId('geoLocatorFeature');
     this.animationSource.addFeature(bboxFeature);
-    this.bboxTimeout = setTimeout(
-      () => this.animationSource.removeFeature(this.animationSource.getFeatureById('geoLocatorFeature') as Feature),
-      5000
-    );
+    if (!isLayerHighlight)
+      this.bboxTimeout = setTimeout(
+        () => this.animationSource.removeFeature(this.animationSource.getFeatureById('geoLocatorFeature') as Feature),
+        5000
+      );
+  }
+
+  /**
+   * Remove bounding box highlight
+   */
+  removeBBoxHighlight() {
+    this.animationSource.removeFeature(this.animationSource.getFeatureById('geoLocatorFeature') as Feature);
   }
 }
