@@ -289,10 +289,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
       api.event.once(
         EVENT_NAMES.LAYER.EVENT_IF_CONDITION,
         (payload) => {
-          this.setVisible(
-            layerConfig.initialSettings!.visible! === 'yes' || layerConfig.initialSettings!.visible! === 'always',
-            layerConfig
-          );
+          this.setVisible(layerConfig.initialSettings!.visible! !== 'no', Layer.getLayerPath(layerConfig));
         },
         `${this.mapId}/visibilityTest`
       );
@@ -350,7 +347,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
     layerConfig: TypeEsriDynamicLayerEntryConfig
   ): Promise<TypeArrayOfFeatureInfoEntries> {
     const promisedQueryResult = new Promise<TypeArrayOfFeatureInfoEntries>((resolve) => {
-      if (!this.getVisible(layerConfig) || !layerConfig.olLayer) resolve([]);
+      if (!this.getVisible(Layer.getLayerPath(layerConfig)) || !layerConfig.olLayer) resolve([]);
       else {
         if (!(layerConfig as TypeEsriDynamicLayerEntryConfig).source.featureInfo?.queryable) resolve([]);
         let identifyUrl = getLocalizedValue(layerConfig.source?.dataAccessPath, this.mapId);
@@ -382,7 +379,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
               const features = new EsriJSON().readFeatures(
                 { features: jsonResponse.results },
                 { dataProjection: 'EPSG:4326', featureProjection: `EPSG:${currentProjection}` }
-              ) as Feature<Geometry>[];
+              ) as Feature[];
               this.formatFeatureInfoResult(features, layerConfig).then((arrayOfFeatureInfoEntries) => {
                 resolve(arrayOfFeatureInfoEntries);
               });
@@ -785,13 +782,14 @@ export class EsriDynamic extends AbstractGeoViewRaster {
   /** ***************************************************************************************************************************
    * Get the bounds of the layer represented in the layerConfig, returns updated bounds
    *
-   * @param {TypeLayerEntryConfig} layerConfig Layer config to get bounds from.
+   * @param {string} layerPath The Layer path to the layer's configuration.
    * @param {Extent | undefined} bounds The current bounding box to be adjusted.
    *
    * @returns {Extent} The layer bounding box.
    */
-  protected getBounds(layerConfig: TypeLayerEntryConfig, bounds: Extent | undefined): Extent | undefined {
-    const layerBounds = layerConfig!.initialSettings?.bounds || [];
+  protected getBounds(layerPath: string, bounds: Extent | undefined): Extent | undefined {
+    const layerConfig = this.getLayerConfig(layerPath);
+    const layerBounds = layerConfig?.initialSettings?.bounds || [];
     const projection = this.metadata?.fullExtent?.spatialReference?.wkid || MapEventProcessor.getMapState(this.mapId).currentProjection;
 
     if (this.metadata?.fullExtent) {

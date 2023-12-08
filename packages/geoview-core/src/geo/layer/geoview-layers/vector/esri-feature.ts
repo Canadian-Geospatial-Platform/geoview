@@ -4,7 +4,6 @@ import { Options as SourceOptions } from 'ol/source/Vector';
 import { EsriJSON } from 'ol/format';
 import { ReadOptions } from 'ol/format/Feature';
 import Feature from 'ol/Feature';
-import Geometry from 'ol/geom/Geometry';
 
 import { AbstractGeoViewLayer, CONST_LAYER_TYPES } from '../abstract-geoview-layers';
 
@@ -252,10 +251,10 @@ export class EsriFeature extends AbstractGeoViewVector {
     layerConfig: TypeBaseLayerEntryConfig,
     sourceOptions: SourceOptions = {},
     readOptions: ReadOptions = {}
-  ): VectorSource<Feature<Geometry>> {
+  ): VectorSource<Feature> {
     // The line below uses var because a var declaration has a wider scope than a let declaration.
     // eslint-disable-next-line no-var
-    var vectorSource: VectorSource<Feature<Geometry>>;
+    var vectorSource: VectorSource<Feature>;
     sourceOptions.url = getLocalizedValue(layerConfig.source!.dataAccessPath!, this.mapId);
     sourceOptions.url = `${sourceOptions.url}/${String(layerConfig.layerId)}/query?f=pjson&outfields=*&where=1%3D1`;
     sourceOptions.format = new EsriJSON();

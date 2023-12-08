@@ -3,8 +3,7 @@ import axios from 'axios';
 import { WMSCapabilities, WKT, GeoJSON } from 'ol/format';
 import { ReadOptions } from 'ol/format/Feature';
 import Geometry from 'ol/geom/Geometry';
-import { Extent } from 'ol/extent';
-import { transformExtent, toLonLat } from 'ol/proj';
+import { toLonLat } from 'ol/proj';
 import { Style, Stroke, Fill, Circle } from 'ol/style';
 import { Color } from 'ol/color';
 import { getArea as getAreaOL } from 'ol/sphere';
@@ -103,17 +102,6 @@ export class GeoUtilities {
       return format.readGeometry(geojson, readOptions);
     }
     return null;
-  };
-
-  /**
-   * Returns the Geometry representation of a given geojson
-   * @function geojsonToGeometry
-   * @param {string} geojson the geojson
-   * @param {ReadOptions} readOptions read options to convert the geojson to a geometry
-   * @returns {Geometry | null} the Geometry representation of the geojson
-   */
-  getExtent = (coordinates: number[], inCrs: number, outCrs: number): Extent => {
-    return transformExtent(coordinates, `EPSG:${inCrs}`, `EPSG:${outCrs}`);
   };
 
   /**

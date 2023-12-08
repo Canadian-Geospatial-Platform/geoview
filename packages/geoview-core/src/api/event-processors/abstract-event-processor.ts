@@ -1,7 +1,7 @@
-import { GeoViewStoreType } from '@/core/stores/geoview-store';
+import { GeoviewStoreType } from '@/core/stores/geoview-store';
 
 export abstract class AbstractEventProcessor {
-  protected store: GeoViewStoreType | undefined;
+  protected store: GeoviewStoreType | undefined;
 
   protected subscriptionArr: Array<() => void>;
 
@@ -10,7 +10,7 @@ export abstract class AbstractEventProcessor {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  onInitialize(store: GeoViewStoreType): void {
+  onInitialize(store: GeoviewStoreType): void {
     // add to arr of subscriptions so it can be destroyed later
     this.subscriptionArr.push();
   }

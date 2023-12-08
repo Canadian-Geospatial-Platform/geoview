@@ -289,21 +289,24 @@ export class ImageStatic extends AbstractGeoViewRaster {
   /** ***************************************************************************************************************************
    * Get the bounds of the layer represented in the layerConfig, returns updated bounds
    *
-   * @param {TypeLayerEntryConfig} layerConfig Layer config to get bounds from.
+   * @param {string} layerPath The Layer path to the layer's configuration.
    * @param {Extent | undefined} bounds The current bounding box to be adjusted.
    *
    * @returns {Extent} The layer bounding box.
    */
-  protected getBounds(layerConfig: TypeLayerEntryConfig, bounds: Extent | undefined): Extent | undefined {
-    const layerBounds = (layerConfig.olLayer as ImageLayer<Static>).getSource()?.getImageExtent();
-    const projection =
-      (layerConfig.olLayer as ImageLayer<Static>).getSource()?.getProjection()?.getCode().replace('EPSG:', '') ||
-      MapEventProcessor.getMapState(this.mapId).currentProjection;
+  protected getBounds(layerPath: string, bounds: Extent | undefined): Extent | undefined {
+    const layerConfig = this.getLayerConfig(layerPath);
+    if (layerConfig) {
+      const layerBounds = (layerConfig.olLayer as ImageLayer<Static>).getSource()?.getImageExtent();
+      const projection =
+        (layerConfig.olLayer as ImageLayer<Static>).getSource()?.getProjection()?.getCode().replace('EPSG:', '') ||
+        MapEventProcessor.getMapState(this.mapId).currentProjection;
 
-    if (layerBounds) {
-      const transformedBounds = transformExtent(layerBounds, `EPSG:${projection}`, `EPSG:4326`);
-      if (!bounds) bounds = [transformedBounds[0], transformedBounds[1], transformedBounds[2], transformedBounds[3]];
-      else bounds = getMinOrMaxExtents(bounds, transformedBounds);
+      if (layerBounds) {
+        const transformedBounds = transformExtent(layerBounds, `EPSG:${projection}`, `EPSG:4326`);
+        if (!bounds) bounds = [transformedBounds[0], transformedBounds[1], transformedBounds[2], transformedBounds[3]];
+        else bounds = getMinOrMaxExtents(bounds, transformedBounds);
+      }
     }
 
     return bounds;

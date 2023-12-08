@@ -60,7 +60,7 @@ import { api } from '@/app';
 
 type TypeStyleProcessor = (
   styleSettings: TypeStyleSettings | TypeKindOfVectorSettings,
-  feature?: Feature<Geometry>,
+  feature?: Feature,
   filterEquation?: FilterNodeArrayType,
   legendFilterIsOff?: boolean
 ) => Style | undefined;
@@ -69,11 +69,11 @@ type TypeStyleProcessor = (
  * This method returns the type of geometry. It removes the Multi prefix because for the geoviewRenderer, a MultiPoint has
  * the same behaviour than a Point.
  *
- * @param {Feature<Geometry>} feature Optional feature. This method does not use it, it is there to have a homogeneous signature.
+ * @param {Feature} feature Optional feature. This method does not use it, it is there to have a homogeneous signature.
  *
  * @returns {TypeStyleGeometry} The type of geometry (Point, LineString, Polygon).
  */
-const getGeometryType = (feature: Feature<Geometry>): TypeStyleGeometry => {
+const getGeometryType = (feature: Feature): TypeStyleGeometry => {
   const geometryType = feature.getGeometry()?.getType();
   if (!geometryType) throw new Error('Features must have a geometry type.');
   return (geometryType.startsWith('Multi') ? geometryType.slice(5) : geometryType) as TypeStyleGeometry;
@@ -519,14 +519,14 @@ export class GeoviewRenderer {
    * This method gets the style of the feature using the layer entry config. If the style does not exist for the geometryType,
    * create it using the default style strategy.
    *
-   * @param {Feature<Geometry>} feature The feature that need its style to be defined.
+   * @param {Feature} feature The feature that need its style to be defined.
    * @param {TypeBaseLayerEntryConfig | TypeVectorTileLayerEntryConfig | TypeVectorLayerEntryConfig} layerConfig The layer
    * entry config that may have a style configuration for the feature. If style does not exist for the geometryType, create it.
    *
    * @returns {Style | undefined} The style applied to the feature or undefined if not found.
    */
   getFeatureStyle(
-    feature: Feature<Geometry>,
+    feature: Feature,
     layerConfig: TypeBaseLayerEntryConfig | TypeVectorTileLayerEntryConfig | TypeVectorLayerEntryConfig
   ): Style | undefined {
     const geometryType = getGeometryType(feature);
@@ -552,14 +552,14 @@ export class GeoviewRenderer {
   /** ***************************************************************************************************************************
    * This method gets the canvas icon from the style of the feature using the layer entry config.
    *
-   * @param {Feature<Geometry>} feature The feature that need its canvas icon to be defined.
+   * @param {Feature} feature The feature that need its canvas icon to be defined.
    * @param {TypeBaseLayerEntryConfig | TypeVectorTileLayerEntryConfig | TypeVectorLayerEntryConfig} layerConfig The layer
    * entry config that may have a style configuration for the feature.
    *
    * @returns {Promise<HTMLCanvasElement | undefined>} The canvas icon associated to the feature or undefined if not found.
    */
   getFeatureCanvas(
-    feature: Feature<Geometry>,
+    feature: Feature,
     layerConfig: TypeBaseLayerEntryConfig | TypeVectorTileLayerEntryConfig | TypeVectorLayerEntryConfig
   ): Promise<HTMLCanvasElement | undefined> {
     const promisedCanvas = new Promise<HTMLCanvasElement | undefined>((resolve) => {
@@ -829,14 +829,14 @@ export class GeoviewRenderer {
    * Process a simple point symbol using the settings. Simple point symbol may be an icon or a vector symbol.
    *
    * @param {TypeStyleSettings | TypeKindOfVectorSettings} styleSettings The settings to use for the Style creation.
-   * @param {Feature<Geometry>} feature Optional feature. This method does not use it, it is there to have a homogeneous signature.
+   * @param {Feature} feature Optional feature. This method does not use it, it is there to have a homogeneous signature.
    * @param {FilterNodeArrayType} filterEquation The filter equation associated to the layer.
    *
    * @returns {Style | undefined} The Style created. Undefined if unable to create it.
    */
   private processSimplePoint(
     styleSettings: TypeStyleSettings | TypeKindOfVectorSettings,
-    feature?: Feature<Geometry>,
+    feature?: Feature,
     filterEquation?: FilterNodeArrayType
   ): Style | undefined {
     if (filterEquation !== undefined && filterEquation.length !== 0 && feature)
@@ -855,14 +855,14 @@ export class GeoviewRenderer {
    * Process a simple lineString using the settings.
    *
    * @param {TypeStyleSettings | TypeKindOfVectorSettings} styleSettings The settings to use for the Style creation.
-   * @param {Feature<Geometry>} feature Optional feature. This method does not use it, it is there to have a homogeneous signature.
+   * @param {Feature} feature Optional feature. This method does not use it, it is there to have a homogeneous signature.
    * @param {FilterNodeArrayType} filterEquation The filter equation associated to the layer.
    *
    * @returns {Style | undefined} The Style created. Undefined if unable to create it.
    */
   private processSimpleLineString(
     styleSettings: TypeStyleSettings | TypeKindOfVectorSettings,
-    feature?: Feature<Geometry>,
+    feature?: Feature,
     filterEquation?: FilterNodeArrayType
   ): Style | undefined {
     if (filterEquation !== undefined && filterEquation.length !== 0 && feature)
@@ -1031,14 +1031,14 @@ export class GeoviewRenderer {
    * Process a simple polygon using the settings.
    *
    * @param {TypeStyleSettings | TypeKindOfVectorSettings} styleSettings The settings to use for the Style creation.
-   * @param {Feature<Geometry>} feature Optional feature. This method does not use it, it is there to have a homogeneous signature.
+   * @param {Feature} feature Optional feature. This method does not use it, it is there to have a homogeneous signature.
    * @param {FilterNodeArrayType} filterEquation The filter equation associated to the layer.
    *
    * @returns {Style | undefined} The Style created. Undefined if unable to create it.
    */
   private processSimplePolygon(
     styleSettings: TypeStyleSettings | TypeKindOfVectorSettings,
-    feature?: Feature<Geometry>,
+    feature?: Feature,
     filterEquation?: FilterNodeArrayType
   ): Style | undefined {
     if (filterEquation !== undefined && filterEquation.length !== 0 && feature)
@@ -1064,15 +1064,11 @@ export class GeoviewRenderer {
    *
    * @param {string[]} fields The fields involved in the unique value definition.
    * @param {TypeUniqueValueStyleInfo[]} uniqueValueStyleInfo The unique value configuration.
-   * @param {Feature<Geometry>} feature The feature used to test the unique value conditions.
+   * @param {Feature} feature The feature used to test the unique value conditions.
    *
    * @returns {Style | undefined} The Style created. Undefined if unable to create it.
    */
-  private searchUniqueValueEntry(
-    fields: string[],
-    uniqueValueStyleInfo: TypeUniqueValueStyleInfo[],
-    feature: Feature<Geometry>
-  ): number | undefined {
+  private searchUniqueValueEntry(fields: string[], uniqueValueStyleInfo: TypeUniqueValueStyleInfo[], feature: Feature): number | undefined {
     for (let i = 0; i < uniqueValueStyleInfo.length; i++) {
       for (let j = 0, isEqual = true; j < fields.length && isEqual; j++) {
         // For obscure reasons, it seems that sometimes the field names in the feature do not have the same case as those in the
@@ -1095,7 +1091,7 @@ export class GeoviewRenderer {
    * Process the unique value settings using a point feature to get its Style.
    *
    * @param {TypeStyleSettings | TypeKindOfVectorSettings} styleSettings The style settings to use.
-   * @param {Feature<Geometry>} feature the feature used to test the unique value conditions.
+   * @param {Feature} feature the feature used to test the unique value conditions.
    * @param {FilterNodeArrayType} filterEquation The filter equation associated to the layer.
    * @param {boolean} legendFilterIsOff when true, do not apply legend filter.
    *
@@ -1103,7 +1099,7 @@ export class GeoviewRenderer {
    */
   private processUniqueValuePoint(
     styleSettings: TypeStyleSettings | TypeKindOfVectorSettings,
-    feature?: Feature<Geometry>,
+    feature?: Feature,
     filterEquation?: FilterNodeArrayType,
     legendFilterIsOff?: boolean
   ): Style | undefined {
@@ -1125,7 +1121,7 @@ export class GeoviewRenderer {
    * Process the unique value settings using a lineString feature to get its Style.
    *
    * @param {TypeStyleSettings | TypeKindOfVectorSettings} styleSettings The style settings to use.
-   * @param {Feature<Geometry>} feature the feature used to test the unique value conditions.
+   * @param {Feature} feature the feature used to test the unique value conditions.
    * @param {FilterNodeArrayType} filterEquation The filter equation associated to the layer.
    * @param {boolean} legendFilterIsOff when true, do not apply legend filter.
    *
@@ -1133,7 +1129,7 @@ export class GeoviewRenderer {
    */
   private processUniqueLineString(
     styleSettings: TypeStyleSettings | TypeKindOfVectorSettings,
-    feature?: Feature<Geometry>,
+    feature?: Feature,
     filterEquation?: FilterNodeArrayType,
     legendFilterIsOff?: boolean
   ): Style | undefined {
@@ -1155,7 +1151,7 @@ export class GeoviewRenderer {
    * Process the unique value settings using a polygon feature to get its Style.
    *
    * @param {TypeStyleSettings | TypeKindOfVectorSettings} styleSettings The style settings to use.
-   * @param {Feature<Geometry>} feature the feature used to test the unique value conditions.
+   * @param {Feature} feature the feature used to test the unique value conditions.
    * @param {FilterNodeArrayType} filterEquation The filter equation associated to the layer.
    * @param {boolean} legendFilterIsOff when true, do not apply legend filter.
    *
@@ -1163,7 +1159,7 @@ export class GeoviewRenderer {
    */
   private processUniquePolygon(
     styleSettings: TypeStyleSettings | TypeKindOfVectorSettings,
-    feature?: Feature<Geometry>,
+    feature?: Feature,
     filterEquation?: FilterNodeArrayType,
     legendFilterIsOff?: boolean
   ): Style | undefined {
@@ -1186,15 +1182,11 @@ export class GeoviewRenderer {
    *
    * @param {string[]} field The field involved in the class break definition.
    * @param {TypeClassBreakStyleInfo[]} classBreakStyleInfo The class break configuration.
-   * @param {Feature<Geometry>} feature The feature used to test the class break conditions.
+   * @param {Feature} feature The feature used to test the class break conditions.
    *
    * @returns {Style | undefined} The Style created. Undefined if unable to create it.
    */
-  private searchClassBreakEntry(
-    field: string,
-    classBreakStyleInfo: TypeClassBreakStyleInfo[],
-    feature: Feature<Geometry>
-  ): number | undefined {
+  private searchClassBreakEntry(field: string, classBreakStyleInfo: TypeClassBreakStyleInfo[], feature: Feature): number | undefined {
     // For obscure reasons, it seems that sometimes the field names in the feature do not have the same case as those in the
     // class break definition.
     const featureKey = (feature as Feature).getKeys().filter((key) => {
@@ -1216,7 +1208,7 @@ export class GeoviewRenderer {
    * Process the class break settings using a Point feature to get its Style.
    *
    * @param {TypeStyleSettings | TypeKindOfVectorSettings} styleSettings The style settings to use.
-   * @param {Feature<Geometry>} feature the feature used to test the unique value conditions.
+   * @param {Feature} feature the feature used to test the unique value conditions.
    * @param {FilterNodeArrayType} filterEquation The filter equation associated to the layer.
    * @param {boolean} legendFilterIsOff when true, do not apply legend filter.
    *
@@ -1224,7 +1216,7 @@ export class GeoviewRenderer {
    */
   private processClassBreaksPoint(
     styleSettings: TypeStyleSettings | TypeKindOfVectorSettings,
-    feature?: Feature<Geometry>,
+    feature?: Feature,
     filterEquation?: FilterNodeArrayType,
     legendFilterIsOff?: boolean
   ): Style | undefined {
@@ -1246,7 +1238,7 @@ export class GeoviewRenderer {
    * Process the class break settings using a lineString feature to get its Style.
    *
    * @param {TypeStyleSettings | TypeKindOfVectorSettings} styleSettings The style settings to use.
-   * @param {Feature<Geometry>} feature the feature used to test the unique value conditions.
+   * @param {Feature} feature the feature used to test the unique value conditions.
    * @param {FilterNodeArrayType} filterEquation The filter equation associated to the layer.
    * @param {boolean} legendFilterIsOff when true, do not apply legend filter.
    *
@@ -1254,7 +1246,7 @@ export class GeoviewRenderer {
    */
   private processClassBreaksLineString(
     styleSettings: TypeStyleSettings | TypeKindOfVectorSettings,
-    feature?: Feature<Geometry>,
+    feature?: Feature,
     filterEquation?: FilterNodeArrayType,
     legendFilterIsOff?: boolean
   ): Style | undefined {
@@ -1276,7 +1268,7 @@ export class GeoviewRenderer {
    * Process the class break settings using a Polygon feature to get its Style.
    *
    * @param {TypeStyleSettings | TypeKindOfVectorSettings} styleSettings The style settings to use.
-   * @param {Feature<Geometry>} feature the feature used to test the unique value conditions.
+   * @param {Feature} feature the feature used to test the unique value conditions.
    * @param {FilterNodeArrayType} filterEquation The filter equation associated to the layer.
    * @param {boolean} legendFilterIsOff when true, do not apply legend filter.
    *
@@ -1284,7 +1276,7 @@ export class GeoviewRenderer {
    */
   private processClassBreaksPolygon(
     styleSettings: TypeStyleSettings | TypeKindOfVectorSettings,
-    feature?: Feature<Geometry>,
+    feature?: Feature,
     filterEquation?: FilterNodeArrayType,
     legendFilterIsOff?: boolean
   ): Style | undefined {
@@ -1361,12 +1353,12 @@ export class GeoviewRenderer {
   /** ***************************************************************************************************************************
    * Use the filter equation and the feature fields to determine if the feature is visible.
    *
-   * @param {Feature<Geometry>} feature the feature used to find the visibility value to return.
+   * @param {Feature} feature the feature used to find the visibility value to return.
    * @param {FilterNodeArrayType} filterEquation the filter used to find the visibility value to return.
    *
    * @returns {boolean | undefined} The visibility flag for the feature specified.
    */
-  private featureIsNotVisible(feature: Feature<Geometry>, filterEquation: FilterNodeArrayType): boolean | undefined {
+  private featureIsNotVisible(feature: Feature, filterEquation: FilterNodeArrayType): boolean | undefined {
     const operatorStack: FilterNodeArrayType = [];
     const dataStack: FilterNodeArrayType = [];
 

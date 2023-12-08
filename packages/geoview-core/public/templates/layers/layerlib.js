@@ -223,20 +223,20 @@ const createTableOfFilter = (mapId) => {
           mapButtonsDiv.appendChild(layerConfigH2);
 
           const toggleLayerVisibility = document.createElement('button');
-          let visibilityFlag = geoviewLayer.getVisible(layerConfig);
+          let visibilityFlag = geoviewLayer.getVisible(layerPath);
           if (visibilityFlag)
             toggleLayerVisibility.innerText = layerConfig?.source?.style === undefined ? 'Hide' : `Hide style ${layerConfig.source.style}`;
           else
             toggleLayerVisibility.innerText = layerConfig?.source?.style === undefined ? 'Show' : `Show style ${layerConfig.source.style}`;
           toggleLayerVisibility.addEventListener('click', (e) => {
-            visibilityFlag = !geoviewLayer.getVisible(layerConfig);
+            visibilityFlag = !geoviewLayer.getVisible(layerPath);
             if (visibilityFlag)
               toggleLayerVisibility.innerText =
                 layerConfig?.source?.style === undefined ? 'Hide' : `Hide style ${layerConfig.source.style}`;
             else
               toggleLayerVisibility.innerText =
                 layerConfig?.source?.style === undefined ? 'Show' : `Show style ${layerConfig.source.style}`;
-            geoviewLayer.setVisible(visibilityFlag, layerConfig);
+            geoviewLayer.setVisible(visibilityFlag, layerPath);
           });
           layerConfigH2.appendChild(toggleLayerVisibility);
 

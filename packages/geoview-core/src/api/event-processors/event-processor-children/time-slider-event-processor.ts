@@ -1,10 +1,10 @@
-import { GeoViewStoreType } from '@/core/stores/geoview-store';
+import { GeoviewStoreType } from '@/core/stores/geoview-store';
 import { AbstractEventProcessor } from '../abstract-event-processor';
 import { AbstractGeoViewVector, EsriDynamic, TypeFeatureInfoLayerConfig, TypeTimeSliderValues, WMS, api, getLocalizedValue } from '@/app';
 import { TypeLegendLayer } from '@/core/components/layers/types';
 
 export class TimeSliderEventProcessor extends AbstractEventProcessor {
-  onInitialize(store: GeoViewStoreType) {
+  onInitialize(store: GeoviewStoreType) {
     const { mapId } = store.getState();
 
     api.event.once(

@@ -354,13 +354,16 @@ export abstract class AbstractGeoViewLayer {
   changeLayerPhase(layerPhase: string, layerConfig?: TypeLayerEntryConfig) {
     if (layerConfig) {
       (layerConfig as TypeBaseLayerEntryConfig).layerPhase = layerPhase;
-      api.event.emit(LayerSetPayload.createLayerSetChangeLayerPhasePayload(this.mapId, layerConfig, layerPhase));
+      api.event.emit(LayerSetPayload.createLayerSetChangeLayerPhasePayload(this.mapId, Layer.getLayerPath(layerConfig), layerPhase));
     } else {
       this.layerPhase = layerPhase;
       const changeAllSublayerPhase = (listOfLayerEntryConfig = this.listOfLayerEntryConfig) => {
         listOfLayerEntryConfig.forEach((subLayerConfig) => {
           if (layerEntryIsGroupLayer(subLayerConfig)) changeAllSublayerPhase(subLayerConfig.listOfLayerEntryConfig);
-          else api.event.emit(LayerSetPayload.createLayerSetChangeLayerPhasePayload(this.mapId, subLayerConfig, layerPhase));
+          else
+            api.event.emit(
+              LayerSetPayload.createLayerSetChangeLayerPhasePayload(this.mapId, Layer.getLayerPath(subLayerConfig), layerPhase)
+            );
         });
       };
       changeAllSublayerPhase();
@@ -374,8 +377,9 @@ export abstract class AbstractGeoViewLayer {
    * @param {TypeLayerEntryConfig} layerConfig The layer configuration affected by the change.
    */
   changeLayerStatus(layerStatus: TypeLayerStatus, layerConfig: TypeLayerEntryConfig) {
+    const layerPath = Layer.getLayerPath(layerConfig);
     (layerConfig as TypeBaseLayerEntryConfig).layerStatus = layerStatus;
-    api.event.emit(LayerSetPayload.createLayerSetChangeLayerStatusPayload(this.mapId, layerConfig, layerStatus!));
+    api.event.emit(LayerSetPayload.createLayerSetChangeLayerStatusPayload(this.mapId, layerPath, layerStatus!));
     if (layerStatus === 'processed') this.changeLayerPhase(layerStatus, layerConfig);
   }
 
@@ -675,11 +679,7 @@ export abstract class AbstractGeoViewLayer {
         if (baseLayer) {
           const layerConfig = baseLayer?.get('layerConfig') as TypeBaseLayerEntryConfig;
           if (layerConfig) {
-            baseLayer.setVisible(
-              layerConfig.initialSettings?.visible === 'yes' ||
-                layerConfig.initialSettings?.visible === 'always' ||
-                layerConfig.initialSettings?.visible === undefined
-            );
+            baseLayer.setVisible(layerConfig.initialSettings?.visible !== 'no');
 
             if (!layerEntryIsGroupLayer(listOfLayerEntryConfig[i])) {
               this.registerToLayerSets(baseLayer.get('layerConfig') as TypeBaseLayerEntryConfig);
@@ -718,20 +718,14 @@ export abstract class AbstractGeoViewLayer {
    * Return feature information for the layer specified.
    *
    * @param {QueryType} queryType  The type of query to perform.
-   * @param {string | TypeLayerEntryConfig | null} layerPathOrConfig Optional layer path or configuration.
+   * @param {string} layerPath The Layer path to the layer's configuration.
    * @param {TypeLocation} location An optionsl pixel, coordinate or polygon that will be used by the query.
    *
    * @returns {Promise<TypeFeatureInfoResult>} The feature info table.
    */
-  async getFeatureInfo(
-    queryType: QueryType,
-    layerPathOrConfig: string | TypeLayerEntryConfig,
-    location: TypeLocation = null
-  ): Promise<TypeArrayOfFeatureInfoEntries> {
+  async getFeatureInfo(queryType: QueryType, layerPath: string, location: TypeLocation = null): Promise<TypeArrayOfFeatureInfoEntries> {
     try {
-      const layerConfig = (
-        typeof layerPathOrConfig === 'string' ? this.getLayerConfig(layerPathOrConfig) : layerPathOrConfig
-      ) as TypeLayerEntryConfig | null;
+      const layerConfig = this.getLayerConfig(layerPath) as TypeLayerEntryConfig | null;
       if (!layerConfig || !layerConfig.source?.featureInfo?.queryable) return [];
 
       switch (queryType) {
@@ -984,15 +978,12 @@ export abstract class AbstractGeoViewLayer {
    * extent. They are mainly used for display purposes to show the bounding box in which the data resides and to zoom in on the
    * entire layer data. It is not used by openlayer to limit the display of data on the map.
    *
-   * @param {string | TypeLayerEntryConfig | TypeListOfLayerEntryConfig} layerPathOrConfig Layer path or configuration.
+   * @param {string} layerPath The Layer path to the layer's configuration.
    * @param {string | number | undefined} projectionCode Optional projection code to use for the returned bounds.
    *
    * @returns {Extent} The layer bounding box.
    */
-  getMetadataBounds(
-    layerPathOrConfig: string | TypeLayerEntryConfig | TypeListOfLayerEntryConfig,
-    projectionCode: string | number | undefined = undefined
-  ): Extent | undefined {
+  getMetadataBounds(layerPath?: string, projectionCode: string | number | undefined = undefined): Extent | undefined {
     let bounds: Extent | undefined;
     const processGroupLayerBounds = (listOfLayerEntryConfig: TypeListOfLayerEntryConfig) => {
       listOfLayerEntryConfig.forEach((layerConfig) => {
@@ -1015,12 +1006,9 @@ export abstract class AbstractGeoViewLayer {
         }
       });
     };
-    const layerConfig = typeof layerPathOrConfig === 'string' ? this.getLayerConfig(layerPathOrConfig) : layerPathOrConfig;
-    if (layerConfig) {
-      if (Array.isArray(layerConfig)) processGroupLayerBounds(layerConfig);
-      else processGroupLayerBounds([layerConfig]);
-      if (projectionCode && bounds) return transformExtent(bounds, `EPSG:4326`, `EPSG:${projectionCode}`);
-    }
+    const layerConfig = layerPath?.includes('/') ? [this.getLayerConfig(layerPath)!] : this.listOfLayerEntryConfig;
+    processGroupLayerBounds(layerConfig);
+    if (projectionCode && bounds) return transformExtent(bounds, `EPSG:4326`, `EPSG:${projectionCode}`);
     return bounds;
   }
 
@@ -1055,12 +1043,12 @@ export abstract class AbstractGeoViewLayer {
    * numbers representing an extent: [minx, miny, maxx, maxy]. This routine return undefined when the layer path can't be found.
    * The extent is used to clip the data displayed on the map.
    *
-   * @param {string | TypeLayerEntryConfig} layerPathOrConfig Layer path or configuration.
+   * @param {string} layerPath The Layer path to the layer's configuration.
    *
    * @returns {Extent} The layer extent.
    */
-  getExtent(layerPathOrConfig: string | TypeLayerEntryConfig): Extent | undefined {
-    const olLayer = typeof layerPathOrConfig === 'string' ? this.getLayerConfig(layerPathOrConfig)?.olLayer : layerPathOrConfig?.olLayer;
+  getExtent(layerPath: string): Extent | undefined {
+    const olLayer = this.getLayerConfig(layerPath)?.olLayer;
     return olLayer ? olLayer.getExtent() : undefined;
   }
 
@@ -1070,22 +1058,22 @@ export abstract class AbstractGeoViewLayer {
    * found.
    *
    * @param {Extent} layerExtent The extent to assign to the layer.
-   * @param {string | TypeLayerEntryConfig} layerPathOrConfig Layer path or configuration.
+   * @param {string} layerPath The Layer path to the layer's configuration.
    */
-  setExtent(layerExtent: Extent, layerPathOrConfig: string | TypeLayerEntryConfig) {
-    const olLayer = typeof layerPathOrConfig === 'string' ? this.getLayerConfig(layerPathOrConfig)?.olLayer : layerPathOrConfig?.olLayer;
+  setExtent(layerExtent: Extent, layerPath: string) {
+    const olLayer = this.getLayerConfig(layerPath)?.olLayer;
     if (olLayer) olLayer.setExtent(layerExtent);
   }
 
   /** ***************************************************************************************************************************
    * Return the opacity of the layer (between 0 and 1). This routine return undefined when the layerPath specified is not found.
    *
-   * @param {string | TypeLayerEntryConfig} layerPathOrConfig Layer path or configuration.
+   * @param {string} layerPath The Layer path to the layer's configuration.
    *
    * @returns {number} The opacity of the layer.
    */
-  getOpacity(layerPathOrConfig: string | TypeLayerEntryConfig): number | undefined {
-    const olLayer = typeof layerPathOrConfig === 'string' ? this.getLayerConfig(layerPathOrConfig)?.olLayer : layerPathOrConfig?.olLayer;
+  getOpacity(layerPath: string): number | undefined {
+    const olLayer = this.getLayerConfig(layerPath)?.olLayer;
     return olLayer ? olLayer.getOpacity() : undefined;
   }
 
@@ -1093,23 +1081,23 @@ export abstract class AbstractGeoViewLayer {
    * Set the opacity of the layer (between 0 and 1). This routine does nothing when the layerPath specified is not found.
    *
    * @param {number} layerOpacity The opacity of the layer.
-   * @param {string | TypeLayerEntryConfig} layerPathOrConfig Layer path or configuration.
+   * @param {string} layerPath The Layer path to the layer's configuration.
    *
    */
-  setOpacity(layerOpacity: number, layerPathOrConfig: string | TypeLayerEntryConfig) {
-    const olLayer = typeof layerPathOrConfig === 'string' ? this.getLayerConfig(layerPathOrConfig)?.olLayer : layerPathOrConfig?.olLayer;
+  setOpacity(layerOpacity: number, layerPath: string) {
+    const olLayer = this.getLayerConfig(layerPath)?.olLayer;
     if (olLayer) olLayer.setOpacity(layerOpacity);
   }
 
   /** ***************************************************************************************************************************
    * Return the visibility of the layer (true or false). This routine return undefined when the layerPath specified is not found.
    *
-   * @param {string | TypeLayerEntryConfig} layerPathOrConfig Layer path or configuration.
+   * @param {string} layerPath The Layer path to the layer's configuration.
    *
    * @returns {boolean} The visibility of the layer.
    */
-  getVisible(layerPathOrConfig: string | TypeLayerEntryConfig): boolean | undefined {
-    const olLayer = typeof layerPathOrConfig === 'string' ? this.getLayerConfig(layerPathOrConfig)?.olLayer : layerPathOrConfig?.olLayer;
+  getVisible(layerPath: string): boolean | undefined {
+    const olLayer = this.getLayerConfig(layerPath)?.olLayer;
     return olLayer ? olLayer.getVisible() : undefined;
   }
 
@@ -1117,10 +1105,10 @@ export abstract class AbstractGeoViewLayer {
    * Set the visibility of the layer (true or false). This routine does nothing when the layerPath specified is not found.
    *
    * @param {boolean} layerVisibility The visibility of the layer.
-   * @param {string | TypeLayerEntryConfig} layerPathOrConfig Layer path or configuration.
+   * @param {string} layerPath The Layer path to the layer's configuration.
    */
-  setVisible(layerVisibility: boolean, layerPathOrConfig: string | TypeLayerEntryConfig) {
-    const olLayer = typeof layerPathOrConfig === 'string' ? this.getLayerConfig(layerPathOrConfig)?.olLayer : layerPathOrConfig?.olLayer;
+  setVisible(layerVisibility: boolean, layerPath: string) {
+    const olLayer = this.getLayerConfig(layerPath)?.olLayer;
     if (olLayer) {
       olLayer.setVisible(layerVisibility);
       olLayer.changed();
@@ -1130,12 +1118,12 @@ export abstract class AbstractGeoViewLayer {
   /** ***************************************************************************************************************************
    * Return the min zoom of the layer. This routine return undefined when the layerPath specified is not found.
    *
-   * @param {string | TypeLayerEntryConfig} layerPathOrConfig Layer path or configuration.
+   * @param {string} layerPath The Layer path to the layer's configuration.
    *
    * @returns {boolean} The visibility of the layer.
    */
-  getMinZoom(layerPathOrConfig: string | TypeLayerEntryConfig): number | undefined {
-    const olLayer = typeof layerPathOrConfig === 'string' ? this.getLayerConfig(layerPathOrConfig)?.olLayer : layerPathOrConfig?.olLayer;
+  getMinZoom(layerPath: string): number | undefined {
+    const olLayer = this.getLayerConfig(layerPath)?.olLayer;
     return olLayer ? olLayer.getMinZoom() : undefined;
   }
 
@@ -1143,22 +1131,22 @@ export abstract class AbstractGeoViewLayer {
    * Set the min zoom of the layer. This routine does nothing when the layerPath specified is not found.
    *
    * @param {boolean} layerVisibility The visibility of the layer.
-   * @param {string | TypeLayerEntryConfig} layerPathOrConfig Layer path or configuration.
+   * @param {string} layerPath The Layer path to the layer's configuration.
    */
-  setMinZoom(minZoom: number, layerPathOrConfig: string | TypeLayerEntryConfig) {
-    const olLayer = typeof layerPathOrConfig === 'string' ? this.getLayerConfig(layerPathOrConfig)?.olLayer : layerPathOrConfig?.olLayer;
+  setMinZoom(minZoom: number, layerPath: string) {
+    const olLayer = this.getLayerConfig(layerPath)?.olLayer;
     if (olLayer) olLayer.setMinZoom(minZoom);
   }
 
   /** ***************************************************************************************************************************
    * Return the max zoom of the layer. This routine return undefined when the layerPath specified is not found.
    *
-   * @param {string | TypeLayerEntryConfig} layerPathOrConfig Layer path or configuration.
+   * @param {string} layerPath The Layer path to the layer's configuration.
    *
    * @returns {boolean} The visibility of the layer.
    */
-  getMaxZoom(layerPathOrConfig: string | TypeLayerEntryConfig): number | undefined {
-    const olLayer = typeof layerPathOrConfig === 'string' ? this.getLayerConfig(layerPathOrConfig)?.olLayer : layerPathOrConfig?.olLayer;
+  getMaxZoom(layerPath: string): number | undefined {
+    const olLayer = this.getLayerConfig(layerPath)?.olLayer;
     return olLayer ? olLayer.getMaxZoom() : undefined;
   }
 
@@ -1166,10 +1154,10 @@ export abstract class AbstractGeoViewLayer {
    * Set the max zoom of the layer. This routine does nothing when the layerPath specified is not found.
    *
    * @param {boolean} layerVisibility The visibility of the layer.
-   * @param {string | TypeLayerEntryConfig} layerPathOrConfig Layer path or configuration.
+   * @param {string} layerPath The Layer path to the layer's configuration.
    */
-  setMaxZoom(maxZoom: number, layerPathOrConfig: string | TypeLayerEntryConfig) {
-    const olLayer = typeof layerPathOrConfig === 'string' ? this.getLayerConfig(layerPathOrConfig)?.olLayer : layerPathOrConfig?.olLayer;
+  setMaxZoom(maxZoom: number, layerPath: string) {
+    const olLayer = this.getLayerConfig(layerPath)?.olLayer;
     if (olLayer) olLayer.setMaxZoom(maxZoom);
   }
 
@@ -1177,7 +1165,7 @@ export abstract class AbstractGeoViewLayer {
    * Return the legend of the layer. This routine returns null when the layerPath specified is not found. If the style property
    * of the layerConfig object is undefined, the legend property of the object returned will be null.
    *
-   * @param {string | TypeLayerEntryConfig} layerPathOrConfig Layer path or configuration.
+   * @param {string} layerPath The Layer path to the layer's configuration.
    *
    * @returns {Promise<TypeLegend | null>} The legend of the layer.
    */
@@ -1223,13 +1211,13 @@ export abstract class AbstractGeoViewLayer {
    * Get and format the value of the field with the name passed in parameter. Vector GeoView layers convert dates to milliseconds
    * since the base date. Vector feature dates must be in ISO format.
    *
-   * @param {Feature<Geometry>} features The features that hold the field values.
+   * @param {Feature} features The features that hold the field values.
    * @param {string} fieldName The field name.
    * @param {'number' | 'string' | 'date'} fieldType The field type.
    *
    * @returns {string | number | Date} The formatted value of the field.
    */
-  protected getFieldValue(feature: Feature<Geometry>, fieldName: string, fieldType: 'number' | 'string' | 'date'): string | number | Date {
+  protected getFieldValue(feature: Feature, fieldName: string, fieldType: 'number' | 'string' | 'date'): string | number | Date {
     const fieldValue = feature.get(fieldName);
     let returnValue: string | number | Date;
     if (fieldType === 'date') {
@@ -1252,18 +1240,19 @@ export abstract class AbstractGeoViewLayer {
   /** ***************************************************************************************************************************
    * Convert the feature information to an array of TypeArrayOfFeatureInfoEntries.
    *
-   * @param {Feature<Geometry>[]} features The array of features to convert.
+   * @param {Feature[]} features The array of features to convert.
    * @param {TypeImageLayerEntryConfig | TypeVectorLayerEntryConfig} layerConfig The layer configuration.
    *
    * @returns {TypeArrayOfFeatureInfoEntries} The Array of feature information.
    */
   protected async formatFeatureInfoResult(
-    features: Feature<Geometry>[],
+    features: Feature[],
     layerConfig: TypeOgcWmsLayerEntryConfig | TypeEsriDynamicLayerEntryConfig | TypeVectorLayerEntryConfig
   ): Promise<TypeArrayOfFeatureInfoEntries> {
     try {
       if (!features.length) return [];
 
+      const layerPath = Layer.getLayerPath(layerConfig);
       const featureInfo = layerConfig?.source?.featureInfo;
       const fieldTypes = featureInfo?.fieldTypes?.split(',') as ('string' | 'number' | 'date')[];
       const outfields = getLocalizedValue(featureInfo?.outfields, this.mapId)?.split(',');
@@ -1271,10 +1260,10 @@ export abstract class AbstractGeoViewLayer {
       const queryResult: TypeArrayOfFeatureInfoEntries = [];
       let featureKeyCounter = 0;
       let fieldKeyCounter = 0;
-      const promisedAllCanvasFound: Promise<{ feature: Feature<Geometry>; canvas: HTMLCanvasElement | undefined }>[] = [];
+      const promisedAllCanvasFound: Promise<{ feature: Feature; canvas: HTMLCanvasElement | undefined }>[] = [];
       features.forEach((featureNeedingItsCanvas) => {
         promisedAllCanvasFound.push(
-          new Promise<{ feature: Feature<Geometry>; canvas: HTMLCanvasElement | undefined }>((resolveCanvas) => {
+          new Promise<{ feature: Feature; canvas: HTMLCanvasElement | undefined }>((resolveCanvas) => {
             api.maps[this.mapId].geoviewRenderer
               .getFeatureCanvas(featureNeedingItsCanvas, layerConfig as TypeVectorLayerEntryConfig)
               .then((canvas) => {
@@ -1299,7 +1288,7 @@ export abstract class AbstractGeoViewLayer {
             nameField: getLocalizedValue(layerConfig?.source?.featureInfo?.nameField, this.mapId) || null,
           };
 
-          const featureFields = (feature as Feature<Geometry>).getKeys();
+          const featureFields = (feature as Feature).getKeys();
           featureFields.forEach((fieldName) => {
             if (fieldName !== 'geometry') {
               if (outfields?.includes(fieldName)) {
@@ -1309,15 +1298,15 @@ export abstract class AbstractGeoViewLayer {
                   value: this.getFieldValue(feature, fieldName, fieldTypes![fieldIndex]),
                   dataType: fieldTypes![fieldIndex] as 'string' | 'date' | 'number',
                   alias: aliasFields![fieldIndex],
-                  domain: this.getFieldDomain(fieldName, layerConfig!),
+                  domain: this.getFieldDomain(fieldName, layerConfig),
                 };
               } else if (!outfields) {
                 featureInfoEntry.fieldInfo[fieldName] = {
                   fieldKey: fieldKeyCounter++,
-                  value: this.getFieldValue(feature, fieldName, this.getFieldType(fieldName, layerConfig!)),
-                  dataType: this.getFieldType(fieldName, layerConfig!),
+                  value: this.getFieldValue(feature, fieldName, this.getFieldType(fieldName, layerConfig)),
+                  dataType: this.getFieldType(fieldName, layerConfig),
                   alias: fieldName,
-                  domain: this.getFieldDomain(fieldName, layerConfig!),
+                  domain: this.getFieldDomain(fieldName, layerConfig),
                 };
               }
             }
@@ -1336,7 +1325,7 @@ export abstract class AbstractGeoViewLayer {
    * Get the layerFilter that is associated to the layer. Returns undefined when the layer config can't be found using the layer
    * path.
    *
-   * @param {string | TypeLayerEntryConfig} layerPathOrConfig Layer path or configuration.
+   * @param {string} layerPath The Layer path to the layer's configuration.
    *
    * @returns {string | undefined} The filter associated to the layer or undefined.
    */
@@ -1351,12 +1340,12 @@ export abstract class AbstractGeoViewLayer {
   /** ***************************************************************************************************************************
    * Get the bounds of the layer represented in the layerConfig, returns updated bounds
    *
-   * @param {TypeLayerEntryConfig} layerConfig Layer config to get bounds from.
+   * @param {string} layerPath The Layer path to the layer's configuration.
    * @param {Extent | undefined} bounds The current bounding box to be adjusted.
    *
    * @returns {Extent} The layer bounding box.
    */
-  protected abstract getBounds(layerConfig: TypeLayerEntryConfig, bounds: Extent | undefined): Extent | undefined;
+  protected abstract getBounds(layerPath: string, bounds: Extent | undefined): Extent | undefined;
 
   /** ***************************************************************************************************************************
    * Compute the layer bounds or undefined if the result can not be obtained from the feature extents that compose the layer. If
@@ -1364,14 +1353,14 @@ export abstract class AbstractGeoViewLayer {
    * different from the extent. They are mainly used for display purposes to show the bounding box in which the data resides and
    * to zoom in on the entire layer data. It is not used by openlayer to limit the display of data on the map.
    *
-   * @param {string | TypeLayerEntryConfig | TypeListOfLayerEntryConfig} layerPathOrConfig Layer path or configuration.
+   * @param {string} layerPath The Layer path to the layer's configuration.
    * @param {string | number | undefined} projectionCode Optional projection code to use for the returned bounds. Default to
    * current projection.
    *
    * @returns {Extent} The layer bounding box.
    */
   calculateBounds(
-    layerPathOrConfig: string | TypeLayerEntryConfig,
+    layerPath: string,
     projectionCode: string | number = MapEventProcessor.getMapState(this.mapId).currentProjection
   ): Extent | undefined {
     let bounds: Extent | undefined;
@@ -1379,15 +1368,15 @@ export abstract class AbstractGeoViewLayer {
       listOfLayerEntryConfig.forEach((layerConfig) => {
         if (layerEntryIsGroupLayer(layerConfig)) processGroupLayerBounds(layerConfig.listOfLayerEntryConfig);
         else {
-          bounds = this.getBounds(layerConfig, bounds);
+          bounds = this.getBounds(layerPath, bounds);
         }
       });
     };
 
-    const rootLayerConfig = typeof layerPathOrConfig === 'string' ? this.getLayerConfig(layerPathOrConfig) : layerPathOrConfig;
-    if (rootLayerConfig) {
-      if (Array.isArray(rootLayerConfig)) processGroupLayerBounds(rootLayerConfig);
-      else processGroupLayerBounds([rootLayerConfig]);
+    const initialLayerConfig = this.getLayerConfig(layerPath);
+    if (initialLayerConfig) {
+      if (Array.isArray(initialLayerConfig)) processGroupLayerBounds(initialLayerConfig);
+      else processGroupLayerBounds([initialLayerConfig]);
     }
 
     if (bounds && bounds[0] !== undefined) {
@@ -1395,5 +1384,27 @@ export abstract class AbstractGeoViewLayer {
     }
 
     return bounds;
+  }
+
+  /**
+   * Set the layerStatus code of all layers in the listOfLayerEntryConfig.
+   *
+   * @param {AbstractGeoViewLayer} geoviewLayerInstance The GeoView layer instance.
+   * @param {TypeListOfLayerEntryConfig} listOfLayerEntryConfig The list of layer's configuration.
+   * @param {string} errorMessage The error message.
+   */
+  setAllLayerStatusToError(listOfLayerEntryConfig: TypeListOfLayerEntryConfig, errorMessage: string) {
+    listOfLayerEntryConfig.forEach((layerConfig: TypeLayerEntryConfig) => {
+      if (layerEntryIsGroupLayer(layerConfig))
+        api.geoUtilities.setAllLayerStatusToError(this, layerConfig.listOfLayerEntryConfig, errorMessage);
+      else {
+        const layerPath = Layer.getLayerPath(layerConfig);
+        this.changeLayerStatus('error', layerConfig);
+        this.layerLoadError.push({
+          layer: layerPath,
+          consoleMessage: `${errorMessage} for layer ${layerPath} of map ${this.mapId}`,
+        });
+      }
+    });
   }
 }

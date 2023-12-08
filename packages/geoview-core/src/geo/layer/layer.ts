@@ -264,6 +264,16 @@ export class Layer {
 
   /**
    * Register the layer identifier. Duplicate identifier are not allowed.
+   * @param {string} layerPath The layer path to the layer's configuration.
+   *
+   * @returns {AbstractGeoViewLayer} Returns false if the layer configuration can't be registered.
+   */
+  geoviewInstance(layerPath: string): AbstractGeoViewLayer {
+    return this.geoviewLayers[layerPath.split('/')[0]];
+  }
+
+  /**
+   * Register the layer identifier. Duplicate identifier are not allowed.
    * @param {TypeLayerEntryConfig} layerConfig The layer configuration to register.
    *
    * @returns {boolean} Returns false if the layer configuration can't be registered.
@@ -272,7 +282,7 @@ export class Layer {
     const layerPath = Layer.getLayerPath(layerConfig);
     if (this.registeredLayers[layerPath]) return false;
     this.registeredLayers[layerPath] = layerConfig;
-    this.geoviewLayers[layerPath.split('/')[0]].changeLayerStatus('newInstance', layerConfig);
+    this.geoviewInstance(layerPath).changeLayerStatus('newInstance', layerConfig);
     return true;
   }
 
@@ -537,35 +547,38 @@ export class Layer {
    */
   highlightLayer(layerPath: string): void {
     this.removeHighlightLayer();
-    this.highlightedLayer = { layerPath, originalOpacity: this.registeredLayers[layerPath].olLayer!.getOpacity() };
-    this.registeredLayers[layerPath].olLayer!.setOpacity(1);
+    this.highlightedLayer = { layerPath, originalOpacity: this.geoviewInstance(layerPath).getOpacity(layerPath) };
+    this.geoviewInstance(layerPath).setOpacity(1, layerPath);
     // If the layerPath is a sublayer of a group, avoid changing parent layer
     if ((this.registeredLayers[layerPath].parentLayerConfig as TypeLayerGroupEntryConfig)?.entryType === 'group') {
-      Object.keys(this.registeredLayers).forEach((geoviewLayerPath) => {
-        const otherOlLayer = this.registeredLayers?.[geoviewLayerPath].olLayer;
-        const up1LevelInLayerPath = geoviewLayerPath.split('/').slice(0, -1).join('/');
-        const up1LevelsInOtherLayerPath = geoviewLayerPath.split('/').slice(0, -1).join('/');
+      Object.keys(this.registeredLayers).forEach((registeredLayerPath) => {
+        const up1LevelInLayerPath = layerPath.split('/').slice(0, -1).join('/');
+        const up1LevelsInOtherLayerPath = registeredLayerPath.split('/').slice(0, -1).join('/');
         if (up1LevelInLayerPath === up1LevelsInOtherLayerPath) this.registeredLayers[layerPath].olLayer!.setZIndex(999);
-        else otherOlLayer!.setOpacity((otherOlLayer!.getOpacity() || 1) * 0.25);
+        else {
+          const otherOpacity = this.geoviewInstance(registeredLayerPath).getOpacity(registeredLayerPath);
+          this.geoviewInstance(registeredLayerPath).setOpacity((otherOpacity || 1) * 0.25, registeredLayerPath);
+        }
       });
       // If it is a group layer, avoid changing sublayers
     } else if (this.registeredLayers[layerPath].entryType === 'group') {
-      Object.keys(this.registeredLayers).forEach((geoviewLayerPath) => {
-        const otherOlLayer = this.registeredLayers?.[geoviewLayerPath].olLayer;
-        const splitGeoviewLayerPath = geoviewLayerPath.split('/');
-        const up1LevelInLayerPath = splitGeoviewLayerPath.slice(0, -1).join('/');
-        const up2LevelsInOtherLayerPath = geoviewLayerPath.split('/').slice(0, -2).join('/');
-        if (geoviewLayerPath === layerPath || (splitGeoviewLayerPath.length > 1 && up2LevelsInOtherLayerPath === up1LevelInLayerPath))
+      Object.keys(this.registeredLayers).forEach((registeredLayerPath) => {
+        const splitLayerPath = layerPath.split('/');
+        const up1LevelInLayerPath = splitLayerPath.slice(0, -1).join('/');
+        const up2LevelsInOtherLayerPath = registeredLayerPath.split('/').slice(0, -2).join('/');
+        if (registeredLayerPath === layerPath || (splitLayerPath.length > 1 && up2LevelsInOtherLayerPath === up1LevelInLayerPath))
           this.registeredLayers[layerPath].olLayer!.setZIndex(999);
-        else otherOlLayer!.setOpacity((otherOlLayer!.getOpacity() || 1) * 0.25);
+        else {
+          const otherOpacity = this.geoviewInstance(registeredLayerPath).getOpacity(registeredLayerPath);
+          this.geoviewInstance(registeredLayerPath).setOpacity((otherOpacity || 1) * 0.25, registeredLayerPath);
+        }
       });
     } else {
-      Object.keys(this.registeredLayers).forEach((geoviewLayerPath) => {
-        const otherOlLayer = this.registeredLayers?.[geoviewLayerPath].olLayer;
-
+      Object.keys(this.registeredLayers).forEach((registeredLayerPath) => {
         // check for otherOlLayer is undefined. It would be undefined if a layer status is error
-        if (geoviewLayerPath !== layerPath && otherOlLayer !== undefined) {
-          otherOlLayer!.setOpacity((otherOlLayer!.getOpacity() || 1) * 0.25);
+        if (registeredLayerPath !== layerPath) {
+          const otherOpacity = this.geoviewInstance(registeredLayerPath).getOpacity(registeredLayerPath);
+          this.geoviewInstance(registeredLayerPath).setOpacity((otherOpacity || 1) * 0.25, registeredLayerPath);
         } else this.registeredLayers[layerPath].olLayer!.setZIndex(999);
       });
     }
@@ -577,34 +590,41 @@ export class Layer {
   removeHighlightLayer(): void {
     if (this.highlightedLayer.layerPath !== undefined) {
       const { layerPath } = this.highlightedLayer;
-      const { olLayer } = this.registeredLayers[this.highlightedLayer.layerPath];
-      if (this.highlightedLayer.originalOpacity) olLayer!.setOpacity(this.highlightedLayer.originalOpacity);
+      if (this.highlightedLayer.originalOpacity)
+        this.geoviewInstance(this.highlightedLayer.layerPath).setOpacity(
+          this.highlightedLayer.originalOpacity,
+          this.highlightedLayer.layerPath
+        );
       if ((this.registeredLayers[layerPath!].parentLayerConfig as TypeLayerGroupEntryConfig)?.entryType === 'group') {
-        Object.keys(this.registeredLayers).forEach((geoviewLayerPath) => {
-          const otherOlLayer = this.registeredLayers?.[geoviewLayerPath].olLayer;
-          const up1LevelInLayerPath = geoviewLayerPath.split('/').slice(0, -1).join('/');
-          const up1LevelsInOtherLayerPath = geoviewLayerPath.split('/').slice(0, -1).join('/');
-          if (up1LevelInLayerPath === up1LevelsInOtherLayerPath) this.setLayerZIndices(this.geoviewLayers[geoviewLayerPath.split('/')[0]]);
-          else otherOlLayer!.setOpacity((otherOlLayer!.getOpacity() || 1) * 4);
+        Object.keys(this.registeredLayers).forEach((registeredLayerPath) => {
+          const up1LevelInLayerPath = layerPath.split('/').slice(0, -1).join('/');
+          const up1LevelsInOtherLayerPath = registeredLayerPath.split('/').slice(0, -1).join('/');
+          if (up1LevelInLayerPath === up1LevelsInOtherLayerPath)
+            this.setLayerZIndices(this.geoviewLayers[registeredLayerPath.split('/')[0]]);
+          else {
+            const otherOpacity = this.geoviewInstance(registeredLayerPath).getOpacity(registeredLayerPath);
+            this.geoviewInstance(registeredLayerPath).setOpacity((otherOpacity || 1) * 4, registeredLayerPath);
+          }
         });
       } else if (this.registeredLayers[layerPath]?.entryType === 'group') {
-        Object.keys(this.registeredLayers).forEach((geoviewLayerPath) => {
-          const otherOlLayer = this.registeredLayers?.[geoviewLayerPath].olLayer;
-          const splitGeoviewLayerPath = geoviewLayerPath.split('/');
-          const up1LevelInLayerPath = splitGeoviewLayerPath.slice(0, -1).join('/');
-          const up2LevelsInOtherLayerPath = geoviewLayerPath.split('/').slice(0, -2).join('/');
-          if (geoviewLayerPath === layerPath || (splitGeoviewLayerPath.length > 1 && up2LevelsInOtherLayerPath === up1LevelInLayerPath))
-            this.setLayerZIndices(this.geoviewLayers[geoviewLayerPath.split('/')[0]]);
-          else otherOlLayer!.setOpacity((otherOlLayer!.getOpacity() || 1) * 4);
+        Object.keys(this.registeredLayers).forEach((registeredLayerPath) => {
+          const splitLayerPath = layerPath.split('/');
+          const up1LevelInLayerPath = splitLayerPath.slice(0, -1).join('/');
+          const up2LevelsInOtherLayerPath = registeredLayerPath.split('/').slice(0, -2).join('/');
+          if (registeredLayerPath === layerPath || (registeredLayerPath.length > 1 && up2LevelsInOtherLayerPath === up1LevelInLayerPath))
+            this.setLayerZIndices(this.geoviewLayers[registeredLayerPath.split('/')[0]]);
+          else {
+            const otherOpacity = this.geoviewInstance(registeredLayerPath).getOpacity(registeredLayerPath);
+            this.geoviewInstance(registeredLayerPath).setOpacity((otherOpacity || 1) * 4, registeredLayerPath);
+          }
         });
       } else {
-        Object.keys(this.registeredLayers).forEach((geoviewLayerPath) => {
-          const otherOlLayer = this.registeredLayers?.[geoviewLayerPath].olLayer;
-
+        Object.keys(this.registeredLayers).forEach((registeredLayerPath) => {
           // check for otherOlLayer is undefined. It would be undefined if a layer status is error
-          if (geoviewLayerPath !== layerPath && otherOlLayer !== undefined) {
-            otherOlLayer!.setOpacity((otherOlLayer!.getOpacity() || 1) * 4);
-          } else this.setLayerZIndices(this.geoviewLayers[geoviewLayerPath.split('/')[0]]);
+          if (registeredLayerPath !== layerPath) {
+            const otherOpacity = this.geoviewInstance(registeredLayerPath).getOpacity(registeredLayerPath);
+            this.geoviewInstance(registeredLayerPath).setOpacity((otherOpacity || 1) * 4, registeredLayerPath);
+          } else this.setLayerZIndices(this.geoviewLayers[registeredLayerPath.split('/')[0]]);
         });
       }
       this.highlightedLayer.layerPath = undefined;

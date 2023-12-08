@@ -5,7 +5,6 @@ import { GeoJSON as FormatGeoJSON } from 'ol/format';
 import { ReadOptions } from 'ol/format/Feature';
 import { Vector as VectorSource } from 'ol/source';
 import Feature from 'ol/Feature';
-import Geometry from 'ol/geom/Geometry';
 
 import defaultsDeep from 'lodash/defaultsDeep';
 import { AbstractGeoViewLayer, CONST_LAYER_TYPES } from '../abstract-geoview-layers';
@@ -232,7 +231,7 @@ export class GeoJSON extends AbstractGeoViewVector {
     layerConfig: TypeBaseLayerEntryConfig,
     sourceOptions: SourceOptions = {},
     readOptions: ReadOptions = {}
-  ): VectorSource<Feature<Geometry>> {
+  ): VectorSource<Feature> {
     readOptions.dataProjection = (layerConfig.source as TypeBaseSourceVectorInitialConfig).dataProjection;
     sourceOptions.url = getLocalizedValue(layerConfig.source!.dataAccessPath!, this.mapId);
     sourceOptions.format = new FormatGeoJSON();

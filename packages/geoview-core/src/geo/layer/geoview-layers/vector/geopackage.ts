@@ -8,7 +8,6 @@ import { Vector as VectorSource } from 'ol/source';
 import BaseLayer from 'ol/layer/Base';
 import LayerGroup from 'ol/layer/Group';
 import { Feature } from 'ol';
-import Geometry from 'ol/geom/Geometry';
 
 import initSqlJs, { SqlValue } from 'sql.js';
 import * as SLDReader from '@nieuwlandgeo/sldreader';
@@ -58,7 +57,7 @@ interface sldsInterface {
 
 interface layerData {
   name: string;
-  source: VectorSource<Feature<Geometry>>;
+  source: VectorSource<Feature>;
   properties: initSqlJs.ParamsObject | undefined;
 }
 
@@ -368,7 +367,7 @@ export class GeoPackage extends AbstractGeoViewVector {
               const tableName = table.table_name;
               const tableDataProjection = `EPSG:${table.srs_id}`;
               const columnName = table.geometry_column_name as string;
-              const features: Feature<Geometry>[] = [];
+              const features: Feature[] = [];
               let properties;
 
               stmt = db.prepare(`SELECT * FROM '${tableName}'`);

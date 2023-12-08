@@ -4,7 +4,6 @@ import { Vector as VectorSource } from 'ol/source';
 import { Options as SourceOptions } from 'ol/source/Vector';
 import { VectorImage as VectorLayer } from 'ol/layer';
 import { Options as VectorLayerOptions } from 'ol/layer/VectorImage';
-import { Geometry } from 'ol/geom';
 import { all, bbox } from 'ol/loadingstrategy';
 import { ReadOptions } from 'ol/format/Feature';
 import BaseLayer from 'ol/layer/Base';
@@ -22,6 +21,7 @@ import {
   TypeListOfLayerEntryConfig,
   TypeVectorLayerEntryConfig,
 } from '@/geo/map/map-schema-types';
+import { Layer } from '@/geo/layer/layer';
 import { api } from '@/app';
 import { getLocalizedValue } from '@/core/utils/utilities';
 import { TypeArrayOfFeatureInfoEntries } from '@/api/events/payloads';
@@ -34,7 +34,7 @@ import { MapEventProcessor } from '@/api/event-processors/event-processor-childr
 
 // Base type used to keep the layer's hierarchical structure. It is similar to ol/layer/Base~BaseLayer.
 export type TypeVectorLayerGroup = LayerGroup;
-export type TypeVectorLayer = VectorSource<Feature<Geometry>>;
+export type TypeVectorLayer = VectorSource<Feature>;
 export type TypeBaseVectorLayer = BaseLayer | TypeVectorLayerGroup | TypeVectorLayer;
 
 // ******************************************************************************************************************************
@@ -93,9 +93,9 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
     layerConfig: TypeBaseLayerEntryConfig,
     sourceOptions: SourceOptions = {},
     readOptions: ReadOptions = {}
-  ): VectorSource<Feature<Geometry>> {
+  ): VectorSource<Feature> {
     // The line below uses var because a var declaration has a wider scope than a let declaration.
-    var vectorSource: VectorSource<Feature<Geometry>>;
+    var vectorSource: VectorSource<Feature>;
     this.changeLayerPhase('createVectorSource');
     if (this.attributions.length !== 0) sourceOptions.attributions = this.attributions;
 
@@ -126,7 +126,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
             ...readOptions,
             featureProjection: projection,
             extent,
-          }) as Feature<Geometry>[];
+          }) as Feature[];
           /* For vector layers, all fields of type date must be specified in milliseconds (number) that has elapsed since the epoch,
              which is defined as the midnight at the beginning of January 1, 1970, UTC (equivalent to the UNIX epoch). If the date type
              is not a number, we assume it is provided as an ISO UTC string. If not, the result is unpredictable.
@@ -146,21 +146,21 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
                   if (typeof fieldValue === 'number') {
                     let dateString = api.dateUtilities.convertMilisecondsToDate(fieldValue);
                     dateString = api.dateUtilities.applyInputDateFormat(dateString, this.serverDateFragmentsOrder);
-                    (feature as Feature<Geometry>).set(fieldName, api.dateUtilities.convertToMilliseconds(dateString), true);
+                    (feature as Feature).set(fieldName, api.dateUtilities.convertToMilliseconds(dateString), true);
                   } else {
                     if (!this.serverDateFragmentsOrder)
                       this.serverDateFragmentsOrder = api.dateUtilities.getDateFragmentsOrder(
                         api.dateUtilities.deduceDateFormat(fieldValue)
                       );
                     fieldValue = api.dateUtilities.applyInputDateFormat(fieldValue, this.serverDateFragmentsOrder);
-                    (feature as Feature<Geometry>).set(fieldName, api.dateUtilities.convertToMilliseconds(fieldValue), true);
+                    (feature as Feature).set(fieldName, api.dateUtilities.convertToMilliseconds(fieldValue), true);
                   }
                 });
               });
             }
           }
           vectorSource.addFeatures(features);
-          if (success) success(features as Feature<Geometry>[]);
+          if (success) success(features as Feature[]);
           layerConfig.olLayer!.changed();
         } else {
           onError();
@@ -192,20 +192,21 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
    * The layer entry configuration keeps a reference to the layer in the olLayer attribute.
    *
    * @param {TypeBaseLayerEntryConfig} layerConfig The layer entry configuration used by the source.
-   * @param {VectorSource<Feature<Geometry>>} vectorSource The source configuration for the vector layer.
+   * @param {VectorSource<Feature>} vectorSource The source configuration for the vector layer.
    *
    * @returns {VectorLayer<VectorSource>} The vector layer created.
    */
-  createVectorLayer(layerConfig: TypeVectorLayerEntryConfig, vectorSource: VectorSource<Feature<Geometry>>): VectorLayer<VectorSource> {
+  createVectorLayer(layerConfig: TypeVectorLayerEntryConfig, vectorSource: VectorSource<Feature>): VectorLayer<VectorSource> {
+    const layerPath = Layer.getLayerPath(layerConfig);
     this.changeLayerPhase('createVectorLayer');
 
     const layerOptions: VectorLayerOptions<VectorSource> = {
       properties: { layerConfig },
-      source: vectorSource as VectorSource<Feature<Geometry>>,
+      source: vectorSource as VectorSource<Feature>,
       style: (feature) => {
         if ('style' in layerConfig) {
           const { geoviewRenderer } = api.maps[this.mapId];
-          return geoviewRenderer.getFeatureStyle(feature as Feature<Geometry>, layerConfig);
+          return geoviewRenderer.getFeatureStyle(feature as Feature, layerConfig);
         }
 
         return undefined;
@@ -214,12 +215,11 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
 
     layerConfig.olLayer = new VectorLayer(layerOptions);
 
-    if (layerConfig.initialSettings?.extent !== undefined) this.setExtent(layerConfig.initialSettings?.extent, layerConfig);
-    if (layerConfig.initialSettings?.maxZoom !== undefined) this.setMaxZoom(layerConfig.initialSettings?.maxZoom, layerConfig);
-    if (layerConfig.initialSettings?.minZoom !== undefined) this.setMinZoom(layerConfig.initialSettings?.minZoom, layerConfig);
-    if (layerConfig.initialSettings?.opacity !== undefined) this.setOpacity(layerConfig.initialSettings?.opacity, layerConfig);
-    if (layerConfig.initialSettings?.visible !== undefined)
-      this.setVisible(!!(layerConfig.initialSettings?.visible === 'yes' || layerConfig.initialSettings?.visible === 'always'), layerConfig);
+    if (layerConfig.initialSettings?.extent !== undefined) this.setExtent(layerConfig.initialSettings?.extent, layerPath);
+    if (layerConfig.initialSettings?.maxZoom !== undefined) this.setMaxZoom(layerConfig.initialSettings?.maxZoom, layerPath);
+    if (layerConfig.initialSettings?.minZoom !== undefined) this.setMinZoom(layerConfig.initialSettings?.minZoom, layerPath);
+    if (layerConfig.initialSettings?.opacity !== undefined) this.setOpacity(layerConfig.initialSettings?.opacity, layerPath);
+    if (layerConfig.initialSettings?.visible !== undefined) this.setVisible(layerConfig.initialSettings?.visible !== 'no', layerPath);
     this.applyViewFilter(layerConfig, layerConfig.layerFilter ? layerConfig.layerFilter : '');
 
     return layerConfig.olLayer as VectorLayer<VectorSource>;
@@ -237,7 +237,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
       if (!layerConfig?.olLayer) resolve([]);
       else
         this.formatFeatureInfoResult(
-          (layerConfig.olLayer as VectorLayer<VectorSource<Feature<Geometry>>>).getSource()!.getFeatures(),
+          (layerConfig.olLayer as VectorLayer<VectorSource<Feature>>).getSource()!.getFeatures(),
           layerConfig as TypeVectorLayerEntryConfig
         ).then((arrayOfFeatureInfoEntries) => {
           resolve(arrayOfFeatureInfoEntries);
@@ -264,7 +264,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
       };
       const { map } = api.maps[this.mapId];
       const features = map.getFeaturesAtPixel(location, { hitTolerance: 4, layerFilter });
-      return await this.formatFeatureInfoResult(features as Feature<Geometry>[], layerConfig as TypeVectorLayerEntryConfig);
+      return await this.formatFeatureInfoResult(features as Feature[], layerConfig as TypeVectorLayerEntryConfig);
     } catch (error) {
       console.log('abstract-geoview-vector.getFeatureInfoAtPixel\n', error);
       return null;
@@ -303,14 +303,15 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
   /** ***************************************************************************************************************************
    * Get the bounds of the layer represented in the layerConfig, returns updated bounds
    *
-   * @param {TypeLayerEntryConfig} layerConfig Layer config to get bounds from.
+   * @param {string} layerPath The Layer path to the layer's configuration.
    * @param {Extent | undefined} bounds The current bounding box to be adjusted.
    *
    * @returns {Extent} The layer bounding box.
    */
-  protected getBounds(layerConfig: TypeLayerEntryConfig, bounds: Extent | undefined): Extent | undefined {
-    if (layerConfig.olLayer) {
-      (layerConfig.olLayer as VectorLayer<VectorSource<Feature<Geometry>>>).getSource()?.forEachFeature((feature) => {
+  protected getBounds(layerPath: string, bounds: Extent | undefined): Extent | undefined {
+    const layerConfig = this.getLayerConfig(layerPath);
+    if (layerConfig?.olLayer) {
+      (layerConfig.olLayer as VectorLayer<VectorSource<Feature>>).getSource()?.forEachFeature((feature) => {
         const coordinates = feature.get('geometry')?.flatCoordinates || feature.get('the_geom')?.flatCoordinates;
         if (coordinates) {
           for (let i = 0; i < coordinates.length; i += 2) {

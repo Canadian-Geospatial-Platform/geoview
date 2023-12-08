@@ -7,12 +7,12 @@
 //     const splitZoom =
 //       (api.maps[mapId].layer.registeredLayers[clusterLayerId].source as TypeVectorSourceInitialConfig)!.cluster!.splitZoom || 7;
 //     if (prevZoom < splitZoom && currentZoom >= splitZoom) {
-//       api.maps[mapId].layer.registeredLayers[clusterLayerId]?.olLayer!.setVisible(false);
-//       api.maps[mapId].layer.registeredLayers[layer]?.olLayer!.setVisible(true);
+//       api.maps[mapId].layer.geoviewLayers(clusterLayerId).setVisible(false);
+//       api.maps[mapId].layer.geoviewLayers(layer).setVisible(true);
 //     }
 //     if (prevZoom >= splitZoom && currentZoom < splitZoom) {
-//       api.maps[mapId].layer.registeredLayers[clusterLayerId]?.olLayer!.setVisible(true);
-//       api.maps[mapId].layer.registeredLayers[layer]?.olLayer!.setVisible(false);
+//       api.maps[mapId].layer.geoviewLayers(clusterLayerId).setVisible(true);
+//       api.maps[mapId].layer.geoviewLayers(layer).setVisible(false);
 //     }
 //   }
 // });
@@ -171,7 +171,7 @@
 // packages\geoview-core\src\geo\layer\geoview-layers\vector\abstract-geoview-vector.ts
 // createVectorLayer(
 //   layerConfig: TypeVectorLayerEntryConfig,
-//   vectorSource: VectorSource<Feature<Geometry>>
+//   vectorSource: VectorSource<Feature>
 // ): VectorLayer<VectorSource> {
 //   this.changeLayerPhase('createVectorLayer');
 //   let configSource: TypeBaseSourceVectorInitialConfig = {};
@@ -188,7 +188,7 @@
 //     properties: { layerConfig },
 //     source: configSource.cluster!.enable
 //       ? new Cluster({
-//           source: vectorSource as VectorSource<Feature<Geometry>>,
+//           source: vectorSource as VectorSource<Feature>,
 //           distance: configSource.cluster!.distance,
 //           minDistance: configSource.cluster!.minDistance,
 //           geometryFunction: ((feature): Point | null => {
@@ -198,18 +198,18 @@
 //               return new Point(center);
 //             }
 //             return null;
-//           }) as (arg0: Feature<Geometry>) => Point,
+//           }) as (arg0: Feature) => Point,
 //         })
-//       : (vectorSource as VectorSource<Feature<Geometry>>),
+//       : (vectorSource as VectorSource<Feature>),
 //     style: (feature) => {
 //       const { geoviewRenderer } = api.maps[this.mapId];
 
 //       if (configSource.cluster!.enable) {
-//         return geoviewRenderer.getClusterStyle(layerConfig, feature as Feature<Geometry>);
+//         return geoviewRenderer.getClusterStyle(layerConfig, feature as Feature);
 //       }
 
 //       if ('style' in layerConfig) {
-//         return geoviewRenderer.getFeatureStyle(feature as Feature<Geometry>, layerConfig);
+//         return geoviewRenderer.getFeatureStyle(feature as Feature, layerConfig);
 //       }
 
 //       return undefined;
@@ -218,18 +218,15 @@
 
 //   layerConfig.olLayer = new VectorLayer(layerOptions);
 
-//   if (layerConfig.initialSettings?.extent !== undefined) this.setExtent(layerConfig.initialSettings?.extent, layerConfig);
+//   if (layerConfig.initialSettings?.extent !== undefined) this.setExtent(layerConfig.initialSettings?.extent, layerPath);
 //   if (layerConfig.initialSettings?.maxZoom !== undefined)
-//     this.setMaxZoom(layerConfig.initialSettings?.maxZoom, layerConfig);
+//     this.setMaxZoom(layerConfig.initialSettings?.maxZoom, layerPath);
 //   if (layerConfig.initialSettings?.minZoom !== undefined)
-//     this.setMinZoom(layerConfig.initialSettings?.minZoom, layerConfig);
+//     this.setMinZoom(layerConfig.initialSettings?.minZoom, layerPath);
 //   if (layerConfig.initialSettings?.opacity !== undefined)
-//     this.setOpacity(layerConfig.initialSettings?.opacity, layerConfig);
+//     this.setOpacity(layerConfig.initialSettings?.opacity, layerPath);
 //   if (layerConfig.initialSettings?.visible !== undefined)
-//     this.setVisible(
-//       !!(layerConfig.initialSettings?.visible === 'yes' || layerConfig.initialSettings?.visible === 'always'),
-//       layerConfig
-//     );
+//     this.setVisible(layerConfig.initialSettings?.visible !== 'no', layerPath);
 //   this.applyViewFilter(layerConfig, layerConfig.layerFilter ? layerConfig.layerFilter : '');
 
 //   return layerConfig.olLayer as VectorLayer<VectorSource>;
@@ -423,7 +420,7 @@
 //     }
 
 // getFeatureCanvas(
-//   feature: Feature<Geometry>,
+//   feature: Feature,
 //   layerConfig: TypeBaseLayerEntryConfig | TypeVectorTileLayerEntryConfig | TypeVectorLayerEntryConfig
 // ): Promise<HTMLCanvasElement | undefined> {
 //   const promisedCanvas = new Promise<HTMLCanvasElement | undefined>((resolve) => {
@@ -471,17 +468,17 @@
  *
  * @param {TypeBaseLayerEntryConfig | TypeVectorLayerEntryConfig} layerConfig The layer entry config that may have a style
  * configuration for the feature. If style does not exist for the geometryType, create it.
- * @param {Feature<Geometry>} feature The feature that need its style to be defined. When undefined, it's because we fetch the styles
+ * @param {Feature} feature The feature that need its style to be defined. When undefined, it's because we fetch the styles
  * for the legend.
  *
  * @returns {Style | undefined} The style applied to the feature or undefined if not found.
  */
-// getClusterStyle(layerConfig: TypeVectorLayerEntryConfig, feature?: Feature<Geometry>): Style | undefined {
+// getClusterStyle(layerConfig: TypeVectorLayerEntryConfig, feature?: Feature): Style | undefined {
 //   const configSource = layerConfig.source as TypeBaseSourceVectorInitialConfig;
 //   if (!configSource.cluster?.textColor) configSource.cluster!.textColor = '';
 
 //   const clusterSize = feature?.get('features')
-//     ? (feature!.get('features') as Array<Feature<Geometry>>).reduce((numberOfFeatures, featureToTest) => {
+//     ? (feature!.get('features') as Array<Feature>).reduce((numberOfFeatures, featureToTest) => {
 //         const geometryType = featureToTest.getGeometry()?.getType();
 //         if (geometryType === 'MultiPoint') return numberOfFeatures + (featureToTest.getGeometry() as MultiPoint).getPoints().length;
 //         if (geometryType === 'MultiLineString')
@@ -512,7 +509,7 @@
 //     const pointStyle = this.processClusterSymbol(layerConfig, feature);
 //     if (pointStyle!.getText()!.getText() !== '1') return pointStyle;
 //     let styleFound: Style | undefined;
-//     const theUniqueVisibleFeature = (feature!.get('features') as Array<Feature<Geometry>>).find((featureToTest) => {
+//     const theUniqueVisibleFeature = (feature!.get('features') as Array<Feature>).find((featureToTest) => {
 //       styleFound = this.getFeatureStyle(featureToTest, layerConfig);
 //       return styleFound;
 //     });
@@ -534,12 +531,12 @@
  * Process a cluster circle symbol using the settings.
  *
  * @param {TypeBaseLayerEntryConfig | TypeVectorLayerEntryConfig} layerConfig The layer configuration.
- * @param {Feature<Geometry>} feature The feature that need its style to be defined. When undefined, it's because we fetch the styles
+ * @param {Feature} feature The feature that need its style to be defined. When undefined, it's because we fetch the styles
  * for the legend.
  *
  * @returns {Style | undefined} The Style created. Undefined if unable to create it.
  */
-// private processClusterSymbol(layerConfig: TypeVectorLayerEntryConfig, feature?: Feature<Geometry>): Style | undefined {
+// private processClusterSymbol(layerConfig: TypeVectorLayerEntryConfig, feature?: Feature): Style | undefined {
 //   const { settings } = layerConfig.source!.cluster!;
 //   const fillOptions: FillOptions = { color: settings!.color };
 //   const strokeOptions: StrokeOptions = this.createStrokeOptions(settings!);
@@ -549,7 +546,7 @@
 //   if (settings!.offset !== undefined) circleOptions.displacement = settings!.offset;
 //   if (settings!.rotation !== undefined) circleOptions.rotation = settings!.rotation;
 //   const text = feature
-//     ? (feature.get('features') as Array<Feature<Geometry>>)
+//     ? (feature.get('features') as Array<Feature>)
 //         .reduce((numberOfVisibleFeature, featureToTest) => {
 //           if (this.getFeatureStyle(featureToTest, layerConfig)) {
 //             const geometryType = featureToTest.getGeometry()?.getType();

@@ -5,7 +5,7 @@ import { Extent } from 'ol/extent';
 import { FitOptions } from 'ol/View';
 import { KeyboardPan } from 'ol/interaction';
 
-import { GeoViewStoreType } from '@/core/stores/geoview-store';
+import { GeoviewStoreType } from '@/core/stores/geoview-store';
 import { AbstractEventProcessor } from '../abstract-event-processor';
 import { api, Coordinate, NORTH_POLE_POSITION, TypeBasemapOptions, TypeClickMarker } from '@/app';
 import { TypeInteraction, TypeMapState, TypeValidMapProjectionCodes } from '@/geo/map/map-schema-types';
@@ -25,7 +25,7 @@ import { getGeoViewStore } from '@/core/stores/stores-managers';
 import { OL_ZOOM_DURATION, OL_ZOOM_PADDING } from '@/core/utils/constant';
 
 export class MapEventProcessor extends AbstractEventProcessor {
-  onInitialize(store: GeoViewStoreType) {
+  onInitialize(store: GeoviewStoreType) {
     const { mapId } = store.getState();
 
     const unsubMapLoaded = store.subscribe(

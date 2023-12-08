@@ -98,8 +98,7 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
 
         // TODO: keep reference to geoview map instance in the store or keep accessing with api - discussion
         //! may not work with group items ... see if Yves work will make this simplier
-        const layerId: string[] = layerPath.split('/');
-        api.maps[get().mapId].layer.geoviewLayers[layerId[0]]!.setOpacity(opacity, layerPath);
+        api.maps[get().mapId].layer.geoviewInstance(layerPath).setOpacity(opacity, layerPath);
 
         // now update store
         set({
@@ -119,8 +118,7 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
 
         // TODO: keep reference to geoview map instance in the store or keep accessing with api - discussion
         //! may not work with group items ... see if Yves work will make this simplier
-        const layerId: string[] = layerPath.split('/');
-        api.maps[get().mapId].layer.geoviewLayers[layerId[0]]!.setVisible(layer?.isVisible !== 'no', layerPath);
+        api.maps[get().mapId].layer.geoviewInstance(layerPath).setVisible(layer?.isVisible !== 'no', layerPath);
 
         // now update store
         set({

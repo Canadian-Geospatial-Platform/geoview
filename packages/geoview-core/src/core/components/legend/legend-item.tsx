@@ -31,6 +31,7 @@ import {
 } from '@/ui';
 import { api, payloadIsLegendInfo, EsriDynamic, IconStack } from '@/app';
 import { LegendIconList } from './legend-icon-list';
+import { Layer } from '@/geo/layer/layer';
 import {
   AbstractGeoViewLayer,
   TypeLegend,
@@ -307,7 +308,7 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
     getLayerName();
     const isGroup = getGroupsDetails();
     if (!isGroup) {
-      setOpacity(geoviewLayerInstance.getOpacity(geoviewLayerInstance.listOfLayerEntryConfig[0]) ?? 1);
+      setOpacity(geoviewLayerInstance.getOpacity(Layer.getLayerPath(geoviewLayerInstance.listOfLayerEntryConfig[0])) ?? 1);
       const legendInfo = api.maps[mapId].legend.legendLayerSet.resultSets?.[path]?.data;
       if (legendInfo) {
         getLegendDetails(legendInfo);
@@ -342,13 +343,13 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
   useEffect(() => {
     if (layerConfigEntry) {
       if (isParentVisible && isChecked) {
-        geoviewLayerInstance.setVisible(true, layerConfigEntry);
+        geoviewLayerInstance.setVisible(true, Layer.getLayerPath(layerConfigEntry));
       } else {
-        geoviewLayerInstance.setVisible(false, layerConfigEntry);
+        geoviewLayerInstance.setVisible(false, Layer.getLayerPath(layerConfigEntry));
       }
     } else {
       // parent layer with no sub layers
-      geoviewLayerInstance.setVisible(isChecked, geoviewLayerInstance.listOfLayerEntryConfig[0]);
+      geoviewLayerInstance.setVisible(isChecked, Layer.getLayerPath(geoviewLayerInstance.listOfLayerEntryConfig[0]));
     }
   }, [isParentVisible, isChecked, layerConfigEntry, geoviewLayerInstance]);
 
@@ -402,7 +403,8 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
   const handleSetOpacity = (opacityValue: number | number[]) => {
     if (!geoviewLayerInstance) return;
     if (subLayerId) geoviewLayerInstance.setOpacity((opacityValue as number) / 100, subLayerId);
-    else geoviewLayerInstance.setOpacity((opacityValue as number) / 100, geoviewLayerInstance.listOfLayerEntryConfig[0]);
+    else
+      geoviewLayerInstance.setOpacity((opacityValue as number) / 100, Layer.getLayerPath(geoviewLayerInstance.listOfLayerEntryConfig[0]));
   };
 
   const handleStackIcon = (e: React.KeyboardEvent<HTMLElement>) => {

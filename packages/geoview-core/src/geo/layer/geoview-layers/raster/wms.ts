@@ -681,7 +681,7 @@ export class WMS extends AbstractGeoViewRaster {
    */
   protected getFeatureInfoAtLongLat(lnglat: Coordinate, layerConfig: TypeOgcWmsLayerEntryConfig): Promise<TypeArrayOfFeatureInfoEntries> {
     const promisedQueryResult = new Promise<TypeArrayOfFeatureInfoEntries>((resolve) => {
-      if (!this.getVisible(layerConfig) || !layerConfig.olLayer) resolve([]);
+      if (!this.getVisible(Layer.getLayerPath(layerConfig)) || !layerConfig.olLayer) resolve([]);
       else {
         const viewResolution = api.maps[this.mapId].getView().getResolution() as number;
         const crs = `EPSG:${MapEventProcessor.getMapState(this.mapId).currentProjection}`;
@@ -1082,13 +1082,14 @@ export class WMS extends AbstractGeoViewRaster {
   /** ***************************************************************************************************************************
    * Get the bounds of the layer represented in the layerConfig, returns updated bounds
    *
-   * @param {TypeLayerEntryConfig} layerConfig Layer config to get bounds from.
+   * @param {string} layerPath The Layer path to the layer's configuration.
    * @param {Extent | undefined} bounds The current bounding box to be adjusted.
    *
    * @returns {Extent} The layer bounding box.
    */
-  protected getBounds(layerConfig: TypeLayerEntryConfig, bounds: Extent | undefined): Extent | undefined {
-    let layerBounds = layerConfig!.initialSettings?.bounds || [];
+  protected getBounds(layerPath: string, bounds: Extent | undefined): Extent | undefined {
+    const layerConfig = this.getLayerConfig(layerPath);
+    let layerBounds = layerConfig?.initialSettings?.bounds || [];
     const boundingBoxes = this.metadata?.Capability.Layer.BoundingBox;
     let bbExtent: Extent | undefined;
 
