@@ -8,9 +8,9 @@ interface LeftPanelProps {
 
 export function LeftPanel({ setIsLayersListPanelVisible }: LeftPanelProps): JSX.Element {
   // get from the store
-  const legendLayers = useLayersList(); // get store value(s)
+  const legendLayers = useLayersList();
   const { setSelectedLayerPath } = useLayerStoreActions();
-  const selectedLayer = useSelectedLayer(); // get store value
+  const selectedLayer = useSelectedLayer();
 
   useEffect(() => {
     if (!selectedLayer) {

@@ -5,7 +5,7 @@ import { SingleLayer } from './single-layer';
 import { getSxClasses } from './left-panel-styles';
 import { Box } from '@/ui';
 import { TypeLegendLayer } from '../types';
-import { useLayerStoreActions, useLayersDisplayState } from '@/core/stores/store-interface-and-intial-values/layer-state';
+import { useLayerStoreActions, useLayersDisplayState } from '@/core/stores/';
 
 interface LayerListProps {
   depth: number;
@@ -19,7 +19,7 @@ export function LayersList({ layersList, setIsLayersListPanelVisible, parentLaye
   const sxClasses = getSxClasses(theme);
 
   const displayState = useLayersDisplayState();
-  const { reOrderLayer } = useLayerStoreActions(); // get store actions
+  const { reorderLayer } = useLayerStoreActions(); // get store actions
 
   const isDragEnabled = displayState === 'order';
 
@@ -30,7 +30,7 @@ export function LayersList({ layersList, setIsLayersListPanelVisible, parentLaye
     if (!result.destination) {
       return;
     }
-    reOrderLayer(result.source.index, result.destination.index, result.draggableId);
+    reorderLayer(result.source.index, result.destination.index, result.draggableId);
   };
 
   const textToSlug = (text: string): string => {
@@ -76,7 +76,7 @@ export function LayersList({ layersList, setIsLayersListPanelVisible, parentLaye
         isDragDisabled={!isDragEnabled}
         key={textToSlug(`${index}${details.layerPath}`)}
         draggableId={details.layerPath}
-        index={index} // TODO Change to details.order
+        index={details.order}
       >
         {(provided, snapshot) => (
           <div
