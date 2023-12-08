@@ -13,10 +13,10 @@ interface GeoChartPanelProps {
 const { cgpv } = window as TypeWindow;
 
 /**
- * Time slider tab
+ * Geo Chart tab
  *
- * @param {TypeTimeSliderProps} props The properties passed to slider
- * @returns {JSX.Element} the time slider tab
+ * @param {TypeTimeSliderProps} props The properties passed to geo chart
+ * @returns {JSX.Element} Geo Chart tab
  */
 export function GeoChartPanel(props: GeoChartPanelProps): JSX.Element {
   const { mapId, configObj, layerList } = props;
