@@ -5,10 +5,7 @@ export interface ILayerState {
     highlightedLayer: string;
     selectedItem?: TypeLegendLayer;
     selectedIsVisible: boolean;
-    selectedLayers: Record<string, {
-        layer: string;
-        icon: string;
-    }[]>;
+    selectedLayer: TypeLegendLayer;
     selectedLayerPath: string | undefined | null;
     legendLayers: TypeLegendLayer[];
     displayState: TypeLayersViewDisplayState;
@@ -23,11 +20,14 @@ export interface ILayerState {
         setAllItemsVisibility: (layerPath: string, visibility: 'yes' | 'no') => void;
         deleteLayer: (layerPath: string) => void;
         zoomToLayerExtent: (layerPath: string) => void;
+        reOrderLayer: (startIndex: number, endIndex: number, layerPath: string) => void;
     };
 }
 export declare function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILayerState;
+export declare const useLayerBounds: () => TypeLegendLayer[];
 export declare const useLayerHighlightedLayer: () => string;
 export declare const useLayersList: () => TypeLegendLayer[];
+export declare const useLayerSelectedLayer: () => TypeLegendLayer;
 export declare const useSelectedLayerPath: () => string | null | undefined;
 export declare const useLayersDisplayState: () => TypeLayersViewDisplayState;
 export declare const useLayerStoreActions: () => {
@@ -41,6 +41,7 @@ export declare const useLayerStoreActions: () => {
     setAllItemsVisibility: (layerPath: string, visibility: 'yes' | 'no') => void;
     deleteLayer: (layerPath: string) => void;
     zoomToLayerExtent: (layerPath: string) => void;
+    reOrderLayer: (startIndex: number, endIndex: number, layerPath: string) => void;
 };
 export declare const useSelectedLayer: () => TypeLegendLayer | undefined;
 export declare const useIconLayerSet: (layerPath: string) => string[];

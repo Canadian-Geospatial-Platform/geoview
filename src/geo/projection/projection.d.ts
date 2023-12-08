@@ -38,47 +38,47 @@ export declare class Projection {
     /**
      * Convert points from one projection to another
      *
-     * @param {unknown} points array of passed in points to convert
+     * @param {Coordinate[]} points array of passed in points to convert
      * @param {string} fromProj projection to be converted from
      * @param {string} toProj projection to be converted to
      */
-    transformPoints: (points: unknown, fromProj: string, toProj: string) => Array<Array<number>>;
+    transformPoints: (points: Coordinate[], fromProj: string, toProj: string) => Array<Array<number>>;
     /**
      * Convert points from LNGLAT EPSG:4326 to LCC EPSG:3978
      *
-     * @param {Array<number | Array<number>>} points array of passed in points to convert
+     * @param {Coordinate[]} points array of passed in points to convert
      */
-    lngLatToLCC: (points: Array<number | Array<number>>) => Array<Array<number> | number>;
+    lngLatToLCC: (points: Coordinate[]) => Array<Array<number> | number>;
     /**
      * Convert points from LNGLAT EPSG:4326 to WM EPSG:3857
      *
-     * @param {Array<number | Array<number>>} points array of passed in points to convert
+     * @param {Coordinate[]} points array of passed in points to convert
      */
-    LngLatToWm: (points: Array<number | Array<number>>) => Array<Array<number> | number>;
+    LngLatToWm: (points: Coordinate[]) => Array<Array<number> | number>;
     /**
      * Convert points from LCC EPSG:3978 to WM EPSG:3857
      *
-     * @param {Array<number | Array<number>>} points array of passed in points to convert
+     * @param {Coordinate[]} points array of passed in points to convert
      */
-    lccToWm: (points: Array<number | Array<number>>) => Array<Array<number> | number>;
+    lccToWm: (points: Coordinate[]) => Array<Array<number> | number>;
     /**
      * Convert points from LCC EPSG:3978 to LNGLAT EPSG:4326
      *
-     * @param {Array<number | Array<number>>} points array of passed in points to convert
+     * @param {Coordinate[]} points array of passed in points to convert
      */
-    lccToLngLat: (points: Array<number | Array<number>>) => Array<Array<number> | number>;
+    lccToLngLat: (points: Coordinate[]) => Array<Array<number> | number>;
     /**
      * Convert points from WM EPSG:3857 to LNGLAT EPSG:4326
      *
-     * @param {Array<number | Array<number>>} points array of passed in points to convert
+     * @param {Coordinate[]} points array of passed in points to convert
      */
-    wmToLngLat: (points: Array<number | Array<number>>) => Array<Array<number> | number>;
+    wmToLngLat: (points: Coordinate[]) => Array<Array<number> | number>;
     /**
      * Convert points from WM EPSG:3857 to LCC EPSG:3978
      *
-     * @param {Array<number | Array<number>>} points array of passed in points to convert
+     * @param {Coordinate[]} points array of passed in points to convert
      */
-    wmToLcc: (points: Array<number | Array<number>>) => Array<Array<number> | number>;
+    wmToLcc: (points: Coordinate[]) => Array<Array<number> | number>;
     /**
      * Get map point resolution
      *

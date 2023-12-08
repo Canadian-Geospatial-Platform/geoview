@@ -1,8 +1,20 @@
 import { Extent } from 'ol/extent';
 import BaseLayer from 'ol/layer/Base';
 import LayerGroup from 'ol/layer/Group';
-import { TypeBasemapOptions } from '../layer/basemap/basemap-types';
-import { TypeGeoviewLayerType } from '../layer/geoview-layers/abstract-geoview-layers';
+import { Coordinate } from 'ol/coordinate';
+import { TypeBasemapOptions } from '@/geo/layer/basemap/basemap-types';
+import { TypeGeoviewLayerType } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
+import { TypeMapMouseInfo } from '@/api/events/payloads';
+/** ******************************************************************************************************************************
+ *  Definition of map state to attach to the map object for reference.
+ */
+export type TypeMapState = {
+    currentProjection: number;
+    currentZoom: number;
+    mapCenterCoordinates: Coordinate;
+    singleClickedPosition: TypeMapMouseInfo;
+    pointerPosition: TypeMapMouseInfo;
+};
 /** ******************************************************************************************************************************
  *  Definition of the post settings type needed when the GeoView GeoJSON layers need to use a POST instead of a GET.
  */
@@ -51,27 +63,6 @@ export type TypeLayerInitialSettings = {
  */
 export type TypeVectorSourceFormats = 'GeoJSON' | 'EsriJSON' | 'KML' | 'WFS' | 'featureAPI' | 'GeoPackage';
 /** ******************************************************************************************************************************
- * Type used to configure the cluster feature of a vector layer. Works out of the box with point geometries. If another geometry is
- * provided, it will be converted to points geometry.
- */
-export type TypeSourceVectorClusterConfig = {
-    /** Flag used to enable clustering. Default = false. */
-    enable: boolean;
-    /** Distance in pixels within which features will be clustered together (default 20px). */
-    distance?: number;
-    /** Minimum distance in pixels between clusters. Will be capped at the configured distance. By default no minimum distance is
-     * guaranteed. This config can be used to avoid overlapping icons. As a tradoff, the cluster feature's position will no longer
-     * be the center of all its features.
-     */
-    minDistance?: number;
-    /** Zoom level at which all clusters will split. Default = 7. */
-    splitZoom?: number;
-    /** Color for the text showing the number of points in a cluster */
-    textColor?: string;
-    /** settings for the cluster symbol and clustered geometries */
-    settings?: TypeSimpleSymbolVectorConfig;
-};
-/** ******************************************************************************************************************************
  * Type used to configure a custom parser.
  */
 export type TypeDetailsLayerConfig = {
@@ -116,8 +107,6 @@ export type TypeBaseSourceVectorInitialConfig = {
     dataProjection?: string;
     /** Definition of the feature information structure that will be used by the getFeatureInfo method. */
     featureInfo?: TypeFeatureInfoLayerConfig;
-    /** Vector source clustering configuration. */
-    cluster?: TypeSourceVectorClusterConfig;
     /** Loading strategy to use (all or bbox). */
     strategy?: 'all' | 'bbox';
 };
@@ -127,8 +116,6 @@ export type TypeBaseSourceVectorInitialConfig = {
 export interface TypeVectorSourceInitialConfig extends TypeBaseSourceVectorInitialConfig {
     /** The feature format used by the XHR feature loader when url is set. */
     format?: TypeVectorSourceFormats;
-    /** Vector source clustering configuration. */
-    cluster?: TypeSourceVectorClusterConfig;
 }
 /** ******************************************************************************************************************************
  * Kind of symbol vector settings.
@@ -819,13 +806,17 @@ export type TypeLayerEntryConfig = TypeLayerGroupEntryConfig | TypeBaseLayerEntr
  */
 export type TypeListOfLayerEntryConfig = TypeLayerEntryConfig[];
 /** ******************************************************************************************************************************
+ * List of supported geoview theme.
+ */
+export type TypeSupportedTheme = 'dark' | 'light' | 'geo.ca';
+/** ******************************************************************************************************************************
  *  Definition of the map feature instance according to what is specified in the schema.
  */
 export type TypeMapFeaturesInstance = {
     /** map configuration. */
     map: TypeMapConfig;
-    /** Display theme, default = dark. */
-    theme?: 'dark' | 'light';
+    /** Display theme, default = geo.ca. */
+    theme?: TypeSupportedTheme;
     /** App bar properties. */
     appBar?: TypeAppBarProps;
     /** Nav bar properies. */

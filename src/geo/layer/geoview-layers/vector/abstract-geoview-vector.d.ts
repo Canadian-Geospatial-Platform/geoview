@@ -56,8 +56,7 @@ export declare abstract class AbstractGeoViewVector extends AbstractGeoViewLayer
     protected createVectorSource(layerEntryConfig: TypeBaseLayerEntryConfig, sourceOptions?: SourceOptions, readOptions?: ReadOptions): VectorSource<Feature<Geometry>>;
     /** ***************************************************************************************************************************
      * Create a vector layer. The layer has in its properties a reference to the layer entry configuration used at creation time.
-     * The layer entry configuration keeps a reference to the layer in the olLayer attribute. If clustering is enabled, creates a
-     * cluster source and uses that to create the layer.
+     * The layer entry configuration keeps a reference to the layer in the olLayer attribute.
      *
      * @param {TypeBaseLayerEntryConfig} layerEntryConfig The layer entry configuration used by the source.
      * @param {VectorSource<Feature<Geometry>>} vectorSource The source configuration for the vector layer.
@@ -118,7 +117,6 @@ export declare abstract class AbstractGeoViewVector extends AbstractGeoViewLayer
      * @param {string | TypeLayerEntryConfig} layerPathOrConfig Layer path or configuration.
      * @param {string} filter An optional filter to be used in place of the getViewFilter value.
      * @param {boolean} CombineLegendFilter Flag used to combine the legend filter and the filter together (default: true)
-     * @param {boolean} checkCluster An optional value to see if we check for clustered layers.
      */
-    applyViewFilter(layerPathOrConfig: string | TypeLayerEntryConfig, filter?: string, CombineLegendFilter?: boolean, checkCluster?: boolean): void;
+    applyViewFilter(layerPathOrConfig: string | TypeLayerEntryConfig, filter?: string, CombineLegendFilter?: boolean): void;
 }

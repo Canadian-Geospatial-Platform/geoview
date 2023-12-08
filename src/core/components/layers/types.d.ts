@@ -8,10 +8,10 @@ export type TypeLegendLayerItem = {
     iconType?: 'simple' | 'list';
     name?: string;
     iconImage?: string | null;
-    iconImgStacked?: string | null;
-    iconList?: TypeLegendLayerListItem[];
+    iconImageStacked?: string | null;
+    iconList?: TypeLegendItem[];
 };
-export interface TypeLegendLayerListItem {
+export interface TypeLegendItem {
     geometryType: TypeStyleGeometry;
     name: string;
     isVisible: TypeVisibilityFlags;
@@ -24,17 +24,17 @@ export interface TypeLegendLayer {
     layerPath: string;
     layerAttribution?: string[];
     metadataAccessPath?: string;
-    order?: number;
+    order: number;
     layerName: string;
-    type: TypeGeoviewLayerType;
-    styleConfig?: TypeStyleConfig;
+    type?: TypeGeoviewLayerType;
+    styleConfig?: TypeStyleConfig | null;
     layerStatus?: TypeLayerStatus;
     layerPhase?: string;
     querySent?: boolean;
     isVisible: TypeVisibilityFlags;
     icons?: TypeLegendLayerIcons;
     allItemsChecked?: boolean;
-    items: TypeLegendLayerListItem[];
+    items: TypeLegendItem[];
     children: TypeLegendLayer[];
     opacity?: number;
     zoom?: number;

@@ -129,18 +129,6 @@ export declare class GeoviewRenderer {
      */
     getFeatureCanvas(feature: Feature<Geometry>, layerEntryConfig: TypeBaseLayerEntryConfig | TypeVectorTileLayerEntryConfig | TypeVectorLayerEntryConfig): Promise<HTMLCanvasElement | undefined>;
     /** ***************************************************************************************************************************
-     * This method gets the style of the cluster feature using the layer entry config. If the style does not exist, create it using
-     * the default style strategy.
-     *
-     * @param {TypeBaseLayerEntryConfig | TypeVectorLayerEntryConfig} layerEntryConfig The layer entry config that may have a style
-     * configuration for the feature. If style does not exist for the geometryType, create it.
-     * @param {Feature<Geometry>} feature The feature that need its style to be defined. When undefined, it's because we fetch the styles
-     * for the legend.
-     *
-     * @returns {Style | undefined} The style applied to the feature or undefined if not found.
-     */
-    getClusterStyle(layerEntryConfig: TypeVectorLayerEntryConfig, feature?: Feature<Geometry>): Style | undefined;
-    /** ***************************************************************************************************************************
      * Increment the default color index.
      */
     private incrementDefaultColorIndex;
@@ -254,16 +242,6 @@ export declare class GeoviewRenderer {
      * @returns {Style | undefined} The Style created. Undefined if unable to create it.
      */
     private processIconSymbol;
-    /** ***************************************************************************************************************************
-     * Process a cluster circle symbol using the settings.
-     *
-     * @param {TypeBaseLayerEntryConfig | TypeVectorLayerEntryConfig} layerEntryConfig The layer configuration.
-     * @param {Feature<Geometry>} feature The feature that need its style to be defined. When undefined, it's because we fetch the styles
-     * for the legend.
-     *
-     * @returns {Style | undefined} The Style created. Undefined if unable to create it.
-     */
-    private processClusterSymbol;
     /** ***************************************************************************************************************************
      * Process a simple point symbol using the settings. Simple point symbol may be an icon or a vector symbol.
      *

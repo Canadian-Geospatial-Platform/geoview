@@ -1,14 +1,5 @@
 /// <reference types="react" />
 import { LegendsLayerSet } from '@/app';
-import { TypeLegendItemProps } from './legend-item';
-export interface TypeLegendProps {
-    layerIds: string[];
-    isRemoveable?: boolean;
-    canSetOpacity?: boolean;
-    expandAll?: boolean;
-    hideAll?: boolean;
-    canZoomTo?: boolean;
-}
 /**
  * API to manage legend component
  *
@@ -28,10 +19,5 @@ export declare class LegendApi {
      * Create a legend as an element
      *
      */
-    createLegend: (props: TypeLegendProps) => import("react").DetailedReactHTMLElement<{}, HTMLElement>;
-    /**
-     * Create an individual legend item
-     *
-     */
-    createLegendItem: (props: TypeLegendItemProps) => import("react").FunctionComponentElement<TypeLegendItemProps>;
+    createLegend: () => import("react").FunctionComponentElement<{}>;
 }

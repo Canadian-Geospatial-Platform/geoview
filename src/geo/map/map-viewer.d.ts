@@ -1,7 +1,7 @@
 /// <reference types="react" />
 import { i18n } from 'i18next';
 import OLMap from 'ol/Map';
-import View, { FitOptions } from 'ol/View';
+import View from 'ol/View';
 import { ProjectionLike } from 'ol/proj';
 import { Coordinate } from 'ol/coordinate';
 import { Extent } from 'ol/extent';
@@ -13,7 +13,6 @@ import { AppbarButtons } from '@/core/components/app-bar/app-bar-buttons';
 import { NavbarButtons } from '@/core/components/nav-bar/nav-bar-buttons';
 import { FooterTabsApi } from '@/core/components/footer-tabs/footer-tabs-api';
 import { LegendApi } from '@/core/components/legend/legend-api';
-import { Legend2Api } from '@/core/components/legend-2/legend-api';
 import { LayersApi } from '@/core/components/layers/layers-api';
 import { DetailsApi } from '@/core/components/details/details-api';
 import { DataTableApi } from '@/core/components/data-table/data-table-api';
@@ -25,8 +24,7 @@ import { Modify } from '@/geo/interaction/modify';
 import { Snap } from '@/geo/interaction/snap';
 import { Translate } from '@/geo/interaction/translate';
 import { ModalApi } from '@/ui';
-import { TypeMapMouseInfo } from '@/api/events/payloads';
-import { TypeListOfGeoviewLayerConfig, TypeDisplayLanguage, TypeViewSettings } from '@/geo/map/map-schema-types';
+import { TypeListOfGeoviewLayerConfig, TypeDisplayLanguage, TypeViewSettings, TypeMapState } from '@/geo/map/map-schema-types';
 import { TypeMapFeaturesConfig, TypeHTMLElement } from '@/core/types/global-types';
 /**
  * Class used to manage created maps
@@ -39,22 +37,17 @@ export declare class MapViewer {
     mapFeaturesConfig: TypeMapFeaturesConfig;
     mapId: string;
     map: OLMap;
+    displayLanguage: TypeDisplayLanguage;
+    mapState: TypeMapState;
     appBarButtons: AppbarButtons;
     navBarButtons: NavbarButtons;
     footerTabs: FooterTabsApi;
     legend: LegendApi;
-    legend2: Legend2Api;
     layers: LayersApi;
     details: DetailsApi;
     dataTable: DataTableApi;
     basemap: Basemap;
     layer: Layer;
-    displayLanguage: TypeDisplayLanguage;
-    currentProjection: number;
-    currentZoom: number;
-    mapCenterCoordinates: Coordinate;
-    singleClickedPosition: TypeMapMouseInfo;
-    pointerPosition: TypeMapMouseInfo;
     i18nInstance: i18n;
     modal: ModalApi;
     geoviewRenderer: GeoviewRenderer;
@@ -120,13 +113,6 @@ export declare class MapViewer {
      * @returns the map viewSettings
      */
     getView(): View;
-    /**
-     * Zoom to the specified extent.
-     *
-     * @param {Extent} extent The extent to zoom to.
-     * @param {FitOptions} options The options to configure the zoomToExtent (default: { padding: [100, 100, 100, 100], maxZoom: 11 }).
-     */
-    zoomToExtent(extent: Extent, options?: FitOptions): void;
     /**
      * Function called when the map has been rendered and ready to be customized
      */
