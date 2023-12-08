@@ -25,7 +25,7 @@ export function LayersList({ layersList, setIsLayersListPanelVisible, parentLaye
 
   const sortedLayers = layersList
     .filter((layer) => layer.isVisible !== 'no')
-    .sort((a, b) => (a.order && b.order && a.order > b.order ? 1 : -1));
+    .sort((a, b) => (a.order > b.order ? 1 : -1));
 
   const onDragEnd = (result: DropResult) => {
     // dropped outside the list
@@ -50,14 +50,13 @@ export function LayersList({ layersList, setIsLayersListPanelVisible, parentLaye
         ...draggableStyle,
       };
     }
-    return {};
+    return { ...draggableStyle };
   };
 
   const getListStyle = (isDraggingOver: boolean) => {
     if (isDraggingOver) {
       return {
-        border: '3px dashed #ccc',
-        padding: '8px',
+        background: 'rgba(192, 192, 192, 0.5)'
       };
     }
     return {};

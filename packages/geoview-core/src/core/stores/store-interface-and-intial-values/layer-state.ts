@@ -221,7 +221,6 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
         if (bounds) MapEventProcessor.zoomToExtent(get().mapId, bounds, options);
       },
       reOrderLayer: (startIndex: number, endIndex: number, layerPath: string) => {
-        // TODO implement re-order layers
         const curLayers = get().layerState.legendLayers;
         const reOrderedLayers = reOrderSingleLayer(curLayers, startIndex, endIndex, layerPath);
         set({
@@ -230,7 +229,7 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
             legendLayers: [...reOrderedLayers],
           },
         });
-        // console.log('reorder layers', startIndex, endIndex, curLayers);
+        // TODO implement re-order layers in the map
       },
     },
   } as ILayerState;
