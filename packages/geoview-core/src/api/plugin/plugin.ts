@@ -7,7 +7,7 @@ import * as translate from 'react-i18next';
 
 import Ajv from 'ajv';
 
-import { showError } from '@/core/utils/utilities';
+import { whenThisThen, showError } from '@/core/utils/utilities';
 
 import { api } from '@/app';
 import { AbstractPlugin } from './abstract-plugin';
@@ -67,20 +67,21 @@ export class Plugin {
         script.id = pluginId;
         document.body.appendChild(script);
         script.onload = () => {
-          // Note: Used timeout to put resolve back in call queue, because when tyring to load a plugin more than once on same page, it's not loaded before resolve
-          // TODO: make async if possible
-          setTimeout(() => resolve(window.plugins[pluginId]), 1000);
+          resolve(window.plugins[pluginId]);
         };
-
         script.onerror = () => {
-          // TODO: make async if possible
-          setTimeout(() => resolve(null), 1000);
+          resolve(null);
         };
-      }
-
-      if (existingScript && window.plugins && window.plugins[pluginId]) {
-        // TODO: make async if possible
-        setTimeout(() => resolve(window.plugins[pluginId]), 1000);
+      } else {
+        // Resolve only once the script is indeed loaded.
+        // This is because when you load for example 2 maps in parallel with the same plugin script, this 'loadScript' function is
+        // called in parallel and the script.onload callback (a few lines above) hasn't been called back yet (for the 1st plugin load).
+        // Therefore, any subsequent call to loadScript has to actually wait for the script.onload to
+        // be calledback. Otherwise, even if 'existingScript' says that it's been loaded,
+        // it's not 'yet' true, because the js file might still be being downloaded and window.plugins[pluginId] still undefined.
+        whenThisThen(() => window.plugins && window.plugins[pluginId]).then(() => {
+          resolve(window.plugins[pluginId]);
+        });
       }
     });
   };

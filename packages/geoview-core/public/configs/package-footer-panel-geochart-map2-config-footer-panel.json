@@ -1,0 +1,15 @@
+{
+  "tabs": {
+    "defaultTabs": [
+      "legend",
+      "details",
+      "geoChart"
+    ],
+    "customTabs": []
+  },
+  "suportedLanguages": [
+    "en",
+    "fr"
+  ],
+  "collapsed": false
+}
