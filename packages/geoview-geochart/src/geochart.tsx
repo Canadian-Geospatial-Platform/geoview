@@ -210,6 +210,7 @@ export function GeoChart(props: GeoChartProps): JSX.Element {
       schemaValidator={schemaValidator}
       sx={{ ...sx, ...{ backgroundColor: defaultColors.backgroundColor } }}
       inputs={inputs}
+      language={displayLanguage}
       defaultColors={defaultColors}
       isLoadingChart={isLoadingChart}
       action={action}
