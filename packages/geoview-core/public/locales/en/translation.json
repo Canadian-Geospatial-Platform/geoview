@@ -145,5 +145,9 @@
   },
   "geoChart": {
     "noChartAvailable": "Click on the map layer with chart"
+  },
+  "footerTabs": {
+    "focusToMap": "Focus to map",
+    "focusToFooter": "Focus to footer"
   }
 }

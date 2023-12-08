@@ -4,7 +4,6 @@ import { useTranslation } from 'react-i18next';
 
 import { useTheme } from '@mui/material/styles';
 
-import Focus from './buttons/focus';
 import ZoomIn from './buttons/zoom-in';
 import ZoomOut from './buttons/zoom-out';
 import Fullscreen from './buttons/fullscreen';
@@ -94,7 +93,7 @@ export function Navbar(): JSX.Element {
 
   return (
     /** TODO - KenChase Need to add styling for scenario when more buttons that can fit vertically occurs (or limit number of buttons that can be added) */
-    <Box ref={navBarRef} sx={[sxClasses.navBarRef, { bottom: footerBarExpanded ? 80 : 40 }]}>
+    <Box id={`focusToMap${mapId}`} ref={navBarRef} sx={[sxClasses.navBarRef, { bottom: footerBarExpanded ? 80 : 40 }]}>
       {Object.keys(buttonPanelGroups).map((groupName) => {
         const buttonPanelGroup = buttonPanelGroups[groupName];
 
@@ -173,8 +172,6 @@ export function Navbar(): JSX.Element {
           {navBarComponents.includes('location') && <Location />}
           {navBarComponents.includes('home') && <Home />}
           {navBarComponents.includes('export') && <ExportButton className={`${sxClasses.navButton} ${activeModalId ? 'export' : ''}`} />}
-          {/* // TODO We might need to refactor code below based on the best solution, issue #1448 */}
-          {navBarComponents.includes('focus') && <Focus />}
         </ButtonGroup>
       </Box>
     </Box>

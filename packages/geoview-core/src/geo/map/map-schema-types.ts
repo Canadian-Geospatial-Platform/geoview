@@ -1122,7 +1122,7 @@ export type TypeAppBarProps = Array<'geolocator' | 'export'>;
 /** ******************************************************************************************************************************
  * Controls available on the navigation bar. Default = ['zoom', 'fullscreen', 'home'].
  */
-export type TypeNavBarProps = Array<'zoom' | 'fullscreen' | 'home' | 'location' | 'export' | 'focus'>;
+export type TypeNavBarProps = Array<'zoom' | 'fullscreen' | 'home' | 'location' | 'export'>;
 
 /** ******************************************************************************************************************************
  *  Overview map options. Default none.

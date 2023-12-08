@@ -122,8 +122,7 @@
     "fullscreen",
     "home",
     "location",
-    "export",
-    "focus"
+    "export"
   ],
   "components": [
     "north-arrow",
