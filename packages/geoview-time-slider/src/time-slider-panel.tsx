@@ -1,7 +1,6 @@
 import { TypeWindow } from 'geoview-core';
-import { CloseButton, EnlargeButton, LayerList, LayerListEntry, LayerTitle, ResponsiveGrid } from 'geoview-core/src/core/components/common';
-import { useVisibleTimeSliderLayers, useTimeSliderLayers, useAppDisplayLanguage } from 'geoview-core/src/core/stores';
-import { getSxClasses } from './time-slider-style';
+import { LayerListEntry, Layout } from 'geoview-core/src/core/components/common';
+import { useVisibleTimeSliderLayers, useAppDisplayLanguage, useTimeSliderLayers } from 'geoview-core/src/core/stores';
 import { TimeSlider } from './time-slider';
 
 interface TypeTimeSliderProps {
@@ -30,93 +29,41 @@ const { cgpv } = window as TypeWindow;
  */
 export function TimeSliderPanel(props: TypeTimeSliderProps): JSX.Element {
   const { mapId } = props;
-  const { react, ui, useTranslation } = cgpv;
-  const { useCallback, useState, useEffect } = react;
+  const { react, ui } = cgpv;
+  const { useState, useEffect } = react;
   const { Box } = ui.elements;
-  const { useTheme } = ui;
-  const { t } = useTranslation<string>();
-  const theme = useTheme();
-  const sxClasses = getSxClasses(theme);
+  const displayLanguage = useAppDisplayLanguage();
 
   const [selectedLayerPath, setSelectedLayerPath] = useState<string>();
-  const [isLayersPanelVisible, setIsLayersPanelVisible] = useState(false);
-  const [isEnlargeDataTable, setIsEnlargeDataTable] = useState(false);
 
-  const displayLanguage = useAppDisplayLanguage();
   const visibleTimeSliderLayers = useVisibleTimeSliderLayers();
   const timeSliderLayers = useTimeSliderLayers();
+
+  /**
+   * handle Layer list when clicked on each layer.
+   * @param {LayerListEntry} layer layer clicked by the user.
+   */
+  const handleLayerList = (layer: LayerListEntry) => {
+    setSelectedLayerPath(layer.layerPath);
+  };
 
   useEffect(() => {
     if (!selectedLayerPath) setSelectedLayerPath(visibleTimeSliderLayers[0]);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [visibleTimeSliderLayers]);
 
-  /**
-   * Handles clicks to layers in left panel. Sets selected layer.
-   *
-   * @param {LayerListEntry} layer The data of the selected layer
-   */
-  const handleLayerChange = (layer: LayerListEntry): void => {
-    setSelectedLayerPath(layer.layerPath);
-    setIsLayersPanelVisible(true);
-  };
-
-  /**
-   * Render group layers as list.
-   *
-   * @returns JSX.Element
-   */
-  const renderLayerList = useCallback(() => {
-    if (visibleTimeSliderLayers.length)
-      return (
-        <LayerList
-          isEnlargeDataTable={isEnlargeDataTable}
-          selectedLayerIndex={selectedLayerPath ? visibleTimeSliderLayers.indexOf(selectedLayerPath) : 0}
-          handleListItemClick={(layer) => {
-            handleLayerChange(layer);
-          }}
-          layerList={visibleTimeSliderLayers.map((layer) => ({
-            layerName: timeSliderLayers[layer].name,
-            layerPath: layer,
-            tooltip: layer as string,
-          }))}
-        />
-      );
-    return <span>{translations[displayLanguage].noLayers}</span>;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [visibleTimeSliderLayers, selectedLayerPath, isEnlargeDataTable]);
-
-  return (
-    <Box sx={sxClasses.detailsContainer}>
-      <ResponsiveGrid.Root>
-        <ResponsiveGrid.Left isLayersPanelVisible={isLayersPanelVisible} isEnlargeDataTable={isEnlargeDataTable}>
-          <LayerTitle>{t('general.layers')}</LayerTitle>
-        </ResponsiveGrid.Left>
-        <ResponsiveGrid.Right isLayersPanelVisible={isLayersPanelVisible} isEnlargeDataTable={isEnlargeDataTable}>
-          <Box
-            sx={{
-              display: 'flex',
-              alignItems: 'center',
-              [theme.breakpoints.up('md')]: { justifyContent: 'right' },
-              [theme.breakpoints.down('md')]: { justifyContent: 'space-between' },
-            }}
-          >
-            <LayerTitle hideTitle>{selectedLayerPath}</LayerTitle>
-            <Box>
-              <EnlargeButton isEnlargeDataTable={isEnlargeDataTable} setIsEnlargeDataTable={setIsEnlargeDataTable} />
-              <CloseButton isLayersPanelVisible={isLayersPanelVisible} setIsLayersPanelVisible={setIsLayersPanelVisible} />
-            </Box>
-          </Box>
-        </ResponsiveGrid.Right>
-      </ResponsiveGrid.Root>
-      <ResponsiveGrid.Root>
-        <ResponsiveGrid.Left isLayersPanelVisible={isLayersPanelVisible} isEnlargeDataTable={isEnlargeDataTable}>
-          {renderLayerList()}
-        </ResponsiveGrid.Left>
-        <ResponsiveGrid.Right isEnlargeDataTable={isEnlargeDataTable} isLayersPanelVisible={isLayersPanelVisible}>
-          {selectedLayerPath && <TimeSlider mapId={mapId} layerPath={selectedLayerPath} key={selectedLayerPath} />}
-        </ResponsiveGrid.Right>
-      </ResponsiveGrid.Root>
-    </Box>
+  if (!visibleTimeSliderLayers.length) return <span>{translations[displayLanguage].noLayers}</span>;
+  return selectedLayerPath ? (
+    <Layout
+      selectedLayerPath={selectedLayerPath}
+      handleLayerList={handleLayerList}
+      layerList={visibleTimeSliderLayers.map((layer) => {
+        return { layerName: timeSliderLayers[layer].name, layerPath: layer, tooltip: timeSliderLayers[layer].name };
+      })}
+    >
+      <TimeSlider mapId={mapId} layerPath={selectedLayerPath} key={selectedLayerPath} />
+    </Layout>
+  ) : (
+    <Box />
   );
 }
