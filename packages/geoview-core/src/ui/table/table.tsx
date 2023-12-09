@@ -8,3 +8,5 @@ import { MaterialReactTable, MaterialReactTableProps } from 'material-react-tabl
 export function Table(props: MaterialReactTableProps) {
   return <MaterialReactTable {...props} />;
 }
+
+export * from 'material-react-table';
