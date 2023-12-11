@@ -1,7 +1,7 @@
 {
-  "layers": [
+  "sliders": [
     {
-      "layerPath": "historical-flood/0",
+      "layerPaths": ["historical-flood/0"],
       "title": "Historical Flood Events - Override",
       "description": "Test 1 Desc - Override",
       "locked": true,
@@ -9,7 +9,7 @@
       "defaultValue": ""
     },
     {
-      "layerPath": "wmsLYR1-spatiotemporel/RADAR_1KM_RSNO",
+      "layerPaths": ["wmsLYR1-spatiotemporel/RADAR_1KM_RSNO"],
       "title": "Spatiotemporel - Override",
       "description": "Test 2 Desc - Override",
       "locked": true,
@@ -17,7 +17,7 @@
       "defaultValue": ""
     },
     {
-      "layerPath": "MSI/msi-94-or-more"
+      "layerPaths": ["MSI/msi-94-or-more"]
     }
   ],
   "suportedLanguages": ["en", "fr"]
