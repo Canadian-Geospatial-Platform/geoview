@@ -23,7 +23,6 @@ import {
 } from '@/geo/map/map-schema-types';
 
 import { getLocalizedValue } from '@/core/utils/utilities';
-import { api } from '@/app';
 import { Layer } from '../../layer';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 
@@ -141,10 +140,10 @@ export class OgcFeature extends AbstractGeoViewVector {
             resolve();
           }) // eslint-disable-next-line @typescript-eslint/no-unused-vars
           .catch((reason) => {
-            api.geoUtilities.setAllLayerStatusToError(this, this.listOfLayerEntryConfig, 'Unable to read metadata');
+            this.setAllLayerStatusToError(this.listOfLayerEntryConfig, 'Unable to read metadata');
           });
       } else {
-        api.geoUtilities.setAllLayerStatusToError(this, this.listOfLayerEntryConfig, 'Unable to read metadata');
+        this.setAllLayerStatusToError(this.listOfLayerEntryConfig, 'Unable to read metadata');
       }
     });
     return promisedExecution;

@@ -538,7 +538,7 @@ export abstract class AbstractGeoViewLayer {
       try {
         const metadataString = await getXMLHttpRequest(`${metadataUrl}?f=json`);
         if (metadataString === '{}') {
-          api.geoUtilities.setAllLayerStatusToError(this, this.listOfLayerEntryConfig, 'Unable to read metadata');
+          this.setAllLayerStatusToError(this.listOfLayerEntryConfig, 'Unable to read metadata');
         } else {
           this.metadata = toJsonObject(JSON.parse(metadataString));
           const { copyrightText } = this.metadata;
@@ -546,7 +546,7 @@ export abstract class AbstractGeoViewLayer {
         }
       } catch (error) {
         console.log(error);
-        api.geoUtilities.setAllLayerStatusToError(this, this.listOfLayerEntryConfig, 'Unable to read metadata');
+        this.setAllLayerStatusToError(this.listOfLayerEntryConfig, 'Unable to read metadata');
       }
     }
   }
@@ -1395,8 +1395,7 @@ export abstract class AbstractGeoViewLayer {
    */
   setAllLayerStatusToError(listOfLayerEntryConfig: TypeListOfLayerEntryConfig, errorMessage: string) {
     listOfLayerEntryConfig.forEach((layerConfig: TypeLayerEntryConfig) => {
-      if (layerEntryIsGroupLayer(layerConfig))
-        api.geoUtilities.setAllLayerStatusToError(this, layerConfig.listOfLayerEntryConfig, errorMessage);
+      if (layerEntryIsGroupLayer(layerConfig)) this.setAllLayerStatusToError(layerConfig.listOfLayerEntryConfig, errorMessage);
       else {
         const layerPath = Layer.getLayerPath(layerConfig);
         this.changeLayerStatus('error', layerConfig);

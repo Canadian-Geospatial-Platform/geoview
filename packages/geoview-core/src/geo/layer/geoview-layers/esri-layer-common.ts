@@ -43,7 +43,7 @@ export function commonGetServiceMetadata(this: EsriDynamic | EsriFeature, resolv
     getXMLHttpRequest(`${metadataUrl}?f=json`)
       .then((metadataString) => {
         if (metadataString === '{}') {
-          api.geoUtilities.setAllLayerStatusToError(this, this.listOfLayerEntryConfig, 'Unable to read metadata');
+          this.setAllLayerStatusToError(this.listOfLayerEntryConfig, 'Unable to read metadata');
         } else {
           this.metadata = JSON.parse(metadataString) as TypeJsonObject;
           const { copyrightText } = this.metadata;
@@ -52,10 +52,10 @@ export function commonGetServiceMetadata(this: EsriDynamic | EsriFeature, resolv
         }
       })
       .catch((reason) => {
-        api.geoUtilities.setAllLayerStatusToError(this, this.listOfLayerEntryConfig, 'Unable to read metadata');
+        this.setAllLayerStatusToError(this.listOfLayerEntryConfig, 'Unable to read metadata');
       });
   } else {
-    api.geoUtilities.setAllLayerStatusToError(this, this.listOfLayerEntryConfig, 'Unable to read metadata');
+    this.setAllLayerStatusToError(this.listOfLayerEntryConfig, 'Unable to read metadata');
   }
 }
 

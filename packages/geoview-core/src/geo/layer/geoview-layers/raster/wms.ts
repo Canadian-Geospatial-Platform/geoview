@@ -187,12 +187,12 @@ export class WMS extends AbstractGeoViewRaster {
                 resolve();
               })
               .catch((reason) => {
-                api.geoUtilities.setAllLayerStatusToError(this, this.listOfLayerEntryConfig, 'Unable to read metadata');
+                this.setAllLayerStatusToError(this.listOfLayerEntryConfig, 'Unable to read metadata');
               });
           }
         }
       } else {
-        api.geoUtilities.setAllLayerStatusToError(this, this.listOfLayerEntryConfig, 'Unable to read metadata');
+        this.setAllLayerStatusToError(this.listOfLayerEntryConfig, 'Unable to read metadata');
       }
     });
     return promisedExecution;
@@ -216,7 +216,7 @@ export class WMS extends AbstractGeoViewRaster {
           });
         })
         .catch(() => {
-          api.geoUtilities.setAllLayerStatusToError(this, this.listOfLayerEntryConfig, 'Unable to read metadata');
+          this.setAllLayerStatusToError(this.listOfLayerEntryConfig, 'Unable to read metadata');
         });
     });
     return promisedJsonObject;
@@ -254,13 +254,13 @@ export class WMS extends AbstractGeoViewRaster {
               };
               setDataAccessPath(this.listOfLayerEntryConfig);
             } else {
-              api.geoUtilities.setAllLayerStatusToError(this, this.listOfLayerEntryConfig, 'Unable to read metadata');
+              this.setAllLayerStatusToError(this.listOfLayerEntryConfig, 'Unable to read metadata');
             }
             resolve();
           });
         })
         .catch((reason) => {
-          api.geoUtilities.setAllLayerStatusToError(this, this.listOfLayerEntryConfig, 'Unable to read metadata');
+          this.setAllLayerStatusToError(this.listOfLayerEntryConfig, 'Unable to read metadata');
         });
     });
     return promisedExecution;

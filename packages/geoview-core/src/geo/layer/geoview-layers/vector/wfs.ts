@@ -22,7 +22,6 @@ import {
 } from '@/geo/map/map-schema-types';
 
 import { getLocalizedValue, getXMLHttpRequest, xmlToJson, findPropertyNameByRegex } from '@/core/utils/utilities';
-import { api } from '@/app';
 import { Layer } from '../../layer';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 
@@ -138,7 +137,7 @@ export class WFS extends AbstractGeoViewVector {
         getXMLHttpRequest(`${metadataUrl}${getCapabilitiesUrl}`)
           .then((metadataString) => {
             if (metadataString === '{}') {
-              api.geoUtilities.setAllLayerStatusToError(this, this.listOfLayerEntryConfig, 'Unable to read metadata');
+              this.setAllLayerStatusToError(this.listOfLayerEntryConfig, 'Unable to read metadata');
             } else {
               // need to pass a xmldom to xmlToJson
               const xmlDOMCapabilities = new DOMParser().parseFromString(metadataString, 'text/xml');
@@ -152,10 +151,10 @@ export class WFS extends AbstractGeoViewVector {
             }
           }) // eslint-disable-next-line @typescript-eslint/no-unused-vars
           .catch((reason) => {
-            api.geoUtilities.setAllLayerStatusToError(this, this.listOfLayerEntryConfig, 'Unable to read metadata');
+            this.setAllLayerStatusToError(this.listOfLayerEntryConfig, 'Unable to read metadata');
           });
       } else {
-        api.geoUtilities.setAllLayerStatusToError(this, this.listOfLayerEntryConfig, 'Unable to read metadata');
+        this.setAllLayerStatusToError(this.listOfLayerEntryConfig, 'Unable to read metadata');
       }
     });
     return promisedExecution;
