@@ -6,7 +6,7 @@
   "comments": "Configuration for GeoView time slider package.",
   "additionalProperties": false,
   "properties": {
-    "layers": {
+    "sliders": {
       "type": "array",
       "items": {
         "type": "object",
@@ -51,5 +51,5 @@
       "minItems": 1
     }
   },
-  "required": ["layers", "suportedLanguages"]
+  "required": ["sliders", "suportedLanguages"]
 }

@@ -67,16 +67,16 @@ export class Plugin {
         script.id = pluginId;
         document.body.appendChild(script);
         script.onload = () => {
-          resolve(window.plugins[pluginId]);
+          setTimeout(() => resolve(window.plugins[pluginId]), 1000);
         };
 
         script.onerror = () => {
-          resolve(null);
+          setTimeout(() => resolve(null), 1000);
         };
       }
 
       if (existingScript && window.plugins && window.plugins[pluginId]) {
-        resolve(window.plugins[pluginId]);
+        setTimeout(() => resolve(window.plugins[pluginId]), 1000);
       }
     });
   };
