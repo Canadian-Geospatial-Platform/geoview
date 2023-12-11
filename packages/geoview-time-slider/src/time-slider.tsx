@@ -88,8 +88,8 @@ export function TimeSlider(TimeSliderPanelProps: TimeSliderPanelProps) {
   // TODO: evaluate best option to set value by layer path.... trough a getter?
   const { setValues, setLocked, setReversed, setDelay, setFiltering } = useTimeSliderStoreActions();
 
-  // slider default config
-  const sliderConfig = config?.layers?.find((o: { layerPath: string }) => o.layerPath === layerPath);
+  // slider config
+  const sliderConfig = config?.sliders?.find((o: { layerPaths: string[] }) => o.layerPaths.includes(layerPath));
   const configValues = {
     title: sliderConfig?.title || '',
     description: sliderConfig?.description || '',
