@@ -58,8 +58,8 @@ export function TimeSliderPanel(props: TypeTimeSliderProps): JSX.Element {
     <Layout
       selectedLayerPath={selectedLayerPath}
       handleLayerList={handleLayerList}
-      layerList={visibleTimeSliderLayers.map((layer) => {
-        return { layerName: timeSliderLayers[layer].name, layerPath: layer, tooltip: timeSliderLayers[layer].name };
+      layerList={visibleTimeSliderLayers.map((layerPath: string) => {
+        return { layerName: timeSliderLayers[layerPath].name, layerPath, tooltip: timeSliderLayers[layerPath].name };
       })}
     >
       <TimeSlider mapId={mapId} config={configObj} layerPath={selectedLayerPath} key={selectedLayerPath} />
