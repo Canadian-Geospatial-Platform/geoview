@@ -2,7 +2,6 @@ import { useTheme } from '@mui/material/styles';
 import { FormControl, InputLabel, NativeSelect } from '@mui/material';
 import { TypeWindow } from 'geoview-core';
 import { useTimeSliderLayers, useTimeSliderStoreActions } from 'geoview-core/src/core/stores';
-import { useCallback } from 'react';
 import { getSxClasses } from './time-slider-style';
 
 /**
