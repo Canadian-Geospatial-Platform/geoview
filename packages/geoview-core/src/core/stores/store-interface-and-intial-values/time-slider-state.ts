@@ -146,5 +146,4 @@ export function initializeTimeSliderState(set: TypeSetStore, get: TypeGetStore):
 // **********************************************************
 export const useTimeSliderLayers = () => useStore(useGeoViewStore(), (state) => state.timeSliderState.timeSliderLayers);
 export const useVisibleTimeSliderLayers = () => useStore(useGeoViewStore(), (state) => state.timeSliderState.visibleTimeSliderLayers);
-
 export const useTimeSliderStoreActions = () => useStore(useGeoViewStore(), (state) => state.timeSliderState.actions);

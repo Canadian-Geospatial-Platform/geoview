@@ -2,16 +2,16 @@
   "sliders": [
     {
       "layerPaths": ["historical-flood/0"],
-      "title": "Historical Flood Events - Override",
-      "description": "Test 1 Desc - Override",
+      "title": "Historical Flood Events - Custom",
+      "description": "Custom description",
       "locked": true,
       "reversed": true,
       "defaultValue": ""
     },
     {
       "layerPaths": ["wmsLYR1-spatiotemporel/RADAR_1KM_RSNO"],
-      "title": "Spatiotemporel - Override",
-      "description": "Test 2 Desc - Override",
+      "title": "Spatiotemporel - Custom",
+      "description": "Custom description",
       "locked": true,
       "reversed": true,
       "defaultValue": ""
