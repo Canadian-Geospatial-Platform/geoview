@@ -76,7 +76,7 @@ export class GeoCore {
    */
   createLayers(geocoreLayerConfig: TypeGeoCoreLayerConfig): Promise<TypeListOfGeoviewLayerConfig[]> {
     const arrayOfListOfGeoviewLayerConfig = new Promise<TypeListOfGeoviewLayerConfig[]>((resolve) => {
-      const url = geocoreLayerConfig.metadataAccessPath || `${catalogUrl}/${api.maps[this.mapId].displayLanguage}`;
+      const url = geocoreLayerConfig.metadataAccessPath || `${catalogUrl}/${api.maps[this.mapId].getDisplayLanguage()}`;
       const promiseOfLayerConfigs: Promise<TypeListOfGeoviewLayerConfig>[] = [];
       geocoreLayerConfig.listOfLayerEntryConfig.forEach((layerEntryConfig: TypeLayerEntryConfig) => {
         const requestUrl = `${url}/${layerEntryConfig.layerId}`;

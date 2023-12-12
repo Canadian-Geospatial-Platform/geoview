@@ -1,3 +1,5 @@
+import { Root } from 'react-dom/client';
+
 import { i18n } from 'i18next';
 /* eslint-disable global-require */
 /* eslint-disable @typescript-eslint/no-var-requires */
@@ -34,8 +36,16 @@ import { Translate } from '@/geo/interaction/translate';
 
 import { ModalApi } from '@/ui';
 import { mapComponentPayload, mapConfigPayload, GeoViewLayerPayload, payloadIsGeoViewLayerAdded } from '@/api/events/payloads';
-import { generateId, getValidConfigFromString } from '@/core/utils/utilities';
-import { TypeListOfGeoviewLayerConfig, TypeDisplayLanguage, TypeViewSettings, TypeMapState } from '@/geo/map/map-schema-types';
+import { addNotificationError, generateId, getLocalizedMessage } from '@/core/utils/utilities';
+import {
+  TypeListOfGeoviewLayerConfig,
+  TypeDisplayLanguage,
+  TypeViewSettings,
+  TypeMapState,
+  TypeDisplayTheme,
+  VALID_DISPLAY_LANGUAGE,
+  VALID_DISPLAY_THEME,
+} from '@/geo/map/map-schema-types';
 import { TypeMapFeaturesConfig, TypeHTMLElement, TypeValidMapProjectionCodes } from '@/core/types/global-types';
 import { layerConfigIsGeoCore } from '@/geo/layer/other/geocore';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
@@ -66,11 +76,8 @@ export class MapViewer {
   // the openlayer map
   map!: OLMap;
 
-  // the display language
-  displayLanguage: TypeDisplayLanguage;
-
-  // the map state
-  mapState: TypeMapState;
+  // the overview map reat root
+  overviewRoot: Root | undefined;
 
   // used to access button panel API to create buttons and button panels on the app-bar
   appBarButtons!: AppbarButtons;
@@ -119,11 +126,6 @@ export class MapViewer {
   constructor(mapFeaturesConfig: TypeMapFeaturesConfig, i18instance: i18n) {
     this.mapId = mapFeaturesConfig.mapId;
     this.mapFeaturesConfig = mapFeaturesConfig;
-    this.displayLanguage = AppEventProcessor.getDisplayLanguage(this.mapId);
-
-    // map state initialize with store data coming from configuration file/object.
-    // updated values will be added by store subscription in map-event-processor
-    this.mapState = MapEventProcessor.getMapState(this.mapId);
 
     this.i18nInstance = i18instance;
 
@@ -143,8 +145,8 @@ export class MapViewer {
     // create basemap and pass in the map id to be able to access the map instance
     this.basemap = new Basemap(
       MapEventProcessor.getBasemapOptions(this.mapId),
-      this.displayLanguage,
-      this.mapState.currentProjection as TypeValidMapProjectionCodes,
+      this.getDisplayLanguage(),
+      this.getMapState().currentProjection as TypeValidMapProjectionCodes,
       this.mapId
     );
 
@@ -355,25 +357,47 @@ export class MapViewer {
     }, 250);
   }
 
+  getMapState(): TypeMapState {
+    // map state initialize with store data coming from configuration file/object.
+    // updated values will be added by store subscription in map-event-processor
+    return MapEventProcessor.getMapState(this.mapId);
+  }
+
+  getDisplayLanguage(): TypeDisplayLanguage {
+    return AppEventProcessor.getDisplayLanguage(this.mapId);
+  }
+
   /**
    * Change the display language of the map
    *
    * @param {TypeDisplayLanguage} displayLanguage the language to use (en, fr)
-   * @param {TypeListOfGeoviewLayerConfig} listOfGeoviewLayerConfig optional new set of layers to apply (will override original set of layers)
+   * @param {boolean} resetLayer optional flag to ask viewer to reload layers with the new localize language
    */
-  changeLanguage(displayLanguage: TypeDisplayLanguage, listOfGeoviewLayerConfig?: TypeListOfGeoviewLayerConfig): void {
-    AppEventProcessor.setDisplayLanguage(this.mapId, displayLanguage);
+  changeLanguage(displayLanguage: TypeDisplayLanguage, resetLayer?: boolean | false): void {
+    if (VALID_DISPLAY_LANGUAGE.includes(displayLanguage)) {
+      AppEventProcessor.setDisplayLanguage(this.mapId, displayLanguage);
 
-    // if a list of geoview layers parameter is present, replace the one from the config
-    // do not concat like updatedMapConfig.map.listOfGeoviewLayerConfig?.concat(listOfGeoviewLayerConfig) this
-    // because it will keep layer in wrong languages if they are present.
-    if (listOfGeoviewLayerConfig) {
-      this.mapFeaturesConfig.map.listOfGeoviewLayerConfig = listOfGeoviewLayerConfig;
-    }
+      // if flag is true, check if config support the layers change and apply
+      if (AppEventProcessor.getSupportedLanguages(this.mapId).includes(displayLanguage)) {
+        // eslint-disable-next-line no-console
+        console.log(resetLayer);
+      } else addNotificationError(this.mapId, getLocalizedMessage(this.mapId, 'validation.changeDisplayLanguageLayers'));
+    } else addNotificationError(this.mapId, getLocalizedMessage(this.mapId, 'validation.changeDisplayLanguage'));
+  }
 
-    // reload the map to change the language
-    // TODO: use store
-    this.reloadMap(this.mapFeaturesConfig);
+  getDisplayTheme(): TypeDisplayTheme {
+    return AppEventProcessor.getDisplayTheme(this.mapId);
+  }
+
+  /**
+   * Change the display theme of the map
+   *
+   * @param {TypeDisplayTheme} displayTheme the theme to use (geo.ca, light, dark)
+   */
+  changeTheme(displayTheme: TypeDisplayTheme): void {
+    if (VALID_DISPLAY_THEME.includes(displayTheme)) {
+      AppEventProcessor.setDisplayTheme(this.mapId, displayTheme);
+    } else addNotificationError(this.mapId, getLocalizedMessage(this.mapId, 'validation.changeDisplayTheme'));
   }
 
   /**
@@ -387,17 +411,6 @@ export class MapViewer {
 
     // emit an event to reload the map with the new config
     api.event.emit(mapConfigPayload(EVENT_NAMES.MAP.EVENT_MAP_RELOAD, this.mapId, mapFeaturesConfig));
-  }
-
-  /**
-   * Create a new config for this map element, validate an load it
-   *
-   * @param {string} mapConfig a new config passed in from the function call
-   */
-  loadMapFromJsonStringConfig(mapConfig: string) {
-    const targetDiv = document.getElementById(this.mapId);
-    // reload the map with the new config
-    this.reloadMap(getValidConfigFromString(mapConfig, targetDiv!));
   }
 
   /**
@@ -423,16 +436,12 @@ export class MapViewer {
    */
   fitBounds(bounds?: Extent, projectionCode: string | number | undefined = undefined) {
     let mapBounds: Extent | undefined;
-    if (bounds)
+    if (bounds) {
+      const { currentProjection } = this.getMapState();
       mapBounds = projectionCode
-        ? olTransformExtent(bounds, `EPSG:${projectionCode}`, api.projection.projections[this.mapState.currentProjection], 20)
-        : olTransformExtent(
-            bounds,
-            api.projection.projections[this.mapState.currentProjection],
-            api.projection.projections[this.mapState.currentProjection],
-            25
-          );
-    else {
+        ? olTransformExtent(bounds, `EPSG:${projectionCode}`, api.projection.projections[currentProjection], 20)
+        : olTransformExtent(bounds, api.projection.projections[currentProjection], api.projection.projections[currentProjection], 25);
+    } else {
       Object.keys(this.layer.geoviewLayers).forEach((geoviewLayerId) => {
         if (!mapBounds)
           mapBounds = this.layer.geoviewLayers[geoviewLayerId].getMetadataBounds(

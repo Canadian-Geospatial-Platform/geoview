@@ -19,10 +19,10 @@ export function initializeEventProcessors(store: GeoViewStoreType) {
   timeSliderEventProcessor.onInitialize(store);
 }
 
-export function destroyEventProcessors() {
-  appEventProcessor.onDestroy();
-  featureInfoEventProcessor.onDestroy();
-  legendEventProcessor.onDestroy();
-  mapEventProcessor.onDestroy();
-  timeSliderEventProcessor.onDestroy();
+export function destroyEventProcessors(store: GeoViewStoreType) {
+  appEventProcessor.onDestroy(store);
+  featureInfoEventProcessor.onDestroy(store);
+  legendEventProcessor.onDestroy(store);
+  mapEventProcessor.onDestroy(store);
+  timeSliderEventProcessor.onDestroy(store);
 }

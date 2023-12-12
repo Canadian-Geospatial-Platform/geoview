@@ -1,7 +1,7 @@
 import { useTheme } from '@mui/material/styles';
 import { FormControl, InputLabel, NativeSelect } from '@mui/material';
 import { TypeWindow } from 'geoview-core';
-import { useTimeSliderLayers, useTimeSliderStoreActions } from 'geoview-core/src/core/stores';
+import { useTimeSliderLayers, useTimeSliderStoreActions, useAppDisplayLanguage } from 'geoview-core/src/core/stores';
 import { getSxClasses } from './time-slider-style';
 
 /**
@@ -52,8 +52,8 @@ const { cgpv } = window as TypeWindow;
  * @returns {JSX.Element} the slider panel
  */
 export function TimeSlider(TimeSliderPanelProps: TimeSliderPanelProps) {
-  const { mapId, layerPath } = TimeSliderPanelProps;
-  const { api, react, ui } = cgpv;
+  const { layerPath } = TimeSliderPanelProps;
+  const { react, ui } = cgpv;
   const { useState, useRef, useEffect } = react;
   const {
     Grid,
@@ -71,7 +71,7 @@ export function TimeSlider(TimeSliderPanelProps: TimeSliderPanelProps) {
     SwitchRightIcon,
     SwitchLeftIcon,
   } = ui.elements;
-  const { displayLanguage } = api.maps[mapId];
+  const displayLanguage = useAppDisplayLanguage();
 
   const theme = useTheme();
   const sxClasses = getSxClasses(theme);

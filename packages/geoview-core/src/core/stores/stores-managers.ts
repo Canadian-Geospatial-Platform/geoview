@@ -40,11 +40,11 @@ export const addGeoViewStore = (config: TypeMapFeaturesConfig): void => {
   mountStoreDevtool(`getViewStore-${config.mapId}`, geoViewStore);
 };
 
-export const getGeoViewStore = (id: string | undefined) => {
+export const getGeoViewStore = (id: string | undefined): GeoViewStoreType => {
   return useStoresManager.getState().stores[id ?? 'unknown'];
 };
 
-export const useGeoViewStore = () => {
+export const useGeoViewStore = (): GeoViewStoreType => {
   const { mapId } = useContext(MapContext);
 
   return useStoresManager.getState().stores[mapId ?? 'unknown'];

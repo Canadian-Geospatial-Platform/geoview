@@ -78,7 +78,7 @@ class GeoChartPlugin extends AbstractPlugin {
       // Access the api calls
       const { api } = cgpv;
       this.value = api.maps[mapId].footerTabs.tabs.length;
-      const language = api.maps[mapId].displayLanguage;
+      const language = api.maps[mapId].getDisplayLanguage();
 
       const layerList = (configObj as PluginGeoChartConfig<ChartType>).charts
         .map((chart) => {
@@ -106,7 +106,7 @@ class GeoChartPlugin extends AbstractPlugin {
 
       api.maps[mapId].footerTabs.createFooterTab({
         value: this.value,
-        label: this.translations[api.maps[mapId].displayLanguage].chartPanel as string,
+        label: this.translations[api.maps[mapId].getDisplayLanguage()].chartPanel as string,
         content: () => createElement(GeoChartPanel, { mapId, configObj, layerList }, []),
       });
     }

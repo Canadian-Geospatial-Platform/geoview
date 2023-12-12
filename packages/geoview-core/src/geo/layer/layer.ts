@@ -1,7 +1,7 @@
 /* eslint-disable no-param-reassign */
 import { EventTypes } from 'ol/Observable';
 import { indexOf } from 'lodash';
-import i18n from 'i18next';
+
 import { GeoCore, layerConfigIsGeoCore } from '@/geo/layer/other/geocore';
 import { Geometry } from '@/geo/layer/geometry/geometry';
 import { FeatureHighlight } from '@/geo/utils/feature-highlight';
@@ -10,7 +10,7 @@ import { api } from '@/app';
 import { EVENT_NAMES } from '@/api/events/event-types';
 
 import { Config } from '@/core/utils/config/config';
-import { generateId, showError, replaceParams, whenThisThen } from '@/core/utils/utilities';
+import { generateId, showError, replaceParams, getLocalizedMessage, whenThisThen } from '@/core/utils/utilities';
 import {
   layerConfigPayload,
   payloadIsALayerConfig,
@@ -234,8 +234,10 @@ export class Layer {
    * @param {TypeGeoviewLayerConfig} geoviewLayerConfig The geoview layer configuration in error.
    */
   private printDuplicateGeoviewLayerConfigError(geoviewLayerConfig: TypeGeoviewLayerConfig) {
-    const trans = i18n.getFixedT(api.maps[this.mapId].displayLanguage);
-    const message = replaceParams([geoviewLayerConfig.geoviewLayerId, this.mapId], trans('validation.layer.usedtwice'));
+    const message = replaceParams(
+      [geoviewLayerConfig.geoviewLayerId, this.mapId],
+      getLocalizedMessage(this.mapId, 'validation.layer.usedtwice')
+    );
     showError(this.mapId, message);
 
     // eslint-disable-next-line no-console
@@ -299,8 +301,7 @@ export class Layer {
     if (geoviewLayer.layerLoadError.length !== 0) {
       geoviewLayer.layerLoadError.forEach((loadError) => {
         const { layer, consoleMessage } = loadError;
-        const trans = i18n.getFixedT(api.maps[this.mapId].displayLanguage);
-        const message = replaceParams([layer, this.mapId], trans('validation.layer.loadfailed'));
+        const message = replaceParams([layer, this.mapId], getLocalizedMessage(this.mapId, 'validation.layer.loadfailed'));
         showError(this.mapId, message);
 
         // eslint-disable-next-line no-console

@@ -1,7 +1,7 @@
 import { GeoViewStoreType } from '@/core/stores/geoview-store';
 import { AbstractEventProcessor } from '../abstract-event-processor';
 import { getGeoViewStore } from '@/core/stores/stores-managers';
-import { NotificationDetailsType, TypeDisplayLanguage, TypeHTMLElement, TypeSupportedTheme } from '@/core/types/cgpv-types';
+import { NotificationDetailsType, TypeDisplayLanguage, TypeHTMLElement, TypeDisplayTheme } from '@/core/types/cgpv-types';
 
 export class AppEventProcessor extends AbstractEventProcessor {
   onInitialize(store: GeoViewStoreType) {
@@ -27,8 +27,8 @@ export class AppEventProcessor extends AbstractEventProcessor {
     return getGeoViewStore(mapId).getState().appState.displayLanguage;
   }
 
-  static getTheme(mapId: string): TypeSupportedTheme {
-    return getGeoViewStore(mapId).getState().appState.theme;
+  static getDisplayTheme(mapId: string): TypeDisplayTheme {
+    return getGeoViewStore(mapId).getState().appState.displayTheme;
   }
 
   static getSupportedLanguages(mapId: string): TypeDisplayLanguage[] {
@@ -42,6 +42,10 @@ export class AppEventProcessor extends AbstractEventProcessor {
 
   static setDisplayLanguage(mapId: string, lang: TypeDisplayLanguage): void {
     getGeoViewStore(mapId).getState().appState.actions.setDisplayLanguage(lang);
+  }
+
+  static setDisplayTheme(mapId: string, theme: TypeDisplayTheme): void {
+    getGeoViewStore(mapId).getState().appState.actions.setDisplayTheme(theme);
   }
 
   static toggleFullscreen(mapId: string, active: boolean, element: TypeHTMLElement): void {
