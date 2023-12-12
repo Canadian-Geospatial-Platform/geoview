@@ -1505,7 +1505,7 @@
       "type": "array",
       "uniqueItems": true,
       "items": {
-        "enum": ["zoom", "fullscreen", "home", "location", "export", "focus"]
+        "enum": ["zoom", "fullscreen", "home", "location", "export"]
       },
       "default": ["zoom", "fullscreen", "home"],
       "description": "Controls availalbe on the navigation bar.",

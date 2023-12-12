@@ -4,7 +4,6 @@ import { useTranslation } from 'react-i18next';
 
 import { useTheme } from '@mui/material/styles';
 
-import Focus from './buttons/focus';
 import ZoomIn from './buttons/zoom-in';
 import ZoomOut from './buttons/zoom-out';
 import Fullscreen from './buttons/fullscreen';
@@ -173,8 +172,6 @@ export function Navbar(): JSX.Element {
           {navBarComponents.includes('location') && <Location />}
           {navBarComponents.includes('home') && <Home />}
           {navBarComponents.includes('export') && <ExportButton className={`${sxClasses.navButton} ${activeModalId ? 'export' : ''}`} />}
-          {/* // TODO We might need to refactor code below based on the best solution, issue #1448 */}
-          {navBarComponents.includes('focus') && <Focus />}
         </ButtonGroup>
       </Box>
     </Box>
