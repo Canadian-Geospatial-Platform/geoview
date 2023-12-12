@@ -84,6 +84,9 @@ export function Tabs(props: TypeTabsProps): JSX.Element {
       <Grid item xs={7} sm={10}>
         <MaterialTabs
           {...props.tabsProps}
+          variant="scrollable"
+          scrollButtons
+          allowScrollButtonsMobile
           value={value}
           onChange={handleChange}
           aria-label="basic tabs"
