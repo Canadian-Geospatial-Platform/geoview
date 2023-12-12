@@ -133,7 +133,7 @@ export class XYZTiles extends AbstractGeoViewRaster {
    * @param {TypeListOfLayerEntryConfig} listOfLayerEntryConfig The list of layer entries configuration to validate.
    */
   protected validateListOfLayerEntryConfig(listOfLayerEntryConfig: TypeListOfLayerEntryConfig) {
-    this.changeLayerPhase('validateListOfLayerEntryConfig');
+    this.setLayerPhase('validateListOfLayerEntryConfig');
     listOfLayerEntryConfig.forEach((layerConfig: TypeLayerEntryConfig) => {
       const layerPath = Layer.getLayerPath(layerConfig);
       if (layerEntryIsGroupLayer(layerConfig)) {
@@ -143,12 +143,12 @@ export class XYZTiles extends AbstractGeoViewRaster {
             layer: layerPath,
             consoleMessage: `Empty layer group (mapId:  ${this.mapId}, layerPath: ${layerPath})`,
           });
-          this.changeLayerStatus('error', layerConfig);
+          this.setLayerStatus('error', layerPath);
           return;
         }
       }
 
-      this.changeLayerStatus('loading', layerConfig);
+      this.setLayerStatus('loading', layerPath);
 
       // When no metadata are provided, all layers are considered valid.
       if (!this.metadata) return;
@@ -163,7 +163,7 @@ export class XYZTiles extends AbstractGeoViewRaster {
             layer: layerPath,
             consoleMessage: `XYZ layer not found (mapId:  ${this.mapId}, layerPath: ${layerPath})`,
           });
-          this.changeLayerStatus('error', layerConfig);
+          this.setLayerStatus('error', layerPath);
           return;
         }
         return;
@@ -184,7 +184,8 @@ export class XYZTiles extends AbstractGeoViewRaster {
    */
   processOneLayerEntry(layerConfig: TypeXYZTilesLayerEntryConfig): Promise<TypeBaseRasterLayer | null> {
     const promisedVectorLayer = new Promise<TypeBaseRasterLayer | null>((resolve) => {
-      this.changeLayerPhase('processOneLayerEntry', layerConfig);
+      const layerPath = Layer.getLayerPath(layerConfig);
+      this.setLayerPhase('processOneLayerEntry', Layer.getLayerPath(layerConfig));
       const sourceOptions: SourceOptions = {
         url: getLocalizedValue(layerConfig.source.dataAccessPath, this.mapId),
       };
@@ -212,7 +213,7 @@ export class XYZTiles extends AbstractGeoViewRaster {
 
       layerConfig.olLayer = new TileLayer(tileLayerOptions);
 
-      super.addLoadendListener(layerConfig, 'tile');
+      super.addLoadendListener(layerPath, 'tile');
 
       resolve(layerConfig.olLayer);
     });

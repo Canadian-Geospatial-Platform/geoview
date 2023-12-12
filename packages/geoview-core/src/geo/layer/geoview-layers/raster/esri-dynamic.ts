@@ -259,7 +259,8 @@ export class EsriDynamic extends AbstractGeoViewRaster {
    */
   processOneLayerEntry(layerConfig: TypeEsriDynamicLayerEntryConfig): Promise<TypeBaseRasterLayer | null> {
     const promisedVectorLayer = new Promise<TypeBaseRasterLayer | null>((resolve) => {
-      this.changeLayerPhase('processOneLayerEntry', layerConfig);
+      const layerPath = Layer.getLayerPath(layerConfig);
+      this.setLayerPhase('processOneLayerEntry', Layer.getLayerPath(layerConfig));
       const sourceOptions: SourceOptions = {};
       sourceOptions.attributions = [(this.metadata!.copyrightText ? this.metadata!.copyrightText : '') as string];
       sourceOptions.url = getLocalizedValue(layerConfig.source.dataAccessPath!, this.mapId);
@@ -297,7 +298,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
       layerConfig.olLayer = new ImageLayer(imageLayerOptions);
       this.applyViewFilter(layerConfig, layerConfig.layerFilter ? layerConfig.layerFilter : '');
 
-      super.addLoadendListener(layerConfig, 'image');
+      this.addLoadendListener(layerPath, 'image');
 
       resolve(layerConfig.olLayer);
     });

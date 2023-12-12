@@ -1,5 +1,4 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-/* eslint-disable no-param-reassign */
+/* eslint-disable @typescript-eslint/no-unused-vars, no-console, no-param-reassign */
 import axios from 'axios';
 
 import ImageLayer from 'ol/layer/Image';
@@ -114,88 +113,73 @@ export class WMS extends AbstractGeoViewRaster {
    *
    * @returns {Promise<void>} A promise that the execution is completed.
    */
-  protected getServiceMetadata(): Promise<void> {
-    this.changeLayerPhase('getServiceMetadata');
-    const promisedExecution = new Promise<void>((resolve) => {
-      const metadataUrl = getLocalizedValue(this.metadataAccessPath, this.mapId);
-      if (metadataUrl) {
-        const metadataAccessPathIsXmlFile = metadataUrl.slice(-4).toLowerCase() === '.xml';
-        if (metadataAccessPathIsXmlFile) {
-          // XML metadata is a special case that does not use GetCapabilities to get the metadata
-          this.getXmlServiceMetadata(metadataUrl).then(() => {
-            resolve();
-          });
+  protected async getServiceMetadata(): Promise<void> {
+    this.setLayerPhase('getServiceMetadata');
+    const metadataUrl = getLocalizedValue(this.metadataAccessPath, this.mapId);
+    if (metadataUrl) {
+      const metadataAccessPathIsXmlFile = metadataUrl.slice(-4).toLowerCase() === '.xml';
+      if (metadataAccessPathIsXmlFile) {
+        // XML metadata is a special case that does not use GetCapabilities to get the metadata
+        await this.getXmlServiceMetadata(metadataUrl);
+      } else {
+        const layerConfigsToQuery = this.getLayersToQuery();
+        if (layerConfigsToQuery.length === 0) {
+          // Use GetCapabilities to get the metadata
+          try {
+            const metadata = await this.fetchServiceMetadata(`${metadataUrl}?service=WMS&version=1.3.0&request=GetCapabilities`);
+            this.metadata = metadata;
+            this.processMetadataInheritance();
+          } catch (error) {
+            console.log(`Unable to read service metadata for GeoView layer ${this.geoviewLayerId} of map ${this.mapId}.`);
+          }
         } else {
-          const layersToQuery = this.getLayersToQuery();
-          if (layersToQuery.length === 0) {
-            // Use GetCapabilities to get the metadata
-            this.fetchServiceMetadata(`${metadataUrl}?service=WMS&version=1.3.0&request=GetCapabilities`)
-              .then((metadata) => {
-                if (metadata) {
-                  this.metadata = metadata;
-                  this.processMetadataInheritance();
-                  resolve();
-                } else {
-                  this.changeLayerStatus('error', layersToQuery[0]);
+          // Uses GetCapabilities to get the metadata. However, to allow geomet metadata to be retrieved using the non-standard
+          // "Layers" parameter on the command line, we need to process each layer individually and merge all layer metadata at
+          // the end. Even though the "Layers" parameter is ignored by other WMS servers, the drawback of this method is
+          // sending unnecessary requests while only one GetCapabilities could be used when the server publishes a small set of
+          // metadata. Which is not the case for the Geomet service.
+          const promisedArrayOfMetadata: Promise<TypeJsonObject | null>[] = [];
+          let i: number;
+          layerConfigsToQuery.forEach((layerConfig: TypeLayerEntryConfig, layerIndex: number) => {
+            for (i = 0; layerConfigsToQuery[i].layerId !== layerConfig.layerId; i++);
+            if (i === layerIndex)
+              // This is the first time we execute this query
+              promisedArrayOfMetadata.push(
+                this.fetchServiceMetadata(`${metadataUrl}?service=WMS&version=1.3.0&request=GetCapabilities&Layers=${layerConfig.layerId}`)
+              );
+            // query already done. Use previous returned value
+            else promisedArrayOfMetadata.push(promisedArrayOfMetadata[i]);
+          });
+          try {
+            const arrayOfMetadata = await Promise.all(promisedArrayOfMetadata);
+            for (i = 0; i < arrayOfMetadata.length && !arrayOfMetadata[i]?.Capability; i++)
+              this.setLayerStatus('error', Layer.getLayerPath(layerConfigsToQuery[i]));
+            this.metadata = i < arrayOfMetadata.length ? arrayOfMetadata[i] : null;
+            if (this.metadata) {
+              for (i++; i < arrayOfMetadata.length; i++) {
+                if (!arrayOfMetadata[i]?.Capability) this.setLayerStatus('error', Layer.getLayerPath(layerConfigsToQuery[i]));
+                else if (!this.getLayerMetadataEntry(layerConfigsToQuery[i].layerId)) {
+                  const metadataLayerPathToAdd = this.getMetadataLayerPath(
+                    layerConfigsToQuery[i].layerId,
+                    arrayOfMetadata[i]!.Capability.Layer
+                  );
+                  this.addLayerToMetadataInstance(
+                    metadataLayerPathToAdd,
+                    this.metadata?.Capability?.Layer,
+                    arrayOfMetadata[i]!.Capability.Layer
+                  );
                 }
-              })
-              .catch((reason) => {
-                this.changeLayerStatus('error', layersToQuery[0]);
-              });
-          } else {
-            // Uses GetCapabilities to get the metadata. However, to allow geomet metadata to be retrieved using the non-standard
-            // "Layers" parameter on the command line, we need to process each layer individually and merge all layer metadata at
-            // the end. Even though the "Layers" parameter is ignored by other WMS servers, the drawback of this method is
-            // sending unnecessary requests while only one GetCapabilities could be used when the server publishes a small set of
-            // metadata. Which is not the case for the Geomet service.
-            const promisedArrayOfMetadata: Promise<TypeJsonObject | null>[] = [];
-            let i: number;
-            layersToQuery.forEach((layerConfig: TypeLayerEntryConfig, layerIndex: number) => {
-              for (i = 0; layersToQuery[i].layerId !== layerConfig.layerId; i++);
-              if (i === layerIndex)
-                // This is the first time we execute this query
-                promisedArrayOfMetadata.push(
-                  this.fetchServiceMetadata(
-                    `${metadataUrl}?service=WMS&version=1.3.0&request=GetCapabilities&Layers=${layerConfig.layerId}`
-                  )
-                );
-              // query already done. Use previous returned value
-              else promisedArrayOfMetadata.push(promisedArrayOfMetadata[i]);
-            });
-            Promise.all(promisedArrayOfMetadata)
-              .then((arrayOfMetadata) => {
-                for (i = 0; i < arrayOfMetadata.length && !arrayOfMetadata[i]?.Capability; i++)
-                  this.changeLayerStatus('error', layersToQuery[i]);
-                this.metadata = i < arrayOfMetadata.length ? arrayOfMetadata[i] : null;
-                if (this.metadata) {
-                  for (i++; i < arrayOfMetadata.length; i++) {
-                    if (!arrayOfMetadata[i]?.Capability) this.changeLayerStatus('error', layersToQuery[i]);
-                    else if (!this.getLayerMetadataEntry(layersToQuery[i].layerId)) {
-                      const metadataLayerPathToAdd = this.getMetadataLayerPath(
-                        layersToQuery[i].layerId,
-                        arrayOfMetadata[i]!.Capability.Layer
-                      );
-                      this.addLayerToMetadataInstance(
-                        metadataLayerPathToAdd,
-                        this.metadata?.Capability?.Layer,
-                        arrayOfMetadata[i]!.Capability.Layer
-                      );
-                    }
-                  }
-                }
-                this.processMetadataInheritance();
-                resolve();
-              })
-              .catch((reason) => {
-                this.setAllLayerStatusToError(this.listOfLayerEntryConfig, 'Unable to read metadata');
-              });
+              }
+            }
+            this.processMetadataInheritance();
+          } catch (error) {
+            this.setAllLayerStatusToError(this.listOfLayerEntryConfig, 'Unable to read metadata');
           }
         }
-      } else {
-        this.setAllLayerStatusToError(this.listOfLayerEntryConfig, 'Unable to read metadata');
       }
-    });
-    return promisedExecution;
+    } else {
+      this.setAllLayerStatusToError(this.listOfLayerEntryConfig, 'Unable to read metadata');
+    }
   }
 
   /** ***************************************************************************************************************************
@@ -230,7 +214,7 @@ export class WMS extends AbstractGeoViewRaster {
    * @returns {Promise<void>} A promise that the execution is completed.
    */
   private getXmlServiceMetadata(metadataUrl: string): Promise<void> {
-    this.changeLayerPhase('getXmlServiceMetadata');
+    this.setLayerPhase('getXmlServiceMetadata');
     const promisedExecution = new Promise<void>((resolve) => {
       const parser = new WMSCapabilities();
       fetch(metadataUrl)
@@ -400,7 +384,7 @@ export class WMS extends AbstractGeoViewRaster {
    * @param {TypeListOfLayerEntryConfig} listOfLayerEntryConfig The list of layer entries configuration to validate.
    */
   protected validateListOfLayerEntryConfig(listOfLayerEntryConfig: TypeListOfLayerEntryConfig) {
-    this.changeLayerPhase('validateListOfLayerEntryConfig');
+    this.setLayerPhase('validateListOfLayerEntryConfig');
     listOfLayerEntryConfig.forEach((layerConfig: TypeLayerEntryConfig) => {
       const layerPath = Layer.getLayerPath(layerConfig);
       if (layerEntryIsGroupLayer(layerConfig)) {
@@ -410,13 +394,13 @@ export class WMS extends AbstractGeoViewRaster {
             layer: layerPath,
             consoleMessage: `Empty layer group (mapId:  ${this.mapId}, layerPath: ${layerPath})`,
           });
-          this.changeLayerStatus('error', layerConfig);
+          this.setLayerStatus('error', layerPath);
         }
         return;
       }
 
       if ((layerConfig as TypeBaseLayerEntryConfig).layerStatus !== 'error') {
-        this.changeLayerStatus('loading', layerConfig);
+        this.setLayerStatus('loading', layerPath);
 
         const layerFound = this.getLayerMetadataEntry(layerConfig.layerId);
         if (!layerFound) {
@@ -424,7 +408,7 @@ export class WMS extends AbstractGeoViewRaster {
             layer: layerPath,
             consoleMessage: `Layer metadata not found (mapId:  ${this.mapId}, layerPath: ${layerPath})`,
           });
-          this.changeLayerStatus('error', layerConfig);
+          this.setLayerStatus('error', layerPath);
           return;
         }
 
@@ -514,7 +498,8 @@ export class WMS extends AbstractGeoViewRaster {
    */
   processOneLayerEntry(layerConfig: TypeBaseLayerEntryConfig): Promise<TypeBaseRasterLayer | null> {
     const promisedVectorLayer = new Promise<TypeBaseRasterLayer | null>((resolve) => {
-      this.changeLayerPhase('processOneLayerEntry', layerConfig);
+      const layerPath = Layer.getLayerPath(layerConfig);
+      this.setLayerPhase('processOneLayerEntry', Layer.getLayerPath(layerConfig));
       if (geoviewEntryIsWMS(layerConfig)) {
         const layerCapabilities = this.getLayerMetadataEntry(layerConfig.layerId);
         if (layerCapabilities) {
@@ -568,7 +553,7 @@ export class WMS extends AbstractGeoViewRaster {
           layerConfig.olLayer = new ImageLayer(imageLayerOptions);
           this.applyViewFilter(layerConfig, layerConfig.layerFilter ? layerConfig.layerFilter : '');
 
-          super.addLoadendListener(layerConfig, 'image');
+          this.addLoadendListener(layerPath, 'image');
 
           resolve(layerConfig.olLayer);
         } else {

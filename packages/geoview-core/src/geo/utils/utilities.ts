@@ -15,6 +15,7 @@ import { TypeFeatureStyle } from '@/geo/layer/geometry/geometry-types';
 import { xmlToJson } from '@/core/utils/utilities';
 
 import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
+// import { NORTH_POLE_POSITION } from '@/core/utils/constant';
 import { NORTH_POLE_POSITION } from '@/core/types/cgpv-types';
 
 /**

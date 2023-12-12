@@ -132,7 +132,7 @@ export class VectorTiles extends AbstractGeoViewRaster {
    * @param {TypeListOfLayerEntryConfig} listOfLayerEntryConfig The list of layer entries configuration to validate.
    */
   protected validateListOfLayerEntryConfig(listOfLayerEntryConfig: TypeListOfLayerEntryConfig) {
-    this.changeLayerPhase('validateListOfLayerEntryConfig');
+    this.setLayerPhase('validateListOfLayerEntryConfig');
     listOfLayerEntryConfig.forEach((layerConfig: TypeLayerEntryConfig) => {
       const layerPath = Layer.getLayerPath(layerConfig);
       if (layerEntryIsGroupLayer(layerConfig)) {
@@ -142,12 +142,12 @@ export class VectorTiles extends AbstractGeoViewRaster {
             layer: layerPath,
             consoleMessage: `Empty layer group (mapId:  ${this.mapId}, layerPath: ${layerPath})`,
           });
-          this.changeLayerStatus('error', layerConfig);
+          this.setLayerStatus('error', layerPath);
           return;
         }
       }
 
-      this.changeLayerStatus('loading', layerConfig);
+      this.setLayerStatus('loading', layerPath);
     });
   }
 
@@ -160,7 +160,8 @@ export class VectorTiles extends AbstractGeoViewRaster {
    */
   processOneLayerEntry(layerConfig: TypeVectorTilesLayerEntryConfig): Promise<TypeBaseRasterLayer | null> {
     const promisedVectorLayer = new Promise<TypeBaseRasterLayer | null>((resolve) => {
-      this.changeLayerPhase('processOneLayerEntry', layerConfig);
+      const layerPath = Layer.getLayerPath(layerConfig);
+      this.setLayerPhase('processOneLayerEntry', layerPath);
       const sourceOptions: SourceOptions = {
         url: getLocalizedValue(layerConfig.source.dataAccessPath, this.mapId),
       };
@@ -171,7 +172,7 @@ export class VectorTiles extends AbstractGeoViewRaster {
         showError(this.mapId, `Error: vector tile layer (${layerConfig.layerId}) projection does not match map projection`);
         // eslint-disable-next-line no-console
         console.log(`Error: vector tile layer (${layerConfig.layerId}) projection does not match map projection`);
-        this.changeLayerStatus('error', layerConfig);
+        this.setLayerStatus('error', Layer.getLayerPath(layerConfig));
         resolve(null);
       } else if (layerConfig.source.projection) sourceOptions.projection = `EPSG:${layerConfig.source.projection}`;
       if (layerConfig.source.tileGrid) {
@@ -205,7 +206,7 @@ export class VectorTiles extends AbstractGeoViewRaster {
           `${getLocalizedValue(this.metadataAccessPath, this.mapId)}${this.metadata.defaultStyles}/root.json`
         );
 
-      super.addLoadendListener(layerConfig, 'tile');
+      this.addLoadendListener(layerPath, 'tile');
 
       resolve(layerConfig.olLayer);
     });

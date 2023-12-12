@@ -37,7 +37,7 @@ import { MapEventProcessor } from '@/api/event-processors/event-processor-childr
  * @returns {Promise<void>} A promise that the execution is completed.
  */
 export function commonGetServiceMetadata(this: EsriDynamic | EsriFeature, resolve: (value: void | PromiseLike<void>) => void) {
-  this.changeLayerPhase('getServiceMetadata');
+  this.setLayerPhase('getServiceMetadata');
   const metadataUrl = getLocalizedValue(this.metadataAccessPath, this.mapId);
   if (metadataUrl) {
     getXMLHttpRequest(`${metadataUrl}?f=json`)
@@ -67,7 +67,7 @@ export function commonGetServiceMetadata(this: EsriDynamic | EsriFeature, resolv
  * @param {TypeListOfLayerEntryConfig} listOfLayerEntryConfig The list of layer entries configuration to validate.
  */
 export function commonValidateListOfLayerEntryConfig(this: EsriDynamic | EsriFeature, listOfLayerEntryConfig: TypeListOfLayerEntryConfig) {
-  this.changeLayerPhase('validateListOfLayerEntryConfig');
+  this.setLayerPhase('validateListOfLayerEntryConfig');
   listOfLayerEntryConfig.forEach((layerConfig: TypeLayerEntryConfig) => {
     const layerPath = Layer.getLayerPath(layerConfig);
     if (layerEntryIsGroupLayer(layerConfig)) {
@@ -77,12 +77,12 @@ export function commonValidateListOfLayerEntryConfig(this: EsriDynamic | EsriFea
           layer: layerPath,
           consoleMessage: `Empty layer group (mapId:  ${this.mapId}, layerPath: ${layerPath})`,
         });
-        this.changeLayerStatus('error', layerConfig);
+        this.setLayerStatus('error', layerPath);
         return;
       }
     }
 
-    this.changeLayerStatus('loading', layerConfig);
+    this.setLayerStatus('loading', layerPath);
 
     let esriIndex = Number(layerConfig.layerId);
     if (Number.isNaN(esriIndex)) {
@@ -90,7 +90,7 @@ export function commonValidateListOfLayerEntryConfig(this: EsriDynamic | EsriFea
         layer: layerPath,
         consoleMessage: `ESRI layerId must be a number (mapId:  ${this.mapId}, layerPath: ${layerPath})`,
       });
-      this.changeLayerStatus('error', layerConfig);
+      this.setLayerStatus('error', layerPath);
       return;
     }
 
@@ -103,7 +103,7 @@ export function commonValidateListOfLayerEntryConfig(this: EsriDynamic | EsriFea
         layer: layerPath,
         consoleMessage: `ESRI layerId not found (mapId:  ${this.mapId}, layerPath: ${layerPath})`,
       });
-      this.changeLayerStatus('error', layerConfig);
+      this.setLayerStatus('error', layerPath);
       return;
     }
 
@@ -121,8 +121,7 @@ export function commonValidateListOfLayerEntryConfig(this: EsriDynamic | EsriFea
         api.maps[this.mapId].layer.registerLayerConfig(subLayerEntryConfig);
       });
 
-      if (this.registerToLayerSetListenerFunctions[Layer.getLayerPath(layerConfig)])
-        this.unregisterFromLayerSets(layerConfig as TypeBaseLayerEntryConfig);
+      if (this.registerToLayerSetListenerFunctions[layerPath]) this.unregisterFromLayerSets(layerConfig as TypeBaseLayerEntryConfig);
       const switchToGroupLayer = Cast<TypeLayerGroupEntryConfig>(layerConfig);
       delete (layerConfig as TypeBaseLayerEntryConfig).layerStatus;
       switchToGroupLayer.entryType = 'group';
@@ -137,7 +136,7 @@ export function commonValidateListOfLayerEntryConfig(this: EsriDynamic | EsriFea
     }
 
     if (this.esriChildHasDetectedAnError(layerConfig, esriIndex)) {
-      this.changeLayerStatus('error', layerConfig);
+      this.setLayerStatus('error', layerPath);
       return;
     }
 

@@ -70,9 +70,9 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
    * @returns {Promise<BaseLayer | null>} The GeoView base layer that has been created.
    */
   protected processOneLayerEntry(layerConfig: TypeBaseLayerEntryConfig): Promise<BaseLayer | null> {
-    this.changeLayerPhase('processOneLayerEntry');
+    this.setLayerPhase('processOneLayerEntry');
     const promisedVectorLayer = new Promise<BaseLayer | null>((resolve) => {
-      this.changeLayerPhase('processOneLayerEntry', layerConfig);
+      this.setLayerPhase('processOneLayerEntry', Layer.getLayerPath(layerConfig));
       const vectorSource = this.createVectorSource(layerConfig);
       const vectorLayer = this.createVectorLayer(layerConfig as TypeVectorLayerEntryConfig, vectorSource);
       resolve(vectorLayer);
@@ -94,9 +94,10 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
     sourceOptions: SourceOptions = {},
     readOptions: ReadOptions = {}
   ): VectorSource<Feature> {
+    const layerPath = Layer.getLayerPath(layerConfig);
     // The line below uses var because a var declaration has a wider scope than a let declaration.
     var vectorSource: VectorSource<Feature>;
-    this.changeLayerPhase('createVectorSource');
+    this.setLayerPhase('createVectorSource');
     if (this.attributions.length !== 0) sourceOptions.attributions = this.attributions;
 
     // set loading strategy option
@@ -173,11 +174,11 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
 
     let featuresLoadErrorHandler: () => void;
     const featuresLoadEndHandler = () => {
-      this.changeLayerStatus('loaded', layerConfig);
+      this.setLayerStatus('loaded', layerPath);
       vectorSource.un('featuresloaderror', featuresLoadErrorHandler);
     };
     featuresLoadErrorHandler = () => {
-      this.changeLayerStatus('error', layerConfig);
+      this.setLayerStatus('error', layerPath);
       vectorSource.un('featuresloadend', featuresLoadEndHandler);
     };
 
@@ -198,7 +199,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
    */
   createVectorLayer(layerConfig: TypeVectorLayerEntryConfig, vectorSource: VectorSource<Feature>): VectorLayer<VectorSource> {
     const layerPath = Layer.getLayerPath(layerConfig);
-    this.changeLayerPhase('createVectorLayer');
+    this.setLayerPhase('createVectorLayer');
 
     const layerOptions: VectorLayerOptions<VectorSource> = {
       properties: { layerConfig },

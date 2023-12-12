@@ -136,7 +136,7 @@ export class GeoPackage extends AbstractGeoViewVector {
    * @returns {Promise<void>} A promise that the execution is completed.
    */
   protected getServiceMetadata(): Promise<void> {
-    this.changeLayerPhase('getServiceMetadata');
+    this.setLayerPhase('getServiceMetadata');
     const promisedExecution = new Promise<void>((resolve) => {
       resolve();
     });
@@ -150,7 +150,7 @@ export class GeoPackage extends AbstractGeoViewVector {
    * @param {TypeListOfLayerEntryConfig} listOfLayerEntryConfig The list of layer entries configuration to validate.
    */
   protected validateListOfLayerEntryConfig(listOfLayerEntryConfig: TypeListOfLayerEntryConfig) {
-    this.changeLayerPhase('validateListOfLayerEntryConfig');
+    this.setLayerPhase('validateListOfLayerEntryConfig');
     return listOfLayerEntryConfig.forEach((layerConfig: TypeLayerEntryConfig) => {
       const layerPath = Layer.getLayerPath(layerConfig);
       if (layerEntryIsGroupLayer(layerConfig)) {
@@ -160,12 +160,12 @@ export class GeoPackage extends AbstractGeoViewVector {
             layer: layerPath,
             consoleMessage: `Empty layer group (mapId:  ${this.mapId}, layerPath: ${layerPath})`,
           });
-          this.changeLayerStatus('error', layerConfig);
+          this.setLayerStatus('error', layerPath);
           return;
         }
       }
 
-      this.changeLayerStatus('loading', layerConfig);
+      this.setLayerStatus('loading', layerPath);
 
       // When no metadata are provided, all layers are considered valid.
       if (!this.metadata) return;
@@ -179,7 +179,7 @@ export class GeoPackage extends AbstractGeoViewVector {
             layer: layerPath,
             consoleMessage: `GeoPackage feature layer not found (mapId:  ${this.mapId}, layerPath: ${layerPath})`,
           });
-          this.changeLayerStatus('error', layerConfig);
+          this.setLayerStatus('error', layerPath);
           return;
         }
 
@@ -225,7 +225,7 @@ export class GeoPackage extends AbstractGeoViewVector {
     listOfLayerEntryConfig: TypeListOfLayerEntryConfig,
     layerGroup?: LayerGroup
   ): Promise<BaseLayer | null> {
-    this.changeLayerPhase('processListOfLayerEntryConfig');
+    this.setLayerPhase('processListOfLayerEntryConfig');
     const promisedListOfLayerEntryProcessed = new Promise<BaseLayer | null>((resolve) => {
       // Single group layer handled recursively
       if (listOfLayerEntryConfig.length === 1 && layerEntryIsGroupLayer(listOfLayerEntryConfig[0])) {
@@ -248,6 +248,7 @@ export class GeoPackage extends AbstractGeoViewVector {
         if (!layerGroup) layerGroup = this.createLayerGroup(listOfLayerEntryConfig[0].parentLayerConfig as TypeLayerEntryConfig);
 
         listOfLayerEntryConfig.forEach((layerConfig) => {
+          const layerPath = Layer.getLayerPath(layerConfig);
           if (layerEntryIsGroupLayer(layerConfig)) {
             const newLayerGroup = this.createLayerGroup(layerConfig);
             this.processListOfLayerEntryConfig(layerConfig.listOfLayerEntryConfig!, newLayerGroup).then((groupReturned) => {
@@ -265,13 +266,13 @@ export class GeoPackage extends AbstractGeoViewVector {
             this.processOneGeopackage(layerConfig as TypeBaseLayerEntryConfig).then((layers) => {
               if (layers) {
                 layerGroup!.getLayers().push(layers);
-                this.changeLayerStatus('processed', layerConfig);
+                this.setLayerStatus('processed', layerPath);
               } else {
                 this.layerLoadError.push({
                   layer: Layer.getLayerPath(listOfLayerEntryConfig[0]),
                   consoleMessage: `Unable to create layer ${Layer.getLayerPath(layerConfig)} on map ${this.mapId}`,
                 });
-                this.changeLayerStatus('error', layerConfig);
+                this.setLayerStatus('error', layerPath);
               }
             });
           }
@@ -280,15 +281,16 @@ export class GeoPackage extends AbstractGeoViewVector {
         // Single non-group config
       } else {
         this.processOneGeopackage(listOfLayerEntryConfig[0] as TypeBaseLayerEntryConfig, layerGroup).then((layer) => {
+          const layerPath0 = Layer.getLayerPath(listOfLayerEntryConfig[0]);
           if (layer) {
-            this.changeLayerStatus('processed', listOfLayerEntryConfig[0]);
+            this.setLayerStatus('processed', layerPath0);
             resolve(layer);
           } else {
             this.layerLoadError.push({
               layer: Layer.getLayerPath(listOfLayerEntryConfig[0]),
               consoleMessage: `Unable to create layer ${Layer.getLayerPath(listOfLayerEntryConfig[0])} on map ${this.mapId}`,
             });
-            this.changeLayerStatus('error', listOfLayerEntryConfig[0]);
+            this.setLayerStatus('error', layerPath0);
           }
         });
       }
@@ -401,13 +403,14 @@ export class GeoPackage extends AbstractGeoViewVector {
                 properties,
               });
 
+              const layerPath = Layer.getLayerPath(layerConfig);
               let featuresLoadErrorHandler: () => void;
               const featuresLoadEndHandler = () => {
-                this.changeLayerStatus('loaded', layerConfig);
+                this.setLayerStatus('loaded', layerPath);
                 vectorSource.un('featuresloaderror', featuresLoadErrorHandler);
               };
               featuresLoadErrorHandler = () => {
-                this.changeLayerStatus('error', layerConfig);
+                this.setLayerStatus('error', layerPath);
                 vectorSource.un('featuresloadend', featuresLoadEndHandler);
               };
 
@@ -584,13 +587,14 @@ export class GeoPackage extends AbstractGeoViewVector {
         this.processFeatureInfoConfig(properties as TypeJsonObject, layerConfig as TypeVectorLayerEntryConfig);
       }
 
+      const layerPath = Layer.getLayerPath(layerConfig);
       let loadErrorHandler: () => void;
       const loadEndHandler = () => {
-        this.changeLayerStatus('loaded', layerConfig);
+        this.setLayerStatus('loaded', layerPath);
         source.un('featuresloaderror', loadErrorHandler);
       };
       loadErrorHandler = () => {
-        this.changeLayerStatus('error', layerConfig);
+        this.setLayerStatus('error', layerPath);
         source.un('featuresloadend', loadEndHandler);
       };
 
@@ -598,7 +602,7 @@ export class GeoPackage extends AbstractGeoViewVector {
       source.once('featuresloaderror', loadErrorHandler);
 
       const vectorLayer = this.createVectorLayer(layerConfig as TypeVectorLayerEntryConfig, source);
-      this.changeLayerStatus('processed', layerConfig);
+      this.setLayerStatus('processed', layerPath);
 
       resolve(vectorLayer);
     });
@@ -616,12 +620,13 @@ export class GeoPackage extends AbstractGeoViewVector {
    */
   protected processOneGeopackage(layerConfig: TypeBaseLayerEntryConfig, layerGroup?: LayerGroup): Promise<BaseLayer | null> {
     const promisedLayers = new Promise<BaseLayer | LayerGroup | null>((resolve) => {
+      const layerPath = Layer.getLayerPath(layerConfig);
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       this.extractGeopackageData(layerConfig).then(([layers, slds]) => {
         if (layers.length === 1) {
           this.processOneGeopackageLayer(layerConfig, layers[0], slds).then((baseLayer) => {
             if (baseLayer) {
-              this.changeLayerStatus('processed', layerConfig);
+              this.setLayerStatus('processed', layerPath);
               if (layerGroup) layerGroup.getLayers().push(baseLayer);
               resolve(layerGroup || baseLayer);
             } else {
@@ -629,7 +634,7 @@ export class GeoPackage extends AbstractGeoViewVector {
                 layer: Layer.getLayerPath(layerConfig),
                 consoleMessage: `Unable to create layer ${Layer.getLayerPath(layerConfig)} on map ${this.mapId}`,
               });
-              this.changeLayerStatus('error', layerConfig);
+              this.setLayerStatus('error', layerPath);
               resolve(null);
             }
           });
@@ -645,16 +650,17 @@ export class GeoPackage extends AbstractGeoViewVector {
             newLayerEntryConfig.parentLayerConfig = Cast<TypeLayerGroupEntryConfig>(layerConfig);
 
             this.processOneGeopackageLayer(newLayerEntryConfig, layers[i], slds).then((baseLayer) => {
+              const newLayerPath = Layer.getLayerPath(newLayerEntryConfig);
               if (baseLayer) {
                 (layerConfig as unknown as TypeLayerGroupEntryConfig).listOfLayerEntryConfig!.push(newLayerEntryConfig);
                 newLayerGroup.getLayers().push(baseLayer);
-                this.changeLayerStatus('processed', newLayerEntryConfig);
+                this.setLayerStatus('processed', newLayerPath);
               } else {
                 this.layerLoadError.push({
                   layer: Layer.getLayerPath(layerConfig),
                   consoleMessage: `Unable to create layer ${Layer.getLayerPath(layerConfig)} on map ${this.mapId}`,
                 });
-                this.changeLayerStatus('error', newLayerEntryConfig);
+                this.setLayerStatus('error', newLayerPath);
                 resolve(null);
               }
             });

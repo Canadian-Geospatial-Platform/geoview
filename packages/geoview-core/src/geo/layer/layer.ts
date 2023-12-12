@@ -282,7 +282,7 @@ export class Layer {
     const layerPath = Layer.getLayerPath(layerConfig);
     if (this.registeredLayers[layerPath]) return false;
     this.registeredLayers[layerPath] = layerConfig;
-    this.geoviewInstance(layerPath).changeLayerStatus('newInstance', layerConfig);
+    this.geoviewInstance(layerPath).setLayerStatus('newInstance', layerPath);
     return true;
   }
 

@@ -1,11 +1,9 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import BaseLayer from 'ol/layer/Base';
-import Feature from 'ol/Feature';
-import Geometry from 'ol/geom/Geometry';
 import LayerGroup from 'ol/layer/Group';
 
-import { AbstractGeoViewLayer } from '../abstract-geoview-layers';
-import { Layer, LayerSetPayload, TypeLayerEntryConfig, api } from '@/app';
+import { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
+import { TypeLayerEntryConfig } from '@/geo/map/map-schema-types';
 
 /** *****************************************************************************************************************************
  * AbstractGeoViewRaster types
@@ -36,17 +34,18 @@ export abstract class AbstractGeoViewRaster extends AbstractGeoViewLayer {
   /** ***************************************************************************************************************************
    * This method adds listeners for openlayers loadend events, indicating that the layer is visible on the map
    *
-   * @param {TypeLayerEntryConfig} layerConfig The config of the layer to add the listener to.
+   * @param {string} layerPath The layer path to the layer's configuration to add the listener to.
    * @param {'tile' | 'image'} layerType The type of raster layer)
    */
-  addLoadendListener(layerConfig: TypeLayerEntryConfig, layerType: 'tile' | 'image'): void {
+  addLoadendListener(layerPath: string, layerType: 'tile' | 'image'): void {
+    const layerConfig = this.getLayerConfig(layerPath) as TypeLayerEntryConfig;
     let loadErrorHandler: () => void;
     const loadEndHandler = () => {
-      this.changeLayerStatus('loaded', layerConfig);
+      this.setLayerStatus('loaded', layerPath);
       layerConfig.olLayer!.get('source').un(`${layerType}loaderror`, loadErrorHandler);
     };
     loadErrorHandler = () => {
-      this.changeLayerStatus('error', layerConfig);
+      this.setLayerStatus('error', layerPath);
       layerConfig.olLayer!.get('source').un(`${layerType}loadend`, loadEndHandler);
     };
 

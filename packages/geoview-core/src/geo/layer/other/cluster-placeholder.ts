@@ -173,7 +173,7 @@
 //   layerConfig: TypeVectorLayerEntryConfig,
 //   vectorSource: VectorSource<Feature>
 // ): VectorLayer<VectorSource> {
-//   this.changeLayerPhase('createVectorLayer');
+//   this.setLayerPhase('createVectorLayer');
 //   let configSource: TypeBaseSourceVectorInitialConfig = {};
 //   if (layerConfig.source !== undefined) {
 //     configSource = layerConfig.source as TypeBaseSourceVectorInitialConfig;
@@ -274,7 +274,7 @@
 //               baseLayer.setVisible(false);
 //               if (!layerGroup) layerGroup = this.createLayerGroup(unclusteredLayerConfig.parentLayerConfig as TypeLayerEntryConfig);
 //               layerGroup.getLayers().push(baseLayer);
-//               this.changeLayerStatus('processed', unclusteredLayerConfig);
+//               this.setLayerStatus('processed', Layer.getLayerPath(unclusteredLayerConfig));
 //             }
 //           });
 
@@ -284,7 +284,7 @@
 
 //         this.processOneGeopackageLayer(layerConfig, layers[0], slds).then((baseLayer) => {
 //           if (baseLayer) {
-//             this.changeLayerStatus('processed', layerConfig);
+//             this.setLayerStatus('processed', Layer.getLayerPath(layerConfig));
 //             if (layerGroup) layerGroup.getLayers().push(baseLayer);
 //             resolve(layerGroup || baseLayer);
 //           } else {
@@ -292,7 +292,7 @@
 //               layer: Layer.getLayerPath(layerConfig),
 //               consoleMessage: `Unable to create layer ${Layer.getLayerPath(layerConfig)} on map ${this.mapId}`,
 //             });
-//             this.changeLayerStatus('error', layerConfig);
+//             this.setLayerStatus('error', Layer.getLayerPath(layerConfig));
 //             resolve(null);
 //           }
 //         });
@@ -315,7 +315,7 @@
 //               if (baseLayer) {
 //                 baseLayer.setVisible(false);
 //                 newLayerGroup.getLayers().push(baseLayer);
-//                 this.changeLayerStatus('processed', unclusteredLayerConfig);
+//                 this.setLayerStatus('processed', Layer.getLayerPath(unclusteredLayerConfig));
 //               }
 //             });
 
@@ -327,13 +327,13 @@
 //             if (baseLayer) {
 //               (layerConfig as unknown as TypeLayerGroupEntryConfig).listOfLayerEntryConfig!.push(newLayerEntryConfig);
 //               newLayerGroup.getLayers().push(baseLayer);
-//               this.changeLayerStatus('processed', newLayerEntryConfig);
+//               this.setLayerStatus('processed', Layer.getLayerPath(newLayerEntryConfig));
 //             } else {
 //               this.layerLoadError.push({
 //                 layer: Layer.getLayerPath(layerConfig),
 //                 consoleMessage: `Unable to create layer ${Layer.getLayerPath(layerConfig)} on map ${this.mapId}`,
 //               });
-//               this.changeLayerStatus('error', newLayerEntryConfig);
+//               this.setLayerStatus('error', Layer.getLayerPath(newLayerEntryConfig));
 //               resolve(null);
 //             }
 //           });
