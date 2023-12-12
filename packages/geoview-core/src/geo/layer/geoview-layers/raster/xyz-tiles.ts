@@ -8,8 +8,8 @@ import { transformExtent } from 'ol/proj';
 import { Extent } from 'ol/extent';
 
 import defaultsDeep from 'lodash/defaultsDeep';
-import { AbstractGeoViewLayer, CONST_LAYER_TYPES } from '../abstract-geoview-layers';
-import { AbstractGeoViewRaster, TypeBaseRasterLayer } from './abstract-geoview-raster';
+import { AbstractGeoViewLayer, CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
+import { AbstractGeoViewRaster, TypeBaseRasterLayer } from '@/geo/layer/geoview-layers/raster/abstract-geoview-raster';
 import {
   TypeLayerEntryConfig,
   TypeSourceTileInitialConfig,
@@ -182,7 +182,7 @@ export class XYZTiles extends AbstractGeoViewRaster {
    *
    * @returns {TypeBaseRasterLayer} The GeoView raster layer that has been created.
    */
-  processOneLayerEntry(layerConfig: TypeXYZTilesLayerEntryConfig): Promise<TypeBaseRasterLayer | null> {
+  protected processOneLayerEntry(layerConfig: TypeXYZTilesLayerEntryConfig): Promise<TypeBaseRasterLayer | null> {
     const promisedVectorLayer = new Promise<TypeBaseRasterLayer | null>((resolve) => {
       const layerPath = Layer.getLayerPath(layerConfig);
       this.setLayerPhase('processOneLayerEntry', Layer.getLayerPath(layerConfig));
@@ -263,17 +263,15 @@ export class XYZTiles extends AbstractGeoViewRaster {
    */
   getBounds(layerPath: string, bounds: Extent | undefined): Extent | undefined {
     const layerConfig = this.getLayerConfig(layerPath);
-    if (layerConfig) {
-      const layerBounds = (layerConfig.olLayer as TileLayer<XYZ>).getSource()?.getTileGrid()?.getExtent();
-      const projection =
-        (layerConfig.olLayer as TileLayer<XYZ>).getSource()?.getProjection()?.getCode().replace('EPSG:', '') ||
-        MapEventProcessor.getMapState(this.mapId).currentProjection;
+    const layerBounds = (layerConfig?.olLayer as TileLayer<XYZ>)?.getSource()?.getTileGrid()?.getExtent();
+    const projection =
+      (layerConfig?.olLayer as TileLayer<XYZ>).getSource()?.getProjection()?.getCode().replace('EPSG:', '') ||
+      MapEventProcessor.getMapState(this.mapId).currentProjection;
 
-      if (layerBounds) {
-        const transformedBounds = transformExtent(layerBounds, `EPSG:${projection}`, `EPSG:4326`);
-        if (!bounds) bounds = [transformedBounds[0], transformedBounds[1], transformedBounds[2], transformedBounds[3]];
-        else bounds = getMinOrMaxExtents(bounds, transformedBounds);
-      }
+    if (layerBounds) {
+      const transformedBounds = transformExtent(layerBounds, `EPSG:${projection}`, `EPSG:4326`);
+      if (!bounds) bounds = [transformedBounds[0], transformedBounds[1], transformedBounds[2], transformedBounds[3]];
+      else bounds = getMinOrMaxExtents(bounds, transformedBounds);
     }
 
     return bounds;

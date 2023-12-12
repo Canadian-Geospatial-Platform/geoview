@@ -75,7 +75,7 @@ export function WMSStyleItem(props: TypeWMSStyleProps): JSX.Element {
   }, [currentWMSStyle]);
 
   const handleWMSStyleToggle = () => {
-    (api.maps[mapId].layer.geoviewLayers[layerId] as WMS).setStyle(name, subLayerId!);
+    (api.maps[mapId].layer.geoviewLayers[layerId] as WMS).setWmsStyle(name, subLayerId!);
     setCurrentWMSStyle(name);
   };
 

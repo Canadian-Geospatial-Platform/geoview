@@ -4,6 +4,7 @@ import LayerGroup from 'ol/layer/Group';
 
 import { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { TypeLayerEntryConfig } from '@/geo/map/map-schema-types';
+import { api } from '@/app';
 
 /** *****************************************************************************************************************************
  * AbstractGeoViewRaster types

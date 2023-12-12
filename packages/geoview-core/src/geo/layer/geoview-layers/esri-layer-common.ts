@@ -1,5 +1,4 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-/* eslint-disable no-param-reassign */
+/* eslint-disable @typescript-eslint/no-unused-vars, no-param-reassign, no-console */
 import axios from 'axios';
 import { Extent } from 'ol/extent';
 import { transformExtent } from 'ol/proj';
@@ -13,7 +12,7 @@ import {
   TypeLayerEntryConfig,
   TypeLayerGroupEntryConfig,
   TypeListOfLayerEntryConfig,
-} from '../../map/map-schema-types';
+} from '@/geo/map/map-schema-types';
 import { getLocalizedValue, getXMLHttpRequest } from '@/core/utils/utilities';
 import { api } from '@/app';
 import { Layer } from '../layer';
@@ -34,26 +33,26 @@ import { MapEventProcessor } from '@/api/event-processors/event-processor-childr
 /** ***************************************************************************************************************************
  * This method reads the service metadata from the metadataAccessPath.
  *
+ * @param {EsriDynamic | EsriFeature} this The ESRI layer instance pointer.
+ *
  * @returns {Promise<void>} A promise that the execution is completed.
  */
-export function commonGetServiceMetadata(this: EsriDynamic | EsriFeature, resolve: (value: void | PromiseLike<void>) => void) {
+export async function commonGetServiceMetadata(this: EsriDynamic | EsriFeature) {
   this.setLayerPhase('getServiceMetadata');
   const metadataUrl = getLocalizedValue(this.metadataAccessPath, this.mapId);
   if (metadataUrl) {
-    getXMLHttpRequest(`${metadataUrl}?f=json`)
-      .then((metadataString) => {
-        if (metadataString === '{}') {
-          this.setAllLayerStatusToError(this.listOfLayerEntryConfig, 'Unable to read metadata');
-        } else {
-          this.metadata = JSON.parse(metadataString) as TypeJsonObject;
-          const { copyrightText } = this.metadata;
-          if (copyrightText) this.attributions.push(copyrightText as string);
-          resolve();
-        }
-      })
-      .catch((reason) => {
-        this.setAllLayerStatusToError(this.listOfLayerEntryConfig, 'Unable to read metadata');
-      });
+    try {
+      const metadataString = await getXMLHttpRequest(`${metadataUrl}?f=json`);
+      if (metadataString === '{}') this.setAllLayerStatusToError(this.listOfLayerEntryConfig, 'Unable to read metadata');
+      else {
+        this.metadata = JSON.parse(metadataString) as TypeJsonObject;
+        const { copyrightText } = this.metadata;
+        if (copyrightText) this.attributions.push(copyrightText as string);
+      }
+    } catch (error) {
+      console.log(error);
+      this.setAllLayerStatusToError(this.listOfLayerEntryConfig, 'Unable to read metadata');
+    }
   } else {
     this.setAllLayerStatusToError(this.listOfLayerEntryConfig, 'Unable to read metadata');
   }
@@ -63,7 +62,7 @@ export function commonGetServiceMetadata(this: EsriDynamic | EsriFeature, resolv
  * This method validates recursively the configuration of the layer entries to ensure that it is a feature layer identified
  * with a numeric layerId and creates a group entry when a layer is a group.
  *
- * @param {EsriDynamic | EsriFeature} this The this property of the ESRI layer.
+ * @param {EsriDynamic | EsriFeature} this The ESRI layer instance pointer.
  * @param {TypeListOfLayerEntryConfig} listOfLayerEntryConfig The list of layer entries configuration to validate.
  */
 export function commonValidateListOfLayerEntryConfig(this: EsriDynamic | EsriFeature, listOfLayerEntryConfig: TypeListOfLayerEntryConfig) {
@@ -151,6 +150,7 @@ export function commonValidateListOfLayerEntryConfig(this: EsriDynamic | EsriFea
 /** ***************************************************************************************************************************
  * Extract the domain of the specified field from the metadata. If the type can not be found, return 'string'.
  *
+ * @param {EsriDynamic | EsriFeature} this The ESRI layer instance pointer.
  * @param {string} fieldName field name for which we want to get the domain.
  * @param {TypeLayerEntryConfig} layerConfig layer configuration.
  *
@@ -178,6 +178,7 @@ export function commonGetFieldType(
 /** ***************************************************************************************************************************
  * Return the type of the specified field.
  *
+ * @param {EsriDynamic | EsriFeature} this The ESRI layer instance pointer.
  * @param {string} fieldName field name for which we want to get the type.
  * @param {TypeLayerEntryConfig} layerConfig layer configuration.
  *
@@ -195,6 +196,8 @@ export function commonGetFieldDomain(
 
 /** ***************************************************************************************************************************
  * This method will create a Geoview temporal dimension if it exist in the service metadata
+ *
+ * @param {EsriDynamic | EsriFeature} this The ESRI layer instance pointer.
  * @param {TypeJsonObject} esriTimeDimension The ESRI time dimension object
  * @param {TypeEsriFeatureLayerEntryConfig | TypeEsriDynamicLayerEntryConfig} layerConfig The layer entry to configure
  */
@@ -213,6 +216,7 @@ export function commonProcessTemporalDimension(
 /** ***************************************************************************************************************************
  * This method verifies if the layer is queryable and sets the outfields and aliasFields of the source feature info.
  *
+ * @param {EsriDynamic | EsriFeature} this The ESRI layer instance pointer.
  * @param {string} capabilities The capabilities that will say if the layer is queryable.
  * @param {string} nameField The display field associated to the layer.
  * @param {string} geometryFieldName The field name of the geometry property.
@@ -276,7 +280,7 @@ export function commonProcessFeatureInfoConfig(
 /** ***************************************************************************************************************************
  * This method set the initial settings based on the service metadata. Priority is given to the layer configuration.
  *
- * @param {string} mapId The map identifier.
+ * @param {EsriDynamic | EsriFeature} this The ESRI layer instance pointer.
  * @param {boolean} visibility The metadata initial visibility of the layer.
  * @param {number} minScale The metadata minScale of the layer.
  * @param {number} maxScale The metadata maxScale of the layer.
@@ -313,51 +317,51 @@ export function commonProcessInitialSettings(
  * This method is used to process the layer's metadata. It will fill the empty fields of the layer's configuration (renderer,
  * initial settings, fields and aliases).
  *
+ * @param {EsriDynamic | EsriFeature} this The ESRI layer instance pointer.
  * @param {TypeLayerEntryConfig} layerConfig The layer entry configuration to process.
  *
  * @returns {Promise<void>} A promise that the layer configuration has its metadata processed.
  */
-export function commonProcessLayerMetadata(
-  this: EsriDynamic | EsriFeature,
-  resolve: (value: void | PromiseLike<void>) => void,
-  layerConfig: TypeLayerEntryConfig
-) {
+export async function commonProcessLayerMetadata(this: EsriDynamic | EsriFeature, layerConfig: TypeLayerEntryConfig) {
   // User-defined groups do not have metadata provided by the service endpoint.
-  if (layerEntryIsGroupLayer(layerConfig) && !layerConfig.isMetadataLayerGroup) resolve();
-  else {
-    let queryUrl = getLocalizedValue(this.metadataAccessPath, this.mapId);
-    if (queryUrl) {
-      queryUrl = queryUrl.endsWith('/') ? `${queryUrl}${layerConfig.layerId}` : `${queryUrl}/${layerConfig.layerId}`;
-      const queryResult = axios.get<TypeJsonObject>(`${queryUrl}?f=pjson`);
-      queryResult.then((response) => {
-        // layers must have a fields attribute except if it is an metadata layer group.
-        if (!response.data.fields && !(layerConfig as TypeLayerGroupEntryConfig).isMetadataLayerGroup)
-          throw new Error(`Despite a return code of 200, an error was detected with this query (${queryUrl}?f=pjson)`);
-        this.layerMetadata[Layer.getLayerPath(layerConfig)] = response.data;
-        if (geoviewEntryIsEsriDynamic(layerConfig) || geoviewEntryIsEsriFeature(layerConfig)) {
-          if (!layerConfig.style) {
-            const renderer = Cast<EsriBaseRenderer>(response.data.drawingInfo?.renderer);
-            if (renderer) layerConfig.style = getStyleFromEsriRenderer(this.mapId, layerConfig, renderer);
-          }
-          this.processFeatureInfoConfig(
-            response.data.capabilities as string,
-            response.data.displayField as string,
-            response.data.geometryField.name as string,
-            response.data.fields as TypeJsonArray,
-            layerConfig
-          );
-          this.processInitialSettings(
-            response.data.defaultVisibility as boolean,
-            response.data.minScale as number,
-            response.data.maxScale as number,
-            response.data.extent,
-            layerConfig
-          );
-          this.processTemporalDimension(response.data.timeInfo as TypeJsonObject, layerConfig);
+  if (layerEntryIsGroupLayer(layerConfig) && !layerConfig.isMetadataLayerGroup) return;
+
+  let queryUrl = getLocalizedValue(this.metadataAccessPath, this.mapId);
+  if (queryUrl) {
+    queryUrl = queryUrl.endsWith('/') ? `${queryUrl}${layerConfig.layerId}` : `${queryUrl}/${layerConfig.layerId}`;
+    try {
+      const { data } = await axios.get<TypeJsonObject>(`${queryUrl}?f=pjson`);
+      // layers must have a fields attribute except if it is an metadata layer group.
+      if (!data?.fields && !(layerConfig as TypeLayerGroupEntryConfig).isMetadataLayerGroup) {
+        this.setLayerStatus('error', Layer.getLayerPath(layerConfig));
+        throw new Error(`Despite a return code of 200, an error was detected with this query (${queryUrl}?f=pjson)`);
+      }
+      this.layerMetadata[Layer.getLayerPath(layerConfig)] = data;
+      if (geoviewEntryIsEsriDynamic(layerConfig) || geoviewEntryIsEsriFeature(layerConfig)) {
+        if (!layerConfig.style) {
+          const renderer = Cast<EsriBaseRenderer>(data.drawingInfo?.renderer);
+          if (renderer) layerConfig.style = getStyleFromEsriRenderer(renderer);
         }
-        resolve();
-      });
-    } else resolve();
+        this.processFeatureInfoConfig(
+          data.capabilities as string,
+          data.displayField as string,
+          data.geometryField.name as string,
+          data.fields as TypeJsonArray,
+          layerConfig
+        );
+        this.processInitialSettings(
+          data.defaultVisibility as boolean,
+          data.minScale as number,
+          data.maxScale as number,
+          data.extent,
+          layerConfig
+        );
+        commonProcessTemporalDimension.call(this, data.timeInfo as TypeJsonObject, layerConfig);
+      }
+    } catch (error) {
+      this.setLayerStatus('error', Layer.getLayerPath(layerConfig));
+      console.log(error);
+    }
   }
 }
 
@@ -365,7 +369,9 @@ export function commonProcessLayerMetadata(
  * Transforms the query results of an Esri service response - when not querying on the Layers themselves (giving a 'reduced' FeatureInfoEntry).
  * The transformation reads the Esri formatted information and return a list of `TypeFeatureInfoEntryPartial` records.
  * In a similar fashion and response object as the "Query Feature Infos" functionalities done via the Layers.
+ *
  * @param results TypeJsonObject The Json Object representing the data from Esri.
+ *
  * @returns TypeFeatureInfoEntryPartial[] an array of relared records of type TypeFeatureInfoEntryPartial
  */
 export function parseFeatureInfoEntries(records: TypeJsonObject[]): TypeFeatureInfoEntryPartial[] {

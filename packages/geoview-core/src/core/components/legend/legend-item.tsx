@@ -573,7 +573,7 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
                 iconLabels={labelList}
                 isParentVisible={isChecked}
                 toggleMapVisible={(sublayerConfig) => {
-                  (geoviewLayerInstance as AbstractGeoViewVector | EsriDynamic).applyViewFilter(sublayerConfig);
+                  (geoviewLayerInstance as AbstractGeoViewVector | EsriDynamic).applyViewFilter(Layer.getLayerPath(sublayerConfig));
                 }}
                 layerConfig={geometryLayerConfig as TypeVectorLayerEntryConfig}
                 geometryKey={layerGeometryKey!}

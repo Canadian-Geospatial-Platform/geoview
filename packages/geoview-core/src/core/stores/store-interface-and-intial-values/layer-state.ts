@@ -152,8 +152,7 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
           }
 
           // apply filter to layer
-          const layerToFilter = api.maps[get().mapId].layer.geoviewLayers[layerPath.split('/')[0]]! as AbstractGeoViewVector | EsriDynamic;
-          layerToFilter.applyViewFilter(layerPath);
+          (api.maps[get().mapId].layer.geoviewInstance(layerPath) as AbstractGeoViewVector | EsriDynamic).applyViewFilter();
         }
         set({
           layerState: {
@@ -195,8 +194,7 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
         //! try to make reusable store actions....
         // TODO: we can have always item.... we cannot set visibility so if present we will need to trap. Need more use case
         // TODO: create a function setItemVisibility called with layer path and this function set the registered layer (from store values) then apply the filter.
-        const layerToFilter = api.maps[get().mapId].layer.geoviewLayers[layerPath.split('/')[0]]! as AbstractGeoViewVector | EsriDynamic;
-        layerToFilter.applyViewFilter(layerPath);
+        (api.maps[get().mapId].layer.geoviewInstance(layerPath) as AbstractGeoViewVector | EsriDynamic).applyViewFilter(layerPath);
       },
       deleteLayer: (layerPath: string) => {
         const curLayers = get().layerState.legendLayers;

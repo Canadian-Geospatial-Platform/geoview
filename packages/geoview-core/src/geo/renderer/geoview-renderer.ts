@@ -1,13 +1,14 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable no-param-reassign */
 import { asArray, asString } from 'ol/color';
-import { Style, Stroke, Fill, RegularShape, Circle as StyleCircle, Icon as StyleIcon } from 'ol/style';
-import { Geometry, LineString, Point, Polygon } from 'ol/geom';
+import { Text, Style, Stroke, Fill, RegularShape, Circle as StyleCircle, Icon as StyleIcon } from 'ol/style';
+import { Geometry, LineString, MultiLineString, Point, MultiPoint, Polygon, MultiPolygon } from 'ol/geom';
 import Icon, { Options as IconOptions } from 'ol/style/Icon';
 import { Options as CircleOptions } from 'ol/style/Circle';
 import { Options as RegularShapeOptions } from 'ol/style/RegularShape';
 import { Options as StrokeOptions } from 'ol/style/Stroke';
 import { Options as FillOptions } from 'ol/style/Fill';
+import { Options as TextOptions } from 'ol/style/Text';
 import Feature from 'ol/Feature';
 import { toContext } from 'ol/render';
 import { Size } from 'ol/size';
@@ -41,6 +42,8 @@ import {
   isClassBreakStyleConfig,
   TypeUniqueValueStyleConfig,
   TypeClassBreakStyleConfig,
+  TypeBaseSourceVectorInitialConfig,
+  layerEntryIsVector,
 } from '../map/map-schema-types';
 import {
   binaryKeywors,
@@ -1307,9 +1310,7 @@ export class GeoviewRenderer {
     layerConfig: TypeVectorTileLayerEntryConfig | TypeVectorLayerEntryConfig
   ): TypeStyleConfig | undefined {
     if (layerConfig.style === undefined) layerConfig.style = {};
-    const styleId = `${this.mapId}/${Layer.getLayerPath(layerConfig)}`;
-    let label = getLocalizedValue(layerConfig.layerName, this.mapId);
-    label = label !== undefined ? label : styleId;
+    const label = getLocalizedValue(layerConfig.layerName, this.mapId) as string;
     if (geometryType === 'Point') {
       const settings: TypeSimpleSymbolVectorConfig = {
         type: 'simpleSymbol',
@@ -1321,7 +1322,7 @@ export class GeoviewRenderer {
         },
         symbol: 'circle',
       };
-      const styleSettings: TypeSimpleStyleConfig = { styleId, styleType: 'simple', label, settings };
+      const styleSettings: TypeSimpleStyleConfig = { styleType: 'simple', label, settings };
       layerConfig.style[geometryType] = styleSettings;
       return layerConfig.style;
     }
@@ -1330,7 +1331,7 @@ export class GeoviewRenderer {
         type: 'lineString',
         stroke: { color: this.getDefaultColorAndIncrementIndex(1) },
       };
-      const styleSettings: TypeSimpleStyleConfig = { styleId, styleType: 'simple', label, settings };
+      const styleSettings: TypeSimpleStyleConfig = { styleType: 'simple', label, settings };
       layerConfig.style[geometryType] = styleSettings;
       return layerConfig.style;
     }
@@ -1341,7 +1342,7 @@ export class GeoviewRenderer {
         stroke: { color: this.getDefaultColorAndIncrementIndex(1) },
         fillStyle: 'solid',
       };
-      const styleSettings: TypeSimpleStyleConfig = { styleId, styleType: 'simple', label, settings };
+      const styleSettings: TypeSimpleStyleConfig = { styleType: 'simple', label, settings };
       layerConfig.style[geometryType] = styleSettings;
       return layerConfig.style;
     }

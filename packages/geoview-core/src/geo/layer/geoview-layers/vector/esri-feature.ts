@@ -5,7 +5,7 @@ import { EsriJSON } from 'ol/format';
 import { ReadOptions } from 'ol/format/Feature';
 import Feature from 'ol/Feature';
 
-import { AbstractGeoViewLayer, CONST_LAYER_TYPES } from '../abstract-geoview-layers';
+import { AbstractGeoViewLayer, CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 
 import {
   TypeLayerEntryConfig,
@@ -114,10 +114,7 @@ export class EsriFeature extends AbstractGeoViewVector {
    * @returns {Promise<void>} A promise that the execution is completed.
    */
   getServiceMetadata(): Promise<void> {
-    const promisedExecution = new Promise<void>((resolve) => {
-      commonGetServiceMetadata.call(this, resolve);
-    });
-    return promisedExecution;
+    return commonGetServiceMetadata.call(this);
   }
 
   /** ***************************************************************************************************************************
@@ -232,10 +229,7 @@ export class EsriFeature extends AbstractGeoViewVector {
    * @returns {Promise<void>} A promise that the layer configuration has its metadata processed.
    */
   protected processLayerMetadata(layerConfig: TypeLayerEntryConfig): Promise<void> {
-    const promiseOfExecution = new Promise<void>((resolve) => {
-      commonProcessLayerMetadata.call(this, resolve, layerConfig);
-    });
-    return promiseOfExecution;
+    return commonProcessLayerMetadata.call(this, layerConfig);
   }
 
   /** ***************************************************************************************************************************

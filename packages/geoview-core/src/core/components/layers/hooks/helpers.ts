@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import { TypeVectorLayerStyles } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { api } from '@/app';
-import { TypeLegendLayer, TypeLegendItem } from '../types';
+import { TypeLegendLayer, TypeLegendItem } from '@/core/components/layers/types';
 import { useGeoViewStore } from '@/core/stores/stores-managers';
 import { generateId } from '@/core/utils/utilities';
 import { TypeVisibilityFlags } from '@/geo';

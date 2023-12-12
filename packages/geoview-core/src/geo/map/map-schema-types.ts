@@ -353,8 +353,6 @@ export const isSimpleStyleConfig = (
  * Simple style configuration.
  */
 export interface TypeSimpleStyleConfig extends TypeBaseStyleConfig {
-  /** Style identifier. */
-  styleId?: string;
   /** Type of style. */
   styleType: 'simple';
   /** Label associated to the style */
@@ -397,8 +395,6 @@ export const isUniqueValueStyleConfig = (
  * Unique value style configuration.
  */
 export interface TypeUniqueValueStyleConfig extends TypeBaseStyleConfig {
-  /** Style identifier. */
-  styleId?: string;
   /** Type of style. */
   styleType: 'uniqueValue';
   /** Label used if field/value association is not found. */
@@ -450,8 +446,6 @@ export const isClassBreakStyleConfig = (
  * Class break style configuration.
  */
 export interface TypeClassBreakStyleConfig extends TypeBaseStyleConfig {
-  /** Style identifier. */
-  styleId?: string;
   /** Type of style. */
   styleType: 'classBreaks';
   /** Label used if field/value association is not found. */

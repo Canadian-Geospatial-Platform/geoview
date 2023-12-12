@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable @typescript-eslint/no-unused-vars, no-console */
 /* eslint-disable block-scoped-var, no-var, vars-on-top, no-param-reassign */
 import axios from 'axios';
 
@@ -9,8 +9,8 @@ import { Extent } from 'ol/extent';
 import { transformExtent } from 'ol/proj';
 
 import { Cast, TypeJsonObject } from '@/core/types/global-types';
-import { AbstractGeoViewLayer, CONST_LAYER_TYPES, TypeLegend } from '../abstract-geoview-layers';
-import { AbstractGeoViewRaster, TypeBaseRasterLayer } from './abstract-geoview-raster';
+import { AbstractGeoViewLayer, CONST_LAYER_TYPES, TypeLegend } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
+import { AbstractGeoViewRaster, TypeBaseRasterLayer } from '@/geo/layer/geoview-layers/raster/abstract-geoview-raster';
 import {
   TypeLayerEntryConfig,
   TypeGeoviewLayerConfig,
@@ -141,52 +141,51 @@ export class ImageStatic extends AbstractGeoViewRaster {
    * Return the legend of the layer.This routine return null when the layerPath specified is not found. If the legend can't be
    * read, the legend property of the object returned will be null.
    *
-   * @param {string | TypeLayerEntryConfig} layerPathOrConfig Layer path or configuration.
+   * @param {string} layerPath The layer path to the layer's configuration.
    *
    * @returns {Promise<TypeLegend | null>} The legend of the layer.
    */
-  getLegend(layerPathOrConfig: string | TypeLayerEntryConfig): Promise<TypeLegend | null> {
-    const promisedLegend = new Promise<TypeLegend | null>((resolve) => {
-      const layerConfig = Cast<TypeImageStaticLayerEntryConfig | undefined | null>(
-        typeof layerPathOrConfig === 'string' ? this.getLayerConfig(layerPathOrConfig) : layerPathOrConfig
-      );
-      if (!layerConfig) resolve(null);
+  async getLegend(layerPath: string): Promise<TypeLegend | null> {
+    try {
+      const layerConfig = this.getLayerConfig(layerPath) as TypeImageStaticLayerEntryConfig | undefined | null;
+      if (!layerConfig) return null;
 
-      this.getLegendImage(layerConfig!).then((legendImage) => {
-        if (!legendImage)
-          resolve({
-            type: this.type,
-            layerPath: Layer.getLayerPath(layerConfig!),
-            layerName: layerConfig!.layerName,
-            legend: null,
-          });
-        else {
-          api.maps[this.mapId].geoviewRenderer.loadImage(legendImage as string).then((image) => {
-            if (image) {
-              const drawingCanvas = document.createElement('canvas');
-              drawingCanvas.width = image.width;
-              drawingCanvas.height = image.height;
-              const drawingContext = drawingCanvas.getContext('2d')!;
-              drawingContext.drawImage(image, 0, 0);
-              const legend: TypeLegend = {
-                type: this.type,
-                layerPath: Layer.getLayerPath(layerConfig!),
-                layerName: layerConfig!.layerName,
-                legend: drawingCanvas,
-              };
-              resolve(legend);
-            } else
-              resolve({
-                type: this.type,
-                layerPath: Layer.getLayerPath(layerConfig!),
-                layerName: layerConfig!.layerName,
-                legend: null,
-              });
-          });
-        }
-      });
-    });
-    return promisedLegend;
+      const legendImage = await this.getLegendImage(layerConfig!);
+      if (!legendImage) {
+        const legend: TypeLegend = {
+          type: this.type,
+          layerPath: Layer.getLayerPath(layerConfig!),
+          layerName: layerConfig!.layerName,
+          legend: null,
+        };
+        return legend;
+      }
+      const image = await api.maps[this.mapId].geoviewRenderer.loadImage(legendImage as string);
+      if (image) {
+        const drawingCanvas = document.createElement('canvas');
+        drawingCanvas.width = image.width;
+        drawingCanvas.height = image.height;
+        const drawingContext = drawingCanvas.getContext('2d')!;
+        drawingContext.drawImage(image, 0, 0);
+        const legend: TypeLegend = {
+          type: this.type,
+          layerPath: Layer.getLayerPath(layerConfig!),
+          layerName: layerConfig!.layerName,
+          legend: drawingCanvas,
+        };
+        return legend;
+      }
+      const legend: TypeLegend = {
+        type: this.type,
+        layerPath: Layer.getLayerPath(layerConfig!),
+        layerName: layerConfig!.layerName,
+        legend: null,
+      };
+      return legend;
+    } catch (error) {
+      console.log(error);
+      return null;
+    }
   }
 
   /** ***************************************************************************************************************************
@@ -248,43 +247,39 @@ export class ImageStatic extends AbstractGeoViewRaster {
    * @returns {TypeBaseRasterLayer} The GeoView raster layer that has been created.
    */
   processOneLayerEntry(layerConfig: TypeImageStaticLayerEntryConfig): Promise<TypeBaseRasterLayer | null> {
-    const promisedVectorLayer = new Promise<TypeBaseRasterLayer | null>((resolve) => {
-      const layerPath = Layer.getLayerPath(layerConfig);
-      this.setLayerPhase('processOneLayerEntry', Layer.getLayerPath(layerConfig));
+    const layerPath = Layer.getLayerPath(layerConfig);
+    this.setLayerPhase('processOneLayerEntry', layerPath);
 
-      if (!layerConfig.source.extent) throw new Error('Parameter extent is not defined in source element of layerConfig.');
-      const sourceOptions: SourceOptions = {
-        url: getLocalizedValue(layerConfig.source.dataAccessPath, this.mapId) || '',
-        imageExtent: layerConfig.source.extent,
-      };
+    if (!layerConfig.source.extent) throw new Error('Parameter extent is not defined in source element of layerConfig.');
+    const sourceOptions: SourceOptions = {
+      url: getLocalizedValue(layerConfig.source.dataAccessPath, this.mapId) || '',
+      imageExtent: layerConfig.source.extent,
+    };
 
-      if (layerConfig.source.crossOrigin) {
-        sourceOptions.crossOrigin = layerConfig.source.crossOrigin;
-      } else {
-        sourceOptions.crossOrigin = 'Anonymous';
-      }
+    if (layerConfig.source.crossOrigin) {
+      sourceOptions.crossOrigin = layerConfig.source.crossOrigin;
+    } else {
+      sourceOptions.crossOrigin = 'Anonymous';
+    }
 
-      if (layerConfig.source.projection) {
-        sourceOptions.projection = `EPSG:${layerConfig.source.projection}`;
-      } else throw new Error('Parameter projection is not define in source element of layerConfig.');
+    if (layerConfig.source.projection) {
+      sourceOptions.projection = `EPSG:${layerConfig.source.projection}`;
+    } else throw new Error('Parameter projection is not define in source element of layerConfig.');
 
-      const staticImageOptions: ImageOptions<Static> = { source: new Static(sourceOptions) };
-      // layerConfig.initialSettings cannot be undefined because config-validation set it to {} if it is undefined.
-      if (layerConfig.initialSettings?.extent !== undefined) staticImageOptions.extent = layerConfig.initialSettings?.extent;
-      if (layerConfig.initialSettings?.maxZoom !== undefined) staticImageOptions.maxZoom = layerConfig.initialSettings?.maxZoom;
-      if (layerConfig.initialSettings?.minZoom !== undefined) staticImageOptions.minZoom = layerConfig.initialSettings?.minZoom;
-      if (layerConfig.initialSettings?.opacity !== undefined) staticImageOptions.opacity = layerConfig.initialSettings?.opacity;
-      if (layerConfig.initialSettings?.visible !== undefined)
-        staticImageOptions.visible = layerConfig.initialSettings?.visible === 'yes' || layerConfig.initialSettings?.visible === 'always';
+    const staticImageOptions: ImageOptions<Static> = { source: new Static(sourceOptions) };
+    // layerConfig.initialSettings cannot be undefined because config-validation set it to {} if it is undefined.
+    if (layerConfig.initialSettings?.extent !== undefined) staticImageOptions.extent = layerConfig.initialSettings?.extent;
+    if (layerConfig.initialSettings?.maxZoom !== undefined) staticImageOptions.maxZoom = layerConfig.initialSettings?.maxZoom;
+    if (layerConfig.initialSettings?.minZoom !== undefined) staticImageOptions.minZoom = layerConfig.initialSettings?.minZoom;
+    if (layerConfig.initialSettings?.opacity !== undefined) staticImageOptions.opacity = layerConfig.initialSettings?.opacity;
+    if (layerConfig.initialSettings?.visible !== undefined)
+      staticImageOptions.visible = layerConfig.initialSettings?.visible === 'yes' || layerConfig.initialSettings?.visible === 'always';
 
-      layerConfig.olLayer = new ImageLayer(staticImageOptions);
+    layerConfig.olLayer = new ImageLayer(staticImageOptions);
 
-      this.addLoadendListener(layerPath, 'image');
+    this.addLoadendListener(layerPath, 'image');
 
-      resolve(layerConfig.olLayer);
-    });
-
-    return promisedVectorLayer;
+    return Promise.resolve(layerConfig.olLayer);
   }
 
   /** ***************************************************************************************************************************
@@ -297,17 +292,15 @@ export class ImageStatic extends AbstractGeoViewRaster {
    */
   protected getBounds(layerPath: string, bounds: Extent | undefined): Extent | undefined {
     const layerConfig = this.getLayerConfig(layerPath);
-    if (layerConfig) {
-      const layerBounds = (layerConfig.olLayer as ImageLayer<Static>).getSource()?.getImageExtent();
-      const projection =
-        (layerConfig.olLayer as ImageLayer<Static>).getSource()?.getProjection()?.getCode().replace('EPSG:', '') ||
-        MapEventProcessor.getMapState(this.mapId).currentProjection;
+    const layerBounds = (layerConfig?.olLayer as ImageLayer<Static>).getSource()?.getImageExtent();
+    const projection =
+      (layerConfig?.olLayer as ImageLayer<Static>).getSource()?.getProjection()?.getCode().replace('EPSG:', '') ||
+      MapEventProcessor.getMapState(this.mapId).currentProjection;
 
-      if (layerBounds) {
-        const transformedBounds = transformExtent(layerBounds, `EPSG:${projection}`, `EPSG:4326`);
-        if (!bounds) bounds = [transformedBounds[0], transformedBounds[1], transformedBounds[2], transformedBounds[3]];
-        else bounds = getMinOrMaxExtents(bounds, transformedBounds);
-      }
+    if (layerBounds) {
+      const transformedBounds = transformExtent(layerBounds, `EPSG:${projection}`, `EPSG:4326`);
+      if (!bounds) bounds = [transformedBounds[0], transformedBounds[1], transformedBounds[2], transformedBounds[3]];
+      else bounds = getMinOrMaxExtents(bounds, transformedBounds);
     }
 
     return bounds;

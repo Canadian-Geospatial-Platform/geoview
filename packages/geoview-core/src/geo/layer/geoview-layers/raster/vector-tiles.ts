@@ -14,8 +14,8 @@ import { Extent } from 'ol/extent';
 import olms, { apply, applyStyle, addMapboxLayer } from 'ol-mapbox-style';
 
 import defaultsDeep from 'lodash/defaultsDeep';
-import { AbstractGeoViewLayer, CONST_LAYER_TYPES } from '../abstract-geoview-layers';
-import { AbstractGeoViewRaster, TypeBaseRasterLayer } from './abstract-geoview-raster';
+import { AbstractGeoViewLayer, CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
+import { AbstractGeoViewRaster, TypeBaseRasterLayer } from '@/geo/layer/geoview-layers/raster/abstract-geoview-raster';
 import {
   TypeLayerEntryConfig,
   TypeSourceTileInitialConfig,
@@ -158,7 +158,7 @@ export class VectorTiles extends AbstractGeoViewRaster {
    *
    * @returns {TypeBaseRasterLayer} The GeoView raster layer that has been created.
    */
-  processOneLayerEntry(layerConfig: TypeVectorTilesLayerEntryConfig): Promise<TypeBaseRasterLayer | null> {
+  protected processOneLayerEntry(layerConfig: TypeVectorTilesLayerEntryConfig): Promise<TypeBaseRasterLayer | null> {
     const promisedVectorLayer = new Promise<TypeBaseRasterLayer | null>((resolve) => {
       const layerPath = Layer.getLayerPath(layerConfig);
       this.setLayerPhase('processOneLayerEntry', layerPath);
@@ -172,7 +172,7 @@ export class VectorTiles extends AbstractGeoViewRaster {
         showError(this.mapId, `Error: vector tile layer (${layerConfig.layerId}) projection does not match map projection`);
         // eslint-disable-next-line no-console
         console.log(`Error: vector tile layer (${layerConfig.layerId}) projection does not match map projection`);
-        this.setLayerStatus('error', Layer.getLayerPath(layerConfig));
+        this.setLayerStatus('error', layerPath);
         resolve(null);
       } else if (layerConfig.source.projection) sourceOptions.projection = `EPSG:${layerConfig.source.projection}`;
       if (layerConfig.source.tileGrid) {
@@ -272,8 +272,9 @@ export class VectorTiles extends AbstractGeoViewRaster {
     return bounds;
   }
 
+  // TODO: This section needs documentation (a header at least). Also, is it normal to have things hardcoded like that?
   addVectorTileLayer() {
-    // ! from code sandbox https://codesandbox.io/s/vector-tile-info-forked-g28jud?file=/main.js it work good
+    // ! from code sandbox https://codesandbox.io/s/vector-tile-info-forked-g28jud?file=/main.js it works good
     // ! from inside GEoView, even when not use, something is wrong.
     olms(
       'LYR3',

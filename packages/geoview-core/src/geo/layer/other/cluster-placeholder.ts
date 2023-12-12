@@ -232,10 +232,9 @@
 //   return layerConfig.olLayer as VectorLayer<VectorSource>;
 // }
 
-// applyViewFilter(layerPathOrConfig: string | TypeLayerEntryConfig, filter = '', CombineLegendFilter = true, checkCluster = true) {
-//   const layerConfig = (
-//     typeof layerPathOrConfig === 'string' ? this.getLayerConfig(layerPathOrConfig) : layerPathOrConfig
-//   ) as TypeVectorLayerEntryConfig;
+// applyViewFilter(layerPath?: string, filter = '', CombineLegendFilter = true, checkCluster = true) {
+//   layerPath = layerPath || api.maps[this.mapId].layer.layerPathAssociatedToTheGeoviewInstance;
+//   const layerConfig = this.getLayerConfig(layerPath) as TypeVectorLayerEntryConfig;
 //   if (layerConfig) {
 //     const layerPath = layerConfig.geoviewRootLayer
 //       ? `${layerConfig.geoviewRootLayer.geoviewLayerId}/${String(layerConfig.layerId).replace('-unclustered', '')}`
@@ -244,13 +243,13 @@
 //     const cluster = !!api.maps[this.mapId].layer.registeredLayers[unclusteredLayerPath];
 //     if (cluster && checkCluster) {
 //       this.applyViewFilter(
-//         api.maps[this.mapId].layer.registeredLayers[layerPath] as TypeVectorLayerEntryConfig,
+//         layerPath,
 //         filter,
 //         CombineLegendFilter,
 //         false
 //       );
 //       this.applyViewFilter(
-//         api.maps[this.mapId].layer.registeredLayers[unclusteredLayerPath] as TypeVectorLayerEntryConfig,
+//         unclusteredLayerPath,
 //         filter,
 //         CombineLegendFilter,
 //         false
