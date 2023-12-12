@@ -54,7 +54,7 @@ const { cgpv } = window as TypeWindow;
  * @returns {JSX.Element} the slider panel
  */
 export function TimeSlider(TimeSliderPanelProps: TimeSliderPanelProps) {
-  const { layerPath, config } = TimeSliderPanelProps;
+  const { mapId, layerPath, config } = TimeSliderPanelProps;
   const { react, ui } = cgpv;
   const { useState, useRef, useEffect } = react;
   const {
