@@ -89,7 +89,7 @@ class TimeSliderPlugin extends AbstractPlugin {
       this.value = api.maps[mapId].footerTabs.tabs.length;
       api.maps[mapId].footerTabs.createFooterTab({
         value: this.value,
-        label: this.translations[api.maps[mapId].displayLanguage].timeSlider as string,
+        label: this.translations[api.maps[mapId].getDisplayLanguage()].timeSlider as string,
         content: () => createElement(TimeSliderPanel, { mapId, configObj }, []),
       });
     }
