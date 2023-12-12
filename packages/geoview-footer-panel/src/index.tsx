@@ -58,20 +58,24 @@ class FooterPanelPlugin extends AbstractPlugin {
    */
   translations = toJsonObject({
     en: {
-      legend: 'Legend',
-      layers: 'Layers',
-      details: 'Details',
-      dataTable: 'DataTable',
-      timeSlider: 'Time Slider',
-      geochart: 'Chart',
+      footerPanel: {
+        legend: 'Legend',
+        layers: 'Layers',
+        details: 'Details',
+        dataTable: 'DataTable',
+        timeSlider: 'Time Slider',
+        geochart: 'Chart',
+      },
     },
     fr: {
-      legend: 'Légende',
-      layers: 'Couches',
-      details: 'Détails',
-      dataTable: 'Données',
-      timeSlider: 'Curseur Temporel',
-      geochart: 'Graphique',
+      footerPanel: {
+        legend: 'Légende',
+        layers: 'Couches',
+        details: 'Détails',
+        dataTable: 'Données',
+        timeSlider: 'Curseur Temporel',
+        geochart: 'Graphique',
+      },
     },
   });
 
@@ -90,7 +94,6 @@ class FooterPanelPlugin extends AbstractPlugin {
       // access the api calls
       const { api } = cgpv;
       const { footerTabs } = api.maps[mapId];
-      const displayLanguage = api.maps[mapId].getDisplayLanguage();
 
       const defaultTabs = configObj?.tabs.defaultTabs as Array<string>;
       let tabsCounter = 0;
@@ -98,7 +101,7 @@ class FooterPanelPlugin extends AbstractPlugin {
         // create new tab and add the LegendComponent to the footer tab
         footerTabs.createFooterTab({
           value: tabsCounter,
-          label: this.translations[displayLanguage].legend as string,
+          label: 'footerPanel.legend',
           content: () => <FooterPanelLegendItem mapId={mapId} />,
           icon: <HubOutlinedIcon />,
         });
@@ -109,7 +112,7 @@ class FooterPanelPlugin extends AbstractPlugin {
         // create new tab and add the LayersComponent to the footer tab
         footerTabs.createFooterTab({
           value: tabsCounter,
-          label: this.translations[displayLanguage].layers as string,
+          label: 'footerPanel.layers',
           content: () => <Layers mapId={mapId} />,
           icon: <LayersOutlinedIcon />,
         });
@@ -122,7 +125,7 @@ class FooterPanelPlugin extends AbstractPlugin {
         const detailsTabValue = tabsCounter;
         footerTabs.createFooterTab({
           value: detailsTabValue,
-          label: this.translations[displayLanguage].details as string,
+          label: 'footerPanel.details',
           content: () => api.maps[mapId].details.createDetails(mapId),
           icon: <InfoOutlinedIcon />,
         });
@@ -153,7 +156,7 @@ class FooterPanelPlugin extends AbstractPlugin {
         /// create new tab and add the DataTable Component to the footer tab
         footerTabs.createFooterTab({
           value: tabsCounter,
-          label: this.translations[displayLanguage].dataTable as string,
+          label: 'footerPanel.dataTable',
           content: () => <DataTable mapId={mapId} />,
           icon: <StorageIcon />,
         });

@@ -4,20 +4,18 @@ import { ScaleLine } from 'ol/control';
 import Overlay from 'ol/Overlay';
 import { fromLonLat, transformExtent } from 'ol/proj';
 import { Extent } from 'ol/extent';
-import { FitOptions } from 'ol/View';
+import View, { FitOptions } from 'ol/View';
 import { KeyboardPan } from 'ol/interaction';
 
 import { GeoViewStoreType } from '@/core/stores/geoview-store';
 import { AbstractEventProcessor } from '../abstract-event-processor';
-import { api, Coordinate, NORTH_POLE_POSITION, TypeBasemapOptions, TypeClickMarker } from '@/app';
+import { api, Coordinate, NORTH_POLE_POSITION, TypeBasemapOptions, TypeBasemapProps, TypeClickMarker } from '@/app';
 import { TypeInteraction, TypeMapState, TypeValidMapProjectionCodes } from '@/geo/map/map-schema-types';
 import {
   mapPayload,
   lngLatPayload,
   mapMouseEventPayload,
   numberPayload,
-  payloadIsAMapViewProjection,
-  PayloadBaseClass,
   mapViewProjectionPayload,
   TypeGeometry,
   TypeFeatureInfoEntry,
@@ -25,6 +23,7 @@ import {
 import { EVENT_NAMES } from '@/api/events/event-types';
 import { getGeoViewStore } from '@/core/stores/stores-managers';
 import { OL_ZOOM_DURATION, OL_ZOOM_PADDING } from '@/core/utils/constant';
+import { AppEventProcessor } from './app-event-processor';
 
 export class MapEventProcessor extends AbstractEventProcessor {
   onInitialize(store: GeoViewStoreType) {
@@ -129,20 +128,6 @@ export class MapEventProcessor extends AbstractEventProcessor {
       }
     );
     // #endregion FEATURE SELECTION
-
-    // TODO: add a destroy events on store/map destroy
-    api.event.on(
-      EVENT_NAMES.MAP.EVENT_MAP_VIEW_PROJECTION_CHANGE,
-      (payload: PayloadBaseClass) => {
-        // because emit and on from api events can be trigger in loop, compare also the api value
-        if (payloadIsAMapViewProjection(payload) && api.maps[mapId].getMapState().currentProjection !== payload.projection!) {
-          store.setState({
-            mapState: { ...store.getState().mapState, currentProjection: payload.projection! },
-          });
-        }
-      },
-      mapId
-    );
 
     // add to arr of subscriptions so it can be destroyed later
     this.subscriptionArr.push(
@@ -276,8 +261,37 @@ export class MapEventProcessor extends AbstractEventProcessor {
     getGeoViewStore(mapId).getState().mapState.actions.setAttribution(attribution);
   }
 
-  static setMapOverviewMapRoot(mapId: string, overviewRoot: Root): void {
-    api.maps[mapId].overviewRoot = overviewRoot;
+  static setInteraction(mapId: string, interaction: TypeInteraction): void {
+    getGeoViewStore(mapId).getState().mapState.actions.setInteraction(interaction);
+  }
+
+  static setProjection(mapId: string, projectionCode: TypeValidMapProjectionCodes): void {
+    // set circular progress to hide basemap switching
+    getGeoViewStore(mapId).getState().appState.actions.setCircularProgress(true);
+    // TODO: make async (last 2 seconds like for overview map)
+    setTimeout(() => getGeoViewStore(mapId).getState().appState.actions.setCircularProgress(false), 2000);
+
+    // get view status (center and projection) to calculate new center
+    const currentView = api.maps[mapId].map.getView();
+    const currentCenter = currentView.getCenter();
+    const currentProjection = currentView.getProjection().getCode();
+    const newCenter = api.projection.transformPoints([currentCenter!], currentProjection, 'EPSG:4326')[0];
+    const newProjection = projectionCode as TypeValidMapProjectionCodes;
+
+    // create new view
+    const newView = new View({
+      zoom: currentView.getZoom() as number,
+      minZoom: currentView.getMinZoom(),
+      maxZoom: currentView.getMaxZoom(),
+      center: api.projection.transformPoints([newCenter], 'EPSG:4326', `EPSG:${newProjection}`)[0] as [number, number],
+      projection: `EPSG:${newProjection}`,
+    });
+
+    // use store action to set projection value in store and apply new view to the map
+    getGeoViewStore(mapId).getState().mapState.actions.setProjection(projectionCode, newView);
+
+    // refresh layers so new projection is render properly
+    api.maps[mapId].refreshLayers();
   }
 
   static rotate(mapId: string, rotation: number): void {
@@ -295,6 +309,21 @@ export class MapEventProcessor extends AbstractEventProcessor {
   //! NEVER add a store action who does set state AND map action at a same time.
   //! Review the action in store state to make sure
   // #region
+  static createEmptyBasemap(mapId: string) {
+    return api.maps[mapId].basemap.createEmptyBasemap();
+  }
+
+  static createOverviewMapBasemap(mapId: string): TypeBasemapProps | undefined {
+    return api.maps[mapId].basemap.getOverviewMap();
+  }
+
+  static resetBasemap(mapId: string) {
+    // reset basemap will use the current display language and projection and recreate the basemap
+    const language = AppEventProcessor.getDisplayLanguage(mapId);
+    const projection = MapEventProcessor.getMapState(mapId).currentProjection as TypeValidMapProjectionCodes;
+    api.maps[mapId].basemap.loadDefaultBasemaps(projection, language);
+  }
+
   static setMapKeyboardPanInteractions(mapId: string, panDelta: number): void {
     const mapElement = api.maps[mapId].map;
 
@@ -305,6 +334,16 @@ export class MapEventProcessor extends AbstractEventProcessor {
       }
     });
     mapElement!.addInteraction(new KeyboardPan({ pixelDelta: panDelta }));
+  }
+
+  /**
+   * Set the React root overview map element so it can be destroy if the map element is destroyed
+   *
+   * @param mapId The map id.
+   * @param overviewRoot The React root element for the overview map
+   */
+  static setMapOverviewMapRoot(mapId: string, overviewRoot: Root): void {
+    api.maps[mapId].overviewRoot = overviewRoot;
   }
 
   /**

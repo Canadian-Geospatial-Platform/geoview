@@ -48,10 +48,10 @@ class LayersPanelPlugin extends AbstractPlugin {
    */
   translations: TypeJsonObject = toJsonObject({
     en: {
-      layersPanel: 'Layers',
+      layersPanel: { title: 'Layers' },
     },
     fr: {
-      layersPanel: 'Couches',
+      layersPanel: { title: 'Couches' },
     },
   });
 
@@ -67,7 +67,6 @@ class LayersPanelPlugin extends AbstractPlugin {
     // access the api calls
     const { api, ui } = cgpv;
     const { LayersOutlinedIcon } = ui.elements;
-    const displayLanguage = api.maps[mapId].getDisplayLanguage();
 
     let panelStatus = false;
 
@@ -76,7 +75,7 @@ class LayersPanelPlugin extends AbstractPlugin {
     // button props
     const button: TypeIconButtonProps = {
       id: 'layersPanelButton',
-      tooltip: this.translations[displayLanguage].layersPanel as string,
+      tooltip: 'layersPanel.title',
       tooltipPlacement: 'right',
       children: <LayersOutlinedIcon />,
       visible: true,
@@ -84,8 +83,8 @@ class LayersPanelPlugin extends AbstractPlugin {
 
     // panel props
     const panel: TypePanelProps = {
-      title: this.translations[displayLanguage].layersPanel,
-      icon: '<i class="material-icons">layers</i>',
+      title: 'layersPanel.title',
+      icon: <LayersOutlinedIcon />,
       width: 350,
       status: panelStatus,
     };

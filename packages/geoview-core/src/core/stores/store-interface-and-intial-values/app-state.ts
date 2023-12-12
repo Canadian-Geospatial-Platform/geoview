@@ -10,10 +10,12 @@ import {
   TypeDisplayTheme,
 } from '@/core/types/cgpv-types';
 import { api } from '@/app';
+import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 
 export interface IAppState {
   displayLanguage: TypeDisplayLanguage;
   displayTheme: TypeDisplayTheme;
+  isCircularProgressActive: boolean;
   isCrosshairsActive: boolean;
   isFullscreenActive: boolean;
   notifications: Array<NotificationDetailsType>;
@@ -24,6 +26,7 @@ export interface IAppState {
 
   actions: {
     addNotification: (notif: NotificationDetailsType) => void;
+    setCircularProgress: (active: boolean) => void;
     setCrosshairActive: (active: boolean) => void;
     setDisplayLanguage: (lang: TypeDisplayLanguage) => void;
     setDisplayTheme: (theme: TypeDisplayTheme) => void;
@@ -36,6 +39,7 @@ export function initializeAppState(set: TypeSetStore, get: TypeGetStore): IAppSt
   return {
     displayLanguage: 'en' as TypeDisplayLanguage,
     displayTheme: 'geo.ca',
+    isCircularProgressActive: false,
     isCrosshairsActive: false,
     isFullscreenActive: false,
     notifications: [],
@@ -67,6 +71,14 @@ export function initializeAppState(set: TypeSetStore, get: TypeGetStore): IAppSt
           },
         });
       },
+      setCircularProgress: (active: boolean) => {
+        set({
+          appState: {
+            ...get().appState,
+            isCircularProgressActive: active,
+          },
+        });
+      },
       setCrosshairActive: (active: boolean) => {
         set({
           appState: {
@@ -87,6 +99,9 @@ export function initializeAppState(set: TypeSetStore, get: TypeGetStore): IAppSt
         const config = get().mapConfig;
         config!.displayLanguage = lang;
         set({ mapConfig: config });
+
+        // reload the basemap from new language
+        MapEventProcessor.resetBasemap(get().mapId);
       },
       setDisplayTheme: (theme: TypeDisplayTheme) => {
         set({
@@ -110,7 +125,7 @@ export function initializeAppState(set: TypeSetStore, get: TypeGetStore): IAppSt
         });
 
         //! we need to keep the call to the api map object because there is a state involve
-        if (element !== undefined) api.maps[get().mapId].toggleFullscreen(active, element);
+        if (element !== undefined) api.maps[get().mapId].setFullscreen(active, element);
       },
       removeNotification: (key: string) => {
         set({
@@ -127,6 +142,7 @@ export function initializeAppState(set: TypeSetStore, get: TypeGetStore): IAppSt
 // **********************************************************
 // App state selectors
 // **********************************************************
+export const useAppCircularProgressActive = () => useStore(useGeoViewStore(), (state) => state.appState.isCircularProgressActive);
 export const useAppCrosshairsActive = () => useStore(useGeoViewStore(), (state) => state.appState.isCrosshairsActive);
 export const useAppDisplayLanguage = () => useStore(useGeoViewStore(), (state) => state.appState.displayLanguage);
 export const useAppDisplayTheme = () => useStore(useGeoViewStore(), (state) => state.appState.displayTheme);

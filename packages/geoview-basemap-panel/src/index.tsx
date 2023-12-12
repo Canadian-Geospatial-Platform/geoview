@@ -48,10 +48,14 @@ class BasemapPanelPlugin extends AbstractPlugin {
    */
   translations = toJsonObject({
     en: {
-      basemapPanel: 'Basemaps',
+      basemapPanel: {
+        title: 'Basemaps',
+      },
     },
     fr: {
-      basemapPanel: 'Fond de carte',
+      basemapPanel: {
+        title: 'Fond de carte',
+      },
     },
   });
 
@@ -70,12 +74,11 @@ class BasemapPanelPlugin extends AbstractPlugin {
       // access the api calls
       const { api, ui } = cgpv;
       const { MapIcon } = ui.elements;
-      const displayLanguage = api.maps[mapId].getDisplayLanguage();
 
       // button props
       const button: TypeIconButtonProps = {
         id: 'basemapPanelButton',
-        tooltip: this.translations[displayLanguage].basemapPanel as string,
+        tooltip: 'basemapPanel.title',
         tooltipPlacement: 'right',
         children: <MapIcon />,
         visible: true,
@@ -83,8 +86,8 @@ class BasemapPanelPlugin extends AbstractPlugin {
 
       // panel props
       const panel: TypePanelProps = {
-        title: this.translations[displayLanguage].basemapPanel,
-        icon: '<i class="material-icons">map</i>',
+        title: 'basemapPanel.title',
+        icon: <MapIcon />,
         width: 350,
         status: configObj?.isOpen as boolean,
       };
