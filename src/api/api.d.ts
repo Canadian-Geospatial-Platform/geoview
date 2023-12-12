@@ -7,7 +7,6 @@ import { DateMgt } from '@/core/utils/date-mgt';
 import * as Utilities from '../core/utils/utilities';
 import { FeatureInfoLayerSet } from '@/geo/utils/feature-info-layer-set';
 import { LegendsLayerSet } from '@/geo/utils/legends-layer-set';
-import { createMapFromConfig } from '@/core/utils/create-map-from-config';
 /**
  * Class used to handle api calls (events, functions etc...)
  *
@@ -17,22 +16,22 @@ import { createMapFromConfig } from '@/core/utils/create-map-from-config';
 export declare class API {
     event: Event;
     eventNames: {
-        APPBAR: Record<import("./events").AppbarEventKey, import("./events/event-types").EventStringId>;
-        BASEMAP: Record<"EVENT_BASEMAP_LAYERS_UPDATE", import("./events/event-types").EventStringId>;
-        FOOTER_TABS: Record<import("./events").FooterTabsEventKey, import("./events/event-types").EventStringId>;
-        GET_FEATURE_INFO: Record<import("./events").GetFeatureInfoEventKey, import("./events/event-types").EventStringId>;
-        GET_LEGENDS: Record<import("./events").GetLegendsEventKey, import("./events/event-types").EventStringId>;
-        GEOMETRY: Record<import("./events").GeometryEventKey, import("./events/event-types").EventStringId>;
-        INTERACTION: Record<import("./events").InteractionEventKey, import("./events/event-types").EventStringId>;
-        LAYER_SET: Record<import("./events").LayerSetEventKey, import("./events/event-types").EventStringId>;
-        LAYER: Record<import("./events").LayerEventKey, import("./events/event-types").EventStringId>;
-        MAP: Record<import("./events").MapEventKey, import("./events/event-types").EventStringId>;
-        FEATURE_HIGHLIGHT: Record<import("./events").FeatureHighlightEventKey, import("./events/event-types").EventStringId>;
-        MODAL: Record<import("./events").ModalEventKey, import("./events/event-types").EventStringId>;
-        NAVBAR: Record<import("./events").NavbarEventKey, import("./events/event-types").EventStringId>;
-        PANEL: Record<import("./events").PanelEventKey, import("./events/event-types").EventStringId>;
-        SLIDER: Record<import("./events").SliderEventKey, import("./events/event-types").EventStringId>;
-        SNACKBAR: Record<"EVENT_SNACKBAR_OPEN", import("./events/event-types").EventStringId>;
+        APPBAR: Record<import("@/app").AppbarEventKey, import("@/app").EventStringId>;
+        BASEMAP: Record<"EVENT_BASEMAP_LAYERS_UPDATE", import("@/app").EventStringId>;
+        FOOTER_TABS: Record<import("@/app").FooterTabsEventKey, import("@/app").EventStringId>;
+        GET_FEATURE_INFO: Record<import("@/app").GetFeatureInfoEventKey, import("@/app").EventStringId>;
+        GET_LEGENDS: Record<import("@/app").GetLegendsEventKey, import("@/app").EventStringId>;
+        GEOMETRY: Record<import("@/app").GeometryEventKey, import("@/app").EventStringId>;
+        INTERACTION: Record<import("@/app").InteractionEventKey, import("@/app").EventStringId>;
+        LAYER_SET: Record<import("@/app").LayerSetEventKey, import("@/app").EventStringId>;
+        LAYER: Record<import("@/app").LayerEventKey, import("@/app").EventStringId>;
+        MAP: Record<import("@/app").MapEventKey, import("@/app").EventStringId>;
+        FEATURE_HIGHLIGHT: Record<import("@/app").FeatureHighlightEventKey, import("@/app").EventStringId>;
+        MODAL: Record<import("@/app").ModalEventKey, import("@/app").EventStringId>;
+        NAVBAR: Record<import("@/app").NavbarEventKey, import("@/app").EventStringId>;
+        PANEL: Record<import("@/app").PanelEventKey, import("@/app").EventStringId>;
+        SLIDER: Record<import("@/app").SliderEventKey, import("@/app").EventStringId>;
+        SNACKBAR: Record<"EVENT_SNACKBAR_OPEN", import("@/app").EventStringId>;
     };
     projection: Projection;
     projectNames: {
@@ -40,7 +39,7 @@ export declare class API {
         WM: string;
         LNGLAT: string;
     };
-    layerTypes: Record<"ESRI_DYNAMIC" | "ESRI_FEATURE" | "IMAGE_STATIC" | "GEOJSON" | "GEOCORE" | "GEOPACKAGE" | "XYZ_TILES" | "VECTOR_TILES" | "OGC_FEATURE" | "WFS" | "WMS", import("@/geo/layer/geoview-layers/abstract-geoview-layers").TypeGeoviewLayerType>;
+    layerTypes: Record<"ESRI_DYNAMIC" | "ESRI_FEATURE" | "IMAGE_STATIC" | "GEOJSON" | "GEOCORE" | "GEOPACKAGE" | "XYZ_TILES" | "VECTOR_TILES" | "OGC_FEATURE" | "WFS" | "WMS", import("@/app").TypeGeoviewLayerType>;
     maps: Record<string, MapViewer>;
     isReady: number;
     readyCallback?: (mapId?: string) => void;
@@ -48,10 +47,6 @@ export declare class API {
     utilities: typeof Utilities;
     geoUtilities: GeoUtilities;
     dateUtilities: DateMgt;
-    generateId: typeof Utilities.generateId;
-    createMapFromConfig: typeof createMapFromConfig;
-    addUiComponent: typeof Utilities.addUiComponent;
-    showMessage: typeof Utilities.showMessage;
     getFeatureInfoLayerSet: typeof FeatureInfoLayerSet.get;
     getLegendsLayerSet: typeof LegendsLayerSet.get;
     /**
@@ -73,4 +68,13 @@ export declare class API {
      * including plugins
      */
     callInitCallback: () => void;
+    /**
+     * Create a new map in a given div
+     * !MUST not be a map div with llwp-map class
+     * If is present, the div will be created with a default config
+     *
+     * @param {string} divId the id of the div to create map in
+     * @param {string} mapConfig the config passed in from the function call
+     */
+    createMapFromConfig: (divId: string, mapConfig: string) => void;
 }

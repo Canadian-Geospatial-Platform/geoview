@@ -3,6 +3,6 @@ export declare abstract class AbstractEventProcessor {
     protected store: GeoViewStoreType | undefined;
     protected subscriptionArr: Array<() => void>;
     constructor();
-    abstract onInitialize(store: GeoViewStoreType): void;
+    onInitialize(store: GeoViewStoreType): void;
     onDestroy(): void;
 }

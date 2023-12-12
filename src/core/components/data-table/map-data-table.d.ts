@@ -1,5 +1,4 @@
 /// <reference types="react" />
-import { Projection } from 'ol/proj';
 import { TypeFieldEntry, TypeFeatureInfoEntry } from '@/app';
 export interface MapDataTableDataEntrys extends TypeFeatureInfoEntry {
     rows: Record<string, string>;
@@ -18,7 +17,6 @@ interface MapDataTableProps {
     layerId: string;
     mapId: string;
     layerKey: string;
-    projectionConfig: Projection;
 }
 /**
  * Build Data table from map.
@@ -26,9 +24,8 @@ interface MapDataTableProps {
  * @param {string} layerId id of the layer
  * @param {string} mapId id of the map.
  * @param {string} layerKey key of the layer.
- * @param {Projection} projectionConfig projection config to transfer lat long.
  * @return {ReactElement} Data table as react element.
  */
-declare function MapDataTable({ data, layerId, mapId, layerKey, projectionConfig }: MapDataTableProps): import("react").JSX.Element;
+declare function MapDataTable({ data, layerId, mapId, layerKey }: MapDataTableProps): import("react").JSX.Element;
 declare const _default: import("react").MemoExoticComponent<typeof MapDataTable>;
 export default _default;

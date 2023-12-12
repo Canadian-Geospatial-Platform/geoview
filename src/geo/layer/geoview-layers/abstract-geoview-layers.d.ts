@@ -63,8 +63,6 @@ export type TypeStyleRepresentation = {
      * break styles.
      */
     defaultCanvas?: HTMLCanvasElement | null;
-    /** The clusterCanvas property is used when the layer clustering is active (layerConfig.source.cluster.enable = true). */
-    clusterCanvas?: HTMLCanvasElement | null;
     /** The arrayOfCanvas property is used by unique value and class break styles. */
     arrayOfCanvas?: (HTMLCanvasElement | null)[];
 };

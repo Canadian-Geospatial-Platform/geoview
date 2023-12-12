@@ -3,7 +3,8 @@ import { TypeLegendLayer } from '../types';
 interface SingleLayerProps {
     layer: TypeLegendLayer;
     depth: number;
-    setIsLayersListPanelVisible: Dispatch<SetStateAction<boolean>> | undefined;
+    isDragging: boolean;
+    setIsLayersListPanelVisible: Dispatch<SetStateAction<boolean>>;
 }
-export declare function SingleLayer(props: SingleLayerProps): JSX.Element;
+export declare function SingleLayer({ isDragging, depth, layer, setIsLayersListPanelVisible }: SingleLayerProps): JSX.Element;
 export {};

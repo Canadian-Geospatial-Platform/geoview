@@ -223,3 +223,9 @@ export declare function whenThisThenThat<T>(checkCallback: () => T, doCallback: 
  * @param timeout the duration in milliseconds until the task is aborted (defaults to 10 seconds)
  */
 export declare function whenThisThen<T>(checkCallback: () => T, checkFrequency?: number, timeout?: number): Promise<T>;
+/**
+ * Delay helper function.
+ * @param ms number Number of milliseconds to wait for.
+ * @returns Promise<void> resolves when the delay timeout expires.
+ */
+export declare const delay: (ms: number) => Promise<void>;

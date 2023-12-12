@@ -22,11 +22,12 @@ export declare const sxClassesFooterBar: {
             cursor: string;
             margin: string;
         };
+        justifyContent: string;
     };
     rotationControlsContainer: {
         display: string;
         flexDirection: string;
-        marginLeft: number;
+        marginLeft: string;
         alignItems: string;
     };
 };
