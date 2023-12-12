@@ -1,42 +1,8 @@
 import { useTheme } from '@mui/material/styles';
 import { FormControl, InputLabel, NativeSelect } from '@mui/material';
 import { TypeWindow } from 'geoview-core';
-import { useTimeSliderLayers, useTimeSliderStoreActions, useAppDisplayLanguage } from 'geoview-core/src/core/stores';
+import { useTimeSliderLayers, useTimeSliderStoreActions } from 'geoview-core/src/core/stores';
 import { getSxClasses } from './time-slider-style';
-
-/**
- * translations object to inject to the viewer translations
- */
-const translations: { [index: string]: { [index: string]: string } } = {
-  en: {
-    unlockRight: 'Unlock right handle',
-    unlockLeft: 'Unlock left handle',
-    lockRight: 'Lock right handle',
-    lockLeft: 'Lock left handle',
-    disableFilter: 'Disable Filtering',
-    enableFilter: 'Enable Filtering',
-    pauseAnimation: 'Pause animation',
-    playAnimation: 'Play animation',
-    back: 'Back',
-    forward: 'Forward',
-    changeDirection: 'Change animation direction',
-    timeDelay: 'Animation time delay',
-  },
-  fr: {
-    unlockRight: 'Déverrouiller la poignée droite',
-    unlockLeft: 'Déverrouiller la poignée gauche',
-    lockRight: 'Verrouiller la poignée droite',
-    lockLeft: 'Verrouiller la poignée gauche',
-    disableFilter: 'Désactiver le filtrage',
-    enableFilter: 'Activer le filtrage',
-    pauseAnimation: `Pause de l'animation`,
-    playAnimation: `Jouer l'animation`,
-    back: 'Retour',
-    forward: 'En avant',
-    changeDirection: `Changer la direction de l'animation`,
-    timeDelay: `Délai d'animation`,
-  },
-};
 
 interface TimeSliderPanelProps {
   mapId: string;
@@ -54,6 +20,7 @@ const { cgpv } = window as TypeWindow;
 export function TimeSlider(TimeSliderPanelProps: TimeSliderPanelProps) {
   const { layerPath } = TimeSliderPanelProps;
   const { react, ui } = cgpv;
+  const { useTranslation } = cgpv;
   const { useState, useRef, useEffect } = react;
   const {
     Grid,
@@ -71,7 +38,8 @@ export function TimeSlider(TimeSliderPanelProps: TimeSliderPanelProps) {
     SwitchRightIcon,
     SwitchLeftIcon,
   } = ui.elements;
-  const displayLanguage = useAppDisplayLanguage();
+
+  const { t } = useTranslation();
 
   const theme = useTheme();
   const sxClasses = getSxClasses(theme);
@@ -294,10 +262,10 @@ export function TimeSlider(TimeSliderPanelProps: TimeSliderPanelProps) {
 
   function returnLockTooltip(): string {
     if (reversed) {
-      const text = locked ? translations[displayLanguage].unlockRight : translations[displayLanguage].lockRight;
+      const text = locked ? t('timeSlider.slider.unlockRight') : t('timeSlider.slider.lockRight');
       return text;
     }
-    const text = locked ? translations[displayLanguage].unlockLeft : translations[displayLanguage].lockLeft;
+    const text = locked ? t('timeSlider.slider.unlockLeft') : t('timeSlider.slider.lockLeft');
     return text;
   }
 
@@ -317,7 +285,7 @@ export function TimeSlider(TimeSliderPanelProps: TimeSliderPanelProps) {
           <Grid item xs={3}>
             <div style={{ textAlign: 'right', marginRight: '25px' }}>
               <Tooltip
-                title={filtering ? translations[displayLanguage].disableFilter : translations[displayLanguage].enableFilter}
+                title={filtering ? t('timeSlider.slider.disableFilter') : t('timeSlider.slider.enableFilter')}
                 placement="top"
                 enterDelay={1000}
               >
@@ -364,8 +332,8 @@ export function TimeSlider(TimeSliderPanelProps: TimeSliderPanelProps) {
               <ArrowLeftIcon />
             </IconButton>
             <IconButton
-              aria-label={isPlaying ? translations[displayLanguage].pauseAnimation : translations[displayLanguage].playAnimation}
-              tooltip={isPlaying ? translations[displayLanguage].pauseAnimation : translations[displayLanguage].playAnimation}
+              aria-label={isPlaying ? (t('timeSlider.slider.pauseAnimation') as string) : (t('timeSlider.slider.playAnimation') as string)}
+              tooltip={isPlaying ? 'timeSlider.slider.pauseAnimation' : 'timeSlider.slider.playAnimation'}
               tooltipPlacement="top"
               disabled={!filtering}
               onClick={() => handlePlay()}
@@ -373,8 +341,8 @@ export function TimeSlider(TimeSliderPanelProps: TimeSliderPanelProps) {
               {!isPlaying ? <PlayArrowIcon /> : <PauseIcon />}
             </IconButton>
             <IconButton
-              aria-label={translations[displayLanguage].forward}
-              tooltip={translations[displayLanguage].forward}
+              aria-label={t('timeSlider.slider.forward') as string}
+              tooltip="timeSlider.slider.forward"
               tooltipPlacement="top"
               disabled={isPlaying || !filtering}
               onClick={() => handleForward()}
@@ -382,15 +350,15 @@ export function TimeSlider(TimeSliderPanelProps: TimeSliderPanelProps) {
               <ArrowRightIcon />
             </IconButton>
             <IconButton
-              aria-label={translations[displayLanguage].changeDirection}
-              tooltip={translations[displayLanguage].changeDirection}
+              aria-label={t('timeSlider.slider.changeDirection') as string}
+              tooltip="timeSlider.slider.changeDirection"
               tooltipPlacement="top"
               onClick={() => handleReverse()}
             >
               {reversed ? <SwitchRightIcon /> : <SwitchLeftIcon />}
             </IconButton>
             <FormControl sx={{ width: '150px' }}>
-              <InputLabel variant="standard">{translations[displayLanguage].timeDelay}</InputLabel>
+              <InputLabel variant="standard">{t('timeSlider.slider.timeDelay')}</InputLabel>
               <NativeSelect
                 defaultValue={delay}
                 inputProps={{

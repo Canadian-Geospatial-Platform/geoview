@@ -17,6 +17,7 @@ import {
 } from '@/core/stores/store-interface-and-intial-values/details-state';
 import { useMapStoreActions } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { ResponsiveGrid, CloseButton, EnlargeButton, LayerList, LayerTitle } from '../common';
+import { useUIStoreActions } from '@/app';
 
 /**
  * layers list
@@ -42,6 +43,7 @@ export function Detailspanel(): JSX.Element {
   const checkedFeatures = useDetailsStoreCheckedFeatures();
   const { setSelectedLayerPath, removeCheckedFeature } = useDetailsStoreActions();
   const { addSelectedFeature, removeSelectedFeature } = useMapStoreActions();
+  const { setActiveFooterTab } = useUIStoreActions();
 
   // Returns the index of matching layer based on the found layer path
   const findLayerPathIndex = (layerDataArray: TypeArrayOfLayerData, layerPathSearch: string): number => {
@@ -76,6 +78,7 @@ export function Detailspanel(): JSX.Element {
       const commonLayerPathIndex = selectedLayerPath ? findLayerPathIndex(arrayOfLayerData, selectedLayerPath) : -1;
       setLayerDataInfo(arrayOfLayerData[commonLayerPathIndex > -1 ? commonLayerPathIndex : 0]);
       setCurrentFeatureIndex(0);
+      setActiveFooterTab('details');
     } else setLayerDataInfo(null);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [arrayOfLayerData]);

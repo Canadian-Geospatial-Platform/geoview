@@ -122,11 +122,17 @@
       cgpv.init(function () {
         console.log('api is ready');
 
+        setTimeout(() => {
+
+
+
+
+        }, 1000)
         /**
          * RANGE SLIDER UI SECTION START
          */
         // add a slider component and link it to a map with mapId props
-        cgpv.api.addUiComponent(
+        cgpv.api.utilities.addUiComponent(
           'UI1-rangeslider1',
           cgpv.react.createElement(cgpv.ui.elements.Slider, {
             mapId: 'UI1',
@@ -171,7 +177,7 @@
         document.getElementById('slidervalues').addEventListener('click', setSliderValues, false);
 
         // add a slider component and link it to a map with mapId props
-        cgpv.api.addUiComponent(
+        cgpv.api.utilities.addUiComponent(
           'UI1-slider1',
           cgpv.react.createElement(cgpv.ui.elements.Slider, {
             mapId: 'UI1',
@@ -210,7 +216,7 @@
         );
 
         // add a slider component and DO NOT link it to a map
-        cgpv.api.addUiComponent(
+        cgpv.api.utilities.addUiComponent(
           'UI1-slider2',
           cgpv.react.createElement(cgpv.ui.elements.Slider, {
             id: 'UI1-slider2',

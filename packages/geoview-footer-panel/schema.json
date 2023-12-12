@@ -38,6 +38,9 @@
           "items": {
             "type": "object",
             "properties": {
+              "id": {
+                "type": "string"
+              },
               "defaultTabs": {
                 "type": "string"
               },

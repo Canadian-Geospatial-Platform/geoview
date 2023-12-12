@@ -15,7 +15,7 @@ import { getGeoViewStore } from '@/core/stores/stores-managers';
 
 import { cgpvTheme } from '@/ui/style/theme';
 import { OverviewMapToggle } from './overview-map-toggle';
-import { api, useGeoViewMapId } from '@/app';
+import { useGeoViewMapId } from '@/app';
 import { useAppDisplayLanguage, useAppDisplayTheme } from '@/core/stores/store-interface-and-intial-values/app-state';
 import { useMapElement, useMapOverviewMapHideZoom } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
@@ -160,8 +160,7 @@ export function OverviewMap(): JSX.Element {
 
   useEffect(() => {
     // get default overview map
-    // TODO: use store basemap info in the store...
-    const defaultBasemap = api.maps[mapId].basemap.overviewMap;
+    const defaultBasemap = MapEventProcessor.createOverviewMapBasemap(mapId);
 
     const toggleButton = document.createElement('div');
 

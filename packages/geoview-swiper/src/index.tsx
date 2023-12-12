@@ -34,12 +34,16 @@ class SwiperPlugin extends AbstractPlugin {
    */
   translations = toJsonObject({
     en: {
-      tooltip: 'Drag to see underlying layer',
-      menu: 'Swiper',
+      swiper: {
+        tooltip: 'Drag to see underlying layer',
+        menu: 'Swiper',
+      },
     },
     fr: {
-      tooltip: 'Faites glisser pour voir les couches sous-jacentes',
-      menu: 'Balayage',
+      swiper: {
+        tooltip: 'Faites glisser pour voir les couches sous-jacentes',
+        menu: 'Balayage',
+      },
     },
   });
 
@@ -65,7 +69,7 @@ class SwiperPlugin extends AbstractPlugin {
       mapElement?.insertBefore(el, mapElement.firstChild);
 
       // create the swiper component and render
-      const node = createElement(Swiper, { mapId, config: configObj!, translations: this.translations });
+      const node = createElement(Swiper, { mapId, config: configObj! });
       const root = createRoot(document.getElementById(`${mapId}-swiper`)!);
       root.render(node);
     }
