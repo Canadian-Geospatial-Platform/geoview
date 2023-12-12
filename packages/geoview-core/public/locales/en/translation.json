@@ -120,7 +120,8 @@
     },
     "changeDisplayLanguageLayers": "Layers can not be relaoded because the configuration does not support this language",
     "changeDisplayLanguage": "Only 'en' and 'fr' are supported",
-    "changeDisplayTheme": "Theme unsuported"
+    "changeDisplayTheme": "Theme unsuported",
+    "changeDisplayProjection": "Projection unsuported"
   },
   "exportModal": {
     "title": "Export Map as PNG",

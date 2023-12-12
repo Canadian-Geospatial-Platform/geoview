@@ -34,6 +34,7 @@
               <a href="./index.html">Main</a><br />
               <a href="#HPRJ1">1. Web Mercator Projection</a><br />
               <a href="#HPRJ2">2. LCC Projection</a><br />
+              <a href="#HPRJ3">3. Change Projection</a>
             </td>
           </tr>
         </tbody>
@@ -117,12 +118,105 @@
     <pre id="PRJ2CS" class="panel"></pre>
     <hr />
 
+    <div class="map-title-holder">
+      <h4 id="HPRJ3">3. Change Projection</h4>
+      <a class="ref-link" href="#top">Top</a>
+    </div>
+    <div
+      id="PRJ3"
+      class="llwp-map"
+      data-lang="en"
+      data-config="{
+          'map': {
+            'interaction': 'dynamic',
+            'viewSettings': {
+              'zoom': 4,
+              'minZoom': 4,
+              'maxZoom': 8,
+              'center': [-100, 60],
+              'projection': 3978
+            },
+            'basemapOptions': {
+              'basemapId': 'transport',
+              'shaded': true,
+              'labeled': true
+            },
+            'listOfGeoviewLayerConfig': [
+              {
+                'geoviewLayerId': 'esriFeatureLYR4',
+                'geoviewLayerName': { 'en': 'Water quality at monitoring sites' },
+                'metadataAccessPath': {
+                  'en': 'https://maps-cartes.ec.gc.ca/arcgis/rest/services/DMS/DEU_CSO_Volume/MapServer'
+                },
+                'geoviewLayerType': 'esriFeature',
+                'listOfLayerEntryConfig': [{ 'layerId': '8' }]
+              },
+              {
+                'geoviewLayerId': 'esriFeatureLYR5',
+                'geoviewLayerName': { 'en': 'Top Projects' },
+                'metadataAccessPath': {
+                  'en': 'https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/900A_and_top_100_en/MapServer/'
+                },
+                'geoviewLayerType': 'esriFeature',
+                'listOfLayerEntryConfig': [{ 'layerId': '0' }]
+              },
+              {
+                'geoviewLayerId': 'geojsonLYR5',
+                'geoviewLayerName': { 'en': 'GeoJSON Sample' },
+                'metadataAccessPath': { 'en': './geojson/metadata.json' },
+                'geoviewLayerType': 'GeoJSON',
+                'listOfLayerEntryConfig': [
+                  {
+                    'layerId': 'polygons.json',
+                    'layerName': { 'en': 'Polygons' }
+                  },
+                  {
+                    'layerId': 'lines.json',
+                    'layerName': { 'en': 'Lines' }
+                  },
+                  {
+                    'entryType': 'group',
+                    'layerId': 'point-feature-group',
+                    'layerName': { 'en': 'point-feature-group' },
+                    'listOfLayerEntryConfig': [
+                      { 'layerId': 'icon_points.json', 'layerName': { 'en': 'Icons' } },
+                      { 'layerId': 'points.json', 'layerName': { 'en': 'Points' } }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          'components': ['overview-map', 'north-arrow'],
+          'corePackages': [],
+          'theme': 'dark',
+          'suportedLanguages': ['en']
+        }"
+    ></div>
+    <div style="display: flex;">
+      <p>This map display projection is:   </p>
+      <div class="theme-selector">
+        <select name="Switch Projection" id="switchProjection">
+          <option value="3978">LCC</option>
+          <option value="3857">Web Mercator</option>
+          <option value="0000">Not Supported</option>
+        </select>
+      </div>
+    </div>
+    <button type="button" class="collapsible">Configuration Snippet</button>
+    <pre id="PRJ3CS" class="panel"></pre>
+    <hr />
+
     <script src="codedoc.js"></script>
     <script>
       // initialize cgpv and api events, a callback is optional, used if calling api's after the rendering is ready
       cgpv.init(function () {
         console.log('api is ready');
 
+        const switchProjectioneElem = document.getElementById("switchProjection");
+        switchProjectioneElem.addEventListener("change", (e) => {
+          cgpv.api.maps['PRJ3'].setProjection(e.target.value)
+        });
         //create snippets
         createConfigSnippet();
       });

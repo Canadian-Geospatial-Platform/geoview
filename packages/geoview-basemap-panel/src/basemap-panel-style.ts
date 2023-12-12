@@ -11,6 +11,7 @@ export const getSxClasses = (theme) => ({
       borderRadius: '6px',
       boxShadow: 'none',
       marginBottom: '16px',
+      width: '300px',
       transition: 'all 0.3s ease-in-out',
       '&:last-child': {
         marginBottom: '0px',

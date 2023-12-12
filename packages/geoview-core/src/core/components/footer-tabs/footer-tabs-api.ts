@@ -37,7 +37,7 @@ export class FooterTabsApi {
   createFooterTab = (tabProps: TypeTabs) => {
     if (tabProps) {
       // find if tab value exists
-      const tab = this.tabs.find((t) => t.value === tabProps.value);
+      const tab = this.tabs.find((t) => t.id === tabProps.id);
 
       // if tab does not exist, create it
       if (!tab) {
@@ -57,15 +57,15 @@ export class FooterTabsApi {
   /**
    * Remove a tab by value
    *
-   * @param {number} value the value of the tab to be removed
+   * @param {string} id the id of the tab to be removed
    */
-  removeFooterTab = (value: number): void => {
+  removeFooterTab = (id: string): void => {
     // find the tab to be removed
-    const tabToRemove = this.tabs.find((tab) => tab.value === value);
+    const tabToRemove = this.tabs.find((tab) => tab.id === id);
 
     if (tabToRemove) {
       // remove the tab from the footer tabs array
-      this.tabs = this.tabs.filter((tab) => tab.value !== value);
+      this.tabs = this.tabs.filter((tab) => tab.id !== id);
 
       // trigger an event that a tab has been removed
       api.event.emit(footerTabPayload(EVENT_NAMES.FOOTER_TABS.EVENT_FOOTER_TABS_TAB_REMOVE, this.mapId, tabToRemove));
@@ -73,13 +73,13 @@ export class FooterTabsApi {
   };
 
   /**
-   * Select a tab by value
+   * Select a tab by id
    *
-   * @param {number} value the value of the tab to be selected
+   * @param {string} id the id of the tab to be selected
    */
-  selectFooterTab = (value: number): void => {
+  selectFooterTab = (id: string): void => {
     // find the tab to be selected
-    const tabToSelect = this.tabs.find((tab) => tab.value === value);
+    const tabToSelect = this.tabs.find((tab) => tab.id === id);
     if (tabToSelect) {
       // trigger an event to select the tab
       api.event.emit(footerTabPayload(EVENT_NAMES.FOOTER_TABS.EVENT_FOOTER_TABS_TAB_SELECT, this.mapId, tabToSelect));

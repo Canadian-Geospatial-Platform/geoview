@@ -1,22 +1,17 @@
 import axios, { AxiosResponse } from 'axios';
 
-import i18n from 'i18next';
-
 import { Extent } from 'ol/extent';
 import { XYZ, OSM } from 'ol/source';
 import TileGrid from 'ol/tilegrid/TileGrid';
+import TileLayer from 'ol/layer/Tile';
 
 import { api } from '@/app';
-
-import { EVENT_NAMES } from '@/api/events/event-types';
-
 import { TypeJsonObject, toJsonObject, TypeJsonArray } from '@/core/types/global-types';
-
-import { generateId, showError } from '@/core/utils/utilities';
-import { basemapLayerArrayPayload } from '@/api/events/payloads';
+import { getLocalizedMessage, showError } from '@/core/utils/utilities';
 import { TypeBasemapProps, TypeBasemapOptions, TypeBasemapLayer } from '@/geo/layer/basemap/basemap-types';
-import { TypeDisplayLanguage, TypeValidMapProjectionCodes, TypeLocalizedString } from '@/geo/map/map-schema-types';
+import { TypeDisplayLanguage, TypeValidMapProjectionCodes } from '@/geo/map/map-schema-types';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
+import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
 
 /**
  * A class to get a Basemap for a define projection and language. For the moment, a list maps are available and
@@ -27,9 +22,6 @@ import { MapEventProcessor } from '@/api/event-processors/event-processor-childr
  * @class Basemap
  */
 export class Basemap {
-  // used to hold all created basemaps for a map
-  basemaps: TypeBasemapProps[] = [];
-
   // active basemap
   activeBasemap?: TypeBasemapProps;
 
@@ -45,17 +37,8 @@ export class Basemap {
   // default overview map layer
   overviewMap?: TypeBasemapProps;
 
-  // attribution text
-  attribution: string;
-
-  // the language to use
-  displayLanguage: TypeDisplayLanguage;
-
   // the basemap options passed from the map config
   basemapOptions: TypeBasemapOptions;
-
-  // the projection number
-  private projection: TypeValidMapProjectionCodes;
 
   // the map id to be used in events
   mapId: string;
@@ -64,25 +47,15 @@ export class Basemap {
    * initialize basemap
    *
    * @param {TypeBasemapOptions} basemapOptions optional basemap option properties, passed in from map config
-   * @param {TypeDisplayLanguage} displayLanguage language to be used, either en or fr
-   * @param {TypeValidMapProjectionCodes} projection projection number
    * @param {string} mapId the map id
    */
-  constructor(
-    basemapOptions: TypeBasemapOptions,
-    displayLanguage: TypeDisplayLanguage,
-    projection: TypeValidMapProjectionCodes,
-    mapId: string
-  ) {
+  constructor(basemapOptions: TypeBasemapOptions, mapId: string) {
     this.mapId = mapId;
 
     this.basemapOptions = basemapOptions;
 
-    this.displayLanguage = displayLanguage;
-
-    this.projection = projection;
-
-    this.attribution = this.attributionVal[displayLanguage] as string;
+    // create the overview default basemap (no label, no shaded)
+    this.setOverviewMap();
   }
 
   /**
@@ -127,14 +100,7 @@ export class Basemap {
     },
   });
 
-  /**
-   * attribution to add the map
-   */
-  private attributionVal: TypeLocalizedString = {
-    en: i18n.t('mapctrl.attribution.defaultnrcan') || '',
-    fr: i18n.t('mapctrl.attribution.defaultnrcan') || '',
-  };
-
+  // #region PRIVATE UTILITY FUNCTIONS
   /**
    * Get projection from basemap url
    * Because OpenLayers can reproject on the fly raster, some like Shaded and Simple even if only available in 3978
@@ -152,121 +118,47 @@ export class Basemap {
 
     return code;
   }
+  // #endregion
 
-  /**
-   * Get basemap thumbnail url
-   *
-   * @param {string[]} basemapTypes basemap layer type (shaded, transport, label, simple)
-   * @param {TypeValidMapProjectionCodes} projection basemap projection
-   * @param {TypeDisplayLanguage} displayLanguage basemap language
-   *
-   * @returns {string[]} array of thumbnail urls
-   */
-  private getThumbnailUrl(basemapTypes: string[], projection: TypeValidMapProjectionCodes, displayLanguage: TypeDisplayLanguage): string[] {
-    const thumbnailUrls: string[] = [];
+  // #region OVERVIEW MAP
+  async setOverviewMap() {
+    const overviewMap = await this.createCoreBasemap({ basemapId: 'transport', shaded: false, labeled: false });
 
-    for (let typeIndex = 0; typeIndex < basemapTypes.length; typeIndex++) {
-      const type = basemapTypes[typeIndex];
-
-      if (type === 'transport') {
-        if (this.basemapsList[projection].transport?.url) {
-          thumbnailUrls.push(
-            (this.basemapsList[projection].transport?.url as string)
-              .replace('{z}', '8')
-              .replace('{y}', projection === 3978 ? '285' : '91')
-              .replace('{x}', projection === 3978 ? '268' : '74')
-          );
-        }
-      }
-
-      if (type === 'simple') {
-        // Only available in 3978
-        if (this.basemapsList[projection].simple?.url) {
-          thumbnailUrls.push(
-            (this.basemapsList[projection].simple.url as string).replace('{z}', '8').replace('{y}', '285').replace('{x}', '268')
-          );
-        }
-      }
-
-      if (type === 'shaded') {
-        // Only available in 3978
-        if (this.basemapsList[projection].shaded?.url) {
-          thumbnailUrls.push(
-            (this.basemapsList[projection].shaded.url as string).replace('{z}', '8').replace('{y}', '285').replace('{x}', '268')
-          );
-        }
-      }
-
-      if (type === 'label') {
-        if (this.basemapsList[projection].label?.url) {
-          thumbnailUrls.push(
-            (this.basemapsList[projection].label.url as string)
-              .replaceAll('xxxx', displayLanguage === 'en' ? 'CBMT' : 'CBCT')
-              .replace('{z}', '8')
-              .replace('{y}', projection === 3978 ? '285' : '91')
-              .replace('{x}', projection === 3978 ? '268' : '74')
-          );
-        }
-      }
-
-      if (type === 'osm') {
-        thumbnailUrls.push('https://tile.openstreetmap.org/0/0/0.png');
-      }
+    if (overviewMap) this.overviewMap = overviewMap;
+    else {
+      showError(this.mapId, 'Error loading overview map');
     }
-
-    return thumbnailUrls;
   }
 
-  /**
-   * Get basemap information (name and description)
-   *
-   * @param {string[]} basemapTypes basemap layer type (shaded, transport, label, simple)
-   * @param {TypeDisplayLanguage} displayLanguage basemap language
-   * @returns {string} array with information [name, description]
-   */
-  private getInfo(basemapTypes: string[], displayLanguage: TypeDisplayLanguage): string[] {
-    let name = '';
-    let description = '';
-
-    if (basemapTypes.includes('transport')) {
-      name = 'Transport';
-      description = `${
-        displayLanguage === 'en'
-          ? 'The Canada Base Map - Transportation (CBMT). This web mapping service provides spatial reference context with an emphasis on transportation networks. It is designed especially for use as a background map in a web mapping application or geographic information system (GIS).'
-          : "Carte de base du Canada - Transport (CBCT). Ce service de cartographie Web offre un contexte de référence spatiale axé sur les réseaux de transport. Il est particulièrement conçu pour être utilisé comme fond de carte dans une application cartographique Web ou un système d'information géographique (SIG)."
-      }`;
-    } else if (basemapTypes.includes('simple')) {
-      name = 'Simple';
-    } else if (basemapTypes.includes('shaded')) {
-      name = `${displayLanguage === 'en' ? 'Shaded relief' : 'Relief ombré'}`;
-      description = `${
-        displayLanguage === 'en'
-          ? 'The Canada Base Map - Elevation (CBME) web mapping services of the Earth Sciences Sector at Natural Resources Canada, is intended primarily for online mapping application users and developers'
-          : "Les services de cartographie Web de la carte de base du Canada - élévation (CBCE) du Secteur des sciences de la Terre de Ressources naturelles Canada sont destinés principalement aux utilisateurs et aux développeurs d'applications de cartographie en ligne."
-      }`;
-    } else if (basemapTypes.includes('osm')) {
-      name = `${displayLanguage === 'en' ? 'Open Street Maps' : 'Carte - Open Street Maps'}`;
-    } else if (basemapTypes.includes('nogeom')) {
-      name = `${displayLanguage === 'en' ? 'No geometry' : 'Pas de géométrie'}`;
-    }
-
-    if (basemapTypes.includes('label')) name = `${name} ${displayLanguage === 'en' ? 'with labels' : 'avec étiquettes'}`;
-
-    return [name, description];
+  getOverviewMap(): TypeBasemapProps | undefined {
+    return this.overviewMap;
   }
+  // #endregion
 
+  // #region CREATE BASEMAPS
   /**
-   * Check if the type of basemap already exist
+   * Create empty basemap tilelayer to use as initial basemap while we load basemap
+   * so the viewer will not fails if basemap is not avialable
    *
-   * @param {string} type basemap type
-   * @returns {boolean} true if basemap exist, false otherwise
+   * @returns {TileLayer<XYZ>} return the created basemap
    */
-  isExisting(type: string): boolean {
-    // check if basemap with provided type exists
-    const exists = this.basemaps.length === 0 ? [] : this.basemaps.filter((basemap: TypeBasemapProps) => basemap.type === type);
+  createEmptyBasemap(): TileLayer<XYZ> {
+    // create empty tilelayer to use as initial basemap while we load basemap
+    const emptyBasemap: TypeBasemapLayer = {
+      basemapId: 'empty',
+      source: new XYZ(),
+      type: 'empty',
+      opacity: 0,
+      resolutions: [],
+      origin: [],
+      minScale: 0,
+      maxScale: 17,
+      extent: [0, 0, 0, 0],
+    };
+    const emptyLayer = new TileLayer(emptyBasemap);
+    emptyLayer.set('mapId', 'basemap');
 
-    // return true if basemap exist
-    return exists.length !== 0;
+    return emptyLayer;
   }
 
   /**
@@ -276,9 +168,10 @@ export class Basemap {
    * @param {TypeJsonObject} basemapLayer the basemap layer url and json url
    * @param {number} opacity the opacity to use for this layer
    * @param {boolean} rest should we do a get request to get the info from the server
+   *
    * @returns {TypeBasemapLayer} return the created basemap layer
    */
-  async createBasemapLayer(
+  private async createBasemapLayer(
     basemapId: string,
     basemapLayer: TypeJsonObject,
     opacity: number,
@@ -356,7 +249,7 @@ export class Basemap {
             url: basemapLayer.url as string,
             jsonUrl: basemapLayer.jsonUrl as string,
             source: new XYZ({
-              attributions: this.attribution,
+              attributions: getLocalizedMessage(this.mapId, 'mapctrl.attribution.defaultnrcan'),
               projection: api.projection.projections[urlProj],
               url: basemapLayer.url as string,
               crossOrigin: 'Anonymous',
@@ -385,8 +278,16 @@ export class Basemap {
    * Create the core basemap and add the layers to it
    *
    * @param {TypeBasemapOptions} basemapOptions basemap options
+   * @param {TypeValidMapProjectionCodes} projection optional projection code
+   * @param {TypeDisplayLanguage} language optional language
+   *
+   * @return {Promise<TypeBasemapProps | undefined>} the core basemap
    */
-  createCoreBasemap(basemapOptions: TypeBasemapOptions, projection?: number): Promise<TypeBasemapProps | undefined> {
+  createCoreBasemap(
+    basemapOptions: TypeBasemapOptions,
+    projection?: TypeValidMapProjectionCodes,
+    language?: TypeDisplayLanguage
+  ): Promise<TypeBasemapProps | undefined> {
     // eslint-disable-next-line no-async-promise-executor
     return new Promise(async (resolve) => {
       const basemapLayers: TypeBasemapLayer[] = [];
@@ -400,7 +301,10 @@ export class Basemap {
       let maxZoom = 17;
 
       // check if projection is provided for the basemap creation
-      const projectionCode = projection === undefined ? this.projection : projection;
+      const projectionCode = projection === undefined ? MapEventProcessor.getMapState(this.mapId).currentProjection : projection;
+
+      // check if language is provided for the basemap creation
+      const languageCode = language === undefined ? AppEventProcessor.getDisplayLanguage(this.mapId) : language;
 
       // check if basemap options are provided for the basemap creation
       const coreBasemapOptions = basemapOptions === undefined ? this.basemapOptions : basemapOptions;
@@ -483,13 +387,10 @@ export class Basemap {
           const labelLayer = await this.createBasemapLayer(
             'label',
             toJsonObject({
-              url: (this.basemapsList[projectionCode].label.url as string)?.replaceAll(
-                'xxxx',
-                this.displayLanguage === 'en' ? 'CBMT' : 'CBCT'
-              ),
+              url: (this.basemapsList[projectionCode].label.url as string)?.replaceAll('xxxx', languageCode === 'en' ? 'CBMT' : 'CBCT'),
               jsonUrl: (this.basemapsList[projectionCode].label.jsonUrl as string)?.replaceAll(
                 'xxxx',
-                this.displayLanguage === 'en' ? 'CBMT' : 'CBCT'
+                languageCode === 'en' ? 'CBMT' : 'CBCT'
               ),
             }),
             0.8,
@@ -502,27 +403,16 @@ export class Basemap {
         }
       }
 
-      if (
-        !this.isExisting(basemaplayerTypes.join('-')) &&
-        (basemapLayers.length > 0 || (basemapLayers.length === 0 && coreBasemapOptions.basemapId === 'nogeom'))
-      ) {
-        const info = this.getInfo(basemaplayerTypes, this.displayLanguage as TypeDisplayLanguage);
-
+      if (basemapLayers.length > 0 || (basemapLayers.length === 0 && coreBasemapOptions.basemapId === 'nogeom')) {
         // id and type are derived from the basemap type composition (shaded, label, transport, simple)
-        const basemap = this.createBasemap({
+        const basemap = {
           basemapId: basemaplayerTypes.join(''),
-          name: info[0],
           layers: basemapLayers,
           type: basemaplayerTypes.join('-'),
-          description: info[1],
-          descSummary: '',
-          altText: info[1],
-          thumbnailUrl: this.getThumbnailUrl(
-            basemaplayerTypes,
-            projectionCode as TypeValidMapProjectionCodes,
-            this.displayLanguage as TypeDisplayLanguage
-          ),
-          attribution: coreBasemapOptions.basemapId === 'osm' ? ['© OpenStreetMap', `${this.attribution}`] : [this.attribution],
+          attribution:
+            coreBasemapOptions.basemapId === 'osm'
+              ? ['© OpenStreetMap', getLocalizedMessage(this.mapId, 'mapctrl.attribution.defaultnrcan')]
+              : [getLocalizedMessage(this.mapId, 'mapctrl.attribution.defaultnrcan')],
           zoomLevels: {
             min: minZoom,
             max: maxZoom,
@@ -530,14 +420,14 @@ export class Basemap {
           defaultExtent,
           defaultOrigin,
           defaultResolutions,
-        });
+          name: '',
+          description: '',
+          descSummary: '',
+          altText: '',
+          thumbnailUrl: '',
+        };
 
         resolve(basemap);
-      } else if (this.isExisting(basemaplayerTypes.join('-'))) {
-        const existingBasemap = this.basemaps.filter(
-          (basemapProps: TypeBasemapProps) => basemapProps.type === basemaplayerTypes.join('-')
-        )[0];
-        resolve(existingBasemap);
       } else {
         // if no basemap set, resolve to undefined
         resolve(undefined);
@@ -549,9 +439,16 @@ export class Basemap {
    * Create a custom basemap
    *
    * @param {TypeBasemapProps} basemapProps basemap properties
+   * @param {TypeValidMapProjectionCodes} projection projection code
+   * @param {TypeDisplayLanguage} language optional language
+   *
    * @returns {TypeBasemapProps} the created custom basemap
    */
-  createCustomBasemap(basemapProps: TypeBasemapProps): TypeBasemapProps {
+  createCustomBasemap(
+    basemapProps: TypeBasemapProps,
+    projection: TypeValidMapProjectionCodes,
+    language?: TypeDisplayLanguage
+  ): TypeBasemapProps {
     interface bilingual {
       en: string;
       fr: string;
@@ -563,17 +460,20 @@ export class Basemap {
     const thumbnailUrl: bilingual = basemapProps.thumbnailUrl as unknown as bilingual;
     const attribution: bilingual = basemapProps.attribution as unknown as bilingual;
 
+    // check if language is provided for the basemap creation
+    const languageCode = language === undefined ? AppEventProcessor.getDisplayLanguage(this.mapId) : language;
+
     // create the basemap properties
     const formatProps: TypeBasemapProps = { ...basemapProps };
-    formatProps.name = this.displayLanguage === 'en' ? name.en : name.fr;
+    formatProps.name = languageCode === 'en' ? name.en : name.fr;
     formatProps.layers = basemapProps.layers.map((layer) => {
       return {
         ...layer,
-        url: this.displayLanguage === 'en' ? (layer.url as unknown as bilingual).en : (layer.url as unknown as bilingual).fr,
+        url: languageCode === 'en' ? (layer.url as unknown as bilingual).en : (layer.url as unknown as bilingual).fr,
         source: new XYZ({
-          attributions: attribution[this.displayLanguage],
-          projection: api.projection.projections[this.projection],
-          url: this.displayLanguage === 'en' ? (layer.url as unknown as bilingual).en : (layer.url as unknown as bilingual).fr,
+          attributions: attribution[languageCode],
+          projection: api.projection.projections[projection],
+          url: languageCode === 'en' ? (layer.url as unknown as bilingual).en : (layer.url as unknown as bilingual).fr,
           crossOrigin: 'Anonymous',
           tileGrid: new TileGrid({
             extent: this.defaultExtent,
@@ -584,85 +484,81 @@ export class Basemap {
       };
     });
     formatProps.type = 'test';
-    formatProps.description = this.displayLanguage === 'en' ? description.en : description.fr;
-    formatProps.altText = this.displayLanguage === 'en' ? description.en : description.fr;
-    formatProps.thumbnailUrl = this.displayLanguage === 'en' ? thumbnailUrl.en : thumbnailUrl.fr;
-    formatProps.attribution = this.displayLanguage === 'en' ? [attribution.en] : [attribution.fr];
+    formatProps.description = languageCode === 'en' ? description.en : description.fr;
+    formatProps.altText = languageCode === 'en' ? description.en : description.fr;
+    formatProps.thumbnailUrl = languageCode === 'en' ? thumbnailUrl.en : thumbnailUrl.fr;
+    formatProps.attribution = languageCode === 'en' ? [attribution.en] : [attribution.fr];
 
-    return this.createBasemap(formatProps);
+    return formatProps;
   }
+  // #endregion
 
   /**
    * Load the default basemap that was passed in the map config
    *
-   * @returns {TypeBasemapProps | undefined} the default basemap
+   * @param {TypeValidMapProjectionCodes} projection optional projection code
+   * @param {TypeDisplayLanguage} language optional language
    */
-  async loadDefaultBasemaps(): Promise<TypeBasemapProps | undefined> {
-    const basemap = await this.createCoreBasemap(MapEventProcessor.getBasemapOptions(this.mapId));
-    const overviewBasemap = await this.createCoreBasemap({ basemapId: 'transport', shaded: false, labeled: false });
-    if (overviewBasemap) this.overviewMap = overviewBasemap;
-    else {
-      showError(this.mapId, 'Error loading overview map');
-    }
+  async loadDefaultBasemaps(projection?: TypeValidMapProjectionCodes, language?: TypeDisplayLanguage): Promise<void> {
+    const basemap = await this.createCoreBasemap(MapEventProcessor.getBasemapOptions(this.mapId), projection, language);
 
     if (basemap) {
-      this.activeBasemap = basemap;
+      // info used by create custom basemap
       this.defaultOrigin = basemap?.defaultOrigin;
       this.defaultResolutions = basemap?.defaultResolutions;
       this.defaultExtent = basemap?.defaultExtent;
 
-      this.setBasemap(basemap.basemapId as string);
-      return basemap;
+      this.setBasemap(basemap);
     }
-    showError(this.mapId, 'Error loading basemap');
-    return undefined;
-  }
-
-  /**
-   * Create a new basemap
-   *
-   * @param {TypeBasemapProps} basemapProps basemap properties
-   */
-  private createBasemap(basemapProps: TypeBasemapProps): TypeBasemapProps {
-    // generate an id if none provided
-    // eslint-disable-next-line no-param-reassign
-    if (!basemapProps.basemapId) basemapProps.basemapId = generateId(basemapProps.basemapId);
-
-    const thumbnailUrls: string[] = [];
-
-    // set thumbnail if not provided
-    if (!basemapProps.thumbnailUrl || basemapProps.thumbnailUrl.length === 0) {
-      basemapProps.layers.forEach(() => {
-        // const { type } = layer;
-        // TODO: set thumbnails from configuration
-      });
-
-      // eslint-disable-next-line no-param-reassign
-      basemapProps.thumbnailUrl = thumbnailUrls;
-    }
-
-    this.basemaps.push(basemapProps);
-
-    return basemapProps;
   }
 
   /**
    * Set the current basemap and update the basemap layers on the map
    *
-   * @param {string} basemapId the id of the basemap
+   * @param {TypeBasemapProps} basemap the basemap
    */
-  setBasemap(basemapId: string): void {
-    // get basemap by id
-    const basemap = this.basemaps.filter((basemapType: TypeBasemapProps) => basemapType.basemapId === basemapId)[0];
-
+  setBasemap(basemap: TypeBasemapProps): void {
     // set active basemap
     this.activeBasemap = basemap;
 
-    // set store attribution for the selected basemap
-    MapEventProcessor.setMapAttribution(this.mapId, basemap.attribution);
+    // set store attribution for the selected basemap or empty string if not provided
+    MapEventProcessor.setMapAttribution(this.mapId, basemap ? basemap.attribution : ['']);
 
-    // emit an event to update the basemap layers on the map
-    if (basemap?.layers)
-      api.event.emit(basemapLayerArrayPayload(EVENT_NAMES.BASEMAP.EVENT_BASEMAP_LAYERS_UPDATE, this.mapId, basemap.layers));
+    // update the basemap layers on the map
+    if (basemap?.layers) {
+      // remove previous basemaps
+      const layers = api.maps[this.mapId].map.getAllLayers();
+
+      // loop through all layers on the map
+      for (let layerIndex = 0; layerIndex < layers.length; layerIndex++) {
+        const layer = layers[layerIndex];
+
+        // get group id that this layer belongs to
+        const layerId = layer.get('mapId');
+
+        // check if the group id matches basemap
+        if (layerId && layerId === 'basemap') {
+          // remove the basemap layer
+          api.maps[this.mapId].map.removeLayer(layer);
+        }
+      }
+
+      // add basemap layers
+      basemap.layers.forEach((layer, index) => {
+        const basemapLayer = new TileLayer({
+          opacity: layer.opacity,
+          source: layer.source,
+        });
+
+        // set this basemap's group id to basemap
+        basemapLayer.set('mapId', 'basemap');
+
+        // add the basemap layer
+        api.maps[this.mapId].map.getLayers().insertAt(index, basemapLayer);
+
+        // render the layer
+        basemapLayer.changed();
+      });
+    }
   }
 }
