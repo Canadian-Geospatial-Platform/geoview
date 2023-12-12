@@ -227,7 +227,11 @@ export function FooterTabs(): JSX.Element | null {
                 {isFullscreen ? <FullscreenExitIcon /> : <FullscreenIcon />}
               </IconButton>
             )}
-            {!isFullscreen && <IconButton onClick={handleCollapse}>{!isCollapsed ? <ExpandMoreIcon /> : <ExpandLessIcon />}</IconButton>}
+            {!isFullscreen && (
+              <IconButton sx={sxClasses.expandBtn} onClick={handleCollapse}>
+                {!isCollapsed ? <ExpandMoreIcon /> : <ExpandLessIcon />}
+              </IconButton>
+            )}
             <IconButton
               onClick={handleDynamicFocus}
               tooltip={isFocusToMap ? 'footerTabsContainer.focusToMap' : 'footerTabsContainer.focusToFooter'}
