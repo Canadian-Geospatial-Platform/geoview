@@ -2,6 +2,7 @@ import { useStore } from 'zustand';
 import { type MRT_ColumnFiltersState as MRTColumnFiltersState } from 'material-react-table';
 import { TypeSetStore, TypeGetStore } from '@/core/stores/geoview-store';
 import { useGeoViewStore } from '../stores-managers';
+import { LayersDataType } from '@/core/components/data-table/data-panel';
 
 export interface IMapDataTableState {
   columnFiltersRecord: Record<string, MRTColumnFiltersState>;
@@ -12,7 +13,7 @@ export interface IMapDataTableState {
   rowSelectionsRecord: Record<string, Record<number, boolean>>;
   selectedLayerIndex: number;
   toolbarRowSelectedMessageRecord: Record<string, string>;
-
+  layersData: LayersDataType[];
   actions: {
     setColumnFiltersEntry: (filtered: MRTColumnFiltersState, layerKey: string) => void;
     setIsEnlargeDataTable: (isEnlarge: boolean) => void;
@@ -21,6 +22,7 @@ export interface IMapDataTableState {
     setRowSelectionsEntry: (rowSelection: Record<number, boolean>, layerKey: string) => void;
     setSelectedLayerIndex: (idx: number) => void;
     setToolbarRowSelectedMessageEntry: (message: string, layerKey: string) => void;
+    setLayersData: (layers: LayersDataType[]) => void;
   };
 }
 
@@ -34,9 +36,18 @@ export function initialDataTableState(set: TypeSetStore, get: TypeGetStore): IMa
     rowSelectionsRecord: {},
     selectedLayerIndex: 0,
     toolbarRowSelectedMessageRecord: {},
+    layersData: [],
 
     // #region ACTIONS
     actions: {
+      setLayersData: (layersData: LayersDataType[]) => {
+        set({
+          dataTableState: {
+            ...get().dataTableState,
+            layersData,
+          },
+        });
+      },
       setMapFilteredEntry: (mapFiltered: boolean, layerKey: string) => {
         set({
           dataTableState: {
@@ -111,5 +122,6 @@ export const useDataTableStoreColumnFiltersRecord = () => useStore(useGeoViewSto
 export const useDataTableStoreRowSelectionsRecord = () => useStore(useGeoViewStore(), (state) => state.dataTableState.rowSelectionsRecord);
 export const useDataTableStoreMapFilteredRecord = () => useStore(useGeoViewStore(), (state) => state.dataTableState.mapFilteredRecord);
 export const useDataTableStoreRowsFiltered = () => useStore(useGeoViewStore(), (state) => state.dataTableState.rowsFilteredRecord);
+export const useDatatableStoreLayersData = () => useStore(useGeoViewStore(), (state) => state.dataTableState.layersData);
 
 export const useDataTableStoreActions = () => useStore(useGeoViewStore(), (state) => state.dataTableState.actions);

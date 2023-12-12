@@ -20,15 +20,17 @@ import {
 
 import { ResponsiveGrid, EnlargeButton, CloseButton, LayerList, LayerListEntry, LayerTitle } from '../common';
 
+export interface LayersDataType extends MapDataTableDataProps, GroupLayers {}
+
 interface DatapanelProps {
-  layerData: (MapDataTableDataProps & GroupLayers)[];
+  layerData: LayersDataType[];
   mapId: string;
   language: TypeDisplayLanguage;
 }
 
 /**
  * Build Data panel from map.
- * @param {MapDataTableProps} layerData map data which will be used to build data table.
+ * @param {LayersDataType} layerData map data which will be used to build data table.
  * @param {string} mapId id of the map.
  * @return {ReactElement} Data table as react element.
  */
@@ -46,7 +48,7 @@ export function Datapanel({ layerData, mapId, language }: DatapanelProps) {
   const isEnlargeDataTable = useDataTableStoreIsEnlargeDataTable();
   const mapFiltered = useDataTableStoreMapFilteredRecord();
   const rowsFiltered = useDataTableStoreRowsFiltered();
-  const { setSelectedLayerIndex, setIsEnlargeDataTable } = useDataTableStoreActions();
+  const { setSelectedLayerIndex, setIsEnlargeDataTable, setLayersData } = useDataTableStoreActions();
 
   const handleLayerChange = useCallback((_layer: LayerListEntry, index: number) => {
     setSelectedLayerIndex(index);
@@ -121,6 +123,10 @@ export function Datapanel({ layerData, mapId, language }: DatapanelProps) {
     return () => clearTimeout(clearLoading);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isLoading, selectedLayerIndex]);
+
+  useEffect(() => {
+    setLayersData(layerData);
+  }, [layerData, setLayersData]);
 
   return (
     <Box sx={sxClasses.dataPanel}>
