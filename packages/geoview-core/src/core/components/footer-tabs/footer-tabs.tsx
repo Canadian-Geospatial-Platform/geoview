@@ -182,20 +182,19 @@ export function FooterTabs(): JSX.Element | null {
   // Handle focus using dynamic focus button
   const handleDynamicFocus = () => {
     const mapIdDiv = document.getElementById(mapId);
-    const yOffset = 30;
 
     if (mapIdDiv) {
       if (isFocusToMap) {
         // scroll to map
         window.scrollTo({
-          top: mapIdDiv.offsetTop - yOffset,
+          top: mapIdDiv.offsetTop - 30,
           behavior: 'smooth',
         });
         setIsFocusToMap(false);
       } else {
-        const focusButtonId = document.getElementById(`focusToMap${mapId}`);
+        const focusButtonId = document.getElementById(`map-${mapId}`);
         if (focusButtonId) {
-          const targetY = focusButtonId.getBoundingClientRect().bottom + window.pageYOffset - yOffset;
+          const targetY = focusButtonId.getBoundingClientRect().bottom + window.pageYOffset - 70;
           // scroll to footer
           window.scrollTo({
             top: targetY,
@@ -231,7 +230,7 @@ export function FooterTabs(): JSX.Element | null {
             {!isFullscreen && <IconButton onClick={handleCollapse}>{!isCollapsed ? <ExpandMoreIcon /> : <ExpandLessIcon />}</IconButton>}
             <IconButton
               onClick={handleDynamicFocus}
-              tooltip={isFocusToMap ? 'footerTabs.focusToMap' : 'footerTabs.focusToFooter'}
+              tooltip={isFocusToMap ? 'footerTabsContainer.focusToMap' : 'footerTabsContainer.focusToFooter'}
               disabled={isCollapsed}
             >
               {isFocusToMap ? <MoveUpRoundedIcon /> : <MoveDownRoundedIcon />}

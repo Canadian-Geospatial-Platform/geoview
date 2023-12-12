@@ -149,8 +149,8 @@
   "geochart": {
     "noChartAvailable": "Cliquez sur la couche de carte avec le graphique"
   },
-  "footerTabs": {
-    "focusToMap": "Se concentrer sur la carte",
-    "focusToFooter": "Focus sur le pied de page"
+  "footerTabsContainer": {
+    "focusToMap": "Aller à la carte",
+    "focusToFooter": "Aller au pied de page"
   }
 }
