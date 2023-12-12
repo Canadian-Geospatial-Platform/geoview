@@ -3,6 +3,8 @@
 /* eslint-disable react/no-array-index-key */
 import { SyntheticEvent, useEffect, useState, ReactNode } from 'react';
 
+import { useTranslation } from 'react-i18next';
+
 import { Grid, Tab as MaterialTab, Tabs as MaterialTabs, TabsProps, TabProps, BoxProps } from '@mui/material';
 
 import { HtmlToReact } from '@/core/containers/html-to-react';
@@ -44,6 +46,8 @@ export interface TypeTabsProps {
  */
 export function Tabs(props: TypeTabsProps): JSX.Element {
   const { tabs, rightButtons, selectedTab, isCollapsed, handleCollapse, TabContentVisibilty = 'inherit' } = props;
+
+  const { t } = useTranslation<string>();
 
   // internal state
   const [value, setValue] = useState(0);
@@ -100,7 +104,7 @@ export function Tabs(props: TypeTabsProps): JSX.Element {
             // eslint-disable-next-line prettier/prettier
             return (
               <MaterialTab
-                label={tab.label}
+                label={t(tab.label)}
                 key={index}
                 icon={tab.icon}
                 iconPosition="start"

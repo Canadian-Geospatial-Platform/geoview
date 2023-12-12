@@ -48,7 +48,7 @@ export class AppEventProcessor extends AbstractEventProcessor {
     getGeoViewStore(mapId).getState().appState.actions.setDisplayTheme(theme);
   }
 
-  static toggleFullscreen(mapId: string, active: boolean, element: TypeHTMLElement): void {
+  static setFullscreen(mapId: string, active: boolean, element: TypeHTMLElement): void {
     getGeoViewStore(mapId).getState().appState.actions.setFullScreenActive(active, element);
   }
   // #endregion

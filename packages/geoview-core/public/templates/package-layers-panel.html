@@ -155,30 +155,9 @@
     <script src="codedoc.js"></script>
     <script>
       function reloadMap() {
-        // DEPRECATED
-        cgpv.api.maps['mapWM'].loadMapFromJsonStringConfig (`{
-          'map': {
-            'interaction': 'dynamic',
-            'viewSettings': {
-              'zoom': 4,
-              'center': [-100, 60],
-              'projection': ${Number(document.getElementById('projections').value)}
-            },
-            'basemapOptions': {
-              'basemapId': 'transport',
-              'shaded': true,
-              'labeled': true
-            },
-            'listOfGeoviewLayerConfig': [
-            ]
-          },
-          'theme': 'dark',
-          'components': [],
-          'corePackages': ['layers-panel'],
-          'appBar': ['export'],
-          'suportedLanguages': ['en']
-        }`);
+        cgpv.api.maps['mapWM'].setProjection(Number(document.getElementById('projections').value))
       }
+
       // initialize cgpv and api events, a callback is optional, used if calling api's after the rendering is ready
       cgpv.init(function () {
         console.log('api is ready');

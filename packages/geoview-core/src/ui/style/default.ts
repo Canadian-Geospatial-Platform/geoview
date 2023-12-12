@@ -193,7 +193,7 @@ export const defaultThemeOptions: ThemeOptions = {
     borderDefault: 'rgba(255,255,255,0.25)',
     borderHover: 'rgba(255,255,255,0.5)',
     borderActive: 'rgba(255,255,255,0.75)',
-    overlayDefault: 'rgba(0,0,0,0.5)',
+    overlayDefault: 'rgba(0,0,0,0.15)',
     overlayHover: 'rgba(0,0,0,0.25)',
     overlayActive: 'transparent',
   },

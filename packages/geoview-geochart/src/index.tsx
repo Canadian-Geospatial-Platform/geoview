@@ -10,6 +10,7 @@ import {
 } from 'geoview-core';
 import { ChartType } from 'geochart';
 import { LayerListEntry } from 'geoview-core/src/core/components/common';
+import { ChartIcon } from 'geoview-core/src/ui/icons';
 import { PayloadBaseClassChart, EVENT_CHART_REDRAW } from './geochart-event-base';
 import { PayloadChartConfig } from './geochart-event-config';
 import { PluginGeoChartConfig } from './geochart-types';
@@ -56,10 +57,14 @@ class GeoChartPlugin extends AbstractPlugin {
    */
   translations = toJsonObject({
     en: {
-      chartPanel: 'Chart',
+      chartPanel: {
+        title: 'Chart',
+      },
     },
     fr: {
-      chartPanel: 'Graphique',
+      chartPanel: {
+        title: 'Graphique',
+      },
     },
   });
 
@@ -106,7 +111,8 @@ class GeoChartPlugin extends AbstractPlugin {
 
       api.maps[mapId].footerTabs.createFooterTab({
         value: this.value,
-        label: this.translations[api.maps[mapId].getDisplayLanguage()].chartPanel as string,
+        label: 'chartPanel.title',
+        icon: <ChartIcon />,
         content: () => createElement(GeoChartPanel, { mapId, configObj, layerList }, []),
       });
     }

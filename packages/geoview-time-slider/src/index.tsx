@@ -1,4 +1,5 @@
 import { Cast, AbstractPlugin, TypeWindow, toJsonObject, TypePluginOptions, TypeButtonPanel } from 'geoview-core';
+import { TimeSliderIcon } from 'geoview-core/src/ui';
 import { TimeSliderPanel } from './time-slider-panel';
 
 export interface LayerProps {
@@ -38,10 +39,14 @@ class TimeSliderPlugin extends AbstractPlugin {
    */
   translations = toJsonObject({
     en: {
-      timeSlider: 'Time Slider',
+      timeSlider: {
+        title: 'Time Slider',
+      },
     },
     fr: {
-      timeSlider: 'Curseur Temporel',
+      timeSlider: {
+        title: 'Curseur Temporel',
+      },
     },
   });
 
@@ -63,7 +68,8 @@ class TimeSliderPlugin extends AbstractPlugin {
       this.value = api.maps[mapId].footerTabs.tabs.length;
       api.maps[mapId].footerTabs.createFooterTab({
         value: this.value,
-        label: this.translations[api.maps[mapId].getDisplayLanguage()].timeSlider as string,
+        label: 'timeSlider.title',
+        icon: <TimeSliderIcon />,
         content: () => createElement(TimeSliderPanel, { mapId }, []),
       });
     }

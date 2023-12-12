@@ -6,6 +6,8 @@ import { ObjectEvent } from 'ol/Object'; // only for typing
 import Overlay from 'ol/Overlay';
 import { Extent } from 'ol/extent'; // only for Typing
 import { FitOptions } from 'ol/View'; // only for typing
+import TileLayer from 'ol/layer/Tile'; // only for typing
+import { XYZ } from 'ol/source'; // only for typing
 
 import { useStore } from 'zustand';
 import { useGeoViewStore } from '@/core/stores/stores-managers';
@@ -69,6 +71,8 @@ export interface IMapState {
   actions: {
     addHighlightedFeature: (feature: TypeFeatureInfoEntry) => void;
     addSelectedFeature: (feature: TypeFeatureInfoEntry) => void;
+    createBaseMapFromOptions: () => void;
+    createEmptyBasemap: () => TileLayer<XYZ>;
     getPixelFromCoordinate: (coord: Coordinate) => [number, number];
     hideClickMarker: () => void;
     highlightBBox: (extent: Extent) => void;
@@ -77,12 +81,14 @@ export interface IMapState {
     setAttribution: (attribution: string[]) => void;
     setClickCoordinates: () => void;
     setFixNorth: (ifFix: boolean) => void;
+    setInteraction: (interaction: TypeInteraction) => void;
     setMapElement: (mapElem: OLMap) => void;
     setMapKeyboardPanInteractions: (panDelta: number) => void;
     setOverlayClickMarker: (overlay: Overlay) => void;
     setOverlayClickMarkerRef: (htmlRef: HTMLElement) => void;
     setOverlayNorthMarker: (overlay: Overlay) => void;
     setOverlayNorthMarkerRef: (htmlRef: HTMLElement) => void;
+    setProjection: (projectionCode: TypeValidMapProjectionCodes, view: View) => void;
     setRotation: (degree: number) => void;
     setZoom: (zoom: number, duration?: number) => void;
     showClickMarker: (marker: TypeClickMarker) => void;
@@ -279,6 +285,12 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
           },
         });
       },
+      createBaseMapFromOptions: () => {
+        MapEventProcessor.resetBasemap(get().mapId);
+      },
+      createEmptyBasemap: (): TileLayer<XYZ> => {
+        return MapEventProcessor.createEmptyBasemap(get().mapId);
+      },
       getPixelFromCoordinate: (coord: Coordinate): [number, number] => {
         return get().mapState.mapElement!.getPixelFromCoordinate(coord) as unknown as [number, number];
       },
@@ -342,6 +354,21 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
           },
         });
       },
+      setInteraction: (interaction: TypeInteraction) => {
+        set({
+          mapState: {
+            ...get().mapState,
+            interaction,
+          },
+        });
+
+        // enable or disable map interaction when type of map interaction is set
+        if (interaction === 'dynamic' || !interaction) {
+          get()
+            .mapState.mapElement!.getInteractions()
+            .forEach((x) => x.setActive(interaction === 'dynamic'));
+        }
+      },
       setMapElement: (mapElem: OLMap) => {
         set({
           mapState: {
@@ -379,6 +406,20 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
       setOverlayNorthMarkerRef: (htmlRef: HTMLElement) => {
         const overlay = get().mapState.overlayNorthMarker;
         if (overlay !== undefined) overlay.setElement(htmlRef);
+      },
+      setProjection: (projectionCode: TypeValidMapProjectionCodes, view: View) => {
+        set({
+          mapState: {
+            ...get().mapState,
+            currentProjection: projectionCode,
+          },
+        });
+
+        // set new view
+        get().mapState.mapElement!.setView(view);
+
+        // reload the basemap from new projection
+        MapEventProcessor.resetBasemap(get().mapId);
       },
       setRotation: (degree: number) => {
         // set ol map rotation

@@ -29,6 +29,7 @@ import {
 } from '@/api/events/payloads';
 import { getShellSxClasses } from './containers-style';
 import { useMapInteraction, useMapLoaded } from '@/core/stores/store-interface-and-intial-values/map-state';
+import { useAppCircularProgressActive } from '@/core/stores/store-interface-and-intial-values/app-state';
 import {
   useUIActiveFocusItem,
   useUIActiveTrapGeoView,
@@ -65,6 +66,7 @@ export function Shell(props: ShellProps): JSX.Element {
 
   // get values from the store
   const mapLoaded = useMapLoaded();
+  const circularProgressActive = useAppCircularProgressActive();
   const activeTrapGeoView = useUIActiveTrapGeoView();
   const mapId = useGeoViewMapId();
   const interaction = useMapInteraction();
@@ -142,7 +144,8 @@ export function Shell(props: ShellProps): JSX.Element {
       <FocusTrap open={activeTrapGeoView}>
         <Box id={`shell-${shellId}`} sx={sxClasses.shell} className="geoview-shell" key={update} tabIndex={-1}>
           <CircularProgress isLoaded={mapLoaded} />
-          <Box sx={sxClasses.mapShellContainer} className="mapContainer" id={`map-${mapId}`}>
+          <CircularProgress isLoaded={!circularProgressActive} />
+          <Box id={`map-${mapId}`} sx={sxClasses.mapShellContainer} className="mapContainer">
             <Appbar />
             {/* load geolocator component if config includes in list of components in appBar */}
             {appBarComponents.includes('geolocator') && interaction === 'dynamic' && <Geolocator />}

@@ -1,4 +1,4 @@
-import { TypeJsonObject, TypeWindow, RefObject } from 'geoview-core';
+import { TypeWindow, RefObject } from 'geoview-core';
 
 import Draggable from 'react-draggable';
 
@@ -89,7 +89,6 @@ const sxClasses = {
 type SwiperProps = {
   mapId: string;
   config: ConfigProps;
-  translations: TypeJsonObject;
 };
 
 type ConfigProps = {
@@ -100,15 +99,15 @@ type ConfigProps = {
 const w = window as TypeWindow;
 
 export function Swiper(props: SwiperProps): JSX.Element {
-  const { mapId, config, translations } = props;
+  const { mapId, config } = props;
 
   const { cgpv } = w;
-  const { api, ui, react } = cgpv;
+  const { api, ui, react, useTranslation } = cgpv;
   const { useEffect, useState, useRef } = react;
 
   const { Box, Tooltip, HandleIcon } = ui.elements;
 
-  const displayLanguage = api.maps[mapId].getDisplayLanguage();
+  const { t } = useTranslation<string>();
 
   const [map] = useState<Map>(api.maps[mapId].map);
   const mapSize = useRef<number[]>(map?.getSize() || [0, 0]);
@@ -359,7 +358,7 @@ export function Swiper(props: SwiperProps): JSX.Element {
         nodeRef={swiperRef as RefObject<HTMLElement>}
       >
         <Box sx={[orientation === 'vertical' ? sxClasses.vertical : sxClasses.horizontal, sxClasses.bar]} tabIndex={0} ref={swiperRef}>
-          <Tooltip title={translations[displayLanguage].tooltip as string}>
+          <Tooltip title={t('swiper.tooltip')}>
             <Box className="handleContainer">
               <HandleIcon sx={sxClasses.handle} className="handleL" />
               <HandleIcon sx={sxClasses.handle} className="handleR" />
