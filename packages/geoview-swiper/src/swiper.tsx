@@ -108,7 +108,7 @@ export function Swiper(props: SwiperProps): JSX.Element {
 
   const { Box, Tooltip, HandleIcon } = ui.elements;
 
-  const { displayLanguage } = api.maps[mapId!];
+  const displayLanguage = api.maps[mapId].getDisplayLanguage();
 
   const [map] = useState<Map>(api.maps[mapId].map);
   const mapSize = useRef<number[]>(map?.getSize() || [0, 0]);

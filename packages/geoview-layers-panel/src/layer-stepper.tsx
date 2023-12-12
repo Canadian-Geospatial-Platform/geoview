@@ -36,7 +36,7 @@ const w = window as TypeWindow;
 function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
   const { cgpv } = w;
   const { api, ui, react } = cgpv;
-  const displayLanguage = api.maps[mapId].displayLanguage as 'en' | 'fr';
+  const displayLanguage = api.maps[mapId].getDisplayLanguage() as 'en' | 'fr';
 
   const { ESRI_DYNAMIC, ESRI_FEATURE, GEOJSON, GEOPACKAGE, WMS, WFS, OGC_FEATURE, XYZ_TILES, GEOCORE } = api.layerTypes;
   const { useState, useEffect, useRef } = react;
@@ -238,7 +238,7 @@ function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
    * @returns {Promise<boolean>} True if layer passes validation
    */
   const wmsValidation = async (): Promise<boolean> => {
-    const proj = api.projection.projections[api.maps[mapId].mapState.currentProjection].getCode();
+    const proj = api.projection.projections[api.maps[mapId].getMapState().currentProjection].getCode();
     let supportedProj: string[] = [];
 
     try {

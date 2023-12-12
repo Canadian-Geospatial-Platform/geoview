@@ -1,3 +1,5 @@
+import { Root } from 'react-dom/client';
+
 import { ScaleLine } from 'ol/control';
 import Overlay from 'ol/Overlay';
 import { fromLonLat, transformExtent } from 'ol/proj';
@@ -40,7 +42,6 @@ export class MapEventProcessor extends AbstractEventProcessor {
       (state) => state.mapState.centerCoordinates,
       (cur, prev) => {
         if (cur !== prev) {
-          api.maps[mapId].mapState.mapCenterCoordinates = cur;
           api.event.emit(lngLatPayload(EVENT_NAMES.MAP.EVENT_MAP_MOVE_END, mapId, cur));
         }
       }
@@ -50,7 +51,6 @@ export class MapEventProcessor extends AbstractEventProcessor {
       (state) => state.mapState.pointerPosition,
       (cur, prev) => {
         if (cur! && cur !== prev) {
-          api.maps[mapId].mapState.pointerPosition = cur;
           api.event.emit(mapMouseEventPayload(EVENT_NAMES.MAP.EVENT_MAP_POINTER_MOVE, mapId, cur));
         }
       }
@@ -60,8 +60,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
       (state) => state.mapState.currentProjection,
       (cur, prev) => {
         // because emit and on from api events can be trigger in loop, compare also the api value
-        if (cur !== prev && api.maps[mapId].mapState.currentProjection !== cur!) {
-          api.maps[mapId].mapState.currentProjection = cur;
+        if (cur !== prev && api.maps[mapId].getMapState().currentProjection !== cur!) {
           api.event.emit(mapViewProjectionPayload(EVENT_NAMES.MAP.EVENT_MAP_VIEW_PROJECTION_CHANGE, mapId, cur!));
         }
       }
@@ -71,7 +70,6 @@ export class MapEventProcessor extends AbstractEventProcessor {
       (state) => state.mapState.clickCoordinates,
       (cur, prev) => {
         if (cur! && cur !== prev) {
-          api.maps[mapId].mapState.singleClickedPosition = cur;
           api.event.emit(mapMouseEventPayload(EVENT_NAMES.MAP.EVENT_MAP_SINGLE_CLICK, mapId, cur));
         }
       }
@@ -81,7 +79,6 @@ export class MapEventProcessor extends AbstractEventProcessor {
       (state) => state.mapState.zoom,
       (cur, prev) => {
         if (cur! && cur !== prev) {
-          api.maps[mapId].mapState.currentZoom = cur;
           api.event.emit(numberPayload(EVENT_NAMES.MAP.EVENT_MAP_ZOOM_END, mapId, cur));
         }
       }
@@ -138,8 +135,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
       EVENT_NAMES.MAP.EVENT_MAP_VIEW_PROJECTION_CHANGE,
       (payload: PayloadBaseClass) => {
         // because emit and on from api events can be trigger in loop, compare also the api value
-        if (payloadIsAMapViewProjection(payload) && api.maps[mapId].mapState.currentProjection !== payload.projection!) {
-          api.maps[mapId].mapState.currentProjection = payload.projection!;
+        if (payloadIsAMapViewProjection(payload) && api.maps[mapId].getMapState().currentProjection !== payload.projection!) {
           store.setState({
             mapState: { ...store.getState().mapState, currentProjection: payload.projection! },
           });
@@ -278,6 +274,10 @@ export class MapEventProcessor extends AbstractEventProcessor {
 
   static setMapAttribution(mapId: string, attribution: string[]): void {
     getGeoViewStore(mapId).getState().mapState.actions.setAttribution(attribution);
+  }
+
+  static setMapOverviewMapRoot(mapId: string, overviewRoot: Root): void {
+    api.maps[mapId].overviewRoot = overviewRoot;
   }
 
   static rotate(mapId: string, rotation: number): void {

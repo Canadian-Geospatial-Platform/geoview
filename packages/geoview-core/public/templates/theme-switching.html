@@ -44,104 +44,96 @@
       </tbody>
     </table>
   </div>
-  <div class="theme-selector">
-    <select name="Switch Theme" id="switchTheme">
-      <option value="dark">Dark</option>
-      <option value="light">Light</option>
-    </select>
+  <div id="mapWM1" class="" data-lang="en"></div>
+  <div style="display: flex;">
+    <p>This map display theme is:   </p>
+    <div class="theme-selector">
+      <select name="Switch Theme" id="switchTheme">
+        <option value="geo.ca">Geo.ca</option>
+        <option value="light">Light</option>
+        <option value="dark">Dark</option>
+        <option value="none">What is this</option>
+      </select>
+    </div>
   </div>
-  <div id="mapWM1" class="llwp-map" data-lang="en"></div>
 
   <script src="codedoc.js"></script>
   <script>
-    const config = {
-      "map": {
-        "interaction": "dynamic",
-        "viewSettings": {
-          "zoom": 4,
-          "center": [-100, 60],
-          "projection": 3978
+    const config = `{
+      'map': {
+        'interaction': 'dynamic',
+        'viewSettings': {
+          'zoom': 4,
+          'center': [-100, 60],
+          'projection': 3978
         },
-        "basemapOptions": {
-          "basemapId": "simple",
-          "shaded": false,
-          "labeled": true
+        'basemapOptions': {
+          'basemapId': 'simple',
+          'shaded': false,
+          'labeled': true
         },
-        "listOfGeoviewLayerConfig": [
+        'listOfGeoviewLayerConfig': [
           {
-            "geoviewLayerId": "esriFeatureLYR4",
-            "geoviewLayerName": { "en": "Water quality at monitoring sites" },
-            "metadataAccessPath": {
-              "en": "https://maps-cartes.ec.gc.ca/arcgis/rest/services/DMS/DEU_CSO_Volume/MapServer"
+            'geoviewLayerId': 'esriFeatureLYR4',
+            'geoviewLayerName': { 'en': 'Water quality at monitoring sites' },
+            'metadataAccessPath': {
+              'en': 'https://maps-cartes.ec.gc.ca/arcgis/rest/services/DMS/DEU_CSO_Volume/MapServer'
             },
-            "geoviewLayerType": "esriFeature",
-            "listOfLayerEntryConfig": [{ "layerId": "8" }]
+            'geoviewLayerType': 'esriFeature',
+            'listOfLayerEntryConfig': [{ 'layerId': '8' }]
           },
           {
-            "geoviewLayerId": "esriFeatureLYR5",
-            "geoviewLayerName": { "en": "Top Projects" },
-            "metadataAccessPath": {
-              "en": "https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/900A_and_top_100_en/MapServer/"
+            'geoviewLayerId': 'esriFeatureLYR5',
+            'geoviewLayerName': { 'en': 'Top Projects' },
+            'metadataAccessPath': {
+              'en': 'https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/900A_and_top_100_en/MapServer/'
             },
-            "geoviewLayerType": "esriFeature",
-            "listOfLayerEntryConfig": [{ "layerId": "0" }]
+            'geoviewLayerType': 'esriFeature',
+            'listOfLayerEntryConfig': [{ 'layerId': '0' }]
           },
           {
-            "geoviewLayerId": "geojsonLYR5",
-            "geoviewLayerName": { "en": "GeoJSON Sample" },
-            "metadataAccessPath": { "en": "./geojson/metadata.json" },
-            "geoviewLayerType": "GeoJSON",
-            "listOfLayerEntryConfig": [
+            'geoviewLayerId': 'geojsonLYR5',
+            'geoviewLayerName': { 'en': 'GeoJSON Sample' },
+            'metadataAccessPath': { 'en': './geojson/metadata.json' },
+            'geoviewLayerType': 'GeoJSON',
+            'listOfLayerEntryConfig': [
               {
-                "layerId": "polygons.json",
-                "layerName": { "en": "Polygons" }
+                'layerId': 'polygons.json',
+                'layerName': { 'en': 'Polygons' }
               },
               {
-                "layerId": "lines.json",
-                "layerName": { "en": "Lines" }
+                'layerId': 'lines.json',
+                'layerName': { 'en': 'Lines' }
               },
               {
-                "entryType": "group",
-                "layerId": "point-feature-group",
-                "layerName": { "en": "point-feature-group" },
-                "listOfLayerEntryConfig": [
-                  { "layerId": "icon_points.json", "layerName": { "en": "Icons" } },
-                  { "layerId": "points.json", "layerName": { "en": "Points" } }
+                'entryType': 'group',
+                'layerId': 'point-feature-group',
+                'layerName': { 'en': 'point-feature-group' },
+                'listOfLayerEntryConfig': [
+                  { 'layerId': 'icon_points.json', 'layerName': { 'en': 'Icons' } },
+                  { 'layerId': 'points.json', 'layerName': { 'en': 'Points' } }
                 ]
               }
             ]
           }
         ]
       },
-      "theme": "dark",
-      "navBar": ["zoom", "fullscreen", "home", "location", "export"],
-      "appBar": ["geolocator", "export"],
-      "components": ["north-arrow", "overview-map"],
-      "corePackages": ["basemap-panel", "layers-panel", "details-panel", "footer-panel"],
-      "externalPackages": [],
-      "suportedLanguages": ["en"]
-    }
+      'theme': 'geo.ca',
+      'navBar': ['zoom', 'fullscreen', 'home', 'location', 'export'],
+      'appBar': ['geolocator', 'export'],
+      'components': ['north-arrow', 'overview-map'],
+      'corePackages': ['basemap-panel', 'layers-panel', 'details-panel', 'footer-panel'],
+      'externalPackages': [],
+      'suportedLanguages': ['en']
+    }`;
+    // TODO: make this function async and launch when api is ready
+    setTimeout(() => {
+      cgpv.api.createMapFromConfig('mapWM1', config);
+    }, 1000);
 
-    function reloadMap(theme) {
-      cgpv.api.maps['mapWM1'].loadMapFromJsonStringConfig (JSON.stringify({ ...config, theme: theme }))
-    }
-
-    // initialize cgpv and api events, a callback is optional, used if calling api's after the rendering is ready
-    cgpv.init(function () {
-      console.log('api is ready');
-      // !put a timeout to show the problem.... map is loaded with default configt then the function trigger
-      // !basemap good, one secondlater bad bassemap. After using the droopdown to set, everything is good
-      // TODO: Refactor loading, related to language as well #1118
-      setTimeout(() => cgpv.api.maps['mapWM1'].loadMapFromJsonStringConfig (JSON.stringify(config)), 2000);
-
-      //create snippets
-      createConfigSnippet();
-      createCodeSnippet();
-
-      const switchThemeElem = document.getElementById("switchTheme");
-      switchThemeElem.addEventListener("change", (e) => {
-        reloadMap(e.target.value)
-      });
+    const switchThemeElem = document.getElementById("switchTheme");
+    switchThemeElem.addEventListener("change", (e) => {
+      cgpv.api.maps['mapWM1'].changeTheme(e.target.value)
     });
   </script>
 </body>

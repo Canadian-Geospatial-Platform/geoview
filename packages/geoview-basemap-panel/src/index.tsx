@@ -70,7 +70,8 @@ class BasemapPanelPlugin extends AbstractPlugin {
       // access the api calls
       const { api, ui } = cgpv;
       const { MapIcon } = ui.elements;
-      const { displayLanguage } = api.maps[mapId];
+      const displayLanguage = api.maps[mapId].getDisplayLanguage();
+
       // button props
       const button: TypeIconButtonProps = {
         id: 'basemapPanelButton',

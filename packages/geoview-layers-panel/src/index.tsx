@@ -67,7 +67,7 @@ class LayersPanelPlugin extends AbstractPlugin {
     // access the api calls
     const { api, ui } = cgpv;
     const { LayersOutlinedIcon } = ui.elements;
-    const { displayLanguage } = api.maps[mapId];
+    const displayLanguage = api.maps[mapId].getDisplayLanguage();
 
     let panelStatus = false;
 

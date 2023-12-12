@@ -4,22 +4,15 @@ import './translation/i18n';
 import i18n from 'i18next';
 import { I18nextProvider } from 'react-i18next';
 
-import { ThemeProvider, Theme, StyledEngineProvider } from '@mui/material/styles';
+import { ThemeProvider, StyledEngineProvider } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 
 import { Shell } from '@/core/containers/shell';
 import { getTheme, cgpvTheme } from '@/ui/style/theme';
 import { MapViewer } from '@/geo/map/map-viewer';
 import { TypeMapFeaturesConfig } from '@/core/types/global-types';
-import { api } from '@/app';
-import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
+import { api, useAppDisplayLanguageById, useAppDisplayThemeById } from '@/app';
 
-declare module '@mui/styles/defaultTheme' {
-  // eslint-disable-next-line @typescript-eslint/no-empty-interface
-  interface DefaultTheme extends Theme {
-    iconImage: React.CSSProperties;
-  }
-}
 // create a state that will hold map config information
 // TODO: use store, only keep map id on context for store manager to gather right store on hooks
 export const MapContext = React.createContext<TypeMapContext>({
@@ -53,23 +46,29 @@ function AppStart(props: AppStartProps): JSX.Element {
     return { mapId: mapId as string };
   }, [mapId]);
 
+  // get store values by id because context is not set.... it is the only 2 atomic selector by id
+  // once context is define, map id is available
+  const language = useAppDisplayLanguageById(mapId);
+  const theme = useAppDisplayThemeById(mapId);
+
   /**
    * Create maps from inline configs with class name llwp-map
    */
   function getInlineMaps() {
     const i18nInstance = i18n.cloneInstance({
-      lng: AppEventProcessor.getDisplayLanguage(mapId),
-      fallbackLng: AppEventProcessor.getDisplayLanguage(mapId),
+      lng: language,
+      fallbackLng: language,
     });
 
     // create a new map viewer instance and add it to the api
     // TODO: use store, remove the use of feature by viewer class and use state to gather values
-    api.maps[mapId] = new MapViewer(mapFeaturesConfig, i18nInstance);
+    if (!Object.keys(api.maps).includes(mapId)) api.maps[mapId] = new MapViewer(mapFeaturesConfig, i18nInstance);
+    else api.maps[mapId].i18nInstance = i18nInstance;
 
     return (
       <I18nextProvider i18n={i18nInstance}>
         <MapContext.Provider value={mapContextValue}>
-          <ThemeProvider theme={getTheme(AppEventProcessor.getTheme(mapId))}>
+          <ThemeProvider theme={getTheme(theme)}>
             <Shell shellId={mapId as string} />
           </ThemeProvider>
         </MapContext.Provider>

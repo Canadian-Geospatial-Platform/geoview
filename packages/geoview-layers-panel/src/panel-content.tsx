@@ -47,7 +47,7 @@ function PanelContent(props: TypePanelContentProps): JSX.Element {
     ReorderIcon,
   } = ui.elements;
 
-  const { displayLanguage } = api.maps[mapId!];
+  const displayLanguage = api.maps[mapId].getDisplayLanguage();
 
   const translations: TypeJsonObject = toJsonObject({
     en: {

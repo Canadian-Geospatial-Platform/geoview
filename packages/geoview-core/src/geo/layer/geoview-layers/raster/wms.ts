@@ -15,8 +15,6 @@ import { transform, transformExtent } from 'ol/proj';
 
 import cloneDeep from 'lodash/cloneDeep';
 
-import i18n from 'i18next';
-
 import { Cast, toJsonObject, TypeJsonArray, TypeJsonObject } from '@/core/types/global-types';
 import { AbstractGeoViewLayer, CONST_LAYER_TYPES, TypeLegend, TypeWmsLegend, TypeWmsLegendStyle } from '../abstract-geoview-layers';
 import { AbstractGeoViewRaster, TypeBaseRasterLayer } from './abstract-geoview-raster';
@@ -37,7 +35,7 @@ import {
   snackbarMessagePayload,
   LayerSetPayload,
 } from '@/api/events/payloads';
-import { getLocalizedValue, getMinOrMaxExtents, xmlToJson, showError, replaceParams } from '@/core/utils/utilities';
+import { getLocalizedValue, getMinOrMaxExtents, xmlToJson, showError, replaceParams, getLocalizedMessage } from '@/core/utils/utilities';
 import { EVENT_NAMES } from '@/api/events/event-types';
 import { api } from '@/app';
 import { Layer } from '../../layer';
@@ -577,8 +575,10 @@ export class WMS extends AbstractGeoViewRaster {
 
           resolve(layerEntryConfig.olLayer);
         } else {
-          const trans = i18n.getFixedT(api.maps[this.mapId].displayLanguage);
-          const message = replaceParams([layerEntryConfig.layerId, this.geoviewLayerId], trans('validation.layer.notfound'));
+          const message = replaceParams(
+            [layerEntryConfig.layerId, this.geoviewLayerId],
+            getLocalizedMessage(this.mapId, 'validation.layer.notfound')
+          );
           showError(this.mapId, message);
 
           resolve(null);
