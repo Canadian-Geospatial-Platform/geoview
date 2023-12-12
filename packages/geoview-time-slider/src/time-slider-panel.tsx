@@ -2,9 +2,10 @@ import { TypeWindow } from 'geoview-core';
 import { LayerListEntry, Layout } from 'geoview-core/src/core/components/common';
 import { useVisibleTimeSliderLayers, useAppDisplayLanguage, useTimeSliderLayers } from 'geoview-core/src/core/stores';
 import { TimeSlider } from './time-slider';
+import { ConfigProps } from './time-slider-types';
 
 interface TypeTimeSliderProps {
-  configObj: unknown;
+  configObj: ConfigProps;
   mapId: string;
 }
 

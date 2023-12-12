@@ -140,9 +140,12 @@ export function Slider(props: TypeSliderProps): JSX.Element {
   };
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  const removeLabelOverlap = () => {
+  const removeLabelOverlap = (mapId: string) => {
     // get slider labels
-    const markers = document.getElementsByClassName('MuiSlider-markLabel');
+    const markers = mapId
+      ? document.getElementById(mapId)?.getElementsByClassName('MuiSlider-markLabel') || []
+      : document.getElementsByClassName('MuiSlider-markLabel');
+
     for (let i = 0; i < markers.length; i++) markers[i].classList.remove('MuiSlider-markLabel-overlap');
 
     let middleIndices = markers.length % 2 === 0 ? [markers.length / 2, markers.length / 2 + 1] : [Math.floor(markers.length / 2)];
@@ -193,11 +196,12 @@ export function Slider(props: TypeSliderProps): JSX.Element {
 
   useLayoutEffect(() => {
     // remove overlaping labels
-    removeLabelOverlap();
+    const mapId = properties?.mapId || '';
+    removeLabelOverlap(mapId);
 
-    window.addEventListener('resize', removeLabelOverlap);
-    return () => window.removeEventListener('resize', removeLabelOverlap);
-  }, [removeLabelOverlap]);
+    window.addEventListener('resize', () => removeLabelOverlap(mapId));
+    return () => window.removeEventListener('resize', () => removeLabelOverlap(mapId));
+  }, [properties?.mapId, removeLabelOverlap]);
 
   useEffect(() => {
     // on set min/max, update slider
@@ -216,6 +220,7 @@ export function Slider(props: TypeSliderProps): JSX.Element {
   // TODO: better implement WCAG on slider
   return (
     <MaterialSlider
+      id={properties.mapId}
       sx={{ ...(!properties.className ? sxClasses.slider : {}) }}
       className={properties.className !== undefined ? properties.className : ''}
       style={properties.style}
