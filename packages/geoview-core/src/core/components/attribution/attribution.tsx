@@ -68,7 +68,7 @@ export function Attribution(): JSX.Element {
         }}
         onClose={handleClosePopover}
       >
-        <Box sx={{ padding: '15px' }}>
+        <Box sx={{ padding: '15px', width: '450px' }}>
           {mapAttribution.map((attribution) => {
             return <Typography key={generateId()}>{attribution}</Typography>;
           })}

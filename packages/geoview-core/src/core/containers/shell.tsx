@@ -30,6 +30,7 @@ import {
 import { getShellSxClasses } from './containers-style';
 import { useMapInteraction, useMapLoaded } from '@/core/stores/store-interface-and-intial-values/map-state';
 import {
+  useUIActiveFocusItem,
   useUIActiveTrapGeoView,
   useUIAppbarComponents,
   useUICorePackagesComponents,
@@ -70,7 +71,7 @@ export function Shell(props: ShellProps): JSX.Element {
   const appBarComponents = useUIAppbarComponents();
   const corePackagesComponents = useUICorePackagesComponents();
   const geoviewConfig = useGeoViewConfig();
-
+  const focusItem = useUIActiveFocusItem();
   /**
    * Causes the shell to re-render
    */
@@ -158,7 +159,7 @@ export function Shell(props: ShellProps): JSX.Element {
           {/* modal section start */}
           <FocusTrapDialog mapId={mapId} focusTrapId={shellId} />
           <ExportModal />
-          <DataTableModal />
+          {focusItem.activeElementId === 'layerDatatable' && <DataTableModal />}
           {/* modal section end */}
           {Object.keys(components).map((key: string) => {
             return <Fragment key={key}>{components[key]}</Fragment>;

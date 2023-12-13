@@ -84,6 +84,9 @@ export function Tabs(props: TypeTabsProps): JSX.Element {
       <Grid item xs={7} sm={10}>
         <MaterialTabs
           {...props.tabsProps}
+          variant="scrollable"
+          scrollButtons
+          allowScrollButtonsMobile
           value={value}
           onChange={handleChange}
           aria-label="basic tabs"
@@ -123,7 +126,7 @@ export function Tabs(props: TypeTabsProps): JSX.Element {
           })}
         </MaterialTabs>
       </Grid>
-      <Grid item xs={5} sm={2} sx={{ textAlign: 'right' }}>
+      <Grid item xs={5} sm={2} sx={{ textAlign: 'right', marginTop: '15px' }}>
         {rightButtons as ReactNode}
       </Grid>
       <Grid item xs={12} sx={{ height: '100%', borderTop: 1, borderColor: 'divider', visibility: TabContentVisibilty }}>
