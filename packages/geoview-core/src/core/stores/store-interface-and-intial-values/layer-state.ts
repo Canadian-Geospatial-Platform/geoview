@@ -8,7 +8,7 @@ import { FitOptions } from 'ol/View';
 import { useGeoViewStore } from '../stores-managers';
 import { TypeLayersViewDisplayState, TypeLegendLayer } from '@/core/components/layers/types';
 import { TypeGetStore, TypeSetStore } from '../geoview-store';
-import { TypeStyleGeometry, TypeUniqueValueStyleConfig, TypeVectorLayerEntryConfig } from '@/geo/map/map-schema-types';
+import { TypeClassBreakStyleConfig, TypeStyleGeometry, TypeUniqueValueStyleConfig, TypeVectorLayerEntryConfig } from '@/geo/map/map-schema-types';
 import { AbstractGeoViewVector, EsriDynamic, api } from '@/app';
 import { OL_ZOOM_DURATION, OL_ZOOM_PADDING } from '@/core/utils/constant';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
@@ -144,7 +144,12 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
               // assign value to registered layer. This is use by applyFilter function to set visibility
               // TODO: check if we need to refactor to centralize attribute setting....
               // TODO: know issue when we toggle a default visibility item https://github.com/Canadian-Geospatial-Platform/geoview/issues/1564
-              (registeredLayer.style![geometryType]! as TypeUniqueValueStyleConfig).uniqueValueStyleInfo[index].visible = item.isVisible;
+              if(registeredLayer.style![geometryType]?.styleType === 'classBreaks') {
+                (registeredLayer.style![geometryType]! as TypeClassBreakStyleConfig).classBreakStyleInfo[index].visible = item.isVisible;
+              } else {
+                (registeredLayer.style![geometryType]! as TypeUniqueValueStyleConfig).uniqueValueStyleInfo[index].visible = item.isVisible;
+              }
+              
             }
           });
           // 'always' is neither 'yes', nor 'no'.

@@ -90,7 +90,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
 
   function renderItemCheckbox(item: TypeLegendItem) {
     if (item.isVisible === 'always') {
-      return null;
+      return (<IconButton disabled> <CheckBoxIcon color="disabled"></CheckBoxIcon> </IconButton>);
     }
 
     return (
@@ -103,16 +103,18 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
   function renderItems() {
     return (
       <Grid container direction="column" spacing={0} sx={sxClasses.itemsGrid} justifyContent="left" justifyItems="stretch">
-        <Grid container direction="row" justifyContent="center" alignItems="stretch" justifyItems="stretch">
-          <Grid item xs="auto">
-            <IconButton color="primary" onClick={() => setAllItemsVisibility(layerDetails.layerPath, !allItemsChecked() ? 'yes' : 'no')}>
-              {allItemsChecked() ? <CheckBoxIcon /> : <CheckBoxOutineBlankIcon />}
-            </IconButton>
+        { layerDetails.items.length > 1 && (        
+          <Grid container direction="row" justifyContent="center" alignItems="stretch" justifyItems="stretch">
+            <Grid item xs="auto">
+              <IconButton color="primary" onClick={() => setAllItemsVisibility(layerDetails.layerPath, !allItemsChecked() ? 'yes' : 'no')}>
+                {allItemsChecked() ? <CheckBoxIcon /> : <CheckBoxOutineBlankIcon />}
+              </IconButton>
+            </Grid>
+            <Grid item xs="auto">
+              <span>{t('general.name')}</span>
+            </Grid>
           </Grid>
-          <Grid item xs="auto">
-            <span>{t('general.name')}</span>
-          </Grid>
-        </Grid>
+        )}
         {layerDetails.items.map((item) => (
           <Grid container direction="row" key={item.name} justifyContent="center" alignItems="stretch">
             <Grid item xs="auto">

@@ -49,6 +49,7 @@ export function SingleLayer({ isDragging, depth, layer, setIsLayersListPanelVisi
   const displayState = useLayersDisplayState();
   const mapFiltered = useDataTableStoreMapFilteredRecord();
 
+  // if any of the chiild layers is selected return true
   const isLayerOrChildSelected = (startingLayer: TypeLegendLayer): boolean => {
     if (startingLayer.layerPath === selectedLayerPath && displayState === 'view') {
       return true;
@@ -60,6 +61,19 @@ export function SingleLayer({ isDragging, depth, layer, setIsLayersListPanelVisi
   };
 
   const isLayerSelected = isLayerOrChildSelected(layer);
+
+  // returns true if any of the layer children or items has visibility of 'always'
+  const layerHasAlwaysVisible = (startingLayer:TypeLegendLayer): boolean =>  {
+    if(layer.isVisible === 'always') { return true; }
+    if(layer.items && layer.items.length) {
+      return layer.items.filter(i => i.isVisible === 'always').length > 0;
+    }
+    if (startingLayer.children && startingLayer.children.length > 0) {
+      return _.some(startingLayer.children, (child) => layerHasAlwaysVisible(child));
+    }
+    return false;
+  }
+  const isLayerAlwaysVisible = layerHasAlwaysVisible(layer);
 
   const [isGroupOpen, setGroupOpen] = useState(isLayerSelected);
 
@@ -152,8 +166,8 @@ export function SingleLayer({ isDragging, depth, layer, setIsLayersListPanelVisi
       );
     }
 
-    if (layer.isVisible === 'always') {
-      return null;
+    if (isLayerAlwaysVisible) {
+      return <IconButton edge="end" size="small" disabled><VisibilityOutlinedIcon color="disabled" /></IconButton>;
     }
 
     return (
