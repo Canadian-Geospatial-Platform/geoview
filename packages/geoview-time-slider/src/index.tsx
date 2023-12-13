@@ -1,4 +1,6 @@
-import { Cast, AbstractPlugin, TypeWindow, toJsonObject, TypePluginOptions, TypeButtonPanel } from 'geoview-core';
+import { Cast, toJsonObject, TypeTabs } from 'geoview-core';
+import { FooterPlugin } from 'geoview-core/src/api/plugin/footer-plugin';
+
 import { TimeSliderPanel } from './time-slider-panel';
 
 export interface LayerProps {
@@ -21,18 +23,7 @@ export interface SliderFilterProps {
 /**
  * Time slider plugin
  */
-class TimeSliderPlugin extends AbstractPlugin {
-  // store the created button panel object
-  buttonPanel: TypeButtonPanel | null;
-
-  // store index of tab
-  value: number | null = null;
-
-  constructor(pluginId: string, props: TypePluginOptions) {
-    super(pluginId, props);
-    this.buttonPanel = null;
-  }
-
+class TimeSliderPlugin extends FooterPlugin {
   /**
    * Translations object to inject to the viewer translations
    */
@@ -45,48 +36,16 @@ class TimeSliderPlugin extends AbstractPlugin {
     },
   });
 
-  /**
-   * Added function called after the plugin has been initialized
-   */
-  added = (): void => {
-    // Fetch cgpv
-    const { cgpv } = window as TypeWindow;
-    const { createElement } = cgpv.react;
-    const { pluginProps } = this as AbstractPlugin;
-    const { mapId } = pluginProps;
-
-    // If cgpv exists
-    if (cgpv) {
-      // Access the api calls
-      const { api } = cgpv;
-
-      this.value = api.maps[mapId].footerTabs.tabs.length;
-      api.maps[mapId].footerTabs.createFooterTab({
-        value: this.value,
-        label: this.translations[api.maps[mapId].getDisplayLanguage()].timeSlider as string,
-        content: () => createElement(TimeSliderPanel, { mapId }, []),
-      });
-    }
-  };
-
-  /**
-   * Function called when the plugin is removed, used for clean up
-   */
-  removed = (): void => {
-    // Fetch cgpv
-    const { cgpv } = window as TypeWindow;
-    const { pluginProps } = this as AbstractPlugin;
-    const { mapId } = pluginProps;
-
-    // If cgpv exists
-    if (cgpv) {
-      // Remove the footer tab
-      if (this.value) cgpv.api.maps[mapId].footerTabs.removeFooterTab(this.value);
-    }
+  onCreateContentProps = (): TypeTabs => {
+    return {
+      value: this.value!,
+      label: this.translations[this.displayLanguage()].timeSlider as string,
+      content: () => <TimeSliderPanel mapId={this.pluginProps.mapId} />,
+    };
   };
 }
 
 export default TimeSliderPlugin;
 
 window.plugins = window.plugins || {};
-window.plugins['time-slider'] = Cast<AbstractPlugin>(TimeSliderPlugin);
+window.plugins['time-slider'] = Cast<TimeSliderPlugin>(TimeSliderPlugin);
