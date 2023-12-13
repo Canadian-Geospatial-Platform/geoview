@@ -54,17 +54,19 @@ export function TimeSlider(TimeSliderPanelProps: TimeSliderPanelProps) {
 
   // Get actions and states from store
   // TODO: evaluate best option to set value by layer path.... trough a getter?
-  const { setValues, setLocked, setReversed, setDelay, setFiltering } = useTimeSliderStoreActions();
+  const { setTitle, setDescription, setDefaultValue, setValues, setLocked, setReversed, setDelay, setFiltering } =
+    useTimeSliderStoreActions();
 
   // slider config
-  const sliderConfig = config?.sliders?.find((o: { layerPaths: string[] }) => o.layerPaths.includes(layerPath));
-  const configValues = {
-    title: getLocalizedValue(sliderConfig?.title, mapId) || '',
-    description: getLocalizedValue(sliderConfig?.description, mapId) || '',
-    defaultValue: sliderConfig?.defaultValue || '',
-    locked: sliderConfig?.locked || false,
-    reversed: sliderConfig?.reversed || false,
-  };
+  useEffect(() => {
+    const sliderConfig = config?.sliders?.find((o: { layerPaths: string[] }) => o.layerPaths.includes(layerPath));
+    setTitle(layerPath, getLocalizedValue(sliderConfig?.title, mapId) || '');
+    setDescription(layerPath, getLocalizedValue(sliderConfig?.description, mapId) || '');
+    setDefaultValue(layerPath, sliderConfig?.defaultValue || '');
+    setLocked(layerPath, sliderConfig?.locked !== undefined ? sliderConfig?.locked : false);
+    setReversed(layerPath, sliderConfig?.reversed !== undefined ? sliderConfig?.reversed : false);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // TODO: check performance as we should technically have one selector by constant
   const {
@@ -83,12 +85,6 @@ export function TimeSlider(TimeSliderPanelProps: TimeSliderPanelProps) {
     locked,
     reversed,
   } = useTimeSliderLayers()[layerPath];
-
-  const sliderTitle = configValues?.title || title || name;
-  const sliderDesc = configValues?.description || description;
-  const sliderDefaultValue = configValues?.defaultValue || defaultValue;
-  const sliderLocked = configValues?.locked !== undefined ? configValues?.locked : locked;
-  const sliderReversed = configValues?.reversed !== undefined ? configValues?.reversed : reversed;
 
   const timeStampRange = range.map((entry: string | number | Date) => new Date(entry).getTime());
   // Check if range occurs in a single day or year
@@ -157,11 +153,11 @@ export function TimeSlider(TimeSliderPanelProps: TimeSliderPanelProps) {
         sliderDeltaRef.current = rightHandle - leftHandle;
       }
       // Check for edge cases and then set new slider values
-      if (locked && sliderReversed) {
+      if (locked && reversed) {
         if (leftHandle === minAndMax[0]) leftHandle = rightHandle;
         leftHandle -= sliderDeltaRef.current;
         if (leftHandle < minAndMax[0]) [leftHandle] = minAndMax;
-      } else if (sliderLocked) {
+      } else if (locked) {
         rightHandle -= sliderDeltaRef.current!;
         if (rightHandle < leftHandle) rightHandle = leftHandle;
         if (rightHandle === leftHandle) [, rightHandle] = minAndMax;
@@ -199,10 +195,10 @@ export function TimeSlider(TimeSliderPanelProps: TimeSliderPanelProps) {
         sliderDeltaRef.current = rightHandle - leftHandle;
       }
       // Check for edge cases and then set new slider values
-      if (sliderLocked && sliderReversed) {
+      if (locked && reversed) {
         leftHandle += sliderDeltaRef.current!;
         if (leftHandle >= rightHandle) [leftHandle] = minAndMax;
-      } else if (sliderLocked) {
+      } else if (locked) {
         if (rightHandle === minAndMax[1]) rightHandle = leftHandle;
         rightHandle += sliderDeltaRef.current!;
         if (rightHandle > minAndMax[1]) [, rightHandle] = minAndMax;
@@ -221,23 +217,23 @@ export function TimeSlider(TimeSliderPanelProps: TimeSliderPanelProps) {
   useEffect(() => {
     // If slider cycle is active, pause before advancing to next increment
     if (isPlaying) {
-      if (sliderReversed) playIntervalRef.current = window.setTimeout(() => moveBack(), delay);
+      if (reversed) playIntervalRef.current = window.setTimeout(() => moveBack(), delay);
       else playIntervalRef.current = window.setTimeout(() => moveForward(), delay);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [values, filtering, sliderReversed, sliderLocked]);
+  }, [values, filtering, reversed, locked]);
 
   // When slider cycle is activated, advance to first increment without delay
   useEffect(() => {
     if (isPlaying) {
-      if (sliderReversed) moveBack();
+      if (reversed) moveBack();
       else moveForward();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isPlaying]);
 
   function handleBack(): void {
-    sliderValueRef.current = sliderReversed ? values[1] : values[0];
+    sliderValueRef.current = reversed ? values[1] : values[0];
     moveBack();
   }
 
@@ -248,20 +244,20 @@ export function TimeSlider(TimeSliderPanelProps: TimeSliderPanelProps) {
 
   function handleLock(): void {
     clearTimeout(playIntervalRef.current);
-    setLocked(layerPath, !sliderLocked);
+    setLocked(layerPath, !locked);
   }
 
   function handlePlay(): void {
     clearTimeout(playIntervalRef.current);
-    sliderValueRef.current = sliderReversed ? values[1] : values[0];
+    sliderValueRef.current = reversed ? values[1] : values[0];
     setIsPlaying(!isPlaying);
   }
 
   function handleReverse(): void {
     clearTimeout(playIntervalRef.current);
-    setReversed(layerPath, !sliderReversed);
+    setReversed(layerPath, !reversed);
     if (isPlaying) {
-      if (sliderReversed) moveBack();
+      if (reversed) moveBack();
       else moveForward();
     }
   }
@@ -300,7 +296,7 @@ export function TimeSlider(TimeSliderPanelProps: TimeSliderPanelProps) {
         <Grid container sx={sxClasses.rightPanelBtnHolder}>
           <Grid item xs={9}>
             <Typography component="div" sx={{ ...sxClasses.panelHeaders, paddingLeft: '20px', paddingTop: '10px' }}>
-              {sliderTitle}
+              {title || name}
             </Typography>
           </Grid>
           <Grid item xs={3}>
@@ -323,7 +319,7 @@ export function TimeSlider(TimeSliderPanelProps: TimeSliderPanelProps) {
               style={{ width: '80%', color: 'primary' }}
               min={minAndMax[0]}
               max={minAndMax[1]}
-              defaultValue={Number(sliderDefaultValue)}
+              defaultValue={Number(defaultValue)}
               value={values}
               valueLabelFormat={(value) => valueLabelFormat(value)}
               marks={sliderMarks}
@@ -342,7 +338,7 @@ export function TimeSlider(TimeSliderPanelProps: TimeSliderPanelProps) {
                 tooltipPlacement="top"
                 onClick={() => handleLock()}
               >
-                {sliderLocked ? <LockIcon /> : <LockOpenIcon />}
+                {locked ? <LockIcon /> : <LockOpenIcon />}
               </IconButton>
             )}
             <IconButton
@@ -378,7 +374,7 @@ export function TimeSlider(TimeSliderPanelProps: TimeSliderPanelProps) {
               tooltipPlacement="top"
               onClick={() => handleReverse()}
             >
-              {sliderReversed ? <SwitchRightIcon /> : <SwitchLeftIcon />}
+              {reversed ? <SwitchRightIcon /> : <SwitchLeftIcon />}
             </IconButton>
             <FormControl sx={{ width: '150px' }}>
               <InputLabel variant="standard">{t('timeSlider.slider.timeDelay')}</InputLabel>
@@ -400,10 +396,10 @@ export function TimeSlider(TimeSliderPanelProps: TimeSliderPanelProps) {
             </FormControl>
           </div>
         </Grid>
-        {sliderDesc && (
+        {description && (
           <Grid item xs={12}>
             <Typography component="div" sx={{ px: '20px', py: '5px' }}>
-              {sliderDesc}
+              {description}
             </Typography>
           </Grid>
         )}
