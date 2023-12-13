@@ -111,7 +111,7 @@ export function Detailspanel(): JSX.Element {
     addSelectedFeature(nextFeature);
     setCurrentFeatureIndex(currentFeatureIndex + change);
   };
-  console.log('selectedLayerPath', selectedLayerPath);
+
   /**
    * Handles clicks to layers in left panel. Removes highlight from previous layers feature if it is not checked,
    * before updating current layer and highlighting first feature.
