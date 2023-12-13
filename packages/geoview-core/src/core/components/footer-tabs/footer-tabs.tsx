@@ -2,18 +2,7 @@ import { MutableRefObject, useCallback, useEffect, useRef, useState } from 'reac
 
 import { useTheme } from '@mui/material/styles';
 
-import {
-  Box,
-  ExpandLessIcon,
-  ExpandMoreIcon,
-  FullscreenIcon,
-  FullscreenExitIcon,
-  IconButton,
-  Tabs,
-  TypeTabs,
-  MoveDownRoundedIcon,
-  MoveUpRoundedIcon,
-} from '@/ui';
+import { Box, FullscreenIcon, FullscreenExitIcon, IconButton, Tabs, TypeTabs, MoveDownRoundedIcon, MoveUpRoundedIcon } from '@/ui';
 import { api, useGeoViewMapId } from '@/app';
 import { EVENT_NAMES } from '@/api/events/event-types';
 import { FooterTabPayload, PayloadBaseClass, payloadIsAFooterTab } from '@/api/events/payloads';
@@ -142,6 +131,9 @@ export function FooterTabs(): JSX.Element | null {
 
   const eventFooterTabsCreateListenerFunction = (payload: PayloadBaseClass) => {
     if (payloadIsAFooterTab(payload)) addTab(payload);
+    // select the first tab
+    setSelectedTab(0);
+    handleCollapse();
   };
 
   const eventFooterTabsRemoveListenerFunction = (payload: PayloadBaseClass) => {
@@ -154,7 +146,6 @@ export function FooterTabs(): JSX.Element | null {
       if (payload.tab.value === 1) {
         handleCollapse();
       }
-      setSelectedTab(undefined); // this will always trigger the tab change, needed in case user changes selection
       setSelectedTab(payload.tab.value);
     }
   };
@@ -225,11 +216,6 @@ export function FooterTabs(): JSX.Element | null {
             {!isCollapsed && (
               <IconButton onClick={() => setIsFullscreen(!isFullscreen)}>
                 {isFullscreen ? <FullscreenExitIcon /> : <FullscreenIcon />}
-              </IconButton>
-            )}
-            {!isFullscreen && (
-              <IconButton sx={sxClasses.expandBtn} onClick={handleCollapse}>
-                {!isCollapsed ? <ExpandMoreIcon /> : <ExpandLessIcon />}
               </IconButton>
             )}
             <IconButton
