@@ -151,7 +151,8 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
               // TODO: know issue when we toggle a default visibility item https://github.com/Canadian-Geospatial-Platform/geoview/issues/1564
               if (registeredLayer.style![geometryType]?.styleType === 'classBreaks') {
                 (registeredLayer.style![geometryType]! as TypeClassBreakStyleConfig).classBreakStyleInfo[index].visible = item.isVisible;
-              } else {
+              } 
+              else if (registeredLayer.style![geometryType]?.styleType === 'uniqueValue') {
                 (registeredLayer.style![geometryType]! as TypeUniqueValueStyleConfig).uniqueValueStyleInfo[index].visible = item.isVisible;
               }
             }
@@ -185,13 +186,19 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
 
               // assign value to registered layer. This is use by applyFilter function to set visibility
               // TODO: check if we need to refactor to centralize attribute setting....
-              (registeredLayer.style![item.geometryType]! as TypeUniqueValueStyleConfig).uniqueValueStyleInfo[index].visible =
-                item.isVisible;
+              if (registeredLayer.style && registeredLayer.style![item.geometryType]?.styleType === 'classBreaks') {
+                (registeredLayer.style![item.geometryType]! as TypeClassBreakStyleConfig).classBreakStyleInfo[index].visible = item.isVisible;
+              } 
+              else if (registeredLayer.style![item.geometryType]?.styleType === 'uniqueValue') {
+                (registeredLayer.style![item.geometryType]! as TypeUniqueValueStyleConfig).uniqueValueStyleInfo[index].visible = item.isVisible;
+              }
             }
           });
           // TODO: this visibility flag for the store should we use to show/hide icon on the layer item list (if always in child, no toggle visibility)
           // This should be set at init of layer
-          layer.isVisible = visibility;
+          if(layer.isVisible !== 'always') {
+            layer.isVisible = visibility;
+          }
         }
 
         set({

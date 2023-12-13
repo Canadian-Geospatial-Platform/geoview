@@ -51,7 +51,7 @@ export class LegendEventProcessor extends AbstractEventProcessor {
               geometryType,
               icon: iconDetailsEntry.iconImage,
               name: iconDetailsEntry.name,
-              isVisible: 'always',
+              isVisible: 'yes',
               default: true,
             };
             iconDetailsEntry.iconList = [legendLayerListItem];
