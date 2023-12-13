@@ -60,8 +60,8 @@ export function SingleLayer({ isDragging, depth, layer, setIsLayersListPanelVisi
     if (layer.layerStatus === 'loading') {
       return t('legend.layerLoading');
     }
-    if (layer.children.length) {
-      return `${layer.children.length} layers`;
+    if (getLayerChildren().length) {
+      return `${getLayerChildren().length} layers`;
     }
     if (mapFiltered[layer.layerPath]) {
       return (
@@ -74,6 +74,10 @@ export function SingleLayer({ isDragging, depth, layer, setIsLayersListPanelVisi
     return `${layer.items.length} items`;
   };
 
+  const getLayerChildren = () => {
+    return layer.children?.filter(c => c.isVisible !== 'no' && ['processed', 'loaded'].includes(c.layerStatus ?? ''))
+  }
+
   /**
    * Handle expand/shrink of layer groups.
    */
@@ -85,7 +89,8 @@ export function SingleLayer({ isDragging, depth, layer, setIsLayersListPanelVisi
     if (!['processed', 'loaded'].includes(layer.layerStatus!)) {
       return;
     }
-    if (layer.children.length === 0) {
+
+    if (getLayerChildren().length === 0) {
       setSelectedLayerPath(layer.layerPath);
       if (setIsLayersListPanelVisible) setIsLayersListPanelVisible(true);
     } else {
@@ -169,7 +174,7 @@ export function SingleLayer({ isDragging, depth, layer, setIsLayersListPanelVisi
   }
 
   function renderCollapsible() {
-    if (!(layer.children?.length || layer.items?.length || layer.children.length === 0)) {
+    if (!(layer.children && layer.children.length)) {
       return null;
     }
 

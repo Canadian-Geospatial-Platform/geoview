@@ -66,6 +66,12 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
     setLayerOpacity(layerDetails.layerPath, val / 100);
   };
 
+  const getItemsCount = () => {
+    const count = layerDetails.items.filter((d) => d.isVisible !== 'no').length;
+    const totalCount = layerDetails.items.length;
+    return t('legend.itemsCount').replace('{count}', count.toString()).replace('{totalCount}', totalCount.toString());
+  }
+
   function renderOpacityControl() {
     return (
       <div style={{ padding: '16px 17px 16px 23px' }}>
@@ -157,16 +163,16 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
       <Box sx={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between' }}>
         <Box sx={{ textAlign: 'left' }}>
           <Typography sx={sxClasses.categoryTitle}> {layerDetails.layerName} </Typography>
-          <Typography sx={{ fontSize: '0.8em' }}> {`${layerDetails.items.length} items available`} </Typography>
+          <Typography sx={{ fontSize: '0.8em' }}> {getItemsCount()} </Typography>
         </Box>
         {renderLayerButtons()}
       </Box>
       {renderOpacityControl()}
       <Box sx={{ marginTop: '20px' }}>{renderItems()}</Box>
-      <Divider sx={{ marginTop: '50px' }} variant="middle" />
+      <Divider sx={{ marginTop: '50px', marginBottom: '10x' }} variant="middle" />
       {layerDetails.layerAttribution &&
         layerDetails.layerAttribution!.map((attribution) => {
-          return <Typography key={generateId()}>{attribution.indexOf('©') === -1 ? `© ${attribution}` : attribution}</Typography>;
+          return <Typography sx={{ marginTop: '10px', color: '#808080', fontSize: '0.8em' }} key={generateId()}>{attribution.indexOf('©') === -1 ? `© ${attribution}` : attribution}</Typography>;
         })}
     </Paper>
   );
