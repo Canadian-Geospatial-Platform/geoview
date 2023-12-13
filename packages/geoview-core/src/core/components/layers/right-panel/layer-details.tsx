@@ -90,7 +90,12 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
 
   function renderItemCheckbox(item: TypeLegendItem) {
     if (item.isVisible === 'always') {
-      return (<IconButton disabled> <CheckBoxIcon color="disabled"></CheckBoxIcon> </IconButton>);
+      return (
+        <IconButton disabled>
+          {' '}
+          <CheckBoxIcon color="disabled" />{' '}
+        </IconButton>
+      );
     }
 
     return (
@@ -103,7 +108,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
   function renderItems() {
     return (
       <Grid container direction="column" spacing={0} sx={sxClasses.itemsGrid} justifyContent="left" justifyItems="stretch">
-        { layerDetails.items.length > 1 && (        
+        {layerDetails.items.length > 1 && (
           <Grid container direction="row" justifyContent="center" alignItems="stretch" justifyItems="stretch">
             <Grid item xs="auto">
               <IconButton color="primary" onClick={() => setAllItemsVisibility(layerDetails.layerPath, !allItemsChecked() ? 'yes' : 'no')}>
