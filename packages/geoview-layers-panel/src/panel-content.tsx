@@ -1,5 +1,5 @@
 import type React from 'react';
-import { toJsonObject, TypeJsonObject, TypeWindow, TypeButtonPanel } from 'geoview-core';
+import { toJsonObject, TypeJsonObject, TypeButtonPanel } from 'geoview-core';
 
 import LayerStepper from './layer-stepper';
 import ReorderLayersList from './reorder-layers-list';
@@ -8,8 +8,6 @@ type TypePanelContentProps = {
   buttonPanel: TypeButtonPanel;
   mapId: string;
 };
-
-const w = window as TypeWindow;
 
 /**
  * A react component that displays the details panel content
@@ -20,7 +18,7 @@ const w = window as TypeWindow;
 function PanelContent(props: TypePanelContentProps): JSX.Element {
   const { mapId, buttonPanel } = props;
 
-  const { cgpv } = w;
+  const { cgpv } = window;
   const { api, ui, react } = cgpv;
   const { useState, useEffect } = react;
   const [addLayerVisible, setAddLayerVisible] = useState(false);
@@ -174,14 +172,14 @@ function PanelContent(props: TypePanelContentProps): JSX.Element {
     // this will disable all scrolling when the user is trying to reorder layers
     // TODO see issue #754 and atlassian/react-beautiful-dnd#460 - there may be a more elegant solution eventually if supported from the react-beautiful-dnd library
     if (reorderLayersVisible) {
-      const x = w.scrollX;
-      const y = w.scrollY;
-      w.onscroll = () => {
-        w.scrollTo(x, y);
+      const x = window.scrollX;
+      const y = window.scrollY;
+      window.onscroll = () => {
+        window.scrollTo(x, y);
       };
     } else {
       // eslint-disable-next-line @typescript-eslint/no-empty-function
-      w.onscroll = () => {};
+      window.onscroll = () => {};
     }
   }, [reorderLayersVisible]);
 

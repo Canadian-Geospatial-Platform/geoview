@@ -1,11 +1,8 @@
 import type React from 'react';
-import { TypeWindow } from 'geoview-core';
 
 interface DataTableProps {
   mapId: string;
 }
-
-const w = window as TypeWindow;
 
 /**
  * Create the datatable that displays in footer panel.
@@ -14,7 +11,7 @@ const w = window as TypeWindow;
  */
 
 export function DataTable({ mapId }: DataTableProps) {
-  const { cgpv } = w;
+  const { cgpv } = window;
   const { api, react } = cgpv;
   const { useState, useEffect } = react;
 
