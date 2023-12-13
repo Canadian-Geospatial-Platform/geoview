@@ -148,7 +148,6 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
             }
           });
           // 'always' is neither 'yes', nor 'no'.
-          layer.allItemsChecked = _.every(layer.items, (i) => ['yes', 'always'].includes(i.isVisible!));
           const allItemsUnchecked = _.every(layer.items, (i) => ['no', 'always'].includes(i.isVisible!));
           if (allItemsUnchecked && layer.isVisible !== 'always') {
             layer.isVisible = 'no';
@@ -181,7 +180,6 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
                 item.isVisible;
             }
           });
-          layer.allItemsChecked = visibility === 'yes';
           // TODO: this visibility flag for the store should we use to show/hide icon on the layer item list (if always in child, no toggle visibility)
           // This should be set at init of layer
           layer.isVisible = visibility;

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useTheme } from '@mui/material';
+import { useTranslation } from 'react-i18next';
 import {
   Box,
   ListItem,
@@ -17,7 +18,6 @@ import {
 import { TypeLegendLayer } from '@/core/components/layers/types';
 import { getSxClasses } from './legend-styles';
 import { IconStack } from '../icon-stack/icon-stack';
-import { useTranslation } from 'react-i18next';
 
 interface LegendLayerProps {
   layer: TypeLegendLayer;
@@ -33,8 +33,8 @@ export function LegendLayer(props: LegendLayerProps): JSX.Element {
   const [isGroupOpen, setGroupOpen] = useState(true);
 
   const getLayerChildren = () => {
-    return layer.children?.filter(c => c.isVisible !== 'no' && ['processed', 'loaded'].includes(c.layerStatus ?? ''))
-  }
+    return layer.children?.filter((c) => c.isVisible !== 'no' && ['processed', 'loaded'].includes(c.layerStatus ?? ''));
+  };
 
   /**
    * Handle expand/shrink of layer groups.

@@ -1,5 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '@mui/material/styles';
+import _ from 'lodash';
 import { TypeLegendLayer, TypeLegendItem } from '../types';
 import { getSxClasses } from './layer-details-style';
 import {
@@ -70,7 +71,11 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
     const count = layerDetails.items.filter((d) => d.isVisible !== 'no').length;
     const totalCount = layerDetails.items.length;
     return t('legend.itemsCount').replace('{count}', count.toString()).replace('{totalCount}', totalCount.toString());
-  }
+  };
+
+  const allItemsChecked = () => {
+    return _.every(layerDetails.items, (i) => ['yes', 'always'].includes(i.isVisible!));
+  };
 
   function renderOpacityControl() {
     return (
@@ -100,11 +105,8 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
       <Grid container direction="column" spacing={0} sx={sxClasses.itemsGrid} justifyContent="left" justifyItems="stretch">
         <Grid container direction="row" justifyContent="center" alignItems="stretch" justifyItems="stretch">
           <Grid item xs="auto">
-            <IconButton
-              color="primary"
-              onClick={() => setAllItemsVisibility(layerDetails.layerPath, !layerDetails.allItemsChecked ? 'yes' : 'no')}
-            >
-              {layerDetails.allItemsChecked ? <CheckBoxIcon /> : <CheckBoxOutineBlankIcon />}
+            <IconButton color="primary" onClick={() => setAllItemsVisibility(layerDetails.layerPath, !allItemsChecked() ? 'yes' : 'no')}>
+              {allItemsChecked() ? <CheckBoxIcon /> : <CheckBoxOutineBlankIcon />}
             </IconButton>
           </Grid>
           <Grid item xs="auto">
@@ -118,9 +120,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
             </Grid>
             <Grid item xs="auto">
               {item.icon ? <img alt={item.name} src={item.icon} /> : <BrowserNotSupportedIcon />}
-              <span style={sxClasses.tableIconLabel}>
-                {item.name} {item.isVisible}
-              </span>
+              <span style={sxClasses.tableIconLabel}>{item.name}</span>
             </Grid>
           </Grid>
         ))}
@@ -172,7 +172,11 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
       <Divider sx={{ marginTop: '50px', marginBottom: '10x' }} variant="middle" />
       {layerDetails.layerAttribution &&
         layerDetails.layerAttribution!.map((attribution) => {
-          return <Typography sx={{ marginTop: '10px', color: '#808080', fontSize: '0.8em' }} key={generateId()}>{attribution.indexOf('©') === -1 ? `© ${attribution}` : attribution}</Typography>;
+          return (
+            <Typography sx={{ marginTop: '10px', color: '#808080', fontSize: '0.8em' }} key={generateId()}>
+              {attribution.indexOf('©') === -1 ? `© ${attribution}` : attribution}
+            </Typography>
+          );
         })}
     </Paper>
   );

@@ -16,7 +16,11 @@ export function LeftPanel({ setIsLayersListPanelVisible }: LeftPanelProps): JSX.
     if (!selectedLayer) {
       const validFirstLayer = legendLayers.find((layer) => !(layer.layerStatus === 'error' || layer.layerStatus === 'loading'));
       if (validFirstLayer) {
-        setSelectedLayerPath(validFirstLayer.layerPath);
+        if (validFirstLayer?.children && validFirstLayer.children.length > 0) {
+          setSelectedLayerPath(validFirstLayer.children[0].layerPath);
+        } else {
+          setSelectedLayerPath(validFirstLayer.layerPath);
+        }
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps

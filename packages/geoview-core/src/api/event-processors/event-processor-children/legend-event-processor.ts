@@ -40,10 +40,22 @@ export class LegendEventProcessor extends AbstractEventProcessor {
           const styleSettings = layerLegend.styleConfig![geometryType]!;
           const iconDetailsEntry: TypeLegendLayerItem = {};
           iconDetailsEntry.geometryType = geometryType;
+
           if (isSimpleStyleConfig(styleSettings)) {
             iconDetailsEntry.iconType = 'simple';
             iconDetailsEntry.iconImage = (styleRepresentation.defaultCanvas as HTMLCanvasElement).toDataURL();
             iconDetailsEntry.name = styleSettings.label;
+
+            // TODO Adding icons list, to be verified by backend devs
+            const legendLayerListItem: TypeLegendItem = {
+              geometryType,
+              icon: iconDetailsEntry.iconImage,
+              name: iconDetailsEntry.name,
+              isVisible: 'yes',
+              default: true,
+            };
+            iconDetailsEntry.iconList = [legendLayerListItem];
+            iconDetails.push(iconDetailsEntry);
           } else {
             iconDetailsEntry.iconType = 'list';
             if (isClassBreakStyleConfig(styleSettings)) {

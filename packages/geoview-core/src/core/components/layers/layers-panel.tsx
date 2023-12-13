@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useTheme } from '@mui/material/styles';
 import { styled } from '@mui/material';
 import { CloseButton, LayerTitle, ResponsiveGrid } from '../common';
-import { Box, DeleteIcon, DeleteOutlineIcon, IconButton, Paper } from '@/ui';
+import { Box, DeleteOutlineIcon, IconButton, Paper } from '@/ui';
 import { getSxClasses } from './layers-style';
 import { useLayersDisplayState, useSelectedLayer } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { LayersActions } from './left-panel/layers-actions';
@@ -69,7 +69,7 @@ export function LayersPanel() {
       return (
         <Paper sx={{ padding: '20px' }}>
           <h3>{t('layers.removingLayers')}</h3>
-          <Box sx={{display: "flex", flexDirection: "row", gap: "2", alignItems: "center"}}>
+          <Box sx={{ display: 'flex', flexDirection: 'row', gap: '2', alignItems: 'center' }}>
             <IconButton edge="end" size="small">
               <DeleteOutlineIcon color="error" />
             </IconButton>
