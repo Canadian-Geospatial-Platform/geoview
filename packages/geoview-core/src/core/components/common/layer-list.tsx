@@ -34,11 +34,11 @@ export function LayerList({ layerList, isEnlargeDataTable, selectedLayerIndex, h
 
   /**
    * check if layer will be selected
-   * @param layer
-   * @param index
+   * @param {LayerListEntry} layer determine if layer will be selected.
+   * @param {number} index number represent index of the layer in the list.
    * @returns
    */
-  const isSelectedLayer = (layer: LayerListEntry, index: number) => {
+  const isSelectedLayer = (layer: LayerListEntry, index: number): boolean => {
     return (layer?.numOffeatures ?? 0) > 0 && selectedLayerIndex === index;
   };
 
