@@ -1,6 +1,6 @@
 import { useTheme } from '@mui/material/styles';
 import { FormControl, InputLabel, NativeSelect } from '@mui/material';
-import { TypeWindow } from 'geoview-core';
+import { TypeWindow, getLocalizedValue } from 'geoview-core';
 import { useTimeSliderLayers, useTimeSliderStoreActions, useAppDisplayLanguage } from 'geoview-core/src/core/stores';
 import { getSxClasses } from './time-slider-style';
 import { ConfigProps } from './time-slider-types';
@@ -92,13 +92,14 @@ export function TimeSlider(TimeSliderPanelProps: TimeSliderPanelProps) {
   // slider config
   const sliderConfig = config?.sliders?.find((o: { layerPaths: string[] }) => o.layerPaths.includes(layerPath));
   const configValues = {
-    title: sliderConfig?.title || '',
-    description: sliderConfig?.description || '',
+    title: getLocalizedValue(sliderConfig?.title, mapId) || '',
+    description: getLocalizedValue(sliderConfig?.description, mapId) || '',
     defaultValue: sliderConfig?.defaultValue || '',
     locked: sliderConfig?.locked || false,
     reversed: sliderConfig?.reversed || false,
   };
 
+  // TODO: check performance as we should technically have one selector by constant
   const {
     title,
     description,

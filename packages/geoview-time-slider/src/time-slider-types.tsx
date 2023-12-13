@@ -1,7 +1,9 @@
+import { TypeLocalizedString } from 'geoview-core/src/geo/map/map-schema-types';
+
 export type SliderProps = {
   layerPaths: string[];
-  title: string;
-  description: string;
+  title: TypeLocalizedString;
+  description: TypeLocalizedString;
   locked: boolean;
   reversed: boolean;
   defaultValue: string;
