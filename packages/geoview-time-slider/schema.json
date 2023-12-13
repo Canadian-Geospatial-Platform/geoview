@@ -12,14 +12,34 @@
         "type": "object",
         "properties": {
           "title": {
-            "type": "string",
-            "default": "Default Time Slider Title",
-            "description": "Title of the time slider panel."
+            "type": "object",
+            "properties": {
+              "en": {
+                "type": "string",
+                "default": "Time slider title",
+                "description": "The English version of the string."
+              },
+              "fr": {
+                "type": "string",
+                "default": "Titre du curseur temporel",
+                "description": "The French version of the string. "
+              }
+            }
           },
           "description": {
-            "type": "string",
-            "default": "Default Time Slider Title",
-            "description": "Description of the time slider panel."
+            "type": "object",
+            "properties": {
+              "en": {
+                "type": "string",
+                "default": "Time slider description",
+                "description": "The English version of the string."
+              },
+              "fr": {
+                "type": "string",
+                "default": "Description du curseur temporel",
+                "description": "The French version of the string. "
+              }
+            }
           },
           "locked": {
             "type": "boolean",
