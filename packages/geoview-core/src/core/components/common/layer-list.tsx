@@ -10,6 +10,7 @@ export interface LayerListEntry {
   layerFeatures?: ReactNode | undefined;
   mapFilteredIcon?: ReactNode | undefined;
   tooltip?: ReactNode | undefined;
+  numOffeatures?: number;
 }
 
 interface LayerListProps {
@@ -31,17 +32,31 @@ export function LayerList({ layerList, isEnlargeDataTable, selectedLayerIndex, h
   const theme = useTheme();
   const sxClasses = getSxClasses(theme);
 
+  /**
+   * check if layer will be selected
+   * @param layer
+   * @param index
+   * @returns
+   */
+  const isSelectedLayer = (layer: LayerListEntry, index: number) => {
+    return (layer?.numOffeatures ?? 0) > 0 && selectedLayerIndex === index;
+  };
+
   return (
     <List sx={sxClasses.list}>
       {layerList.map((layer, index) => (
         <Paper
-          sx={{ ...sxClasses.paper, border: selectedLayerIndex === index ? sxClasses.borderWithIndex : sxClasses.borderNone }}
+          sx={{ ...sxClasses.paper, border: isSelectedLayer(layer, index) ? sxClasses.borderWithIndex : sxClasses.borderNone }}
           key={layer.layerPath}
         >
           <Tooltip title={layer.tooltip} placement="top" arrow>
             <Box>
               <ListItem disablePadding>
-                <ListItemButton selected={selectedLayerIndex === index} onClick={() => handleListItemClick(layer, index)}>
+                <ListItemButton
+                  selected={isSelectedLayer(layer, index)}
+                  disabled={layer?.numOffeatures === 0}
+                  onClick={() => handleListItemClick(layer, index)}
+                >
                   <ListItemIcon>
                     <IconStack layerPath={layer.layerPath} />
                   </ListItemIcon>

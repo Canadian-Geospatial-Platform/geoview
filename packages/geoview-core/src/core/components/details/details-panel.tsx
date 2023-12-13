@@ -43,9 +43,14 @@ export function Detailspanel(): JSX.Element {
   const { setSelectedLayerPath, removeCheckedFeature } = useDetailsStoreActions();
   const { addSelectedFeature, removeSelectedFeature } = useMapStoreActions();
 
-  // Returns the index of matching layer based on the found layer path
+  /**
+   * Find the layer path index which is selected in previous layerData based on layerPath and have more than Zero features.
+   * @param {TypeArrayOfLayerData} layerDataArray list of layers.
+   * @param {string} layerPathSearch layer path to be searched in layers array.
+   * @returns number
+   */
   const findLayerPathIndex = (layerDataArray: TypeArrayOfLayerData, layerPathSearch: string): number => {
-    return layerDataArray.findIndex((item) => item.layerPath === layerPathSearch);
+    return layerDataArray.findIndex((item) => item.layerPath === layerPathSearch && item?.features?.length);
   };
 
   /**
@@ -74,7 +79,9 @@ export function Detailspanel(): JSX.Element {
       // Check if have the previous selected layer path in incoming arrayOfLayerData
       // if so, get the index of the found layer, we need to pass to setLayerDataInfo to load layer in left panel
       const commonLayerPathIndex = selectedLayerPath ? findLayerPathIndex(arrayOfLayerData, selectedLayerPath) : -1;
-      setLayerDataInfo(arrayOfLayerData[commonLayerPathIndex > -1 ? commonLayerPathIndex : 0]);
+      // Get index of first layer from array which doesn't have feature zero.
+      const firstLayerIndex = arrayOfLayerData.findIndex((layer) => layer?.features?.length);
+      setLayerDataInfo(arrayOfLayerData[commonLayerPathIndex > -1 ? commonLayerPathIndex : firstLayerIndex]);
       setCurrentFeatureIndex(0);
     } else setLayerDataInfo(null);
     // eslint-disable-next-line react-hooks/exhaustive-deps
