@@ -27,6 +27,8 @@ export interface ITimeSliderState {
     addTimeSliderLayer: (newLayer: { [index: string]: TypeTimeSliderValues }) => void;
     applyFilters: (layerPath: string, values: number[]) => void;
     removeTimeSliderLayer: (layerPath: string) => void;
+    setTitle: (layerPath: string, title: string) => void;
+    setDescription: (layerPath: string, description: string) => void;
     setDelay: (layerPath: string, delay: number) => void;
     setFiltering: (layerPath: string, filter: boolean) => void;
     setLocked: (layerPath: string, locked: boolean) => void;
@@ -57,6 +59,26 @@ export function initializeTimeSliderState(set: TypeSetStore, get: TypeGetStore):
       removeTimeSliderLayer(layerPath: string): void {
         const sliderLayers = get().timeSliderState.timeSliderLayers;
         delete sliderLayers[layerPath];
+        set({
+          timeSliderState: {
+            ...get().timeSliderState,
+            timeSliderLayers: { ...sliderLayers },
+          },
+        });
+      },
+      setTitle(layerPath: string, title: string): void {
+        const sliderLayers = get().timeSliderState.timeSliderLayers;
+        sliderLayers[layerPath].title = title;
+        set({
+          timeSliderState: {
+            ...get().timeSliderState,
+            timeSliderLayers: { ...sliderLayers },
+          },
+        });
+      },
+      setDescription(layerPath: string, description: string): void {
+        const sliderLayers = get().timeSliderState.timeSliderLayers;
+        sliderLayers[layerPath].description = description;
         set({
           timeSliderState: {
             ...get().timeSliderState,
