@@ -14,8 +14,8 @@ import { Extent } from 'ol/extent';
 import olms, { apply, applyStyle, addMapboxLayer } from 'ol-mapbox-style';
 
 import defaultsDeep from 'lodash/defaultsDeep';
-import { AbstractGeoViewLayer, CONST_LAYER_TYPES } from '../abstract-geoview-layers';
-import { AbstractGeoViewRaster, TypeBaseRasterLayer } from './abstract-geoview-raster';
+import { AbstractGeoViewLayer, CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
+import { AbstractGeoViewRaster, TypeBaseRasterLayer } from '@/geo/layer/geoview-layers/raster/abstract-geoview-raster';
 import {
   TypeLayerEntryConfig,
   TypeSourceTileInitialConfig,
@@ -132,22 +132,22 @@ export class VectorTiles extends AbstractGeoViewRaster {
    * @param {TypeListOfLayerEntryConfig} listOfLayerEntryConfig The list of layer entries configuration to validate.
    */
   protected validateListOfLayerEntryConfig(listOfLayerEntryConfig: TypeListOfLayerEntryConfig) {
-    this.changeLayerPhase('validateListOfLayerEntryConfig');
+    this.setLayerPhase('validateListOfLayerEntryConfig');
     listOfLayerEntryConfig.forEach((layerConfig: TypeLayerEntryConfig) => {
       const layerPath = Layer.getLayerPath(layerConfig);
       if (layerEntryIsGroupLayer(layerConfig)) {
         this.validateListOfLayerEntryConfig(layerConfig.listOfLayerEntryConfig!);
-        if (!layerConfig.listOfLayerEntryConfig.length) {
+        if (!layerConfig?.listOfLayerEntryConfig?.length) {
           this.layerLoadError.push({
             layer: layerPath,
             consoleMessage: `Empty layer group (mapId:  ${this.mapId}, layerPath: ${layerPath})`,
           });
-          this.changeLayerStatus('error', layerConfig);
+          this.setLayerStatus('error', layerPath);
           return;
         }
       }
 
-      this.changeLayerStatus('loading', layerConfig);
+      this.setLayerStatus('loading', layerPath);
     });
   }
 
@@ -158,9 +158,10 @@ export class VectorTiles extends AbstractGeoViewRaster {
    *
    * @returns {TypeBaseRasterLayer} The GeoView raster layer that has been created.
    */
-  processOneLayerEntry(layerConfig: TypeVectorTilesLayerEntryConfig): Promise<TypeBaseRasterLayer | null> {
+  protected processOneLayerEntry(layerConfig: TypeVectorTilesLayerEntryConfig): Promise<TypeBaseRasterLayer | null> {
     const promisedVectorLayer = new Promise<TypeBaseRasterLayer | null>((resolve) => {
-      this.changeLayerPhase('processOneLayerEntry', layerConfig);
+      const layerPath = Layer.getLayerPath(layerConfig);
+      this.setLayerPhase('processOneLayerEntry', layerPath);
       const sourceOptions: SourceOptions = {
         url: getLocalizedValue(layerConfig.source.dataAccessPath, this.mapId),
       };
@@ -171,7 +172,7 @@ export class VectorTiles extends AbstractGeoViewRaster {
         showError(this.mapId, `Error: vector tile layer (${layerConfig.layerId}) projection does not match map projection`);
         // eslint-disable-next-line no-console
         console.log(`Error: vector tile layer (${layerConfig.layerId}) projection does not match map projection`);
-        this.changeLayerStatus('error', layerConfig);
+        this.setLayerStatus('error', layerPath);
         resolve(null);
       } else if (layerConfig.source.projection) sourceOptions.projection = `EPSG:${layerConfig.source.projection}`;
       if (layerConfig.source.tileGrid) {
@@ -205,7 +206,7 @@ export class VectorTiles extends AbstractGeoViewRaster {
           `${getLocalizedValue(this.metadataAccessPath, this.mapId)}${this.metadata.defaultStyles}/root.json`
         );
 
-      super.addLoadendListener(layerConfig, 'tile');
+      this.addLoadendListener(layerPath, 'tile');
 
       resolve(layerConfig.olLayer);
     });
@@ -250,15 +251,16 @@ export class VectorTiles extends AbstractGeoViewRaster {
   /** ***************************************************************************************************************************
    * Get the bounds of the layer represented in the layerConfig, returns updated bounds
    *
-   * @param {TypeLayerEntryConfig} layerConfig Layer config to get bounds from.
+   * @param {string} layerPath The Layer path to the layer's configuration.
    * @param {Extent | undefined} bounds The current bounding box to be adjusted.
    *
    * @returns {Extent} The layer bounding box.
    */
-  getBounds(layerConfig: TypeLayerEntryConfig, bounds: Extent | undefined): Extent | undefined {
-    const layerBounds = (layerConfig.olLayer as TileLayer<VectorTileSource>).getSource()?.getTileGrid()?.getExtent();
+  getBounds(layerPath: string, bounds: Extent | undefined): Extent | undefined {
+    const layerConfig = this.getLayerConfig(layerPath);
+    const layerBounds = (layerConfig?.olLayer as TileLayer<VectorTileSource>).getSource()?.getTileGrid()?.getExtent();
     const projection =
-      (layerConfig.olLayer as TileLayer<VectorTileSource>).getSource()?.getProjection()?.getCode().replace('EPSG:', '') ||
+      (layerConfig?.olLayer as TileLayer<VectorTileSource>).getSource()?.getProjection()?.getCode().replace('EPSG:', '') ||
       MapEventProcessor.getMapState(this.mapId).currentProjection;
 
     if (layerBounds) {
@@ -270,8 +272,9 @@ export class VectorTiles extends AbstractGeoViewRaster {
     return bounds;
   }
 
+  // TODO: This section needs documentation (a header at least). Also, is it normal to have things hardcoded like that?
   addVectorTileLayer() {
-    // ! from code sandbox https://codesandbox.io/s/vector-tile-info-forked-g28jud?file=/main.js it work good
+    // ! from code sandbox https://codesandbox.io/s/vector-tile-info-forked-g28jud?file=/main.js it works good
     // ! from inside GEoView, even when not use, something is wrong.
     olms(
       'LYR3',

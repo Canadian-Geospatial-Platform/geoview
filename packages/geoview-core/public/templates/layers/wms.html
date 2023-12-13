@@ -607,12 +607,10 @@
           window.setInterval(() => {
             const layerConfig = cgpv.api.maps.LYR1.layer.registeredLayers['wmsLYR1-spatiotemporel/RADAR_1KM_RSNO'];
             const temporalData =
-              cgpv.api.maps.LYR1.layer.geoviewLayers['wmsLYR1-spatiotemporel'].layerTemporalDimension[
-                'wmsLYR1-spatiotemporel/RADAR_1KM_RSNO'
-              ];
+              cgpv.api.maps.LYR1.layer.geoviewInstance('wmsLYR1-spatiotemporel/RADAR_1KM_RSNO').getTemporalDimension();
             if (temporalData) {
-              cgpv.api.maps.LYR1.layer.geoviewLayers['wmsLYR1-spatiotemporel'].applyViewFilter(
-                layerConfig,
+              cgpv.api.maps.LYR1.layer.geoviewInstance('wmsLYR1-spatiotemporel/RADAR_1KM_RSNO').applyViewFilter(
+                '',
                 `time=date '${temporalData.range.range[i]}'`
               );
               if (++i === temporalData.range.range.length) i = 0;
@@ -622,10 +620,10 @@
           let j = 0;
           window.setInterval(() => {
             const layerConfig = cgpv.api.maps.LYR1.layer.registeredLayers['wmsLYR1-msi/msi-94-or-more'];
-            const temporalData = cgpv.api.maps.LYR1.layer.geoviewLayers['wmsLYR1-msi'].layerTemporalDimension['wmsLYR1-msi/msi-94-or-more'];
+            const temporalData = cgpv.api.maps.LYR1.layer.geoviewInstance('wmsLYR1-msi/msi-94-or-more').getTemporalDimension();
             if (temporalData) {
-              cgpv.api.maps.LYR1.layer.geoviewLayers['wmsLYR1-msi'].applyViewFilter(
-                layerConfig,
+              cgpv.api.maps.LYR1.layer.geoviewInstance('wmsLYR1-msi/msi-94-or-more').applyViewFilter(
+                '',
                 `time=date '${temporalData.range.range[j]}'`
               );
               if (++j === temporalData.range.range.length) j = 0;
