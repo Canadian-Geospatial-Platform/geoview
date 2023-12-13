@@ -1,5 +1,6 @@
 import { AbstractEventProcessor } from '../abstract-event-processor';
 import { TypeFeatureInfoResultSets, TypeArrayOfLayerData, EventType } from '@/api/events/payloads/get-feature-info-payload';
+import { IDetailsState } from '@/core/stores';
 import { getGeoViewStore } from '@/core/stores/stores-managers';
 
 export class FeatureInfoEventProcessor extends AbstractEventProcessor {
@@ -18,7 +19,7 @@ export class FeatureInfoEventProcessor extends AbstractEventProcessor {
       layerPathInResultSets.forEach((existingLayerPath) => {
         if (resultSets[existingLayerPath].data[eventType]?.features) newDetails.push(resultSets[existingLayerPath].data[eventType]!);
       });
-      const storeDetails = store.getState().detailsState.layerDataArray;
+      const storeDetails = (store.getState().detailsState as IDetailsState).layerDataArray;
       if (storeDetails.length !== newDetails.length || storeDetails.findIndex((layerData, i) => layerData !== newDetails[i]) !== -1)
         store.getState().detailsState.actions.setLayerDataArray(newDetails);
     }
