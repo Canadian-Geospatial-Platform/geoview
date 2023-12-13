@@ -82,7 +82,7 @@ export default function DataTableModal(): JSX.Element {
 
   const rows = useMemo(() => {
     return (
-      layer?.features.splice(0, 50).map((feature) => {
+      layer?.features.splice(0, 99).map((feature) => {
         return feature.rows;
       }) ?? []
     );
@@ -90,7 +90,7 @@ export default function DataTableModal(): JSX.Element {
   }, [layer]);
 
   return (
-    <Dialog open={activeModalId === 'layerDatatable'} onClose={closeModal}>
+    <Dialog open={activeModalId === 'layerDatatable'} onClose={closeModal} maxWidth="xl">
       <DialogTitle>{`${t('legend.tableDetails')} ${layer?.layerName![displayLanguage] ?? selectedLayer}`}</DialogTitle>
       <DialogContent>
         <Table
@@ -100,7 +100,10 @@ export default function DataTableModal(): JSX.Element {
           enableTopToolbar={false}
           enableBottomToolbar={false}
           initialState={{ density: 'compact' }}
+          muiTableContainerProps={{ sx: { maxHeight: '90%' } }}
           enablePagination={false}
+          enableStickyHeader
+          enableSorting
         />
       </DialogContent>
       <DialogActions>
