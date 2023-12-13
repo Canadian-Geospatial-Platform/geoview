@@ -5,6 +5,8 @@ import { MutableRefObject } from 'react';
 /* eslint-disable no-underscore-dangle */
 import { Root, createRoot } from 'react-dom/client';
 
+import i18n from 'i18next';
+
 import { Extent } from 'ol/extent';
 
 import sanitizeHtml from 'sanitize-html';
@@ -19,7 +21,7 @@ import { NotificationType } from '@/core/components/notifications/notifications'
 import { Config } from '@/core/utils/config/config';
 
 /**
- * Get the string associated to the current display language.
+ * Get the string associated to the current display language for localized object type.
  *
  * @param {TypeLocalizedString} localizedString the localized string to process.
  * @param {string} mapId the map identifier that holds the localized string.
@@ -27,7 +29,7 @@ import { Config } from '@/core/utils/config/config';
  * @returns {string} The string value according to the map display language,
  */
 export function getLocalizedValue(localizedString: TypeLocalizedString | undefined, mapId: string): string | undefined {
-  if (localizedString) return localizedString[api.maps[mapId].displayLanguage];
+  if (localizedString) return localizedString[api.maps[mapId].getDisplayLanguage()];
   return undefined;
 }
 
@@ -175,7 +177,20 @@ export function showError(mapId: string, message: string, withNotification = tru
 }
 
 /**
+ * Return proper language Geoview localized values from map i18n instance
+ *
+ * @param {string} mapId the map to get the i18n
+ * @param {string} localizedKey localize key to get
+ * @returns {string} message with values replaced
+ */
+export function getLocalizedMessage(mapId: string, localizedKey: string): string {
+  const trans = i18n.getFixedT(api.maps[mapId].getDisplayLanguage());
+  return trans(localizedKey);
+}
+
+/**
  * Take string and replace parameters from array of values
+ *
  * @param {string[]} params array of parameters to replace
  * @param {string} message original message
  * @returns {string} message with values replaced

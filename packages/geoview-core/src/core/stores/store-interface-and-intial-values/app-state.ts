@@ -1,5 +1,5 @@
 import { useStore } from 'zustand';
-import { useGeoViewStore } from '@/core/stores/stores-managers';
+import { getGeoViewStore, useGeoViewStore } from '@/core/stores/stores-managers';
 import { TypeSetStore, TypeGetStore } from '@/core/stores/geoview-store';
 
 import {
@@ -7,18 +7,18 @@ import {
   TypeDisplayLanguage,
   TypeHTMLElement,
   TypeMapFeaturesConfig,
-  TypeSupportedTheme,
+  TypeDisplayTheme,
 } from '@/core/types/cgpv-types';
 import { api } from '@/app';
 
 export interface IAppState {
   displayLanguage: TypeDisplayLanguage;
+  displayTheme: TypeDisplayTheme;
   isCrosshairsActive: boolean;
   isFullscreenActive: boolean;
   notifications: Array<NotificationDetailsType>;
   geolocatorServiceURL: string | undefined;
   suportedLanguages: TypeDisplayLanguage[];
-  theme: TypeSupportedTheme;
 
   setDefaultConfigValues: (geoviewConfig: TypeMapFeaturesConfig) => void;
 
@@ -26,6 +26,7 @@ export interface IAppState {
     addNotification: (notif: NotificationDetailsType) => void;
     setCrosshairActive: (active: boolean) => void;
     setDisplayLanguage: (lang: TypeDisplayLanguage) => void;
+    setDisplayTheme: (theme: TypeDisplayTheme) => void;
     setFullScreenActive: (active: boolean, element?: TypeHTMLElement) => void;
     removeNotification: (key: string) => void;
   };
@@ -34,12 +35,12 @@ export interface IAppState {
 export function initializeAppState(set: TypeSetStore, get: TypeGetStore): IAppState {
   return {
     displayLanguage: 'en' as TypeDisplayLanguage,
+    displayTheme: 'geo.ca',
     isCrosshairsActive: false,
     isFullscreenActive: false,
     notifications: [],
     geolocatorServiceURL: '',
     suportedLanguages: [],
-    theme: 'geo.ca',
 
     // initialize default stores section from config information when store receive configuration file
     setDefaultConfigValues: (geoviewConfig: TypeMapFeaturesConfig) => {
@@ -47,9 +48,9 @@ export function initializeAppState(set: TypeSetStore, get: TypeGetStore): IAppSt
         appState: {
           ...get().appState,
           displayLanguage: geoviewConfig.displayLanguage as TypeDisplayLanguage,
+          displayTheme: geoviewConfig.theme || 'geo.ca',
           geolocatorServiceURL: geoviewConfig.serviceUrls?.geolocator,
           suportedLanguages: geoviewConfig.suportedLanguages,
-          theme: geoviewConfig.theme || 'geo.ca',
         },
       });
     },
@@ -81,6 +82,24 @@ export function initializeAppState(set: TypeSetStore, get: TypeGetStore): IAppSt
             displayLanguage: lang,
           },
         });
+
+        // also set the display name from original config for reloading purpose
+        const config = get().mapConfig;
+        config!.displayLanguage = lang;
+        set({ mapConfig: config });
+      },
+      setDisplayTheme: (theme: TypeDisplayTheme) => {
+        set({
+          appState: {
+            ...get().appState,
+            displayTheme: theme,
+          },
+        });
+
+        // also set the theme from original config for reloading purpose
+        const config = get().mapConfig;
+        config!.theme = theme;
+        set({ mapConfig: config });
       },
       setFullScreenActive: (active: boolean, element?: TypeHTMLElement) => {
         set({
@@ -110,10 +129,15 @@ export function initializeAppState(set: TypeSetStore, get: TypeGetStore): IAppSt
 // **********************************************************
 export const useAppCrosshairsActive = () => useStore(useGeoViewStore(), (state) => state.appState.isCrosshairsActive);
 export const useAppDisplayLanguage = () => useStore(useGeoViewStore(), (state) => state.appState.displayLanguage);
+export const useAppDisplayTheme = () => useStore(useGeoViewStore(), (state) => state.appState.displayTheme);
 export const useAppFullscreenActive = () => useStore(useGeoViewStore(), (state) => state.appState.isFullscreenActive);
 export const useAppGeolocatorServiceURL = () => useStore(useGeoViewStore(), (state) => state.appState.geolocatorServiceURL);
 export const useAppNotifications = () => useStore(useGeoViewStore(), (state) => state.appState.notifications);
 export const useAppSuportedLanguages = () => useStore(useGeoViewStore(), (state) => state.appState.suportedLanguages);
-export const useAppTheme = () => useStore(useGeoViewStore(), (state) => state.appState.theme);
+
+//! these 2 selector are use in app-stasrt.tsx before context is assigned to the map
+//! DO NOT USE this technique elsewhere, it is only to reload language and theme
+export const useAppDisplayLanguageById = (mapId: string) => useStore(getGeoViewStore(mapId), (state) => state.appState.displayLanguage);
+export const useAppDisplayThemeById = (mapId: string) => useStore(getGeoViewStore(mapId), (state) => state.appState.displayTheme);
 
 export const useAppStoreActions = () => useStore(useGeoViewStore(), (state) => state.appState.actions);

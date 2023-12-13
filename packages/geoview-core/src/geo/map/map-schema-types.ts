@@ -950,7 +950,8 @@ export type TypeListOfLayerEntryConfig = TypeLayerEntryConfig[];
 /** ******************************************************************************************************************************
  * List of supported geoview theme.
  */
-export type TypeSupportedTheme = 'dark' | 'light' | 'geo.ca';
+export type TypeDisplayTheme = 'dark' | 'light' | 'geo.ca';
+export const VALID_DISPLAY_THEME: TypeDisplayTheme[] = ['dark', 'light', 'geo.ca'];
 
 /** ******************************************************************************************************************************
  *  Definition of the map feature instance according to what is specified in the schema.
@@ -959,7 +960,7 @@ export type TypeMapFeaturesInstance = {
   /** map configuration. */
   map: TypeMapConfig;
   /** Display theme, default = geo.ca. */
-  theme?: TypeSupportedTheme;
+  theme?: TypeDisplayTheme;
   /** App bar properties. */
   appBar?: TypeAppBarProps;
   /** Nav bar properies. */
@@ -1122,7 +1123,7 @@ export type TypeAppBarProps = Array<'geolocator' | 'export'>;
 /** ******************************************************************************************************************************
  * Controls available on the navigation bar. Default = ['zoom', 'fullscreen', 'home'].
  */
-export type TypeNavBarProps = Array<'zoom' | 'fullscreen' | 'home' | 'location' | 'export' | 'focus'>;
+export type TypeNavBarProps = Array<'zoom' | 'fullscreen' | 'home' | 'location' | 'export'>;
 
 /** ******************************************************************************************************************************
  *  Overview map options. Default none.

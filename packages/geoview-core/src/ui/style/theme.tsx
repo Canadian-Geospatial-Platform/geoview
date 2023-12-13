@@ -2,7 +2,7 @@ import { createTheme } from '@mui/material/styles';
 import { lightThemeOptions } from './light-theme';
 import { darkThemeOptions } from './dark-theme';
 import { geoCaThemeOptions } from './geo-ca-theme';
-import { TypeSupportedTheme } from '@/geo/map/map-schema-types';
+import { TypeDisplayTheme } from '@/geo/map/map-schema-types';
 
 declare module '@mui/material/styles/createPalette' {
   interface Palette {
@@ -12,7 +12,7 @@ declare module '@mui/material/styles/createPalette' {
   }
 }
 
-function getThemeOptions(mode: TypeSupportedTheme) {
+function getThemeOptions(mode: TypeDisplayTheme) {
   switch (mode) {
     case 'dark':
       return darkThemeOptions;
@@ -23,7 +23,7 @@ function getThemeOptions(mode: TypeSupportedTheme) {
   }
 }
 
-export const getTheme = (mode: TypeSupportedTheme) => {
+export const getTheme = (mode: TypeDisplayTheme) => {
   const optionClone = getThemeOptions(mode);
 
   return createTheme(optionClone);

@@ -13,7 +13,6 @@ import {
   TypeTabs,
   MoveDownRoundedIcon,
   MoveUpRoundedIcon,
-  ArrowUpIcon,
 } from '@/ui';
 import { api, useGeoViewMapId } from '@/app';
 import { EVENT_NAMES } from '@/api/events/event-types';
@@ -37,7 +36,6 @@ export function FooterTabs(): JSX.Element | null {
   const [isCollapsed, setIsCollapsed] = useState(true);
 
   const [isFullscreen, setIsFullscreen] = useState(false);
-  // TODO We might need to refactor code below based on the best solution, issue #1448
   const [isFocusToMap, setIsFocusToMap] = useState<boolean>(true);
 
   const tabsContainerRef = useRef<HTMLDivElement>();
@@ -182,8 +180,7 @@ export function FooterTabs(): JSX.Element | null {
   }, [addTab, mapId, removeTab]);
 
   // Handle focus using dynamic focus button
-  // TODO We might need to refactor code below based on the best solution, issue #1448
-  const handleFocus = () => {
+  const handleDynamicFocus = () => {
     const mapIdDiv = document.getElementById(mapId);
 
     if (mapIdDiv) {
@@ -195,11 +192,10 @@ export function FooterTabs(): JSX.Element | null {
         });
         setIsFocusToMap(false);
       } else {
-        const focusButtonId = document.getElementById(`focuseToMap${mapId}`);
+        const focusButtonId = document.getElementById(`map-${mapId}`);
         if (focusButtonId) {
-          const yOffset = -30;
-          const targetY = focusButtonId.getBoundingClientRect().top + window.pageYOffset + yOffset;
-
+          const targetY = focusButtonId.getBoundingClientRect().bottom + window.pageYOffset - 70;
+          // scroll to footer
           window.scrollTo({
             top: targetY,
             behavior: 'smooth',
@@ -208,19 +204,6 @@ export function FooterTabs(): JSX.Element | null {
 
         setIsFocusToMap(true);
       }
-    }
-  };
-
-  // TODO We might need to refactor code below based on the best solution, issue #1448
-  // Move to top of the given map Id
-  const moveToMap = () => {
-    const mapIdDiv = document.getElementById(mapId);
-    if (mapIdDiv) {
-      const offsetTop = mapIdDiv.offsetTop - 30;
-      window.scrollTo({
-        top: offsetTop,
-        behavior: 'smooth',
-      });
     }
   };
 
@@ -245,18 +228,12 @@ export function FooterTabs(): JSX.Element | null {
               </IconButton>
             )}
             {!isFullscreen && <IconButton onClick={handleCollapse}>{!isCollapsed ? <ExpandMoreIcon /> : <ExpandLessIcon />}</IconButton>}
-            {isFocusToMap ? (
-              <IconButton onClick={handleFocus} tooltip="Focus to map">
-                <MoveUpRoundedIcon />
-              </IconButton>
-            ) : (
-              <IconButton onClick={handleFocus} tooltip="Focus to footer">
-                <MoveDownRoundedIcon />
-              </IconButton>
-            )}
-            {/* // TODO We might need to refactor code below based on the best solution, issue #1448 */}
-            <IconButton onClick={moveToMap} tooltip="Focus to map">
-              <ArrowUpIcon />
+            <IconButton
+              onClick={handleDynamicFocus}
+              tooltip={isFocusToMap ? 'footerTabsContainer.focusToMap' : 'footerTabsContainer.focusToFooter'}
+              disabled={isCollapsed}
+            >
+              {isFocusToMap ? <MoveUpRoundedIcon /> : <MoveDownRoundedIcon />}
             </IconButton>
           </>
         }

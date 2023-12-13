@@ -16,16 +16,17 @@ import { getGeoViewStore } from '@/core/stores/stores-managers';
 import { cgpvTheme } from '@/ui/style/theme';
 import { OverviewMapToggle } from './overview-map-toggle';
 import { api, useGeoViewMapId } from '@/app';
-import { useAppDisplayLanguage } from '@/core/stores/store-interface-and-intial-values/app-state';
+import { useAppDisplayLanguage, useAppDisplayTheme } from '@/core/stores/store-interface-and-intial-values/app-state';
 import { useMapElement, useMapOverviewMapHideZoom } from '@/core/stores/store-interface-and-intial-values/map-state';
+import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 
 // TODO: We need to find solution to remove makeStyles with either plain css or material ui.
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles(() => ({
   overviewMap: {
     bottom: 'auto',
     left: 'auto',
-    right: theme.spacing(5),
-    top: theme.spacing(5),
+    right: '5px',
+    top: '5px',
     margin: 5,
     order: 1,
     padding: 0,
@@ -56,7 +57,7 @@ const useStyles = makeStyles((theme) => ({
       border: 'none',
     },
     '& button': {
-      zIndex: theme.zIndex.tooltip,
+      zIndex: 100,
       position: 'absolute',
       top: 0,
       right: 0,
@@ -71,7 +72,7 @@ const useStyles = makeStyles((theme) => ({
       width: 0,
       height: 0,
       borderRadius: 2,
-      zIndex: theme.zIndex.appBar,
+      zIndex: 100,
       right: 0,
       top: 0,
     },
@@ -99,6 +100,7 @@ export function OverviewMap(): JSX.Element {
   const mapElement = useMapElement();
   const hideOnZoom = useMapOverviewMapHideZoom();
   const displayLanguage = useAppDisplayLanguage();
+  const displayTheme = useAppDisplayTheme();
 
   // TODO: remove useStyle
   const classes = useStyles();
@@ -140,7 +142,7 @@ export function OverviewMap(): JSX.Element {
           overviewMap.setMap(null);
 
           // wait for the view change then set the map and open the overview
-          // TODO: look for better options then Timeout
+          // TODO: use async - look for better options then Timeout
           setTimeout(() => {
             overviewMap.setMap(mapElement!);
             setTimeout(() => overviewMap.setCollapsed(false), 500);
@@ -154,7 +156,7 @@ export function OverviewMap(): JSX.Element {
       unsubMapCurrentProjection();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [mapId]);
+  }, []);
 
   useEffect(() => {
     // get default overview map
@@ -184,7 +186,11 @@ export function OverviewMap(): JSX.Element {
       tipLabel: '',
     });
 
+    // remove the overview map control and link the new one on refresh
+    mapElement!.removeControl(getOverViewMap());
     mapElement!.addControl(overviewMapControl);
+
+    // set initial state for the overview map for the hideOnZoom
     if (mapElement!.getView().getZoom() && mapElement!.getView().getZoom()! < hideOnZoom) overviewMapControl.setMap(null);
 
     // need to recreate the i18n instance as the overviewmap is a new map inside the main map
@@ -202,8 +208,11 @@ export function OverviewMap(): JSX.Element {
       </I18nextProvider>
     );
 
+    // link the root to the the map so we can unmount
+    MapEventProcessor.setMapOverviewMapRoot(mapId, root);
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [displayLanguage, displayTheme]);
 
   return <div />;
 }
