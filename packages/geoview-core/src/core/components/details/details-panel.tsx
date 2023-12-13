@@ -81,8 +81,10 @@ export function Detailspanel(): JSX.Element {
       const commonLayerPathIndex = selectedLayerPath ? findLayerPathIndex(arrayOfLayerData, selectedLayerPath) : -1;
       // Get index of first layer from array which doesn't have feature zero.
       const firstLayerIndex = arrayOfLayerData.findIndex((layer) => layer?.features?.length);
-      setLayerDataInfo(arrayOfLayerData[commonLayerPathIndex > -1 ? commonLayerPathIndex : firstLayerIndex]);
+      const selectedLayer = arrayOfLayerData[commonLayerPathIndex > -1 ? commonLayerPathIndex : firstLayerIndex];
+      setLayerDataInfo(selectedLayer);
       setCurrentFeatureIndex(0);
+      setSelectedLayerPath(selectedLayer?.layerPath ?? '');
     } else setLayerDataInfo(null);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [arrayOfLayerData]);
@@ -109,7 +111,7 @@ export function Detailspanel(): JSX.Element {
     addSelectedFeature(nextFeature);
     setCurrentFeatureIndex(currentFeatureIndex + change);
   };
-
+  console.log('selectedLayerPath', selectedLayerPath);
   /**
    * Handles clicks to layers in left panel. Removes highlight from previous layers feature if it is not checked,
    * before updating current layer and highlighting first feature.
