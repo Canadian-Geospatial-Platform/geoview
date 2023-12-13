@@ -235,7 +235,7 @@ function LayersList(props: TypeLayersPanelListProps): JSX.Element {
   const onSliderChange = (value: number, data: AbstractGeoViewLayer) => {
     setLayerOpacity((state) => ({ ...state, [data.geoviewLayerId]: value }));
     const opacity = layerVisibility[data.geoviewLayerId] ? value / 100 : 0;
-    data.setOpacity(opacity);
+    data.setOpacity(opacity); // ! needs a layerPath
   };
 
   /**
@@ -247,7 +247,7 @@ function LayersList(props: TypeLayersPanelListProps): JSX.Element {
   const onVisibilityChange = (value: boolean, data: AbstractGeoViewLayer) => {
     setLayerVisibility((state) => ({ ...state, [data.geoviewLayerId]: value }));
     const opacity = value ? layerOpacity[data.geoviewLayerId] / 100 : 0;
-    data.setOpacity(opacity);
+    data.setOpacity(opacity); // ! needs a layerPath
     if (value && data.setEntries) {
       setSubLayerVisibility((state) => ({ ...state, [data.geoviewLayerId]: data.entries as number[] }));
       data.setEntries(data.entries as number[]);
@@ -270,11 +270,11 @@ function LayersList(props: TypeLayersPanelListProps): JSX.Element {
     const entries = value ? [...new Set([...oldEntries, id])] : oldEntries.filter((x) => x !== id);
     if (oldEntries.length === 0) {
       setLayerVisibility((state) => ({ ...state, [data.geoviewLayerId]: true }));
-      data.setOpacity(layerOpacity[data.geoviewLayerId] / 100);
+      data.setOpacity(layerOpacity[data.geoviewLayerId] / 100); // ! needs a layerPath
     }
     if (entries.length === 0) {
       setLayerVisibility((state) => ({ ...state, [data.geoviewLayerId]: false }));
-      data.setOpacity(0);
+      data.setOpacity(0); // ! needs a layerPath
     }
     setSubLayerVisibility((state) => ({ ...state, [data.geoviewLayerId]: entries }));
     if (data.setEntries) data.setEntries(entries);

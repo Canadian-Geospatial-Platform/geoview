@@ -223,20 +223,20 @@ const createTableOfFilter = (mapId) => {
           mapButtonsDiv.appendChild(layerConfigH2);
 
           const toggleLayerVisibility = document.createElement('button');
-          let visibilityFlag = geoviewLayer.getVisible(layerConfig);
+          let visibilityFlag = geoviewLayer.getVisible(layerPath);
           if (visibilityFlag)
             toggleLayerVisibility.innerText = layerConfig?.source?.style === undefined ? 'Hide' : `Hide style ${layerConfig.source.style}`;
           else
             toggleLayerVisibility.innerText = layerConfig?.source?.style === undefined ? 'Show' : `Show style ${layerConfig.source.style}`;
           toggleLayerVisibility.addEventListener('click', (e) => {
-            visibilityFlag = !geoviewLayer.getVisible(layerConfig);
+            visibilityFlag = !geoviewLayer.getVisible(layerPath);
             if (visibilityFlag)
               toggleLayerVisibility.innerText =
                 layerConfig?.source?.style === undefined ? 'Hide' : `Hide style ${layerConfig.source.style}`;
             else
               toggleLayerVisibility.innerText =
                 layerConfig?.source?.style === undefined ? 'Show' : `Show style ${layerConfig.source.style}`;
-            geoviewLayer.setVisible(visibilityFlag, layerConfig);
+            geoviewLayer.setVisible(visibilityFlag, layerPath);
           });
           layerConfigH2.appendChild(toggleLayerVisibility);
 
@@ -275,7 +275,7 @@ const createTableOfFilter = (mapId) => {
                       const checkbox = document.getElementById(`checkbox-${mapId}-${geoviewLayer.geoviewLayerId}`);
                       const filterInput = document.getElementById(`filter-input-${mapId}-${geoviewLayer.geoviewLayerId}`);
                       const filter = checkbox.value === 'true' ? filterInput.value : geoviewLayer.getLayerFilter(layerConfig);
-                      geoviewLayer.applyViewFilter(layerConfig, filter, checkbox.value !== 'true');
+                      geoviewLayer.applyViewFilter(Layer.getLayerPath(layerConfig), filter, checkbox.value !== 'true');
                     });
                     mapButtonsDiv.appendChild(toggleUniqueValueDefault);
                     mapButtonsDiv.appendChild(legendStyle[geometry].defaultCanvas);
@@ -313,7 +313,7 @@ const createTableOfFilter = (mapId) => {
                       const checkbox = document.getElementById(`checkbox-${mapId}-${geoviewLayer.geoviewLayerId}`);
                       const filterInput = document.getElementById(`filter-input-${mapId}-${geoviewLayer.geoviewLayerId}`);
                       const filter = checkbox.value === 'true' ? filterInput.value : geoviewLayer.getLayerFilter(layerConfig);
-                      geoviewLayer.applyViewFilter(layerConfig, filter, checkbox.value !== 'true');
+                      geoviewLayer.applyViewFilter(Layer.getLayerPath(layerConfig), filter, checkbox.value !== 'true');
                     });
                     mapButtonsDiv.appendChild(toggleUniqueValueFeature);
                     mapButtonsDiv.appendChild(legendStyle[geometry].arrayOfCanvas[i]);
@@ -351,7 +351,7 @@ const createTableOfFilter = (mapId) => {
                       const checkbox = document.getElementById(`checkbox-${mapId}-${geoviewLayer.geoviewLayerId}`);
                       const filterInput = document.getElementById(`filter-input-${mapId}-${geoviewLayer.geoviewLayerId}`);
                       const filter = checkbox.value === 'true' ? filterInput.value : geoviewLayer.getLayerFilter(layerConfig);
-                      geoviewLayer.applyViewFilter(layerConfig, filter, checkbox.value !== 'true');
+                      geoviewLayer.applyViewFilter(Layer.getLayerPath(layerConfig), filter, checkbox.value !== 'true');
                     });
                     mapButtonsDiv.appendChild(toggleClassBreakDefault);
                     const br = document.createElement('br');
@@ -388,7 +388,7 @@ const createTableOfFilter = (mapId) => {
                       const checkbox = document.getElementById(`checkbox-${mapId}-${geoviewLayer.geoviewLayerId}`);
                       const filterInput = document.getElementById(`filter-input-${mapId}-${geoviewLayer.geoviewLayerId}`);
                       const filter = checkbox.value === 'true' ? filterInput.value : geoviewLayer.getLayerFilter(layerConfig);
-                      geoviewLayer.applyViewFilter(layerConfig, filter, checkbox.value !== 'true');
+                      geoviewLayer.applyViewFilter(Layer.getLayerPath(layerConfig), filter, checkbox.value !== 'true');
                     });
                     mapButtonsDiv.appendChild(toggleClassBreakFeature);
                     mapButtonsDiv.appendChild(legendStyle[geometry].arrayOfCanvas[i]);
@@ -411,7 +411,7 @@ const createTableOfFilter = (mapId) => {
                 const layerFilterButton = document.createElement('button');
                 layerFilterButton.addEventListener('click', (e) => {
                   const checkbox = document.getElementById(`checkbox-${mapId}-${geoviewLayer.geoviewLayerId}`);
-                  geoviewLayer.applyViewFilter(layerConfig, layerFilterInput.value, checkbox.value !== 'true');
+                  geoviewLayer.applyViewFilter(Layer.getLayerPath(layerConfig), layerFilterInput.value, checkbox.value !== 'true');
                 });
                 layerFilterButton.innerText = 'Apply';
                 layerFilterText.style.width = 'max-content';
@@ -423,7 +423,7 @@ const createTableOfFilter = (mapId) => {
                 checkboxInput.id = `checkbox-${mapId}-${geoviewLayer.geoviewLayerId}`;
                 checkboxInput.addEventListener('click', (e) => {
                   checkboxInput.value = checkboxInput.value === 'true' ? 'false' : 'true';
-                  geoviewLayer.applyViewFilter(layerConfig, layerFilterInput.value, checkboxInput.value !== 'true');
+                  geoviewLayer.applyViewFilter(Layer.getLayerPath(layerConfig), layerFilterInput.value, checkboxInput.value !== 'true');
                 });
                 mapButtonsDiv.appendChild(checkboxInput);
                 const checkboxText = document.createElement('label');

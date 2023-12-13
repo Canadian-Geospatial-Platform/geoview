@@ -235,19 +235,17 @@
           var timeConsoleLyr2 = document.getElementById('LYR2TD');
           var timeConsoleLyr3 = document.getElementById('LYR3TD');
           timeConsoleLyr1.textContent = JSON.stringify(
-            cgpv.api.maps['LYR1'].layer.geoviewLayers['wmsLYR1-Root'].layerTemporalDimension[
-              'wmsLYR1-Root/wmsLYR1-Group1/wmsLYR1-Group2/wmsLYR1-Group3/RADAR_1KM_RSNO.ending'
-            ],
+            cgpv.api.maps['LYR1'].layer.geoviewInstance('wmsLYR1-Root/wmsLYR1-Group1/wmsLYR1-Group2/wmsLYR1-Group3/RADAR_1KM_RSNO.ending').getTemporalDimension(),
             undefined,
             2
           );
           timeConsoleLyr2.textContent = JSON.stringify(
-            cgpv.api.maps['LYR2'].layer.geoviewLayers['esriDynamicLYR3'].layerTemporalDimension['esriDynamicLYR3/0'],
+            cgpv.api.maps['LYR2'].layer.geoviewInstance('esriDynamicLYR3/0').getTemporalDimension(),
             undefined,
             2
           );
           timeConsoleLyr3.textContent = JSON.stringify(
-            cgpv.api.maps['LYR3'].layer.geoviewLayers['esriFeatureLYR4b'].layerTemporalDimension['esriFeatureLYR4b/0'],
+            cgpv.api.maps['LYR3'].layer.geoviewInstance('esriFeatureLYR4b/0').getTemporalDimension(),
             undefined,
             2
           );
