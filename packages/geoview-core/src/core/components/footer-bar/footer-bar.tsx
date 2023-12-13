@@ -43,7 +43,15 @@ export function Footerbar(): JSX.Element {
         </Grid>
 
         <Grid container item md={11} spacing={2}>
-          <Grid container justifyContent="flex-end">
+          <Grid
+            container
+            justifyContent="flex-end"
+            sx={{
+              [theme.breakpoints.down('md')]: {
+                marginTop: '-32px',
+              },
+            }}
+          >
             <Grid item md={10}>
               <Box id="mouseAndScaleControls" sx={sxClassesFooterBar.mouseScaleControlsContainer}>
                 {interaction === 'dynamic' && <MousePosition />}
