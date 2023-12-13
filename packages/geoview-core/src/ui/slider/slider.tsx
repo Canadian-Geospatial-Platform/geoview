@@ -48,10 +48,10 @@ interface TypeSliderProps extends SliderProps {
  */
 export function Slider(props: TypeSliderProps): JSX.Element {
   const { ...properties } = props;
-  properties.sliderId = properties.id!;
-
   const theme = useTheme();
   const sxClasses = getSxClasses(theme);
+
+  const containerId = `${properties.mapId}-${properties.sliderId}` || '';
 
   // internal state
   const [min, setMin] = useState<number>(properties.min);
@@ -140,10 +140,10 @@ export function Slider(props: TypeSliderProps): JSX.Element {
   };
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  const removeLabelOverlap = (mapId: string) => {
+  const removeLabelOverlap = () => {
     // get slider labels
-    const markers = mapId
-      ? document.getElementById(mapId)?.getElementsByClassName('MuiSlider-markLabel') || []
+    const markers = containerId
+      ? document.getElementById(containerId)?.getElementsByClassName('MuiSlider-markLabel') || []
       : document.getElementsByClassName('MuiSlider-markLabel');
 
     for (let i = 0; i < markers.length; i++) markers[i].classList.remove('MuiSlider-markLabel-overlap');
@@ -196,12 +196,11 @@ export function Slider(props: TypeSliderProps): JSX.Element {
 
   useLayoutEffect(() => {
     // remove overlaping labels
-    const mapId = properties?.mapId || '';
-    removeLabelOverlap(mapId);
+    removeLabelOverlap();
 
-    window.addEventListener('resize', () => removeLabelOverlap(mapId));
-    return () => window.removeEventListener('resize', () => removeLabelOverlap(mapId));
-  }, [properties?.mapId, removeLabelOverlap]);
+    window.addEventListener('resize', () => removeLabelOverlap);
+    return () => window.removeEventListener('resize', () => removeLabelOverlap);
+  }, [removeLabelOverlap]);
 
   useEffect(() => {
     // on set min/max, update slider
@@ -220,7 +219,7 @@ export function Slider(props: TypeSliderProps): JSX.Element {
   // TODO: better implement WCAG on slider
   return (
     <MaterialSlider
-      id={properties.mapId}
+      id={`${properties.mapId}-${properties.sliderId}`}
       sx={{ ...(!properties.className ? sxClasses.slider : {}) }}
       className={properties.className !== undefined ? properties.className : ''}
       style={properties.style}
