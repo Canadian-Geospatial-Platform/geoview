@@ -67,15 +67,19 @@ export class Plugin {
         script.id = pluginId;
         document.body.appendChild(script);
         script.onload = () => {
+          // Note: Used timeout to put resolve back in call queue, because when tyring to load a plugin more than once on same page, it's not loaded before resolve
+          // TODO: make async if possible
           setTimeout(() => resolve(window.plugins[pluginId]), 1000);
         };
 
         script.onerror = () => {
+          // TODO: make async if possible
           setTimeout(() => resolve(null), 1000);
         };
       }
 
       if (existingScript && window.plugins && window.plugins[pluginId]) {
+        // TODO: make async if possible
         setTimeout(() => resolve(window.plugins[pluginId]), 1000);
       }
     });
