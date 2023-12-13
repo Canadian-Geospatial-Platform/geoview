@@ -1,16 +1,10 @@
-import {
-  Cast,
-  AbstractPlugin,
-  AnySchemaObject,
-  TypePluginOptions,
-  TypeWindow,
-  TypeButtonPanel,
-  toJsonObject,
-  TypeJsonObject,
-} from 'geoview-core';
+import { Cast, AnySchemaObject, toJsonObject, TypeJsonObject } from 'geoview-core';
+import { FooterPlugin } from 'geoview-core/src/api/plugin/footer-plugin';
+import { TypeTabs } from 'geoview-core/src/ui/tabs/tabs';
 import { ChartType } from 'geochart';
 import { LayerListEntry } from 'geoview-core/src/core/components/common';
 import { ChartIcon } from 'geoview-core/src/ui/icons';
+
 import { PayloadBaseClassChart, EVENT_CHART_REDRAW } from './geochart-event-base';
 import { PayloadChartConfig } from './geochart-event-config';
 import { PluginGeoChartConfig } from './geochart-types';
@@ -21,23 +15,7 @@ import { GeoChartPanel } from './geochart-panel';
 /**
  * The Chart Plugin which will be automatically instanciated during GeoView's initialization.
  */
-class GeoChartPlugin extends AbstractPlugin {
-  // Store the created button panel object
-  buttonPanel?: TypeButtonPanel;
-
-  // store index of tab
-  value: number | null = null;
-
-  /**
-   * Constructor
-   * @param pluginId The plugin id
-   * @param props The plugin properties upon initialization
-   */
-  constructor(pluginId: string, props: TypePluginOptions) {
-    super(pluginId, props);
-    this.buttonPanel = null;
-  }
-
+class GeoChartFooterPlugin extends FooterPlugin {
   /**
    * Return the package schema
    *
@@ -68,112 +46,76 @@ class GeoChartPlugin extends AbstractPlugin {
     },
   });
 
-  /**
-   * Added function called after the plugin has been initialized
-   */
-  added = (): void => {
-    // Fetch cgpv
-    const { cgpv } = window as TypeWindow;
-    const { createElement } = cgpv.react;
-    const { configObj, pluginProps } = this as AbstractPlugin;
-    const { mapId } = pluginProps;
+  onCreateContentProps(): TypeTabs {
+    // Cast the config
+    const chartConfig: PluginGeoChartConfig<ChartType> | undefined = this.configObj;
 
-    // If cgpv exists
-    if (cgpv) {
-      // Access the api calls
-      const { api } = cgpv;
-      this.value = api.maps[mapId].footerTabs.tabs.length;
-      const language = api.maps[mapId].getDisplayLanguage();
+    // Create content
+    const layerList = chartConfig?.charts
+      .map((chart) => {
+        const layerIds =
+          chart.layers?.map((layer) => {
+            return layer.layerId;
+          }) ?? [];
 
-      const layerList = (configObj as PluginGeoChartConfig<ChartType>).charts
-        .map((chart) => {
-          const layerIds =
-            chart.layers?.map((layer) => {
-              return layer.layerId;
-            }) ?? [];
+        return layerIds;
+      })
+      .flat()
+      .reduce((acc, curr) => {
+        if (this.api.maps[this.pluginProps.mapId].layer.registeredLayers[curr]) {
+          const currLayer = this.api.maps[this.pluginProps.mapId].layer.registeredLayers[curr];
+          const layerName =
+            currLayer.layerName && this.displayLanguage() in currLayer.layerName
+              ? currLayer.layerName[this.displayLanguage()]
+              : currLayer.layerName;
+          const layerData = {
+            layerName,
+            layerPath: curr,
+            tooltip: layerName,
+          };
+          acc.push(layerData);
+        }
 
-          return layerIds;
-        })
-        .flat()
-        .reduce((acc, curr) => {
-          if (api.maps[mapId].layer.registeredLayers[curr]) {
-            const currLayer = api.maps[mapId].layer.registeredLayers[curr];
-            const layerName = currLayer.layerName && language in currLayer.layerName ? currLayer.layerName[language] : currLayer.layerName;
-            const layerData = {
-              layerName,
-              layerPath: curr,
-              tooltip: layerName,
-            };
-            acc.push(layerData);
-          }
+        return acc;
+      }, [] as LayerListEntry[]);
 
-          return acc;
-        }, [] as LayerListEntry[]);
-
-      api.maps[mapId].footerTabs.createFooterTab({
-        id: 'geochart',
-        value: this.value,
-        label: 'chartPanel.title',
-        icon: <ChartIcon />,
-        content: () => createElement(GeoChartPanel, { mapId, configObj, layerList }, []),
-      });
+    // If any layers list
+    let content = <div>No layers in config</div>;
+    if (layerList) {
+      // Create element
+      content = <GeoChartPanel mapId={this.pluginProps.mapId} configObj={this.configObj} layerList={layerList} />;
     }
-  };
 
-  /**
-   * Function called when the plugin is removed, used for clean up
-   */
-  removed = (): void => {
-    // Fetch cgpv
-    const { cgpv } = window as TypeWindow;
-    const { pluginProps } = this as AbstractPlugin;
-    const { mapId } = pluginProps;
-
-    // If cgpv exists
-    if (cgpv) {
-      // Remove the footer tab
-      if (this.value) cgpv.api.maps[mapId].footerTabs.removeFooterTab(this.value);
-    }
-  };
+    return {
+      id: 'geochart',
+      value: this.value!,
+      label: 'chartPanel.title',
+      icon: <ChartIcon />,
+      content: () => content,
+    };
+  }
 
   /**
    * Callable plugin function to emit a Chart config event in order to update the Chart configuration on demand.
-   * @param data The GeoChartData to update the Chart with
-   * @param options The GeoChartOptions to update the Chart with
+   * @param config PluginGeoChartConfig<ChartType> The GeoChart Config
    */
-  loadConfig = (config: PluginGeoChartConfig<ChartType>): void => {
-    // Fetch cgpv
-    const { cgpv } = window as TypeWindow;
-    const { pluginProps } = this as AbstractPlugin;
-    const { mapId } = pluginProps;
-
-    // If cgpv exists
-    if (cgpv) {
-      // Emit a Chart Changed event so the chart updates
-      cgpv.api.event.emit(new PayloadChartConfig(mapId, config));
-    }
-  };
+  loadConfig(config: PluginGeoChartConfig<ChartType>): void {
+    // Emit a Chart Changed event so the chart updates
+    this.api.event.emit(new PayloadChartConfig(this.pluginProps.mapId, config));
+  }
 
   /**
    * Callable plugin function to emit a Chart redraw event in order to update the Chart ui on demand.
    */
-  redrawChart = (): void => {
-    // Fetch cgpv
-    const { cgpv } = window as TypeWindow;
-    const { pluginProps } = this as AbstractPlugin;
-    const { mapId } = pluginProps;
-
-    // If cgpv exists
-    if (cgpv) {
-      // Emit a Chart Redraw event so the chart redraws
-      cgpv.api.event.emit(new PayloadBaseClassChart(EVENT_CHART_REDRAW, mapId));
-    }
-  };
+  redrawChart(): void {
+    // Emit a Chart Redraw event so the chart redraws
+    this.api.event.emit(new PayloadBaseClassChart(EVENT_CHART_REDRAW, this.pluginProps.mapId));
+  }
 }
 
-// Exports the GeoChartPlugin
-export default GeoChartPlugin;
+// Exports the GeoChartFooterPlugin
+export default GeoChartFooterPlugin;
 
 // Keep a reference to the GeoChartPlugin as part of the plugins property stored in the window object
 window.plugins = window.plugins || {};
-window.plugins.geochart = Cast<AbstractPlugin>(GeoChartPlugin);
+window.plugins.geochart = Cast<GeoChartFooterPlugin>(GeoChartFooterPlugin);
