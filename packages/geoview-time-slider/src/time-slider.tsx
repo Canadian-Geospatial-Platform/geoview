@@ -1,6 +1,5 @@
 import { useTheme } from '@mui/material/styles';
 import { FormControl, InputLabel, NativeSelect } from '@mui/material';
-import { TypeWindow } from 'geoview-core';
 import { useTimeSliderLayers, useTimeSliderStoreActions, useAppDisplayLanguage } from 'geoview-core/src/core/stores';
 import { getSxClasses } from './time-slider-style';
 
@@ -43,8 +42,6 @@ interface TimeSliderPanelProps {
   layerPath: string;
 }
 
-const { cgpv } = window as TypeWindow;
-
 /**
  * Creates a panel with time sliders
  *
@@ -52,6 +49,7 @@ const { cgpv } = window as TypeWindow;
  * @returns {JSX.Element} the slider panel
  */
 export function TimeSlider(TimeSliderPanelProps: TimeSliderPanelProps) {
+  const { cgpv } = window;
   const { layerPath } = TimeSliderPanelProps;
   const { react, ui } = cgpv;
   const { useState, useRef, useEffect } = react;

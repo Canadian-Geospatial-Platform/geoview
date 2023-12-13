@@ -5,7 +5,6 @@ import {
   toJsonObject,
   TypeJsonObject,
   AbstractGeoViewLayer,
-  TypeWindow,
   geoviewLayerIsWMS,
   geoviewLayerIsEsriDynamic,
   geoviewLayerIsEsriFeature,
@@ -31,8 +30,6 @@ type TypeLegend =
 
 type TypeSubLayerVisibility = { [subLayerId: string]: number[] };
 
-const w = window as TypeWindow;
-
 /**
  * A react component that will list the map server layers defined in the map config
  * @param {TypeLayersPanelListProps} props properties passed to the component
@@ -41,7 +38,7 @@ const w = window as TypeWindow;
 function LayersList(props: TypeLayersPanelListProps): JSX.Element {
   const { mapId, layers, displayLanguage } = props;
 
-  const { cgpv } = w;
+  const { cgpv } = window;
   const { ui, api, react } = cgpv;
   const { useState, useEffect } = react;
 

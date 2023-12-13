@@ -1,5 +1,4 @@
 /* eslint-disable react/require-default-props */
-import { TypeWindow } from 'geoview-core';
 import { DragDropContext, Draggable, Droppable, DropResult } from 'react-beautiful-dnd';
 
 interface Props {
@@ -10,15 +9,13 @@ interface Props {
   setMapLayers: (reorderedLayerIds: string[]) => void;
 }
 
-const w = window as TypeWindow;
-
 /**
  * A react component that displays the reorderable layers list
  *
  * @returns {JSX.Element} A React JSX Element with the reorderable layers list
  */
 function ReorderLayersList({ mapId, title, layerIds, setReorderLayersVisible, setMapLayers }: Props): JSX.Element {
-  const { cgpv } = w;
+  const { cgpv } = window;
   const { api, ui } = cgpv;
 
   const { List, ListItem, ListItemButton, ListItemIcon, HandleIcon, ListItemText, Box, IconButton, CloseIcon } = ui.elements;
