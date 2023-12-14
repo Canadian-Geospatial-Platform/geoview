@@ -335,7 +335,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
    * @param {boolean} CombineLegendFilter Flag used to combine the legend filter and the filter together (default: true)
    */
   applyViewFilter(layerPath?: string, filter = '', CombineLegendFilter = true) {
-    layerPath = layerPath || api.maps[this.mapId].layer.layerPathAssociatedToTheGeoviewInstance;
+    layerPath = layerPath || api.maps[this.mapId].layer.layerPathAssociatedToThegeoviewLayer;
     const layerConfig = this.getLayerConfig(layerPath) as TypeVectorLayerEntryConfig;
     if (!layerConfig?.olLayer) return; // We must wait for the layer to be created.
 

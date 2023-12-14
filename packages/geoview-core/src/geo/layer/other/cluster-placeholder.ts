@@ -233,7 +233,7 @@
 // }
 
 // applyViewFilter(layerPath?: string, filter = '', CombineLegendFilter = true, checkCluster = true) {
-//   layerPath = layerPath || api.maps[this.mapId].layer.layerPathAssociatedToTheGeoviewInstance;
+//   layerPath = layerPath || api.maps[this.mapId].layer.layerPathAssociatedToThegeoviewLayer;
 //   const layerConfig = this.getLayerConfig(layerPath) as TypeVectorLayerEntryConfig;
 //   if (layerConfig) {
 //     const layerPath = layerConfig.geoviewRootLayer

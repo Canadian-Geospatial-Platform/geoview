@@ -732,7 +732,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
    * @param {boolean} CombineLegendFilter Flag used to combine the legend filter and the filter together (default: true)
    */
   applyViewFilter(layerPath?: string, filter = '', CombineLegendFilter = true) {
-    layerPath = layerPath || api.maps[this.mapId].layer.layerPathAssociatedToTheGeoviewInstance;
+    layerPath = layerPath || api.maps[this.mapId].layer.layerPathAssociatedToThegeoviewLayer;
     const layerConfig = this.getLayerConfig(layerPath) as TypeEsriDynamicLayerEntryConfig;
     const source = (layerConfig.olLayer as ImageLayer<ImageArcGISRest>).getSource();
     if (source) {

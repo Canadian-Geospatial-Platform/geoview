@@ -383,7 +383,7 @@ export abstract class AbstractGeoViewLayer {
    * @param {string} layerPath The layer path to the layer's configuration affected by the change.
    */
   setLayerStatus(layerStatus: TypeLayerStatus, layerPath?: string) {
-    layerPath = layerPath || api.maps[this.mapId].layer.layerPathAssociatedToTheGeoviewInstance;
+    layerPath = layerPath || api.maps[this.mapId].layer.layerPathAssociatedToThegeoviewLayer;
     const layerConfig = this.getLayerConfig(layerPath) as TypeBaseLayerEntryConfig;
     layerConfig.layerStatus = layerStatus;
     api.event.emit(LayerSetPayload.createLayerSetChangeLayerStatusPayload(this.mapId, layerPath, layerStatus!));
@@ -1065,7 +1065,7 @@ export abstract class AbstractGeoViewLayer {
    * @returns {Extent} The layer extent.
    */
   getExtent(layerPath?: string): Extent | undefined {
-    layerPath = layerPath || api.maps[this.mapId].layer.layerPathAssociatedToTheGeoviewInstance;
+    layerPath = layerPath || api.maps[this.mapId].layer.layerPathAssociatedToThegeoviewLayer;
     const olLayer = this.getLayerConfig(layerPath)?.olLayer;
     return olLayer?.getExtent();
   }
@@ -1079,7 +1079,7 @@ export abstract class AbstractGeoViewLayer {
    * @param {string} layerPath The layer path to the layer's configuration.
    */
   setExtent(layerExtent: Extent, layerPath?: string) {
-    layerPath = layerPath || api.maps[this.mapId].layer.layerPathAssociatedToTheGeoviewInstance;
+    layerPath = layerPath || api.maps[this.mapId].layer.layerPathAssociatedToThegeoviewLayer;
     const olLayer = this.getLayerConfig(layerPath)?.olLayer;
     if (olLayer) olLayer.setExtent(layerExtent);
   }
@@ -1092,7 +1092,7 @@ export abstract class AbstractGeoViewLayer {
    * @returns {number} The opacity of the layer.
    */
   getOpacity(layerPath?: string): number | undefined {
-    layerPath = layerPath || api.maps[this.mapId].layer.layerPathAssociatedToTheGeoviewInstance;
+    layerPath = layerPath || api.maps[this.mapId].layer.layerPathAssociatedToThegeoviewLayer;
     const olLayer = this.getLayerConfig(layerPath)?.olLayer;
     return olLayer?.getOpacity();
   }
@@ -1105,7 +1105,7 @@ export abstract class AbstractGeoViewLayer {
    *
    */
   setOpacity(layerOpacity: number, layerPath?: string) {
-    layerPath = layerPath || api.maps[this.mapId].layer.layerPathAssociatedToTheGeoviewInstance;
+    layerPath = layerPath || api.maps[this.mapId].layer.layerPathAssociatedToThegeoviewLayer;
     const olLayer = this.getLayerConfig(layerPath)?.olLayer;
     if (olLayer) olLayer.setOpacity(layerOpacity);
   }
@@ -1118,7 +1118,7 @@ export abstract class AbstractGeoViewLayer {
    * @returns {boolean} The visibility of the layer.
    */
   getVisible(layerPath?: string): boolean | undefined {
-    layerPath = layerPath || api.maps[this.mapId].layer.layerPathAssociatedToTheGeoviewInstance;
+    layerPath = layerPath || api.maps[this.mapId].layer.layerPathAssociatedToThegeoviewLayer;
     const olLayer = this.getLayerConfig(layerPath)?.olLayer;
     return olLayer?.getVisible();
   }
@@ -1130,7 +1130,7 @@ export abstract class AbstractGeoViewLayer {
    * @param {string} layerPath The layer path to the layer's configuration.
    */
   setVisible(layerVisibility: boolean, layerPath?: string) {
-    layerPath = layerPath || api.maps[this.mapId].layer.layerPathAssociatedToTheGeoviewInstance;
+    layerPath = layerPath || api.maps[this.mapId].layer.layerPathAssociatedToThegeoviewLayer;
     const olLayer = this.getLayerConfig(layerPath)?.olLayer;
     if (olLayer) {
       olLayer.setVisible(layerVisibility);
@@ -1146,7 +1146,7 @@ export abstract class AbstractGeoViewLayer {
    * @returns {boolean} The visibility of the layer.
    */
   getMinZoom(layerPath?: string): number | undefined {
-    layerPath = layerPath || api.maps[this.mapId].layer.layerPathAssociatedToTheGeoviewInstance;
+    layerPath = layerPath || api.maps[this.mapId].layer.layerPathAssociatedToThegeoviewLayer;
     const olLayer = this.getLayerConfig(layerPath)?.olLayer;
     return olLayer?.getMinZoom();
   }
@@ -1158,7 +1158,7 @@ export abstract class AbstractGeoViewLayer {
    * @param {string} layerPath The layer path to the layer's configuration.
    */
   setMinZoom(minZoom: number, layerPath?: string) {
-    layerPath = layerPath || api.maps[this.mapId].layer.layerPathAssociatedToTheGeoviewInstance;
+    layerPath = layerPath || api.maps[this.mapId].layer.layerPathAssociatedToThegeoviewLayer;
     const olLayer = this.getLayerConfig(layerPath)?.olLayer;
     if (olLayer) olLayer.setMinZoom(minZoom);
   }
@@ -1171,7 +1171,7 @@ export abstract class AbstractGeoViewLayer {
    * @returns {boolean} The visibility of the layer.
    */
   getMaxZoom(layerPath?: string): number | undefined {
-    layerPath = layerPath || api.maps[this.mapId].layer.layerPathAssociatedToTheGeoviewInstance;
+    layerPath = layerPath || api.maps[this.mapId].layer.layerPathAssociatedToThegeoviewLayer;
     const olLayer = this.getLayerConfig(layerPath)?.olLayer;
     return olLayer?.getMaxZoom();
   }
@@ -1183,7 +1183,7 @@ export abstract class AbstractGeoViewLayer {
    * @param {string} layerPath The layer path to the layer's configuration.
    */
   setMaxZoom(maxZoom: number, layerPath?: string) {
-    layerPath = layerPath || api.maps[this.mapId].layer.layerPathAssociatedToTheGeoviewInstance;
+    layerPath = layerPath || api.maps[this.mapId].layer.layerPathAssociatedToThegeoviewLayer;
     const olLayer = this.getLayerConfig(layerPath)?.olLayer;
     if (olLayer) olLayer.setMaxZoom(maxZoom);
   }
@@ -1198,7 +1198,7 @@ export abstract class AbstractGeoViewLayer {
    */
   async getLegend(layerPath?: string): Promise<TypeLegend | null> {
     try {
-      layerPath = layerPath || api.maps[this.mapId].layer.layerPathAssociatedToTheGeoviewInstance;
+      layerPath = layerPath || api.maps[this.mapId].layer.layerPathAssociatedToThegeoviewLayer;
       const layerConfig = this.getLayerConfig(layerPath) as
         | (TypeBaseLayerEntryConfig & {
             style: TypeStyleConfig;
@@ -1362,7 +1362,7 @@ export abstract class AbstractGeoViewLayer {
    * @returns {string | undefined} The filter associated to the layer or undefined.
    */
   getLayerFilter(layerPath?: string): string | undefined {
-    layerPath = layerPath || api.maps[this.mapId].layer.layerPathAssociatedToTheGeoviewInstance;
+    layerPath = layerPath || api.maps[this.mapId].layer.layerPathAssociatedToThegeoviewLayer;
     const layerConfig = this.getLayerConfig(layerPath);
     return layerConfig?.olLayer?.get('layerFilter');
   }
@@ -1376,7 +1376,7 @@ export abstract class AbstractGeoViewLayer {
    * @returns {TimeDimension} The temporal dimension associated to the layer or undefined.
    */
   getTemporalDimension(layerPath?: string): TimeDimension {
-    layerPath = layerPath || api.maps[this.mapId].layer.layerPathAssociatedToTheGeoviewInstance;
+    layerPath = layerPath || api.maps[this.mapId].layer.layerPathAssociatedToThegeoviewLayer;
     return this.layerTemporalDimension[layerPath];
   }
 
@@ -1406,7 +1406,7 @@ export abstract class AbstractGeoViewLayer {
     layerPath?: string,
     projectionCode: string | number = MapEventProcessor.getMapState(this.mapId).currentProjection
   ): Extent | undefined {
-    layerPath = layerPath || api.maps[this.mapId].layer.layerPathAssociatedToTheGeoviewInstance;
+    layerPath = layerPath || api.maps[this.mapId].layer.layerPathAssociatedToThegeoviewLayer;
     let bounds: Extent | undefined;
     const processGroupLayerBounds = (listOfLayerEntryConfig: TypeListOfLayerEntryConfig) => {
       listOfLayerEntryConfig.forEach((layerConfig) => {
@@ -1456,7 +1456,7 @@ export abstract class AbstractGeoViewLayer {
    * @param {string} layerPath The layerpath to the node we want to delete.
    */
   removeConfig(layerPath?: string) {
-    layerPath = layerPath || api.maps[this.mapId].layer.layerPathAssociatedToTheGeoviewInstance;
+    layerPath = layerPath || api.maps[this.mapId].layer.layerPathAssociatedToThegeoviewLayer;
     const layerConfigToRemove = this.getLayerConfig(layerPath) as TypeBaseLayerEntryConfig;
     if (layerConfigToRemove.entryType !== 'group') this.unregisterFromLayerSets(layerConfigToRemove);
     delete api.maps[this.mapId].layer.registeredLayers[layerPath];

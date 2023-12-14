@@ -52,7 +52,7 @@
     </div>
 
     <div class="map-title-holder">
-      <h4 id="HLYR1">1. Many WMS Layers</h4>
+      <h4 id="HLYR1">1. Many WMS Layers (the map displays the different phases of the temporal dimension)</h4>
       <a class="ref-link" href="#top">Top</a>
     </div>
     <button class="collapsible active">Map Status Flags</button>
@@ -607,9 +607,9 @@
           window.setInterval(() => {
             const layerConfig = cgpv.api.maps.LYR1.layer.registeredLayers['wmsLYR1-spatiotemporel/RADAR_1KM_RSNO'];
             const temporalData =
-              cgpv.api.maps.LYR1.layer.geoviewInstance('wmsLYR1-spatiotemporel/RADAR_1KM_RSNO').getTemporalDimension();
+              cgpv.api.maps.LYR1.layer.geoviewLayer('wmsLYR1-spatiotemporel/RADAR_1KM_RSNO').getTemporalDimension();
             if (temporalData) {
-              cgpv.api.maps.LYR1.layer.geoviewInstance('wmsLYR1-spatiotemporel/RADAR_1KM_RSNO').applyViewFilter(
+              cgpv.api.maps.LYR1.layer.geoviewLayer('wmsLYR1-spatiotemporel/RADAR_1KM_RSNO').applyViewFilter(
                 '',
                 `time=date '${temporalData.range.range[i]}'`
               );
@@ -620,9 +620,9 @@
           let j = 0;
           window.setInterval(() => {
             const layerConfig = cgpv.api.maps.LYR1.layer.registeredLayers['wmsLYR1-msi/msi-94-or-more'];
-            const temporalData = cgpv.api.maps.LYR1.layer.geoviewInstance('wmsLYR1-msi/msi-94-or-more').getTemporalDimension();
+            const temporalData = cgpv.api.maps.LYR1.layer.geoviewLayer('wmsLYR1-msi/msi-94-or-more').getTemporalDimension();
             if (temporalData) {
-              cgpv.api.maps.LYR1.layer.geoviewInstance('wmsLYR1-msi/msi-94-or-more').applyViewFilter(
+              cgpv.api.maps.LYR1.layer.geoviewLayer('wmsLYR1-msi/msi-94-or-more').applyViewFilter(
                 '',
                 `time=date '${temporalData.range.range[j]}'`
               );
