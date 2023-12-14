@@ -89,10 +89,12 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
   }
 
   function renderItemCheckbox(item: TypeLegendItem) {
-    //no checkbox for simple style layers
-    if(layerDetails.styleConfig?.LineString?.styleType === 'simple' 
-    || layerDetails.styleConfig?.Point?.styleType === 'simple'
-    || layerDetails.styleConfig?.Polygon?.styleType === 'simple') {
+    // no checkbox for simple style layers
+    if (
+      layerDetails.styleConfig?.LineString?.styleType === 'simple' ||
+      layerDetails.styleConfig?.Point?.styleType === 'simple' ||
+      layerDetails.styleConfig?.Polygon?.styleType === 'simple'
+    ) {
       return null;
     }
     if (item.isVisible === 'always') {
