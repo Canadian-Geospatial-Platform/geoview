@@ -1,5 +1,6 @@
 import React from 'react';
 import i18next from 'react-i18next';
+import { useTheme } from '@mui/material/styles';
 import { API } from '@/api/api';
 import { MapViewer } from '@/geo/map/map-viewer';
 import { TypeWindow, TypeJsonObject } from '@/core/types/global-types';
@@ -32,23 +33,16 @@ export abstract class AbstractPlugin {
   // Plugin api object
   api?: API;
 
-  // Plugin translate object
-  translate?: typeof i18next;
-
   // Plugin react object
   react?: typeof React;
 
-  // Plugin createElement object
-  // TODO: Refactor - Plugin - Why createElement? - I'll just comment it out for now, as I've made it work another way in this refactor
-  // createElement?: typeof React.createElement;
+  // Plugin translate object
+  // TODO: Refactor - Plugin - Maybe translate is not necessary here.. This might get removed eventually. Don't forget to remove in plugin class too in 'Object.defineProperties'(!)
+  translate?: typeof i18next;
 
   // Plugin useTheme object
-  // TODO: Refactor - Plugin - Why useTheme? - I'll just comment it out for now, as it doesn't seem to be used at all anyways (it should be commented out in plugin addPlugin too)
-  // useTheme?: typeof useTheme;
-
-  // Plugin props object
-  // TODO: Refactor - Plugin - Remove 'props'? I don't know why props is set here, it seems like same thing as pluginProps already set in the constructor?
-  props?: TypePluginOptions;
+  // TODO: Refactor - Plugin - Maybe useTheme is not necessary here.. This might get removed eventually. Don't forget to remove in plugin class too in 'Object.defineProperties'(!)
+  useTheme?: typeof useTheme;
 
   // NOTE END !! ******************************************************************************************************
 
