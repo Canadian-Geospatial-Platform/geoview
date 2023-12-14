@@ -176,13 +176,8 @@ export class Plugin {
         Object.defineProperties(plugin, {
           pluginId: { value: pluginId },
           api: { value: api },
-          // TODO: Refactor - Plugin - Why createElement?
-          createElement: { value: React.createElement },
           react: { value: React },
-          // TODO: Refactor - Plugin - Remove 'props'? I don't know why props is set here, it seems like same thing as pluginProps already set in the constructor?
-          props: { value: props !== undefined && props !== null ? props : {} },
           translate: { value: translate },
-          // TODO: Refactor - Plugin - Why useTheme?
           useTheme: { value: useTheme },
           configObj: { value: pluginConfigObj },
         });
