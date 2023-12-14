@@ -443,14 +443,9 @@ export class MapViewer {
         : olTransformExtent(bounds, api.projection.projections[currentProjection], api.projection.projections[currentProjection], 25);
     } else {
       Object.keys(this.layer.geoviewLayers).forEach((geoviewLayerId) => {
-        if (!mapBounds)
-          mapBounds = this.layer.geoviewLayers[geoviewLayerId].getMetadataBounds(
-            this.layer.geoviewLayers[geoviewLayerId].listOfLayerEntryConfig
-          );
+        if (!mapBounds) mapBounds = this.layer.geoviewLayers[geoviewLayerId].getMetadataBounds(geoviewLayerId);
         else {
-          const newMapBounds = this.layer.geoviewLayers[geoviewLayerId].getMetadataBounds(
-            this.layer.geoviewLayers[geoviewLayerId].listOfLayerEntryConfig
-          );
+          const newMapBounds = this.layer.geoviewLayers[geoviewLayerId].getMetadataBounds(geoviewLayerId);
           if (newMapBounds) {
             mapBounds = [
               Math.min(newMapBounds[0], mapBounds[0]),

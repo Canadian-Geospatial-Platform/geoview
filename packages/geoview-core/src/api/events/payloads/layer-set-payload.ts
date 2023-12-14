@@ -1,8 +1,7 @@
 import { PayloadBaseClass } from './payload-base-class';
 
 import { EventStringId, EVENT_NAMES } from '../event-types';
-import { TypeLayerEntryConfig, TypeLayerStatus, TypeLocalizedString } from '@/geo/map/map-schema-types';
-import { Layer } from '@/geo/layer/layer';
+import { TypeLayerStatus, TypeLocalizedString } from '@/geo/map/map-schema-types';
 
 /** Valid events that can create LayerSetPayload */
 const validEvents: EventStringId[] = [
@@ -214,17 +213,16 @@ export class LayerSetPayload extends PayloadBaseClass {
    * Static method used to create a layer set payload when we need to change a layer status
    *
    * @param {string} handlerName the handler Name
-   * @param {string | TypeLayerEntryConfig} layerPathOrConfig the layer path affected by the change
+   * @param {string} layerPath the layer path affected by the change
    * @param {TypeLayerStatus} layerStatus the value to assign to the layerStatus property
    *
    * @returns {TypelayerSetUpdatedPayload} the requestLayerInventoryPayload object created
    */
   static createLayerSetChangeLayerStatusPayload = (
     handlerName: string,
-    layerPathOrConfig: string | TypeLayerEntryConfig,
+    layerPath: string,
     layerStatus: TypeLayerStatus
   ): TypeLayerSetChangeLayerStatusPayload => {
-    const layerPath = typeof layerPathOrConfig === 'string' ? layerPathOrConfig : Layer.getLayerPath(layerPathOrConfig);
     const layerSetChangeLayerStatusPayload = new LayerSetPayload(
       EVENT_NAMES.LAYER_SET.CHANGE_LAYER_STATUS,
       handlerName
@@ -238,17 +236,16 @@ export class LayerSetPayload extends PayloadBaseClass {
    * Static method used to create a layer set payload when we need to change a layer phase
    *
    * @param {string} handlerName the handler Name
-   * @param {string | TypeLayerEntryConfig} layerPathOrConfig the layer path affected by the change
+   * @param {string} layerPath the layer path affected by the change
    * @param {string} layerPhase the value to assign to the layerPhase property
    *
    * @returns {TypelayerSetUpdatedPayload} the requestLayerInventoryPayload object created
    */
   static createLayerSetChangeLayerPhasePayload = (
     handlerName: string,
-    layerPathOrConfig: string | TypeLayerEntryConfig,
+    layerPath: string,
     layerPhase: string
   ): TypeLayerSetChangeLayerPhasePayload => {
-    const layerPath = typeof layerPathOrConfig === 'string' ? layerPathOrConfig : Layer.getLayerPath(layerPathOrConfig);
     const layerSetChangeLayerPhasePayload = new LayerSetPayload(
       EVENT_NAMES.LAYER_SET.CHANGE_LAYER_PHASE,
       handlerName

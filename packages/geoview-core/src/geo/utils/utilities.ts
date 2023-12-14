@@ -3,8 +3,7 @@ import axios from 'axios';
 import { WMSCapabilities, WKT, GeoJSON } from 'ol/format';
 import { ReadOptions } from 'ol/format/Feature';
 import Geometry from 'ol/geom/Geometry';
-import { Extent } from 'ol/extent';
-import { transformExtent, toLonLat } from 'ol/proj';
+import { toLonLat } from 'ol/proj';
 import { Style, Stroke, Fill, Circle } from 'ol/style';
 import { Color } from 'ol/color';
 import { getArea as getAreaOL } from 'ol/sphere';
@@ -15,11 +14,8 @@ import { Cast, TypeJsonObject } from '@/core/types/global-types';
 import { TypeFeatureStyle } from '@/geo/layer/geometry/geometry-types';
 import { xmlToJson } from '@/core/utils/utilities';
 
-import { TypeLayerEntryConfig, TypeListOfLayerEntryConfig, layerEntryIsGroupLayer } from '@/geo/map/map-schema-types';
-import { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
-import { Layer } from '@/geo/layer/layer';
 import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
-import { NORTH_POLE_POSITION } from '@/core/utils/constant';
+import { NORTH_POLE_POSITION } from '@/core/types/cgpv-types';
 
 /**
  * Interface used for css style declarations
@@ -30,39 +26,15 @@ interface TypeCSSStyleDeclaration extends CSSStyleDeclaration {
 
 export class GeoUtilities {
   /**
-   * Set the layerStatus code of all layers in the listOfLayerEntryConfig.
-   *
-   * @param {AbstractGeoViewLayer} geoviewLayerInstance The GeoView layer instance.
-   * @param {TypeListOfLayerEntryConfig} listOfLayerEntryConfig The list of layer's configuration.
-   * @param {string} errorMessage The error message.
-   */
-  setAllLayerStatusToError(
-    geoviewLayerInstance: AbstractGeoViewLayer,
-    listOfLayerEntryConfig: TypeListOfLayerEntryConfig,
-    errorMessage: string
-  ) {
-    listOfLayerEntryConfig.forEach((layerConfig: TypeLayerEntryConfig) => {
-      if (layerEntryIsGroupLayer(layerConfig))
-        this.setAllLayerStatusToError(geoviewLayerInstance, layerConfig.listOfLayerEntryConfig, errorMessage);
-      else {
-        const layerPath = Layer.getLayerPath(layerConfig);
-        geoviewLayerInstance.changeLayerStatus('error', layerConfig);
-        geoviewLayerInstance.layerLoadError.push({
-          layer: layerPath,
-          consoleMessage: `${errorMessage} for layer ${layerPath} of map ${geoviewLayerInstance.mapId}`,
-        });
-      }
-    });
-  }
-
-  /**
    * Returns the WKT representation of a given geometry
    * @function geometryToWKT
    * @param {string} geometry the geometry
    * @returns {string | null} the WKT representation of the geometry
    */
   geometryToWKT = (geometry: Geometry): string | null => {
-    // TODO: Refactoring - This method should be static, but since it goes through the api instance to be importable afterwards it loses non static methods. For this reason, I've left it like this. See api.constructor: this.geoUtilities = new GeoUtilities();
+    // TODO: Refactoring - This method should be static, but since it goes through the api instance to be importable
+    // TODO  afterwards it loses non static methods. For this reason, I've left it like this.
+    // TODO  See api.constructor: this.geoUtilities = new GeoUtilities();
     if (geometry) {
       // Get the wkt for the geometry
       const format = new WKT();
@@ -79,7 +51,9 @@ export class GeoUtilities {
    * @returns {Geometry | null} the Geometry representation of the wkt
    */
   wktToGeometry = (wkt: string, readOptions: ReadOptions): Geometry | null => {
-    // TODO: Refactoring - This method should be static, but since it goes through the api instance to be importable afterwards it loses non static methods. For this reason, I've left it like this. See api.constructor: this.geoUtilities = new GeoUtilities();
+    // TODO: Refactoring - This method should be static, but since it goes through the api instance to be importable
+    // TODO  afterwards it loses non static methods. For this reason, I've left it like this.
+    // TODO  See api.constructor: this.geoUtilities = new GeoUtilities();
     if (wkt) {
       // Get the feature for the wkt
       const format = new WKT();
@@ -96,7 +70,9 @@ export class GeoUtilities {
    * @returns {Geometry | null} the Geometry representation of the geojson
    */
   geojsonToGeometry = (geojson: string, readOptions: ReadOptions): Geometry | null => {
-    // TODO: Refactoring - This method should be static, but since it goes through the api instance to be importable afterwards it loses non static methods. For this reason, I've left it like this. See api.constructor: this.geoUtilities = new GeoUtilities();
+    // TODO: Refactoring - This method should be static, but since it goes through the api instance to be importable
+    // TODO  afterwards it loses non static methods. For this reason, I've left it like this.
+    // TODO  See api.constructor: this.geoUtilities = new GeoUtilities();
     if (geojson) {
       // Get the feature for the geojson
       const format = new GeoJSON();
@@ -106,22 +82,13 @@ export class GeoUtilities {
   };
 
   /**
-   * Returns the Geometry representation of a given geojson
-   * @function geojsonToGeometry
-   * @param {string} geojson the geojson
-   * @param {ReadOptions} readOptions read options to convert the geojson to a geometry
-   * @returns {Geometry | null} the Geometry representation of the geojson
-   */
-  getExtent = (coordinates: number[], inCrs: number, outCrs: number): Extent => {
-    return transformExtent(coordinates, `EPSG:${inCrs}`, `EPSG:${outCrs}`);
-  };
-
-  /**
    * Default drawing style for GeoView
    * @returns an Open Layers styling for drawing on a map
    */
   defaultDrawingStyle = (strokeColor?: Color | string, strokeWidth?: number, fillColor?: Color | string): Style => {
-    // TODO: Refactoring - This method should be static, but since it goes through the api instance to be importable afterwards it loses non static methods. For this reason, I've left it like this. See api.constructor: this.geoUtilities = new GeoUtilities();
+    // TODO: Refactoring - This method should be static, but since it goes through the api instance to be importable
+    // TODO  afterwards it loses non static methods. For this reason, I've left it like this.
+    // TODO  See api.constructor: this.geoUtilities = new GeoUtilities();
     return new Style({
       stroke: new Stroke({
         color: strokeColor || 'orange',
@@ -157,8 +124,12 @@ export class GeoUtilities {
    * @returns an Open Layers styling for drawing on a map or undefined
    */
   convertTypeFeatureStyleToOpenLayersStyle = (style?: TypeFeatureStyle): Style => {
-    // TODO: Refactoring - This method should be static, but since it goes through the api instance to be importable afterwards it loses non static methods. For this reason, I've left it like this. See api.constructor: this.geoUtilities = new GeoUtilities();
-    // TODO: Refactoring - This function could also be used by vector class when it works with the styling. So I'm putting it in this utilities class so that it eventually becomes shared between vector class and interactions classes.
+    // TODO: Refactoring - This method should be static, but since it goes through the api instance to be importable
+    // TODO  afterwards it loses non static methods. For this reason, I've left it like this.
+    // TODO  See api.constructor: this.geoUtilities = new GeoUtilities();
+    // TODO: Refactoring - This function could also be used by vector class when it works with the styling.
+    // TODO  So I'm putting it in this utilities class so that it eventually becomes shared between vector
+    // TODO  class and interactions classes.
     // Redirect
     return this.defaultDrawingStyle(style?.strokeColor, style?.strokeWidth, style?.fillColor);
   };
