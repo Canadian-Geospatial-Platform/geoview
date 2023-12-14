@@ -84,7 +84,6 @@ export function Detailspanel(): JSX.Element {
       const selectedLayer = arrayOfLayerData[commonLayerPathIndex > -1 ? commonLayerPathIndex : firstLayerIndex];
       setLayerDataInfo(selectedLayer);
       setCurrentFeatureIndex(0);
-      setSelectedLayerPath(selectedLayer?.layerPath ?? '');
     } else setLayerDataInfo(null);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [arrayOfLayerData]);

@@ -39,7 +39,7 @@ export function LayerList({ layerList, isEnlargeDataTable, selectedLayerIndex, h
    * @returns
    */
   const isSelectedLayer = (layer: LayerListEntry, index: number): boolean => {
-    return (layer?.numOffeatures ?? 0) > 0 && selectedLayerIndex === index;
+    return (layer?.numOffeatures ?? 1) > 0 && selectedLayerIndex === index;
   };
 
   return (
