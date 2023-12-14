@@ -8,8 +8,8 @@ import { transformExtent } from 'ol/proj';
 import { Extent } from 'ol/extent';
 
 import defaultsDeep from 'lodash/defaultsDeep';
-import { AbstractGeoViewLayer, CONST_LAYER_TYPES } from '../abstract-geoview-layers';
-import { AbstractGeoViewRaster, TypeBaseRasterLayer } from './abstract-geoview-raster';
+import { AbstractGeoViewLayer, CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
+import { AbstractGeoViewRaster, TypeBaseRasterLayer } from '@/geo/layer/geoview-layers/raster/abstract-geoview-raster';
 import {
   TypeLayerEntryConfig,
   TypeSourceTileInitialConfig,
@@ -133,7 +133,7 @@ export class XYZTiles extends AbstractGeoViewRaster {
    * @param {TypeListOfLayerEntryConfig} listOfLayerEntryConfig The list of layer entries configuration to validate.
    */
   protected validateListOfLayerEntryConfig(listOfLayerEntryConfig: TypeListOfLayerEntryConfig) {
-    this.changeLayerPhase('validateListOfLayerEntryConfig');
+    this.setLayerPhase('validateListOfLayerEntryConfig');
     listOfLayerEntryConfig.forEach((layerConfig: TypeLayerEntryConfig) => {
       const layerPath = Layer.getLayerPath(layerConfig);
       if (layerEntryIsGroupLayer(layerConfig)) {
@@ -143,12 +143,12 @@ export class XYZTiles extends AbstractGeoViewRaster {
             layer: layerPath,
             consoleMessage: `Empty layer group (mapId:  ${this.mapId}, layerPath: ${layerPath})`,
           });
-          this.changeLayerStatus('error', layerConfig);
+          this.setLayerStatus('error', layerPath);
           return;
         }
       }
 
-      this.changeLayerStatus('loading', layerConfig);
+      this.setLayerStatus('loading', layerPath);
 
       // When no metadata are provided, all layers are considered valid.
       if (!this.metadata) return;
@@ -163,7 +163,7 @@ export class XYZTiles extends AbstractGeoViewRaster {
             layer: layerPath,
             consoleMessage: `XYZ layer not found (mapId:  ${this.mapId}, layerPath: ${layerPath})`,
           });
-          this.changeLayerStatus('error', layerConfig);
+          this.setLayerStatus('error', layerPath);
           return;
         }
         return;
@@ -182,9 +182,10 @@ export class XYZTiles extends AbstractGeoViewRaster {
    *
    * @returns {TypeBaseRasterLayer} The GeoView raster layer that has been created.
    */
-  processOneLayerEntry(layerConfig: TypeXYZTilesLayerEntryConfig): Promise<TypeBaseRasterLayer | null> {
+  protected processOneLayerEntry(layerConfig: TypeXYZTilesLayerEntryConfig): Promise<TypeBaseRasterLayer | null> {
     const promisedVectorLayer = new Promise<TypeBaseRasterLayer | null>((resolve) => {
-      this.changeLayerPhase('processOneLayerEntry', layerConfig);
+      const layerPath = Layer.getLayerPath(layerConfig);
+      this.setLayerPhase('processOneLayerEntry', layerPath);
       const sourceOptions: SourceOptions = {
         url: getLocalizedValue(layerConfig.source.dataAccessPath, this.mapId),
       };
@@ -212,7 +213,7 @@ export class XYZTiles extends AbstractGeoViewRaster {
 
       layerConfig.olLayer = new TileLayer(tileLayerOptions);
 
-      super.addLoadendListener(layerConfig, 'tile');
+      this.addLoadendListener(layerPath, 'tile');
 
       resolve(layerConfig.olLayer);
     });
@@ -255,15 +256,16 @@ export class XYZTiles extends AbstractGeoViewRaster {
   /** ***************************************************************************************************************************
    * Get the bounds of the layer represented in the layerConfig, returns updated bounds
    *
-   * @param {TypeLayerEntryConfig} layerConfig Layer config to get bounds from.
+   * @param {string} layerPath The Layer path to the layer's configuration.
    * @param {Extent | undefined} bounds The current bounding box to be adjusted.
    *
    * @returns {Extent} The layer bounding box.
    */
-  getBounds(layerConfig: TypeLayerEntryConfig, bounds: Extent | undefined): Extent | undefined {
-    const layerBounds = (layerConfig.olLayer as TileLayer<XYZ>).getSource()?.getTileGrid()?.getExtent();
+  getBounds(layerPath: string, bounds: Extent | undefined): Extent | undefined {
+    const layerConfig = this.getLayerConfig(layerPath);
+    const layerBounds = (layerConfig?.olLayer as TileLayer<XYZ>)?.getSource()?.getTileGrid()?.getExtent();
     const projection =
-      (layerConfig.olLayer as TileLayer<XYZ>).getSource()?.getProjection()?.getCode().replace('EPSG:', '') ||
+      (layerConfig?.olLayer as TileLayer<XYZ>).getSource()?.getProjection()?.getCode().replace('EPSG:', '') ||
       MapEventProcessor.getMapState(this.mapId).currentProjection;
 
     if (layerBounds) {

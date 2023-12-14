@@ -13,12 +13,12 @@ import { IUIState, initializeUIState } from './store-interface-and-intial-values
 import { TypeMapFeaturesConfig } from '@/core/types/global-types';
 
 export type TypeSetStore = (
-  partial: IGeoViewState | Partial<IGeoViewState> | ((state: IGeoViewState) => IGeoViewState | Partial<IGeoViewState>),
+  partial: IGeoviewState | Partial<IGeoviewState> | ((state: IGeoviewState) => IGeoviewState | Partial<IGeoviewState>),
   replace?: boolean | undefined
 ) => void;
-export type TypeGetStore = () => IGeoViewState;
+export type TypeGetStore = () => IGeoviewState;
 
-export interface IGeoViewState {
+export interface IGeoviewState {
   mapConfig: TypeMapFeaturesConfig | undefined;
   mapId: string;
   setMapConfig: (config: TypeMapFeaturesConfig) => void;
@@ -33,7 +33,7 @@ export interface IGeoViewState {
   uiState: IUIState;
 }
 
-export const geoViewStoreDefinition = (set: TypeSetStore, get: TypeGetStore) =>
+export const geoviewStoreDefinition = (set: TypeSetStore, get: TypeGetStore) =>
   ({
     mapConfig: undefined,
     setMapConfig: (config: TypeMapFeaturesConfig) => {
@@ -52,12 +52,12 @@ export const geoViewStoreDefinition = (set: TypeSetStore, get: TypeGetStore) =>
     mapState: initializeMapState(set, get),
     timeSliderState: initializeTimeSliderState(set, get),
     uiState: initializeUIState(set, get),
-  } as IGeoViewState);
+  } as IGeoviewState);
 
-export const geoViewStoreDefinitionWithSubscribeSelector = subscribeWithSelector(geoViewStoreDefinition);
+export const geoviewStoreDefinitionWithSubscribeSelector = subscribeWithSelector(geoviewStoreDefinition);
 
-const fakeStore = create<IGeoViewState>()(geoViewStoreDefinitionWithSubscribeSelector);
-export type GeoViewStoreType = typeof fakeStore;
+const fakeStore = create<IGeoviewState>()(geoviewStoreDefinitionWithSubscribeSelector);
+export type GeoviewStoreType = typeof fakeStore;
 
 // **********************************************************
 // GeoView state selectors

@@ -480,7 +480,7 @@
         'suportedLanguages': ['en']
       }"
     ></div>
-    <button type="button" class="collapsible">Visibility and filters</button>
+    <button type="button" class="collapsible active">Visibility and filters</button>
     <pre id="layer1-buttons-pre" class="panel"></pre>
     <button class="collapsible">Get Legend</button>
     <pre id="LegendsId1-table-pre" class="panel"></pre>
@@ -1060,10 +1060,11 @@
           createTableOfFilter('LYR2');
           createTableOfFilter('LYR3');
 
-          const field2 = cgpv.api.maps.LYR2.layer.geoviewLayers['historical-flood'].layerTemporalDimension['historical-flood/0'].field;
-          const LYR2_FILTERS = [`${field2} >= date '01/01/2018 05:00:00' and ${field2} <= date '12/31/2019 19:00:00-05:00'`,
-                                `${field2} > date '01/01/2018 05:00:00' and ${field2} <= date '01/01/2020 05:00:00Z'`,
-                                `${field2} >= date '01/01/2018 05:00:00' and ${field2} < date '01/01/2020 00:00:00+05:00'`];
+          /*
+          const field1 = cgpv.api.maps.LYR2.layer.geoviewInstance('historical-flood/0').getTemporalDimension().field;
+          const LYR2_FILTERS = [`${field1} >= date '01/01/2018 05:00:00' and ${field1} <= date '12/31/2019 19:00:00-05:00'`,
+                                `${field1} > date '01/01/2018 05:00:00' and ${field1} <= date '01/01/2020 05:00:00Z'`,
+                                `${field1} >= date '01/01/2018 05:00:00' and ${field1} < date '01/01/2020 00:00:00+05:00'`];
           let i = 0;
           window.setInterval(() => {
             const input = document.getElementById('filter-input-LYR2-historical-flood');
@@ -1071,7 +1072,7 @@
               input.value = LYR2_FILTERS[i];
               const layerConfig = cgpv.api.maps.LYR2.layer.registeredLayers['historical-flood/0'];
               const checkbox = document.getElementById('checkbox-LYR2-historical-flood');
-              cgpv.api.maps.LYR2.layer.geoviewLayers['historical-flood'].applyViewFilter(layerConfig,
+              cgpv.api.maps.LYR2.layer.geoviewInstance('historical-flood/0').applyViewFilter('',
                 LYR2_FILTERS[j],
                 checkbox.value !== 'true'
               );
@@ -1079,7 +1080,7 @@
             }
           }, 3000)
 
-          const field3 = cgpv.api.maps.LYR3.layer.geoviewLayers['historical-flood'].layerTemporalDimension['historical-flood/0'].field;
+          const field2 = cgpv.api.maps.LYR3.layer.geoviewInstance('historical-flood/0').getTemporalDimension().field;
           const LYR3_FILTERS = [`${field2} >= date '2018-01-01T00:00:00' and ${field2} <= date '2020-01-01T00:00:00'`,
                                `${field2} > date '2018-01-01T00:00:00' and ${field2} <= date '2020-01-01T00:00:00'`,
                                `${field2} >= date '2018-01-01T00:00:00' and ${field2} < date '2020-01-01T00:00:00'`];
@@ -1090,7 +1091,7 @@
               input.value = LYR3_FILTERS[j];
               const layerConfig = cgpv.api.maps.LYR3.layer.registeredLayers['historical-flood/0'];
               const checkbox = document.getElementById('checkbox-LYR3-historical-flood');
-              cgpv.api.maps.LYR3.layer.geoviewLayers['historical-flood'].applyViewFilter(layerConfig,
+              cgpv.api.maps.LYR3.layer.geoviewInstance('historical-flood/0').applyViewFilter('',
                 LYR3_FILTERS[j],
                 checkbox.value !== 'true'
               );
@@ -1104,8 +1105,8 @@
             if (input) {
               const layerConfig = cgpv.api.maps.LYR1.layer.registeredLayers['esriFeatureLYR1/0'];
               const checkbox = document.getElementById('checkbox-LYR1-esriFeatureLYR1');
-              const temporalData = cgpv.api.maps.LYR1.layer.geoviewLayers['esriFeatureLYR1'].layerTemporalDimension['esriFeatureLYR1/0'];
-              cgpv.api.maps.LYR1.layer.geoviewLayers['esriFeatureLYR1'].applyViewFilter(layerConfig,
+              const temporalData = cgpv.api.maps.LYR1.layer.geoviewInstance('esriFeatureLYR1/0').getTemporalDimension();
+              cgpv.api.maps.LYR1.layer.geoviewInstance('esriFeatureLYR1/0').applyViewFilter('',
                 `Date < date '${temporalData.range.range[k]}'`,
                 checkbox.value !== 'true'
               );
@@ -1113,6 +1114,7 @@
               if (++k === temporalData.range.range.length) k = 0;
             }
           }, 1000)
+          */
         }
       });
 
