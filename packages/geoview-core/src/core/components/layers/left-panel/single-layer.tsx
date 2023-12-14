@@ -1,5 +1,6 @@
 import { Dispatch, SetStateAction, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import _ from 'lodash';
 import {
   Box,
   Collapse,
@@ -48,9 +49,35 @@ export function SingleLayer({ isDragging, depth, layer, setIsLayersListPanelVisi
   const displayState = useLayersDisplayState();
   const mapFiltered = useDataTableStoreMapFilteredRecord();
 
-  const layerIsSelected = layer.layerPath === selectedLayerPath && displayState === 'view';
+  // if any of the chiild layers is selected return true
+  const isLayerOrChildSelected = (startingLayer: TypeLegendLayer): boolean => {
+    if (startingLayer.layerPath === selectedLayerPath && displayState === 'view') {
+      return true;
+    }
+    if (startingLayer.children && startingLayer.children.length > 0) {
+      return _.some(startingLayer.children, (child) => isLayerOrChildSelected(child));
+    }
+    return false;
+  };
 
-  const [isGroupOpen, setGroupOpen] = useState(layerIsSelected);
+  const isLayerSelected = isLayerOrChildSelected(layer);
+
+  // returns true if any of the layer children or items has visibility of 'always'
+  const layerHasAlwaysVisible = (startingLayer: TypeLegendLayer): boolean => {
+    if (layer.isVisible === 'always') {
+      return true;
+    }
+    if (layer.items && layer.items.length) {
+      return layer.items.filter((i) => i.isVisible === 'always').length > 0;
+    }
+    if (startingLayer.children && startingLayer.children.length > 0) {
+      return _.some(startingLayer.children, (child) => layerHasAlwaysVisible(child));
+    }
+    return false;
+  };
+  const isLayerAlwaysVisible = layerHasAlwaysVisible(layer);
+
+  const [isGroupOpen, setGroupOpen] = useState(isLayerSelected);
 
   // get layer description
   const getLayerDescription = () => {
@@ -60,18 +87,25 @@ export function SingleLayer({ isDragging, depth, layer, setIsLayersListPanelVisi
     if (layer.layerStatus === 'loading') {
       return t('legend.layerLoading');
     }
-    if (layer.children.length) {
-      return `${layer.children.length} layers`;
+
+    const validChildren = layer.children?.filter((c) => c.isVisible !== 'no' && ['processed', 'loaded'].includes(c.layerStatus ?? ''));
+    if (validChildren.length) {
+      return t('legend.subLayersCount').replace('{count}', validChildren.length.toString());
     }
+
+    const count = layer.items.filter((d) => d.isVisible !== 'no').length;
+    const totalCount = layer.items.length;
+    const itemsLengthDesc = t('legend.itemsCount').replace('{count}', count.toString()).replace('{totalCount}', totalCount.toString());
+
     if (mapFiltered[layer.layerPath]) {
       return (
         <Box style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'left', gap: 1 }}>
-          <span>{layer.items.length} items </span>
+          <span>{itemsLengthDesc} </span>
           <TableViewIcon />
         </Box>
       );
     }
-    return `${layer.items.length} items`;
+    return itemsLengthDesc;
   };
 
   /**
@@ -85,7 +119,8 @@ export function SingleLayer({ isDragging, depth, layer, setIsLayersListPanelVisi
     if (!['processed', 'loaded'].includes(layer.layerStatus!)) {
       return;
     }
-    if (layer.children.length === 0) {
+
+    if (layer.children && layer.children.length === 0) {
       setSelectedLayerPath(layer.layerPath);
       if (setIsLayersListPanelVisible) setIsLayersListPanelVisible(true);
     } else {
@@ -133,8 +168,12 @@ export function SingleLayer({ isDragging, depth, layer, setIsLayersListPanelVisi
       );
     }
 
-    if (layer.isVisible === 'always') {
-      return null;
+    if (isLayerAlwaysVisible) {
+      return (
+        <IconButton edge="end" size="small" disabled>
+          <VisibilityOutlinedIcon color="disabled" />
+        </IconButton>
+      );
     }
 
     return (
@@ -169,12 +208,12 @@ export function SingleLayer({ isDragging, depth, layer, setIsLayersListPanelVisi
   }
 
   function renderCollapsible() {
-    if (!(layer.children?.length || layer.items?.length || layer.children.length === 0)) {
+    if (!(layer.children && layer.children.length)) {
       return null;
     }
 
     return (
-      <Collapse in={isGroupOpen} timeout="auto">
+      <Collapse in={isGroupOpen || isLayerSelected} timeout="auto">
         <LayersList
           parentLayerPath={layer.layerPath}
           depth={1 + depth}
@@ -213,7 +252,7 @@ export function SingleLayer({ isDragging, depth, layer, setIsLayersListPanelVisi
   function getContainerClass() {
     const result: string[] = ['layerItemContainer', layer.layerStatus ?? ''];
 
-    if (layerIsSelected) {
+    if (isLayerSelected) {
       result.push('selectedLayer');
     }
 
@@ -227,7 +266,7 @@ export function SingleLayer({ isDragging, depth, layer, setIsLayersListPanelVisi
   return (
     <Box className={getContainerClass()}>
       <ListItem key={layer.layerName} divider>
-        <ListItemButton selected={layerIsSelected}>
+        <ListItemButton selected={isLayerSelected}>
           {renderLayerIcon()}
           <Tooltip title={layer.layerName} placement="top" enterDelay={1000}>
             <ListItemText

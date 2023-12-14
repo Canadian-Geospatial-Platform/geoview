@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useTheme } from '@mui/material/styles';
 import { styled } from '@mui/material';
 import { CloseButton, LayerTitle, ResponsiveGrid } from '../common';
-import { Box, DeleteIcon, IconButton, Paper } from '@/ui';
+import { Box, DeleteOutlineIcon, IconButton, Paper } from '@/ui';
 import { getSxClasses } from './layers-style';
 import { useLayersDisplayState, useSelectedLayer } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { LayersActions } from './left-panel/layers-actions';
@@ -64,27 +64,29 @@ export function LayersPanel() {
       );
     }
     if (displayState === 'remove') {
+      const markup = { __html: t('layers.removeLayerDescription') };
+      /* eslint-disable react/no-danger */
       return (
         <Paper sx={{ padding: '20px' }}>
-          <h3>Removing layers</h3>
-          <Box sx={sxClasses.buttonDescriptionContainer}>
-            <IconButton>
-              <DeleteIcon style={{ fill: '#a9a9a9' }} />
+          <h3>{t('layers.removingLayers')}</h3>
+          <Box sx={{ display: 'flex', flexDirection: 'row', gap: '2', alignItems: 'center' }}>
+            <IconButton edge="end" size="small">
+              <DeleteOutlineIcon color="error" />
             </IconButton>
-            <p>
-              Lorem, ipsum dolor sit amet consectetur adipisicing elit. Ipsum perspiciatis doloribus veritatis iste? Quae alias praesentium,
-              delectus reprehenderit itaque voluptatibus!
-            </p>
+            <Box>
+              <div dangerouslySetInnerHTML={markup} />
+            </Box>
           </Box>
         </Paper>
       );
+      /* eslint-enable react/no-danger */
     }
     if (displayState === 'order') {
       const markup = { __html: t('layers.sortingDescription') };
       /* eslint-disable react/no-danger */
       return (
         <Paper sx={{ padding: '20px' }}>
-          <h3>Re-ordering layers</h3>
+          <h3>{t('layers.reArrangeLayers')}</h3>
           <Box sx={sxClasses.buttonDescriptionContainer}>
             <div dangerouslySetInnerHTML={markup} />
           </Box>

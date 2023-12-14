@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useTheme } from '@mui/material';
+import { useTranslation } from 'react-i18next';
 import {
   Box,
   ListItem,
@@ -25,10 +26,15 @@ interface LegendLayerProps {
 export function LegendLayer(props: LegendLayerProps): JSX.Element {
   const { layer } = props;
 
+  const { t } = useTranslation<string>();
   const theme = useTheme();
   const sxClasses = getSxClasses(theme);
 
   const [isGroupOpen, setGroupOpen] = useState(true);
+
+  const getLayerChildren = () => {
+    return layer.children?.filter((c) => c.isVisible !== 'no' && ['processed', 'loaded'].includes(c.layerStatus ?? ''));
+  };
 
   /**
    * Handle expand/shrink of layer groups.
@@ -38,11 +44,13 @@ export function LegendLayer(props: LegendLayerProps): JSX.Element {
   };
 
   const getSecondaryText = () => {
-    if (layer.children.length) {
-      return `${layer.children.length} sub-layers`;
+    if (getLayerChildren().length) {
+      return t('legend.subLayersCount').replace('{count}', getLayerChildren().length.toString());
     }
     if (layer.items.length) {
-      return `${layer.items.filter((d) => d.isVisible !== 'no').length} of ${layer.items.length} items`;
+      const count = layer.items.filter((d) => d.isVisible !== 'no').length;
+      const totalCount = layer.items.length;
+      return t('legend.itemsCount').replace('{count}', count.toString()).replace('{totalCount}', totalCount.toString());
     }
 
     return '';

@@ -65,9 +65,14 @@
     "layerLoading": "Layer is loading...",
     "tableDetails": "Table details",
     "refreshLayer": "Refresh layer",
-    "highlightLayer": "Highlight layer"
+    "highlightLayer": "Highlight layer",
+    "subLayersCount": "{count} sub-layers",
+    "itemsCount": "{count} of {totalCount} items"
   },
   "layers": {
+    "removingLayers": "Removing Layers",
+    "reArrangeLayers": "Re-arrange Layers",
+    "removeLayerDescription": "To remove a layer, click on the delete icon to the right of the layer. To revert to back to view functionality click on the delete button at the top.",
     "sortingDescription": "<p>To sort the layers you can simply drag and drop each layer panel.</p><h4>Using the keyboard for drag and drop</h4><p>If you using the keyboard for sorting layers, note the following;</p><ul><li>When the layer panel has focus use the spacebar to lift the panel. This will start the drag.</li><li>Once the drag has started you can use the up and down arrows to move the panel</li><li>You can use the spacebar to drop the panel.</li><li>Use the ESC key to cancel drag</li></ul>"
   },
   "details": {

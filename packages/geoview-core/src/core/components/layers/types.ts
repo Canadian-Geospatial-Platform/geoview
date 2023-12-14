@@ -42,7 +42,6 @@ export interface TypeLegendLayer {
 
   icons?: TypeLegendLayerIcons;
   // data: TypeLegend | undefined | null;
-  allItemsChecked?: boolean; // if all items in this layer are visible
   items: TypeLegendItem[];
   children: TypeLegendLayer[];
 

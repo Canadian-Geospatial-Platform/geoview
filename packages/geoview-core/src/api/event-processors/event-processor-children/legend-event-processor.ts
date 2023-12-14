@@ -40,10 +40,22 @@ export class LegendEventProcessor extends AbstractEventProcessor {
           const styleSettings = layerLegend.styleConfig![geometryType]!;
           const iconDetailsEntry: TypeLegendLayerItem = {};
           iconDetailsEntry.geometryType = geometryType;
+
           if (isSimpleStyleConfig(styleSettings)) {
             iconDetailsEntry.iconType = 'simple';
             iconDetailsEntry.iconImage = (styleRepresentation.defaultCanvas as HTMLCanvasElement).toDataURL();
             iconDetailsEntry.name = styleSettings.label;
+
+            // TODO Adding icons list, to be verified by backend devs
+            const legendLayerListItem: TypeLegendItem = {
+              geometryType,
+              icon: iconDetailsEntry.iconImage,
+              name: iconDetailsEntry.name,
+              isVisible: 'yes',
+              default: true,
+            };
+            iconDetailsEntry.iconList = [legendLayerListItem];
+            iconDetails.push(iconDetailsEntry);
           } else {
             iconDetailsEntry.iconType = 'list';
             if (isClassBreakStyleConfig(styleSettings)) {
@@ -120,6 +132,7 @@ export class LegendEventProcessor extends AbstractEventProcessor {
             // TODO: Why do we have the following line in the store? Do we have to fetch the metadata again since the GeoView layer read and keep them?
             metadataAccessPath: getLocalizedValue(layerConfig.geoviewRootLayer?.metadataAccessPath, mapId),
             layerPath: entryLayerPath,
+            layerStatus: legendResultSetsEntry.layerStatus,
             layerName: legendResultSetsEntry.data?.layerName ? getLocalizedValue(legendResultSetsEntry.data.layerName, mapId)! : '',
             type: layerConfig.entryType as TypeGeoviewLayerType,
             isVisible: layerConfig.initialSettings?.visible ? layerConfig.initialSettings.visible : 'yes',
