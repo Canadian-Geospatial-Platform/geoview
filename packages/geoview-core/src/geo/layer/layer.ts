@@ -1,5 +1,4 @@
 /* eslint-disable no-param-reassign */
-import { EventTypes } from 'ol/Observable';
 import { indexOf } from 'lodash';
 
 import { GeoCore, layerConfigIsGeoCore } from '@/geo/layer/other/geocore';
