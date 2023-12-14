@@ -34,7 +34,7 @@ export abstract class FooterPlugin extends AbstractPlugin {
     // TODO: Refactor - Create Content in another overridable function ideally, would need more refactoring..
     const footerProps = this.onCreateContentProps();
 
-    // Create table with the props
+    // Create tab with the props
     this.map()?.footerTabs.createFooterTab(footerProps);
   }
 
