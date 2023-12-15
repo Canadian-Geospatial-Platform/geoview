@@ -39,7 +39,7 @@ import { EVENT_NAMES } from '@/api/events/event-types';
 import {
   commonGetFieldDomain,
   commonGetFieldType,
-  commonGetServiceMetadata,
+  commonfetchServiceMetadata,
   commonProcessFeatureInfoConfig,
   commonProcessInitialSettings,
   commonProcessLayerMetadata,
@@ -124,8 +124,8 @@ export class EsriDynamic extends AbstractGeoViewRaster {
    *
    * @returns {Promise<void>} A promise that the execution is completed.
    */
-  getServiceMetadata(): Promise<void> {
-    return commonGetServiceMetadata.call(this);
+  fetchServiceMetadata(): Promise<void> {
+    return commonfetchServiceMetadata.call(this);
   }
 
   /** ***************************************************************************************************************************

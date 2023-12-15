@@ -123,8 +123,8 @@ export class WFS extends AbstractGeoViewVector {
    *
    * @returns {Promise<void>} A promise that the execution is completed.
    */
-  protected getServiceMetadata(): Promise<void> {
-    this.setLayerPhase('getServiceMetadata');
+  protected fetchServiceMetadata(): Promise<void> {
+    this.setLayerPhase('fetchServiceMetadata');
     const promisedExecution = new Promise<void>((resolve) => {
       let metadataUrl = getLocalizedValue(this.metadataAccessPath, this.mapId) as string;
 

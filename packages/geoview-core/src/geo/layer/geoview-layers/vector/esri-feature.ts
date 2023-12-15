@@ -21,7 +21,7 @@ import { getLocalizedValue } from '@/core/utils/utilities';
 import {
   commonGetFieldDomain,
   commonGetFieldType,
-  commonGetServiceMetadata,
+  commonfetchServiceMetadata,
   commonProcessFeatureInfoConfig,
   commonProcessInitialSettings,
   commonProcessLayerMetadata,
@@ -113,8 +113,8 @@ export class EsriFeature extends AbstractGeoViewVector {
    *
    * @returns {Promise<void>} A promise that the execution is completed.
    */
-  getServiceMetadata(): Promise<void> {
-    return commonGetServiceMetadata.call(this);
+  fetchServiceMetadata(): Promise<void> {
+    return commonfetchServiceMetadata.call(this);
   }
 
   /** ***************************************************************************************************************************

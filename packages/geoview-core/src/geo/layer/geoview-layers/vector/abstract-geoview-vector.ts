@@ -251,10 +251,10 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
    * @param {Coordinate} location The pixel coordinate that will be used by the query.
    * @param {string} layerPath The layer path to the layer's configuration.
    *
-   * @returns {Promise<TypeArrayOfFeatureInfoEntries>} The feature info table.
+   * @returns {Promise<TypeArrayOfFeatureInfoEntries> | null} The feature info table or null if an error occured.
    */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  protected async getFeatureInfoAtPixel(location: Pixel, layerPath: string): Promise<TypeArrayOfFeatureInfoEntries> {
+  protected async getFeatureInfoAtPixel(location: Pixel, layerPath: string): Promise<TypeArrayOfFeatureInfoEntries | null> {
     try {
       const layerConfig = this.getLayerConfig(layerPath) as TypeLayerEntryConfig;
       const layerFilter = (layer: BaseLayer) => {

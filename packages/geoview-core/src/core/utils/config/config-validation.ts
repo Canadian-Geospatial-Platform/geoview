@@ -596,7 +596,7 @@ export class ConfigValidation {
         if (!layerConfig.source) layerConfig.source = {};
         if (!layerConfig.source.dataAccessPath) {
           // When the dataAccessPath is undefined and the metadataAccessPath ends with ".xml", the dataAccessPath is temporarilly
-          // set to '' and will be filled in the getServiceMetadata method of the class WMS. So, we begin with the assumption
+          // set to '' and will be filled in the fetchServiceMetadata method of the class WMS. So, we begin with the assumption
           // that both en and fr end with ".xml". Be aware that in metadataAccessPath, one language can ends with ".xml" and the
           // other not.
           layerConfig.source.dataAccessPath = { en: '', fr: '' };

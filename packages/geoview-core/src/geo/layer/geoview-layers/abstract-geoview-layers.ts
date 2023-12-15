@@ -521,7 +521,7 @@ export abstract class AbstractGeoViewLayer {
   protected async getAdditionalServiceDefinition(): Promise<void> {
     this.setLayerPhase('getAdditionalServiceDefinition');
     try {
-      await this.getServiceMetadata();
+      await this.fetchServiceMetadata();
       if (this.listOfLayerEntryConfig.length) {
         // Recursively process the configuration tree of layer entries by removing layers in error and processing valid layers.
         this.validateListOfLayerEntryConfig(this.listOfLayerEntryConfig);
@@ -537,8 +537,8 @@ export abstract class AbstractGeoViewLayer {
    *
    * @returns {Promise<void>} A promise that the execution is completed.
    */
-  protected async getServiceMetadata(): Promise<void> {
-    this.setLayerPhase('getServiceMetadata');
+  protected async fetchServiceMetadata(): Promise<void> {
+    this.setLayerPhase('fetchServiceMetadata');
     const metadataUrl = getLocalizedValue(this.metadataAccessPath, this.mapId);
     if (metadataUrl) {
       try {

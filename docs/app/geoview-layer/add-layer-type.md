@@ -101,7 +101,7 @@ For the moment, my class and my source type are define but I still have an error
 From [abstract-geoview-layers](../../packages/geoview-core/src/geo/layer/geoview-layers/abstract-geoview-layers.ts)
 
 ```
-protected abstract getServiceMetadata(): Promise<void>;
+protected abstract fetchServiceMetadata(): Promise<void>;
 protected abstract validateListOfLayerEntryConfig(listOfLayerEntryConfig: TypeListOfLayerEntryConfig): TypeListOfLayerEntryConfig;
 protected abstract processLayerMetadata(layerConfig: TypeLayerEntryConfig): Promise<void>;
 protected abstract processOneLayerEntry(layerConfig: TypeBaseLayerEntryConfig): Promise<BaseLayer | null>;

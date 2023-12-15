@@ -109,20 +109,20 @@ export class WMS extends AbstractGeoViewRaster {
    *
    * @returns {Promise<void>} A promise that the execution is completed.
    */
-  protected async getServiceMetadata(): Promise<void> {
-    this.setLayerPhase('getServiceMetadata');
+  protected async fetchServiceMetadata(): Promise<void> {
+    this.setLayerPhase('fetchServiceMetadata');
     const metadataUrl = getLocalizedValue(this.metadataAccessPath, this.mapId);
     if (metadataUrl) {
       const metadataAccessPathIsXmlFile = metadataUrl.slice(-4).toLowerCase() === '.xml';
       if (metadataAccessPathIsXmlFile) {
         // XML metadata is a special case that does not use GetCapabilities to get the metadata
-        await this.getXmlServiceMetadata(metadataUrl);
+        await this.fetchXmlServiceMetadata(metadataUrl);
       } else {
         const layerConfigsToQuery = this.getLayersToQuery();
         if (layerConfigsToQuery.length === 0) {
           // Use GetCapabilities to get the metadata
           try {
-            const metadata = await this.fetchServiceMetadata(`${metadataUrl}?service=WMS&version=1.3.0&request=GetCapabilities`);
+            const metadata = await this.getServiceMetadata(`${metadataUrl}?service=WMS&version=1.3.0&request=GetCapabilities`);
             this.metadata = metadata;
             this.processMetadataInheritance();
           } catch (error) {
@@ -141,7 +141,7 @@ export class WMS extends AbstractGeoViewRaster {
             if (i === layerIndex)
               // This is the first time we execute this query
               promisedArrayOfMetadata.push(
-                this.fetchServiceMetadata(`${metadataUrl}?service=WMS&version=1.3.0&request=GetCapabilities&Layers=${layerConfig.layerId}`)
+                this.getServiceMetadata(`${metadataUrl}?service=WMS&version=1.3.0&request=GetCapabilities&Layers=${layerConfig.layerId}`)
               );
             // query already done. Use previous returned value
             else promisedArrayOfMetadata.push(promisedArrayOfMetadata[i]);
@@ -185,7 +185,7 @@ export class WMS extends AbstractGeoViewRaster {
    *
    * @returns {Promise<void>} A promise that the execution is completed.
    */
-  private async fetchServiceMetadata(url: string): Promise<TypeJsonObject | null> {
+  private async getServiceMetadata(url: string): Promise<TypeJsonObject | null> {
     try {
       const response = await fetch(url);
       const capabilitiesString = await response.text();
@@ -205,8 +205,8 @@ export class WMS extends AbstractGeoViewRaster {
    *
    * @returns {Promise<void>} A promise that the execution is completed.
    */
-  private async getXmlServiceMetadata(metadataUrl: string): Promise<void> {
-    this.setLayerPhase('getXmlServiceMetadata');
+  private async fetchXmlServiceMetadata(metadataUrl: string): Promise<void> {
+    this.setLayerPhase('fetchXmlServiceMetadata');
     try {
       const parser = new WMSCapabilities();
       const response = await fetch(metadataUrl);

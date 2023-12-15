@@ -37,8 +37,8 @@ import { MapEventProcessor } from '@/api/event-processors/event-processor-childr
  *
  * @returns {Promise<void>} A promise that the execution is completed.
  */
-export async function commonGetServiceMetadata(this: EsriDynamic | EsriFeature) {
-  this.setLayerPhase('getServiceMetadata');
+export async function commonfetchServiceMetadata(this: EsriDynamic | EsriFeature): Promise<void> {
+  this.setLayerPhase('fetchServiceMetadata');
   const metadataUrl = getLocalizedValue(this.metadataAccessPath, this.mapId);
   if (metadataUrl) {
     try {
@@ -322,7 +322,7 @@ export function commonProcessInitialSettings(
  *
  * @returns {Promise<void>} A promise that the layer configuration has its metadata processed.
  */
-export async function commonProcessLayerMetadata(this: EsriDynamic | EsriFeature, layerConfig: TypeLayerEntryConfig) {
+export async function commonProcessLayerMetadata(this: EsriDynamic | EsriFeature, layerConfig: TypeLayerEntryConfig): Promise<void> {
   // User-defined groups do not have metadata provided by the service endpoint.
   if (layerEntryIsGroupLayer(layerConfig) && !layerConfig.isMetadataLayerGroup) return;
   const layerPath = Layer.getLayerPath(layerConfig);
