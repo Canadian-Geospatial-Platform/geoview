@@ -212,13 +212,13 @@ function MapDataTable({ data, layerId, mapId, layerKey }: MapDataTableProps) {
       .join(' and ');
 
     // TODO: use Store
-    const geoviewLayerInstance = api.maps[mapId].layer.geoviewLayers[layerId];
+    const geoviewLayerInstance = api.maps[mapId].layer.geoviewLayer(layerKey);
     const filterLayerConfig = api.maps[mapId].layer.registeredLayers[layerKey] as TypeLayerEntryConfig;
 
     if (mapFilteredRecord[layerKey] && geoviewLayerInstance !== undefined && filterLayerConfig !== undefined && filterStrings.length) {
-      (geoviewLayerInstance as AbstractGeoViewVector | EsriDynamic)?.applyViewFilter(filterLayerConfig, filterStrings);
+      (api.maps[mapId].layer.geoviewLayer(layerKey) as AbstractGeoViewVector | EsriDynamic)?.applyViewFilter('', filterStrings);
     } else {
-      (geoviewLayerInstance as AbstractGeoViewVector | EsriDynamic)?.applyViewFilter(filterLayerConfig, '');
+      (api.maps[mapId].layer.geoviewLayer(layerKey) as AbstractGeoViewVector | EsriDynamic)?.applyViewFilter();
     }
   }, FILTER_MAP_DELAY);
 

@@ -1,10 +1,10 @@
-import { GeoViewStoreType } from '@/core/stores/geoview-store';
+import { GeoviewStoreType } from '@/core/stores/geoview-store';
 import { AbstractEventProcessor } from '../abstract-event-processor';
 import { AbstractGeoViewVector, EsriDynamic, TypeFeatureInfoLayerConfig, TypeTimeSliderValues, WMS, api, getLocalizedValue } from '@/app';
 import { TypeLegendLayer } from '@/core/components/layers/types';
 
 export class TimeSliderEventProcessor extends AbstractEventProcessor {
-  onInitialize(store: GeoViewStoreType) {
+  onInitialize(store: GeoviewStoreType) {
     const { mapId } = store.getState();
 
     api.event.once(
@@ -65,10 +65,7 @@ export class TimeSliderEventProcessor extends AbstractEventProcessor {
    */
   private static filterTimeSliderLayers(mapId: string, legendLayers: TypeLegendLayer[]): string[] {
     const filteredLayerPaths = legendLayers
-      .filter(
-        (legendLayer) =>
-          api.maps[mapId].layer.geoviewLayers[legendLayer.layerPath.split('/')[0]].layerTemporalDimension[legendLayer.layerPath]
-      )
+      .filter((legendLayer) => api.maps[mapId].layer.geoviewLayer(legendLayer.layerPath).getTemporalDimension())
       .map((legendLayer) => legendLayer.layerPath);
     return filteredLayerPaths;
   }
@@ -84,8 +81,7 @@ export class TimeSliderEventProcessor extends AbstractEventProcessor {
     const filteredLayerPaths = legendLayers
       .filter((legendLayer) => {
         return (
-          (api.maps[mapId].layer.geoviewLayers[legendLayer.layerPath.split('/')[0]].layerTemporalDimension[legendLayer.layerPath] &&
-            legendLayer.isVisible === 'always') ||
+          (api.maps[mapId].layer.geoviewLayer(legendLayer.layerPath).getTemporalDimension() && legendLayer.isVisible === 'always') ||
           legendLayer.isVisible === 'yes'
         );
       })
@@ -102,7 +98,7 @@ export class TimeSliderEventProcessor extends AbstractEventProcessor {
    */
   static getInitialTimeSliderValues(mapId: string, layerPath: string): { [index: string]: TypeTimeSliderValues } {
     const name = getLocalizedValue(api.maps[mapId].layer.geoviewLayers[layerPath.split('/')[0]].geoviewLayerName, mapId) || layerPath;
-    const temporalDimensionInfo = api.maps[mapId].layer.geoviewLayers[layerPath.split('/')[0]].layerTemporalDimension[layerPath];
+    const temporalDimensionInfo = api.maps[mapId].layer.geoviewLayer(layerPath).getTemporalDimension();
     const { range } = temporalDimensionInfo.range;
     const defaultValue = temporalDimensionInfo.default;
     const minAndMax: number[] = [new Date(range[0]).getTime(), new Date(range[range.length - 1]).getTime()];
@@ -168,29 +164,23 @@ export class TimeSliderEventProcessor extends AbstractEventProcessor {
       if (filtering) {
         const newValue = `${new Date(values[0]).toISOString().slice(0, new Date(values[0]).toISOString().length - 5)}Z`;
         const filter = `${field}=date '${newValue}'`;
-        (api.maps[mapId].layer.geoviewLayers[layerPath.split('/')[0]] as WMS).applyViewFilter(layerPath, filter);
+        (api.maps[mapId].layer.geoviewLayer(layerPath) as WMS).applyViewFilter('', filter);
       } else {
         const filter = `${field}=date '${defaultValue}'`;
-        (api.maps[mapId].layer.geoviewLayers[layerPath.split('/')[0]] as WMS).applyViewFilter(layerPath, filter);
+        (api.maps[mapId].layer.geoviewLayer(layerPath) as WMS).applyViewFilter('', filter);
       }
     } else if (filtering) {
       let filter = `${field} >= date '${new Date(values[0]).toISOString()}'`;
       if (values.length > 1) {
         filter += ` and ${field} <= date '${new Date(values[1]).toISOString()}'`;
       }
-      (api.maps[mapId].layer.geoviewLayers[layerPath.split('/')[0]] as AbstractGeoViewVector | EsriDynamic).applyViewFilter(
-        layerPath,
-        filter
-      );
+      (api.maps[mapId].layer.geoviewLayer(layerPath) as AbstractGeoViewVector | EsriDynamic).applyViewFilter('', filter);
     } else {
       let filter = `${field} >= date '${new Date(minAndMax[0]).toISOString()}'`;
       if (values.length > 1) {
         filter += `and ${field} <= date '${new Date(minAndMax[1]).toISOString()}'`;
       }
-      (api.maps[mapId].layer.geoviewLayers[layerPath.split('/')[0]] as AbstractGeoViewVector | EsriDynamic).applyViewFilter(
-        layerPath,
-        filter
-      );
+      (api.maps[mapId].layer.geoviewLayer(layerPath) as AbstractGeoViewVector | EsriDynamic).applyViewFilter('', filter);
     }
   }
 }

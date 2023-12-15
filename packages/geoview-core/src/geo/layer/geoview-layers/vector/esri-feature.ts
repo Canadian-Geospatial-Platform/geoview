@@ -4,9 +4,8 @@ import { Options as SourceOptions } from 'ol/source/Vector';
 import { EsriJSON } from 'ol/format';
 import { ReadOptions } from 'ol/format/Feature';
 import Feature from 'ol/Feature';
-import Geometry from 'ol/geom/Geometry';
 
-import { AbstractGeoViewLayer, CONST_LAYER_TYPES } from '../abstract-geoview-layers';
+import { AbstractGeoViewLayer, CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 
 import {
   TypeLayerEntryConfig,
@@ -22,7 +21,7 @@ import { getLocalizedValue } from '@/core/utils/utilities';
 import {
   commonGetFieldDomain,
   commonGetFieldType,
-  commonGetServiceMetadata,
+  commonfetchServiceMetadata,
   commonProcessFeatureInfoConfig,
   commonProcessInitialSettings,
   commonProcessLayerMetadata,
@@ -114,11 +113,8 @@ export class EsriFeature extends AbstractGeoViewVector {
    *
    * @returns {Promise<void>} A promise that the execution is completed.
    */
-  getServiceMetadata(): Promise<void> {
-    const promisedExecution = new Promise<void>((resolve) => {
-      commonGetServiceMetadata.call(this, resolve);
-    });
-    return promisedExecution;
+  fetchServiceMetadata(): Promise<void> {
+    return commonfetchServiceMetadata.call(this);
   }
 
   /** ***************************************************************************************************************************
@@ -138,11 +134,11 @@ export class EsriFeature extends AbstractGeoViewVector {
    *
    * @returns {boolean} true if an error is detected.
    */
-  esriChildHasDetectedAnError(layerEntryConfig: TypeLayerEntryConfig, esriIndex: number): boolean {
+  esriChildHasDetectedAnError(layerConfig: TypeLayerEntryConfig, esriIndex: number): boolean {
     if (this.metadata!.layers[esriIndex].type !== 'Feature Layer') {
       this.layerLoadError.push({
-        layer: Layer.getLayerPath(layerEntryConfig),
-        consoleMessage: `LayerId ${Layer.getLayerPath(layerEntryConfig)} of map ${this.mapId} is not a feature layer`,
+        layer: Layer.getLayerPath(layerConfig),
+        consoleMessage: `LayerId ${Layer.getLayerPath(layerConfig)} of map ${this.mapId} is not a feature layer`,
       });
       return true;
     }
@@ -176,13 +172,13 @@ export class EsriFeature extends AbstractGeoViewVector {
   /** ***************************************************************************************************************************
    * This method will create a Geoview temporal dimension if it exist in the service metadata
    * @param {TypeJsonObject} esriTimeDimension The ESRI time dimension object
-   * @param {TypeEsriFeatureLayerEntryConfig | TypeEsriDynamicLayerEntryConfig} layerEntryConfig The layer entry to configure
+   * @param {TypeEsriFeatureLayerEntryConfig | TypeEsriDynamicLayerEntryConfig} layerConfig The layer entry to configure
    */
   processTemporalDimension(
     esriTimeDimension: TypeJsonObject,
-    layerEntryConfig: TypeEsriFeatureLayerEntryConfig | TypeEsriDynamicLayerEntryConfig
+    layerConfig: TypeEsriFeatureLayerEntryConfig | TypeEsriDynamicLayerEntryConfig
   ) {
-    return commonProcessTemporalDimension.call(this, esriTimeDimension, layerEntryConfig);
+    return commonProcessTemporalDimension.call(this, esriTimeDimension, layerConfig);
   }
 
   /** ***************************************************************************************************************************
@@ -192,16 +188,16 @@ export class EsriFeature extends AbstractGeoViewVector {
    * @param {string} nameField The display field associated to the layer.
    * @param {string} geometryFieldName The field name of the geometry property.
    * @param {TypeJsonArray} fields An array of field names and its aliases.
-   * @param {TypeEsriFeatureLayerEntryConfig | TypeEsriDynamicLayerEntryConfig} layerEntryConfig The layer entry to configure.
+   * @param {TypeEsriFeatureLayerEntryConfig | TypeEsriDynamicLayerEntryConfig} layerConfig The layer entry to configure.
    */
   processFeatureInfoConfig = (
     capabilities: string,
     nameField: string,
     geometryFieldName: string,
     fields: TypeJsonArray,
-    layerEntryConfig: TypeEsriFeatureLayerEntryConfig | TypeEsriDynamicLayerEntryConfig
+    layerConfig: TypeEsriFeatureLayerEntryConfig | TypeEsriDynamicLayerEntryConfig
   ) => {
-    return commonProcessFeatureInfoConfig.call(this, capabilities, nameField, geometryFieldName, fields, layerEntryConfig);
+    return commonProcessFeatureInfoConfig.call(this, capabilities, nameField, geometryFieldName, fields, layerConfig);
   };
 
   /** ***************************************************************************************************************************
@@ -212,55 +208,52 @@ export class EsriFeature extends AbstractGeoViewVector {
    * @param {number} minScale The metadata minScale of the layer.
    * @param {number} maxScale The metadata maxScale of the layer.
    * @param {TypeJsonObject} extent The metadata layer extent.
-   * @param {TypeEsriFeatureLayerEntryConfig | TypeEsriDynamicLayerEntryConfig} layerEntryConfig The layer entry to configure.
+   * @param {TypeEsriFeatureLayerEntryConfig | TypeEsriDynamicLayerEntryConfig} layerConfig The layer entry to configure.
    */
   processInitialSettings(
     visibility: boolean,
     minScale: number,
     maxScale: number,
     extent: TypeJsonObject,
-    layerEntryConfig: TypeEsriFeatureLayerEntryConfig | TypeEsriDynamicLayerEntryConfig
+    layerConfig: TypeEsriFeatureLayerEntryConfig | TypeEsriDynamicLayerEntryConfig
   ) {
-    return commonProcessInitialSettings.call(this, visibility, minScale, maxScale, extent, layerEntryConfig);
+    return commonProcessInitialSettings.call(this, visibility, minScale, maxScale, extent, layerConfig);
   }
 
   /** ***************************************************************************************************************************
    * This method is used to process the layer's metadata. It will fill the empty fields of the layer's configuration (renderer,
    * initial settings, fields and aliases).
    *
-   * @param {TypeLayerEntryConfig} layerEntryConfig The layer entry configuration to process.
+   * @param {TypeLayerEntryConfig} layerConfig The layer entry configuration to process.
    *
    * @returns {Promise<void>} A promise that the layer configuration has its metadata processed.
    */
-  protected processLayerMetadata(layerEntryConfig: TypeLayerEntryConfig): Promise<void> {
-    const promiseOfExecution = new Promise<void>((resolve) => {
-      commonProcessLayerMetadata.call(this, resolve, layerEntryConfig);
-    });
-    return promiseOfExecution;
+  protected processLayerMetadata(layerConfig: TypeLayerEntryConfig): Promise<void> {
+    return commonProcessLayerMetadata.call(this, layerConfig);
   }
 
   /** ***************************************************************************************************************************
    * Create a source configuration for the vector layer.
    *
-   * @param {TypeEsriFeatureLayerEntryConfig} layerEntryConfig The layer entry configuration.
+   * @param {TypeEsriFeatureLayerEntryConfig} layerConfig The layer entry configuration.
    * @param {SourceOptions} sourceOptions The source options (default: {}).
    * @param {ReadOptions} readOptions The read options (default: {}).
    *
    * @returns {VectorSource<Geometry>} The source configuration that will be used to create the vector layer.
    */
   protected createVectorSource(
-    layerEntryConfig: TypeBaseLayerEntryConfig,
+    layerConfig: TypeBaseLayerEntryConfig,
     sourceOptions: SourceOptions = {},
     readOptions: ReadOptions = {}
-  ): VectorSource<Feature<Geometry>> {
+  ): VectorSource<Feature> {
     // The line below uses var because a var declaration has a wider scope than a let declaration.
     // eslint-disable-next-line no-var
-    var vectorSource: VectorSource<Feature<Geometry>>;
-    sourceOptions.url = getLocalizedValue(layerEntryConfig.source!.dataAccessPath!, this.mapId);
-    sourceOptions.url = `${sourceOptions.url}/${String(layerEntryConfig.layerId)}/query?f=pjson&outfields=*&where=1%3D1`;
+    var vectorSource: VectorSource<Feature>;
+    sourceOptions.url = getLocalizedValue(layerConfig.source!.dataAccessPath!, this.mapId);
+    sourceOptions.url = `${sourceOptions.url}/${String(layerConfig.layerId)}/query?f=pjson&outfields=*&where=1%3D1`;
     sourceOptions.format = new EsriJSON();
 
-    vectorSource = super.createVectorSource(layerEntryConfig, sourceOptions, readOptions);
+    vectorSource = super.createVectorSource(layerConfig, sourceOptions, readOptions);
     return vectorSource;
   }
 }

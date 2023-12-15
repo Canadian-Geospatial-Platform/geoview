@@ -1,6 +1,5 @@
 /* eslint-disable no-console */
 import { asString } from 'ol/color';
-import { Layer } from '../layer/layer';
 import {
   isFilledPolygonVectorConfig,
   isIconSymbolVectorConfig,
@@ -21,7 +20,6 @@ import {
   TypeSymbol,
   TypeUniqueValueStyleConfig,
   TypeUniqueValueStyleInfo,
-  TypeLayerEntryConfig,
 } from '../map/map-schema-types';
 
 /*
@@ -437,12 +435,11 @@ function getStyleGeometry(settings: TypeKindOfVectorSettings): TypeStyleGeometry
 /** *****************************************************************************************************************************
  * Process ESRI unique value renderer and convert it to a GeoView style.
  *
- * @param {string} styleId The identifier to assign to the style.
  * @param {EsriUniqueValueRenderer} renderer The ESRI renderer to convert.
  *
  * @returns {TypeStyleConfig | undefined} The Geoview style or undefined if it can not be created.
  */
-function processUniqueValueRenderer(styleId: string, renderer: EsriUniqueValueRenderer): TypeStyleConfig | undefined {
+function processUniqueValueRenderer(renderer: EsriUniqueValueRenderer): TypeStyleConfig | undefined {
   const style: TypeStyleConfig = {};
   const styleType = 'uniqueValue';
   const defaultLabel = renderer.defaultLabel === null ? undefined : renderer.defaultLabel;
@@ -467,7 +464,6 @@ function processUniqueValueRenderer(styleId: string, renderer: EsriUniqueValueRe
   });
   const styleGeometry = getStyleGeometry(uniqueValueStyleInfo[0].settings);
   const styleSettings: TypeUniqueValueStyleConfig = {
-    styleId,
     styleType,
     defaultLabel,
     defaultVisible,
@@ -485,20 +481,19 @@ function processUniqueValueRenderer(styleId: string, renderer: EsriUniqueValueRe
 /** *****************************************************************************************************************************
  * Process ESRI simple renderer and convert it to a GeoView style.
  *
- * @param {string} styleId The identifier to assign to the style.
  * @param {EsriSimpleRenderer} renderer The ESRI renderer to convert.
  *
  * @returns {TypeStyleConfig | undefined} The Geoview style or undefined if it can not be created.
  */
-function processSimpleRenderer(styleId: string, renderer: EsriSimpleRenderer): TypeStyleConfig | undefined {
+function processSimpleRenderer(renderer: EsriSimpleRenderer): TypeStyleConfig | undefined {
   const style: TypeStyleConfig = {};
-  const label = renderer.label ? renderer.label : styleId;
+  const { label } = renderer;
   const settings = convertSymbol(renderer.symbol);
   if (settings) {
     if (renderer.rotationType === 'geographic' && (isIconSymbolVectorConfig(settings) || isSimpleSymbolVectorConfig(settings)))
       settings.rotation = Math.PI / 2 - settings.rotation!;
     const styleGeometry = getStyleGeometry(settings);
-    const styleSettings: TypeSimpleStyleConfig = { styleId, styleType: 'simple', label, settings };
+    const styleSettings: TypeSimpleStyleConfig = { styleType: 'simple', label, settings };
     if (styleGeometry) {
       style[styleGeometry] = styleSettings;
       return style;
@@ -510,12 +505,11 @@ function processSimpleRenderer(styleId: string, renderer: EsriSimpleRenderer): T
 /** *****************************************************************************************************************************
  * Process ESRI class break renderer and convert it to a GeoView style.
  *
- * @param {string} styleId The identifier to assign to the style.
  * @param {EsriClassBreakRenderer} EsriRenderer The ESRI renderer to convert.
  *
  * @returns {TypeStyleConfig | undefined} The Geoview style or undefined if it can not be created.
  */
-function processClassBreakRenderer(styleId: string, EsriRenderer: EsriClassBreakRenderer): TypeStyleConfig | undefined {
+function processClassBreakRenderer(EsriRenderer: EsriClassBreakRenderer): TypeStyleConfig | undefined {
   const style: TypeStyleConfig = {};
   const styleType = 'classBreaks';
   const defaultLabel = EsriRenderer.defaultLabel === null ? undefined : EsriRenderer.defaultLabel;
@@ -545,7 +539,6 @@ function processClassBreakRenderer(styleId: string, EsriRenderer: EsriClassBreak
 
   const styleGeometry = getStyleGeometry(classBreakStyleInfo[0].settings);
   const styleSettings: TypeClassBreakStyleConfig = {
-    styleId,
     styleType,
     defaultVisible,
     defaultLabel,
@@ -563,21 +556,14 @@ function processClassBreakRenderer(styleId: string, EsriRenderer: EsriClassBreak
 /** *****************************************************************************************************************************
  * Get GeoView style from Esri renderer.
  *
- * @param {string} mapId The map identifier of the ESRI layer.
- * @param {TypeLayerEntryConfig} layerEntryConfig The layer configuration object.
  * @param {EsriBaseRenderer} renderer The ESRI renderer to convert.
  *
  * @returns {TypeStyleConfig | undefined} The Geoview style or undefined if it can not be created.
  */
-export function getStyleFromEsriRenderer(
-  mapId: string,
-  layerEntryConfig: TypeLayerEntryConfig,
-  renderer: EsriBaseRenderer
-): TypeStyleConfig | undefined {
-  const id = `${mapId}/${Layer.getLayerPath(layerEntryConfig)}`;
-  if (esriRendererIsUniqueValue(renderer)) return processUniqueValueRenderer(id, renderer);
-  if (esriRendererIsSimple(renderer)) return processSimpleRenderer(id, renderer);
-  if (esriRendererIsClassBreaks(renderer)) return processClassBreakRenderer(id, renderer);
+export function getStyleFromEsriRenderer(renderer: EsriBaseRenderer): TypeStyleConfig | undefined {
+  if (esriRendererIsUniqueValue(renderer)) return processUniqueValueRenderer(renderer);
+  if (esriRendererIsSimple(renderer)) return processSimpleRenderer(renderer);
+  if (esriRendererIsClassBreaks(renderer)) return processClassBreakRenderer(renderer);
   console.log(`Handling of ESRI renderer '${renderer.type}' is not coded, default GeoView settings will be used instead.`);
   return undefined;
 }
