@@ -1,4 +1,4 @@
-import { Cast, toJsonObject, TypeJsonObject, TypeWindow, TypeIconButtonProps, TypePanelProps, AnySchemaObject } from 'geoview-core';
+import { Cast, toJsonObject, TypeJsonObject, TypeIconButtonProps, TypePanelProps, AnySchemaObject } from 'geoview-core';
 import { AppBarPlugin } from 'geoview-core/src/api/plugin/appbar-plugin';
 import { LayersOutlinedIcon } from 'geoview-core/src/ui';
 import PanelContent from './panel-content';

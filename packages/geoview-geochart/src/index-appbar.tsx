@@ -1,4 +1,4 @@
-import { Cast, AnySchemaObject, TypeWindow, TypeIconButtonProps, TypePanelProps, toJsonObject, TypeJsonObject } from 'geoview-core';
+import { Cast, AnySchemaObject, TypeIconButtonProps, TypePanelProps, toJsonObject, TypeJsonObject } from 'geoview-core';
 import { AppBarPlugin } from 'geoview-core/src/api/plugin/appbar-plugin';
 import { ChartType, SchemaValidator } from 'geochart';
 import { ChartIcon } from 'geoview-core/src/ui/icons';
