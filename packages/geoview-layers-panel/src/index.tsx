@@ -1,5 +1,6 @@
 import { Cast, toJsonObject, TypeJsonObject, TypeWindow, TypeIconButtonProps, TypePanelProps, AnySchemaObject } from 'geoview-core';
 import { AppBarPlugin } from 'geoview-core/src/api/plugin/appbar-plugin';
+import { LayersOutlinedIcon } from 'geoview-core/src/ui';
 import PanelContent from './panel-content';
 import schema from '../schema.json';
 import defaultConfig from '../default-config-layers-panel.json';
@@ -35,10 +36,6 @@ class LayersPanelPlugin extends AppBarPlugin {
   });
 
   onCreateButtonProps(): TypeIconButtonProps {
-    // Fetch cgpv
-    const { cgpv } = window as TypeWindow;
-    const { LayersOutlinedIcon } = cgpv.ui.elements;
-
     // Button props
     return {
       id: 'layersPanelButton',
@@ -50,10 +47,6 @@ class LayersPanelPlugin extends AppBarPlugin {
   }
 
   onCreateContentProps(): TypePanelProps {
-    // Fetch cgpv
-    const { cgpv } = window as TypeWindow;
-    const { LayersOutlinedIcon } = cgpv.ui.elements;
-
     // Panel props
     return {
       title: 'layersPanel.title',

@@ -45,16 +45,12 @@ export class GeoChartAppBarPlugin extends AppBarPlugin {
   });
 
   onCreateButtonProps(): TypeIconButtonProps {
-    // Fetch cgpv
-    const { cgpv } = window as TypeWindow;
-    const { MapIcon } = cgpv.ui.elements;
-
     // Button props
     return {
       id: 'geoChartPanelButton',
       tooltip: 'chartPanel.title',
       tooltipPlacement: 'right',
-      children: <MapIcon />,
+      children: <ChartIcon />,
       visible: true,
     };
   }

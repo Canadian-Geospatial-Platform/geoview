@@ -62,13 +62,11 @@ class FooterPanelPlugin extends AbstractPlugin {
    * Function called when plugin is being added
    */
   onAdd(): void {
-    const { footerTabs } = this.api.maps[this.pluginProps.mapId];
-
     const defaultTabs = (this.configObj?.tabs.defaultTabs as Array<string>) || [];
     let tabsCounter = 0;
     if (defaultTabs.includes('legend')) {
       // create new tab and add the LegendComponent to the footer tab
-      footerTabs.createFooterTab({
+      this.map().footerTabs.createFooterTab({
         id: 'legend',
         value: tabsCounter,
         label: 'footerPanel.legend',
@@ -80,7 +78,7 @@ class FooterPanelPlugin extends AbstractPlugin {
 
     if (defaultTabs.includes('layers')) {
       // create new tab and add the LayersComponent to the footer tab
-      footerTabs.createFooterTab({
+      this.map().footerTabs.createFooterTab({
         id: 'layers',
         value: tabsCounter,
         label: 'footerPanel.layers',
@@ -94,7 +92,7 @@ class FooterPanelPlugin extends AbstractPlugin {
     if (defaultTabs.includes('details')) {
       // create new tab and add the DetailComponent to the footer tab
       const detailsTabValue = tabsCounter;
-      footerTabs.createFooterTab({
+      this.map().footerTabs.createFooterTab({
         id: 'details',
         value: detailsTabValue,
         label: 'footerPanel.details',
@@ -106,7 +104,7 @@ class FooterPanelPlugin extends AbstractPlugin {
 
     if (defaultTabs.includes('data-table')) {
       /// create new tab and add the DataTable Component to the footer tab
-      footerTabs.createFooterTab({
+      this.map().footerTabs.createFooterTab({
         id: 'data-table',
         value: tabsCounter,
         label: 'footerPanel.dataTable',
@@ -153,8 +151,7 @@ class FooterPanelPlugin extends AbstractPlugin {
     const customTabs = this.configObj?.tabs.customTabs as Array<string>;
     for (let i = 0; i < customTabs.length; i++) {
       const tab = customTabs[i] as unknown as CustomTabs;
-
-      footerTabs.createFooterTab({
+      this.map().footerTabs.createFooterTab({
         id: tab.id,
         value: tabsCounter,
         label: tab.title,
