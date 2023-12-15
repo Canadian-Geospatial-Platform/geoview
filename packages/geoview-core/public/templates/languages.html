@@ -118,7 +118,7 @@
           'navBar': ['zoom', 'fullscreen', 'home', 'location', 'export'],
           'appBar': ['geolocator', 'export'],
           'components': ['overview-map', 'north-arrow'],
-          'corePackages': ['layers-panel', 'basemap-panel', 'footer-panel'],
+          'corePackages': ['layers-panel', 'basemap-panel', 'footer-panel', 'time-slider'],
           'theme': 'geo.ca',
           'suportedLanguages': ['fr', 'en']
         }`;
@@ -132,14 +132,14 @@
 
       const switchLang = document.getElementById("switchLang");
       switchLang.addEventListener("change", (e) => {
-        cgpv.api.maps['LNG1'].changeLanguage(e.target.value)
+        cgpv.api.maps['LNG1'].setLanguage(e.target.value)
       });
 
       // change map language and reset layers
       var mapLangButton = document.getElementById('Change-Lang-Button');
       mapLangButton.addEventListener('click', function (e) {
         const lang = cgpv.api.maps['LNG1'].getDisplayLanguage() === 'en' ? 'fr' : 'en';
-        cgpv.api.maps['LNG1'].changeLanguage(lang, true)
+        cgpv.api.maps['LNG1'].setLanguage(lang, true)
       });
 
       // initialize cgpv and api events, a callback is optional, used if calling api's after the rendering is ready

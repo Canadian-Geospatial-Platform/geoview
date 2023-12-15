@@ -17,6 +17,7 @@ import {
 } from '@/core/stores/store-interface-and-intial-values/details-state';
 import { useMapStoreActions } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { ResponsiveGrid, CloseButton, EnlargeButton, LayerList, LayerTitle } from '../common';
+import { useUIStoreActions } from '@/app';
 
 /**
  * layers list
@@ -42,6 +43,7 @@ export function Detailspanel(): JSX.Element {
   const checkedFeatures = useDetailsStoreCheckedFeatures();
   const { setSelectedLayerPath, removeCheckedFeature } = useDetailsStoreActions();
   const { addSelectedFeature, removeSelectedFeature } = useMapStoreActions();
+  const { setActiveFooterTab } = useUIStoreActions();
 
   /**
    * Find the layer path index which is selected in previous layerData based on layerPath and have more than Zero features.
@@ -84,6 +86,7 @@ export function Detailspanel(): JSX.Element {
       const selectedLayer = arrayOfLayerData[commonLayerPathIndex > -1 ? commonLayerPathIndex : firstLayerIndex];
       setLayerDataInfo(selectedLayer);
       setCurrentFeatureIndex(0);
+      setActiveFooterTab('details');
     } else setLayerDataInfo(null);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [arrayOfLayerData]);

@@ -3,6 +3,7 @@ import { useGeoViewStore } from '@/core/stores/stores-managers';
 import { TypeSetStore, TypeGetStore } from '@/core/stores/geoview-store';
 import { TypeAppBarProps, TypeMapCorePackages, TypeNavBarProps } from '@/geo';
 import { TypeMapFeaturesConfig } from '@/core/types/cgpv-types';
+import { UIEventProcessor } from '@/api/event-processors/event-processor-children/ui-event-processor';
 
 type focusItemProps = {
   activeElementId: string | false;
@@ -10,6 +11,7 @@ type focusItemProps = {
 };
 
 export interface IUIState {
+  activefoorterTabId: string;
   activeTrapGeoView: boolean;
   appBarComponents: TypeAppBarProps;
   corePackagesComponents: TypeMapCorePackages;
@@ -23,6 +25,7 @@ export interface IUIState {
   actions: {
     closeModal: () => void;
     openModal: (uiFocus: focusItemProps) => void;
+    setActiveFooterTab: (id: string) => void;
     setActiveTrapGeoView: (active: boolean) => void;
     setFooterBarExpanded: (expanded: boolean) => void;
     setGeolocatorActive: (active: boolean) => void;
@@ -32,6 +35,7 @@ export interface IUIState {
 export function initializeUIState(set: TypeSetStore, get: TypeGetStore): IUIState {
   const init = {
     appBarComponents: ['geolocator', 'export'],
+    activefoorterTabId: 'legend',
     activeTrapGeoView: false,
     corePackagesComponents: [],
     focusITem: { activeElementId: false, callbackElementId: false },
@@ -69,6 +73,16 @@ export function initializeUIState(set: TypeSetStore, get: TypeGetStore): IUIStat
             focusITem: { activeElementId: uiFocus.activeElementId, callbackElementId: uiFocus.callbackElementId },
           },
         });
+      },
+      setActiveFooterTab: (id: string) => {
+        set({
+          uiState: {
+            ...get().uiState,
+            activefoorterTabId: id,
+          },
+        });
+
+        UIEventProcessor.setActiveFooterTab(get().mapId, id);
       },
       setActiveTrapGeoView: (active: boolean) => {
         set({

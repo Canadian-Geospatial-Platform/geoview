@@ -472,7 +472,6 @@
     </div>
     <button class="collapsible active">Map Status Flags</button>
     <pre id="HLYR5-state" class="panel map-title-holder"></pre>
-    <button class="test-refresh-WMS-btn">Test Refresh WMS</button>
     <div
       id="LYR5"
       class="llwp-map"
@@ -657,7 +656,7 @@
       // Test a refresh WMS from projection change
       var testRefreshBtn = document.getElementsByClassName('test-refresh-WMS-btn')[0];
       testRefreshBtn.addEventListener('click', function (e) {
-        cgpv.api.event.emit(cgpv.types.mapViewProjectionPayload(cgpv.api.eventNames.MAP.EVENT_MAP_VIEW_PROJECTION_CHANGE, 'LYR1', 3978));
+        cgpv.api.maps['LYR1'].setProjection(3978);
       });
 
       listenToLegendLayerSetChanges('HLYR1-state', 'LYR1/LegendsLayerSet');
@@ -721,12 +720,6 @@
 
       listenToLegendLayerSetChanges('HLYR4-state', 'LYR4/LegendsLayerSet');
 
-      // ========================================================================================================================
-      // Test a refresh WMS from projection change
-      var testRefreshBtn = document.getElementsByClassName('test-refresh-WMS-btn')[0];
-      testRefreshBtn.addEventListener('click', function (e) {
-        cgpv.api.event.emit(cgpv.types.mapViewProjectionPayload(cgpv.api.eventNames.MAP.EVENT_MAP_VIEW_PROJECTION_CHANGE, 'LYR1', 3978));
-      });
       //create snippets
       createCodeSnippet();
       createConfigSnippet();

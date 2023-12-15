@@ -9,6 +9,9 @@ import View, { ViewOptions } from 'ol/View';
 import { fromLonLat, ProjectionLike, toLonLat, transform as olTransform, transformExtent as olTransformExtent } from 'ol/proj';
 import { Coordinate } from 'ol/coordinate';
 import { Extent } from 'ol/extent';
+import BaseLayer from 'ol/layer/Base';
+import Collection from 'ol/Collection';
+import { Source } from 'ol/source';
 
 import queryString from 'query-string';
 
@@ -45,6 +48,8 @@ import {
   TypeDisplayTheme,
   VALID_DISPLAY_LANGUAGE,
   VALID_DISPLAY_THEME,
+  VALID_PROJECTION_CODES,
+  TypeInteraction,
 } from '@/geo/map/map-schema-types';
 import { TypeMapFeaturesConfig, TypeHTMLElement, TypeValidMapProjectionCodes } from '@/core/types/global-types';
 import { layerConfigIsGeoCore } from '@/geo/layer/other/geocore';
@@ -143,12 +148,7 @@ export class MapViewer {
     this.geoviewRenderer = new GeoviewRenderer(this.mapId);
 
     // create basemap and pass in the map id to be able to access the map instance
-    this.basemap = new Basemap(
-      MapEventProcessor.getBasemapOptions(this.mapId),
-      this.getDisplayLanguage(),
-      this.getMapState().currentProjection as TypeValidMapProjectionCodes,
-      this.mapId
-    );
+    this.basemap = new Basemap(MapEventProcessor.getBasemapOptions(this.mapId), this.mapId);
 
     // extract the number of layers to load and listen to added layers event to decrease the number of expected layer
     const listOfGeoviewLayerConfig: TypeListOfGeoviewLayerConfig = this.mapFeaturesConfig.map.listOfGeoviewLayerConfig || [];
@@ -269,12 +269,71 @@ export class MapViewer {
   }
 
   /**
-   * Toggle fullscreen / exit fullscreen function
+   * Function called when the map has been rendered and ready to be customized
+   */
+  mapReady(): void {
+    const layerInterval = setInterval(() => {
+      if (this.layer?.geoviewLayers) {
+        const { geoviewLayers } = this.layer;
+        let allGeoviewLayerReady =
+          this.mapFeaturesConfig.map.listOfGeoviewLayerConfig?.length === 0 || Object.keys(geoviewLayers).length !== 0;
+        Object.keys(geoviewLayers).forEach((geoviewLayerId) => {
+          allGeoviewLayerReady &&= geoviewLayers[geoviewLayerId].allLayerEntryConfigProcessed();
+        });
+        if (allGeoviewLayerReady) {
+          MapEventProcessor.setMapLoaded(this.mapId);
+          clearInterval(layerInterval);
+        }
+      }
+    }, 250);
+  }
+
+  // #region MAP STATES
+  /**
+   * Return the current display language
+   *
+   * @returns {TypeDisplayLanguage} The display language
+   */
+  getDisplayLanguage(): TypeDisplayLanguage {
+    return AppEventProcessor.getDisplayLanguage(this.mapId);
+  }
+
+  /**
+   * Return the current display theme
+   *
+   * @returns {TypeDisplayTheme} The display theme
+   */
+  getDisplayTheme(): TypeDisplayTheme {
+    return AppEventProcessor.getDisplayTheme(this.mapId);
+  }
+
+  /**
+   * Return the map current state information
+   *
+   * @returns {TypeMapState} The map state
+   */
+  getMapState(): TypeMapState {
+    // map state initialize with store data coming from configuration file/object.
+    // updated values will be added by store subscription in map-event-processor
+    return MapEventProcessor.getMapState(this.mapId);
+  }
+
+  /**
+   * Get the map viewSettings
+   *
+   * @returns the map viewSettings
+   */
+  getView(): View {
+    return this.map.getView();
+  }
+
+  /**
+   * set fullscreen / exit fullscreen
    *
    * @param status toggle fullscreen or exit fullscreen status
    * @param {HTMLElement} element the element to toggle fullscreen on
    */
-  toggleFullscreen(status: boolean, element: TypeHTMLElement): void {
+  setFullscreen(status: boolean, element: TypeHTMLElement): void {
     // enter fullscreen
     if (status) {
       if (element.requestFullscreen) {
@@ -309,7 +368,58 @@ export class MapViewer {
   }
 
   /**
-   * Update the map viewSettings
+   * Set map to either dynamic or static
+   *
+   * @param {TypeInteraction} interaction map interaction
+   */
+  setInteraction(interaction: TypeInteraction) {
+    MapEventProcessor.setInteraction(this.mapId, interaction);
+  }
+
+  /**
+   * Set the display language of the map
+   *
+   * @param {TypeDisplayLanguage} displayLanguage the language to use (en, fr)
+   * @param {boolean} resetLayer optional flag to ask viewer to reload layers with the new localize language
+   */
+  setLanguage(displayLanguage: TypeDisplayLanguage, resetLayer?: boolean | false): void {
+    if (VALID_DISPLAY_LANGUAGE.includes(displayLanguage)) {
+      AppEventProcessor.setDisplayLanguage(this.mapId, displayLanguage);
+
+      // if flag is true, check if config support the layers change and apply
+      if (resetLayer) {
+        if (AppEventProcessor.getSupportedLanguages(this.mapId).includes(displayLanguage)) {
+          // eslint-disable-next-line no-console
+          console.log('reset layers not implemented yet');
+        } else addNotificationError(this.mapId, getLocalizedMessage(this.mapId, 'validation.changeDisplayLanguageLayers'));
+      }
+    } else addNotificationError(this.mapId, getLocalizedMessage(this.mapId, 'validation.changeDisplayLanguage'));
+  }
+
+  /**
+   * Set the display projection of the map
+   *
+   * @param {TypeValidMapProjectionCodes} projectionCode the projection code (3978, 3857)
+   */
+  setProjection(projectionCode: TypeValidMapProjectionCodes): void {
+    if (VALID_PROJECTION_CODES.includes(Number(projectionCode))) {
+      MapEventProcessor.setProjection(this.mapId, projectionCode);
+    } else addNotificationError(this.mapId, getLocalizedMessage(this.mapId, 'validation.changeDisplayProjection'));
+  }
+
+  /**
+   * Set the display theme of the map
+   *
+   * @param {TypeDisplayTheme} displayTheme the theme to use (geo.ca, light, dark)
+   */
+  setTheme(displayTheme: TypeDisplayTheme): void {
+    if (VALID_DISPLAY_THEME.includes(displayTheme)) {
+      AppEventProcessor.setDisplayTheme(this.mapId, displayTheme);
+    } else addNotificationError(this.mapId, getLocalizedMessage(this.mapId, 'validation.changeDisplayTheme'));
+  }
+
+  /**
+   * Set the map viewSettings
    *
    * @param {TypeMapView} mapView map viewSettings object
    */
@@ -329,76 +439,29 @@ export class MapViewer {
   }
 
   /**
-   * Get the map viewSettings
-   *
-   * @returns the map viewSettings
+   * Loop trought all geoview layeres and refresh source. Use this function on projection change or other
+   * viewer modification who may affect rendering
    */
-  getView(): View {
-    return this.map.getView();
-  }
-
-  /**
-   * Function called when the map has been rendered and ready to be customized
-   */
-  mapReady(): void {
-    const layerInterval = setInterval(() => {
-      if (this.layer?.geoviewLayers) {
-        const { geoviewLayers } = this.layer;
-        let allGeoviewLayerReady =
-          this.mapFeaturesConfig.map.listOfGeoviewLayerConfig?.length === 0 || Object.keys(geoviewLayers).length !== 0;
-        Object.keys(geoviewLayers).forEach((geoviewLayerId) => {
-          allGeoviewLayerReady &&= geoviewLayers[geoviewLayerId].allLayerEntryConfigProcessed();
-        });
-        if (allGeoviewLayerReady) {
-          MapEventProcessor.setMapLoaded(this.mapId);
-          clearInterval(layerInterval);
+  refreshLayers(): void {
+    const mapLayers = api.maps[this.mapId].layer.geoviewLayers;
+    Object.entries(mapLayers).forEach((mapLayerEntry) => {
+      const refreshBaseLayer = (baseLayer: BaseLayer | null) => {
+        if (baseLayer) {
+          const layerGroup: Array<BaseLayer> | Collection<BaseLayer> | undefined = baseLayer.get('layers');
+          if (layerGroup) {
+            layerGroup.forEach((baseLayerEntry) => {
+              refreshBaseLayer(baseLayerEntry);
+            });
+          } else {
+            const layerSource: Source = baseLayer.get('source');
+            layerSource.refresh();
+          }
         }
-      }
-    }, 250);
+      };
+      refreshBaseLayer(mapLayerEntry[1].olLayers);
+    });
   }
-
-  getMapState(): TypeMapState {
-    // map state initialize with store data coming from configuration file/object.
-    // updated values will be added by store subscription in map-event-processor
-    return MapEventProcessor.getMapState(this.mapId);
-  }
-
-  getDisplayLanguage(): TypeDisplayLanguage {
-    return AppEventProcessor.getDisplayLanguage(this.mapId);
-  }
-
-  /**
-   * Change the display language of the map
-   *
-   * @param {TypeDisplayLanguage} displayLanguage the language to use (en, fr)
-   * @param {boolean} resetLayer optional flag to ask viewer to reload layers with the new localize language
-   */
-  changeLanguage(displayLanguage: TypeDisplayLanguage, resetLayer?: boolean | false): void {
-    if (VALID_DISPLAY_LANGUAGE.includes(displayLanguage)) {
-      AppEventProcessor.setDisplayLanguage(this.mapId, displayLanguage);
-
-      // if flag is true, check if config support the layers change and apply
-      if (AppEventProcessor.getSupportedLanguages(this.mapId).includes(displayLanguage)) {
-        // eslint-disable-next-line no-console
-        console.log(resetLayer);
-      } else addNotificationError(this.mapId, getLocalizedMessage(this.mapId, 'validation.changeDisplayLanguageLayers'));
-    } else addNotificationError(this.mapId, getLocalizedMessage(this.mapId, 'validation.changeDisplayLanguage'));
-  }
-
-  getDisplayTheme(): TypeDisplayTheme {
-    return AppEventProcessor.getDisplayTheme(this.mapId);
-  }
-
-  /**
-   * Change the display theme of the map
-   *
-   * @param {TypeDisplayTheme} displayTheme the theme to use (geo.ca, light, dark)
-   */
-  changeTheme(displayTheme: TypeDisplayTheme): void {
-    if (VALID_DISPLAY_THEME.includes(displayTheme)) {
-      AppEventProcessor.setDisplayTheme(this.mapId, displayTheme);
-    } else addNotificationError(this.mapId, getLocalizedMessage(this.mapId, 'validation.changeDisplayTheme'));
-  }
+  // #endregion
 
   /**
    * Reload a map from a config object
@@ -411,19 +474,6 @@ export class MapViewer {
 
     // emit an event to reload the map with the new config
     api.event.emit(mapConfigPayload(EVENT_NAMES.MAP.EVENT_MAP_RELOAD, this.mapId, mapFeaturesConfig));
-  }
-
-  /**
-   * Set map to either dynamic or static
-   *
-   * @param {string} interaction map interaction
-   */
-  toggleMapInteraction(interaction: string) {
-    if (interaction === 'dynamic' || !interaction) {
-      this.map.getInteractions().forEach((x) => x.setActive(true));
-    } else {
-      this.map.getInteractions().forEach((x) => x.setActive(false));
-    }
   }
 
   /**
@@ -517,6 +567,7 @@ export class MapViewer {
     MapEventProcessor.clickMarkerIconShow(this.mapId, marker);
   }
 
+  // #region MAP INTERACTIONS
   /**
    * Initializes selection interactions
    */
@@ -604,4 +655,5 @@ export class MapViewer {
     snap.startInteraction();
     return snap;
   }
+  // #endregion
 }

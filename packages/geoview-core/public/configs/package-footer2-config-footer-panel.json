@@ -3,6 +3,7 @@
     "defaultTabs": [],
     "customTabs": [
       {
+        "id": "custom",
         "title": "What is this Map?",
         "contentHTML": "<div>This is a custom tab define as HTML content in configuration! By the way, this is a static map.</div>"
       }

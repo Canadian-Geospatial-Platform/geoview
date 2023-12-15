@@ -20,7 +20,12 @@ export type { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-g
 export type { AbstractGeoViewRaster } from '@/geo/layer/geoview-layers/raster/abstract-geoview-raster';
 export type { AbstractGeoViewVector } from '@/geo/layer/geoview-layers/vector/abstract-geoview-vector';
 export type { TypeGeoviewLayerType } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
-export type { TypeGeoviewLayerConfig, TypeListOfLayerEntryConfig, TypeLayerEntryConfig } from '@/geo/map/map-schema-types';
+export type {
+  TypeGeoviewLayerConfig,
+  TypeListOfLayerEntryConfig,
+  TypeLayerEntryConfig,
+  TypeDisplayLanguage,
+} from '@/geo/map/map-schema-types';
 export type { TypeValidMapProjectionCodes } from '@/geo/map/map-schema-types';
 export type { TypeBasemapOptions } from '@/geo/layer/basemap/basemap-types';
 export type { TypeViewSettings } from '@/geo/map/map-schema-types';

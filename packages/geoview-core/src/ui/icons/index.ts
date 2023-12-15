@@ -1,4 +1,5 @@
 export {
+  AccessTime as TimeSliderIcon,
   Add as ZoomInIcon,
   Add as AddIcon,
   AddCircleOutline as AddCircleOutlineIcon,
@@ -71,6 +72,7 @@ export {
   OpenInBrowser as OpenInBrowserIcon,
   Pause as PauseIcon,
   PlayArrow as PlayArrowIcon,
+  QueryStats as ChartIcon,
   RadioButtonChecked as RadioButtonCheckedIcon,
   RadioButtonUnchecked as RadioButtonUncheckedIcon,
   Remove as ZoomOutIcon,

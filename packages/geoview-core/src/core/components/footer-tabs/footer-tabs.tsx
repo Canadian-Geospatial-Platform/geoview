@@ -143,7 +143,9 @@ export function FooterTabs(): JSX.Element | null {
   const eventFooterTabsSelectListenerFunction = (payload: PayloadBaseClass) => {
     if (payloadIsAFooterTab(payload)) {
       // for details tab, extand the tab
-      if (payload.tab.value === 1) {
+      // TODO: there is a bug, I need to set another tab from cgpv before it works again
+      // Try to add onChange event...
+      if (payload.tab.id === 'details') {
         handleCollapse();
       }
       setSelectedTab(payload.tab.value);
