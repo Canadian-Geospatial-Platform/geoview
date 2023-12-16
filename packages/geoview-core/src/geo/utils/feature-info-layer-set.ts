@@ -135,7 +135,7 @@ export class FeatureInfoLayerSet {
               features: arrayOfRecords,
               layerPath,
               layerName: getLocalizedValue(api.maps[mapId].layer.registeredLayers[layerPath].layerName, mapId)!,
-              layerFlags: this.resultSets[layerPath],
+              layerStatus: this.resultSets[layerPath].data[eventType]?.layerStatus || 'error',
             };
             FeatureInfoEventProcessor.propagateFeatureInfoToStore(mapId, layerPath, eventType, this.resultSets);
           }

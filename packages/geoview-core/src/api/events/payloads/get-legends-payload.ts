@@ -2,7 +2,7 @@ import { PayloadBaseClass } from './payload-base-class';
 
 import { EventStringId, EVENT_NAMES } from '../event-types';
 import { TypeLegend } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
-import { TypeLayerStatus } from '@/geo/map/map-schema-types';
+import { TypeLayerStatus, TypeLocalizedString } from '@/geo/map/map-schema-types';
 import { TypeResultSets } from './layer-set-payload';
 
 /** Valid events that can create GetLegendsPayload */
@@ -17,6 +17,7 @@ export type TypeLegendResultSetsEntry = {
   layerPhase: string;
   querySent: boolean;
   data: TypeLegend | undefined | null;
+  layerName?: TypeLocalizedString;
 };
 
 /** The legend resultset type associate a layer path to a legend object. The undefined value indicate that the get legend query

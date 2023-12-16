@@ -30,18 +30,18 @@ export function Detailspanel(): JSX.Element {
   const theme = useTheme();
   const sxClasses = getSxClasses(theme);
 
-  // internal state
-  const [layerDataInfo, setLayerDataInfo] = useState<TypeLayerData | null>(null);
-  const [currentFeatureIndex, setCurrentFeatureIndex] = useState<number>(0);
-  const [isLayersPanelVisible, setIsLayersPanelVisible] = useState(false);
-  const [isEnlargeDataTable, setIsEnlargeDataTable] = useState(false);
-
   // get values from store
   const selectedLayerPath = useDetailsStoreSelectedLayerPath();
   const arrayOfLayerData = useDetailsStoreLayerDataArray();
   const checkedFeatures = useDetailsStoreCheckedFeatures();
   const { setSelectedLayerPath, removeCheckedFeature } = useDetailsStoreActions();
   const { addSelectedFeature, removeSelectedFeature } = useMapStoreActions();
+
+  // internal state
+  const [layerDataInfo, setLayerDataInfo] = useState<TypeLayerData | null>(arrayOfLayerData[0]);
+  const [currentFeatureIndex, setCurrentFeatureIndex] = useState<number>(0);
+  const [isLayersPanelVisible, setIsLayersPanelVisible] = useState(false);
+  const [isEnlargeDataTable, setIsEnlargeDataTable] = useState(false);
 
   /**
    * Find the layer path index which is selected in previous layerData based on layerPath and have more than Zero features.
@@ -79,11 +79,17 @@ export function Detailspanel(): JSX.Element {
       // Check if have the previous selected layer path in incoming arrayOfLayerData
       // if so, get the index of the found layer, we need to pass to setLayerDataInfo to load layer in left panel
       const commonLayerPathIndex = selectedLayerPath ? findLayerPathIndex(arrayOfLayerData, selectedLayerPath) : -1;
+
       // Get index of first layer from array which doesn't have feature zero.
       const firstLayerIndex = arrayOfLayerData.findIndex((layer) => layer?.features?.length);
+
       const selectedLayer = arrayOfLayerData[commonLayerPathIndex > -1 ? commonLayerPathIndex : firstLayerIndex];
-      setLayerDataInfo(selectedLayer);
-      setCurrentFeatureIndex(0);
+
+      // update selected layer data info when layer have atleast 1 feature.
+      if (selectedLayer) {
+        setLayerDataInfo(selectedLayer);
+        setCurrentFeatureIndex(0);
+      }
     } else setLayerDataInfo(null);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [arrayOfLayerData]);
@@ -145,7 +151,7 @@ export function Detailspanel(): JSX.Element {
       />
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [layerDataInfo, arrayOfLayerData, isEnlargeDataTable, checkedFeatures]);
+  }, [layerDataInfo, isEnlargeDataTable, checkedFeatures]);
 
   return (
     <Box sx={sxClasses.detailsContainer}>

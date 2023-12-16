@@ -9,7 +9,7 @@ import { PayloadBaseClass } from './payload-base-class';
 
 import { EventStringId, EVENT_NAMES } from '../event-types';
 import { TypeGeoviewLayerType } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
-import { TypeLayerStatus } from '@/geo/map/map-schema-types';
+import { TypeLayerStatus, TypeLocalizedString } from '@/geo/map/map-schema-types';
 
 /** Valid events that can create GetFeatureInfoPayload */
 const validEvents: EventStringId[] = [
@@ -75,7 +75,7 @@ export type TypeArrayOfFeatureInfoEntries = TypeFeatureInfoEntry[] | undefined |
 export type TypeLayerData = {
   layerPath: string;
   layerName: string;
-  layerFlags: Omit<TypeFeatureInfoResultSetsEntry, 'data'>;
+  layerStatus: TypeLayerStatus;
   features: TypeArrayOfFeatureInfoEntries;
 };
 export type TypeArrayOfLayerData = TypeLayerData[];
@@ -88,6 +88,7 @@ export type TypeFeatureInfoResultSetsEntry = {
   layerStatus: TypeLayerStatus;
   layerPhase: string;
   data: TypeFeatureInfoByEventTypes;
+  layerName?: TypeLocalizedString;
 };
 
 // TODO: Refactor - Should probably call this a 'ResultsSet' instead of 'ResultSets' to avoid confusion, because it's a single set of results, not multiple sets of result(s).
