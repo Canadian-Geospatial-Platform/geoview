@@ -1,6 +1,5 @@
 import { Extent } from 'ol/extent';
 import { Coordinate } from 'ol/coordinate';
-import Geometry from 'ol/geom/Geometry';
 import Feature from 'ol/Feature';
 import RenderFeature from 'ol/render/Feature';
 import { Pixel } from 'ol/pixel';
@@ -57,7 +56,7 @@ export type TypeFeatureInfoEntry = {
   featureKey: number;
   geoviewLayerType: TypeGeoviewLayerType;
   extent: Extent;
-  geometry: TypeGeometry | Feature<Geometry> | null;
+  geometry: TypeGeometry | Feature | null;
   featureIcon: HTMLCanvasElement;
   fieldInfo: Partial<Record<string, TypeFieldEntry>>;
   nameField: string | null;

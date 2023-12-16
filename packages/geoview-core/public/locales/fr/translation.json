@@ -120,7 +120,8 @@
     },
     "changeDisplayLanguageLayers": "Les couches ne peuvent être chargée(s) de nouveau car la configuration ne supporte pas ce langage",
     "changeDisplayLanguage": "Seulement 'en' et 'fr' sont supporées",
-    "changeDisplayTheme": "Theme non supporé"
+    "changeDisplayTheme": "Theme non supporté",
+    "changeDisplayProjection": "Projection non supportée"
   },
   "exportModal": {
     "title": "Exporter la carte en PNG",

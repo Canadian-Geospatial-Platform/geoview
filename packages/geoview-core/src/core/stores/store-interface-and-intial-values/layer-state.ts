@@ -104,8 +104,7 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
 
         // TODO: keep reference to geoview map instance in the store or keep accessing with api - discussion
         //! may not work with group items ... see if Yves work will make this simplier
-        const layerId: string[] = layerPath.split('/');
-        api.maps[get().mapId].layer.geoviewLayers[layerId[0]]!.setOpacity(opacity, layerPath);
+        api.maps[get().mapId].layer.geoviewLayer(layerPath).setOpacity(opacity, layerPath);
 
         // now update store
         set({
@@ -125,8 +124,7 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
 
         // TODO: keep reference to geoview map instance in the store or keep accessing with api - discussion
         //! may not work with group items ... see if Yves work will make this simplier
-        const layerId: string[] = layerPath.split('/');
-        api.maps[get().mapId].layer.geoviewLayers[layerId[0]]!.setVisible(layer?.isVisible !== 'no', layerPath);
+        api.maps[get().mapId].layer.geoviewLayer(layerPath).setVisible(layer?.isVisible !== 'no', layerPath);
 
         // now update store
         set({
@@ -164,8 +162,7 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
           }
 
           // apply filter to layer
-          const layerToFilter = api.maps[get().mapId].layer.geoviewLayers[layerPath.split('/')[0]]! as AbstractGeoViewVector | EsriDynamic;
-          layerToFilter.applyViewFilter(layerPath);
+          (api.maps[get().mapId].layer.geoviewLayer(layerPath) as AbstractGeoViewVector | EsriDynamic).applyViewFilter();
         }
         set({
           layerState: {
@@ -213,8 +210,7 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
         //! try to make reusable store actions....
         // TODO: we can have always item.... we cannot set visibility so if present we will need to trap. Need more use case
         // TODO: create a function setItemVisibility called with layer path and this function set the registered layer (from store values) then apply the filter.
-        const layerToFilter = api.maps[get().mapId].layer.geoviewLayers[layerPath.split('/')[0]]! as AbstractGeoViewVector | EsriDynamic;
-        layerToFilter.applyViewFilter(layerPath);
+        (api.maps[get().mapId].layer.geoviewLayer(layerPath) as AbstractGeoViewVector | EsriDynamic).applyViewFilter(layerPath);
       },
       deleteLayer: (layerPath: string) => {
         const curLayers = get().layerState.legendLayers;

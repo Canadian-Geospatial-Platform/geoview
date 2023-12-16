@@ -1,10 +1,10 @@
-import { GeoViewStoreType } from '@/core/stores/geoview-store';
+import { GeoviewStoreType } from '@/core/stores/geoview-store';
 import { AbstractEventProcessor } from '../abstract-event-processor';
 import { getGeoViewStore } from '@/core/stores/stores-managers';
 import { NotificationDetailsType, TypeDisplayLanguage, TypeHTMLElement, TypeDisplayTheme } from '@/core/types/cgpv-types';
 
 export class AppEventProcessor extends AbstractEventProcessor {
-  onInitialize(store: GeoViewStoreType) {
+  onInitialize(store: GeoviewStoreType) {
     store.getState();
 
     // add to arr of subscriptions so it can be destroyed later
@@ -48,7 +48,7 @@ export class AppEventProcessor extends AbstractEventProcessor {
     getGeoViewStore(mapId).getState().appState.actions.setDisplayTheme(theme);
   }
 
-  static toggleFullscreen(mapId: string, active: boolean, element: TypeHTMLElement): void {
+  static setFullscreen(mapId: string, active: boolean, element: TypeHTMLElement): void {
     getGeoViewStore(mapId).getState().appState.actions.setFullScreenActive(active, element);
   }
   // #endregion

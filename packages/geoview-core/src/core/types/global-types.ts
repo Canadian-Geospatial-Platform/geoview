@@ -13,13 +13,19 @@ export * from 'zustand';
 export { getGeoViewStore } from '@/core/stores/stores-managers';
 export { isEqual } from 'lodash';
 export type { MutableRefObject, RefObject, Dispatch, SetStateAction } from 'react';
-export type { TypeArrayOfLayerData } from '@/api/events/payloads';
+export type { TypeArrayOfLayerData, TypeLayerData, TypeFeatureInfoEntry, TypeFeatureInfoEntryPartial } from '@/api/events/payloads';
+export type { TypeRegisteredLayers } from '@/geo/layer/layer';
 export type { ButtonPropsLayerPanel } from '@/ui/panel/panel-types';
 export type { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 export type { AbstractGeoViewRaster } from '@/geo/layer/geoview-layers/raster/abstract-geoview-raster';
 export type { AbstractGeoViewVector } from '@/geo/layer/geoview-layers/vector/abstract-geoview-vector';
 export type { TypeGeoviewLayerType } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
-export type { TypeGeoviewLayerConfig, TypeListOfLayerEntryConfig, TypeLayerEntryConfig } from '@/geo/map/map-schema-types';
+export type {
+  TypeGeoviewLayerConfig,
+  TypeListOfLayerEntryConfig,
+  TypeLayerEntryConfig,
+  TypeDisplayLanguage,
+} from '@/geo/map/map-schema-types';
 export type { TypeValidMapProjectionCodes } from '@/geo/map/map-schema-types';
 export type { TypeBasemapOptions } from '@/geo/layer/basemap/basemap-types';
 export type { TypeViewSettings } from '@/geo/map/map-schema-types';

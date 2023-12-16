@@ -7,9 +7,6 @@ import {
   toJsonObject,
   TypeJsonObject,
   AnySchemaObject,
-  payloadIsAllQueriesDone,
-  TypeArrayOfFeatureInfoEntries,
-  PayloadBaseClass,
   TypeJsonValue,
 } from 'geoview-core';
 
@@ -23,6 +20,7 @@ import { Layers } from './layers';
 const w = window as TypeWindow;
 
 type CustomTabs = {
+  id: string;
   title: string;
   contentHTML: string;
 };
@@ -58,20 +56,24 @@ class FooterPanelPlugin extends AbstractPlugin {
    */
   translations = toJsonObject({
     en: {
-      legend: 'Legend',
-      layers: 'Layers',
-      details: 'Details',
-      dataTable: 'DataTable',
-      timeSlider: 'Time Slider',
-      geochart: 'Chart',
+      footerPanel: {
+        legend: 'Legend',
+        layers: 'Layers',
+        details: 'Details',
+        dataTable: 'DataTable',
+        timeSlider: 'Time Slider',
+        geochart: 'Chart',
+      },
     },
     fr: {
-      legend: 'Légende',
-      layers: 'Couches',
-      details: 'Détails',
-      dataTable: 'Données',
-      timeSlider: 'Curseur Temporel',
-      geochart: 'Graphique',
+      footerPanel: {
+        legend: 'Légende',
+        layers: 'Couches',
+        details: 'Détails',
+        dataTable: 'Données',
+        timeSlider: 'Curseur Temporel',
+        geochart: 'Graphique',
+      },
     },
   });
 
@@ -90,15 +92,15 @@ class FooterPanelPlugin extends AbstractPlugin {
       // access the api calls
       const { api } = cgpv;
       const { footerTabs } = api.maps[mapId];
-      const displayLanguage = api.maps[mapId].getDisplayLanguage();
 
       const defaultTabs = configObj?.tabs.defaultTabs as Array<string>;
       let tabsCounter = 0;
       if (defaultTabs.includes('legend')) {
         // create new tab and add the LegendComponent to the footer tab
         footerTabs.createFooterTab({
+          id: 'legend',
           value: tabsCounter,
-          label: this.translations[displayLanguage].legend as string,
+          label: 'footerPanel.legend',
           content: () => <FooterPanelLegendItem mapId={mapId} />,
           icon: <HubOutlinedIcon />,
         });
@@ -108,8 +110,9 @@ class FooterPanelPlugin extends AbstractPlugin {
       if (defaultTabs.includes('layers')) {
         // create new tab and add the LayersComponent to the footer tab
         footerTabs.createFooterTab({
+          id: 'layers',
           value: tabsCounter,
-          label: this.translations[displayLanguage].layers as string,
+          label: 'footerPanel.layers',
           content: () => <Layers mapId={mapId} />,
           icon: <LayersOutlinedIcon />,
         });
@@ -121,39 +124,21 @@ class FooterPanelPlugin extends AbstractPlugin {
         // create new tab and add the DetailComponent to the footer tab
         const detailsTabValue = tabsCounter;
         footerTabs.createFooterTab({
+          id: 'details',
           value: detailsTabValue,
-          label: this.translations[displayLanguage].details as string,
+          label: 'footerPanel.details',
           content: () => api.maps[mapId].details.createDetails(mapId),
           icon: <InfoOutlinedIcon />,
         });
         tabsCounter++;
-        // select the details tab when map click queries are done
-        // TODO: This info should be kept in the store cause we do notlisten to layerset directly anymore
-        api.event.on(
-          api.eventNames.GET_FEATURE_INFO.ALL_QUERIES_DONE,
-          (payload: PayloadBaseClass) => {
-            if (payloadIsAllQueriesDone(payload)) {
-              const { eventType, resultSets } = payload;
-              if (eventType === 'click') {
-                let features: TypeArrayOfFeatureInfoEntries = [];
-                Object.keys(resultSets).forEach((layerPath) => {
-                  features = features.concat(resultSets[layerPath]!);
-                });
-                if (features.length > 0) {
-                  footerTabs.selectFooterTab(detailsTabValue);
-                }
-              }
-            }
-          },
-          `${mapId}/FeatureInfoLayerSet`
-        );
       }
 
       if (defaultTabs.includes('data-table')) {
         /// create new tab and add the DataTable Component to the footer tab
         footerTabs.createFooterTab({
+          id: 'data-table',
           value: tabsCounter,
-          label: this.translations[displayLanguage].dataTable as string,
+          label: 'footerPanel.dataTable',
           content: () => <DataTable mapId={mapId} />,
           icon: <StorageIcon />,
         });
@@ -199,6 +184,7 @@ class FooterPanelPlugin extends AbstractPlugin {
         const tab = customTabs[i] as unknown as CustomTabs;
 
         footerTabs.createFooterTab({
+          id: tab.id,
           value: tabsCounter,
           label: tab.title,
           content: tab.contentHTML,

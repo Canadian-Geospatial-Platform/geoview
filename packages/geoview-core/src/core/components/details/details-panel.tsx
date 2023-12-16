@@ -17,6 +17,7 @@ import {
 } from '@/core/stores/store-interface-and-intial-values/details-state';
 import { useMapStoreActions } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { ResponsiveGrid, CloseButton, EnlargeButton, LayerList, LayerTitle } from '../common';
+import { useUIStoreActions } from '@/app';
 
 /**
  * layers list
@@ -36,6 +37,7 @@ export function Detailspanel(): JSX.Element {
   const checkedFeatures = useDetailsStoreCheckedFeatures();
   const { setSelectedLayerPath, removeCheckedFeature } = useDetailsStoreActions();
   const { addSelectedFeature, removeSelectedFeature } = useMapStoreActions();
+  const { setActiveFooterTab } = useUIStoreActions();
 
   // internal state
   const [layerDataInfo, setLayerDataInfo] = useState<TypeLayerData | null>(arrayOfLayerData[0]);
@@ -89,6 +91,7 @@ export function Detailspanel(): JSX.Element {
       if (selectedLayer) {
         setLayerDataInfo(selectedLayer);
         setCurrentFeatureIndex(0);
+        setActiveFooterTab('details');
       }
     } else setLayerDataInfo(null);
     // eslint-disable-next-line react-hooks/exhaustive-deps

@@ -1,5 +1,4 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-/* eslint-disable no-param-reassign */
+/* eslint-disable @typescript-eslint/no-unused-vars, no-param-reassign, no-console */
 import axios from 'axios';
 import { Extent } from 'ol/extent';
 import { transformExtent } from 'ol/proj';
@@ -13,7 +12,7 @@ import {
   TypeLayerEntryConfig,
   TypeLayerGroupEntryConfig,
   TypeListOfLayerEntryConfig,
-} from '../../map/map-schema-types';
+} from '@/geo/map/map-schema-types';
 import { getLocalizedValue, getXMLHttpRequest } from '@/core/utils/utilities';
 import { api } from '@/app';
 import { Layer } from '../layer';
@@ -34,28 +33,28 @@ import { MapEventProcessor } from '@/api/event-processors/event-processor-childr
 /** ***************************************************************************************************************************
  * This method reads the service metadata from the metadataAccessPath.
  *
+ * @param {EsriDynamic | EsriFeature} this The ESRI layer instance pointer.
+ *
  * @returns {Promise<void>} A promise that the execution is completed.
  */
-export function commonGetServiceMetadata(this: EsriDynamic | EsriFeature, resolve: (value: void | PromiseLike<void>) => void) {
-  this.changeLayerPhase('getServiceMetadata');
+export async function commonfetchServiceMetadata(this: EsriDynamic | EsriFeature): Promise<void> {
+  this.setLayerPhase('fetchServiceMetadata');
   const metadataUrl = getLocalizedValue(this.metadataAccessPath, this.mapId);
   if (metadataUrl) {
-    getXMLHttpRequest(`${metadataUrl}?f=json`)
-      .then((metadataString) => {
-        if (metadataString === '{}') {
-          api.geoUtilities.setAllLayerStatusToError(this, this.listOfLayerEntryConfig, 'Unable to read metadata');
-        } else {
-          this.metadata = JSON.parse(metadataString) as TypeJsonObject;
-          const { copyrightText } = this.metadata;
-          if (copyrightText) this.attributions.push(copyrightText as string);
-          resolve();
-        }
-      })
-      .catch((reason) => {
-        api.geoUtilities.setAllLayerStatusToError(this, this.listOfLayerEntryConfig, 'Unable to read metadata');
-      });
+    try {
+      const metadataString = await getXMLHttpRequest(`${metadataUrl}?f=json`);
+      if (metadataString === '{}') this.setAllLayerStatusToError(this.listOfLayerEntryConfig, 'Unable to read metadata');
+      else {
+        this.metadata = JSON.parse(metadataString) as TypeJsonObject;
+        const { copyrightText } = this.metadata;
+        if (copyrightText) this.attributions.push(copyrightText as string);
+      }
+    } catch (error) {
+      console.log(error);
+      this.setAllLayerStatusToError(this.listOfLayerEntryConfig, 'Unable to read metadata');
+    }
   } else {
-    api.geoUtilities.setAllLayerStatusToError(this, this.listOfLayerEntryConfig, 'Unable to read metadata');
+    this.setAllLayerStatusToError(this.listOfLayerEntryConfig, 'Unable to read metadata');
   }
 }
 
@@ -63,34 +62,34 @@ export function commonGetServiceMetadata(this: EsriDynamic | EsriFeature, resolv
  * This method validates recursively the configuration of the layer entries to ensure that it is a feature layer identified
  * with a numeric layerId and creates a group entry when a layer is a group.
  *
- * @param {EsriDynamic | EsriFeature} this The this property of the ESRI layer.
+ * @param {EsriDynamic | EsriFeature} this The ESRI layer instance pointer.
  * @param {TypeListOfLayerEntryConfig} listOfLayerEntryConfig The list of layer entries configuration to validate.
  */
 export function commonValidateListOfLayerEntryConfig(this: EsriDynamic | EsriFeature, listOfLayerEntryConfig: TypeListOfLayerEntryConfig) {
-  this.changeLayerPhase('validateListOfLayerEntryConfig');
-  listOfLayerEntryConfig.forEach((layerEntryConfig: TypeLayerEntryConfig) => {
-    const layerPath = Layer.getLayerPath(layerEntryConfig);
-    if (layerEntryIsGroupLayer(layerEntryConfig)) {
-      this.validateListOfLayerEntryConfig(layerEntryConfig.listOfLayerEntryConfig!);
-      if (!layerEntryConfig.listOfLayerEntryConfig.length) {
+  this.setLayerPhase('validateListOfLayerEntryConfig');
+  listOfLayerEntryConfig.forEach((layerConfig: TypeLayerEntryConfig) => {
+    const layerPath = Layer.getLayerPath(layerConfig);
+    if (layerEntryIsGroupLayer(layerConfig)) {
+      this.validateListOfLayerEntryConfig(layerConfig.listOfLayerEntryConfig!);
+      if (!layerConfig.listOfLayerEntryConfig.length) {
         this.layerLoadError.push({
           layer: layerPath,
           consoleMessage: `Empty layer group (mapId:  ${this.mapId}, layerPath: ${layerPath})`,
         });
-        this.changeLayerStatus('error', layerEntryConfig);
+        this.setLayerStatus('error', layerPath);
         return;
       }
     }
 
-    this.changeLayerStatus('loading', layerEntryConfig);
+    this.setLayerStatus('loading', layerPath);
 
-    let esriIndex = Number(layerEntryConfig.layerId);
+    let esriIndex = Number(layerConfig.layerId);
     if (Number.isNaN(esriIndex)) {
       this.layerLoadError.push({
         layer: layerPath,
         consoleMessage: `ESRI layerId must be a number (mapId:  ${this.mapId}, layerPath: ${layerPath})`,
       });
-      this.changeLayerStatus('error', layerEntryConfig);
+      this.setLayerStatus('error', layerPath);
       return;
     }
 
@@ -103,15 +102,15 @@ export function commonValidateListOfLayerEntryConfig(this: EsriDynamic | EsriFea
         layer: layerPath,
         consoleMessage: `ESRI layerId not found (mapId:  ${this.mapId}, layerPath: ${layerPath})`,
       });
-      this.changeLayerStatus('error', layerEntryConfig);
+      this.setLayerStatus('error', layerPath);
       return;
     }
 
     if (this.metadata!.layers[esriIndex].type === 'Group Layer') {
       const newListOfLayerEntryConfig: TypeListOfLayerEntryConfig = [];
       (this.metadata!.layers[esriIndex].subLayerIds as TypeJsonArray).forEach((layerId) => {
-        const subLayerEntryConfig: TypeLayerEntryConfig = cloneDeep(layerEntryConfig);
-        subLayerEntryConfig.parentLayerConfig = Cast<TypeLayerGroupEntryConfig>(layerEntryConfig);
+        const subLayerEntryConfig: TypeLayerEntryConfig = cloneDeep(layerConfig);
+        subLayerEntryConfig.parentLayerConfig = Cast<TypeLayerGroupEntryConfig>(layerConfig);
         subLayerEntryConfig.layerId = `${layerId}`;
         subLayerEntryConfig.layerName = {
           en: this.metadata!.layers[layerId as number].name as string,
@@ -121,10 +120,9 @@ export function commonValidateListOfLayerEntryConfig(this: EsriDynamic | EsriFea
         api.maps[this.mapId].layer.registerLayerConfig(subLayerEntryConfig);
       });
 
-      if (this.registerToLayerSetListenerFunctions[Layer.getLayerPath(layerEntryConfig)])
-        this.unregisterFromLayerSets(layerEntryConfig as TypeBaseLayerEntryConfig);
-      const switchToGroupLayer = Cast<TypeLayerGroupEntryConfig>(layerEntryConfig);
-      delete (layerEntryConfig as TypeBaseLayerEntryConfig).layerStatus;
+      if (this.registerToLayerSetListenerFunctions[layerPath]) this.unregisterFromLayerSets(layerConfig as TypeBaseLayerEntryConfig);
+      const switchToGroupLayer = Cast<TypeLayerGroupEntryConfig>(layerConfig);
+      delete (layerConfig as TypeBaseLayerEntryConfig).layerStatus;
       switchToGroupLayer.entryType = 'group';
       switchToGroupLayer.layerName = {
         en: this.metadata!.layers[esriIndex].name as string,
@@ -136,13 +134,13 @@ export function commonValidateListOfLayerEntryConfig(this: EsriDynamic | EsriFea
       return;
     }
 
-    if (this.esriChildHasDetectedAnError(layerEntryConfig, esriIndex)) {
-      this.changeLayerStatus('error', layerEntryConfig);
+    if (this.esriChildHasDetectedAnError(layerConfig, esriIndex)) {
+      this.setLayerStatus('error', layerPath);
       return;
     }
 
-    if (!layerEntryConfig.layerName)
-      layerEntryConfig.layerName = {
+    if (!layerConfig.layerName)
+      layerConfig.layerName = {
         en: this.metadata!.layers[esriIndex].name as string,
         fr: this.metadata!.layers[esriIndex].name as string,
       };
@@ -152,6 +150,7 @@ export function commonValidateListOfLayerEntryConfig(this: EsriDynamic | EsriFea
 /** ***************************************************************************************************************************
  * Extract the domain of the specified field from the metadata. If the type can not be found, return 'string'.
  *
+ * @param {EsriDynamic | EsriFeature} this The ESRI layer instance pointer.
  * @param {string} fieldName field name for which we want to get the domain.
  * @param {TypeLayerEntryConfig} layerConfig layer configuration.
  *
@@ -179,6 +178,7 @@ export function commonGetFieldType(
 /** ***************************************************************************************************************************
  * Return the type of the specified field.
  *
+ * @param {EsriDynamic | EsriFeature} this The ESRI layer instance pointer.
  * @param {string} fieldName field name for which we want to get the type.
  * @param {TypeLayerEntryConfig} layerConfig layer configuration.
  *
@@ -196,16 +196,18 @@ export function commonGetFieldDomain(
 
 /** ***************************************************************************************************************************
  * This method will create a Geoview temporal dimension if it exist in the service metadata
+ *
+ * @param {EsriDynamic | EsriFeature} this The ESRI layer instance pointer.
  * @param {TypeJsonObject} esriTimeDimension The ESRI time dimension object
- * @param {TypeEsriFeatureLayerEntryConfig | TypeEsriDynamicLayerEntryConfig} layerEntryConfig The layer entry to configure
+ * @param {TypeEsriFeatureLayerEntryConfig | TypeEsriDynamicLayerEntryConfig} layerConfig The layer entry to configure
  */
 export function commonProcessTemporalDimension(
   this: EsriDynamic | EsriFeature,
   esriTimeDimension: TypeJsonObject,
-  layerEntryConfig: TypeEsriFeatureLayerEntryConfig | TypeEsriDynamicLayerEntryConfig
+  layerConfig: TypeEsriFeatureLayerEntryConfig | TypeEsriDynamicLayerEntryConfig
 ) {
   if (esriTimeDimension !== undefined) {
-    this.layerTemporalDimension[Layer.getLayerPath(layerEntryConfig)] = api.dateUtilities.createDimensionFromESRI(
+    this.layerTemporalDimension[Layer.getLayerPath(layerConfig)] = api.dateUtilities.createDimensionFromESRI(
       Cast<TimeDimensionESRI>(esriTimeDimension)
     );
   }
@@ -214,11 +216,12 @@ export function commonProcessTemporalDimension(
 /** ***************************************************************************************************************************
  * This method verifies if the layer is queryable and sets the outfields and aliasFields of the source feature info.
  *
+ * @param {EsriDynamic | EsriFeature} this The ESRI layer instance pointer.
  * @param {string} capabilities The capabilities that will say if the layer is queryable.
  * @param {string} nameField The display field associated to the layer.
  * @param {string} geometryFieldName The field name of the geometry property.
  * @param {TypeJsonArray} fields An array of field names and its aliases.
- * @param {TypeEsriFeatureLayerEntryConfig | TypeEsriDynamicLayerEntryConfig} layerEntryConfig The layer entry to configure.
+ * @param {TypeEsriFeatureLayerEntryConfig | TypeEsriDynamicLayerEntryConfig} layerConfig The layer entry to configure.
  */
 export function commonProcessFeatureInfoConfig(
   this: EsriDynamic | EsriFeature,
@@ -226,51 +229,50 @@ export function commonProcessFeatureInfoConfig(
   nameField: string,
   geometryFieldName: string,
   fields: TypeJsonArray,
-  layerEntryConfig: TypeEsriFeatureLayerEntryConfig | TypeEsriDynamicLayerEntryConfig
+  layerConfig: TypeEsriFeatureLayerEntryConfig | TypeEsriDynamicLayerEntryConfig
 ) {
-  if (!layerEntryConfig.source.featureInfo) layerEntryConfig.source.featureInfo = { queryable: capabilities.includes('Query') };
+  if (!layerConfig.source.featureInfo) layerConfig.source.featureInfo = { queryable: capabilities.includes('Query') };
   // dynamic group layer doesn't have fields definition
-  if (!layerEntryConfig.isMetadataLayerGroup) {
+  if (!layerConfig.isMetadataLayerGroup) {
     // Process undefined outfields or aliasFields ('' = false and !'' = true). Also, if en is undefined, then fr is also undefined.
     // when en and fr are undefined, we set both en and fr to the same value.
-    if (!layerEntryConfig.source.featureInfo.outfields?.en || !layerEntryConfig.source.featureInfo.aliasFields?.en) {
-      const processOutField = !layerEntryConfig.source.featureInfo.outfields?.en;
-      const processAliasFields = !layerEntryConfig.source.featureInfo.aliasFields?.en;
+    if (!layerConfig.source.featureInfo.outfields?.en || !layerConfig.source.featureInfo.aliasFields?.en) {
+      const processOutField = !layerConfig.source.featureInfo.outfields?.en;
+      const processAliasFields = !layerConfig.source.featureInfo.aliasFields?.en;
       if (processOutField) {
-        layerEntryConfig.source.featureInfo.outfields = { en: '' };
-        layerEntryConfig.source.featureInfo.fieldTypes = '';
+        layerConfig.source.featureInfo.outfields = { en: '' };
+        layerConfig.source.featureInfo.fieldTypes = '';
       }
-      if (processAliasFields) layerEntryConfig.source.featureInfo.aliasFields = { en: '' };
+      if (processAliasFields) layerConfig.source.featureInfo.aliasFields = { en: '' };
       fields.forEach((fieldEntry) => {
         if (fieldEntry.name === geometryFieldName) return;
         if (processOutField) {
-          layerEntryConfig.source.featureInfo!.outfields!.en = `${layerEntryConfig.source.featureInfo!.outfields!.en}${fieldEntry.name},`;
-          const fieldType = this.getFieldType(fieldEntry.name as string, layerEntryConfig);
-          layerEntryConfig.source.featureInfo!.fieldTypes = `${layerEntryConfig.source.featureInfo!.fieldTypes}${fieldType},`;
+          layerConfig.source.featureInfo!.outfields!.en = `${layerConfig.source.featureInfo!.outfields!.en}${fieldEntry.name},`;
+          const fieldType = this.getFieldType(fieldEntry.name as string, layerConfig);
+          layerConfig.source.featureInfo!.fieldTypes = `${layerConfig.source.featureInfo!.fieldTypes}${fieldType},`;
         }
         if (processAliasFields)
-          layerEntryConfig.source.featureInfo!.aliasFields!.en = `${layerEntryConfig.source.featureInfo!.aliasFields!.en}${
+          layerConfig.source.featureInfo!.aliasFields!.en = `${layerConfig.source.featureInfo!.aliasFields!.en}${
             fieldEntry.alias ? fieldEntry.alias : fieldEntry.name
           },`;
       });
-      layerEntryConfig.source.featureInfo!.outfields!.en = layerEntryConfig.source.featureInfo!.outfields?.en?.slice(0, -1);
-      layerEntryConfig.source.featureInfo!.fieldTypes = layerEntryConfig.source.featureInfo!.fieldTypes?.slice(0, -1);
-      layerEntryConfig.source.featureInfo!.aliasFields!.en = layerEntryConfig.source.featureInfo!.aliasFields?.en?.slice(0, -1);
-      layerEntryConfig.source.featureInfo!.outfields!.fr = layerEntryConfig.source.featureInfo!.outfields?.en;
-      layerEntryConfig.source.featureInfo!.aliasFields!.fr = layerEntryConfig.source.featureInfo!.aliasFields?.en;
+      layerConfig.source.featureInfo!.outfields!.en = layerConfig.source.featureInfo!.outfields?.en?.slice(0, -1);
+      layerConfig.source.featureInfo!.fieldTypes = layerConfig.source.featureInfo!.fieldTypes?.slice(0, -1);
+      layerConfig.source.featureInfo!.aliasFields!.en = layerConfig.source.featureInfo!.aliasFields?.en?.slice(0, -1);
+      layerConfig.source.featureInfo!.outfields!.fr = layerConfig.source.featureInfo!.outfields?.en;
+      layerConfig.source.featureInfo!.aliasFields!.fr = layerConfig.source.featureInfo!.aliasFields?.en;
     }
-    if (!layerEntryConfig.source.featureInfo.nameField)
+    if (!layerConfig.source.featureInfo.nameField)
       if (nameField)
-        layerEntryConfig.source.featureInfo.nameField = {
+        layerConfig.source.featureInfo.nameField = {
           en: nameField,
           fr: nameField,
         };
       else {
         const en =
-          layerEntryConfig.source.featureInfo!.outfields!.en?.split(',')[0] ||
-          layerEntryConfig.source.featureInfo!.outfields!.fr?.split(',')[0];
+          layerConfig.source.featureInfo!.outfields!.en?.split(',')[0] || layerConfig.source.featureInfo!.outfields!.fr?.split(',')[0];
         const fr = en;
-        if (en) layerEntryConfig.source.featureInfo.nameField = { en, fr };
+        if (en) layerConfig.source.featureInfo.nameField = { en, fr };
       }
   }
 }
@@ -278,12 +280,12 @@ export function commonProcessFeatureInfoConfig(
 /** ***************************************************************************************************************************
  * This method set the initial settings based on the service metadata. Priority is given to the layer configuration.
  *
- * @param {string} mapId The map identifier.
+ * @param {EsriDynamic | EsriFeature} this The ESRI layer instance pointer.
  * @param {boolean} visibility The metadata initial visibility of the layer.
  * @param {number} minScale The metadata minScale of the layer.
  * @param {number} maxScale The metadata maxScale of the layer.
  * @param {TypeJsonObject} extent The metadata layer extent.
- * @param {TypeEsriFeatureLayerEntryConfig | TypeEsriDynamicLayerEntryConfig} layerEntryConfig The layer entry to configure.
+ * @param {TypeEsriFeatureLayerEntryConfig | TypeEsriDynamicLayerEntryConfig} layerConfig The layer entry to configure.
  */
 export function commonProcessInitialSettings(
   this: EsriDynamic | EsriFeature,
@@ -291,23 +293,23 @@ export function commonProcessInitialSettings(
   minScale: number,
   maxScale: number,
   extent: TypeJsonObject,
-  layerEntryConfig: TypeEsriFeatureLayerEntryConfig | TypeEsriDynamicLayerEntryConfig
+  layerConfig: TypeEsriFeatureLayerEntryConfig | TypeEsriDynamicLayerEntryConfig
 ) {
-  // layerEntryConfig.initialSettings cannot be undefined because config-validation set it to {} if it is undefined.
-  if (layerEntryConfig.initialSettings?.visible === undefined) layerEntryConfig.initialSettings!.visible = visibility ? 'yes' : 'no';
+  // layerConfig.initialSettings cannot be undefined because config-validation set it to {} if it is undefined.
+  if (layerConfig.initialSettings?.visible === undefined) layerConfig.initialSettings!.visible = visibility ? 'yes' : 'no';
   // ! TODO: The solution implemented in the following two lines is not right. scale and zoom are not the same things.
-  // ! if (layerEntryConfig.initialSettings?.minZoom === undefined && minScale !== 0) layerEntryConfig.initialSettings.minZoom = minScale;
-  // ! if (layerEntryConfig.initialSettings?.maxZoom === undefined && maxScale !== 0) layerEntryConfig.initialSettings.maxZoom = maxScale;
-  if (layerEntryConfig.initialSettings?.extent)
-    layerEntryConfig.initialSettings.extent = transformExtent(
-      layerEntryConfig.initialSettings.extent,
+  // ! if (layerConfig.initialSettings?.minZoom === undefined && minScale !== 0) layerConfig.initialSettings.minZoom = minScale;
+  // ! if (layerConfig.initialSettings?.maxZoom === undefined && maxScale !== 0) layerConfig.initialSettings.maxZoom = maxScale;
+  if (layerConfig.initialSettings?.extent)
+    layerConfig.initialSettings.extent = transformExtent(
+      layerConfig.initialSettings.extent,
       'EPSG:4326',
       `EPSG:${MapEventProcessor.getMapState(this.mapId).currentProjection}`
     );
 
-  if (!layerEntryConfig.initialSettings?.bounds) {
+  if (!layerConfig.initialSettings?.bounds) {
     const layerExtent = [extent.xmin, extent.ymin, extent.xmax, extent.ymax] as Extent;
-    layerEntryConfig.initialSettings!.bounds = layerExtent;
+    layerConfig.initialSettings!.bounds = layerExtent;
   }
 }
 
@@ -315,51 +317,52 @@ export function commonProcessInitialSettings(
  * This method is used to process the layer's metadata. It will fill the empty fields of the layer's configuration (renderer,
  * initial settings, fields and aliases).
  *
- * @param {TypeLayerEntryConfig} layerEntryConfig The layer entry configuration to process.
+ * @param {EsriDynamic | EsriFeature} this The ESRI layer instance pointer.
+ * @param {TypeLayerEntryConfig} layerConfig The layer entry configuration to process.
  *
  * @returns {Promise<void>} A promise that the layer configuration has its metadata processed.
  */
-export function commonProcessLayerMetadata(
-  this: EsriDynamic | EsriFeature,
-  resolve: (value: void | PromiseLike<void>) => void,
-  layerEntryConfig: TypeLayerEntryConfig
-) {
+export async function commonProcessLayerMetadata(this: EsriDynamic | EsriFeature, layerConfig: TypeLayerEntryConfig): Promise<void> {
   // User-defined groups do not have metadata provided by the service endpoint.
-  if (layerEntryIsGroupLayer(layerEntryConfig) && !layerEntryConfig.isMetadataLayerGroup) resolve();
-  else {
-    let queryUrl = getLocalizedValue(this.metadataAccessPath, this.mapId);
-    if (queryUrl) {
-      queryUrl = queryUrl.endsWith('/') ? `${queryUrl}${layerEntryConfig.layerId}` : `${queryUrl}/${layerEntryConfig.layerId}`;
-      const queryResult = axios.get<TypeJsonObject>(`${queryUrl}?f=pjson`);
-      queryResult.then((response) => {
-        // layers must have a fields attribute except if it is an metadata layer group.
-        if (!response.data.fields && !(layerEntryConfig as TypeLayerGroupEntryConfig).isMetadataLayerGroup)
-          throw new Error(`Despite a return code of 200, an error was detected with this query (${queryUrl}?f=pjson)`);
-        this.layerMetadata[Layer.getLayerPath(layerEntryConfig)] = response.data;
-        if (geoviewEntryIsEsriDynamic(layerEntryConfig) || geoviewEntryIsEsriFeature(layerEntryConfig)) {
-          if (!layerEntryConfig.style) {
-            const renderer = Cast<EsriBaseRenderer>(response.data.drawingInfo?.renderer);
-            if (renderer) layerEntryConfig.style = getStyleFromEsriRenderer(this.mapId, layerEntryConfig, renderer);
-          }
-          this.processFeatureInfoConfig(
-            response.data.capabilities as string,
-            response.data.displayField as string,
-            response.data.geometryField.name as string,
-            response.data.fields as TypeJsonArray,
-            layerEntryConfig
-          );
-          this.processInitialSettings(
-            response.data.defaultVisibility as boolean,
-            response.data.minScale as number,
-            response.data.maxScale as number,
-            response.data.extent,
-            layerEntryConfig
-          );
-          this.processTemporalDimension(response.data.timeInfo as TypeJsonObject, layerEntryConfig);
+  if (layerEntryIsGroupLayer(layerConfig) && !layerConfig.isMetadataLayerGroup) return;
+  const layerPath = Layer.getLayerPath(layerConfig);
+
+  let queryUrl = getLocalizedValue(this.metadataAccessPath, this.mapId);
+  if (queryUrl) {
+    queryUrl = queryUrl.endsWith('/') ? `${queryUrl}${layerConfig.layerId}` : `${queryUrl}/${layerConfig.layerId}`;
+    try {
+      const { data } = await axios.get<TypeJsonObject>(`${queryUrl}?f=pjson`);
+      // layers must have a fields attribute except if it is an metadata layer group.
+      if (!data?.fields && !(layerConfig as TypeLayerGroupEntryConfig).isMetadataLayerGroup) {
+        this.setLayerStatus('error', layerPath);
+        throw new Error(`Despite a return code of 200, an error was detected with this query (${queryUrl}?f=pjson)`);
+      }
+      this.layerMetadata[layerPath] = data;
+      if (geoviewEntryIsEsriDynamic(layerConfig) || geoviewEntryIsEsriFeature(layerConfig)) {
+        if (!layerConfig.style) {
+          const renderer = Cast<EsriBaseRenderer>(data.drawingInfo?.renderer);
+          if (renderer) layerConfig.style = getStyleFromEsriRenderer(renderer);
         }
-        resolve();
-      });
-    } else resolve();
+        this.processFeatureInfoConfig(
+          data.capabilities as string,
+          data.displayField as string,
+          data.geometryField.name as string,
+          data.fields as TypeJsonArray,
+          layerConfig
+        );
+        this.processInitialSettings(
+          data.defaultVisibility as boolean,
+          data.minScale as number,
+          data.maxScale as number,
+          data.extent,
+          layerConfig
+        );
+        commonProcessTemporalDimension.call(this, data.timeInfo as TypeJsonObject, layerConfig);
+      }
+    } catch (error) {
+      this.setLayerStatus('error', layerPath);
+      console.log(error);
+    }
   }
 }
 
@@ -367,7 +370,9 @@ export function commonProcessLayerMetadata(
  * Transforms the query results of an Esri service response - when not querying on the Layers themselves (giving a 'reduced' FeatureInfoEntry).
  * The transformation reads the Esri formatted information and return a list of `TypeFeatureInfoEntryPartial` records.
  * In a similar fashion and response object as the "Query Feature Infos" functionalities done via the Layers.
+ *
  * @param results TypeJsonObject The Json Object representing the data from Esri.
+ *
  * @returns TypeFeatureInfoEntryPartial[] an array of relared records of type TypeFeatureInfoEntryPartial
  */
 export function parseFeatureInfoEntries(records: TypeJsonObject[]): TypeFeatureInfoEntryPartial[] {

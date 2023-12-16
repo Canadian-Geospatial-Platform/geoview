@@ -5,12 +5,11 @@ import { WFS as FormatWFS } from 'ol/format';
 import { ReadOptions } from 'ol/format/Feature';
 import { Vector as VectorSource } from 'ol/source';
 import Feature from 'ol/Feature';
-import Geometry from 'ol/geom/Geometry';
 import { bbox } from 'ol/loadingstrategy';
 
 import { TypeJsonArray, TypeJsonObject } from '@/core/types/global-types';
-import { AbstractGeoViewLayer, CONST_LAYER_TYPES } from '../abstract-geoview-layers';
-import { AbstractGeoViewVector } from './abstract-geoview-vector';
+import { AbstractGeoViewLayer, CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
+import { AbstractGeoViewVector } from '@/geo/layer/geoview-layers/vector/abstract-geoview-vector';
 import {
   TypeLayerEntryConfig,
   TypeVectorLayerEntryConfig,
@@ -23,7 +22,6 @@ import {
 } from '@/geo/map/map-schema-types';
 
 import { getLocalizedValue, getXMLHttpRequest, xmlToJson, findPropertyNameByRegex } from '@/core/utils/utilities';
-import { api } from '@/app';
 import { Layer } from '../../layer';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 
@@ -125,8 +123,8 @@ export class WFS extends AbstractGeoViewVector {
    *
    * @returns {Promise<void>} A promise that the execution is completed.
    */
-  protected getServiceMetadata(): Promise<void> {
-    this.changeLayerPhase('getServiceMetadata');
+  protected fetchServiceMetadata(): Promise<void> {
+    this.setLayerPhase('fetchServiceMetadata');
     const promisedExecution = new Promise<void>((resolve) => {
       let metadataUrl = getLocalizedValue(this.metadataAccessPath, this.mapId) as string;
 
@@ -139,7 +137,7 @@ export class WFS extends AbstractGeoViewVector {
         getXMLHttpRequest(`${metadataUrl}${getCapabilitiesUrl}`)
           .then((metadataString) => {
             if (metadataString === '{}') {
-              api.geoUtilities.setAllLayerStatusToError(this, this.listOfLayerEntryConfig, 'Unable to read metadata');
+              this.setAllLayerStatusToError(this.listOfLayerEntryConfig, 'Unable to read metadata');
             } else {
               // need to pass a xmldom to xmlToJson
               const xmlDOMCapabilities = new DOMParser().parseFromString(metadataString, 'text/xml');
@@ -153,10 +151,10 @@ export class WFS extends AbstractGeoViewVector {
             }
           }) // eslint-disable-next-line @typescript-eslint/no-unused-vars
           .catch((reason) => {
-            api.geoUtilities.setAllLayerStatusToError(this, this.listOfLayerEntryConfig, 'Unable to read metadata');
+            this.setAllLayerStatusToError(this.listOfLayerEntryConfig, 'Unable to read metadata');
           });
       } else {
-        api.geoUtilities.setAllLayerStatusToError(this, this.listOfLayerEntryConfig, 'Unable to read metadata');
+        this.setAllLayerStatusToError(this.listOfLayerEntryConfig, 'Unable to read metadata');
       }
     });
     return promisedExecution;
@@ -169,22 +167,22 @@ export class WFS extends AbstractGeoViewVector {
    * @param {TypeListOfLayerEntryConfig} listOfLayerEntryConfig The list of layer entries configuration to validate.
    */
   protected validateListOfLayerEntryConfig(listOfLayerEntryConfig: TypeListOfLayerEntryConfig) {
-    this.changeLayerPhase('validateListOfLayerEntryConfig');
-    listOfLayerEntryConfig.forEach((layerEntryConfig: TypeLayerEntryConfig) => {
-      const layerPath = Layer.getLayerPath(layerEntryConfig);
-      if (layerEntryIsGroupLayer(layerEntryConfig)) {
-        this.validateListOfLayerEntryConfig(layerEntryConfig.listOfLayerEntryConfig!);
-        if (!layerEntryConfig.listOfLayerEntryConfig.length) {
+    this.setLayerPhase('validateListOfLayerEntryConfig');
+    listOfLayerEntryConfig.forEach((layerConfig: TypeLayerEntryConfig) => {
+      const layerPath = Layer.getLayerPath(layerConfig);
+      if (layerEntryIsGroupLayer(layerConfig)) {
+        this.validateListOfLayerEntryConfig(layerConfig.listOfLayerEntryConfig!);
+        if (!layerConfig.listOfLayerEntryConfig.length) {
           this.layerLoadError.push({
             layer: layerPath,
             consoleMessage: `Empty layer group (mapId:  ${this.mapId}, layerPath: ${layerPath})`,
           });
-          this.changeLayerStatus('error', layerEntryConfig);
+          this.setLayerStatus('error', layerPath);
           return;
         }
       }
 
-      this.changeLayerStatus('loading', layerEntryConfig);
+      this.setLayerStatus('loading', layerPath);
 
       // Note that the code assumes wfs feature type list does not contains metadata layer group. If you need layer group,
       // you can define them in the configuration section.
@@ -196,7 +194,7 @@ export class WFS extends AbstractGeoViewVector {
         const metadataLayerList = this.metadata?.FeatureTypeList.FeatureType as Array<TypeJsonObject>;
         const foundMetadata = metadataLayerList.find((layerMetadata) => {
           const metadataLayerId = (layerMetadata.Name && layerMetadata.Name['#text']) as string;
-          return metadataLayerId.includes(layerEntryConfig.layerId);
+          return metadataLayerId.includes(layerConfig.layerId);
         });
 
         if (!foundMetadata) {
@@ -204,24 +202,24 @@ export class WFS extends AbstractGeoViewVector {
             layer: layerPath,
             consoleMessage: `WFS feature layer not found (mapId:  ${this.mapId}, layerPath: ${layerPath})`,
           });
-          this.changeLayerStatus('error', layerEntryConfig);
+          this.setLayerStatus('error', layerPath);
           return;
         }
 
         const { currentProjection } = MapEventProcessor.getMapState(this.mapId);
-        if (layerEntryConfig.initialSettings?.extent)
-          layerEntryConfig.initialSettings.extent = transformExtent(
-            layerEntryConfig.initialSettings.extent,
+        if (layerConfig.initialSettings?.extent)
+          layerConfig.initialSettings.extent = transformExtent(
+            layerConfig.initialSettings.extent,
             'EPSG:4326',
             `EPSG:${currentProjection}`
           );
 
-        if (!layerEntryConfig.initialSettings?.bounds && foundMetadata['ows:WGS84BoundingBox']) {
+        if (!layerConfig.initialSettings?.bounds && foundMetadata['ows:WGS84BoundingBox']) {
           const lowerCorner = (foundMetadata['ows:WGS84BoundingBox']['ows:LowerCorner']['#text'] as string).split(' ');
           const upperCorner = (foundMetadata['ows:WGS84BoundingBox']['ows:UpperCorner']['#text'] as string).split(' ');
           const bounds = [Number(lowerCorner[0]), Number(lowerCorner[1]), Number(upperCorner[0]), Number(upperCorner[1])];
-          // layerEntryConfig.initialSettings cannot be undefined because config-validation set it to {} if it is undefined.
-          layerEntryConfig.initialSettings!.bounds = transformExtent(bounds, 'EPSG:4326', `EPSG:${currentProjection}`);
+          // layerConfig.initialSettings cannot be undefined because config-validation set it to {} if it is undefined.
+          layerConfig.initialSettings!.bounds = transformExtent(bounds, 'EPSG:4326', `EPSG:${currentProjection}`);
         }
       }
     });
@@ -231,13 +229,13 @@ export class WFS extends AbstractGeoViewVector {
    * This method is used to process the layer's metadata. It will fill the empty outfields and aliasFields properties of the
    * layer's configuration.
    *
-   * @param {TypeVectorLayerEntryConfig} layerEntryConfig The layer entry configuration to process.
+   * @param {TypeVectorLayerEntryConfig} layerConfig The layer entry configuration to process.
    *
    * @returns {Promise<void>} A promise that the vector layer configuration has its metadata processed.
    */
-  protected processLayerMetadata(layerEntryConfig: TypeVectorLayerEntryConfig): Promise<void> {
+  protected processLayerMetadata(layerConfig: TypeVectorLayerEntryConfig): Promise<void> {
     const promiseOfExecution = new Promise<void>((resolve) => {
-      let queryUrl = getLocalizedValue(layerEntryConfig.source!.dataAccessPath, this.mapId);
+      let queryUrl = getLocalizedValue(layerConfig.source!.dataAccessPath, this.mapId);
 
       // check if url contains metadata parameters for the getCapabilities request and reformat the urls
       queryUrl = queryUrl!.indexOf('?') > -1 ? queryUrl!.substring(0, queryUrl!.indexOf('?')) : queryUrl;
@@ -259,7 +257,7 @@ export class WFS extends AbstractGeoViewVector {
       // eslint-disable-next-line prettier/prettier
       const describeFeatureUrl = `${queryUrl}?service=WFS&request=DescribeFeatureType&version=${
         this.version
-      }&outputFormat=${encodeURIComponent(outputFormat as string)}&typeName=${layerEntryConfig.layerId}`;
+      }&outputFormat=${encodeURIComponent(outputFormat as string)}&typeName=${layerConfig.layerId}`;
 
       if (describeFeatureUrl && outputFormat === 'application/json') {
         fetch(describeFeatureUrl)
@@ -268,8 +266,8 @@ export class WFS extends AbstractGeoViewVector {
           })
           .then((layerMetadata) => {
             if (Array.isArray(layerMetadata.featureTypes) && Array.isArray(layerMetadata.featureTypes[0].properties)) {
-              this.layerMetadata[Layer.getLayerPath(layerEntryConfig)] = layerMetadata.featureTypes[0].properties;
-              this.processFeatureInfoConfig(layerMetadata.featureTypes[0].properties as TypeJsonArray, layerEntryConfig);
+              this.layerMetadata[Layer.getLayerPath(layerConfig)] = layerMetadata.featureTypes[0].properties;
+              this.processFeatureInfoConfig(layerMetadata.featureTypes[0].properties as TypeJsonArray, layerConfig);
             }
             resolve();
           });
@@ -298,8 +296,8 @@ export class WFS extends AbstractGeoViewVector {
                 featureTypeProperties.push(element['@attributes']);
               });
 
-              this.layerMetadata[Layer.getLayerPath(layerEntryConfig)] = featureTypeProperties as TypeJsonObject;
-              this.processFeatureInfoConfig(featureTypeProperties as TypeJsonArray, layerEntryConfig);
+              this.layerMetadata[Layer.getLayerPath(layerConfig)] = featureTypeProperties as TypeJsonObject;
+              this.processFeatureInfoConfig(featureTypeProperties as TypeJsonArray, layerConfig);
             }
             resolve();
           });
@@ -312,73 +310,70 @@ export class WFS extends AbstractGeoViewVector {
    * This method sets the outfields and aliasFields of the source feature info.
    *
    * @param {TypeJsonArray} fields An array of field names and its aliases.
-   * @param {TypeVectorLayerEntryConfig} layerEntryConfig The vector layer entry to configure.
+   * @param {TypeVectorLayerEntryConfig} layerConfig The vector layer entry to configure.
    */
-  private processFeatureInfoConfig(fields: TypeJsonArray, layerEntryConfig: TypeVectorLayerEntryConfig) {
-    if (!layerEntryConfig.source) layerEntryConfig.source = {};
-    if (!layerEntryConfig.source.featureInfo) layerEntryConfig.source.featureInfo = { queryable: true };
+  private processFeatureInfoConfig(fields: TypeJsonArray, layerConfig: TypeVectorLayerEntryConfig) {
+    if (!layerConfig.source) layerConfig.source = {};
+    if (!layerConfig.source.featureInfo) layerConfig.source.featureInfo = { queryable: true };
     // Process undefined outfields or aliasFields ('' = false and !'' = true). Also, if en is undefined, then fr is also undefined.
     // when en and fr are undefined, we set both en and fr to the same value.
-    if (!layerEntryConfig.source.featureInfo.outfields?.en || !layerEntryConfig.source.featureInfo.aliasFields?.en) {
-      const processOutField = !layerEntryConfig.source.featureInfo.outfields?.en;
-      const processAliasFields = !layerEntryConfig.source.featureInfo.aliasFields?.en;
+    if (!layerConfig.source.featureInfo.outfields?.en || !layerConfig.source.featureInfo.aliasFields?.en) {
+      const processOutField = !layerConfig.source.featureInfo.outfields?.en;
+      const processAliasFields = !layerConfig.source.featureInfo.aliasFields?.en;
       if (processOutField) {
-        layerEntryConfig.source.featureInfo.outfields = { en: '' };
-        layerEntryConfig.source.featureInfo.fieldTypes = '';
+        layerConfig.source.featureInfo.outfields = { en: '' };
+        layerConfig.source.featureInfo.fieldTypes = '';
       }
-      if (processAliasFields) layerEntryConfig.source.featureInfo.aliasFields = { en: '' };
+      if (processAliasFields) layerConfig.source.featureInfo.aliasFields = { en: '' };
       fields.forEach((fieldEntry) => {
         const fieldEntryType = (fieldEntry.type as string).split(':').slice(-1)[0];
         if (fieldEntryType === 'Geometry') return;
         if (processOutField) {
-          layerEntryConfig.source!.featureInfo!.outfields!.en = `${layerEntryConfig.source!.featureInfo!.outfields!.en}${fieldEntry.name},`;
-          layerEntryConfig.source!.featureInfo!.fieldTypes = `${layerEntryConfig.source!.featureInfo!.fieldTypes}${this.getFieldType(
+          layerConfig.source!.featureInfo!.outfields!.en = `${layerConfig.source!.featureInfo!.outfields!.en}${fieldEntry.name},`;
+          layerConfig.source!.featureInfo!.fieldTypes = `${layerConfig.source!.featureInfo!.fieldTypes}${this.getFieldType(
             fieldEntry.name as string,
-            layerEntryConfig
+            layerConfig
           )},`;
         }
-        layerEntryConfig.source!.featureInfo!.aliasFields!.en = `${layerEntryConfig.source!.featureInfo!.aliasFields!.en}${
-          fieldEntry.name
-        },`;
+        layerConfig.source!.featureInfo!.aliasFields!.en = `${layerConfig.source!.featureInfo!.aliasFields!.en}${fieldEntry.name},`;
       });
-      layerEntryConfig.source.featureInfo!.outfields!.en = layerEntryConfig.source.featureInfo!.outfields?.en?.slice(0, -1);
-      layerEntryConfig.source.featureInfo!.fieldTypes = layerEntryConfig.source.featureInfo!.fieldTypes?.slice(0, -1);
-      layerEntryConfig.source.featureInfo!.aliasFields!.en = layerEntryConfig.source.featureInfo!.aliasFields?.en?.slice(0, -1);
-      layerEntryConfig.source!.featureInfo!.outfields!.fr = layerEntryConfig.source!.featureInfo!.outfields?.en;
-      layerEntryConfig.source!.featureInfo!.aliasFields!.fr = layerEntryConfig.source!.featureInfo!.aliasFields?.en;
+      layerConfig.source.featureInfo!.outfields!.en = layerConfig.source.featureInfo!.outfields?.en?.slice(0, -1);
+      layerConfig.source.featureInfo!.fieldTypes = layerConfig.source.featureInfo!.fieldTypes?.slice(0, -1);
+      layerConfig.source.featureInfo!.aliasFields!.en = layerConfig.source.featureInfo!.aliasFields?.en?.slice(0, -1);
+      layerConfig.source!.featureInfo!.outfields!.fr = layerConfig.source!.featureInfo!.outfields?.en;
+      layerConfig.source!.featureInfo!.aliasFields!.fr = layerConfig.source!.featureInfo!.aliasFields?.en;
     }
-    if (!layerEntryConfig.source.featureInfo.nameField) {
+    if (!layerConfig.source.featureInfo.nameField) {
       // INFO: WFS as geometry for first field, use second one
       const en =
-        layerEntryConfig.source.featureInfo!.outfields!.en?.split(',')[1] ||
-        layerEntryConfig.source.featureInfo!.outfields!.fr?.split(',')[1];
+        layerConfig.source.featureInfo!.outfields!.en?.split(',')[1] || layerConfig.source.featureInfo!.outfields!.fr?.split(',')[1];
       const fr = en;
-      if (en) layerEntryConfig.source.featureInfo.nameField = { en, fr };
+      if (en) layerConfig.source.featureInfo.nameField = { en, fr };
     }
   }
 
   /** ***************************************************************************************************************************
    * Create a source configuration for the vector layer.
    *
-   * @param {TypeBaseLayerEntryConfig} layerEntryConfig The layer entry configuration.
+   * @param {TypeBaseLayerEntryConfig} layerConfig The layer entry configuration.
    * @param {SourceOptions} sourceOptions The source options (default: {}).
    * @param {ReadOptions} readOptions The read options (default: {}).
    *
    * @returns {VectorSource<Geometry>} The source configuration that will be used to create the vector layer.
    */
   protected createVectorSource(
-    layerEntryConfig: TypeBaseLayerEntryConfig,
+    layerConfig: TypeBaseLayerEntryConfig,
     sourceOptions: SourceOptions = {},
     readOptions: ReadOptions = {}
-  ): VectorSource<Feature<Geometry>> {
-    readOptions.dataProjection = (layerEntryConfig.source as TypeBaseSourceVectorInitialConfig).dataProjection;
+  ): VectorSource<Feature> {
+    readOptions.dataProjection = (layerConfig.source as TypeBaseSourceVectorInitialConfig).dataProjection;
 
     sourceOptions.url = (extent): string => {
       // check if url contains metadata parameters for the getCapabilities request and reformat the urls
-      let sourceUrl = getLocalizedValue(layerEntryConfig.source!.dataAccessPath!, this.mapId);
+      let sourceUrl = getLocalizedValue(layerConfig.source!.dataAccessPath!, this.mapId);
       sourceUrl = sourceUrl!.indexOf('?') > -1 ? sourceUrl!.substring(0, sourceUrl!.indexOf('?')) : sourceUrl;
       sourceUrl = `${sourceUrl}?service=WFS&request=getFeature&version=${this.version}`;
-      sourceUrl = `${sourceUrl}&typeName=${layerEntryConfig.layerId}`;
+      sourceUrl = `${sourceUrl}&typeName=${layerConfig.layerId}`;
       // if an extent is provided, use it in the url
       if (sourceOptions.strategy === bbox && Number.isFinite(extent[0])) {
         sourceUrl = `${sourceUrl}&bbox=${extent},EPSG:${MapEventProcessor.getMapState(this.mapId).currentProjection}`;
@@ -390,7 +385,7 @@ export class WFS extends AbstractGeoViewVector {
       version: this.version,
     });
 
-    const vectorSource = super.createVectorSource(layerEntryConfig, sourceOptions, readOptions);
+    const vectorSource = super.createVectorSource(layerConfig, sourceOptions, readOptions);
 
     return vectorSource;
   }

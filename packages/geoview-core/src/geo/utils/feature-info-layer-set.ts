@@ -44,9 +44,9 @@ export class FeatureInfoLayerSet {
   private constructor(mapId: string) {
     // This function determines whether a layer can be registered.
     const registrationConditionFunction = (layerPath: string): boolean => {
-      const layerEntryConfig = api.maps[this.mapId].layer.registeredLayers[layerPath];
-      if (layerEntryConfig?.source) {
-        return 'featureInfo' in layerEntryConfig.source! && !!layerEntryConfig.source.featureInfo?.queryable;
+      const layerConfig = api.maps[this.mapId].layer.registeredLayers[layerPath];
+      if (layerConfig?.source) {
+        return 'featureInfo' in layerConfig.source! && !!layerConfig.source.featureInfo?.queryable;
       }
       return false;
     };

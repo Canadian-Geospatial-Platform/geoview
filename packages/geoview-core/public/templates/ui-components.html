@@ -126,7 +126,7 @@
          * RANGE SLIDER UI SECTION START
          */
         // add a slider component and link it to a map with mapId props
-        cgpv.api.addUiComponent(
+        cgpv.api.utilities.addUiComponent(
           'UI1-rangeslider1',
           cgpv.react.createElement(cgpv.ui.elements.Slider, {
             mapId: 'UI1',
@@ -144,8 +144,8 @@
             ],
             track: 'normal',
             customOnChange: (dates) => {
-              const field = cgpv.api.maps.UI1.layer.geoviewLayers['historical-flood'].layerTemporalDimension['historical-flood/0'].field;
-              cgpv.api.maps.UI1.layer.geoviewLayers['historical-flood'].applyViewFilter('historical-flood/0', `${field} >= date '${dates[0]}-01-01' and ${field} <= date '${dates[1]}-12-31'`);
+              const field = cgpv.api.maps.UI1.layer.geoviewLayer('historical-flood/0').getTemporalDimension().field;
+              cgpv.api.maps.UI1.layer.geoviewLayer('historical-flood/0)').applyViewFilter('', `${field} >= date '${dates[0]}-01-01' and ${field} <= date '${dates[1]}-12-31'`);
             },
           })
         );
@@ -171,7 +171,7 @@
         document.getElementById('slidervalues').addEventListener('click', setSliderValues, false);
 
         // add a slider component and link it to a map with mapId props
-        cgpv.api.addUiComponent(
+        cgpv.api.utilities.addUiComponent(
           'UI1-slider1',
           cgpv.react.createElement(cgpv.ui.elements.Slider, {
             mapId: 'UI1',
@@ -210,7 +210,7 @@
         );
 
         // add a slider component and DO NOT link it to a map
-        cgpv.api.addUiComponent(
+        cgpv.api.utilities.addUiComponent(
           'UI1-slider2',
           cgpv.react.createElement(cgpv.ui.elements.Slider, {
             id: 'UI1-slider2',

@@ -101,15 +101,15 @@ For the moment, my class and my source type are define but I still have an error
 From [abstract-geoview-layers](../../packages/geoview-core/src/geo/layer/geoview-layers/abstract-geoview-layers.ts)
 
 ```
-protected abstract getServiceMetadata(): Promise<void>;
+protected abstract fetchServiceMetadata(): Promise<void>;
 protected abstract validateListOfLayerEntryConfig(listOfLayerEntryConfig: TypeListOfLayerEntryConfig): TypeListOfLayerEntryConfig;
-protected abstract processLayerMetadata(layerEntryConfig: TypeLayerEntryConfig): Promise<void>;
-protected abstract processOneLayerEntry(layerEntryConfig: TypeBaseLayerEntryConfig): Promise<BaseLayer | null>;
-protected abstract getFeatureInfoAtPixel(location: Pixel, layerConfig: TypeLayerEntryConfig): Promise<TypeArrayOfFeatureInfoEntries>;
-protected abstract getFeatureInfoAtCoordinate(location: Coordinate, layerConfig: TypeLayerEntryConfig): Promise<TypeArrayOfFeatureInfoEntries>;
-protected abstract getFeatureInfoAtLongLat(location: Coordinate, layerConfig: TypeLayerEntryConfig): Promise<TypeArrayOfFeatureInfoEntries>;
-protected abstract getFeatureInfoUsingBBox(location: Coordinate[], layerConfig: TypeLayerEntryConfig): Promise<TypeArrayOfFeatureInfoEntries>;
-protected abstract getFeatureInfoUsingPolygon(location: Coordinate[], layerConfig: TypeLayerEntryConfig): Promise<TypeArrayOfFeatureInfoEntries>;
+protected abstract processLayerMetadata(layerConfig: TypeLayerEntryConfig): Promise<void>;
+protected abstract processOneLayerEntry(layerConfig: TypeBaseLayerEntryConfig): Promise<BaseLayer | null>;
+protected abstract getFeatureInfoAtPixel(location: Pixel, layerPath: string): Promise<TypeArrayOfFeatureInfoEntries>;
+protected abstract getFeatureInfoAtCoordinate(location: Coordinate, layerPath: string): Promise<TypeArrayOfFeatureInfoEntries>;
+protected abstract getFeatureInfoAtLongLat(location: Coordinate, layerPath: string): Promise<TypeArrayOfFeatureInfoEntries>;
+protected abstract getFeatureInfoUsingBBox(location: Coordinate[], layerPath: string): Promise<TypeArrayOfFeatureInfoEntries>;
+protected abstract getFeatureInfoUsingPolygon(location: Coordinate[], layerPath: string): Promise<TypeArrayOfFeatureInfoEntries>;
 protected abstract getFieldDomain(fieldName: string, layerConfig: TypeLayerEntryConfig): null | codedValueType | rangeDomainType;
 protected abstract getFieldType(fieldName: string, layerConfig: TypeLayerEntryConfig): 'string' | 'date' | 'number';
 ```
@@ -221,17 +221,17 @@ Lastly create the layer entry config who will be use later in the loading proces
 
 ```
 private processLayerEntryConfig(rootLayerConfig: TypeGeoviewLayerConfig, parentLayerConfig: TypeGeoviewLayerConfig | TypeLayerGroupEntryConfig, listOfLayerEntryConfig: TypeListOfLayerEntryConfig) {
-...} else if (geoviewEntryIsImageStatic(layerEntryConfig)) {
-    // Value for layerEntryConfig.entryType can only be raster
-    if (!layerEntryConfig.entryType) layerEntryConfig.entryType = 'raster';
-    if (!layerEntryConfig.source.dataAccessPath) {
+...} else if (geoviewEntryIsImageStatic(layerConfig)) {
+    // Value for layerConfig.entryType can only be raster
+    if (!layerConfig.entryType) layerConfig.entryType = 'raster';
+    if (!layerConfig.source.dataAccessPath) {
       throw new Error(
-        `source.dataAccessPath on layer entry ${Layer.getLayerPath(layerEntryConfig)} is mandatory for GeoView layer ${
+        `source.dataAccessPath on layer entry ${Layer.getLayerPath(layerConfig)} is mandatory for GeoView layer ${
           rootLayerConfig.geoviewLayerId
         } of type ${rootLayerConfig.geoviewLayerType}`
       );
     }
-  } else if (geoviewEntryIsXYZTiles(layerEntryConfig)) {...
+  } else if (geoviewEntryIsXYZTiles(layerConfig)) {...
 }
 ```
 
