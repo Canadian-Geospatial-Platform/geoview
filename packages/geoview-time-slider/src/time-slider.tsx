@@ -297,7 +297,9 @@ export function TimeSlider(TimeSliderPanelProps: TimeSliderPanelProps) {
         <Grid container sx={sxClasses.rightPanelBtnHolder}>
           <Grid item xs={9}>
             <Typography component="div" sx={{ ...sxClasses.panelHeaders, paddingLeft: '20px', paddingTop: '10px' }}>
-              {title || name}
+              {`${title || name}`}
+              {timeframe !== undefined &&
+                ` (${timeframe === 'day' ? new Date(defaultValue).toLocaleDateString() : new Date(defaultValue).getFullYear()})`}
             </Typography>
           </Grid>
           <Grid item xs={3}>
