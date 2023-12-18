@@ -206,6 +206,11 @@ export class MapEventProcessor extends AbstractEventProcessor {
     api.getFeatureInfoLayerSet(mapId);
     api.getLegendsLayerSet(mapId);
 
+    // set autofocus/blur on mouse enter/leave the map so user can scroll (zoom) without having to click the map
+    const mapHTMLElement = map.getTargetElement();
+    mapHTMLElement.addEventListener('mouseenter', () => mapHTMLElement.focus());
+    mapHTMLElement.addEventListener('mouseleave', () => mapHTMLElement.blur());
+
     // set store
     // TODO: try async, evaluate if still needed OR use another approach
     setTimeout(() => store.getState().mapState.actions.setMapElement(map), 250);

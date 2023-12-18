@@ -15,6 +15,7 @@ import { FeatureInfoLayerSet } from '@/geo/utils/feature-info-layer-set';
 import { LegendsLayerSet } from '@/geo/utils/legends-layer-set';
 import { GeoViewLayerPayload, payloadIsTestGeoViewLayers } from './events/payloads/geoview-layer-payload';
 import { initMapDivFromFunctionCall } from '@/app';
+import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
 
 /**
  * Class used to handle api calls (events, functions etc...)
@@ -76,7 +77,7 @@ export class API {
     this.dateUtilities = new DateMgt();
 
     // apply focus to element when keyboard navigation is use
-    this.geoUtilities.manageKeyboardFocus();
+    this.manageKeyboardFocus();
 
     // Run the callback for maps that have the triggerReadyCallback set to true and when all the maps are ready
     this.event.once(
@@ -111,7 +112,45 @@ export class API {
   }
 
   /**
+   * Apply outline to elements when keyboard is use to navigate
+   * Code from: https://github.com/MaxMaeder/keyboardFocus.js
    */
+  private manageKeyboardFocus = (): void => {
+    // Remove the 'keyboard-focused' class from any elements that have it
+    function removeFocusedClass() {
+      const previouslyFocusedElement = document.getElementsByClassName('keyboard-focused')[0];
+      if (previouslyFocusedElement) previouslyFocusedElement.classList.toggle('keyboard-focused');
+    }
+
+    // Add event listener for when tab pressed
+    document.addEventListener('keyup', (e: KeyboardEvent) => {
+      if (e.key !== 'Tab') return;
+
+      // get array of map elements
+      const elements: Element[] = Array.from(document.getElementsByClassName('geoview-map'));
+      const activeEl = document.activeElement;
+
+      if (elements.some((element) => element.contains(activeEl))) {
+        // Remove class on previous element then add the 'keyboard-focused' class to the currently focused element
+        removeFocusedClass();
+        activeEl?.classList.toggle('keyboard-focused');
+
+        // Check if the focus element is a map and set store value for crosshair
+        const mapId =
+          activeEl?.closest('.geoview-shell') !== null ? activeEl?.closest('.geoview-shell')!.getAttribute('id')?.split('-')[1] : undefined;
+
+        if (mapId !== undefined) {
+          const mapFocus = activeEl?.getAttribute('id') === `map-${mapId}`;
+          AppEventProcessor.setAppIsCrosshairActive(mapId, mapFocus);
+        }
+      }
+    });
+
+    // Remove the class when the user interacts with the page with their mouse, or when the page looses focus
+    document.addEventListener('click', removeFocusedClass);
+    document.addEventListener('focusout', removeFocusedClass);
+  };
+
   /**
    * Check if map rendering / drawing is ready then run the callback function
    * Timeout does not effect rendering speed, each map will cancel the previous timer after it renders
@@ -142,7 +181,7 @@ export class API {
 
   /**
    * Create a new map in a given div
-   * !MUST not be a map div with llwp-map class
+   * !MUST not be a map div with geoview-map class
    * If is present, the div will be created with a default config
    *
    * @param {string} divId the id of the div to create map in
@@ -150,7 +189,7 @@ export class API {
    */
   createMapFromConfig = (divId: string, mapConfig: string): void => {
     const mapDiv = document.getElementById(divId);
-    if (mapDiv && !mapDiv.classList.contains('llwp-map')) {
+    if (mapDiv && !mapDiv.classList.contains('geoview-map')) {
       initMapDivFromFunctionCall(mapDiv!, mapConfig);
     } else {
       // eslint-disable-next-line no-console

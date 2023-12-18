@@ -14,7 +14,6 @@ import { Cast, TypeJsonObject } from '@/core/types/global-types';
 import { TypeFeatureStyle } from '@/geo/layer/geometry/geometry-types';
 import { xmlToJson } from '@/core/utils/utilities';
 
-import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
 import { NORTH_POLE_POSITION } from '@/core/types/cgpv-types';
 
 /**
@@ -188,46 +187,6 @@ export class GeoUtilities {
     const json = xmlToJson(xmlDOM);
     const capabilities = json['wfs:WFS_Capabilities'];
     return capabilities;
-  };
-
-  /**
-   * Apply outline to elements when keyboard is use to navigate
-   * Code from: https://github.com/MaxMaeder/keyboardFocus.js
-   */
-  manageKeyboardFocus = (): void => {
-    // Remove the 'keyboard-focused' class from any elements that have it
-    function removeFocusedClass() {
-      const previouslyFocusedElement = document.getElementsByClassName('keyboard-focused')[0];
-      if (previouslyFocusedElement) previouslyFocusedElement.classList.toggle('keyboard-focused');
-    }
-
-    // Add event listener for when tab pressed
-    document.addEventListener('keyup', (e: KeyboardEvent) => {
-      if (e.key !== 'Tab') return;
-
-      // get array of map elements
-      const elements: Element[] = Array.from(document.getElementsByClassName('llwp-map'));
-      const activeEl = document.activeElement;
-
-      if (elements.some((element) => element.contains(activeEl))) {
-        // Remove class on previous element then add the 'keyboard-focused' class to the currently focused element
-        removeFocusedClass();
-        activeEl?.classList.toggle('keyboard-focused');
-
-        // Check if the focus element is a map and set store value for crosshair
-        const mapId =
-          activeEl?.closest('.geoview-shell') !== null ? activeEl?.closest('.geoview-shell')!.getAttribute('id')?.split('-')[1] : undefined;
-
-        if (mapId !== undefined) {
-          const mapFocus = activeEl?.getAttribute('id') === `map-${mapId}`;
-          AppEventProcessor.setAppIsCrosshairActive(mapId, mapFocus);
-        }
-      }
-    });
-
-    // Remove the class when the user interacts with the page with their mouse, or when the page looses focus
-    document.addEventListener('click', removeFocusedClass);
-    document.addEventListener('focusout', removeFocusedClass);
   };
 
   /**

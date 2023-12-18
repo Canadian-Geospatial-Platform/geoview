@@ -36,7 +36,7 @@ To associate a custom configuration with a package, follow these steps:
 ```html
 <div
   id="mapLCC"
-  class="llwp-map"
+  class="geoview-map"
   data-lang="en"
   data-config-url="./configs/package-bp1-lcc-config.json"
 ></div>
