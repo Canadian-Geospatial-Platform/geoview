@@ -1,8 +1,8 @@
 import TileLayer from 'ol/layer/Tile';
 import XYZ from 'ol/source/XYZ';
 import { Extent } from 'ol/extent';
-import { AbstractGeoViewLayer } from '../abstract-geoview-layers';
-import { AbstractGeoViewRaster, TypeBaseRasterLayer } from './abstract-geoview-raster';
+import { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
+import { AbstractGeoViewRaster, TypeBaseRasterLayer } from '@/geo/layer/geoview-layers/raster/abstract-geoview-raster';
 import { TypeLayerEntryConfig, TypeSourceTileInitialConfig, TypeTileLayerEntryConfig, TypeGeoviewLayerConfig, TypeListOfLayerEntryConfig } from '@/geo/map/map-schema-types';
 export type TypeSourceImageXYZTilesInitialConfig = TypeSourceTileInitialConfig;
 export interface TypeXYZTilesLayerEntryConfig extends Omit<TypeTileLayerEntryConfig, 'source'> {
@@ -75,29 +75,29 @@ export declare class XYZTiles extends AbstractGeoViewRaster {
      */
     protected validateListOfLayerEntryConfig(listOfLayerEntryConfig: TypeListOfLayerEntryConfig): void;
     /** ****************************************************************************************************************************
-     * This method creates a GeoView XYZTiles layer using the definition provided in the layerEntryConfig parameter.
+     * This method creates a GeoView XYZTiles layer using the definition provided in the layerConfig parameter.
      *
-     * @param {TypeXYZTilesLayerEntryConfig} layerEntryConfig Information needed to create the GeoView layer.
+     * @param {TypeXYZTilesLayerEntryConfig} layerConfig Information needed to create the GeoView layer.
      *
      * @returns {TypeBaseRasterLayer} The GeoView raster layer that has been created.
      */
-    processOneLayerEntry(layerEntryConfig: TypeXYZTilesLayerEntryConfig): Promise<TypeBaseRasterLayer | null>;
+    protected processOneLayerEntry(layerConfig: TypeXYZTilesLayerEntryConfig): Promise<TypeBaseRasterLayer | null>;
     /** ***************************************************************************************************************************
      * This method is used to process the layer's metadata. It will fill the empty fields of the layer's configuration (renderer,
      * initial settings, fields and aliases).
      *
-     * @param {TypeVectorLaTypeLayerEntryConfigyerEntryConfig} layerEntryConfig The layer entry configuration to process.
+     * @param {TypeVectorLaTypeLayerEntryConfigyerEntryConfig} layerConfig The layer entry configuration to process.
      *
      * @returns {Promise<void>} A promise that the vector layer configuration has its metadata processed.
      */
-    protected processLayerMetadata(layerEntryConfig: TypeLayerEntryConfig): Promise<void>;
+    protected processLayerMetadata(layerConfig: TypeLayerEntryConfig): Promise<void>;
     /** ***************************************************************************************************************************
      * Get the bounds of the layer represented in the layerConfig, returns updated bounds
      *
-     * @param {TypeLayerEntryConfig} layerConfig Layer config to get bounds from.
+     * @param {string} layerPath The Layer path to the layer's configuration.
      * @param {Extent | undefined} bounds The current bounding box to be adjusted.
      *
      * @returns {Extent} The layer bounding box.
      */
-    getBounds(layerConfig: TypeLayerEntryConfig, bounds: Extent | undefined): Extent | undefined;
+    getBounds(layerPath: string, bounds: Extent | undefined): Extent | undefined;
 }

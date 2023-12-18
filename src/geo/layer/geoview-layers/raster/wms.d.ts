@@ -2,8 +2,8 @@ import { Coordinate } from 'ol/coordinate';
 import { Pixel } from 'ol/pixel';
 import { Extent } from 'ol/extent';
 import { TypeJsonObject } from '@/core/types/global-types';
-import { AbstractGeoViewLayer, TypeLegend } from '../abstract-geoview-layers';
-import { AbstractGeoViewRaster, TypeBaseRasterLayer } from './abstract-geoview-raster';
+import { AbstractGeoViewLayer, TypeLegend } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
+import { AbstractGeoViewRaster, TypeBaseRasterLayer } from '@/geo/layer/geoview-layers/raster/abstract-geoview-raster';
 import { TypeLayerEntryConfig, TypeGeoviewLayerConfig, TypeListOfLayerEntryConfig, TypeBaseLayerEntryConfig, TypeOgcWmsLayerEntryConfig } from '@/geo/map/map-schema-types';
 import { TypeArrayOfFeatureInfoEntries } from '@/api/events/payloads';
 export interface TypeWMSLayerConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig'> {
@@ -59,7 +59,7 @@ export declare class WMS extends AbstractGeoViewRaster {
      *
      * @returns {Promise<void>} A promise that the execution is completed.
      */
-    protected getServiceMetadata(): Promise<void>;
+    protected fetchServiceMetadata(): Promise<void>;
     /** ***************************************************************************************************************************
      * This method reads the service metadata using a GetCapabilities request.
      *
@@ -67,7 +67,7 @@ export declare class WMS extends AbstractGeoViewRaster {
      *
      * @returns {Promise<void>} A promise that the execution is completed.
      */
-    private fetchServiceMetadata;
+    private getServiceMetadata;
     /** ***************************************************************************************************************************
      * This method reads the service metadata from a XML metadataAccessPath.
      *
@@ -75,7 +75,7 @@ export declare class WMS extends AbstractGeoViewRaster {
      *
      * @returns {Promise<void>} A promise that the execution is completed.
      */
-    private getXmlServiceMetadata;
+    private fetchXmlServiceMetadata;
     /** ***************************************************************************************************************************
      * This method find the layer path that lead to the layer identified by the layerName. Values stored in the array tell us which
      * direction to use to get to the layer. A value of -1 tells us that the Layer property is an object. Other values tell us that
@@ -124,7 +124,7 @@ export declare class WMS extends AbstractGeoViewRaster {
      * This method create recursively dynamic group layers from the service metadata.
      *
      * @param {TypeJsonObject} layer The dynamic group layer metadata.
-     * @param {TypeLayerEntryConfig} layerEntryConfig The layer configurstion associated to the dynamic group.
+     * @param {TypeBaseLayerEntryConfig} layerConfig The layer configurstion associated to the dynamic group.
      */
     private createGroupLayer;
     /** ****************************************************************************************************************************
@@ -137,55 +137,55 @@ export declare class WMS extends AbstractGeoViewRaster {
      */
     private getLayerMetadataEntry;
     /** ****************************************************************************************************************************
-     * This method creates a GeoView WMS layer using the definition provided in the layerEntryConfig parameter.
+     * This method creates a GeoView WMS layer using the definition provided in the layerConfig parameter.
      *
-     * @param {TypeBaseLayerEntryConfig} layerEntryConfig Information needed to create the GeoView layer.
+     * @param {TypeBaseLayerEntryConfig} layerConfig Information needed to create the GeoView layer.
      *
      * @returns {TypeBaseRasterLayer | null} The GeoView raster layer that has been created.
      */
-    processOneLayerEntry(layerEntryConfig: TypeBaseLayerEntryConfig): Promise<TypeBaseRasterLayer | null>;
+    protected processOneLayerEntry(layerConfig: TypeBaseLayerEntryConfig): Promise<TypeBaseRasterLayer | null>;
     /** ***************************************************************************************************************************
      * This method is used to process the layer's metadata. It will fill the empty fields of the layer's configuration (renderer,
      * initial settings, fields and aliases).
      *
-     * @param {TypeLayerEntryConfig} layerEntryConfig The layer entry configuration to process.
+     * @param {TypeLayerEntryConfig} layerConfig The layer entry configuration to process.
      *
      * @returns {Promise<void>} A promise that the layer configuration has its metadata processed.
      */
-    protected processLayerMetadata(layerEntryConfig: TypeLayerEntryConfig): Promise<void>;
+    protected processLayerMetadata(layerConfig: TypeLayerEntryConfig): Promise<void>;
     /** ***************************************************************************************************************************
      * This method will create a Geoview temporal dimension if it existds in the service metadata
      * @param {TypeJsonObject} wmsTimeDimension The WMS time dimension object
-     * @param {TypeOgcWmsLayerEntryConfig} layerEntryConfig The layer entry to configure
+     * @param {TypeOgcWmsLayerEntryConfig} layerConfig The layer entry to configure
      */
-    private processTemporalDimension;
+    protected processTemporalDimension(wmsTimeDimension: TypeJsonObject, layerConfig: TypeOgcWmsLayerEntryConfig): void;
     /** ***************************************************************************************************************************
      * Return feature information for all the features around the provided Pixel.
      *
      * @param {Coordinate} location The pixel coordinate that will be used by the query.
-     * @param {TypeOgcWmsLayerEntryConfig} layerConfig The layer configuration.
+     * @param {string} layerPath The layer path to the layer's configuration.
      *
      * @returns {Promise<TypeArrayOfFeatureInfoEntries>} The feature info table.
      */
-    protected getFeatureInfoAtPixel(location: Pixel, layerConfig: TypeOgcWmsLayerEntryConfig): Promise<TypeArrayOfFeatureInfoEntries>;
+    protected getFeatureInfoAtPixel(location: Pixel, layerPath: string): Promise<TypeArrayOfFeatureInfoEntries>;
     /** ***************************************************************************************************************************
      * Return feature information for all the features around the provided projection coordinate.
      *
      * @param {Coordinate} location The coordinate that will be used by the query.
-     * @param {TypeOgcWmsLayerEntryConfig} layerConfig The layer configuration.
+     * @param {string} layerPath The layer path to the layer's configuration.
      *
      * @returns {Promise<TypeArrayOfFeatureInfoEntries>} The promised feature info table.
      */
-    protected getFeatureInfoAtCoordinate(location: Coordinate, layerConfig: TypeOgcWmsLayerEntryConfig): Promise<TypeArrayOfFeatureInfoEntries>;
+    protected getFeatureInfoAtCoordinate(location: Coordinate, layerPath: string): Promise<TypeArrayOfFeatureInfoEntries>;
     /** ***************************************************************************************************************************
      * Return feature information for all the features around the provided coordinate.
      *
      * @param {Coordinate} lnglat The coordinate that will be used by the query.
-     * @param {TypeOgcWmsLayerEntryConfig} layerConfig The layer configuration.
+     * @param {string} layerPath The layer path to the layer's configuration.
      *
      * @returns {Promise<TypeArrayOfFeatureInfoEntries>} The promised feature info table.
      */
-    protected getFeatureInfoAtLongLat(lnglat: Coordinate, layerConfig: TypeOgcWmsLayerEntryConfig): Promise<TypeArrayOfFeatureInfoEntries>;
+    protected getFeatureInfoAtLongLat(lnglat: Coordinate, layerPath: string): Promise<TypeArrayOfFeatureInfoEntries>;
     /** ***************************************************************************************************************************
      * Get the legend image URL of a layer from the capabilities. Return null if it does not exist.
      *
@@ -217,21 +217,21 @@ export declare class WMS extends AbstractGeoViewRaster {
      * Return the legend of the layer. This routine return null when the layerPath specified is not found. If the legend can't be
      * read, the legend property of the object returned will be null.
      *
-     * @param {string | TypeLayerEntryConfig} layerPathOrConfig Layer path or configuration.
+     * @param {string} layerPath The layer path to the layer's configuration.
      *
      * @returns {Promise<TypeLegend | null>} The legend of the layer or null.
      */
-    getLegend(layerPathOrConfig: string | TypeLayerEntryConfig): Promise<TypeLegend | null>;
+    getLegend(layerPath: string): Promise<TypeLegend | null>;
     /** ***************************************************************************************************************************
      * Translate the get feature information result set to the TypeArrayOfFeatureInfoEntries used by GeoView.
      *
      * @param {TypeJsonObject} featureMember An object formatted using the query syntax.
-     * @param {TypeOgcWmsLayerEntryConfig} layerEntryConfig The layer configuration.
+     * @param {TypeOgcWmsLayerEntryConfig} layerConfig The layer configuration.
      * @param {Coordinate} clickCoordinate The coordinate where the user has clicked.
      *
      * @returns {TypeArrayOfFeatureInfoEntries} The feature info table.
      */
-    formatWmsFeatureInfoResult(featureMember: TypeJsonObject, layerEntryConfig: TypeOgcWmsLayerEntryConfig, clickCoordinate: Coordinate): TypeArrayOfFeatureInfoEntries;
+    private formatWmsFeatureInfoResult;
     /** ***************************************************************************************************************************
      * Return the attribute of an object that ends with the specified ending string or null if not found.
      *
@@ -244,10 +244,10 @@ export declare class WMS extends AbstractGeoViewRaster {
     /** ***************************************************************************************************************************
      * Set the style to be used by the wms layer. This methode does nothing if the layer path can't be found.
      *
-     * @param {string} StyleId The style identifier that will be used.
-     * @param {string | TypeLayerEntryConfig} layerPathOrConfig The layer path to the layer config or a layer config.
+     * @param {string} wmsStyleId The style identifier that will be used.
+     * @param {string} layerPath The layer path to the layer's configuration.
      */
-    setStyle(StyleId: string, layerPathOrConfig: string | TypeLayerEntryConfig): void;
+    setWmsStyle(wmsStyleId: string, layerPath: string): void;
     /** ***************************************************************************************************************************
      * Apply a view filter to the layer. When the CombineLegendFilter flag is false, the filter paramater is used alone to display
      * the features. Otherwise, the legend filter and the filter parameter are combined together to define the view filter. The
@@ -255,18 +255,18 @@ export declare class WMS extends AbstractGeoViewRaster {
      * is done.
      * TODO ! The combination of the legend filter and the dimension filter probably does not apply to WMS. The code can be simplified.
      *
-     * @param {string | TypeLayerEntryConfig} layerPathOrConfig Layer path or configuration.
+     * @param {string} layerPath The layer path to the layer's configuration.
      * @param {string} filter An optional filter to be used in place of the getViewFilter value.
      * @param {boolean} CombineLegendFilter Flag used to combine the legend filter and the filter together (default: true)
      */
-    applyViewFilter(layerPathOrConfig: string | TypeLayerEntryConfig, filter?: string, CombineLegendFilter?: boolean): void;
+    applyViewFilter(layerPath?: string, filter?: string, CombineLegendFilter?: boolean): void;
     /** ***************************************************************************************************************************
      * Get the bounds of the layer represented in the layerConfig, returns updated bounds
      *
-     * @param {TypeLayerEntryConfig} layerConfig Layer config to get bounds from.
+     * @param {string} layerPath The Layer path to the layer's configuration.
      * @param {Extent | undefined} bounds The current bounding box to be adjusted.
      *
      * @returns {Extent} The layer bounding box.
      */
-    protected getBounds(layerConfig: TypeLayerEntryConfig, bounds: Extent | undefined): Extent | undefined;
+    getBounds(layerPath: string, bounds: Extent | undefined): Extent | undefined;
 }

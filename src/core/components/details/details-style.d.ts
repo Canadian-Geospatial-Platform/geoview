@@ -5,6 +5,13 @@ export declare const getSxClasses: (theme: Theme) => {
         boxShadow: string;
         padding: string;
     };
+    detailsInstructionsTitle: {
+        font: string;
+        fontSize: string;
+    };
+    detailsInstructionsBody: {
+        fontSize: string;
+    };
     panelHeaders: {
         font: string;
     };

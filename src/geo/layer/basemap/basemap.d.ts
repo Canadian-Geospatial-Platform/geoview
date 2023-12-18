@@ -1,6 +1,8 @@
 import { Extent } from 'ol/extent';
+import { XYZ } from 'ol/source';
+import TileLayer from 'ol/layer/Tile';
 import { TypeJsonObject } from '@/core/types/global-types';
-import { TypeBasemapProps, TypeBasemapOptions, TypeBasemapLayer } from '@/geo/layer/basemap/basemap-types';
+import { TypeBasemapProps, TypeBasemapOptions } from '@/geo/layer/basemap/basemap-types';
 import { TypeDisplayLanguage, TypeValidMapProjectionCodes } from '@/geo/map/map-schema-types';
 /**
  * A class to get a Basemap for a define projection and language. For the moment, a list maps are available and
@@ -11,34 +13,24 @@ import { TypeDisplayLanguage, TypeValidMapProjectionCodes } from '@/geo/map/map-
  * @class Basemap
  */
 export declare class Basemap {
-    basemaps: TypeBasemapProps[];
     activeBasemap?: TypeBasemapProps;
     defaultOrigin?: number[];
     defaultResolutions?: number[];
     defaultExtent?: Extent;
     overviewMap?: TypeBasemapProps;
-    attribution: string;
-    displayLanguage: TypeDisplayLanguage;
     basemapOptions: TypeBasemapOptions;
-    private projection;
     mapId: string;
     /**
      * initialize basemap
      *
      * @param {TypeBasemapOptions} basemapOptions optional basemap option properties, passed in from map config
-     * @param {TypeDisplayLanguage} displayLanguage language to be used, either en or fr
-     * @param {TypeValidMapProjectionCodes} projection projection number
      * @param {string} mapId the map id
      */
-    constructor(basemapOptions: TypeBasemapOptions, displayLanguage: TypeDisplayLanguage, projection: TypeValidMapProjectionCodes, mapId: string);
+    constructor(basemapOptions: TypeBasemapOptions, mapId: string);
     /**
      * basemap list
      */
     basemapsList: TypeJsonObject;
-    /**
-     * attribution to add the map
-     */
-    private attributionVal;
     /**
      * Get projection from basemap url
      * Because OpenLayers can reproject on the fly raster, some like Shaded and Simple even if only available in 3978
@@ -48,31 +40,15 @@ export declare class Basemap {
      * @returns {number} projection code
      */
     private getProjectionFromUrl;
+    setOverviewMap(): Promise<void>;
+    getOverviewMap(): TypeBasemapProps | undefined;
     /**
-     * Get basemap thumbnail url
+     * Create empty basemap tilelayer to use as initial basemap while we load basemap
+     * so the viewer will not fails if basemap is not avialable
      *
-     * @param {string[]} basemapTypes basemap layer type (shaded, transport, label, simple)
-     * @param {TypeValidMapProjectionCodes} projection basemap projection
-     * @param {TypeDisplayLanguage} displayLanguage basemap language
-     *
-     * @returns {string[]} array of thumbnail urls
+     * @returns {TileLayer<XYZ>} return the created basemap
      */
-    private getThumbnailUrl;
-    /**
-     * Get basemap information (name and description)
-     *
-     * @param {string[]} basemapTypes basemap layer type (shaded, transport, label, simple)
-     * @param {TypeDisplayLanguage} displayLanguage basemap language
-     * @returns {string} array with information [name, description]
-     */
-    private getInfo;
-    /**
-     * Check if the type of basemap already exist
-     *
-     * @param {string} type basemap type
-     * @returns {boolean} true if basemap exist, false otherwise
-     */
-    isExisting(type: string): boolean;
+    createEmptyBasemap(): TileLayer<XYZ>;
     /**
      * Create a basemap layer
      *
@@ -80,38 +56,41 @@ export declare class Basemap {
      * @param {TypeJsonObject} basemapLayer the basemap layer url and json url
      * @param {number} opacity the opacity to use for this layer
      * @param {boolean} rest should we do a get request to get the info from the server
+     *
      * @returns {TypeBasemapLayer} return the created basemap layer
      */
-    createBasemapLayer(basemapId: string, basemapLayer: TypeJsonObject, opacity: number, rest: boolean): Promise<null | TypeBasemapLayer>;
+    private createBasemapLayer;
     /**
      * Create the core basemap and add the layers to it
      *
      * @param {TypeBasemapOptions} basemapOptions basemap options
+     * @param {TypeValidMapProjectionCodes} projection optional projection code
+     * @param {TypeDisplayLanguage} language optional language
+     *
+     * @return {Promise<TypeBasemapProps | undefined>} the core basemap
      */
-    createCoreBasemap(basemapOptions: TypeBasemapOptions, projection?: number): Promise<TypeBasemapProps | undefined>;
+    createCoreBasemap(basemapOptions: TypeBasemapOptions, projection?: TypeValidMapProjectionCodes, language?: TypeDisplayLanguage): Promise<TypeBasemapProps | undefined>;
     /**
      * Create a custom basemap
      *
      * @param {TypeBasemapProps} basemapProps basemap properties
+     * @param {TypeValidMapProjectionCodes} projection projection code
+     * @param {TypeDisplayLanguage} language optional language
+     *
      * @returns {TypeBasemapProps} the created custom basemap
      */
-    createCustomBasemap(basemapProps: TypeBasemapProps): TypeBasemapProps;
+    createCustomBasemap(basemapProps: TypeBasemapProps, projection: TypeValidMapProjectionCodes, language?: TypeDisplayLanguage): TypeBasemapProps;
     /**
      * Load the default basemap that was passed in the map config
      *
-     * @returns {TypeBasemapProps | undefined} the default basemap
+     * @param {TypeValidMapProjectionCodes} projection optional projection code
+     * @param {TypeDisplayLanguage} language optional language
      */
-    loadDefaultBasemaps(): Promise<TypeBasemapProps | undefined>;
-    /**
-     * Create a new basemap
-     *
-     * @param {TypeBasemapProps} basemapProps basemap properties
-     */
-    private createBasemap;
+    loadDefaultBasemaps(projection?: TypeValidMapProjectionCodes, language?: TypeDisplayLanguage): Promise<void>;
     /**
      * Set the current basemap and update the basemap layers on the map
      *
-     * @param {string} basemapId the id of the basemap
+     * @param {TypeBasemapProps} basemap the basemap
      */
-    setBasemap(basemapId: string): void;
+    setBasemap(basemap: TypeBasemapProps): void;
 }

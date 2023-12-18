@@ -1,13 +1,12 @@
 import { Extent } from 'ol/extent';
 import { Coordinate } from 'ol/coordinate';
-import Geometry from 'ol/geom/Geometry';
 import Feature from 'ol/Feature';
 import RenderFeature from 'ol/render/Feature';
 import { Pixel } from 'ol/pixel';
 import { PayloadBaseClass } from './payload-base-class';
 import { EventStringId } from '../event-types';
 import { TypeGeoviewLayerType } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
-import { TypeLayerStatus } from '@/geo/map/map-schema-types';
+import { TypeLayerStatus, TypeLocalizedString } from '@/geo/map/map-schema-types';
 export type EventType = 'click' | 'hover' | 'crosshaire-enter' | 'all-features';
 export declare const ArrayOfEventTypes: EventType[];
 export type QueryType = 'at_pixel' | 'at_coordinate' | 'at_long_lat' | 'using_a_bounding_box' | 'using_a_polygon' | 'all';
@@ -41,7 +40,7 @@ export type TypeFeatureInfoEntry = {
     featureKey: number;
     geoviewLayerType: TypeGeoviewLayerType;
     extent: Extent;
-    geometry: TypeGeometry | Feature<Geometry> | null;
+    geometry: TypeGeometry | Feature | null;
     featureIcon: HTMLCanvasElement;
     fieldInfo: Partial<Record<string, TypeFieldEntry>>;
     nameField: string | null;
@@ -56,7 +55,7 @@ export type TypeArrayOfFeatureInfoEntries = TypeFeatureInfoEntry[] | undefined |
 export type TypeLayerData = {
     layerPath: string;
     layerName: string;
-    layerFlags: Omit<TypeFeatureInfoResultSetsEntry, 'data'>;
+    layerStatus: TypeLayerStatus;
     features: TypeArrayOfFeatureInfoEntries;
 };
 export type TypeArrayOfLayerData = TypeLayerData[];
@@ -67,6 +66,7 @@ export type TypeFeatureInfoResultSetsEntry = {
     layerStatus: TypeLayerStatus;
     layerPhase: string;
     data: TypeFeatureInfoByEventTypes;
+    layerName?: TypeLocalizedString;
 };
 export type TypeFeatureInfoResultSets = {
     [layerPath: string]: TypeFeatureInfoResultSetsEntry;

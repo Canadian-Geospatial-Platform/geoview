@@ -1,7 +1,10 @@
 import { Geometry } from '@/geo/layer/geometry/geometry';
 import { FeatureHighlight } from '@/geo/utils/feature-highlight';
-import { AbstractGeoViewLayer } from './geoview-layers/abstract-geoview-layers';
+import { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { TypeGeoviewLayerConfig, TypeLayerEntryConfig, TypeListOfLayerEntryConfig, TypeListOfLocalizedLanguages } from '@/geo/map/map-schema-types';
+export type TypeRegisteredLayers = {
+    [layerPath: string]: TypeLayerEntryConfig;
+};
 /**
  * A class to get the layer from layer type. Layer type can be esriFeature, esriDynamic and ogcWMS
  *
@@ -10,17 +13,16 @@ import { TypeGeoviewLayerConfig, TypeLayerEntryConfig, TypeListOfLayerEntryConfi
  */
 export declare class Layer {
     /** Layers with valid configuration for this map. */
-    registeredLayers: {
-        [layerEntryConfigId: string]: TypeLayerEntryConfig;
-    };
+    registeredLayers: TypeRegisteredLayers;
     geoviewLayers: {
         [geoviewLayerId: string]: AbstractGeoViewLayer;
     };
+    layerPathAssociatedToThegeoviewLayer: string;
     geometry: Geometry | undefined;
     layerOrder: string[];
     /** used to reference the map id */
     private mapId;
-    /** used to keep a reference the Layer's event handler functions */
+    /** used to keep a reference to the Layer's event handler functions */
     private eventHandlerFunctions;
     /** used to keep a reference of highlighted layer */
     private highlightedLayer;
@@ -55,26 +57,34 @@ export declare class Layer {
     private printDuplicateGeoviewLayerConfigError;
     /**
      * Get the layer Path of the layer configuration parameter.
-     * @param {TypeLayerEntryConfig} layerEntryConfig The layer configuration for wich we want to get the layer path.
+     * @param {TypeLayerEntryConfig} layerConfig The layer configuration for wich we want to get the layer path.
      * @param {string} layerPath Internal parameter used to build the layer path (should not be used by the user).
      *
      * @returns {string} Returns the layer path.
      */
-    static getLayerPath(layerEntryConfig: TypeLayerEntryConfig, layerPath?: string): string;
+    static getLayerPath(layerConfig: TypeLayerEntryConfig, layerPath?: string): string;
+    /**
+     * This method returns the GeoView instance associated to a specific layer path. The first element of the layerPath
+     * is the geoviewLayerId.
+     * @param {string} layerPath The layer path to the layer's configuration.
+     *
+     * @returns {AbstractGeoViewLayer} Returns the geoview instance associated to the layer path.
+     */
+    geoviewLayer(layerPath: string): AbstractGeoViewLayer;
     /**
      * Register the layer identifier. Duplicate identifier are not allowed.
-     * @param {TypeLayerEntryConfig} layerEntryConfig The layer configuration to register.
+     * @param {TypeLayerEntryConfig} layerConfig The layer configuration to register.
      *
      * @returns {boolean} Returns false if the layer configuration can't be registered.
      */
-    registerLayerConfig(layerEntryConfig: TypeLayerEntryConfig): boolean;
+    registerLayerConfig(layerConfig: TypeLayerEntryConfig): boolean;
     /**
      * Method used to verify if a layer is registered. Returns true if registered.
-     * @param {TypeLayerEntryConfig} layerEntryConfig The layer configuration to test.
+     * @param {TypeLayerEntryConfig} layerConfig The layer configuration to test.
      *
      * @returns {boolean} Returns true if the layer configuration is registered.
      */
-    isRegistered(layerEntryConfig: TypeLayerEntryConfig): boolean;
+    isRegistered(layerConfig: TypeLayerEntryConfig): boolean;
     /**
      * Add the layer to the map if valid. If not (is a string) emit an error
      * @param {any} geoviewLayer the layer config

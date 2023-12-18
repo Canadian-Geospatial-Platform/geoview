@@ -2,9 +2,8 @@ import { Options as SourceOptions } from 'ol/source/Vector';
 import { ReadOptions } from 'ol/format/Feature';
 import { Vector as VectorSource } from 'ol/source';
 import Feature from 'ol/Feature';
-import Geometry from 'ol/geom/Geometry';
-import { AbstractGeoViewLayer } from '../abstract-geoview-layers';
-import { AbstractGeoViewVector } from './abstract-geoview-vector';
+import { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
+import { AbstractGeoViewVector } from '@/geo/layer/geoview-layers/vector/abstract-geoview-vector';
 import { TypeLayerEntryConfig, TypeVectorLayerEntryConfig, TypeVectorSourceInitialConfig, TypeGeoviewLayerConfig, TypeListOfLayerEntryConfig, TypeBaseLayerEntryConfig } from '@/geo/map/map-schema-types';
 export interface TypeSourceGeoJSONInitialConfig extends Omit<TypeVectorSourceInitialConfig, 'format'> {
     format: 'GeoJSON';
@@ -81,19 +80,19 @@ export declare class GeoJSON extends AbstractGeoViewVector {
      * This method is used to process the layer's metadata. It will fill the empty fields of the layer's configuration (renderer,
      * initial settings, fields and aliases).
      *
-     * @param {TypeVectorLayerEntryConfig} layerEntryConfig The layer entry configuration to process.
+     * @param {TypeVectorLayerEntryConfig} layerConfig The layer entry configuration to process.
      *
      * @returns {Promise<void>} A promise that the vector layer configuration has its metadata processed.
      */
-    protected processLayerMetadata(layerEntryConfig: TypeVectorLayerEntryConfig): Promise<void>;
+    protected processLayerMetadata(layerConfig: TypeVectorLayerEntryConfig): Promise<void>;
     /** ***************************************************************************************************************************
      * Create a source configuration for the vector layer.
      *
-     * @param {TypeBaseLayerEntryConfig} layerEntryConfig The layer entry configuration.
+     * @param {TypeBaseLayerEntryConfig} layerConfig The layer entry configuration.
      * @param {SourceOptions} sourceOptions The source options (default: {}).
      * @param {ReadOptions} readOptions The read options (default: {}).
      *
      * @returns {VectorSource<Geometry>} The source configuration that will be used to create the vector layer.
      */
-    protected createVectorSource(layerEntryConfig: TypeBaseLayerEntryConfig, sourceOptions?: SourceOptions, readOptions?: ReadOptions): VectorSource<Feature<Geometry>>;
+    protected createVectorSource(layerConfig: TypeBaseLayerEntryConfig, sourceOptions?: SourceOptions, readOptions?: ReadOptions): VectorSource<Feature>;
 }

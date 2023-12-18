@@ -39,7 +39,7 @@ export declare class API {
         WM: string;
         LNGLAT: string;
     };
-    layerTypes: Record<"ESRI_DYNAMIC" | "ESRI_FEATURE" | "IMAGE_STATIC" | "GEOJSON" | "GEOCORE" | "GEOPACKAGE" | "XYZ_TILES" | "VECTOR_TILES" | "OGC_FEATURE" | "WFS" | "WMS", import("@/app").TypeGeoviewLayerType>;
+    layerTypes: Record<"WFS" | "ESRI_DYNAMIC" | "ESRI_FEATURE" | "IMAGE_STATIC" | "GEOJSON" | "GEOCORE" | "GEOPACKAGE" | "XYZ_TILES" | "VECTOR_TILES" | "OGC_FEATURE" | "WMS", import("@/app").TypeGeoviewLayerType>;
     maps: Record<string, MapViewer>;
     isReady: number;
     readyCallback?: (mapId?: string) => void;

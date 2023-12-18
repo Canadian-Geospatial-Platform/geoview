@@ -288,8 +288,6 @@ export declare const isSimpleStyleConfig: (verifyIfConfig: TypeStyleSettings | T
  * Simple style configuration.
  */
 export interface TypeSimpleStyleConfig extends TypeBaseStyleConfig {
-    /** Style identifier. */
-    styleId?: string;
     /** Type of style. */
     styleType: 'simple';
     /** Label associated to the style */
@@ -325,8 +323,6 @@ export declare const isUniqueValueStyleConfig: (verifyIfConfig: TypeStyleSetting
  * Unique value style configuration.
  */
 export interface TypeUniqueValueStyleConfig extends TypeBaseStyleConfig {
-    /** Style identifier. */
-    styleId?: string;
     /** Type of style. */
     styleType: 'uniqueValue';
     /** Label used if field/value association is not found. */
@@ -371,8 +367,6 @@ export declare const isClassBreakStyleConfig: (verifyIfConfig: TypeStyleSettings
  * Class break style configuration.
  */
 export interface TypeClassBreakStyleConfig extends TypeBaseStyleConfig {
-    /** Style identifier. */
-    styleId?: string;
     /** Type of style. */
     styleType: 'classBreaks';
     /** Label used if field/value association is not found. */
@@ -808,7 +802,8 @@ export type TypeListOfLayerEntryConfig = TypeLayerEntryConfig[];
 /** ******************************************************************************************************************************
  * List of supported geoview theme.
  */
-export type TypeSupportedTheme = 'dark' | 'light' | 'geo.ca';
+export type TypeDisplayTheme = 'dark' | 'light' | 'geo.ca';
+export declare const VALID_DISPLAY_THEME: TypeDisplayTheme[];
 /** ******************************************************************************************************************************
  *  Definition of the map feature instance according to what is specified in the schema.
  */
@@ -816,7 +811,7 @@ export type TypeMapFeaturesInstance = {
     /** map configuration. */
     map: TypeMapConfig;
     /** Display theme, default = geo.ca. */
-    theme?: TypeSupportedTheme;
+    theme?: TypeDisplayTheme;
     /** App bar properties. */
     appBar?: TypeAppBarProps;
     /** Nav bar properies. */
@@ -963,7 +958,7 @@ export type TypeAppBarProps = Array<'geolocator' | 'export'>;
 /** ******************************************************************************************************************************
  * Controls available on the navigation bar. Default = ['zoom', 'fullscreen', 'home'].
  */
-export type TypeNavBarProps = Array<'zoom' | 'fullscreen' | 'home' | 'location' | 'export' | 'focus'>;
+export type TypeNavBarProps = Array<'zoom' | 'fullscreen' | 'home' | 'location' | 'export'>;
 /** ******************************************************************************************************************************
  *  Overview map options. Default none.
  */

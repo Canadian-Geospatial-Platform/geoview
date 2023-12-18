@@ -1,12 +1,12 @@
 import { Coordinate } from 'ol/coordinate';
 import { Pixel } from 'ol/pixel';
 import { Extent } from 'ol/extent';
-import { AbstractGeoViewLayer } from '../abstract-geoview-layers';
-import { AbstractGeoViewRaster, TypeBaseRasterLayer } from './abstract-geoview-raster';
+import { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
+import { AbstractGeoViewRaster, TypeBaseRasterLayer } from '@/geo/layer/geoview-layers/raster/abstract-geoview-raster';
+import { TypeEsriFeatureLayerEntryConfig } from '@/geo/layer/geoview-layers/vector/esri-feature';
 import { TypeLayerEntryConfig, TypeGeoviewLayerConfig, TypeListOfLayerEntryConfig, TypeEsriDynamicLayerEntryConfig } from '@/geo/map/map-schema-types';
 import { TypeArrayOfFeatureInfoEntries, codedValueType, rangeDomainType } from '@/api/events/payloads';
 import { TypeJsonArray, TypeJsonObject } from '@/core/types/global-types';
-import { TypeEsriFeatureLayerEntryConfig } from '../vector/esri-feature';
 export interface TypeEsriDynamicLayerConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig'> {
     geoviewLayerType: 'esriDynamic';
     listOfLayerEntryConfig: TypeEsriDynamicLayerEntryConfig[];
@@ -60,7 +60,7 @@ export declare class EsriDynamic extends AbstractGeoViewRaster {
      *
      * @returns {Promise<void>} A promise that the execution is completed.
      */
-    getServiceMetadata(): Promise<void>;
+    fetchServiceMetadata(): Promise<void>;
     /** ***************************************************************************************************************************
      * This method validates recursively the configuration of the layer entries to ensure that it is a feature layer identified
      * with a numeric layerId and creates a group entry when a layer is a group.
@@ -75,7 +75,7 @@ export declare class EsriDynamic extends AbstractGeoViewRaster {
      *
      * @returns {boolean} true if an error is detected.
      */
-    esriChildHasDetectedAnError(layerEntryConfig: TypeLayerEntryConfig, esriIndex: number): boolean;
+    esriChildHasDetectedAnError(layerConfig: TypeLayerEntryConfig, esriIndex: number): boolean;
     /** ***************************************************************************************************************************
      * Extract the type of the specified field from the metadata. If the type can not be found, return 'string'.
      *
@@ -97,9 +97,9 @@ export declare class EsriDynamic extends AbstractGeoViewRaster {
     /** ***************************************************************************************************************************
      * This method will create a Geoview temporal dimension if it exist in the service metadata
      * @param {TypeJsonObject} esriTimeDimension The ESRI time dimension object
-     * @param {TypeEsriFeatureLayerEntryConfig | TypeEsriDynamicLayerEntryConfig} layerEntryConfig The layer entry to configure
+     * @param {TypeEsriFeatureLayerEntryConfig | TypeEsriDynamicLayerEntryConfig} layerConfig The layer entry to configure
      */
-    processTemporalDimension(esriTimeDimension: TypeJsonObject, layerEntryConfig: TypeEsriFeatureLayerEntryConfig | TypeEsriDynamicLayerEntryConfig): void;
+    processTemporalDimension(esriTimeDimension: TypeJsonObject, layerConfig: TypeEsriFeatureLayerEntryConfig | TypeEsriDynamicLayerEntryConfig): void;
     /** ***************************************************************************************************************************
      * This method verifies if the layer is queryable and sets the outfields and aliasFields of the source feature info.
      *
@@ -107,9 +107,9 @@ export declare class EsriDynamic extends AbstractGeoViewRaster {
      * @param {string} nameField The display field associated to the layer.
      * @param {string} geometryFieldName The field name of the geometry property.
      * @param {TypeJsonArray} fields An array of field names and its aliases.
-     * @param {TypeEsriFeatureLayerEntryConfig | TypeEsriDynamicLayerEntryConfig} layerEntryConfig The layer entry to configure.
+     * @param {TypeEsriFeatureLayerEntryConfig | TypeEsriDynamicLayerEntryConfig} layerConfig The layer entry to configure.
      */
-    processFeatureInfoConfig: (capabilities: string, nameField: string, geometryFieldName: string, fields: TypeJsonArray, layerEntryConfig: TypeEsriFeatureLayerEntryConfig | TypeEsriDynamicLayerEntryConfig) => void;
+    processFeatureInfoConfig: (capabilities: string, nameField: string, geometryFieldName: string, fields: TypeJsonArray, layerConfig: TypeEsriFeatureLayerEntryConfig | TypeEsriDynamicLayerEntryConfig) => void;
     /** ***************************************************************************************************************************
      * This method set the initial settings based on the service metadata. Priority is given to the layer configuration.
      *
@@ -118,53 +118,53 @@ export declare class EsriDynamic extends AbstractGeoViewRaster {
      * @param {number} minScale The metadata minScale of the layer.
      * @param {number} maxScale The metadata maxScale of the layer.
      * @param {TypeJsonObject} extent The metadata layer extent.
-     * @param {TypeEsriFeatureLayerEntryConfig | TypeEsriDynamicLayerEntryConfig} layerEntryConfig The layer entry to configure.
+     * @param {TypeEsriFeatureLayerEntryConfig | TypeEsriDynamicLayerEntryConfig} layerConfig The layer entry to configure.
      */
-    processInitialSettings(visibility: boolean, minScale: number, maxScale: number, extent: TypeJsonObject, layerEntryConfig: TypeEsriFeatureLayerEntryConfig | TypeEsriDynamicLayerEntryConfig): void;
+    processInitialSettings(visibility: boolean, minScale: number, maxScale: number, extent: TypeJsonObject, layerConfig: TypeEsriFeatureLayerEntryConfig | TypeEsriDynamicLayerEntryConfig): void;
     /** ***************************************************************************************************************************
      * This method is used to process the layer's metadata. It will fill the empty fields of the layer's configuration (renderer,
      * initial settings, fields and aliases).
      *
-     * @param {TypeLayerEntryConfig} layerEntryConfig The layer entry configuration to process.
+     * @param {TypeLayerEntryConfig} layerConfig The layer entry configuration to process.
      *
      * @returns {Promise<void>} A promise that the layer configuration has its metadata processed.
      */
-    protected processLayerMetadata(layerEntryConfig: TypeLayerEntryConfig): Promise<void>;
+    protected processLayerMetadata(layerConfig: TypeLayerEntryConfig): Promise<void>;
     /** ****************************************************************************************************************************
-     * This method creates a GeoView EsriDynamic layer using the definition provided in the layerEntryConfig parameter.
+     * This method creates a GeoView EsriDynamic layer using the definition provided in the layerConfig parameter.
      *
-     * @param {TypeEsriDynamicLayerEntryConfig} layerEntryConfig Information needed to create the GeoView layer.
+     * @param {TypeEsriDynamicLayerEntryConfig} layerConfig Information needed to create the GeoView layer.
      *
      * @returns {TypeBaseRasterLayer} The GeoView raster layer that has been created.
      */
-    processOneLayerEntry(layerEntryConfig: TypeEsriDynamicLayerEntryConfig): Promise<TypeBaseRasterLayer | null>;
+    protected processOneLayerEntry(layerConfig: TypeEsriDynamicLayerEntryConfig): Promise<TypeBaseRasterLayer | null>;
     /** ***************************************************************************************************************************
      * Return feature information for all the features around the provided Pixel.
      *
      * @param {Coordinate} location The pixel coordinate that will be used by the query.
-     * @param {TypeEsriDynamicLayerEntryConfig} layerConfig The layer configuration.
+     * @param {string} layerPath The layer path to the layer's configuration.
      *
      * @returns {Promise<TypeArrayOfFeatureInfoEntries>} The feature info table.
      */
-    protected getFeatureInfoAtPixel(location: Pixel, layerConfig: TypeEsriDynamicLayerEntryConfig): Promise<TypeArrayOfFeatureInfoEntries>;
+    protected getFeatureInfoAtPixel(location: Pixel, layerPath: string): Promise<TypeArrayOfFeatureInfoEntries>;
     /** ***************************************************************************************************************************
      * Return feature information for all the features around the provided projection coordinate.
      *
      * @param {Coordinate} location The coordinate that will be used by the query.
-     * @param {TypeEsriDynamicLayerEntryConfig} layerConfig The layer configuration.
+     * @param {string} layerPath The layer path to the layer's configuration.
      *
      * @returns {Promise<TypeArrayOfFeatureInfoEntries>} The promised feature info table.
      */
-    protected getFeatureInfoAtCoordinate(location: Coordinate, layerConfig: TypeEsriDynamicLayerEntryConfig): Promise<TypeArrayOfFeatureInfoEntries>;
+    protected getFeatureInfoAtCoordinate(location: Coordinate, layerPath: string): Promise<TypeArrayOfFeatureInfoEntries>;
     /** ***************************************************************************************************************************
      * Return feature information for all the features around the provided coordinate.
      *
      * @param {Coordinate} lnglat The coordinate that will be used by the query.
-     * @param {TypeEsriDynamicLayerEntryConfig} layerConfig The layer configuration.
+     * @param {string} layerPath The layer path to the layer's configuration.
      *
      * @returns {Promise<TypeArrayOfFeatureInfoEntries>} The promised feature info table.
      */
-    protected getFeatureInfoAtLongLat(lnglat: Coordinate, layerConfig: TypeEsriDynamicLayerEntryConfig): Promise<TypeArrayOfFeatureInfoEntries>;
+    protected getFeatureInfoAtLongLat(lnglat: Coordinate, layerPath: string): Promise<TypeArrayOfFeatureInfoEntries>;
     /** ***************************************************************************************************************************
      * Count the number of times the value of a field is used by the unique value style information object. Depending on the
      * visibility of the default, we count visible or invisible settings.
@@ -233,29 +233,29 @@ export declare class EsriDynamic extends AbstractGeoViewRaster {
      * Get the layer view filter. The filter is derived fron the uniqueValue or the classBreak visibility flags and a layerFilter
      * associated to the layer.
      *
-     * @param {string | TypeLayerEntryConfig} layerPathOrConfig Layer path or configuration.
+     * @param {string} layerPath The layer path to the layer's configuration.
      *
      * @returns {string} the filter associated to the layerPath
      */
-    getViewFilter(layerPathOrConfig: string | TypeLayerEntryConfig): string;
+    getViewFilter(layerPath: string): string;
     /** ***************************************************************************************************************************
      * Apply a view filter to the layer. When the CombineLegendFilter flag is false, the filter paramater is used alone to display
      * the features. Otherwise, the legend filter and the filter parameter are combined together to define the view filter. The
      * legend filters are derived from the uniqueValue or classBreaks style of the layer. When the layer config is invalid, nothing
      * is done.
      *
-     * @param {string | TypeLayerEntryConfig} layerPathOrConfig Layer path or configuration.
+     * @param {string} layerPath The layer path to the layer's configuration.
      * @param {string} filter An optional filter to be used in place of the getViewFilter value.
      * @param {boolean} CombineLegendFilter Flag used to combine the legend filter and the filter together (default: true)
      */
-    applyViewFilter(layerPathOrConfig: string | TypeLayerEntryConfig, filter?: string, CombineLegendFilter?: boolean): void;
+    applyViewFilter(layerPath?: string, filter?: string, CombineLegendFilter?: boolean): void;
     /** ***************************************************************************************************************************
      * Get the bounds of the layer represented in the layerConfig, returns updated bounds
      *
-     * @param {TypeLayerEntryConfig} layerConfig Layer config to get bounds from.
+     * @param {string} layerPath The Layer path to the layer's configuration.
      * @param {Extent | undefined} bounds The current bounding box to be adjusted.
      *
      * @returns {Extent} The layer bounding box.
      */
-    protected getBounds(layerConfig: TypeLayerEntryConfig, bounds: Extent | undefined): Extent | undefined;
+    getBounds(layerPath: string, bounds: Extent | undefined): Extent | undefined;
 }

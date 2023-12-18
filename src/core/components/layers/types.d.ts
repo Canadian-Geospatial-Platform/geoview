@@ -33,7 +33,6 @@ export interface TypeLegendLayer {
     querySent?: boolean;
     isVisible: TypeVisibilityFlags;
     icons?: TypeLegendLayerIcons;
-    allItemsChecked?: boolean;
     items: TypeLegendItem[];
     children: TypeLegendLayer[];
     opacity?: number;

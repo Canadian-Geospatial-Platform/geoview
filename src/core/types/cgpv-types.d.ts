@@ -15,6 +15,7 @@ export * from '../stores/store-interface-and-intial-values/layer-state';
 export * from '../stores/store-interface-and-intial-values/map-state';
 export * from '../stores/store-interface-and-intial-values/ui-state';
 export * from '@/api';
+export * from '@/api/events/payloads';
 export * from '@/core/components';
 export * from '@/core/stores';
 export * from '@/app';

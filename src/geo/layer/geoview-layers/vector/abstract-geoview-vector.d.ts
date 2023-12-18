@@ -2,18 +2,17 @@ import Feature from 'ol/Feature';
 import { Vector as VectorSource } from 'ol/source';
 import { Options as SourceOptions } from 'ol/source/Vector';
 import { VectorImage as VectorLayer } from 'ol/layer';
-import { Geometry } from 'ol/geom';
 import { ReadOptions } from 'ol/format/Feature';
 import BaseLayer from 'ol/layer/Base';
 import LayerGroup from 'ol/layer/Group';
 import { Coordinate } from 'ol/coordinate';
 import { Extent } from 'ol/extent';
 import { Pixel } from 'ol/pixel';
-import { AbstractGeoViewLayer } from '../abstract-geoview-layers';
-import { TypeBaseLayerEntryConfig, TypeLayerEntryConfig, TypeListOfLayerEntryConfig, TypeVectorLayerEntryConfig } from '@/geo/map/map-schema-types';
+import { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
+import { TypeBaseLayerEntryConfig, TypeListOfLayerEntryConfig, TypeVectorLayerEntryConfig } from '@/geo/map/map-schema-types';
 import { TypeArrayOfFeatureInfoEntries } from '@/api/events/payloads';
 export type TypeVectorLayerGroup = LayerGroup;
-export type TypeVectorLayer = VectorSource<Feature<Geometry>>;
+export type TypeVectorLayer = VectorSource<Feature>;
 export type TypeBaseVectorLayer = BaseLayer | TypeVectorLayerGroup | TypeVectorLayer;
 /** *****************************************************************************************************************************
  * The AbstractGeoViewVector class is a direct descendant of AbstractGeoViewLayer. As its name indicates, it is used to
@@ -37,86 +36,86 @@ export declare abstract class AbstractGeoViewVector extends AbstractGeoViewLayer
      */
     protected abstract validateListOfLayerEntryConfig(listOfLayerEntryConfig: TypeListOfLayerEntryConfig): void;
     /** ***************************************************************************************************************************
-     * This method creates a GeoView layer using the definition provided in the layerEntryConfig parameter.
+     * This method creates a GeoView layer using the definition provided in the layerConfig parameter.
      *
-     * @param {TypeLayerEntryConfig} layerEntryConfig Information needed to create the GeoView layer.
+     * @param {TypeLayerEntryConfig} layerConfig Information needed to create the GeoView layer.
      *
      * @returns {Promise<BaseLayer | null>} The GeoView base layer that has been created.
      */
-    protected processOneLayerEntry(layerEntryConfig: TypeBaseLayerEntryConfig): Promise<BaseLayer | null>;
+    protected processOneLayerEntry(layerConfig: TypeBaseLayerEntryConfig): Promise<BaseLayer | null>;
     /** ***************************************************************************************************************************
      * Create a source configuration for the vector layer.
      *
-     * @param {TypeBaseLayerEntryConfig} layerEntryConfig The layer entry configuration.
+     * @param {TypeBaseLayerEntryConfig} layerConfig The layer entry configuration.
      * @param {SourceOptions} sourceOptions The source options (default: { strategy: all }).
      * @param {ReadOptions} readOptions The read options (default: {}).
      *
      * @returns {VectorSource<Geometry>} The source configuration that will be used to create the vector layer.
      */
-    protected createVectorSource(layerEntryConfig: TypeBaseLayerEntryConfig, sourceOptions?: SourceOptions, readOptions?: ReadOptions): VectorSource<Feature<Geometry>>;
+    protected createVectorSource(layerConfig: TypeBaseLayerEntryConfig, sourceOptions?: SourceOptions, readOptions?: ReadOptions): VectorSource<Feature>;
     /** ***************************************************************************************************************************
-     * Create a vector layer. The layer has in its properties a reference to the layer entry configuration used at creation time.
+     * Create a vector layer. The layer has in its properties a reference to the layer configuration used at creation time.
      * The layer entry configuration keeps a reference to the layer in the olLayer attribute.
      *
-     * @param {TypeBaseLayerEntryConfig} layerEntryConfig The layer entry configuration used by the source.
-     * @param {VectorSource<Feature<Geometry>>} vectorSource The source configuration for the vector layer.
+     * @param {TypeBaseLayerEntryConfig} layerConfig The layer entry configuration used by the source.
+     * @param {VectorSource<Feature>} vectorSource The source configuration for the vector layer.
      *
      * @returns {VectorLayer<VectorSource>} The vector layer created.
      */
-    createVectorLayer(layerEntryConfig: TypeVectorLayerEntryConfig, vectorSource: VectorSource<Feature<Geometry>>): VectorLayer<VectorSource>;
+    protected createVectorLayer(layerConfig: TypeVectorLayerEntryConfig, vectorSource: VectorSource<Feature>): VectorLayer<VectorSource>;
     /** ***************************************************************************************************************************
      * Return feature information for all the features stored in the layer.
      *
-     * @param {TypeLayerEntryConfig} layerEntryConfig The layer configuration.
+     * @param {string} layerPath The layer path to the layer's configuration.
      *
      * @returns {TypeArrayOfFeatureInfoEntries} The feature info table.
      */
-    protected getAllFeatureInfo(layerEntryConfig: TypeLayerEntryConfig): Promise<TypeArrayOfFeatureInfoEntries>;
+    protected getAllFeatureInfo(layerPath: string): Promise<TypeArrayOfFeatureInfoEntries>;
     /** ***************************************************************************************************************************
      * Return feature information for all the features around the provided Pixel.
      *
      * @param {Coordinate} location The pixel coordinate that will be used by the query.
-     * @param {TypeLayerEntryConfig} layerConfig The layer configuration.
+     * @param {string} layerPath The layer path to the layer's configuration.
      *
-     * @returns {Promise<TypeArrayOfFeatureInfoEntries>} The feature info table.
+     * @returns {Promise<TypeArrayOfFeatureInfoEntries> | null} The feature info table or null if an error occured.
      */
-    protected getFeatureInfoAtPixel(location: Pixel, layerConfig: TypeLayerEntryConfig): Promise<TypeArrayOfFeatureInfoEntries>;
+    protected getFeatureInfoAtPixel(location: Pixel, layerPath: string): Promise<TypeArrayOfFeatureInfoEntries | null>;
     /** ***************************************************************************************************************************
      * Return feature information for all the features around the provided projected coordinate.
      *
      * @param {Coordinate} location The pixel coordinate that will be used by the query.
-     * @param {TypeLayerEntryConfig} layerConfig The layer configuration.
+     * @param {string} layerPath The layer path to the layer's configuration.
      *
      * @returns {Promise<TypeArrayOfFeatureInfoEntries>} The feature info table.
      */
-    protected getFeatureInfoAtCoordinate(location: Coordinate, layerConfig: TypeLayerEntryConfig): Promise<TypeArrayOfFeatureInfoEntries>;
+    protected getFeatureInfoAtCoordinate(location: Coordinate, layerPath: string): Promise<TypeArrayOfFeatureInfoEntries>;
     /** ***************************************************************************************************************************
      * Return feature information for all the features around the provided longitude latitude.
      *
      * @param {Coordinate} location The coordinate that will be used by the query.
-     * @param {TypeLayerEntryConfig} layerConfig The layer configuration.
+     * @param {string} layerPath The layer path to the layer's configuration.
      *
      * @returns {Promise<TypeArrayOfFeatureInfoEntries>} The feature info table.
      */
-    protected getFeatureInfoAtLongLat(location: Coordinate, layerConfig: TypeLayerEntryConfig): Promise<TypeArrayOfFeatureInfoEntries>;
+    protected getFeatureInfoAtLongLat(location: Coordinate, layerPath: string): Promise<TypeArrayOfFeatureInfoEntries>;
     /** ***************************************************************************************************************************
      * Get the bounds of the layer represented in the layerConfig, returns updated bounds
      *
-     * @param {TypeLayerEntryConfig} layerConfig Layer config to get bounds from.
+     * @param {string} layerPath The Layer path to the layer's configuration.
      * @param {Extent | undefined} bounds The current bounding box to be adjusted.
      *
      * @returns {Extent} The layer bounding box.
      */
-    protected getBounds(layerConfig: TypeLayerEntryConfig, bounds: Extent | undefined): Extent | undefined;
+    getBounds(layerPath: string, bounds: Extent | undefined): Extent | undefined;
     /** ***************************************************************************************************************************
      * Apply a view filter to the layer. When the CombineLegendFilter flag is false, the filter paramater is used alone to display
      * the features. Otherwise, the legend filter and the filter parameter are combined together to define the view filter. The
      * legend filters are derived from the uniqueValue or classBreaks style of the layer. When the layer config is invalid, nothing
      * is done.
      *
-     * @param {string | TypeLayerEntryConfig} layerPathOrConfig Layer path or configuration.
+     * @param {string} layerPath The layer path to the layer's configuration.
      * @param {string} filter An optional filter to be used in place of the getViewFilter value.
      * @param {boolean} CombineLegendFilter Flag used to combine the legend filter and the filter together (default: true)
      */
-    applyViewFilter(layerPathOrConfig: string | TypeLayerEntryConfig, filter?: string, CombineLegendFilter?: boolean): void;
+    applyViewFilter(layerPath?: string, filter?: string, CombineLegendFilter?: boolean): void;
 }

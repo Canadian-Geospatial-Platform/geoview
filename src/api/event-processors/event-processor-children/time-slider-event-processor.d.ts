@@ -1,8 +1,8 @@
-import { GeoViewStoreType } from '@/core/stores/geoview-store';
+import { GeoviewStoreType } from '@/core/stores/geoview-store';
 import { AbstractEventProcessor } from '../abstract-event-processor';
 import { TypeTimeSliderValues } from '@/app';
 export declare class TimeSliderEventProcessor extends AbstractEventProcessor {
-    onInitialize(store: GeoViewStoreType): void;
+    onInitialize(store: GeoviewStoreType): void;
     /**
      * Filter array of legend layers to get usable time slider layer paths
      *

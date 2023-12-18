@@ -5,6 +5,7 @@ export interface LayerListEntry {
     layerFeatures?: ReactNode | undefined;
     mapFilteredIcon?: ReactNode | undefined;
     tooltip?: ReactNode | undefined;
+    numOffeatures?: number;
 }
 interface LayerListProps {
     isEnlargeDataTable: boolean;

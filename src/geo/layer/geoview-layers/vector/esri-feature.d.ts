@@ -2,8 +2,7 @@ import { Vector as VectorSource } from 'ol/source';
 import { Options as SourceOptions } from 'ol/source/Vector';
 import { ReadOptions } from 'ol/format/Feature';
 import Feature from 'ol/Feature';
-import Geometry from 'ol/geom/Geometry';
-import { AbstractGeoViewLayer } from '../abstract-geoview-layers';
+import { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { TypeLayerEntryConfig, TypeVectorLayerEntryConfig, TypeVectorSourceInitialConfig, TypeGeoviewLayerConfig, TypeListOfLayerEntryConfig, TypeEsriDynamicLayerEntryConfig, TypeBaseLayerEntryConfig } from '@/geo/map/map-schema-types';
 import { AbstractGeoViewVector } from './abstract-geoview-vector';
 import { TypeJsonArray, TypeJsonObject } from '@/core/types/global-types';
@@ -68,7 +67,7 @@ export declare class EsriFeature extends AbstractGeoViewVector {
      *
      * @returns {Promise<void>} A promise that the execution is completed.
      */
-    getServiceMetadata(): Promise<void>;
+    fetchServiceMetadata(): Promise<void>;
     /** ***************************************************************************************************************************
      * This method validates recursively the configuration of the layer entries to ensure that it is a feature layer identified
      * with a numeric layerId and creates a group entry when a layer is a group.
@@ -83,7 +82,7 @@ export declare class EsriFeature extends AbstractGeoViewVector {
      *
      * @returns {boolean} true if an error is detected.
      */
-    esriChildHasDetectedAnError(layerEntryConfig: TypeLayerEntryConfig, esriIndex: number): boolean;
+    esriChildHasDetectedAnError(layerConfig: TypeLayerEntryConfig, esriIndex: number): boolean;
     /** ***************************************************************************************************************************
      * Extract the type of the specified field from the metadata. If the type can not be found, return 'string'.
      *
@@ -105,9 +104,9 @@ export declare class EsriFeature extends AbstractGeoViewVector {
     /** ***************************************************************************************************************************
      * This method will create a Geoview temporal dimension if it exist in the service metadata
      * @param {TypeJsonObject} esriTimeDimension The ESRI time dimension object
-     * @param {TypeEsriFeatureLayerEntryConfig | TypeEsriDynamicLayerEntryConfig} layerEntryConfig The layer entry to configure
+     * @param {TypeEsriFeatureLayerEntryConfig | TypeEsriDynamicLayerEntryConfig} layerConfig The layer entry to configure
      */
-    processTemporalDimension(esriTimeDimension: TypeJsonObject, layerEntryConfig: TypeEsriFeatureLayerEntryConfig | TypeEsriDynamicLayerEntryConfig): void;
+    processTemporalDimension(esriTimeDimension: TypeJsonObject, layerConfig: TypeEsriFeatureLayerEntryConfig | TypeEsriDynamicLayerEntryConfig): void;
     /** ***************************************************************************************************************************
      * This method verifies if the layer is queryable and sets the outfields and aliasFields of the source feature info.
      *
@@ -115,9 +114,9 @@ export declare class EsriFeature extends AbstractGeoViewVector {
      * @param {string} nameField The display field associated to the layer.
      * @param {string} geometryFieldName The field name of the geometry property.
      * @param {TypeJsonArray} fields An array of field names and its aliases.
-     * @param {TypeEsriFeatureLayerEntryConfig | TypeEsriDynamicLayerEntryConfig} layerEntryConfig The layer entry to configure.
+     * @param {TypeEsriFeatureLayerEntryConfig | TypeEsriDynamicLayerEntryConfig} layerConfig The layer entry to configure.
      */
-    processFeatureInfoConfig: (capabilities: string, nameField: string, geometryFieldName: string, fields: TypeJsonArray, layerEntryConfig: TypeEsriFeatureLayerEntryConfig | TypeEsriDynamicLayerEntryConfig) => void;
+    processFeatureInfoConfig: (capabilities: string, nameField: string, geometryFieldName: string, fields: TypeJsonArray, layerConfig: TypeEsriFeatureLayerEntryConfig | TypeEsriDynamicLayerEntryConfig) => void;
     /** ***************************************************************************************************************************
      * This method set the initial settings based on the service metadata. Priority is given to the layer configuration.
      *
@@ -126,26 +125,26 @@ export declare class EsriFeature extends AbstractGeoViewVector {
      * @param {number} minScale The metadata minScale of the layer.
      * @param {number} maxScale The metadata maxScale of the layer.
      * @param {TypeJsonObject} extent The metadata layer extent.
-     * @param {TypeEsriFeatureLayerEntryConfig | TypeEsriDynamicLayerEntryConfig} layerEntryConfig The layer entry to configure.
+     * @param {TypeEsriFeatureLayerEntryConfig | TypeEsriDynamicLayerEntryConfig} layerConfig The layer entry to configure.
      */
-    processInitialSettings(visibility: boolean, minScale: number, maxScale: number, extent: TypeJsonObject, layerEntryConfig: TypeEsriFeatureLayerEntryConfig | TypeEsriDynamicLayerEntryConfig): void;
+    processInitialSettings(visibility: boolean, minScale: number, maxScale: number, extent: TypeJsonObject, layerConfig: TypeEsriFeatureLayerEntryConfig | TypeEsriDynamicLayerEntryConfig): void;
     /** ***************************************************************************************************************************
      * This method is used to process the layer's metadata. It will fill the empty fields of the layer's configuration (renderer,
      * initial settings, fields and aliases).
      *
-     * @param {TypeLayerEntryConfig} layerEntryConfig The layer entry configuration to process.
+     * @param {TypeLayerEntryConfig} layerConfig The layer entry configuration to process.
      *
      * @returns {Promise<void>} A promise that the layer configuration has its metadata processed.
      */
-    protected processLayerMetadata(layerEntryConfig: TypeLayerEntryConfig): Promise<void>;
+    protected processLayerMetadata(layerConfig: TypeLayerEntryConfig): Promise<void>;
     /** ***************************************************************************************************************************
      * Create a source configuration for the vector layer.
      *
-     * @param {TypeEsriFeatureLayerEntryConfig} layerEntryConfig The layer entry configuration.
+     * @param {TypeEsriFeatureLayerEntryConfig} layerConfig The layer entry configuration.
      * @param {SourceOptions} sourceOptions The source options (default: {}).
      * @param {ReadOptions} readOptions The read options (default: {}).
      *
      * @returns {VectorSource<Geometry>} The source configuration that will be used to create the vector layer.
      */
-    protected createVectorSource(layerEntryConfig: TypeBaseLayerEntryConfig, sourceOptions?: SourceOptions, readOptions?: ReadOptions): VectorSource<Feature<Geometry>>;
+    protected createVectorSource(layerConfig: TypeBaseLayerEntryConfig, sourceOptions?: SourceOptions, readOptions?: ReadOptions): VectorSource<Feature>;
 }

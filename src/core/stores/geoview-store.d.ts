@@ -6,9 +6,9 @@ import { IMapDataTableState } from './store-interface-and-intial-values/data-tab
 import { ITimeSliderState } from './store-interface-and-intial-values/time-slider-state';
 import { IUIState } from './store-interface-and-intial-values/ui-state';
 import { TypeMapFeaturesConfig } from '@/core/types/global-types';
-export type TypeSetStore = (partial: IGeoViewState | Partial<IGeoViewState> | ((state: IGeoViewState) => IGeoViewState | Partial<IGeoViewState>), replace?: boolean | undefined) => void;
-export type TypeGetStore = () => IGeoViewState;
-export interface IGeoViewState {
+export type TypeSetStore = (partial: IGeoviewState | Partial<IGeoviewState> | ((state: IGeoviewState) => IGeoviewState | Partial<IGeoviewState>), replace?: boolean | undefined) => void;
+export type TypeGetStore = () => IGeoviewState;
+export interface IGeoviewState {
     mapConfig: TypeMapFeaturesConfig | undefined;
     mapId: string;
     setMapConfig: (config: TypeMapFeaturesConfig) => void;
@@ -20,18 +20,18 @@ export interface IGeoViewState {
     timeSliderState: ITimeSliderState;
     uiState: IUIState;
 }
-export declare const geoViewStoreDefinition: (set: TypeSetStore, get: TypeGetStore) => IGeoViewState;
-export declare const geoViewStoreDefinitionWithSubscribeSelector: import("zustand").StateCreator<IGeoViewState, [], [["zustand/subscribeWithSelector", never]], IGeoViewState>;
-declare const fakeStore: import("zustand").UseBoundStore<Omit<import("zustand").StoreApi<IGeoViewState>, "subscribe"> & {
+export declare const geoviewStoreDefinition: (set: TypeSetStore, get: TypeGetStore) => IGeoviewState;
+export declare const geoviewStoreDefinitionWithSubscribeSelector: import("zustand").StateCreator<IGeoviewState, [], [["zustand/subscribeWithSelector", never]], IGeoviewState>;
+declare const fakeStore: import("zustand").UseBoundStore<Omit<import("zustand").StoreApi<IGeoviewState>, "subscribe"> & {
     subscribe: {
-        (listener: (selectedState: IGeoViewState, previousSelectedState: IGeoViewState) => void): () => void;
-        <U>(selector: (state: IGeoViewState) => U, listener: (selectedState: U, previousSelectedState: U) => void, options?: {
+        (listener: (selectedState: IGeoviewState, previousSelectedState: IGeoviewState) => void): () => void;
+        <U>(selector: (state: IGeoviewState) => U, listener: (selectedState: U, previousSelectedState: U) => void, options?: {
             equalityFn?: ((a: U, b: U) => boolean) | undefined;
             fireImmediately?: boolean | undefined;
         } | undefined): () => void;
     };
 }>;
-export type GeoViewStoreType = typeof fakeStore;
+export type GeoviewStoreType = typeof fakeStore;
 export declare const useGeoViewMapId: () => string;
 export declare const useGeoViewConfig: () => TypeMapFeaturesConfig | undefined;
 export {};
