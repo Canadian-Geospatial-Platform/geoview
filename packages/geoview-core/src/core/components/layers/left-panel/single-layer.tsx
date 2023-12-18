@@ -4,11 +4,8 @@ import _ from 'lodash';
 import {
   Box,
   Collapse,
-  ErrorIcon,
-  GroupWorkOutlinedIcon,
   IconButton,
   KeyboardArrowDownIcon,
-  KeyboardArrowRightIcon,
   KeyboardArrowUpIcon,
   ListItem,
   ListItemButton,
@@ -18,7 +15,6 @@ import {
   VisibilityOffOutlinedIcon,
   VisibilityOutlinedIcon,
   RestartAltIcon,
-  CircularProgressBase,
   TableViewIcon,
   HandleIcon,
 } from '@/ui';
@@ -29,9 +25,9 @@ import {
   useSelectedLayerPath,
 } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { useDataTableStoreMapFilteredRecord } from '@/core/stores/store-interface-and-intial-values/data-table-state';
-import { IconStack } from '../../icon-stack/icon-stack';
 import { DeleteUndoButton } from './delete-undo-button';
 import { LayersList } from './layers-list';
+import { LayerIcon } from '../layer-icon';
 
 interface SingleLayerProps {
   layer: TypeLegendLayer;
@@ -120,11 +116,9 @@ export function SingleLayer({ isDragging, depth, layer, setIsLayersListPanelVisi
       return;
     }
 
-    if (layer.children && layer.children.length === 0) {
-      setSelectedLayerPath(layer.layerPath);
-      if (setIsLayersListPanelVisible) setIsLayersListPanelVisible(true);
-    } else {
-      setGroupOpen(!isGroupOpen);
+    setSelectedLayerPath(layer.layerPath);
+    if (setIsLayersListPanelVisible) {
+      setIsLayersListPanelVisible(true);
     }
   };
 
@@ -197,13 +191,7 @@ export function SingleLayer({ isDragging, depth, layer, setIsLayersListPanelVisi
         </IconButton>
       );
     }
-    if (displayState === 'view') {
-      return (
-        <IconButton edge="end" size="small" onClick={handleLayerClick}>
-          <KeyboardArrowRightIcon />
-        </IconButton>
-      );
-    }
+
     return null;
   }
 
@@ -224,31 +212,6 @@ export function SingleLayer({ isDragging, depth, layer, setIsLayersListPanelVisi
     );
   }
 
-  function renderLayerIcon() {
-    if (layer.layerStatus === 'error') {
-      return (
-        <IconButton sx={{ color: 'red' }}>
-          <ErrorIcon />
-        </IconButton>
-      );
-    }
-    if (layer.layerStatus === 'loading') {
-      return (
-        <Box sx={{ padding: '5px', marginRight: '10px' }}>
-          <CircularProgressBase size={20} />
-        </Box>
-      );
-    }
-    if (layer?.children.length) {
-      return (
-        <IconButton color="primary">
-          <GroupWorkOutlinedIcon />
-        </IconButton>
-      );
-    }
-    return <IconStack layerPath={layer.layerPath} />;
-  }
-
   function getContainerClass() {
     const result: string[] = ['layerItemContainer', layer.layerStatus ?? ''];
 
@@ -267,7 +230,7 @@ export function SingleLayer({ isDragging, depth, layer, setIsLayersListPanelVisi
     <Box className={getContainerClass()}>
       <ListItem key={layer.layerName} divider>
         <ListItemButton selected={isLayerSelected}>
-          {renderLayerIcon()}
+          <LayerIcon layer={layer} />
           <Tooltip title={layer.layerName} placement="top" enterDelay={1000}>
             <ListItemText
               primary={layer.layerName !== undefined ? layer.layerName : layer.metadataAccessPath}

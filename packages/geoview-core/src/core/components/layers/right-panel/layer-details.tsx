@@ -26,6 +26,7 @@ import {
 } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { useUIStoreActions } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import { generateId } from '@/core/utils/utilities';
+import { LayerIcon } from '../layer-icon';
 
 interface LayerDetailsProps {
   layerDetails: TypeLegendLayer;
@@ -67,10 +68,20 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
     setLayerOpacity(layerDetails.layerPath, val / 100);
   };
 
-  const getItemsCount = () => {
-    const count = layerDetails.items.filter((d) => d.isVisible !== 'no').length;
-    const totalCount = layerDetails.items.length;
-    return t('legend.itemsCount').replace('{count}', count.toString()).replace('{totalCount}', totalCount.toString());
+  const getSubTitle = () => {
+    if (layerDetails.children.length > 0) {
+      const validChildren = layerDetails.children?.filter(
+        (c) => c.isVisible !== 'no' && ['processed', 'loaded'].includes(c.layerStatus ?? '')
+      );
+      if (validChildren.length) {
+        return t('legend.subLayersCount').replace('{count}', validChildren.length.toString());
+      }
+    } else {
+      const count = layerDetails.items.filter((d) => d.isVisible !== 'no').length;
+      const totalCount = layerDetails.items.length;
+      return t('legend.itemsCount').replace('{count}', count.toString()).replace('{totalCount}', totalCount.toString());
+    }
+    return null;
   };
 
   const allItemsChecked = () => {
@@ -143,12 +154,39 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
     );
   }
 
+  function renderLayers() {
+    return (
+      <>
+        <Typography sx={{ fontWeight: 'bold', textAlign: 'left', margin: '10px 0px' }}>{t('layers.subLayersList')}</Typography>
+        <Grid container direction="column" spacing={0} sx={sxClasses.itemsGrid} justifyContent="left" justifyItems="stretch">
+          {layerDetails.children.map((layer) => (
+            <Box
+              key={layer.layerId}
+              sx={{ display: 'flex', flexDirection: 'column', alignItems: 'stretch', padding: '8px 0', borderBottom: '1px solid #ccc' }}
+            >
+              <Box sx={{ display: 'flex', flexDirection: 'row' }}>
+                <Box sx={{ marginLeft: '20px' }}>
+                  <LayerIcon layer={layer} />
+                </Box>
+                <Box>
+                  <span style={sxClasses.tableIconLabel}>{layer.layerName}</span>
+                </Box>
+              </Box>
+            </Box>
+          ))}
+        </Grid>
+      </>
+    );
+  }
+
   function renderLayerButtons() {
     return (
       <Box sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '15px' }}>
-        <IconButton id="table-details" tooltip="legend.tableDetails" sx={{ backgroundColor: '#F6F6F6' }} onClick={handleOpenTable}>
-          <TableViewIcon />
-        </IconButton>
+        {layerDetails.items.length > 0 && (
+          <IconButton id="table-details" tooltip="legend.tableDetails" sx={{ backgroundColor: '#F6F6F6' }} onClick={handleOpenTable}>
+            <TableViewIcon />
+          </IconButton>
+        )}
         <IconButton tooltip="legend.refreshLayer" sx={{ backgroundColor: '#F6F6F6' }} onClick={handleRefreshLayer}>
           <RestartAltIcon />
         </IconButton>
@@ -178,12 +216,15 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
       <Box sx={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between' }}>
         <Box sx={{ textAlign: 'left' }}>
           <Typography sx={sxClasses.categoryTitle}> {layerDetails.layerName} </Typography>
-          <Typography sx={{ fontSize: '0.8em' }}> {getItemsCount()} </Typography>
+          <Typography sx={{ fontSize: '0.8em' }}> {getSubTitle()} </Typography>
         </Box>
         {renderLayerButtons()}
       </Box>
       {renderOpacityControl()}
-      <Box sx={{ marginTop: '20px' }}>{renderItems()}</Box>
+      <Box sx={{ marginTop: '20px' }}>
+        {layerDetails.items?.length > 0 && renderItems()}
+        {layerDetails.children.length > 0 && renderLayers()}
+      </Box>
       <Divider sx={{ marginTop: '50px', marginBottom: '10x' }} variant="middle" />
       {layerDetails.layerAttribution &&
         layerDetails.layerAttribution!.map((attribution) => {

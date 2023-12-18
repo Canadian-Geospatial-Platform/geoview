@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '@mui/material/styles';
 import { styled } from '@mui/material';
@@ -39,12 +39,6 @@ export function LayersPanel() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   */
-
-  useEffect(() => {
-    if (layerDetailsRef.current) {
-      layerDetailsRef.current.scrollIntoView({ behavior: 'smooth' });
-    }
-  }, [selectedLayer]);
 
   const leftPanel = () => {
     return (
