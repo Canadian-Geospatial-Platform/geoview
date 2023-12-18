@@ -11,7 +11,7 @@ import { HtmlToReact } from '@/core/containers/html-to-react';
 import { TabPanel } from './tab-panel';
 import { useUIActiveTrapGeoView, useUIStoreActions } from '@/core/stores/store-interface-and-intial-values/ui-state';
 
-type TypeChildren = ReactNode;
+type TypeChildren = React.ElementType;
 /**
  * Type used for properties of each tab
  */

@@ -1,34 +1,15 @@
-import {
-  Cast,
-  AbstractPlugin,
-  TypePluginOptions,
-  TypeIconButtonProps,
-  TypeButtonPanel,
-  TypeWindow,
-  toJsonObject,
-  TypePanelProps,
-  TypeJsonObject,
-  AnySchemaObject,
-} from 'geoview-core';
+import { Cast, TypeIconButtonProps, toJsonObject, TypePanelProps, TypeJsonObject, AnySchemaObject } from 'geoview-core';
+import { AppBarPlugin } from 'geoview-core/src/api/plugin/appbar-plugin';
+import { MapIcon } from 'geoview-core/src/ui/icons';
 
 import { BasemapPanel } from './basemap-panel';
 import schema from '../schema.json';
 import defaultConfig from '../default-config-basemap-panel.json';
 
-const w = window as TypeWindow;
-
 /**
  * Create a class for the plugin instance
  */
-class BasemapPanelPlugin extends AbstractPlugin {
-  // store the created button panel object
-  buttonPanel: TypeButtonPanel | null;
-
-  constructor(pluginId: string, props: TypePluginOptions) {
-    super(pluginId, props);
-    this.buttonPanel = null;
-  }
-
+class BasemapPanelPlugin extends AppBarPlugin {
   /**
    * Return the package schema
    *
@@ -53,7 +34,7 @@ class BasemapPanelPlugin extends AbstractPlugin {
         info: {
           transport: {
             name: 'Transport',
-            description: `The Canada Base Map - Transportation (CBMT). This web mapping service provides spatial reference context with an emphasis on transportation networks. 
+            description: `The Canada Base Map - Transportation (CBMT). This web mapping service provides spatial reference context with an emphasis on transportation networks.
                           It is designed especially for use as a background map in a web mapping application or geographic information system (GIS).`,
           },
           simple: {
@@ -61,7 +42,7 @@ class BasemapPanelPlugin extends AbstractPlugin {
           },
           shaded: {
             name: 'Shaded relief',
-            description: `The Canada Base Map - Elevation (CBME) web mapping services of the Earth Sciences Sector at Natural Resources Canada, 
+            description: `The Canada Base Map - Elevation (CBME) web mapping services of the Earth Sciences Sector at Natural Resources Canada,
                           is intended primarily for online mapping application users and developers`,
           },
           osm: {
@@ -82,7 +63,7 @@ class BasemapPanelPlugin extends AbstractPlugin {
         info: {
           transport: {
             name: 'Transport',
-            description: `Carte de base du Canada - Transport (CBCT). Ce service de cartographie Web offre un contexte de référence spatiale axé sur les réseaux de transport. 
+            description: `Carte de base du Canada - Transport (CBCT). Ce service de cartographie Web offre un contexte de référence spatiale axé sur les réseaux de transport.
                           Il est particulièrement conçu pour être utilisé comme fond de carte dans une application cartographique Web ou un système d'information géographique (SIG).`,
           },
           simple: {
@@ -90,7 +71,7 @@ class BasemapPanelPlugin extends AbstractPlugin {
           },
           shaded: {
             name: 'Relief ombré',
-            description: `Les services de cartographie Web de la carte de base du Canada - élévation (CBCE) du Secteur des sciences de la 
+            description: `Les services de cartographie Web de la carte de base du Canada - élévation (CBCE) du Secteur des sciences de la
                           Terre de Ressources naturelles Canada sont destinés principalement aux utilisateurs et aux développeurs d'applications de cartographie en ligne.`,
           },
           osm: {
@@ -107,72 +88,43 @@ class BasemapPanelPlugin extends AbstractPlugin {
     },
   });
 
-  /**
-   * Added function called after the plugin has been initialized
-   */
-  added = (): void => {
-    const { configObj, pluginProps } = this as AbstractPlugin;
+  onCreateButtonProps(): TypeIconButtonProps {
+    // Button props
+    return {
+      id: 'basemapPanelButton',
+      tooltip: 'basemapPanel.title',
+      tooltipPlacement: 'right',
+      children: <MapIcon />,
+      visible: true,
+    };
+  }
 
-    const { mapId } = pluginProps;
+  onCreateContentProps(): TypePanelProps {
+    // Panel props
+    return {
+      title: 'basemapPanel.title',
+      icon: <MapIcon />,
+      width: 350,
+      status: this.configObj?.isOpen as boolean,
+    };
+  }
 
-    // access the cgpv object from the window object
-    const { cgpv } = w;
-
-    if (cgpv) {
-      // access the api calls
-      const { api, ui } = cgpv;
-      const { MapIcon } = ui.elements;
-
-      // button props
-      const button: TypeIconButtonProps = {
-        id: 'basemapPanelButton',
-        tooltip: 'basemapPanel.title',
-        tooltipPlacement: 'right',
-        children: <MapIcon />,
-        visible: true,
-      };
-
-      // panel props
-      const panel: TypePanelProps = {
-        title: 'basemapPanel.title',
-        icon: <MapIcon />,
-        width: 350,
-        status: configObj?.isOpen as boolean,
-      };
-
-      // create a new button panel on the app-bar
-      this.buttonPanel = api.maps[mapId].appBarButtons.createAppbarPanel(button, panel, null);
-      // set panel content
-      this.buttonPanel?.panel?.changeContent(<BasemapPanel mapId={mapId} config={configObj || {}} />);
-    }
+  onCreateContent = (): JSX.Element => {
+    return <BasemapPanel mapId={this.pluginProps.mapId} config={this.configObj || {}} />;
   };
 
   /**
    * Function called when the plugin is removed, used for clean up
    */
-  removed(): void {
-    const { mapId } = (this as AbstractPlugin).pluginProps;
-
-    // access the cgpv object from the window object
-    const { cgpv } = w;
-
-    if (cgpv) {
-      // access the api calls
-      const { api } = cgpv;
-
-      if (this.buttonPanel) {
-        api.maps[mapId].appBarButtons.removeAppbarPanel(this.buttonPanel.buttonPanelId);
-
-        // reset basemaps array
-        api.maps[mapId].basemap.basemaps = [];
-        // reload default basemap
-        api.maps[mapId].basemap.loadDefaultBasemaps();
-      }
-    }
+  onRemoved(): void {
+    // reset basemaps array
+    this.api.maps[this.pluginProps.mapId].basemap.basemaps = [];
+    // reload default basemap
+    this.api.maps[this.pluginProps.mapId].basemap.loadDefaultBasemaps();
   }
 }
 
 export default BasemapPanelPlugin;
 
-w.plugins = w.plugins || {};
-w.plugins['basemap-panel'] = Cast<AbstractPlugin>(BasemapPanelPlugin);
+window.plugins = window.plugins || {};
+window.plugins['basemap-panel'] = Cast<BasemapPanelPlugin>(BasemapPanelPlugin);

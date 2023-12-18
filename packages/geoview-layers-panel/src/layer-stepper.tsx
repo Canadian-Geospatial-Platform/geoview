@@ -1,7 +1,6 @@
 /* eslint-disable react/require-default-props */
 import type React from 'react';
 import {
-  TypeWindow,
   TypeJsonArray,
   TypeGeoviewLayerConfig,
   TypeGeoviewLayerType,
@@ -26,15 +25,13 @@ type EsriOptions = {
   capability: string;
 };
 
-const w = window as TypeWindow;
-
 /**
  * A react component that displays the details panel content
  *
  * @returns {JSX.Element} A React JSX Element with the details panel
  */
 function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
-  const { cgpv } = w;
+  const { cgpv } = window;
   const { api, ui, react } = cgpv;
   const displayLanguage = api.maps[mapId].getDisplayLanguage() as 'en' | 'fr';
 

@@ -1,34 +1,14 @@
-/* eslint-disable @typescript-eslint/explicit-module-boundary-types */
-import {
-  Cast,
-  AbstractPlugin,
-  toJsonObject,
-  TypeJsonObject,
-  TypeWindow,
-  TypePluginOptions,
-  TypeButtonPanel,
-  TypeIconButtonProps,
-  TypePanelProps,
-  AnySchemaObject,
-} from 'geoview-core';
+import { Cast, toJsonObject, TypeJsonObject, TypeIconButtonProps, TypePanelProps, AnySchemaObject } from 'geoview-core';
+import { AppBarPlugin } from 'geoview-core/src/api/plugin/appbar-plugin';
+import { LayersOutlinedIcon } from 'geoview-core/src/ui';
 import PanelContent from './panel-content';
 import schema from '../schema.json';
 import defaultConfig from '../default-config-layers-panel.json';
 
-const w = window as TypeWindow;
-
 /**
  * Create a class for the plugin instance
  */
-class LayersPanelPlugin extends AbstractPlugin {
-  // store the created button panel object
-  buttonPanel: TypeButtonPanel | null;
-
-  constructor(pluginId: string, props: TypePluginOptions) {
-    super(pluginId, props);
-    this.buttonPanel = null;
-  }
-
+class LayersPanelPlugin extends AppBarPlugin {
   /**
    * Return the schema that is defined for this package
    *
@@ -55,66 +35,33 @@ class LayersPanelPlugin extends AbstractPlugin {
     },
   });
 
-  /**
-   * Added function called after the plugin has been initialized
-   */
-  added(): void {
-    const { mapId } = (this as AbstractPlugin).pluginProps;
-
-    // access the cgpv object from the window object
-    const { cgpv } = w;
-
-    // access the api calls
-    const { api, ui } = cgpv;
-    const { LayersOutlinedIcon } = ui.elements;
-
-    let panelStatus = false;
-
-    panelStatus = (this as AbstractPlugin).configObj?.isOpen?.large as boolean;
-
-    // button props
-    const button: TypeIconButtonProps = {
+  onCreateButtonProps(): TypeIconButtonProps {
+    // Button props
+    return {
       id: 'layersPanelButton',
       tooltip: 'layersPanel.title',
       tooltipPlacement: 'right',
       children: <LayersOutlinedIcon />,
       visible: true,
     };
+  }
 
-    // panel props
-    const panel: TypePanelProps = {
+  onCreateContentProps(): TypePanelProps {
+    // Panel props
+    return {
       title: 'layersPanel.title',
       icon: <LayersOutlinedIcon />,
       width: 350,
-      status: panelStatus,
+      status: this.configObj?.isOpen?.large as boolean,
     };
-
-    // create a new button panel on the app-bar
-    this.buttonPanel = api.maps[mapId].appBarButtons.createAppbarPanel(button, panel, null);
-
-    // set panel content
-    this.buttonPanel?.panel?.changeContent(<PanelContent buttonPanel={this.buttonPanel} mapId={mapId} />);
   }
 
-  /**
-   * Function called when the plugin is removed, used for clean up
-   */
-  removed(): void {
-    const { mapId } = (this as AbstractPlugin).pluginProps;
-
-    // access the cgpv object from the window object
-    const { cgpv } = w;
-
-    // access the api calls
-    const { api } = cgpv;
-
-    if (this.buttonPanel) {
-      api.maps[mapId].appBarButtons.removeAppbarPanel(this.buttonPanel.buttonPanelId);
-    }
+  onCreateContent(): JSX.Element {
+    return <PanelContent buttonPanel={this.buttonPanel} mapId={this.pluginProps.mapId} />;
   }
 }
 
 export default LayersPanelPlugin;
 
-w.plugins = w.plugins || {};
-w.plugins['layers-panel'] = Cast<AbstractPlugin>(LayersPanelPlugin);
+window.plugins = window.plugins || {};
+window.plugins['layers-panel'] = Cast<LayersPanelPlugin>(LayersPanelPlugin);

@@ -4,7 +4,6 @@ import {
   TypeJsonObject,
   TypeJsonArray,
   SelectChangeEvent,
-  TypeWindow,
   TypeBasemapOptions,
   TypeValidMapProjectionCodes,
   TypeDisplayLanguage,
@@ -14,8 +13,6 @@ import {
 import { useMapProjection } from 'geoview-core/src/core/stores/store-interface-and-intial-values/map-state';
 import { getSxClasses } from './basemap-panel-style';
 
-const w = window as TypeWindow;
-
 interface BaseMapPanelProps {
   mapId: string;
   config: TypeJsonObject;
@@ -24,7 +21,7 @@ interface BaseMapPanelProps {
 export function BasemapPanel(props: BaseMapPanelProps): JSX.Element {
   const { mapId, config } = props;
 
-  const { cgpv } = w;
+  const { cgpv } = window;
   const myMap = cgpv.api.maps[mapId];
 
   const { api, ui, react } = cgpv;

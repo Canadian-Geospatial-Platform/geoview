@@ -176,9 +176,7 @@ export class Plugin {
         Object.defineProperties(plugin, {
           pluginId: { value: pluginId },
           api: { value: api },
-          createElement: { value: React.createElement },
           react: { value: React },
-          props: { value: props !== undefined && props !== null ? props : {} },
           translate: { value: translate },
           useTheme: { value: useTheme },
           configObj: { value: pluginConfigObj },
