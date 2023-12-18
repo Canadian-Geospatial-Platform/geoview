@@ -1,9 +1,12 @@
 import { useTheme } from '@mui/material/styles';
 import { FormControl, InputLabel, NativeSelect } from '@mui/material';
 import { useTimeSliderLayers, useTimeSliderStoreActions } from 'geoview-core/src/core/stores';
+import { getLocalizedValue } from 'geoview-core';
 import { getSxClasses } from './time-slider-style';
+import { ConfigProps } from './time-slider-types';
 
 interface TimeSliderPanelProps {
+  config: ConfigProps;
   mapId: string;
   layerPath: string;
 }
@@ -16,7 +19,7 @@ interface TimeSliderPanelProps {
  */
 export function TimeSlider(TimeSliderPanelProps: TimeSliderPanelProps) {
   const { cgpv } = window;
-  const { layerPath } = TimeSliderPanelProps;
+  const { config, layerPath, mapId } = TimeSliderPanelProps;
   const { react, ui } = cgpv;
   const { useTranslation } = cgpv;
   const { useState, useRef, useEffect } = react;
@@ -51,19 +54,40 @@ export function TimeSlider(TimeSliderPanelProps: TimeSliderPanelProps) {
 
   // Get actions and states from store
   // TODO: evaluate best option to set value by layer path.... trough a getter?
-  const { setValues, setLocked, setReversed, setDelay, setFiltering } = useTimeSliderStoreActions();
-  const { range } = useTimeSliderLayers()[layerPath];
-  const { defaultValue } = useTimeSliderLayers()[layerPath];
-  const { minAndMax } = useTimeSliderLayers()[layerPath];
-  const { fieldAlias } = useTimeSliderLayers()[layerPath];
-  const { singleHandle } = useTimeSliderLayers()[layerPath];
-  const { values } = useTimeSliderLayers()[layerPath];
-  const { filtering } = useTimeSliderLayers()[layerPath];
-  const { delay } = useTimeSliderLayers()[layerPath];
-  const { locked } = useTimeSliderLayers()[layerPath];
-  const { reversed } = useTimeSliderLayers()[layerPath];
+  const { setTitle, setDescription, setDefaultValue, setValues, setLocked, setReversed, setDelay, setFiltering } =
+    useTimeSliderStoreActions();
 
-  const timeStampRange = range.map((entry) => new Date(entry).getTime());
+  // TODO: check performance as we should technically have one selector by constant
+  const {
+    title,
+    description,
+    name,
+    defaultValue,
+    range,
+    minAndMax,
+    field,
+    fieldAlias,
+    filtering,
+    singleHandle,
+    values,
+    delay,
+    locked,
+    reversed,
+  } = useTimeSliderLayers()[layerPath];
+
+  // slider config
+  useEffect(() => {
+    // TODO: add mechanism to initialize these values during store onInitialize
+    const sliderConfig = config?.sliders?.find((o: { layerPaths: string[] }) => o.layerPaths.includes(layerPath));
+    if (title === undefined) setTitle(layerPath, getLocalizedValue(sliderConfig?.title, mapId) || '');
+    if (description === undefined) setDescription(layerPath, getLocalizedValue(sliderConfig?.description, mapId) || '');
+    if (defaultValue === undefined) setDefaultValue(layerPath, sliderConfig?.defaultValue || '');
+    if (locked === undefined) setLocked(layerPath, sliderConfig?.locked !== undefined ? sliderConfig?.locked : false);
+    if (reversed === undefined) setReversed(layerPath, sliderConfig?.reversed !== undefined ? sliderConfig?.reversed : false);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const timeStampRange = range.map((entry: string | number | Date) => new Date(entry).getTime());
   // Check if range occurs in a single day or year
   const timeDelta = minAndMax[1] - minAndMax[0];
   const dayDelta = new Date(minAndMax[1]).getDate() - new Date(minAndMax[0]).getDate();
@@ -272,12 +296,10 @@ export function TimeSlider(TimeSliderPanelProps: TimeSliderPanelProps) {
       <div style={sxClasses.rightPanelContainer}>
         <Grid container sx={sxClasses.rightPanelBtnHolder}>
           <Grid item xs={9}>
-            <Typography component="div" sx={{ ...sxClasses.panelHeaders, paddingLeft: '20px', textAlign: 'center', paddingTop: '10px' }}>
-              {timeframe !== undefined
-                ? `${fieldAlias} (${
-                    timeframe === 'day' ? new Date(defaultValue).toLocaleDateString() : new Date(defaultValue).getFullYear()
-                  })`
-                : fieldAlias}
+            <Typography component="div" sx={{ ...sxClasses.panelHeaders, paddingLeft: '20px', paddingTop: '10px' }}>
+              {`${title || name}`}
+              {timeframe !== undefined &&
+                ` (${timeframe === 'day' ? new Date(defaultValue).toLocaleDateString() : new Date(defaultValue).getFullYear()})`}
             </Typography>
           </Grid>
           <Grid item xs={3}>
@@ -296,9 +318,11 @@ export function TimeSlider(TimeSliderPanelProps: TimeSliderPanelProps) {
           <div style={{ textAlign: 'center', paddingTop: '20px' }}>
             <Slider
               sliderId={layerPath}
+              mapId={mapId}
               style={{ width: '80%', color: 'primary' }}
               min={minAndMax[0]}
               max={minAndMax[1]}
+              defaultValue={Number(defaultValue)}
               value={values}
               valueLabelFormat={(value) => valueLabelFormat(value)}
               marks={sliderMarks}
@@ -375,6 +399,20 @@ export function TimeSlider(TimeSliderPanelProps: TimeSliderPanelProps) {
             </FormControl>
           </div>
         </Grid>
+        {description && (
+          <Grid item xs={12}>
+            <Typography component="div" sx={{ px: '20px', py: '5px' }}>
+              {description}
+            </Typography>
+          </Grid>
+        )}
+        {fieldAlias && (
+          <Grid item xs={12}>
+            <Typography component="div" sx={{ px: '20px', py: '5px' }}>
+              {`${fieldAlias} (${field})`}
+            </Typography>
+          </Grid>
+        )}
       </div>
     </Grid>
   );

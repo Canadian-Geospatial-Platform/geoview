@@ -125,8 +125,8 @@ export class TimeSliderEventProcessor extends AbstractEventProcessor {
         filtering: true,
         values,
         delay: 1000,
-        locked: false,
-        reversed: false,
+        locked: undefined,
+        reversed: undefined,
       },
     };
     return sliderData;
