@@ -87,7 +87,8 @@
     "previousFeatureBtn": "Item précédent",
     "clearAllfeatures": "Déselctionner tout les items",
     "highlightFeaturesOnMap": "Déselctionner tout les items",
-    "keepFeatureSelected": "Garder l'élément sélectionné"
+    "keepFeatureSelected": "Garder l'élément sélectionné",
+    "detailsInstructions": "Instructions détaillées"
   },
   "lightbox": {
     "next": "Prochaine",
