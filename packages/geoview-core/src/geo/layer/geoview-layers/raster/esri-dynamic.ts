@@ -124,7 +124,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
    *
    * @returns {Promise<void>} A promise that the execution is completed.
    */
-  fetchServiceMetadata(): Promise<void> {
+  protected fetchServiceMetadata(): Promise<void> {
     return commonfetchServiceMetadata.call(this);
   }
 
@@ -164,7 +164,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
    *
    * @returns {'string' | 'date' | 'number'} The type of the field.
    */
-  getFieldType(fieldName: string, layerConfig: TypeLayerEntryConfig): 'string' | 'date' | 'number' {
+  protected getFieldType(fieldName: string, layerConfig: TypeLayerEntryConfig): 'string' | 'date' | 'number' {
     return commonGetFieldType.call(this, fieldName, layerConfig);
   }
 
@@ -176,7 +176,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
    *
    * @returns {null | codedValueType | rangeDomainType} The domain of the field.
    */
-  getFieldDomain(fieldName: string, layerConfig: TypeLayerEntryConfig): null | codedValueType | rangeDomainType {
+  protected getFieldDomain(fieldName: string, layerConfig: TypeLayerEntryConfig): null | codedValueType | rangeDomainType {
     return commonGetFieldDomain.call(this, fieldName, layerConfig);
   }
 
@@ -185,11 +185,11 @@ export class EsriDynamic extends AbstractGeoViewRaster {
    * @param {TypeJsonObject} esriTimeDimension The ESRI time dimension object
    * @param {TypeEsriFeatureLayerEntryConfig | TypeEsriDynamicLayerEntryConfig} layerConfig The layer entry to configure
    */
-  processTemporalDimension(
+  protected processTemporalDimension(
     esriTimeDimension: TypeJsonObject,
     layerConfig: TypeEsriFeatureLayerEntryConfig | TypeEsriDynamicLayerEntryConfig
   ) {
-    return commonProcessTemporalDimension.call(this, esriTimeDimension, layerConfig);
+    commonProcessTemporalDimension.call(this, esriTimeDimension, layerConfig);
   }
 
   /** ***************************************************************************************************************************
@@ -208,7 +208,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
     fields: TypeJsonArray,
     layerConfig: TypeEsriFeatureLayerEntryConfig | TypeEsriDynamicLayerEntryConfig
   ) => {
-    return commonProcessFeatureInfoConfig.call(this, capabilities, nameField, geometryFieldName, fields, layerConfig);
+    commonProcessFeatureInfoConfig.call(this, capabilities, nameField, geometryFieldName, fields, layerConfig);
   };
 
   /** ***************************************************************************************************************************
@@ -228,7 +228,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
     extent: TypeJsonObject,
     layerConfig: TypeEsriFeatureLayerEntryConfig | TypeEsriDynamicLayerEntryConfig
   ) {
-    return commonProcessInitialSettings.call(this, visibility, minScale, maxScale, extent, layerConfig);
+    commonProcessInitialSettings.call(this, visibility, minScale, maxScale, extent, layerConfig);
   }
 
   /** ***************************************************************************************************************************
@@ -329,51 +329,50 @@ export class EsriDynamic extends AbstractGeoViewRaster {
    *
    * @returns {Promise<TypeArrayOfFeatureInfoEntries>} The promised feature info table.
    */
-  protected getFeatureInfoAtLongLat(lnglat: Coordinate, layerPath: string): Promise<TypeArrayOfFeatureInfoEntries> {
-    const promisedQueryResult = new Promise<TypeArrayOfFeatureInfoEntries>((resolve) => {
+  protected async getFeatureInfoAtLongLat(lnglat: Coordinate, layerPath: string): Promise<TypeArrayOfFeatureInfoEntries> {
+    try {
       const layerConfig = this.getLayerConfig(layerPath) as TypeEsriDynamicLayerEntryConfig;
-      if (!this.getVisible(layerPath) || !layerConfig.olLayer) resolve([]);
-      else {
-        if (!(layerConfig as TypeEsriDynamicLayerEntryConfig).source.featureInfo?.queryable) resolve([]);
-        let identifyUrl = getLocalizedValue(layerConfig.source?.dataAccessPath, this.mapId);
-        if (!identifyUrl) resolve([]);
-        else {
-          identifyUrl = identifyUrl.endsWith('/') ? identifyUrl : `${identifyUrl}/`;
-          const mapLayer = api.maps[this.mapId].map;
-          const { currentProjection } = MapEventProcessor.getMapState(this.mapId);
-          const size = mapLayer.getSize()!;
-          let bounds = mapLayer.getView().calculateExtent();
-          bounds = transformExtent(bounds, `EPSG:${currentProjection}`, 'EPSG:4326');
+      if (!this.getVisible(layerPath) || !layerConfig.olLayer) return [];
 
-          const extent = { xmin: bounds[0], ymin: bounds[1], xmax: bounds[2], ymax: bounds[3] };
+      if (!(layerConfig as TypeEsriDynamicLayerEntryConfig).source.featureInfo?.queryable) return [];
 
-          const source = (layerConfig.olLayer as ImageLayer<ImageArcGISRest>).getSource()!;
-          const { layerDefs } = source.getParams();
+      let identifyUrl = getLocalizedValue(layerConfig.source?.dataAccessPath, this.mapId);
+      if (!identifyUrl) return [];
 
-          identifyUrl =
-            `${identifyUrl}identify?f=json&tolerance=7` +
-            `&mapExtent=${extent.xmin},${extent.ymin},${extent.xmax},${extent.ymax}` +
-            `&imageDisplay=${size[0]},${size[1]},96` +
-            `&layers=visible:${layerConfig.layerId}` +
-            `&layerDefs=${layerDefs}` +
-            `&returnFieldName=true&sr=4326&returnGeometry=true` +
-            `&geometryType=esriGeometryPoint&geometry=${lnglat[0]},${lnglat[1]}`;
+      identifyUrl = identifyUrl.endsWith('/') ? identifyUrl : `${identifyUrl}/`;
+      const mapLayer = api.maps[this.mapId].map;
+      const { currentProjection } = MapEventProcessor.getMapState(this.mapId);
+      const size = mapLayer.getSize()!;
+      let bounds = mapLayer.getView().calculateExtent();
+      bounds = transformExtent(bounds, `EPSG:${currentProjection}`, 'EPSG:4326');
 
-          fetch(identifyUrl).then((response) => {
-            response.json().then((jsonResponse) => {
-              const features = new EsriJSON().readFeatures(
-                { features: jsonResponse.results },
-                { dataProjection: 'EPSG:4326', featureProjection: `EPSG:${currentProjection}` }
-              ) as Feature<Geometry>[];
-              this.formatFeatureInfoResult(features, layerConfig).then((arrayOfFeatureInfoEntries) => {
-                resolve(arrayOfFeatureInfoEntries);
-              });
-            });
-          });
-        }
-      }
-    });
-    return promisedQueryResult;
+      const extent = { xmin: bounds[0], ymin: bounds[1], xmax: bounds[2], ymax: bounds[3] };
+
+      const source = (layerConfig.olLayer as ImageLayer<ImageArcGISRest>).getSource()!;
+      const { layerDefs } = source.getParams();
+
+      identifyUrl =
+        `${identifyUrl}identify?f=json&tolerance=7` +
+        `&mapExtent=${extent.xmin},${extent.ymin},${extent.xmax},${extent.ymax}` +
+        `&imageDisplay=${size[0]},${size[1]},96` +
+        `&layers=visible:${layerConfig.layerId}` +
+        `&layerDefs=${layerDefs}` +
+        `&returnFieldName=true&sr=4326&returnGeometry=true` +
+        `&geometryType=esriGeometryPoint&geometry=${lnglat[0]},${lnglat[1]}`;
+
+      const response = await fetch(identifyUrl);
+      const jsonResponse = await response.json();
+      const features = new EsriJSON().readFeatures(
+        { features: jsonResponse.results },
+        { dataProjection: 'EPSG:4326', featureProjection: `EPSG:${currentProjection}` }
+      ) as Feature<Geometry>[];
+      const arrayOfFeatureInfoEntries = await this.formatFeatureInfoResult(features, layerConfig);
+      return arrayOfFeatureInfoEntries;
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.log(error);
+      return null;
+    }
   }
 
   /** ***************************************************************************************************************************
@@ -555,7 +554,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
   }
 
   /** ***************************************************************************************************************************
-   * Get the layer view filter. The filter is derived fron the uniqueValue or the classBreak visibility flags and a layerFilter
+   * Get the layer view filter. The filter is derived from the uniqueValue or the classBreak visibility flags and a layerFilter
    * associated to the layer.
    *
    * @param {string} layerPath The layer path to the layer's configuration.
@@ -563,6 +562,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
    * @returns {string} the filter associated to the layerPath
    */
   getViewFilter(layerPath: string): string {
+    layerPath = layerPath || api.maps[this.mapId].layer.layerPathAssociatedToThegeoviewLayer;
     const layerConfig = this.getLayerConfig(layerPath) as TypeEsriDynamicLayerEntryConfig;
     const layerFilter = layerConfig.olLayer?.get('layerFilter');
 
@@ -758,41 +758,45 @@ export class EsriDynamic extends AbstractGeoViewRaster {
       layerPath = parameter1;
       filter = parameter2 as string;
       CombineLegendFilter = parameter3;
-    } else if (parameter2) {
+    } else if (parameter2 !== undefined) {
       if (typeof parameter2 === 'boolean') {
         filter = parameter1;
         CombineLegendFilter = parameter2;
-      } else filter = parameter2;
+      } else {
+        layerPath = parameter1;
+        filter = parameter2;
+      }
     } else filter = parameter1;
 
     const layerConfig = this.getLayerConfig(layerPath) as TypeEsriDynamicLayerEntryConfig;
-    const source = (layerConfig.olLayer as ImageLayer<ImageArcGISRest>).getSource();
-    if (source) {
-      let filterValueToUse = filter.replaceAll(/\s{2,}/g, ' ').trim();
-      layerConfig.olLayer!.set('legendFilterIsOff', !CombineLegendFilter);
-      layerConfig.olLayer?.set('layerFilter', filterValueToUse);
-      if (CombineLegendFilter) filterValueToUse = this.getViewFilter(layerPath);
+    if (!layerConfig?.olLayer) return; // We must wait for the layer to be created.
 
-      // Convert date constants using the externalFragmentsOrder derived from the externalDateFormat
-      const searchDateEntry = [
-        ...filterValueToUse.matchAll(/(?<=^date\b\s')[\d/\-T\s:+Z]{4,25}(?=')|(?<=[(\s]date\b\s')[\d/\-T\s:+Z]{4,25}(?=')/gi),
-      ];
-      searchDateEntry.reverse();
-      searchDateEntry.forEach((dateFound) => {
-        // If the date has a time zone, keep it as is, otherwise reverse its time zone by changing its sign
-        const reverseTimeZone = ![20, 25].includes(dateFound[0].length);
-        let reformattedDate = api.dateUtilities.applyInputDateFormat(dateFound[0], this.externalFragmentsOrder, reverseTimeZone);
-        // ESRI Dynamic layers doesn't accept the ISO date format. The time zone must be removed. The 'T' separator
-        // normally placed between the date and the time must be replaced by a space.
-        reformattedDate = reformattedDate.slice(0, reformattedDate.length === 20 ? -1 : -6); // drop time zone.
-        reformattedDate = reformattedDate.replace('T', ' ');
-        filterValueToUse = `${filterValueToUse!.slice(0, dateFound.index)}${reformattedDate}${filterValueToUse!.slice(
-          dateFound.index! + dateFound[0].length
-        )}`;
-      });
-      source.updateParams({ layerDefs: `{"${layerConfig.layerId}": "${filterValueToUse}"}` });
-      layerConfig.olLayer!.changed();
-    }
+    let filterValueToUse = filter.replaceAll(/\s{2,}/g, ' ').trim();
+    layerConfig.olLayer!.set('legendFilterIsOff', !CombineLegendFilter);
+    layerConfig.olLayer?.set('layerFilter', filterValueToUse);
+    if (CombineLegendFilter) filterValueToUse = this.getViewFilter(layerPath);
+
+    // Convert date constants using the externalFragmentsOrder derived from the externalDateFormat
+    const searchDateEntry = [
+      ...filterValueToUse.matchAll(/(?<=^date\b\s')[\d/\-T\s:+Z]{4,25}(?=')|(?<=[(\s]date\b\s')[\d/\-T\s:+Z]{4,25}(?=')/gi),
+    ];
+    searchDateEntry.reverse();
+    searchDateEntry.forEach((dateFound) => {
+      // If the date has a time zone, keep it as is, otherwise reverse its time zone by changing its sign
+      const reverseTimeZone = ![20, 25].includes(dateFound[0].length);
+      let reformattedDate = api.dateUtilities.applyInputDateFormat(dateFound[0], this.externalFragmentsOrder, reverseTimeZone);
+      // ESRI Dynamic layers doesn't accept the ISO date format. The time zone must be removed. The 'T' separator
+      // normally placed between the date and the time must be replaced by a space.
+      reformattedDate = reformattedDate.slice(0, reformattedDate.length === 20 ? -1 : -6); // drop time zone.
+      reformattedDate = reformattedDate.replace('T', ' ');
+      filterValueToUse = `${filterValueToUse!.slice(0, dateFound.index)}${reformattedDate}${filterValueToUse!.slice(
+        dateFound.index! + dateFound[0].length
+      )}`;
+    });
+    (layerConfig.olLayer as ImageLayer<ImageArcGISRest>)
+      .getSource()!
+      .updateParams({ layerDefs: `{"${layerConfig.layerId}": "${filterValueToUse}"}` });
+    layerConfig.olLayer!.changed();
   }
 
   /** ***************************************************************************************************************************

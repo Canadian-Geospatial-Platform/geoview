@@ -228,25 +228,28 @@ export class GeoviewRenderer {
    *
    * @returns {Promise<HTMLCanvasElement>} A promise that the canvas is created.
    */
-  private createIconCanvas(pointStyle?: Style): Promise<HTMLCanvasElement | null> {
-    const promisedCanvas = new Promise<HTMLCanvasElement | null>((resolve) => {
+  private async createIconCanvas(pointStyle?: Style): Promise<HTMLCanvasElement | null> {
+    try {
       const iconStyle = pointStyle?.getImage() as Icon;
-      this.loadImage(iconStyle.getSrc()!).then((image) => {
-        if (image) {
-          const size = iconStyle.getSize() as Size;
-          const width = Array.isArray(size) ? size[0] : image.width || this.LEGEND_CANVAS_WIDTH;
-          const height = Array.isArray(size) ? size[1] : image.height || this.LEGEND_CANVAS_HEIGHT;
-          const drawingCanvas = document.createElement('canvas');
-          drawingCanvas.width = width;
-          drawingCanvas.height = height;
-          const drawingContext = drawingCanvas.getContext('2d')!;
-          drawingContext.globalAlpha = iconStyle.getOpacity();
-          drawingContext.drawImage(image, 0, 0);
-          resolve(drawingCanvas);
-        } else resolve(null);
-      });
-    });
-    return promisedCanvas;
+      const image = await this.loadImage(iconStyle.getSrc()!);
+      if (image) {
+        const size = iconStyle.getSize() as Size;
+        const width = Array.isArray(size) ? size[0] : image.width || this.LEGEND_CANVAS_WIDTH;
+        const height = Array.isArray(size) ? size[1] : image.height || this.LEGEND_CANVAS_HEIGHT;
+        const drawingCanvas = document.createElement('canvas');
+        drawingCanvas.width = width;
+        drawingCanvas.height = height;
+        const drawingContext = drawingCanvas.getContext('2d')!;
+        drawingContext.globalAlpha = iconStyle.getOpacity();
+        drawingContext.drawImage(image, 0, 0);
+        return drawingCanvas;
+      }
+      return null;
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.log(error);
+      return null;
+    }
   }
 
   /** ***************************************************************************************************************************
@@ -344,32 +347,36 @@ export class GeoviewRenderer {
    * @param {(value: TypeVectorLayerStyles | PromiseLike<TypeVectorLayerStyles>) => void} resolve The function that will resolve the promise
    * of the calling methode.
    */
-  private processArrayOfPointStyleConfig(
+  private async processArrayOfPointStyleConfig(
     layerStyles: TypeVectorLayerStyles,
-    arrayOfPointStyleConfig: TypeUniqueValueStyleInfo[] | TypeClassBreakStyleInfo[],
-    resolve: (value: TypeVectorLayerStyles | PromiseLike<TypeVectorLayerStyles>) => void
-  ) {
-    // UniqueValue or ClassBreak point style configuration ============================================================
-    const styleArray: (HTMLCanvasElement | null)[] = layerStyles.Point!.arrayOfCanvas!;
-    const promiseOfCanvasCreated: Promise<HTMLCanvasElement | null>[] = [];
-    for (let i = 0; i < arrayOfPointStyleConfig.length; i++) {
-      if (isIconSymbolVectorConfig(arrayOfPointStyleConfig[i].settings))
-        // Icon symbol ================================================================================================
-        promiseOfCanvasCreated.push(this.createIconCanvas(this.processSimplePoint(arrayOfPointStyleConfig[i].settings)));
-      // Simple vector symbol =======================================================================================
-      else
-        promiseOfCanvasCreated.push(
-          new Promise<HTMLCanvasElement | null>((resolveSimpleVectorSymbol) => {
-            resolveSimpleVectorSymbol(this.createPointCanvas(this.processSimplePoint(arrayOfPointStyleConfig[i].settings)));
-          })
-        );
-    }
-    Promise.all(promiseOfCanvasCreated).then((listOfCanvasCreated) => {
+    arrayOfPointStyleConfig: TypeUniqueValueStyleInfo[] | TypeClassBreakStyleInfo[]
+  ): Promise<TypeVectorLayerStyles> {
+    try {
+      // UniqueValue or ClassBreak point style configuration ============================================================
+      const styleArray: (HTMLCanvasElement | null)[] = layerStyles.Point!.arrayOfCanvas!;
+      const promiseOfCanvasCreated: Promise<HTMLCanvasElement | null>[] = [];
+      for (let i = 0; i < arrayOfPointStyleConfig.length; i++) {
+        if (isIconSymbolVectorConfig(arrayOfPointStyleConfig[i].settings))
+          // Icon symbol ================================================================================================
+          promiseOfCanvasCreated.push(this.createIconCanvas(this.processSimplePoint(arrayOfPointStyleConfig[i].settings)));
+        // Simple vector symbol =======================================================================================
+        else
+          promiseOfCanvasCreated.push(
+            new Promise<HTMLCanvasElement | null>((resolveSimpleVectorSymbol) => {
+              resolveSimpleVectorSymbol(this.createPointCanvas(this.processSimplePoint(arrayOfPointStyleConfig[i].settings)));
+            })
+          );
+      }
+      const listOfCanvasCreated = await Promise.all(promiseOfCanvasCreated);
       listOfCanvasCreated.forEach((canvas) => {
         styleArray.push(canvas);
       });
-      resolve(layerStyles);
-    });
+      return layerStyles;
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.log(error);
+      return {} as TypeVectorLayerStyles;
+    }
   }
 
   /** ***************************************************************************************************************************
@@ -384,36 +391,40 @@ export class GeoviewRenderer {
    *
    * @returns {Promise<TypeVectorLayerStyles>} A promise that the layer styles are processed.
    */
-  private getPointStyleSubRoutine(
+  private async getPointStyleSubRoutine(
     defaultSettings?: TypeKindOfVectorSettings,
     arrayOfPointStyleConfig?: TypeUniqueValueStyleInfo[] | TypeClassBreakStyleInfo[]
   ): Promise<TypeVectorLayerStyles> {
-    const promisedLayerStyle = new Promise<TypeVectorLayerStyles>((resolve) => {
+    try {
       const layerStyles: TypeVectorLayerStyles = { Point: {} };
       if (defaultSettings) {
         if (isIconSymbolVectorConfig(defaultSettings)) {
           // Icon symbol ======================================================================================
-          this.createIconCanvas(this.processSimplePoint(defaultSettings)).then((canvas) => {
-            layerStyles.Point!.defaultCanvas = canvas;
-            if (arrayOfPointStyleConfig) {
-              layerStyles.Point!.arrayOfCanvas = [];
-              this.processArrayOfPointStyleConfig(layerStyles, arrayOfPointStyleConfig, resolve);
-            } else resolve(layerStyles);
-          });
-        } else {
-          // Simple vector symbol =============================================================================
-          layerStyles.Point!.defaultCanvas = this.createPointCanvas(this.processSimplePoint(defaultSettings));
+          const canvas = await this.createIconCanvas(this.processSimplePoint(defaultSettings));
+          layerStyles.Point!.defaultCanvas = canvas;
           if (arrayOfPointStyleConfig) {
             layerStyles.Point!.arrayOfCanvas = [];
-            this.processArrayOfPointStyleConfig(layerStyles, arrayOfPointStyleConfig, resolve);
-          } else resolve(layerStyles);
+            return await this.processArrayOfPointStyleConfig(layerStyles, arrayOfPointStyleConfig);
+          }
+          return layerStyles;
         }
-      } else {
-        layerStyles.Point!.arrayOfCanvas = [];
-        this.processArrayOfPointStyleConfig(layerStyles, arrayOfPointStyleConfig!, resolve);
+
+        // Simple vector symbol =============================================================================
+        layerStyles.Point!.defaultCanvas = this.createPointCanvas(this.processSimplePoint(defaultSettings));
+        if (arrayOfPointStyleConfig) {
+          layerStyles.Point!.arrayOfCanvas = [];
+          return await this.processArrayOfPointStyleConfig(layerStyles, arrayOfPointStyleConfig);
+        }
+        return layerStyles;
       }
-    });
-    return promisedLayerStyle;
+
+      layerStyles.Point!.arrayOfCanvas = [];
+      return await this.processArrayOfPointStyleConfig(layerStyles, arrayOfPointStyleConfig!);
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.log(error);
+      return {} as TypeVectorLayerStyles;
+    }
   }
 
   /** ***************************************************************************************************************************
