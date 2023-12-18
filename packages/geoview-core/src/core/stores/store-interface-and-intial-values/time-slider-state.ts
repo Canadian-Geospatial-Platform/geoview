@@ -4,6 +4,8 @@ import { TypeGetStore, TypeSetStore } from '../geoview-store';
 import { TimeSliderEventProcessor } from '@/api/event-processors/event-processor-children/time-slider-event-processor';
 
 export interface TypeTimeSliderValues {
+  title?: string;
+  description?: string;
   name: string;
   range: string[];
   defaultValue: string;
@@ -14,8 +16,8 @@ export interface TypeTimeSliderValues {
   values: number[];
   filtering: boolean;
   delay: number;
-  locked: boolean;
-  reversed: boolean;
+  locked?: boolean;
+  reversed?: boolean;
 }
 
 export interface ITimeSliderState {
@@ -25,10 +27,13 @@ export interface ITimeSliderState {
     addTimeSliderLayer: (newLayer: { [index: string]: TypeTimeSliderValues }) => void;
     applyFilters: (layerPath: string, values: number[]) => void;
     removeTimeSliderLayer: (layerPath: string) => void;
+    setTitle: (layerPath: string, title: string) => void;
+    setDescription: (layerPath: string, description: string) => void;
     setDelay: (layerPath: string, delay: number) => void;
     setFiltering: (layerPath: string, filter: boolean) => void;
     setLocked: (layerPath: string, locked: boolean) => void;
     setReversed: (layerPath: string, locked: boolean) => void;
+    setDefaultValue: (layerPath: string, defaultValue: string) => void;
     setValues: (layerPath: string, values: number[]) => void;
     setVisibleTimeSliderLayers: (visibleLayerPaths: string[]) => void;
   };
@@ -38,7 +43,6 @@ export function initializeTimeSliderState(set: TypeSetStore, get: TypeGetStore):
   const init = {
     timeSliderLayers: {},
     visibleTimeSliderLayers: [],
-
     actions: {
       addTimeSliderLayer(newLayer: { [index: string]: TypeTimeSliderValues }): void {
         set({
@@ -55,6 +59,26 @@ export function initializeTimeSliderState(set: TypeSetStore, get: TypeGetStore):
       removeTimeSliderLayer(layerPath: string): void {
         const sliderLayers = get().timeSliderState.timeSliderLayers;
         delete sliderLayers[layerPath];
+        set({
+          timeSliderState: {
+            ...get().timeSliderState,
+            timeSliderLayers: { ...sliderLayers },
+          },
+        });
+      },
+      setTitle(layerPath: string, title: string): void {
+        const sliderLayers = get().timeSliderState.timeSliderLayers;
+        sliderLayers[layerPath].title = title;
+        set({
+          timeSliderState: {
+            ...get().timeSliderState,
+            timeSliderLayers: { ...sliderLayers },
+          },
+        });
+      },
+      setDescription(layerPath: string, description: string): void {
+        const sliderLayers = get().timeSliderState.timeSliderLayers;
+        sliderLayers[layerPath].description = description;
         set({
           timeSliderState: {
             ...get().timeSliderState,
@@ -104,6 +128,16 @@ export function initializeTimeSliderState(set: TypeSetStore, get: TypeGetStore):
           },
         });
       },
+      setDefaultValue(layerPath: string, defaultValue: string): void {
+        const sliderLayers = get().timeSliderState.timeSliderLayers;
+        sliderLayers[layerPath].defaultValue = defaultValue;
+        set({
+          timeSliderState: {
+            ...get().timeSliderState,
+            timeSliderLayers: { ...sliderLayers },
+          },
+        });
+      },
       setValues(layerPath: string, values: number[]): void {
         const sliderLayers = get().timeSliderState.timeSliderLayers;
         sliderLayers[layerPath].values = values;
@@ -134,5 +168,4 @@ export function initializeTimeSliderState(set: TypeSetStore, get: TypeGetStore):
 // **********************************************************
 export const useTimeSliderLayers = () => useStore(useGeoViewStore(), (state) => state.timeSliderState.timeSliderLayers);
 export const useVisibleTimeSliderLayers = () => useStore(useGeoViewStore(), (state) => state.timeSliderState.visibleTimeSliderLayers);
-
 export const useTimeSliderStoreActions = () => useStore(useGeoViewStore(), (state) => state.timeSliderState.actions);

@@ -1,0 +1,75 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "GeoView Time Slider Config Schema",
+  "type": "object",
+  "version": 1.0,
+  "comments": "Configuration for GeoView time slider package.",
+  "additionalProperties": false,
+  "properties": {
+    "sliders": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "object",
+            "properties": {
+              "en": {
+                "type": "string",
+                "default": "Time slider title",
+                "description": "The English version of the string."
+              },
+              "fr": {
+                "type": "string",
+                "default": "Titre du curseur temporel",
+                "description": "The French version of the string. "
+              }
+            }
+          },
+          "description": {
+            "type": "object",
+            "properties": {
+              "en": {
+                "type": "string",
+                "default": "Time slider description",
+                "description": "The English version of the string."
+              },
+              "fr": {
+                "type": "string",
+                "default": "Description du curseur temporel",
+                "description": "The French version of the string. "
+              }
+            }
+          },
+          "locked": {
+            "type": "boolean",
+            "default": false,
+            "description": "Lock handle"
+          },
+          "reversed": {
+            "type": "boolean",
+            "default": false,
+            "description": "Reverse direction of the slider animation"
+          },
+          "defaultValue": {
+            "type": "string",
+            "default": false,
+            "description": "Initial value on slider"
+          }
+        }
+      }
+    },
+    "suportedLanguages": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "enum": ["en", "fr"]
+      },
+      "default": ["en", "fr"],
+      "description": "ISO 639-1 code indicating the languages supported by the configuration file.",
+      "minItems": 1
+    }
+  },
+  "required": ["sliders", "suportedLanguages"]
+}

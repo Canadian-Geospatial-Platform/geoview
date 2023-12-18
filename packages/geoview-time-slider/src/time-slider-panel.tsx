@@ -2,8 +2,10 @@ import { TypeWindow } from 'geoview-core';
 import { LayerListEntry, Layout } from 'geoview-core/src/core/components/common';
 import { useVisibleTimeSliderLayers, useTimeSliderLayers } from 'geoview-core/src/core/stores';
 import { TimeSlider } from './time-slider';
+import { ConfigProps } from './time-slider-types';
 
 interface TypeTimeSliderProps {
+  configObj: ConfigProps;
   mapId: string;
 }
 
@@ -16,7 +18,7 @@ const { cgpv } = window as TypeWindow;
  * @returns {JSX.Element} the time slider tab
  */
 export function TimeSliderPanel(props: TypeTimeSliderProps): JSX.Element {
-  const { mapId } = props;
+  const { mapId, configObj } = props;
   const { react, ui } = cgpv;
   const { useTranslation } = cgpv;
   const { useState, useEffect } = react;
@@ -49,11 +51,11 @@ export function TimeSliderPanel(props: TypeTimeSliderProps): JSX.Element {
     <Layout
       selectedLayerPath={selectedLayerPath}
       handleLayerList={handleLayerList}
-      layerList={visibleTimeSliderLayers.map((layer) => {
-        return { layerName: timeSliderLayers[layer].name, layerPath: layer, tooltip: timeSliderLayers[layer].name };
+      layerList={visibleTimeSliderLayers.map((layerPath: string) => {
+        return { layerName: timeSliderLayers[layerPath].name, layerPath, tooltip: timeSliderLayers[layerPath].name };
       })}
     >
-      <TimeSlider mapId={mapId} layerPath={selectedLayerPath} key={selectedLayerPath} />
+      <TimeSlider mapId={mapId} config={configObj} layerPath={selectedLayerPath} key={selectedLayerPath} />
     </Layout>
   ) : (
     <Box />

@@ -1,0 +1,36 @@
+{
+  "sliders": [
+    {
+      "layerPaths": ["historical-flood/0"],
+      "title": {
+        "en": "Historical Flood Events - Custom",
+        "fr": "Événements d'inondation historiques - Personnalisé"
+      },
+      "description": {
+        "en": "Custom description",
+        "fr": "Descriptif personnalisé"
+      },
+      "locked": true,
+      "reversed": true,
+      "defaultValue": ""
+    },
+    {
+      "layerPaths": ["wmsLYR1-spatiotemporel/RADAR_1KM_RSNO"],
+      "title": {
+        "en": "Spatiotemporel - Custom",
+        "fr": "Spatiotemporel - Personnalisé"
+      },
+      "description": {
+        "en": "Custom description",
+        "fr": "Descriptif personnalisé"
+      },
+      "locked": true,
+      "reversed": true,
+      "defaultValue": ""
+    },
+    {
+      "layerPaths": ["MSI/msi-94-or-more"]
+    }
+  ],
+  "suportedLanguages": ["en", "fr"]
+}

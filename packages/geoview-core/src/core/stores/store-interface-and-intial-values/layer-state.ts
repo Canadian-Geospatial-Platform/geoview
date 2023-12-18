@@ -150,7 +150,6 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
               if (registeredLayer.style![geometryType]?.styleType === 'classBreaks') {
                 (registeredLayer.style![geometryType]! as TypeClassBreakStyleConfig).classBreakStyleInfo[index].visible = item.isVisible;
               } else if (registeredLayer.style![geometryType]?.styleType === 'uniqueValue') {
-                console.log(registeredLayer);
                 (registeredLayer.style![geometryType]! as TypeUniqueValueStyleConfig).uniqueValueStyleInfo[index].visible = item.isVisible;
               }
             }
