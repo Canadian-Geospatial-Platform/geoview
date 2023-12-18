@@ -57,17 +57,6 @@ export function TimeSlider(TimeSliderPanelProps: TimeSliderPanelProps) {
   const { setTitle, setDescription, setDefaultValue, setValues, setLocked, setReversed, setDelay, setFiltering } =
     useTimeSliderStoreActions();
 
-  // slider config
-  useEffect(() => {
-    const sliderConfig = config?.sliders?.find((o: { layerPaths: string[] }) => o.layerPaths.includes(layerPath));
-    setTitle(layerPath, getLocalizedValue(sliderConfig?.title, mapId) || '');
-    setDescription(layerPath, getLocalizedValue(sliderConfig?.description, mapId) || '');
-    setDefaultValue(layerPath, sliderConfig?.defaultValue || '');
-    setLocked(layerPath, sliderConfig?.locked !== undefined ? sliderConfig?.locked : false);
-    setReversed(layerPath, sliderConfig?.reversed !== undefined ? sliderConfig?.reversed : false);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
   // TODO: check performance as we should technically have one selector by constant
   const {
     title,
@@ -85,6 +74,18 @@ export function TimeSlider(TimeSliderPanelProps: TimeSliderPanelProps) {
     locked,
     reversed,
   } = useTimeSliderLayers()[layerPath];
+
+  // slider config
+  useEffect(() => {
+    // TODO: add mechanism to initialize these values during store onInitialize
+    const sliderConfig = config?.sliders?.find((o: { layerPaths: string[] }) => o.layerPaths.includes(layerPath));
+    if (title === undefined) setTitle(layerPath, getLocalizedValue(sliderConfig?.title, mapId) || '');
+    if (description === undefined) setDescription(layerPath, getLocalizedValue(sliderConfig?.description, mapId) || '');
+    if (defaultValue === undefined) setDefaultValue(layerPath, sliderConfig?.defaultValue || '');
+    if (locked === undefined) setLocked(layerPath, sliderConfig?.locked !== undefined ? sliderConfig?.locked : false);
+    if (reversed === undefined) setReversed(layerPath, sliderConfig?.reversed !== undefined ? sliderConfig?.reversed : false);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const timeStampRange = range.map((entry: string | number | Date) => new Date(entry).getTime());
   // Check if range occurs in a single day or year
