@@ -170,7 +170,7 @@ export function Detailspanel(): JSX.Element {
       />
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [layerDataInfo, isEnlargeDataTable, checkedFeatures]);
+  }, [layerDataInfo, arrayOfLayerData, isEnlargeDataTable, checkedFeatures]);
 
   return (
     <Box sx={sxClasses.detailsContainer}>
