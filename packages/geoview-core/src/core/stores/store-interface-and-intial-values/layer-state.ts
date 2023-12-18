@@ -150,7 +150,6 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
               if (registeredLayer.style![geometryType]?.styleType === 'classBreaks') {
                 (registeredLayer.style![geometryType]! as TypeClassBreakStyleConfig).classBreakStyleInfo[index].visible = item.isVisible;
               } else if (registeredLayer.style![geometryType]?.styleType === 'uniqueValue') {
-                console.log(registeredLayer);
                 (registeredLayer.style![geometryType]! as TypeUniqueValueStyleConfig).uniqueValueStyleInfo[index].visible = item.isVisible;
               }
             }
@@ -162,7 +161,7 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
           }
 
           // apply filter to layer
-          (api.maps[get().mapId].layer.geoviewLayer(layerPath) as AbstractGeoViewVector | EsriDynamic).applyViewFilter();
+          (api.maps[get().mapId].layer.geoviewLayer(layerPath) as AbstractGeoViewVector).applyViewFilter('');
         }
         set({
           layerState: {
