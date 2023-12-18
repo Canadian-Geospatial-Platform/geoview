@@ -1,11 +1,20 @@
 /* eslint-disable react/require-default-props */
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useMemo } from 'react';
 
 import { useTranslation } from 'react-i18next';
 
 import { useTheme } from '@mui/material/styles';
 
-import { IconButton, Grid, Typography, ArrowForwardIosOutlinedIcon, ArrowBackIosOutlinedIcon, LayersClearOutlinedIcon, Box } from '@/ui';
+import {
+  IconButton,
+  Grid,
+  Typography,
+  ArrowForwardIosOutlinedIcon,
+  ArrowBackIosOutlinedIcon,
+  LayersClearOutlinedIcon,
+  Box,
+  Paper,
+} from '@/ui';
 import { FeatureInfo } from './feature-info-new';
 import { TypeFeatureInfoEntry, TypeArrayOfLayerData, TypeLayerData, TypeGeometry } from '@/api/events/payloads';
 import { getSxClasses } from './details-style';
@@ -107,6 +116,13 @@ export function Detailspanel(): JSX.Element {
   };
 
   /**
+   * Check if any layer has features.
+   */
+  const isLayersHasFeatures = useMemo(() => {
+    return () => arrayOfLayerData.some((layer) => (layer?.features?.length ?? 0) > 0);
+  }, [arrayOfLayerData]);
+
+  /**
    * Handles clicks to forward and back arrows in right panel.
    * Removes previous feature from selectedFeatures store if it is not checked, and adds new feature.
    *
@@ -158,13 +174,6 @@ export function Detailspanel(): JSX.Element {
 
   return (
     <Box sx={sxClasses.detailsContainer}>
-      {!layerDataInfo && (
-        <ResponsiveGrid.Root>
-          <ResponsiveGrid.Left isLayersPanelVisible={isLayersPanelVisible} isEnlargeDataTable={isEnlargeDataTable}>
-            <Typography component="p">{t('details.selectVisbleLayer')}</Typography>
-          </ResponsiveGrid.Left>
-        </ResponsiveGrid.Root>
-      )}
       {layerDataInfo && (
         <>
           <ResponsiveGrid.Root>
@@ -194,50 +203,62 @@ export function Detailspanel(): JSX.Element {
               {renderLayerList()}
             </ResponsiveGrid.Left>
             <ResponsiveGrid.Right isEnlargeDataTable={isEnlargeDataTable} isLayersPanelVisible={isLayersPanelVisible}>
-              <Box sx={sxClasses.rightPanelContainer}>
-                <Grid container sx={sxClasses.rightPanelBtnHolder}>
-                  <Grid item xs={6}>
-                    <Box style={{ marginLeft: '22px' }}>
-                      Feature {currentFeatureIndex + 1} of {layerDataInfo?.features!.length}
-                      <IconButton
-                        sx={{ marginLeft: '20px' }}
-                        aria-label="clear-all-features"
-                        tooltip="details.clearAllfeatures"
-                        tooltipPlacement="top"
-                        onClick={() => handleClearAllFeatures()}
-                        disabled={checkedFeatures.length === 0}
-                      >
-                        <LayersClearOutlinedIcon />
-                      </IconButton>
-                    </Box>
+              {!isLayersHasFeatures() && (
+                <Paper sx={{ padding: '2rem' }}>
+                  <Typography variant="h3" gutterBottom sx={sxClasses.detailsInstructionsTitle}>
+                    {t('details.detailsInstructions')}
+                  </Typography>
+                  <Typography component="p" sx={sxClasses.detailsInstructionsBody}>
+                    {t('details.selectVisbleLayer')}
+                  </Typography>
+                </Paper>
+              )}
+              {isLayersHasFeatures() && (
+                <Box sx={sxClasses.rightPanelContainer}>
+                  <Grid container sx={sxClasses.rightPanelBtnHolder}>
+                    <Grid item xs={6}>
+                      <Box style={{ marginLeft: '22px' }}>
+                        Feature {currentFeatureIndex + 1} of {layerDataInfo?.features!.length}
+                        <IconButton
+                          sx={{ marginLeft: '20px' }}
+                          aria-label="clear-all-features"
+                          tooltip="details.clearAllfeatures"
+                          tooltipPlacement="top"
+                          onClick={() => handleClearAllFeatures()}
+                          disabled={checkedFeatures.length === 0}
+                        >
+                          <LayersClearOutlinedIcon />
+                        </IconButton>
+                      </Box>
+                    </Grid>
+                    <Grid item xs={6}>
+                      <Box sx={{ textAlign: 'right', marginRight: '26px' }}>
+                        <IconButton
+                          aria-label="backward"
+                          tooltip="details.previousFeatureBtn"
+                          tooltipPlacement="top"
+                          onClick={() => handleFeatureNavigateChange(-1)}
+                          disabled={currentFeatureIndex === 0}
+                        >
+                          <ArrowBackIosOutlinedIcon />
+                        </IconButton>
+                        <IconButton
+                          sx={{ marginLeft: '20px' }}
+                          aria-label="forward"
+                          tooltip="details.nextFeatureBtn"
+                          tooltipPlacement="top"
+                          onClick={() => handleFeatureNavigateChange(1)}
+                          // eslint-disable-next-line no-unsafe-optional-chaining
+                          disabled={currentFeatureIndex === layerDataInfo?.features!.length - 1}
+                        >
+                          <ArrowForwardIosOutlinedIcon />
+                        </IconButton>
+                      </Box>
+                    </Grid>
                   </Grid>
-                  <Grid item xs={6}>
-                    <Box sx={{ textAlign: 'right', marginRight: '26px' }}>
-                      <IconButton
-                        aria-label="backward"
-                        tooltip="details.previousFeatureBtn"
-                        tooltipPlacement="top"
-                        onClick={() => handleFeatureNavigateChange(-1)}
-                        disabled={currentFeatureIndex === 0}
-                      >
-                        <ArrowBackIosOutlinedIcon />
-                      </IconButton>
-                      <IconButton
-                        sx={{ marginLeft: '20px' }}
-                        aria-label="forward"
-                        tooltip="details.nextFeatureBtn"
-                        tooltipPlacement="top"
-                        onClick={() => handleFeatureNavigateChange(1)}
-                        // eslint-disable-next-line no-unsafe-optional-chaining
-                        disabled={currentFeatureIndex === layerDataInfo?.features!.length - 1}
-                      >
-                        <ArrowForwardIosOutlinedIcon />
-                      </IconButton>
-                    </Box>
-                  </Grid>
-                </Grid>
-                <FeatureInfo features={layerDataInfo?.features} currentFeatureIndex={currentFeatureIndex} />
-              </Box>
+                  <FeatureInfo features={layerDataInfo?.features} currentFeatureIndex={currentFeatureIndex} />
+                </Box>
+              )}
             </ResponsiveGrid.Right>
           </ResponsiveGrid.Root>
         </>
