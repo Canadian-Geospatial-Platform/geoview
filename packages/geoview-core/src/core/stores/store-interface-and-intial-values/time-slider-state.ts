@@ -16,8 +16,8 @@ export interface TypeTimeSliderValues {
   values: number[];
   filtering: boolean;
   delay: number;
-  locked: boolean;
-  reversed: boolean;
+  locked?: boolean;
+  reversed?: boolean;
 }
 
 export interface ITimeSliderState {
