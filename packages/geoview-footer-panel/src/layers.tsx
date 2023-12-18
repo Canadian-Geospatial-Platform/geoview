@@ -1,12 +1,11 @@
 /* eslint-disable react/require-default-props */
 import type React from 'react';
-import { TypeWindow, payloadIsALayerConfig, payloadIsRemoveGeoViewLayer } from 'geoview-core';
+import { payloadIsALayerConfig, payloadIsRemoveGeoViewLayer } from 'geoview-core';
 import { LayerConfigPayload, PayloadBaseClass, TypeRemoveGeoviewLayerPayload } from 'geoview-core/src/api/events/payloads';
 
 interface Props {
   mapId: string;
 }
-const w = window as TypeWindow;
 
 /**
  * Create an element that displays the layers component
@@ -14,7 +13,7 @@ const w = window as TypeWindow;
  * @returns {JSX.Element} created layers component
  */
 export function Layers({ mapId }: Props): JSX.Element {
-  const { cgpv } = w;
+  const { cgpv } = window;
   const { api, react } = cgpv;
 
   const { useState, useEffect } = react;

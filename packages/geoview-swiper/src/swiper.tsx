@@ -1,4 +1,4 @@
-import { TypeWindow, RefObject } from 'geoview-core';
+import { RefObject } from 'geoview-core';
 
 import Draggable from 'react-draggable';
 
@@ -96,12 +96,10 @@ type ConfigProps = {
   orientation: string;
 };
 
-const w = window as TypeWindow;
-
 export function Swiper(props: SwiperProps): JSX.Element {
   const { mapId, config } = props;
 
-  const { cgpv } = w;
+  const { cgpv } = window;
   const { api, ui, react, useTranslation } = cgpv;
   const { useEffect, useState, useRef } = react;
 

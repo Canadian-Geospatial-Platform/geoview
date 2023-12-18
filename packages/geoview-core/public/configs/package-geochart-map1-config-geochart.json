@@ -137,28 +137,6 @@
     {
       "layers": [
         {
-          "layerId": "ogcFeatureLakes/lakes",
-          "propertyValue": "name",
-          "propertyDisplay": "name"
-        }
-      ],
-      "query": {
-        "type": "ogcAPIFeatures",
-        "url": "https://demo.pygeoapi.io/master/collections/lakes"
-      },
-      "chart": "bar",
-      "geochart": {
-        "xAxis": {
-          "property": "name"
-        },
-        "yAxis": {
-          "property": "id"
-        }
-      }
-    },
-    {
-      "layers": [
-        {
           "layerId": "geojsonLYR5/polygons.json"
         }
       ],
