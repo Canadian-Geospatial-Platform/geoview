@@ -161,7 +161,7 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
           }
 
           // apply filter to layer
-          (api.maps[get().mapId].layer.geoviewLayer(layerPath) as AbstractGeoViewVector | EsriDynamic).applyViewFilter();
+          (api.maps[get().mapId].layer.geoviewLayer(layerPath) as AbstractGeoViewVector).applyViewFilter('');
         }
         set({
           layerState: {

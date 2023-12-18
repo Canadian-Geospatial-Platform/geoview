@@ -251,52 +251,48 @@ export class EsriDynamic extends AbstractGeoViewRaster {
    * @returns {TypeBaseRasterLayer} The GeoView raster layer that has been created.
    */
   protected processOneLayerEntry(layerConfig: TypeEsriDynamicLayerEntryConfig): Promise<TypeBaseRasterLayer | null> {
-    const promisedVectorLayer = new Promise<TypeBaseRasterLayer | null>((resolve) => {
-      const layerPath = Layer.getLayerPath(layerConfig);
-      this.setLayerPhase('processOneLayerEntry', Layer.getLayerPath(layerConfig));
-      const sourceOptions: SourceOptions = {};
-      sourceOptions.attributions = [(this.metadata!.copyrightText ? this.metadata!.copyrightText : '') as string];
-      sourceOptions.url = getLocalizedValue(layerConfig.source.dataAccessPath!, this.mapId);
-      sourceOptions.params = { LAYERS: `show:${layerConfig.layerId}` };
-      if (layerConfig.source.transparent) Object.defineProperty(sourceOptions.params, 'transparent', layerConfig.source.transparent!);
-      if (layerConfig.source.format) Object.defineProperty(sourceOptions.params, 'format', layerConfig.source.format!);
-      if (layerConfig.source.crossOrigin) {
-        sourceOptions.crossOrigin = layerConfig.source.crossOrigin;
-      } else {
-        sourceOptions.crossOrigin = 'Anonymous';
-      }
-      if (layerConfig.source.projection) sourceOptions.projection = `EPSG:${layerConfig.source.projection}`;
+    const layerPath = Layer.getLayerPath(layerConfig);
+    this.setLayerPhase('processOneLayerEntry', layerPath);
+    const sourceOptions: SourceOptions = {};
+    sourceOptions.attributions = [(this.metadata!.copyrightText ? this.metadata!.copyrightText : '') as string];
+    sourceOptions.url = getLocalizedValue(layerConfig.source.dataAccessPath!, this.mapId);
+    sourceOptions.params = { LAYERS: `show:${layerConfig.layerId}` };
+    if (layerConfig.source.transparent) Object.defineProperty(sourceOptions.params, 'transparent', layerConfig.source.transparent!);
+    if (layerConfig.source.format) Object.defineProperty(sourceOptions.params, 'format', layerConfig.source.format!);
+    if (layerConfig.source.crossOrigin) {
+      sourceOptions.crossOrigin = layerConfig.source.crossOrigin;
+    } else {
+      sourceOptions.crossOrigin = 'Anonymous';
+    }
+    if (layerConfig.source.projection) sourceOptions.projection = `EPSG:${layerConfig.source.projection}`;
 
-      const imageLayerOptions: ImageOptions<ImageArcGISRest> = {
-        source: new ImageArcGISRest(sourceOptions),
-        properties: { layerConfig },
-      };
-      // layerConfig.initialSettings cannot be undefined because config-validation set it to {} if it is undefined.
-      if (layerConfig.initialSettings?.className !== undefined) imageLayerOptions.className = layerConfig.initialSettings?.className;
-      if (layerConfig.initialSettings?.extent !== undefined) imageLayerOptions.extent = layerConfig.initialSettings?.extent;
-      if (layerConfig.initialSettings?.maxZoom !== undefined) imageLayerOptions.maxZoom = layerConfig.initialSettings?.maxZoom;
-      if (layerConfig.initialSettings?.minZoom !== undefined) imageLayerOptions.minZoom = layerConfig.initialSettings?.minZoom;
-      if (layerConfig.initialSettings?.opacity !== undefined) imageLayerOptions.opacity = layerConfig.initialSettings?.opacity;
-      // If all layers on the map have an initialSettings.visible set to false, a loading error occurs because nothing is drawn on the
-      // map and the 'change' or 'prerender' events are never sent to the addToMap method of the layer.ts file. The workaround is to
-      // postpone the setVisible action until all layers have been loaded on the map.
-      api.event.once(
-        EVENT_NAMES.LAYER.EVENT_IF_CONDITION,
-        (payload) => {
-          this.setVisible(layerConfig.initialSettings!.visible! !== 'no', layerPath);
-        },
-        `${this.mapId}/visibilityTest`
-      );
+    const imageLayerOptions: ImageOptions<ImageArcGISRest> = {
+      source: new ImageArcGISRest(sourceOptions),
+      properties: { layerConfig },
+    };
+    // layerConfig.initialSettings cannot be undefined because config-validation set it to {} if it is undefined.
+    if (layerConfig.initialSettings?.className !== undefined) imageLayerOptions.className = layerConfig.initialSettings?.className;
+    if (layerConfig.initialSettings?.extent !== undefined) imageLayerOptions.extent = layerConfig.initialSettings?.extent;
+    if (layerConfig.initialSettings?.maxZoom !== undefined) imageLayerOptions.maxZoom = layerConfig.initialSettings?.maxZoom;
+    if (layerConfig.initialSettings?.minZoom !== undefined) imageLayerOptions.minZoom = layerConfig.initialSettings?.minZoom;
+    if (layerConfig.initialSettings?.opacity !== undefined) imageLayerOptions.opacity = layerConfig.initialSettings?.opacity;
+    // If all layers on the map have an initialSettings.visible set to false, a loading error occurs because nothing is drawn on the
+    // map and the 'change' or 'prerender' events are never sent to the addToMap method of the layer.ts file. The workaround is to
+    // postpone the setVisible action until all layers have been loaded on the map.
+    api.event.once(
+      EVENT_NAMES.LAYER.EVENT_IF_CONDITION,
+      (payload) => {
+        this.setVisible(layerConfig.initialSettings!.visible! !== 'no', layerPath);
+      },
+      `${this.mapId}/visibilityTest`
+    );
 
-      layerConfig.olLayer = new ImageLayer(imageLayerOptions);
-      this.applyViewFilter(layerPath, layerConfig.layerFilter ? layerConfig.layerFilter : '');
+    layerConfig.olLayer = new ImageLayer(imageLayerOptions);
+    this.applyViewFilter(layerPath, layerConfig.layerFilter ? layerConfig.layerFilter : '');
 
-      this.addLoadendListener(layerPath, 'image');
+    this.addLoadendListener(layerPath, 'image');
 
-      resolve(layerConfig.olLayer);
-    });
-
-    return promisedVectorLayer;
+    return Promise.resolve(layerConfig.olLayer);
   }
 
   /** ***************************************************************************************************************************
@@ -722,6 +718,27 @@ export class EsriDynamic extends AbstractGeoViewRaster {
   }
 
   /** ***************************************************************************************************************************
+   * Apply a view filter to the layer identified by the path stored in the layerPathAssociatedToThegeoviewLayer property stored
+   * in the layer instance associated to the map. The legend filters are derived from the uniqueValue or classBreaks style of the
+   * layer. When the layer config is invalid, nothing is done.
+   *
+   * @param {string} filter An optional filter to be used in place of the getViewFilter value.
+   */
+  applyViewFilter(filter: string, notUsed1?: never, notUsed2?: never): void;
+
+  /** ***************************************************************************************************************************
+   * Apply a view filter to the layer identified by the path stored in the layerPathAssociatedToThegeoviewLayer property stored
+   * in the layer instance associated to the map. When the CombineLegendFilter flag is false, the filter paramater is used alone
+   * to display the features. Otherwise, the legend filter and the filter parameter are combined together to define the view
+   * filter. The legend filters are derived from the uniqueValue or classBreaks style of the layer. When the layer config is
+   * invalid, nothing is done.
+   *
+   * @param {string} filter An optional filter to be used in place of the getViewFilter value.
+   * @param {boolean} CombineLegendFilter Flag used to combine the legend filter and the filter together (default: true)
+   */
+  applyViewFilter(filter: string, CombineLegendFilter: boolean, notUsed?: never): void;
+
+  /** ***************************************************************************************************************************
    * Apply a view filter to the layer. When the CombineLegendFilter flag is false, the filter paramater is used alone to display
    * the features. Otherwise, the legend filter and the filter parameter are combined together to define the view filter. The
    * legend filters are derived from the uniqueValue or classBreaks style of the layer. When the layer config is invalid, nothing
@@ -731,8 +748,23 @@ export class EsriDynamic extends AbstractGeoViewRaster {
    * @param {string} filter An optional filter to be used in place of the getViewFilter value.
    * @param {boolean} CombineLegendFilter Flag used to combine the legend filter and the filter together (default: true)
    */
-  applyViewFilter(layerPath?: string, filter = '', CombineLegendFilter = true) {
-    layerPath = layerPath || api.maps[this.mapId].layer.layerPathAssociatedToThegeoviewLayer;
+  applyViewFilter(layerPath: string, filter?: string, CombineLegendFilter?: boolean): void;
+
+  applyViewFilter(parameter1: string, parameter2?: string | boolean | never, parameter3?: boolean | never) {
+    let layerPath = api.maps[this.mapId].layer.layerPathAssociatedToThegeoviewLayer;
+    let filter = '';
+    let CombineLegendFilter = true;
+    if (parameter3) {
+      layerPath = parameter1;
+      filter = parameter2 as string;
+      CombineLegendFilter = parameter3;
+    } else if (parameter2) {
+      if (typeof parameter2 === 'boolean') {
+        filter = parameter1;
+        CombineLegendFilter = parameter2;
+      } else filter = parameter2;
+    } else filter = parameter1;
+
     const layerConfig = this.getLayerConfig(layerPath) as TypeEsriDynamicLayerEntryConfig;
     const source = (layerConfig.olLayer as ImageLayer<ImageArcGISRest>).getSource();
     if (source) {
