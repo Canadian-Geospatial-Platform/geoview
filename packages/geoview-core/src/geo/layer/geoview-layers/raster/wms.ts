@@ -14,6 +14,7 @@ import { transform, transformExtent } from 'ol/proj';
 
 import cloneDeep from 'lodash/cloneDeep';
 
+import Static from 'ol/source/ImageStatic';
 import { Cast, toJsonObject, TypeJsonArray, TypeJsonObject } from '@/core/types/global-types';
 import {
   AbstractGeoViewLayer,
@@ -34,7 +35,7 @@ import {
 } from '@/geo/map/map-schema-types';
 import { TypeFeatureInfoEntry, TypeArrayOfFeatureInfoEntries } from '@/api/events/payloads';
 import { getLocalizedValue, getMinOrMaxExtents, xmlToJson, showError, replaceParams, getLocalizedMessage } from '@/core/utils/utilities';
-import { api } from '@/app';
+import { api, TypeImageStaticLayerConfig } from '@/app';
 import { Layer } from '@/geo/layer/layer';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 
@@ -1088,13 +1089,17 @@ export class WMS extends AbstractGeoViewRaster {
    */
   getBounds(layerPath: string, bounds: Extent | undefined): Extent | undefined {
     const layerConfig = this.getLayerConfig(layerPath);
+    const projection =
+      (layerConfig?.olLayer as ImageLayer<Static>).getSource()?.getProjection()?.getCode().replace('EPSG:', '') ||
+      MapEventProcessor.getMapState(this.mapId).currentProjection;
     let layerBounds = layerConfig?.initialSettings?.bounds || [];
+    layerBounds = transformExtent(layerBounds, 'EPSG:4326', `EPSG:${projection}`);
     const boundingBoxes = this.metadata?.Capability.Layer.BoundingBox;
     let bbExtent: Extent | undefined;
 
     if (boundingBoxes) {
       for (let i = 0; i < (boundingBoxes.length as number); i++) {
-        if (boundingBoxes[i].crs === 'EPSG:4326')
+        if (boundingBoxes[i].crs === `EPSG:${projection}`)
           bbExtent = [
             boundingBoxes[i].extent[1],
             boundingBoxes[i].extent[0],

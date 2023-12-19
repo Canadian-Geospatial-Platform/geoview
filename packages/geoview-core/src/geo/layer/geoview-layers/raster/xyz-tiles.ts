@@ -189,7 +189,11 @@ export class XYZTiles extends AbstractGeoViewRaster {
       const sourceOptions: SourceOptions = {
         url: getLocalizedValue(layerConfig.source.dataAccessPath, this.mapId),
       };
-      if (layerConfig.source.crossOrigin) sourceOptions.crossOrigin = layerConfig.source.crossOrigin;
+      if (layerConfig.source.crossOrigin) {
+        sourceOptions.crossOrigin = layerConfig.source.crossOrigin;
+      } else {
+        sourceOptions.crossOrigin = 'Anonymous';
+      }
       if (layerConfig.source.projection) sourceOptions.projection = `EPSG:${layerConfig.source.projection}`;
       if (layerConfig.source.tileGrid) {
         const tileGridOptions: TileGridOptions = {
@@ -269,7 +273,14 @@ export class XYZTiles extends AbstractGeoViewRaster {
       MapEventProcessor.getMapState(this.mapId).currentProjection;
 
     if (layerBounds) {
-      const transformedBounds = transformExtent(layerBounds, `EPSG:${projection}`, `EPSG:4326`);
+      let transformedBounds = layerBounds;
+      if (this.metadata?.fullExtent?.spatialReference?.wkid !== MapEventProcessor.getMapState(this.mapId).currentProjection) {
+        transformedBounds = transformExtent(
+          layerBounds,
+          `EPSG:${projection}`,
+          `EPSG:${MapEventProcessor.getMapState(this.mapId).currentProjection}`
+        );
+      }
       if (!bounds) bounds = [transformedBounds[0], transformedBounds[1], transformedBounds[2], transformedBounds[3]];
       else bounds = getMinOrMaxExtents(bounds, transformedBounds);
     }

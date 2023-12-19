@@ -19,11 +19,7 @@ import {
   BrowserNotSupportedIcon,
   Divider,
 } from '@/ui';
-import {
-  useLayerHighlightedLayer,
-  useLayerSelectedLayer,
-  useLayerStoreActions,
-} from '@/core/stores/store-interface-and-intial-values/layer-state';
+import { useLayerHighlightedLayer, useLayerStoreActions } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { useUIStoreActions } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import { generateId } from '@/core/utils/utilities';
 
@@ -41,9 +37,9 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
 
   // get store actions
   const highlightedLayer = useLayerHighlightedLayer();
-  const { setAllItemsVisibility, toggleItemVisibility, setLayerOpacity, setHighlightLayer, zoomToLayerExtent } = useLayerStoreActions();
+  const { setAllItemsVisibility, toggleItemVisibility, setLayerOpacity, setHighlightLayer, zoomToLayerExtent, getLayerBounds } =
+    useLayerStoreActions();
   const { openModal } = useUIStoreActions();
-  const selectedLayer = useLayerSelectedLayer();
 
   const handleZoomTo = () => {
     zoomToLayerExtent(layerDetails.layerPath);
@@ -52,6 +48,11 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
   const handleOpenTable = () => {
     openModal({ activeElementId: 'layerDatatable', callbackElementId: `table-details` });
   };
+
+  if (layerDetails.bounds === undefined || layerDetails.bounds[0] === Infinity) {
+    const bounds = getLayerBounds(layerDetails.layerPath);
+    if (bounds) layerDetails.bounds = bounds;
+  }
 
   const handleRefreshLayer = () => {
     // eslint-disable-next-line no-console
@@ -163,7 +164,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
           tooltip="legend.zoomTo"
           onClick={handleZoomTo}
           sx={{ backgroundColor: '#F6F6F6' }}
-          disabled={selectedLayer.bounds === undefined}
+          disabled={layerDetails.bounds === undefined}
         >
           <ZoomInSearchIcon />
         </IconButton>

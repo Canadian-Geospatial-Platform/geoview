@@ -11,7 +11,7 @@ import LayerGroup from 'ol/layer/Group';
 import { Coordinate } from 'ol/coordinate';
 import { Extent } from 'ol/extent';
 import { Pixel } from 'ol/pixel';
-import { transform, transformExtent } from 'ol/proj';
+import { transform } from 'ol/proj';
 
 import { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import {
@@ -327,15 +327,11 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
     const layerPath = typeof parameter1 === 'string' ? parameter1 : api.maps[this.mapId].layer.layerPathAssociatedToThegeoviewLayer;
     let bounds = typeof parameter1 !== 'string' ? parameter1 : parameter2;
     const layerConfig = this.getLayerConfig(layerPath);
-    const layerBounds = (layerConfig?.olLayer as VectorLayer<VectorSource>)?.getExtent();
-    const projection =
-      (layerConfig?.olLayer as VectorLayer<VectorSource>).getSource()?.getProjection()?.getCode().replace('EPSG:', '') ||
-      MapEventProcessor.getMapState(this.mapId).currentProjection;
+    const layerBounds = (layerConfig?.olLayer as VectorLayer<VectorSource>)?.getSource()?.getExtent();
 
     if (layerBounds) {
-      const transformedBounds = transformExtent(layerBounds, `EPSG:${projection}`, `EPSG:4326`);
-      if (!bounds) bounds = [transformedBounds[0], transformedBounds[1], transformedBounds[2], transformedBounds[3]];
-      else bounds = getMinOrMaxExtents(bounds, transformedBounds);
+      if (!bounds) bounds = [layerBounds[0], layerBounds[1], layerBounds[2], layerBounds[3]];
+      else bounds = getMinOrMaxExtents(bounds, layerBounds);
     }
 
     return bounds;

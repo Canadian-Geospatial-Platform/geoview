@@ -87,10 +87,15 @@ export function FeatureInfo({ features, currentFeatureIndex }: TypeFeatureInfoPr
               <Tooltip title={t('details.select')} placement="top" enterDelay={1000}>
                 <>
                   {t('details.keepFeatureSelected')}
-                  <Checkbox onChange={(e) => handleSelect(e)} checked={checked} sx={sxClasses.selectFeatureCheckbox} />
+                  <Checkbox
+                    onChange={(e) => handleSelect(e)}
+                    checked={checked}
+                    sx={sxClasses.selectFeatureCheckbox}
+                    disabled={!feature?.geometry}
+                  />
                 </>
               </Tooltip>
-              <IconButton color="primary" onClick={(e) => handleZoomIn(e)}>
+              <IconButton color="primary" onClick={(e) => handleZoomIn(e)} disabled={!feature?.geometry}>
                 <Tooltip title={t('details.zoomTo')} placement="top" enterDelay={1000}>
                   <ZoomInSearchIcon />
                 </Tooltip>
