@@ -259,8 +259,7 @@ export class Layer {
     if (pathEnding === undefined)
       pathEnding =
         layerConfig.layerPathEnding === undefined ? layerConfig.layerId : `${layerConfig.layerId}.${layerConfig.layerPathEnding}`;
-    if (layerConfig.geoviewRootLayer === layerConfig.parentLayerConfig)
-      return `${layerConfig.geoviewRootLayer!.geoviewLayerId!}/${pathEnding}`;
+    if (!layerConfig.parentLayerConfig) return `${layerConfig.geoviewRootLayer!.geoviewLayerId!}/${pathEnding}`;
     return this.getLayerPath(
       layerConfig.parentLayerConfig as TypeLayerGroupEntryConfig,
       `${(layerConfig.parentLayerConfig as TypeLayerGroupEntryConfig).layerId}/${pathEnding}`

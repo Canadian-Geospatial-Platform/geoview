@@ -14,7 +14,7 @@ import {
   TypeUniqueValueStyleConfig,
   TypeVectorLayerEntryConfig,
 } from '@/geo/map/map-schema-types';
-import { AbstractGeoViewVector, EsriDynamic, api } from '@/app';
+import { AbstractGeoViewVector, api } from '@/app';
 import { OL_ZOOM_DURATION, OL_ZOOM_PADDING } from '@/core/utils/constant';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 
@@ -161,7 +161,7 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
           }
 
           // apply filter to layer
-          (api.maps[get().mapId].layer.geoviewLayer(layerPath) as AbstractGeoViewVector | EsriDynamic).applyViewFilter();
+          (api.maps[get().mapId].layer.geoviewLayer(layerPath) as AbstractGeoViewVector).applyViewFilter('');
         }
         set({
           layerState: {
@@ -206,10 +206,10 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
         });
 
         // TODO: keep reference to geoview map instance in the store or keep accessing with api - discussion
-        //! try to make reusable store actions....
-        // TODO: we can have always item.... we cannot set visibility so if present we will need to trap. Need more use case
-        // TODO: create a function setItemVisibility called with layer path and this function set the registered layer (from store values) then apply the filter.
-        (api.maps[get().mapId].layer.geoviewLayer(layerPath) as AbstractGeoViewVector | EsriDynamic).applyViewFilter(layerPath);
+        // ! try to make reusable store actions....
+        // ! we can have always item.... we cannot set visibility so if present we will need to trap. Need more use case
+        // ! create a function setItemVisibility called with layer path and this function set the registered layer (from store values) then apply the filter.
+        (api.maps[get().mapId].layer.geoviewLayer(layerPath) as AbstractGeoViewVector).applyViewFilter(layerPath);
       },
       deleteLayer: (layerPath: string) => {
         const curLayers = get().layerState.legendLayers;

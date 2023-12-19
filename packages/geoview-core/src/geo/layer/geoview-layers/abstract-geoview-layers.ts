@@ -335,7 +335,22 @@ export abstract class AbstractGeoViewLayer {
     this.geoviewLayerName.fr = mapLayerConfig?.geoviewLayerName?.fr ? mapLayerConfig.geoviewLayerName.fr : DEFAULT_LAYER_NAMES[type];
     if (mapLayerConfig.metadataAccessPath?.en) this.metadataAccessPath.en = mapLayerConfig.metadataAccessPath.en.trim();
     if (mapLayerConfig.metadataAccessPath?.fr) this.metadataAccessPath.fr = mapLayerConfig.metadataAccessPath.fr.trim();
-    if (mapLayerConfig.listOfLayerEntryConfig) this.listOfLayerEntryConfig = mapLayerConfig.listOfLayerEntryConfig;
+    if (mapLayerConfig.listOfLayerEntryConfig.length === 1) this.listOfLayerEntryConfig = mapLayerConfig.listOfLayerEntryConfig;
+    else {
+      const layerGroup: TypeLayerGroupEntryConfig = {
+        geoviewRootLayer: mapLayerConfig.listOfLayerEntryConfig[0].geoviewRootLayer,
+        layerId: this.geoviewLayerId,
+        layerName: this.geoviewLayerName,
+        entryType: 'group',
+        isMetadataLayerGroup: false,
+        initialSettings: mapLayerConfig.initialSettings,
+        listOfLayerEntryConfig: mapLayerConfig.listOfLayerEntryConfig,
+      };
+      this.listOfLayerEntryConfig = [layerGroup];
+      mapLayerConfig.listOfLayerEntryConfig.forEach((layerConfig) => {
+        layerConfig.parentLayerConfig = layerGroup;
+      });
+    }
     this.initialSettings = mapLayerConfig.initialSettings;
     this.serverDateFragmentsOrder = mapLayerConfig.serviceDateFormat
       ? api.dateUtilities.getDateFragmentsOrder(mapLayerConfig.serviceDateFormat)

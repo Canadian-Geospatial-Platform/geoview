@@ -113,7 +113,7 @@ export class EsriFeature extends AbstractGeoViewVector {
    *
    * @returns {Promise<void>} A promise that the execution is completed.
    */
-  fetchServiceMetadata(): Promise<void> {
+  protected fetchServiceMetadata(): Promise<void> {
     return commonfetchServiceMetadata.call(this);
   }
 
@@ -153,7 +153,7 @@ export class EsriFeature extends AbstractGeoViewVector {
    *
    * @returns {'string' | 'date' | 'number'} The type of the field.
    */
-  getFieldType(fieldName: string, layerConfig: TypeLayerEntryConfig): 'string' | 'date' | 'number' {
+  protected getFieldType(fieldName: string, layerConfig: TypeLayerEntryConfig): 'string' | 'date' | 'number' {
     return commonGetFieldType.call(this, fieldName, layerConfig);
   }
 
@@ -165,7 +165,7 @@ export class EsriFeature extends AbstractGeoViewVector {
    *
    * @returns {null | codedValueType | rangeDomainType} The domain of the field.
    */
-  getFieldDomain(fieldName: string, layerConfig: TypeLayerEntryConfig): null | codedValueType | rangeDomainType {
+  protected getFieldDomain(fieldName: string, layerConfig: TypeLayerEntryConfig): null | codedValueType | rangeDomainType {
     return commonGetFieldDomain.call(this, fieldName, layerConfig);
   }
 
@@ -174,7 +174,7 @@ export class EsriFeature extends AbstractGeoViewVector {
    * @param {TypeJsonObject} esriTimeDimension The ESRI time dimension object
    * @param {TypeEsriFeatureLayerEntryConfig | TypeEsriDynamicLayerEntryConfig} layerConfig The layer entry to configure
    */
-  processTemporalDimension(
+  protected processTemporalDimension(
     esriTimeDimension: TypeJsonObject,
     layerConfig: TypeEsriFeatureLayerEntryConfig | TypeEsriDynamicLayerEntryConfig
   ) {
