@@ -37,7 +37,7 @@ import { Box, Button, IconButton, Tooltip, ZoomInSearchIcon } from '@/ui';
 import ExportButton from './export-button';
 import JSONExportButton from './json-export-button';
 import FilterMap from './filter-map';
-import { AbstractGeoViewVector, TypeLayerEntryConfig, api, TypeFieldEntry, TypeFeatureInfoEntry, isImage } from '@/app';
+import { AbstractGeoViewVector, TypeLayerEntryConfig, api, TypeFieldEntry, TypeFeatureInfoEntry, isImage, EsriDynamic } from '@/app';
 import { getSxClasses } from './data-table-style';
 import { useMapStoreActions } from '@/core/stores/store-interface-and-intial-values/map-state';
 import {
@@ -216,9 +216,9 @@ function MapDataTable({ data, layerId, mapId, layerKey }: MapDataTableProps) {
     const filterLayerConfig = api.maps[mapId].layer.registeredLayers[layerKey] as TypeLayerEntryConfig;
 
     if (mapFilteredRecord[layerKey] && geoviewLayerInstance !== undefined && filterLayerConfig !== undefined && filterStrings.length) {
-      (api.maps[mapId].layer.geoviewLayer(layerKey) as AbstractGeoViewVector)?.applyViewFilter(filterStrings);
+      (api.maps[mapId].layer.geoviewLayer(layerKey) as AbstractGeoViewVector | EsriDynamic)?.applyViewFilter(filterStrings);
     } else {
-      (api.maps[mapId].layer.geoviewLayer(layerKey) as AbstractGeoViewVector)?.applyViewFilter('');
+      (api.maps[mapId].layer.geoviewLayer(layerKey) as AbstractGeoViewVector | EsriDynamic)?.applyViewFilter('');
     }
   }, FILTER_MAP_DELAY);
 

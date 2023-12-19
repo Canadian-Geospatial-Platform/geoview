@@ -746,9 +746,9 @@ export class EsriDynamic extends AbstractGeoViewRaster {
    *
    * @param {string} layerPath The layer path to the layer's configuration.
    * @param {string} filter An optional filter to be used in place of the getViewFilter value.
-   * @param {boolean} CombineLegendFilter Flag used to combine the legend filter and the filter together (default: true)
+   * @param {boolean} combineLegendFilter Flag used to combine the legend filter and the filter together (default: true)
    */
-  applyViewFilter(layerPath: string, filter?: string, CombineLegendFilter?: boolean): void;
+  applyViewFilter(layerPath: string, filter?: string, combineLegendFilter?: boolean): void;
 
   applyViewFilter(parameter1: string, parameter2?: string | boolean | never, parameter3?: boolean | never) {
     let layerPath = api.maps[this.mapId].layer.layerPathAssociatedToThegeoviewLayer;
