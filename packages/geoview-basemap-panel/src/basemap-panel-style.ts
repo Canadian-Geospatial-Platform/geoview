@@ -7,7 +7,7 @@ export const getSxClasses = (theme) => ({
       display: 'flex',
       flexDirection: 'column',
       backgroundClip: 'padding-box',
-      border: '1px solid rgba(255,255,255,0.25)',
+      border: '2px solid rgba(255,255,255,0.25)',
       borderRadius: '6px',
       boxShadow: 'none',
       marginBottom: '16px',
