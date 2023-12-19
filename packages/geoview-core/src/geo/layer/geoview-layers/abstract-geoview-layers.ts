@@ -1417,10 +1417,7 @@ export abstract class AbstractGeoViewLayer {
    *
    * @returns {Extent} The layer bounding box.
    */
-  calculateBounds(
-    layerPath?: string,
-    projectionCode: string | number = MapEventProcessor.getMapState(this.mapId).currentProjection
-  ): Extent | undefined {
+  calculateBounds(layerPath?: string): Extent | undefined {
     layerPath = layerPath || api.maps[this.mapId].layer.layerPathAssociatedToThegeoviewLayer;
     let bounds: Extent | undefined;
     const processGroupLayerBounds = (listOfLayerEntryConfig: TypeListOfLayerEntryConfig) => {
@@ -1436,10 +1433,6 @@ export abstract class AbstractGeoViewLayer {
     if (initialLayerConfig) {
       if (Array.isArray(initialLayerConfig)) processGroupLayerBounds(initialLayerConfig);
       else processGroupLayerBounds([initialLayerConfig]);
-    }
-
-    if (bounds && bounds[0] !== undefined) {
-      bounds = transformExtent(bounds, `EPSG:4326`, `EPSG:${projectionCode}`);
     }
 
     return bounds;
