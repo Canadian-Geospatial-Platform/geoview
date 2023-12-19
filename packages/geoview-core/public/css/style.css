@@ -96,6 +96,16 @@ td {
   height: 800px;
   border: gray 1px solid;
 }
+.llwp-map ::-webkit-scrollbar {
+  width: 12px;
+}
+.llwp-map ::-webkit-scrollbar-track {
+  box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.25);
+}
+.llwp-map ::-webkit-scrollbar-thumb {
+  background-color: darkgrey;
+  outline: 1px solid slategrey;
+}
 
 .legendTable {
   padding: 5px;
@@ -192,18 +202,4 @@ th.state {
 
 table.state {
   display: flex;
-}
-
-/* Customize website's scrollbar */
-*::-webkit-scrollbar {
-  width: 12px;
-}
- 
-*::-webkit-scrollbar-track {
-  box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.25);
-}
- 
-*::-webkit-scrollbar-thumb {
-  background-color: darkgrey;
-  outline: 1px solid slategrey;
 }
