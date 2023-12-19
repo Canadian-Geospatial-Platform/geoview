@@ -54,7 +54,7 @@
     </div>
     <div
       id="LYR1"
-      class="llwp-map"
+      class="geoview-map"
       data-lang="en"
       data-config="{
             'map': {
@@ -125,7 +125,7 @@
     </div>
     <div
       id="LYR2"
-      class="llwp-map"
+      class="geoview-map"
       data-lang="en"
       data-config="{
           'map': {
@@ -177,7 +177,7 @@
     </div>
     <div
       id="LYR3"
-      class="llwp-map"
+      class="geoview-map"
       data-lang="en"
       data-config="{
           'map': {
@@ -235,7 +235,9 @@
           var timeConsoleLyr2 = document.getElementById('LYR2TD');
           var timeConsoleLyr3 = document.getElementById('LYR3TD');
           timeConsoleLyr1.textContent = JSON.stringify(
-            cgpv.api.maps['LYR1'].layer.geoviewLayer('wmsLYR1-Root/wmsLYR1-Group1/wmsLYR1-Group2/wmsLYR1-Group3/RADAR_1KM_RSNO.ending').getTemporalDimension(),
+            cgpv.api.maps['LYR1'].layer
+              .geoviewLayer('wmsLYR1-Root/wmsLYR1-Group1/wmsLYR1-Group2/wmsLYR1-Group3/RADAR_1KM_RSNO.ending')
+              .getTemporalDimension(),
             undefined,
             2
           );

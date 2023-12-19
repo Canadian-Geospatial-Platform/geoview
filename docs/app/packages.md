@@ -180,7 +180,7 @@ The viewer is bundled with core packages, you can load them by passing their id 
 ```html
 <div
   id="mapWM"
-  class="llwp-map"
+  class="geoview-map"
   data-lang="en"
   data-config="{
         'map': {

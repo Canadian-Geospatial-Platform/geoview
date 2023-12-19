@@ -995,6 +995,27 @@ export class WMS extends AbstractGeoViewRaster {
   }
 
   /** ***************************************************************************************************************************
+   * Apply a view filter to the layer identified by the path stored in the layerPathAssociatedToThegeoviewLayer property stored
+   * in the layer instance associated to the map. The legend filters are derived from the uniqueValue or classBreaks style of the
+   * layer. When the layer config is invalid, nothing is done.
+   *
+   * @param {string} filter An optional filter to be used in place of the getViewFilter value.
+   */
+  applyViewFilter(filter: string, notUsed1?: never, notUsed2?: never): void;
+
+  /** ***************************************************************************************************************************
+   * Apply a view filter to the layer identified by the path stored in the layerPathAssociatedToThegeoviewLayer property stored
+   * in the layer instance associated to the map. When the CombineLegendFilter flag is false, the filter paramater is used alone
+   * to display the features. Otherwise, the legend filter and the filter parameter are combined together to define the view
+   * filter. The legend filters are derived from the uniqueValue or classBreaks style of the layer. When the layer config is
+   * invalid, nothing is done.
+   *
+   * @param {string} filter An optional filter to be used in place of the getViewFilter value.
+   * @param {boolean} CombineLegendFilter Flag used to combine the legend filter and the filter together (default: true)
+   */
+  applyViewFilter(filter: string, CombineLegendFilter: boolean, notUsed?: never): void;
+
+  /** ***************************************************************************************************************************
    * Apply a view filter to the layer. When the CombineLegendFilter flag is false, the filter paramater is used alone to display
    * the features. Otherwise, the legend filter and the filter parameter are combined together to define the view filter. The
    * legend filters are derived from the uniqueValue or classBreaks style of the layer. When the layer config is invalid, nothing
@@ -1005,8 +1026,26 @@ export class WMS extends AbstractGeoViewRaster {
    * @param {string} filter An optional filter to be used in place of the getViewFilter value.
    * @param {boolean} CombineLegendFilter Flag used to combine the legend filter and the filter together (default: true)
    */
-  applyViewFilter(layerPath?: string, filter = '', CombineLegendFilter = true) {
-    layerPath = layerPath || api.maps[this.mapId].layer.layerPathAssociatedToThegeoviewLayer;
+  applyViewFilter(layerPath: string, filter?: string, CombineLegendFilter?: boolean): void;
+
+  applyViewFilter(parameter1: string, parameter2?: string | boolean | never, parameter3?: boolean | never) {
+    let layerPath = api.maps[this.mapId].layer.layerPathAssociatedToThegeoviewLayer;
+    let filter = '';
+    let CombineLegendFilter = true;
+    if (parameter3) {
+      layerPath = parameter1;
+      filter = parameter2 as string;
+      CombineLegendFilter = parameter3;
+    } else if (parameter2 !== undefined) {
+      if (typeof parameter2 === 'boolean') {
+        filter = parameter1;
+        CombineLegendFilter = parameter2;
+      } else {
+        layerPath = parameter1;
+        filter = parameter2;
+      }
+    } else filter = parameter1;
+
     const layerConfig = this.getLayerConfig(layerPath) as TypeOgcWmsLayerEntryConfig;
     const source = (layerConfig.olLayer as ImageLayer<ImageWMS>).getSource();
     if (source) {
