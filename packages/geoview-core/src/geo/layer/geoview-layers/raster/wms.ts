@@ -1036,11 +1036,14 @@ export class WMS extends AbstractGeoViewRaster {
       layerPath = parameter1;
       filter = parameter2 as string;
       CombineLegendFilter = parameter3;
-    } else if (parameter2) {
+    } else if (parameter2 !== undefined) {
       if (typeof parameter2 === 'boolean') {
         filter = parameter1;
         CombineLegendFilter = parameter2;
-      } else filter = parameter2;
+      } else {
+        layerPath = parameter1;
+        filter = parameter2;
+      }
     } else filter = parameter1;
 
     const layerConfig = this.getLayerConfig(layerPath) as TypeOgcWmsLayerEntryConfig;

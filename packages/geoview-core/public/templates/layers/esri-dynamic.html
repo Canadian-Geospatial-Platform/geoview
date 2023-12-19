@@ -57,7 +57,6 @@
     </div>
     <button class="collapsible active">Map Status Flags</button>
     <pre id="HLYR1-state" class="panel map-title-holder"></pre>
-    <button class="test-refresh-btn">Test Refresh</button>
     <div
       id="LYR1"
       class="llwp-map"
@@ -1182,13 +1181,6 @@
       );
 
       listenToLegendLayerSetChanges('HLYR3-state', 'LYR3/LegendsLayerSet');
-
-      // ========================================================================================================================
-      // Test a refresh WMS from projection change
-      var testRefreshBtn = document.getElementsByClassName('test-refresh-btn')[0];
-      testRefreshBtn.addEventListener('click', function (e) {
-        cgpv.api.maps.LYR1.map.dispatchEvent('change');
-      });
 
       //create snippets
       createCodeSnippet();

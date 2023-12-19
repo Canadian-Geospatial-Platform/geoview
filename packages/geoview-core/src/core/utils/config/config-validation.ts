@@ -36,6 +36,7 @@ import {
   TypeListOfGeoviewLayerConfig,
   TypeListOfLocalizedLanguages,
   TypeEsriDynamicLayerEntryConfig,
+  TypeOgcWmsLayerEntryConfig,
 } from '@/geo/map/map-schema-types';
 import { Cast, toJsonObject, TypeJsonObject, TypeMapFeaturesConfig } from '@/core/types/global-types';
 
@@ -597,7 +598,7 @@ export class ConfigValidation {
         this.processLayerEntryConfig(rootLayerConfig, layerConfig.listOfLayerEntryConfig, layerConfig);
       else if (geoviewEntryIsWMS(layerConfig)) {
         // if layerConfig.source.dataAccessPath is undefined, the metadataAccessPath defined on the root is used.
-        if (layerConfig.source) layerConfig.source = {};
+        if (!layerConfig.source) (layerConfig as TypeOgcWmsLayerEntryConfig).source = {};
         if (!layerConfig.source.dataAccessPath) {
           // When the dataAccessPath is undefined and the metadataAccessPath ends with ".xml", the dataAccessPath is temporarilly
           // set to '' and will be filled in the fetchServiceMetadata method of the class WMS. So, we begin with the assumption

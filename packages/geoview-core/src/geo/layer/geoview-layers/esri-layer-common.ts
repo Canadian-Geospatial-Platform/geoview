@@ -248,7 +248,7 @@ export function commonProcessFeatureInfoConfig(
         if (fieldEntry.name === geometryFieldName) return;
         if (processOutField) {
           layerConfig.source.featureInfo!.outfields!.en = `${layerConfig.source.featureInfo!.outfields!.en}${fieldEntry.name},`;
-          const fieldType = this.getFieldType(fieldEntry.name as string, layerConfig);
+          const fieldType = commonGetFieldType.call(this, fieldEntry.name as string, layerConfig);
           layerConfig.source.featureInfo!.fieldTypes = `${layerConfig.source.featureInfo!.fieldTypes}${fieldType},`;
         }
         if (processAliasFields)

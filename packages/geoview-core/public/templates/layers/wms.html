@@ -609,7 +609,6 @@
               cgpv.api.maps.LYR1.layer.geoviewLayer('wmsLYR1-spatiotemporel/RADAR_1KM_RSNO').getTemporalDimension();
             if (temporalData) {
               cgpv.api.maps.LYR1.layer.geoviewLayer('wmsLYR1-spatiotemporel/RADAR_1KM_RSNO').applyViewFilter(
-                '',
                 `time=date '${temporalData.range.range[i]}'`
               );
               if (++i === temporalData.range.range.length) i = 0;
@@ -622,7 +621,6 @@
             const temporalData = cgpv.api.maps.LYR1.layer.geoviewLayer('wmsLYR1-msi/msi-94-or-more').getTemporalDimension();
             if (temporalData) {
               cgpv.api.maps.LYR1.layer.geoviewLayer('wmsLYR1-msi/msi-94-or-more').applyViewFilter(
-                '',
                 `time=date '${temporalData.range.range[j]}'`
               );
               if (++j === temporalData.range.range.length) j = 0;
