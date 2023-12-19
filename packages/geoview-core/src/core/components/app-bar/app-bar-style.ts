@@ -5,7 +5,6 @@ export const getSxClasses = (theme: Theme) => ({
     display: 'flex',
     flexDirection: 'row',
     justifyContent: 'space-between',
-    minWidth: 64,
     zIndex: theme.zIndex.appBar,
     pointerEvents: 'all',
     backgroundColor: theme.appBar.background,
