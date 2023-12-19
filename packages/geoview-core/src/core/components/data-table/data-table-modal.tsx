@@ -82,12 +82,12 @@ export default function DataTableModal(): JSX.Element {
 
   const rows = useMemo(() => {
     return (
-      layer?.features.splice(0, 99).map((feature) => {
+      layer?.features.slice(0, 99).map((feature) => {
         return feature.rows;
       }) ?? []
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [layer?.fieldAliases]);
 
   return (
     <Dialog open={activeModalId === 'layerDatatable'} onClose={closeModal} maxWidth="xl">
@@ -110,17 +110,17 @@ export default function DataTableModal(): JSX.Element {
           enableFilters={false}
           enableFullScreenToggle={false}
           enableHiding={false}
-          enableTopToolbar={(layer?.features?.length ?? 0) > 100}
+          enableTopToolbar={(layer?.features?.length ?? 0) > 0}
           renderTopToolbarCustomActions={() => {
-            return (layer?.features?.length ?? 0) > 100 ? (
+            return (
               <Box sx={{ ...sxClasses.selectedRows, ...sxClasses.selectedRowsDirection }}>
                 <Typography component="p">
-                  {t('layers.dataModalFeaturesDisplayed').replace('{numberOfFeatures}', (layer?.features?.length ?? 0).toString())}
+                  {t('layers.dataModalFeaturesDisplayed')
+                    .replace('{totalNumberOfFeatures}', (layer?.features?.length ?? 0).toString())
+                    .replace('{numberOfFeatures}', ((layer?.features?.length ?? 0) > 100 ? 100 : layer?.features?.length ?? 0).toString())}
                 </Typography>
                 <Typography component="p">{t('layers.completeTable')}</Typography>
               </Box>
-            ) : (
-              ''
             );
           }}
         />
