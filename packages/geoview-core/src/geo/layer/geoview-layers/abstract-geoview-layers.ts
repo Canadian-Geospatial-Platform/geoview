@@ -1396,14 +1396,24 @@ export abstract class AbstractGeoViewLayer {
   }
 
   /** ***************************************************************************************************************************
-   * Get the bounds of the layer represented in the layerConfig, returns updated bounds
+   * Get the bounds of the layer represented in the layerConfig pointed to by the cached layerPath, returns updated bounds
+   *
+   * @param {Extent | undefined} bounds The current bounding box to be adjusted.
+   * @param {never} notUsed This parameter must not be provided. It is there to allow overloading of the method signature.
+   *
+   * @returns {Extent} The new layer bounding box.
+   */
+  protected abstract getBounds(bounds: Extent, notUsed?: never): Extent | undefined;
+
+  /** ***************************************************************************************************************************
+   * Get the bounds of the layer represented in the layerConfig pointed to by the layerPath, returns updated bounds
    *
    * @param {string} layerPath The Layer path to the layer's configuration.
    * @param {Extent | undefined} bounds The current bounding box to be adjusted.
    *
-   * @returns {Extent} The layer bounding box.
+   * @returns {Extent} The new layer bounding box.
    */
-  protected abstract getBounds(layerPath?: string, bounds?: Extent): Extent | undefined;
+  protected abstract getBounds(layerPath: string, bounds?: Extent): Extent | undefined;
 
   /** ***************************************************************************************************************************
    * Compute the layer bounds or undefined if the result can not be obtained from the feature extents that compose the layer. If
@@ -1427,7 +1437,7 @@ export abstract class AbstractGeoViewLayer {
       listOfLayerEntryConfig.forEach((layerConfig) => {
         if (layerEntryIsGroupLayer(layerConfig)) processGroupLayerBounds(layerConfig.listOfLayerEntryConfig);
         else {
-          bounds = this.getBounds(layerPath, bounds);
+          bounds = this.getBounds(layerPath!, bounds);
         }
       });
     };

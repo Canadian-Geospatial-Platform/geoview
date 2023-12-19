@@ -723,6 +723,8 @@ export class EsriDynamic extends AbstractGeoViewRaster {
    * layer. When the layer config is invalid, nothing is done.
    *
    * @param {string} filter An optional filter to be used in place of the getViewFilter value.
+   * @param {never} notUsed1 This parameter must not be provided. It is there to allow overloading of the method signature.
+   * @param {never} notUsed2 This parameter must not be provided. It is there to allow overloading of the method signature.
    */
   applyViewFilter(filter: string, notUsed1?: never, notUsed2?: never): void;
 
@@ -735,6 +737,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
    *
    * @param {string} filter An optional filter to be used in place of the getViewFilter value.
    * @param {boolean} CombineLegendFilter Flag used to combine the legend filter and the filter together (default: true)
+   * @param {never} notUsed This parameter must not be provided. It is there to allow overloading of the method signature.
    */
   applyViewFilter(filter: string, CombineLegendFilter: boolean, notUsed?: never): void;
 
@@ -750,6 +753,8 @@ export class EsriDynamic extends AbstractGeoViewRaster {
    */
   applyViewFilter(layerPath: string, filter?: string, combineLegendFilter?: boolean): void;
 
+  // See above headers for signification of the parameters. The first lines of the method select the template
+  // used based on the parameter types received.
   applyViewFilter(parameter1: string, parameter2?: string | boolean | never, parameter3?: boolean | never) {
     let layerPath = api.maps[this.mapId].layer.layerPathAssociatedToThegeoviewLayer;
     let filter = '';
@@ -800,14 +805,30 @@ export class EsriDynamic extends AbstractGeoViewRaster {
   }
 
   /** ***************************************************************************************************************************
-   * Get the bounds of the layer represented in the layerConfig, returns updated bounds
+   * Get the bounds of the layer represented in the layerConfig pointed to by the cached layerPath, returns updated bounds
+   *
+   * @param {Extent | undefined} bounds The current bounding box to be adjusted.
+   * @param {never} notUsed This parameter must not be provided. It is there to allow overloading of the method signature.
+   *
+   * @returns {Extent} The new layer bounding box.
+   */
+  protected getBounds(bounds: Extent, notUsed?: never): Extent | undefined;
+
+  /** ***************************************************************************************************************************
+   * Get the bounds of the layer represented in the layerConfig pointed to by the layerPath, returns updated bounds
    *
    * @param {string} layerPath The Layer path to the layer's configuration.
    * @param {Extent | undefined} bounds The current bounding box to be adjusted.
    *
-   * @returns {Extent} The layer bounding box.
+   * @returns {Extent} The new layer bounding box.
    */
-  getBounds(layerPath: string, bounds: Extent | undefined): Extent | undefined {
+  protected getBounds(layerPath: string, bounds?: Extent): Extent | undefined;
+
+  // See above headers for signification of the parameters. The first lines of the method select the template
+  // used based on the parameter types received.
+  protected getBounds(parameter1?: string | Extent, parameter2?: Extent): Extent | undefined {
+    const layerPath = typeof parameter1 === 'string' ? parameter1 : api.maps[this.mapId].layer.layerPathAssociatedToThegeoviewLayer;
+    let bounds = typeof parameter1 !== 'string' ? parameter1 : parameter2;
     const layerConfig = this.getLayerConfig(layerPath);
     const layerBounds = layerConfig?.initialSettings?.bounds || [];
     const projection = this.metadata?.fullExtent?.spatialReference?.wkid || MapEventProcessor.getMapState(this.mapId).currentProjection;
