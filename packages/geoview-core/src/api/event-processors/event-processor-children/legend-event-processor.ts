@@ -133,7 +133,7 @@ export class LegendEventProcessor extends AbstractEventProcessor {
             metadataAccessPath: getLocalizedValue(layerConfig.geoviewRootLayer?.metadataAccessPath, mapId),
             layerPath: entryLayerPath,
             layerStatus: legendResultSetsEntry.layerStatus,
-            layerName: legendResultSetsEntry.data?.layerName ? getLocalizedValue(legendResultSetsEntry.data.layerName, mapId)! : '',
+            layerName: getLocalizedValue(layerConfig.layerName, mapId) || '',
             type: layerConfig.entryType as TypeGeoviewLayerType,
             isVisible: layerConfig.initialSettings?.visible ? layerConfig.initialSettings.visible : 'yes',
             opacity: layerConfig.initialSettings?.opacity ? layerConfig.initialSettings.opacity : 1,
@@ -155,7 +155,7 @@ export class LegendEventProcessor extends AbstractEventProcessor {
           layerAttribution: api.maps[mapId].layer.geoviewLayers[layerPathNodes[0]].attributions,
           // ! Why do wee have metadataAccessPath here? Do we need to fetch the metadata again? The GeoView layer fetch them and store them in this.metadata.
           metadataAccessPath: getLocalizedValue(layerConfig.geoviewRootLayer?.metadataAccessPath, mapId),
-          layerName: getLocalizedValue(legendResultSetsEntry.data?.layerName, mapId)!,
+          layerName: getLocalizedValue(legendResultSetsEntry.data?.layerName, mapId) || '',
           layerStatus: legendResultSetsEntry.layerStatus,
           layerPhase: legendResultSetsEntry.layerPhase,
           querySent: legendResultSetsEntry.querySent,
