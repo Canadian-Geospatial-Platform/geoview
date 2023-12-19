@@ -1,7 +1,7 @@
 import { useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '@mui/material/styles';
-import { Button, Dialog, DialogActions, DialogTitle, DialogContent, Table, MRT_ColumnDef as MRTColumnDef, Box } from '@/ui';
+import { Button, Dialog, DialogActions, DialogTitle, DialogContent, Table, MRT_ColumnDef as MRTColumnDef, Box, Typography } from '@/ui';
 import { useUIActiveFocusItem, useUIStoreActions } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import { useSelectedLayerPath } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { useDatatableStoreLayersData } from '@/core/stores/store-interface-and-intial-values/data-table-state';
@@ -87,7 +87,7 @@ export default function DataTableModal(): JSX.Element {
       }) ?? []
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [layer]);
+  }, []);
 
   return (
     <Dialog open={activeModalId === 'layerDatatable'} onClose={closeModal} maxWidth="xl">
@@ -97,13 +97,32 @@ export default function DataTableModal(): JSX.Element {
           columns={columns as MRTColumnDef[]}
           data={rows}
           enableColumnActions={false}
-          enableTopToolbar={false}
           enableBottomToolbar={false}
           initialState={{ density: 'compact' }}
-          muiTableContainerProps={{ sx: { maxHeight: '90%' } }}
+          muiTableContainerProps={{ sx: { maxHeight: '70vh' } }}
           enablePagination={false}
           enableStickyHeader
           enableSorting
+          positionToolbarAlertBanner="none" // hide existing row count
+          enableGlobalFilter={false}
+          enableColumnFilters={false}
+          enableDensityToggle={false}
+          enableFilters={false}
+          enableFullScreenToggle={false}
+          enableHiding={false}
+          enableTopToolbar={(layer?.features?.length ?? 0) > 100}
+          renderTopToolbarCustomActions={() => {
+            return (layer?.features?.length ?? 0) > 100 ? (
+              <Box sx={{ ...sxClasses.selectedRows, ...sxClasses.selectedRowsDirection }}>
+                <Typography component="p">
+                  {t('layers.dataModalFeaturesDisplayed').replace('{numberOfFeatures}', (layer?.features?.length ?? 0).toString())}
+                </Typography>
+                <Typography component="p">{t('layers.completeTable')}</Typography>
+              </Box>
+            ) : (
+              ''
+            );
+          }}
         />
       </DialogContent>
       <DialogActions>
