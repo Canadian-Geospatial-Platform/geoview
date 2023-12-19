@@ -1,7 +1,6 @@
 import BaseLayer from 'ol/layer/Base';
 import LayerGroup from 'ol/layer/Group';
-import { AbstractGeoViewLayer } from '../abstract-geoview-layers';
-import { TypeLayerEntryConfig } from '@/app';
+import { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 /** *****************************************************************************************************************************
  * AbstractGeoViewRaster types
  */
@@ -25,8 +24,8 @@ export declare abstract class AbstractGeoViewRaster extends AbstractGeoViewLayer
     /** ***************************************************************************************************************************
      * This method adds listeners for openlayers loadend events, indicating that the layer is visible on the map
      *
-     * @param {TypeLayerEntryConfig} layerEntryConfig The config of the layer to add the listener to.
+     * @param {string} layerPath The layer path to the layer's configuration to add the listener to.
      * @param {'tile' | 'image'} layerType The type of raster layer)
      */
-    addLoadendListener(layerEntryConfig: TypeLayerEntryConfig, layerType: 'tile' | 'image'): void;
+    addLoadendListener(layerPath: string, layerType: 'tile' | 'image'): void;
 }

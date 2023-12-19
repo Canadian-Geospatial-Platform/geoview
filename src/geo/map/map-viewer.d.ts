@@ -1,4 +1,5 @@
 /// <reference types="react" />
+import { Root } from 'react-dom/client';
 import { i18n } from 'i18next';
 import OLMap from 'ol/Map';
 import View from 'ol/View';
@@ -24,8 +25,8 @@ import { Modify } from '@/geo/interaction/modify';
 import { Snap } from '@/geo/interaction/snap';
 import { Translate } from '@/geo/interaction/translate';
 import { ModalApi } from '@/ui';
-import { TypeListOfGeoviewLayerConfig, TypeDisplayLanguage, TypeViewSettings, TypeMapState } from '@/geo/map/map-schema-types';
-import { TypeMapFeaturesConfig, TypeHTMLElement } from '@/core/types/global-types';
+import { TypeListOfGeoviewLayerConfig, TypeDisplayLanguage, TypeViewSettings, TypeMapState, TypeDisplayTheme, TypeInteraction } from '@/geo/map/map-schema-types';
+import { TypeMapFeaturesConfig, TypeHTMLElement, TypeValidMapProjectionCodes } from '@/core/types/global-types';
 /**
  * Class used to manage created maps
  *
@@ -37,8 +38,7 @@ export declare class MapViewer {
     mapFeaturesConfig: TypeMapFeaturesConfig;
     mapId: string;
     map: OLMap;
-    displayLanguage: TypeDisplayLanguage;
-    mapState: TypeMapState;
+    overviewRoot: Root | undefined;
     appBarButtons: AppbarButtons;
     navBarButtons: NavbarButtons;
     footerTabs: FooterTabsApi;
@@ -95,18 +95,27 @@ export declare class MapViewer {
      */
     removeComponent(mapComponentId: string): void;
     /**
-     * Toggle fullscreen / exit fullscreen function
-     *
-     * @param status toggle fullscreen or exit fullscreen status
-     * @param {HTMLElement} element the element to toggle fullscreen on
+     * Function called when the map has been rendered and ready to be customized
      */
-    toggleFullscreen(status: boolean, element: TypeHTMLElement): void;
+    mapReady(): void;
     /**
-     * Update the map viewSettings
+     * Return the current display language
      *
-     * @param {TypeMapView} mapView map viewSettings object
+     * @returns {TypeDisplayLanguage} The display language
      */
-    setView(mapView: TypeViewSettings): void;
+    getDisplayLanguage(): TypeDisplayLanguage;
+    /**
+     * Return the current display theme
+     *
+     * @returns {TypeDisplayTheme} The display theme
+     */
+    getDisplayTheme(): TypeDisplayTheme;
+    /**
+     * Return the map current state information
+     *
+     * @returns {TypeMapState} The map state
+     */
+    getMapState(): TypeMapState;
     /**
      * Get the map viewSettings
      *
@@ -114,34 +123,54 @@ export declare class MapViewer {
      */
     getView(): View;
     /**
-     * Function called when the map has been rendered and ready to be customized
+     * set fullscreen / exit fullscreen
+     *
+     * @param status toggle fullscreen or exit fullscreen status
+     * @param {HTMLElement} element the element to toggle fullscreen on
      */
-    mapReady(): void;
+    setFullscreen(status: boolean, element: TypeHTMLElement): void;
     /**
-     * Change the display language of the map
+     * Set map to either dynamic or static
+     *
+     * @param {TypeInteraction} interaction map interaction
+     */
+    setInteraction(interaction: TypeInteraction): void;
+    /**
+     * Set the display language of the map
      *
      * @param {TypeDisplayLanguage} displayLanguage the language to use (en, fr)
-     * @param {TypeListOfGeoviewLayerConfig} listOfGeoviewLayerConfig optional new set of layers to apply (will override original set of layers)
+     * @param {boolean} resetLayer optional flag to ask viewer to reload layers with the new localize language
      */
-    changeLanguage(displayLanguage: TypeDisplayLanguage, listOfGeoviewLayerConfig?: TypeListOfGeoviewLayerConfig): void;
+    setLanguage(displayLanguage: TypeDisplayLanguage, resetLayer?: boolean | false): void;
+    /**
+     * Set the display projection of the map
+     *
+     * @param {TypeValidMapProjectionCodes} projectionCode the projection code (3978, 3857)
+     */
+    setProjection(projectionCode: TypeValidMapProjectionCodes): void;
+    /**
+     * Set the display theme of the map
+     *
+     * @param {TypeDisplayTheme} displayTheme the theme to use (geo.ca, light, dark)
+     */
+    setTheme(displayTheme: TypeDisplayTheme): void;
+    /**
+     * Set the map viewSettings
+     *
+     * @param {TypeMapView} mapView map viewSettings object
+     */
+    setView(mapView: TypeViewSettings): void;
+    /**
+     * Loop trought all geoview layeres and refresh source. Use this function on projection change or other
+     * viewer modification who may affect rendering
+     */
+    refreshLayers(): void;
     /**
      * Reload a map from a config object
      *
      * @param {TypeMapFeaturesConfig} mapFeaturesConfig a new config passed in from the function call
      */
     reloadMap(mapFeaturesConfig: TypeMapFeaturesConfig): void;
-    /**
-     * Create a new config for this map element, validate an load it
-     *
-     * @param {string} mapConfig a new config passed in from the function call
-     */
-    loadMapFromJsonStringConfig(mapConfig: string): void;
-    /**
-     * Set map to either dynamic or static
-     *
-     * @param {string} interaction map interaction
-     */
-    toggleMapInteraction(interaction: string): void;
     /**
      * Fit the map to its boundaries. It is assumed that the boundaries use the map projection. If projectionCode is undefined,
      * the boundaries are used as is, otherwise they are reprojected from the specified projection code to the map projection.

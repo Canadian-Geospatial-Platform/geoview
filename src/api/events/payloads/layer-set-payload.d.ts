@@ -1,6 +1,6 @@
 import { PayloadBaseClass } from './payload-base-class';
 import { EventStringId } from '../event-types';
-import { TypeLayerEntryConfig, TypeLayerStatus, TypeLocalizedString } from '@/geo/map/map-schema-types';
+import { TypeLayerStatus, TypeLocalizedString } from '@/geo/map/map-schema-types';
 export type TypeResultSets = {
     [layerPath: string]: {
         layerName?: TypeLocalizedString;
@@ -137,22 +137,22 @@ export declare class LayerSetPayload extends PayloadBaseClass {
      * Static method used to create a layer set payload when we need to change a layer status
      *
      * @param {string} handlerName the handler Name
-     * @param {string | TypeLayerEntryConfig} layerPathOrConfig the layer path affected by the change
+     * @param {string} layerPath the layer path affected by the change
      * @param {TypeLayerStatus} layerStatus the value to assign to the layerStatus property
      *
      * @returns {TypelayerSetUpdatedPayload} the requestLayerInventoryPayload object created
      */
-    static createLayerSetChangeLayerStatusPayload: (handlerName: string, layerPathOrConfig: string | TypeLayerEntryConfig, layerStatus: TypeLayerStatus) => TypeLayerSetChangeLayerStatusPayload;
+    static createLayerSetChangeLayerStatusPayload: (handlerName: string, layerPath: string, layerStatus: TypeLayerStatus) => TypeLayerSetChangeLayerStatusPayload;
     /**
      * Static method used to create a layer set payload when we need to change a layer phase
      *
      * @param {string} handlerName the handler Name
-     * @param {string | TypeLayerEntryConfig} layerPathOrConfig the layer path affected by the change
+     * @param {string} layerPath the layer path affected by the change
      * @param {string} layerPhase the value to assign to the layerPhase property
      *
      * @returns {TypelayerSetUpdatedPayload} the requestLayerInventoryPayload object created
      */
-    static createLayerSetChangeLayerPhasePayload: (handlerName: string, layerPathOrConfig: string | TypeLayerEntryConfig, layerPhase: string) => TypeLayerSetChangeLayerPhasePayload;
+    static createLayerSetChangeLayerPhasePayload: (handlerName: string, layerPath: string, layerPhase: string) => TypeLayerSetChangeLayerPhasePayload;
     /**
      * Static method used to create a layer set payload sent when a layer is updated
      *

@@ -1,22 +1,11 @@
 import { ReadOptions } from 'ol/format/Feature';
 import Geometry from 'ol/geom/Geometry';
-import { Extent } from 'ol/extent';
 import { Style } from 'ol/style';
 import { Color } from 'ol/color';
 import OLMap from 'ol/Map';
 import { TypeJsonObject } from '@/core/types/global-types';
 import { TypeFeatureStyle } from '@/geo/layer/geometry/geometry-types';
-import { TypeListOfLayerEntryConfig } from '@/geo/map/map-schema-types';
-import { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 export declare class GeoUtilities {
-    /**
-     * Set the layerStatus code of all layers in the listOfLayerEntryConfig.
-     *
-     * @param {AbstractGeoViewLayer} geoviewLayerInstance The GeoView layer instance.
-     * @param {TypeListOfLayerEntryConfig} listOfLayerEntryConfig The list of layer's configuration.
-     * @param {string} errorMessage The error message.
-     */
-    setAllLayerStatusToError(geoviewLayerInstance: AbstractGeoViewLayer, listOfLayerEntryConfig: TypeListOfLayerEntryConfig, errorMessage: string): void;
     /**
      * Returns the WKT representation of a given geometry
      * @function geometryToWKT
@@ -40,14 +29,6 @@ export declare class GeoUtilities {
      * @returns {Geometry | null} the Geometry representation of the geojson
      */
     geojsonToGeometry: (geojson: string, readOptions: ReadOptions) => Geometry | null;
-    /**
-     * Returns the Geometry representation of a given geojson
-     * @function geojsonToGeometry
-     * @param {string} geojson the geojson
-     * @param {ReadOptions} readOptions read options to convert the geojson to a geometry
-     * @returns {Geometry | null} the Geometry representation of the geojson
-     */
-    getExtent: (coordinates: number[], inCrs: number, outCrs: number) => Extent;
     /**
      * Default drawing style for GeoView
      * @returns an Open Layers styling for drawing on a map

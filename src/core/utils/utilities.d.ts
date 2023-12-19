@@ -5,7 +5,7 @@ import { AbstractGeoViewLayer } from '@/app';
 import { TypeLocalizedString } from '@/geo/map/map-schema-types';
 import { TypeJsonArray, TypeJsonObject, TypeJsonValue, TypeMapFeaturesConfig } from '@/core/types/global-types';
 /**
- * Get the string associated to the current display language.
+ * Get the string associated to the current display language for localized object type.
  *
  * @param {TypeLocalizedString} localizedString the localized string to process.
  * @param {string} mapId the map identifier that holds the localized string.
@@ -84,7 +84,16 @@ export declare function showWarning(mapId: string, message: string, withNotifica
  */
 export declare function showError(mapId: string, message: string, withNotification?: boolean, button?: {}): void;
 /**
+ * Return proper language Geoview localized values from map i18n instance
+ *
+ * @param {string} mapId the map to get the i18n
+ * @param {string} localizedKey localize key to get
+ * @returns {string} message with values replaced
+ */
+export declare function getLocalizedMessage(mapId: string, localizedKey: string): string;
+/**
  * Take string and replace parameters from array of values
+ *
  * @param {string[]} params array of parameters to replace
  * @param {string} message original message
  * @returns {string} message with values replaced

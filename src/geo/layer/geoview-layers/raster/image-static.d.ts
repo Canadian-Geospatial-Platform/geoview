@@ -1,6 +1,6 @@
 import { Extent } from 'ol/extent';
-import { AbstractGeoViewLayer, TypeLegend } from '../abstract-geoview-layers';
-import { AbstractGeoViewRaster, TypeBaseRasterLayer } from './abstract-geoview-raster';
+import { AbstractGeoViewLayer, TypeLegend } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
+import { AbstractGeoViewRaster, TypeBaseRasterLayer } from '@/geo/layer/geoview-layers/raster/abstract-geoview-raster';
 import { TypeLayerEntryConfig, TypeGeoviewLayerConfig, TypeListOfLayerEntryConfig, TypeImageStaticLayerEntryConfig } from '@/geo/map/map-schema-types';
 export interface TypeImageStaticLayerConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig'> {
     geoviewLayerType: 'imageStatic';
@@ -55,7 +55,7 @@ export declare class ImageStatic extends AbstractGeoViewRaster {
      *
      * @returns {Promise<void>} A promise that the execution is completed.
      */
-    protected getServiceMetadata(): Promise<void>;
+    protected fetchServiceMetadata(): Promise<void>;
     /** ***************************************************************************************************************************
      * Get the legend image of a layer.
      *
@@ -68,11 +68,11 @@ export declare class ImageStatic extends AbstractGeoViewRaster {
      * Return the legend of the layer.This routine return null when the layerPath specified is not found. If the legend can't be
      * read, the legend property of the object returned will be null.
      *
-     * @param {string | TypeLayerEntryConfig} layerPathOrConfig Layer path or configuration.
+     * @param {string} layerPath The layer path to the layer's configuration.
      *
      * @returns {Promise<TypeLegend | null>} The legend of the layer.
      */
-    getLegend(layerPathOrConfig: string | TypeLayerEntryConfig): Promise<TypeLegend | null>;
+    getLegend(layerPath: string): Promise<TypeLegend | null>;
     /** ***************************************************************************************************************************
      * This method recursively validates the layer configuration entries by filtering and reporting invalid layers. If needed,
      * extra configuration may be done here.
@@ -83,20 +83,20 @@ export declare class ImageStatic extends AbstractGeoViewRaster {
      */
     protected validateListOfLayerEntryConfig(listOfLayerEntryConfig: TypeListOfLayerEntryConfig): void;
     /** ****************************************************************************************************************************
-     * This method creates a GeoView Image Static layer using the definition provided in the layerEntryConfig parameter.
+     * This method creates a GeoView Image Static layer using the definition provided in the layerConfig parameter.
      *
-     * @param {TypeImageStaticLayerEntryConfig} layerEntryConfig Information needed to create the GeoView layer.
+     * @param {TypeImageStaticLayerEntryConfig} layerConfig Information needed to create the GeoView layer.
      *
      * @returns {TypeBaseRasterLayer} The GeoView raster layer that has been created.
      */
-    processOneLayerEntry(layerEntryConfig: TypeImageStaticLayerEntryConfig): Promise<TypeBaseRasterLayer | null>;
+    processOneLayerEntry(layerConfig: TypeImageStaticLayerEntryConfig): Promise<TypeBaseRasterLayer | null>;
     /** ***************************************************************************************************************************
      * Get the bounds of the layer represented in the layerConfig, returns updated bounds
      *
-     * @param {TypeLayerEntryConfig} layerConfig Layer config to get bounds from.
+     * @param {string} layerPath The Layer path to the layer's configuration.
      * @param {Extent | undefined} bounds The current bounding box to be adjusted.
      *
      * @returns {Extent} The layer bounding box.
      */
-    protected getBounds(layerConfig: TypeLayerEntryConfig, bounds: Extent | undefined): Extent | undefined;
+    protected getBounds(layerPath: string, bounds: Extent | undefined): Extent | undefined;
 }

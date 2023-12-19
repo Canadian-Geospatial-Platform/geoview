@@ -2,9 +2,8 @@ import { Options as SourceOptions } from 'ol/source/Vector';
 import { ReadOptions } from 'ol/format/Feature';
 import { Vector as VectorSource } from 'ol/source';
 import Feature from 'ol/Feature';
-import Geometry from 'ol/geom/Geometry';
-import { AbstractGeoViewLayer } from '../abstract-geoview-layers';
-import { AbstractGeoViewVector } from './abstract-geoview-vector';
+import { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
+import { AbstractGeoViewVector } from '@/geo/layer/geoview-layers/vector/abstract-geoview-vector';
 import { TypeLayerEntryConfig, TypeVectorLayerEntryConfig, TypeVectorSourceInitialConfig, TypeGeoviewLayerConfig, TypeListOfLayerEntryConfig, TypeBaseLayerEntryConfig } from '@/geo/map/map-schema-types';
 export interface TypeSourceWFSVectorInitialConfig extends TypeVectorSourceInitialConfig {
     format: 'WFS';
@@ -75,7 +74,7 @@ export declare class WFS extends AbstractGeoViewVector {
      *
      * @returns {Promise<void>} A promise that the execution is completed.
      */
-    protected getServiceMetadata(): Promise<void>;
+    protected fetchServiceMetadata(): Promise<void>;
     /** ***************************************************************************************************************************
      * This method recursively validates the configuration of the layer entries to ensure that each layer is correctly defined. If
      * necessary, additional code can be executed in the child method to complete the layer configuration.
@@ -87,26 +86,26 @@ export declare class WFS extends AbstractGeoViewVector {
      * This method is used to process the layer's metadata. It will fill the empty outfields and aliasFields properties of the
      * layer's configuration.
      *
-     * @param {TypeVectorLayerEntryConfig} layerEntryConfig The layer entry configuration to process.
+     * @param {TypeVectorLayerEntryConfig} layerConfig The layer entry configuration to process.
      *
      * @returns {Promise<void>} A promise that the vector layer configuration has its metadata processed.
      */
-    protected processLayerMetadata(layerEntryConfig: TypeVectorLayerEntryConfig): Promise<void>;
+    protected processLayerMetadata(layerConfig: TypeVectorLayerEntryConfig): Promise<void>;
     /** ***************************************************************************************************************************
      * This method sets the outfields and aliasFields of the source feature info.
      *
      * @param {TypeJsonArray} fields An array of field names and its aliases.
-     * @param {TypeVectorLayerEntryConfig} layerEntryConfig The vector layer entry to configure.
+     * @param {TypeVectorLayerEntryConfig} layerConfig The vector layer entry to configure.
      */
     private processFeatureInfoConfig;
     /** ***************************************************************************************************************************
      * Create a source configuration for the vector layer.
      *
-     * @param {TypeBaseLayerEntryConfig} layerEntryConfig The layer entry configuration.
+     * @param {TypeBaseLayerEntryConfig} layerConfig The layer entry configuration.
      * @param {SourceOptions} sourceOptions The source options (default: {}).
      * @param {ReadOptions} readOptions The read options (default: {}).
      *
      * @returns {VectorSource<Geometry>} The source configuration that will be used to create the vector layer.
      */
-    protected createVectorSource(layerEntryConfig: TypeBaseLayerEntryConfig, sourceOptions?: SourceOptions, readOptions?: ReadOptions): VectorSource<Feature<Geometry>>;
+    protected createVectorSource(layerConfig: TypeBaseLayerEntryConfig, sourceOptions?: SourceOptions, readOptions?: ReadOptions): VectorSource<Feature>;
 }

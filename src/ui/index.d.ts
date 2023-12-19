@@ -40,6 +40,7 @@ export * from './stepper/stepper';
 export * from './style/theme';
 export * from './svg/geo-ca-icon';
 export * from './switch/switch';
+export * from './table/table';
 export * from './tabs/tabs';
 export * from './text-field/custom-text-field';
 export * from './text-field/text-field';

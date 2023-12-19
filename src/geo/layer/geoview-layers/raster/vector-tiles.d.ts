@@ -1,6 +1,6 @@
 import { Extent } from 'ol/extent';
-import { AbstractGeoViewLayer } from '../abstract-geoview-layers';
-import { AbstractGeoViewRaster, TypeBaseRasterLayer } from './abstract-geoview-raster';
+import { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
+import { AbstractGeoViewRaster, TypeBaseRasterLayer } from '@/geo/layer/geoview-layers/raster/abstract-geoview-raster';
 import { TypeLayerEntryConfig, TypeSourceTileInitialConfig, TypeTileLayerEntryConfig, TypeGeoviewLayerConfig, TypeListOfLayerEntryConfig, TypeTileGrid } from '@/geo/map/map-schema-types';
 export type TypeSourceVectorTilesInitialConfig = TypeSourceTileInitialConfig;
 export interface TypeVectorTilesLayerEntryConfig extends Omit<TypeTileLayerEntryConfig, 'source'> {
@@ -73,31 +73,31 @@ export declare class VectorTiles extends AbstractGeoViewRaster {
      */
     protected validateListOfLayerEntryConfig(listOfLayerEntryConfig: TypeListOfLayerEntryConfig): void;
     /** ****************************************************************************************************************************
-     * This method creates a GeoView VectorTiles layer using the definition provided in the layerEntryConfig parameter.
+     * This method creates a GeoView VectorTiles layer using the definition provided in the layerConfig parameter.
      *
-     * @param {TypeVectorTilesLayerEntryConfig} layerEntryConfig Information needed to create the GeoView layer.
+     * @param {TypeVectorTilesLayerEntryConfig} layerConfig Information needed to create the GeoView layer.
      *
      * @returns {TypeBaseRasterLayer} The GeoView raster layer that has been created.
      */
-    processOneLayerEntry(layerEntryConfig: TypeVectorTilesLayerEntryConfig): Promise<TypeBaseRasterLayer | null>;
+    protected processOneLayerEntry(layerConfig: TypeVectorTilesLayerEntryConfig): Promise<TypeBaseRasterLayer | null>;
     /** ***************************************************************************************************************************
      * This method is used to process the layer's metadata. It will fill the empty fields of the layer's configuration (renderer,
      * initial settings, fields and aliases).
      *
-     * @param {TypeTileLayerEntryConfig} layerEntryConfig The layer entry configuration to process.
+     * @param {TypeTileLayerEntryConfig} layerConfig The layer entry configuration to process.
      *
      * @returns {Promise<void>} A promise that the vector layer configuration has its metadata processed.
      */
-    protected processLayerMetadata(layerEntryConfig: TypeTileLayerEntryConfig): Promise<void>;
+    protected processLayerMetadata(layerConfig: TypeTileLayerEntryConfig): Promise<void>;
     /** ***************************************************************************************************************************
      * Get the bounds of the layer represented in the layerConfig, returns updated bounds
      *
-     * @param {TypeLayerEntryConfig} layerConfig Layer config to get bounds from.
+     * @param {string} layerPath The Layer path to the layer's configuration.
      * @param {Extent | undefined} bounds The current bounding box to be adjusted.
      *
      * @returns {Extent} The layer bounding box.
      */
-    getBounds(layerConfig: TypeLayerEntryConfig, bounds: Extent | undefined): Extent | undefined;
+    getBounds(layerPath: string, bounds: Extent | undefined): Extent | undefined;
     addVectorTileLayer(): void;
     /**
      * Set Vector Tile style

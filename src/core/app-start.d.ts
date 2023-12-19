@@ -1,12 +1,6 @@
 import React from 'react';
 import './translation/i18n';
-import { Theme } from '@mui/material/styles';
 import { TypeMapFeaturesConfig } from '@/core/types/global-types';
-declare module '@mui/styles/defaultTheme' {
-    interface DefaultTheme extends Theme {
-        iconImage: React.CSSProperties;
-    }
-}
 export declare const MapContext: React.Context<TypeMapContext>;
 /**
  * Type used for the map context

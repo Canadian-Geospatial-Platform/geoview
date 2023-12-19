@@ -6,6 +6,7 @@ type focusItemProps = {
     callbackElementId: string | false;
 };
 export interface IUIState {
+    activefoorterTabId: string;
     activeTrapGeoView: boolean;
     appBarComponents: TypeAppBarProps;
     corePackagesComponents: TypeMapCorePackages;
@@ -17,6 +18,7 @@ export interface IUIState {
     actions: {
         closeModal: () => void;
         openModal: (uiFocus: focusItemProps) => void;
+        setActiveFooterTab: (id: string) => void;
         setActiveTrapGeoView: (active: boolean) => void;
         setFooterBarExpanded: (expanded: boolean) => void;
         setGeolocatorActive: (active: boolean) => void;
@@ -33,6 +35,7 @@ export declare const useUINavbarComponents: () => TypeNavBarProps;
 export declare const useUIStoreActions: () => {
     closeModal: () => void;
     openModal: (uiFocus: focusItemProps) => void;
+    setActiveFooterTab: (id: string) => void;
     setActiveTrapGeoView: (active: boolean) => void;
     setFooterBarExpanded: (expanded: boolean) => void;
     setGeolocatorActive: (active: boolean) => void;

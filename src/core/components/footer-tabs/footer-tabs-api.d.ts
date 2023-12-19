@@ -24,13 +24,13 @@ export declare class FooterTabsApi {
     /**
      * Remove a tab by value
      *
-     * @param {number} value the value of the tab to be removed
+     * @param {string} id the id of the tab to be removed
      */
-    removeFooterTab: (value: number) => void;
+    removeFooterTab: (id: string) => void;
     /**
-     * Select a tab by value
+     * Select a tab by id
      *
-     * @param {number} value the value of the tab to be selected
+     * @param {string} id the id of the tab to be selected
      */
-    selectFooterTab: (value: number) => void;
+    selectFooterTab: (id: string) => void;
 }

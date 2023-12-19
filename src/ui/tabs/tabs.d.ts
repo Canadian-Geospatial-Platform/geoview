@@ -1,10 +1,11 @@
-import { ReactNode } from 'react';
+/// <reference types="react" />
 import { TabsProps, TabProps, BoxProps } from '@mui/material';
-type TypeChildren = ReactNode;
+type TypeChildren = React.ElementType;
 /**
  * Type used for properties of each tab
  */
 export type TypeTabs = {
+    id: string;
     value: number;
     label: string;
     content: TypeChildren | string;

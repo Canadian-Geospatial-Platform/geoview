@@ -4,7 +4,6 @@ import { Vector as VectorSource } from 'ol/source';
 import BaseLayer from 'ol/layer/Base';
 import LayerGroup from 'ol/layer/Group';
 import { Feature } from 'ol';
-import Geometry from 'ol/geom/Geometry';
 import initSqlJs from 'sql.js';
 import { AbstractGeoViewLayer } from '../abstract-geoview-layers';
 import { AbstractGeoViewVector } from './abstract-geoview-vector';
@@ -24,7 +23,7 @@ interface sldsInterface {
 }
 interface layerData {
     name: string;
-    source: VectorSource<Feature<Geometry>>;
+    source: VectorSource<Feature>;
     properties: initSqlJs.ParamsObject | undefined;
 }
 /** *****************************************************************************************************************************
@@ -78,7 +77,7 @@ export declare class GeoPackage extends AbstractGeoViewVector {
      *
      * @returns {Promise<void>} A promise that the execution is completed.
      */
-    protected getServiceMetadata(): Promise<void>;
+    protected fetchServiceMetadata(): Promise<void>;
     /** ***************************************************************************************************************************
      * This method validates recursively the configuration of the layer entries to ensure that it is a feature layer identified
      * with a numeric layerId and creates a group entry when a layer is a group.
@@ -99,34 +98,34 @@ export declare class GeoPackage extends AbstractGeoViewVector {
     /** ***************************************************************************************************************************
      * Create a source configuration for the vector layer.
      *
-     * @param {TypeBaseLayerEntryConfig} layerEntryConfig The layer entry configuration.
+     * @param {TypeBaseLayerEntryConfig} layerConfig The layer entry configuration.
      * @param {SourceOptions} sourceOptions The source options (default: {}).
      * @param {ReadOptions} readOptions The read options (default: {}).
      */
-    protected extractGeopackageData(layerEntryConfig: TypeBaseLayerEntryConfig, sourceOptions?: SourceOptions, readOptions?: ReadOptions): Promise<[layerData[], sldsInterface]>;
+    protected extractGeopackageData(layerConfig: TypeBaseLayerEntryConfig, sourceOptions?: SourceOptions, readOptions?: ReadOptions): Promise<[layerData[], sldsInterface]>;
     /** ***************************************************************************************************************************
-     * This method creates a GeoView layer using the definition provided in the layerEntryConfig parameter.
+     * This method creates a GeoView layer using the definition provided in the layerConfig parameter.
      *
-     * @param {TypeLayerEntryConfig} layerEntryConfig Information needed to create the GeoView layer.
+     * @param {TypeLayerEntryConfig} layerConfig Information needed to create the GeoView layer.
      * @param {sldsInterface} sld The SLD style associated with the layers geopackage, if any
      *
      * @returns {Promise<BaseLayer | null>} The GeoView base layer that has been created.
      */
-    protected processOneGeopackageLayer(layerEntryConfig: TypeBaseLayerEntryConfig, layerInfo: layerData, sld?: sldsInterface): Promise<BaseLayer | null>;
+    protected processOneGeopackageLayer(layerConfig: TypeBaseLayerEntryConfig, layerInfo: layerData, sld?: sldsInterface): Promise<BaseLayer | null>;
     /** ***************************************************************************************************************************
      * This method creates all layers from a single geopackage
      *
-     * @param {TypeLayerEntryConfig} layerEntryConfig Information needed to create the GeoView layer.
+     * @param {TypeLayerEntryConfig} layerConfig Information needed to create the GeoView layer.
      * @param {LayerGroup} layerGroup Optional layer group for multiple layers.
      *
      * @returns {Promise<BaseLayer | null>} The GeoView base layer that has been created.
      */
-    protected processOneGeopackage(layerEntryConfig: TypeBaseLayerEntryConfig, layerGroup?: LayerGroup): Promise<BaseLayer | null>;
+    protected processOneGeopackage(layerConfig: TypeBaseLayerEntryConfig, layerGroup?: LayerGroup): Promise<BaseLayer | null>;
     /** ***************************************************************************************************************************
      * This method sets the outfields and aliasFields of the source feature info.
      *
      * @param {TypeJsonArray} fields An array of field names and its aliases.
-     * @param {TypeVectorLayerEntryConfig} layerEntryConfig The vector layer entry to configure.
+     * @param {TypeVectorLayerEntryConfig} layerConfig The vector layer entry to configure.
      */
     private processFeatureInfoConfig;
     /** ***************************************************************************************************************************
