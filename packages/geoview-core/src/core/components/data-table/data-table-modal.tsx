@@ -1,7 +1,18 @@
-import { useCallback, useMemo } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '@mui/material/styles';
-import { Button, Dialog, DialogActions, DialogTitle, DialogContent, Table, MRT_ColumnDef as MRTColumnDef, Box, Typography } from '@/ui';
+import {
+  Button,
+  Dialog,
+  DialogActions,
+  DialogTitle,
+  DialogContent,
+  Table,
+  MRT_ColumnDef as MRTColumnDef,
+  Box,
+  Typography,
+  CircularProgress,
+} from '@/ui';
 import { useUIActiveFocusItem, useUIStoreActions } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import { useSelectedLayerPath } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { useDatatableStoreLayersData } from '@/core/stores/store-interface-and-intial-values/data-table-state';
@@ -20,6 +31,8 @@ export default function DataTableModal(): JSX.Element {
 
   const sxtheme = useTheme();
   const sxClasses = getSxClasses(sxtheme);
+
+  const [isLoading, setIsLoading] = useState(true);
 
   // get store function
   const { closeModal } = useUIStoreActions();
@@ -89,41 +102,68 @@ export default function DataTableModal(): JSX.Element {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [layer?.fieldAliases]);
 
+  useEffect(() => {
+    const clearLoading = setTimeout(
+      () => {
+        setIsLoading(false);
+      },
+      // set timeout delay 1 sec when layer has more than 100 features.
+      (layer?.features?.length ?? 0) > 100 ? 1000 : 0
+    );
+    return () => clearTimeout(clearLoading);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isLoading, selectedLayer]);
+
   return (
     <Dialog open={activeModalId === 'layerDatatable'} onClose={closeModal} maxWidth="xl">
       <DialogTitle>{`${t('legend.tableDetails')} ${layer?.layerName![displayLanguage] ?? selectedLayer}`}</DialogTitle>
       <DialogContent>
-        <Table
-          columns={columns as MRTColumnDef[]}
-          data={rows}
-          enableColumnActions={false}
-          enableBottomToolbar={false}
-          initialState={{ density: 'compact' }}
-          muiTableContainerProps={{ sx: { maxHeight: '70vh' } }}
-          enablePagination={false}
-          enableStickyHeader
-          enableSorting
-          positionToolbarAlertBanner="none" // hide existing row count
-          enableGlobalFilter={false}
-          enableColumnFilters={false}
-          enableDensityToggle={false}
-          enableFilters={false}
-          enableFullScreenToggle={false}
-          enableHiding={false}
-          enableTopToolbar={(layer?.features?.length ?? 0) > 0}
-          renderTopToolbarCustomActions={() => {
-            return (
-              <Box sx={{ ...sxClasses.selectedRows, ...sxClasses.selectedRowsDirection }}>
-                <Typography component="p">
-                  {t('layers.dataModalFeaturesDisplayed')
-                    .replace('{totalNumberOfFeatures}', (layer?.features?.length ?? 0).toString())
-                    .replace('{numberOfFeatures}', ((layer?.features?.length ?? 0) > 100 ? 100 : layer?.features?.length ?? 0).toString())}
-                </Typography>
-                <Typography component="p">{t('layers.completeTable')}</Typography>
-              </Box>
-            );
-          }}
-        />
+        {isLoading && (
+          <Box sx={{ minHeight: '300px', minWidth: '450px', position: 'relative' }}>
+            <CircularProgress
+              isLoaded={!isLoading}
+              sx={{
+                backgroundColor: 'inherit',
+              }}
+            />
+          </Box>
+        )}
+        {!isLoading && (
+          <Table
+            columns={columns as MRTColumnDef[]}
+            data={rows}
+            enableColumnActions={false}
+            enableBottomToolbar={false}
+            initialState={{ density: 'compact' }}
+            muiTableContainerProps={{ sx: { maxHeight: '70vh' } }}
+            enablePagination={false}
+            enableStickyHeader
+            enableSorting
+            positionToolbarAlertBanner="none" // hide existing row count
+            enableGlobalFilter={false}
+            enableColumnFilters={false}
+            enableDensityToggle={false}
+            enableFilters={false}
+            enableFullScreenToggle={false}
+            enableHiding={false}
+            enableTopToolbar={(layer?.features?.length ?? 0) > 0}
+            renderTopToolbarCustomActions={() => {
+              return (
+                <Box sx={{ ...sxClasses.selectedRows, ...sxClasses.selectedRowsDirection }}>
+                  <Typography component="p">
+                    {t('layers.dataModalFeaturesDisplayed')
+                      .replace('{totalNumberOfFeatures}', (layer?.features?.length ?? 0).toString())
+                      .replace(
+                        '{numberOfFeatures}',
+                        ((layer?.features?.length ?? 0) > 100 ? 100 : layer?.features?.length ?? 0).toString()
+                      )}
+                  </Typography>
+                  <Typography component="p">{t('layers.completeTable')}</Typography>
+                </Box>
+              );
+            }}
+          />
+        )}
       </DialogContent>
       <DialogActions>
         <Button onClick={closeModal} type="text" size="small" autoFocus>
