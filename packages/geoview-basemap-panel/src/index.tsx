@@ -91,7 +91,7 @@ class BasemapPanelPlugin extends AppBarPlugin {
   onCreateButtonProps(): TypeIconButtonProps {
     // Button props
     return {
-      id: 'basemapPanelButton',
+      id: `${this.pluginProps.mapId}-basemapPanelButton`,
       tooltip: 'basemapPanel.title',
       tooltipPlacement: 'right',
       children: <MapIcon />,

@@ -16,6 +16,12 @@ export const getSxClasses = (theme) => ({
       '&:last-child': {
         marginBottom: '0px',
       },
+      '&:hover': {
+        border: `2px solid #FFFF00`,
+      },
+      '&.active': {
+        border: `2px solid #FFFFFF`,
+      },
     },
     '& .MuiCardHeader-root': {
       backgroundColor: `${theme.palette.grey.A700} !important`,
