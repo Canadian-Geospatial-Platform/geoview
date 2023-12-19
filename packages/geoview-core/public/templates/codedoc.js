@@ -38,9 +38,9 @@ function createCodeSnippetUsingIDs() {
 function createConfigSnippet() {
   let j = 0;
   // inject configuration snippet inside panel
-  for (j = 0; j < document.getElementsByClassName('llwp-map').length; j++) {
+  for (j = 0; j < document.getElementsByClassName('geoview-map').length; j++) {
     let configSnippet = '';
-    const mapID = document.getElementsByClassName('llwp-map')[j].id;
+    const mapID = document.getElementsByClassName('geoview-map')[j].id;
     configSnippet = document.getElementById(mapID).attributes['data-config'];
     const el = document.getElementById(`${mapID}CS`);
 

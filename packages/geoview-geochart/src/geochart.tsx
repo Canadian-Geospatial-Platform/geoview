@@ -1,4 +1,4 @@
-import { TypeWindow, TypeLayerEntryConfig } from 'geoview-core';
+import { TypeWindow, TypeLayerEntryConfig, useAppDisplayLanguageById } from 'geoview-core';
 import { useDetailsStoreLayerDataArray } from 'geoview-core/src/core/stores/store-interface-and-intial-values/details-state';
 import { GeoChart as GeoChartComponent, GeoChartConfig, ChartType, GeoChartDefaultColors, SchemaValidator, GeoChartAction } from 'geochart';
 import {
@@ -33,7 +33,6 @@ export function GeoChart(props: GeoChartProps): JSX.Element {
   // Fetch cgpv
   const w = window as TypeWindow;
   const { cgpv } = w;
-  const { useTranslation } = cgpv;
   const { useTheme } = cgpv.ui;
   const { useEffect, useState, useCallback } = cgpv.react;
 
@@ -42,9 +41,6 @@ export function GeoChart(props: GeoChartProps): JSX.Element {
 
   // Get the theme
   const theme = useTheme();
-
-  // Get the translations
-  const { i18n } = useTranslation<string>();
 
   // Tweak the default colors based on the theme
   const defaultColors: GeoChartDefaultColors = {
@@ -63,6 +59,7 @@ export function GeoChart(props: GeoChartProps): JSX.Element {
 
   // Use Store
   const storeLayerDataArray = useDetailsStoreLayerDataArray();
+  const displayLanguage = useAppDisplayLanguageById(mapId);
 
   // #endregion
 
@@ -152,7 +149,7 @@ export function GeoChart(props: GeoChartProps): JSX.Element {
           const chartConfig = loadDatasources(foundConfigChart!, foundConfigChartLyr!, foundData!);
 
           // Set the title
-          chartConfig.title = foundLayerEntry.layerName![i18n.language];
+          chartConfig.title = foundLayerEntry.layerName![displayLanguage];
 
           // Load the chart
           setChart(chartConfig);
@@ -162,7 +159,7 @@ export function GeoChart(props: GeoChartProps): JSX.Element {
         setIsLoadingChart(false);
       }
     },
-    [cgpv.api.maps, config, i18n.language, mapId]
+    [cgpv.api.maps, config, displayLanguage, mapId]
   );
 
   /**

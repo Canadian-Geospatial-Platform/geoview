@@ -53,7 +53,7 @@
     </div>
     <div
       id="PRJ1"
-      class="llwp-map"
+      class="geoview-map"
       data-lang="en"
       data-config="{
           'map': {
@@ -86,7 +86,7 @@
     </div>
     <div
       id="PRJ2"
-      class="llwp-map"
+      class="geoview-map"
       data-lang="en"
       data-config="{
           'map': {
@@ -124,7 +124,7 @@
     </div>
     <div
       id="PRJ3"
-      class="llwp-map"
+      class="geoview-map"
       data-lang="en"
       data-config="{
           'map': {
@@ -193,8 +193,8 @@
           'suportedLanguages': ['en']
         }"
     ></div>
-    <div style="display: flex;">
-      <p>This map display projection is:   </p>
+    <div style="display: flex">
+      <p>This map display projection is:</p>
       <div class="theme-selector">
         <select name="Switch Projection" id="switchProjection">
           <option value="3978">LCC</option>
@@ -213,9 +213,9 @@
       cgpv.init(function () {
         console.log('api is ready');
 
-        const switchProjectioneElem = document.getElementById("switchProjection");
-        switchProjectioneElem.addEventListener("change", (e) => {
-          cgpv.api.maps['PRJ3'].setProjection(e.target.value)
+        const switchProjectioneElem = document.getElementById('switchProjection');
+        switchProjectioneElem.addEventListener('change', (e) => {
+          cgpv.api.maps['PRJ3'].setProjection(e.target.value);
         });
         //create snippets
         createConfigSnippet();

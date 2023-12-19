@@ -34,7 +34,8 @@ td {
   font-size: 15px;
 }
 
-.active, .collapsible:hover {
+.active,
+.collapsible:hover {
   background-color: #555;
 }
 
@@ -91,7 +92,7 @@ td {
   display: block;
 }
 
-.llwp-map {
+.geoview-map {
   height: 800px;
   border: gray 1px solid;
 }
@@ -108,9 +109,9 @@ td {
 }
 
 .map-title-holder .ref-link {
-    margin-top: auto;
-    margin-bottom: auto;
-    margin-left: 20px;
+  margin-top: auto;
+  margin-bottom: auto;
+  margin-left: 20px;
 }
 
 .theme-selector {
@@ -154,14 +155,23 @@ td {
   font-size: smaller;
 }
 
-table.info, th.info, td.info, th.infoCol1, td.infoCol1 {
+table.info,
+th.info,
+td.info,
+th.infoCol1,
+td.infoCol1 {
   border: 1px solid black;
 }
-th.info, td.info, th.infoCol1, td.infoCol1 {
+th.info,
+td.info,
+th.infoCol1,
+td.infoCol1 {
   padding: 15px;
   width: 15%;
 }
-th.info, th.infoCol1, td.infoCol1 {
+th.info,
+th.infoCol1,
+td.infoCol1 {
   text-align: left;
   font-weight: bold;
   font-size: 15px;
@@ -173,7 +183,8 @@ table.state {
   width: 100%;
 }
 
-td.state, th.state {
+td.state,
+th.state {
   border: 1px solid #dddddd;
   text-align: left;
   padding: 8px;

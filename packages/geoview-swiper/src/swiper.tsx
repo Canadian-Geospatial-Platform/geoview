@@ -1,4 +1,4 @@
-import { RefObject } from 'geoview-core';
+import { RefObject, useAppDisplayLanguageById } from 'geoview-core';
 
 import Draggable from 'react-draggable';
 
@@ -12,6 +12,8 @@ import { EventTypes } from 'ol/Observable';
 import BaseEvent from 'ol/events/Event';
 
 import debounce from 'lodash/debounce';
+
+import { getLocalizedMessage } from 'geoview-core/src/core/utils/utilities';
 import { EVENT_NAMES } from 'geoview-core/src/api/events/event-types';
 import { PayloadBaseClass, TypeResultSets, payloadIsLayerSetUpdated } from 'geoview-core/src/api/events/payloads';
 
@@ -100,12 +102,10 @@ export function Swiper(props: SwiperProps): JSX.Element {
   const { mapId, config } = props;
 
   const { cgpv } = window;
-  const { api, ui, react, useTranslation } = cgpv;
+  const { api, ui, react } = cgpv;
   const { useEffect, useState, useRef } = react;
 
   const { Box, Tooltip, HandleIcon } = ui.elements;
-
-  const { t } = useTranslation<string>();
 
   const [map] = useState<Map>(api.maps[mapId].map);
   const mapSize = useRef<number[]>(map?.getSize() || [0, 0]);
@@ -118,6 +118,9 @@ export function Swiper(props: SwiperProps): JSX.Element {
 
   const swiperValue = useRef(50);
   const swiperRef = useRef<HTMLElement>();
+
+  // Get store value
+  const displayLanguage = useAppDisplayLanguageById(mapId);
 
   /**
    * Sort layers to only include those that are loaded
@@ -278,7 +281,7 @@ export function Swiper(props: SwiperProps): JSX.Element {
       });
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [layersIds]);
+  }, [layersIds, displayLanguage]);
 
   // Update layer list if a layer loads late
   useEffect(() => {
@@ -296,7 +299,8 @@ export function Swiper(props: SwiperProps): JSX.Element {
     return () => {
       api.event.off(EVENT_NAMES.LAYER_SET.UPDATED, mapId, layerSetUpdatedHandler);
     };
-  });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   /**
    * Update swiper and layers from keyboard CTRL + Arrow key
@@ -305,7 +309,6 @@ export function Swiper(props: SwiperProps): JSX.Element {
   const updateSwiper = debounce((evt: KeyboardEvent): void => {
     // * there is a know issue when stiching from keyboard to mouse swiper but we can live with it as we are not expecting to face this
     // * offset from mouse method is not working properly anymore
-
     if (evt.ctrlKey && 'ArrowLeft ArrowRight ArrowUp ArrowDown'.includes(evt.key)) {
       // get swiper bar style then set the move
       const styleValues = getSwiperStyle();
@@ -356,7 +359,7 @@ export function Swiper(props: SwiperProps): JSX.Element {
         nodeRef={swiperRef as RefObject<HTMLElement>}
       >
         <Box sx={[orientation === 'vertical' ? sxClasses.vertical : sxClasses.horizontal, sxClasses.bar]} tabIndex={0} ref={swiperRef}>
-          <Tooltip title={t('swiper.tooltip')}>
+          <Tooltip title={getLocalizedMessage(mapId, 'swiper.tooltip')}>
             <Box className="handleContainer">
               <HandleIcon sx={sxClasses.handle} className="handleL" />
               <HandleIcon sx={sxClasses.handle} className="handleR" />

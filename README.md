@@ -42,7 +42,6 @@ Our developers use [Visual Studio Code](https://code.visualstudio.com/) with a f
 
 - We are using [React Dev Tools](https://chrome.google.com/webstore/detail/react-developer-tools/fmkadmapgofadopljbjfkapdkoienihi)
 
-
 ### Documentation for GeoView
 
 - [click here](https://canadian-geospatial-platform.github.io/geoview/public/docs/) to view generated typedoc for the GeoView core.
@@ -164,7 +163,7 @@ There are multiple ways to load maps. Below we will show a basic usage of loadin
 
 The viewer allows you to load multiple maps on the page, you need to provide a **different id** for each map. Maps are added in the body tag of the **HTML** document. _You can also load maps inside any **JS** framework such as React, Angular, VueJS._
 
-For the viewer to recognize that you are trying to render a map on the page, you need to have a **div element** with **class** "llwp-map".
+For the viewer to recognize that you are trying to render a map on the page, you need to have a **div element** with **class** "geoview-map".
 
 It's **recommended** to pass in an **id attribute**, if an id is not passed then the viewer will auto generate an id for you. If you want to use APIs that control this map then you will need to view all created maps on the page and figure out the id of the created map.
 
@@ -175,7 +174,7 @@ Below is an example of a simple map, with an id **mapOne**. This map will be usi
 ```html
 <div
   id="mapOne"
-  class="llwp-map"
+  class="geoview-map"
   style="height: 100vh;"
   data-lang="en"
   data-config="{
@@ -235,7 +234,7 @@ Full example:
   <body>
     <div
       id="mapOne"
-      class="llwp-map"
+      class="geoview-map"
       style="height: 100vh;"
       data-lang="en"
       data-config="{... insert your configuration ...}"
