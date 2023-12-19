@@ -201,7 +201,7 @@ export function SingleLayer({ isDragging, depth, layer, setIsLayersListPanelVisi
     }
 
     return (
-      <Collapse in={isGroupOpen || isLayerSelected} timeout="auto">
+      <Collapse in={isGroupOpen} timeout="auto">
         <LayersList
           parentLayerPath={layer.layerPath}
           depth={1 + depth}

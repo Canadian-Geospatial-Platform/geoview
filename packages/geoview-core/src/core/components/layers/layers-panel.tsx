@@ -42,10 +42,10 @@ export function LayersPanel() {
 
   const leftPanel = () => {
     return (
-      <div>
+      <Box>
         <LayersActions />
         {displayState === 'add' ? <AddNewLayer /> : <LeftPanel setIsLayersListPanelVisible={setIsLayersListPanelVisible} />}
-      </div>
+      </Box>
     );
   };
 
