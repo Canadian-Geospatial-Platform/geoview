@@ -131,7 +131,7 @@ class FooterPanelPlugin extends AbstractPlugin {
     }
 
     if (defaultTabs.includes('geoChart')) {
-      /// create a new tab by loading the geo chart plugin
+      // create a new tab by loading the geo chart plugin
       this.api.plugin
         .loadScript('geochart')
         .then((constructor: AbstractPlugin | ((pluginId: string, props: TypeJsonObject) => TypeJsonValue)) => {
