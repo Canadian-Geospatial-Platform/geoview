@@ -1,5 +1,4 @@
 /* eslint-disable no-var, vars-on-top, block-scoped-var, no-param-reassign */
-import { get, transformExtent } from 'ol/proj';
 import { Options as SourceOptions } from 'ol/source/Vector';
 import { WKB as FormatWKB } from 'ol/format';
 
@@ -191,7 +190,7 @@ export class GeoPackage extends AbstractGeoViewVector {
 
         const { currentProjection } = MapEventProcessor.getMapState(this.mapId);
         if (layerConfig.initialSettings?.extent)
-          layerConfig.initialSettings.extent = transformExtent(
+          layerConfig.initialSettings.extent = api.projection.transformExtent(
             layerConfig.initialSettings.extent,
             'EPSG:4326',
             `EPSG:${currentProjection}`
@@ -199,9 +198,9 @@ export class GeoPackage extends AbstractGeoViewVector {
 
         if (!layerConfig.initialSettings?.bounds && foundCollection.extent?.spatial?.bbox && foundCollection.extent?.spatial?.crs) {
           // layerConfig.initialSettings cannot be undefined because config-validation set it to {} if it is undefined.
-          layerConfig.initialSettings!.bounds = transformExtent(
+          layerConfig.initialSettings!.bounds = api.projection.transformExtent(
             foundCollection.extent.spatial.bbox[0] as number[],
-            get(foundCollection.extent.spatial.crs as string)!,
+            api.projection.getProjection(foundCollection.extent.spatial.crs as string)!,
             `EPSG:${currentProjection}`
           );
         }

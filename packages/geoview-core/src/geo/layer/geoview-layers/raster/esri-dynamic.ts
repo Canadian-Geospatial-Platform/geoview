@@ -6,7 +6,6 @@ import { Options as ImageOptions } from 'ol/layer/BaseImage';
 import { Image as ImageLayer } from 'ol/layer';
 import { Coordinate } from 'ol/coordinate';
 import { Pixel } from 'ol/pixel';
-import { transform, transformExtent } from 'ol/proj';
 import { EsriJSON } from 'ol/format';
 import { Extent } from 'ol/extent';
 import Feature from 'ol/Feature';
@@ -317,7 +316,11 @@ export class EsriDynamic extends AbstractGeoViewRaster {
    * @returns {Promise<TypeArrayOfFeatureInfoEntries>} The promised feature info table.
    */
   protected getFeatureInfoAtCoordinate(location: Coordinate, layerPath: string): Promise<TypeArrayOfFeatureInfoEntries> {
-    const convertedLocation = transform(location, `EPSG:${MapEventProcessor.getMapState(this.mapId).currentProjection}`, 'EPSG:4326');
+    const convertedLocation = api.projection.transform(
+      location,
+      `EPSG:${MapEventProcessor.getMapState(this.mapId).currentProjection}`,
+      'EPSG:4326'
+    );
     return this.getFeatureInfoAtLongLat(convertedLocation, layerPath);
   }
 
@@ -344,7 +347,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
       const { currentProjection } = MapEventProcessor.getMapState(this.mapId);
       const size = mapLayer.getSize()!;
       let bounds = mapLayer.getView().calculateExtent();
-      bounds = transformExtent(bounds, `EPSG:${currentProjection}`, 'EPSG:4326');
+      bounds = api.projection.transformExtent(bounds, `EPSG:${currentProjection}`, 'EPSG:4326');
 
       const extent = { xmin: bounds[0], ymin: bounds[1], xmax: bounds[2], ymax: bounds[3] };
 
@@ -843,12 +846,13 @@ export class EsriDynamic extends AbstractGeoViewRaster {
     if (layerBounds) {
       let transformedBounds = layerBounds;
       if (this.metadata?.fullExtent?.spatialReference?.wkid !== MapEventProcessor.getMapState(this.mapId).currentProjection) {
-        transformedBounds = transformExtent(
+        transformedBounds = api.projection.transformExtent(
           layerBounds,
           `EPSG:${projection}`,
           `EPSG:${MapEventProcessor.getMapState(this.mapId).currentProjection}`
         );
       }
+
       if (!bounds) bounds = [transformedBounds[0], transformedBounds[1], transformedBounds[2], transformedBounds[3]];
       else bounds = getMinOrMaxExtents(bounds, transformedBounds);
     }

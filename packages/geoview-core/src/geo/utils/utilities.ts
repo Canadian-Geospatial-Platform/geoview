@@ -3,7 +3,6 @@ import axios from 'axios';
 import { WMSCapabilities, WKT, GeoJSON } from 'ol/format';
 import { ReadOptions } from 'ol/format/Feature';
 import Geometry from 'ol/geom/Geometry';
-import { toLonLat } from 'ol/proj';
 import { Style, Stroke, Fill, Circle } from 'ol/style';
 import { Color } from 'ol/color';
 import { getArea as getAreaOL } from 'ol/sphere';
@@ -15,6 +14,7 @@ import { TypeFeatureStyle } from '@/geo/layer/geometry/geometry-types';
 import { xmlToJson } from '@/core/utils/utilities';
 
 import { NORTH_POLE_POSITION } from '@/core/types/cgpv-types';
+import { api } from '@/app';
 
 /**
  * Interface used for css style declarations
@@ -303,7 +303,7 @@ export class GeoUtilities {
     // Check the container value for top middle of the screen
     // Convert this value to a lat long coordinate
     const pointXY = [map.getSize()![0] / 2, 1];
-    const pt = toLonLat(map.getCoordinateFromPixel(pointXY), map.getView().getProjection());
+    const pt = api.projection.transformToLonLat(map.getCoordinateFromPixel(pointXY), map.getView().getProjection());
 
     // If user is pass north, long value will start to be positive (other side of the earth).
     // This will work only for LCC Canada.
@@ -324,7 +324,7 @@ export class GeoUtilities {
 
       // map center (we use botton parallel to introduce less distortion)
       const extent = map.getView().calculateExtent();
-      const center: Coordinate = toLonLat([(extent[0] + extent[2]) / 2, extent[1]], map.getView().getProjection());
+      const center: Coordinate = api.projection.transformToLonLat([(extent[0] + extent[2]) / 2, extent[1]], map.getView().getProjection());
       const pointB = { x: center[0], y: center[1] };
 
       // set info on longitude and latitude

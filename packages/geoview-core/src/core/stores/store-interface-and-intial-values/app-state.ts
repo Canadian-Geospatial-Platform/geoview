@@ -95,11 +95,6 @@ export function initializeAppState(set: TypeSetStore, get: TypeGetStore): IAppSt
           },
         });
 
-        // also set the display name from original config for reloading purpose
-        const config = get().mapConfig;
-        config!.displayLanguage = lang;
-        set({ mapConfig: config });
-
         // reload the basemap from new language
         MapEventProcessor.resetBasemap(get().mapId);
       },

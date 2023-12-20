@@ -25,6 +25,4 @@ export type TypePluginStructure = {
 /** ******************************************************************************************************************************
  * Record of plugins.
  */
-export type TypeRecordOfPlugin = {
-  [MapId: string]: { [pluginId: string]: TypePluginStructure };
-};
+export type TypeRecordOfPlugin = { [pluginId: string]: TypePluginStructure };

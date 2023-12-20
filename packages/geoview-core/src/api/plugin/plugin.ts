@@ -11,7 +11,7 @@ import { whenThisThen, showError } from '@/core/utils/utilities';
 
 import { api } from '@/app';
 import { AbstractPlugin } from './abstract-plugin';
-import { TypePluginStructure, TypeRecordOfPlugin } from './plugin-types';
+import { TypePluginStructure } from './plugin-types';
 import { toJsonObject, TypeJsonObject, TypeJsonValue } from '@/core/types/global-types';
 import { UIEventProcessor } from '../event-processors/event-processor-children/ui-event-processor';
 
@@ -27,8 +27,6 @@ export class Plugin {
 
   // used to indicate that all initial plugins finished loading
   pluginsLoaded = false;
-
-  plugins: TypeRecordOfPlugin = {};
 
   /**
    * Load a package script on runtime
@@ -67,7 +65,7 @@ export class Plugin {
         script.id = pluginId;
         document.body.appendChild(script);
         script.onload = () => {
-          resolve(window.plugins[pluginId]);
+          resolve(window.geoviewPlugins[pluginId]);
         };
         script.onerror = () => {
           resolve(null);
@@ -78,9 +76,9 @@ export class Plugin {
         // called in parallel and the script.onload callback (a few lines above) hasn't been called back yet (for the 1st plugin load).
         // Therefore, any subsequent call to loadScript has to actually wait for the script.onload to
         // be calledback. Otherwise, even if 'existingScript' says that it's been loaded,
-        // it's not 'yet' true, because the js file might still be being downloaded and window.plugins[pluginId] still undefined.
-        whenThisThen(() => window.plugins && window.plugins[pluginId]).then(() => {
-          resolve(window.plugins[pluginId]);
+        // it's not 'yet' true, because the js file might still be being downloaded and window.geoviewPlugins[pluginId] still undefined.
+        whenThisThen(() => window.geoviewPlugins?.[pluginId]).then(() => {
+          resolve(window.geoviewPlugins[pluginId]);
         });
       }
     });
@@ -100,7 +98,7 @@ export class Plugin {
     constructor?: AbstractPlugin | ((pluginId: string, props: TypeJsonObject) => TypeJsonValue),
     props?: TypeJsonObject
   ): Promise<void> => {
-    if ((this.plugins[mapId] && !this.plugins[mapId][pluginId]) || !(mapId in this.plugins)) {
+    if (!api.maps?.[mapId]?.plugins?.[pluginId]) {
       let plugin: TypePluginStructure | null = null;
 
       if (constructor) {
@@ -187,13 +185,8 @@ export class Plugin {
           configObj: { value: pluginConfigObj },
         });
 
-        if (!this.plugins[mapId]) {
-          this.plugins[mapId] = {
-            [pluginId]: plugin,
-          };
-        } else {
-          this.plugins[mapId][pluginId] = plugin;
-        }
+        // attach to the map plugins object
+        api.maps[mapId].plugins[pluginId] = plugin;
 
         // call plugin added method if available
         if (typeof plugin.added === 'function') {
@@ -224,35 +217,21 @@ export class Plugin {
   };
 
   /**
-   * Delete a plugin
+   * Delete a specific plugin loaded in a map
    *
    * @param {string} pluginId the id of the plugin to delete
-   * @param {string} mapId the map id to remove the plugin from (if not provided then plugin will be removed from all maps)
+   * @param {string} mapId the map id to remove the plugin from
    */
-  removePlugin = (pluginId: string, mapId?: string): void => {
+  removePlugin = (pluginId: string, mapId: string): void => {
     if (mapId) {
-      if (this.plugins[mapId] && this.plugins[mapId][pluginId]) {
-        const plugin = this.plugins[mapId][pluginId];
+      if (!api.maps?.[mapId]?.plugins?.[pluginId]) {
+        const plugin = api.maps[mapId].plugins[pluginId];
 
         // call the removed function on the plugin
         if (typeof plugin.removed === 'function') plugin.removed();
       }
 
-      delete this.plugins[mapId][pluginId];
-    } else {
-      // remove the plugin from all maps
-      const pluginKeys = Object.keys(this.plugins);
-      for (let i = 0; i < pluginKeys.length; i += 1) {
-        const pluginKey = pluginKeys[i];
-        const recordOfPlugins = this.plugins[pluginKey];
-
-        const plugin = recordOfPlugins[pluginId];
-
-        // call the removed function on the plugin
-        if (typeof plugin.removed === 'function') plugin.removed();
-
-        delete this.plugins[pluginKey][pluginId];
-      }
+      delete api.maps[mapId].plugins[pluginId];
     }
   };
 
@@ -263,7 +242,7 @@ export class Plugin {
    */
   removePlugins = (mapId: string): void => {
     if (mapId) {
-      const recordOfPlugins = this.plugins[mapId];
+      const recordOfPlugins = api.maps[mapId].plugins;
 
       if (recordOfPlugins) {
         // remove all plugins by map
@@ -317,7 +296,7 @@ export class Plugin {
       // load packages at next map if exists
       this.loadPlugin(mapIndex + 1, 0);
       // if no plugins loaded then call init callback function
-    } else if (Object.keys(this.plugins).length === 0) {
+    } else if (Object.keys(api.maps[mapId].plugins).length === 0) {
       api.callInitCallback();
     }
   };
