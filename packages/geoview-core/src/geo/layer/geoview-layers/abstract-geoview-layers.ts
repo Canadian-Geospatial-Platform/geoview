@@ -1434,7 +1434,7 @@ export abstract class AbstractGeoViewLayer {
       listOfLayerEntryConfig.forEach((layerConfig) => {
         if (layerEntryIsGroupLayer(layerConfig)) processGroupLayerBounds(layerConfig.listOfLayerEntryConfig);
         else {
-          bounds = this.getBounds(layerPath!, bounds);
+          bounds = this.getBounds(Layer.getLayerPath(layerConfig), bounds);
         }
       });
     };
