@@ -3,7 +3,8 @@ import { createElement, ReactNode } from 'react';
 import { api } from '@/app';
 import { EVENT_NAMES } from '@/api/events/event-types';
 
-import { CheckboxListAPI } from '../list/checkbox-list/checkbox-list-api';
+// TODO: Refactor CheckboxList - Cleanup, remove this code once things are confirmed working.
+// import { CheckboxListAPIOBSOLETE } from '../list/checkbox-list/checkbox-list-api';
 
 import { PanelPayload, TypeActionButton } from '@/api/events/payloads';
 import { generateId } from '@/core/utils/utilities';
@@ -43,7 +44,8 @@ export class PanelApi {
   // reference to the map id
   mapId: string;
 
-  checkboxListAPI?: CheckboxListAPI;
+  // TODO: Refactor CheckboxList - Cleanup, remove this code once things are confirmed working.
+  // checkboxListAPI?: CheckboxListAPIOBSOLETE;
 
   panelStyles?: PanelStyles;
 
@@ -166,19 +168,6 @@ export class PanelApi {
     );
 
     return this;
-  };
-
-  /**
-   * Create a check list that can be used as a content
-   *
-   * @param {String[]} elements of the check list the content to update to
-   *
-   * @returns {CheckboxList} the check list
-   */
-  attachCheckBoxList = (listItems: string[], multiselectFlag?: boolean, checkedItems?: number[]): void => {
-    if (this.checkboxListAPI) delete this.checkboxListAPI;
-    this.checkboxListAPI = new CheckboxListAPI(listItems, multiselectFlag, checkedItems);
-    this.changeContent(this.checkboxListAPI.CheckboxList);
   };
 
   /**

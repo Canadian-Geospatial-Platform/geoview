@@ -79,7 +79,7 @@ export function GeoChartPanel(props: GeoChartPanelProps): JSX.Element {
           type="button"
           value="TEMP REDRAW"
           onClick={() => {
-            cgpv.api.plugins.UIM10.geochart.redrawChart();
+            cgpv.api.plugins[mapId].geochart.redrawChart();
           }}
         />
       </Box>
