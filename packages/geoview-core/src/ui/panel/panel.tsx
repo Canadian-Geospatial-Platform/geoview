@@ -242,6 +242,7 @@ export function Panel(props: TypePanelAppProps): JSX.Element {
         focusTrapOptions={{
           escapeDeactivates: false,
           clickOutsideDeactivates: true,
+          initialFocus: false,
         }}
       >
         <Card
