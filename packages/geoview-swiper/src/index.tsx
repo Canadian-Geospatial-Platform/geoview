@@ -28,12 +28,16 @@ class SwiperPlugin extends MapPlugin {
    */
   translations = toJsonObject({
     en: {
-      tooltip: 'Drag to see underlying layer',
-      menu: 'Swiper',
+      swiper: {
+        tooltip: 'Drag to see underlying layer',
+        menu: 'Swiper',
+      },
     },
     fr: {
-      tooltip: 'Faites glisser pour voir les couches sous-jacentes',
-      menu: 'Balayage',
+      swiper: {
+        tooltip: 'Faites glisser pour voir les couches sous-jacentes',
+        menu: 'Balayage',
+      },
     },
   });
 

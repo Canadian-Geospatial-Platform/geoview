@@ -1,0 +1,65 @@
+{
+  "map": {
+    "interaction": "dynamic",
+    "viewSettings": {
+      "zoom": 4,
+      "center": [-100, 60],
+      "projection": 3857
+    },
+    "basemapOptions": {
+      "basemapId": "transport",
+      "shaded": false,
+      "labeled": true
+    },
+    "listOfGeoviewLayerConfig": [
+      {
+        "geoviewLayerId": "historical-flood",
+        "serviceDateFormat": "yyyy/mm/ddThh:mm:ssz",
+        "geoviewLayerName": {
+          "en": "Historical Flood Events (HFE)"
+        },
+        "metadataAccessPath": {
+          "en": "https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/historical_flood_event_en/MapServer"
+        },
+        "geoviewLayerType": "esriFeature",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "0"
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "wmsLYR1-spatiotemporel",
+        "geoviewLayerName": { "en": "Spatiotemporel" },
+        "metadataAccessPath": { "en": "https://geo.weather.gc.ca/geomet" },
+        "geoviewLayerType": "ogcWms",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "RADAR_1KM_RSNO",
+            "layerName": { "en": "Test Spatiotemporel" }
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "MSI",
+        "geoviewLayerName": {
+          "en": "MSI"
+        },
+        "metadataAccessPath": {
+          "en": "https://datacube.services.geo.ca/ows/msi"
+        },
+        "geoviewLayerType": "ogcWms",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "msi-94-or-more"
+          }
+        ]
+      }
+    ]
+  },
+  "theme": "geo.ca",
+  "components": ["north-arrow", "overview-map"],
+  "corePackages": ["footer-panel"],
+  "externalPackages": [],
+  "suportedLanguages": ["en"]
+}

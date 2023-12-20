@@ -1,9 +1,12 @@
 import { TypeWindow } from 'geoview-core';
 import { LayerListEntry, Layout } from 'geoview-core/src/core/components/common';
 import { useVisibleTimeSliderLayers, useTimeSliderLayers } from 'geoview-core/src/core/stores';
+import { getLocalizedMessage } from 'geoview-core/src/core/utils/utilities';
 import { TimeSlider } from './time-slider';
+import { ConfigProps } from './time-slider-types';
 
 interface TypeTimeSliderProps {
+  configObj: ConfigProps;
   mapId: string;
 }
 
@@ -16,13 +19,10 @@ const { cgpv } = window as TypeWindow;
  * @returns {JSX.Element} the time slider tab
  */
 export function TimeSliderPanel(props: TypeTimeSliderProps): JSX.Element {
-  const { mapId } = props;
+  const { mapId, configObj } = props;
   const { react, ui } = cgpv;
-  const { useTranslation } = cgpv;
   const { useState, useEffect } = react;
   const { Box } = ui.elements;
-
-  const { t } = useTranslation();
 
   // internal state
   const [selectedLayerPath, setSelectedLayerPath] = useState<string>();
@@ -44,16 +44,16 @@ export function TimeSliderPanel(props: TypeTimeSliderProps): JSX.Element {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [visibleTimeSliderLayers]);
 
-  if (!visibleTimeSliderLayers.length) return <span>{t('timeSlider.panel.noLayers')}</span>;
+  if (!visibleTimeSliderLayers.length) return <span>{getLocalizedMessage(mapId, 'timeSlider.panel.noLayers')}</span>;
   return selectedLayerPath ? (
     <Layout
       selectedLayerPath={selectedLayerPath}
       handleLayerList={handleLayerList}
-      layerList={visibleTimeSliderLayers.map((layer) => {
-        return { layerName: timeSliderLayers[layer].name, layerPath: layer, tooltip: timeSliderLayers[layer].name };
+      layerList={visibleTimeSliderLayers.map((layerPath: string) => {
+        return { layerName: timeSliderLayers[layerPath].name, layerPath, tooltip: timeSliderLayers[layerPath].name };
       })}
     >
-      <TimeSlider mapId={mapId} layerPath={selectedLayerPath} key={selectedLayerPath} />
+      <TimeSlider mapId={mapId} config={configObj} layerPath={selectedLayerPath} key={selectedLayerPath} />
     </Layout>
   ) : (
     <Box />

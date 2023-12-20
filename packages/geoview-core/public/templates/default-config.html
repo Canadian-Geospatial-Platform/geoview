@@ -72,7 +72,7 @@
       <h4 id="HLCONF1">1. Load from no config object</h4>
       <a class="ref-link" href="#top">Top</a>
     </div>
-    <div id="CONF1" class="llwp-map"></div>
+    <div id="CONF1" class="geoview-map"></div>
     <p>This map will will load with default configuration because none is provided.</p>
     <hr />
 
@@ -82,7 +82,7 @@
     </div>
     <div
       id="CONF2"
-      class="llwp-map"
+      class="geoview-map"
       data-lang="en"
       data-config="{
           'map': {
@@ -103,7 +103,7 @@
     </div>
     <div
       id="CONF3"
-      class="llwp-map"
+      class="geoview-map"
       data-lang="test_sp-CA"
       data-config="{
           'map': {
@@ -137,7 +137,7 @@
     </div>
     <div
       id="CONF4"
-      class="llwp-map"
+      class="geoview-map"
       data-lang="test_sp-CA"
       data-config="{
         'map': {
@@ -187,7 +187,7 @@
       <h4 id="HLCONF5">5. Load config from URL params</h4>
       <a class="ref-link" href="#top">Top</a>
     </div>
-    <div id="CONF5" class="llwp-map" data-lang="en" data-shared="true"></div>
+    <div id="CONF5" class="geoview-map" data-lang="en" data-shared="true"></div>
     <p>
       This map loads it's configurations from the URL parameters by providing <strong>data-shared</strong>. If
       <strong>data-config</strong> is provided then it will override all loaded config from parameters.
@@ -198,7 +198,7 @@
       <h4 id="HLCONF6">6. Load config from file</h4>
       <a class="ref-link" href="#top">Top</a>
     </div>
-    <div id="CONF6" class="llwp-map" data-lang="en" data-config-url="./configs/my-config.json"></div>
+    <div id="CONF6" class="geoview-map" data-lang="en" data-config-url="./configs/my-config.json"></div>
     <p>This map loads it's configurations from a file by providing <strong>data-config-url</strong>, the map is static!</p>
     <hr />
 
@@ -217,7 +217,9 @@
     <script>
       // TODO: make this function async and launch when api is ready
       setTimeout(() => {
-        cgpv.api.createMapFromConfig('CONF7', `{
+        cgpv.api.createMapFromConfig(
+          'CONF7',
+          `{
                 'map': {
                   'interaction': 'dynamic',
                   'viewSettings': {
@@ -268,9 +270,10 @@
                 'corePackages': [],
                 'theme': 'dark',
                 'suportedLanguages': ['en']
-              }`);
+              }`
+        );
       }, 1000);
-  
+
       // initialize cgpv and api events, a callback is optional, used if calling api's after the rendering is ready
       cgpv.init(function (mapId) {
         console.log('api is ready');

@@ -1,8 +1,6 @@
 import React from 'react';
 import { Root, createRoot } from 'react-dom/client';
 
-import { useTranslation } from 'react-i18next';
-
 import { useMediaQuery } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 
@@ -60,7 +58,7 @@ export function addReloadListener(mapId: string) {
           // recreate the map - crate e new div and remove the active one
           const newDiv = document.createElement('div');
           newDiv.setAttribute('id', mapId);
-          newDiv.setAttribute('class', 'llwp-map');
+          newDiv.setAttribute('class', 'geoview-map');
           map!.parentNode!.insertBefore(newDiv, map);
           map.remove();
 
@@ -131,7 +129,7 @@ async function renderMap(mapElement: Element): Promise<void> {
 }
 
 /**
- * Initialize a basic div from a function call. The div MUST not have llwp-map class.
+ * Initialize a basic div from a function call. The div MUST not have geoview-map class.
  * If is present, the div will be created with a default config
  *
  * @param {Element} mapDiv The basic div to initialise
@@ -143,7 +141,7 @@ export function initMapDivFromFunctionCall(mapDiv: HTMLElement, mapConfig: strin
   att.value = mapConfig;
   mapDiv.setAttributeNode(att);
 
-  mapDiv.classList.add('llwp-map');
+  mapDiv.classList.add('geoview-map');
   renderMap(mapDiv);
 }
 
@@ -156,7 +154,7 @@ function init(callback: () => void) {
   // set the API callback if a callback is provided
   if (callback) api.readyCallback = callback;
 
-  const mapElements = document.getElementsByClassName('llwp-map');
+  const mapElements = document.getElementsByClassName('geoview-map');
 
   // loop through map elements on the page
   for (let i = 0; i < mapElements.length; i += 1) {
@@ -180,7 +178,6 @@ export const cgpv: types.TypeCGPV = {
     useMediaQuery,
     elements: UI,
   },
-  useTranslation,
   types,
 };
 

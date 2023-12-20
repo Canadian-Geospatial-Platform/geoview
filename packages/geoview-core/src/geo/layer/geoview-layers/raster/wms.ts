@@ -14,6 +14,7 @@ import { transform, transformExtent } from 'ol/proj';
 
 import cloneDeep from 'lodash/cloneDeep';
 
+import Static from 'ol/source/ImageStatic';
 import { Cast, toJsonObject, TypeJsonArray, TypeJsonObject } from '@/core/types/global-types';
 import {
   AbstractGeoViewLayer,
@@ -34,7 +35,7 @@ import {
 } from '@/geo/map/map-schema-types';
 import { TypeFeatureInfoEntry, TypeArrayOfFeatureInfoEntries } from '@/api/events/payloads';
 import { getLocalizedValue, getMinOrMaxExtents, xmlToJson, showError, replaceParams, getLocalizedMessage } from '@/core/utils/utilities';
-import { api } from '@/app';
+import { api, TypeImageStaticLayerConfig } from '@/app';
 import { Layer } from '@/geo/layer/layer';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 
@@ -995,6 +996,30 @@ export class WMS extends AbstractGeoViewRaster {
   }
 
   /** ***************************************************************************************************************************
+   * Apply a view filter to the layer identified by the path stored in the layerPathAssociatedToThegeoviewLayer property stored
+   * in the layer instance associated to the map. The legend filters are derived from the uniqueValue or classBreaks style of the
+   * layer. When the layer config is invalid, nothing is done.
+   *
+   * @param {string} filter An optional filter to be used in place of the getViewFilter value.
+   * @param {never} notUsed1 This parameter must not be provided. It is there to allow overloading of the method signature.
+   * @param {never} notUsed2 This parameter must not be provided. It is there to allow overloading of the method signature.
+   */
+  applyViewFilter(filter: string, notUsed1?: never, notUsed2?: never): void;
+
+  /** ***************************************************************************************************************************
+   * Apply a view filter to the layer identified by the path stored in the layerPathAssociatedToThegeoviewLayer property stored
+   * in the layer instance associated to the map. When the CombineLegendFilter flag is false, the filter paramater is used alone
+   * to display the features. Otherwise, the legend filter and the filter parameter are combined together to define the view
+   * filter. The legend filters are derived from the uniqueValue or classBreaks style of the layer. When the layer config is
+   * invalid, nothing is done.
+   *
+   * @param {string} filter An optional filter to be used in place of the getViewFilter value.
+   * @param {boolean} CombineLegendFilter Flag used to combine the legend filter and the filter together (default: true)
+   * @param {never} notUsed This parameter must not be provided. It is there to allow overloading of the method signature.
+   */
+  applyViewFilter(filter: string, CombineLegendFilter: boolean, notUsed?: never): void;
+
+  /** ***************************************************************************************************************************
    * Apply a view filter to the layer. When the CombineLegendFilter flag is false, the filter paramater is used alone to display
    * the features. Otherwise, the legend filter and the filter parameter are combined together to define the view filter. The
    * legend filters are derived from the uniqueValue or classBreaks style of the layer. When the layer config is invalid, nothing
@@ -1005,8 +1030,28 @@ export class WMS extends AbstractGeoViewRaster {
    * @param {string} filter An optional filter to be used in place of the getViewFilter value.
    * @param {boolean} CombineLegendFilter Flag used to combine the legend filter and the filter together (default: true)
    */
-  applyViewFilter(layerPath?: string, filter = '', CombineLegendFilter = true) {
-    layerPath = layerPath || api.maps[this.mapId].layer.layerPathAssociatedToThegeoviewLayer;
+  applyViewFilter(layerPath: string, filter?: string, CombineLegendFilter?: boolean): void;
+
+  // See above headers for signification of the parameters. The first lines of the method select the template
+  // used based on the parameter types received.
+  applyViewFilter(parameter1: string, parameter2?: string | boolean | never, parameter3?: boolean | never) {
+    let layerPath = api.maps[this.mapId].layer.layerPathAssociatedToThegeoviewLayer;
+    let filter = '';
+    let CombineLegendFilter = true;
+    if (parameter3) {
+      layerPath = parameter1;
+      filter = parameter2 as string;
+      CombineLegendFilter = parameter3;
+    } else if (parameter2 !== undefined) {
+      if (typeof parameter2 === 'boolean') {
+        filter = parameter1;
+        CombineLegendFilter = parameter2;
+      } else {
+        layerPath = parameter1;
+        filter = parameter2;
+      }
+    } else filter = parameter1;
+
     const layerConfig = this.getLayerConfig(layerPath) as TypeOgcWmsLayerEntryConfig;
     const source = (layerConfig.olLayer as ImageLayer<ImageWMS>).getSource();
     if (source) {
@@ -1040,22 +1085,42 @@ export class WMS extends AbstractGeoViewRaster {
   }
 
   /** ***************************************************************************************************************************
-   * Get the bounds of the layer represented in the layerConfig, returns updated bounds
+   * Get the bounds of the layer represented in the layerConfig pointed to by the cached layerPath, returns updated bounds
+   *
+   * @param {Extent | undefined} bounds The current bounding box to be adjusted.
+   * @param {never} notUsed This parameter must not be provided. It is there to allow overloading of the method signature.
+   *
+   * @returns {Extent} The new layer bounding box.
+   */
+  protected getBounds(bounds: Extent, notUsed?: never): Extent | undefined;
+
+  /** ***************************************************************************************************************************
+   * Get the bounds of the layer represented in the layerConfig pointed to by the layerPath, returns updated bounds
    *
    * @param {string} layerPath The Layer path to the layer's configuration.
    * @param {Extent | undefined} bounds The current bounding box to be adjusted.
    *
-   * @returns {Extent} The layer bounding box.
+   * @returns {Extent} The new layer bounding box.
    */
-  getBounds(layerPath: string, bounds: Extent | undefined): Extent | undefined {
+  protected getBounds(layerPath: string, bounds?: Extent): Extent | undefined;
+
+  // See above headers for signification of the parameters. The first lines of the method select the template
+  // used based on the parameter types received.
+  protected getBounds(parameter1?: string | Extent, parameter2?: Extent): Extent | undefined {
+    const layerPath = typeof parameter1 === 'string' ? parameter1 : api.maps[this.mapId].layer.layerPathAssociatedToThegeoviewLayer;
+    let bounds = typeof parameter1 !== 'string' ? parameter1 : parameter2;
     const layerConfig = this.getLayerConfig(layerPath);
+    const projection =
+      (layerConfig?.olLayer as ImageLayer<Static>).getSource()?.getProjection()?.getCode().replace('EPSG:', '') ||
+      MapEventProcessor.getMapState(this.mapId).currentProjection;
     let layerBounds = layerConfig?.initialSettings?.bounds || [];
+    layerBounds = transformExtent(layerBounds, 'EPSG:4326', `EPSG:${projection}`);
     const boundingBoxes = this.metadata?.Capability.Layer.BoundingBox;
     let bbExtent: Extent | undefined;
 
     if (boundingBoxes) {
       for (let i = 0; i < (boundingBoxes.length as number); i++) {
-        if (boundingBoxes[i].crs === 'EPSG:4326')
+        if (boundingBoxes[i].crs === `EPSG:${projection}`)
           bbExtent = [
             boundingBoxes[i].extent[1],
             boundingBoxes[i].extent[0],

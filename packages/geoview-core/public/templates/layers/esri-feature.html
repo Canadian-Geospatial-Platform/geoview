@@ -59,7 +59,7 @@
     <pre id="HLYR1-state" class="panel map-title-holder"></pre>
     <div
       id="LYR1"
-      class="llwp-map"
+      class="geoview-map"
       triggerReadyCallback="true"
       data-lang="en"
       data-config="{
@@ -147,7 +147,7 @@
     <pre id="HLYR2-state" class="panel map-title-holder"></pre>
     <div
       id="LYR2"
-      class="llwp-map"
+      class="geoview-map"
       triggerReadyCallback="true"
       data-lang="en"
       data-config="{
@@ -209,7 +209,7 @@
     <pre id="HLYR3-state" class="panel map-title-holder"></pre>
     <div
       id="LYR3"
-      class="llwp-map"
+      class="geoview-map"
       triggerReadyCallback="true"
       data-lang="en"
       data-config="{
@@ -270,7 +270,7 @@
     <pre id="HLYR4-state" class="panel map-title-holder"></pre>
     <div
       id="LYR4"
-      class="llwp-map"
+      class="geoview-map"
       triggerReadyCallback="true"
       data-lang="en"
       data-config="{
@@ -368,7 +368,7 @@
               input.value = LYR2_FILTERS[i];
               const layerConfig = cgpv.api.maps.LYR2.layer.registeredLayers['historical-flood/0'];
               const checkbox = document.getElementById('checkbox-LYR2-historical-flood');
-              cgpv.api.maps.LYR2.layer.geoviewLayer('historical-flood/0').applyViewFilter('',
+              cgpv.api.maps.LYR2.layer.geoviewLayer('historical-flood/0').applyViewFilter(
                 LYR2_FILTERS[j],
                 checkbox.value !== 'true'
               );
@@ -387,7 +387,7 @@
               input.value = LYR3_FILTERS[j];
               const layerConfig = cgpv.api.maps.LYR3.layer.registeredLayers['historical-flood/0'];
               const checkbox = document.getElementById('checkbox-LYR3-historical-flood');
-              cgpv.api.maps.LYR3.layer.geoviewLayer('historical-flood/0').applyViewFilter('',
+              cgpv.api.maps.LYR3.layer.geoviewLayer('historical-flood/0').applyViewFilter(
                 LYR3_FILTERS[j],
                 checkbox.value !== 'true'
               );
@@ -402,7 +402,7 @@
               const layerConfig = cgpv.api.maps.LYR1.layer.registeredLayers['esriFeatureLYR1/0'];
               const checkbox = document.getElementById('checkbox-LYR1-esriFeatureLYR1');
               const temporalData = cgpv.api.maps.LYR1.layer.geoviewLayer('esriFeatureLYR1/0').getTemporalDimension();
-              cgpv.api.maps.LYR1.layer.geoviewLayer('esriFeatureLYR1/0').applyViewFilter('',
+              cgpv.api.maps.LYR1.layer.geoviewLayer('esriFeatureLYR1/0').applyViewFilter(
                 `Date < date '${temporalData.range.range[k]}'`,
                 checkbox.value !== 'true'
               );

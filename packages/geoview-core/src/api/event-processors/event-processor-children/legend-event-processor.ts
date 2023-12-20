@@ -128,12 +128,15 @@ export class LegendEventProcessor extends AbstractEventProcessor {
           const legendLayerEntry: TypeLegendLayer = {
             bounds: undefined,
             layerId: layerConfig.layerId,
-            order: existingEntries.length,
+            order:
+              api.maps[mapId].layer.initialLayerOrder.indexOf(entryLayerPath) !== -1
+                ? api.maps[mapId].layer.initialLayerOrder.indexOf(entryLayerPath)
+                : existingEntries.length,
             // TODO: Why do we have the following line in the store? Do we have to fetch the metadata again since the GeoView layer read and keep them?
             metadataAccessPath: getLocalizedValue(layerConfig.geoviewRootLayer?.metadataAccessPath, mapId),
             layerPath: entryLayerPath,
             layerStatus: legendResultSetsEntry.layerStatus,
-            layerName: legendResultSetsEntry.data?.layerName ? getLocalizedValue(legendResultSetsEntry.data.layerName, mapId)! : '',
+            layerName: getLocalizedValue(layerConfig.layerName, mapId) || layerConfig.layerId,
             type: layerConfig.entryType as TypeGeoviewLayerType,
             isVisible: layerConfig.initialSettings?.visible ? layerConfig.initialSettings.visible : 'yes',
             opacity: layerConfig.initialSettings?.opacity ? layerConfig.initialSettings.opacity : 1,
@@ -150,12 +153,15 @@ export class LegendEventProcessor extends AbstractEventProcessor {
         const newLegendLayer: TypeLegendLayer = {
           bounds: undefined,
           layerId: layerPathNodes[currentLevel],
-          order: existingEntries.length,
+          order:
+            api.maps[mapId].layer.initialLayerOrder.indexOf(entryLayerPath) !== -1
+              ? api.maps[mapId].layer.initialLayerOrder.indexOf(entryLayerPath)
+              : existingEntries.length,
           layerPath: entryLayerPath,
           layerAttribution: api.maps[mapId].layer.geoviewLayers[layerPathNodes[0]].attributions,
-          // ! Why do wee have metadataAccessPath here? Do we need to fetch the metadata again? The GeoView layer fetch them and store them in this.metadata.
+          // ! Why do we have metadataAccessPath here? Do we need to fetch the metadata again? The GeoView layer fetch them and store them in this.metadata.
           metadataAccessPath: getLocalizedValue(layerConfig.geoviewRootLayer?.metadataAccessPath, mapId),
-          layerName: getLocalizedValue(legendResultSetsEntry.data?.layerName, mapId)!,
+          layerName: getLocalizedValue(legendResultSetsEntry.data?.layerName, mapId) || layerConfig.layerId,
           layerStatus: legendResultSetsEntry.layerStatus,
           layerPhase: legendResultSetsEntry.layerPhase,
           querySent: legendResultSetsEntry.querySent,

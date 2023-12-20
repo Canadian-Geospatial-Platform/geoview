@@ -60,7 +60,7 @@
     <button class="test-refresh-WMS-btn">Test Refresh WMS</button>
     <div
       id="LYR1"
-      class="llwp-map"
+      class="geoview-map"
       triggerReadyCallback="true"
       data-lang="en"
       data-config="{
@@ -173,7 +173,7 @@
     <pre id="HLYR2-state" class="panel map-title-holder"></pre>
     <div
       id="LYR2"
-      class="llwp-map"
+      class="geoview-map"
       data-lang="en"
       data-config="{
       'map': {
@@ -359,7 +359,7 @@
     <pre id="HLYR3-state" class="panel map-title-holder"></pre>
     <div
       id="LYR3"
-      class="llwp-map"
+      class="geoview-map"
       data-lang="en"
       data-config="{
       'map': {
@@ -418,7 +418,7 @@
     <pre id="HLYR4-state" class="panel map-title-holder"></pre>
     <div
       id="LYR4"
-      class="llwp-map"
+      class="geoview-map"
       data-lang="en"
       data-config="{
         'map': {
@@ -474,7 +474,7 @@
     <pre id="HLYR5-state" class="panel map-title-holder"></pre>
     <div
       id="LYR5"
-      class="llwp-map"
+      class="geoview-map"
       triggerReadyCallback="true"
       data-lang="en"
       data-config="{
@@ -605,11 +605,9 @@
           let i = 0;
           window.setInterval(() => {
             const layerConfig = cgpv.api.maps.LYR1.layer.registeredLayers['wmsLYR1-spatiotemporel/RADAR_1KM_RSNO'];
-            const temporalData =
-              cgpv.api.maps.LYR1.layer.geoviewLayer('wmsLYR1-spatiotemporel/RADAR_1KM_RSNO').getTemporalDimension();
+            const temporalData = cgpv.api.maps.LYR1.layer.geoviewLayer('wmsLYR1-spatiotemporel/RADAR_1KM_RSNO').getTemporalDimension();
             if (temporalData) {
               cgpv.api.maps.LYR1.layer.geoviewLayer('wmsLYR1-spatiotemporel/RADAR_1KM_RSNO').applyViewFilter(
-                '',
                 `time=date '${temporalData.range.range[i]}'`
               );
               if (++i === temporalData.range.range.length) i = 0;
@@ -622,7 +620,6 @@
             const temporalData = cgpv.api.maps.LYR1.layer.geoviewLayer('wmsLYR1-msi/msi-94-or-more').getTemporalDimension();
             if (temporalData) {
               cgpv.api.maps.LYR1.layer.geoviewLayer('wmsLYR1-msi/msi-94-or-more').applyViewFilter(
-                '',
                 `time=date '${temporalData.range.range[j]}'`
               );
               if (++j === temporalData.range.range.length) j = 0;

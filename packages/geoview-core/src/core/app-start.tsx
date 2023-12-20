@@ -52,7 +52,7 @@ function AppStart(props: AppStartProps): JSX.Element {
   const theme = useAppDisplayThemeById(mapId);
 
   /**
-   * Create maps from inline configs with class name llwp-map
+   * Create maps from inline configs with class name geoview-map
    */
   function getInlineMaps() {
     const i18nInstance = i18n.cloneInstance({
@@ -63,7 +63,6 @@ function AppStart(props: AppStartProps): JSX.Element {
     // create a new map viewer instance and add it to the api
     // TODO: use store, remove the use of feature by viewer class and use state to gather values
     if (!Object.keys(api.maps).includes(mapId)) api.maps[mapId] = new MapViewer(mapFeaturesConfig, i18nInstance);
-    else api.maps[mapId].i18nInstance = i18nInstance;
 
     return (
       <I18nextProvider i18n={i18nInstance}>

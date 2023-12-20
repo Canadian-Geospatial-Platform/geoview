@@ -270,7 +270,7 @@ export function SingleLayer({ isDragging, depth, layer, setIsLayersListPanelVisi
           {renderLayerIcon()}
           <Tooltip title={layer.layerName} placement="top" enterDelay={1000}>
             <ListItemText
-              primary={layer.layerName !== undefined ? layer.layerName : layer.metadataAccessPath}
+              primary={layer.layerName !== undefined ? layer.layerName : layer.layerId}
               secondary={getLayerDescription()}
               onClick={handleLayerClick}
             />

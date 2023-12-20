@@ -14,7 +14,7 @@ import {
   TypeUniqueValueStyleConfig,
   TypeVectorLayerEntryConfig,
 } from '@/geo/map/map-schema-types';
-import { AbstractGeoViewVector, EsriDynamic, api } from '@/app';
+import { AbstractGeoViewVector, api } from '@/app';
 import { OL_ZOOM_DURATION, OL_ZOOM_PADDING } from '@/core/utils/constant';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 
@@ -28,16 +28,17 @@ export interface ILayerState {
   displayState: TypeLayersViewDisplayState;
   actions: {
     getLayer: (layerPath: string) => TypeLegendLayer | undefined;
+    getLayerBounds: (layerPath: string) => number[] | undefined;
     setDisplayState: (newDisplayState: TypeLayersViewDisplayState) => void;
     setHighlightLayer: (layerPath: string) => void;
-    setSelectedLayerPath: (layerPath: string) => void;
     setLayerOpacity: (layerPath: string, opacity: number) => void;
+    reorderLayer: (startIndex: number, endIndex: number, layerPath: string) => void;
+    setSelectedLayerPath: (layerPath: string) => void;
     toggleLayerVisibility: (layerPath: string) => void;
     toggleItemVisibility: (layerPath: string, geometryType: TypeStyleGeometry, itemName: string) => void;
     setAllItemsVisibility: (layerPath: string, visibility: 'yes' | 'no') => void;
     deleteLayer: (layerPath: string) => void;
     zoomToLayerExtent: (layerPath: string) => void;
-    reOrderLayer: (startIndex: number, endIndex: number, layerPath: string) => void;
   };
 }
 
@@ -55,6 +56,14 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
         const layer = findLayerByPath(curLayers, layerPath);
         return layer;
       },
+      getLayerBounds: (layerPath: string) => {
+        const layer = api.maps[get().mapId].layer.getGeoviewLayerById(layerPath.split('/')[0]);
+        if (layer) {
+          const bounds = layer.calculateBounds(layerPath);
+          if (bounds) return bounds;
+        }
+        return undefined;
+      },
       setDisplayState: (newDisplayState: TypeLayersViewDisplayState) => {
         const curState = get().layerState.displayState;
         set({
@@ -65,18 +74,20 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
         });
       },
       setHighlightLayer: (layerPath: string) => {
-        // keep track oh highlighted layer to set active button state because they can only be one highlighted layer at a time
-        const currentHiglight = get().layerState.highlightedLayer;
+        // keep track of highlighted layer to set active button state because there can only be one highlighted layer at a time
+        const currentHighlight = get().layerState.highlightedLayer;
         let tempLayerPath = layerPath;
 
         // TODO: keep reference to geoview map instance in the store or keep accessing with api - discussion
-        if (currentHiglight === tempLayerPath) {
+        if (currentHighlight === tempLayerPath) {
           api.maps[get().mapId].layer.removeHighlightLayer();
           tempLayerPath = '';
         } else {
           api.maps[get().mapId].layer.highlightLayer(tempLayerPath);
+          const layer = findLayerByPath(get().layerState.legendLayers, layerPath);
+          const { bounds } = layer as TypeLegendLayer;
+          if (bounds) get().mapState.actions.highlightBBox(bounds, true);
         }
-
         set({
           layerState: {
             ...get().layerState,
@@ -150,7 +161,6 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
               if (registeredLayer.style![geometryType]?.styleType === 'classBreaks') {
                 (registeredLayer.style![geometryType]! as TypeClassBreakStyleConfig).classBreakStyleInfo[index].visible = item.isVisible;
               } else if (registeredLayer.style![geometryType]?.styleType === 'uniqueValue') {
-                console.log(registeredLayer);
                 (registeredLayer.style![geometryType]! as TypeUniqueValueStyleConfig).uniqueValueStyleInfo[index].visible = item.isVisible;
               }
             }
@@ -162,7 +172,7 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
           }
 
           // apply filter to layer
-          (api.maps[get().mapId].layer.geoviewLayer(layerPath) as AbstractGeoViewVector | EsriDynamic).applyViewFilter();
+          (api.maps[get().mapId].layer.geoviewLayer(layerPath) as AbstractGeoViewVector).applyViewFilter('');
         }
         set({
           layerState: {
@@ -207,10 +217,10 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
         });
 
         // TODO: keep reference to geoview map instance in the store or keep accessing with api - discussion
-        //! try to make reusable store actions....
-        // TODO: we can have always item.... we cannot set visibility so if present we will need to trap. Need more use case
-        // TODO: create a function setItemVisibility called with layer path and this function set the registered layer (from store values) then apply the filter.
-        (api.maps[get().mapId].layer.geoviewLayer(layerPath) as AbstractGeoViewVector | EsriDynamic).applyViewFilter(layerPath);
+        // ! try to make reusable store actions....
+        // ! we can have always item.... we cannot set visibility so if present we will need to trap. Need more use case
+        // ! create a function setItemVisibility called with layer path and this function set the registered layer (from store values) then apply the filter.
+        (api.maps[get().mapId].layer.geoviewLayer(layerPath) as AbstractGeoViewVector).applyViewFilter(layerPath);
       },
       deleteLayer: (layerPath: string) => {
         const curLayers = get().layerState.legendLayers;
@@ -224,10 +234,6 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
 
         // TODO: keep reference to geoview map instance in the store or keep accessing with api - discussion
         api.maps[get().mapId].layer.removeLayersUsingPath(layerPath);
-
-        // TODO: keep reference to geoview map instance in the store or keep accessing with api - discussion
-        // Set back if undo click
-        get().layerState.actions.toggleLayerVisibility(layerPath);
       },
       zoomToLayerExtent: (layerPath: string) => {
         const options: FitOptions = { padding: OL_ZOOM_PADDING, duration: OL_ZOOM_DURATION };
@@ -235,16 +241,15 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
         const { bounds } = layer as TypeLegendLayer;
         if (bounds) MapEventProcessor.zoomToExtent(get().mapId, bounds, options);
       },
-      reOrderLayer: (startIndex: number, endIndex: number, layerPath: string) => {
+      reorderLayer: (startIndex: number, endIndex: number, layerPath: string) => {
         const curLayers = get().layerState.legendLayers;
-        const reOrderedLayers = reOrderSingleLayer(curLayers, startIndex, endIndex, layerPath);
+        const reorderedLayers = reorderSingleLayer(curLayers, startIndex, endIndex, layerPath);
         set({
           layerState: {
             ...get().layerState,
-            legendLayers: [...reOrderedLayers],
+            legendLayers: [...reorderedLayers],
           },
         });
-        // TODO implement re-order layers in the map
       },
     },
   } as ILayerState;
@@ -291,7 +296,7 @@ function deleteSingleLayer(layers: TypeLegendLayer[], layerPath: string) {
   }
 }
 
-function reOrderSingleLayer(collection: TypeLegendLayer[], startIndex: number, endIndex: number, layerPath: string): TypeLegendLayer[] {
+function reorderSingleLayer(collection: TypeLegendLayer[], startIndex: number, endIndex: number, layerPath: string): TypeLegendLayer[] {
   let layerFound = false;
 
   function findLayerAndSortIt(startingCollection: TypeLegendLayer[]) {
@@ -306,7 +311,7 @@ function reOrderSingleLayer(collection: TypeLegendLayer[], startIndex: number, e
 
       /* eslint-disable no-param-reassign */
       for (let i = 0; i < startingCollection.length; i++) {
-        startingCollection[i].order = i + 1;
+        startingCollection[i].order = i;
       }
 
       return;

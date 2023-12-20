@@ -51,7 +51,7 @@ import {
   VALID_PROJECTION_CODES,
   TypeInteraction,
 } from '@/geo/map/map-schema-types';
-import { TypeMapFeaturesConfig, TypeHTMLElement, TypeValidMapProjectionCodes } from '@/core/types/global-types';
+import { TypeMapFeaturesConfig, TypeHTMLElement, TypeValidMapProjectionCodes, TypeJsonObject } from '@/core/types/global-types';
 import { layerConfigIsGeoCore } from '@/geo/layer/other/geocore';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
@@ -110,9 +110,6 @@ export class MapViewer {
   // used to access layers functions
   layer!: Layer;
 
-  // i18n instance
-  i18nInstance!: i18n;
-
   // modals creation
   modal!: ModalApi;
 
@@ -121,6 +118,9 @@ export class MapViewer {
 
   // flag used to indicate that the ready callback routine has been called once
   readyCallbackHasRun = false;
+
+  // i18n instance
+  private i18nInstance!: i18n;
 
   /**
    * Add the map instance to the maps array in the api
@@ -169,8 +169,7 @@ export class MapViewer {
             (payload) => {
               if (payloadIsGeoViewLayerAdded(payload)) {
                 const { geoviewLayer } = payload;
-                geoviewLayer.layerOrder = this.layer.orderSubLayers(geoviewLayer.listOfLayerEntryConfig);
-                this.layer.setLayerZIndices(geoviewLayer);
+                MapEventProcessor.setLayerZIndices(this.mapId);
                 if (geoviewLayer.allLayerEntryConfigProcessed()) {
                   api.event.emit(GeoViewLayerPayload.createTestGeoviewLayersPayload('run cgpv.init callback?'));
                 }
@@ -217,7 +216,7 @@ export class MapViewer {
    */
   loadGeometries(): void {
     // see if a data geometry endpoint is configured and geoms param is provided then get the param value(s)
-    const servEndpoint = this.map.getTargetElement()?.closest('.llwp-map')?.getAttribute('data-geometry-endpoint') || '';
+    const servEndpoint = this.map.getTargetElement()?.closest('.geoview-map')?.getAttribute('data-geometry-endpoint') || '';
 
     // eslint-disable-next-line no-restricted-globals
     const parsed = queryString.parse(location.search);
@@ -266,6 +265,17 @@ export class MapViewer {
       // emit an event to add the component
       api.event.emit(mapComponentPayload(EVENT_NAMES.MAP.EVENT_MAP_REMOVE_COMPONENT, this.mapId, mapComponentId));
     }
+  }
+
+  /**
+   * Add a localization ressource bundle for a supported language (fr, en). Then the new key added can be
+   * access from the utilies function getLocalizesMessage to reuse in ui from outside the core viewer.
+   *
+   * @param {TypeDisplayLanguage} language the language to add the ressoruce for (en, fr)
+   * @param {TypeJsonObject} translations the translation object to add
+   */
+  addLocalizeRessourceBundle(language: TypeDisplayLanguage, translations: TypeJsonObject): void {
+    this.i18nInstance.addResourceBundle(language, 'translation', translations, true, false);
   }
 
   /**

@@ -1,9 +1,12 @@
 import { useTheme } from '@mui/material/styles';
 import { FormControl, InputLabel, NativeSelect } from '@mui/material';
 import { useTimeSliderLayers, useTimeSliderStoreActions } from 'geoview-core/src/core/stores';
+import { getLocalizedMessage, getLocalizedValue } from 'geoview-core/src/core/utils/utilities';
 import { getSxClasses } from './time-slider-style';
+import { ConfigProps } from './time-slider-types';
 
 interface TimeSliderPanelProps {
+  config: ConfigProps;
   mapId: string;
   layerPath: string;
 }
@@ -16,9 +19,8 @@ interface TimeSliderPanelProps {
  */
 export function TimeSlider(TimeSliderPanelProps: TimeSliderPanelProps) {
   const { cgpv } = window;
-  const { layerPath } = TimeSliderPanelProps;
+  const { config, layerPath, mapId } = TimeSliderPanelProps;
   const { react, ui } = cgpv;
-  const { useTranslation } = cgpv;
   const { useState, useRef, useEffect } = react;
   const {
     Grid,
@@ -37,8 +39,6 @@ export function TimeSlider(TimeSliderPanelProps: TimeSliderPanelProps) {
     SwitchLeftIcon,
   } = ui.elements;
 
-  const { t } = useTranslation();
-
   const theme = useTheme();
   const sxClasses = getSxClasses(theme);
 
@@ -51,19 +51,41 @@ export function TimeSlider(TimeSliderPanelProps: TimeSliderPanelProps) {
 
   // Get actions and states from store
   // TODO: evaluate best option to set value by layer path.... trough a getter?
-  const { setValues, setLocked, setReversed, setDelay, setFiltering } = useTimeSliderStoreActions();
-  const { range } = useTimeSliderLayers()[layerPath];
-  const { defaultValue } = useTimeSliderLayers()[layerPath];
-  const { minAndMax } = useTimeSliderLayers()[layerPath];
-  const { fieldAlias } = useTimeSliderLayers()[layerPath];
-  const { singleHandle } = useTimeSliderLayers()[layerPath];
-  const { values } = useTimeSliderLayers()[layerPath];
-  const { filtering } = useTimeSliderLayers()[layerPath];
-  const { delay } = useTimeSliderLayers()[layerPath];
-  const { locked } = useTimeSliderLayers()[layerPath];
-  const { reversed } = useTimeSliderLayers()[layerPath];
+  const { setTitle, setDescription, setDefaultValue, setValues, setLocked, setReversed, setDelay, setFiltering } =
+    useTimeSliderStoreActions();
 
-  const timeStampRange = range.map((entry) => new Date(entry).getTime());
+  // TODO: check performance as we should technically have one selector by constant
+  const {
+    title,
+    description,
+    name,
+    defaultValue,
+    range,
+    minAndMax,
+    field,
+    fieldAlias,
+    filtering,
+    singleHandle,
+    values,
+    delay,
+    locked,
+    reversed,
+  } = useTimeSliderLayers()[layerPath];
+
+  // slider config
+  useEffect(() => {
+    // TODO: add mechanism to initialize these values during store onInitialize
+    const sliderConfig = config?.sliders?.find((o: { layerPaths: string[] }) => o.layerPaths.includes(layerPath));
+    if (title === undefined) setTitle(layerPath, getLocalizedValue(sliderConfig?.title, mapId) || '');
+    if (description === undefined) setDescription(layerPath, getLocalizedValue(sliderConfig?.description, mapId) || '');
+    if (defaultValue === undefined) setDefaultValue(layerPath, sliderConfig?.defaultValue || '');
+    if (locked === undefined) setLocked(layerPath, sliderConfig?.locked !== undefined ? sliderConfig?.locked : false);
+    if (reversed === undefined) setReversed(layerPath, sliderConfig?.reversed !== undefined ? sliderConfig?.reversed : false);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const timeStampRange = range.map((entry: string | number | Date) => new Date(entry).getTime());
+
   // Check if range occurs in a single day or year
   const timeDelta = minAndMax[1] - minAndMax[0];
   const dayDelta = new Date(minAndMax[1]).getDate() - new Date(minAndMax[0]).getDate();
@@ -191,6 +213,7 @@ export function TimeSlider(TimeSliderPanelProps: TimeSliderPanelProps) {
     }
   }
 
+  // #region USE EFFECT
   useEffect(() => {
     // If slider cycle is active, pause before advancing to next increment
     if (isPlaying) {
@@ -208,7 +231,9 @@ export function TimeSlider(TimeSliderPanelProps: TimeSliderPanelProps) {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isPlaying]);
+  // #endregion
 
+  // #region HANDLE FUNCTIONS
   function handleBack(): void {
     sliderValueRef.current = reversed ? values[1] : values[0];
     moveBack();
@@ -257,13 +282,18 @@ export function TimeSlider(TimeSliderPanelProps: TimeSliderPanelProps) {
       setIsPlaying(false);
     }
   }
+  // #endregion
 
   function returnLockTooltip(): string {
     if (reversed) {
-      const text = locked ? t('timeSlider.slider.unlockRight') : t('timeSlider.slider.lockRight');
+      const text = locked
+        ? getLocalizedMessage(mapId, 'timeSlider.slider.unlockRight')
+        : getLocalizedMessage(mapId, 'timeSlider.slider.lockRight');
       return text;
     }
-    const text = locked ? t('timeSlider.slider.unlockLeft') : t('timeSlider.slider.lockLeft');
+    const text = locked
+      ? getLocalizedMessage(mapId, 'timeSlider.slider.unlockLeft')
+      : getLocalizedMessage(mapId, 'timeSlider.slider.lockLeft');
     return text;
   }
 
@@ -272,18 +302,20 @@ export function TimeSlider(TimeSliderPanelProps: TimeSliderPanelProps) {
       <div style={sxClasses.rightPanelContainer}>
         <Grid container sx={sxClasses.rightPanelBtnHolder}>
           <Grid item xs={9}>
-            <Typography component="div" sx={{ ...sxClasses.panelHeaders, paddingLeft: '20px', textAlign: 'center', paddingTop: '10px' }}>
-              {timeframe !== undefined
-                ? `${fieldAlias} (${
-                    timeframe === 'day' ? new Date(defaultValue).toLocaleDateString() : new Date(defaultValue).getFullYear()
-                  })`
-                : fieldAlias}
+            <Typography component="div" sx={{ ...sxClasses.panelHeaders, paddingLeft: '20px', paddingTop: '10px' }}>
+              {`${title || name}`}
+              {timeframe !== undefined &&
+                ` (${timeframe === 'day' ? new Date(defaultValue).toLocaleDateString() : new Date(defaultValue).getFullYear()})`}
             </Typography>
           </Grid>
           <Grid item xs={3}>
             <div style={{ textAlign: 'right', marginRight: '25px' }}>
               <Tooltip
-                title={filtering ? t('timeSlider.slider.disableFilter') : t('timeSlider.slider.enableFilter')}
+                title={
+                  filtering
+                    ? getLocalizedMessage(mapId, 'timeSlider.slider.disableFilter')
+                    : getLocalizedMessage(mapId, 'timeSlider.slider.enableFilter')
+                }
                 placement="top"
                 enterDelay={1000}
               >
@@ -296,9 +328,11 @@ export function TimeSlider(TimeSliderPanelProps: TimeSliderPanelProps) {
           <div style={{ textAlign: 'center', paddingTop: '20px' }}>
             <Slider
               sliderId={layerPath}
+              mapId={mapId}
               style={{ width: '80%', color: 'primary' }}
               min={minAndMax[0]}
               max={minAndMax[1]}
+              defaultValue={Number(defaultValue)}
               value={values}
               valueLabelFormat={(value) => valueLabelFormat(value)}
               marks={sliderMarks}
@@ -321,8 +355,8 @@ export function TimeSlider(TimeSliderPanelProps: TimeSliderPanelProps) {
               </IconButton>
             )}
             <IconButton
-              aria-label="Back"
-              tooltip="Back"
+              aria-label={getLocalizedMessage(mapId, 'timeSlider.slider.back') as string}
+              tooltip="timeSlider.slider.back"
               tooltipPlacement="top"
               disabled={isPlaying || !filtering}
               onClick={() => handleBack()}
@@ -330,7 +364,11 @@ export function TimeSlider(TimeSliderPanelProps: TimeSliderPanelProps) {
               <ArrowLeftIcon />
             </IconButton>
             <IconButton
-              aria-label={isPlaying ? (t('timeSlider.slider.pauseAnimation') as string) : (t('timeSlider.slider.playAnimation') as string)}
+              aria-label={
+                isPlaying
+                  ? (getLocalizedMessage(mapId, 'timeSlider.slider.pauseAnimation') as string)
+                  : (getLocalizedMessage(mapId, 'timeSlider.slider.playAnimation') as string)
+              }
               tooltip={isPlaying ? 'timeSlider.slider.pauseAnimation' : 'timeSlider.slider.playAnimation'}
               tooltipPlacement="top"
               disabled={!filtering}
@@ -339,7 +377,7 @@ export function TimeSlider(TimeSliderPanelProps: TimeSliderPanelProps) {
               {!isPlaying ? <PlayArrowIcon /> : <PauseIcon />}
             </IconButton>
             <IconButton
-              aria-label={t('timeSlider.slider.forward') as string}
+              aria-label={getLocalizedMessage(mapId, 'timeSlider.slider.forward') as string}
               tooltip="timeSlider.slider.forward"
               tooltipPlacement="top"
               disabled={isPlaying || !filtering}
@@ -348,7 +386,7 @@ export function TimeSlider(TimeSliderPanelProps: TimeSliderPanelProps) {
               <ArrowRightIcon />
             </IconButton>
             <IconButton
-              aria-label={t('timeSlider.slider.changeDirection') as string}
+              aria-label={getLocalizedMessage(mapId, 'timeSlider.slider.changeDirection') as string}
               tooltip="timeSlider.slider.changeDirection"
               tooltipPlacement="top"
               onClick={() => handleReverse()}
@@ -356,7 +394,7 @@ export function TimeSlider(TimeSliderPanelProps: TimeSliderPanelProps) {
               {reversed ? <SwitchRightIcon /> : <SwitchLeftIcon />}
             </IconButton>
             <FormControl sx={{ width: '150px' }}>
-              <InputLabel variant="standard">{t('timeSlider.slider.timeDelay')}</InputLabel>
+              <InputLabel variant="standard">{getLocalizedMessage(mapId, 'timeSlider.slider.timeDelay')}</InputLabel>
               <NativeSelect
                 defaultValue={delay}
                 inputProps={{
@@ -375,6 +413,20 @@ export function TimeSlider(TimeSliderPanelProps: TimeSliderPanelProps) {
             </FormControl>
           </div>
         </Grid>
+        {description && (
+          <Grid item xs={12}>
+            <Typography component="div" sx={{ px: '20px', py: '5px' }}>
+              {description}
+            </Typography>
+          </Grid>
+        )}
+        {fieldAlias && (
+          <Grid item xs={12}>
+            <Typography component="div" sx={{ px: '20px', py: '5px' }}>
+              {`${fieldAlias} (${field})`}
+            </Typography>
+          </Grid>
+        )}
       </div>
     </Grid>
   );

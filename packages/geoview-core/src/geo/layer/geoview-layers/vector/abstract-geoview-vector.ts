@@ -11,7 +11,7 @@ import LayerGroup from 'ol/layer/Group';
 import { Coordinate } from 'ol/coordinate';
 import { Extent } from 'ol/extent';
 import { Pixel } from 'ol/pixel';
-import { transform, transformExtent } from 'ol/proj';
+import { transform } from 'ol/proj';
 
 import { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import {
@@ -229,7 +229,8 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
    *
    * @returns {TypeArrayOfFeatureInfoEntries} The feature info table.
    */
-  protected async getAllFeatureInfo(layerPath: string): Promise<TypeArrayOfFeatureInfoEntries> {
+  protected async getAllFeatureInfo(layerPath?: string): Promise<TypeArrayOfFeatureInfoEntries> {
+    layerPath = layerPath || api.maps[this.mapId].layer.layerPathAssociatedToThegeoviewLayer;
     const layerConfig = this.getLayerConfig(layerPath) as TypeLayerEntryConfig;
     if (!layerConfig?.olLayer) return [];
 
@@ -254,7 +255,8 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
    * @returns {Promise<TypeArrayOfFeatureInfoEntries> | null} The feature info table or null if an error occured.
    */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  protected async getFeatureInfoAtPixel(location: Pixel, layerPath: string): Promise<TypeArrayOfFeatureInfoEntries | null> {
+  protected async getFeatureInfoAtPixel(location: Pixel, layerPath?: string): Promise<TypeArrayOfFeatureInfoEntries | null> {
+    layerPath = layerPath || api.maps[this.mapId].layer.layerPathAssociatedToThegeoviewLayer;
     try {
       const layerConfig = this.getLayerConfig(layerPath) as TypeLayerEntryConfig;
       const layerFilter = (layer: BaseLayer) => {
@@ -280,7 +282,8 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
    * @returns {Promise<TypeArrayOfFeatureInfoEntries>} The feature info table.
    */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  protected getFeatureInfoAtCoordinate(location: Coordinate, layerPath: string): Promise<TypeArrayOfFeatureInfoEntries> {
+  protected getFeatureInfoAtCoordinate(location: Coordinate, layerPath?: string): Promise<TypeArrayOfFeatureInfoEntries> {
+    layerPath = layerPath || api.maps[this.mapId].layer.layerPathAssociatedToThegeoviewLayer;
     const { map } = api.maps[this.mapId];
     return this.getFeatureInfoAtPixel(map.getPixelFromCoordinate(location as Coordinate), layerPath);
   }
@@ -294,35 +297,72 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
    * @returns {Promise<TypeArrayOfFeatureInfoEntries>} The feature info table.
    */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  protected getFeatureInfoAtLongLat(location: Coordinate, layerPath: string): Promise<TypeArrayOfFeatureInfoEntries> {
+  protected getFeatureInfoAtLongLat(location: Coordinate, layerPath?: string): Promise<TypeArrayOfFeatureInfoEntries> {
+    layerPath = layerPath || api.maps[this.mapId].layer.layerPathAssociatedToThegeoviewLayer;
     const { map } = api.maps[this.mapId];
     const convertedLocation = transform(location, 'EPSG:4326', `EPSG:${MapEventProcessor.getMapState(this.mapId).currentProjection}`);
     return this.getFeatureInfoAtPixel(map.getPixelFromCoordinate(convertedLocation as Coordinate), layerPath);
   }
 
   /** ***************************************************************************************************************************
-   * Get the bounds of the layer represented in the layerConfig, returns updated bounds
+   * Get the bounds of the layer represented in the layerConfig pointed to by the cached layerPath, returns updated bounds
+   *
+   * @param {Extent | undefined} bounds The current bounding box to be adjusted.
+   * @param {never} notUsed This parameter must not be provided. It is there to allow overloading of the method signature.
+   *
+   * @returns {Extent} The new layer bounding box.
+   */
+  protected getBounds(bounds: Extent, notUsed?: never): Extent | undefined;
+
+  /** ***************************************************************************************************************************
+   * Get the bounds of the layer represented in the layerConfig pointed to by the layerPath, returns updated bounds
    *
    * @param {string} layerPath The Layer path to the layer's configuration.
    * @param {Extent | undefined} bounds The current bounding box to be adjusted.
    *
-   * @returns {Extent} The layer bounding box.
+   * @returns {Extent} The new layer bounding box.
    */
-  getBounds(layerPath: string, bounds: Extent | undefined): Extent | undefined {
+  protected getBounds(layerPath: string, bounds?: Extent): Extent | undefined;
+
+  // See above headers for signification of the parameters. The first lines of the method select the template
+  // used based on the parameter types received.
+  protected getBounds(parameter1?: string | Extent, parameter2?: Extent): Extent | undefined {
+    const layerPath = typeof parameter1 === 'string' ? parameter1 : api.maps[this.mapId].layer.layerPathAssociatedToThegeoviewLayer;
+    let bounds = typeof parameter1 !== 'string' ? parameter1 : parameter2;
     const layerConfig = this.getLayerConfig(layerPath);
-    const layerBounds = (layerConfig?.olLayer as VectorLayer<VectorSource>)?.getExtent();
-    const projection =
-      (layerConfig?.olLayer as VectorLayer<VectorSource>).getSource()?.getProjection()?.getCode().replace('EPSG:', '') ||
-      MapEventProcessor.getMapState(this.mapId).currentProjection;
+    const layerBounds = (layerConfig?.olLayer as VectorLayer<VectorSource>)?.getSource()?.getExtent();
 
     if (layerBounds) {
-      const transformedBounds = transformExtent(layerBounds, `EPSG:${projection}`, `EPSG:4326`);
-      if (!bounds) bounds = [transformedBounds[0], transformedBounds[1], transformedBounds[2], transformedBounds[3]];
-      else bounds = getMinOrMaxExtents(bounds, transformedBounds);
+      if (!bounds) bounds = [layerBounds[0], layerBounds[1], layerBounds[2], layerBounds[3]];
+      else bounds = getMinOrMaxExtents(bounds, layerBounds);
     }
 
     return bounds;
   }
+
+  /** ***************************************************************************************************************************
+   * Apply a view filter to the layer identified by the path stored in the layerPathAssociatedToThegeoviewLayer property stored
+   * in the layer instance associated to the map. The legend filters are derived from the uniqueValue or classBreaks style of the
+   * layer. When the layer config is invalid, nothing is done.
+   *
+   * @param {string} filter A filter to be used in place of the getViewFilter value.
+   * @param {never} notUsed1 This parameter must not be provided. It is there to allow overloading of the method signature.
+   * @param {never} notUsed2 This parameter must not be provided. It is there to allow overloading of the method signature.
+   */
+  applyViewFilter(filter: string, notUsed1?: never, notUsed2?: never): void;
+
+  /** ***************************************************************************************************************************
+   * Apply a view filter to the layer identified by the path stored in the layerPathAssociatedToThegeoviewLayer property stored
+   * in the layer instance associated to the map. When the CombineLegendFilter flag is false, the filter paramater is used alone
+   * to display the features. Otherwise, the legend filter and the filter parameter are combined together to define the view
+   * filter. The legend filters are derived from the uniqueValue or classBreaks style of the layer. When the layer config is
+   * invalid, nothing is done.
+   *
+   * @param {string} filter A filter to be used in place of the getViewFilter value.
+   * @param {boolean} CombineLegendFilter Flag used to combine the legend filter and the filter together (default: true)
+   * @param {never} notUsed This parameter must not be provided. It is there to allow overloading of the method signature.
+   */
+  applyViewFilter(filter: string, CombineLegendFilter: boolean, notUsed?: never): void;
 
   /** ***************************************************************************************************************************
    * Apply a view filter to the layer. When the CombineLegendFilter flag is false, the filter paramater is used alone to display
@@ -331,15 +371,35 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
    * is done.
    *
    * @param {string} layerPath The layer path to the layer's configuration.
-   * @param {string} filter An optional filter to be used in place of the getViewFilter value.
+   * @param {string} filter A filter to be used in place of the getViewFilter value.
    * @param {boolean} CombineLegendFilter Flag used to combine the legend filter and the filter together (default: true)
    */
-  applyViewFilter(layerPath?: string, filter = '', CombineLegendFilter = true) {
-    layerPath = layerPath || api.maps[this.mapId].layer.layerPathAssociatedToThegeoviewLayer;
+  applyViewFilter(layerPath: string, filter?: string, CombineLegendFilter?: boolean): void;
+
+  // See above headers for signification of the parameters. The first lines of the method select the template
+  // used based on the parameter types received.
+  applyViewFilter(parameter1: string, parameter2?: string | boolean | never, parameter3?: boolean | never) {
+    let layerPath = api.maps[this.mapId].layer.layerPathAssociatedToThegeoviewLayer;
+    let filter = '';
+    let CombineLegendFilter = true;
+    if (parameter3) {
+      layerPath = parameter1;
+      filter = parameter2 as string;
+      CombineLegendFilter = parameter3;
+    } else if (parameter2 !== undefined) {
+      if (typeof parameter2 === 'boolean') {
+        filter = parameter1;
+        CombineLegendFilter = parameter2;
+      } else {
+        layerPath = parameter1;
+        filter = parameter2;
+      }
+    } else filter = parameter1;
+
     const layerConfig = this.getLayerConfig(layerPath) as TypeVectorLayerEntryConfig;
     if (!layerConfig?.olLayer) return; // We must wait for the layer to be created.
 
-    let filterValueToUse = filter;
+    let filterValueToUse = filter.replaceAll(/\s{2,}/g, ' ').trim();
     layerConfig.olLayer!.set('legendFilterIsOff', !CombineLegendFilter);
     if (CombineLegendFilter) layerConfig.olLayer?.set('layerFilter', filter);
 

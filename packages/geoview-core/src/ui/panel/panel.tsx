@@ -102,7 +102,7 @@ export function Panel(props: TypePanelAppProps): JSX.Element {
       mapCont.focus();
 
       // if in focus trap mode, trigger the event
-      if (mapCont.closest('.llwp-map')?.classList.contains('map-focus-trap')) {
+      if (mapCont.closest('.geoview-map')?.classList.contains('map-focus-trap')) {
         mapCont.classList.add('keyboard-focus');
         api.event.emit(inKeyfocusPayload(EVENT_NAMES.MAP.EVENT_MAP_IN_KEYFOCUS, `map-${mapId}`));
       }

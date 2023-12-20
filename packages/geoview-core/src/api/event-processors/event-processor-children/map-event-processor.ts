@@ -24,6 +24,7 @@ import { EVENT_NAMES } from '@/api/events/event-types';
 import { getGeoViewStore } from '@/core/stores/stores-managers';
 import { OL_ZOOM_DURATION, OL_ZOOM_PADDING } from '@/core/utils/constant';
 import { AppEventProcessor } from './app-event-processor';
+import { TypeLegendLayer } from '@/core/components/layers/types';
 
 export class MapEventProcessor extends AbstractEventProcessor {
   onInitialize(store: GeoviewStoreType) {
@@ -129,6 +130,22 @@ export class MapEventProcessor extends AbstractEventProcessor {
     );
     // #endregion FEATURE SELECTION
 
+    const unsubLegendLayers = store.subscribe(
+      (state) => state.layerState.legendLayers,
+      (cur) => {
+        const orderedLayerPaths = MapEventProcessor.getLayerPathsFromLegendsArray(cur);
+        const prevLayerOrder = [...store.getState().mapState.layerOrder];
+        if (JSON.stringify(prevLayerOrder) !== JSON.stringify(orderedLayerPaths))
+          store.getState().mapState.actions.setLayerOrder(orderedLayerPaths);
+        const orderedVisibleLayers = orderedLayerPaths.filter(
+          (layerPath) => store.getState().layerState.actions.getLayer(layerPath)?.isVisible !== 'no'
+        );
+        const prevVisibleLayers = [...store.getState().mapState.visibleLayers];
+        if (JSON.stringify(prevVisibleLayers) !== JSON.stringify(orderedVisibleLayers))
+          store.getState().mapState.actions.setVisibleLayers(orderedVisibleLayers);
+      }
+    );
+
     // add to arr of subscriptions so it can be destroyed later
     this.subscriptionArr.push(
       unsubMapHighlightedFeatures,
@@ -138,7 +155,8 @@ export class MapEventProcessor extends AbstractEventProcessor {
       unsubMapProjection,
       unsubMapSelectedFeatures,
       unsubMapZoom,
-      unsubMapSingleClick
+      unsubMapSingleClick,
+      unsubLegendLayers
     );
   }
 
@@ -201,10 +219,22 @@ export class MapEventProcessor extends AbstractEventProcessor {
     });
     map.addOverlay(clickMarkerOverlay);
 
+    const orderedLayerPaths = MapEventProcessor.getLayerPathsFromLegendsArray(store.getState().layerState.legendLayers);
+    store.getState().mapState.actions.setLayerOrder(orderedLayerPaths);
+    const orderedVisibleLayers = orderedLayerPaths.filter(
+      (layerPath) => store.getState().layerState.actions.getLayer(layerPath)?.isVisible !== 'no'
+    );
+    store.getState().mapState.actions.setVisibleLayers(orderedVisibleLayers);
+
     // trigger the creation of feature info layer set and legend layer set
     // We always trigger creation because outside package may rely on them
     api.getFeatureInfoLayerSet(mapId);
     api.getLegendsLayerSet(mapId);
+
+    // set autofocus/blur on mouse enter/leave the map so user can scroll (zoom) without having to click the map
+    const mapHTMLElement = map.getTargetElement();
+    mapHTMLElement.addEventListener('mouseenter', () => mapHTMLElement.focus());
+    mapHTMLElement.addEventListener('mouseleave', () => mapHTMLElement.blur());
 
     // set store
     // TODO: try async, evaluate if still needed OR use another approach
@@ -324,6 +354,20 @@ export class MapEventProcessor extends AbstractEventProcessor {
     api.maps[mapId].basemap.loadDefaultBasemaps(projection, language);
   }
 
+  static getLayerPathsFromLegendsArray(legendsArray: TypeLegendLayer[]): string[] {
+    const layerPathList: string[] = [];
+    for (let i = 0; i < legendsArray.length; i++) {
+      const nextLayerLegend = legendsArray.filter((layerLegend) => layerLegend.order === i)[0];
+      if (nextLayerLegend) {
+        layerPathList.push(nextLayerLegend.layerPath);
+        if (nextLayerLegend.children.length > 0) {
+          layerPathList.push(...this.getLayerPathsFromLegendsArray(nextLayerLegend.children));
+        }
+      }
+    }
+    return layerPathList;
+  }
+
   static setMapKeyboardPanInteractions(mapId: string, panDelta: number): void {
     const mapElement = api.maps[mapId].map;
 
@@ -421,5 +465,19 @@ export class MapEventProcessor extends AbstractEventProcessor {
 
     MapEventProcessor.zoomToExtent(mapId, extent, options);
   }
+
+  /**
+   * Set Z index for layers
+   *
+   * @param {string} mapId Id of map to set layer Z indices
+   */
+  static setLayerZIndices = (mapId: string) => {
+    const reversedLayers = [...getGeoViewStore(mapId).getState().mapState.layerOrder].reverse();
+    reversedLayers.forEach((layerPath, index) => {
+      if (api.maps[mapId].layer.registeredLayers[layerPath]?.olLayer)
+        api.maps[mapId].layer.registeredLayers[layerPath].olLayer?.setZIndex(index + 10);
+    });
+  };
+
   // #endregion
 }

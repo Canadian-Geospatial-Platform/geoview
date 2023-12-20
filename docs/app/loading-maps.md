@@ -24,7 +24,7 @@ cp is for core packages to be loaded (array of strings) supported values: "detai
 keys is for layer uuid keys (the keys will match keys in the catalog, can be comma seperated)
 ```
 
-When the page loads with the provided URL search parameters, the app will look for a map with the **llwp-map** class. If a map is found, it will check if the map div element contains **data-shared="true"**. If the **data-shared** value is true, it means that the map will load the configurations from the url search parameters, if **multiple maps** are loaded in the page and all of them have the **data-shared** attribute then all of those maps will use the same URL parameters config.
+When the page loads with the provided URL search parameters, the app will look for a map with the **geoview-map** class. If a map is found, it will check if the map div element contains **data-shared="true"**. If the **data-shared** value is true, it means that the map will load the configurations from the url search parameters, if **multiple maps** are loaded in the page and all of them have the **data-shared** attribute then all of those maps will use the same URL parameters config.
 
 ### By providing a json file url in the div in the data-config-url attribute
 
@@ -33,7 +33,7 @@ You can also provide a URL for a json file with the config object and pass it in
 ```js
 <div
   id="mapWM"
-  class="llwp-map"
+  class="geoview-map"
   data-lang="en"
   data-config-url="https://canadian-geospatial-platform.github.io/geoview/public/configs/my-config.json"
 ></div>
@@ -79,7 +79,7 @@ An example of this:
 ```html
 <div
   id="UC1"
-  class="llwp-map"
+  class="geoview-map"
   data-lang="en"
   data-config="{
                     'map': {
@@ -131,7 +131,7 @@ An example of this:
 
 <div
     id="mapWM"
-    class="llwp-map"
+    class="geoview-map"
     data-lang="en"
 ></div>
 
