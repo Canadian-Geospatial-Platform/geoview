@@ -112,7 +112,7 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
         if (layer) {
           layer.opacity = opacity;
 
-          if(layer.children.length) {
+          if (layer.children.length) {
             setPropInChildLayers(layer.children, 'opacity', opacity);
           }
         }

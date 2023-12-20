@@ -71,7 +71,7 @@ export function SingleLayer({ isDragging, depth, layer, setIsLayersListPanelVisi
     if (startingLayer.items && startingLayer.items.length) {
       itemsHasAlways = startingLayer.items.filter((i) => i.isVisible === 'always').length > 0;
     }
-    
+
     return itemsHasAlways || childrenHasAlways;
   };
 
@@ -88,7 +88,6 @@ export function SingleLayer({ isDragging, depth, layer, setIsLayersListPanelVisi
       return t('legend.layerLoading');
     }
 
-    
     if (layer.children.length > 0) {
       return t('legend.subLayersCount').replace('{count}', layer.children.length.toString());
     }
@@ -122,7 +121,7 @@ export function SingleLayer({ isDragging, depth, layer, setIsLayersListPanelVisi
 
     setSelectedLayerPath(layer.layerPath);
     if (setIsLayersListPanelVisible) {
-      if(layer.children.length > 0 && isGroupOpen === false) {
+      if (layer.children.length > 0 && isGroupOpen === false) {
         setGroupOpen(true);
       }
       setIsLayersListPanelVisible(true);

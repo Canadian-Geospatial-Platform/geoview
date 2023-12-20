@@ -161,20 +161,19 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
 
   function renderLayers(startLayer: TypeLegendLayer) {
     return (
-      <>
-        <List>
-          {startLayer.children.map((layer) => (
-            <>
-            <ListItem sx={{ padding: "6px 0px", borderTop: "1px solid #ccc"}}>
-              <ListItemIcon><LayerIcon layer={layer} /></ListItemIcon>
-                <ListItemText primary={layer.layerName}></ListItemText>
-                
+      <List>
+        {startLayer.children.map((layer) => (
+          <>
+            <ListItem sx={{ padding: '6px 0px', borderTop: '1px solid #ccc' }}>
+              <ListItemIcon>
+                <LayerIcon layer={layer} />
+              </ListItemIcon>
+              <ListItemText primary={layer.layerName} />
             </ListItem>
-            {layer.children.length > 0 && <Box sx={{paddingLeft: "30px", width: "100%"}}>{renderLayers(layer)}</Box>}
-            </>
-          ))}
-        </List>
-      </>
+            {layer.children.length > 0 && <Box sx={{ paddingLeft: '30px', width: '100%' }}>{renderLayers(layer)}</Box>}
+          </>
+        ))}
+      </List>
     );
   }
 
@@ -224,10 +223,10 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
         {layerDetails.items?.length > 0 && renderItems()}
         {layerDetails.children.length > 0 && (
           <>
-           <Typography sx={{ fontWeight: 'bold', textAlign: 'left', margin: '10px 0px' }}>{t('layers.subLayersList')}</Typography>
-           {renderLayers(layerDetails)}
+            <Typography sx={{ fontWeight: 'bold', textAlign: 'left', margin: '10px 0px' }}>{t('layers.subLayersList')}</Typography>
+            {renderLayers(layerDetails)}
           </>
-          )}
+        )}
       </Box>
       <Divider sx={{ marginTop: '50px', marginBottom: '10x' }} variant="middle" />
       {layerDetails.layerAttribution &&

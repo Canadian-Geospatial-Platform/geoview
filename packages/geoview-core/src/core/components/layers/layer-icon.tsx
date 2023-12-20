@@ -1,4 +1,4 @@
-import { Box, CircularProgressBase, ErrorIcon, GroupWorkOutlinedIcon, IconButton } from '@/ui';
+import { Box, CircularProgressBase, ErrorIcon, GroupWorkOutlinedIcon } from '@/ui';
 import { TypeLegendLayer } from './types';
 import { IconStack } from '../icon-stack/icon-stack';
 
@@ -8,9 +8,7 @@ interface LayerIconProps {
 
 export function LayerIcon({ layer }: LayerIconProps): JSX.Element {
   if (layer.layerStatus === 'error') {
-    return (
-        <ErrorIcon color="error" />
-    );
+    return <ErrorIcon color="error" />;
   }
   if (layer.layerStatus === 'loading') {
     return (
@@ -20,9 +18,7 @@ export function LayerIcon({ layer }: LayerIconProps): JSX.Element {
     );
   }
   if (layer?.children.length) {
-    return (
-        <GroupWorkOutlinedIcon color="primary" />
-    );
+    return <GroupWorkOutlinedIcon color="primary" />;
   }
   return <IconStack layerPath={layer.layerPath} />;
 }
