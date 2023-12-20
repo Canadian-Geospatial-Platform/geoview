@@ -145,7 +145,7 @@ export function Shell(props: ShellProps): JSX.Element {
         <Box id={`shell-${shellId}`} sx={sxClasses.shell} className="geoview-shell" key={update} tabIndex={-1}>
           <CircularProgress isLoaded={mapLoaded} />
           <CircularProgress isLoaded={!circularProgressActive} />
-          <Box id={`map-${mapId}`} sx={sxClasses.mapShellContainer} className="mapContainer">
+          <Box id={`map-container-${mapId}`} sx={sxClasses.mapShellContainer} className="mapContainer">
             <Appbar />
             {/* load geolocator component if config includes in list of components in appBar */}
             {appBarComponents.includes('geolocator') && interaction === 'dynamic' && <Geolocator />}
