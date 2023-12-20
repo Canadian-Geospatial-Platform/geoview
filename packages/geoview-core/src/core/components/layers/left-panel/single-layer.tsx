@@ -60,17 +60,21 @@ export function SingleLayer({ isDragging, depth, layer, setIsLayersListPanelVisi
 
   // returns true if any of the layer children or items has visibility of 'always'
   const layerHasAlwaysVisible = (startingLayer: TypeLegendLayer): boolean => {
-    if (layer.isVisible === 'always') {
+    if (startingLayer.isVisible === 'always') {
       return true;
     }
-    if (layer.items && layer.items.length) {
-      return layer.items.filter((i) => i.isVisible === 'always').length > 0;
-    }
+    let itemsHasAlways = false;
+    let childrenHasAlways = false;
     if (startingLayer.children && startingLayer.children.length > 0) {
-      return _.some(startingLayer.children, (child) => layerHasAlwaysVisible(child));
+      childrenHasAlways = _.some(startingLayer.children, (child) => layerHasAlwaysVisible(child));
     }
-    return false;
+    if (startingLayer.items && startingLayer.items.length) {
+      itemsHasAlways = startingLayer.items.filter((i) => i.isVisible === 'always').length > 0;
+    }
+    
+    return itemsHasAlways || childrenHasAlways;
   };
+
   const isLayerAlwaysVisible = layerHasAlwaysVisible(layer);
 
   const [isGroupOpen, setGroupOpen] = useState(isLayerSelected);
@@ -84,9 +88,9 @@ export function SingleLayer({ isDragging, depth, layer, setIsLayersListPanelVisi
       return t('legend.layerLoading');
     }
 
-    const validChildren = layer.children?.filter((c) => c.isVisible !== 'no' && ['processed', 'loaded'].includes(c.layerStatus ?? ''));
-    if (validChildren.length) {
-      return t('legend.subLayersCount').replace('{count}', validChildren.length.toString());
+    
+    if (layer.children.length > 0) {
+      return t('legend.subLayersCount').replace('{count}', layer.children.length.toString());
     }
 
     const count = layer.items.filter((d) => d.isVisible !== 'no').length;
@@ -118,6 +122,9 @@ export function SingleLayer({ isDragging, depth, layer, setIsLayersListPanelVisi
 
     setSelectedLayerPath(layer.layerPath);
     if (setIsLayersListPanelVisible) {
+      if(layer.children.length > 0 && isGroupOpen === false) {
+        setGroupOpen(true);
+      }
       setIsLayersListPanelVisible(true);
     }
   };

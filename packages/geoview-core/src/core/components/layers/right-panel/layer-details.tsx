@@ -18,6 +18,10 @@ import {
   TableViewIcon,
   BrowserNotSupportedIcon,
   Divider,
+  ListItemText,
+  ListItemIcon,
+  ListItem,
+  List,
 } from '@/ui';
 import { useLayerHighlightedLayer, useLayerStoreActions } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { useUIStoreActions } from '@/core/stores/store-interface-and-intial-values/ui-state';
@@ -155,27 +159,21 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
     );
   }
 
-  function renderLayers() {
+  function renderLayers(startLayer: TypeLegendLayer) {
     return (
       <>
-        <Typography sx={{ fontWeight: 'bold', textAlign: 'left', margin: '10px 0px' }}>{t('layers.subLayersList')}</Typography>
-        <Grid container direction="column" spacing={0} sx={sxClasses.itemsGrid} justifyContent="left" justifyItems="stretch">
-          {layerDetails.children.map((layer) => (
-            <Box
-              key={layer.layerId}
-              sx={{ display: 'flex', flexDirection: 'column', alignItems: 'stretch', padding: '8px 0', borderBottom: '1px solid #ccc' }}
-            >
-              <Box sx={{ display: 'flex', flexDirection: 'row' }}>
-                <Box sx={{ marginLeft: '20px' }}>
-                  <LayerIcon layer={layer} />
-                </Box>
-                <Box>
-                  <span style={sxClasses.tableIconLabel}>{layer.layerName}</span>
-                </Box>
-              </Box>
-            </Box>
+        <List>
+          {startLayer.children.map((layer) => (
+            <>
+            <ListItem sx={{ padding: "6px 0px", borderTop: "1px solid #ccc"}}>
+              <ListItemIcon><LayerIcon layer={layer} /></ListItemIcon>
+                <ListItemText primary={layer.layerName}></ListItemText>
+                
+            </ListItem>
+            {layer.children.length > 0 && <Box sx={{paddingLeft: "30px", width: "100%"}}>{renderLayers(layer)}</Box>}
+            </>
           ))}
-        </Grid>
+        </List>
       </>
     );
   }
@@ -224,7 +222,12 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
       {renderOpacityControl()}
       <Box sx={{ marginTop: '20px' }}>
         {layerDetails.items?.length > 0 && renderItems()}
-        {layerDetails.children.length > 0 && renderLayers()}
+        {layerDetails.children.length > 0 && (
+          <>
+           <Typography sx={{ fontWeight: 'bold', textAlign: 'left', margin: '10px 0px' }}>{t('layers.subLayersList')}</Typography>
+           {renderLayers(layerDetails)}
+          </>
+          )}
       </Box>
       <Divider sx={{ marginTop: '50px', marginBottom: '10x' }} variant="middle" />
       {layerDetails.layerAttribution &&

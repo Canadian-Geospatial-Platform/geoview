@@ -9,9 +9,7 @@ interface LayerIconProps {
 export function LayerIcon({ layer }: LayerIconProps): JSX.Element {
   if (layer.layerStatus === 'error') {
     return (
-      <IconButton sx={{ color: 'red' }}>
-        <ErrorIcon />
-      </IconButton>
+        <ErrorIcon color="error" />
     );
   }
   if (layer.layerStatus === 'loading') {
@@ -23,9 +21,7 @@ export function LayerIcon({ layer }: LayerIconProps): JSX.Element {
   }
   if (layer?.children.length) {
     return (
-      <IconButton color="primary">
-        <GroupWorkOutlinedIcon />
-      </IconButton>
+        <GroupWorkOutlinedIcon color="primary" />
     );
   }
   return <IconStack layerPath={layer.layerPath} />;
