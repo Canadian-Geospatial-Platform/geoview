@@ -273,9 +273,6 @@ export abstract class AbstractGeoViewLayer {
   /** The GeoView layer metadataAccessPath. The name attribute is optional */
   metadataAccessPath: TypeLocalizedString = { en: '', fr: '' };
 
-  // order to load layers
-  layerOrder: string[];
-
   /**
    * An array of layer settings. In the schema, this attribute is optional. However, we define it as mandatory and if the
    * configuration does not provide a value, we use an empty array instead of an undefined attribute.
@@ -329,7 +326,6 @@ export abstract class AbstractGeoViewLayer {
     this.mapId = mapId;
     this.originalMapLayerConfig = cloneDeep(mapLayerConfig);
     this.type = type;
-    this.layerOrder = [];
     this.geoviewLayerId = mapLayerConfig.geoviewLayerId || generateId('');
     this.geoviewLayerName.en = mapLayerConfig?.geoviewLayerName?.en ? mapLayerConfig.geoviewLayerName.en : DEFAULT_LAYER_NAMES[type];
     this.geoviewLayerName.fr = mapLayerConfig?.geoviewLayerName?.fr ? mapLayerConfig.geoviewLayerName.fr : DEFAULT_LAYER_NAMES[type];
