@@ -321,7 +321,7 @@ export class GeoPackage extends AbstractGeoViewVector {
       xhr.responseType = 'arraybuffer';
 
       initSqlJs({
-        locateFile: (file) => `https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/${file}`,
+        locateFile: (file) => `https://sql.js.org/dist/${file}`,
       }).then((SQL) => {
         xhr.open('GET', url as string);
         xhr.onload = () => {
@@ -339,7 +339,7 @@ export class GeoPackage extends AbstractGeoViewVector {
 
             while (stmt.step()) {
               const row = stmt.get();
-              tables.push({
+              tables.unshift({
                 table_name: row[0],
                 srs_id: row[1]?.toString(),
                 geometry_column_name: row[2],
