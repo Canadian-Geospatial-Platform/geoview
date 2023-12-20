@@ -7,7 +7,9 @@ export const getSxClasses = (theme: Theme) => ({
     fontSize: '20px',
   },
   layerDetails: {
-    border: '2px solid #515BA5',
+    borderColor: theme.palette.primary.main,
+    borderWidth: '2px',
+    borderStyle: 'solid',
     padding: '20px',
     overflow: 'auto',
     maxHeight: '700px',

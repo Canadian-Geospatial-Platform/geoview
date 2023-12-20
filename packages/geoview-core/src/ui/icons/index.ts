@@ -86,6 +86,7 @@ export {
   TableView as TableViewIcon,
   TableChartOutlined as TableChartOutlinedIcon,
   Undo as UndoIcon,
+  UploadFile as UploadFileIcon,
   Visibility as VisibilityIcon,
   VisibilityOff as VisibilityOffIcon,
   VisibilityOutlined as VisibilityOutlinedIcon,

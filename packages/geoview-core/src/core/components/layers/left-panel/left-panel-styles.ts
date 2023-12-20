@@ -30,7 +30,9 @@ export const getSxClasses = (theme: Theme) => ({
 
       // for selected layer
       '&.selectedLayer': {
-        border: '2px solid #515BA5',
+        borderColor: theme.palette.primary.main,
+        borderWidth: '2px',
+        borderStyle: 'solid',
       },
 
       '&.dragging': {
