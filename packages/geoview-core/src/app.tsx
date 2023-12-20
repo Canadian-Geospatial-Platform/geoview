@@ -55,7 +55,7 @@ export function addReloadListener(mapId: string) {
           if (api.maps[mapId].overviewRoot) api.maps[mapId].overviewRoot?.unmount();
           if (reactRoot[mapId] !== null) reactRoot[mapId].unmount();
 
-          // recreate the map - crate e new div and remove the active one
+          // recreate the map - create e new div and remove the active one
           const newDiv = document.createElement('div');
           newDiv.setAttribute('id', mapId);
           newDiv.setAttribute('class', 'geoview-map');
@@ -66,11 +66,8 @@ export function addReloadListener(mapId: string) {
           const newRoot = document.getElementById(mapId);
           reactRoot[mapId] = createRoot(newRoot!);
 
-          // delete the map instance from the maps array
+          // delete the map instance from the maps array, will delete attached plugins
           delete api.maps[mapId];
-
-          // delete plugins that were loaded on the map
-          delete api.plugin.plugins[mapId];
 
           // set plugin's loaded to false
           api.plugin.pluginsLoaded = false;
@@ -78,11 +75,11 @@ export function addReloadListener(mapId: string) {
           // eslint-disable-next-line dot-notation
           delete mapFeaturesConfig['triggerReadyCallback'];
 
-          // Create a data-config attribute and set config value
-          const att = document.createAttribute('data-config');
-          att.value = JSON.stringify(mapFeaturesConfig);
+          // // Create a data-config attribute and set config value
+          // const att = document.createAttribute('data-config');
+          // att.value = JSON.stringify(mapFeaturesConfig);
 
-          newDiv.setAttributeNode(att);
+          // newDiv.setAttributeNode(att);
 
           // TODO: use store when we reload a map from scratch... delete and recreate
           // follow same recipe so we ahve one wauy of loading

@@ -1,5 +1,4 @@
 /* eslint-disable no-var, vars-on-top, block-scoped-var, no-param-reassign */
-import { transformExtent } from 'ol/proj';
 import { Options as SourceOptions } from 'ol/source/Vector';
 import { WFS as FormatWFS } from 'ol/format';
 import { ReadOptions } from 'ol/format/Feature';
@@ -24,6 +23,7 @@ import {
 import { getLocalizedValue, getXMLHttpRequest, xmlToJson, findPropertyNameByRegex } from '@/core/utils/utilities';
 import { Layer } from '../../layer';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
+import { api } from '@/app';
 
 export interface TypeSourceWFSVectorInitialConfig extends TypeVectorSourceInitialConfig {
   format: 'WFS';
@@ -208,7 +208,7 @@ export class WFS extends AbstractGeoViewVector {
 
         const { currentProjection } = MapEventProcessor.getMapState(this.mapId);
         if (layerConfig.initialSettings?.extent)
-          layerConfig.initialSettings.extent = transformExtent(
+          layerConfig.initialSettings.extent = api.projection.transformExtent(
             layerConfig.initialSettings.extent,
             'EPSG:4326',
             `EPSG:${currentProjection}`
@@ -219,7 +219,7 @@ export class WFS extends AbstractGeoViewVector {
           const upperCorner = (foundMetadata['ows:WGS84BoundingBox']['ows:UpperCorner']['#text'] as string).split(' ');
           const bounds = [Number(lowerCorner[0]), Number(lowerCorner[1]), Number(upperCorner[0]), Number(upperCorner[1])];
           // layerConfig.initialSettings cannot be undefined because config-validation set it to {} if it is undefined.
-          layerConfig.initialSettings!.bounds = transformExtent(bounds, 'EPSG:4326', `EPSG:${currentProjection}`);
+          layerConfig.initialSettings!.bounds = api.projection.transformExtent(bounds, 'EPSG:4326', `EPSG:${currentProjection}`);
         }
       }
     });

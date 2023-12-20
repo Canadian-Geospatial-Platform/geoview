@@ -106,5 +106,6 @@ class TimeSliderPlugin extends FooterPlugin {
 
 export default TimeSliderPlugin;
 
-window.plugins = window.plugins || {};
-window.plugins['time-slider'] = Cast<TimeSliderPlugin>(TimeSliderPlugin);
+// Keep a reference to the Time Slider Plugin as part of the geoviewPlugins property stored in the window object
+window.geoviewPlugins = window.geoviewPlugins || {};
+window.geoviewPlugins['time-slider'] = Cast<TimeSliderPlugin>(TimeSliderPlugin);

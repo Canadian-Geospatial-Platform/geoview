@@ -1,7 +1,9 @@
 import { create, useStore } from 'zustand';
 import { subscribeWithSelector } from 'zustand/middleware';
-import { useGeoViewStore } from '@/core/stores/stores-managers';
 
+import cloneDeep from 'lodash/cloneDeep';
+
+import { useGeoViewStore } from '@/core/stores/stores-managers';
 import { IAppState, initializeAppState } from './store-interface-and-intial-values/app-state';
 import { IDetailsState, initialDetailsState } from './store-interface-and-intial-values/details-state';
 import { ILayerState, initializeLayerState } from './store-interface-and-intial-values/layer-state';
@@ -37,7 +39,7 @@ export const geoviewStoreDefinition = (set: TypeSetStore, get: TypeGetStore) =>
   ({
     mapConfig: undefined,
     setMapConfig: (config: TypeMapFeaturesConfig) => {
-      set({ mapConfig: config, mapId: config.mapId });
+      set({ mapConfig: cloneDeep(config), mapId: config.mapId });
 
       // initialize default stores section from config information
       get().appState.setDefaultConfigValues(config);

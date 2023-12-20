@@ -95,5 +95,5 @@ export class GeoChartAppBarPlugin extends AppBarPlugin {
 export default GeoChartAppBarPlugin;
 
 // Keep a reference to the GeoChartPlugin as part of the plugins property stored in the window object
-window.plugins = window.plugins || {};
-window.plugins.geochart = Cast<GeoChartAppBarPlugin>(GeoChartAppBarPlugin);
+window.geoviewPlugins = window.geoviewPlugins || {};
+window.geoviewPlugins.geochart = Cast<GeoChartAppBarPlugin>(GeoChartAppBarPlugin);

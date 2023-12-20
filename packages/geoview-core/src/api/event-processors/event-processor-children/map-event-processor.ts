@@ -2,7 +2,6 @@ import { Root } from 'react-dom/client';
 
 import { ScaleLine } from 'ol/control';
 import Overlay from 'ol/Overlay';
-import { fromLonLat, transformExtent } from 'ol/proj';
 import { Extent } from 'ol/extent';
 import View, { FitOptions } from 'ol/View';
 import { KeyboardPan } from 'ol/interaction';
@@ -193,7 +192,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
     // add map overlays
     // create overlay for north pole icon
     const northPoleId = `${mapId}-northpole`;
-    const projectionPosition = fromLonLat(
+    const projectionPosition = api.projection.transformFromLonLat(
       [NORTH_POLE_POSITION[1], NORTH_POLE_POSITION[0]],
       `EPSG:${store.getState().mapState.currentProjection}`
     );
@@ -233,7 +232,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
 
     // set autofocus/blur on mouse enter/leave the map so user can scroll (zoom) without having to click the map
     const mapHTMLElement = map.getTargetElement();
-    mapHTMLElement.addEventListener('mouseenter', () => mapHTMLElement.focus());
+    mapHTMLElement.addEventListener('wheel', () => mapHTMLElement.focus());
     mapHTMLElement.addEventListener('mouseleave', () => mapHTMLElement.blur());
 
     // set store
@@ -413,7 +412,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
       //! There were issues with fromLonLat in rare cases in LCC projections, transformExtent seems to solve them.
       //! fromLonLat and transformExtent give differing results in many cases, fromLonLat had issues with the first
       //! three results from a geolocator search for "vancouver river"
-      const convertedExtent = transformExtent(bbox, 'EPSG:4326', projectionConfig);
+      const convertedExtent = api.projection.transformExtent(bbox, 'EPSG:4326', projectionConfig);
       MapEventProcessor.zoomToExtent(mapId, convertedExtent, {
         padding: [50, 50, 50, 50],
         maxZoom: 16,
@@ -429,7 +428,10 @@ export class MapEventProcessor extends AbstractEventProcessor {
         }
       }, OL_ZOOM_DURATION + 150);
     } else {
-      MapEventProcessor.zoomToExtent(mapId, fromLonLat(coords, projectionConfig), { maxZoom: 16, duration: OL_ZOOM_DURATION });
+      MapEventProcessor.zoomToExtent(mapId, api.projection.transformFromLonLat(coords, projectionConfig), {
+        maxZoom: 16,
+        duration: OL_ZOOM_DURATION,
+      });
       setTimeout(() => {
         MapEventProcessor.clickMarkerIconShow(mapId, { lnglat: coords });
         for (let i = 0; i < indicatorBox.length; i++) {

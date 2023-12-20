@@ -5,9 +5,7 @@ import { i18n } from 'i18next';
 /* eslint-disable @typescript-eslint/no-var-requires */
 
 import OLMap from 'ol/Map';
-import View, { ViewOptions } from 'ol/View';
-import { fromLonLat, ProjectionLike, toLonLat, transform as olTransform, transformExtent as olTransformExtent } from 'ol/proj';
-import { Coordinate } from 'ol/coordinate';
+import View, { FitOptions, ViewOptions } from 'ol/View';
 import { Extent } from 'ol/extent';
 import BaseLayer from 'ol/layer/Base';
 import Collection from 'ol/Collection';
@@ -20,6 +18,7 @@ import { Layer } from '@/geo/layer/layer';
 import { TypeFeatureStyle } from '@/geo/layer/geometry/geometry-types';
 
 import { TypeClickMarker, api } from '@/app';
+import { TypeRecordOfPlugin } from '@/api/plugin/plugin-types';
 import { EVENT_NAMES } from '@/api/events/event-types';
 
 import { AppbarButtons } from '@/core/components/app-bar/app-bar-buttons';
@@ -80,6 +79,9 @@ export class MapViewer {
 
   // the openlayer map
   map!: OLMap;
+
+  // plugins attach to the map
+  plugins: TypeRecordOfPlugin = {};
 
   // the overview map reat root
   overviewRoot: Root | undefined;
@@ -195,6 +197,26 @@ export class MapViewer {
   }
 
   /**
+   * Function called when the map has been rendered and ready to be customized
+   */
+  mapReady(): void {
+    const layerInterval = setInterval(() => {
+      if (this.layer?.geoviewLayers) {
+        const { geoviewLayers } = this.layer;
+        let allGeoviewLayerReady =
+          this.mapFeaturesConfig.map.listOfGeoviewLayerConfig?.length === 0 || Object.keys(geoviewLayers).length !== 0;
+        Object.keys(geoviewLayers).forEach((geoviewLayerId) => {
+          allGeoviewLayerReady &&= geoviewLayers[geoviewLayerId].allLayerEntryConfigProcessed();
+        });
+        if (allGeoviewLayerReady) {
+          MapEventProcessor.setMapLoaded(this.mapId);
+          clearInterval(layerInterval);
+        }
+      }
+    }, 250);
+  }
+
+  /**
    * Initialize layers, basemap and projection
    *
    * @param cgpMap
@@ -209,37 +231,6 @@ export class MapViewer {
 
     // check if geometries are provided from url
     this.loadGeometries();
-  }
-
-  /**
-   * Check if geometries needs to be loaded from a URL geoms parameter
-   */
-  loadGeometries(): void {
-    // see if a data geometry endpoint is configured and geoms param is provided then get the param value(s)
-    const servEndpoint = this.map.getTargetElement()?.closest('.geoview-map')?.getAttribute('data-geometry-endpoint') || '';
-
-    // eslint-disable-next-line no-restricted-globals
-    const parsed = queryString.parse(location.search);
-
-    if (parsed.geoms && servEndpoint !== '') {
-      const geoms = (parsed.geoms as string).split(',');
-
-      // for the moment, only polygon are supported but if need be, other geometries can easely be use as well
-      geoms.forEach((key: string) => {
-        fetch(`${servEndpoint}${key}`).then((response) => {
-          // only process valid response
-          if (response.status === 200) {
-            response.json().then((data) => {
-              if (data.geometry !== undefined) {
-                // add the geometry
-                // TODO: use the geometry as GeoJSON and add properties to by queried by the details panel
-                this.layer.geometry?.addPolygon(data.geometry.coordinates, undefined, generateId(null));
-              }
-            });
-          }
-        });
-      });
-    }
   }
 
   /**
@@ -276,26 +267,6 @@ export class MapViewer {
    */
   addLocalizeRessourceBundle(language: TypeDisplayLanguage, translations: TypeJsonObject): void {
     this.i18nInstance.addResourceBundle(language, 'translation', translations, true, false);
-  }
-
-  /**
-   * Function called when the map has been rendered and ready to be customized
-   */
-  mapReady(): void {
-    const layerInterval = setInterval(() => {
-      if (this.layer?.geoviewLayers) {
-        const { geoviewLayers } = this.layer;
-        let allGeoviewLayerReady =
-          this.mapFeaturesConfig.map.listOfGeoviewLayerConfig?.length === 0 || Object.keys(geoviewLayers).length !== 0;
-        Object.keys(geoviewLayers).forEach((geoviewLayerId) => {
-          allGeoviewLayerReady &&= geoviewLayers[geoviewLayerId].allLayerEntryConfigProcessed();
-        });
-        if (allGeoviewLayerReady) {
-          MapEventProcessor.setMapLoaded(this.mapId);
-          clearInterval(layerInterval);
-        }
-      }
-    }, 250);
   }
 
   // #region MAP STATES
@@ -439,8 +410,11 @@ export class MapViewer {
     viewOptions.projection = mapView.projection ? `EPSG:${mapView.projection}` : currentView.getProjection();
     viewOptions.zoom = mapView.zoom ? mapView.zoom : currentView.getZoom();
     viewOptions.center = mapView.center
-      ? fromLonLat([mapView.center[0], mapView.center[1]], viewOptions.projection)
-      : fromLonLat(toLonLat(currentView.getCenter()!, currentView.getProjection()), viewOptions.projection);
+      ? api.projection.transformFromLonLat([mapView.center[0], mapView.center[1]], viewOptions.projection)
+      : api.projection.transformFromLonLat(
+          api.projection.transformToLonLat(currentView.getCenter()!, currentView.getProjection()),
+          viewOptions.projection
+        );
     viewOptions.minZoom = mapView.minZoom ? mapView.minZoom : currentView.getMinZoom();
     viewOptions.maxZoom = mapView.maxZoom ? mapView.maxZoom : currentView.getMaxZoom();
     if (mapView.extent) viewOptions.extent = mapView.extent;
@@ -473,6 +447,38 @@ export class MapViewer {
   }
   // #endregion
 
+  // #region MAP ACTIONS
+  /**
+   * Check if geometries needs to be loaded from a URL geoms parameter
+   */
+  loadGeometries(): void {
+    // see if a data geometry endpoint is configured and geoms param is provided then get the param value(s)
+    const servEndpoint = this.map.getTargetElement()?.closest('.geoview-map')?.getAttribute('data-geometry-endpoint') || '';
+
+    // eslint-disable-next-line no-restricted-globals
+    const parsed = queryString.parse(location.search);
+
+    if (parsed.geoms && servEndpoint !== '') {
+      const geoms = (parsed.geoms as string).split(',');
+
+      // for the moment, only polygon are supported but if need be, other geometries can easely be use as well
+      geoms.forEach((key: string) => {
+        fetch(`${servEndpoint}${key}`).then((response) => {
+          // only process valid response
+          if (response.status === 200) {
+            response.json().then((data) => {
+              if (data.geometry !== undefined) {
+                // add the geometry
+                // TODO: use the geometry as GeoJSON and add properties to by queried by the details panel
+                this.layer.geometry?.addPolygon(data.geometry.coordinates, undefined, generateId(null));
+              }
+            });
+          }
+        });
+      });
+    }
+  }
+
   /**
    * Reload a map from a config object
    *
@@ -480,11 +486,23 @@ export class MapViewer {
    */
   reloadMap(mapFeaturesConfig: TypeMapFeaturesConfig) {
     // TODO: use store
-    api.maps[this.mapId].mapFeaturesConfig = mapFeaturesConfig;
-
+    // api.maps[this.mapId].mapFeaturesConfig =
+    console.log(mapFeaturesConfig);
+    const test = api.maps[this.mapId].mapFeaturesConfig;
     // emit an event to reload the map with the new config
-    api.event.emit(mapConfigPayload(EVENT_NAMES.MAP.EVENT_MAP_RELOAD, this.mapId, mapFeaturesConfig));
+    api.event.emit(mapConfigPayload(EVENT_NAMES.MAP.EVENT_MAP_RELOAD, this.mapId, test));
   }
+
+  /**
+   * Zoom to the specified extent.
+   *
+   * @param {Extent} extent The extent to zoom to.
+   * @param {FitOptions} options The options to configure the zoomToExtent (default: { padding: [100, 100, 100, 100], maxZoom: 11 }).
+   */
+  zoomToExtent(extent: Extent, options?: FitOptions): void {
+    MapEventProcessor.zoomToExtent(this.mapId, extent, options);
+  }
+  // #endregion
 
   /**
    * Fit the map to its boundaries. It is assumed that the boundaries use the map projection. If projectionCode is undefined,
@@ -494,13 +512,19 @@ export class MapViewer {
    * @param {string | number | undefined} projectionCode Optional projection code used by the bounds.
    * @returns the bounds
    */
+  // TODO: only use in the layers panel package... see if still needed and if it is the right place
   fitBounds(bounds?: Extent, projectionCode: string | number | undefined = undefined) {
     let mapBounds: Extent | undefined;
     if (bounds) {
       const { currentProjection } = this.getMapState();
       mapBounds = projectionCode
-        ? olTransformExtent(bounds, `EPSG:${projectionCode}`, api.projection.projections[currentProjection], 20)
-        : olTransformExtent(bounds, api.projection.projections[currentProjection], api.projection.projections[currentProjection], 25);
+        ? api.projection.transformExtent(bounds, `EPSG:${projectionCode}`, api.projection.projections[currentProjection], 20)
+        : api.projection.transformExtent(
+            bounds,
+            api.projection.projections[currentProjection],
+            api.projection.projections[currentProjection],
+            25
+          );
     } else {
       Object.keys(this.layer.geoviewLayers).forEach((geoviewLayerId) => {
         if (!mapBounds) mapBounds = this.layer.geoviewLayers[geoviewLayerId].getMetadataBounds(geoviewLayerId);
@@ -522,44 +546,6 @@ export class MapViewer {
       this.map.getView().fit(mapBounds, { size: this.map.getSize() });
       this.map.getView().setZoom(this.map.getView().getZoom()! - 0.15);
     }
-  }
-
-  /**
-   * Transforms an extent from source projection to destination projection. This returns a new extent (and does not modify the
-   * original).
-   *
-   * @param {Extent} extent The extent to transform.
-   * @param {ProjectionLike} source Source projection-like.
-   * @param {ProjectionLike} destination Destination projection-like.
-   * @param {number} stops Optional number of stops per side used for the transform. By default only the corners are used.
-   *
-   * @returns The new extent transformed in the destination projection.
-   */
-  transformExtent(extent: Extent, source: ProjectionLike, destination: ProjectionLike, stops?: number | undefined): Extent {
-    return olTransformExtent(extent, source, destination, stops);
-  }
-
-  /**
-   * Transforms an extent from source projection to destination projection. This returns a new extent (and does not modify the
-   * original).
-   *
-   * @param {Extent} extent The extent to transform.
-   * @param {ProjectionLike} source Source projection-like.
-   * @param {ProjectionLike} destination Destination projection-like.
-   * @param {number} stops Optional number of stops per side used for the transform. The default value is 20.
-   *
-   * @returns The densified extent transformed in the destination projection.
-   */
-  transformAndDensifyExtent(extent: Extent, source: ProjectionLike, destination: ProjectionLike, stops = 25): Coordinate[] {
-    const coordinates: number[][] = [];
-    const width: number = extent[2] - extent[0];
-    const height: number = extent[3] - extent[1];
-    for (let i = 0; i < stops; ++i) coordinates.push([extent[0] + (width * i) / stops, extent[1]]);
-    for (let i = 0; i < stops; ++i) coordinates.push([extent[2], extent[1] + (height * i) / stops]);
-    for (let i = 0; i < stops; ++i) coordinates.push([extent[2] - (width * i) / stops, extent[3]]);
-    for (let i = 0; i < stops; ++i) coordinates.push([extent[0], extent[3] - (height * i) / stops]);
-    for (let i = 0; i < coordinates.length; i++) coordinates[i] = olTransform(coordinates[i], source, destination);
-    return coordinates;
   }
 
   /**
