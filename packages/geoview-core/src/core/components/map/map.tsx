@@ -1,7 +1,6 @@
 /* eslint-disable react/jsx-props-no-spreading */
 import { useEffect, useRef, MutableRefObject } from 'react';
 
-import { fromLonLat, transformExtent } from 'ol/proj';
 import OLMap from 'ol/Map';
 import View from 'ol/View';
 import { Extent } from 'ol/extent';
@@ -70,14 +69,14 @@ export function Map(): JSX.Element {
 
     let extentProjected: Extent | undefined;
     if (mapStoreConfig?.map.viewSettings.extent)
-      extentProjected = transformExtent(mapStoreConfig?.map.viewSettings.extent, 'EPSG:4326', projection.getCode());
+      extentProjected = api.projection.transformExtent(mapStoreConfig?.map.viewSettings.extent, 'EPSG:4326', projection.getCode());
 
     const initialMap = new OLMap({
       target: mapElement.current as string | HTMLElement | undefined,
       layers: [createEmptyBasemap()],
       view: new View({
         projection,
-        center: fromLonLat(
+        center: api.projection.transformFromLonLat(
           [mapStoreConfig?.map.viewSettings.center[0] || -105, mapStoreConfig?.map.viewSettings.center[1] || 60],
           projection
         ),

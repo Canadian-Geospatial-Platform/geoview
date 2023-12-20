@@ -28,79 +28,13 @@ export const api = new API();
 
 const reactRoot: Record<string, Root> = {};
 
-/*
- * Listen for map reload events. The map component is linked to a specific mapId. When we modify something on the map, the
- * changes spread throughout the data structure. We therefore need to reload the entire map configuration to ensure that
- * all changes made to the map are applied.
+/**
+ * Function to unmount a map element
+ * 
+ * @param {string} mapId the map id to unmount 
  */
-export function addReloadListener(mapId: string) {
-  const reloadHandler = (payload: types.PayloadBaseClass) => {
-    if (payloadIsAmapFeaturesConfig(payload)) {
-      const { mapFeaturesConfig } = payload;
-      if (mapFeaturesConfig) {
-        if (api.maps[mapId]?.layer) api.maps[mapId].layer.removeAllGeoviewLayers();
-        // unsubscribe from all remaining events registered on this map
-        api.event.offAll(mapId);
-        LegendsLayerSet.delete(mapId);
-        FeatureInfoLayerSet.delete(mapId);
-
-        // unload all loaded plugins on the map
-        api.plugin.removePlugins(mapId);
-
-        // get the map container
-        const map = document.getElementById(mapId);
-
-        if (map) {
-          // remove the dom element (remove rendered map and overview map)
-          if (api.maps[mapId].overviewRoot) api.maps[mapId].overviewRoot?.unmount();
-          if (reactRoot[mapId] !== null) reactRoot[mapId].unmount();
-
-          // recreate the map - crate e new div and remove the active one
-          const newDiv = document.createElement('div');
-          newDiv.setAttribute('id', mapId);
-          newDiv.setAttribute('class', 'geoview-map');
-          map!.parentNode!.insertBefore(newDiv, map);
-          map.remove();
-
-          // create the new root
-          const newRoot = document.getElementById(mapId);
-          reactRoot[mapId] = createRoot(newRoot!);
-
-          // delete the map instance from the maps array
-          delete api.maps[mapId];
-
-          // delete plugins that were loaded on the map
-          delete api.plugin.plugins[mapId];
-
-          // set plugin's loaded to false
-          api.plugin.pluginsLoaded = false;
-
-          // eslint-disable-next-line dot-notation
-          delete mapFeaturesConfig['triggerReadyCallback'];
-
-          // Create a data-config attribute and set config value
-          const att = document.createAttribute('data-config');
-          att.value = JSON.stringify(mapFeaturesConfig);
-
-          newDiv.setAttributeNode(att);
-
-          // TODO: use store when we reload a map from scratch... delete and recreate
-          // follow same recipe so we ahve one wauy of loading
-          // create a new config for this map element
-          // const config = new Config(newDiv);
-
-          // const configObj = await config.initializeMapConfig();
-          // TODO: remove store before
-          // addGeoViewStore(mapFeaturesConfig!);
-
-          addReloadListener(mapId);
-          // re-render map with updated config keeping previous values if unchanged
-          reactRoot[mapId].render(<AppStart mapFeaturesConfig={mapFeaturesConfig} />);
-        }
-      }
-    }
-  };
-  api.event.on(EVENT_NAMES.MAP.EVENT_MAP_RELOAD, reloadHandler, `${mapId}/delete_old_map`);
+export function unmountMap(mapId: string) {
+  if (reactRoot[mapId] !== null) reactRoot[mapId].unmount();
 }
 
 /**
@@ -126,6 +60,46 @@ async function renderMap(mapElement: Element): Promise<void> {
     addReloadListener(mapId);
     reactRoot[mapId].render(<AppStart mapFeaturesConfig={configObj} />);
   }
+}
+
+/*
+ * Listen for map reload events. The map component is linked to a specific mapId. When we modify something on the map, the
+ * changes spread throughout the data structure. We therefore need to reload the entire map configuration to ensure that
+ * all changes made to the map are applied.
+ */
+/**
+ * 
+ * @param {string} mapId the map id to relaod 
+ */
+export function addReloadListener(mapId: string) {
+  const reloadHandler = (payload: types.PayloadBaseClass) => {
+    if (payloadIsAmapFeaturesConfig(payload)) {
+      const { mapFeaturesConfig } = payload;
+      if (mapFeaturesConfig) {
+        const map = api.maps[mapId].remove(false);
+
+        // recreate the map - create a new div and remove the active one
+        const newRoot = document.createElement('div');
+        newRoot.setAttribute('id', mapId);
+        newRoot.setAttribute('class', 'geoview-map');
+        map!.parentNode!.insertBefore(newRoot, map);
+        map.remove();
+
+        // set plugin's loaded to false
+        // TODO: need to have this flag by map not for the api
+        api.plugin.pluginsLoaded = false;
+
+        addGeoViewStore(mapFeaturesConfig!);
+        // create the new root
+        reactRoot[mapId] = createRoot(newRoot!);
+        addReloadListener(mapId);
+
+        // re-render map with original configuration
+        reactRoot[mapId].render(<AppStart mapFeaturesConfig={mapFeaturesConfig} />);
+      }
+    }
+  };
+  api.event.on(EVENT_NAMES.MAP.EVENT_MAP_RELOAD, reloadHandler, `${mapId}/delete_old_map`);
 }
 
 /**

@@ -111,7 +111,7 @@
 
         // add event handler to the load basemap panel button
         loadBasemapPanelBtn.addEventListener('click', function (e) {
-          cgpv.api.addPlugin('basemap-panel', 'mapWM', window.plugins['basemap-panel'], {
+          cgpv.api.addPlugin('basemap-panel', 'mapWM', window.geoviewPlugins['basemap-panel'], {
             mapId: 'mapWM',
           });
         });
@@ -129,7 +129,7 @@
 
         // add event handler to the load layers panel button
         loadLayersPanelBtn.addEventListener('click', function (e) {
-          cgpv.api.addPlugin('layers-panel', 'mapWM', window.plugins['layers-panel'], {
+          cgpv.api.addPlugin('layers-panel', 'mapWM', window.geoviewPlugins['layers-panel'], {
             mapId: 'mapWM',
           });
         });

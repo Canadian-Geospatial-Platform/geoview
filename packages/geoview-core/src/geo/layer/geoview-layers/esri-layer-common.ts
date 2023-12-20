@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars, no-param-reassign, no-console */
 import axios from 'axios';
 import { Extent } from 'ol/extent';
-import { transformExtent } from 'ol/proj';
 
 import cloneDeep from 'lodash/cloneDeep';
 import { Cast, TypeJsonArray, TypeJsonObject } from '@/core/types/global-types';
@@ -301,7 +300,7 @@ export function commonProcessInitialSettings(
   // ! if (layerConfig.initialSettings?.minZoom === undefined && minScale !== 0) layerConfig.initialSettings.minZoom = minScale;
   // ! if (layerConfig.initialSettings?.maxZoom === undefined && maxScale !== 0) layerConfig.initialSettings.maxZoom = maxScale;
   if (layerConfig.initialSettings?.extent)
-    layerConfig.initialSettings.extent = transformExtent(
+    layerConfig.initialSettings.extent = api.projection.transformExtent(
       layerConfig.initialSettings.extent,
       'EPSG:4326',
       `EPSG:${MapEventProcessor.getMapState(this.mapId).currentProjection}`

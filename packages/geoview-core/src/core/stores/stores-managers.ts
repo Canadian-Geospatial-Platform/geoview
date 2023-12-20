@@ -3,6 +3,7 @@ import { useContext } from 'react';
 import { create, createStore } from 'zustand';
 import { mountStoreDevtool } from 'simple-zustand-devtools';
 
+import { destroyEventProcessors } from '@/api/event-processors';
 import { initializeEventProcessors } from '@/api/event-processors';
 import { TypeMapFeaturesConfig } from '@/core/types/global-types';
 import { IGeoviewState, GeoviewStoreType, geoviewStoreDefinitionWithSubscribeSelector } from './geoview-store';
@@ -39,6 +40,12 @@ export const addGeoViewStore = (config: TypeMapFeaturesConfig): void => {
   } */
   mountStoreDevtool(`getViewStore-${config.mapId}`, geoviewStore);
 };
+
+export const removeGeoviewStore = (id: string): void => {
+  // delete the event processor, unsubscribe and remove the store for the manager
+  destroyEventProcessors(getGeoViewStore(id));
+  delete useStoresManager.getState().stores[id];
+}
 
 export const getGeoViewStore = (id: string | undefined): GeoviewStoreType => {
   return useStoresManager.getState().stores[id ?? 'unknown'];

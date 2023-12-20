@@ -12,17 +12,23 @@ const mapEventProcessor = new MapEventProcessor();
 const timeSliderEventProcessor = new TimeSliderEventProcessor();
 
 export function initializeEventProcessors(store: GeoviewStoreType) {
+  // core stores
   appEventProcessor.onInitialize(store);
   featureInfoEventProcessor.onInitialize(store);
   legendEventProcessor.onInitialize(store);
   mapEventProcessor.onInitialize(store);
-  timeSliderEventProcessor.onInitialize(store);
+
+  // package stores, only create if needed
+  if (store.getState().mapConfig!.corePackages?.includes('time-slider')) timeSliderEventProcessor.onInitialize(store);
 }
 
 export function destroyEventProcessors(store: GeoviewStoreType) {
+  // core stores
   appEventProcessor.onDestroy(store);
   featureInfoEventProcessor.onDestroy(store);
   legendEventProcessor.onDestroy(store);
   mapEventProcessor.onDestroy(store);
-  timeSliderEventProcessor.onDestroy(store);
+
+  // package stores, only destroy if created
+  if (store.getState().mapConfig!.corePackages?.includes('time-slider')) timeSliderEventProcessor.onDestroy(store);
 }

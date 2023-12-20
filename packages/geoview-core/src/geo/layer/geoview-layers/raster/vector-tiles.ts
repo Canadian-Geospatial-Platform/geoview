@@ -8,7 +8,6 @@ import { Options as TileOptions } from 'ol/layer/BaseTile';
 import VectorTileSource, { Options as SourceOptions } from 'ol/source/VectorTile';
 import { MVT } from 'ol/format';
 import TileGrid, { Options as TileGridOptions } from 'ol/tilegrid/TileGrid';
-import { transformExtent } from 'ol/proj';
 import { Extent } from 'ol/extent';
 
 import olms, { apply, applyStyle, addMapboxLayer } from 'ol-mapbox-style';
@@ -236,7 +235,7 @@ export class VectorTiles extends AbstractGeoViewRaster {
         layerConfig.source!.tileGrid = newTileGrid;
 
         if (layerConfig.initialSettings?.extent)
-          layerConfig.initialSettings.extent = transformExtent(
+          layerConfig.initialSettings.extent = api.projection.transformExtent(
             layerConfig.initialSettings.extent,
             'EPSG:4326',
             `EPSG:${MapEventProcessor.getMapState(this.mapId).currentProjection}`
@@ -282,12 +281,13 @@ export class VectorTiles extends AbstractGeoViewRaster {
     if (layerBounds) {
       let transformedBounds = layerBounds;
       if (this.metadata?.fullExtent?.spatialReference?.wkid !== MapEventProcessor.getMapState(this.mapId).currentProjection) {
-        transformedBounds = transformExtent(
+        transformedBounds = api.projection.transformExtent(
           layerBounds,
           `EPSG:${projection}`,
           `EPSG:${MapEventProcessor.getMapState(this.mapId).currentProjection}`
         );
       }
+
       if (!bounds) bounds = [transformedBounds[0], transformedBounds[1], transformedBounds[2], transformedBounds[3]];
       else bounds = getMinOrMaxExtents(bounds, transformedBounds);
     }
