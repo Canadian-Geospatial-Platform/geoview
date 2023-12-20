@@ -73,7 +73,9 @@
     "removingLayers": "Suppression des couches",
     "reArrangeLayers": "Réorganiser les couches",
     "removeLayerDescription": "Pour supprimer un calque, cliquez sur l'icône de suppression à droite du calque. Pour revenir à la fonctionnalité d'affichage, cliquez sur le bouton Supprimer en haut.",
-    "sortingDescription": "<p>Pour trier les calques, vous pouvez simplement faire glisser et déposer chaque panneau de calque.</p><h4>Utilisation du clavier pour faire glisser et déposer</h4><p>Si vous utilisez le clavier pour trier les calques, suivez les instructions suivantes :</p><ul><li>Lorsque le panneau de calque est en focus, utilisez la barre d'espace pour soulever le panneau. Cela lancera le glisser-déposer.</li><li>Une fois le glisser-déposer commencé, vous pouvez utiliser les flèches haut et bas pour déplacer le panneau.</li><li>Vous pouvez utiliser la barre d'espace pour déposer le panneau.</li><li>Utilisez la touche ÉCHAP pour annuler le glisser-déposer.</li></ul>"
+    "sortingDescription": "<p>Pour trier les calques, vous pouvez simplement faire glisser et déposer chaque panneau de calque.</p><h4>Utilisation du clavier pour faire glisser et déposer</h4><p>Si vous utilisez le clavier pour trier les calques, suivez les instructions suivantes :</p><ul><li>Lorsque le panneau de calque est en focus, utilisez la barre d'espace pour soulever le panneau. Cela lancera le glisser-déposer.</li><li>Une fois le glisser-déposer commencé, vous pouvez utiliser les flèches haut et bas pour déplacer le panneau.</li><li>Vous pouvez utiliser la barre d'espace pour déposer le panneau.</li><li>Utilisez la touche ÉCHAP pour annuler le glisser-déposer.</li></ul>",
+    "completeTable": "Pour des données complètes, veuillez consulter les onglets des tableaux de données.",
+    "dataModalFeaturesDisplayed": "{numberOfFeatures} des {totalNumberOfFeatures} caractéristiques affichées"
   },
   "details": {
     "zoomTo": "Zoom à l'élément",
