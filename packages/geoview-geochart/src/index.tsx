@@ -116,6 +116,6 @@ class GeoChartFooterPlugin extends FooterPlugin {
 // Exports the GeoChartFooterPlugin
 export default GeoChartFooterPlugin;
 
-// Keep a reference to the GeoChartPlugin as part of the plugins property stored in the window object
-window.plugins = window.plugins || {};
-window.plugins.geochart = Cast<GeoChartFooterPlugin>(GeoChartFooterPlugin);
+// Keep a reference to the GeoChartPlugin as part of the geoviewPlugins property stored in the window object
+window.geoviewPlugins = window.geoviewPlugins || {};
+window.geoviewPlugins.geochart = Cast<GeoChartFooterPlugin>(GeoChartFooterPlugin);

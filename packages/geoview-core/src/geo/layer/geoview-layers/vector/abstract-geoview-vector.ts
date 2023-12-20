@@ -11,7 +11,6 @@ import LayerGroup from 'ol/layer/Group';
 import { Coordinate } from 'ol/coordinate';
 import { Extent } from 'ol/extent';
 import { Pixel } from 'ol/pixel';
-import { transform } from 'ol/proj';
 
 import { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import {
@@ -300,7 +299,11 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
   protected getFeatureInfoAtLongLat(location: Coordinate, layerPath?: string): Promise<TypeArrayOfFeatureInfoEntries> {
     layerPath = layerPath || api.maps[this.mapId].layer.layerPathAssociatedToThegeoviewLayer;
     const { map } = api.maps[this.mapId];
-    const convertedLocation = transform(location, 'EPSG:4326', `EPSG:${MapEventProcessor.getMapState(this.mapId).currentProjection}`);
+    const convertedLocation = api.projection.transform(
+      location,
+      'EPSG:4326',
+      `EPSG:${MapEventProcessor.getMapState(this.mapId).currentProjection}`
+    );
     return this.getFeatureInfoAtPixel(map.getPixelFromCoordinate(convertedLocation as Coordinate), layerPath);
   }
 

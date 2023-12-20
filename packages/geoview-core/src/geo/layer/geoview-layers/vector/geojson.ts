@@ -1,5 +1,4 @@
 /* eslint-disable block-scoped-var, no-var, vars-on-top, no-param-reassign */
-import { transformExtent } from 'ol/proj';
 import { Options as SourceOptions } from 'ol/source/Vector';
 import { GeoJSON as FormatGeoJSON } from 'ol/format';
 import { ReadOptions } from 'ol/format/Feature';
@@ -24,6 +23,7 @@ import { getLocalizedValue } from '@/core/utils/utilities';
 import { Cast, toJsonObject } from '@/core/types/global-types';
 import { Layer } from '../../layer';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
+import { api } from '@/app';
 
 export interface TypeSourceGeoJSONInitialConfig extends Omit<TypeVectorSourceInitialConfig, 'format'> {
   format: 'GeoJSON';
@@ -206,7 +206,7 @@ export class GeoJSON extends AbstractGeoViewVector {
         }
 
         if (layerConfig.initialSettings?.extent)
-          layerConfig.initialSettings.extent = transformExtent(
+          layerConfig.initialSettings.extent = api.projection.transformExtent(
             layerConfig.initialSettings.extent,
             'EPSG:4326',
             `EPSG:${MapEventProcessor.getMapState(this.mapId).currentProjection}`

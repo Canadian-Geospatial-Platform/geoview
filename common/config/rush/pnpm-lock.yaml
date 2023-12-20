@@ -397,7 +397,7 @@ importers:
       typescript: ^4.5.5
     dependencies:
       '@mui/material': 5.15.1_4lf4xofvn366h3sgouxfymsrw4
-      geochart: github.com/Canadian-Geospatial-Platform/geochart/82eadba43b23641a888df605d9752e5aeccfccc3_@types+react@18.2.45
+      geochart: github.com/Canadian-Geospatial-Platform/geochart/ce5a5bbcd69c50bdd934132e8d614aa66e167a11_@types+react@18.2.45
       geoview-core: link:../geoview-core
       lodash: 4.17.21
     devDependencies:
@@ -5863,8 +5863,8 @@ packages:
     engines: {node: '>=6.9.0'}
     dev: true
 
-  /geotiff/2.1.0:
-    resolution: {integrity: sha512-B/iFJuFfRpmPHXf8aIRPRgUWwfaNb6dlsynkM8SWeHAPu7CpyvfqEa43KlBt7xxq5OTVysQacFHxhCn3SZhRKQ==}
+  /geotiff/2.1.1:
+    resolution: {integrity: sha512-Ss6HQEhrlR2v0FmOGq88l0wa2oCmmGi6rXAMiUxR/T7Xe98evypEmyiji7lvVeVR/AXuxK0xDCWcwfWkSmOrAA==}
     engines: {node: '>=10.19'}
     dependencies:
       '@petamoriken/float16': 3.8.4
@@ -7649,8 +7649,8 @@ packages:
     resolution: {integrity: sha512-5LC9SOxjSc2HF6vO2CyuTDNivEdoz2IvyJJGj6X8DJ0eFyfszE0QiEd+iXmBvUP3WHxSjFH/vIsA0EN00cgr8w==}
     dev: false
 
-  /mrmime/1.0.1:
-    resolution: {integrity: sha512-hzzEagAgDyoU1Q6yg5uI+AorQgdvMCur3FcKf7NhMKWsaYg+RnbTyHRa/9IlLF9rf455MOCtcqqrQQ83pPP7Uw==}
+  /mrmime/2.0.0:
+    resolution: {integrity: sha512-eu38+hdgojoyq63s+yTpN4XMBdt5l8HhMhc4VKLO9KM5caLIBvUm4thi7fFaxyTmCKeNnXZ5pAlBwCUnhA09uw==}
     engines: {node: '>=10'}
     dev: true
 
@@ -7836,7 +7836,7 @@ packages:
       color-rgba: 3.0.0
       color-space: 2.0.1
       earcut: 2.2.4
-      geotiff: 2.1.0
+      geotiff: 2.1.1
       pbf: 3.2.1
       rbush: 3.0.1
     dev: false
@@ -8931,12 +8931,12 @@ packages:
       zustand: 4.4.7_qinpt5tsrh57s4kh6guy25fqdq
     dev: true
 
-  /sirv/2.0.3:
-    resolution: {integrity: sha512-O9jm9BsID1P+0HOi81VpXPoDxYP374pkOLzACAoyUQ/3OUVndNpsz6wMnY2z+yOxzbllCKZrM+9QrWsv4THnyA==}
+  /sirv/2.0.4:
+    resolution: {integrity: sha512-94Bdh3cC2PKrbgSOUqTiGPWVZeSiXfKOVZNJniWoqrWrRkB1CJzBU3NEbiTsPcYy1lDsANA/THzS+9WBiy5nfQ==}
     engines: {node: '>= 10'}
     dependencies:
       '@polka/url': 1.0.0-next.24
-      mrmime: 1.0.1
+      mrmime: 2.0.0
       totalist: 3.0.1
     dev: true
 
@@ -9692,7 +9692,7 @@ packages:
       is-plain-object: 5.0.0
       opener: 1.5.2
       picocolors: 1.0.0
-      sirv: 2.0.3
+      sirv: 2.0.4
       ws: 7.5.9
     transitivePeerDependencies:
       - bufferutil
@@ -10105,9 +10105,9 @@ packages:
       react: 18.2.0
       use-sync-external-store: 1.2.0_react@18.2.0
 
-  github.com/Canadian-Geospatial-Platform/geochart/82eadba43b23641a888df605d9752e5aeccfccc3_@types+react@18.2.45:
-    resolution: {tarball: https://codeload.github.com/Canadian-Geospatial-Platform/geochart/tar.gz/82eadba43b23641a888df605d9752e5aeccfccc3}
-    id: github.com/Canadian-Geospatial-Platform/geochart/82eadba43b23641a888df605d9752e5aeccfccc3
+  github.com/Canadian-Geospatial-Platform/geochart/ce5a5bbcd69c50bdd934132e8d614aa66e167a11_@types+react@18.2.45:
+    resolution: {tarball: https://codeload.github.com/Canadian-Geospatial-Platform/geochart/tar.gz/ce5a5bbcd69c50bdd934132e8d614aa66e167a11}
+    id: github.com/Canadian-Geospatial-Platform/geochart/ce5a5bbcd69c50bdd934132e8d614aa66e167a11
     name: geoview-geochart
     version: 0.1.0
     dependencies:

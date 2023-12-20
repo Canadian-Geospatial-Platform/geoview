@@ -71,7 +71,7 @@ export interface TypeMapFeaturesConfig extends TypeMapFeaturesInstance {
 declare global {
   interface Window {
     cgpv: TypeCGPV;
-    plugins: Record<string, unknown>;
+    geoviewPlugins: Record<string, unknown>;
   }
 }
 
@@ -82,7 +82,7 @@ export interface TypeWindow extends Window {
   /** the core */
   cgpv: TypeCGPV;
   /** plugins added to the core */
-  plugins: { [pluginId: string]: ((pluginId: string, props: TypeJsonValue) => TypeJsonValue) | AbstractPlugin | undefined };
+  geoviewPlugins: { [pluginId: string]: ((pluginId: string, props: TypeJsonValue) => TypeJsonValue) | AbstractPlugin | undefined };
 }
 
 /** ******************************************************************************************************************************

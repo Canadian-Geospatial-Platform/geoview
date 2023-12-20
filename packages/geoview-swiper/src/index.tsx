@@ -48,5 +48,6 @@ class SwiperPlugin extends MapPlugin {
 
 export default SwiperPlugin;
 
-window.plugins = window.plugins || {};
-window.plugins.swiper = Cast<SwiperPlugin>(SwiperPlugin);
+// Keep a reference to the Swiper Plugin as part of the geoviewPlugins property stored in the window object
+window.geoviewPlugins = window.geoviewPlugins || {};
+window.geoviewPlugins.swiper = Cast<SwiperPlugin>(SwiperPlugin);
