@@ -126,5 +126,6 @@ class BasemapPanelPlugin extends AppBarPlugin {
 
 export default BasemapPanelPlugin;
 
-window.plugins = window.plugins || {};
-window.plugins['basemap-panel'] = Cast<BasemapPanelPlugin>(BasemapPanelPlugin);
+// Keep a reference to the Basemap Panel Plugin as part of the geoviewPlugins property stored in the window object
+window.geoviewPlugins = window.geoviewPlugins || {};
+window.geoviewPlugins['basemap-panel'] = Cast<BasemapPanelPlugin>(BasemapPanelPlugin);

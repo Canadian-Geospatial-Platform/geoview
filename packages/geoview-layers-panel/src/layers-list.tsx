@@ -132,7 +132,7 @@ function LayersList(props: TypeLayersPanelListProps): JSX.Element {
   };
 
   /**
-   * Removes selcted layer from map
+   * Removes selected layer from map
    *
    * @param layer layer config
    */
