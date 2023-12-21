@@ -46,17 +46,22 @@ export function SingleLayer({ isDragging, depth, layer, setIsLayersListPanelVisi
   const mapFiltered = useDataTableStoreMapFilteredRecord();
 
   // if any of the chiild layers is selected return true
-  const isLayerOrChildSelected = (startingLayer: TypeLegendLayer): boolean => {
-    if (startingLayer.layerPath === selectedLayerPath && displayState === 'view') {
-      return true;
+  const isLayerChildSelected = (startingLayer: TypeLegendLayer): boolean => {
+    if(displayState !== 'view') {
+      return false;
     }
     if (startingLayer.children && startingLayer.children.length > 0) {
-      return _.some(startingLayer.children, (child) => isLayerOrChildSelected(child));
+      if(startingLayer.children.filter(child => child.layerPath === selectedLayerPath).length > 0) {
+        return true;
+      }
+      
+      return _.some(startingLayer.children, (child) => isLayerChildSelected(child));
     }
     return false;
   };
 
-  const isLayerSelected = isLayerOrChildSelected(layer);
+  const layerChildIsSelected = isLayerChildSelected(layer);
+  const layerIsSelected = layer.layerPath === selectedLayerPath && displayState === 'view';
 
   // returns true if any of the layer children or items has visibility of 'always'
   const layerHasAlwaysVisible = (startingLayer: TypeLegendLayer): boolean => {
@@ -77,7 +82,7 @@ export function SingleLayer({ isDragging, depth, layer, setIsLayersListPanelVisi
 
   const isLayerAlwaysVisible = layerHasAlwaysVisible(layer);
 
-  const [isGroupOpen, setGroupOpen] = useState(isLayerSelected);
+  const [isGroupOpen, setGroupOpen] = useState(layerIsSelected || layerChildIsSelected);
 
   // get layer description
   const getLayerDescription = () => {
@@ -221,7 +226,12 @@ export function SingleLayer({ isDragging, depth, layer, setIsLayersListPanelVisi
   function getContainerClass() {
     const result: string[] = ['layerItemContainer', layer.layerStatus ?? ''];
 
-    if (isLayerSelected) {
+    // if layer has selected child but its not itself selected
+    if (layerChildIsSelected && !layerIsSelected && !isGroupOpen) {
+      result.push('selectedLayer');
+    }
+
+    if (layerIsSelected) {
       result.push('selectedLayer');
     }
 
@@ -235,7 +245,7 @@ export function SingleLayer({ isDragging, depth, layer, setIsLayersListPanelVisi
   return (
     <Box className={getContainerClass()}>
       <ListItem key={layer.layerName} divider>
-        <ListItemButton selected={isLayerSelected}>
+        <ListItemButton selected={layerIsSelected || (layerChildIsSelected && !isGroupOpen)}>
           <LayerIcon layer={layer} />
           <Tooltip title={layer.layerName} placement="top" enterDelay={1000}>
             <ListItemText
