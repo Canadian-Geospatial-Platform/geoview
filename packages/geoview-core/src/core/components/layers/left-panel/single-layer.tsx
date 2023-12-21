@@ -47,14 +47,14 @@ export function SingleLayer({ isDragging, depth, layer, setIsLayersListPanelVisi
 
   // if any of the chiild layers is selected return true
   const isLayerChildSelected = (startingLayer: TypeLegendLayer): boolean => {
-    if(displayState !== 'view') {
+    if (displayState !== 'view') {
       return false;
     }
     if (startingLayer.children && startingLayer.children.length > 0) {
-      if(startingLayer.children.filter(child => child.layerPath === selectedLayerPath).length > 0) {
+      if (startingLayer.children.filter((child) => child.layerPath === selectedLayerPath).length > 0) {
         return true;
       }
-      
+
       return _.some(startingLayer.children, (child) => isLayerChildSelected(child));
     }
     return false;
