@@ -1,70 +1,116 @@
-import { useState } from 'react';
+/* eslint-disable no-plusplus */
+import { useState, useEffect } from 'react';
 
 import { useTheme } from '@mui/material/styles';
-import { Checkbox, List, ListItem, ListItemIcon, Typography } from '@mui/material';
+import { Typography } from '@mui/material';
+import List from '@mui/material/List';
+import ListItem from '@mui/material/ListItem';
+import ListItemIcon from '@mui/material/ListItemIcon';
+import Checkbox from '@mui/material/Checkbox';
+import Box from '@mui/material/Box';
 
 import { getSxClasses } from './checkbox-list-style';
 
 /**
- * interface for CheckboxList basic properties
+ * CheckboxList main Props
  */
-interface CheckboxListType {
-  listItems: string[];
-  checkedItems: number[];
+export interface CheckboxListProps {
+  listItems: Array<CheckboxListItem>;
+  checkedValues: string[];
   multiselect: boolean;
-  setApiCheckedItems: (checkedItems: number[]) => void;
+  onChecked?: (value: string, checked: boolean, allChecked: Array<string>) => void;
 }
 
-export function CheckboxList({ listItems, multiselect, checkedItems, setApiCheckedItems }: CheckboxListType): JSX.Element {
+/**
+ * A CheckboxList item
+ */
+export type CheckboxListItem = {
+  display: string;
+  value: string;
+  contentRight: JSX.Element;
+};
+
+/**
+ * Main Component
+ * @param props Main props for the component
+ * @returns JSX.Element The Component
+ */
+export function CheckboxList(props: CheckboxListProps): JSX.Element {
+  const { listItems, checkedValues, multiselect, onChecked } = props;
+
   const theme = useTheme();
   const sxClasses = getSxClasses(theme);
 
   // internal state
-  const [listOfItems] = useState(listItems);
-  const [checked, setChecked] = useState(checkedItems);
-  let keyValue = 0;
+  const [checked, setChecked] = useState(checkedValues);
 
-  const handleToggle = (value: number) => () => {
-    let newCheckedItems: number[];
+  const handleToggle = (value: string) => {
+    let newCheckedValues: string[];
     if (multiselect) {
       const currentIndex = checked.indexOf(value);
-      newCheckedItems = [...checked];
+      newCheckedValues = [...checked];
 
       if (currentIndex === -1) {
-        newCheckedItems.push(value);
+        newCheckedValues.push(value);
       } else {
-        newCheckedItems.splice(currentIndex, 1);
+        newCheckedValues.splice(currentIndex, 1);
       }
     } else {
-      newCheckedItems = [value];
+      newCheckedValues = [value];
     }
 
-    setChecked(newCheckedItems);
-    setApiCheckedItems(newCheckedItems);
+    // Set state
+    setChecked(newCheckedValues);
+
+    // Callback
+    onChecked?.(value, newCheckedValues.indexOf(value) >= 0, newCheckedValues);
   };
+
+  /**
+   * Helper function to stop propagation on click of the right-side content
+   * @param e React.MouseEvent<HTMLElement> The mouse click event
+   */
+  const handleClickContent = (e: React.MouseEvent<HTMLElement>) => {
+    e.stopPropagation();
+  };
+
+  // Effect triggered when the checked values changes
+  useEffect(() => {
+    if (checkedValues) setChecked(checkedValues);
+  }, [checkedValues]);
 
   return (
     <List sx={sxClasses.list}>
-      {listOfItems.map((value, index) => {
-        const labelId = `checkbox-list-label-${index}`;
+      {listItems.map((item: CheckboxListItem, idx: number) => {
+        const labelId = `checkbox-list-label-${idx}`;
 
         return (
-          <ListItem sx={sxClasses.listItem} title={value} key={keyValue++} dense onClick={handleToggle(index)}>
+          <ListItem sx={sxClasses.listItem} title={item.display} key={item.value} dense onClick={() => handleToggle(item.value)}>
             <ListItemIcon sx={sxClasses.listItemIcon}>
               <Checkbox
                 edge="start"
-                checked={checked.indexOf(index) !== -1}
+                checked={checked.includes(item.value)}
                 tabIndex={-1}
                 disableRipple
                 inputProps={{ 'aria-labelledby': labelId }}
               />
             </ListItemIcon>
             <Typography sx={sxClasses.typography} variant="body2" noWrap component="ul">
-              {value}
+              {item.display}
             </Typography>
+            <Box sx={sxClasses.boxcontent} className="Checkbox-content-root" onClick={(e) => handleClickContent(e)}>
+              {item.contentRight}
+            </Box>
           </ListItem>
         );
       })}
     </List>
   );
 }
+
+/**
+ * React's default properties for the CheckboxList
+ */
+CheckboxList.defaultProps = {
+  onChecked: null,
+};

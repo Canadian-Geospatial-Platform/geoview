@@ -31,8 +31,8 @@ export class GeoUtilities {
    * @returns {string | null} the WKT representation of the geometry
    */
   geometryToWKT = (geometry: Geometry): string | null => {
-    // TODO: Refactoring -
-    // ! This method should be static, but since it goes through the api instance to be importable
+    // TODO: Refactor - This method should be static
+    // ! but since it goes through the api instance to be importable
     // ! afterwards it loses non static methods. For this reason, I've left it like this.
     // ! See api.constructor: this.geoUtilities = new GeoUtilities();
     if (geometry) {
@@ -51,8 +51,8 @@ export class GeoUtilities {
    * @returns {Geometry | null} the Geometry representation of the wkt
    */
   wktToGeometry = (wkt: string, readOptions: ReadOptions): Geometry | null => {
-    // TODO: Refactoring -
-    // ! This method should be static, but since it goes through the api instance to be importable
+    // TODO: Refactor - This method should be static
+    // ! but since it goes through the api instance to be importable
     // ! afterwards it loses non static methods. For this reason, I've left it like this.
     // ! See api.constructor: this.geoUtilities = new GeoUtilities();
     if (wkt) {
@@ -71,8 +71,8 @@ export class GeoUtilities {
    * @returns {Geometry | null} the Geometry representation of the geojson
    */
   geojsonToGeometry = (geojson: string, readOptions: ReadOptions): Geometry | null => {
-    // TODO: Refactoring -
-    // ! This method should be static, but since it goes through the api instance to be importable
+    // TODO: Refactor - This method should be static
+    // ! but since it goes through the api instance to be importable
     // ! afterwards it loses non static methods. For this reason, I've left it like this.
     // ! See api.constructor: this.geoUtilities = new GeoUtilities();
     if (geojson) {
@@ -88,8 +88,8 @@ export class GeoUtilities {
    * @returns an Open Layers styling for drawing on a map
    */
   defaultDrawingStyle = (strokeColor?: Color | string, strokeWidth?: number, fillColor?: Color | string): Style => {
-    // TODO: Refactoring -
-    // ! This method should be static, but since it goes through the api instance to be importable
+    // TODO: Refactor - This method should be static
+    // ! but since it goes through the api instance to be importable
     // ! afterwards it loses non static methods. For this reason, I've left it like this.
     // ! See api.constructor: this.geoUtilities = new GeoUtilities();
     return new Style({
@@ -127,12 +127,11 @@ export class GeoUtilities {
    * @returns an Open Layers styling for drawing on a map or undefined
    */
   convertTypeFeatureStyleToOpenLayersStyle = (style?: TypeFeatureStyle): Style => {
-    // TODO: Refactoring -
-    // ! This method should be static, but since it goes through the api instance to be importable
+    // TODO: Refactor - This method should be static
+    // ! but since it goes through the api instance to be importable
     // ! afterwards it loses non static methods. For this reason, I've left it like this.
     // ! See api.constructor: this.geoUtilities = new GeoUtilities();
-    // TODO: Refactoring -
-    // ! This function could also be used by vector class when it works with the styling.
+    // TODO: Refactor - This function could also be used by vector class when it works with the styling
     // ! So I'm putting it in this utilities class so that it eventually becomes shared between vector
     // ! class and interactions classes.
     // Redirect
