@@ -75,17 +75,12 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
 
   const getSubTitle = () => {
     if (layerDetails.children.length > 0) {
-      const validChildren = layerDetails.children?.filter(
-        (c) => c.isVisible !== 'no' && ['processed', 'loaded'].includes(c.layerStatus ?? '')
-      );
-      if (validChildren.length) {
-        return t('legend.subLayersCount').replace('{count}', validChildren.length.toString());
-      }
-    } else {
-      const count = layerDetails.items.filter((d) => d.isVisible !== 'no').length;
-      const totalCount = layerDetails.items.length;
-      return t('legend.itemsCount').replace('{count}', count.toString()).replace('{totalCount}', totalCount.toString());
+      return t('legend.subLayersCount').replace('{count}', layerDetails.children.length.toString());
     }
+    const count = layerDetails.items.filter((d) => d.isVisible !== 'no').length;
+    const totalCount = layerDetails.items.length;
+    return t('legend.itemsCount').replace('{count}', count.toString()).replace('{totalCount}', totalCount.toString());
+
     return null;
   };
 
