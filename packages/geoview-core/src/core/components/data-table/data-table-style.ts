@@ -25,6 +25,10 @@ export const getSxClasses = (theme: Theme) => ({
     padding: '6px',
     color: 'rgb(1, 67, 97)',
   },
+  selectedRowsDirection: {
+    display: 'flex',
+    flexDirection: 'column',
+  },
   tableCell: { whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' },
   dataTableWrapper: {
     '& .MuiPaper-root': {
