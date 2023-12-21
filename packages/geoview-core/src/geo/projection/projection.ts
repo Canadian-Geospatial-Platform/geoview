@@ -2,7 +2,17 @@ import proj4 from 'proj4';
 import { Coordinate } from 'ol/coordinate';
 
 import { register } from 'ol/proj/proj4';
-import { get as getOLProjection, Projection as OLProjection, getPointResolution } from 'ol/proj';
+import {
+  get as olGetProjection,
+  Projection as olProjection,
+  getPointResolution,
+  ProjectionLike,
+  transform as olTransform,
+  transformExtent as olTransformExtent,
+  fromLonLat,
+  toLonLat,
+} from 'ol/proj';
+import { Extent } from 'ol/extent';
 
 /**
  * constant used for the available projection names
@@ -23,7 +33,7 @@ export class Projection {
   /**
    * List of supported projections
    */
-  projections: Record<string, OLProjection> = {};
+  projections: Record<string, olProjection> = {};
 
   /**
    * initialize projections
@@ -37,6 +47,7 @@ export class Projection {
     register(proj4);
   }
 
+  // #region INITIALIZE SUPPORTED PROJECTIONS
   /**
    * Initialize WM Projection
    */
@@ -45,7 +56,7 @@ export class Projection {
     newDefinition.axis = 'neu';
     proj4.defs('http://www.opengis.net/def/crs/OGC/1.3/CRS84', newDefinition);
 
-    const projection = getOLProjection('http://www.opengis.net/def/crs/OGC/1.3/CRS84');
+    const projection = olGetProjection('http://www.opengis.net/def/crs/OGC/1.3/CRS84');
     if (projection) this.projections['http://www.opengis.net/def/crs/OGC/1.3/CRS84'] = projection;
   }
 
@@ -53,7 +64,7 @@ export class Projection {
    * Initialize WM Projection
    */
   private initWMProjection() {
-    const projection = getOLProjection('EPSG:3857');
+    const projection = olGetProjection('EPSG:3857');
 
     if (projection) this.projections['3857'] = projection;
   }
@@ -69,13 +80,52 @@ export class Projection {
     );
     register(proj4);
 
-    const projection = getOLProjection('EPSG:3978');
+    const projection = olGetProjection('EPSG:3978');
 
     if (projection) this.projections['3978'] = projection;
   }
+  // #endregion
 
   /**
-   * Convert points from one projection to another
+   * Transforms an extent from source projection to destination projection. This returns a new extent (and does not modify the
+   * original).
+   *
+   * @param {Extent} extent The extent to transform.
+   * @param {ProjectionLike} source Source projection-like.
+   * @param {ProjectionLike} destination Destination projection-like.
+   * @param {number} stops Optional number of stops per side used for the transform. The default value is 20.
+   *
+   * @returns The densified extent transformed in the destination projection.
+   */
+  transformAndDensifyExtent(extent: Extent, source: ProjectionLike, destination: ProjectionLike, stops = 25): Coordinate[] {
+    const coordinates: number[][] = [];
+    const width: number = extent[2] - extent[0];
+    const height: number = extent[3] - extent[1];
+    for (let i = 0; i < stops; ++i) coordinates.push([extent[0] + (width * i) / stops, extent[1]]);
+    for (let i = 0; i < stops; ++i) coordinates.push([extent[2], extent[1] + (height * i) / stops]);
+    for (let i = 0; i < stops; ++i) coordinates.push([extent[2] - (width * i) / stops, extent[3]]);
+    for (let i = 0; i < stops; ++i) coordinates.push([extent[0], extent[3] - (height * i) / stops]);
+    for (let i = 0; i < coordinates.length; i++) coordinates[i] = olTransform(coordinates[i], source, destination);
+    return coordinates;
+  }
+
+  /**
+   * Transforms an extent from source projection to destination projection. This returns a new extent (and does not modify the
+   * original).
+   *
+   * @param {Extent} extent The extent to transform.
+   * @param {ProjectionLike} source Source projection-like.
+   * @param {ProjectionLike} destination Destination projection-like.
+   * @param {number} stops Optional number of stops per side used for the transform. By default only the corners are used.
+   *
+   * @returns The new extent transformed in the destination projection.
+   */
+  transformExtent(extent: Extent, source: ProjectionLike, destination: ProjectionLike, stops?: number | undefined): Extent {
+    return olTransformExtent(extent, source, destination, stops);
+  }
+
+  /**
+   * Convert points from one projection to another using proj4
    *
    * @param {Coordinate[]} points array of passed in points to convert
    * @param {string} fromProj projection to be converted from
@@ -104,58 +154,48 @@ export class Projection {
   };
 
   /**
-   * Convert points from LNGLAT EPSG:4326 to LCC EPSG:3978
+   * Wrapper around OpenLayers function to transforms a coordinate from lone projection to another.
    *
-   * @param {Coordinate[]} points array of passed in points to convert
+   * @param {Coordinate} coordinate Longitude/latitude coordinate
+   * @param {ProjectionLike} inProjection Actual projection of the coordinate
+   * @param {ProjectionLike} outProjection Desired projection of the coordinate
+   * @return {Coordinate}  Coordinate as projected
    */
-  lngLatToLCC = (points: Coordinate[]): Array<Array<number> | number> => {
-    return this.transformPoints(points, PROJECTION_NAMES.LNGLAT, PROJECTION_NAMES.LCC);
-  };
+  transform(coordinate: Coordinate, inProjection: ProjectionLike, outProjection: ProjectionLike): Coordinate {
+    return olTransform(coordinate, inProjection, outProjection);
+  }
 
   /**
-   * Convert points from LNGLAT EPSG:4326 to WM EPSG:3857
+   * Wrapper around OpenLayers function to transforms a coordinate from longitude/latitude.
    *
-   * @param {Coordinate[]} points array of passed in points to convert
+   * @param {Coordinate} coordinate Longitude/latitude coordinate
+   * @param {ProjectionLike} projection Projection to project the coordinate
+   * @return {Coordinate}  Coordinate as projected
    */
-  LngLatToWm = (points: Coordinate[]): Array<Array<number> | number> => {
-    return this.transformPoints(points, PROJECTION_NAMES.LNGLAT, PROJECTION_NAMES.WM);
-  };
+  transformFromLonLat(coordinate: Coordinate, projection: ProjectionLike): Coordinate {
+    return fromLonLat(coordinate, projection);
+  }
 
   /**
-   * Convert points from LCC EPSG:3978 to WM EPSG:3857
+   * Wrapper around OpenLayers function to transforms a coordinate to longitude/latitude.
    *
-   * @param {Coordinate[]} points array of passed in points to convert
+   * @param {Coordinate} coordinate Projected coordinate
+   * @param {ProjectionLike} projection Projection of the coordinate
+   * @return {Coordinate}  Coordinate as longitude and latitude, i.e. an array with longitude as 1st and latitude as 2nd element.
    */
-  lccToWm = (points: Coordinate[]): Array<Array<number> | number> => {
-    return this.transformPoints(points, PROJECTION_NAMES.LCC, PROJECTION_NAMES.WM);
-  };
+  transformToLonLat(coordinate: Coordinate, projection: ProjectionLike): Coordinate {
+    return toLonLat(coordinate, projection);
+  }
 
   /**
-   * Convert points from LCC EPSG:3978 to LNGLAT EPSG:4326
+   * Wrapper around OpenLayers get function that fetches a Projection object for the code specified.
    *
-   * @param {Coordinate[]} points array of passed in points to convert
+   * @param {ProjectionLike} projectionLike Either a code string which is a combination of authority and identifier such as "EPSG:4326", or an existing projection object, or undefined.
+   * @return {olProjection | null} — Projection object, or null if not in list.
    */
-  lccToLngLat = (points: Coordinate[]): Array<Array<number> | number> => {
-    return this.transformPoints(points, PROJECTION_NAMES.LCC, PROJECTION_NAMES.LNGLAT);
-  };
-
-  /**
-   * Convert points from WM EPSG:3857 to LNGLAT EPSG:4326
-   *
-   * @param {Coordinate[]} points array of passed in points to convert
-   */
-  wmToLngLat = (points: Coordinate[]): Array<Array<number> | number> => {
-    return this.transformPoints(points, PROJECTION_NAMES.WM, PROJECTION_NAMES.LNGLAT);
-  };
-
-  /**
-   * Convert points from WM EPSG:3857 to LCC EPSG:3978
-   *
-   * @param {Coordinate[]} points array of passed in points to convert
-   */
-  wmToLcc = (points: Coordinate[]): Array<Array<number> | number> => {
-    return this.transformPoints(points, PROJECTION_NAMES.WM, PROJECTION_NAMES.LCC);
-  };
+  getProjection(projectionLike: ProjectionLike): olProjection | null {
+    return olGetProjection(projectionLike);
+  }
 
   /**
    * Get map point resolution

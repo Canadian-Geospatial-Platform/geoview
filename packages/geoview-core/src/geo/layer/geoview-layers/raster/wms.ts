@@ -10,7 +10,6 @@ import { Options as SourceOptions } from 'ol/source/ImageWMS';
 import WMSCapabilities from 'ol/format/WMSCapabilities';
 import { Layer as OlLayer } from 'ol/layer';
 import { Extent } from 'ol/extent';
-import { transform, transformExtent } from 'ol/proj';
 
 import cloneDeep from 'lodash/cloneDeep';
 
@@ -579,7 +578,7 @@ export class WMS extends AbstractGeoViewRaster {
           // if (layerConfig.initialSettings?.maxZoom === undefined && layerCapabilities.MaxScaleDenominator !== undefined)
           //   layerConfig.initialSettings.maxZoom = layerCapabilities.MaxScaleDenominator as number;
           if (layerConfig.initialSettings?.extent)
-            layerConfig.initialSettings.extent = transformExtent(
+            layerConfig.initialSettings.extent = api.projection.transformExtent(
               layerConfig.initialSettings.extent,
               'EPSG:4326',
               `EPSG:${MapEventProcessor.getMapState(this.mapId).currentProjection}`
@@ -635,7 +634,11 @@ export class WMS extends AbstractGeoViewRaster {
    * @returns {Promise<TypeArrayOfFeatureInfoEntries>} The promised feature info table.
    */
   protected getFeatureInfoAtCoordinate(location: Coordinate, layerPath: string): Promise<TypeArrayOfFeatureInfoEntries> {
-    const convertedLocation = transform(location, `EPSG:${MapEventProcessor.getMapState(this.mapId).currentProjection}`, 'EPSG:4326');
+    const convertedLocation = api.projection.transform(
+      location,
+      `EPSG:${MapEventProcessor.getMapState(this.mapId).currentProjection}`,
+      'EPSG:4326'
+    );
     return this.getFeatureInfoAtLongLat(convertedLocation, layerPath);
   }
 
@@ -654,7 +657,7 @@ export class WMS extends AbstractGeoViewRaster {
 
       const viewResolution = api.maps[this.mapId].getView().getResolution() as number;
       const crs = `EPSG:${MapEventProcessor.getMapState(this.mapId).currentProjection}`;
-      const clickCoordinate = transform(lnglat, 'EPSG:4326', crs);
+      const clickCoordinate = api.projection.transform(lnglat, 'EPSG:4326', crs);
       if (
         lnglat[0] < layerConfig.initialSettings!.bounds![0] ||
         layerConfig.initialSettings!.bounds![2] < lnglat[0] ||
@@ -1114,7 +1117,7 @@ export class WMS extends AbstractGeoViewRaster {
       (layerConfig?.olLayer as ImageLayer<Static>).getSource()?.getProjection()?.getCode().replace('EPSG:', '') ||
       MapEventProcessor.getMapState(this.mapId).currentProjection;
     let layerBounds = layerConfig?.initialSettings?.bounds || [];
-    layerBounds = transformExtent(layerBounds, 'EPSG:4326', `EPSG:${projection}`);
+    layerBounds = api.projection.transformExtent(layerBounds, 'EPSG:4326', `EPSG:${projection}`);
     const boundingBoxes = this.metadata?.Capability.Layer.BoundingBox;
     let bbExtent: Extent | undefined;
 

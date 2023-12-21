@@ -199,7 +199,7 @@ importers:
       webpack-bundle-analyzer: ^4.5.0
       webpack-bundle-size-analyzer: ^3.1.0
       webpack-cli: ^4.9.2
-      webpack-dev-server: ^4.7.4
+      webpack-dev-server: ^4.15.1
       webpack-merge: ^5.8.0
       yet-another-react-lightbox: ^3.11.3
       zustand: ~4.4.1
@@ -4259,7 +4259,7 @@ packages:
     engines: {node: ^6 || ^7 || ^8 || ^9 || ^10 || ^11 || ^12 || >=13.7}
     hasBin: true
     dependencies:
-      caniuse-lite: 1.0.30001570
+      caniuse-lite: 1.0.30001571
       electron-to-chromium: 1.4.615
       node-releases: 2.0.14
       update-browserslist-db: 1.0.13_browserslist@4.22.2
@@ -4314,8 +4314,8 @@ packages:
     engines: {node: '>=10'}
     dev: true
 
-  /caniuse-lite/1.0.30001570:
-    resolution: {integrity: sha512-+3e0ASu4sw1SWaoCtvPeyXp+5PsjigkSt8OXZbF9StH5pQWbxEjLAZE3n8Aup5udop1uRiKA7a4utUk/uoSpUw==}
+  /caniuse-lite/1.0.30001571:
+    resolution: {integrity: sha512-tYq/6MoXhdezDLFZuCO/TKboTzuQ/xR5cFdgXPfDtM7/kchBO3b4VWghE/OAi/DV7tTdhmLjZiZBZi1fA/GheQ==}
     dev: true
 
   /chalk/2.4.2:
@@ -4644,7 +4644,7 @@ packages:
       postcss: 8.4.32
       postcss-modules-extract-imports: 3.0.0_postcss@8.4.32
       postcss-modules-local-by-default: 4.0.3_postcss@8.4.32
-      postcss-modules-scope: 3.0.0_postcss@8.4.32
+      postcss-modules-scope: 3.1.0_postcss@8.4.32
       postcss-modules-values: 4.0.0_postcss@8.4.32
       postcss-value-parser: 4.2.0
       semver: 7.5.4
@@ -8080,8 +8080,8 @@ packages:
       postcss-value-parser: 4.2.0
     dev: true
 
-  /postcss-modules-scope/3.0.0_postcss@8.4.32:
-    resolution: {integrity: sha512-hncihwFA2yPath8oZ15PZqvWGkWf+XUfQgUGamS4LqoP1anQLOsOJw0vr7J7IwLpoY9fatA2qiGUGmuZL0Iqlg==}
+  /postcss-modules-scope/3.1.0_postcss@8.4.32:
+    resolution: {integrity: sha512-SaIbK8XW+MZbd0xHPf7kdfA/3eOt7vxJ72IRecn3EzuZVLr1r0orzf0MX/pN8m+NMDoo6X/SQd8oeKqGZd8PXg==}
     engines: {node: ^10 || ^12 || >= 14}
     peerDependencies:
       postcss: ^8.1.0

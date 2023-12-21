@@ -63,5 +63,6 @@ class LayersPanelPlugin extends AppBarPlugin {
 
 export default LayersPanelPlugin;
 
-window.plugins = window.plugins || {};
-window.plugins['layers-panel'] = Cast<LayersPanelPlugin>(LayersPanelPlugin);
+// Keep a reference to the Layers Panel Plugin as part of the geoviewPlugins property stored in the window object
+window.geoviewPlugins = window.geoviewPlugins || {};
+window.geoviewPlugins['layers-panel'] = Cast<LayersPanelPlugin>(LayersPanelPlugin);

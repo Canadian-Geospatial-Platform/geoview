@@ -64,6 +64,12 @@
     <div>
       Switch between French and English and override layers <button id="Change-Lang-Button">Reset Lang</button> !!! not yet supported
     </div>
+    <div>
+      Reload the map <button id="Reload-Button">Reload</button>
+    </div>
+    <div>
+      Remove the map <button id="Remove-Button">Remove</button>
+    </div>
     <hr />
 
     <div class="map-title-holder">
@@ -127,6 +133,16 @@
       const switchLang = document.getElementById('switchLang');
       switchLang.addEventListener('change', (e) => {
         cgpv.api.maps['LNG1'].setLanguage(e.target.value);
+      });
+
+      const reload = document.getElementById('Reload-Button');
+      reload.addEventListener('click', (e) => {
+        cgpv.api.maps['LNG1'].reload();
+      });
+
+      const remove = document.getElementById('Remove-Button');
+      remove.addEventListener('click', (e) => {
+        cgpv.api.maps['LNG1'].remove(true);
       });
 
       // change map language and reset layers
