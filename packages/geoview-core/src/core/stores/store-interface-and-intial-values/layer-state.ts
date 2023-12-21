@@ -111,6 +111,10 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
         const layer = findLayerByPath(curLayers, layerPath);
         if (layer) {
           layer.opacity = opacity;
+
+          if (layer.children.length) {
+            setPropInChildLayers(layer.children, 'opacity', opacity);
+          }
         }
 
         // TODO: keep reference to geoview map instance in the store or keep accessing with api - discussion

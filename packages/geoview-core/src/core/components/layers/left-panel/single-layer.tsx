@@ -4,11 +4,8 @@ import _ from 'lodash';
 import {
   Box,
   Collapse,
-  ErrorIcon,
-  GroupWorkOutlinedIcon,
   IconButton,
   KeyboardArrowDownIcon,
-  KeyboardArrowRightIcon,
   KeyboardArrowUpIcon,
   ListItem,
   ListItemButton,
@@ -18,7 +15,6 @@ import {
   VisibilityOffOutlinedIcon,
   VisibilityOutlinedIcon,
   RestartAltIcon,
-  CircularProgressBase,
   TableViewIcon,
   HandleIcon,
 } from '@/ui';
@@ -29,9 +25,9 @@ import {
   useSelectedLayerPath,
 } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { useDataTableStoreMapFilteredRecord } from '@/core/stores/store-interface-and-intial-values/data-table-state';
-import { IconStack } from '../../icon-stack/icon-stack';
 import { DeleteUndoButton } from './delete-undo-button';
 import { LayersList } from './layers-list';
+import { LayerIcon } from '../layer-icon';
 
 interface SingleLayerProps {
   layer: TypeLegendLayer;
@@ -50,34 +46,43 @@ export function SingleLayer({ isDragging, depth, layer, setIsLayersListPanelVisi
   const mapFiltered = useDataTableStoreMapFilteredRecord();
 
   // if any of the chiild layers is selected return true
-  const isLayerOrChildSelected = (startingLayer: TypeLegendLayer): boolean => {
-    if (startingLayer.layerPath === selectedLayerPath && displayState === 'view') {
-      return true;
+  const isLayerChildSelected = (startingLayer: TypeLegendLayer): boolean => {
+    if (displayState !== 'view') {
+      return false;
     }
     if (startingLayer.children && startingLayer.children.length > 0) {
-      return _.some(startingLayer.children, (child) => isLayerOrChildSelected(child));
+      if (startingLayer.children.filter((child) => child.layerPath === selectedLayerPath).length > 0) {
+        return true;
+      }
+
+      return _.some(startingLayer.children, (child) => isLayerChildSelected(child));
     }
     return false;
   };
 
-  const isLayerSelected = isLayerOrChildSelected(layer);
+  const layerChildIsSelected = isLayerChildSelected(layer);
+  const layerIsSelected = layer.layerPath === selectedLayerPath && displayState === 'view';
 
   // returns true if any of the layer children or items has visibility of 'always'
   const layerHasAlwaysVisible = (startingLayer: TypeLegendLayer): boolean => {
-    if (layer.isVisible === 'always') {
+    if (startingLayer.isVisible === 'always') {
       return true;
     }
-    if (layer.items && layer.items.length) {
-      return layer.items.filter((i) => i.isVisible === 'always').length > 0;
-    }
+    let itemsHasAlways = false;
+    let childrenHasAlways = false;
     if (startingLayer.children && startingLayer.children.length > 0) {
-      return _.some(startingLayer.children, (child) => layerHasAlwaysVisible(child));
+      childrenHasAlways = _.some(startingLayer.children, (child) => layerHasAlwaysVisible(child));
     }
-    return false;
+    if (startingLayer.items && startingLayer.items.length) {
+      itemsHasAlways = startingLayer.items.filter((i) => i.isVisible === 'always').length > 0;
+    }
+
+    return itemsHasAlways || childrenHasAlways;
   };
+
   const isLayerAlwaysVisible = layerHasAlwaysVisible(layer);
 
-  const [isGroupOpen, setGroupOpen] = useState(isLayerSelected);
+  const [isGroupOpen, setGroupOpen] = useState(layerIsSelected || layerChildIsSelected);
 
   // get layer description
   const getLayerDescription = () => {
@@ -88,9 +93,8 @@ export function SingleLayer({ isDragging, depth, layer, setIsLayersListPanelVisi
       return t('legend.layerLoading');
     }
 
-    const validChildren = layer.children?.filter((c) => c.isVisible !== 'no' && ['processed', 'loaded'].includes(c.layerStatus ?? ''));
-    if (validChildren.length) {
-      return t('legend.subLayersCount').replace('{count}', validChildren.length.toString());
+    if (layer.children.length > 0) {
+      return t('legend.subLayersCount').replace('{count}', layer.children.length.toString());
     }
 
     const count = layer.items.filter((d) => d.isVisible !== 'no').length;
@@ -120,11 +124,12 @@ export function SingleLayer({ isDragging, depth, layer, setIsLayersListPanelVisi
       return;
     }
 
-    if (layer.children && layer.children.length === 0) {
-      setSelectedLayerPath(layer.layerPath);
-      if (setIsLayersListPanelVisible) setIsLayersListPanelVisible(true);
-    } else {
-      setGroupOpen(!isGroupOpen);
+    setSelectedLayerPath(layer.layerPath);
+    if (setIsLayersListPanelVisible) {
+      if (layer.children.length > 0) {
+        setGroupOpen(false);
+      }
+      setIsLayersListPanelVisible(true);
     }
   };
 
@@ -197,13 +202,7 @@ export function SingleLayer({ isDragging, depth, layer, setIsLayersListPanelVisi
         </IconButton>
       );
     }
-    if (displayState === 'view') {
-      return (
-        <IconButton edge="end" size="small" onClick={handleLayerClick}>
-          <KeyboardArrowRightIcon />
-        </IconButton>
-      );
-    }
+
     return null;
   }
 
@@ -213,7 +212,7 @@ export function SingleLayer({ isDragging, depth, layer, setIsLayersListPanelVisi
     }
 
     return (
-      <Collapse in={isGroupOpen || isLayerSelected} timeout="auto">
+      <Collapse in={isGroupOpen} timeout="auto">
         <LayersList
           parentLayerPath={layer.layerPath}
           depth={1 + depth}
@@ -224,35 +223,15 @@ export function SingleLayer({ isDragging, depth, layer, setIsLayersListPanelVisi
     );
   }
 
-  function renderLayerIcon() {
-    if (layer.layerStatus === 'error') {
-      return (
-        <IconButton sx={{ color: 'red' }}>
-          <ErrorIcon />
-        </IconButton>
-      );
-    }
-    if (layer.layerStatus === 'loading') {
-      return (
-        <Box sx={{ padding: '5px', marginRight: '10px' }}>
-          <CircularProgressBase size={20} />
-        </Box>
-      );
-    }
-    if (layer?.children.length) {
-      return (
-        <IconButton color="primary">
-          <GroupWorkOutlinedIcon />
-        </IconButton>
-      );
-    }
-    return <IconStack layerPath={layer.layerPath} />;
-  }
-
   function getContainerClass() {
     const result: string[] = ['layerItemContainer', layer.layerStatus ?? ''];
 
-    if (isLayerSelected) {
+    // if layer has selected child but its not itself selected
+    if (layerChildIsSelected && !layerIsSelected && !isGroupOpen) {
+      result.push('selectedLayer');
+    }
+
+    if (layerIsSelected) {
       result.push('selectedLayer');
     }
 
@@ -266,8 +245,8 @@ export function SingleLayer({ isDragging, depth, layer, setIsLayersListPanelVisi
   return (
     <Box className={getContainerClass()}>
       <ListItem key={layer.layerName} divider>
-        <ListItemButton selected={isLayerSelected}>
-          {renderLayerIcon()}
+        <ListItemButton selected={layerIsSelected || (layerChildIsSelected && !isGroupOpen)}>
+          <LayerIcon layer={layer} />
           <Tooltip title={layer.layerName} placement="top" enterDelay={1000}>
             <ListItemText
               primary={layer.layerName !== undefined ? layer.layerName : layer.layerId}

@@ -18,10 +18,15 @@ import {
   TableViewIcon,
   BrowserNotSupportedIcon,
   Divider,
+  ListItemText,
+  ListItemIcon,
+  ListItem,
+  List,
 } from '@/ui';
 import { useLayerHighlightedLayer, useLayerStoreActions } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { useUIStoreActions } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import { generateId } from '@/core/utils/utilities';
+import { LayerIcon } from '../layer-icon';
 
 interface LayerDetailsProps {
   layerDetails: TypeLegendLayer;
@@ -68,10 +73,15 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
     setLayerOpacity(layerDetails.layerPath, val / 100);
   };
 
-  const getItemsCount = () => {
+  const getSubTitle = () => {
+    if (layerDetails.children.length > 0) {
+      return t('legend.subLayersCount').replace('{count}', layerDetails.children.length.toString());
+    }
     const count = layerDetails.items.filter((d) => d.isVisible !== 'no').length;
     const totalCount = layerDetails.items.length;
     return t('legend.itemsCount').replace('{count}', count.toString()).replace('{totalCount}', totalCount.toString());
+
+    return null;
   };
 
   const allItemsChecked = () => {
@@ -144,12 +154,32 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
     );
   }
 
+  function renderLayers(startLayer: TypeLegendLayer) {
+    return (
+      <List>
+        {startLayer.children.map((layer) => (
+          <>
+            <ListItem sx={{ padding: '6px 0px', borderTop: '1px solid #ccc' }}>
+              <ListItemIcon>
+                <LayerIcon layer={layer} />
+              </ListItemIcon>
+              <ListItemText primary={layer.layerName} />
+            </ListItem>
+            {layer.children.length > 0 && <Box sx={{ paddingLeft: '30px', width: '100%' }}>{renderLayers(layer)}</Box>}
+          </>
+        ))}
+      </List>
+    );
+  }
+
   function renderLayerButtons() {
     return (
       <Box sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '15px' }}>
-        <IconButton id="table-details" tooltip="legend.tableDetails" sx={{ backgroundColor: '#F6F6F6' }} onClick={handleOpenTable}>
-          <TableViewIcon />
-        </IconButton>
+        {layerDetails.items.length > 0 && (
+          <IconButton id="table-details" tooltip="legend.tableDetails" sx={{ backgroundColor: '#F6F6F6' }} onClick={handleOpenTable}>
+            <TableViewIcon />
+          </IconButton>
+        )}
         <IconButton tooltip="legend.refreshLayer" sx={{ backgroundColor: '#F6F6F6' }} onClick={handleRefreshLayer}>
           <RestartAltIcon />
         </IconButton>
@@ -179,12 +209,20 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
       <Box sx={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between' }}>
         <Box sx={{ textAlign: 'left' }}>
           <Typography sx={sxClasses.categoryTitle}> {layerDetails.layerName} </Typography>
-          <Typography sx={{ fontSize: '0.8em' }}> {getItemsCount()} </Typography>
+          <Typography sx={{ fontSize: '0.8em' }}> {getSubTitle()} </Typography>
         </Box>
         {renderLayerButtons()}
       </Box>
       {renderOpacityControl()}
-      <Box sx={{ marginTop: '20px' }}>{renderItems()}</Box>
+      <Box sx={{ marginTop: '20px' }}>
+        {layerDetails.items?.length > 0 && renderItems()}
+        {layerDetails.children.length > 0 && (
+          <>
+            <Typography sx={{ fontWeight: 'bold', textAlign: 'left', margin: '10px 0px' }}>{t('layers.subLayersList')}</Typography>
+            {renderLayers(layerDetails)}
+          </>
+        )}
+      </Box>
       <Divider sx={{ marginTop: '50px', marginBottom: '10x' }} variant="middle" />
       {layerDetails.layerAttribution &&
         layerDetails.layerAttribution!.map((attribution) => {

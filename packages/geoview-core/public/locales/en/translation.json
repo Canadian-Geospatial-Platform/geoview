@@ -70,6 +70,7 @@
     "itemsCount": "{count} of {totalCount} items"
   },
   "layers": {
+    "subLayersList": "Sub-Layers List",
     "removingLayers": "Removing Layers",
     "reArrangeLayers": "Re-arrange Layers",
     "removeLayerDescription": "To remove a layer, click on the delete icon to the right of the layer. To revert to back to view functionality click on the delete button at the top.",

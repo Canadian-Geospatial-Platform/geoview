@@ -1,23 +1,10 @@
 import { useState } from 'react';
 import { useTheme } from '@mui/material';
 import { useTranslation } from 'react-i18next';
-import {
-  Box,
-  ListItem,
-  Tooltip,
-  ListItemText,
-  ListItemIcon,
-  IconButton,
-  Collapse,
-  List,
-  GroupWorkOutlinedIcon,
-  ErrorIcon,
-  BrowserNotSupportedIcon,
-  CircularProgressBase,
-} from '@/ui';
+import { Box, ListItem, Tooltip, ListItemText, ListItemIcon, Collapse, List, BrowserNotSupportedIcon } from '@/ui';
 import { TypeLegendLayer } from '@/core/components/layers/types';
 import { getSxClasses } from './legend-styles';
-import { IconStack } from '../icon-stack/icon-stack';
+import { LayerIcon } from '../layers/layer-icon';
 
 interface LegendLayerProps {
   layer: TypeLegendLayer;
@@ -107,35 +94,10 @@ export function LegendLayer(props: LegendLayerProps): JSX.Element {
     );
   }
 
-  function renderLayerIcon() {
-    if (layer.layerStatus === 'error') {
-      return (
-        <IconButton sx={{ color: 'red' }}>
-          <ErrorIcon />
-        </IconButton>
-      );
-    }
-    if (layer.layerStatus === 'loading') {
-      return (
-        <Box sx={{ padding: '5px', marginRight: '10px' }}>
-          <CircularProgressBase size={20} />
-        </Box>
-      );
-    }
-    if (layer?.children.length) {
-      return (
-        <IconButton color="primary">
-          <GroupWorkOutlinedIcon />
-        </IconButton>
-      );
-    }
-    return <IconStack layerPath={layer.layerPath} />;
-  }
-
   return (
     <Box sx={sxClasses.legendLayerListItem}>
       <ListItem key={layer.layerName} divider onClick={handleExpandGroupClick}>
-        {renderLayerIcon()}
+        <LayerIcon layer={layer} />
         <Tooltip title={layer.layerName} placement="top" enterDelay={1000}>
           <ListItemText primary={layer.layerName} className="layerTitle" secondary={getSecondaryText()} />
         </Tooltip>

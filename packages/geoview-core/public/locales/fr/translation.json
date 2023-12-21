@@ -70,6 +70,7 @@
     "itemsCount": "{count} sur {totalCount} éléments"
   },
   "layers": {
+    "subLayersList": "Liste des sous-couches",
     "removingLayers": "Suppression des couches",
     "reArrangeLayers": "Réorganiser les couches",
     "removeLayerDescription": "Pour supprimer un calque, cliquez sur l'icône de suppression à droite du calque. Pour revenir à la fonctionnalité d'affichage, cliquez sur le bouton Supprimer en haut.",
