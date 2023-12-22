@@ -26,17 +26,11 @@ export const getSxClasses = (theme: Theme) => ({
     marginBottom: '9px',
     boxShadow: '0px 12px 9px -13px #E0E0E0',
   },
-  itemText: {
-    '& .MuiListItemText-primary': {
-      font: theme.footerPanel.layerTitleFont,
-    },
-  },
   featureInfoListContainer: {
     paddingLeft: '25px',
     paddingRight: '25px',
     paddingBottom: '25px',
-    height: 'auto',
-    maxHeight: '80%',
+    height: '600px',
     overflowY: 'auto',
     overflowX: 'hidden',
   },

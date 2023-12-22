@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 
 import { useTheme, Theme } from '@mui/material/styles';
 
-import { List, ListItem, ListItemText, ZoomInSearchIcon, Tooltip, IconButton, Checkbox, Paper } from '@/ui';
+import { List, ZoomInSearchIcon, Tooltip, IconButton, Checkbox, Paper, Box, Grid, Typography } from '@/ui';
 import { TypeFieldEntry, TypeArrayOfFeatureInfoEntries, TypeGeometry } from '@/api/events/payloads';
 import { FeatureInfoTable } from './feature-info-table';
 import { getSxClasses } from './details-style';
@@ -79,38 +79,69 @@ export function FeatureInfo({ features, currentFeatureIndex }: TypeFeatureInfoPr
 
   return (
     <Paper sx={{ boxShadow: 'none' }}>
-      <List>
-        <ListItem
-          sx={{ marginBottom: '16px' }}
-          secondaryAction={
-            <>
-              <Tooltip title={t('details.select')} placement="top" enterDelay={1000}>
-                <>
-                  {t('details.keepFeatureSelected')}
-                  <Checkbox
-                    onChange={(e) => handleSelect(e)}
-                    checked={checked}
-                    sx={sxClasses.selectFeatureCheckbox}
-                    disabled={!feature?.geometry}
-                  />
-                </>
-              </Tooltip>
-              <IconButton color="primary" onClick={(e) => handleZoomIn(e)} disabled={!feature?.geometry}>
-                <Tooltip title={t('details.zoomTo')} placement="top" enterDelay={1000}>
-                  <ZoomInSearchIcon />
-                </Tooltip>
-              </IconButton>
-            </>
-          }
-        >
-          <img
-            src={featureIconSrc}
-            alt={nameFieldValue}
-            style={{ ...theme.iconImage, marginRight: '10px', width: '35px', height: '35px' }}
-          />
-          <ListItemText sx={sxClasses.itemText} primary={nameFieldValue} />
-        </ListItem>
-      </List>
+      <Box sx={{ padding: '20px', flexWrap: 'wrap' }}>
+        <Grid container justifyContent="space-between">
+          {/* Left side */}
+          <Grid
+            item
+            container
+            xs={12}
+            md={12}
+            lg={6}
+            spacing={2}
+            justifyContent="space-between"
+            sx={{ flexBasis: '100%', alignItems: 'center' }}
+          >
+            <Grid item xs={1} md={1} sx={{ paddingRight: '10px', height: '35px' }}>
+              {/* Image element */}
+              <Box sx={{ paddingRight: '10px', width: '35px' }}>
+                <img
+                  src={featureIconSrc}
+                  alt={nameFieldValue}
+                  style={{ ...theme.iconImage, marginRight: '10px', width: '35px', height: '35px' }}
+                />
+              </Box>
+            </Grid>
+            <Grid item xs={11}>
+              {/* Feature value name */}
+              <Box sx={{ padding: '5px', flexBasis: '100%' }}>{nameFieldValue}</Box>
+            </Grid>
+          </Grid>
+
+          {/* Right side */}
+          <Grid item container xs={12} md={12} lg={6} spacing={2} sx={{ [theme.breakpoints.down('sm')]: { display: 'none' } }}>
+            <Grid item xs={10}>
+              {/* Text keep feature highlighted */}
+              <Typography
+                component="div"
+                sx={{
+                  marginTop: '3px',
+                  [theme.breakpoints.up('md')]: { textAlign: 'right' },
+                  [theme.breakpoints.down('md')]: { textAlign: 'left' },
+                }}
+              >
+                {t('details.keepFeatureSelected')}
+              </Typography>
+            </Grid>
+            <Grid item xs={1}>
+              {/* Checkbox  */}
+              <div style={{ marginTop: '-6px' }}>
+                <Checkbox onChange={(e) => handleSelect(e)} checked={checked} sx={sxClasses.selectFeatureCheckbox} />
+              </div>
+            </Grid>
+            <Grid item xs={1}>
+              {/* Zoom button */}
+              <div>
+                <IconButton sx={{ marginTop: '-3px' }} color="primary" onClick={(e) => handleZoomIn(e)}>
+                  <Tooltip title={t('details.zoomTo')} placement="top" enterDelay={1000}>
+                    <ZoomInSearchIcon />
+                  </Tooltip>
+                </IconButton>
+              </div>
+            </Grid>
+          </Grid>
+        </Grid>
+      </Box>
 
       <List sx={sxClasses.featureInfoListContainer}>
         <FeatureInfoTable featureInfoList={featureInfoList} />

@@ -2,14 +2,11 @@ import { Theme } from '@mui/material';
 
 export const getSxClasses = (theme: Theme) => ({
   list: {
+    height: '740px',
+    overflowY: 'auto',
     color: 'text.primary',
     width: '100%',
-    [theme.breakpoints.up('md')]: {
-      paddingRight: '1rem',
-    },
-    [theme.breakpoints.up('xl')]: {
-      paddingRight: '2rem',
-    },
+    paddingRight: '14px',
     '& .MuiListItemText-primary': {
       font: theme.footerPanel.layerTitleFont,
     },
