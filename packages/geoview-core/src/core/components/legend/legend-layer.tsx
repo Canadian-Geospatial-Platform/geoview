@@ -70,7 +70,7 @@ export function LegendLayer(props: LegendLayerProps): JSX.Element {
         {layer.items
           .filter((d) => d.isVisible !== 'no')
           .map((item) => (
-            <ListItem key={item.name} className={!item.isVisible ? 'unchecked' : ''}>
+            <ListItem key={item.icon} className={!item.isVisible ? 'unchecked' : ''}>
               <ListItemIcon>{item.icon ? <img alt={item.name} src={item.icon} /> : <BrowserNotSupportedIcon />}</ListItemIcon>
               <Tooltip title={item.name} placement="top" enterDelay={1000}>
                 <ListItemText primary={item.name} />
