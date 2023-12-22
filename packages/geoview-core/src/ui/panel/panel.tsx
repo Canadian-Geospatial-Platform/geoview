@@ -239,13 +239,10 @@ export function Panel(props: TypePanelAppProps): JSX.Element {
   return (
     <Box sx={panelContainerStyles}>
       <FocusTrap
-        active={panelStatus}
+        active={activeTrapGeoView && panelStatus}
         focusTrapOptions={{
           escapeDeactivates: false,
           clickOutsideDeactivates: true,
-          ...(!activeTrapGeoView && {
-            initialFocus: false,
-          }),
         }}
       >
         <Card
