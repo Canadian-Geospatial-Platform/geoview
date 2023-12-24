@@ -1,7 +1,7 @@
 /* eslint-disable react/require-default-props */
 /* eslint-disable react/destructuring-assignment */
 /* eslint-disable react/no-array-index-key */
-import { SyntheticEvent, useEffect, useState, ReactNode } from 'react';
+import { SyntheticEvent, useEffect, useState, ReactNode, useRef, RefObject } from 'react';
 
 import { useTranslation } from 'react-i18next';
 
@@ -52,6 +52,7 @@ export function Tabs(props: TypeTabsProps): JSX.Element {
 
   // internal state
   const [value, setValue] = useState(0);
+  const footerPanelRef = useRef() as RefObject<HTMLDivElement>;
 
   // get store values and actions
   const activeTrapGeoView = useUIActiveTrapGeoView();
@@ -86,53 +87,55 @@ export function Tabs(props: TypeTabsProps): JSX.Element {
 
   return (
     <Grid container spacing={2} sx={{ width: '100%', height: '100%' }}>
-      <Grid item xs={7} sm={10}>
-        <MaterialTabs
-          {...props.tabsProps}
-          variant="scrollable"
-          scrollButtons
-          allowScrollButtonsMobile
-          value={value}
-          onChange={handleChange}
-          aria-label="basic tabs"
-          sx={{
-            '& .MuiTabs-indicator': {
-              backgroundColor: (theme) => theme.palette.secondary.main,
-            },
-          }}
-        >
-          {tabs.map((tab, index) => {
-            // eslint-disable-next-line prettier/prettier
-            return (
-              <MaterialTab
-                label={t(tab.label)}
-                key={index}
-                icon={tab.icon}
-                iconPosition="start"
-                {...props.tabProps}
-                id={`tab-${index}`}
-                onClick={() => handleClick(index)}
-                sx={{
-                  fontSize: 16,
-                  fontWeight: 'bold',
-                  minWidth: 'min(4vw, 24px)',
-                  padding: '16px 2%',
-                  textTransform: 'capitalize',
-                  '&.Mui-selected': {
-                    color: 'secondary.main',
-                  },
-                  '.MuiTab-iconWrapper': {
-                    marginRight: '7px',
-                    maxWidth: '18px',
-                  },
-                }}
-              />
-            );
-          })}
-        </MaterialTabs>
-      </Grid>
-      <Grid item xs={5} sm={2} sx={{ textAlign: 'right', marginTop: '15px' }}>
-        {rightButtons as ReactNode}
+      <Grid container component="div" sx={{ backgroundColor: 'white' }} id="resizing-event" ref={footerPanelRef}>
+        <Grid item xs={7} sm={10}>
+          <MaterialTabs
+            {...props.tabsProps}
+            variant="scrollable"
+            scrollButtons
+            allowScrollButtonsMobile
+            value={value}
+            onChange={handleChange}
+            aria-label="basic tabs"
+            sx={{
+              '& .MuiTabs-indicator': {
+                backgroundColor: (theme) => theme.palette.secondary.main,
+              },
+            }}
+          >
+            {tabs.map((tab, index) => {
+              // eslint-disable-next-line prettier/prettier
+              return (
+                <MaterialTab
+                  label={t(tab.label)}
+                  key={index}
+                  icon={tab.icon}
+                  iconPosition="start"
+                  {...props.tabProps}
+                  id={`tab-${index}`}
+                  onClick={() => handleClick(index)}
+                  sx={{
+                    fontSize: 16,
+                    fontWeight: 'bold',
+                    minWidth: 'min(4vw, 24px)',
+                    padding: '16px 2%',
+                    textTransform: 'capitalize',
+                    '&.Mui-selected': {
+                      color: 'secondary.main',
+                    },
+                    '.MuiTab-iconWrapper': {
+                      marginRight: '7px',
+                      maxWidth: '18px',
+                    },
+                  }}
+                />
+              );
+            })}
+          </MaterialTabs>
+        </Grid>
+        <Grid item xs={5} sm={2} sx={{ textAlign: 'right', marginTop: '15px' }}>
+          {rightButtons as ReactNode}
+        </Grid>
       </Grid>
       <Grid item xs={12} sx={{ height: '100%', borderTop: 1, borderColor: 'divider', visibility: TabContentVisibilty }}>
         {tabs.map((tab, index) => {
