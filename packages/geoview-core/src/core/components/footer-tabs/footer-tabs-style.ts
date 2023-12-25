@@ -12,6 +12,5 @@ export const getSxClasses = (theme: Theme) => ({
   },
   tabContainerFullScreenMode: {
     zIndex: '9999999',
-    cursor: 'ns-resize',
   },
 });

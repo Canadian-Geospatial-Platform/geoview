@@ -2,7 +2,6 @@
 /* eslint-disable react/destructuring-assignment */
 /* eslint-disable react/no-array-index-key */
 import { SyntheticEvent, useEffect, useState, ReactNode, useRef, RefObject, Dispatch, SetStateAction, MouseEvent } from 'react';
-
 import { useTranslation } from 'react-i18next';
 
 import { Grid, Tab as MaterialTab, Tabs as MaterialTabs, TabsProps, TabProps, BoxProps } from '@mui/material';
@@ -10,6 +9,7 @@ import { Grid, Tab as MaterialTab, Tabs as MaterialTabs, TabsProps, TabProps, Bo
 import { HtmlToReact } from '@/core/containers/html-to-react';
 import { TabPanel } from './tab-panel';
 import { useUIActiveTrapGeoView, useUIStoreActions } from '@/core/stores/store-interface-and-intial-values/ui-state';
+import { useAppFullscreenActive } from '@/core/stores/store-interface-and-intial-values/app-state';
 
 type TypeChildren = React.ElementType;
 /**
@@ -67,6 +67,7 @@ export function Tabs(props: TypeTabsProps): JSX.Element {
 
   // get store values and actions
   const activeTrapGeoView = useUIActiveTrapGeoView();
+  const isMapFullscreen = useAppFullscreenActive();
   const { closeModal, openModal } = useUIStoreActions();
 
   /**
@@ -110,7 +111,7 @@ export function Tabs(props: TypeTabsProps): JSX.Element {
       <Grid
         container
         component="div"
-        sx={{ backgroundColor: 'white' }}
+        sx={{ backgroundColor: 'white', ...(isMapFullscreen && { cursor: 'ns-resize' }) }}
         id="resizing-event"
         ref={footerPanelRef}
         onMouseMove={onMouseMove}
@@ -165,7 +166,18 @@ export function Tabs(props: TypeTabsProps): JSX.Element {
           {rightButtons as ReactNode}
         </Grid>
       </Grid>
-      <Grid item xs={12} sx={{ height: '100%', borderTop: 1, borderColor: 'divider', visibility: TabContentVisibilty }}>
+      <Grid
+        item
+        xs={12}
+        sx={{
+          height: '100%',
+          paddingTop: '0 !important',
+          borderTop: 1,
+          borderColor: 'divider',
+          visibility: TabContentVisibilty,
+          ...(isMapFullscreen && { height: '600px', paddingBottom: '40px' }),
+        }}
+      >
         {tabs.map((tab, index) => {
           const TabContent = tab.content as React.ElementType;
           return (

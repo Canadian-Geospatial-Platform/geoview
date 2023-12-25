@@ -30,6 +30,7 @@ export function FooterTabs(): JSX.Element | null {
 
   const tabsContainerRef = useRef<HTMLDivElement>();
   const yPositionRef = useRef<number>(0);
+  const footerPanelFullscreenBounds = useRef({ max: -60, min: 0 });
 
   // get map div and follow state of original map height
   const mapDiv = document.getElementById(mapId)!;
@@ -236,15 +237,21 @@ export function FooterTabs(): JSX.Element | null {
    * @param {number} yPosition y axis movementY position of mouse.
    */
   const handleMouseMove = (yPosition: number) => {
-    if (pressed && tabsContainerRef.current && isMapFullscreen && yPositionRef.current >= -50 && yPositionRef.current <= 0) {
+    if (
+      pressed &&
+      tabsContainerRef.current &&
+      isMapFullscreen &&
+      yPositionRef.current >= footerPanelFullscreenBounds.current.max &&
+      yPositionRef.current <= footerPanelFullscreenBounds.current.min
+    ) {
       yPositionRef.current += yPosition;
       // set max y axis to bound the panel.
-      if (yPositionRef.current < -50) {
-        yPositionRef.current = -50;
+      if (yPositionRef.current < footerPanelFullscreenBounds.current.max) {
+        yPositionRef.current = footerPanelFullscreenBounds.current.max;
       }
       // set min y axis to bound the panel.
-      if (yPositionRef.current > 0) {
-        yPositionRef.current = 0;
+      if (yPositionRef.current > footerPanelFullscreenBounds.current.min) {
+        yPositionRef.current = footerPanelFullscreenBounds.current.min;
       }
       tabsContainerRef.current.style.transform = `translateY(${yPositionRef.current}%)`;
     }
@@ -272,7 +279,15 @@ export function FooterTabs(): JSX.Element | null {
         rightButtons={
           <>
             {!isCollapsed && (
-              <IconButton onClick={() => setIsFullscreen(!isFullscreen)}>
+              <IconButton
+                onClick={() => {
+                  yPositionRef.current = 0;
+                  if (tabsContainerRef.current) {
+                    tabsContainerRef.current.style.transform = 'translateY(0%)';
+                  }
+                  setIsFullscreen(!isFullscreen);
+                }}
+              >
                 {isFullscreen ? <FullscreenExitIcon /> : <FullscreenIcon />}
               </IconButton>
             )}
