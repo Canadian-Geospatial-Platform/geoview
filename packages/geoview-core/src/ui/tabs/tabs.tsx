@@ -1,7 +1,7 @@
 /* eslint-disable react/require-default-props */
 /* eslint-disable react/destructuring-assignment */
 /* eslint-disable react/no-array-index-key */
-import { SyntheticEvent, useEffect, useState, ReactNode, useRef, RefObject } from 'react';
+import { SyntheticEvent, useEffect, useState, ReactNode, useRef, RefObject, Dispatch, SetStateAction, MouseEvent } from 'react';
 
 import { useTranslation } from 'react-i18next';
 
@@ -37,6 +37,8 @@ export interface TypeTabsProps {
   // eslint-disable-next-line @typescript-eslint/ban-types
   handleCollapse?: Function | undefined;
   TabContentVisibilty?: string | undefined;
+  setPressed: Dispatch<SetStateAction<boolean>>;
+  handleMouseMove: (yPosition: number) => void;
 }
 
 /**
@@ -46,7 +48,16 @@ export interface TypeTabsProps {
  * @returns {JSX.Element} returns the tabs ui
  */
 export function Tabs(props: TypeTabsProps): JSX.Element {
-  const { tabs, rightButtons, selectedTab, isCollapsed, handleCollapse, TabContentVisibilty = 'inherit' } = props;
+  const {
+    tabs,
+    rightButtons,
+    selectedTab,
+    isCollapsed,
+    handleCollapse,
+    TabContentVisibilty = 'inherit',
+    handleMouseMove,
+    setPressed,
+  } = props;
 
   const { t } = useTranslation<string>();
 
@@ -85,9 +96,26 @@ export function Tabs(props: TypeTabsProps): JSX.Element {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedTab]);
 
+  /**
+   * Callback handler for mouse move
+   * @param {MouseEvent} event the event emitted by mouse when it move's on screen.
+   */
+  const onMouseMove = (event: MouseEvent) => {
+    event?.stopPropagation();
+    handleMouseMove(event.movementY);
+  };
+
   return (
-    <Grid container spacing={2} sx={{ width: '100%', height: '100%' }}>
-      <Grid container component="div" sx={{ backgroundColor: 'white' }} id="resizing-event" ref={footerPanelRef}>
+    <Grid container spacing={2} onMouseUp={() => setPressed(false)}>
+      <Grid
+        container
+        component="div"
+        sx={{ backgroundColor: 'white' }}
+        id="resizing-event"
+        ref={footerPanelRef}
+        onMouseMove={onMouseMove}
+        onMouseDown={() => setPressed(true)}
+      >
         <Grid item xs={7} sm={10}>
           <MaterialTabs
             {...props.tabsProps}

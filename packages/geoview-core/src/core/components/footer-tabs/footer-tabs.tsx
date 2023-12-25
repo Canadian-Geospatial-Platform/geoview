@@ -3,7 +3,7 @@ import { MutableRefObject, useCallback, useEffect, useRef, useState } from 'reac
 import { useTheme } from '@mui/material/styles';
 
 import { Box, FullscreenIcon, FullscreenExitIcon, IconButton, Tabs, TypeTabs, MoveDownRoundedIcon, MoveUpRoundedIcon } from '@/ui';
-import { api, useGeoViewMapId } from '@/app';
+import { api, useAppFullscreenActive, useGeoViewMapId } from '@/app';
 import { EVENT_NAMES } from '@/api/events/event-types';
 import { FooterTabPayload, PayloadBaseClass, payloadIsAFooterTab } from '@/api/events/payloads';
 import { getSxClasses } from './footer-tabs-style';
@@ -26,12 +26,16 @@ export function FooterTabs(): JSX.Element | null {
 
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [isFocusToMap, setIsFocusToMap] = useState<boolean>(true);
+  const [pressed, setPressed] = useState(false);
 
   const tabsContainerRef = useRef<HTMLDivElement>();
+  const yPositionRef = useRef<number>(0);
 
   // get map div and follow state of original map height
   const mapDiv = document.getElementById(mapId)!;
   const [origHeight, setOrigHeight] = useState<number>(0);
+
+  const isMapFullscreen = useAppFullscreenActive();
 
   /**
    * Add a tab
@@ -199,9 +203,59 @@ export function FooterTabs(): JSX.Element | null {
       }
     }
   };
+  /**
+   * Callback handler for reseting the mouse button click.
+   */
+  const handlerMouseUp = () => {
+    setPressed(false);
+  };
+
+  useEffect(() => {
+    // Event Listener on gshell, so that mouseup can be listener when on fullscreen mode.
+    let mapElem: HTMLElement | null = null;
+    if (isMapFullscreen) {
+      mapElem = document.getElementById(`shell-${mapId}`);
+      mapElem?.addEventListener('mouseup', handlerMouseUp);
+    }
+
+    return () => {
+      mapElem?.removeEventListener('mouseup', handlerMouseUp);
+    };
+  }, [isMapFullscreen, mapId]);
+
+  useEffect(() => {
+    // reset the footer panel position after fullscreen is set to false
+    if (!isMapFullscreen && tabsContainerRef.current) {
+      yPositionRef.current = 0;
+      tabsContainerRef.current.style.transform = 'translateY(0%)';
+    }
+  }, [isMapFullscreen]);
+
+  /**
+   * Calculate footer panel position based on yPosition sent by mosue event.
+   * @param {number} yPosition y axis movementY position of mouse.
+   */
+  const handleMouseMove = (yPosition: number) => {
+    if (pressed && tabsContainerRef.current && isMapFullscreen && yPositionRef.current >= -50 && yPositionRef.current <= 0) {
+      yPositionRef.current += yPosition;
+      // set max y axis to bound the panel.
+      if (yPositionRef.current < -50) {
+        yPositionRef.current = -50;
+      }
+      // set min y axis to bound the panel.
+      if (yPositionRef.current > 0) {
+        yPositionRef.current = 0;
+      }
+      tabsContainerRef.current.style.transform = `translateY(${yPositionRef.current}%)`;
+    }
+  };
 
   return api.maps[mapId].footerTabs.tabs.length > 0 ? (
-    <Box ref={tabsContainerRef as MutableRefObject<HTMLDivElement>} sx={sxClasses.tabsContainer} className="tabsContainer">
+    <Box
+      ref={tabsContainerRef as MutableRefObject<HTMLDivElement>}
+      sx={{ ...sxClasses.tabsContainer, ...(isMapFullscreen && { ...sxClasses.tabContainerFullScreenMode }) }}
+      className="tabsContainer"
+    >
       <Tabs
         isCollapsed={isCollapsed}
         handleCollapse={handleCollapse}
@@ -212,6 +266,8 @@ export function FooterTabs(): JSX.Element | null {
             ...tab,
           };
         })}
+        handleMouseMove={handleMouseMove}
+        setPressed={setPressed}
         TabContentVisibilty={!isCollapsed ? 'visible' : 'hidden'}
         rightButtons={
           <>
