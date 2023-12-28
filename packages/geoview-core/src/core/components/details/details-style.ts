@@ -62,4 +62,9 @@ export const getSxClasses = (theme: Theme) => ({
     fontSize: '16px',
     lineHeight: '19px',
   },
+  flexBoxAlignCenter: {
+    display: 'flex',
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
 });
