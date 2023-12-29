@@ -364,3 +364,8 @@ export const useIconLayerSet = (layerPath: string): string[] => {
   }
   return [];
 };
+
+export const useInheritedOpacity = (layerPath: string): number | undefined => {
+  
+  return 0.50;
+}

@@ -23,10 +23,11 @@ import {
   ListItem,
   List,
 } from '@/ui';
-import { useLayerHighlightedLayer, useLayerStoreActions } from '@/core/stores/store-interface-and-intial-values/layer-state';
+import { useInheritedOpacity, useLayerHighlightedLayer, useLayerStoreActions } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { useUIStoreActions } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import { generateId } from '@/core/utils/utilities';
 import { LayerIcon } from '../layer-icon';
+import { Mark } from '@mui/base';
 
 interface LayerDetailsProps {
   layerDetails: TypeLegendLayer;
@@ -44,6 +45,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
   const highlightedLayer = useLayerHighlightedLayer();
   const { setAllItemsVisibility, toggleItemVisibility, setLayerOpacity, setHighlightLayer, zoomToLayerExtent, getLayerBounds } =
     useLayerStoreActions();
+  const inheritedOpacity = useInheritedOpacity(layerDetails.layerPath);
   const { openModal } = useUIStoreActions();
 
   const handleZoomTo = () => {
@@ -68,9 +70,22 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
     setHighlightLayer(layerDetails.layerPath);
   };
 
+
+  function enforceInheritedOpacity() {
+    if(inheritedOpacity && layerDetails.opacity && inheritedOpacity !== 1 && (layerDetails.opacity > inheritedOpacity)) {
+      console.log('enforce inheritedOpacity ', layerDetails.opacity, inheritedOpacity);
+      setLayerOpacity(layerDetails.layerPath, inheritedOpacity);
+      return;
+    }
+  }
+
   const handleSetOpacity = (opacityValue: number | number[]) => {
     const val = Array.isArray(opacityValue) ? opacityValue[0] : opacityValue;
+    console.log('inheritedOpacity--- ', inheritedOpacity, val);
+
     setLayerOpacity(layerDetails.layerPath, val / 100);
+
+    enforceInheritedOpacity();
   };
 
   const getSubTitle = () => {
@@ -89,11 +104,19 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
   };
 
   function renderOpacityControl() {
+    let marks: Mark[] = [];
+    if(inheritedOpacity && inheritedOpacity !== 1) {
+      marks = [{ value: (inheritedOpacity * 100), label: `Max from parent` }];
+    }
+
     return (
       <div style={{ padding: '16px 17px 16px 23px' }}>
         <Box sx={sxClasses.opacityMenu}>
           <Typography sx={{ fontWeight: 'bold' }}>{t('legend.opacity')}</Typography>
-          <SliderBase min={0} max={100} value={(layerDetails.opacity ? layerDetails.opacity : 1) * 100} customOnChange={handleSetOpacity} />
+          <SliderBase min={0} max={100} value={(layerDetails.opacity ? layerDetails.opacity : 1) * 100} 
+            customOnChange={handleSetOpacity}
+            marks={marks}
+          />
         </Box>
       </div>
     );

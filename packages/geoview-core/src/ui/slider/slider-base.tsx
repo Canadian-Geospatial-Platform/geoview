@@ -25,7 +25,7 @@ interface TypeSliderProps extends SliderProps {
  * @returns {JSX.Element} the created Slider element
  */
 export function SliderBase(props: TypeSliderProps): JSX.Element {
-  const { min, max, step, value: parentValue, orientation, customOnChange, onValueDisplay, onValueDisplayAriaLabel } = props;
+  const { min, max, step, value: parentValue, orientation, customOnChange, onValueDisplay, onValueDisplayAriaLabel, marks } = props;
 
   // internal state
   const [sliderValue, setValue] = useState<number[] | number>(parentValue);
@@ -57,6 +57,7 @@ export function SliderBase(props: TypeSliderProps): JSX.Element {
       value={sliderValue}
       min={min}
       max={max}
+      marks={marks}
       orientation={orientation}
       step={step}
       onChange={handleChange}
