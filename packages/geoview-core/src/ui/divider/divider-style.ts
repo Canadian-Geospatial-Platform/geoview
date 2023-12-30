@@ -5,14 +5,14 @@ export const getSxClasses = (theme: Theme) => ({
     alignSelf: 'center',
     height: 40,
     width: '1px !important',
-    backgroundColor: theme.palette.primary.contrastText,
+    backgroundColor: theme.palette?.primary?.contrastText,
   },
   horizontal: {
     height: 1,
-    backgroundColor: theme.palette.primary.contrastText,
+    backgroundColor: theme.palette?.primary?.contrastText,
   },
   grow: {
     flexGrow: 1,
-    backgroundColor: theme.palette.primary.main,
+    backgroundColor: theme.palette?.primary?.main,
   },
 });

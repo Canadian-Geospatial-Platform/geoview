@@ -97,7 +97,7 @@ export function Tabs(props: TypeTabsProps): JSX.Element {
           aria-label="basic tabs"
           sx={{
             '& .MuiTabs-indicator': {
-              backgroundColor: (theme) => theme.palette.secondary.main,
+              backgroundColor: (theme) => theme.palette?.secondary?.main,
             },
           }}
         >
