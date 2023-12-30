@@ -13,10 +13,10 @@ export const getSxClasses = (theme: Theme) => ({
     zIndex: 10000,
     backgroundColor: '#000000',
     textAlign: 'center',
-    transition: theme.transitions.create(['visibility', 'opacity'], {
-      delay: theme.transitions.duration.shortest,
-      easing: theme.transitions.easing.easeOut,
-      duration: theme.transitions.duration.splash,
+    transition: theme.transitions?.create(['visibility', 'opacity'], {
+      delay: theme.transitions?.duration?.shortest,
+      easing: theme.transitions?.easing?.easeOut,
+      duration: theme.transitions?.duration?.splash,
     }),
   },
   progress: {

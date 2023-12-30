@@ -11,7 +11,7 @@ export const getSxClasses = (theme: Theme) => ({
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
-    color: theme.palette.primary.dark,
+    color: theme.palette?.primary?.dark,
   },
   text: {
     width: '100%',
@@ -26,7 +26,7 @@ export const getSxClasses = (theme: Theme) => ({
   },
   buttonClass: {
     display: 'flex',
-    fontSize: theme.typography.fontSize,
+    fontSize: theme.typography?.fontSize,
     paddingLeft: '16px',
     paddingRight: '16px',
     justifyContent: 'center',

@@ -35,7 +35,7 @@ export function Button(props: TypeButtonProps): JSX.Element {
   const sxClasses = getSxClasses(theme);
 
   const sxProps = {
-    ...(theme.palette.mode === 'light' && {
+    ...(theme.palette?.mode === 'light' && {
       backgroundColor: 'primary.light',
       color: 'primary.dark',
       '&:hover': { backgroundColor: 'primary.main', color: 'white' },

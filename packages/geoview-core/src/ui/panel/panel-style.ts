@@ -2,6 +2,7 @@ import { Theme } from '@mui/material/styles';
 
 export const getSxClasses = (theme: Theme) => ({
   panelContainer: {
+    // TODO because we are using ! in line below, we cannot make panel to be optional. Same scenarios for other lines.
     backgroundColor: theme.panel.background!,
     height: 'calc(100% - 35px)',
     borderRadius: 0,

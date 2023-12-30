@@ -9,18 +9,18 @@ export const getSxClasses = (theme: Theme) => ({
   },
   drawerOpen: {
     width: drawerWidth,
-    transition: theme.transitions.create('width', {
-      easing: theme.transitions.easing.sharp,
-      duration: theme.transitions.duration.enteringScreen,
+    transition: theme.transitions?.create('width', {
+      easing: theme.transitions?.easing?.sharp,
+      duration: theme.transitions?.duration?.enteringScreen,
     }),
     '& $toolbar': {
       justifyContent: 'flex-end',
     },
   },
   drawerClose: {
-    transition: theme.transitions.create('width', {
-      easing: theme.transitions.easing.sharp,
-      duration: theme.transitions.duration.leavingScreen,
+    transition: theme.transitions?.create('width', {
+      easing: theme.transitions?.easing?.sharp,
+      duration: theme.transitions?.duration?.leavingScreen,
     }),
     overflowX: 'hidden',
     width: '61px',
