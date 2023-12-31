@@ -6,7 +6,7 @@ export const getSxClasses = (theme: Theme) => ({
     alignItems: 'center',
     gap: '15px',
     padding: '8px 20px 7px 15px',
-    backgroundColor: '#F6F6F6',
+    backgroundColor: theme.palette.grey[400],
     '& .MuiSlider-mark': {
       width: '10px',
       height: '10px',

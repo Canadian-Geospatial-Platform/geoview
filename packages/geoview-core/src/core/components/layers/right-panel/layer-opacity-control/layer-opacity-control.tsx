@@ -1,6 +1,5 @@
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '@mui/material/styles';
-import _ from 'lodash';
 import { Mark } from '@mui/base';
 import { Slider as MaterialSlider } from '@mui/material';
 import { getSxClasses } from './layer-opacity-control-styles';
