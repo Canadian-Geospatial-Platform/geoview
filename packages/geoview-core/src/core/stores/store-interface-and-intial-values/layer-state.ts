@@ -114,6 +114,7 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
 
           if (layer.children.length) {
             setPropInChildLayers(layer.children, 'opacity', opacity);
+            setPropInChildLayers(layer.children, 'opacityFromParent', opacity);
           }
         }
 
@@ -364,8 +365,3 @@ export const useIconLayerSet = (layerPath: string): string[] => {
   }
   return [];
 };
-
-export const useInheritedOpacity = (layerPath: string): number | undefined => {
-  
-  return 0.50;
-}

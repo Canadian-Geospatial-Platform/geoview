@@ -23,18 +23,18 @@ export const getSxClasses = (theme: Theme) => ({
     gap: '15px',
     padding: '8px 20px 7px 15px',
     backgroundColor: '#F6F6F6',
-    '& .MuiSlider-mark' : {
-      width: "10px",
-      height: "10px",
+    '& .MuiSlider-mark': {
+      width: '10px',
+      height: '10px',
       opacity: 1,
-      backgroundColor: "#ccc",
-      border: "1px solid gray",
-      borderRadius: "50%"
+      backgroundColor: '#ccc',
+      border: '1px solid gray',
+      borderRadius: '50%',
     },
     '& .MuiSlider-markLabel': {
-      fontSize: "0.8em",
-      color: "gray"
-    }
+      fontSize: '0.8em',
+      color: 'gray',
+    },
   },
 
   itemsGrid: {
