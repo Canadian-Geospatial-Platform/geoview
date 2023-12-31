@@ -108,7 +108,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
     ) {
       return null;
     }
-    if (item.isVisible === 'always') {
+    if (item.isVisible === 'always' || layerDetails.isVisible === 'always') {
       return (
         <IconButton disabled>
           {' '}
@@ -124,15 +124,30 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
     );
   }
 
+  function renderHeaderCheckbox() {
+    if (layerDetails.isVisible === 'always') {
+      return (
+        <IconButton disabled>
+          {' '}
+          <CheckBoxIcon color="disabled" />{' '}
+        </IconButton>
+      );
+    }
+
+    return (
+      <IconButton color="primary" onClick={() => setAllItemsVisibility(layerDetails.layerPath, !allItemsChecked() ? 'yes' : 'no')}>
+        {allItemsChecked() ? <CheckBoxIcon /> : <CheckBoxOutineBlankIcon />}
+      </IconButton>
+    );
+  }
+
   function renderItems() {
     return (
       <Grid container direction="column" spacing={0} sx={sxClasses.itemsGrid} justifyContent="left" justifyItems="stretch">
         {layerDetails.items.length > 1 && (
           <Grid container direction="row" justifyContent="center" alignItems="stretch" justifyItems="stretch">
             <Grid item xs="auto">
-              <IconButton color="primary" onClick={() => setAllItemsVisibility(layerDetails.layerPath, !allItemsChecked() ? 'yes' : 'no')}>
-                {allItemsChecked() ? <CheckBoxIcon /> : <CheckBoxOutineBlankIcon />}
-              </IconButton>
+              {renderHeaderCheckbox()}
             </Grid>
             <Grid item xs="auto">
               <span>{t('general.name')}</span>
