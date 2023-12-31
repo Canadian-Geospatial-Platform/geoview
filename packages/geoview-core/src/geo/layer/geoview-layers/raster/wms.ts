@@ -1114,7 +1114,7 @@ export class WMS extends AbstractGeoViewRaster {
     let bounds = typeof parameter1 !== 'string' ? parameter1 : parameter2;
     const layerConfig = this.getLayerConfig(layerPath);
     const projection =
-      (layerConfig?.olLayer as ImageLayer<Static>).getSource()?.getProjection()?.getCode().replace('EPSG:', '') ||
+      (layerConfig?.olLayer as ImageLayer<Static>)?.getSource()?.getProjection()?.getCode().replace('EPSG:', '') ||
       MapEventProcessor.getMapState(this.mapId).currentProjection;
     let layerBounds = layerConfig?.initialSettings?.bounds || [];
     layerBounds = api.projection.transformExtent(layerBounds, 'EPSG:4326', `EPSG:${projection}`);

@@ -127,7 +127,7 @@ export function SingleLayer({ isDragging, depth, layer, setIsLayersListPanelVisi
     setSelectedLayerPath(layer.layerPath);
     if (setIsLayersListPanelVisible) {
       if (layer.children.length > 0) {
-        setGroupOpen(false);
+        setGroupOpen(true);
       }
       setIsLayersListPanelVisible(true);
     }
