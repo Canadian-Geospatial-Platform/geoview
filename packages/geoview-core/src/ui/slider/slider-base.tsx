@@ -13,7 +13,6 @@ interface TypeSliderProps extends SliderProps {
   value: number | number[];
 
   // custom onChange callback
-  customOnChange?: (value: number[] | number) => void;
   onValueDisplay?: (value: number, index: number) => string;
   onValueDisplayAriaLabel?: (value: number, index: number) => string;
 }
@@ -31,7 +30,7 @@ export function SliderBase(props: TypeSliderProps): JSX.Element {
     step,
     value: parentValue,
     orientation,
-    customOnChange,
+    onChange,
     onValueDisplay,
     onValueDisplayAriaLabel,
     marks,
@@ -41,23 +40,6 @@ export function SliderBase(props: TypeSliderProps): JSX.Element {
 
   // internal state
   const [sliderValue, setValue] = useState<number[] | number>(parentValue);
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [activeThumb, setActiveThumb] = useState<number>(0);
-
-  // handle constant change on the slider to set active thumb and instant values
-  const handleChange = (event: React.SyntheticEvent | Event, newValue: number | number[], newActiveThumb: number) => {
-    setValue(newValue);
-    setActiveThumb(newActiveThumb);
-  };
-
-  // handle the commit change event when mouseup is fired
-  const handleChangeCommitted = (event: React.SyntheticEvent | Event, newValue: number | number[]) => {
-    setValue(newValue);
-
-    // Callback
-    // TODO: Refactor - change the name of this callback to 'onCustomChange' to follow standards
-    customOnChange?.(newValue);
-  };
 
   // Effect used to listen on the value state coming from the parent element.
   useEffect(() => {
@@ -72,8 +54,7 @@ export function SliderBase(props: TypeSliderProps): JSX.Element {
       marks={marks}
       orientation={orientation}
       step={step}
-      onChange={handleChange}
-      onChangeCommitted={handleChangeCommitted}
+      onChange={onChange}
       valueLabelDisplay="auto"
       valueLabelFormat={onValueDisplay}
       getAriaValueText={onValueDisplayAriaLabel}

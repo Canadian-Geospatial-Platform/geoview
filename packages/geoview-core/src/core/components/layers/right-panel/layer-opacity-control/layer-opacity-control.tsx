@@ -1,9 +1,8 @@
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '@mui/material/styles';
 import { Mark } from '@mui/base';
-import { Slider as MaterialSlider } from '@mui/material';
 import { getSxClasses } from './layer-opacity-control-styles';
-import { Box, Typography } from '@/ui';
+import { Box, SliderBase, Typography } from '@/ui';
 import { TypeLegendLayer } from '../../types';
 import { useLayerStoreActions } from '@/core/stores/store-interface-and-intial-values/layer-state';
 
@@ -41,7 +40,7 @@ export function LayerOpacityControl(props: LayerOpacityControlProps): JSX.Elemen
     <div style={{ padding: '16px 17px 16px 23px' }}>
       <Box sx={sxClasses.layerOpacityControl}>
         <Typography sx={{ fontWeight: 'bold' }}>{t('layers.opacity')}</Typography>
-        <MaterialSlider
+        <SliderBase
           min={0}
           max={100}
           value={(layerDetails.opacity ? layerDetails.opacity : 1) * 100}
