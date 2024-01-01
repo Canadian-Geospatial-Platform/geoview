@@ -182,7 +182,7 @@ export function SingleLayer({ isDragging, depth, layer, setIsLayersListPanelVisi
     }
 
     return (
-      <IconButton color="primary" edge="end" size="small" onClick={() => handleToggleVisibility()}  tooltip="layers.toggleVisibility">
+      <IconButton color="primary" edge="end" size="small" onClick={() => handleToggleVisibility()} tooltip="layers.toggleVisibility">
         {(() => {
           if (layer.isVisible === 'no') return <VisibilityOffOutlinedIcon />;
           return <VisibilityOutlinedIcon />;
