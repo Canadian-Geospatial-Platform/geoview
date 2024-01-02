@@ -1,12 +1,14 @@
-import React, { ChangeEvent, useCallback, useRef, useState } from 'react';
+import React, { ChangeEvent, useCallback, useEffect, useRef, useState } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { Autocomplete, Box, Button, ButtonGroup, CircularProgressBase, CloseIcon, FileUploadIcon, IconButton, Paper, Select, Stepper, TextField, UploadFileIcon } from '@/ui';
 import { CONST_LAYER_TYPES, GeoUtilities, TypeGeoviewLayerConfig, TypeGeoviewLayerType, TypeListOfLayerEntryConfig } from '@/geo';
 import { ButtonPropsLayerPanel, SelectChangeEvent, TypeJsonArray, TypeJsonObject } from '@/core/types/global-types';
 import { useTranslation } from 'react-i18next';
-import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { useGeoViewMapId } from '@/core/stores/geoview-store';
 import { generateId } from '@/core/utils/utilities';
+import { useMapProjection } from '@/core/stores/store-interface-and-intial-values/map-state';
+import { useLayersList } from '@/core/stores/store-interface-and-intial-values/layer-state';
+import { api } from '@/app';
 
 type EsriOptions = {
   err: string;
@@ -31,11 +33,17 @@ export function AddNewLayer(): JSX.Element {
 
   const dragPopover = useRef(null);
 
+  //get values from store
   const mapId = useGeoViewMapId();
+  const layersList = useLayersList();
 
   const isMultiple = () => layerType === ESRI_DYNAMIC || layerType === WFS || layerType === WMS;
 
   const geoUtilities = new GeoUtilities();
+
+  const newLayerId = generateId();
+
+
   /**
    * List of layer types and labels
    */
@@ -52,6 +60,12 @@ export function AddNewLayer(): JSX.Element {
   ];
   
   // const acceptedFiles = ["*.json"];
+
+  useEffect(() => {
+    console.log('layersList ', layersList);
+    //setIsLoading(false);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [layersList]);
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const onDrop = useCallback((acceptedFiles: any) => {
@@ -107,7 +121,7 @@ export function AddNewLayer(): JSX.Element {
    */
   const emitErrorEmpty = (textField: string) => {
     setIsLoading(false);
-    // api.utilities.showError(mapId, `${textField} ${t('layers.errorEmpty')}`, false);
+    api.utilities.showError(mapId, `${textField} ${t('layers.errorEmpty')}`, false);
   };
 
   /**
@@ -117,7 +131,7 @@ export function AddNewLayer(): JSX.Element {
    */
   const emitErrorNone = () => {
     setIsLoading(false);
-    // api.utilities.showError(mapId, t('layers.errorNone'), false);
+    api.utilities.showError(mapId, t('layers.errorNone'), false);
   };
 
   /**
@@ -126,7 +140,7 @@ export function AddNewLayer(): JSX.Element {
    * @param textField label for the TextField input that cannot be empty
    */
   const emitErrorFile = () => {
-    // api.utilities.showError(mapId, t('layers.errorFile'), false);
+    api.utilities.showError(mapId, t('layers.errorFile'), false);
   };
 
   /**
@@ -136,7 +150,7 @@ export function AddNewLayer(): JSX.Element {
    */
   const emitErrorServer = (serviceName: string) => {
     setIsLoading(false);
-    // api.utilities.showError(mapId, `${serviceName} ${t('layers.errorServer')}`, false);
+    api.utilities.showError(mapId, `${serviceName} ${t('layers.errorServer')}`, false);
   };
 
   /**
@@ -150,7 +164,7 @@ export function AddNewLayer(): JSX.Element {
     const message = `${serviceName} ${t('layers.errorProj')} ${proj}, ${
       t('layers.only')
     } ${supportedProj.join(', ')}`;
-    // api.utilities.showError(mapId, message, false);
+    api.utilities.showError(mapId, message, false);
   };
 
   /**
@@ -162,7 +176,6 @@ export function AddNewLayer(): JSX.Element {
    */
   const wmsValidation = async (): Promise<boolean> => {
     
-    MapEventProcessor.getMapState(mapId).currentProjection //WHY? (ADDED)
     const proj = api.projection.projections[api.maps[mapId].getMapState().currentProjection].getCode();
     let supportedProj: string[] = [];
 
@@ -529,13 +542,12 @@ export function AddNewLayer(): JSX.Element {
    */
   const handleStepLast = () => {
     setIsLoading(true);
-    const geoviewLayerId = generateId();
     /*api.event.on(  //WHY?
       api.eventNames.LAYER.EVENT_LAYER_ADDED,
       () => {
         api.event.off(api.eventNames.LAYER.EVENT_LAYER_ADDED, mapId);
         setIsLoading(false);
-        // setAddLayerVisible(false); //WHY?
+        // setAddLayerVisible(false);
       },
       `${mapId}/${geoviewLayerId}`
     );*/
@@ -555,7 +567,7 @@ export function AddNewLayer(): JSX.Element {
       emitErrorEmpty(isMultiple() ? t('layers.layer') : t('layers.name'));
     }
     const layerConfig: TypeGeoviewLayerConfig = {
-      geoviewLayerId,
+      geoviewLayerId: newLayerId,
       geoviewLayerName: {
         en: name,
         fr: name,
