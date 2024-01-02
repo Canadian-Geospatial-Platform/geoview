@@ -8,7 +8,7 @@ import { getSxClasses } from './layers-style';
 import { useLayersDisplayState, useSelectedLayer } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { LayersActions } from './left-panel/layers-actions';
 import { LayerDetails } from './right-panel/layer-details';
-import { AddNewLayer } from './left-panel/add-new-layer';
+import { AddNewLayer } from './left-panel/add-new-layer/add-new-layer';
 import { LeftPanel } from './left-panel/left-panel';
 
 const Item = styled('div')(({ theme }) => ({
