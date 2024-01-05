@@ -77,7 +77,11 @@
     "completeTable": "For complete data, please check data table tabs.",
     "dataModalFeaturesDisplayed": "{numberOfFeatures} of {totalNumberOfFeatures} features displayed.",
     "opacity": "Opacity",
-    "opacityMax": "Max from parent"
+    "opacityMax": "Max from parent",
+    "reloadLayer": "Reload layer",
+    "visibilityIsAlways": "Visibility is always enabled",
+    "toggleVisibility": "Toggle visibility",
+    "toggleCollapse": "Toggle collapse"
   },
   "details": {
     "zoomTo": "Zoom to feature",

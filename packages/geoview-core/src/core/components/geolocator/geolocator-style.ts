@@ -3,10 +3,10 @@ import { Input, styled } from '@mui/material';
 export const sxClasses = {
   root: {
     position: 'absolute',
-    top: 16,
+    top: 12,
     left: 80,
-    maxWidth: 400,
-    width: 400,
+    maxWidth: 284,
+    width: 284,
   },
   geolocator: {
     position: 'relative',
