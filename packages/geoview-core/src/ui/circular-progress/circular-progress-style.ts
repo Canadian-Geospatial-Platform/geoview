@@ -14,8 +14,8 @@ export const getSxClasses = (theme: Theme) => ({
     backgroundColor: '#000000',
     textAlign: 'center',
     transition: theme.transitions?.create(['visibility', 'opacity'], {
-      delay: theme.transitions?.duration?.shortest,
-      easing: theme.transitions?.easing?.easeOut,
+      delay: theme.transitions.duration.shortest,
+      easing: theme.transitions.easing.easeOut,
       duration: theme.transitions?.duration?.splash,
     }),
   },
