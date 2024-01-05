@@ -79,7 +79,7 @@
     "dataModalFeaturesDisplayed": "{numberOfFeatures} des {totalNumberOfFeatures} caractéristiques affichées",
     "reloadLayer": "Recharger la couche",
     "toggleVisibility": "Basculer la visibilité",
-    "toggleCollapse": "Basculer l'effondrement"
+    "toggleCollapse": "Basculer la fermeture"
   },
   "details": {
     "zoomTo": "Zoom à l'élément",
