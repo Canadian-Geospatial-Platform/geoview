@@ -33,6 +33,6 @@ export const getSxClasses = (theme: Theme) => ({
     },
   },
   disabledButton: {
-    color: `${theme.palette?.primary?.contrastText}!important`,
+    color: `${theme.palette.primary.contrastText}!important`,
   },
 });
