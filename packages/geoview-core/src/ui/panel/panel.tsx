@@ -73,7 +73,7 @@ export function Panel(props: TypePanelAppProps): JSX.Element {
   const panelContainerStyles = {
     ...(panelStyles?.panelContainer && { ...panelStyles.panelContainer }),
     width: panelStatus ? panelWidth : 0,
-    transition: `width ${theme.transitions?.duration?.standard}ms ease`,
+    transition: `width ${theme.transitions.duration.standard}ms ease`,
   };
 
   // get store values and actions

@@ -10,7 +10,7 @@ export const getSxClasses = (theme: Theme) => ({
   listItem: {
     height: '28px',
     padding: 0,
-    color: theme.palette?.secondary?.contrastText,
+    color: theme.palette.secondary.contrastText,
     '&:hover': {
       backgroundColor: '#dddddd',
       color: theme.palette.primary.dark,

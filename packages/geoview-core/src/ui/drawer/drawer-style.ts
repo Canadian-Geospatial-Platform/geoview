@@ -18,7 +18,7 @@ export const getSxClasses = (theme: Theme) => ({
     },
   },
   drawerClose: {
-    transition: theme.transitions?.create('width', {
+    transition: theme.transitions.create('width', {
       easing: theme.transitions.easing.sharp,
       duration: theme.transitions.duration.leavingScreen,
     }),
