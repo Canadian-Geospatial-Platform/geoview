@@ -167,7 +167,7 @@ export function SingleLayer({ isDragging, depth, layer, setIsLayersListPanelVisi
     }
     if (layer.layerStatus === 'error') {
       return (
-        <IconButton edge="end" size="small" onClick={handleReloadLayer}>
+        <IconButton edge="end" size="small" onClick={handleReloadLayer} tooltip="layers.reloadLayer">
           <RestartAltIcon />
         </IconButton>
       );
@@ -175,14 +175,14 @@ export function SingleLayer({ isDragging, depth, layer, setIsLayersListPanelVisi
 
     if (isLayerAlwaysVisible) {
       return (
-        <IconButton edge="end" size="small" disabled>
+        <IconButton edge="end" size="small" tooltip="layers.visibilityIsAlways" disabled>
           <VisibilityOutlinedIcon color="disabled" />
         </IconButton>
       );
     }
 
     return (
-      <IconButton color="primary" edge="end" size="small" onClick={() => handleToggleVisibility()}>
+      <IconButton color="primary" edge="end" size="small" onClick={() => handleToggleVisibility()} tooltip="layers.toggleVisibility">
         {(() => {
           if (layer.isVisible === 'no') return <VisibilityOffOutlinedIcon />;
           return <VisibilityOutlinedIcon />;
@@ -197,7 +197,7 @@ export function SingleLayer({ isDragging, depth, layer, setIsLayersListPanelVisi
     }
     if (layer.children?.length) {
       return (
-        <IconButton color="primary" edge="end" size="small" onClick={handleExpandGroupClick}>
+        <IconButton color="primary" edge="end" size="small" onClick={handleExpandGroupClick} tooltip="layers.toggleCollapse">
           {isGroupOpen ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
         </IconButton>
       );
