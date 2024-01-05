@@ -175,7 +175,7 @@ export function SingleLayer({ isDragging, depth, layer, setIsLayersListPanelVisi
 
     if (isLayerAlwaysVisible) {
       return (
-        <IconButton edge="end" size="small" tooltip="layers.toggleVisibility" disabled>
+        <IconButton edge="end" size="small" tooltip="layers.visibilityIsAlways" disabled>
           <VisibilityOutlinedIcon color="disabled" />
         </IconButton>
       );

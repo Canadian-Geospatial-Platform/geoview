@@ -155,7 +155,7 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
             if (item.geometryType === geometryType && item.name === itemName && item.isVisible !== 'always') {
               item.isVisible = item.isVisible === 'no' ? 'yes' : 'no'; // eslint-disable-line no-param-reassign
 
-              if(item.isVisible === 'yes' && layer.isVisible === 'no') {
+              if (item.isVisible === 'yes' && layer.isVisible === 'no') {
                 layer.isVisible = 'yes';
               }
 
@@ -263,15 +263,15 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
 
 // private functions
 
-//function set visibility in layer and its items
+// function set visibility in layer and its items
 function setVisibilityInLayerAndItems(layer: TypeLegendLayer, visibility: 'yes' | 'no') {
-  if(layer.isVisible === 'always') {
+  if (layer.isVisible === 'always') {
     return;
   }
-  layer.isVisible = visibility;
+  _.set(layer, 'isVisible', visibility);
   _.each(layer.items, (item) => {
-    if(item.isVisible !== 'always') {
-      item.isVisible = visibility;
+    if (item.isVisible !== 'always') {
+      _.set(item, 'isVisible', visibility);
     }
   });
   if (layer.children && layer.children.length > 0) {

@@ -78,6 +78,7 @@
     "completeTable": "For complete data, please check data table tabs.",
     "dataModalFeaturesDisplayed": "{numberOfFeatures} of {totalNumberOfFeatures} features displayed.",
     "reloadLayer": "Reload layer",
+    "visibilityIsAlways": "Visibility is always enabled",
     "toggleVisibility": "Toggle visibility",
     "toggleCollapse": "Toggle collapse"
   },
