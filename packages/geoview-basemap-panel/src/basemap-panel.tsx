@@ -247,6 +247,7 @@ export function BasemapPanel(props: BaseMapPanelProps): JSX.Element {
           label="Projection"
           style={{
             display: config.canSwichProjection ? 'flex' : 'none',
+            marginBottom: '8px',
           }}
           inputLabel={{
             id: 'projection-label',
@@ -279,7 +280,7 @@ export function BasemapPanel(props: BaseMapPanelProps): JSX.Element {
                     // eslint-disable-next-line react/no-array-index-key
                     return <img key={index} src={thumbnail} alt={basemap.altText} className="basemapCardThumbnail" />;
                   })}
-                <div className="basemapCardThumbnailOverlay" />
+                <div className={basemap.basemapId !== activeBasemapId ? 'basemapCardThumbnailOverlay' : ''} />
               </>
             }
           />

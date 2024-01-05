@@ -96,6 +96,16 @@ td {
   height: 800px;
   border: gray 1px solid;
 }
+.geoview-map ::-webkit-scrollbar {
+  width: 12px;
+}
+.geoview-map ::-webkit-scrollbar-track {
+  box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.25);
+}
+.geoview-map ::-webkit-scrollbar-thumb {
+  background-color: darkgrey;
+  outline: 1px solid slategrey;
+}
 
 .legendTable {
   padding: 5px;
