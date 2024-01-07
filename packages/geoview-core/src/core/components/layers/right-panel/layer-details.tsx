@@ -24,7 +24,7 @@ import {
   List,
 } from '@/ui';
 import { useLayerHighlightedLayer, useLayerStoreActions } from '@/core/stores/store-interface-and-intial-values/layer-state';
-import { useUIStoreActions } from '@/core/stores/store-interface-and-intial-values/ui-state';
+import { useUIFooterBarFullScreenActive, useUIStoreActions } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import { generateId } from '@/core/utils/utilities';
 import { LayerIcon } from '../layer-icon';
 
@@ -45,6 +45,8 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
   const { setAllItemsVisibility, toggleItemVisibility, setLayerOpacity, setHighlightLayer, zoomToLayerExtent, getLayerBounds } =
     useLayerStoreActions();
   const { openModal } = useUIStoreActions();
+
+  const isFooterbarFullscreenActive = useUIFooterBarFullScreenActive();
 
   const handleZoomTo = () => {
     zoomToLayerExtent(layerDetails.layerPath);
@@ -221,7 +223,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
   // function renderItems
 
   return (
-    <Paper sx={sxClasses.layerDetails}>
+    <Paper sx={{ ...sxClasses.layerDetails, ...(!isFooterbarFullscreenActive && { maxHeight: '700px' }) }}>
       <Box sx={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between' }}>
         <Box sx={{ textAlign: 'left' }}>
           <Typography sx={sxClasses.categoryTitle}> {layerDetails.layerName} </Typography>

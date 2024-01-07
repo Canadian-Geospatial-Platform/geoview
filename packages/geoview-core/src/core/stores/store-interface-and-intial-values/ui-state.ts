@@ -18,6 +18,7 @@ export interface IUIState {
   focusITem: focusItemProps;
   footerBarExpanded: boolean;
   geoLocatorActive: boolean;
+  isFooterBarFullScreenActive: boolean;
   navBarComponents: TypeNavBarProps;
 
   setDefaultConfigValues: (geoviewConfig: TypeMapFeaturesConfig) => void;
@@ -29,6 +30,7 @@ export interface IUIState {
     setActiveTrapGeoView: (active: boolean) => void;
     setFooterBarExpanded: (expanded: boolean) => void;
     setGeolocatorActive: (active: boolean) => void;
+    setIsFooterBarFullScreenActive: (active: boolean) => void;
   };
 }
 
@@ -40,6 +42,7 @@ export function initializeUIState(set: TypeSetStore, get: TypeGetStore): IUIStat
     corePackagesComponents: [],
     focusITem: { activeElementId: false, callbackElementId: false },
     footerBarExpanded: false,
+    isFooterBarFullScreenActive: false,
     geoLocatorActive: false,
     navBarComponents: [],
 
@@ -100,6 +103,14 @@ export function initializeUIState(set: TypeSetStore, get: TypeGetStore): IUIStat
           },
         });
       },
+      setIsFooterBarFullScreenActive: (active: boolean) => {
+        set({
+          uiState: {
+            ...get().uiState,
+            isFooterBarFullScreenActive: active,
+          },
+        });
+      },
       setGeolocatorActive: (active: boolean) => {
         set({
           uiState: {
@@ -127,3 +138,4 @@ export const useUIFooterBarExpanded = () => useStore(useGeoViewStore(), (state) 
 export const useUINavbarComponents = () => useStore(useGeoViewStore(), (state) => state.uiState.navBarComponents);
 
 export const useUIStoreActions = () => useStore(useGeoViewStore(), (state) => state.uiState.actions);
+export const useUIFooterBarFullScreenActive = () => useStore(useGeoViewStore(), (state) => state.uiState.isFooterBarFullScreenActive);

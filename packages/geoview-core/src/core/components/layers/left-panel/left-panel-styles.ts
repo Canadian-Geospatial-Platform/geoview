@@ -6,7 +6,6 @@ export const getSxClasses = (theme: Theme) => ({
     width: '100%',
     padding: '8px',
     overflow: 'auto',
-    maxHeight: '660px',
 
     // layer title
     '& .MuiListItemText-primary': {
@@ -111,7 +110,7 @@ export const getSxClasses = (theme: Theme) => ({
     width: 'unset',
     boxSizing: 'border-box',
     '& .layerItemContainer': {
-      backgroundColor: 'transparent',
+      backgroundColor: 'transparent !important',
       marginBottom: '0px',
     },
   },
@@ -123,7 +122,7 @@ export const getSxClasses = (theme: Theme) => ({
     width: 'unset',
     boxSizing: 'border-box',
     '& .layerItemContainer': {
-      backgroundColor: 'transparent',
+      backgroundColor: 'transparent !important',
       marginBottom: '0px',
     },
   },

@@ -3,7 +3,7 @@ import { MutableRefObject, useCallback, useEffect, useRef, useState } from 'reac
 import { useTheme } from '@mui/material/styles';
 
 import { Box, FullscreenIcon, FullscreenExitIcon, IconButton, Tabs, TypeTabs, MoveDownRoundedIcon, MoveUpRoundedIcon } from '@/ui';
-import { api, useAppFullscreenActive, useGeoViewMapId } from '@/app';
+import { api, useAppFullscreenActive, useGeoViewMapId, useUIFooterBarFullScreenActive, useUIStoreActions } from '@/app';
 import { EVENT_NAMES } from '@/api/events/event-types';
 import { FooterTabPayload, PayloadBaseClass, payloadIsAFooterTab } from '@/api/events/payloads';
 import { getSxClasses } from './footer-tabs-style';
@@ -24,19 +24,20 @@ export function FooterTabs(): JSX.Element | null {
   const [footerTabs, setFooterTabs] = useState<TypeTabs[]>([]);
   const [isCollapsed, setIsCollapsed] = useState(true);
 
-  const [isFullscreen, setIsFullscreen] = useState(false);
   const [isFocusToMap, setIsFocusToMap] = useState<boolean>(true);
   const [pressed, setPressed] = useState(false);
 
   const tabsContainerRef = useRef<HTMLDivElement>();
   const yPositionRef = useRef<number>(0);
-  const footerPanelFullscreenBounds = useRef({ max: -60, min: 0 });
+  const footerPanelFullscreenBounds = useRef({ max: -75, min: 0 });
 
   // get map div and follow state of original map height
   const mapDiv = document.getElementById(mapId)!;
   const [origHeight, setOrigHeight] = useState<number>(0);
 
   const isMapFullscreen = useAppFullscreenActive();
+  const isFullscreen = useUIFooterBarFullScreenActive();
+  const { setIsFooterBarFullScreenActive: setIsFullscreen } = useUIStoreActions();
 
   /**
    * Add a tab
@@ -254,6 +255,7 @@ export function FooterTabs(): JSX.Element | null {
         yPositionRef.current = footerPanelFullscreenBounds.current.min;
       }
       tabsContainerRef.current.style.transform = `translateY(${yPositionRef.current}%)`;
+      tabsContainerRef.current.style.height = yPositionRef.current !== 0 ? `${yPositionRef.current}vh` : 'fit-content';
     }
   };
 

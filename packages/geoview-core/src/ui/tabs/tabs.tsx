@@ -175,7 +175,7 @@ export function Tabs(props: TypeTabsProps): JSX.Element {
           borderTop: 1,
           borderColor: 'divider',
           visibility: TabContentVisibilty,
-          ...(isMapFullscreen && { height: '600px', paddingBottom: '40px' }),
+          ...(isMapFullscreen && { paddingBottom: '40px' }),
         }}
       >
         {tabs.map((tab, index) => {

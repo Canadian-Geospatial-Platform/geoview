@@ -5,7 +5,7 @@ import { SingleLayer } from './single-layer';
 import { getSxClasses } from './left-panel-styles';
 import { Box } from '@/ui';
 import { TypeLegendLayer } from '../types';
-import { useLayerStoreActions, useLayersDisplayState } from '@/core/stores/';
+import { useLayerStoreActions, useLayersDisplayState, useUIFooterBarFullScreenActive } from '@/core/stores/';
 
 interface LayerListProps {
   depth: number;
@@ -20,6 +20,7 @@ export function LayersList({ layersList, setIsLayersListPanelVisible, parentLaye
 
   const displayState = useLayersDisplayState();
   const { reorderLayer } = useLayerStoreActions(); // get store actions
+  const isFooterbarFullscreenActive = useUIFooterBarFullScreenActive();
 
   const isDragEnabled = displayState === 'order';
 
@@ -62,7 +63,7 @@ export function LayersList({ layersList, setIsLayersListPanelVisible, parentLaye
 
   const getListClass = () => {
     if (depth === 0) {
-      return sxClasses.list;
+      return { ...sxClasses.list, ...(!isFooterbarFullscreenActive && { maxHeight: '660px' }) };
     }
     if (depth % 2) {
       return sxClasses.evenDepthList;
