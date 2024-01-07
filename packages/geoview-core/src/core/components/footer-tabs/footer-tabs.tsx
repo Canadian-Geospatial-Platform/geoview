@@ -29,7 +29,8 @@ export function FooterTabs(): JSX.Element | null {
 
   const tabsContainerRef = useRef<HTMLDivElement>();
   const yPositionRef = useRef<number>(0);
-  const footerPanelFullscreenBounds = useRef({ max: -75, min: 0 });
+  const footerPanelFullscreenBounds = useRef({ max: -80, min: 0 });
+  const tabsContainerRefHeight = useRef<number>();
 
   // get map div and follow state of original map height
   const mapDiv = document.getElementById(mapId)!;
@@ -178,6 +179,15 @@ export function FooterTabs(): JSX.Element | null {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [addTab, mapId, removeTab]);
 
+  /**
+   * Calculate initial height of tabContainer when goes to fullscreen
+   */
+  useEffect(() => {
+    if (tabsContainerRef.current) {
+      tabsContainerRefHeight.current = tabsContainerRef.current.getBoundingClientRect().height;
+    }
+  }, [isMapFullscreen]);
+
   // Handle focus using dynamic focus button
   const handleDynamicFocus = () => {
     const mapIdDiv = document.getElementById(mapId);
@@ -230,6 +240,7 @@ export function FooterTabs(): JSX.Element | null {
     if (!isMapFullscreen && tabsContainerRef.current) {
       yPositionRef.current = 0;
       tabsContainerRef.current.style.transform = 'translateY(0%)';
+      tabsContainerRef.current.style.minHeight = 'fit-content';
     }
   }, [isMapFullscreen]);
 
@@ -241,6 +252,7 @@ export function FooterTabs(): JSX.Element | null {
     if (
       pressed &&
       tabsContainerRef.current &&
+      tabsContainerRefHeight.current &&
       isMapFullscreen &&
       yPositionRef.current >= footerPanelFullscreenBounds.current.max &&
       yPositionRef.current <= footerPanelFullscreenBounds.current.min
@@ -254,8 +266,10 @@ export function FooterTabs(): JSX.Element | null {
       if (yPositionRef.current > footerPanelFullscreenBounds.current.min) {
         yPositionRef.current = footerPanelFullscreenBounds.current.min;
       }
+
       tabsContainerRef.current.style.transform = `translateY(${yPositionRef.current}%)`;
-      tabsContainerRef.current.style.height = yPositionRef.current !== 0 ? `${yPositionRef.current}vh` : 'fit-content';
+      tabsContainerRef.current.style.minHeight =
+        yPositionRef.current !== 0 ? `${Math.abs(yPositionRef.current) * 2 + tabsContainerRefHeight.current}px` : 'fit-content';
     }
   };
 
@@ -286,6 +300,7 @@ export function FooterTabs(): JSX.Element | null {
                   yPositionRef.current = 0;
                   if (tabsContainerRef.current) {
                     tabsContainerRef.current.style.transform = 'translateY(0%)';
+                    tabsContainerRef.current.style.minHeight = 'fit-content';
                   }
                   setIsFullscreen(!isFullscreen);
                 }}
