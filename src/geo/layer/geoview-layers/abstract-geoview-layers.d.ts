@@ -116,7 +116,6 @@ export declare abstract class AbstractGeoViewLayer {
     geoviewLayerName: TypeLocalizedString;
     /** The GeoView layer metadataAccessPath. The name attribute is optional */
     metadataAccessPath: TypeLocalizedString;
-    layerOrder: string[];
     /**
      * An array of layer settings. In the schema, this attribute is optional. However, we define it as mandatory and if the
      * configuration does not provide a value, we use an empty array instead of an undefined attribute.
@@ -546,14 +545,23 @@ export declare abstract class AbstractGeoViewLayer {
      */
     getTemporalDimension(layerPath?: string): TimeDimension;
     /** ***************************************************************************************************************************
-     * Get the bounds of the layer represented in the layerConfig, returns updated bounds
+     * Get the bounds of the layer represented in the layerConfig pointed to by the cached layerPath, returns updated bounds
+     *
+     * @param {Extent | undefined} bounds The current bounding box to be adjusted.
+     * @param {never} notUsed This parameter must not be provided. It is there to allow overloading of the method signature.
+     *
+     * @returns {Extent} The new layer bounding box.
+     */
+    protected abstract getBounds(bounds: Extent, notUsed?: never): Extent | undefined;
+    /** ***************************************************************************************************************************
+     * Get the bounds of the layer represented in the layerConfig pointed to by the layerPath, returns updated bounds
      *
      * @param {string} layerPath The Layer path to the layer's configuration.
      * @param {Extent | undefined} bounds The current bounding box to be adjusted.
      *
-     * @returns {Extent} The layer bounding box.
+     * @returns {Extent} The new layer bounding box.
      */
-    protected abstract getBounds(layerPath?: string, bounds?: Extent): Extent | undefined;
+    protected abstract getBounds(layerPath: string, bounds?: Extent): Extent | undefined;
     /** ***************************************************************************************************************************
      * Compute the layer bounds or undefined if the result can not be obtained from the feature extents that compose the layer. If
      * projectionCode is defined, returns the bounds in the specified projection otherwise use the map projection. The bounds are
@@ -566,7 +574,7 @@ export declare abstract class AbstractGeoViewLayer {
      *
      * @returns {Extent} The layer bounding box.
      */
-    calculateBounds(layerPath?: string, projectionCode?: string | number): Extent | undefined;
+    calculateBounds(layerPath?: string): Extent | undefined;
     /** ***************************************************************************************************************************
      * Set the layerStatus code of all layers in the listOfLayerEntryConfig.
      *

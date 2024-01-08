@@ -6,4 +6,5 @@ export interface StoresManagerState {
 export declare const useStoresManager: import("zustand").StoreApi<StoresManagerState>;
 export declare const addGeoViewStore: (config: TypeMapFeaturesConfig) => void;
 export declare const getGeoViewStore: (id: string | undefined) => GeoviewStoreType;
+export declare const removeGeoviewStore: (id: string) => void;
 export declare const useGeoViewStore: () => GeoviewStoreType;

@@ -187,9 +187,9 @@ export declare class ConfigValidation {
     /** ***************************************************************************************************************************
      * Process recursively the layer entries to create layers and layer groups.
      * @param {TypeGeoviewLayerConfig} rootLayerConfig The GeoView layer configuration to adjust and validate.
+     * @param {TypeListOfLayerEntryConfig} listOfLayerEntryConfig The list of layer entry configurations to process.
      * @param {TypeGeoviewLayerConfig | TypeLayerGroupEntryConfig} parentLayerConfig The parent layer configuration of all the
      * layer entry configurations found in the list of layer entries.
-     * @param {TypeListOfLayerEntryConfig} listOfLayerEntryConfig The list of layer entry configurations to process.
      */
     private processLayerEntryConfig;
     /** ***************************************************************************************************************************

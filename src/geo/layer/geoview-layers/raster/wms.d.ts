@@ -249,6 +249,28 @@ export declare class WMS extends AbstractGeoViewRaster {
      */
     setWmsStyle(wmsStyleId: string, layerPath: string): void;
     /** ***************************************************************************************************************************
+     * Apply a view filter to the layer identified by the path stored in the layerPathAssociatedToThegeoviewLayer property stored
+     * in the layer instance associated to the map. The legend filters are derived from the uniqueValue or classBreaks style of the
+     * layer. When the layer config is invalid, nothing is done.
+     *
+     * @param {string} filter An optional filter to be used in place of the getViewFilter value.
+     * @param {never} notUsed1 This parameter must not be provided. It is there to allow overloading of the method signature.
+     * @param {never} notUsed2 This parameter must not be provided. It is there to allow overloading of the method signature.
+     */
+    applyViewFilter(filter: string, notUsed1?: never, notUsed2?: never): void;
+    /** ***************************************************************************************************************************
+     * Apply a view filter to the layer identified by the path stored in the layerPathAssociatedToThegeoviewLayer property stored
+     * in the layer instance associated to the map. When the CombineLegendFilter flag is false, the filter paramater is used alone
+     * to display the features. Otherwise, the legend filter and the filter parameter are combined together to define the view
+     * filter. The legend filters are derived from the uniqueValue or classBreaks style of the layer. When the layer config is
+     * invalid, nothing is done.
+     *
+     * @param {string} filter An optional filter to be used in place of the getViewFilter value.
+     * @param {boolean} CombineLegendFilter Flag used to combine the legend filter and the filter together (default: true)
+     * @param {never} notUsed This parameter must not be provided. It is there to allow overloading of the method signature.
+     */
+    applyViewFilter(filter: string, CombineLegendFilter: boolean, notUsed?: never): void;
+    /** ***************************************************************************************************************************
      * Apply a view filter to the layer. When the CombineLegendFilter flag is false, the filter paramater is used alone to display
      * the features. Otherwise, the legend filter and the filter parameter are combined together to define the view filter. The
      * legend filters are derived from the uniqueValue or classBreaks style of the layer. When the layer config is invalid, nothing
@@ -259,14 +281,23 @@ export declare class WMS extends AbstractGeoViewRaster {
      * @param {string} filter An optional filter to be used in place of the getViewFilter value.
      * @param {boolean} CombineLegendFilter Flag used to combine the legend filter and the filter together (default: true)
      */
-    applyViewFilter(layerPath?: string, filter?: string, CombineLegendFilter?: boolean): void;
+    applyViewFilter(layerPath: string, filter?: string, CombineLegendFilter?: boolean): void;
     /** ***************************************************************************************************************************
-     * Get the bounds of the layer represented in the layerConfig, returns updated bounds
+     * Get the bounds of the layer represented in the layerConfig pointed to by the cached layerPath, returns updated bounds
+     *
+     * @param {Extent | undefined} bounds The current bounding box to be adjusted.
+     * @param {never} notUsed This parameter must not be provided. It is there to allow overloading of the method signature.
+     *
+     * @returns {Extent} The new layer bounding box.
+     */
+    protected getBounds(bounds: Extent, notUsed?: never): Extent | undefined;
+    /** ***************************************************************************************************************************
+     * Get the bounds of the layer represented in the layerConfig pointed to by the layerPath, returns updated bounds
      *
      * @param {string} layerPath The Layer path to the layer's configuration.
      * @param {Extent | undefined} bounds The current bounding box to be adjusted.
      *
-     * @returns {Extent} The layer bounding box.
+     * @returns {Extent} The new layer bounding box.
      */
-    getBounds(layerPath: string, bounds: Extent | undefined): Extent | undefined;
+    protected getBounds(layerPath: string, bounds?: Extent): Extent | undefined;
 }

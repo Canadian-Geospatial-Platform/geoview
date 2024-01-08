@@ -31,6 +31,10 @@ export declare const getSxClasses: (theme: Theme) => {
         padding: string;
         color: string;
     };
+    selectedRowsDirection: {
+        display: string;
+        flexDirection: string;
+    };
     tableCell: {
         whiteSpace: string;
         textOverflow: string;

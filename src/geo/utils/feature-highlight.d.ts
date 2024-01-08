@@ -23,6 +23,8 @@ export declare class FeatureHighlight {
     private darkFill;
     /** The style for the highlight */
     private darkStyle;
+    /** The style for the highlight */
+    private darkOutlineStyle;
     /** The ID's of currently animated features */
     private selectedFeatureIds;
     /** The ID's of currently highlighted features */
@@ -119,6 +121,11 @@ export declare class FeatureHighlight {
      * Highlight a bounding box
      *
      * @param {Extent} extent the extent to highlight
+     * @param {boolean} isLayerHighlight optional if it is a layer highlight
      */
-    highlightGeolocatorBBox(extent: Extent): void;
+    highlightGeolocatorBBox(extent: Extent, isLayerHighlight?: boolean): void;
+    /**
+     * Remove bounding box highlight
+     */
+    removeBBoxHighlight(): void;
 }

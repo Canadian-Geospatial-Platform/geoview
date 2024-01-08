@@ -30,7 +30,7 @@ export interface IMapState {
     fixNorth: boolean;
     highlightedFeatures: Array<TypeFeatureInfoEntry>;
     interaction: TypeInteraction;
-    pointerPosition?: TypeMapMouseInfo;
+    layerOrder: string[];
     mapElement?: OLMap;
     mapExtent: Extent | undefined;
     mapLoaded: boolean;
@@ -40,10 +40,12 @@ export interface IMapState {
     overlayNorthMarker?: Overlay;
     overviewMap: boolean;
     overviewMapHideZoom: number;
+    pointerPosition?: TypeMapMouseInfo;
     rotation: number;
     scale: TypeScaleInfo;
     selectedFeatures: Array<TypeFeatureInfoEntry>;
     size: [number, number];
+    visibleLayers: string[];
     zoom: number;
     setDefaultConfigValues: (config: TypeMapFeaturesConfig) => void;
     events: {
@@ -61,13 +63,14 @@ export interface IMapState {
         createEmptyBasemap: () => TileLayer<XYZ>;
         getPixelFromCoordinate: (coord: Coordinate) => [number, number];
         hideClickMarker: () => void;
-        highlightBBox: (extent: Extent) => void;
+        highlightBBox: (extent: Extent, isLayerHighlight?: boolean) => void;
         removeHighlightedFeature: (feature: TypeFeatureInfoEntry | 'all') => void;
         removeSelectedFeature: (feature: TypeFeatureInfoEntry | 'all') => void;
         setAttribution: (attribution: string[]) => void;
         setClickCoordinates: () => void;
         setFixNorth: (ifFix: boolean) => void;
         setInteraction: (interaction: TypeInteraction) => void;
+        setLayerOrder: (newOrder: string[]) => void;
         setMapElement: (mapElem: OLMap) => void;
         setMapKeyboardPanInteractions: (panDelta: number) => void;
         setOverlayClickMarker: (overlay: Overlay) => void;
@@ -76,6 +79,7 @@ export interface IMapState {
         setOverlayNorthMarkerRef: (htmlRef: HTMLElement) => void;
         setProjection: (projectionCode: TypeValidMapProjectionCodes, view: View) => void;
         setRotation: (degree: number) => void;
+        setVisibleLayers: (newOrder: string[]) => void;
         setZoom: (zoom: number, duration?: number) => void;
         showClickMarker: (marker: TypeClickMarker) => void;
         transformPoints: (coords: Coordinate[], outputProjection: number) => Coordinate[];
@@ -93,6 +97,7 @@ export declare const useMapClickMarker: () => TypeClickMarker | undefined;
 export declare const useMapElement: () => OLMap | undefined;
 export declare const useMapExtent: () => Extent | undefined;
 export declare const useMapFixNorth: () => boolean;
+export declare const useMapLayers: () => string[];
 export declare const useMapInteraction: () => TypeInteraction;
 export declare const useMapLoaded: () => boolean;
 export declare const useMapNorthArrow: () => boolean;
@@ -105,6 +110,7 @@ export declare const useMapRotation: () => number;
 export declare const useMapSelectedFeatures: () => TypeFeatureInfoEntry[];
 export declare const useMapScale: () => TypeScaleInfo;
 export declare const useMapSize: () => [number, number];
+export declare const useMapVisibleLayers: () => string[];
 export declare const useMapZoom: () => number;
 export declare const useMapStoreActions: () => {
     addHighlightedFeature: (feature: TypeFeatureInfoEntry) => void;
@@ -113,13 +119,14 @@ export declare const useMapStoreActions: () => {
     createEmptyBasemap: () => TileLayer<XYZ>;
     getPixelFromCoordinate: (coord: Coordinate) => [number, number];
     hideClickMarker: () => void;
-    highlightBBox: (extent: Extent) => void;
+    highlightBBox: (extent: Extent, isLayerHighlight?: boolean) => void;
     removeHighlightedFeature: (feature: TypeFeatureInfoEntry | 'all') => void;
     removeSelectedFeature: (feature: TypeFeatureInfoEntry | 'all') => void;
     setAttribution: (attribution: string[]) => void;
     setClickCoordinates: () => void;
     setFixNorth: (ifFix: boolean) => void;
     setInteraction: (interaction: TypeInteraction) => void;
+    setLayerOrder: (newOrder: string[]) => void;
     setMapElement: (mapElem: OLMap) => void;
     setMapKeyboardPanInteractions: (panDelta: number) => void;
     setOverlayClickMarker: (overlay: Overlay) => void;
@@ -128,6 +135,7 @@ export declare const useMapStoreActions: () => {
     setOverlayNorthMarkerRef: (htmlRef: HTMLElement) => void;
     setProjection: (projectionCode: TypeValidMapProjectionCodes, view: View) => void;
     setRotation: (degree: number) => void;
+    setVisibleLayers: (newOrder: string[]) => void;
     setZoom: (zoom: number, duration?: number) => void;
     showClickMarker: (marker: TypeClickMarker) => void;
     transformPoints: (coords: Coordinate[], outputProjection: number) => Coordinate[];

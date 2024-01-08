@@ -1,5 +1,4 @@
 import { AbstractPlugin } from './abstract-plugin';
-import { TypeRecordOfPlugin } from './plugin-types';
 import { TypeJsonObject, TypeJsonValue } from '@/core/types/global-types';
 /**
  * Class to manage plugins
@@ -10,7 +9,6 @@ import { TypeJsonObject, TypeJsonValue } from '@/core/types/global-types';
 export declare class Plugin {
     #private;
     pluginsLoaded: boolean;
-    plugins: TypeRecordOfPlugin;
     /**
      * Load a package script on runtime
      *
@@ -27,12 +25,12 @@ export declare class Plugin {
      */
     addPlugin: (pluginId: string, mapId: string, constructor?: AbstractPlugin | ((pluginId: string, props: TypeJsonObject) => TypeJsonValue) | undefined, props?: TypeJsonObject) => Promise<void>;
     /**
-     * Delete a plugin
+     * Delete a specific plugin loaded in a map
      *
      * @param {string} pluginId the id of the plugin to delete
-     * @param {string} mapId the map id to remove the plugin from (if not provided then plugin will be removed from all maps)
+     * @param {string} mapId the map id to remove the plugin from
      */
-    removePlugin: (pluginId: string, mapId?: string) => void;
+    removePlugin: (pluginId: string, mapId: string) => void;
     /**
      * Delete all plugins loaded in a map
      *

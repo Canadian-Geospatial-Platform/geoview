@@ -90,14 +90,23 @@ export declare class VectorTiles extends AbstractGeoViewRaster {
      */
     protected processLayerMetadata(layerConfig: TypeTileLayerEntryConfig): Promise<void>;
     /** ***************************************************************************************************************************
-     * Get the bounds of the layer represented in the layerConfig, returns updated bounds
+     * Get the bounds of the layer represented in the layerConfig pointed to by the cached layerPath, returns updated bounds
+     *
+     * @param {Extent | undefined} bounds The current bounding box to be adjusted.
+     * @param {never} notUsed This parameter must not be provided. It is there to allow overloading of the method signature.
+     *
+     * @returns {Extent} The new layer bounding box.
+     */
+    protected getBounds(bounds: Extent, notUsed?: never): Extent | undefined;
+    /** ***************************************************************************************************************************
+     * Get the bounds of the layer represented in the layerConfig pointed to by the layerPath, returns updated bounds
      *
      * @param {string} layerPath The Layer path to the layer's configuration.
      * @param {Extent | undefined} bounds The current bounding box to be adjusted.
      *
-     * @returns {Extent} The layer bounding box.
+     * @returns {Extent} The new layer bounding box.
      */
-    getBounds(layerPath: string, bounds: Extent | undefined): Extent | undefined;
+    protected getBounds(layerPath: string, bounds?: Extent): Extent | undefined;
     addVectorTileLayer(): void;
     /**
      * Set Vector Tile style

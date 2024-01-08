@@ -11,7 +11,7 @@ interface DatapanelProps {
 }
 /**
  * Build Data panel from map.
- * @param {LayersDataType} layerData map data which will be used to build data table.
+ * @param {LayersDataType[]} layerData map data which will be used to build data table.
  * @param {string} mapId id of the map.
  * @return {ReactElement} Data table as react element.
  */

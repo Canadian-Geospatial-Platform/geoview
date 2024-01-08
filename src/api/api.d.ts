@@ -54,7 +54,10 @@ export declare class API {
      */
     constructor();
     /**
+     * Apply outline to elements when keyboard is use to navigate
+     * Code from: https://github.com/MaxMaeder/keyboardFocus.js
      */
+    private manageKeyboardFocus;
     /**
      * Check if map rendering / drawing is ready then run the callback function
      * Timeout does not effect rendering speed, each map will cancel the previous timer after it renders
@@ -70,7 +73,7 @@ export declare class API {
     callInitCallback: () => void;
     /**
      * Create a new map in a given div
-     * !MUST not be a map div with llwp-map class
+     * !MUST not be a map div with geoview-map class
      * If is present, the div will be created with a default config
      *
      * @param {string} divId the id of the div to create map in

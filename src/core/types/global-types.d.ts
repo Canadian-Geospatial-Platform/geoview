@@ -1,7 +1,6 @@
 import React from 'react';
 import { createRoot } from 'react-dom/client';
 import { useTheme } from '@mui/material/styles';
-import { useTranslation } from 'react-i18next';
 import { useMediaQuery } from '@mui/material';
 import { API } from '@/api/api';
 import * as UI from '../../ui';
@@ -53,7 +52,7 @@ export interface TypeMapFeaturesConfig extends TypeMapFeaturesInstance {
 declare global {
     interface Window {
         cgpv: TypeCGPV;
-        plugins: Record<string, unknown>;
+        geoviewPlugins: Record<string, unknown>;
     }
 }
 /** ******************************************************************************************************************************
@@ -63,7 +62,7 @@ export interface TypeWindow extends Window {
     /** the core */
     cgpv: TypeCGPV;
     /** plugins added to the core */
-    plugins: {
+    geoviewPlugins: {
         [pluginId: string]: ((pluginId: string, props: TypeJsonValue) => TypeJsonValue) | AbstractPlugin | undefined;
     };
 }
@@ -76,7 +75,6 @@ export type TypeCGPV = {
     react: typeof React;
     createRoot: typeof createRoot;
     ui: TypeCGPVUI;
-    useTranslation: typeof useTranslation;
     types: typeof import('./cgpv-types');
 };
 /** ******************************************************************************************************************************
