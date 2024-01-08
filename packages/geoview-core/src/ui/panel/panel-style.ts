@@ -2,7 +2,6 @@ import { Theme } from '@mui/material/styles';
 
 export const getSxClasses = (theme: Theme) => ({
   panelContainer: {
-    // TODO because we are using ! in line below, we cannot make panel to be optional. Same scenarios for other lines.
     backgroundColor: theme.panel?.background,
     height: 'calc(100% - 35px)',
     borderRadius: 0,
@@ -13,7 +12,7 @@ export const getSxClasses = (theme: Theme) => ({
     }!,
     '& .MuiCardHeader-root': {
       backgroundColor: theme.panel?.background,
-      borderBottomColor: theme.panel.border!,
+      borderBottomColor: theme.panel?.border,
       borderBottomWidth: 1,
       borderBottomStyle: 'solid',
       height: 64,
