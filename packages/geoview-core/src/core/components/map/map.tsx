@@ -99,7 +99,7 @@ export function Map(): JSX.Element {
 
   return (
     /* eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex */
-    <Box id={`map-${mapId}`} ref={mapElement as MutableRefObject<HTMLDivElement>} sx={sxClasses.mapContainer} tabIndex={0}>
+    <Box id={`mapbox-${mapId}`} ref={mapElement as MutableRefObject<HTMLDivElement>} sx={sxClasses.mapContainer} tabIndex={0}>
       {mapLoaded && (
         <>
           {northArrow && <NorthArrow />}
