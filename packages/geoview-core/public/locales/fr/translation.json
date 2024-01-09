@@ -77,7 +77,7 @@
     "completeTable": "Pour des données complètes, veuillez consulter les onglets des tableaux de données.",
     "dataModalFeaturesDisplayed": "{numberOfFeatures} des {totalNumberOfFeatures} caractéristiques affichées",
     "opacity": "Opacité",
-    "opacityMax": "Max depuis le parent",
+    "opacityMax": "Maximum du parent",
     "reloadLayer": "Recharger la couche",
     "visibilityIsAlways": "La visibilité est toujours activée",
     "toggleVisibility": "Basculer la visibilité",
