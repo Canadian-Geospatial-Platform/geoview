@@ -48,7 +48,7 @@ import {
   useDataTableStoreMapFilteredRecord,
   useDataTableStoreToolbarRowSelectedMessageRecord,
 } from '@/core/stores/store-interface-and-intial-values/data-table-state';
-import { useLightBox, useSelectedRows, useFilteredRows, useToolbarActionMessage } from './hooks';
+import { useLightBox, useSelectedRows, useFilterRows, useToolbarActionMessage } from './hooks';
 import { useAppDisplayLanguage } from '@/core/stores/store-interface-and-intial-values/app-state';
 
 export interface DataTableDataEntrys extends TypeFeatureInfoEntry {
@@ -148,7 +148,7 @@ function DataTable({ data, layerId, mapId, layerKey }: DataTableProps) {
   // #region REACT CUSTOM HOOKS
   const { initLightBox, LightBoxComponent } = useLightBox();
   const { rowSelection, setRowSelection } = useSelectedRows({ layerKey });
-  const { columnFilters, setColumnFilters } = useFilteredRows({ layerKey });
+  const { columnFilters, setColumnFilters } = useFilterRows({ layerKey });
   // #endregion
 
   useEffect(() => {

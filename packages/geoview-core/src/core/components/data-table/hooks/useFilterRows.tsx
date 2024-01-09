@@ -1,11 +1,11 @@
-import { useEffect, useState } from 'react';
+import { Dispatch, SetStateAction, useEffect, useState } from 'react';
 import { type MRT_ColumnFiltersState as MRTColumnFiltersState } from 'material-react-table';
 import {
   useDataTableStoreActions,
-  useDataTableStoreColumnFiltersRecord,
+  useDataTableStoreColumnFilteredRecord,
 } from '@/core/stores/store-interface-and-intial-values/data-table-state';
 
-interface UseFilteredRowsProps {
+export interface UseFilterRowsProps {
   layerKey: string;
 }
 
@@ -14,8 +14,11 @@ interface UseFilteredRowsProps {
  * @param {string} layerKey key of the layer selected.
  * @returns {Object}
  */
-export function useFilteredRows({ layerKey }: UseFilteredRowsProps) {
-  const columnFiltersRecord = useDataTableStoreColumnFiltersRecord();
+export function useFilterRows({ layerKey }: UseFilterRowsProps): {
+  columnFilters: MRTColumnFiltersState;
+  setColumnFilters: Dispatch<SetStateAction<MRTColumnFiltersState>>;
+} {
+  const columnFiltersRecord = useDataTableStoreColumnFilteredRecord();
 
   const { setColumnFiltersEntry } = useDataTableStoreActions();
 
