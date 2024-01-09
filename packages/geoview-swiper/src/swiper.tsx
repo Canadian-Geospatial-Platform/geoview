@@ -34,7 +34,7 @@ const sxClasses = {
   bar: {
     position: 'absolute',
     backgroundColor: 'rgba(50,50,50,0.75)',
-    zIndex: 30,
+    zIndex: 151,
     boxSizing: 'content-box',
     margin: 0,
     padding: '0!important',
@@ -199,7 +199,7 @@ export function Swiper(props: SwiperProps): JSX.Element {
   /**
    * On Drag and Drag Stop, calculate the clipping extent
    * @param {MouseEvent} evt The mouse event to calculate the clipping
-   * @param {Boolean} keyboard true if functio is called from keyboard event
+   * @param {Boolean} keyboard true if function is called from keyboard event
    */
   const onStop = debounce((evt: MouseEvent, keyboard = false) => {
     // get map size
@@ -215,7 +215,9 @@ export function Swiper(props: SwiperProps): JSX.Element {
     // offset is only used when event is triggered from the mouse event. When triggered from keyboard, we use
     // the swiper bar computed style
     if (!keyboard) {
-      swiperValue.current = ((client - offset) / size) * 100;
+      if (((client - offset) / size) * 100 > 99) swiperValue.current = 99;
+      else if (((client - offset) / size) * 100 < 0) swiperValue.current = 0;
+      else swiperValue.current = ((client - offset) / size) * 100;
     } else {
       const position = orientation === 'vertical' ? getSwiperStyle()[0] : getSwiperStyle()[1];
       swiperValue.current = (position / size) * 100;
