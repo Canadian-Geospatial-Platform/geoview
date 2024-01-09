@@ -112,15 +112,9 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
         if (layer) {
           layer.opacity = opacity;
 
-          if (layer.children.length) {
-            setPropInChildLayers(layer.children, 'opacity', opacity);
-            setPropInChildLayers(layer.children, 'opacityFromParent', opacity);
-          }
+          const { mapId } = get();
+          setOpacityInLayerAndChildren(layer, opacity, mapId);
         }
-
-        // TODO: keep reference to geoview map instance in the store or keep accessing with api - discussion
-        //! may not work with group items ... see if Yves work will make this simplier
-        api.maps[get().mapId].layer.geoviewLayer(layerPath).setOpacity(opacity, layerPath);
 
         // now update store
         set({
@@ -282,13 +276,17 @@ function setVisibilityInLayerAndItems(layer: TypeLegendLayer, visibility: 'yes' 
   }
 }
 
-function setPropInChildLayers(children: TypeLegendLayer[], propName: string, val: unknown) {
-  _.each(children, (child) => {
-    _.set(child, propName, val);
-    if (child.children && child.children.length > 0) {
-      setPropInChildLayers(child.children, propName, val);
-    }
-  });
+function setOpacityInLayerAndChildren(layer: TypeLegendLayer, opacity: number, mapId: string, isChild = false) {
+  _.set(layer, 'opacity', opacity);
+  api.maps[mapId].layer.geoviewLayer(layer.layerPath).setOpacity(opacity, layer.layerPath);
+  if (isChild) {
+    _.set(layer, 'opacityFromParent', opacity);
+  }
+  if (layer.children && layer.children.length > 0) {
+    _.each(layer.children, (child) => {
+      setOpacityInLayerAndChildren(child, opacity, mapId, true);
+    });
+  }
 }
 
 function findLayerByPath(layers: TypeLegendLayer[], layerPath: string): TypeLegendLayer | undefined {
