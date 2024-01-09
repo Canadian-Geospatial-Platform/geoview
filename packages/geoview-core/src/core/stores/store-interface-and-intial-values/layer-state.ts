@@ -86,7 +86,7 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
           api.maps[get().mapId].layer.highlightLayer(tempLayerPath);
           const layer = findLayerByPath(get().layerState.legendLayers, layerPath);
           const { bounds } = layer as TypeLegendLayer;
-          if (bounds) get().mapState.actions.highlightBBox(bounds, true);
+          if (bounds && bounds[0] !== Infinity) get().mapState.actions.highlightBBox(bounds, true);
         }
         set({
           layerState: {
