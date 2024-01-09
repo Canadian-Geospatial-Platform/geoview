@@ -69,7 +69,7 @@
     "linkify-html": "^4.1.1",
     "linkifyjs": "^4.1.0",
     "lodash": "^4.17.21",
-    "material-react-table": "^1.14.0",
+    "material-react-table": "~2.4.1",
     "ol": "^8.1.0",
     "ol-mapbox-style": "^12.0.0",
     "proj4": "^2.7.5",

@@ -3,17 +3,17 @@ import { useTranslation } from 'react-i18next';
 import { Geometry, Point, Polygon, LineString, MultiPoint } from 'ol/geom';
 
 import { MenuItem } from '@/ui';
-import { MapDataTableDataEntrys } from './map-data-table';
+import { DataTableDataEntrys } from './data-table';
 import { useMapStoreActions } from '@/core/stores/store-interface-and-intial-values/map-state';
 
 interface JSONExportButtonProps {
-  features: MapDataTableDataEntrys[];
+  features: DataTableDataEntrys[];
   layerId: string;
 }
 
 /**
  * Custom  GeoJson export button which will help to download data table data in geojson format.
- * @param {MapDataTableDataEntrys[]} features list of rows to be displayed in data table
+ * @param {DataTableDataEntrys[]} features list of rows to be displayed in data table
  * @param {string} layerId id of the layer
  * @returns {JSX.Element} returns Menu Item
  *

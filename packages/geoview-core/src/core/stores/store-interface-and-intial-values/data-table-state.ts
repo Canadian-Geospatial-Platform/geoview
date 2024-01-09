@@ -6,7 +6,6 @@ import { LayersDataType } from '@/core/components/data-table/data-panel';
 
 export interface IMapDataTableState {
   columnFiltersRecord: Record<string, MRTColumnFiltersState>;
-  filterMapDelay: number;
   isEnlargeDataTable: boolean;
   mapFilteredRecord: Record<string, boolean>;
   rowsFilteredRecord: Record<string, number>;
@@ -29,7 +28,6 @@ export interface IMapDataTableState {
 export function initialDataTableState(set: TypeSetStore, get: TypeGetStore): IMapDataTableState {
   return {
     columnFiltersRecord: {},
-    filterMapDelay: 1000,
     isEnlargeDataTable: false,
     mapFilteredRecord: {},
     rowsFilteredRecord: {},
@@ -115,7 +113,6 @@ export function initialDataTableState(set: TypeSetStore, get: TypeGetStore): IMa
 // **********************************************************
 export const useDataTableStoreSelectedLayerIndex = () => useStore(useGeoViewStore(), (state) => state.dataTableState.selectedLayerIndex);
 export const useDataTableStoreIsEnlargeDataTable = () => useStore(useGeoViewStore(), (state) => state.dataTableState.isEnlargeDataTable);
-export const useDataTableStoreFilterMapDelay = () => useStore(useGeoViewStore(), (state) => state.dataTableState.filterMapDelay);
 export const useDataTableStoreToolbarRowSelectedMessageRecord = () =>
   useStore(useGeoViewStore(), (state) => state.dataTableState.toolbarRowSelectedMessageRecord);
 export const useDataTableStoreColumnFiltersRecord = () => useStore(useGeoViewStore(), (state) => state.dataTableState.columnFiltersRecord);

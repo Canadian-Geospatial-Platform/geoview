@@ -1,8 +1,6 @@
 import { createElement, ReactElement } from 'react';
-
-import DataTable, { DataTableData } from './data-table';
 import { api, TypeListOfLayerEntryConfig, TypeArrayOfFeatureInfoEntries, TypeFieldEntry, TypeLocalizedString } from '@/app';
-import { MapDataTableData as MapDataTableDataProps } from './map-data-table';
+import { DataTableData } from './data-table';
 import { Datapanel } from './data-panel';
 import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
 
@@ -23,16 +21,6 @@ export class DataTableApi {
   constructor(mapId: string) {
     this.mapId = mapId;
   }
-
-  /**
-   * Create a data table as an element
-   *
-   * @param { 'materialReactDataTable'} tableType type of table that user want to create.
-   * @return {ReactElement} the data table react element
-   */
-  createDataTable = ({ data }: { data: DataTableData }): ReactElement => {
-    return createElement(DataTable, { data }, []);
-  };
 
   /**
    * Create group layer keys based on layer rendered on map
@@ -133,7 +121,7 @@ export class DataTableApi {
         return this.buildFeatureRows(result.value);
       });
 
-    const filteredData: (MapDataTableDataProps & GroupLayers)[] = [];
+    const filteredData: (DataTableData & GroupLayers)[] = [];
 
     // filter data based on features.
     data.forEach((res, index) => {
