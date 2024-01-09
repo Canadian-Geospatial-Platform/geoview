@@ -2,14 +2,13 @@
 import { Root } from 'react-dom/client';
 import { i18n } from 'i18next';
 import OLMap from 'ol/Map';
-import View from 'ol/View';
-import { ProjectionLike } from 'ol/proj';
-import { Coordinate } from 'ol/coordinate';
+import View, { FitOptions } from 'ol/View';
 import { Extent } from 'ol/extent';
 import { Basemap } from '@/geo/layer/basemap/basemap';
 import { Layer } from '@/geo/layer/layer';
 import { TypeFeatureStyle } from '@/geo/layer/geometry/geometry-types';
 import { TypeClickMarker } from '@/app';
+import { TypeRecordOfPlugin } from '@/api/plugin/plugin-types';
 import { AppbarButtons } from '@/core/components/app-bar/app-bar-buttons';
 import { NavbarButtons } from '@/core/components/nav-bar/nav-bar-buttons';
 import { FooterTabsApi } from '@/core/components/footer-tabs/footer-tabs-api';
@@ -26,7 +25,7 @@ import { Snap } from '@/geo/interaction/snap';
 import { Translate } from '@/geo/interaction/translate';
 import { ModalApi } from '@/ui';
 import { TypeListOfGeoviewLayerConfig, TypeDisplayLanguage, TypeViewSettings, TypeMapState, TypeDisplayTheme, TypeInteraction } from '@/geo/map/map-schema-types';
-import { TypeMapFeaturesConfig, TypeHTMLElement, TypeValidMapProjectionCodes } from '@/core/types/global-types';
+import { TypeMapFeaturesConfig, TypeHTMLElement, TypeValidMapProjectionCodes, TypeJsonObject } from '@/core/types/global-types';
 /**
  * Class used to manage created maps
  *
@@ -38,6 +37,7 @@ export declare class MapViewer {
     mapFeaturesConfig: TypeMapFeaturesConfig;
     mapId: string;
     map: OLMap;
+    plugins: TypeRecordOfPlugin;
     overviewRoot: Root | undefined;
     appBarButtons: AppbarButtons;
     navBarButtons: NavbarButtons;
@@ -48,10 +48,10 @@ export declare class MapViewer {
     dataTable: DataTableApi;
     basemap: Basemap;
     layer: Layer;
-    i18nInstance: i18n;
     modal: ModalApi;
     geoviewRenderer: GeoviewRenderer;
     readyCallbackHasRun: boolean;
+    private i18nInstance;
     /**
      * Add the map instance to the maps array in the api
      *
@@ -72,15 +72,15 @@ export declare class MapViewer {
      */
     mapIsReady(): boolean;
     /**
+     * Function called when the map has been rendered and ready to be customized
+     */
+    mapReady(): void;
+    /**
      * Initialize layers, basemap and projection
      *
      * @param cgpMap
      */
     initMap(cgpMap: OLMap): void;
-    /**
-     * Check if geometries needs to be loaded from a URL geoms parameter
-     */
-    loadGeometries(): void;
     /**
      * Add a new custom component to the map
      *
@@ -95,9 +95,13 @@ export declare class MapViewer {
      */
     removeComponent(mapComponentId: string): void;
     /**
-     * Function called when the map has been rendered and ready to be customized
+     * Add a localization ressource bundle for a supported language (fr, en). Then the new key added can be
+     * access from the utilies function getLocalizesMessage to reuse in ui from outside the core viewer.
+     *
+     * @param {TypeDisplayLanguage} language the language to add the ressoruce for (en, fr)
+     * @param {TypeJsonObject} translations the translation object to add
      */
-    mapReady(): void;
+    addLocalizeRessourceBundle(language: TypeDisplayLanguage, translations: TypeJsonObject): void;
     /**
      * Return the current display language
      *
@@ -166,11 +170,36 @@ export declare class MapViewer {
      */
     refreshLayers(): void;
     /**
-     * Reload a map from a config object
-     *
-     * @param {TypeMapFeaturesConfig} mapFeaturesConfig a new config passed in from the function call
+     * Hide a click marker from the map
      */
-    reloadMap(mapFeaturesConfig: TypeMapFeaturesConfig): void;
+    clickMarkerIconHide(): void;
+    /**
+     * Show a marker on the map
+     * @param {TypeClickMarker} marker the marker to add
+     */
+    clickMarkerIconShow(marker: TypeClickMarker): void;
+    /**
+     * Check if geometries needs to be loaded from a URL geoms parameter
+     */
+    loadGeometries(): void;
+    /**
+     * Remove map
+     *
+     * @param {boolean} deleteContainer true if we want to delete div from the page
+     * @returns {HTMLElement} return the HTML element
+     */
+    remove(deleteContainer: boolean): HTMLElement;
+    /**
+     * Reload a map from a config object stored in store
+     */
+    reload(): void;
+    /**
+     * Zoom to the specified extent.
+     *
+     * @param {Extent} extent The extent to zoom to.
+     * @param {FitOptions} options The options to configure the zoomToExtent (default: { padding: [100, 100, 100, 100], maxZoom: 11 }).
+     */
+    zoomToExtent(extent: Extent, options?: FitOptions): void;
     /**
      * Fit the map to its boundaries. It is assumed that the boundaries use the map projection. If projectionCode is undefined,
      * the boundaries are used as is, otherwise they are reprojected from the specified projection code to the map projection.
@@ -180,39 +209,6 @@ export declare class MapViewer {
      * @returns the bounds
      */
     fitBounds(bounds?: Extent, projectionCode?: string | number | undefined): void;
-    /**
-     * Transforms an extent from source projection to destination projection. This returns a new extent (and does not modify the
-     * original).
-     *
-     * @param {Extent} extent The extent to transform.
-     * @param {ProjectionLike} source Source projection-like.
-     * @param {ProjectionLike} destination Destination projection-like.
-     * @param {number} stops Optional number of stops per side used for the transform. By default only the corners are used.
-     *
-     * @returns The new extent transformed in the destination projection.
-     */
-    transformExtent(extent: Extent, source: ProjectionLike, destination: ProjectionLike, stops?: number | undefined): Extent;
-    /**
-     * Transforms an extent from source projection to destination projection. This returns a new extent (and does not modify the
-     * original).
-     *
-     * @param {Extent} extent The extent to transform.
-     * @param {ProjectionLike} source Source projection-like.
-     * @param {ProjectionLike} destination Destination projection-like.
-     * @param {number} stops Optional number of stops per side used for the transform. The default value is 20.
-     *
-     * @returns The densified extent transformed in the destination projection.
-     */
-    transformAndDensifyExtent(extent: Extent, source: ProjectionLike, destination: ProjectionLike, stops?: number): Coordinate[];
-    /**
-     * Hide a click marker from the map
-     */
-    clickMarkerIconHide(): void;
-    /**
-     * Show a marker on the map
-     * @param {TypeClickMarker} marker the marker to add
-     */
-    clickMarkerIconShow(marker: TypeClickMarker): void;
     /**
      * Initializes selection interactions
      */

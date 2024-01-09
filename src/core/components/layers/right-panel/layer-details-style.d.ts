@@ -8,6 +8,8 @@ export declare const getSxClasses: (theme: Theme) => {
     layerDetails: {
         border: string;
         padding: string;
+        overflow: string;
+        maxHeight: string;
     };
     buttonDescriptionContainer: {
         display: string;

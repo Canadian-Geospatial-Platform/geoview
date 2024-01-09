@@ -1,12 +1,29 @@
 /// <reference types="react" />
 /**
- * interface for CheckboxList basic properties
+ * CheckboxList main Props
  */
-interface CheckboxListType {
-    listItems: string[];
-    checkedItems: number[];
+export interface CheckboxListProps {
+    listItems: Array<CheckboxListItem>;
+    checkedValues: string[];
     multiselect: boolean;
-    setApiCheckedItems: (checkedItems: number[]) => void;
+    onChecked?: (value: string, checked: boolean, allChecked: Array<string>) => void;
 }
-export declare function CheckboxList({ listItems, multiselect, checkedItems, setApiCheckedItems }: CheckboxListType): JSX.Element;
-export {};
+/**
+ * A CheckboxList item
+ */
+export type CheckboxListItem = {
+    display: string;
+    value: string;
+    contentRight: JSX.Element;
+};
+/**
+ * Main Component
+ * @param props Main props for the component
+ * @returns JSX.Element The Component
+ */
+export declare function CheckboxList(props: CheckboxListProps): JSX.Element;
+export declare namespace CheckboxList {
+    var defaultProps: {
+        onChecked: null;
+    };
+}

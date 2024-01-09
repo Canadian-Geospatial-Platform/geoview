@@ -1,5 +1,7 @@
 import { TypeGetStore, TypeSetStore } from '../geoview-store';
 export interface TypeTimeSliderValues {
+    title?: string;
+    description?: string;
     name: string;
     range: string[];
     defaultValue: string;
@@ -10,8 +12,8 @@ export interface TypeTimeSliderValues {
     values: number[];
     filtering: boolean;
     delay: number;
-    locked: boolean;
-    reversed: boolean;
+    locked?: boolean;
+    reversed?: boolean;
 }
 export interface ITimeSliderState {
     timeSliderLayers: {
@@ -24,10 +26,13 @@ export interface ITimeSliderState {
         }) => void;
         applyFilters: (layerPath: string, values: number[]) => void;
         removeTimeSliderLayer: (layerPath: string) => void;
+        setTitle: (layerPath: string, title: string) => void;
+        setDescription: (layerPath: string, description: string) => void;
         setDelay: (layerPath: string, delay: number) => void;
         setFiltering: (layerPath: string, filter: boolean) => void;
         setLocked: (layerPath: string, locked: boolean) => void;
         setReversed: (layerPath: string, locked: boolean) => void;
+        setDefaultValue: (layerPath: string, defaultValue: string) => void;
         setValues: (layerPath: string, values: number[]) => void;
         setVisibleTimeSliderLayers: (visibleLayerPaths: string[]) => void;
     };
@@ -43,10 +48,13 @@ export declare const useTimeSliderStoreActions: () => {
     }) => void;
     applyFilters: (layerPath: string, values: number[]) => void;
     removeTimeSliderLayer: (layerPath: string) => void;
+    setTitle: (layerPath: string, title: string) => void;
+    setDescription: (layerPath: string, description: string) => void;
     setDelay: (layerPath: string, delay: number) => void;
     setFiltering: (layerPath: string, filter: boolean) => void;
     setLocked: (layerPath: string, locked: boolean) => void;
     setReversed: (layerPath: string, locked: boolean) => void;
+    setDefaultValue: (layerPath: string, defaultValue: string) => void;
     setValues: (layerPath: string, values: number[]) => void;
     setVisibleTimeSliderLayers: (visibleLayerPaths: string[]) => void;
 };

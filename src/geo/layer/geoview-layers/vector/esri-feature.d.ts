@@ -67,7 +67,7 @@ export declare class EsriFeature extends AbstractGeoViewVector {
      *
      * @returns {Promise<void>} A promise that the execution is completed.
      */
-    fetchServiceMetadata(): Promise<void>;
+    protected fetchServiceMetadata(): Promise<void>;
     /** ***************************************************************************************************************************
      * This method validates recursively the configuration of the layer entries to ensure that it is a feature layer identified
      * with a numeric layerId and creates a group entry when a layer is a group.
@@ -91,7 +91,7 @@ export declare class EsriFeature extends AbstractGeoViewVector {
      *
      * @returns {'string' | 'date' | 'number'} The type of the field.
      */
-    getFieldType(fieldName: string, layerConfig: TypeLayerEntryConfig): 'string' | 'date' | 'number';
+    protected getFieldType(fieldName: string, layerConfig: TypeLayerEntryConfig): 'string' | 'date' | 'number';
     /** ***************************************************************************************************************************
      * Return the domain of the specified field.
      *
@@ -100,13 +100,13 @@ export declare class EsriFeature extends AbstractGeoViewVector {
      *
      * @returns {null | codedValueType | rangeDomainType} The domain of the field.
      */
-    getFieldDomain(fieldName: string, layerConfig: TypeLayerEntryConfig): null | codedValueType | rangeDomainType;
+    protected getFieldDomain(fieldName: string, layerConfig: TypeLayerEntryConfig): null | codedValueType | rangeDomainType;
     /** ***************************************************************************************************************************
      * This method will create a Geoview temporal dimension if it exist in the service metadata
      * @param {TypeJsonObject} esriTimeDimension The ESRI time dimension object
      * @param {TypeEsriFeatureLayerEntryConfig | TypeEsriDynamicLayerEntryConfig} layerConfig The layer entry to configure
      */
-    processTemporalDimension(esriTimeDimension: TypeJsonObject, layerConfig: TypeEsriFeatureLayerEntryConfig | TypeEsriDynamicLayerEntryConfig): void;
+    protected processTemporalDimension(esriTimeDimension: TypeJsonObject, layerConfig: TypeEsriFeatureLayerEntryConfig | TypeEsriDynamicLayerEntryConfig): void;
     /** ***************************************************************************************************************************
      * This method verifies if the layer is queryable and sets the outfields and aliasFields of the source feature info.
      *

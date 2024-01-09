@@ -1,7 +1,7 @@
 import { Geometry } from '@/geo/layer/geometry/geometry';
 import { FeatureHighlight } from '@/geo/utils/feature-highlight';
 import { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
-import { TypeGeoviewLayerConfig, TypeLayerEntryConfig, TypeListOfLayerEntryConfig, TypeListOfLocalizedLanguages } from '@/geo/map/map-schema-types';
+import { TypeGeoviewLayerConfig, TypeLayerEntryConfig, TypeListOfLocalizedLanguages } from '@/geo/map/map-schema-types';
 export type TypeRegisteredLayers = {
     [layerPath: string]: TypeLayerEntryConfig;
 };
@@ -19,7 +19,7 @@ export declare class Layer {
     };
     layerPathAssociatedToThegeoviewLayer: string;
     geometry: Geometry | undefined;
-    layerOrder: string[];
+    initialLayerOrder: string[];
     /** used to reference the map id */
     private mapId;
     /** used to keep a reference to the Layer's event handler functions */
@@ -57,7 +57,7 @@ export declare class Layer {
     private printDuplicateGeoviewLayerConfigError;
     /**
      * Get the layer Path of the layer configuration parameter.
-     * @param {TypeLayerEntryConfig} layerConfig The layer configuration for wich we want to get the layer path.
+     * @param {TypeLayerEntryConfig} layerConfig The layer configuration for which we want to get the layer path.
      * @param {string} layerPath Internal parameter used to build the layer path (should not be used by the user).
      *
      * @returns {string} Returns the layer path.
@@ -134,26 +134,6 @@ export declare class Layer {
      * @returns the found layer data object
      */
     getGeoviewLayerByIdAsync: (layerID: string, mustBeLoaded: boolean, checkFrequency?: number, timeout?: number) => Promise<AbstractGeoViewLayer | null>;
-    /**
-     * Function used to order the sublayers based on their position in the config.
-     *
-     * @param {TypeListOfLayerEntryConfig} listOfLayerConfig List of layer configs to order
-     */
-    orderSubLayers(listOfLayerConfig: TypeListOfLayerEntryConfig): string[];
-    /**
-     * Set Z index for layer and it's sublayers
-     *
-     * @param {AbstractGeoViewLayer} geoviewLayer layer to set Z index for
-     */
-    setLayerZIndices: (geoviewLayer: AbstractGeoViewLayer) => void;
-    /**
-     * Move layer to new spot.
-     *
-     * @param {string} layerId ID of layer to be moved
-     * @param {number} destination index that layer is to move to
-     * @param {string} parentLayerId ID of parent layer if layer is a sublayer
-     */
-    moveLayer: (layerId: string, destination: number, parentLayerId?: string) => void;
     /**
      * Highlight layer or sublayer on map
      *

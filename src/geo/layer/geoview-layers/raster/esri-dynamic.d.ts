@@ -60,7 +60,7 @@ export declare class EsriDynamic extends AbstractGeoViewRaster {
      *
      * @returns {Promise<void>} A promise that the execution is completed.
      */
-    fetchServiceMetadata(): Promise<void>;
+    protected fetchServiceMetadata(): Promise<void>;
     /** ***************************************************************************************************************************
      * This method validates recursively the configuration of the layer entries to ensure that it is a feature layer identified
      * with a numeric layerId and creates a group entry when a layer is a group.
@@ -84,7 +84,7 @@ export declare class EsriDynamic extends AbstractGeoViewRaster {
      *
      * @returns {'string' | 'date' | 'number'} The type of the field.
      */
-    getFieldType(fieldName: string, layerConfig: TypeLayerEntryConfig): 'string' | 'date' | 'number';
+    protected getFieldType(fieldName: string, layerConfig: TypeLayerEntryConfig): 'string' | 'date' | 'number';
     /** ***************************************************************************************************************************
      * Return the domain of the specified field.
      *
@@ -93,13 +93,13 @@ export declare class EsriDynamic extends AbstractGeoViewRaster {
      *
      * @returns {null | codedValueType | rangeDomainType} The domain of the field.
      */
-    getFieldDomain(fieldName: string, layerConfig: TypeLayerEntryConfig): null | codedValueType | rangeDomainType;
+    protected getFieldDomain(fieldName: string, layerConfig: TypeLayerEntryConfig): null | codedValueType | rangeDomainType;
     /** ***************************************************************************************************************************
      * This method will create a Geoview temporal dimension if it exist in the service metadata
      * @param {TypeJsonObject} esriTimeDimension The ESRI time dimension object
      * @param {TypeEsriFeatureLayerEntryConfig | TypeEsriDynamicLayerEntryConfig} layerConfig The layer entry to configure
      */
-    processTemporalDimension(esriTimeDimension: TypeJsonObject, layerConfig: TypeEsriFeatureLayerEntryConfig | TypeEsriDynamicLayerEntryConfig): void;
+    protected processTemporalDimension(esriTimeDimension: TypeJsonObject, layerConfig: TypeEsriFeatureLayerEntryConfig | TypeEsriDynamicLayerEntryConfig): void;
     /** ***************************************************************************************************************************
      * This method verifies if the layer is queryable and sets the outfields and aliasFields of the source feature info.
      *
@@ -230,7 +230,7 @@ export declare class EsriDynamic extends AbstractGeoViewRaster {
      */
     private buildQuery;
     /** ***************************************************************************************************************************
-     * Get the layer view filter. The filter is derived fron the uniqueValue or the classBreak visibility flags and a layerFilter
+     * Get the layer view filter. The filter is derived from the uniqueValue or the classBreak visibility flags and a layerFilter
      * associated to the layer.
      *
      * @param {string} layerPath The layer path to the layer's configuration.
@@ -239,6 +239,28 @@ export declare class EsriDynamic extends AbstractGeoViewRaster {
      */
     getViewFilter(layerPath: string): string;
     /** ***************************************************************************************************************************
+     * Apply a view filter to the layer identified by the path stored in the layerPathAssociatedToThegeoviewLayer property stored
+     * in the layer instance associated to the map. The legend filters are derived from the uniqueValue or classBreaks style of the
+     * layer. When the layer config is invalid, nothing is done.
+     *
+     * @param {string} filter An optional filter to be used in place of the getViewFilter value.
+     * @param {never} notUsed1 This parameter must not be provided. It is there to allow overloading of the method signature.
+     * @param {never} notUsed2 This parameter must not be provided. It is there to allow overloading of the method signature.
+     */
+    applyViewFilter(filter: string, notUsed1?: never, notUsed2?: never): void;
+    /** ***************************************************************************************************************************
+     * Apply a view filter to the layer identified by the path stored in the layerPathAssociatedToThegeoviewLayer property stored
+     * in the layer instance associated to the map. When the CombineLegendFilter flag is false, the filter paramater is used alone
+     * to display the features. Otherwise, the legend filter and the filter parameter are combined together to define the view
+     * filter. The legend filters are derived from the uniqueValue or classBreaks style of the layer. When the layer config is
+     * invalid, nothing is done.
+     *
+     * @param {string} filter An optional filter to be used in place of the getViewFilter value.
+     * @param {boolean} CombineLegendFilter Flag used to combine the legend filter and the filter together (default: true)
+     * @param {never} notUsed This parameter must not be provided. It is there to allow overloading of the method signature.
+     */
+    applyViewFilter(filter: string, CombineLegendFilter: boolean, notUsed?: never): void;
+    /** ***************************************************************************************************************************
      * Apply a view filter to the layer. When the CombineLegendFilter flag is false, the filter paramater is used alone to display
      * the features. Otherwise, the legend filter and the filter parameter are combined together to define the view filter. The
      * legend filters are derived from the uniqueValue or classBreaks style of the layer. When the layer config is invalid, nothing
@@ -246,16 +268,25 @@ export declare class EsriDynamic extends AbstractGeoViewRaster {
      *
      * @param {string} layerPath The layer path to the layer's configuration.
      * @param {string} filter An optional filter to be used in place of the getViewFilter value.
-     * @param {boolean} CombineLegendFilter Flag used to combine the legend filter and the filter together (default: true)
+     * @param {boolean} combineLegendFilter Flag used to combine the legend filter and the filter together (default: true)
      */
-    applyViewFilter(layerPath?: string, filter?: string, CombineLegendFilter?: boolean): void;
+    applyViewFilter(layerPath: string, filter?: string, combineLegendFilter?: boolean): void;
     /** ***************************************************************************************************************************
-     * Get the bounds of the layer represented in the layerConfig, returns updated bounds
+     * Get the bounds of the layer represented in the layerConfig pointed to by the cached layerPath, returns updated bounds
+     *
+     * @param {Extent | undefined} bounds The current bounding box to be adjusted.
+     * @param {never} notUsed This parameter must not be provided. It is there to allow overloading of the method signature.
+     *
+     * @returns {Extent} The new layer bounding box.
+     */
+    protected getBounds(bounds: Extent, notUsed?: never): Extent | undefined;
+    /** ***************************************************************************************************************************
+     * Get the bounds of the layer represented in the layerConfig pointed to by the layerPath, returns updated bounds
      *
      * @param {string} layerPath The Layer path to the layer's configuration.
      * @param {Extent | undefined} bounds The current bounding box to be adjusted.
      *
-     * @returns {Extent} The layer bounding box.
+     * @returns {Extent} The new layer bounding box.
      */
-    getBounds(layerPath: string, bounds: Extent | undefined): Extent | undefined;
+    protected getBounds(layerPath: string, bounds?: Extent): Extent | undefined;
 }

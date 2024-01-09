@@ -4,7 +4,6 @@ export declare const getSxClasses: (theme: Theme) => {
         display: string;
         flexDirection: string;
         justifyContent: string;
-        minWidth: number;
         zIndex: number;
         pointerEvents: string;
         backgroundColor: string;

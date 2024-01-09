@@ -12,14 +12,6 @@ export declare class TimeSliderEventProcessor extends AbstractEventProcessor {
      */
     private static filterTimeSliderLayers;
     /**
-     * Filter array of legend layers to get visible time slider layer paths
-     *
-     * @param {string} mapId The id of the map
-     * @param {TypeLegendLayer[]} legendLayers Array of legend layers to filter
-     * @returns {string[]} A list of usable layer paths
-     */
-    private static filterVisibleTimeSliderLayers;
-    /**
      * Get initial values for a layer's time slider states
      *
      * @param {string} mapId The id of the map

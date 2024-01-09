@@ -5,6 +5,7 @@ import { GeoviewStoreType } from '@/core/stores/geoview-store';
 import { AbstractEventProcessor } from '../abstract-event-processor';
 import { Coordinate, TypeBasemapOptions, TypeBasemapProps, TypeClickMarker } from '@/app';
 import { TypeInteraction, TypeMapState, TypeValidMapProjectionCodes } from '@/geo/map/map-schema-types';
+import { TypeLegendLayer } from '@/core/components/layers/types';
 export declare class MapEventProcessor extends AbstractEventProcessor {
     onInitialize(store: GeoviewStoreType): void;
     static setMapLoaded(mapId: string): void;
@@ -21,6 +22,7 @@ export declare class MapEventProcessor extends AbstractEventProcessor {
     static createEmptyBasemap(mapId: string): import("ol/layer/Tile").default<import("ol/source/XYZ").default>;
     static createOverviewMapBasemap(mapId: string): TypeBasemapProps | undefined;
     static resetBasemap(mapId: string): void;
+    static getLayerPathsFromLegendsArray(legendsArray: TypeLegendLayer[]): string[];
     static setMapKeyboardPanInteractions(mapId: string, panDelta: number): void;
     /**
      * Set the React root overview map element so it can be destroy if the map element is destroyed
@@ -40,4 +42,10 @@ export declare class MapEventProcessor extends AbstractEventProcessor {
     static zoomToGeoLocatorLocation(mapId: string, coords: Coordinate, bbox?: Extent): void;
     static zoomToInitialExtent(mapId: string): void;
     static zoomToMyLocation(mapId: string, position: GeolocationPosition): void;
+    /**
+     * Set Z index for layers
+     *
+     * @param {string} mapId Id of map to set layer Z indices
+     */
+    static setLayerZIndices: (mapId: string) => void;
 }

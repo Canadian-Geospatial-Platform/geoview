@@ -1,5 +1,4 @@
 import { ReactNode } from 'react';
-import { CheckboxListAPI } from '../list/checkbox-list/checkbox-list-api';
 import { PanelStyles, TypePanelProps } from './panel-types';
 /**
  * Class used to handle creating a new panel
@@ -17,7 +16,6 @@ export declare class PanelApi {
     content: ReactNode;
     buttonId: string;
     mapId: string;
-    checkboxListAPI?: CheckboxListAPI;
     panelStyles?: PanelStyles;
     /**
      * Initialize a new panel
@@ -50,14 +48,6 @@ export declare class PanelApi {
      * @returns {Panel} the panel
      */
     addActionButton: (actionButtonId: string, title: string, children: string | React.ReactElement | Element, action: () => void) => PanelApi;
-    /**
-     * Create a check list that can be used as a content
-     *
-     * @param {String[]} elements of the check list the content to update to
-     *
-     * @returns {CheckboxList} the check list
-     */
-    attachCheckBoxList: (listItems: string[], multiselectFlag?: boolean, checkedItems?: number[]) => void;
     /**
      * Change the content of the panel
      *

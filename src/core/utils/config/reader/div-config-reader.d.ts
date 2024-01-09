@@ -1,7 +1,7 @@
 import { TypeMapFeaturesConfig } from '@/core/types/global-types';
 /** *****************************************************************************************************************************
  * A class to read the configuration of the GeoView map features from an online div. The configuration is provided in an HTML div
- * whose class name is "llwp-map". The div tag also has the attributes id to set the map id, data-lang to specify the display
+ * whose class name is "geoview-map". The div tag also has the attributes id to set the map id, data-lang to specify the display
  * language and data-config to provide the map configuration.
  *
  * The configuration must respect the JSON format. However, for readability reasons, the quotes (") are replaced by

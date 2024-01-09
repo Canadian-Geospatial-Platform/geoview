@@ -507,7 +507,7 @@ export type TypeBaseLayerEntryConfig = {
      * metadata. */
     isMetadataLayerGroup?: boolean;
     /** Tag used to link the entry to a specific schema. */
-    schemaTag: TypeGeoviewLayerType;
+    schemaTag?: TypeGeoviewLayerType;
     /** Layer entry data type. */
     entryType?: 'vector' | 'vector-tile' | 'vector-heatmap' | 'raster-image' | 'raster-tile' | 'group';
     /** The ending element of the layer configuration path. */
@@ -780,14 +780,14 @@ export type TypeSourceGeocoreConfig = {
 /** ******************************************************************************************************************************
  * Type used to define a layer group.
  */
-export interface TypeLayerGroupEntryConfig extends Omit<TypeBaseLayerEntryConfig, 'layerStatus' | 'listOfLayerEntryConfig'> {
+export interface TypeLayerGroupEntryConfig extends Omit<TypeBaseLayerEntryConfig, 'source' | 'layerStatus' | 'listOfLayerEntryConfig'> {
     /** This attribute is not part of the schema. It is used internally to distinguish layer groups derived from the
      * metadata. */
     isMetadataLayerGroup?: boolean;
     /** Layer entry data type. */
     entryType: 'group';
     /** The source attribute does not exists on the layer group entry. */
-    source: never;
+    source?: never;
     /** The list of layer entry configurations to use from the GeoView layer group. */
     listOfLayerEntryConfig: TypeListOfLayerEntryConfig;
 }
@@ -974,7 +974,7 @@ export type TypeMapComponents = Array<'north-arrow' | 'overview-map'>;
  * the same loaction as core config (<<core config name>>-<<package name>>.json).
  * Default = ['basemap-panel' | 'layers-panel' | 'details-panel' | 'geolocator-panel'].
  */
-export type TypeMapCorePackages = Array<'basemap-panel' | 'layers-panel' | 'details-panel' | 'geolocator-panel' | 'footer-panel'>;
+export type TypeMapCorePackages = Array<'basemap-panel' | 'layers-panel' | 'details-panel' | 'geolocator-panel' | 'footer-panel' | 'geochart' | 'time-slider'>;
 /** ******************************************************************************************************************************
  * List of external packages to initialize on viewer load. Default = [].
  */

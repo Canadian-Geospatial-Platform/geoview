@@ -68,11 +68,6 @@ export declare class GeoUtilities {
      */
     getWFSServiceMetadata: (url: string) => Promise<TypeJsonObject>;
     /**
-     * Apply outline to elements when keyboard is use to navigate
-     * Code from: https://github.com/MaxMaeder/keyboardFocus.js
-     */
-    manageKeyboardFocus: () => void;
-    /**
      * Return the map server url from a layer service
      *
      * @param {string} url the service url for a wms / dynamic or feature layers

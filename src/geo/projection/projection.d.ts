@@ -1,5 +1,6 @@
 import { Coordinate } from 'ol/coordinate';
-import { Projection as OLProjection } from 'ol/proj';
+import { Projection as olProjection, ProjectionLike } from 'ol/proj';
+import { Extent } from 'ol/extent';
 /**
  * constant used for the available projection names
  */
@@ -18,7 +19,7 @@ export declare class Projection {
     /**
      * List of supported projections
      */
-    projections: Record<string, OLProjection>;
+    projections: Record<string, olProjection>;
     /**
      * initialize projections
      */
@@ -36,7 +37,31 @@ export declare class Projection {
      */
     private initLCCProjection;
     /**
-     * Convert points from one projection to another
+     * Transforms an extent from source projection to destination projection. This returns a new extent (and does not modify the
+     * original).
+     *
+     * @param {Extent} extent The extent to transform.
+     * @param {ProjectionLike} source Source projection-like.
+     * @param {ProjectionLike} destination Destination projection-like.
+     * @param {number} stops Optional number of stops per side used for the transform. The default value is 20.
+     *
+     * @returns The densified extent transformed in the destination projection.
+     */
+    transformAndDensifyExtent(extent: Extent, source: ProjectionLike, destination: ProjectionLike, stops?: number): Coordinate[];
+    /**
+     * Transforms an extent from source projection to destination projection. This returns a new extent (and does not modify the
+     * original).
+     *
+     * @param {Extent} extent The extent to transform.
+     * @param {ProjectionLike} source Source projection-like.
+     * @param {ProjectionLike} destination Destination projection-like.
+     * @param {number} stops Optional number of stops per side used for the transform. By default only the corners are used.
+     *
+     * @returns The new extent transformed in the destination projection.
+     */
+    transformExtent(extent: Extent, source: ProjectionLike, destination: ProjectionLike, stops?: number | undefined): Extent;
+    /**
+     * Convert points from one projection to another using proj4
      *
      * @param {Coordinate[]} points array of passed in points to convert
      * @param {string} fromProj projection to be converted from
@@ -44,41 +69,37 @@ export declare class Projection {
      */
     transformPoints: (points: Coordinate[], fromProj: string, toProj: string) => Array<Array<number>>;
     /**
-     * Convert points from LNGLAT EPSG:4326 to LCC EPSG:3978
+     * Wrapper around OpenLayers function to transforms a coordinate from lone projection to another.
      *
-     * @param {Coordinate[]} points array of passed in points to convert
+     * @param {Coordinate} coordinate Longitude/latitude coordinate
+     * @param {ProjectionLike} inProjection Actual projection of the coordinate
+     * @param {ProjectionLike} outProjection Desired projection of the coordinate
+     * @return {Coordinate}  Coordinate as projected
      */
-    lngLatToLCC: (points: Coordinate[]) => Array<Array<number> | number>;
+    transform(coordinate: Coordinate, inProjection: ProjectionLike, outProjection: ProjectionLike): Coordinate;
     /**
-     * Convert points from LNGLAT EPSG:4326 to WM EPSG:3857
+     * Wrapper around OpenLayers function to transforms a coordinate from longitude/latitude.
      *
-     * @param {Coordinate[]} points array of passed in points to convert
+     * @param {Coordinate} coordinate Longitude/latitude coordinate
+     * @param {ProjectionLike} projection Projection to project the coordinate
+     * @return {Coordinate}  Coordinate as projected
      */
-    LngLatToWm: (points: Coordinate[]) => Array<Array<number> | number>;
+    transformFromLonLat(coordinate: Coordinate, projection: ProjectionLike): Coordinate;
     /**
-     * Convert points from LCC EPSG:3978 to WM EPSG:3857
+     * Wrapper around OpenLayers function to transforms a coordinate to longitude/latitude.
      *
-     * @param {Coordinate[]} points array of passed in points to convert
+     * @param {Coordinate} coordinate Projected coordinate
+     * @param {ProjectionLike} projection Projection of the coordinate
+     * @return {Coordinate}  Coordinate as longitude and latitude, i.e. an array with longitude as 1st and latitude as 2nd element.
      */
-    lccToWm: (points: Coordinate[]) => Array<Array<number> | number>;
+    transformToLonLat(coordinate: Coordinate, projection: ProjectionLike): Coordinate;
     /**
-     * Convert points from LCC EPSG:3978 to LNGLAT EPSG:4326
+     * Wrapper around OpenLayers get function that fetches a Projection object for the code specified.
      *
-     * @param {Coordinate[]} points array of passed in points to convert
+     * @param {ProjectionLike} projectionLike Either a code string which is a combination of authority and identifier such as "EPSG:4326", or an existing projection object, or undefined.
+     * @return {olProjection | null} — Projection object, or null if not in list.
      */
-    lccToLngLat: (points: Coordinate[]) => Array<Array<number> | number>;
-    /**
-     * Convert points from WM EPSG:3857 to LNGLAT EPSG:4326
-     *
-     * @param {Coordinate[]} points array of passed in points to convert
-     */
-    wmToLngLat: (points: Coordinate[]) => Array<Array<number> | number>;
-    /**
-     * Convert points from WM EPSG:3857 to LCC EPSG:3978
-     *
-     * @param {Coordinate[]} points array of passed in points to convert
-     */
-    wmToLcc: (points: Coordinate[]) => Array<Array<number> | number>;
+    getProjection(projectionLike: ProjectionLike): olProjection | null;
     /**
      * Get map point resolution
      *

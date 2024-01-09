@@ -70,7 +70,7 @@ export declare abstract class AbstractGeoViewVector extends AbstractGeoViewLayer
      *
      * @returns {TypeArrayOfFeatureInfoEntries} The feature info table.
      */
-    protected getAllFeatureInfo(layerPath: string): Promise<TypeArrayOfFeatureInfoEntries>;
+    protected getAllFeatureInfo(layerPath?: string): Promise<TypeArrayOfFeatureInfoEntries>;
     /** ***************************************************************************************************************************
      * Return feature information for all the features around the provided Pixel.
      *
@@ -79,7 +79,7 @@ export declare abstract class AbstractGeoViewVector extends AbstractGeoViewLayer
      *
      * @returns {Promise<TypeArrayOfFeatureInfoEntries> | null} The feature info table or null if an error occured.
      */
-    protected getFeatureInfoAtPixel(location: Pixel, layerPath: string): Promise<TypeArrayOfFeatureInfoEntries | null>;
+    protected getFeatureInfoAtPixel(location: Pixel, layerPath?: string): Promise<TypeArrayOfFeatureInfoEntries | null>;
     /** ***************************************************************************************************************************
      * Return feature information for all the features around the provided projected coordinate.
      *
@@ -88,7 +88,7 @@ export declare abstract class AbstractGeoViewVector extends AbstractGeoViewLayer
      *
      * @returns {Promise<TypeArrayOfFeatureInfoEntries>} The feature info table.
      */
-    protected getFeatureInfoAtCoordinate(location: Coordinate, layerPath: string): Promise<TypeArrayOfFeatureInfoEntries>;
+    protected getFeatureInfoAtCoordinate(location: Coordinate, layerPath?: string): Promise<TypeArrayOfFeatureInfoEntries>;
     /** ***************************************************************************************************************************
      * Return feature information for all the features around the provided longitude latitude.
      *
@@ -97,16 +97,47 @@ export declare abstract class AbstractGeoViewVector extends AbstractGeoViewLayer
      *
      * @returns {Promise<TypeArrayOfFeatureInfoEntries>} The feature info table.
      */
-    protected getFeatureInfoAtLongLat(location: Coordinate, layerPath: string): Promise<TypeArrayOfFeatureInfoEntries>;
+    protected getFeatureInfoAtLongLat(location: Coordinate, layerPath?: string): Promise<TypeArrayOfFeatureInfoEntries>;
     /** ***************************************************************************************************************************
-     * Get the bounds of the layer represented in the layerConfig, returns updated bounds
+     * Get the bounds of the layer represented in the layerConfig pointed to by the cached layerPath, returns updated bounds
+     *
+     * @param {Extent | undefined} bounds The current bounding box to be adjusted.
+     * @param {never} notUsed This parameter must not be provided. It is there to allow overloading of the method signature.
+     *
+     * @returns {Extent} The new layer bounding box.
+     */
+    protected getBounds(bounds: Extent, notUsed?: never): Extent | undefined;
+    /** ***************************************************************************************************************************
+     * Get the bounds of the layer represented in the layerConfig pointed to by the layerPath, returns updated bounds
      *
      * @param {string} layerPath The Layer path to the layer's configuration.
      * @param {Extent | undefined} bounds The current bounding box to be adjusted.
      *
-     * @returns {Extent} The layer bounding box.
+     * @returns {Extent} The new layer bounding box.
      */
-    getBounds(layerPath: string, bounds: Extent | undefined): Extent | undefined;
+    protected getBounds(layerPath: string, bounds?: Extent): Extent | undefined;
+    /** ***************************************************************************************************************************
+     * Apply a view filter to the layer identified by the path stored in the layerPathAssociatedToThegeoviewLayer property stored
+     * in the layer instance associated to the map. The legend filters are derived from the uniqueValue or classBreaks style of the
+     * layer. When the layer config is invalid, nothing is done.
+     *
+     * @param {string} filter A filter to be used in place of the getViewFilter value.
+     * @param {never} notUsed1 This parameter must not be provided. It is there to allow overloading of the method signature.
+     * @param {never} notUsed2 This parameter must not be provided. It is there to allow overloading of the method signature.
+     */
+    applyViewFilter(filter: string, notUsed1?: never, notUsed2?: never): void;
+    /** ***************************************************************************************************************************
+     * Apply a view filter to the layer identified by the path stored in the layerPathAssociatedToThegeoviewLayer property stored
+     * in the layer instance associated to the map. When the CombineLegendFilter flag is false, the filter paramater is used alone
+     * to display the features. Otherwise, the legend filter and the filter parameter are combined together to define the view
+     * filter. The legend filters are derived from the uniqueValue or classBreaks style of the layer. When the layer config is
+     * invalid, nothing is done.
+     *
+     * @param {string} filter A filter to be used in place of the getViewFilter value.
+     * @param {boolean} CombineLegendFilter Flag used to combine the legend filter and the filter together (default: true)
+     * @param {never} notUsed This parameter must not be provided. It is there to allow overloading of the method signature.
+     */
+    applyViewFilter(filter: string, CombineLegendFilter: boolean, notUsed?: never): void;
     /** ***************************************************************************************************************************
      * Apply a view filter to the layer. When the CombineLegendFilter flag is false, the filter paramater is used alone to display
      * the features. Otherwise, the legend filter and the filter parameter are combined together to define the view filter. The
@@ -114,8 +145,8 @@ export declare abstract class AbstractGeoViewVector extends AbstractGeoViewLayer
      * is done.
      *
      * @param {string} layerPath The layer path to the layer's configuration.
-     * @param {string} filter An optional filter to be used in place of the getViewFilter value.
+     * @param {string} filter A filter to be used in place of the getViewFilter value.
      * @param {boolean} CombineLegendFilter Flag used to combine the legend filter and the filter together (default: true)
      */
-    applyViewFilter(layerPath?: string, filter?: string, CombineLegendFilter?: boolean): void;
+    applyViewFilter(layerPath: string, filter?: string, CombineLegendFilter?: boolean): void;
 }
