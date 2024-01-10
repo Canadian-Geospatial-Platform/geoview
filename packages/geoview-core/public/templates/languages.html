@@ -33,7 +33,7 @@
             <td>
               <a href="./index.html">Main</a><br />
               <a href="#HLNG1">1. French</a><br />
-              <a href="#HLNG3">2. English</a><br />
+              <a href="#HLNG2">2. English</a><br />
             </td>
           </tr>
         </tbody>
@@ -73,10 +73,10 @@
     <hr />
 
     <div class="map-title-holder">
-      <h4 id="HLNG3">2. English</h4>
+      <h4 id="HLNG2">2. English</h4>
       <a class="ref-link" href="#top">Top</a>
     </div>
-    <div id="LNG3" class="geoview-map" data-lang="en"></div>
+    <div id="LNG2" class="" data-lang="en"></div>
     <p>This map is in English.</p>
     <hr />
 
@@ -123,12 +123,9 @@
           'suportedLanguages': ['fr', 'en']
         }`;
 
-      // creates map in empty div
-      // TODO: make the function createMapFromConfig async with api is ready
-      setTimeout(() => {
-        cgpv.api.createMapFromConfig('LNG1', config);
-        // cgpv.api.createMapFromConfig('LNG2', config);
-      }, 1000);
+      // create maps in empty divs
+      cgpv.api.createMapFromConfig('LNG1', config);
+      cgpv.api.createMapFromConfig('LNG2', config);
 
       const switchLang = document.getElementById('switchLang');
       switchLang.addEventListener('change', (e) => {
@@ -150,29 +147,6 @@
       mapLangButton.addEventListener('click', function (e) {
         const lang = cgpv.api.maps['LNG1'].getDisplayLanguage() === 'en' ? 'fr' : 'en';
         cgpv.api.maps['LNG1'].setLanguage(lang, true);
-      });
-
-      // initialize cgpv and api events, a callback is optional, used if calling api's after the rendering is ready
-      // we need a least one map to trigger callback
-      // TODO: we can have the callback after one map has been trigger from outside, I put a timeout of 1000 so init goes first
-      // TODO make the function async
-      cgpv.init(function () {
-        console.log('api is ready');
-
-        // loads config in blank map
-        // cgpv.api.maps['LNG2'].loadMapFromJsonStringConfig (config);
-        // TODO: Investigate part of #1118, if we remove the calss on div it works by passing with getValidMapConfig
-        // if using the loadMapFromJsonStringConfig  (when cass exist) it fails for the second map. This whole start from function must be refactor.
-        // because of class geoview-map, the map is created from default config.
-        // We should not let injection of new config in created map... only reload
-        // See if we remove loadMapFromJsonStringConfig.. use change language and chage theme to switch....
-        // setTimeout(() => {
-        //   cgpv.api.createMapFromConfig('LNG3', config)
-        // }, 4000);
-
-        //create snippet
-        createConfigSnippet();
-        createCodeSnippet();
       });
     </script>
   </body>

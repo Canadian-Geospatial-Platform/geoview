@@ -426,10 +426,12 @@ export class MapViewer {
   }
 
   /**
-   * Loop trought all geoview layeres and refresh source. Use this function on projection change or other
-   * viewer modification who may affect rendering
+   * Loop through all geoview layers and refresh their respective source.
+   * Use this function on projection change or other viewer modification who may affect rendering.
+   *
+   * @returns A Promise which resolves when the rendering is completed after the source(s) were changed.
    */
-  refreshLayers(): void {
+  refreshLayers(): Promise<void> {
     const mapLayers = api.maps[this.mapId].layer.geoviewLayers;
     Object.entries(mapLayers).forEach((mapLayerEntry) => {
       const refreshBaseLayer = (baseLayer: BaseLayer | null) => {
@@ -446,6 +448,14 @@ export class MapViewer {
         }
       };
       refreshBaseLayer(mapLayerEntry[1].olLayers);
+    });
+
+    // Return a promise for when rendering will complete
+    return new Promise<void>((resolve) => {
+      api.maps[this.mapId].map.once('rendercomplete', () => {
+        // Done
+        resolve();
+      });
     });
   }
   // #endregion
