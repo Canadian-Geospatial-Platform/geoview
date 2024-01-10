@@ -190,7 +190,8 @@ export class LegendEventProcessor extends AbstractEventProcessor {
         try {
           const myLayer = await api.maps[mapId].layer.getGeoviewLayerByIdAsync(layerPathNodes[0], true);
           newLegendLayer.bounds = myLayer?.calculateBounds(layerPath);
-        } catch {
+        } catch (error) {
+          console.error(`Couldn't calculate bounds on layer ${layerPath}`);
           newLegendLayer.bounds = undefined;
         }
       }
