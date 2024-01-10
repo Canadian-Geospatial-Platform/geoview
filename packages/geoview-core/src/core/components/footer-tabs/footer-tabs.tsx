@@ -1,12 +1,21 @@
-import { MutableRefObject, useCallback, useEffect, useRef, useState } from 'react';
-
+import { MutableRefObject, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTheme } from '@mui/material/styles';
-
-import { Box, FullscreenIcon, FullscreenExitIcon, IconButton, Tabs, TypeTabs, MoveDownRoundedIcon, MoveUpRoundedIcon } from '@/ui';
+import { Box, IconButton, Tabs, TypeTabs, MoveDownRoundedIcon, MoveUpRoundedIcon } from '@/ui';
 import { api, useGeoViewMapId } from '@/app';
 import { EVENT_NAMES } from '@/api/events/event-types';
 import { FooterTabPayload, PayloadBaseClass, payloadIsAFooterTab } from '@/api/events/payloads';
 import { getSxClasses } from './footer-tabs-style';
+import { ResizePopover } from '../resize-popover/resize-popover';
+import { useAppFullscreenActive } from '@/core/stores/store-interface-and-intial-values/app-state';
+import { useUIFooterPanelResizeValue, useUIFooterPanelResizeValues } from '@/core/stores/store-interface-and-intial-values/ui-state';
+
+interface MapContainerCssProperties {
+  mapVisibility: string;
+  mapMinHeight: number;
+  mapHeight: number;
+  tabMinHeight: string | number;
+  tabMaxHeight: number | string;
+}
 
 /**
  * The FooterTabs component is used to display a list of tabs and their content.
@@ -28,10 +37,46 @@ export function FooterTabs(): JSX.Element | null {
   const [isFocusToMap, setIsFocusToMap] = useState<boolean>(true);
 
   const tabsContainerRef = useRef<HTMLDivElement>();
+  const mapContainerRef = useRef<HTMLElement | null>(null);
 
   // get map div and follow state of original map height
   const mapDiv = document.getElementById(mapId)!;
   const [origHeight, setOrigHeight] = useState<number>(0);
+
+  const isMapFullScreen = useAppFullscreenActive();
+  const footerPanelResizeValue = useUIFooterPanelResizeValue();
+  const footerPanelResizeValues = useUIFooterPanelResizeValues();
+
+  /**
+   * Calculate resize values from popover values defined in store.
+   */
+  const resizeValues = useMemo(() => {
+    return footerPanelResizeValues.reduce((acc, curr) => {
+      const windowHeight = window.screen.height;
+      let values: [string, number, number, number | string, number | string] = [
+        'visible',
+        windowHeight - (windowHeight * footerPanelResizeValue) / 100,
+        windowHeight - (windowHeight * footerPanelResizeValue) / 100,
+        '',
+        origHeight,
+      ];
+
+      if (curr === 10) {
+        values = ['visible', origHeight, origHeight, '', origHeight];
+      } else if (curr === 100) {
+        values = ['hidden', 0, 0, 2 * origHeight, ''];
+      }
+
+      acc[curr] = {
+        mapVisibility: values[0],
+        mapMinHeight: values[1],
+        mapHeight: values[2],
+        tabMinHeight: values[3],
+        tabMaxHeight: values[4],
+      };
+      return acc;
+    }, {} as Record<number, MapContainerCssProperties>);
+  }, [origHeight, footerPanelResizeValue, footerPanelResizeValues]);
 
   /**
    * Add a tab
@@ -102,24 +147,44 @@ export function FooterTabs(): JSX.Element | null {
    */
   useEffect(() => {
     // ol map container div
-    const olMapContainer: HTMLElement | null = mapDiv.querySelector('.mapContainer');
-    if (olMapContainer) {
-      olMapContainer.style.visibility = isFullscreen ? 'hidden' : 'visible';
-      olMapContainer.style.minHeight = isFullscreen ? '0px' : `${origHeight}px`;
-      olMapContainer.style.height = isFullscreen ? '0px' : `${origHeight}px`;
+    mapContainerRef.current = mapDiv.querySelector('.mapContainer');
+    const { mapVisibility, mapHeight, mapMinHeight, tabMaxHeight, tabMinHeight } = resizeValues[10];
+
+    if (mapContainerRef.current) {
+      mapContainerRef.current.style.visibility = mapVisibility;
+      mapContainerRef.current.style.minHeight = `${mapMinHeight}px`;
+      mapContainerRef.current.style.height = `${mapHeight}px`;
     }
     // tabs container div
     if (isFullscreen) setIsCollapsed(false);
     const tabsContainers: NodeListOf<HTMLElement> = mapDiv.querySelectorAll('.tabsContainer');
     if (tabsContainers.length > 0) {
       const tabsContainer: HTMLElement = tabsContainers[0];
-      tabsContainer.style.minHeight = isFullscreen ? `${2 * origHeight}px` : '';
+      tabsContainer.style.minHeight = typeof tabMaxHeight === 'string' ? '' : `${tabMinHeight}px`;
       const lastChild = tabsContainer.firstElementChild?.lastElementChild as HTMLElement | null;
       if (lastChild) {
-        lastChild.style.maxHeight = isFullscreen ? '' : `${origHeight}px`;
+        lastChild.style.maxHeight = typeof tabMaxHeight === 'string' ? '' : `${tabMaxHeight}px`;
       }
     }
-  }, [isFullscreen, mapDiv, origHeight]);
+  }, [isFullscreen, mapDiv, origHeight, resizeValues]);
+
+  useEffect(() => {
+    // Update the height of mapContainer and footer tabs Container based on resize value in store.
+    mapContainerRef.current = mapDiv.querySelector('.mapContainer');
+    if (tabsContainerRef.current && mapContainerRef.current) {
+      const { mapVisibility, mapHeight, mapMinHeight, tabMaxHeight, tabMinHeight } = resizeValues[footerPanelResizeValue];
+
+      mapContainerRef.current.style.visibility = mapVisibility;
+      mapContainerRef.current.style.minHeight = `${mapMinHeight}px`;
+      mapContainerRef.current.style.height = `${mapHeight}px`;
+      tabsContainerRef.current.style.minHeight = typeof tabMaxHeight === 'string' ? '' : `${tabMinHeight}px`;
+      const lastChild = tabsContainerRef.current.firstElementChild?.lastElementChild as HTMLElement | null;
+      if (lastChild) {
+        lastChild.style.maxHeight = typeof tabMaxHeight === 'string' ? '' : `${tabMaxHeight}px`;
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isMapFullScreen, footerPanelResizeValue]);
 
   /**
    * Handle a collapse, expand event for the tabs component
@@ -215,15 +280,13 @@ export function FooterTabs(): JSX.Element | null {
         TabContentVisibilty={!isCollapsed ? 'visible' : 'hidden'}
         rightButtons={
           <>
-            {!isCollapsed && (
-              <IconButton onClick={() => setIsFullscreen(!isFullscreen)}>
-                {isFullscreen ? <FullscreenExitIcon /> : <FullscreenIcon />}
-              </IconButton>
-            )}
+            {!isCollapsed && <ResizePopover />}
             <IconButton
               onClick={handleDynamicFocus}
               tooltip={isFocusToMap ? 'footerTabsContainer.focusToMap' : 'footerTabsContainer.focusToFooter'}
-              disabled={isCollapsed}
+              disabled={
+                isCollapsed || isMapFullScreen || footerPanelResizeValues[footerPanelResizeValues.length - 1] === footerPanelResizeValue
+              }
             >
               {isFocusToMap ? <MoveUpRoundedIcon /> : <MoveDownRoundedIcon />}
             </IconButton>
