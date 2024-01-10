@@ -82,7 +82,7 @@ export function Scale(): JSX.Element {
               sx={{
                 ...sxClasses.scaleText,
                 borderBottom: !scaleValues[scaleMode].borderBottom ? 'none' : '1px solid',
-                width: !scaleValues[scaleMode].borderBottom ? 'inherit' : scale.lineWidth,
+                width: scaleValues[scaleMode].borderBottom ? scale.lineWidth : 'none',
               }}
             >
               {scaleValues[scaleMode].label}
