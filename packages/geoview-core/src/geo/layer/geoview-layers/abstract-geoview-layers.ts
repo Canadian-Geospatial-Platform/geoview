@@ -8,11 +8,18 @@ import { Pixel } from 'ol/pixel';
 import { Extent } from 'ol/extent';
 import LayerGroup, { Options as LayerGroupOptions } from 'ol/layer/Group';
 import Feature from 'ol/Feature';
-import Geometry from 'ol/geom/Geometry';
 
 import cloneDeep from 'lodash/cloneDeep';
 
-import { generateId, getLocalizedValue, getXMLHttpRequest, showError, replaceParams, getLocalizedMessage } from '@/core/utils/utilities';
+import {
+  generateId,
+  getLocalizedValue,
+  getXMLHttpRequest,
+  showError,
+  replaceParams,
+  getLocalizedMessage,
+  whenThisThen,
+} from '@/core/utils/utilities';
 import {
   TypeGeoviewLayerConfig,
   TypeListOfLayerEntryConfig,
@@ -514,14 +521,12 @@ export abstract class AbstractGeoViewLayer {
         await this.getAdditionalServiceDefinition();
         this.olLayers = await this.processListOfLayerEntryConfig(this.listOfLayerEntryConfig);
       } catch (error) {
-        console.log(error);
+        console.error(error);
       }
     } else {
       const message = replaceParams([this.mapId], getLocalizedMessage(this.mapId, 'validation.layer.createtwice'));
       showError(this.mapId, message);
-
-      // eslint-disable-next-line no-console
-      console.log(`Can not execute twice the createGeoViewLayers method for the map ${this.mapId}`);
+      console.error(`Can not execute twice the createGeoViewLayers method for the map ${this.mapId}`);
     }
   }
 
@@ -539,7 +544,7 @@ export abstract class AbstractGeoViewLayer {
         await this.processListOfLayerEntryMetadata(this.listOfLayerEntryConfig);
       }
     } catch (error) {
-      console.log(error);
+      console.error(error);
     }
   }
 
@@ -562,7 +567,7 @@ export abstract class AbstractGeoViewLayer {
           if (copyrightText) this.attributions.push(copyrightText as string);
         }
       } catch (error) {
-        console.log(error);
+        console.error(error);
         this.setAllLayerStatusToError(this.listOfLayerEntryConfig, 'Unable to read metadata');
       }
     }
@@ -595,7 +600,7 @@ export abstract class AbstractGeoViewLayer {
       });
       await Promise.all(promisedAllLayerDone);
     } catch (error) {
-      console.log(error);
+      console.error(error);
     }
   }
 
@@ -613,7 +618,7 @@ export abstract class AbstractGeoViewLayer {
       await this.processLayerMetadata(layerConfig);
       await this.processListOfLayerEntryMetadata(layerConfig.listOfLayerEntryConfig!);
     } catch (error) {
-      console.log(error);
+      console.error(error);
     }
   }
 
@@ -721,7 +726,7 @@ export abstract class AbstractGeoViewLayer {
 
       return layerGroup!;
     } catch (error) {
-      console.log(error);
+      console.error(error);
       return null;
     }
   }
@@ -752,28 +757,22 @@ export abstract class AbstractGeoViewLayer {
       switch (queryType) {
         case 'all':
           return await this.getAllFeatureInfo(layerPath);
-          break;
         case 'at_pixel':
           return await this.getFeatureInfoAtPixel(location as Pixel, layerPath);
-          break;
         case 'at_coordinate':
           return await this.getFeatureInfoAtCoordinate(location as Coordinate, layerPath);
-          break;
         case 'at_long_lat':
           return await this.getFeatureInfoAtLongLat(location as Coordinate, layerPath);
-          break;
         case 'using_a_bounding_box':
           return await this.getFeatureInfoUsingBBox(location as Coordinate[], layerPath);
-          break;
         case 'using_a_polygon':
           return await this.getFeatureInfoUsingPolygon(location as Coordinate[], layerPath);
-          break;
         default:
-          console.log(`Queries using ${queryType} are invalid.`);
+          console.warn(`Queries using ${queryType} are invalid.`);
           return [];
       }
     } catch (error) {
-      console.log(error);
+      console.error(error);
       return [];
     }
   }
@@ -788,7 +787,7 @@ export abstract class AbstractGeoViewLayer {
    */
 
   protected getAllFeatureInfo(layerPath: string): Promise<TypeArrayOfFeatureInfoEntries> {
-    console.log('getAllFeatureInfo is not implemented!');
+    console.warn('getAllFeatureInfo is not implemented!');
     return Promise.resolve([]);
   }
 
@@ -803,7 +802,7 @@ export abstract class AbstractGeoViewLayer {
    */
 
   protected getFeatureInfoAtPixel(location: Pixel, layerPath: string): Promise<TypeArrayOfFeatureInfoEntries> {
-    console.log('getFeatureInfoAtPixel is not implemented!');
+    console.warn('getFeatureInfoAtPixel is not implemented!');
     return Promise.resolve([]);
   }
 
@@ -818,7 +817,7 @@ export abstract class AbstractGeoViewLayer {
    */
 
   protected getFeatureInfoAtCoordinate(location: Coordinate, layerPath: string): Promise<TypeArrayOfFeatureInfoEntries> {
-    console.log('getFeatureInfoAtCoordinate is not implemented!');
+    console.warn('getFeatureInfoAtCoordinate is not implemented!');
     return Promise.resolve([]);
   }
 
@@ -833,7 +832,7 @@ export abstract class AbstractGeoViewLayer {
    */
 
   protected getFeatureInfoAtLongLat(location: Coordinate, layerPath: string): Promise<TypeArrayOfFeatureInfoEntries> {
-    console.log('getFeatureInfoAtLongLat is not implemented!');
+    console.warn('getFeatureInfoAtLongLat is not implemented!');
     return Promise.resolve([]);
   }
 
@@ -848,7 +847,7 @@ export abstract class AbstractGeoViewLayer {
    */
 
   protected getFeatureInfoUsingBBox(location: Coordinate[], layerPath: string): Promise<TypeArrayOfFeatureInfoEntries> {
-    console.log('getFeatureInfoUsingBBox is not implemented!');
+    console.warn('getFeatureInfoUsingBBox is not implemented!');
     return Promise.resolve([]);
   }
 
@@ -863,7 +862,7 @@ export abstract class AbstractGeoViewLayer {
    */
 
   protected getFeatureInfoUsingPolygon(location: Coordinate[], layerPath: string): Promise<TypeArrayOfFeatureInfoEntries> {
-    console.log('getFeatureInfoUsingPolygon is not implemented!');
+    console.warn('getFeatureInfoUsingPolygon is not implemented!');
     return Promise.resolve([]);
   }
 
@@ -991,6 +990,70 @@ export abstract class AbstractGeoViewLayer {
    */
   getLayerConfig(layerPath: string): TypeLayerEntryConfig | undefined {
     return api.maps?.[this.mapId]?.layer?.registeredLayers?.[layerPath];
+  }
+
+  /**
+   * Asynchronously gets the layer configuration of the specified layerPath.
+   * If the layer configuration we're searching for has to be loaded, set mustBeLoaded to true when awaiting on this method.
+   * This function waits the timeout period before abandonning (or uses the default timeout when not provided).
+   * Note this function uses the 'Async' suffix only to differentiate it from 'getLayerConfig'.
+   *
+   * @param {string} layerPath the layer path to look for
+   * @param {string} mustBeLoaded indicate if the layer we're searching for must be found only once loaded
+   * @param {string} timeout optionally indicate the timeout after which time to abandon the promise
+   * @param {string} checkFrequency optionally indicate the frequency at which to check for the condition on the layer
+   * @returns a promise with the TypeLayerEntryConfig or null when layer config was not found
+   * @throws an exception when the layer config for the layer path was found, but failed to become in loaded status before the timeout expired
+   */
+  async getLayerConfigAsync(
+    layerPath: string,
+    mustBeLoaded: boolean,
+    timeout?: number,
+    checkFrequency?: number
+  ): Promise<TypeLayerEntryConfig | null> {
+    // Redirects
+    const layer = this.getLayerConfig(layerPath);
+
+    // If layer was found
+    if (layer) {
+      // Check if not waiting and returning immediately
+      if (!mustBeLoaded) return Promise.resolve(layer);
+
+      try {
+        // Waiting for the loaded status, possibly throwing exception if that's not happening
+        await this.waitForLoadedStatus(layer as TypeBaseLayerEntryConfig, timeout, checkFrequency);
+        return layer;
+      } catch (error) {
+        console.error(`Took too long for config of ${layer.layerId} to get in 'loaded' status.`, (error as Error).stack);
+        throw error;
+      }
+    }
+
+    // Failed
+    return Promise.resolve(null);
+  }
+
+  /**
+   * Returns a Promise that will be resolved once the given layer config is in a loaded status.
+   * This function waits the timeout period before abandonning (or uses the default timeout when not provided).
+   *
+   * @param {string} layerConfig the layer config
+   * @param {string} timeout optionally indicate the timeout after which time to abandon the promise
+   * @param {string} checkFrequency optionally indicate the frequency at which to check for the condition on the layer config
+   * @throws an exception when the layer failed to become in loaded status before the timeout expired
+   */
+  async waitForLoadedStatus(layerConfig: TypeBaseLayerEntryConfig, timeout?: number, checkFrequency?: number): Promise<void> {
+    // Wait for the loaded state
+    await whenThisThen(
+      () => {
+        return layerConfig.layerStatus === 'loaded';
+      },
+      timeout,
+      checkFrequency
+    );
+
+    // Resolve successfully, otherwise an exception has been thrown already
+    return Promise.resolve();
   }
 
   /** ***************************************************************************************************************************
@@ -1241,12 +1304,13 @@ export abstract class AbstractGeoViewLayer {
       const legend: TypeLegend = {
         type: this.type,
         layerPath,
-        layerName: layerConfig.layerName!,
+        layerName: layerConfig?.layerName,
         styleConfig: layerConfig?.style,
         legend: await api.maps[this.mapId].geoviewRenderer.getLegendStyles(layerConfig),
       };
       return legend;
     } catch (error) {
+      console.error(error);
       return null;
     }
   }
@@ -1359,9 +1423,9 @@ export abstract class AbstractGeoViewLayer {
       });
       return queryResult;
     } catch (error) {
-      console.log(error);
+      console.error(error);
+      return [];
     }
-    return [];
   }
 
   /** ***************************************************************************************************************************

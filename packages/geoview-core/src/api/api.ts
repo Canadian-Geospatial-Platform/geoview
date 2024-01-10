@@ -180,17 +180,21 @@ export class API {
   };
 
   /**
-   * Create a new map in a given div
-   * !MUST not be a map div with geoview-map class
+   * Create a new map in a given div id.
+   * !The div MUST NOT have a geoview-map class or a warning will be shown when initMapDivFromFunctionCall is called.
    * If is present, the div will be created with a default config
    *
    * @param {string} divId the id of the div to create map in
    * @param {string} mapConfig the config passed in from the function call
    */
   createMapFromConfig = (divId: string, mapConfig: string): void => {
+    // Get the map div
     const mapDiv = document.getElementById(divId);
-    if (mapDiv && !mapDiv.classList.contains('geoview-map')) {
-      initMapDivFromFunctionCall(mapDiv!, mapConfig);
+
+    // If found the map div
+    if (mapDiv) {
+      // Init by function call
+      initMapDivFromFunctionCall(mapDiv, mapConfig);
     } else {
       // eslint-disable-next-line no-console
       console.error(`Div with id ${divId} does not exist`);
