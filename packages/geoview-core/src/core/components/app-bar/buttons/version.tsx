@@ -4,6 +4,7 @@ import { Typography, Box, Link, Theme, SvgIcon } from '@mui/material';
 
 import { GITHUB_REPO, GEO_URL_TEXT } from '@/core/utils/constant';
 import { GeoCaIcon, Popover, IconButton } from '@/ui';
+import { useGeoViewMapId } from '@/app';
 
 // eslint-disable-next-line no-underscore-dangle
 declare const __VERSION__: TypeAppVersion;
@@ -24,6 +25,9 @@ export type TypeAppVersion = {
 
 export default function Version(): JSX.Element {
   const { t } = useTranslation<string>();
+
+  const mapId = useGeoViewMapId();
+  const mapElem = document.getElementById(`shell-${mapId}`);
 
   const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
 
@@ -69,6 +73,7 @@ export default function Version(): JSX.Element {
         onClose={handleClose}
         anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
         transformOrigin={{ vertical: 'bottom', horizontal: 'left' }}
+        container={mapElem}
       >
         <Box sx={sxClasses}>
           <Typography component="div">

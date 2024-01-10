@@ -5,7 +5,7 @@ import { api, useGeoViewMapId } from '@/app';
 import { EVENT_NAMES } from '@/api/events/event-types';
 import { FooterTabPayload, PayloadBaseClass, payloadIsAFooterTab } from '@/api/events/payloads';
 import { getSxClasses } from './footer-tabs-style';
-import { ResizePopover } from '../resize-popover/resize-popover';
+import { ResizeFooterPanel } from '../resize-footer-panel/resize-footer-panel';
 import { useAppFullscreenActive } from '@/core/stores/store-interface-and-intial-values/app-state';
 import { useUIFooterPanelResizeValue, useUIFooterPanelResizeValues } from '@/core/stores/store-interface-and-intial-values/ui-state';
 
@@ -280,7 +280,7 @@ export function FooterTabs(): JSX.Element | null {
         TabContentVisibilty={!isCollapsed ? 'visible' : 'hidden'}
         rightButtons={
           <>
-            {!isCollapsed && <ResizePopover />}
+            {!isCollapsed && <ResizeFooterPanel />}
             <IconButton
               onClick={handleDynamicFocus}
               tooltip={isFocusToMap ? 'footerTabsContainer.focusToMap' : 'footerTabsContainer.focusToFooter'}

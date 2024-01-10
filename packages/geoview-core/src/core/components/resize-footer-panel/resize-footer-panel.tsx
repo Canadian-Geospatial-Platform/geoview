@@ -1,7 +1,8 @@
 import { useState, MouseEvent, useMemo } from 'react';
 import Slider from '@mui/material/Slider';
+import { useGeoViewMapId } from '@/app';
 import { Box, HeightIcon, IconButton, Popover } from '@/ui';
-import { getSxClasses } from './resize-popover-style';
+import { getSxClasses } from './resize-footer-panel-style';
 import {
   useUIFooterPanelResizeValue,
   useUIStoreActions,
@@ -12,9 +13,12 @@ import {
  * Popover to resize the map container and footer panel.
  * @returns
  */
-export function ResizePopover() {
+export function ResizeFooterPanel() {
   const sxClasses = getSxClasses();
-  const elem = document.getElementById('shell-mapWM1');
+
+  const mapId = useGeoViewMapId();
+  const mapElem = document.getElementById(`shell-${mapId}`);
+
   // store state
   const footerPanelResizeValue = useUIFooterPanelResizeValue();
   const footerPanelResizeValues = useUIFooterPanelResizeValues();
@@ -51,7 +55,7 @@ export function ResizePopover() {
         open={open}
         anchorEl={anchorEl}
         onClose={handleClose}
-        container={elem} // so that popover will be displayed when screen is in fullscreen mode.
+        container={mapElem} // popover will be displayed when screen is in fullscreen mode.
         anchorOrigin={{
           vertical: 'top',
           horizontal: 'left',

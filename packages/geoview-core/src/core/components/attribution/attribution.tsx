@@ -7,6 +7,7 @@ import { Box, MoreHorizIcon, Popover, IconButton, Typography } from '@/ui';
 import { useUIFooterBarExpanded } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import { useMapAttribution } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { generateId } from '@/core/utils/utilities';
+import { useGeoViewMapId } from '@/app';
 
 /**
  * Create an Attribution component that will display an attribution box
@@ -16,6 +17,9 @@ import { generateId } from '@/core/utils/utilities';
  */
 export function Attribution(): JSX.Element {
   const theme = useTheme();
+
+  const mapId = useGeoViewMapId();
+  const mapElem = document.getElementById(`shell-${mapId}`);
 
   // internal state
   const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
@@ -58,6 +62,7 @@ export function Attribution(): JSX.Element {
       <Popover
         open={open}
         anchorEl={anchorEl}
+        container={mapElem}
         anchorOrigin={{
           vertical: 'top',
           horizontal: 'right',
