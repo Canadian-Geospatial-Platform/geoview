@@ -10,6 +10,7 @@ import { Grid, Tab as MaterialTab, Tabs as MaterialTabs, TabsProps, TabProps, Bo
 import { HtmlToReact } from '@/core/containers/html-to-react';
 import { TabPanel } from './tab-panel';
 import { useUIActiveTrapGeoView, useUIStoreActions } from '@/core/stores/store-interface-and-intial-values/ui-state';
+import { getSxClasses } from './tabs-style';
 
 type TypeChildren = React.ElementType;
 /**
@@ -50,6 +51,7 @@ export function Tabs(props: TypeTabsProps): JSX.Element {
 
   const { t } = useTranslation<string>();
 
+  const sxClasses = getSxClasses();
   // internal state
   const [value, setValue] = useState(0);
 
@@ -86,7 +88,7 @@ export function Tabs(props: TypeTabsProps): JSX.Element {
 
   return (
     <Grid container spacing={2} sx={{ width: '100%', height: '100%' }}>
-      <Grid item xs={7} sm={10}>
+      <Grid item xs={7} sm={10} sx={{ background: 'white' }}>
         <MaterialTabs
           {...props.tabsProps}
           variant="scrollable"
@@ -112,29 +114,23 @@ export function Tabs(props: TypeTabsProps): JSX.Element {
                 {...props.tabProps}
                 id={`tab-${index}`}
                 onClick={() => handleClick(index)}
-                sx={{
-                  fontSize: 16,
-                  fontWeight: 'bold',
-                  minWidth: 'min(4vw, 24px)',
-                  padding: '16px 2%',
-                  textTransform: 'capitalize',
-                  '&.Mui-selected': {
-                    color: 'secondary.main',
-                  },
-                  '.MuiTab-iconWrapper': {
-                    marginRight: '7px',
-                    maxWidth: '18px',
-                  },
-                }}
+                sx={sxClasses.tab}
               />
             );
           })}
         </MaterialTabs>
       </Grid>
-      <Grid item xs={5} sm={2} sx={{ textAlign: 'right', marginTop: '15px' }}>
+      <Grid item xs={5} sm={2} sx={sxClasses.rightIcons}>
         {rightButtons as ReactNode}
       </Grid>
-      <Grid item xs={12} sx={{ height: '100%', borderTop: 1, borderColor: 'divider', visibility: TabContentVisibilty }}>
+      <Grid
+        item
+        xs={12}
+        sx={{
+          ...sxClasses.panel,
+          visibility: TabContentVisibilty,
+        }}
+      >
         {tabs.map((tab, index) => {
           const TabContent = tab.content as React.ElementType;
           return (

@@ -6,7 +6,6 @@ export const getSxClasses = (theme: Theme) => ({
     width: '100%',
     padding: '8px',
     overflow: 'auto',
-    maxHeight: '660px',
 
     // layer title
     '& .MuiListItemText-primary': {
