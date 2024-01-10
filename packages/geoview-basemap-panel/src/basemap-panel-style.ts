@@ -7,7 +7,7 @@ export const getSxClasses = (theme) => ({
       display: 'flex',
       flexDirection: 'column',
       backgroundClip: 'padding-box',
-      border: '1px solid rgba(255,255,255,0.25)',
+      border: '2px solid rgba(255,255,255,0.25)',
       borderRadius: '6px',
       boxShadow: 'none',
       marginBottom: '16px',
@@ -15,6 +15,12 @@ export const getSxClasses = (theme) => ({
       transition: 'all 0.3s ease-in-out',
       '&:last-child': {
         marginBottom: '0px',
+      },
+      '&:hover': {
+        border: `2px solid #FFFF00`,
+      },
+      '&.active': {
+        border: `2px solid #FFFFFF`,
       },
     },
     '& .MuiCardHeader-root': {

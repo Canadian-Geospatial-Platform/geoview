@@ -121,7 +121,7 @@ declare module '@mui/material/styles' {
     };
     panel: {
       activeBg: string;
-      background?: string;
+      background: string;
       border: string;
       borderLight: string;
       defaultBg: string;

@@ -15,7 +15,7 @@ import { useTheme } from '@mui/material/styles';
 import { Cast } from '@/core/types/global-types';
 import { HtmlToReact } from '@/core/containers/html-to-react';
 
-import { api, useGeoViewMapId } from '@/app';
+import { api, useGeoViewMapId, useUIActiveTrapGeoView } from '@/app';
 import { EVENT_NAMES } from '@/api/events/event-types';
 
 import { IconButton, CloseIcon, PanelApi, Box } from '..';
@@ -62,6 +62,7 @@ export function Panel(props: TypePanelAppProps): JSX.Element {
 
   // internal state
   // set the active trap value for FocusTrap
+  const activeTrapGeoView = useUIActiveTrapGeoView();
   const [panelStatus, setPanelStatus] = useState(false);
   const [actionButtons, setActionButtons] = useState<JSX.Element[] & ReactNode[]>([]);
   const [, updatePanelContent] = useState(0);
@@ -238,7 +239,7 @@ export function Panel(props: TypePanelAppProps): JSX.Element {
   return (
     <Box sx={panelContainerStyles}>
       <FocusTrap
-        active={panelStatus}
+        active={activeTrapGeoView && panelStatus}
         focusTrapOptions={{
           escapeDeactivates: false,
           clickOutsideDeactivates: true,

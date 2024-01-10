@@ -86,7 +86,7 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
           api.maps[get().mapId].layer.highlightLayer(tempLayerPath);
           const layer = findLayerByPath(get().layerState.legendLayers, layerPath);
           const { bounds } = layer as TypeLegendLayer;
-          if (bounds) get().mapState.actions.highlightBBox(bounds, true);
+          if (bounds && bounds[0] !== Infinity) get().mapState.actions.highlightBBox(bounds, true);
         }
         set({
           layerState: {
@@ -112,14 +112,9 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
         if (layer) {
           layer.opacity = opacity;
 
-          if (layer.children.length) {
-            setPropInChildLayers(layer.children, 'opacity', opacity);
-          }
+          const { mapId } = get();
+          setOpacityInLayerAndChildren(layer, opacity, mapId);
         }
-
-        // TODO: keep reference to geoview map instance in the store or keep accessing with api - discussion
-        //! may not work with group items ... see if Yves work will make this simplier
-        api.maps[get().mapId].layer.geoviewLayer(layerPath).setOpacity(opacity, layerPath);
 
         // now update store
         set({
@@ -132,11 +127,7 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
       toggleLayerVisibility: (layerPath: string) => {
         const curLayers = get().layerState.legendLayers;
         const layer = findLayerByPath(curLayers, layerPath);
-        if (layer && layer.isVisible !== 'always') {
-          layer.isVisible = layer.isVisible === 'no' ? 'yes' : 'no';
-          setPropInChildLayers(layer.children, 'isVisible', layer.isVisible);
-        }
-
+        setVisibilityInLayerAndItems(layer as TypeLegendLayer, layer?.isVisible === 'no' ? 'yes' : 'no');
         // TODO: keep reference to geoview map instance in the store or keep accessing with api - discussion
         //! may not work with group items ... see if Yves work will make this simplier
         api.maps[get().mapId].layer.geoviewLayer(layerPath).setVisible(layer?.isVisible !== 'no', layerPath);
@@ -158,6 +149,10 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
           _.each(layer.items, (item, index) => {
             if (item.geometryType === geometryType && item.name === itemName && item.isVisible !== 'always') {
               item.isVisible = item.isVisible === 'no' ? 'yes' : 'no'; // eslint-disable-line no-param-reassign
+
+              if (item.isVisible === 'yes' && layer.isVisible === 'no') {
+                layer.isVisible = 'yes';
+              }
 
               // assign value to registered layer. This is use by applyFilter function to set visibility
               // TODO: check if we need to refactor to centralize attribute setting....
@@ -262,13 +257,36 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
 }
 
 // private functions
-function setPropInChildLayers(children: TypeLegendLayer[], propName: string, val: unknown) {
-  _.each(children, (child) => {
-    _.set(child, propName, val);
-    if (child.children && child.children.length > 0) {
-      setPropInChildLayers(child.children, propName, val);
+
+// function set visibility in layer and its items
+function setVisibilityInLayerAndItems(layer: TypeLegendLayer, visibility: 'yes' | 'no') {
+  if (layer.isVisible === 'always') {
+    return;
+  }
+  _.set(layer, 'isVisible', visibility);
+  _.each(layer.items, (item) => {
+    if (item.isVisible !== 'always') {
+      _.set(item, 'isVisible', visibility);
     }
   });
+  if (layer.children && layer.children.length > 0) {
+    _.each(layer.children, (child) => {
+      setVisibilityInLayerAndItems(child, visibility);
+    });
+  }
+}
+
+function setOpacityInLayerAndChildren(layer: TypeLegendLayer, opacity: number, mapId: string, isChild = false) {
+  _.set(layer, 'opacity', opacity);
+  api.maps[mapId].layer.geoviewLayer(layer.layerPath).setOpacity(opacity, layer.layerPath);
+  if (isChild) {
+    _.set(layer, 'opacityFromParent', opacity);
+  }
+  if (layer.children && layer.children.length > 0) {
+    _.each(layer.children, (child) => {
+      setOpacityInLayerAndChildren(child, opacity, mapId, true);
+    });
+  }
 }
 
 function findLayerByPath(layers: TypeLegendLayer[], layerPath: string): TypeLegendLayer | undefined {

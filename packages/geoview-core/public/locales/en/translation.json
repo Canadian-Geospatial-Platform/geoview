@@ -54,7 +54,6 @@
   "legend": {
     "unknown": "Unknown Layer Title",
     "removeLayer": "Remove Layer",
-    "opacity": "Opacity",
     "toggleOpacity": "Toggle Opacity DEPRECATED",
     "zoomTo": "Zoom to Layer",
     "overviewTitle": "Legend Overview",
@@ -98,14 +97,20 @@
     "errorFile": "Only geoJSON and GeoPackage files can be used",
     "errorServer": "source is not valid",
     "errorProj": "does not support current map projection",
-    "only": "only"
+    "only": "only",
+    "opacity": "Opacity",
+    "opacityMax": "Maximum from parent",
+    "reloadLayer": "Reload layer",
+    "visibilityIsAlways": "Visibility is always enabled",
+    "toggleVisibility": "Toggle visibility",
+    "toggleCollapse": "Toggle collapse"
   },
   "details": {
     "zoomTo": "Zoom to feature",
     "select": "Highlight feature on map",
     "externalLink": "External Link",
     "detailsView": "Details View",
-    "selectVisbleLayer": "Click on a feature on the map to view it's details",
+    "selectVisbleLayer": "Click on a feature on the map to view its details",
     "feature": "feature",
     "clickOnMap": "Click on map",
     "nextFeatureBtn": "Next feature",
