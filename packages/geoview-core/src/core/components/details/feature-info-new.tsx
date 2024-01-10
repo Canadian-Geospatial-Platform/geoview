@@ -81,7 +81,6 @@ export function FeatureInfo({ features, currentFeatureIndex }: TypeFeatureInfoPr
     <Paper sx={{ boxShadow: 'none' }}>
       <Box
         sx={{
-          [theme.breakpoints.down('md')]: { flexDirection: 'column' },
           p: '0 20px 10px 20px',
           display: 'flex',
           flexDirection: 'row',
@@ -101,10 +100,9 @@ export function FeatureInfo({ features, currentFeatureIndex }: TypeFeatureInfoPr
         </Box>
         {/* Right box - checkbox and zoom icon */}
         <Box sx={{ ...sxClasses.flexBoxAlignCenter, [theme.breakpoints.down('sm')]: { display: 'none' } }}>
-          <Typography sx={{ display: 'inline-block', textWrap: 'nowrap' }} component="div">
-            {t('details.keepFeatureSelected')}
-          </Typography>
-          <Checkbox onChange={(e) => handleSelect(e)} checked={checked} sx={sxClasses.selectFeatureCheckbox} />
+          <Tooltip title={t('details.keepFeatureSelected')} placement="top" enterDelay={1000}>
+            <Checkbox onChange={(e) => handleSelect(e)} checked={checked} sx={sxClasses.selectFeatureCheckbox} />
+          </Tooltip>
           <IconButton color="primary" onClick={(e) => handleZoomIn(e)}>
             <Tooltip title={t('details.zoomTo')} placement="top" enterDelay={1000}>
               <ZoomInSearchIcon />
