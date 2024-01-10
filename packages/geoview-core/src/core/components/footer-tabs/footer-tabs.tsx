@@ -1,3 +1,4 @@
+/* eslint-disable no-lonely-if */
 import { MutableRefObject, useCallback, useEffect, useRef, useState } from 'react';
 
 import { useTheme } from '@mui/material/styles';
@@ -113,7 +114,6 @@ export function FooterTabs(): JSX.Element | null {
     const tabsContainers: NodeListOf<HTMLElement> = mapDiv.querySelectorAll('.tabsContainer');
     if (tabsContainers.length > 0) {
       const tabsContainer: HTMLElement = tabsContainers[0];
-      tabsContainer.style.minHeight = isFullscreen ? `${2 * origHeight}px` : '';
       const lastChild = tabsContainer.firstElementChild?.lastElementChild as HTMLElement | null;
       if (lastChild) {
         lastChild.style.maxHeight = isFullscreen ? '' : `${origHeight}px`;
@@ -223,7 +223,7 @@ export function FooterTabs(): JSX.Element | null {
             <IconButton
               onClick={handleDynamicFocus}
               tooltip={isFocusToMap ? 'footerTabsContainer.focusToMap' : 'footerTabsContainer.focusToFooter'}
-              disabled={isCollapsed}
+              disabled={isCollapsed || isFullscreen}
             >
               {isFocusToMap ? <MoveUpRoundedIcon /> : <MoveDownRoundedIcon />}
             </IconButton>

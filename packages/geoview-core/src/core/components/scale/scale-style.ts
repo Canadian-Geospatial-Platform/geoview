@@ -32,9 +32,7 @@ export const getSxClasses = (theme: Theme) => ({
   scaleText: {
     fontSize: theme.typography.fontSize,
     color: theme.palette.primary.light,
-    textOverflow: 'ellipsis',
     whiteSpace: 'nowrap',
-    overflow: 'hidden',
     border: '1px solid',
     borderColor: theme.palette.primary.light,
     borderTop: 'none',
