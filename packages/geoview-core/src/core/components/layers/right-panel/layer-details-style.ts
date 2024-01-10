@@ -17,14 +17,6 @@ export const getSxClasses = (theme: Theme) => ({
     flexDirection: 'row',
     alignItems: 'center',
   },
-  opacityMenu: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '15px',
-    padding: '8px 20px 7px 15px',
-    backgroundColor: '#F6F6F6',
-  },
-
   itemsGrid: {
     width: '100%',
     '& .MuiGrid-container': {
