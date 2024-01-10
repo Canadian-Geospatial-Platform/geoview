@@ -1,12 +1,10 @@
-import React, { ChangeEvent, useCallback, useEffect, useRef, useState } from 'react';
-import { useDropzone } from 'react-dropzone';
-import { Autocomplete, Box, Button, ButtonGroup, CircularProgressBase, CloseIcon, FileUploadIcon, IconButton, Paper, Select, Stepper, TextField, UploadFileIcon } from '@/ui';
+import React, { ChangeEvent, useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { Autocomplete, Box, Button, ButtonGroup, CircularProgressBase, FileUploadIcon, Paper, Select, Stepper, TextField } from '@/ui';
 import { CONST_LAYER_TYPES, GeoUtilities, TypeGeoviewLayerConfig, TypeGeoviewLayerType, TypeListOfLayerEntryConfig } from '@/geo';
 import { ButtonPropsLayerPanel, SelectChangeEvent, TypeJsonArray, TypeJsonObject } from '@/core/types/global-types';
-import { useTranslation } from 'react-i18next';
 import { useGeoViewMapId } from '@/core/stores/geoview-store';
 import { generateId } from '@/core/utils/utilities';
-import { useMapProjection } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { useLayersList } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { api } from '@/app';
 
@@ -16,11 +14,10 @@ type EsriOptions = {
 };
 
 export function AddNewLayer(): JSX.Element {
-
   const { t } = useTranslation<string>();
 
   const { ESRI_DYNAMIC, ESRI_FEATURE, GEOJSON, GEOPACKAGE, WMS, WFS, OGC_FEATURE, XYZ_TILES, GEOCORE } = CONST_LAYER_TYPES;
-  
+
   const [activeStep, setActiveStep] = useState(0);
   const [layerURL, setLayerURL] = useState('');
   const [displayURL, setDisplayURL] = useState('');
@@ -33,7 +30,7 @@ export function AddNewLayer(): JSX.Element {
 
   const dragPopover = useRef(null);
 
-  //get values from store
+  // get values from store
   const mapId = useGeoViewMapId();
   const layersList = useLayersList();
 
@@ -42,7 +39,6 @@ export function AddNewLayer(): JSX.Element {
   const geoUtilities = new GeoUtilities();
 
   const newLayerId = generateId();
-
 
   /**
    * List of layer types and labels
@@ -58,22 +54,14 @@ export function AddNewLayer(): JSX.Element {
     [XYZ_TILES, 'XYZ Raster Tiles'],
     [GEOCORE, 'GeoCore'],
   ];
-  
+
   // const acceptedFiles = ["*.json"];
 
   useEffect(() => {
     console.log('layersList ', layersList);
-    //setIsLoading(false);
+    // setIsLoading(false);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [layersList]);
-
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const onDrop = useCallback((acceptedFiles: any) => {
-    // Do something with the files
-    console.log('acceptedFiles ', acceptedFiles);
-  }, []);
-  const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop });
-
 
   const sxClasses = {
     buttonGroup: {
@@ -81,6 +69,15 @@ export function AddNewLayer(): JSX.Element {
       gap: 6,
     },
   };
+
+  /*
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const onDrop = useCallback((acceptedFiles: any) => {
+    // Do something with the files
+    console.log('acceptedFiles ', acceptedFiles);
+  }, []);
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop });
 
   const dropAreaSx = {
     boxShadow: 'inset 0px 3px 6px #00000029',
@@ -94,16 +91,15 @@ export function AddNewLayer(): JSX.Element {
     cursor: 'pointer',
     marginBottom: '20px',
     textAlign: 'center',
-  };
+  }; */
 
-
-   /**
+  /**
    * Returns the appropriate error config for ESRI layer types
    *
    * @param type one of esriDynamic or esriFeature
    * @returns {EsriOptions} an error configuration object for populating dialogues
    */
-   const esriOptions = (type: string): EsriOptions => {
+  const esriOptions = (type: string): EsriOptions => {
     switch (type) {
       case ESRI_DYNAMIC:
         return { err: 'ESRI Map', capability: 'Map' };
@@ -161,9 +157,7 @@ export function AddNewLayer(): JSX.Element {
    */
   const emitErrorProj = (serviceName: string, proj: string | undefined, supportedProj: TypeJsonArray | string[]) => {
     setIsLoading(false);
-    const message = `${serviceName} ${t('layers.errorProj')} ${proj}, ${
-      t('layers.only')
-    } ${supportedProj.join(', ')}`;
+    const message = `${serviceName} ${t('layers.errorProj')} ${proj}, ${t('layers.only')} ${supportedProj.join(', ')}`;
     api.utilities.showError(mapId, message, false);
   };
 
@@ -175,7 +169,6 @@ export function AddNewLayer(): JSX.Element {
    * @returns {Promise<boolean>} True if layer passes validation
    */
   const wmsValidation = async (): Promise<boolean> => {
-    
     const proj = api.projection.projections[api.maps[mapId].getMapState().currentProjection].getCode();
     let supportedProj: string[] = [];
 
@@ -542,7 +535,7 @@ export function AddNewLayer(): JSX.Element {
    */
   const handleStepLast = () => {
     setIsLoading(true);
-    /*api.event.on(  //WHY?
+    /* api.event.on(  //WHY?
       api.eventNames.LAYER.EVENT_LAYER_ADDED,
       () => {
         api.event.off(api.eventNames.LAYER.EVENT_LAYER_ADDED, mapId);
@@ -550,7 +543,7 @@ export function AddNewLayer(): JSX.Element {
         // setAddLayerVisible(false);
       },
       `${mapId}/${geoviewLayerId}`
-    );*/
+    ); */
 
     let valid = true;
     const name = layerName;
@@ -608,7 +601,7 @@ export function AddNewLayer(): JSX.Element {
         }, 3000);
       }
 
-      /*if (layerConfig.geoviewLayerId) {
+      /* if (layerConfig.geoviewLayerId) {
         api.maps[mapId].layer.layerOrder.push(layerConfig.geoviewLayerId);
       } else if (layerConfig.listOfLayerEntryConfig !== undefined) {
         layerConfig.listOfLayerEntryConfig.forEach((subLayer: TypeLayerEntryConfig) => {
@@ -616,7 +609,7 @@ export function AddNewLayer(): JSX.Element {
         });
       }
 
-      api.maps[mapId].layer.addGeoviewLayer(layerConfig);*/
+      api.maps[mapId].layer.addGeoviewLayer(layerConfig); */
     }
   };
 
@@ -778,9 +771,8 @@ export function AddNewLayer(): JSX.Element {
   }
 
   return (
-    <Paper sx={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '8' }}>
+    <Paper sx={{ padding: '20px', gap: '8' }}>
       <Stepper
-        sx={{ position: 'relative', zIndex: 1 }}
         activeStep={activeStep}
         orientation="vertical"
         steps={[

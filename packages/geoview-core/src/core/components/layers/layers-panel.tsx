@@ -44,12 +44,15 @@ export function LayersPanel() {
     return (
       <Box>
         <LayersActions />
-        {displayState === 'add' ? <AddNewLayer /> : <LeftPanel setIsLayersListPanelVisible={setIsLayersListPanelVisible} />}
+        <LeftPanel setIsLayersListPanelVisible={setIsLayersListPanelVisible} />
       </Box>
     );
   };
 
   const rightPanel = () => {
+    if (displayState === 'add') {
+      return <AddNewLayer />;
+    }
     if (selectedLayer && displayState === 'view') {
       return (
         <Item ref={layerDetailsRef}>
