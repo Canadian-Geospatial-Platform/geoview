@@ -33,7 +33,6 @@ export function FooterTabs(): JSX.Element | null {
   const [footerTabs, setFooterTabs] = useState<TypeTabs[]>([]);
   const [isCollapsed, setIsCollapsed] = useState(true);
 
-  const [isFullscreen, setIsFullscreen] = useState(false);
   const [isFocusToMap, setIsFocusToMap] = useState<boolean>(true);
 
   const tabsContainerRef = useRef<HTMLDivElement>();
@@ -175,7 +174,6 @@ export function FooterTabs(): JSX.Element | null {
    * Handle a collapse, expand event for the tabs component
    */
   const handleCollapse = () => {
-    setIsFullscreen(false);
     setIsCollapsed(!isCollapsed);
   };
 
