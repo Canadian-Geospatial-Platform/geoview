@@ -1,6 +1,12 @@
 import { Dispatch, SetStateAction, useEffect } from 'react';
-import { useLayerStoreActions, useLayersList, useSelectedLayer } from '@/core/stores/store-interface-and-intial-values/layer-state';
+import {
+  useLayerStoreActions,
+  useLayersDisplayState,
+  useLayersList,
+  useSelectedLayer,
+} from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { LayersList } from './layers-list';
+import { AddNewLayer } from './add-new-layer/add-new-layer';
 
 interface LeftPanelProps {
   setIsLayersListPanelVisible: Dispatch<SetStateAction<boolean>>;
@@ -11,6 +17,7 @@ export function LeftPanel({ setIsLayersListPanelVisible }: LeftPanelProps): JSX.
   const legendLayers = useLayersList();
   const { setSelectedLayerPath } = useLayerStoreActions();
   const selectedLayer = useSelectedLayer();
+  const displayState = useLayersDisplayState();
 
   useEffect(() => {
     if (!selectedLayer) {
@@ -22,6 +29,9 @@ export function LeftPanel({ setIsLayersListPanelVisible }: LeftPanelProps): JSX.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  if (displayState === 'add') {
+    return <AddNewLayer />;
+  }
   return (
     <LayersList parentLayerPath="none" layersList={legendLayers} depth={0} setIsLayersListPanelVisible={setIsLayersListPanelVisible} />
   );

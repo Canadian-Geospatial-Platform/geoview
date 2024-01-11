@@ -8,7 +8,6 @@ import { getSxClasses } from './layers-style';
 import { useLayersDisplayState, useSelectedLayer } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { LayersActions } from './left-panel/layers-actions';
 import { LayerDetails } from './right-panel/layer-details';
-import { AddNewLayer } from './left-panel/add-new-layer';
 import { LeftPanel } from './left-panel/left-panel';
 
 const Item = styled('div')(({ theme }) => ({
@@ -44,7 +43,7 @@ export function LayersPanel() {
     return (
       <Box>
         <LayersActions />
-        {displayState === 'add' ? <AddNewLayer /> : <LeftPanel setIsLayersListPanelVisible={setIsLayersListPanelVisible} />}
+        <LeftPanel setIsLayersListPanelVisible={setIsLayersListPanelVisible} />
       </Box>
     );
   };
@@ -73,11 +72,9 @@ export function LayersPanel() {
           </Box>
         </Paper>
       );
-      /* eslint-enable react/no-danger */
     }
     if (displayState === 'order') {
       const markup = { __html: t('layers.sortingDescription') };
-      /* eslint-disable react/no-danger */
       return (
         <Paper sx={{ padding: '20px' }}>
           <h3>{t('layers.reArrangeLayers')}</h3>
@@ -86,7 +83,18 @@ export function LayersPanel() {
           </Box>
         </Paper>
       );
-      /* eslint-enable react/no-danger */
+    }
+    if (displayState === 'add') {
+      const markup = { __html: t('layers.addingNewLayerDescription') };
+      return (
+        <Paper sx={{ padding: '20px' }}>
+          <h3>{t('layers.addingNewLayer')}</h3>
+          <Box sx={sxClasses.buttonDescriptionContainer}>
+            <div dangerouslySetInnerHTML={markup} />
+          </Box>
+        </Paper>
+      );
+      /* eslint-disable react/no-danger */
     }
 
     return null;
