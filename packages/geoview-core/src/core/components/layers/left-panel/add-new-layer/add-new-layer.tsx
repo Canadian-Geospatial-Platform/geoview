@@ -593,7 +593,7 @@ export function AddNewLayer(): JSX.Element {
         fr: geoUtilities.getOGCServerUrl(layerURL),
       };
     }
-    
+
     if (valid) {
       // TODO issue #668 - geocore layers do not have same ID, it is impossible to use the added event
       // workaround - close after 3 sec

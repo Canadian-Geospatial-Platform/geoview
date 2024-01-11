@@ -72,11 +72,9 @@ export function LayersPanel() {
           </Box>
         </Paper>
       );
-      /* eslint-enable react/no-danger */
     }
     if (displayState === 'order') {
       const markup = { __html: t('layers.sortingDescription') };
-      /* eslint-disable react/no-danger */
       return (
         <Paper sx={{ padding: '20px' }}>
           <h3>{t('layers.reArrangeLayers')}</h3>
@@ -85,11 +83,9 @@ export function LayersPanel() {
           </Box>
         </Paper>
       );
-      /* eslint-enable react/no-danger */
     }
     if (displayState === 'add') {
       const markup = { __html: t('layers.addingNewLayerDescription') };
-      /* eslint-disable react/no-danger */
       return (
         <Paper sx={{ padding: '20px' }}>
           <h3>{t('layers.addingNewLayer')}</h3>
@@ -98,7 +94,7 @@ export function LayersPanel() {
           </Box>
         </Paper>
       );
-      /* eslint-enable react/no-danger */
+      /* eslint-disable react/no-danger */
     }
 
     return null;
