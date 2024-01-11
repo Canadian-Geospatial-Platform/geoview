@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 
 import { useTheme, Theme } from '@mui/material/styles';
 
-import { List, ListItem, ListItemText, ZoomInSearchIcon, Tooltip, IconButton, Checkbox, Paper } from '@/ui';
+import { List, ZoomInSearchIcon, Tooltip, IconButton, Checkbox, Paper, Box, Typography } from '@/ui';
 import { TypeFieldEntry, TypeArrayOfFeatureInfoEntries, TypeGeometry } from '@/api/events/payloads';
 import { FeatureInfoTable } from './feature-info-table';
 import { getSxClasses } from './details-style';
@@ -79,38 +79,37 @@ export function FeatureInfo({ features, currentFeatureIndex }: TypeFeatureInfoPr
 
   return (
     <Paper sx={{ boxShadow: 'none' }}>
-      <List>
-        <ListItem
-          sx={{ marginBottom: '16px' }}
-          secondaryAction={
-            <>
-              <Tooltip title={t('details.select')} placement="top" enterDelay={1000}>
-                <>
-                  {t('details.keepFeatureSelected')}
-                  <Checkbox
-                    onChange={(e) => handleSelect(e)}
-                    checked={checked}
-                    sx={sxClasses.selectFeatureCheckbox}
-                    disabled={!feature?.geometry}
-                  />
-                </>
-              </Tooltip>
-              <IconButton color="primary" onClick={(e) => handleZoomIn(e)} disabled={!feature?.geometry}>
-                <Tooltip title={t('details.zoomTo')} placement="top" enterDelay={1000}>
-                  <ZoomInSearchIcon />
-                </Tooltip>
-              </IconButton>
-            </>
-          }
-        >
+      <Box
+        sx={{
+          p: '0 20px 10px 20px',
+          display: 'flex',
+          flexDirection: 'row',
+          justifyContent: 'space-between',
+        }}
+      >
+        {/* Left box - feature icon and feature name */}
+        <Box sx={sxClasses.flexBoxAlignCenter}>
           <img
             src={featureIconSrc}
             alt={nameFieldValue}
-            style={{ ...theme.iconImage, marginRight: '10px', width: '35px', height: '35px' }}
+            style={{ ...theme.iconImage, marginRight: '5px', width: '35px', height: '35px' }}
           />
-          <ListItemText sx={sxClasses.itemText} primary={nameFieldValue} />
-        </ListItem>
-      </List>
+          <Typography sx={{ display: 'inline-block' }} component="div">
+            {nameFieldValue}
+          </Typography>
+        </Box>
+        {/* Right box - checkbox and zoom icon */}
+        <Box sx={{ ...sxClasses.flexBoxAlignCenter, [theme.breakpoints.down('sm')]: { display: 'none' } }}>
+          <Tooltip title={t('details.keepFeatureSelected')} placement="top" enterDelay={1000}>
+            <Checkbox onChange={(e) => handleSelect(e)} checked={checked} sx={sxClasses.selectFeatureCheckbox} />
+          </Tooltip>
+          <IconButton color="primary" onClick={(e) => handleZoomIn(e)}>
+            <Tooltip title={t('details.zoomTo')} placement="top" enterDelay={1000}>
+              <ZoomInSearchIcon />
+            </Tooltip>
+          </IconButton>
+        </Box>
+      </Box>
 
       <List sx={sxClasses.featureInfoListContainer}>
         <FeatureInfoTable featureInfoList={featureInfoList} />

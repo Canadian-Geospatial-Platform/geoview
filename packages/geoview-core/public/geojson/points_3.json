@@ -1,0 +1,50 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "Red": 94,
+        "Green": "1 Start, this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text. END",
+        "Blue": "2 Start, this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text. END",
+        "Yellow": "3 Start, this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text. END",
+        "Orange": 75,
+        "creationDate": "15/02/2022T05:00:00-05:00"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-50, 100]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Red": 200,
+        "Green": 54,
+        "Blue": 32.3,
+        "Yellow": 5.43,
+        "Orange": 55,
+        "creationDate": "07/01/2020T12:00:00-05:00"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-200, 78]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Red": 255,
+        "Green": 255,
+        "Blue": 32.3,
+        "Yellow": 5.43,
+        "Orange": 55,
+        "creationDate": "15/02/2019T17:00:00-05:00"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-150, 74]
+      }
+    }
+  ]
+}

@@ -152,6 +152,84 @@
           }
         }
       }
+    },
+    {
+      "layerId": "points_1.json",
+      "layerName": { "en": "Points_1" },
+      "source": {
+        "featureInfo": {
+          "queryable": "true",
+          "nameField": { "en": "Red", "fr": "Red" },
+          "outfields": { "en": "Red,Green,Blue,Yellow,Orange,creationDate", "fr": "Red,Green,Blue,Yellow,Orange,creationDate" },
+          "fieldTypes": "number,number,number,number,number,date",
+          "aliasFields": { "en": "Red,Green,Blue,Yellow,Orange,Creation Date", "fr": "Rouge,Vert,Bleu,Jaune,Orange,Date de création" }
+        }
+      },
+      "initialSettings": {
+        "visible": "yes"
+      },
+      "style": {
+        "Point": {
+          "styleType": "simple",
+          "label": "Point label",
+          "settings": {
+            "type": "simpleSymbol",
+            "symbol": "star"
+          }
+        }
+      }
+    },
+    {
+      "layerId": "points_2.json",
+      "layerName": { "en": "Points_1" },
+      "source": {
+        "featureInfo": {
+          "queryable": "true",
+          "nameField": { "en": "Red", "fr": "Red" },
+          "outfields": { "en": "Red,Green,Blue,Yellow,Orange,creationDate", "fr": "Red,Green,Blue,Yellow,Orange,creationDate" },
+          "fieldTypes": "number,number,number,number,number,date",
+          "aliasFields": { "en": "Red,Green,Blue,Yellow,Orange,Creation Date", "fr": "Rouge,Vert,Bleu,Jaune,Orange,Date de création" }
+        }
+      },
+      "initialSettings": {
+        "visible": "yes"
+      },
+      "style": {
+        "Point": {
+          "styleType": "simple",
+          "label": "Point label",
+          "settings": {
+            "type": "simpleSymbol",
+            "symbol": "star"
+          }
+        }
+      }
+    },
+    {
+      "layerId": "points_3.json",
+      "layerName": { "en": "Points_1" },
+      "source": {
+        "featureInfo": {
+          "queryable": "true",
+          "nameField": { "en": "Red", "fr": "Red" },
+          "outfields": { "en": "Red,Green,Blue,Yellow,Orange,creationDate", "fr": "Red,Green,Blue,Yellow,Orange,creationDate" },
+          "fieldTypes": "number,number,number,number,number,date",
+          "aliasFields": { "en": "Red,Green,Blue,Yellow,Orange,Creation Date", "fr": "Rouge,Vert,Bleu,Jaune,Orange,Date de création" }
+        }
+      },
+      "initialSettings": {
+        "visible": "yes"
+      },
+      "style": {
+        "Point": {
+          "styleType": "simple",
+          "label": "Point label",
+          "settings": {
+            "type": "simpleSymbol",
+            "symbol": "star"
+          }
+        }
+      }
     }
   ]
 }

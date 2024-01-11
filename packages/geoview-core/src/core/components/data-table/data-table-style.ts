@@ -34,8 +34,10 @@ export const getSxClasses = (theme: Theme) => ({
     '& .MuiPaper-root': {
       border: `2px solid ${theme.palette.primary.main}`,
       borderRadius: '6px',
+      height: '745px',
     },
     '& .MuiTableContainer-root': {
+      maxHeight: '680px',
       borderRadius: '6px',
     },
     '& .MuiToolbar-root ': {
