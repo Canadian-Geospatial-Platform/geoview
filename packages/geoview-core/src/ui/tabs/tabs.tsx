@@ -124,6 +124,7 @@ export function Tabs(props: TypeTabsProps): JSX.Element {
         {rightButtons as ReactNode}
       </Grid>
       <Grid
+        id="tabPanel"
         item
         xs={12}
         sx={{

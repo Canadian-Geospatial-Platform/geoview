@@ -514,7 +514,7 @@ function MapDataTable({ data, layerId, mapId, layerKey }: MapDataTableProps) {
         enablePagination={false}
         enablePinning
         enableRowVirtualization
-        muiTableContainerProps={{ sx: { maxHeight: '600px' } }}
+        // muiTableContainerProps={{ sx: { maxHeight: '600px' } }}
         rowVirtualizerInstanceRef={rowVirtualizerInstanceRef}
         rowVirtualizerProps={{ overscan: 5 }}
         columnVirtualizerProps={{ overscan: 2 }}

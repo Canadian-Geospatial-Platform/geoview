@@ -13,8 +13,8 @@ interface MapContainerCssProperties {
   mapVisibility: string;
   mapMinHeight: number;
   mapHeight: number;
-  tabMinHeight: string | number;
-  tabMaxHeight: number | string;
+  tabMinHeight: number | string;
+  tabMaxHeight: number;
 }
 
 /**
@@ -53,18 +53,18 @@ export function FooterTabs(): JSX.Element | null {
   const resizeValues = useMemo(() => {
     return footerPanelResizeValues.reduce((acc, curr) => {
       const windowHeight = window.screen.height;
-      let values: [string, number, number, number | string, number | string] = [
+      let values: [string, number, number, number | string, number] = [
         'visible',
         windowHeight - (windowHeight * footerPanelResizeValue) / 100,
         windowHeight - (windowHeight * footerPanelResizeValue) / 100,
-        '',
         origHeight,
+        (windowHeight * footerPanelResizeValue) / 100,
       ];
 
       if (curr === 10) {
-        values = ['visible', origHeight, origHeight, '', origHeight];
+        values = ['visible', origHeight, origHeight, '', windowHeight - origHeight];
       } else if (curr === 100) {
-        values = ['hidden', 0, 0, 2 * origHeight, ''];
+        values = ['hidden', 0, 0, '', windowHeight];
       }
 
       acc[curr] = {
@@ -121,9 +121,11 @@ export function FooterTabs(): JSX.Element | null {
     mapDiv.style.transition = 'height 0.2s ease-out 0.2s';
 
     // ol map container div
-    const mapContainer = mapDiv.querySelector('.mapContainer') as HTMLElement | null;
-    if (mapContainer) {
-      mapContainer.style.minHeight = `${origHeight}px`;
+    mapContainerRef.current = mapDiv.querySelector('.mapContainer') as HTMLElement | null;
+    if (mapContainerRef.current) {
+      mapContainerRef.current.style.visibility = 'visible';
+      mapContainerRef.current.style.minHeight = `${origHeight}px`;
+      mapContainerRef.current.style.height = `${origHeight}px`;
     }
 
     // tabs container div
@@ -142,45 +144,28 @@ export function FooterTabs(): JSX.Element | null {
   // TODO: need a refactor to use proper sx classes and style.
   // TODO: maybe this component should all be in the package-footer-panel.
   // !https://github.com/Canadian-Geospatial-Platform/geoview/issues/1136
-  /**
-   * Handle the fullscreen state effect
-   */
-  useEffect(() => {
-    // ol map container div
-    mapContainerRef.current = mapDiv.querySelector('.mapContainer');
-    const { mapVisibility, mapHeight, mapMinHeight, tabMaxHeight, tabMinHeight } = resizeValues[10];
-
-    if (mapContainerRef.current) {
-      mapContainerRef.current.style.visibility = mapVisibility;
-      mapContainerRef.current.style.minHeight = `${mapMinHeight}px`;
-      mapContainerRef.current.style.height = `${mapHeight}px`;
-    }
-    // tabs container div
-    if (isFullscreen) setIsCollapsed(false);
-    const tabsContainers: NodeListOf<HTMLElement> = mapDiv.querySelectorAll('.tabsContainer');
-    if (tabsContainers.length > 0) {
-      const tabsContainer: HTMLElement = tabsContainers[0];
-      tabsContainer.style.minHeight = typeof tabMaxHeight === 'string' ? '' : `${tabMinHeight}px`;
-      const lastChild = tabsContainer.firstElementChild?.lastElementChild as HTMLElement | null;
-      if (lastChild) {
-        lastChild.style.maxHeight = typeof tabMaxHeight === 'string' ? '' : `${tabMaxHeight}px`;
-      }
-    }
-  }, [isFullscreen, mapDiv, origHeight, resizeValues]);
 
   useEffect(() => {
     // Update the height of mapContainer and footer tabs Container based on resize value in store.
     mapContainerRef.current = mapDiv.querySelector('.mapContainer');
     if (tabsContainerRef.current && mapContainerRef.current) {
-      const { mapVisibility, mapHeight, mapMinHeight, tabMaxHeight, tabMinHeight } = resizeValues[footerPanelResizeValue];
+      const { mapVisibility, mapHeight, mapMinHeight, tabMaxHeight } = resizeValues[footerPanelResizeValue];
 
       mapContainerRef.current.style.visibility = mapVisibility;
       mapContainerRef.current.style.minHeight = `${mapMinHeight}px`;
       mapContainerRef.current.style.height = `${mapHeight}px`;
-      tabsContainerRef.current.style.minHeight = typeof tabMaxHeight === 'string' ? '' : `${tabMinHeight}px`;
+
       const lastChild = tabsContainerRef.current.firstElementChild?.lastElementChild as HTMLElement | null;
-      if (lastChild) {
-        lastChild.style.maxHeight = typeof tabMaxHeight === 'string' ? '' : `${tabMaxHeight}px`;
+      const firstChild = tabsContainerRef.current.firstElementChild?.firstElementChild as HTMLElement | null;
+      if (lastChild && firstChild) {
+        const height = tabMaxHeight - firstChild.clientHeight;
+        lastChild.style.height = `${height}px`;
+        lastChild.style.maxHeight = `${height}px`;
+        // reset the height of the footer tab panel after comes out of fullscreen.
+        if (!isMapFullScreen) {
+          lastChild.style.maxHeight = `${origHeight}px`;
+          lastChild.style.height = `${origHeight}px`;
+        }
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps

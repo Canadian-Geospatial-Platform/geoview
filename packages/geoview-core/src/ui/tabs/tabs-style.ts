@@ -7,7 +7,6 @@ export const getSxClasses = () => ({
     alignItems: 'center',
   },
   panel: {
-    height: '100%',
     borderTop: 1,
     paddingTop: '0 !important',
     borderColor: 'divider',
