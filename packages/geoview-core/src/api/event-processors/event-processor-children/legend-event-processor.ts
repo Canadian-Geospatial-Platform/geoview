@@ -133,7 +133,7 @@ export class LegendEventProcessor extends AbstractEventProcessor {
                 ? api.maps[mapId].layer.initialLayerOrder.indexOf(entryLayerPath)
                 : existingEntries.length,
             // TODO: Why do we have the following line in the store? Do we have to fetch the metadata again since the GeoView layer read and keep them?
-            metadataAccessPath: getLocalizedValue(layerConfig.geoviewRootLayer?.metadataAccessPath, mapId) || '',
+            metadataAccessPath: getLocalizedValue(layerConfig.geoviewLayerConfig?.metadataAccessPath, mapId) || '',
             layerPath: entryLayerPath,
             layerStatus: legendResultSetsEntry.layerStatus,
             layerName: getLocalizedValue(layerConfig.layerName, mapId) || layerConfig.layerId,
@@ -160,8 +160,8 @@ export class LegendEventProcessor extends AbstractEventProcessor {
           layerPath: entryLayerPath,
           layerAttribution: api.maps[mapId].layer.geoviewLayers[layerPathNodes[0]].attributions,
           // ! Why do we have metadataAccessPath here? Do we need to fetch the metadata again? The GeoView layer fetch them and store them in this.metadata.
-          metadataAccessPath: getLocalizedValue(layerConfig.geoviewRootLayer?.metadataAccessPath, mapId) || '',
-          layerName: getLocalizedValue(legendResultSetsEntry.data?.layerName, mapId) || layerConfig.layerId,
+          metadataAccessPath: getLocalizedValue(layerConfig.geoviewLayerConfig?.metadataAccessPath, mapId) || '',
+          layerName: getLocalizedValue(legendResultSetsEntry.data?.layerName, mapId) || layerConfig.layerId!,
           layerStatus: legendResultSetsEntry.layerStatus,
           layerPhase: legendResultSetsEntry.layerPhase,
           querySent: legendResultSetsEntry.querySent,

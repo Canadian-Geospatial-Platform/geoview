@@ -24,13 +24,21 @@ import { FeatureInfoEventProcessor } from '@/api/event-processors/event-processo
  */
 export class FeatureInfoLayerSet {
   /** Private static variable to keep the single instance that can be created by this class for a mapId (see singleton design pattern) */
-  private static featureInfoLayerSetInstance: Record<string, FeatureInfoLayerSet> = {};
+  private static featureInfoLayerSetInstance: {
+    [mapId: string]: FeatureInfoLayerSet;
+  } = {};
 
   /** The map identifier the layer set belongs to. */
-  mapId: string;
+  private mapId: string;
 
   /** The layer set object. */
-  layerSet: LayerSet;
+  private layerSet: LayerSet;
+
+  /** Flag used to disable click event for the entire layerSet */
+  private disableClick = false;
+
+  /** Flag used to disable hover event for the entire layerSet */
+  private disableHover = false;
 
   /** An object containing the result sets indexed using the layer path */
   resultSets: TypeFeatureInfoResultSets = {};
@@ -164,7 +172,7 @@ export class FeatureInfoLayerSet {
 
   /**
    * Helper function used to instanciate a FeatureInfoLayerSet object. This function
-   * avoids the "new FeatureInfoLayerSet" syntax.
+   * must be used in place of the "new FeatureInfoLayerSet" syntax.
    *
    * @param {string} mapId The map identifier the layer set belongs to.
    *
