@@ -67,7 +67,7 @@ export async function commonfetchServiceMetadata(this: EsriDynamic | EsriFeature
 export function commonValidateListOfLayerEntryConfig(this: EsriDynamic | EsriFeature, listOfLayerEntryConfig: TypeListOfLayerEntryConfig) {
   this.setLayerPhase('validateListOfLayerEntryConfig');
   listOfLayerEntryConfig.forEach((layerConfig: TypeLayerEntryConfig) => {
-    const layerPath = Layer.getLayerPath(layerConfig);
+    const { layerPath } = layerConfig;
     if (layerEntryIsGroupLayer(layerConfig)) {
       this.validateListOfLayerEntryConfig(layerConfig.listOfLayerEntryConfig!);
       if (!layerConfig.listOfLayerEntryConfig.length) {
@@ -160,7 +160,7 @@ export function commonGetFieldType(
   fieldName: string,
   layerConfig: TypeLayerEntryConfig
 ): 'string' | 'date' | 'number' {
-  const esriFieldDefinitions = this.layerMetadata[Layer.getLayerPath(layerConfig)].fields as TypeJsonArray;
+  const esriFieldDefinitions = this.layerMetadata[layerConfig.layerPath].fields as TypeJsonArray;
   const fieldDefinition = esriFieldDefinitions.find((metadataEntry) => metadataEntry.name === fieldName);
   if (!fieldDefinition) return 'string';
   const esriFieldType = fieldDefinition.type as string;
@@ -188,7 +188,7 @@ export function commonGetFieldDomain(
   fieldName: string,
   layerConfig: TypeLayerEntryConfig
 ): null | codedValueType | rangeDomainType {
-  const esriFieldDefinitions = this.layerMetadata[Layer.getLayerPath(layerConfig)].fields as TypeJsonArray;
+  const esriFieldDefinitions = this.layerMetadata[layerConfig.layerPath].fields as TypeJsonArray;
   const fieldDefinition = esriFieldDefinitions.find((metadataEntry) => metadataEntry.name === fieldName);
   return fieldDefinition ? Cast<codedValueType | rangeDomainType>(fieldDefinition.domain) : null;
 }
@@ -206,7 +206,7 @@ export function commonProcessTemporalDimension(
   layerConfig: TypeEsriFeatureLayerEntryConfig | TypeEsriDynamicLayerEntryConfig
 ) {
   if (esriTimeDimension !== undefined) {
-    this.layerTemporalDimension[Layer.getLayerPath(layerConfig)] = api.dateUtilities.createDimensionFromESRI(
+    this.layerTemporalDimension[layerConfig.layerPath] = api.dateUtilities.createDimensionFromESRI(
       Cast<TimeDimensionESRI>(esriTimeDimension)
     );
   }
@@ -324,7 +324,7 @@ export function commonProcessInitialSettings(
 export async function commonProcessLayerMetadata(this: EsriDynamic | EsriFeature, layerConfig: TypeLayerEntryConfig): Promise<void> {
   // User-defined groups do not have metadata provided by the service endpoint.
   if (layerEntryIsGroupLayer(layerConfig) && !layerConfig.isMetadataLayerGroup) return;
-  const layerPath = Layer.getLayerPath(layerConfig);
+  const { layerPath } = layerConfig;
 
   let queryUrl = getLocalizedValue(this.metadataAccessPath, this.mapId);
   if (queryUrl) {

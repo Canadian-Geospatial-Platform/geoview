@@ -1,4 +1,5 @@
 /* eslint-disable no-var, vars-on-top, block-scoped-var, no-param-reassign */
+// eslint-disable-next-line max-classes-per-file
 import { Options as SourceOptions } from 'ol/source/Vector';
 import { WFS as FormatWFS } from 'ol/format';
 import { ReadOptions } from 'ol/format/Feature';
@@ -18,10 +19,10 @@ import {
   layerEntryIsGroupLayer,
   TypeBaseSourceVectorInitialConfig,
   TypeBaseLayerEntryConfig,
+  TypeLocalizedString,
 } from '@/geo/map/map-schema-types';
 
 import { getLocalizedValue, getXMLHttpRequest, xmlToJson, findPropertyNameByRegex } from '@/core/utils/utilities';
-import { Layer } from '../../layer';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { api } from '@/app';
 
@@ -29,8 +30,26 @@ export interface TypeSourceWFSVectorInitialConfig extends TypeVectorSourceInitia
   format: 'WFS';
 }
 
-export interface TypeWfsLayerEntryConfig extends Omit<TypeVectorLayerEntryConfig, 'source'> {
-  source: TypeSourceWFSVectorInitialConfig;
+export class TypeWfsLayerEntryConfig extends TypeVectorLayerEntryConfig {
+  declare source: TypeSourceWFSVectorInitialConfig;
+
+  /**
+   * The class constructor.
+   * @param {TypeWfsLayerEntryConfig} layerConfig The layer configuration we want to instanciate.
+   */
+  constructor(layerConfig: TypeWfsLayerEntryConfig) {
+    super(layerConfig);
+    Object.assign(this, layerConfig);
+
+    // Attribute 'style' must exist in layerConfig even if it is undefined
+    if (!('style' in this)) this.style = undefined;
+    // if this.source.dataAccessPath is undefined, we assign the metadataAccessPath of the GeoView layer to it.
+    // Value for this.source.format can only be WFS.
+    if (!this.source) this.source = { format: 'WFS' };
+    if (!this.source.format) this.source.format = 'WFS';
+    if (!this.source.dataAccessPath) this.source.dataAccessPath = { ...this.geoviewLayerConfig.metadataAccessPath } as TypeLocalizedString;
+    if (!this.source.dataProjection) this.source.dataProjection = 'EPSG:4326';
+  }
 }
 
 export interface TypeWFSLayerConfig extends Omit<TypeGeoviewLayerConfig, 'geoviewLayerType'> {
@@ -65,7 +84,7 @@ export const geoviewLayerIsWFS = (verifyIfGeoViewLayer: AbstractGeoViewLayer): v
 
 /** *****************************************************************************************************************************
  * type guard function that redefines a TypeLayerEntryConfig as a TypeWfsLayerEntryConfig if the geoviewLayerType attribute of the
- * verifyIfGeoViewEntry.geoviewRootLayer attribute is WFS. The type ascention applies only to the true block of
+ * verifyIfGeoViewEntry.geoviewLayerConfig attribute is WFS. The type ascention applies only to the true block of
  * the if clause that use this function.
  *
  * @param {TypeLayerEntryConfig} verifyIfGeoViewEntry Polymorphic object to test in order to determine if the type ascention is
@@ -74,7 +93,7 @@ export const geoviewLayerIsWFS = (verifyIfGeoViewLayer: AbstractGeoViewLayer): v
  * @returns {boolean} true if the type ascention is valid.
  */
 export const geoviewEntryIsWFS = (verifyIfGeoViewEntry: TypeLayerEntryConfig): verifyIfGeoViewEntry is TypeWfsLayerEntryConfig => {
-  return verifyIfGeoViewEntry?.geoviewRootLayer?.geoviewLayerType === CONST_LAYER_TYPES.WFS;
+  return verifyIfGeoViewEntry?.geoviewLayerConfig?.geoviewLayerType === CONST_LAYER_TYPES.WFS;
 };
 
 // ******************************************************************************************************************************
@@ -109,7 +128,7 @@ export class WFS extends AbstractGeoViewVector {
    */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   protected getFieldType(fieldName: string, layerConfig: TypeLayerEntryConfig): 'string' | 'date' | 'number' {
-    const fieldDefinitions = this.layerMetadata[Layer.getLayerPath(layerConfig)] as TypeJsonArray;
+    const fieldDefinitions = this.layerMetadata[layerConfig.layerPath] as TypeJsonArray;
     const fieldDefinition = fieldDefinitions.find((metadataEntry) => metadataEntry.name === fieldName);
     if (!fieldDefinition) return 'string';
     const fieldEntryType = (fieldDefinition.type as string).split(':').slice(-1)[0] as string;
@@ -169,7 +188,7 @@ export class WFS extends AbstractGeoViewVector {
   protected validateListOfLayerEntryConfig(listOfLayerEntryConfig: TypeListOfLayerEntryConfig) {
     this.setLayerPhase('validateListOfLayerEntryConfig');
     listOfLayerEntryConfig.forEach((layerConfig: TypeLayerEntryConfig) => {
-      const layerPath = Layer.getLayerPath(layerConfig);
+      const { layerPath } = layerConfig;
       if (layerEntryIsGroupLayer(layerConfig)) {
         this.validateListOfLayerEntryConfig(layerConfig.listOfLayerEntryConfig!);
         if (!layerConfig.listOfLayerEntryConfig.length) {
@@ -194,7 +213,7 @@ export class WFS extends AbstractGeoViewVector {
         const metadataLayerList = this.metadata?.FeatureTypeList.FeatureType as Array<TypeJsonObject>;
         const foundMetadata = metadataLayerList.find((layerMetadata) => {
           const metadataLayerId = (layerMetadata.Name && layerMetadata.Name['#text']) as string;
-          return metadataLayerId.includes(layerConfig.layerId);
+          return metadataLayerId.includes(layerConfig.layerId!);
         });
 
         if (!foundMetadata) {
@@ -266,7 +285,7 @@ export class WFS extends AbstractGeoViewVector {
           })
           .then((layerMetadata) => {
             if (Array.isArray(layerMetadata.featureTypes) && Array.isArray(layerMetadata.featureTypes[0].properties)) {
-              this.layerMetadata[Layer.getLayerPath(layerConfig)] = layerMetadata.featureTypes[0].properties;
+              this.layerMetadata[layerConfig.layerPath] = layerMetadata.featureTypes[0].properties;
               this.processFeatureInfoConfig(layerMetadata.featureTypes[0].properties as TypeJsonArray, layerConfig);
             }
             resolve();
@@ -296,7 +315,7 @@ export class WFS extends AbstractGeoViewVector {
                 featureTypeProperties.push(element['@attributes']);
               });
 
-              this.layerMetadata[Layer.getLayerPath(layerConfig)] = featureTypeProperties as TypeJsonObject;
+              this.layerMetadata[layerConfig.layerPath] = featureTypeProperties as TypeJsonObject;
               this.processFeatureInfoConfig(featureTypeProperties as TypeJsonArray, layerConfig);
             }
             resolve();

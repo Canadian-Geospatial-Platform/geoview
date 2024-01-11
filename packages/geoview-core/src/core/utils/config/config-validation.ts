@@ -12,8 +12,8 @@ import schema from '../../../../schema.json';
 import { TypeBasemapId, TypeBasemapOptions, VALID_BASEMAP_ID } from '@/geo/layer/basemap/basemap-types';
 import { geoviewEntryIsWMS } from '@/geo/layer/geoview-layers/raster/wms';
 import { geoviewEntryIsImageStatic } from '@/geo/layer/geoview-layers/raster/image-static';
-import { geoviewEntryIsXYZTiles } from '@/geo/layer/geoview-layers/raster/xyz-tiles';
-import { geoviewEntryIsVectorTiles } from '@/geo/layer/geoview-layers/raster/vector-tiles';
+import { TypeXYZTilesLayerEntryConfig, geoviewEntryIsXYZTiles } from '@/geo/layer/geoview-layers/raster/xyz-tiles';
+import { TypeVectorTilesLayerEntryConfig, geoviewEntryIsVectorTiles } from '@/geo/layer/geoview-layers/raster/vector-tiles';
 import { geoviewEntryIsEsriDynamic } from '@/geo/layer/geoview-layers/raster/esri-dynamic';
 import { TypeEsriFeatureLayerEntryConfig, geoviewEntryIsEsriFeature } from '@/geo/layer/geoview-layers/vector/esri-feature';
 import { TypeWfsLayerEntryConfig, geoviewEntryIsWFS } from '@/geo/layer/geoview-layers/vector/wfs';
@@ -37,10 +37,10 @@ import {
   TypeListOfLocalizedLanguages,
   TypeEsriDynamicLayerEntryConfig,
   TypeOgcWmsLayerEntryConfig,
+  TypeImageStaticLayerEntryConfig,
 } from '@/geo/map/map-schema-types';
 import { Cast, toJsonObject, TypeJsonObject, TypeMapFeaturesConfig } from '@/core/types/global-types';
 
-import { Layer } from '@/geo/layer/layer';
 import { CONST_GEOVIEW_SCHEMA_BY_TYPE, TypeGeoviewLayerType } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 
 // ******************************************************************************************************************************
@@ -362,7 +362,7 @@ export class ConfigValidation {
   }
 
   /** ***************************************************************************************************************************
-   * Validate the configuration of the map features against the TypeMapFeaturesInstance defined in the schema..
+   * Validate the configuration of the map features against the TypeMapFeaturesInstance defined in the schema.
    * @param {TypeMapFeaturesConfig} mapFeaturesConfigToValidate The map features configuration to validate.
    * @param {Ajv} validator The schema validator to use.
    *
@@ -574,174 +574,50 @@ export class ConfigValidation {
 
   /** ***************************************************************************************************************************
    * Process recursively the layer entries to create layers and layer groups.
-   * @param {TypeGeoviewLayerConfig} rootLayerConfig The GeoView layer configuration to adjust and validate.
+   * @param {TypeGeoviewLayerConfig} geoviewLayerConfig The GeoView layer configuration to adjust and validate.
    * @param {TypeListOfLayerEntryConfig} listOfLayerEntryConfig The list of layer entry configurations to process.
    * @param {TypeGeoviewLayerConfig | TypeLayerGroupEntryConfig} parentLayerConfig The parent layer configuration of all the
    * layer entry configurations found in the list of layer entries.
    */
   private processLayerEntryConfig(
-    rootLayerConfig: TypeGeoviewLayerConfig,
+    geoviewLayerConfig: TypeGeoviewLayerConfig,
     listOfLayerEntryConfig: TypeListOfLayerEntryConfig,
     parentLayerConfig?: TypeLayerGroupEntryConfig
   ) {
-    listOfLayerEntryConfig.forEach((layerConfig: TypeLayerEntryConfig) => {
-      // links the entry to its root GeoView layer.
-      layerConfig.geoviewRootLayer = rootLayerConfig;
+    listOfLayerEntryConfig.forEach((layerConfig: TypeLayerEntryConfig, i: number) => {
+      // links the entry to its GeoView layer config.
+      layerConfig.geoviewLayerConfig = geoviewLayerConfig;
       // links the entry to its parent layer configuration.
       layerConfig.parentLayerConfig = parentLayerConfig;
       // layerConfig.initialSettings attributes that are not defined inherits parent layer settings that are defined.
       layerConfig.initialSettings = defaultsDeep(
         layerConfig.initialSettings,
-        layerConfig.parentLayerConfig?.initialSettings || layerConfig.geoviewRootLayer?.initialSettings
+        layerConfig.parentLayerConfig?.initialSettings || layerConfig.geoviewLayerConfig?.initialSettings
       );
-      if (layerEntryIsGroupLayer(layerConfig))
-        this.processLayerEntryConfig(rootLayerConfig, layerConfig.listOfLayerEntryConfig, layerConfig);
-      else if (geoviewEntryIsWMS(layerConfig)) {
-        // if layerConfig.source.dataAccessPath is undefined, the metadataAccessPath defined on the root is used.
-        if (!layerConfig.source) (layerConfig as TypeOgcWmsLayerEntryConfig).source = {};
-        if (!layerConfig.source.dataAccessPath) {
-          // When the dataAccessPath is undefined and the metadataAccessPath ends with ".xml", the dataAccessPath is temporarilly
-          // set to '' and will be filled in the fetchServiceMetadata method of the class WMS. So, we begin with the assumption
-          // that both en and fr end with ".xml". Be aware that in metadataAccessPath, one language can ends with ".xml" and the
-          // other not.
-          layerConfig.source.dataAccessPath = { en: '', fr: '' };
-          // When the dataAccessPath is undefined and the metadataAccessPath does not end with ".xml", the dataAccessPath is set
-          // to the same value of the corresponding metadataAccessPath.
-          if (rootLayerConfig.metadataAccessPath!.en!.slice(-4).toLowerCase() !== '.xml')
-            layerConfig.source.dataAccessPath.en = rootLayerConfig.metadataAccessPath!.en;
-          if (rootLayerConfig.metadataAccessPath!.fr!.slice(-4).toLowerCase() !== '.xml')
-            layerConfig.source.dataAccessPath.fr = rootLayerConfig.metadataAccessPath!.fr;
-        }
-        // Default value for layerConfig.source.serverType is 'mapserver'.
-        if (!layerConfig.source.serverType) layerConfig.source.serverType = 'mapserver';
-      } else if (geoviewEntryIsImageStatic(layerConfig)) {
-        // Value for layerConfig.entryType can only be raster
-        if (!layerConfig.entryType) layerConfig.entryType = 'raster-image';
 
-        if (!layerConfig.source.dataAccessPath) {
-          throw new Error(
-            `source.dataAccessPath on layer entry ${Layer.getLayerPath(layerConfig)} is mandatory for GeoView layer ${
-              rootLayerConfig.geoviewLayerId
-            } of type ${rootLayerConfig.geoviewLayerType}`
-          );
-        }
+      if (layerEntryIsGroupLayer(layerConfig)) {
+        listOfLayerEntryConfig[i] = new TypeLayerGroupEntryConfig(layerConfig);
+        this.processLayerEntryConfig(geoviewLayerConfig, layerConfig.listOfLayerEntryConfig, layerConfig);
+      } else if (geoviewEntryIsWMS(layerConfig)) {
+        listOfLayerEntryConfig[i] = new TypeOgcWmsLayerEntryConfig(layerConfig);
+      } else if (geoviewEntryIsImageStatic(layerConfig)) {
+        listOfLayerEntryConfig[i] = new TypeImageStaticLayerEntryConfig(layerConfig);
       } else if (geoviewEntryIsXYZTiles(layerConfig)) {
-        /** layerConfig.source.dataAccessPath is mandatory. */
-        if (!layerConfig.source.dataAccessPath) {
-          throw new Error(
-            `source.dataAccessPath on layer entry ${Layer.getLayerPath(layerConfig)} is mandatory for GeoView layer ${
-              rootLayerConfig.geoviewLayerId
-            } of type ${rootLayerConfig.geoviewLayerType}`
-          );
-        }
+        listOfLayerEntryConfig[i] = new TypeXYZTilesLayerEntryConfig(layerConfig);
       } else if (geoviewEntryIsVectorTiles(layerConfig)) {
-        /** layerConfig.source.dataAccessPath is mandatory. */
-        if (!layerConfig.source!.dataAccessPath) {
-          throw new Error(
-            `source.dataAccessPath on layer entry ${Layer.getLayerPath(layerConfig)} is mandatory for GeoView layer ${
-              rootLayerConfig.geoviewLayerId
-            } of type ${rootLayerConfig.geoviewLayerType}`
-          );
-        }
+        listOfLayerEntryConfig[i] = new TypeVectorTilesLayerEntryConfig(layerConfig);
       } else if (geoviewEntryIsEsriDynamic(layerConfig)) {
-        if (Number.isNaN(layerConfig.layerId)) {
-          throw new Error(`The layer entry with layerId equal to ${Layer.getLayerPath(layerConfig)} must be an integer string`);
-        }
-        // if layerConfig.source.dataAccessPath is undefined, we assign the metadataAccessPath of the GeoView layer to it.
-        if (!layerConfig.source) (layerConfig as TypeEsriDynamicLayerEntryConfig).source = {};
-        if (!layerConfig.source.dataAccessPath)
-          layerConfig.source.dataAccessPath = { ...rootLayerConfig.metadataAccessPath } as TypeLocalizedString;
+        listOfLayerEntryConfig[i] = new TypeEsriDynamicLayerEntryConfig(layerConfig);
       } else if (geoviewEntryIsEsriFeature(layerConfig)) {
-        if (Number.isNaN(layerConfig.layerId)) {
-          throw new Error(`The layer entry with layerId equal to ${Layer.getLayerPath(layerConfig)} must be an integer string`);
-        }
-        // Attribute 'style' must exist in layerConfig even if it is undefined
-        if (!('style' in layerConfig)) layerConfig.style = undefined;
-        // if layerConfig.source.dataAccessPath is undefined, we assign the metadataAccessPath of the GeoView layer to it
-        // and place the layerId at the end of it.
-        // Value for layerConfig.source.format can only be EsriJSON.
-        if (!layerConfig.source) (layerConfig as TypeEsriFeatureLayerEntryConfig).source = { format: 'EsriJSON' };
-        if (!layerConfig?.source?.format) layerConfig.source.format = 'EsriJSON';
-        if (!layerConfig.source.dataAccessPath)
-          layerConfig.source.dataAccessPath = { ...rootLayerConfig.metadataAccessPath } as TypeLocalizedString;
+        listOfLayerEntryConfig[i] = new TypeEsriFeatureLayerEntryConfig(layerConfig);
       } else if (geoviewEntryIsWFS(layerConfig)) {
-        // Attribute 'style' must exist in layerConfig even if it is undefined
-        if (!('style' in layerConfig)) layerConfig.style = undefined;
-        // if layerConfig.source.dataAccessPath is undefined, we assign the metadataAccessPath of the GeoView layer to it.
-        // Value for layerConfig.source.format can only be WFS.
-        if (!layerConfig.source) (layerConfig as TypeWfsLayerEntryConfig).source = { format: 'WFS' };
-        if (!layerConfig?.source?.format) layerConfig.source.format = 'WFS';
-        if (!layerConfig.source.dataAccessPath)
-          layerConfig.source.dataAccessPath = { ...rootLayerConfig.metadataAccessPath } as TypeLocalizedString;
-        if (!layerConfig?.source?.dataProjection) layerConfig.source.dataProjection = 'EPSG:4326';
+        listOfLayerEntryConfig[i] = new TypeWfsLayerEntryConfig(layerConfig);
       } else if (geoviewEntryIsOgcFeature(layerConfig)) {
-        // Attribute 'style' must exist in layerConfig even if it is undefined
-        if (!('style' in layerConfig)) layerConfig.style = undefined;
-        // if layerConfig.source.dataAccessPath is undefined, we assign the metadataAccessPath of the GeoView layer to it.
-        // Value for layerConfig.source.format can only be WFS.
-        if (!layerConfig.source) (layerConfig as TypeOgcFeatureLayerEntryConfig).source = { format: 'featureAPI' };
-        if (!layerConfig?.source?.format) layerConfig.source.format = 'featureAPI';
-        if (!layerConfig.source.dataAccessPath)
-          layerConfig.source.dataAccessPath = { ...rootLayerConfig.metadataAccessPath } as TypeLocalizedString;
-        if (!layerConfig?.source?.dataProjection) layerConfig.source.dataProjection = 'EPSG:4326';
+        listOfLayerEntryConfig[i] = new TypeOgcFeatureLayerEntryConfig(layerConfig);
       } else if (geoviewEntryIsGeoPackage(layerConfig)) {
-        // Attribute 'style' must exist in layerConfig even if it is undefined
-        if (!('style' in layerConfig)) layerConfig.style = undefined;
-        // if layerConfig.source.dataAccessPath is undefined, we assign the metadataAccessPath of the GeoView layer to it.
-        // Value for layerConfig.source.format can only be GeoPackage.
-        if (!layerConfig.source) (layerConfig as TypeGeoPackageLayerEntryConfig).source = { format: 'GeoPackage' };
-        if (!layerConfig?.source?.format) layerConfig.source.format = 'GeoPackage';
-        if (!layerConfig.source.dataAccessPath) {
-          let { en, fr } = rootLayerConfig.metadataAccessPath!;
-          en = en!.split('/').length > 1 ? en!.split('/').slice(0, -1).join('/') : './';
-          fr = fr!.split('/').length > 1 ? fr!.split('/').slice(0, -1).join('/') : './';
-          layerConfig.source.dataAccessPath = { en, fr } as TypeLocalizedString;
-        }
-        if (
-          !(layerConfig.source.dataAccessPath!.en?.startsWith('blob') && !layerConfig.source.dataAccessPath!.en?.endsWith('/')) &&
-          !layerConfig.source.dataAccessPath!.en?.toLowerCase().endsWith('.gpkg')
-        ) {
-          layerConfig.source.dataAccessPath!.en = layerConfig.source.dataAccessPath!.en!.endsWith('/')
-            ? `${layerConfig.source.dataAccessPath!.en}${layerConfig.layerId}`
-            : `${layerConfig.source.dataAccessPath!.en}/${layerConfig.layerId}`;
-          layerConfig.source.dataAccessPath!.fr = layerConfig.source.dataAccessPath!.fr!.endsWith('/')
-            ? `${layerConfig.source.dataAccessPath!.fr}${layerConfig.layerId}`
-            : `${layerConfig.source.dataAccessPath!.fr}/${layerConfig.layerId}`;
-        }
-        if (!layerConfig?.source?.dataProjection) layerConfig.source.dataProjection = 'EPSG:4326';
+        listOfLayerEntryConfig[i] = new TypeGeoPackageLayerEntryConfig(layerConfig);
       } else if (geoviewEntryIsGeoJSON(layerConfig)) {
-        if (!layerConfig.geoviewRootLayer.metadataAccessPath && !layerConfig.source?.dataAccessPath) {
-          throw new Error(
-            `dataAccessPath is mandatory for GeoView layer ${rootLayerConfig.geoviewLayerId} of type GeoJSON when the metadataAccessPath is undefined.`
-          );
-        }
-        // Default value for layerConfig.entryType is vector
-        if (!layerConfig.entryType) layerConfig.entryType = 'vector';
-        // Attribute 'style' must exist in layerConfig even if it is undefined
-        if (!('style' in layerConfig)) layerConfig.style = undefined;
-        // if layerConfig.source.dataAccessPath is undefined, we assign the metadataAccessPath of the GeoView layer to it
-        // and place the layerId at the end of it.
-        // Value for layerConfig.source.format can only be EsriJSON.
-        if (!layerConfig.source) (layerConfig as TypeGeoJSONLayerEntryConfig).source = { format: 'GeoJSON' };
-        if (!layerConfig?.source?.format) layerConfig.source.format = 'GeoJSON';
-        if (!layerConfig.source.dataAccessPath) {
-          let { en, fr } = rootLayerConfig.metadataAccessPath!;
-          en = en!.split('/').length > 1 ? en!.split('/').slice(0, -1).join('/') : './';
-          fr = fr!.split('/').length > 1 ? fr!.split('/').slice(0, -1).join('/') : './';
-          layerConfig.source.dataAccessPath = { en, fr } as TypeLocalizedString;
-        }
-        if (
-          !(layerConfig.source.dataAccessPath!.en?.startsWith('blob') && !layerConfig.source.dataAccessPath!.en?.endsWith('/')) &&
-          !layerConfig.source.dataAccessPath!.en?.endsWith('.json' || '.geojson' || '.JSON' || '.geoJSON' || '.GEOJSON')
-        ) {
-          layerConfig.source.dataAccessPath!.en = layerConfig.source.dataAccessPath!.en!.endsWith('/')
-            ? `${layerConfig.source.dataAccessPath!.en}${layerConfig.layerId}`
-            : `${layerConfig.source.dataAccessPath!.en}/${layerConfig.layerId}`;
-          layerConfig.source.dataAccessPath!.fr = layerConfig.source.dataAccessPath!.fr!.endsWith('/')
-            ? `${layerConfig.source.dataAccessPath!.fr}${layerConfig.layerId}`
-            : `${layerConfig.source.dataAccessPath!.fr}/${layerConfig.layerId}`;
-        }
-        if (!layerConfig?.source?.dataProjection) layerConfig.source.dataProjection = 'EPSG:4326';
+        listOfLayerEntryConfig[i] = new TypeGeoJSONLayerEntryConfig(layerConfig);
       }
     });
   }
@@ -784,9 +660,9 @@ export class ConfigValidation {
                   throw new Error('When you support both languages, you must set all en and fr properties of localized strings.');
                 }
               }
-              // Avoid the 'geoviewRootLayer' and 'parentLayerConfig' properties because they loop on themself and cause a
+              // Avoid the 'geoviewLayerConfig' and 'parentLayerConfig' properties because they loop on themself and cause a
               // stack overflow error.
-              else if (!['geoviewRootLayer', 'parentLayerConfig'].includes(key)) validateLocalizedString(config[key]);
+              else if (!['geoviewLayerConfig', 'parentLayerConfig'].includes(key)) validateLocalizedString(config[key]);
             }
           });
         }
@@ -812,9 +688,9 @@ export class ConfigValidation {
             if (typeof config[key] === 'object') {
               if ('en' in config[key] || 'fr' in config[key])
                 this.SynchronizeLocalizedString(Cast<TypeLocalizedString>(config[key]), sourceKey, destinationKey);
-              // Avoid the 'geoviewRootLayer' and 'parentLayerConfig' properties because they loop on themself and cause a
+              // Avoid the 'geoviewLayerConfig' and 'parentLayerConfig' properties because they loop on themself and cause a
               // stack overflow error.
-              else if (!['geoviewRootLayer', 'parentLayerConfig'].includes(key)) propagateLocalizedString(config[key]);
+              else if (!['geoviewLayerConfig', 'parentLayerConfig'].includes(key)) propagateLocalizedString(config[key]);
             }
           });
         }
