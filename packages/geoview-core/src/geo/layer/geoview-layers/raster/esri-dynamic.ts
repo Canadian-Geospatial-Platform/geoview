@@ -84,7 +84,7 @@ export const geoviewLayerIsEsriDynamic = (verifyIfGeoViewLayer: AbstractGeoViewL
 
 /** ******************************************************************************************************************************
  * type guard function that redefines a TypeLayerEntryConfig as a TypeEsriDynamicLayerEntryConfig if the geoviewLayerType attribute
- * of the verifyIfGeoViewEntry.geoviewRootLayer attribute is ESRI_DYNAMIC. The type ascention applies only to the true block of
+ * of the verifyIfGeoViewEntry.geoviewLayerConfig attribute is ESRI_DYNAMIC. The type ascention applies only to the true block of
  * the if clause that use this function.
  *
  * @param {TypeLayerEntryConfig} verifyIfGeoViewEntry Polymorphic object to test in order to determine if the type ascention is
@@ -95,7 +95,7 @@ export const geoviewLayerIsEsriDynamic = (verifyIfGeoViewLayer: AbstractGeoViewL
 export const geoviewEntryIsEsriDynamic = (
   verifyIfGeoViewEntry: TypeLayerEntryConfig
 ): verifyIfGeoViewEntry is TypeEsriDynamicLayerEntryConfig => {
-  return verifyIfGeoViewEntry?.geoviewRootLayer?.geoviewLayerType === CONST_LAYER_TYPES.ESRI_DYNAMIC;
+  return verifyIfGeoViewEntry?.geoviewLayerConfig?.geoviewLayerType === CONST_LAYER_TYPES.ESRI_DYNAMIC;
 };
 
 // ******************************************************************************************************************************
@@ -147,8 +147,8 @@ export class EsriDynamic extends AbstractGeoViewRaster {
   esriChildHasDetectedAnError(layerConfig: TypeLayerEntryConfig, esriIndex: number): boolean {
     if (!this.metadata!.supportsDynamicLayers) {
       this.layerLoadError.push({
-        layer: Layer.getLayerPath(layerConfig),
-        consoleMessage: `Layer ${Layer.getLayerPath(layerConfig)} of map ${this.mapId} does not support dynamic layers.`,
+        layer: layerConfig.layerPath,
+        consoleMessage: `Layer ${layerConfig.layerPath} of map ${this.mapId} does not support dynamic layers.`,
       });
       return true;
     }
@@ -250,7 +250,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
    * @returns {TypeBaseRasterLayer} The GeoView raster layer that has been created.
    */
   protected processOneLayerEntry(layerConfig: TypeEsriDynamicLayerEntryConfig): Promise<TypeBaseRasterLayer | null> {
-    const layerPath = Layer.getLayerPath(layerConfig);
+    const { layerPath } = layerConfig;
     this.setLayerPhase('processOneLayerEntry', layerPath);
     const sourceOptions: SourceOptions = {};
     sourceOptions.attributions = [(this.metadata!.copyrightText ? this.metadata!.copyrightText : '') as string];
@@ -287,6 +287,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
     );
 
     layerConfig.olLayer = new ImageLayer(imageLayerOptions);
+    layerConfig.geoviewLayerInstance = this;
     this.applyViewFilter(layerPath, layerConfig.layerFilter ? layerConfig.layerFilter : '');
 
     this.addLoadendListener(layerPath, 'image');
@@ -565,7 +566,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
    * @returns {string} the filter associated to the layerPath
    */
   getViewFilter(layerPath: string): string {
-    layerPath = layerPath || api.maps[this.mapId].layer.layerPathAssociatedToThegeoviewLayer;
+    layerPath = layerPath || this.layerPathAssociatedToTheGeoviewLayer;
     const layerConfig = this.getLayerConfig(layerPath) as TypeEsriDynamicLayerEntryConfig;
     const layerFilter = layerConfig.olLayer?.get('layerFilter');
 
@@ -721,7 +722,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
   }
 
   /** ***************************************************************************************************************************
-   * Apply a view filter to the layer identified by the path stored in the layerPathAssociatedToThegeoviewLayer property stored
+   * Apply a view filter to the layer identified by the path stored in the layerPathAssociatedToTheGeoviewLayer property stored
    * in the layer instance associated to the map. The legend filters are derived from the uniqueValue or classBreaks style of the
    * layer. When the layer config is invalid, nothing is done.
    *
@@ -732,7 +733,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
   applyViewFilter(filter: string, notUsed1?: never, notUsed2?: never): void;
 
   /** ***************************************************************************************************************************
-   * Apply a view filter to the layer identified by the path stored in the layerPathAssociatedToThegeoviewLayer property stored
+   * Apply a view filter to the layer identified by the path stored in the layerPathAssociatedToTheGeoviewLayer property stored
    * in the layer instance associated to the map. When the CombineLegendFilter flag is false, the filter paramater is used alone
    * to display the features. Otherwise, the legend filter and the filter parameter are combined together to define the view
    * filter. The legend filters are derived from the uniqueValue or classBreaks style of the layer. When the layer config is
@@ -759,7 +760,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
   // See above headers for signification of the parameters. The first lines of the method select the template
   // used based on the parameter types received.
   applyViewFilter(parameter1: string, parameter2?: string | boolean | never, parameter3?: boolean | never) {
-    let layerPath = api.maps[this.mapId].layer.layerPathAssociatedToThegeoviewLayer;
+    let layerPath = this.layerPathAssociatedToTheGeoviewLayer;
     let filter = '';
     let CombineLegendFilter = true;
     if (parameter3) {
@@ -830,7 +831,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
   // See above headers for signification of the parameters. The first lines of the method select the template
   // used based on the parameter types received.
   protected getBounds(parameter1?: string | Extent, parameter2?: Extent): Extent | undefined {
-    const layerPath = typeof parameter1 === 'string' ? parameter1 : api.maps[this.mapId].layer.layerPathAssociatedToThegeoviewLayer;
+    const layerPath = typeof parameter1 === 'string' ? parameter1 : this.layerPathAssociatedToTheGeoviewLayer;
     let bounds = typeof parameter1 !== 'string' ? parameter1 : parameter2;
     const layerConfig = this.getLayerConfig(layerPath);
     const layerBounds = layerConfig?.initialSettings?.bounds || [];

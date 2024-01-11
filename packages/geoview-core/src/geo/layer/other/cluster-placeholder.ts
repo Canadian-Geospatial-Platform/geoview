@@ -217,6 +217,7 @@
 //   };
 
 //   layerConfig.olLayer = new VectorLayer(layerOptions);
+//   layerConfig.geoviewLayerInstance = this;
 
 //   if (layerConfig.initialSettings?.extent !== undefined) this.setExtent(layerConfig.initialSettings?.extent, layerPath);
 //   if (layerConfig.initialSettings?.maxZoom !== undefined)
@@ -233,11 +234,11 @@
 // }
 
 // applyViewFilter(layerPath?: string, filter = '', CombineLegendFilter = true, checkCluster = true) {
-//   layerPath = layerPath || api.maps[this.mapId].layer.layerPathAssociatedToThegeoviewLayer;
+//   layerPath = layerPath || this.layerPathAssociatedToTheGeoviewLayer;
 //   const layerConfig = this.getLayerConfig(layerPath) as TypeVectorLayerEntryConfig;
 //   if (layerConfig) {
-//     const layerPath = layerConfig.geoviewRootLayer
-//       ? `${layerConfig.geoviewRootLayer.geoviewLayerId}/${String(layerConfig.layerId).replace('-unclustered', '')}`
+//     const layerPath = layerConfig.geoviewLayerConfig
+//       ? `${layerConfig.geoviewLayerConfig.geoviewLayerId}/${String(layerConfig.layerId).replace('-unclustered', '')}`
 //       : String(layerConfig.layerId).replace('-unclustered', '');
 //     const unclusteredLayerPath = `${layerPath}-unclustered`;
 //     const cluster = !!api.maps[this.mapId].layer.registeredLayers[unclusteredLayerPath];
@@ -273,7 +274,7 @@
 //               baseLayer.setVisible(false);
 //               if (!layerGroup) layerGroup = this.createLayerGroup(unclusteredLayerConfig.parentLayerConfig as TypeLayerEntryConfig);
 //               layerGroup.getLayers().push(baseLayer);
-//               this.setLayerStatus('processed', Layer.getLayerPath(unclusteredLayerConfig));
+//               this.setLayerStatus('processed', unclusteredLayerConfig.layerPath);
 //             }
 //           });
 
@@ -283,15 +284,15 @@
 
 //         this.processOneGeopackageLayer(layerConfig, layers[0], slds).then((baseLayer) => {
 //           if (baseLayer) {
-//             this.setLayerStatus('processed', Layer.getLayerPath(layerConfig));
+//             this.setLayerStatus('processed', layerConfig.layerPath);
 //             if (layerGroup) layerGroup.getLayers().push(baseLayer);
 //             resolve(layerGroup || baseLayer);
 //           } else {
 //             this.layerLoadError.push({
-//               layer: Layer.getLayerPath(layerConfig),
-//               consoleMessage: `Unable to create layer ${Layer.getLayerPath(layerConfig)} on map ${this.mapId}`,
+//               layer: layerConfig.layerPath,
+//               consoleMessage: `Unable to create layer ${layerConfig.layerPath} on map ${this.mapId}`,
 //             });
-//             this.setLayerStatus('error', Layer.getLayerPath(layerConfig));
+//             this.setLayerStatus('error', layerConfig.layerPath);
 //             resolve(null);
 //           }
 //         });
@@ -314,7 +315,7 @@
 //               if (baseLayer) {
 //                 baseLayer.setVisible(false);
 //                 newLayerGroup.getLayers().push(baseLayer);
-//                 this.setLayerStatus('processed', Layer.getLayerPath(unclusteredLayerConfig));
+//                 this.setLayerStatus('processed', unclusteredLayerConfig.layerPath);
 //               }
 //             });
 
@@ -326,13 +327,13 @@
 //             if (baseLayer) {
 //               (layerConfig as unknown as TypeLayerGroupEntryConfig).listOfLayerEntryConfig!.push(newLayerEntryConfig);
 //               newLayerGroup.getLayers().push(baseLayer);
-//               this.setLayerStatus('processed', Layer.getLayerPath(newLayerEntryConfig));
+//               this.setLayerStatus('processed', newLayerEntryConfig.layerPath;
 //             } else {
 //               this.layerLoadError.push({
-//                 layer: Layer.getLayerPath(layerConfig),
-//                 consoleMessage: `Unable to create layer ${Layer.getLayerPath(layerConfig)} on map ${this.mapId}`,
+//                 layer: layerConfig.layerPath,
+//                 consoleMessage: `Unable to create layer ${layerConfig.layerPath} on map ${this.mapId}`,
 //               });
-//               this.setLayerStatus('error', Layer.getLayerPath(newLayerEntryConfig));
+//               this.setLayerStatus('error', newLayerEntryConfig.layerPath);
 //               resolve(null);
 //             }
 //           });
@@ -580,7 +581,7 @@
 //   layerConfig: TypeVectorTileLayerEntryConfig | TypeVectorLayerEntryConfig
 // ): TypeStyleConfig | undefined {
 //   if (layerConfig.style === undefined) layerConfig.style = {};
-//   const styleId = `${this.mapId}/${Layer.getLayerPath(layerConfig)}`;
+//   const styleId = `${this.mapId}/${layerConfig.layerPath}`;
 //   let label = getLocalizedValue(layerConfig.layerName, this.mapId);
 //   label = label !== undefined ? label : styleId;
 //   if (geometryType === 'Point') {

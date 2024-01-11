@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable block-scoped-var, no-var, vars-on-top, no-param-reassign */
+// eslint-disable-next-line max-classes-per-file
 import View from 'ol/View';
 import Map from 'ol/Map';
 import TileLayer from 'ol/layer/Tile';
@@ -37,9 +38,26 @@ import { MapEventProcessor } from '@/api/event-processors/event-processor-childr
 
 export type TypeSourceVectorTilesInitialConfig = TypeSourceTileInitialConfig;
 
-export interface TypeVectorTilesLayerEntryConfig extends Omit<TypeTileLayerEntryConfig, 'source'> {
-  source: TypeSourceVectorTilesInitialConfig;
-  tileGrid: TypeTileGrid;
+export class TypeVectorTilesLayerEntryConfig extends TypeTileLayerEntryConfig {
+  declare source: TypeSourceVectorTilesInitialConfig;
+
+  tileGrid!: TypeTileGrid;
+
+  /**
+   * The class constructor.
+   * @param {TypeVectorTilesLayerEntryConfig} layerConfig The layer configuration we want to instanciate.
+   */
+  constructor(layerConfig: TypeVectorTilesLayerEntryConfig) {
+    super(layerConfig);
+    Object.assign(this, layerConfig);
+
+    /** layerConfig.source.dataAccessPath is mandatory. */
+    if (!layerConfig.source!.dataAccessPath) {
+      throw new Error(
+        `source.dataAccessPath on layer entry ${this.layerPath} is mandatory for GeoView layer ${this.geoviewLayerConfig.geoviewLayerId} of type ${this.geoviewLayerConfig.geoviewLayerType}`
+      );
+    }
+  }
 }
 
 export interface TypeVectorTilesConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig'> {
@@ -75,7 +93,7 @@ export const geoviewLayerIsVectorTiles = (verifyIfGeoViewLayer: AbstractGeoViewL
 
 /** *****************************************************************************************************************************
  * type guard function that redefines a TypeLayerEntryConfig as a TypeVectorTilesLayerEntryConfig if the geoviewLayerType attribute
- * of the verifyIfGeoViewEntry.geoviewRootLayer attribute is VECTOR_TILES. The type ascention applies only to the true block of
+ * of the verifyIfGeoViewEntry.geoviewLayerConfig attribute is VECTOR_TILES. The type ascention applies only to the true block of
  * the if clause that use this function.
  *
  * @param {TypeLayerEntryConfig} verifyIfGeoViewEntry Polymorphic object to test in order to determine if the type ascention is
@@ -86,7 +104,7 @@ export const geoviewLayerIsVectorTiles = (verifyIfGeoViewLayer: AbstractGeoViewL
 export const geoviewEntryIsVectorTiles = (
   verifyIfGeoViewEntry: TypeLayerEntryConfig
 ): verifyIfGeoViewEntry is TypeVectorTilesLayerEntryConfig => {
-  return verifyIfGeoViewEntry?.geoviewRootLayer?.geoviewLayerType === CONST_LAYER_TYPES.VECTOR_TILES;
+  return verifyIfGeoViewEntry?.geoviewLayerConfig?.geoviewLayerType === CONST_LAYER_TYPES.VECTOR_TILES;
 };
 
 // ******************************************************************************************************************************
@@ -118,7 +136,7 @@ export class VectorTiles extends AbstractGeoViewRaster {
    * @returns {'string' | 'date' | 'number'} The type of the field.
    */
   protected getFieldType(fieldName: string, layerConfig: TypeLayerEntryConfig): 'string' | 'date' | 'number' {
-    const fieldDefinitions = this.layerMetadata[Layer.getLayerPath(layerConfig)].source.featureInfo;
+    const fieldDefinitions = this.layerMetadata[layerConfig.layerPath].source.featureInfo;
     const fieldIndex = getLocalizedValue(Cast<TypeLocalizedString>(fieldDefinitions.outfields), this.mapId)?.split(',').indexOf(fieldName);
     if (!fieldIndex || fieldIndex === -1) return 'string';
     return (fieldDefinitions.fieldTypes as string).split(',')[fieldIndex!] as 'string' | 'date' | 'number';
@@ -133,7 +151,7 @@ export class VectorTiles extends AbstractGeoViewRaster {
   protected validateListOfLayerEntryConfig(listOfLayerEntryConfig: TypeListOfLayerEntryConfig) {
     this.setLayerPhase('validateListOfLayerEntryConfig');
     listOfLayerEntryConfig.forEach((layerConfig: TypeLayerEntryConfig) => {
-      const layerPath = Layer.getLayerPath(layerConfig);
+      const { layerPath } = layerConfig;
       if (layerEntryIsGroupLayer(layerConfig)) {
         this.validateListOfLayerEntryConfig(layerConfig.listOfLayerEntryConfig!);
         if (!layerConfig?.listOfLayerEntryConfig?.length) {
@@ -159,7 +177,7 @@ export class VectorTiles extends AbstractGeoViewRaster {
    */
   protected processOneLayerEntry(layerConfig: TypeVectorTilesLayerEntryConfig): Promise<TypeBaseRasterLayer | null> {
     const promisedVectorLayer = new Promise<TypeBaseRasterLayer | null>((resolve) => {
-      const layerPath = Layer.getLayerPath(layerConfig);
+      const { layerPath } = layerConfig;
       this.setLayerPhase('processOneLayerEntry', layerPath);
       const sourceOptions: SourceOptions = {
         url: getLocalizedValue(layerConfig.source.dataAccessPath, this.mapId),
@@ -184,7 +202,8 @@ export class VectorTiles extends AbstractGeoViewRaster {
         sourceOptions.tileGrid = new TileGrid(tileGridOptions);
       }
 
-      sourceOptions.format = new MVT();
+      // ! The following line cause an error now.
+      // sourceOptions.format = new MVT();
       sourceOptions.projection = `EPSG:${MapEventProcessor.getMapState(this.mapId).currentProjection}`;
       sourceOptions.tileGrid = new TileGrid(layerConfig.source!.tileGrid!);
       const tileLayerOptions: TileOptions<VectorTileSource> = { source: new VectorTileSource(sourceOptions) };
@@ -199,6 +218,7 @@ export class VectorTiles extends AbstractGeoViewRaster {
       // TODO remove after demoing
       const declutter = this.mapId !== 'LYR2';
       layerConfig.olLayer = new VectorTileLayer({ ...tileLayerOptions, declutter });
+      layerConfig.geoviewLayerInstance = this;
       if (this.metadata?.defaultStyles)
         applyStyle(
           layerConfig.olLayer as VectorTileLayer,
@@ -270,7 +290,7 @@ export class VectorTiles extends AbstractGeoViewRaster {
   // See above headers for signification of the parameters. The first lines of the method select the template
   // used based on the parameter types received.
   protected getBounds(parameter1?: string | Extent, parameter2?: Extent): Extent | undefined {
-    const layerPath = typeof parameter1 === 'string' ? parameter1 : api.maps[this.mapId].layer.layerPathAssociatedToThegeoviewLayer;
+    const layerPath = typeof parameter1 === 'string' ? parameter1 : this.layerPathAssociatedToTheGeoviewLayer;
     let bounds = typeof parameter1 !== 'string' ? parameter1 : parameter2;
     const layerConfig = this.getLayerConfig(layerPath);
     const layerBounds = (layerConfig?.olLayer as TileLayer<VectorTileSource>).getSource()?.getTileGrid()?.getExtent();

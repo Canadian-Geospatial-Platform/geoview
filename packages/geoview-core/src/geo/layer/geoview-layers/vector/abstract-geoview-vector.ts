@@ -20,7 +20,6 @@ import {
   TypeListOfLayerEntryConfig,
   TypeVectorLayerEntryConfig,
 } from '@/geo/map/map-schema-types';
-import { Layer } from '@/geo/layer/layer';
 import { api } from '@/app';
 import { getLocalizedValue, getMinOrMaxExtents } from '@/core/utils/utilities';
 import { TypeArrayOfFeatureInfoEntries } from '@/api/events/payloads';
@@ -69,7 +68,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
    * @returns {Promise<BaseLayer | null>} The GeoView base layer that has been created.
    */
   protected processOneLayerEntry(layerConfig: TypeBaseLayerEntryConfig): Promise<BaseLayer | null> {
-    this.setLayerPhase('processOneLayerEntry', Layer.getLayerPath(layerConfig));
+    this.setLayerPhase('processOneLayerEntry', layerConfig.layerPath);
     const vectorSource = this.createVectorSource(layerConfig);
     const vectorLayer = this.createVectorLayer(layerConfig as TypeVectorLayerEntryConfig, vectorSource);
     return Promise.resolve(vectorLayer);
@@ -89,7 +88,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
     sourceOptions: SourceOptions = {},
     readOptions: ReadOptions = {}
   ): VectorSource<Feature> {
-    const layerPath = Layer.getLayerPath(layerConfig);
+    const { layerPath } = layerConfig;
     // The line below uses var because a var declaration has a wider scope than a let declaration.
     var vectorSource: VectorSource<Feature>;
     this.setLayerPhase('createVectorSource', layerPath);
@@ -193,7 +192,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
    * @returns {VectorLayer<VectorSource>} The vector layer created.
    */
   protected createVectorLayer(layerConfig: TypeVectorLayerEntryConfig, vectorSource: VectorSource<Feature>): VectorLayer<VectorSource> {
-    const layerPath = Layer.getLayerPath(layerConfig);
+    const { layerPath } = layerConfig;
     this.setLayerPhase('createVectorLayer');
 
     const layerOptions: VectorLayerOptions<VectorSource> = {
@@ -210,6 +209,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
     };
 
     layerConfig.olLayer = new VectorLayer(layerOptions);
+    layerConfig.geoviewLayerInstance = this;
 
     if (layerConfig.initialSettings?.extent !== undefined) this.setExtent(layerConfig.initialSettings?.extent, layerPath);
     if (layerConfig.initialSettings?.maxZoom !== undefined) this.setMaxZoom(layerConfig.initialSettings?.maxZoom, layerPath);
@@ -229,7 +229,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
    * @returns {TypeArrayOfFeatureInfoEntries} The feature info table.
    */
   protected async getAllFeatureInfo(layerPath?: string): Promise<TypeArrayOfFeatureInfoEntries> {
-    layerPath = layerPath || api.maps[this.mapId].layer.layerPathAssociatedToThegeoviewLayer;
+    layerPath = layerPath || this.layerPathAssociatedToTheGeoviewLayer;
     const layerConfig = this.getLayerConfig(layerPath) as TypeLayerEntryConfig;
     if (!layerConfig?.olLayer) return [];
 
@@ -255,7 +255,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
    */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   protected async getFeatureInfoAtPixel(location: Pixel, layerPath?: string): Promise<TypeArrayOfFeatureInfoEntries | null> {
-    layerPath = layerPath || api.maps[this.mapId].layer.layerPathAssociatedToThegeoviewLayer;
+    layerPath = layerPath || this.layerPathAssociatedToTheGeoviewLayer;
     try {
       const layerConfig = this.getLayerConfig(layerPath) as TypeLayerEntryConfig;
       const layerFilter = (layer: BaseLayer) => {
@@ -282,7 +282,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
    */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   protected getFeatureInfoAtCoordinate(location: Coordinate, layerPath?: string): Promise<TypeArrayOfFeatureInfoEntries> {
-    layerPath = layerPath || api.maps[this.mapId].layer.layerPathAssociatedToThegeoviewLayer;
+    layerPath = layerPath || this.layerPathAssociatedToTheGeoviewLayer;
     const { map } = api.maps[this.mapId];
     return this.getFeatureInfoAtPixel(map.getPixelFromCoordinate(location as Coordinate), layerPath);
   }
@@ -297,7 +297,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
    */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   protected getFeatureInfoAtLongLat(location: Coordinate, layerPath?: string): Promise<TypeArrayOfFeatureInfoEntries> {
-    layerPath = layerPath || api.maps[this.mapId].layer.layerPathAssociatedToThegeoviewLayer;
+    layerPath = layerPath || this.layerPathAssociatedToTheGeoviewLayer;
     const { map } = api.maps[this.mapId];
     const convertedLocation = api.projection.transform(
       location,
@@ -330,7 +330,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
   // See above headers for signification of the parameters. The first lines of the method select the template
   // used based on the parameter types received.
   protected getBounds(parameter1?: string | Extent, parameter2?: Extent): Extent | undefined {
-    const layerPath = typeof parameter1 === 'string' ? parameter1 : api.maps[this.mapId].layer.layerPathAssociatedToThegeoviewLayer;
+    const layerPath = typeof parameter1 === 'string' ? parameter1 : this.layerPathAssociatedToTheGeoviewLayer;
     let bounds = typeof parameter1 !== 'string' ? parameter1 : parameter2;
     const layerConfig = this.getLayerConfig(layerPath);
     const layerBounds = (layerConfig?.olLayer as VectorLayer<VectorSource>)?.getSource()?.getExtent();
@@ -344,7 +344,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
   }
 
   /** ***************************************************************************************************************************
-   * Apply a view filter to the layer identified by the path stored in the layerPathAssociatedToThegeoviewLayer property stored
+   * Apply a view filter to the layer identified by the path stored in the layerPathAssociatedToTheGeoviewLayer property stored
    * in the layer instance associated to the map. The legend filters are derived from the uniqueValue or classBreaks style of the
    * layer. When the layer config is invalid, nothing is done.
    *
@@ -355,7 +355,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
   applyViewFilter(filter: string, notUsed1?: never, notUsed2?: never): void;
 
   /** ***************************************************************************************************************************
-   * Apply a view filter to the layer identified by the path stored in the layerPathAssociatedToThegeoviewLayer property stored
+   * Apply a view filter to the layer identified by the path stored in the layerPathAssociatedToTheGeoviewLayer property stored
    * in the layer instance associated to the map. When the CombineLegendFilter flag is false, the filter paramater is used alone
    * to display the features. Otherwise, the legend filter and the filter parameter are combined together to define the view
    * filter. The legend filters are derived from the uniqueValue or classBreaks style of the layer. When the layer config is
@@ -382,7 +382,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
   // See above headers for signification of the parameters. The first lines of the method select the template
   // used based on the parameter types received.
   applyViewFilter(parameter1: string, parameter2?: string | boolean | never, parameter3?: boolean | never) {
-    let layerPath = api.maps[this.mapId].layer.layerPathAssociatedToThegeoviewLayer;
+    let layerPath = this.layerPathAssociatedToTheGeoviewLayer;
     let filter = '';
     let CombineLegendFilter = true;
     if (parameter3) {

@@ -54,6 +54,12 @@
     "@babel/plugin-proposal-function-sent",
     "@babel/plugin-transform-logical-assignment-operators",
     [
+      "@babel/plugin-transform-typescript",
+      {
+        "allowDeclareFields": true
+      }
+    ],
+    [
       "@babel/plugin-transform-nullish-coalescing-operator",
       {
         "loose": false
