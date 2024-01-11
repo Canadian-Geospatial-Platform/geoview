@@ -225,7 +225,7 @@ export function Detailspanel(): JSX.Element {
                       <Box style={{ marginLeft: '22px' }}>
                         Feature {currentFeatureIndex + 1} of {layerDataInfo?.features!.length}
                         <IconButton
-                          sx={{ marginLeft: '20px' }}
+                          sx={{ marginLeft: '20px', [theme.breakpoints.down('sm')]: { display: 'none' } }}
                           aria-label="clear-all-features"
                           tooltip="details.clearAllfeatures"
                           tooltipPlacement="top"
