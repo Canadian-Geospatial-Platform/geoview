@@ -71,8 +71,6 @@ export function AddNewLayer(): JSX.Element {
   };
 
   /*
-
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const onDrop = useCallback((acceptedFiles: any) => {
     // Do something with the files
     console.log('acceptedFiles ', acceptedFiles);
@@ -519,7 +517,7 @@ export function AddNewLayer(): JSX.Element {
   };
 
   /**
-   * Handle the behavior of the 'Finish' button in the Stepper UI
+   * Handle the behavior of the 'Step3' button in the Stepper UI
    */
   const handleStep3 = () => {
     let valid = true;
@@ -535,7 +533,7 @@ export function AddNewLayer(): JSX.Element {
    */
   const handleStepLast = () => {
     setIsLoading(true);
-    /* api.event.on(  //WHY?
+    /* api.event.on(  //TODO - Investigate
       api.eventNames.LAYER.EVENT_LAYER_ADDED,
       () => {
         api.event.off(api.eventNames.LAYER.EVENT_LAYER_ADDED, mapId);
@@ -548,9 +546,11 @@ export function AddNewLayer(): JSX.Element {
     let valid = true;
     const name = layerName;
     let url = layerURL;
+
     if (layerType === ESRI_DYNAMIC || layerType === ESRI_FEATURE) {
       url = geoUtilities.getMapServerUrl(layerURL);
     }
+
     if (layerType === WMS) {
       [url] = layerURL.split('?');
     }
@@ -581,9 +581,11 @@ export function AddNewLayer(): JSX.Element {
         fr: '',
       };
     }
+
     if (layerType === GEOCORE) {
       delete layerConfig.metadataAccessPath;
     }
+
     if (layerType === OGC_FEATURE) {
       // make sure the metadataAccessPath is the root OGC API URL
       layerConfig.metadataAccessPath = {
@@ -591,13 +593,14 @@ export function AddNewLayer(): JSX.Element {
         fr: geoUtilities.getOGCServerUrl(layerURL),
       };
     }
+    
     if (valid) {
       // TODO issue #668 - geocore layers do not have same ID, it is impossible to use the added event
       // workaround - close after 3 sec
       if (layerType === GEOCORE) {
         setTimeout(() => {
           setIsLoading(false);
-          // setAddLayerVisible(false); //WHY?
+          // setAddLayerVisible(false); //TODO - Investigate
         }, 3000);
       }
 
