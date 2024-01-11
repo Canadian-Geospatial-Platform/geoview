@@ -97,7 +97,7 @@ export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
     mapHTMLElement.addEventListener('keydown', handleExit);
 
     // update the store and focus to map
-    setTimeout(() => document.getElementById(`map-${mapId}`)?.focus(), 0);
+    setTimeout(() => document.getElementById(`mapbox-${mapId}`)?.focus(), 0);
     setCrosshairActive(true);
   }
 
