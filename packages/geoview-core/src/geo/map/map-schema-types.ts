@@ -654,7 +654,7 @@ export class BaseLayerProperties {
    *
    * @returns {string} Returns the layer path.
    */
-  private getLayerPath(layerConfig: BaseLayerProperties, layerPath?: string): string {
+  getLayerPath(layerConfig: BaseLayerProperties, layerPath?: string): string {
     let pathEnding = layerPath;
     if (pathEnding === undefined)
       pathEnding =
@@ -716,7 +716,7 @@ export class TypeBaseLayerEntryConfig extends BaseLayerProperties {
     | TypeSourceImageStaticInitialConfig;
 
   /** The listOfLayerEntryConfig attribute is not used by child of TypeBaseLayerEntryConfig. */
-  listOfLayerEntryConfig?: never;
+  declare listOfLayerEntryConfig: never;
 
   /**
    * The class constructor.
@@ -1071,14 +1071,14 @@ export class TypeTileLayerEntryConfig extends TypeBaseLayerEntryConfig {
  * configuration will handle bilangual informations.
  */
 export class TypeGeocoreLayerEntryConfig extends BaseLayerProperties {
-  /** This attribute is not part of the schema and is not used by object of this type.
-  layerStatus?: never;
+  /** This attribute from BaseLayerProperties is not used by groups. */
+  declare layerStatus: never;
 
-  /** This attribute is not part of the schema and is not used by object of this type.
-  layerPhase?: never;
+  /** This attribute from BaseLayerProperties is not used by groups. */
+  declare layerPhase: never;
 
-  /** This attribute is not part of the schema and is not used by object of this type.
-  isMetadataLayerGroup?: never;
+  /** This attribute from BaseLayerProperties is not used by groups. */
+  declare isMetadataLayerGroup: never;
 
   /** Tag used to link the entry to a specific schema. */
   schemaTag = 'geoCore' as TypeGeoviewLayerType;
@@ -1090,10 +1090,10 @@ export class TypeGeocoreLayerEntryConfig extends BaseLayerProperties {
   declare layerId: never;
 
   /** The layerPathEnding is not used by geocore layers. */
-  declare layerPathEnding?: never;
+  declare layerPathEnding: never;
 
   /** The display name of a geocore layer is in geocoreLayerName. */
-  layerName?: never;
+  declare layerName: never;
 
   /** The display name of the layer (English/French). */
   geocoreLayerName?: TypeLocalizedString;
@@ -1136,14 +1136,14 @@ export type TypeSourceGeocoreConfig = {
  * Type used to define a layer group.
  */
 export class TypeLayerGroupEntryConfig extends BaseLayerProperties {
-  /** This attribute is not part of the schema and is not used by object of this type.
-  layerStatus?: never;
+  /** This attribute from BaseLayerProperties is not used by groups. */
+  declare layerStatus: never;
 
-  /** This attribute is not part of the schema and is not used by object of this type.
-  layerPhase?: never;
+  /** This attribute from BaseLayerProperties is not used by groups. */
+  declare layerPhase: never;
 
   /** Tag used to link the entry to a specific schema is not used by groups. */
-  schemaTag?: never;
+  declare schemaTag: never;
 
   /** Layer entry data type. */
   entryType = 'group' as TypeLayerEntryType;
@@ -1164,7 +1164,7 @@ export class TypeLayerGroupEntryConfig extends BaseLayerProperties {
   initialSettings?: TypeLayerInitialSettings;
 
   /** Source settings to apply to the GeoView vector layer source at creation time is not used by groups. */
-  source?: never;
+  declare source: never;
 
   /** The list of layer entry configurations to use from the GeoView layer group. */
   listOfLayerEntryConfig: TypeListOfLayerEntryConfig = [];

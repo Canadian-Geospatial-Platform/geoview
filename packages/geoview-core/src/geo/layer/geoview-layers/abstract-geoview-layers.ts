@@ -332,18 +332,17 @@ export abstract class AbstractGeoViewLayer {
     if (mapLayerConfig.metadataAccessPath?.fr) this.metadataAccessPath.fr = mapLayerConfig.metadataAccessPath.fr.trim();
     if (mapLayerConfig.listOfLayerEntryConfig.length === 1) this.listOfLayerEntryConfig = mapLayerConfig.listOfLayerEntryConfig;
     else {
-      const layerGroup: TypeLayerGroupEntryConfig = new TypeLayerGroupEntryConfig({
+      const layerGroup = new TypeLayerGroupEntryConfig({
         geoviewLayerConfig: mapLayerConfig.listOfLayerEntryConfig[0].geoviewLayerConfig,
         layerId: this.geoviewLayerId,
         layerName: this.geoviewLayerName,
-        entryType: 'group',
         isMetadataLayerGroup: false,
         initialSettings: mapLayerConfig.initialSettings,
         listOfLayerEntryConfig: mapLayerConfig.listOfLayerEntryConfig,
       } as TypeLayerGroupEntryConfig);
       this.listOfLayerEntryConfig = [layerGroup];
-      mapLayerConfig.listOfLayerEntryConfig.forEach((layerConfig) => {
-        layerConfig.parentLayerConfig = layerGroup;
+      layerGroup.listOfLayerEntryConfig.forEach((layerConfig, i) => {
+        layerGroup.listOfLayerEntryConfig[i].parentLayerConfig = layerGroup;
       });
     }
     this.initialSettings = mapLayerConfig.initialSettings;
@@ -461,7 +460,11 @@ export abstract class AbstractGeoViewLayer {
         });
         // Duplicat layer can't be kept because it has the same layer path than the first encontered layer.
         delete listOfLayerEntryConfig[i];
-      } else layer.registerLayerConfig(layerConfig);
+      } else {
+        layerConfig.layerPath = layerConfig.getLayerPath(layerConfig);
+        layerConfig.geoviewLayerInstance = this;
+        layer.registerLayerConfig(layerConfig);
+      }
       if (layerEntryIsGroupLayer(layerConfig)) this.initRegisteredLayers(layerConfig.listOfLayerEntryConfig);
     });
   }

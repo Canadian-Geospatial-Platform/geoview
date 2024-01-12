@@ -596,8 +596,9 @@ export class ConfigValidation {
       );
 
       if (layerEntryIsGroupLayer(layerConfig)) {
-        listOfLayerEntryConfig[i] = new TypeLayerGroupEntryConfig(layerConfig);
-        this.processLayerEntryConfig(geoviewLayerConfig, layerConfig.listOfLayerEntryConfig, layerConfig);
+        const parent = new TypeLayerGroupEntryConfig(layerConfig);
+        listOfLayerEntryConfig[i] = parent;
+        this.processLayerEntryConfig(geoviewLayerConfig, layerConfig.listOfLayerEntryConfig, parent);
       } else if (geoviewEntryIsWMS(layerConfig)) {
         listOfLayerEntryConfig[i] = new TypeOgcWmsLayerEntryConfig(layerConfig);
       } else if (geoviewEntryIsImageStatic(layerConfig)) {
