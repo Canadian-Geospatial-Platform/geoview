@@ -31,9 +31,7 @@ export declare const getSxClasses: (theme: Theme) => {
     scaleText: {
         fontSize: number;
         color: string;
-        textOverflow: string;
         whiteSpace: string;
-        overflow: string;
         border: string;
         borderColor: string;
         borderTop: string;

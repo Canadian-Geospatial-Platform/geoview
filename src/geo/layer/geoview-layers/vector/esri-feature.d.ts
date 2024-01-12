@@ -10,8 +10,13 @@ import { codedValueType, rangeDomainType } from '@/api/events/payloads';
 export interface TypeSourceEsriFeatureInitialConfig extends Omit<TypeVectorSourceInitialConfig, 'format'> {
     format: 'EsriJSON';
 }
-export interface TypeEsriFeatureLayerEntryConfig extends Omit<TypeVectorLayerEntryConfig, 'source'> {
+export declare class TypeEsriFeatureLayerEntryConfig extends TypeVectorLayerEntryConfig {
     source: TypeSourceEsriFeatureInitialConfig;
+    /**
+     * The class constructor.
+     * @param {TypeEsriFeatureLayerEntryConfig} layerConfig The layer configuration we want to instanciate.
+     */
+    constructor(layerConfig: TypeEsriFeatureLayerEntryConfig);
 }
 export interface TypeEsriFeatureLayerConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig'> {
     geoviewLayerType: 'esriFeature';
@@ -39,7 +44,7 @@ export declare const layerConfigIsEsriFeature: (verifyIfLayer: TypeGeoviewLayerC
 export declare const geoviewLayerIsEsriFeature: (verifyIfGeoViewLayer: AbstractGeoViewLayer) => verifyIfGeoViewLayer is EsriFeature;
 /** *****************************************************************************************************************************
  * type guard function that redefines a TypeLayerEntryConfig as a TypeEsriFeatureLayerEntryConfig if the geoviewLayerType
- * attribute of the verifyIfGeoViewEntry.geoviewRootLayer attribute is ESRI_FEATURE. The type ascention applies only to the true
+ * attribute of the verifyIfGeoViewEntry.geoviewLayerConfig attribute is ESRI_FEATURE. The type ascention applies only to the true
  * block of the if clause that use this function.
  *
  * @param {TypeLayerEntryConfig} verifyIfGeoViewEntry Polymorphic object to test in order to determine if the type ascention

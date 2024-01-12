@@ -31,7 +31,7 @@ export declare const layerConfigIsWMS: (verifyIfLayer: TypeGeoviewLayerConfig) =
 export declare const geoviewLayerIsWMS: (verifyIfGeoViewLayer: AbstractGeoViewLayer) => verifyIfGeoViewLayer is WMS;
 /** *****************************************************************************************************************************
  * type guard function that redefines a TypeLayerEntryConfig as a TypeOgcWmsLayerEntryConfig if the geoviewLayerType attribute of the
- * verifyIfGeoViewEntry.geoviewRootLayer attribute is WMS. The type ascention applies only to the true block of
+ * verifyIfGeoViewEntry.geoviewLayerConfig attribute is WMS. The type ascention applies only to the true block of
  * the if clause that use this function.
  *
  * @param {TypeLayerEntryConfig} verifyIfGeoViewEntry Polymorphic object to test in order to determine if the type ascention is
@@ -249,7 +249,7 @@ export declare class WMS extends AbstractGeoViewRaster {
      */
     setWmsStyle(wmsStyleId: string, layerPath: string): void;
     /** ***************************************************************************************************************************
-     * Apply a view filter to the layer identified by the path stored in the layerPathAssociatedToThegeoviewLayer property stored
+     * Apply a view filter to the layer identified by the path stored in the layerPathAssociatedToTheGeoviewLayer property stored
      * in the layer instance associated to the map. The legend filters are derived from the uniqueValue or classBreaks style of the
      * layer. When the layer config is invalid, nothing is done.
      *
@@ -259,7 +259,7 @@ export declare class WMS extends AbstractGeoViewRaster {
      */
     applyViewFilter(filter: string, notUsed1?: never, notUsed2?: never): void;
     /** ***************************************************************************************************************************
-     * Apply a view filter to the layer identified by the path stored in the layerPathAssociatedToThegeoviewLayer property stored
+     * Apply a view filter to the layer identified by the path stored in the layerPathAssociatedToTheGeoviewLayer property stored
      * in the layer instance associated to the map. When the CombineLegendFilter flag is false, the filter paramater is used alone
      * to display the features. Otherwise, the legend filter and the filter parameter are combined together to define the view
      * filter. The legend filters are derived from the uniqueValue or classBreaks style of the layer. When the layer config is

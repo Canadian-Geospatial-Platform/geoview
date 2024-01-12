@@ -36,6 +36,7 @@ export interface TypeLegendLayer {
     items: TypeLegendItem[];
     children: TypeLegendLayer[];
     opacity?: number;
+    opacityFromParent?: number;
     zoom?: number;
     isRemovable?: boolean;
     canSetOpacity?: boolean;

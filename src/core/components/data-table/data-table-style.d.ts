@@ -44,8 +44,10 @@ export declare const getSxClasses: (theme: Theme) => {
         '& .MuiPaper-root': {
             border: string;
             borderRadius: string;
+            height: string;
         };
         '& .MuiTableContainer-root': {
+            maxHeight: string;
             borderRadius: string;
         };
         '& .MuiToolbar-root ': {

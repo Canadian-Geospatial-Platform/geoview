@@ -5,8 +5,13 @@ import { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geovie
 import { AbstractGeoViewRaster, TypeBaseRasterLayer } from '@/geo/layer/geoview-layers/raster/abstract-geoview-raster';
 import { TypeLayerEntryConfig, TypeSourceTileInitialConfig, TypeTileLayerEntryConfig, TypeGeoviewLayerConfig, TypeListOfLayerEntryConfig } from '@/geo/map/map-schema-types';
 export type TypeSourceImageXYZTilesInitialConfig = TypeSourceTileInitialConfig;
-export interface TypeXYZTilesLayerEntryConfig extends Omit<TypeTileLayerEntryConfig, 'source'> {
+export declare class TypeXYZTilesLayerEntryConfig extends TypeTileLayerEntryConfig {
     source: TypeSourceImageXYZTilesInitialConfig;
+    /**
+     * The class constructor.
+     * @param {TypeXYZTilesLayerEntryConfig} layerConfig The layer configuration we want to instanciate.
+     */
+    constructor(layerConfig: TypeXYZTilesLayerEntryConfig);
 }
 export interface TypeXYZTilesConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig'> {
     geoviewLayerType: 'xyzTiles';
@@ -34,7 +39,7 @@ export declare const layerConfigIsXYZTiles: (verifyIfLayer: TypeGeoviewLayerConf
 export declare const geoviewLayerIsXYZTiles: (verifyIfGeoViewLayer: AbstractGeoViewLayer) => verifyIfGeoViewLayer is XYZTiles;
 /** *****************************************************************************************************************************
  * type guard function that redefines a TypeLayerEntryConfig as a TypeXYZTilesLayerEntryConfig if the geoviewLayerType attribute
- * of the verifyIfGeoViewEntry.geoviewRootLayer attribute is XYZ_TILES. The type ascention applies only to the true block of
+ * of the verifyIfGeoViewEntry.geoviewLayerConfig attribute is XYZ_TILES. The type ascention applies only to the true block of
  * the if clause that use this function.
  *
  * @param {TypeLayerEntryConfig} verifyIfGeoViewEntry Polymorphic object to test in order to determine if the type ascention is

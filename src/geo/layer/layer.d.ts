@@ -17,7 +17,6 @@ export declare class Layer {
     geoviewLayers: {
         [geoviewLayerId: string]: AbstractGeoViewLayer;
     };
-    layerPathAssociatedToThegeoviewLayer: string;
     geometry: Geometry | undefined;
     initialLayerOrder: string[];
     /** used to reference the map id */
@@ -55,14 +54,6 @@ export declare class Layer {
      * @param {TypeGeoviewLayerConfig} geoviewLayerConfig The geoview layer configuration in error.
      */
     private printDuplicateGeoviewLayerConfigError;
-    /**
-     * Get the layer Path of the layer configuration parameter.
-     * @param {TypeLayerEntryConfig} layerConfig The layer configuration for which we want to get the layer path.
-     * @param {string} layerPath Internal parameter used to build the layer path (should not be used by the user).
-     *
-     * @returns {string} Returns the layer path.
-     */
-    static getLayerPath(layerConfig: TypeLayerEntryConfig, layerPath?: string): string;
     /**
      * This method returns the GeoView instance associated to a specific layer path. The first element of the layerPath
      * is the geoviewLayerId.

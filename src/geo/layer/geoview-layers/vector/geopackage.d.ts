@@ -11,8 +11,13 @@ import { TypeLayerEntryConfig, TypeVectorLayerEntryConfig, TypeVectorSourceIniti
 export interface TypeSourceGeoPackageInitialConfig extends TypeVectorSourceInitialConfig {
     format: 'GeoPackage';
 }
-export interface TypeGeoPackageLayerEntryConfig extends Omit<TypeVectorLayerEntryConfig, 'source'> {
+export declare class TypeGeoPackageLayerEntryConfig extends TypeVectorLayerEntryConfig {
     source: TypeSourceGeoPackageInitialConfig;
+    /**
+     * The class constructor.
+     * @param {TypeGeoPackageLayerEntryConfig} layerConfig The layer configuration we want to instanciate.
+     */
+    constructor(layerConfig: TypeGeoPackageLayerEntryConfig);
 }
 export interface TypeGeoPackageLayerConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig' | 'geoviewLayerType'> {
     geoviewLayerType: 'GeoPackage';
@@ -49,7 +54,7 @@ export declare const layerConfigIsGeoPackage: (verifyIfLayer: TypeGeoviewLayerCo
 export declare const geoviewLayerIsGeoPackage: (verifyIfGeoViewLayer: AbstractGeoViewLayer) => verifyIfGeoViewLayer is GeoPackage;
 /** *****************************************************************************************************************************
  * type guard function that redefines a TypeLayerEntryConfig as a TypeGeoPackageLayerEntryConfig if the geoviewLayerType attribute
- * of the verifyIfGeoViewEntry.geoviewRootLayer attribute is GEOPACKAGE. The type ascention applies only to the true block of
+ * of the verifyIfGeoViewEntry.geoviewLayerConfig attribute is GEOPACKAGE. The type ascention applies only to the true block of
  * the if clause that use this function.
  *
  * @param {TypeLayerEntryConfig} verifyIfGeoViewEntry Polymorphic object to test in order to determine if the type ascention is

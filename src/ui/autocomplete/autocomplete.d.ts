@@ -1,4 +1,4 @@
-import { ReactNode } from 'react';
+/// <reference types="react" />
 import { AutocompleteProps } from '@mui/material';
 /**
  * Customized Material UI Autocomplete properties
@@ -11,6 +11,6 @@ export interface TypeAutocompleteProps<T, Multiple extends boolean | undefined =
  * Create a Material UI Autocomplete component
  *
  * @param {TypeAutocompleteProps} props custom autocomplete properties
- * @returns {ReactNode} the auto complete ui component
+ * @returns {JSX.Element} the auto complete ui component
  */
-export declare function Autocomplete<T, Multiple extends boolean | undefined = undefined, DisableClearable extends boolean | undefined = undefined, FreeSolo extends boolean | undefined = undefined>(props: TypeAutocompleteProps<T, Multiple, DisableClearable, FreeSolo>): ReactNode;
+export declare function Autocomplete<T, Multiple extends boolean | undefined = undefined, DisableClearable extends boolean | undefined = undefined, FreeSolo extends boolean | undefined = undefined>(props: TypeAutocompleteProps<T, Multiple, DisableClearable, FreeSolo>): JSX.Element;

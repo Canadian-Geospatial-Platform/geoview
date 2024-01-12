@@ -23,7 +23,9 @@ export declare const getSxClasses: (theme: Theme) => {
                 marginLeft: string;
             };
             '&.selectedLayer': {
-                border: string;
+                borderColor: string;
+                borderWidth: string;
+                borderStyle: string;
             };
             '&.dragging': {
                 backgroundColor: string;

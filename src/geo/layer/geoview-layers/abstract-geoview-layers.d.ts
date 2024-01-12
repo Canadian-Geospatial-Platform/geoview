@@ -100,8 +100,6 @@ type TypeLayerSetHandlerFunctions = {
 export declare abstract class AbstractGeoViewLayer {
     /** The unique identifier of the map on which the GeoView layer will be drawn. */
     mapId: string;
-    /** Original map layer configuration */
-    originalMapLayerConfig: TypeGeoviewLayerConfig;
     /** Flag used to indicate the layer's phase */
     layerPhase: string;
     /** The type of GeoView layer that is instantiated. */
@@ -149,6 +147,7 @@ export declare abstract class AbstractGeoViewLayer {
     serverDateFragmentsOrder?: TypeDateFragments;
     /** Date format object used to translate internal UTC ISO format to the external format, the one used by the user */
     externalFragmentsOrder: TypeDateFragments;
+    layerPathAssociatedToTheGeoviewLayer: string;
     /** ***************************************************************************************************************************
      * The class constructor saves parameters and common configuration parameters in attributes.
      *
@@ -375,10 +374,10 @@ export declare abstract class AbstractGeoViewLayer {
     unregisterFromLayerSets(layerConfig: TypeBaseLayerEntryConfig): void;
     /** ***************************************************************************************************************************
      * This method create a layer group.
-     * @param {TypeLayerEntryConfig | TypeGeoviewLayerConfig} layerConfig The layer configuration.
+     * @param {TypeLayerEntryConfig} layerConfig The layer configuration.
      * @returns {LayerGroup} A new layer group.
      */
-    protected createLayerGroup(layerConfig: TypeLayerEntryConfig | TypeGeoviewLayerConfig): LayerGroup;
+    protected createLayerGroup(layerConfig: TypeLayerEntryConfig): LayerGroup;
     /** ***************************************************************************************************************************
      * Get the layer configuration of the specified layer path.
      *
