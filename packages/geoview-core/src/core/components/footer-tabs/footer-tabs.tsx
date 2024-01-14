@@ -156,8 +156,6 @@ export function FooterTabs(): JSX.Element | null {
       mapContainerRef.current.style.height = `${mapHeight}px`;
       tabsContainerRef.current.style.height = typeof tabHeight === 'string' ? tabHeight : `${tabHeight}px`;
       // #endregion
-
-      // next step update the heigths of left panel and rigt panel.
     }
   }, [isMapFullScreen, footerPanelResizeValue, resizeValues]);
 
