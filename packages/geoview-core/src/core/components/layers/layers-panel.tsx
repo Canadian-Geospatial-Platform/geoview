@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '@mui/material/styles';
 import { styled } from '@mui/material';
@@ -10,6 +10,8 @@ import { LayersActions } from './left-panel/layers-actions';
 import { LayerDetails } from './right-panel/layer-details';
 import { AddNewLayer } from './left-panel/add-new-layer';
 import { LeftPanel } from './left-panel/left-panel';
+import { useAppFullscreenActive } from '@/core/stores/store-interface-and-intial-values/app-state';
+import { useUIActiveFooterTabId, useUIFooterPanelResizeValue } from '@/core/stores/store-interface-and-intial-values/ui-state';
 
 const Item = styled('div')(({ theme }) => ({
   backgroundColor: theme.palette.mode === 'dark' ? '#262B32' : '#fff',
@@ -31,6 +33,12 @@ export function LayersPanel() {
   const selectedLayer = useSelectedLayer(); // get store value
   const displayState = useLayersDisplayState();
 
+  const leftPanelRef = useRef<HTMLDivElement>(null);
+  const rightPanelRef = useRef<HTMLDivElement>(null);
+  const panelTitleRef = useRef<HTMLDivElement>(null);
+  const isMapFullScreen = useAppFullscreenActive();
+  const footerPanelResizeValue = useUIFooterPanelResizeValue();
+  const activeFooterTabId = useUIActiveFooterTabId();
   /*
   // Using helpers
   const helpers = useLegendHelpers();
@@ -39,6 +47,27 @@ export function LayersPanel() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   */
+
+  useEffect(() => {
+    if (leftPanelRef.current && rightPanelRef.current && panelTitleRef.current && isMapFullScreen && activeFooterTabId === 'layers') {
+      const panelTitleHeight = panelTitleRef.current.clientHeight;
+      const tabsContainer = document.getElementById('tabsContainer')!;
+      const firstChild = tabsContainer.firstElementChild?.firstElementChild;
+      const firstChildHeight = firstChild?.clientHeight || 0;
+      const leftPanelHeight = (window.screen.height * footerPanelResizeValue) / 100 - panelTitleHeight - firstChildHeight;
+
+      leftPanelRef.current.style.maxHeight = `${leftPanelHeight}px`;
+      leftPanelRef.current.style.overflow = `auto`;
+      leftPanelRef.current.style.paddingBottom = `24px`;
+
+      const rightPanel = rightPanelRef.current.firstElementChild?.firstElementChild as HTMLElement | null;
+      if (rightPanel) {
+        rightPanel.style.maxHeight = `${leftPanelHeight}px`;
+        rightPanel.style.overflow = `auto`;
+        rightPanel.style.paddingBottom = `24px`;
+      }
+    }
+  }, [footerPanelResizeValue, isMapFullScreen, activeFooterTabId]);
 
   const leftPanel = () => {
     return (
@@ -94,7 +123,7 @@ export function LayersPanel() {
 
   return (
     <Box sx={sxClasses.layersPanelContainer}>
-      <ResponsiveGrid.Root>
+      <ResponsiveGrid.Root sx={{ pt: 8, pb: 8 }} ref={panelTitleRef}>
         <ResponsiveGrid.Left isEnlargeDataTable={false} isLayersPanelVisible={isLayersListPanelVisible}>
           <LayerTitle>{t('general.layers')}</LayerTitle>
         </ResponsiveGrid.Left>
@@ -110,12 +139,12 @@ export function LayersPanel() {
           </Box>
         </ResponsiveGrid.Right>
       </ResponsiveGrid.Root>
-      <ResponsiveGrid.Root sx={{ mt: 8 }}>
-        <ResponsiveGrid.Left isEnlargeDataTable={false} isLayersPanelVisible={isLayersListPanelVisible}>
+      <ResponsiveGrid.Root>
+        <ResponsiveGrid.Left isEnlargeDataTable={false} isLayersPanelVisible={isLayersListPanelVisible} ref={leftPanelRef}>
           {leftPanel()}
         </ResponsiveGrid.Left>
 
-        <ResponsiveGrid.Right isEnlargeDataTable={false} isLayersPanelVisible={isLayersListPanelVisible}>
+        <ResponsiveGrid.Right isEnlargeDataTable={false} isLayersPanelVisible={isLayersListPanelVisible} ref={rightPanelRef}>
           {rightPanel()}
         </ResponsiveGrid.Right>
       </ResponsiveGrid.Root>

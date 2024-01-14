@@ -2,7 +2,6 @@ import { Theme } from '@mui/material/styles';
 
 export const getSxClasses = (theme: Theme) => ({
   container: {
-    boxShadow: theme.footerPanel.contentShadow,
     padding: '20px',
     display: 'flex',
     flexDirection: 'column',

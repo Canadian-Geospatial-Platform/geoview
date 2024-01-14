@@ -9,11 +9,10 @@ import { ResizeFooterPanel } from '../resize-footer-panel/resize-footer-panel';
 import { useAppFullscreenActive } from '@/core/stores/store-interface-and-intial-values/app-state';
 import { useUIFooterPanelResizeValue, useUIFooterPanelResizeValues } from '@/core/stores/store-interface-and-intial-values/ui-state';
 
-interface MapContainerCssProperties {
+interface ShellContainerCssProperties {
   mapVisibility: string;
-  mapMinHeight: number;
   mapHeight: number;
-  tabMinHeight: number | string;
+  tabHeight: number | string;
   tabMaxHeight: number;
 }
 
@@ -52,30 +51,33 @@ export function FooterTabs(): JSX.Element | null {
   const resizeValues = useMemo(() => {
     return footerPanelResizeValues.reduce((acc, curr) => {
       const windowHeight = window.screen.height;
-      let values: [string, number, number, number | string, number] = [
+      let values: [string, number, number | string, number] = [
         'visible',
         windowHeight - (windowHeight * footerPanelResizeValue) / 100,
         windowHeight - (windowHeight * footerPanelResizeValue) / 100,
-        origHeight,
-        (windowHeight * footerPanelResizeValue) / 100,
+        windowHeight - (windowHeight * footerPanelResizeValue) / 100,
       ];
-
-      if (curr === 10) {
-        values = ['visible', origHeight, origHeight, '', windowHeight - origHeight];
-      } else if (curr === 100) {
-        values = ['hidden', 0, 0, '', windowHeight];
+      if (curr === footerPanelResizeValues[0]) {
+        values = [
+          'visible',
+          windowHeight - (windowHeight * footerPanelResizeValue) / 100,
+          (windowHeight * footerPanelResizeValue) / 100,
+          (windowHeight * footerPanelResizeValue) / 100,
+        ];
+      }
+      if (curr === footerPanelResizeValues[footerPanelResizeValues.length - 1]) {
+        values = ['hidden', 0, windowHeight, windowHeight];
       }
 
       acc[curr] = {
         mapVisibility: values[0],
-        mapMinHeight: values[1],
-        mapHeight: values[2],
-        tabMinHeight: values[3],
-        tabMaxHeight: values[4],
+        mapHeight: values[1],
+        tabHeight: values[2],
+        tabMaxHeight: values[3],
       };
       return acc;
-    }, {} as Record<number, MapContainerCssProperties>);
-  }, [origHeight, footerPanelResizeValue, footerPanelResizeValues]);
+    }, {} as Record<number, ShellContainerCssProperties>);
+  }, [footerPanelResizeValue, footerPanelResizeValues]);
 
   /**
    * Add a tab
@@ -134,8 +136,8 @@ export function FooterTabs(): JSX.Element | null {
       tabsContainer.style.height = 'fit-content';
       const lastChild = tabsContainer.firstElementChild?.lastElementChild as HTMLElement | null;
       if (lastChild) {
-        lastChild.style.overflow = isCollapsed ? 'unset' : 'auto';
-        lastChild.style.maxHeight = isCollapsed ? '0px' : `${origHeight}px`;
+        lastChild.style.overflow = isCollapsed ? 'unset' : '';
+        lastChild.style.maxHeight = isCollapsed ? '0px' : '';
       }
     }
   }, [isCollapsed, mapDiv, origHeight]);
@@ -145,30 +147,19 @@ export function FooterTabs(): JSX.Element | null {
   // !https://github.com/Canadian-Geospatial-Platform/geoview/issues/1136
 
   useEffect(() => {
-    // Update the height of mapContainer and footer tabs Container based on resize value in store.
-    mapContainerRef.current = mapDiv.querySelector('.mapContainer');
-    if (tabsContainerRef.current && mapContainerRef.current) {
-      const { mapVisibility, mapHeight, mapMinHeight, tabMaxHeight } = resizeValues[footerPanelResizeValue];
+    if (isMapFullScreen && tabsContainerRef.current && mapContainerRef.current) {
+      const { mapVisibility, mapHeight, tabHeight } = resizeValues[footerPanelResizeValue];
 
+      // #region i have set the map height and tabCOnatiner height.
       mapContainerRef.current.style.visibility = mapVisibility;
-      mapContainerRef.current.style.minHeight = `${mapMinHeight}px`;
+      mapContainerRef.current.style.minHeight = `${mapHeight}px`;
       mapContainerRef.current.style.height = `${mapHeight}px`;
+      tabsContainerRef.current.style.height = typeof tabHeight === 'string' ? tabHeight : `${tabHeight}px`;
+      // #endregion
 
-      const lastChild = tabsContainerRef.current.firstElementChild?.lastElementChild as HTMLElement | null;
-      const firstChild = tabsContainerRef.current.firstElementChild?.firstElementChild as HTMLElement | null;
-      if (lastChild && firstChild) {
-        const height = tabMaxHeight - firstChild.clientHeight;
-        lastChild.style.height = `${height}px`;
-        lastChild.style.maxHeight = `${height}px`;
-        // reset the height of the footer tab panel after comes out of fullscreen.
-        if (!isMapFullScreen) {
-          lastChild.style.maxHeight = `${origHeight}px`;
-          lastChild.style.height = `${origHeight}px`;
-        }
-      }
+      // next step update the heigths of left panel and rigt panel.
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isMapFullScreen, footerPanelResizeValue]);
+  }, [isMapFullScreen, footerPanelResizeValue, resizeValues]);
 
   /**
    * Handle a collapse, expand event for the tabs component
@@ -249,7 +240,12 @@ export function FooterTabs(): JSX.Element | null {
   };
 
   return api.maps[mapId].footerTabs.tabs.length > 0 ? (
-    <Box ref={tabsContainerRef as MutableRefObject<HTMLDivElement>} sx={sxClasses.tabsContainer} className="tabsContainer">
+    <Box
+      ref={tabsContainerRef as MutableRefObject<HTMLDivElement>}
+      sx={sxClasses.tabsContainer}
+      className="tabsContainer"
+      id="tabsContainer"
+    >
       <Tabs
         isCollapsed={isCollapsed}
         handleCollapse={handleCollapse}

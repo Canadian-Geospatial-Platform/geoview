@@ -10,6 +10,7 @@ export const getSxClasses = () => ({
     borderTop: 1,
     paddingTop: '0 !important',
     borderColor: 'divider',
+    height: '100%',
   },
   tab: {
     fontSize: 16,

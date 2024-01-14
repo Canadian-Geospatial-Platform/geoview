@@ -11,7 +11,7 @@ type focusItemProps = {
 };
 
 export interface IUIState {
-  activefoorterTabId: string;
+  activefooterTabId: string;
   activeTrapGeoView: boolean;
   appBarComponents: TypeAppBarProps;
   corePackagesComponents: TypeMapCorePackages;
@@ -37,15 +37,15 @@ export interface IUIState {
 export function initializeUIState(set: TypeSetStore, get: TypeGetStore): IUIState {
   const init = {
     appBarComponents: ['geolocator', 'export'],
-    activefoorterTabId: 'legend',
+    activefooterTabId: 'legend',
     activeTrapGeoView: false,
     corePackagesComponents: [],
     focusITem: { activeElementId: false, callbackElementId: false },
     footerBarExpanded: false,
     geoLocatorActive: false,
     navBarComponents: [],
-    footerPanelResizeValue: 10,
-    footerPanelResizeValues: [10, 25, 50, 100],
+    footerPanelResizeValue: 35,
+    footerPanelResizeValues: [35, 50, 100],
 
     // initialize default stores section from config information when store receive configuration file
     setDefaultConfigValues: (geoviewConfig: TypeMapFeaturesConfig) => {
@@ -82,7 +82,7 @@ export function initializeUIState(set: TypeSetStore, get: TypeGetStore): IUIStat
         set({
           uiState: {
             ...get().uiState,
-            activefoorterTabId: id,
+            activefooterTabId: id,
           },
         });
 
@@ -139,5 +139,6 @@ export const useUIFooterBarExpanded = () => useStore(useGeoViewStore(), (state) 
 export const useUINavbarComponents = () => useStore(useGeoViewStore(), (state) => state.uiState.navBarComponents);
 export const useUIFooterPanelResizeValue = () => useStore(useGeoViewStore(), (state) => state.uiState.footerPanelResizeValue);
 export const useUIFooterPanelResizeValues = () => useStore(useGeoViewStore(), (state) => state.uiState.footerPanelResizeValues);
+export const useUIActiveFooterTabId = () => useStore(useGeoViewStore(), (state) => state.uiState.activefooterTabId);
 
 export const useUIStoreActions = () => useStore(useGeoViewStore(), (state) => state.uiState.actions);

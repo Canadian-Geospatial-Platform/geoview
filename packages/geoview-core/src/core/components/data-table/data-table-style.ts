@@ -1,7 +1,7 @@
 import { Theme } from '@mui/material';
 
 export const getSxClasses = (theme: Theme) => ({
-  dataPanel: { background: theme.footerPanel.contentBg, boxShadow: theme.footerPanel.contentShadow, padding: '1rem 0' },
+  dataPanel: { background: theme.footerPanel.contentBg },
   gridContainer: { paddingLeft: '1rem', paddingRight: '1rem' },
   iconImage: {
     padding: 3,
@@ -34,10 +34,8 @@ export const getSxClasses = (theme: Theme) => ({
     '& .MuiPaper-root': {
       border: `2px solid ${theme.palette.primary.main}`,
       borderRadius: '6px',
-      height: '745px',
     },
     '& .MuiTableContainer-root': {
-      maxHeight: '680px',
       borderRadius: '6px',
     },
     '& .MuiToolbar-root ': {

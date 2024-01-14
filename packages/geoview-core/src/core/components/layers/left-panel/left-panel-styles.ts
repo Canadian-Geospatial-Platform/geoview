@@ -5,8 +5,7 @@ export const getSxClasses = (theme: Theme) => ({
     color: 'text.primary',
     width: '100%',
     padding: '8px',
-    overflow: 'auto',
-
+    overflowY: 'auto',
     // layer title
     '& .MuiListItemText-primary': {
       font: theme.footerPanel.layerTitleFont,

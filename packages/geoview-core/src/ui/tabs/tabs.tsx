@@ -57,7 +57,7 @@ export function Tabs(props: TypeTabsProps): JSX.Element {
 
   // get store values and actions
   const activeTrapGeoView = useUIActiveTrapGeoView();
-  const { closeModal, openModal } = useUIStoreActions();
+  const { closeModal, openModal, setActiveFooterTab } = useUIStoreActions();
 
   /**
    * Handle a tab change
@@ -67,6 +67,7 @@ export function Tabs(props: TypeTabsProps): JSX.Element {
    */
   const handleChange = (event: SyntheticEvent<Element, Event>, newValue: number) => {
     setValue(newValue);
+    setActiveFooterTab(t(tabs[newValue].label).toLowerCase());
   };
 
   /**
@@ -87,41 +88,43 @@ export function Tabs(props: TypeTabsProps): JSX.Element {
   }, [selectedTab]);
 
   return (
-    <Grid container spacing={2} sx={{ width: '100%', height: '100%' }}>
-      <Grid item xs={7} sm={10} sx={{ background: 'white' }}>
-        <MaterialTabs
-          {...props.tabsProps}
-          variant="scrollable"
-          scrollButtons
-          allowScrollButtonsMobile
-          value={value}
-          onChange={handleChange}
-          aria-label="basic tabs"
-          sx={{
-            '& .MuiTabs-indicator': {
-              backgroundColor: (theme) => theme.palette.secondary.main,
-            },
-          }}
-        >
-          {tabs.map((tab, index) => {
-            // eslint-disable-next-line prettier/prettier
-            return (
-              <MaterialTab
-                label={t(tab.label)}
-                key={index}
-                icon={tab.icon}
-                iconPosition="start"
-                {...props.tabProps}
-                id={`tab-${index}`}
-                onClick={() => handleClick(index)}
-                sx={sxClasses.tab}
-              />
-            );
-          })}
-        </MaterialTabs>
-      </Grid>
-      <Grid item xs={5} sm={2} sx={sxClasses.rightIcons}>
-        {rightButtons as ReactNode}
+    <Grid container sx={{ width: '100%', height: '100%' }}>
+      <Grid container>
+        <Grid item xs={7} sm={10} sx={{ background: 'white' }}>
+          <MaterialTabs
+            {...props.tabsProps}
+            variant="scrollable"
+            scrollButtons
+            allowScrollButtonsMobile
+            value={value}
+            onChange={handleChange}
+            aria-label="basic tabs"
+            sx={{
+              '& .MuiTabs-indicator': {
+                backgroundColor: (theme) => theme.palette.secondary.main,
+              },
+            }}
+          >
+            {tabs.map((tab, index) => {
+              // eslint-disable-next-line prettier/prettier
+              return (
+                <MaterialTab
+                  label={t(tab.label)}
+                  key={index}
+                  icon={tab.icon}
+                  iconPosition="start"
+                  {...props.tabProps}
+                  id={`tab-${index}`}
+                  onClick={() => handleClick(index)}
+                  sx={sxClasses.tab}
+                />
+              );
+            })}
+          </MaterialTabs>
+        </Grid>
+        <Grid item xs={5} sm={2} sx={sxClasses.rightIcons}>
+          {rightButtons as ReactNode}
+        </Grid>
       </Grid>
       <Grid
         id="tabPanel"

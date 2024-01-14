@@ -78,8 +78,8 @@ export function ResizeFooterPanel() {
             valueLabelDisplay="off"
             marks={marks}
             onChange={handleOnSliderChange}
-            min={10}
-            max={100}
+            min={footerPanelResizeValues[0]}
+            max={footerPanelResizeValues[footerPanelResizeValues.length - 1]}
           />
         </Box>
       </Popover>

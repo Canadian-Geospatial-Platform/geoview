@@ -9,7 +9,7 @@ export const getSxClasses = (theme: Theme) => ({
   layerDetails: {
     border: '2px solid #515BA5',
     padding: '20px',
-    overflow: 'auto',
+    overflowY: 'auto',
   },
   buttonDescriptionContainer: {
     display: 'flex',

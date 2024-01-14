@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { useTranslation } from 'react-i18next';
 
@@ -11,12 +11,15 @@ import { GroupLayers } from './data-table-api';
 import { TypeDisplayLanguage } from '@/geo/map/map-schema-types';
 
 import {
+  useAppFullscreenActive,
   useDataTableStoreActions,
   useDataTableStoreIsEnlargeDataTable,
   useDataTableStoreMapFilteredRecord,
   useDataTableStoreRowsFiltered,
   useDataTableStoreSelectedLayerIndex,
   useMapVisibleLayers,
+  useUIActiveFooterTabId,
+  useUIFooterPanelResizeValue,
 } from '@/core/stores';
 
 import { ResponsiveGrid, EnlargeButton, CloseButton, LayerList, LayerListEntry, LayerTitle } from '../common';
@@ -45,6 +48,7 @@ export function Datapanel({ layerData, mapId, language }: DatapanelProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [isLayersPanelVisible, setIsLayersPanelVisible] = useState(false);
   const [orderedLayerData, setOrderedLayerData] = useState<LayersDataType[]>([]);
+  const [tableHeight, setTableHeight] = useState<number>(600);
 
   const selectedLayerIndex = useDataTableStoreSelectedLayerIndex();
   const isEnlargeDataTable = useDataTableStoreIsEnlargeDataTable();
@@ -52,6 +56,13 @@ export function Datapanel({ layerData, mapId, language }: DatapanelProps) {
   const rowsFiltered = useDataTableStoreRowsFiltered();
   const visibleLayers = useMapVisibleLayers();
   const { setSelectedLayerIndex, setIsEnlargeDataTable, setLayersData } = useDataTableStoreActions();
+
+  const leftPanelRef = useRef<HTMLDivElement>(null);
+  const rightPanelRef = useRef<HTMLDivElement>(null);
+  const panelTitleRef = useRef<HTMLDivElement>(null);
+  const isMapFullScreen = useAppFullscreenActive();
+  const footerPanelResizeValue = useUIFooterPanelResizeValue();
+  const activeFooterTabId = useUIActiveFooterTabId();
 
   const handleLayerChange = useCallback((_layer: LayerListEntry, index: number) => {
     setSelectedLayerIndex(index);
@@ -139,9 +150,24 @@ export function Datapanel({ layerData, mapId, language }: DatapanelProps) {
     setLayersData(layerData);
   }, [layerData, setLayersData]);
 
+  useEffect(() => {
+    if (isMapFullScreen && leftPanelRef.current && rightPanelRef.current && panelTitleRef.current && activeFooterTabId === 'datatable') {
+      const panelTitleHeight = panelTitleRef.current.clientHeight;
+      const tabsContainer = document.getElementById('tabsContainer')!;
+      const firstChild = tabsContainer.firstElementChild?.firstElementChild;
+      const firstChildHeight = firstChild?.clientHeight || 0;
+      const leftPanelHeight = (window.screen.height * footerPanelResizeValue) / 100 - panelTitleHeight - firstChildHeight;
+
+      leftPanelRef.current.style.maxHeight = `${leftPanelHeight}px`;
+      leftPanelRef.current.style.overflow = `auto`;
+      leftPanelRef.current.style.paddingBottom = `24px`;
+      setTableHeight(leftPanelHeight - 10);
+    }
+  }, [footerPanelResizeValue, isMapFullScreen, activeFooterTabId]);
+
   return (
     <Box sx={sxClasses.dataPanel}>
-      <ResponsiveGrid.Root>
+      <ResponsiveGrid.Root sx={{ pt: 8, pb: 8 }} ref={panelTitleRef}>
         <ResponsiveGrid.Left isLayersPanelVisible={isLayersPanelVisible} isEnlargeDataTable={isEnlargeDataTable}>
           <LayerTitle>{t('general.layers')}</LayerTitle>
         </ResponsiveGrid.Left>
@@ -163,15 +189,11 @@ export function Datapanel({ layerData, mapId, language }: DatapanelProps) {
           </Box>
         </ResponsiveGrid.Right>
       </ResponsiveGrid.Root>
-      <ResponsiveGrid.Root sx={{ mt: 8 }}>
-        <ResponsiveGrid.Left isLayersPanelVisible={isLayersPanelVisible} isEnlargeDataTable={isEnlargeDataTable}>
+      <ResponsiveGrid.Root>
+        <ResponsiveGrid.Left isLayersPanelVisible={isLayersPanelVisible} isEnlargeDataTable={isEnlargeDataTable} ref={leftPanelRef}>
           {renderList()}
         </ResponsiveGrid.Left>
-        <ResponsiveGrid.Right
-          isEnlargeDataTable={isEnlargeDataTable}
-          isLayersPanelVisible={isLayersPanelVisible}
-          sxProps={{ minHeight: '250px' }}
-        >
+        <ResponsiveGrid.Right isEnlargeDataTable={isEnlargeDataTable} isLayersPanelVisible={isLayersPanelVisible} ref={rightPanelRef}>
           <CircularProgress
             isLoaded={!isLoading}
             sx={{
@@ -185,7 +207,13 @@ export function Datapanel({ layerData, mapId, language }: DatapanelProps) {
                 {index === selectedLayerIndex ? (
                   <Box>
                     {orderedLayerData[index]?.features.length ? (
-                      <MapDataTable data={orderedLayerData[index]} layerId={layerId} mapId={mapId} layerKey={layerKey} />
+                      <MapDataTable
+                        data={orderedLayerData[index]}
+                        layerId={layerId}
+                        mapId={mapId}
+                        layerKey={layerKey}
+                        tableHeight={tableHeight}
+                      />
                     ) : (
                       'No Data'
                     )}

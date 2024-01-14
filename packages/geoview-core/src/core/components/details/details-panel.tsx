@@ -1,5 +1,5 @@
 /* eslint-disable react/require-default-props */
-import React, { useEffect, useState, useCallback, useMemo } from 'react';
+import React, { useEffect, useState, useCallback, useMemo, useRef } from 'react';
 
 import { useTranslation } from 'react-i18next';
 
@@ -25,6 +25,9 @@ import {
   useDetailsStoreCheckedFeatures,
   useDetailsStoreLayerDataArray,
   useDetailsStoreSelectedLayerPath,
+  useAppFullscreenActive,
+  useUIFooterPanelResizeValue,
+  useUIActiveFooterTabId,
 } from '@/core/stores';
 import { ResponsiveGrid, CloseButton, EnlargeButton, LayerList, LayerTitle } from '../common';
 import { useUIStoreActions } from '@/app';
@@ -56,6 +59,12 @@ export function Detailspanel(): JSX.Element {
   const [isLayersPanelVisible, setIsLayersPanelVisible] = useState(false);
   const [isEnlargeDataTable, setIsEnlargeDataTable] = useState(false);
 
+  const leftPanelRef = useRef<HTMLDivElement>(null);
+  const rightPanelRef = useRef<HTMLDivElement>(null);
+  const panelTitleRef = useRef<HTMLDivElement>(null);
+  const isMapFullScreen = useAppFullscreenActive();
+  const footerPanelResizeValue = useUIFooterPanelResizeValue();
+  const activeFooterTabId = useUIActiveFooterTabId();
   /**
    * Find the layer path index which is selected in previous layerData based on layerPath and have more than Zero features.
    * @param {TypeArrayOfLayerData} layerDataArray list of layers.
@@ -107,6 +116,27 @@ export function Detailspanel(): JSX.Element {
     } else setLayerDataInfo(null);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [arrayOfLayerData]);
+
+  useEffect(() => {
+    if (isMapFullScreen && leftPanelRef.current && rightPanelRef.current && panelTitleRef.current && activeFooterTabId === 'details') {
+      const panelTitleHeight = panelTitleRef.current.clientHeight;
+      const tabsContainer = document.getElementById('tabsContainer')!;
+      const firstChild = tabsContainer.firstElementChild?.firstElementChild;
+      const firstChildHeight = firstChild?.clientHeight || 0;
+      const leftPanelHeight = (window.screen.height * footerPanelResizeValue) / 100 - panelTitleHeight - firstChildHeight;
+
+      leftPanelRef.current.style.maxHeight = `${leftPanelHeight}px`;
+      leftPanelRef.current.style.overflow = `auto`;
+      leftPanelRef.current.style.paddingBottom = `24px`;
+
+      const rightPanel = rightPanelRef.current.firstElementChild as HTMLElement | null;
+      if (rightPanel) {
+        rightPanel.style.maxHeight = `${leftPanelHeight - 5}px`;
+        rightPanel.style.overflow = `auto`;
+        rightPanel.style.paddingBottom = `24px`;
+      }
+    }
+  }, [footerPanelResizeValue, isMapFullScreen, activeFooterTabId, arrayOfLayerData]);
 
   /**
    * Get number of features of a layer.
@@ -181,7 +211,7 @@ export function Detailspanel(): JSX.Element {
     <Box sx={sxClasses.detailsContainer}>
       {layerDataInfo && (
         <>
-          <ResponsiveGrid.Root>
+          <ResponsiveGrid.Root sx={{ pt: 8, pb: 8 }} ref={panelTitleRef}>
             <ResponsiveGrid.Left isEnlargeDataTable={isEnlargeDataTable} isLayersPanelVisible={isLayersPanelVisible}>
               <LayerTitle>{t('general.layers')}</LayerTitle>
             </ResponsiveGrid.Left>
@@ -203,11 +233,11 @@ export function Detailspanel(): JSX.Element {
               </Box>
             </ResponsiveGrid.Right>
           </ResponsiveGrid.Root>
-          <ResponsiveGrid.Root sx={{ mt: 8 }}>
-            <ResponsiveGrid.Left isEnlargeDataTable={isEnlargeDataTable} isLayersPanelVisible={isLayersPanelVisible}>
+          <ResponsiveGrid.Root>
+            <ResponsiveGrid.Left isEnlargeDataTable={isEnlargeDataTable} isLayersPanelVisible={isLayersPanelVisible} ref={leftPanelRef}>
               {renderLayerList()}
             </ResponsiveGrid.Left>
-            <ResponsiveGrid.Right isEnlargeDataTable={isEnlargeDataTable} isLayersPanelVisible={isLayersPanelVisible}>
+            <ResponsiveGrid.Right isEnlargeDataTable={isEnlargeDataTable} isLayersPanelVisible={isLayersPanelVisible} ref={rightPanelRef}>
               {!isLayersHasFeatures() && (
                 <Paper sx={{ padding: '2rem' }}>
                   <Typography variant="h3" gutterBottom sx={sxClasses.detailsInstructionsTitle}>
