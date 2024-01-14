@@ -146,19 +146,6 @@ export function FooterTabs(): JSX.Element | null {
   // TODO: maybe this component should all be in the package-footer-panel.
   // !https://github.com/Canadian-Geospatial-Platform/geoview/issues/1136
 
-  useEffect(() => {
-    if (isMapFullScreen && tabsContainerRef.current && mapContainerRef.current) {
-      const { mapVisibility, mapHeight, tabHeight } = resizeValues[footerPanelResizeValue];
-
-      // #region i have set the map height and tabCOnatiner height.
-      mapContainerRef.current.style.visibility = mapVisibility;
-      mapContainerRef.current.style.minHeight = `${mapHeight}px`;
-      mapContainerRef.current.style.height = `${mapHeight}px`;
-      tabsContainerRef.current.style.height = typeof tabHeight === 'string' ? tabHeight : `${tabHeight}px`;
-      // #endregion
-    }
-  }, [isMapFullScreen, footerPanelResizeValue, resizeValues]);
-
   /**
    * Handle a collapse, expand event for the tabs component
    */
@@ -208,6 +195,32 @@ export function FooterTabs(): JSX.Element | null {
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [addTab, mapId, removeTab]);
+
+  /**
+   * Update map and footer panel height when switch to fullscreen
+   */
+  useEffect(() => {
+    if (isMapFullScreen && tabsContainerRef.current && mapContainerRef.current && !isCollapsed) {
+      const { mapVisibility, mapHeight, tabHeight } = resizeValues[footerPanelResizeValue];
+
+      // #region i have set the map height and tabCOnatiner height.
+      mapContainerRef.current.style.visibility = mapVisibility;
+      mapContainerRef.current.style.minHeight = `${mapHeight}px`;
+      mapContainerRef.current.style.height = `${mapHeight}px`;
+      tabsContainerRef.current.style.height = typeof tabHeight === 'string' ? tabHeight : `${tabHeight}px`;
+      // #endregion
+    }
+  }, [isMapFullScreen, footerPanelResizeValue, resizeValues, isCollapsed]);
+
+  /**
+   * Update the map and footer panel height after footer panel is collapsed.
+   */
+  useEffect(() => {
+    if (isMapFullScreen && isCollapsed && mapContainerRef.current && tabsContainerRef.current) {
+      mapContainerRef.current.style.minHeight = `${window.screen.height - tabsContainerRef.current.clientHeight}px`;
+      mapContainerRef.current.style.height = `${window.screen.height - tabsContainerRef.current.clientHeight}px`;
+    }
+  }, [isCollapsed, isMapFullScreen]);
 
   // Handle focus using dynamic focus button
   const handleDynamicFocus = () => {
