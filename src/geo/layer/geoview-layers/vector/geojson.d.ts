@@ -8,8 +8,13 @@ import { TypeLayerEntryConfig, TypeVectorLayerEntryConfig, TypeVectorSourceIniti
 export interface TypeSourceGeoJSONInitialConfig extends Omit<TypeVectorSourceInitialConfig, 'format'> {
     format: 'GeoJSON';
 }
-export interface TypeGeoJSONLayerEntryConfig extends Omit<TypeVectorLayerEntryConfig, 'source'> {
+export declare class TypeGeoJSONLayerEntryConfig extends TypeVectorLayerEntryConfig {
     source: TypeSourceGeoJSONInitialConfig;
+    /**
+     * The class constructor.
+     * @param {TypeGeoJSONLayerEntryConfig} layerConfig The layer configuration we want to instanciate.
+     */
+    constructor(layerConfig: TypeGeoJSONLayerEntryConfig);
 }
 export interface TypeGeoJSONLayerConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig'> {
     geoviewLayerType: 'GeoJSON';
@@ -37,7 +42,7 @@ export declare const layerConfigIsGeoJSON: (verifyIfLayer: TypeGeoviewLayerConfi
 export declare const geoviewLayerIsGeoJSON: (verifyIfGeoViewLayer: AbstractGeoViewLayer) => verifyIfGeoViewLayer is GeoJSON;
 /** *****************************************************************************************************************************
  * type guard function that redefines a TypeLayerEntryConfig as a TypeGeoJSONLayerEntryConfig if the geoviewLayerType attribute of
- * the verifyIfGeoViewEntry.geoviewRootLayer attribute is GEOJSON. The type ascention applies only to the true block of the if
+ * the verifyIfGeoViewEntry.geoviewLayerConfig attribute is GEOJSON. The type ascention applies only to the true block of the if
  * clause that use this function.
  *
  * @param {TypeLayerEntryConfig} verifyIfGeoViewEntry Polymorphic object to test in order to determine if the type ascention is

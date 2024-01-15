@@ -8,8 +8,13 @@ import { TypeLayerEntryConfig, TypeVectorLayerEntryConfig, TypeVectorSourceIniti
 export interface TypeSourceOgcFeatureInitialConfig extends TypeVectorSourceInitialConfig {
     format: 'featureAPI';
 }
-export interface TypeOgcFeatureLayerEntryConfig extends Omit<TypeVectorLayerEntryConfig, 'source'> {
+export declare class TypeOgcFeatureLayerEntryConfig extends TypeVectorLayerEntryConfig {
     source: TypeSourceOgcFeatureInitialConfig;
+    /**
+     * The class constructor.
+     * @param {TypeOgcFeatureLayerEntryConfig} layerConfig The layer configuration we want to instanciate.
+     */
+    constructor(layerConfig: TypeOgcFeatureLayerEntryConfig);
 }
 export interface TypeOgcFeatureLayerConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig' | 'geoviewLayerType'> {
     geoviewLayerType: 'ogcFeature';
@@ -38,7 +43,7 @@ export declare const layerConfigIsOgcFeature: (verifyIfLayer: TypeGeoviewLayerCo
 export declare const geoviewLayerIsOgcFeature: (verifyIfGeoViewLayer: AbstractGeoViewLayer) => verifyIfGeoViewLayer is OgcFeature;
 /** *****************************************************************************************************************************
  * type guard function that redefines a TypeLayerEntryConfig as a TypeOgcFeatureLayerEntryConfig if the geoviewLayerType attribute
- * of the verifyIfGeoViewEntry.geoviewRootLayer attribute is OGC_FEATURE. The type ascention applies only to the true block of
+ * of the verifyIfGeoViewEntry.geoviewLayerConfig attribute is OGC_FEATURE. The type ascention applies only to the true block of
  * the if clause that use this function.
  *
  * @param {TypeLayerEntryConfig} verifyIfGeoViewEntry Polymorphic object to test in order to determine if the type ascention is

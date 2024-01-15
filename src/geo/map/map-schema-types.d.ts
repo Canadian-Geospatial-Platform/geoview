@@ -3,7 +3,7 @@ import BaseLayer from 'ol/layer/Base';
 import LayerGroup from 'ol/layer/Group';
 import { Coordinate } from 'ol/coordinate';
 import { TypeBasemapOptions } from '@/geo/layer/basemap/basemap-types';
-import { TypeGeoviewLayerType } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
+import { AbstractGeoViewLayer, TypeGeoviewLayerType } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { TypeMapMouseInfo } from '@/api/events/payloads';
 /** ******************************************************************************************************************************
  *  Definition of map state to attach to the map object for reference.
@@ -395,7 +395,7 @@ export type TypeStyleConfig = Partial<Record<TypeStyleGeometry, TypeStyleSetting
 /** ******************************************************************************************************************************
  * Type of Style to apply to the GeoView vector layer source at creation time.
  */
-export type TypeLayerEntryType = 'vector' | 'vector-tile' | 'vector-heatmap' | 'raster-tile' | 'raster-image' | 'geoCore';
+export type TypeLayerEntryType = 'vector' | 'vector-tile' | 'vector-heatmap' | 'raster-tile' | 'raster-image' | 'geoCore' | 'group';
 /** ******************************************************************************************************************************
  * type guard function that redefines a TypeLayerEntryConfig as a TypeLayerGroupEntryConfig if the entryType attribute of the
  * verifyIfLayer parameter is 'group'. The type ascention applies only to the true block of the if clause that use this function.
@@ -486,19 +486,27 @@ export declare const layerEntryIsRasterTile: (verifyIfLayer: TypeLayerEntryConfi
  */
 export declare const layerEntryIsGeocore: (verifyIfLayer: TypeLayerEntryConfig) => verifyIfLayer is TypeGeocoreLayerEntryConfig;
 /** ******************************************************************************************************************************
- * Valid values for the LayerStatus property
+ * Valid values for the layerStatus property.
  */
 export type TypeLayerStatus = 'newInstance' | 'loading' | 'processed' | 'loaded' | 'error';
 /** ******************************************************************************************************************************
  * Base type used to define a GeoView layer to display on the map.
  */
-export type TypeBaseLayerEntryConfig = {
+export declare class BaseLayerProperties {
+    /** The layer path to this instance. */
+    layerPath: string;
+    /** The ending element of the layer configuration path. */
+    layerPathEnding?: string;
+    /** The id of the layer to display on the map. */
+    layerId: string;
+    /** The geoview layer instance that contains this layer configuration. */
+    geoviewLayerInstance?: AbstractGeoViewLayer;
     /** This attribute is not part of the schema. It is used to identified unprocessed layers and shows the final layer state */
     layerStatus?: TypeLayerStatus;
     /** This attribute is not part of the schema. It is used to identified the process phase of the layer */
     layerPhase?: string;
     /** This attribute is not part of the schema. It is used to link the layer entry config to the GeoView root layer config. */
-    geoviewRootLayer?: TypeGeoviewLayerConfig;
+    geoviewLayerConfig: TypeGeoviewLayerConfig;
     /** This attribute is not part of the schema. It is used to link the layer entry config to the parent's layer config. */
     parentLayerConfig?: TypeGeoviewLayerConfig | TypeLayerGroupEntryConfig;
     /** This attribute is not part of the schema. It is used to link the displayed layer to its layer entry config. */
@@ -506,12 +514,38 @@ export type TypeBaseLayerEntryConfig = {
     /** This attribute is not part of the schema. It is used internally to distinguish layer groups derived from the
      * metadata. */
     isMetadataLayerGroup?: boolean;
+    /**
+     * The class constructor.
+     * @param {BaseLayerProperties} layerConfig The layer configuration we want to instanciate.
+     */
+    constructor(layerConfig: BaseLayerProperties);
+    /**
+     * Get the layer Path of the layer configuration parameter.
+     * @param {BaseLayerProperties} layerConfig The layer configuration for which we want to get the layer path.
+     * @param {string} layerPath Internal parameter used to build the layer path (should not be used by the user).
+     *
+     * @returns {string} Returns the layer path.
+     */
+    getLayerPath(layerConfig: BaseLayerProperties, layerPath?: string): string;
+    /**
+     * This method returns the GeoView instance associated to a specific layer path. The first element of the layerPath
+     * is the geoviewLayerId.
+     * @param {string} layerPath The layer path to the layer's configuration.
+     *
+     * @returns {AbstractGeoViewLayer} Returns the geoview instance associated to the layer path.
+     */
+    geoviewLayer(layerPath?: string): AbstractGeoViewLayer;
+}
+/** ******************************************************************************************************************************
+ * Base type used to define a GeoView layer to display on the map.
+ */
+export declare class TypeBaseLayerEntryConfig extends BaseLayerProperties {
     /** Tag used to link the entry to a specific schema. */
     schemaTag?: TypeGeoviewLayerType;
     /** Layer entry data type. */
-    entryType?: 'vector' | 'vector-tile' | 'vector-heatmap' | 'raster-image' | 'raster-tile' | 'group';
+    entryType?: TypeLayerEntryType;
     /** The ending element of the layer configuration path. */
-    layerPathEnding?: string;
+    layerPathEnding?: string | undefined;
     /** The id of the layer to display on the map. */
     layerId: string;
     /** The display name of the layer (English/French). */
@@ -522,22 +556,32 @@ export type TypeBaseLayerEntryConfig = {
      */
     initialSettings?: TypeLayerInitialSettings;
     /** Source settings to apply to the GeoView vector layer source at creation time. */
-    source?: TypeBaseSourceVectorInitialConfig | TypeSourceImageInitialConfig | TypeSourceTileInitialConfig;
+    source?: TypeBaseSourceVectorInitialConfig | TypeSourceTileInitialConfig | TypeVectorSourceInitialConfig | TypeVectorTileSourceInitialConfig | TypeSourceImageInitialConfig | TypeSourceImageWmsInitialConfig | TypeSourceImageEsriInitialConfig | TypeSourceImageStaticInitialConfig;
     /** The listOfLayerEntryConfig attribute is not used by child of TypeBaseLayerEntryConfig. */
-    listOfLayerEntryConfig?: never;
-};
+    listOfLayerEntryConfig: never;
+    /**
+     * The class constructor.
+     * @param {TypeBaseLayerEntryConfig} layerConfig The layer configuration we want to instanciate.
+     */
+    constructor(layerConfig: TypeBaseLayerEntryConfig);
+}
 /** ******************************************************************************************************************************
  * Type used to define a GeoView vector layer to display on the map.
  */
-export interface TypeVectorLayerEntryConfig extends TypeBaseLayerEntryConfig {
+export declare class TypeVectorLayerEntryConfig extends TypeBaseLayerEntryConfig {
     /** Layer entry data type. */
-    entryType?: 'vector';
+    entryType: TypeLayerEntryType;
     /** Filter to apply on feature of this layer. */
     layerFilter?: string;
     /** Initial settings to apply to the GeoView vector layer source at creation time. */
     source?: TypeVectorSourceInitialConfig;
     /** Style to apply to the vector layer. */
     style?: TypeStyleConfig;
+    /**
+     * The class constructor.
+     * @param {TypeVectorLayerEntryConfig} layerConfig The layer configuration we want to instanciate.
+     */
+    constructor(layerConfig: TypeVectorLayerEntryConfig);
 }
 /** ******************************************************************************************************************************
  * Type that defines the domain of valid values for the ESRI format parameter.
@@ -642,9 +686,9 @@ export interface TypeSourceTileInitialConfig extends Omit<TypeBaseSourceImageIni
 /** ******************************************************************************************************************************
  * Type used to identify a GeoView vector heamap layer to display on the map.
  */
-export interface TypeVectorHeatmapLayerEntryConfig extends TypeBaseLayerEntryConfig {
+export declare class TypeVectorHeatmapLayerEntryConfig extends TypeBaseLayerEntryConfig {
     /** Layer entry data type. */
-    entryType?: 'vector-heatmap';
+    entryType: TypeLayerEntryType;
     /** Initial settings to apply to the GeoView vector layer source at creation time. */
     source?: TypeVectorSourceInitialConfig;
     /**
@@ -658,6 +702,11 @@ export interface TypeVectorHeatmapLayerEntryConfig extends TypeBaseLayerEntryCon
     blur?: number;
     /** Feature attribute to use for the weight or a function (ADD FORMAT) that returns a weight from a feature. */
     weight?: string;
+    /**
+     * The class constructor.
+     * @param {TypeVectorHeatmapLayerEntryConfig} layerConfig The layer configuration we want to instanciate.
+     */
+    constructor(layerConfig: TypeVectorHeatmapLayerEntryConfig);
 }
 /** ******************************************************************************************************************************
  * Initial settings to apply to the GeoView vector tile layer source at creation time.
@@ -669,89 +718,114 @@ export interface TypeVectorTileSourceInitialConfig extends TypeBaseSourceVectorI
 /** ******************************************************************************************************************************
  * Type used to define a GeoView vector tile layer to display on the map. The vector data is divided into a tile grid.
  */
-export interface TypeVectorTileLayerEntryConfig extends TypeBaseLayerEntryConfig {
+export declare class TypeVectorTileLayerEntryConfig extends TypeBaseLayerEntryConfig {
     /** Layer entry data type. */
-    entryType?: 'vector-tile';
+    entryType: TypeLayerEntryType;
     /** Filter to apply on feature of this layer. */
     layerFilter?: string;
     /** Source settings to apply to the GeoView vector layer source at creation time. */
     source?: TypeVectorTileSourceInitialConfig;
     /** Style to apply to the vector layer. */
     style?: TypeStyleConfig;
+    /**
+     * The class constructor.
+     * @param {TypeVectorTileLayerEntryConfig} layerConfig The layer configuration we want to instanciate.
+     */
+    constructor(layerConfig: TypeVectorTileLayerEntryConfig);
 }
 /** ******************************************************************************************************************************
  * Type used to define a GeoView image layer to display on the map.
  */
-export interface TypeOgcWmsLayerEntryConfig extends TypeBaseLayerEntryConfig {
+export declare class TypeOgcWmsLayerEntryConfig extends TypeBaseLayerEntryConfig {
     /** Tag used to link the entry to a specific schema. */
-    schemaTag: 'ogcWms';
+    schemaTag: TypeGeoviewLayerType;
     /** Layer entry data type. */
-    entryType?: 'raster-image';
+    entryType: TypeLayerEntryType;
     /** Filter to apply on feature of this layer. */
     layerFilter?: string;
     /** Source settings to apply to the GeoView image layer source at creation time. */
     source: TypeSourceImageWmsInitialConfig;
     /** Style to apply to the raster layer. */
     style?: TypeStyleConfig;
+    /**
+     * The class constructor.
+     * @param {TypeOgcWmsLayerEntryConfig} layerConfig The layer configuration we want to instanciate.
+     */
+    constructor(layerConfig: TypeOgcWmsLayerEntryConfig);
 }
 /** ******************************************************************************************************************************
  * Type used to define a GeoView image layer to display on the map.
  */
-export interface TypeEsriDynamicLayerEntryConfig extends TypeBaseLayerEntryConfig {
+export declare class TypeEsriDynamicLayerEntryConfig extends TypeBaseLayerEntryConfig {
     /** Tag used to link the entry to a specific schema. */
-    schemaTag: 'esriDynamic';
+    schemaTag: TypeGeoviewLayerType;
     /** Layer entry data type. */
-    entryType?: 'raster-image';
+    entryType: TypeLayerEntryType;
     /** Filter to apply on feature of this layer. */
     layerFilter?: string;
     /** Source settings to apply to the GeoView image layer source at creation time. */
     source: TypeSourceImageEsriInitialConfig;
     /** Style to apply to the raster layer. */
     style?: TypeStyleConfig;
+    /**
+     * The class constructor.
+     * @param {TypeEsriDynamicLayerEntryConfig} layerConfig The layer configuration we want to instanciate.
+     */
+    constructor(layerConfig: TypeEsriDynamicLayerEntryConfig);
 }
 /** ******************************************************************************************************************************
  * Type used to define a GeoView image layer to display on the map.
  */
-export interface TypeImageStaticLayerEntryConfig extends TypeBaseLayerEntryConfig {
+export declare class TypeImageStaticLayerEntryConfig extends TypeBaseLayerEntryConfig {
     /** Tag used to link the entry to a specific schema. */
-    schemaTag: 'imageStatic';
+    schemaTag: TypeGeoviewLayerType;
     /** Layer entry data type. */
-    entryType?: 'raster-image';
+    entryType: TypeLayerEntryType;
     /** Filter to apply on feature of this layer. */
     layerFilter?: string;
     /** Source settings to apply to the GeoView image layer source at creation time. */
     source: TypeSourceImageStaticInitialConfig;
+    /**
+     * The class constructor.
+     * @param {TypeImageStaticLayerEntryConfig} layerConfig The layer configuration we want to instanciate.
+     */
+    constructor(layerConfig: TypeImageStaticLayerEntryConfig);
 }
 /** ******************************************************************************************************************************
  * Type used to define a GeoView image layer to display on the map.
  */
-export interface TypeTileLayerEntryConfig extends TypeBaseLayerEntryConfig {
+export declare class TypeTileLayerEntryConfig extends TypeBaseLayerEntryConfig {
     /** Layer entry data type. */
-    entryType?: 'raster-tile';
+    entryType: TypeLayerEntryType;
     /** Initial settings to apply to the GeoView image layer source at creation time. */
     source?: TypeSourceTileInitialConfig;
+    /**
+     * The class constructor.
+     * @param {TypeTileLayerEntryConfig} layerConfig The layer configuration we want to instanciate.
+     */
+    constructor(layerConfig: TypeTileLayerEntryConfig);
 }
 /** ******************************************************************************************************************************
  * Type used to define a GeoView layer where configration is extracted by a configuration snippet stored on a server. The server
  * configuration will handle bilangual informations.
  */
-export type TypeGeocoreLayerEntryConfig = {
-    /** This attribute is not part of the schema. It is used to link the layer config config to the GeoView parent's layer config. */
-    geoviewRootLayer?: TypeGeoviewLayerConfig;
-    /** This attribute is not part of the schema. It is used to link the layer entry config to the parent's layer config. */
-    parentLayerConfig?: TypeGeoviewLayerConfig | TypeLayerGroupEntryConfig;
-    /** This attribute is not part of the schema. It is used to link the displayed layer to its layer entry config. */
-    olLayer?: BaseLayer | LayerGroup | null;
+export declare class TypeGeocoreLayerEntryConfig extends BaseLayerProperties {
+    /** This attribute from BaseLayerProperties is not used by groups. */
+    layerStatus: never;
+    /** This attribute from BaseLayerProperties is not used by groups. */
+    layerPhase: never;
+    /** This attribute from BaseLayerProperties is not used by groups. */
+    isMetadataLayerGroup: never;
     /** Tag used to link the entry to a specific schema. */
-    schemaTag: 'geoCore';
+    schemaTag: TypeGeoviewLayerType;
     /** Layer entry data type. */
-    entryType?: 'geoCore';
+    entryType: TypeLayerEntryType;
     /** The layerId is not used by geocore layers. */
     layerId: never;
     /** The layerPathEnding is not used by geocore layers. */
     layerPathEnding: never;
     /** The display name of a geocore layer is in geocoreLayerName. */
-    layerName?: never;
+    layerName: never;
     /** The display name of the layer (English/French). */
     geocoreLayerName?: TypeLocalizedString;
     /** The access path to the geoCore endpoint (optional, this value should be embeded in the GeoView API). */
@@ -763,7 +837,12 @@ export type TypeGeocoreLayerEntryConfig = {
     initialSettings?: TypeLayerInitialSettings;
     /** The list of layer entry configurations to use from the Geocore layer. */
     listOfLayerEntryConfig?: TypeListOfLayerEntryConfig;
-};
+    /**
+     * The class constructor.
+     * @param {TypeGeocoreLayerEntryConfig} layerConfig The layer configuration we want to instanciate.
+     */
+    constructor(layerConfig: TypeGeocoreLayerEntryConfig);
+}
 /** ******************************************************************************************************************************
  * Initial settings to apply to the GeoView vector layer source at creation time.
  */
@@ -780,16 +859,35 @@ export type TypeSourceGeocoreConfig = {
 /** ******************************************************************************************************************************
  * Type used to define a layer group.
  */
-export interface TypeLayerGroupEntryConfig extends Omit<TypeBaseLayerEntryConfig, 'source' | 'layerStatus' | 'listOfLayerEntryConfig'> {
-    /** This attribute is not part of the schema. It is used internally to distinguish layer groups derived from the
-     * metadata. */
-    isMetadataLayerGroup?: boolean;
+export declare class TypeLayerGroupEntryConfig extends BaseLayerProperties {
+    /** This attribute from BaseLayerProperties is not used by groups. */
+    layerStatus: never;
+    /** This attribute from BaseLayerProperties is not used by groups. */
+    layerPhase: never;
+    /** Tag used to link the entry to a specific schema is not used by groups. */
+    schemaTag: never;
     /** Layer entry data type. */
-    entryType: 'group';
-    /** The source attribute does not exists on the layer group entry. */
-    source?: never;
+    entryType: TypeLayerEntryType;
+    /** The id of the layer to display on the map. */
+    layerId: string;
+    /** The ending element of the layer configuration path is not used on groups. */
+    layerPathEnding: never;
+    /** The display name of the layer (English/French). */
+    layerName?: TypeLocalizedString;
+    /**
+     * Initial settings to apply to the GeoView layer entry at creation time. Initial settings are inherited from the parent in the
+     * configuration tree.
+     */
+    initialSettings?: TypeLayerInitialSettings;
+    /** Source settings to apply to the GeoView vector layer source at creation time is not used by groups. */
+    source: never;
     /** The list of layer entry configurations to use from the GeoView layer group. */
     listOfLayerEntryConfig: TypeListOfLayerEntryConfig;
+    /**
+     * The class constructor.
+     * @param {TypeLayerGroupEntryConfig} layerConfig The layer configuration we want to instanciate.
+     */
+    constructor(layerConfig: TypeLayerGroupEntryConfig);
 }
 /** ******************************************************************************************************************************
  * Layer config type.

@@ -3,9 +3,14 @@ import { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geovie
 import { AbstractGeoViewRaster, TypeBaseRasterLayer } from '@/geo/layer/geoview-layers/raster/abstract-geoview-raster';
 import { TypeLayerEntryConfig, TypeSourceTileInitialConfig, TypeTileLayerEntryConfig, TypeGeoviewLayerConfig, TypeListOfLayerEntryConfig, TypeTileGrid } from '@/geo/map/map-schema-types';
 export type TypeSourceVectorTilesInitialConfig = TypeSourceTileInitialConfig;
-export interface TypeVectorTilesLayerEntryConfig extends Omit<TypeTileLayerEntryConfig, 'source'> {
+export declare class TypeVectorTilesLayerEntryConfig extends TypeTileLayerEntryConfig {
     source: TypeSourceVectorTilesInitialConfig;
     tileGrid: TypeTileGrid;
+    /**
+     * The class constructor.
+     * @param {TypeVectorTilesLayerEntryConfig} layerConfig The layer configuration we want to instanciate.
+     */
+    constructor(layerConfig: TypeVectorTilesLayerEntryConfig);
 }
 export interface TypeVectorTilesConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig'> {
     geoviewLayerType: 'vectorTiles';
@@ -33,7 +38,7 @@ export declare const layerConfigIsVectorTiles: (verifyIfLayer: TypeGeoviewLayerC
 export declare const geoviewLayerIsVectorTiles: (verifyIfGeoViewLayer: AbstractGeoViewLayer) => verifyIfGeoViewLayer is VectorTiles;
 /** *****************************************************************************************************************************
  * type guard function that redefines a TypeLayerEntryConfig as a TypeVectorTilesLayerEntryConfig if the geoviewLayerType attribute
- * of the verifyIfGeoViewEntry.geoviewRootLayer attribute is VECTOR_TILES. The type ascention applies only to the true block of
+ * of the verifyIfGeoViewEntry.geoviewLayerConfig attribute is VECTOR_TILES. The type ascention applies only to the true block of
  * the if clause that use this function.
  *
  * @param {TypeLayerEntryConfig} verifyIfGeoViewEntry Polymorphic object to test in order to determine if the type ascention is

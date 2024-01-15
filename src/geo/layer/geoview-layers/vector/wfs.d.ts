@@ -8,8 +8,13 @@ import { TypeLayerEntryConfig, TypeVectorLayerEntryConfig, TypeVectorSourceIniti
 export interface TypeSourceWFSVectorInitialConfig extends TypeVectorSourceInitialConfig {
     format: 'WFS';
 }
-export interface TypeWfsLayerEntryConfig extends Omit<TypeVectorLayerEntryConfig, 'source'> {
+export declare class TypeWfsLayerEntryConfig extends TypeVectorLayerEntryConfig {
     source: TypeSourceWFSVectorInitialConfig;
+    /**
+     * The class constructor.
+     * @param {TypeWfsLayerEntryConfig} layerConfig The layer configuration we want to instanciate.
+     */
+    constructor(layerConfig: TypeWfsLayerEntryConfig);
 }
 export interface TypeWFSLayerConfig extends Omit<TypeGeoviewLayerConfig, 'geoviewLayerType'> {
     geoviewLayerType: 'ogcWfs';
@@ -36,7 +41,7 @@ export declare const layerConfigIsWFS: (verifyIfLayer: TypeGeoviewLayerConfig) =
 export declare const geoviewLayerIsWFS: (verifyIfGeoViewLayer: AbstractGeoViewLayer) => verifyIfGeoViewLayer is WFS;
 /** *****************************************************************************************************************************
  * type guard function that redefines a TypeLayerEntryConfig as a TypeWfsLayerEntryConfig if the geoviewLayerType attribute of the
- * verifyIfGeoViewEntry.geoviewRootLayer attribute is WFS. The type ascention applies only to the true block of
+ * verifyIfGeoViewEntry.geoviewLayerConfig attribute is WFS. The type ascention applies only to the true block of
  * the if clause that use this function.
  *
  * @param {TypeLayerEntryConfig} verifyIfGeoViewEntry Polymorphic object to test in order to determine if the type ascention is

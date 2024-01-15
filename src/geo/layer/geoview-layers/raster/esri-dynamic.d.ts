@@ -33,7 +33,7 @@ export declare const layerConfigIsEsriDynamic: (verifyIfLayer: TypeGeoviewLayerC
 export declare const geoviewLayerIsEsriDynamic: (verifyIfGeoViewLayer: AbstractGeoViewLayer) => verifyIfGeoViewLayer is EsriDynamic;
 /** ******************************************************************************************************************************
  * type guard function that redefines a TypeLayerEntryConfig as a TypeEsriDynamicLayerEntryConfig if the geoviewLayerType attribute
- * of the verifyIfGeoViewEntry.geoviewRootLayer attribute is ESRI_DYNAMIC. The type ascention applies only to the true block of
+ * of the verifyIfGeoViewEntry.geoviewLayerConfig attribute is ESRI_DYNAMIC. The type ascention applies only to the true block of
  * the if clause that use this function.
  *
  * @param {TypeLayerEntryConfig} verifyIfGeoViewEntry Polymorphic object to test in order to determine if the type ascention is
@@ -239,7 +239,7 @@ export declare class EsriDynamic extends AbstractGeoViewRaster {
      */
     getViewFilter(layerPath: string): string;
     /** ***************************************************************************************************************************
-     * Apply a view filter to the layer identified by the path stored in the layerPathAssociatedToThegeoviewLayer property stored
+     * Apply a view filter to the layer identified by the path stored in the layerPathAssociatedToTheGeoviewLayer property stored
      * in the layer instance associated to the map. The legend filters are derived from the uniqueValue or classBreaks style of the
      * layer. When the layer config is invalid, nothing is done.
      *
@@ -249,7 +249,7 @@ export declare class EsriDynamic extends AbstractGeoViewRaster {
      */
     applyViewFilter(filter: string, notUsed1?: never, notUsed2?: never): void;
     /** ***************************************************************************************************************************
-     * Apply a view filter to the layer identified by the path stored in the layerPathAssociatedToThegeoviewLayer property stored
+     * Apply a view filter to the layer identified by the path stored in the layerPathAssociatedToTheGeoviewLayer property stored
      * in the layer instance associated to the map. When the CombineLegendFilter flag is false, the filter paramater is used alone
      * to display the features. Otherwise, the legend filter and the filter parameter are combined together to define the view
      * filter. The legend filters are derived from the uniqueValue or classBreaks style of the layer. When the layer config is

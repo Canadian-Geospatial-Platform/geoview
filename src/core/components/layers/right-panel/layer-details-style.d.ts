@@ -6,7 +6,9 @@ export declare const getSxClasses: (theme: Theme) => {
         fontSize: string;
     };
     layerDetails: {
-        border: string;
+        borderColor: string;
+        borderWidth: string;
+        borderStyle: string;
         padding: string;
         overflow: string;
         maxHeight: string;
@@ -15,13 +17,6 @@ export declare const getSxClasses: (theme: Theme) => {
         display: string;
         flexDirection: string;
         alignItems: string;
-    };
-    opacityMenu: {
-        display: string;
-        alignItems: string;
-        gap: string;
-        padding: string;
-        backgroundColor: string;
     };
     itemsGrid: {
         width: string;

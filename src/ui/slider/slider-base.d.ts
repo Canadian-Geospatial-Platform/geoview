@@ -7,7 +7,6 @@ interface TypeSliderProps extends SliderProps {
     min: number;
     max: number;
     value: number | number[];
-    customOnChange?: (value: number[] | number) => void;
     onValueDisplay?: (value: number, index: number) => string;
     onValueDisplayAriaLabel?: (value: number, index: number) => string;
 }
