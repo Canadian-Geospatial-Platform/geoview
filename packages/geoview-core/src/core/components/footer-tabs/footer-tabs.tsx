@@ -283,7 +283,7 @@ export function FooterTabs(): JSX.Element | null {
         TabContentVisibilty={!isCollapsed ? 'visible' : 'hidden'}
         rightButtons={
           <>
-            {!isCollapsed && <ResizeFooterPanel />}
+            {!isCollapsed && isMapFullScreen && <ResizeFooterPanel />}
             <IconButton
               onClick={handleDynamicFocus}
               tooltip={isFocusToMap ? 'footerTabsContainer.focusToMap' : 'footerTabsContainer.focusToFooter'}
