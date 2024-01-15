@@ -7,7 +7,11 @@ import { FooterTabPayload, PayloadBaseClass, payloadIsAFooterTab } from '@/api/e
 import { getSxClasses } from './footer-tabs-style';
 import { ResizeFooterPanel } from '../resize-footer-panel/resize-footer-panel';
 import { useAppFullscreenActive } from '@/core/stores/store-interface-and-intial-values/app-state';
-import { useUIFooterPanelResizeValue, useUIFooterPanelResizeValues } from '@/core/stores/store-interface-and-intial-values/ui-state';
+import {
+  useUIFooterPanelResizeValue,
+  useUIFooterPanelResizeValues,
+  useUIStoreActions,
+} from '@/core/stores/store-interface-and-intial-values/ui-state';
 
 interface ShellContainerCssProperties {
   mapVisibility: string;
@@ -44,6 +48,7 @@ export function FooterTabs(): JSX.Element | null {
   const isMapFullScreen = useAppFullscreenActive();
   const footerPanelResizeValue = useUIFooterPanelResizeValue();
   const footerPanelResizeValues = useUIFooterPanelResizeValues();
+  const { setFooterPanelResizeValue } = useUIStoreActions();
 
   /**
    * Calculate resize values from popover values defined in store.
@@ -210,6 +215,14 @@ export function FooterTabs(): JSX.Element | null {
       tabsContainerRef.current.style.height = typeof tabHeight === 'string' ? tabHeight : `${tabHeight}px`;
       // #endregion
     }
+    if (!isMapFullScreen && tabsContainerRef.current && mapContainerRef.current) {
+      mapContainerRef.current.style.visibility = 'visible';
+      mapContainerRef.current.style.minHeight = `${origHeight}px`;
+      mapContainerRef.current.style.height = `${origHeight}px`;
+      tabsContainerRef.current.style.height = 'fit-content';
+      setFooterPanelResizeValue(footerPanelResizeValues[0]);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isMapFullScreen, footerPanelResizeValue, resizeValues, isCollapsed]);
 
   /**
