@@ -1,4 +1,5 @@
 /* eslint-disable no-var, vars-on-top, block-scoped-var, no-param-reassign */
+// eslint-disable-next-line max-classes-per-file
 import { Options as SourceOptions } from 'ol/source/Vector';
 import { WKB as FormatWKB } from 'ol/format';
 
@@ -29,20 +30,54 @@ import {
   TypeLineStringVectorConfig,
   TypePolygonVectorConfig,
   TypeFillStyle,
+  TypeLocalizedString,
 } from '@/geo/map/map-schema-types';
 
 import { getLocalizedValue } from '@/core/utils/utilities';
 
 import { api } from '@/app';
-import { Layer } from '../../layer';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 
 export interface TypeSourceGeoPackageInitialConfig extends TypeVectorSourceInitialConfig {
   format: 'GeoPackage';
 }
 
-export interface TypeGeoPackageLayerEntryConfig extends Omit<TypeVectorLayerEntryConfig, 'source'> {
-  source: TypeSourceGeoPackageInitialConfig;
+export class TypeGeoPackageLayerEntryConfig extends TypeVectorLayerEntryConfig {
+  declare source: TypeSourceGeoPackageInitialConfig;
+
+  /**
+   * The class constructor.
+   * @param {TypeGeoPackageLayerEntryConfig} layerConfig The layer configuration we want to instanciate.
+   */
+  constructor(layerConfig: TypeGeoPackageLayerEntryConfig) {
+    super(layerConfig);
+    Object.assign(this, layerConfig);
+
+    // Attribute 'style' must exist in layerConfig even if it is undefined
+    if (!('style' in this)) this.style = undefined;
+    // if this.source.dataAccessPath is undefined, we assign the metadataAccessPath of the GeoView layer to it.
+    // Value for this.source.format can only be GeoPackage.
+    if (!this.source) this.source = { format: 'GeoPackage' };
+    if (!this.source.format) this.source.format = 'GeoPackage';
+    if (!this.source.dataAccessPath) {
+      let { en, fr } = this.geoviewLayerConfig.metadataAccessPath!;
+      en = en!.split('/').length > 1 ? en!.split('/').slice(0, -1).join('/') : './';
+      fr = fr!.split('/').length > 1 ? fr!.split('/').slice(0, -1).join('/') : './';
+      this.source.dataAccessPath = { en, fr } as TypeLocalizedString;
+    }
+    if (
+      !(this.source.dataAccessPath!.en?.startsWith('blob') && !this.source.dataAccessPath!.en?.endsWith('/')) &&
+      !this.source.dataAccessPath!.en?.toLowerCase().endsWith('.gpkg')
+    ) {
+      this.source.dataAccessPath!.en = this.source.dataAccessPath!.en!.endsWith('/')
+        ? `${this.source.dataAccessPath!.en}${this.layerId}`
+        : `${this.source.dataAccessPath!.en}/${this.layerId}`;
+      this.source.dataAccessPath!.fr = this.source.dataAccessPath!.fr!.endsWith('/')
+        ? `${this.source.dataAccessPath!.fr}${this.layerId}`
+        : `${this.source.dataAccessPath!.fr}/${this.layerId}`;
+    }
+    if (!this?.source?.dataProjection) this.source.dataProjection = 'EPSG:4326';
+  }
 }
 
 export interface TypeGeoPackageLayerConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig' | 'geoviewLayerType'> {
@@ -95,7 +130,7 @@ export const geoviewLayerIsGeoPackage = (verifyIfGeoViewLayer: AbstractGeoViewLa
 
 /** *****************************************************************************************************************************
  * type guard function that redefines a TypeLayerEntryConfig as a TypeGeoPackageLayerEntryConfig if the geoviewLayerType attribute
- * of the verifyIfGeoViewEntry.geoviewRootLayer attribute is GEOPACKAGE. The type ascention applies only to the true block of
+ * of the verifyIfGeoViewEntry.geoviewLayerConfig attribute is GEOPACKAGE. The type ascention applies only to the true block of
  * the if clause that use this function.
  *
  * @param {TypeLayerEntryConfig} verifyIfGeoViewEntry Polymorphic object to test in order to determine if the type ascention is
@@ -106,7 +141,7 @@ export const geoviewLayerIsGeoPackage = (verifyIfGeoViewLayer: AbstractGeoViewLa
 export const geoviewEntryIsGeoPackage = (
   verifyIfGeoViewEntry: TypeLayerEntryConfig
 ): verifyIfGeoViewEntry is TypeGeoPackageLayerEntryConfig => {
-  return verifyIfGeoViewEntry?.geoviewRootLayer?.geoviewLayerType === CONST_LAYER_TYPES.GEOPACKAGE;
+  return verifyIfGeoViewEntry?.geoviewLayerConfig?.geoviewLayerType === CONST_LAYER_TYPES.GEOPACKAGE;
 };
 
 // ******************************************************************************************************************************
@@ -151,7 +186,7 @@ export class GeoPackage extends AbstractGeoViewVector {
   protected validateListOfLayerEntryConfig(listOfLayerEntryConfig: TypeListOfLayerEntryConfig) {
     this.setLayerPhase('validateListOfLayerEntryConfig');
     return listOfLayerEntryConfig.forEach((layerConfig: TypeLayerEntryConfig) => {
-      const layerPath = Layer.getLayerPath(layerConfig);
+      const { layerPath } = layerConfig;
       if (layerEntryIsGroupLayer(layerConfig)) {
         this.validateListOfLayerEntryConfig(layerConfig.listOfLayerEntryConfig!);
         if (!layerConfig.listOfLayerEntryConfig.length) {
@@ -236,8 +271,8 @@ export class GeoPackage extends AbstractGeoViewVector {
             resolve(groupReturned);
           } else {
             this.layerLoadError.push({
-              layer: Layer.getLayerPath(listOfLayerEntryConfig[0]),
-              consoleMessage: `Unable to create group layer ${Layer.getLayerPath(listOfLayerEntryConfig[0])} on map ${this.mapId}`,
+              layer: listOfLayerEntryConfig[0].layerPath,
+              consoleMessage: `Unable to create group layer ${listOfLayerEntryConfig[0].layerPath} on map ${this.mapId}`,
             });
             resolve(null);
           }
@@ -247,7 +282,7 @@ export class GeoPackage extends AbstractGeoViewVector {
         if (!layerGroup) layerGroup = this.createLayerGroup(listOfLayerEntryConfig[0].parentLayerConfig as TypeLayerEntryConfig);
 
         listOfLayerEntryConfig.forEach((layerConfig) => {
-          const layerPath = Layer.getLayerPath(layerConfig);
+          const { layerPath } = layerConfig;
           if (layerEntryIsGroupLayer(layerConfig)) {
             const newLayerGroup = this.createLayerGroup(layerConfig);
             this.processListOfLayerEntryConfig(layerConfig.listOfLayerEntryConfig!, newLayerGroup).then((groupReturned) => {
@@ -255,8 +290,8 @@ export class GeoPackage extends AbstractGeoViewVector {
                 layerGroup!.getLayers().push(groupReturned);
               } else {
                 this.layerLoadError.push({
-                  layer: Layer.getLayerPath(listOfLayerEntryConfig[0]),
-                  consoleMessage: `Unable to create group layer ${Layer.getLayerPath(layerConfig)} on map ${this.mapId}`,
+                  layer: listOfLayerEntryConfig[0].layerPath,
+                  consoleMessage: `Unable to create group layer ${layerConfig.layerPath} on map ${this.mapId}`,
                 });
                 resolve(null);
               }
@@ -268,8 +303,8 @@ export class GeoPackage extends AbstractGeoViewVector {
                 this.setLayerStatus('processed', layerPath);
               } else {
                 this.layerLoadError.push({
-                  layer: Layer.getLayerPath(listOfLayerEntryConfig[0]),
-                  consoleMessage: `Unable to create layer ${Layer.getLayerPath(layerConfig)} on map ${this.mapId}`,
+                  layer: listOfLayerEntryConfig[0].layerPath,
+                  consoleMessage: `Unable to create layer ${layerConfig.layerPath} on map ${this.mapId}`,
                 });
                 this.setLayerStatus('error', layerPath);
               }
@@ -280,14 +315,14 @@ export class GeoPackage extends AbstractGeoViewVector {
         // Single non-group config
       } else {
         this.processOneGeopackage(listOfLayerEntryConfig[0] as TypeBaseLayerEntryConfig, layerGroup).then((layer) => {
-          const layerPath0 = Layer.getLayerPath(listOfLayerEntryConfig[0]);
+          const layerPath0 = listOfLayerEntryConfig[0].layerPath;
           if (layer) {
             this.setLayerStatus('processed', layerPath0);
             resolve(layer);
           } else {
             this.layerLoadError.push({
-              layer: Layer.getLayerPath(listOfLayerEntryConfig[0]),
-              consoleMessage: `Unable to create layer ${Layer.getLayerPath(listOfLayerEntryConfig[0])} on map ${this.mapId}`,
+              layer: listOfLayerEntryConfig[0].layerPath,
+              consoleMessage: `Unable to create layer ${listOfLayerEntryConfig[0].layerPath} on map ${this.mapId}`,
             });
             this.setLayerStatus('error', layerPath0);
           }
@@ -402,7 +437,7 @@ export class GeoPackage extends AbstractGeoViewVector {
                 properties,
               });
 
-              const layerPath = Layer.getLayerPath(layerConfig);
+              const { layerPath } = layerConfig;
               let featuresLoadErrorHandler: () => void;
               const featuresLoadEndHandler = () => {
                 this.setLayerStatus('loaded', layerPath);
@@ -586,7 +621,7 @@ export class GeoPackage extends AbstractGeoViewVector {
         this.processFeatureInfoConfig(properties as TypeJsonObject, layerConfig as TypeVectorLayerEntryConfig);
       }
 
-      const layerPath = Layer.getLayerPath(layerConfig);
+      const { layerPath } = layerConfig;
       let loadErrorHandler: () => void;
       const loadEndHandler = () => {
         this.setLayerStatus('loaded', layerPath);
@@ -619,7 +654,7 @@ export class GeoPackage extends AbstractGeoViewVector {
    */
   protected processOneGeopackage(layerConfig: TypeBaseLayerEntryConfig, layerGroup?: LayerGroup): Promise<BaseLayer | null> {
     const promisedLayers = new Promise<BaseLayer | LayerGroup | null>((resolve) => {
-      const layerPath = Layer.getLayerPath(layerConfig);
+      const { layerPath } = layerConfig;
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       this.extractGeopackageData(layerConfig).then(([layers, slds]) => {
         if (layers.length === 1) {
@@ -630,8 +665,8 @@ export class GeoPackage extends AbstractGeoViewVector {
               resolve(layerGroup || baseLayer);
             } else {
               this.layerLoadError.push({
-                layer: Layer.getLayerPath(layerConfig),
-                consoleMessage: `Unable to create layer ${Layer.getLayerPath(layerConfig)} on map ${this.mapId}`,
+                layer: layerConfig.layerPath,
+                consoleMessage: `Unable to create layer ${layerConfig.layerPath} on map ${this.mapId}`,
               });
               this.setLayerStatus('error', layerPath);
               resolve(null);
@@ -649,15 +684,15 @@ export class GeoPackage extends AbstractGeoViewVector {
             newLayerEntryConfig.parentLayerConfig = Cast<TypeLayerGroupEntryConfig>(layerConfig);
 
             this.processOneGeopackageLayer(newLayerEntryConfig, layers[i], slds).then((baseLayer) => {
-              const newLayerPath = Layer.getLayerPath(newLayerEntryConfig);
+              const newLayerPath = newLayerEntryConfig.layerPath;
               if (baseLayer) {
                 (layerConfig as unknown as TypeLayerGroupEntryConfig).listOfLayerEntryConfig!.push(newLayerEntryConfig);
                 newLayerGroup.getLayers().push(baseLayer);
                 this.setLayerStatus('processed', newLayerPath);
               } else {
                 this.layerLoadError.push({
-                  layer: Layer.getLayerPath(layerConfig),
-                  consoleMessage: `Unable to create layer ${Layer.getLayerPath(layerConfig)} on map ${this.mapId}`,
+                  layer: layerConfig.layerPath,
+                  consoleMessage: `Unable to create layer ${layerConfig.layerPath} on map ${this.mapId}`,
                 });
                 this.setLayerStatus('error', newLayerPath);
                 resolve(null);

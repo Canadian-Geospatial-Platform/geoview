@@ -1,6 +1,3 @@
-/* eslint-disable react/require-default-props */
-import { ReactNode } from 'react';
-
 import { Autocomplete as MaterialAutocomplete, AutocompleteProps, FormControl } from '@mui/material';
 
 /**
@@ -20,14 +17,14 @@ export interface TypeAutocompleteProps<
  * Create a Material UI Autocomplete component
  *
  * @param {TypeAutocompleteProps} props custom autocomplete properties
- * @returns {ReactNode} the auto complete ui component
+ * @returns {JSX.Element} the auto complete ui component
  */
 export function Autocomplete<
   T,
   Multiple extends boolean | undefined = undefined,
   DisableClearable extends boolean | undefined = undefined,
   FreeSolo extends boolean | undefined = undefined
->(props: TypeAutocompleteProps<T, Multiple, DisableClearable, FreeSolo>): ReactNode {
+>(props: TypeAutocompleteProps<T, Multiple, DisableClearable, FreeSolo>): JSX.Element {
   const { fullWidth, ...autoCompleteProps } = props;
 
   return (

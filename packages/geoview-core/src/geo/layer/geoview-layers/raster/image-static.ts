@@ -55,7 +55,7 @@ export const geoviewLayerIsImageStatic = (verifyIfGeoViewLayer: AbstractGeoViewL
 
 /** *****************************************************************************************************************************
  * type guard function that redefines a TypeLayerEntryConfig as a TypeImageStaticLayerEntryConfig if the geoviewLayerType attribute of the
- * verifyIfGeoViewEntry.geoviewRootLayer attribute is ImageStatic. The type ascention applies only to the true block of
+ * verifyIfGeoViewEntry.geoviewLayerConfig attribute is ImageStatic. The type ascention applies only to the true block of
  * the if clause that use this function.
  *
  * @param {TypeLayerEntryConfig} verifyIfGeoViewEntry Polymorphic object to test in order to determine if the type ascention is
@@ -66,7 +66,7 @@ export const geoviewLayerIsImageStatic = (verifyIfGeoViewLayer: AbstractGeoViewL
 export const geoviewEntryIsImageStatic = (
   verifyIfGeoViewEntry: TypeLayerEntryConfig
 ): verifyIfGeoViewEntry is TypeImageStaticLayerEntryConfig => {
-  return verifyIfGeoViewEntry?.geoviewRootLayer?.geoviewLayerType === CONST_LAYER_TYPES.IMAGE_STATIC;
+  return verifyIfGeoViewEntry?.geoviewLayerConfig?.geoviewLayerType === CONST_LAYER_TYPES.IMAGE_STATIC;
 };
 
 // ******************************************************************************************************************************
@@ -153,7 +153,7 @@ export class ImageStatic extends AbstractGeoViewRaster {
       if (!legendImage) {
         const legend: TypeLegend = {
           type: this.type,
-          layerPath: Layer.getLayerPath(layerConfig!),
+          layerPath: layerConfig.layerPath,
           layerName: layerConfig!.layerName,
           legend: null,
         };
@@ -168,7 +168,7 @@ export class ImageStatic extends AbstractGeoViewRaster {
         drawingContext.drawImage(image, 0, 0);
         const legend: TypeLegend = {
           type: this.type,
-          layerPath: Layer.getLayerPath(layerConfig!),
+          layerPath: layerConfig.layerPath,
           layerName: layerConfig!.layerName,
           legend: drawingCanvas,
         };
@@ -176,7 +176,7 @@ export class ImageStatic extends AbstractGeoViewRaster {
       }
       const legend: TypeLegend = {
         type: this.type,
-        layerPath: Layer.getLayerPath(layerConfig!),
+        layerPath: layerConfig.layerPath,
         layerName: layerConfig!.layerName,
         legend: null,
       };
@@ -198,7 +198,7 @@ export class ImageStatic extends AbstractGeoViewRaster {
   protected validateListOfLayerEntryConfig(listOfLayerEntryConfig: TypeListOfLayerEntryConfig) {
     this.setLayerPhase('validateListOfLayerEntryConfig');
     listOfLayerEntryConfig.forEach((layerConfig: TypeLayerEntryConfig) => {
-      const layerPath = Layer.getLayerPath(layerConfig);
+      const { layerPath } = layerConfig;
       if (layerEntryIsGroupLayer(layerConfig)) {
         this.validateListOfLayerEntryConfig(layerConfig.listOfLayerEntryConfig!);
         if (!layerConfig.listOfLayerEntryConfig.length) {
@@ -246,7 +246,7 @@ export class ImageStatic extends AbstractGeoViewRaster {
    * @returns {TypeBaseRasterLayer} The GeoView raster layer that has been created.
    */
   processOneLayerEntry(layerConfig: TypeImageStaticLayerEntryConfig): Promise<TypeBaseRasterLayer | null> {
-    const layerPath = Layer.getLayerPath(layerConfig);
+    const { layerPath } = layerConfig;
     this.setLayerPhase('processOneLayerEntry', layerPath);
 
     if (!layerConfig?.source?.extent) throw new Error('Parameter extent is not defined in source element of layerConfig.');
@@ -275,6 +275,7 @@ export class ImageStatic extends AbstractGeoViewRaster {
       staticImageOptions.visible = layerConfig.initialSettings?.visible === 'yes' || layerConfig.initialSettings?.visible === 'always';
 
     layerConfig.olLayer = new ImageLayer(staticImageOptions);
+    layerConfig.geoviewLayerInstance = this;
 
     this.addLoadendListener(layerPath, 'image');
 
@@ -304,7 +305,7 @@ export class ImageStatic extends AbstractGeoViewRaster {
   // See above headers for signification of the parameters. The first lines of the method select the template
   // used based on the parameter types received.
   protected getBounds(parameter1?: string | Extent, parameter2?: Extent): Extent | undefined {
-    const layerPath = typeof parameter1 === 'string' ? parameter1 : api.maps[this.mapId].layer.layerPathAssociatedToThegeoviewLayer;
+    const layerPath = typeof parameter1 === 'string' ? parameter1 : this.layerPathAssociatedToTheGeoviewLayer;
     let bounds = typeof parameter1 !== 'string' ? parameter1 : parameter2;
     const layerConfig = this.getLayerConfig(layerPath);
     const layerBounds = (layerConfig?.olLayer as ImageLayer<Static>).getSource()?.getImageExtent();

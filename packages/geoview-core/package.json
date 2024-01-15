@@ -83,7 +83,8 @@
     "sql.js": "^1.8.0",
     "yet-another-react-lightbox": "^3.11.3",
     "zustand": "~4.4.1",
-    "react-beautiful-dnd": "~13.1.1"
+    "react-beautiful-dnd": "~13.1.1",
+    "react-dropzone": "^14.2.3"
   },
   "devDependencies": {
     "@babel/cli": "^7.17.0",

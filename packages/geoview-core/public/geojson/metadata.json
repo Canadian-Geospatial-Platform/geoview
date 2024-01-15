@@ -6,7 +6,7 @@
       "layerName": { "en": "Polygons" },
       "source": {
         "featureInfo": {
-          "queryable": "true",
+          "queryable": "false",
           "nameField": { "en": "Province", "fr": "Province" },
           "outfields": { "en": "Province,creationDate,myImages", "fr": "Province,creationDate,myImages" },
           "fieldTypes": "string,date",

@@ -1,4 +1,5 @@
 /* eslint-disable no-param-reassign */
+// eslint-disable-next-line max-classes-per-file
 import { Vector as VectorSource } from 'ol/source';
 import { Options as SourceOptions } from 'ol/source/Vector';
 import { EsriJSON } from 'ol/format';
@@ -15,6 +16,7 @@ import {
   TypeListOfLayerEntryConfig,
   TypeEsriDynamicLayerEntryConfig,
   TypeBaseLayerEntryConfig,
+  TypeLocalizedString,
 } from '@/geo/map/map-schema-types';
 
 import { getLocalizedValue } from '@/core/utils/utilities';
@@ -31,14 +33,34 @@ import {
 import { AbstractGeoViewVector } from './abstract-geoview-vector';
 import { TypeJsonArray, TypeJsonObject } from '@/core/types/global-types';
 import { codedValueType, rangeDomainType } from '@/api/events/payloads';
-import { Layer } from '../../layer';
 
 export interface TypeSourceEsriFeatureInitialConfig extends Omit<TypeVectorSourceInitialConfig, 'format'> {
   format: 'EsriJSON';
 }
 
-export interface TypeEsriFeatureLayerEntryConfig extends Omit<TypeVectorLayerEntryConfig, 'source'> {
-  source: TypeSourceEsriFeatureInitialConfig;
+export class TypeEsriFeatureLayerEntryConfig extends TypeVectorLayerEntryConfig {
+  declare source: TypeSourceEsriFeatureInitialConfig;
+
+  /**
+   * The class constructor.
+   * @param {TypeEsriFeatureLayerEntryConfig} layerConfig The layer configuration we want to instanciate.
+   */
+  constructor(layerConfig: TypeEsriFeatureLayerEntryConfig) {
+    super(layerConfig);
+    Object.assign(this, layerConfig);
+
+    if (Number.isNaN(this.layerId)) {
+      throw new Error(`The layer entry with layerId equal to ${this.layerPath} must be an integer string`);
+    }
+    // Attribute 'style' must exist in layerConfig even if it is undefined
+    if (!('style' in this)) this.style = undefined;
+    // if this.source.dataAccessPath is undefined, we assign the metadataAccessPath of the GeoView layer to it
+    // and place the layerId at the end of it.
+    // Value for this.source.format can only be EsriJSON.
+    if (!this.source) this.source = { format: 'EsriJSON' };
+    if (!this.source.format) this.source.format = 'EsriJSON';
+    if (!this.source.dataAccessPath) this.source.dataAccessPath = { ...this.geoviewLayerConfig.metadataAccessPath } as TypeLocalizedString;
+  }
 }
 
 export interface TypeEsriFeatureLayerConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig'> {
@@ -74,7 +96,7 @@ export const geoviewLayerIsEsriFeature = (verifyIfGeoViewLayer: AbstractGeoViewL
 
 /** *****************************************************************************************************************************
  * type guard function that redefines a TypeLayerEntryConfig as a TypeEsriFeatureLayerEntryConfig if the geoviewLayerType
- * attribute of the verifyIfGeoViewEntry.geoviewRootLayer attribute is ESRI_FEATURE. The type ascention applies only to the true
+ * attribute of the verifyIfGeoViewEntry.geoviewLayerConfig attribute is ESRI_FEATURE. The type ascention applies only to the true
  * block of the if clause that use this function.
  *
  * @param {TypeLayerEntryConfig} verifyIfGeoViewEntry Polymorphic object to test in order to determine if the type ascention
@@ -85,7 +107,7 @@ export const geoviewLayerIsEsriFeature = (verifyIfGeoViewLayer: AbstractGeoViewL
 export const geoviewEntryIsEsriFeature = (
   verifyIfGeoViewEntry: TypeLayerEntryConfig
 ): verifyIfGeoViewEntry is TypeEsriFeatureLayerEntryConfig => {
-  return verifyIfGeoViewEntry?.geoviewRootLayer?.geoviewLayerType === CONST_LAYER_TYPES.ESRI_FEATURE;
+  return verifyIfGeoViewEntry?.geoviewLayerConfig?.geoviewLayerType === CONST_LAYER_TYPES.ESRI_FEATURE;
 };
 
 // ******************************************************************************************************************************
@@ -137,8 +159,8 @@ export class EsriFeature extends AbstractGeoViewVector {
   esriChildHasDetectedAnError(layerConfig: TypeLayerEntryConfig, esriIndex: number): boolean {
     if (this.metadata!.layers[esriIndex].type !== 'Feature Layer') {
       this.layerLoadError.push({
-        layer: Layer.getLayerPath(layerConfig),
-        consoleMessage: `LayerId ${Layer.getLayerPath(layerConfig)} of map ${this.mapId} is not a feature layer`,
+        layer: layerConfig.layerPath,
+        consoleMessage: `LayerId ${layerConfig.layerPath} of map ${this.mapId} is not a feature layer`,
       });
       return true;
     }

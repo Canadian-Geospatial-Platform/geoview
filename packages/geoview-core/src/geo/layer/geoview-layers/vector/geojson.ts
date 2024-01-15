@@ -1,4 +1,5 @@
 /* eslint-disable block-scoped-var, no-var, vars-on-top, no-param-reassign */
+// eslint-disable-next-line max-classes-per-file
 import { Options as SourceOptions } from 'ol/source/Vector';
 import { GeoJSON as FormatGeoJSON } from 'ol/format';
 import { ReadOptions } from 'ol/format/Feature';
@@ -21,7 +22,6 @@ import {
 } from '@/geo/map/map-schema-types';
 import { getLocalizedValue } from '@/core/utils/utilities';
 import { Cast, toJsonObject } from '@/core/types/global-types';
-import { Layer } from '../../layer';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { api } from '@/app';
 
@@ -29,8 +29,50 @@ export interface TypeSourceGeoJSONInitialConfig extends Omit<TypeVectorSourceIni
   format: 'GeoJSON';
 }
 
-export interface TypeGeoJSONLayerEntryConfig extends Omit<TypeVectorLayerEntryConfig, 'source'> {
-  source: TypeSourceGeoJSONInitialConfig;
+export class TypeGeoJSONLayerEntryConfig extends TypeVectorLayerEntryConfig {
+  declare source: TypeSourceGeoJSONInitialConfig;
+
+  /**
+   * The class constructor.
+   * @param {TypeGeoJSONLayerEntryConfig} layerConfig The layer configuration we want to instanciate.
+   */
+  constructor(layerConfig: TypeGeoJSONLayerEntryConfig) {
+    super(layerConfig);
+    Object.assign(this, layerConfig);
+
+    if (!this.geoviewLayerConfig.metadataAccessPath && !this.source?.dataAccessPath) {
+      throw new Error(
+        `dataAccessPath is mandatory for GeoView layer ${this.geoviewLayerConfig.geoviewLayerId} of type GeoJSON when the metadataAccessPath is undefined.`
+      );
+    }
+    // Default value for this.entryType is vector
+    if (this.entryType === undefined) this.entryType = 'vector';
+    // Attribute 'style' must exist in layerConfig even if it is undefined
+    if (!('style' in this)) this.style = undefined;
+    // if this.source.dataAccessPath is undefined, we assign the metadataAccessPath of the GeoView layer to it
+    // and place the layerId at the end of it.
+    // Value for this.source.format can only be GeoJSON.
+    if (!this.source) this.source = { format: 'GeoJSON' };
+    if (!this.source.format) this.source.format = 'GeoJSON';
+    if (!this.source.dataAccessPath) {
+      let { en, fr } = this.geoviewLayerConfig.metadataAccessPath!;
+      en = en!.split('/').length > 1 ? en!.split('/').slice(0, -1).join('/') : './';
+      fr = fr!.split('/').length > 1 ? fr!.split('/').slice(0, -1).join('/') : './';
+      this.source.dataAccessPath = { en, fr } as TypeLocalizedString;
+    }
+    if (
+      !(this.source.dataAccessPath!.en?.startsWith('blob') && !this.source.dataAccessPath!.en?.endsWith('/')) &&
+      !this.source.dataAccessPath!.en?.toUpperCase().endsWith('.JSON' || '.GEOJSON')
+    ) {
+      this.source.dataAccessPath!.en = this.source.dataAccessPath!.en!.endsWith('/')
+        ? `${this.source.dataAccessPath!.en}${this.layerId}`
+        : `${this.source.dataAccessPath!.en}/${this.layerId}`;
+      this.source.dataAccessPath!.fr = this.source.dataAccessPath!.fr!.endsWith('/')
+        ? `${this.source.dataAccessPath!.fr}${this.layerId}`
+        : `${this.source.dataAccessPath!.fr}/${this.layerId}`;
+    }
+    if (!this.source.dataProjection) this.source.dataProjection = 'EPSG:4326';
+  }
 }
 
 export interface TypeGeoJSONLayerConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig'> {
@@ -66,7 +108,7 @@ export const geoviewLayerIsGeoJSON = (verifyIfGeoViewLayer: AbstractGeoViewLayer
 
 /** *****************************************************************************************************************************
  * type guard function that redefines a TypeLayerEntryConfig as a TypeGeoJSONLayerEntryConfig if the geoviewLayerType attribute of
- * the verifyIfGeoViewEntry.geoviewRootLayer attribute is GEOJSON. The type ascention applies only to the true block of the if
+ * the verifyIfGeoViewEntry.geoviewLayerConfig attribute is GEOJSON. The type ascention applies only to the true block of the if
  * clause that use this function.
  *
  * @param {TypeLayerEntryConfig} verifyIfGeoViewEntry Polymorphic object to test in order to determine if the type ascention is
@@ -75,7 +117,7 @@ export const geoviewLayerIsGeoJSON = (verifyIfGeoViewLayer: AbstractGeoViewLayer
  * @returns {boolean} true if the type ascention is valid.
  */
 export const geoviewEntryIsGeoJSON = (verifyIfGeoViewEntry: TypeLayerEntryConfig): verifyIfGeoViewEntry is TypeGeoJSONLayerEntryConfig => {
-  return verifyIfGeoViewEntry?.geoviewRootLayer?.geoviewLayerType === CONST_LAYER_TYPES.GEOJSON;
+  return verifyIfGeoViewEntry?.geoviewLayerConfig?.geoviewLayerType === CONST_LAYER_TYPES.GEOJSON;
 };
 
 // ******************************************************************************************************************************
@@ -108,7 +150,7 @@ export class GeoJSON extends AbstractGeoViewVector {
    */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   protected getFieldType(fieldName: string, layerConfig: TypeLayerEntryConfig): 'string' | 'date' | 'number' {
-    const fieldDefinitions = this.layerMetadata[Layer.getLayerPath(layerConfig)].source.featureInfo;
+    const fieldDefinitions = this.layerMetadata[layerConfig.layerPath].source.featureInfo;
     const fieldIndex = getLocalizedValue(Cast<TypeLocalizedString>(fieldDefinitions.outfields), this.mapId)?.split(',').indexOf(fieldName);
     if (!fieldIndex || fieldIndex === -1) return 'string';
     return (fieldDefinitions.fieldTypes as string).split(',')[fieldIndex!] as 'string' | 'date' | 'number';
@@ -123,7 +165,7 @@ export class GeoJSON extends AbstractGeoViewVector {
   protected validateListOfLayerEntryConfig(listOfLayerEntryConfig: TypeListOfLayerEntryConfig) {
     this.setLayerPhase('validateListOfLayerEntryConfig');
     listOfLayerEntryConfig.forEach((layerConfig: TypeLayerEntryConfig) => {
-      const layerPath = Layer.getLayerPath(layerConfig);
+      const { layerPath } = layerConfig;
       if (layerEntryIsGroupLayer(layerConfig)) {
         this.validateListOfLayerEntryConfig(layerConfig.listOfLayerEntryConfig!);
         if (!layerConfig.listOfLayerEntryConfig.length) {
@@ -182,7 +224,7 @@ export class GeoJSON extends AbstractGeoViewVector {
           (layerMetadata) => layerMetadata.layerId === layerConfig.layerId && layerMetadata.layerPathEnding === layerConfig.layerPathEnding
         );
         if (layerMetadataFound) {
-          this.layerMetadata[Layer.getLayerPath(layerConfig)] = toJsonObject(layerMetadataFound);
+          this.layerMetadata[layerConfig.layerPath] = toJsonObject(layerMetadataFound);
           layerConfig.layerName = layerConfig.layerName || layerMetadataFound.layerName;
           layerConfig.source = defaultsDeep(layerConfig.source, layerMetadataFound.source);
           layerConfig.initialSettings = defaultsDeep(layerConfig.initialSettings, layerMetadataFound.initialSettings);
@@ -191,7 +233,7 @@ export class GeoJSON extends AbstractGeoViewVector {
           // layerId ending, chances are that it was set by the config-validation because of an empty dataAcessPath value in the config.
           // This situation means that we want to use the dataAccessPath found in the metadata if it is set, otherwise we will keep the
           // config dataAccessPath value.
-          let metadataAccessPathRoot = getLocalizedValue(layerConfig.geoviewRootLayer?.metadataAccessPath, this.mapId);
+          let metadataAccessPathRoot = getLocalizedValue(layerConfig.geoviewLayerConfig?.metadataAccessPath, this.mapId);
           if (metadataAccessPathRoot) {
             metadataAccessPathRoot =
               metadataAccessPathRoot.split('/').length > 1 ? metadataAccessPathRoot.split('/').slice(0, -1).join('/') : './';
