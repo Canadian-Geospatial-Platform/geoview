@@ -1,7 +1,19 @@
 import { useState } from 'react';
 import { useTheme } from '@mui/material';
 import { useTranslation } from 'react-i18next';
-import { Box, ListItem, Tooltip, ListItemText, ListItemIcon, Collapse, List, BrowserNotSupportedIcon } from '@/ui';
+import {
+  Box,
+  ListItem,
+  Tooltip,
+  ListItemText,
+  ListItemIcon,
+  Collapse,
+  List,
+  BrowserNotSupportedIcon,
+  IconButton,
+  KeyboardArrowDownIcon,
+  KeyboardArrowUpIcon,
+} from '@/ui';
 import { TypeLegendLayer } from '@/core/components/layers/types';
 import { getSxClasses } from './legend-styles';
 import { LayerIcon } from '../layers/layer-icon';
@@ -87,7 +99,7 @@ export function LegendLayer(props: LegendLayerProps): JSX.Element {
     }
 
     return (
-      <Collapse in sx={sxClasses.collapsibleContainer} timeout="auto">
+      <Collapse in={isGroupOpen} sx={sxClasses.collapsibleContainer} timeout="auto">
         {renderChildren()}
         {renderItems()}
       </Collapse>
@@ -99,7 +111,21 @@ export function LegendLayer(props: LegendLayerProps): JSX.Element {
       <ListItem key={layer.layerName} divider onClick={handleExpandGroupClick}>
         <LayerIcon layer={layer} />
         <Tooltip title={layer.layerName} placement="top" enterDelay={1000}>
-          <ListItemText primary={layer.layerName} className="layerTitle" secondary={getSecondaryText()} />
+          <>
+            <ListItemText
+              sx={{
+                '&:hover': {
+                  cursor: 'pointer',
+                },
+              }}
+              primary={layer.layerName}
+              className="layerTitle"
+              secondary={getSecondaryText()}
+            />
+            <IconButton sx={{ marginBottom: '20px' }} color="primary" edge="end" size="small" tooltip="layers.toggleCollapse">
+              {isGroupOpen ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
+            </IconButton>
+          </>
         </Tooltip>
       </ListItem>
       {renderCollapsible()}
