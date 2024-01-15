@@ -136,6 +136,15 @@ export function Detailspanel(): JSX.Element {
         rightPanel.style.paddingBottom = `24px`;
       }
     }
+    if (!isMapFullScreen && leftPanelRef.current && rightPanelRef.current) {
+      leftPanelRef.current.style.maxHeight = '700px';
+      leftPanelRef.current.style.overflow = 'auto';
+      const rightPanel = rightPanelRef.current.firstElementChild as HTMLElement | null;
+      if (rightPanel) {
+        rightPanel.style.maxHeight = '700px';
+        rightPanel.style.overflow = `auto`;
+      }
+    }
   }, [footerPanelResizeValue, isMapFullScreen, activeFooterTabId, arrayOfLayerData]);
 
   /**

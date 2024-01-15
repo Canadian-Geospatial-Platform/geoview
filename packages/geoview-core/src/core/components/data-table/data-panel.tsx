@@ -163,6 +163,12 @@ export function Datapanel({ layerData, mapId, language }: DatapanelProps) {
       leftPanelRef.current.style.paddingBottom = `24px`;
       setTableHeight(leftPanelHeight - 10);
     }
+
+    if (!isMapFullScreen && leftPanelRef.current && rightPanelRef.current) {
+      leftPanelRef.current.style.maxHeight = '700px';
+      leftPanelRef.current.style.overflow = 'auto';
+      setTableHeight(700);
+    }
   }, [footerPanelResizeValue, isMapFullScreen, activeFooterTabId]);
 
   return (

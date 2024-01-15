@@ -56,11 +56,15 @@ export function Legend(): JSX.Element {
       legendPanelRef.current.style.overflow = `auto`;
       legendPanelRef.current.style.paddingBottom = `24px`;
     }
+    if (!isMapFullScreen && legendPanelRef.current) {
+      legendPanelRef.current.style.maxHeight = '700px';
+      legendPanelRef.current.style.overflow = 'auto';
+    }
   }, [footerPanelResizeValue, isMapFullScreen, activeFooterTabId]);
 
   function renderLegendLayersList() {
     return (
-      <Box display="flex" flexDirection="row" flexWrap="wrap" style={!isMapFullScreen ? { overflow: 'auto' } : {}}>
+      <Box display="flex" flexDirection="row" flexWrap="wrap">
         {legendLayers.map((item) => (
           <Box key={item!.layerPath} width={{ xs: '100%', sm: '50%', md: '33.33%', lg: '25%', xl: '25%' }} style={{ minHeight: 0 }} p={2}>
             <LegendLayer layer={item!} key={item!.layerPath} />
@@ -71,7 +75,7 @@ export function Legend(): JSX.Element {
   }
 
   return (
-    <Box sx={sxClasses.container} ref={legendPanelRef}>
+    <Box sx={sxClasses.container} ref={legendPanelRef} id="legendContainer">
       <Box>
         <Typography sx={sxClasses.title}>{t('legend.overviewTitle')}</Typography>
         <Typography sx={sxClasses.subtitle} />
