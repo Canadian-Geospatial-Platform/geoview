@@ -35,7 +35,7 @@ export function Legend(): JSX.Element {
 
   function renderLegendLayersList() {
     return (
-      <Box display="flex" flexDirection="row" flexWrap="wrap" style={{ height: 600, overflowY: 'auto', overflowX: 'hidden' }}>
+      <Box display="flex" flexDirection="row" flexWrap="wrap" style={{ overflowY: 'auto', overflowX: 'hidden' }}>
         {legendLayers.map((item) => (
           <Box key={item!.layerPath} width={{ xs: '100%', sm: '50%', md: '33.33%', lg: '25%', xl: '25%' }} style={{ minHeight: 0 }} p={2}>
             <LegendLayer layer={item!} key={item!.layerPath} />
