@@ -140,8 +140,17 @@
     ]
   },
   "theme": "geo.ca",
+  "footerTabs": {
+    "tabs": {
+      "core": [
+        "layers",
+        "details",
+        "geochart"
+      ]
+    }
+  },
   "corePackages": [
-    "footer-panel"
+    "geochart"
   ],
   "suportedLanguages": [
     "en",

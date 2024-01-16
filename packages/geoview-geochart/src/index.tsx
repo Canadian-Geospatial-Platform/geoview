@@ -91,7 +91,7 @@ class GeoChartFooterPlugin extends FooterPlugin {
       value: this.value!,
       label: 'chartPanel.title',
       icon: <ChartIcon />,
-      content: () => content,
+      content,
     };
   }
 

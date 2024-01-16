@@ -54,11 +54,6 @@ const config = {
       dependOn: 'cgpv-main',
       filename: 'corePackages/[name].js',
     },
-    'geoview-footer-panel': {
-      import: '../geoview-footer-panel/src/index.tsx',
-      dependOn: 'cgpv-main',
-      filename: 'corePackages/[name].js',
-    },
     'geoview-swiper': {
       import: '../geoview-swiper/src/index.tsx',
       dependOn: 'cgpv-main',

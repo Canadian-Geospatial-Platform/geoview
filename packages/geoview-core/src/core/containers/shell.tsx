@@ -34,7 +34,6 @@ import {
   useUIActiveFocusItem,
   useUIActiveTrapGeoView,
   useUIAppbarComponents,
-  useUICorePackagesComponents,
 } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import ExportModal from '@/core/components/export/export-modal';
 import DataTableModal from '@/core/components/data-table/data-table-modal';
@@ -71,9 +70,9 @@ export function Shell(props: ShellProps): JSX.Element {
   const mapId = useGeoViewMapId();
   const interaction = useMapInteraction();
   const appBarComponents = useUIAppbarComponents();
-  const corePackagesComponents = useUICorePackagesComponents();
   const geoviewConfig = useGeoViewConfig();
   const focusItem = useUIActiveFocusItem();
+
   /**
    * Causes the shell to re-render
    */
@@ -155,7 +154,7 @@ export function Shell(props: ShellProps): JSX.Element {
             </Box>
             {interaction === 'dynamic' && <Navbar />}
           </Box>
-          {corePackagesComponents.includes('footer-panel') && <FooterTabs />}
+          {geoviewConfig!.footerTabs !== undefined && <FooterTabs />}
           {Object.keys(api.maps[shellId].modal.modals).map((modalId) => (
             <Modal key={modalId} id={modalId} open={false} mapId={shellId} />
           ))}
