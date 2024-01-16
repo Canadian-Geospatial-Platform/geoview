@@ -34,8 +34,10 @@ export class FeatureInfoLayerSet {
   /** The layer set object. */
   private layerSet: LayerSet;
 
-  /** Flag used to disable click event for the entire layerSet */
-  private disableClick = false;
+  /** Private variable to keep the single instance that can be created by this class for a mapId (see singleton design pattern) */
+  private disableClickOnLayer: {
+    [layerPath: string]: boolean;
+  } = {};
 
   /** Flag used to disable hover event for the entire layerSet */
   private disableHover = false;
@@ -53,16 +55,25 @@ export class FeatureInfoLayerSet {
     // This function determines whether a layer can be registered.
     const registrationConditionFunction = (layerPath: string): boolean => {
       const layerConfig = api.maps[this.mapId].layer.registeredLayers[layerPath];
-      if (layerConfig?.source) {
-        return 'featureInfo' in layerConfig.source! && !!layerConfig.source.featureInfo?.queryable;
+      const queryable = layerConfig?.source?.featureInfo?.queryable;
+      if (queryable) {
+        FeatureInfoEventProcessor.propagateFeatureInfoToStore(mapId, layerPath, 'click', this.resultSets);
+        return true;
       }
       return false;
     };
 
-    // This function is used to initialise the date property of the layer path entry.
+    // This function is used to initialise the data property of the layer path entry.
     const registrationUserDataInitialisation = (layerPath: string) => {
+      this.disableClickOnLayer[layerPath] = false;
       this.resultSets[layerPath].data = {};
       ArrayOfEventTypes.forEach((eventType) => {
+        this.resultSets[layerPath].data[eventType] = {
+          features: [],
+          layerPath,
+          layerName: getLocalizedValue(api.maps[mapId].layer.registeredLayers[layerPath].layerName, mapId) ?? '',
+          layerStatus: api.maps[this.mapId].layer.registeredLayers[layerPath].layerStatus!,
+        };
         this.resultSets[layerPath].data[eventType] = undefined;
       });
     };
@@ -82,14 +93,17 @@ export class FeatureInfoLayerSet {
       (payload) => {
         if (payloadIsAMapMouseEvent(payload)) {
           Object.keys(this.resultSets).forEach((layerPath) => {
-            this.resultSets[layerPath].data.click = undefined;
+            if (this.disableClickOnLayer[layerPath]) return;
+            this.resultSets[layerPath].data.click = {
+              features: undefined,
+              layerPath,
+              layerName: getLocalizedValue(api.maps[mapId].layer.registeredLayers[layerPath].layerName, mapId) ?? '',
+              layerStatus: api.maps[this.mapId].layer.registeredLayers[layerPath].layerStatus!,
+            };
           });
-          // TODO: Suggestion - Implement a "loading state" between query events. Via new function in FeatureInfoEventProcessor?
-          // TO.DO.CONT: It'd be great to have a "store state" that indicates when a query is
-          // in progress (that is between this event (and its siblings) and the GET_FEATURE_INFO.QUERY_RESULT).
-          // Because otherwise, we have to attach to both events in our Component to determine the status of the query and
-          // it might potentially unsynch between event calls.
-          // Doing so would also be nicer, because we'd have both ways work with store instead of having one working with api.event GET_FEATURE_INFO.QUERY_LAYER and one with store.
+          // When property features is undefined, we are waiting for the query result.
+          // when Array.isArray(features) is true, the features property contains the query result.
+          // when property features is null, the query ended with an error.
           api.event.emit(GetFeatureInfoPayload.createQueryLayerPayload(this.mapId, 'at_long_lat', payload.coordinates.lnglat, 'click'));
         }
       },
@@ -113,6 +127,7 @@ export class FeatureInfoLayerSet {
       EVENT_NAMES.MAP.EVENT_MAP_POINTER_MOVE,
       debounce((payload) => {
         if (payloadIsAMapMouseEvent(payload)) {
+          if (this.disableHover) return;
           Object.keys(this.resultSets).forEach((layerPath) => {
             this.resultSets[layerPath].data.hover = undefined;
           });
@@ -142,14 +157,14 @@ export class FeatureInfoLayerSet {
             this.resultSets[layerPath].data[eventType] = {
               features: arrayOfRecords,
               layerPath,
-              layerName: getLocalizedValue(api.maps[mapId].layer.registeredLayers[layerPath].layerName, mapId)!,
-              layerStatus: this.resultSets[layerPath].data[eventType]?.layerStatus || 'error',
+              layerName: getLocalizedValue(api.maps[mapId].layer.registeredLayers[layerPath].layerName, mapId) ?? '',
+              layerStatus: api.maps[this.mapId].layer.registeredLayers[layerPath].layerStatus!,
             };
             FeatureInfoEventProcessor.propagateFeatureInfoToStore(mapId, layerPath, eventType, this.resultSets);
           }
 
           const allDone = Object.keys(this.resultSets).reduce((doneFlag, layerPathToTest) => {
-            return doneFlag && this.resultSets[layerPathToTest].data[eventType] !== undefined;
+            return doneFlag && this.resultSets[layerPathToTest].data[eventType]?.features !== undefined;
           }, true);
 
           if (allDone) {
@@ -191,5 +206,47 @@ export class FeatureInfoLayerSet {
    */
   static delete(mapId: string) {
     if (FeatureInfoLayerSet.featureInfoLayerSetInstance[mapId]) delete FeatureInfoLayerSet.featureInfoLayerSetInstance[mapId];
+  }
+
+  /**
+   * Function used to enable listening of click events. When a layer path is not provided,
+   * click events listening is enabled for all layers
+   *
+   * @param {string} layerPath Optional parameter used to enable only one layer
+   */
+  enableClickListener(layerPath?: string) {
+    if (layerPath) this.disableClickOnLayer[layerPath] = false;
+    else
+      Object.keys((key: string) => {
+        this.disableClickOnLayer[key] = false;
+      });
+  }
+
+  /**
+   * Function used to disable listening of click events. When a layer path is not provided,
+   * click events listening is disable for all layers
+   *
+   * @param {string} layerPath Optional parameter used to disable only one layer
+   */
+  disableClickListener(layerPath?: string) {
+    if (layerPath) this.disableClickOnLayer[layerPath] = false;
+    else
+      Object.keys((key: string) => {
+        this.disableClickOnLayer[key] = true;
+      });
+  }
+
+  /**
+   * Function used to enable listening of hover events.
+   */
+  enableHoverListener() {
+    this.disableHover = false;
+  }
+
+  /**
+   * Function used to disable listening of hover events.
+   */
+  disableHoverListener() {
+    this.disableHover = true;
   }
 }
