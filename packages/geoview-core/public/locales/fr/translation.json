@@ -6,7 +6,8 @@
     "name": "Nom",
     "exit": "Sortir",
     "open": "Ouvrir",
-    "remove": "Retirer"
+    "remove": "Retirer",
+    "view": "Vue"
   },
   "mapnav": {
     "arianavbar": "groupe de buttons vertical pour navigation sur la carte",

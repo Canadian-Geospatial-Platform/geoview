@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import { Button } from '@mui/material';
-import { Box, AddCircleOutlineIcon, ButtonGroup, DeleteOutlineIcon, HandleIcon, Tooltip } from '@/ui';
+import { Box, AddCircleOutlineIcon, ButtonGroup, DeleteOutlineIcon, HandleIcon, Tooltip, VisibilityOutlinedIcon } from '@/ui';
 import { useLayerStoreActions, useLayersDisplayState } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { TypeLayersViewDisplayState } from '../types';
 
@@ -43,6 +43,15 @@ export function LayersActions(): JSX.Element {
             onClick={() => handleSetDisplayState('remove')}
           >
             {t('general.remove')}
+          </Button>
+        </Tooltip>
+        <Tooltip title={t('general.view')} placement="top" enterDelay={1000}>
+          <Button
+            variant={displayState === 'view' ? 'contained' : 'outlined'}
+            startIcon={<VisibilityOutlinedIcon fontSize="small" />}
+            onClick={() => handleSetDisplayState('view')}
+          >
+            {t('general.view')}
           </Button>
         </Tooltip>
       </ButtonGroup>
