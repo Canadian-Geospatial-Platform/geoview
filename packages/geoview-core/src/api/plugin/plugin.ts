@@ -35,7 +35,7 @@ export class Plugin {
    */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   loadScript = (pluginId: string): Promise<any> => {
-    return new Promise((resolve) => {
+    return new Promise((resolve, reject) => {
       const existingScript = document.getElementById(pluginId);
 
       if (!existingScript) {
@@ -77,9 +77,13 @@ export class Plugin {
         // Therefore, any subsequent call to loadScript has to actually wait for the script.onload to
         // be calledback. Otherwise, even if 'existingScript' says that it's been loaded,
         // it's not 'yet' true, because the js file might still be being downloaded and window.geoviewPlugins[pluginId] still undefined.
-        whenThisThen(() => window.geoviewPlugins?.[pluginId]).then(() => {
-          resolve(window.geoviewPlugins[pluginId]);
-        });
+        whenThisThen(() => window.geoviewPlugins?.[pluginId])
+          .then(() => {
+            resolve(window.geoviewPlugins[pluginId]);
+          })
+          .catch((error) => {
+            reject(error);
+          });
       }
     });
   };
