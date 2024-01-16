@@ -75,6 +75,9 @@ export type TypeLayerData = {
   layerPath: string;
   layerName: string;
   layerStatus: TypeLayerStatus;
+  // When property features is undefined, we are waiting for the query result.
+  // when Array.isArray(features) is true, the features property contains the query result.
+  // when property features is null, the query ended with an error.
   features: TypeArrayOfFeatureInfoEntries;
 };
 export type TypeArrayOfLayerData = TypeLayerData[];

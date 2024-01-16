@@ -13,13 +13,13 @@
       },
       "geometry": {
         "type": "Point",
-        "coordinates": [-50, 100]
+        "coordinates": [-90, 60]
       }
     },
     {
       "type": "Feature",
       "properties": {
-        "Red": 200,
+        "Red": 201,
         "Green": 54,
         "Blue": 32.3,
         "Yellow": 5.43,
@@ -28,7 +28,7 @@
       },
       "geometry": {
         "type": "Point",
-        "coordinates": [-200, 78]
+        "coordinates": [-200, 76]
       }
     },
     {
