@@ -217,7 +217,7 @@ export class FeatureInfoLayerSet {
   enableClickListener(layerPath?: string) {
     if (layerPath) this.disableClickOnLayer[layerPath] = false;
     else
-      Object.keys((key: string) => {
+      Object.keys(this.disableClickOnLayer).forEach((key: string) => {
         this.disableClickOnLayer[key] = false;
       });
   }
@@ -231,7 +231,7 @@ export class FeatureInfoLayerSet {
   disableClickListener(layerPath?: string) {
     if (layerPath) this.disableClickOnLayer[layerPath] = false;
     else
-      Object.keys((key: string) => {
+      Object.keys(this.disableClickOnLayer).forEach((key: string) => {
         this.disableClickOnLayer[key] = true;
       });
   }
