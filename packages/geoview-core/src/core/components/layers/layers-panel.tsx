@@ -2,7 +2,7 @@ import { useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '@mui/material/styles';
 import { styled } from '@mui/material';
-import { CloseButton, LayerTitle, ResponsiveGrid } from '../common';
+import { CloseButton, LayerTitle, ResponsiveGrid, useFooterPanelHeight } from '../common';
 import { Box, DeleteOutlineIcon, IconButton, Paper } from '@/ui';
 import { getSxClasses } from './layers-style';
 import { useLayersDisplayState, useSelectedLayer } from '@/core/stores/store-interface-and-intial-values/layer-state';
@@ -38,6 +38,9 @@ export function LayersPanel() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   */
+
+  // Custom hook for calculating the height of footer panel
+  const { leftPanelRef, rightPanelRef, panelTitleRef } = useFooterPanelHeight({ footerPanelTab: 'layers' });
 
   const leftPanel = () => {
     return (
@@ -102,7 +105,7 @@ export function LayersPanel() {
 
   return (
     <Box sx={sxClasses.layersPanelContainer}>
-      <ResponsiveGrid.Root>
+      <ResponsiveGrid.Root sx={{ pt: 8, pb: 8 }} ref={panelTitleRef}>
         <ResponsiveGrid.Left isEnlargeDataTable={false} isLayersPanelVisible={isLayersListPanelVisible}>
           <LayerTitle>{t('general.layers')}</LayerTitle>
         </ResponsiveGrid.Left>
@@ -118,12 +121,12 @@ export function LayersPanel() {
           </Box>
         </ResponsiveGrid.Right>
       </ResponsiveGrid.Root>
-      <ResponsiveGrid.Root sx={{ mt: 8 }}>
-        <ResponsiveGrid.Left isEnlargeDataTable={false} isLayersPanelVisible={isLayersListPanelVisible}>
+      <ResponsiveGrid.Root>
+        <ResponsiveGrid.Left isEnlargeDataTable={false} isLayersPanelVisible={isLayersListPanelVisible} ref={leftPanelRef}>
           {leftPanel()}
         </ResponsiveGrid.Left>
 
-        <ResponsiveGrid.Right isEnlargeDataTable={false} isLayersPanelVisible={isLayersListPanelVisible}>
+        <ResponsiveGrid.Right isEnlargeDataTable={false} isLayersPanelVisible={isLayersListPanelVisible} ref={rightPanelRef}>
           {rightPanel()}
         </ResponsiveGrid.Right>
       </ResponsiveGrid.Root>

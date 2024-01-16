@@ -68,6 +68,7 @@ interface MapDataTableProps {
   layerId: string;
   mapId: string;
   layerKey: string;
+  tableHeight: number;
 }
 
 const DATE_FILTER: Record<string, string> = {
@@ -112,10 +113,11 @@ const NUMBER_FILTER: Record<string, string> = {
  * @param {string} layerId id of the layer
  * @param {string} mapId id of the map.
  * @param {string} layerKey key of the layer.
+ * @param {number} tableHeight Height of the container which contains all rows.
  * @return {ReactElement} Data table as react element.
  */
 
-function MapDataTable({ data, layerId, mapId, layerKey }: MapDataTableProps) {
+function MapDataTable({ data, layerId, mapId, layerKey, tableHeight = 600 }: MapDataTableProps) {
   const { t } = useTranslation();
 
   const sxtheme = useTheme();
@@ -514,7 +516,7 @@ function MapDataTable({ data, layerId, mapId, layerKey }: MapDataTableProps) {
         enablePagination={false}
         enablePinning
         enableRowVirtualization
-        muiTableContainerProps={{ sx: { maxHeight: '600px' } }}
+        muiTableContainerProps={{ sx: { maxHeight: `${tableHeight - 60}px` } }}
         rowVirtualizerInstanceRef={rowVirtualizerInstanceRef}
         rowVirtualizerProps={{ overscan: 5 }}
         columnVirtualizerProps={{ overscan: 2 }}

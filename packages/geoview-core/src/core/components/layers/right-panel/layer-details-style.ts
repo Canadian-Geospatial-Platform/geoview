@@ -11,8 +11,7 @@ export const getSxClasses = (theme: Theme) => ({
     borderWidth: '2px',
     borderStyle: 'solid',
     padding: '20px',
-    overflow: 'auto',
-    maxHeight: '700px',
+    overflowY: 'auto',
   },
   buttonDescriptionContainer: {
     display: 'flex',

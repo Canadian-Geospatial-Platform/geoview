@@ -14,6 +14,7 @@ import { useGeoViewMapId } from '@/app';
  */
 export default function ExportModal(): JSX.Element {
   const mapId = useGeoViewMapId();
+  const mapElem = document.getElementById(`shell-${mapId}`);
 
   const { t } = useTranslation();
 
@@ -27,7 +28,7 @@ export default function ExportModal(): JSX.Element {
   }) as MouseEventHandler<HTMLButtonElement>;
 
   return (
-    <Dialog open={activeModalId === 'export'} onClose={closeModal}>
+    <Dialog open={activeModalId === 'export'} onClose={closeModal} container={mapElem}>
       <DialogTitle>{t('exportModal.title')}</DialogTitle>
       <DialogActions>
         <Button onClick={closeModal} type="text" size="small" autoFocus>

@@ -44,6 +44,7 @@ export {
   HighlightOutlined as HighlightOutlinedIcon,
   Home as HomeIcon,
   HubOutlined as HubOutlinedIcon,
+  Height as HeightIcon,
   ImportExport as ReorderIcon,
   Info as InfoIcon,
   InfoOutlined as InfoOutlinedIcon,

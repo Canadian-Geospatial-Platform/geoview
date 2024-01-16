@@ -19,7 +19,7 @@ import {
   useMapVisibleLayers,
 } from '@/core/stores';
 
-import { ResponsiveGrid, EnlargeButton, CloseButton, LayerList, LayerListEntry, LayerTitle } from '../common';
+import { ResponsiveGrid, EnlargeButton, CloseButton, LayerList, LayerListEntry, LayerTitle, useFooterPanelHeight } from '../common';
 
 export interface LayersDataType extends MapDataTableDataProps, GroupLayers {}
 
@@ -52,6 +52,9 @@ export function Datapanel({ layerData, mapId, language }: DatapanelProps) {
   const rowsFiltered = useDataTableStoreRowsFiltered();
   const visibleLayers = useMapVisibleLayers();
   const { setSelectedLayerIndex, setIsEnlargeDataTable, setLayersData } = useDataTableStoreActions();
+
+  // Custom hook for calculating the height of footer panel
+  const { leftPanelRef, rightPanelRef, panelTitleRef, tableHeight } = useFooterPanelHeight({ footerPanelTab: 'datatable' });
 
   const handleLayerChange = useCallback((_layer: LayerListEntry, index: number) => {
     setSelectedLayerIndex(index);
@@ -141,7 +144,7 @@ export function Datapanel({ layerData, mapId, language }: DatapanelProps) {
 
   return (
     <Box sx={sxClasses.dataPanel}>
-      <ResponsiveGrid.Root>
+      <ResponsiveGrid.Root sx={{ pt: 8, pb: 8 }} ref={panelTitleRef}>
         <ResponsiveGrid.Left isLayersPanelVisible={isLayersPanelVisible} isEnlargeDataTable={isEnlargeDataTable}>
           <LayerTitle>{t('general.layers')}</LayerTitle>
         </ResponsiveGrid.Left>
@@ -163,15 +166,11 @@ export function Datapanel({ layerData, mapId, language }: DatapanelProps) {
           </Box>
         </ResponsiveGrid.Right>
       </ResponsiveGrid.Root>
-      <ResponsiveGrid.Root sx={{ mt: 8 }}>
-        <ResponsiveGrid.Left isLayersPanelVisible={isLayersPanelVisible} isEnlargeDataTable={isEnlargeDataTable}>
+      <ResponsiveGrid.Root>
+        <ResponsiveGrid.Left isLayersPanelVisible={isLayersPanelVisible} isEnlargeDataTable={isEnlargeDataTable} ref={leftPanelRef}>
           {renderList()}
         </ResponsiveGrid.Left>
-        <ResponsiveGrid.Right
-          isEnlargeDataTable={isEnlargeDataTable}
-          isLayersPanelVisible={isLayersPanelVisible}
-          sxProps={{ minHeight: '250px' }}
-        >
+        <ResponsiveGrid.Right isEnlargeDataTable={isEnlargeDataTable} isLayersPanelVisible={isLayersPanelVisible} ref={rightPanelRef}>
           <CircularProgress
             isLoaded={!isLoading}
             sx={{
@@ -185,7 +184,13 @@ export function Datapanel({ layerData, mapId, language }: DatapanelProps) {
                 {index === selectedLayerIndex ? (
                   <Box>
                     {orderedLayerData[index]?.features.length ? (
-                      <MapDataTable data={orderedLayerData[index]} layerId={layerId} mapId={mapId} layerKey={layerKey} />
+                      <MapDataTable
+                        data={orderedLayerData[index]}
+                        layerId={layerId}
+                        mapId={mapId}
+                        layerKey={layerKey}
+                        tableHeight={tableHeight}
+                      />
                     ) : (
                       'No Data'
                     )}

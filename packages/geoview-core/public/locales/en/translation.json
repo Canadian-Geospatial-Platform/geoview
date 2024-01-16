@@ -190,6 +190,7 @@
   },
   "footerTabsContainer": {
     "focusToMap": "Focus to map",
-    "focusToFooter": "Focus to footer"
+    "focusToFooter": "Focus to footer",
+    "resizeTooltip": "Resize"
   }
 }

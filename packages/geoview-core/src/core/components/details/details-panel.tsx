@@ -26,7 +26,7 @@ import {
   useDetailsStoreLayerDataArray,
   useDetailsStoreSelectedLayerPath,
 } from '@/core/stores';
-import { ResponsiveGrid, CloseButton, EnlargeButton, LayerList, LayerTitle } from '../common';
+import { ResponsiveGrid, CloseButton, EnlargeButton, LayerList, LayerTitle, useFooterPanelHeight } from '../common';
 import { useUIStoreActions } from '@/app';
 
 /**
@@ -55,6 +55,9 @@ export function Detailspanel(): JSX.Element {
   const [currentFeatureIndex, setCurrentFeatureIndex] = useState<number>(0);
   const [isLayersPanelVisible, setIsLayersPanelVisible] = useState(false);
   const [isEnlargeDataTable, setIsEnlargeDataTable] = useState(false);
+
+  // Custom hook for calculating the height of footer panel
+  const { leftPanelRef, rightPanelRef, panelTitleRef } = useFooterPanelHeight({ footerPanelTab: 'details' });
 
   /**
    * Find the layer path index which is selected in previous layerData based on layerPath and have more than Zero features.
@@ -181,7 +184,7 @@ export function Detailspanel(): JSX.Element {
     <Box sx={sxClasses.detailsContainer}>
       {layerDataInfo && (
         <>
-          <ResponsiveGrid.Root>
+          <ResponsiveGrid.Root sx={{ pt: 8, pb: 8 }} ref={panelTitleRef}>
             <ResponsiveGrid.Left isEnlargeDataTable={isEnlargeDataTable} isLayersPanelVisible={isLayersPanelVisible}>
               <LayerTitle>{t('general.layers')}</LayerTitle>
             </ResponsiveGrid.Left>
@@ -203,11 +206,11 @@ export function Detailspanel(): JSX.Element {
               </Box>
             </ResponsiveGrid.Right>
           </ResponsiveGrid.Root>
-          <ResponsiveGrid.Root sx={{ mt: 8 }}>
-            <ResponsiveGrid.Left isEnlargeDataTable={isEnlargeDataTable} isLayersPanelVisible={isLayersPanelVisible}>
+          <ResponsiveGrid.Root>
+            <ResponsiveGrid.Left isEnlargeDataTable={isEnlargeDataTable} isLayersPanelVisible={isLayersPanelVisible} ref={leftPanelRef}>
               {renderLayerList()}
             </ResponsiveGrid.Left>
-            <ResponsiveGrid.Right isEnlargeDataTable={isEnlargeDataTable} isLayersPanelVisible={isLayersPanelVisible}>
+            <ResponsiveGrid.Right isEnlargeDataTable={isEnlargeDataTable} isLayersPanelVisible={isLayersPanelVisible} ref={rightPanelRef}>
               {!isLayersHasFeatures() && (
                 <Paper sx={{ padding: '2rem' }}>
                   <Typography variant="h3" gutterBottom sx={sxClasses.detailsInstructionsTitle}>

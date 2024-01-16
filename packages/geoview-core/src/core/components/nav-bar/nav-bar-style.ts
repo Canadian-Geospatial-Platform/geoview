@@ -4,8 +4,8 @@ export const getSxClasses = (theme: Theme) => ({
   navBarRef: {
     position: 'absolute',
     right: theme.spacing(5),
-    height: '600px',
-    maxHeight: 'calc( 100% - 200px)',
+    // height: '600px',
+    // maxHeight: 'calc( 100% - 200px)',
     display: 'flex',
     flexDirection: 'row',
     marginRight: 0,
