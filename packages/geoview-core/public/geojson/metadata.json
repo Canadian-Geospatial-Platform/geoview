@@ -6,7 +6,7 @@
       "layerName": { "en": "Polygons" },
       "source": {
         "featureInfo": {
-          "queryable": "false",
+          "queryable": true,
           "nameField": { "en": "Province", "fr": "Province" },
           "outfields": { "en": "Province,creationDate,myImages", "fr": "Province,creationDate,myImages" },
           "fieldTypes": "string,date",
@@ -76,7 +76,7 @@
       "layerName": { "en": "Lines" },
       "source": {
         "featureInfo": {
-          "queryable": "true",
+          "queryable": false,
           "nameField": { "en": "Road_Number", "fr": "Road_Number" },
           "outfields": { "en": "Road_Number,Province,creationDate", "fr": "Road_Number,Province,creationDate" },
           "fieldTypes": "number,string,date",
@@ -104,7 +104,7 @@
       "layerName": { "en": "Icons" },
       "source": {
         "featureInfo": {
-          "queryable": "true",
+          "queryable": true,
           "nameField": { "en": "data", "fr": "data" },
           "outfields": { "en": "data,label,creationDate", "fr": "data,label,creationDate" },
           "fieldTypes": "string,string,date",
@@ -132,7 +132,7 @@
       "layerName": { "en": "Points" },
       "source": {
         "featureInfo": {
-          "queryable": "true",
+          "queryable": false,
           "nameField": { "en": "Red", "fr": "Red" },
           "outfields": { "en": "Red,Green,Blue,Yellow,Orange,creationDate", "fr": "Red,Green,Blue,Yellow,Orange,creationDate" },
           "fieldTypes": "number,number,number,number,number,date",
@@ -158,7 +158,7 @@
       "layerName": { "en": "Points_1" },
       "source": {
         "featureInfo": {
-          "queryable": "true",
+          "queryable": true,
           "nameField": { "en": "Red", "fr": "Red" },
           "outfields": { "en": "Red,Green,Blue,Yellow,Orange,creationDate", "fr": "Red,Green,Blue,Yellow,Orange,creationDate" },
           "fieldTypes": "number,number,number,number,number,date",
@@ -184,7 +184,7 @@
       "layerName": { "en": "Points_1" },
       "source": {
         "featureInfo": {
-          "queryable": "true",
+          "queryable": true,
           "nameField": { "en": "Red", "fr": "Red" },
           "outfields": { "en": "Red,Green,Blue,Yellow,Orange,creationDate", "fr": "Red,Green,Blue,Yellow,Orange,creationDate" },
           "fieldTypes": "number,number,number,number,number,date",
@@ -210,7 +210,7 @@
       "layerName": { "en": "Points_1" },
       "source": {
         "featureInfo": {
-          "queryable": "true",
+          "queryable": false,
           "nameField": { "en": "Red", "fr": "Red" },
           "outfields": { "en": "Red,Green,Blue,Yellow,Orange,creationDate", "fr": "Red,Green,Blue,Yellow,Orange,creationDate" },
           "fieldTypes": "number,number,number,number,number,date",

@@ -1,16 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { EVENT_NAMES } from '@/api/events/event-types';
-import {
-  GetLegendsPayload,
-  payloadIsLegendInfo,
-  TypeLegendResultSets,
-  payloadIsLayerSetUpdated,
-  TypeFeatureInfoResultSets,
-} from '@/api/events/payloads';
+import { GetLegendsPayload, payloadIsLegendInfo, TypeLegendResultSets, payloadIsLayerSetUpdated } from '@/api/events/payloads';
 import { api } from '@/app';
 import { LayerSet } from './layer-set';
 import { LegendEventProcessor } from '@/api/event-processors/event-processor-children/legend-event-processor';
-import { FeatureInfoEventProcessor } from '@/api/event-processors/event-processor-children/feature-info-event-processor';
 
 /** *****************************************************************************************************************************
  * A class to hold a set of layers associated with an array of TypeLegend. When this class is instantiated, all layers already
@@ -80,14 +73,6 @@ export class LegendsLayerSet {
           if (layerPath in this.resultSets) {
             this.resultSets[layerPath].data = legendInfo;
             LegendEventProcessor.propagateLegendToStore(this.mapId, layerPath, this.resultSets[layerPath]);
-            // Update feature info store to display list of layers when details tab is opened.
-            FeatureInfoEventProcessor.propagateFeatureInfoToStore(
-              this.mapId,
-              layerPath,
-              'click',
-              this.resultSets as TypeFeatureInfoResultSets,
-              true
-            );
             api.event.emit(
               GetLegendsPayload.createLegendsLayersetUpdatedPayload(`${this.mapId}/LegendsLayerSet`, layerPath, this.resultSets)
             );
