@@ -51,7 +51,12 @@
   },
   "theme": "dark",
   "components": ["north-arrow", "overview-map"],
-  "corePackages": ["footer-panel"],
+  "footerTabs": {
+    "tabs": {
+      "core": ["legend", "layers", "details"]
+    }
+  },
+  "corePackages": [],
   "externalPackages": [],
   "suportedLanguages": ["en"]
 }

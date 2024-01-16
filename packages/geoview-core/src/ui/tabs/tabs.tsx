@@ -12,7 +12,6 @@ import { TabPanel } from './tab-panel';
 import { useUIActiveTrapGeoView, useUIStoreActions } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import { getSxClasses } from './tabs-style';
 
-type TypeChildren = React.ElementType;
 /**
  * Type used for properties of each tab
  */
@@ -20,7 +19,7 @@ export type TypeTabs = {
   id: string;
   value: number;
   label: string;
-  content: TypeChildren | string;
+  content?: JSX.Element | string;
   icon?: JSX.Element;
 };
 
@@ -136,10 +135,9 @@ export function Tabs(props: TypeTabsProps): JSX.Element {
         }}
       >
         {tabs.map((tab, index) => {
-          const TabContent = tab.content as React.ElementType;
           return (
             <TabPanel key={index} value={value} index={index}>
-              {typeof tab.content === 'string' ? <HtmlToReact htmlContent={tab.content} /> : <TabContent />}
+              {typeof tab.content === 'string' ? <HtmlToReact htmlContent={tab.content} /> : tab.content}
             </TabPanel>
           );
         })}

@@ -1,5 +1,8 @@
+/* eslint-disable no-param-reassign */
 import { MutableRefObject, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+
 import { useTheme } from '@mui/material/styles';
+
 import { Box, IconButton, Tabs, TypeTabs, MoveDownRoundedIcon, MoveUpRoundedIcon } from '@/ui';
 import { api, useGeoViewMapId } from '@/app';
 import { EVENT_NAMES } from '@/api/events/event-types';
@@ -12,6 +15,16 @@ import {
   useUIFooterPanelResizeValues,
   useUIStoreActions,
 } from '@/core/stores/store-interface-and-intial-values/ui-state';
+
+import { toJsonObject, TypeJsonObject, TypeJsonValue } from '@/core/types/global-types';
+import { AbstractPlugin } from '@/api/plugin/abstract-plugin';
+import { useGeoViewConfig } from '@/core/stores/geoview-store';
+
+// default tabs icon and class
+import { HubOutlinedIcon, InfoOutlinedIcon, LayersOutlinedIcon, StorageIcon } from '@/ui/icons';
+import { Legend } from '@/core/components/legend/legend';
+import { LayersPanel } from '@/core/components/layers/layers-panel';
+import { DetailsPanel } from '@/core/components/details/details-panel';
 
 interface ShellContainerCssProperties {
   mapVisibility: string;
@@ -34,9 +47,10 @@ export function FooterTabs(): JSX.Element | null {
   // internal state
   const [selectedTab, setSelectedTab] = useState<number | undefined>();
   const [footerTabs, setFooterTabs] = useState<TypeTabs[]>([]);
-  const [isCollapsed, setIsCollapsed] = useState(true);
+  const [isCollapsed, setIsCollapsed] = useState(false);
 
   const [isFocusToMap, setIsFocusToMap] = useState<boolean>(true);
+  const [table, setTable] = useState<JSX.Element | undefined>();
 
   const tabsContainerRef = useRef<HTMLDivElement>();
   const mapContainerRef = useRef<HTMLElement | null>(null);
@@ -49,6 +63,9 @@ export function FooterTabs(): JSX.Element | null {
   const footerPanelResizeValue = useUIFooterPanelResizeValue();
   const footerPanelResizeValues = useUIFooterPanelResizeValues();
   const { setFooterPanelResizeValue } = useUIStoreActions();
+
+  // get store config for footer tabs to add
+  const footerTabsConfig = useGeoViewConfig()?.footerTabs;
 
   /**
    * Calculate resize values from popover values defined in store.
@@ -147,10 +164,6 @@ export function FooterTabs(): JSX.Element | null {
     }
   }, [isCollapsed, mapDiv, origHeight]);
 
-  // TODO: need a refactor to use proper sx classes and style.
-  // TODO: maybe this component should all be in the package-footer-panel.
-  // !https://github.com/Canadian-Geospatial-Platform/geoview/issues/1136
-
   /**
    * Handle a collapse, expand event for the tabs component
    */
@@ -235,6 +248,93 @@ export function FooterTabs(): JSX.Element | null {
     }
   }, [isCollapsed, isMapFullScreen]);
 
+  /**
+   * Create default tabs from configuration parameters
+   */
+  useEffect(() => {
+    if (footerTabsConfig && footerTabsConfig.tabs.core.includes('legend')) {
+      // create new tab and add the Layers component to the footer tab
+      const legendTab = {
+        id: 'legend',
+        value: 0,
+        label: 'legend.title',
+        icon: <HubOutlinedIcon />,
+      };
+      setFooterTabs((prevArray) => [...prevArray, legendTab as TypeTabs]);
+    }
+
+    if (footerTabsConfig && footerTabsConfig.tabs.core.includes('layers')) {
+      // create new tab and add the Layers component to the footer tab
+      const layersTab = {
+        id: 'layers',
+        value: 1,
+        label: 'layers.title',
+        icon: <LayersOutlinedIcon />,
+      };
+      setFooterTabs((prevArray) => [...prevArray, layersTab as TypeTabs]);
+    }
+
+    // create new tab and add the Details component to the footer tab
+    if (footerTabsConfig && footerTabsConfig.tabs.core.includes('details')) {
+      const detailsTab = {
+        id: 'details',
+        value: 2,
+        label: 'details.title',
+        icon: <InfoOutlinedIcon />,
+      };
+      setFooterTabs((prevArray) => [...prevArray, detailsTab as TypeTabs]);
+    }
+
+    if (footerTabsConfig && footerTabsConfig.tabs.core.includes('data-table')) {
+      // create new tab and add the Data Table component to the footer tab
+      api.maps[mapId].dataTable.createDataPanel().then((newTable) => {
+        setTable(newTable);
+        const tableTab = {
+          id: 'data-table',
+          value: 3,
+          label: 'dataTable.title',
+          icon: <StorageIcon />,
+        };
+        setFooterTabs((prevArray) => [...prevArray, tableTab as TypeTabs]);
+      });
+    }
+
+    // Packages tab
+    if (footerTabsConfig && footerTabsConfig.tabs.core.includes('time-slider')) {
+      // create a new tab by loading the time-slider plugin
+      api.plugin
+        .loadScript('time-slider')
+        .then((constructor: AbstractPlugin | ((pluginId: string, props: TypeJsonObject) => TypeJsonValue)) => {
+          api.plugin.addPlugin(
+            'time-slider',
+            mapId,
+            constructor,
+            toJsonObject({
+              mapId,
+            })
+          );
+        });
+    }
+
+    if (footerTabsConfig && footerTabsConfig.tabs.core.includes('geochart')) {
+      // create a new tab by loading the geo chart plugin
+      api.plugin
+        .loadScript('geochart')
+        .then((constructor: AbstractPlugin | ((pluginId: string, props: TypeJsonObject) => TypeJsonValue)) => {
+          api.plugin.addPlugin(
+            'geochart',
+            mapId,
+            constructor,
+            toJsonObject({
+              mapId,
+            })
+          );
+        });
+    }
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   // Handle focus using dynamic focus button
   const handleDynamicFocus = () => {
     const mapIdDiv = document.getElementById(mapId);
@@ -263,12 +363,12 @@ export function FooterTabs(): JSX.Element | null {
     }
   };
 
-  return api.maps[mapId].footerTabs.tabs.length > 0 ? (
+  return footerTabs.length > 0 ? (
     <Box
       ref={tabsContainerRef as MutableRefObject<HTMLDivElement>}
       sx={sxClasses.tabsContainer}
       className="tabsContainer"
-      id="tabsContainer"
+      id={`tabsContainer-${mapId}`}
     >
       <Tabs
         isCollapsed={isCollapsed}
@@ -276,6 +376,11 @@ export function FooterTabs(): JSX.Element | null {
         selectedTab={selectedTab}
         tabsProps={{ variant: 'scrollable' }}
         tabs={footerTabs.map((tab) => {
+          if (tab.id === 'legend') tab.content = <Legend />;
+          if (tab.id === 'layers') tab.content = <LayersPanel />;
+          if (tab.id === 'details') tab.content = <DetailsPanel />;
+          if (tab.id === 'table') tab.content = table;
+
           return {
             ...tab,
           };

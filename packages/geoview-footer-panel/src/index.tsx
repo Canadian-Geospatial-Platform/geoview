@@ -1,12 +1,12 @@
 import { Cast, toJsonObject, TypeJsonObject, AnySchemaObject, TypeJsonValue } from 'geoview-core';
 import { AbstractPlugin } from 'geoview-core/src/api/plugin/abstract-plugin';
-import { HubOutlinedIcon, InfoOutlinedIcon, LayersOutlinedIcon, StorageIcon } from 'geoview-core/src/ui';
+// import { HubOutlinedIcon, InfoOutlinedIcon, LayersOutlinedIcon, StorageIcon } from 'geoview-core/src/ui';
 
 import schema from '../schema.json';
 import defaultConfig from '../default-config-footer-panel.json';
-import { FooterPanelLegendItem } from './footer-panel-legend-item';
-import { DataTable } from './data-table';
-import { Layers } from './layers';
+// import { FooterPanelLegendItem } from './footer-panel-legend-item';
+// import { DataTable } from './data-table';
+// import { Layers } from './layers';
 
 type CustomTabs = {
   id: string;
@@ -64,71 +64,71 @@ class FooterPanelPlugin extends AbstractPlugin {
   onAdd(): void {
     const defaultTabs = (this.configObj?.tabs.defaultTabs as Array<string>) || [];
     let tabsCounter = 0;
-    if (defaultTabs.includes('legend')) {
-      // create new tab and add the LegendComponent to the footer tab
-      this.map().footerTabs.createFooterTab({
-        id: 'legend',
-        value: tabsCounter,
-        label: 'footerPanel.legend',
-        content: () => <FooterPanelLegendItem mapId={this.pluginProps.mapId} />,
-        icon: <HubOutlinedIcon />,
-      });
-      tabsCounter++;
-    }
+    // if (defaultTabs.includes('legend')) {
+    //   // create new tab and add the LegendComponent to the footer tab
+    //   this.map().footerTabs.createFooterTab({
+    //     id: 'legend',
+    //     value: tabsCounter,
+    //     label: 'footerPanel.legend',
+    //     content: () => <FooterPanelLegendItem mapId={this.pluginProps.mapId} />,
+    //     icon: <HubOutlinedIcon />,
+    //   });
+    //   tabsCounter++;
+    // }
 
-    if (defaultTabs.includes('layers')) {
-      // create new tab and add the LayersComponent to the footer tab
-      this.map().footerTabs.createFooterTab({
-        id: 'layers',
-        value: tabsCounter,
-        label: 'footerPanel.layers',
-        content: () => <Layers mapId={this.pluginProps.mapId} />,
-        icon: <LayersOutlinedIcon />,
-      });
-      tabsCounter++;
-    }
+    // if (defaultTabs.includes('layers')) {
+    //   // create new tab and add the LayersComponent to the footer tab
+    //   this.map().footerTabs.createFooterTab({
+    //     id: 'layers',
+    //     value: tabsCounter,
+    //     label: 'footerPanel.layers',
+    //     content: () => <Layers mapId={this.pluginProps.mapId} />,
+    //     icon: <LayersOutlinedIcon />,
+    //   });
+    //   tabsCounter++;
+    // }
 
-    // create the listener to return the details
-    if (defaultTabs.includes('details')) {
-      // create new tab and add the DetailComponent to the footer tab
-      const detailsTabValue = tabsCounter;
-      this.map().footerTabs.createFooterTab({
-        id: 'details',
-        value: detailsTabValue,
-        label: 'footerPanel.details',
-        content: () => this.map()?.details.createDetails(this.pluginProps.mapId),
-        icon: <InfoOutlinedIcon />,
-      });
-      tabsCounter++;
-    }
+    // // create the listener to return the details
+    // if (defaultTabs.includes('details')) {
+    //   // create new tab and add the DetailComponent to the footer tab
+    //   const detailsTabValue = tabsCounter;
+    //   this.map().footerTabs.createFooterTab({
+    //     id: 'details',
+    //     value: detailsTabValue,
+    //     label: 'footerPanel.details',
+    //     content: () => this.map()?.details.createDetails(this.pluginProps.mapId),
+    //     icon: <InfoOutlinedIcon />,
+    //   });
+    //   tabsCounter++;
+    // }
 
-    if (defaultTabs.includes('data-table')) {
-      /// create new tab and add the DataTable Component to the footer tab
-      this.map().footerTabs.createFooterTab({
-        id: 'data-table',
-        value: tabsCounter,
-        label: 'footerPanel.dataTable',
-        content: () => <DataTable mapId={this.pluginProps.mapId} />,
-        icon: <StorageIcon />,
-      });
-      tabsCounter++;
-    }
+    // if (defaultTabs.includes('data-table')) {
+    //   /// create new tab and add the DataTable Component to the footer tab
+    //   this.map().footerTabs.createFooterTab({
+    //     id: 'data-table',
+    //     value: tabsCounter,
+    //     label: 'footerPanel.dataTable',
+    //     content: () => <DataTable mapId={this.pluginProps.mapId} />,
+    //     icon: <StorageIcon />,
+    //   });
+    //   tabsCounter++;
+    // }
 
-    if (defaultTabs.includes('time-slider')) {
-      /// create a new tab by loading the time-slider plugin
-      this.api.plugin
-        .loadScript('time-slider')
-        .then((constructor: AbstractPlugin | ((pluginId: string, props: TypeJsonObject) => TypeJsonValue)) => {
-          this.api.plugin.addPlugin(
-            'time-slider',
-            this.pluginProps.mapId,
-            constructor,
-            toJsonObject({
-              mapId: this.pluginProps.mapId,
-            })
-          );
-        });
-    }
+    // if (defaultTabs.includes('time-slider')) {
+    //   /// create a new tab by loading the time-slider plugin
+    //   this.api.plugin
+    //     .loadScript('time-slider')
+    //     .then((constructor: AbstractPlugin | ((pluginId: string, props: TypeJsonObject) => TypeJsonValue)) => {
+    //       this.api.plugin.addPlugin(
+    //         'time-slider',
+    //         this.pluginProps.mapId,
+    //         constructor,
+    //         toJsonObject({
+    //           mapId: this.pluginProps.mapId,
+    //         })
+    //       );
+    //     });
+    // }
 
     if (defaultTabs.includes('geoChart')) {
       // create a new tab by loading the geo chart plugin

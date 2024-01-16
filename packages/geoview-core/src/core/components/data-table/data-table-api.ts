@@ -42,7 +42,6 @@ export class DataTableApi {
    * @param {string[]} grouplayerKeys list of keys already exists.
    * @returns {string[]} array of layer keys
    */
-
   getGroupKeys = (listOfLayerEntryConfig: TypeListOfLayerEntryConfig, parentLayerId: string, groupLayers: GroupLayers[]): GroupLayers[] => {
     listOfLayerEntryConfig.forEach((LayerEntryConfig) => {
       if (
@@ -69,7 +68,6 @@ export class DataTableApi {
    * @param {TypeArrayOfFeatureInfoEntries} arrayOfFeatureInfoEntries the properties of the data table to be created
    * @return {TypeJsonArray} the data table rows
    */
-
   buildFeatureRows = (arrayOfFeatureInfoEntries: TypeArrayOfFeatureInfoEntries) => {
     const features = arrayOfFeatureInfoEntries!.map((feature) => {
       return {
@@ -103,9 +101,9 @@ export class DataTableApi {
   /**
    * Create data panel for various layers.
    *
-   * @returns {Promise<ReactElement | null>} Promise of ReactElement.
+   * @returns {Promise<ReactElement | undefined>} Promise of ReactElement.
    */
-  createDataPanel = async (): Promise<ReactElement | null> => {
+  createDataPanel = async (): Promise<ReactElement | undefined> => {
     let groupLayers: GroupLayers[] = [];
     // TODO: use Store event processor
     const language = AppEventProcessor.getDisplayLanguage(this.mapId);
@@ -143,6 +141,6 @@ export class DataTableApi {
       }
     });
 
-    return createElement(Datapanel, { layerData: filteredData, mapId: this.mapId, language }, null);
+    return createElement(Datapanel, { layerData: filteredData, mapId: this.mapId, language }, undefined);
   };
 }

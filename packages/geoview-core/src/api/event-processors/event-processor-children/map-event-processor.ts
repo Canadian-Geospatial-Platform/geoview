@@ -227,6 +227,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
 
     // trigger the creation of feature info layer set and legend layer set
     // We always trigger creation because outside package may rely on them
+    // ? duplicate of code in app-start, evaluate if there is a needed refactor for layer set.
     api.getFeatureInfoLayerSet(mapId);
     api.getLegendsLayerSet(mapId);
 
