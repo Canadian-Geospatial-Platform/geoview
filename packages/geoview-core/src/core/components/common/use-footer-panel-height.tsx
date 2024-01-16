@@ -4,7 +4,7 @@ import { useUIActiveFooterTabId, useUIFooterPanelResizeValue } from '@/core/stor
 import { useDetailsStoreLayerDataArray } from '@/core/stores/store-interface-and-intial-values/details-state';
 
 interface UseFooterPanelHeightType {
-  footerPanelTab: 'layers' | 'details' | 'datatable' | 'legend';
+  footerPanelTab: 'layers' | 'details' | 'datatable' | 'legend' | 'default';
 }
 
 /**
@@ -27,7 +27,7 @@ export function useFooterPanelHeight({ footerPanelTab }: UseFooterPanelHeightTyp
   useEffect(() => {
     const defaultHeight = 700;
 
-    if (leftPanelRef.current && isMapFullScreen && activeFooterTabId === footerPanelTab) {
+    if (leftPanelRef.current && isMapFullScreen && (activeFooterTabId === footerPanelTab || footerPanelTab === 'default')) {
       const panelTitleHeight = panelTitleRef.current?.clientHeight ?? 0;
       const tabsContainer = document.getElementById('tabsContainer')!;
       const firstChild = tabsContainer.firstElementChild?.firstElementChild;
@@ -45,7 +45,7 @@ export function useFooterPanelHeight({ footerPanelTab }: UseFooterPanelHeightTyp
         let rightPanel;
         if (footerPanelTab === 'details') {
           rightPanel = (rightPanelRef.current?.firstElementChild ?? null) as HTMLElement | null;
-        } else if (footerPanelTab === 'layers') {
+        } else if (footerPanelTab === 'layers' || footerPanelTab === 'default') {
           rightPanel = (rightPanelRef.current?.firstElementChild?.firstElementChild ?? null) as HTMLElement | null;
         }
         if (rightPanel) {
@@ -65,7 +65,7 @@ export function useFooterPanelHeight({ footerPanelTab }: UseFooterPanelHeightTyp
         let rightPanel;
         if (footerPanelTab === 'details') {
           rightPanel = (rightPanelRef.current?.firstElementChild ?? null) as HTMLElement | null;
-        } else {
+        } else if (footerPanelTab === 'layers' || footerPanelTab === 'default') {
           rightPanel = (rightPanelRef.current?.firstElementChild?.firstElementChild ?? null) as HTMLElement | null;
         }
 
