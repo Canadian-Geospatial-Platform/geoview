@@ -1012,19 +1012,19 @@ export abstract class AbstractGeoViewLayer {
     checkFrequency?: number
   ): Promise<TypeLayerEntryConfig | null> {
     // Redirects
-    const lyr = this.getLayerConfig(layerPath);
+    const layer = this.getLayerConfig(layerPath);
 
     // If layer was found
-    if (lyr) {
+    if (layer) {
       // Check if not waiting and returning immediately
-      if (!mustBeLoaded) return Promise.resolve(lyr);
+      if (!mustBeLoaded) return Promise.resolve(layer);
 
       try {
         // Waiting for the loaded status, possibly throwing exception if that's not happening
-        await this.waitForLoadedStatus(lyr as TypeBaseLayerEntryConfig, timeout, checkFrequency);
-        return lyr;
+        await this.waitForLoadedStatus(layer as TypeBaseLayerEntryConfig, timeout, checkFrequency);
+        return layer;
       } catch (error) {
-        console.error(`Took too long for config of ${lyr.layerId} to get in 'loaded' status.`, (error as Error).stack);
+        console.error(`Took too long for config of ${layer.layerId} to get in 'loaded' status.`, (error as Error).stack);
         throw error;
       }
     }

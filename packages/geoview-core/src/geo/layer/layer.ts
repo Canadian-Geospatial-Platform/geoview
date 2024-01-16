@@ -419,20 +419,20 @@ export class Layer {
     checkFrequency?: number
   ): Promise<AbstractGeoViewLayer | null> => {
     // Redirects
-    const lyr = this.getGeoviewLayerById(geoviewLayerId);
+    const layer = this.getGeoviewLayerById(geoviewLayerId);
 
     // If layer was found
-    if (lyr) {
+    if (layer) {
       // Check if not waiting and returning immediately
-      if (!mustBeProcessed) return Promise.resolve(lyr);
+      if (!mustBeProcessed) return Promise.resolve(layer);
 
       try {
         // Waiting for the processed phase, possibly throwing exception if that's not happening
-        await this.waitForProcessedPhase(lyr, timeout, checkFrequency);
-        return lyr;
+        await this.waitForProcessedPhase(layer, timeout, checkFrequency);
+        return layer;
       } catch (error) {
         // eslint-disable-next-line no-console
-        console.error(`Took too long for ${lyr.geoviewLayerId} to get in 'processed' phase`, (error as Error).stack);
+        console.error(`Took too long for ${layer.geoviewLayerId} to get in 'processed' phase`, (error as Error).stack);
         throw error;
       }
     }

@@ -148,7 +148,9 @@ async function init(callback: () => void): Promise<void> {
     const mapElement = mapElements[i] as Element;
     if (!mapElement.classList.contains('geoview-map-func-call')) promises.push(renderMap(mapElement));
   }
+
   // Wait for map renders to end. Note: the api.readyCallback isn't quite done yet; that's different.
+  // TODO: Check - Maybe we want to use Promise.allSettled here instead?
   await Promise.all(promises);
 }
 

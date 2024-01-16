@@ -231,16 +231,16 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
   protected async getAllFeatureInfo(layerPath?: string): Promise<TypeArrayOfFeatureInfoEntries> {
     layerPath = layerPath || this.layerPathAssociatedToTheGeoviewLayer;
     try {
-      // TODO: Check - Is it okay to not have the `| null` at the end of here? The way it is here, when layerConfig is
-      // TO.DO.CONT: undefined, it crashes (which I'm fine with it), but then returns empty array which
-      // TO.DO.CONT: seems to be different behavior than in `getFeatureInfoAtPixel`? Should it be 'standard' (`null` or `[]`)?
-      // TO.DO.CONT: Leaving logic untouched on this PR to minimize impacts.
+      // TODO: Check - Is it okay to not have the `| null` at the end of here and let the code crash on the following line (if layerConfig is null)
+      // TO.DO.CONT: It seems to be the expected behavior?
       const layerConfig = (await this.getLayerConfigAsync(layerPath, true)) as TypeLayerEntryConfig;
       const features = (layerConfig.olLayer as VectorLayer<VectorSource>).getSource()!.getFeatures();
       const arrayOfFeatureInfoEntries = await this.formatFeatureInfoResult(features, layerConfig as TypeVectorLayerEntryConfig);
       return arrayOfFeatureInfoEntries;
     } catch (error) {
       console.error(error);
+      // TODO: Check - Shouldn't this return null instead of [] to be consistent with getFeatureInfoAtPixel and others?
+      // TO.DO.CONT: If returning null is decided, the function should probably return Promise<TypeArrayOfFeatureInfoEntries | null>?
       return [];
     }
   }
@@ -280,6 +280,8 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
    * @returns {Promise<TypeArrayOfFeatureInfoEntries>} The feature info table.
    */
   protected getFeatureInfoAtCoordinate(location: Coordinate, layerPath?: string): Promise<TypeArrayOfFeatureInfoEntries> {
+    // TODO: Check - The return type of this function should maybe be Promise<TypeArrayOfFeatureInfoEntries | null>
+    // TO.DD.CONT: and standardize this across all layer classes and all getFeatureInfo functions.
     layerPath = layerPath || this.layerPathAssociatedToTheGeoviewLayer;
     const { map } = api.maps[this.mapId];
     return this.getFeatureInfoAtPixel(map.getPixelFromCoordinate(location as Coordinate), layerPath);
