@@ -5,7 +5,7 @@ export const getSxClasses = (theme: Theme) => ({
     padding: '20px',
     display: 'flex',
     flexDirection: 'column',
-    height: '600px',
+    height: '700px',
   },
   title: {
     textAlign: 'left',

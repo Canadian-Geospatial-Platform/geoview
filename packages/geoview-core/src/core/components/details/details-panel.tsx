@@ -1,5 +1,5 @@
 /* eslint-disable react/require-default-props */
-import React, { useEffect, useState, useCallback, useMemo, useRef } from 'react';
+import React, { useEffect, useState, useCallback, useMemo } from 'react';
 
 import { useTranslation } from 'react-i18next';
 
@@ -25,11 +25,8 @@ import {
   useDetailsStoreCheckedFeatures,
   useDetailsStoreLayerDataArray,
   useDetailsStoreSelectedLayerPath,
-  useAppFullscreenActive,
-  useUIFooterPanelResizeValue,
-  useUIActiveFooterTabId,
 } from '@/core/stores';
-import { ResponsiveGrid, CloseButton, EnlargeButton, LayerList, LayerTitle } from '../common';
+import { ResponsiveGrid, CloseButton, EnlargeButton, LayerList, LayerTitle, useFooterPanelHeight } from '../common';
 import { useUIStoreActions } from '@/app';
 
 /**
@@ -59,12 +56,9 @@ export function Detailspanel(): JSX.Element {
   const [isLayersPanelVisible, setIsLayersPanelVisible] = useState(false);
   const [isEnlargeDataTable, setIsEnlargeDataTable] = useState(false);
 
-  const leftPanelRef = useRef<HTMLDivElement>(null);
-  const rightPanelRef = useRef<HTMLDivElement>(null);
-  const panelTitleRef = useRef<HTMLDivElement>(null);
-  const isMapFullScreen = useAppFullscreenActive();
-  const footerPanelResizeValue = useUIFooterPanelResizeValue();
-  const activeFooterTabId = useUIActiveFooterTabId();
+  // Custom hook for calculating the height of footer panel
+  const { leftPanelRef, rightPanelRef, panelTitleRef } = useFooterPanelHeight({ footerPanelTab: 'details' });
+
   /**
    * Find the layer path index which is selected in previous layerData based on layerPath and have more than Zero features.
    * @param {TypeArrayOfLayerData} layerDataArray list of layers.
@@ -116,36 +110,6 @@ export function Detailspanel(): JSX.Element {
     } else setLayerDataInfo(null);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [arrayOfLayerData]);
-
-  useEffect(() => {
-    if (isMapFullScreen && leftPanelRef.current && rightPanelRef.current && panelTitleRef.current && activeFooterTabId === 'details') {
-      const panelTitleHeight = panelTitleRef.current.clientHeight;
-      const tabsContainer = document.getElementById('tabsContainer')!;
-      const firstChild = tabsContainer.firstElementChild?.firstElementChild;
-      const firstChildHeight = firstChild?.clientHeight || 0;
-      const leftPanelHeight = (window.screen.height * footerPanelResizeValue) / 100 - panelTitleHeight - firstChildHeight;
-
-      leftPanelRef.current.style.maxHeight = `${leftPanelHeight}px`;
-      leftPanelRef.current.style.overflow = `auto`;
-      leftPanelRef.current.style.paddingBottom = `24px`;
-
-      const rightPanel = rightPanelRef.current.firstElementChild as HTMLElement | null;
-      if (rightPanel) {
-        rightPanel.style.maxHeight = `${leftPanelHeight - 5}px`;
-        rightPanel.style.overflow = `auto`;
-        rightPanel.style.paddingBottom = `24px`;
-      }
-    }
-    if (!isMapFullScreen && leftPanelRef.current && rightPanelRef.current) {
-      leftPanelRef.current.style.maxHeight = '700px';
-      leftPanelRef.current.style.overflow = 'auto';
-      const rightPanel = rightPanelRef.current.firstElementChild as HTMLElement | null;
-      if (rightPanel) {
-        rightPanel.style.maxHeight = '700px';
-        rightPanel.style.overflow = `auto`;
-      }
-    }
-  }, [footerPanelResizeValue, isMapFullScreen, activeFooterTabId, arrayOfLayerData]);
 
   /**
    * Get number of features of a layer.

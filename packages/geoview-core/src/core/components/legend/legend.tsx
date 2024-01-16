@@ -1,17 +1,12 @@
 import { useTheme } from '@mui/material';
 import { useTranslation } from 'react-i18next';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Box, Typography } from '@/ui';
-import {
-  useMapVisibleLayers,
-  useLayerStoreActions,
-  useAppFullscreenActive,
-  useUIActiveFooterTabId,
-  useUIFooterPanelResizeValue,
-} from '@/core/stores/';
+import { useMapVisibleLayers, useLayerStoreActions } from '@/core/stores/';
 import { getSxClasses } from './legend-styles';
 import { LegendLayer } from './legend-layer';
 import { TypeLegendLayer } from '../layers/types';
+import { useFooterPanelHeight } from '../common';
 
 export function Legend(): JSX.Element {
   const { t } = useTranslation<string>();
@@ -23,11 +18,8 @@ export function Legend(): JSX.Element {
   const visibleLayers = useMapVisibleLayers();
   const { getLayer } = useLayerStoreActions();
 
-  const legendPanelRef = useRef<HTMLDivElement>(null);
-
-  const isMapFullScreen = useAppFullscreenActive();
-  const footerPanelResizeValue = useUIFooterPanelResizeValue();
-  const activeFooterTabId = useUIActiveFooterTabId();
+  // Custom hook for calculating the height of footer panel
+  const { leftPanelRef } = useFooterPanelHeight({ footerPanelTab: 'legend' });
 
   useEffect(() => {
     const parentPaths: string[] = [];
@@ -45,23 +37,6 @@ export function Legend(): JSX.Element {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [visibleLayers]);
 
-  useEffect(() => {
-    if (isMapFullScreen && legendPanelRef.current && activeFooterTabId === 'legend') {
-      const tabsContainer = document.getElementById('tabsContainer')!;
-      const firstChild = tabsContainer.firstElementChild?.firstElementChild;
-      const firstChildHeight = firstChild?.clientHeight || 0;
-      const leftPanelHeight = (window.screen.height * footerPanelResizeValue) / 100 - firstChildHeight;
-
-      legendPanelRef.current.style.maxHeight = `${leftPanelHeight}px`;
-      legendPanelRef.current.style.overflow = `auto`;
-      legendPanelRef.current.style.paddingBottom = `24px`;
-    }
-    if (!isMapFullScreen && legendPanelRef.current) {
-      legendPanelRef.current.style.maxHeight = '700px';
-      legendPanelRef.current.style.overflow = 'auto';
-    }
-  }, [footerPanelResizeValue, isMapFullScreen, activeFooterTabId]);
-
   function renderLegendLayersList() {
     return (
       <Box display="flex" flexDirection="row" flexWrap="wrap">
@@ -75,7 +50,7 @@ export function Legend(): JSX.Element {
   }
 
   return (
-    <Box sx={sxClasses.container} ref={legendPanelRef} id="legendContainer">
+    <Box sx={sxClasses.container} ref={leftPanelRef} id="legendContainer">
       <Box>
         <Typography sx={sxClasses.title}>{t('legend.overviewTitle')}</Typography>
         <Typography sx={sxClasses.subtitle} />

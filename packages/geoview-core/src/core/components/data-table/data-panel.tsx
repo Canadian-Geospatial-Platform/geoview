@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 import { useTranslation } from 'react-i18next';
 
@@ -11,18 +11,15 @@ import { GroupLayers } from './data-table-api';
 import { TypeDisplayLanguage } from '@/geo/map/map-schema-types';
 
 import {
-  useAppFullscreenActive,
   useDataTableStoreActions,
   useDataTableStoreIsEnlargeDataTable,
   useDataTableStoreMapFilteredRecord,
   useDataTableStoreRowsFiltered,
   useDataTableStoreSelectedLayerIndex,
   useMapVisibleLayers,
-  useUIActiveFooterTabId,
-  useUIFooterPanelResizeValue,
 } from '@/core/stores';
 
-import { ResponsiveGrid, EnlargeButton, CloseButton, LayerList, LayerListEntry, LayerTitle } from '../common';
+import { ResponsiveGrid, EnlargeButton, CloseButton, LayerList, LayerListEntry, LayerTitle, useFooterPanelHeight } from '../common';
 
 export interface LayersDataType extends MapDataTableDataProps, GroupLayers {}
 
@@ -48,7 +45,6 @@ export function Datapanel({ layerData, mapId, language }: DatapanelProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [isLayersPanelVisible, setIsLayersPanelVisible] = useState(false);
   const [orderedLayerData, setOrderedLayerData] = useState<LayersDataType[]>([]);
-  const [tableHeight, setTableHeight] = useState<number>(600);
 
   const selectedLayerIndex = useDataTableStoreSelectedLayerIndex();
   const isEnlargeDataTable = useDataTableStoreIsEnlargeDataTable();
@@ -57,12 +53,8 @@ export function Datapanel({ layerData, mapId, language }: DatapanelProps) {
   const visibleLayers = useMapVisibleLayers();
   const { setSelectedLayerIndex, setIsEnlargeDataTable, setLayersData } = useDataTableStoreActions();
 
-  const leftPanelRef = useRef<HTMLDivElement>(null);
-  const rightPanelRef = useRef<HTMLDivElement>(null);
-  const panelTitleRef = useRef<HTMLDivElement>(null);
-  const isMapFullScreen = useAppFullscreenActive();
-  const footerPanelResizeValue = useUIFooterPanelResizeValue();
-  const activeFooterTabId = useUIActiveFooterTabId();
+  // Custom hook for calculating the height of footer panel
+  const { leftPanelRef, rightPanelRef, panelTitleRef, tableHeight } = useFooterPanelHeight({ footerPanelTab: 'datatable' });
 
   const handleLayerChange = useCallback((_layer: LayerListEntry, index: number) => {
     setSelectedLayerIndex(index);
@@ -149,27 +141,6 @@ export function Datapanel({ layerData, mapId, language }: DatapanelProps) {
   useEffect(() => {
     setLayersData(layerData);
   }, [layerData, setLayersData]);
-
-  useEffect(() => {
-    if (isMapFullScreen && leftPanelRef.current && rightPanelRef.current && panelTitleRef.current && activeFooterTabId === 'datatable') {
-      const panelTitleHeight = panelTitleRef.current.clientHeight;
-      const tabsContainer = document.getElementById('tabsContainer')!;
-      const firstChild = tabsContainer.firstElementChild?.firstElementChild;
-      const firstChildHeight = firstChild?.clientHeight || 0;
-      const leftPanelHeight = (window.screen.height * footerPanelResizeValue) / 100 - panelTitleHeight - firstChildHeight;
-
-      leftPanelRef.current.style.maxHeight = `${leftPanelHeight}px`;
-      leftPanelRef.current.style.overflow = `auto`;
-      leftPanelRef.current.style.paddingBottom = `24px`;
-      setTableHeight(leftPanelHeight - 10);
-    }
-
-    if (!isMapFullScreen && leftPanelRef.current && rightPanelRef.current) {
-      leftPanelRef.current.style.maxHeight = '700px';
-      leftPanelRef.current.style.overflow = 'auto';
-      setTableHeight(700);
-    }
-  }, [footerPanelResizeValue, isMapFullScreen, activeFooterTabId]);
 
   return (
     <Box sx={sxClasses.dataPanel}>

@@ -191,6 +191,6 @@
   "footerTabsContainer": {
     "focusToMap": "Aller à la carte",
     "focusToFooter": "Aller au pied de page",
-    "resize": "Redimensionner"
+    "resizeTooltip": "Redimensionner"
   }
 }
