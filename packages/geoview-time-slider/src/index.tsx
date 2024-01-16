@@ -99,7 +99,7 @@ class TimeSliderPlugin extends FooterPlugin {
       value: this.value!,
       label: 'timeSlider.title',
       icon: <TimeSliderIcon />,
-      content: () => <TimeSliderPanel mapId={this.pluginProps.mapId} configObj={this.configObj} />,
+      content: <TimeSliderPanel mapId={this.pluginProps.mapId} configObj={this.configObj} />,
     };
   };
 }

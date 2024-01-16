@@ -40,6 +40,7 @@ When created, the `FeatureInfoLayerSet` start listening for `MAP.EVENT_MAP_SINGL
 To see how you can use the `FeatureInfoLayerSet`, you can analyse the code of the following files:
 
 - the constructor of the `DetailsAPI` class defined in [packages/geoview-core/src/core/components/details/details/details-api.ts](../../../../packages/geoview-core/src/core/components/details/details-api.ts#L25) and its `createDetails` function;
+__DEPRECATED__
 - the `GET_FEATURE_INFO.ALL_QUERIES_DONE` listener in the `DetailsItem` JSX.Element defined in [packages\geoview-details-panel\src\details-item.tsx](../../../../packages/geoview-details-panel/src/details-item.tsx#L43) and the `createDetails` API call near the end of the file;
 - the `GET_FEATURE_INFO.ALL_QUERIES_DONE` listener in the `DetailsItem` JSX.Element defined in [packages\geoview-footer-panel\src\details-item.tsx](../../../../packages/geoview-footer-panel/src/details-item.tsx#L40) and the `createDetails` API call near the end of the file.
 
