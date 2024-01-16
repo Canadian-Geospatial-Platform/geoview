@@ -418,7 +418,7 @@ function DataTable({ data, layerId, mapId, layerKey, tableHeight = 600 }: DataTa
       sx: (theme) => ({
         // stripe style of table
         '& tr:nth-of-type(odd)': {
-          backgroundColor: darken(theme.palette.background.default, 0.1),
+          backgroundColor: `${darken(theme.palette.background.default, 0.1)}!important`,
         },
         '& tr:hover > td': {
           backgroundColor: '#00ffff14',
