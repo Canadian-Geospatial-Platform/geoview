@@ -1,11 +1,8 @@
 import { useCallback, useEffect, useState } from 'react';
-
 import { useTranslation } from 'react-i18next';
-
 import { useTheme } from '@mui/material/styles';
-
 import { Box, CircularProgress, FilterAltIcon } from '@/ui';
-import MapDataTable, { MapDataTableData as MapDataTableDataProps } from './map-data-table';
+import MapDataTable, { DataTableData } from './data-table';
 import { getSxClasses } from './data-table-style';
 import { GroupLayers } from './data-table-api';
 import { TypeDisplayLanguage } from '@/geo/map/map-schema-types';
@@ -21,7 +18,7 @@ import {
 
 import { ResponsiveGrid, EnlargeButton, CloseButton, LayerList, LayerListEntry, LayerTitle, useFooterPanelHeight } from '../common';
 
-export interface LayersDataType extends MapDataTableDataProps, GroupLayers {}
+export interface LayersDataType extends DataTableData, GroupLayers {}
 
 interface DatapanelProps {
   layerData: LayersDataType[];

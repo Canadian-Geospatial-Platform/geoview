@@ -3,8 +3,7 @@ import { Theme } from '@mui/material/styles';
 export const getSxClasses = (theme: Theme) => ({
   detailsContainer: {
     background: theme.footerPanel.contentBg,
-    boxShadow: theme.footerPanel.contentShadow,
-    padding: '1rem 0',
+    paddingBottom: '1rem',
   },
   panelHeaders: {
     font: theme.footerPanel.titleFont,

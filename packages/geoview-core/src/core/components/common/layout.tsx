@@ -8,6 +8,7 @@ import { LayerTitle } from './layer-title';
 import { EnlargeButton } from './enlarge-button';
 import { CloseButton } from './close-button';
 import { Box } from '@/ui';
+import { useFooterPanelHeight } from './use-footer-panel-height';
 
 interface LayoutProps {
   children?: ReactNode;
@@ -25,6 +26,9 @@ export function Layout({ children, layerList, handleLayerList, selectedLayerPath
   const layerTitle = t('general.layers');
   const [isLayersPanelVisible, setIsLayersPanelVisible] = useState(false);
   const [isEnlargeDataTable, setIsEnlargeDataTable] = useState(false);
+
+  // Custom hook for calculating the height of footer panel
+  const { leftPanelRef, rightPanelRef, panelTitleRef } = useFooterPanelHeight({ footerPanelTab: 'default' });
 
   /**
    * Handles clicks to layers in left panel. Sets selected layer.
@@ -57,7 +61,7 @@ export function Layout({ children, layerList, handleLayerList, selectedLayerPath
 
   return (
     <Box sx={sxClasses.detailsContainer}>
-      <ResponsiveGrid.Root>
+      <ResponsiveGrid.Root sx={{ pt: 8, pb: 8 }} ref={panelTitleRef}>
         <ResponsiveGrid.Left isLayersPanelVisible={isLayersPanelVisible} isEnlargeDataTable={isEnlargeDataTable}>
           <LayerTitle>{layerTitle}</LayerTitle>
         </ResponsiveGrid.Left>
@@ -78,11 +82,11 @@ export function Layout({ children, layerList, handleLayerList, selectedLayerPath
           </Box>
         </ResponsiveGrid.Right>
       </ResponsiveGrid.Root>
-      <ResponsiveGrid.Root sx={{ marginTop: '1rem' }}>
-        <ResponsiveGrid.Left isLayersPanelVisible={isLayersPanelVisible} isEnlargeDataTable={isEnlargeDataTable}>
+      <ResponsiveGrid.Root>
+        <ResponsiveGrid.Left isLayersPanelVisible={isLayersPanelVisible} isEnlargeDataTable={isEnlargeDataTable} ref={leftPanelRef}>
           {renderLayerList()}
         </ResponsiveGrid.Left>
-        <ResponsiveGrid.Right isEnlargeDataTable={isEnlargeDataTable} isLayersPanelVisible={isLayersPanelVisible}>
+        <ResponsiveGrid.Right isEnlargeDataTable={isEnlargeDataTable} isLayersPanelVisible={isLayersPanelVisible} ref={rightPanelRef}>
           {children}
         </ResponsiveGrid.Right>
       </ResponsiveGrid.Root>
