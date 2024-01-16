@@ -34,8 +34,13 @@ export class FeatureInfoLayerSet {
   /** The layer set object. */
   private layerSet: LayerSet;
 
-  /** Private variable to keep the single instance that can be created by this class for a mapId (see singleton design pattern) */
+  /** Private variable that keeps the click disable flags associated to the layerPath  */
   private disableClickOnLayer: {
+    [layerPath: string]: boolean;
+  } = {};
+
+  /** Private variable that keeps the hover disable flags associated to the layerPath  */
+  private disableHoverOverLayer: {
     [layerPath: string]: boolean;
   } = {};
 
@@ -66,6 +71,7 @@ export class FeatureInfoLayerSet {
     // This function is used to initialise the data property of the layer path entry.
     const registrationUserDataInitialisation = (layerPath: string) => {
       this.disableClickOnLayer[layerPath] = false;
+      this.disableHoverOverLayer[layerPath] = false;
       this.resultSets[layerPath].data = {};
       ArrayOfEventTypes.forEach((eventType) => {
         this.resultSets[layerPath].data[eventType] = {
@@ -104,7 +110,15 @@ export class FeatureInfoLayerSet {
           // When property features is undefined, we are waiting for the query result.
           // when Array.isArray(features) is true, the features property contains the query result.
           // when property features is null, the query ended with an error.
-          api.event.emit(GetFeatureInfoPayload.createQueryLayerPayload(this.mapId, 'at_long_lat', payload.coordinates.lnglat, 'click'));
+          api.event.emit(
+            GetFeatureInfoPayload.createQueryLayerPayload(
+              this.mapId,
+              'at_long_lat',
+              this.disableClickOnLayer,
+              payload.coordinates.lnglat,
+              'click'
+            )
+          );
         }
       },
       this.mapId
@@ -117,7 +131,15 @@ export class FeatureInfoLayerSet {
           Object.keys(this.resultSets).forEach((layerPath) => {
             this.resultSets[layerPath].data['crosshaire-enter'] = undefined;
           });
-          api.event.emit(GetFeatureInfoPayload.createQueryLayerPayload(this.mapId, 'at_long_lat', payload.lnglat, 'crosshaire-enter'));
+          api.event.emit(
+            GetFeatureInfoPayload.createQueryLayerPayload(
+              this.mapId,
+              'at_long_lat',
+              this.disableClickOnLayer,
+              payload.lnglat,
+              'crosshaire-enter'
+            )
+          );
         }
       },
       this.mapId
@@ -131,7 +153,15 @@ export class FeatureInfoLayerSet {
           Object.keys(this.resultSets).forEach((layerPath) => {
             this.resultSets[layerPath].data.hover = undefined;
           });
-          api.event.emit(GetFeatureInfoPayload.createQueryLayerPayload(this.mapId, 'at_pixel', payload.coordinates.pixel, 'hover'));
+          api.event.emit(
+            GetFeatureInfoPayload.createQueryLayerPayload(
+              this.mapId,
+              'at_pixel',
+              this.disableClickOnLayer,
+              payload.coordinates.pixel,
+              'hover'
+            )
+          );
         }
       }, 750),
       this.mapId
@@ -143,7 +173,7 @@ export class FeatureInfoLayerSet {
         Object.keys(this.resultSets).forEach((layerPath) => {
           this.resultSets[layerPath].data['all-features'] = undefined;
         });
-        api.event.emit(GetFeatureInfoPayload.createQueryLayerPayload(this.mapId, 'all'));
+        api.event.emit(GetFeatureInfoPayload.createQueryLayerPayload(this.mapId, 'all', this.disableClickOnLayer));
       },
       this.mapId
     );
@@ -237,16 +267,30 @@ export class FeatureInfoLayerSet {
   }
 
   /**
-   * Function used to enable listening of hover events.
+   * Function used to enable listening of hover events. When a layer path is not provided,
+   * hover events listening is enabled for all layers
+   *
+   * @param {string} layerPath Optional parameter used to enable only one layer
    */
-  enableHoverListener() {
-    this.disableHover = false;
+  enableHoverListener(layerPath?: string) {
+    if (layerPath) this.disableHoverOverLayer[layerPath] = false;
+    else
+      Object.keys(this.disableHoverOverLayer).forEach((key: string) => {
+        this.disableHoverOverLayer[key] = false;
+      });
   }
 
   /**
-   * Function used to disable listening of hover events.
+   * Function used to disable listening of hover events. When a layer path is not provided,
+   * hover events listening is disable for all layers
+   *
+   * @param {string} layerPath Optional parameter used to disable only one layer
    */
-  disableHoverListener() {
-    this.disableHover = true;
+  disableHoverListener(layerPath?: string) {
+    if (layerPath) this.disableHoverOverLayer[layerPath] = false;
+    else
+      Object.keys(this.disableHoverOverLayer).forEach((key: string) => {
+        this.disableHoverOverLayer[key] = true;
+      });
   }
 }

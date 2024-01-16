@@ -127,6 +127,8 @@ export const payloadIsQueryLayerQueryTypeAtLongLat = (verifyIfPayload: PayloadBa
 export interface TypeQueryLayerPayload extends GetFeatureInfoPayload {
   // The query type to perform
   queryType: QueryType;
+  // Object containing layerPath and its associated disable flag
+  disabledLayers: { [layerPath: string]: boolean };
   // the location to query, null is used when queryType is all
   location?: TypeLocation;
   // Event type that triggered the query. It can be a click, a hover, a crosshair enter, all ...
@@ -232,6 +234,7 @@ export class GetFeatureInfoPayload extends PayloadBaseClass {
    *
    * @param {string | null} handlerName the handler Name
    * @param {QueryType} queryType the query's type to perform
+   * @param {{ [layerPath: string]: boolean }} disabledLayers Object containing layerPath and its disable flag.
    * @param {TypeLocation} location the location to query
    * @param {EventType} eventType the type of event that triggered the query
    *
@@ -240,12 +243,14 @@ export class GetFeatureInfoPayload extends PayloadBaseClass {
   static createQueryLayerPayload = (
     handlerName: string,
     queryType: QueryType,
+    disabledLayers: { [layerPath: string]: boolean },
     location?: TypeLocation,
     eventType: EventType = 'all-features'
   ): TypeQueryLayerPayload => {
     const queryLayerPayload = new GetFeatureInfoPayload(EVENT_NAMES.GET_FEATURE_INFO.QUERY_LAYER, handlerName) as TypeQueryLayerPayload;
     queryLayerPayload.queryType = queryType;
     queryLayerPayload.location = location;
+    queryLayerPayload.disabledLayers = disabledLayers;
     queryLayerPayload.eventType = eventType;
     return queryLayerPayload;
   };
