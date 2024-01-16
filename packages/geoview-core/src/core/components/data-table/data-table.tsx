@@ -71,6 +71,7 @@ interface DataTableProps {
   layerId: string;
   mapId: string;
   layerKey: string;
+  tableHeight: number;
 }
 
 const DATE_FILTER: Record<string, string> = {
@@ -115,10 +116,11 @@ const NUMBER_FILTER: Record<string, string> = {
  * @param {string} layerId id of the layer
  * @param {string} mapId id of the map.
  * @param {string} layerKey key of the layer.
+ * @param {number} tableHeight Height of the container which contains all rows.
  * @return {ReactElement} Data table as react element.
  */
 
-function DataTable({ data, layerId, mapId, layerKey }: DataTableProps) {
+function DataTable({ data, layerId, mapId, layerKey, tableHeight = 600 }: DataTableProps) {
   const { t } = useTranslation();
 
   const sxtheme = useTheme();
@@ -399,7 +401,7 @@ function DataTable({ data, layerId, mapId, layerKey }: DataTableProps) {
     enableColumnVirtualization: true,
     enablePagination: false,
     enableRowVirtualization: true,
-    muiTableContainerProps: { sx: { maxHeight: '600px' } },
+    muiTableContainerProps: { sx: { maxHeight: `${tableHeight - 60}px` } },
     rowVirtualizerInstanceRef,
     rowVirtualizerOptions: { overscan: 5 },
     columnVirtualizerOptions: { overscan: 2 },
