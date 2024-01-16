@@ -25,6 +25,8 @@ export function useFooterPanelHeight({ footerPanelTab }: UseFooterPanelHeightTyp
   const arrayOfLayerData = useDetailsStoreLayerDataArray();
 
   useEffect(() => {
+    const defaultHeight = 700;
+
     if (leftPanelRef.current && isMapFullScreen && activeFooterTabId === footerPanelTab) {
       const panelTitleHeight = panelTitleRef.current?.clientHeight ?? 0;
       const tabsContainer = document.getElementById('tabsContainer')!;
@@ -33,8 +35,9 @@ export function useFooterPanelHeight({ footerPanelTab }: UseFooterPanelHeightTyp
       const leftPanelHeight = (window.screen.height * footerPanelResizeValue) / 100 - panelTitleHeight - firstChildHeight;
 
       leftPanelRef.current.style.maxHeight = `${leftPanelHeight}px`;
-      leftPanelRef.current.style.overflow = `auto`;
-      leftPanelRef.current.style.paddingBottom = `24px`;
+      leftPanelRef.current.style.height = `${leftPanelHeight}px`;
+      leftPanelRef.current.style.overflow = 'auto';
+      leftPanelRef.current.style.paddingBottom = '24px';
 
       if (footerPanelTab === 'datatable') {
         setTableHeight(leftPanelHeight - 10);
@@ -54,10 +57,10 @@ export function useFooterPanelHeight({ footerPanelTab }: UseFooterPanelHeightTyp
     }
     // reset the footer panel after map is not in fullscreen.
     if (!isMapFullScreen && leftPanelRef.current) {
-      leftPanelRef.current.style.maxHeight = '700px';
+      leftPanelRef.current.style.maxHeight = `${defaultHeight}px`;
       leftPanelRef.current.style.overflow = 'auto';
       if (footerPanelTab === 'datatable') {
-        setTableHeight(700);
+        setTableHeight(defaultHeight);
       } else {
         let rightPanel;
         if (footerPanelTab === 'details') {
@@ -67,7 +70,7 @@ export function useFooterPanelHeight({ footerPanelTab }: UseFooterPanelHeightTyp
         }
 
         if (rightPanel) {
-          rightPanel.style.maxHeight = '700px';
+          rightPanel.style.maxHeight = `${defaultHeight}px`;
           rightPanel.style.overflow = `auto`;
         }
       }
