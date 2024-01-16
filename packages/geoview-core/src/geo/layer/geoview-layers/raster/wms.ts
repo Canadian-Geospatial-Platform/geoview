@@ -70,7 +70,7 @@ export const geoviewLayerIsWMS = (verifyIfGeoViewLayer: AbstractGeoViewLayer): v
 
 /** *****************************************************************************************************************************
  * type guard function that redefines a TypeLayerEntryConfig as a TypeOgcWmsLayerEntryConfig if the geoviewLayerType attribute of the
- * verifyIfGeoViewEntry.geoviewRootLayer attribute is WMS. The type ascention applies only to the true block of
+ * verifyIfGeoViewEntry.geoviewLayerConfig attribute is WMS. The type ascention applies only to the true block of
  * the if clause that use this function.
  *
  * @param {TypeLayerEntryConfig} verifyIfGeoViewEntry Polymorphic object to test in order to determine if the type ascention is
@@ -79,7 +79,7 @@ export const geoviewLayerIsWMS = (verifyIfGeoViewLayer: AbstractGeoViewLayer): v
  * @returns {boolean} true if the type ascention is valid.
  */
 export const geoviewEntryIsWMS = (verifyIfGeoViewEntry: TypeLayerEntryConfig): verifyIfGeoViewEntry is TypeOgcWmsLayerEntryConfig => {
-  return verifyIfGeoViewEntry?.geoviewRootLayer?.geoviewLayerType === CONST_LAYER_TYPES.WMS;
+  return verifyIfGeoViewEntry?.geoviewLayerConfig?.geoviewLayerType === CONST_LAYER_TYPES.WMS;
 };
 
 // ******************************************************************************************************************************
@@ -149,14 +149,14 @@ export class WMS extends AbstractGeoViewRaster {
           try {
             const arrayOfMetadata = await Promise.all(promisedArrayOfMetadata);
             for (i = 0; i < arrayOfMetadata.length && !arrayOfMetadata[i]?.Capability; i++)
-              this.setLayerStatus('error', Layer.getLayerPath(layerConfigsToQuery[i]));
+              this.setLayerStatus('error', layerConfigsToQuery[i].layerPath);
             this.metadata = i < arrayOfMetadata.length ? arrayOfMetadata[i] : null;
             if (this.metadata) {
               for (i++; i < arrayOfMetadata.length; i++) {
-                if (!arrayOfMetadata[i]?.Capability) this.setLayerStatus('error', Layer.getLayerPath(layerConfigsToQuery[i]));
-                else if (!this.getLayerMetadataEntry(layerConfigsToQuery[i].layerId)) {
+                if (!arrayOfMetadata[i]?.Capability) this.setLayerStatus('error', layerConfigsToQuery[i].layerPath);
+                else if (!this.getLayerMetadataEntry(layerConfigsToQuery[i].layerId!)) {
                   const metadataLayerPathToAdd = this.getMetadataLayerPath(
-                    layerConfigsToQuery[i].layerId,
+                    layerConfigsToQuery[i].layerId!,
                     arrayOfMetadata[i]!.Capability.Layer
                   );
                   this.addLayerToMetadataInstance(
@@ -372,7 +372,7 @@ export class WMS extends AbstractGeoViewRaster {
   protected validateListOfLayerEntryConfig(listOfLayerEntryConfig: TypeListOfLayerEntryConfig) {
     this.setLayerPhase('validateListOfLayerEntryConfig');
     listOfLayerEntryConfig.forEach((layerConfig: TypeLayerEntryConfig) => {
-      const layerPath = Layer.getLayerPath(layerConfig);
+      const { layerPath } = layerConfig;
       if (layerEntryIsGroupLayer(layerConfig)) {
         this.validateListOfLayerEntryConfig(layerConfig.listOfLayerEntryConfig!);
         if (!layerConfig?.listOfLayerEntryConfig?.length) {
@@ -388,7 +388,7 @@ export class WMS extends AbstractGeoViewRaster {
       if ((layerConfig as TypeBaseLayerEntryConfig).layerStatus !== 'error') {
         this.setLayerStatus('loading', layerPath);
 
-        const layerFound = this.getLayerMetadataEntry(layerConfig.layerId);
+        const layerFound = this.getLayerMetadataEntry(layerConfig.layerId!);
         if (!layerFound) {
           this.layerLoadError.push({
             layer: layerPath,
@@ -419,7 +419,7 @@ export class WMS extends AbstractGeoViewRaster {
    * @param {TypeBaseLayerEntryConfig} layerConfig The layer configurstion associated to the dynamic group.
    */
   private createGroupLayer(layer: TypeJsonObject, layerConfig: TypeBaseLayerEntryConfig) {
-    const layerPath = Layer.getLayerPath(layerConfig);
+    const { layerPath } = layerConfig;
     const newListOfLayerEntryConfig: TypeListOfLayerEntryConfig = [];
     const arrayOfLayerMetadata = Array.isArray(layer.Layer) ? layer.Layer : ([layer.Layer] as TypeJsonArray);
 
@@ -484,7 +484,7 @@ export class WMS extends AbstractGeoViewRaster {
    */
   protected processOneLayerEntry(layerConfig: TypeBaseLayerEntryConfig): Promise<TypeBaseRasterLayer | null> {
     const promisedVectorLayer = new Promise<TypeBaseRasterLayer | null>((resolve) => {
-      const layerPath = Layer.getLayerPath(layerConfig);
+      const { layerPath } = layerConfig;
       this.setLayerPhase('processOneLayerEntry', layerPath);
       if (geoviewEntryIsWMS(layerConfig)) {
         const layerCapabilities = this.getLayerMetadataEntry(layerConfig.layerId);
@@ -537,6 +537,7 @@ export class WMS extends AbstractGeoViewRaster {
             imageLayerOptions.visible = layerConfig.initialSettings?.visible === 'yes' || layerConfig.initialSettings?.visible === 'always';
 
           layerConfig.olLayer = new ImageLayer(imageLayerOptions);
+          layerConfig.geoviewLayerInstance = this;
           this.applyViewFilter(layerPath, layerConfig.layerFilter ? layerConfig.layerFilter : '');
 
           this.addLoadendListener(layerPath, 'image');
@@ -568,7 +569,7 @@ export class WMS extends AbstractGeoViewRaster {
     const promiseOfExecution = new Promise<void>((resolve) => {
       if (geoviewEntryIsWMS(layerConfig)) {
         const layerCapabilities = this.getLayerMetadataEntry(layerConfig.layerId)!;
-        this.layerMetadata[Layer.getLayerPath(layerConfig)] = layerCapabilities;
+        this.layerMetadata[layerConfig.layerPath] = layerCapabilities;
         if (layerCapabilities) {
           if (layerCapabilities.Attribution) this.attributions.push(layerCapabilities.Attribution.Title as string);
           if (!layerConfig.source.featureInfo) layerConfig.source.featureInfo = { queryable: !!layerCapabilities.queryable };
@@ -608,7 +609,7 @@ export class WMS extends AbstractGeoViewRaster {
    */
   protected processTemporalDimension(wmsTimeDimension: TypeJsonObject, layerConfig: TypeOgcWmsLayerEntryConfig) {
     if (wmsTimeDimension !== undefined) {
-      this.layerTemporalDimension[Layer.getLayerPath(layerConfig)] = api.dateUtilities.createDimensionFromOGC(wmsTimeDimension);
+      this.layerTemporalDimension[layerConfig.layerPath] = api.dateUtilities.createDimensionFromOGC(wmsTimeDimension);
     }
   }
 
@@ -878,7 +879,7 @@ export class WMS extends AbstractGeoViewRaster {
           drawingContext.drawImage(image, 0, 0);
           legend = {
             type: this.type,
-            layerPath: Layer.getLayerPath(layerConfig!),
+            layerPath: layerConfig.layerPath,
             layerName: layerConfig!.layerName,
             legend: drawingCanvas,
             styles: styleLegends.length ? styleLegends : undefined,
@@ -889,7 +890,7 @@ export class WMS extends AbstractGeoViewRaster {
 
       legend = {
         type: this.type,
-        layerPath: Layer.getLayerPath(layerConfig!),
+        layerPath: layerConfig.layerPath,
         layerName: layerConfig!.layerName,
         legend: null,
         styles: styleLegends.length > 1 ? styleLegends : undefined,
@@ -999,7 +1000,7 @@ export class WMS extends AbstractGeoViewRaster {
   }
 
   /** ***************************************************************************************************************************
-   * Apply a view filter to the layer identified by the path stored in the layerPathAssociatedToThegeoviewLayer property stored
+   * Apply a view filter to the layer identified by the path stored in the layerPathAssociatedToTheGeoviewLayer property stored
    * in the layer instance associated to the map. The legend filters are derived from the uniqueValue or classBreaks style of the
    * layer. When the layer config is invalid, nothing is done.
    *
@@ -1010,7 +1011,7 @@ export class WMS extends AbstractGeoViewRaster {
   applyViewFilter(filter: string, notUsed1?: never, notUsed2?: never): void;
 
   /** ***************************************************************************************************************************
-   * Apply a view filter to the layer identified by the path stored in the layerPathAssociatedToThegeoviewLayer property stored
+   * Apply a view filter to the layer identified by the path stored in the layerPathAssociatedToTheGeoviewLayer property stored
    * in the layer instance associated to the map. When the CombineLegendFilter flag is false, the filter paramater is used alone
    * to display the features. Otherwise, the legend filter and the filter parameter are combined together to define the view
    * filter. The legend filters are derived from the uniqueValue or classBreaks style of the layer. When the layer config is
@@ -1038,7 +1039,7 @@ export class WMS extends AbstractGeoViewRaster {
   // See above headers for signification of the parameters. The first lines of the method select the template
   // used based on the parameter types received.
   applyViewFilter(parameter1: string, parameter2?: string | boolean | never, parameter3?: boolean | never) {
-    let layerPath = api.maps[this.mapId].layer.layerPathAssociatedToThegeoviewLayer;
+    let layerPath = this.layerPathAssociatedToTheGeoviewLayer;
     let filter = '';
     let CombineLegendFilter = true;
     if (parameter3) {
@@ -1110,7 +1111,7 @@ export class WMS extends AbstractGeoViewRaster {
   // See above headers for signification of the parameters. The first lines of the method select the template
   // used based on the parameter types received.
   protected getBounds(parameter1?: string | Extent, parameter2?: Extent): Extent | undefined {
-    const layerPath = typeof parameter1 === 'string' ? parameter1 : api.maps[this.mapId].layer.layerPathAssociatedToThegeoviewLayer;
+    const layerPath = typeof parameter1 === 'string' ? parameter1 : this.layerPathAssociatedToTheGeoviewLayer;
     let bounds = typeof parameter1 !== 'string' ? parameter1 : parameter2;
     const layerConfig = this.getLayerConfig(layerPath);
     const projection =

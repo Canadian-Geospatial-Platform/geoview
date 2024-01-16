@@ -1,5 +1,5 @@
+import { useEffect } from 'react';
 import { useTheme } from '@mui/material/styles';
-
 import { IconButton, FullscreenIcon, FullscreenExitIcon } from '@/ui';
 import { TypeHTMLElement } from '@/core/types/global-types';
 import { getSxClasses } from '../nav-bar-style';
@@ -22,44 +22,36 @@ export default function Fullscreen(): JSX.Element {
   const { setFullScreenActive } = useAppStoreActions();
 
   /**
-   * Exit fullscreen with ESC key
-   */
-  function handleExit() {
-    const mapIdFS =
-      document.activeElement !== undefined && document.activeElement?.closest('.geoview-shell') !== null
-        ? document.activeElement?.closest('.geoview-shell')!.getAttribute('id')?.split('-')[1]
-        : undefined;
-
-    if (mapIdFS !== undefined) {
-      setFullScreenActive(false);
-      document.removeEventListener('fullscreenchange', handleExit);
-      document.removeEventListener('webkitfullscreenchange', handleExit);
-      document.removeEventListener('mozfullscreenchange', handleExit);
-      document.removeEventListener('MSFullscreenChange', handleExit);
-    }
-  }
-
-  /**
    * Toggle between fullscreen and window mode
    */
   function setFullscreen() {
     const element = document.getElementById(`shell-${mapId}`);
-
     if (element) {
       setFullScreenActive(!isFullScreen, element as TypeHTMLElement);
-
-      // if state will become fullscreen, add event listerner to trap exit by ESC key
-      // put a timeout for the toggle to fullscreen to happen
-      if (!isFullScreen) {
-        setTimeout(() => {
-          document.addEventListener('fullscreenchange', handleExit);
-          document.addEventListener('webkitfullscreenchange', handleExit);
-          document.addEventListener('mozfullscreenchange', handleExit);
-          document.addEventListener('MSFullscreenChange', handleExit);
-        }, 100);
-      }
     }
   }
+
+  useEffect(() => {
+    /**
+     * Exit fullscreen with ESC key
+     */
+    function handleExit() {
+      if (!document.fullscreenElement) {
+        setFullScreenActive(false);
+      }
+    }
+    document.addEventListener('fullscreenchange', handleExit);
+    document.addEventListener('webkitfullscreenchange', handleExit);
+    document.addEventListener('mozfullscreenchange', handleExit);
+    document.addEventListener('MSFullscreenChange', handleExit);
+    return () => {
+      document.removeEventListener('fullscreenchange', handleExit);
+      document.removeEventListener('webkitfullscreenchange', handleExit);
+      document.removeEventListener('mozfullscreenchange', handleExit);
+      document.removeEventListener('MSFullscreenChange', handleExit);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <IconButton

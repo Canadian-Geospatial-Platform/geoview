@@ -34,7 +34,7 @@ const sxClasses = {
   bar: {
     position: 'absolute',
     backgroundColor: 'rgba(50,50,50,0.75)',
-    zIndex: 30,
+    zIndex: 151,
     boxSizing: 'content-box',
     margin: 0,
     padding: '0!important',
@@ -112,7 +112,6 @@ export function Swiper(props: SwiperProps): JSX.Element {
   const defaultX = mapSize.current[0] / 2;
   const defaultY = mapSize.current[1] / 2;
   const [olLayers, setOlLayers] = useState<BaseLayer[]>([]);
-  const [offset, setOffset] = useState(0);
 
   const [orientation] = useState(config.orientation);
 
@@ -199,52 +198,22 @@ export function Swiper(props: SwiperProps): JSX.Element {
   /**
    * On Drag and Drag Stop, calculate the clipping extent
    * @param {MouseEvent} evt The mouse event to calculate the clipping
-   * @param {Boolean} keyboard true if functio is called from keyboard event
+   * @param {Boolean} keyboard true if function is called from keyboard event
    */
-  const onStop = debounce((evt: MouseEvent, keyboard = false) => {
+  const onStop = debounce(() => {
     // get map size
     mapSize.current = map.getSize() || [0, 0];
-
-    // set Swiper % value
-    const client =
-      orientation === 'vertical'
-        ? -map.getTargetElement().getBoundingClientRect().left + evt.clientX
-        : -map.getTargetElement().getBoundingClientRect().top + evt.clientY;
     const size = orientation === 'vertical' ? mapSize.current[0] : mapSize.current[1];
-
-    // offset is only used when event is triggered from the mouse event. When triggered from keyboard, we use
-    // the swiper bar computed style
-    if (!keyboard) {
-      swiperValue.current = ((client - offset) / size) * 100;
-    } else {
-      const position = orientation === 'vertical' ? getSwiperStyle()[0] : getSwiperStyle()[1];
-      swiperValue.current = (position / size) * 100;
-    }
+    const position = orientation === 'vertical' ? getSwiperStyle()[0] : getSwiperStyle()[1];
+    swiperValue.current = (position / size) * 100;
 
     // force VectorImage to refresh
     olLayers.forEach((layer: BaseLayer) => {
-      if (layer !== null && typeof (layer as VectorImage<VectorSource>).getImageRatio === 'function') layer?.changed();
+      if (layer !== null && typeof (layer as VectorImage<VectorSource>).getImageRatio === 'function') layer.changed();
     });
 
     map.render();
   }, 100);
-
-  /**
-   * On Click, calculate the offset between click location and swiper
-   * @param {MouseEvent} evt The mouse event to calculate the offset
-   */
-  const setMouseOffset = (evt: MouseEvent) => {
-    const position =
-      orientation === 'vertical'
-        ? -map.getTargetElement().getBoundingClientRect().left + evt.clientX
-        : -map.getTargetElement().getBoundingClientRect().top + evt.clientY;
-    mapSize.current = map.getSize() || [0, 0];
-
-    const size = orientation === 'vertical' ? mapSize.current[0] : mapSize.current[1];
-    const offSetOnClick = position - (size * swiperValue.current) / 100;
-
-    setOffset(offSetOnClick);
-  };
 
   /**
    * Set the prerender and postrender events
@@ -300,7 +269,7 @@ export function Swiper(props: SwiperProps): JSX.Element {
       api.event.off(EVENT_NAMES.LAYER_SET.UPDATED, mapId, layerSetUpdatedHandler);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [layersIds]);
 
   /**
    * Update swiper and layers from keyboard CTRL + Arrow key
@@ -320,15 +289,12 @@ export function Swiper(props: SwiperProps): JSX.Element {
       // eslint-disable-next-line no-nested-ternary
       styleValues[1] = styleValues[1] <= 10 ? 10 : styleValues[1] >= mapSize.current[1] - 10 ? mapSize.current[1] - 10 : styleValues[1];
 
-      const mouse =
-        orientation === 'vertical' ? { clientX: styleValues[0] + move, clientY: 0 } : { clientX: 0, clientY: styleValues[1] + move };
-
       // apply new style to the bar
       swiperRef!.current!.style.transform =
         orientation === 'vertical' ? `translate(${styleValues[0] + move}px, 0px)` : `translate(0px, ${styleValues[1] + move}px)`;
 
       // send the onStop event to update layers
-      setTimeout(() => onStop(mouse as MouseEvent, true), 75);
+      setTimeout(() => onStop(), 75);
     }
   }, 100);
 
@@ -349,13 +315,8 @@ export function Swiper(props: SwiperProps): JSX.Element {
         axis={orientation === 'vertical' ? 'x' : 'y'}
         bounds="parent"
         defaultPosition={{ x: orientation === 'vertical' ? defaultX : 0, y: orientation === 'vertical' ? 0 : defaultY }}
-        onMouseDown={(e) => setMouseOffset(e)}
-        onStop={(e) => {
-          onStop(e as MouseEvent);
-        }}
-        onDrag={(e) => {
-          onStop(e as MouseEvent);
-        }}
+        onStop={() => onStop()}
+        onDrag={() => onStop()}
         nodeRef={swiperRef as RefObject<HTMLElement>}
       >
         <Box sx={[orientation === 'vertical' ? sxClasses.vertical : sxClasses.horizontal, sxClasses.bar]} tabIndex={0} ref={swiperRef}>

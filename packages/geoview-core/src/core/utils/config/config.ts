@@ -1,5 +1,5 @@
 /* eslint-disable no-console */
-import { TypeDisplayLanguage, TypeListOfLayerEntryConfig } from '@/geo/map/map-schema-types';
+import { TypeDisplayLanguage, TypeListOfLayerEntryConfig, layerEntryIsGroupLayer } from '@/geo/map/map-schema-types';
 import { CONST_LAYER_ENTRY_TYPE, TypeGeoviewLayerType } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { TypeMapFeaturesConfig } from '../../types/global-types';
 import { ConfigValidation } from './config-validation';
@@ -133,7 +133,7 @@ export class Config {
    */
   private setLayerEntryType(listOfLayerEntryConfig: TypeListOfLayerEntryConfig, geoviewLayerType: TypeGeoviewLayerType): void {
     listOfLayerEntryConfig?.forEach((layerConfig) => {
-      if (layerConfig.entryType === 'group') this.setLayerEntryType(layerConfig.listOfLayerEntryConfig!, geoviewLayerType);
+      if (layerEntryIsGroupLayer(layerConfig)) this.setLayerEntryType(layerConfig.listOfLayerEntryConfig!, geoviewLayerType);
       else {
         // eslint-disable-next-line no-param-reassign
         layerConfig.schemaTag = geoviewLayerType;

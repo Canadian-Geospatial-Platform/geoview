@@ -11,7 +11,7 @@ type focusItemProps = {
 };
 
 export interface IUIState {
-  activefoorterTabId: string;
+  activefooterTabId: string;
   activeTrapGeoView: boolean;
   appBarComponents: TypeAppBarProps;
   corePackagesComponents: TypeMapCorePackages;
@@ -19,7 +19,8 @@ export interface IUIState {
   footerBarExpanded: boolean;
   geoLocatorActive: boolean;
   navBarComponents: TypeNavBarProps;
-
+  footerPanelResizeValue: number;
+  footerPanelResizeValues: number[];
   setDefaultConfigValues: (geoviewConfig: TypeMapFeaturesConfig) => void;
 
   actions: {
@@ -29,19 +30,22 @@ export interface IUIState {
     setActiveTrapGeoView: (active: boolean) => void;
     setFooterBarExpanded: (expanded: boolean) => void;
     setGeolocatorActive: (active: boolean) => void;
+    setFooterPanelResizeValue: (value: number) => void;
   };
 }
 
 export function initializeUIState(set: TypeSetStore, get: TypeGetStore): IUIState {
   const init = {
     appBarComponents: ['geolocator', 'export'],
-    activefoorterTabId: 'legend',
+    activefooterTabId: 'legend',
     activeTrapGeoView: false,
     corePackagesComponents: [],
     focusITem: { activeElementId: false, callbackElementId: false },
     footerBarExpanded: false,
     geoLocatorActive: false,
     navBarComponents: [],
+    footerPanelResizeValue: 35,
+    footerPanelResizeValues: [35, 50, 100],
 
     // initialize default stores section from config information when store receive configuration file
     setDefaultConfigValues: (geoviewConfig: TypeMapFeaturesConfig) => {
@@ -78,7 +82,7 @@ export function initializeUIState(set: TypeSetStore, get: TypeGetStore): IUIStat
         set({
           uiState: {
             ...get().uiState,
-            activefoorterTabId: id,
+            activefooterTabId: id,
           },
         });
 
@@ -108,6 +112,14 @@ export function initializeUIState(set: TypeSetStore, get: TypeGetStore): IUIStat
           },
         });
       },
+      setFooterPanelResizeValue: (value) => {
+        set({
+          uiState: {
+            ...get().uiState,
+            footerPanelResizeValue: value,
+          },
+        });
+      },
     },
     // #endregion ACTIONS
   } as IUIState;
@@ -125,5 +137,8 @@ export const useUIAppbarGeolocatorActive = () => useStore(useGeoViewStore(), (st
 export const useUICorePackagesComponents = () => useStore(useGeoViewStore(), (state) => state.uiState.corePackagesComponents);
 export const useUIFooterBarExpanded = () => useStore(useGeoViewStore(), (state) => state.uiState.footerBarExpanded);
 export const useUINavbarComponents = () => useStore(useGeoViewStore(), (state) => state.uiState.navBarComponents);
+export const useUIFooterPanelResizeValue = () => useStore(useGeoViewStore(), (state) => state.uiState.footerPanelResizeValue);
+export const useUIFooterPanelResizeValues = () => useStore(useGeoViewStore(), (state) => state.uiState.footerPanelResizeValues);
+export const useUIActiveFooterTabId = () => useStore(useGeoViewStore(), (state) => state.uiState.activefooterTabId);
 
 export const useUIStoreActions = () => useStore(useGeoViewStore(), (state) => state.uiState.actions);

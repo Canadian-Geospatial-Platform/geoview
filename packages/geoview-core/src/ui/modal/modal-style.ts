@@ -12,7 +12,7 @@ export const getSxClasses = (theme: Theme) => ({
   },
   backdrop: {
     position: 'absolute',
-    background: theme.palette.backdrop,
+    background: theme.palette?.backdrop,
   },
   content: {
     padding: theme.spacing(5, 0),

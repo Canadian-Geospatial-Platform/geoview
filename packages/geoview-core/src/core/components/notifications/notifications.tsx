@@ -16,6 +16,7 @@ import {
 } from '@/ui';
 import { sxClasses } from './notifications-style';
 import { useAppNotifications, useAppStoreActions } from '@/core/stores/store-interface-and-intial-values/app-state';
+import { useGeoViewMapId } from '@/app';
 
 export type NotificationDetailsType = {
   key: string;
@@ -33,6 +34,9 @@ export type NotificationType = 'success' | 'error' | 'info' | 'warning';
  */
 export default function Notifications(): JSX.Element {
   const { t } = useTranslation<string>();
+
+  const mapId = useGeoViewMapId();
+  const mapElem = document.getElementById(`shell-${mapId}`);
 
   // internal state
   const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
@@ -109,6 +113,7 @@ export default function Notifications(): JSX.Element {
           horizontal: 'left',
         }}
         onClose={handleClosePopover}
+        container={mapElem}
       >
         <Box sx={sxClasses.notificationPanel}>
           <Typography component="div">{t('appbar.notifications')}</Typography>

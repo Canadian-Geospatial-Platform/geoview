@@ -1,4 +1,4 @@
-import { ReactNode } from 'react';
+import { ReactNode, forwardRef } from 'react';
 import { useTheme } from '@mui/material/styles';
 import { Grid, GridProps, SxProps } from '@/ui';
 
@@ -18,13 +18,12 @@ interface ResponsiveGridPanelProps extends GridProps {
  * @param {ReactNode} children children to be renderer
  * @returns JSX.Element
  */
-function ResponsiveGridRoot({ children, ...rest }: ResponsiveGridProps) {
-  return (
-    <Grid container {...rest} paddingLeft={12} paddingRight={12}>
-      {children}
-    </Grid>
-  );
-}
+const ResponsiveGridRoot = forwardRef(({ children, ...rest }: ResponsiveGridProps, ref) => (
+  <Grid component="div" container {...rest} paddingLeft={12} paddingRight={12} ref={ref}>
+    {children}
+  </Grid>
+));
+ResponsiveGridRoot.displayName = 'ResponsiveGridRoot';
 
 /**
  * Create Left Panel for responsive grid.
@@ -33,31 +32,29 @@ function ResponsiveGridRoot({ children, ...rest }: ResponsiveGridProps) {
  * @param {boolean} isEnlargeDataTable panel is enlarge
  * @returns JSX.Element
  */
-function ResponsiveGridLeftPanel({
-  children,
-  isLayersPanelVisible = false,
-  sxProps = {},
-  isEnlargeDataTable,
-  ...rest
-}: ResponsiveGridPanelProps) {
-  const theme = useTheme();
-
-  return (
-    <Grid
-      item
-      xs={isLayersPanelVisible ? 0 : 12}
-      md={!isEnlargeDataTable ? 4 : 2}
-      lg={!isEnlargeDataTable ? 4 : 1.25}
-      sx={{
-        [theme.breakpoints.down('md')]: { display: isLayersPanelVisible ? 'none' : 'block' },
-        ...sxProps,
-      }}
-      {...rest}
-    >
-      {children}
-    </Grid>
-  );
-}
+const ResponsiveGridLeftPanel = forwardRef(
+  ({ children, isLayersPanelVisible = false, sxProps = {}, isEnlargeDataTable, ...rest }: ResponsiveGridPanelProps, ref) => {
+    const theme = useTheme();
+    return (
+      <Grid
+        item
+        xs={isLayersPanelVisible ? 0 : 12}
+        md={!isEnlargeDataTable ? 4 : 2}
+        lg={!isEnlargeDataTable ? 4 : 1.25}
+        sx={{
+          [theme.breakpoints.down('md')]: { display: isLayersPanelVisible ? 'none' : 'block' },
+          ...sxProps,
+        }}
+        component="div"
+        ref={ref}
+        {...rest}
+      >
+        {children}
+      </Grid>
+    );
+  }
+);
+ResponsiveGridLeftPanel.displayName = 'ResponsiveGridLeftPanel';
 
 /**
  * Create Right Panel for responsive grid.
@@ -67,32 +64,31 @@ function ResponsiveGridLeftPanel({
  * @param {object} sxProps Optional sx props
  * @returns JSX.Element
  */
-function ResponsiveGridRightPanel({
-  children,
-  isLayersPanelVisible = false,
-  sxProps = {},
-  isEnlargeDataTable,
-  ...rest
-}: ResponsiveGridPanelProps) {
-  const theme = useTheme();
-  return (
-    <Grid
-      item
-      xs={!isLayersPanelVisible ? 0 : 12}
-      md={!isEnlargeDataTable ? 8 : 10}
-      lg={!isEnlargeDataTable ? 8 : 10.75}
-      sx={{
-        position: 'relative',
-        [theme.breakpoints.up('md')]: { paddingLeft: '1rem' },
-        [theme.breakpoints.down('md')]: { display: !isLayersPanelVisible ? 'none' : 'block' },
-        ...sxProps,
-      }}
-      {...rest}
-    >
-      {children}
-    </Grid>
-  );
-}
+const ResponsiveGridRightPanel = forwardRef(
+  ({ children, isLayersPanelVisible = false, sxProps = {}, isEnlargeDataTable, ...rest }: ResponsiveGridPanelProps, ref) => {
+    const theme = useTheme();
+    return (
+      <Grid
+        item
+        xs={!isLayersPanelVisible ? 0 : 12}
+        md={!isEnlargeDataTable ? 8 : 10}
+        lg={!isEnlargeDataTable ? 8 : 10.75}
+        sx={{
+          position: 'relative',
+          [theme.breakpoints.up('md')]: { paddingLeft: '1rem' },
+          [theme.breakpoints.down('md')]: { display: !isLayersPanelVisible ? 'none' : 'block' },
+          ...sxProps,
+        }}
+        component="div"
+        ref={ref}
+        {...rest}
+      >
+        {children}
+      </Grid>
+    );
+  }
+);
+ResponsiveGridRightPanel.displayName = 'ResponsiveGridRightPanel';
 
 export const ResponsiveGrid = {
   Root: ResponsiveGridRoot,

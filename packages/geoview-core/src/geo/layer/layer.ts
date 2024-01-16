@@ -21,8 +21,8 @@ import { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geovie
 import {
   TypeGeoviewLayerConfig,
   TypeLayerEntryConfig,
-  TypeLayerGroupEntryConfig,
   TypeListOfLocalizedLanguages,
+  layerEntryIsGroupLayer,
 } from '@/geo/map/map-schema-types';
 import { GeoJSON, layerConfigIsGeoJSON } from '@/geo/layer/geoview-layers/vector/geojson';
 import { GeoPackage, layerConfigIsGeoPackage } from '@/geo/layer/geoview-layers/vector/geopackage';
@@ -54,10 +54,6 @@ export class Layer {
 
   // variable used to store all added geoview layers
   geoviewLayers: { [geoviewLayerId: string]: AbstractGeoViewLayer } = {};
-
-  // LayerPath to use when we want to call a GeoView layer's method using the following syntaxe:
-  // api.maps[mapId].layer.geoviewLayer(layerPath).getVisible()
-  layerPathAssociatedToThegeoviewLayer = '';
 
   // used to access geometry API to create and manage geometries
   geometry: Geometry | undefined;
@@ -243,25 +239,6 @@ export class Layer {
   }
 
   /**
-   * Get the layer Path of the layer configuration parameter.
-   * @param {TypeLayerEntryConfig} layerConfig The layer configuration for which we want to get the layer path.
-   * @param {string} layerPath Internal parameter used to build the layer path (should not be used by the user).
-   *
-   * @returns {string} Returns the layer path.
-   */
-  static getLayerPath(layerConfig: TypeLayerEntryConfig, layerPath?: string): string {
-    let pathEnding = layerPath;
-    if (pathEnding === undefined)
-      pathEnding =
-        layerConfig.layerPathEnding === undefined ? layerConfig.layerId : `${layerConfig.layerId}.${layerConfig.layerPathEnding}`;
-    if (!layerConfig.parentLayerConfig) return `${layerConfig.geoviewRootLayer!.geoviewLayerId!}/${pathEnding}`;
-    return this.getLayerPath(
-      layerConfig.parentLayerConfig as TypeLayerGroupEntryConfig,
-      `${(layerConfig.parentLayerConfig as TypeLayerGroupEntryConfig).layerId}/${pathEnding}`
-    );
-  }
-
-  /**
    * This method returns the GeoView instance associated to a specific layer path. The first element of the layerPath
    * is the geoviewLayerId.
    * @param {string} layerPath The layer path to the layer's configuration.
@@ -269,8 +246,9 @@ export class Layer {
    * @returns {AbstractGeoViewLayer} Returns the geoview instance associated to the layer path.
    */
   geoviewLayer(layerPath: string): AbstractGeoViewLayer {
-    this.layerPathAssociatedToThegeoviewLayer = layerPath;
-    return this.geoviewLayers[layerPath.split('/')[0]];
+    const geoviewLayerInstance = this.geoviewLayers[layerPath.split('/')[0]];
+    geoviewLayerInstance.layerPathAssociatedToTheGeoviewLayer = layerPath;
+    return geoviewLayerInstance;
   }
 
   /**
@@ -280,7 +258,7 @@ export class Layer {
    * @returns {boolean} Returns false if the layer configuration can't be registered.
    */
   registerLayerConfig(layerConfig: TypeLayerEntryConfig): boolean {
-    const layerPath = Layer.getLayerPath(layerConfig);
+    const { layerPath } = layerConfig;
     if (this.registeredLayers[layerPath]) return false;
     this.registeredLayers[layerPath] = layerConfig;
     this.geoviewLayer(layerPath).setLayerStatus('newInstance');
@@ -294,7 +272,7 @@ export class Layer {
    * @returns {boolean} Returns true if the layer configuration is registered.
    */
   isRegistered(layerConfig: TypeLayerEntryConfig): boolean {
-    const layerPath = Layer.getLayerPath(layerConfig);
+    const { layerPath } = layerConfig;
     return this.registeredLayers[layerPath] !== undefined;
   }
 
@@ -468,39 +446,23 @@ export class Layer {
     this.removeHighlightLayer();
     this.highlightedLayer = { layerPath, originalOpacity: this.geoviewLayer(layerPath).getOpacity() };
     this.geoviewLayer(layerPath).setOpacity(1);
-    // If the layerPath is a sublayer of a group, avoid changing parent layer
-    if ((this.registeredLayers[layerPath].parentLayerConfig as TypeLayerGroupEntryConfig)?.entryType === 'group') {
+    // If it is a group layer, highlight sublayers
+    if (layerEntryIsGroupLayer(this.registeredLayers[layerPath])) {
       Object.keys(this.registeredLayers).forEach((registeredLayerPath) => {
-        const up1LevelInLayerPath = layerPath.split('/').slice(0, -1).join('/');
-        const up1LevelsInOtherLayerPath = registeredLayerPath.split('/').slice(0, -1).join('/');
-        // ! Do we need to code setZIndex on our geoview layers?
-        if (up1LevelInLayerPath === up1LevelsInOtherLayerPath) this.registeredLayers[layerPath].olLayer!.setZIndex(999);
-        else {
+        if (!registeredLayerPath.startsWith(layerPath) && layerEntryIsGroupLayer(this.registeredLayers[registeredLayerPath])) {
           const otherOpacity = this.geoviewLayer(registeredLayerPath).getOpacity();
           this.geoviewLayer(registeredLayerPath).setOpacity((otherOpacity || 1) * 0.25);
-        }
-      });
-      // If it is a group layer, avoid changing sublayers
-    } else if (this.registeredLayers[layerPath].entryType === 'group') {
-      Object.keys(this.registeredLayers).forEach((registeredLayerPath) => {
-        const splitLayerPath = layerPath.split('/');
-        const up1LevelInLayerPath = splitLayerPath.slice(0, -1).join('/');
-        const up2LevelsInOtherLayerPath = registeredLayerPath.split('/').slice(0, -2).join('/');
-        if (registeredLayerPath === layerPath || (splitLayerPath.length > 1 && up2LevelsInOtherLayerPath === up1LevelInLayerPath))
-          this.registeredLayers[layerPath].olLayer!.setZIndex(999);
-        else {
-          const otherOpacity = this.geoviewLayer(registeredLayerPath).getOpacity();
-          this.geoviewLayer(registeredLayerPath).setOpacity((otherOpacity || 1) * 0.25);
-        }
+        } else this.registeredLayers[registeredLayerPath].olLayer!.setZIndex(999);
       });
     } else {
       Object.keys(this.registeredLayers).forEach((registeredLayerPath) => {
         // check for otherOlLayer is undefined. It would be undefined if a layer status is error
-        if (registeredLayerPath !== layerPath) {
+        if (registeredLayerPath !== layerPath && layerEntryIsGroupLayer(this.registeredLayers[registeredLayerPath])) {
           const otherOpacity = this.geoviewLayer(registeredLayerPath).getOpacity();
           this.geoviewLayer(registeredLayerPath).setOpacity((otherOpacity || 1) * 0.25);
-        } else this.registeredLayers[layerPath].olLayer!.setZIndex(999);
+        }
       });
+      this.registeredLayers[layerPath].olLayer!.setZIndex(999);
     }
   }
 
@@ -510,40 +472,24 @@ export class Layer {
   removeHighlightLayer(): void {
     api.maps[this.mapId].layer.featureHighlight.removeBBoxHighlight();
     if (this.highlightedLayer.layerPath !== undefined) {
-      const { layerPath } = this.highlightedLayer;
-      if (this.highlightedLayer.originalOpacity)
-        this.geoviewLayer(this.highlightedLayer.layerPath).setOpacity(this.highlightedLayer.originalOpacity);
-      if ((this.registeredLayers[layerPath!].parentLayerConfig as TypeLayerGroupEntryConfig)?.entryType === 'group') {
+      const { layerPath, originalOpacity } = this.highlightedLayer;
+      if (layerEntryIsGroupLayer(this.registeredLayers[layerPath])) {
         Object.keys(this.registeredLayers).forEach((registeredLayerPath) => {
-          const up1LevelInLayerPath = layerPath.split('/').slice(0, -1).join('/');
-          const up1LevelsInOtherLayerPath = registeredLayerPath.split('/').slice(0, -1).join('/');
-          if (up1LevelInLayerPath === up1LevelsInOtherLayerPath) MapEventProcessor.setLayerZIndices(this.mapId);
-          else {
+          if (!registeredLayerPath.startsWith(layerPath) && layerEntryIsGroupLayer(this.registeredLayers[registeredLayerPath])) {
             const otherOpacity = this.geoviewLayer(registeredLayerPath).getOpacity();
-            this.geoviewLayer(registeredLayerPath).setOpacity((otherOpacity || 1) * 4);
-          }
-        });
-      } else if (this.registeredLayers[layerPath]?.entryType === 'group') {
-        Object.keys(this.registeredLayers).forEach((registeredLayerPath) => {
-          const splitLayerPath = layerPath.split('/');
-          const up1LevelInLayerPath = splitLayerPath.slice(0, -1).join('/');
-          const up2LevelsInOtherLayerPath = registeredLayerPath.split('/').slice(0, -2).join('/');
-          if (registeredLayerPath === layerPath || (registeredLayerPath.length > 1 && up2LevelsInOtherLayerPath === up1LevelInLayerPath))
-            MapEventProcessor.setLayerZIndices(this.mapId);
-          else {
-            const otherOpacity = this.geoviewLayer(registeredLayerPath).getOpacity();
-            this.geoviewLayer(registeredLayerPath).setOpacity((otherOpacity || 1) * 4);
-          }
+            this.geoviewLayer(registeredLayerPath).setOpacity(otherOpacity ? otherOpacity * 4 : 1);
+          } else this.geoviewLayer(registeredLayerPath).setOpacity(originalOpacity || 1);
         });
       } else {
         Object.keys(this.registeredLayers).forEach((registeredLayerPath) => {
           // check for otherOlLayer is undefined. It would be undefined if a layer status is error
-          if (registeredLayerPath !== layerPath) {
+          if (registeredLayerPath !== layerPath && layerEntryIsGroupLayer(this.registeredLayers[registeredLayerPath])) {
             const otherOpacity = this.geoviewLayer(registeredLayerPath).getOpacity();
-            this.geoviewLayer(registeredLayerPath).setOpacity((otherOpacity || 1) * 4);
-          } else MapEventProcessor.setLayerZIndices(this.mapId);
+            this.geoviewLayer(registeredLayerPath).setOpacity(otherOpacity ? otherOpacity * 4 : 1);
+          } else this.geoviewLayer(registeredLayerPath).setOpacity(originalOpacity || 1);
         });
       }
+      MapEventProcessor.setLayerZIndices(this.mapId);
       this.highlightedLayer.layerPath = undefined;
       this.highlightedLayer.originalOpacity = undefined;
     }

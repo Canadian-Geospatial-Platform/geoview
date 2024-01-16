@@ -3,8 +3,7 @@ import { Theme } from '@mui/material/styles';
 export const getSxClasses = (theme: Theme) => ({
   detailsContainer: {
     background: theme.footerPanel.contentBg,
-    boxShadow: theme.footerPanel.contentShadow,
-    padding: '1rem 0',
+    paddingBottom: '1rem',
   },
   detailsInstructionsTitle: {
     font: theme.footerPanel.titleFont,
@@ -26,17 +25,10 @@ export const getSxClasses = (theme: Theme) => ({
     marginBottom: '9px',
     boxShadow: '0px 12px 9px -13px #E0E0E0',
   },
-  itemText: {
-    '& .MuiListItemText-primary': {
-      font: theme.footerPanel.layerTitleFont,
-    },
-  },
   featureInfoListContainer: {
     paddingLeft: '25px',
     paddingRight: '25px',
     paddingBottom: '25px',
-    height: 'auto',
-    maxHeight: '80%',
     overflowY: 'auto',
     overflowX: 'hidden',
   },
@@ -67,5 +59,10 @@ export const getSxClasses = (theme: Theme) => ({
     wordWrap: 'break-word',
     fontSize: '16px',
     lineHeight: '19px',
+  },
+  flexBoxAlignCenter: {
+    display: 'flex',
+    flexDirection: 'row',
+    alignItems: 'center',
   },
 });

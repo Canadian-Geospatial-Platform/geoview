@@ -16,7 +16,7 @@ export function LayersActions(): JSX.Element {
   };
 
   return (
-    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'right', marginBottom: '15px' }}>
+    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'right', marginBottom: '15px', paddingRight: '8px' }}>
       <ButtonGroup size="small" variant="outlined" aria-label="outlined button group">
         <Tooltip title={t('legend.addLayer')} placement="top" enterDelay={1000}>
           <Button

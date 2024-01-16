@@ -250,9 +250,6 @@ export abstract class AbstractGeoViewLayer {
   /** The unique identifier of the map on which the GeoView layer will be drawn. */
   mapId: string;
 
-  /** Original map layer configuration */
-  originalMapLayerConfig: TypeGeoviewLayerConfig;
-
   /** Flag used to indicate the layer's phase */
   layerPhase = '';
 
@@ -314,6 +311,10 @@ export abstract class AbstractGeoViewLayer {
   /** Date format object used to translate internal UTC ISO format to the external format, the one used by the user */
   externalFragmentsOrder: TypeDateFragments;
 
+  // LayerPath to use when we want to call a GeoView layer's method using the following syntaxe:
+  // api.maps[mapId].layer.geoviewLayer(layerPath).getVisible()
+  layerPathAssociatedToTheGeoviewLayer = '';
+
   /** ***************************************************************************************************************************
    * The class constructor saves parameters and common configuration parameters in attributes.
    *
@@ -323,7 +324,6 @@ export abstract class AbstractGeoViewLayer {
    */
   constructor(type: TypeGeoviewLayerType, mapLayerConfig: TypeGeoviewLayerConfig, mapId: string) {
     this.mapId = mapId;
-    this.originalMapLayerConfig = cloneDeep(mapLayerConfig);
     this.type = type;
     this.geoviewLayerId = mapLayerConfig.geoviewLayerId || generateId('');
     this.geoviewLayerName.en = mapLayerConfig?.geoviewLayerName?.en ? mapLayerConfig.geoviewLayerName.en : DEFAULT_LAYER_NAMES[type];
@@ -332,18 +332,17 @@ export abstract class AbstractGeoViewLayer {
     if (mapLayerConfig.metadataAccessPath?.fr) this.metadataAccessPath.fr = mapLayerConfig.metadataAccessPath.fr.trim();
     if (mapLayerConfig.listOfLayerEntryConfig.length === 1) this.listOfLayerEntryConfig = mapLayerConfig.listOfLayerEntryConfig;
     else {
-      const layerGroup: TypeLayerGroupEntryConfig = {
-        geoviewRootLayer: mapLayerConfig.listOfLayerEntryConfig[0].geoviewRootLayer,
+      const layerGroup = new TypeLayerGroupEntryConfig({
+        geoviewLayerConfig: mapLayerConfig.listOfLayerEntryConfig[0].geoviewLayerConfig,
         layerId: this.geoviewLayerId,
         layerName: this.geoviewLayerName,
-        entryType: 'group',
         isMetadataLayerGroup: false,
         initialSettings: mapLayerConfig.initialSettings,
         listOfLayerEntryConfig: mapLayerConfig.listOfLayerEntryConfig,
-      };
+      } as TypeLayerGroupEntryConfig);
       this.listOfLayerEntryConfig = [layerGroup];
-      mapLayerConfig.listOfLayerEntryConfig.forEach((layerConfig) => {
-        layerConfig.parentLayerConfig = layerGroup;
+      layerGroup.listOfLayerEntryConfig.forEach((layerConfig, i) => {
+        layerGroup.listOfLayerEntryConfig[i].parentLayerConfig = layerGroup;
       });
     }
     this.initialSettings = mapLayerConfig.initialSettings;
@@ -376,9 +375,7 @@ export abstract class AbstractGeoViewLayer {
           if (layerEntryIsGroupLayer(subLayerConfig)) changeAllSublayerPhase(subLayerConfig.listOfLayerEntryConfig);
           else {
             (subLayerConfig as TypeBaseLayerEntryConfig).layerPhase = layerPhase;
-            api.event.emit(
-              LayerSetPayload.createLayerSetChangeLayerPhasePayload(this.mapId, Layer.getLayerPath(subLayerConfig), layerPhase)
-            );
+            api.event.emit(LayerSetPayload.createLayerSetChangeLayerPhasePayload(this.mapId, subLayerConfig.layerPath, layerPhase));
           }
         });
       };
@@ -393,7 +390,7 @@ export abstract class AbstractGeoViewLayer {
    * @param {string} layerPath The layer path to the layer's configuration affected by the change.
    */
   setLayerStatus(layerStatus: TypeLayerStatus, layerPath?: string) {
-    layerPath = layerPath || api.maps[this.mapId].layer.layerPathAssociatedToThegeoviewLayer;
+    layerPath = layerPath || this.layerPathAssociatedToTheGeoviewLayer;
     const layerConfig = this.getLayerConfig(layerPath) as TypeBaseLayerEntryConfig;
     layerConfig.layerStatus = layerStatus;
     api.event.emit(LayerSetPayload.createLayerSetChangeLayerStatusPayload(this.mapId, layerPath, layerStatus!));
@@ -458,12 +455,16 @@ export abstract class AbstractGeoViewLayer {
     listOfLayerEntryConfig.forEach((layerConfig: TypeLayerEntryConfig, i) => {
       if (layer.isRegistered(layerConfig)) {
         this.layerLoadError.push({
-          layer: Layer.getLayerPath(layerConfig),
-          consoleMessage: `Duplicate layerPath (mapId:  ${this.mapId}, layerPath: ${Layer.getLayerPath(layerConfig)})`,
+          layer: layerConfig.layerPath,
+          consoleMessage: `Duplicate layerPath (mapId:  ${this.mapId}, layerPath: ${layerConfig.layerPath})`,
         });
         // Duplicat layer can't be kept because it has the same layer path than the first encontered layer.
         delete listOfLayerEntryConfig[i];
-      } else layer.registerLayerConfig(layerConfig);
+      } else {
+        layerConfig.layerPath = layerConfig.getLayerPath(layerConfig);
+        layerConfig.geoviewLayerInstance = this;
+        layer.registerLayerConfig(layerConfig);
+      }
       if (layerEntryIsGroupLayer(layerConfig)) this.initRegisteredLayers(layerConfig.listOfLayerEntryConfig);
     });
   }
@@ -483,7 +484,7 @@ export abstract class AbstractGeoViewLayer {
         if (layerEntryIsGroupLayer(layerConfig)) this.registerAllLayersToLayerSets(layerConfig.listOfLayerEntryConfig!);
         else {
           this.registerToLayerSets(layerConfig as TypeBaseLayerEntryConfig);
-          this.setLayerPhase('newInstance', Layer.getLayerPath(layerConfig));
+          this.setLayerPhase('newInstance', layerConfig.layerPath);
         }
       });
   }
@@ -654,14 +655,14 @@ export abstract class AbstractGeoViewLayer {
             return groupReturned;
           }
           this.layerLoadError.push({
-            layer: Layer.getLayerPath(listOfLayerEntryConfig[0]),
-            consoleMessage: `Unable to create group layer ${Layer.getLayerPath(listOfLayerEntryConfig[0])} on map ${this.mapId}`,
+            layer: listOfLayerEntryConfig[0].layerPath,
+            consoleMessage: `Unable to create group layer ${listOfLayerEntryConfig[0].layerPath} on map ${this.mapId}`,
           });
           return null;
         }
 
         if ((listOfLayerEntryConfig[0] as TypeBaseLayerEntryConfig).layerStatus === 'error') return null;
-        const layerPath = Layer.getLayerPath(listOfLayerEntryConfig[0]);
+        const { layerPath } = listOfLayerEntryConfig[0];
         const baseLayer = await this.processOneLayerEntry(listOfLayerEntryConfig[0] as TypeBaseLayerEntryConfig);
         if (baseLayer) {
           baseLayer.setVisible(listOfLayerEntryConfig[0].initialSettings?.visible !== 'no');
@@ -671,8 +672,8 @@ export abstract class AbstractGeoViewLayer {
           return layerGroup || baseLayer;
         }
         this.layerLoadError.push({
-          layer: Layer.getLayerPath(listOfLayerEntryConfig[0]),
-          consoleMessage: `Unable to create layer ${Layer.getLayerPath(listOfLayerEntryConfig[0])} on map ${this.mapId}`,
+          layer: listOfLayerEntryConfig[0].layerPath,
+          consoleMessage: `Unable to create layer ${listOfLayerEntryConfig[0].layerPath} on map ${this.mapId}`,
         });
         this.setLayerStatus('error', layerPath);
         return null;
@@ -695,7 +696,7 @@ export abstract class AbstractGeoViewLayer {
       });
       const listOfLayerCreated = await Promise.all(promiseOfLayerCreated);
       listOfLayerCreated.forEach((baseLayer, i) => {
-        const layerPath = Layer.getLayerPath(listOfLayerEntryConfig[i]);
+        const { layerPath } = listOfLayerEntryConfig[i];
         if (baseLayer) {
           const layerConfig = baseLayer?.get('layerConfig') as TypeBaseLayerEntryConfig;
           if (layerConfig) {
@@ -709,10 +710,10 @@ export abstract class AbstractGeoViewLayer {
           }
         } else {
           this.layerLoadError.push({
-            layer: Layer.getLayerPath(listOfLayerEntryConfig[i]),
-            consoleMessage: `Unable to create ${
-              layerEntryIsGroupLayer(listOfLayerEntryConfig[i]) ? 'group' : ''
-            } layer ${Layer.getLayerPath(listOfLayerEntryConfig[i])} on map ${this.mapId}`,
+            layer: listOfLayerEntryConfig[i].layerPath,
+            consoleMessage: `Unable to create ${layerEntryIsGroupLayer(listOfLayerEntryConfig[i]) ? 'group' : ''} layer ${
+              listOfLayerEntryConfig[i].layerPath
+            } on map ${this.mapId}`,
           });
           this.setLayerStatus('error', layerPath);
         }
@@ -872,7 +873,7 @@ export abstract class AbstractGeoViewLayer {
    * @param {TypeBaseLayerEntryConfig} layerConfig The layer config to register.
    */
   protected registerToLayerSets(layerConfig: TypeBaseLayerEntryConfig) {
-    const layerPath = Layer.getLayerPath(layerConfig);
+    const { layerPath } = layerConfig;
     if (!this.registerToLayerSetListenerFunctions[layerPath]) this.registerToLayerSetListenerFunctions[layerPath] = {};
 
     if (!this.registerToLayerSetListenerFunctions[layerPath].requestLayerInventory) {
@@ -934,7 +935,7 @@ export abstract class AbstractGeoViewLayer {
    * @param {TypeBaseLayerEntryConfig} layerConfig The layer entry to register.
    */
   unregisterFromLayerSets(layerConfig: TypeBaseLayerEntryConfig) {
-    const layerPath = Layer.getLayerPath(layerConfig);
+    const { layerPath } = layerConfig;
     api.event.emit(LayerSetPayload.createLayerRegistrationPayload(this.mapId, layerPath, 'remove'));
 
     if (this.registerToLayerSetListenerFunctions[layerPath].requestLayerInventory) {
@@ -963,10 +964,10 @@ export abstract class AbstractGeoViewLayer {
 
   /** ***************************************************************************************************************************
    * This method create a layer group.
-   * @param {TypeLayerEntryConfig | TypeGeoviewLayerConfig} layerConfig The layer configuration.
+   * @param {TypeLayerEntryConfig} layerConfig The layer configuration.
    * @returns {LayerGroup} A new layer group.
    */
-  protected createLayerGroup(layerConfig: TypeLayerEntryConfig | TypeGeoviewLayerConfig): LayerGroup {
+  protected createLayerGroup(layerConfig: TypeLayerEntryConfig): LayerGroup {
     const layerGroupOptions: LayerGroupOptions = {
       layers: new Collection(),
       properties: { layerConfig },
@@ -1075,7 +1076,7 @@ export abstract class AbstractGeoViewLayer {
    * @returns {Extent} The layer extent.
    */
   getExtent(layerPath?: string): Extent | undefined {
-    layerPath = layerPath || api.maps[this.mapId].layer.layerPathAssociatedToThegeoviewLayer;
+    layerPath = layerPath || this.layerPathAssociatedToTheGeoviewLayer;
     const olLayer = this.getLayerConfig(layerPath)?.olLayer;
     return olLayer?.getExtent();
   }
@@ -1089,7 +1090,7 @@ export abstract class AbstractGeoViewLayer {
    * @param {string} layerPath The layer path to the layer's configuration.
    */
   setExtent(layerExtent: Extent, layerPath?: string) {
-    layerPath = layerPath || api.maps[this.mapId].layer.layerPathAssociatedToThegeoviewLayer;
+    layerPath = layerPath || this.layerPathAssociatedToTheGeoviewLayer;
     const olLayer = this.getLayerConfig(layerPath)?.olLayer;
     if (olLayer) olLayer.setExtent(layerExtent);
   }
@@ -1102,7 +1103,7 @@ export abstract class AbstractGeoViewLayer {
    * @returns {number} The opacity of the layer.
    */
   getOpacity(layerPath?: string): number | undefined {
-    layerPath = layerPath || api.maps[this.mapId].layer.layerPathAssociatedToThegeoviewLayer;
+    layerPath = layerPath || this.layerPathAssociatedToTheGeoviewLayer;
     const olLayer = this.getLayerConfig(layerPath)?.olLayer;
     return olLayer?.getOpacity();
   }
@@ -1115,7 +1116,7 @@ export abstract class AbstractGeoViewLayer {
    *
    */
   setOpacity(layerOpacity: number, layerPath?: string) {
-    layerPath = layerPath || api.maps[this.mapId].layer.layerPathAssociatedToThegeoviewLayer;
+    layerPath = layerPath || this.layerPathAssociatedToTheGeoviewLayer;
     const olLayer = this.getLayerConfig(layerPath)?.olLayer;
     if (olLayer) olLayer.setOpacity(layerOpacity);
   }
@@ -1128,7 +1129,7 @@ export abstract class AbstractGeoViewLayer {
    * @returns {boolean} The visibility of the layer.
    */
   getVisible(layerPath?: string): boolean | undefined {
-    layerPath = layerPath || api.maps[this.mapId].layer.layerPathAssociatedToThegeoviewLayer;
+    layerPath = layerPath || this.layerPathAssociatedToTheGeoviewLayer;
     const olLayer = this.getLayerConfig(layerPath)?.olLayer;
     return olLayer?.getVisible();
   }
@@ -1140,7 +1141,7 @@ export abstract class AbstractGeoViewLayer {
    * @param {string} layerPath The layer path to the layer's configuration.
    */
   setVisible(layerVisibility: boolean, layerPath?: string) {
-    layerPath = layerPath || api.maps[this.mapId].layer.layerPathAssociatedToThegeoviewLayer;
+    layerPath = layerPath || this.layerPathAssociatedToTheGeoviewLayer;
     const olLayer = this.getLayerConfig(layerPath)?.olLayer;
     if (olLayer) {
       olLayer.setVisible(layerVisibility);
@@ -1156,7 +1157,7 @@ export abstract class AbstractGeoViewLayer {
    * @returns {boolean} The visibility of the layer.
    */
   getMinZoom(layerPath?: string): number | undefined {
-    layerPath = layerPath || api.maps[this.mapId].layer.layerPathAssociatedToThegeoviewLayer;
+    layerPath = layerPath || this.layerPathAssociatedToTheGeoviewLayer;
     const olLayer = this.getLayerConfig(layerPath)?.olLayer;
     return olLayer?.getMinZoom();
   }
@@ -1168,7 +1169,7 @@ export abstract class AbstractGeoViewLayer {
    * @param {string} layerPath The layer path to the layer's configuration.
    */
   setMinZoom(minZoom: number, layerPath?: string) {
-    layerPath = layerPath || api.maps[this.mapId].layer.layerPathAssociatedToThegeoviewLayer;
+    layerPath = layerPath || this.layerPathAssociatedToTheGeoviewLayer;
     const olLayer = this.getLayerConfig(layerPath)?.olLayer;
     if (olLayer) olLayer.setMinZoom(minZoom);
   }
@@ -1181,7 +1182,7 @@ export abstract class AbstractGeoViewLayer {
    * @returns {boolean} The visibility of the layer.
    */
   getMaxZoom(layerPath?: string): number | undefined {
-    layerPath = layerPath || api.maps[this.mapId].layer.layerPathAssociatedToThegeoviewLayer;
+    layerPath = layerPath || this.layerPathAssociatedToTheGeoviewLayer;
     const olLayer = this.getLayerConfig(layerPath)?.olLayer;
     return olLayer?.getMaxZoom();
   }
@@ -1193,7 +1194,7 @@ export abstract class AbstractGeoViewLayer {
    * @param {string} layerPath The layer path to the layer's configuration.
    */
   setMaxZoom(maxZoom: number, layerPath?: string) {
-    layerPath = layerPath || api.maps[this.mapId].layer.layerPathAssociatedToThegeoviewLayer;
+    layerPath = layerPath || this.layerPathAssociatedToTheGeoviewLayer;
     const olLayer = this.getLayerConfig(layerPath)?.olLayer;
     if (olLayer) olLayer.setMaxZoom(maxZoom);
   }
@@ -1208,7 +1209,7 @@ export abstract class AbstractGeoViewLayer {
    */
   async getLegend(layerPath?: string): Promise<TypeLegend | null> {
     try {
-      layerPath = layerPath || api.maps[this.mapId].layer.layerPathAssociatedToThegeoviewLayer;
+      layerPath = layerPath || this.layerPathAssociatedToTheGeoviewLayer;
       const layerConfig = this.getLayerConfig(layerPath) as
         | (TypeBaseLayerEntryConfig & {
             style: TypeStyleConfig;
@@ -1372,7 +1373,7 @@ export abstract class AbstractGeoViewLayer {
    * @returns {string | undefined} The filter associated to the layer or undefined.
    */
   getLayerFilter(layerPath?: string): string | undefined {
-    layerPath = layerPath || api.maps[this.mapId].layer.layerPathAssociatedToThegeoviewLayer;
+    layerPath = layerPath || this.layerPathAssociatedToTheGeoviewLayer;
     const layerConfig = this.getLayerConfig(layerPath);
     return layerConfig?.olLayer?.get('layerFilter');
   }
@@ -1386,7 +1387,7 @@ export abstract class AbstractGeoViewLayer {
    * @returns {TimeDimension} The temporal dimension associated to the layer or undefined.
    */
   getTemporalDimension(layerPath?: string): TimeDimension {
-    layerPath = layerPath || api.maps[this.mapId].layer.layerPathAssociatedToThegeoviewLayer;
+    layerPath = layerPath || this.layerPathAssociatedToTheGeoviewLayer;
     return this.layerTemporalDimension[layerPath];
   }
 
@@ -1423,13 +1424,13 @@ export abstract class AbstractGeoViewLayer {
    * @returns {Extent} The layer bounding box.
    */
   calculateBounds(layerPath?: string): Extent | undefined {
-    layerPath = layerPath || api.maps[this.mapId].layer.layerPathAssociatedToThegeoviewLayer;
+    layerPath = layerPath || this.layerPathAssociatedToTheGeoviewLayer;
     let bounds: Extent | undefined;
     const processGroupLayerBounds = (listOfLayerEntryConfig: TypeListOfLayerEntryConfig) => {
       listOfLayerEntryConfig.forEach((layerConfig) => {
         if (layerEntryIsGroupLayer(layerConfig)) processGroupLayerBounds(layerConfig.listOfLayerEntryConfig);
         else {
-          bounds = this.getBounds(Layer.getLayerPath(layerConfig), bounds);
+          bounds = this.getBounds(layerConfig.layerPath, bounds);
         }
       });
     };
@@ -1453,7 +1454,7 @@ export abstract class AbstractGeoViewLayer {
     listOfLayerEntryConfig.forEach((layerConfig: TypeLayerEntryConfig) => {
       if (layerEntryIsGroupLayer(layerConfig)) this.setAllLayerStatusToError(layerConfig.listOfLayerEntryConfig, errorMessage);
       else {
-        const layerPath = Layer.getLayerPath(layerConfig);
+        const { layerPath } = layerConfig;
         this.setLayerStatus('error', layerPath);
         this.layerLoadError.push({
           layer: layerPath,
@@ -1469,7 +1470,7 @@ export abstract class AbstractGeoViewLayer {
    * @param {string} layerPath The layerpath to the node we want to delete.
    */
   removeConfig(layerPath?: string) {
-    layerPath = layerPath || api.maps[this.mapId].layer.layerPathAssociatedToThegeoviewLayer;
+    layerPath = layerPath || this.layerPathAssociatedToTheGeoviewLayer;
     const layerConfigToRemove = this.getLayerConfig(layerPath) as TypeBaseLayerEntryConfig;
     if (layerConfigToRemove.entryType !== 'group') this.unregisterFromLayerSets(layerConfigToRemove);
     delete api.maps[this.mapId].layer.registeredLayers[layerPath];

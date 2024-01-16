@@ -2,13 +2,12 @@ import { useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '@mui/material/styles';
 import { styled } from '@mui/material';
-import { CloseButton, LayerTitle, ResponsiveGrid } from '../common';
+import { CloseButton, LayerTitle, ResponsiveGrid, useFooterPanelHeight } from '../common';
 import { Box, DeleteOutlineIcon, IconButton, Paper } from '@/ui';
 import { getSxClasses } from './layers-style';
 import { useLayersDisplayState, useSelectedLayer } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { LayersActions } from './left-panel/layers-actions';
 import { LayerDetails } from './right-panel/layer-details';
-import { AddNewLayer } from './left-panel/add-new-layer';
 import { LeftPanel } from './left-panel/left-panel';
 
 const Item = styled('div')(({ theme }) => ({
@@ -40,11 +39,14 @@ export function LayersPanel() {
   }, []);
   */
 
+  // Custom hook for calculating the height of footer panel
+  const { leftPanelRef, rightPanelRef, panelTitleRef } = useFooterPanelHeight({ footerPanelTab: 'layers' });
+
   const leftPanel = () => {
     return (
       <Box>
         <LayersActions />
-        {displayState === 'add' ? <AddNewLayer /> : <LeftPanel setIsLayersListPanelVisible={setIsLayersListPanelVisible} />}
+        <LeftPanel setIsLayersListPanelVisible={setIsLayersListPanelVisible} />
       </Box>
     );
   };
@@ -73,11 +75,9 @@ export function LayersPanel() {
           </Box>
         </Paper>
       );
-      /* eslint-enable react/no-danger */
     }
     if (displayState === 'order') {
       const markup = { __html: t('layers.sortingDescription') };
-      /* eslint-disable react/no-danger */
       return (
         <Paper sx={{ padding: '20px' }}>
           <h3>{t('layers.reArrangeLayers')}</h3>
@@ -86,7 +86,18 @@ export function LayersPanel() {
           </Box>
         </Paper>
       );
-      /* eslint-enable react/no-danger */
+    }
+    if (displayState === 'add') {
+      const markup = { __html: t('layers.addingNewLayerDescription') };
+      return (
+        <Paper sx={{ padding: '20px' }}>
+          <h3>{t('layers.addingNewLayer')}</h3>
+          <Box sx={sxClasses.buttonDescriptionContainer}>
+            <div dangerouslySetInnerHTML={markup} />
+          </Box>
+        </Paper>
+      );
+      /* eslint-disable react/no-danger */
     }
 
     return null;
@@ -94,7 +105,7 @@ export function LayersPanel() {
 
   return (
     <Box sx={sxClasses.layersPanelContainer}>
-      <ResponsiveGrid.Root>
+      <ResponsiveGrid.Root sx={{ pt: 8, pb: 8 }} ref={panelTitleRef}>
         <ResponsiveGrid.Left isEnlargeDataTable={false} isLayersPanelVisible={isLayersListPanelVisible}>
           <LayerTitle>{t('general.layers')}</LayerTitle>
         </ResponsiveGrid.Left>
@@ -110,12 +121,12 @@ export function LayersPanel() {
           </Box>
         </ResponsiveGrid.Right>
       </ResponsiveGrid.Root>
-      <ResponsiveGrid.Root sx={{ mt: 8 }}>
-        <ResponsiveGrid.Left isEnlargeDataTable={false} isLayersPanelVisible={isLayersListPanelVisible}>
+      <ResponsiveGrid.Root>
+        <ResponsiveGrid.Left isEnlargeDataTable={false} isLayersPanelVisible={isLayersListPanelVisible} ref={leftPanelRef}>
           {leftPanel()}
         </ResponsiveGrid.Left>
 
-        <ResponsiveGrid.Right isEnlargeDataTable={false} isLayersPanelVisible={isLayersListPanelVisible}>
+        <ResponsiveGrid.Right isEnlargeDataTable={false} isLayersPanelVisible={isLayersListPanelVisible} ref={rightPanelRef}>
           {rightPanel()}
         </ResponsiveGrid.Right>
       </ResponsiveGrid.Root>

@@ -6,6 +6,7 @@ import { useMapVisibleLayers, useLayerStoreActions } from '@/core/stores/';
 import { getSxClasses } from './legend-styles';
 import { LegendLayer } from './legend-layer';
 import { TypeLegendLayer } from '../layers/types';
+import { useFooterPanelHeight } from '../common';
 
 export function Legend(): JSX.Element {
   const { t } = useTranslation<string>();
@@ -16,6 +17,9 @@ export function Legend(): JSX.Element {
 
   const visibleLayers = useMapVisibleLayers();
   const { getLayer } = useLayerStoreActions();
+
+  // Custom hook for calculating the height of footer panel
+  const { leftPanelRef } = useFooterPanelHeight({ footerPanelTab: 'legend' });
 
   useEffect(() => {
     const parentPaths: string[] = [];
@@ -35,7 +39,7 @@ export function Legend(): JSX.Element {
 
   function renderLegendLayersList() {
     return (
-      <Box display="flex" flexDirection="column" flexWrap="wrap" style={{ height: 600, overflow: 'auto' }}>
+      <Box display="flex" flexDirection="row" flexWrap="wrap">
         {legendLayers.map((item) => (
           <Box key={item!.layerPath} width={{ xs: '100%', sm: '50%', md: '33.33%', lg: '25%', xl: '25%' }} style={{ minHeight: 0 }} p={2}>
             <LegendLayer layer={item!} key={item!.layerPath} />
@@ -46,7 +50,7 @@ export function Legend(): JSX.Element {
   }
 
   return (
-    <Box sx={sxClasses.container}>
+    <Box sx={sxClasses.container} ref={leftPanelRef} id="legendContainer">
       <Box>
         <Typography sx={sxClasses.title}>{t('legend.overviewTitle')}</Typography>
         <Typography sx={sxClasses.subtitle} />

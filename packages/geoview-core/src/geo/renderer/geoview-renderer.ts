@@ -706,7 +706,7 @@ export class GeoviewRenderer {
     const fillOptions: FillOptions = { color: settings.color };
     const strokeOptions: StrokeOptions = this.createStrokeOptions(settings);
     const regularShapeOptions: RegularShapeOptions = {
-      radius1: settings.size !== undefined ? settings.size : 6,
+      radius: settings.size !== undefined ? settings.size : 6,
       radius2: settings.size !== undefined ? settings.size / 3 : 2,
       angle,
       points,

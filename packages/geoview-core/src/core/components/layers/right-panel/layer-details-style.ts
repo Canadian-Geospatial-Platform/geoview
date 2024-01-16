@@ -7,24 +7,17 @@ export const getSxClasses = (theme: Theme) => ({
     fontSize: '20px',
   },
   layerDetails: {
-    border: '2px solid #515BA5',
+    borderColor: theme.palette.primary.main,
+    borderWidth: '2px',
+    borderStyle: 'solid',
     padding: '20px',
-    overflow: 'auto',
-    maxHeight: '700px',
+    overflowY: 'auto',
   },
   buttonDescriptionContainer: {
     display: 'flex',
     flexDirection: 'row',
     alignItems: 'center',
   },
-  opacityMenu: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '15px',
-    padding: '8px 20px 7px 15px',
-    backgroundColor: '#F6F6F6',
-  },
-
   itemsGrid: {
     width: '100%',
     '& .MuiGrid-container': {
