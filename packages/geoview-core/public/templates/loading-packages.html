@@ -86,8 +86,6 @@
     <div class="toolbar">
       <button id="load-basemap-panel-btn">Load Basemap Panel</button>
       <button id="unload-basemap-panel-btn">Unload Basemap Panel</button>
-      <button id="load-layers-panel-btn">Load Layers Panel</button>
-      <button id="unload-layers-panel-btn">Unload Layers Panel</button>
     </div>
 
     <div id="mapWM" class="geoview-map" data-lang="en" data-config-url="./configs/loading-packages-config.json"></div>
@@ -122,24 +120,6 @@
         // add event handler to the unload basemap panel button
         unloadBasemapPanelBtn.addEventListener('click', function (e) {
           cgpv.api.removePlugin('basemap-panel', 'mapWM');
-        });
-
-        // get load layers panel button element
-        var loadLayersPanelBtn = document.getElementById('load-layers-panel-btn');
-
-        // add event handler to the load layers panel button
-        loadLayersPanelBtn.addEventListener('click', function (e) {
-          cgpv.api.addPlugin('layers-panel', 'mapWM', window.geoviewPlugins['layers-panel'], {
-            mapId: 'mapWM',
-          });
-        });
-
-        // get unload layers panel button element
-        var unloadLayersPanelBtn = document.getElementById('unload-layers-panel-btn');
-
-        // add event handler to the unload layers panel button
-        unloadLayersPanelBtn.addEventListener('click', function (e) {
-          cgpv.api.removePlugin('layers-panel');
         });
       });
     </script>

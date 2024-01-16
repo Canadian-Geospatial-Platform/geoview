@@ -1511,6 +1511,71 @@
       "description": "Controls availalbe on the navigation bar.",
       "minItems": 0
     },
+    "TypeFooterTabsProps": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "tabs": {
+          "type": "object",
+          "description": "Available tabs",
+          "properties": {
+            "core": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "legend",
+                  "layers",
+                  "details",
+                  "data-table",
+                  "time-slider",
+                  "geochart"
+                ]
+              },
+              "minItems": 1,
+              "default": [
+                "legend",
+                "layers",
+                "details",
+                "data-table"
+              ],
+              "uniqueItems": true,
+              "description": "Default core tabs of footer panel to use"
+            },
+            "custom": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string"
+                  },
+                  "defaultTabs": {
+                    "type": "string"
+                  },
+                  "contentHTML": {
+                    "type": "string"
+                  }
+                }
+              },
+              "minItems": 0,
+              "default": [],
+              "uniqueItems": true,
+              "description": "Custom tabs of footer panel to use"
+            }
+          },
+          "additionalProperties": false
+        },
+        "collapsed": {
+          "type": "boolean",
+          "default": false,
+          "description": "State of footer panel when map is loaded (expanded or collapsed)"
+        }
+      },
+      "required": [
+        "tabs"
+      ]
+    },
     "TypeOverviewMapProps": {
       "type": "object",
       "additionalProperties": false,
@@ -1538,7 +1603,7 @@
       "type": "array",
       "uniqueItems": true,
       "items": {
-        "enum": ["basemap-panel", "layers-panel", "details-panel", "geolocator-panel", "footer-panel", "swiper", "geochart", "time-slider"]
+        "enum": ["basemap-panel", "swiper", "geochart", "time-slider"]
       },
       "default": ["basemap-panel", "layers-panel", "details-panel", "geolocator-panel"],
       "description": "Core packages to initialize on viewer load. The schema for those are on their own package. NOTE: config from packages are in the same loaction as core config (<<core config name>>-<<package name>>.json).",
@@ -1627,6 +1692,9 @@
         },
         "navBar": {
           "$ref": "#/definitions/TypeNavBarProps"
+        },
+        "footerTabs": {
+          "$ref": "#/definitions/TypeFooterTabsProps"
         },
         "overviewMap": {
           "$ref": "#/definitions/TypeOverviewMapProps"

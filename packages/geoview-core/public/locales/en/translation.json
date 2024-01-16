@@ -52,6 +52,7 @@
     "repoLink": "Repo link"
   },
   "legend": {
+    "title": "Legend",
     "unknown": "Unknown Layer Title",
     "removeLayer": "Remove Layer",
     "toggleOpacity": "Toggle Opacity DEPRECATED",
@@ -69,6 +70,7 @@
     "itemsCount": "{count} of {totalCount} items"
   },
   "layers": {
+    "title": "Layers",
     "subLayersList": "Sub-Layers List",
     "removingLayers": "Removing Layers",
     "reArrangeLayers": "Re-arrange Layers",
@@ -108,6 +110,7 @@
     "toggleCollapse": "Toggle collapse"
   },
   "details": {
+    "title": "Details",
     "zoomTo": "Zoom to feature",
     "select": "Highlight feature on map",
     "externalLink": "External Link",
@@ -169,6 +172,7 @@
     "alticon": "Selected feature icon"
   },
   "dataTable": {
+    "title": "Data Table",
     "icon": "ICON",
     "zoom": "ZOOM",
     "exportBtn": "Export",
