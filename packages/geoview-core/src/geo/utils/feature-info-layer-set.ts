@@ -124,6 +124,7 @@ export class FeatureInfoLayerSet {
       this.mapId
     );
 
+    // ! Do we want to keep this type of event? I think we already said that we want to remove it.
     api.event.on(
       EVENT_NAMES.MAP.EVENT_MAP_CROSSHAIR_ENTER,
       (payload) => {
@@ -149,15 +150,20 @@ export class FeatureInfoLayerSet {
       EVENT_NAMES.MAP.EVENT_MAP_POINTER_MOVE,
       debounce((payload) => {
         if (payloadIsAMapMouseEvent(payload)) {
-          if (this.disableHover) return;
           Object.keys(this.resultSets).forEach((layerPath) => {
-            this.resultSets[layerPath].data.hover = undefined;
+            if (this.disableHoverOverLayer[layerPath]) return;
+            this.resultSets[layerPath].data.hover = {
+              features: undefined,
+              layerPath,
+              layerName: getLocalizedValue(api.maps[mapId].layer.registeredLayers[layerPath].layerName, mapId) ?? '',
+              layerStatus: api.maps[this.mapId].layer.registeredLayers[layerPath].layerStatus!,
+            };
           });
           api.event.emit(
             GetFeatureInfoPayload.createQueryLayerPayload(
               this.mapId,
               'at_pixel',
-              this.disableClickOnLayer,
+              this.disableHoverOverLayer,
               payload.coordinates.pixel,
               'hover'
             )
@@ -171,7 +177,13 @@ export class FeatureInfoLayerSet {
       EVENT_NAMES.MAP.EVENT_MAP_GET_ALL_FEATURES,
       () => {
         Object.keys(this.resultSets).forEach((layerPath) => {
-          this.resultSets[layerPath].data['all-features'] = undefined;
+          if (this.disableClickOnLayer[layerPath]) return;
+          this.resultSets[layerPath].data['all-features'] = {
+            features: undefined,
+            layerPath,
+            layerName: getLocalizedValue(api.maps[mapId].layer.registeredLayers[layerPath].layerName, mapId) ?? '',
+            layerStatus: api.maps[this.mapId].layer.registeredLayers[layerPath].layerStatus!,
+          };
         });
         api.event.emit(GetFeatureInfoPayload.createQueryLayerPayload(this.mapId, 'all', this.disableClickOnLayer));
       },
@@ -259,7 +271,7 @@ export class FeatureInfoLayerSet {
    * @param {string} layerPath Optional parameter used to disable only one layer
    */
   disableClickListener(layerPath?: string) {
-    if (layerPath) this.disableClickOnLayer[layerPath] = false;
+    if (layerPath) this.disableClickOnLayer[layerPath] = true;
     else
       Object.keys(this.disableClickOnLayer).forEach((key: string) => {
         this.disableClickOnLayer[key] = true;
@@ -287,7 +299,7 @@ export class FeatureInfoLayerSet {
    * @param {string} layerPath Optional parameter used to disable only one layer
    */
   disableHoverListener(layerPath?: string) {
-    if (layerPath) this.disableHoverOverLayer[layerPath] = false;
+    if (layerPath) this.disableHoverOverLayer[layerPath] = true;
     else
       Object.keys(this.disableHoverOverLayer).forEach((key: string) => {
         this.disableHoverOverLayer[key] = true;
