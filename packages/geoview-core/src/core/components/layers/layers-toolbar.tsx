@@ -15,7 +15,7 @@ interface ResponsiveButtonProps {
 function ResponsiveButton(props: ResponsiveButtonProps): JSX.Element {
   const { tooltipKey, translationKey, icon, newState } = props;
   const { t } = useTranslation<string>();
-  const breakpoint = 450;
+  const breakpoint = 490;
 
   // state
   const [screenWidth, setScreenWidth] = useState(window.innerWidth);
