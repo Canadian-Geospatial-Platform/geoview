@@ -137,7 +137,9 @@ export class MapEventProcessor extends AbstractEventProcessor {
         if (JSON.stringify(prevLayerOrder) !== JSON.stringify(orderedLayerPaths))
           store.getState().mapState.actions.setLayerOrder(orderedLayerPaths);
         const orderedVisibleLayers = orderedLayerPaths.filter(
-          (layerPath) => store.getState().layerState.actions.getLayer(layerPath)?.isVisible !== 'no'
+          (layerPath) =>
+            store.getState().layerState.actions.getLayer(layerPath)?.isVisible === 'yes' ||
+            store.getState().layerState.actions.getLayer(layerPath)?.isVisible === 'always'
         );
         const prevVisibleLayers = [...store.getState().mapState.visibleLayers];
         if (JSON.stringify(prevVisibleLayers) !== JSON.stringify(orderedVisibleLayers))
@@ -218,10 +220,11 @@ export class MapEventProcessor extends AbstractEventProcessor {
     });
     map.addOverlay(clickMarkerOverlay);
 
-    const orderedLayerPaths = MapEventProcessor.getLayerPathsFromLegendsArray(store.getState().layerState.legendLayers);
-    store.getState().mapState.actions.setLayerOrder(orderedLayerPaths);
-    const orderedVisibleLayers = orderedLayerPaths.filter(
-      (layerPath) => store.getState().layerState.actions.getLayer(layerPath)?.isVisible !== 'no'
+    store.getState().mapState.actions.setLayerOrder(api.maps[mapId].layer.initialLayerOrder);
+    const orderedVisibleLayers = api.maps[mapId].layer.initialLayerOrder.filter(
+      (layerPath) =>
+        store.getState().layerState.actions.getLayer(layerPath)?.isVisible === 'yes' ||
+        store.getState().layerState.actions.getLayer(layerPath)?.isVisible === 'always'
     );
     store.getState().mapState.actions.setVisibleLayers(orderedVisibleLayers);
 
@@ -359,11 +362,12 @@ export class MapEventProcessor extends AbstractEventProcessor {
 
   static getLayerPathsFromLegendsArray(legendsArray: TypeLegendLayer[]): string[] {
     const layerPathList: string[] = [];
-    for (let i = 0; i < legendsArray.length; i++) {
+    const maxOrder = Math.max(...legendsArray.map((legendLayer) => legendLayer.order));
+    for (let i = 0; i <= maxOrder; i++) {
       const nextLayerLegend = legendsArray.filter((layerLegend) => layerLegend.order === i)[0];
       if (nextLayerLegend) {
         layerPathList.push(nextLayerLegend.layerPath);
-        if (nextLayerLegend.children.length > 0) {
+        if (nextLayerLegend.children.length) {
           layerPathList.push(...this.getLayerPathsFromLegendsArray(nextLayerLegend.children));
         }
       }

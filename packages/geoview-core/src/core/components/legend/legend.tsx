@@ -27,7 +27,7 @@ export function Legend(): JSX.Element {
   useEffect(() => {
     // TODO: make this async as the visible layers array is empty when useEffect is triggered
     // TD-CONT: Seems to be more problematic with group layer, raw-feature-info, we do not have the legend title
-    // TD-CONT: because if by default the tab is colllapse, it is a blank screen
+    // TD-CONT: because if by default the tab is collapse, it is a blank screen
     const parentPaths: string[] = [];
     const layers = visibleLayers
       .map((layerPath) => {
