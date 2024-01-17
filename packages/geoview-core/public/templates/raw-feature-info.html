@@ -195,8 +195,8 @@
       let hoverFlag = true;
       var testToggleHoverBtn = document.getElementsByClassName('test-toggle-hover-btn')[0];
       testToggleHoverBtn.addEventListener('click', function (e) {
-        if (hoverFlag) cgpv.api.getFeatureInfoLayerSet('mapWM1').disableHoverListener();
-        else cgpv.api.getFeatureInfoLayerSet('mapWM1').enableHoverListener();
+        if (hoverFlag) cgpv.api.getFeatureInfoLayerSet('mapWM1').disableHoverListener('geojsonLYR1/geojsonLYR1/point-feature-group/icon_points.json');
+        else cgpv.api.getFeatureInfoLayerSet('mapWM1').enableHoverListener('geojsonLYR1/geojsonLYR1/point-feature-group/icon_points.json');
         hoverFlag = !hoverFlag;
       });
 
