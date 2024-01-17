@@ -13,8 +13,11 @@ export function Legend(): JSX.Element {
 
   const theme = useTheme();
   const sxClasses = getSxClasses(theme);
+
+  // internal state
   const [legendLayers, setLegendLayers] = useState<TypeLegendLayer[]>([]);
 
+  // store state
   const visibleLayers = useMapVisibleLayers();
   const { getLayer } = useLayerStoreActions();
 
@@ -22,6 +25,9 @@ export function Legend(): JSX.Element {
   const { leftPanelRef } = useFooterPanelHeight({ footerPanelTab: 'legend' });
 
   useEffect(() => {
+    // TODO: make this async as the visible layers array is empty when useEffect is triggered
+    // TD-CONT: Seems to be more problematic with group layer, raw-feature-info, we do not have the legend title
+    // TD-CONT: because if by default the tab is colllapse, it is a blank screen
     const parentPaths: string[] = [];
     const layers = visibleLayers
       .map((layerPath) => {
@@ -34,6 +40,7 @@ export function Legend(): JSX.Element {
       })
       .filter((layer) => layer !== undefined);
     setLegendLayers(layers as TypeLegendLayer[]);
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [visibleLayers]);
 

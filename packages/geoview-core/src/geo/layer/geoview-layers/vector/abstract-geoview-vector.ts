@@ -230,17 +230,17 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
    */
   protected async getAllFeatureInfo(layerPath?: string): Promise<TypeArrayOfFeatureInfoEntries> {
     layerPath = layerPath || this.layerPathAssociatedToTheGeoviewLayer;
-    const layerConfig = this.getLayerConfig(layerPath) as TypeLayerEntryConfig;
-    if (!layerConfig?.olLayer) return [];
-
     try {
-      const arrayOfFeatureInfoEntries = await this.formatFeatureInfoResult(
-        (layerConfig.olLayer as VectorLayer<VectorSource>).getSource()!.getFeatures(),
-        layerConfig as TypeVectorLayerEntryConfig
-      );
+      // TODO: Check - Is it okay to not have the `| null` at the end of here and let the code crash on the following line (if layerConfig is null)
+      // TO.DO.CONT: It seems to be the expected behavior?
+      const layerConfig = (await this.getLayerConfigAsync(layerPath, true)) as TypeLayerEntryConfig;
+      const features = (layerConfig.olLayer as VectorLayer<VectorSource>).getSource()!.getFeatures();
+      const arrayOfFeatureInfoEntries = await this.formatFeatureInfoResult(features, layerConfig as TypeVectorLayerEntryConfig);
       return arrayOfFeatureInfoEntries;
     } catch (error) {
-      console.log(error);
+      console.error(error);
+      // TODO: Check - Shouldn't this return null instead of [] to be consistent with getFeatureInfoAtPixel and others?
+      // TO.DO.CONT: If returning null is decided, the function should probably return Promise<TypeArrayOfFeatureInfoEntries | null>?
       return [];
     }
   }
@@ -253,11 +253,10 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
    *
    * @returns {Promise<TypeArrayOfFeatureInfoEntries> | null} The feature info table or null if an error occured.
    */
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   protected async getFeatureInfoAtPixel(location: Pixel, layerPath?: string): Promise<TypeArrayOfFeatureInfoEntries | null> {
     layerPath = layerPath || this.layerPathAssociatedToTheGeoviewLayer;
     try {
-      const layerConfig = this.getLayerConfig(layerPath) as TypeLayerEntryConfig;
+      const layerConfig = (await this.getLayerConfigAsync(layerPath, true)) as TypeLayerEntryConfig | null;
       const layerFilter = (layer: BaseLayer) => {
         const layerSource = layer.get('layerConfig')?.source;
         const configSource = layerConfig?.source;
@@ -267,7 +266,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
       const features = map.getFeaturesAtPixel(location, { hitTolerance: 4, layerFilter });
       return await this.formatFeatureInfoResult(features as Feature[], layerConfig as TypeVectorLayerEntryConfig);
     } catch (error) {
-      console.log('abstract-geoview-vector.getFeatureInfoAtPixel\n', error);
+      console.error('abstract-geoview-vector.getFeatureInfoAtPixel\n', error);
       return null;
     }
   }
@@ -280,8 +279,9 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
    *
    * @returns {Promise<TypeArrayOfFeatureInfoEntries>} The feature info table.
    */
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   protected getFeatureInfoAtCoordinate(location: Coordinate, layerPath?: string): Promise<TypeArrayOfFeatureInfoEntries> {
+    // TODO: Check - The return type of this function should maybe be Promise<TypeArrayOfFeatureInfoEntries | null>
+    // TO.DD.CONT: and standardize this across all layer classes and all getFeatureInfo functions.
     layerPath = layerPath || this.layerPathAssociatedToTheGeoviewLayer;
     const { map } = api.maps[this.mapId];
     return this.getFeatureInfoAtPixel(map.getPixelFromCoordinate(location as Coordinate), layerPath);
@@ -295,7 +295,6 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
    *
    * @returns {Promise<TypeArrayOfFeatureInfoEntries>} The feature info table.
    */
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   protected getFeatureInfoAtLongLat(location: Coordinate, layerPath?: string): Promise<TypeArrayOfFeatureInfoEntries> {
     layerPath = layerPath || this.layerPathAssociatedToTheGeoviewLayer;
     const { map } = api.maps[this.mapId];
@@ -352,7 +351,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
    * @param {never} notUsed1 This parameter must not be provided. It is there to allow overloading of the method signature.
    * @param {never} notUsed2 This parameter must not be provided. It is there to allow overloading of the method signature.
    */
-  applyViewFilter(filter: string, notUsed1?: never, notUsed2?: never): void;
+  applyViewFilter(filter: string, notUsed1?: never, notUsed2?: never): Promise<void>;
 
   /** ***************************************************************************************************************************
    * Apply a view filter to the layer identified by the path stored in the layerPathAssociatedToTheGeoviewLayer property stored
@@ -365,7 +364,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
    * @param {boolean} CombineLegendFilter Flag used to combine the legend filter and the filter together (default: true)
    * @param {never} notUsed This parameter must not be provided. It is there to allow overloading of the method signature.
    */
-  applyViewFilter(filter: string, CombineLegendFilter: boolean, notUsed?: never): void;
+  applyViewFilter(filter: string, CombineLegendFilter: boolean, notUsed?: never): Promise<void>;
 
   /** ***************************************************************************************************************************
    * Apply a view filter to the layer. When the CombineLegendFilter flag is false, the filter paramater is used alone to display
@@ -377,11 +376,11 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
    * @param {string} filter A filter to be used in place of the getViewFilter value.
    * @param {boolean} CombineLegendFilter Flag used to combine the legend filter and the filter together (default: true)
    */
-  applyViewFilter(layerPath: string, filter?: string, CombineLegendFilter?: boolean): void;
+  applyViewFilter(layerPath: string, filter?: string, CombineLegendFilter?: boolean): Promise<void>;
 
   // See above headers for signification of the parameters. The first lines of the method select the template
   // used based on the parameter types received.
-  applyViewFilter(parameter1: string, parameter2?: string | boolean | never, parameter3?: boolean | never) {
+  async applyViewFilter(parameter1: string, parameter2?: string | boolean | never, parameter3?: boolean | never): Promise<void> {
     let layerPath = this.layerPathAssociatedToTheGeoviewLayer;
     let filter = '';
     let CombineLegendFilter = true;
@@ -399,9 +398,9 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
       }
     } else filter = parameter1;
 
-    const layerConfig = this.getLayerConfig(layerPath) as TypeVectorLayerEntryConfig;
-    if (!layerConfig?.olLayer) return; // We must wait for the layer to be created.
-
+    // Get the layer config in a loaded phase
+    const layerConfig = await this.getLayerConfigAsync(layerPath, true);
+    if (!layerConfig) throw new Error(`Couldn't applyViewFilter for vector as couldn't get layer config for layerPath ${layerPath}`);
     let filterValueToUse = filter.replaceAll(/\s{2,}/g, ' ').trim();
     layerConfig.olLayer!.set('legendFilterIsOff', !CombineLegendFilter);
     if (CombineLegendFilter) layerConfig.olLayer?.set('layerFilter', filter);

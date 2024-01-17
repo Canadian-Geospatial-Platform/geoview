@@ -53,6 +53,7 @@
     "repoLink": "Lien repo"
   },
   "legend": {
+    "title": "Légende",
     "unknown": "Titre de légende inconnu",
     "removeLayer": "Supprimer le calque",
     "toggleOpacity": "Basculer le Opacité DEPRECATED",
@@ -70,6 +71,7 @@
     "itemsCount": "{count} sur {totalCount} éléments"
   },
   "layers": {
+    "title": "Couche",
     "subLayersList": "Liste des sous-couches",
     "removingLayers": "Suppression des couches",
     "reArrangeLayers": "Réorganiser les couches",
@@ -109,6 +111,7 @@
     "toggleCollapse": "Basculer la fermeture"
   },
   "details": {
+    "title": "Détails",
     "zoomTo": "Zoom à l'élément",
     "select": "Sélectionner l'élément sur la carte",
     "externalLink": "Lien externe",
@@ -170,6 +173,7 @@
     "alticon": "Symbol de l'élément sélectionné"
   },
   "dataTable": {
+    "title": "Données",
     "icon": "ICÔNE",
     "zoom": "ZOOM",
     "exportBtn": "Exporter",

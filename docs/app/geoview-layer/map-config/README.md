@@ -45,7 +45,7 @@ The `components` property is optional and its type is `TypeMapComponents` which 
 
 ## corePackages
 
-The `corePackages` property is optional and its type is `TypeMapCorePackages` which is an array whose value domain is `'basemap-panel', 'layers-panel', 'details-panel', 'geolocator-panel', 'footer-panel'`. It is used to define the core packages to initialize when the viewer is loaded. The schema for these packages and their default configuration are on their own package. When its value is undefined, the default = ['basemap-panel' | 'layers-panel' | 'details-panel' | 'geolocator-panel'] is used.
+The `corePackages` property is optional and its type is `TypeMapCorePackages` which is an array whose value domain is `'basemap-panel', 'swiper', 'time-slider', 'geochart'`. It is used to define the core packages to initialize when the viewer is loaded. The schema for these packages and their default configuration are on their own package. When its value is undefined, the default = [] is used.
 
 ## externalPackages
 

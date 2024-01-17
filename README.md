@@ -26,8 +26,6 @@ This project is now a monorepo and contains the following packages under the `pa
 
 - [geoview-layers-panel](packages/geoview-layers-panel) - a package that displays a panel with a list of loaded layers and their legend.
 
-- [geoview-footer-panel](packages/geoview-footer-panel) - a package that displays a footer panel with a list of tabs (legend, details, data table, ...) for basic view.
-
 - [geoview-swiper](packages/geoview-swiper) - a package that enable a swiper control to tooggle visibility of layers from one side to the other side of the swiper bar.
 
 ## Development

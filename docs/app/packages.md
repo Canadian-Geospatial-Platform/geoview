@@ -197,11 +197,11 @@ The viewer is bundled with core packages, you can load them by passing their id 
           }
         },
         'components': ['north-arrow', 'overview-map'],
-        'corePackages': ['details-panel', 'layers-panel', 'basemap-panel'],
+        'corePackages': ['basemap-panel'],
         'theme': 'dark',
         'suportedLanguages': ['en']
       }"
 ></div>
 ```
 
-Available package ids `details-panel`, `layers-panel`, `basemap-panel`, `footer-panel`
+Available package ids `basemap-panel`, `swiper`, `time-slider`, `geochart`

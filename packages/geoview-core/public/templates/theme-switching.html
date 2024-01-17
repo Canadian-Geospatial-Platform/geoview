@@ -122,7 +122,12 @@
       'navBar': ['zoom', 'fullscreen', 'home', 'location', 'export'],
       'appBar': ['geolocator', 'export'],
       'components': ['north-arrow', 'overview-map'],
-      'corePackages': ['basemap-panel', 'layers-panel', 'details-panel', 'footer-panel'],
+      'footerTabs': {
+        'tabs': {
+          'core': ['legend', 'layers', 'details', 'data-table']
+        }
+      },
+      'corePackages': ['basemap-panel'],
       'externalPackages': [],
       'suportedLanguages': ['en']
     }`;
