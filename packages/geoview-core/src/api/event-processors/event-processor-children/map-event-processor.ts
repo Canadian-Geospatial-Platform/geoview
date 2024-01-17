@@ -363,7 +363,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
       const nextLayerLegend = legendsArray.filter((layerLegend) => layerLegend.order === i)[0];
       if (nextLayerLegend) {
         layerPathList.push(nextLayerLegend.layerPath);
-        if (nextLayerLegend.children.length > 0) {
+        if (nextLayerLegend.children.length) {
           layerPathList.push(...this.getLayerPathsFromLegendsArray(nextLayerLegend.children));
         }
       }
