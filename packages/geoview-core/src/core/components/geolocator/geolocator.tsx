@@ -1,16 +1,12 @@
 import { ChangeEvent, useCallback, useRef, useState } from 'react';
-
 import { useTranslation } from 'react-i18next';
-
 import debounce from 'lodash/debounce';
-
-import { CloseIcon, SearchIcon, AppBar, Box, Divider, IconButton, Paper, ProgressBar, Toolbar, Typography } from '@/ui';
-import GeoList from './geo-list';
+import { CloseIcon, SearchIcon, AppBar, Box, Divider, IconButton, ProgressBar, Toolbar } from '@/ui';
 import { StyledInputField, sxClasses } from './geolocator-style';
 import { OL_ZOOM_DURATION } from '@/core/utils/constant';
 import { useUIAppbarGeolocatorActive } from '@/core/stores/store-interface-and-intial-values/ui-state';
-import { useMapSize, useMapStoreActions } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { useAppGeolocatorServiceURL, useAppDisplayLanguage } from '@/core/stores/store-interface-and-intial-values/app-state';
+import { GeolocatorResult } from './geolocator-result';
 
 export interface GeoListItem {
   key: string;
@@ -35,11 +31,9 @@ export function Geolocator() {
   // get store values
   const displayLanguage = useAppDisplayLanguage();
   const geolocatorServiceURL = useAppGeolocatorServiceURL();
-  const mapSize = useMapSize();
 
   // set the active (visible) or not active (hidden) from geolocator button click
   const active = useUIAppbarGeolocatorActive();
-  const { zoomToGeoLocatorLocation } = useMapStoreActions();
 
   const urlRef = useRef<string>(`${geolocatorServiceURL}&lang=${displayLanguage}`);
 
@@ -129,7 +123,7 @@ export function Geolocator() {
                 <StyledInputField placeholder={t('geolocator.search')!} autoFocus onChange={onChange} value={searchValue} />
               )}
 
-              <Box sx={{ display: 'flex', marginLeft: 'auto' }}>
+              <Box sx={{ display: 'flex', marginLeft: 'auto', alignItems: 'center' }}>
                 <IconButton
                   size="small"
                   edge="end"
@@ -167,19 +161,7 @@ export function Geolocator() {
       )}
       {!!data && (
         <Box sx={sxClasses.searchResult}>
-          <Paper
-            component="div"
-            square
-            elevation={4}
-            sx={{ width: 400, height: mapSize![1] - 80, maxHeight: mapSize![1] - 80, overflowY: 'auto' }}
-          >
-            {!!data.length && <GeoList geoListItems={data} zoomToLocation={zoomToGeoLocatorLocation} />}
-            {(!data.length || error) && (
-              <Typography component="p" sx={{ fontSize: 14, p: 10 }}>
-                {t('geolocator.errorMessage')} {searchValue}
-              </Typography>
-            )}
-          </Paper>
+          <GeolocatorResult geoLocationData={data} searchValue={searchValue} error={error} />
         </Box>
       )}
     </Box>

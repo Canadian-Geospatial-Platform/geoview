@@ -5,8 +5,8 @@ export const sxClasses = {
     position: 'absolute',
     top: 12,
     left: 80,
-    maxWidth: 284,
-    width: 284,
+    maxWidth: 350,
+    width: 350,
   },
   geolocator: {
     position: 'relative',
@@ -32,9 +32,24 @@ export const sxClasses = {
       width: '100%',
     },
   },
+  filter: {
+    display: 'flex',
+    flexDirection: 'row',
+    alignItems: 'end',
+    padding: 6,
+    paddingTop: 2,
+    '& .MuiInputLabel-formControl': {
+      fontSize: '14px',
+      marginTop: 0,
+    },
+    '& .MuiSelect-select': {
+      padding: '0px 12px 4px 12px !important',
+    },
+  },
   searchResult: {
     position: 'relative',
     display: 'flex',
+    flexDirection: 'column',
     zIndex: 1100,
     marginTop: 6,
   },
