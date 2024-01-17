@@ -1,7 +1,6 @@
-
 import { useTranslation } from 'react-i18next';
 import { Button } from '@mui/material';
-import Hidden from '@mui/material/Hidden';
+import { useEffect, useState } from 'react';
 import { Box, AddCircleOutlineIcon, ButtonGroup, DeleteOutlineIcon, HandleIcon, Tooltip, VisibilityOutlinedIcon } from '@/ui';
 import { useLayerStoreActions, useLayersDisplayState } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { TypeLayersViewDisplayState } from './types';
@@ -16,6 +15,10 @@ interface ResponsiveButtonProps {
 function ResponsiveButton(props: ResponsiveButtonProps): JSX.Element {
   const { tooltipKey, translationKey, icon, newState } = props;
   const { t } = useTranslation<string>();
+  const breakpoint = 450;
+
+  // state
+  const [screenWidth, setScreenWidth] = useState(window.innerWidth);
 
   // access store
   const displayState = useLayersDisplayState();
@@ -25,30 +28,40 @@ function ResponsiveButton(props: ResponsiveButtonProps): JSX.Element {
     setDisplayState(dispState);
   };
 
+  useEffect(() => {
+    const handleResize = () => {
+      setScreenWidth(window.innerWidth);
+    };
+
+    window.addEventListener('resize', handleResize);
+
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    };
+  }, []);
+
+  if (screenWidth < breakpoint) {
+    return (
+      <Tooltip title={t(tooltipKey)} placement="top" enterDelay={1000}>
+        <Button
+          sx={{ paddingLeft: '20px' }}
+          variant={displayState === newState ? 'contained' : 'outlined'}
+          startIcon={icon}
+          onClick={() => handleSetDisplayState(newState)}
+        />
+      </Tooltip>
+    );
+  }
   return (
-    <>
-      <Hidden smDown>
-        <Tooltip title={t(tooltipKey)} placement="top" enterDelay={1000}>
-          <Button
-            variant={displayState === newState ? 'contained' : 'outlined'}
-            startIcon={icon}
-            onClick={() => handleSetDisplayState(newState)}
-          >
-            {t(translationKey)}
-          </Button>
-        </Tooltip>
-      </Hidden>
-      <Hidden smUp>
-        <Tooltip title={t(tooltipKey)} placement="top" enterDelay={1000}>
-          <Button
-            sx={{ paddingLeft: '20px' }}
-            variant={displayState === newState ? 'contained' : 'outlined'}
-            startIcon={icon}
-            onClick={() => handleSetDisplayState(newState)}
-          />
-        </Tooltip>
-      </Hidden>
-    </>
+    <Tooltip title={t(tooltipKey)} placement="top" enterDelay={1000}>
+      <Button
+        variant={displayState === newState ? 'contained' : 'outlined'}
+        startIcon={icon}
+        onClick={() => handleSetDisplayState(newState)}
+      >
+        {t(translationKey)}
+      </Button>
+    </Tooltip>
   );
 }
 

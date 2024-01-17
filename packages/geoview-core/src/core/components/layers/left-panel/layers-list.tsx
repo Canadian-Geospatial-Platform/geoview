@@ -53,12 +53,12 @@ export function LayersList({ layersList, setIsLayersListPanelVisible, parentLaye
 
   const getListStyle = (isDraggingOver: boolean) => {
     if (isDraggingOver) {
-      return { 
-        background: 'rgba(192, 192, 192, 0.5)'
+      return {
+        background: 'rgba(192, 192, 192, 0.5)',
       };
     }
     return {
-      padding: '2px 0px 0px 0px'
+      padding: '2px 0px 0px 0px',
     };
   };
 
