@@ -16,37 +16,37 @@ import { PluginGeoChartConfig, GeoViewGeoChartConfig, GeoViewGeoChartConfigLayer
  * @return [GeoViewGeoChartConfig<ChartType> | undefined, GeoViewGeoChartConfigLayer | undefined]
  * The GeoViewGeoChartConfig and GeoViewGeoChartConfigLayer configurations
  */
-const findLayerConfig = (
-  config: PluginGeoChartConfig<ChartType>,
-  layerId: string
-): [GeoViewGeoChartConfig<ChartType> | undefined, GeoViewGeoChartConfigLayer | undefined] => {
-  // Find the chart plugin layer config that works with layer that contains found data
-  // For each chart plugin config that works with a layer config
-  let foundConfigChart: GeoViewGeoChartConfig<ChartType> | undefined;
-  let foundConfigLyr: GeoViewGeoChartConfigLayer | undefined;
-  config.charts
-    .filter((x: GeoViewGeoChartConfig<ChartType>) => {
-      return x.layers;
-    })
-    .forEach((c: GeoViewGeoChartConfig<ChartType>) => {
-      // If still not found
-      if (!foundConfigLyr) {
-        // Find the config that works with the layer (if any)
-        const layerConfigs = c.layers!.filter((x: GeoViewGeoChartConfigLayer) => {
-          return x.layerId === layerId;
-        });
+// const findLayerConfig = (
+//   config: PluginGeoChartConfig<ChartType>,
+//   layerId: string
+// ): [GeoViewGeoChartConfig<ChartType> | undefined, GeoViewGeoChartConfigLayer | undefined] => {
+//   // Find the chart plugin layer config that works with layer that contains found data
+//   // For each chart plugin config that works with a layer config
+//   let foundConfigChart: GeoViewGeoChartConfig<ChartType> | undefined;
+//   let foundConfigLyr: GeoViewGeoChartConfigLayer | undefined;
+//   config.charts
+//     .filter((x: GeoViewGeoChartConfig<ChartType>) => {
+//       return x.layers;
+//     })
+//     .forEach((c: GeoViewGeoChartConfig<ChartType>) => {
+//       // If still not found
+//       if (!foundConfigLyr) {
+//         // Find the config that works with the layer (if any)
+//         const layerConfigs = c.layers!.filter((x: GeoViewGeoChartConfigLayer) => {
+//           return x.layerId === layerId;
+//         });
 
-        // If found any, take the first one and this will stop the loop
-        if (layerConfigs.length > 0) {
-          foundConfigChart = c;
-          [foundConfigLyr] = layerConfigs;
-        }
-      }
-    });
+//         // If found any, take the first one and this will stop the loop
+//         if (layerConfigs.length > 0) {
+//           foundConfigChart = c;
+//           [foundConfigLyr] = layerConfigs;
+//         }
+//       }
+//     });
 
-  // Return it when found
-  return [foundConfigChart, foundConfigLyr];
-};
+//   // Return it when found
+//   return [foundConfigChart, foundConfigLyr];
+// };
 
 /**
  * Simplifies the FeatureInfoEntries into more straightforward TypeJsonObjects.
@@ -99,7 +99,8 @@ export const findLayerDataAndConfigFromQueryResults = (
       // If found something
       if (layerData.features && layerData.features.length > 0) {
         // Find the layer config associated with the dada
-        [foundConfigChart, foundConfigChartLyr] = findLayerConfig(config, layerData.layerPath);
+        // [foundConfigChart, foundConfigChartLyr] = findLayerConfig(config, layerData.layerPath);
+        [foundConfigChart, foundConfigChartLyr] = [config[layerData.layerPath], config[layerData.layerPath].layers[0]];
 
         // If found a corresponding layer config
         if (foundConfigChartLyr) {

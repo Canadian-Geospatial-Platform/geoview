@@ -2,9 +2,9 @@ import { Cast, AnySchemaObject, toJsonObject, TypeJsonObject } from 'geoview-cor
 import { FooterPlugin } from 'geoview-core/src/api/plugin/footer-plugin';
 import { TypeTabs } from 'geoview-core/src/ui/tabs/tabs';
 import { ChartType } from 'geochart';
-import { LayerListEntry } from 'geoview-core/src/core/components/common';
 import { ChartIcon } from 'geoview-core/src/ui/icons';
 
+import { GeochartEventProcessor } from 'geoview-core/src/api/event-processors/event-processor-children/geochart-event-processor';
 import { PayloadBaseClassChart, EVENT_CHART_REDRAW } from './geochart-event-base';
 import { PayloadChartConfig } from './geochart-event-config';
 import { PluginGeoChartConfig } from './geochart-types';
@@ -37,61 +37,31 @@ class GeoChartFooterPlugin extends FooterPlugin {
     en: {
       chartPanel: {
         title: 'Chart',
+        panel: {
+          noLayers: 'No layers with chart data',
+        },
       },
     },
     fr: {
       chartPanel: {
         title: 'Graphique',
+        panel: {
+          noLayers: 'Pas de couches avec des données graphiques',
+        },
       },
     },
   });
 
   onCreateContentProps(): TypeTabs {
-    // Cast the config
-    const chartConfig: PluginGeoChartConfig<ChartType> | undefined = this.configObj;
-
-    // Create content
-    const layerList = chartConfig?.charts
-      .map((chart) => {
-        const layerIds =
-          chart.layers?.map((layer) => {
-            return layer.layerId;
-          }) ?? [];
-
-        return layerIds;
-      })
-      .flat()
-      .reduce((acc, curr) => {
-        if (this.api.maps[this.pluginProps.mapId].layer.registeredLayers[curr]) {
-          const currLayer = this.api.maps[this.pluginProps.mapId].layer.registeredLayers[curr];
-          const layerName =
-            currLayer.layerName && this.displayLanguage() in currLayer.layerName
-              ? currLayer.layerName[this.displayLanguage()]
-              : currLayer.layerName;
-          const layerData = {
-            layerName,
-            layerPath: curr,
-            tooltip: layerName,
-          };
-          acc.push(layerData);
-        }
-
-        return acc;
-      }, [] as LayerListEntry[]);
-
-    // If any layers list
-    let content = <div>No layers in config</div>;
-    if (layerList) {
-      // Create element
-      content = <GeoChartPanel mapId={this.pluginProps.mapId} configObj={this.configObj} layerList={layerList} />;
-    }
+    // initialize the store with geochart provided configuration
+    GeochartEventProcessor.setGeochartCharts(this.pluginProps.mapId, this.configObj.charts);
 
     return {
       id: 'geochart',
       value: this.value!,
       label: 'chartPanel.title',
       icon: <ChartIcon />,
-      content,
+      content: <GeoChartPanel mapId={this.pluginProps.mapId} configObj={this.configObj} />,
     };
   }
 

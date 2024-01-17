@@ -57,7 +57,7 @@ export function Layout({ children, layerList, handleLayerList, selectedLayerPath
       />
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedLayerPath, isEnlargeDataTable]);
+  }, [selectedLayerPath, isEnlargeDataTable, layerList]);
 
   return (
     <Box sx={sxClasses.detailsContainer}>

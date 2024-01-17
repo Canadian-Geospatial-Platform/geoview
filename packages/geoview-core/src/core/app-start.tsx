@@ -1,4 +1,4 @@
-import React, { Suspense, useMemo } from 'react';
+import { createContext, Suspense, useMemo } from 'react';
 
 import './translation/i18n';
 import i18n from 'i18next';
@@ -15,7 +15,7 @@ import { api, useAppDisplayLanguageById, useAppDisplayThemeById } from '@/app';
 
 // create a state that will hold map config information
 // TODO: use store, only keep map id on context for store manager to gather right store on hooks
-export const MapContext = React.createContext<TypeMapContext>({
+export const MapContext = createContext<TypeMapContext>({
   mapId: '',
   mapFeaturesConfig: undefined,
 });
@@ -76,7 +76,9 @@ function AppStart(props: AppStartProps): JSX.Element {
       <I18nextProvider i18n={i18nInstance}>
         <MapContext.Provider value={mapContextValue}>
           <ThemeProvider theme={getTheme(theme)}>
+            {/* <StrictMode> */}
             <Shell shellId={mapId as string} />
+            {/* </StrictMode> */}
           </ThemeProvider>
         </MapContext.Provider>
       </I18nextProvider>

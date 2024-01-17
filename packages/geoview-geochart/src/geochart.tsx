@@ -8,6 +8,7 @@ import {
   TypeFeatureInfoEntry,
 } from 'geoview-core/src/api/events/payloads';
 import { logger } from 'geoview-core/src/core/utils/logger';
+import { useGeochartConfigs } from 'geoview-core/src/core/stores/store-interface-and-intial-values/geochart-state';
 import { findLayerDataAndConfigFromQueryResults, loadDatasources } from './geochart-parsing';
 import { PluginGeoChartConfig, GeoViewGeoChartConfig, GeoViewGeoChartConfigLayer } from './geochart-types';
 import { PayloadBaseClassChart, EVENT_CHART_CONFIG, EVENT_CHART_LOAD, EVENT_CHART_REDRAW } from './geochart-event-base';
@@ -19,7 +20,7 @@ import { PayloadChartLoad } from './geochart-event-load';
  */
 interface GeoChartProps {
   mapId: string;
-  config: PluginGeoChartConfig<ChartType>;
+  // config: PluginGeoChartConfig<ChartType>;
   schemaValidator: SchemaValidator;
   // eslint-disable-next-line react/require-default-props
   sx?: React.CSSProperties;
@@ -38,7 +39,7 @@ export function GeoChart(props: GeoChartProps): JSX.Element {
   const { useEffect, useState, useCallback } = cgpv.react;
 
   // Read props
-  const { mapId, config: parentConfig, schemaValidator, sx } = props;
+  const { mapId, schemaValidator, sx } = props;
 
   // Get the theme
   const theme = useTheme();
@@ -46,19 +47,21 @@ export function GeoChart(props: GeoChartProps): JSX.Element {
   // Tweak the default colors based on the theme
   const defaultColors: GeoChartDefaultColors = {
     backgroundColor: theme.palette.background.default,
-    borderColor: theme.palette.border.primary,
+    borderColor: 'black', // theme.palette.primary,
     color: theme.palette.primary.main,
   };
 
   // #region USE STATE SECTION ****************************************************************************************
 
   // Use State
-  const [config, setConfig] = useState<PluginGeoChartConfig<ChartType>>(parentConfig);
+  const [configFound, setConfigFound] = useState<PluginGeoChartConfig<ChartType>>();
   const [inputs, setInputs] = useState<GeoChartConfig<ChartType>>();
   const [action, setAction] = useState<GeoChartAction>();
   const [isLoadingChart, setIsLoadingChart] = useState<boolean>();
+  console.log(configFound);
 
   // Use Store
+  const config = useGeochartConfigs();
   const storeLayerDataArray = useDetailsStoreLayerDataArray();
   const displayLanguage = useAppDisplayLanguageById(mapId);
 
@@ -101,7 +104,7 @@ export function GeoChart(props: GeoChartProps): JSX.Element {
    */
   const handleChartConfig = (e: PayloadChartConfig): void => {
     // Set the config
-    setConfig(e.config);
+    setConfigFound(e.config);
   };
 
   // #endregion
