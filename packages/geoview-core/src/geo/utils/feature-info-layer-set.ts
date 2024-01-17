@@ -150,7 +150,6 @@ export class FeatureInfoLayerSet {
       EVENT_NAMES.MAP.EVENT_MAP_POINTER_MOVE,
       debounce((payload) => {
         if (payloadIsAMapMouseEvent(payload)) {
-          if (this.disableHover) return;
           Object.keys(this.resultSets).forEach((layerPath) => {
             if (this.disableHoverOverLayer[layerPath]) return;
             this.resultSets[layerPath].data.hover = {
