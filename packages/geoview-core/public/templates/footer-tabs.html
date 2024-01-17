@@ -269,19 +269,12 @@
         // import footerTabs from the core for the current map
         const { footerTabs } = api.maps[mapId];
 
-        // create new tab and add the LegendComponent to the footer tab
-        footerTabs.createFooterTab({
-          id: 'legend',
-          value: 0,
-          label: 'Legend',
-          content: () => api.maps[mapId].legend.createLegend({ layerIds: ['wmsLYR1', 'esriDynamicLYR2', 'esriFeatureLYR4'] }),
-        });
-
+        // create new tab and add the component
         footerTabs.createFooterTab({
           id: 'custom',
-          value: 4,
+          value: 2,
           label: 'Custom',
-          content: () => 'This is a table to develop', // TableComponent,
+          content: 'This is a table to develop', // TableComponent,
         });
       });
     </script>

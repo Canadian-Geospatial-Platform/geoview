@@ -558,16 +558,16 @@ export function stringify(str: unknown): unknown | string {
  * @param doCallback the function executed when checkCallback returns true or some object
  * @param failCallback the function executed when checkCallback has failed for too long (went over the timeout)
  * @param startDate the initial date this task was started
- * @param checkFrequency the frequency in milliseconds to callback for a check (defaults to 100 milliseconds)
  * @param timeout the duration in milliseconds until the task is aborted
+ * @param checkFrequency the frequency in milliseconds to callback for a check (defaults to 100 milliseconds)
  */
 function _whenThisThenThat<T>(
   checkCallback: () => T,
   doCallback: (value: T) => void,
   failCallback: (reason?: any) => void,
   startDate: Date,
-  checkFrequency: number,
-  timeout: number
+  timeout: number,
+  checkFrequency: number
 ): void {
   // Check if we're good
   const v = checkCallback();
@@ -578,10 +578,10 @@ function _whenThisThenThat<T>(
     // Check again later
     setTimeout(() => {
       // Recursive call
-      _whenThisThenThat(checkCallback, doCallback, failCallback, startDate, checkFrequency, timeout);
+      _whenThisThenThat(checkCallback, doCallback, failCallback, startDate, timeout, checkFrequency);
     }, checkFrequency);
   } else {
-    // Failed, took too long
+    // Failed, took too long, this throws an exception in typical async/await contexts
     failCallback('Task abandonned, took too long.');
   }
 }
@@ -593,33 +593,33 @@ function _whenThisThenThat<T>(
  * @param checkCallback the function executed to verify a particular condition until it's passed
  * @param doCallback the function executed when checkCallback returns true or some object
  * @param failCallback the function executed when checkCallback has failed for too long (went over the timeout)
- * @param checkFrequency the frequency in milliseconds to callback for a check (defaults to 100 milliseconds)
  * @param timeout the duration in milliseconds until the task is aborted (defaults to 10 seconds)
+ * @param checkFrequency the frequency in milliseconds to callback for a check (defaults to 100 milliseconds)
  */
 export function whenThisThenThat<T>(
   checkCallback: () => T,
   doCallback: (value: T) => void,
   failCallback: (reason?: any) => void,
-  checkFrequency?: number,
-  timeout?: number
+  timeout?: number,
+  checkFrequency?: number
 ): void {
   const startDate = new Date();
   if (!checkFrequency) checkFrequency = 100; // Check every 100 milliseconds by default
   if (!timeout) timeout = 10000; // Timeout after 10 seconds by default
-  _whenThisThenThat(checkCallback, doCallback, failCallback, startDate, checkFrequency, timeout);
+  _whenThisThenThat(checkCallback, doCallback, failCallback, startDate, timeout, checkFrequency);
 }
 
 /**
  * This asynchronous generic function checks for a validity of something via the checkCallback() until it's found or until the timer runs out.
  * This method returns a Promise which the developper can use to await or use .then().catch().finally() principles.
  * @param checkCallback the function executed to verify a particular condition until it's passed
- * @param checkFrequency the frequency in milliseconds to check for an update (defaults to 100 milliseconds)
  * @param timeout the duration in milliseconds until the task is aborted (defaults to 10 seconds)
+ * @param checkFrequency the frequency in milliseconds to check for an update (defaults to 100 milliseconds)
  */
-export function whenThisThen<T>(checkCallback: () => T, checkFrequency?: number, timeout?: number): Promise<T> {
+export function whenThisThen<T>(checkCallback: () => T, timeout?: number, checkFrequency?: number): Promise<T> {
   return new Promise<T>((resolve, reject) => {
     // Redirect
-    whenThisThenThat(checkCallback, resolve, reject, checkFrequency, timeout);
+    whenThisThenThat(checkCallback, resolve, reject, timeout, checkFrequency);
   });
 }
 

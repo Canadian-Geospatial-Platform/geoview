@@ -99,20 +99,36 @@ async function renderMap(mapElement: Element): Promise<void> {
 }
 
 /**
- * Initialize a basic div from a function call. The div MUST not have geoview-map class.
+ * Initialize a basic div from a function call.
+ * !The div MUST NOT have a geoview-map class or a warning will be shown.
  * If is present, the div will be created with a default config
  *
  * @param {Element} mapDiv The basic div to initialise
  * @param {string} mapConfig the new config passed in from the function call
  */
-export function initMapDivFromFunctionCall(mapDiv: HTMLElement, mapConfig: string): void {
-  // Create a data-config attribute and set config value
-  const att = document.createAttribute('data-config');
-  att.value = mapConfig;
-  mapDiv.setAttributeNode(att);
+export async function initMapDivFromFunctionCall(mapDiv: HTMLElement, mapConfig: string): Promise<void> {
+  // If the div doesn't have a geoview-map class (therefore isn't supposed to be loaded via init())
+  if (!mapDiv.classList.contains('geoview-map')) {
+    // Create a data-config attribute and set config value on the div
+    const att = document.createAttribute('data-config');
+    att.value = mapConfig;
+    mapDiv.setAttributeNode(att);
 
-  mapDiv.classList.add('geoview-map');
-  renderMap(mapDiv);
+    // Set the geoview-map class on the div so that this class name is standard for all maps (either created via init or via func call)
+    mapDiv.classList.add('geoview-map');
+
+    // Add a compatibility flag on the div so that when a map is loaded via function call, it's subsequently ignored in eventual init() calls.
+    // This is useful in case that a html first calls for example `cgpv.api.createMapFromConfig('LNG1', config);` and then
+    // calls `cgpv.init()` (let's say for other maps on the page), the map LNG1 isn't being initialized twice.
+    // Remember that init() grabs all maps with geoview-map class and we just added that class manually above, so we need that flag.
+    mapDiv.classList.add('geoview-map-func-call');
+
+    // Render the map
+    await renderMap(mapDiv);
+  } else {
+    // eslint-disable-next-line no-console
+    console.warn(`Div with id ${mapDiv.id} has a class 'geoview-map' and should be initialized via a cgpv.init() call.`);
+  }
 }
 
 /**
@@ -120,17 +136,22 @@ export function initMapDivFromFunctionCall(mapDiv: HTMLElement, mapConfig: strin
  *
  * @param {Function} callback optional callback function to run once the rendering is ready
  */
-function init(callback: () => void) {
+async function init(callback: () => void): Promise<void> {
   // set the API callback if a callback is provided
   if (callback) api.readyCallback = callback;
 
   const mapElements = document.getElementsByClassName('geoview-map');
 
   // loop through map elements on the page
+  const promises = [];
   for (let i = 0; i < mapElements.length; i += 1) {
     const mapElement = mapElements[i] as Element;
-    renderMap(mapElement);
+    if (!mapElement.classList.contains('geoview-map-func-call')) promises.push(renderMap(mapElement));
   }
+
+  // Wait for map renders to end. Note: the api.readyCallback isn't quite done yet; that's different.
+  // TODO: Check - Maybe we want to use Promise.allSettled here instead?
+  await Promise.all(promises);
 }
 
 // cgpv object to be exported with the api for outside use

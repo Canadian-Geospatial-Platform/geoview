@@ -13,45 +13,30 @@
     },
     "listOfGeoviewLayerConfig": [
       {
-        "geoviewLayerId": "wmsLYR1",
-        "geoviewLayerName": {
-          "en": "Première Nation / First Nation",
-          "fr": "Première Nation / First Nation"
-        },
-        "metadataAccessPath": {
-          "en": "https://services.aadnc-aandc.gc.ca/geomatics/services/Donnees_Ouvertes-Open_Data/Premiere_Nation_First_Nation/MapServer/WMSServer",
-          "fr": "https://services.aadnc-aandc.gc.ca/geomatics/services/Donnees_Ouvertes-Open_Data/Premiere_Nation_First_Nation/MapServer/WMSServer"
-        },
-        "geoviewLayerType": "ogcWms",
-        "listOfLayerEntryConfig": [{ "layerId": "0" }]
-      },
-      {
-        "geoviewLayerId": "esriDynamicLYR2",
-        "geoviewLayerName": {
-          "en": "Energy",
-          "fr": "Energy"
-        },
-        "metadataAccessPath": {
-          "en": "https://maps-cartes.ec.gc.ca/arcgis/rest/services/CESI/MapServer",
-          "fr": "https://maps-cartes.ec.gc.ca/arcgis/rest/services/CESI/MapServer"
-        },
-        "geoviewLayerType": "esriDynamic",
-        "listOfLayerEntryConfig": [{ "layerId": "0" }, { "layerId": "6" }]
-      },
-      {
         "geoviewLayerId": "esriFeatureLYR4",
-        "geoviewLayerName": { "en": "Water quality at monitoring sites" },
+        "geoviewLayerName": {
+          "en": "Water quality at monitoring sites"
+        },
         "metadataAccessPath": {
           "en": "https://maps-cartes.ec.gc.ca/arcgis/rest/services/DMS/DEU_CSO_Volume/MapServer"
         },
         "geoviewLayerType": "esriFeature",
-        "listOfLayerEntryConfig": [{ "layerId": "8" }]
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "8"
+          }
+        ]
       }
     ]
   },
-  "theme": "dark",
+  "theme": "geo.ca",
   "components": ["north-arrow", "overview-map"],
-  "corePackages": ["footer-panel"],
+  "footerTabs": {
+    "tabs": {
+      "core": ["legend", "layers"]
+    }
+  },
+  "corePackages": [],
   "externalPackages": [],
   "suportedLanguages": ["en"]
 }

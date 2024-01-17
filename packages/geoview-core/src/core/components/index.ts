@@ -26,7 +26,6 @@ export * from './geolocator/geolocator';
 export * from './geolocator/geolocator-style';
 export * from './hover-tooltip/hover-tooltip';
 export * from './icon-stack/icon-stack';
-export * from './legend/legend-api';
 export * from './lightbox/lightbox';
 export * from './map/map';
 export * from './mouse-position/mouse-position';

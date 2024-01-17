@@ -46,7 +46,7 @@ function AppStart(props: AppStartProps): JSX.Element {
     return { mapId: mapId as string };
   }, [mapId]);
 
-  // get store values by id because context is not set.... it is the only 2 atomic selector by id
+  //! get store values by id because context is not set.... it is the only 2 atomic selector by id
   // once context is define, map id is available
   const language = useAppDisplayLanguageById(mapId);
   const theme = useAppDisplayThemeById(mapId);
@@ -59,6 +59,11 @@ function AppStart(props: AppStartProps): JSX.Element {
       lng: language,
       fallbackLng: language,
     });
+
+    //! call layer sets creation here instead of map event processor because the store map event processor
+    //! is ot created yet
+    api.getFeatureInfoLayerSet(mapId);
+    api.getLegendsLayerSet(mapId);
 
     // create a new map viewer instance and add it to the api
     // TODO: use store, remove the use of feature by viewer class and use state to gather values

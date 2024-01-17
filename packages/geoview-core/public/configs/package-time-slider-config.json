@@ -59,7 +59,12 @@
   },
   "theme": "geo.ca",
   "components": ["north-arrow", "overview-map"],
-  "corePackages": ["footer-panel", "time-slider"],
+  "footerTabs": {
+    "tabs": {
+      "core": ["legend", "layers", "details", "data-table", "time-slider"]
+    }
+  },
+  "corePackages": ["time-slider"],
   "externalPackages": [],
   "suportedLanguages": ["en"]
 }

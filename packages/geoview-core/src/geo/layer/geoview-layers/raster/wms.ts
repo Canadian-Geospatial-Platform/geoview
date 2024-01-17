@@ -653,9 +653,8 @@ export class WMS extends AbstractGeoViewRaster {
    */
   protected async getFeatureInfoAtLongLat(lnglat: Coordinate, layerPath: string): Promise<TypeArrayOfFeatureInfoEntries> {
     try {
-      const layerConfig = this.getLayerConfig(layerPath) as TypeOgcWmsLayerEntryConfig;
-      if (!this.getVisible(layerPath) || !layerConfig.olLayer) return [];
-
+      const layerConfig = (await this.getLayerConfigAsync(layerPath, true)) as TypeOgcWmsLayerEntryConfig | null;
+      if (!layerConfig || !this.getVisible(layerPath)) return [];
       const viewResolution = api.maps[this.mapId].getView().getResolution() as number;
       const crs = `EPSG:${MapEventProcessor.getMapState(this.mapId).currentProjection}`;
       const clickCoordinate = api.projection.transform(lnglat, 'EPSG:4326', crs);
@@ -715,7 +714,7 @@ export class WMS extends AbstractGeoViewRaster {
       }
       return [];
     } catch (error) {
-      console.log(error);
+      console.error(error);
       return [];
     }
   }
@@ -855,7 +854,7 @@ export class WMS extends AbstractGeoViewRaster {
    */
   async getLegend(layerPath: string): Promise<TypeLegend | null> {
     try {
-      const layerConfig = this.getLayerConfig(layerPath) as TypeOgcWmsLayerEntryConfig | undefined | null;
+      const layerConfig = (await this.getLayerConfigAsync(layerPath, true)) as TypeOgcWmsLayerEntryConfig | null;
       if (!layerConfig) return null;
 
       let legend: TypeWmsLegend;
@@ -897,6 +896,7 @@ export class WMS extends AbstractGeoViewRaster {
       };
       return legend;
     } catch (error) {
+      console.error(error);
       return null;
     }
   }
@@ -1008,7 +1008,7 @@ export class WMS extends AbstractGeoViewRaster {
    * @param {never} notUsed1 This parameter must not be provided. It is there to allow overloading of the method signature.
    * @param {never} notUsed2 This parameter must not be provided. It is there to allow overloading of the method signature.
    */
-  applyViewFilter(filter: string, notUsed1?: never, notUsed2?: never): void;
+  applyViewFilter(filter: string, notUsed1?: never, notUsed2?: never): Promise<void>;
 
   /** ***************************************************************************************************************************
    * Apply a view filter to the layer identified by the path stored in the layerPathAssociatedToTheGeoviewLayer property stored
@@ -1021,7 +1021,7 @@ export class WMS extends AbstractGeoViewRaster {
    * @param {boolean} CombineLegendFilter Flag used to combine the legend filter and the filter together (default: true)
    * @param {never} notUsed This parameter must not be provided. It is there to allow overloading of the method signature.
    */
-  applyViewFilter(filter: string, CombineLegendFilter: boolean, notUsed?: never): void;
+  applyViewFilter(filter: string, CombineLegendFilter: boolean, notUsed?: never): Promise<void>;
 
   /** ***************************************************************************************************************************
    * Apply a view filter to the layer. When the CombineLegendFilter flag is false, the filter paramater is used alone to display
@@ -1034,11 +1034,11 @@ export class WMS extends AbstractGeoViewRaster {
    * @param {string} filter An optional filter to be used in place of the getViewFilter value.
    * @param {boolean} CombineLegendFilter Flag used to combine the legend filter and the filter together (default: true)
    */
-  applyViewFilter(layerPath: string, filter?: string, CombineLegendFilter?: boolean): void;
+  applyViewFilter(layerPath: string, filter?: string, CombineLegendFilter?: boolean): Promise<void>;
 
   // See above headers for signification of the parameters. The first lines of the method select the template
   // used based on the parameter types received.
-  applyViewFilter(parameter1: string, parameter2?: string | boolean | never, parameter3?: boolean | never) {
+  async applyViewFilter(parameter1: string, parameter2?: string | boolean | never, parameter3?: boolean | never): Promise<void> {
     let layerPath = this.layerPathAssociatedToTheGeoviewLayer;
     let filter = '';
     let CombineLegendFilter = true;
@@ -1056,7 +1056,9 @@ export class WMS extends AbstractGeoViewRaster {
       }
     } else filter = parameter1;
 
-    const layerConfig = this.getLayerConfig(layerPath) as TypeOgcWmsLayerEntryConfig;
+    // Get the layer config in a loaded phase
+    const layerConfig = await this.getLayerConfigAsync(layerPath, true);
+    if (!layerConfig) throw new Error(`Couldn't applyViewFilter for wms as couldn't get layer config for layerPath ${layerPath}`);
     const source = (layerConfig.olLayer as ImageLayer<ImageWMS>).getSource();
     if (source) {
       let filterValueToUse = filter;

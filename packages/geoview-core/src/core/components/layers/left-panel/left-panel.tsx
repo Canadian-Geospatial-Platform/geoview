@@ -21,10 +21,13 @@ export function LeftPanel({ setIsLayersListPanelVisible }: LeftPanelProps): JSX.
 
   useEffect(() => {
     if (!selectedLayer) {
-      const validFirstLayer = legendLayers.find((layer) => !(layer.layerStatus === 'error' || layer.layerStatus === 'loading'));
-      if (validFirstLayer) {
-        setSelectedLayerPath(validFirstLayer.layerPath);
-      }
+      // TODO: Make this useEffect Async, when this useEffect is hit, the legenLayer is empty.
+      setTimeout(() => {
+        const validFirstLayer = legendLayers.find((layer) => !(layer.layerStatus === 'error' || layer.layerStatus === 'loading'));
+        if (validFirstLayer) {
+          setSelectedLayerPath(validFirstLayer.layerPath);
+        }
+      }, 1000);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
