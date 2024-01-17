@@ -6,7 +6,7 @@ import { CloseButton, LayerTitle, ResponsiveGrid, useFooterPanelHeight } from '.
 import { Box, DeleteOutlineIcon, IconButton, Paper } from '@/ui';
 import { getSxClasses } from './layers-style';
 import { useLayersDisplayState, useSelectedLayer } from '@/core/stores/store-interface-and-intial-values/layer-state';
-import { LayersActions } from './left-panel/layers-actions';
+import { LayersToolbar } from './layers-toolbar';
 import { LayerDetails } from './right-panel/layer-details';
 import { LeftPanel } from './left-panel/left-panel';
 
@@ -45,7 +45,6 @@ export function LayersPanel() {
   const leftPanel = () => {
     return (
       <Box>
-        <LayersActions />
         <LeftPanel setIsLayersListPanelVisible={setIsLayersListPanelVisible} />
       </Box>
     );
@@ -105,10 +104,8 @@ export function LayersPanel() {
 
   return (
     <Box sx={sxClasses.layersPanelContainer}>
+      <LayersToolbar />
       <ResponsiveGrid.Root sx={{ pt: 8, pb: 8 }} ref={panelTitleRef}>
-        <ResponsiveGrid.Left isEnlargeDataTable={false} isLayersPanelVisible={isLayersListPanelVisible}>
-          <LayerTitle>{t('general.layers')}</LayerTitle>
-        </ResponsiveGrid.Left>
         <ResponsiveGrid.Right isEnlargeDataTable={false} isLayersPanelVisible={isLayersListPanelVisible}>
           <Box
             sx={{
