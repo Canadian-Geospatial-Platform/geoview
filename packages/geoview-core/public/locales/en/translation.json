@@ -6,7 +6,8 @@
     "layers": "Layers",
     "name": "Name",
     "open": "Open",
-    "remove": "Remove"
+    "remove": "Remove",
+    "view": "View"
   },
   "mapnav": {
     "arianavbar": "vertical button group for map navigation",
@@ -75,7 +76,7 @@
     "removingLayers": "Removing Layers",
     "reArrangeLayers": "Re-arrange Layers",
     "addingNewLayer": "Adding a new layer",
-    "removeLayerDescription": "To remove a layer, click on the delete icon to the right of the layer. To revert to back to view functionality click on the delete button at the top.",
+    "removeLayerDescription": "To remove a layer, click on the delete icon to the right of the layer.",
     "sortingDescription": "<p>To sort the layers you can simply drag and drop each layer panel.</p><h4>Using the keyboard for drag and drop</h4><p>If you using the keyboard for sorting layers, note the following;</p><ul><li>When the layer panel has focus use the spacebar to lift the panel. This will start the drag.</li><li>Once the drag has started you can use the up and down arrows to move the panel</li><li>You can use the spacebar to drop the panel.</li><li>Use the ESC key to cancel drag</li></ul>",
     "addingNewLayerDescription": "To add a layer, click on the add layer button at the top of the layer list. This will open a dialog where you can select the layer you want to add.",
     "completeTable": "For complete data, please check data table tabs.",
