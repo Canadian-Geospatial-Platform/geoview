@@ -129,7 +129,7 @@ export class LegendEventProcessor extends AbstractEventProcessor {
             bounds: undefined,
             layerId: layerConfig.layerId,
             order:
-              api.maps[mapId].layer.initialLayerOrder.indexOf(entryLayerPath) !== -1
+              api.maps[mapId].layer.initialLayerOrder.indexOf(entryLayerPath) !== -1 && !layerConfig.parentLayerConfig
                 ? api.maps[mapId].layer.initialLayerOrder.indexOf(entryLayerPath)
                 : existingEntries.length,
             // TODO: Why do we have the following line in the store? Do we have to fetch the metadata again since the GeoView layer read and keep them?
@@ -154,7 +154,7 @@ export class LegendEventProcessor extends AbstractEventProcessor {
           bounds: undefined,
           layerId: layerPathNodes[currentLevel],
           order:
-            api.maps[mapId].layer.initialLayerOrder.indexOf(entryLayerPath) !== -1
+            api.maps[mapId].layer.initialLayerOrder.indexOf(entryLayerPath) !== -1 && !layerConfig.parentLayerConfig
               ? api.maps[mapId].layer.initialLayerOrder.indexOf(entryLayerPath)
               : existingEntries.length,
           layerPath: entryLayerPath,

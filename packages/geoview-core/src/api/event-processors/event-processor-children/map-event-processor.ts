@@ -218,9 +218,8 @@ export class MapEventProcessor extends AbstractEventProcessor {
     });
     map.addOverlay(clickMarkerOverlay);
 
-    const orderedLayerPaths = MapEventProcessor.getLayerPathsFromLegendsArray(store.getState().layerState.legendLayers);
-    store.getState().mapState.actions.setLayerOrder(orderedLayerPaths);
-    const orderedVisibleLayers = orderedLayerPaths.filter(
+    store.getState().mapState.actions.setLayerOrder(api.maps[mapId].layer.initialLayerOrder);
+    const orderedVisibleLayers = api.maps[mapId].layer.initialLayerOrder.filter(
       (layerPath) => store.getState().layerState.actions.getLayer(layerPath)?.isVisible !== 'no'
     );
     store.getState().mapState.actions.setVisibleLayers(orderedVisibleLayers);
