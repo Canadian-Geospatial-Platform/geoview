@@ -92,6 +92,7 @@ export class Layer {
         if (payloadIsALayerConfig(payload)) {
           const { layerConfig } = payload;
 
+          console.log('4', layerConfig);
           if (layerConfigIsGeoCore(layerConfig)) {
             const geoCore = new GeoCore(this.mapId);
             geoCore.createLayers(layerConfig).then((arrayOfListOfGeoviewLayerConfig) => {
@@ -117,6 +118,7 @@ export class Layer {
               this.addToMap(wmsLayer);
             });
           } else if (layerConfigIsEsriDynamic(layerConfig)) {
+            console.log('3');
             const esriDynamic = new EsriDynamic(this.mapId, layerConfig);
             esriDynamic.createGeoViewLayers().then(() => {
               this.addToMap(esriDynamic);
@@ -281,6 +283,7 @@ export class Layer {
    * @param {any} geoviewLayer the layer config
    */
   private addToMap(geoviewLayer: AbstractGeoViewLayer): void {
+    console.log('1');
     // if the returned layer object has something in the layerLoadError, it is because an error was detected
     // do not add the layer to the map
     if (geoviewLayer.layerLoadError.length !== 0) {
@@ -288,7 +291,7 @@ export class Layer {
         const { layer, consoleMessage } = loadError;
         const message = replaceParams([layer, this.mapId], getLocalizedMessage(this.mapId, 'validation.layer.loadfailed'));
         showError(this.mapId, message);
-
+        console.log('2');
         // eslint-disable-next-line no-console
         console.log(consoleMessage);
       });

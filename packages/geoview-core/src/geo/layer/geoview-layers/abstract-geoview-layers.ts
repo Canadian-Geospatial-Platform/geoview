@@ -508,6 +508,7 @@ export abstract class AbstractGeoViewLayer {
    * the details-panel.
    */
   async createGeoViewLayers(): Promise<void> {
+    console.log('444444444');
     if (this.olLayers === null) {
       try {
         this.setLayerPhase('createGeoViewLayers');
@@ -515,6 +516,7 @@ export abstract class AbstractGeoViewLayer {
         this.olLayers = await this.processListOfLayerEntryConfig(this.listOfLayerEntryConfig);
       } catch (error) {
         console.log(error);
+        console.log('errrrrrrrr');
       }
     } else {
       const message = replaceParams([this.mapId], getLocalizedMessage(this.mapId, 'validation.layer.createtwice'));
