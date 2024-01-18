@@ -913,7 +913,8 @@ export abstract class AbstractGeoViewLayer {
         // Listen to events that request to query a layer and return the resultset to the requester.
         this.registerToLayerSetListenerFunctions[layerPath].queryLayer = (payload) => {
           if (payloadIsQueryLayer(payload)) {
-            const { queryType, location, eventType } = payload;
+            const { queryType, location, eventType, disabledLayers } = payload;
+            if (disabledLayers[layerPath]) return;
             this.getFeatureInfo(queryType, layerPath, location).then((queryResult) => {
               api.event.emit(GetFeatureInfoPayload.createQueryResultPayload(this.mapId, layerPath, queryType, queryResult, eventType));
             });

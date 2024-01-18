@@ -1,5 +1,6 @@
+import { isEqual } from 'lodash';
 import { AbstractEventProcessor } from '../abstract-event-processor';
-import { TypeFeatureInfoResultSets, EventType } from '@/api/events/payloads/get-feature-info-payload';
+import { TypeFeatureInfoResultSets, EventType, TypeLayerData, TypeArrayOfLayerData } from '@/api/events/payloads/get-feature-info-payload';
 import { getGeoViewStore } from '@/core/stores/stores-managers';
 
 export class FeatureInfoEventProcessor extends AbstractEventProcessor {
@@ -10,13 +11,15 @@ export class FeatureInfoEventProcessor extends AbstractEventProcessor {
   //! Some action does state modifications AND map actions.
   //! ALWAYS use map event processor when an action modify store and IS NOT trap by map state event handler
   // #region
-  static propagateFeatureInfoToStore(
-    mapId: string,
-    layerPath: string,
-    eventType: EventType,
-    resultSets: TypeFeatureInfoResultSets,
-    isLegendData?: boolean
-  ) {
+  /**
+   * Static methode used to propagate feature info layer sets to the store..
+   *
+   * @param {string} mapId The map identifier of the resul set modified.
+   * @param {string} layerPath The layer path that has changed.
+   * @param {EventType} eventType The event type that triggered the layer set update.
+   * @param {TypeFeatureInfoResultSets} resultSets The resul sets associated to the map.
+   */
+  static propagateFeatureInfoToStore(mapId: string, layerPath: string, eventType: EventType, resultSets: TypeFeatureInfoResultSets) {
     const store = getGeoViewStore(mapId);
     const layerPathInResultSets = Object.keys(resultSets);
 
@@ -24,20 +27,27 @@ export class FeatureInfoEventProcessor extends AbstractEventProcessor {
       /**
        * Create a details object for each layer which is then used to render layers in details panel.
        */
-      const newDetails = layerPathInResultSets.map((layerPathItem) => {
-        // when propagateFeatureInfoToStore is called from Legend Processor, at that time no features are available,
-        // so to get the features from correct object, we need isLegendData flag.
-        const features = isLegendData ? [] : resultSets[layerPathItem]?.data[eventType]?.features || [];
-        const language = store.getState().appState.displayLanguage;
-        return {
-          features,
+      const layerDataArray = [] as TypeArrayOfLayerData;
+      layerPathInResultSets.forEach((layerPathItem) => {
+        const newLayerData: TypeLayerData = {
+          features: resultSets?.[layerPathItem]?.data?.[eventType]?.features ?? [],
           layerStatus: resultSets[layerPathItem].layerStatus,
           layerPath: layerPathItem,
-          layerName: resultSets[layerPathItem]?.layerName![language] ?? '',
+          layerName: resultSets?.[layerPathItem]?.layerName?.[store.getState().appState.displayLanguage] ?? '',
         };
+        const layerDataFound = layerDataArray.find((layerEntry) => layerEntry.layerPath === layerPathItem);
+        if (layerDataFound) {
+          if (!isEqual(layerDataFound, newLayerData)) {
+            layerDataFound.features = newLayerData.features;
+            layerDataFound.layerStatus = newLayerData.layerStatus;
+            layerDataFound.layerName = newLayerData.layerName;
+          }
+        } else {
+          layerDataArray.push(newLayerData);
+        }
       });
 
-      store.getState().detailsState.actions.setLayerDataArray(newDetails);
+      store.getState().detailsState.actions.setLayerDataArray(layerDataArray);
     }
   }
   // #endregion

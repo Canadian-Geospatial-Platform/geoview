@@ -9,7 +9,9 @@ export interface TypeAutocompleteProps<
   DisableClearable extends boolean | undefined = undefined,
   FreeSolo extends boolean | undefined = undefined
 > extends AutocompleteProps<T, Multiple, DisableClearable, FreeSolo> {
+  // eslint-disable-next-line react/require-default-props
   mapId?: string;
+  // eslint-disable-next-line react/require-default-props
   fullWidth?: boolean;
 }
 
