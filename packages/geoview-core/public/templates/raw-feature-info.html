@@ -41,6 +41,8 @@
       </table>
     </div>
 
+    <button type="button" class="collapsible">Click and Hover event listeners</button>
+    <pre id="buttonTable" class="panel"></pre>
     <div class="map-title-holder">
       <h4 id="HUC1">1. Basic Map</h4>
       <a class="ref-link" href="#top">Top</a>
@@ -167,10 +169,7 @@
     ></div>
     <hr />
     <div id="resultMap" style="margin-top: 20px; margin-left: 15px">Click on a layer on the map</div>
-
     <hr />
-    <button class="test-toggle-click-btn">Toggle click flag</button>
-    <button class="test-toggle-hover-btn">Toggle hover flag</button>
     <button type="button" class="collapsible">Code Snippet</button>
     <pre id="codeSnippet" class="panel"></pre>
 
@@ -180,27 +179,135 @@
       cgpv.init(function () {
         console.log('api is ready');
 
-      // ========================================================================================================================
-      // Test enable/disable click on layer
-      let clickFlag = true;
-      var testToggleHoverBtn = document.getElementsByClassName('test-toggle-click-btn')[0];
-      testToggleHoverBtn.addEventListener('click', function (e) {
-        if (clickFlag) cgpv.api.getFeatureInfoLayerSet('mapWM1').disableClickListener();
-        else cgpv.api.getFeatureInfoLayerSet('mapWM1').enableClickListener();
-        clickFlag = !clickFlag;
-      });
+        // ========================================================================================================================
+        // Test enable/disable click and hover on layer
+        const fillTableRow = (key, tableId, disableButtonEnding, enableButtonEnding, textEnding) => {
+          const clickTable = document.getElementById(tableId);
+          const tableRowElement = document.createElement('tr');
+          tableRowElement.classList.add('info');
+          clickTable.appendChild(tableRowElement);
+          const tableDataButtons = document.createElement('td');
+          tableDataButtons.classList.add('info');
+          tableDataButtons.style.width = '15%';
+          tableRowElement.appendChild(tableDataButtons);
+          const buttonEnableElement = document.createElement('button');
+          buttonEnableElement.id = `${key}-${enableButtonEnding}`;
+          buttonEnableElement.innerText = 'Enable';
+          tableDataButtons.appendChild(buttonEnableElement);
+          const buttonDisableElement = document.createElement('button');
+          buttonDisableElement.id = `${key}-${disableButtonEnding}`;
+          buttonDisableElement.innerText = 'Disable';
+          tableDataButtons.appendChild(buttonDisableElement);
+          const tableDataText = document.createElement('td');
+          tableDataText.id = `${key}-${textEnding}`;
+          tableDataText.classList.add('info');
+          tableDataText.style.width = '85%';
+          tableRowElement.appendChild(tableDataText);
+          if (key === 'all')
+            configureTableRow(true, tableDataText.id, 'All layers are', buttonDisableElement.id, buttonEnableElement.id, '');
+          else
+            configureTableRow(true, tableDataText.id, `layer "${key}" is`, buttonDisableElement.id, buttonEnableElement.id, key);
+        }
 
-      // ========================================================================================================================
-      // Test enable/disable hover on layer
-      let hoverFlag = true;
-      var testToggleHoverBtn = document.getElementsByClassName('test-toggle-hover-btn')[0];
-      testToggleHoverBtn.addEventListener('click', function (e) {
-        if (hoverFlag) cgpv.api.getFeatureInfoLayerSet('mapWM1').disableHoverListener('geojsonLYR1/geojsonLYR1/point-feature-group/icon_points.json');
-        else cgpv.api.getFeatureInfoLayerSet('mapWM1').enableHoverListener('geojsonLYR1/geojsonLYR1/point-feature-group/icon_points.json');
-        hoverFlag = !hoverFlag;
-      });
+        const getEventListenerFunctions = (clickFlag) => {
+          if (clickFlag.endsWith('click-text')) {
+            return [cgpv.api.getFeatureInfoLayerSet('mapWM1').isClickListenerdisabled,
+              cgpv.api.getFeatureInfoLayerSet('mapWM1').disableClickListener,
+              cgpv.api.getFeatureInfoLayerSet('mapWM1').enableClickListener,
+              cgpv.api.getFeatureInfoLayerSet('mapWM1')
+            ];
+          } else {
+            return [cgpv.api.getFeatureInfoLayerSet('mapWM1').isHoverListenerdisabled,
+              cgpv.api.getFeatureInfoLayerSet('mapWM1').disableHoverListener,
+              cgpv.api.getFeatureInfoLayerSet('mapWM1').enableHoverListener,
+              cgpv.api.getFeatureInfoLayerSet('mapWM1')
+            ];
+          }
+        }
 
-      //create snippets
+        const configureTableRow = (setClickListener, textCellId, text, disableId, enableId, layerPath) => {
+          const [isEventListenerdisabled, disableEventListener, enableEventListener, layerSet] = getEventListenerFunctions(textCellId);
+          const textCell = document.getElementById(textCellId);
+          const layerFlagDisabled = isEventListenerdisabled.call(layerSet, layerPath);
+          const disableButton = document.getElementById(disableId);          const enableButton = document.getElementById(enableId);
+          if (setClickListener) {
+            disableButton.addEventListener('click', (e) => {
+              disableEventListener.call(layerSet, layerPath);
+              updateButtonTable();
+            });
+            enableButton.addEventListener('click', (e) => {
+              enableEventListener.call(layerSet, layerPath);
+              updateButtonTable();
+            });
+          }
+
+          if (layerFlagDisabled === undefined) {
+            disableButton.disabled = false;
+            enableButton.disabled = false;
+            textCell.innerText = 'The map contains a mix of enabled/disabled layers';
+          } else if (layerFlagDisabled) {
+            disableButton.disabled = true;
+            enableButton.disabled = false;
+            textCell.innerText =  `${text} disabled`;
+          } else {
+            disableButton.disabled = false;
+            enableButton.disabled = true;
+            textCell.innerText =  `${text} enabled`;
+          }
+        }
+
+        const updateButtonTable = () => {
+          const registeredLayers = cgpv.api.maps.mapWM1?.layer?.registeredLayers
+          let firstpass = true;
+          Object.keys(registeredLayers).forEach((key) => {
+            if (['processed', 'loaded'].includes(registeredLayers[key].layerStatus)) {
+              const queryable = registeredLayers[key]?.source?.featureInfo?.queryable ?? true;
+              if (queryable) {
+                if (firstpass) {
+                  firstpass = false;
+                  configureTableRow(false, 'all-click-text', 'All layers are', 'all-click-disable', 'all-click-enable', '');
+                  configureTableRow(false, 'all-hover-text', 'All layers are', 'all-hover-disable', 'all-hover-enable', '');
+                }
+                configureTableRow(false, `${key}-click-text`, `layer "${key}" is`, `${key}-click-disable`, `${key}-click-enable`, key);
+                configureTableRow(false, `${key}-hover-text`, `layer "${key}" is`, `${key}-hover-disable`, `${key}-hover-enable`, key);
+              }
+            }
+          });
+        }
+
+        const displayField = document.getElementById('buttonTable');
+        displayField.innerHTML = `<table id="buttonTable" style="width:100%">
+          <tr>
+            <th style="width:50%", class="info">Click event listener</th>
+            <th style="width:50%", class="info">Hover event listener</th>
+          </tr>
+          <tr>
+            <td class="info">
+              <table id="click-table", class="info", style="width:100%"></table>
+            </td>
+            <td class="info">
+              <table id="hover-table", class="info", style="width:100%"></table>
+            </td>
+          </tr>
+        </table>`;
+        const registeredLayers = cgpv.api.maps.mapWM1?.layer?.registeredLayers
+        let firstpass = true;
+        Object.keys(registeredLayers).forEach((key) => {
+          if (['processed', 'loaded'].includes(registeredLayers[key].layerStatus)) {
+            const queryable = registeredLayers[key]?.source?.featureInfo?.queryable ?? true;
+            if (queryable) {
+              if (firstpass) {
+                firstpass = false;
+                fillTableRow('all', 'click-table', 'click-disable', 'click-enable', 'click-text');
+                fillTableRow('all', 'hover-table', 'hover-disable', 'hover-enable', 'hover-text');
+              }
+              fillTableRow(key, 'click-table', 'click-disable', 'click-enable', 'click-text');
+              fillTableRow(key, 'hover-table', 'hover-disable', 'hover-enable', 'hover-text');
+            }
+          }
+        })
+
+        //create snippets
         createConfigSnippet();
         createCodeSnippet();
       });

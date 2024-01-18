@@ -279,6 +279,25 @@ export class FeatureInfoLayerSet {
   }
 
   /**
+   * Function used to determine whether click events are disabled for a layer. When a layer path is not provided,
+   * the value returned is undefined if the map flags are a mixture of true and false values.
+   *
+   * @param {string} layerPath Optional parameter used to get the flag value of a layer.
+   *
+   * @returns {boolean | undefined} The flag value for the map or layer.
+   */
+  isClickListenerdisabled(layerPath?: string): boolean | undefined {
+    if (layerPath) return this.disableClickOnLayer[layerPath];
+
+    let returnValue: boolean | undefined;
+    Object.keys(this.disableClickOnLayer).forEach((key: string, i) => {
+      if (i === 0) returnValue = this.disableClickOnLayer[key];
+      if (returnValue !== this.disableClickOnLayer[key]) returnValue = undefined;
+    });
+    return returnValue;
+  }
+
+  /**
    * Function used to enable listening of hover events. When a layer path is not provided,
    * hover events listening is enabled for all layers
    *
@@ -304,5 +323,24 @@ export class FeatureInfoLayerSet {
       Object.keys(this.disableHoverOverLayer).forEach((key: string) => {
         this.disableHoverOverLayer[key] = true;
       });
+  }
+
+  /**
+   * Function used to determine whether hover events are disabled for a layer. When a layer path is not provided,
+   * the value returned is undefined if the map flags are a mixture of true and false values.
+   *
+   * @param {string} layerPath Optional parameter used to get the flag value of a layer.
+   *
+   * @returns {boolean | undefined} The flag value for the map or layer.
+   */
+  isHoverListenerdisabled(layerPath?: string): boolean | undefined {
+    if (layerPath) return this.disableHoverOverLayer[layerPath];
+
+    let returnValue: boolean | undefined;
+    Object.keys(this.disableHoverOverLayer).forEach((key: string, i) => {
+      if (i === 0) returnValue = this.disableHoverOverLayer[key];
+      if (returnValue !== this.disableHoverOverLayer[key]) returnValue = undefined;
+    });
+    return returnValue;
   }
 }
