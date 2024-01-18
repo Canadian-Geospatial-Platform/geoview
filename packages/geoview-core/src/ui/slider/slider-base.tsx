@@ -1,5 +1,5 @@
 /* eslint-disable react/require-default-props */
-import { useState, useEffect } from 'react';
+import { useState, useEffect, SyntheticEvent } from 'react';
 
 import { Slider as MaterialSlider, SliderProps } from '@mui/material';
 
@@ -13,6 +13,8 @@ interface TypeSliderProps extends SliderProps {
   value: number | number[];
 
   // custom onChange callback
+  onChange?: (event: Event, value: number | number[], activeThumb: number) => void;
+  onChangeCommitted?: (event: Event | SyntheticEvent<Element, Event>, value: number | number[]) => void;
   onValueDisplay?: (value: number, index: number) => string;
   onValueDisplayAriaLabel?: (value: number, index: number) => string;
 }
@@ -31,6 +33,7 @@ export function SliderBase(props: TypeSliderProps): JSX.Element {
     value: parentValue,
     orientation,
     onChange,
+    onChangeCommitted,
     onValueDisplay,
     onValueDisplayAriaLabel,
     marks,
@@ -41,9 +44,24 @@ export function SliderBase(props: TypeSliderProps): JSX.Element {
   // internal state
   const [sliderValue, setValue] = useState<number[] | number>(parentValue);
 
+  /**
+   * Handles the change event of the MaterialSlider
+   * @param event Event The event
+   * @param value number | number[] The value(s)
+   * @param activeThumb number
+   */
+  const handleChange = (event: Event, value: number | number[], activeThumb: number): void => {
+    // Set the value when user is sliding the anchor
+    setValue(value);
+
+    // Callback on regular component callback
+    onChange?.(event, value, activeThumb);
+  };
+
   // Effect used to listen on the value state coming from the parent element.
   useEffect(() => {
-    setValue(parentValue); // Update child's value state when the parent's value prop changes
+    // Update child's value state when the parent's value prop changes
+    setValue(parentValue);
   }, [parentValue]);
 
   return (
@@ -54,7 +72,8 @@ export function SliderBase(props: TypeSliderProps): JSX.Element {
       marks={marks}
       orientation={orientation}
       step={step}
-      onChange={onChange}
+      onChange={(event: Event, value: number | number[], activeThumb: number) => handleChange(event, value, activeThumb)}
+      onChangeCommitted={onChangeCommitted}
       valueLabelDisplay="auto"
       valueLabelFormat={onValueDisplay}
       getAriaValueText={onValueDisplayAriaLabel}
