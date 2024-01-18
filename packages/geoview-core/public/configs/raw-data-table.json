@@ -128,9 +128,12 @@
     "north-arrow",
     "overview-map"
   ],
-  "corePackages": [
-    "footer-panel"
-  ],
+  "footerTabs": {
+    "tabs": {
+      "core": ["legend", "layers", "details", "data-table"]
+    }
+  },
+  "corePackages": [],
   "externalPackages": [],
   "suportedLanguages": [
     "fr",

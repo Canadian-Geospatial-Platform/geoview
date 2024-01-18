@@ -1,8 +1,6 @@
 import { createElement, ReactElement } from 'react';
-
-import DataTable, { DataTableData } from './data-table';
 import { api, TypeListOfLayerEntryConfig, TypeArrayOfFeatureInfoEntries, TypeFieldEntry, TypeLocalizedString } from '@/app';
-import { MapDataTableData as MapDataTableDataProps } from './map-data-table';
+import { DataTableData } from './data-table';
 import { Datapanel } from './data-panel';
 import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
 
@@ -25,16 +23,6 @@ export class DataTableApi {
   }
 
   /**
-   * Create a data table as an element
-   *
-   * @param { 'materialReactDataTable'} tableType type of table that user want to create.
-   * @return {ReactElement} the data table react element
-   */
-  createDataTable = ({ data }: { data: DataTableData }): ReactElement => {
-    return createElement(DataTable, { data }, []);
-  };
-
-  /**
    * Create group layer keys based on layer rendered on map
    *
    * @param {TyepListOfLayerEntryConfig} listOfLayerEntryConfig list of layers configured to be rendered on map.
@@ -42,7 +30,6 @@ export class DataTableApi {
    * @param {string[]} grouplayerKeys list of keys already exists.
    * @returns {string[]} array of layer keys
    */
-
   getGroupKeys = (listOfLayerEntryConfig: TypeListOfLayerEntryConfig, parentLayerId: string, groupLayers: GroupLayers[]): GroupLayers[] => {
     listOfLayerEntryConfig.forEach((LayerEntryConfig) => {
       if (
@@ -69,7 +56,6 @@ export class DataTableApi {
    * @param {TypeArrayOfFeatureInfoEntries} arrayOfFeatureInfoEntries the properties of the data table to be created
    * @return {TypeJsonArray} the data table rows
    */
-
   buildFeatureRows = (arrayOfFeatureInfoEntries: TypeArrayOfFeatureInfoEntries) => {
     const features = arrayOfFeatureInfoEntries!.map((feature) => {
       return {
@@ -103,9 +89,9 @@ export class DataTableApi {
   /**
    * Create data panel for various layers.
    *
-   * @returns {Promise<ReactElement | null>} Promise of ReactElement.
+   * @returns {Promise<ReactElement | undefined>} Promise of ReactElement.
    */
-  createDataPanel = async (): Promise<ReactElement | null> => {
+  createDataPanel = async (): Promise<ReactElement | undefined> => {
     let groupLayers: GroupLayers[] = [];
     // TODO: use Store event processor
     const language = AppEventProcessor.getDisplayLanguage(this.mapId);
@@ -133,7 +119,7 @@ export class DataTableApi {
         return this.buildFeatureRows(result.value);
       });
 
-    const filteredData: (MapDataTableDataProps & GroupLayers)[] = [];
+    const filteredData: (DataTableData & GroupLayers)[] = [];
 
     // filter data based on features.
     data.forEach((res, index) => {
@@ -143,6 +129,6 @@ export class DataTableApi {
       }
     });
 
-    return createElement(Datapanel, { layerData: filteredData, mapId: this.mapId, language }, null);
+    return createElement(Datapanel, { layerData: filteredData, mapId: this.mapId, language }, undefined);
   };
 }

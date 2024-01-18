@@ -227,6 +227,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
 
     // trigger the creation of feature info layer set and legend layer set
     // We always trigger creation because outside package may rely on them
+    // ? duplicate of code in app-start, evaluate if there is a needed refactor for layer set.
     api.getFeatureInfoLayerSet(mapId);
     api.getLegendsLayerSet(mapId);
 
@@ -294,33 +295,36 @@ export class MapEventProcessor extends AbstractEventProcessor {
     getGeoViewStore(mapId).getState().mapState.actions.setInteraction(interaction);
   }
 
-  static setProjection(mapId: string, projectionCode: TypeValidMapProjectionCodes): void {
-    // set circular progress to hide basemap switching
-    getGeoViewStore(mapId).getState().appState.actions.setCircularProgress(true);
-    // TODO: make async (last 2 seconds like for overview map)
-    setTimeout(() => getGeoViewStore(mapId).getState().appState.actions.setCircularProgress(false), 2000);
+  static async setProjection(mapId: string, projectionCode: TypeValidMapProjectionCodes): Promise<void> {
+    try {
+      // Set circular progress to hide basemap switching
+      getGeoViewStore(mapId).getState().appState.actions.setCircularProgress(true);
 
-    // get view status (center and projection) to calculate new center
-    const currentView = api.maps[mapId].map.getView();
-    const currentCenter = currentView.getCenter();
-    const currentProjection = currentView.getProjection().getCode();
-    const newCenter = api.projection.transformPoints([currentCenter!], currentProjection, 'EPSG:4326')[0];
-    const newProjection = projectionCode as TypeValidMapProjectionCodes;
+      // get view status (center and projection) to calculate new center
+      const currentView = api.maps[mapId].map.getView();
+      const currentCenter = currentView.getCenter();
+      const currentProjection = currentView.getProjection().getCode();
+      const newCenter = api.projection.transformPoints([currentCenter!], currentProjection, 'EPSG:4326')[0];
+      const newProjection = projectionCode as TypeValidMapProjectionCodes;
 
-    // create new view
-    const newView = new View({
-      zoom: currentView.getZoom() as number,
-      minZoom: currentView.getMinZoom(),
-      maxZoom: currentView.getMaxZoom(),
-      center: api.projection.transformPoints([newCenter], 'EPSG:4326', `EPSG:${newProjection}`)[0] as [number, number],
-      projection: `EPSG:${newProjection}`,
-    });
+      // create new view
+      const newView = new View({
+        zoom: currentView.getZoom() as number,
+        minZoom: currentView.getMinZoom(),
+        maxZoom: currentView.getMaxZoom(),
+        center: api.projection.transformPoints([newCenter], 'EPSG:4326', `EPSG:${newProjection}`)[0] as [number, number],
+        projection: `EPSG:${newProjection}`,
+      });
 
-    // use store action to set projection value in store and apply new view to the map
-    getGeoViewStore(mapId).getState().mapState.actions.setProjection(projectionCode, newView);
+      // use store action to set projection value in store and apply new view to the map
+      getGeoViewStore(mapId).getState().mapState.actions.setProjection(projectionCode, newView);
 
-    // refresh layers so new projection is render properly
-    api.maps[mapId].refreshLayers();
+      // refresh layers so new projection is render properly and await on it
+      await api.maps[mapId].refreshLayers();
+    } finally {
+      // Remove circular progress as refresh is done
+      getGeoViewStore(mapId).getState().appState.actions.setCircularProgress(false);
+    }
   }
 
   static rotate(mapId: string, rotation: number): void {

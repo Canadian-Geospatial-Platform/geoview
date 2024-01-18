@@ -8,7 +8,7 @@ import {
   DialogTitle,
   DialogContent,
   Table,
-  MRT_ColumnDef as MRTColumnDef,
+  type MRT_ColumnDef as MRTColumnDef,
   Box,
   Typography,
   CircularProgress,
@@ -16,7 +16,7 @@ import {
 import { useUIActiveFocusItem, useUIStoreActions } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import { useSelectedLayerPath } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { useDatatableStoreLayersData } from '@/core/stores/store-interface-and-intial-values/data-table-state';
-import { ColumnsType } from './map-data-table';
+import { ColumnsType } from './data-table';
 import { LayersDataType } from './data-panel';
 import { getSxClasses } from './data-table-style';
 import { useAppDisplayLanguage } from '@/core/stores/store-interface-and-intial-values/app-state';
@@ -130,7 +130,7 @@ export default function DataTableModal(): JSX.Element {
         )}
         {!isLoading && (
           <Table
-            columns={columns as MRTColumnDef[]}
+            columns={columns as MRTColumnDef<Record<string, string>, unknown>[]}
             data={rows}
             enableColumnActions={false}
             enableBottomToolbar={false}

@@ -35,7 +35,7 @@ import { useUIStoreActions } from '@/app';
  * @param {DetailsPanelProps} props The properties passed to LayersListFooter
  * @returns {JSX.Element} the layers list
  */
-export function Detailspanel(): JSX.Element {
+export function DetailsPanel(): JSX.Element {
   const { t } = useTranslation<string>();
 
   const theme = useTheme();

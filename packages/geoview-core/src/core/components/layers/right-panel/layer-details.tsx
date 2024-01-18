@@ -33,7 +33,7 @@ interface LayerDetailsProps {
 }
 
 export function LayerDetails(props: LayerDetailsProps): JSX.Element {
-  const { layerDetails } = props;
+  const { layerDetails } = props; // TODO: LayerDetails is triggered twice and the second time it is undefined, need to investigate (warning key error)
 
   const { t } = useTranslation<string>();
 
@@ -53,7 +53,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
     openModal({ activeElementId: 'layerDatatable', callbackElementId: `table-details` });
   };
 
-  if (layerDetails.bounds === undefined || layerDetails.bounds[0] === Infinity) {
+  if (layerDetails.bounds === undefined || layerDetails.bounds![0] === Infinity) {
     const bounds = getLayerBounds(layerDetails.layerPath);
     if (bounds) layerDetails.bounds = bounds;
   }
@@ -156,7 +156,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
       <List>
         {startLayer.children.map((layer) => (
           <>
-            <ListItem sx={{ padding: '6px 0px', borderTop: '1px solid #ccc' }}>
+            <ListItem key={layer.layerId} sx={{ padding: '6px 0px', borderTop: '1px solid #ccc' }}>
               <ListItemIcon>
                 <LayerIcon layer={layer} />
               </ListItemIcon>
@@ -200,35 +200,39 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
   }
 
   // function renderItems
-
+  // TODO: LayerDetails is triggered twice and the second time it is undefined, need to investigate
   return (
     <Paper sx={sxClasses.layerDetails}>
-      <Box sx={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between' }}>
-        <Box sx={{ textAlign: 'left' }}>
-          <Typography sx={sxClasses.categoryTitle}> {layerDetails.layerName} </Typography>
-          <Typography sx={{ fontSize: '0.8em' }}> {getSubTitle()} </Typography>
-        </Box>
-        {renderLayerButtons()}
-      </Box>
-      <LayerOpacityControl layerDetails={layerDetails} />
-      <Box sx={{ marginTop: '20px' }}>
-        {layerDetails.items?.length > 0 && renderItems()}
-        {layerDetails.children.length > 0 && (
-          <>
-            <Typography sx={{ fontWeight: 'bold', textAlign: 'left', margin: '10px 0px' }}>{t('layers.subLayersList')}</Typography>
-            {renderLayers(layerDetails)}
-          </>
-        )}
-      </Box>
-      <Divider sx={{ marginTop: '50px', marginBottom: '10x' }} variant="middle" />
-      {layerDetails.layerAttribution &&
-        layerDetails.layerAttribution!.map((attribution) => {
-          return (
-            <Typography sx={{ marginTop: '10px', color: '#808080', fontSize: '0.8em' }} key={generateId()}>
-              {attribution.indexOf('©') === -1 ? `© ${attribution}` : attribution}
-            </Typography>
-          );
-        })}
+      {layerDetails !== undefined && (
+        <>
+          <Box sx={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between' }}>
+            <Box sx={{ textAlign: 'left' }}>
+              <Typography sx={sxClasses.categoryTitle}> {layerDetails.layerName} </Typography>
+              <Typography sx={{ fontSize: '0.8em' }}> {getSubTitle()} </Typography>
+            </Box>
+            {renderLayerButtons()}
+          </Box>
+          <LayerOpacityControl layerDetails={layerDetails} />
+          <Box sx={{ marginTop: '20px' }}>
+            {layerDetails.items?.length > 0 && renderItems()}
+            {layerDetails.children.length > 0 && (
+              <>
+                <Typography sx={{ fontWeight: 'bold', textAlign: 'left', margin: '10px 0px' }}>{t('layers.subLayersList')}</Typography>
+                {renderLayers(layerDetails)}
+              </>
+            )}
+          </Box>
+          <Divider sx={{ marginTop: '50px', marginBottom: '10x' }} variant="middle" />
+          {layerDetails.layerAttribution &&
+            layerDetails.layerAttribution!.map((attribution) => {
+              return (
+                <Typography sx={{ marginTop: '10px', color: '#808080', fontSize: '0.8em' }} key={generateId()}>
+                  {attribution.indexOf('©') === -1 ? `© ${attribution}` : attribution}
+                </Typography>
+              );
+            })}
+        </>
+      )}
     </Paper>
   );
 }
