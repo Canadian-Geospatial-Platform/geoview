@@ -17,6 +17,7 @@ import { EVENT_NAMES } from '@/api/events/event-types';
 import { API } from '@/api/api';
 
 import { Config } from '@/core/utils/config/config';
+import { useWhatChanged } from '@/core/utils/useWhatChanged';
 import { payloadIsAmapFeaturesConfig } from '@/api/events/payloads';
 import { addGeoViewStore } from '@/core/stores/stores-managers';
 
@@ -167,6 +168,7 @@ export const cgpv: types.TypeCGPV = {
   ui: {
     useTheme,
     useMediaQuery,
+    useWhatChanged,
     elements: UI,
   },
   types,

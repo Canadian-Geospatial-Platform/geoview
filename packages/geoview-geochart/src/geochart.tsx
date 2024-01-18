@@ -7,6 +7,7 @@ import {
   TypeArrayOfLayerData,
   TypeFeatureInfoEntry,
 } from 'geoview-core/src/api/events/payloads';
+import { logger } from 'geoview-core/src/core/utils/logger';
 import { findLayerDataAndConfigFromQueryResults, loadDatasources } from './geochart-parsing';
 import { PluginGeoChartConfig, GeoViewGeoChartConfig, GeoViewGeoChartConfigLayer } from './geochart-types';
 import { PayloadBaseClassChart, EVENT_CHART_CONFIG, EVENT_CHART_LOAD, EVENT_CHART_REDRAW } from './geochart-event-base';
@@ -112,6 +113,9 @@ export function GeoChart(props: GeoChartProps): JSX.Element {
    * @param e PayloadChartLoad The event payload with the inputs to load
    */
   const handleChartLoad = useCallback<(e: PayloadChartLoad) => void>((e: PayloadChartLoad): void => {
+    // Log
+    logger.logUseCallback('GEOVIEW-GEOCHART - handleChartLoad', e);
+
     // Redirect
     setChart(e.inputs);
   }, []);
@@ -121,6 +125,9 @@ export function GeoChart(props: GeoChartProps): JSX.Element {
    * @param e PayloadBaseClass The event payload determining the query that's happened
    */
   const handleQueryStarted = useCallback<(e: PayloadBaseClass) => void>((e: PayloadBaseClass): void => {
+    // Log
+    logger.logUseCallback('GEOVIEW-GEOCHART - handleQueryStarted', e);
+
     // Verify the payload
     if (payloadIsQueryLayerQueryTypeAtLongLat(e)) {
       // Loading
@@ -134,6 +141,9 @@ export function GeoChart(props: GeoChartProps): JSX.Element {
    */
   const fetchDatasources = useCallback<(layerDataArray: TypeArrayOfLayerData) => void>(
     (layerDataArray: TypeArrayOfLayerData): void => {
+      // Log
+      logger.logUseCallback('GEOVIEW-GEOCHART - fetchDatasources', mapId, layerDataArray);
+
       try {
         // Find the right config/layer/data for what we want based on the layerDataArray
         const [foundConfigChart, foundConfigChartLyr, foundLayerEntry, foundData]: [
@@ -169,6 +179,9 @@ export function GeoChart(props: GeoChartProps): JSX.Element {
    */
   const handleError = useCallback<(error: string, exception: unknown | undefined) => void>(
     (error: string): void => {
+      // Log
+      logger.logUseCallback('GEOVIEW-GEOCHART - handleError', mapId, error);
+
       // Show error
       cgpv.api.utilities.showError(mapId, error);
     },
@@ -177,14 +190,25 @@ export function GeoChart(props: GeoChartProps): JSX.Element {
 
   // Effect hook when the storeLayerDataArray changes - coming from the store.
   useEffect(() => {
-    // eslint-disable-next-line no-console
-    console.log('USE EFFECT storeLayerDataArray', storeLayerDataArray);
+    // Log
+    const USE_EFFECT_FUNC = 'GEOVIEW-GEOCHART - storeLayerDataArray';
+    logger.logUseEffectMount(USE_EFFECT_FUNC, storeLayerDataArray);
+
     // Fetches the datasources associated with the layerDataArray coming from the store - reloading the Chart in the process
     fetchDatasources(storeLayerDataArray);
+
+    return () => {
+      // Log
+      logger.logUseEffectUnmount(USE_EFFECT_FUNC, storeLayerDataArray);
+    };
   }, [fetchDatasources, storeLayerDataArray]);
 
   // Effect hook to add and remove event listeners
   useEffect(() => {
+    // Log
+    const USE_EFFECT_FUNC = 'GEOVIEW-GEOCHART - init';
+    logger.logUseEffectMount(USE_EFFECT_FUNC, mapId);
+
     // Wire handlers on component mount
     cgpv.api.event.on(EVENT_CHART_CONFIG, handleChartConfig, mapId);
     cgpv.api.event.on(EVENT_CHART_LOAD, handleChartLoad, mapId);
@@ -192,6 +216,9 @@ export function GeoChart(props: GeoChartProps): JSX.Element {
     cgpv.api.event.on(cgpv.api.eventNames.GET_FEATURE_INFO.QUERY_LAYER, handleQueryStarted, `${mapId}`);
 
     return () => {
+      // Log
+      logger.logUseEffectUnmount(USE_EFFECT_FUNC, mapId);
+
       // Unwire handlers on component unmount
       // TODO: Refactor - The store should have a 'loading features clicked state (with abortion mechanisms)'. An issue is being created for this already. For now, this works.
       cgpv.api.event.off(cgpv.api.eventNames.GET_FEATURE_INFO.QUERY_LAYER, `${mapId}`, handleQueryStarted);
