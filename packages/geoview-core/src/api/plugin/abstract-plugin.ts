@@ -1,9 +1,11 @@
 import React from 'react';
 import i18next from 'react-i18next';
+
 import { useTheme } from '@mui/material/styles';
 import { API } from '@/api/api';
 import { MapViewer } from '@/geo/map/map-viewer';
 import { TypeWindow, TypeJsonObject } from '@/core/types/global-types';
+import { logger } from '@/core/utils/logger';
 
 /** ******************************************************************************************************************************
  * interface used by all plugins to define their options.
@@ -101,8 +103,8 @@ export abstract class AbstractPlugin {
 
     // If cgpv
     if (cgpv) {
-      // eslint-disable-next-line no-console
-      console.log(`Plugin ${this.pluginId} loaded, adding it on map ${this.pluginProps.mapId}`);
+      // Log
+      logger.logInfo(`Plugin ${this.pluginId} loaded, adding it on map ${this.pluginProps.mapId}`);
 
       // Add
       this.onAdd();
@@ -110,8 +112,8 @@ export abstract class AbstractPlugin {
       // Added
       this.onAdded?.();
 
-      // eslint-disable-next-line no-console
-      console.log(`Plugin ${this.pluginId} loaded, and added to map ${this.pluginProps.mapId}`);
+      // Log
+      logger.logInfo(`Plugin ${this.pluginId} loaded, and added to map ${this.pluginProps.mapId}`);
     }
   }
 
@@ -124,8 +126,8 @@ export abstract class AbstractPlugin {
 
     // If cgpv
     if (cgpv) {
-      // eslint-disable-next-line no-console
-      console.log(`Plugin ${this.pluginId} being removed from map ${this.pluginProps.mapId}`);
+      // Log
+      logger.logInfo(`Plugin ${this.pluginId} being removed from map ${this.pluginProps.mapId}`);
 
       // Remove
       this.onRemove();
@@ -133,8 +135,8 @@ export abstract class AbstractPlugin {
       // Removed
       this.onRemoved?.();
 
-      // eslint-disable-next-line no-console
-      console.log(`Plugin ${this.pluginId} removed from map ${this.pluginProps.mapId}`);
+      // Log
+      logger.logInfo(`Plugin ${this.pluginId} removed from map ${this.pluginProps.mapId}`);
     }
   }
 }

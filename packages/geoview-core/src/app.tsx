@@ -17,6 +17,7 @@ import { EVENT_NAMES } from '@/api/events/event-types';
 import { API } from '@/api/api';
 
 import { Config } from '@/core/utils/config/config';
+import { useWhatChanged } from '@/core/utils/useWhatChanged';
 import { payloadIsAmapFeaturesConfig } from '@/api/events/payloads';
 import { addGeoViewStore } from '@/core/stores/stores-managers';
 
@@ -94,6 +95,7 @@ async function renderMap(mapElement: Element): Promise<void> {
     // render the map with the config
     reactRoot[mapId] = createRoot(mapElement!);
     addReloadListener(mapId);
+    // TODO: Refactor - Activate <React.StrictMode>
     reactRoot[mapId].render(<AppStart mapFeaturesConfig={configObj} />);
   }
 }
@@ -167,6 +169,7 @@ export const cgpv: types.TypeCGPV = {
   ui: {
     useTheme,
     useMediaQuery,
+    useWhatChanged,
     elements: UI,
   },
   types,

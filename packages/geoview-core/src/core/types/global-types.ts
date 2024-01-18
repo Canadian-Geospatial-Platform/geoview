@@ -4,6 +4,7 @@ import { createRoot } from 'react-dom/client';
 import { useTheme } from '@mui/material/styles';
 import { useMediaQuery } from '@mui/material';
 import { API } from '@/api/api';
+import { useWhatChanged } from '@/core/utils/useWhatChanged';
 import * as UI from '../../ui';
 import { AbstractPlugin } from '@/api/plugin/abstract-plugin';
 import { TypeDisplayLanguage, TypeMapFeaturesInstance } from '@/geo/map/map-schema-types';
@@ -108,6 +109,7 @@ export type TypeCallback = (callback: () => void) => void;
 export type TypeCGPVUI = {
   useTheme: typeof useTheme;
   useMediaQuery: typeof useMediaQuery;
+  useWhatChanged: typeof useWhatChanged;
   elements: typeof UI;
 };
 
