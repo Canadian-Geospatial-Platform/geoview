@@ -3,8 +3,6 @@ export declare const getSxClasses: (theme: Theme) => {
     navBarRef: {
         position: string;
         right: string;
-        height: string;
-        maxHeight: string;
         display: string;
         flexDirection: string;
         marginRight: number;

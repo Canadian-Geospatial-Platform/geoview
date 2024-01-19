@@ -4,8 +4,7 @@ export declare const getSxClasses: (theme: Theme) => {
         color: string;
         width: string;
         padding: string;
-        overflow: string;
-        maxHeight: string;
+        overflowY: string;
         '& .MuiListItemText-primary': {
             font: string;
             padding: string;

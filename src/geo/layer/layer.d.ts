@@ -106,25 +106,36 @@ export declare class Layer {
      */
     removeAllGeoviewLayers: () => string;
     /**
-     * Search for a layer using it's id and return the layer data
+     * Search for a layer using its id and return the layer data
      *
      * @param {string} geoviewLayerId the layer id to look for
      * @returns the found layer data object
      */
     getGeoviewLayerById: (geoviewLayerId: string) => AbstractGeoViewLayer | null;
     /**
-     * Search asynchronously for a layer using it's id and return the layer data.
-     * If the layer we're searching for has to be loaded, set mustBeLoaded to true when awaiting on this method.
+     * Asynchronously gets a layer using its id and return the layer data.
+     * If the layer we're searching for has to be processed, set mustBeProcessed to true when awaiting on this method.
      * This function waits the timeout period before abandonning (or uses the default timeout when not provided).
-     * Note this function uses 'Async' suffix only to differentiate it from 'getGeoviewLayerById'.
+     * Note this function uses the 'Async' suffix only to differentiate it from 'getGeoviewLayerById'.
      *
      * @param {string} layerID the layer id to look for
-     * @param {string} mustBeLoaded indicate if the layer we're searching for must be found only once loaded
-     * @param {string} checkFrequency optionally indicate the frequency at which to check for the condition on the layer
+     * @param {string} mustBeProcessed indicate if the layer we're searching for must be found only once processed
      * @param {string} timeout optionally indicate the timeout after which time to abandon the promise
-     * @returns the found layer data object
+     * @param {string} checkFrequency optionally indicate the frequency at which to check for the condition on the layer
+     * @returns a promise with the AbstractGeoViewLayer or null when the layer id was not found
+     * @throws an exception when the layer for the layer id was found, but failed to become in processed phase before the timeout expired
      */
-    getGeoviewLayerByIdAsync: (layerID: string, mustBeLoaded: boolean, checkFrequency?: number, timeout?: number) => Promise<AbstractGeoViewLayer | null>;
+    getGeoviewLayerByIdAsync: (geoviewLayerId: string, mustBeProcessed: boolean, timeout?: number, checkFrequency?: number) => Promise<AbstractGeoViewLayer | null>;
+    /**
+     * Returns a Promise that will be resolved once the given layer is in a processed phase.
+     * This function waits the timeout period before abandonning (or uses the default timeout when not provided).
+     *
+     * @param {string} layer the layer object
+     * @param {string} timeout optionally indicate the timeout after which time to abandon the promise
+     * @param {string} checkFrequency optionally indicate the frequency at which to check for the condition on the layer
+     * @throws an exception when the layer failed to become in processed phase before the timeout expired
+     */
+    waitForProcessedPhase: (layer: AbstractGeoViewLayer, timeout?: number, checkFrequency?: number) => Promise<void>;
     /**
      * Highlight layer or sublayer on map
      *

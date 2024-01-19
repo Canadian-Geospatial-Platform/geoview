@@ -2,8 +2,7 @@ import { Theme } from '@mui/material';
 export declare const getSxClasses: (theme: Theme) => {
     dataPanel: {
         background: string;
-        boxShadow: string;
-        padding: string;
+        paddingBottom: string;
     };
     gridContainer: {
         paddingLeft: string;
@@ -44,10 +43,8 @@ export declare const getSxClasses: (theme: Theme) => {
         '& .MuiPaper-root': {
             border: string;
             borderRadius: string;
-            height: string;
         };
         '& .MuiTableContainer-root': {
-            maxHeight: string;
             borderRadius: string;
         };
         '& .MuiToolbar-root ': {

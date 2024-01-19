@@ -914,6 +914,8 @@ export type TypeMapFeaturesInstance = {
     appBar?: TypeAppBarProps;
     /** Nav bar properies. */
     navBar?: TypeNavBarProps;
+    /** Footer bar properies. */
+    footerTabs?: TypeFooterTabsProps;
     /** Overview map properies. */
     overviewMap?: TypeOverviewMapProps;
     /** Map components. */
@@ -1058,6 +1060,16 @@ export type TypeAppBarProps = Array<'geolocator' | 'export'>;
  */
 export type TypeNavBarProps = Array<'zoom' | 'fullscreen' | 'home' | 'location' | 'export'>;
 /** ******************************************************************************************************************************
+ * Configuration available for the footer tabs component.
+ */
+export type TypeFooterTabsProps = {
+    tabs: {
+        core: Array<'legend' | 'layers' | 'details' | 'data-table' | 'time-slider' | 'geochart'>;
+        custom: Array<string>;
+    };
+    collapsed: boolean;
+};
+/** ******************************************************************************************************************************
  *  Overview map options. Default none.
  */
 export type TypeOverviewMapProps = {
@@ -1070,9 +1082,9 @@ export type TypeMapComponents = Array<'north-arrow' | 'overview-map'>;
 /** ******************************************************************************************************************************
  * Core packages to initialize on viewer load. The schema for those are on their own package. NOTE: config from packages are in
  * the same loaction as core config (<<core config name>>-<<package name>>.json).
- * Default = ['basemap-panel' | 'layers-panel' | 'details-panel' | 'geolocator-panel'].
+ * Default = [].
  */
-export type TypeMapCorePackages = Array<'basemap-panel' | 'layers-panel' | 'details-panel' | 'geolocator-panel' | 'footer-panel' | 'geochart' | 'time-slider'>;
+export type TypeMapCorePackages = Array<'basemap-panel' | 'geochart' | 'time-slider' | 'swiper'>;
 /** ******************************************************************************************************************************
  * List of external packages to initialize on viewer load. Default = [].
  */

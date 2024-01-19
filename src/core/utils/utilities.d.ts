@@ -220,18 +220,18 @@ export declare function stringify(str: unknown): unknown | string;
  * @param checkCallback the function executed to verify a particular condition until it's passed
  * @param doCallback the function executed when checkCallback returns true or some object
  * @param failCallback the function executed when checkCallback has failed for too long (went over the timeout)
- * @param checkFrequency the frequency in milliseconds to callback for a check (defaults to 100 milliseconds)
  * @param timeout the duration in milliseconds until the task is aborted (defaults to 10 seconds)
+ * @param checkFrequency the frequency in milliseconds to callback for a check (defaults to 100 milliseconds)
  */
-export declare function whenThisThenThat<T>(checkCallback: () => T, doCallback: (value: T) => void, failCallback: (reason?: any) => void, checkFrequency?: number, timeout?: number): void;
+export declare function whenThisThenThat<T>(checkCallback: () => T, doCallback: (value: T) => void, failCallback: (reason?: any) => void, timeout?: number, checkFrequency?: number): void;
 /**
  * This asynchronous generic function checks for a validity of something via the checkCallback() until it's found or until the timer runs out.
  * This method returns a Promise which the developper can use to await or use .then().catch().finally() principles.
  * @param checkCallback the function executed to verify a particular condition until it's passed
- * @param checkFrequency the frequency in milliseconds to check for an update (defaults to 100 milliseconds)
  * @param timeout the duration in milliseconds until the task is aborted (defaults to 10 seconds)
+ * @param checkFrequency the frequency in milliseconds to check for an update (defaults to 100 milliseconds)
  */
-export declare function whenThisThen<T>(checkCallback: () => T, checkFrequency?: number, timeout?: number): Promise<T>;
+export declare function whenThisThen<T>(checkCallback: () => T, timeout?: number, checkFrequency?: number): Promise<T>;
 /**
  * Delay helper function.
  * @param ms number Number of milliseconds to wait for.

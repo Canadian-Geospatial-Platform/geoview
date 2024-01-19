@@ -72,8 +72,8 @@ export declare class API {
      */
     callInitCallback: () => void;
     /**
-     * Create a new map in a given div
-     * !MUST not be a map div with geoview-map class
+     * Create a new map in a given div id.
+     * !The div MUST NOT have a geoview-map class or a warning will be shown when initMapDivFromFunctionCall is called.
      * If is present, the div will be created with a default config
      *
      * @param {string} divId the id of the div to create map in

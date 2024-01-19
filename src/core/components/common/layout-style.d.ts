@@ -2,8 +2,7 @@ import { Theme } from '@mui/material/styles';
 export declare const getSxClasses: (theme: Theme) => {
     detailsContainer: {
         background: string;
-        boxShadow: string;
-        padding: string;
+        paddingBottom: string;
     };
     panelHeaders: {
         font: string;

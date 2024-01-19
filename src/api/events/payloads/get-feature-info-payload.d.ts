@@ -92,6 +92,9 @@ export declare const payloadIsQueryLayerQueryTypeAtLongLat: (verifyIfPayload: Pa
  */
 export interface TypeQueryLayerPayload extends GetFeatureInfoPayload {
     queryType: QueryType;
+    disabledLayers: {
+        [layerPath: string]: boolean;
+    };
     location?: TypeLocation;
     eventType: EventType;
 }
@@ -167,12 +170,15 @@ export declare class GetFeatureInfoPayload extends PayloadBaseClass {
      *
      * @param {string | null} handlerName the handler Name
      * @param {QueryType} queryType the query's type to perform
+     * @param {{ [layerPath: string]: boolean }} disabledLayers Object containing layerPath and its disable flag.
      * @param {TypeLocation} location the location to query
      * @param {EventType} eventType the type of event that triggered the query
      *
      * @returns {TypeQueryLayerPayload} the queryLayerPayload object created
      */
-    static createQueryLayerPayload: (handlerName: string, queryType: QueryType, location?: TypeLocation, eventType?: EventType) => TypeQueryLayerPayload;
+    static createQueryLayerPayload: (handlerName: string, queryType: QueryType, disabledLayers: {
+        [layerPath: string]: boolean;
+    }, location?: TypeLocation, eventType?: EventType) => TypeQueryLayerPayload;
     /**
      * Static method used to create an "all queries done" payload.
      *

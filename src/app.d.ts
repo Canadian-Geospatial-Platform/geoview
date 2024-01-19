@@ -19,11 +19,12 @@ export declare function unmountMap(mapId: string): void;
  */
 export declare function addReloadListener(mapId: string): void;
 /**
- * Initialize a basic div from a function call. The div MUST not have geoview-map class.
+ * Initialize a basic div from a function call.
+ * !The div MUST NOT have a geoview-map class or a warning will be shown.
  * If is present, the div will be created with a default config
  *
  * @param {Element} mapDiv The basic div to initialise
  * @param {string} mapConfig the new config passed in from the function call
  */
-export declare function initMapDivFromFunctionCall(mapDiv: HTMLElement, mapConfig: string): void;
+export declare function initMapDivFromFunctionCall(mapDiv: HTMLElement, mapConfig: string): Promise<void>;
 export declare const cgpv: types.TypeCGPV;

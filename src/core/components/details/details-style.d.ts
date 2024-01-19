@@ -2,8 +2,7 @@ import { Theme } from '@mui/material/styles';
 export declare const getSxClasses: (theme: Theme) => {
     detailsContainer: {
         background: string;
-        boxShadow: string;
-        padding: string;
+        paddingBottom: string;
     };
     detailsInstructionsTitle: {
         font: string;
@@ -29,7 +28,6 @@ export declare const getSxClasses: (theme: Theme) => {
         paddingLeft: string;
         paddingRight: string;
         paddingBottom: string;
-        height: string;
         overflowY: string;
         overflowX: string;
     };
