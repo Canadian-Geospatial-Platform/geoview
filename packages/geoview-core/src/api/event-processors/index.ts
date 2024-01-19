@@ -19,7 +19,8 @@ export function initializeEventProcessors(store: GeoviewStoreType) {
   mapEventProcessor.onInitialize(store);
 
   // package stores, only create if needed
-  if (store.getState().mapConfig!.corePackages?.includes('time-slider')) timeSliderEventProcessor.onInitialize(store);
+  // TODO: Change this check for something more generic that checks in appBarTabs too
+  if (store.getState().mapConfig!.footerTabs?.tabs.core.includes('time-slider')) timeSliderEventProcessor.onInitialize(store);
 }
 
 export function destroyEventProcessors(store: GeoviewStoreType) {
@@ -30,5 +31,6 @@ export function destroyEventProcessors(store: GeoviewStoreType) {
   mapEventProcessor.onDestroy(store);
 
   // package stores, only destroy if created
-  if (store.getState().mapConfig!.corePackages?.includes('time-slider')) timeSliderEventProcessor.onDestroy(store);
+  // TODO: Change this check for something more generic that checks in appBarTabs too
+  if (store.getState().mapConfig!.footerTabs?.tabs.core.includes('time-slider')) timeSliderEventProcessor.onDestroy(store);
 }

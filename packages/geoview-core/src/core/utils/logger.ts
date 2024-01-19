@@ -161,9 +161,6 @@ export class ConsoleLogger {
     this.logLevel(LOG_TRACE_USE_EFFECT, 'U_EFF', 'mediumorchid', useEffectFunction, ...message);
   };
 
-  // TODO: Obsolete. Remove once geochart has been redeployed.. temporary backwards compatibility support.
-  logTraceUseEffectMount = this.logTraceUseEffect;
-
   /**
    * Logs trace information for core processing.
    * Only shows if LOG_ACTIVE is true.
