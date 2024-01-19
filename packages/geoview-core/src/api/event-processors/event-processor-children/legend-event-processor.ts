@@ -15,6 +15,7 @@ import {
 import { getGeoViewStore } from '@/core/stores/stores-managers';
 import { TypeLegendLayer, TypeLegendLayerIcons, TypeLegendLayerItem, TypeLegendItem } from '@/core/components/layers/types';
 import { api, getLocalizedValue } from '@/app';
+import { logger } from '@/core/utils/logger';
 
 export class LegendEventProcessor extends AbstractEventProcessor {
   // **********************************************************
@@ -191,8 +192,8 @@ export class LegendEventProcessor extends AbstractEventProcessor {
           const myLayer = await api.maps[mapId].layer.getGeoviewLayerByIdAsync(layerPathNodes[0], true);
           newLegendLayer.bounds = myLayer?.calculateBounds(layerPath);
         } catch (error) {
-          // eslint-disable-next-line no-console
-          console.error(`Couldn't calculate bounds on layer ${layerPath}`);
+          // Log
+          logger.logError(`Couldn't calculate bounds on layer ${layerPath}`);
           newLegendLayer.bounds = undefined;
         }
       }

@@ -55,6 +55,7 @@ import { TypeMapFeaturesConfig, TypeHTMLElement, TypeValidMapProjectionCodes, Ty
 import { layerConfigIsGeoCore } from '@/geo/layer/other/geocore';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
+import { logger } from '@/core/utils/logger';
 
 interface TypeDcoument extends Document {
   webkitExitFullscreen: () => void;
@@ -191,6 +192,8 @@ export class MapViewer {
    */
   mapReady(): void {
     const layerInterval = setInterval(() => {
+      // Log
+      logger.logTraceCore('mapReady check', this.mapId);
       if (this.layer?.geoviewLayers) {
         const { geoviewLayers } = this.layer;
         let allGeoviewLayerReady =
@@ -199,6 +202,8 @@ export class MapViewer {
           allGeoviewLayerReady &&= geoviewLayers[geoviewLayerId].allLayerEntryConfigProcessed();
         });
         if (allGeoviewLayerReady) {
+          // Log
+          logger.logTraceCore('mapReady was ready!', this.mapId);
           MapEventProcessor.setMapLoaded(this.mapId);
           clearInterval(layerInterval);
         }
@@ -214,6 +219,9 @@ export class MapViewer {
   initMap(cgpMap: OLMap): void {
     this.mapId = cgpMap.get('mapId');
     this.map = cgpMap;
+
+    // Log
+    logger.logTraceCore('initMap', this.mapId);
 
     // initialize layers and load the layers passed in from map config if any
     this.layer = new Layer(this.mapId);

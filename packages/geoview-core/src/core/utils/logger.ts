@@ -35,6 +35,29 @@ const runningDev = (): boolean => {
 };
 
 /**
+ * Helper function to format a time for logging.
+ * @param date {Date} The date to format
+ * @returns The formatted date
+ */
+const formatTime = (date: Date): string => {
+  const options: Intl.DateTimeFormatOptions = {
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hour12: false,
+  };
+
+  const formatter = new Intl.DateTimeFormat('en-US', options);
+  const formattedDate = formatter.format(date);
+
+  // Extract milliseconds separately and pad with zeros if needed
+  const milliseconds = date.getMilliseconds();
+  const formattedMilliseconds = milliseconds.toString().padStart(3, '0');
+
+  return `${formattedDate}.${formattedMilliseconds}`;
+};
+
+/**
  * A Console Logger to help out logging information with levels of details.
  */
 export class ConsoleLogger {
@@ -119,7 +142,7 @@ export class ConsoleLogger {
     // Validate running environment
     if (!runningDev()) return;
     // Redirect
-    this.logLevel(LOG_TRACE_CORE, ...message);
+    this.logLevel(LOG_TRACE_CORE, formatTime(new Date()), ...message);
   };
 
   /**

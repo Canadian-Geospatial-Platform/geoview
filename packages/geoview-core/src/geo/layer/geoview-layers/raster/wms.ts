@@ -37,6 +37,7 @@ import { getLocalizedValue, getMinOrMaxExtents, xmlToJson, showError, replacePar
 import { api, TypeImageStaticLayerConfig } from '@/app';
 import { Layer } from '@/geo/layer/layer';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
+import { logger } from '@/core/utils/logger';
 
 export interface TypeWMSLayerConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig'> {
   geoviewLayerType: 'ogcWms';
@@ -538,6 +539,7 @@ export class WMS extends AbstractGeoViewRaster {
 
           layerConfig.olLayer = new ImageLayer(imageLayerOptions);
           layerConfig.geoviewLayerInstance = this;
+
           this.applyViewFilter(layerPath, layerConfig.layerFilter ? layerConfig.layerFilter : '');
 
           this.addLoadendListener(layerPath, 'image');
@@ -1039,6 +1041,9 @@ export class WMS extends AbstractGeoViewRaster {
   // See above headers for signification of the parameters. The first lines of the method select the template
   // used based on the parameter types received.
   async applyViewFilter(parameter1: string, parameter2?: string | boolean | never, parameter3?: boolean | never): Promise<void> {
+    // Log
+    logger.logTraceCore('wms.applyViewFilter');
+
     let layerPath = this.layerPathAssociatedToTheGeoviewLayer;
     let filter = '';
     let CombineLegendFilter = true;

@@ -24,6 +24,7 @@ import { getGeoViewStore } from '@/core/stores/stores-managers';
 import { OL_ZOOM_DURATION, OL_ZOOM_PADDING } from '@/core/utils/constant';
 import { AppEventProcessor } from './app-event-processor';
 import { TypeLegendLayer } from '@/core/components/layers/types';
+import { logger } from '@/core/utils/logger';
 
 export class MapEventProcessor extends AbstractEventProcessor {
   onInitialize(store: GeoviewStoreType) {
@@ -161,6 +162,9 @@ export class MapEventProcessor extends AbstractEventProcessor {
 
   //! THIS IS THE ONLY FUNCTION TO SET STORE DIRECTLY
   static setMapLoaded(mapId: string): void {
+    // Log
+    logger.logTraceCore('setMapLoaded', mapId);
+
     // use api to access map because this function will set map element in store
     const { map } = api.maps[mapId];
     const store = getGeoViewStore(mapId);

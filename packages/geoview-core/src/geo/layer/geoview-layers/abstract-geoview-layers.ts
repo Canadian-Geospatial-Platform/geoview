@@ -60,6 +60,7 @@ import { Layer } from '@/geo/layer/layer';
 import { TimeDimension, TypeDateFragments } from '@/core/utils/date-mgt';
 import { TypeEventHandlerFunction } from '@/api/events/event';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
+import { logger } from '@/core/utils/logger';
 
 export type TypeLegend = {
   layerPath: string;
@@ -517,11 +518,20 @@ export abstract class AbstractGeoViewLayer {
   async createGeoViewLayers(): Promise<void> {
     if (this.olLayers === null) {
       try {
+        // Log
+        logger.logTraceCore('createGeoViewLayers');
+
+        // Set the phase
         this.setLayerPhase('createGeoViewLayers');
+
+        // Get additional service and await
         await this.getAdditionalServiceDefinition();
+
+        // Process list of layers and await
         this.olLayers = await this.processListOfLayerEntryConfig(this.listOfLayerEntryConfig);
       } catch (error) {
-        console.error(error);
+        // Log error
+        logger.logError(error);
       }
     } else {
       const message = replaceParams([this.mapId], getLocalizedMessage(this.mapId, 'validation.layer.createtwice'));
@@ -1011,7 +1021,7 @@ export abstract class AbstractGeoViewLayer {
     mustBeLoaded: boolean,
     timeout?: number,
     checkFrequency?: number
-  ): Promise<TypeLayerEntryConfig | null> {
+  ): Promise<TypeLayerEntryConfig> {
     // Redirects
     const layer = this.getLayerConfig(layerPath);
 
@@ -1021,17 +1031,21 @@ export abstract class AbstractGeoViewLayer {
       if (!mustBeLoaded) return Promise.resolve(layer);
 
       try {
-        // Waiting for the loaded status, possibly throwing exception if that's not happening
-        await this.waitForLoadedStatus(layer as TypeBaseLayerEntryConfig, timeout, checkFrequency);
-        return layer;
+        // Waiting for the loaded status, possibly throwing exception if timing out
+        await this.waitForLoadedOrErrorStatus(layer as TypeBaseLayerEntryConfig, timeout, checkFrequency);
       } catch (error) {
-        console.error(`Took too long for config of ${layer.layerId} to get in 'loaded' status.`, (error as Error).stack);
-        throw error;
+        // Throw
+        throw new Error(`Took too long for config of ${layer.layerId} to respond.`);
       }
+
+      // At this point, the layer has a status of either 'loaded' or 'error'
+      // Check the layer status
+      if (layer.layerStatus === 'loaded') return Promise.resolve(layer);
+      throw new Error(`Layer config of ${layer.layerId} is in error and has failed to load.`); // Throw
     }
 
-    // Failed
-    return Promise.resolve(null);
+    // Throw
+    throw new Error(`Layer path ${layerPath} doesn't exist. Couldn't get its config.`);
   }
 
   /**
@@ -1043,11 +1057,11 @@ export abstract class AbstractGeoViewLayer {
    * @param {string} checkFrequency optionally indicate the frequency at which to check for the condition on the layer config
    * @throws an exception when the layer failed to become in loaded status before the timeout expired
    */
-  async waitForLoadedStatus(layerConfig: TypeBaseLayerEntryConfig, timeout?: number, checkFrequency?: number): Promise<void> {
+  async waitForLoadedOrErrorStatus(layerConfig: TypeBaseLayerEntryConfig, timeout?: number, checkFrequency?: number): Promise<void> {
     // Wait for the loaded state
     await whenThisThen(
       () => {
-        return layerConfig.layerStatus === 'loaded';
+        return layerConfig.layerStatus === 'loaded' || layerConfig.layerStatus === 'error';
       },
       timeout,
       checkFrequency
