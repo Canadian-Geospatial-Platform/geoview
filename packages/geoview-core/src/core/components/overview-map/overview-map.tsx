@@ -19,6 +19,7 @@ import { useGeoViewMapId } from '@/app';
 import { useAppDisplayLanguage, useAppDisplayTheme } from '@/core/stores/store-interface-and-intial-values/app-state';
 import { useMapElement, useMapOverviewMapHideZoom } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
+import { logger } from '@/core/utils/logger';
 
 // TODO: We need to find solution to remove makeStyles with either plain css or material ui.
 const useStyles = makeStyles(() => ({
@@ -119,6 +120,9 @@ export function OverviewMap(): JSX.Element {
   };
 
   useEffect(() => {
+    // Log
+    logger.logTraceUseEffect('OVERVIEW-MAP - mount');
+
     // if zoom changed, view change:resolution event has been triggered
     const unsubMapZoom = getGeoViewStore(mapId).subscribe(
       (state) => state.mapState.zoom,
@@ -159,6 +163,9 @@ export function OverviewMap(): JSX.Element {
   }, []);
 
   useEffect(() => {
+    // Log
+    logger.logTraceUseEffect('OVERVIEW-MAP - displayLanguage', displayLanguage, displayTheme);
+
     // get default overview map
     const defaultBasemap = MapEventProcessor.createOverviewMapBasemap(mapId);
 

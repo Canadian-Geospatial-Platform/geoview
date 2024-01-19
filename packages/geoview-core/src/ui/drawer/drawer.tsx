@@ -8,6 +8,7 @@ import { Drawer as MaterialDrawer, DrawerProps, Box } from '@mui/material';
 import { IconButton, ChevronLeftIcon, ChevronRightIcon } from '..';
 import { getSxClasses } from './drawer-style';
 import { useGeoViewMapId } from '@/app';
+import { logger } from '@/core/utils/logger';
 
 /**
  * Drawer Properties
@@ -41,6 +42,9 @@ export function Drawer(props: TypeDrawerProps): JSX.Element {
   };
 
   useEffect(() => {
+    // Log
+    logger.logTraceUseEffect('DRAWER - mapId', mapId, status);
+
     // set status from props if passed in
     if (status !== undefined) {
       setOpen(status);

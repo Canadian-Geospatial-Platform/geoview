@@ -93,9 +93,11 @@ async function renderMap(mapElement: Element): Promise<void> {
   if (configObj) {
     const { mapId } = configObj;
     addGeoViewStore(configObj);
+
     // render the map with the config
     reactRoot[mapId] = createRoot(mapElement!);
     addReloadListener(mapId);
+
     // TODO: Refactor - Activate <React.StrictMode>
     reactRoot[mapId].render(<AppStart mapFeaturesConfig={configObj} />);
   }

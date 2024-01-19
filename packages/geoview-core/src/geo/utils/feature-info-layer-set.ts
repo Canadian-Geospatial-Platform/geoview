@@ -13,6 +13,7 @@ import {
 import { api, getLocalizedValue } from '@/app';
 import { LayerSet } from './layer-set';
 import { FeatureInfoEventProcessor } from '@/api/event-processors/event-processor-children/feature-info-event-processor';
+import { logger } from '@/core/utils/logger';
 
 /** ***************************************************************************************************************************
  * A class to hold a set of layers associated with an array of TypeArrayOfFeatureInfoEntries. When this class is instantiated,
@@ -98,6 +99,9 @@ export class FeatureInfoLayerSet {
       EVENT_NAMES.MAP.EVENT_MAP_SINGLE_CLICK,
       (payload) => {
         if (payloadIsAMapMouseEvent(payload)) {
+          // Log
+          logger.logTraceDetailed('feature-info-layer-set on EVENT_NAMES.MAP.EVENT_MAP_SINGLE_CLICK', this.mapId, payload);
+
           Object.keys(this.resultSets).forEach((layerPath) => {
             if (this.disableClickOnLayer[layerPath]) return;
             this.resultSets[layerPath].data.click = {
@@ -129,6 +133,9 @@ export class FeatureInfoLayerSet {
       EVENT_NAMES.MAP.EVENT_MAP_CROSSHAIR_ENTER,
       (payload) => {
         if (payloadIsALngLat(payload)) {
+          // Log
+          logger.logTraceDetailed('feature-info-layer-set on EVENT_NAMES.MAP.EVENT_MAP_CROSSHAIR_ENTER', this.mapId, payload);
+
           Object.keys(this.resultSets).forEach((layerPath) => {
             this.resultSets[layerPath].data['crosshaire-enter'] = undefined;
           });
@@ -150,6 +157,9 @@ export class FeatureInfoLayerSet {
       EVENT_NAMES.MAP.EVENT_MAP_POINTER_MOVE,
       debounce((payload) => {
         if (payloadIsAMapMouseEvent(payload)) {
+          // Log
+          logger.logTraceDetailed('feature-info-layer-set on EVENT_NAMES.MAP.EVENT_MAP_POINTER_MOVE', this.mapId, payload);
+
           Object.keys(this.resultSets).forEach((layerPath) => {
             if (this.disableHoverOverLayer[layerPath]) return;
             this.resultSets[layerPath].data.hover = {
@@ -176,6 +186,9 @@ export class FeatureInfoLayerSet {
     api.event.on(
       EVENT_NAMES.MAP.EVENT_MAP_GET_ALL_FEATURES,
       () => {
+        // Log
+        logger.logTraceDetailed('feature-info-layer-set on EVENT_NAMES.MAP.EVENT_MAP_GET_ALL_FEATURES', this.mapId);
+
         Object.keys(this.resultSets).forEach((layerPath) => {
           if (this.disableClickOnLayer[layerPath]) return;
           this.resultSets[layerPath].data['all-features'] = {
@@ -194,6 +207,9 @@ export class FeatureInfoLayerSet {
       EVENT_NAMES.GET_FEATURE_INFO.QUERY_RESULT,
       (payload) => {
         if (payloadIsQueryResult(payload)) {
+          // Log
+          logger.logTraceDetailed('feature-info-layer-set on EVENT_NAMES.GET_FEATURE_INFO.QUERY_RESULT', this.mapId, payload);
+
           const { layerPath, queryType, arrayOfRecords, eventType } = payload;
           if (this.resultSets?.[layerPath]?.data) {
             this.resultSets[layerPath].data[eventType] = {

@@ -4,6 +4,7 @@ import { GetLegendsPayload, payloadIsLegendInfo, TypeLegendResultSets, payloadIs
 import { api } from '@/app';
 import { LayerSet } from './layer-set';
 import { LegendEventProcessor } from '@/api/event-processors/event-processor-children/legend-event-processor';
+import { logger } from '@/core/utils/logger';
 
 /** *****************************************************************************************************************************
  * A class to hold a set of layers associated with an array of TypeLegend. When this class is instantiated, all layers already
@@ -56,6 +57,13 @@ export class LegendsLayerSet {
       EVENT_NAMES.LAYER_SET.UPDATED,
       (layerUpdatedPayload) => {
         if (payloadIsLayerSetUpdated(layerUpdatedPayload)) {
+          // Log
+          logger.logTraceDetailed(
+            'legends-layer-set on EVENT_NAMES.LAYER_SET.UPDATED (LegendsLayerSetStatusOrPhaseChanged)',
+            this.mapId,
+            layerUpdatedPayload
+          );
+
           const { layerPath, resultSets } = layerUpdatedPayload;
           api.event.emit(GetLegendsPayload.createLegendsLayersetUpdatedPayload(`${this.mapId}/LegendsLayerSet`, layerPath, resultSets));
         }
@@ -69,6 +77,9 @@ export class LegendsLayerSet {
       EVENT_NAMES.GET_LEGENDS.LEGEND_INFO,
       (payload) => {
         if (payloadIsLegendInfo(payload)) {
+          // Log
+          logger.logTraceDetailed('legends-layer-set on EVENT_NAMES.GET_LEGENDS.LEGEND_INFO', this.mapId, payload);
+
           const { layerPath, legendInfo } = payload;
           if (layerPath in this.resultSets) {
             this.resultSets[layerPath].data = legendInfo;
@@ -86,6 +97,9 @@ export class LegendsLayerSet {
       EVENT_NAMES.LAYER_SET.UPDATED,
       (layerUpdatedPayload) => {
         if (payloadIsLayerSetUpdated(layerUpdatedPayload)) {
+          // Log
+          logger.logTraceDetailed('legends-layer-set on EVENT_NAMES.LAYER_SET.UPDATED (LegendsLayerSet)', this.mapId, layerUpdatedPayload);
+
           const { layerPath, resultSets } = layerUpdatedPayload;
           if (resultSets[layerPath]?.layerStatus === 'processed' && !(resultSets as TypeLegendResultSets)[layerPath].querySent) {
             api.event.emit(GetLegendsPayload.createQueryLegendPayload(`${this.mapId}/${layerPath}`, layerPath));

@@ -13,6 +13,7 @@ import { ITimeSliderState, initializeTimeSliderState } from './store-interface-a
 import { IUIState, initializeUIState } from './store-interface-and-intial-values/ui-state';
 
 import { TypeMapFeaturesConfig } from '@/core/types/global-types';
+import { logger } from '@/core/utils/logger';
 
 export type TypeSetStore = (
   partial: IGeoviewState | Partial<IGeoviewState> | ((state: IGeoviewState) => IGeoviewState | Partial<IGeoviewState>),
@@ -35,8 +36,12 @@ export interface IGeoviewState {
   uiState: IUIState;
 }
 
-export const geoviewStoreDefinition = (set: TypeSetStore, get: TypeGetStore) =>
-  ({
+export const geoviewStoreDefinition = (set: TypeSetStore, get: TypeGetStore) => {
+  // Log
+  logger.logTraceCore('Initializing store core states...');
+
+  // Return the initialized store definition
+  return {
     mapConfig: undefined,
     setMapConfig: (config: TypeMapFeaturesConfig) => {
       // ! this is a copy of the original map configuration, no modifications is allowed
@@ -59,7 +64,8 @@ export const geoviewStoreDefinition = (set: TypeSetStore, get: TypeGetStore) =>
     layerState: initializeLayerState(set, get),
     mapState: initializeMapState(set, get),
     uiState: initializeUIState(set, get),
-  } as IGeoviewState);
+  } as IGeoviewState;
+};
 
 export const geoviewStoreDefinitionWithSubscribeSelector = subscribeWithSelector(geoviewStoreDefinition);
 

@@ -19,6 +19,7 @@ import { TypeModalProps } from '.';
 import { CloseIcon, IconButton } from '..';
 import { PayloadBaseClass, payloadIsAModal } from '@/api/events/payloads';
 import { getSxClasses } from './modal-style';
+import { logger } from '@/core/utils/logger';
 
 /**
  * Customized Material UI Dialog Properties
@@ -217,6 +218,9 @@ export function Modal(props: TypeDialogProps): JSX.Element {
   };
 
   useEffect(() => {
+    // Log
+    logger.logTraceUseEffect('MODAL - updateModal');
+
     // to open the modal
     api.event.on(EVENT_NAMES.MODAL.EVENT_MODAL_OPEN, modalOpenListenerFunction, mapId);
 

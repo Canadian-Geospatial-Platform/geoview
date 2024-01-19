@@ -22,6 +22,7 @@ import {
   useUIFooterBarExpanded,
   useUINavbarComponents,
 } from '@/core/stores/store-interface-and-intial-values/ui-state';
+import { logger } from '@/core/utils/logger';
 
 /**
  * Create a nav-bar with buttons that can call functions or open custom panels
@@ -72,6 +73,9 @@ export function Navbar(): JSX.Element {
   );
 
   useEffect(() => {
+    // Log
+    logger.logTraceUseEffect('NAV-BAR - addButtonPanel', mapId);
+
     const navbarBtnPanelCreateListenerFunction = (payload: PayloadBaseClass) => {
       if (payloadIsAButtonPanel(payload)) addButtonPanel(payload);
     };

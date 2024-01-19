@@ -1,4 +1,4 @@
-/* eslint-disable no-console, no-param-reassign, no-var */
+/* eslint-disable no-param-reassign */
 import Feature from 'ol/Feature';
 import { Vector as VectorSource } from 'ol/source';
 import { Options as SourceOptions } from 'ol/source/Vector';
@@ -16,7 +16,6 @@ import { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geovie
 import {
   TypeBaseLayerEntryConfig,
   TypeBaseSourceVectorInitialConfig,
-  TypeLayerEntryConfig,
   TypeListOfLayerEntryConfig,
   TypeVectorLayerEntryConfig,
 } from '@/geo/map/map-schema-types';
@@ -25,6 +24,7 @@ import { getLocalizedValue, getMinOrMaxExtents } from '@/core/utils/utilities';
 import { TypeArrayOfFeatureInfoEntries } from '@/api/events/payloads';
 import { NodeType } from '@/geo/renderer/geoview-renderer-types';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
+import { logger } from '@/core/utils/logger';
 
 /* *******************************************************************************************************************************
  * AbstractGeoViewVector types
@@ -90,7 +90,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
   ): VectorSource<Feature> {
     const { layerPath } = layerConfig;
     // The line below uses var because a var declaration has a wider scope than a let declaration.
-    var vectorSource: VectorSource<Feature>;
+    let vectorSource: VectorSource<Feature>;
     this.setLayerPhase('createVectorSource', layerPath);
     if (this.attributions.length !== 0) sourceOptions.attributions = this.attributions;
 
@@ -231,14 +231,14 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
   protected async getAllFeatureInfo(layerPath?: string): Promise<TypeArrayOfFeatureInfoEntries> {
     layerPath = layerPath || this.layerPathAssociatedToTheGeoviewLayer;
     try {
-      // TODO: Check - Is it okay to not have the `| null` at the end of here and let the code crash on the following line (if layerConfig is null)
-      // TO.DO.CONT: It seems to be the expected behavior?
-      const layerConfig = (await this.getLayerConfigAsync(layerPath, true)) as TypeLayerEntryConfig;
+      // Get the layer config in a loaded phase
+      const layerConfig = (await this.getLayerConfigAsync(layerPath, true)) as TypeVectorLayerEntryConfig;
       const features = (layerConfig.olLayer as VectorLayer<VectorSource>).getSource()!.getFeatures();
       const arrayOfFeatureInfoEntries = await this.formatFeatureInfoResult(features, layerConfig as TypeVectorLayerEntryConfig);
       return arrayOfFeatureInfoEntries;
     } catch (error) {
-      console.error(error);
+      // Log
+      logger.logError('abstract-geoview-vector.getAllFeatureInfo()\n', error);
       // TODO: Check - Shouldn't this return null instead of [] to be consistent with getFeatureInfoAtPixel and others?
       // TO.DO.CONT: If returning null is decided, the function should probably return Promise<TypeArrayOfFeatureInfoEntries | null>?
       return [];
@@ -256,7 +256,8 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
   protected async getFeatureInfoAtPixel(location: Pixel, layerPath?: string): Promise<TypeArrayOfFeatureInfoEntries | null> {
     layerPath = layerPath || this.layerPathAssociatedToTheGeoviewLayer;
     try {
-      const layerConfig = (await this.getLayerConfigAsync(layerPath, true)) as TypeLayerEntryConfig | null;
+      // Get the layer config in a loaded phase
+      const layerConfig = (await this.getLayerConfigAsync(layerPath, true)) as TypeVectorLayerEntryConfig;
       const layerFilter = (layer: BaseLayer) => {
         const layerSource = layer.get('layerConfig')?.source;
         const configSource = layerConfig?.source;
@@ -266,7 +267,8 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
       const features = map.getFeaturesAtPixel(location, { hitTolerance: 4, layerFilter });
       return await this.formatFeatureInfoResult(features as Feature[], layerConfig as TypeVectorLayerEntryConfig);
     } catch (error) {
-      console.error('abstract-geoview-vector.getFeatureInfoAtPixel\n', error);
+      // Log
+      logger.logError('abstract-geoview-vector.getFeatureInfoAtPixel()\n', error);
       return null;
     }
   }
@@ -382,6 +384,10 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
   // used based on the parameter types received.
   async applyViewFilter(parameter1: string, parameter2?: string | boolean | never, parameter3?: boolean | never): Promise<void> {
     let layerPath = this.layerPathAssociatedToTheGeoviewLayer;
+
+    // Log
+    logger.logTraceCore('abstract-geoview-vector.applyViewFilter', layerPath);
+
     let filter = '';
     let CombineLegendFilter = true;
     if (parameter3) {
@@ -398,9 +404,17 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
       }
     } else filter = parameter1;
 
-    // Get the layer config in a loaded phase
-    const layerConfig = await this.getLayerConfigAsync(layerPath, true);
-    if (!layerConfig) throw new Error(`Couldn't applyViewFilter for vector as couldn't get layer config for layerPath ${layerPath}`);
+    // TODO: Refactor - Maybe try-catch higher in the call stack instead of here? Notably to 'try again'?
+    let layerConfig;
+    try {
+      // Get the layer config in a loaded phase
+      layerConfig = (await this.getLayerConfigAsync(layerPath, true)) as TypeVectorLayerEntryConfig;
+    } catch (error) {
+      // Log
+      logger.logError('abstract-geoview-vector.applyViewFilter()\n', error);
+      return;
+    }
+
     let filterValueToUse = filter.replaceAll(/\s{2,}/g, ' ').trim();
     layerConfig.olLayer!.set('legendFilterIsOff', !CombineLegendFilter);
     if (CombineLegendFilter) layerConfig.olLayer?.set('layerFilter', filter);

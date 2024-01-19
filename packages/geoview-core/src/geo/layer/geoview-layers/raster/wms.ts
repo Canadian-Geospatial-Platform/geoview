@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-unused-vars, no-console, no-param-reassign */
+/* eslint-disable no-param-reassign */
 import axios from 'axios';
 
 import ImageLayer from 'ol/layer/Image';
@@ -34,9 +34,9 @@ import {
 } from '@/geo/map/map-schema-types';
 import { TypeFeatureInfoEntry, TypeArrayOfFeatureInfoEntries } from '@/api/events/payloads';
 import { getLocalizedValue, getMinOrMaxExtents, xmlToJson, showError, replaceParams, getLocalizedMessage } from '@/core/utils/utilities';
-import { api, TypeImageStaticLayerConfig } from '@/app';
-import { Layer } from '@/geo/layer/layer';
+import { api } from '@/app';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
+import { logger } from '@/core/utils/logger';
 
 export interface TypeWMSLayerConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig'> {
   geoviewLayerType: 'ogcWms';
@@ -126,7 +126,8 @@ export class WMS extends AbstractGeoViewRaster {
             this.metadata = metadata;
             this.processMetadataInheritance();
           } catch (error) {
-            console.log(`Unable to read service metadata for GeoView layer ${this.geoviewLayerId} of map ${this.mapId}.`);
+            // Log
+            logger.logError(`Unable to read service metadata for GeoView layer ${this.geoviewLayerId} of map ${this.mapId}.`);
           }
         } else {
           // Uses GetCapabilities to get the metadata. However, to allow geomet metadata to be retrieved using the non-standard
@@ -288,7 +289,6 @@ export class WMS extends AbstractGeoViewRaster {
     if (metadataLayerPathToAdd[0] === -1)
       this.addLayerToMetadataInstance(metadataLayerPathToAdd.slice(1), metadataLayer.Layer, layerToAdd.Layer);
     else {
-      let i: number;
       const metadataLayerFound = (metadataLayer as TypeJsonArray).find(
         (layerEntry) => layerEntry.Name === layerToAdd[metadataLayerPathToAdd[0]].Name
       );
@@ -424,6 +424,8 @@ export class WMS extends AbstractGeoViewRaster {
     const arrayOfLayerMetadata = Array.isArray(layer.Layer) ? layer.Layer : ([layer.Layer] as TypeJsonArray);
 
     arrayOfLayerMetadata.forEach((subLayer) => {
+      // Log for pertinent debugging purposes
+      logger.logTraceCore('wms.createGroupLayer', 'Cloning the layer config', layerConfig.layerPath);
       const subLayerEntryConfig: TypeLayerEntryConfig = cloneDeep(layerConfig);
       subLayerEntryConfig.parentLayerConfig = Cast<TypeLayerGroupEntryConfig>(layerConfig);
       subLayerEntryConfig.layerId = subLayer.Name as string;
@@ -483,6 +485,9 @@ export class WMS extends AbstractGeoViewRaster {
    * @returns {TypeBaseRasterLayer | null} The GeoView raster layer that has been created.
    */
   protected processOneLayerEntry(layerConfig: TypeBaseLayerEntryConfig): Promise<TypeBaseRasterLayer | null> {
+    // Log
+    logger.logTraceCore('processOneLayerEntry', layerConfig.layerPath);
+
     const promisedVectorLayer = new Promise<TypeBaseRasterLayer | null>((resolve) => {
       const { layerPath } = layerConfig;
       this.setLayerPhase('processOneLayerEntry', layerPath);
@@ -538,6 +543,7 @@ export class WMS extends AbstractGeoViewRaster {
 
           layerConfig.olLayer = new ImageLayer(imageLayerOptions);
           layerConfig.geoviewLayerInstance = this;
+
           this.applyViewFilter(layerPath, layerConfig.layerFilter ? layerConfig.layerFilter : '');
 
           this.addLoadendListener(layerPath, 'image');
@@ -653,8 +659,10 @@ export class WMS extends AbstractGeoViewRaster {
    */
   protected async getFeatureInfoAtLongLat(lnglat: Coordinate, layerPath: string): Promise<TypeArrayOfFeatureInfoEntries> {
     try {
-      const layerConfig = (await this.getLayerConfigAsync(layerPath, true)) as TypeOgcWmsLayerEntryConfig | null;
-      if (!layerConfig || !this.getVisible(layerPath)) return [];
+      // Get the layer config in a loaded phase
+      const layerConfig = (await this.getLayerConfigAsync(layerPath, true)) as TypeOgcWmsLayerEntryConfig;
+      if (!this.getVisible(layerPath)) return [];
+
       const viewResolution = api.maps[this.mapId].getView().getResolution() as number;
       const crs = `EPSG:${MapEventProcessor.getMapState(this.mapId).currentProjection}`;
       const clickCoordinate = api.projection.transform(lnglat, 'EPSG:4326', crs);
@@ -714,7 +722,8 @@ export class WMS extends AbstractGeoViewRaster {
       }
       return [];
     } catch (error) {
-      console.error(error);
+      // Log
+      logger.logError('wms.getFeatureInfoAtLongLat()\n', error);
       return [];
     }
   }
@@ -764,11 +773,10 @@ export class WMS extends AbstractGeoViewRaster {
   private getLegendImage(layerConfig: TypeOgcWmsLayerEntryConfig, chosenStyle?: string): Promise<string | ArrayBuffer | null> {
     const promisedImage = new Promise<string | ArrayBuffer | null>((resolve) => {
       const readImage = (blob: Blob): Promise<string | ArrayBuffer | null> =>
-        // eslint-disable-next-line @typescript-eslint/no-shadow
-        new Promise((resolve, reject) => {
+        new Promise((resolveImage) => {
           const reader = new FileReader();
-          reader.onloadend = () => resolve(reader.result);
-          reader.onerror = () => resolve(null);
+          reader.onloadend = () => resolveImage(reader.result);
+          reader.onerror = () => resolveImage(null);
           reader.readAsDataURL(blob);
         });
 
@@ -791,7 +799,7 @@ export class WMS extends AbstractGeoViewRaster {
             }
             resolve(readImage(Cast<Blob>(response.data)));
           })
-          .catch((error) => resolve(null));
+          .catch(() => resolve(null));
       } else resolve(null);
     });
     return promisedImage;
@@ -854,8 +862,8 @@ export class WMS extends AbstractGeoViewRaster {
    */
   async getLegend(layerPath: string): Promise<TypeLegend | null> {
     try {
-      const layerConfig = (await this.getLayerConfigAsync(layerPath, true)) as TypeOgcWmsLayerEntryConfig | null;
-      if (!layerConfig) return null;
+      // Get the layer config in a loaded phase
+      const layerConfig = (await this.getLayerConfigAsync(layerPath, true)) as TypeOgcWmsLayerEntryConfig;
 
       let legend: TypeWmsLegend;
       const legendImage = await this.getLegendImage(layerConfig!);
@@ -896,7 +904,8 @@ export class WMS extends AbstractGeoViewRaster {
       };
       return legend;
     } catch (error) {
-      console.error(error);
+      // Log
+      logger.logError('wms.getLegend()\n', error);
       return null;
     }
   }
@@ -1040,6 +1049,10 @@ export class WMS extends AbstractGeoViewRaster {
   // used based on the parameter types received.
   async applyViewFilter(parameter1: string, parameter2?: string | boolean | never, parameter3?: boolean | never): Promise<void> {
     let layerPath = this.layerPathAssociatedToTheGeoviewLayer;
+
+    // Log
+    logger.logTraceCore('wms.applyViewFilter', layerPath);
+
     let filter = '';
     let CombineLegendFilter = true;
     if (parameter3) {
@@ -1056,9 +1069,18 @@ export class WMS extends AbstractGeoViewRaster {
       }
     } else filter = parameter1;
 
-    // Get the layer config in a loaded phase
-    const layerConfig = await this.getLayerConfigAsync(layerPath, true);
-    if (!layerConfig) throw new Error(`Couldn't applyViewFilter for wms as couldn't get layer config for layerPath ${layerPath}`);
+    // TODO: Refactor - Maybe try-catch higher in the call stack instead of here? Notably to 'try again'?
+    let layerConfig;
+    try {
+      // Get the layer config in a loaded phase
+      layerConfig = (await this.getLayerConfigAsync(layerPath, true)) as TypeOgcWmsLayerEntryConfig;
+    } catch (error) {
+      // Log
+      logger.logError('wms.applyViewFilter()\n', error);
+      return;
+    }
+
+    // Get source
     const source = (layerConfig.olLayer as ImageLayer<ImageWMS>).getSource();
     if (source) {
       let filterValueToUse = filter;

@@ -8,6 +8,7 @@ import { EVENT_NAMES } from '@/api/events/event-types';
 import { Cast } from '@/core/types/global-types';
 import { PayloadBaseClass, payloadIsASnackbarMessage } from '@/api/events/payloads';
 import { SnackbarType } from '@/api/events/payloads/snackbar-message-payload';
+import { logger } from '@/core/utils/logger';
 
 /**
  * Snackbar properties interface
@@ -83,6 +84,9 @@ export function Snackbar(props: SnackBarProps): JSX.Element {
   };
 
   useEffect(() => {
+    // Log
+    logger.logTraceUseEffect('SNACKBAR - mount', mapId);
+
     // listen to API event when app wants to show message
     api.event.on(EVENT_NAMES.SNACKBAR.EVENT_SNACKBAR_OPEN, snackBarOpenListenerFunction, mapId);
 
@@ -90,8 +94,7 @@ export function Snackbar(props: SnackBarProps): JSX.Element {
     return () => {
       api.event.off(EVENT_NAMES.SNACKBAR.EVENT_SNACKBAR_OPEN, mapId, snackBarOpenListenerFunction);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [mapId]);
 
   return (
     <MaterialSnackbar

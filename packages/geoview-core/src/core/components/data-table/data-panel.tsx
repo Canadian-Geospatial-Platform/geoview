@@ -17,6 +17,7 @@ import {
 } from '@/core/stores';
 
 import { ResponsiveGrid, EnlargeButton, CloseButton, LayerList, LayerListEntry, LayerTitle, useFooterPanelHeight } from '../common';
+import { logger } from '@/core/utils/logger';
 
 export interface LayersDataType extends DataTableData, GroupLayers {}
 
@@ -96,11 +97,13 @@ export function Datapanel({ layerData, mapId, language }: DatapanelProps) {
   };
 
   useEffect(() => {
+    // Log
+    logger.logTraceUseEffect('DATA-PANEL - visibleLayers', visibleLayers, layerData);
+
     const updatedLayerData = visibleLayers
       .map((layerPath) => layerData.filter((data) => data.layerKey === layerPath)[0])
       .filter((layer) => layer !== undefined);
     setOrderedLayerData(updatedLayerData);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [visibleLayers, layerData]);
 
   /**
@@ -109,25 +112,40 @@ export function Datapanel({ layerData, mapId, language }: DatapanelProps) {
    * @returns JSX.Element
    */
   const renderList = useCallback(
-    () => (
-      <LayerList
-        layerList={orderedLayerData.map((layer, index) => ({
-          layerName: layer.layerName![language] ?? '',
-          layerPath: layer.layerKey,
-          layerFeatures: getFeaturesOfLayer(layer.layerKey, index),
-          tooltip: getLayerTooltip(layer.layerName![language] ?? '', layer.layerKey, index),
-          mapFilteredIcon: isMapFilteredSelectedForLayer(layer.layerKey) && <FilterAltIcon sx={{ color: theme.palette.grey['500'] }} />,
-        }))}
-        isEnlargeDataTable={isEnlargeDataTable}
-        selectedLayerIndex={selectedLayerIndex}
-        handleListItemClick={handleLayerChange}
-      />
-    ),
+    () => {
+      // Log
+      logger.logTraceUseCallback(
+        'data-panel.renderList',
+        selectedLayerIndex,
+        isEnlargeDataTable,
+        mapFiltered,
+        rowsFiltered,
+        orderedLayerData
+      );
+
+      return (
+        <LayerList
+          layerList={orderedLayerData.map((layer, index) => ({
+            layerName: layer.layerName![language] ?? '',
+            layerPath: layer.layerKey,
+            layerFeatures: getFeaturesOfLayer(layer.layerKey, index),
+            tooltip: getLayerTooltip(layer.layerName![language] ?? '', layer.layerKey, index),
+            mapFilteredIcon: isMapFilteredSelectedForLayer(layer.layerKey) && <FilterAltIcon sx={{ color: theme.palette.grey['500'] }} />,
+          }))}
+          isEnlargeDataTable={isEnlargeDataTable}
+          selectedLayerIndex={selectedLayerIndex}
+          handleListItemClick={handleLayerChange}
+        />
+      );
+    },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [selectedLayerIndex, isEnlargeDataTable, mapFiltered, rowsFiltered, orderedLayerData]
   );
 
   useEffect(() => {
+    // Log
+    logger.logTraceUseEffect('DATA-PANEL - isLoading', isLoading, selectedLayerIndex);
+
     const clearLoading = setTimeout(() => {
       setIsLoading(false);
     }, 1000);
@@ -136,6 +154,9 @@ export function Datapanel({ layerData, mapId, language }: DatapanelProps) {
   }, [isLoading, selectedLayerIndex]);
 
   useEffect(() => {
+    // Log
+    logger.logTraceUseEffect('DATA-PANEL - layerData', layerData);
+
     setLayersData(layerData);
   }, [layerData, setLayersData]);
 

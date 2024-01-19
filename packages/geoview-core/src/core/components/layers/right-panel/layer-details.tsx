@@ -1,3 +1,4 @@
+import { Fragment } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '@mui/material/styles';
 import _ from 'lodash';
@@ -33,7 +34,7 @@ interface LayerDetailsProps {
 }
 
 export function LayerDetails(props: LayerDetailsProps): JSX.Element {
-  const { layerDetails } = props; // TODO: LayerDetails is triggered twice and the second time it is undefined, need to investigate (warning key error)
+  const { layerDetails } = props;
 
   const { t } = useTranslation<string>();
 
@@ -155,15 +156,15 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
     return (
       <List>
         {startLayer.children.map((layer) => (
-          <>
-            <ListItem key={layer.layerId} sx={{ padding: '6px 0px', borderTop: '1px solid #ccc' }}>
+          <Fragment key={layer.layerId}>
+            <ListItem sx={{ padding: '6px 0px', borderTop: '1px solid #ccc' }}>
               <ListItemIcon>
                 <LayerIcon layer={layer} />
               </ListItemIcon>
               <ListItemText primary={layer.layerName} />
             </ListItem>
             {layer.children.length > 0 && <Box sx={{ paddingLeft: '30px', width: '100%' }}>{renderLayers(layer)}</Box>}
-          </>
+          </Fragment>
         ))}
       </List>
     );
@@ -199,8 +200,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
     );
   }
 
-  // function renderItems
-  // TODO: LayerDetails is triggered twice and the second time it is undefined, need to investigate
+  // Render
   return (
     <Paper sx={sxClasses.layerDetails}>
       {layerDetails !== undefined && (

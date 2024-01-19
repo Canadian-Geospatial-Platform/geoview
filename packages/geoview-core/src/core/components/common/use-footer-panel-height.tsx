@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useAppFullscreenActive } from '@/core/stores/store-interface-and-intial-values/app-state';
 import { useUIActiveFooterTabId, useUIFooterPanelResizeValue } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import { useDetailsStoreLayerDataArray } from '@/core/stores/store-interface-and-intial-values/details-state';
+import { logger } from '@/core/utils/logger';
 
 interface UseFooterPanelHeightType {
   footerPanelTab: 'layers' | 'details' | 'datatable' | 'legend' | 'default';
@@ -25,6 +26,9 @@ export function useFooterPanelHeight({ footerPanelTab }: UseFooterPanelHeightTyp
   const arrayOfLayerData = useDetailsStoreLayerDataArray();
 
   useEffect(() => {
+    // Log
+    logger.logTraceUseEffect('USE-FOOTER-PANEL-HEIGHT - footerPanelResizeValue', footerPanelResizeValue, isMapFullScreen);
+
     const defaultHeight = 700;
 
     if (leftPanelRef.current && isMapFullScreen && (activeFooterTabId === footerPanelTab || footerPanelTab === 'default')) {
