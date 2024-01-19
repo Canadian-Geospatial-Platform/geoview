@@ -12,9 +12,7 @@ import { whenThisThen, showError } from '@/core/utils/utilities';
 import { api } from '@/app';
 import { AbstractPlugin } from './abstract-plugin';
 import { TypePluginStructure } from './plugin-types';
-import { toJsonObject, TypeJsonObject, TypeJsonValue } from '@/core/types/global-types';
-import { UIEventProcessor } from '../event-processors/event-processor-children/ui-event-processor';
-import { logger } from '@/core/utils/logger';
+import { TypeJsonObject, TypeJsonValue } from '@/core/types/global-types';
 
 /**
  * Class to manage plugins
@@ -237,64 +235,6 @@ export class Plugin {
           this.removePlugin(pluginId, mapId);
         }
       }
-    }
-  };
-
-  /**
-   * A function that will load each plugin on a map then checks if there are a next plugin to load
-   *
-   * @param {string} mapIndex the map index to load the plugin at
-   * @param {string} pluginIndex the plugin index to load
-   */
-  loadPlugin = (mapIndex: number, pluginIndex: number) => {
-    const mapId = Object.keys(api.maps)[mapIndex];
-
-    // check if the map at this index have core packages and if there is a package at the plugin index
-    const corePackages = UIEventProcessor.getCorePackageComponents(mapId);
-    if (corePackages[pluginIndex]) {
-      const pluginId = corePackages[pluginIndex];
-
-      // load the plugin from the script tag or create it
-      this.loadScript(pluginId).then((constructor) => {
-        // add the plugin by passing in the loaded constructor from the script tag
-        this.addPlugin(
-          pluginId,
-          mapId,
-          constructor,
-          toJsonObject({
-            mapId,
-          })
-        );
-
-        // check if there is a next plugin at the current map index
-        if (corePackages[pluginIndex + 1]) {
-          // load next plugin at the same map index
-          this.loadPlugin(mapIndex, pluginIndex + 1);
-          // if no more plugins at current map index then check if there is another map
-        } else if (Object.keys(api.maps)[mapIndex + 1]) {
-          // try to load first plugin at the next map
-          this.loadPlugin(mapIndex + 1, 0);
-        }
-      });
-      // if previous map did not have any packages then try to load packages from next map
-    } else if (Object.keys(api.maps)[mapIndex + 1]) {
-      // load packages at next map if exists
-      this.loadPlugin(mapIndex + 1, 0);
-      // if no plugins loaded then call init callback function
-    }
-  };
-
-  /**
-   * Load plugins provided by map config
-   */
-  loadPlugins = (): void => {
-    // Log
-    logger.logTraceCore('loadPlugins');
-
-    // check if a map exists
-    if (Object.keys(api.maps)[0]) {
-      // start loading core packages on first map and first package
-      this.loadPlugin(0, 0);
     }
   };
 }
