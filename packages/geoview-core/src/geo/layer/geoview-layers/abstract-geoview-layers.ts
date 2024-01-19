@@ -515,7 +515,6 @@ export abstract class AbstractGeoViewLayer {
    * the details-panel.
    */
   async createGeoViewLayers(): Promise<void> {
-    console.log('444444444');
     if (this.olLayers === null) {
       try {
         this.setLayerPhase('createGeoViewLayers');
