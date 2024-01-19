@@ -10,35 +10,37 @@ The logger class can be found here:  [https://github.com/Canadian-Geospatial-Pla
 
 The `logger` provides functions for high-level logging abstraction following best-practices concepts and the following constants:
 ```ts
-// The most detailed messages. Disabled by default. Only shows in development environment.
+// The most detailed messages. Disabled by default. Only shows if actually running in dev environment, never shown otherwise.
 export const LOG_TRACE_DETAILED = 1;
-// For tracing useEffect unmounting. Disabled by default. Only shows in development environment.
+// For tracing useEffect unmounting. Disabled by default. Only shows if running in dev environment or GEOVIEW_LOG_ACTIVE key is set in local storage.
 export const LOG_TRACE_USE_EFFECT_UNMOUNT = 2;
-// For tracing rendering. Disabled by default. Only shows in development environment.
+// For tracing rendering. Disabled by default. Only shows if running in dev environment or GEOVIEW_LOG_ACTIVE key is set in local storage.
 export const LOG_TRACE_RENDER = 3;
-// For tracing useCallback. Disabled by default. Only shows in development environment.
+// For tracing useCallback. Disabled by default. Only shows if running in dev environment or GEOVIEW_LOG_ACTIVE key is set in local storage.
 export const LOG_TRACE_USE_CALLBACK = 4;
-// For tracing useEffect mounting. Disabled by default. Only shows in development environment.
+// For tracing useEffect mounting. Disabled by default. Only shows if running in dev environment or GEOVIEW_LOG_ACTIVE key is set in local storage.
 export const LOG_TRACE_USE_EFFECT = 5;
-// For tracing core functions. Disabled by default. Only shows in development environment.
+// For tracing core functions. Disabled by default. Only shows if running in dev environment or GEOVIEW_LOG_ACTIVE key is set in local storage.
 export const LOG_TRACE_CORE = 10;
-// Default. For debugging and development. Enabled by default. Only shows in development environment.
+// Default. For debugging and development. Enabled by default. Only shows if running in dev environment or GEOVIEW_LOG_ACTIVE key is set in local storage.
 export const LOG_DEBUG = 20;
-// Tracks the general flow of the app. Enabled by default. Shows in all environment.
+// Tracks the general flow of the app. Enabled by default. Shows all the time.
 export const LOG_INFO = 30;
-// For abnormal or unexpected events. Typically includes errors or conditions that don't cause the app to fail. Enabled by default. Shows in all environment.
+// For abnormal or unexpected events. Typically includes errors or conditions that don't cause the app to fail. Enabled by default. Shows all the time.
 export const LOG_WARNING = 40;
-// For errors and exceptions that cannot be handled. Enabled by default. Shows in all environment.
+// For errors and exceptions that cannot be handled. Enabled by default. Shows all the time.
 export const LOG_ERROR = 50;
 ```
+
+The `logger` is active when (1) running in dev environment or (2) the local storage `GEOVIEW_LOG_ACTIVE` key is set.
 
 The `logger` singleton is created using the logging level specified by the local storage `GEOVIEW_LOG_LEVEL` value. __To change your logging level, edit that local storage key__. When no value can be found, the local storage is set to LOG_DEBUG level.
 
 The `LOG_TRACE` functions are used when the developer wants to view the call stack in the console. The calls to `logger.logTrace` are meant to remain in the code forever. By default they will just be ignored, because the logger logs level LOG_DEBUG and higher. There is a extra level of granularity for tracing (`LOG_TRACE_USE_EFFECT`, `LOG_TRACE_RENDER`, etc) , due to GeoView needs.
 
-`LOG_DEBUG` is the default and essentially replaces the straightforward `console.log`, but only stays active in development environment. The calls to `logger.logDebug()` may remain in the code and be pushed up the source tree, however, they aren't meant to remain forever. In any case, in production, those will never show up at all.
+`LOG_DEBUG` is the default and essentially replaces the straightforward `console.log`, but only stays active in development. The calls to `logger.logDebug()` may remain in the code and be pushed up the source tree, however, they aren't meant to remain forever. In any case, in production, those will never show up unless the GEOVIEW_LOG_ACTIVE is set.
 
-`LOG_INFO` and higher (`LOG_WARNING`, `LOG_ERROR`) are meant to indicate core information/warnings/errors which are to be shown in all environments. Those logs should remain in the code and be pushed up the source tree.
+`LOG_INFO` and higher (`LOG_WARNING`, `LOG_ERROR`) are meant to indicate core information/warnings/errors which are to be shown all the time. Those logs should remain in the code and be pushed up the source tree.
 
 Typically, to debug an application, the developer should use `logger.logDebug()` and when they are done, they should remove the line after some time. The line can be committed and remain in the code for a while, but they aren't meant to stay forever.
 
