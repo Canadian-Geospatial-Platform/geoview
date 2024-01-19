@@ -65,7 +65,7 @@ export function FooterTabs(): JSX.Element | null {
   const footerPanelResizeValues = useUIFooterPanelResizeValues();
   const { setFooterPanelResizeValue } = useUIStoreActions();
 
-  // get store config for footer tabs to add
+  // get store config for footer tabs to add (similar logic as in app-bar)
   const footerTabsConfig = useGeoViewConfig()?.footerTabs;
 
   /**
@@ -265,7 +265,7 @@ export function FooterTabs(): JSX.Element | null {
   }, [isCollapsed, isMapFullScreen]);
 
   /**
-   * Create default tabs from configuration parameters
+   * Create default tabs from configuration parameters (similar logic as in app-bar).
    */
   useEffect(() => {
     // Log
@@ -351,9 +351,7 @@ export function FooterTabs(): JSX.Element | null {
           );
         });
     }
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [footerTabsConfig, mapId]);
 
   // Handle focus using dynamic focus button
   const handleDynamicFocus = () => {

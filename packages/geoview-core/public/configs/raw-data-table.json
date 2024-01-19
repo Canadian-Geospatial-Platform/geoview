@@ -133,7 +133,6 @@
       "core": ["legend", "layers", "details", "data-table"]
     }
   },
-  "corePackages": [],
   "externalPackages": [],
   "suportedLanguages": [
     "fr",
