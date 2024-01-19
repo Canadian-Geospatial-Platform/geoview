@@ -25,6 +25,7 @@ import { getLocalizedValue, getMinOrMaxExtents } from '@/core/utils/utilities';
 import { TypeArrayOfFeatureInfoEntries } from '@/api/events/payloads';
 import { NodeType } from '@/geo/renderer/geoview-renderer-types';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
+import { logger } from '@/core/utils/logger';
 
 /* *******************************************************************************************************************************
  * AbstractGeoViewVector types
@@ -351,7 +352,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
    * @param {never} notUsed1 This parameter must not be provided. It is there to allow overloading of the method signature.
    * @param {never} notUsed2 This parameter must not be provided. It is there to allow overloading of the method signature.
    */
-  applyViewFilter(filter: string, notUsed1?: never, notUsed2?: never): Promise<void>;
+  applyViewFilter(filter: string, notUsed1?: never, notUsed2?: never): void;
 
   /** ***************************************************************************************************************************
    * Apply a view filter to the layer identified by the path stored in the layerPathAssociatedToTheGeoviewLayer property stored
@@ -364,7 +365,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
    * @param {boolean} CombineLegendFilter Flag used to combine the legend filter and the filter together (default: true)
    * @param {never} notUsed This parameter must not be provided. It is there to allow overloading of the method signature.
    */
-  applyViewFilter(filter: string, CombineLegendFilter: boolean, notUsed?: never): Promise<void>;
+  applyViewFilter(filter: string, CombineLegendFilter: boolean, notUsed?: never): void;
 
   /** ***************************************************************************************************************************
    * Apply a view filter to the layer. When the CombineLegendFilter flag is false, the filter paramater is used alone to display
@@ -376,11 +377,14 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
    * @param {string} filter A filter to be used in place of the getViewFilter value.
    * @param {boolean} CombineLegendFilter Flag used to combine the legend filter and the filter together (default: true)
    */
-  applyViewFilter(layerPath: string, filter?: string, CombineLegendFilter?: boolean): Promise<void>;
+  applyViewFilter(layerPath: string, filter?: string, CombineLegendFilter?: boolean): void;
 
   // See above headers for signification of the parameters. The first lines of the method select the template
   // used based on the parameter types received.
-  async applyViewFilter(parameter1: string, parameter2?: string | boolean | never, parameter3?: boolean | never): Promise<void> {
+  applyViewFilter(parameter1: string, parameter2?: string | boolean | never, parameter3?: boolean | never): void {
+    // Log
+    logger.logTraceCore('abstract-geoview-vector.applyViewFilter');
+
     let layerPath = this.layerPathAssociatedToTheGeoviewLayer;
     let filter = '';
     let CombineLegendFilter = true;
@@ -398,9 +402,13 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
       }
     } else filter = parameter1;
 
+    // TODO: Refactor - Try using getLayerConfigAsync() for better async?
+    // TO.DO.CONT: instead of having to wait for the layer to be created and return void here..
+    // TO.DO.CONT: (this code has been reverted back to using getLayerConfig())
     // Get the layer config in a loaded phase
-    const layerConfig = await this.getLayerConfigAsync(layerPath, true);
-    if (!layerConfig) throw new Error(`Couldn't applyViewFilter for vector as couldn't get layer config for layerPath ${layerPath}`);
+    const layerConfig = this.getLayerConfig(layerPath) as TypeVectorLayerEntryConfig;
+    if (!layerConfig?.olLayer) return; // We must wait for the layer to be created.
+
     let filterValueToUse = filter.replaceAll(/\s{2,}/g, ' ').trim();
     layerConfig.olLayer!.set('legendFilterIsOff', !CombineLegendFilter);
     if (CombineLegendFilter) layerConfig.olLayer?.set('layerFilter', filter);

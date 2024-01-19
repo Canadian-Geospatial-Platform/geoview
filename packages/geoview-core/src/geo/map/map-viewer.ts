@@ -192,8 +192,6 @@ export class MapViewer {
    */
   mapReady(): void {
     const layerInterval = setInterval(() => {
-      // Log
-      logger.logTraceCore('mapReady check', this.mapId);
       if (this.layer?.geoviewLayers) {
         const { geoviewLayers } = this.layer;
         let allGeoviewLayerReady =
@@ -203,7 +201,7 @@ export class MapViewer {
         });
         if (allGeoviewLayerReady) {
           // Log
-          logger.logTraceCore('mapReady was ready!', this.mapId);
+          logger.logTraceCore('map-viewer.mapReady was ready!', this.mapId);
           MapEventProcessor.setMapLoaded(this.mapId);
           clearInterval(layerInterval);
         }
