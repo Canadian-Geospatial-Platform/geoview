@@ -10,6 +10,7 @@ import {
   PayloadBaseClass,
 } from '@/api/events/payloads';
 import { TypeLocalizedString, api } from '@/app';
+import { logger } from '@/core/utils/logger';
 
 /** ***************************************************************************************************************************
  * A class to hold a set of layers associated with an value of any type. When this class is instantiated, all layers already
@@ -62,6 +63,9 @@ export class LayerSet {
 
     const changeLayerStatusListenerFunctions = (payload: PayloadBaseClass) => {
       if (payloadIsLayerSetChangeLayerStatus(payload)) {
+        // Log
+        logger.logTraceDetailed('layer-set on EVENT_NAMES.LAYER_SET.CHANGE_LAYER_STATUS', this.mapId, payload);
+
         const { layerPath, layerStatus } = payload;
         if (this.resultSets[layerPath]) {
           if (this.resultSets[layerPath].layerStatus !== layerStatus) {
@@ -90,6 +94,9 @@ export class LayerSet {
 
     const changeLayerPhaseListenerFunctions = (payload: PayloadBaseClass) => {
       if (payloadIsLayerSetChangeLayerPhase(payload)) {
+        // Log
+        logger.logTraceDetailed('layer-set on EVENT_NAMES.LAYER_SET.CHANGE_LAYER_PHASE', this.mapId, payload);
+
         const { layerPath, layerPhase } = payload;
         if (this.resultSets[layerPath] && this.resultSets[layerPath].layerStatus !== 'error') {
           if (this.resultSets[layerPath].layerPhase !== layerPhase) {
@@ -115,6 +122,9 @@ export class LayerSet {
       EVENT_NAMES.LAYER_SET.LAYER_REGISTRATION,
       (payload) => {
         if (payloadIsLayerRegistration(payload)) {
+          // Log
+          logger.logTraceDetailed('layer-set on EVENT_NAMES.LAYER_SET.LAYER_REGISTRATION', this.mapId, payload);
+
           const { action, layerPath, layerSetId } = payload;
           // update the registration of all layer sets if !payload.layerSetId or update only the specified layer set
           if (!layerSetId || layerSetId === this.layerSetId) {

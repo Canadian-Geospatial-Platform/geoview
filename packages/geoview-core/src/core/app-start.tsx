@@ -69,6 +69,9 @@ function AppStart(props: AppStartProps): JSX.Element {
     // TODO: use store, remove the use of feature by viewer class and use state to gather values
     if (!Object.keys(api.maps).includes(mapId)) api.maps[mapId] = new MapViewer(mapFeaturesConfig, i18nInstance);
 
+    // Start the process of checking for map readiness
+    api.maps[mapId].mapReady();
+
     return (
       <I18nextProvider i18n={i18nInstance}>
         <MapContext.Provider value={mapContextValue}>

@@ -4,6 +4,7 @@ import { ExpandMoreIcon, ExpandLessIcon, IconButton, Box } from '@/ui';
 import { sxClassesExportButton } from './footer-bar-style';
 import { useUIStoreActions, useUIFooterBarExpanded } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import { useGeoViewMapId } from '@/app';
+import { logger } from '@/core/utils/logger';
 
 /**
  * Footerbar Expand Button component
@@ -63,6 +64,9 @@ export function FooterbarExpandButton(): JSX.Element {
   };
 
   useEffect(() => {
+    // Log
+    logger.logTraceUseEffect('FOOTER-BAR-EXPAND-BUTTON - mount');
+
     return () => {
       const footerBar = document.getElementById(`${mapId}-footerBar`);
       if (footerBar) {

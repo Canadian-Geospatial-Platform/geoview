@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next';
 import makeStyles from '@mui/styles/makeStyles';
 
 import { ChevronLeftIcon, Tooltip } from '@/ui';
+import { logger } from '@/core/utils/logger';
 
 // TODO: We need to find solution to remove makeStyles with either plain css or material ui.
 const useStyles = makeStyles(() => ({
@@ -60,6 +61,9 @@ export function OverviewMapToggle(props: OverviewMapToggleProps): JSX.Element {
   const classes = useStyles();
 
   useEffect(() => {
+    // Log
+    logger.logTraceUseEffect('OVERVIEW-MAP-TOGGLE - mount');
+
     // get toggle icon element
     if (divRef && divRef.current) {
       // get toggle button

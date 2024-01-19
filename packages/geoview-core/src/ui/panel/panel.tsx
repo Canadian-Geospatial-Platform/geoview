@@ -29,6 +29,7 @@ import {
 import { TypeIconButtonProps } from '../icon-button/icon-button-types';
 import { getSxClasses } from './panel-style';
 import { useMapStoreActions } from '@/core/stores/store-interface-and-intial-values/map-state';
+import { logger } from '@/core/utils/logger';
 
 /**
  * Interface for panel properties
@@ -199,6 +200,9 @@ export function Panel(props: TypePanelAppProps): JSX.Element {
   };
 
   useEffect(() => {
+    // Log
+    logger.logTraceUseEffect('PANEL - mount');
+
     // if the panel was still open on reload then close it
     if (panel.status) {
       panel.closeAll();
@@ -232,6 +236,9 @@ export function Panel(props: TypePanelAppProps): JSX.Element {
   }, []);
 
   useEffect(() => {
+    // Log
+    logger.logTraceUseEffect('PANEL - button', button);
+
     // set focus on close button on panel open
     if (closeBtnRef && closeBtnRef.current) if (button.visible) Cast<HTMLElement>(closeBtnRef.current).focus();
   }, [button, closeBtnRef]);

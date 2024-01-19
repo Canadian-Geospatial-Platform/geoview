@@ -7,6 +7,7 @@ import { destroyEventProcessors, initializeEventProcessors } from '@/api/event-p
 import { TypeMapFeaturesConfig } from '@/core/types/global-types';
 import { IGeoviewState, GeoviewStoreType, geoviewStoreDefinitionWithSubscribeSelector } from './geoview-store';
 import { MapContext } from '@/core/app-start';
+import { logger } from '@/core/utils/logger';
 
 export interface StoresManagerState {
   stores: Record<string, GeoviewStoreType>;
@@ -20,6 +21,11 @@ export const addGeoViewStore = (config: TypeMapFeaturesConfig): void => {
   if (!config.mapId) {
     return;
   }
+
+  // Log
+  logger.logTraceCore(`Creating the store for map ${config.mapId}`);
+
+  // Create the store
   const geoviewStore = create<IGeoviewState>()(geoviewStoreDefinitionWithSubscribeSelector);
   geoviewStore.getState().setMapConfig(config);
 
