@@ -149,9 +149,7 @@
       ]
     }
   },
-  "corePackages": [
-    "geochart"
-  ],
+  "corePackages": [],
   "suportedLanguages": [
     "en",
     "fr"

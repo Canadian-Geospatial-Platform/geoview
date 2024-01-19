@@ -5,6 +5,7 @@ import LayerGroup from 'ol/layer/Group';
 import { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { TypeLayerEntryConfig } from '@/geo/map/map-schema-types';
 import { api } from '@/app';
+import { logger } from '@/core/utils/logger';
 
 /** *****************************************************************************************************************************
  * AbstractGeoViewRaster types
@@ -50,7 +51,44 @@ export abstract class AbstractGeoViewRaster extends AbstractGeoViewLayer {
       layerConfig.olLayer!.get('source').un(`${layerType}loadend`, loadEndHandler);
     };
 
+    // TODO: BUG: Careful, sometimes 'source' is undefined (esri-dynamic layer case - notably in use-cases template);
+    // TO.DOCONT: see NON-FIXING :( 'addLoadendListener_TEMPORARY' below for an alternate function
     layerConfig.olLayer!.get('source').once(`${layerType}loadend`, loadEndHandler);
     layerConfig.olLayer!.get('source').once(`${layerType}loaderror`, loadErrorHandler);
+  }
+
+  // TODO: Refactor - Either use or delete this temporary function replacing addLoadendListener
+  // TO.DOCONT: to better handle the error when no source is defined or when
+  // TO.DOCONT: something crashes, so that 'error' layer status is at least set.
+  // TO.DOCONT: That said, the issue leading to this alternative method still isn't fixed,
+  // TO.DOCONT: so I'm just leaving the method here for further debugging if necessary
+  addLoadendListener_TEMPORARY(layerPath: string, layerType: 'tile' | 'image'): void {
+    try {
+      // Get the layer config and DO NOT use async here, because THIS is the code
+      // that actually sets the 'loaded' status that getLayerConfigAsync is waiting for!
+      const layerConfig = this.getLayerConfig(layerPath);
+      let loadErrorHandler: () => void;
+      const loadEndHandler = () => {
+        this.setLayerStatus('loaded', layerPath);
+        layerConfig!.olLayer!.get('source').un(`${layerType}loaderror`, loadErrorHandler);
+      };
+      loadErrorHandler = () => {
+        this.setLayerStatus('error', layerPath);
+        layerConfig!.olLayer!.get('source').un(`${layerType}loadend`, loadEndHandler);
+      };
+
+      // If found
+      if (layerConfig) {
+        // Wire the handlers for loadend and loaderror
+        layerConfig.olLayer!.get('source').once(`${layerType}loadend`, loadEndHandler);
+        layerConfig.olLayer!.get('source').once(`${layerType}loaderror`, loadErrorHandler);
+      } else throw new Error(`Couldn't find layer config for layer path ${layerPath}`);
+    } catch (error) {
+      // Error wire handlers, so better set error right away
+      this.setLayerStatus('error', layerPath);
+
+      // Log
+      logger.logError('addLoadendListener\n', error);
+    }
   }
 }

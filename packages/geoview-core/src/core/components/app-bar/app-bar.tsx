@@ -3,7 +3,7 @@ import { useState, useRef, useEffect, useCallback, Fragment } from 'react';
 import { useTheme } from '@mui/material/styles';
 import { Box, List, ListItem, Panel, IconButton } from '@/ui';
 
-import { api, useGeoViewMapId } from '@/app';
+import { AbstractPlugin, TypeJsonObject, TypeJsonValue, api, toJsonObject, useGeoViewMapId } from '@/app';
 import { EVENT_NAMES } from '@/api/events/event-types';
 
 import { payloadIsAButtonPanel, ButtonPanelPayload, PayloadBaseClass } from '@/api/events/payloads';
@@ -16,6 +16,7 @@ import Version from './buttons/version';
 import { getSxClasses } from './app-bar-style';
 import { useUIActiveFocusItem, useUIAppbarComponents } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import { useMapInteraction } from '@/core/stores/store-interface-and-intial-values/map-state';
+import { useGeoViewConfig } from '@/core/stores/geoview-store';
 import { logger } from '@/core/utils/logger';
 
 /**
@@ -38,6 +39,9 @@ export function Appbar(): JSX.Element {
   const appBarComponents = useUIAppbarComponents();
 
   const appBarPanelCloseListenerFunction = () => setSelectedAppbarButtonId('');
+
+  // get store config for app bar tabs to add (similar logic as in footer-tabs)
+  const appBarTabsConfig = useGeoViewConfig()?.appBarTabs;
 
   // #region REACT HOOKS
   const addButtonPanel = useCallback(
@@ -96,6 +100,31 @@ export function Appbar(): JSX.Element {
     };
   }, [addButtonPanel, mapId, removeButtonPanel, selectedAppBarButtonId]);
   // #endregion
+
+  /**
+   * Create default tabs from configuration parameters (similar logic as in footer-tabs).
+   */
+  useEffect(() => {
+    // Log
+    logger.logTraceUseEffect('app-bar.appBarTabsConfig');
+
+    // Packages tab
+    if (appBarTabsConfig && appBarTabsConfig.tabs.core.includes('basemap-panel')) {
+      // create a new tab by loading the plugin
+      api.plugin
+        .loadScript('basemap-panel')
+        .then((constructor: AbstractPlugin | ((pluginId: string, props: TypeJsonObject) => TypeJsonValue)) => {
+          api.plugin.addPlugin(
+            'basemap-panel',
+            mapId,
+            constructor,
+            toJsonObject({
+              mapId,
+            })
+          );
+        });
+    }
+  }, [appBarTabsConfig, mapId]);
 
   return (
     <Box sx={sxClasses.appBar} ref={appBar}>
