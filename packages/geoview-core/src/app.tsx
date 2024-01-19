@@ -20,6 +20,7 @@ import { Config } from '@/core/utils/config/config';
 import { useWhatChanged } from '@/core/utils/useWhatChanged';
 import { payloadIsAmapFeaturesConfig } from '@/api/events/payloads';
 import { addGeoViewStore } from '@/core/stores/stores-managers';
+import { logger } from '@/core/utils/logger';
 
 // The next export allow to import the cgpv-types from 'geoview-core' from outside of the geoview-core package.
 export * from './core/types/cgpv-types';
@@ -172,6 +173,7 @@ export const cgpv: types.TypeCGPV = {
     useWhatChanged,
     elements: UI,
   },
+  logger,
   types,
 };
 
