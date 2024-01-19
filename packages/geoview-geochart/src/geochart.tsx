@@ -192,7 +192,7 @@ export function GeoChart(props: GeoChartProps): JSX.Element {
   useEffect(() => {
     // Log
     const USE_EFFECT_FUNC = 'GEOVIEW-GEOCHART - storeLayerDataArray';
-    logger.logTraceUseEffectMount(USE_EFFECT_FUNC, storeLayerDataArray);
+    logger.logTraceUseEffect(USE_EFFECT_FUNC, storeLayerDataArray);
 
     // Fetches the datasources associated with the layerDataArray coming from the store - reloading the Chart in the process
     fetchDatasources(storeLayerDataArray);
@@ -207,7 +207,7 @@ export function GeoChart(props: GeoChartProps): JSX.Element {
   useEffect(() => {
     // Log
     const USE_EFFECT_FUNC = 'GEOVIEW-GEOCHART - init';
-    logger.logTraceUseEffectMount(USE_EFFECT_FUNC, mapId);
+    logger.logTraceUseEffect(USE_EFFECT_FUNC, mapId);
 
     // Wire handlers on component mount
     cgpv.api.event.on(EVENT_CHART_CONFIG, handleChartConfig, mapId);

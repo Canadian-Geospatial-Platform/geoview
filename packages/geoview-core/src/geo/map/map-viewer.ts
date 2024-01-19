@@ -203,7 +203,9 @@ export class MapViewer {
         let allGeoviewLayerReady =
           this.mapFeaturesConfig.map.listOfGeoviewLayerConfig?.length === 0 || Object.keys(geoviewLayers).length !== 0;
         Object.keys(geoviewLayers).forEach((geoviewLayerId) => {
-          allGeoviewLayerReady &&= geoviewLayers[geoviewLayerId].allLayerEntryConfigProcessed();
+          const layerIsReady = geoviewLayers[geoviewLayerId].allLayerEntryConfigProcessed();
+          logger.logTraceDetailed('map-viewer.mapReady? layer ready?', geoviewLayerId, layerIsReady);
+          allGeoviewLayerReady &&= layerIsReady;
         });
         if (allGeoviewLayerReady) {
           // Log

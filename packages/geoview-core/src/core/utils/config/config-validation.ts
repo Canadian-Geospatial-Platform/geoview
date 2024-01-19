@@ -750,6 +750,8 @@ export class ConfigValidation {
       displayLanguage: this._displayLanguage,
       appBar: tempMapFeaturesConfig.appBar,
       navBar: tempMapFeaturesConfig.navBar,
+      // TODO: FEATURE #1713 Refactor - to have appBar and footer only instead of appBar, appBarTabs, footerTabs as it is now
+      appBarTabs: tempMapFeaturesConfig.appBarTabs,
       footerTabs: tempMapFeaturesConfig.footerTabs,
       overviewMap: tempMapFeaturesConfig.overviewMap,
       externalPackages: tempMapFeaturesConfig.externalPackages,
