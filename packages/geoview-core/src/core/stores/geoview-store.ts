@@ -54,7 +54,8 @@ export const geoviewStoreDefinition = (set: TypeSetStore, get: TypeGetStore) => 
       get().uiState.setDefaultConfigValues(config);
 
       // packages states, only create if needed
-      if (config.corePackages?.includes('time-slider')) set({ timeSliderState: initializeTimeSliderState(set, get) });
+      // TODO: Change this check for something more generic that checks in appBarTabs too
+      if (config.footerTabs?.tabs.core.includes('time-slider')) set({ timeSliderState: initializeTimeSliderState(set, get) });
     },
 
     // core states
