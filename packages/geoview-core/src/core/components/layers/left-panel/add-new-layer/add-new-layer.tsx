@@ -58,6 +58,7 @@ export function AddNewLayer(): JSX.Element {
   // const acceptedFiles = ["*.json"];
 
   useEffect(() => {
+    // eslint-disable-next-line no-console
     console.log('layersList ', layersList);
     // setIsLoading(false);
     // eslint-disable-next-line react-hooks/exhaustive-deps

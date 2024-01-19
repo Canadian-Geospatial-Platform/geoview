@@ -172,8 +172,8 @@ export function DetailsPanel(): JSX.Element {
           }))}
         isEnlargeDataTable={isEnlargeDataTable}
         selectedLayerIndex={arrayOfLayerData.findIndex((layer) => layer.layerPath === layerDataInfo?.layerPath)}
-        handleListItemClick={(_layer, index: number) => {
-          handleLayerChange(arrayOfLayerData[index]);
+        handleListItemClick={(_layer) => {
+          handleLayerChange(arrayOfLayerData[findLayerPathIndex(arrayOfLayerData, _layer.layerPath)]);
         }}
       />
     );
