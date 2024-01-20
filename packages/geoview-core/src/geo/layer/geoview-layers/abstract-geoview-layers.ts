@@ -18,6 +18,7 @@ import {
   replaceParams,
   getLocalizedMessage,
   whenThisThen,
+  createLocalizedString,
 } from '@/core/utils/utilities';
 import {
   TypeGeoviewLayerConfig,
@@ -271,10 +272,10 @@ export abstract class AbstractGeoViewLayer {
   /** The GeoView layer name. The value of this attribute is extracted from the mapLayerConfig parameter. If its value is
    * undefined, a default value is generated.
    */
-  geoviewLayerName: TypeLocalizedString = { en: '', fr: '' };
+  geoviewLayerName: TypeLocalizedString = createLocalizedString('');
 
   /** The GeoView layer metadataAccessPath. The name attribute is optional */
-  metadataAccessPath: TypeLocalizedString = { en: '', fr: '' };
+  metadataAccessPath: TypeLocalizedString = createLocalizedString('');
 
   /**
    * An array of layer settings. In the schema, this attribute is optional. However, we define it as mandatory and if the
@@ -337,28 +338,39 @@ export abstract class AbstractGeoViewLayer {
     this.geoviewLayerName.fr = mapLayerConfig?.geoviewLayerName?.fr ? mapLayerConfig.geoviewLayerName.fr : DEFAULT_LAYER_NAMES[type];
     if (mapLayerConfig.metadataAccessPath?.en) this.metadataAccessPath.en = mapLayerConfig.metadataAccessPath.en.trim();
     if (mapLayerConfig.metadataAccessPath?.fr) this.metadataAccessPath.fr = mapLayerConfig.metadataAccessPath.fr.trim();
-    if (mapLayerConfig.listOfLayerEntryConfig.length === 1) this.listOfLayerEntryConfig = mapLayerConfig.listOfLayerEntryConfig;
+    this.initialSettings = mapLayerConfig.initialSettings;
+    this.serverDateFragmentsOrder = mapLayerConfig.serviceDateFormat
+      ? api.dateUtilities.getDateFragmentsOrder(mapLayerConfig.serviceDateFormat)
+      : undefined;
+    this.externalFragmentsOrder = api.dateUtilities.getDateFragmentsOrder(mapLayerConfig.externalDateFormat);
+    api.maps[mapId].layer.geoviewLayers[this.geoviewLayerId] = this;
+    this.setListOfLayerEntryConfig(mapLayerConfig, mapLayerConfig.listOfLayerEntryConfig);
+  }
+
+  /** ***************************************************************************************************************************
+   * Set the list of layer entry configuration and initialize the registered layer object and register all layers to layer sets.
+   *
+   * @param {TypeGeoviewLayer} mapLayerConfig The GeoView layer configuration options.
+   * @param {TypeListOfLayerEntryConfig} listOfLayerEntryConfig The list of layer's configuration
+   */
+  setListOfLayerEntryConfig(mapLayerConfig: TypeGeoviewLayerConfig, listOfLayerEntryConfig: TypeListOfLayerEntryConfig) {
+    if (listOfLayerEntryConfig.length === 0) return;
+    if (listOfLayerEntryConfig.length === 1) this.listOfLayerEntryConfig = listOfLayerEntryConfig;
     else {
       const layerGroup = new TypeLayerGroupEntryConfig({
-        geoviewLayerConfig: mapLayerConfig.listOfLayerEntryConfig[0].geoviewLayerConfig,
+        geoviewLayerConfig: listOfLayerEntryConfig[0].geoviewLayerConfig,
         layerId: this.geoviewLayerId,
         layerName: this.geoviewLayerName,
         isMetadataLayerGroup: false,
         initialSettings: mapLayerConfig.initialSettings,
-        listOfLayerEntryConfig: mapLayerConfig.listOfLayerEntryConfig,
+        listOfLayerEntryConfig,
       } as TypeLayerGroupEntryConfig);
       this.listOfLayerEntryConfig = [layerGroup];
       layerGroup.listOfLayerEntryConfig.forEach((layerConfig, i) => {
         layerGroup.listOfLayerEntryConfig[i].parentLayerConfig = layerGroup;
       });
     }
-    this.initialSettings = mapLayerConfig.initialSettings;
-    this.serverDateFragmentsOrder = mapLayerConfig.serviceDateFormat
-      ? api.dateUtilities.getDateFragmentsOrder(mapLayerConfig.serviceDateFormat)
-      : undefined;
-    this.externalFragmentsOrder = api.dateUtilities.getDateFragmentsOrder(mapLayerConfig.externalDateFormat);
-    const { layer } = api.maps[mapId];
-    layer.geoviewLayers[this.geoviewLayerId] = this;
+    this.listOfLayerEntryConfig[0].geoviewLayerConfig.listOfLayerEntryConfig = listOfLayerEntryConfig;
     this.initRegisteredLayers();
     this.registerAllLayersToLayerSets();
   }
@@ -672,7 +684,7 @@ export abstract class AbstractGeoViewLayer {
    *
    * @returns {Promise<BaseLayer | null>} The promise that the layers were processed.
    */
-  protected async processListOfLayerEntryConfig(
+  async processListOfLayerEntryConfig(
     listOfLayerEntryConfig: TypeListOfLayerEntryConfig,
     layerGroup?: LayerGroup
   ): Promise<BaseLayer | null> {
@@ -681,9 +693,10 @@ export abstract class AbstractGeoViewLayer {
 
     this.setLayerPhase('processListOfLayerEntryConfig');
     try {
+      if (listOfLayerEntryConfig.length === 0) return null;
       if (listOfLayerEntryConfig.length === 1) {
         if (layerEntryIsGroupLayer(listOfLayerEntryConfig[0])) {
-          const newLayerGroup = this.createLayerGroup(listOfLayerEntryConfig[0]);
+          const newLayerGroup = this.createLayerGroup(listOfLayerEntryConfig[0], listOfLayerEntryConfig[0].initialSettings!);
           const groupReturned = await this.processListOfLayerEntryConfig(listOfLayerEntryConfig[0].listOfLayerEntryConfig!, newLayerGroup);
           if (groupReturned) {
             if (layerGroup) layerGroup.getLayers().push(groupReturned);
@@ -716,12 +729,15 @@ export abstract class AbstractGeoViewLayer {
 
       if (!layerGroup) {
         // All children of this level in the tree have the same parent, so we use the first element of the array to retrieve the parent node.
-        layerGroup = this.createLayerGroup(listOfLayerEntryConfig[0].parentLayerConfig as TypeLayerEntryConfig);
+        layerGroup = this.createLayerGroup(
+          listOfLayerEntryConfig[0].parentLayerConfig as TypeLayerEntryConfig,
+          listOfLayerEntryConfig[0].initialSettings!
+        );
       }
       const promiseOfLayerCreated: Promise<BaseLayer | LayerGroup | null>[] = [];
       listOfLayerEntryConfig.forEach((layerConfig, i) => {
         if (layerEntryIsGroupLayer(layerConfig)) {
-          const newLayerGroup = this.createLayerGroup(listOfLayerEntryConfig[i]);
+          const newLayerGroup = this.createLayerGroup(listOfLayerEntryConfig[i], listOfLayerEntryConfig[i].initialSettings!);
           promiseOfLayerCreated.push(this.processListOfLayerEntryConfig(layerConfig.listOfLayerEntryConfig!, newLayerGroup));
         } else if ((listOfLayerEntryConfig[i] as TypeBaseLayerEntryConfig).layerStatus === 'error')
           promiseOfLayerCreated.push(Promise.resolve(null));
@@ -1040,19 +1056,19 @@ export abstract class AbstractGeoViewLayer {
   /** ***************************************************************************************************************************
    * This method create a layer group.
    * @param {TypeLayerEntryConfig} layerConfig The layer configuration.
+   * @param {TypeLayerInitialSettings } initialSettings Initial settings to apply to the layer.
    * @returns {LayerGroup} A new layer group.
    */
-  protected createLayerGroup(layerConfig: TypeLayerEntryConfig): LayerGroup {
+  protected createLayerGroup(layerConfig: TypeLayerEntryConfig, initialSettings: TypeLayerInitialSettings): LayerGroup {
     const layerGroupOptions: LayerGroupOptions = {
       layers: new Collection(),
       properties: { layerConfig },
     };
-    if (layerConfig.initialSettings?.extent !== undefined) layerGroupOptions.extent = layerConfig.initialSettings?.extent;
-    if (layerConfig.initialSettings?.maxZoom !== undefined) layerGroupOptions.maxZoom = layerConfig.initialSettings?.maxZoom;
-    if (layerConfig.initialSettings?.minZoom !== undefined) layerGroupOptions.minZoom = layerConfig.initialSettings?.minZoom;
-    if (layerConfig.initialSettings?.opacity !== undefined) layerGroupOptions.opacity = layerConfig.initialSettings?.opacity;
-    if (layerConfig.initialSettings?.visible !== undefined)
-      layerGroupOptions.visible = layerConfig.initialSettings?.visible === 'yes' || layerConfig.initialSettings?.visible === 'always';
+    if (initialSettings?.extent !== undefined) layerGroupOptions.extent = initialSettings?.extent;
+    if (initialSettings?.maxZoom !== undefined) layerGroupOptions.maxZoom = initialSettings?.maxZoom;
+    if (initialSettings?.minZoom !== undefined) layerGroupOptions.minZoom = initialSettings?.minZoom;
+    if (initialSettings?.opacity !== undefined) layerGroupOptions.opacity = initialSettings?.opacity;
+    if (initialSettings?.visible !== undefined) layerGroupOptions.visible = initialSettings?.visible !== 'no';
     layerConfig.olLayer = new LayerGroup(layerGroupOptions);
     return layerConfig.olLayer as LayerGroup;
   }

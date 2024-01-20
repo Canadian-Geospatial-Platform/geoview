@@ -101,6 +101,7 @@
     "errorNone": "No file or source added",
     "errorFile": "Only geoJSON and GeoPackage files can be used",
     "errorServer": "source is not valid",
+    "errorNotLoaded": "An error occured when loading the geoview layer",
     "errorProj": "does not support current map projection",
     "only": "only",
     "opacity": "Opacity",
