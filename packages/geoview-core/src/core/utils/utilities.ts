@@ -34,6 +34,18 @@ export function getLocalizedValue(localizedString: TypeLocalizedString | undefin
 }
 
 /**
+ * Create a localized string and set its "en" and "fr" properties to the same value.
+ *
+ * @param {TypeLocalizedString} localizedString the localized string to process.
+ *
+ * @returns {string} The string value according to the map display language,
+ */
+export function createLocalizedString(value: string) {
+  const localizedString: TypeLocalizedString = { en: value, fr: value };
+  return localizedString;
+}
+
+/**
  * Generate a unique id if an id was not provided
  * @param {string} id an id to return if it was already passed
  * @returns {string} the generated id

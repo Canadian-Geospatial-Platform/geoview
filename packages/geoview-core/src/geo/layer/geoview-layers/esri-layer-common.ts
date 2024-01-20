@@ -339,7 +339,8 @@ export async function commonProcessLayerMetadata(
       // layers must have a fields attribute except if it is an metadata layer group.
       if (!data?.fields && !(layerConfig as TypeLayerGroupEntryConfig).isMetadataLayerGroup && layerConfig.schemaTag !== 'esriImage') {
         this.setLayerStatus('error', layerPath);
-        throw new Error(`Despite a return code of 200, an error was detected with this query (${queryUrl}?f=pjson)`);
+        if (data?.error) throw new Error(`Error code = ${data.error.code}, ${data.error.message}`);
+        else throw new Error(`Despite a return code of 200, no fields was returned with this query (${queryUrl}?f=pjson)`);
       }
       this.layerMetadata[layerPath] = data;
       if (geoviewEntryIsEsriDynamic(layerConfig) || geoviewEntryIsEsriFeature(layerConfig)) {
