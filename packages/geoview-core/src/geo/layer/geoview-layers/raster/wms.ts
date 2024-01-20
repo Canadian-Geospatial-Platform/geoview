@@ -558,6 +558,9 @@ export class WMS extends AbstractGeoViewRaster {
 
           resolve(null);
         }
+      } else {
+        console.log(`geoviewLayerType must be ${CONST_LAYER_TYPES.WMS}`);
+        resolve(null);
       }
     });
     return promisedVectorLayer;

@@ -171,6 +171,7 @@ export class WFS extends AbstractGeoViewVector {
           }) // eslint-disable-next-line @typescript-eslint/no-unused-vars
           .catch((reason) => {
             this.setAllLayerStatusToError(this.listOfLayerEntryConfig, 'Unable to read metadata');
+            resolve();
           });
       } else {
         this.setAllLayerStatusToError(this.listOfLayerEntryConfig, 'Unable to read metadata');
