@@ -33,7 +33,7 @@ import {
   TypeLocalizedString,
 } from '@/geo/map/map-schema-types';
 
-import { getLocalizedValue } from '@/core/utils/utilities';
+import { createLocalizedString, getLocalizedValue } from '@/core/utils/utilities';
 
 import { api } from '@/app';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
@@ -255,15 +255,12 @@ export class GeoPackage extends AbstractGeoViewVector {
    *
    * @returns {Promise<BaseLayer | null>} The promise that the layers were processed.
    */
-  protected processListOfLayerEntryConfig(
-    listOfLayerEntryConfig: TypeListOfLayerEntryConfig,
-    layerGroup?: LayerGroup
-  ): Promise<BaseLayer | null> {
+  processListOfLayerEntryConfig(listOfLayerEntryConfig: TypeListOfLayerEntryConfig, layerGroup?: LayerGroup): Promise<BaseLayer | null> {
     this.setLayerPhase('processListOfLayerEntryConfig');
     const promisedListOfLayerEntryProcessed = new Promise<BaseLayer | null>((resolve) => {
       // Single group layer handled recursively
       if (listOfLayerEntryConfig.length === 1 && layerEntryIsGroupLayer(listOfLayerEntryConfig[0])) {
-        const newLayerGroup = this.createLayerGroup(listOfLayerEntryConfig[0]);
+        const newLayerGroup = this.createLayerGroup(listOfLayerEntryConfig[0], listOfLayerEntryConfig[0].initialSettings!);
 
         this.processListOfLayerEntryConfig(listOfLayerEntryConfig[0].listOfLayerEntryConfig!, newLayerGroup).then((groupReturned) => {
           if (groupReturned) {
@@ -279,12 +276,16 @@ export class GeoPackage extends AbstractGeoViewVector {
         });
         // Multiple layer configs are processed individually and added to layer group
       } else if (listOfLayerEntryConfig.length > 1) {
-        if (!layerGroup) layerGroup = this.createLayerGroup(listOfLayerEntryConfig[0].parentLayerConfig as TypeLayerEntryConfig);
+        if (!layerGroup)
+          layerGroup = this.createLayerGroup(
+            listOfLayerEntryConfig[0].parentLayerConfig as TypeLayerEntryConfig,
+            listOfLayerEntryConfig[0].initialSettings!
+          );
 
         listOfLayerEntryConfig.forEach((layerConfig) => {
           const { layerPath } = layerConfig;
           if (layerEntryIsGroupLayer(layerConfig)) {
-            const newLayerGroup = this.createLayerGroup(layerConfig);
+            const newLayerGroup = this.createLayerGroup(layerConfig, layerConfig.initialSettings!);
             this.processListOfLayerEntryConfig(layerConfig.listOfLayerEntryConfig!, newLayerGroup).then((groupReturned) => {
               if (groupReturned) {
                 layerGroup!.getLayers().push(groupReturned);
@@ -675,11 +676,11 @@ export class GeoPackage extends AbstractGeoViewVector {
         } else {
           layerConfig.entryType = 'group';
           (layerConfig as TypeLayerEntryConfig).listOfLayerEntryConfig = [];
-          const newLayerGroup = this.createLayerGroup(layerConfig);
+          const newLayerGroup = this.createLayerGroup(layerConfig, layerConfig.initialSettings!);
           for (let i = 0; i < layers.length; i++) {
             const newLayerEntryConfig = cloneDeep(layerConfig) as TypeBaseLayerEntryConfig;
             newLayerEntryConfig.layerId = layers[i].name;
-            newLayerEntryConfig.layerName = { en: layers[i].name, fr: layers[i].name };
+            newLayerEntryConfig.layerName = createLocalizedString(layers[i].name);
             newLayerEntryConfig.entryType = 'vector';
             newLayerEntryConfig.parentLayerConfig = Cast<TypeLayerGroupEntryConfig>(layerConfig);
 

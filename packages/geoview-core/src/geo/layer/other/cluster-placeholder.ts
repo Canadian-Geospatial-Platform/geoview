@@ -303,7 +303,7 @@
 //         for (let i = 0; i < layers.length; i++) {
 //           const newLayerEntryConfig = cloneDeep(layerConfig) as TypeBaseLayerEntryConfig;
 //           newLayerEntryConfig.layerId = layers[i].name;
-//           newLayerEntryConfig.layerName = { en: layers[i].name, fr: layers[i].name };
+//           newLayerEntryConfig.layerName =  createLocalizedString(layers[i].name);
 //           newLayerEntryConfig.entryType = 'vector';
 //           newLayerEntryConfig.parentLayerConfig = Cast<TypeLayerGroupEntryConfig>(layerConfig);
 //           if ((newLayerEntryConfig.source as TypeBaseSourceVectorInitialConfig)?.cluster?.enable) {

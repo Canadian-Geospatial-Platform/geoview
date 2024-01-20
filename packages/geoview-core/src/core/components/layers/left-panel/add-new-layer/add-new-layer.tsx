@@ -1,10 +1,26 @@
 import React, { ChangeEvent, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Autocomplete, Box, Button, ButtonGroup, CircularProgressBase, FileUploadIcon, Paper, Select, Stepper, TextField } from '@/ui';
-import { CONST_LAYER_TYPES, GeoUtilities, TypeGeoviewLayerConfig, TypeGeoviewLayerType, TypeListOfLayerEntryConfig } from '@/geo';
+import {
+  AbstractGeoViewLayer,
+  CONST_LAYER_TYPES,
+  EsriDynamic,
+  EsriFeature,
+  TypeEsriDynamicLayerConfig,
+  TypeEsriDynamicLayerEntryConfig,
+  TypeEsriFeatureLayerConfig,
+  TypeEsriFeatureLayerEntryConfig,
+  TypeGeoviewLayerType,
+  TypeLayerEntryConfig,
+  TypeListOfLayerEntryConfig,
+  TypeOgcWmsLayerEntryConfig,
+} from '@/geo';
+import { OgcFeature, TypeOgcFeatureLayerConfig, TypeOgcFeatureLayerEntryConfig } from '@/geo/layer/geoview-layers/vector/ogc-feature';
+import { TypeWMSLayerConfig, WMS as WmsGeoviewClass } from '@/geo/layer/geoview-layers/raster/wms';
+import { TypeWFSLayerConfig, TypeWfsLayerEntryConfig, WFS as WfsGeoviewClass } from '@/geo/layer/geoview-layers/vector/wfs';
 import { ButtonPropsLayerPanel, SelectChangeEvent, TypeJsonArray, TypeJsonObject } from '@/core/types/global-types';
 import { useGeoViewMapId } from '@/core/stores/geoview-store';
-import { generateId } from '@/core/utils/utilities';
+import { createLocalizedString } from '@/core/utils/utilities';
 import { useLayersList } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { api } from '@/app';
 
@@ -18,11 +34,13 @@ export function AddNewLayer(): JSX.Element {
 
   const { ESRI_DYNAMIC, ESRI_FEATURE, GEOJSON, GEOPACKAGE, WMS, WFS, OGC_FEATURE, XYZ_TILES, GEOCORE } = CONST_LAYER_TYPES;
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [geoviewLayerInstance, setGeoviewLayerInstance] = useState<AbstractGeoViewLayer | undefined>();
   const [activeStep, setActiveStep] = useState(0);
   const [layerURL, setLayerURL] = useState('');
   const [displayURL, setDisplayURL] = useState('');
   const [layerType, setLayerType] = useState<TypeGeoviewLayerType | ''>('');
-  const [layerList, setLayerList] = useState<TypeJsonArray[]>([]);
+  const [layerList, setLayerList] = useState<TypeListOfLayerEntryConfig>([]);
   const [layerName, setLayerName] = useState('');
   const [layerEntries, setLayerEntries] = useState<TypeListOfLayerEntryConfig>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -35,10 +53,6 @@ export function AddNewLayer(): JSX.Element {
   const layersList = useLayersList();
 
   const isMultiple = () => layerType === ESRI_DYNAMIC || layerType === WFS || layerType === WMS;
-
-  const geoUtilities = new GeoUtilities();
-
-  const newLayerId = generateId();
 
   /**
    * List of layer types and labels
@@ -149,6 +163,16 @@ export function AddNewLayer(): JSX.Element {
   };
 
   /**
+   * Emits an error when the geoview layer doesn't load
+   *
+   * @param serviceName type of service provided by the URL
+   */
+  const emitErrorNotLoaded = () => {
+    setIsLoading(false);
+    api.utilities.showError(mapId, t('layers.errorNotLoaded'), false);
+  };
+
+  /**
    * Emits an error when a service does not support the current map projection
    *
    * @param serviceName type of service provided by the URL
@@ -172,16 +196,32 @@ export function AddNewLayer(): JSX.Element {
     let supportedProj: string[] = [];
 
     try {
-      const [baseUrl, queryString] = layerURL.split('?');
+      const [accessPath, queryString] = layerURL.split('?');
       const urlParams = new URLSearchParams(queryString);
-      const paramLayers = urlParams.get('layers')?.split(',') || [''];
+      const paramLayers = urlParams.get('Layers')?.split(',') || [];
       // query layers are not sent, as not all services support asking for multiple layers
-      const wms = await geoUtilities.getWMSServiceMetadata(baseUrl, '');
+      const wmsGeoviewLayerConfig = {
+        geoviewLayerType: WMS,
+        listOfLayerEntryConfig: [] as TypeOgcWmsLayerEntryConfig[],
+        metadataAccessPath: createLocalizedString(accessPath),
+      } as TypeWMSLayerConfig;
+      const wmsGeoviewLayerInstance = new WmsGeoviewClass(mapId, wmsGeoviewLayerConfig);
+      // Synchronize the geoviewLayerId.
+      wmsGeoviewLayerConfig.geoviewLayerId = wmsGeoviewLayerInstance.geoviewLayerId;
+      setGeoviewLayerInstance(wmsGeoviewLayerInstance);
+      await wmsGeoviewLayerInstance.createGeoViewLayers();
+      if (!wmsGeoviewLayerInstance.metadata) throw new Error('Cannot get metadata');
+      const wmsMetadata = wmsGeoviewLayerInstance.metadata;
 
-      supportedProj = wms.Capability.Layer.CRS as string[];
+      if (wmsMetadata === null || !Object.keys(wmsMetadata).length) {
+        emitErrorServer('OGC WMS');
+        return false;
+      }
+
+      supportedProj = wmsMetadata.Capability.Layer.CRS as string[];
       if (!supportedProj.includes(proj)) throw new Error('proj');
 
-      const layers: TypeJsonArray[] = [];
+      const layers: TypeOgcWmsLayerEntryConfig[] = [];
 
       const hasChildLayers = (layer: TypeJsonObject) => {
         if (layer.Layer && (layer.Layer as TypeJsonArray).length > 0) {
@@ -190,22 +230,25 @@ export function AddNewLayer(): JSX.Element {
           });
         } else {
           for (let i = 0; i < paramLayers.length; i++) {
-            if ((layer.Name as string) === paramLayers[i]) layers.push([layer.Name, layer.Title] as TypeJsonArray);
+            if ((layer.Name as string) === paramLayers[i])
+              layers.push(
+                new TypeOgcWmsLayerEntryConfig({
+                  geoviewLayerConfig: wmsGeoviewLayerConfig,
+                  layerId: layer.Name as string,
+                  layerName: createLocalizedString(layer.Title as string),
+                } as TypeOgcWmsLayerEntryConfig)
+              );
           }
         }
       };
 
-      if (wms.Capability.Layer) {
-        hasChildLayers(wms.Capability.Layer);
+      if (wmsMetadata.Capability.Layer) {
+        hasChildLayers(wmsMetadata.Capability.Layer);
       }
 
       if (layers.length === 1) {
-        setLayerName(layers[0][1] as string);
-        setLayerEntries([
-          {
-            layerId: layers[0][0] as string,
-          },
-        ] as TypeListOfLayerEntryConfig);
+        setLayerName(layers[0].layerName!.en!);
+        setLayerEntries([layers[0]]);
       } else {
         setLayerList(layers);
       }
@@ -229,18 +272,30 @@ export function AddNewLayer(): JSX.Element {
    */
   const wfsValidation = async (): Promise<boolean> => {
     try {
-      const wfs = await geoUtilities.getWFSServiceMetadata(layerURL);
-      const layers = (wfs.FeatureTypeList.FeatureType as TypeJsonArray).map((aFeatureType) => [
-        (aFeatureType.Name['#text'] as string).split(':')[1] as TypeJsonObject,
-        aFeatureType.Title['#text'],
-      ]);
+      const wfsGeoviewLayerConfig = {
+        geoviewLayerType: WFS,
+        listOfLayerEntryConfig: [] as TypeWfsLayerEntryConfig[],
+        metadataAccessPath: createLocalizedString(layerURL),
+      } as TypeWFSLayerConfig;
+      const wfsGeoviewLayerInstance = new WfsGeoviewClass(mapId, wfsGeoviewLayerConfig);
+      // Synchronize the geoviewLayerId.
+      wfsGeoviewLayerConfig.geoviewLayerId = wfsGeoviewLayerInstance.geoviewLayerId;
+      setGeoviewLayerInstance(wfsGeoviewLayerInstance);
+      await wfsGeoviewLayerInstance.createGeoViewLayers();
+      if (!wfsGeoviewLayerInstance.metadata) throw new Error('Cannot get metadata');
+      const wfsMetadata = wfsGeoviewLayerInstance.metadata;
+      const layers = (wfsMetadata.FeatureTypeList.FeatureType as TypeJsonArray).map(
+        (aFeatureType) =>
+          new TypeWfsLayerEntryConfig({
+            geoviewLayerConfig: wfsGeoviewLayerConfig,
+            layerId: (aFeatureType.Name['#text'] as string).split(':')[1] as string,
+            layerName: createLocalizedString(aFeatureType.Title['#text'] as string),
+          } as TypeWfsLayerEntryConfig)
+      );
+
       if (layers.length === 1) {
-        setLayerName(layers[0][1] as string);
-        setLayerEntries([
-          {
-            layerId: layers[0][0] as string,
-          },
-        ] as TypeListOfLayerEntryConfig);
+        setLayerName(layers[0].layerName!.en! as string);
+        setLayerEntries([layers[0]]);
       } else {
         setLayerList(layers);
       }
@@ -258,38 +313,54 @@ export function AddNewLayer(): JSX.Element {
    * @returns {Promise<boolean>} True if layer passes validation
    */
   const ogcFeatureValidation = async (): Promise<boolean> => {
-    const keysSingleLayer = ['id', 'title'];
-    const responseSingle = await fetch(`${layerURL}/?f=json`);
-    if (responseSingle.status !== 200) {
-      emitErrorServer('OGC API Feature');
-      return false;
-    }
-    const jsonSingle = await responseSingle.json();
-    const isSingleLayerValid = keysSingleLayer.every((key) => Object.keys(jsonSingle).includes(key));
-    if (isSingleLayerValid) {
-      setLayerEntries([
-        {
-          layerId: jsonSingle.id,
-        },
-      ] as TypeListOfLayerEntryConfig);
-      setLayerName(jsonSingle.title);
-      return true;
-    }
-
     try {
-      const keys = ['collections', 'links'];
-      const responseCollection = await fetch(`${layerURL}/collections?f=json`);
-      const jsonCollection = await responseCollection.json();
-      const isCollectionValid = keys.every((key) => Object.keys(jsonCollection).includes(key));
-      if (!isCollectionValid) throw new Error('err');
-      const layers = (jsonCollection.collections as TypeJsonArray).map((aFeatureType) => [aFeatureType.id, aFeatureType.title]);
-      if (layers.length === 1) {
-        setLayerName(layers[0][1] as string);
+      const ogcFeatureLayerConfig = {
+        geoviewLayerType: OGC_FEATURE,
+        listOfLayerEntryConfig: [] as TypeOgcFeatureLayerEntryConfig[],
+        metadataAccessPath: createLocalizedString(layerURL),
+      } as TypeOgcFeatureLayerConfig;
+      const ogcFeatureInstance = new OgcFeature(mapId, ogcFeatureLayerConfig);
+      // Synchronize the geoviewLayerId.
+      ogcFeatureLayerConfig.geoviewLayerId = ogcFeatureInstance.geoviewLayerId;
+      setGeoviewLayerInstance(ogcFeatureInstance);
+      await ogcFeatureInstance.createGeoViewLayers();
+      if (!ogcFeatureInstance.metadata) throw new Error('Cannot get metadata');
+      const ogcFeatureMetadata = ogcFeatureInstance.metadata!;
+
+      if (!Object.keys(ogcFeatureMetadata).length) {
+        emitErrorServer('OGC API Feature');
+        return false;
+      }
+
+      /*
+      const keysSingleLayer = ['id', 'title'];
+      const isSingleLayerValid = keysSingleLayer.every((key) => Object.keys(ogcFeatureMetadata).includes(key));
+      if (isSingleLayerValid) {
         setLayerEntries([
-          {
-            layerId: layers[0][0] as string,
-          },
-        ] as TypeListOfLayerEntryConfig);
+          new TypeOgcFeatureLayerEntryConfig({
+            layerId: ogcFeatureMetadata.id as string,
+            layerName: createLocalizedString(ogcFeatureMetadata.title as string),
+          } as TypeOgcFeatureLayerEntryConfig),
+        ]);
+        setLayerName(ogcFeatureMetadata.title as string);
+        return true;
+      }
+      */
+
+      const keys = ['collections', 'links'];
+      const isCollectionValid = keys.every((key) => Object.keys(ogcFeatureMetadata).includes(key));
+      if (!isCollectionValid) throw new Error('err');
+      const layers = (ogcFeatureMetadata.collections as TypeJsonArray).map(
+        (aFeatureType) =>
+          new TypeOgcFeatureLayerEntryConfig({
+            geoviewLayerConfig: ogcFeatureLayerConfig,
+            layerId: aFeatureType.id as string,
+            layerName: createLocalizedString(aFeatureType.title as string),
+          } as TypeOgcFeatureLayerEntryConfig)
+      );
+      if (layers.length === 1) {
+        setLayerName(layers[0].layerName!.en! as string);
+        setLayerEntries([layers[0]]);
       } else {
         setLayerList(layers);
       }
@@ -331,27 +402,66 @@ export function AddNewLayer(): JSX.Element {
    */
   const esriValidation = async (type: string): Promise<boolean> => {
     try {
-      const esri = await geoUtilities.getESRIServiceMetadata(layerURL);
-      if ((esri.capabilities as string).includes(esriOptions(type).capability)) {
-        if ('layers' in esri) {
-          const layers = (esri.layers as TypeJsonArray).map((aLayer) => [aLayer.id, aLayer.name]);
+      const esriGeoviewLayerConfig =
+        type === ESRI_DYNAMIC
+          ? ({
+              geoviewLayerType: type,
+              listOfLayerEntryConfig: [] as TypeEsriDynamicLayerEntryConfig[],
+              metadataAccessPath: createLocalizedString(layerURL),
+            } as TypeEsriDynamicLayerConfig)
+          : ({
+              geoviewLayerType: type,
+              listOfLayerEntryConfig: [] as TypeEsriFeatureLayerEntryConfig[],
+              metadataAccessPath: createLocalizedString(layerURL),
+            } as TypeEsriFeatureLayerConfig);
+      const esriGeoviewLayerInstance =
+        type === ESRI_DYNAMIC
+          ? new EsriDynamic(mapId, esriGeoviewLayerConfig as TypeEsriDynamicLayerConfig)
+          : new EsriFeature(mapId, esriGeoviewLayerConfig as TypeEsriFeatureLayerConfig);
+      // Synchronize the geoviewLayerId.
+      esriGeoviewLayerConfig.geoviewLayerId = esriGeoviewLayerInstance.geoviewLayerId;
+      setGeoviewLayerInstance(esriGeoviewLayerInstance);
+      await esriGeoviewLayerInstance.createGeoViewLayers();
+      const esriMetadata = esriGeoviewLayerInstance.metadata!;
+      if (esriMetadata !== null && (esriMetadata.capabilities as string).includes(esriOptions(type).capability)) {
+        if ('layers' in esriMetadata) {
+          const layers =
+            type === ESRI_DYNAMIC
+              ? (esriMetadata.layers as TypeJsonArray).map(
+                  (aLayer) =>
+                    new TypeEsriDynamicLayerEntryConfig({
+                      geoviewLayerConfig: esriGeoviewLayerConfig,
+                      layerId: aLayer.id as string,
+                      layerName: createLocalizedString(aLayer.name as string),
+                    } as TypeEsriDynamicLayerEntryConfig)
+                )
+              : (esriMetadata.layers as TypeJsonArray).map(
+                  (aLayer) =>
+                    new TypeEsriFeatureLayerEntryConfig({
+                      geoviewLayerConfig: esriGeoviewLayerConfig,
+                      layerId: aLayer.id as string,
+                      layerName: createLocalizedString(aLayer.name as string),
+                    } as TypeEsriFeatureLayerEntryConfig)
+                );
           if (layers.length === 1) {
-            setLayerName(layers[0][1] as string);
-            setLayerEntries([
-              {
-                layerId: layers[0][0] as string,
-              },
-            ] as TypeListOfLayerEntryConfig);
+            setLayerName(layers[0].layerName!.en!);
+            setLayerEntries([layers[0]]);
           } else {
             setLayerList(layers);
           }
         } else {
-          setLayerName(esri.name as string);
+          setLayerName(esriMetadata.name as string);
           setLayerEntries([
-            {
-              layerId: esri.id as string,
-            },
-          ] as TypeListOfLayerEntryConfig);
+            type === ESRI_DYNAMIC
+              ? new TypeEsriDynamicLayerEntryConfig({
+                  layerId: esriMetadata.id as string,
+                  layerName: createLocalizedString(esriMetadata.name as string),
+                } as TypeEsriDynamicLayerEntryConfig)
+              : new TypeEsriFeatureLayerEntryConfig({
+                  layerId: esriMetadata.id as string,
+                  layerName: createLocalizedString(esriMetadata.name as string),
+                } as TypeEsriFeatureLayerEntryConfig),
+          ]);
         }
       } else {
         throw new Error('err');
@@ -532,88 +642,88 @@ export function AddNewLayer(): JSX.Element {
   /**
    * Handle the behavior of the 'Finish' button in the Stepper UI
    */
-  const handleStepLast = () => {
-    setIsLoading(true);
-    /* api.event.on(  //TODO - Investigate
-      api.eventNames.LAYER.EVENT_LAYER_ADDED,
-      () => {
-        api.event.off(api.eventNames.LAYER.EVENT_LAYER_ADDED, mapId);
-        setIsLoading(false);
-        // setAddLayerVisible(false);
-      },
-      `${mapId}/${geoviewLayerId}`
-    ); */
-
-    let valid = true;
-    const name = layerName;
-    let url = layerURL;
-
-    if (layerType === ESRI_DYNAMIC || layerType === ESRI_FEATURE) {
-      url = geoUtilities.getMapServerUrl(layerURL);
-    }
-
-    if (layerType === WMS) {
-      [url] = layerURL.split('?');
-    }
-
-    if (layerName === '') {
-      valid = false;
-      emitErrorEmpty(isMultiple() ? t('layers.layer') : t('layers.name'));
-    }
-    const layerConfig: TypeGeoviewLayerConfig = {
-      geoviewLayerId: newLayerId,
-      geoviewLayerName: {
-        en: name,
-        fr: name,
-      },
-      geoviewLayerType: layerType as TypeGeoviewLayerType,
-      metadataAccessPath: {
-        en: url,
-        fr: url,
-      },
-      listOfLayerEntryConfig: layerEntries as TypeListOfLayerEntryConfig,
-    };
-
-    if (layerType === GEOJSON || layerType === XYZ_TILES || layerType === GEOPACKAGE) {
-      // TODO probably want an option to add metadata if geojson or geopackage
-      // need to clear our metadata path or it will give errors trying to find it
-      layerConfig.metadataAccessPath = {
-        en: '',
-        fr: '',
-      };
-    }
-
-    if (layerType === GEOCORE) {
-      delete layerConfig.metadataAccessPath;
-    }
-
-    if (layerType === OGC_FEATURE) {
-      // make sure the metadataAccessPath is the root OGC API URL
-      layerConfig.metadataAccessPath = {
-        en: geoUtilities.getOGCServerUrl(layerURL),
-        fr: geoUtilities.getOGCServerUrl(layerURL),
-      };
-    }
-
-    if (valid) {
-      // TODO issue #668 - geocore layers do not have same ID, it is impossible to use the added event
-      // workaround - close after 3 sec
-      if (layerType === GEOCORE) {
-        setTimeout(() => {
+  const handleStepLast = async () => {
+    if (geoviewLayerInstance) {
+      setIsLoading(true);
+      /* api.event.on(  //TODO - Investigate
+        api.eventNames.LAYER.EVENT_LAYER_ADDED,
+        () => {
+          api.event.off(api.eventNames.LAYER.EVENT_LAYER_ADDED, mapId);
           setIsLoading(false);
-          // setAddLayerVisible(false); //TODO - Investigate
-        }, 3000);
+          // setAddLayerVisible(false);
+        },
+        `${mapId}/${geoviewLayerId}`
+      ); */
+
+      const valid = true;
+      /*
+      const name = layerName;
+      let url = layerURL;
+
+      if (layerType === ESRI_DYNAMIC || layerType === ESRI_FEATURE) {
+        url = geoUtilities.getMapServerUrl(layerURL);
       }
 
-      /* if (layerConfig.geoviewLayerId) {
-        api.maps[mapId].layer.layerOrder.push(layerConfig.geoviewLayerId);
-      } else if (layerConfig.listOfLayerEntryConfig !== undefined) {
-        layerConfig.listOfLayerEntryConfig.forEach((subLayer: TypeLayerEntryConfig) => {
-          if (subLayer.layerId) api.maps[mapId].layer.layerOrder.unshift(subLayer.layerId);
-        });
+      if (layerType === WMS) {
+        [url] = layerURL.split('?');
       }
 
-      api.maps[mapId].layer.addGeoviewLayer(layerConfig); */
+      if (layerName === '') {
+        valid = false;
+        emitErrorEmpty(isMultiple() ? t('layers.layer') : t('layers.name'));
+      }
+      */
+      geoviewLayerInstance.geoviewLayerName = createLocalizedString(layerName);
+      layerEntries[0].geoviewLayerConfig.geoviewLayerName = createLocalizedString(layerName);
+      geoviewLayerInstance.setListOfLayerEntryConfig(layerEntries[0].geoviewLayerConfig, layerEntries);
+
+      if (layerType === GEOJSON || layerType === XYZ_TILES || layerType === GEOPACKAGE) {
+        // TODO probably want an option to add metadata if geojson or geopackage
+        // need to clear our metadata path or it will give errors trying to find it
+        geoviewLayerInstance!.metadataAccessPath = createLocalizedString('');
+      }
+
+      /*
+      if (layerType === GEOCORE) {
+        delete layerConfig.metadataAccessPath;
+      }
+
+      if (layerType === OGC_FEATURE) {
+        // make sure the metadataAccessPath is the root OGC API URL
+        layerConfig.metadataAccessPath = {
+          en: geoUtilities.getOGCServerUrl(layerURL),
+          fr: geoUtilities.getOGCServerUrl(layerURL),
+        };
+      }
+      */
+
+      if (valid) {
+        // TODO issue #668 - geocore layers do not have same ID, it is impossible to use the added event
+        // workaround - close after 3 sec
+        if (layerType === GEOCORE) {
+          setTimeout(() => {
+            setIsLoading(false);
+            // setAddLayerVisible(false); //TODO - Investigate
+          }, 3000);
+        }
+
+        /* if (layerConfig.geoviewLayerId) {
+          api.maps[mapId].layer.layerOrder.push(layerConfig.geoviewLayerId);
+        } else if (layerConfig.listOfLayerEntryConfig !== undefined) {
+          layerConfig.listOfLayerEntryConfig.forEach((subLayer: TypeLayerEntryConfig) => {
+            if (subLayer.layerId) api.maps[mapId].layer.layerOrder.unshift(subLayer.layerId);
+          });
+        }
+        */
+        geoviewLayerInstance.olLayers = await geoviewLayerInstance.processListOfLayerEntryConfig.call(
+          geoviewLayerInstance,
+          geoviewLayerInstance.listOfLayerEntryConfig
+        );
+        if (geoviewLayerInstance.olLayers) api.maps[mapId].layer.addToMap(geoviewLayerInstance);
+        else emitErrorNotLoaded();
+
+        setIsLoading(false);
+      }
     }
   };
 
@@ -669,19 +779,18 @@ export function AddNewLayer(): JSX.Element {
    * Set the currently selected layer from a list
    *
    * @param event Select event
+   *
    * @param newValue value/label pairs of select options
    */
-  const handleSelectLayer = (event: Event, newValue: string[]) => {
+  const handleSelectLayer = (event: Event, newValue: TypeListOfLayerEntryConfig | TypeLayerEntryConfig) => {
     if (isMultiple()) {
-      setLayerEntries(
-        newValue.map((x: string) => {
-          return { layerId: `${x[0]}` };
-        }) as TypeListOfLayerEntryConfig
+      setLayerEntries(newValue as TypeListOfLayerEntryConfig);
+      setLayerName(
+        (newValue as TypeListOfLayerEntryConfig).map((layerConfig: TypeLayerEntryConfig) => layerConfig.layerName!.en).join(', ')
       );
-      setLayerName(newValue.map((x) => x[1]).join(', '));
     } else {
-      setLayerEntries([{ layerId: `${newValue[0]}` }] as TypeListOfLayerEntryConfig);
-      setLayerName(newValue[1]);
+      setLayerEntries([newValue as TypeLayerEntryConfig]);
+      setLayerName((newValue as TypeLayerEntryConfig).layerName!.en!);
     }
   };
 
@@ -896,8 +1005,8 @@ export function AddNewLayer(): JSX.Element {
                       disableClearable={!isMultiple()}
                       id="service-layer-label"
                       options={layerList}
-                      getOptionLabel={(option) => `${option[1]} (${option[0]})`}
-                      renderOption={(props, option) => <span {...props}>{option[1] as string}</span>}
+                      getOptionLabel={(option) => `${option.layerName!.en} (${option.layerId})`}
+                      renderOption={(props, option) => <span {...props}>{option.layerName!.en}</span>}
                       // eslint-disable-next-line @typescript-eslint/no-explicit-any
                       onChange={handleSelectLayer as any}
                       renderInput={(params) => <TextField {...params} label={t('layers.layerSelect')} />}
