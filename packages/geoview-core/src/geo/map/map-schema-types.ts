@@ -7,6 +7,7 @@ import { Coordinate } from 'ol/coordinate';
 import { TypeBasemapOptions } from '@/geo/layer/basemap/basemap-types';
 import { AbstractGeoViewLayer, TypeGeoviewLayerType } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { TypeMapMouseInfo } from '@/api/events/payloads';
+import { createLocalizedString } from '@/core/utils/utilities';
 
 /** ******************************************************************************************************************************
  *  Definition of map state to attach to the map object for reference.
@@ -624,7 +625,7 @@ export class BaseLayerProperties {
   /** This attribute is not part of the schema. It is used to identified the process phase of the layer */
   layerPhase?: string;
 
-  /** This attribute is not part of the schema. It is used to link the layer entry config to the GeoView root layer config. */
+  /** This attribute is not part of the schema. It is used to link the layer entry config to the GeoView layer config. */
   geoviewLayerConfig: TypeGeoviewLayerConfig;
 
   /** This attribute is not part of the schema. It is used to link the layer entry config to the parent's layer config. */
@@ -702,7 +703,7 @@ export class TypeBaseLayerEntryConfig extends BaseLayerProperties {
    * Initial settings to apply to the GeoView layer entry at creation time. Initial settings are inherited from the parent in the
    * configuration tree.
    */
-  initialSettings?: TypeLayerInitialSettings;
+  initialSettings?: TypeLayerInitialSettings = {};
 
   /** Source settings to apply to the GeoView vector layer source at creation time. */
   source?:
@@ -965,7 +966,7 @@ export class TypeOgcWmsLayerEntryConfig extends TypeBaseLayerEntryConfig {
       // set to '' and will be filled in the fetchServiceMetadata method of the class WMS. So, we begin with the assumption
       // that both en and fr end with ".xml". Be aware that in metadataAccessPath, one language can ends with ".xml" and the
       // other not.
-      this.source.dataAccessPath = { en: '', fr: '' };
+      this.source.dataAccessPath = createLocalizedString('');
       // When the dataAccessPath is undefined and the metadataAccessPath does not end with ".xml", the dataAccessPath is set
       // to the same value of the corresponding metadataAccessPath.
       if (this.geoviewLayerConfig.metadataAccessPath!.en!.slice(-4).toLowerCase() !== '.xml')
@@ -1297,9 +1298,7 @@ export type TypeListOfGeoviewLayerConfig = TypeGeoviewLayerConfig[];
 export type TypeGeoviewLayerConfig = {
   /** This attribute is not part of the schema. It is used to link the displayed layer to its layer entry config. */
   olLayer?: Promise<BaseLayer>;
-  /**
-   * The GeoView layer identifier.
-   */
+  /** The GeoView layer identifier. */
   geoviewLayerId: string;
   /**
    * The display name of the layer (English/French). If it is not present the viewer will make an attempt to scrape this

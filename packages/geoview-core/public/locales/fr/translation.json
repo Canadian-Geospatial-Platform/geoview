@@ -101,6 +101,7 @@
     "errorNone": "Pas de fichier ou de source ajouté",
     "errorFile": "Seuls les fichiers geoJSON et GeoPackage peuvent être utilisés",
     "errorServer": "source n'est pas valide",
+    "errorNotLoaded": "Une erreur s'est produite lors du chargement de la couche geoview",
     "errorProj": "ne prend pas en charge la projection cartographique actuelle",
     "only": "seulement",
     "opacity": "Opacité",
