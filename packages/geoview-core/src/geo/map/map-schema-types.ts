@@ -643,6 +643,11 @@ export class BaseLayerProperties {
    * @param {BaseLayerProperties} layerConfig The layer configuration we want to instanciate.
    */
   constructor(layerConfig: BaseLayerProperties) {
+    if ('entryType' in layerConfig && layerConfig.entryType === 'geoCore') {
+      this.layerPath = '';
+      this.geoviewLayerConfig = {} as TypeGeoviewLayerConfig;
+      return;
+    }
     this.geoviewLayerConfig = layerConfig.geoviewLayerConfig;
     Object.assign(this, layerConfig);
     this.layerPath = this.getLayerPath(layerConfig);

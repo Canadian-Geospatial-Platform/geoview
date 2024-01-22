@@ -571,13 +571,9 @@ export abstract class AbstractGeoViewLayer {
     if (metadataUrl) {
       try {
         const metadataString = await getXMLHttpRequest(`${metadataUrl}?f=json`);
-        if (metadataString === '{}') {
-          this.setAllLayerStatusToError(this.listOfLayerEntryConfig, 'Unable to read metadata');
-        } else {
-          this.metadata = toJsonObject(JSON.parse(metadataString));
-          const { copyrightText } = this.metadata;
-          if (copyrightText) this.attributions.push(copyrightText as string);
-        }
+        this.metadata = toJsonObject(JSON.parse(metadataString));
+        const { copyrightText } = this.metadata;
+        if (copyrightText) this.attributions.push(copyrightText as string);
       } catch (error) {
         console.error(error);
         this.setAllLayerStatusToError(this.listOfLayerEntryConfig, 'Unable to read metadata');
