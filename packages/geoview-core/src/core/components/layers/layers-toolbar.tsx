@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { Box, AddCircleOutlineIcon, ButtonGroup, DeleteOutlineIcon, HandleIcon, Tooltip, VisibilityOutlinedIcon } from '@/ui';
 import { useLayerStoreActions, useLayersDisplayState } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { TypeLayersViewDisplayState } from './types';
+import { logger } from '@/core/utils/logger';
 
 interface ResponsiveButtonProps {
   tooltipKey: string;
@@ -15,7 +16,7 @@ interface ResponsiveButtonProps {
 function ResponsiveButton(props: ResponsiveButtonProps): JSX.Element {
   const { tooltipKey, translationKey, icon, newState } = props;
   const { t } = useTranslation<string>();
-  const breakpoint = 490;
+  const breakpoint = 510;
 
   // state
   const [screenWidth, setScreenWidth] = useState(window.innerWidth);
@@ -29,6 +30,9 @@ function ResponsiveButton(props: ResponsiveButtonProps): JSX.Element {
   };
 
   useEffect(() => {
+    // Log
+    logger.logTraceUseEffect('LAYERS-TOOLBAR - mount');
+
     const handleResize = () => {
       setScreenWidth(window.innerWidth);
     };

@@ -184,16 +184,30 @@ export class Layer {
    */
   loadListOfGeoviewLayer(geoviewLayerConfigs?: TypeGeoviewLayerConfig[]) {
     const validGeoviewLayerConfigs = this.deleteDuplicatGeoviewLayerConfig(geoviewLayerConfigs);
+    const addSubLayerPathToLayerOrder = (layerEntryConfig: TypeLayerEntryConfig, layerPath: string): void => {
+      const subLayerPath = `${layerPath}/${layerEntryConfig.layerId}`;
+      this.initialLayerOrder.push(subLayerPath);
+      if (layerEntryConfig.listOfLayerEntryConfig?.length) {
+        layerEntryConfig.listOfLayerEntryConfig?.forEach((subLayerEntryConfig) => {
+          addSubLayerPathToLayerOrder(subLayerEntryConfig, subLayerPath);
+        });
+      }
+    };
 
     // set order for layers to appear on the map according to config
-    this.initialLayerOrder = [];
-
     validGeoviewLayerConfigs.forEach((geoviewLayerConfig) => {
-      const layerPath =
-        geoviewLayerConfig.listOfLayerEntryConfig.length > 1
-          ? `${geoviewLayerConfig.geoviewLayerId}/${geoviewLayerConfig.geoviewLayerId}`
-          : `${geoviewLayerConfig.geoviewLayerId}/${geoviewLayerConfig.listOfLayerEntryConfig[0].layerId}`;
-      this.initialLayerOrder.push(layerPath);
+      let layerPath = '';
+      if (geoviewLayerConfig.listOfLayerEntryConfig.length > 1) {
+        layerPath = `${geoviewLayerConfig.geoviewLayerId}/${geoviewLayerConfig.geoviewLayerId}`;
+        this.initialLayerOrder.push(layerPath);
+        geoviewLayerConfig.listOfLayerEntryConfig.forEach((layerEntryConfig) => {
+          addSubLayerPathToLayerOrder(layerEntryConfig, layerPath);
+        });
+      } else {
+        layerPath = `${geoviewLayerConfig.geoviewLayerId}/${geoviewLayerConfig.listOfLayerEntryConfig[0].layerId}`;
+        this.initialLayerOrder.push(layerPath);
+      }
+
       api.event.emit(layerConfigPayload(EVENT_NAMES.LAYER.EVENT_ADD_LAYER, this.mapId, geoviewLayerConfig));
     });
   }
@@ -288,7 +302,6 @@ export class Layer {
         const { layer, consoleMessage } = loadError;
         const message = replaceParams([layer, this.mapId], getLocalizedMessage(this.mapId, 'validation.layer.loadfailed'));
         showError(this.mapId, message);
-
         // eslint-disable-next-line no-console
         console.log(consoleMessage);
       });
@@ -409,15 +422,15 @@ export class Layer {
    * @param {string} mustBeProcessed indicate if the layer we're searching for must be found only once processed
    * @param {string} timeout optionally indicate the timeout after which time to abandon the promise
    * @param {string} checkFrequency optionally indicate the frequency at which to check for the condition on the layer
-   * @returns a promise with the AbstractGeoViewLayer or null when the layer id was not found
-   * @throws an exception when the layer for the layer id was found, but failed to become in processed phase before the timeout expired
+   * @returns a promise with the AbstractGeoViewLayer
+   * @throws an exception when the layer for the layer id couldn't be found, or waiting time expired
    */
   getGeoviewLayerByIdAsync = async (
     geoviewLayerId: string,
     mustBeProcessed: boolean,
     timeout?: number,
     checkFrequency?: number
-  ): Promise<AbstractGeoViewLayer | null> => {
+  ): Promise<AbstractGeoViewLayer> => {
     // Redirects
     const layer = this.getGeoviewLayerById(geoviewLayerId);
 
@@ -431,14 +444,13 @@ export class Layer {
         await this.waitForProcessedPhase(layer, timeout, checkFrequency);
         return layer;
       } catch (error) {
-        // eslint-disable-next-line no-console
-        console.error(`Took too long for ${layer.geoviewLayerId} to get in 'processed' phase`, (error as Error).stack);
-        throw error;
+        // Throw
+        throw new Error(`Took too long for layer ${geoviewLayerId} to get in 'processed' phase`);
       }
     }
 
-    // Failed
-    return Promise.resolve(null);
+    // Throw
+    throw new Error(`Layer ${geoviewLayerId} not found.`);
   };
 
   /**
@@ -476,7 +488,7 @@ export class Layer {
     // If it is a group layer, highlight sublayers
     if (layerEntryIsGroupLayer(this.registeredLayers[layerPath])) {
       Object.keys(this.registeredLayers).forEach((registeredLayerPath) => {
-        if (!registeredLayerPath.startsWith(layerPath) && layerEntryIsGroupLayer(this.registeredLayers[registeredLayerPath])) {
+        if (!registeredLayerPath.startsWith(layerPath) && !layerEntryIsGroupLayer(this.registeredLayers[registeredLayerPath])) {
           const otherOpacity = this.geoviewLayer(registeredLayerPath).getOpacity();
           this.geoviewLayer(registeredLayerPath).setOpacity((otherOpacity || 1) * 0.25);
         } else this.registeredLayers[registeredLayerPath].olLayer!.setZIndex(999);
@@ -484,7 +496,7 @@ export class Layer {
     } else {
       Object.keys(this.registeredLayers).forEach((registeredLayerPath) => {
         // check for otherOlLayer is undefined. It would be undefined if a layer status is error
-        if (registeredLayerPath !== layerPath && layerEntryIsGroupLayer(this.registeredLayers[registeredLayerPath])) {
+        if (registeredLayerPath !== layerPath && !layerEntryIsGroupLayer(this.registeredLayers[registeredLayerPath])) {
           const otherOpacity = this.geoviewLayer(registeredLayerPath).getOpacity();
           this.geoviewLayer(registeredLayerPath).setOpacity((otherOpacity || 1) * 0.25);
         }
@@ -502,7 +514,7 @@ export class Layer {
       const { layerPath, originalOpacity } = this.highlightedLayer;
       if (layerEntryIsGroupLayer(this.registeredLayers[layerPath])) {
         Object.keys(this.registeredLayers).forEach((registeredLayerPath) => {
-          if (!registeredLayerPath.startsWith(layerPath) && layerEntryIsGroupLayer(this.registeredLayers[registeredLayerPath])) {
+          if (!registeredLayerPath.startsWith(layerPath) && !layerEntryIsGroupLayer(this.registeredLayers[registeredLayerPath])) {
             const otherOpacity = this.geoviewLayer(registeredLayerPath).getOpacity();
             this.geoviewLayer(registeredLayerPath).setOpacity(otherOpacity ? otherOpacity * 4 : 1);
           } else this.geoviewLayer(registeredLayerPath).setOpacity(originalOpacity || 1);
@@ -510,7 +522,7 @@ export class Layer {
       } else {
         Object.keys(this.registeredLayers).forEach((registeredLayerPath) => {
           // check for otherOlLayer is undefined. It would be undefined if a layer status is error
-          if (registeredLayerPath !== layerPath && layerEntryIsGroupLayer(this.registeredLayers[registeredLayerPath])) {
+          if (registeredLayerPath !== layerPath && !layerEntryIsGroupLayer(this.registeredLayers[registeredLayerPath])) {
             const otherOpacity = this.geoviewLayer(registeredLayerPath).getOpacity();
             this.geoviewLayer(registeredLayerPath).setOpacity(otherOpacity ? otherOpacity * 4 : 1);
           } else this.geoviewLayer(registeredLayerPath).setOpacity(originalOpacity || 1);

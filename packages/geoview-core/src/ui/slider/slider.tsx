@@ -8,6 +8,7 @@ import { api } from '@/app';
 import { EVENT_NAMES } from '@/api/events/event-types';
 import { sliderPayload, payloadIsASlider, SliderTypePayload, PayloadBaseClass } from '@/api/events/payloads';
 import { getSxClasses } from './slider-style';
+import { logger } from '@/core/utils/logger';
 
 /**
  * Properties for the Slider
@@ -203,6 +204,9 @@ export function Slider(props: TypeSliderProps): JSX.Element {
   }, [removeLabelOverlap]);
 
   useEffect(() => {
+    // Log
+    logger.logTraceUseEffect('SLIDER - minmax', min, max, value);
+
     // on set min/max, update slider
     api.event.on(EVENT_NAMES.SLIDER.EVENT_SLIDER_SET_MINMAX, sliderSetMinMaxListenerFunction, properties.id);
 

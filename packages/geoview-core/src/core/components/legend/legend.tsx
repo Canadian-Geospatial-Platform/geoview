@@ -7,6 +7,7 @@ import { getSxClasses } from './legend-styles';
 import { LegendLayer } from './legend-layer';
 import { TypeLegendLayer } from '../layers/types';
 import { useFooterPanelHeight } from '../common';
+import { logger } from '@/core/utils/logger';
 
 export function Legend(): JSX.Element {
   const { t } = useTranslation<string>();
@@ -24,10 +25,14 @@ export function Legend(): JSX.Element {
   // Custom hook for calculating the height of footer panel
   const { leftPanelRef } = useFooterPanelHeight({ footerPanelTab: 'legend' });
 
+  // Log
+  logger.logTraceRender('legend');
+
   useEffect(() => {
-    // TODO: make this async as the visible layers array is empty when useEffect is triggered
-    // TD-CONT: Seems to be more problematic with group layer, raw-feature-info, we do not have the legend title
-    // TD-CONT: because if by default the tab is colllapse, it is a blank screen
+    // Log
+    logger.logTraceUseEffect('LEGEND - visiblelayers', visibleLayers.length, visibleLayers);
+
+    // Loop on the visible layers to retrieve the valid TypeLegendLayer objects
     const parentPaths: string[] = [];
     const layers = visibleLayers
       .map((layerPath) => {
@@ -38,18 +43,18 @@ export function Legend(): JSX.Element {
         }
         return undefined;
       })
-      .filter((layer) => layer !== undefined);
-    setLegendLayers(layers as TypeLegendLayer[]);
+      .filter((layer) => layer !== undefined) as TypeLegendLayer[];
 
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [visibleLayers]);
+    // Update the legend layers
+    setLegendLayers(layers);
+  }, [getLayer, visibleLayers]);
 
   function renderLegendLayersList() {
     return (
       <Box display="flex" flexDirection="row" flexWrap="wrap">
         {legendLayers.map((item) => (
           <Box key={item!.layerPath} width={{ xs: '100%', sm: '50%', md: '33.33%', lg: '25%', xl: '25%' }} style={{ minHeight: 0 }} p={2}>
-            <LegendLayer layer={item!} key={item!.layerPath} />
+            <LegendLayer layer={item!} />
           </Box>
         ))}
       </Box>

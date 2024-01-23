@@ -3,6 +3,7 @@ import {
   useDataTableStoreActions,
   useDataTableStoreRowSelectionsRecord,
 } from '@/core/stores/store-interface-and-intial-values/data-table-state';
+import { logger } from '@/core/utils/logger';
 
 interface UseSelectedRowMessageProps {
   layerKey: string;
@@ -23,6 +24,9 @@ export function useSelectedRows({ layerKey }: UseSelectedRowMessageProps) {
 
   // update store row selections.
   useEffect(() => {
+    // Log
+    logger.logTraceUseEffect('USESELECTEDROWS - RowSelection', rowSelection);
+
     setRowSelectionsEntry(rowSelection, layerKey);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [rowSelection]);

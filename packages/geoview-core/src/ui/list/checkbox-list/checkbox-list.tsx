@@ -10,6 +10,7 @@ import Checkbox from '@mui/material/Checkbox';
 import Box from '@mui/material/Box';
 
 import { getSxClasses } from './checkbox-list-style';
+import { logger } from '@/core/utils/logger';
 
 /**
  * CheckboxList main Props
@@ -76,6 +77,9 @@ export function CheckboxList(props: CheckboxListProps): JSX.Element {
 
   // Effect triggered when the checked values changes
   useEffect(() => {
+    // Log
+    logger.logTraceUseEffect('CHECKBOX-LIST - checkedValues', checkedValues);
+
     if (checkedValues) setChecked(checkedValues);
   }, [checkedValues]);
 

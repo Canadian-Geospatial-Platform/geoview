@@ -50,6 +50,7 @@ import {
 } from '@/core/stores/store-interface-and-intial-values/data-table-state';
 import { useLightBox, useSelectedRows, useFilterRows, useToolbarActionMessage } from './hooks';
 import { useAppDisplayLanguage } from '@/core/stores/store-interface-and-intial-values/app-state';
+import { logger } from '@/core/utils/logger';
 
 export interface DataTableDataEntrys extends TypeFeatureInfoEntry {
   rows: Record<string, string>;
@@ -154,6 +155,9 @@ function DataTable({ data, layerId, mapId, layerKey, tableHeight = 600 }: DataTa
   // #endregion
 
   useEffect(() => {
+    // Log
+    logger.logTraceUseEffect('DATA-TABLE - sorting', sorting);
+
     // scroll to the top of the table when the sorting changes
     try {
       rowVirtualizerInstanceRef.current?.scrollToIndex?.(0);
@@ -169,6 +173,9 @@ function DataTable({ data, layerId, mapId, layerKey, tableHeight = 600 }: DataTa
    * @returns JSX.Element
    */
   const getTableHeader = useCallback((header: string) => {
+    // Log
+    logger.logTraceUseCallback('DATA-TABLE - getTableHeader');
+
     return (
       <Tooltip title={header} placement="top" arrow>
         <Box component="span" sx={{ whiteSpace: 'nowrap' }}>
@@ -432,6 +439,9 @@ function DataTable({ data, layerId, mapId, layerKey, tableHeight = 600 }: DataTa
 
   // add/remove hightlight feature when row is selected/unselected.
   useEffect(() => {
+    // Log
+    logger.logTraceUseEffect('DATA-TABLE - rowSelection', rowSelection);
+
     const selectedRows = Object.keys(rowSelection).map((key) => Number(key));
 
     const addAnimationRowIds = difference(selectedRows, rowSelectionRef.current);
@@ -529,6 +539,9 @@ function DataTable({ data, layerId, mapId, layerKey, tableHeight = 600 }: DataTa
 
   // update map when column filters change
   useEffect(() => {
+    // Log
+    logger.logTraceUseEffect('DATA-TABLE - columnFilters', columnFilters);
+
     if (columnFilters && mapFilteredRecord[layerKey]) {
       debouncedColumnFilters(columnFilters);
     }
@@ -537,6 +550,9 @@ function DataTable({ data, layerId, mapId, layerKey, tableHeight = 600 }: DataTa
 
   // Update map when filter map switch is toggled.
   useEffect(() => {
+    // Log
+    logger.logTraceUseEffect('DATA-TABLE - mapFilteredRecord', mapFilteredRecord[layerKey]);
+
     filterMap(columnFilters);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mapFilteredRecord[layerKey]]);

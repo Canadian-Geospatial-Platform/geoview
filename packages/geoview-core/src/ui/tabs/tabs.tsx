@@ -8,6 +8,7 @@ import { HtmlToReact } from '@/core/containers/html-to-react';
 import { TabPanel } from './tab-panel';
 import { useUIActiveTrapGeoView, useUIStoreActions } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import { getSxClasses } from './tabs-style';
+import { logger } from '@/core/utils/logger';
 
 /**
  * Type used for properties of each tab
@@ -79,9 +80,11 @@ export function Tabs(props: TypeTabsProps): JSX.Element {
   };
 
   useEffect(() => {
+    // Log
+    logger.logTraceUseEffect('TABS - selectedTab', selectedTab, value);
+
     if (selectedTab && value !== selectedTab) setValue(selectedTab);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedTab]);
+  }, [selectedTab, value]);
 
   return (
     <Grid container sx={{ width: '100%', height: '100%' }}>

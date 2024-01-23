@@ -25,6 +25,7 @@ import { HubOutlinedIcon, InfoOutlinedIcon, LayersOutlinedIcon, StorageIcon } fr
 import { Legend } from '@/core/components/legend/legend';
 import { LayersPanel } from '@/core/components/layers/layers-panel';
 import { DetailsPanel } from '@/core/components/details/details-panel';
+import { logger } from '@/core/utils/logger';
 
 interface ShellContainerCssProperties {
   mapVisibility: string;
@@ -162,8 +163,11 @@ export function FooterTabs(): JSX.Element | null {
 
   // on map creation, get original height to set the foorter collapse/expand height
   useEffect(() => {
+    // Log
+    logger.logTraceUseEffect('FOOTER-TABS - mapDiv');
+
     setOrigHeight(mapDiv!.clientHeight + 55);
-  }, [mapDiv]);
+  }, [mapDiv]); // ! Is a useEffect on a dom element recommented here? Consider using useRef?
 
   // TODO: need a refactor to use proper sx classes and style
   // !https://github.com/Canadian-Geospatial-Platform/geoview/issues/1136
@@ -171,6 +175,9 @@ export function FooterTabs(): JSX.Element | null {
    * Handle the collapse/expand state effect
    */
   useEffect(() => {
+    // Log
+    logger.logTraceUseEffect('FOOTER-TABS - isCollapsed.mapDiv.origHeight', isCollapsed);
+
     // map div
     mapDiv.style.height = 'fit-content';
     mapDiv.style.transition = 'height 0.2s ease-out 0.2s';
@@ -194,7 +201,7 @@ export function FooterTabs(): JSX.Element | null {
         lastChild.style.maxHeight = isCollapsed ? '0px' : '';
       }
     }
-  }, [isCollapsed, mapDiv, origHeight]);
+  }, [isCollapsed, mapDiv, origHeight]); // ! Is a useEffect on a dom element recommented here? Consider using useRef?
 
   /**
    * Handle a collapse, expand event for the tabs component
@@ -229,6 +236,9 @@ export function FooterTabs(): JSX.Element | null {
    * Manage the tab 'create', 'remove' and 'select'
    */
   useEffect(() => {
+    // Log
+    logger.logTraceUseEffect('FOOTER-TABS - addTab.removeTab', mapId);
+
     // listen to new tab creation
     api.event.on(EVENT_NAMES.FOOTER_TABS.EVENT_FOOTER_TABS_TAB_CREATE, eventFooterTabsCreateListenerFunction, mapId);
 
@@ -249,6 +259,9 @@ export function FooterTabs(): JSX.Element | null {
    * Update map and footer panel height when switch to fullscreen
    */
   useEffect(() => {
+    // Log
+    logger.logTraceUseEffect('FOOTER-TABS - isMapFullScreen', isMapFullScreen, isCollapsed);
+
     if (isMapFullScreen && tabsContainerRef.current && mapContainerRef.current && !isCollapsed) {
       const { mapVisibility, mapHeight, tabHeight } = resizeValues[footerPanelResizeValue];
 
@@ -273,6 +286,9 @@ export function FooterTabs(): JSX.Element | null {
    * Update the map and footer panel height after footer panel is collapsed.
    */
   useEffect(() => {
+    // Log
+    logger.logTraceUseEffect('FOOTER-TABS - isCollapsed.isMapFullScreen', isCollapsed, isMapFullScreen);
+
     if (isMapFullScreen && isCollapsed && mapContainerRef.current && tabsContainerRef.current) {
       mapContainerRef.current.style.minHeight = `${window.screen.height - tabsContainerRef.current.clientHeight}px`;
       mapContainerRef.current.style.height = `${window.screen.height - tabsContainerRef.current.clientHeight}px`;
@@ -283,6 +299,10 @@ export function FooterTabs(): JSX.Element | null {
    * Create default tabs from configuration parameters
    */
   useEffect(() => {
+    // Log
+    logger.logTraceUseEffect('FOOTER-TABS - mount');
+    logger.logDebug('FOOTER-TABS - mount'); // remove this one when things stabilize
+
     if (footerTabsConfig && footerTabsConfig.tabs.core.includes('data-table')) {
       // create new tab and add the Data Table component to the footer tab
       // TODO: This will be refactor after new store for data table is implemented.

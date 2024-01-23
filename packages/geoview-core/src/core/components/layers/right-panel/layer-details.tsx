@@ -34,7 +34,7 @@ interface LayerDetailsProps {
 }
 
 export function LayerDetails(props: LayerDetailsProps): JSX.Element {
-  const { layerDetails } = props; // TODO: LayerDetails is triggered twice and the second time it is undefined, need to investigate (warning key error)
+  const { layerDetails } = props;
 
   const { t } = useTranslation<string>();
 
@@ -200,8 +200,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
     );
   }
 
-  // function renderItems
-  // TODO: LayerDetails is triggered twice and the second time it is undefined, need to investigate
+  // Render
   return (
     <Paper sx={sxClasses.layerDetails}>
       {layerDetails !== undefined && (

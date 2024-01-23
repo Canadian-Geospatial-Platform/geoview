@@ -10,6 +10,7 @@ import { getSxClasses } from './mouse-position-style';
 import { useUIFooterBarExpanded } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import { useMapPointerPosition } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { api } from '@/app';
+import { logger } from '@/core/utils/logger';
 
 /**
  * Create the mouse position
@@ -37,6 +38,9 @@ export function MousePosition(): JSX.Element {
   };
 
   useEffect(() => {
+    // Log
+    logger.logTraceUseEffect('MOUSE-POSITION - pointerPosition', pointerPosition);
+
     /**
      * Format the coordinates output in lat long
      * @param {Coordinate} lnglat the Lng and Lat value to format

@@ -10,6 +10,7 @@ import Download from 'yet-another-react-lightbox/plugins/download';
 import 'yet-another-react-lightbox/styles.css';
 
 import { CloseIcon, ArrowRightIcon, ArrowLeftIcon, DownloadIcon, Tooltip } from '@/ui';
+import { logger } from '@/core/utils/logger';
 
 /**
  * Interface used for lightbox properties and slides
@@ -45,6 +46,9 @@ export function LightboxImg(props: LightboxProps): JSX.Element {
   const [swipe] = useState(500);
 
   useEffect(() => {
+    // Log
+    logger.logTraceUseEffect('LIGHTBOX - open', open);
+
     setIsOpen(open);
   }, [open]);
 

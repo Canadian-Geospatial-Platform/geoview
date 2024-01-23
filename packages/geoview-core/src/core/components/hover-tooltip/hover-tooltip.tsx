@@ -11,6 +11,7 @@ import { Box } from '@/ui';
 import { api, useGeoViewMapId } from '@/app';
 import { EVENT_NAMES } from '@/api/events/event-types';
 import { PayloadBaseClass, TypeFeatureInfoEntry, payloadIsAllQueriesDone } from '@/api/events/payloads';
+import { logger } from '@/core/utils/logger';
 
 const sxClasses = {
   tooltipItem: {
@@ -96,6 +97,9 @@ export function HoverTooltip(): JSX.Element {
   };
 
   useEffect(() => {
+    // Log
+    logger.logTraceUseEffect('HOVER-TOOLTIP - mount');
+
     // if pointerPosition changed, map pointer event has been triggered
     const unsubMapPointer = getGeoViewStore(mapId).subscribe(
       (state) => state.mapState.pointerPosition,

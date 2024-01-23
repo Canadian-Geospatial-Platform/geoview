@@ -9,6 +9,7 @@ import { getSxClasses } from './crosshair-style';
 import { CrosshairIcon } from './crosshair-icon';
 import { useAppCrosshairsActive } from '@/core/stores/store-interface-and-intial-values/app-state';
 import { useMapElement, useMapStoreActions } from '@/core/stores/store-interface-and-intial-values/map-state';
+import { logger } from '@/core/utils/logger';
 
 /**
  * Create a Crosshair when map is focus with the keyboard so user can click on the map
@@ -57,6 +58,9 @@ export function Crosshair(): JSX.Element {
   }, []);
 
   useEffect(() => {
+    // Log
+    logger.logTraceUseEffect('CROSSHAIR - isCrosshairsActive', isCrosshairsActive);
+
     const mapHTMLElement = mapElement!.getTargetElement();
     if (isCrosshairsActive) {
       panelButtonId.current = 'detailsPanel';
