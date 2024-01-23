@@ -133,7 +133,6 @@ export class MapEventProcessor extends AbstractEventProcessor {
     const unsubLegendLayers = store.subscribe(
       (state) => state.layerState.legendLayers,
       (cur) => {
-        // There is a conflict with @Damon's work to address here, did best I could for now
         const orderedLayerPaths = MapEventProcessor.getLayerPathsFromLegendsArray(cur);
         const prevLayerOrder = [...store.getState().mapState.layerOrder];
         if (JSON.stringify(prevLayerOrder) !== JSON.stringify(orderedLayerPaths))
@@ -363,7 +362,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
       const nextLayerLegend = legendsArray.filter((layerLegend) => layerLegend.order === i)[0];
       if (nextLayerLegend) {
         layerPathList.push(nextLayerLegend.layerPath);
-        if (nextLayerLegend.children.length > 0) {
+        if (nextLayerLegend.children.length) {
           layerPathList.push(...this.getLayerPathsFromLegendsArray(nextLayerLegend.children));
         }
       }
