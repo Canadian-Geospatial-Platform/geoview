@@ -612,8 +612,9 @@ export function AddNewLayer(): JSX.Element {
           if (subLayer.layerId) api.maps[mapId].layer.layerOrder.unshift(subLayer.layerId);
         });
       }
+      */
 
-      api.maps[mapId].layer.addGeoviewLayer(layerConfig); */
+      api.maps[mapId].layer.addGeoviewLayer(layerConfig);
     }
   };
 

@@ -302,7 +302,6 @@ export class Layer {
         const { layer, consoleMessage } = loadError;
         const message = replaceParams([layer, this.mapId], getLocalizedMessage(this.mapId, 'validation.layer.loadfailed'));
         showError(this.mapId, message);
-
         // eslint-disable-next-line no-console
         console.log(consoleMessage);
       });
