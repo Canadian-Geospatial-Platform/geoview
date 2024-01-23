@@ -18,17 +18,18 @@ export function LeftPanel({ setIsLayersListPanelVisible }: LeftPanelProps): JSX.
   const { setSelectedLayerPath } = useLayerStoreActions();
   const selectedLayer = useSelectedLayer();
   const displayState = useLayersDisplayState();
-
   useEffect(() => {
+    let timeout: ReturnType<typeof setTimeout>;
     if (!selectedLayer) {
       // TODO: Make this useEffect Async, when this useEffect is hit, the legenLayer is empty.
-      setTimeout(() => {
+      timeout = setTimeout(() => {
         const validFirstLayer = legendLayers.find((layer) => !(layer.layerStatus === 'error' || layer.layerStatus === 'loading'));
         if (validFirstLayer) {
           setSelectedLayerPath(validFirstLayer.layerPath);
         }
-      }, 1000);
+      }, 0);
     }
+    return () => clearTimeout(timeout);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

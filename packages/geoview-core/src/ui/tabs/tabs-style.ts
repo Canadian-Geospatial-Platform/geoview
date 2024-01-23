@@ -11,6 +11,7 @@ export const getSxClasses = () => ({
     paddingTop: '0 !important',
     borderColor: 'divider',
     height: '100%',
+    minHeight: 350,
   },
   tab: {
     fontSize: 16,
