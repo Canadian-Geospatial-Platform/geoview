@@ -11,6 +11,7 @@ import {
   useMapStoreActions,
   useMapZoom,
 } from '@/core/stores/store-interface-and-intial-values/map-state';
+import { logger } from '@/core/utils/logger';
 
 /**
  * Custom hook to Manage North arrow.
@@ -81,6 +82,9 @@ const useManageArrow = () => {
   }
 
   useEffect(() => {
+    // Log
+    logger.logTraceUseEffect('USEMANAGEARROW - northArrowElement', northArrowElement, fixNorth);
+
     if (`EPSG:${mapProjection}` === PROJECTION_NAMES.LCC) {
       // Because of the projection, corners are wrapped and central value of the polygon may be higher then corners values.
       // There is no easy way to see if the user sees the north pole just by using bounding box. One of the solution may

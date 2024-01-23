@@ -24,6 +24,7 @@ import { getGeoViewStore } from '@/core/stores/stores-managers';
 import { OL_ZOOM_DURATION, OL_ZOOM_PADDING } from '@/core/utils/constant';
 import { AppEventProcessor } from './app-event-processor';
 import { TypeLegendLayer } from '@/core/components/layers/types';
+import { logger } from '@/core/utils/logger';
 
 export class MapEventProcessor extends AbstractEventProcessor {
   onInitialize(store: GeoviewStoreType) {
@@ -132,12 +133,15 @@ export class MapEventProcessor extends AbstractEventProcessor {
     const unsubLegendLayers = store.subscribe(
       (state) => state.layerState.legendLayers,
       (cur) => {
+        // There is a conflict with @Damon's work to address here, did best I could for now
         const orderedLayerPaths = MapEventProcessor.getLayerPathsFromLegendsArray(cur);
         const prevLayerOrder = [...store.getState().mapState.layerOrder];
         if (JSON.stringify(prevLayerOrder) !== JSON.stringify(orderedLayerPaths))
           store.getState().mapState.actions.setLayerOrder(orderedLayerPaths);
         const orderedVisibleLayers = orderedLayerPaths.filter(
-          (layerPath) => store.getState().layerState.actions.getLayer(layerPath)?.isVisible !== 'no'
+          (layerPath) =>
+            store.getState().layerState.actions.getLayer(layerPath)?.isVisible === 'yes' ||
+            store.getState().layerState.actions.getLayer(layerPath)?.isVisible === 'always'
         );
         const prevVisibleLayers = [...store.getState().mapState.visibleLayers];
         if (JSON.stringify(prevVisibleLayers) !== JSON.stringify(orderedVisibleLayers))
@@ -161,6 +165,9 @@ export class MapEventProcessor extends AbstractEventProcessor {
 
   //! THIS IS THE ONLY FUNCTION TO SET STORE DIRECTLY
   static setMapLoaded(mapId: string): void {
+    // Log
+    logger.logTraceCore('setMapLoaded', mapId);
+
     // use api to access map because this function will set map element in store
     const { map } = api.maps[mapId];
     const store = getGeoViewStore(mapId);
@@ -218,13 +225,6 @@ export class MapEventProcessor extends AbstractEventProcessor {
     });
     map.addOverlay(clickMarkerOverlay);
 
-    const orderedLayerPaths = MapEventProcessor.getLayerPathsFromLegendsArray(store.getState().layerState.legendLayers);
-    store.getState().mapState.actions.setLayerOrder(orderedLayerPaths);
-    const orderedVisibleLayers = orderedLayerPaths.filter(
-      (layerPath) => store.getState().layerState.actions.getLayer(layerPath)?.isVisible !== 'no'
-    );
-    store.getState().mapState.actions.setVisibleLayers(orderedVisibleLayers);
-
     // trigger the creation of feature info layer set and legend layer set
     // We always trigger creation because outside package may rely on them
     // ? duplicate of code in app-start, evaluate if there is a needed refactor for layer set.
@@ -237,11 +237,10 @@ export class MapEventProcessor extends AbstractEventProcessor {
     mapHTMLElement.addEventListener('mouseleave', () => mapHTMLElement.blur());
 
     // set store
-    // TODO: try async, evaluate if still needed OR use another approach
-    setTimeout(() => store.getState().mapState.actions.setMapElement(map), 250);
-    setTimeout(() => store.getState().mapState.actions.setOverlayNorthMarker(northPoleMarker), 250);
-    setTimeout(() => store.getState().mapState.actions.setOverlayClickMarker(clickMarkerOverlay), 250);
-    setTimeout(() => map.dispatchEvent('change:size'), 500); // dispatch event to set initial value
+    store.getState().mapState.actions.setMapElement(map);
+    store.getState().mapState.actions.setOverlayNorthMarker(northPoleMarker);
+    store.getState().mapState.actions.setOverlayClickMarker(clickMarkerOverlay);
+    map.dispatchEvent('change:size'); // dispatch event to set initial value
   }
 
   // **********************************************************
@@ -359,7 +358,8 @@ export class MapEventProcessor extends AbstractEventProcessor {
 
   static getLayerPathsFromLegendsArray(legendsArray: TypeLegendLayer[]): string[] {
     const layerPathList: string[] = [];
-    for (let i = 0; i < legendsArray.length; i++) {
+    const maxOrder = Math.max(...legendsArray.map((legendLayer) => legendLayer.order));
+    for (let i = 0; i <= maxOrder; i++) {
       const nextLayerLegend = legendsArray.filter((layerLegend) => layerLegend.order === i)[0];
       if (nextLayerLegend) {
         layerPathList.push(nextLayerLegend.layerPath);

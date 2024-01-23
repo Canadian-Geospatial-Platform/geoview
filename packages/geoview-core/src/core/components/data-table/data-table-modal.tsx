@@ -20,6 +20,7 @@ import { ColumnsType } from './data-table';
 import { LayersDataType } from './data-panel';
 import { getSxClasses } from './data-table-style';
 import { useAppDisplayLanguage } from '@/core/stores/store-interface-and-intial-values/app-state';
+import { logger } from '@/core/utils/logger';
 
 /**
  * Open lighweight version (no function) of data table in a modal window
@@ -103,6 +104,9 @@ export default function DataTableModal(): JSX.Element {
   }, [layer?.fieldAliases]);
 
   useEffect(() => {
+    // Log
+    logger.logTraceUseEffect('DATA-TABLE-MODAL - isLoading', isLoading, selectedLayer);
+
     const clearLoading = setTimeout(
       () => {
         setIsLoading(false);

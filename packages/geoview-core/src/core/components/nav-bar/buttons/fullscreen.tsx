@@ -5,6 +5,7 @@ import { TypeHTMLElement } from '@/core/types/global-types';
 import { getSxClasses } from '../nav-bar-style';
 import { useAppStoreActions, useAppFullscreenActive } from '@/core/stores/store-interface-and-intial-values/app-state';
 import { useGeoViewMapId } from '@/app';
+import { logger } from '@/core/utils/logger';
 
 /**
  * Create a toggle button to toggle between fullscreen
@@ -32,6 +33,9 @@ export default function Fullscreen(): JSX.Element {
   }
 
   useEffect(() => {
+    // Log
+    logger.logTraceUseEffect('FULLSCREEN - mount');
+
     /**
      * Exit fullscreen with ESC key
      */

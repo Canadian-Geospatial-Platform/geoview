@@ -2,6 +2,7 @@
 import { useState, useEffect, SyntheticEvent } from 'react';
 
 import { Slider as MaterialSlider, SliderProps } from '@mui/material';
+import { logger } from '@/core/utils/logger';
 
 /**
  * Properties for the Slider
@@ -60,6 +61,9 @@ export function SliderBase(props: TypeSliderProps): JSX.Element {
 
   // Effect used to listen on the value state coming from the parent element.
   useEffect(() => {
+    // Log
+    logger.logTraceUseEffect('SLIDER-BASE - parentValue', parentValue);
+
     // Update child's value state when the parent's value prop changes
     setValue(parentValue);
   }, [parentValue]);

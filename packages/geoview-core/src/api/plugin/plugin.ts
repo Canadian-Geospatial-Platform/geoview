@@ -14,6 +14,7 @@ import { AbstractPlugin } from './abstract-plugin';
 import { TypePluginStructure } from './plugin-types';
 import { toJsonObject, TypeJsonObject, TypeJsonValue } from '@/core/types/global-types';
 import { UIEventProcessor } from '../event-processors/event-processor-children/ui-event-processor';
+import { logger } from '@/core/utils/logger';
 
 /**
  * Class to manage plugins
@@ -198,26 +199,6 @@ export class Plugin {
         }
       }
     }
-
-    // call this only if plugins are being loaded from map config
-    // this will not call if a plugin is loaded later from an api call
-    if (!this.pluginsLoaded) {
-      /**
-       * are we still calling addPlugin to load more plugins? If so
-       * Clear our timeout throughout the addPlugin call
-       */
-      window.clearTimeout(this.#pluginsReady);
-
-      /**
-       * If nothing clears this timeout
-       * this will only be called after the last call of addPlugin
-       */
-      this.#pluginsReady = window.setTimeout(() => {
-        this.pluginsLoaded = true;
-
-        api.callInitCallback();
-      }, 1000);
-    }
   };
 
   /**
@@ -300,8 +281,6 @@ export class Plugin {
       // load packages at next map if exists
       this.loadPlugin(mapIndex + 1, 0);
       // if no plugins loaded then call init callback function
-    } else if (Object.keys(api.maps[mapId].plugins).length === 0) {
-      api.callInitCallback();
     }
   };
 
@@ -309,6 +288,9 @@ export class Plugin {
    * Load plugins provided by map config
    */
   loadPlugins = (): void => {
+    // Log
+    logger.logTraceCore('loadPlugins');
+
     // check if a map exists
     if (Object.keys(api.maps)[0]) {
       // start loading core packages on first map and first package

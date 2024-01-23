@@ -6,6 +6,7 @@ import {
   useDataTableStoreToolbarRowSelectedMessageRecord,
 } from '@/core/stores/store-interface-and-intial-values/data-table-state';
 import { DataTableData, ColumnsType } from '../data-table';
+import { logger } from '@/core/utils/logger';
 
 interface UseSelectedRowMessageProps {
   data: DataTableData;
@@ -33,6 +34,9 @@ export function useToolbarActionMessage({ data, rowSelection, columnFilters, lay
 
   // show row selected message in the toolbar.
   useEffect(() => {
+    // Log
+    logger.logTraceUseEffect('USETOOLBARACTIONMESSAGE - rowSelection', rowSelection);
+
     let message = toolbarRowSelectedMessageRecord[layerKey] ?? '';
     if (Object.keys(rowSelection).length && tableInstance) {
       message = t('dataTable.rowsSelected')
@@ -52,6 +56,9 @@ export function useToolbarActionMessage({ data, rowSelection, columnFilters, lay
 
   // show row filtered message in the toolbar.
   useEffect(() => {
+    // Log
+    logger.logTraceUseEffect('USETOOLBARACTIONMESSAGE - columnFilters', columnFilters);
+
     let message = toolbarRowSelectedMessageRecord[layerKey] ?? '';
     let length = 0;
     if (tableInstance) {

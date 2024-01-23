@@ -14,6 +14,7 @@ import {
 import { Box, ClickMapMarker } from '@/ui';
 
 import { useMapClickMarker, useMapStoreActions } from '@/core/stores/store-interface-and-intial-values/map-state';
+import { logger } from '@/core/utils/logger';
 
 export type TypeClickMarker = {
   lnglat: Coordinate;
@@ -43,6 +44,9 @@ export function ClickMarker(): JSX.Element {
 
   // When layerDataArray is updated, check for feature to add to selectedFeatures (highlight)
   useEffect(() => {
+    // Log
+    logger.logTraceUseEffect('CLICK-MARKER - layerDataArray', layerDataArray);
+
     removeSelectedFeature('all');
     let feature: TypeFeatureInfoEntry | undefined;
     const selectedLayerDataEntry = layerDataArray.filter((layerData) => layerData.layerPath === selectedLayerPath)[0];
@@ -71,6 +75,9 @@ export function ClickMarker(): JSX.Element {
   }, [layerDataArray]);
 
   useEffect(() => {
+    // Log
+    logger.logTraceUseEffect('CLICK-MARKER - mount');
+
     // if mapClickCoordinates changed, single click event has been triggered
     const unsubMapSingleClick = getGeoViewStore(mapId).subscribe(
       (state) => state.mapState.clickCoordinates,

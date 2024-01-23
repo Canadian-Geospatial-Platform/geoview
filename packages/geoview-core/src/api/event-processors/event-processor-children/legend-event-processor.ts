@@ -15,8 +15,20 @@ import {
 import { getGeoViewStore } from '@/core/stores/stores-managers';
 import { TypeLegendLayer, TypeLegendLayerIcons, TypeLegendLayerItem, TypeLegendItem } from '@/core/components/layers/types';
 import { api, getLocalizedValue } from '@/app';
+import { delay } from '@/core/utils/utilities';
+import { logger } from '@/core/utils/logger';
 
 export class LegendEventProcessor extends AbstractEventProcessor {
+  // Semaphore indicating if initial load was done
+  // (Fake semaphore, because JavaScript is single-threaded, but using the term still to represent its purpose)
+  static semaphoreInitialLoad = false;
+
+  // The time delay before selecting a layer in the store upon first legend propagation.
+  // The longer the delay, the more chances layers will be loaded state, but the later there will be a selected layer in the store
+  // This is a matter of decision, not really something we can fix with an await
+  // ! Implementing this for now... will likely be revised, but it works better than it was and behavior is clear
+  static timeDelayBeforeSelectingLayerInStore = 2000;
+
   // **********************************************************
   // Static functions for Typescript files to access store actions
   // **********************************************************
@@ -113,7 +125,7 @@ export class LegendEventProcessor extends AbstractEventProcessor {
     return undefined;
   }
 
-  static propagateLegendToStore(mapId: string, layerPath: string, legendResultSetsEntry: TypeLegendResultSetsEntry) {
+  static async propagateLegendToStore(mapId: string, layerPath: string, legendResultSetsEntry: TypeLegendResultSetsEntry): Promise<void> {
     const layerPathNodes = layerPath.split('/');
     const createNewLegendEntries = async (
       layerPathBeginning: string,
@@ -129,7 +141,7 @@ export class LegendEventProcessor extends AbstractEventProcessor {
             bounds: undefined,
             layerId: layerConfig.layerId,
             order:
-              api.maps[mapId].layer.initialLayerOrder.indexOf(entryLayerPath) !== -1
+              api.maps[mapId].layer.initialLayerOrder.indexOf(entryLayerPath) !== -1 && !layerConfig.parentLayerConfig
                 ? api.maps[mapId].layer.initialLayerOrder.indexOf(entryLayerPath)
                 : existingEntries.length,
             // TODO: Why do we have the following line in the store? Do we have to fetch the metadata again since the GeoView layer read and keep them?
@@ -154,7 +166,7 @@ export class LegendEventProcessor extends AbstractEventProcessor {
           bounds: undefined,
           layerId: layerPathNodes[currentLevel],
           order:
-            api.maps[mapId].layer.initialLayerOrder.indexOf(entryLayerPath) !== -1
+            api.maps[mapId].layer.initialLayerOrder.indexOf(entryLayerPath) !== -1 && !layerConfig.parentLayerConfig
               ? api.maps[mapId].layer.initialLayerOrder.indexOf(entryLayerPath)
               : existingEntries.length,
           layerPath: entryLayerPath,
@@ -186,18 +198,53 @@ export class LegendEventProcessor extends AbstractEventProcessor {
         else existingEntries[entryIndex] = newLegendLayer;
 
         // TODO: find the best place to calculate layers item and assign https://github.com/Canadian-Geospatial-Platform/geoview/issues/1566
-        // listen to layer status with the whenthisthat async utility function
         try {
+          // Await for the Geoview layer in loaded state
           const myLayer = await api.maps[mapId].layer.getGeoviewLayerByIdAsync(layerPathNodes[0], true);
-          newLegendLayer.bounds = myLayer?.calculateBounds(layerPath);
+
+          try {
+            // Calculate the bounds
+            newLegendLayer.bounds = myLayer.calculateBounds(layerPath);
+          } catch (error) {
+            // Log
+            logger.logError(`Couldn't calculate bounds on layer ${layerPath}`, error);
+            newLegendLayer.bounds = undefined;
+          }
         } catch (error) {
-          // eslint-disable-next-line no-console
-          console.error(`Couldn't calculate bounds on layer ${layerPath}`);
-          newLegendLayer.bounds = undefined;
+          // Log
+          logger.logError(`Couldn't initialize legend information on layer ${layerPath}`, error);
         }
       }
     };
-    createNewLegendEntries(layerPathNodes[0], 1, getGeoViewStore(mapId).getState().layerState.legendLayers);
+
+    // Obtain the list of layers currently in the store
+    const layers = getGeoViewStore(mapId).getState().layerState.legendLayers;
+
+    // Process creation of legend entries
+    createNewLegendEntries(layerPathNodes[0], 1, layers);
+
+    // Update the legend layers with the updated array, triggering the subscribe
+    getGeoViewStore(mapId).getState().layerState.actions.setLegendLayers(layers);
+
+    // Check if this is an initial load
+    if (!LegendEventProcessor.semaphoreInitialLoad) {
+      // Flag for concurrency, so this is only executed once
+      LegendEventProcessor.semaphoreInitialLoad = true;
+
+      // Give it some time so that each layer has their chance to load on time
+      await delay(LegendEventProcessor.timeDelayBeforeSelectingLayerInStore);
+
+      // Find the layers that are processed
+      const validFirstLayer = layers.find((layer) => {
+        return layer.layerStatus === 'processed';
+      });
+      if (validFirstLayer) {
+        getGeoViewStore(mapId).getState().layerState.actions.setSelectedLayerPath(validFirstLayer.layerPath);
+      } else {
+        // Log
+        logger.logError(`Couldn't select a layer as none were processed in time`);
+      }
+    }
   }
   // #endregion
 

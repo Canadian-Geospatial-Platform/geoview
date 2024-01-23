@@ -16,6 +16,7 @@ import Version from './buttons/version';
 import { getSxClasses } from './app-bar-style';
 import { useUIActiveFocusItem, useUIAppbarComponents } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import { useMapInteraction } from '@/core/stores/store-interface-and-intial-values/map-state';
+import { logger } from '@/core/utils/logger';
 
 /**
  * Create an app-bar with buttons that can open a panel
@@ -68,6 +69,10 @@ export function Appbar(): JSX.Element {
   );
 
   useEffect(() => {
+    // Log
+    logger.logTraceUseEffect('APP-BAR - addButtonPanel', mapId);
+    logger.logDebug('APP-BAR - addButtonPanel', mapId); // remove this one when things stabilize
+
     const appBarPanelCreateListenerFunction = (payload: PayloadBaseClass) => {
       if (payloadIsAButtonPanel(payload)) addButtonPanel(payload);
     };
