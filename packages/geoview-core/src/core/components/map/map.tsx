@@ -1,5 +1,4 @@
-/* eslint-disable react/jsx-props-no-spreading */
-import { useEffect, useRef, MutableRefObject } from 'react';
+import { useEffect, useRef, useCallback, MutableRefObject } from 'react';
 
 import OLMap from 'ol/Map';
 import View from 'ol/View';
@@ -25,7 +24,8 @@ import {
   useMapStoreActions,
 } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { useGeoViewConfig, useGeoViewMapId } from '@/core/stores/geoview-store';
-import { api } from '@/app';
+import { api, toJsonObject } from '@/app';
+import { logger } from '@/core/utils/logger';
 
 export function Map(): JSX.Element {
   const defaultTheme = useTheme();
@@ -47,23 +47,41 @@ export function Map(): JSX.Element {
   // TODO: use store
   const viewer: MapViewer = api.maps[mapId];
 
-  const initCGPVMap = (cgpvMap: OLMap) => {
-    cgpvMap.set('mapId', mapId);
+  const initCGPVMap = useCallback(
+    (cgpvMap: OLMap) => {
+      // Log
+      logger.logTraceUseCallback('map.initCGPVMap');
 
-    // initialize the map viewer and load plugins
-    viewer.initMap(cgpvMap);
+      cgpvMap.set('mapId', mapId);
 
-    // load basemap from selected options
-    createBaseMapFromOptions();
+      // initialize the map viewer and load plugins
+      viewer.initMap(cgpvMap);
 
-    // call the ready function since rendering of this map instance is done
-    api.ready(() => {
-      // load plugins once all maps have rendered
-      api.plugin.loadPlugins();
-    });
-  };
+      // load basemap from selected options
+      createBaseMapFromOptions();
 
-  const initMap = (): void => {
+      // Load the core packages which are the ones who load on map (not footer plugin, not app-bar plugin)
+      mapStoreConfig?.corePackages?.forEach((corePackage: string) => {
+        api.plugin.loadScript(corePackage).then((constructor) => {
+          // add the plugin by passing in the loaded constructor from the script tag
+          api.plugin.addPlugin(
+            corePackage,
+            mapId,
+            constructor,
+            toJsonObject({
+              mapId,
+            })
+          );
+        });
+      });
+    },
+    [createBaseMapFromOptions, mapId, mapStoreConfig?.corePackages, viewer]
+  );
+
+  const initMap = useCallback((): void => {
+    // Log
+    logger.logTraceUseCallback('map.initMap');
+
     // create map projection object from code
     const projection = api.projection.projections[projectionCode];
 
@@ -90,12 +108,25 @@ export function Map(): JSX.Element {
     });
 
     initCGPVMap(initialMap);
-  };
+  }, [
+    createEmptyBasemap,
+    initCGPVMap,
+    mapId,
+    mapStoreConfig?.map.viewSettings.center,
+    mapStoreConfig?.map.viewSettings.extent,
+    mapStoreConfig?.map.viewSettings.maxZoom,
+    mapStoreConfig?.map.viewSettings.minZoom,
+    mapStoreConfig?.map.viewSettings.zoom,
+    projectionCode,
+  ]);
 
   useEffect(() => {
+    // Log
+    logger.logTraceUseEffect('map.initMap');
+
+    // Init the map on first render
     initMap();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [initMap]);
 
   return (
     /* eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex */

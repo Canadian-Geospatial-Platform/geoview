@@ -1217,6 +1217,8 @@ export type TypeMapFeaturesInstance = {
   appBar?: TypeAppBarProps;
   /** Nav bar properies. */
   navBar?: TypeNavBarProps;
+  /** App bar properies. */
+  appBarTabs?: TypeAppBarTabsProps;
   /** Footer bar properies. */
   footerTabs?: TypeFooterTabsProps;
   /** Overview map properies. */
@@ -1382,6 +1384,17 @@ export type TypeNavBarProps = Array<'zoom' | 'fullscreen' | 'home' | 'location' 
 /** ******************************************************************************************************************************
  * Configuration available for the footer tabs component.
  */
+export type TypeAppBarTabsProps = {
+  tabs: {
+    core: Array<'basemap-panel' | 'layers-panel' | 'geochart'>;
+    custom: Array<string>; // TODO: support custom tab by creating a Typeobject for it
+  };
+  collapsed: boolean;
+};
+
+/** ******************************************************************************************************************************
+ * Configuration available for the footer tabs component.
+ */
 export type TypeFooterTabsProps = {
   tabs: {
     core: Array<'legend' | 'layers' | 'details' | 'data-table' | 'time-slider' | 'geochart'>;
@@ -1405,7 +1418,7 @@ export type TypeMapComponents = Array<'north-arrow' | 'overview-map'>;
  * the same loaction as core config (<<core config name>>-<<package name>>.json).
  * Default = [].
  */
-export type TypeMapCorePackages = Array<'basemap-panel' | 'geochart' | 'time-slider' | 'swiper'>;
+export type TypeMapCorePackages = Array<'swiper'>;
 
 /** ******************************************************************************************************************************
  * List of external packages to initialize on viewer load. Default = [].

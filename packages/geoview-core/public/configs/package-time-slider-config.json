@@ -64,7 +64,7 @@
       "core": ["legend", "layers", "details", "data-table", "time-slider"]
     }
   },
-  "corePackages": ["time-slider"],
+  "corePackages": [],
   "externalPackages": [],
   "suportedLanguages": ["en"]
 }

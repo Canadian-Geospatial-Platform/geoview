@@ -1576,6 +1576,63 @@
         "tabs"
       ]
     },
+    "TypeAppBarTabsProps": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "tabs": {
+          "type": "object",
+          "description": "Available tabs",
+          "properties": {
+            "core": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "basemap-panel",
+                  "layers",
+                  "geochart"
+                ]
+              },
+              "minItems": 1,
+              "default": [],
+              "uniqueItems": true,
+              "description": "Default core tabs of app-bar to use"
+            },
+            "custom": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string"
+                  },
+                  "defaultTabs": {
+                    "type": "string"
+                  },
+                  "contentHTML": {
+                    "type": "string"
+                  }
+                }
+              },
+              "minItems": 0,
+              "default": [],
+              "uniqueItems": true,
+              "description": "Custom tabs of app-bar to use"
+            }
+          },
+          "additionalProperties": false
+        },
+        "collapsed": {
+          "type": "boolean",
+          "default": false,
+          "description": "State of app-bar when map is loaded (expanded or collapsed)"
+        }
+      },
+      "required": [
+        "tabs"
+      ]
+    },
     "TypeOverviewMapProps": {
       "type": "object",
       "additionalProperties": false,
@@ -1695,6 +1752,9 @@
         },
         "footerTabs": {
           "$ref": "#/definitions/TypeFooterTabsProps"
+        },
+        "appBarTabs": {
+          "$ref": "#/definitions/TypeAppBarTabsProps"
         },
         "overviewMap": {
           "$ref": "#/definitions/TypeOverviewMapProps"

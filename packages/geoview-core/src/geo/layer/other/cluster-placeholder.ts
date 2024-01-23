@@ -106,7 +106,6 @@
 //   },
 //   "theme": "dark",
 //   "components": [],
-//   "corePackages": ["layers-panel"],
 //   "suportedLanguages": ["en"]
 // }
 
