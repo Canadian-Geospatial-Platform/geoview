@@ -62,7 +62,7 @@ const formatTime = (date: Date): string => {
 type ColorCode = {
   darkorange: string;
   dodgerblue: string;
-  tomato: string;
+  yellowgreen: string;
   green: string;
   plum: string;
   turquoise: string;
@@ -227,7 +227,7 @@ export class ConsoleLogger {
     if (hours) logMsg = `${hours} hours, ${mins} minutes, ${seconds} seconds, and ${timeSpan} ms`;
 
     // Redirect
-    this.logLevel(LOG_DEBUG, 'MARKR', 'tomato', logMsg, ...message, `(${markerKey})`); // Not a typo, 5 characters for alignment
+    this.logLevel(LOG_DEBUG, 'MARKR', 'yellowgreen', logMsg, ...message, `(${markerKey})`); // Not a typo, 5 characters for alignment
   };
 
   /**
