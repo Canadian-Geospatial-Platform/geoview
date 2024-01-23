@@ -409,15 +409,15 @@ export class Layer {
    * @param {string} mustBeProcessed indicate if the layer we're searching for must be found only once processed
    * @param {string} timeout optionally indicate the timeout after which time to abandon the promise
    * @param {string} checkFrequency optionally indicate the frequency at which to check for the condition on the layer
-   * @returns a promise with the AbstractGeoViewLayer or null when the layer id was not found
-   * @throws an exception when the layer for the layer id was found, but failed to become in processed phase before the timeout expired
+   * @returns a promise with the AbstractGeoViewLayer
+   * @throws an exception when the layer for the layer id couldn't be found, or waiting time expired
    */
   getGeoviewLayerByIdAsync = async (
     geoviewLayerId: string,
     mustBeProcessed: boolean,
     timeout?: number,
     checkFrequency?: number
-  ): Promise<AbstractGeoViewLayer | null> => {
+  ): Promise<AbstractGeoViewLayer> => {
     // Redirects
     const layer = this.getGeoviewLayerById(geoviewLayerId);
 
@@ -431,14 +431,13 @@ export class Layer {
         await this.waitForProcessedPhase(layer, timeout, checkFrequency);
         return layer;
       } catch (error) {
-        // eslint-disable-next-line no-console
-        console.error(`Took too long for ${layer.geoviewLayerId} to get in 'processed' phase`, (error as Error).stack);
-        throw error;
+        // Throw
+        throw new Error(`Took too long for layer ${geoviewLayerId} to get in 'processed' phase`);
       }
     }
 
-    // Failed
-    return Promise.resolve(null);
+    // Throw
+    throw new Error(`Layer ${geoviewLayerId} not found.`);
   };
 
   /**

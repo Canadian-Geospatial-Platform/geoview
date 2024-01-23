@@ -12,6 +12,7 @@ import {
   useMapProjection,
   useMapStoreActions,
 } from '@/core/stores/store-interface-and-intial-values/map-state';
+import { logger } from '@/core/utils/logger';
 
 /**
  * Footerbar Fix North Switch component
@@ -45,6 +46,9 @@ export function FooterbarFixNorthSwitch(): JSX.Element {
   };
 
   useEffect(() => {
+    // Log
+    logger.logTraceUseEffect('FOOTER-BAR-FIXNORTH-SWITCH - deviceSizeMedUp', deviceSizeMedUp);
+
     if (deviceSizeMedUp) {
       setFixNorth(false);
     }

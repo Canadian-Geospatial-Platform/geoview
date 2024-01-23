@@ -11,6 +11,7 @@ import { FeatureInfoTable } from './feature-info-table';
 import { getSxClasses } from './details-style';
 import { useDetailsStoreCheckedFeatures, useDetailsStoreActions } from '@/core/stores/store-interface-and-intial-values/details-state';
 import { useMapStoreActions } from '@/core/stores/store-interface-and-intial-values/map-state';
+import { logger } from '@/core/utils/logger';
 
 export interface TypeFeatureInfoProps {
   features: TypeArrayOfFeatureInfoEntries;
@@ -69,13 +70,16 @@ export function FeatureInfo({ features, currentFeatureIndex }: TypeFeatureInfoPr
   };
 
   useEffect(() => {
+    // Log
+    logger.logTraceUseEffect('FEATURE-INFO-NEW - checkedFeatures', checkedFeatures, feature);
+
     setChecked(
       checkedFeatures.some((checkedFeature) => {
         return (checkedFeature.geometry as TypeGeometry)?.ol_uid === featureUid;
       })
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [checkedFeatures, feature]);
+  }, [checkedFeatures, feature]); // ! Check if feature is necessary in this dependency array? If so explain it in comment? Should be featurUid?
 
   return (
     <Paper sx={{ boxShadow: 'none' }}>

@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-/* eslint-disable no-console */
 /* eslint-disable no-param-reassign */
 import BaseLayer from 'ol/layer/Base';
 import Collection from 'ol/Collection';
@@ -60,6 +59,7 @@ import { Layer } from '@/geo/layer/layer';
 import { TimeDimension, TypeDateFragments } from '@/core/utils/date-mgt';
 import { TypeEventHandlerFunction } from '@/api/events/event';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
+import { logger } from '@/core/utils/logger';
 
 export type TypeLegend = {
   layerPath: string;
@@ -517,16 +517,39 @@ export abstract class AbstractGeoViewLayer {
   async createGeoViewLayers(): Promise<void> {
     if (this.olLayers === null) {
       try {
+        // Log
+        logger.logTraceCore('createGeoViewLayers', this.listOfLayerEntryConfig);
+
+        // Try to get a key for logging timings
+        let logTimingsKey;
+        if (this.listOfLayerEntryConfig.length > 0) logTimingsKey = `${this.mapId} | ${this.listOfLayerEntryConfig[0].layerPath}`;
+
+        // Log
+        if (logTimingsKey) logger.logMarkerStart(logTimingsKey);
+
+        // Set the phase
         this.setLayerPhase('createGeoViewLayers');
+
+        // Get additional service and await
         await this.getAdditionalServiceDefinition();
+
+        // Log the time it took thus far
+        if (logTimingsKey) logger.logMarkerCheck(logTimingsKey, 'to get additional service definition (since creating the geoview layer)');
+
+        // Process list of layers and await
         this.olLayers = await this.processListOfLayerEntryConfig(this.listOfLayerEntryConfig);
+
+        // Log the time it took thus far
+        if (logTimingsKey) logger.logMarkerCheck(logTimingsKey, 'to process list of layer entry config (since creating the geoview layer)');
       } catch (error) {
-        console.error(error);
+        // Log error
+        logger.logError(error);
       }
     } else {
       const message = replaceParams([this.mapId], getLocalizedMessage(this.mapId, 'validation.layer.createtwice'));
       showError(this.mapId, message);
-      console.error(`Can not execute twice the createGeoViewLayers method for the map ${this.mapId}`);
+      // Log
+      logger.logError(`Can not execute twice the createGeoViewLayers method for the map ${this.mapId}`);
     }
   }
 
@@ -544,7 +567,8 @@ export abstract class AbstractGeoViewLayer {
         await this.processListOfLayerEntryMetadata(this.listOfLayerEntryConfig);
       }
     } catch (error) {
-      console.error(error);
+      // Log
+      logger.logError(error);
     }
   }
 
@@ -567,7 +591,8 @@ export abstract class AbstractGeoViewLayer {
           if (copyrightText) this.attributions.push(copyrightText as string);
         }
       } catch (error) {
-        console.error(error);
+        // Log
+        logger.logError(error);
         this.setAllLayerStatusToError(this.listOfLayerEntryConfig, 'Unable to read metadata');
       }
     }
@@ -600,7 +625,8 @@ export abstract class AbstractGeoViewLayer {
       });
       await Promise.all(promisedAllLayerDone);
     } catch (error) {
-      console.error(error);
+      // Log
+      logger.logError(error);
     }
   }
 
@@ -618,7 +644,8 @@ export abstract class AbstractGeoViewLayer {
       await this.processLayerMetadata(layerConfig);
       await this.processListOfLayerEntryMetadata(layerConfig.listOfLayerEntryConfig!);
     } catch (error) {
-      console.error(error);
+      // Log
+      logger.logError(error);
     }
   }
 
@@ -649,6 +676,9 @@ export abstract class AbstractGeoViewLayer {
     listOfLayerEntryConfig: TypeListOfLayerEntryConfig,
     layerGroup?: LayerGroup
   ): Promise<BaseLayer | null> {
+    // Log
+    logger.logTraceCore('processListOfLayerEntryConfig', listOfLayerEntryConfig);
+
     this.setLayerPhase('processListOfLayerEntryConfig');
     try {
       if (listOfLayerEntryConfig.length === 1) {
@@ -726,7 +756,8 @@ export abstract class AbstractGeoViewLayer {
 
       return layerGroup!;
     } catch (error) {
-      console.error(error);
+      // Log
+      logger.logError(error);
       return null;
     }
   }
@@ -768,11 +799,13 @@ export abstract class AbstractGeoViewLayer {
         case 'using_a_polygon':
           return await this.getFeatureInfoUsingPolygon(location as Coordinate[], layerPath);
         default:
-          console.warn(`Queries using ${queryType} are invalid.`);
+          // Log
+          logger.logWarning(`Queries using ${queryType} are invalid.`);
           return [];
       }
     } catch (error) {
-      console.error(error);
+      // Log
+      logger.logError(error);
       return [];
     }
   }
@@ -787,7 +820,8 @@ export abstract class AbstractGeoViewLayer {
    */
 
   protected getAllFeatureInfo(layerPath: string): Promise<TypeArrayOfFeatureInfoEntries> {
-    console.warn('getAllFeatureInfo is not implemented!');
+    // Log
+    logger.logWarning('getAllFeatureInfo is not implemented!');
     return Promise.resolve([]);
   }
 
@@ -802,7 +836,8 @@ export abstract class AbstractGeoViewLayer {
    */
 
   protected getFeatureInfoAtPixel(location: Pixel, layerPath: string): Promise<TypeArrayOfFeatureInfoEntries> {
-    console.warn('getFeatureInfoAtPixel is not implemented!');
+    // Log
+    logger.logWarning('getFeatureInfoAtPixel is not implemented!');
     return Promise.resolve([]);
   }
 
@@ -817,7 +852,8 @@ export abstract class AbstractGeoViewLayer {
    */
 
   protected getFeatureInfoAtCoordinate(location: Coordinate, layerPath: string): Promise<TypeArrayOfFeatureInfoEntries> {
-    console.warn('getFeatureInfoAtCoordinate is not implemented!');
+    // Log
+    logger.logWarning('getFeatureInfoAtCoordinate is not implemented!');
     return Promise.resolve([]);
   }
 
@@ -832,7 +868,8 @@ export abstract class AbstractGeoViewLayer {
    */
 
   protected getFeatureInfoAtLongLat(location: Coordinate, layerPath: string): Promise<TypeArrayOfFeatureInfoEntries> {
-    console.warn('getFeatureInfoAtLongLat is not implemented!');
+    // Log
+    logger.logWarning('getFeatureInfoAtLongLat is not implemented!');
     return Promise.resolve([]);
   }
 
@@ -847,7 +884,8 @@ export abstract class AbstractGeoViewLayer {
    */
 
   protected getFeatureInfoUsingBBox(location: Coordinate[], layerPath: string): Promise<TypeArrayOfFeatureInfoEntries> {
-    console.warn('getFeatureInfoUsingBBox is not implemented!');
+    // Log
+    logger.logWarning('getFeatureInfoUsingBBox is not implemented!');
     return Promise.resolve([]);
   }
 
@@ -862,7 +900,8 @@ export abstract class AbstractGeoViewLayer {
    */
 
   protected getFeatureInfoUsingPolygon(location: Coordinate[], layerPath: string): Promise<TypeArrayOfFeatureInfoEntries> {
-    console.warn('getFeatureInfoUsingPolygon is not implemented!');
+    // Log
+    logger.logWarning('getFeatureInfoUsingPolygon is not implemented!');
     return Promise.resolve([]);
   }
 
@@ -997,7 +1036,7 @@ export abstract class AbstractGeoViewLayer {
    * Asynchronously gets the layer configuration of the specified layerPath.
    * If the layer configuration we're searching for has to be loaded, set mustBeLoaded to true when awaiting on this method.
    * This function waits the timeout period before abandonning (or uses the default timeout when not provided).
-   * Note this function uses the 'Async' suffix only to differentiate it from 'getLayerConfig'.
+   * Note this function uses the 'Async' suffix to differentiate it from 'getLayerConfig'.
    *
    * @param {string} layerPath the layer path to look for
    * @param {string} mustBeLoaded indicate if the layer we're searching for must be found only once loaded
@@ -1011,7 +1050,7 @@ export abstract class AbstractGeoViewLayer {
     mustBeLoaded: boolean,
     timeout?: number,
     checkFrequency?: number
-  ): Promise<TypeLayerEntryConfig | null> {
+  ): Promise<TypeLayerEntryConfig> {
     // Redirects
     const layer = this.getLayerConfig(layerPath);
 
@@ -1021,33 +1060,37 @@ export abstract class AbstractGeoViewLayer {
       if (!mustBeLoaded) return Promise.resolve(layer);
 
       try {
-        // Waiting for the loaded status, possibly throwing exception if that's not happening
-        await this.waitForLoadedStatus(layer as TypeBaseLayerEntryConfig, timeout, checkFrequency);
-        return layer;
+        // Waiting for the loaded or error status, possibly throwing exception if timing out
+        await this.waitForLoadedOrErrorStatus(layer as TypeBaseLayerEntryConfig, timeout, checkFrequency);
       } catch (error) {
-        console.error(`Took too long for config of ${layer.layerId} to get in 'loaded' status.`, (error as Error).stack);
-        throw error;
+        // Throw
+        throw new Error(`Layer ${layerPath} has failed to respond for the layer config.`);
       }
+
+      // At this point, the layer has a status of either 'loaded' or 'error'
+      // Check the layer status
+      if (layer.layerStatus === 'loaded') return Promise.resolve(layer);
+      throw new Error(`Layer ${layerPath} has resolved in an error status for the layer config; failed to load.`);
     }
 
-    // Failed
-    return Promise.resolve(null);
+    // Throw
+    throw new Error(`Layer ${layerPath} doesn't exist. Couldn't get its layer config.`);
   }
 
   /**
-   * Returns a Promise that will be resolved once the given layer config is in a loaded status.
+   * Returns a Promise that will be resolved once the given layer config is in a loaded or error status.
    * This function waits the timeout period before abandonning (or uses the default timeout when not provided).
    *
    * @param {string} layerConfig the layer config
    * @param {string} timeout optionally indicate the timeout after which time to abandon the promise
    * @param {string} checkFrequency optionally indicate the frequency at which to check for the condition on the layer config
-   * @throws an exception when the layer failed to become in loaded status before the timeout expired
+   * @throws an exception when the layer failed to become in loaded or error status before the timeout expired
    */
-  async waitForLoadedStatus(layerConfig: TypeBaseLayerEntryConfig, timeout?: number, checkFrequency?: number): Promise<void> {
+  async waitForLoadedOrErrorStatus(layerConfig: TypeBaseLayerEntryConfig, timeout?: number, checkFrequency?: number): Promise<void> {
     // Wait for the loaded state
     await whenThisThen(
       () => {
-        return layerConfig.layerStatus === 'loaded';
+        return layerConfig.layerStatus === 'loaded' || layerConfig.layerStatus === 'error';
       },
       timeout,
       checkFrequency
@@ -1311,7 +1354,8 @@ export abstract class AbstractGeoViewLayer {
       };
       return legend;
     } catch (error) {
-      console.error(error);
+      // Log
+      logger.logError(error);
       return null;
     }
   }
@@ -1424,7 +1468,8 @@ export abstract class AbstractGeoViewLayer {
       });
       return queryResult;
     } catch (error) {
-      console.error(error);
+      // Log
+      logger.logError(error);
       return [];
     }
   }

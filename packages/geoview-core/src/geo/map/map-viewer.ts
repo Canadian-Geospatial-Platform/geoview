@@ -55,6 +55,7 @@ import { TypeMapFeaturesConfig, TypeHTMLElement, TypeValidMapProjectionCodes, Ty
 import { layerConfigIsGeoCore } from '@/geo/layer/other/geocore';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
+import { logger } from '@/core/utils/logger';
 
 interface TypeDcoument extends Document {
   webkitExitFullscreen: () => void;
@@ -190,7 +191,13 @@ export class MapViewer {
    * Function called when the map has been rendered and ready to be customized
    */
   mapReady(): void {
+    // Log Marker Start
+    logger.logMarkerStart(`mapReady-${this.mapId}`);
+
     const layerInterval = setInterval(() => {
+      // Log
+      logger.logTraceDetailed('map-viewer.mapReady?', this.mapId);
+
       if (this.layer?.geoviewLayers) {
         const { geoviewLayers } = this.layer;
         let allGeoviewLayerReady =
@@ -199,6 +206,8 @@ export class MapViewer {
           allGeoviewLayerReady &&= geoviewLayers[geoviewLayerId].allLayerEntryConfigProcessed();
         });
         if (allGeoviewLayerReady) {
+          // Log
+          logger.logMarkerCheck(`mapReady-${this.mapId}`, 'for map to be ready');
           MapEventProcessor.setMapLoaded(this.mapId);
           clearInterval(layerInterval);
         }

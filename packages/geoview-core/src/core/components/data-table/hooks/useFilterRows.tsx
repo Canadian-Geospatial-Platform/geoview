@@ -4,6 +4,7 @@ import {
   useDataTableStoreActions,
   useDataTableStoreColumnFilteredRecord,
 } from '@/core/stores/store-interface-and-intial-values/data-table-state';
+import { logger } from '@/core/utils/logger';
 
 export interface UseFilterRowsProps {
   layerKey: string;
@@ -26,6 +27,9 @@ export function useFilterRows({ layerKey }: UseFilterRowsProps): {
 
   // update store column filters
   useEffect(() => {
+    // Log
+    logger.logTraceUseEffect('USEFILTERROWS - columnFilters', columnFilters);
+
     setColumnFiltersEntry(columnFilters, layerKey);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [columnFilters]);
