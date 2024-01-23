@@ -5,4 +5,4 @@
  * @param {DetailsPanelProps} props The properties passed to LayersListFooter
  * @returns {JSX.Element} the layers list
  */
-export declare function Detailspanel(): JSX.Element;
+export declare function DetailsPanel(): JSX.Element;

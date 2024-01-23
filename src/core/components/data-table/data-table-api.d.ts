@@ -1,5 +1,4 @@
 import { ReactElement } from 'react';
-import { DataTableData } from './data-table';
 import { TypeListOfLayerEntryConfig, TypeArrayOfFeatureInfoEntries, TypeFieldEntry, TypeLocalizedString } from '@/app';
 export interface GroupLayers {
     layerId: string;
@@ -14,15 +13,6 @@ export declare class DataTableApi {
      * @param mapId the id of the map this data table belongs to
      */
     constructor(mapId: string);
-    /**
-     * Create a data table as an element
-     *
-     * @param { 'materialReactDataTable'} tableType type of table that user want to create.
-     * @return {ReactElement} the data table react element
-     */
-    createDataTable: ({ data }: {
-        data: DataTableData;
-    }) => ReactElement;
     /**
      * Create group layer keys based on layer rendered on map
      *
@@ -54,7 +44,7 @@ export declare class DataTableApi {
     /**
      * Create data panel for various layers.
      *
-     * @returns {Promise<ReactElement | null>} Promise of ReactElement.
+     * @returns {Promise<ReactElement | undefined>} Promise of ReactElement.
      */
-    createDataPanel: () => Promise<ReactElement | null>;
+    createDataPanel: () => Promise<ReactElement | undefined>;
 }

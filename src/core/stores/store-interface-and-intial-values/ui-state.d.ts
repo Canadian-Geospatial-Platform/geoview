@@ -6,7 +6,7 @@ type focusItemProps = {
     callbackElementId: string | false;
 };
 export interface IUIState {
-    activefoorterTabId: string;
+    activefooterTabId: string;
     activeTrapGeoView: boolean;
     appBarComponents: TypeAppBarProps;
     corePackagesComponents: TypeMapCorePackages;
@@ -14,6 +14,8 @@ export interface IUIState {
     footerBarExpanded: boolean;
     geoLocatorActive: boolean;
     navBarComponents: TypeNavBarProps;
+    footerPanelResizeValue: number;
+    footerPanelResizeValues: number[];
     setDefaultConfigValues: (geoviewConfig: TypeMapFeaturesConfig) => void;
     actions: {
         closeModal: () => void;
@@ -22,6 +24,7 @@ export interface IUIState {
         setActiveTrapGeoView: (active: boolean) => void;
         setFooterBarExpanded: (expanded: boolean) => void;
         setGeolocatorActive: (active: boolean) => void;
+        setFooterPanelResizeValue: (value: number) => void;
     };
 }
 export declare function initializeUIState(set: TypeSetStore, get: TypeGetStore): IUIState;
@@ -32,6 +35,9 @@ export declare const useUIAppbarGeolocatorActive: () => boolean;
 export declare const useUICorePackagesComponents: () => TypeMapCorePackages;
 export declare const useUIFooterBarExpanded: () => boolean;
 export declare const useUINavbarComponents: () => TypeNavBarProps;
+export declare const useUIFooterPanelResizeValue: () => number;
+export declare const useUIFooterPanelResizeValues: () => number[];
+export declare const useUIActiveFooterTabId: () => string;
 export declare const useUIStoreActions: () => {
     closeModal: () => void;
     openModal: (uiFocus: focusItemProps) => void;
@@ -39,5 +45,6 @@ export declare const useUIStoreActions: () => {
     setActiveTrapGeoView: (active: boolean) => void;
     setFooterBarExpanded: (expanded: boolean) => void;
     setGeolocatorActive: (active: boolean) => void;
+    setFooterPanelResizeValue: (value: number) => void;
 };
 export {};

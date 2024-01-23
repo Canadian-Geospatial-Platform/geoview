@@ -7,13 +7,13 @@ export declare const getSxClasses: () => {
         height: number;
     };
     iconPreviewHoverable: {
+        width: number;
+        height: number;
         position: string;
         left: number;
         top: number;
         padding: number;
         borderRadius: number;
-        border: string;
-        borderColor: string;
         boxShadow: string;
         transition: string;
         '&:hover': {
@@ -21,6 +21,8 @@ export declare const getSxClasses: () => {
         };
     };
     iconPreviewStacked: {
+        width: number;
+        height: number;
         padding: number;
         borderRadius: number;
         border: string;
@@ -31,8 +33,6 @@ export declare const getSxClasses: () => {
     maxIconImg: {
         maxWidth: number;
         maxHeight: number;
-        width: number;
-        height: number;
     };
     legendIcon: {
         display: string;
@@ -41,8 +41,12 @@ export declare const getSxClasses: () => {
         width: number;
         height: number;
         background: string;
+        border: string;
+        borderColor: string;
     };
     stackIconsBox: {
+        width: number;
+        height: number;
         position: string;
         '&:focus': {
             outlineColor: string;
@@ -51,8 +55,6 @@ export declare const getSxClasses: () => {
     iconPreview: {
         padding: number;
         borderRadius: number;
-        border: string;
-        borderColor: string;
         boxShadow: string;
         '&:focus': {
             border: string;

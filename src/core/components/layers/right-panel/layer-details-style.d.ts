@@ -10,8 +10,7 @@ export declare const getSxClasses: (theme: Theme) => {
         borderWidth: string;
         borderStyle: string;
         padding: string;
-        overflow: string;
-        maxHeight: string;
+        overflowY: string;
     };
     buttonDescriptionContainer: {
         display: string;

@@ -1,6 +1,5 @@
 /// <reference types="react" />
 import { TabsProps, TabProps, BoxProps } from '@mui/material';
-type TypeChildren = React.ElementType;
 /**
  * Type used for properties of each tab
  */
@@ -8,7 +7,7 @@ export type TypeTabs = {
     id: string;
     value: number;
     label: string;
-    content: TypeChildren | string;
+    content?: JSX.Element | string;
     icon?: JSX.Element;
 };
 /**
@@ -32,4 +31,3 @@ export interface TypeTabsProps {
  * @returns {JSX.Element} returns the tabs ui
  */
 export declare function Tabs(props: TypeTabsProps): JSX.Element;
-export {};

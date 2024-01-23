@@ -12,9 +12,6 @@ import { TypeRecordOfPlugin } from '@/api/plugin/plugin-types';
 import { AppbarButtons } from '@/core/components/app-bar/app-bar-buttons';
 import { NavbarButtons } from '@/core/components/nav-bar/nav-bar-buttons';
 import { FooterTabsApi } from '@/core/components/footer-tabs/footer-tabs-api';
-import { LegendApi } from '@/core/components/legend/legend-api';
-import { LayersApi } from '@/core/components/layers/layers-api';
-import { DetailsApi } from '@/core/components/details/details-api';
 import { DataTableApi } from '@/core/components/data-table/data-table-api';
 import { GeoviewRenderer } from '@/geo/renderer/geoview-renderer';
 import { Select } from '@/geo/interaction/select';
@@ -42,9 +39,6 @@ export declare class MapViewer {
     appBarButtons: AppbarButtons;
     navBarButtons: NavbarButtons;
     footerTabs: FooterTabsApi;
-    legend: LegendApi;
-    layers: LayersApi;
-    details: DetailsApi;
     dataTable: DataTableApi;
     basemap: Basemap;
     layer: Layer;
@@ -165,10 +159,12 @@ export declare class MapViewer {
      */
     setView(mapView: TypeViewSettings): void;
     /**
-     * Loop trought all geoview layeres and refresh source. Use this function on projection change or other
-     * viewer modification who may affect rendering
+     * Loop through all geoview layers and refresh their respective source.
+     * Use this function on projection change or other viewer modification who may affect rendering.
+     *
+     * @returns A Promise which resolves when the rendering is completed after the source(s) were changed.
      */
-    refreshLayers(): void;
+    refreshLayers(): Promise<void>;
     /**
      * Hide a click marker from the map
      */

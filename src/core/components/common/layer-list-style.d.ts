@@ -1,7 +1,6 @@
 import { Theme } from '@mui/material';
 export declare const getSxClasses: (theme: Theme) => {
     list: {
-        height: string;
         overflowY: string;
         color: string;
         width: string;

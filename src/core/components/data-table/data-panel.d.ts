@@ -1,8 +1,8 @@
 /// <reference types="react" />
-import { MapDataTableData as MapDataTableDataProps } from './map-data-table';
+import { DataTableData } from './data-table';
 import { GroupLayers } from './data-table-api';
 import { TypeDisplayLanguage } from '@/geo/map/map-schema-types';
-export interface LayersDataType extends MapDataTableDataProps, GroupLayers {
+export interface LayersDataType extends DataTableData, GroupLayers {
 }
 interface DatapanelProps {
     layerData: LayersDataType[];

@@ -16,7 +16,7 @@ export declare class MapEventProcessor extends AbstractEventProcessor {
     static getMapState(mapId: string): TypeMapState;
     static setMapAttribution(mapId: string, attribution: string[]): void;
     static setInteraction(mapId: string, interaction: TypeInteraction): void;
-    static setProjection(mapId: string, projectionCode: TypeValidMapProjectionCodes): void;
+    static setProjection(mapId: string, projectionCode: TypeValidMapProjectionCodes): Promise<void>;
     static rotate(mapId: string, rotation: number): void;
     static zoom(mapId: string, zoom: number): void;
     static createEmptyBasemap(mapId: string): import("ol/layer/Tile").default<import("ol/source/XYZ").default>;
