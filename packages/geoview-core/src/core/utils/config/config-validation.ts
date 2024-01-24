@@ -38,10 +38,12 @@ import {
   TypeEsriDynamicLayerEntryConfig,
   TypeOgcWmsLayerEntryConfig,
   TypeImageStaticLayerEntryConfig,
+  TypeEsriImageLayerEntryConfig,
 } from '@/geo/map/map-schema-types';
 import { Cast, toJsonObject, TypeJsonObject, TypeMapFeaturesConfig } from '@/core/types/global-types';
 
 import { CONST_GEOVIEW_SCHEMA_BY_TYPE, TypeGeoviewLayerType } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
+import { geoviewEntryIsEsriImage } from '@/geo/layer/geoview-layers/raster/esri-image';
 
 // ******************************************************************************************************************************
 // ******************************************************************************************************************************
@@ -534,6 +536,7 @@ export class ConfigValidation {
             break;
           case 'esriDynamic':
           case 'esriFeature':
+          case 'esriImage':
           case 'ogcFeature':
           case 'ogcWfs':
           case 'ogcWms':
@@ -613,6 +616,8 @@ export class ConfigValidation {
         listOfLayerEntryConfig[i] = new TypeEsriDynamicLayerEntryConfig(layerConfig);
       } else if (geoviewEntryIsEsriFeature(layerConfig)) {
         listOfLayerEntryConfig[i] = new TypeEsriFeatureLayerEntryConfig(layerConfig);
+      } else if (geoviewEntryIsEsriImage(layerConfig)) {
+        listOfLayerEntryConfig[i] = new TypeEsriImageLayerEntryConfig(layerConfig);
       } else if (geoviewEntryIsWFS(layerConfig)) {
         listOfLayerEntryConfig[i] = new TypeWfsLayerEntryConfig(layerConfig);
       } else if (geoviewEntryIsOgcFeature(layerConfig)) {

@@ -1,7 +1,6 @@
 import { useTheme } from '@mui/material';
-import { useTranslation } from 'react-i18next';
 import { useEffect, useState } from 'react';
-import { Box, Typography } from '@/ui';
+import { Box } from '@/ui';
 import { useMapVisibleLayers, useLayerStoreActions } from '@/core/stores/';
 import { getSxClasses } from './legend-styles';
 import { LegendLayer } from './legend-layer';
@@ -12,8 +11,6 @@ import { logger } from '@/core/utils/logger';
 export function Legend(): JSX.Element {
   // Log
   logger.logTraceRender('components/legend/legend');
-
-  const { t } = useTranslation<string>();
 
   const theme = useTheme();
   const sxClasses = getSxClasses(theme);
@@ -63,10 +60,6 @@ export function Legend(): JSX.Element {
 
   return (
     <Box sx={sxClasses.container} ref={leftPanelRef} id="legendContainer">
-      <Box>
-        <Typography sx={sxClasses.title}>{t('legend.overviewTitle')}</Typography>
-        <Typography sx={sxClasses.subtitle} />
-      </Box>
       {renderLegendLayersList()}
     </Box>
   );

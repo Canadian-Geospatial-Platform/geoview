@@ -39,6 +39,7 @@ export interface TypeLegendLayer {
   querySent?: boolean;
 
   isVisible: TypeVisibilityFlags; // is layer is visible
+  canToggle?: boolean; // can sublayer visibility be toggled
 
   icons?: TypeLegendLayerIcons;
   // data: TypeLegend | undefined | null;
