@@ -122,6 +122,7 @@ export function GeolocatorResult({ geoLocationData, searchValue, error }: Geoloc
               label={t('geolocator.province')}
               inputLabel={{ id: 'geolocationProvinceFilter' }}
               menuItems={provinces}
+              disabled={!data.length}
             />
           </Box>
           <Box sx={{ flexGrow: 2, paddingRight: '8px', maxWidth: 150 }}>
@@ -135,10 +136,18 @@ export function GeolocatorResult({ geoLocationData, searchValue, error }: Geoloc
               label={t('geolocator.category')}
               inputLabel={{ id: 'geolocationCategoryFilter' }}
               menuItems={categories}
+              disabled={!data.length}
             />
           </Box>
           <Box>
-            <IconButton size="small" edge="end" color="inherit" tooltip="geolocator.clearFilters" onClick={handleClearFilters}>
+            <IconButton
+              size="small"
+              edge="end"
+              color="inherit"
+              tooltip="geolocator.clearFilters"
+              onClick={handleClearFilters}
+              disabled={!data.length}
+            >
               <FilterAltOffIcon fontSize="small" />
             </IconButton>
           </Box>
