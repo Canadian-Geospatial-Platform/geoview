@@ -111,7 +111,7 @@ export function GeolocatorResult({ geoLocationData, searchValue, error }: Geoloc
     <Paper component="div" elevation={4} square sx={{ width: 350 }}>
       {!error && (
         <Box sx={sxClasses.filter}>
-          <Box sx={{ flexGrow: 2, paddingRight: '8px' }}>
+          <Box sx={{ flexGrow: 2, paddingRight: '8px', maxWidth: 150 }}>
             <Select
               labelId="provinceGeolocatorFiltersLabel"
               formControlProps={{ variant: 'standard', size: 'small' }}
@@ -124,7 +124,7 @@ export function GeolocatorResult({ geoLocationData, searchValue, error }: Geoloc
               menuItems={provinces}
             />
           </Box>
-          <Box sx={{ flexGrow: 2, paddingRight: '8px' }}>
+          <Box sx={{ flexGrow: 2, paddingRight: '8px', maxWidth: 150 }}>
             <Select
               labelId="categoryGeolocatorFiltersLabel"
               id="typeGeolocatorFilters"

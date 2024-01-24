@@ -43,7 +43,7 @@ export const sxClasses = {
       marginTop: 0,
     },
     '& .MuiSelect-select': {
-      padding: '0px 12px 4px 12px !important',
+      padding: '0px 12px 4px 0px !important',
     },
   },
   searchResult: {
