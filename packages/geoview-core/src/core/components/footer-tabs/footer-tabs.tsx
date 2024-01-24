@@ -16,8 +16,8 @@ import {
   useUIStoreActions,
 } from '@/core/stores/store-interface-and-intial-values/ui-state';
 
-// import { toJsonObject, TypeJsonObject, TypeJsonValue } from '@/core/types/global-types';
-// import { AbstractPlugin } from '@/api/plugin/abstract-plugin';
+import { toJsonObject, TypeJsonObject, TypeJsonValue } from '@/core/types/global-types';
+import { AbstractPlugin } from '@/api/plugin/abstract-plugin';
 import { useGeoViewConfig } from '@/core/stores/geoview-store';
 
 // default tabs icon and class
@@ -88,7 +88,7 @@ export function FooterTabs(): JSX.Element | null {
       };
     }) as TypeTabs[];
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [footerTabs]);
 
   /**
    * Calculate resize values from popover values defined in store.
@@ -127,20 +127,21 @@ export function FooterTabs(): JSX.Element | null {
   /**
    * Add a tab
    */
-  const addTab = useCallback((payload: FooterTabPayload) => {
-    const idx = defaultFooterTabs.findIndex((tab) => tab.id === payload.tab.id);
-
-    if (idx !== -1) {
-      defaultFooterTabs[idx].content = payload.tab.content;
-      defaultFooterTabs[idx].icon = payload.tab.icon;
-      defaultFooterTabs[idx].label = payload.tab.label;
-    } else {
-      defaultFooterTabs.push(payload.tab);
-    }
-
-    setFooterTabs(defaultFooterTabs);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  const addTab = useCallback(
+    (payload: FooterTabPayload) => {
+      const idx = defaultFooterTabs.findIndex((tab) => tab.id === payload.tab.id);
+      if (idx !== -1) {
+        defaultFooterTabs[idx].content = payload.tab.content;
+        defaultFooterTabs[idx].icon = payload.tab.icon;
+        defaultFooterTabs[idx].label = payload.tab.label;
+      } else {
+        defaultFooterTabs.push(payload.tab);
+      }
+      setFooterTabs(defaultFooterTabs);
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    },
+    [defaultFooterTabs]
+  );
 
   /**
    * Remove a tab
@@ -323,37 +324,35 @@ export function FooterTabs(): JSX.Element | null {
 
     // Packages tab
     if (footerTabsConfig && footerTabsConfig.tabs.core.includes('time-slider')) {
-      // TODO:: 1699
       // create a new tab by loading the time-slider plugin
-      // api.plugin
-      //   .loadScript('time-slider')
-      //   .then((constructor: AbstractPlugin | ((pluginId: string, props: TypeJsonObject) => TypeJsonValue)) => {
-      //     api.plugin.addPlugin(
-      //       'time-slider',
-      //       mapId,
-      //       constructor,
-      //       toJsonObject({
-      //         mapId,
-      //       })
-      //     );
-      //   });
+      api.plugin
+        .loadScript('time-slider')
+        .then((constructor: AbstractPlugin | ((pluginId: string, props: TypeJsonObject) => TypeJsonValue)) => {
+          api.plugin.addPlugin(
+            'time-slider',
+            mapId,
+            constructor,
+            toJsonObject({
+              mapId,
+            })
+          );
+        });
     }
 
     if (footerTabsConfig && footerTabsConfig.tabs.core.includes('geochart')) {
-      // TODO:: 1699
       // create a new tab by loading the geo chart plugin
-      // api.plugin
-      //   .loadScript('geochart')
-      //   .then((constructor: AbstractPlugin | ((pluginId: string, props: TypeJsonObject) => TypeJsonValue)) => {
-      //     api.plugin.addPlugin(
-      //       'geochart',
-      //       mapId,
-      //       constructor,
-      //       toJsonObject({
-      //         mapId,
-      //       })
-      //     );
-      //   });
+      api.plugin
+        .loadScript('geochart')
+        .then((constructor: AbstractPlugin | ((pluginId: string, props: TypeJsonObject) => TypeJsonValue)) => {
+          api.plugin.addPlugin(
+            'geochart',
+            mapId,
+            constructor,
+            toJsonObject({
+              mapId,
+            })
+          );
+        });
     }
     setFooterTabs(defaultFooterTabs!);
     // eslint-disable-next-line react-hooks/exhaustive-deps

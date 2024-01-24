@@ -106,7 +106,6 @@ export function Tabs(props: TypeTabsProps): JSX.Element {
             }}
           >
             {tabs.map((tab, index) => {
-              // eslint-disable-next-line prettier/prettier
               return (
                 <MaterialTab
                   label={t(tab.label)}
