@@ -5,7 +5,7 @@ import { sxClasses } from './geolocator-style';
 import { Box, Divider, FilterAltOffIcon, IconButton, Paper, Select, TypeMenuItemProps, Typography } from '@/ui';
 import { GeoListItem } from './geolocator';
 import GeoList from './geo-list';
-import { useMapSize, useMapStoreActions } from '@/core/stores/store-interface-and-intial-values/map-state';
+import { useMapSize } from '@/core/stores/store-interface-and-intial-values/map-state';
 
 interface GeolocatorFiltersType {
   geoLocationData: GeoListItem[];
@@ -28,7 +28,6 @@ export function GeolocatorResult({ geoLocationData, searchValue, error }: Geoloc
 
   // get store values
   const mapSize = useMapSize();
-  const { zoomToGeoLocatorLocation } = useMapStoreActions();
 
   /**
    * Clear all filters.
@@ -155,7 +154,7 @@ export function GeolocatorResult({ geoLocationData, searchValue, error }: Geoloc
       )}
       <Divider />
       <Box sx={{ maxHeight: mapSize![1] - 130, overflowY: 'auto' }}>
-        {!!data.length && <GeoList geoListItems={data} zoomToLocation={zoomToGeoLocatorLocation} />}
+        {!!data.length && <GeoList geoListItems={data} />}
         {(!data.length || error) && (
           <Typography component="p" sx={{ fontSize: 14, p: 10 }}>
             {t('geolocator.errorMessage')} {searchValue} {province} {category}

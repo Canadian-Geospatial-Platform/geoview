@@ -431,10 +431,16 @@ export class MapEventProcessor extends AbstractEventProcessor {
         }
       }, OL_ZOOM_DURATION + 150);
     } else {
-      MapEventProcessor.zoomToExtent(mapId, api.projection.transformFromLonLat(coords, projectionConfig), {
-        maxZoom: 16,
-        duration: OL_ZOOM_DURATION,
-      });
+      const projectedCoords = api.projection.transformPoints(
+        [coords],
+        `EPSG:4326`,
+        `EPSG:${getGeoViewStore(mapId).getState().mapState.currentProjection}`
+      );
+
+      const extent: Extent = [...projectedCoords[0], ...projectedCoords[0]];
+      const options: FitOptions = { padding: OL_ZOOM_PADDING, maxZoom: 13, duration: OL_ZOOM_DURATION };
+      MapEventProcessor.zoomToExtent(mapId, extent, options);
+
       setTimeout(() => {
         MapEventProcessor.clickMarkerIconShow(mapId, { lnglat: coords });
         for (let i = 0; i < indicatorBox.length; i++) {
