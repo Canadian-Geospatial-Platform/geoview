@@ -10,6 +10,7 @@ import { useMapNorthArrowElement, useMapProjection, useMapStoreActions } from '@
 
 import useManageArrow from './hooks/useManageArrow';
 import { useGeoViewMapId } from '@/app';
+import { logger } from '@/core/utils/logger';
 
 /**
  * Create a north arrow
@@ -17,6 +18,9 @@ import { useGeoViewMapId } from '@/app';
  * @returns {JSX.Element} the north arrow component
  */
 export function NorthArrow(): JSX.Element {
+  // Log
+  logger.logTraceRender('components/north-arrow/north-arrow');
+
   const theme = useTheme();
   const sxClasses = getSxClasses(theme);
 

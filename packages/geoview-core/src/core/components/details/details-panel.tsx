@@ -37,6 +37,9 @@ import { logger } from '@/core/utils/logger';
  * @returns {JSX.Element} the layers list
  */
 export function DetailsPanel(): JSX.Element {
+  // Log
+  logger.logTraceRender('components/details/details-panel');
+
   const { t } = useTranslation<string>();
 
   const theme = useTheme();

@@ -95,6 +95,9 @@ const useStyles = makeStyles(() => ({
  * @returns {JSX.Element} returns empty container
  */
 export function OverviewMap(): JSX.Element {
+  // Log
+  logger.logTraceRender('components/overview-map/overview-map');
+
   const mapId = useGeoViewMapId();
 
   // get the values from store

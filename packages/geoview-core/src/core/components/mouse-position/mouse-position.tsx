@@ -17,6 +17,9 @@ import { logger } from '@/core/utils/logger';
  * @returns {JSX.Element} the mouse position component
  */
 export function MousePosition(): JSX.Element {
+  // Log
+  logger.logTraceRender('components/mouse-position/mouse-position');
+
   const { t } = useTranslation<string>();
 
   const theme = useTheme();

@@ -12,6 +12,7 @@ import { CardMedia, Box, Grid } from '@/ui';
 import { isImage, stringify, generateId, sanitizeHtmlContent } from '@/core/utils/utilities';
 import { HtmlToReact } from '@/core/containers/html-to-react';
 import { getSxClasses } from './details-style';
+import { logger } from '@/core/utils/logger';
 
 interface FeatureInfoTableProps {
   featureInfoList: TypeFieldEntry[];
@@ -24,6 +25,9 @@ interface FeatureInfoTableProps {
  * @returns {JSX.Element} the layers list
  */
 export function FeatureInfoTable({ featureInfoList }: FeatureInfoTableProps): JSX.Element {
+  // Log
+  logger.logTraceRender('components/details/feature-info-table');
+
   const { t } = useTranslation<string>();
 
   const theme = useTheme();

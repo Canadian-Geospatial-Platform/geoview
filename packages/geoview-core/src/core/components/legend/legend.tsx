@@ -10,6 +10,9 @@ import { useFooterPanelHeight } from '../common';
 import { logger } from '@/core/utils/logger';
 
 export function Legend(): JSX.Element {
+  // Log
+  logger.logTraceRender('components/legend/legend');
+
   const { t } = useTranslation<string>();
 
   const theme = useTheme();
@@ -24,9 +27,6 @@ export function Legend(): JSX.Element {
 
   // Custom hook for calculating the height of footer panel
   const { leftPanelRef } = useFooterPanelHeight({ footerPanelTab: 'legend' });
-
-  // Log
-  logger.logTraceRender('legend');
 
   useEffect(() => {
     // Log

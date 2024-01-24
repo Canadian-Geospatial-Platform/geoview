@@ -13,6 +13,7 @@ import { sxClassesFooterBar } from './footer-bar-style';
 import { useMapInteraction } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { useUIFooterBarExpanded } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import { useGeoViewMapId } from '@/app';
+import { logger } from '@/core/utils/logger';
 
 /**
  * Create a footer bar element that contains attribtuion, mouse position and scale
@@ -20,6 +21,9 @@ import { useGeoViewMapId } from '@/app';
  * @returns {JSX.Element} the footer bar element
  */
 export function Footerbar(): JSX.Element {
+  // Log
+  logger.logTraceRender('components/footer-bar/footer-bar');
+
   const mapId = useGeoViewMapId();
 
   const theme = useTheme();

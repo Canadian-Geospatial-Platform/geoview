@@ -14,6 +14,9 @@ interface ResponsiveButtonProps {
 }
 
 function ResponsiveButton(props: ResponsiveButtonProps): JSX.Element {
+  // Log
+  logger.logTraceRender('components/layers/layers-toolbar');
+
   const { tooltipKey, translationKey, icon, newState } = props;
   const { t } = useTranslation<string>();
   const breakpoint = 510;

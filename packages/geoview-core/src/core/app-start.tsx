@@ -12,6 +12,7 @@ import { getTheme, cgpvTheme } from '@/ui/style/theme';
 import { MapViewer } from '@/geo/map/map-viewer';
 import { TypeMapFeaturesConfig } from '@/core/types/global-types';
 import { api, useAppDisplayLanguageById, useAppDisplayThemeById } from '@/app';
+import { logger } from './utils/logger';
 
 // create a state that will hold map config information
 // TODO: use store, only keep map id on context for store manager to gather right store on hooks
@@ -39,6 +40,9 @@ interface AppStartProps {
  * Initialize the app with maps from inline html configs, url params
  */
 function AppStart(props: AppStartProps): JSX.Element {
+  // Log
+  logger.logTraceRender('components/app-start');
+
   const { mapFeaturesConfig } = props;
   const { mapId } = mapFeaturesConfig;
 

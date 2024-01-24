@@ -28,6 +28,9 @@ import { logger } from '@/core/utils/logger';
  * @returns {JSX.Element} the data table modal component
  */
 export default function DataTableModal(): JSX.Element {
+  // Log
+  logger.logTraceRender('components/data-table/data-table-modal');
+
   const { t } = useTranslation();
 
   const sxtheme = useTheme();

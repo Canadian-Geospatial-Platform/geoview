@@ -12,6 +12,7 @@ import { disableScrolling } from '@/app';
 import { useAppStoreActions } from '../stores/store-interface-and-intial-values/app-state';
 import { useUIStoreActions } from '../stores/store-interface-and-intial-values/ui-state';
 import { useMapElement } from '../stores/store-interface-and-intial-values/map-state';
+import { logger } from '@/core/utils/logger';
 
 /**
  * Interface for the focus trap properties
@@ -27,6 +28,9 @@ interface FocusTrapProps {
  * @returns {JSX.Element} the focus trap dialog component
  */
 export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
+  // Log
+  logger.logTraceRender('containers/focus-trap/focus-trap');
+
   const { mapId, focusTrapId } = props;
 
   const { t } = useTranslation<string>();
