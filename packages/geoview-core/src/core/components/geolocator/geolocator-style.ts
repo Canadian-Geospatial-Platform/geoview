@@ -53,6 +53,18 @@ export const sxClasses = {
     zIndex: 1100,
     marginTop: 6,
   },
+  filterListError: {
+    listStyleType: 'disc',
+    listStylePosition: 'inside',
+    '& li': {
+      display: 'list-item',
+      paddingLeft: 12,
+      '& .MuiListItemText-root': {
+        display: 'inline-flex',
+        marginLeft: '-8px',
+      },
+    },
+  },
 };
 
 export const sxClassesList = {

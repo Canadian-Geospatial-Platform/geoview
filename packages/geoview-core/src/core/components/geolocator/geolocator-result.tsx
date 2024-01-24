@@ -2,7 +2,19 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { SelectChangeEvent } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { sxClasses } from './geolocator-style';
-import { Box, Divider, FilterAltOffIcon, IconButton, Paper, Select, TypeMenuItemProps, Typography } from '@/ui';
+import {
+  Box,
+  Divider,
+  FilterAltOffIcon,
+  IconButton,
+  List,
+  ListItem,
+  ListItemText,
+  Paper,
+  Select,
+  TypeMenuItemProps,
+  Typography,
+} from '@/ui';
 import { GeoListItem } from './geolocator';
 import GeoList from './geo-list';
 import { useMapSize } from '@/core/stores/store-interface-and-intial-values/map-state';
@@ -121,7 +133,7 @@ export function GeolocatorResult({ geoLocationData, searchValue, error }: Geoloc
               label={t('geolocator.province')}
               inputLabel={{ id: 'geolocationProvinceFilter' }}
               menuItems={provinces}
-              disabled={!data.length}
+              disabled={!geoLocationData.length}
             />
           </Box>
           <Box sx={{ flexGrow: 2, paddingRight: '8px', maxWidth: 150 }}>
@@ -135,7 +147,7 @@ export function GeolocatorResult({ geoLocationData, searchValue, error }: Geoloc
               label={t('geolocator.category')}
               inputLabel={{ id: 'geolocationCategoryFilter' }}
               menuItems={categories}
-              disabled={!data.length}
+              disabled={!geoLocationData.length}
             />
           </Box>
           <Box>
@@ -145,7 +157,7 @@ export function GeolocatorResult({ geoLocationData, searchValue, error }: Geoloc
               color="inherit"
               tooltip="geolocator.clearFilters"
               onClick={handleClearFilters}
-              disabled={!data.length}
+              disabled={!geoLocationData.length}
             >
               <FilterAltOffIcon fontSize="small" />
             </IconButton>
@@ -156,9 +168,25 @@ export function GeolocatorResult({ geoLocationData, searchValue, error }: Geoloc
       <Box sx={{ maxHeight: mapSize![1] - 130, overflowY: 'auto' }}>
         {!!data.length && <GeoList geoListItems={data} />}
         {(!data.length || error) && (
-          <Typography component="p" sx={{ fontSize: 14, p: 10 }}>
-            {t('geolocator.errorMessage')} {searchValue} {province} {category}
-          </Typography>
+          <Box sx={{ p: 10 }}>
+            <Typography component="p" sx={{ fontSize: 14 }}>
+              {t('geolocator.errorMessage')} <b>{searchValue}</b>
+            </Typography>
+            {!!(province.length || category.length) && (
+              <List sx={sxClasses.filterListError}>
+                {!!province.length && (
+                  <ListItem>
+                    <ListItemText primary={`${t('geolocator.province')}: ${province}`} />
+                  </ListItem>
+                )}
+                {!!category.length && (
+                  <ListItem>
+                    <ListItemText primary={`${t('geolocator.category')}: ${category}`} />
+                  </ListItem>
+                )}
+              </List>
+            )}
+          </Box>
         )}
       </Box>
     </Paper>
