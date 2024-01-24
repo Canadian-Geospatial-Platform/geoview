@@ -35,12 +35,12 @@ class GeoChartFooterPlugin extends FooterPlugin {
    */
   translations = toJsonObject({
     en: {
-      chartPanel: {
+      geochart: {
         title: 'Chart',
       },
     },
     fr: {
-      chartPanel: {
+      geochart: {
         title: 'Graphique',
       },
     },
@@ -89,7 +89,7 @@ class GeoChartFooterPlugin extends FooterPlugin {
     return {
       id: 'geochart',
       value: this.value!,
-      label: 'chartPanel.title',
+      label: 'geochart.title',
       icon: <ChartIcon />,
       content,
     };

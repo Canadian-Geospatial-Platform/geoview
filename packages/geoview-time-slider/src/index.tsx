@@ -95,7 +95,7 @@ class TimeSliderPlugin extends FooterPlugin {
 
   onCreateContentProps = (): TypeTabs => {
     return {
-      id: 'slider',
+      id: 'time-slider',
       value: this.value!,
       label: 'timeSlider.title',
       icon: <TimeSliderIcon />,

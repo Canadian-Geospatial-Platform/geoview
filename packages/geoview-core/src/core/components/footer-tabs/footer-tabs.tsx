@@ -1,6 +1,6 @@
 /* eslint-disable no-param-reassign */
-import { MutableRefObject, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-
+import { MutableRefObject, ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { camelCase } from 'lodash';
 import { useTheme } from '@mui/material/styles';
 
 import { Box, IconButton, Tabs, TypeTabs, MoveDownRoundedIcon, MoveUpRoundedIcon } from '@/ui';
@@ -67,6 +67,28 @@ export function FooterTabs(): JSX.Element | null {
 
   // get store config for footer tabs to add (similar logic as in app-bar)
   const footerTabsConfig = useGeoViewConfig()?.footerTabs;
+  const tabs: Record<string, Record<string, ReactNode>> = useMemo(
+    () => ({
+      legend: { icon: <HubOutlinedIcon />, content: <Legend /> },
+      layers: { icon: <LayersOutlinedIcon />, content: <LayersPanel /> },
+      details: { icon: <InfoOutlinedIcon />, content: <DetailsPanel /> },
+      'data-table': { icon: <StorageIcon />, content: table },
+    }),
+    [table]
+  );
+
+  const defaultFooterTabs = useMemo(() => {
+    return footerTabsConfig?.tabs.core.map((tab, index) => {
+      return {
+        id: tab,
+        value: index,
+        label: `${camelCase(tab)}.title`,
+        icon: tabs[tab]?.icon ?? '',
+        content: tabs[tab]?.content ?? '',
+      };
+    }) as TypeTabs[];
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [footerTabs]);
 
   /**
    * Calculate resize values from popover values defined in store.
@@ -105,10 +127,21 @@ export function FooterTabs(): JSX.Element | null {
   /**
    * Add a tab
    */
-  const addTab = useCallback((payload: FooterTabPayload) => {
-    // push the tab to the end of the list
-    setFooterTabs((prevArray) => [...prevArray, payload.tab as TypeTabs]);
-  }, []);
+  const addTab = useCallback(
+    (payload: FooterTabPayload) => {
+      const idx = defaultFooterTabs.findIndex((tab) => tab.id === payload.tab.id);
+      if (idx !== -1) {
+        defaultFooterTabs[idx].content = payload.tab.content;
+        defaultFooterTabs[idx].icon = payload.tab.icon;
+        defaultFooterTabs[idx].label = payload.tab.label;
+      } else {
+        defaultFooterTabs.push(payload.tab);
+      }
+      setFooterTabs(defaultFooterTabs);
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    },
+    [defaultFooterTabs]
+  );
 
   /**
    * Remove a tab
@@ -179,10 +212,9 @@ export function FooterTabs(): JSX.Element | null {
   };
 
   const eventFooterTabsCreateListenerFunction = (payload: PayloadBaseClass) => {
-    if (payloadIsAFooterTab(payload)) addTab(payload);
-    // select the first tab
-    setSelectedTab(0);
-    handleCollapse();
+    if (payloadIsAFooterTab(payload)) {
+      addTab(payload);
+    }
   };
 
   const eventFooterTabsRemoveListenerFunction = (payload: PayloadBaseClass) => {
@@ -271,50 +303,21 @@ export function FooterTabs(): JSX.Element | null {
     // Log
     logger.logTraceUseEffect('FOOTER-TABS - mount');
 
-    if (footerTabsConfig && footerTabsConfig.tabs.core.includes('legend')) {
-      // create new tab and add the Layers component to the footer tab
-      const legendTab = {
-        id: 'legend',
-        value: 0,
-        label: 'legend.title',
-        icon: <HubOutlinedIcon />,
-      };
-      setFooterTabs((prevArray) => [...prevArray, legendTab as TypeTabs]);
-    }
-
-    if (footerTabsConfig && footerTabsConfig.tabs.core.includes('layers')) {
-      // create new tab and add the Layers component to the footer tab
-      const layersTab = {
-        id: 'layers',
-        value: 1,
-        label: 'layers.title',
-        icon: <LayersOutlinedIcon />,
-      };
-      setFooterTabs((prevArray) => [...prevArray, layersTab as TypeTabs]);
-    }
-
-    // create new tab and add the Details component to the footer tab
-    if (footerTabsConfig && footerTabsConfig.tabs.core.includes('details')) {
-      const detailsTab = {
-        id: 'details',
-        value: 2,
-        label: 'details.title',
-        icon: <InfoOutlinedIcon />,
-      };
-      setFooterTabs((prevArray) => [...prevArray, detailsTab as TypeTabs]);
-    }
-
     if (footerTabsConfig && footerTabsConfig.tabs.core.includes('data-table')) {
       // create new tab and add the Data Table component to the footer tab
+      // TODO: This will be refactor after new store for data table is implemented.
+      // Right now `geoviewLayerInstance.getFeatureInfo('all', layer.layerKey);` is returning empty features, which leads to no table shown.
       api.maps[mapId].dataTable.createDataPanel().then((newTable) => {
-        setTable(newTable);
         const tableTab = {
           id: 'data-table',
           value: 3,
           label: 'dataTable.title',
           icon: <StorageIcon />,
+          content: newTable,
         };
-        setFooterTabs((prevArray) => [...prevArray, tableTab as TypeTabs]);
+
+        setTable(newTable);
+        addTab({ tab: tableTab, event: EVENT_NAMES.FOOTER_TABS.EVENT_FOOTER_TABS_TAB_CREATE, handlerName: 'TABLE' });
       });
     }
 
@@ -350,6 +353,8 @@ export function FooterTabs(): JSX.Element | null {
           );
         });
     }
+    setFooterTabs(defaultFooterTabs!);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [footerTabsConfig, mapId]);
 
   // Handle focus using dynamic focus button
@@ -392,16 +397,7 @@ export function FooterTabs(): JSX.Element | null {
         handleCollapse={handleCollapse}
         selectedTab={selectedTab}
         tabsProps={{ variant: 'scrollable' }}
-        tabs={footerTabs.map((tab) => {
-          if (tab.id === 'legend') tab.content = <Legend />;
-          if (tab.id === 'layers') tab.content = <LayersPanel />;
-          if (tab.id === 'details') tab.content = <DetailsPanel />;
-          if (tab.id === 'table') tab.content = table;
-
-          return {
-            ...tab,
-          };
-        })}
+        tabs={footerTabs}
         TabContentVisibilty={!isCollapsed ? 'visible' : 'hidden'}
         rightButtons={
           <>
