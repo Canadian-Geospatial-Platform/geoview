@@ -75,7 +75,6 @@ export function Appbar(): JSX.Element {
   useEffect(() => {
     // Log
     logger.logTraceUseEffect('APP-BAR - addButtonPanel', mapId);
-    logger.logDebug('APP-BAR - addButtonPanel', mapId); // remove this one when things stabilize
 
     const appBarPanelCreateListenerFunction = (payload: PayloadBaseClass) => {
       if (payloadIsAButtonPanel(payload)) addButtonPanel(payload);

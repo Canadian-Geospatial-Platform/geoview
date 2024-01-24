@@ -782,27 +782,53 @@ export abstract class AbstractGeoViewLayer {
    */
   async getFeatureInfo(queryType: QueryType, layerPath: string, location: TypeLocation = null): Promise<TypeArrayOfFeatureInfoEntries> {
     try {
+      // Get the layer config
       const layerConfig = this.getLayerConfig(layerPath);
+
       if (!layerConfig || !layerConfig.source?.featureInfo?.queryable) return [];
 
+      // Log
+      logger.logTraceCore('abstract-geoview-layers.getFeatureInfo', queryType, layerPath);
+      const logMarkerKey = `${queryType} | ${layerPath}`;
+      logger.logMarkerStart(logMarkerKey);
+
+      let promiseGetFeature: Promise<TypeArrayOfFeatureInfoEntries>;
       switch (queryType) {
         case 'all':
-          return await this.getAllFeatureInfo(layerPath);
+          promiseGetFeature = this.getAllFeatureInfo(layerPath);
+          break;
         case 'at_pixel':
-          return await this.getFeatureInfoAtPixel(location as Pixel, layerPath);
+          promiseGetFeature = this.getFeatureInfoAtPixel(location as Pixel, layerPath);
+          break;
         case 'at_coordinate':
-          return await this.getFeatureInfoAtCoordinate(location as Coordinate, layerPath);
+          promiseGetFeature = this.getFeatureInfoAtCoordinate(location as Coordinate, layerPath);
+          break;
         case 'at_long_lat':
-          return await this.getFeatureInfoAtLongLat(location as Coordinate, layerPath);
+          promiseGetFeature = this.getFeatureInfoAtLongLat(location as Coordinate, layerPath);
+          break;
         case 'using_a_bounding_box':
-          return await this.getFeatureInfoUsingBBox(location as Coordinate[], layerPath);
+          promiseGetFeature = this.getFeatureInfoUsingBBox(location as Coordinate[], layerPath);
+          break;
         case 'using_a_polygon':
-          return await this.getFeatureInfoUsingPolygon(location as Coordinate[], layerPath);
+          promiseGetFeature = this.getFeatureInfoUsingPolygon(location as Coordinate[], layerPath);
+          break;
         default:
+          // Default is empty array
+          promiseGetFeature = Promise.resolve([]);
+
           // Log
           logger.logWarning(`Queries using ${queryType} are invalid.`);
-          return [];
+          break;
       }
+
+      // Wait for results
+      const arrayOfFeatureInfoEntries = await promiseGetFeature;
+
+      // Log
+      logger.logMarkerCheck(logMarkerKey, 'to getFeatureInfo', arrayOfFeatureInfoEntries);
+
+      // Return the result
+      return arrayOfFeatureInfoEntries;
     } catch (error) {
       // Log
       logger.logError(error);
@@ -919,6 +945,9 @@ export abstract class AbstractGeoViewLayer {
       // This will register all existing layers to a newly created layer set.
       this.registerToLayerSetListenerFunctions[layerPath].requestLayerInventory = (payload) => {
         if (payloadIsRequestLayerInventory(payload)) {
+          // Log
+          logger.logTraceDetailed('abstract-geoview-layers on requestLayerInventory', this.mapId, payload);
+
           const { layerSetId } = payload;
           api.event.emit(LayerSetPayload.createLayerRegistrationPayload(this.mapId, layerPath, 'add', layerSetId));
         }
@@ -934,6 +963,9 @@ export abstract class AbstractGeoViewLayer {
     if (!this.registerToLayerSetListenerFunctions[layerPath].queryLegend) {
       this.registerToLayerSetListenerFunctions[layerPath].queryLegend = (payload) => {
         if (payloadIsQueryLegend(payload)) {
+          // Log
+          logger.logTraceDetailed('abstract-geoview-layers on queryLegend', this.mapId, payload);
+
           this.getLegend(layerPath).then((queryResult) => {
             api.event.emit(GetLegendsPayload.createLegendInfoPayload(this.mapId, layerPath, queryResult));
           });
@@ -950,13 +982,17 @@ export abstract class AbstractGeoViewLayer {
     if (!this.registerToLayerSetListenerFunctions[layerPath].queryLayer) {
       if ('featureInfo' in layerConfig.source! && layerConfig.source.featureInfo?.queryable) {
         // Listen to events that request to query a layer and return the resultset to the requester.
-        this.registerToLayerSetListenerFunctions[layerPath].queryLayer = (payload) => {
+        this.registerToLayerSetListenerFunctions[layerPath].queryLayer = async (payload) => {
           if (payloadIsQueryLayer(payload)) {
+            // Log
+            logger.logTraceDetailed('abstract-geoview-layers on queryLayer', this.mapId, payload);
+
             const { queryType, location, eventType, disabledLayers } = payload;
             if (disabledLayers[layerPath]) return;
-            this.getFeatureInfo(queryType, layerPath, location).then((queryResult) => {
-              api.event.emit(GetFeatureInfoPayload.createQueryResultPayload(this.mapId, layerPath, queryType, queryResult, eventType));
-            });
+
+            // Get Feature Info
+            const queryResult = await this.getFeatureInfo(queryType, layerPath, location);
+            api.event.emit(GetFeatureInfoPayload.createQueryResultPayload(this.mapId, layerPath, queryType, queryResult, eventType));
           }
         };
 
