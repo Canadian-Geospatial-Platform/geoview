@@ -17,8 +17,10 @@ import { EVENT_NAMES } from '@/api/events/event-types';
 import { API } from '@/api/api';
 
 import { Config } from '@/core/utils/config/config';
+import { useWhatChanged } from '@/core/utils/useWhatChanged';
 import { payloadIsAmapFeaturesConfig } from '@/api/events/payloads';
 import { addGeoViewStore } from '@/core/stores/stores-managers';
+import { logger } from '@/core/utils/logger';
 
 // The next export allow to import the cgpv-types from 'geoview-core' from outside of the geoview-core package.
 export * from './core/types/cgpv-types';
@@ -91,9 +93,12 @@ async function renderMap(mapElement: Element): Promise<void> {
   if (configObj) {
     const { mapId } = configObj;
     addGeoViewStore(configObj);
+
     // render the map with the config
     reactRoot[mapId] = createRoot(mapElement!);
     addReloadListener(mapId);
+
+    // TODO: Refactor - Activate <React.StrictMode>
     reactRoot[mapId].render(<AppStart mapFeaturesConfig={configObj} />);
   }
 }
@@ -167,8 +172,10 @@ export const cgpv: types.TypeCGPV = {
   ui: {
     useTheme,
     useMediaQuery,
+    useWhatChanged,
     elements: UI,
   },
+  logger,
   types,
 };
 

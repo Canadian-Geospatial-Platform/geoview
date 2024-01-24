@@ -34,6 +34,9 @@ export function LayersPanel() {
   // Using helpers
   const helpers = useLegendHelpers();
   useEffect(() => {
+    // Log
+    logger.logTraceUseEffect('LAYERS-PANEL - mount');
+
     helpers.populateLegendStoreWithFakeData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

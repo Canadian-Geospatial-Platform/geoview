@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable no-param-reassign */
 import { ImageArcGISRest } from 'ol/source';
 import { Options as SourceOptions } from 'ol/source/ImageArcGISRest';
@@ -26,14 +25,11 @@ import {
   isSimpleStyleConfig,
   TypeListOfLayerEntryConfig,
   TypeEsriDynamicLayerEntryConfig,
-  TypeUniqueValueStyleInfo,
   TypeFeatureInfoLayerConfig,
-  layerEntryIsGroupLayer,
   TypeVisibilityFlags,
 } from '@/geo/map/map-schema-types';
-import { LayerSetPayload, TypeArrayOfFeatureInfoEntries, codedValueType, rangeDomainType } from '@/api/events/payloads';
+import { TypeArrayOfFeatureInfoEntries, codedValueType, rangeDomainType } from '@/api/events/payloads';
 import { api } from '@/app';
-import { Layer } from '../../layer';
 import { EVENT_NAMES } from '@/api/events/event-types';
 import {
   commonGetFieldDomain,
@@ -47,6 +43,7 @@ import {
 } from '../esri-layer-common';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { TypeJsonArray, TypeJsonObject } from '@/core/types/global-types';
+import { logger } from '@/core/utils/logger';
 
 export interface TypeEsriDynamicLayerConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig'> {
   geoviewLayerType: 'esriDynamic';
@@ -144,6 +141,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
    *
    * @returns {boolean} true if an error is detected.
    */
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   esriChildHasDetectedAnError(layerConfig: TypeLayerEntryConfig, esriIndex: number): boolean {
     if (!this.metadata!.supportsDynamicLayers) {
       this.layerLoadError.push({
@@ -280,7 +278,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
     // postpone the setVisible action until all layers have been loaded on the map.
     api.event.once(
       EVENT_NAMES.LAYER.EVENT_IF_CONDITION,
-      (payload) => {
+      () => {
         this.setVisible(layerConfig.initialSettings!.visible! !== 'no', layerPath);
       },
       `${this.mapId}/visibilityTest`
@@ -335,8 +333,9 @@ export class EsriDynamic extends AbstractGeoViewRaster {
    */
   protected async getFeatureInfoAtLongLat(lnglat: Coordinate, layerPath: string): Promise<TypeArrayOfFeatureInfoEntries> {
     try {
-      const layerConfig = (await this.getLayerConfigAsync(layerPath, true)) as TypeEsriDynamicLayerEntryConfig | null;
-      if (!layerConfig || !this.getVisible(layerPath)) return [];
+      // Get the layer config in a loaded phase
+      const layerConfig = (await this.getLayerConfigAsync(layerPath, true)) as TypeEsriDynamicLayerEntryConfig;
+      if (!this.getVisible(layerPath)) return [];
       if (!layerConfig.source?.featureInfo?.queryable) return [];
 
       let identifyUrl = getLocalizedValue(layerConfig.source?.dataAccessPath, this.mapId);
@@ -372,8 +371,8 @@ export class EsriDynamic extends AbstractGeoViewRaster {
       const arrayOfFeatureInfoEntries = await this.formatFeatureInfoResult(features, layerConfig);
       return arrayOfFeatureInfoEntries;
     } catch (error) {
-      // eslint-disable-next-line no-console
-      console.error(error);
+      // Log
+      logger.logError('esri-dynamic.getFeatureInfoAtLongLat()\n', error);
       return null;
     }
   }
@@ -421,7 +420,6 @@ export class EsriDynamic extends AbstractGeoViewRaster {
   private sortFieldOfTheSameValue(styleSettings: TypeUniqueValueStyleConfig, fieldOfTheSameValue: TypeFieldOfTheSameValue[][]): number[] {
     const fieldNotUsed = styleSettings.fields.map(() => true);
     const fieldOrder: number[] = [];
-    const query = '';
     for (let entrySelected = 0; entrySelected !== -1; entrySelected = fieldNotUsed.findIndex((flag) => flag)) {
       let entrySelectedTotalEntryCount = fieldOfTheSameValue[entrySelected].reduce((accumulator, fieldEntry) => {
         return accumulator + fieldEntry.nbOccurence;
@@ -760,6 +758,10 @@ export class EsriDynamic extends AbstractGeoViewRaster {
   // used based on the parameter types received.
   async applyViewFilter(parameter1: string, parameter2?: string | boolean | never, parameter3?: boolean | never): Promise<void> {
     let layerPath = this.layerPathAssociatedToTheGeoviewLayer;
+
+    // Log
+    logger.logTraceCore('esri-dynamic.applyViewFilter', layerPath);
+
     let filter = '';
     let CombineLegendFilter = true;
     if (parameter3) {
@@ -776,9 +778,17 @@ export class EsriDynamic extends AbstractGeoViewRaster {
       }
     } else filter = parameter1;
 
-    // Get the layer config in a loaded phase
-    const layerConfig = await this.getLayerConfigAsync(layerPath, true);
-    if (!layerConfig) throw new Error(`Couldn't applyViewFilter for esri-dynamic as couldn't get layer config for layerPath ${layerPath}`);
+    // TODO: Refactor - Maybe try-catch higher in the call stack instead of here? Notably to 'try again'?
+    let layerConfig;
+    try {
+      // Get the layer config in a loaded phase
+      layerConfig = (await this.getLayerConfigAsync(layerPath, true)) as TypeEsriDynamicLayerEntryConfig;
+    } catch (error) {
+      // Log
+      logger.logError('esri-dynamic.applyViewFilter()\n', error);
+      return;
+    }
+
     let filterValueToUse = filter.replaceAll(/\s{2,}/g, ' ').trim();
     layerConfig.olLayer!.set('legendFilterIsOff', !CombineLegendFilter);
     layerConfig.olLayer?.set('layerFilter', filterValueToUse);

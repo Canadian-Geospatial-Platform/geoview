@@ -27,6 +27,7 @@ export interface ILayerState {
   legendLayers: TypeLegendLayer[];
   displayState: TypeLayersViewDisplayState;
   actions: {
+    setLegendLayers: (legendLayers: TypeLegendLayer[]) => void;
     getLayer: (layerPath: string) => TypeLegendLayer | undefined;
     getLayerBounds: (layerPath: string) => number[] | undefined;
     setDisplayState: (newDisplayState: TypeLayersViewDisplayState) => void;
@@ -51,6 +52,14 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
     displayState: 'view',
 
     actions: {
+      setLegendLayers: (legendLayers: TypeLegendLayer[]): void => {
+        set({
+          layerState: {
+            ...get().layerState,
+            legendLayers: [...legendLayers],
+          },
+        });
+      },
       getLayer: (layerPath: string) => {
         const curLayers = get().layerState.legendLayers;
         const layer = findLayerByPath(curLayers, layerPath);

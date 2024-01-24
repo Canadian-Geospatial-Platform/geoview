@@ -55,6 +55,7 @@ import { TypeMapFeaturesConfig, TypeHTMLElement, TypeValidMapProjectionCodes, Ty
 import { layerConfigIsGeoCore } from '@/geo/layer/other/geocore';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
+import { logger } from '@/core/utils/logger';
 
 interface TypeDcoument extends Document {
   webkitExitFullscreen: () => void;
@@ -160,6 +161,9 @@ export class MapViewer {
             EVENT_NAMES.LAYER.EVENT_LAYER_ADDED,
             (payload) => {
               if (payloadIsGeoViewLayerAdded(payload)) {
+                // Log
+                logger.logTraceDetailed('map-viewer on EVENT_NAMES.LAYER.EVENT_LAYER_ADDED', this.mapId, payload);
+
                 const { geoviewLayer } = payload;
                 MapEventProcessor.setLayerZIndices(this.mapId);
                 if (geoviewLayer.allLayerEntryConfigProcessed()) {
@@ -190,15 +194,26 @@ export class MapViewer {
    * Function called when the map has been rendered and ready to be customized
    */
   mapReady(): void {
+    // Log Marker Start
+    logger.logMarkerStart(`mapReady-${this.mapId}`);
+
     const layerInterval = setInterval(() => {
+      // Log
+      logger.logTraceDetailed('map-viewer.mapReady?', this.mapId);
+
       if (this.layer?.geoviewLayers) {
         const { geoviewLayers } = this.layer;
         let allGeoviewLayerReady =
           this.mapFeaturesConfig.map.listOfGeoviewLayerConfig?.length === 0 || Object.keys(geoviewLayers).length !== 0;
         Object.keys(geoviewLayers).forEach((geoviewLayerId) => {
-          allGeoviewLayerReady &&= geoviewLayers[geoviewLayerId].allLayerEntryConfigProcessed();
+          const layerIsReady = geoviewLayers[geoviewLayerId].allLayerEntryConfigProcessed();
+          logger.logTraceDetailed('map-viewer.mapReady? layer ready?', geoviewLayerId, layerIsReady);
+          allGeoviewLayerReady &&= layerIsReady;
         });
         if (allGeoviewLayerReady) {
+          // Log
+          logger.logInfo('Map is ready', this.mapId);
+          logger.logMarkerCheck(`mapReady-${this.mapId}`, 'for map to be ready');
           MapEventProcessor.setMapLoaded(this.mapId);
           clearInterval(layerInterval);
         }

@@ -16,6 +16,7 @@ Once the project matures, these docs can be the basis of official public docs, h
 - [Programming Best Practices](./programming/best-practices.md)
 - [Programming with TypeScript](./programming/using-type.md)
 - [Programming with store](./programming/using-store.md)
+- [Programming with logs](./programming/logging.md)
 
 ## How the application works
 

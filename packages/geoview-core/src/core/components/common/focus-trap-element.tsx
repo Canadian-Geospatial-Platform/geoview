@@ -6,6 +6,7 @@ import { FocusTrap } from '@mui/base/FocusTrap';
 
 import { useUIActiveFocusItem, useUIActiveTrapGeoView, useUIStoreActions } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import { Box, Button } from '@/ui';
+import { logger } from '@/core/utils/logger';
 
 type FocusTrapElementProps = {
   id: string;
@@ -35,11 +36,17 @@ export function FocusTrapElement(props: FocusTrapElementProps): JSX.Element {
   // #region REACT HOOKS
   // if keyboard navigation if turned off, remove trap settings
   useEffect(() => {
+    // Log
+    logger.logTraceUseEffect('FOCUS-TRAP-ELEMENT - activeTrapGeoView', activeTrapGeoView);
+
     if (!activeTrapGeoView) closeModal();
   }, [activeTrapGeoView, closeModal]);
 
   // if focus trap gets focus, send focus to the exit button
   useEffect(() => {
+    // Log
+    logger.logTraceUseEffect('FOCUS-TRAP-ELEMENT - focusItem', focusItem);
+
     if (id === focusItem.activeElementId) {
       setTimeout(() => document.getElementById(`${id}-exit-btn`)?.focus(), 0);
     }

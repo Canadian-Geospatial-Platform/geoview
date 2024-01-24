@@ -28,6 +28,7 @@ import {
 } from '@/core/stores';
 import { ResponsiveGrid, CloseButton, EnlargeButton, LayerList, LayerTitle, useFooterPanelHeight } from '../common';
 import { useUIStoreActions } from '@/app';
+import { logger } from '@/core/utils/logger';
 
 /**
  * layers list
@@ -91,6 +92,9 @@ export function DetailsPanel(): JSX.Element {
   };
 
   useEffect(() => {
+    // Log
+    logger.logTraceUseEffect('DETAILS-PANEL - ArrayOfLayerData', arrayOfLayerData);
+
     if (arrayOfLayerData.length > 0) {
       // Check if have the previous selected layer path in incoming arrayOfLayerData
       // if so, get the index of the found layer, we need to pass to setLayerDataInfo to load layer in left panel
@@ -172,8 +176,8 @@ export function DetailsPanel(): JSX.Element {
           }))}
         isEnlargeDataTable={isEnlargeDataTable}
         selectedLayerIndex={arrayOfLayerData.findIndex((layer) => layer.layerPath === layerDataInfo?.layerPath)}
-        handleListItemClick={(_layer, index: number) => {
-          handleLayerChange(arrayOfLayerData[index]);
+        handleListItemClick={(_layer) => {
+          handleLayerChange(arrayOfLayerData[findLayerPathIndex(arrayOfLayerData, _layer.layerPath)]);
         }}
       />
     );
