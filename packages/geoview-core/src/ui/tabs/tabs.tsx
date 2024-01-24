@@ -1,7 +1,4 @@
-/* eslint-disable react/require-default-props */
-/* eslint-disable react/destructuring-assignment */
-/* eslint-disable react/no-array-index-key */
-import { SyntheticEvent, useEffect, useState, ReactNode } from 'react';
+import { SyntheticEvent, ReactNode, useState, useEffect } from 'react';
 
 import { useTranslation } from 'react-i18next';
 
@@ -27,6 +24,7 @@ export type TypeTabs = {
 /**
  * Tabs ui properties
  */
+/* eslint-disable react/require-default-props */
 export interface TypeTabsProps {
   tabs: TypeTabs[];
   selectedTab?: number;
@@ -35,8 +33,7 @@ export interface TypeTabsProps {
   tabProps?: TabProps;
   rightButtons?: unknown;
   isCollapsed?: boolean;
-  // eslint-disable-next-line @typescript-eslint/ban-types
-  handleCollapse?: Function | undefined;
+  handleCollapse?: () => void | undefined;
   TabContentVisibilty?: string | undefined;
 }
 
@@ -94,6 +91,7 @@ export function Tabs(props: TypeTabsProps): JSX.Element {
       <Grid container>
         <Grid item xs={7} sm={10} sx={{ background: 'white' }}>
           <MaterialTabs
+            // eslint-disable-next-line react/destructuring-assignment
             {...props.tabsProps}
             variant="scrollable"
             scrollButtons
@@ -108,13 +106,13 @@ export function Tabs(props: TypeTabsProps): JSX.Element {
             }}
           >
             {tabs.map((tab, index) => {
-              // eslint-disable-next-line prettier/prettier
               return (
                 <MaterialTab
                   label={t(tab.label)}
-                  key={index}
+                  key={`${t(tab.label)}`}
                   icon={tab.icon}
                   iconPosition="start"
+                  // eslint-disable-next-line react/destructuring-assignment
                   {...props.tabProps}
                   id={`tab-${index}`}
                   onClick={() => handleClick(index)}
@@ -137,13 +135,13 @@ export function Tabs(props: TypeTabsProps): JSX.Element {
           visibility: TabContentVisibilty,
         }}
       >
-        {tabs.map((tab, index) => {
-          return (
-            <TabPanel key={index} value={value} index={index}>
-              {typeof tab.content === 'string' ? <HtmlToReact htmlContent={tab.content} /> : tab.content}
-            </TabPanel>
-          );
-        })}
+        <TabPanel value={value} index={value}>
+          {typeof tabs[value]?.content === 'string' ? (
+            <HtmlToReact htmlContent={(tabs[value]?.content as string) ?? ''} />
+          ) : (
+            tabs[value].content
+          )}
+        </TabPanel>
       </Grid>
     </Grid>
   );
