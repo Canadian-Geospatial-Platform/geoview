@@ -49,13 +49,14 @@ export class TypeGeoJSONLayerEntryConfig extends TypeVectorLayerEntryConfig {
     if (this.entryType === undefined) this.entryType = 'vector';
     // Attribute 'style' must exist in layerConfig even if it is undefined
     if (!('style' in this)) this.style = undefined;
-    // if this.source.dataAccessPath is undefined, we assign the metadataAccessPath of the GeoView layer to it
-    // and place the layerId at the end of it.
     // Value for this.source.format can only be GeoJSON.
     if (!this.source) this.source = { format: 'GeoJSON' };
     if (!this.source.format) this.source.format = 'GeoJSON';
+    // if this.source.dataAccessPath is undefined, we assign the metadataAccessPath of the GeoView layer to it
+    // and place the layerId at the end of it.
     if (!this.source.dataAccessPath) {
       let { en, fr } = this.geoviewLayerConfig.metadataAccessPath!;
+      // Remove the metadata file name and keep only the path to the directory where the metadata resides
       en = en!.split('/').length > 1 ? en!.split('/').slice(0, -1).join('/') : './';
       fr = fr!.split('/').length > 1 ? fr!.split('/').slice(0, -1).join('/') : './';
       this.source.dataAccessPath = { en, fr } as TypeLocalizedString;
