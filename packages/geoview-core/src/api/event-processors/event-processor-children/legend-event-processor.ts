@@ -239,7 +239,10 @@ export class LegendEventProcessor extends AbstractEventProcessor {
         return layer.layerStatus === 'processed';
       });
       if (validFirstLayer) {
+        // Set the selected layer path in the store
         getGeoViewStore(mapId).getState().layerState.actions.setSelectedLayerPath(validFirstLayer.layerPath);
+        // Log
+        logger.logDebug(`Selected layer ${validFirstLayer.layerPath}`);
       } else {
         // Log
         logger.logError(`Couldn't select a layer as none were processed in time`);
