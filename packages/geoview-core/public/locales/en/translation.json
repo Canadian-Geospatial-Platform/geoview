@@ -169,7 +169,7 @@
     "search": "Search",
     "errorMessage": "No matches found for",
     "province": "Province",
-    "type": "Type",
+    "category": "Category",
     "clearFilters": "Clear Filters"
   },
   "hovertooltip": {

@@ -3,7 +3,6 @@ import { SelectChangeEvent } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { sxClasses } from './geolocator-style';
 import { Box, Divider, FilterAltOffIcon, IconButton, Paper, Select, TypeMenuItemProps, Typography } from '@/ui';
-import { PROVINCES } from '@/app';
 import { GeoListItem } from './geolocator';
 import GeoList from './geo-list';
 import { useMapSize, useMapStoreActions } from '@/core/stores/store-interface-and-intial-values/map-state';
@@ -23,8 +22,8 @@ interface GeolocatorFiltersType {
  */
 export function GeolocatorResult({ geoLocationData, searchValue, error }: GeolocatorFiltersType) {
   const { t } = useTranslation();
-  const [province, setProvince] = useState<string | number>('');
-  const [type, setType] = useState<string | number>('');
+  const [province, setProvince] = useState<string>('');
+  const [category, setCategory] = useState<string>('');
   const [data, setData] = useState<GeoListItem[]>(geoLocationData);
 
   // get store values
@@ -35,35 +34,46 @@ export function GeolocatorResult({ geoLocationData, searchValue, error }: Geoloc
    * Clear all filters.
    */
   const handleClearFilters = () => {
-    if (province || type) {
+    if (province || category) {
       setProvince('');
-      setType('');
+      setCategory('');
       setData(geoLocationData);
     }
   };
 
   /**
-   * Map constants PROVINCES into menu item of Select Component.
+   * Reduce provinces from api response data i.e. geoLocationData and return transform into MenuItem
    */
   const provinces: TypeMenuItemProps[] = useMemo(() => {
-    return PROVINCES.map((provinceItem: string, index: number) => {
-      return { type: 'item', item: { value: index + 1, children: provinceItem } };
+    const provincesList = geoLocationData
+      .reduce((acc, curr) => {
+        if (curr.province && !acc.includes(curr.province)) {
+          acc.push(curr.province);
+        }
+        return acc;
+      }, [] as string[])
+      .sort();
+
+    return [...new Set(provincesList)].map((typeItem: string) => {
+      return { type: 'item', item: { value: typeItem, children: typeItem } };
     });
-  }, []);
+  }, [geoLocationData]);
 
   /**
-   * Reduce types from api response data i.e. geoLocationData
+   * Reduce categories from api response data i.e. geoLocationData
    */
-  const types: TypeMenuItemProps[] = useMemo(() => {
-    const locationData = geoLocationData.reduce((acc, curr) => {
-      if (curr.tag && curr.tag[1]) {
-        acc.push(curr.tag[1]);
-      }
-      return acc;
-    }, [] as string[]);
+  const categories: TypeMenuItemProps[] = useMemo(() => {
+    const locationData = geoLocationData
+      .reduce((acc, curr) => {
+        if (curr.category) {
+          acc.push(curr.category);
+        }
+        return acc;
+      }, [] as string[])
+      .sort();
 
-    return [...new Set(locationData)].map((typeItem: string, index: number) => {
-      return { type: 'item', item: { value: index + 1, children: typeItem } };
+    return [...new Set(locationData)].map((typeItem: string) => {
+      return { type: 'item', item: { value: typeItem, children: typeItem } };
     });
   }, [geoLocationData]);
 
@@ -73,31 +83,29 @@ export function GeolocatorResult({ geoLocationData, searchValue, error }: Geoloc
 
   useEffect(() => {
     // update result list after setting the province and type.
-    if (province || type) {
+    if (province || category) {
       const filterData = geoLocationData.filter((item) => {
-        if (province && !type) {
-          return item.province.toLowerCase() === PROVINCES[(province as number) - 1].toLowerCase();
+        let result = true;
+        if (province.length && !category.length) {
+          result = item.province.toLowerCase() === province.toLowerCase();
+        } else if (province.length && category.length) {
+          result = item.province.toLowerCase() === province.toLowerCase() && item.category.toLowerCase() === category.toLowerCase();
+        } else if (!province.length && category.length) {
+          result = item.category.toLowerCase() === category.toLowerCase();
         }
-        if (province && type) {
-          return (
-            item.province.toLowerCase() === PROVINCES[(province as number) - 1].toLowerCase() &&
-            item.tag &&
-            item.tag[1] &&
-            item.tag[1].toLowerCase() === (types[(type as number) - 1].item?.children?.toString().toLowerCase() ?? '')
-          );
-        }
-        if (!province && type) {
-          return (
-            item.tag &&
-            item.tag[1] &&
-            item.tag[1].toLowerCase() === (types[(type as number) - 1].item?.children?.toString().toLowerCase() ?? '')
-          );
-        }
-        return true;
+        return result;
       });
       setData(filterData);
     }
-  }, [geoLocationData, province, type, types]);
+  }, [geoLocationData, province, category, categories, provinces]);
+
+  useEffect(() => {
+    // Reset the filters when no result found.
+    if (!geoLocationData.length) {
+      setProvince('');
+      setCategory('');
+    }
+  }, [geoLocationData]);
 
   return (
     <Paper component="div" elevation={4} square sx={{ width: 350 }}>
@@ -118,15 +126,15 @@ export function GeolocatorResult({ geoLocationData, searchValue, error }: Geoloc
           </Box>
           <Box sx={{ flexGrow: 2, paddingRight: '8px' }}>
             <Select
-              labelId="typeGeolocatorFiltersLabel"
+              labelId="categoryGeolocatorFiltersLabel"
               id="typeGeolocatorFilters"
               formControlProps={{ variant: 'standard', size: 'small' }}
-              value={types.length ? type : ''}
+              value={category ?? ''}
               fullWidth
-              onChange={(e: SelectChangeEvent<unknown>) => setType(e.target.value as string)}
-              label={t('geolocator.type')}
-              inputLabel={{ id: 'geolocation-types-filter' }}
-              menuItems={types}
+              onChange={(e: SelectChangeEvent<unknown>) => setCategory(e.target.value as string)}
+              label={t('geolocator.category')}
+              inputLabel={{ id: 'geolocationCategoryFilter' }}
+              menuItems={categories}
             />
           </Box>
           <Box>
@@ -141,8 +149,7 @@ export function GeolocatorResult({ geoLocationData, searchValue, error }: Geoloc
         {!!data.length && <GeoList geoListItems={data} zoomToLocation={zoomToGeoLocatorLocation} />}
         {(!data.length || error) && (
           <Typography component="p" sx={{ fontSize: 14, p: 10 }}>
-            {t('geolocator.errorMessage')} {searchValue} {(province as number) ? PROVINCES[(province as number) - 1] : ''}{' '}
-            {(type as number) ? types[(type as number) - 1]?.item?.children : ''}
+            {t('geolocator.errorMessage')} {searchValue} {province} {category}
           </Typography>
         )}
       </Box>

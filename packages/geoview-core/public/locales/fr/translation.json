@@ -169,7 +169,7 @@
     "search": "Texte à rechercher",
     "errorMessage": "Aucun résultat correspondant à",
     "province": "Province",
-    "type": "Type",
+    "category": "Catégorie",
     "clearFilters": "Effacer les filtres"
   },
   "hovertooltip": {
