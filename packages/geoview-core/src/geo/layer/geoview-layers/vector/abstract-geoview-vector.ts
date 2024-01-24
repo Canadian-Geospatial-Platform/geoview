@@ -166,19 +166,6 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
 
     vectorSource = new VectorSource(sourceOptions);
 
-    let featuresLoadErrorHandler: () => void;
-    const featuresLoadEndHandler = () => {
-      this.setLayerStatus('loaded', layerPath);
-      vectorSource.un('featuresloaderror', featuresLoadErrorHandler);
-    };
-    featuresLoadErrorHandler = () => {
-      this.setLayerStatus('error', layerPath);
-      vectorSource.un('featuresloadend', featuresLoadEndHandler);
-    };
-
-    vectorSource.once('featuresloadend', featuresLoadEndHandler);
-    vectorSource.once('featuresloaderror', featuresLoadErrorHandler);
-
     return vectorSource;
   }
 
@@ -208,6 +195,8 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
       },
     };
 
+    // You must always set the layerConfig.loadEndListenerType before setting the layerConfig.olLayer except when entryType = 'group'.
+    layerConfig.loadEndListenerType = 'features';
     layerConfig.olLayer = new VectorLayer(layerOptions);
     layerConfig.geoviewLayerInstance = this;
 

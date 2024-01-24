@@ -284,11 +284,11 @@ export class EsriDynamic extends AbstractGeoViewRaster {
       `${this.mapId}/visibilityTest`
     );
 
+    // You must always set the layerConfig.loadEndListenerType before setting the layerConfig.olLayer except when entryType = 'group'.
+    layerConfig.loadEndListenerType = 'image';
     layerConfig.olLayer = new ImageLayer(imageLayerOptions);
     layerConfig.geoviewLayerInstance = this;
     this.applyViewFilter(layerPath, layerConfig.layerFilter ? layerConfig.layerFilter : '');
-
-    this.addLoadendListener(layerPath, 'image');
 
     return Promise.resolve(layerConfig.olLayer);
   }

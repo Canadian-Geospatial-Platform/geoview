@@ -164,7 +164,7 @@ export class VectorTiles extends AbstractGeoViewRaster {
         }
       }
 
-      this.setLayerStatus('loading', layerPath);
+      this.setLayerStatus('processing', layerPath);
     });
   }
 
@@ -216,7 +216,10 @@ export class VectorTiles extends AbstractGeoViewRaster {
       if (layerConfig.initialSettings?.visible !== undefined) tileLayerOptions.visible = layerConfig.initialSettings?.visible !== 'no';
 
       // TODO remove after demoing
+      // ! Humm! Have we done the demo?
       const declutter = this.mapId !== 'LYR2';
+      // You must always set the layerConfig.loadEndListenerType before setting the layerConfig.olLayer except when entryType = 'group'.
+      layerConfig.loadEndListenerType = 'tile';
       layerConfig.olLayer = new VectorTileLayer({ ...tileLayerOptions, declutter });
       layerConfig.geoviewLayerInstance = this;
       if (this.metadata?.defaultStyles)
@@ -224,8 +227,6 @@ export class VectorTiles extends AbstractGeoViewRaster {
           layerConfig.olLayer as VectorTileLayer,
           `${getLocalizedValue(this.metadataAccessPath, this.mapId)}${this.metadata.defaultStyles}/root.json`
         );
-
-      this.addLoadendListener(layerPath, 'tile');
 
       resolve(layerConfig.olLayer);
     });

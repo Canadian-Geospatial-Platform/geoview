@@ -199,7 +199,7 @@ export class GeoPackage extends AbstractGeoViewVector {
         }
       }
 
-      this.setLayerStatus('loading', layerPath);
+      this.setLayerStatus('processing', layerPath);
 
       // When no metadata are provided, all layers are considered valid.
       if (!this.metadata) return;
@@ -437,20 +437,6 @@ export class GeoPackage extends AbstractGeoViewVector {
                 source: vectorSource,
                 properties,
               });
-
-              const { layerPath } = layerConfig;
-              let featuresLoadErrorHandler: () => void;
-              const featuresLoadEndHandler = () => {
-                this.setLayerStatus('loaded', layerPath);
-                vectorSource.un('featuresloaderror', featuresLoadErrorHandler);
-              };
-              featuresLoadErrorHandler = () => {
-                this.setLayerStatus('error', layerPath);
-                vectorSource.un('featuresloadend', featuresLoadEndHandler);
-              };
-
-              vectorSource.once('featuresloadend', featuresLoadEndHandler);
-              vectorSource.once('featuresloaderror', featuresLoadErrorHandler);
             }
 
             db.close();
@@ -478,7 +464,7 @@ export class GeoPackage extends AbstractGeoViewVector {
     sld?: sldsInterface
   ): Promise<BaseLayer | null> {
     const promisedVectorLayer = new Promise<BaseLayer | null>((resolve) => {
-      api.maps[this.mapId].layer.registerLayerConfig(layerConfig);
+      layerConfig.registerLayerConfig();
       this.registerToLayerSets(layerConfig);
 
       const { name, source } = layerInfo;
@@ -622,22 +608,8 @@ export class GeoPackage extends AbstractGeoViewVector {
         this.processFeatureInfoConfig(properties as TypeJsonObject, layerConfig as TypeVectorLayerEntryConfig);
       }
 
-      const { layerPath } = layerConfig;
-      let loadErrorHandler: () => void;
-      const loadEndHandler = () => {
-        this.setLayerStatus('loaded', layerPath);
-        source.un('featuresloaderror', loadErrorHandler);
-      };
-      loadErrorHandler = () => {
-        this.setLayerStatus('error', layerPath);
-        source.un('featuresloadend', loadEndHandler);
-      };
-
-      source.once('featuresloadend', loadEndHandler);
-      source.once('featuresloaderror', loadErrorHandler);
-
       const vectorLayer = this.createVectorLayer(layerConfig as TypeVectorLayerEntryConfig, source);
-      this.setLayerStatus('processed', layerPath);
+      this.setLayerStatus('processed', layerConfig.layerPath);
 
       resolve(vectorLayer);
     });

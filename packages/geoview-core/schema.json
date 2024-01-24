@@ -691,9 +691,9 @@
         "entryType": {
           "enum": ["vector-heatmap"]
         },
-        "layerPathEnding": {
+        "layerIdExtension": {
           "type": "string",
-          "description": "The ending element of the layer configuration path."
+          "description": "The extension (ending) element of the layer identifier."
         },
         "layerId": {
           "type": "string",
@@ -751,9 +751,9 @@
         "entryType": {
           "enum": ["vector"]
         },
-        "layerPathEnding": {
+        "layerIdExtension": {
           "type": "string",
-          "description": "The ending element of the layer configuration path."
+          "description": "The extension (ending) element of the layer identifier."
         },
         "layerId": {
           "type": "string",
@@ -797,9 +797,9 @@
         "entryType": {
           "enum": ["vector-tile"]
         },
-        "layerPathEnding": {
+        "layerIdExtension": {
           "type": "string",
-          "description": "The ending element of the layer configuration path."
+          "description": "The extension (ending) element of the layer identifier."
         },
         "layerId": {
           "type": "string",
@@ -872,9 +872,9 @@
           "type": "string",
           "description": "The id of the layer to display on the map."
         },
-        "layerPathEnding": {
+        "layerIdExtension": {
           "type": "string",
-          "description": "The ending element of the layer configuration path."
+          "description": "The extension (ending) element of the layer identifier."
         },
         "layerName": {
           "$ref": "#/definitions/TypeLocalizedString",
@@ -914,9 +914,9 @@
           "type": "string",
           "description": "The id of the layer to display on the map."
         },
-        "layerPathEnding": {
+        "layerIdExtension": {
           "type": "string",
-          "description": "The ending element of the layer configuration path."
+          "description": "The extension (ending) element of the layer identifier."
         },
         "layerName": {
           "$ref": "#/definitions/TypeLocalizedString",
@@ -959,9 +959,9 @@
           "type": "string",
           "description": "The id of the layer to display on the map."
         },
-        "layerPathEnding": {
+        "layerIdExtension": {
           "type": "string",
-          "description": "The ending element of the layer configuration path."
+          "description": "The extension (ending) element of the layer identifier."
         },
         "layerName": {
           "$ref": "#/definitions/TypeLocalizedString",
@@ -993,9 +993,9 @@
         "entryType": {
           "enum": ["raster-tile"]
         },
-        "layerPathEnding": {
+        "layerIdExtension": {
           "type": "string",
-          "description": "The ending element of the layer configuration path."
+          "description": "The extension (ending) element of the layer identifier."
         },
         "layerId": {
           "type": "string",
@@ -1085,9 +1085,9 @@
           "description": "The id of the layer group to display on the map."
         },
         "not": {
-          "layerPathEnding": {
+          "layerIdExtension": {
             "type": "string",
-            "description": "The ending element of the layer configuration path."
+            "description": "The extension (ending) element of the layer identifier."
           }
         },
         "layerName": {
