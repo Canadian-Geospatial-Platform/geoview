@@ -211,7 +211,7 @@ export class ImageStatic extends AbstractGeoViewRaster {
         }
       }
 
-      this.setLayerStatus('loading', layerPath);
+      this.setLayerStatus('processing', layerPath);
 
       // When no metadata are provided, all layers are considered valid.
       if (!this.metadata) return;
@@ -274,10 +274,10 @@ export class ImageStatic extends AbstractGeoViewRaster {
     if (layerConfig.initialSettings?.visible !== undefined)
       staticImageOptions.visible = layerConfig.initialSettings?.visible === 'yes' || layerConfig.initialSettings?.visible === 'always';
 
+    // You must always set the layerConfig.loadEndListenerType before setting the layerConfig.olLayer except when entryType = 'group'.
+    layerConfig.loadEndListenerType = 'image';
     layerConfig.olLayer = new ImageLayer(staticImageOptions);
     layerConfig.geoviewLayerInstance = this;
-
-    this.addLoadendListener(layerPath, 'image');
 
     return Promise.resolve(layerConfig.olLayer);
   }
