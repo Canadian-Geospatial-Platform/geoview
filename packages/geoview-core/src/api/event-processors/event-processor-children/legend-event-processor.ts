@@ -97,7 +97,7 @@ export class LegendEventProcessor extends AbstractEventProcessor {
                   geometryType,
                   icon: canvas ? canvas.toDataURL() : null,
                   name: styleSettings.uniqueValueStyleInfo[i].label,
-                  isVisible: styleSettings.uniqueValueStyleInfo[i].visible!,
+                  isVisible: styleSettings.uniqueValueStyleInfo[i].visible || 'yes',
                   default: false,
                 };
                 return legendLayerListItem;

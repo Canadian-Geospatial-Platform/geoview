@@ -899,13 +899,57 @@
       },
       "required": ["schemaTag", "entryType", "layerId"]
     },
-
     "TypeEsriDynamicLayerEntryConfig": {
       "additionalProperties": false,
       "type": "object",
       "properties": {
         "schemaTag": {
           "enum": ["esriDynamic"]
+        },
+        "entryType": {
+          "enum": ["raster-image"]
+        },
+        "layerId": {
+          "type": "string",
+          "description": "The id of the layer to display on the map."
+        },
+        "layerPathEnding": {
+          "type": "string",
+          "description": "The ending element of the layer configuration path."
+        },
+        "layerName": {
+          "$ref": "#/definitions/TypeLocalizedString",
+          "description": "The display name of the layer (English/French). If it is not present the viewer will make an attempt to scrape this information."
+        },
+        "layerFilter": {
+          "type": "string",
+          "description": "Filter to apply on feature of this layer."
+        },
+        "initialSettings": {
+          "$ref": "#/definitions/TypeLayerInitialSettings",
+          "description": "Initial settings to apply to the layer entry at creation time. Initial settings are inherited from the parent in the configuration tree."
+        },
+        "source": {
+          "$ref": "#/definitions/TypeSourceImageEsriInitialConfig"
+        },
+        "style": {
+          "$ref": "#/definitions/TypeStyleConfig"
+        },
+        "not": {
+          "listOfLayerEntryConfig": {
+            "$ref": "#/definitions/TypeListOfLayerEntryConfig",
+            "description": "The list of layer entry configurations to use from the GeoView layer group."
+          }
+        }
+      },
+      "required": ["schemaTag", "entryType", "layerId"]
+    },
+    "TypeEsriImageLayerEntryConfig": {
+      "additionalProperties": false,
+      "type": "object",
+      "properties": {
+        "schemaTag": {
+          "enum": ["esriImage"]
         },
         "entryType": {
           "enum": ["raster-image"]
@@ -1126,6 +1170,9 @@
           "$ref": "#/definitions/TypeEsriDynamicLayerEntryConfig"
         },
         {
+          "$ref": "#/definitions/TypeEsriImageLayerEntryConfig"
+        },
+        {
           "$ref": "#/definitions/TypeTileLayerEntryConfig"
         },
         {
@@ -1209,6 +1256,22 @@
           },
           {
             "$ref": "#/definitions/TypeVectorLayerEntryConfig"
+          }
+        ]
+      }
+    },
+    "TypeListOfEsriImageLayerEntryConfig": {
+      "description": "This type is used recursively by the IsValidTypeListOfLayerEntryConfig method coded in config-validation.ts file. It completes the validation of the list of layer entry config.",
+      "type": "array",
+      "minItems": 1,
+      "additionalProperties": false,
+      "items": {
+        "oneOf": [
+          {
+            "$ref": "#/definitions/TypeLayerGroupEntryConfig"
+          },
+          {
+            "$ref": "#/definitions/TypeEsriImageLayerEntryConfig"
           }
         ]
       }
@@ -1403,6 +1466,7 @@
         "enum": [
           "esriDynamic",
           "esriFeature",
+          "esriImage",
           "GeoJSON",
           "geoCore",
           "GeoPackage",
@@ -1523,22 +1587,10 @@
               "type": "array",
               "items": {
                 "type": "string",
-                "enum": [
-                  "legend",
-                  "layers",
-                  "details",
-                  "data-table",
-                  "time-slider",
-                  "geochart"
-                ]
+                "enum": ["legend", "layers", "details", "data-table", "time-slider", "geochart"]
               },
               "minItems": 1,
-              "default": [
-                "legend",
-                "layers",
-                "details",
-                "data-table"
-              ],
+              "default": ["legend", "layers", "details", "data-table"],
               "uniqueItems": true,
               "description": "Default core tabs of footer panel to use"
             },
@@ -1572,9 +1624,7 @@
           "description": "State of footer panel when map is loaded (expanded or collapsed)"
         }
       },
-      "required": [
-        "tabs"
-      ]
+      "required": ["tabs"]
     },
     "TypeAppBarTabsProps": {
       "type": "object",
@@ -1588,11 +1638,7 @@
               "type": "array",
               "items": {
                 "type": "string",
-                "enum": [
-                  "basemap-panel",
-                  "layers",
-                  "geochart"
-                ]
+                "enum": ["basemap-panel", "layers", "geochart"]
               },
               "minItems": 1,
               "default": [],
@@ -1629,9 +1675,7 @@
           "description": "State of app-bar when map is loaded (expanded or collapsed)"
         }
       },
-      "required": [
-        "tabs"
-      ]
+      "required": ["tabs"]
     },
     "TypeOverviewMapProps": {
       "type": "object",

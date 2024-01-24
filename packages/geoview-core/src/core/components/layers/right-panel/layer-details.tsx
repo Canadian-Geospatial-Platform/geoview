@@ -90,7 +90,8 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
     if (
       layerDetails.styleConfig?.LineString?.styleType === 'simple' ||
       layerDetails.styleConfig?.Point?.styleType === 'simple' ||
-      layerDetails.styleConfig?.Polygon?.styleType === 'simple'
+      layerDetails.styleConfig?.Polygon?.styleType === 'simple' ||
+      layerDetails.type === 'esriImage'
     ) {
       return null;
     }
@@ -218,7 +219,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
           </Box>
           <LayerOpacityControl layerDetails={layerDetails} />
           <Box sx={{ marginTop: '20px' }}>
-            {layerDetails.items?.length > 0 && renderItems()}
+            {layerDetails.items?.length > 0 && layerDetails.type !== 'esriImage' && renderItems()}
             {layerDetails.children.length > 0 && (
               <>
                 <Typography sx={{ fontWeight: 'bold', textAlign: 'left', margin: '10px 0px' }}>{t('layers.subLayersList')}</Typography>

@@ -8,6 +8,7 @@ import {
   layerEntryIsGroupLayer,
   TypeBaseLayerEntryConfig,
   TypeEsriDynamicLayerEntryConfig,
+  TypeEsriImageLayerEntryConfig,
   TypeLayerEntryConfig,
   TypeLayerGroupEntryConfig,
   TypeListOfLayerEntryConfig,
@@ -28,6 +29,7 @@ import {
   TypeFieldEntry,
 } from '@/api/events/payloads';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
+import { EsriImage, layerConfigIsEsriImage } from './raster/esri-image';
 
 /** ***************************************************************************************************************************
  * This method reads the service metadata from the metadataAccessPath.
@@ -156,7 +158,7 @@ export function commonValidateListOfLayerEntryConfig(this: EsriDynamic | EsriFea
  * @returns {'string' | 'date' | 'number'} The type of the field.
  */
 export function commonGetFieldType(
-  this: EsriDynamic | EsriFeature,
+  this: EsriDynamic | EsriFeature | EsriImage,
   fieldName: string,
   layerConfig: TypeLayerEntryConfig
 ): 'string' | 'date' | 'number' {
@@ -184,7 +186,7 @@ export function commonGetFieldType(
  * @returns {null | codedValueType | rangeDomainType} The domain of the field.
  */
 export function commonGetFieldDomain(
-  this: EsriDynamic | EsriFeature,
+  this: EsriDynamic | EsriFeature | EsriImage,
   fieldName: string,
   layerConfig: TypeLayerEntryConfig
 ): null | codedValueType | rangeDomainType {
@@ -201,9 +203,9 @@ export function commonGetFieldDomain(
  * @param {TypeEsriFeatureLayerEntryConfig | TypeEsriDynamicLayerEntryConfig} layerConfig The layer entry to configure
  */
 export function commonProcessTemporalDimension(
-  this: EsriDynamic | EsriFeature,
+  this: EsriDynamic | EsriFeature | EsriImage,
   esriTimeDimension: TypeJsonObject,
-  layerConfig: TypeEsriFeatureLayerEntryConfig | TypeEsriDynamicLayerEntryConfig
+  layerConfig: TypeEsriFeatureLayerEntryConfig | TypeEsriDynamicLayerEntryConfig | TypeEsriImageLayerEntryConfig
 ) {
   if (esriTimeDimension !== undefined) {
     this.layerTemporalDimension[layerConfig.layerPath] = api.dateUtilities.createDimensionFromESRI(
@@ -223,12 +225,12 @@ export function commonProcessTemporalDimension(
  * @param {TypeEsriFeatureLayerEntryConfig | TypeEsriDynamicLayerEntryConfig} layerConfig The layer entry to configure.
  */
 export function commonProcessFeatureInfoConfig(
-  this: EsriDynamic | EsriFeature,
+  this: EsriDynamic | EsriFeature | EsriImage,
   capabilities: string,
   nameField: string,
   geometryFieldName: string,
   fields: TypeJsonArray,
-  layerConfig: TypeEsriFeatureLayerEntryConfig | TypeEsriDynamicLayerEntryConfig
+  layerConfig: TypeEsriFeatureLayerEntryConfig | TypeEsriDynamicLayerEntryConfig | TypeEsriImageLayerEntryConfig
 ) {
   if (!layerConfig.source.featureInfo) layerConfig.source.featureInfo = { queryable: capabilities.includes('Query') };
   // dynamic group layer doesn't have fields definition
@@ -287,12 +289,12 @@ export function commonProcessFeatureInfoConfig(
  * @param {TypeEsriFeatureLayerEntryConfig | TypeEsriDynamicLayerEntryConfig} layerConfig The layer entry to configure.
  */
 export function commonProcessInitialSettings(
-  this: EsriDynamic | EsriFeature,
+  this: EsriDynamic | EsriFeature | EsriImage,
   visibility: boolean,
   minScale: number,
   maxScale: number,
   extent: TypeJsonObject,
-  layerConfig: TypeEsriFeatureLayerEntryConfig | TypeEsriDynamicLayerEntryConfig
+  layerConfig: TypeEsriFeatureLayerEntryConfig | TypeEsriDynamicLayerEntryConfig | TypeEsriImageLayerEntryConfig
 ) {
   // layerConfig.initialSettings cannot be undefined because config-validation set it to {} if it is undefined.
   if (layerConfig.initialSettings?.visible === undefined) layerConfig.initialSettings!.visible = visibility ? 'yes' : 'no';
@@ -321,7 +323,10 @@ export function commonProcessInitialSettings(
  *
  * @returns {Promise<void>} A promise that the layer configuration has its metadata processed.
  */
-export async function commonProcessLayerMetadata(this: EsriDynamic | EsriFeature, layerConfig: TypeLayerEntryConfig): Promise<void> {
+export async function commonProcessLayerMetadata(
+  this: EsriDynamic | EsriFeature | EsriImage,
+  layerConfig: TypeLayerEntryConfig
+): Promise<void> {
   // User-defined groups do not have metadata provided by the service endpoint.
   if (layerEntryIsGroupLayer(layerConfig) && !layerConfig.isMetadataLayerGroup) return;
   const { layerPath } = layerConfig;
@@ -332,7 +337,7 @@ export async function commonProcessLayerMetadata(this: EsriDynamic | EsriFeature
     try {
       const { data } = await axios.get<TypeJsonObject>(`${queryUrl}?f=pjson`);
       // layers must have a fields attribute except if it is an metadata layer group.
-      if (!data?.fields && !(layerConfig as TypeLayerGroupEntryConfig).isMetadataLayerGroup) {
+      if (!data?.fields && !(layerConfig as TypeLayerGroupEntryConfig).isMetadataLayerGroup && layerConfig.schemaTag !== 'esriImage') {
         this.setLayerStatus('error', layerPath);
         throw new Error(`Despite a return code of 200, an error was detected with this query (${queryUrl}?f=pjson)`);
       }
