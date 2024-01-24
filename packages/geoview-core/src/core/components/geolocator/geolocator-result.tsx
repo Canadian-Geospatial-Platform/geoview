@@ -145,7 +145,7 @@ export function GeolocatorResult({ geoLocationData, searchValue, error }: Geoloc
         </Box>
       )}
       <Divider />
-      <Box sx={{ maxHeight: mapSize![1] - 120, overflowY: 'auto' }}>
+      <Box sx={{ maxHeight: mapSize![1] - 130, overflowY: 'auto' }}>
         {!!data.length && <GeoList geoListItems={data} zoomToLocation={zoomToGeoLocatorLocation} />}
         {(!data.length || error) && (
           <Typography component="p" sx={{ fontSize: 14, p: 10 }}>
