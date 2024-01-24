@@ -28,6 +28,7 @@ import { useDataTableStoreMapFilteredRecord } from '@/core/stores/store-interfac
 import { DeleteUndoButton } from './delete-undo-button';
 import { LayersList } from './layers-list';
 import { LayerIcon } from '../layer-icon';
+import { logger } from '@/core/utils/logger';
 
 interface SingleLayerProps {
   layer: TypeLegendLayer;
@@ -37,6 +38,9 @@ interface SingleLayerProps {
 }
 
 export function SingleLayer({ isDragging, depth, layer, setIsLayersListPanelVisible }: SingleLayerProps): JSX.Element {
+  // Log
+  logger.logTraceRender('components/layers/left-panel/single-layer');
+
   const { t } = useTranslation<string>();
 
   const { toggleLayerVisibility, setSelectedLayerPath } = useLayerStoreActions(); // get store actions

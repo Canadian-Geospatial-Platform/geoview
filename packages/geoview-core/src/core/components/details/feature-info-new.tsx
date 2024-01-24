@@ -25,6 +25,9 @@ export interface TypeFeatureInfoProps {
  * @returns {JSX.Element} the feature info
  */
 export function FeatureInfo({ features, currentFeatureIndex }: TypeFeatureInfoProps): JSX.Element {
+  // Log
+  logger.logTraceRender('components/details/feature-info-new');
+
   const { t } = useTranslation<string>();
 
   const theme: Theme & {

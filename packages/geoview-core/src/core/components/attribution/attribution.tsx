@@ -8,6 +8,7 @@ import { useUIFooterBarExpanded } from '@/core/stores/store-interface-and-intial
 import { useMapAttribution } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { generateId } from '@/core/utils/utilities';
 import { useGeoViewMapId } from '@/app';
+import { logger } from '@/core/utils/logger';
 
 /**
  * Create an Attribution component that will display an attribution box
@@ -16,6 +17,9 @@ import { useGeoViewMapId } from '@/app';
  * @returns {JSX.Element} created attribution element
  */
 export function Attribution(): JSX.Element {
+  // Log
+  logger.logTraceRender('components/attribution/attribution');
+
   const theme = useTheme();
 
   const mapId = useGeoViewMapId();

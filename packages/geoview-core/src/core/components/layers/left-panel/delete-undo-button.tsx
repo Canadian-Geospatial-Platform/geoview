@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Box, CircularProgressBase, DeleteOutlineIcon, IconButton, UndoIcon } from '@/ui';
 import { TypeLegendLayer } from '../types';
 import { useLayerStoreActions } from '@/core/stores/store-interface-and-intial-values/layer-state';
+import { logger } from '@/core/utils/logger';
 
 interface DeleteUndoButtonProps {
   layer: TypeLegendLayer;
@@ -13,6 +14,9 @@ interface UndoButtonProps {
 }
 
 function UndoButtonWithProgress(props: UndoButtonProps): JSX.Element {
+  // Log
+  logger.logTraceRender('components/layers/left-panel/delete-undo-button/UndoButtonWithProgress');
+
   const { progressValue, onUndo } = props;
   return (
     <Box sx={{ position: 'relative', display: 'inline-flex' }} onClick={onUndo}>
@@ -38,6 +42,9 @@ function UndoButtonWithProgress(props: UndoButtonProps): JSX.Element {
 }
 
 export function DeleteUndoButton(props: DeleteUndoButtonProps): JSX.Element {
+  // Log
+  logger.logTraceRender('components/layers/left-panel/delete-undo-button/DeleteUndoButton');
+
   const { layer } = props;
 
   const [progress, setProgress] = useState(10);

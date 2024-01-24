@@ -40,6 +40,9 @@ interface ShellContainerCssProperties {
  * @returns {JSX.Element} returns the Footer Tabs component
  */
 export function FooterTabs(): JSX.Element | null {
+  // Log
+  logger.logTraceRender('components/footer-tabs/footer-tabs');
+
   const mapId = useGeoViewMapId();
 
   const theme = useTheme();

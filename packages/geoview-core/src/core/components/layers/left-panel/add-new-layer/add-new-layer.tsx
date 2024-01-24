@@ -7,6 +7,7 @@ import { useGeoViewMapId } from '@/core/stores/geoview-store';
 import { generateId } from '@/core/utils/utilities';
 import { useLayersList } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { api } from '@/app';
+import { logger } from '@/core/utils/logger';
 
 type EsriOptions = {
   err: string;
@@ -14,6 +15,9 @@ type EsriOptions = {
 };
 
 export function AddNewLayer(): JSX.Element {
+  // Log
+  logger.logTraceRender('components/layers/left-panel/add-new-layer/add-new-layer');
+
   const { t } = useTranslation<string>();
 
   const { ESRI_DYNAMIC, ESRI_FEATURE, GEOJSON, GEOPACKAGE, WMS, WFS, OGC_FEATURE, XYZ_TILES, GEOCORE } = CONST_LAYER_TYPES;
