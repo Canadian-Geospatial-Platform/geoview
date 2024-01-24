@@ -45,6 +45,9 @@ const sxClasses = {
  * @returns {JSX.Element} the hover tooltip component
  */
 export function HoverTooltip(): JSX.Element {
+  // Log
+  logger.logTraceRender('components/hover-tooltip/hover-tooltip');
+
   const mapId = useGeoViewMapId();
 
   const { t } = useTranslation<string>();

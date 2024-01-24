@@ -8,6 +8,7 @@ import { type MRT_ColumnDef as MRTColumnDef } from 'material-react-table';
 
 import { IconButton, DownloadIcon, Tooltip, Menu, MenuItem } from '@/ui';
 import { ColumnsType } from './data-table';
+import { logger } from '@/core/utils/logger';
 
 interface ExportButtonProps {
   rows: ColumnsType[];
@@ -25,6 +26,9 @@ interface ExportButtonProps {
  *
  */
 function ExportButton({ rows, columns, children }: ExportButtonProps): JSX.Element {
+  // Log
+  logger.logTraceRender('components/data-table/export-button');
+
   const { t } = useTranslation<string>();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);

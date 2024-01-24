@@ -4,6 +4,7 @@ import { IconButton, EmojiPeopleIcon } from '@/ui';
 import { api, useGeoViewMapId } from '@/app';
 import { getSxClasses } from '../nav-bar-style';
 import { useMapStoreActions } from '@/core/stores/store-interface-and-intial-values/map-state';
+import { logger } from '@/core/utils/logger';
 
 /**
  * Create a location button to zoom to user location
@@ -11,6 +12,9 @@ import { useMapStoreActions } from '@/core/stores/store-interface-and-intial-val
  * @returns {JSX.Element} the created location button
  */
 export default function Location(): JSX.Element {
+  // Log
+  logger.logTraceRender('components/nav-bar/buttons/location');
+
   const mapId = useGeoViewMapId();
 
   const theme = useTheme();

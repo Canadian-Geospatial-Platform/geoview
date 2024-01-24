@@ -9,6 +9,7 @@ import { getSxClasses } from './scale-style';
 import { useMapScale } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { useUIFooterBarExpanded } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import { useGeoViewMapId } from '@/app';
+import { logger } from '@/core/utils/logger';
 
 interface TypeScale {
   scaleId: string;
@@ -22,6 +23,9 @@ interface TypeScale {
  * @returns {JSX.Element} created scale element
  */
 export function Scale(): JSX.Element {
+  // Log
+  logger.logTraceRender('components/scale/scale');
+
   const mapId = useGeoViewMapId();
 
   const { t } = useTranslation<string>();

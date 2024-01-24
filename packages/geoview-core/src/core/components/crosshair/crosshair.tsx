@@ -16,6 +16,9 @@ import { logger } from '@/core/utils/logger';
  * @returns {JSX.Element} the crosshair component
  */
 export function Crosshair(): JSX.Element {
+  // Log
+  logger.logTraceRender('components/crosshair/crosshair');
+
   const { t } = useTranslation<string>();
 
   const theme = useTheme();

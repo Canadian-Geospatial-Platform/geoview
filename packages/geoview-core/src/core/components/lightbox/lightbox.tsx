@@ -34,6 +34,9 @@ export interface LightBoxSlides {
  * @returns {JSX.Element} created lightbox element
  */
 export function LightboxImg(props: LightboxProps): JSX.Element {
+  // Log
+  logger.logTraceRender('components/lightbox/lightbox');
+
   const { open, slides, index, exited } = props;
 
   const { t } = useTranslation<string>();

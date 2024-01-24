@@ -5,12 +5,16 @@ import { getSxClasses } from './layer-opacity-control-styles';
 import { Box, SliderBase, Typography } from '@/ui';
 import { TypeLegendLayer } from '../../types';
 import { useLayerStoreActions } from '@/core/stores/store-interface-and-intial-values/layer-state';
+import { logger } from '@/core/utils/logger';
 
 interface LayerOpacityControlProps {
   layerDetails: TypeLegendLayer;
 }
 
 export function LayerOpacityControl(props: LayerOpacityControlProps): JSX.Element {
+  // Log
+  logger.logTraceRender('components/layers/right-panel/layer-opacity-control/layer-opacity-control');
+
   const { layerDetails } = props;
 
   const { t } = useTranslation<string>();

@@ -9,6 +9,7 @@ import { useLayersDisplayState, useSelectedLayer } from '@/core/stores/store-int
 import { LayersToolbar } from './layers-toolbar';
 import { LayerDetails } from './right-panel/layer-details';
 import { LeftPanel } from './left-panel/left-panel';
+import { logger } from '@/core/utils/logger';
 
 const Item = styled('div')(({ theme }) => ({
   backgroundColor: theme.palette.mode === 'dark' ? '#262B32' : '#fff',
@@ -18,6 +19,9 @@ const Item = styled('div')(({ theme }) => ({
 }));
 
 export function LayersPanel() {
+  // Log
+  logger.logTraceRender('components/layers/layers-panel');
+
   const { t } = useTranslation<string>();
 
   const theme = useTheme();

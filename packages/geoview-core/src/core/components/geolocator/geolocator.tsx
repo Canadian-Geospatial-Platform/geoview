@@ -11,6 +11,7 @@ import { OL_ZOOM_DURATION } from '@/core/utils/constant';
 import { useUIAppbarGeolocatorActive } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import { useMapSize, useMapStoreActions } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { useAppGeolocatorServiceURL, useAppDisplayLanguage } from '@/core/stores/store-interface-and-intial-values/app-state';
+import { logger } from '@/core/utils/logger';
 
 export interface GeoListItem {
   key: string;
@@ -23,6 +24,9 @@ export interface GeoListItem {
 }
 
 export function Geolocator() {
+  // Log
+  logger.logTraceRender('components/geolocator/geolocator');
+
   const { t } = useTranslation();
 
   // internal state

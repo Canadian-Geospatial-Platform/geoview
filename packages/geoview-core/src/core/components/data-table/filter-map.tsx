@@ -9,6 +9,7 @@ import {
   useDataTableStoreActions,
   useDataTableStoreMapFilteredRecord,
 } from '@/core/stores/store-interface-and-intial-values/data-table-state';
+import { logger } from '@/core/utils/logger';
 
 interface FilterMapProps {
   layerKey: string;
@@ -22,6 +23,9 @@ interface FilterMapProps {
  *
  */
 function FilterMap({ layerKey }: FilterMapProps): JSX.Element {
+  // Log
+  logger.logTraceRender('components/data-table/filter-map');
+
   const theme = useTheme();
   const sxClasses = getSxClasses(theme);
 

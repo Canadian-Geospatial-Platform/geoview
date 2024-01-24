@@ -6,6 +6,7 @@ import { getSxClasses } from './left-panel-styles';
 import { Box } from '@/ui';
 import { TypeLegendLayer } from '../types';
 import { useLayerStoreActions, useLayersDisplayState } from '@/core/stores/';
+import { logger } from '@/core/utils/logger';
 
 interface LayerListProps {
   depth: number;
@@ -15,6 +16,9 @@ interface LayerListProps {
 }
 
 export function LayersList({ layersList, setIsLayersListPanelVisible, parentLayerPath, depth }: LayerListProps): JSX.Element {
+  // Log
+  logger.logTraceRender('components/layers/left-panel/layers-list');
+
   const theme = useTheme();
   const sxClasses = getSxClasses(theme);
 

@@ -28,6 +28,9 @@ import { api, toJsonObject } from '@/app';
 import { logger } from '@/core/utils/logger';
 
 export function Map(): JSX.Element {
+  // Log
+  logger.logTraceRender('components/map/map');
+
   const defaultTheme = useTheme();
 
   // internal state - get ref to div element
