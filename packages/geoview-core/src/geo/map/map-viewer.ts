@@ -161,6 +161,9 @@ export class MapViewer {
             EVENT_NAMES.LAYER.EVENT_LAYER_ADDED,
             (payload) => {
               if (payloadIsGeoViewLayerAdded(payload)) {
+                // Log
+                logger.logTraceDetailed('map-viewer on EVENT_NAMES.LAYER.EVENT_LAYER_ADDED', this.mapId, payload);
+
                 const { geoviewLayer } = payload;
                 MapEventProcessor.setLayerZIndices(this.mapId);
                 if (geoviewLayer.allLayerEntryConfigProcessed()) {
@@ -209,6 +212,7 @@ export class MapViewer {
         });
         if (allGeoviewLayerReady) {
           // Log
+          logger.logInfo('Map is ready', this.mapId);
           logger.logMarkerCheck(`mapReady-${this.mapId}`, 'for map to be ready');
           MapEventProcessor.setMapLoaded(this.mapId);
           clearInterval(layerInterval);

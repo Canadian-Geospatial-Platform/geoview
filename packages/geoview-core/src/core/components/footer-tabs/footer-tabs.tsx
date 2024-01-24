@@ -270,7 +270,6 @@ export function FooterTabs(): JSX.Element | null {
   useEffect(() => {
     // Log
     logger.logTraceUseEffect('FOOTER-TABS - mount');
-    logger.logDebug('FOOTER-TABS - mount'); // remove this one when things stabilize
 
     if (footerTabsConfig && footerTabsConfig.tabs.core.includes('legend')) {
       // create new tab and add the Layers component to the footer tab
