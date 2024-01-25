@@ -170,7 +170,8 @@
     "errorMessage": "Aucun résultat correspondant à",
     "province": "Province",
     "category": "Catégorie",
-    "clearFilters": "Effacer les filtres"
+    "clearFilters": "Effacer les filtres",
+    "noFilter": "Aucun Filtre"
   },
   "hovertooltip": {
     "alticon": "Symbol de l'élément sélectionné"

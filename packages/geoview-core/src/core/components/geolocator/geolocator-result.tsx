@@ -64,10 +64,14 @@ export function GeolocatorResult({ geoLocationData, searchValue, error }: Geoloc
         return acc;
       }, [] as string[])
       .sort();
-
-    return [...new Set(provincesList)].map((typeItem: string) => {
-      return { type: 'item', item: { value: typeItem, children: typeItem } };
+    // added empty string for resetting the filter
+    return ['', ...new Set(provincesList)].map((typeItem: string) => {
+      return {
+        type: 'item',
+        item: { value: !typeItem.length ? '' : typeItem, children: !typeItem.length ? t('geolocator.noFilter') : typeItem },
+      };
     });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [geoLocationData]);
 
   /**
@@ -82,10 +86,14 @@ export function GeolocatorResult({ geoLocationData, searchValue, error }: Geoloc
         return acc;
       }, [] as string[])
       .sort();
-
-    return [...new Set(locationData)].map((typeItem: string) => {
-      return { type: 'item', item: { value: typeItem, children: typeItem } };
+    // added empty string for resetting the filter
+    return ['', ...new Set(locationData)].map((typeItem: string) => {
+      return {
+        type: 'item',
+        item: { value: !typeItem.length ? '' : typeItem, children: !typeItem.length ? t('geolocator.noFilter') : typeItem },
+      };
     });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [geoLocationData]);
 
   useEffect(() => {
@@ -94,20 +102,18 @@ export function GeolocatorResult({ geoLocationData, searchValue, error }: Geoloc
 
   useEffect(() => {
     // update result list after setting the province and type.
-    if (province || category) {
-      const filterData = geoLocationData.filter((item) => {
-        let result = true;
-        if (province.length && !category.length) {
-          result = item.province.toLowerCase() === province.toLowerCase();
-        } else if (province.length && category.length) {
-          result = item.province.toLowerCase() === province.toLowerCase() && item.category.toLowerCase() === category.toLowerCase();
-        } else if (!province.length && category.length) {
-          result = item.category.toLowerCase() === category.toLowerCase();
-        }
-        return result;
-      });
-      setData(filterData);
-    }
+    const filterData = geoLocationData.filter((item) => {
+      let result = true;
+      if (province.length && !category.length) {
+        result = item.province.toLowerCase() === province.toLowerCase();
+      } else if (province.length && category.length) {
+        result = item.province.toLowerCase() === province.toLowerCase() && item.category.toLowerCase() === category.toLowerCase();
+      } else if (!province.length && category.length) {
+        result = item.category.toLowerCase() === category.toLowerCase();
+      }
+      return result;
+    });
+    setData(filterData);
   }, [geoLocationData, province, category, categories, provinces]);
 
   useEffect(() => {
