@@ -1,4 +1,4 @@
-import { ReactNode, memo, useMemo } from 'react';
+import { ReactNode, memo } from 'react';
 import { useTheme } from '@mui/material/styles';
 import { Box, ChevronRightIcon, IconButton, List, ListItem, ListItemButton, ListItemIcon, Paper, Tooltip, Typography } from '@/ui';
 import { getSxClasses } from './layer-list-style';
@@ -17,51 +17,26 @@ interface LayerListProps {
   isEnlargeDataTable: boolean;
   layerList: LayerListEntry[];
   selectedLayerIndex: number;
-  handleListItemClick: (layer: LayerListEntry, index: number) => void;
+  handleListItemClick: (layer: LayerListEntry) => void;
 }
 
 interface LayerListItemProps {
-  selectedLayerIndex: number;
+  isSelected: boolean;
   layer: LayerListEntry;
-  index: number;
-  handleListItemClick: (layer: LayerListEntry, index: number) => void;
+  handleListItemClick: (layer: LayerListEntry) => void;
   isEnlargeDataTable: boolean;
 }
 
-const LayerListItem = memo(function LayerListItem({
-  selectedLayerIndex,
-  layer,
-  index,
-  handleListItemClick,
-  isEnlargeDataTable,
-}: LayerListItemProps) {
+const LayerListItem = memo(function LayerListItem({ isSelected, layer, handleListItemClick, isEnlargeDataTable }: LayerListItemProps) {
   const theme = useTheme();
   const sxClasses = getSxClasses(theme);
 
-  /**
-   * check if layer will be selected
-   * @param {LayerListEntry} selectedLayer determine if layer will be selected.
-   * @param {number} idx number represent index of the layer in the list.
-   * @returns
-   */
-  const isSelectedLayer = useMemo(
-    () =>
-      (selectedLayer: LayerListEntry, idx: number): boolean => {
-        return (selectedLayer?.numOffeatures ?? 1) > 0 && selectedLayerIndex === idx;
-      },
-    [selectedLayerIndex]
-  );
-
   return (
-    <Paper sx={{ ...sxClasses.paper, border: isSelectedLayer(layer, index) ? sxClasses.borderWithIndex : sxClasses.borderNone }}>
+    <Paper sx={{ ...sxClasses.paper, border: isSelected ? sxClasses.borderWithIndex : sxClasses.borderNone }}>
       <Tooltip title={layer.tooltip} placement="top" arrow>
         <Box>
           <ListItem disablePadding>
-            <ListItemButton
-              selected={isSelectedLayer(layer, index)}
-              disabled={layer?.numOffeatures === 0}
-              onClick={() => handleListItemClick(layer, index)}
-            >
+            <ListItemButton selected={isSelected} disabled={layer?.numOffeatures === 0} onClick={() => handleListItemClick(layer)}>
               <ListItemIcon>
                 <IconStack layerPath={layer.layerPath} />
               </ListItemIcon>
@@ -122,9 +97,8 @@ export function LayerList({ layerList, isEnlargeDataTable, selectedLayerIndex, h
       {layerList.map((layer, index) => (
         <LayerListItem
           key={layer.layerPath}
-          selectedLayerIndex={selectedLayerIndex}
+          isSelected={!!layer.numOffeatures && index === selectedLayerIndex}
           layer={layer}
-          index={index}
           handleListItemClick={handleListItemClick}
           isEnlargeDataTable={isEnlargeDataTable}
         />
