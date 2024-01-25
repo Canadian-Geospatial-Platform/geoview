@@ -1,12 +1,11 @@
 import { Cast, AnySchemaObject, TypeIconButtonProps, TypePanelProps, toJsonObject, TypeJsonObject } from 'geoview-core';
 import { AppBarPlugin } from 'geoview-core/src/api/plugin/appbar-plugin';
-import { ChartType, SchemaValidator } from 'geochart';
+import { ChartType } from 'geochart';
 import { ChartIcon } from 'geoview-core/src/ui/icons';
 
 import { PayloadBaseClassChart, EVENT_CHART_REDRAW } from './geochart-event-base';
 import { PayloadChartConfig } from './geochart-event-config';
 import { PluginGeoChartConfig } from './geochart-types';
-import { GeoChart } from './geochart';
 import schema from '../schema.json';
 import defaultConfig from '../default-config-geochart.json';
 
@@ -70,7 +69,9 @@ export class GeoChartAppBarPlugin extends AppBarPlugin {
 
   onCreateContent(): JSX.Element {
     // Fetch cgpv
-    return <GeoChart mapId={this.pluginProps.mapId} config={this.configObj || {}} schemaValidator={new SchemaValidator()} />;
+    // TODO: Create a geochart-appbar-panel equivalent to geochart-panel to hold the GeoChart itself and hook on the useGeochartConfigs store the same way geochart-panel does it
+    // return <GeoChartAppBarPanel mapId={this.pluginProps.mapId} schemaValidator={new SchemaValidator()} />;
+    return <div>Not implemented</div>;
   }
 
   /**

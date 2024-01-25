@@ -60,17 +60,19 @@ export class FeatureInfoLayerSet {
   private constructor(mapId: string) {
     // This function determines whether a layer can be registered.
     const registrationConditionFunction = (layerPath: string): boolean => {
+      // Log
+      logger.logTraceCore('FeatureInfoLayerSet registration condition...', layerPath, Object.keys(this.resultSets));
+
       const layerConfig = api.maps[this.mapId].layer.registeredLayers[layerPath];
       const queryable = layerConfig?.source?.featureInfo?.queryable;
-      if (queryable) {
-        FeatureInfoEventProcessor.propagateFeatureInfoToStore(mapId, layerPath, 'click', this.resultSets);
-        return true;
-      }
-      return false;
+      return !!queryable;
     };
 
     // This function is used to initialise the data property of the layer path entry.
     const registrationUserDataInitialisation = (layerPath: string) => {
+      // Log
+      logger.logTraceCore('FeatureInfoLayerSet initializing...', layerPath, Object.keys(this.resultSets));
+
       this.disableClickOnLayer[layerPath] = false;
       this.disableHoverOverLayer[layerPath] = false;
       this.resultSets[layerPath].data = {};
@@ -83,6 +85,9 @@ export class FeatureInfoLayerSet {
         };
         this.resultSets[layerPath].data[eventType] = undefined;
       });
+
+      // Propagate feature info to the store, now that the this.resultSets is more representative of the reality
+      FeatureInfoEventProcessor.propagateFeatureInfoToStore(mapId, layerPath, 'click', this.resultSets);
     };
 
     this.mapId = mapId;

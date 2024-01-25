@@ -46,7 +46,7 @@ export function GeoChart(props: GeoChartProps): JSX.Element {
   // Tweak the default colors based on the theme
   const defaultColors: GeoChartDefaultColors = {
     backgroundColor: theme.palette.background.default,
-    borderColor: theme.palette.border.primary,
+    borderColor: 'black', // theme.palette.primary,
     color: theme.palette.primary.main,
   };
 
