@@ -108,7 +108,7 @@ export function Appbar(): JSX.Element {
    */
   useEffect(() => {
     // Log
-    logger.logTraceUseEffect('app-bar.appBarTabsConfig');
+    logger.logTraceUseEffect('APP-BAR - appBarTabsConfig');
 
     // Packages tab
     if (appBarTabsConfig && appBarTabsConfig.tabs.core.includes('basemap-panel')) {

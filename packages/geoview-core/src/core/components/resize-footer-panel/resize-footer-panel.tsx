@@ -8,6 +8,7 @@ import {
   useUIStoreActions,
   useUIFooterPanelResizeValues,
 } from '@/core/stores/store-interface-and-intial-values/ui-state';
+import { logger } from '@/core/utils/logger';
 
 /**
  * Popover to resize the map container and footer panel.
@@ -28,6 +29,9 @@ export function ResizeFooterPanel() {
   const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
 
   const marks = useMemo(() => {
+    // Log
+    logger.logTraceUseMemo('RESIZE-FOOTER-PANEL - marks', footerPanelResizeValues);
+
     return footerPanelResizeValues.map((value) => ({ value, label: `${value}%` }));
   }, [footerPanelResizeValues]);
 

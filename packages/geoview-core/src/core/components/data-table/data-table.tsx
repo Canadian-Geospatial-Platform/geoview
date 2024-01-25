@@ -279,6 +279,9 @@ function DataTable({ data, layerId, mapId, layerKey, tableHeight = 600 }: DataTa
    * @param {object} data.fieldAliases object values transformed into required key value property of material react data table
    */
   const columns = useMemo<MRTColumnDef<ColumnsType>[]>(() => {
+    // Log
+    logger.logTraceUseMemo('DATA-TABLE - columns', density);
+
     const entries = Object.entries({ ICON: iconColumn, ZOOM: zoomColumn, ...data.fieldAliases });
     const columnList = [] as MRTColumnDef<ColumnsType>[];
     entries.forEach(([key, value]) => {
@@ -351,6 +354,9 @@ function DataTable({ data, layerId, mapId, layerKey, tableHeight = 600 }: DataTa
    * @param {Features} features list of objects transform into rows.
    */
   const rows = useMemo(() => {
+    // Log
+    logger.logTraceUseMemo('DATA-TABLE - rows', data.features);
+
     return data.features.map((feature) => {
       return {
         ICON: (

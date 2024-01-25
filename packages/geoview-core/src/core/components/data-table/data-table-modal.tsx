@@ -17,7 +17,6 @@ import { useUIActiveFocusItem, useUIStoreActions } from '@/core/stores/store-int
 import { useSelectedLayerPath } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { useDatatableStoreLayersData } from '@/core/stores/store-interface-and-intial-values/data-table-state';
 import { ColumnsType } from './data-table';
-import { LayersDataType } from './data-panel';
 import { getSxClasses } from './data-table-style';
 import { useAppDisplayLanguage } from '@/core/stores/store-interface-and-intial-values/app-state';
 import { logger } from '@/core/utils/logger';
@@ -45,7 +44,10 @@ export default function DataTableModal(): JSX.Element {
   const layersData = useDatatableStoreLayersData();
   const displayLanguage = useAppDisplayLanguage();
 
-  const layer: LayersDataType | undefined = useMemo(() => {
+  const layer = useMemo(() => {
+    // Log
+    logger.logTraceUseMemo('DATA-TABLE-MODAL - layer', layersData, selectedLayer);
+
     return layersData?.find((layerData) => layerData.layerKey === selectedLayer);
   }, [layersData, selectedLayer]);
 
@@ -69,6 +71,9 @@ export default function DataTableModal(): JSX.Element {
    * @returns JSX.Element
    */
   const getTableHeader = useCallback((header: string) => {
+    // Log
+    logger.logTraceUseCallback('DATA-TABLE-MODAL - getTableHeader');
+
     return (
       <Box component="span" sx={{ whiteSpace: 'nowrap' }}>
         {header}
@@ -77,6 +82,9 @@ export default function DataTableModal(): JSX.Element {
   }, []);
 
   const columns = useMemo<MRTColumnDef<ColumnsType>[]>(() => {
+    // Log
+    logger.logTraceUseMemo('DATA-TABLE-MODAL - columns', layer?.fieldAliases);
+
     if (!layer?.fieldAliases) {
       return [];
     }
@@ -98,6 +106,9 @@ export default function DataTableModal(): JSX.Element {
   }, [layer?.fieldAliases]);
 
   const rows = useMemo(() => {
+    // Log
+    logger.logTraceUseMemo('DATA-TABLE-MODAL - rows', layer?.fieldAliases);
+
     return (
       layer?.features.slice(0, 99).map((feature) => {
         return feature.rows;

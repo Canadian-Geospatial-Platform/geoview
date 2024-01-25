@@ -10,8 +10,10 @@ export const LOG_TRACE_USE_EFFECT_UNMOUNT = 2;
 export const LOG_TRACE_RENDER = 3;
 // For tracing useCallback. Disabled by default. Only shows if running in dev environment or GEOVIEW_LOG_ACTIVE key is set in local storage.
 export const LOG_TRACE_USE_CALLBACK = 4;
+// For tracing useMemo. Disabled by default. Only shows if running in dev environment or GEOVIEW_LOG_ACTIVE key is set in local storage.
+export const LOG_TRACE_USE_MEMO = 5;
 // For tracing useEffect mounting. Disabled by default. Only shows if running in dev environment or GEOVIEW_LOG_ACTIVE key is set in local storage.
-export const LOG_TRACE_USE_EFFECT = 5;
+export const LOG_TRACE_USE_EFFECT = 6;
 // For tracing core functions. Disabled by default. Only shows if running in dev environment or GEOVIEW_LOG_ACTIVE key is set in local storage.
 export const LOG_TRACE_CORE = 10;
 // Default. For debugging and development. Enabled by default. Only shows if running in dev environment or GEOVIEW_LOG_ACTIVE key is set in local storage.
@@ -67,8 +69,9 @@ type ColorCode = {
   plum: string;
   turquoise: string;
   grey: string;
-  darkorchid: string;
+  orchid: string;
   mediumorchid: string;
+  darkorchid: string;
 };
 
 /**
@@ -133,6 +136,19 @@ export class ConsoleLogger {
     if (!LOG_ACTIVE) return;
     // Redirect
     this.logLevel(LOG_TRACE_RENDER, 'RENDR', 'plum', component, ...message); // Not a typo, 5 characters for alignment
+  };
+
+  /**
+   * Logging function commonly used in the useMemo to track when a value is being memoized.
+   * Only shows if LOG_ACTIVE is true.
+   * @param message string useCallbackFunction the useCallback function identifier
+   * @param message unknown[] the messages to log
+   */
+  logTraceUseMemo = (useMemoFunction: string, ...message: unknown[]): void => {
+    // Validate log active
+    if (!LOG_ACTIVE) return;
+    // Redirect
+    this.logLevel(LOG_TRACE_USE_MEMO, 'U_MEM', 'orchid', useMemoFunction, ...message);
   };
 
   /**

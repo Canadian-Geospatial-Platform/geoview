@@ -78,17 +78,22 @@ export function FooterTabs(props: FooterTabsProps): JSX.Element | null {
   // get store config for footer tabs to add (similar logic as in app-bar)
   const footerTabsConfig = useGeoViewConfig()?.footerTabs;
 
-  const tabs: Record<string, Record<string, ReactNode>> = useMemo(
-    () => ({
+  const tabs = useMemo(() => {
+    // Log
+    logger.logTraceUseMemo('FOOTER-TABS - tabs', table);
+
+    return {
       legend: { icon: <HubOutlinedIcon />, content: <Legend /> },
       layers: { icon: <LayersOutlinedIcon />, content: <LayersPanel /> },
       details: { icon: <InfoOutlinedIcon />, content: <DetailsPanel /> },
       'data-table': { icon: <StorageIcon />, content: table },
-    }),
-    [table]
-  );
+    } as Record<string, Record<string, ReactNode>>;
+  }, [table]);
 
   const defaultFooterTabs = useMemo(() => {
+    // Log
+    logger.logTraceUseMemo('FOOTER-TABS - defaultFooterTabs', footerTabs);
+
     return footerTabsConfig?.tabs.core.map((tab, index) => {
       return {
         id: tab,
@@ -99,12 +104,15 @@ export function FooterTabs(props: FooterTabsProps): JSX.Element | null {
       };
     }) as TypeTabs[];
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [footerTabs]);
+  }, [footerTabs]); // TODO: Investigate - shouldn't this be footerTabsConfig (and tabs?) instead of footerTabs?
 
   /**
    * Calculate resize values from popover values defined in store.
    */
   const resizeValues = useMemo(() => {
+    // Log
+    logger.logTraceUseMemo('FOOTER-TABS - resizeValues', footerPanelResizeValue, footerPanelResizeValues);
+
     return footerPanelResizeValues.reduce((acc, curr) => {
       const windowHeight = window.screen.height;
       let values: [string, number, number | string, number] = [
