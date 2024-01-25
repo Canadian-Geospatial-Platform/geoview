@@ -170,7 +170,8 @@
     "errorMessage": "No matches found for",
     "province": "Province",
     "category": "Category",
-    "clearFilters": "Clear Filters"
+    "clearFilters": "Clear Filters",
+    "noFilter": "No Filter"
   },
   "hovertooltip": {
     "alticon": "Selected feature icon"
