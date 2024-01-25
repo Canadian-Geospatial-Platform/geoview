@@ -132,6 +132,9 @@ export function FooterTabs(): JSX.Element | null {
    */
   const addTab = useCallback(
     (payload: FooterTabPayload) => {
+      // Log
+      logger.logTraceUseCallback('FOOTER-TABS - defaultFooterTabs', defaultFooterTabs);
+
       const idx = defaultFooterTabs.findIndex((tab) => tab.id === payload.tab.id);
       if (idx !== -1) {
         defaultFooterTabs[idx].content = payload.tab.content;
@@ -214,6 +217,25 @@ export function FooterTabs(): JSX.Element | null {
     setIsCollapsed(!isCollapsed);
   };
 
+  /**
+   * Handles when the selected tab changes
+   * @param tab The newly selected tab
+   */
+  const handleSelectedTabChanged = (tab: TypeTabs) => {
+    // If clicked on a tab with a plugin
+    if (api.maps[mapId].plugins[tab.id]) {
+      // Get the plugin
+      const theSelectedPlugin = api.maps[mapId].plugins[tab.id];
+
+      // A bit hacky, but not much other choice for now...
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      if (typeof (theSelectedPlugin as any).onSelected === 'function') {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (theSelectedPlugin as any).onSelected();
+      }
+    }
+  };
+
   const eventFooterTabsCreateListenerFunction = (payload: PayloadBaseClass) => {
     if (payloadIsAFooterTab(payload)) {
       addTab(payload);
@@ -249,7 +271,7 @@ export function FooterTabs(): JSX.Element | null {
     // listen on tab removal
     api.event.on(EVENT_NAMES.FOOTER_TABS.EVENT_FOOTER_TABS_TAB_REMOVE, eventFooterTabsRemoveListenerFunction, mapId);
 
-    // listen for tab selection
+    // listen for tab selection when selecting via the api call (NOT when user clicks on a tab, this is only for api calls)
     api.event.on(EVENT_NAMES.FOOTER_TABS.EVENT_FOOTER_TABS_TAB_SELECT, eventFooterTabsSelectListenerFunction, mapId);
     return () => {
       api.event.off(EVENT_NAMES.FOOTER_TABS.EVENT_FOOTER_TABS_TAB_CREATE, mapId, eventFooterTabsCreateListenerFunction);
@@ -398,6 +420,7 @@ export function FooterTabs(): JSX.Element | null {
       <Tabs
         isCollapsed={isCollapsed}
         handleCollapse={handleCollapse}
+        onSelectedTabChanged={handleSelectedTabChanged}
         selectedTab={selectedTab}
         tabsProps={{ variant: 'scrollable' }}
         tabs={footerTabs}
