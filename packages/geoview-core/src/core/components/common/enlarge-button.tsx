@@ -6,6 +6,7 @@ import { getSxClasses } from './enlarge-button-style';
 
 interface EnlargeButtonProps {
   isEnlargeDataTable: boolean;
+  // TODO: Refactor this props something like 'onEnlarge'? (getting rid of legacy 'data table' stuff and align with callback namings conv?)
   setIsEnlargeDataTable: Dispatch<boolean>;
 }
 
