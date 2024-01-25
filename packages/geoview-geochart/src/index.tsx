@@ -73,6 +73,14 @@ class GeoChartFooterPlugin extends FooterPlugin {
     };
   }
 
+  onSelected(): void {
+    // Call parent
+    super.onSelected();
+
+    // When the GeoChart Plugin in the Footer is selected, we redraw the chart, in case
+    this.redrawChart();
+  }
+
   /**
    * Callable plugin function to emit a Chart config event in order to update the Chart configuration on demand.
    * @param config PluginGeoChartConfig<ChartType> The GeoChart Config
