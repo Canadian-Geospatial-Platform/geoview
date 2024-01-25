@@ -9,9 +9,9 @@ import {
   MenuItemProps,
   Select as MaterialSelect,
   SelectProps,
+  FormControlProps,
 } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
-
 import { getSxClasses } from './select-style';
 
 /**
@@ -22,12 +22,13 @@ interface TypeSelectProps extends SelectProps {
   fullWidth?: boolean;
   menuItems: TypeMenuItemProps[];
   inputLabel: InputLabelProps;
+  formControlProps?: FormControlProps;
 }
 
 /**
  * Menu Item properties
  */
-interface TypeMenuItemProps {
+export interface TypeMenuItemProps {
   type?: 'item' | 'header';
   item: MenuItemProps | ListSubheaderProps | null;
 }
@@ -39,13 +40,13 @@ interface TypeMenuItemProps {
  * @returns {JSX.Element} the auto complete ui component
  */
 export function Select(props: TypeSelectProps): JSX.Element {
-  const { fullWidth, inputLabel, menuItems, ...selectProps } = props;
+  const { fullWidth, inputLabel, menuItems, formControlProps = {}, ...selectProps } = props;
 
   const theme = useTheme();
   const sxClasses = getSxClasses(theme);
 
   return (
-    <FormControl fullWidth={fullWidth}>
+    <FormControl fullWidth={fullWidth} {...formControlProps}>
       <InputLabel sx={sxClasses.label} {...inputLabel}>
         {selectProps.label}
       </InputLabel>

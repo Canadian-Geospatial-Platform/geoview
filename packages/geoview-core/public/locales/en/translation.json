@@ -167,7 +167,10 @@
   },
   "geolocator": {
     "search": "Search",
-    "errorMessage": "No matches found for"
+    "errorMessage": "No matches found for",
+    "province": "Province",
+    "category": "Category",
+    "clearFilters": "Clear Filters"
   },
   "hovertooltip": {
     "alticon": "Selected feature icon"

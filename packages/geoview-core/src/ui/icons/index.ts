@@ -34,6 +34,7 @@ export {
   ExpandMore as ExpandMoreIcon,
   FileUpload as FileUploadIcon,
   FilterAlt as FilterAltIcon,
+  FilterAltOff as FilterAltOffIcon,
   Fullscreen as FullscreenIcon,
   FullscreenExit as FullscreenExitIcon,
   GitHub as GitHubIcon,
