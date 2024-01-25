@@ -28,12 +28,16 @@ import { useUIStoreActions } from '@/core/stores/store-interface-and-intial-valu
 import { generateId } from '@/core/utils/utilities';
 import { LayerIcon } from '../layer-icon';
 import { LayerOpacityControl } from './layer-opacity-control/layer-opacity-control';
+import { logger } from '@/core/utils/logger';
 
 interface LayerDetailsProps {
   layerDetails: TypeLegendLayer;
 }
 
 export function LayerDetails(props: LayerDetailsProps): JSX.Element {
+  // Log
+  logger.logTraceRender('components/layers/right-panel/layer-details');
+
   const { layerDetails } = props;
 
   const { t } = useTranslation<string>();

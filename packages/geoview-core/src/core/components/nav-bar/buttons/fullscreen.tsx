@@ -13,6 +13,9 @@ import { logger } from '@/core/utils/logger';
  * @returns {JSX.Element} the fullscreen toggle button
  */
 export default function Fullscreen(): JSX.Element {
+  // Log
+  logger.logTraceRender('components/nav-bar/buttons/fullscreen');
+
   const mapId = useGeoViewMapId();
 
   const theme = useTheme();

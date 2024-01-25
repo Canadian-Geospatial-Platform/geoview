@@ -28,6 +28,9 @@ export type TypeClickMarker = {
  * @returns {JSX.Element} the react element with a marker on click
  */
 export function ClickMarker(): JSX.Element {
+  // Log
+  logger.logTraceRender('components/click-marker/click-marker');
+
   const mapId = useGeoViewMapId();
 
   // internal state

@@ -3,6 +3,7 @@ import { useTheme } from '@mui/material/styles';
 import { IconButton, ZoomInIcon } from '@/ui';
 import { getSxClasses } from '../nav-bar-style';
 import { useMapStoreActions, useMapZoom } from '@/core/stores/store-interface-and-intial-values/map-state';
+import { logger } from '@/core/utils/logger';
 
 /**
  * Create a zoom in button
@@ -10,6 +11,9 @@ import { useMapStoreActions, useMapZoom } from '@/core/stores/store-interface-an
  * @returns {JSX.Element} return the created zoom in button
  */
 export default function ZoomIn(): JSX.Element {
+  // Log
+  logger.logTraceRender('components/nav-bar/buttons/zoom-in');
+
   const theme = useTheme();
   const sxClasses = getSxClasses(theme);
 

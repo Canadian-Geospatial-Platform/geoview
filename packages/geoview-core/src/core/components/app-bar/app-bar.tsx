@@ -23,6 +23,9 @@ import { logger } from '@/core/utils/logger';
  * Create an app-bar with buttons that can open a panel
  */
 export function Appbar(): JSX.Element {
+  // Log
+  logger.logTraceRender('components/app-bar/app-bar');
+
   const mapId = useGeoViewMapId();
 
   const theme = useTheme();

@@ -17,6 +17,7 @@ import {
 import { sxClasses } from './notifications-style';
 import { useAppNotifications, useAppStoreActions } from '@/core/stores/store-interface-and-intial-values/app-state';
 import { useGeoViewMapId } from '@/app';
+import { logger } from '@/core/utils/logger';
 
 export type NotificationDetailsType = {
   key: string;
@@ -33,6 +34,9 @@ export type NotificationType = 'success' | 'error' | 'info' | 'warning';
  * @returns {JSX.Element} the notification button
  */
 export default function Notifications(): JSX.Element {
+  // Log
+  logger.logTraceRender('components/notifications/notifications');
+
   const { t } = useTranslation<string>();
 
   const mapId = useGeoViewMapId();

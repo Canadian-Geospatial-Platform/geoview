@@ -17,12 +17,16 @@ import {
 import { TypeLegendLayer } from '@/core/components/layers/types';
 import { getSxClasses } from './legend-styles';
 import { LayerIcon } from '../layers/layer-icon';
+import { logger } from '@/core/utils/logger';
 
 interface LegendLayerProps {
   layer: TypeLegendLayer;
 }
 
 export function LegendLayer(props: LegendLayerProps): JSX.Element {
+  // Log
+  logger.logTraceRender('components/legend/legend-layer');
+
   const { layer } = props;
 
   const { t } = useTranslation<string>();

@@ -1,5 +1,5 @@
 import { ListItem } from '@mui/material'; // TODO because of forward ref problem we can't use it inside the tooltip if provided by UI
-import { ListItemButton, Grid, Tooltip, Typography } from '@/ui';
+import { Box, ListItemButton, Grid, Tooltip, Typography } from '@/ui';
 import { GeoListItem } from './geolocator';
 import { sxClassesList } from './geolocator-style';
 import { useMapStoreActions } from '@/core/stores/store-interface-and-intial-values/map-state';
@@ -39,7 +39,7 @@ export default function GeoList({ geoListItems }: GeoListProps) {
   const { zoomToGeoLocatorLocation } = useMapStoreActions();
 
   return (
-    <>
+    <Box>
       {geoListItems.map((geoListItem, index) => (
         <Tooltip
           title={getTooltipTitle(geoListItem)}
@@ -71,6 +71,6 @@ export default function GeoList({ geoListItems }: GeoListProps) {
           </ListItem>
         </Tooltip>
       ))}
-    </>
+    </Box>
   );
 }
