@@ -1,5 +1,6 @@
 /* eslint-disable no-console */
 import { TypeMapFeaturesConfig } from '@/core/types/global-types';
+import { logger } from '@/core/utils/logger';
 
 // ******************************************************************************************************************************
 // ******************************************************************************************************************************
@@ -32,7 +33,7 @@ export class JsonConfigReader {
 
         mapConfig = { ...configData };
       } catch (error) {
-        console.log(`- Map: ${mapId} - Invalid config url provided -`);
+        logger.logError(`- Map: ${mapId} - Invalid config url provided -`);
       }
     }
 
