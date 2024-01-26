@@ -167,6 +167,17 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
             size: get().mapState.mapElement?.getSize() as unknown as [number, number],
           },
         });
+
+        // on map size change, set the scale values... apply a timeout so it is set the first time sizew is set
+        // ? this timeout is 0ms only to make the call when map change size is really done
+        setTimeout(() => {
+          set({
+            mapState: {
+              ...get().mapState,
+              scale: setScale(get().mapId),
+            },
+          });
+        }, 0);
       },
       onMapMoveEnd: debounce((event: MapEvent) => {
         const coords = event.map.getView().getCenter()!;
@@ -220,23 +231,27 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
           });
         }
       }, 100),
-      onMapPointerMove: debounce((event: MapEvent) => {
-        set({
-          mapState: {
-            ...get().mapState,
-            pointerPosition: {
-              projected: (event as MapBrowserEvent<UIEvent>).coordinate,
-              pixel: (event as MapBrowserEvent<UIEvent>).pixel,
-              lnglat: api.projection.transformPoints(
-                [(event as MapBrowserEvent<UIEvent>).coordinate],
-                `EPSG:${get().mapState.currentProjection}`,
-                `EPSG:4326`
-              )[0],
-              dragging: (event as MapBrowserEvent<UIEvent>).dragging,
+      onMapPointerMove: debounce(
+        (event: MapEvent) => {
+          set({
+            mapState: {
+              ...get().mapState,
+              pointerPosition: {
+                projected: (event as MapBrowserEvent<UIEvent>).coordinate,
+                pixel: (event as MapBrowserEvent<UIEvent>).pixel,
+                lnglat: api.projection.transformPoints(
+                  [(event as MapBrowserEvent<UIEvent>).coordinate],
+                  `EPSG:${get().mapState.currentProjection}`,
+                  `EPSG:4326`
+                )[0],
+                dragging: (event as MapBrowserEvent<UIEvent>).dragging,
+              },
             },
-          },
-        });
-      }, 10),
+          });
+        },
+        10,
+        { leading: true }
+      ),
       onMapRotation: debounce((event: ObjectEvent) => {
         set({
           mapState: {
@@ -245,23 +260,27 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
           },
         });
       }, 100),
-      onMapSingleClick: (event: MapEvent) => {
-        set({
-          mapState: {
-            ...get().mapState,
-            clickCoordinates: {
-              projected: (event as MapBrowserEvent<UIEvent>).coordinate,
-              pixel: (event as MapBrowserEvent<UIEvent>).pixel,
-              lnglat: api.projection.transformPoints(
-                [(event as MapBrowserEvent<UIEvent>).coordinate],
-                `EPSG:${get().mapState.currentProjection}`,
-                `EPSG:4326`
-              )[0],
-              dragging: (event as MapBrowserEvent<UIEvent>).dragging,
+      onMapSingleClick: debounce(
+        (event: MapEvent) => {
+          set({
+            mapState: {
+              ...get().mapState,
+              clickCoordinates: {
+                projected: (event as MapBrowserEvent<UIEvent>).coordinate,
+                pixel: (event as MapBrowserEvent<UIEvent>).pixel,
+                lnglat: api.projection.transformPoints(
+                  [(event as MapBrowserEvent<UIEvent>).coordinate],
+                  `EPSG:${get().mapState.currentProjection}`,
+                  `EPSG:4326`
+                )[0],
+                dragging: (event as MapBrowserEvent<UIEvent>).dragging,
+              },
             },
-          },
-        });
-      },
+          });
+        },
+        1500,
+        { leading: true }
+      ),
       onMapZoomEnd: debounce((event: ObjectEvent) => {
         set({
           mapState: {
@@ -377,11 +396,9 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
         });
 
         // enable or disable map interaction when type of map interaction is set
-        if (interaction === 'dynamic' || !interaction) {
-          get()
-            .mapState.mapElement!.getInteractions()
-            .forEach((x) => x.setActive(interaction === 'dynamic'));
-        }
+        get()
+          .mapState.mapElement!.getInteractions()
+          .forEach((x) => x.setActive(interaction === 'dynamic'));
       },
       setLayerOrder: (newOrder: string[]) => {
         set({

@@ -240,6 +240,9 @@ export class MapEventProcessor extends AbstractEventProcessor {
     store.getState().mapState.actions.setOverlayNorthMarker(northPoleMarker);
     store.getState().mapState.actions.setOverlayClickMarker(clickMarkerOverlay);
     map.dispatchEvent('change:size'); // dispatch event to set initial value
+
+    // set map interaction
+    MapEventProcessor.setInteraction(mapId, store.getState().mapState.interaction);
   }
 
   // **********************************************************
