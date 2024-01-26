@@ -194,9 +194,6 @@
     "images": "Images",
     "close": "Close"
   },
-  "geoChart": {
-    "noChartAvailable": "Click on the map layer with chart"
-  },
   "footerTabsContainer": {
     "focusToMap": "Focus to map",
     "focusToFooter": "Focus to footer",

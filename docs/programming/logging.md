@@ -11,7 +11,7 @@ The logger class can be found here:  [https://github.com/Canadian-Geospatial-Pla
 The `logger` provides functions for high-level logging abstraction following best-practices concepts and the following constants:
 ```ts
 // The most detailed messages. Disabled by default. Only shows if actually running in dev environment, never shown otherwise.
-export const LOG_TRACE_DETAILED 1;
+export const LOG_TRACE_DETAILED = 1;
 // For tracing useEffect unmounting. Disabled by default. Only shows if running in dev environment or GEOVIEW_LOG_ACTIVE key is set in local storage.
 export const LOG_TRACE_USE_EFFECT_UNMOUNT = 2;
 // For tracing rendering. Disabled by default. Only shows if running in dev environment or GEOVIEW_LOG_ACTIVE key is set in local storage.
