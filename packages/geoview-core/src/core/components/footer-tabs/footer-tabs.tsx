@@ -34,14 +34,20 @@ interface ShellContainerCssProperties {
   tabMaxHeight: number;
 }
 
+type FooterTabsProps = {
+  onSelectedTabChanged?: (tab: TypeTabs) => void;
+};
+
 /**
  * The FooterTabs component is used to display a list of tabs and their content.
  *
  * @returns {JSX.Element} returns the Footer Tabs component
  */
-export function FooterTabs(): JSX.Element | null {
+export function FooterTabs(props: FooterTabsProps): JSX.Element | null {
   // Log
   logger.logTraceRender('components/footer-tabs/footer-tabs');
+
+  const { onSelectedTabChanged } = props;
 
   const mapId = useGeoViewMapId();
 
@@ -222,6 +228,9 @@ export function FooterTabs(): JSX.Element | null {
    * @param tab The newly selected tab
    */
   const handleSelectedTabChanged = (tab: TypeTabs) => {
+    // Callback
+    onSelectedTabChanged?.(tab);
+
     // If clicked on a tab with a plugin
     if (api.maps[mapId].plugins[tab.id]) {
       // Get the plugin
@@ -443,3 +452,7 @@ export function FooterTabs(): JSX.Element | null {
     </Box>
   ) : null;
 }
+
+FooterTabs.defaultProps = {
+  onSelectedTabChanged: undefined,
+};
