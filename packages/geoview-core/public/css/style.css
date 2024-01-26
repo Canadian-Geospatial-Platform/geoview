@@ -203,3 +203,11 @@ th.state {
 table.state {
   display: flex;
 }
+
+.config-error {
+  color: red;
+}
+
+.config-json-valid {
+  color: green
+}

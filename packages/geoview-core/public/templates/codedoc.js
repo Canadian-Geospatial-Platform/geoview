@@ -1,5 +1,15 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
+function sleep(milliseconds) {
+  const date = Date.now();
+  let currentDate = null;
+  do {
+    currentDate = Date.now();
+  } while (currentDate - date < milliseconds);
+}
+
 function createCodeSnippet() {
+  sleep(1000);
+
   const scripts = Array.prototype.filter.call(document.getElementsByTagName('script'), (obj) => {
     return obj.getAttribute('id') === null;
   });
@@ -17,6 +27,8 @@ function createCodeSnippet() {
 }
 
 function createCodeSnippetUsingIDs() {
+  sleep(1000);
+
   // Enhanced code snippet generator which allows to associate a script id with a code snippet script (og function is using indexes)
   // and write down different code snippet spreaded in the dom tree (og function always reuses 'script' variable which is the last script tag found in the dom)
   // Get all scripts on page which has an id
@@ -36,6 +48,8 @@ function createCodeSnippetUsingIDs() {
 }
 
 function createConfigSnippet() {
+  sleep(1000);
+
   let j = 0;
   // inject configuration snippet inside panel
   for (j = 0; j < document.getElementsByClassName('geoview-map').length; j++) {

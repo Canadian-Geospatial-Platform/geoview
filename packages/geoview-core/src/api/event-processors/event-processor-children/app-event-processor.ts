@@ -1,6 +1,6 @@
 import { GeoviewStoreType } from '@/core/stores/geoview-store';
 import { AbstractEventProcessor } from '../abstract-event-processor';
-import { getGeoViewStore } from '@/core/stores/stores-managers';
+import { getGeoViewStore, getGeoViewStoreAsync } from '@/core/stores/stores-managers';
 import { NotificationDetailsType, TypeDisplayLanguage, TypeHTMLElement, TypeDisplayTheme } from '@/core/types/cgpv-types';
 
 export class AppEventProcessor extends AbstractEventProcessor {
@@ -18,8 +18,10 @@ export class AppEventProcessor extends AbstractEventProcessor {
   //! Some action does state modifications AND map actions.
   //! ALWAYS use map event processor when an action modify store and IS NOT trap by map state event handler
   // #region
-  static addAppNotification(mapId: string, notification: NotificationDetailsType) {
-    const store = getGeoViewStore(mapId);
+  static async addAppNotification(mapId: string, notification: NotificationDetailsType): Promise<void> {
+    // because notification is called before map is created, we use the async
+    // version of getGeoViewStore
+    const store = await getGeoViewStoreAsync(mapId);
     store.getState().appState.actions.addNotification(notification);
   }
 

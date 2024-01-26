@@ -1,6 +1,7 @@
 /* eslint-disable no-console */
 import { TypeMapFeaturesConfig } from '@/core/types/global-types';
 import { isJsonString, removeCommentsFromJSON } from '../../utilities';
+import { logger } from '@/core/utils/logger';
 
 // ******************************************************************************************************************************
 // ******************************************************************************************************************************
@@ -43,7 +44,7 @@ export class InlineDivConfigReader {
       configObjStr = configObjStr.replace(/\\'/gm, "'");
 
       if (!isJsonString(configObjStr)) {
-        console.log(`- Map: ${mapId} - Invalid JSON configuration object in div, a fallback strategy will be used -`);
+        logger.logWarning(`- Map: ${mapId} - Invalid JSON configuration object in div, a fallback strategy will be used -`);
       } else {
         mapConfig = { ...JSON.parse(configObjStr) };
       }
