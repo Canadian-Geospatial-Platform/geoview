@@ -178,16 +178,16 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
     return (
       <Box sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '15px' }}>
         {layerDetails.items.length > 0 && (
-          <IconButton id="table-details" tooltip="legend.tableDetails" sx={{ backgroundColor: '#F6F6F6' }} onClick={handleOpenTable}>
+          <IconButton id="table-details" tooltip="legend.tableDetails" sx={{ backgroundColor: theme.palette.geoViewColors.layersRoundButtonsBg }} onClick={handleOpenTable}>
             <TableViewIcon />
           </IconButton>
         )}
-        <IconButton tooltip="legend.refreshLayer" sx={{ backgroundColor: '#F6F6F6' }} onClick={handleRefreshLayer}>
+        <IconButton tooltip="legend.refreshLayer" sx={{ backgroundColor: theme.palette.geoViewColors.layersRoundButtonsBg }} onClick={handleRefreshLayer}>
           <RestartAltIcon />
         </IconButton>
         <IconButton
           tooltip="legend.highlightLayer"
-          sx={{ backgroundColor: layerDetails.layerPath !== highlightedLayer ? '#F6F6F6' : theme.palette.action.active }}
+          sx={{ backgroundColor: layerDetails.layerPath !== highlightedLayer ? theme.palette.geoViewColors.layersRoundButtonsBg : theme.palette.action.active }}
           onClick={handleHighlightLayer}
         >
           <HighlightOutlinedIcon />
@@ -195,7 +195,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
         <IconButton
           tooltip="legend.zoomTo"
           onClick={handleZoomTo}
-          sx={{ backgroundColor: '#F6F6F6' }}
+          sx={{ backgroundColor: theme.palette.geoViewColors.layersRoundButtonsBg }}
           disabled={layerDetails.bounds === undefined}
         >
           <ZoomInSearchIcon />

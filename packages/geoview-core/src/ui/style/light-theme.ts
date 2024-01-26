@@ -6,6 +6,7 @@ import { defaultThemeOptions, opacity } from './default';
  * see https://mui.com/material-ui/customization/palette/
  */
 const lightPalette = {
+  ...defaultThemeOptions.palette,
   primary: {
     light: '#ffffff',
     main: '#808080',

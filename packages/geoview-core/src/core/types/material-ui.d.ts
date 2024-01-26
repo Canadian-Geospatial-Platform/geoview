@@ -1,3 +1,4 @@
+import { IGeoViewColors } from '@/ui/style/geoView.interface';
 import { ComponentsVariants, ComponentsOverrides, ComponentsProps } from '@mui/material';
 
 /** https://material-ui.com/guides/typescript/ */
@@ -154,10 +155,16 @@ declare module '@mui/material/styles' {
 declare module '@mui/material/styles/createPalette' {
   interface Palette {
     backdrop: string;
+    geoViewColors: IGeoViewColors;
+    geoViewText: IGeoViewText;
+    geoViewSpacingAndSizing: IGeoViewSpacingAndSizing;
   }
 
   interface PaletteOptions {
     backdrop?: string;
+    geoViewColors?: IGeoViewColors;
+    geoViewText?: IGeoViewText;
+    geoViewSpacingAndSizing?: IGeoViewSpacingAndSizing;
   }
 }
 

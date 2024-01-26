@@ -23,7 +23,7 @@ export const getSxClasses = (theme: Theme) => ({
   rightPanelBtnHolder: {
     marginTop: '20px',
     marginBottom: '9px',
-    boxShadow: '0px 12px 9px -13px #E0E0E0',
+    boxShadow: `0px 12px 9px -13px ${theme.palette.geoViewColors.bgColorDark}`,
   },
   featureInfoListContainer: {
     paddingLeft: '25px',
