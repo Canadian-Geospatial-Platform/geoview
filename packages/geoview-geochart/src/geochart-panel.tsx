@@ -1,6 +1,5 @@
-import { useTranslation } from 'react-i18next';
 import { useTheme } from '@mui/material/styles';
-import { TypeWindow } from 'geoview-core';
+import { TypeWindow, getLocalizedMessage } from 'geoview-core';
 import { ChartType, SchemaValidator } from 'geochart';
 import { LayerListEntry, Layout } from 'geoview-core/src/core/components/common';
 import { TypeArrayOfLayerData, TypeLayerData } from 'geoview-core/src/api/events/payloads';
@@ -38,8 +37,6 @@ export function GeoChartPanel(props: GeoChartPanelProps): JSX.Element {
   const { react } = cgpv;
   const { useState, useCallback, useEffect, useRef } = react;
 
-  const { t } = useTranslation<string>();
-
   const theme = useTheme();
   const sxClasses = getSxClasses(theme);
 
@@ -65,9 +62,9 @@ export function GeoChartPanel(props: GeoChartPanelProps): JSX.Element {
   const getFeaturesOfLayer = useCallback(
     (layer: TypeLayerData): string => {
       const numOfFeatures = layer.features?.length ?? 0;
-      return `${numOfFeatures} ${t('geochart.panel.chart')}${numOfFeatures > 1 ? 's' : ''}`;
+      return `${numOfFeatures} ${getLocalizedMessage(mapId, 'geochart.panel.chart')}${numOfFeatures > 1 ? 's' : ''}`;
     },
-    [t]
+    [mapId]
   );
 
   /**
@@ -210,10 +207,10 @@ export function GeoChartPanel(props: GeoChartPanelProps): JSX.Element {
             {!selectedLayerPath && (
               <Paper sx={{ padding: '2rem' }}>
                 <Typography variant="h3" gutterBottom sx={sxClasses.geochartInstructionsTitle}>
-                  {t('geochart.panel.clickMap')}
+                  {getLocalizedMessage(mapId, 'geochart.panel.clickMap')}
                 </Typography>
                 <Typography component="p" sx={sxClasses.geochartInstructionsBody}>
-                  {t('geochart.panel.clickMap')}
+                  {getLocalizedMessage(mapId, 'geochart.panel.clickMap')}
                 </Typography>
               </Paper>
             )}
@@ -222,11 +219,11 @@ export function GeoChartPanel(props: GeoChartPanelProps): JSX.Element {
       }
 
       // No layers
-      return <Typography>{t('geochart.panel.noLayers')}</Typography>;
+      return <Typography>{getLocalizedMessage(mapId, 'geochart.panel.noLayers')}</Typography>;
     }
 
     // Loading UI
-    return <Typography>{t('geochart.panel.loadingUI')}</Typography>;
+    return <Typography>{getLocalizedMessage(mapId, 'geochart.panel.loadingUI')}</Typography>;
   };
 
   // Render
