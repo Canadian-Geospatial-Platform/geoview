@@ -69,13 +69,15 @@ export function FooterTabs(props: FooterTabsProps): JSX.Element | null {
   const mapDiv = document.getElementById(mapId)!;
   const [origHeight, setOrigHeight] = useState<number>(0);
 
+  // get store values and actions
   const isMapFullScreen = useAppFullscreenActive();
   const footerPanelResizeValue = useUIFooterPanelResizeValue();
   const footerPanelResizeValues = useUIFooterPanelResizeValues();
-  const { setFooterPanelResizeValue } = useUIStoreActions();
+  const { setFooterPanelResizeValue, setActiveFooterTab } = useUIStoreActions();
 
   // get store config for footer tabs to add (similar logic as in app-bar)
   const footerTabsConfig = useGeoViewConfig()?.footerTabs;
+
   const tabs: Record<string, Record<string, ReactNode>> = useMemo(
     () => ({
       legend: { icon: <HubOutlinedIcon />, content: <Legend /> },
@@ -228,21 +230,12 @@ export function FooterTabs(props: FooterTabsProps): JSX.Element | null {
    * @param tab The newly selected tab
    */
   const handleSelectedTabChanged = (tab: TypeTabs) => {
-    // Callback
-    onSelectedTabChanged?.(tab);
-
-    // If clicked on a tab with a plugin
-    if (api.maps[mapId].plugins[tab.id]) {
-      // Get the plugin
-      const theSelectedPlugin = api.maps[mapId].plugins[tab.id];
-
-      // A bit hacky, but not much other choice for now...
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      if (typeof (theSelectedPlugin as any).onSelected === 'function') {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (theSelectedPlugin as any).onSelected();
-      }
-    }
+    // Set the active footer tab with store action which
+    // will trigger the uiprocessor which
+    // will use the shared api in the window object which
+    // will use footertabsapi to raise a EVENT_FOOTER_TABS_TAB_SELECT event which
+    // is listened in eventFooterTabsSelectListenerFunction() below
+    setActiveFooterTab(tab.id);
   };
 
   const eventFooterTabsCreateListenerFunction = (payload: PayloadBaseClass) => {
@@ -263,7 +256,25 @@ export function FooterTabs(props: FooterTabsProps): JSX.Element | null {
       if (payload.tab.id === 'details') {
         handleCollapse();
       }
+
+      // Keep internal state
       setSelectedTab(payload.tab.value);
+
+      // Callback
+      onSelectedTabChanged?.(payload.tab);
+
+      // If clicked on a tab with a plugin
+      if (api.maps[mapId].plugins[payload.tab.id]) {
+        // Get the plugin
+        const theSelectedPlugin = api.maps[mapId].plugins[payload.tab.id];
+
+        // A bit hacky, but not much other choice for now...
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        if (typeof (theSelectedPlugin as any).onSelected === 'function') {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          (theSelectedPlugin as any).onSelected();
+        }
+      }
     }
   };
 

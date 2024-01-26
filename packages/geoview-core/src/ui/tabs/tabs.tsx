@@ -55,7 +55,7 @@ export function Tabs(props: TypeTabsProps): JSX.Element {
 
   // get store values and actions
   const activeTrapGeoView = useUIActiveTrapGeoView();
-  const { closeModal, openModal, setActiveFooterTab } = useUIStoreActions();
+  const { closeModal, openModal } = useUIStoreActions();
 
   /**
    * Handle a tab change
@@ -65,7 +65,6 @@ export function Tabs(props: TypeTabsProps): JSX.Element {
    */
   const handleChange = (event: SyntheticEvent<Element, Event>, newValue: number) => {
     setValue(newValue);
-    setActiveFooterTab(t(tabs[newValue].label).toLowerCase());
 
     // Callback
     onSelectedTabChanged?.(tabs[newValue]);
