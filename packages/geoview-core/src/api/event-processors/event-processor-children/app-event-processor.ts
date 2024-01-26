@@ -19,8 +19,16 @@ export class AppEventProcessor extends AbstractEventProcessor {
   //! ALWAYS use map event processor when an action modify store and IS NOT trap by map state event handler
   // #region
   static addAppNotification(mapId: string, notification: NotificationDetailsType) {
-    const store = getGeoViewStore(mapId);
-    store.getState().appState.actions.addNotification(notification);
+    // because notification is called before map is created, we just loop until
+    // store for this map is created.
+    const myInterval = setInterval(() => {
+      const store = getGeoViewStore(mapId);
+
+      if (store !== undefined) {
+        store.getState().appState.actions.addNotification(notification);
+        clearInterval(myInterval);
+      }
+    }, 100);
   }
 
   static getDisplayLanguage(mapId: string): TypeDisplayLanguage {

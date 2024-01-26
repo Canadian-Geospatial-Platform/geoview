@@ -3,11 +3,11 @@
   "listOfLayerEntryConfig": [
     {
       "layerId": "execution",
-      "layerName": { "en": "Downstream Analysis" },
+      "layerName": { "en": "Downstream Analysis", "fr": "Downstream Analysis" },
       "source": {
         "dataAccessPath": {
-          "en": "https://132.156.9.48:30102/api/processes/downstream-analysis/execution",
-          "fr": "https://132.156.9.48:30102/api/processes/downstream-analysis/execution"
+          "en": "https://app.chn-rhc.geogc.ca/api/processes/downstream-analysis/execution",
+          "fr": "https://app.chn-rhc.geogc.ca/api/processes/downstream-analysis/execution"
         },
         "postSettings": {
           "header": {

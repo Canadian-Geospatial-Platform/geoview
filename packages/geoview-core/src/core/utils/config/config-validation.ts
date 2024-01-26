@@ -44,6 +44,7 @@ import { Cast, toJsonObject, TypeJsonObject, TypeMapFeaturesConfig } from '@/cor
 
 import { CONST_GEOVIEW_SCHEMA_BY_TYPE, TypeGeoviewLayerType } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { geoviewEntryIsEsriImage } from '@/geo/layer/geoview-layers/raster/esri-image';
+import { logger } from '@/core/utils/logger';
 
 // ******************************************************************************************************************************
 // ******************************************************************************************************************************
@@ -241,7 +242,7 @@ export class ConfigValidation {
   validateDisplayLanguage(language?: TypeDisplayLanguage): TypeDisplayLanguage {
     if (language && VALID_DISPLAY_LANGUAGE.includes(language)) return language;
 
-    console.log(
+    logger.logWarning(
       `- Map: ${this.mapId} - Invalid display language code ${language} replaced by ${this._defaultMapFeaturesConfig.displayLanguage} -`
     );
     return this._defaultMapFeaturesConfig.displayLanguage!;
@@ -355,9 +356,9 @@ export class ConfigValidation {
       for (let j = 1; j < path.length; j += 1) {
         node = node[path[j]];
       }
-      console.log(this.mapId, '='.repeat(200));
-      console.log('Schema error: ', this.mapId, error);
-      console.log('Object affected: ', this.mapId, node);
+      logger.logWarning(this.mapId, '='.repeat(200));
+      logger.logWarning('Schema error: ', this.mapId, error);
+      logger.logWarning('Object affected: ', this.mapId, node);
     }
 
     setTimeout(() => {
@@ -379,7 +380,7 @@ export class ConfigValidation {
     if (!validate) {
       setTimeout(() => {
         const message = replaceParams([schemaPath], getLocalizedMessage(this.mapId, 'validation.schema.wrongPath'));
-        console.log(`- Map ${this.mapId}: ${message}`);
+        logger.logWarning(`- Map ${this.mapId}: ${message}`);
         showError(this.mapId, message);
       }, 2000);
       return false;
@@ -418,7 +419,7 @@ export class ConfigValidation {
       if (!validate) {
         setTimeout(() => {
           const message = replaceParams([schemaPath], getLocalizedMessage(this.mapId, 'validation.schema.wrongPath'));
-          console.log(`- Map ${this.mapId}: ${message}`);
+          logger.logWarning(`- Map ${this.mapId}: ${message}`);
           showError(this.mapId, message);
         }, 2000);
         return false;
@@ -779,18 +780,18 @@ export class ConfigValidation {
     // eslint-disable-next-line array-callback-return
     Object.keys(inputMapFeaturesConfig).map((key) => {
       if (!(key in validMapFeaturesConfig)) {
-        console.log(`- Map: ${this.mapId} - Key '${key}' is invalid -`);
+        logger.logWarning(`- Map: ${this.mapId} - Key '${key}' is invalid -`);
       }
     });
 
     if (inputMapFeaturesConfig?.map?.viewSettings?.projection !== validMapFeaturesConfig.map.viewSettings.projection) {
-      console.log(
+      logger.logWarning(
         `- Map: ${this.mapId} - Invalid projection code ${inputMapFeaturesConfig?.map?.viewSettings?.projection} replaced by ${validMapFeaturesConfig.map.viewSettings.projection} -`
       );
     }
 
     if (inputMapFeaturesConfig?.map?.viewSettings?.zoom !== validMapFeaturesConfig.map.viewSettings.zoom) {
-      console.log(
+      logger.logWarning(
         `- Map: ${this.mapId} - Invalid zoom level ${inputMapFeaturesConfig?.map?.viewSettings?.zoom} replaced by ${validMapFeaturesConfig.map.viewSettings.zoom} -`
       );
     }
@@ -798,13 +799,13 @@ export class ConfigValidation {
     if (
       JSON.stringify(inputMapFeaturesConfig?.map?.viewSettings?.center) !== JSON.stringify(validMapFeaturesConfig.map.viewSettings.center)
     ) {
-      console.log(
+      logger.logWarning(
         `- Map: ${this.mapId} - Invalid center ${inputMapFeaturesConfig?.map?.viewSettings?.center} replaced by ${validMapFeaturesConfig.map.viewSettings.center}`
       );
     }
 
     if (JSON.stringify(inputMapFeaturesConfig?.map?.basemapOptions) !== JSON.stringify(validMapFeaturesConfig.map.basemapOptions)) {
-      console.log(
+      logger.logWarning(
         `- Map: ${this.mapId} - Invalid basemap options ${JSON.stringify(
           inputMapFeaturesConfig?.map?.basemapOptions
         )} replaced by ${JSON.stringify(validMapFeaturesConfig.map.basemapOptions)} -`

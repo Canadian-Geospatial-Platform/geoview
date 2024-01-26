@@ -12,6 +12,7 @@ import { Cast, TypeJsonObject, TypeJsonValue, TypeMapFeaturesConfig } from '@/co
 import { catalogUrl } from '../config';
 import { UUIDmapConfigReader } from './uuid-config-reader';
 import { ConfigValidation } from '../config-validation';
+import { logger } from '../../logger';
 
 // ******************************************************************************************************************************
 // ******************************************************************************************************************************
@@ -132,6 +133,7 @@ export class URLmapConfigReader {
       // get layer information from catalog using their uuid's if any passed from url params
       if (urlParams.keys) {
         const requestUrl = `${catalogUrl}/${displayLanguage.split('-')[0]}/${urlParams.keys}`;
+        // TODO: issue 1742, list of layers always empty
         listOfGeoviewLayerConfig = await UUIDmapConfigReader.getGVlayersConfigFromUUID(mapId, requestUrl);
       }
 
@@ -167,6 +169,9 @@ export class URLmapConfigReader {
         schemaVersionUsed,
       };
     }
+
+    // Trace the detail config read from url
+    logger.logTraceDetailed('URL Config - ', mapConfig);
 
     return mapConfig;
   }

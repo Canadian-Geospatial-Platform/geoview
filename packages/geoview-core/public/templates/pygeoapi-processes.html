@@ -66,16 +66,41 @@
         'shaded': true,
         'labeled': false
       },
-      'listOfGeoviewLayerConfig': []
+      'listOfGeoviewLayerConfig': [
+        {
+          'geoviewLayerId': 'NHN',
+          'geoviewLayerName': {
+            'en': 'Hydro Network',
+            'fr': 'Hydro Network'
+          },
+          'metadataAccessPath': {
+            'en': 'https://maps.geogratis.gc.ca/wms/hydro_network_en',
+            'fr': 'https://maps.geogratis.gc.ca/wms/hydro_network_en'
+          },
+          'geoviewLayerType': 'ogcWms',
+          'listOfLayerEntryConfig': [
+            {
+              'layerId': 'nhn:nhn:drainageareas:nhnda',
+              'initialSettings': {
+                'visible' : 'no'
+              },
+              'layerName': {
+                  'en': 'Hydro Network',
+                  'fr': 'Hydro Network'
+              }
+            }
+          ]
+        }
+      ]
     },
     'components': ['overview-map'],
     'footerTabs': {
       'tabs': {
-        'core': ['legend', 'layers', 'details', 'data-table']
+        'core': ['legend', 'layers', 'details']
       }
     },
     'corePackages': [],
-    'theme': 'dark',
+    'theme': 'light',
     'suportedLanguages': ['en']
     }"
     ></div>
@@ -90,8 +115,8 @@
           </td>
           <td style="border: 1px solid black;padding: 15px; width: 5%;">
             <button id="Add-Hydro-Button">Downstream Analysis</button><br />
-            Latitude: <input id="Hydro-Lat-Input" type="number" value=47.03></input><br />
-            Longitude: <input id="Hydro-Long-Input" type="number" value=-65.84></input><br />
+            Latitude: <input id="Hydro-Lat-Input" type="number" value=47.02115799969316></input><br />
+            Longitude: <input id="Hydro-Long-Input" type="number" value=-65.93753763004142></input><br />
             <label> Added Layer ID : </label><label id="Hydro-New-Layer-Id-Label"></label>
           </td>
         </tr>
@@ -136,7 +161,6 @@
       'LYR5/LegendsLayerSet'
     );
     </script>
-    // =========================================================================================================================
     <script>
       // initialize cgpv and api events, a callback is optional, used if calling api's after the rendering is ready
       cgpv.init(function (mapId) {
@@ -228,8 +252,8 @@
                   'postSettings': {
                     'data': {
                       'inputs': {
-                        'lat': lat,
-                        'long': long,
+                        'lat': Number(lat),
+                        'long': Number(long),
                       }
                     }
                   }

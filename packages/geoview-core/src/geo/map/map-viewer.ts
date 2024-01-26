@@ -376,7 +376,7 @@ export class MapViewer {
       if (resetLayer) {
         if (AppEventProcessor.getSupportedLanguages(this.mapId).includes(displayLanguage)) {
           // eslint-disable-next-line no-console
-          console.log('reset layers not implemented yet');
+          logger.logInfo('reset layers not implemented yet');
         } else addNotificationError(this.mapId, getLocalizedMessage(this.mapId, 'validation.changeDisplayLanguageLayers'));
       }
     } else addNotificationError(this.mapId, getLocalizedMessage(this.mapId, 'validation.changeDisplayLanguage'));
