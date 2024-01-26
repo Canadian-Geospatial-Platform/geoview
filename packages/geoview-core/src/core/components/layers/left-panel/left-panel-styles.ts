@@ -18,7 +18,7 @@ export const getSxClasses = (theme: Theme) => ({
     },
 
     '& .layerItemContainer': {
-      background: '#FFFFFF 0% 0% no-repeat padding-box',
+      background: `${theme.palette.geoViewColors.bgColorLight} 0% 0% no-repeat padding-box`,
       borderRadius: '5px',
       marginBottom: '1rem',
 
@@ -64,7 +64,7 @@ export const getSxClasses = (theme: Theme) => ({
 
         '& .MuiIconButton-root': {
           color: `${theme.palette.primary.main} !important`,
-          background: `${theme.palette.grey.A100} !important`,
+          background: `${theme.palette.geoViewColors.layersRoundButtonsBg} !important`,
           margin: '0px 5px',
         },
       },

@@ -1,20 +1,51 @@
 import { ThemeOptions } from '@mui/material';
-import { defaultThemeOptions, opacity } from './default';
+import { defaultThemeOptions, opacity, geoViewColors as defaultGeoViewColors } from './default';
+import { IGeoViewColors } from './geoView.interface';
 
 /**
  * Make changes to MUI default DARK theme/mode here
  * see https://mui.com/material-ui/customization/palette/
  */
+
+const geoViewColors: IGeoViewColors = {
+  ...defaultGeoViewColors,
+  bgColor: '#3C3E42',
+  bgColorLight: '#232323',
+  bgColorLighter: '#393939',
+  bgColorLightest: '#4f4f4f',
+  bgColorDark: '#000000',
+  bgColorDarker: '#000000',
+  bgColorDarkest: '#000000',
+
+  primary: '#00b4d8',
+  primaryLight: '#90e0ef',
+  primaryLighter: '#caf0f8',
+  primaryLightest: '#e6f8ff',
+  primaryDark: '#0096c7',
+  primaryDarker: '#0077a8',
+  primaryDarkest: '#005082',
+
+  textColor: '#ffffff',
+  textColorLight: '#d8d8d8',
+  textColorLighter: '#bdbdbd',
+  textColorLightest: '#393939',
+
+  subtleText: '#d8d8d8',
+  layersRoundButtonsBg: '#393939',
+};
+
 const darkPalette = {
+  ...defaultThemeOptions.palette,
+  geoViewColors: geoViewColors,
   common: {
-    black: '#000',
+    black: '#101010',
     white: '#fff',
   },
   primary: {
-    main: '#90caf9',
-    light: '#e3f2fd',
-    dark: '#42a5f5',
-    contrastText: 'rgba(0, 0, 0, 0.87)',
+    light: '#c8cde4',
+    main: '#515BA5',
+    dark: '#2e2e6c',
+    contrastText: '#ffffff',
   },
   secondary: {
     main: '#ce93d8',
@@ -115,9 +146,15 @@ const darkPanel = {
   activeBg: '#4f4f4f',
 };
 
+const footerPanel = {
+  ...defaultThemeOptions.footerPanel,
+  contentBg: `${darkPalette.geoViewColors.bgColor} 0% 0% no-repeat padding-box`
+}
+
 export const darkThemeOptions: ThemeOptions = {
   ...defaultThemeOptions,
   palette: darkPalette,
   appBar: darkAppBar,
   panel: darkPanel,
+  footerPanel: footerPanel,
 };

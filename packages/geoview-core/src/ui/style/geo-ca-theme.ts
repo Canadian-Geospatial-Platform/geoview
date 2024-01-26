@@ -6,6 +6,7 @@ import { defaultThemeOptions, opacity } from './default';
  * see https://mui.com/material-ui/customization/palette/
  */
 const geoCaPalette = {
+  ...defaultThemeOptions.palette,
   primary: {
     light: '#c8cde4',
     main: '#515BA5',

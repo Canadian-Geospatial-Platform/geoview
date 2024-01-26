@@ -1,4 +1,5 @@
 import { ThemeOptions } from '@mui/material';
+import { IGeoViewColors, IGeoViewText } from './geoView.interface';
 
 export const font = "'Roboto', 'Helvetica', 'Arial', sans-serif";
 
@@ -15,8 +16,51 @@ export const opacity = {
   activatedOpacity: 0.24,
 };
 
+export const geoViewColors: IGeoViewColors = {
+  subtleText: '#393939',
+  buttonShadow: '#e0e0e0',
+  enlargeBtnBg:'#F4F5FF',
+  layersRoundButtonsBg: '#F6F6F6',
+
+  bgColorDarkest: '#3E3F41',
+  bgColorDarker: '#626365',
+  bgColorDark: '#9A9B9D',
+  bgColor: '#F1F2F5',
+  bgColorLight: '#FFFFFF',
+  bgColorLighter: '#FFFFFF',
+  bgColorLightest: '#FFFFFF',
+
+  primary: '#515BA5',
+  primaryLight: '#c8cde4',
+  primaryLighter: '#e0e3f1',
+  primaryLightest: '#f4f5ff',
+  primaryDark: '#2e2e6c',
+  primaryDarker: '#1c1c4c',
+  primaryDarkest: '#0f0f2e',
+
+  textColor: '#393939',
+  textColorLight: '#757575',
+  textColorLighter: '#bdbdbd',
+  textColorLightest: '#ffffff',
+}
+
+const geoViewText: IGeoViewText = {
+  xxxl: '32px',
+  xxl: '28px',
+  xl: '22px',
+  lg: '18px',
+  md: '14px',
+  sm: '10px',
+  xs: '8px',
+}
+
 export const defaultThemeOptions: ThemeOptions = {
-  palette: {},
+  palette: {
+    geoViewColors: geoViewColors,
+    geoViewText: geoViewText,
+    geoViewSpacingAndSizing: {
+    },
+  },
   typography: {
     fontSize: 16,
     htmlFontSize: 16,
