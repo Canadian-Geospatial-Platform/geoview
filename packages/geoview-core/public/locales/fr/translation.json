@@ -194,9 +194,6 @@
     "images": "Images",
     "close": "Fermer"
   },
-  "geochart": {
-    "noChartAvailable": "Cliquez sur la couche de carte avec le graphique"
-  },
   "footerTabsContainer": {
     "focusToMap": "Aller à la carte",
     "focusToFooter": "Aller au pied de page",

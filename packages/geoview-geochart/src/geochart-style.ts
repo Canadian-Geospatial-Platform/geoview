@@ -1,11 +1,12 @@
 import { Theme } from '@mui/material/styles';
 
 export const getSxClasses = (theme: Theme) => ({
-  detailsInstructionsTitle: {
+  geochartInstructionsTitle: {
     font: theme.footerPanel.titleFont,
     fontSize: '1.5rem',
+    lineHeight: '1.5em',
   },
-  detailsInstructionsBody: {
+  geochartInstructionsBody: {
     fontSize: '1rem',
   },
 });

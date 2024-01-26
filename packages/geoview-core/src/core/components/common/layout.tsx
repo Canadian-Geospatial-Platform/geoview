@@ -14,7 +14,7 @@ interface LayoutProps {
   children?: ReactNode;
   layerList: LayerListEntry[];
   selectedLayerPath: string;
-  // ? Name this onLayerListClicked? and make it optional with '?' suffix?
+  // TODO: Name this onLayerListClicked and make it optional with '?' suffix?
   handleLayerList: (layer: LayerListEntry) => void;
   onIsEnlargeClicked?: (isEnlarge: boolean) => void;
 }
