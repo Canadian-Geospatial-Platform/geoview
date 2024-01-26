@@ -4,8 +4,7 @@ import { AutocompleteProps } from '@mui/material';
  * Customized Material UI Autocomplete properties
  */
 export interface TypeAutocompleteProps<T, Multiple extends boolean | undefined = undefined, DisableClearable extends boolean | undefined = undefined, FreeSolo extends boolean | undefined = undefined> extends AutocompleteProps<T, Multiple, DisableClearable, FreeSolo> {
-    mapId?: string;
-    fullWidth?: boolean;
+    fullWidth: boolean;
 }
 /**
  * Create a Material UI Autocomplete component

@@ -5,11 +5,13 @@ interface LayoutProps {
     layerList: LayerListEntry[];
     selectedLayerPath: string;
     handleLayerList: (layer: LayerListEntry) => void;
+    onIsEnlargeClicked?: (isEnlarge: boolean) => void;
 }
-export declare function Layout({ children, layerList, handleLayerList, selectedLayerPath }: LayoutProps): import("react").JSX.Element;
+export declare function Layout({ children, layerList, selectedLayerPath, handleLayerList, onIsEnlargeClicked }: LayoutProps): import("react").JSX.Element;
 export declare namespace Layout {
     var defaultProps: {
         children: null;
+        onIsEnlargeClicked: undefined;
     };
 }
 export {};

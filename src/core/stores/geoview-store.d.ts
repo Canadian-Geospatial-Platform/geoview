@@ -4,6 +4,7 @@ import { ILayerState } from './store-interface-and-intial-values/layer-state';
 import { IMapState } from './store-interface-and-intial-values/map-state';
 import { IMapDataTableState } from './store-interface-and-intial-values/data-table-state';
 import { ITimeSliderState } from './store-interface-and-intial-values/time-slider-state';
+import { IGeochartState } from './store-interface-and-intial-values/geochart-state';
 import { IUIState } from './store-interface-and-intial-values/ui-state';
 import { TypeMapFeaturesConfig } from '@/core/types/global-types';
 export type TypeSetStore = (partial: IGeoviewState | Partial<IGeoviewState> | ((state: IGeoviewState) => IGeoviewState | Partial<IGeoviewState>), replace?: boolean | undefined) => void;
@@ -17,8 +18,9 @@ export interface IGeoviewState {
     dataTableState: IMapDataTableState;
     layerState: ILayerState;
     mapState: IMapState;
-    timeSliderState: ITimeSliderState;
     uiState: IUIState;
+    geochartState: IGeochartState;
+    timeSliderState: ITimeSliderState;
 }
 export declare const geoviewStoreDefinition: (set: TypeSetStore, get: TypeGetStore) => IGeoviewState;
 export declare const geoviewStoreDefinitionWithSubscribeSelector: import("zustand").StateCreator<IGeoviewState, [], [["zustand/subscribeWithSelector", never]], IGeoviewState>;

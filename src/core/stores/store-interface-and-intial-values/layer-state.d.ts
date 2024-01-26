@@ -10,6 +10,7 @@ export interface ILayerState {
     legendLayers: TypeLegendLayer[];
     displayState: TypeLayersViewDisplayState;
     actions: {
+        setLegendLayers: (legendLayers: TypeLegendLayer[]) => void;
         getLayer: (layerPath: string) => TypeLegendLayer | undefined;
         getLayerBounds: (layerPath: string) => number[] | undefined;
         setDisplayState: (newDisplayState: TypeLayersViewDisplayState) => void;
@@ -32,6 +33,7 @@ export declare const useLayerSelectedLayer: () => TypeLegendLayer;
 export declare const useSelectedLayerPath: () => string | null | undefined;
 export declare const useLayersDisplayState: () => TypeLayersViewDisplayState;
 export declare const useLayerStoreActions: () => {
+    setLegendLayers: (legendLayers: TypeLegendLayer[]) => void;
     getLayer: (layerPath: string) => TypeLegendLayer | undefined;
     getLayerBounds: (layerPath: string) => number[] | undefined;
     setDisplayState: (newDisplayState: TypeLayersViewDisplayState) => void;

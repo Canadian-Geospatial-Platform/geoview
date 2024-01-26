@@ -122,10 +122,10 @@ export declare class Layer {
      * @param {string} mustBeProcessed indicate if the layer we're searching for must be found only once processed
      * @param {string} timeout optionally indicate the timeout after which time to abandon the promise
      * @param {string} checkFrequency optionally indicate the frequency at which to check for the condition on the layer
-     * @returns a promise with the AbstractGeoViewLayer or null when the layer id was not found
-     * @throws an exception when the layer for the layer id was found, but failed to become in processed phase before the timeout expired
+     * @returns a promise with the AbstractGeoViewLayer
+     * @throws an exception when the layer for the layer id couldn't be found, or waiting time expired
      */
-    getGeoviewLayerByIdAsync: (geoviewLayerId: string, mustBeProcessed: boolean, timeout?: number, checkFrequency?: number) => Promise<AbstractGeoViewLayer | null>;
+    getGeoviewLayerByIdAsync: (geoviewLayerId: string, mustBeProcessed: boolean, timeout?: number, checkFrequency?: number) => Promise<AbstractGeoViewLayer>;
     /**
      * Returns a Promise that will be resolved once the given layer is in a processed phase.
      * This function waits the timeout period before abandonning (or uses the default timeout when not provided).

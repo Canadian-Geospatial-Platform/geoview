@@ -19,4 +19,8 @@ export declare abstract class FooterPlugin extends AbstractPlugin {
      * Called when a footer plugin is being removed
      */
     onRemove(): void;
+    /**
+     * Called when a footer plugin has been selected in the tabs
+     */
+    onSelected(): void;
 }

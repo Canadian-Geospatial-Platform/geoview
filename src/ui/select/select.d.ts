@@ -1,5 +1,5 @@
 /// <reference types="react" />
-import { InputLabelProps, ListSubheaderProps, MenuItemProps, SelectProps } from '@mui/material';
+import { InputLabelProps, ListSubheaderProps, MenuItemProps, SelectProps, FormControlProps } from '@mui/material';
 /**
  * Custom MUI Select properties
  */
@@ -8,11 +8,12 @@ interface TypeSelectProps extends SelectProps {
     fullWidth?: boolean;
     menuItems: TypeMenuItemProps[];
     inputLabel: InputLabelProps;
+    formControlProps?: FormControlProps;
 }
 /**
  * Menu Item properties
  */
-interface TypeMenuItemProps {
+export interface TypeMenuItemProps {
     type?: 'item' | 'header';
     item: MenuItemProps | ListSubheaderProps | null;
 }
