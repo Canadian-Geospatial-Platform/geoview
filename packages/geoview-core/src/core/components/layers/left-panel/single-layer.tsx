@@ -142,8 +142,7 @@ export function SingleLayer({ isDragging, depth, layer, setIsLayersListPanelVisi
   };
 
   const handleReloadLayer = () => {
-    // eslint-disable-next-line no-console
-    console.log('reloading layer');
+    logger.logInfo('reloading layer not implemented...');
   };
 
   const handleReArrangeLayer = () => {

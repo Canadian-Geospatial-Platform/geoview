@@ -377,11 +377,9 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
         });
 
         // enable or disable map interaction when type of map interaction is set
-        if (interaction === 'dynamic' || !interaction) {
-          get()
-            .mapState.mapElement!.getInteractions()
-            .forEach((x) => x.setActive(interaction === 'dynamic'));
-        }
+        get()
+          .mapState.mapElement!.getInteractions()
+          .forEach((x) => x.setActive(interaction === 'dynamic'));
       },
       setLayerOrder: (newOrder: string[]) => {
         set({

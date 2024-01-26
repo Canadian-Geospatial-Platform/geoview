@@ -6,6 +6,7 @@ import { ConfigValidation } from './config-validation';
 import { InlineDivConfigReader } from './reader/div-config-reader';
 import { JsonConfigReader } from './reader/json-config-reader';
 import { URLmapConfigReader } from './reader/url-config-reader';
+import { logger } from '@/core/utils/logger';
 
 export const catalogUrl = 'https://maps.canada.ca/geonetwork/srv/api/v2/docs';
 
@@ -174,7 +175,7 @@ export class Config {
 
     // NOTE: URL config has precedence on JSON file config that has precedence on inline config
     if (!mapFeaturesConfig) {
-      console.log(`- Map: ${this.mapId} - Empty JSON configuration object, using default -`);
+      logger.logInfo(`- Map: ${this.mapId} - Empty JSON configuration object, using default -`);
     }
 
     return this.getValidMapConfig(mapFeaturesConfig!);
