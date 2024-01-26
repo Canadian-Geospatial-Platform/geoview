@@ -42,7 +42,7 @@
           <tr>
             <td>
               <a href="#HLYR1">1. Many Geocore Layers</a><br />
-              <a href="#HLYR2">1. Geocore Layers - with footer panel</a><br />
+              <a href="#HLYR2">2. Geocore Layers - with footer panel</a><br />
             </td>
           </tr>
         </tbody>
@@ -147,7 +147,7 @@
     <pre id="codeSnippet" class="panel"></pre>
 
     <div class="map-title-holder">
-      <h4 id="HLYR2">1. GeoCore Layers - with footer panel</h4>
+      <h4 id="HLYR2">2. GeoCore Layers - with footer panel</h4>
       <a class="ref-link" href="#top">Top</a>
     </div>
     <button class="collapsible active">Map Status Flags</button>
@@ -251,6 +251,10 @@
         'LYR1/LegendsLayerSet'
       );
       listenToLegendLayerSetChanges('HLYR1-state', 'LYR1/LegendsLayerSet');
+
+      // LYR2 ===================================================================================================================
+      listenToLegendLayerSetChanges('HLYR2-state', 'LYR2/LegendsLayerSet');
+
       //create snippets
       createCodeSnippet();
       createConfigSnippet();

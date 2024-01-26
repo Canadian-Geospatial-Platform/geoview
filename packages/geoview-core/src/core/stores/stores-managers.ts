@@ -8,6 +8,7 @@ import { TypeMapFeaturesConfig } from '@/core/types/global-types';
 import { IGeoviewState, GeoviewStoreType, geoviewStoreDefinitionWithSubscribeSelector } from './geoview-store';
 import { MapContext } from '@/core/app-start';
 import { logger } from '@/core/utils/logger';
+import { whenThisThen } from '@/core/utils/utilities';
 
 export interface StoresManagerState {
   stores: Record<string, GeoviewStoreType>;
@@ -48,6 +49,12 @@ export const addGeoViewStore = (config: TypeMapFeaturesConfig): void => {
 
 export const getGeoViewStore = (id: string | undefined): GeoviewStoreType => {
   return useStoresManager.getState().stores[id ?? 'unknown'];
+};
+
+// async version to use when we need to access store and it may not be created yet
+export const getGeoViewStoreAsync = async (id: string | undefined): Promise<GeoviewStoreType> => {
+  const store = await whenThisThen(() => getGeoViewStore(id));
+  return store;
 };
 
 export const removeGeoviewStore = (id: string): void => {
