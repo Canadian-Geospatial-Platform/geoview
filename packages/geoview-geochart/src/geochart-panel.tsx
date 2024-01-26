@@ -65,7 +65,7 @@ export function GeoChartPanel(props: GeoChartPanelProps): JSX.Element {
   const getFeaturesOfLayer = useCallback(
     (layer: TypeLayerData): string => {
       const numOfFeatures = layer.features?.length ?? 0;
-      return `${numOfFeatures} ${t('details.feature')}${numOfFeatures > 1 ? 's' : ''}`;
+      return `${numOfFeatures} ${t('geochart.title')}${numOfFeatures > 1 ? 's' : ''}`;
     },
     [t]
   );
@@ -209,11 +209,11 @@ export function GeoChartPanel(props: GeoChartPanelProps): JSX.Element {
               })}
             {!selectedLayerPath && (
               <Paper sx={{ padding: '2rem' }}>
-                <Typography variant="h3" gutterBottom sx={sxClasses.detailsInstructionsTitle}>
-                  {t('geochart.chartPanel.noLayers')}
+                <Typography variant="h3" gutterBottom sx={sxClasses.geochartInstructionsTitle}>
+                  {t('geochart.panel.clickMap')}
                 </Typography>
-                <Typography component="p" sx={sxClasses.detailsInstructionsBody}>
-                  {t('geochart.chartPanel.noLayers')}
+                <Typography component="p" sx={sxClasses.geochartInstructionsBody}>
+                  {t('geochart.panel.clickMap')}
                 </Typography>
               </Paper>
             )}
@@ -222,12 +222,11 @@ export function GeoChartPanel(props: GeoChartPanelProps): JSX.Element {
       }
 
       // No layers
-      return <Typography>{t('chartPanel.panel.noLayers')}</Typography>;
+      return <Typography>{t('geochart.panel.noLayers')}</Typography>;
     }
 
     // Loading UI
-    return <Typography>{t('chartPanel.panel.loadingUI')}</Typography>;
-    // return <CircularProgress isLoaded={false} />;
+    return <Typography>{t('geochart.panel.loadingUI')}</Typography>;
   };
 
   // Render
