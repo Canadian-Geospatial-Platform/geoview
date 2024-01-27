@@ -148,7 +148,7 @@
 //   const baseLayer = await this.processOneLayerEntry(unclusteredLayerConfig as TypeBaseLayerEntryConfig);
 //   if (baseLayer) {
 //     baseLayer!.setVisible(false);
-//     api.maps[this.mapId].layer.registerLayerConfig(unclusteredLayerConfig);
+//     unclusteredLayerConfig.registerLayerConfig();
 //     this.registerToLayerSets(unclusteredLayerConfig as TypeBaseLayerEntryConfig);
 //     if (!layerGroup) layerGroup = this.createLayerGroup(unclusteredLayerConfig.parentLayerConfig as TypeLayerEntryConfig);
 //     layerGroup!.getLayers().push(baseLayer!);
@@ -161,7 +161,7 @@
 //   const unclusteredLayerConfig = cloneDeep(layerConfig) as TypeVectorLayerEntryConfig;
 //   unclusteredLayerConfig.layerId = `${layerConfig.layerId}-unclustered`;
 //   unclusteredLayerConfig.source!.cluster!.enable = false;
-//   api.maps[this.mapId].layer.registerLayerConfig(unclusteredLayerConfig);
+//   unclusteredLayerConfig.registerLayerConfig();
 //   promiseOfLayerCreated.push(this.processOneLayerEntry(unclusteredLayerConfig as TypeBaseLayerEntryConfig));
 //   (layerConfig.source as TypeBaseSourceVectorInitialConfig)!.cluster!.settings =
 //     unclusteredLayerConfig.source!.cluster!.settings;
@@ -215,6 +215,8 @@
 //     },
 //   };
 
+//    ! You must always set the layerConfig.loadEndListenerType before setting the layerConfig.olLayer except when entryType = 'group'.
+//    layerConfig.loadEndListenerType = 'features';
 //   layerConfig.olLayer = new VectorLayer(layerOptions);
 //   layerConfig.geoviewLayerInstance = this;
 

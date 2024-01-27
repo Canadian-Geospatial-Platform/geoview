@@ -102,7 +102,7 @@ It is thanks to this identifier that we can unambiguously identify this layer wh
 
 Layer paths can only be used once. However, it sometimes happens that we want to place the same layer from the same server twice on the same display level in the viewer, because some servers differentiate the data with styles. This is the case with WMS sometimes. But in this case, how can we achieve this since the link is only made with the `layerId`? We would have to repeat the same path twice.
 
-To do this, the viewer uses an additional field named `layerPathEnding` to be able to place the layer again on the same display level. In this case, the syntax of the layer path is a bit different. In figure [Layer Grouping and Entry Config Chaining](./README.md#layerGroupingAndEntryConfigChaining) there are two layers on the lowest level that exploit this capability. Let's take the layer path to get to the bottom left configuration. Its value is:
+To do this, the viewer uses an additional field named `layerIdExtension` to be able to place the layer again on the same display level. In this case, the syntax of the layer path is a bit different. In figure [Layer Grouping and Entry Config Chaining](./README.md#layerGroupingAndEntryConfigChaining) there are two layers on the lowest level that exploit this capability. Let's take the layer path to get to the bottom left configuration. Its value is:
 **_<p align="center">My_map_layer/Points/Symbols/Squares.Style1.</p>_**
 
-The `layerPathEnding` does not participate in the connection to the server. Only the `layerId` does. And it is not a node in the tree either. So we can't use a forward slash as a separator. We differentiate it with a dot as a separator.
+The `layerIdExtension` does not participate in the connection to the server. Only the `layerId` does. And it is not a node in the tree either. So we can't use a forward slash as a separator. We differentiate it with a dot as a separator.

@@ -93,7 +93,7 @@ export function SingleLayer({ isDragging, depth, layer, setIsLayersListPanelVisi
     if (layer.layerStatus === 'error') {
       return t('legend.layerError');
     }
-    if (layer.layerStatus === 'loading') {
+    if (layer.layerStatus === 'processing') {
       return t('legend.layerLoading');
     }
 
@@ -166,7 +166,7 @@ export function SingleLayer({ isDragging, depth, layer, setIsLayersListPanelVisi
   }
 
   function renderMoreLayerButtons() {
-    if (layer.layerStatus === 'loading' || displayState !== 'view') {
+    if (layer.layerStatus === 'processing' || displayState !== 'view') {
       return null;
     }
     if (layer.layerStatus === 'error') {

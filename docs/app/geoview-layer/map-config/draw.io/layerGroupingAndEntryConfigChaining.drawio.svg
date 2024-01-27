@@ -11,7 +11,7 @@
                                 <font color="#000000" style="background-color: rgb(255, 255, 255); font-size: 12px;">
                                     +
                                     <span style="">
-                                        layerPathEnding
+                                        layerIdExtension
                                     </span>
                                     : 'Style2'
                                 </font>
@@ -20,7 +20,7 @@
                     </div>
                 </foreignObject>
                 <text x="327" y="915" fill="rgb(0, 0, 0)" font-family="Helvetica" font-size="12px">
-                    + layerPathEnding: 'Style2'
+                    + layerIdExtension: 'Style2'
                 </text>
             </switch>
         </g>
@@ -164,7 +164,7 @@
                                 <font color="#000000" style="background-color: rgb(255, 255, 255); font-size: 12px;">
                                     +
                                     <span style="">
-                                        layerPathEnding
+                                        layerIdExtension
                                     </span>
                                     : 'Style1'
                                 </font>
@@ -173,7 +173,7 @@
                     </div>
                 </foreignObject>
                 <text x="47" y="915" fill="rgb(0, 0, 0)" font-family="Helvetica" font-size="12px">
-                    + layerPathEnding: 'Style1'
+                    + layerIdExtension: 'Style1'
                 </text>
             </switch>
         </g>
