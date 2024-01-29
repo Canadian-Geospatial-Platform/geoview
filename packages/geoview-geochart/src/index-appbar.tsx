@@ -60,7 +60,7 @@ export class GeoChartAppBarPlugin extends AppBarPlugin {
       title: 'chartPanel.title',
       icon: <ChartIcon />,
       width: '80vw',
-      handlePanelOpened: () => {
+      onPanelOpened: () => {
         // Redraw the chart, because of the canvas rendering
         this.redrawChart();
       },

@@ -15,6 +15,7 @@ import {
   useUIFooterPanelResizeValue,
   useUIFooterPanelResizeValues,
   useUIStoreActions,
+  useUIActiveTrapGeoView,
 } from '@/core/stores/store-interface-and-intial-values/ui-state';
 
 import { toJsonObject, TypeJsonObject, TypeJsonValue } from '@/core/types/global-types';
@@ -68,7 +69,8 @@ export function FooterBar(): JSX.Element | null {
   const footerPanelResizeValue = useUIFooterPanelResizeValue();
   const footerPanelResizeValues = useUIFooterPanelResizeValues();
   const selectedTab = useUIActiveFooterBarTabId();
-  const { setFooterPanelResizeValue, setActiveFooterBarTab } = useUIStoreActions();
+  const activeTrapGeoView = useUIActiveTrapGeoView();
+  const { setFooterPanelResizeValue, setActiveFooterBarTab, openModal, closeModal } = useUIStoreActions();
 
   // get store config for footer bar tabs to add (similar logic as in app-bar)
   const footerBarTabsConfig = useGeoViewConfig()?.footerBar;
@@ -403,9 +405,12 @@ export function FooterBar(): JSX.Element | null {
       id="tabsContainer"
     >
       <Tabs
+        activeTrap={activeTrapGeoView}
         isCollapsed={isCollapsed}
-        handleCollapse={handleCollapse}
+        onCollapse={handleCollapse}
         onSelectedTabChanged={handleSelectedTabChanged}
+        onOpenModal={openModal}
+        onCloseModal={closeModal}
         selectedTab={footerBarTabs.findIndex((t) => t.id === selectedTab)}
         tabsProps={{ variant: 'scrollable' }}
         tabs={footerBarTabs}
