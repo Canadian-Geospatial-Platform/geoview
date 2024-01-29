@@ -10,7 +10,7 @@ import {
   payloadIsALngLat,
   ArrayOfEventTypes,
 } from '@/api/events/payloads';
-import { api, getLocalizedValue } from '@/app';
+import { TypeLayerEntryConfig, api, getLocalizedValue } from '@/app';
 import { LayerSet } from './layer-set';
 import { FeatureInfoEventProcessor } from '@/api/event-processors/event-processor-children/feature-info-event-processor';
 import { logger } from '@/core/utils/logger';
@@ -63,7 +63,7 @@ export class FeatureInfoLayerSet {
       // Log
       logger.logTraceCore('FeatureInfoLayerSet registration condition...', layerPath, Object.keys(this.resultSets));
 
-      const layerConfig = api.maps[this.mapId].layer.registeredLayers[layerPath];
+      const layerConfig = api.maps[this.mapId].layer.registeredLayers[layerPath] as TypeLayerEntryConfig;
       const queryable = layerConfig?.source?.featureInfo?.queryable;
       return !!queryable;
     };
@@ -80,7 +80,7 @@ export class FeatureInfoLayerSet {
         this.resultSets[layerPath].data[eventType] = {
           features: [],
           layerPath,
-          layerName: getLocalizedValue(api.maps[mapId].layer.registeredLayers[layerPath].layerName, mapId) ?? '',
+          layerName: getLocalizedValue((api.maps[mapId].layer.registeredLayers[layerPath] as TypeLayerEntryConfig).layerName, mapId) ?? '',
           layerStatus: api.maps[this.mapId].layer.registeredLayers[layerPath].layerStatus!,
         };
         this.resultSets[layerPath].data[eventType] = undefined;
@@ -112,7 +112,8 @@ export class FeatureInfoLayerSet {
             this.resultSets[layerPath].data.click = {
               features: undefined,
               layerPath,
-              layerName: getLocalizedValue(api.maps[mapId].layer.registeredLayers[layerPath].layerName, mapId) ?? '',
+              layerName:
+                getLocalizedValue((api.maps[mapId].layer.registeredLayers[layerPath] as TypeLayerEntryConfig).layerName, mapId) ?? '',
               layerStatus: api.maps[this.mapId].layer.registeredLayers[layerPath].layerStatus!,
             };
           });
@@ -170,7 +171,8 @@ export class FeatureInfoLayerSet {
             this.resultSets[layerPath].data.hover = {
               features: undefined,
               layerPath,
-              layerName: getLocalizedValue(api.maps[mapId].layer.registeredLayers[layerPath].layerName, mapId) ?? '',
+              layerName:
+                getLocalizedValue((api.maps[mapId].layer.registeredLayers[layerPath] as TypeLayerEntryConfig).layerName, mapId) ?? '',
               layerStatus: api.maps[this.mapId].layer.registeredLayers[layerPath].layerStatus!,
             };
           });
@@ -199,7 +201,8 @@ export class FeatureInfoLayerSet {
           this.resultSets[layerPath].data['all-features'] = {
             features: undefined,
             layerPath,
-            layerName: getLocalizedValue(api.maps[mapId].layer.registeredLayers[layerPath].layerName, mapId) ?? '',
+            layerName:
+              getLocalizedValue((api.maps[mapId].layer.registeredLayers[layerPath] as TypeLayerEntryConfig).layerName, mapId) ?? '',
             layerStatus: api.maps[this.mapId].layer.registeredLayers[layerPath].layerStatus!,
           };
         });
@@ -220,7 +223,8 @@ export class FeatureInfoLayerSet {
             this.resultSets[layerPath].data[eventType] = {
               features: arrayOfRecords,
               layerPath,
-              layerName: getLocalizedValue(api.maps[mapId].layer.registeredLayers[layerPath].layerName, mapId) ?? '',
+              layerName:
+                getLocalizedValue((api.maps[mapId].layer.registeredLayers[layerPath] as TypeLayerEntryConfig).layerName, mapId) ?? '',
               layerStatus: api.maps[this.mapId].layer.registeredLayers[layerPath].layerStatus!,
             };
             FeatureInfoEventProcessor.propagateFeatureInfoToStore(mapId, layerPath, eventType, this.resultSets);

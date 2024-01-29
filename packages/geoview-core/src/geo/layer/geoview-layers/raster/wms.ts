@@ -170,12 +170,12 @@ export class WMS extends AbstractGeoViewRaster {
             }
             this.processMetadataInheritance();
           } catch (error) {
-            this.setAllLayerStatusToError(this.listOfLayerEntryConfig, 'Unable to read metadata');
+            this.setAllLayerStatusTo('error', this.listOfLayerEntryConfig, 'Unable to read metadata');
           }
         }
       }
     } else {
-      this.setAllLayerStatusToError(this.listOfLayerEntryConfig, 'Unable to read metadata');
+      this.setAllLayerStatusTo('error', this.listOfLayerEntryConfig, 'Unable to read metadata');
     }
   }
 
@@ -194,7 +194,7 @@ export class WMS extends AbstractGeoViewRaster {
       const metadata: TypeJsonObject = parser.read(capabilitiesString);
       return metadata;
     } catch (error) {
-      this.setAllLayerStatusToError(this.listOfLayerEntryConfig, 'Unable to read metadata');
+      this.setAllLayerStatusTo('error', this.listOfLayerEntryConfig, 'Unable to read metadata');
       return null;
     }
   }
@@ -230,10 +230,10 @@ export class WMS extends AbstractGeoViewRaster {
         };
         setDataAccessPath(this.listOfLayerEntryConfig);
       } else {
-        this.setAllLayerStatusToError(this.listOfLayerEntryConfig, 'Unable to read metadata');
+        this.setAllLayerStatusTo('error', this.listOfLayerEntryConfig, 'Unable to read metadata');
       }
     } catch (error) {
-      this.setAllLayerStatusToError(this.listOfLayerEntryConfig, 'Unable to read metadata');
+      this.setAllLayerStatusTo('error', this.listOfLayerEntryConfig, 'Unable to read metadata');
     }
   }
 
@@ -386,7 +386,7 @@ export class WMS extends AbstractGeoViewRaster {
       }
 
       if ((layerConfig as TypeBaseLayerEntryConfig).layerStatus !== 'error') {
-        this.setLayerStatus('loading', layerPath);
+        this.setLayerStatus('processing', layerPath);
 
         const layerFound = this.getLayerMetadataEntry(layerConfig.layerId!);
         if (!layerFound) {
@@ -434,7 +434,7 @@ export class WMS extends AbstractGeoViewRaster {
         fr: subLayer.Title as string,
       };
       newListOfLayerEntryConfig.push(subLayerEntryConfig);
-      api.maps[this.mapId].layer.registerLayerConfig(subLayerEntryConfig);
+      subLayerEntryConfig.registerLayerConfig();
     });
 
     if (this.registerToLayerSetListenerFunctions[layerPath]) this.unregisterFromLayerSets(layerConfig);
@@ -541,12 +541,12 @@ export class WMS extends AbstractGeoViewRaster {
           if (layerConfig.initialSettings?.visible !== undefined)
             imageLayerOptions.visible = layerConfig.initialSettings?.visible === 'yes' || layerConfig.initialSettings?.visible === 'always';
 
+          // You must always set the layerConfig.loadEndListenerType before setting the layerConfig.olLayer except when entryType = 'group'.
+          layerConfig.loadEndListenerType = 'image';
           layerConfig.olLayer = new ImageLayer(imageLayerOptions);
           layerConfig.geoviewLayerInstance = this;
 
           this.applyViewFilter(layerPath, layerConfig.layerFilter ? layerConfig.layerFilter : '');
-
-          this.addLoadendListener(layerPath, 'image');
 
           resolve(layerConfig.olLayer);
         } else {
@@ -559,7 +559,7 @@ export class WMS extends AbstractGeoViewRaster {
           resolve(null);
         }
       } else {
-        console.log(`geoviewLayerType must be ${CONST_LAYER_TYPES.WMS}`);
+        logger.logError(`geoviewLayerType must be ${CONST_LAYER_TYPES.WMS}`);
         resolve(null);
       }
     });

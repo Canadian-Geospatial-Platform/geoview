@@ -9,7 +9,7 @@ import {
   GetLegendsPayload,
   PayloadBaseClass,
 } from '@/api/events/payloads';
-import { TypeLocalizedString, api } from '@/app';
+import { TypeLayerEntryConfig, TypeLocalizedString, api } from '@/app';
 import { logger } from '@/core/utils/logger';
 
 /** ***************************************************************************************************************************
@@ -69,18 +69,18 @@ export class LayerSet {
         const { layerPath, layerStatus } = payload;
         if (this.resultSets[layerPath]) {
           if (this.resultSets[layerPath].layerStatus !== layerStatus) {
+            const layerEntryConfig = api.maps[mapId].layer.registeredLayers[layerPath] as TypeLayerEntryConfig;
             this.resultSets[layerPath].layerStatus = layerStatus;
             if (!this.resultSets[layerPath].layerName)
-              this.resultSets[layerPath].layerName = api.maps[mapId].layer.registeredLayers[layerPath].layerName
-                ? api.maps[mapId].layer.registeredLayers[layerPath].layerName
+              this.resultSets[layerPath].layerName = layerEntryConfig.layerName
+                ? layerEntryConfig.layerName
                 : ({
                     en: `Anonymous Layer ${this.anonymousSequenceNumber}`,
                     fr: `Couche Anonyme ${this.anonymousSequenceNumber++}`,
                   } as TypeLocalizedString);
             if (this.resultSets[layerPath].layerStatus === 'processed')
-              if (api.maps[mapId].layer.registeredLayers[layerPath].layerName)
-                this.resultSets[layerPath].layerName = api.maps[mapId].layer.registeredLayers[layerPath].layerName;
-              else api.maps[mapId].layer.registeredLayers[layerPath].layerName = this.resultSets[layerPath].layerName;
+              if (layerEntryConfig.layerName) this.resultSets[layerPath].layerName = layerEntryConfig.layerName;
+              else layerEntryConfig.layerName = this.resultSets[layerPath].layerName;
             api.event.emit(LayerSetPayload.createLayerSetUpdatedPayload(this.layerSetId, this.resultSets, layerPath));
             if (this.layerSetId === `${mapId}/LegendsLayerSet`)
               // LegendLayerSet is the absolute reference for finding out whether a layer has been loaded or is in error. Then, every
@@ -100,10 +100,11 @@ export class LayerSet {
         const { layerPath, layerPhase } = payload;
         if (this.resultSets[layerPath] && this.resultSets[layerPath].layerStatus !== 'error') {
           if (this.resultSets[layerPath].layerPhase !== layerPhase) {
+            const layerEntryConfig = api.maps[mapId].layer.registeredLayers[layerPath] as TypeLayerEntryConfig;
             this.resultSets[layerPath].layerPhase = layerPhase;
             if (!this.resultSets[layerPath].layerName)
-              this.resultSets[layerPath].layerName = api.maps[mapId].layer.registeredLayers[layerPath].layerName
-                ? api.maps[mapId].layer.registeredLayers[layerPath].layerName
+              this.resultSets[layerPath].layerName = layerEntryConfig.layerName
+                ? layerEntryConfig.layerName
                 : ({
                     en: `Anonymous Layer ${this.anonymousSequenceNumber}`,
                     fr: `Couche Anonyme ${this.anonymousSequenceNumber++}`,
@@ -133,7 +134,7 @@ export class LayerSet {
                 data: undefined,
                 layerStatus: 'newInstance',
                 layerPhase: 'newInstance',
-                layerName: api.maps[this.mapId].layer.registeredLayers[layerPath].layerName,
+                layerName: (api.maps[this.mapId].layer.registeredLayers[layerPath] as TypeLayerEntryConfig).layerName,
               };
               if (this.registrationUserDataInitialisation) this.registrationUserDataInitialisation(layerPath);
               api.event.emit(LayerSetPayload.createLayerSetUpdatedPayload(this.layerSetId, this.resultSets, layerPath));

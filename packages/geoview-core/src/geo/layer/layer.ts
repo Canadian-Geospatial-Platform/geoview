@@ -19,6 +19,7 @@ import {
 } from '@/api/events/payloads';
 import { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import {
+  LayerEntryConfigBaseClass,
   TypeGeoviewLayerConfig,
   TypeLayerEntryConfig,
   TypeListOfLocalizedLanguages,
@@ -36,7 +37,7 @@ import { layerConfigIsOgcFeature, OgcFeature } from '@/geo/layer/geoview-layers/
 import { layerConfigIsXYZTiles, XYZTiles } from '@/geo/layer/geoview-layers/raster/xyz-tiles';
 import { layerConfigIsVectorTiles, VectorTiles } from '@/geo/layer/geoview-layers/raster/vector-tiles';
 
-export type TypeRegisteredLayers = { [layerPath: string]: TypeLayerEntryConfig };
+export type TypeRegisteredLayers = { [layerPath: string]: LayerEntryConfigBaseClass | TypeLayerEntryConfig };
 
 type TypeEventHandlerFunctions = {
   addLayer: (payload: PayloadBaseClass) => void;
@@ -272,20 +273,6 @@ export class Layer {
   }
 
   /**
-   * Register the layer identifier. Duplicate identifier are not allowed.
-   * @param {TypeLayerEntryConfig} layerConfig The layer configuration to register.
-   *
-   * @returns {boolean} Returns false if the layer configuration can't be registered.
-   */
-  registerLayerConfig(layerConfig: TypeLayerEntryConfig): boolean {
-    const { layerPath } = layerConfig;
-    if (this.registeredLayers[layerPath]) return false;
-    this.registeredLayers[layerPath] = layerConfig;
-    this.geoviewLayer(layerPath).setLayerStatus('newInstance');
-    return true;
-  }
-
-  /**
    * Method used to verify if a layer is registered. Returns true if registered.
    * @param {TypeLayerEntryConfig} layerConfig The layer configuration to test.
    *
@@ -313,12 +300,13 @@ export class Layer {
       });
     }
 
-    if (geoviewLayer.allLayerEntryConfigAreInError())
+    if (geoviewLayer.allLayerStatusAreIn(['error']))
       // an empty geoview layer is created
       api.event.emit(GeoViewLayerPayload.createGeoviewLayerAddedPayload(`${this.mapId}/${geoviewLayer.geoviewLayerId}`, geoviewLayer));
     else {
-      api.event.emit(GeoViewLayerPayload.createGeoviewLayerAddedPayload(`${this.mapId}/${geoviewLayer.geoviewLayerId}`, geoviewLayer));
+      geoviewLayer.setAllLayerStatusTo('loading', geoviewLayer.listOfLayerEntryConfig);
       api.maps[this.mapId].map.addLayer(geoviewLayer.olLayers!);
+      api.event.emit(GeoViewLayerPayload.createGeoviewLayerAddedPayload(`${this.mapId}/${geoviewLayer.geoviewLayerId}`, geoviewLayer));
     }
   }
 
@@ -492,9 +480,12 @@ export class Layer {
     this.highlightedLayer = { layerPath, originalOpacity: this.geoviewLayer(layerPath).getOpacity() };
     this.geoviewLayer(layerPath).setOpacity(1);
     // If it is a group layer, highlight sublayers
-    if (layerEntryIsGroupLayer(this.registeredLayers[layerPath])) {
+    if (layerEntryIsGroupLayer(this.registeredLayers[layerPath] as TypeLayerEntryConfig)) {
       Object.keys(this.registeredLayers).forEach((registeredLayerPath) => {
-        if (!registeredLayerPath.startsWith(layerPath) && !layerEntryIsGroupLayer(this.registeredLayers[registeredLayerPath])) {
+        if (
+          !registeredLayerPath.startsWith(layerPath) &&
+          !layerEntryIsGroupLayer(this.registeredLayers[registeredLayerPath] as TypeLayerEntryConfig)
+        ) {
           const otherOpacity = this.geoviewLayer(registeredLayerPath).getOpacity();
           this.geoviewLayer(registeredLayerPath).setOpacity((otherOpacity || 1) * 0.25);
         } else this.registeredLayers[registeredLayerPath].olLayer!.setZIndex(999);
@@ -502,7 +493,10 @@ export class Layer {
     } else {
       Object.keys(this.registeredLayers).forEach((registeredLayerPath) => {
         // check for otherOlLayer is undefined. It would be undefined if a layer status is error
-        if (registeredLayerPath !== layerPath && !layerEntryIsGroupLayer(this.registeredLayers[registeredLayerPath])) {
+        if (
+          registeredLayerPath !== layerPath &&
+          !layerEntryIsGroupLayer(this.registeredLayers[registeredLayerPath] as TypeLayerEntryConfig)
+        ) {
           const otherOpacity = this.geoviewLayer(registeredLayerPath).getOpacity();
           this.geoviewLayer(registeredLayerPath).setOpacity((otherOpacity || 1) * 0.25);
         }
@@ -518,9 +512,12 @@ export class Layer {
     api.maps[this.mapId].layer.featureHighlight.removeBBoxHighlight();
     if (this.highlightedLayer.layerPath !== undefined) {
       const { layerPath, originalOpacity } = this.highlightedLayer;
-      if (layerEntryIsGroupLayer(this.registeredLayers[layerPath])) {
+      if (layerEntryIsGroupLayer(this.registeredLayers[layerPath] as TypeLayerEntryConfig)) {
         Object.keys(this.registeredLayers).forEach((registeredLayerPath) => {
-          if (!registeredLayerPath.startsWith(layerPath) && !layerEntryIsGroupLayer(this.registeredLayers[registeredLayerPath])) {
+          if (
+            !registeredLayerPath.startsWith(layerPath) &&
+            !layerEntryIsGroupLayer(this.registeredLayers[registeredLayerPath] as TypeLayerEntryConfig)
+          ) {
             const otherOpacity = this.geoviewLayer(registeredLayerPath).getOpacity();
             this.geoviewLayer(registeredLayerPath).setOpacity(otherOpacity ? otherOpacity * 4 : 1);
           } else this.geoviewLayer(registeredLayerPath).setOpacity(originalOpacity || 1);
@@ -528,7 +525,10 @@ export class Layer {
       } else {
         Object.keys(this.registeredLayers).forEach((registeredLayerPath) => {
           // check for otherOlLayer is undefined. It would be undefined if a layer status is error
-          if (registeredLayerPath !== layerPath && !layerEntryIsGroupLayer(this.registeredLayers[registeredLayerPath])) {
+          if (
+            registeredLayerPath !== layerPath &&
+            !layerEntryIsGroupLayer(this.registeredLayers[registeredLayerPath] as TypeLayerEntryConfig)
+          ) {
             const otherOpacity = this.geoviewLayer(registeredLayerPath).getOpacity();
             this.geoviewLayer(registeredLayerPath).setOpacity(otherOpacity ? otherOpacity * 4 : 1);
           } else this.geoviewLayer(registeredLayerPath).setOpacity(originalOpacity || 1);

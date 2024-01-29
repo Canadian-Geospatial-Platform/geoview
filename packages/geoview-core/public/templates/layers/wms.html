@@ -197,7 +197,7 @@
             'listOfLayerEntryConfig': [
               {
                 'layerId': 'landcover_2015_19classes',
-                'layerPathEnding': 'style=1',
+                'layerIdExtension': 'style=1',
                 'source': {
                   'style': '1',
                   'serverType': 'qgis'
@@ -205,126 +205,126 @@
               },
               {
                 'layerId': 'landcover_2015_19classes',
-                'layerPathEnding': 'style=2',
+                'layerIdExtension': 'style=2',
                 'source': {
                   'style': '2'
                 }
               },
               {
                 'layerId': 'landcover_2015_19classes',
-                'layerPathEnding': 'style=3',
+                'layerIdExtension': 'style=3',
                 'source': {
                   'style': '3'
                 }
               },
               {
                 'layerId': 'landcover_2015_19classes',
-                'layerPathEnding': 'style=4',
+                'layerIdExtension': 'style=4',
                 'source': {
                   'style': '4'
                 }
               },
               {
                 'layerId': 'landcover_2015_19classes',
-                'layerPathEnding': 'style=5',
+                'layerIdExtension': 'style=5',
                 'source': {
                   'style': '5'
                 }
               },
               {
                 'layerId': 'landcover_2015_19classes',
-                'layerPathEnding': 'style=6',
+                'layerIdExtension': 'style=6',
                 'source': {
                   'style': '6'
                 }
               },
               {
                 'layerId': 'landcover_2015_19classes',
-                'layerPathEnding': 'style=7',
+                'layerIdExtension': 'style=7',
                 'source': {
                   'style': '7'
                 }
               },
               {
                 'layerId': 'landcover_2015_19classes',
-                'layerPathEnding': 'style=8',
+                'layerIdExtension': 'style=8',
                 'source': {
                   'style': '8'
                 }
               },
               {
                 'layerId': 'landcover_2015_19classes',
-                'layerPathEnding': 'style=9',
+                'layerIdExtension': 'style=9',
                 'source': {
                   'style': '9'
                 }
               },
               {
                 'layerId': 'landcover_2015_19classes',
-                'layerPathEnding': 'style=10',
+                'layerIdExtension': 'style=10',
                 'source': {
                   'style': '10'
                 }
               },
               {
                 'layerId': 'landcover_2015_19classes',
-                'layerPathEnding': 'style=11',
+                'layerIdExtension': 'style=11',
                 'source': {
                   'style': '11'
                 }
               },
               {
                 'layerId': 'landcover_2015_19classes',
-                'layerPathEnding': 'style=12',
+                'layerIdExtension': 'style=12',
                 'source': {
                   'style': '12'
                 }
               },
               {
                 'layerId': 'landcover_2015_19classes',
-                'layerPathEnding': 'style=13',
+                'layerIdExtension': 'style=13',
                 'source': {
                   'style': '13'
                 }
               },
               {
                 'layerId': 'landcover_2015_19classes',
-                'layerPathEnding': 'style=14',
+                'layerIdExtension': 'style=14',
                 'source': {
                   'style': '14'
                 }
               },
               {
                 'layerId': 'landcover_2015_19classes',
-                'layerPathEnding': 'style=15',
+                'layerIdExtension': 'style=15',
                 'source': {
                   'style': '15'
                 }
               },
               {
                 'layerId': 'landcover_2015_19classes',
-                'layerPathEnding': 'style=16',
+                'layerIdExtension': 'style=16',
                 'source': {
                   'style': '16'
                 }
               },
               {
                 'layerId': 'landcover_2015_19classes',
-                'layerPathEnding': 'style=17',
+                'layerIdExtension': 'style=17',
                 'source': {
                   'style': '17'
                 }
               },
               {
                 'layerId': 'landcover_2015_19classes',
-                'layerPathEnding': 'style=18',
+                'layerIdExtension': 'style=18',
                 'source': {
                   'style': '18'
                 }
               },
               {
                 'layerId': 'landcover_2015_19classes',
-                'layerPathEnding': 'style=19',
+                'layerIdExtension': 'style=19',
                 'source': {
                   'style': '19'
                 }
@@ -589,7 +589,8 @@
           createTableOfFilter('LYR4');
 
           const intervalId = window.setInterval(() => {
-            if (cgpv.api.maps.LYR3?.layer?.geoviewLayers?.['wmsLYR3-Root']?.allLayerEntryConfigProcessed()) {
+            // If metadata are processed
+            if (cgpv.api.maps.LYR3?.layer?.geoviewLayers?.['wmsLYR3-Root']?.allLayerStatusAreIn(['processed', 'error', 'loaded'])) {
               const lyr3LayerConfig = cgpv.api.maps.LYR3.layer.registeredLayers['wmsLYR3-Root/landcover_2015_19classes'];
               if (Array.isArray(lyr3LayerConfig?.source?.style)) {
                 const dropDownContent = document.getElementById('style');
