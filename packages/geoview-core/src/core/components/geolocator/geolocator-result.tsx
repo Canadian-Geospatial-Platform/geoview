@@ -18,6 +18,7 @@ import {
 import { GeoListItem } from './geolocator';
 import GeoList from './geo-list';
 import { useMapSize } from '@/core/stores/store-interface-and-intial-values/map-state';
+import { logger } from '@/core/utils/logger';
 
 interface GeolocatorFiltersType {
   geoLocationData: GeoListItem[];
@@ -56,6 +57,9 @@ export function GeolocatorResult({ geoLocationData, searchValue, error }: Geoloc
    * Reduce provinces from api response data i.e. geoLocationData and return transform into MenuItem
    */
   const provinces: TypeMenuItemProps[] = useMemo(() => {
+    // Log
+    logger.logTraceUseMemo('GEOLOCATOR-RESULT - provinces', geoLocationData);
+
     const provincesList = geoLocationData
       .reduce((acc, curr) => {
         if (curr.province && !acc.includes(curr.province)) {
@@ -78,6 +82,9 @@ export function GeolocatorResult({ geoLocationData, searchValue, error }: Geoloc
    * Reduce categories from api response data i.e. geoLocationData
    */
   const categories: TypeMenuItemProps[] = useMemo(() => {
+    // Log
+    logger.logTraceUseMemo('GEOLOCATOR-RESULT - categories', geoLocationData);
+
     const locationData = geoLocationData
       .reduce((acc, curr) => {
         if (curr.category) {
@@ -97,10 +104,16 @@ export function GeolocatorResult({ geoLocationData, searchValue, error }: Geoloc
   }, [geoLocationData]);
 
   useEffect(() => {
+    // Log
+    logger.logTraceUseEffect('GEOLOCATOR-RESULT - geoLocationData', geoLocationData);
+
     setData(geoLocationData);
   }, [geoLocationData]);
 
   useEffect(() => {
+    // Log
+    logger.logTraceUseEffect('GEOLOCATOR-RESULT - geoLocationData province category', geoLocationData, province, category);
+
     // update result list after setting the province and type.
     const filterData = geoLocationData.filter((item) => {
       let result = true;
@@ -117,6 +130,9 @@ export function GeolocatorResult({ geoLocationData, searchValue, error }: Geoloc
   }, [geoLocationData, province, category, categories, provinces]);
 
   useEffect(() => {
+    // Log
+    logger.logTraceUseEffect('GEOLOCATOR-RESULT - geoLocationData reset', geoLocationData);
+
     // Reset the filters when no result found.
     if (!geoLocationData.length) {
       setProvince('');

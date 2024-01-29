@@ -94,7 +94,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
     ) {
       return null;
     }
-    if (item.isVisible === 'always' || layerDetails.isVisible === 'always') {
+    if (item.isVisible === 'always' || layerDetails.isVisible === 'always' || !layerDetails.canToggle) {
       return (
         <IconButton disabled tooltip="layers.visibilityIsAlways">
           {' '}
@@ -112,7 +112,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
 
   function renderHeaderCheckbox() {
     const containsDisabled = _.some(layerDetails.items, (i) => i.isVisible === 'always');
-    if (layerDetails.isVisible === 'always' || containsDisabled) {
+    if (layerDetails.isVisible === 'always' || !layerDetails.canToggle || containsDisabled) {
       return (
         <IconButton disabled>
           {' '}

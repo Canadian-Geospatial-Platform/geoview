@@ -1,5 +1,6 @@
 import { TypeTabs } from '@/ui/tabs/tabs';
 import { AbstractPlugin } from './abstract-plugin';
+import { logger } from '@/core/utils/logger';
 
 /** ******************************************************************************************************************************
  * Footer Plugin abstract class.
@@ -31,6 +32,9 @@ export abstract class FooterPlugin extends AbstractPlugin {
    * Called when a footer plugin is being added
    */
   onAdd(): void {
+    // Log
+    // No need to log, parent class does it well already via added() function.
+
     // Set value to length of tabs(?)
     this.value = this.map()?.footerTabs.tabs.length;
 
@@ -45,7 +49,22 @@ export abstract class FooterPlugin extends AbstractPlugin {
    * Called when a footer plugin is being removed
    */
   onRemove(): void {
+    // Log
+    // No need to log, parent class does it well already via removed() function.
+
     // Remove the footer tab
     if (this.value) this.map()?.footerTabs.removeFooterTab(this.footerProps!.id);
+  }
+
+  /**
+   * Called when a footer plugin has been selected in the tabs
+   */
+  onSelected(): void {
+    // Log
+    logger.logTraceCore('footer-plugin.onSelected');
+
+    // TODO: Refactor - Move 'onSelected' in AbstractPlugin class so that AppBar can eventually benefit as well?
+
+    // Nothing else here.. but inherited FooterPlugins might override this method to do stuff when they are selected!
   }
 }

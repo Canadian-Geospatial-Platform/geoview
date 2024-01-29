@@ -29,6 +29,7 @@ import { GeoPackage, layerConfigIsGeoPackage } from '@/geo/layer/geoview-layers/
 import { layerConfigIsWMS, WMS } from '@/geo/layer/geoview-layers/raster/wms';
 import { EsriDynamic, layerConfigIsEsriDynamic } from '@/geo/layer/geoview-layers/raster/esri-dynamic';
 import { EsriFeature, layerConfigIsEsriFeature } from '@/geo/layer/geoview-layers/vector/esri-feature';
+import { EsriImage, layerConfigIsEsriImage } from '@/geo/layer/geoview-layers/raster/esri-image';
 import { ImageStatic, layerConfigIsImageStatic } from '@/geo/layer/geoview-layers/raster/image-static';
 import { layerConfigIsWFS, WFS } from '@/geo/layer/geoview-layers/vector/wfs';
 import { layerConfigIsOgcFeature, OgcFeature } from '@/geo/layer/geoview-layers/vector/ogc-feature';
@@ -125,6 +126,11 @@ export class Layer {
             const esriFeature = new EsriFeature(this.mapId, layerConfig);
             esriFeature.createGeoViewLayers().then(() => {
               this.addToMap(esriFeature);
+            });
+          } else if (layerConfigIsEsriImage(layerConfig)) {
+            const esriImage = new EsriImage(this.mapId, layerConfig);
+            esriImage.createGeoViewLayers().then(() => {
+              this.addToMap(esriImage);
             });
           } else if (layerConfigIsImageStatic(layerConfig)) {
             const imageStatic = new ImageStatic(this.mapId, layerConfig);

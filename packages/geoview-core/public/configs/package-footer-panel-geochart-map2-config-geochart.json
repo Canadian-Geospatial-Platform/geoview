@@ -137,7 +137,7 @@
     {
       "layers": [
         {
-          "layerId": "geojsonLYR5/polygons.json"
+          "layerId": "geojsonLYR5/geojsonLYR5/polygons.json"
         }
       ],
       "chart": "pie",
@@ -232,7 +232,7 @@
     {
       "layers": [
         {
-          "layerId": "geojsonLYR5/point-feature-group/points.json"
+          "layerId": "geojsonLYR5/geojsonLYR5/point-feature-group/points.json"
         }
       ],
       "chart": "bar",

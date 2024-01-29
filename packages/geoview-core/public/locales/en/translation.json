@@ -58,7 +58,6 @@
     "removeLayer": "Remove Layer",
     "toggleOpacity": "Toggle Opacity DEPRECATED",
     "zoomTo": "Zoom to Layer",
-    "overviewTitle": "Legend Overview",
     "addLayer": "Add Layer",
     "sortLayers": "Sort Layers",
     "sort": "Sort",
@@ -193,9 +192,6 @@
     "featureFiltered": "features filtered",
     "images": "Images",
     "close": "Close"
-  },
-  "geoChart": {
-    "noChartAvailable": "Click on the map layer with chart"
   },
   "footerTabsContainer": {
     "focusToMap": "Focus to map",

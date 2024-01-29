@@ -2,9 +2,9 @@ import { Cast, AnySchemaObject, toJsonObject, TypeJsonObject } from 'geoview-cor
 import { FooterPlugin } from 'geoview-core/src/api/plugin/footer-plugin';
 import { TypeTabs } from 'geoview-core/src/ui/tabs/tabs';
 import { ChartType } from 'geochart';
-import { LayerListEntry } from 'geoview-core/src/core/components/common';
 import { ChartIcon } from 'geoview-core/src/ui/icons';
 
+import { GeochartEventProcessor } from 'geoview-core/src/api/event-processors/event-processor-children/geochart-event-processor';
 import { PayloadBaseClassChart, EVENT_CHART_REDRAW } from './geochart-event-base';
 import { PayloadChartConfig } from './geochart-event-config';
 import { PluginGeoChartConfig } from './geochart-types';
@@ -37,54 +37,38 @@ class GeoChartFooterPlugin extends FooterPlugin {
     en: {
       geochart: {
         title: 'Chart',
+        panel: {
+          chart: 'chart',
+          noLayers: 'No layers with chart data',
+          clickMap: 'Click on the map on a layer with a graph',
+          loadingUI: 'Loading the Chart panel',
+        },
       },
     },
     fr: {
       geochart: {
         title: 'Graphique',
+        panel: {
+          chart: 'graphique',
+          noLayers: 'Pas de couches avec des données graphiques',
+          clickMap: 'Cliquez sur la map sur la couche ayant un graphique',
+          loadingUI: "Chargement de l'interface pour graphique",
+        },
       },
     },
   });
 
+  onAdd(): void {
+    // Initialize the store with geochart provided configuration
+    GeochartEventProcessor.setGeochartCharts(this.pluginProps.mapId, this.configObj.charts);
+
+    // Call parent
+    super.onAdd();
+  }
+
   onCreateContentProps(): TypeTabs {
-    // Cast the config
-    const chartConfig: PluginGeoChartConfig<ChartType> | undefined = this.configObj;
-
-    // Create content
-    const layerList = chartConfig?.charts
-      .map((chart) => {
-        const layerIds =
-          chart.layers?.map((layer) => {
-            return layer.layerId;
-          }) ?? [];
-
-        return layerIds;
-      })
-      .flat()
-      .reduce((acc, curr) => {
-        if (this.api.maps[this.pluginProps.mapId].layer.registeredLayers[curr]) {
-          const currLayer = this.api.maps[this.pluginProps.mapId].layer.registeredLayers[curr];
-          const layerName =
-            currLayer.layerName && this.displayLanguage() in currLayer.layerName
-              ? currLayer.layerName[this.displayLanguage()]
-              : currLayer.layerName;
-          const layerData = {
-            layerName,
-            layerPath: curr,
-            tooltip: layerName,
-          };
-          acc.push(layerData);
-        }
-
-        return acc;
-      }, [] as LayerListEntry[]);
-
-    // If any layers list
-    let content = <div>No layers in config</div>;
-    if (layerList) {
-      // Create element
-      content = <GeoChartPanel mapId={this.pluginProps.mapId} configObj={this.configObj} layerList={layerList} />;
-    }
+    // Create element
+    const content = <GeoChartPanel mapId={this.pluginProps.mapId} />;
 
     return {
       id: 'geochart',
@@ -93,6 +77,14 @@ class GeoChartFooterPlugin extends FooterPlugin {
       icon: <ChartIcon />,
       content,
     };
+  }
+
+  onSelected(): void {
+    // Call parent
+    super.onSelected();
+
+    // When the GeoChart Plugin in the Footer is selected, we redraw the chart, in case
+    this.redrawChart();
   }
 
   /**

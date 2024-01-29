@@ -3,6 +3,7 @@ import { useGeoViewStore } from '../stores-managers';
 import { TypeGetStore, TypeSetStore } from '../geoview-store';
 import { TimeSliderEventProcessor } from '@/api/event-processors/event-processor-children/time-slider-event-processor';
 
+// #region INTERFACES
 export interface TypeTimeSliderValues {
   title?: string;
   description?: string;
@@ -23,6 +24,7 @@ export interface TypeTimeSliderValues {
 export interface ITimeSliderState {
   timeSliderLayers: { [index: string]: TypeTimeSliderValues };
   visibleTimeSliderLayers: string[];
+
   actions: {
     addTimeSliderLayer: (newLayer: { [index: string]: TypeTimeSliderValues }) => void;
     applyFilters: (layerPath: string, values: number[]) => void;
@@ -38,11 +40,14 @@ export interface ITimeSliderState {
     setVisibleTimeSliderLayers: (visibleLayerPaths: string[]) => void;
   };
 }
+// #endregion INTERFACES
 
 export function initializeTimeSliderState(set: TypeSetStore, get: TypeGetStore): ITimeSliderState {
   const init = {
     timeSliderLayers: {},
     visibleTimeSliderLayers: [],
+
+    // #region ACTIONS
     actions: {
       addTimeSliderLayer(newLayer: { [index: string]: TypeTimeSliderValues }): void {
         set({
@@ -157,6 +162,7 @@ export function initializeTimeSliderState(set: TypeSetStore, get: TypeGetStore):
           },
         });
       },
+      // #endregion ACTIONS
     },
   } as ITimeSliderState;
 
@@ -168,4 +174,5 @@ export function initializeTimeSliderState(set: TypeSetStore, get: TypeGetStore):
 // **********************************************************
 export const useTimeSliderLayers = () => useStore(useGeoViewStore(), (state) => state.timeSliderState.timeSliderLayers);
 export const useVisibleTimeSliderLayers = () => useStore(useGeoViewStore(), (state) => state.timeSliderState.visibleTimeSliderLayers);
+
 export const useTimeSliderStoreActions = () => useStore(useGeoViewStore(), (state) => state.timeSliderState.actions);

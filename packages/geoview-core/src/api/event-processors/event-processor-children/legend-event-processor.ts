@@ -97,7 +97,7 @@ export class LegendEventProcessor extends AbstractEventProcessor {
                   geometryType,
                   icon: canvas ? canvas.toDataURL() : null,
                   name: styleSettings.uniqueValueStyleInfo[i].label,
-                  isVisible: styleSettings.uniqueValueStyleInfo[i].visible!,
+                  isVisible: styleSettings.uniqueValueStyleInfo[i].visible || 'yes',
                   default: false,
                 };
                 return legendLayerListItem;
@@ -151,6 +151,7 @@ export class LegendEventProcessor extends AbstractEventProcessor {
             layerName: getLocalizedValue(layerConfig.layerName, mapId) || layerConfig.layerId,
             type: layerConfig.entryType as TypeGeoviewLayerType,
             isVisible: layerConfig.initialSettings?.visible ? layerConfig.initialSettings.visible : 'yes',
+            canToggle: legendResultSetsEntry.data?.type !== 'esriImage',
             opacity: layerConfig.initialSettings?.opacity ? layerConfig.initialSettings.opacity : 1,
             items: [] as TypeLegendItem[],
             children: [] as TypeLegendLayer[],
@@ -180,6 +181,7 @@ export class LegendEventProcessor extends AbstractEventProcessor {
           styleConfig: legendResultSetsEntry.data?.styleConfig,
           type: legendResultSetsEntry.data?.type,
           isVisible: layerConfig.initialSettings?.visible || 'yes',
+          canToggle: legendResultSetsEntry.data?.type !== 'esriImage',
           opacity: layerConfig.initialSettings?.opacity || 1,
           items: [] as TypeLegendItem[],
           children: [] as TypeLegendLayer[],

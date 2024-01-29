@@ -14,10 +14,12 @@ interface LayoutProps {
   children?: ReactNode;
   layerList: LayerListEntry[];
   selectedLayerPath: string;
+  // TODO: Name this onLayerListClicked and make it optional with '?' suffix?
   handleLayerList: (layer: LayerListEntry) => void;
+  onIsEnlargeClicked?: (isEnlarge: boolean) => void;
 }
 
-export function Layout({ children, layerList, handleLayerList, selectedLayerPath }: LayoutProps) {
+export function Layout({ children, layerList, selectedLayerPath, handleLayerList, onIsEnlargeClicked }: LayoutProps) {
   const { t } = useTranslation<string>();
 
   const theme = useTheme();
@@ -41,6 +43,19 @@ export function Layout({ children, layerList, handleLayerList, selectedLayerPath
   };
 
   /**
+   * Handles click on the Enlarge button.
+   *
+   * @param {boolean} isEnlarge Indicate if enlarge
+   */
+  const handleIsEnlarge = (isEnlarge: boolean): void => {
+    // Set the isEnlarge
+    setIsEnlargeDataTable(isEnlarge);
+
+    // Callback
+    onIsEnlargeClicked?.(isEnlarge);
+  };
+
+  /**
    * Render group layers as list.
    *
    * @returns JSX.Element
@@ -57,7 +72,7 @@ export function Layout({ children, layerList, handleLayerList, selectedLayerPath
       />
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedLayerPath, isEnlargeDataTable]);
+  }, [selectedLayerPath, isEnlargeDataTable, layerList]);
 
   return (
     <Box sx={sxClasses.detailsContainer}>
@@ -76,7 +91,7 @@ export function Layout({ children, layerList, handleLayerList, selectedLayerPath
           >
             <LayerTitle hideTitle>{layerList.find((layer) => layer.layerPath === selectedLayerPath)?.layerName ?? ''}</LayerTitle>
             <Box>
-              <EnlargeButton isEnlargeDataTable={isEnlargeDataTable} setIsEnlargeDataTable={setIsEnlargeDataTable} />
+              <EnlargeButton isEnlargeDataTable={isEnlargeDataTable} setIsEnlargeDataTable={handleIsEnlarge} />
               <CloseButton isLayersPanelVisible={isLayersPanelVisible} setIsLayersPanelVisible={setIsLayersPanelVisible} />
             </Box>
           </Box>
@@ -96,4 +111,5 @@ export function Layout({ children, layerList, handleLayerList, selectedLayerPath
 
 Layout.defaultProps = {
   children: null,
+  onIsEnlargeClicked: undefined,
 };

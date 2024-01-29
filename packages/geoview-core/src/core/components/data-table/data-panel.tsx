@@ -6,7 +6,6 @@ import MapDataTable, { DataTableData } from './data-table';
 import { getSxClasses } from './data-table-style';
 import { GroupLayers } from './data-table-api';
 import { TypeDisplayLanguage } from '@/geo/map/map-schema-types';
-
 import {
   useDataTableStoreActions,
   useDataTableStoreIsEnlargeDataTable,
@@ -15,7 +14,6 @@ import {
   useDataTableStoreSelectedLayerIndex,
   useMapVisibleLayers,
 } from '@/core/stores';
-
 import { ResponsiveGrid, EnlargeButton, CloseButton, LayerList, LayerListEntry, LayerTitle, useFooterPanelHeight } from '../common';
 import { logger } from '@/core/utils/logger';
 
@@ -54,12 +52,19 @@ export function Datapanel({ layerData, mapId, language }: DatapanelProps) {
   // Custom hook for calculating the height of footer panel
   const { leftPanelRef, rightPanelRef, panelTitleRef, tableHeight } = useFooterPanelHeight({ footerPanelTab: 'datatable' });
 
-  const handleLayerChange = useCallback((_layer: LayerListEntry, index: number) => {
-    setSelectedLayerIndex(index);
-    setIsLoading(true);
-    setIsLayersPanelVisible(true);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  // Copied similar logic from details-panel, because of the indexes thing
+  const findLayerPathIndex = (layerDataArray: LayersDataType[], layerPathSearch: string): number => {
+    return layerDataArray.findIndex((item) => item.layerKey === layerPathSearch);
+  };
+
+  const handleLayerChange = useCallback(
+    (_layer: LayerListEntry) => {
+      setSelectedLayerIndex(findLayerPathIndex(orderedLayerData, _layer.layerPath));
+      setIsLoading(true);
+      setIsLayersPanelVisible(true);
+    },
+    [orderedLayerData, setSelectedLayerIndex]
+  );
 
   /**
    * Check if filtered are being set for each layer.

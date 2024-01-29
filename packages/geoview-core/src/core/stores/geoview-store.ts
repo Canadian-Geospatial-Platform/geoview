@@ -10,6 +10,7 @@ import { ILayerState, initializeLayerState } from './store-interface-and-intial-
 import { IMapState, initializeMapState } from './store-interface-and-intial-values/map-state';
 import { IMapDataTableState, initialDataTableState } from './store-interface-and-intial-values/data-table-state';
 import { ITimeSliderState, initializeTimeSliderState } from './store-interface-and-intial-values/time-slider-state';
+import { IGeochartState, initializeGeochartState } from './store-interface-and-intial-values/geochart-state';
 import { IUIState, initializeUIState } from './store-interface-and-intial-values/ui-state';
 
 import { TypeMapFeaturesConfig } from '@/core/types/global-types';
@@ -26,14 +27,17 @@ export interface IGeoviewState {
   mapId: string;
   setMapConfig: (config: TypeMapFeaturesConfig) => void;
 
-  // state interfaces
+  // core state interfaces
   appState: IAppState;
   detailsState: IDetailsState;
   dataTableState: IMapDataTableState;
   layerState: ILayerState;
   mapState: IMapState;
-  timeSliderState: ITimeSliderState;
   uiState: IUIState;
+
+  // packages state interface
+  geochartState: IGeochartState;
+  timeSliderState: ITimeSliderState;
 }
 
 export const geoviewStoreDefinition = (set: TypeSetStore, get: TypeGetStore) => {
@@ -56,6 +60,7 @@ export const geoviewStoreDefinition = (set: TypeSetStore, get: TypeGetStore) => 
       // packages states, only create if needed
       // TODO: Change this check for something more generic that checks in appBarTabs too
       if (config.footerTabs?.tabs.core.includes('time-slider')) set({ timeSliderState: initializeTimeSliderState(set, get) });
+      if (config.footerTabs?.tabs.core.includes('geochart')) set({ geochartState: initializeGeochartState(set, get) });
     },
 
     // core states
