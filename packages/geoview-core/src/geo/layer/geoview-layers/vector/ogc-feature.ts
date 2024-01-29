@@ -159,11 +159,11 @@ export class OgcFeature extends AbstractGeoViewVector {
             resolve();
           }) // eslint-disable-next-line @typescript-eslint/no-unused-vars
           .catch((reason) => {
-            this.setAllLayerStatusToError(this.listOfLayerEntryConfig, 'Unable to read metadata');
+            this.setAllLayerStatusTo('error', this.listOfLayerEntryConfig, 'Unable to read metadata');
             resolve();
           });
       } else {
-        this.setAllLayerStatusToError(this.listOfLayerEntryConfig, 'Unable to read metadata');
+        this.setAllLayerStatusTo('error', this.listOfLayerEntryConfig, 'Unable to read metadata');
       }
     });
     return promisedExecution;
@@ -191,7 +191,7 @@ export class OgcFeature extends AbstractGeoViewVector {
         }
       }
 
-      this.setLayerStatus('loading', layerPath);
+      this.setLayerStatus('processing', layerPath);
 
       // Note that the code assumes ogc-feature collections does not contains metadata layer group. If you need layer group,
       // you can define them in the configuration section.

@@ -601,9 +601,11 @@ export class ConfigValidation {
       );
 
       if (layerEntryIsGroupLayer(layerConfig)) {
+        // We must set the parents of all elements in the group.
+        this.recursivelySetChildParent(geoviewLayerConfig, [layerConfig], parentLayerConfig);
         const parent = new TypeLayerGroupEntryConfig(layerConfig);
         listOfLayerEntryConfig[i] = parent;
-        this.processLayerEntryConfig(geoviewLayerConfig, layerConfig.listOfLayerEntryConfig, parent);
+        this.processLayerEntryConfig(geoviewLayerConfig, parent.listOfLayerEntryConfig, parent);
       } else if (geoviewEntryIsWMS(layerConfig)) {
         listOfLayerEntryConfig[i] = new TypeOgcWmsLayerEntryConfig(layerConfig);
       } else if (geoviewEntryIsImageStatic(layerConfig)) {
@@ -627,6 +629,26 @@ export class ConfigValidation {
       } else if (geoviewEntryIsGeoJSON(layerConfig)) {
         listOfLayerEntryConfig[i] = new TypeGeoJSONLayerEntryConfig(layerConfig);
       }
+    });
+  }
+
+  /** ***************************************************************************************************************************
+   * Process recursively the layer entries to set the parents of each entries.
+   * @param {TypeGeoviewLayerConfig} geoviewLayerConfig The GeoView layer configuration.
+   * @param {TypeListOfLayerEntryConfig} listOfLayerEntryConfig The list of layer entry configurations to process.
+   * @param {TypeLayerGroupEntryConfig} parentLayerConfig The parent layer configuration of all the
+   * layer configurations found in the list of layer entries.
+   */
+  private recursivelySetChildParent(
+    geoviewLayerConfig: TypeGeoviewLayerConfig,
+    listOfLayerEntryConfig: TypeListOfLayerEntryConfig,
+    parentLayerConfig?: TypeLayerGroupEntryConfig
+  ) {
+    listOfLayerEntryConfig.forEach((layerConfig) => {
+      layerConfig.parentLayerConfig = parentLayerConfig;
+      layerConfig.geoviewLayerConfig = geoviewLayerConfig;
+      if (layerEntryIsGroupLayer(layerConfig))
+        this.recursivelySetChildParent(geoviewLayerConfig, layerConfig.listOfLayerEntryConfig, layerConfig);
     });
   }
 

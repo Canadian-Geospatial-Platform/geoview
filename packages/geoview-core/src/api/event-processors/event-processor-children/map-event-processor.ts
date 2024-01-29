@@ -133,7 +133,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
     const unsubLegendLayers = store.subscribe(
       (state) => state.layerState.legendLayers,
       (cur) => {
-        const orderedLayerPaths = MapEventProcessor.getLayerPathsFromLegendsArray(cur);
+        const orderedLayerPaths = MapEventProcessor.evaluateLayerPathsFromLegendsArray(cur);
         const prevLayerOrder = [...store.getState().mapState.layerOrder];
         if (JSON.stringify(prevLayerOrder) !== JSON.stringify(orderedLayerPaths))
           store.getState().mapState.actions.setLayerOrder(orderedLayerPaths);
@@ -355,7 +355,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
     api.maps[mapId].basemap.loadDefaultBasemaps(projection, language);
   }
 
-  static getLayerPathsFromLegendsArray(legendsArray: TypeLegendLayer[]): string[] {
+  static evaluateLayerPathsFromLegendsArray(legendsArray: TypeLegendLayer[]): string[] {
     const layerPathList: string[] = [];
     const maxOrder = Math.max(...legendsArray.map((legendLayer) => legendLayer.order));
     for (let i = 0; i <= maxOrder; i++) {
@@ -363,7 +363,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
       if (nextLayerLegend) {
         layerPathList.push(nextLayerLegend.layerPath);
         if (nextLayerLegend.children.length) {
-          layerPathList.push(...this.getLayerPathsFromLegendsArray(nextLayerLegend.children));
+          layerPathList.push(...this.evaluateLayerPathsFromLegendsArray(nextLayerLegend.children));
         }
       }
     }

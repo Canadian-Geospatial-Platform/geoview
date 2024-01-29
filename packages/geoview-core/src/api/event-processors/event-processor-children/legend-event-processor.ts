@@ -9,6 +9,7 @@ import {
   isWmsLegend,
   layerEntryIsGroupLayer,
   TypeGeoviewLayerType,
+  TypeLayerEntryConfig,
   TypeLegend,
   TypeStyleGeometry,
 } from '@/geo';
@@ -133,7 +134,7 @@ export class LegendEventProcessor extends AbstractEventProcessor {
       existingEntries: TypeLegendLayer[]
     ): Promise<void> => {
       const entryLayerPath = `${layerPathBeginning}/${layerPathNodes[currentLevel]}`;
-      const layerConfig = api.maps[mapId].layer.registeredLayers[entryLayerPath];
+      const layerConfig = api.maps[mapId].layer.registeredLayers[entryLayerPath] as TypeLayerEntryConfig;
       let entryIndex = existingEntries.findIndex((entry) => entry.layerPath === entryLayerPath);
       if (layerEntryIsGroupLayer(layerConfig)) {
         if (entryIndex === -1) {

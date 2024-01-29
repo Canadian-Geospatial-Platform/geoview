@@ -44,7 +44,7 @@ export async function commonfetchServiceMetadata(this: EsriDynamic | EsriFeature
   if (metadataUrl) {
     try {
       const metadataString = await getXMLHttpRequest(`${metadataUrl}?f=json`);
-      if (metadataString === '{}') this.setAllLayerStatusToError(this.listOfLayerEntryConfig, 'Unable to read metadata');
+      if (metadataString === '{}') this.setAllLayerStatusTo('error', this.listOfLayerEntryConfig, 'Unable to read metadata');
       else {
         this.metadata = JSON.parse(metadataString) as TypeJsonObject;
         const { copyrightText } = this.metadata;
@@ -52,10 +52,10 @@ export async function commonfetchServiceMetadata(this: EsriDynamic | EsriFeature
       }
     } catch (error) {
       console.log(error);
-      this.setAllLayerStatusToError(this.listOfLayerEntryConfig, 'Unable to read metadata');
+      this.setAllLayerStatusTo('error', this.listOfLayerEntryConfig, 'Unable to read metadata');
     }
   } else {
-    this.setAllLayerStatusToError(this.listOfLayerEntryConfig, 'Unable to read metadata');
+    this.setAllLayerStatusTo('error', this.listOfLayerEntryConfig, 'Unable to read metadata');
   }
 }
 
@@ -68,7 +68,7 @@ export async function commonfetchServiceMetadata(this: EsriDynamic | EsriFeature
  */
 export function commonValidateListOfLayerEntryConfig(this: EsriDynamic | EsriFeature, listOfLayerEntryConfig: TypeListOfLayerEntryConfig) {
   this.setLayerPhase('validateListOfLayerEntryConfig');
-  listOfLayerEntryConfig.forEach((layerConfig: TypeLayerEntryConfig) => {
+  listOfLayerEntryConfig.forEach((layerConfig: TypeLayerEntryConfig, i) => {
     const { layerPath } = layerConfig;
     if (layerEntryIsGroupLayer(layerConfig)) {
       this.validateListOfLayerEntryConfig(layerConfig.listOfLayerEntryConfig!);
@@ -82,7 +82,7 @@ export function commonValidateListOfLayerEntryConfig(this: EsriDynamic | EsriFea
       }
     }
 
-    this.setLayerStatus('loading', layerPath);
+    this.setLayerStatus('processing', layerPath);
 
     let esriIndex = Number(layerConfig.layerId);
     if (Number.isNaN(esriIndex)) {
@@ -108,22 +108,11 @@ export function commonValidateListOfLayerEntryConfig(this: EsriDynamic | EsriFea
     }
 
     if (this.metadata!.layers[esriIndex].type === 'Group Layer') {
+      // We will create dynamically a group layer.
       const newListOfLayerEntryConfig: TypeListOfLayerEntryConfig = [];
-      (this.metadata!.layers[esriIndex].subLayerIds as TypeJsonArray).forEach((layerId) => {
-        const subLayerEntryConfig: TypeLayerEntryConfig = cloneDeep(layerConfig);
-        subLayerEntryConfig.parentLayerConfig = Cast<TypeLayerGroupEntryConfig>(layerConfig);
-        subLayerEntryConfig.layerId = `${layerId}`;
-        subLayerEntryConfig.layerName = {
-          en: this.metadata!.layers[layerId as number].name as string,
-          fr: this.metadata!.layers[layerId as number].name as string,
-        };
-        newListOfLayerEntryConfig.push(subLayerEntryConfig);
-        api.maps[this.mapId].layer.registerLayerConfig(subLayerEntryConfig);
-      });
-
+      // Group layer are not registered to layer sets.
       if (this.registerToLayerSetListenerFunctions[layerPath]) this.unregisterFromLayerSets(layerConfig as TypeBaseLayerEntryConfig);
-      const switchToGroupLayer = Cast<TypeLayerGroupEntryConfig>(layerConfig);
-      delete (layerConfig as TypeBaseLayerEntryConfig).layerStatus;
+      const switchToGroupLayer = cloneDeep(layerConfig);
       switchToGroupLayer.entryType = 'group';
       switchToGroupLayer.layerName = {
         en: this.metadata!.layers[esriIndex].name as string,
@@ -131,6 +120,26 @@ export function commonValidateListOfLayerEntryConfig(this: EsriDynamic | EsriFea
       };
       switchToGroupLayer.isMetadataLayerGroup = true;
       switchToGroupLayer.listOfLayerEntryConfig = newListOfLayerEntryConfig;
+      const groupLayerConfig = new TypeLayerGroupEntryConfig(switchToGroupLayer as TypeLayerGroupEntryConfig);
+      // Replace the old version of the layer with the new layer group
+      listOfLayerEntryConfig[i] = groupLayerConfig;
+      // Don't forget to replace the old version in registeredLayers
+      api.maps[this.mapId].layer.registeredLayers[groupLayerConfig.layerPath] = groupLayerConfig;
+
+      (this.metadata!.layers[esriIndex].subLayerIds as TypeJsonArray).forEach((layerId) => {
+        const subLayerEntryConfig: TypeLayerEntryConfig = geoviewEntryIsEsriDynamic(layerConfig)
+          ? new TypeEsriDynamicLayerEntryConfig(layerConfig as TypeEsriDynamicLayerEntryConfig)
+          : new TypeEsriFeatureLayerEntryConfig(layerConfig as TypeEsriFeatureLayerEntryConfig);
+        subLayerEntryConfig.parentLayerConfig = groupLayerConfig;
+        subLayerEntryConfig.layerId = `${layerId}`;
+        subLayerEntryConfig.layerName = {
+          en: this.metadata!.layers[layerId as number].name as string,
+          fr: this.metadata!.layers[layerId as number].name as string,
+        };
+        newListOfLayerEntryConfig.push(subLayerEntryConfig);
+        subLayerEntryConfig.registerLayerConfig();
+      });
+
       this.validateListOfLayerEntryConfig(newListOfLayerEntryConfig);
       return;
     }

@@ -226,7 +226,7 @@ private processLayerEntryConfig(rootLayerConfig: TypeGeoviewLayerConfig, parentL
     if (!layerConfig.entryType) layerConfig.entryType = 'raster';
     if (!layerConfig.source.dataAccessPath) {
       throw new Error(
-        `source.dataAccessPath on layer entry ${Layer.getLayerPath(layerConfig)} is mandatory for GeoView layer ${
+        `source.dataAccessPath on layer entry ${Layer.evaluateLayerPath(layerConfig)} is mandatory for GeoView layer ${
           rootLayerConfig.geoviewLayerId
         } of type ${rootLayerConfig.geoviewLayerType}`
       );

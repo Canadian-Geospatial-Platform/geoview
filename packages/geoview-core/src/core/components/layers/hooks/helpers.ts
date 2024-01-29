@@ -134,7 +134,7 @@ export function useLegendHelpers() {
                 layerName: 'TEST--chris parent child25555',
                 type: 'GeoJSON',
                 order: 2,
-                layerStatus: 'loading',
+                layerStatus: 'processing',
                 layerPhase: 'processed',
                 isVisible: 'no',
                 querySent: true,

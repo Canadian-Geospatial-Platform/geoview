@@ -351,10 +351,9 @@ export class EsriImage extends AbstractGeoViewRaster {
       `${this.mapId}/visibilityTest`
     );
 
+    layerConfig.loadEndListenerType = 'image';
     layerConfig.olLayer = new ImageLayer(imageLayerOptions);
     layerConfig.geoviewLayerInstance = this;
-
-    this.addLoadendListener(layerPath, 'image');
 
     return Promise.resolve(layerConfig.olLayer);
   }

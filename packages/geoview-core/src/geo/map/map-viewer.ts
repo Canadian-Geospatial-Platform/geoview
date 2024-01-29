@@ -166,7 +166,8 @@ export class MapViewer {
 
                 const { geoviewLayer } = payload;
                 MapEventProcessor.setLayerZIndices(this.mapId);
-                if (geoviewLayer.allLayerEntryConfigProcessed()) {
+                // If metadata are processed
+                if (geoviewLayer.allLayerStatusAreIn(['processed', 'loading', 'loaded', 'error'])) {
                   api.event.emit(GeoViewLayerPayload.createTestGeoviewLayersPayload('run cgpv.init callback?'));
                 }
               }
@@ -179,14 +180,15 @@ export class MapViewer {
   }
 
   /**
-   * Method used to test all geoview layers ready flag to determine if a map is ready.
+   * Method used to test all geoview layers status flags to determine if all the metadata of the map are loaded.
+   * This doesn't mean that all the layers are loaded on the map, Only the metadata are read and processed.
    *
    * @returns true if all geoview layers on the map are loaded or detected as a load error.
    */
   mapIsReady(): boolean {
     if (this.layer === undefined) return false;
     return !Object.keys(this.layer.geoviewLayers).find((geoviewLayerId) => {
-      return !this.layer.geoviewLayers[geoviewLayerId].allLayerEntryConfigProcessed();
+      return !this.layer.geoviewLayers[geoviewLayerId].allLayerStatusAreIn(['processed', 'loading', 'loaded', 'error']);
     });
   }
 
@@ -206,8 +208,8 @@ export class MapViewer {
         let allGeoviewLayerReady =
           this.mapFeaturesConfig.map.listOfGeoviewLayerConfig?.length === 0 || Object.keys(geoviewLayers).length !== 0;
         Object.keys(geoviewLayers).forEach((geoviewLayerId) => {
-          const layerIsReady = geoviewLayers[geoviewLayerId].allLayerEntryConfigProcessed();
-          logger.logTraceDetailed('map-viewer.mapReady? layer ready?', geoviewLayerId, layerIsReady);
+          const layerIsReady = geoviewLayers[geoviewLayerId].allLayerStatusAreIn(['processed', 'loading', 'error', 'loaded']);
+          logger.logTraceDetailed('map-viewer.mapReady? geoview layer ready?', geoviewLayerId, layerIsReady);
           allGeoviewLayerReady &&= layerIsReady;
         });
         if (allGeoviewLayerReady) {
