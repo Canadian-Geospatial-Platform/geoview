@@ -2,9 +2,9 @@ import { ReactNode } from 'react';
 export interface LayerListEntry {
     layerName: string;
     layerPath: string;
-    layerFeatures?: ReactNode | undefined;
-    mapFilteredIcon?: ReactNode | undefined;
-    tooltip?: ReactNode | undefined;
+    layerFeatures?: ReactNode;
+    mapFilteredIcon?: ReactNode;
+    tooltip?: ReactNode;
     numOffeatures?: number;
 }
 interface LayerListProps {

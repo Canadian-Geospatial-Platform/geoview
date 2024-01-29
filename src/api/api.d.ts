@@ -67,11 +67,6 @@ export declare class API {
      */
     ready: (callback: () => void) => void;
     /**
-     * Call map ready functions and the init callback once everything is done loading
-     * including plugins
-     */
-    callInitCallback: () => void;
-    /**
      * Create a new map in a given div id.
      * !The div MUST NOT have a geoview-map class or a warning will be shown when initMapDivFromFunctionCall is called.
      * If is present, the div will be created with a default config

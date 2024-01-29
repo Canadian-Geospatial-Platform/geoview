@@ -31,11 +31,38 @@ export declare const sxClasses: {
             width: string;
         };
     };
+    filter: {
+        display: string;
+        flexDirection: string;
+        alignItems: string;
+        padding: number;
+        paddingTop: number;
+        '& .MuiInputLabel-formControl': {
+            fontSize: string;
+            marginTop: number;
+        };
+        '& .MuiSelect-select': {
+            padding: string;
+        };
+    };
     searchResult: {
         position: string;
         display: string;
+        flexDirection: string;
         zIndex: number;
         marginTop: number;
+    };
+    filterListError: {
+        listStyleType: string;
+        listStylePosition: string;
+        '& li': {
+            display: string;
+            paddingLeft: number;
+            '& .MuiListItemText-root': {
+                display: string;
+                marginLeft: string;
+            };
+        };
     };
 };
 export declare const sxClassesList: {

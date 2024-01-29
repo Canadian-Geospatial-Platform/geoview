@@ -6,6 +6,6 @@ export interface GeoListItem {
     lng: number;
     bbox: [number, number, number, number];
     province: string;
-    tag: (string | null)[] | null;
+    category: string;
 }
 export declare function Geolocator(): import("react").JSX.Element;

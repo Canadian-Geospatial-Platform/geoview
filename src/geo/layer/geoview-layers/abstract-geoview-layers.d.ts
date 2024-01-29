@@ -390,7 +390,7 @@ export declare abstract class AbstractGeoViewLayer {
      * Asynchronously gets the layer configuration of the specified layerPath.
      * If the layer configuration we're searching for has to be loaded, set mustBeLoaded to true when awaiting on this method.
      * This function waits the timeout period before abandonning (or uses the default timeout when not provided).
-     * Note this function uses the 'Async' suffix only to differentiate it from 'getLayerConfig'.
+     * Note this function uses the 'Async' suffix to differentiate it from 'getLayerConfig'.
      *
      * @param {string} layerPath the layer path to look for
      * @param {string} mustBeLoaded indicate if the layer we're searching for must be found only once loaded
@@ -399,17 +399,17 @@ export declare abstract class AbstractGeoViewLayer {
      * @returns a promise with the TypeLayerEntryConfig or null when layer config was not found
      * @throws an exception when the layer config for the layer path was found, but failed to become in loaded status before the timeout expired
      */
-    getLayerConfigAsync(layerPath: string, mustBeLoaded: boolean, timeout?: number, checkFrequency?: number): Promise<TypeLayerEntryConfig | null>;
+    getLayerConfigAsync(layerPath: string, mustBeLoaded: boolean, timeout?: number, checkFrequency?: number): Promise<TypeLayerEntryConfig>;
     /**
-     * Returns a Promise that will be resolved once the given layer config is in a loaded status.
+     * Returns a Promise that will be resolved once the given layer config is in a loaded or error status.
      * This function waits the timeout period before abandonning (or uses the default timeout when not provided).
      *
      * @param {string} layerConfig the layer config
      * @param {string} timeout optionally indicate the timeout after which time to abandon the promise
      * @param {string} checkFrequency optionally indicate the frequency at which to check for the condition on the layer config
-     * @throws an exception when the layer failed to become in loaded status before the timeout expired
+     * @throws an exception when the layer failed to become in loaded or error status before the timeout expired
      */
-    waitForLoadedStatus(layerConfig: TypeBaseLayerEntryConfig, timeout?: number, checkFrequency?: number): Promise<void>;
+    waitForLoadedOrErrorStatus(layerConfig: TypeBaseLayerEntryConfig, timeout?: number, checkFrequency?: number): Promise<void>;
     /** ***************************************************************************************************************************
      * Returns the layer bounds or undefined if not defined in the layer configuration or the metadata. If projectionCode is
      * defined, returns the bounds in the specified projection otherwise use the map projection. The bounds are different from the

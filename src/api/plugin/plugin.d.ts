@@ -37,15 +37,4 @@ export declare class Plugin {
      * @param {string} mapId the map id to remove the plugin from (if not provided then plugin will be removed from all maps)
      */
     removePlugins: (mapId: string) => void;
-    /**
-     * A function that will load each plugin on a map then checks if there are a next plugin to load
-     *
-     * @param {string} mapIndex the map index to load the plugin at
-     * @param {string} pluginIndex the plugin index to load
-     */
-    loadPlugin: (mapIndex: number, pluginIndex: number) => void;
-    /**
-     * Load plugins provided by map config
-     */
-    loadPlugins: () => void;
 }

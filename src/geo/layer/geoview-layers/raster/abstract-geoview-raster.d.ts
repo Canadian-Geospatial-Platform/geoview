@@ -28,4 +28,5 @@ export declare abstract class AbstractGeoViewRaster extends AbstractGeoViewLayer
      * @param {'tile' | 'image'} layerType The type of raster layer)
      */
     addLoadendListener(layerPath: string, layerType: 'tile' | 'image'): void;
+    addLoadendListener_TEMPORARY(layerPath: string, layerType: 'tile' | 'image'): void;
 }

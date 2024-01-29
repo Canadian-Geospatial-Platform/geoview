@@ -1,7 +1,7 @@
-import React from 'react';
+/// <reference types="react" />
 import './translation/i18n';
 import { TypeMapFeaturesConfig } from '@/core/types/global-types';
-export declare const MapContext: React.Context<TypeMapContext>;
+export declare const MapContext: import("react").Context<TypeMapContext>;
 /**
  * Type used for the map context
  */
