@@ -1,5 +1,5 @@
 /* eslint-disable react/require-default-props */
-import React, { useEffect, useState, useCallback, useMemo } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 
 import { useTranslation } from 'react-i18next';
 
@@ -26,7 +26,7 @@ import {
   useDetailsStoreLayerDataArray,
   useDetailsStoreSelectedLayerPath,
 } from '@/core/stores';
-import { ResponsiveGrid, CloseButton, EnlargeButton, LayerList, LayerTitle, useFooterPanelHeight } from '../common';
+import { ResponsiveGrid, CloseButton, EnlargeButton, LayerList, LayerTitle, useFooterPanelHeight, LayerListEntry } from '../common';
 import { useUIStoreActions } from '@/app';
 import { logger } from '@/core/utils/logger';
 
@@ -55,6 +55,7 @@ export function DetailsPanel(): JSX.Element {
   const { setActiveFooterTab } = useUIStoreActions();
 
   // internal state
+  const [layersList, setLayersList] = useState<LayerListEntry[]>([]);
   const [layerDataInfo, setLayerDataInfo] = useState<TypeLayerData | null>(arrayOfLayerData[0]);
   const [currentFeatureIndex, setCurrentFeatureIndex] = useState<number>(0);
   const [isLayersPanelVisible, setIsLayersPanelVisible] = useState(false);
@@ -94,6 +95,15 @@ export function DetailsPanel(): JSX.Element {
     addSelectedFeature(layerDataInfo?.features![currentFeatureIndex] as TypeFeatureInfoEntry);
   };
 
+  /**
+   * Get number of features of a layer.
+   * @returns string
+   */
+  const getFeaturesOfLayer = (layer: TypeLayerData): string => {
+    const numOfFeatures = layer.features?.length ?? 0;
+    return `${numOfFeatures} ${t('details.feature')}${numOfFeatures > 1 ? 's' : ''}`;
+  };
+
   useEffect(() => {
     // Log
     logger.logTraceUseEffect('DETAILS-PANEL - ArrayOfLayerData', arrayOfLayerData);
@@ -115,17 +125,23 @@ export function DetailsPanel(): JSX.Element {
         setActiveFooterTab('details');
       }
     } else setLayerDataInfo(null);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [arrayOfLayerData]);
 
-  /**
-   * Get number of features of a layer.
-   * @returns string
-   */
-  const getFeaturesOfLayer = (layer: TypeLayerData): string => {
-    const numOfFeatures = layer.features?.length ?? 0;
-    return `${numOfFeatures} ${t('details.feature')}${numOfFeatures > 1 ? 's' : ''}`;
-  };
+    // Set the layers list
+    setLayersList(
+      visibleLayers
+        .map((layerPath) => arrayOfLayerData.filter((layerData) => layerData.layerPath === layerPath)[0])
+        .filter((layer) => layer !== undefined)
+        .map((layer) => ({
+          layerName: layer.layerName ?? '',
+          layerPath: layer.layerPath,
+          numOffeatures: layer.features?.length ?? 0,
+          layerFeatures: getFeaturesOfLayer(layer),
+          tooltip: `${layer.layerName}, ${getFeaturesOfLayer(layer)}`,
+        }))
+    );
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [arrayOfLayerData, visibleLayers]);
 
   /**
    * Check if any layer has features.
@@ -167,28 +183,18 @@ export function DetailsPanel(): JSX.Element {
     addSelectedFeature(layerData.features![0]);
   };
 
-  const renderLayerList = useCallback(() => {
+  const renderLayerList = () => {
     return (
       <LayerList
-        layerList={visibleLayers
-          .map((layerPath) => arrayOfLayerData.filter((layerData) => layerData.layerPath === layerPath)[0])
-          .filter((layer) => layer !== undefined)
-          .map((layer) => ({
-            layerName: layer.layerName ?? '',
-            layerPath: layer.layerPath,
-            numOffeatures: layer.features?.length ?? 0,
-            layerFeatures: getFeaturesOfLayer(layer),
-            tooltip: `${layer.layerName}, ${getFeaturesOfLayer(layer)}`,
-          }))}
+        layerList={layersList}
         isEnlargeDataTable={isEnlargeDataTable}
-        selectedLayerIndex={arrayOfLayerData.findIndex((layer) => layer.layerPath === layerDataInfo?.layerPath)}
+        selectedLayerIndex={layersList.findIndex((layer) => layer.layerPath === layerDataInfo?.layerPath)}
         handleListItemClick={(_layer) => {
           handleLayerChange(arrayOfLayerData[findLayerPathIndex(arrayOfLayerData, _layer.layerPath)]);
         }}
       />
     );
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [layerDataInfo, arrayOfLayerData, isEnlargeDataTable, checkedFeatures, visibleLayers]);
+  };
 
   return (
     <Box sx={sxClasses.detailsContainer}>
