@@ -122,7 +122,7 @@ export function FeatureInfoTable({ featureInfoList }: FeatureInfoTableProps): JS
       )}
       {featureInfoList.map((featureInfoItem, index) => (
         // eslint-disable-next-line react/no-array-index-key
-        <Grid container spacing={5} sx={{ backgroundColor: index % 2 > 0 ? theme.palette.primary.main : '', marginBottom: '20px' }} key={index}>
+        <Grid container spacing={5} sx={{ backgroundColor: index % 2 > 0 ? theme.palette.geoViewColors.primary : '', marginBottom: '20px' }} key={index}>
           <Grid item xs="auto" sx={{ fontWeight: 'bold', width: '80% !important' }}>
             {featureInfoItem.alias}
           </Grid>

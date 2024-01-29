@@ -17,6 +17,8 @@ export const opacity = {
 };
 
 export const geoViewColors: IGeoViewColors = {
+  white: '#FFFFFF',
+  
   subtleText: '#393939',
   buttonShadow: '#e0e0e0',
   enlargeBtnBg:'#F4F5FF',
