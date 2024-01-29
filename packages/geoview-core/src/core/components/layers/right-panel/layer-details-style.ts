@@ -7,7 +7,7 @@ export const getSxClasses = (theme: Theme) => ({
     fontSize: '20px',
   },
   layerDetails: {
-    borderColor: theme.palette.primary.main,
+    borderColor: theme.palette.geoViewColors.primary,
     borderWidth: '2px',
     borderStyle: 'solid',
     padding: '20px',
@@ -43,8 +43,8 @@ export const getSxClasses = (theme: Theme) => ({
     },
   },
   tableIconLabel: {
-    color: 'text.primary',
-    fontSize: 16,
+    color: 'geoViewColors.primary',
+    fontSize: theme.palette.geoViewText.lg,
     noWrap: true,
     marginLeft: 20,
   },

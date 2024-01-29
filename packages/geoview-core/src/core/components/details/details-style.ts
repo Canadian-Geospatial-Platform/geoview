@@ -16,7 +16,7 @@ export const getSxClasses = (theme: Theme) => ({
     font: theme.footerPanel.titleFont,
   },
   rightPanelContainer: {
-    border: `2px solid ${theme.palette.primary.main}`,
+    border: `2px solid ${theme.palette.geoViewColors.primary}`,
     borderRadius: '5px',
     backgroundColor: theme.palette.common.white,
   },
@@ -44,9 +44,9 @@ export const getSxClasses = (theme: Theme) => ({
     height: '35px',
   },
   selectFeatureCheckbox: {
-    color: theme.palette.primary.main,
+    color: theme.palette.geoViewColors.primary,
     '&.Mui-checked': {
-      color: theme.palette.primary.main,
+      color: theme.palette.geoViewColors.primary,
     },
   },
   featureInfoItemValue: {

@@ -28,7 +28,7 @@ export const getSxClasses = (theme: Theme) => ({
 
       // for selected layer
       '&.selectedLayer': {
-        borderColor: theme.palette.primary.main,
+        borderColor: theme.palette.geoViewColors.primary,
         borderWidth: '2px',
         borderStyle: 'solid',
       },
@@ -63,7 +63,7 @@ export const getSxClasses = (theme: Theme) => ({
         alignItems: 'center',
 
         '& .MuiIconButton-root': {
-          color: `${theme.palette.primary.main} !important`,
+          color: `${theme.palette.geoViewColors.primary} !important`,
           background: `${theme.palette.geoViewColors.layersRoundButtonsBg} !important`,
           margin: '0px 5px',
         },

@@ -1,5 +1,7 @@
 //Can populate using https://www.htmlcsscolor.com/hex/F1F2F5
 export interface IGeoViewColors {
+
+  white: string;
   subtleText: string;
   buttonShadow: string;
   enlargeBtnBg: string;
