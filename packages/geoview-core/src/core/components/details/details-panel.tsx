@@ -1,10 +1,6 @@
-/* eslint-disable react/require-default-props */
-import React, { useEffect, useState, useCallback, useMemo } from 'react';
-
+import { useState, useMemo, useCallback, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-
 import { useTheme } from '@mui/material/styles';
-
 import {
   IconButton,
   Grid,
@@ -15,19 +11,20 @@ import {
   Box,
   Paper,
 } from '@/ui';
-import { FeatureInfo } from './feature-info-new';
-import { TypeFeatureInfoEntry, TypeArrayOfLayerData, TypeLayerData, TypeGeometry } from '@/api/events/payloads';
-import { getSxClasses } from './details-style';
+import { TypeFeatureInfoEntry, TypeLayerData, TypeGeometry } from '@/api/events/payloads';
 import {
   useMapStoreActions,
   useMapVisibleLayers,
   useDetailsStoreActions,
   useDetailsStoreCheckedFeatures,
-  useDetailsStoreLayerDataArray,
+  useDetailsStoreLayerDataArrayBatch,
   useDetailsStoreSelectedLayerPath,
 } from '@/core/stores';
-import { ResponsiveGrid, CloseButton, EnlargeButton, LayerList, LayerTitle, useFooterPanelHeight } from '../common';
 import { logger } from '@/core/utils/logger';
+
+import { ResponsiveGrid, CloseButton, EnlargeButton, LayerList, LayerTitle, useFooterPanelHeight, LayerListEntry } from '../common';
+import { getSxClasses } from './details-style';
+import { FeatureInfo } from './feature-info-new';
 
 /**
  * layers list
@@ -44,32 +41,29 @@ export function DetailsPanel(): JSX.Element {
   const theme = useTheme();
   const sxClasses = getSxClasses(theme);
 
-  // get values from store
+  // Get states and actions from store
   const selectedLayerPath = useDetailsStoreSelectedLayerPath();
-  const arrayOfLayerData = useDetailsStoreLayerDataArray();
+  const arrayOfLayerDataBatch = useDetailsStoreLayerDataArrayBatch();
   const checkedFeatures = useDetailsStoreCheckedFeatures();
   const visibleLayers = useMapVisibleLayers();
-  const { setSelectedLayerPath, removeCheckedFeature } = useDetailsStoreActions();
+  const { setSelectedLayerPath, removeCheckedFeature, setLayerDataArrayBatchLayerPathBypass } = useDetailsStoreActions();
   const { addSelectedFeature, removeSelectedFeature } = useMapStoreActions();
-
-  // internal state
-  const [layerDataInfo, setLayerDataInfo] = useState<TypeLayerData | null>(arrayOfLayerData[0]);
-  const [currentFeatureIndex, setCurrentFeatureIndex] = useState<number>(0);
-  const [isLayersPanelVisible, setIsLayersPanelVisible] = useState(false);
-  const [isEnlargeDataTable, setIsEnlargeDataTable] = useState(false);
 
   // Custom hook for calculating the height of footer panel
   const { leftPanelRef, rightPanelRef, panelTitleRef } = useFooterPanelHeight({ footerPanelTab: 'details' });
 
-  /**
-   * Find the layer path index which is selected in previous layerData based on layerPath and have more than Zero features.
-   * @param {TypeArrayOfLayerData} layerDataArray list of layers.
-   * @param {string} layerPathSearch layer path to be searched in layers array.
-   * @returns number
-   */
-  const findLayerPathIndex = (layerDataArray: TypeArrayOfLayerData, layerPathSearch: string): number => {
-    return layerDataArray.findIndex((item) => item.layerPath === layerPathSearch && item?.features?.length);
-  };
+  // #region USE STATE SECTION ****************************************************************************************
+
+  // internal state
+  const [currentFeatureIndex, setCurrentFeatureIndex] = useState<number>(0);
+  const [isLayersPanelVisible, setIsLayersPanelVisible] = useState(false);
+  const [isEnlargeDataTable, setIsEnlargeDataTable] = useState(false);
+  const [selectedLayerPathLocal, setselectedLayerPathLocal] = useState<string>(selectedLayerPath);
+  const [arrayOfLayerListLocal, setArrayOfLayerListLocal] = useState<LayerListEntry[]>([]);
+
+  // #endregion
+
+  // #region MAIN HOOKS SECTION ***************************************************************************************
 
   /**
    * Check if feature is in the store checkedFeatures array
@@ -77,62 +71,145 @@ export function DetailsPanel(): JSX.Element {
    * @param {TypeFeatureInfoEntry} feature The feature to check
    * @returns {boolean} true if feature is in checkedFeatures
    */
-  const isFeatureInCheckedFeatures = (feature: TypeFeatureInfoEntry): boolean => {
-    return checkedFeatures.some((checkedFeature) => {
-      return (checkedFeature.geometry as TypeGeometry).ol_uid === (feature.geometry as TypeGeometry).ol_uid;
-    });
-  };
+  const isFeatureInCheckedFeatures = useCallback(
+    (feature: TypeFeatureInfoEntry): boolean => {
+      // Log
+      logger.logTraceUseCallback('DETAILS-PANEL - isFeatureInCheckedFeatures');
 
+      return checkedFeatures.some((checkedFeature) => {
+        return (checkedFeature.geometry as TypeGeometry).ol_uid === (feature.geometry as TypeGeometry).ol_uid;
+      });
+    },
+    [checkedFeatures]
+  );
+
+  /**
+   * Get the label for the number of features of a layer.
+   * @returns string
+   */
+  const getNumFeaturesLabel = useCallback(
+    (layer: TypeLayerData): string => {
+      // Log
+      logger.logTraceUseCallback('DETAILS-PANEL - getNumFeaturesLabel');
+
+      const numOfFeatures = layer.features?.length ?? 0;
+      return `${numOfFeatures} ${t('details.feature')}${numOfFeatures > 1 ? 's' : ''}`;
+    },
+    [t]
+  );
+
+  /**
+   * Memoize the layers list for the LayerList component and centralizing indexing purposes.
+   */
+  const memoLayersList = useMemo(() => {
+    // Log
+    logger.logTraceUseMemo('DETAILS-PANEL - memoLayersList', visibleLayers, arrayOfLayerDataBatch);
+
+    // Set the layers list
+    return visibleLayers
+      .map((layerPath) => arrayOfLayerDataBatch.find((layerData) => layerData.layerPath === layerPath))
+      .filter((layer) => layer)
+      .map(
+        (layer) =>
+          ({
+            layerName: layer!.layerName ?? '',
+            layerPath: layer!.layerPath,
+            queryStatus: layer!.queryStatus,
+            numOffeatures: layer!.features?.length ?? 0,
+            layerFeatures: getNumFeaturesLabel(layer!),
+            tooltip: `${layer!.layerName}, ${getNumFeaturesLabel(layer!)}`,
+          } as LayerListEntry)
+      );
+  }, [visibleLayers, arrayOfLayerDataBatch, getNumFeaturesLabel]);
+
+  /**
+   * Memoize the selected layer for the LayerList component.
+   */
+  const memoLayerSelectedItem = useMemo(() => {
+    // Log
+    logger.logTraceUseMemo('DETAILS-PANEL - memoLayerSelectedItem', memoLayersList, selectedLayerPath);
+    return memoLayersList.find((layer) => layer.layerPath === selectedLayerPath);
+  }, [memoLayersList, selectedLayerPath]);
+
+  /**
+   * Memoize the selected layer data
+   */
+  const memoSelectedLayerData = useMemo(() => {
+    // Log
+    logger.logTraceUseMemo('DETAILS-PANEL - memoSelectedLayerData', arrayOfLayerDataBatch, selectedLayerPath);
+    return arrayOfLayerDataBatch.find((layer) => layer.layerPath === selectedLayerPath);
+  }, [arrayOfLayerDataBatch, selectedLayerPath]);
+
+  /**
+   * Effect used to persist persist the layer path bypass for the layerDataArray.
+   * A useEffect is necessary in order to keep this component pure and be able to set the layer path bypass elsewhere than in this component.
+   */
+  useEffect(() => {
+    // Log
+    logger.logTraceUseEffect('DETAILS-PANEL - update layer data bypass', selectedLayerPath);
+
+    // Set the layer data array batch bypass to the currently selected layer
+    setLayerDataArrayBatchLayerPathBypass(selectedLayerPath);
+  }, [selectedLayerPath, setLayerDataArrayBatchLayerPathBypass]);
+
+  /**
+   * Effect used to persist or alter the current layer selection based on the layers list changes
+   * A useEffect is necessary in order to keep this component pure and be able to set the selected layer path elsewhere than in this component.
+   */
+  useEffect(() => {
+    // Log
+    logger.logTraceUseEffect('DETAILS-PANEL - check selection', memoLayerSelectedItem);
+    // logger.logDebug('DETAILS-PANEL - check selection', memoLayerSelectedItem);
+
+    // Check if the layer we are on is not 'processed' or 'error', ignore if so
+    if (memoLayerSelectedItem && !(memoLayerSelectedItem.queryStatus === 'processed' || memoLayerSelectedItem.queryStatus === 'error'))
+      return;
+
+    // If the layer has features
+    if (memoLayerSelectedItem?.numOffeatures) {
+      // Log
+      // logger.logDebug('DETAILS-PANEL', 'keep selection', memoLayerSelectedItem);
+      // All good, keep selection
+      // Reset the bypass for next time
+      setLayerDataArrayBatchLayerPathBypass(memoLayerSelectedItem.layerPath);
+    } else {
+      // Find the first layer with features
+      const anotherLayerEntry = memoLayersList.find((layer) => {
+        return memoLayersList.find((layer2) => layer.layerPath === layer2.layerPath && layer2.numOffeatures);
+      });
+
+      // If found
+      if (anotherLayerEntry) {
+        // Log
+        // logger.logDebug('DETAILS-PANEL', 'select another', memoLayerSelectedItem, anotherLayerEntry.layerPath);
+
+        // Select that one
+        setSelectedLayerPath(anotherLayerEntry.layerPath);
+      } else {
+        // Log
+        // logger.logDebug('DETAILS-PANEL', 'select none', memoLayerSelectedItem);
+
+        // None found, select none
+        setSelectedLayerPath('');
+      }
+    }
+  }, [memoLayerSelectedItem, memoLayersList, setSelectedLayerPath, setLayerDataArrayBatchLayerPathBypass]);
+
+  // #endregion
+
+  // #region EVENT HANDLERS SECTION ***********************************************************************************
+
+  /**
+   * Handles click to remove all features in right panel.
+   */
   const handleClearAllFeatures = () => {
     // clear all highlights from features on the map in all layers
     removeSelectedFeature('all');
     // clear checked features array
     removeCheckedFeature('all');
     // add the highlight to the current feature
-    addSelectedFeature(layerDataInfo?.features![currentFeatureIndex] as TypeFeatureInfoEntry);
+    addSelectedFeature(memoSelectedLayerData?.features?.[currentFeatureIndex] as TypeFeatureInfoEntry);
   };
-
-  useEffect(() => {
-    // Log
-    logger.logTraceUseEffect('DETAILS-PANEL - ArrayOfLayerData', arrayOfLayerData);
-
-    if (arrayOfLayerData.length > 0) {
-      // Check if have the previous selected layer path in incoming arrayOfLayerData
-      // if so, get the index of the found layer, we need to pass to setLayerDataInfo to load layer in left panel
-      const commonLayerPathIndex = selectedLayerPath ? findLayerPathIndex(arrayOfLayerData, selectedLayerPath) : -1;
-
-      // Get index of first layer from array which doesn't have feature zero.
-      const firstLayerIndex = arrayOfLayerData.findIndex((layer) => layer?.features?.length);
-
-      const selectedLayer = arrayOfLayerData[commonLayerPathIndex > -1 ? commonLayerPathIndex : firstLayerIndex];
-
-      // update selected layer data info when layer have atleast 1 feature.
-      if (selectedLayer) {
-        setLayerDataInfo(selectedLayer);
-        setCurrentFeatureIndex(0);
-      }
-    } else setLayerDataInfo(null);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [arrayOfLayerData]);
-
-  /**
-   * Get number of features of a layer.
-   * @returns string
-   */
-  const getFeaturesOfLayer = (layer: TypeLayerData): string => {
-    const numOfFeatures = layer.features?.length ?? 0;
-    return `${numOfFeatures} ${t('details.feature')}${numOfFeatures > 1 ? 's' : ''}`;
-  };
-
-  /**
-   * Check if any layer has features.
-   */
-  const isLayersHasFeatures = useMemo(() => {
-    // Log
-    logger.logTraceUseMemo('DETAILS-PANEL - isLayersHasFeatures', arrayOfLayerData);
-
-    return () => arrayOfLayerData.some((layer) => (layer?.features?.length ?? 0) > 0);
-  }, [arrayOfLayerData]);
 
   /**
    * Handles clicks to forward and back arrows in right panel.
@@ -141,55 +218,57 @@ export function DetailsPanel(): JSX.Element {
    * @param {-1 | 1} change The change to index number (-1 for back, 1 for forward)
    */
   const handleFeatureNavigateChange = (change: -1 | 1): void => {
-    const currentFeature = layerDataInfo!.features![currentFeatureIndex];
-    const nextFeature = layerDataInfo!.features![currentFeatureIndex + change];
-    if (!isFeatureInCheckedFeatures(currentFeature)) removeSelectedFeature(currentFeature);
-    addSelectedFeature(nextFeature);
+    // Get the current feature in highlight
+    const currentFeature = memoSelectedLayerData?.features?.[currentFeatureIndex];
+    // If found, remove it
+    if (currentFeature && !isFeatureInCheckedFeatures(currentFeature)) removeSelectedFeature(currentFeature);
+
+    // Get the next feature navigating to
+    const nextFeature = memoSelectedLayerData?.features?.[currentFeatureIndex + change];
+    // If found, add it
+    if (nextFeature) addSelectedFeature(nextFeature);
+
+    // Update the current feature index
     setCurrentFeatureIndex(currentFeatureIndex + change);
   };
 
   /**
-   * Handles clicks to layers in left panel. Removes highlight from previous layers feature if it is not checked,
-   * before updating current layer and highlighting first feature.
+   * Handles click to change the selected layer in left panel.
    *
-   * @param {TypeLayerData} layerData The data of the selected layer
+   * @param {LayerListEntry} layerEntry The data of the newly selected layer
    */
-  const handleLayerChange = (layerData: TypeLayerData): void => {
-    const currentFeature = layerDataInfo!.features![currentFeatureIndex];
-    if (!isFeatureInCheckedFeatures(currentFeature)) removeSelectedFeature(currentFeature);
-    setLayerDataInfo(layerData);
-    setCurrentFeatureIndex(0);
-    setSelectedLayerPath(layerData.layerPath);
-    setIsLayersPanelVisible(true);
-    addSelectedFeature(layerData.features![0]);
+  const handleLayerChange = (layerEntry: LayerListEntry): void => {
+    // Set the selected layer path in the store which will in turn trigger the store listeners on this component
+    setSelectedLayerPath(layerEntry.layerPath);
   };
 
-  const renderLayerList = useCallback(() => {
-    return (
-      <LayerList
-        layerList={visibleLayers
-          .map((layerPath) => arrayOfLayerData.filter((layerData) => layerData.layerPath === layerPath)[0])
-          .filter((layer) => layer !== undefined)
-          .map((layer) => ({
-            layerName: layer.layerName ?? '',
-            layerPath: layer.layerPath,
-            numOffeatures: layer.features?.length ?? 0,
-            layerFeatures: getFeaturesOfLayer(layer),
-            tooltip: `${layer.layerName}, ${getFeaturesOfLayer(layer)}`,
-          }))}
-        isEnlargeDataTable={isEnlargeDataTable}
-        selectedLayerIndex={arrayOfLayerData.findIndex((layer) => layer.layerPath === layerDataInfo?.layerPath)}
-        handleListItemClick={(_layer) => {
-          handleLayerChange(arrayOfLayerData[findLayerPathIndex(arrayOfLayerData, _layer.layerPath)]);
-        }}
-      />
-    );
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [layerDataInfo, arrayOfLayerData, isEnlargeDataTable, checkedFeatures, visibleLayers]);
+  // #endregion
+
+  // #region PROCESSING ***********************************************************************************************
+
+  // If the array of layer data has changed since last render
+  if (arrayOfLayerListLocal !== memoLayersList) {
+    // Selected array layer data changed
+    setArrayOfLayerListLocal(memoLayersList);
+    // Reset the feature index, because there may be less features this time than where the index was before
+    setCurrentFeatureIndex(0);
+  }
+
+  // If the layer path has changed since last render
+  if (selectedLayerPathLocal !== selectedLayerPath) {
+    // Selected layer path changed
+    setselectedLayerPathLocal(selectedLayerPath);
+    // Reset the feature index, because it's a whole different selected layer with different features
+    setCurrentFeatureIndex(0);
+  }
+
+  // #endregion
+
+  // #region RENDER SECTION *******************************************************************************************
 
   return (
     <Box sx={sxClasses.detailsContainer}>
-      {layerDataInfo && (
+      {memoLayersList.length && (
         <>
           <ResponsiveGrid.Root sx={{ pt: 8, pb: 8 }} ref={panelTitleRef}>
             <ResponsiveGrid.Left isEnlargeDataTable={isEnlargeDataTable} isLayersPanelVisible={isLayersPanelVisible}>
@@ -204,7 +283,7 @@ export function DetailsPanel(): JSX.Element {
                   [theme.breakpoints.down('md')]: { justifyContent: 'space-between' },
                 }}
               >
-                <LayerTitle hideTitle>{layerDataInfo.layerName}</LayerTitle>
+                <LayerTitle hideTitle>{memoSelectedLayerData?.layerName}</LayerTitle>
 
                 <Box>
                   <EnlargeButton isEnlargeDataTable={isEnlargeDataTable} setIsEnlargeDataTable={setIsEnlargeDataTable} />
@@ -215,25 +294,20 @@ export function DetailsPanel(): JSX.Element {
           </ResponsiveGrid.Root>
           <ResponsiveGrid.Root>
             <ResponsiveGrid.Left isEnlargeDataTable={isEnlargeDataTable} isLayersPanelVisible={isLayersPanelVisible} ref={leftPanelRef}>
-              {renderLayerList()}
+              <LayerList
+                layerList={memoLayersList}
+                isEnlargeDataTable={isEnlargeDataTable}
+                selectedLayerPath={selectedLayerPath}
+                handleListItemClick={handleLayerChange}
+              />
             </ResponsiveGrid.Left>
             <ResponsiveGrid.Right isEnlargeDataTable={isEnlargeDataTable} isLayersPanelVisible={isLayersPanelVisible} ref={rightPanelRef}>
-              {!isLayersHasFeatures() && (
-                <Paper sx={{ padding: '2rem' }}>
-                  <Typography variant="h3" gutterBottom sx={sxClasses.detailsInstructionsTitle}>
-                    {t('details.detailsInstructions')}
-                  </Typography>
-                  <Typography component="p" sx={sxClasses.detailsInstructionsBody}>
-                    {t('details.selectVisbleLayer')}
-                  </Typography>
-                </Paper>
-              )}
-              {isLayersHasFeatures() && (
+              {!!memoSelectedLayerData?.features?.length && (
                 <Box sx={sxClasses.rightPanelContainer}>
                   <Grid container sx={sxClasses.rightPanelBtnHolder}>
                     <Grid item xs={6}>
                       <Box style={{ marginLeft: '22px' }}>
-                        Feature {currentFeatureIndex + 1} of {layerDataInfo?.features!.length}
+                        Feature {currentFeatureIndex + 1} of {memoSelectedLayerData?.features.length}
                         <IconButton
                           sx={{ marginLeft: '20px', [theme.breakpoints.down('sm')]: { display: 'none' } }}
                           aria-label="clear-all-features"
@@ -253,7 +327,7 @@ export function DetailsPanel(): JSX.Element {
                           tooltip="details.previousFeatureBtn"
                           tooltipPlacement="top"
                           onClick={() => handleFeatureNavigateChange(-1)}
-                          disabled={currentFeatureIndex === 0}
+                          disabled={currentFeatureIndex <= 0}
                         >
                           <ArrowBackIosOutlinedIcon />
                         </IconButton>
@@ -263,16 +337,25 @@ export function DetailsPanel(): JSX.Element {
                           tooltip="details.nextFeatureBtn"
                           tooltipPlacement="top"
                           onClick={() => handleFeatureNavigateChange(1)}
-                          // eslint-disable-next-line no-unsafe-optional-chaining
-                          disabled={currentFeatureIndex === layerDataInfo?.features!.length - 1}
+                          disabled={!memoSelectedLayerData?.features || currentFeatureIndex + 1 >= memoSelectedLayerData!.features!.length}
                         >
                           <ArrowForwardIosOutlinedIcon />
                         </IconButton>
                       </Box>
                     </Grid>
                   </Grid>
-                  <FeatureInfo features={layerDataInfo?.features} currentFeatureIndex={currentFeatureIndex} />
+                  <FeatureInfo features={memoSelectedLayerData?.features} currentFeatureIndex={currentFeatureIndex} />
                 </Box>
+              )}
+              {!memoSelectedLayerData?.features?.length && (
+                <Paper sx={{ padding: '2rem' }}>
+                  <Typography variant="h3" gutterBottom sx={sxClasses.detailsInstructionsTitle}>
+                    {t('details.detailsInstructions')}
+                  </Typography>
+                  <Typography component="p" sx={sxClasses.detailsInstructionsBody}>
+                    {t('details.selectVisbleLayer')}
+                  </Typography>
+                </Paper>
               )}
             </ResponsiveGrid.Right>
           </ResponsiveGrid.Root>
@@ -280,4 +363,6 @@ export function DetailsPanel(): JSX.Element {
       )}
     </Box>
   );
+
+  // # endregion
 }

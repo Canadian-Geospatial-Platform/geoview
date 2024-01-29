@@ -1,33 +1,37 @@
-import { GeoviewStoreType } from '@/core/stores/geoview-store';
-import { AbstractEventProcessor } from '../abstract-event-processor';
-import { getGeoViewStore } from '@/core/stores/stores-managers';
 import { TypeValidAppBarCoreProps, TypeMapCorePackages } from '@/geo';
+import { IUIState } from '@/app';
+
+import { AbstractEventProcessor } from '../abstract-event-processor';
 
 export class UIEventProcessor extends AbstractEventProcessor {
-  onInitialize(store: GeoviewStoreType) {
-    store.getState();
-
-    // add to arr of subscriptions so it can be destroyed later
-    this.subscriptionArr.push();
-  }
-
   // **********************************************************
   // Static functions for Typescript files to access store actions
   // **********************************************************
-  //! Typescript MUST always use store action to modify store - NEVER use setState!
+  //! Typescript MUST always use the defined store actions below to modify store - NEVER use setState!
   //! Some action does state modifications AND map actions.
   //! ALWAYS use map event processor when an action modify store and IS NOT trap by map state event handler
+
+  /**
+   * Shortcut to get the UI state for a given map id
+   * @param {string} mapId The mapId
+   * @returns {IUIState} The UI state.
+   */
+  protected static getUIState(mapId: string): IUIState {
+    // Return the time slider state
+    return super.getState(mapId).uiState;
+  }
+
   // #region
   static getActiveFooterBarTab(mapId: string): string {
-    return getGeoViewStore(mapId).getState().uiState.activeFooterBarTabId;
+    return this.getUIState(mapId).activeFooterBarTabId;
   }
 
   static getAppBarComponents(mapId: string): TypeValidAppBarCoreProps {
-    return getGeoViewStore(mapId).getState().uiState.appBarComponents;
+    return this.getUIState(mapId).appBarComponents;
   }
 
   static getCorePackageComponents(mapId: string): TypeMapCorePackages {
-    return getGeoViewStore(mapId).getState().uiState.corePackagesComponents;
+    return this.getUIState(mapId).corePackagesComponents;
   }
   // #endregion
 
@@ -36,7 +40,7 @@ export class UIEventProcessor extends AbstractEventProcessor {
   // **********************************************************
   //! NEVER add a store action who does set state AND map action at a same time.
   //! Review the action in store state to make sure
-  static setActiveFooterBarTab(mapId: string, id: string): void {
-    getGeoViewStore(mapId).getState().uiState.actions.setActiveFooterBarTab(id);
+  static setActiveFooterTab(mapId: string, id: string): void {
+    this.getUIState(mapId).actions.setActiveFooterBarTab(id);
   }
 }
