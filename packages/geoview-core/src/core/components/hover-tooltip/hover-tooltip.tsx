@@ -19,8 +19,8 @@ import { logger } from '@/core/utils/logger';
  * @returns {JSX.Element} the hover tooltip component
  */
 export function HoverTooltip(): JSX.Element {
-  // Log
-  logger.logTraceRender('components/hover-tooltip/hover-tooltip');
+  // Log too annoying
+  // logger.logTraceRender('components/hover-tooltip/hover-tooltip');
 
   const mapId = useGeoViewMapId();
 

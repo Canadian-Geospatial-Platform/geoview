@@ -1,18 +1,17 @@
 import { SyntheticEvent, ReactNode, useState, useEffect, useRef, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
+
 import { Grid, Tab as MaterialTab, Tabs as MaterialTabs, TabsProps, TabProps, BoxProps, Box } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
-import { Select, TypeMenuItemProps } from '../select/select';
 import { HtmlToReact } from '@/core/containers/html-to-react';
-import { TabPanel } from './tab-panel';
-import {
-  useUIActiveFooterBarTabId,
-  useUIActiveTrapGeoView,
-  useUIStoreActions,
-} from '@/core/stores/store-interface-and-intial-values/ui-state';
-import { getSxClasses } from './tabs-style';
 import { logger } from '@/core/utils/logger';
 import { useGeoViewMapId, useMapSize } from '@/app';
+// TODO: Refactor - UI - remove the dependency to the store for this component
+import { useUIActiveTrapGeoView, useUIStoreActions } from '@/core/stores/store-interface-and-intial-values/ui-state';
+
+import { Select, TypeMenuItemProps } from '../select/select';
+import { getSxClasses } from './tabs-style';
+import { TabPanel } from './tab-panel';
 
 /**
  * Type used for properties of each tab
@@ -63,7 +62,6 @@ export function Tabs(props: TypeTabsProps): JSX.Element {
   const tabPanelRefs = useRef([tabs[0]]);
   // get store values and actions
   const activeTrapGeoView = useUIActiveTrapGeoView();
-  const activeFooterBarTabId = useUIActiveFooterBarTabId();
   const mapSize = useMapSize();
   const { closeModal, openModal } = useUIStoreActions();
 
@@ -118,22 +116,6 @@ export function Tabs(props: TypeTabsProps): JSX.Element {
     if (selectedTab && value !== selectedTab) setValue(selectedTab);
   }, [selectedTab, value]);
 
-  useEffect(() => {
-    // Log
-    logger.logTraceUseEffect('TABS - Mouse Clicked On Map');
-    //  open details tab when clicked on layer on
-    if (activeFooterBarTabId === 'details') {
-      const idx = tabs.findIndex((tab) => tab.id === activeFooterBarTabId);
-      if (!tabPanelRefs.current[idx]) {
-        tabPanelRefs.current[idx] = tabs[idx];
-      }
-      setValue(idx);
-      // open tab panel if closed.
-      if (handleCollapse && isCollapsed) handleCollapse();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeFooterBarTabId]);
-
   /**
    * Build mobile tab dropdown.
    */
@@ -144,7 +126,7 @@ export function Tabs(props: TypeTabsProps): JSX.Element {
     }));
 
     // no tab field which will be used to collapse the footer panel.
-    const noTab = { type: 'item', item: { value: '', children: t('footerBar.noTab') } };
+    const noTab = { type: 'item', item: { value: '', children: t('footerTabsContainer.noTab') } };
     return [noTab, ...newTabs] as TypeMenuItemProps[];
   }, [tabs, t]);
 
@@ -196,11 +178,11 @@ export function Tabs(props: TypeTabsProps): JSX.Element {
           ) : (
             <Box sx={sxClasses.mobileDropdown}>
               <Select
-                labelId="footerBarDropdownLabel"
+                labelId="footerTabsDropdownLabel"
                 formControlProps={{ size: 'small' }}
-                id="footerBarDropdown"
+                id="footerTabsDropdown"
                 fullWidth
-                inputLabel={{ id: 'footerBarDropdownLabel' }}
+                inputLabel={{ id: 'footerTabsDropdownLabel' }}
                 menuItems={mobileTabsDropdownValues}
                 value={value}
                 onChange={(e) => updateTabPanel(e.target.value as number)}

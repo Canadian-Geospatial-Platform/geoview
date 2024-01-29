@@ -1,4 +1,3 @@
-import { AbstractEventProcessor } from '../abstract-event-processor';
 import { TypeLegendResultsSetEntry } from '@/api/events/payloads';
 import {
   isClassBreakStyleConfig,
@@ -12,30 +11,40 @@ import {
   TypeLegend,
   TypeStyleGeometry,
 } from '@/geo';
-import { getGeoViewStore } from '@/core/stores/stores-managers';
 import { TypeLegendLayer, TypeLegendLayerIcons, TypeLegendLayerItem, TypeLegendItem } from '@/core/components/layers/types';
-import { api, getLocalizedValue } from '@/app';
+import { api, getLocalizedValue, ILayerState } from '@/app';
 import { delay } from '@/core/utils/utilities';
 import { logger } from '@/core/utils/logger';
 
+import { AbstractEventProcessor } from '../abstract-event-processor';
+
 export class LegendEventProcessor extends AbstractEventProcessor {
-  // Semaphore indicating if initial load was done
-  // (Fake semaphore, because JavaScript is single-threaded, but using the term still to represent its purpose)
-  static semaphoreInitialLoad = false;
-
-  // The time delay before selecting a layer in the store upon first legend propagation.
-  // The longer the delay, the more chances layers will be loaded state, but the later there will be a selected layer in the store
-  // This is a matter of decision, not really something we can fix with an await
-  // ! Implementing this for now... will likely be revised, but it works better than it was and behavior is clear
-  static timeDelayBeforeSelectingLayerInStore = 2000;
-
   // **********************************************************
   // Static functions for Typescript files to access store actions
   // **********************************************************
-  //! Typescript MUST always use store action to modify store - NEVER use setState!
+  //! Typescript MUST always use the defined store actions below to modify store - NEVER use setState!
   //! Some action does state modifications AND map actions.
   //! ALWAYS use map event processor when an action modify store and IS NOT trap by map state event handler
+
   // #region
+  // Indicate if the processor has been propagated once yet
+  private static propagatedOnce = false;
+
+  // The time delay before selecting a layer in the store upon first legend propagation.
+  // The longer the delay, the more chances layers will be loaded state at the time of picking a layer to be selected.
+  // The longer the delay, the later a layer will be selected in the store upon initial propagation.
+  private static timeDelayBeforeSelectingLayerInStore = 2000;
+
+  /**
+   * Shortcut to get the Layer state for a given map id
+   * @param {string} mapId The mapId
+   * @returns {ILayerState} The Layer state
+   */
+  public static getLayerState(mapId: string): ILayerState {
+    // Return the layer state
+    return super.getState(mapId).layerState;
+  }
+
   private static getLayerIconImage(mapId: string, layerPath: string, layerLegend: TypeLegend | null): TypeLegendLayerIcons | undefined {
     const iconDetails: TypeLegendLayerIcons = [];
     if (layerLegend) {
@@ -125,7 +134,11 @@ export class LegendEventProcessor extends AbstractEventProcessor {
     return undefined;
   }
 
-  static async propagateLegendToStore(mapId: string, layerPath: string, legendResultsSetEntry: TypeLegendResultsSetEntry): Promise<void> {
+  public static async propagateLegendToStore(
+    mapId: string,
+    layerPath: string,
+    legendResultsSetEntry: TypeLegendResultsSetEntry
+  ): Promise<void> {
     const layerPathNodes = layerPath.split('/');
     const createNewLegendEntries = async (
       layerPathBeginning: string,
@@ -220,18 +233,18 @@ export class LegendEventProcessor extends AbstractEventProcessor {
     };
 
     // Obtain the list of layers currently in the store
-    const layers = getGeoViewStore(mapId).getState().layerState.legendLayers;
+    const layers = this.getLayerState(mapId).legendLayers;
 
     // Process creation of legend entries
     createNewLegendEntries(layerPathNodes[0], 1, layers);
 
     // Update the legend layers with the updated array, triggering the subscribe
-    getGeoViewStore(mapId).getState().layerState.actions.setLegendLayers(layers);
+    this.getLayerState(mapId).actions.setLegendLayers(layers);
 
     // Check if this is an initial load
-    if (!LegendEventProcessor.semaphoreInitialLoad) {
-      // Flag for concurrency, so this is only executed once
-      LegendEventProcessor.semaphoreInitialLoad = true;
+    if (!LegendEventProcessor.propagatedOnce) {
+      // Flag so this is only executed once after initial load
+      LegendEventProcessor.propagatedOnce = true;
 
       // Give it some time so that each layer has their chance to load on time
       await delay(LegendEventProcessor.timeDelayBeforeSelectingLayerInStore);
@@ -240,9 +253,11 @@ export class LegendEventProcessor extends AbstractEventProcessor {
       const validFirstLayer = layers.find((layer) => {
         return layer.layerStatus === 'processed';
       });
+
+      // If found a valid first layer to select
       if (validFirstLayer) {
         // Set the selected layer path in the store
-        getGeoViewStore(mapId).getState().layerState.actions.setSelectedLayerPath(validFirstLayer.layerPath);
+        this.getLayerState(mapId).actions.setSelectedLayerPath(validFirstLayer.layerPath);
         // Log
         logger.logDebug(`Selected layer ${validFirstLayer.layerPath}`);
       } else {

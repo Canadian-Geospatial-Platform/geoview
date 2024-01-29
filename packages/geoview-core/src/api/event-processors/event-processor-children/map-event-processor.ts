@@ -1,5 +1,4 @@
 import { Root } from 'react-dom/client';
-
 import { ScaleLine } from 'ol/control';
 import Overlay from 'ol/Overlay';
 import { Extent } from 'ol/extent';
@@ -7,8 +6,7 @@ import View, { FitOptions } from 'ol/View';
 import { KeyboardPan } from 'ol/interaction';
 
 import { GeoviewStoreType } from '@/core/stores/geoview-store';
-import { AbstractEventProcessor } from '../abstract-event-processor';
-import { api, Coordinate, NORTH_POLE_POSITION, TypeBasemapOptions, TypeBasemapProps, TypeClickMarker } from '@/app';
+import { api, Coordinate, NORTH_POLE_POSITION, TypeBasemapOptions, TypeBasemapProps, TypeClickMarker, TypeMapFeaturesConfig } from '@/app';
 import { TypeInteraction, TypeMapState, TypeValidMapProjectionCodes } from '@/geo/map/map-schema-types';
 import {
   mapPayload,
@@ -26,8 +24,13 @@ import { AppEventProcessor } from './app-event-processor';
 import { TypeLegendLayer } from '@/core/components/layers/types';
 import { logger } from '@/core/utils/logger';
 
+import { AbstractEventProcessor } from '../abstract-event-processor';
+
 export class MapEventProcessor extends AbstractEventProcessor {
-  onInitialize(store: GeoviewStoreType) {
+  /**
+   * Override the initialization process to wire subscriptions and return them so they can be destroyed later.
+   */
+  protected onInitialize(store: GeoviewStoreType): Array<() => void> | void {
     const { mapId } = store.getState();
 
     const unsubMapLoaded = store.subscribe(
@@ -148,8 +151,8 @@ export class MapEventProcessor extends AbstractEventProcessor {
       }
     );
 
-    // add to arr of subscriptions so it can be destroyed later
-    this.subscriptionArr.push(
+    // Return the array of subscriptions so they can be destroyed later
+    return [
       unsubMapHighlightedFeatures,
       unsubMapLoaded,
       unsubMapCenterCoord,
@@ -158,8 +161,8 @@ export class MapEventProcessor extends AbstractEventProcessor {
       unsubMapSelectedFeatures,
       unsubMapZoom,
       unsubMapSingleClick,
-      unsubLegendLayers
-    );
+      unsubLegendLayers,
+    ];
   }
 
   //! THIS IS THE ONLY FUNCTION TO SET STORE DIRECTLY
@@ -248,10 +251,21 @@ export class MapEventProcessor extends AbstractEventProcessor {
   // **********************************************************
   // Static functions for Typescript files to access store actions
   // **********************************************************
-  //! Typescript MUST always use store action to modify store - NEVER use setState!
+  //! Typescript MUST always use the defined store actions below to modify store - NEVER use setState!
   //! Some action does state modifications AND map actions.
   //! ALWAYS use map event processor when an action modify store and IS NOT trap by map state event handler
+
   // #region
+  /**
+   * Use to get the map configuration
+   *
+   * @param {string} mapId the map id to retreive the config for
+   * @returns {TypeMapFeaturesConfig | undefined} the map config or undefined if there is no config for this map id
+   */
+  public static getGeoViewMapConfig(mapId: string): TypeMapFeaturesConfig | undefined {
+    return this.getState(mapId).mapConfig;
+  }
+
   static getBasemapOptions(mapId: string): TypeBasemapOptions {
     return getGeoViewStore(mapId).getState().mapState.basemapOptions;
   }
