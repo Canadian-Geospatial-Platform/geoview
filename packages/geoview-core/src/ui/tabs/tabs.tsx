@@ -35,6 +35,7 @@ export interface TypeTabsProps {
   isCollapsed?: boolean;
   handleCollapse?: () => void | undefined;
   TabContentVisibilty?: string | undefined;
+  onSelectedTabChanged?: (tab: TypeTabs) => void;
 }
 
 /**
@@ -44,7 +45,7 @@ export interface TypeTabsProps {
  * @returns {JSX.Element} returns the tabs ui
  */
 export function Tabs(props: TypeTabsProps): JSX.Element {
-  const { tabs, rightButtons, selectedTab, isCollapsed, handleCollapse, TabContentVisibilty = 'inherit' } = props;
+  const { tabs, rightButtons, selectedTab, isCollapsed, handleCollapse, onSelectedTabChanged, TabContentVisibilty = 'inherit' } = props;
 
   const { t } = useTranslation<string>();
 
@@ -54,7 +55,7 @@ export function Tabs(props: TypeTabsProps): JSX.Element {
 
   // get store values and actions
   const activeTrapGeoView = useUIActiveTrapGeoView();
-  const { closeModal, openModal, setActiveFooterTab } = useUIStoreActions();
+  const { closeModal, openModal } = useUIStoreActions();
 
   /**
    * Handle a tab change
@@ -64,7 +65,9 @@ export function Tabs(props: TypeTabsProps): JSX.Element {
    */
   const handleChange = (event: SyntheticEvent<Element, Event>, newValue: number) => {
     setValue(newValue);
-    setActiveFooterTab(t(tabs[newValue].label).toLowerCase());
+
+    // Callback
+    onSelectedTabChanged?.(tabs[newValue]);
   };
 
   /**

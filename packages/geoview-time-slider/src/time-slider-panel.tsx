@@ -2,6 +2,7 @@ import { TypeWindow } from 'geoview-core';
 import { LayerListEntry, Layout } from 'geoview-core/src/core/components/common';
 import { useVisibleTimeSliderLayers, useTimeSliderLayers } from 'geoview-core/src/core/stores';
 import { getLocalizedMessage } from 'geoview-core/src/core/utils/utilities';
+import { Typography } from 'geoview-core/src/ui';
 import { TimeSlider } from './time-slider';
 import { ConfigProps } from './time-slider-types';
 
@@ -20,9 +21,8 @@ const { cgpv } = window as TypeWindow;
  */
 export function TimeSliderPanel(props: TypeTimeSliderProps): JSX.Element {
   const { mapId, configObj } = props;
-  const { react, ui } = cgpv;
-  const { useState, useEffect } = react;
-  const { Box } = ui.elements;
+  const { react } = cgpv;
+  const { useState, useEffect, useCallback } = react;
 
   // internal state
   const [selectedLayerPath, setSelectedLayerPath] = useState<string>();
@@ -44,18 +44,19 @@ export function TimeSliderPanel(props: TypeTimeSliderProps): JSX.Element {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [visibleTimeSliderLayers]);
 
-  if (!visibleTimeSliderLayers.length) return <span>{getLocalizedMessage(mapId, 'timeSlider.panel.noLayers')}</span>;
+  const renderLayerList = useCallback(() => {
+    const array = visibleTimeSliderLayers.map((layerPath: string) => {
+      return { layerName: timeSliderLayers[layerPath].name, layerPath, tooltip: timeSliderLayers[layerPath].name };
+    });
+
+    return array;
+  }, [timeSliderLayers, visibleTimeSliderLayers]);
+
   return selectedLayerPath ? (
-    <Layout
-      selectedLayerPath={selectedLayerPath}
-      handleLayerList={handleLayerList}
-      layerList={visibleTimeSliderLayers.map((layerPath: string) => {
-        return { layerName: timeSliderLayers[layerPath].name, layerPath, tooltip: timeSliderLayers[layerPath].name };
-      })}
-    >
+    <Layout selectedLayerPath={selectedLayerPath} handleLayerList={handleLayerList} layerList={renderLayerList()}>
       <TimeSlider mapId={mapId} config={configObj} layerPath={selectedLayerPath} key={selectedLayerPath} />
     </Layout>
   ) : (
-    <Box />
+    <Typography>{getLocalizedMessage(mapId, 'timeSlider.panel.noLayers')}</Typography>
   );
 }

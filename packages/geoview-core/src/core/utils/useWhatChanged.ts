@@ -1,5 +1,5 @@
 /* eslint-disable no-console */
-import React, { useEffect, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 
 // Indicates if currently logging useWhatChanged
 const CURRENT_ACTIVE = true;
@@ -73,7 +73,7 @@ export const useWhatChanged = (hookId: string, dependency?: unknown[], dependenc
   const backgroundColorRef = useRef('');
 
   // Flag for a cleaner logging when using React18+ and double useEffect reasons (when working in react.StrictMode)
-  const useEffectRan = React.useRef(false);
+  const useEffectRan = useRef(false);
 
   // Logs footer information
   function logFooter() {
@@ -184,7 +184,7 @@ export const useWhatChanged = (hookId: string, dependency?: unknown[], dependenc
 
   // Prepare a hook for React18+ and double useEffect reasons (when working in react.StrictMode).
   // This will verify which dependency changed and log a table in the console.
-  React.useEffect(() => {
+  useEffect(() => {
     // Use Effect ran once
     return () => {
       useEffectRan.current = true;

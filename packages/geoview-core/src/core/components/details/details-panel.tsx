@@ -131,6 +131,9 @@ export function DetailsPanel(): JSX.Element {
    * Check if any layer has features.
    */
   const isLayersHasFeatures = useMemo(() => {
+    // Log
+    logger.logTraceUseMemo('DETAILS-PANEL - isLayersHasFeatures', arrayOfLayerData);
+
     return () => arrayOfLayerData.some((layer) => (layer?.features?.length ?? 0) > 0);
   }, [arrayOfLayerData]);
 

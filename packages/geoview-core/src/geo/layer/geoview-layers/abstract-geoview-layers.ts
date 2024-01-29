@@ -108,7 +108,15 @@ export interface TypeImageStaticLegend extends Omit<TypeLegend, 'styleConfig'> {
   legend: HTMLCanvasElement | null;
 }
 
-const validVectorLayerLegendTypes: TypeGeoviewLayerType[] = ['GeoJSON', 'esriDynamic', 'esriFeature', 'ogcFeature', 'ogcWfs', 'GeoPackage'];
+const validVectorLayerLegendTypes: TypeGeoviewLayerType[] = [
+  'GeoJSON',
+  'esriDynamic',
+  'esriFeature',
+  'esriImage',
+  'ogcFeature',
+  'ogcWfs',
+  'GeoPackage',
+];
 /**
  * type guard function that redefines a TypeLegend as a TypeVectorLegend
  * if the type attribute of the verifyIfLegend parameter is valid. The type ascention
@@ -143,6 +151,7 @@ export type TypeVectorLayerStyles = Partial<Record<TypeStyleGeometry, TypeStyleR
 const DEFAULT_LAYER_NAMES: Record<TypeGeoviewLayerType, string> = {
   esriDynamic: 'Esri Dynamic Layer',
   esriFeature: 'Esri Feature Layer',
+  esriImage: 'Esri Image Layer',
   imageStatic: 'Static Image Layer',
   GeoJSON: 'GeoJson Layer',
   geoCore: 'GeoCore Layer',
@@ -158,6 +167,7 @@ const DEFAULT_LAYER_NAMES: Record<TypeGeoviewLayerType, string> = {
 type LayerTypesKey =
   | 'ESRI_DYNAMIC'
   | 'ESRI_FEATURE'
+  | 'ESRI_IMAGE'
   | 'IMAGE_STATIC'
   | 'GEOJSON'
   | 'GEOCORE'
@@ -174,6 +184,7 @@ type LayerTypesKey =
 export type TypeGeoviewLayerType =
   | 'esriDynamic'
   | 'esriFeature'
+  | 'esriImage'
   | 'imageStatic'
   | 'GeoJSON'
   | 'geoCore'
@@ -190,6 +201,7 @@ export type TypeGeoviewLayerType =
 export const CONST_LAYER_TYPES: Record<LayerTypesKey, TypeGeoviewLayerType> = {
   ESRI_DYNAMIC: 'esriDynamic',
   ESRI_FEATURE: 'esriFeature',
+  ESRI_IMAGE: 'esriImage',
   IMAGE_STATIC: 'imageStatic',
   GEOJSON: 'GeoJSON',
   GEOCORE: 'geoCore',
@@ -208,6 +220,7 @@ export const CONST_LAYER_ENTRY_TYPE: Record<TypeGeoviewLayerType, TypeLayerEntry
   imageStatic: 'raster-image',
   esriDynamic: 'raster-image',
   esriFeature: 'vector',
+  esriImage: 'raster-image',
   GeoJSON: 'vector',
   geoCore: 'geoCore',
   GeoPackage: 'vector',
@@ -225,6 +238,7 @@ export const CONST_GEOVIEW_SCHEMA_BY_TYPE: Record<TypeGeoviewLayerType, string> 
   imageStatic: 'TypeImageStaticLayerEntryConfig',
   esriDynamic: 'TypeEsriDynamicLayerEntryConfig',
   esriFeature: 'TypeVectorLayerEntryConfig',
+  esriImage: 'TypeEsriImageLayerEntryConfig',
   GeoJSON: 'TypeVectorLayerEntryConfig',
   geoCore: 'TypeGeocoreLayerEntryConfig',
   GeoPackage: 'TypeVectorLayerEntryConfig',
