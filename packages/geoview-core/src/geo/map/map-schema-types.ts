@@ -559,6 +559,19 @@ export const layerEntryIsEsriDynamic = (verifyIfLayer: TypeLayerEntryConfig): ve
 };
 
 /** ******************************************************************************************************************************
+ * type guard function that redefines a TypeLayerEntryConfig as a TypeEsriImageLayerEntryConfig if the schemaTag attribute of
+ * the verifyIfLayer parameter is 'ogcWms'. The type ascention applies only to the true block of the if clause that use this
+ * function.
+ *
+ * @param {TypeLayerEntryConfig} verifyIfLayer Polymorphic object to test in order to determine if the type ascention is valid.
+ *
+ * @returns {boolean} true if the type ascention is valid.
+ */
+export const layerEntryIsEsriimage = (verifyIfLayer: TypeLayerEntryConfig): verifyIfLayer is TypeEsriImageLayerEntryConfig => {
+  return verifyIfLayer?.schemaTag === 'esriImage';
+};
+
+/** ******************************************************************************************************************************
  * type guard function that redefines a TypeLayerEntryConfig as a TypeImageStaticLayerEntryConfig if the schemaTag attribute of
  * the verifyIfLayer parameter is 'ogcWms'. The type ascention applies only to the true block of the if clause that use this
  * function.
@@ -1004,6 +1017,38 @@ export class TypeEsriDynamicLayerEntryConfig extends TypeBaseLayerEntryConfig {
   constructor(layerConfig: TypeEsriDynamicLayerEntryConfig) {
     super(layerConfig);
     Object.assign(this, layerConfig);
+    // if layerConfig.source.dataAccessPath is undefined, we assign the metadataAccessPath of the GeoView layer to it.
+    if (!this.source) this.source = {};
+    if (!this.source.dataAccessPath) this.source.dataAccessPath = { ...this.geoviewLayerConfig.metadataAccessPath } as TypeLocalizedString;
+  }
+}
+
+/** ******************************************************************************************************************************
+ * Type used to define a GeoView image layer to display on the map.
+ */
+export class TypeEsriImageLayerEntryConfig extends TypeBaseLayerEntryConfig {
+  /** Tag used to link the entry to a specific schema. */
+  schemaTag = 'esriImage' as TypeGeoviewLayerType;
+
+  /** Layer entry data type. */
+  entryType = 'raster-image' as TypeLayerEntryType;
+
+  /** Filter to apply on feature of this layer. */
+  layerFilter?: string;
+
+  /** Source settings to apply to the GeoView image layer source at creation time. */
+  declare source: TypeSourceImageEsriInitialConfig;
+
+  /** Style to apply to the raster layer. */
+  style?: TypeStyleConfig;
+
+  /**
+   * The class constructor.
+   * @param {TypeEsriImageLayerEntryConfig} layerConfig The layer configuration we want to instanciate.
+   */
+  constructor(layerConfig: TypeEsriImageLayerEntryConfig) {
+    super(layerConfig);
+    Object.assign(this, layerConfig);
 
     if (Number.isNaN(this.layerId)) {
       throw new Error(`The layer entry with layerId equal to ${this.layerPath} must be an integer string`);
@@ -1190,6 +1235,7 @@ export type TypeLayerEntryConfig =
   | TypeVectorLayerEntryConfig
   | TypeOgcWmsLayerEntryConfig
   | TypeEsriDynamicLayerEntryConfig
+  | TypeEsriImageLayerEntryConfig
   | TypeImageStaticLayerEntryConfig
   | TypeTileLayerEntryConfig
   | TypeGeocoreLayerEntryConfig;
