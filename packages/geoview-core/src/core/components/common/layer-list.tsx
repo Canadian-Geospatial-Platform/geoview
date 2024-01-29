@@ -16,7 +16,7 @@ export interface LayerListEntry {
 interface LayerListProps {
   isEnlargeDataTable: boolean;
   layerList: LayerListEntry[];
-  selectedLayerIndex: number;
+  selectedLayerPath: string;
   handleListItemClick: (layer: LayerListEntry) => void;
 }
 
@@ -91,19 +91,19 @@ const LayerListItem = memo(function LayerListItem({ isSelected, layer, handleLis
  * @param {Function} handleListItemClick  Callback function excecuted when list item is clicked.
  * @returns
  */
-export function LayerList({ layerList, isEnlargeDataTable, selectedLayerIndex, handleListItemClick }: LayerListProps) {
+export function LayerList({ layerList, isEnlargeDataTable, selectedLayerPath, handleListItemClick }: LayerListProps) {
   const theme = useTheme();
   const sxClasses = getSxClasses(theme);
 
   return (
     <List sx={sxClasses.list}>
-      {layerList.map((layer, index) => (
+      {layerList.map((layer) => (
         <LayerListItem
           key={layer.layerPath}
           // Reason:- (layer?.numOffeatures ?? 1) > 0
           // Some of layers will not have numOfFeatures, so to make layer look like selected, we need to set default value to 1.
           // Also we cant set numOfFeature initially, then it num of features will be display as sub title.
-          isSelected={(layer?.numOffeatures ?? 1) > 0 && index === selectedLayerIndex}
+          isSelected={(layer?.numOffeatures ?? 1) > 0 && layer.layerPath === selectedLayerPath}
           layer={layer}
           handleListItemClick={handleListItemClick}
           isEnlargeDataTable={isEnlargeDataTable}

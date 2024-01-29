@@ -41,8 +41,8 @@ export function MousePosition(): JSX.Element {
   };
 
   useEffect(() => {
-    // Log
-    logger.logTraceUseEffect('MOUSE-POSITION - pointerPosition', pointerPosition);
+    // Log too annoying
+    // logger.logTraceUseEffect('MOUSE-POSITION - pointerPosition', pointerPosition);
 
     /**
      * Format the coordinates output in lat long

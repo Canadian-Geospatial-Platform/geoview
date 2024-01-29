@@ -19,14 +19,12 @@ import { delay } from '@/core/utils/utilities';
 import { logger } from '@/core/utils/logger';
 
 export class LegendEventProcessor extends AbstractEventProcessor {
-  // Semaphore indicating if initial load was done
-  // (Fake semaphore, because JavaScript is single-threaded, but using the term still to represent its purpose)
-  static semaphoreInitialLoad = false;
+  // Indicate if the processor has been propagated once yet
+  static propagatedOnce = false;
 
   // The time delay before selecting a layer in the store upon first legend propagation.
-  // The longer the delay, the more chances layers will be loaded state, but the later there will be a selected layer in the store
-  // This is a matter of decision, not really something we can fix with an await
-  // ! Implementing this for now... will likely be revised, but it works better than it was and behavior is clear
+  // The longer the delay, the more chances layers will be loaded state at the time of picking a layer to be selected.
+  // The longer the delay, the later a layer will be selected in the store upon initial propagation.
   static timeDelayBeforeSelectingLayerInStore = 2000;
 
   // **********************************************************
@@ -229,9 +227,9 @@ export class LegendEventProcessor extends AbstractEventProcessor {
     getGeoViewStore(mapId).getState().layerState.actions.setLegendLayers(layers);
 
     // Check if this is an initial load
-    if (!LegendEventProcessor.semaphoreInitialLoad) {
-      // Flag for concurrency, so this is only executed once
-      LegendEventProcessor.semaphoreInitialLoad = true;
+    if (!LegendEventProcessor.propagatedOnce) {
+      // Flag so this is only executed once after initial load
+      LegendEventProcessor.propagatedOnce = true;
 
       // Give it some time so that each layer has their chance to load on time
       await delay(LegendEventProcessor.timeDelayBeforeSelectingLayerInStore);
@@ -240,6 +238,8 @@ export class LegendEventProcessor extends AbstractEventProcessor {
       const validFirstLayer = layers.find((layer) => {
         return layer.layerStatus === 'processed';
       });
+
+      // If found a valid first layer to select
       if (validFirstLayer) {
         // Set the selected layer path in the store
         getGeoViewStore(mapId).getState().layerState.actions.setSelectedLayerPath(validFirstLayer.layerPath);
