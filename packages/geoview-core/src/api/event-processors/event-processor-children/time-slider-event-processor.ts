@@ -1,9 +1,22 @@
 import { GeoviewStoreType } from '@/core/stores/geoview-store';
+import {
+  AbstractGeoViewVector,
+  EsriDynamic,
+  ITimeSliderState,
+  TypeFeatureInfoLayerConfig,
+  TypeTimeSliderValues,
+  WMS,
+  api,
+  getLocalizedValue,
+} from '@/app';
+
 import { AbstractEventProcessor } from '../abstract-event-processor';
-import { AbstractGeoViewVector, EsriDynamic, TypeFeatureInfoLayerConfig, TypeTimeSliderValues, WMS, api, getLocalizedValue } from '@/app';
 
 export class TimeSliderEventProcessor extends AbstractEventProcessor {
-  onInitialize(store: GeoviewStoreType) {
+  /**
+   * Override the initialization process to wire subscriptions and return them so they can be destroyed later.
+   */
+  protected onInitialize(store: GeoviewStoreType) {
     const { mapId } = store.getState();
 
     api.event.once(
@@ -53,17 +66,30 @@ export class TimeSliderEventProcessor extends AbstractEventProcessor {
       }
     );
 
-    // add to arr of subscriptions so it can be destroyed later
-    this.subscriptionArr.push(unsubLayerOrder, unsubVisibleLayers);
+    // Return the array of subscriptions so they can be destroyed later
+    return [unsubLayerOrder, unsubVisibleLayers];
   }
 
   // **********************************************************
   // Static functions for Typescript files to access store actions
   // **********************************************************
-  //! Typescript MUST always use store action to modify store - NEVER use setState!
+  //! Typescript MUST always use the defined store actions below to modify store - NEVER use setState!
   //! Some action does state modifications AND map actions.
   //! ALWAYS use map event processor when an action modify store and IS NOT trap by map state event handler
+
   // #region
+  /**
+   * Shortcut to get the TimeSlider state for a given map id
+   * @param {string} mapId The mapId
+   * @returns {ITimeSliderState | undefined} The Time Slider state. Forcing the return to also be 'undefined', because
+   *                                         there will be no timeSliderState if the TimeSlider plugin isn't active.
+   *                                         This helps the developers making sure the existence is checked.
+   */
+  public static getTimesliderState(mapId: string): ITimeSliderState | undefined {
+    // Return the time slider state
+    return super.getState(mapId).timeSliderState;
+  }
+
   /**
    * Filter array of legend layers to get usable time slider layer paths
    *
@@ -127,6 +153,8 @@ export class TimeSliderEventProcessor extends AbstractEventProcessor {
   // **********************************************************
   //! NEVER add a store action who does set state AND map action at a same time.
   //! Review the action in store state to make sure
+
+  // #region
   /**
    * Filter the layer provided in the layerPath variable according to current states (filtering and values)
    *
@@ -172,4 +200,5 @@ export class TimeSliderEventProcessor extends AbstractEventProcessor {
       (api.maps[mapId].layer.geoviewLayer(layerPath) as AbstractGeoViewVector | EsriDynamic).applyViewFilter(filter);
     }
   }
+  // #endregion
 }
