@@ -1,5 +1,5 @@
 /* eslint-disable react/require-default-props */
-import React, { useEffect, useState, useCallback, useMemo } from 'react';
+import React, { useEffect, useState, useMemo, useCallback } from 'react';
 
 import { useTranslation } from 'react-i18next';
 
@@ -54,14 +54,18 @@ export function DetailsPanel(): JSX.Element {
   const { addSelectedFeature, removeSelectedFeature } = useMapStoreActions();
   const { setActiveFooterTab } = useUIStoreActions();
 
+  // Custom hook for calculating the height of footer panel
+  const { leftPanelRef, rightPanelRef, panelTitleRef } = useFooterPanelHeight({ footerPanelTab: 'details' });
+
+  // #region USE STATE SECTION ****************************************************************************************
+
   // internal state
   const [layerDataInfo, setLayerDataInfo] = useState<TypeLayerData | null>(arrayOfLayerData[0]);
   const [currentFeatureIndex, setCurrentFeatureIndex] = useState<number>(0);
   const [isLayersPanelVisible, setIsLayersPanelVisible] = useState(false);
   const [isEnlargeDataTable, setIsEnlargeDataTable] = useState(false);
 
-  // Custom hook for calculating the height of footer panel
-  const { leftPanelRef, rightPanelRef, panelTitleRef } = useFooterPanelHeight({ footerPanelTab: 'details' });
+  // #endregion
 
   /**
    * Find the layer path index which is selected in previous layerData based on layerPath and have more than Zero features.
@@ -85,6 +89,8 @@ export function DetailsPanel(): JSX.Element {
     });
   };
 
+  // #region EVENT HANDLERS SECTION **********************************************************************************
+
   const handleClearAllFeatures = () => {
     // clear all highlights from features on the map in all layers
     removeSelectedFeature('all');
@@ -93,49 +99,6 @@ export function DetailsPanel(): JSX.Element {
     // add the highlight to the current feature
     addSelectedFeature(layerDataInfo?.features![currentFeatureIndex] as TypeFeatureInfoEntry);
   };
-
-  useEffect(() => {
-    // Log
-    logger.logTraceUseEffect('DETAILS-PANEL - ArrayOfLayerData', arrayOfLayerData);
-
-    if (arrayOfLayerData.length > 0) {
-      // Check if have the previous selected layer path in incoming arrayOfLayerData
-      // if so, get the index of the found layer, we need to pass to setLayerDataInfo to load layer in left panel
-      const commonLayerPathIndex = selectedLayerPath ? findLayerPathIndex(arrayOfLayerData, selectedLayerPath) : -1;
-
-      // Get index of first layer from array which doesn't have feature zero.
-      const firstLayerIndex = arrayOfLayerData.findIndex((layer) => layer?.features?.length);
-
-      const selectedLayer = arrayOfLayerData[commonLayerPathIndex > -1 ? commonLayerPathIndex : firstLayerIndex];
-
-      // update selected layer data info when layer have atleast 1 feature.
-      if (selectedLayer) {
-        setLayerDataInfo(selectedLayer);
-        setCurrentFeatureIndex(0);
-        setActiveFooterTab('details');
-      }
-    } else setLayerDataInfo(null);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [arrayOfLayerData]);
-
-  /**
-   * Get number of features of a layer.
-   * @returns string
-   */
-  const getFeaturesOfLayer = (layer: TypeLayerData): string => {
-    const numOfFeatures = layer.features?.length ?? 0;
-    return `${numOfFeatures} ${t('details.feature')}${numOfFeatures > 1 ? 's' : ''}`;
-  };
-
-  /**
-   * Check if any layer has features.
-   */
-  const isLayersHasFeatures = useMemo(() => {
-    // Log
-    logger.logTraceUseMemo('DETAILS-PANEL - isLayersHasFeatures', arrayOfLayerData);
-
-    return () => arrayOfLayerData.some((layer) => (layer?.features?.length ?? 0) > 0);
-  }, [arrayOfLayerData]);
 
   /**
    * Handles clicks to forward and back arrows in right panel.
@@ -167,28 +130,91 @@ export function DetailsPanel(): JSX.Element {
     addSelectedFeature(layerData.features![0]);
   };
 
-  const renderLayerList = useCallback(() => {
+  // #endregion
+
+  // #region HOOKS SECTION ********************************************************************************************
+
+  /**
+   * Get number of features of a layer.
+   * @returns string
+   */
+  const getFeaturesOfLayer = useCallback(
+    (layer: TypeLayerData): string => {
+      const numOfFeatures = layer.features?.length ?? 0;
+      return `${numOfFeatures} ${t('details.feature')}${numOfFeatures > 1 ? 's' : ''}`;
+    },
+    [t]
+  );
+
+  /**
+   * Memoize the layers list for the LayerList component and centralizing indexing purposes.
+   */
+  const layersList = useMemo(() => {
+    // Log
+    logger.logTraceUseMemo('DETAILS-PANEL - setLayersList', arrayOfLayerData);
+
+    // Set the layers list
+    return visibleLayers
+      .map((layerPath) => arrayOfLayerData.filter((layerData) => layerData.layerPath === layerPath)[0])
+      .filter((layer) => layer !== undefined)
+      .map((layer) => ({
+        layerName: layer.layerName ?? '',
+        layerPath: layer.layerPath,
+        numOffeatures: layer.features?.length ?? 0,
+        layerFeatures: getFeaturesOfLayer(layer),
+        tooltip: `${layer.layerName}, ${getFeaturesOfLayer(layer)}`,
+      }));
+  }, [arrayOfLayerData, getFeaturesOfLayer, visibleLayers]);
+
+  /**
+   * Check if any layer has features.
+   */
+  const isLayersHasFeatures = useMemo(() => {
+    // Log
+    logger.logTraceUseMemo('DETAILS-PANEL - isLayersHasFeatures', arrayOfLayerData);
+
+    return () => arrayOfLayerData.some((layer) => (layer?.features?.length ?? 0) > 0);
+  }, [arrayOfLayerData]);
+
+  useEffect(() => {
+    // Log
+    logger.logTraceUseEffect('DETAILS-PANEL - ArrayOfLayerData', arrayOfLayerData);
+
+    if (arrayOfLayerData.length > 0) {
+      // Check if have the previous selected layer path in incoming arrayOfLayerData
+      // if so, get the index of the found layer, we need to pass to setLayerDataInfo to load layer in left panel
+      const commonLayerPathIndex = selectedLayerPath ? findLayerPathIndex(arrayOfLayerData, selectedLayerPath) : -1;
+
+      // Get index of first layer from array which doesn't have feature zero.
+      const firstLayerIndex = arrayOfLayerData.findIndex((layer) => layer?.features?.length);
+
+      const selectedLayer = arrayOfLayerData[commonLayerPathIndex > -1 ? commonLayerPathIndex : firstLayerIndex];
+
+      // update selected layer data info when layer have atleast 1 feature.
+      if (selectedLayer) {
+        setLayerDataInfo(selectedLayer);
+        setCurrentFeatureIndex(0);
+        setActiveFooterTab('details');
+      }
+    } else setLayerDataInfo(null);
+  }, [arrayOfLayerData, selectedLayerPath, setActiveFooterTab, visibleLayers]);
+
+  // #endregion
+
+  // #region RENDER SECTION ********************************************************************************************
+
+  const renderLayerList = () => {
     return (
       <LayerList
-        layerList={visibleLayers
-          .map((layerPath) => arrayOfLayerData.filter((layerData) => layerData.layerPath === layerPath)[0])
-          .filter((layer) => layer !== undefined)
-          .map((layer) => ({
-            layerName: layer.layerName ?? '',
-            layerPath: layer.layerPath,
-            numOffeatures: layer.features?.length ?? 0,
-            layerFeatures: getFeaturesOfLayer(layer),
-            tooltip: `${layer.layerName}, ${getFeaturesOfLayer(layer)}`,
-          }))}
+        layerList={layersList}
         isEnlargeDataTable={isEnlargeDataTable}
-        selectedLayerIndex={arrayOfLayerData.findIndex((layer) => layer.layerPath === layerDataInfo?.layerPath)}
+        selectedLayerIndex={layersList.findIndex((layer) => layer.layerPath === layerDataInfo?.layerPath)}
         handleListItemClick={(_layer) => {
           handleLayerChange(arrayOfLayerData[findLayerPathIndex(arrayOfLayerData, _layer.layerPath)]);
         }}
       />
     );
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [layerDataInfo, arrayOfLayerData, isEnlargeDataTable, checkedFeatures, visibleLayers]);
+  };
 
   return (
     <Box sx={sxClasses.detailsContainer}>
@@ -283,4 +309,6 @@ export function DetailsPanel(): JSX.Element {
       )}
     </Box>
   );
+
+  // # endregion
 }

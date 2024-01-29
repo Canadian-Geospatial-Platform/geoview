@@ -230,7 +230,7 @@ export function GeoChart(props: GeoChartProps): JSX.Element {
 
   // #endregion
 
-  // region RENDER SECTION ********************************************************************************************
+  // #region RENDER SECTION ********************************************************************************************
 
   return (
     <GeoChartComponent
