@@ -47,6 +47,9 @@ function AppStart(props: AppStartProps): JSX.Element {
   const { mapId } = mapFeaturesConfig;
 
   const mapContextValue = useMemo(() => {
+    // Log
+    logger.logTraceUseMemo('APP-START - mapContextValue', mapId);
+
     return { mapId: mapId as string };
   }, [mapId]);
 
