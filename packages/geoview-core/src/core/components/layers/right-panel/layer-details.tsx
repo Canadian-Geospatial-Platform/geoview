@@ -230,7 +230,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
           {layerDetails.layerAttribution &&
             layerDetails.layerAttribution!.map((attribution) => {
               return (
-                <Typography sx={{ marginTop: '10px', color: '#808080', fontSize: '0.8em' }} key={generateId()}>
+                <Typography sx={{ marginTop: '10px', color: theme.palette.geoViewColors.textColorLight, fontSize: theme.palette.geoViewText.sm }} key={generateId()}>
                   {attribution.indexOf('©') === -1 ? `© ${attribution}` : attribution}
                 </Typography>
               );

@@ -11,7 +11,7 @@ export const sxClassesFooterBar = {
     minHeight: '35px',
     maxHeight: '35px',
     backdropFilter: 'blur(5px)',
-    backgroundColor: '#000000cc',
+    backgroundColor: 'geoViewColors.bgColorDarkest',
     pointerEvents: 'all',
     gap: 0.5,
     order: 3,
