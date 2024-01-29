@@ -50,8 +50,8 @@ const geoViewText: IGeoViewText = {
   xl: '22px',
   lg: '18px',
   md: '14px',
-  sm: '10px',
-  xs: '8px',
+  sm: '12px',
+  xs: '10px',
 }
 
 export const defaultThemeOptions: ThemeOptions = {

@@ -16,7 +16,7 @@ export const getSxClasses = (theme: Theme) => ({
   subtitle: {
     font: theme.footerPanel.titleFont,
     fontWeight: 'normal',
-    fontSize: theme.palette.geoViewText.xl,
+    fontSize: theme.palette.geoViewText.lg,
     textAlign: 'left',
     marginBottom: '15px',
   },
