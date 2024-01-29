@@ -1,3 +1,4 @@
+/* eslint-disable no-underscore-dangle */
 /* eslint-disable max-classes-per-file */
 import { Extent } from 'ol/extent';
 import BaseLayer from 'ol/layer/Base';
@@ -8,6 +9,9 @@ import { TypeBasemapOptions } from '@/geo/layer/basemap/basemap-types';
 import { AbstractGeoViewLayer, TypeGeoviewLayerType } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { TypeMapMouseInfo } from '@/api/events/payloads';
 import { createLocalizedString } from '@/core/utils/utilities';
+import { logger } from '@/core/utils/logger';
+import { Cast } from '@/core/types/cgpv-types';
+import { api } from '@/app';
 
 /** ******************************************************************************************************************************
  *  Definition of map state to attach to the map object for reference.
@@ -614,70 +618,160 @@ export const layerEntryIsGeocore = (verifyIfLayer: TypeLayerEntryConfig): verify
 /** ******************************************************************************************************************************
  * Valid values for the layerStatus property.
  */
-export type TypeLayerStatus = 'newInstance' | 'loading' | 'processed' | 'loaded' | 'error';
+export type TypeLayerStatus = 'registered' | 'newInstance' | 'processing' | 'processed' | 'loading' | 'loaded' | 'error';
 
 /** ******************************************************************************************************************************
- * Base type used to define a GeoView layer to display on the map.
+ * Valid values for the layerStatus property.
  */
-export class BaseLayerProperties {
-  /** The layer path to this instance. */
-  layerPath: string;
+export type TypeLoadEndListenerType = 'features' | 'tile' | 'image';
 
-  /** The ending element of the layer configuration path. */
-  layerPathEnding?: string;
+/** ******************************************************************************************************************************
+ * Base type used to define a GeoView layer to display on the map. Unless specified,its properties are not part of the schema.
+ */
+export class LayerEntryConfigBaseClass {
+  /** The identifier of the layer to display on the map. This element is part of the schema. */
+  private _layerId = '';
 
-  /** The id of the layer to display on the map. */
-  layerId = '';
+  /** The ending extension (element) of the layer identifier. This element is part of the schema. */
+  layerIdExtension?: string;
+
+  /** Tag used to link the entry to a specific schema. This element is part of the schema. */
+  schemaTag?: TypeGeoviewLayerType;
+
+  /** Layer entry data type. This element is part of the schema. */
+  entryType?: TypeLayerEntryType;
 
   /** The geoview layer instance that contains this layer configuration. */
   geoviewLayerInstance?: AbstractGeoViewLayer;
 
-  /** This attribute is not part of the schema. It is used to identified unprocessed layers and shows the final layer state */
+  /** It is used to identified unprocessed layers and shows the final layer state */
   layerStatus?: TypeLayerStatus;
 
-  /** This attribute is not part of the schema. It is used to identified the process phase of the layer */
+  /** It is used to identified the process phase of the layer */
   layerPhase?: string;
 
-  /** This attribute is not part of the schema. It is used to link the layer entry config to the GeoView layer config. */
+  /** It is used to link the layer entry config to the GeoView layer config. */
   geoviewLayerConfig: TypeGeoviewLayerConfig;
 
-  /** This attribute is not part of the schema. It is used to link the layer entry config to the parent's layer config. */
+  /** It is used to link the layer entry config to the parent's layer config. */
   parentLayerConfig?: TypeGeoviewLayerConfig | TypeLayerGroupEntryConfig;
 
-  /** This attribute is not part of the schema. It is used to link the displayed layer to its layer entry config. */
-  olLayer?: BaseLayer | LayerGroup | null;
-
-  /** This attribute is not part of the schema. It is used internally to distinguish layer groups derived from the
+  /** It is used internally to distinguish layer groups derived from the
    * metadata. */
   isMetadataLayerGroup?: boolean;
 
+  /** The layer path to this instance. */
+  private _layerPath = '';
+
+  /* Name of the load end listener for the olLayer defined below */
+  loadEndListenerType?: TypeLoadEndListenerType;
+
+  /** This property is used to link the displayed layer to its layer entry config. */
+  private _olLayer: BaseLayer | LayerGroup | null = null;
+
   /**
    * The class constructor.
-   * @param {BaseLayerProperties} layerConfig The layer configuration we want to instanciate.
+   * @param {LayerEntryConfigBaseClass} layerConfig The layer configuration we want to instanciate.
    */
-  constructor(layerConfig: BaseLayerProperties) {
+  constructor(layerConfig: LayerEntryConfigBaseClass) {
+    if (layerConfig.entryType === 'geoCore') {
+      this._layerPath = '';
+      this.geoviewLayerConfig = {} as TypeGeoviewLayerConfig;
+      return;
+    }
     this.geoviewLayerConfig = layerConfig.geoviewLayerConfig;
     Object.assign(this, layerConfig);
-    this.layerPath = this.getLayerPath(layerConfig);
+    if (this.geoviewLayerConfig) this._layerPath = LayerEntryConfigBaseClass.getLayerPath(layerConfig);
+    else logger.logError("Couldn't calculate layerPath because geoviewLayerConfig has an invalid value");
   }
 
   /**
-   * Get the layer Path of the layer configuration parameter.
-   * @param {BaseLayerProperties} layerConfig The layer configuration for which we want to get the layer path.
+   * The layerPath getter method for the LayerEntryConfigBaseClass class and its descendant classes.
+   */
+  get layerPath() {
+    if (this._layerPath) return this._layerPath;
+    this._layerPath = LayerEntryConfigBaseClass.getLayerPath(this);
+    return this._layerPath;
+  }
+
+  /**
+   * Getter for the layer Path of the layer configuration parameter.
+   * @param {LayerEntryConfigBaseClass} layerConfig The layer configuration for which we want to get the layer path.
    * @param {string} layerPath Internal parameter used to build the layer path (should not be used by the user).
    *
    * @returns {string} Returns the layer path.
    */
-  getLayerPath(layerConfig: BaseLayerProperties, layerPath?: string): string {
+  static getLayerPath(layerConfig: LayerEntryConfigBaseClass, layerPath?: string): string {
     let pathEnding = layerPath;
     if (pathEnding === undefined)
       pathEnding =
-        layerConfig.layerPathEnding === undefined ? layerConfig.layerId : `${layerConfig.layerId}.${layerConfig.layerPathEnding}`;
+        layerConfig.layerIdExtension === undefined ? layerConfig.layerId : `${layerConfig.layerId}.${layerConfig.layerIdExtension}`;
     if (!layerConfig.parentLayerConfig) return `${layerConfig.geoviewLayerConfig!.geoviewLayerId!}/${pathEnding}`;
     return this.getLayerPath(
       layerConfig.parentLayerConfig as TypeLayerGroupEntryConfig,
       `${(layerConfig.parentLayerConfig as TypeLayerGroupEntryConfig).layerId}/${pathEnding}`
     );
+  }
+
+  /**
+   * The layerId getter method for the LayerEntryConfigBaseClass class and its descendant classes.
+   */
+  get layerId() {
+    return this._layerId;
+  }
+
+  /**
+   * The layerId setter method for the LayerEntryConfigBaseClass class and its descendant classes.
+   */
+  set layerId(newLayerId: string) {
+    this._layerId = newLayerId;
+    this._layerPath = LayerEntryConfigBaseClass.getLayerPath(this);
+  }
+
+  /**
+   * The olLayer getter method for the LayerEntryConfigBaseClass class and its descendant classes.
+   */
+  get olLayer() {
+    return this._olLayer;
+  }
+
+  /**
+   * The olLayer setter method for the LayerEntryConfigBaseClass class and its descendant classes.
+   * @param {BaseLayer | LayerGroup | null} value The layer configuration we want to instanciate.
+   */
+  set olLayer(olLayerValue: BaseLayer | LayerGroup | null) {
+    this._olLayer = olLayerValue;
+    if (this._olLayer && this.entryType !== 'group') {
+      if (this.loadEndListenerType) {
+        let loadErrorHandler: () => void;
+        const loadEndHandler = () => {
+          // TODO: Move the following line in a setter for layerStatus. It will be safer.
+          this.geoviewLayerInstance!.setLayerStatus('loaded', this.layerPath);
+          this.olLayer!.get('source').un(`${this.loadEndListenerType}loaderror`, loadErrorHandler);
+        };
+        loadErrorHandler = () => {
+          this.geoviewLayerInstance!.setLayerStatus('error', this.layerPath);
+          this.olLayer!.get('source').un(`${this.loadEndListenerType}loadend`, loadEndHandler);
+        };
+        this.olLayer!.get('source').once(`${this.loadEndListenerType}loaderror`, loadErrorHandler);
+        this.olLayer!.get('source').once(`${this.loadEndListenerType}loadend`, loadEndHandler);
+      } else logger.logError('You must set the loadEndListenerType property before a olLayer affectation');
+    }
+  }
+
+  /**
+   * Register the layer identifier. Duplicate identifier are not allowed.
+   *
+   * @returns {boolean} Returns false if the layer configuration can't be registered.
+   */
+  registerLayerConfig(): boolean {
+    const { registeredLayers } = api.maps[this.geoviewLayerInstance!.mapId].layer;
+    if (registeredLayers[this.layerPath]) return false;
+    registeredLayers[this.layerPath] = this;
+    if (!this.layerStatus) this.geoviewLayerInstance!.setLayerStatus('registered', this.layerPath);
+    if (this.entryType !== 'group')
+      (this.geoviewLayerInstance as AbstractGeoViewLayer).registerToLayerSets(Cast<TypeBaseLayerEntryConfig>(this));
+    return true;
   }
 
   /**
@@ -696,18 +790,9 @@ export class BaseLayerProperties {
 /** ******************************************************************************************************************************
  * Base type used to define a GeoView layer to display on the map.
  */
-export class TypeBaseLayerEntryConfig extends BaseLayerProperties {
-  /** Tag used to link the entry to a specific schema. */
-  schemaTag?: TypeGeoviewLayerType;
-
-  /** Layer entry data type. */
-  entryType?: TypeLayerEntryType;
-
+export class TypeBaseLayerEntryConfig extends LayerEntryConfigBaseClass {
   /** The ending element of the layer configuration path. */
-  layerPathEnding?: string | undefined = undefined;
-
-  /** The id of the layer to display on the map. */
-  layerId = '';
+  layerIdExtension?: string | undefined = undefined;
 
   /** The display name of the layer (English/French). */
   layerName?: TypeLocalizedString;
@@ -1116,14 +1201,14 @@ export class TypeTileLayerEntryConfig extends TypeBaseLayerEntryConfig {
  * Type used to define a GeoView layer where configration is extracted by a configuration snippet stored on a server. The server
  * configuration will handle bilangual informations.
  */
-export class TypeGeocoreLayerEntryConfig extends BaseLayerProperties {
-  /** This attribute from BaseLayerProperties is not used by groups. */
+export class TypeGeocoreLayerEntryConfig extends LayerEntryConfigBaseClass {
+  /** This attribute from LayerEntryConfigBaseClass is not used by groups. */
   declare layerStatus: never;
 
-  /** This attribute from BaseLayerProperties is not used by groups. */
+  /** This attribute from LayerEntryConfigBaseClass is not used by groups. */
   declare layerPhase: never;
 
-  /** This attribute from BaseLayerProperties is not used by groups. */
+  /** This attribute from LayerEntryConfigBaseClass is not used by groups. */
   declare isMetadataLayerGroup: never;
 
   /** Tag used to link the entry to a specific schema. */
@@ -1132,11 +1217,8 @@ export class TypeGeocoreLayerEntryConfig extends BaseLayerProperties {
   /** Layer entry data type. */
   entryType = 'geoCore' as TypeLayerEntryType;
 
-  /** The layerId is not used by geocore layers. */
-  declare layerId: never;
-
-  /** The layerPathEnding is not used by geocore layers. */
-  declare layerPathEnding: never;
+  /** The layerIdExtension is not used by geocore layers. */
+  declare layerIdExtension: never;
 
   /** The display name of a geocore layer is in geocoreLayerName. */
   declare layerName: never;
@@ -1181,11 +1263,11 @@ export type TypeSourceGeocoreConfig = {
 /** ******************************************************************************************************************************
  * Type used to define a layer group.
  */
-export class TypeLayerGroupEntryConfig extends BaseLayerProperties {
-  /** This attribute from BaseLayerProperties is not used by groups. */
+export class TypeLayerGroupEntryConfig extends LayerEntryConfigBaseClass {
+  /** This attribute from LayerEntryConfigBaseClass is not used by groups. */
   declare layerStatus: never;
 
-  /** This attribute from BaseLayerProperties is not used by groups. */
+  /** This attribute from LayerEntryConfigBaseClass is not used by groups. */
   declare layerPhase: never;
 
   /** Tag used to link the entry to a specific schema is not used by groups. */
@@ -1194,11 +1276,8 @@ export class TypeLayerGroupEntryConfig extends BaseLayerProperties {
   /** Layer entry data type. */
   entryType = 'group' as TypeLayerEntryType;
 
-  /** The id of the layer to display on the map. */
-  layerId = '';
-
   /** The ending element of the layer configuration path is not used on groups. */
-  declare layerPathEnding: never;
+  declare layerIdExtension: never;
 
   /** The display name of the layer (English/French). */
   layerName?: TypeLocalizedString;
@@ -1343,6 +1422,7 @@ export type TypeListOfGeoviewLayerConfig = TypeGeoviewLayerConfig[];
 /** ******************************************************************************************************************************
  *  Definition of a single Geoview layer configuration.
  */
+// TODO: Convert this type to a class
 export type TypeGeoviewLayerConfig = {
   /** This attribute is not part of the schema. It is used to link the displayed layer to its layer entry config. */
   olLayer?: Promise<BaseLayer>;
