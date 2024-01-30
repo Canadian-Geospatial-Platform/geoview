@@ -62,7 +62,7 @@ export class TypeGeoJSONLayerEntryConfig extends TypeVectorLayerEntryConfig {
     }
     if (
       !(this.source.dataAccessPath!.en?.startsWith('blob') && !this.source.dataAccessPath!.en?.endsWith('/')) &&
-      !this.source.dataAccessPath!.en?.toUpperCase().endsWith('.JSON' || '.GEOJSON')
+      !this.source.dataAccessPath!.en?.toUpperCase().endsWith('JSON' || 'GEOJSON')
     ) {
       this.source.dataAccessPath!.en = this.source.dataAccessPath!.en!.endsWith('/')
         ? `${this.source.dataAccessPath!.en}${this.layerId}`
@@ -229,7 +229,7 @@ export class GeoJSON extends AbstractGeoViewVector {
           layerConfig.source = defaultsDeep(layerConfig.source, layerMetadataFound.source);
           layerConfig.initialSettings = defaultsDeep(layerConfig.initialSettings, layerMetadataFound.initialSettings);
           layerConfig.style = defaultsDeep(layerConfig.style, layerMetadataFound.style);
-          // When the dataAccessPath stored in the layerConfig.source objet is equal to the root of the metadataAccessPath with a
+          // When the dataAccessPath stored in the layerConfig.source object is equal to the root of the metadataAccessPath with a
           // layerId ending, chances are that it was set by the config-validation because of an empty dataAcessPath value in the config.
           // This situation means that we want to use the dataAccessPath found in the metadata if it is set, otherwise we will keep the
           // config dataAccessPath value.
