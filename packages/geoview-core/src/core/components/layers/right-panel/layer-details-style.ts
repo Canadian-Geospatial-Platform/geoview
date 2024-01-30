@@ -7,7 +7,7 @@ export const getSxClasses = (theme: Theme) => ({
     fontSize: '20px',
   },
   layerDetails: {
-    borderColor: theme.palette.geoViewColors.primary,
+    borderColor: 'geoViewColors.primary',
     borderWidth: '2px',
     borderStyle: 'solid',
     padding: '20px',

@@ -1,5 +1,5 @@
-import { IGeoViewColors } from '@/ui/style/geoView.interface';
 import { ComponentsVariants, ComponentsOverrides, ComponentsProps } from '@mui/material';
+import { IGeoViewColors } from '@/ui/style/geoView.interface';
 
 /** https://material-ui.com/guides/typescript/ */
 

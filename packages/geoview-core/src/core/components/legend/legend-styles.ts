@@ -11,7 +11,7 @@ export const getSxClasses = (theme: Theme) => ({
     textAlign: 'left',
     font: theme.footerPanel.titleFont,
     color: 'geoViewColors.textColor',
-    fontSize: theme.palette.geoViewText.xl
+    fontSize: theme.palette.geoViewText.xl,
   },
   subtitle: {
     font: theme.footerPanel.titleFont,

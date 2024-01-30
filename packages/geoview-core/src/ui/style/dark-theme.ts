@@ -36,7 +36,7 @@ const geoViewColors: IGeoViewColors = {
 
 const darkPalette = {
   ...defaultThemeOptions.palette,
-  geoViewColors: geoViewColors,
+  geoViewColors,
   common: {
     black: '#101010',
     white: '#fff',
@@ -146,15 +146,9 @@ const darkPanel = {
   activeBg: '#4f4f4f',
 };
 
-const footerPanel = {
-  ...defaultThemeOptions.footerPanel,
-  contentBg: `${darkPalette.geoViewColors.bgColor} 0% 0% no-repeat padding-box`
-}
-
 export const darkThemeOptions: ThemeOptions = {
   ...defaultThemeOptions,
   palette: darkPalette,
   appBar: darkAppBar,
   panel: darkPanel,
-  footerPanel: footerPanel,
 };

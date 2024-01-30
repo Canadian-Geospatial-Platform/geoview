@@ -1,13 +1,12 @@
-//Can populate using https://www.htmlcsscolor.com/hex/F1F2F5
+// Can populate using https://www.htmlcsscolor.com/hex/F1F2F5
 export interface IGeoViewColors {
-
   white: string;
   subtleText: string;
   buttonShadow: string;
   enlargeBtnBg: string;
-  layersRoundButtonsBg: string; //buttons on the right side of the layer details item
+  layersRoundButtonsBg: string; // buttons on the right side of the layer details item
 
-  bgColor?: string;
+  bgColor: string;
   bgColorLight?: string;
   bgColorLighter?: string;
   bgColorLightest?: string;
@@ -15,8 +14,8 @@ export interface IGeoViewColors {
   bgColorDarker: string;
   bgColorDarkest?: string;
 
-  primary?: string;
-  primaryLight?: string;
+  primary: string;
+  primaryLight: string;
   primaryLighter?: string;
   primaryLightest?: string;
   primaryDark?: string;
@@ -48,5 +47,5 @@ export interface IGeoViewText {
 }
 
 export interface IGeoViewSpacingAndSizing {
- layersTitleHeight?: string; 
+  layersTitleHeight?: string;
 }
