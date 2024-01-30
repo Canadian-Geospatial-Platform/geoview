@@ -18,7 +18,7 @@ export const getSxClasses = (theme: Theme) => ({
     },
     '& .MuiSlider-markLabel': {
       fontSize: 'geoViewText.xs',
-      color: theme.palette.geoViewColors.textColor.main
+      color: theme.palette.geoViewColors.textColor.main,
     },
   },
 });

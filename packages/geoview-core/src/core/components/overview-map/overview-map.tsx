@@ -5,8 +5,7 @@ import { createRoot } from 'react-dom/client';
 import i18n from 'i18next';
 import { I18nextProvider } from 'react-i18next';
 
-import { ThemeProvider } from '@mui/material/styles';
-import { useTheme } from '@mui/material/styles';
+import { ThemeProvider, useTheme } from '@mui/material/styles';
 
 import TileLayer from 'ol/layer/Tile';
 import { OverviewMap as OLOverviewMap } from 'ol/control';
@@ -21,7 +20,6 @@ import { useMapElement, useMapOverviewMapHideZoom } from '@/core/stores/store-in
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { logger } from '@/core/utils/logger';
 import { getSxClasses } from './overview-map-styles';
-
 
 /**
  * Creates an overview map control and adds it to the map

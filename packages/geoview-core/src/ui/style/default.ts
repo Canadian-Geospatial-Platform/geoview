@@ -25,7 +25,7 @@ export const geoViewColors: IGeoViewColors = {
   enlargeBtnBg: '#F4F5FF',
   layersRoundButtonsBg: '#F6F6F6',
 
-  overlayMapButtonBgColor: "#CCCCCC",
+  overlayMapButtonBgColor: '#CCCCCC',
 
   bgColor: {
     darkest: '#3E3F41',
@@ -36,14 +36,14 @@ export const geoViewColors: IGeoViewColors = {
     lighter: '#FFFFFF',
     lightest: '#FFFFFF',
   },
-  
+
   primary: new GeoViewWCAGColor('#515BA5'),
-  /*primaryLight: '#c8cde4',
+  /* primaryLight: '#c8cde4',
   primaryLighter: '#e0e3f1',
   primaryLightest: '#f4f5ff',
   primaryDark: '#2e2e6c',
   primaryDarker: '#1c1c4c',
-  primaryDarkest: '#0f0f2e',*/
+  primaryDarkest: '#0f0f2e', */
 
   textColor: new GeoViewWCAGColor('#393939'),
 };
@@ -255,6 +255,6 @@ export const defaultThemeOptions: ThemeOptions = {
     featureKeyFont: `normal normal medium 16px/19px ${font}`,
     featureValueFont: `normal normal normal 16px/19px ${font}`,
     chooseLayerFont: `normal normal 600 16px/24px ${font}`,
-    boxShadow: 'rgb(0 0 0 / 20%) 0px 3px 1px -2px, rgb(0 0 0 / 14%) 0px 2px 2px 0px, rgb(0 0 0 / 12%) 0px 1px 5px 0px'
+    boxShadow: 'rgb(0 0 0 / 20%) 0px 3px 1px -2px, rgb(0 0 0 / 14%) 0px 2px 2px 0px, rgb(0 0 0 / 12%) 0px 1px 5px 0px',
   },
 };

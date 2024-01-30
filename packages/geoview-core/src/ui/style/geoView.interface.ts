@@ -1,16 +1,20 @@
 // Can populate using https://www.htmlcsscolor.com/hex/F1F2F5
-
-import { darken, lighten, alpha } from "@mui/material";
-
+/* eslint-disable no-underscore-dangle */
+import { darken, lighten, alpha } from '@mui/material';
 
 export class GeoViewWCAGColor {
   main: string;
 
   light: string;
+
   lighter: string;
+
   lightest: string;
+
   dark: string;
+
   darker: string;
+
   darkest: string;
 
   constructor(mainColor: string) {
@@ -34,58 +38,56 @@ export class GeoViewWCAGColor {
     return colorRegex.test(color);
   }
 
-  _main(opacity: number = 1): string {
+  _main(opacity = 1): string {
     return alpha(this.main, opacity);
   }
 
-  _light(opacity: number = 1): string {
+  _light(opacity = 1): string {
     return alpha(lighten(this.main, 0.2), opacity);
   }
 
-  _lighter(opacity: number = 1): string {
+  _lighter(opacity = 1): string {
     return alpha(lighten(this.main, 0.4), opacity);
   }
 
   // returns color that is 70% lighter than the main color
-  _lightest(opacity: number = 1): string {
+  _lightest(opacity = 1): string {
     return alpha(lighten(this.main, 0.7), opacity);
   }
 
-  _lighten(coefficient: number, opacity: number = 1): string {
+  _lighten(coefficient: number, opacity = 1): string {
     return alpha(lighten(this.main, coefficient), opacity);
   }
 
-  //returns color that is 20% darker than the main color
-  _dark(opacity: number = 1): string {
+  // returns color that is 20% darker than the main color
+  _dark(opacity = 1): string {
     return alpha(darken(this.main, 0.2), opacity);
   }
 
-  //returns color that is 40% darker than the main color
-  _darker(opacity: number = 1): string {
+  // returns color that is 40% darker than the main color
+  _darker(opacity = 1): string {
     return alpha(darken(this.main, 0.4), opacity);
   }
 
   // returns color that is 70% darker than the main color
-  _darkest(opacity: number = 1): string {
+  _darkest(opacity = 1): string {
     return alpha(darken(this.main, 0.7), opacity);
   }
 
-  _darken(coefficient: number, opacity: number = 1): string {
+  _darken(coefficient: number, opacity = 1): string {
     return alpha(darken(this.main, coefficient), opacity);
   }
 
-  //returns black or white color depending on the contrast ratio
+  // returns black or white color depending on the contrast ratio
   _contrastText(): string {
-    let hex = this.main.slice(1); //removing the #
+    const hex = this.main.slice(1); // removing the #
 
-    var r = parseInt(hex.slice(0, 2), 16),
-        g = parseInt(hex.slice(2, 4), 16),
-        b = parseInt(hex.slice(4, 6), 16);
+    const r = parseInt(hex.slice(0, 2), 16);
+    const g = parseInt(hex.slice(2, 4), 16);
+    const b = parseInt(hex.slice(4, 6), 16);
 
-      // https://stackoverflow.com/a/3943023/112731
-      return (r * 0.299 + g * 0.587 + b * 0.114) > 186
-          ? '#000000'
-          : '#FFFFFF';
+    // https://stackoverflow.com/a/3943023/112731
+    return r * 0.299 + g * 0.587 + b * 0.114 > 186 ? '#000000' : '#FFFFFF';
   }
 }
 
@@ -113,9 +115,9 @@ export interface IGeoViewColors {
 
   bgColor: IGeoViewShadedColor;
 
-  textColor: GeoViewWCAGColor,
+  textColor: GeoViewWCAGColor;
 
-  primary: GeoViewWCAGColor,
+  primary: GeoViewWCAGColor;
 }
 
 export interface IGeoViewText {

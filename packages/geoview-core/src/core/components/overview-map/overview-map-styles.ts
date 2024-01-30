@@ -64,5 +64,5 @@ export const getSxClasses = (theme: Theme) => ({
         backgroundColor: 'geoViewColors.white',
       },
     },
-  }
+  },
 });
