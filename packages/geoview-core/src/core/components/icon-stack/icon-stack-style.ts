@@ -28,7 +28,7 @@ export const getSxClasses = (theme: Theme) => ({
     padding: 0,
     borderRadius: 0,
     border: '1px solid',
-    borderColor: 'geoViewColors.bgColorDarker',
+    borderColor: 'geoViewColors.bgColor.darker',
     boxShadow: theme?.footerPanel.boxShadow,
     backgroundColor: 'geoViewColors.white',
   },
@@ -44,14 +44,14 @@ export const getSxClasses = (theme: Theme) => ({
     height: 24,
     backgroundColor: 'geoViewColors.white',
     border: '1px solid',
-    borderColor: 'geoViewColors.bgColorDarker',
+    borderColor: 'geoViewColors.bgColor.darker',
   },
   stackIconsBox: {
     width: 24,
     height: 24,
     position: 'relative',
     '&:focus': {
-      outlineColor: 'geoViewColors.bgColorDarker',
+      outlineColor: 'geoViewColors.bgColor.darker',
     },
   },
   iconPreview: {

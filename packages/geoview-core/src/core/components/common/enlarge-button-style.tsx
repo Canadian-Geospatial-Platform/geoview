@@ -5,7 +5,7 @@ export const getSxClasses = (theme: Theme) => ({
     width: '7rem !important',
     height: '2.5rem !important',
     borderRadius: '1.5rem',
-    boxShadow: `0px 3px 6px ${theme.palette.geoViewColors.bgColorDarker}`,
+    boxShadow: `0px 3px 6px ${theme.palette.geoViewColors.bgColor.darker}`,
     marginTop: '0.25rem',
     background: `${theme.palette.geoViewColors.enlargeBtnBg} !important`,
     '>div': {

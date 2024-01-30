@@ -6,7 +6,7 @@ export const getSxClasses = (theme: Theme) => ({
     alignItems: 'center',
     gap: '15px',
     padding: '8px 20px 7px 15px',
-    backgroundColor: 'geoViewColors.bgColor',
+    backgroundColor: 'geoViewColors.bgColor.main',
     borderRadius: '10px',
     '& .MuiSlider-mark': {
       width: '9px',
@@ -18,7 +18,7 @@ export const getSxClasses = (theme: Theme) => ({
     },
     '& .MuiSlider-markLabel': {
       fontSize: 'geoViewText.xs',
-      color: 'geoViewColors.textColorLight',
+      color: theme.palette.geoViewColors.textColor.main()
     },
   },
 });

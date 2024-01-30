@@ -1,5 +1,5 @@
 import { ThemeOptions } from '@mui/material';
-import { IGeoViewColors, IGeoViewText } from './geoView.interface';
+import { GeoViewWCAGColor, IGeoViewColors, IGeoViewText } from './geoView.interface';
 
 export const font = "'Roboto', 'Helvetica', 'Arial', sans-serif";
 
@@ -25,14 +25,18 @@ export const geoViewColors: IGeoViewColors = {
   enlargeBtnBg: '#F4F5FF',
   layersRoundButtonsBg: '#F6F6F6',
 
-  bgColorDarkest: '#3E3F41',
-  bgColorDarker: '#626365',
-  bgColorDark: '#9A9B9D',
-  bgColor: '#F1F2F5',
-  bgColorLight: '#FFFFFF',
-  bgColorLighter: '#FFFFFF',
-  bgColorLightest: '#FFFFFF',
+  overlayMapButtonBgColor: "#CCCCCC",
 
+  bgColor: {
+    darkest: '#3E3F41',
+    darker: '#626365',
+    dark: '#9A9B9D',
+    main: '#F1F2F5',
+    light: '#FFFFFF',
+    lighter: '#FFFFFF',
+    lightest: '#FFFFFF',
+  },
+  
   primary: '#515BA5',
   primaryLight: '#c8cde4',
   primaryLighter: '#e0e3f1',
@@ -41,10 +45,7 @@ export const geoViewColors: IGeoViewColors = {
   primaryDarker: '#1c1c4c',
   primaryDarkest: '#0f0f2e',
 
-  textColor: '#393939',
-  textColorLight: '#757575',
-  textColorLighter: '#bdbdbd',
-  textColorLightest: '#ffffff',
+  textColor: new GeoViewWCAGColor('#393939'),
 };
 
 const geoViewText: IGeoViewText = {
@@ -244,7 +245,7 @@ export const defaultThemeOptions: ThemeOptions = {
     overlayActive: 'transparent',
   },
   footerPanel: {
-    contentBg: `${geoViewColors.bgColor} 0% 0% no-repeat padding-box`,
+    contentBg: `${geoViewColors.bgColor.main} 0% 0% no-repeat padding-box`,
     contentShadow: 'inset 0px 3px 6px #00000029',
     titleFont: `normal normal 600 20px/27px ${font}`,
     layerTitleFont: `normal normal 600 18px/24px ${font}`,
