@@ -54,7 +54,7 @@ export const getShellSxClasses = (theme: Theme) => ({
     width: '1px',
     textAlign: 'left',
     overflow: 'hidden',
-    backgroundColor: '#FFFFFF',
+    backgroundColor: 'geoViewColors.white',
     zIndex: theme.zIndex.tooltip,
 
     '&:active, &:focus': {

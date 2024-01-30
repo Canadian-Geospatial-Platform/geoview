@@ -85,6 +85,7 @@ declare module '@mui/material/styles' {
       featureKeyFont: string;
       featureValueFont: string;
       chooseLayerFont: string;
+      boxShadow: string;
     };
   }
   interface Theme {
@@ -148,6 +149,7 @@ declare module '@mui/material/styles' {
       featureKeyFont: string;
       featureValueFont: string;
       chooseLayerFont: string;
+      boxShadow: string;
     };
   }
 }
