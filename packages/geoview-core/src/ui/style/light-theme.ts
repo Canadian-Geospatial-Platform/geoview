@@ -1,10 +1,19 @@
-import { ThemeOptions } from '@mui/material';
-import { defaultThemeOptions, opacity } from './default';
+import { geoViewColors as defaultGeoViewColors } from './default';
+import { GeoViewWCAGColor, IGeoViewColors } from './geoView.interface';
 
-/**
- * Make changes to MUI default LIGHT theme/mode here
- * see https://mui.com/material-ui/customization/palette/
- */
+export const lightThemeColors: IGeoViewColors = {
+  ...defaultGeoViewColors,
+
+  bgColor: new GeoViewWCAGColor('#3C3E42', true),
+  primary: new GeoViewWCAGColor('#000000'),
+  textColor: new GeoViewWCAGColor('#000000'),
+
+  layersRoundButtonsBg: '#393939',
+};
+
+
+/*
+LEAVING HERE FOR REFERENCE - WILL DELETE WHEN STYLES ARE DONE
 const lightPalette = {
   ...defaultThemeOptions.palette,
   primary: {
@@ -101,3 +110,6 @@ export const lightThemeOptions: ThemeOptions = {
   ...defaultThemeOptions,
   palette: lightPalette,
 };
+
+
+*/

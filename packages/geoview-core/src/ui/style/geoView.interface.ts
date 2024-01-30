@@ -17,11 +17,14 @@ export class GeoViewWCAGColor {
 
   darkest: string;
 
-  constructor(mainColor: string) {
+  isInverse: boolean;
+
+  constructor(mainColor: string, isInverse = false) {
     if (!this.isValidColor(mainColor)) {
       throw new Error('Invalid color format');
     }
     this.main = mainColor;
+    this.isInverse = isInverse;
 
     this.light = this._light();
     this.lighter = this._lighter();
@@ -43,38 +46,62 @@ export class GeoViewWCAGColor {
   }
 
   _light(opacity = 1): string {
-    return alpha(lighten(this.main, 0.2), opacity);
+    if(this.isInverse) {
+      return alpha(darken(this.main, 0.3), opacity);
+    }
+    return alpha(lighten(this.main, 0.3), opacity);
   }
 
   _lighter(opacity = 1): string {
-    return alpha(lighten(this.main, 0.4), opacity);
+    if(this.isInverse) {
+      return alpha(darken(this.main, 0.6), opacity);
+    }
+    return alpha(lighten(this.main, 0.6), opacity);
   }
 
   // returns color that is 70% lighter than the main color
   _lightest(opacity = 1): string {
-    return alpha(lighten(this.main, 0.7), opacity);
+    if(this.isInverse) {
+      return alpha(darken(this.main, 0.9), opacity);
+    }
+    return alpha(lighten(this.main, 0.9), opacity);
   }
 
   _lighten(coefficient: number, opacity = 1): string {
+    if(this.isInverse) {
+      return alpha(darken(this.main, coefficient), opacity);
+    }
     return alpha(lighten(this.main, coefficient), opacity);
   }
 
   // returns color that is 20% darker than the main color
   _dark(opacity = 1): string {
+    if(this.isInverse) {
+      return alpha(lighten(this.main, 0.2), opacity);
+    }
     return alpha(darken(this.main, 0.2), opacity);
   }
 
   // returns color that is 40% darker than the main color
   _darker(opacity = 1): string {
+    if(this.isInverse) {
+      return alpha(lighten(this.main, 0.4), opacity);
+    }
     return alpha(darken(this.main, 0.4), opacity);
   }
 
   // returns color that is 70% darker than the main color
   _darkest(opacity = 1): string {
+    if(this.isInverse) {
+      return alpha(lighten(this.main, 0.7), opacity);
+    }
     return alpha(darken(this.main, 0.7), opacity);
   }
 
   _darken(coefficient: number, opacity = 1): string {
+    if(this.isInverse) {
+      return alpha(lighten(this.main, coefficient), opacity);
+    }
     return alpha(darken(this.main, coefficient), opacity);
   }
 
@@ -91,19 +118,8 @@ export class GeoViewWCAGColor {
   }
 }
 
-interface IGeoViewShadedColor {
-  main: string;
-  light: string;
-  lighter?: string;
-  lightest?: string;
-  dark?: string;
-  darker?: string;
-  darkest?: string;
-}
-
 export interface IGeoViewColors {
   white: string;
-  subtleText: string;
   buttonShadow: string;
   enlargeBtnBg: string;
 
@@ -113,11 +129,14 @@ export interface IGeoViewColors {
 
   crosshairBg: string;
 
-  bgColor: IGeoViewShadedColor;
-
+  bgColor: GeoViewWCAGColor;
   textColor: GeoViewWCAGColor;
-
   primary: GeoViewWCAGColor;
+  secondary: GeoViewWCAGColor;
+  success: GeoViewWCAGColor;
+  error: GeoViewWCAGColor;
+  info: GeoViewWCAGColor;
+  warning: GeoViewWCAGColor;
 }
 
 export interface IGeoViewText {

@@ -1,5 +1,4 @@
-import { ThemeOptions } from '@mui/material';
-import { defaultThemeOptions, opacity, geoViewColors as defaultGeoViewColors, font } from './default';
+import { geoViewColors as defaultGeoViewColors } from './default';
 import { GeoViewWCAGColor, IGeoViewColors } from './geoView.interface';
 
 /**
@@ -7,10 +6,10 @@ import { GeoViewWCAGColor, IGeoViewColors } from './geoView.interface';
  * see https://mui.com/material-ui/customization/palette/
  */
 
-const geoViewColors: IGeoViewColors = {
+export const darkThemeColors: IGeoViewColors = {
   ...defaultGeoViewColors,
 
-  bgColor: {
+  /*bgColor: {
     main: '#3C3E42',
     light: '#232323',
     lighter: '#393939',
@@ -18,18 +17,22 @@ const geoViewColors: IGeoViewColors = {
     dark: '#000000',
     darker: '#000000',
     darkest: '#000000',
-  },
+  },*/
 
+  bgColor: new GeoViewWCAGColor('#3C3E42', true),
   primary: new GeoViewWCAGColor('#515BA5'),
   textColor: new GeoViewWCAGColor('#ffffff'),
 
-  subtleText: '#d8d8d8',
   layersRoundButtonsBg: '#393939',
 };
 
+
+
+/*
+LEAVING HERE FOR REFERENCE - WILL DELETE WHEN STYLES ARE DONE
 const darkPalette = {
   ...defaultThemeOptions.palette,
-  geoViewColors,
+  geoViewColors: darkThemeColors,
   common: {
     black: '#101010',
     white: '#fff',
@@ -139,25 +142,5 @@ const darkPanel = {
   activeBg: '#4f4f4f',
 };
 
-const footerPanel = {
-  ...(defaultThemeOptions.footerPanel as typeof defaultThemeOptions.footerPanel),
-  contentBg: `${geoViewColors.bgColor.main} 0% 0% no-repeat padding-box`,
-  contentShadow: 'inset 0px 3px 6px #00000029',
-  titleFont: `normal normal 600 20px/27px ${font}`,
-  layerTitleFont: `normal normal 600 18px/24px ${font}`,
-  layerSecondaryTitleFont: `normal normal normal 16px/22px ${font}`,
-  highlightColor: '#515BA5',
-  featureNumbersFont: `normal normal normal 16px/22px ${font}`,
-  featureKeyFont: `normal normal medium 16px/19px ${font}`,
-  featureValueFont: `normal normal normal 16px/19px ${font}`,
-  chooseLayerFont: `normal normal 600 16px/24px ${font}`,
-  boxShadow: 'rgb(0 0 0 / 20%) 0px 3px 1px -2px, rgb(0 0 0 / 14%) 0px 2px 2px 0px, rgb(0 0 0 / 12%) 0px 1px 5px 0px',
-};
 
-export const darkThemeOptions: ThemeOptions = {
-  ...defaultThemeOptions,
-  palette: darkPalette,
-  appBar: darkAppBar,
-  panel: darkPanel,
-  footerPanel,
-};
+*/

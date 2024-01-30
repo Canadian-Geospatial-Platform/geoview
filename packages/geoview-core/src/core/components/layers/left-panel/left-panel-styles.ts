@@ -18,7 +18,7 @@ export const getSxClasses = (theme: Theme) => ({
     },
 
     '& .layerItemContainer': {
-      background: `${theme.palette.geoViewColors.bgColor.light} 0% 0% no-repeat padding-box`,
+      background: `${theme.palette.geoViewColors.bgColor.lighter} 0% 0% no-repeat padding-box`,
       borderRadius: '5px',
       marginBottom: '1rem',
 
@@ -34,21 +34,21 @@ export const getSxClasses = (theme: Theme) => ({
       },
 
       '&.dragging': {
-        backgroundcolor: 'geoViewColors.primary.light',
+        backgroundcolor: 'geoViewColors.primary.darker',
         cursor: 'grab',
         userSelect: 'none',
       },
 
       // for handling layer status
       '&.error': {
-        background: '#ffdcdb 0% 0% no-repeat padding-box',
+        background: 'error.light',
         '& .MuiListItemText-secondary': {
           fontWeight: 'bold',
           color: 'error.main',
         },
       },
       '&.loading': {
-        background: '#e5efff 0% 0% no-repeat padding-box',
+        background: 'geoViewColors.info.lighter',
         '& .MuiListItemText-secondary': {
           fontWeight: 'bold',
           color: 'info.main',
