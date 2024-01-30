@@ -21,7 +21,7 @@ export const getSxClasses = (theme: Theme) => ({
     left: theme.spacing(0),
     height: 'calc(1em + 8px)',
     padding: theme.spacing(2, 1, 4, 1),
-    backgroundColor: 'rgba(228, 227, 227, 0.9)',
+    backgroundColor: 'theme.palette.geoViewColors.crosshairBg',
     '& span': {
       paddingLeft: 70,
     },

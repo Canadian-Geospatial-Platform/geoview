@@ -18,6 +18,7 @@ export const opacity = {
 
 export const geoViewColors: IGeoViewColors = {
   white: '#FFFFFF',
+  crosshairBg: 'rgba(228, 227, 227, 0.9)',
 
   subtleText: '#393939',
   buttonShadow: '#e0e0e0',
@@ -253,5 +254,6 @@ export const defaultThemeOptions: ThemeOptions = {
     featureKeyFont: `normal normal medium 16px/19px ${font}`,
     featureValueFont: `normal normal normal 16px/19px ${font}`,
     chooseLayerFont: `normal normal 600 16px/24px ${font}`,
+    boxShadow: 'rgb(0 0 0 / 20%) 0px 3px 1px -2px, rgb(0 0 0 / 14%) 0px 2px 2px 0px, rgb(0 0 0 / 12%) 0px 1px 5px 0px'
   },
 };

@@ -1,10 +1,19 @@
 // Can populate using https://www.htmlcsscolor.com/hex/F1F2F5
+
+interface DualColor {
+  bg: string;
+  color: string;
+}
+
+
 export interface IGeoViewColors {
   white: string;
   subtleText: string;
   buttonShadow: string;
   enlargeBtnBg: string;
   layersRoundButtonsBg: string; // buttons on the right side of the layer details item
+
+  crosshairBg: string;
 
   bgColor: string;
   bgColorLight?: string;
