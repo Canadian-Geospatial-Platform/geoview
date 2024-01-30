@@ -37,13 +37,13 @@ export const geoViewColors: IGeoViewColors = {
     lightest: '#FFFFFF',
   },
   
-  primary: '#515BA5',
-  primaryLight: '#c8cde4',
+  primary: new GeoViewWCAGColor('#515BA5'),
+  /*primaryLight: '#c8cde4',
   primaryLighter: '#e0e3f1',
   primaryLightest: '#f4f5ff',
   primaryDark: '#2e2e6c',
   primaryDarker: '#1c1c4c',
-  primaryDarkest: '#0f0f2e',
+  primaryDarkest: '#0f0f2e',*/
 
   textColor: new GeoViewWCAGColor('#393939'),
 };

@@ -28,13 +28,13 @@ export const getSxClasses = (theme: Theme) => ({
 
       // for selected layer
       '&.selectedLayer': {
-        borderColor: theme.palette.geoViewColors.primary,
+        borderColor: theme.palette.geoViewColors.primary.main,
         borderWidth: '2px',
         borderStyle: 'solid',
       },
 
       '&.dragging': {
-        backgroundcolor: 'geoViewColors.primaryLight',
+        backgroundcolor: 'geoViewColors.primary.light',
         cursor: 'grab',
         userSelect: 'none',
       },

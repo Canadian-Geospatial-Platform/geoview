@@ -26,6 +26,6 @@ export const getSxClasses = (theme: Theme) => ({
     [theme.breakpoints.down('md')]: { display: 'none' },
   },
   enlargeBtnIcon: {
-    color: theme.palette.geoViewColors.primary,
+    color: theme.palette.geoViewColors.primary.main,
   },
 });

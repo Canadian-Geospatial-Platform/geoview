@@ -31,10 +31,10 @@ export const getSxClasses = (theme: Theme) => ({
   },
   scaleText: {
     fontSize: theme.typography.fontSize,
-    color: theme.palette.geoViewColors.primaryLight,
+    color: theme.palette.geoViewColors.primary.light,
     whiteSpace: 'nowrap',
     border: '1px solid',
-    borderColor: theme.palette.geoViewColors.primaryLight,
+    borderColor: theme.palette.geoViewColors.primary.light,
     borderTop: 'none',
     borderLeft: 'none',
     borderRight: 'none',
@@ -42,6 +42,6 @@ export const getSxClasses = (theme: Theme) => ({
   },
   scaleCheckmark: {
     paddingRight: 5,
-    color: theme.palette.geoViewColors.primaryLight,
+    color: theme.palette.geoViewColors.primary.light,
   },
 });

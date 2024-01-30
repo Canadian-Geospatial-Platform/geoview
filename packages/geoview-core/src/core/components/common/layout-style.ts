@@ -15,7 +15,7 @@ export const getSxClasses = (theme: Theme) => ({
     textOverflow: 'ellipsis',
   },
   listItemIcon: {
-    color: theme.palette.geoViewColors.primary,
+    color: theme.palette.geoViewColors.primary.main,
     background: theme.footerPanel.contentBg,
   },
   layerNamePrimary: {

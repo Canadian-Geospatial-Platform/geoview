@@ -4,13 +4,27 @@ import { darken, lighten, alpha } from "@mui/material";
 
 
 export class GeoViewWCAGColor {
-  mainColor: string;
+  main: string;
+
+  light: string;
+  lighter: string;
+  lightest: string;
+  dark: string;
+  darker: string;
+  darkest: string;
 
   constructor(mainColor: string) {
     if (!this.isValidColor(mainColor)) {
       throw new Error('Invalid color format');
     }
-    this.mainColor = mainColor;
+    this.main = mainColor;
+
+    this.light = this._light();
+    this.lighter = this._lighter();
+    this.lightest = this._lightest();
+    this.dark = this._dark();
+    this.darker = this._darker();
+    this.darkest = this._darkest();
   }
 
   private isValidColor(color: string): boolean {
@@ -20,49 +34,49 @@ export class GeoViewWCAGColor {
     return colorRegex.test(color);
   }
 
-  main(opacity: number = 1): string {
-    return alpha(this.mainColor, opacity);
+  _main(opacity: number = 1): string {
+    return alpha(this.main, opacity);
   }
 
-  light(opacity: number = 1): string {
-    return alpha(lighten(this.mainColor, 0.2), opacity);
+  _light(opacity: number = 1): string {
+    return alpha(lighten(this.main, 0.2), opacity);
   }
 
-  lighter(opacity: number = 1): string {
-    return alpha(lighten(this.mainColor, 0.4), opacity);
+  _lighter(opacity: number = 1): string {
+    return alpha(lighten(this.main, 0.4), opacity);
   }
 
   // returns color that is 70% lighter than the main color
-  lightest(opacity: number = 1): string {
-    return alpha(lighten(this.mainColor, 0.7), opacity);
+  _lightest(opacity: number = 1): string {
+    return alpha(lighten(this.main, 0.7), opacity);
   }
 
-  lighten(coefficient: number, opacity: number = 1): string {
-    return alpha(lighten(this.mainColor, coefficient), opacity);
+  _lighten(coefficient: number, opacity: number = 1): string {
+    return alpha(lighten(this.main, coefficient), opacity);
   }
 
   //returns color that is 20% darker than the main color
-  dark(opacity: number = 1): string {
-    return alpha(darken(this.mainColor, 0.2), opacity);
+  _dark(opacity: number = 1): string {
+    return alpha(darken(this.main, 0.2), opacity);
   }
 
   //returns color that is 40% darker than the main color
-  darker(opacity: number = 1): string {
-    return alpha(darken(this.mainColor, 0.4), opacity);
+  _darker(opacity: number = 1): string {
+    return alpha(darken(this.main, 0.4), opacity);
   }
 
   // returns color that is 70% darker than the main color
-  darkest(opacity: number = 1): string {
-    return alpha(darken(this.mainColor, 0.7), opacity);
+  _darkest(opacity: number = 1): string {
+    return alpha(darken(this.main, 0.7), opacity);
   }
 
-  darken(coefficient: number, opacity: number = 1): string {
-    return alpha(darken(this.mainColor, coefficient), opacity);
+  _darken(coefficient: number, opacity: number = 1): string {
+    return alpha(darken(this.main, coefficient), opacity);
   }
 
   //returns black or white color depending on the contrast ratio
-  contrastText(): string {
-    let hex = this.mainColor.slice(1); //removing the #
+  _contrastText(): string {
+    let hex = this.main.slice(1); //removing the #
 
     var r = parseInt(hex.slice(0, 2), 16),
         g = parseInt(hex.slice(2, 4), 16),
@@ -99,20 +113,9 @@ export interface IGeoViewColors {
 
   bgColor: IGeoViewShadedColor;
 
-  primary: string;
-  primaryLight: string;
-  primaryLighter?: string;
-  primaryLightest?: string;
-  primaryDark?: string;
-  primaryDarker?: string;
-  primaryDarkest?: string;
-
   textColor: GeoViewWCAGColor,
 
-  /*textColor?: string;
-  textColorLight?: string;
-  textColorLighter?: string;
-  textColorLightest?: string;*/
+  primary: GeoViewWCAGColor,
 }
 
 export interface IGeoViewText {

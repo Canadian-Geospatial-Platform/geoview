@@ -20,14 +20,7 @@ const geoViewColors: IGeoViewColors = {
     darkest: '#000000',
   },
   
-  primary: '#00b4d8',
-  primaryLight: '#90e0ef',
-  primaryLighter: '#caf0f8',
-  primaryLightest: '#e6f8ff',
-  primaryDark: '#0096c7',
-  primaryDarker: '#0077a8',
-  primaryDarkest: '#005082',
-
+  primary: new GeoViewWCAGColor('#515BA5'),
   textColor: new GeoViewWCAGColor('#ffffff'),
 
   subtleText: '#d8d8d8',
