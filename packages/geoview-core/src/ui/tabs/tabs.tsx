@@ -1,4 +1,4 @@
-import { SyntheticEvent, ReactNode, useState, useEffect } from 'react';
+import { SyntheticEvent, ReactNode, useState, useEffect, useRef } from 'react';
 
 import { useTranslation } from 'react-i18next';
 
@@ -52,7 +52,8 @@ export function Tabs(props: TypeTabsProps): JSX.Element {
   const sxClasses = getSxClasses();
   // internal state
   const [value, setValue] = useState(0);
-
+  // reference to display tab panels on demand.
+  const tabPanelRefs = useRef([tabs[0]]);
   // get store values and actions
   const activeTrapGeoView = useUIActiveTrapGeoView();
   const { closeModal, openModal } = useUIStoreActions();
@@ -64,8 +65,11 @@ export function Tabs(props: TypeTabsProps): JSX.Element {
    * @param {number} newValue value of the new tab
    */
   const handleChange = (event: SyntheticEvent<Element, Event>, newValue: number) => {
+    // Update panel refs when tab value is changed.
+    if (!tabPanelRefs.current[newValue]) {
+      tabPanelRefs.current[newValue] = tabs[newValue];
+    }
     setValue(newValue);
-
     // Callback
     onSelectedTabChanged?.(tabs[newValue]);
   };
@@ -138,13 +142,11 @@ export function Tabs(props: TypeTabsProps): JSX.Element {
           visibility: TabContentVisibilty,
         }}
       >
-        <TabPanel value={value} index={value}>
-          {typeof tabs[value]?.content === 'string' ? (
-            <HtmlToReact htmlContent={(tabs[value]?.content as string) ?? ''} />
-          ) : (
-            tabs[value].content
-          )}
-        </TabPanel>
+        {tabPanelRefs.current?.map((tab, index) => (
+          <TabPanel value={value} index={index} key={tab.id}>
+            {typeof tab?.content === 'string' ? <HtmlToReact htmlContent={(tab?.content as string) ?? ''} /> : tab.content}
+          </TabPanel>
+        ))}
       </Grid>
     </Grid>
   );

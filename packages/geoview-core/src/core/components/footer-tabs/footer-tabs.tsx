@@ -94,7 +94,7 @@ export function FooterTabs(props: FooterTabsProps): JSX.Element | null {
     // Log
     logger.logTraceUseMemo('FOOTER-TABS - defaultFooterTabs', footerTabs);
 
-    return footerTabsConfig?.tabs.core.map((tab, index) => {
+    return (footerTabsConfig?.tabs?.core ?? []).map((tab, index) => {
       return {
         id: tab,
         value: index,
