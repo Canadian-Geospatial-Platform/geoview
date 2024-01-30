@@ -10,7 +10,7 @@ export const getSxClasses = (theme: Theme) => ({
   title: {
     textAlign: 'left',
     font: theme.footerPanel.titleFont,
-    color: theme.palette.geoViewColors.textColor.main(),
+    color: theme.palette.geoViewColors.textColor.main,
     fontSize: theme.palette.geoViewText.xl,
   },
   subtitle: {
@@ -65,7 +65,7 @@ export const getSxClasses = (theme: Theme) => ({
         '&.unchecked': {
           borderLeft: `5px solid ${theme.palette.geoViewColors.bgColor.darker}`,
           fontStyle: 'italic',
-          color: theme.palette.geoViewColors.textColor.lighter(),
+          color: theme.palette.geoViewColors.textColor.lighter,
         },
       },
     },

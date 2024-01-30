@@ -44,9 +44,9 @@ export const getSxClasses = (theme: Theme) => ({
     height: '35px',
   },
   selectFeatureCheckbox: {
-    color: theme.palette.geoViewColors.primary,
+    color: theme.palette.geoViewColors.primary.main,
     '&.Mui-checked': {
-      color: theme.palette.geoViewColors.primary,
+      color: theme.palette.geoViewColors.primary.main,
     },
   },
   featureInfoItemValue: {

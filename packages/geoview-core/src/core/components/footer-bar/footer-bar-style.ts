@@ -39,7 +39,7 @@ export const sxClassesExportButton = {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    color: 'geoViewColors.primaryLight',
+    color: 'geoViewColors.primary.light',
     height: '30px',
     width: '30px',
     marginLeft: '5px',
@@ -57,6 +57,6 @@ export const sxClassesRotationButton = {
     fontSize: 'fontSize',
     width: '1.5em',
     height: '1.5em',
-    color: 'geoViewColors.primaryLight',
+    color: 'geoViewColors.primary.light',
   },
 };

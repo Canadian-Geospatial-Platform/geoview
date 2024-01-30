@@ -19,7 +19,7 @@ export const getSxClasses = (theme: Theme) => ({
       padding: 0,
       '&:hover': {
         backgroundColor: 'transparent',
-        color: theme.palette.geoViewColors.primaryLight,
+        color: theme.palette.geoViewColors.primary.light,
       },
     },
     '& hr': {
@@ -36,21 +36,21 @@ export const getSxClasses = (theme: Theme) => ({
   },
   appBarButton: {
     backgroundColor: theme.appBar.btnDefaultBg,
-    color: theme.palette.geoViewColors.primaryLight,
+    color: theme.palette.geoViewColors.primary.light,
     height: 44,
     width: 44,
     transition: 'background-color 0.3s ease-in-out',
     '&:hover': {
       backgroundColor: theme.appBar.btnHoverBg,
-      color: theme.palette.geoViewColors.primaryLight,
+      color: theme.palette.geoViewColors.primary.light,
     },
     '&:focus': {
       backgroundColor: theme.appBar.btnFocusBg,
-      color: theme.palette.geoViewColors.primaryLight,
+      color: theme.palette.geoViewColors.primary.light,
     },
     '&:active': {
       backgroundColor: theme.appBar.btnActiveBg,
-      color: theme.palette.geoViewColors.primaryLight,
+      color: theme.palette.geoViewColors.primary.light,
     },
     '&.active': {
       backgroundColor: theme.appBar.btnActiveBg,
