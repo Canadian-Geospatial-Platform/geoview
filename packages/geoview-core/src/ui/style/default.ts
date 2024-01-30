@@ -18,10 +18,10 @@ export const opacity = {
 
 export const geoViewColors: IGeoViewColors = {
   white: '#FFFFFF',
-  
+
   subtleText: '#393939',
   buttonShadow: '#e0e0e0',
-  enlargeBtnBg:'#F4F5FF',
+  enlargeBtnBg: '#F4F5FF',
   layersRoundButtonsBg: '#F6F6F6',
 
   bgColorDarkest: '#3E3F41',
@@ -44,7 +44,7 @@ export const geoViewColors: IGeoViewColors = {
   textColorLight: '#757575',
   textColorLighter: '#bdbdbd',
   textColorLightest: '#ffffff',
-}
+};
 
 const geoViewText: IGeoViewText = {
   xxxl: '32px',
@@ -54,14 +54,13 @@ const geoViewText: IGeoViewText = {
   md: '14px',
   sm: '12px',
   xs: '10px',
-}
+};
 
 export const defaultThemeOptions: ThemeOptions = {
   palette: {
-    geoViewColors: geoViewColors,
-    geoViewText: geoViewText,
-    geoViewSpacingAndSizing: {
-    },
+    geoViewColors,
+    geoViewText,
+    geoViewSpacingAndSizing: {},
   },
   typography: {
     fontSize: 16,
@@ -244,7 +243,7 @@ export const defaultThemeOptions: ThemeOptions = {
     overlayActive: 'transparent',
   },
   footerPanel: {
-    contentBg: '#F1F2F5 0% 0% no-repeat padding-box',
+    contentBg: `${geoViewColors.bgColor} 0% 0% no-repeat padding-box`,
     contentShadow: 'inset 0px 3px 6px #00000029',
     titleFont: `normal normal 600 20px/27px ${font}`,
     layerTitleFont: `normal normal 600 18px/24px ${font}`,

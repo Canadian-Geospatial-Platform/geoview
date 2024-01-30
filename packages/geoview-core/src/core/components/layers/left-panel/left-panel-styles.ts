@@ -34,7 +34,7 @@ export const getSxClasses = (theme: Theme) => ({
       },
 
       '&.dragging': {
-        backgroundColor: 'primary.light',
+        backgroundcolor: 'geoViewColors.primaryLight',
         cursor: 'grab',
         userSelect: 'none',
       },

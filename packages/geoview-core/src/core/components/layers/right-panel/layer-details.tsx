@@ -178,16 +178,28 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
     return (
       <Box sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '15px' }}>
         {layerDetails.items.length > 0 && (
-          <IconButton id="table-details" tooltip="legend.tableDetails" sx={{ backgroundColor: theme.palette.geoViewColors.layersRoundButtonsBg }} onClick={handleOpenTable}>
+          <IconButton
+            id="table-details"
+            tooltip="legend.tableDetails"
+            sx={{ backgroundColor: theme.palette.geoViewColors.layersRoundButtonsBg }}
+            onClick={handleOpenTable}
+          >
             <TableViewIcon />
           </IconButton>
         )}
-        <IconButton tooltip="legend.refreshLayer" sx={{ backgroundColor: theme.palette.geoViewColors.layersRoundButtonsBg }} onClick={handleRefreshLayer}>
+        <IconButton
+          tooltip="legend.refreshLayer"
+          sx={{ backgroundColor: theme.palette.geoViewColors.layersRoundButtonsBg }}
+          onClick={handleRefreshLayer}
+        >
           <RestartAltIcon />
         </IconButton>
         <IconButton
           tooltip="legend.highlightLayer"
-          sx={{ backgroundColor: layerDetails.layerPath !== highlightedLayer ? theme.palette.geoViewColors.layersRoundButtonsBg : theme.palette.action.active }}
+          sx={{
+            backgroundColor:
+              layerDetails.layerPath !== highlightedLayer ? theme.palette.geoViewColors.layersRoundButtonsBg : theme.palette.action.active,
+          }}
           onClick={handleHighlightLayer}
         >
           <HighlightOutlinedIcon />
@@ -230,7 +242,10 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
           {layerDetails.layerAttribution &&
             layerDetails.layerAttribution!.map((attribution) => {
               return (
-                <Typography sx={{ marginTop: '10px', color: theme.palette.geoViewColors.textColorLight, fontSize: theme.palette.geoViewText.sm }} key={generateId()}>
+                <Typography
+                  sx={{ marginTop: '10px', color: theme.palette.geoViewColors.textColorLight, fontSize: theme.palette.geoViewText.sm }}
+                  key={generateId()}
+                >
                   {attribution.indexOf('©') === -1 ? `© ${attribution}` : attribution}
                 </Typography>
               );
