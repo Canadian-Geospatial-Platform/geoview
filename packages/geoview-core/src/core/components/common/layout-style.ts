@@ -65,7 +65,7 @@ export const getSxClasses = (theme: Theme) => ({
   rightPanelBtnHolder: {
     marginTop: '20px',
     marginBottom: '9px',
-    boxShadow: `0px 12px 9px -13px ${theme.palette.geoViewColors.bgColorDark}`,
+    boxShadow: `0px 12px 9px -13px ${theme.palette.geoViewColors.bgColor.dark}`,
   },
   gridContainer: { paddingLeft: '1rem', paddingRight: '1rem' },
   listPrimaryText: {

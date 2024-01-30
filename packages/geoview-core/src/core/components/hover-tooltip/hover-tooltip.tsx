@@ -15,7 +15,7 @@ import { logger } from '@/core/utils/logger';
 
 const sxClasses = {
   tooltipItem: {
-    color: '#fff',
+    color: 'geoViewColors.white',
     background: '#222',
     opacity: 0.9,
     fontSize: '16px',

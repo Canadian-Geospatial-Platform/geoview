@@ -1,5 +1,6 @@
 /* eslint-disable react/require-default-props */
 import React from 'react';
+import { useTheme } from '@mui/material/styles';
 import { Box, IconButton, BrowserNotSupportedIcon } from '@/ui';
 import { getSxClasses } from './icon-stack-style';
 import { useIconLayerSet } from '@/core/stores/store-interface-and-intial-values/layer-state';
@@ -17,7 +18,8 @@ export interface TypeIconStackProps {
  * @returns {JSX.Element} the icon stack item
  */
 export function IconStack({ layerPath, onIconClick, onStackIconClick }: TypeIconStackProps): JSX.Element | null {
-  const sxClasses = getSxClasses();
+  const theme = useTheme();
+  const sxClasses = getSxClasses(theme);
 
   const iconData = useIconLayerSet(layerPath);
 

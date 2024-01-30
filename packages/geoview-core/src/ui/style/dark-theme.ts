@@ -1,6 +1,6 @@
 import { ThemeOptions } from '@mui/material';
 import { defaultThemeOptions, opacity, geoViewColors as defaultGeoViewColors } from './default';
-import { IGeoViewColors } from './geoView.interface';
+import { GeoViewWCAGColor, IGeoViewColors } from './geoView.interface';
 
 /**
  * Make changes to MUI default DARK theme/mode here
@@ -9,14 +9,17 @@ import { IGeoViewColors } from './geoView.interface';
 
 const geoViewColors: IGeoViewColors = {
   ...defaultGeoViewColors,
-  bgColor: '#3C3E42',
-  bgColorLight: '#232323',
-  bgColorLighter: '#393939',
-  bgColorLightest: '#4f4f4f',
-  bgColorDark: '#000000',
-  bgColorDarker: '#000000',
-  bgColorDarkest: '#000000',
 
+  bgColor: {
+    main: '#3C3E42',
+    light: '#232323',
+    lighter: '#393939',
+    lightest: '#4f4f4f',
+    dark: '#000000',
+    darker: '#000000',
+    darkest: '#000000',
+  },
+  
   primary: '#00b4d8',
   primaryLight: '#90e0ef',
   primaryLighter: '#caf0f8',
@@ -25,10 +28,7 @@ const geoViewColors: IGeoViewColors = {
   primaryDarker: '#0077a8',
   primaryDarkest: '#005082',
 
-  textColor: '#ffffff',
-  textColorLight: '#d8d8d8',
-  textColorLighter: '#bdbdbd',
-  textColorLightest: '#393939',
+  textColor: new GeoViewWCAGColor('#ffffff'),
 
   subtleText: '#d8d8d8',
   layersRoundButtonsBg: '#393939',
