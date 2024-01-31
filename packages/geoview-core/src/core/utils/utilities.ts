@@ -19,6 +19,7 @@ import { Cast, TypeJsonArray, TypeJsonObject, TypeJsonValue, TypeMapFeaturesConf
 import { SnackbarType, snackbarMessagePayload } from '@/api/events/payloads';
 import { NotificationType } from '@/core/components/notifications/notifications';
 import { Config } from '@/core/utils/config/config';
+import { logger } from '@/core/utils/logger';
 
 /**
  * Get the string associated to the current display language for localized object type.
@@ -184,7 +185,9 @@ export function showError(mapId: string, message: string, withNotification = tru
  * @returns {string} message with values replaced
  */
 export function getLocalizedMessage(mapId: string, localizedKey: string): string {
-  const trans = i18n.getFixedT(api.maps[mapId].getDisplayLanguage());
+  // when called from a failed map, there is no map to take the display language for.... default to en
+  const lang = api.maps[mapId] !== undefined ? api.maps[mapId].getDisplayLanguage() : 'en';
+  const trans = i18n.getFixedT(lang);
   return trans(localizedKey);
 }
 
@@ -230,10 +233,13 @@ export function isJsonString(str: string): boolean {
       return false;
     }
   } catch (e) {
-    console.log('- Invalid JSON string. String passed to the JSON parser:');
-    console.log(str);
-    console.log('- JSON Parser error:', (e as { message: string }).message);
-    console.log('- See text above.');
+    logger.logError(
+      '- Invalid JSON string. String passed to the JSON parser:',
+      str,
+      '- JSON Parser error:',
+      (e as { message: string }).message,
+      '- See text above.'
+    );
     return false;
   }
   return true;
@@ -634,3 +640,12 @@ export const delay = (ms: number): Promise<void> => {
     setTimeout(resolve, ms);
   });
 };
+
+/**
+ * Excape special characters from string
+ * @param {string} text text to escape
+ * @returns {string} espaced string
+ */
+export function escapeRegExp(text: string): string {
+  return text.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&');
+}
