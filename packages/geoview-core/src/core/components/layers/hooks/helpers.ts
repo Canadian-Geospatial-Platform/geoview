@@ -12,7 +12,7 @@ export function useLegendHelpers() {
   const { mapId } = store.getState();
 
   function populateLegendStoreWithFakeData() {
-    const legendInfo = api.getLegendsLayerSet(mapId).resultSets;
+    const legendInfo = api.getLegendsLayerSet(mapId).resultsSet;
     // console.log('I got here ', legendInfo, _.keys(legendInfo));
     const keys = _.keys(legendInfo);
 

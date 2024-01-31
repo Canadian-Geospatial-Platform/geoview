@@ -16,6 +16,7 @@ import { LegendsLayerSet } from '@/geo/utils/legends-layer-set';
 import { GeoViewLayerPayload, payloadIsTestGeoViewLayers } from './events/payloads/geoview-layer-payload';
 import { initMapDivFromFunctionCall } from '@/app';
 import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
+import { logger } from '@/core/utils/logger';
 
 /**
  * Class used to handle api calls (events, functions etc...)
@@ -140,7 +141,8 @@ export class API {
           activeEl?.closest('.geoview-shell') !== null ? activeEl?.closest('.geoview-shell')!.getAttribute('id')?.split('-')[1] : undefined;
 
         if (mapId !== undefined) {
-          const mapFocus = activeEl?.getAttribute('id') === `map-${mapId}`;
+          const mapFocus = activeEl?.getAttribute('id') === `mapbox-${mapId}`;
+          logger.logInfo(`Map ${mapId} focus and crosshair is enabled`, [mapFocus]);
           AppEventProcessor.setAppIsCrosshairActive(mapId, mapFocus);
         }
       }

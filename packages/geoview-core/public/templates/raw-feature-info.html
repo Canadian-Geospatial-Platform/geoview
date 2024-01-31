@@ -211,13 +211,13 @@
 
         const getEventListenerFunctions = (clickFlag) => {
           if (clickFlag.endsWith('click-text')) {
-            return [cgpv.api.getFeatureInfoLayerSet('mapWM1').isClickListenerdisabled,
+            return [cgpv.api.getFeatureInfoLayerSet('mapWM1').isClickListenerEnabled,
               cgpv.api.getFeatureInfoLayerSet('mapWM1').disableClickListener,
               cgpv.api.getFeatureInfoLayerSet('mapWM1').enableClickListener,
               cgpv.api.getFeatureInfoLayerSet('mapWM1')
             ];
           } else {
-            return [cgpv.api.getFeatureInfoLayerSet('mapWM1').isHoverListenerdisabled,
+            return [cgpv.api.getFeatureInfoLayerSet('mapWM1').isHoverListenerEnabled,
               cgpv.api.getFeatureInfoLayerSet('mapWM1').disableHoverListener,
               cgpv.api.getFeatureInfoLayerSet('mapWM1').enableHoverListener,
               cgpv.api.getFeatureInfoLayerSet('mapWM1')
@@ -226,9 +226,9 @@
         }
 
         const configureTableRow = (setClickListener, textCellId, text, disableId, enableId, layerPath) => {
-          const [isEventListenerdisabled, disableEventListener, enableEventListener, layerSet] = getEventListenerFunctions(textCellId);
+          const [isEventListenerEnabled, disableEventListener, enableEventListener, layerSet] = getEventListenerFunctions(textCellId);
           const textCell = document.getElementById(textCellId);
-          const layerFlagDisabled = isEventListenerdisabled.call(layerSet, layerPath);
+          const layerFlagDisabled = !isEventListenerEnabled.call(layerSet, layerPath);
           const disableButton = document.getElementById(disableId);          const enableButton = document.getElementById(enableId);
           if (setClickListener) {
             disableButton.addEventListener('click', (e) => {

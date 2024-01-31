@@ -26,19 +26,6 @@
         "listOfLayerEntryConfig": [{ "layerId": "0" }]
       },
       {
-        "geoviewLayerId": "esriDynamicLYR2",
-        "geoviewLayerName": {
-          "en": "Energy",
-          "fr": "Energy"
-        },
-        "metadataAccessPath": {
-          "en": "https://maps-cartes.ec.gc.ca/arcgis/rest/services/CESI/MapServer",
-          "fr": "https://maps-cartes.ec.gc.ca/arcgis/rest/services/CESI/MapServer"
-        },
-        "geoviewLayerType": "esriDynamic",
-        "listOfLayerEntryConfig": [{ "layerId": "0" }, { "layerId": "6" }]
-      },
-      {
         "geoviewLayerId": "geojsonLYR4",
         "geoviewLayerName": {
           "en": "GeoJSON Line",

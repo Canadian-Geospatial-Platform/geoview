@@ -41,8 +41,8 @@
           </tr>
           <tr>
             <td>
-              <a href="#HLYR1">1. ESRI Image Layers</a><br />
-              <a href="#HLYR2">2. ESRI Image Layers - with footer panel</a><br />
+              <a href="#HMap1">1. ESRI Image Layers</a><br />
+              <a href="#HMap2">2. ESRI Image Layers - with footer panel</a><br />
             </td>
           </tr>
         </tbody>
@@ -162,6 +162,8 @@
       <h4 id="HMap2">2. ESRI Image Layers - with footer panel</h4>
       <a class="ref-link" href="#top">Top</a>
     </div>
+    <button class="collapsible active">Map Status Flags</button>
+    <pre id="HMap2-state" class="panel map-title-holder"></pre>
     <div
       id="Map2"
       class="geoview-map"
@@ -273,13 +275,17 @@
       cgpv.api.event.on(
         cgpv.api.eventNames.GET_LEGENDS.LEGENDS_LAYERSET_UPDATED,
         (payload) => {
-          const { resultSets } = payload;
-          displayLegend('LegendsId1', resultSets);
+          const { resultsSet } = payload;
+          displayLegend('LegendsId1', resultsSet);
         },
         'Map1/LegendsLayerSet'
       );
 
       listenToLegendLayerSetChanges('HMap1-state', 'Map1/LegendsLayerSet');
+
+      // LYR2 ===================================================================================================================
+      listenToLegendLayerSetChanges('HMap2-state', 'Map2/LegendsLayerSet');
+
       //create snippets
       createCodeSnippet();
       createConfigSnippet();
