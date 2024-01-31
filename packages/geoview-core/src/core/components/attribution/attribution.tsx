@@ -52,7 +52,7 @@ export function Attribution(): JSX.Element {
         tooltipPlacement="top"
         tooltip="mapctrl.attribution.tooltip"
         sx={{
-          color: theme.palette.geoViewColors.primary.light[300],
+          color: theme.palette.geoViewColor.primary.light[300],
           marginTop: expanded ? '12px' : '4px',
           [theme.breakpoints.up('md')]: {
             marginTop: expanded ? '23px' : 'none',

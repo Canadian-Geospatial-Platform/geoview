@@ -1,5 +1,5 @@
 import { geoViewColors } from './default';
-import { IGeoViewColors } from './geoView.interface';
+import { IGeoViewColors } from './types';
 
 export const geoCaThemeColors: IGeoViewColors = {
   ...geoViewColors,

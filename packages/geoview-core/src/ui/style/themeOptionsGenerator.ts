@@ -1,12 +1,12 @@
 import { ThemeOptions } from '@mui/material';
-import { IGeoViewColors } from './geoView.interface';
-import { font, geoViewText, headingStyles, opacity, geoViewColors as defaultGeoViewColors, defaultFontSize } from './default';
+import { IGeoViewColors } from './types';
+import { font, headingStyles, opacity, geoViewColors as defaultGeoViewColors, defaultFontSize, geoViewFontSizes } from './default';
 
 export const generateThemeOptions = function (geoViewColors: IGeoViewColors = defaultGeoViewColors): ThemeOptions {
   const themeOptions: ThemeOptions = {
     palette: {
-      geoViewColors,
-      geoViewText,
+      geoViewColor: geoViewColors,
+      geoViewFontSize: geoViewFontSizes,
       geoViewSpacingAndSizing: {},
       backdrop: '#3F3F3F50',
       common: {

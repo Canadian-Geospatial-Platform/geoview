@@ -32,8 +32,8 @@ export function HoverTooltip(): JSX.Element {
 
   const sxClasses = {
     tooltipItem: {
-      color: theme.palette.geoViewColors.bgColor.light[900],
-      background: theme.palette.geoViewColors.bgColor.dark[900],
+      color: theme.palette.geoViewColor.bgColor.light[900],
+      background: theme.palette.geoViewColor.bgColor.dark[900],
       opacity: 0.9,
       fontSize: '16px',
       padding: '3px 8px',
@@ -48,7 +48,7 @@ export function HoverTooltip(): JSX.Element {
     },
     tooltipText: {
       fontSize: '16px',
-      color: theme.palette.geoViewColors.bgColor.light[900],
+      color: theme.palette.geoViewColor.bgColor.light[900],
       textOverflow: 'ellipsis',
       whiteSpace: 'nowrap',
       overflow: 'hidden',

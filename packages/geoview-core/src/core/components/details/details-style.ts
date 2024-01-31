@@ -16,14 +16,14 @@ export const getSxClasses = (theme: Theme) => ({
     font: theme.footerPanel.titleFont,
   },
   rightPanelContainer: {
-    border: `2px solid ${theme.palette.geoViewColors.primary.main}`,
+    border: `2px solid ${theme.palette.geoViewColor.primary.main}`,
     borderRadius: '5px',
-    backgroundColor: theme.palette.geoViewColors.white,
+    backgroundColor: theme.palette.geoViewColor.white,
   },
   rightPanelBtnHolder: {
     marginTop: '20px',
     marginBottom: '9px',
-    boxShadow: `0px 12px 9px -13px ${theme.palette.geoViewColors.bgColor.dark[200]}`,
+    boxShadow: `0px 12px 9px -13px ${theme.palette.geoViewColor.bgColor.dark[200]}`,
   },
   featureInfoListContainer: {
     paddingLeft: '25px',
@@ -36,17 +36,17 @@ export const getSxClasses = (theme: Theme) => ({
     padding: 3,
     borderRadius: 0,
     border: '1px solid',
-    borderColor: theme.palette.geoViewColors.grey.dark[100],
+    borderColor: theme.palette.geoViewColor.grey.dark[100],
     boxShadow: theme.footerPanel.boxShadow,
-    background: theme.palette.geoViewColors.white,
+    background: theme.palette.geoViewColor.white,
     objectFit: 'scale-down',
     width: '35px',
     height: '35px',
   },
   selectFeatureCheckbox: {
-    color: theme.palette.geoViewColors.primary.main,
+    color: theme.palette.geoViewColor.primary.main,
     '&.Mui-checked': {
-      color: theme.palette.geoViewColors.primary.main,
+      color: theme.palette.geoViewColor.primary.main,
     },
   },
   featureInfoItemValue: {

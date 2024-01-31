@@ -136,7 +136,7 @@ export function Datapanel({ layerData, mapId, language }: DatapanelProps) {
             layerFeatures: getFeaturesOfLayer(layer.layerKey, index),
             tooltip: getLayerTooltip(layer.layerName![language] ?? '', layer.layerKey, index),
             mapFilteredIcon: isMapFilteredSelectedForLayer(layer.layerKey) && (
-              <FilterAltIcon sx={{ color: theme.palette.geoViewColors.grey.main }} />
+              <FilterAltIcon sx={{ color: theme.palette.geoViewColor.grey.main }} />
             ),
           }))}
           isEnlargeDataTable={isEnlargeDataTable}

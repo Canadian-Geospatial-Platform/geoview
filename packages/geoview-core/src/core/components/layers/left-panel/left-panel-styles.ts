@@ -18,7 +18,7 @@ export const getSxClasses = (theme: Theme) => ({
     },
 
     '& .layerItemContainer': {
-      background: `${theme.palette.geoViewColors.bgColor.light[600]} 0% 0% no-repeat padding-box`,
+      background: `${theme.palette.geoViewColor.bgColor.light[600]} 0% 0% no-repeat padding-box`,
       borderRadius: '5px',
       marginBottom: '1rem',
 
@@ -28,13 +28,13 @@ export const getSxClasses = (theme: Theme) => ({
 
       // for selected layer
       '&.selectedLayer': {
-        borderColor: theme.palette.geoViewColors.primary.main,
+        borderColor: theme.palette.geoViewColor.primary.main,
         borderWidth: '2px',
         borderStyle: 'solid',
       },
 
       '&.dragging': {
-        backgroundcolor: theme.palette.geoViewColors.primary.dark[600],
+        backgroundcolor: theme.palette.geoViewColor.primary.dark[600],
         cursor: 'grab',
         userSelect: 'none',
       },
@@ -48,7 +48,7 @@ export const getSxClasses = (theme: Theme) => ({
         },
       },
       '&.loading': {
-        background: theme.palette.geoViewColors.info.light[600],
+        background: theme.palette.geoViewColor.info.light[600],
         '& .MuiListItemText-secondary': {
           fontWeight: 'bold',
           color: 'info.main',
@@ -63,8 +63,8 @@ export const getSxClasses = (theme: Theme) => ({
         alignItems: 'center',
 
         '& .MuiIconButton-root': {
-          color: `${theme.palette.geoViewColors.primary.main} !important`,
-          background: `${theme.palette.geoViewColors.bgColor.dark[100]} !important`,
+          color: `${theme.palette.geoViewColor.primary.main} !important`,
+          background: `${theme.palette.geoViewColor.bgColor.dark[100]} !important`,
           margin: '0px 5px',
         },
       },

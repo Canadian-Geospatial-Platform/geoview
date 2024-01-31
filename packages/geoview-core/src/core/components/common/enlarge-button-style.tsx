@@ -5,27 +5,27 @@ export const getSxClasses = (theme: Theme) => ({
     width: '7rem !important',
     height: '2.5rem !important',
     borderRadius: '1.5rem',
-    boxShadow: `0px 3px 6px ${theme.palette.geoViewColors.bgColor.dark[600]}`,
+    boxShadow: `0px 3px 6px ${theme.palette.geoViewColor.bgColor.dark[600]}`,
     marginTop: '0.25rem',
-    background: `${theme.palette.geoViewColors.primary.light[800]} !important`,
+    background: `${theme.palette.geoViewColor.primary.light[800]} !important`,
     '>div': {
-      color: `${theme.palette.geoViewColors.primary.main} !important`,
+      color: `${theme.palette.geoViewColor.primary.main} !important`,
     },
     '& svg': {
       marginRight: '0.25rem',
     },
     ':hover': {
-      backgroundColor: `${theme.palette.geoViewColors.primary.main} !important`,
+      backgroundColor: `${theme.palette.geoViewColor.primary.main} !important`,
       '> div': {
-        color: `${theme.palette.geoViewColors.white} !important`,
+        color: `${theme.palette.geoViewColor.white} !important`,
       },
       '& svg': {
-        color: `${theme.palette.geoViewColors.white} !important`,
+        color: `${theme.palette.geoViewColor.white} !important`,
       },
     },
     [theme.breakpoints.down('md')]: { display: 'none' },
   },
   enlargeBtnIcon: {
-    color: theme.palette.geoViewColors.primary.main,
+    color: theme.palette.geoViewColor.primary.main,
   },
 });

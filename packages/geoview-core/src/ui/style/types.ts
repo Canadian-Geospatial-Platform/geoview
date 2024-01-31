@@ -7,7 +7,7 @@ const ColorKeyValues = _.range(50, 1000, 50);
 type ColorKey = (typeof ColorKeyValues)[number];
 type ColorRecord = Record<ColorKey, string>;
 
-export class GeoViewWCAGColor {
+export class GeoViewColorClass {
   main: string;
 
   isInverse: boolean;
@@ -69,31 +69,26 @@ export class GeoViewWCAGColor {
 
 export interface IGeoViewColors {
   white: string;
-  buttonShadow: string;
 
-  overlayMapButtonBgColor: string;
-
-  crosshairBg: string;
-
-  bgColor: GeoViewWCAGColor;
-  textColor: GeoViewWCAGColor;
-  primary: GeoViewWCAGColor;
-  secondary: GeoViewWCAGColor;
-  success: GeoViewWCAGColor;
-  error: GeoViewWCAGColor;
-  info: GeoViewWCAGColor;
-  warning: GeoViewWCAGColor;
-  grey: GeoViewWCAGColor;
+  bgColor: GeoViewColorClass;
+  textColor: GeoViewColorClass;
+  primary: GeoViewColorClass;
+  secondary: GeoViewColorClass;
+  success: GeoViewColorClass;
+  error: GeoViewColorClass;
+  info: GeoViewColorClass;
+  warning: GeoViewColorClass;
+  grey: GeoViewColorClass;
 }
 
-export interface IGeoViewText {
-  xxxl: string;
+export interface IGeoViewFontSizes {
   xxl: string;
   xl: string;
   lg: string;
   md: string;
   sm: string;
   xs: string;
+  [key: string]: string;
 }
 
 export interface IGeoViewSpacingAndSizing {
