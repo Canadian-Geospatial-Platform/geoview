@@ -6,7 +6,11 @@ import { Grid, Tab as MaterialTab, Tabs as MaterialTabs, TabsProps, TabProps, Bo
 
 import { HtmlToReact } from '@/core/containers/html-to-react';
 import { TabPanel } from './tab-panel';
-import { useUIActiveTrapGeoView, useUIStoreActions } from '@/core/stores/store-interface-and-intial-values/ui-state';
+import {
+  useUIActiveFooterTabId,
+  useUIActiveTrapGeoView,
+  useUIStoreActions,
+} from '@/core/stores/store-interface-and-intial-values/ui-state';
 import { getSxClasses } from './tabs-style';
 import { logger } from '@/core/utils/logger';
 
@@ -56,6 +60,8 @@ export function Tabs(props: TypeTabsProps): JSX.Element {
   const tabPanelRefs = useRef([tabs[0]]);
   // get store values and actions
   const activeTrapGeoView = useUIActiveTrapGeoView();
+  const activeFooterTabId = useUIActiveFooterTabId();
+
   const { closeModal, openModal } = useUIStoreActions();
 
   /**
@@ -92,6 +98,22 @@ export function Tabs(props: TypeTabsProps): JSX.Element {
 
     if (selectedTab && value !== selectedTab) setValue(selectedTab);
   }, [selectedTab, value]);
+
+  useEffect(() => {
+    // Log
+    logger.logTraceUseEffect('TABS - Mouse Clicked On Map');
+    //  open details tab when clicked on layer on
+    if (activeFooterTabId === 'details') {
+      const idx = tabs.findIndex((tab) => tab.id === activeFooterTabId);
+      if (!tabPanelRefs.current[idx]) {
+        tabPanelRefs.current[idx] = tabs[idx];
+      }
+      setValue(idx);
+      // open tab panel if closed.
+      if (handleCollapse && isCollapsed) handleCollapse();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeFooterTabId]);
 
   return (
     <Grid container sx={{ width: '100%', height: '100%' }}>

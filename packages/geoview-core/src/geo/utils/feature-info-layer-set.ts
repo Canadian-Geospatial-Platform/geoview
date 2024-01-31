@@ -14,6 +14,7 @@ import { api, getLocalizedValue } from '@/app';
 import { LayerSet } from './layer-set';
 import { FeatureInfoEventProcessor } from '@/api/event-processors/event-processor-children/feature-info-event-processor';
 import { logger } from '@/core/utils/logger';
+import { getGeoViewStore } from '@/core/stores/stores-managers';
 
 /** ***************************************************************************************************************************
  * A class to hold a set of layers associated with an array of TypeArrayOfFeatureInfoEntries. When this class is instantiated,
@@ -59,6 +60,7 @@ export class FeatureInfoLayerSet {
    */
   private constructor(mapId: string) {
     // This function determines whether a layer can be registered.
+    const store = getGeoViewStore(mapId);
     const registrationConditionFunction = (layerPath: string): boolean => {
       // Log
       logger.logTraceCore('FeatureInfoLayerSet registration condition...', layerPath, Object.keys(this.resultSets));
@@ -128,6 +130,7 @@ export class FeatureInfoLayerSet {
               'click'
             )
           );
+          store.getState().uiState.actions.setActiveFooterTab('details');
         }
       },
       this.mapId
