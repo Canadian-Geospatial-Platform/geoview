@@ -22,8 +22,6 @@ export const darkThemeColors: IGeoViewColors = {
   bgColor: new GeoViewWCAGColor('#3C3E42', true),
   primary: new GeoViewWCAGColor('#515BA5'),
   textColor: new GeoViewWCAGColor('#ffffff'),
-
-  layersRoundButtonsBg: '#393939',
 };
 
 

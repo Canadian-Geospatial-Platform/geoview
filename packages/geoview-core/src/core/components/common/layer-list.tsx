@@ -67,7 +67,7 @@ const LayerListItem = memo(function LayerListItem({ isSelected, layer, handleLis
                   disabled
                   edge="end"
                   size="small"
-                  sx={{ color: `${theme.palette.geoViewColors.primary} !important`, background: `${theme.palette.grey.A100} !important` }}
+                  sx={{ color: `${theme.palette.geoViewColors.primary.main} !important`, background: `${theme.palette.grey.A100} !important` }}
                 >
                   <ChevronRightIcon />
                 </IconButton>

@@ -48,7 +48,7 @@ export default function Version(): JSX.Element {
     m: 7,
     '& a': {
       color: (theme: Theme) =>
-        theme.palette.mode === 'light' ? theme.palette.secondary.contrastText : theme.palette.geoViewColors.primary.light,
+        theme.palette.mode === 'light' ? theme.palette.secondary.contrastText : theme.palette.geoViewColors.primary.light[300],
       textDecoration: 'underLine',
     },
   };

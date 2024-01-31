@@ -181,7 +181,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
           <IconButton
             id="table-details"
             tooltip="legend.tableDetails"
-            sx={{ backgroundColor: theme.palette.geoViewColors.layersRoundButtonsBg }}
+            sx={{ backgroundColor: theme.palette.geoViewColors.bgColor.dark[100] }}
             onClick={handleOpenTable}
           >
             <TableViewIcon />
@@ -189,7 +189,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
         )}
         <IconButton
           tooltip="legend.refreshLayer"
-          sx={{ backgroundColor: theme.palette.geoViewColors.layersRoundButtonsBg }}
+          sx={{ backgroundColor: theme.palette.geoViewColors.bgColor.dark[100] }}
           onClick={handleRefreshLayer}
         >
           <RestartAltIcon />
@@ -198,7 +198,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
           tooltip="legend.highlightLayer"
           sx={{
             backgroundColor:
-              layerDetails.layerPath !== highlightedLayer ? theme.palette.geoViewColors.layersRoundButtonsBg : theme.palette.action.active,
+              layerDetails.layerPath !== highlightedLayer ? theme.palette.geoViewColors.bgColor.dark[100] : theme.palette.action.active,
           }}
           onClick={handleHighlightLayer}
         >
@@ -207,7 +207,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
         <IconButton
           tooltip="legend.zoomTo"
           onClick={handleZoomTo}
-          sx={{ backgroundColor: theme.palette.geoViewColors.layersRoundButtonsBg }}
+          sx={{ backgroundColor: theme.palette.geoViewColors.bgColor.dark[100] }}
           disabled={layerDetails.bounds === undefined}
         >
           <ZoomInSearchIcon />
@@ -243,7 +243,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
             layerDetails.layerAttribution!.map((attribution) => {
               return (
                 <Typography
-                  sx={{ marginTop: '10px', color: theme.palette.geoViewColors.textColor.light, fontSize: theme.palette.geoViewText.sm }}
+                  sx={{ marginTop: '10px', color: theme.palette.geoViewColors.textColor.light[300], fontSize: theme.palette.geoViewText.sm }}
                   key={generateId()}
                 >
                   {attribution.indexOf('©') === -1 ? `© ${attribution}` : attribution}

@@ -1,23 +1,18 @@
 // Can populate using https://www.htmlcsscolor.com/hex/F1F2F5
 /* eslint-disable no-underscore-dangle */
 import { darken, lighten, alpha } from '@mui/material';
+import _ from 'lodash';
+
+const ColorKeyValues = _.range(50, 1000, 50);
+type ColorKey = typeof ColorKeyValues[number];
+type ColorRecord = Record<ColorKey, string>;
 
 export class GeoViewWCAGColor {
   main: string;
 
-  light: string;
-
-  lighter: string;
-
-  lightest: string;
-
-  dark: string;
-
-  darker: string;
-
-  darkest: string;
-
   isInverse: boolean;
+  dark: Record<ColorKey, string> = {};
+  light: Record<ColorKey, string> = {};
 
   constructor(mainColor: string, isInverse = false) {
     if (!this.isValidColor(mainColor)) {
@@ -25,13 +20,12 @@ export class GeoViewWCAGColor {
     }
     this.main = mainColor;
     this.isInverse = isInverse;
+    
+    ColorKeyValues.forEach((i) => {
+      this.dark[i] = this.darken(i/1000);
+      this.light[i] = this.lighten(i/1000);
+    });
 
-    this.light = this._light();
-    this.lighter = this._lighter();
-    this.lightest = this._lightest();
-    this.dark = this._dark();
-    this.darker = this._darker();
-    this.darkest = this._darkest();
   }
 
   private isValidColor(color: string): boolean {
@@ -45,60 +39,14 @@ export class GeoViewWCAGColor {
     return alpha(this.main, opacity);
   }
 
-  _light(opacity = 1): string {
-    if(this.isInverse) {
-      return alpha(darken(this.main, 0.3), opacity);
-    }
-    return alpha(lighten(this.main, 0.3), opacity);
-  }
-
-  _lighter(opacity = 1): string {
-    if(this.isInverse) {
-      return alpha(darken(this.main, 0.6), opacity);
-    }
-    return alpha(lighten(this.main, 0.6), opacity);
-  }
-
-  // returns color that is 70% lighter than the main color
-  _lightest(opacity = 1): string {
-    if(this.isInverse) {
-      return alpha(darken(this.main, 0.9), opacity);
-    }
-    return alpha(lighten(this.main, 0.9), opacity);
-  }
-
-  _lighten(coefficient: number, opacity = 1): string {
+  lighten(coefficient: number, opacity = 1): string {
     if(this.isInverse) {
       return alpha(darken(this.main, coefficient), opacity);
     }
     return alpha(lighten(this.main, coefficient), opacity);
   }
 
-  // returns color that is 20% darker than the main color
-  _dark(opacity = 1): string {
-    if(this.isInverse) {
-      return alpha(lighten(this.main, 0.2), opacity);
-    }
-    return alpha(darken(this.main, 0.2), opacity);
-  }
-
-  // returns color that is 40% darker than the main color
-  _darker(opacity = 1): string {
-    if(this.isInverse) {
-      return alpha(lighten(this.main, 0.4), opacity);
-    }
-    return alpha(darken(this.main, 0.4), opacity);
-  }
-
-  // returns color that is 70% darker than the main color
-  _darkest(opacity = 1): string {
-    if(this.isInverse) {
-      return alpha(lighten(this.main, 0.7), opacity);
-    }
-    return alpha(darken(this.main, 0.7), opacity);
-  }
-
-  _darken(coefficient: number, opacity = 1): string {
+  darken(coefficient: number, opacity = 1): string {
     if(this.isInverse) {
       return alpha(lighten(this.main, coefficient), opacity);
     }
@@ -121,9 +69,6 @@ export class GeoViewWCAGColor {
 export interface IGeoViewColors {
   white: string;
   buttonShadow: string;
-  enlargeBtnBg: string;
-
-  layersRoundButtonsBg: string; // buttons on the right side of the layer details item
 
   overlayMapButtonBgColor: string;
 

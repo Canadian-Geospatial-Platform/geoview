@@ -6,9 +6,7 @@ export const lightThemeColors: IGeoViewColors = {
 
   bgColor: new GeoViewWCAGColor('#3C3E42', true),
   primary: new GeoViewWCAGColor('#000000'),
-  textColor: new GeoViewWCAGColor('#000000'),
-
-  layersRoundButtonsBg: '#393939',
+  textColor: new GeoViewWCAGColor('#000000')
 };
 
 

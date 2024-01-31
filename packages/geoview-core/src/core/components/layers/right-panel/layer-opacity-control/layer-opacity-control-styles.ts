@@ -12,8 +12,8 @@ export const getSxClasses = (theme: Theme) => ({
       width: '9px',
       height: '9px',
       opacity: 1,
-      backgroundColor: 'geoViewColors.primary.lighter',
-      border: `2px solid ${theme.palette.geoViewColors.primary}`,
+      backgroundColor: 'geoViewColors.primary.light[600]',
+      border: `2px solid ${theme.palette.geoViewColors.primary.main}`,
       borderRadius: '50%',
     },
     '& .MuiSlider-markLabel': {

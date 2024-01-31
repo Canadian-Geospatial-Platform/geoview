@@ -5,17 +5,17 @@ export const getSxClasses = (theme: Theme) => ({
     width: '7rem !important',
     height: '2.5rem !important',
     borderRadius: '1.5rem',
-    boxShadow: `0px 3px 6px ${theme.palette.geoViewColors.bgColor.darker}`,
+    boxShadow: `0px 3px 6px ${theme.palette.geoViewColors.bgColor.dark[600]}`,
     marginTop: '0.25rem',
-    background: `${theme.palette.geoViewColors.enlargeBtnBg} !important`,
+    background: `${theme.palette.geoViewColors.primary.light[200]} !important`,
     '>div': {
-      color: `${theme.palette.geoViewColors.primary} !important`,
+      color: `${theme.palette.geoViewColors.primary.main} !important`,
     },
     '& svg': {
       marginRight: '0.25rem',
     },
     ':hover': {
-      backgroundColor: `${theme.palette.geoViewColors.primary} !important`,
+      backgroundColor: `${theme.palette.geoViewColors.primary.main} !important`,
       '> div': {
         color: `${theme.palette.common.white} !important`,
       },

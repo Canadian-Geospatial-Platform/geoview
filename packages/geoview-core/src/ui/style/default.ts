@@ -21,8 +21,6 @@ export const geoViewColors: IGeoViewColors = {
   crosshairBg: 'rgba(228, 227, 227, 0.9)',
 
   buttonShadow: '#e0e0e0',
-  enlargeBtnBg: '#F4F5FF',
-  layersRoundButtonsBg: '#F6F6F6',
 
   overlayMapButtonBgColor: '#CCCCCC',
 

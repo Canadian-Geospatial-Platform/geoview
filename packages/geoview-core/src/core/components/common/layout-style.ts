@@ -58,14 +58,14 @@ export const getSxClasses = (theme: Theme) => ({
     },
   },
   rightPanelContainer: {
-    border: `2px solid ${theme.palette.geoViewColors.primary}`,
+    border: `2px solid ${theme.palette.geoViewColors.primary.main}`,
     borderRadius: '5px',
     backgroundColor: theme.palette.common.white,
   },
   rightPanelBtnHolder: {
     marginTop: '20px',
     marginBottom: '9px',
-    boxShadow: `0px 12px 9px -13px ${theme.palette.geoViewColors.bgColor.dark}`,
+    boxShadow: `0px 12px 9px -13px ${theme.palette.geoViewColors.bgColor.dark[200]}`,
   },
   gridContainer: { paddingLeft: '1rem', paddingRight: '1rem' },
   listPrimaryText: {
