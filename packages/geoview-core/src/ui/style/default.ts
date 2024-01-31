@@ -34,6 +34,7 @@ export const geoViewColors: IGeoViewColors = {
   error: new GeoViewWCAGColor('#d32f2f'),
   warning: new GeoViewWCAGColor('#ed6c02'),
   info: new GeoViewWCAGColor('#2e7d32'),
+  grey: new GeoViewWCAGColor('#9e9e9e'),
 };
 
 export const geoViewText: IGeoViewText = {

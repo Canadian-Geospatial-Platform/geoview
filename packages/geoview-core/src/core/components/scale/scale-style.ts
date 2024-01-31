@@ -11,7 +11,7 @@ export const getSxClasses = (theme: Theme) => ({
     height: '100%',
     ':hover': {
       backgroundColor: 'transparent',
-      color: theme.palette.common.white,
+      color: theme.palette.geoViewColors.white,
     },
   },
   scaleExpandedContainer: {

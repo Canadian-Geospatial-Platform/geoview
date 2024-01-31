@@ -60,7 +60,7 @@ export const getSxClasses = (theme: Theme) => ({
   rightPanelContainer: {
     border: `2px solid ${theme.palette.geoViewColors.primary.main}`,
     borderRadius: '5px',
-    backgroundColor: theme.palette.common.white,
+    backgroundColor: theme.palette.geoViewColors.white,
   },
   rightPanelBtnHolder: {
     marginTop: '20px',

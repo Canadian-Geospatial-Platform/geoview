@@ -34,7 +34,7 @@ export const getSxClasses = (theme: Theme) => ({
       },
 
       '&.dragging': {
-        backgroundcolor: 'geoViewColors.primary.dark[600]',
+        backgroundcolor: theme.palette.geoViewColors.primary.dark[600],
         cursor: 'grab',
         userSelect: 'none',
       },
@@ -48,7 +48,7 @@ export const getSxClasses = (theme: Theme) => ({
         },
       },
       '&.loading': {
-        background: 'geoViewColors.info.light[600]',
+        background: theme.palette.geoViewColors.info.light[600],
         '& .MuiListItemText-secondary': {
           fontWeight: 'bold',
           color: 'info.main',

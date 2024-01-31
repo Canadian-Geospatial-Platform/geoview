@@ -7,15 +7,15 @@ export const getSxClasses = (theme: Theme) => ({
     padding: 3,
     borderRadius: 0,
     border: '1px solid',
-    borderColor: theme.palette.grey[600],
+    borderColor: theme.palette.geoViewColors.grey.dark[100],
     boxShadow: theme.footerPanel.boxShadow,
-    background: theme.palette.common.white,
+    background: theme.palette.geoViewColors.white,
     objectFit: 'scale-down',
     width: '35px',
     height: '35px',
   },
   selectedRows: {
-    backgroundColor: theme.palette.common.white,
+    backgroundColor: theme.palette.geoViewColors.white,
     transition: 'box-shadow 300ms cubic-bezier(0.4, 0, 0.2, 1) 0ms',
     fontWeight: 400,
     fontSize: '0.875rem',
@@ -49,7 +49,7 @@ export const getSxClasses = (theme: Theme) => ({
       },
     },
     '& .MuiTouchRipple-root': {
-      color: theme.palette.grey['900'],
+      color: theme.palette.geoViewColors.grey.dark[900],
     },
   },
   tableHeadCell: {

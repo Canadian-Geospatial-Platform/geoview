@@ -17,10 +17,10 @@ export const getSxClasses = (theme: Theme) => ({
     ':hover': {
       backgroundColor: `${theme.palette.geoViewColors.primary.main} !important`,
       '> div': {
-        color: `${theme.palette.common.white} !important`,
+        color: `${theme.palette.geoViewColors.white} !important`,
       },
       '& svg': {
-        color: `${theme.palette.common.white} !important`,
+        color: `${theme.palette.geoViewColors.white} !important`,
       },
     },
     [theme.breakpoints.down('md')]: { display: 'none' },

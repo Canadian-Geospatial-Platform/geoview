@@ -83,6 +83,7 @@ export interface IGeoViewColors {
   error: GeoViewWCAGColor;
   info: GeoViewWCAGColor;
   warning: GeoViewWCAGColor;
+  grey: GeoViewWCAGColor;
 }
 
 export interface IGeoViewText {

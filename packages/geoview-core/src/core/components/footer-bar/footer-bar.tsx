@@ -9,7 +9,7 @@ import { Scale } from '@/core/components/scale/scale';
 import { FooterbarExpandButton } from './footer-bar-expand-button';
 import { FooterbarRotationButton } from './footer-bar-rotation-button';
 import { FooterbarFixNorthSwitch } from './footer-bar-fixnorth-switch';
-import { sxClassesFooterBar } from './footer-bar-style';
+import { getSxClasses } from './footer-bar-style';
 import { useMapInteraction } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { useUIFooterBarExpanded } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import { useGeoViewMapId } from '@/app';
@@ -27,6 +27,7 @@ export function Footerbar(): JSX.Element {
   const mapId = useGeoViewMapId();
 
   const theme = useTheme();
+  const sxClasses = getSxClasses(theme);
 
   // internal state
   const footerBarRef = useRef<HTMLDivElement>();
@@ -39,7 +40,7 @@ export function Footerbar(): JSX.Element {
   const interaction = useMapInteraction();
 
   return (
-    <Box id={`${mapId}-footerBar`} sx={sxClassesFooterBar.footerBarContainer} ref={footerBarRef as MutableRefObject<HTMLDivElement>}>
+    <Box id={`${mapId}-footerBar`} sx={sxClasses.footerBarContainer} ref={footerBarRef as MutableRefObject<HTMLDivElement>}>
       <FooterbarExpandButton />
       <Grid container justifyContent="space-between">
         <Grid item md={1}>
@@ -57,7 +58,7 @@ export function Footerbar(): JSX.Element {
             }}
           >
             <Grid item md={10}>
-              <Box id="mouseAndScaleControls" sx={sxClassesFooterBar.mouseScaleControlsContainer}>
+              <Box id="mouseAndScaleControls" sx={sxClasses.mouseScaleControlsContainer}>
                 {interaction === 'dynamic' && <MousePosition />}
                 <Scale />
               </Box>
@@ -66,7 +67,7 @@ export function Footerbar(): JSX.Element {
               <Grid item md={2}>
                 <Box
                   sx={{
-                    ...sxClassesFooterBar.rotationControlsContainer,
+                    ...sxClasses.rotationControlsContainer,
                     marginTop: !expanded ? '5px' : '10px',
                     [theme.breakpoints.down('md')]: {
                       marginTop: expanded ? '10px' : 'none',
