@@ -2,8 +2,7 @@ import { ThemeOptions } from '@mui/material';
 import { IGeoViewColors } from './geoView.interface';
 import { font, geoViewText, headingStyles, opacity, geoViewColors as defaultGeoViewColors, defaultFontSize } from './default';
 
-export const generateThemeOptions = function(geoViewColors: IGeoViewColors = defaultGeoViewColors): ThemeOptions {
-
+export const generateThemeOptions = function (geoViewColors: IGeoViewColors = defaultGeoViewColors): ThemeOptions {
   const themeOptions: ThemeOptions = {
     palette: {
       geoViewColors,
@@ -18,37 +17,37 @@ export const generateThemeOptions = function(geoViewColors: IGeoViewColors = def
         main: geoViewColors.primary.main,
         light: geoViewColors.primary.light[600],
         dark: geoViewColors.primary.dark[200],
-        contrastText: geoViewColors.primary._contrastText(),
+        contrastText: geoViewColors.primary.contrastText(),
       },
       secondary: {
         main: geoViewColors.primary.main,
         light: geoViewColors.primary.light[600],
         dark: geoViewColors.primary.dark[300],
-        contrastText: geoViewColors.primary._contrastText(),
+        contrastText: geoViewColors.primary.contrastText(),
       },
       error: {
         main: geoViewColors.error.main,
         light: geoViewColors.error.light[600],
         dark: geoViewColors.error.dark[300],
-        contrastText: geoViewColors.error._contrastText(),
+        contrastText: geoViewColors.error.contrastText(),
       },
       warning: {
         main: geoViewColors.warning.main,
         light: geoViewColors.warning.light[600],
         dark: geoViewColors.warning.dark[300],
-        contrastText: geoViewColors.warning._contrastText(),
+        contrastText: geoViewColors.warning.contrastText(),
       },
       info: {
         main: geoViewColors.info.main,
         light: geoViewColors.info.light[600],
         dark: geoViewColors.info.dark[300],
-        contrastText: geoViewColors.info._contrastText(),
+        contrastText: geoViewColors.info.contrastText(),
       },
       success: {
         main: geoViewColors.success.main,
         light: geoViewColors.success.light[600],
         dark: geoViewColors.success.dark[300],
-        contrastText: geoViewColors.success._contrastText(),
+        contrastText: geoViewColors.success.contrastText(),
       },
       grey: {
         '50': '#fafafa',
@@ -77,7 +76,7 @@ export const generateThemeOptions = function(geoViewColors: IGeoViewColors = def
       background: {
         paper: geoViewColors.bgColor.light[600],
         default: '#fff',
-       // grey: '#eeeeee',
+        // grey: '#eeeeee',
       },
       action: {
         active: 'rgba(81,91,165, 0.94)',
@@ -99,8 +98,7 @@ export const generateThemeOptions = function(geoViewColors: IGeoViewColors = def
       },
     },
 
-
-    //start of other options
+    // start of other options
     typography: {
       fontSize: defaultFontSize,
       htmlFontSize: 16,
@@ -317,5 +315,4 @@ export const generateThemeOptions = function(geoViewColors: IGeoViewColors = def
   };
 
   return themeOptions;
-
 };

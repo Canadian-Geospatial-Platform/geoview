@@ -3,16 +3,17 @@
 import { darken, lighten, alpha } from '@mui/material';
 import _ from 'lodash';
 
-const ColorKeyValues = _.range(50, 1000, 50); 
-// [50, 100, 150, 200, 250, 300, 350, 400, 450, 500, 550, 600, 650, 700, 750, 800, 850, 900, 950, 1000] as const
-type ColorKey = typeof ColorKeyValues[number];
+const ColorKeyValues = _.range(50, 1000, 50);
+type ColorKey = (typeof ColorKeyValues)[number];
 type ColorRecord = Record<ColorKey, string>;
 
 export class GeoViewWCAGColor {
   main: string;
 
   isInverse: boolean;
+
   dark: ColorRecord = {};
+
   light: ColorRecord = {};
 
   constructor(mainColor: string, isInverse = false) {
@@ -21,12 +22,11 @@ export class GeoViewWCAGColor {
     }
     this.main = mainColor;
     this.isInverse = isInverse;
-    
-    ColorKeyValues.forEach((i) => {
-      this.dark[i] = this.darken(i/1000);
-      this.light[i] = this.lighten(i/1000);
-    });
 
+    ColorKeyValues.forEach((i) => {
+      this.dark[i] = this.darken(i / 1000);
+      this.light[i] = this.lighten(i / 1000);
+    });
   }
 
   private isValidColor(color: string): boolean {
@@ -41,21 +41,21 @@ export class GeoViewWCAGColor {
   }
 
   lighten(coefficient: number, opacity = 1): string {
-    if(this.isInverse) {
+    if (this.isInverse) {
       return alpha(darken(this.main, coefficient), opacity);
     }
     return alpha(lighten(this.main, coefficient), opacity);
   }
 
   darken(coefficient: number, opacity = 1): string {
-    if(this.isInverse) {
+    if (this.isInverse) {
       return alpha(lighten(this.main, coefficient), opacity);
     }
     return alpha(darken(this.main, coefficient), opacity);
   }
 
   // returns black or white color depending on the contrast ratio
-  _contrastText(): string {
+  contrastText(): string {
     const hex = this.main.slice(1); // removing the #
 
     const r = parseInt(hex.slice(0, 2), 16);
@@ -98,6 +98,3 @@ export interface IGeoViewText {
 export interface IGeoViewSpacingAndSizing {
   layersTitleHeight?: string;
 }
-
-
-

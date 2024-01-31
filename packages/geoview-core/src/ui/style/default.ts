@@ -26,24 +26,8 @@ export const geoViewColors: IGeoViewColors = {
 
   overlayMapButtonBgColor: '#CCCCCC',
 
-  /*bgColor: {
-    darkest: '#3E3F41',
-    darker: '#626365',
-    dark: '#9A9B9D',
-    main: '#F1F2F5',
-    light: '#FFFFFF',
-    lighter: '#FFFFFF',
-    lightest: '#FFFFFF',
-  },*/
-
   bgColor: new GeoViewWCAGColor('#F1F2F5'),
 
-  /* primaryLight: '#c8cde4',
-  primaryLighter: '#e0e3f1',
-  primaryLightest: '#f4f5ff',
-  primaryDark: '#2e2e6c',
-  primaryDarker: '#1c1c4c',
-  primaryDarkest: '#0f0f2e', */
   primary: new GeoViewWCAGColor('#515BA5'),
   secondary: new GeoViewWCAGColor('#1976d2'),
   textColor: new GeoViewWCAGColor('#393939'),
@@ -62,6 +46,3 @@ export const geoViewText: IGeoViewText = {
   sm: '12px',
   xs: '10px',
 };
-
-
-

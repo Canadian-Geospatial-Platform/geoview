@@ -25,7 +25,7 @@ export function IconButton(props: TypeIconButtonProps): JSX.Element {
     iconRef,
     size,
     disabled,
-    color
+    color,
   } = props;
 
   const { t } = useTranslation<string>();

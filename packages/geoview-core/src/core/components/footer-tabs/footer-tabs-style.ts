@@ -11,6 +11,6 @@ export const getSxClasses = (theme: Theme) => ({
 
     '&.MuiGrid-container': {
       background: theme.footerPanel.contentBg,
-    }
+    },
   },
 });

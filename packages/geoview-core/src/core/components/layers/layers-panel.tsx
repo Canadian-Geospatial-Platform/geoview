@@ -10,7 +10,6 @@ import { LayerDetails } from './right-panel/layer-details';
 import { LeftPanel } from './left-panel/left-panel';
 import { logger } from '@/core/utils/logger';
 
-
 export function LayersPanel() {
   // Log
   logger.logTraceRender('components/layers/layers-panel');
@@ -50,9 +49,7 @@ export function LayersPanel() {
 
   const rightPanel = () => {
     if (selectedLayer && displayState === 'view') {
-      return (
-        <LayerDetails layerDetails={selectedLayer} />
-      );
+      return <LayerDetails layerDetails={selectedLayer} />;
     }
     if (displayState === 'remove') {
       const markup = { __html: t('layers.removeLayerDescription') };
