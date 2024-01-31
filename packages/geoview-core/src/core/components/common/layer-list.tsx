@@ -100,7 +100,10 @@ export function LayerList({ layerList, isEnlargeDataTable, selectedLayerIndex, h
       {layerList.map((layer, index) => (
         <LayerListItem
           key={layer.layerPath}
-          isSelected={!!layer.numOffeatures && index === selectedLayerIndex}
+          // Reason:- (layer?.numOffeatures ?? 1) > 0
+          // Some of layers will not have numOfFeatures, so to make layer look like selected, we need to set default value to 1.
+          // Also we cant set numOfFeature initially, then it num of features will be display as sub title.
+          isSelected={(layer?.numOffeatures ?? 1) > 0 && index === selectedLayerIndex}
           layer={layer}
           handleListItemClick={handleListItemClick}
           isEnlargeDataTable={isEnlargeDataTable}
