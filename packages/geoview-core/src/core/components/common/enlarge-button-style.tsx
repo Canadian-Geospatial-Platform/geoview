@@ -7,7 +7,7 @@ export const getSxClasses = (theme: Theme) => ({
     borderRadius: '1.5rem',
     boxShadow: `0px 3px 6px ${theme.palette.geoViewColors.bgColor.dark[600]}`,
     marginTop: '0.25rem',
-    background: `${theme.palette.geoViewColors.primary.light[200]} !important`,
+    background: `${theme.palette.geoViewColors.primary.light[800]} !important`,
     '>div': {
       color: `${theme.palette.geoViewColors.primary.main} !important`,
     },

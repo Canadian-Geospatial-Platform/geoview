@@ -161,7 +161,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
       <List>
         {startLayer.children.map((layer) => (
           <Fragment key={layer.layerId}>
-            <ListItem sx={{ padding: '6px 0px', borderTop: '1px solid #ccc' }}>
+            <ListItem sx={{ padding: '6px 0px', borderTop: `1px solid ${theme.palette.geoViewColors.bgColor.dark[50]}` }}>
               <ListItemIcon>
                 <LayerIcon layer={layer} />
               </ListItemIcon>

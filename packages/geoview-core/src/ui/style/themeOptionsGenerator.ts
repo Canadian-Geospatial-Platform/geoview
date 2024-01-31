@@ -1,6 +1,6 @@
 import { ThemeOptions } from '@mui/material';
 import { IGeoViewColors } from './geoView.interface';
-import { font, geoViewText, headingStyles, opacity, geoViewColors as defaultGeoViewColors } from './default';
+import { font, geoViewText, headingStyles, opacity, geoViewColors as defaultGeoViewColors, defaultFontSize } from './default';
 
 export const generateThemeOptions = function(geoViewColors: IGeoViewColors = defaultGeoViewColors): ThemeOptions {
 
@@ -75,7 +75,7 @@ export const generateThemeOptions = function(geoViewColors: IGeoViewColors = def
       },
       divider: 'rgba(0, 0, 0, 0.12)',
       background: {
-        paper: '#fff',
+        paper: geoViewColors.bgColor.light[600],
         default: '#fff',
        // grey: '#eeeeee',
       },
@@ -102,7 +102,7 @@ export const generateThemeOptions = function(geoViewColors: IGeoViewColors = def
 
     //start of other options
     typography: {
-      fontSize: 16,
+      fontSize: defaultFontSize,
       htmlFontSize: 16,
       fontFamily: font,
       h1: headingStyles,
@@ -220,6 +220,26 @@ export const generateThemeOptions = function(geoViewColors: IGeoViewColors = def
       MuiListItemButton: {
         defaultProps: {
           disableTouchRipple: true,
+        },
+      },
+      MuiTabs: {
+        styleOverrides: {
+          root: {
+            backgroundColor: geoViewColors.bgColor.dark[100], // Background color for the Tabs component
+          },
+          indicator: {
+            backgroundColor: '#FF4081', // Background color for the selected tab indicator
+          },
+        },
+      },
+      MuiTab: {
+        styleOverrides: {
+          root: {
+            color: geoViewColors.textColor.light[100], // Text color for the tabs
+            '&.Mui-selected': {
+              color: `${geoViewColors.primary.light[200]} !important`, // Text color for the selected tab
+            },
+          },
         },
       },
     },

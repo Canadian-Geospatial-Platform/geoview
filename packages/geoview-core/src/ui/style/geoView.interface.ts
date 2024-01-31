@@ -3,7 +3,8 @@
 import { darken, lighten, alpha } from '@mui/material';
 import _ from 'lodash';
 
-const ColorKeyValues = _.range(50, 1000, 50);
+const ColorKeyValues = _.range(50, 1000, 50); 
+// [50, 100, 150, 200, 250, 300, 350, 400, 450, 500, 550, 600, 650, 700, 750, 800, 850, 900, 950, 1000] as const
 type ColorKey = typeof ColorKeyValues[number];
 type ColorRecord = Record<ColorKey, string>;
 
@@ -11,8 +12,8 @@ export class GeoViewWCAGColor {
   main: string;
 
   isInverse: boolean;
-  dark: Record<ColorKey, string> = {};
-  light: Record<ColorKey, string> = {};
+  dark: ColorRecord = {};
+  light: ColorRecord = {};
 
   constructor(mainColor: string, isInverse = false) {
     if (!this.isValidColor(mainColor)) {
@@ -97,3 +98,6 @@ export interface IGeoViewText {
 export interface IGeoViewSpacingAndSizing {
   layersTitleHeight?: string;
 }
+
+
+

@@ -3,6 +3,8 @@ import { GeoViewWCAGColor, IGeoViewColors, IGeoViewText } from './geoView.interf
 
 export const font = "'Roboto', 'Helvetica', 'Arial', sans-serif";
 
+export const defaultFontSize = 16;
+
 export const headingStyles = {
   fontFamily: font,
   fontWeight: 700,
@@ -60,3 +62,6 @@ export const geoViewText: IGeoViewText = {
   sm: '12px',
   xs: '10px',
 };
+
+
+

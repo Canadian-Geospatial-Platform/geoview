@@ -1,7 +1,6 @@
-import { useRef, useState } from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '@mui/material/styles';
-import { styled } from '@mui/material';
 import { CloseButton, ResponsiveGrid, useFooterPanelHeight } from '../common';
 import { Box, DeleteOutlineIcon, IconButton, Paper } from '@/ui';
 import { getSxClasses } from './layers-style';
@@ -11,12 +10,6 @@ import { LayerDetails } from './right-panel/layer-details';
 import { LeftPanel } from './left-panel/left-panel';
 import { logger } from '@/core/utils/logger';
 
-const Item = styled('div')(({ theme }) => ({
-  backgroundColor: theme.palette.mode === 'dark' ? '#262B32' : '#fff',
-  padding: theme.spacing(1),
-  textAlign: 'center',
-  borderRadius: 4,
-}));
 
 export function LayersPanel() {
   // Log
@@ -28,8 +21,6 @@ export function LayersPanel() {
   const sxClasses = getSxClasses(theme);
 
   const [isLayersListPanelVisible, setIsLayersListPanelVisible] = useState(false);
-
-  const layerDetailsRef = useRef<HTMLDivElement>(null);
 
   const selectedLayer = useSelectedLayer(); // get store value
   const displayState = useLayersDisplayState();
@@ -60,9 +51,7 @@ export function LayersPanel() {
   const rightPanel = () => {
     if (selectedLayer && displayState === 'view') {
       return (
-        <Item ref={layerDetailsRef}>
-          <LayerDetails layerDetails={selectedLayer} />
-        </Item>
+        <LayerDetails layerDetails={selectedLayer} />
       );
     }
     if (displayState === 'remove') {

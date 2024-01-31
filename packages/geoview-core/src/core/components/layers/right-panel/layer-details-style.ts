@@ -23,8 +23,8 @@ export const getSxClasses = (theme: Theme) => ({
     '& .MuiGrid-container': {
       '&:first-of-type': {
         fontWeight: 'bold',
-        borderTop: '1px solid #ccc',
-        borderBottom: '2px solid #ccc',
+        borderTop: `1px solid ${theme.palette.geoViewColors.bgColor.dark[300]}`,
+        borderBottom: `1px solid ${theme.palette.geoViewColors.bgColor.dark[300]}`,
       },
       '& .MuiGrid-item': {
         padding: '3px 6px',

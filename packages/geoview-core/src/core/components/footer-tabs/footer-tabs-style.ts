@@ -8,5 +8,9 @@ export const getSxClasses = (theme: Theme) => ({
     width: '100%',
     transition: 'height 0.2s ease-out',
     height: '55px',
+
+    '&.MuiGrid-container': {
+      background: theme.footerPanel.contentBg,
+    }
   },
 });
