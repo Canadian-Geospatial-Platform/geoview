@@ -1,4 +1,3 @@
-import { ThemeOptions } from '@mui/material';
 import { GeoViewWCAGColor, IGeoViewColors, IGeoViewText } from './geoView.interface';
 
 export const font = "'Roboto', 'Helvetica', 'Arial', sans-serif";
