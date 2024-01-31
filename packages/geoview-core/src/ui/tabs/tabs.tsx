@@ -1,4 +1,4 @@
-import { SyntheticEvent, ReactNode, useState, useEffect } from 'react';
+import { SyntheticEvent, ReactNode, useState, useEffect, useRef } from 'react';
 
 import { useTranslation } from 'react-i18next';
 
@@ -6,7 +6,11 @@ import { Grid, Tab as MaterialTab, Tabs as MaterialTabs, TabsProps, TabProps, Bo
 
 import { HtmlToReact } from '@/core/containers/html-to-react';
 import { TabPanel } from './tab-panel';
-import { useUIActiveTrapGeoView, useUIStoreActions } from '@/core/stores/store-interface-and-intial-values/ui-state';
+import {
+  useUIActiveFooterTabId,
+  useUIActiveTrapGeoView,
+  useUIStoreActions,
+} from '@/core/stores/store-interface-and-intial-values/ui-state';
 import { getSxClasses } from './tabs-style';
 import { logger } from '@/core/utils/logger';
 
@@ -52,9 +56,12 @@ export function Tabs(props: TypeTabsProps): JSX.Element {
   const sxClasses = getSxClasses();
   // internal state
   const [value, setValue] = useState(0);
-
+  // reference to display tab panels on demand.
+  const tabPanelRefs = useRef([tabs[0]]);
   // get store values and actions
   const activeTrapGeoView = useUIActiveTrapGeoView();
+  const activeFooterTabId = useUIActiveFooterTabId();
+
   const { closeModal, openModal } = useUIStoreActions();
 
   /**
@@ -64,8 +71,11 @@ export function Tabs(props: TypeTabsProps): JSX.Element {
    * @param {number} newValue value of the new tab
    */
   const handleChange = (event: SyntheticEvent<Element, Event>, newValue: number) => {
+    // Update panel refs when tab value is changed.
+    if (!tabPanelRefs.current[newValue]) {
+      tabPanelRefs.current[newValue] = tabs[newValue];
+    }
     setValue(newValue);
-
     // Callback
     onSelectedTabChanged?.(tabs[newValue]);
   };
@@ -88,6 +98,22 @@ export function Tabs(props: TypeTabsProps): JSX.Element {
 
     if (selectedTab && value !== selectedTab) setValue(selectedTab);
   }, [selectedTab, value]);
+
+  useEffect(() => {
+    // Log
+    logger.logTraceUseEffect('TABS - Mouse Clicked On Map');
+    //  open details tab when clicked on layer on
+    if (activeFooterTabId === 'details') {
+      const idx = tabs.findIndex((tab) => tab.id === activeFooterTabId);
+      if (!tabPanelRefs.current[idx]) {
+        tabPanelRefs.current[idx] = tabs[idx];
+      }
+      setValue(idx);
+      // open tab panel if closed.
+      if (handleCollapse && isCollapsed) handleCollapse();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeFooterTabId]);
 
   return (
     <Grid container sx={{ width: '100%', height: '100%' }}>
@@ -138,13 +164,11 @@ export function Tabs(props: TypeTabsProps): JSX.Element {
           visibility: TabContentVisibilty,
         }}
       >
-        <TabPanel value={value} index={value}>
-          {typeof tabs[value]?.content === 'string' ? (
-            <HtmlToReact htmlContent={(tabs[value]?.content as string) ?? ''} />
-          ) : (
-            tabs[value].content
-          )}
-        </TabPanel>
+        {tabPanelRefs.current?.map((tab, index) => (
+          <TabPanel value={value} index={index} key={tab.id}>
+            {typeof tab?.content === 'string' ? <HtmlToReact htmlContent={(tab?.content as string) ?? ''} /> : tab.content}
+          </TabPanel>
+        ))}
       </Grid>
     </Grid>
   );
