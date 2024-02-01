@@ -1,5 +1,5 @@
 import { TypeWindow, TypeLayerEntryConfig, useAppDisplayLanguageById } from 'geoview-core';
-import { useDetailsStoreLayerDataArray } from 'geoview-core/src/core/stores/store-interface-and-intial-values/details-state';
+import { useDetailsStoreLayerDataArray } from 'geoview-core/src/core/stores/store-interface-and-intial-values/feature-info-state';
 import { GeoChart as GeoChartComponent, GeoChartConfig, ChartType, GeoChartDefaultColors, SchemaValidator, GeoChartAction } from 'geochart';
 import {
   PayloadBaseClass,

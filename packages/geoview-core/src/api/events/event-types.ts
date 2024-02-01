@@ -57,7 +57,7 @@ export type EventStringId =
   | 'geometry/on'
   | 'geometry/remove'
   | 'get_feature_info/all_queries_done'
-  | 'get_feature_info/hover_query_done'
+  | 'get_feature_info/get_all_layer_features'
   | 'get_feature_info/query_layer'
   | 'get_feature_info/query_result'
   | 'get_legends/legends_layerset_updated'

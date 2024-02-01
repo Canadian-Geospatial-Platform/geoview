@@ -145,8 +145,8 @@
     cgpv.api.event.on(
       cgpv.api.eventNames.GET_FEATURE_INFO.ALL_QUERIES_DONE,
       (payload) => {
-        const { layerSetId, resultSets, eventType } = payload;
-        createInfoTable('LYR5', 'geoJsonResultSetId', resultSets, eventType);
+        const { layerSetId, resultsSet, eventType } = payload;
+        createInfoTable('LYR5', 'geoJsonResultSetId', resultsSet, eventType);
       },
       'LYR5/FeatureInfoLayerSet'
     );
@@ -155,8 +155,8 @@
     cgpv.api.event.on(
       cgpv.api.eventNames.GET_LEGENDS.LEGENDS_LAYERSET_UPDATED,
       (payload) => {
-        const { resultSets } = payload;
-        displayLegend('geojsonLegendsId', resultSets);
+        const { resultsSet } = payload;
+        displayLegend('geojsonLegendsId', resultsSet);
       },
       'LYR5/LegendsLayerSet'
     );

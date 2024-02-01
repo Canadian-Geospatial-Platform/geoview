@@ -70,7 +70,7 @@ const simplifyTypeFeatureInfoEntries = (entries: TypeFeatureInfoEntryPartial[]):
  * Finds complete configuration necessary to build a GeoChart based on a given results set.
  * @param config PluginGeoChartConfig<ChartType> The complete GeoChart Plugin configuration
  * @param registeredLayers { [layerEntryConfigId: string]: TypeLayerEntryConfig } The registered layers
- * @param resultsSet TypeFeatureInfoResultSets The Results set of results to be simplified
+ * @param resultsSet TypeFeatureInfoResultsSet The Results set of results to be simplified
  * @return [
     GeoViewGeoChartConfig<ChartType> | undefined,
     GeoViewGeoChartConfigLayer | undefined,

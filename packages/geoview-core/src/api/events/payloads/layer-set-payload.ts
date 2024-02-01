@@ -1,7 +1,7 @@
 import { PayloadBaseClass } from './payload-base-class';
 
 import { EventStringId, EVENT_NAMES } from '../event-types';
-import { TypeLayerStatus, TypeLocalizedString } from '@/geo/map/map-schema-types';
+import { TypeLayerStatus } from '@/geo/map/map-schema-types';
 
 /** Valid events that can create LayerSetPayload */
 const validEvents: EventStringId[] = [
@@ -12,9 +12,9 @@ const validEvents: EventStringId[] = [
   EVENT_NAMES.LAYER_SET.UPDATED,
 ];
 
-export type TypeResultSets = {
+export type TypeResultsSet = {
   [layerPath: string]: {
-    layerName?: TypeLocalizedString;
+    layerName?: string;
     layerStatus: TypeLayerStatus;
     layerPhase: string;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -83,7 +83,7 @@ export const payloadIsLayerSetUpdated = (verifyIfPayload: PayloadBaseClass): ver
  */
 export interface TypelayerSetUpdatedPayload extends LayerSetPayload {
   /** An object containing the result sets indexed using the layer path */
-  resultSets: TypeResultSets;
+  resultsSet: TypeResultsSet;
   // The layerPath affected
   layerPath: string;
 }
@@ -265,11 +265,11 @@ export class LayerSetPayload extends PayloadBaseClass {
    */
   static createLayerSetUpdatedPayload = (
     handlerName: string,
-    resultSets: TypeResultSets,
+    resultsSet: TypeResultsSet,
     layerPath: string
   ): TypelayerSetUpdatedPayload => {
     const layerSetUpdatedPayload = new LayerSetPayload(EVENT_NAMES.LAYER_SET.UPDATED, handlerName) as TypelayerSetUpdatedPayload;
-    layerSetUpdatedPayload.resultSets = resultSets;
+    layerSetUpdatedPayload.resultsSet = resultsSet;
     layerSetUpdatedPayload.layerPath = layerPath;
     return layerSetUpdatedPayload;
   };
