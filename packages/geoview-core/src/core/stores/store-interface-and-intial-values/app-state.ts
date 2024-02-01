@@ -146,7 +146,7 @@ export const useAppGeolocatorServiceURL = () => useStore(useGeoViewStore(), (sta
 export const useAppNotifications = () => useStore(useGeoViewStore(), (state) => state.appState.notifications);
 export const useAppSuportedLanguages = () => useStore(useGeoViewStore(), (state) => state.appState.suportedLanguages);
 
-//! these 2 selector are use in app-stasrt.tsx before context is assigned to the map
+//! these 2 selector are use in app-start.tsx before context is assigned to the map
 //! DO NOT USE this technique elsewhere, it is only to reload language and theme
 export const useAppDisplayLanguageById = (mapId: string) => useStore(getGeoViewStore(mapId), (state) => state.appState.displayLanguage);
 export const useAppDisplayThemeById = (mapId: string) => useStore(getGeoViewStore(mapId), (state) => state.appState.displayTheme);

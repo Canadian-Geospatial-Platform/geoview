@@ -13,7 +13,7 @@
     }
   },
   "corePackages": [],
-  "appBarTabs": {
+  "appBar": {
     "tabs": {
       "core": ["basemap-panel"]
     }

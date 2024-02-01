@@ -6,23 +6,23 @@ import { Attribution } from '@/core/components/attribution/attribution';
 import { MousePosition } from '@/core/components/mouse-position/mouse-position';
 import { Scale } from '@/core/components/scale/scale';
 
-import { FooterbarExpandButton } from './footer-bar-expand-button';
-import { FooterbarRotationButton } from './footer-bar-rotation-button';
-import { FooterbarFixNorthSwitch } from './footer-bar-fixnorth-switch';
-import { getSxClasses } from './footer-bar-style';
+import { MapInfoExpandButton } from './map-info-expand-button';
+import { MapInfoRotationButton } from './map-info-rotation-button';
+import { MapInfoFixNorthSwitch } from './map-info-fixnorth-switch';
+import { getSxClasses } from './map-info-style';
 import { useMapInteraction } from '@/core/stores/store-interface-and-intial-values/map-state';
-import { useUIFooterBarExpanded } from '@/core/stores/store-interface-and-intial-values/ui-state';
+import { useUIMapInfoExpanded } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import { useGeoViewMapId } from '@/app';
 import { logger } from '@/core/utils/logger';
 
 /**
- * Create a footer bar element that contains attribtuion, mouse position and scale
+ * Create a map information element that contains attribtuion, mouse position and scale
  *
- * @returns {JSX.Element} the footer bar element
+ * @returns {JSX.Element} the map information element
  */
-export function Footerbar(): JSX.Element {
+export function MapInfo(): JSX.Element {
   // Log
-  logger.logTraceRender('components/footer-bar/footer-bar');
+  logger.logTraceRender('components/map-info/map-info');
 
   const mapId = useGeoViewMapId();
 
@@ -30,18 +30,18 @@ export function Footerbar(): JSX.Element {
   const sxClasses = getSxClasses(theme);
 
   // internal state
-  const footerBarRef = useRef<HTMLDivElement>();
+  const mapInfoRef = useRef<HTMLDivElement>();
 
   // get store values
-  const expanded = useUIFooterBarExpanded();
+  const expanded = useUIMapInfoExpanded();
 
   // get value from the store
   // if map is static do not display mouse position or rotation controls
   const interaction = useMapInteraction();
 
   return (
-    <Box id={`${mapId}-footerBar`} sx={sxClasses.footerBarContainer} ref={footerBarRef as MutableRefObject<HTMLDivElement>}>
-      <FooterbarExpandButton />
+    <Box id={`${mapId}-mapInfo`} sx={sxClasses.mapInfoContainer} ref={mapInfoRef as MutableRefObject<HTMLDivElement>}>
+      <MapInfoExpandButton />
       <Grid container justifyContent="space-between">
         <Grid item md={1}>
           <Attribution />
@@ -74,8 +74,8 @@ export function Footerbar(): JSX.Element {
                     },
                   }}
                 >
-                  <FooterbarRotationButton />
-                  <FooterbarFixNorthSwitch />
+                  <MapInfoRotationButton />
+                  <MapInfoFixNorthSwitch />
                 </Box>
               </Grid>
             )}

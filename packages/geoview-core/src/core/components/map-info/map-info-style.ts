@@ -1,8 +1,8 @@
-// footer-bar.tsx
+// map-info.tsx
 import { Theme } from '@mui/material/styles';
 
 export const getSxClasses = (theme: Theme) => ({
-  footerBarContainer: {
+  mapInfoContainer: {
     flexGrow: 1,
     zIndex: 50,
     display: 'flex',
@@ -34,7 +34,7 @@ export const getSxClasses = (theme: Theme) => ({
     alignItems: 'flex-end',
   },
 
-  // footer-bar-expand-button.tsx
+  // map-info-expand-button.tsx
   sxClassesExportButton: {
     expandbuttonContainer: {
       display: 'flex',
@@ -47,7 +47,7 @@ export const getSxClasses = (theme: Theme) => ({
     },
   },
 
-  // footer-bar-rotation-button.tsx
+  // map-info-rotation-button.tsx
   sxClassesRotationButton: {
     rotationButton: {
       height: 25,

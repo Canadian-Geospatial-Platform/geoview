@@ -24,7 +24,7 @@ export function initializeEventProcessors(store: GeoviewStoreType) {
   mapEventProcessor.onInitialize(store);
 
   // package stores, only create if needed
-  // TODO: Change this check for something more generic that checks in appBarTabs too
+  // TODO: Change this check for something more generic that checks in appBar too
   if (store.getState().mapConfig!.footerTabs?.tabs.core.includes('time-slider')) timeSliderEventProcessor.onInitialize(store);
   if (store.getState().mapConfig!.footerTabs?.tabs.core.includes('geochart')) geochartEventProcessor.onInitialize(store);
 }
@@ -37,7 +37,7 @@ export function destroyEventProcessors(store: GeoviewStoreType) {
   mapEventProcessor.onDestroy(store);
 
   // package stores, only destroy if created
-  // TODO: Change this check for something more generic that checks in appBarTabs too
+  // TODO: Change this check for something more generic that checks in appBar too
   if (store.getState().mapConfig!.footerTabs?.tabs.core.includes('time-slider')) timeSliderEventProcessor.onDestroy(store);
   if (store.getState().mapConfig!.footerTabs?.tabs.core.includes('geochart')) geochartEventProcessor.onDestroy(store);
 }

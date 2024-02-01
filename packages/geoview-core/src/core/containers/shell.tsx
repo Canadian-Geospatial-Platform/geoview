@@ -12,7 +12,7 @@ import { Appbar } from '@/core/components/app-bar/app-bar';
 import { Navbar } from '@/core/components/nav-bar/nav-bar';
 import { FooterTabs } from '@/core/components/footer-tabs/footer-tabs';
 import { Geolocator } from '@/core/components/geolocator/geolocator';
-import { Footerbar } from '@/core/components/footer-bar/footer-bar';
+import { MapInfo } from '@/core/components/map-info/map-info';
 
 import { FocusTrapDialog } from './focus-trap';
 
@@ -150,7 +150,7 @@ export function Shell(props: ShellProps): JSX.Element {
             {appBarComponents.includes('geolocator') && interaction === 'dynamic' && <Geolocator />}
             <Box sx={sxClasses.mapContainer}>
               <Map />
-              <Footerbar />
+              <MapInfo />
             </Box>
             {interaction === 'dynamic' && <Navbar />}
           </Box>
