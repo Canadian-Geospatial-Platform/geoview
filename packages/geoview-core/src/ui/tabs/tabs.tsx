@@ -58,7 +58,6 @@ export function Tabs(props: TypeTabsProps): JSX.Element {
   const sxClasses = getSxClasses();
   // internal state
   const [value, setValue] = useState(0);
-  const [showMobileDropdown, setShowMobileDropdown] = useState(false);
 
   // reference to display tab panels on demand.
   const tabPanelRefs = useRef([tabs[0]]);
@@ -66,8 +65,10 @@ export function Tabs(props: TypeTabsProps): JSX.Element {
   const activeTrapGeoView = useUIActiveTrapGeoView();
   const activeFooterTabId = useUIActiveFooterTabId();
   const mapSize = useMapSize();
-
   const { closeModal, openModal } = useUIStoreActions();
+
+  // show/hide dropdown based on map size
+  const [showMobileDropdown, setShowMobileDropdown] = useState(mapSize[0] < theme.breakpoints.values.sm);
 
   /**
    * Update Tab panel when value change from tabs and dropdown.
@@ -75,12 +76,19 @@ export function Tabs(props: TypeTabsProps): JSX.Element {
    */
   const updateTabPanel = (tabValue: number) => {
     // Update panel refs when tab value is changed.
-    if (!tabPanelRefs.current[tabValue]) {
-      tabPanelRefs.current[tabValue] = tabs[tabValue];
+    // handle no tab when mobile dropdown is displayed.
+    if (typeof tabValue === 'string') {
+      if (!isCollapsed) handleCollapse?.();
+      setValue(tabValue);
+    } else {
+      if (!tabPanelRefs.current[tabValue]) {
+        tabPanelRefs.current[tabValue] = tabs[tabValue];
+      }
+      setValue(tabValue);
+      if (isCollapsed) handleCollapse?.();
+      // Callback
+      onSelectedTabChanged?.(tabs[tabValue]);
     }
-    setValue(tabValue);
-    // Callback
-    onSelectedTabChanged?.(tabs[tabValue]);
   };
 
   /**
@@ -129,18 +137,24 @@ export function Tabs(props: TypeTabsProps): JSX.Element {
   /**
    * Build mobile tab dropdown.
    */
-  const mobileTabsDropdownValues: TypeMenuItemProps[] = useMemo(() => {
-    return tabs.map((tab) => ({
+  const mobileTabsDropdownValues = useMemo(() => {
+    const newTabs = tabs.map((tab) => ({
       type: 'item',
       item: { value: tab.value, children: t(`${tab.label}`) },
     }));
+
+    // add no tab field which will be used to collapse the footer panel.
+    const noTab = { type: 'item', item: { value: '', children: 'No Tab' } };
+    return [noTab, ...newTabs] as TypeMenuItemProps[];
   }, [tabs, t]);
 
   useEffect(() => {
     // show/hide mobile dropdown when screen size change.
-    const resizeHandler = () => (mapSize[0] < theme.breakpoints.values.sm ? setShowMobileDropdown(true) : setShowMobileDropdown(false));
-    // update the showMobileDropdown state on page load.
-    resizeHandler();
+    if (mapSize[0] < theme.breakpoints.values.sm) {
+      setShowMobileDropdown(true);
+    } else {
+      setShowMobileDropdown(false);
+    }
   }, [mapSize, theme.breakpoints.values.sm]);
 
   return (

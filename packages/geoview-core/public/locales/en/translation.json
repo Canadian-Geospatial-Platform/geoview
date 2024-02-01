@@ -196,6 +196,7 @@
   "footerTabsContainer": {
     "focusToMap": "Focus to map",
     "focusToFooter": "Focus to footer",
-    "resizeTooltip": "Resize"
+    "resizeTooltip": "Resize",
+    "noTab": "No Tab"
   }
 }
