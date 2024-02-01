@@ -9,7 +9,7 @@ import { List, ZoomInSearchIcon, Tooltip, IconButton, Checkbox, Paper, Box, Typo
 import { TypeFieldEntry, TypeArrayOfFeatureInfoEntries, TypeGeometry } from '@/api/events/payloads';
 import { FeatureInfoTable } from './feature-info-table';
 import { getSxClasses } from './details-style';
-import { useDetailsStoreCheckedFeatures, useDetailsStoreActions } from '@/core/stores/store-interface-and-intial-values/details-state';
+import { useDetailsStoreCheckedFeatures, useDetailsStoreActions } from '@/core/stores/store-interface-and-intial-values/feature-info-state';
 import { useMapStoreActions } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { logger } from '@/core/utils/logger';
 

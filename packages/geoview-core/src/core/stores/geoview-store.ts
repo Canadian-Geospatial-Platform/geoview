@@ -5,7 +5,7 @@ import cloneDeep from 'lodash/cloneDeep';
 
 import { useGeoViewStore } from '@/core/stores/stores-managers';
 import { IAppState, initializeAppState } from './store-interface-and-intial-values/app-state';
-import { IDetailsState, initialDetailsState } from './store-interface-and-intial-values/details-state';
+import { IFeatureInfoState, initFeatureInfoState } from './store-interface-and-intial-values/feature-info-state';
 import { ILayerState, initializeLayerState } from './store-interface-and-intial-values/layer-state';
 import { IMapState, initializeMapState } from './store-interface-and-intial-values/map-state';
 import { IMapDataTableState, initialDataTableState } from './store-interface-and-intial-values/data-table-state';
@@ -29,7 +29,7 @@ export interface IGeoviewState {
 
   // core state interfaces
   appState: IAppState;
-  detailsState: IDetailsState;
+  detailsState: IFeatureInfoState;
   dataTableState: IMapDataTableState;
   layerState: ILayerState;
   mapState: IMapState;
@@ -65,7 +65,7 @@ export const geoviewStoreDefinition = (set: TypeSetStore, get: TypeGetStore) => 
 
     // core states
     appState: initializeAppState(set, get),
-    detailsState: initialDetailsState(set, get),
+    detailsState: initFeatureInfoState(set, get),
     dataTableState: initialDataTableState(set, get),
     layerState: initializeLayerState(set, get),
     mapState: initializeMapState(set, get),

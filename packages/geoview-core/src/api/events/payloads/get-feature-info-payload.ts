@@ -8,11 +8,12 @@ import { PayloadBaseClass } from './payload-base-class';
 
 import { EventStringId, EVENT_NAMES } from '../event-types';
 import { TypeGeoviewLayerType } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
-import { TypeLayerStatus, TypeLocalizedString } from '@/geo/map/map-schema-types';
+import { TypeLayerStatus } from '@/geo/map/map-schema-types';
 
 /** Valid events that can create GetFeatureInfoPayload */
 const validEvents: EventStringId[] = [
   EVENT_NAMES.GET_FEATURE_INFO.QUERY_LAYER,
+  EVENT_NAMES.GET_FEATURE_INFO.GET_ALL_LAYER_FEATURES,
   EVENT_NAMES.GET_FEATURE_INFO.ALL_QUERIES_DONE,
   EVENT_NAMES.GET_FEATURE_INFO.QUERY_RESULT,
 ];
@@ -21,7 +22,7 @@ export type EventType = 'click' | 'hover' | 'crosshaire-enter' | 'all-features';
 export const ArrayOfEventTypes: EventType[] = ['click', 'hover', 'crosshaire-enter', 'all-features'];
 export type QueryType = 'at_pixel' | 'at_coordinate' | 'at_long_lat' | 'using_a_bounding_box' | 'using_a_polygon' | 'all';
 
-export type TypeLocation = null | Pixel | Coordinate | Coordinate[];
+export type TypeLocation = null | Pixel | Coordinate | Coordinate[] | string;
 
 export type codeValueEntryType = {
   name: string;
@@ -71,13 +72,17 @@ export type TypeFeatureInfoEntryPartial = Pick<TypeFeatureInfoEntry, 'fieldInfo'
 
 export type TypeArrayOfFeatureInfoEntries = TypeFeatureInfoEntry[] | undefined | null;
 
+export type TypeQueryStatus = 'processing' | 'processed' | 'error';
+
 export type TypeLayerData = {
   layerPath: string;
   layerName: string;
   layerStatus: TypeLayerStatus;
+  eventListenerEnabled: boolean;
   // When property features is undefined, we are waiting for the query result.
   // when Array.isArray(features) is true, the features property contains the query result.
   // when property features is null, the query ended with an error.
+  queryStatus: TypeQueryStatus;
   features: TypeArrayOfFeatureInfoEntries;
 };
 export type TypeArrayOfLayerData = TypeLayerData[];
@@ -86,17 +91,15 @@ export type TypeFeatureInfoByEventTypes = {
   [eventName in EventType]?: TypeLayerData;
 };
 
-export type TypeFeatureInfoResultSetsEntry = {
+export type TypeFeatureInfoResultsSetEntry = {
   layerStatus: TypeLayerStatus;
   layerPhase: string;
   data: TypeFeatureInfoByEventTypes;
-  layerName?: TypeLocalizedString;
+  layerName?: string;
 };
 
-// TODO: Refactor - Should probably call this a 'ResultsSet' instead of 'ResultSets' to avoid confusion, because it's a single set of results, not multiple sets of result(s).
-// https://www.totaltypescript.com/tips/how-to-name-your-types
-export type TypeFeatureInfoResultSets = {
-  [layerPath: string]: TypeFeatureInfoResultSetsEntry;
+export type TypeFeatureInfoResultsSet = {
+  [layerPath: string]: TypeFeatureInfoResultsSetEntry;
 };
 
 /**
@@ -127,10 +130,8 @@ export const payloadIsQueryLayerQueryTypeAtLongLat = (verifyIfPayload: PayloadBa
 export interface TypeQueryLayerPayload extends GetFeatureInfoPayload {
   // The query type to perform
   queryType: QueryType;
-  // Object containing layerPath and its associated disable flag
-  disabledLayers: { [layerPath: string]: boolean };
-  // the location to query, null is used when queryType is all
-  location?: TypeLocation;
+  // the location to query. A string layerPath is used when eventType is all-features
+  location?: TypeLocation | string;
   // Event type that triggered the query. It can be a click, a hover, a crosshair enter, all ...
   eventType: EventType;
 }
@@ -169,8 +170,8 @@ export interface TypeAllQueriesDonePayload extends GetFeatureInfoPayload {
   queryType: QueryType;
   // The layer set identifier
   layerSetId: string;
-  // the resultSets that contains the query results
-  resultSets: TypeFeatureInfoResultSets;
+  // the resultsSet that contains the query results
+  resultsSet: TypeFeatureInfoResultsSet;
 }
 
 /**
@@ -234,7 +235,6 @@ export class GetFeatureInfoPayload extends PayloadBaseClass {
    *
    * @param {string | null} handlerName the handler Name
    * @param {QueryType} queryType the query's type to perform
-   * @param {{ [layerPath: string]: boolean }} disabledLayers Object containing layerPath and its disable flag.
    * @param {TypeLocation} location the location to query
    * @param {EventType} eventType the type of event that triggered the query
    *
@@ -243,15 +243,34 @@ export class GetFeatureInfoPayload extends PayloadBaseClass {
   static createQueryLayerPayload = (
     handlerName: string,
     queryType: QueryType,
-    disabledLayers: { [layerPath: string]: boolean },
     location?: TypeLocation,
     eventType: EventType = 'all-features'
   ): TypeQueryLayerPayload => {
     const queryLayerPayload = new GetFeatureInfoPayload(EVENT_NAMES.GET_FEATURE_INFO.QUERY_LAYER, handlerName) as TypeQueryLayerPayload;
     queryLayerPayload.queryType = queryType;
     queryLayerPayload.location = location;
-    queryLayerPayload.disabledLayers = disabledLayers;
     queryLayerPayload.eventType = eventType;
+    return queryLayerPayload;
+  };
+
+  /**
+   * Static method used to create a "get all layer features info" payload that will run a query on a specific layer in the set.
+   *
+   * @param {string | null} handlerName the handler Name
+   * @param {QueryType} queryType the query's type to perform
+   * @param {string} location the location to query
+   * @param {EventType} eventType the type of event that triggered the query
+   *
+   * @returns {TypeQueryLayerPayload} the queryLayerPayload object created
+   */
+  static createGetAllLayerFeaturesPayload = (handlerName: string, queryType: QueryType, location: string): TypeQueryLayerPayload => {
+    const queryLayerPayload = new GetFeatureInfoPayload(
+      EVENT_NAMES.GET_FEATURE_INFO.GET_ALL_LAYER_FEATURES,
+      handlerName
+    ) as TypeQueryLayerPayload;
+    queryLayerPayload.queryType = queryType;
+    queryLayerPayload.location = location;
+    queryLayerPayload.eventType = 'all-features';
     return queryLayerPayload;
   };
 
@@ -263,7 +282,7 @@ export class GetFeatureInfoPayload extends PayloadBaseClass {
    * @param {string} layerPath the layer path updated
    * @param {QueryType} queryType the query's type done
    * @param {string} layerSetId the layer set identifier
-   * @param {TypeFeatureInfoResultSets} resultSets the result set for the query
+   * @param {TypeFeatureInfoResultsSet} resultsSet the result set for the query
    *
    * @returns {TypeAllQueriesDonePayload} the TypeAllQueriesDonePayload object created
    */
@@ -273,7 +292,7 @@ export class GetFeatureInfoPayload extends PayloadBaseClass {
     layerPath: string,
     queryType: QueryType,
     layerSetId: string,
-    resultSets: TypeFeatureInfoResultSets
+    resultsSet: TypeFeatureInfoResultsSet
   ): TypeAllQueriesDonePayload => {
     const allQueriesDonePayload = new GetFeatureInfoPayload(
       EVENT_NAMES.GET_FEATURE_INFO.ALL_QUERIES_DONE,
@@ -283,7 +302,7 @@ export class GetFeatureInfoPayload extends PayloadBaseClass {
     allQueriesDonePayload.layerPath = layerPath;
     allQueriesDonePayload.queryType = queryType;
     allQueriesDonePayload.layerSetId = layerSetId;
-    allQueriesDonePayload.resultSets = resultSets;
+    allQueriesDonePayload.resultsSet = resultsSet;
     return allQueriesDonePayload;
   };
 

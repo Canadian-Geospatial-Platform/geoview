@@ -195,8 +195,8 @@
       cgpv.api.event.on(
         cgpv.api.eventNames.GET_LEGENDS.LEGENDS_LAYERSET_UPDATED,
         (payload) => {
-          const { resultSets } = payload;
-          displayLegend('LegendsId1', resultSets);
+          const { resultsSet } = payload;
+          displayLegend('LegendsId1', resultsSet);
         },
         'LYR1/LegendsLayerSet'
       );

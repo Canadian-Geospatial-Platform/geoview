@@ -294,8 +294,8 @@
       cgpv.api.event.on(
         cgpv.api.eventNames.GET_FEATURE_INFO.ALL_QUERIES_DONE,
         (payload) => {
-          const { layerSetId, resultSets, eventType } = payload;
-          createInfoTable('LYR1', 'ResultSetId1', resultSets, eventType);
+          const { layerSetId, resultsSet, eventType } = payload;
+          createInfoTable('LYR1', 'ResultSetId1', resultsSet, eventType);
         },
         'LYR1/FeatureInfoLayerSet'
       );
@@ -303,8 +303,8 @@
       cgpv.api.event.on(
         cgpv.api.eventNames.GET_LEGENDS.LEGENDS_LAYERSET_UPDATED,
         (payload) => {
-          const { resultSets } = payload;
-          displayLegend('LegendsId1', resultSets);
+          const { resultsSet } = payload;
+          displayLegend('LegendsId1', resultsSet);
         },
         'LYR1/LegendsLayerSet'
       );
@@ -320,8 +320,8 @@
       cgpv.api.event.on(
         cgpv.api.eventNames.GET_FEATURE_INFO.ALL_QUERIES_DONE,
         (payload) => {
-          const { layerSetId, resultSets, eventType } = payload;
-          createInfoTable('LYR2', 'ResultSetId2', resultSets, eventType);
+          const { layerSetId, resultsSet, eventType } = payload;
+          createInfoTable('LYR2', 'ResultSetId2', resultsSet, eventType);
         },
         'LYR2/FeatureInfoLayerSet'
       );
@@ -329,8 +329,8 @@
       cgpv.api.event.on(
         cgpv.api.eventNames.GET_LEGENDS.LEGENDS_LAYERSET_UPDATED,
         (payload) => {
-          const { resultSets } = payload;
-          displayLegend('LegendsId2', resultSets);
+          const { resultsSet } = payload;
+          displayLegend('LegendsId2', resultsSet);
         },
         'LYR2/LegendsLayerSet'
       );

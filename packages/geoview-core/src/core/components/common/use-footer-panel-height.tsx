@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useAppFullscreenActive } from '@/core/stores/store-interface-and-intial-values/app-state';
 import { useUIActiveFooterTabId, useUIFooterPanelResizeValue } from '@/core/stores/store-interface-and-intial-values/ui-state';
-import { useDetailsStoreLayerDataArray } from '@/core/stores/store-interface-and-intial-values/details-state';
+import { useDetailsStoreLayerDataArray } from '@/core/stores/store-interface-and-intial-values/feature-info-state';
 import { logger } from '@/core/utils/logger';
 
 interface UseFooterPanelHeightType {
