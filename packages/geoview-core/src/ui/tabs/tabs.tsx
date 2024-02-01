@@ -1,9 +1,8 @@
 import { SyntheticEvent, ReactNode, useState, useEffect, useRef, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import debounce from 'lodash/debounce';
 import { Grid, Tab as MaterialTab, Tabs as MaterialTabs, TabsProps, TabProps, BoxProps, Box } from '@mui/material';
+import { useTheme } from '@mui/material/styles';
 import { Select, TypeMenuItemProps } from '../select/select';
-
 import { HtmlToReact } from '@/core/containers/html-to-react';
 import { TabPanel } from './tab-panel';
 import {
@@ -13,7 +12,7 @@ import {
 } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import { getSxClasses } from './tabs-style';
 import { logger } from '@/core/utils/logger';
-import { useGeoViewMapId } from '@/app';
+import { useGeoViewMapId, useMapSize } from '@/app';
 
 /**
  * Type used for properties of each tab
@@ -55,6 +54,7 @@ export function Tabs(props: TypeTabsProps): JSX.Element {
   const mapElem = document.getElementById(`shell-${mapId}`);
   const { t } = useTranslation<string>();
 
+  const theme = useTheme();
   const sxClasses = getSxClasses();
   // internal state
   const [value, setValue] = useState(0);
@@ -65,6 +65,7 @@ export function Tabs(props: TypeTabsProps): JSX.Element {
   // get store values and actions
   const activeTrapGeoView = useUIActiveTrapGeoView();
   const activeFooterTabId = useUIActiveFooterTabId();
+  const mapSize = useMapSize();
 
   const { closeModal, openModal } = useUIStoreActions();
 
@@ -137,17 +138,10 @@ export function Tabs(props: TypeTabsProps): JSX.Element {
 
   useEffect(() => {
     // show/hide mobile dropdown when screen size change.
-    const resizeHandler = () => (document.body.offsetWidth < 768 ? setShowMobileDropdown(true) : setShowMobileDropdown(false));
+    const resizeHandler = () => (mapSize[0] < theme.breakpoints.values.sm ? setShowMobileDropdown(true) : setShowMobileDropdown(false));
     // update the showMobileDropdown state on page load.
     resizeHandler();
-
-    const handleResizeDebounced = debounce(resizeHandler, 10);
-    window.addEventListener('resize', handleResizeDebounced);
-    return () => {
-      window.removeEventListener('resize', handleResizeDebounced);
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [mapSize, theme.breakpoints.values.sm]);
 
   return (
     <Grid container sx={{ width: '100%', height: '100%' }}>
@@ -165,7 +159,7 @@ export function Tabs(props: TypeTabsProps): JSX.Element {
               aria-label="basic tabs"
               sx={{
                 '& .MuiTabs-indicator': {
-                  backgroundColor: (theme) => theme.palette.secondary.main,
+                  backgroundColor: (bgTheme) => bgTheme.palette.secondary.main,
                 },
               }}
             >
@@ -188,7 +182,7 @@ export function Tabs(props: TypeTabsProps): JSX.Element {
           ) : (
             <Box sx={sxClasses.mobileDropdown}>
               <Select
-                labelId="provinceGeolocatorFiltersLabel"
+                labelId="footerTabsDropdownLabel"
                 formControlProps={{ size: 'small' }}
                 id="footerTabsDropdown"
                 fullWidth
