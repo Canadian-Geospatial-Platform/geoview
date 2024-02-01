@@ -67,7 +67,7 @@ export const getSxClasses = (theme: Theme) => ({
     },
   },
   paper: { marginBottom: '1rem' },
-  borderWithIndex: `2px solid ${theme.palette.primary.main}`,
+  borderWithIndex: `2px solid ${theme.palette.geoViewColor.primary.main}`,
   borderNone: 'none',
   headline: { fontSize: '1.125rem', fontWeight: 'bold' },
 });

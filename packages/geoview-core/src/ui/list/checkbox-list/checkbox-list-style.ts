@@ -13,7 +13,7 @@ export const getSxClasses = (theme: Theme) => ({
     color: theme.palette.secondary.contrastText,
     '&:hover': {
       backgroundColor: '#dddddd',
-      color: theme.palette.primary.dark,
+      color: theme.palette.geoViewColor.primary.dark,
     },
   },
   listItemIcon: {

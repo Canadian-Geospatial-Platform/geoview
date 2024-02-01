@@ -1,8 +1,9 @@
 import { createTheme } from '@mui/material/styles';
-import { lightThemeOptions } from './light-theme';
-import { darkThemeOptions } from './dark-theme';
-import { geoCaThemeOptions } from './geo-ca-theme';
+import { lightThemeColors } from './light-theme';
+import { darkThemeColors } from './dark-theme';
+import { geoCaThemeColors } from './geo-ca-theme';
 import { TypeDisplayTheme } from '@/geo/map/map-schema-types';
+import { generateThemeOptions } from './themeOptionsGenerator';
 
 declare module '@mui/material/styles/createPalette' {
   interface Palette {
@@ -15,11 +16,11 @@ declare module '@mui/material/styles/createPalette' {
 function getThemeOptions(mode: TypeDisplayTheme) {
   switch (mode) {
     case 'dark':
-      return darkThemeOptions;
+      return generateThemeOptions(darkThemeColors);
     case 'geo.ca':
-      return geoCaThemeOptions;
+      return generateThemeOptions(geoCaThemeColors);
     default:
-      return lightThemeOptions;
+      return generateThemeOptions(lightThemeColors);
   }
 }
 

@@ -161,7 +161,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
       <List>
         {startLayer.children.map((layer) => (
           <Fragment key={layer.layerId}>
-            <ListItem sx={{ padding: '6px 0px', borderTop: '1px solid #ccc' }}>
+            <ListItem sx={{ padding: '6px 0px', borderTop: `1px solid ${theme.palette.geoViewColor.bgColor.dark[50]}` }}>
               <ListItemIcon>
                 <LayerIcon layer={layer} />
               </ListItemIcon>
@@ -178,16 +178,28 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
     return (
       <Box sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '15px' }}>
         {layerDetails.items.length > 0 && (
-          <IconButton id="table-details" tooltip="legend.tableDetails" sx={{ backgroundColor: '#F6F6F6' }} onClick={handleOpenTable}>
+          <IconButton
+            id="table-details"
+            tooltip="legend.tableDetails"
+            sx={{ backgroundColor: theme.palette.geoViewColor.bgColor.dark[100] }}
+            onClick={handleOpenTable}
+          >
             <TableViewIcon />
           </IconButton>
         )}
-        <IconButton tooltip="legend.refreshLayer" sx={{ backgroundColor: '#F6F6F6' }} onClick={handleRefreshLayer}>
+        <IconButton
+          tooltip="legend.refreshLayer"
+          sx={{ backgroundColor: theme.palette.geoViewColor.bgColor.dark[100] }}
+          onClick={handleRefreshLayer}
+        >
           <RestartAltIcon />
         </IconButton>
         <IconButton
           tooltip="legend.highlightLayer"
-          sx={{ backgroundColor: layerDetails.layerPath !== highlightedLayer ? '#F6F6F6' : theme.palette.action.active }}
+          sx={{
+            backgroundColor:
+              layerDetails.layerPath !== highlightedLayer ? theme.palette.geoViewColor.bgColor.dark[100] : theme.palette.action.active,
+          }}
           onClick={handleHighlightLayer}
         >
           <HighlightOutlinedIcon />
@@ -195,7 +207,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
         <IconButton
           tooltip="legend.zoomTo"
           onClick={handleZoomTo}
-          sx={{ backgroundColor: '#F6F6F6' }}
+          sx={{ backgroundColor: theme.palette.geoViewColor.bgColor.dark[100] }}
           disabled={layerDetails.bounds === undefined}
         >
           <ZoomInSearchIcon />
@@ -230,7 +242,14 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
           {layerDetails.layerAttribution &&
             layerDetails.layerAttribution!.map((attribution) => {
               return (
-                <Typography sx={{ marginTop: '10px', color: '#808080', fontSize: '0.8em' }} key={generateId()}>
+                <Typography
+                  sx={{
+                    marginTop: '10px',
+                    color: theme.palette.geoViewColor.textColor.light[300],
+                    fontSize: theme.palette.geoViewFontSize['0.4x'],
+                  }}
+                  key={generateId()}
+                >
                   {attribution.indexOf('©') === -1 ? `© ${attribution}` : attribution}
                 </Typography>
               );

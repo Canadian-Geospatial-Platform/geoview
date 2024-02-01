@@ -1,4 +1,5 @@
 import { ComponentsVariants, ComponentsOverrides, ComponentsProps } from '@mui/material';
+import { IGeoViewColors } from '@/ui/style/types';
 
 /** https://material-ui.com/guides/typescript/ */
 
@@ -84,6 +85,7 @@ declare module '@mui/material/styles' {
       featureKeyFont: string;
       featureValueFont: string;
       chooseLayerFont: string;
+      boxShadow: string;
     };
   }
   interface Theme {
@@ -147,6 +149,7 @@ declare module '@mui/material/styles' {
       featureKeyFont: string;
       featureValueFont: string;
       chooseLayerFont: string;
+      boxShadow: string;
     };
   }
 }
@@ -154,10 +157,16 @@ declare module '@mui/material/styles' {
 declare module '@mui/material/styles/createPalette' {
   interface Palette {
     backdrop: string;
+    geoViewColor: IGeoViewColors;
+    geoViewFontSize: IGeoViewFontSizes;
+    geoViewSpacingAndSizing: IGeoViewSpacingAndSizing;
   }
 
   interface PaletteOptions {
     backdrop?: string;
+    geoViewColor?: IGeoViewColors;
+    geoViewFontSize?: IGeoViewFontSizes;
+    geoViewSpacingAndSizing?: IGeoViewSpacingAndSizing;
   }
 }
 

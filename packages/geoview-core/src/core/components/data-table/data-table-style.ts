@@ -7,15 +7,15 @@ export const getSxClasses = (theme: Theme) => ({
     padding: 3,
     borderRadius: 0,
     border: '1px solid',
-    borderColor: theme.palette.grey[600],
-    boxShadow: 'rgb(0 0 0 / 20%) 0px 3px 1px -2px, rgb(0 0 0 / 14%) 0px 2px 2px 0px, rgb(0 0 0 / 12%) 0px 1px 5px 0px',
-    background: theme.palette.common.white,
+    borderColor: theme.palette.geoViewColor.grey.dark[100],
+    boxShadow: theme.footerPanel.boxShadow,
+    background: theme.palette.geoViewColor.white,
     objectFit: 'scale-down',
     width: '35px',
     height: '35px',
   },
   selectedRows: {
-    backgroundColor: theme.palette.common.white,
+    backgroundColor: theme.palette.geoViewColor.white,
     transition: 'box-shadow 300ms cubic-bezier(0.4, 0, 0.2, 1) 0ms',
     fontWeight: 400,
     fontSize: '0.875rem',
@@ -32,7 +32,7 @@ export const getSxClasses = (theme: Theme) => ({
   tableCell: { whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' },
   dataTableWrapper: {
     '& .MuiPaper-root': {
-      border: `2px solid ${theme.palette.primary.main}`,
+      border: `2px solid ${theme.palette.geoViewColor.primary.main}`,
       borderRadius: '6px',
     },
     '& .MuiTableContainer-root': {
@@ -49,7 +49,7 @@ export const getSxClasses = (theme: Theme) => ({
       },
     },
     '& .MuiTouchRipple-root': {
-      color: theme.palette.grey['900'],
+      color: theme.palette.geoViewColor.grey.dark[900],
     },
   },
   tableHeadCell: {

@@ -20,7 +20,7 @@ export const getSxClasses = (theme: Theme) => ({
     },
     '& .MuiFormLabel-root.Mui-focused': {
       color: theme.palette.primary.contrastText,
-      background: theme.palette.primary.light,
+      background: theme.palette.geoViewColor.primary.light,
     },
     '& .MuiSelect-select': {
       padding: '16px 12px',

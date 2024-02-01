@@ -1,7 +1,8 @@
 import { useEffect } from 'react';
 
+import { useTheme } from '@mui/material';
 import { ExpandMoreIcon, ExpandLessIcon, IconButton, Box } from '@/ui';
-import { sxClassesExportButton } from './footer-bar-style';
+import { getSxClasses } from './footer-bar-style';
 import { useUIStoreActions, useUIFooterBarExpanded } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import { useGeoViewMapId } from '@/app';
 import { logger } from '@/core/utils/logger';
@@ -12,6 +13,9 @@ import { logger } from '@/core/utils/logger';
  * @returns {JSX.Element} the expand buttons
  */
 export function FooterbarExpandButton(): JSX.Element {
+  const theme = useTheme();
+  const sxClasses = getSxClasses(theme);
+
   // get the expand or collapse from expand button click
   const mapId = useGeoViewMapId();
   const expanded = useUIFooterBarExpanded();
@@ -78,7 +82,10 @@ export function FooterbarExpandButton(): JSX.Element {
 
   return (
     <Box>
-      <IconButton sx={sxClassesExportButton.expandbuttonContainer} onClick={() => (expanded ? collapseFooterbar() : expandFooterbar())}>
+      <IconButton
+        sx={sxClasses.sxClassesExportButton.expandbuttonContainer}
+        onClick={() => (expanded ? collapseFooterbar() : expandFooterbar())}
+      >
         {expanded ? <ExpandMoreIcon /> : <ExpandLessIcon />}
       </IconButton>
     </Box>

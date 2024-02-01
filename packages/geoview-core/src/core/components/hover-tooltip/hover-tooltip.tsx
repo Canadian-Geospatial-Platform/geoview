@@ -13,32 +13,6 @@ import { EVENT_NAMES } from '@/api/events/event-types';
 import { PayloadBaseClass, TypeFeatureInfoEntry, payloadIsAllQueriesDone } from '@/api/events/payloads';
 import { logger } from '@/core/utils/logger';
 
-const sxClasses = {
-  tooltipItem: {
-    color: '#fff',
-    background: '#222',
-    opacity: 0.9,
-    fontSize: '16px',
-    padding: '3px 8px',
-    borderRadius: '5px',
-    textAlign: 'center',
-    maxWidth: '350px',
-    maxHeight: '60px',
-    position: 'absolute',
-    display: 'flex',
-    top: '-5px',
-    left: '3px',
-  },
-  tooltipText: {
-    fontSize: 'text.fontSize',
-    color: 'palette.primary.light',
-    textOverflow: 'ellipsis',
-    whiteSpace: 'nowrap',
-    overflow: 'hidden',
-    padding: '5px',
-  },
-};
-
 /**
  * Hover tooltip component to show name field information on hover
  *
@@ -55,6 +29,32 @@ export function HoverTooltip(): JSX.Element {
   const theme: Theme & {
     iconImage: React.CSSProperties;
   } = useTheme();
+
+  const sxClasses = {
+    tooltipItem: {
+      color: theme.palette.geoViewColor.bgColor.light[900],
+      background: theme.palette.geoViewColor.bgColor.dark[900],
+      opacity: 0.9,
+      fontSize: theme.palette.geoViewFontSize.default,
+      padding: '3px 8px',
+      borderRadius: '5px',
+      textAlign: 'center',
+      maxWidth: '350px',
+      maxHeight: '60px',
+      position: 'absolute',
+      display: 'flex',
+      top: '-5px',
+      left: '3px',
+    },
+    tooltipText: {
+      fontSize: theme.palette.geoViewFontSize.default,
+      color: theme.palette.geoViewColor.bgColor.light[900],
+      textOverflow: 'ellipsis',
+      whiteSpace: 'nowrap',
+      overflow: 'hidden',
+      padding: '5px',
+    },
+  };
 
   // internal component state
   const [pixel, setPixel] = useState<[number, number]>([0, 0]);

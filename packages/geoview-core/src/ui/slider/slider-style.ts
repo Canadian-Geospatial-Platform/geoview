@@ -3,12 +3,12 @@ import { Theme } from '@mui/material/styles';
 export const getSxClasses = (theme: Theme) => ({
   slider: {
     '& .MuiSlider-root': {
-      color: '#fff',
+      color: theme.palette.geoViewColor.white,
     },
     '& .MuiSlider-thumb': {
       width: 15,
       height: 15,
-      color: theme.palette.primary.main,
+      color: theme.palette.geoViewColor.primary.main,
       transition: '0.3s cubic-bezier(.47,1.64,.41,.8)',
       '&:before': {
         boxShadow: '0 2px 12px 0 rgba(0,0,0,0.4)',
@@ -23,10 +23,10 @@ export const getSxClasses = (theme: Theme) => ({
     },
     '& .MuiSlider-rail': {
       opacity: 0.35,
-      color: 'rgba(0,0,0,0.87)',
+      color: theme.palette.geoViewColor.grey.darken(0.9, 0.87),
     },
     '& .MuiSlider-track': {
-      color: theme.palette.primary.main,
+      color: theme.palette.geoViewColor.primary.main,
     },
     '& .MuiSlider-mark': {
       height: 4,

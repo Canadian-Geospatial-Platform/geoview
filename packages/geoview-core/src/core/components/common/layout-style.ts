@@ -15,7 +15,7 @@ export const getSxClasses = (theme: Theme) => ({
     textOverflow: 'ellipsis',
   },
   listItemIcon: {
-    color: theme.palette.primary.main,
+    color: theme.palette.geoViewColor.primary.main,
     background: theme.footerPanel.contentBg,
   },
   layerNamePrimary: {
@@ -58,14 +58,14 @@ export const getSxClasses = (theme: Theme) => ({
     },
   },
   rightPanelContainer: {
-    border: `2px solid ${theme.palette.primary.main}`,
+    border: `2px solid ${theme.palette.geoViewColor.primary.main}`,
     borderRadius: '5px',
-    backgroundColor: theme.palette.common.white,
+    backgroundColor: theme.palette.geoViewColor.white,
   },
   rightPanelBtnHolder: {
     marginTop: '20px',
     marginBottom: '9px',
-    boxShadow: '0px 12px 9px -13px #E0E0E0',
+    boxShadow: `0px 12px 9px -13px ${theme.palette.geoViewColor.bgColor.dark[200]}`,
   },
   gridContainer: { paddingLeft: '1rem', paddingRight: '1rem' },
   listPrimaryText: {

@@ -1,4 +1,6 @@
-export const getSxClasses = () => ({
+import { Theme } from '@mui/material/styles';
+
+export const getSxClasses = (theme: Theme) => ({
   legendIconTransparent: {
     display: 'flex',
     justifyContent: 'center',
@@ -14,7 +16,7 @@ export const getSxClasses = () => ({
     top: -2,
     padding: 0,
     borderRadius: 0,
-    boxShadow: 'rgb(0 0 0 / 20%) 0px 3px 1px -2px, rgb(0 0 0 / 14%) 0px 2px 2px 0px, rgb(0 0 0 / 12%) 0px 1px 5px 0px',
+    boxShadow: theme?.footerPanel.boxShadow,
     transition: 'transform .3s ease-in-out',
     '&:hover': {
       transform: 'rotate(-18deg) translateX(-8px)',
@@ -26,9 +28,9 @@ export const getSxClasses = () => ({
     padding: 0,
     borderRadius: 0,
     border: '1px solid',
-    borderColor: 'grey.600',
-    boxShadow: 'rgb(0 0 0 / 20%) 0px 3px 1px -2px, rgb(0 0 0 / 14%) 0px 2px 2px 0px, rgb(0 0 0 / 12%) 0px 1px 5px 0px',
-    background: '#fff',
+    borderColor: theme.palette.geoViewColor.bgColor.dark[600],
+    boxShadow: theme?.footerPanel.boxShadow,
+    backgroundColor: theme.palette.geoViewColor.white,
   },
   maxIconImg: {
     maxWidth: 24,
@@ -40,22 +42,22 @@ export const getSxClasses = () => ({
     alignItems: 'center',
     width: 24,
     height: 24,
-    background: '#fff',
+    backgroundColor: theme.palette.geoViewColor.white,
     border: '1px solid',
-    borderColor: 'grey.600',
+    borderColor: theme.palette.geoViewColor.bgColor.dark[600],
   },
   stackIconsBox: {
     width: 24,
     height: 24,
     position: 'relative',
     '&:focus': {
-      outlineColor: 'grey',
+      outlineColor: theme.palette.geoViewColor.bgColor.dark[600],
     },
   },
   iconPreview: {
     padding: 0,
     borderRadius: 0,
-    boxShadow: 'rgb(0 0 0 / 20%) 0px 3px 1px -2px, rgb(0 0 0 / 14%) 0px 2px 2px 0px, rgb(0 0 0 / 12%) 0px 1px 5px 0px',
+    boxShadow: theme?.footerPanel.boxShadow,
     '&:focus': {
       border: 'revert',
     },

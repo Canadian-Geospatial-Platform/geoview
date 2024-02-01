@@ -55,7 +55,7 @@ export function Tabs(props: TypeTabsProps): JSX.Element {
   const { t } = useTranslation<string>();
 
   const theme = useTheme();
-  const sxClasses = getSxClasses();
+  const sxClasses = getSxClasses(theme);
   // internal state
   const [value, setValue] = useState(0);
 
