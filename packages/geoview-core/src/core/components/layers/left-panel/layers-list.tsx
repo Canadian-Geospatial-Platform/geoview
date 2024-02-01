@@ -58,7 +58,7 @@ export function LayersList({ layersList, setIsLayersListPanelVisible, parentLaye
   const getListStyle = (isDraggingOver: boolean) => {
     if (isDraggingOver) {
       return {
-        background: theme.palette.geoViewColor.grey.darken(0.5, 0.5)
+        background: theme.palette.geoViewColor.grey.darken(0.5, 0.5),
       };
     }
     return {

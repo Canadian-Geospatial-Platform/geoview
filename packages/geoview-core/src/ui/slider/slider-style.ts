@@ -3,7 +3,7 @@ import { Theme } from '@mui/material/styles';
 export const getSxClasses = (theme: Theme) => ({
   slider: {
     '& .MuiSlider-root': {
-      color: theme.palette.geoViewColor.white
+      color: theme.palette.geoViewColor.white,
     },
     '& .MuiSlider-thumb': {
       width: 15,
