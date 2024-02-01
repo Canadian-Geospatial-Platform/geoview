@@ -1,6 +1,6 @@
 import { isEqual } from 'lodash';
 import { AbstractEventProcessor } from '../abstract-event-processor';
-import { TypeFeatureInfoResultSets, EventType, TypeLayerData, TypeArrayOfLayerData } from '@/api/events/payloads/get-feature-info-payload';
+import { TypeFeatureInfoResultsSet, EventType, TypeLayerData, TypeArrayOfLayerData } from '@/api/events/payloads/get-feature-info-payload';
 import { getGeoViewStore } from '@/core/stores/stores-managers';
 
 export class FeatureInfoEventProcessor extends AbstractEventProcessor {
@@ -17,24 +17,19 @@ export class FeatureInfoEventProcessor extends AbstractEventProcessor {
    * @param {string} mapId The map identifier of the resul set modified.
    * @param {string} layerPath The layer path that has changed.
    * @param {EventType} eventType The event type that triggered the layer set update.
-   * @param {TypeFeatureInfoResultSets} resultSets The resul sets associated to the map.
+   * @param {TypeFeatureInfoResultsSet} resultsSet The resul sets associated to the map.
    */
-  static propagateFeatureInfoToStore(mapId: string, layerPath: string, eventType: EventType, resultSets: TypeFeatureInfoResultSets) {
+  static propagateFeatureInfoToStore(mapId: string, layerPath: string, eventType: EventType, resultsSet: TypeFeatureInfoResultsSet) {
     const store = getGeoViewStore(mapId);
-    const layerPathInResultSets = Object.keys(resultSets);
+    const layerPathInResultsSet = Object.keys(resultsSet);
 
     if (eventType === 'click') {
       /**
        * Create a details object for each layer which is then used to render layers in details panel.
        */
       const layerDataArray = [] as TypeArrayOfLayerData;
-      layerPathInResultSets.forEach((layerPathItem) => {
-        const newLayerData: TypeLayerData = {
-          features: resultSets?.[layerPathItem]?.data?.[eventType]?.features ?? [],
-          layerStatus: resultSets[layerPathItem].layerStatus,
-          layerPath: layerPathItem,
-          layerName: resultSets?.[layerPathItem]?.layerName?.[store.getState().appState.displayLanguage] ?? '',
-        };
+      layerPathInResultsSet.forEach((layerPathItem) => {
+        const newLayerData: TypeLayerData = resultsSet?.[layerPathItem]?.data.click as TypeLayerData;
         const layerDataFound = layerDataArray.find((layerEntry) => layerEntry.layerPath === layerPathItem);
         if (layerDataFound) {
           if (!isEqual(layerDataFound, newLayerData)) {
@@ -48,6 +43,46 @@ export class FeatureInfoEventProcessor extends AbstractEventProcessor {
       });
 
       store.getState().detailsState.actions.setLayerDataArray(layerDataArray);
+    } else if (eventType === 'hover') {
+      /**
+       * Create a hover object for each layer which is then used to render layers
+       */
+      const hoverDataArray = [] as TypeArrayOfLayerData;
+      layerPathInResultsSet.forEach((layerPathItem) => {
+        const newLayerData: TypeLayerData = resultsSet?.[layerPathItem]?.data.hover as TypeLayerData;
+        const layerDataFound = hoverDataArray.find((layerEntry) => layerEntry.layerPath === layerPathItem);
+        if (layerDataFound) {
+          if (!isEqual(layerDataFound, newLayerData)) {
+            layerDataFound.features = newLayerData.features;
+            layerDataFound.layerStatus = newLayerData.layerStatus;
+            layerDataFound.layerName = newLayerData.layerName;
+          }
+        } else {
+          hoverDataArray.push(newLayerData);
+        }
+      });
+
+      store.getState().detailsState.actions.setHoverDataArray(hoverDataArray);
+    } else if (eventType === 'all-features') {
+      /**
+       * Create a get all features info object for each layer which is then used to render layers
+       */
+      const allFeaturesDataArray = [] as TypeArrayOfLayerData;
+      layerPathInResultsSet.forEach((layerPathItem) => {
+        const newLayerData: TypeLayerData = resultsSet?.[layerPathItem]?.data['all-features'] as TypeLayerData;
+        const layerDataFound = allFeaturesDataArray.find((layerEntry) => layerEntry.layerPath === layerPathItem);
+        if (layerDataFound) {
+          if (!isEqual(layerDataFound, newLayerData)) {
+            layerDataFound.features = newLayerData.features;
+            layerDataFound.layerStatus = newLayerData.layerStatus;
+            layerDataFound.layerName = newLayerData.layerName;
+          }
+        } else {
+          allFeaturesDataArray.push(newLayerData);
+        }
+      });
+
+      store.getState().detailsState.actions.setAllFeaturesDataArray(allFeaturesDataArray);
     }
   }
   // #endregion

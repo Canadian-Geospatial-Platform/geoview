@@ -1,6 +1,6 @@
 # LayerSet class
 
-The `layerSet` class has four properties. The first is the identifier of the map to which it is attached. The second is the `layerSet` identifier used to differentiate the `layerSet` when we have several of them. Then we have the resultSets which will have as many properties as there are layer entries (sometimes named layer path) on the attached map. Finally, there is a registration condition function that will filter out layer entries that we don't want registered in the layerSet.
+The `layerSet` class has four properties. The first is the identifier of the map to which it is attached. The second is the `layerSet` identifier used to differentiate the `layerSet` when we have several of them. Then we have the resultsSet which will have as many properties as there are layer entries (sometimes named layer path) on the attached map. Finally, there is a registration condition function that will filter out layer entries that we don't want registered in the layerSet.
 
 The class can be instantiated using the constructor or the create method. At creation time, the instance sends a `LAYER_SET.REQUEST_LAYER_INVENTORY` event in order to get the list of all the layerPaths existing on the map. This list is filtered with the registration condition function to keep only the layerPaths of interest. Throughout its existence, the instance listens to the `LAYER_SET.LAYER_REGISTRATION` events which are emitted when a layer is created/destroyed on the map or in response to an inventory request.
 <p>&nbsp;</p>
