@@ -161,7 +161,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
       <List>
         {startLayer.children.map((layer) => (
           <Fragment key={layer.layerId}>
-            <ListItem sx={{ padding: '6px 0px', borderTop: '1px solid #ccc' }}>
+            <ListItem sx={{ padding: '6px 0px', borderTop: `1px solid ${theme.palette.geoViewColor.bgColor.dark[50]}` }}>
               <ListItemIcon>
                 <LayerIcon layer={layer} />
               </ListItemIcon>
@@ -181,7 +181,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
           <IconButton
             id="table-details"
             tooltip="legend.tableDetails"
-            sx={{ backgroundColor: theme.palette.geoViewColors.layersRoundButtonsBg }}
+            sx={{ backgroundColor: theme.palette.geoViewColor.bgColor.dark[100] }}
             onClick={handleOpenTable}
           >
             <TableViewIcon />
@@ -189,7 +189,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
         )}
         <IconButton
           tooltip="legend.refreshLayer"
-          sx={{ backgroundColor: theme.palette.geoViewColors.layersRoundButtonsBg }}
+          sx={{ backgroundColor: theme.palette.geoViewColor.bgColor.dark[100] }}
           onClick={handleRefreshLayer}
         >
           <RestartAltIcon />
@@ -198,7 +198,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
           tooltip="legend.highlightLayer"
           sx={{
             backgroundColor:
-              layerDetails.layerPath !== highlightedLayer ? theme.palette.geoViewColors.layersRoundButtonsBg : theme.palette.action.active,
+              layerDetails.layerPath !== highlightedLayer ? theme.palette.geoViewColor.bgColor.dark[100] : theme.palette.action.active,
           }}
           onClick={handleHighlightLayer}
         >
@@ -207,7 +207,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
         <IconButton
           tooltip="legend.zoomTo"
           onClick={handleZoomTo}
-          sx={{ backgroundColor: theme.palette.geoViewColors.layersRoundButtonsBg }}
+          sx={{ backgroundColor: theme.palette.geoViewColor.bgColor.dark[100] }}
           disabled={layerDetails.bounds === undefined}
         >
           <ZoomInSearchIcon />
@@ -243,7 +243,11 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
             layerDetails.layerAttribution!.map((attribution) => {
               return (
                 <Typography
-                  sx={{ marginTop: '10px', color: theme.palette.geoViewColors.textColor.light, fontSize: theme.palette.geoViewText.sm }}
+                  sx={{
+                    marginTop: '10px',
+                    color: theme.palette.geoViewColor.textColor.light[300],
+                    fontSize: theme.palette.geoViewFontSize['0.4x'],
+                  }}
                   key={generateId()}
                 >
                   {attribution.indexOf('©') === -1 ? `© ${attribution}` : attribution}

@@ -18,7 +18,7 @@ export const getSxClasses = (theme: Theme) => ({
     },
 
     '& .layerItemContainer': {
-      background: `${theme.palette.geoViewColors.bgColor.light} 0% 0% no-repeat padding-box`,
+      background: `${theme.palette.geoViewColor.bgColor.light[600]} 0% 0% no-repeat padding-box`,
       borderRadius: '5px',
       marginBottom: '1rem',
 
@@ -28,30 +28,30 @@ export const getSxClasses = (theme: Theme) => ({
 
       // for selected layer
       '&.selectedLayer': {
-        borderColor: theme.palette.geoViewColors.primary.main,
+        borderColor: theme.palette.geoViewColor.primary.main,
         borderWidth: '2px',
         borderStyle: 'solid',
       },
 
       '&.dragging': {
-        backgroundcolor: 'geoViewColors.primary.light',
+        backgroundcolor: theme.palette.geoViewColor.primary.dark[600],
         cursor: 'grab',
         userSelect: 'none',
       },
 
       // for handling layer status
       '&.error': {
-        background: '#ffdcdb 0% 0% no-repeat padding-box',
+        background: theme.palette.geoViewColor.error.light[400],
         '& .MuiListItemText-secondary': {
           fontWeight: 'bold',
-          color: 'error.main',
+          color: theme.palette.geoViewColor.error.main,
         },
       },
       '&.loading': {
-        background: '#e5efff 0% 0% no-repeat padding-box',
+        background: theme.palette.geoViewColor.info.light[600],
         '& .MuiListItemText-secondary': {
           fontWeight: 'bold',
-          color: 'info.main',
+          color: theme.palette.geoViewColor.info.main,
         },
       },
 
@@ -63,8 +63,8 @@ export const getSxClasses = (theme: Theme) => ({
         alignItems: 'center',
 
         '& .MuiIconButton-root': {
-          color: `${theme.palette.geoViewColors.primary} !important`,
-          background: `${theme.palette.geoViewColors.layersRoundButtonsBg} !important`,
+          color: `${theme.palette.geoViewColor.primary.main} !important`,
+          background: `${theme.palette.geoViewColor.bgColor.dark[100]} !important`,
           margin: '0px 5px',
         },
       },

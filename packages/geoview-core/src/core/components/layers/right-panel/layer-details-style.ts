@@ -7,7 +7,7 @@ export const getSxClasses = (theme: Theme) => ({
     fontSize: '20px',
   },
   layerDetails: {
-    borderColor: 'geoViewColors.primary.main',
+    borderColor: theme.palette.geoViewColor.primary.main,
     borderWidth: '2px',
     borderStyle: 'solid',
     padding: '20px',
@@ -23,8 +23,8 @@ export const getSxClasses = (theme: Theme) => ({
     '& .MuiGrid-container': {
       '&:first-of-type': {
         fontWeight: 'bold',
-        borderTop: '1px solid #ccc',
-        borderBottom: '2px solid #ccc',
+        borderTop: `1px solid ${theme.palette.geoViewColor.bgColor.dark[300]}`,
+        borderBottom: `1px solid ${theme.palette.geoViewColor.bgColor.dark[300]}`,
       },
       '& .MuiGrid-item': {
         padding: '3px 6px',
@@ -43,8 +43,8 @@ export const getSxClasses = (theme: Theme) => ({
     },
   },
   tableIconLabel: {
-    color: 'geoViewColors.primary.main',
-    fontSize: theme.palette.geoViewText.lg,
+    color: theme.palette.geoViewColor.primary.main,
+    fontSize: theme.palette.geoViewFontSize.lg,
     noWrap: true,
     marginLeft: 20,
   },

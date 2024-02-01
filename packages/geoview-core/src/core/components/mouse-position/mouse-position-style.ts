@@ -12,11 +12,11 @@ export const getSxClasses = (theme: Theme) => ({
     width: 'auto',
     backgroundColor: 'transparent !important',
     height: 'inherit !important',
-    color: theme.palette.common.white,
+    color: theme.palette.geoViewColor.white,
     lineHeight: 1.5,
     ':hover': {
       backgroundColor: 'transparent !important',
-      color: theme.palette.common.white,
+      color: theme.palette.geoViewColor.white,
     },
   },
   mousePositionTextContainer: {
@@ -33,7 +33,7 @@ export const getSxClasses = (theme: Theme) => ({
     alignItems: 'center',
     '& span': {
       fontSize: theme.typography.fontSize,
-      color: theme.palette.geoViewColors.primary.light,
+      color: theme.palette.geoViewColor.primary.light[300],
       textOverflow: 'ellipsis',
       whiteSpace: 'nowrap',
       overflow: 'hidden',
@@ -41,11 +41,11 @@ export const getSxClasses = (theme: Theme) => ({
   },
   mousePositionCheckmark: {
     paddingRight: 5,
-    color: theme.palette.geoViewColors.primary.light,
+    color: theme.palette.geoViewColor.primary.light[300],
   },
   mousePositionText: {
     fontSize: theme.typography.fontSize,
-    color: theme.palette.geoViewColors.primary.light,
+    color: theme.palette.geoViewColor.primary.light[300],
     textOverflow: 'ellipsis',
     whiteSpace: 'nowrap',
     overflow: 'hidden',

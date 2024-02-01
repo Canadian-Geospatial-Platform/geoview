@@ -10,13 +10,13 @@ export const getSxClasses = (theme: Theme) => ({
   title: {
     textAlign: 'left',
     font: theme.footerPanel.titleFont,
-    color: theme.palette.geoViewColors.textColor.main,
-    fontSize: theme.palette.geoViewText.xl,
+    color: theme.palette.geoViewColor.textColor.main,
+    fontSize: theme.palette.geoViewFontSize.xl,
   },
   subtitle: {
     font: theme.footerPanel.titleFont,
     fontWeight: 'normal',
-    fontSize: theme.palette.geoViewText.lg,
+    fontSize: theme.palette.geoViewFontSize.lg,
     textAlign: 'left',
     marginBottom: '15px',
   },
@@ -57,15 +57,15 @@ export const getSxClasses = (theme: Theme) => ({
         padding: 0,
       },
       '& li': {
-        borderLeft: `5px solid ${theme.palette.geoViewColors.bgColor.dark}`,
+        borderLeft: `5px solid ${theme.palette.geoViewColor.bgColor.dark[200]}`,
         paddingLeft: '6px',
         marginBottom: '3px',
         fontWeight: '400',
 
         '&.unchecked': {
-          borderLeft: `5px solid ${theme.palette.geoViewColors.bgColor.darker}`,
+          borderLeft: `5px solid ${theme.palette.geoViewColor.bgColor.dark[600]}`,
           fontStyle: 'italic',
-          color: theme.palette.geoViewColors.textColor.lighter,
+          color: theme.palette.geoViewColor.textColor.light[600],
         },
       },
     },

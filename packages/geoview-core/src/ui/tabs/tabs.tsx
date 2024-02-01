@@ -2,7 +2,7 @@ import { SyntheticEvent, ReactNode, useState, useEffect, useRef } from 'react';
 
 import { useTranslation } from 'react-i18next';
 
-import { Grid, Tab as MaterialTab, Tabs as MaterialTabs, TabsProps, TabProps, BoxProps } from '@mui/material';
+import { Grid, Tab as MaterialTab, Tabs as MaterialTabs, TabsProps, TabProps, BoxProps, useTheme } from '@mui/material';
 
 import { HtmlToReact } from '@/core/containers/html-to-react';
 import { TabPanel } from './tab-panel';
@@ -52,8 +52,8 @@ export function Tabs(props: TypeTabsProps): JSX.Element {
   const { tabs, rightButtons, selectedTab, isCollapsed, handleCollapse, onSelectedTabChanged, TabContentVisibilty = 'inherit' } = props;
 
   const { t } = useTranslation<string>();
-
-  const sxClasses = getSxClasses();
+  const theme = useTheme();
+  const sxClasses = getSxClasses(theme);
   // internal state
   const [value, setValue] = useState(0);
   // reference to display tab panels on demand.
@@ -130,7 +130,7 @@ export function Tabs(props: TypeTabsProps): JSX.Element {
             aria-label="basic tabs"
             sx={{
               '& .MuiTabs-indicator': {
-                backgroundColor: (theme) => theme.palette.secondary.main,
+                backgroundColor: theme.palette.secondary.main,
               },
             }}
           >
