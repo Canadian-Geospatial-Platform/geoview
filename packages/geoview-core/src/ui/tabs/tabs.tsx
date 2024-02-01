@@ -13,6 +13,7 @@ import {
 } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import { getSxClasses } from './tabs-style';
 import { logger } from '@/core/utils/logger';
+import { useGeoViewMapId } from '@/app';
 
 /**
  * Type used for properties of each tab
@@ -50,7 +51,8 @@ export interface TypeTabsProps {
  */
 export function Tabs(props: TypeTabsProps): JSX.Element {
   const { tabs, rightButtons, selectedTab, isCollapsed, handleCollapse, onSelectedTabChanged, TabContentVisibilty = 'inherit' } = props;
-
+  const mapId = useGeoViewMapId();
+  const mapElem = document.getElementById(`shell-${mapId}`);
   const { t } = useTranslation<string>();
 
   const sxClasses = getSxClasses();
@@ -194,6 +196,7 @@ export function Tabs(props: TypeTabsProps): JSX.Element {
                 menuItems={mobileTabsDropdownValues}
                 value={value}
                 onChange={(e) => updateTabPanel(e.target.value as number)}
+                MenuProps={{ container: mapElem }}
               />
             </Box>
           )}
