@@ -43,7 +43,7 @@
                                 </div>
                                 <div style="font-family: Consolas, &quot;Courier New&quot;, monospace; line-height: 19px; font-size: 11px;">
                                     <font style="font-size: 11px;">
-                                        + ResultSets: Record&lt;string, any&gt;
+                                        + ResultsSet: Record&lt;string, any&gt;
                                     </font>
                                 </div>
                                 <div style="font-family: Consolas, &quot;Courier New&quot;, monospace; line-height: 19px; font-size: 11px;">
@@ -83,7 +83,7 @@
                                                 layerSetId,
                                             </span>
                                             <span style="background-color: initial;">
-                                                ResultSets,
+                                                ResultsSet,
                                             </span>
                                         </font>
                                     </font>
@@ -118,7 +118,7 @@
                                                 layerSetId,
                                             </span>
                                             <span style="background-color: initial;">
-                                                ResultSets,
+                                                ResultsSet,
                                             </span>
                                             <br/>
                                         </font>
@@ -136,7 +136,7 @@
                     </div>
                 </foreignObject>
                 <text x="38" y="215" fill="#000000" font-family="Helvetica" font-size="12px">
-                    + constructor (mapId, layerSetId, ResultSets,...
+                    + constructor (mapId, layerSetId, ResultsSet,...
                 </text>
             </switch>
         </g>

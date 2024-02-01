@@ -47,9 +47,11 @@ export function Select(props: TypeSelectProps): JSX.Element {
 
   return (
     <FormControl fullWidth={fullWidth} {...formControlProps}>
-      <InputLabel sx={sxClasses.label} {...inputLabel}>
-        {selectProps.label}
-      </InputLabel>
+      {!!selectProps.label && (
+        <InputLabel sx={sxClasses.label} {...inputLabel}>
+          {selectProps.label}
+        </InputLabel>
+      )}
       <MaterialSelect sx={sxClasses.formControl} {...selectProps}>
         {menuItems.map((menuItem: TypeMenuItemProps, index) => {
           if (menuItem) {

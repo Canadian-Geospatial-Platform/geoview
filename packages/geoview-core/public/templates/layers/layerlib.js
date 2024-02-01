@@ -8,10 +8,10 @@ function listenToLegendLayerSetChanges(elementId, handlerName) {
       const outputHeader =
         '<table class="state"><tr class="state"><th class="state">Name</th><th class="state">Phase</th><th class="state">Status</th></tr>';
       const displayField = document.getElementById(elementId);
-      const { resultSets } = payload;
-      const output = Object.keys(resultSets).reduce((outputValue, layerPath) => {
-        const layerName = resultSets[layerPath]?.layerName?.en || resultSets[layerPath]?.layerName?.fr || '';
-        const { layerPhase, layerStatus } = resultSets[layerPath];
+      const { resultsSet } = payload;
+      const output = Object.keys(resultsSet).reduce((outputValue, layerPath) => {
+        const layerName = resultsSet[layerPath]?.layerName?.en || resultsSet[layerPath]?.layerName?.fr || '';
+        const { layerPhase, layerStatus } = resultsSet[layerPath];
         return `${outputValue}<tr class="state"><td class="state">${layerName}</td><td class="state">${layerPhase}</td><td class="state">${layerStatus}</td></tr>`;
       }, outputHeader);
       displayField.innerHTML = output && output !== outputHeader ? `${output}</table>` : '';
@@ -42,17 +42,17 @@ const addBoundsPolygon = (mapId, bbox) => {
 };
 
 // ==========================================================================================================================
-const createInfoTable = (mapId, resultSetsId, resultSets, eventType) => {
+const createInfoTable = (mapId, resultsSetId, resultsSet, eventType) => {
   if (eventType !== 'click') return;
-  const infoTable = document.getElementById(`${resultSetsId}-${eventType}`);
+  const infoTable = document.getElementById(`${resultsSetId}-${eventType}`);
   infoTable.textContent = '';
   const oldContent = document.getElementById(`layer${mapId.slice(-1)}-${eventType}-info`);
   if (oldContent) oldContent.remove();
   const content = document.createElement('div');
   content.id = `layer${mapId.slice(-1)}-${eventType}-info`;
   infoTable.appendChild(content);
-  Object.keys(resultSets).forEach((layerPath) => {
-    const activeResultSet = resultSets[layerPath];
+  Object.keys(resultsSet).forEach((layerPath) => {
+    const activeResultSet = resultsSet[layerPath];
     const layerData = activeResultSet.data[eventType].features;
 
     // Header of the layer
@@ -439,7 +439,7 @@ const createTableOfFilter = (mapId) => {
 };
 
 // ==========================================================================================================================
-function displayLegend(layerSetId, resultSets) {
+function displayLegend(layerSetId, resultsSet) {
   const addHeader = (title, container) => {
     const tableHeader = document.createElement('th');
     tableHeader.style = 'text-align: center; vertical-align: middle;';
@@ -465,8 +465,8 @@ function displayLegend(layerSetId, resultSets) {
   table.style = 'width:50%';
   legendTable.appendChild(table);
   let createHeader = true;
-  Object.keys(resultSets).forEach((layerPath) => {
-    const activeResultSet = resultSets[layerPath];
+  Object.keys(resultsSet).forEach((layerPath) => {
+    const activeResultSet = resultsSet[layerPath];
     if (createHeader) {
       createHeader = false;
       const tableRow1 = document.createElement('tr');

@@ -1,5 +1,5 @@
 import { AbstractEventProcessor } from '../abstract-event-processor';
-import { TypeLegendResultSetsEntry } from '@/api/events/payloads';
+import { TypeLegendResultsSetEntry } from '@/api/events/payloads';
 import {
   isClassBreakStyleConfig,
   isImageStaticLegend,
@@ -125,7 +125,7 @@ export class LegendEventProcessor extends AbstractEventProcessor {
     return undefined;
   }
 
-  static async propagateLegendToStore(mapId: string, layerPath: string, legendResultSetsEntry: TypeLegendResultSetsEntry): Promise<void> {
+  static async propagateLegendToStore(mapId: string, layerPath: string, legendResultsSetEntry: TypeLegendResultsSetEntry): Promise<void> {
     const layerPathNodes = layerPath.split('/');
     const createNewLegendEntries = async (
       layerPathBeginning: string,
@@ -147,11 +147,11 @@ export class LegendEventProcessor extends AbstractEventProcessor {
             // TODO: Why do we have the following line in the store? Do we have to fetch the metadata again since the GeoView layer read and keep them?
             metadataAccessPath: getLocalizedValue(layerConfig.geoviewLayerConfig?.metadataAccessPath, mapId) || '',
             layerPath: entryLayerPath,
-            layerStatus: legendResultSetsEntry.layerStatus,
+            layerStatus: legendResultsSetEntry.layerStatus,
             layerName: getLocalizedValue(layerConfig.layerName, mapId) || layerConfig.layerId,
             type: layerConfig.entryType as TypeGeoviewLayerType,
             isVisible: layerConfig.initialSettings?.visible ? layerConfig.initialSettings.visible : 'yes',
-            canToggle: legendResultSetsEntry.data?.type !== 'esriImage',
+            canToggle: legendResultsSetEntry.data?.type !== 'esriImage',
             opacity: layerConfig.initialSettings?.opacity ? layerConfig.initialSettings.opacity : 1,
             items: [] as TypeLegendItem[],
             children: [] as TypeLegendLayer[],
@@ -174,18 +174,18 @@ export class LegendEventProcessor extends AbstractEventProcessor {
           layerAttribution: api.maps[mapId].layer.geoviewLayers[layerPathNodes[0]].attributions,
           // ! Why do we have metadataAccessPath here? Do we need to fetch the metadata again? The GeoView layer fetch them and store them in this.metadata.
           metadataAccessPath: getLocalizedValue(layerConfig.geoviewLayerConfig?.metadataAccessPath, mapId) || '',
-          layerName: getLocalizedValue(legendResultSetsEntry.data?.layerName, mapId) || layerConfig.layerId!,
-          layerStatus: legendResultSetsEntry.layerStatus,
-          layerPhase: legendResultSetsEntry.layerPhase,
-          querySent: legendResultSetsEntry.querySent,
-          styleConfig: legendResultSetsEntry.data?.styleConfig,
-          type: legendResultSetsEntry.data?.type,
+          layerName: getLocalizedValue(legendResultsSetEntry.data?.layerName, mapId) || layerConfig.layerId!,
+          layerStatus: legendResultsSetEntry.layerStatus,
+          layerPhase: legendResultsSetEntry.layerPhase,
+          querySent: legendResultsSetEntry.querySent,
+          styleConfig: legendResultsSetEntry.data?.styleConfig,
+          type: legendResultsSetEntry.data?.type,
           isVisible: layerConfig.initialSettings?.visible || 'yes',
-          canToggle: legendResultSetsEntry.data?.type !== 'esriImage',
+          canToggle: legendResultsSetEntry.data?.type !== 'esriImage',
           opacity: layerConfig.initialSettings?.opacity || 1,
           items: [] as TypeLegendItem[],
           children: [] as TypeLegendLayer[],
-          icons: LegendEventProcessor.getLayerIconImage(mapId, layerPath, legendResultSetsEntry.data!),
+          icons: LegendEventProcessor.getLayerIconImage(mapId, layerPath, legendResultsSetEntry.data!),
         };
 
         newLegendLayer.items = [];

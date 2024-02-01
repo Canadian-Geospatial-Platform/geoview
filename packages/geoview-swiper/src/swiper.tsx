@@ -15,7 +15,7 @@ import debounce from 'lodash/debounce';
 
 import { getLocalizedMessage } from 'geoview-core/src/core/utils/utilities';
 import { EVENT_NAMES } from 'geoview-core/src/api/events/event-types';
-import { PayloadBaseClass, TypeResultSets, payloadIsLayerSetUpdated } from 'geoview-core/src/api/events/payloads';
+import { PayloadBaseClass, TypeResultsSet, payloadIsLayerSetUpdated } from 'geoview-core/src/api/events/payloads';
 
 const sxClasses = {
   layerSwipe: {
@@ -123,11 +123,11 @@ export function Swiper(props: SwiperProps): JSX.Element {
 
   /**
    * Sort layers to only include those that are loaded
-   * @param {TypeResultSets} resultsSets The resultSet from the layer set
+   * @param {TypeResultsSet} resultsSets The resulstSet from the layer set
    *
    * @returns {string[]} array of IDs for layers that are loaded on the map
    */
-  function sortLayerIds(resultsSets: TypeResultSets) {
+  function sortLayerIds(resultsSets: TypeResultsSet) {
     const layerIds: string[] = [];
     Object.keys(resultsSets).forEach((result) => {
       if (resultsSets[result].layerStatus === 'loaded') layerIds.push(result.split('/')[0]);
@@ -135,7 +135,7 @@ export function Swiper(props: SwiperProps): JSX.Element {
     return layerIds;
   }
 
-  const [layersIds, setLayersIds] = useState<string[]>(sortLayerIds(api.getLegendsLayerSet(mapId).resultSets));
+  const [layersIds, setLayersIds] = useState<string[]>(sortLayerIds(api.getLegendsLayerSet(mapId).resultsSet));
 
   /**
    * Pre compose, Pre render event callback
@@ -255,7 +255,7 @@ export function Swiper(props: SwiperProps): JSX.Element {
   // Update layer list if a layer loads late
   useEffect(() => {
     const layerSetUpdatedHandler = (payload: PayloadBaseClass) => {
-      if (payloadIsLayerSetUpdated(payload) && payload.resultSets[payload.layerPath]?.layerStatus === 'loaded') {
+      if (payloadIsLayerSetUpdated(payload) && payload.resultsSet[payload.layerPath]?.layerStatus === 'loaded') {
         const layerId = payload.layerPath.split('/')[0];
         const ids = [...layersIds];
         if (ids.indexOf(layerId) === -1) {

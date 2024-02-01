@@ -3,23 +3,29 @@ import { TypeSetStore, TypeGetStore } from '@/core/stores/geoview-store';
 import { TypeArrayOfLayerData, TypeFeatureInfoEntry, TypeGeometry } from '@/api/events/payloads/get-feature-info-payload';
 import { useGeoViewStore } from '../stores-managers';
 
-export interface IDetailsState {
+export interface IFeatureInfoState {
   checkedFeatures: Array<TypeFeatureInfoEntry>;
   layerDataArray: TypeArrayOfLayerData;
+  hoverDataArray: TypeArrayOfLayerData;
+  allFeaturesDataArray: TypeArrayOfLayerData;
   selectedLayerPath: string;
 
   actions: {
     addCheckedFeature: (feature: TypeFeatureInfoEntry) => void;
     removeCheckedFeature: (feature: TypeFeatureInfoEntry | 'all') => void;
     setLayerDataArray: (layerDataArray: TypeArrayOfLayerData) => void;
+    setHoverDataArray: (hoverDataArray: TypeArrayOfLayerData) => void;
+    setAllFeaturesDataArray: (allFeaturesDataArray: TypeArrayOfLayerData) => void;
     setSelectedLayerPath: (selectedLayerPath: string) => void;
   };
 }
 
-export function initialDetailsState(set: TypeSetStore, get: TypeGetStore): IDetailsState {
+export function initFeatureInfoState(set: TypeSetStore, get: TypeGetStore): IFeatureInfoState {
   return {
     checkedFeatures: [],
     layerDataArray: [],
+    hoverDataArray: [],
+    allFeaturesDataArray: [],
     selectedLayerPath: '',
 
     // #region ACTIONS
@@ -54,6 +60,22 @@ export function initialDetailsState(set: TypeSetStore, get: TypeGetStore): IDeta
           },
         });
       },
+      setHoverDataArray(hoverDataArray: TypeArrayOfLayerData) {
+        set({
+          detailsState: {
+            ...get().detailsState,
+            hoverDataArray,
+          },
+        });
+      },
+      setAllFeaturesDataArray(allFeaturesDataArray: TypeArrayOfLayerData) {
+        set({
+          detailsState: {
+            ...get().detailsState,
+            allFeaturesDataArray,
+          },
+        });
+      },
       setSelectedLayerPath(selectedLayerPath: string) {
         set({
           detailsState: {
@@ -64,7 +86,7 @@ export function initialDetailsState(set: TypeSetStore, get: TypeGetStore): IDeta
       },
     },
     // #endregion ACTIONS
-  } as IDetailsState;
+  } as IFeatureInfoState;
 }
 
 // **********************************************************

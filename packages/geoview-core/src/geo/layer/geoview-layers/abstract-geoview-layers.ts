@@ -1001,8 +1001,7 @@ export abstract class AbstractGeoViewLayer {
             // Log
             logger.logTraceDetailed('abstract-geoview-layers on queryLayer', this.mapId, payload);
 
-            const { queryType, location, eventType, disabledLayers } = payload;
-            if (disabledLayers[layerPath]) return;
+            const { queryType, location, eventType } = payload;
 
             // Get Feature Info
             const queryResult = await this.getFeatureInfo(queryType, layerPath, location);
@@ -1010,7 +1009,11 @@ export abstract class AbstractGeoViewLayer {
           }
         };
 
-        api.event.on(EVENT_NAMES.GET_FEATURE_INFO.QUERY_LAYER, this.registerToLayerSetListenerFunctions[layerPath].queryLayer!, this.mapId);
+        api.event.on(
+          EVENT_NAMES.GET_FEATURE_INFO.QUERY_LAYER,
+          this.registerToLayerSetListenerFunctions[layerPath].queryLayer!,
+          `${this.mapId}/${layerPath}`
+        );
       }
     }
 

@@ -66,10 +66,10 @@ export function HoverTooltip(): JSX.Element {
 
   const allQueriesDoneListenerFunciton = (payload: PayloadBaseClass) => {
     if (payloadIsAllQueriesDone(payload)) {
-      const { eventType, resultSets } = payload;
+      const { eventType, resultsSet } = payload;
       if (eventType === 'hover') {
         // eslint-disable-next-line no-restricted-syntax
-        for (const [, value] of Object.entries(resultSets)) {
+        for (const [, value] of Object.entries(resultsSet)) {
           // if there is a result and layer is not ogcWms, and it is not selected, show tooltip
           if (
             value?.data?.hover?.features &&
@@ -87,8 +87,8 @@ export function HoverTooltip(): JSX.Element {
           }
         }
       } else if (eventType === 'click') {
-        Object.keys(resultSets).every((layerPath) => {
-          const features = resultSets[layerPath]!.data.click?.features;
+        Object.keys(resultsSet).every((layerPath) => {
+          const features = resultsSet[layerPath]!.data.click?.features;
           if (features && features.length > 0 && features[0].geoviewLayerType !== 'ogcWms') {
             [selectedFeature.current] = features;
             return false;
