@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useTheme } from '@mui/material/styles';
 
 import { Box, MoreHorizIcon, Popover, IconButton, Typography } from '@/ui';
-import { useUIFooterBarExpanded } from '@/core/stores/store-interface-and-intial-values/ui-state';
+import { useUIMapInfoExpanded } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import { useMapAttribution } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { generateId } from '@/core/utils/utilities';
 import { useGeoViewMapId } from '@/app';
@@ -41,7 +41,7 @@ export function Attribution(): JSX.Element {
   };
 
   // get store value
-  const expanded = useUIFooterBarExpanded();
+  const expanded = useUIMapInfoExpanded();
 
   return (
     <>

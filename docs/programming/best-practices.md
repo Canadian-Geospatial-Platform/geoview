@@ -161,7 +161,7 @@ const sxClasses = getSxClasses(theme);
 const [scaleMode, setScaleMode] = useState<number>(0);
 
 // get the values from store
-const expanded = useUIFooterBarExpanded();
+const expanded = useUIMapInfoExpanded();
 const scale = useMapScale();
 ```
 

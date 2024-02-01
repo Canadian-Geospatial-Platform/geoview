@@ -1555,16 +1555,6 @@
       "default": 3978,
       "description": "Spatial Reference EPSG code supported (https://epsg.io/). We support Web Mercator and Lambert Conical Conform Canada."
     },
-    "TypeAppBarProps": {
-      "type": "array",
-      "uniqueItems": true,
-      "items": {
-        "enum": ["geolocator", "export"]
-      },
-      "default": ["geolocator"],
-      "description": "Controls available on the application bar.",
-      "minItems": 0
-    },
     "TypeNavBarProps": {
       "type": "array",
       "uniqueItems": true,
@@ -1592,7 +1582,7 @@
               "minItems": 1,
               "default": ["legend", "layers", "details", "data-table"],
               "uniqueItems": true,
-              "description": "Default core tabs of footer panel to use"
+              "description": "Default core tabs of footer panel to use. NOTE: config from packages for time-slider and geochart are in the same loaction as core config (<<core config name>>-<<package name>>.json)."
             },
             "custom": {
               "type": "array",
@@ -1626,53 +1616,27 @@
       },
       "required": ["tabs"]
     },
-    "TypeAppBarTabsProps": {
+    "TypeAppBarProps": {
       "type": "object",
       "additionalProperties": false,
       "properties": {
         "tabs": {
           "type": "object",
-          "description": "Available tabs",
+          "description": "Available tabs - controls",
           "properties": {
             "core": {
               "type": "array",
               "items": {
                 "type": "string",
-                "enum": ["basemap-panel", "layers", "geochart"]
-              },
-              "minItems": 1,
-              "default": [],
-              "uniqueItems": true,
-              "description": "Default core tabs of app-bar to use"
-            },
-            "custom": {
-              "type": "array",
-              "items": {
-                "type": "object",
-                "properties": {
-                  "id": {
-                    "type": "string"
-                  },
-                  "defaultTabs": {
-                    "type": "string"
-                  },
-                  "contentHTML": {
-                    "type": "string"
-                  }
-                }
+                "enum": ["geolocator", "export", "basemap-panel", "geochart"]
               },
               "minItems": 0,
-              "default": [],
+              "default": ["geolocator"],
               "uniqueItems": true,
-              "description": "Custom tabs of app-bar to use"
+              "description": "Default core tabs of app-bar to use. NOTE: config from packages like geochart are in the same loaction as core config (<<core config name>>-<<package name>>.json)."
             }
           },
           "additionalProperties": false
-        },
-        "collapsed": {
-          "type": "boolean",
-          "default": false,
-          "description": "State of app-bar when map is loaded (expanded or collapsed)"
         }
       },
       "required": ["tabs"]
@@ -1694,9 +1658,9 @@
       "type": "array",
       "uniqueItems": true,
       "items": {
-        "enum": ["overview-map", "north-arrow", "geolocator"]
+        "enum": ["overview-map", "north-arrow"]
       },
-      "default": ["overview-map", "north-arrow", "geolocator"],
+      "default": ["overview-map", "north-arrow"],
       "description": "Core components to initialize on viewer load. The schema for those are inside this file.",
       "minItems": 0
     },
@@ -1704,10 +1668,10 @@
       "type": "array",
       "uniqueItems": true,
       "items": {
-        "enum": ["basemap-panel", "swiper", "geochart", "time-slider"]
+        "enum": ["swiper"]
       },
-      "default": ["basemap-panel", "layers-panel", "details-panel", "geolocator-panel"],
-      "description": "Core packages to initialize on viewer load. The schema for those are on their own package. NOTE: config from packages are in the same loaction as core config (<<core config name>>-<<package name>>.json).",
+      "default": [],
+      "description": "Core map packages to initialize on viewer load. The schema for those are on their own package. NOTE: config from packages are in the same loaction as core config (<<core config name>>-<<package name>>.json).",
       "minItems": 0
     },
     "TypeExternalPackages": {
@@ -1788,17 +1752,14 @@
           "default": "dark",
           "description": "Theme style the viewer."
         },
-        "appBar": {
-          "$ref": "#/definitions/TypeAppBarProps"
-        },
         "navBar": {
           "$ref": "#/definitions/TypeNavBarProps"
         },
         "footerTabs": {
           "$ref": "#/definitions/TypeFooterTabsProps"
         },
-        "appBarTabs": {
-          "$ref": "#/definitions/TypeAppBarTabsProps"
+        "appBar": {
+          "$ref": "#/definitions/TypeAppBarProps"
         },
         "overviewMap": {
           "$ref": "#/definitions/TypeOverviewMapProps"

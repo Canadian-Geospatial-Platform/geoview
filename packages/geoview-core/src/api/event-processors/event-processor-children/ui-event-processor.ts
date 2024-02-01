@@ -1,7 +1,7 @@
 import { GeoviewStoreType } from '@/core/stores/geoview-store';
 import { AbstractEventProcessor } from '../abstract-event-processor';
 import { getGeoViewStore } from '@/core/stores/stores-managers';
-import { TypeAppBarProps, TypeMapCorePackages } from '@/geo';
+import { TypeValidAppBarCoreProps, TypeMapCorePackages } from '@/geo';
 import { api } from '@/app';
 
 export class UIEventProcessor extends AbstractEventProcessor {
@@ -19,7 +19,11 @@ export class UIEventProcessor extends AbstractEventProcessor {
   //! Some action does state modifications AND map actions.
   //! ALWAYS use map event processor when an action modify store and IS NOT trap by map state event handler
   // #region
-  static getAppBarComponents(mapId: string): TypeAppBarProps {
+  static getActiveFooterTab(mapId: string): string {
+    return getGeoViewStore(mapId).getState().uiState.activefooterTabId;
+  }
+
+  static getAppBarComponents(mapId: string): TypeValidAppBarCoreProps {
     return getGeoViewStore(mapId).getState().uiState.appBarComponents;
   }
 

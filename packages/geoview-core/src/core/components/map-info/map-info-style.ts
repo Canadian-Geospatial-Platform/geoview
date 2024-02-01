@@ -1,6 +1,6 @@
-// footer-bar.tsx
-export const sxClassesFooterBar = {
-  footerBarContainer: {
+// map-info.tsx
+export const sxClassesMapInfo = {
+  mapInfoContainer: {
     flexGrow: 1,
     zIndex: 50,
     display: 'flex',
@@ -33,7 +33,7 @@ export const sxClassesFooterBar = {
   },
 };
 
-// footer-bar-expand-button.tsx
+// map-info-expand-button.tsx
 export const sxClassesExportButton = {
   expandbuttonContainer: {
     display: 'flex',
@@ -46,7 +46,7 @@ export const sxClassesExportButton = {
   },
 };
 
-// footer-bar-rotation-button.tsx
+// map-info-rotation-button.tsx
 export const sxClassesRotationButton = {
   rotationButton: {
     height: 25,

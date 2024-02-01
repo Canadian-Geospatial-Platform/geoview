@@ -25,7 +25,7 @@
   },
   "theme": "light",
   "components": ["north-arrow", "overview-map"],
-  "appBarTabs": {
+  "appBar": {
     "tabs": {
       "core": ["basemap-panel"]
     }

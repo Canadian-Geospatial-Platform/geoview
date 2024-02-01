@@ -3,15 +3,15 @@ import { useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { ArrowUpIcon, IconButton } from '@/ui';
-import { sxClassesRotationButton } from './footer-bar-style';
+import { sxClassesRotationButton } from './map-info-style';
 import { useMapRotation, useMapStoreActions } from '@/core/stores/store-interface-and-intial-values/map-state';
 
 /**
- * Footerbar Rotation Button component
+ * Map Information Rotation Button component
  *
  * @returns {JSX.Element} the rotation buttons
  */
-export function FooterbarRotationButton(): JSX.Element {
+export function MapInfoRotationButton(): JSX.Element {
   const { t } = useTranslation<string>();
 
   // internal state
