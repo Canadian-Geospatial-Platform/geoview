@@ -143,8 +143,8 @@ export function Tabs(props: TypeTabsProps): JSX.Element {
       item: { value: tab.value, children: t(`${tab.label}`) },
     }));
 
-    // add no tab field which will be used to collapse the footer panel.
-    const noTab = { type: 'item', item: { value: '', children: 'No Tab' } };
+    // no tab field which will be used to collapse the footer panel.
+    const noTab = { type: 'item', item: { value: '', children: t('footerTabsContainer.noTab') } };
     return [noTab, ...newTabs] as TypeMenuItemProps[];
   }, [tabs, t]);
 
