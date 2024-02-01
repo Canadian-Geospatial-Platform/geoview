@@ -1,8 +1,8 @@
-import { SyntheticEvent, ReactNode, useState, useEffect, useRef } from 'react';
-
+import { SyntheticEvent, ReactNode, useState, useEffect, useRef, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-
-import { Grid, Tab as MaterialTab, Tabs as MaterialTabs, TabsProps, TabProps, BoxProps } from '@mui/material';
+import debounce from 'lodash/debounce';
+import { Grid, Tab as MaterialTab, Tabs as MaterialTabs, TabsProps, TabProps, BoxProps, Box } from '@mui/material';
+import { Select, TypeMenuItemProps } from '../select/select';
 
 import { HtmlToReact } from '@/core/containers/html-to-react';
 import { TabPanel } from './tab-panel';
@@ -56,6 +56,8 @@ export function Tabs(props: TypeTabsProps): JSX.Element {
   const sxClasses = getSxClasses();
   // internal state
   const [value, setValue] = useState(0);
+  const [showMobileDropdown, setShowMobileDropdown] = useState(false);
+
   // reference to display tab panels on demand.
   const tabPanelRefs = useRef([tabs[0]]);
   // get store values and actions
@@ -65,19 +67,25 @@ export function Tabs(props: TypeTabsProps): JSX.Element {
   const { closeModal, openModal } = useUIStoreActions();
 
   /**
+   * Update Tab panel when value change from tabs and dropdown.
+   * @param {number} tabValue index of the tab or dropdown.
+   */
+  const updateTabPanel = (tabValue: number) => {
+    // Update panel refs when tab value is changed.
+    if (!tabPanelRefs.current[tabValue]) {
+      tabPanelRefs.current[tabValue] = tabs[tabValue];
+    }
+    setValue(tabValue);
+    // Callback
+    onSelectedTabChanged?.(tabs[tabValue]);
+  };
+
+  /**
    * Handle a tab change
-   *
-   * @param {SyntheticEvent<Element, Event>} event the event used on a tab change
    * @param {number} newValue value of the new tab
    */
   const handleChange = (event: SyntheticEvent<Element, Event>, newValue: number) => {
-    // Update panel refs when tab value is changed.
-    if (!tabPanelRefs.current[newValue]) {
-      tabPanelRefs.current[newValue] = tabs[newValue];
-    }
-    setValue(newValue);
-    // Callback
-    onSelectedTabChanged?.(tabs[newValue]);
+    updateTabPanel(newValue);
   };
 
   /**
@@ -115,41 +123,80 @@ export function Tabs(props: TypeTabsProps): JSX.Element {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeFooterTabId]);
 
+  /**
+   * Build mobile tab dropdown.
+   */
+  const mobileTabsDropdownValues: TypeMenuItemProps[] = useMemo(() => {
+    return tabs.map((tab) => ({
+      type: 'item',
+      item: { value: tab.value, children: t(`${tab.label}`) },
+    }));
+  }, [tabs, t]);
+
+  useEffect(() => {
+    // show/hide mobile dropdown when screen size change.
+    const resizeHandler = () => (document.body.offsetWidth < 768 ? setShowMobileDropdown(true) : setShowMobileDropdown(false));
+    // update the showMobileDropdown state on page load.
+    resizeHandler();
+
+    const handleResizeDebounced = debounce(resizeHandler, 10);
+    window.addEventListener('resize', handleResizeDebounced);
+    return () => {
+      window.removeEventListener('resize', handleResizeDebounced);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   return (
     <Grid container sx={{ width: '100%', height: '100%' }}>
       <Grid container>
         <Grid item xs={7} sm={10} sx={{ background: 'white' }}>
-          <MaterialTabs
-            // eslint-disable-next-line react/destructuring-assignment
-            {...props.tabsProps}
-            variant="scrollable"
-            scrollButtons
-            allowScrollButtonsMobile
-            value={value}
-            onChange={handleChange}
-            aria-label="basic tabs"
-            sx={{
-              '& .MuiTabs-indicator': {
-                backgroundColor: (theme) => theme.palette.secondary.main,
-              },
-            }}
-          >
-            {tabs.map((tab, index) => {
-              return (
-                <MaterialTab
-                  label={t(tab.label)}
-                  key={`${t(tab.label)}`}
-                  icon={tab.icon}
-                  iconPosition="start"
-                  // eslint-disable-next-line react/destructuring-assignment
-                  {...props.tabProps}
-                  id={`tab-${index}`}
-                  onClick={() => handleClick(index)}
-                  sx={sxClasses.tab}
-                />
-              );
-            })}
-          </MaterialTabs>
+          {!showMobileDropdown ? (
+            <MaterialTabs
+              // eslint-disable-next-line react/destructuring-assignment
+              {...props.tabsProps}
+              variant="scrollable"
+              scrollButtons
+              allowScrollButtonsMobile
+              value={value}
+              onChange={handleChange}
+              aria-label="basic tabs"
+              sx={{
+                '& .MuiTabs-indicator': {
+                  backgroundColor: (theme) => theme.palette.secondary.main,
+                },
+              }}
+            >
+              {tabs.map((tab, index) => {
+                return (
+                  <MaterialTab
+                    label={t(tab.label)}
+                    key={`${t(tab.label)}`}
+                    icon={tab.icon}
+                    iconPosition="start"
+                    // eslint-disable-next-line react/destructuring-assignment
+                    {...props.tabProps}
+                    id={`tab-${index}`}
+                    onClick={() => handleClick(index)}
+                    sx={sxClasses.tab}
+                  />
+                );
+              })}
+            </MaterialTabs>
+          ) : (
+            <Box sx={sxClasses.mobileDropdown}>
+              <Select
+                labelId="provinceGeolocatorFiltersLabel"
+                formControlProps={{ size: 'small' }}
+                id="footerTabsDropdown"
+                fullWidth
+                inputLabel={{ id: 'footerTabsDropdownLabel' }}
+                menuItems={mobileTabsDropdownValues}
+                value={value}
+                onChange={(e) => updateTabPanel(e.target.value as number)}
+              />
+            </Box>
+          )}
         </Grid>
         <Grid item xs={5} sm={2} sx={sxClasses.rightIcons}>
           {rightButtons as ReactNode}

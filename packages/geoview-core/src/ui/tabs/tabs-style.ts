@@ -26,4 +26,14 @@ export const getSxClasses = () => ({
       maxWidth: '18px',
     },
   },
+  mobileDropdown: {
+    maxWidth: '200px',
+    p: 6,
+    '& .MuiInputBase-root': {
+      borderRadius: '4px',
+    },
+    '& .MuiSelect-select': {
+      padding: '8px 12px !important',
+    },
+  },
 });
