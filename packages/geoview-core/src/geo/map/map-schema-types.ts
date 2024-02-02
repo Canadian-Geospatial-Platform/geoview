@@ -1259,14 +1259,12 @@ export type TypeMapFeaturesInstance = {
   map: TypeMapConfig;
   /** Display theme, default = geo.ca. */
   theme?: TypeDisplayTheme;
-  /** App bar properties. */
-  appBar?: TypeAppBarProps;
   /** Nav bar properies. */
   navBar?: TypeNavBarProps;
   /** App bar properies. */
-  appBarTabs?: TypeAppBarTabsProps;
+  appBar?: TypeAppBarProps;
   /** Footer bar properies. */
-  footerTabs?: TypeFooterTabsProps;
+  footerBar?: TypeFooterBarProps;
   /** Overview map properies. */
   overviewMap?: TypeOverviewMapProps;
   /** Map components. */
@@ -1418,36 +1416,31 @@ export type TypeValidMapProjectionCodes = 3978 | 3857;
 export const VALID_PROJECTION_CODES = [3978, 3857];
 
 /** ******************************************************************************************************************************
- *  Controls available on the application bar. Default = ['geolocator']. The about GeoView and notification are always there.
- */
-export type TypeAppBarProps = Array<'geolocator' | 'export'>;
-
-/** ******************************************************************************************************************************
  * Controls available on the navigation bar. Default = ['zoom', 'fullscreen', 'home'].
  */
 export type TypeNavBarProps = Array<'zoom' | 'fullscreen' | 'home' | 'location' | 'export'>;
 
 /** ******************************************************************************************************************************
- * Configuration available for the footer tabs component.
+ * Configuration available on the application bar. Default = ['geolocator']. The about GeoView and notification are always there.
  */
-export type TypeAppBarTabsProps = {
+export type TypeAppBarProps = {
   tabs: {
-    core: Array<'basemap-panel' | 'layers-panel' | 'geochart'>;
-    custom: Array<string>; // TODO: support custom tab by creating a Typeobject for it
+    core: TypeValidAppBarCoreProps;
   };
-  collapsed: boolean;
 };
+export type TypeValidAppBarCoreProps = Array<'geolocator' | 'export' | 'basemap-panel' | 'geochart'>;
 
 /** ******************************************************************************************************************************
- * Configuration available for the footer tabs component.
+ * Configuration available for the footer bar component.
  */
-export type TypeFooterTabsProps = {
+export type TypeFooterBarProps = {
   tabs: {
-    core: Array<'legend' | 'layers' | 'details' | 'data-table' | 'time-slider' | 'geochart'>;
+    core: TypeValidFooterBarTabsCoreProps;
     custom: Array<string>; // TODO: support custom tab by creating a Typeobject for it
   };
   collapsed: boolean;
 };
+export type TypeValidFooterBarTabsCoreProps = Array<'legend' | 'layers' | 'details' | 'data-table' | 'time-slider' | 'geochart'>;
 
 /** ******************************************************************************************************************************
  *  Overview map options. Default none.

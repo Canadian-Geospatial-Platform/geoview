@@ -193,7 +193,7 @@
     "images": "Images",
     "close": "Fermer"
   },
-  "footerTabsContainer": {
+  "footerBar": {
     "focusToMap": "Aller à la carte",
     "focusToFooter": "Aller au pied de page",
     "resizeTooltip": "Redimensionner",

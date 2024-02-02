@@ -94,7 +94,7 @@
   },
   "theme": "dark",
   "components": [],
-  "footerTabs": {
+  "footerBar": {
     "tabs": {
       "core": ["legend", "layers", "details"]
     }

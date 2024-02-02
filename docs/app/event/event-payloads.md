@@ -9,7 +9,7 @@ Below you will find a list of some available functions and payload types/interfa
   <li><a href="https://canadian-geospatial-platform.github.io/geoview/public/docs/functions/payloadIsABasemapLayerArray.html">payloadIsABasemapLayerArray</a></li>
   <li><a href="https://canadian-geospatial-platform.github.io/geoview/public/docs/functions/payloadIsABoolean.html">payloadIsABoolean</a></li>
   <li><a href="https://canadian-geospatial-platform.github.io/geoview/public/docs/functions/payloadIsAButtonPanel.html">payloadIsAButtonPanel</a></li>
-  <li><a href="https://canadian-geospatial-platform.github.io/geoview/public/docs/functions/payloadIsAFooterTab.html">payloadIsAFooterTab</a></li>
+  <li><a href="https://canadian-geospatial-platform.github.io/geoview/public/docs/functions/payloadIsAFooterTab.html">payloadIsAFooterBar</a></li>
   <li><a href="https://canadian-geospatial-platform.github.io/geoview/public/docs/functions/payloadIsGeoViewLayerAdded.html">payloadIsGeoViewLayerAdded</a></li>
   <li><a href="https://canadian-geospatial-platform.github.io/geoview/public/docs/functions/payloadIsRemoveGeoViewLayer.html">payloadIsRemoveGeoViewLayer</a></li>
   <li><a href="https://canadian-geospatial-platform.github.io/geoview/public/docs/functions/payloadIsTestGeoViewLayers.html">payloadIsTestGeoViewLayers</a></li>
@@ -57,7 +57,7 @@ Below you will find a list of some available functions and payload types/interfa
   <li><a href="https://canadian-geospatial-platform.github.io/geoview/public/docs/functions/basemapLayerArrayPayload-1.html">basemapLayerArrayPayload</a></li>
   <li><a href="https://canadian-geospatial-platform.github.io/geoview/public/docs/functions/booleanPayload-1.html">booleanPayload</a></li>
   <li><a href="https://canadian-geospatial-platform.github.io/geoview/public/docs/functions/buttonPanelPayload-1.html">buttonPanelPayload</a></li>
-  <li><a href="https://canadian-geospatial-platform.github.io/geoview/public/docs/functions/footerTabPayload-1.html">footerTabPayload</a></li>
+  <li><a href="https://canadian-geospatial-platform.github.io/geoview/public/docs/functions/footerTabPayload-1.html">footerBarPayload</a></li>
   <li>
     <a href="https://canadian-geospatial-platform.github.io/geoview/public/docs/classes/GeoViewLayerPayload.html#createGeoviewLayerAddedPayload">TypeGeoviewLayerAddedPayload</a>
   </li>
@@ -122,7 +122,7 @@ Below you will find a list of some available functions and payload types/interfa
   <li><a href="https://canadian-geospatial-platform.github.io/geoview/public/docs/classes/BasemapLayerArrayPayload.html">BasemapLayerArrayPayload</a></li>
   <li><a href="https://canadian-geospatial-platform.github.io/geoview/public/docs/classes/BooleanPayload.html">BooleanPayload</a></li>
   <li><a href="https://canadian-geospatial-platform.github.io/geoview/public/docs/classes/ButtonPanelPayload.html">ButtonPanelPayload</a></li>
-  <li><a href="https://canadian-geospatial-platform.github.io/geoview/public/docs/classes/FooterTabPayload.html">FooterTabPayload</a></li>
+  <li><a href="https://canadian-geospatial-platform.github.io/geoview/public/docs/classes/FooterTabPayload.html">FooterBarPayload</a></li>
   <li><a href="https://canadian-geospatial-platform.github.io/geoview/public/docs/classes/GeoViewLayerPayload.html">GeoViewLayerPayload</a></li>
   <li><a href="https://canadian-geospatial-platform.github.io/geoview/public/docs/classes/GetFeatureInfoPayload.html">GetFeatureInfoPayload</a></li>
   <li><a href="https://canadian-geospatial-platform.github.io/geoview/public/docs/classes/GetLegendsPayload.html">GetLegendsPayload</a></li>

@@ -120,14 +120,18 @@
       },
       'theme': 'geo.ca',
       'navBar': ['zoom', 'fullscreen', 'home', 'location', 'export'],
-      'appBar': ['geolocator', 'export'],
+      'appBar': {
+        'tabs': {
+          'core': ['geolocator', 'export', 'basemap-panel']
+        }
+      },
       'components': ['north-arrow', 'overview-map'],
-      'footerTabs': {
+      'footerBar': {
         'tabs': {
           'core': ['legend', 'layers', 'details', 'data-table']
         }
       },
-      'corePackages': ['basemap-panel'],
+      'corePackages': [],
       'externalPackages': [],
       'suportedLanguages': ['en']
     }`;

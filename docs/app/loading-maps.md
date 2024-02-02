@@ -61,9 +61,6 @@ The content of the config must match the schema, an example of the object in the
   "components": ["north-arrow"],
   "corePackages": [
     "basemap-panel",
-    "layers-panel",
-    "details-panel",
-    "geolocator"
   ],
   "externalPackages": [],
   "suportedLanguages": ["en", "fr"]
@@ -112,7 +109,7 @@ An example of this:
                     },
                     'theme': 'dark',
                     'components': ['north-arrow', 'overview-map'],
-                    'corePackages': ['basemap-panel'],
+                    'corePackages': [],
                     'externalPackages': [],
                     'suportedLanguages': ['en', 'fr']
                 }'

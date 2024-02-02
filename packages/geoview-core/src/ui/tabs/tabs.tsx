@@ -6,7 +6,7 @@ import { Select, TypeMenuItemProps } from '../select/select';
 import { HtmlToReact } from '@/core/containers/html-to-react';
 import { TabPanel } from './tab-panel';
 import {
-  useUIActiveFooterTabId,
+  useUIActiveFooterBarTabId,
   useUIActiveTrapGeoView,
   useUIStoreActions,
 } from '@/core/stores/store-interface-and-intial-values/ui-state';
@@ -63,7 +63,7 @@ export function Tabs(props: TypeTabsProps): JSX.Element {
   const tabPanelRefs = useRef([tabs[0]]);
   // get store values and actions
   const activeTrapGeoView = useUIActiveTrapGeoView();
-  const activeFooterTabId = useUIActiveFooterTabId();
+  const activeFooterBarTabId = useUIActiveFooterBarTabId();
   const mapSize = useMapSize();
   const { closeModal, openModal } = useUIStoreActions();
 
@@ -122,8 +122,8 @@ export function Tabs(props: TypeTabsProps): JSX.Element {
     // Log
     logger.logTraceUseEffect('TABS - Mouse Clicked On Map');
     //  open details tab when clicked on layer on
-    if (activeFooterTabId === 'details') {
-      const idx = tabs.findIndex((tab) => tab.id === activeFooterTabId);
+    if (activeFooterBarTabId === 'details') {
+      const idx = tabs.findIndex((tab) => tab.id === activeFooterBarTabId);
       if (!tabPanelRefs.current[idx]) {
         tabPanelRefs.current[idx] = tabs[idx];
       }
@@ -132,7 +132,7 @@ export function Tabs(props: TypeTabsProps): JSX.Element {
       if (handleCollapse && isCollapsed) handleCollapse();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeFooterTabId]);
+  }, [activeFooterBarTabId]);
 
   /**
    * Build mobile tab dropdown.
@@ -144,7 +144,7 @@ export function Tabs(props: TypeTabsProps): JSX.Element {
     }));
 
     // no tab field which will be used to collapse the footer panel.
-    const noTab = { type: 'item', item: { value: '', children: t('footerTabsContainer.noTab') } };
+    const noTab = { type: 'item', item: { value: '', children: t('footerBar.noTab') } };
     return [noTab, ...newTabs] as TypeMenuItemProps[];
   }, [tabs, t]);
 
@@ -196,11 +196,11 @@ export function Tabs(props: TypeTabsProps): JSX.Element {
           ) : (
             <Box sx={sxClasses.mobileDropdown}>
               <Select
-                labelId="footerTabsDropdownLabel"
+                labelId="footerBarDropdownLabel"
                 formControlProps={{ size: 'small' }}
-                id="footerTabsDropdown"
+                id="footerBarDropdown"
                 fullWidth
-                inputLabel={{ id: 'footerTabsDropdownLabel' }}
+                inputLabel={{ id: 'footerBarDropdownLabel' }}
                 menuItems={mobileTabsDropdownValues}
                 value={value}
                 onChange={(e) => updateTabPanel(e.target.value as number)}

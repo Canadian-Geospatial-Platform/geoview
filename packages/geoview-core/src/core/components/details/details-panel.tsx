@@ -27,7 +27,6 @@ import {
   useDetailsStoreSelectedLayerPath,
 } from '@/core/stores';
 import { ResponsiveGrid, CloseButton, EnlargeButton, LayerList, LayerTitle, useFooterPanelHeight } from '../common';
-import { useUIStoreActions } from '@/app';
 import { logger } from '@/core/utils/logger';
 
 /**
@@ -52,7 +51,6 @@ export function DetailsPanel(): JSX.Element {
   const visibleLayers = useMapVisibleLayers();
   const { setSelectedLayerPath, removeCheckedFeature } = useDetailsStoreActions();
   const { addSelectedFeature, removeSelectedFeature } = useMapStoreActions();
-  const { setActiveFooterTab } = useUIStoreActions();
 
   // internal state
   const [layerDataInfo, setLayerDataInfo] = useState<TypeLayerData | null>(arrayOfLayerData[0]);
@@ -112,7 +110,6 @@ export function DetailsPanel(): JSX.Element {
       if (selectedLayer) {
         setLayerDataInfo(selectedLayer);
         setCurrentFeatureIndex(0);
-        setActiveFooterTab('details');
       }
     } else setLayerDataInfo(null);
     // eslint-disable-next-line react-hooks/exhaustive-deps

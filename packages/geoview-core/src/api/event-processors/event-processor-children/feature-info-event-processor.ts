@@ -2,6 +2,7 @@ import { isEqual } from 'lodash';
 import { AbstractEventProcessor } from '../abstract-event-processor';
 import { TypeFeatureInfoResultsSet, EventType, TypeLayerData, TypeArrayOfLayerData } from '@/api/events/payloads/get-feature-info-payload';
 import { getGeoViewStore } from '@/core/stores/stores-managers';
+import { UIEventProcessor } from './ui-event-processor';
 
 export class FeatureInfoEventProcessor extends AbstractEventProcessor {
   // **********************************************************
@@ -43,6 +44,8 @@ export class FeatureInfoEventProcessor extends AbstractEventProcessor {
       });
 
       store.getState().detailsState.actions.setLayerDataArray(layerDataArray);
+      if (!['details', 'geochart'].includes(UIEventProcessor.getActiveFooterBarTab(mapId)))
+        UIEventProcessor.setActiveFooterBarTab(mapId, 'details');
     } else if (eventType === 'hover') {
       /**
        * Create a hover object for each layer which is then used to render layers

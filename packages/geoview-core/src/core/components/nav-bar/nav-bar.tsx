@@ -19,7 +19,7 @@ import { TypeButtonPanel } from '@/ui/panel/panel-types';
 import { getSxClasses } from './nav-bar-style';
 import {
   useUIActiveFocusItem,
-  useUIFooterBarExpanded,
+  useUIMapInfoExpanded,
   useUINavbarComponents,
 } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import { logger } from '@/core/utils/logger';
@@ -40,7 +40,7 @@ export function Navbar(): JSX.Element {
   const [buttonPanelGroups, setButtonPanelGroups] = useState<Record<string, Record<string, TypeButtonPanel>>>({});
 
   // get the expand or collapse from store
-  const footerBarExpanded = useUIFooterBarExpanded();
+  const mapInfoExpanded = useUIMapInfoExpanded();
   const activeModalId = useUIActiveFocusItem().activeElementId;
   const navBarComponents = useUINavbarComponents();
 
@@ -97,7 +97,7 @@ export function Navbar(): JSX.Element {
 
   return (
     /** TODO - KenChase Need to add styling for scenario when more buttons that can fit vertically occurs (or limit number of buttons that can be added) */
-    <Box ref={navBarRef} sx={[sxClasses.navBarRef, { bottom: footerBarExpanded ? 80 : 40 }]}>
+    <Box ref={navBarRef} sx={[sxClasses.navBarRef, { bottom: mapInfoExpanded ? 80 : 40 }]}>
       {Object.keys(buttonPanelGroups).map((groupName) => {
         const buttonPanelGroup = buttonPanelGroups[groupName];
 

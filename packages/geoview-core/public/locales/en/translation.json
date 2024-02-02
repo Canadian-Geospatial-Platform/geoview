@@ -193,7 +193,7 @@
     "images": "Images",
     "close": "Close"
   },
-  "footerTabsContainer": {
+  "footerBar": {
     "focusToMap": "Focus to map",
     "focusToFooter": "Focus to footer",
     "resizeTooltip": "Resize",
