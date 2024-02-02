@@ -80,6 +80,7 @@ export {
   Remove as ZoomOutIcon,
   RemoveCircleOutline as RemoveCircleOutlineIcon,
   RestartAlt as RestartAltIcon,
+  School as SchoolIcon,
   Search as SearchIcon,
   Send as SendIcon,
   Storage as StorageIcon,

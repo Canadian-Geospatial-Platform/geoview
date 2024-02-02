@@ -39,7 +39,8 @@ export function IconStack({ layerPath, onIconClick, onStackIconClick }: TypeIcon
         </Box>
       )}
     </IconButton>
-  ) : numOfIcons && numOfIcons > 0 ? (
+  ) : // eslint-disable-next-line no-nested-ternary
+  numOfIcons && numOfIcons > 0 ? (
     <Box tabIndex={0} onClick={onIconClick} sx={sxClasses.stackIconsBox} onKeyPress={(e) => onStackIconClick?.(e)}>
       <IconButton sx={sxClasses.iconPreviewStacked} color="primary" size="small" tabIndex={-1}>
         <Box sx={sxClasses.legendIconTransparent}>
@@ -50,7 +51,7 @@ export function IconStack({ layerPath, onIconClick, onStackIconClick }: TypeIcon
         <Box sx={sxClasses.legendIcon}>{iconImage && <img alt="icon" src={iconImage} style={sxClasses.maxIconImg} />}</Box>
       </IconButton>
     </Box>
-  ) : (
+  ) : layerPath !== '' ? (
     <Box tabIndex={0} onClick={onIconClick} sx={sxClasses.stackIconsBox} onKeyPress={(e) => onStackIconClick?.(e)}>
       <IconButton sx={sxClasses.iconPreviewStacked} color="primary" size="small" tabIndex={-1}>
         <Box sx={sxClasses.legendIconTransparent}>
@@ -58,5 +59,5 @@ export function IconStack({ layerPath, onIconClick, onStackIconClick }: TypeIcon
         </Box>
       </IconButton>
     </Box>
-  );
+  ) : null;
 }
