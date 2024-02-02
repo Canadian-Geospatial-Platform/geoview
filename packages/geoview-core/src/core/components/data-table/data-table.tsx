@@ -360,10 +360,11 @@ function DataTable({ data, layerId, mapId, layerKey, tableHeight = 600 }: DataTa
     return data.features.map((feature) => {
       return {
         ICON: (
-          <img
+          <Box
+            component="img"
             alt={feature.featureIcon.toDataURL().toString()}
             src={feature.featureIcon.toDataURL().toString()}
-            style={sxClasses.iconImage as React.CSSProperties}
+            sx={sxClasses.iconImage}
           />
         ),
         ZOOM: (

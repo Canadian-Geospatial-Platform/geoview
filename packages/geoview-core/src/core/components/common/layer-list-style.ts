@@ -7,7 +7,8 @@ export const getSxClasses = (theme: Theme) => ({
     width: '100%',
     paddingRight: '14px',
     '& .MuiListItemText-primary': {
-      font: theme.footerPanel.layerTitleFont,
+      fontSize: theme.palette.geoViewFontSize.lg,
+      fontWeight: '600',
     },
 
     '& .MuiListItem-root': {
@@ -44,8 +45,8 @@ export const getSxClasses = (theme: Theme) => ({
     display: 'flex',
     flexDirection: 'column',
     '& .layerTitle': {
-      fontSize: '1rem',
-      font: theme.footerPanel.layerTitleFont,
+      fontSize: theme.palette.geoViewFontSize.default,
+      fontWeight: '600',
       lineHeight: 1.5,
       overflow: 'hidden',
       textOverflow: 'ellipsis',

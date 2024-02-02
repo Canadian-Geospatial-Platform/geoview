@@ -6,7 +6,8 @@ export const getSxClasses = (theme: Theme) => ({
     paddingBottom: '1rem',
   },
   panelHeaders: {
-    font: theme.footerPanel.titleFont,
+    fontSize: theme.palette.geoViewFontSize.lg,
+    fontWeight: '600',
     marginBottom: '20px',
   },
   layerListPaper: {
@@ -20,7 +21,8 @@ export const getSxClasses = (theme: Theme) => ({
   },
   layerNamePrimary: {
     '& .MuiListItemText-primary': {
-      font: theme.footerPanel.layerTitleFont,
+      fontSize: theme.palette.geoViewFontSize.lg,
+      fontWeight: '600',
     },
     marginLeft: '10px',
   },
@@ -31,7 +33,8 @@ export const getSxClasses = (theme: Theme) => ({
       paddingRight: '2rem',
     },
     '& .MuiListItemText-primary': {
-      font: theme.footerPanel.layerTitleFont,
+      fontSize: theme.palette.geoViewFontSize.lg,
+      fontWeight: '600',
     },
 
     '& .MuiListItem-root': {

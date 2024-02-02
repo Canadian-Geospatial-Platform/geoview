@@ -9,12 +9,11 @@ export const getSxClasses = (theme: Theme) => ({
   },
   title: {
     textAlign: 'left',
-    font: theme.footerPanel.titleFont,
+    fontWeight: '600',
     color: theme.palette.geoViewColor.textColor.main,
     fontSize: theme.palette.geoViewFontSize.xl,
   },
   subtitle: {
-    font: theme.footerPanel.titleFont,
     fontWeight: 'normal',
     fontSize: theme.palette.geoViewFontSize.lg,
     textAlign: 'left',
@@ -39,7 +38,8 @@ export const getSxClasses = (theme: Theme) => ({
   legendLayerListItem: {
     padding: '6px 4px',
     '& .layerTitle > .MuiListItemText-primary': {
-      font: theme.footerPanel.layerTitleFont,
+      fontSize: theme.palette.geoViewFontSize.lg,
+      fontWeight: '600',
       textOverflow: 'ellipsis',
       whiteSpace: 'nowrap',
       overflow: 'hidden',

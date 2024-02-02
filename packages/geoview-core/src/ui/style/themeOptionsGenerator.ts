@@ -233,10 +233,6 @@ export const generateThemeOptions = function (geoViewColors: IGeoViewColors = de
         size: { width: 275, height: 275 },
       },
     },
-    footerPanel: {
-      titleFont: `normal normal 600 20px/27px ${font}`,
-      layerTitleFont: `normal normal 600 18px/24px ${font}`,
-    },
   };
 
   return themeOptions;

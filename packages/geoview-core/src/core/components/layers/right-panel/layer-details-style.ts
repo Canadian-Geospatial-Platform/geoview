@@ -3,7 +3,7 @@ import { Theme } from '@mui/material/styles';
 export const getSxClasses = (theme: Theme) => ({
   categoryTitle: {
     textAlign: 'left',
-    font: theme.footerPanel.titleFont,
+    fontWeight: '600',
     fontSize: theme.palette.geoViewFontSize.lg,
   },
   layerDetails: {
@@ -47,5 +47,5 @@ export const getSxClasses = (theme: Theme) => ({
     fontSize: theme.palette.geoViewFontSize.default,
     noWrap: true,
     marginLeft: 20,
-  }
+  },
 });

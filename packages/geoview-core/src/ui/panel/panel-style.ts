@@ -2,7 +2,7 @@ import { Theme } from '@mui/material/styles';
 
 export const getSxClasses = (theme: Theme) => ({
   panelContainer: {
-    backgroundColor: theme.panel?.background,
+    backgroundColor: theme.palette.geoViewColor.bgColor.main,
     height: 'calc(100% - 35px)',
     borderRadius: 0,
     flexDirection: 'column',
@@ -11,8 +11,8 @@ export const getSxClasses = (theme: Theme) => ({
       minWidth: '100%',
     }!,
     '& .MuiCardHeader-root': {
-      backgroundColor: theme.panel?.background,
-      borderBottomColor: theme.panel?.border,
+      backgroundColor: theme.palette.geoViewColor.bgColor.dark[50],
+      borderBottomColor: theme.palette.geoViewColor.bgColor.dark[100],
       borderBottomWidth: 1,
       borderBottomStyle: 'solid',
       height: 64,
@@ -37,7 +37,7 @@ export const getSxClasses = (theme: Theme) => ({
           marginRight: 0,
         },
         '&:hover': {
-          backgroundColor: theme.appBar?.btnHoverBg,
+          backgroundColor: theme.palette.geoViewColor.bgColor.dark[100],
         },
       },
     },

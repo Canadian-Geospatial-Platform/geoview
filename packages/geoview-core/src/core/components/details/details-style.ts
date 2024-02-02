@@ -6,14 +6,15 @@ export const getSxClasses = (theme: Theme) => ({
     paddingBottom: '1rem',
   },
   detailsInstructionsTitle: {
-    font: theme.footerPanel.titleFont,
-    fontSize: '1.5rem',
+    fontSize: theme.palette.geoViewFontSize.lg,
+    fontWeight: '600',
   },
   detailsInstructionsBody: {
     fontSize: '1rem',
   },
   panelHeaders: {
-    font: theme.footerPanel.titleFont,
+    fontSize: theme.palette.geoViewFontSize.lg,
+    fontWeight: '600',
   },
   rightPanelContainer: {
     border: `2px solid ${theme.palette.geoViewColor.primary.main}`,

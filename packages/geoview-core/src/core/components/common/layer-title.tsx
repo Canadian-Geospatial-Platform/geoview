@@ -18,7 +18,8 @@ export function LayerTitle({ children, hideTitle }: LayerTitleProp) {
   return (
     <Typography
       sx={{
-        font: theme.footerPanel.layerTitleFont,
+        fontSize: theme.palette.geoViewFontSize.lg,
+        fontWeight: '600',
         marginTop: '12px',
         [theme.breakpoints.up('md')]: { display: hideTitle ? 'none' : 'block' },
       }}

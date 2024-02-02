@@ -25,10 +25,6 @@ declare module '@mui/material/styles' {
         size: { width: string | number; height: string | number };
       };
     };
-    footerPanel?: {
-      titleFont: string;
-      layerTitleFont: string;
-    };
   }
   interface Theme {
     overrides: {
@@ -41,10 +37,6 @@ declare module '@mui/material/styles' {
       crosshairIcon: {
         size: { width: number; height: number };
       };
-    };
-    footerPanel: {
-      titleFont: string;
-      layerTitleFont: string;
     };
   }
 }

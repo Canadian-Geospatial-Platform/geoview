@@ -247,7 +247,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
                     marginTop: '10px',
                     color: theme.palette.geoViewColor.textColor.light[200],
                     fontSize: theme.palette.geoViewFontSize.xs,
-                    textAlign: 'center'
+                    textAlign: 'center',
                   }}
                   key={generateId()}
                 >
