@@ -233,15 +233,6 @@ export const generateThemeOptions = function (geoViewColors: IGeoViewColors = de
         size: { width: 275, height: 275 },
       },
     },
-    iconImage: {
-      padding: 3,
-      borderRadius: 0,
-      border: '1px solid',
-      borderColor: '#757575',
-      boxShadow: 'rgb(0 0 0 / 20%) 0px 3px 1px -2px, rgb(0 0 0 / 14%) 0px 2px 2px 0px, rgb(0 0 0 / 12%) 0px 1px 5px 0px',
-      background: '#fff',
-      objectFit: 'scale-down',
-    },
     footerPanel: {
       titleFont: `normal normal 600 20px/27px ${font}`,
       layerTitleFont: `normal normal 600 18px/24px ${font}`,
