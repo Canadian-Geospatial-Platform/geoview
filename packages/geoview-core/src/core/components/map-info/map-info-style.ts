@@ -35,20 +35,18 @@ export const getSxClasses = (theme: Theme) => ({
   },
 
   // map-info-expand-button.tsx
-  sxClassesExportButton: {
-    expandbuttonContainer: {
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      color: theme.palette.geoViewColor.primary.light[300],
-      height: '30px',
-      width: '30px',
-      marginLeft: '5px',
-    },
+  expandButton: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    color: theme.palette.geoViewColor.primary.light[300],
+    height: '30px',
+    width: '30px',
+    marginLeft: '5px',
   },
 
   // map-info-rotation-button.tsx
-  sxClassesRotationButton: {
+  rotationButton: {
     rotationButton: {
       height: 25,
       width: 25,

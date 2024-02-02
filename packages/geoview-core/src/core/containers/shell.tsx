@@ -10,7 +10,7 @@ import { FocusTrap } from '@mui/base/FocusTrap';
 import { Map } from '@/core/components/map/map';
 import { Appbar } from '@/core/components/app-bar/app-bar';
 import { Navbar } from '@/core/components/nav-bar/nav-bar';
-import { FooterTabs } from '@/core/components/footer-tabs/footer-tabs';
+import { FooterBar } from '@/core/components/footer-bar/footer-bar';
 import { Geolocator } from '@/core/components/geolocator/geolocator';
 import { MapInfo } from '@/core/components/map-info/map-info';
 
@@ -154,7 +154,7 @@ export function Shell(props: ShellProps): JSX.Element {
             </Box>
             {interaction === 'dynamic' && <Navbar />}
           </Box>
-          {geoviewConfig!.footerTabs !== undefined && <FooterTabs />}
+          {geoviewConfig!.footerBar !== undefined && <FooterBar />}
           {Object.keys(api.maps[shellId].modal.modals).map((modalId) => (
             <Modal key={modalId} id={modalId} open={false} mapId={shellId} />
           ))}

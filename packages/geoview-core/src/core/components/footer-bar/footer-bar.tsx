@@ -6,11 +6,12 @@ import { useTheme } from '@mui/material/styles';
 import { Box, IconButton, Tabs, TypeTabs, MoveDownRoundedIcon, MoveUpRoundedIcon } from '@/ui';
 import { api, useGeoViewMapId } from '@/app';
 import { EVENT_NAMES } from '@/api/events/event-types';
-import { FooterTabPayload, PayloadBaseClass, payloadIsAFooterTab } from '@/api/events/payloads';
-import { getSxClasses } from './footer-tabs-style';
+import { FooterBarPayload, PayloadBaseClass, payloadIsAFooterBar } from '@/api/events/payloads';
+import { getSxClasses } from './footer-bar-style';
 import { ResizeFooterPanel } from '../resize-footer-panel/resize-footer-panel';
 import { useAppFullscreenActive } from '@/core/stores/store-interface-and-intial-values/app-state';
 import {
+  useUIActiveFooterBarTabId,
   useUIFooterPanelResizeValue,
   useUIFooterPanelResizeValues,
   useUIStoreActions,
@@ -34,20 +35,14 @@ interface ShellContainerCssProperties {
   tabMaxHeight: number;
 }
 
-type FooterTabsProps = {
-  onSelectedTabChanged?: (tab: TypeTabs) => void;
-};
-
 /**
- * The FooterTabs component is used to display a list of tabs and their content.
+ * The FooterBar component is used to display a list of tabs and their content.
  *
- * @returns {JSX.Element} returns the Footer Tabs component
+ * @returns {JSX.Element} returns the FooterBar Tabs component
  */
-export function FooterTabs(props: FooterTabsProps): JSX.Element | null {
+export function FooterBar(): JSX.Element | null {
   // Log
-  logger.logTraceRender('components/footer-tabs/footer-tabs');
-
-  const { onSelectedTabChanged } = props;
+  logger.logTraceRender('components/footer-bar/footer-bar');
 
   const mapId = useGeoViewMapId();
 
@@ -55,8 +50,7 @@ export function FooterTabs(props: FooterTabsProps): JSX.Element | null {
   const sxClasses = getSxClasses(theme);
 
   // internal state
-  const [selectedTab, setSelectedTab] = useState<number | undefined>();
-  const [footerTabs, setFooterTabs] = useState<TypeTabs[]>([]);
+  const [footerBarTabs, setFooterBarTabs] = useState<TypeTabs[]>([]);
   const [isCollapsed, setIsCollapsed] = useState(false);
 
   const [isFocusToMap, setIsFocusToMap] = useState<boolean>(true);
@@ -73,14 +67,15 @@ export function FooterTabs(props: FooterTabsProps): JSX.Element | null {
   const isMapFullScreen = useAppFullscreenActive();
   const footerPanelResizeValue = useUIFooterPanelResizeValue();
   const footerPanelResizeValues = useUIFooterPanelResizeValues();
-  const { setFooterPanelResizeValue, setActiveFooterTab } = useUIStoreActions();
+  const selectedTab = useUIActiveFooterBarTabId();
+  const { setFooterPanelResizeValue, setActiveFooterBarTab } = useUIStoreActions();
 
-  // get store config for footer tabs to add (similar logic as in app-bar)
-  const footerTabsConfig = useGeoViewConfig()?.footerTabs;
+  // get store config for footer bar tabs to add (similar logic as in app-bar)
+  const footerBarTabsConfig = useGeoViewConfig()?.footerBar;
 
   const tabs = useMemo(() => {
     // Log
-    logger.logTraceUseMemo('FOOTER-TABS - tabs', table);
+    logger.logTraceUseMemo('FOOTER-BAR - tabs', table);
 
     return {
       legend: { icon: <HubOutlinedIcon />, content: <Legend /> },
@@ -90,11 +85,11 @@ export function FooterTabs(props: FooterTabsProps): JSX.Element | null {
     } as Record<string, Record<string, ReactNode>>;
   }, [table]);
 
-  const defaultFooterTabs = useMemo(() => {
+  const defaultFooterBarTabs = useMemo(() => {
     // Log
-    logger.logTraceUseMemo('FOOTER-TABS - defaultFooterTabs', footerTabs);
+    logger.logTraceUseMemo('FOOTER-BAR - defaultFooterBarTabs', footerBarTabs);
 
-    return (footerTabsConfig?.tabs?.core ?? []).map((tab, index) => {
+    return (footerBarTabsConfig?.tabs?.core ?? []).map((tab, index) => {
       return {
         id: tab,
         value: index,
@@ -104,14 +99,14 @@ export function FooterTabs(props: FooterTabsProps): JSX.Element | null {
       };
     }) as TypeTabs[];
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [footerTabs]); // TODO: Investigate - shouldn't this be footerTabsConfig (and tabs?) instead of footerTabs?
+  }, [footerBarTabs]); // TODO: Investigate - shouldn't this be footerBarTabsConfig (and tabs?) instead of footerBarTabs?
 
   /**
    * Calculate resize values from popover values defined in store.
    */
   const resizeValues = useMemo(() => {
     // Log
-    logger.logTraceUseMemo('FOOTER-TABS - resizeValues', footerPanelResizeValue, footerPanelResizeValues);
+    logger.logTraceUseMemo('FOOTER-BAR - resizeValues', footerPanelResizeValue, footerPanelResizeValues);
 
     return footerPanelResizeValues.reduce((acc, curr) => {
       const windowHeight = window.screen.height;
@@ -147,31 +142,31 @@ export function FooterTabs(props: FooterTabsProps): JSX.Element | null {
    * Add a tab
    */
   const addTab = useCallback(
-    (payload: FooterTabPayload) => {
+    (payload: FooterBarPayload) => {
       // Log
-      logger.logTraceUseCallback('FOOTER-TABS - defaultFooterTabs', defaultFooterTabs);
+      logger.logTraceUseCallback('FOOTER-BAR - defaultFooterBarTabs', defaultFooterBarTabs);
 
-      const idx = defaultFooterTabs.findIndex((tab) => tab.id === payload.tab.id);
+      const idx = defaultFooterBarTabs.findIndex((tab) => tab.id === payload.tab.id);
       if (idx !== -1) {
-        defaultFooterTabs[idx].content = payload.tab.content;
-        defaultFooterTabs[idx].icon = payload.tab.icon;
-        defaultFooterTabs[idx].label = payload.tab.label;
+        defaultFooterBarTabs[idx].content = payload.tab.content;
+        defaultFooterBarTabs[idx].icon = payload.tab.icon;
+        defaultFooterBarTabs[idx].label = payload.tab.label;
       } else {
-        defaultFooterTabs.push(payload.tab);
+        defaultFooterBarTabs.push(payload.tab);
       }
-      setFooterTabs(defaultFooterTabs);
+      setFooterBarTabs(defaultFooterBarTabs);
       // eslint-disable-next-line react-hooks/exhaustive-deps
     },
-    [defaultFooterTabs]
+    [defaultFooterBarTabs]
   );
 
   /**
    * Remove a tab
    */
   const removeTab = useCallback(
-    (payload: FooterTabPayload) => {
+    (payload: FooterBarPayload) => {
       // remove the tab from the list
-      setFooterTabs((prevState) => {
+      setFooterBarTabs((prevState) => {
         const state = [...prevState];
         const index = state.findIndex((tab) => tab.value === payload.tab.value);
         if (index > -1) {
@@ -181,7 +176,7 @@ export function FooterTabs(props: FooterTabsProps): JSX.Element | null {
         return state;
       });
     },
-    [setFooterTabs]
+    [setFooterBarTabs]
   );
 
   // on map creation, get original height to set the foorter collapse/expand height
@@ -199,7 +194,7 @@ export function FooterTabs(props: FooterTabsProps): JSX.Element | null {
    */
   useEffect(() => {
     // Log
-    logger.logTraceUseEffect('FOOTER-TABS - isCollapsed.mapDiv.origHeight', isCollapsed);
+    logger.logTraceUseEffect('FOOTER-BAR - isCollapsed.mapDiv.origHeight', isCollapsed);
 
     // map div
     mapDiv.style.height = 'fit-content';
@@ -238,73 +233,35 @@ export function FooterTabs(props: FooterTabsProps): JSX.Element | null {
    * @param tab The newly selected tab
    */
   const handleSelectedTabChanged = (tab: TypeTabs) => {
-    // Set the active footer tab with store action which
-    // will trigger the uiprocessor which
-    // will use the shared api in the window object which
-    // will use footertabsapi to raise a EVENT_FOOTER_TABS_TAB_SELECT event which
-    // is listened in eventFooterTabsSelectListenerFunction() below
-    setActiveFooterTab(tab.id);
+    setActiveFooterBarTab(tab.id);
   };
 
-  const eventFooterTabsCreateListenerFunction = (payload: PayloadBaseClass) => {
-    if (payloadIsAFooterTab(payload)) {
+  const eventFooterBarCreateListenerFunction = (payload: PayloadBaseClass) => {
+    if (payloadIsAFooterBar(payload)) {
       addTab(payload);
     }
   };
 
-  const eventFooterTabsRemoveListenerFunction = (payload: PayloadBaseClass) => {
-    if (payloadIsAFooterTab(payload)) removeTab(payload);
-  };
-
-  const eventFooterTabsSelectListenerFunction = (payload: PayloadBaseClass) => {
-    if (payloadIsAFooterTab(payload)) {
-      // for details tab, extand the tab
-      // TODO: there is a bug, I need to set another tab from cgpv before it works again
-      // Try to add onChange event...
-      if (payload.tab.id === 'details') {
-        handleCollapse();
-      }
-
-      // Keep internal state
-      setSelectedTab(payload.tab.value);
-
-      // Callback
-      onSelectedTabChanged?.(payload.tab);
-
-      // If clicked on a tab with a plugin
-      if (api.maps[mapId].plugins[payload.tab.id]) {
-        // Get the plugin
-        const theSelectedPlugin = api.maps[mapId].plugins[payload.tab.id];
-
-        // A bit hacky, but not much other choice for now...
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        if (typeof (theSelectedPlugin as any).onSelected === 'function') {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          (theSelectedPlugin as any).onSelected();
-        }
-      }
-    }
+  const eventFooterBarRemoveListenerFunction = (payload: PayloadBaseClass) => {
+    if (payloadIsAFooterBar(payload)) removeTab(payload);
   };
 
   /**
-   * Manage the tab 'create', 'remove' and 'select'
+   * Manage the tab 'create', 'remove'
    */
   useEffect(() => {
     // Log
-    logger.logTraceUseEffect('FOOTER-TABS - addTab.removeTab', mapId);
+    logger.logTraceUseEffect('FOOTER-BAR - addTab.removeTab', mapId);
 
     // listen to new tab creation
-    api.event.on(EVENT_NAMES.FOOTER_TABS.EVENT_FOOTER_TABS_TAB_CREATE, eventFooterTabsCreateListenerFunction, mapId);
+    api.event.on(EVENT_NAMES.FOOTERBAR.EVENT_FOOTERBAR_TAB_CREATE, eventFooterBarCreateListenerFunction, mapId);
 
     // listen on tab removal
-    api.event.on(EVENT_NAMES.FOOTER_TABS.EVENT_FOOTER_TABS_TAB_REMOVE, eventFooterTabsRemoveListenerFunction, mapId);
+    api.event.on(EVENT_NAMES.FOOTERBAR.EVENT_FOOTERBAR_TAB_REMOVE, eventFooterBarRemoveListenerFunction, mapId);
 
-    // listen for tab selection when selecting via the api call (NOT when user clicks on a tab, this is only for api calls)
-    api.event.on(EVENT_NAMES.FOOTER_TABS.EVENT_FOOTER_TABS_TAB_SELECT, eventFooterTabsSelectListenerFunction, mapId);
     return () => {
-      api.event.off(EVENT_NAMES.FOOTER_TABS.EVENT_FOOTER_TABS_TAB_CREATE, mapId, eventFooterTabsCreateListenerFunction);
-      api.event.off(EVENT_NAMES.FOOTER_TABS.EVENT_FOOTER_TABS_TAB_REMOVE, mapId, eventFooterTabsRemoveListenerFunction);
-      api.event.off(EVENT_NAMES.FOOTER_TABS.EVENT_FOOTER_TABS_TAB_SELECT, mapId, eventFooterTabsSelectListenerFunction);
+      api.event.off(EVENT_NAMES.FOOTERBAR.EVENT_FOOTERBAR_TAB_CREATE, mapId, eventFooterBarCreateListenerFunction);
+      api.event.off(EVENT_NAMES.FOOTERBAR.EVENT_FOOTERBAR_TAB_REMOVE, mapId, eventFooterBarRemoveListenerFunction);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [addTab, mapId, removeTab]);
@@ -354,9 +311,9 @@ export function FooterTabs(props: FooterTabsProps): JSX.Element | null {
    */
   useEffect(() => {
     // Log
-    logger.logTraceUseEffect('FOOTER-TABS - mount');
+    logger.logTraceUseEffect('FOOTER-BAR - mount');
 
-    if (footerTabsConfig && footerTabsConfig.tabs.core.includes('data-table')) {
+    if (footerBarTabsConfig && footerBarTabsConfig.tabs.core.includes('data-table')) {
       // create new tab and add the Data Table component to the footer tab
       // TODO: This will be refactor after new store for data table is implemented.
       // Right now `geoviewLayerInstance.getFeatureInfo('all', layer.layerKey);` is returning empty features, which leads to no table shown.
@@ -370,12 +327,12 @@ export function FooterTabs(props: FooterTabsProps): JSX.Element | null {
         };
 
         setTable(newTable);
-        addTab({ tab: tableTab, event: EVENT_NAMES.FOOTER_TABS.EVENT_FOOTER_TABS_TAB_CREATE, handlerName: 'TABLE' });
+        addTab({ tab: tableTab, event: EVENT_NAMES.FOOTERBAR.EVENT_FOOTERBAR_TAB_CREATE, handlerName: 'TABLE' });
       });
     }
 
     // Packages tab
-    if (footerTabsConfig && footerTabsConfig.tabs.core.includes('time-slider')) {
+    if (footerBarTabsConfig && footerBarTabsConfig.tabs.core.includes('time-slider')) {
       // create a new tab by loading the time-slider plugin
       api.plugin
         .loadScript('time-slider')
@@ -391,7 +348,7 @@ export function FooterTabs(props: FooterTabsProps): JSX.Element | null {
         });
     }
 
-    if (footerTabsConfig && footerTabsConfig.tabs.core.includes('geochart')) {
+    if (footerBarTabsConfig && footerBarTabsConfig.tabs.core.includes('geochart')) {
       // create a new tab by loading the geo chart plugin
       api.plugin
         .loadScript('geochart')
@@ -406,9 +363,9 @@ export function FooterTabs(props: FooterTabsProps): JSX.Element | null {
           );
         });
     }
-    setFooterTabs(defaultFooterTabs!);
+    setFooterBarTabs(defaultFooterBarTabs!);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [footerTabsConfig, mapId]);
+  }, [footerBarTabsConfig, mapId]);
 
   // Handle focus using dynamic focus button
   const handleDynamicFocus = () => {
@@ -438,7 +395,7 @@ export function FooterTabs(props: FooterTabsProps): JSX.Element | null {
     }
   };
 
-  return footerTabs.length > 0 ? (
+  return footerBarTabs.length > 0 ? (
     <Box
       ref={tabsContainerRef as MutableRefObject<HTMLDivElement>}
       sx={sxClasses.tabsContainer}
@@ -449,16 +406,16 @@ export function FooterTabs(props: FooterTabsProps): JSX.Element | null {
         isCollapsed={isCollapsed}
         handleCollapse={handleCollapse}
         onSelectedTabChanged={handleSelectedTabChanged}
-        selectedTab={selectedTab}
+        selectedTab={footerBarTabs.findIndex((t) => t.id === selectedTab)}
         tabsProps={{ variant: 'scrollable' }}
-        tabs={footerTabs}
+        tabs={footerBarTabs}
         TabContentVisibilty={!isCollapsed ? 'visible' : 'hidden'}
         rightButtons={
           <>
             {!isCollapsed && isMapFullScreen && <ResizeFooterPanel />}
             <IconButton
               onClick={handleDynamicFocus}
-              tooltip={isFocusToMap ? 'footerTabsContainer.focusToMap' : 'footerTabsContainer.focusToFooter'}
+              tooltip={isFocusToMap ? 'footerBar.focusToMap' : 'footerBar.focusToFooter'}
               disabled={
                 isCollapsed || isMapFullScreen || footerPanelResizeValues[footerPanelResizeValues.length - 1] === footerPanelResizeValue
               }
@@ -471,7 +428,3 @@ export function FooterTabs(props: FooterTabsProps): JSX.Element | null {
     </Box>
   ) : null;
 }
-
-FooterTabs.defaultProps = {
-  onSelectedTabChanged: undefined,
-};

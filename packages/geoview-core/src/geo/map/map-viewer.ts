@@ -24,7 +24,7 @@ import { EVENT_NAMES } from '@/api/events/event-types';
 
 import { AppbarButtons } from '@/core/components/app-bar/app-bar-buttons';
 import { NavbarButtons } from '@/core/components/nav-bar/nav-bar-buttons';
-import { FooterTabsApi } from '@/core/components/footer-tabs/footer-tabs-api';
+import { FooterBarApi } from '@/core/components/footer-bar/footer-bar-api';
 
 import { DataTableApi } from '@/core/components/data-table/data-table-api';
 import { GeoviewRenderer } from '@/geo/renderer/geoview-renderer';
@@ -95,7 +95,7 @@ export class MapViewer {
   navBarButtons!: NavbarButtons;
 
   // used to access the footer tabs api
-  footerTabs!: FooterTabsApi;
+  footerBar!: FooterBarApi;
 
   // used to access the data table api
   dataTable!: DataTableApi;
@@ -132,7 +132,7 @@ export class MapViewer {
 
     this.appBarButtons = new AppbarButtons(this.mapId);
     this.navBarButtons = new NavbarButtons(this.mapId);
-    this.footerTabs = new FooterTabsApi(this.mapId);
+    this.footerBar = new FooterBarApi(this.mapId);
 
     this.dataTable = new DataTableApi(this.mapId);
 

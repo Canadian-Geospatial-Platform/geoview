@@ -26,7 +26,7 @@
   "theme": "light",
   "navBar": ["zoom", "fullscreen", "home", "location", "export"],
   "components": [],
-  "footerTabs": {
+  "footerBar": {
     "tabs": {
       "core": []
     }

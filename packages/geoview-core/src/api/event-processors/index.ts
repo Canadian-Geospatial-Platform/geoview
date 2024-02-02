@@ -25,8 +25,8 @@ export function initializeEventProcessors(store: GeoviewStoreType) {
 
   // package stores, only create if needed
   // TODO: Change this check for something more generic that checks in appBar too
-  if (store.getState().mapConfig!.footerTabs?.tabs.core.includes('time-slider')) timeSliderEventProcessor.onInitialize(store);
-  if (store.getState().mapConfig!.footerTabs?.tabs.core.includes('geochart')) geochartEventProcessor.onInitialize(store);
+  if (store.getState().mapConfig!.footerBar?.tabs.core.includes('time-slider')) timeSliderEventProcessor.onInitialize(store);
+  if (store.getState().mapConfig!.footerBar?.tabs.core.includes('geochart')) geochartEventProcessor.onInitialize(store);
 }
 
 export function destroyEventProcessors(store: GeoviewStoreType) {
@@ -38,6 +38,6 @@ export function destroyEventProcessors(store: GeoviewStoreType) {
 
   // package stores, only destroy if created
   // TODO: Change this check for something more generic that checks in appBar too
-  if (store.getState().mapConfig!.footerTabs?.tabs.core.includes('time-slider')) timeSliderEventProcessor.onDestroy(store);
-  if (store.getState().mapConfig!.footerTabs?.tabs.core.includes('geochart')) geochartEventProcessor.onDestroy(store);
+  if (store.getState().mapConfig!.footerBar?.tabs.core.includes('time-slider')) timeSliderEventProcessor.onDestroy(store);
+  if (store.getState().mapConfig!.footerBar?.tabs.core.includes('geochart')) geochartEventProcessor.onDestroy(store);
 }

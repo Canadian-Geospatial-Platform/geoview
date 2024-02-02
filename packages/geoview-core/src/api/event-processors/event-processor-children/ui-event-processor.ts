@@ -2,7 +2,6 @@ import { GeoviewStoreType } from '@/core/stores/geoview-store';
 import { AbstractEventProcessor } from '../abstract-event-processor';
 import { getGeoViewStore } from '@/core/stores/stores-managers';
 import { TypeValidAppBarCoreProps, TypeMapCorePackages } from '@/geo';
-import { api } from '@/app';
 
 export class UIEventProcessor extends AbstractEventProcessor {
   onInitialize(store: GeoviewStoreType) {
@@ -19,8 +18,8 @@ export class UIEventProcessor extends AbstractEventProcessor {
   //! Some action does state modifications AND map actions.
   //! ALWAYS use map event processor when an action modify store and IS NOT trap by map state event handler
   // #region
-  static getActiveFooterTab(mapId: string): string {
-    return getGeoViewStore(mapId).getState().uiState.activefooterTabId;
+  static getActiveFooterBarTab(mapId: string): string {
+    return getGeoViewStore(mapId).getState().uiState.activeFooterBarTabId;
   }
 
   static getAppBarComponents(mapId: string): TypeValidAppBarCoreProps {
@@ -37,7 +36,7 @@ export class UIEventProcessor extends AbstractEventProcessor {
   // **********************************************************
   //! NEVER add a store action who does set state AND map action at a same time.
   //! Review the action in store state to make sure
-  static setActiveFooterTab(mapId: string, id: string): void {
-    api.maps[mapId].footerTabs.selectFooterTab(id);
+  static setActiveFooterBarTab(mapId: string, id: string): void {
+    getGeoViewStore(mapId).getState().uiState.actions.setActiveFooterBarTab(id);
   }
 }

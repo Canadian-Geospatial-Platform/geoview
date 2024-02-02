@@ -1565,7 +1565,7 @@
       "description": "Controls availalbe on the navigation bar.",
       "minItems": 0
     },
-    "TypeFooterTabsProps": {
+    "TypeFooterBarProps": {
       "type": "object",
       "additionalProperties": false,
       "properties": {
@@ -1582,7 +1582,7 @@
               "minItems": 1,
               "default": ["legend", "layers", "details", "data-table"],
               "uniqueItems": true,
-              "description": "Default core tabs of footer panel to use. NOTE: config from packages for time-slider and geochart are in the same loaction as core config (<<core config name>>-<<package name>>.json)."
+              "description": "Default core tabs of footer bar to use. NOTE: config from packages for time-slider and geochart are in the same loaction as core config (<<core config name>>-<<package name>>.json)."
             },
             "custom": {
               "type": "array",
@@ -1603,7 +1603,7 @@
               "minItems": 0,
               "default": [],
               "uniqueItems": true,
-              "description": "Custom tabs of footer panel to use"
+              "description": "Custom tabs of footer bar to use"
             }
           },
           "additionalProperties": false
@@ -1611,7 +1611,7 @@
         "collapsed": {
           "type": "boolean",
           "default": false,
-          "description": "State of footer panel when map is loaded (expanded or collapsed)"
+          "description": "State of footer bar when map is loaded (expanded or collapsed)"
         }
       },
       "required": ["tabs"]
@@ -1755,8 +1755,8 @@
         "navBar": {
           "$ref": "#/definitions/TypeNavBarProps"
         },
-        "footerTabs": {
-          "$ref": "#/definitions/TypeFooterTabsProps"
+        "footerBar": {
+          "$ref": "#/definitions/TypeFooterBarProps"
         },
         "appBar": {
           "$ref": "#/definitions/TypeAppBarProps"

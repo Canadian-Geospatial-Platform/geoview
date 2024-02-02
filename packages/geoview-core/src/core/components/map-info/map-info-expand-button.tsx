@@ -1,7 +1,8 @@
 import { useEffect } from 'react';
 
+import { useTheme } from '@mui/material';
 import { ExpandMoreIcon, ExpandLessIcon, IconButton, Box } from '@/ui';
-import { sxClassesExportButton } from './map-info-style';
+import { getSxClasses } from './map-info-style';
 import { useUIStoreActions, useUIMapInfoExpanded } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import { useGeoViewMapId } from '@/app';
 import { logger } from '@/core/utils/logger';
@@ -12,6 +13,9 @@ import { logger } from '@/core/utils/logger';
  * @returns {JSX.Element} the expand buttons
  */
 export function MapInfoExpandButton(): JSX.Element {
+  const theme = useTheme();
+  const sxClasses = getSxClasses(theme);
+
   // get the expand or collapse from expand button click
   const mapId = useGeoViewMapId();
   const expanded = useUIMapInfoExpanded();
@@ -78,7 +82,7 @@ export function MapInfoExpandButton(): JSX.Element {
 
   return (
     <Box>
-      <IconButton sx={sxClassesExportButton.expandbuttonContainer} onClick={() => (expanded ? collapseMapInfo() : expandMapInfo())}>
+      <IconButton sx={sxClasses.expandButton} onClick={() => (expanded ? collapseMapInfo() : expandMapInfo())}>
         {expanded ? <ExpandMoreIcon /> : <ExpandLessIcon />}
       </IconButton>
     </Box>

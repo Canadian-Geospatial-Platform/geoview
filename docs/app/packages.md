@@ -175,7 +175,7 @@ cgpv.init(function () {
 
 ## Loading bundled core packages
 
-The viewer is bundled with core packages, you can load them by passing their id in the map config object in the `corePackages`, `footerTabs.tabs.core` or `appBar.tabs.core` array as follows
+The viewer is bundled with core packages, you can load them by passing their id in the map config object in the `corePackages`, `footerBar.tabs.core` or `appBar.tabs.core` array as follows
 
 ```html
 <div
@@ -203,7 +203,7 @@ The viewer is bundled with core packages, you can load them by passing their id 
             'core': ['basemap-panel']
           }
         },
-        'footerTabs': {
+        'footerBar': {
           'tabs': {
             'core': ['time-slider']
           }

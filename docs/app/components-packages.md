@@ -35,7 +35,7 @@ A **Core Package** is a package developed and maintained by the viewer team. The
  },
  ```
  ```js
- 'footerTabs': {
+ 'footerBar': {
   'tabs': {
     'core': ['time-slider']
   }
@@ -69,7 +69,7 @@ To associate a custom configuration with a package, follow these steps:
  },
  ```
  ```js
- 'footerTabs': {
+ 'footerBar': {
   'tabs': {
     'core': ['time-slider']
   }

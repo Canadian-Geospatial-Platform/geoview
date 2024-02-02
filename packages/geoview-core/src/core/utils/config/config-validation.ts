@@ -756,7 +756,7 @@ export class ConfigValidation {
       displayLanguage: this._displayLanguage,
       navBar: tempMapFeaturesConfig.navBar,
       appBar: tempMapFeaturesConfig.appBar,
-      footerTabs: tempMapFeaturesConfig.footerTabs,
+      footerBar: tempMapFeaturesConfig.footerBar,
       overviewMap: tempMapFeaturesConfig.overviewMap,
       externalPackages: tempMapFeaturesConfig.externalPackages,
       schemaVersionUsed,

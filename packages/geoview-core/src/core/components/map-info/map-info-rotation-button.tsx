@@ -27,13 +27,13 @@ export function MapInfoRotationButton(): JSX.Element {
 
   return (
     <IconButton
-      sx={sxClasses.sxClassesRotationButton.rotationButton}
+      sx={sxClasses.rotationButton.rotationButton}
       tooltipPlacement="top"
       tooltip={t('mapctrl.rotation.resetRotation')!}
       title={t('mapctrl.rotation.resetRotation')!}
       onClick={() => setRotation(0)}
     >
-      <ArrowUpIcon ref={iconRef} sx={sxClasses.sxClassesRotationButton.rotationIcon} style={{ transform: `rotate(${mapRotation}rad)` }} />
+      <ArrowUpIcon ref={iconRef} sx={sxClasses.rotationButton.rotationIcon} style={{ transform: `rotate(${mapRotation}rad)` }} />
     </IconButton>
   );
 }

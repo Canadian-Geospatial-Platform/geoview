@@ -4,32 +4,28 @@ import { EventStringId, EVENT_NAMES } from '../event-types';
 
 import { TypeTabs } from '@/ui/tabs/tabs';
 
-/** Valid events that can create FooterTabPayload */
-const validEvents: EventStringId[] = [
-  EVENT_NAMES.FOOTER_TABS.EVENT_FOOTER_TABS_TAB_CREATE,
-  EVENT_NAMES.FOOTER_TABS.EVENT_FOOTER_TABS_TAB_REMOVE,
-  EVENT_NAMES.FOOTER_TABS.EVENT_FOOTER_TABS_TAB_SELECT,
-];
+/** Valid events that can create FooterBarPayload */
+const validEvents: EventStringId[] = [EVENT_NAMES.FOOTERBAR.EVENT_FOOTERBAR_TAB_CREATE, EVENT_NAMES.FOOTERBAR.EVENT_FOOTERBAR_TAB_REMOVE];
 
 /**
- * type guard function that redefines a PayloadBaseClass as a FooterTabPayload
+ * type guard function that redefines a PayloadBaseClass as a FooteBarPayload
  * if the event attribute of the verifyIfPayload parameter is valid. The type ascention
  * applies only to the the true block of the if clause.
  *
  * @param {PayloadBaseClass} verifyIfPayload object to test in order to determine if the type ascention is valid
  * @returns {boolean} returns true if the payload is valid
  */
-export const payloadIsAFooterTab = (verifyIfPayload: PayloadBaseClass): verifyIfPayload is FooterTabPayload => {
+export const payloadIsAFooterBar = (verifyIfPayload: PayloadBaseClass): verifyIfPayload is FooterBarPayload => {
   return validEvents.includes(verifyIfPayload?.event);
 };
 
 /**
- * Class definition for FooterTabPayload
+ * Class definition for FooterBarPayload
  *
  * @exports
- * @class FooterTabPayload
+ * @class FooterBarPayload
  */
-export class FooterTabPayload extends PayloadBaseClass {
+export class FooterBarPayload extends PayloadBaseClass {
   // the tab properties
   tab: TypeTabs;
 
@@ -42,22 +38,22 @@ export class FooterTabPayload extends PayloadBaseClass {
    *
    */
   constructor(event: EventStringId, handlerName: string | null, tab: TypeTabs) {
-    if (!validEvents.includes(event)) throw new Error(`FooterTabPayload can't be instanciated for event of type ${event}`);
+    if (!validEvents.includes(event)) throw new Error(`FooterBarPayload can't be instanciated for event of type ${event}`);
     super(event, handlerName);
     this.tab = tab;
   }
 }
 
 /**
- * Helper function used to instanciate a FooterTabPayload object. This function
- * avoids the "new FooterTabPayload" syntax.
+ * Helper function used to instanciate a FooterBarPayload object. This function
+ * avoids the "new FooterBarPayload" syntax.
  *
  * @param {EventStringId} event the event identifier for which the payload is constructed
  * @param {string | null} handlerName the handler Name
  * @param {TypeTabs} tab the the tab properties carried by the payload
  *
- * @returns {FooterTabPayload} the FooterTabPayload object created
+ * @returns {FooterBarPayload} the FooterBarPayload object created
  */
-export const footerTabPayload = (event: EventStringId, handlerName: string | null, tab: TypeTabs): FooterTabPayload => {
-  return new FooterTabPayload(event, handlerName, tab);
+export const footerBarPayload = (event: EventStringId, handlerName: string | null, tab: TypeTabs): FooterBarPayload => {
+  return new FooterBarPayload(event, handlerName, tab);
 };

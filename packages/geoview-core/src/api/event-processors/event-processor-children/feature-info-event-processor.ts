@@ -44,8 +44,8 @@ export class FeatureInfoEventProcessor extends AbstractEventProcessor {
       });
 
       store.getState().detailsState.actions.setLayerDataArray(layerDataArray);
-      if (!['details', 'geochart'].includes(UIEventProcessor.getActiveFooterTab(mapId)))
-        UIEventProcessor.setActiveFooterTab(mapId, 'details');
+      if (!['details', 'geochart'].includes(UIEventProcessor.getActiveFooterBarTab(mapId)))
+        UIEventProcessor.setActiveFooterBarTab(mapId, 'details');
     } else if (eventType === 'hover') {
       /**
        * Create a hover object for each layer which is then used to render layers
