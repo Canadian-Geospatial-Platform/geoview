@@ -146,7 +146,8 @@
         "legend",
         "layers",
         "details",
-        "geochart"
+        "geochart",
+        "guide"
       ]
     }
   },
