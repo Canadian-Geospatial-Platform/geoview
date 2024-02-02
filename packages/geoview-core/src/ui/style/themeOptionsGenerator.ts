@@ -242,26 +242,9 @@ export const generateThemeOptions = function (geoViewColors: IGeoViewColors = de
       background: '#fff',
       objectFit: 'scale-down',
     },
-    appBar: {
-      background: geoViewColors.bgColor.main,
-      border: `1px solid ${geoViewColors.primary.light[500]}`,   //'#eb0707'
-      btnActiveBg: geoViewColors.primary.light[100],
-      btnDefaultBg: geoViewColors.primary.main,
-      btnFocusBg: geoViewColors.primary.light[150],
-      btnHoverBg: geoViewColors.primary.light[100],
-    },
     footerPanel: {
-      contentBg: `${geoViewColors.bgColor.main} 0% 0% no-repeat padding-box`,
-      contentShadow: 'inset 0px 3px 6px #00000029',
       titleFont: `normal normal 600 20px/27px ${font}`,
       layerTitleFont: `normal normal 600 18px/24px ${font}`,
-      layerSecondaryTitleFont: `normal normal normal 16px/22px ${font}`,
-      highlightColor: '#515BA5',
-      featureNumbersFont: `normal normal normal 16px/22px ${font}`,
-      featureKeyFont: `normal normal medium 16px/19px ${font}`,
-      featureValueFont: `normal normal normal 16px/19px ${font}`,
-      chooseLayerFont: `normal normal 600 16px/24px ${font}`,
-      boxShadow: 'rgb(0 0 0 / 20%) 0px 3px 1px -2px, rgb(0 0 0 / 14%) 0px 2px 2px 0px, rgb(0 0 0 / 12%) 0px 1px 5px 0px',
     },
   };
 

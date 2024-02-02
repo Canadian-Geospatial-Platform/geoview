@@ -2,7 +2,7 @@ import { Theme } from '@mui/material/styles';
 
 export const getSxClasses = (theme: Theme) => ({
   detailsContainer: {
-    background: theme.footerPanel.contentBg,
+    background: theme.palette.geoViewColor.bgColor.main,
     paddingBottom: '1rem',
   },
   detailsInstructionsTitle: {
@@ -37,7 +37,7 @@ export const getSxClasses = (theme: Theme) => ({
     borderRadius: 0,
     border: '1px solid',
     borderColor: theme.palette.geoViewColor.grey.dark[100],
-    boxShadow: theme.footerPanel.boxShadow,
+    boxShadow: 2,
     background: theme.palette.geoViewColor.white,
     objectFit: 'scale-down',
     width: '35px',

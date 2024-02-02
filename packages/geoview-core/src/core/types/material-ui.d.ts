@@ -37,17 +37,8 @@ declare module '@mui/material/styles' {
       height?: string;
     };
     footerPanel?: {
-      contentBg: string;
-      contentShadow: string;
       titleFont: string;
       layerTitleFont: string;
-      layerSecondaryTitleFont: string;
-      highlightColor: string;
-      featureNumbersFont: string;
-      featureKeyFont: string;
-      featureValueFont: string;
-      chooseLayerFont: string;
-      boxShadow: string;
     };
   }
   interface Theme {
@@ -63,17 +54,8 @@ declare module '@mui/material/styles' {
       };
     };
     footerPanel: {
-      contentBg: string;
-      contentShadow: string;
       titleFont: string;
       layerTitleFont: string;
-      layerSecondaryTitleFont: string;
-      highlightColor: string;
-      featureNumbersFont: string;
-      featureKeyFont: string;
-      featureValueFont: string;
-      chooseLayerFont: string;
-      boxShadow: string;
     };
   }
 }

@@ -2,7 +2,7 @@ import { Theme } from '@mui/material/styles';
 
 export const getSxClasses = (theme: Theme) => ({
   detailsContainer: {
-    background: theme.footerPanel.contentBg,
+    background: theme.palette.geoViewColor.bgColor.main,
     paddingBottom: '1rem',
   },
   panelHeaders: {
@@ -16,7 +16,7 @@ export const getSxClasses = (theme: Theme) => ({
   },
   listItemIcon: {
     color: theme.palette.geoViewColor.primary.main,
-    background: theme.footerPanel.contentBg,
+    background: theme.palette.geoViewColor.bgColor.main,
   },
   layerNamePrimary: {
     '& .MuiListItemText-primary': {
