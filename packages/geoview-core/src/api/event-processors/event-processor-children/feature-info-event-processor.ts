@@ -80,7 +80,7 @@ export class FeatureInfoEventProcessor extends AbstractEventProcessor {
       // If there was some features on this propagation
       if (atLeastOneFeature) {
         // If the current tab is not 'details' nor 'geochart', switch to details
-        if (!['details', 'geochart'].includes(uiState.activefooterTabId)) uiState.actions.setActiveFooterTab('details');
+        if (!['details', 'geochart'].includes(uiState.activeFooterBarTabId)) uiState.actions.setActiveFooterBarTab('details');
       }
 
       // Also propagate in the batched array

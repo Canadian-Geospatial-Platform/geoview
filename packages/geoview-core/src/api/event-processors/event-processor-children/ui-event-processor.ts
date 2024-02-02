@@ -1,5 +1,5 @@
-import { TypeAppBarProps, TypeMapCorePackages } from '@/geo';
-import { IUIState, api } from '@/app';
+import { TypeValidAppBarCoreProps, TypeMapCorePackages } from '@/geo';
+import { IUIState } from '@/app';
 
 import { AbstractEventProcessor } from '../abstract-event-processor';
 
@@ -22,7 +22,7 @@ export class UIEventProcessor extends AbstractEventProcessor {
   }
 
   // #region
-  static getAppBarComponents(mapId: string): TypeAppBarProps {
+  static getAppBarComponents(mapId: string): TypeValidAppBarCoreProps {
     return this.getUIState(mapId).appBarComponents;
   }
 
@@ -37,6 +37,6 @@ export class UIEventProcessor extends AbstractEventProcessor {
   //! NEVER add a store action who does set state AND map action at a same time.
   //! Review the action in store state to make sure
   static setActiveFooterTab(mapId: string, id: string): void {
-    api.maps[mapId].footerTabs.selectFooterTab(id);
+    this.getUIState(mapId).actions.setActiveFooterBarTab(id);
   }
 }
