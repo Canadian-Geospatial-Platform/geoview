@@ -69,5 +69,7 @@ export const getSxClasses = (theme: Theme) => ({
   paper: { marginBottom: '1rem' },
   borderWithIndex: `2px solid ${theme.palette.geoViewColor.primary.main}`,
   borderNone: 'none',
+  backgroundProcessing: 'bisque',
+  backgroundError: 'pink',
   headline: { fontSize: '1.125rem', fontWeight: 'bold' },
 });

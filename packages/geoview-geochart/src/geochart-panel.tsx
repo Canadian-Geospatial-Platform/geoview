@@ -8,7 +8,7 @@ import { Paper } from 'geoview-core/src/ui';
 import {
   useMapVisibleLayers,
   useGeochartStoreActions,
-  useGeochartStoreLayerDataArrayBatch,
+  useGeochartStoreLayerDataArray,
   useGeochartStoreSelectedLayerPath,
 } from 'geoview-core/src/core/stores';
 import { useGeochartConfigs } from 'geoview-core/src/core/stores/store-interface-and-intial-values/geochart-state';
@@ -43,7 +43,7 @@ export function GeoChartPanel(props: GeoChartPanelProps): JSX.Element {
   // Get states and actions from store
   const configObj = useGeochartConfigs();
   const visibleLayers = useMapVisibleLayers() as string[];
-  const arrayOfLayerData = useGeochartStoreLayerDataArrayBatch() as TypeArrayOfLayerData;
+  const arrayOfLayerData = useGeochartStoreLayerDataArray() as TypeArrayOfLayerData;
   const selectedLayerPath = useGeochartStoreSelectedLayerPath() as string;
   const { setSelectedLayerPath, setLayerDataArrayBatchLayerPathBypass } = useGeochartStoreActions();
 
@@ -92,12 +92,13 @@ export function GeoChartPanel(props: GeoChartPanelProps): JSX.Element {
     // Set the layers list
     return visibleLayers
       .map((layerPath) => arrayOfLayerData.find((layerData) => layerData.layerPath === layerPath))
-      .filter((layer) => layer !== undefined && configObj[layer.layerPath])
+      .filter((layer) => layer && configObj[layer.layerPath])
       .map(
         (layer) =>
           ({
             layerName: layer!.layerName ?? '',
             layerPath: layer!.layerPath,
+            queryStatus: layer!.queryStatus,
             numOffeatures: layer!.features?.length ?? 0,
             layerFeatures: getNumFeaturesLabel(layer!),
             tooltip: `${layer!.layerName}, ${getNumFeaturesLabel(layer!)}`,
@@ -127,18 +128,24 @@ export function GeoChartPanel(props: GeoChartPanelProps): JSX.Element {
   }, [selectedLayerPath, setLayerDataArrayBatchLayerPathBypass]);
 
   /**
-   * Effect used to persist persist or alter the current layer selection.
+   * Effect used to persist or alter the current layer selection based on the layers list changes.
    * A useEffect is necessary in order to keep this component pure and be able to set the selected layer path elsewhere than in this component.
    */
   useEffect(() => {
     // Log
     logger.logTraceUseEffect('GEOCHART-PANEL - check selection', memoLayerSelectedItem);
 
+    // Check if the layer we are on is not 'processed' or 'error', ignore if so
+    if (memoLayerSelectedItem && !(memoLayerSelectedItem.queryStatus === 'processed' || memoLayerSelectedItem.queryStatus === 'error'))
+      return;
+
     // Check if the layer we are one still have features
     if (memoLayerSelectedItem?.numOffeatures) {
       // Log
-      logger.logDebug('GEOCHART-PANEL', 'keep selection');
-      // All good, keep selection, do nothing
+      // logger.logDebug('GEOCHART-PANEL', 'keep selection');
+      // All good, keep selection
+      // Reset the bypass for next time
+      setLayerDataArrayBatchLayerPathBypass(memoLayerSelectedItem.layerPath);
     } else {
       // Find the first layer with features
       const anotherLayerEntry = memoLayersList.find((layer) => {
@@ -148,19 +155,19 @@ export function GeoChartPanel(props: GeoChartPanelProps): JSX.Element {
       // If found
       if (anotherLayerEntry) {
         // Log
-        logger.logDebug('GEOCHART-PANEL', 'select another', anotherLayerEntry.layerPath);
+        // logger.logDebug('GEOCHART-PANEL', 'select another', anotherLayerEntry.layerPath);
 
         // Select that one
         setSelectedLayerPath(anotherLayerEntry.layerPath);
       } else {
         // Log
-        logger.logDebug('GEOCHART-PANEL', 'select none');
+        // logger.logDebug('GEOCHART-PANEL', 'select none');
 
         // None found, select none
         setSelectedLayerPath('');
       }
     }
-  }, [memoLayerSelectedItem, memoLayersList, setSelectedLayerPath]);
+  }, [memoLayerSelectedItem, memoLayersList, setSelectedLayerPath, setLayerDataArrayBatchLayerPathBypass]);
 
   /**
    * Handles clicks to layers in left panel. Sets selected layer.

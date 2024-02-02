@@ -112,7 +112,28 @@ export class FeatureInfoLayerSet {
      * @param {QueryType} queryType The query type (ex.: "all" | "at_pixel" | "at_coordinate" | "at_long_lat", ...)
      * @param {Coordinate} coordinate The coordinate of the event
      */
-    const createQueryLayerPayload = (eventType: EventType, queryType: QueryType, coordinate: Coordinate) => {
+    const createQueryLayerPayload = (eventType: EventType, queryType: QueryType, coordinate: Coordinate): void => {
+      // ! Added an 'init' propagation before starting the processing propagations.
+      // ! Please review its implementation... and apply logic in other places?
+      // Originally, there was no 'init' propagation. That means, after a first query, all layers are in 'processed' status in the resultsSet.
+      // Then, when a second query happens, if there's not 'reset' of sorts, and a propagation happens after each single layer is set to 'processing',
+      // the propagation will contain 1 'processing' layer and x 'processed' layers. Then 2 'processing' and x-1 'processed' layers, etc.
+      // This is problematic when a component is trying to understand what's happening.
+      // Indeed, the component sees the array state being triggered and doesn't know if the 'processed' state is because the query was successful or
+      // if it's because it hasn't been cleared and put into 'processing' status just yet. If it's the later and the component
+      // tries to select a layer (because it thinks it was successful) it's going to select a layer that's about to turn in processing state
+      // and the component will be acting weird.
+
+      Object.keys(this.resultsSet).forEach((layerPath) => {
+        if (!this.resultsSet[layerPath].data[eventType]!.eventListenerEnabled) return;
+        const dataForEventType = this.resultsSet[layerPath].data[eventType] as TypeLayerData;
+        dataForEventType.queryStatus = 'init';
+        dataForEventType.features = undefined;
+      });
+
+      // Propagate initialization to the store
+      FeatureInfoEventProcessor.propagateFeatureInfoToStore(mapId, 'unused_var', eventType, this.resultsSet);
+
       Object.keys(this.resultsSet).forEach((layerPath) => {
         if (!this.resultsSet[layerPath].data[eventType]!.eventListenerEnabled) return;
         const dataForEventType = this.resultsSet[layerPath].data[eventType] as TypeLayerData;
@@ -129,8 +150,9 @@ export class FeatureInfoLayerSet {
         if (dataForEventType.eventListenerEnabled && dataForEventType.queryStatus !== 'error') {
           api.event.emit(GetFeatureInfoPayload.createQueryLayerPayload(`${this.mapId}/${layerPath}`, queryType, coordinate, eventType));
         }
-        // Propagate feature info to the store, now that the this.resultsSet is more representative of the reality
-        FeatureInfoEventProcessor.propagateFeatureInfoToStore(mapId, layerPath, eventType, this.resultsSet);
+
+        // Propagate feature info to the store for each layer path of the results set
+        FeatureInfoEventProcessor.propagateFeatureInfoToStore(mapId, 'unused_var', eventType, this.resultsSet);
       });
     };
 

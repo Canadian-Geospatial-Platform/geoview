@@ -2,11 +2,12 @@ import { ReactNode, memo } from 'react';
 import { useTheme } from '@mui/material/styles';
 import { Box, ChevronRightIcon, IconButton, List, ListItem, ListItemButton, ListItemIcon, Paper, Tooltip, Typography } from '@/ui';
 import { getSxClasses } from './layer-list-style';
-import { IconStack } from '@/app';
+import { IconStack, TypeQueryStatus } from '@/app';
 
 export interface LayerListEntry {
   layerName: string;
   layerPath: string;
+  queryStatus: TypeQueryStatus;
   layerFeatures?: ReactNode;
   mapFilteredIcon?: ReactNode;
   tooltip?: ReactNode;
@@ -22,17 +23,42 @@ interface LayerListProps {
 
 interface LayerListItemProps {
   isSelected: boolean;
+  queryStatus: TypeQueryStatus;
   layer: LayerListEntry;
   handleListItemClick: (layer: LayerListEntry) => void;
   isEnlargeDataTable: boolean;
 }
 
-const LayerListItem = memo(function LayerListItem({ isSelected, layer, handleListItemClick, isEnlargeDataTable }: LayerListItemProps) {
+const LayerListItem = memo(function LayerListItem({
+  isSelected,
+  queryStatus,
+  layer,
+  handleListItemClick,
+  isEnlargeDataTable,
+}: LayerListItemProps) {
   const theme = useTheme();
   const sxClasses = getSxClasses(theme);
 
+  const renderQueryStatusBackground = () => {
+    switch (queryStatus) {
+      case 'init':
+      case 'processing':
+        return sxClasses.backgroundProcessing;
+      case 'error':
+        return sxClasses.backgroundError;
+      default:
+        return 'unset';
+    }
+  };
+
   return (
-    <Paper sx={{ ...sxClasses.paper, border: isSelected ? sxClasses.borderWithIndex : sxClasses.borderNone }}>
+    <Paper
+      sx={{
+        ...sxClasses.paper,
+        border: isSelected ? sxClasses.borderWithIndex : sxClasses.borderNone,
+        backgroundColor: renderQueryStatusBackground(),
+      }}
+    >
       <Tooltip title={layer.tooltip} placement="top" arrow>
         <Box>
           <ListItem disablePadding>
@@ -104,6 +130,7 @@ export function LayerList({ layerList, isEnlargeDataTable, selectedLayerPath, ha
           // Some of layers will not have numOfFeatures, so to make layer look like selected, we need to set default value to 1.
           // Also we cant set numOfFeature initially, then it num of features will be display as sub title.
           isSelected={(layer?.numOffeatures ?? 1) > 0 && layer.layerPath === selectedLayerPath}
+          queryStatus={layer.queryStatus}
           layer={layer}
           handleListItemClick={handleListItemClick}
           isEnlargeDataTable={isEnlargeDataTable}

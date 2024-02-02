@@ -17,7 +17,7 @@ import {
   useMapVisibleLayers,
   useDetailsStoreActions,
   useDetailsStoreCheckedFeatures,
-  useDetailsStoreLayerDataArrayBatch,
+  useDetailsStoreLayerDataArray,
   useDetailsStoreSelectedLayerPath,
 } from '@/core/stores';
 import { logger } from '@/core/utils/logger';
@@ -43,7 +43,7 @@ export function DetailsPanel(): JSX.Element {
 
   // Get states and actions from store
   const selectedLayerPath = useDetailsStoreSelectedLayerPath();
-  const arrayOfLayerDataBatch = useDetailsStoreLayerDataArrayBatch();
+  const arrayOfLayerDataBatch = useDetailsStoreLayerDataArray();
   const checkedFeatures = useDetailsStoreCheckedFeatures();
   const visibleLayers = useMapVisibleLayers();
   const { setSelectedLayerPath, removeCheckedFeature, setLayerDataArrayBatchLayerPathBypass } = useDetailsStoreActions();
@@ -108,12 +108,13 @@ export function DetailsPanel(): JSX.Element {
     // Set the layers list
     return visibleLayers
       .map((layerPath) => arrayOfLayerDataBatch.find((layerData) => layerData.layerPath === layerPath))
-      .filter((layer) => layer !== undefined)
+      .filter((layer) => layer)
       .map(
         (layer) =>
           ({
             layerName: layer!.layerName ?? '',
             layerPath: layer!.layerPath,
+            queryStatus: layer!.queryStatus,
             numOffeatures: layer!.features?.length ?? 0,
             layerFeatures: getNumFeaturesLabel(layer!),
             tooltip: `${layer!.layerName}, ${getNumFeaturesLabel(layer!)}`,
@@ -152,17 +153,21 @@ export function DetailsPanel(): JSX.Element {
   }, [selectedLayerPath, setLayerDataArrayBatchLayerPathBypass]);
 
   /**
-   * Effect used to persist persist or alter the current layer selection.
+   * Effect used to persist or alter the current layer selection based on the layers list changes
    * A useEffect is necessary in order to keep this component pure and be able to set the selected layer path elsewhere than in this component.
    */
   useEffect(() => {
     // Log
     logger.logTraceUseEffect('DETAILS-PANEL - check selection', memoLayerSelectedItem);
 
-    // Check if the layer we are one still have features
+    // Check if the layer we are on is not 'processed' or 'error', ignore if so
+    if (memoLayerSelectedItem && !(memoLayerSelectedItem.queryStatus === 'processed' || memoLayerSelectedItem.queryStatus === 'error'))
+      return;
+
+    // If the layer has features
     if (memoLayerSelectedItem?.numOffeatures) {
       // Log
-      logger.logDebug('DETAILS-PANEL', 'keep selection');
+      // logger.logDebug('DETAILS-PANEL', 'keep selection', memoLayerSelectedItem);
       // All good, keep selection
       // Reset the bypass for next time
       setLayerDataArrayBatchLayerPathBypass(memoLayerSelectedItem.layerPath);
@@ -175,13 +180,13 @@ export function DetailsPanel(): JSX.Element {
       // If found
       if (anotherLayerEntry) {
         // Log
-        logger.logDebug('DETAILS-PANEL', 'select another', anotherLayerEntry.layerPath);
+        // logger.logDebug('DETAILS-PANEL', 'select another', memoLayerSelectedItem, anotherLayerEntry.layerPath);
 
         // Select that one
         setSelectedLayerPath(anotherLayerEntry.layerPath);
       } else {
         // Log
-        logger.logDebug('DETAILS-PANEL', 'select none');
+        // logger.logDebug('DETAILS-PANEL', 'select none', memoLayerSelectedItem);
 
         // None found, select none
         setSelectedLayerPath('');
@@ -260,17 +265,6 @@ export function DetailsPanel(): JSX.Element {
 
   // #region RENDER SECTION *******************************************************************************************
 
-  const renderLayerList = () => {
-    return (
-      <LayerList
-        layerList={memoLayersList}
-        isEnlargeDataTable={isEnlargeDataTable}
-        selectedLayerPath={selectedLayerPath}
-        handleListItemClick={handleLayerChange}
-      />
-    );
-  };
-
   return (
     <Box sx={sxClasses.detailsContainer}>
       {memoLayersList.length && (
@@ -299,7 +293,12 @@ export function DetailsPanel(): JSX.Element {
           </ResponsiveGrid.Root>
           <ResponsiveGrid.Root>
             <ResponsiveGrid.Left isEnlargeDataTable={isEnlargeDataTable} isLayersPanelVisible={isLayersPanelVisible} ref={leftPanelRef}>
-              {renderLayerList()}
+              <LayerList
+                layerList={memoLayersList}
+                isEnlargeDataTable={isEnlargeDataTable}
+                selectedLayerPath={selectedLayerPath}
+                handleListItemClick={handleLayerChange}
+              />
             </ResponsiveGrid.Left>
             <ResponsiveGrid.Right isEnlargeDataTable={isEnlargeDataTable} isLayersPanelVisible={isLayersPanelVisible} ref={rightPanelRef}>
               {!!memoSelectedLayerData?.features?.length && (
