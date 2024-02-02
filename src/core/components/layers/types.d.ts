@@ -32,6 +32,7 @@ export interface TypeLegendLayer {
     layerPhase?: string;
     querySent?: boolean;
     isVisible: TypeVisibilityFlags;
+    canToggle?: boolean;
     icons?: TypeLegendLayerIcons;
     items: TypeLegendItem[];
     children: TypeLegendLayer[];

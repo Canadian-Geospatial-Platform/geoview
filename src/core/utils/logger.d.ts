@@ -2,7 +2,8 @@ export declare const LOG_TRACE_DETAILED = 1;
 export declare const LOG_TRACE_USE_EFFECT_UNMOUNT = 2;
 export declare const LOG_TRACE_RENDER = 3;
 export declare const LOG_TRACE_USE_CALLBACK = 4;
-export declare const LOG_TRACE_USE_EFFECT = 5;
+export declare const LOG_TRACE_USE_MEMO = 5;
+export declare const LOG_TRACE_USE_EFFECT = 6;
 export declare const LOG_TRACE_CORE = 10;
 export declare const LOG_DEBUG = 20;
 export declare const LOG_INFO = 30;
@@ -19,8 +20,9 @@ type ColorCode = {
     plum: string;
     turquoise: string;
     grey: string;
-    darkorchid: string;
+    orchid: string;
     mediumorchid: string;
+    darkorchid: string;
 };
 /**
  * A Log marker with various keys, used to track various timings
@@ -59,6 +61,13 @@ export declare class ConsoleLogger {
      * @param message unknown[] the messages to log
      */
     logTraceRender: (component: string, ...message: unknown[]) => void;
+    /**
+     * Logging function commonly used in the useMemo to track when a value is being memoized.
+     * Only shows if LOG_ACTIVE is true.
+     * @param message string useCallbackFunction the useCallback function identifier
+     * @param message unknown[] the messages to log
+     */
+    logTraceUseMemo: (useMemoFunction: string, ...message: unknown[]) => void;
     /**
      * Logging function commonly used in the useCallback to track when a callback is being memoized.
      * Only shows if LOG_ACTIVE is true.

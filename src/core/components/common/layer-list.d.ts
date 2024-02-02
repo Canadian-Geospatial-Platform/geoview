@@ -11,7 +11,7 @@ interface LayerListProps {
     isEnlargeDataTable: boolean;
     layerList: LayerListEntry[];
     selectedLayerIndex: number;
-    handleListItemClick: (layer: LayerListEntry, index: number) => void;
+    handleListItemClick: (layer: LayerListEntry) => void;
 }
 /**
  * Create a list of layers

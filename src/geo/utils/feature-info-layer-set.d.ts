@@ -1,4 +1,4 @@
-import { TypeFeatureInfoResultSets } from '@/api/events/payloads';
+import { TypeFeatureInfoResultsSet } from '@/api/events/payloads';
 /** ***************************************************************************************************************************
  * A class to hold a set of layers associated with an array of TypeArrayOfFeatureInfoEntries. When this class is instantiated,
  * all layers already loaded on the specified map that are queryable will be added to the set. Layers added afterwards will be
@@ -14,14 +14,20 @@ export declare class FeatureInfoLayerSet {
     private mapId;
     /** The layer set object. */
     private layerSet;
-    /** Private variable that keeps the click disable flags associated to the layerPath  */
-    private disableClickOnLayer;
-    /** Private variable that keeps the hover disable flags associated to the layerPath  */
-    private disableHoverOverLayer;
+    /** Private variable that keeps the click disable flags associated to the layerPath  * /
+    private disableClickOnLayer: {
+      [layerPath: string]: boolean;
+    } = {};
+  
+    /** Private variable that keeps the hover disable flags associated to the layerPath  * /
+    private disableHoverOverLayer: {
+      [layerPath: string]: boolean;
+    } = {};
+  
     /** Flag used to disable hover event for the entire layerSet */
     private disableHover;
     /** An object containing the result sets indexed using the layer path */
-    resultSets: TypeFeatureInfoResultSets;
+    resultsSet: TypeFeatureInfoResultsSet;
     /** ***************************************************************************************************************************
      * The class constructor that instanciate a set of layer.
      *
@@ -66,7 +72,7 @@ export declare class FeatureInfoLayerSet {
      *
      * @returns {boolean | undefined} The flag value for the map or layer.
      */
-    isClickListenerdisabled(layerPath?: string): boolean | undefined;
+    isClickListenerEnabled(layerPath?: string): boolean | undefined;
     /**
      * Function used to enable listening of hover events. When a layer path is not provided,
      * hover events listening is enabled for all layers
@@ -89,5 +95,5 @@ export declare class FeatureInfoLayerSet {
      *
      * @returns {boolean | undefined} The flag value for the map or layer.
      */
-    isHoverListenerdisabled(layerPath?: string): boolean | undefined;
+    isHoverListenerEnabled(layerPath?: string): boolean | undefined;
 }

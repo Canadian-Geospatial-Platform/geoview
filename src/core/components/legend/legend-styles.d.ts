@@ -9,12 +9,13 @@ export declare const getSxClasses: (theme: Theme) => {
     title: {
         textAlign: string;
         font: string;
-        fontSize: string;
+        color: string;
+        fontSize: any;
     };
     subtitle: {
         font: string;
         fontWeight: string;
-        fontSize: string;
+        fontSize: any;
         textAlign: string;
         marginBottom: string;
     };

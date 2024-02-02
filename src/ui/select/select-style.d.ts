@@ -18,7 +18,9 @@ export declare const getSxClasses: (theme: Theme) => {
         };
         '& .MuiFormLabel-root.Mui-focused': {
             color: string;
-            background: string;
+            background: {
+                [x: number]: string;
+            };
         };
         '& .MuiSelect-select': {
             padding: string;

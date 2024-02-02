@@ -12,7 +12,9 @@ export declare const getSxClasses: (theme: Theme) => {
         color: string;
         '&:hover': {
             backgroundColor: string;
-            color: string;
+            color: {
+                [x: number]: string;
+            };
         };
     };
     listItemIcon: {

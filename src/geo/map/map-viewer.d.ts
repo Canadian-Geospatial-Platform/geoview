@@ -11,7 +11,7 @@ import { TypeClickMarker } from '@/app';
 import { TypeRecordOfPlugin } from '@/api/plugin/plugin-types';
 import { AppbarButtons } from '@/core/components/app-bar/app-bar-buttons';
 import { NavbarButtons } from '@/core/components/nav-bar/nav-bar-buttons';
-import { FooterTabsApi } from '@/core/components/footer-tabs/footer-tabs-api';
+import { FooterBarApi } from '@/core/components/footer-bar/footer-bar-api';
 import { DataTableApi } from '@/core/components/data-table/data-table-api';
 import { GeoviewRenderer } from '@/geo/renderer/geoview-renderer';
 import { Select } from '@/geo/interaction/select';
@@ -38,7 +38,7 @@ export declare class MapViewer {
     overviewRoot: Root | undefined;
     appBarButtons: AppbarButtons;
     navBarButtons: NavbarButtons;
-    footerTabs: FooterTabsApi;
+    footerBar: FooterBarApi;
     dataTable: DataTableApi;
     basemap: Basemap;
     layer: Layer;

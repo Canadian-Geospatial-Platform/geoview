@@ -456,6 +456,16 @@ export declare const layerEntryIsOgcWms: (verifyIfLayer: TypeLayerEntryConfig) =
  */
 export declare const layerEntryIsEsriDynamic: (verifyIfLayer: TypeLayerEntryConfig) => verifyIfLayer is TypeEsriDynamicLayerEntryConfig;
 /** ******************************************************************************************************************************
+ * type guard function that redefines a TypeLayerEntryConfig as a TypeEsriImageLayerEntryConfig if the schemaTag attribute of
+ * the verifyIfLayer parameter is 'ogcWms'. The type ascention applies only to the true block of the if clause that use this
+ * function.
+ *
+ * @param {TypeLayerEntryConfig} verifyIfLayer Polymorphic object to test in order to determine if the type ascention is valid.
+ *
+ * @returns {boolean} true if the type ascention is valid.
+ */
+export declare const layerEntryIsEsriimage: (verifyIfLayer: TypeLayerEntryConfig) => verifyIfLayer is TypeEsriImageLayerEntryConfig;
+/** ******************************************************************************************************************************
  * type guard function that redefines a TypeLayerEntryConfig as a TypeImageStaticLayerEntryConfig if the schemaTag attribute of
  * the verifyIfLayer parameter is 'ogcWms'. The type ascention applies only to the true block of the if clause that use this
  * function.
@@ -776,6 +786,26 @@ export declare class TypeEsriDynamicLayerEntryConfig extends TypeBaseLayerEntryC
 /** ******************************************************************************************************************************
  * Type used to define a GeoView image layer to display on the map.
  */
+export declare class TypeEsriImageLayerEntryConfig extends TypeBaseLayerEntryConfig {
+    /** Tag used to link the entry to a specific schema. */
+    schemaTag: TypeGeoviewLayerType;
+    /** Layer entry data type. */
+    entryType: TypeLayerEntryType;
+    /** Filter to apply on feature of this layer. */
+    layerFilter?: string;
+    /** Source settings to apply to the GeoView image layer source at creation time. */
+    source: TypeSourceImageEsriInitialConfig;
+    /** Style to apply to the raster layer. */
+    style?: TypeStyleConfig;
+    /**
+     * The class constructor.
+     * @param {TypeEsriImageLayerEntryConfig} layerConfig The layer configuration we want to instanciate.
+     */
+    constructor(layerConfig: TypeEsriImageLayerEntryConfig);
+}
+/** ******************************************************************************************************************************
+ * Type used to define a GeoView image layer to display on the map.
+ */
 export declare class TypeImageStaticLayerEntryConfig extends TypeBaseLayerEntryConfig {
     /** Tag used to link the entry to a specific schema. */
     schemaTag: TypeGeoviewLayerType;
@@ -892,7 +922,7 @@ export declare class TypeLayerGroupEntryConfig extends BaseLayerProperties {
 /** ******************************************************************************************************************************
  * Layer config type.
  */
-export type TypeLayerEntryConfig = TypeLayerGroupEntryConfig | TypeBaseLayerEntryConfig | TypeVectorHeatmapLayerEntryConfig | TypeVectorTileLayerEntryConfig | TypeVectorLayerEntryConfig | TypeOgcWmsLayerEntryConfig | TypeEsriDynamicLayerEntryConfig | TypeImageStaticLayerEntryConfig | TypeTileLayerEntryConfig | TypeGeocoreLayerEntryConfig;
+export type TypeLayerEntryConfig = TypeLayerGroupEntryConfig | TypeBaseLayerEntryConfig | TypeVectorHeatmapLayerEntryConfig | TypeVectorTileLayerEntryConfig | TypeVectorLayerEntryConfig | TypeOgcWmsLayerEntryConfig | TypeEsriDynamicLayerEntryConfig | TypeEsriImageLayerEntryConfig | TypeImageStaticLayerEntryConfig | TypeTileLayerEntryConfig | TypeGeocoreLayerEntryConfig;
 /** ******************************************************************************************************************************
  * List of layers. Corresponds to the layerList defined in the schema.
  */
@@ -910,14 +940,12 @@ export type TypeMapFeaturesInstance = {
     map: TypeMapConfig;
     /** Display theme, default = geo.ca. */
     theme?: TypeDisplayTheme;
-    /** App bar properties. */
-    appBar?: TypeAppBarProps;
     /** Nav bar properies. */
     navBar?: TypeNavBarProps;
     /** App bar properies. */
-    appBarTabs?: TypeAppBarTabsProps;
+    appBar?: TypeAppBarProps;
     /** Footer bar properies. */
-    footerTabs?: TypeFooterTabsProps;
+    footerBar?: TypeFooterBarProps;
     /** Overview map properies. */
     overviewMap?: TypeOverviewMapProps;
     /** Map components. */
@@ -1054,33 +1082,29 @@ export type TypeValidMapProjectionCodes = 3978 | 3857;
  */
 export declare const VALID_PROJECTION_CODES: number[];
 /** ******************************************************************************************************************************
- *  Controls available on the application bar. Default = ['geolocator']. The about GeoView and notification are always there.
- */
-export type TypeAppBarProps = Array<'geolocator' | 'export'>;
-/** ******************************************************************************************************************************
  * Controls available on the navigation bar. Default = ['zoom', 'fullscreen', 'home'].
  */
 export type TypeNavBarProps = Array<'zoom' | 'fullscreen' | 'home' | 'location' | 'export'>;
 /** ******************************************************************************************************************************
- * Configuration available for the footer tabs component.
+ * Configuration available on the application bar. Default = ['geolocator']. The about GeoView and notification are always there.
  */
-export type TypeAppBarTabsProps = {
+export type TypeAppBarProps = {
     tabs: {
-        core: Array<'basemap-panel' | 'layers-panel' | 'geochart'>;
-        custom: Array<string>;
+        core: TypeValidAppBarCoreProps;
     };
-    collapsed: boolean;
 };
+export type TypeValidAppBarCoreProps = Array<'geolocator' | 'export' | 'basemap-panel' | 'geochart'>;
 /** ******************************************************************************************************************************
- * Configuration available for the footer tabs component.
+ * Configuration available for the footer bar component.
  */
-export type TypeFooterTabsProps = {
+export type TypeFooterBarProps = {
     tabs: {
-        core: Array<'legend' | 'layers' | 'details' | 'data-table' | 'time-slider' | 'geochart'>;
+        core: TypeValidFooterBarTabsCoreProps;
         custom: Array<string>;
     };
     collapsed: boolean;
 };
+export type TypeValidFooterBarTabsCoreProps = Array<'legend' | 'layers' | 'details' | 'data-table' | 'time-slider' | 'geochart'>;
 /** ******************************************************************************************************************************
  *  Overview map options. Default none.
  */

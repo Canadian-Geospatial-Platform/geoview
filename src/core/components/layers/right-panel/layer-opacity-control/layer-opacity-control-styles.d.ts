@@ -6,6 +6,7 @@ export declare const getSxClasses: (theme: Theme) => {
         gap: string;
         padding: string;
         backgroundColor: string;
+        borderRadius: string;
         '& .MuiSlider-mark': {
             width: string;
             height: string;
@@ -15,7 +16,7 @@ export declare const getSxClasses: (theme: Theme) => {
             borderRadius: string;
         };
         '& .MuiSlider-markLabel': {
-            fontSize: string;
+            fontSize: any;
             color: string;
         };
     };

@@ -2,8 +2,8 @@ import { PayloadBaseClass } from './payload-base-class';
 import { EventStringId } from '../event-types';
 import { TypeLegend } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { TypeLayerStatus, TypeLocalizedString } from '@/geo/map/map-schema-types';
-import { TypeResultSets } from './layer-set-payload';
-export type TypeLegendResultSetsEntry = {
+import { TypeResultsSet } from './layer-set-payload';
+export type TypeLegendResultsSetEntry = {
     layerStatus: TypeLayerStatus;
     layerPhase: string;
     querySent: boolean;
@@ -13,8 +13,8 @@ export type TypeLegendResultSetsEntry = {
 /** The legend resultset type associate a layer path to a legend object. The undefined value indicate that the get legend query
  * hasn't been run and the null value indicate that there was a get legend error.
  */
-export type TypeLegendResultSets = {
-    [layerPath: string]: TypeLegendResultSetsEntry;
+export type TypeLegendResultsSet = {
+    [layerPath: string]: TypeLegendResultsSetEntry;
 };
 /**
  * type guard function that redefines a PayloadBaseClass as a TypeLegendsLayersetUpdatedPayload
@@ -30,7 +30,7 @@ export declare const payloadIsLegendsLayersetUpdated: (verifyIfPayload: PayloadB
  */
 export interface TypeLegendsLayersetUpdatedPayload extends GetLegendsPayload {
     layerPath: string;
-    resultSets: TypeLegendResultSets;
+    resultsSet: TypeLegendResultsSet;
 }
 /**
  * type guard function that redefines a PayloadBaseClass as a TypeLegendInfoPayload
@@ -95,11 +95,11 @@ export declare class GetLegendsPayload extends PayloadBaseClass {
      *
      * @param {string | null} handlerName the handler Name
      * @param {string} layerPath the layer path updated
-     * @param {TypeResultSets | TypeLegendResultSets} resultSets the legend resultset
+     * @param {TypeResultsSet | TypeLegendResultsSet} resultsSet the legend resultset
      *
      * @returns {TypeLegendsLayersetUpdatedPayload} the TypeLegendsLayersetUpdatedPayload object created
      */
-    static createLegendsLayersetUpdatedPayload: (handlerName: string, layerPath: string, resultSets: TypeResultSets | TypeLegendResultSets) => TypeLegendsLayersetUpdatedPayload;
+    static createLegendsLayersetUpdatedPayload: (handlerName: string, layerPath: string, resultsSet: TypeResultsSet | TypeLegendResultsSet) => TypeLegendsLayersetUpdatedPayload;
     /**
      * Static method used to create a get legends payload that will return the legend's query result
      *

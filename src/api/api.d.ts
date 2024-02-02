@@ -18,7 +18,7 @@ export declare class API {
     eventNames: {
         APPBAR: Record<import("@/app").AppbarEventKey, import("@/app").EventStringId>;
         BASEMAP: Record<"EVENT_BASEMAP_LAYERS_UPDATE", import("@/app").EventStringId>;
-        FOOTER_TABS: Record<import("@/app").FooterTabsEventKey, import("@/app").EventStringId>;
+        FOOTERBAR: Record<import("@/app").FooterBarEventKey, import("@/app").EventStringId>;
         GET_FEATURE_INFO: Record<import("@/app").GetFeatureInfoEventKey, import("@/app").EventStringId>;
         GET_LEGENDS: Record<import("@/app").GetLegendsEventKey, import("@/app").EventStringId>;
         GEOMETRY: Record<import("@/app").GeometryEventKey, import("@/app").EventStringId>;
@@ -39,7 +39,7 @@ export declare class API {
         WM: string;
         LNGLAT: string;
     };
-    layerTypes: Record<"WFS" | "ESRI_DYNAMIC" | "ESRI_FEATURE" | "IMAGE_STATIC" | "GEOJSON" | "GEOCORE" | "GEOPACKAGE" | "XYZ_TILES" | "VECTOR_TILES" | "OGC_FEATURE" | "WMS", import("@/app").TypeGeoviewLayerType>;
+    layerTypes: Record<"WFS" | "ESRI_DYNAMIC" | "ESRI_FEATURE" | "ESRI_IMAGE" | "IMAGE_STATIC" | "GEOJSON" | "GEOCORE" | "GEOPACKAGE" | "XYZ_TILES" | "VECTOR_TILES" | "OGC_FEATURE" | "WMS", import("@/app").TypeGeoviewLayerType>;
     maps: Record<string, MapViewer>;
     isReady: number;
     readyCallback?: (mapId?: string) => void;

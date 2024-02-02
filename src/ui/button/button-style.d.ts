@@ -10,7 +10,9 @@ export declare const getSxClasses: (theme: Theme) => {
         display: string;
         justifyContent: string;
         alignItems: string;
-        color: string;
+        color: {
+            [x: number]: string;
+        };
     };
     text: {
         width: string;

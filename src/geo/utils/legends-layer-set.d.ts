@@ -1,4 +1,4 @@
-import { TypeLegendResultSets } from '@/api/events/payloads';
+import { TypeLegendResultsSet } from '@/api/events/payloads';
 import { LayerSet } from './layer-set';
 /** *****************************************************************************************************************************
  * A class to hold a set of layers associated with an array of TypeLegend. When this class is instantiated, all layers already
@@ -15,7 +15,7 @@ export declare class LegendsLayerSet {
     /** The layer set object. */
     layerSet: LayerSet;
     /** An object containing the result sets indexed using the layer path */
-    resultSets: TypeLegendResultSets;
+    resultsSet: TypeLegendResultsSet;
     /** ***************************************************************************************************************************
      * The class constructor that instanciate a set of layer.
      *
