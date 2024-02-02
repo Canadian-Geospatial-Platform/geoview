@@ -245,8 +245,9 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
                 <Typography
                   sx={{
                     marginTop: '10px',
-                    color: theme.palette.geoViewColor.textColor.light[300],
-                    fontSize: theme.palette.geoViewFontSize['0.4x'],
+                    color: theme.palette.geoViewColor.textColor.light[200],
+                    fontSize: theme.palette.geoViewFontSize.xs,
+                    textAlign: 'center'
                   }}
                   key={generateId()}
                 >

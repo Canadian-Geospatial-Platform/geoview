@@ -24,7 +24,7 @@ export const getSxClasses = (theme: Theme) => ({
     },
     '& .MuiCardHeader-action': {
       '& .MuiButtonBase-root': {
-        border: `1px solid ${theme.appBar?.btnDefaultBg}`,
+        border: `1px solid ${theme.palette.geoViewColor.primary.main}`,
         height: 44,
         width: 44,
         marginRight: 8,

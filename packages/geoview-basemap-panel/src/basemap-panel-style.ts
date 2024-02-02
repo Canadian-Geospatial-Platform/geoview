@@ -24,8 +24,8 @@ export const getSxClasses = (theme) => ({
       },
     },
     '& .MuiCardHeader-root': {
-      backgroundColor: `${theme.palette.grey.A700} !important`,
-      color: theme.basemapPanel.header,
+      backgroundColor: `${theme.palette.geoViewColor.grey.dark[900]} !important`,
+      color: theme.palette.geoViewColor.grey.light[900],
       fontSize: 14,
       fontWeight: 400,
       margin: 0,
@@ -55,24 +55,24 @@ export const getSxClasses = (theme) => ({
         height: '100%',
         width: '100%',
         position: 'absolute',
-        backgroundColor: theme.basemapPanel.overlayDefault,
+        backgroundColor: theme.palette.geoViewColor.grey.lighten(0.5, 0.85),
         transition: 'all 0.3s ease-in-out',
       },
     },
     '&:hover': {
       cursor: 'pointer',
-      borderColor: theme.basemapPanel.borderHover,
+      borderColor: theme.palette.geoViewColor.primary.main,
       '& .MuiCardContent-root': {
         '& .basemapCardThumbnailOverlay': {
-          backgroundColor: theme.basemapPanel.overlayHover,
+          backgroundColor: theme.palette.geoViewColor.grey.lighten(0.5, 0.55),
         },
       },
     },
     '&.active': {
-      borderColor: theme.basemapPanel.borderActive,
+      borderColor: theme.palette.geoViewColor.primary.light[200],
       '& .MuiCardContent-root': {
         '& .basemapCardThumbnailOverlay': {
-          backgroundColor: theme.basemapPanel.overlayActive,
+          backgroundColor: 'transparent',
         },
       },
       '&:hover': {

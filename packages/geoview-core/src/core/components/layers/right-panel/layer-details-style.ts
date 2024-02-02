@@ -4,7 +4,7 @@ export const getSxClasses = (theme: Theme) => ({
   categoryTitle: {
     textAlign: 'left',
     font: theme.footerPanel.titleFont,
-    fontSize: '20px',
+    fontSize: theme.palette.geoViewFontSize.lg,
   },
   layerDetails: {
     borderColor: theme.palette.geoViewColor.primary.main,
@@ -43,9 +43,9 @@ export const getSxClasses = (theme: Theme) => ({
     },
   },
   tableIconLabel: {
-    color: theme.palette.geoViewColor.primary.main,
-    fontSize: theme.palette.geoViewFontSize.lg,
+    color: theme.palette.geoViewColor.textColor.main,
+    fontSize: theme.palette.geoViewFontSize.default,
     noWrap: true,
     marginLeft: 20,
-  },
+  }
 });
