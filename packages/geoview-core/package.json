@@ -84,7 +84,8 @@
     "yet-another-react-lightbox": "^3.11.3",
     "zustand": "~4.4.1",
     "react-beautiful-dnd": "~13.1.1",
-    "react-dropzone": "^14.2.3"
+    "react-dropzone": "^14.2.3",
+    "markdown-to-jsx": "~7.4.0"
   },
   "devDependencies": {
     "@babel/cli": "^7.17.0",
@@ -172,7 +173,9 @@
     "webpack-dev-server": "^4.15.1",
     "webpack-merge": "^5.8.0",
     "zustand": "~4.4.1",
-    "simple-zustand-devtools": "^1.1.0"
+    "simple-zustand-devtools": "^1.1.0",
+    "markdown-loader": "~8.0.0",
+    "html-loader": "~5.0.0"
   },
   "resolutions": {
     "@types/react": "^18.2.0",

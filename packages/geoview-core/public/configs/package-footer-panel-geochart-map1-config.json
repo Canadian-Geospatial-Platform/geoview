@@ -145,7 +145,8 @@
       "core": [
         "layers",
         "details",
-        "geochart"
+        "geochart",
+        "guide"
       ]
     }
   },

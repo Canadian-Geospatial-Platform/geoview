@@ -1440,7 +1440,7 @@ export type TypeFooterBarProps = {
   };
   collapsed: boolean;
 };
-export type TypeValidFooterBarTabsCoreProps = Array<'legend' | 'layers' | 'details' | 'data-table' | 'time-slider' | 'geochart'>;
+export type TypeValidFooterBarTabsCoreProps = Array<'legend' | 'layers' | 'details' | 'data-table' | 'time-slider' | 'geochart' | 'guide'>;
 
 /** ******************************************************************************************************************************
  *  Overview map options. Default none.
