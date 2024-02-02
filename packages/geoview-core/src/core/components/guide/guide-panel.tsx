@@ -62,7 +62,7 @@ export function GuidePanel(): JSX.Element {
   const allTabs: coreTabsType | undefined = footerTabsConfig?.tabs.core;
 
   // fetch the content of general guide items with custom hook
-  useFetchAndParseMarkdown(mapId, '/locales/markdown/general-content.md', t('guide.errorMessage'), setLeftPanelHelpItems);
+  useFetchAndParseMarkdown(mapId, '/geoview/locales/markdown/general-content.md', t('guide.errorMessage'), setLeftPanelHelpItems);
 
   const leftPanelItemKeys = leftPanelHelpItems && Object.keys(leftPanelHelpItems);
   const contentOfFooterInRightPanel = leftPanelHelpItems?.Footer;
