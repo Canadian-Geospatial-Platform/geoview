@@ -40,6 +40,7 @@ const LayerListItem = memo(function LayerListItem({
   const sxClasses = getSxClasses(theme);
 
   const renderQueryStatusBackground = () => {
+    // TODO: 1752 Fit this queryStatus flag with the layerStatus flag in a uniform manner
     switch (queryStatus) {
       case 'init':
       case 'processing':

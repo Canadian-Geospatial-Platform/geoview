@@ -1,10 +1,10 @@
 import { isEqual } from 'lodash';
 import { TypeFeatureInfoResultsSet, EventType, TypeLayerData, TypeArrayOfLayerData } from '@/api/events/payloads/get-feature-info-payload';
-import { getGeoViewStore } from '@/core/stores/stores-managers';
 import { IFeatureInfoState } from '@/core/stores';
 
 import { GeochartEventProcessor } from './geochart-event-processor';
 import { AbstractEventProcessor, BatchedPropagationLayerDataArrayByMap } from '../abstract-event-processor';
+import { UIEventProcessor } from './ui-event-processor';
 
 /**
  * Event processor focusing on interacting with the feature info state in the store (currently called detailsState).
@@ -31,7 +31,7 @@ export class FeatureInfoEventProcessor extends AbstractEventProcessor {
    * @param {string} mapId The mapId
    * @returns {IFeatureInfoState} The Feature Info state
    */
-  public static getFeatureInfoState(mapId: string): IFeatureInfoState {
+  protected static getFeatureInfoState(mapId: string): IFeatureInfoState {
     // Return the feature info state
     return super.getState(mapId).detailsState;
   }
@@ -51,7 +51,6 @@ export class FeatureInfoEventProcessor extends AbstractEventProcessor {
     const layerPathInResultsSet = Object.keys(resultsSet);
 
     const featureInfoState = this.getFeatureInfoState(mapId);
-    const { uiState } = getGeoViewStore(mapId).getState();
 
     if (eventType === 'click') {
       /**
@@ -80,7 +79,8 @@ export class FeatureInfoEventProcessor extends AbstractEventProcessor {
       // If there was some features on this propagation
       if (atLeastOneFeature) {
         // If the current tab is not 'details' nor 'geochart', switch to details
-        if (!['details', 'geochart'].includes(uiState.activeFooterBarTabId)) uiState.actions.setActiveFooterBarTab('details');
+        if (!['details', 'geochart'].includes(UIEventProcessor.getActiveFooterBarTab(mapId)))
+          UIEventProcessor.setActiveFooterTab(mapId, 'details');
       }
 
       // Also propagate in the batched array

@@ -40,7 +40,7 @@ export class LegendEventProcessor extends AbstractEventProcessor {
    * @param {string} mapId The mapId
    * @returns {ILayerState} The Layer state
    */
-  public static getLayerState(mapId: string): ILayerState {
+  protected static getLayerState(mapId: string): ILayerState {
     // Return the layer state
     return super.getState(mapId).layerState;
   }

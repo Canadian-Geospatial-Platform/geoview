@@ -16,7 +16,7 @@ export class TimeSliderEventProcessor extends AbstractEventProcessor {
   /**
    * Override the initialization process to wire subscriptions and return them so they can be destroyed later.
    */
-  protected onInitialize(store: GeoviewStoreType) {
+  protected onInitialize(store: GeoviewStoreType): Array<() => void> | void {
     const { mapId } = store.getState();
 
     api.event.once(
@@ -85,7 +85,7 @@ export class TimeSliderEventProcessor extends AbstractEventProcessor {
    *                                         there will be no timeSliderState if the TimeSlider plugin isn't active.
    *                                         This helps the developers making sure the existence is checked.
    */
-  public static getTimesliderState(mapId: string): ITimeSliderState | undefined {
+  protected static getTimesliderState(mapId: string): ITimeSliderState | undefined {
     // Return the time slider state
     return super.getState(mapId).timeSliderState;
   }

@@ -15,17 +15,17 @@ export class AppEventProcessor extends AbstractEventProcessor {
    * @param {string} mapId The mapId
    * @returns {IAppState} The App state.
    */
-  public static getAppState(mapId: string): IAppState {
+  protected static getAppState(mapId: string): IAppState {
     // Return the app state
     return super.getState(mapId).appState;
   }
 
   /**
-   * Shortcut to get the Geochart state for a given map id
+   * Shortcut to get the App state for a given map id
    * @param {string} mapId The mapId
    * @returns {IAppState} The App state.
    */
-  public static async getAppStateAsync(mapId: string): Promise<IAppState> {
+  protected static async getAppStateAsync(mapId: string): Promise<IAppState> {
     // Return the app state
     return (await super.getStateAsync(mapId)).appState;
   }

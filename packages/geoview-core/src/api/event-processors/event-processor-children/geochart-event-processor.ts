@@ -30,7 +30,7 @@ export class GeochartEventProcessor extends AbstractEventProcessor {
    *                                       there will be no geochartState if the Geochart plugin isn't active.
    *                                       This helps the developers making sure the existence is checked.
    */
-  public static getGeochartState(mapId: string): IGeochartState | undefined {
+  protected static getGeochartState(mapId: string): IGeochartState | undefined {
     // Return the geochart state when it exists
     return super.getState(mapId).geochartState;
   }

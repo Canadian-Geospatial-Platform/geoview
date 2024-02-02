@@ -16,12 +16,16 @@ export class UIEventProcessor extends AbstractEventProcessor {
    * @param {string} mapId The mapId
    * @returns {IUIState} The UI state.
    */
-  public static getUIState(mapId: string): IUIState {
+  protected static getUIState(mapId: string): IUIState {
     // Return the time slider state
     return super.getState(mapId).uiState;
   }
 
   // #region
+  static getActiveFooterBarTab(mapId: string): string {
+    return this.getUIState(mapId).activeFooterBarTabId;
+  }
+
   static getAppBarComponents(mapId: string): TypeValidAppBarCoreProps {
     return this.getUIState(mapId).appBarComponents;
   }

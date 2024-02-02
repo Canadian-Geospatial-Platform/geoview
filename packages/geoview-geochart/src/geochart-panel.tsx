@@ -87,7 +87,7 @@ export function GeoChartPanel(props: GeoChartPanelProps): JSX.Element {
   // Reacts when the array of layer data updates
   const memoLayersList = useMemo(() => {
     // Log
-    logger.logTraceUseEffect('GEOCHART-PANEL - ArrayOfLayerData', arrayOfLayerData);
+    logger.logTraceUseMemo('GEOCHART-PANEL - ArrayOfLayerData', arrayOfLayerData);
 
     // Set the layers list
     return visibleLayers
@@ -119,6 +119,7 @@ export function GeoChartPanel(props: GeoChartPanelProps): JSX.Element {
    * Effect used to persist persist the layer path bypass for the layerDataArray.
    * A useEffect is necessary in order to keep this component pure and be able to set the layer path bypass elsewhere than in this component.
    */
+  // TODO: This useEffect and the next one are the same in details-panel, create a custom hook for both?
   useEffect(() => {
     // Log
     logger.logTraceUseEffect('GEOCHART-PANEL - update layer data bypass', selectedLayerPath);
