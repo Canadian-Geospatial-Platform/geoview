@@ -111,7 +111,7 @@
   },
   "theme": "light",
   "corePackages": [],
-  "footerTabs": {
+  "footerBar": {
     "tabs": {
       "core": ["geochart"]
     }

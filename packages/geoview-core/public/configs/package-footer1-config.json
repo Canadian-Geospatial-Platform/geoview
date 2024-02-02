@@ -121,7 +121,7 @@
   "theme": "geo.ca",
   "navBar": ["zoom", "fullscreen", "home", "location", "export"],
   "components": ["north-arrow", "overview-map"],
-  "footerTabs": {
+  "footerBar": {
     "tabs": {
       "core": ["legend", "layers", "details"]
     }

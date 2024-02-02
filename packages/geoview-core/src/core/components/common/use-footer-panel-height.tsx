@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useAppFullscreenActive } from '@/core/stores/store-interface-and-intial-values/app-state';
-import { useUIActiveFooterTabId, useUIFooterPanelResizeValue } from '@/core/stores/store-interface-and-intial-values/ui-state';
+import { useUIActiveFooterBarTabId, useUIFooterPanelResizeValue } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import { useDetailsStoreLayerDataArray } from '@/core/stores/store-interface-and-intial-values/feature-info-state';
 import { logger } from '@/core/utils/logger';
 
@@ -22,7 +22,7 @@ export function useFooterPanelHeight({ footerPanelTab }: UseFooterPanelHeightTyp
 
   const isMapFullScreen = useAppFullscreenActive();
   const footerPanelResizeValue = useUIFooterPanelResizeValue();
-  const activeFooterTabId = useUIActiveFooterTabId();
+  const activeFooterBarTabId = useUIActiveFooterBarTabId();
   const arrayOfLayerData = useDetailsStoreLayerDataArray();
 
   useEffect(() => {
@@ -31,7 +31,7 @@ export function useFooterPanelHeight({ footerPanelTab }: UseFooterPanelHeightTyp
 
     const defaultHeight = 700;
 
-    if (leftPanelRef.current && isMapFullScreen && (activeFooterTabId === footerPanelTab || footerPanelTab === 'default')) {
+    if (leftPanelRef.current && isMapFullScreen && (activeFooterBarTabId === footerPanelTab || footerPanelTab === 'default')) {
       const panelTitleHeight = panelTitleRef.current?.clientHeight ?? 0;
       const tabsContainer = document.getElementById('tabsContainer')!;
       const firstChild = tabsContainer.firstElementChild?.firstElementChild;
@@ -79,7 +79,7 @@ export function useFooterPanelHeight({ footerPanelTab }: UseFooterPanelHeightTyp
         }
       }
     }
-  }, [footerPanelResizeValue, isMapFullScreen, activeFooterTabId, footerPanelTab, arrayOfLayerData]);
+  }, [footerPanelResizeValue, isMapFullScreen, activeFooterBarTabId, footerPanelTab, arrayOfLayerData]);
 
   return { leftPanelRef, rightPanelRef, panelTitleRef, tableHeight };
 }

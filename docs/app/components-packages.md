@@ -21,12 +21,26 @@ In all these cases, components are building blocks on which we can build more im
 
 Packages are collections of components that extend the functionality of the viewer. There are two types of packages, **Core Package** and **External Package**.
 
-A **Core Package** is a package developed and maintained by the viewer team. The viewer supports few core packages such as a [basemap panel](https://canadian-geospatial-platform.github.io/geoview/public/package-basemap-panel.html) or [time slider](https://canadian-geospatial-platform.github.io/geoview/public/package-time-slider.html). Core packages can be added to the map from the configuration via the following line:
+A **Core Package** is a package developed and maintained by the viewer team. The viewer supports few core packages such as a [basemap panel](https://canadian-geospatial-platform.github.io/geoview/public/package-basemap-panel.html) or [time slider](https://canadian-geospatial-platform.github.io/geoview/public/package-time-slider.html). Core packages can be added to the map from the configuration via the following line for map package like swiper:
 
 ```js
-'corePackages': ['basemap-panel', 'swiper', 'time-slider', 'geochart'],
+'corePackages': ['swiper'],
 ```
-
+ For package who are inside a component, use that component to initialize it properly like
+ ```js
+ 'appBar': {
+   'tabs': {
+    'core': ['basemap-panel']
+   }
+ },
+ ```
+ ```js
+ 'footerBar': {
+  'tabs': {
+    'core': ['time-slider']
+  }
+ },
+ ```
 Each of these packages is associated with a default schema and configuration. It is therefore possible to configure them to some extent according to our needs. For exemple, the basemap panel has this [schema](https://github.com/Canadian-Geospatial-Platform/geoview/blob/develop/packages/geoview-basemap-panel/schema.json) and [default configuration](https://github.com/Canadian-Geospatial-Platform/geoview/blob/develop/packages/geoview-basemap-panel/default-config-basemap-panel.json). If necessary, the user can customize the package by providing a custom configuration file to initialize the package.
 
 To associate a custom configuration with a package, follow these steps:
@@ -45,8 +59,22 @@ To associate a custom configuration with a package, follow these steps:
 - In the provided json file, specify the desired core package using the **corePackages** key as follows:
 
 ```js
-'corePackages': ['basemap-panel'],
+'corePackages': ['swiper'],
 ```
+```js
+ 'appBar': {
+   'tabs': {
+    'core': ['basemap-panel']
+   }
+ },
+ ```
+ ```js
+ 'footerBar': {
+  'tabs': {
+    'core': ['time-slider']
+  }
+ },
+ ```
 
 - Then, create a configuration file for the package and name it <config-file-name>-<package-name>(i.e. `package-bp1-lcc-config-basemap-panel.json`)
 - Put both configuration files in the same folder

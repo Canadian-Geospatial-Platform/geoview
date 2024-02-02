@@ -154,9 +154,13 @@
         ]
       },
       'theme': 'geo.ca',
-      'appBar': ['export'],
+      'appBar': {
+        'tabs': {
+          'core': ['geolocator', 'export']
+        }
+      },
       'navBar': ['zoom', 'fullscreen', 'home', 'location', 'export'],
-      'footerTabs': {
+      'footerBar': {
         'tabs': {
           'core': ['legend', 'layers', 'details', 'data-table']
         }

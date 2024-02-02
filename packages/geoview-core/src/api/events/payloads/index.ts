@@ -3,7 +3,7 @@ export * from './boolean-payload';
 export * from './button-panel-payload';
 export * from './clear-highlights-payload';
 export * from './feature-highlight-payload';
-export * from './footer-tab-payload';
+export * from './footer-bar-payload';
 export * from './geometry-config-payload';
 export * from './geometry-payload';
 export * from './geoview-layer-payload';

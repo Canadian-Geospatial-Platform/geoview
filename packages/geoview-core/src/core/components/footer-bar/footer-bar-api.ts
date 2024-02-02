@@ -3,9 +3,10 @@ import { api } from '@/app';
 import { EVENT_NAMES } from '@/api/events/event-types';
 import { sanitizeHtmlContent } from '../../utils/utilities';
 
-import { footerTabPayload } from '@/api/events/payloads';
+import { footerBarPayload } from '@/api/events/payloads';
 
 import { TypeTabs } from '@/ui/tabs/tabs';
+import { UIEventProcessor } from '@/api/event-processors/event-processor-children/ui-event-processor';
 
 /**
  * API to manage tabs on the tabs component
@@ -13,7 +14,7 @@ import { TypeTabs } from '@/ui/tabs/tabs';
  * @exports
  * @class
  */
-export class FooterTabsApi {
+export class FooterBarApi {
   mapId!: string;
 
   // array that hold added tabs
@@ -29,12 +30,12 @@ export class FooterTabsApi {
   }
 
   /**
-   * Create a tab on the footer tabs
+   * Create a tab on the footer bar
    *
    * @param {TypeTabs} tabProps the properties of the tab to be created
    *
    */
-  createFooterTab = (tabProps: TypeTabs) => {
+  createTab = (tabProps: TypeTabs) => {
     if (tabProps) {
       // find if tab value exists
       const tab = this.tabs.find((t) => t.id === tabProps.id);
@@ -49,7 +50,7 @@ export class FooterTabsApi {
         this.tabs.push(tabProps);
 
         // trigger an event that a new tab has been created
-        api.event.emit(footerTabPayload(EVENT_NAMES.FOOTER_TABS.EVENT_FOOTER_TABS_TAB_CREATE, this.mapId, tabProps));
+        api.event.emit(footerBarPayload(EVENT_NAMES.FOOTERBAR.EVENT_FOOTERBAR_TAB_CREATE, this.mapId, tabProps));
       }
     }
   };
@@ -59,7 +60,7 @@ export class FooterTabsApi {
    *
    * @param {string} id the id of the tab to be removed
    */
-  removeFooterTab = (id: string): void => {
+  removeTab = (id: string): void => {
     // find the tab to be removed
     const tabToRemove = this.tabs.find((tab) => tab.id === id);
 
@@ -68,7 +69,7 @@ export class FooterTabsApi {
       this.tabs = this.tabs.filter((tab) => tab.id !== id);
 
       // trigger an event that a tab has been removed
-      api.event.emit(footerTabPayload(EVENT_NAMES.FOOTER_TABS.EVENT_FOOTER_TABS_TAB_REMOVE, this.mapId, tabToRemove));
+      api.event.emit(footerBarPayload(EVENT_NAMES.FOOTERBAR.EVENT_FOOTERBAR_TAB_REMOVE, this.mapId, tabToRemove));
     }
   };
 
@@ -77,12 +78,11 @@ export class FooterTabsApi {
    *
    * @param {string} id the id of the tab to be selected
    */
-  selectFooterTab = (id: string): void => {
+  selectTab = (id: string): void => {
     // find the tab to be selected
     const tabToSelect = this.tabs.find((tab) => tab.id === id);
     if (tabToSelect) {
-      // trigger an event to select the tab
-      api.event.emit(footerTabPayload(EVENT_NAMES.FOOTER_TABS.EVENT_FOOTER_TABS_TAB_SELECT, this.mapId, tabToSelect));
+      UIEventProcessor.setActiveFooterBarTab(this.mapId, id);
     }
   };
 }

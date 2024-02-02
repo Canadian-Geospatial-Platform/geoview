@@ -8,7 +8,7 @@ export abstract class AppBarPlugin extends AbstractPlugin {
   // Store the created button panel object
   buttonPanel?: TypeButtonPanel;
 
-  // Store the footer props
+  // Store the button props
   buttonProps?: TypeIconButtonProps;
 
   // Store the panel props

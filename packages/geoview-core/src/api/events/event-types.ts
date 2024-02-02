@@ -1,6 +1,6 @@
 import { APPBAR } from './constants/app-bar-constants';
 import { BASEMAP } from './constants/basemap-constants';
-import { FOOTER_TABS } from './constants/footer-tabs-constants';
+import { FOOTERBAR } from './constants/footer-bar-constants';
 import { GET_FEATURE_INFO } from './constants/get-feature-info-constants';
 import { GET_LEGENDS } from './constants/get-legends-constants';
 import { GEOMETRY } from './constants/geometry-constants';
@@ -21,7 +21,7 @@ import { SNACKBAR } from './constants/snackbar-constants';
 export const EVENT_NAMES = {
   APPBAR,
   BASEMAP,
-  FOOTER_TABS,
+  FOOTERBAR,
   GET_FEATURE_INFO,
   GET_LEGENDS,
   GEOMETRY,
@@ -48,9 +48,8 @@ export type EventStringId =
   | 'feature_highlight/highlight'
   | 'feature_highlight/clear'
   | 'feature_highlight/highlightBBox'
-  | 'footer_tabs/tab_create'
-  | 'footer_tabs/tab_remove'
-  | 'footer_tabs/tab_select'
+  | 'footerbar/tab_create'
+  | 'footerbar/tab_remove'
   | 'geometry/add'
   | 'geometry/added'
   | 'geometry/off'

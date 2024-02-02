@@ -1,9 +1,8 @@
 import { useStore } from 'zustand';
 import { useGeoViewStore } from '@/core/stores/stores-managers';
 import { TypeSetStore, TypeGetStore } from '@/core/stores/geoview-store';
-import { TypeAppBarProps, TypeMapCorePackages, TypeNavBarProps } from '@/geo';
+import { TypeValidAppBarCoreProps, TypeMapCorePackages, TypeNavBarProps } from '@/geo';
 import { TypeMapFeaturesConfig } from '@/core/types/cgpv-types';
-import { UIEventProcessor } from '@/api/event-processors/event-processor-children/ui-event-processor';
 
 type focusItemProps = {
   activeElementId: string | false;
@@ -11,13 +10,13 @@ type focusItemProps = {
 };
 
 export interface IUIState {
-  activefooterTabId: string;
+  activeFooterBarTabId: string;
   activeTrapGeoView: boolean;
-  appBarComponents: TypeAppBarProps;
+  appBarComponents: TypeValidAppBarCoreProps;
   corePackagesComponents: TypeMapCorePackages;
   focusITem: focusItemProps;
-  footerBarExpanded: boolean;
   geoLocatorActive: boolean;
+  mapInfoExpanded: boolean;
   navBarComponents: TypeNavBarProps;
   footerPanelResizeValue: number;
   footerPanelResizeValues: number[];
@@ -26,23 +25,23 @@ export interface IUIState {
   actions: {
     closeModal: () => void;
     openModal: (uiFocus: focusItemProps) => void;
-    setActiveFooterTab: (id: string) => void;
+    setActiveFooterBarTab: (id: string) => void;
     setActiveTrapGeoView: (active: boolean) => void;
-    setFooterBarExpanded: (expanded: boolean) => void;
     setGeolocatorActive: (active: boolean) => void;
     setFooterPanelResizeValue: (value: number) => void;
+    setMapInfoExpanded: (expanded: boolean) => void;
   };
 }
 
 export function initializeUIState(set: TypeSetStore, get: TypeGetStore): IUIState {
   const init = {
-    appBarComponents: ['geolocator', 'export'],
-    activefooterTabId: 'legend',
+    appBarComponents: ['geolocator'],
+    activeFooterBarTabId: 'legend',
     activeTrapGeoView: false,
     corePackagesComponents: [],
     focusITem: { activeElementId: false, callbackElementId: false },
-    footerBarExpanded: false,
     geoLocatorActive: false,
+    mapInfoExpanded: false,
     navBarComponents: [],
     footerPanelResizeValue: 35,
     footerPanelResizeValues: [35, 50, 100],
@@ -52,7 +51,7 @@ export function initializeUIState(set: TypeSetStore, get: TypeGetStore): IUIStat
       set({
         uiState: {
           ...get().uiState,
-          appBarComponents: geoviewConfig.appBar || [],
+          appBarComponents: geoviewConfig.appBar?.tabs.core || [],
           corePackagesComponents: geoviewConfig.corePackages || [],
           navBarComponents: geoviewConfig.navBar || [],
         },
@@ -78,29 +77,19 @@ export function initializeUIState(set: TypeSetStore, get: TypeGetStore): IUIStat
           },
         });
       },
-      setActiveFooterTab: (id: string) => {
+      setActiveFooterBarTab: (id: string) => {
         set({
           uiState: {
             ...get().uiState,
-            activefooterTabId: id,
+            activeFooterBarTabId: id,
           },
         });
-
-        UIEventProcessor.setActiveFooterTab(get().mapId, id);
       },
       setActiveTrapGeoView: (active: boolean) => {
         set({
           uiState: {
             ...get().uiState,
             activeTrapGeoView: active,
-          },
-        });
-      },
-      setFooterBarExpanded: (expanded: boolean) => {
-        set({
-          uiState: {
-            ...get().uiState,
-            footerBarExpanded: expanded,
           },
         });
       },
@@ -120,6 +109,14 @@ export function initializeUIState(set: TypeSetStore, get: TypeGetStore): IUIStat
           },
         });
       },
+      setMapInfoExpanded: (expanded: boolean) => {
+        set({
+          uiState: {
+            ...get().uiState,
+            mapInfoExpanded: expanded,
+          },
+        });
+      },
     },
     // #endregion ACTIONS
   } as IUIState;
@@ -131,14 +128,14 @@ export function initializeUIState(set: TypeSetStore, get: TypeGetStore): IUIStat
 // UI state selectors
 // **********************************************************
 export const useUIActiveFocusItem = () => useStore(useGeoViewStore(), (state) => state.uiState.focusITem);
+export const useUIActiveFooterBarTabId = () => useStore(useGeoViewStore(), (state) => state.uiState.activeFooterBarTabId);
 export const useUIActiveTrapGeoView = () => useStore(useGeoViewStore(), (state) => state.uiState.activeTrapGeoView);
 export const useUIAppbarComponents = () => useStore(useGeoViewStore(), (state) => state.uiState.appBarComponents);
 export const useUIAppbarGeolocatorActive = () => useStore(useGeoViewStore(), (state) => state.uiState.geoLocatorActive);
 export const useUICorePackagesComponents = () => useStore(useGeoViewStore(), (state) => state.uiState.corePackagesComponents);
-export const useUIFooterBarExpanded = () => useStore(useGeoViewStore(), (state) => state.uiState.footerBarExpanded);
-export const useUINavbarComponents = () => useStore(useGeoViewStore(), (state) => state.uiState.navBarComponents);
 export const useUIFooterPanelResizeValue = () => useStore(useGeoViewStore(), (state) => state.uiState.footerPanelResizeValue);
 export const useUIFooterPanelResizeValues = () => useStore(useGeoViewStore(), (state) => state.uiState.footerPanelResizeValues);
-export const useUIActiveFooterTabId = () => useStore(useGeoViewStore(), (state) => state.uiState.activefooterTabId);
+export const useUIMapInfoExpanded = () => useStore(useGeoViewStore(), (state) => state.uiState.mapInfoExpanded);
+export const useUINavbarComponents = () => useStore(useGeoViewStore(), (state) => state.uiState.navBarComponents);
 
 export const useUIStoreActions = () => useStore(useGeoViewStore(), (state) => state.uiState.actions);

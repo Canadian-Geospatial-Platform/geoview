@@ -14,7 +14,6 @@ const validEvents: EventStringId[] = [
 
 export type TypeLegendResultsSetEntry = {
   layerStatus: TypeLayerStatus;
-  layerPhase: string;
   querySent: boolean;
   data: TypeLegend | undefined | null;
   layerName?: TypeLocalizedString;

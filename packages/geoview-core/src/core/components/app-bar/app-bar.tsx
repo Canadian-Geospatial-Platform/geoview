@@ -43,8 +43,8 @@ export function Appbar(): JSX.Element {
 
   const appBarPanelCloseListenerFunction = () => setSelectedAppbarButtonId('');
 
-  // get store config for app bar tabs to add (similar logic as in footer-tabs)
-  const appBarTabsConfig = useGeoViewConfig()?.appBarTabs;
+  // get store config for app bar to add (similar logic as in footer-bar)
+  const appBarConfig = useGeoViewConfig()?.appBar;
 
   // #region REACT HOOKS
   const addButtonPanel = useCallback(
@@ -104,14 +104,14 @@ export function Appbar(): JSX.Element {
   // #endregion
 
   /**
-   * Create default tabs from configuration parameters (similar logic as in footer-tabs).
+   * Create default tabs from configuration parameters (similar logic as in footer-bar).
    */
   useEffect(() => {
     // Log
-    logger.logTraceUseEffect('APP-BAR - appBarTabsConfig');
+    logger.logTraceUseEffect('APP-BAR - appBarConfig');
 
     // Packages tab
-    if (appBarTabsConfig && appBarTabsConfig.tabs.core.includes('basemap-panel')) {
+    if (appBarConfig && appBarConfig.tabs.core.includes('basemap-panel')) {
       // create a new tab by loading the plugin
       api.plugin
         .loadScript('basemap-panel')
@@ -126,7 +126,7 @@ export function Appbar(): JSX.Element {
           );
         });
     }
-  }, [appBarTabsConfig, mapId]);
+  }, [appBarConfig, mapId]);
 
   return (
     <Box sx={sxClasses.appBar} ref={appBar}>
