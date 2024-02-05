@@ -6,12 +6,6 @@ import { useTheme } from '@mui/material/styles';
 import { HtmlToReact } from '@/core/containers/html-to-react';
 import { logger } from '@/core/utils/logger';
 import { useGeoViewMapId, useMapSize } from '@/app';
-// TODO: Refactor - UI - remove the dependency to the store for this component
-import {
-  useUIActiveFooterBarTabId,
-  useUIActiveTrapGeoView,
-  useUIStoreActions,
-} from '@/core/stores/store-interface-and-intial-values/ui-state';
 
 import { Select, TypeMenuItemProps } from '../select/select';
 import { getSxClasses } from './tabs-style';
@@ -29,6 +23,14 @@ export type TypeTabs = {
 };
 
 /**
+ * Type used for focus
+ */
+type FocusItemProps = {
+  activeElementId: string | false;
+  callbackElementId: string | false;
+};
+
+/**
  * Tabs ui properties
  */
 /* eslint-disable react/require-default-props */
@@ -40,9 +42,12 @@ export interface TypeTabsProps {
   tabProps?: TabProps;
   rightButtons?: unknown;
   isCollapsed?: boolean;
-  handleCollapse?: () => void | undefined;
+  activeTrap?: boolean;
   TabContentVisibilty?: string | undefined;
+  onCollapse?: () => void;
   onSelectedTabChanged?: (tab: TypeTabs) => void;
+  onOpenModal?: (uiFocus: FocusItemProps) => void;
+  onCloseModal?: () => void;
 }
 
 /**
@@ -52,7 +57,18 @@ export interface TypeTabsProps {
  * @returns {JSX.Element} returns the tabs ui
  */
 export function Tabs(props: TypeTabsProps): JSX.Element {
-  const { tabs, rightButtons, selectedTab, isCollapsed, handleCollapse, onSelectedTabChanged, TabContentVisibilty = 'inherit' } = props;
+  const {
+    tabs,
+    rightButtons,
+    selectedTab,
+    isCollapsed,
+    activeTrap,
+    onCollapse,
+    onSelectedTabChanged,
+    onOpenModal,
+    onCloseModal,
+    TabContentVisibilty = 'inherit',
+  } = props;
   const mapId = useGeoViewMapId();
   const mapElem = document.getElementById(`shell-${mapId}`);
   const { t } = useTranslation<string>();
@@ -65,10 +81,7 @@ export function Tabs(props: TypeTabsProps): JSX.Element {
   // reference to display tab panels on demand.
   const tabPanelRefs = useRef([tabs[0]]);
   // get store values and actions
-  const activeTrapGeoView = useUIActiveTrapGeoView();
-  const activeFooterBarTabId = useUIActiveFooterBarTabId();
   const mapSize = useMapSize();
-  const { closeModal, openModal } = useUIStoreActions();
 
   // show/hide dropdown based on map size
   const [showMobileDropdown, setShowMobileDropdown] = useState(mapSize[0] < theme.breakpoints.values.sm);
@@ -81,14 +94,14 @@ export function Tabs(props: TypeTabsProps): JSX.Element {
     // Update panel refs when tab value is changed.
     // handle no tab when mobile dropdown is displayed.
     if (typeof tabValue === 'string') {
-      if (!isCollapsed) handleCollapse?.();
+      if (!isCollapsed) onCollapse?.();
       setValue(tabValue);
     } else {
       if (!tabPanelRefs.current[tabValue]) {
         tabPanelRefs.current[tabValue] = tabs[tabValue];
       }
       setValue(tabValue);
-      if (isCollapsed) handleCollapse?.();
+      if (isCollapsed) onCollapse?.();
       // Callback
       onSelectedTabChanged?.(tabs[tabValue]);
     }
@@ -107,19 +120,31 @@ export function Tabs(props: TypeTabsProps): JSX.Element {
    * If the panel is collapsed when tab is clicked, expand the panel
    */
   const handleClick = (index: number) => {
-    if (isCollapsed || value === index) handleCollapse?.();
+    if (isCollapsed || value === index) onCollapse?.();
 
     // WCAG - if keyboard navigation is on and the tabs gets expanded, set the trap store info to open, close otherwise
-    if (activeTrapGeoView) openModal({ activeElementId: `panel-${index}`, callbackElementId: `tab-${index}` });
-    else closeModal();
+    if (activeTrap) onOpenModal?.({ activeElementId: `panel-${index}`, callbackElementId: `tab-${index}` });
+    else onCloseModal?.();
   };
 
   useEffect(() => {
     // Log
-    logger.logTraceUseEffect('TABS - selectedTab', selectedTab, value);
+    logger.logTraceUseEffect('TABS - selectedTab', selectedTab);
 
-    if (selectedTab && value !== selectedTab) setValue(selectedTab);
-  }, [selectedTab, value]);
+    // If a selected tab is defined
+    if (selectedTab !== undefined) {
+      // Keep the tab in reference
+      if (!tabPanelRefs.current[selectedTab]) {
+        tabPanelRefs.current[selectedTab] = tabs[selectedTab];
+      }
+
+      // Make sure internal state follows
+      setValue(selectedTab);
+
+      // Make sure it's visible
+      if (isCollapsed) onCollapse?.();
+    }
+  }, [onCollapse, isCollapsed, selectedTab, tabs]);
 
   /**
    * Build mobile tab dropdown.
@@ -143,24 +168,6 @@ export function Tabs(props: TypeTabsProps): JSX.Element {
       setShowMobileDropdown(false);
     }
   }, [mapSize, theme.breakpoints.values.sm]);
-
-  useEffect(() => {
-    // Log
-    logger.logTraceUseEffect('TABS - activeFooterBarTabId', activeFooterBarTabId);
-
-    // Find the index of the tab in question
-    const idx = tabs.findIndex((tab) => tab.id === activeFooterBarTabId);
-
-    // Keep the tab in reference
-    if (!tabPanelRefs.current[idx]) {
-      tabPanelRefs.current[idx] = tabs[idx];
-    }
-    setValue(idx);
-
-    // Make sure it's visible
-    if (isCollapsed) handleCollapse?.();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [tabs, activeFooterBarTabId]);
 
   return (
     <Grid container sx={{ width: '100%', height: '100%' }}>
