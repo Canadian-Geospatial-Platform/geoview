@@ -19,7 +19,7 @@ interface UseSelectedRowMessageProps {
 
 /**
  * Custom hook to set the selected/filtered row message for data table.
- * @param {DataTableData} data data to be rendered inside data table
+ * @param {MappedLayerDataType} data data to be rendered inside data table
  * @param {string} layerPath key of the layer selected.
  * @param {MRTTableInstance} tableInstance  object of the data table.
  * @param {Object} rowSelection selected rows by the user

@@ -41,7 +41,7 @@ export function Datapanel() {
 
   const [isLoading, setIsLoading] = useState(false);
   const [isLayersPanelVisible, setIsLayersPanelVisible] = useState(false);
-  const [orderedLayerData, setOrderedLayerData] = useState<LayersDataType[]>([]);
+  // const [orderedLayerData, setOrderedLayerData] = useState<TypeArrayOfLayerData>(layerData);
 
   const selectedLayerIndex = useDataTableStoreSelectedLayerIndex();
   const isEnlargeDataTable = useDataTableStoreIsEnlargeDataTable();
@@ -56,8 +56,14 @@ export function Datapanel() {
   // Create columns for data table.
   const mappedLayerData = useFeatureFieldInfos(layerData);
 
+  const orderedLayerData = useMemo(() => {
+    return visibleLayers
+      .map((layerPath) => mappedLayerData.filter((data) => data.layerPath === layerPath)[0])
+      .filter((layer) => layer !== undefined);
+  }, [mappedLayerData, visibleLayers]);
+
   // Copied similar logic from details-panel, because of the indexes thing
-  const findLayerPathIndex = (layerDataArray: LayersDataType[], layerPathSearch: string): number => {
+  const findLayerPathIndex = (layerDataArray: MappedLayerDataType[], layerPathSearch: string): number => {
     return layerDataArray.findIndex((item) => item.layerPath === layerPathSearch);
   };
 
@@ -85,7 +91,7 @@ export function Datapanel() {
   const getFeaturesOfLayer = (layerPath: string): string => {
     return rowsFiltered && rowsFiltered[layerPath]
       ? `${rowsFiltered[layerPath]} ${t('dataTable.featureFiltered')}`
-      : `${mappedLayerData?.find((layer) => layer.layerPath === layerPath)?.features?.length ?? 0} ${t('dataTable.features')}`;
+      : `${orderedLayerData?.find((layer) => layer.layerPath === layerPath)?.features?.length ?? 0} ${t('dataTable.features')}`;
   };
 
   /**
@@ -102,16 +108,6 @@ export function Datapanel() {
       </Box>
     );
   };
-
-  useEffect(() => {
-    // Log
-    logger.logTraceUseEffect('DATA-PANEL - visibleLayers', visibleLayers, layerData);
-
-    const updatedLayerData = visibleLayers
-      .map((layerPath) => layerData.filter((data) => data.layerPath === layerPath)[0])
-      .filter((layer) => layer !== undefined);
-    setOrderedLayerData(updatedLayerData);
-  }, [visibleLayers, layerData]);
 
   /**
    * Render group layers as list.
@@ -132,7 +128,7 @@ export function Datapanel() {
 
       return (
         <LayerList
-          layerList={mappedLayerData
+          layerList={orderedLayerData
             .filter(({ features }) => !!features?.length)
             .map((layer) => ({
               layerName: layer.layerName ?? '',
@@ -150,7 +146,7 @@ export function Datapanel() {
       );
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [selectedLayerIndex, isEnlargeDataTable, mapFiltered, rowsFiltered, mappedLayerData]
+    [selectedLayerIndex, isEnlargeDataTable, mapFiltered, rowsFiltered, orderedLayerData]
   );
 
   useEffect(() => {
@@ -164,13 +160,6 @@ export function Datapanel() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isLoading, selectedLayerIndex]);
 
-  // useEffect(() => {
-  //   // Log
-  //   logger.logTraceUseEffect('DATA-PANEL - layerData', layerData);
-
-  //   setLayersData(layerData);
-  // }, [layerData, setLayersData]);
-  console.log('mappedLayerData', mappedLayerData);
   return (
     <Box sx={sxClasses.dataPanel}>
       <ResponsiveGrid.Root sx={{ pt: 8, pb: 8 }} ref={panelTitleRef}>
@@ -208,7 +197,7 @@ export function Datapanel() {
           />
 
           {!isLoading &&
-            mappedLayerData
+            orderedLayerData
               .filter(({ features }) => !!features?.length)
               .map((data, index) => (
                 <Box key={data.layerPath}>

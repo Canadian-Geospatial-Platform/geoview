@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { useCallback, useEffect, useMemo, useRef, useState, memo, ReactNode, isValidElement } from 'react';
 
 import { useTranslation } from 'react-i18next';
@@ -71,8 +72,8 @@ interface FieldInfos {
 }
 
 export interface ColumnsType {
-  ICON: string;
-  ZOOM: string;
+  ICON: FieldInfos;
+  ZOOM: FieldInfos;
   [key: string]: FieldInfos;
 }
 
@@ -322,7 +323,7 @@ function DataTable({ data, mapId, layerPath, tableHeight = 600 }: DataTableProps
         Header: ({ column }) => getTableHeader(column.columnDef.header),
         Cell: ({ cell }) => getCellValueWithTooltip(cell.getValue() as string | number | ReactNode, cell.id),
         ...(value.dataType === 'date' && {
-          accessorFn: (row) => new Date(row[key]),
+          accessorFn: (row) => new Date(row[key].value as string),
           sortingFn: 'datetime',
           Cell: ({ cell }) => getDateColumnTooltip(cell.getValue<Date>()),
           Filter: ({ column }) => getDateFilter(column),
@@ -388,7 +389,7 @@ function DataTable({ data, mapId, layerPath, tableHeight = 600 }: DataTableProps
       };
     }) as unknown as ColumnsType[];
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [data?.features]);
+  }, []);
 
   const useTable = useMaterialReactTable({
     columns,

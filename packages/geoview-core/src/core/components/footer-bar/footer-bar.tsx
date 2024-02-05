@@ -26,6 +26,7 @@ import { HubOutlinedIcon, InfoOutlinedIcon, LayersOutlinedIcon, StorageIcon } fr
 import { Legend } from '@/core/components/legend/legend';
 import { LayersPanel } from '@/core/components/layers/layers-panel';
 import { DetailsPanel } from '@/core/components/details/details-panel';
+import { Datapanel } from '@/core/components/data-table/data-panel';
 import { logger } from '@/core/utils/logger';
 
 interface ShellContainerCssProperties {
@@ -54,7 +55,6 @@ export function FooterBar(): JSX.Element | null {
   const [isCollapsed, setIsCollapsed] = useState(false);
 
   const [isFocusToMap, setIsFocusToMap] = useState<boolean>(true);
-  const [table, setTable] = useState<JSX.Element | undefined>();
 
   const tabsContainerRef = useRef<HTMLDivElement>();
   const mapContainerRef = useRef<HTMLElement | null>(null);
@@ -75,15 +75,15 @@ export function FooterBar(): JSX.Element | null {
 
   const tabs = useMemo(() => {
     // Log
-    logger.logTraceUseMemo('FOOTER-BAR - tabs', table);
+    logger.logTraceUseMemo('FOOTER-BAR - tabs');
 
     return {
       legend: { icon: <HubOutlinedIcon />, content: <Legend /> },
       layers: { icon: <LayersOutlinedIcon />, content: <LayersPanel /> },
       details: { icon: <InfoOutlinedIcon />, content: <DetailsPanel /> },
-      'data-table': { icon: <StorageIcon />, content: table },
+      'data-table': { icon: <StorageIcon />, content: <Datapanel /> },
     } as Record<string, Record<string, ReactNode>>;
-  }, [table]);
+  }, []);
 
   const defaultFooterBarTabs = useMemo(() => {
     // Log
@@ -312,25 +312,6 @@ export function FooterBar(): JSX.Element | null {
   useEffect(() => {
     // Log
     logger.logTraceUseEffect('FOOTER-BAR - mount');
-
-    if (footerBarTabsConfig && footerBarTabsConfig.tabs.core.includes('data-table')) {
-      // create new tab and add the Data Table component to the footer tab
-      // TODO: This will be refactor after new store for data table is implemented.
-      // Right now `geoviewLayerInstance.getFeatureInfo('all', layer.layerKey);` is returning empty features, which leads to no table shown.
-      api.maps[mapId].dataTable.createDataPanel().then((newTable) => {
-        const tableTab = {
-          id: 'data-table',
-          value: 3,
-          label: 'dataTable.title',
-          icon: <StorageIcon />,
-          content: newTable,
-        };
-
-        setTable(newTable);
-        addTab({ tab: tableTab, event: EVENT_NAMES.FOOTERBAR.EVENT_FOOTERBAR_TAB_CREATE, handlerName: 'TABLE' });
-      });
-    }
-
     // Packages tab
     if (footerBarTabsConfig && footerBarTabsConfig.tabs.core.includes('time-slider')) {
       // create a new tab by loading the time-slider plugin
