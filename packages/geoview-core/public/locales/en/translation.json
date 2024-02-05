@@ -107,7 +107,8 @@
     "reloadLayer": "Reload layer",
     "visibilityIsAlways": "Visibility is always enabled",
     "toggleVisibility": "Toggle visibility",
-    "toggleCollapse": "Toggle collapse"
+    "toggleCollapse": "Toggle collapse",
+    "querying": "Querying"
   },
   "details": {
     "title": "Details",
