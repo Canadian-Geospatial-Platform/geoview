@@ -7,7 +7,6 @@ export * from './attribution/attribution';
 export * from './click-marker/click-marker';
 export * from './crosshair/crosshair-icon';
 export * from './crosshair/crosshair';
-export * from './data-table/data-table-api';
 export * from './data-table/export-button';
 export * from './data-table/filter-map';
 export * from './data-table/json-export-button';

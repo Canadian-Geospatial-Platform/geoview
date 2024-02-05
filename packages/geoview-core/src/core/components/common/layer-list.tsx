@@ -16,7 +16,8 @@ export interface LayerListEntry {
 interface LayerListProps {
   isEnlargeDataTable: boolean;
   layerList: LayerListEntry[];
-  selectedLayerIndex: number;
+  selectedLayerIndex?: number;
+  selectedLayerPath?: string;
   handleListItemClick: (layer: LayerListEntry) => void;
 }
 
@@ -88,10 +89,11 @@ const LayerListItem = memo(function LayerListItem({ isSelected, layer, handleLis
  * @param {LayerListEntry} layerList  Array of layer list entries.
  * @param {boolean} isEnlargeDataTable  Boolean value if right panel is enlarged or not.
  * @param {number} selectedLayerIndex  Current index of list item selected.
+ * @param {string} selectedLayerPath  Selected path of the layer.
  * @param {Function} handleListItemClick  Callback function excecuted when list item is clicked.
  * @returns
  */
-export function LayerList({ layerList, isEnlargeDataTable, selectedLayerIndex, handleListItemClick }: LayerListProps) {
+export function LayerList({ layerList, isEnlargeDataTable, selectedLayerIndex, handleListItemClick, selectedLayerPath }: LayerListProps) {
   const theme = useTheme();
   const sxClasses = getSxClasses(theme);
 
@@ -103,7 +105,7 @@ export function LayerList({ layerList, isEnlargeDataTable, selectedLayerIndex, h
           // Reason:- (layer?.numOffeatures ?? 1) > 0
           // Some of layers will not have numOfFeatures, so to make layer look like selected, we need to set default value to 1.
           // Also we cant set numOfFeature initially, then numOffeatures will be display as sub title in the layer list item.
-          isSelected={(layer?.numOffeatures ?? 1) > 0 && index === selectedLayerIndex}
+          isSelected={(layer?.numOffeatures ?? 1) > 0 && (index === selectedLayerIndex || layer.layerPath === selectedLayerPath)}
           layer={layer}
           handleListItemClick={handleListItemClick}
           isEnlargeDataTable={isEnlargeDataTable}
@@ -112,3 +114,8 @@ export function LayerList({ layerList, isEnlargeDataTable, selectedLayerIndex, h
     </List>
   );
 }
+
+LayerList.defaultProps = {
+  selectedLayerPath: '',
+  selectedLayerIndex: null,
+};

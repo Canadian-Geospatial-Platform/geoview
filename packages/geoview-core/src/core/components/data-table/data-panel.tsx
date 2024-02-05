@@ -9,8 +9,9 @@ import {
   useDataTableStoreIsEnlargeDataTable,
   useDataTableStoreMapFilteredRecord,
   useDataTableStoreRowsFiltered,
-  useDataTableStoreSelectedLayerIndex,
+  useDataTableStoreSelectedLayerPath,
   useDetailsStoreLayerDataArray,
+  useGeoViewMapId,
   useMapVisibleLayers,
 } from '@/core/stores';
 import { ResponsiveGrid, EnlargeButton, CloseButton, LayerList, LayerListEntry, LayerTitle, useFooterPanelHeight } from '../common';
@@ -31,21 +32,21 @@ export function Datapanel() {
   const { t } = useTranslation();
   const theme = useTheme();
 
+  // TODO: Update layer data from store when available.
   const layerData = useDetailsStoreLayerDataArray();
-  const mapId = 'map-WM1';
+  const mapId = useGeoViewMapId();
 
   const sxClasses = getSxClasses(theme);
 
   const [isLoading, setIsLoading] = useState(false);
   const [isLayersPanelVisible, setIsLayersPanelVisible] = useState(false);
-  // const [orderedLayerData, setOrderedLayerData] = useState<TypeArrayOfLayerData>(layerData);
 
-  const selectedLayerIndex = useDataTableStoreSelectedLayerIndex();
+  const selectedLayerPath = useDataTableStoreSelectedLayerPath();
   const isEnlargeDataTable = useDataTableStoreIsEnlargeDataTable();
   const mapFiltered = useDataTableStoreMapFilteredRecord();
   const rowsFiltered = useDataTableStoreRowsFiltered();
   const visibleLayers = useMapVisibleLayers();
-  const { setSelectedLayerIndex, setIsEnlargeDataTable } = useDataTableStoreActions();
+  const { setSelectedLayerPath, setIsEnlargeDataTable } = useDataTableStoreActions();
 
   // Custom hook for calculating the height of footer panel
   const { leftPanelRef, rightPanelRef, panelTitleRef, tableHeight } = useFooterPanelHeight({ footerPanelTab: 'datatable' });
@@ -59,18 +60,13 @@ export function Datapanel() {
       .filter((layer) => layer !== undefined);
   }, [mappedLayerData, visibleLayers]);
 
-  // Copied similar logic from details-panel, because of the indexes thing
-  const findLayerPathIndex = (layerDataArray: MappedLayerDataType[], layerPathSearch: string): number => {
-    return layerDataArray.findIndex((item) => item.layerPath === layerPathSearch);
-  };
-
   const handleLayerChange = useCallback(
     (_layer: LayerListEntry) => {
-      setSelectedLayerIndex(findLayerPathIndex(orderedLayerData, _layer.layerPath));
+      setSelectedLayerPath(_layer.layerPath);
       setIsLoading(true);
       setIsLayersPanelVisible(true);
     },
-    [orderedLayerData, setSelectedLayerIndex]
+    [setSelectedLayerPath]
   );
 
   /**
@@ -116,7 +112,7 @@ export function Datapanel() {
       // Log
       logger.logTraceUseCallback(
         'data-panel.renderList',
-        selectedLayerIndex,
+        selectedLayerPath,
         isEnlargeDataTable,
         mapFiltered,
         rowsFiltered,
@@ -137,25 +133,30 @@ export function Datapanel() {
               ),
             }))}
           isEnlargeDataTable={isEnlargeDataTable}
-          selectedLayerIndex={selectedLayerIndex}
+          selectedLayerPath={selectedLayerPath}
           handleListItemClick={handleLayerChange}
         />
       );
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [selectedLayerIndex, isEnlargeDataTable, mapFiltered, rowsFiltered, orderedLayerData]
+    [selectedLayerPath, isEnlargeDataTable, mapFiltered, rowsFiltered, orderedLayerData]
   );
 
   useEffect(() => {
     // Log
-    logger.logTraceUseEffect('DATA-PANEL - isLoading', isLoading, selectedLayerIndex);
+    logger.logTraceUseEffect('DATA-PANEL - isLoading', isLoading, selectedLayerPath);
 
     const clearLoading = setTimeout(() => {
       setIsLoading(false);
     }, 1000);
     return () => clearTimeout(clearLoading);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isLoading, selectedLayerIndex]);
+  }, [isLoading, selectedLayerPath]);
+
+  useEffect(() => {
+    setSelectedLayerPath(orderedLayerData[0].layerPath);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <Box sx={sxClasses.dataPanel}>
@@ -172,7 +173,9 @@ export function Datapanel() {
               [theme.breakpoints.down('md')]: { justifyContent: 'space-between' },
             }}
           >
-            {!isLoading && <LayerTitle hideTitle>{layerData![selectedLayerIndex]?.layerName ?? ''}</LayerTitle>}
+            {!isLoading && (
+              <LayerTitle hideTitle>{orderedLayerData.find((layer) => layer.layerPath === selectedLayerPath)?.layerName ?? ''}</LayerTitle>
+            )}
 
             <Box>
               <EnlargeButton isEnlargeDataTable={isEnlargeDataTable} setIsEnlargeDataTable={setIsEnlargeDataTable} />
@@ -196,9 +199,9 @@ export function Datapanel() {
           {!isLoading &&
             orderedLayerData
               .filter(({ features }) => !!features?.length)
-              .map((data, index) => (
+              .map((data) => (
                 <Box key={data.layerPath}>
-                  {index === selectedLayerIndex ? (
+                  {data.layerPath === selectedLayerPath ? (
                     <Box>
                       <MapDataTable data={data} mapId={mapId} layerPath={data.layerPath} tableHeight={tableHeight} />
                     </Box>

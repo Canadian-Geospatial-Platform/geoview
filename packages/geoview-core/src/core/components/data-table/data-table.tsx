@@ -449,30 +449,33 @@ function DataTable({ data, mapId, layerPath, tableHeight = 600 }: DataTableProps
   });
 
   // add/remove hightlight feature when row is selected/unselected.
-  // useEffect(() => {
-  //   // Log
-  //   logger.logTraceUseEffect('DATA-TABLE - rowSelection', rowSelection);
+  useEffect(() => {
+    // Log
+    logger.logTraceUseEffect('DATA-TABLE - rowSelection', rowSelection);
 
-  //   const selectedRows = Object.keys(rowSelection).map((key) => Number(key));
+    const selectedRows = Object.keys(rowSelection).map((key) => Number(key));
 
-  //   const addAnimationRowIds = difference(selectedRows, rowSelectionRef.current);
+    const addAnimationRowIds = difference(selectedRows, rowSelectionRef.current);
 
-  //   addAnimationRowIds.forEach((idx) => {
-  //     const row = data?.features?[Number(idx)] || null;
-  //     if (row) {
-  //       addHighlightedFeature(row);
-  //     }
-  //   });
+    console.log('adda animation', addAnimationRowIds);
+    // addAnimationRowIds.forEach((idx) => {
+    //   const row = data?.features?[Number(idx)] || null;
+    //   if (row) {
+    //     addHighlightedFeature(row);
+    //   }
+    // });
+    const removeAnimationRowIds = difference(rowSelectionRef.current, selectedRows);
 
-  //   const removeAnimationRowIds = difference(rowSelectionRef.current, selectedRows);
-  //   removeAnimationRowIds.forEach((id) => {
-  //     const feature = data?.features?[Number(id)] || null;
-  //     removeHighlightedFeature(feature);
-  //   });
+    console.log('removeAnimationRowIds', removeAnimationRowIds);
 
-  //   rowSelectionRef.current = selectedRows;
-  //   // eslint-disable-next-line react-hooks/exhaustive-deps
-  // }, [rowSelection]);
+    // removeAnimationRowIds.forEach((id) => {
+    //   const feature = data?.features?[Number(id)] || null;
+    //   removeHighlightedFeature(feature);
+    // });
+
+    rowSelectionRef.current = selectedRows;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [rowSelection]);
 
   /**
    * Convert the filter list from the Column Filter state to filter the map.
@@ -529,42 +532,41 @@ function DataTable({ data, mapId, layerPath, tableHeight = 600 }: DataTableProps
    *
    * @param {Array} filterStrings list of filter strings.
    */
-  // const filterMap = debounce((filters: MRTColumnFiltersState) => {
-  //   const filterStrings = buildFilterList(filters)
-  //     .filter((filterValue) => filterValue.length)
-  //     .join(' and ');
+  const filterMap = debounce((filters: MRTColumnFiltersState) => {
+    const filterStrings = buildFilterList(filters)
+      .filter((filterValue) => filterValue.length)
+      .join(' and ');
 
-  //   // TODO: use Store
-  //   const geoviewLayerInstance = api.maps[mapId].layer.geoviewLayer(layerPath);
-  //   const filterLayerConfig = api.maps[mapId].layer.registeredLayers[layerPath] as TypeLayerEntryConfig;
+    // TODO: use Store
+    const geoviewLayerInstance = api.maps[mapId].layer.geoviewLayer(layerPath);
+    const filterLayerConfig = api.maps[mapId].layer.registeredLayers[layerPath] as TypeLayerEntryConfig;
 
-  //   if (mapFilteredRecord[layerPath] && geoviewLayerInstance !== undefined && filterLayerConfig !== undefined && filterStrings.length) {
-  //     (api.maps[mapId].layer.geoviewLayer(layerPath) as AbstractGeoViewVector | EsriDynamic)?.applyViewFilter(filterStrings);
-  //   } else {
-  //     (api.maps[mapId].layer.geoviewLayer(layerPath) as AbstractGeoViewVector | EsriDynamic)?.applyViewFilter('');
-  //   }
-  // }, 1000);
+    if (mapFilteredRecord[layerPath] && geoviewLayerInstance !== undefined && filterLayerConfig !== undefined && filterStrings.length) {
+      (api.maps[mapId].layer.geoviewLayer(layerPath) as AbstractGeoViewVector | EsriDynamic)?.applyViewFilter(filterStrings);
+    } else {
+      (api.maps[mapId].layer.geoviewLayer(layerPath) as AbstractGeoViewVector | EsriDynamic)?.applyViewFilter('');
+    }
+  }, 1000);
 
-  // // eslint-disable-next-line react-hooks/exhaustive-deps
-  // const debouncedColumnFilters = useCallback((filters: MRTColumnFiltersState) => filterMap(filters), [mapFilteredRecord[layerPath]]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const debouncedColumnFilters = useCallback((filters: MRTColumnFiltersState) => filterMap(filters), [mapFilteredRecord[layerPath]]);
 
-  // // update map when column filters change
-  // useEffect(() => {
-  //   // Log
-  //   logger.logTraceUseEffect('DATA-TABLE - columnFilters', columnFilters);
-
-  //   if (columnFilters && mapFilteredRecord[layerPath]) {
-  //     debouncedColumnFilters(columnFilters);
-  //   }
-  //   // eslint-disable-next-line react-hooks/exhaustive-deps
-  // }, [columnFilters]);
+  // update map when column filters change
+  useEffect(() => {
+    // Log
+    logger.logTraceUseEffect('DATA-TABLE - columnFilters', columnFilters);
+    if (!!columnFilters.length && !!Object.keys(mapFilteredRecord[layerPath]).length) {
+      debouncedColumnFilters(columnFilters);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [columnFilters]);
 
   // Update map when filter map switch is toggled.
   useEffect(() => {
     // Log
     logger.logTraceUseEffect('DATA-TABLE - mapFilteredRecord', mapFilteredRecord[layerPath]);
 
-    // filterMap(columnFilters);
+    filterMap(columnFilters);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mapFilteredRecord[layerPath]]);
 

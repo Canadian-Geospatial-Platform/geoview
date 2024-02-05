@@ -10,7 +10,7 @@ interface IMapDataTableStateActions {
   setMapFilteredEntry: (mapFiltered: boolean, layerKey: string) => void;
   setRowsFilteredEntry: (rows: number, layerKey: string) => void;
   setRowSelectionsEntry: (rowSelection: Record<number, boolean>, layerKey: string) => void;
-  setSelectedLayerIndex: (idx: number) => void;
+  setSelectedLayerPath: (layerPath: string) => void;
   setToolbarRowSelectedMessageEntry: (message: string, layerKey: string) => void;
   setLayersData: (layers: TypeArrayOfLayerData) => void;
 }
@@ -20,7 +20,7 @@ export interface IMapDataTableState {
   mapFilteredRecord: Record<string, boolean>;
   rowsFilteredRecord: Record<string, number>;
   rowSelectionsRecord: Record<string, Record<number, boolean>>;
-  selectedLayerIndex: number;
+  selectedLayerPath: string;
   toolbarRowSelectedMessageRecord: Record<string, string>;
   layersData: TypeArrayOfLayerData;
   actions: IMapDataTableStateActions;
@@ -33,7 +33,7 @@ export function initialDataTableState(set: TypeSetStore, get: TypeGetStore): IMa
     mapFilteredRecord: {},
     rowsFilteredRecord: {},
     rowSelectionsRecord: {},
-    selectedLayerIndex: 0,
+    selectedLayerPath: '',
     toolbarRowSelectedMessageRecord: {},
     layersData: [],
 
@@ -88,11 +88,11 @@ export function initialDataTableState(set: TypeSetStore, get: TypeGetStore): IMa
           },
         });
       },
-      setSelectedLayerIndex: (index: number) => {
+      setSelectedLayerPath: (layerPath: string) => {
         set({
           dataTableState: {
             ...get().dataTableState,
-            selectedLayerIndex: index,
+            selectedLayerPath: layerPath,
           },
         });
       },
@@ -112,8 +112,8 @@ export function initialDataTableState(set: TypeSetStore, get: TypeGetStore): IMa
 // **********************************************************
 // Data-table state selectors
 // **********************************************************
-export const useDataTableStoreSelectedLayerIndex = (): number =>
-  useStore(useGeoViewStore(), (state) => state.dataTableState.selectedLayerIndex);
+export const useDataTableStoreSelectedLayerPath = (): string =>
+  useStore(useGeoViewStore(), (state) => state.dataTableState.selectedLayerPath);
 export const useDataTableStoreIsEnlargeDataTable = (): boolean =>
   useStore(useGeoViewStore(), (state) => state.dataTableState.isEnlargeDataTable);
 export const useDataTableStoreToolbarRowSelectedMessageRecord = (): Record<string, string> =>
