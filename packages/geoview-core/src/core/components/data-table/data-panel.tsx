@@ -2,9 +2,8 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '@mui/material/styles';
 import { Box, CircularProgress, FilterAltIcon } from '@/ui';
-import MapDataTable, { DataTableData } from './data-table';
+import MapDataTable from './data-table';
 import { getSxClasses } from './data-table-style';
-import { GroupLayers } from './data-table-api';
 import {
   useDataTableStoreActions,
   useDataTableStoreIsEnlargeDataTable,
@@ -18,8 +17,6 @@ import { ResponsiveGrid, EnlargeButton, CloseButton, LayerList, LayerListEntry, 
 import { logger } from '@/core/utils/logger';
 import { useFeatureFieldInfos } from './hooks';
 import { TypeFieldEntry, TypeLayerData } from '@/app';
-
-export interface LayersDataType extends DataTableData, GroupLayers {}
 
 export interface MappedLayerDataType extends TypeLayerData {
   fieldInfos: Record<string, TypeFieldEntry | undefined>;

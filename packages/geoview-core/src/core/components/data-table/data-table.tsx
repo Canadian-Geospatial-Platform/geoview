@@ -54,15 +54,6 @@ import { useAppDisplayLanguage } from '@/core/stores/store-interface-and-intial-
 import { logger } from '@/core/utils/logger';
 import { MappedLayerDataType } from './data-panel';
 
-export interface DataTableDataEntrys extends TypeFeatureInfoEntry {
-  rows: Record<string, string>;
-}
-
-export interface DataTableData {
-  features: DataTableDataEntrys[];
-  fieldAliases: Record<string, TypeFieldEntry>;
-}
-
 interface FieldInfos {
   alias: string;
   dataType: string;
