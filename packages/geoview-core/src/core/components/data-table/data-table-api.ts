@@ -7,7 +7,7 @@ import { AppEventProcessor } from '@/api/event-processors/event-processor-childr
 export interface GroupLayers {
   layerId: string;
   layerName?: TypeLocalizedString;
-  layerKey: string;
+  layerPath: string;
 }
 
 export class DataTableApi {
@@ -42,7 +42,7 @@ export class DataTableApi {
         groupLayers.push({
           layerId: parentLayerId,
           layerName: LayerEntryConfig.layerName,
-          layerKey: `${parentLayerId}/${LayerEntryConfig.layerId}`,
+          layerPath: `${parentLayerId}/${LayerEntryConfig.layerId}`,
         });
       }
     });
@@ -107,7 +107,7 @@ export class DataTableApi {
 
     const requests = groupLayers.map((layer) => {
       const geoviewLayerInstance = api.maps[this.mapId].layer.geoviewLayers[layer.layerId];
-      return geoviewLayerInstance.getFeatureInfo('all', layer.layerKey);
+      return geoviewLayerInstance.getFeatureInfo('all', layer.layerPath);
     });
 
     const response = await Promise.allSettled(requests);

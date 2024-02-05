@@ -1,40 +1,41 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '@mui/material/styles';
 import { Box, CircularProgress, FilterAltIcon } from '@/ui';
 import MapDataTable, { DataTableData } from './data-table';
 import { getSxClasses } from './data-table-style';
 import { GroupLayers } from './data-table-api';
-import { TypeDisplayLanguage } from '@/geo/map/map-schema-types';
 import {
   useDataTableStoreActions,
   useDataTableStoreIsEnlargeDataTable,
   useDataTableStoreMapFilteredRecord,
   useDataTableStoreRowsFiltered,
   useDataTableStoreSelectedLayerIndex,
+  useDetailsStoreLayerDataArray,
   useMapVisibleLayers,
 } from '@/core/stores';
 import { ResponsiveGrid, EnlargeButton, CloseButton, LayerList, LayerListEntry, LayerTitle, useFooterPanelHeight } from '../common';
 import { logger } from '@/core/utils/logger';
+import { useFeatureFieldInfos } from './hooks';
+import { TypeFieldEntry, TypeLayerData } from '@/app';
 
 export interface LayersDataType extends DataTableData, GroupLayers {}
 
-interface DatapanelProps {
-  layerData: LayersDataType[];
-  mapId: string;
-  language: TypeDisplayLanguage;
+export interface MappedLayerDataType extends TypeLayerData {
+  fieldInfos: Record<string, TypeFieldEntry | undefined>;
 }
 
 /**
  * Build Data panel from map.
- * @param {LayersDataType[]} layerData map data which will be used to build data table.
- * @param {string} mapId id of the map.
  * @return {ReactElement} Data table as react element.
  */
 
-export function Datapanel({ layerData, mapId, language }: DatapanelProps) {
+export function Datapanel() {
   const { t } = useTranslation();
   const theme = useTheme();
+
+  const layerData = useDetailsStoreLayerDataArray();
+  const mapId = 'map-WM1';
 
   const sxClasses = getSxClasses(theme);
 
@@ -47,14 +48,17 @@ export function Datapanel({ layerData, mapId, language }: DatapanelProps) {
   const mapFiltered = useDataTableStoreMapFilteredRecord();
   const rowsFiltered = useDataTableStoreRowsFiltered();
   const visibleLayers = useMapVisibleLayers();
-  const { setSelectedLayerIndex, setIsEnlargeDataTable, setLayersData } = useDataTableStoreActions();
+  const { setSelectedLayerIndex, setIsEnlargeDataTable } = useDataTableStoreActions();
 
   // Custom hook for calculating the height of footer panel
   const { leftPanelRef, rightPanelRef, panelTitleRef, tableHeight } = useFooterPanelHeight({ footerPanelTab: 'datatable' });
 
+  // Create columns for data table.
+  const mappedLayerData = useFeatureFieldInfos(layerData);
+
   // Copied similar logic from details-panel, because of the indexes thing
   const findLayerPathIndex = (layerDataArray: LayersDataType[], layerPathSearch: string): number => {
-    return layerDataArray.findIndex((item) => item.layerKey === layerPathSearch);
+    return layerDataArray.findIndex((item) => item.layerPath === layerPathSearch);
   };
 
   const handleLayerChange = useCallback(
@@ -76,26 +80,24 @@ export function Datapanel({ layerData, mapId, language }: DatapanelProps) {
   /**
    * Get number of features of a layer with filtered or selected layer.
    * @param {string} layerPath the path of the layer
-   * @param {number} index index of layer in the list
    * @returns
    */
-  const getFeaturesOfLayer = (layerPath: string, index: number): string => {
+  const getFeaturesOfLayer = (layerPath: string): string => {
     return rowsFiltered && rowsFiltered[layerPath]
       ? `${rowsFiltered[layerPath]} ${t('dataTable.featureFiltered')}`
-      : `${orderedLayerData[index].features.length} ${t('dataTable.features')}`;
+      : `${mappedLayerData?.find((layer) => layer.layerPath === layerPath)?.features?.length ?? 0} ${t('dataTable.features')}`;
   };
 
   /**
    * Create layer tooltip
-   * @param {TypeLocalizedString} layerName en/fr layer name
+   * @param {string} layerName en/fr layer name
    * @param {string} layerPath the path of the layer.
-   * @param {number} index an index of the layer in the array.
    * @returns
    */
-  const getLayerTooltip = (layerName: string, layerPath: string, index: number): React.ReactNode => {
+  const getLayerTooltip = (layerName: string, layerPath: string): React.ReactNode => {
     return (
       <Box sx={{ display: 'flex', alignContent: 'center', '& svg ': { width: '0.75em', height: '0.75em' } }}>
-        {`${layerName}, ${getFeaturesOfLayer(layerPath, index)}`}
+        {`${layerName}, ${getFeaturesOfLayer(layerPath)}`}
         {isMapFilteredSelectedForLayer(layerPath) && <FilterAltIcon />}
       </Box>
     );
@@ -106,7 +108,7 @@ export function Datapanel({ layerData, mapId, language }: DatapanelProps) {
     logger.logTraceUseEffect('DATA-PANEL - visibleLayers', visibleLayers, layerData);
 
     const updatedLayerData = visibleLayers
-      .map((layerPath) => layerData.filter((data) => data.layerKey === layerPath)[0])
+      .map((layerPath) => layerData.filter((data) => data.layerPath === layerPath)[0])
       .filter((layer) => layer !== undefined);
     setOrderedLayerData(updatedLayerData);
   }, [visibleLayers, layerData]);
@@ -130,15 +132,17 @@ export function Datapanel({ layerData, mapId, language }: DatapanelProps) {
 
       return (
         <LayerList
-          layerList={orderedLayerData.map((layer, index) => ({
-            layerName: layer.layerName![language] ?? '',
-            layerPath: layer.layerKey,
-            layerFeatures: getFeaturesOfLayer(layer.layerKey, index),
-            tooltip: getLayerTooltip(layer.layerName![language] ?? '', layer.layerKey, index),
-            mapFilteredIcon: isMapFilteredSelectedForLayer(layer.layerKey) && (
-              <FilterAltIcon sx={{ color: theme.palette.geoViewColor.grey.main }} />
-            ),
-          }))}
+          layerList={mappedLayerData
+            .filter(({ features }) => !!features?.length)
+            .map((layer) => ({
+              layerName: layer.layerName ?? '',
+              layerPath: layer.layerPath,
+              layerFeatures: getFeaturesOfLayer(layer.layerPath),
+              tooltip: getLayerTooltip(layer.layerName ?? '', layer.layerPath),
+              mapFilteredIcon: isMapFilteredSelectedForLayer(layer.layerPath) && (
+                <FilterAltIcon sx={{ color: theme.palette.geoViewColor.grey.main }} />
+              ),
+            }))}
           isEnlargeDataTable={isEnlargeDataTable}
           selectedLayerIndex={selectedLayerIndex}
           handleListItemClick={handleLayerChange}
@@ -146,7 +150,7 @@ export function Datapanel({ layerData, mapId, language }: DatapanelProps) {
       );
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [selectedLayerIndex, isEnlargeDataTable, mapFiltered, rowsFiltered, orderedLayerData]
+    [selectedLayerIndex, isEnlargeDataTable, mapFiltered, rowsFiltered, mappedLayerData]
   );
 
   useEffect(() => {
@@ -160,13 +164,13 @@ export function Datapanel({ layerData, mapId, language }: DatapanelProps) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isLoading, selectedLayerIndex]);
 
-  useEffect(() => {
-    // Log
-    logger.logTraceUseEffect('DATA-PANEL - layerData', layerData);
+  // useEffect(() => {
+  //   // Log
+  //   logger.logTraceUseEffect('DATA-PANEL - layerData', layerData);
 
-    setLayersData(layerData);
-  }, [layerData, setLayersData]);
-
+  //   setLayersData(layerData);
+  // }, [layerData, setLayersData]);
+  console.log('mappedLayerData', mappedLayerData);
   return (
     <Box sx={sxClasses.dataPanel}>
       <ResponsiveGrid.Root sx={{ pt: 8, pb: 8 }} ref={panelTitleRef}>
@@ -182,7 +186,7 @@ export function Datapanel({ layerData, mapId, language }: DatapanelProps) {
               [theme.breakpoints.down('md')]: { justifyContent: 'space-between' },
             }}
           >
-            {!isLoading && <LayerTitle hideTitle>{layerData![selectedLayerIndex]?.layerName![language] ?? ''}</LayerTitle>}
+            {!isLoading && <LayerTitle hideTitle>{layerData![selectedLayerIndex]?.layerName ?? ''}</LayerTitle>}
 
             <Box>
               <EnlargeButton isEnlargeDataTable={isEnlargeDataTable} setIsEnlargeDataTable={setIsEnlargeDataTable} />
@@ -204,27 +208,19 @@ export function Datapanel({ layerData, mapId, language }: DatapanelProps) {
           />
 
           {!isLoading &&
-            orderedLayerData.map(({ layerKey, layerId }, index) => (
-              <Box key={layerKey}>
-                {index === selectedLayerIndex ? (
-                  <Box>
-                    {orderedLayerData[index]?.features.length ? (
-                      <MapDataTable
-                        data={orderedLayerData[index]}
-                        layerId={layerId}
-                        mapId={mapId}
-                        layerKey={layerKey}
-                        tableHeight={tableHeight}
-                      />
-                    ) : (
-                      'No Data'
-                    )}
-                  </Box>
-                ) : (
-                  <Box />
-                )}
-              </Box>
-            ))}
+            mappedLayerData
+              .filter(({ features }) => !!features?.length)
+              .map((data, index) => (
+                <Box key={data.layerPath}>
+                  {index === selectedLayerIndex ? (
+                    <Box>
+                      <MapDataTable data={data} mapId={mapId} layerPath={data.layerPath} tableHeight={tableHeight} />
+                    </Box>
+                  ) : (
+                    <Box />
+                  )}
+                </Box>
+              ))}
         </ResponsiveGrid.Right>
       </ResponsiveGrid.Root>
     </Box>

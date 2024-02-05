@@ -12,17 +12,17 @@ import {
 import { logger } from '@/core/utils/logger';
 
 interface FilterMapProps {
-  layerKey: string;
+  layerPath: string;
 }
 
 /**
  * Custom Filter map toggle button.
- * @param {string} layerKey key of the layer displayed in the map.
+ * @param {string} layerPath key of the layer displayed in the map.
  * @param {string} mapid id of the map
  * @returns {JSX.Element} returns Switch
  *
  */
-function FilterMap({ layerKey }: FilterMapProps): JSX.Element {
+function FilterMap({ layerPath }: FilterMapProps): JSX.Element {
   // Log
   logger.logTraceRender('components/data-table/filter-map');
 
@@ -34,11 +34,11 @@ function FilterMap({ layerKey }: FilterMapProps): JSX.Element {
 
   const { t } = useTranslation();
   return (
-    <Tooltip title={mapFiltered[layerKey] ? t('dataTable.stopFilterMap') : t('dataTable.filterMap')}>
+    <Tooltip title={mapFiltered[layerPath] ? t('dataTable.stopFilterMap') : t('dataTable.filterMap')}>
       <Switch
         size="medium"
-        onChange={() => setMapFilteredEntry(!mapFiltered[layerKey] ?? true, layerKey)}
-        checked={!!mapFiltered[layerKey]}
+        onChange={() => setMapFilteredEntry(!mapFiltered[layerPath] ?? true, layerPath)}
+        checked={!!mapFiltered[layerPath]}
         sx={sxClasses.filterMap}
       />
     </Tooltip>
