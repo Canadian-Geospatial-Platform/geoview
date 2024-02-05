@@ -137,6 +137,7 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
         const curLayers = get().layerState.legendLayers;
         const layer = findLayerByPath(curLayers, layerPath);
         setVisibilityInLayerAndItems(layer as TypeLegendLayer, layer?.isVisible === 'no' ? 'yes' : 'no');
+        // TODO: verify if the isVisible value can be 'always', if so we have a bug here
         // TODO: keep reference to geoview map instance in the store or keep accessing with api - discussion
         //! may not work with group items ... see if Yves work will make this simplier
         api.maps[get().mapId].layer.geoviewLayer(layerPath).setVisible(layer?.isVisible !== 'no', layerPath);

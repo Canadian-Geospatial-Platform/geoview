@@ -16,9 +16,8 @@ export type TypeResultsSet = {
   [layerPath: string]: {
     layerName?: string;
     layerStatus: TypeLayerStatus;
-    layerPhase: string;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    data: any | null;
+    data: any;
   };
 };
 
@@ -100,20 +99,6 @@ export const payloadIsLayerSetChangeLayerStatus = (
   verifyIfPayload: PayloadBaseClass
 ): verifyIfPayload is TypeLayerSetChangeLayerStatusPayload => {
   return verifyIfPayload?.event === EVENT_NAMES.LAYER_SET.CHANGE_LAYER_STATUS;
-};
-
-/**
- * type guard function that redefines a PayloadBaseClass as a TypeLayerSetChangeLayerPhasePayload
- * if the event attribute of the verifyIfPayload parameter is valid. The type ascention
- * applies only to the true block of the if clause.
- *
- * @param {PayloadBaseClass} verifyIfPayload object to test in order to determine if the type ascention is valid
- * @returns {boolean} returns true if the payload is valid
- */
-export const payloadIsLayerSetChangeLayerPhase = (
-  verifyIfPayload: PayloadBaseClass
-): verifyIfPayload is TypeLayerSetChangeLayerPhasePayload => {
-  return verifyIfPayload?.event === EVENT_NAMES.LAYER_SET.CHANGE_LAYER_PHASE;
 };
 
 /**

@@ -164,7 +164,7 @@ export class XYZTiles extends AbstractGeoViewRaster {
         }
       }
 
-      this.setLayerStatus('loading', layerPath);
+      this.setLayerStatus('processing', layerPath);
 
       // When no metadata are provided, all layers are considered valid.
       if (!this.metadata) return;
@@ -231,10 +231,11 @@ export class XYZTiles extends AbstractGeoViewRaster {
       if (layerConfig.initialSettings?.visible !== undefined)
         tileLayerOptions.visible = layerConfig.initialSettings?.visible === 'yes' || layerConfig.initialSettings?.visible === 'always';
 
-      layerConfig.olLayer = new TileLayer(tileLayerOptions);
+      layerConfig.olLayerAndLoadEndListeners = {
+        olLayer: new TileLayer(tileLayerOptions),
+        loadEndListenerType: 'tile',
+      };
       layerConfig.geoviewLayerInstance = this;
-
-      this.addLoadendListener(layerPath, 'tile');
 
       resolve(layerConfig.olLayer);
     });

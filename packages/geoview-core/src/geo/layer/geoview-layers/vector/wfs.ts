@@ -156,7 +156,7 @@ export class WFS extends AbstractGeoViewVector {
         getXMLHttpRequest(`${metadataUrl}${getCapabilitiesUrl}`)
           .then((metadataString) => {
             if (metadataString === '{}') {
-              this.setAllLayerStatusToError(this.listOfLayerEntryConfig, 'Unable to read metadata');
+              this.setAllLayerStatusTo('error', this.listOfLayerEntryConfig, 'Unable to read metadata');
             } else {
               // need to pass a xmldom to xmlToJson
               const xmlDOMCapabilities = new DOMParser().parseFromString(metadataString, 'text/xml');
@@ -170,10 +170,11 @@ export class WFS extends AbstractGeoViewVector {
             }
           }) // eslint-disable-next-line @typescript-eslint/no-unused-vars
           .catch((reason) => {
-            this.setAllLayerStatusToError(this.listOfLayerEntryConfig, 'Unable to read metadata');
+            this.setAllLayerStatusTo('error', this.listOfLayerEntryConfig, 'Unable to read metadata');
+            resolve();
           });
       } else {
-        this.setAllLayerStatusToError(this.listOfLayerEntryConfig, 'Unable to read metadata');
+        this.setAllLayerStatusTo('error', this.listOfLayerEntryConfig, 'Unable to read metadata');
       }
     });
     return promisedExecution;
@@ -201,7 +202,7 @@ export class WFS extends AbstractGeoViewVector {
         }
       }
 
-      this.setLayerStatus('loading', layerPath);
+      this.setLayerStatus('processing', layerPath);
 
       // Note that the code assumes wfs feature type list does not contains metadata layer group. If you need layer group,
       // you can define them in the configuration section.

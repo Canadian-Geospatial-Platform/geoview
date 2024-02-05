@@ -1,6 +1,15 @@
 import { GeoviewStoreType } from '@/core/stores/geoview-store';
 import { AbstractEventProcessor } from '../abstract-event-processor';
-import { AbstractGeoViewVector, EsriDynamic, TypeFeatureInfoLayerConfig, TypeTimeSliderValues, WMS, api, getLocalizedValue } from '@/app';
+import {
+  AbstractGeoViewVector,
+  EsriDynamic,
+  TypeFeatureInfoLayerConfig,
+  TypeLayerEntryConfig,
+  TypeTimeSliderValues,
+  WMS,
+  api,
+  getLocalizedValue,
+} from '@/app';
 
 export class TimeSliderEventProcessor extends AbstractEventProcessor {
   onInitialize(store: GeoviewStoreType) {
@@ -94,7 +103,7 @@ export class TimeSliderEventProcessor extends AbstractEventProcessor {
     const { field, singleHandle } = temporalDimensionInfo;
     // If the field type has an alias, use that as a label
     let fieldAlias = field;
-    const { featureInfo } = api.maps[mapId].layer.registeredLayers[layerPath].source!;
+    const { featureInfo } = (api.maps[mapId].layer.registeredLayers[layerPath] as TypeLayerEntryConfig).source!;
     const { aliasFields, outfields } = featureInfo as TypeFeatureInfoLayerConfig;
     const localizedOutFields = getLocalizedValue(outfields, mapId)?.split(',');
     const localizedAliasFields = getLocalizedValue(aliasFields, mapId)?.split(',');
