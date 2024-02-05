@@ -454,24 +454,20 @@ function DataTable({ data, mapId, layerPath, tableHeight = 600 }: DataTableProps
     logger.logTraceUseEffect('DATA-TABLE - rowSelection', rowSelection);
 
     const selectedRows = Object.keys(rowSelection).map((key) => Number(key));
-
     const addAnimationRowIds = difference(selectedRows, rowSelectionRef.current);
-
-    console.log('adda animation', addAnimationRowIds);
-    // addAnimationRowIds.forEach((idx) => {
-    //   const row = data?.features?[Number(idx)] || null;
-    //   if (row) {
-    //     addHighlightedFeature(row);
-    //   }
-    // });
+    addAnimationRowIds.forEach((idx) => {
+      const row = data?.features ? data.features[idx] : null;
+      if (row) {
+        addHighlightedFeature(row);
+      }
+    });
     const removeAnimationRowIds = difference(rowSelectionRef.current, selectedRows);
-
-    console.log('removeAnimationRowIds', removeAnimationRowIds);
-
-    // removeAnimationRowIds.forEach((id) => {
-    //   const feature = data?.features?[Number(id)] || null;
-    //   removeHighlightedFeature(feature);
-    // });
+    removeAnimationRowIds.forEach((idx) => {
+      const feature = data?.features ? data.features[idx] : null;
+      if (feature) {
+        removeHighlightedFeature(feature);
+      }
+    });
 
     rowSelectionRef.current = selectedRows;
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -555,7 +551,7 @@ function DataTable({ data, mapId, layerPath, tableHeight = 600 }: DataTableProps
   useEffect(() => {
     // Log
     logger.logTraceUseEffect('DATA-TABLE - columnFilters', columnFilters);
-    if (!!columnFilters.length && !!Object.keys(mapFilteredRecord[layerPath]).length) {
+    if (!!columnFilters.length && !!Object.keys(mapFilteredRecord[layerPath] ?? {}).length) {
       debouncedColumnFilters(columnFilters);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
