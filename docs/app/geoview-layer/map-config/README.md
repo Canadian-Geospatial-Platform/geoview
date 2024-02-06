@@ -33,7 +33,7 @@ The `theme` property is optional and its value can be `'dark'` or `'light'`. Whe
 
 ## appBar
 
-The `appBar` property is optional and its type is `TypeAppBarProps`. It is used to define the controls available on the application bar. When its value is undefined, the default `['geolocator']` will be used.
+The `appBar` property is optional and its type is `TypeAppBarProps`. It is used to define the controls available on the application bar. When its value is undefined, the default `[]` will be used.
 
 ## navBar
 
@@ -45,7 +45,7 @@ The `components` property is optional and its type is `TypeMapComponents` which 
 
 ## corePackages
 
-The `corePackages` property is optional and its type is `TypeMapCorePackages` which is an array whose value domain is `'basemap-panel', 'swiper', 'time-slider', 'geochart'`. It is used to define the core packages to initialize when the viewer is loaded. The schema for these packages and their default configuration are on their own package. When its value is undefined, the default = [] is used.
+The `corePackages` property is optional and its type is `TypeMapCorePackages` which is an array whose value domain is `'swiper'`. It is used to define the core packages to initialize when the viewer is loaded. The schema for these packages and their default configuration are on their own package. When its value is undefined, the default = [] is used.
 
 ## externalPackages
 

@@ -2,28 +2,28 @@ import { useTheme } from '@mui/material/styles';
 import { TypeWindow, getLocalizedMessage } from 'geoview-core';
 import { ChartType, SchemaValidator } from 'geochart';
 import { LayerListEntry, Layout } from 'geoview-core/src/core/components/common';
-import { TypeArrayOfLayerData, TypeLayerData } from 'geoview-core/src/api/events/payloads';
+import { TypeLayerData, TypeArrayOfLayerData } from 'geoview-core/src/api/events/payloads/get-feature-info-payload';
 import { Typography } from 'geoview-core/src/ui/typography/typography';
 import { Paper } from 'geoview-core/src/ui';
-import { logger } from 'geoview-core/src/core/utils/logger';
-import { useMapVisibleLayers } from 'geoview-core/src/core/stores/store-interface-and-intial-values/map-state';
-import { useDetailsStoreLayerDataArray } from 'geoview-core/src/core/stores';
+import {
+  useMapVisibleLayers,
+  useGeochartStoreActions,
+  useGeochartStoreLayerDataArray,
+  useGeochartStoreSelectedLayerPath,
+} from 'geoview-core/src/core/stores';
 import { useGeochartConfigs } from 'geoview-core/src/core/stores/store-interface-and-intial-values/geochart-state';
+import { logger } from 'geoview-core/src/core/utils/logger';
 
 import { GeoChart } from './geochart';
 import { GeoViewGeoChartConfig } from './geochart-types';
 import { getSxClasses } from './geochart-style';
-
-type GeoChartRenders = {
-  [layerPath: string]: boolean;
-};
 
 interface GeoChartPanelProps {
   mapId: string;
 }
 
 /**
- * Geo Chart tab
+ * Geo Chart Panel with Layers on the left and Charts on the right
  *
  * @param {TypeTimeSliderProps} props The properties passed to geo chart
  * @returns {JSX.Element} Geo Chart tab
@@ -35,50 +35,23 @@ export function GeoChartPanel(props: GeoChartPanelProps): JSX.Element {
   const { cgpv } = window as TypeWindow;
   const { mapId } = props;
   const { react } = cgpv;
-  const { useState, useCallback, useEffect, useRef } = react;
+  const { useState, useCallback, useMemo, useEffect } = react;
 
   const theme = useTheme();
   const sxClasses = getSxClasses(theme);
 
-  // Prepare the states
-  const [selectedLayerPath, setSelectedLayerPath] = useState<string>();
-  const [geoChartLayersList, setGeoChartLayersList] = useState<LayerListEntry[]>();
-
-  // get store geochart info
+  // Get states and actions from store
   const configObj = useGeochartConfigs();
   const visibleLayers = useMapVisibleLayers() as string[];
-  const arrayOfLayerData = useDetailsStoreLayerDataArray() as TypeArrayOfLayerData;
+  const arrayOfLayerData = useGeochartStoreLayerDataArray() as TypeArrayOfLayerData;
+  const selectedLayerPath = useGeochartStoreSelectedLayerPath() as string;
+  const { setSelectedLayerPath, setLayerDataArrayBatchLayerPathBypass } = useGeochartStoreActions();
+
+  // Prepare the internal states
+  const [arrayOfLayerDataLocal, setArrayOfLayerDataLocal] = useState<LayerListEntry[]>([]);
 
   // Create the validator shared for all the charts in the footer
   const [schemaValidator] = useState<SchemaValidator>(new SchemaValidator());
-
-  // Lists the charts that were rendered at least once
-  const chartFirstRenders = useRef({} as GeoChartRenders);
-
-  /**
-   * Get number of features of a layer.
-   * @returns string
-   */
-  const getFeaturesOfLayer = useCallback(
-    (layer: TypeLayerData): string => {
-      const numOfFeatures = layer.features?.length ?? 0;
-      return `${numOfFeatures} ${getLocalizedMessage(mapId, 'geochart.panel.chart')}${numOfFeatures > 1 ? 's' : ''}`;
-    },
-    [mapId]
-  );
-
-  /**
-   * Handles clicks to layers in left panel. Sets selected layer.
-   *
-   * @param {LayerListEntry} layer The data of the selected layer
-   */
-  const handleLayerChange = useCallback((layer: LayerListEntry): void => {
-    // Log
-    logger.logTraceUseCallback('GEOCHART-PANEL - layer', layer);
-
-    // Set the selected layer path
-    setSelectedLayerPath(layer.layerPath);
-  }, []);
 
   /**
    * Handles click on enlarge button in the layout component.
@@ -96,81 +69,125 @@ export function GeoChartPanel(props: GeoChartPanelProps): JSX.Element {
     [cgpv.api.maps, mapId]
   );
 
+  /**
+   * Get the label for the number of features of a layer.
+   * @returns string
+   */
+  const getNumFeaturesLabel = useCallback(
+    (layer: TypeLayerData): string => {
+      // Log
+      logger.logTraceUseCallback('GEOCHART-PANEL - getNumFeaturesLabel');
+
+      const numOfFeatures = layer.features?.length ?? 0;
+      return `${numOfFeatures} ${getLocalizedMessage(mapId, 'geochart.panel.chart')}${numOfFeatures > 1 ? 's' : ''}`;
+    },
+    [mapId]
+  );
+
   // Reacts when the array of layer data updates
+  const memoLayersList = useMemo(() => {
+    // Log
+    logger.logTraceUseMemo('GEOCHART-PANEL - ArrayOfLayerData', arrayOfLayerData);
+
+    // Set the layers list
+    return visibleLayers
+      .map((layerPath) => arrayOfLayerData.find((layerData) => layerData.layerPath === layerPath))
+      .filter((layer) => layer && configObj[layer.layerPath])
+      .map(
+        (layer) =>
+          ({
+            layerName: layer!.layerName ?? '',
+            layerPath: layer!.layerPath,
+            queryStatus: layer!.queryStatus,
+            numOffeatures: layer!.features?.length ?? 0,
+            layerFeatures: getNumFeaturesLabel(layer!),
+            tooltip: `${layer!.layerName}, ${getNumFeaturesLabel(layer!)}`,
+          } as LayerListEntry)
+      );
+  }, [visibleLayers, arrayOfLayerData, configObj, getNumFeaturesLabel]);
+
+  /**
+   * Memoize the selected layer for the LayerList component.
+   */
+  const memoLayerSelectedItem = useMemo(() => {
+    // Log
+    logger.logTraceUseMemo('GEOCHART-PANEL - memoLayerSelectedItem', memoLayersList, selectedLayerPath);
+    return memoLayersList.find((layer) => layer.layerPath === selectedLayerPath);
+  }, [memoLayersList, selectedLayerPath]);
+
+  /**
+   * Effect used to persist persist the layer path bypass for the layerDataArray.
+   * A useEffect is necessary in order to keep this component pure and be able to set the layer path bypass elsewhere than in this component.
+   */
+  // TODO: This useEffect and the next one are the same in details-panel, create a custom hook for both?
   useEffect(() => {
     // Log
-    logger.logTraceUseEffect('GEOCHART-PANEL - ArrayOfLayerData', arrayOfLayerData);
+    logger.logTraceUseEffect('GEOCHART-PANEL - update layer data bypass', selectedLayerPath);
 
-    // Update the layers list information
-    const layerListEntry: LayerListEntry[] = [];
-    arrayOfLayerData.forEach((layer) => {
-      // If the layer is visible and has a chart in the config
-      if (visibleLayers.includes(layer.layerPath) && configObj[layer.layerPath]) {
-        layerListEntry.push({
-          layerName: layer.layerName ?? '',
-          layerPath: layer.layerPath,
-          numOffeatures: layer.features?.length ?? 0,
-          layerFeatures: getFeaturesOfLayer(layer),
-          tooltip: `${layer.layerName}, ${getFeaturesOfLayer(layer)}`,
-        });
-      }
-    });
+    // Set the layer data array batch bypass to the currently selected layer
+    setLayerDataArrayBatchLayerPathBypass(selectedLayerPath);
+  }, [selectedLayerPath, setLayerDataArrayBatchLayerPathBypass]);
 
-    // Set the list
-    setGeoChartLayersList(layerListEntry);
-  }, [arrayOfLayerData, configObj, getFeaturesOfLayer, visibleLayers]);
-
-  // Reacts when the list of layers being officially listed changed
+  /**
+   * Effect used to persist or alter the current layer selection based on the layers list changes.
+   * A useEffect is necessary in order to keep this component pure and be able to set the selected layer path elsewhere than in this component.
+   */
   useEffect(() => {
     // Log
-    logger.logTraceUseEffect('GEOCHART-PANEL - GeoChartLayersList', geoChartLayersList, selectedLayerPath);
+    logger.logTraceUseEffect('GEOCHART-PANEL - check selection', memoLayerSelectedItem);
 
-    // If there was a selected layer path already
-    let changeSelectedLayerPath = false;
-    let finalLayerPath = '';
-    if (geoChartLayersList && selectedLayerPath) {
-      // Get the layer list entry for that layer path
-      const geoChartLayerEntry = geoChartLayersList.find((geoChartLayer: LayerListEntry) => geoChartLayer.layerPath === selectedLayerPath);
+    // Check if the layer we are on is not 'processed' or 'error', ignore if so
+    if (memoLayerSelectedItem && !(memoLayerSelectedItem.queryStatus === 'processed' || memoLayerSelectedItem.queryStatus === 'error'))
+      return;
 
-      // If found
-      if (geoChartLayerEntry) {
-        // Check if there's nothing currently selected on that layer path
-        if (!geoChartLayerEntry.numOffeatures) {
-          changeSelectedLayerPath = true;
-        } else {
-          // There is something, stay on it.
-          finalLayerPath = selectedLayerPath;
-        }
-      }
+    // Check if the layer we are one still have features
+    if (memoLayerSelectedItem?.numOffeatures) {
+      // Log
+      // logger.logDebug('GEOCHART-PANEL', 'keep selection');
+      // All good, keep selection
+      // Reset the bypass for next time
+      setLayerDataArrayBatchLayerPathBypass(memoLayerSelectedItem.layerPath);
     } else {
-      // Find another layer with features
-      changeSelectedLayerPath = true;
-    }
+      // Find the first layer with features
+      const anotherLayerEntry = memoLayersList.find((layer) => {
+        return memoLayersList.find((layer2) => layer.layerPath === layer2.layerPath && layer2.numOffeatures);
+      });
 
-    // If changing
-    if (geoChartLayersList && changeSelectedLayerPath) {
-      // Find another layer with features
-      const anotherGeoChartLayerEntry = geoChartLayersList.find((geoChartLayer: LayerListEntry) => geoChartLayer.numOffeatures);
       // If found
-      if (anotherGeoChartLayerEntry) {
+      if (anotherLayerEntry) {
+        // Log
+        // logger.logDebug('GEOCHART-PANEL', 'select another', anotherLayerEntry.layerPath);
+
         // Select that one
-        setSelectedLayerPath(anotherGeoChartLayerEntry.layerPath);
-        finalLayerPath = anotherGeoChartLayerEntry.layerPath;
+        setSelectedLayerPath(anotherLayerEntry.layerPath);
       } else {
+        // Log
+        // logger.logDebug('GEOCHART-PANEL', 'select none');
+
         // None found, select none
         setSelectedLayerPath('');
       }
     }
+  }, [memoLayerSelectedItem, memoLayersList, setSelectedLayerPath, setLayerDataArrayBatchLayerPathBypass]);
 
-    // If it was the first rendering for that particular layer path
-    if (!chartFirstRenders.current[finalLayerPath]) {
-      // Rendered at least once
-      chartFirstRenders.current[finalLayerPath] = true;
+  /**
+   * Handles clicks to layers in left panel. Sets selected layer.
+   *
+   * @param {LayerListEntry} layer The data of the selected layer
+   */
+  const handleLayerChange = (layer: LayerListEntry): void => {
+    // Log
+    logger.logTraceUseCallback('GEOCHART-PANEL - layer', layer);
 
-      // We need to redraw when the canvas isn't 'showing' in the DOM and when the user resizes the canvas placeholder.
-      cgpv.api.maps[mapId].plugins.geochart.redrawChart();
-    }
-  }, [cgpv.api.maps, geoChartLayersList, mapId, selectedLayerPath]);
+    // Set the selected layer path in the store which will in turn trigger the store listeners on this component
+    setSelectedLayerPath(layer.layerPath);
+  };
+
+  // If the array of layer data has changed since last render
+  if (arrayOfLayerDataLocal !== memoLayersList) {
+    // Selected array layer data changed
+    setArrayOfLayerDataLocal(memoLayersList);
+  }
 
   /**
    * Renders a single GeoChart component
@@ -187,12 +204,12 @@ export function GeoChartPanel(props: GeoChartPanelProps): JSX.Element {
    * @returns JSX.Element
    */
   const renderComplete = () => {
-    if (geoChartLayersList) {
-      if (geoChartLayersList.length > 0) {
+    if (memoLayersList) {
+      if (memoLayersList.length > 0) {
         return (
           <Layout
             selectedLayerPath={selectedLayerPath || ''}
-            layerList={geoChartLayersList}
+            layerList={memoLayersList}
             handleLayerList={handleLayerChange}
             onIsEnlargeClicked={handleIsEnlargeClicked}
           >

@@ -140,7 +140,7 @@
     ]
   },
   "theme": "dark",
-  "footerTabs": {
+  "footerBar": {
     "tabs": {
       "core": [
         "legend",

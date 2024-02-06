@@ -654,7 +654,7 @@ export const delay = (ms: number): Promise<void> => {
 };
 
 /**
- * Excape special characters from string
+ * Escape special characters from string
  * @param {string} text text to escape
  * @returns {string} espaced string
  */

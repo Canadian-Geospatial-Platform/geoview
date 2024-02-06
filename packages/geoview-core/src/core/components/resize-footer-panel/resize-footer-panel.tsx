@@ -52,7 +52,7 @@ export function ResizeFooterPanel() {
   const open = Boolean(anchorEl);
   return (
     <>
-      <IconButton onClick={(e) => handleClick(e)} tooltip="footerTabsContainer.resizeTooltip">
+      <IconButton onClick={(e) => handleClick(e)} tooltip="footerBar.resizeTooltip">
         <HeightIcon />
       </IconButton>
       <Popover

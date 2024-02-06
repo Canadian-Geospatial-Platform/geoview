@@ -4,15 +4,15 @@ import { useTranslation } from 'react-i18next';
 
 import { useTheme } from '@mui/material';
 import { ArrowUpIcon, IconButton } from '@/ui';
-import { getSxClasses } from './footer-bar-style';
+import { getSxClasses } from './map-info-style';
 import { useMapRotation, useMapStoreActions } from '@/core/stores/store-interface-and-intial-values/map-state';
 
 /**
- * Footerbar Rotation Button component
+ * Map Information Rotation Button component
  *
  * @returns {JSX.Element} the rotation buttons
  */
-export function FooterbarRotationButton(): JSX.Element {
+export function MapInfoRotationButton(): JSX.Element {
   const { t } = useTranslation<string>();
 
   const theme = useTheme();
@@ -27,13 +27,13 @@ export function FooterbarRotationButton(): JSX.Element {
 
   return (
     <IconButton
-      sx={sxClasses.sxClassesRotationButton.rotationButton}
+      sx={sxClasses.rotationButton.rotationButton}
       tooltipPlacement="top"
       tooltip={t('mapctrl.rotation.resetRotation')!}
       title={t('mapctrl.rotation.resetRotation')!}
       onClick={() => setRotation(0)}
     >
-      <ArrowUpIcon ref={iconRef} sx={sxClasses.sxClassesRotationButton.rotationIcon} style={{ transform: `rotate(${mapRotation}rad)` }} />
+      <ArrowUpIcon ref={iconRef} sx={sxClasses.rotationButton.rotationIcon} style={{ transform: `rotate(${mapRotation}rad)` }} />
     </IconButton>
   );
 }

@@ -118,7 +118,7 @@
   "theme": "dark",
   "components": ["north-arrow", "overview-map"],
   "corePackages": [],
-  "appBarTabs": {
+  "appBar": {
     "tabs": {
       "core": ["basemap-panel"]
     }

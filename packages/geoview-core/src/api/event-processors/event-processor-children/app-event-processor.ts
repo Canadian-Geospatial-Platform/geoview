@@ -1,57 +1,67 @@
-import { GeoviewStoreType } from '@/core/stores/geoview-store';
+import { NotificationDetailsType, TypeDisplayLanguage, TypeHTMLElement, TypeDisplayTheme, IAppState } from '@/core/types/cgpv-types';
+
 import { AbstractEventProcessor } from '../abstract-event-processor';
-import { getGeoViewStore, getGeoViewStoreAsync } from '@/core/stores/stores-managers';
-import { NotificationDetailsType, TypeDisplayLanguage, TypeHTMLElement, TypeDisplayTheme } from '@/core/types/cgpv-types';
 
 export class AppEventProcessor extends AbstractEventProcessor {
-  onInitialize(store: GeoviewStoreType) {
-    store.getState();
-
-    // add to arr of subscriptions so it can be destroyed later
-    this.subscriptionArr.push();
-  }
-
-  // **********************************************************
   // Static functions for Typescript files to access store actions
   // **********************************************************
-  //! Typescript MUST always use store action to modify store - NEVER use setState!
+  //! Typescript MUST always use the defined store actions below to modify store - NEVER use setState!
   //! Some action does state modifications AND map actions.
   //! ALWAYS use map event processor when an action modify store and IS NOT trap by map state event handler
+
   // #region
+  /**
+   * Shortcut to get the App state for a given map id
+   * @param {string} mapId The mapId
+   * @returns {IAppState} The App state.
+   */
+  protected static getAppState(mapId: string): IAppState {
+    // Return the app state
+    return super.getState(mapId).appState;
+  }
+
+  /**
+   * Shortcut to get the App state for a given map id
+   * @param {string} mapId The mapId
+   * @returns {IAppState} The App state.
+   */
+  protected static async getAppStateAsync(mapId: string): Promise<IAppState> {
+    // Return the app state
+    return (await super.getStateAsync(mapId)).appState;
+  }
+
   static async addAppNotification(mapId: string, notification: NotificationDetailsType): Promise<void> {
     // because notification is called before map is created, we use the async
-    // version of getGeoViewStore
-    const store = await getGeoViewStoreAsync(mapId);
-    store.getState().appState.actions.addNotification(notification);
+    // version of getAppStateAsync
+    (await this.getAppStateAsync(mapId)).actions.addNotification(notification);
   }
 
   static getDisplayLanguage(mapId: string): TypeDisplayLanguage {
-    return getGeoViewStore(mapId).getState().appState.displayLanguage;
+    return this.getAppState(mapId).displayLanguage;
   }
 
   static getDisplayTheme(mapId: string): TypeDisplayTheme {
-    return getGeoViewStore(mapId).getState().appState.displayTheme;
+    return this.getAppState(mapId).displayTheme;
   }
 
   static getSupportedLanguages(mapId: string): TypeDisplayLanguage[] {
-    return getGeoViewStore(mapId).getState().appState.suportedLanguages;
+    return this.getAppState(mapId).suportedLanguages;
   }
 
   static setAppIsCrosshairActive(mapId: string, isActive: boolean): void {
-    const store = getGeoViewStore(mapId);
-    store.getState().appState.actions.setCrosshairActive(isActive);
+    this.getAppState(mapId).actions.setCrosshairActive(isActive);
   }
 
   static setDisplayLanguage(mapId: string, lang: TypeDisplayLanguage): void {
-    getGeoViewStore(mapId).getState().appState.actions.setDisplayLanguage(lang);
+    this.getAppState(mapId).actions.setDisplayLanguage(lang);
   }
 
   static setDisplayTheme(mapId: string, theme: TypeDisplayTheme): void {
-    getGeoViewStore(mapId).getState().appState.actions.setDisplayTheme(theme);
+    this.getAppState(mapId).actions.setDisplayTheme(theme);
   }
 
   static setFullscreen(mapId: string, active: boolean, element: TypeHTMLElement): void {
-    getGeoViewStore(mapId).getState().appState.actions.setFullScreenActive(active, element);
+    this.getAppState(mapId).actions.setFullScreenActive(active, element);
   }
   // #endregion
 

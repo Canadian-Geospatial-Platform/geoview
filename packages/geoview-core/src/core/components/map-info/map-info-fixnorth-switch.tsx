@@ -5,7 +5,7 @@ import { useMediaQuery } from '@mui/material';
 
 import { Switch, Box } from '@/ui';
 import { PROJECTION_NAMES } from '@/geo/projection/projection';
-import { useUIFooterBarExpanded } from '@/core/stores/store-interface-and-intial-values/ui-state';
+import { useUIMapInfoExpanded } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import {
   useMapFixNorth,
   useMapNorthArrow,
@@ -15,18 +15,18 @@ import {
 import { logger } from '@/core/utils/logger';
 
 /**
- * Footerbar Fix North Switch component
+ * Map Information Fix North Switch component
  *
  * @returns {JSX.Element} the fix north switch
  */
-export function FooterbarFixNorthSwitch(): JSX.Element {
+export function MapInfoFixNorthSwitch(): JSX.Element {
   const { t } = useTranslation<string>();
 
   const theme = useTheme();
   const deviceSizeMedUp = useMediaQuery(theme.breakpoints.down('md'));
 
   // get store values
-  const expanded = useUIFooterBarExpanded();
+  const expanded = useUIMapInfoExpanded();
   const isNorthEnable = useMapNorthArrow();
   const isFixNorth = useMapFixNorth();
   const mapProjection = useMapProjection();
@@ -47,7 +47,7 @@ export function FooterbarFixNorthSwitch(): JSX.Element {
 
   useEffect(() => {
     // Log
-    logger.logTraceUseEffect('FOOTER-BAR-FIXNORTH-SWITCH - deviceSizeMedUp', deviceSizeMedUp);
+    logger.logTraceUseEffect('MAP-INFO-FIXNORTH-SWITCH - deviceSizeMedUp', deviceSizeMedUp);
 
     if (deviceSizeMedUp) {
       setFixNorth(false);

@@ -1,18 +1,21 @@
 import { SyntheticEvent, ReactNode, useState, useEffect, useRef, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
+
 import { Grid, Tab as MaterialTab, Tabs as MaterialTabs, TabsProps, TabProps, BoxProps, Box } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
-import { Select, TypeMenuItemProps } from '../select/select';
 import { HtmlToReact } from '@/core/containers/html-to-react';
-import { TabPanel } from './tab-panel';
+import { logger } from '@/core/utils/logger';
+import { useGeoViewMapId, useMapSize } from '@/app';
+// TODO: Refactor - UI - remove the dependency to the store for this component
 import {
-  useUIActiveFooterTabId,
+  useUIActiveFooterBarTabId,
   useUIActiveTrapGeoView,
   useUIStoreActions,
 } from '@/core/stores/store-interface-and-intial-values/ui-state';
+
+import { Select, TypeMenuItemProps } from '../select/select';
 import { getSxClasses } from './tabs-style';
-import { logger } from '@/core/utils/logger';
-import { useGeoViewMapId, useMapSize } from '@/app';
+import { TabPanel } from './tab-panel';
 
 /**
  * Type used for properties of each tab
@@ -63,7 +66,7 @@ export function Tabs(props: TypeTabsProps): JSX.Element {
   const tabPanelRefs = useRef([tabs[0]]);
   // get store values and actions
   const activeTrapGeoView = useUIActiveTrapGeoView();
-  const activeFooterTabId = useUIActiveFooterTabId();
+  const activeFooterBarTabId = useUIActiveFooterBarTabId();
   const mapSize = useMapSize();
   const { closeModal, openModal } = useUIStoreActions();
 
@@ -104,7 +107,7 @@ export function Tabs(props: TypeTabsProps): JSX.Element {
    * If the panel is collapsed when tab is clicked, expand the panel
    */
   const handleClick = (index: number) => {
-    if (handleCollapse !== undefined && (isCollapsed || value === index)) handleCollapse();
+    if (isCollapsed || value === index) handleCollapse?.();
 
     // WCAG - if keyboard navigation is on and the tabs gets expanded, set the trap store info to open, close otherwise
     if (activeTrapGeoView) openModal({ activeElementId: `panel-${index}`, callbackElementId: `tab-${index}` });
@@ -118,22 +121,6 @@ export function Tabs(props: TypeTabsProps): JSX.Element {
     if (selectedTab && value !== selectedTab) setValue(selectedTab);
   }, [selectedTab, value]);
 
-  useEffect(() => {
-    // Log
-    logger.logTraceUseEffect('TABS - Mouse Clicked On Map');
-    //  open details tab when clicked on layer on
-    if (activeFooterTabId === 'details') {
-      const idx = tabs.findIndex((tab) => tab.id === activeFooterTabId);
-      if (!tabPanelRefs.current[idx]) {
-        tabPanelRefs.current[idx] = tabs[idx];
-      }
-      setValue(idx);
-      // open tab panel if closed.
-      if (handleCollapse && isCollapsed) handleCollapse();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeFooterTabId]);
-
   /**
    * Build mobile tab dropdown.
    */
@@ -144,7 +131,7 @@ export function Tabs(props: TypeTabsProps): JSX.Element {
     }));
 
     // no tab field which will be used to collapse the footer panel.
-    const noTab = { type: 'item', item: { value: '', children: t('footerTabsContainer.noTab') } };
+    const noTab = { type: 'item', item: { value: '', children: t('footerBar.noTab') } };
     return [noTab, ...newTabs] as TypeMenuItemProps[];
   }, [tabs, t]);
 
@@ -156,6 +143,24 @@ export function Tabs(props: TypeTabsProps): JSX.Element {
       setShowMobileDropdown(false);
     }
   }, [mapSize, theme.breakpoints.values.sm]);
+
+  useEffect(() => {
+    // Log
+    logger.logTraceUseEffect('TABS - activeFooterBarTabId', activeFooterBarTabId);
+
+    // Find the index of the tab in question
+    const idx = tabs.findIndex((tab) => tab.id === activeFooterBarTabId);
+
+    // Keep the tab in reference
+    if (!tabPanelRefs.current[idx]) {
+      tabPanelRefs.current[idx] = tabs[idx];
+    }
+    setValue(idx);
+
+    // Make sure it's visible
+    if (isCollapsed) handleCollapse?.();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tabs, activeFooterBarTabId]);
 
   return (
     <Grid container sx={{ width: '100%', height: '100%' }}>
@@ -196,11 +201,11 @@ export function Tabs(props: TypeTabsProps): JSX.Element {
           ) : (
             <Box sx={sxClasses.mobileDropdown}>
               <Select
-                labelId="footerTabsDropdownLabel"
+                labelId="footerBarDropdownLabel"
                 formControlProps={{ size: 'small' }}
-                id="footerTabsDropdown"
+                id="footerBarDropdown"
                 fullWidth
-                inputLabel={{ id: 'footerTabsDropdownLabel' }}
+                inputLabel={{ id: 'footerBarDropdownLabel' }}
                 menuItems={mobileTabsDropdownValues}
                 value={value}
                 onChange={(e) => updateTabPanel(e.target.value as number)}

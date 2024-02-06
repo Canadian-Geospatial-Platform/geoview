@@ -7,7 +7,7 @@ import { useTheme } from '@mui/material/styles';
 
 import { Box, Button, CheckIcon } from '@/ui';
 import { getSxClasses } from './mouse-position-style';
-import { useUIFooterBarExpanded } from '@/core/stores/store-interface-and-intial-values/ui-state';
+import { useUIMapInfoExpanded } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import { useMapPointerPosition } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { api } from '@/app';
 import { logger } from '@/core/utils/logger';
@@ -30,7 +30,7 @@ export function MousePosition(): JSX.Element {
   const [positionMode, setPositionMode] = useState<number>(0);
 
   // get store values
-  const expanded = useUIFooterBarExpanded();
+  const expanded = useUIMapInfoExpanded();
   const pointerPosition = useMapPointerPosition();
 
   /**
@@ -41,8 +41,8 @@ export function MousePosition(): JSX.Element {
   };
 
   useEffect(() => {
-    // Log
-    logger.logTraceUseEffect('MOUSE-POSITION - pointerPosition', pointerPosition);
+    // Log too annoying
+    // logger.logTraceUseEffect('MOUSE-POSITION - pointerPosition', pointerPosition);
 
     /**
      * Format the coordinates output in lat long

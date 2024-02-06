@@ -112,7 +112,20 @@ export class FeatureInfoLayerSet {
      * @param {QueryType} queryType The query type (ex.: "all" | "at_pixel" | "at_coordinate" | "at_long_lat", ...)
      * @param {Coordinate} coordinate The coordinate of the event
      */
-    const createQueryLayerPayload = (eventType: EventType, queryType: QueryType, coordinate: Coordinate) => {
+    const createQueryLayerPayload = (eventType: EventType, queryType: QueryType, coordinate: Coordinate): void => {
+      // Reinitialize the resultsSet
+      Object.keys(this.resultsSet).forEach((layerPath) => {
+        if (!this.resultsSet[layerPath].data[eventType]!.eventListenerEnabled) return;
+        const dataForEventType = this.resultsSet[layerPath].data[eventType] as TypeLayerData;
+        dataForEventType.queryStatus = 'init';
+        dataForEventType.features = undefined;
+        // TODO: Check if the above is enough for basically resetting the queryStatus to 'init'
+      });
+
+      // Propagate initialization to the store
+      FeatureInfoEventProcessor.propagateFeatureInfoToStore(mapId, 'unused_var', eventType, this.resultsSet);
+
+      // Loop on each layer path in the resultsSet
       Object.keys(this.resultsSet).forEach((layerPath) => {
         if (!this.resultsSet[layerPath].data[eventType]!.eventListenerEnabled) return;
         const dataForEventType = this.resultsSet[layerPath].data[eventType] as TypeLayerData;
@@ -129,7 +142,8 @@ export class FeatureInfoLayerSet {
         if (dataForEventType.eventListenerEnabled && dataForEventType.queryStatus !== 'error') {
           api.event.emit(GetFeatureInfoPayload.createQueryLayerPayload(`${this.mapId}/${layerPath}`, queryType, coordinate, eventType));
         }
-        // Propagate feature info to the store, now that the this.resultsSet is more representative of the reality
+
+        // Propagate feature info to the store for each layer path of the results set
         FeatureInfoEventProcessor.propagateFeatureInfoToStore(mapId, layerPath, eventType, this.resultsSet);
       });
     };

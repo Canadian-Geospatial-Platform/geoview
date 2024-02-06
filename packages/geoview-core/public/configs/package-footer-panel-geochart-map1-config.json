@@ -140,9 +140,10 @@
     ]
   },
   "theme": "geo.ca",
-  "footerTabs": {
+  "footerBar": {
     "tabs": {
       "core": [
+        "legend",
         "layers",
         "details",
         "geochart"

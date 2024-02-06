@@ -266,11 +266,11 @@
           );
         }
 
-        // import footerTabs from the core for the current map
-        const { footerTabs } = api.maps[mapId];
+        // import footerBar tabs from the core for the current map
+        const { footerBar } = api.maps[mapId];
 
         // create new tab and add the component
-        footerTabs.createFooterTab({
+        footerBar.createTab({
           id: 'custom',
           value: 2,
           label: 'Custom',

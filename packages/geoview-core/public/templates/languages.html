@@ -106,7 +106,7 @@
                   'en': 'https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/historical_flood_event_en/MapServer',
                   'fr': 'https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/historical_flood_event_en/MapServer'
                 },
-                'geoviewLayerType': 'esriDynamic',
+                'geoviewLayerType': 'esriFeature',
                 'listOfLayerEntryConfig': [
                   {
                     'layerId': '0'
@@ -116,14 +116,18 @@
             ]
           },
           'navBar': ['zoom', 'fullscreen', 'home', 'location', 'export'],
-          'appBar': ['geolocator', 'export'],
-          'footerTabs': {
+          'appBar': {
+            'tabs': {
+              'core': ['geolocator', 'export', 'basemap-panel']
+            }
+          },
+          'footerBar': {
             'tabs': {
               'core': ['legend', 'layers', 'details', 'data-table', 'time-slider']
             }
           },
           'components': ['overview-map', 'north-arrow'],
-          'corePackages': ['basemap-panel', 'time-slider'],
+          'corePackages': [],
           'theme': 'geo.ca',
           'suportedLanguages': ['fr', 'en']
         }`;

@@ -27,7 +27,8 @@
           <tr>
             <td>
               <a href="./index.html">Main</a><br />
-              <a href="#HUC1">1. Basic map</a><br />
+              <a href="#HUC1">1. Basic map English Geo.ca theme</a><br />
+              <a href="#HUC2">1. Basic map French Dark theme</a><br />
             </td>
           </tr>
         </tbody>
@@ -44,7 +45,7 @@
     <button type="button" class="collapsible">Click and Hover event listeners</button>
     <pre id="buttonTable" class="panel"></pre>
     <div class="map-title-holder">
-      <h4 id="HUC1">1. Basic Map</h4>
+      <h4 id="HUC1">1. Basic Map English Geo.ca theme</h4>
       <a class="ref-link" href="#top">Top</a>
     </div>
     <div
@@ -68,10 +69,12 @@
           {
             'geoviewLayerId': 'esriFeatureLYR4',
             'geoviewLayerName': {
-              'en': 'Water quality at monitoring sites'
+              'en': 'Water quality at monitoring sites',
+              'fr': 'Qualité eau'
             },
             'metadataAccessPath': {
-              'en': 'https://maps-cartes.ec.gc.ca/arcgis/rest/services/DMS/DEU_CSO_Volume/MapServer'
+              'en': 'https://maps-cartes.ec.gc.ca/arcgis/rest/services/DMS/DEU_CSO_Volume/MapServer',
+              'fr': 'https://maps-cartes.ec.gc.ca/arcgis/rest/services/DMS/DEU_CSO_Volume/MapServer'
             },
             'geoviewLayerType': 'esriFeature',
             'initialSettings': { 'visible': 'always' },
@@ -83,8 +86,8 @@
           },
           {
             'geoviewLayerId': 'uniqueValueId',
-            'geoviewLayerName': { 'en': 'uniqueValue' },
-            'metadataAccessPath': { 'en': 'https://maps-cartes.ec.gc.ca/arcgis/rest/services/CESI/MapServer/' },
+            'geoviewLayerName': { 'en': 'uniqueValue', 'fr': 'uniqueValue' },
+            'metadataAccessPath': { 'en': 'https://maps-cartes.ec.gc.ca/arcgis/rest/services/CESI/MapServer/', 'fr': 'https://maps-cartes.ec.gc.ca/arcgis/rest/services/CESI/MapServer/' },
             'geoviewLayerType': 'esriFeature',
             'listOfLayerEntryConfig': [
               {
@@ -95,10 +98,12 @@
           {
             'geoviewLayerId': 'esriFeatureLYR5',
             'geoviewLayerName': {
-              'en': 'Top Projects'
+              'en': 'Top Projects',
+              'fr': 'Projets super'
             },
             'metadataAccessPath': {
-              'en': 'https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/900A_and_top_100_en/MapServer/'
+              'en': 'https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/900A_and_top_100_en/MapServer/',
+              'fr': 'https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/900A_and_top_100_en/MapServer/'
             },
             'geoviewLayerType': 'esriFeature',
             'listOfLayerEntryConfig': [
@@ -109,43 +114,43 @@
           },
           {
             'geoviewLayerId': 'geojsonLYR1',
-            'geoviewLayerName': { 'en': 'GeoJSON Sample' },
-            'metadataAccessPath': { 'en': './geojson/metadata.json' },
+            'geoviewLayerName': { 'en': 'GeoJSON Sample', 'fr': 'GeoJSON Échantillon' },
+            'metadataAccessPath': { 'en': './geojson/metadata.json', 'fr': './geojson/metadata.json' },
             'geoviewLayerType': 'GeoJSON',
             'listOfLayerEntryConfig': [
               {
                 'layerId': 'polygons.json',
-                'layerName': { 'en': 'Polygons' }
+                'layerName': { 'en': 'Polygons', 'fr': 'Polygones' }
               },
               {
                 'layerId': 'lines.json',
-                'layerName': { 'en': 'Lines' }
+                'layerName': { 'en': 'Lines', 'fr': 'Lignes' }
               },
               {
                 'entryType': 'group',
                 'layerId': 'point-feature-group',
-                'layerName': { 'en': 'point-feature-group' },
+                'layerName': { 'en': 'point-feature-group', 'fr': 'point-feature-group' },
                 'listOfLayerEntryConfig': [
                   {
                     'layerId': 'icon_points.json',
-                    'layerName': { 'en': 'Icons' },
+                    'layerName': { 'en': 'Icons', 'fr': 'Icones' },
                     'initialSettings': { 'visible': 'yes' }
                   },
                   {
                     'layerId': 'points.json',
-                    'layerName': { 'en': 'Points' }
+                    'layerName': { 'en': 'Points', 'fr': 'Points' }
                   },
                   {
                     'layerId': 'points_1.json',
-                    'layerName': { 'en': 'Points 1' }
+                    'layerName': { 'en': 'Points 1', 'fr': 'Points 1' }
                   },
                   {
                     'layerId': 'points_2.json',
-                    'layerName': { 'en': 'Points 2' }
+                    'layerName': { 'en': 'Points 2', 'fr': 'Points 2' }
                   },
                   {
                     'layerId': 'points_3.json',
-                    'layerName': { 'en': 'Points 3' }
+                    'layerName': { 'en': 'Points 3', 'fr': 'Points 3' }
                   }
                 ]
               }
@@ -154,9 +159,13 @@
         ]
       },
       'theme': 'geo.ca',
-      'appBar': ['export'],
+      'appBar': {
+        'tabs': {
+          'core': ['geolocator', 'export']
+        }
+      },
       'navBar': ['zoom', 'fullscreen', 'home', 'location', 'export'],
-      'footerTabs': {
+      'footerBar': {
         'tabs': {
           'core': ['legend', 'layers', 'details', 'data-table']
         }
@@ -164,7 +173,7 @@
       'components': ['north-arrow'],
       'corePackages': [],
       'externalPackages': [],
-      'suportedLanguages': ['en']
+      'suportedLanguages': ['en', 'fr']
     }"
     ></div>
     <hr />
@@ -172,6 +181,140 @@
     <hr />
     <button type="button" class="collapsible">Code Snippet</button>
     <pre id="codeSnippet" class="panel"></pre>
+
+    <div class="map-title-holder">
+      <h4 id="HUC2">2. Basic Map French Dark theme</h4>
+      <a class="ref-link" href="#top">Top</a>
+    </div>
+    <div
+      id="mapWM2"
+      class="geoview-map"
+      data-lang="fr"
+      data-config="{
+        'map': {
+          'interaction': 'dynamic',
+          'viewSettings': {
+            'zoom': 3,
+            'center': [-100, 50],
+            'projection': 3978
+          },
+          'basemapOptions': {
+            'basemapId': 'osm',
+            'shaded': false,
+            'labeled': false
+          },
+          'listOfGeoviewLayerConfig': [
+            {
+              'geoviewLayerId': 'esriFeatureLYR4',
+              'geoviewLayerName': {
+                'en': 'Water quality at monitoring sites',
+                'fr': 'Qualite de eau'
+              },
+              'metadataAccessPath': {
+                'en': 'https://maps-cartes.ec.gc.ca/arcgis/rest/services/DMS/DEU_CSO_Volume/MapServer',
+                'fr': 'https://maps-cartes.ec.gc.ca/arcgis/rest/services/DMS/DEU_CSO_Volume/MapServer'
+              },
+              'geoviewLayerType': 'esriFeature',
+              'initialSettings': { 'visible': 'always' },
+              'listOfLayerEntryConfig': [
+                {
+                  'layerId': '8'
+                }
+              ]
+            },
+            {
+              'geoviewLayerId': 'uniqueValueId',
+              'geoviewLayerName': { 'en': 'uniqueValue', 'fr': 'uniqueValue' },
+              'metadataAccessPath': { 'en': 'https://maps-cartes.ec.gc.ca/arcgis/rest/services/CESI/MapServer/', 'fr': 'https://maps-cartes.ec.gc.ca/arcgis/rest/services/CESI/MapServer/' },
+              'geoviewLayerType': 'esriFeature',
+              'listOfLayerEntryConfig': [
+                {
+                  'layerId': '1'
+                }
+              ]
+            },
+            {
+              'geoviewLayerId': 'esriFeatureLYR5',
+              'geoviewLayerName': {
+                'en': 'Top Projects',
+                'fr': 'Projets super'
+              },
+              'metadataAccessPath': {
+                'en': 'https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/900A_and_top_100_en/MapServer/',
+                'fr': 'https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/900A_and_top_100_en/MapServer/'
+              },
+              'geoviewLayerType': 'esriFeature',
+              'listOfLayerEntryConfig': [
+                {
+                  'layerId': '0'
+                }
+              ]
+            },
+            {
+              'geoviewLayerId': 'geojsonLYR1',
+              'geoviewLayerName': { 'en': 'GeoJSON Sample', 'fr': 'GeoJSON Échantillon' },
+              'metadataAccessPath': { 'en': './geojson/metadata.json', 'fr': './geojson/metadata.json' },
+              'geoviewLayerType': 'GeoJSON',
+              'listOfLayerEntryConfig': [
+                {
+                  'layerId': 'polygons.json',
+                  'layerName': { 'en': 'Polygons', 'fr': 'Polygones' }
+                },
+                {
+                  'layerId': 'lines.json',
+                  'layerName': { 'en': 'Lines', 'fr': 'Lignes' }
+                },
+                {
+                  'entryType': 'group',
+                  'layerId': 'point-feature-group',
+                  'layerName': { 'en': 'point-feature-group', 'fr': 'point-feature-group' },
+                  'listOfLayerEntryConfig': [
+                    {
+                      'layerId': 'icon_points.json',
+                      'layerName': { 'en': 'Icons', 'fr': 'Icones' },
+                      'initialSettings': { 'visible': 'yes' }
+                    },
+                    {
+                      'layerId': 'points.json',
+                      'layerName': { 'en': 'Points', 'fr': 'Points' }
+                    },
+                    {
+                      'layerId': 'points_1.json',
+                      'layerName': { 'en': 'Points 1', 'fr': 'Points 1' }
+                    },
+                    {
+                      'layerId': 'points_2.json',
+                      'layerName': { 'en': 'Points 2', 'fr': 'Points 2' }
+                    },
+                    {
+                      'layerId': 'points_3.json',
+                      'layerName': { 'en': 'Points 3', 'fr': 'Points 3' }
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+      'theme': 'dark',
+      'appBar': {
+        'tabs': {
+          'core': ['geolocator', 'export']
+        }
+      },
+      'navBar': ['zoom', 'fullscreen', 'home', 'location', 'export'],
+      'footerBar': {
+        'tabs': {
+          'core': ['legend', 'layers', 'details', 'data-table']
+        }
+      },
+      'components': ['north-arrow'],
+      'corePackages': [],
+      'externalPackages': [],
+      'suportedLanguages': ['en', 'fr']
+    }"
+    ></div>
+    <hr />
 
     <script src="codedoc.js"></script>
     <script>
