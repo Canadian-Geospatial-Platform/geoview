@@ -59,15 +59,23 @@ function ExportButton({ rows, columns, children }: ExportButtonProps): JSX.Eleme
     showLabels: true,
     useBom: true,
     useKeysAsHeaders: false,
-    headers: columns.map((c) => c.header),
+    headers: columns.map((c) => c.id as string),
   });
 
   /**
    * Export data table in csv format.
    */
   const handleExportData = () => {
+    // format the rows for csv.
+    const csvRows = rows.map((row) => {
+      const mappedRow = Object.keys(row).reduce((acc, curr) => {
+        acc[curr] = row[curr]?.value ?? '';
+        return acc;
+      }, {} as Record<string, string | null>);
+      return mappedRow;
+    });
     const csvExporter = new ExportToCsv(getCsvOptions());
-    csvExporter.generateCsv(rows);
+    csvExporter.generateCsv(csvRows);
   };
 
   return (
