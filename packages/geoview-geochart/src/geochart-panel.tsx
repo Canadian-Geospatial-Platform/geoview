@@ -114,6 +114,7 @@ export function GeoChartPanel(props: GeoChartPanelProps): JSX.Element {
           ({
             layerName: layer!.layerName ?? '',
             layerPath: layer!.layerPath,
+            layerStatus: layer!.layerStatus,
             queryStatus: layer!.queryStatus,
             numOffeatures: layer!.features?.length ?? 0,
             layerFeatures: getNumFeaturesLabel(layer!),
