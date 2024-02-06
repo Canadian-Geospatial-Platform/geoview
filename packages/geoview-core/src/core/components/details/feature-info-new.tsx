@@ -108,7 +108,12 @@ export function FeatureInfo({ features, currentFeatureIndex }: TypeFeatureInfoPr
         {/* Right box - checkbox and zoom icon */}
         <Box sx={{ ...sxClasses.flexBoxAlignCenter, [theme.breakpoints.down('sm')]: { display: 'none' } }}>
           <Tooltip title={t('details.keepFeatureSelected')} placement="top" enterDelay={1000}>
-            <Checkbox onChange={(e) => handleSelect(e)} checked={checked} sx={sxClasses.selectFeatureCheckbox} />
+            <Checkbox
+              disabled={!feature?.geometry}
+              onChange={(e) => handleSelect(e)}
+              checked={checked}
+              sx={sxClasses.selectFeatureCheckbox}
+            />
           </Tooltip>
           <IconButton color="primary" onClick={(e) => handleZoomIn(e)}>
             <Tooltip title={t('details.zoomTo')} placement="top" enterDelay={1000}>

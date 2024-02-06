@@ -44,7 +44,7 @@ export interface TypeTabsProps {
   isCollapsed?: boolean;
   activeTrap?: boolean;
   TabContentVisibilty?: string | undefined;
-  onCollapse?: () => void;
+  onToggleCollapse?: () => void;
   onSelectedTabChanged?: (tab: TypeTabs) => void;
   onOpenKeyboard?: (uiFocus: FocusItemProps) => void;
   onCloseKeyboard?: () => void;
@@ -63,7 +63,7 @@ export function Tabs(props: TypeTabsProps): JSX.Element {
     selectedTab,
     isCollapsed,
     activeTrap,
-    onCollapse,
+    onToggleCollapse,
     onSelectedTabChanged,
     onOpenKeyboard,
     onCloseKeyboard,
@@ -94,14 +94,12 @@ export function Tabs(props: TypeTabsProps): JSX.Element {
     // Update panel refs when tab value is changed.
     // handle no tab when mobile dropdown is displayed.
     if (typeof tabValue === 'string') {
-      if (!isCollapsed) onCollapse?.();
       setValue(tabValue);
     } else {
       if (!tabPanelRefs.current[tabValue]) {
         tabPanelRefs.current[tabValue] = tabs[tabValue];
       }
       setValue(tabValue);
-      if (isCollapsed) onCollapse?.();
       // Callback
       onSelectedTabChanged?.(tabs[tabValue]);
     }
@@ -120,7 +118,7 @@ export function Tabs(props: TypeTabsProps): JSX.Element {
    * If the panel is collapsed when tab is clicked, expand the panel
    */
   const handleClick = (index: number) => {
-    if (isCollapsed || value === index) onCollapse?.();
+    if (value === index) onToggleCollapse?.();
 
     // WCAG - if keyboard navigation is on and the tabs gets expanded, set the trap store info to open, close otherwise
     if (activeTrap) onOpenKeyboard?.({ activeElementId: `panel-${index}`, callbackElementId: `tab-${index}` });
@@ -142,10 +140,11 @@ export function Tabs(props: TypeTabsProps): JSX.Element {
       setValue(selectedTab);
 
       // Make sure it's visible
-      if (isCollapsed) onCollapse?.();
+      if (isCollapsed) onToggleCollapse?.();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedTab, tabs]);
+  // Do not add dependency on onToggleCollapse or isCollapse, because then on re-render after the change, the useEffect just re-collapses/re-expands...
 
   /**
    * Build mobile tab dropdown.

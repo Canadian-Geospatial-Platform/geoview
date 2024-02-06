@@ -4,13 +4,7 @@ import { Coordinate } from 'ol/coordinate'; // For typing only
 
 import { getGeoViewStore } from '@/core/stores/stores-managers';
 
-import {
-  TypeFeatureInfoEntry,
-  TypeJsonObject,
-  useDetailsStoreLayerDataArray,
-  useDetailsStoreSelectedLayerPath,
-  useGeoViewMapId,
-} from '@/app';
+import { TypeJsonObject, useGeoViewMapId } from '@/app';
 import { Box, ClickMapMarker } from '@/ui';
 
 import { useMapClickMarker, useMapStoreActions } from '@/core/stores/store-interface-and-intial-values/map-state';
@@ -40,42 +34,8 @@ export function ClickMarker(): JSX.Element {
 
   // get values from the store
   const clickMarker = useMapClickMarker();
-  const { hideClickMarker, setOverlayClickMarkerRef, showClickMarker, addSelectedFeature, removeSelectedFeature } = useMapStoreActions();
-  const layerDataArray = useDetailsStoreLayerDataArray();
-  const selectedLayerPath = useDetailsStoreSelectedLayerPath();
+  const { setOverlayClickMarkerRef, showClickMarker } = useMapStoreActions();
   setTimeout(() => setOverlayClickMarkerRef(clickMarkerRef.current as HTMLElement), 0);
-
-  // When layerDataArray is updated, check for feature to add to selectedFeatures (highlight)
-  useEffect(() => {
-    // Log
-    logger.logTraceUseEffect('CLICK-MARKER - layerDataArray', layerDataArray);
-
-    removeSelectedFeature('all');
-    let feature: TypeFeatureInfoEntry | undefined;
-    const selectedLayerDataEntry = layerDataArray.filter((layerData) => layerData.layerPath === selectedLayerPath)[0];
-    if (
-      selectedLayerDataEntry != null &&
-      selectedLayerDataEntry.features?.length &&
-      selectedLayerDataEntry.features[0].geoviewLayerType !== 'ogcWms'
-    )
-      [feature] = selectedLayerDataEntry.features;
-    else {
-      layerDataArray.every((layer) => {
-        const { features } = layer;
-        if (features && features.length > 0 && features[0].geoviewLayerType !== 'ogcWms') {
-          [feature] = features;
-          return false;
-        }
-        return true;
-      });
-    }
-
-    if (feature) {
-      hideClickMarker();
-      addSelectedFeature(feature);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [layerDataArray]);
 
   useEffect(() => {
     // Log
@@ -86,7 +46,6 @@ export function ClickMarker(): JSX.Element {
       (state) => state.mapState.clickCoordinates,
       (curClick, prevClick) => {
         if (curClick !== prevClick) {
-          removeSelectedFeature('all');
           markerCoordinates.current = curClick!.lnglat;
           showClickMarker({ lnglat: curClick!.lnglat });
         }
