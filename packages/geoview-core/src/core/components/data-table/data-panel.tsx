@@ -11,7 +11,7 @@ import {
   useDataTableStoreIsEnlargeDataTable,
   useDataTableStoreMapFilteredRecord,
   useDataTableStoreRowsFiltered,
-  useDataTableStoreSelectedLayerIndex,
+  useDataTableStoreSelectedLayerPath,
   useMapVisibleLayers,
 } from '@/core/stores';
 import { ResponsiveGrid, EnlargeButton, CloseButton, LayerList, LayerListEntry, LayerTitle, useFooterPanelHeight } from '../common';
@@ -42,28 +42,23 @@ export function Datapanel({ layerData, mapId, language }: DatapanelProps) {
   const [isLayersPanelVisible, setIsLayersPanelVisible] = useState(false);
   const [orderedLayerData, setOrderedLayerData] = useState<LayersDataType[]>([]);
 
-  const selectedLayerIndex = useDataTableStoreSelectedLayerIndex();
+  const selectedLayerPath = useDataTableStoreSelectedLayerPath();
   const isEnlargeDataTable = useDataTableStoreIsEnlargeDataTable();
   const mapFiltered = useDataTableStoreMapFilteredRecord();
   const rowsFiltered = useDataTableStoreRowsFiltered();
   const visibleLayers = useMapVisibleLayers();
-  const { setSelectedLayerIndex, setIsEnlargeDataTable, setLayersData } = useDataTableStoreActions();
+  const { setSelectedLayerPath, setIsEnlargeDataTable, setLayersData } = useDataTableStoreActions();
 
   // Custom hook for calculating the height of footer panel
   const { leftPanelRef, rightPanelRef, panelTitleRef, tableHeight } = useFooterPanelHeight({ footerPanelTab: 'datatable' });
 
-  // Copied similar logic from details-panel, because of the indexes thing
-  const findLayerPathIndex = (layerDataArray: LayersDataType[], layerPathSearch: string): number => {
-    return layerDataArray.findIndex((item) => item.layerKey === layerPathSearch);
-  };
-
   const handleLayerChange = useCallback(
     (_layer: LayerListEntry) => {
-      setSelectedLayerIndex(findLayerPathIndex(orderedLayerData, _layer.layerPath));
+      setSelectedLayerPath(_layer.layerPath);
       setIsLoading(true);
       setIsLayersPanelVisible(true);
     },
-    [orderedLayerData, setSelectedLayerIndex]
+    [setSelectedLayerPath]
   );
 
   /**
@@ -121,18 +116,20 @@ export function Datapanel({ layerData, mapId, language }: DatapanelProps) {
       // Log
       logger.logTraceUseCallback(
         'data-panel.renderList',
-        selectedLayerIndex,
+        selectedLayerPath,
         isEnlargeDataTable,
         mapFiltered,
         rowsFiltered,
         orderedLayerData
       );
 
+      // TODO: Fix the queryStatus below when refactoring will be done for the data-panel (parallel development happening, not doing it now)
       return (
         <LayerList
           layerList={orderedLayerData.map((layer, index) => ({
             layerName: layer.layerName![language] ?? '',
             layerPath: layer.layerKey,
+            queryStatus: 'processed',
             layerFeatures: getFeaturesOfLayer(layer.layerKey, index),
             tooltip: getLayerTooltip(layer.layerName![language] ?? '', layer.layerKey, index),
             mapFilteredIcon: isMapFilteredSelectedForLayer(layer.layerKey) && (
@@ -140,25 +137,25 @@ export function Datapanel({ layerData, mapId, language }: DatapanelProps) {
             ),
           }))}
           isEnlargeDataTable={isEnlargeDataTable}
-          selectedLayerIndex={selectedLayerIndex}
+          selectedLayerPath={selectedLayerPath}
           handleListItemClick={handleLayerChange}
         />
       );
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [selectedLayerIndex, isEnlargeDataTable, mapFiltered, rowsFiltered, orderedLayerData]
+    [selectedLayerPath, isEnlargeDataTable, mapFiltered, rowsFiltered, orderedLayerData]
   );
 
   useEffect(() => {
     // Log
-    logger.logTraceUseEffect('DATA-PANEL - isLoading', isLoading, selectedLayerIndex);
+    logger.logTraceUseEffect('DATA-PANEL - isLoading', isLoading);
 
+    // TODO: Get rid of this setTimeout of 1 second?
     const clearLoading = setTimeout(() => {
       setIsLoading(false);
     }, 1000);
     return () => clearTimeout(clearLoading);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isLoading, selectedLayerIndex]);
+  }, [isLoading]);
 
   useEffect(() => {
     // Log
@@ -167,6 +164,8 @@ export function Datapanel({ layerData, mapId, language }: DatapanelProps) {
     setLayersData(layerData);
   }, [layerData, setLayersData]);
 
+  // TODO: Use the correct layer title in the title below
+  // TO.DOCONT: Dropped out when reworking the layer index/layer path indexing and not adjusted as parallel development happening on this component
   return (
     <Box sx={sxClasses.dataPanel}>
       <ResponsiveGrid.Root sx={{ pt: 8, pb: 8 }} ref={panelTitleRef}>
@@ -182,7 +181,7 @@ export function Datapanel({ layerData, mapId, language }: DatapanelProps) {
               [theme.breakpoints.down('md')]: { justifyContent: 'space-between' },
             }}
           >
-            {!isLoading && <LayerTitle hideTitle>{layerData![selectedLayerIndex]?.layerName![language] ?? ''}</LayerTitle>}
+            {!isLoading && <LayerTitle hideTitle>The Layer Name Here</LayerTitle>}
 
             <Box>
               <EnlargeButton isEnlargeDataTable={isEnlargeDataTable} setIsEnlargeDataTable={setIsEnlargeDataTable} />
@@ -206,7 +205,7 @@ export function Datapanel({ layerData, mapId, language }: DatapanelProps) {
           {!isLoading &&
             orderedLayerData.map(({ layerKey, layerId }, index) => (
               <Box key={layerKey}>
-                {index === selectedLayerIndex ? (
+                {layerKey === selectedLayerPath ? (
                   <Box>
                     {orderedLayerData[index]?.features.length ? (
                       <MapDataTable

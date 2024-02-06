@@ -64,10 +64,8 @@ export function Layout({ children, layerList, selectedLayerPath, handleLayerList
     return (
       <LayerList
         isEnlargeDataTable={isEnlargeDataTable}
-        selectedLayerIndex={layerList.findIndex((layer) => layer.layerPath === selectedLayerPath)}
-        handleListItemClick={(layer) => {
-          handleLayerChange(layer);
-        }}
+        selectedLayerPath={selectedLayerPath}
+        handleListItemClick={handleLayerChange}
         layerList={layerList}
       />
     );

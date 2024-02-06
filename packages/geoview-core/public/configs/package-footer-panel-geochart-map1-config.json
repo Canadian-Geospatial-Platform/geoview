@@ -143,6 +143,7 @@
   "footerBar": {
     "tabs": {
       "core": [
+        "legend",
         "layers",
         "details",
         "geochart"

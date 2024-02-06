@@ -72,7 +72,7 @@ export type TypeFeatureInfoEntryPartial = Pick<TypeFeatureInfoEntry, 'fieldInfo'
 
 export type TypeArrayOfFeatureInfoEntries = TypeFeatureInfoEntry[] | undefined | null;
 
-export type TypeQueryStatus = 'processing' | 'processed' | 'error';
+export type TypeQueryStatus = 'init' | 'processing' | 'processed' | 'error';
 
 export type TypeLayerData = {
   layerPath: string;

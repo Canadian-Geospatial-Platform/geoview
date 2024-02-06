@@ -6,6 +6,8 @@ import { useGeoViewStore } from '../stores-managers';
 export interface IFeatureInfoState {
   checkedFeatures: Array<TypeFeatureInfoEntry>;
   layerDataArray: TypeArrayOfLayerData;
+  layerDataArrayBatch: TypeArrayOfLayerData;
+  layerDataArrayBatchLayerPathBypass: string;
   hoverDataArray: TypeArrayOfLayerData;
   allFeaturesDataArray: TypeArrayOfLayerData;
   selectedLayerPath: string;
@@ -14,6 +16,8 @@ export interface IFeatureInfoState {
     addCheckedFeature: (feature: TypeFeatureInfoEntry) => void;
     removeCheckedFeature: (feature: TypeFeatureInfoEntry | 'all') => void;
     setLayerDataArray: (layerDataArray: TypeArrayOfLayerData) => void;
+    setLayerDataArrayBatch: (layerDataArray: TypeArrayOfLayerData) => void;
+    setLayerDataArrayBatchLayerPathBypass: (layerPath: string) => void;
     setHoverDataArray: (hoverDataArray: TypeArrayOfLayerData) => void;
     setAllFeaturesDataArray: (allFeaturesDataArray: TypeArrayOfLayerData) => void;
     setSelectedLayerPath: (selectedLayerPath: string) => void;
@@ -24,6 +28,8 @@ export function initFeatureInfoState(set: TypeSetStore, get: TypeGetStore): IFea
   return {
     checkedFeatures: [],
     layerDataArray: [],
+    layerDataArrayBatch: [],
+    layerDataArrayBatchLayerPathBypass: '',
     hoverDataArray: [],
     allFeaturesDataArray: [],
     selectedLayerPath: '',
@@ -57,6 +63,22 @@ export function initFeatureInfoState(set: TypeSetStore, get: TypeGetStore): IFea
           detailsState: {
             ...get().detailsState,
             layerDataArray,
+          },
+        });
+      },
+      setLayerDataArrayBatch(layerDataArrayBatch: TypeArrayOfLayerData) {
+        set({
+          detailsState: {
+            ...get().detailsState,
+            layerDataArrayBatch,
+          },
+        });
+      },
+      setLayerDataArrayBatchLayerPathBypass(layerDataArrayBatchLayerPathBypass: string) {
+        set({
+          detailsState: {
+            ...get().detailsState,
+            layerDataArrayBatchLayerPathBypass,
           },
         });
       },
@@ -94,6 +116,7 @@ export function initFeatureInfoState(set: TypeSetStore, get: TypeGetStore): IFea
 // **********************************************************
 export const useDetailsStoreCheckedFeatures = () => useStore(useGeoViewStore(), (state) => state.detailsState.checkedFeatures);
 export const useDetailsStoreLayerDataArray = () => useStore(useGeoViewStore(), (state) => state.detailsState.layerDataArray);
+export const useDetailsStoreLayerDataArrayBatch = () => useStore(useGeoViewStore(), (state) => state.detailsState.layerDataArrayBatch);
 export const useDetailsStoreSelectedLayerPath = () => useStore(useGeoViewStore(), (state) => state.detailsState.selectedLayerPath);
 
 export const useDetailsStoreActions = () => useStore(useGeoViewStore(), (state) => state.detailsState.actions);
