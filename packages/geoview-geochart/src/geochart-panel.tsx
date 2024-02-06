@@ -209,38 +209,33 @@ export function GeoChartPanel(props: GeoChartPanelProps): JSX.Element {
    */
   const renderComplete = () => {
     if (memoLayersList) {
-      if (memoLayersList.length > 0) {
-        return (
-          <Layout
-            selectedLayerPath={selectedLayerPath || ''}
-            layerList={memoLayersList}
-            handleLayerList={handleLayerChange}
-            onIsEnlargeClicked={handleIsEnlargeClicked}
-          >
-            {selectedLayerPath &&
-              Object.entries(configObj).map(([layerPath, layerChartConfig], index) => {
-                const sx: React.CSSProperties = { position: 'absolute', top: '-5000px' };
-                if (layerPath === selectedLayerPath) {
-                  sx.top = '0px';
-                }
-                return renderChart(layerChartConfig as GeoViewGeoChartConfig<ChartType>, sx, index.toString());
-              })}
-            {!selectedLayerPath && (
-              <Paper sx={{ padding: '2rem' }}>
-                <Typography variant="h3" gutterBottom sx={sxClasses.geochartInstructionsTitle}>
-                  {getLocalizedMessage(mapId, 'geochart.panel.clickMap')}
-                </Typography>
-                <Typography component="p" sx={sxClasses.geochartInstructionsBody}>
-                  {getLocalizedMessage(mapId, 'geochart.panel.clickMap')}
-                </Typography>
-              </Paper>
-            )}
-          </Layout>
-        );
-      }
-
-      // No layers
-      return <Typography>{getLocalizedMessage(mapId, 'geochart.panel.noLayers')}</Typography>;
+      return (
+        <Layout
+          selectedLayerPath={selectedLayerPath || ''}
+          layerList={memoLayersList}
+          handleLayerList={handleLayerChange}
+          onIsEnlargeClicked={handleIsEnlargeClicked}
+        >
+          {selectedLayerPath &&
+            Object.entries(configObj).map(([layerPath, layerChartConfig], index) => {
+              const sx: React.CSSProperties = { position: 'absolute', top: '-5000px' };
+              if (layerPath === selectedLayerPath) {
+                sx.top = '0px';
+              }
+              return renderChart(layerChartConfig as GeoViewGeoChartConfig<ChartType>, sx, index.toString());
+            })}
+          {!selectedLayerPath && (
+            <Paper sx={{ padding: '2rem' }}>
+              <Typography variant="h3" gutterBottom sx={sxClasses.geochartInstructionsTitle}>
+                {getLocalizedMessage(mapId, 'geochart.panel.clickMap')}
+              </Typography>
+              <Typography component="p" sx={sxClasses.geochartInstructionsBody}>
+                {getLocalizedMessage(mapId, 'geochart.panel.clickMap')}
+              </Typography>
+            </Paper>
+          )}
+        </Layout>
+      );
     }
 
     // Loading UI

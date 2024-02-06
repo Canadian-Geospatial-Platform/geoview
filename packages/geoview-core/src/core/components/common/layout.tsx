@@ -25,7 +25,6 @@ export function Layout({ children, layerList, selectedLayerPath, handleLayerList
   const theme = useTheme();
   const sxClasses = getSxClasses(theme);
 
-  const layerTitle = t('general.layers');
   const [isLayersPanelVisible, setIsLayersPanelVisible] = useState(false);
   const [isEnlargeDataTable, setIsEnlargeDataTable] = useState(false);
 
@@ -76,7 +75,7 @@ export function Layout({ children, layerList, selectedLayerPath, handleLayerList
     <Box sx={sxClasses.detailsContainer}>
       <ResponsiveGrid.Root sx={{ pt: 8, pb: 8 }} ref={panelTitleRef}>
         <ResponsiveGrid.Left isLayersPanelVisible={isLayersPanelVisible} isEnlargeDataTable={isEnlargeDataTable}>
-          <LayerTitle>{layerTitle}</LayerTitle>
+          {!!layerList.length && <LayerTitle>{t('general.layers')}</LayerTitle>}
         </ResponsiveGrid.Left>
         <ResponsiveGrid.Right isLayersPanelVisible={isLayersPanelVisible} isEnlargeDataTable={isEnlargeDataTable}>
           <Box
