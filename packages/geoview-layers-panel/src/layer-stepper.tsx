@@ -803,7 +803,7 @@ function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
     if (event.dataTransfer?.files) {
       const file = event.dataTransfer.files[0];
       const upFilename = file.name.toUpperCase();
-      if (upFilename.endsWith('.JSON') || upFilename.endsWith('.GEOJSON') || upFilename.endsWith('.GPKG')) {
+      if (upFilename.endsWith('.JSON') || upFilename.endsWith('.GEOJSON') || upFilename.endsWith('.GPKG') || upFilename.endsWith('.CSV')) {
         handleFile(file);
       } else {
         emitErrorFile();
@@ -894,7 +894,7 @@ function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
                       onChange={(e) => {
                         if (e.target.files) handleFile(e.target.files[0]);
                       }}
-                      accept=".gpkg, .json, .geojson"
+                      accept=".gpkg, .json, .geojson, .csv"
                     />
                   </div>
                   <Button type="text" onClick={() => document.getElementById('fileUpload')?.click()} className="">

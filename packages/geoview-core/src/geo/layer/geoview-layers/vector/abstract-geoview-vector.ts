@@ -25,6 +25,7 @@ import { TypeArrayOfFeatureInfoEntries } from '@/api/events/payloads';
 import { NodeType } from '@/geo/renderer/geoview-renderer-types';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { logger } from '@/core/utils/logger';
+import { CSV } from './csv';
 
 /* *******************************************************************************************************************************
  * AbstractGeoViewVector types
@@ -117,16 +118,24 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
       xhr.onerror = onError;
       xhr.onload = () => {
         if (xhr.status === 200) {
-          const features = vectorSource.getFormat()!.readFeatures(xhr.responseText, {
-            ...readOptions,
-            featureProjection: projection,
-            extent,
-          }) as Feature[];
+          let features: Feature[] | null;
+          if (layerConfig.schemaTag === 'CSV') {
+            features = (api.maps[this.mapId].layer.geoviewLayer(layerPath) as CSV).convertCsv(
+              xhr.responseText,
+              layerConfig as TypeVectorLayerEntryConfig
+            );
+          } else {
+            features = vectorSource.getFormat()!.readFeatures(xhr.responseText, {
+              ...readOptions,
+              featureProjection: projection,
+              extent,
+            }) as Feature[];
+          }
           /* For vector layers, all fields of type date must be specified in milliseconds (number) that has elapsed since the epoch,
              which is defined as the midnight at the beginning of January 1, 1970, UTC (equivalent to the UNIX epoch). If the date type
              is not a number, we assume it is provided as an ISO UTC string. If not, the result is unpredictable.
           */
-          if (layerConfig.source?.featureInfo?.queryable) {
+          if (layerConfig.source?.featureInfo?.queryable && features) {
             const featureInfo = (layerConfig.source as TypeBaseSourceVectorInitialConfig).featureInfo!;
             const fieldTypes = featureInfo.fieldTypes?.split(',');
             const fieldNames = getLocalizedValue(featureInfo.outfields, this.mapId)!.split(',');
@@ -154,9 +163,11 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
               });
             }
           }
-          vectorSource.addFeatures(features);
-          if (success) success(features as Feature[]);
-          layerConfig.olLayer!.changed();
+          if (features) {
+            vectorSource.addFeatures(features);
+            if (success) success(features as Feature[]);
+            layerConfig.olLayer!.changed();
+          }
         } else {
           onError();
         }
