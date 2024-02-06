@@ -22,7 +22,6 @@ import {
 } from '@/geo/map/map-schema-types';
 import { codedValueType, rangeDomainType } from '@/api/events/payloads';
 import { TypeEsriFeatureLayerEntryConfig, api } from '@/app';
-import { EVENT_NAMES } from '@/api/events/event-types';
 import {
   commonGetFieldDomain,
   commonGetFieldType,
@@ -340,21 +339,15 @@ export class EsriImage extends AbstractGeoViewRaster {
     if (layerConfig.initialSettings?.maxZoom !== undefined) imageLayerOptions.maxZoom = layerConfig.initialSettings?.maxZoom;
     if (layerConfig.initialSettings?.minZoom !== undefined) imageLayerOptions.minZoom = layerConfig.initialSettings?.minZoom;
     if (layerConfig.initialSettings?.opacity !== undefined) imageLayerOptions.opacity = layerConfig.initialSettings?.opacity;
-    // If all layers on the map have an initialSettings.visible set to false, a loading error occurs because nothing is drawn on the
-    // map and the 'change' or 'prerender' events are never sent to the addToMap method of the layer.ts file. The workaround is to
-    // postpone the setVisible action until all layers have been loaded on the map.
-    api.event.once(
-      EVENT_NAMES.LAYER.EVENT_IF_CONDITION,
-      () => {
-        this.setVisible(layerConfig.initialSettings!.visible! !== 'no', layerPath);
-      },
-      `${this.mapId}/visibilityTest`
-    );
+    // If a layer on the map has an initialSettings.visible set to false, its status will never reach the status 'loaded' because
+    // nothing is drawn on the map. We must wait until the 'loaded' status is reached to set the visibility to false. The call
+    // will be done in the layerConfig.loadedFunction() which is called right after the 'loaded' signal.
 
-    layerConfig.olLayer = new ImageLayer(imageLayerOptions);
+    layerConfig.olLayerAndLoadEndListeners = {
+      olLayer: new ImageLayer(imageLayerOptions),
+      loadEndListenerType: 'image',
+    };
     layerConfig.geoviewLayerInstance = this;
-
-    this.addLoadendListener(layerPath, 'image');
 
     return Promise.resolve(layerConfig.olLayer);
   }

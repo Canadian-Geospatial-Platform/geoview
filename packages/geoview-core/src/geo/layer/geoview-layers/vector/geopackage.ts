@@ -33,7 +33,7 @@ import {
   TypeLocalizedString,
 } from '@/geo/map/map-schema-types';
 
-import { getLocalizedValue } from '@/core/utils/utilities';
+import { createLocalizedString, getLocalizedValue } from '@/core/utils/utilities';
 
 import { api } from '@/app';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
@@ -199,7 +199,7 @@ export class GeoPackage extends AbstractGeoViewVector {
         }
       }
 
-      this.setLayerStatus('loading', layerPath);
+      this.setLayerStatus('processing', layerPath);
 
       // When no metadata are provided, all layers are considered valid.
       if (!this.metadata) return;
@@ -255,15 +255,12 @@ export class GeoPackage extends AbstractGeoViewVector {
    *
    * @returns {Promise<BaseLayer | null>} The promise that the layers were processed.
    */
-  protected processListOfLayerEntryConfig(
-    listOfLayerEntryConfig: TypeListOfLayerEntryConfig,
-    layerGroup?: LayerGroup
-  ): Promise<BaseLayer | null> {
+  processListOfLayerEntryConfig(listOfLayerEntryConfig: TypeListOfLayerEntryConfig, layerGroup?: LayerGroup): Promise<BaseLayer | null> {
     this.setLayerPhase('processListOfLayerEntryConfig');
     const promisedListOfLayerEntryProcessed = new Promise<BaseLayer | null>((resolve) => {
       // Single group layer handled recursively
       if (listOfLayerEntryConfig.length === 1 && layerEntryIsGroupLayer(listOfLayerEntryConfig[0])) {
-        const newLayerGroup = this.createLayerGroup(listOfLayerEntryConfig[0]);
+        const newLayerGroup = this.createLayerGroup(listOfLayerEntryConfig[0], listOfLayerEntryConfig[0].initialSettings!);
 
         this.processListOfLayerEntryConfig(listOfLayerEntryConfig[0].listOfLayerEntryConfig!, newLayerGroup).then((groupReturned) => {
           if (groupReturned) {
@@ -279,12 +276,16 @@ export class GeoPackage extends AbstractGeoViewVector {
         });
         // Multiple layer configs are processed individually and added to layer group
       } else if (listOfLayerEntryConfig.length > 1) {
-        if (!layerGroup) layerGroup = this.createLayerGroup(listOfLayerEntryConfig[0].parentLayerConfig as TypeLayerEntryConfig);
+        if (!layerGroup)
+          layerGroup = this.createLayerGroup(
+            listOfLayerEntryConfig[0].parentLayerConfig as TypeLayerEntryConfig,
+            listOfLayerEntryConfig[0].initialSettings!
+          );
 
         listOfLayerEntryConfig.forEach((layerConfig) => {
           const { layerPath } = layerConfig;
           if (layerEntryIsGroupLayer(layerConfig)) {
-            const newLayerGroup = this.createLayerGroup(layerConfig);
+            const newLayerGroup = this.createLayerGroup(layerConfig, layerConfig.initialSettings!);
             this.processListOfLayerEntryConfig(layerConfig.listOfLayerEntryConfig!, newLayerGroup).then((groupReturned) => {
               if (groupReturned) {
                 layerGroup!.getLayers().push(groupReturned);
@@ -436,20 +437,6 @@ export class GeoPackage extends AbstractGeoViewVector {
                 source: vectorSource,
                 properties,
               });
-
-              const { layerPath } = layerConfig;
-              let featuresLoadErrorHandler: () => void;
-              const featuresLoadEndHandler = () => {
-                this.setLayerStatus('loaded', layerPath);
-                vectorSource.un('featuresloaderror', featuresLoadErrorHandler);
-              };
-              featuresLoadErrorHandler = () => {
-                this.setLayerStatus('error', layerPath);
-                vectorSource.un('featuresloadend', featuresLoadEndHandler);
-              };
-
-              vectorSource.once('featuresloadend', featuresLoadEndHandler);
-              vectorSource.once('featuresloaderror', featuresLoadErrorHandler);
             }
 
             db.close();
@@ -477,7 +464,7 @@ export class GeoPackage extends AbstractGeoViewVector {
     sld?: sldsInterface
   ): Promise<BaseLayer | null> {
     const promisedVectorLayer = new Promise<BaseLayer | null>((resolve) => {
-      api.maps[this.mapId].layer.registerLayerConfig(layerConfig);
+      layerConfig.registerLayerConfig();
       this.registerToLayerSets(layerConfig);
 
       const { name, source } = layerInfo;
@@ -621,22 +608,8 @@ export class GeoPackage extends AbstractGeoViewVector {
         this.processFeatureInfoConfig(properties as TypeJsonObject, layerConfig as TypeVectorLayerEntryConfig);
       }
 
-      const { layerPath } = layerConfig;
-      let loadErrorHandler: () => void;
-      const loadEndHandler = () => {
-        this.setLayerStatus('loaded', layerPath);
-        source.un('featuresloaderror', loadErrorHandler);
-      };
-      loadErrorHandler = () => {
-        this.setLayerStatus('error', layerPath);
-        source.un('featuresloadend', loadEndHandler);
-      };
-
-      source.once('featuresloadend', loadEndHandler);
-      source.once('featuresloaderror', loadErrorHandler);
-
       const vectorLayer = this.createVectorLayer(layerConfig as TypeVectorLayerEntryConfig, source);
-      this.setLayerStatus('processed', layerPath);
+      this.setLayerStatus('processed', layerConfig.layerPath);
 
       resolve(vectorLayer);
     });
@@ -675,11 +648,11 @@ export class GeoPackage extends AbstractGeoViewVector {
         } else {
           layerConfig.entryType = 'group';
           (layerConfig as TypeLayerEntryConfig).listOfLayerEntryConfig = [];
-          const newLayerGroup = this.createLayerGroup(layerConfig);
+          const newLayerGroup = this.createLayerGroup(layerConfig, layerConfig.initialSettings!);
           for (let i = 0; i < layers.length; i++) {
             const newLayerEntryConfig = cloneDeep(layerConfig) as TypeBaseLayerEntryConfig;
             newLayerEntryConfig.layerId = layers[i].name;
-            newLayerEntryConfig.layerName = { en: layers[i].name, fr: layers[i].name };
+            newLayerEntryConfig.layerName = createLocalizedString(layers[i].name);
             newLayerEntryConfig.entryType = 'vector';
             newLayerEntryConfig.parentLayerConfig = Cast<TypeLayerGroupEntryConfig>(layerConfig);
 

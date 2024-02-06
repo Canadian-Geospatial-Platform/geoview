@@ -2,6 +2,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 // ==========================================================================================================================
 function listenToLegendLayerSetChanges(elementId, handlerName) {
+  const mapId = handlerName.split('/')[0];
   cgpv.api.event.on(
     cgpv.api.eventNames.GET_LEGENDS.LEGENDS_LAYERSET_UPDATED,
     (payload) => {
@@ -10,8 +11,9 @@ function listenToLegendLayerSetChanges(elementId, handlerName) {
       const displayField = document.getElementById(elementId);
       const { resultsSet } = payload;
       const output = Object.keys(resultsSet).reduce((outputValue, layerPath) => {
-        const layerName = resultsSet[layerPath]?.layerName?.en || resultsSet[layerPath]?.layerName?.fr || '';
-        const { layerPhase, layerStatus } = resultsSet[layerPath];
+        const layerName = resultsSet[layerPath]?.layerName || '';
+        const { layerStatus } = resultsSet[layerPath];
+        const { layerPhase } = cgpv.api.maps[mapId].layer.registeredLayers[layerPath];
         return `${outputValue}<tr class="state"><td class="state">${layerName}</td><td class="state">${layerPhase}</td><td class="state">${layerStatus}</td></tr>`;
       }, outputHeader);
       displayField.innerHTML = output && output !== outputHeader ? `${output}</table>` : '';
