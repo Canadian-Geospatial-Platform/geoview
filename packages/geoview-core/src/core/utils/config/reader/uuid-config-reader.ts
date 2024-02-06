@@ -1,7 +1,6 @@
 import axios, { AxiosResponse } from 'axios';
 
 import { TypeJsonObject, TypeJsonArray, TypeJsonValue } from '@/core/types/global-types';
-
 import {
   TypeEsriDynamicLayerEntryConfig,
   TypeImageStaticLayerEntryConfig,
@@ -21,8 +20,8 @@ import { TypeGeoJSONLayerConfig, TypeGeoJSONLayerEntryConfig } from '@/geo/layer
 import { TypeGeoPackageLayerConfig, TypeGeoPackageLayerEntryConfig } from '@/geo/layer/geoview-layers/vector/geopackage';
 import { TypeXYZTilesConfig, TypeXYZTilesLayerEntryConfig } from '@/geo/layer/geoview-layers/raster/xyz-tiles';
 import { TypeVectorTilesConfig, TypeVectorTilesLayerEntryConfig } from '@/geo/layer/geoview-layers/raster/vector-tiles';
-
 import { showError, replaceParams, getLocalizedMessage, createLocalizedString } from '@/core/utils/utilities';
+import { logger } from '@/core/utils/logger';
 
 // ******************************************************************************************************************************
 // ******************************************************************************************************************************
@@ -295,6 +294,9 @@ export class UUIDmapConfigReader {
                 return imageStaticLayerEntryConfig;
               });
               listOfGeoviewLayerConfig.push(geoviewLayerConfig);
+            } else {
+              // Log
+              logger.logWarning(`Layer type ${layerType} not supported`);
             }
           }
         }
@@ -315,9 +317,10 @@ export class UUIDmapConfigReader {
   static async getGVlayersConfigFromUUID(mapId: string, requestUrl: string): Promise<TypeListOfGeoviewLayerConfig> {
     try {
       const result = await axios.get<TypeJsonObject>(requestUrl);
-
       return this.getLayerConfigFromResponse(result);
     } catch (error: unknown) {
+      // Log
+      logger.logError('Failed to get the GeoView layer from UUI', requestUrl, error);
       const message = replaceParams([error as TypeJsonValue, mapId], getLocalizedMessage(mapId, 'validation.layer.loadfailed'));
       showError(mapId, message);
     }

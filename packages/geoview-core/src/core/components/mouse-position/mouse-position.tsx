@@ -1,24 +1,21 @@
 import { useState, useEffect } from 'react';
-
-import { Coordinate } from 'ol/coordinate';
-
 import { useTranslation } from 'react-i18next';
+import { Coordinate } from 'ol/coordinate';
 import { useTheme } from '@mui/material/styles';
-
 import { Box, Button, CheckIcon } from '@/ui';
-import { getSxClasses } from './mouse-position-style';
 import { useUIMapInfoExpanded } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import { useMapPointerPosition } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { api } from '@/app';
-import { logger } from '@/core/utils/logger';
+
+import { getSxClasses } from './mouse-position-style';
 
 /**
  * Create the mouse position
  * @returns {JSX.Element} the mouse position component
  */
 export function MousePosition(): JSX.Element {
-  // Log
-  logger.logTraceRender('components/mouse-position/mouse-position');
+  // Log too annoying
+  // logger.logTraceRender('components/mouse-position/mouse-position');
 
   const { t } = useTranslation<string>();
 
