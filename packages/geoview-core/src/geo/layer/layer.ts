@@ -35,6 +35,7 @@ import { layerConfigIsWFS, WFS } from '@/geo/layer/geoview-layers/vector/wfs';
 import { layerConfigIsOgcFeature, OgcFeature } from '@/geo/layer/geoview-layers/vector/ogc-feature';
 import { layerConfigIsXYZTiles, XYZTiles } from '@/geo/layer/geoview-layers/raster/xyz-tiles';
 import { layerConfigIsVectorTiles, VectorTiles } from '@/geo/layer/geoview-layers/raster/vector-tiles';
+import { CSV, layerConfigIsCSV } from '@/geo/layer/geoview-layers/vector/csv';
 
 export type TypeRegisteredLayers = { [layerPath: string]: TypeLayerEntryConfig };
 
@@ -111,6 +112,11 @@ export class Layer {
             const geoPackage = new GeoPackage(this.mapId, layerConfig);
             geoPackage.createGeoViewLayers().then(() => {
               this.addToMap(geoPackage);
+            });
+          } else if (layerConfigIsCSV(layerConfig)) {
+            const csv = new CSV(this.mapId, layerConfig);
+            csv.createGeoViewLayers().then(() => {
+              this.addToMap(csv);
             });
           } else if (layerConfigIsWMS(layerConfig)) {
             const wmsLayer = new WMS(this.mapId, layerConfig);

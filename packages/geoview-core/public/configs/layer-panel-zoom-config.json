@@ -3,10 +3,7 @@
     "interaction": "dynamic",
     "viewSettings": {
       "zoom": 4,
-      "center": [
-        -100,
-        60
-      ],
+      "center": [-100, 60],
       "projection": 3978
     },
     "basemapOptions": {
@@ -51,7 +48,7 @@
           "en": "GeoJSON Sample"
         },
         "metadataAccessPath": {
-          "en": "./geojson/metadata.json"
+          "en": "./datasets/geojson/metadata.json"
         },
         "geoviewLayerType": "GeoJSON",
         "listOfLayerEntryConfig": [
@@ -100,7 +97,5 @@
     }
   },
   "corePackages": [],
-  "suportedLanguages": [
-    "en"
-  ]
+  "suportedLanguages": ["en"]
 }

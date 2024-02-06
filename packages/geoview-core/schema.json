@@ -470,7 +470,7 @@
       }
     },
     "TypeVectorSourceFormats": {
-      "enum": ["GeoJSON", "EsriJSON", "KML", "WFS", "featureAPI", "GeoPackage"],
+      "enum": ["GeoJSON", "EsriJSON", "KML", "WFS", "featureAPI", "GeoPackage", "CSV"],
       "description": "The feature format used by the XHR feature loader when access path is set."
     },
     "TypeVectorSourceInitialConfig": {
@@ -502,6 +502,10 @@
           "enum": ["all", "bbox"],
           "default": "all",
           "description": "The loading strategy to use. By default an all strategy is used, a one-off strategy which loads all features at once."
+        },
+        "separator": {
+          "type": "string",
+          "description": "The character used to separate columns of csv file"
         }
       }
     },
@@ -746,7 +750,7 @@
       "type": "object",
       "properties": {
         "schemaTag": {
-          "enum": ["GeoJSON", "esriFeature", "ogcWfs", "ogcFeature", "GeoPackage"]
+          "enum": ["CSV", "GeoJSON", "esriFeature", "ogcWfs", "ogcFeature", "GeoPackage"]
         },
         "entryType": {
           "enum": ["vector"]
@@ -1356,6 +1360,22 @@
         ]
       }
     },
+    "TypeListOfCsvLayerEntryConfig": {
+      "description": "This type is used recursively by the IsValidTypeListOfLayerEntryConfig method coded in config-validation.ts file. It completes the validation of the list of layer entry config.",
+      "type": "array",
+      "minItems": 1,
+      "additionalProperties": false,
+      "items": {
+        "oneOf": [
+          {
+            "$ref": "#/definitions/TypeLayerGroupEntryConfig"
+          },
+          {
+            "$ref": "#/definitions/TypeCsvLayerEntryConfig"
+          }
+        ]
+      }
+    },
     "TypeListOfLayerEntryConfig": {
       "type": "array",
       "minItems": 1
@@ -1464,6 +1484,7 @@
       "type": "string",
       "items": {
         "enum": [
+          "CSV",
           "esriDynamic",
           "esriFeature",
           "esriImage",
