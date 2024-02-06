@@ -10,6 +10,7 @@ import { FooterBarPayload, PayloadBaseClass, payloadIsAFooterBar } from '@/api/e
 import { getSxClasses } from './footer-bar-style';
 import { ResizeFooterPanel } from '../resize-footer-panel/resize-footer-panel';
 import { useAppFullscreenActive } from '@/core/stores/store-interface-and-intial-values/app-state';
+import { useDetailsStoreLayerDataArrayBatch } from '@/core/stores/store-interface-and-intial-values/feature-info-state';
 import {
   useUIActiveFooterBarTabId,
   useUIFooterPanelResizeValue,
@@ -66,6 +67,7 @@ export function FooterBar(): JSX.Element | null {
 
   // get store values and actions
   const isMapFullScreen = useAppFullscreenActive();
+  const arrayOfLayerDataBatch = useDetailsStoreLayerDataArrayBatch();
   const footerPanelResizeValue = useUIFooterPanelResizeValue();
   const footerPanelResizeValues = useUIFooterPanelResizeValues();
   const selectedTab = useUIActiveFooterBarTabId();
@@ -146,7 +148,7 @@ export function FooterBar(): JSX.Element | null {
   const addTab = useCallback(
     (payload: FooterBarPayload) => {
       // Log
-      logger.logTraceUseCallback('FOOTER-BAR - defaultFooterBarTabs', defaultFooterBarTabs);
+      logger.logTraceUseCallback('FOOTER-BAR - addTab', payload);
 
       const idx = defaultFooterBarTabs.findIndex((tab) => tab.id === payload.tab.id);
       if (idx !== -1) {
@@ -165,21 +167,18 @@ export function FooterBar(): JSX.Element | null {
   /**
    * Remove a tab
    */
-  const removeTab = useCallback(
-    (payload: FooterBarPayload) => {
-      // remove the tab from the list
-      setFooterBarTabs((prevState) => {
-        const state = [...prevState];
-        const index = state.findIndex((tab) => tab.value === payload.tab.value);
-        if (index > -1) {
-          state.splice(index, 1);
-          return state;
-        }
+  const removeTab = useCallback((payload: FooterBarPayload) => {
+    // remove the tab from the list
+    setFooterBarTabs((prevState) => {
+      const state = [...prevState];
+      const index = state.findIndex((tab) => tab.value === payload.tab.value);
+      if (index > -1) {
+        state.splice(index, 1);
         return state;
-      });
-    },
-    [setFooterBarTabs]
-  );
+      }
+      return state;
+    });
+  }, []);
 
   // on map creation, get original height to set the foorter collapse/expand height
   useEffect(() => {
@@ -188,6 +187,22 @@ export function FooterBar(): JSX.Element | null {
 
     setOrigHeight(mapDiv!.clientHeight + 55);
   }, [mapDiv]); // ! Is a useEffect on a dom element recommented here? Consider using useRef?
+
+  /**
+   * Whenever the array layer data batch changes if we're on 'details' tab and it's collapsed, make sure we uncollapse it
+   */
+  useEffect(() => {
+    // Log
+    logger.logTraceUseEffect('FOOTER-TABS - arrayOfLayerDataBatch', arrayOfLayerDataBatch, selectedTab, isCollapsed);
+
+    // If we're on the details panel and the footer is collapsed
+    if (selectedTab === 'details' && isCollapsed) {
+      // Uncollapse it
+      setIsCollapsed(false);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [arrayOfLayerDataBatch, selectedTab]);
+  // Don't add isCollapsed in the dependency array, because it'll retrigger the useEffect
 
   // TODO: need a refactor to use proper sx classes and style
   // !https://github.com/Canadian-Geospatial-Platform/geoview/issues/1136
@@ -226,7 +241,7 @@ export function FooterBar(): JSX.Element | null {
   /**
    * Handle a collapse, expand event for the tabs component
    */
-  const handleCollapse = () => {
+  const handleToggleCollapse = () => {
     setIsCollapsed(!isCollapsed);
   };
 
@@ -268,7 +283,7 @@ export function FooterBar(): JSX.Element | null {
    */
   useEffect(() => {
     // Log
-    logger.logTraceUseEffect('FOOTER-BAR - addTab.removeTab', mapId);
+    logger.logTraceUseEffect('FOOTER-BAR - addTab | removeTab', mapId);
 
     // listen to new tab creation
     api.event.on(EVENT_NAMES.FOOTERBAR.EVENT_FOOTERBAR_TAB_CREATE, eventFooterBarCreateListenerFunction, mapId);
@@ -328,7 +343,7 @@ export function FooterBar(): JSX.Element | null {
    */
   useEffect(() => {
     // Log
-    logger.logTraceUseEffect('FOOTER-BAR - mount');
+    logger.logTraceUseEffect('FOOTER-BAR - footerBarTabsConfig');
     // Packages tab
     if (footerBarTabsConfig && footerBarTabsConfig.tabs.core.includes('time-slider')) {
       // create a new tab by loading the time-slider plugin
@@ -403,7 +418,7 @@ export function FooterBar(): JSX.Element | null {
       <Tabs
         activeTrap={activeTrapGeoView}
         isCollapsed={isCollapsed}
-        onCollapse={handleCollapse}
+        onToggleCollapse={handleToggleCollapse}
         onSelectedTabChanged={handleSelectedTabChanged}
         onOpenKeyboard={openModal}
         onCloseKeyboard={closeModal}
