@@ -38,6 +38,7 @@ export function FeatureInfoTable({ featureInfoList }: FeatureInfoTableProps): JS
   const [isLightBoxOpen, setIsLightBoxOpen] = useState(false);
   const [slides, setSlides] = useState<LightBoxSlides[]>([]);
   const [slidesIndex, setSlidesIndex] = useState(0);
+  console.log(featureInfoList);
 
   // linkify options
   const linkifyOptions = {

@@ -48,7 +48,7 @@ export function AddNewLayer(): JSX.Element {
 
   const { t } = useTranslation<string>();
 
-  const { ESRI_DYNAMIC, ESRI_FEATURE, GEOJSON, GEOPACKAGE, WMS, WFS, OGC_FEATURE, XYZ_TILES, GEOCORE } = CONST_LAYER_TYPES;
+  const { CSV, ESRI_DYNAMIC, ESRI_FEATURE, GEOJSON, GEOPACKAGE, WMS, WFS, OGC_FEATURE, XYZ_TILES, GEOCORE } = CONST_LAYER_TYPES;
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [geoviewLayerInstance, setGeoviewLayerInstance] = useState<AbstractGeoViewLayer | undefined>();
@@ -75,6 +75,7 @@ export function AddNewLayer(): JSX.Element {
    * List of layer types and labels
    */
   const layerOptions = [
+    [CSV, 'CSV'],
     [ESRI_DYNAMIC, 'ESRI Dynamic Service'],
     [ESRI_FEATURE, 'ESRI Feature Service'],
     [GEOJSON, 'GeoJSON'],
@@ -626,6 +627,15 @@ export function AddNewLayer(): JSX.Element {
     return true;
   };
 
+  // /**
+  //  * Using the layerURL state object, check whether URL is a valid CSV.
+  //  *
+  //  * @returns {Promise<boolean>} True if layer passes validation
+  //  */
+  // const csvValidation = (): boolean => {
+  //   return true;
+  // };
+
   /**
    * Using the layerURL state object, check whether URL is a valid GeoPackage.
    *
@@ -688,6 +698,8 @@ export function AddNewLayer(): JSX.Element {
       setLayerType(GEOCORE);
     } else if (displayURL.toUpperCase().indexOf('WMS') !== -1) {
       setLayerType(WMS);
+    } else if (displayURL.toUpperCase().indexOf('CSV') !== -1) {
+      setLayerType(CSV);
     }
   };
 
