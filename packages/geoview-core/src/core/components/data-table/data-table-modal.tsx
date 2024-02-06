@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { isValidElement, useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '@mui/material/styles';
 import {
@@ -15,12 +15,16 @@ import {
 } from '@/ui';
 import { useUIActiveFocusItem, useUIStoreActions } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import { useSelectedLayerPath } from '@/core/stores/store-interface-and-intial-values/layer-state';
-import { useDatatableStoreLayersData } from '@/core/stores/store-interface-and-intial-values/data-table-state';
-import { ColumnsType } from './data-table';
-import { getSxClasses } from './data-table-style';
-import { useAppDisplayLanguage } from '@/core/stores/store-interface-and-intial-values/app-state';
-import { logger } from '@/core/utils/logger';
 
+import { FieldInfos } from './data-table';
+import { getSxClasses } from './data-table-style';
+import { logger } from '@/core/utils/logger';
+import { useDetailsStoreLayerDataArray } from '@/core/stores';
+import { useFeatureFieldInfos } from './hooks';
+
+interface ColumnsType {
+  [key: string]: FieldInfos;
+}
 /**
  * Open lighweight version (no function) of data table in a modal window
  *
@@ -41,15 +45,19 @@ export default function DataTableModal(): JSX.Element {
   const { closeModal } = useUIStoreActions();
   const activeModalId = useUIActiveFocusItem().activeElementId;
   const selectedLayer = useSelectedLayerPath();
-  const layersData = useDatatableStoreLayersData();
-  const displayLanguage = useAppDisplayLanguage();
+
+  // TODO:: update when correct data is available, mean time we will be using details store data.
+  const layersData = useDetailsStoreLayerDataArray();
+
+  // Create columns for data table.
+  const mappedLayerData = useFeatureFieldInfos(layersData);
 
   const layer = useMemo(() => {
     // Log
-    logger.logTraceUseMemo('DATA-TABLE-MODAL - layer', layersData, selectedLayer);
+    logger.logTraceUseMemo('DATA-TABLE-MODAL - layer', mappedLayerData, selectedLayer);
 
-    return layersData?.find((layerData) => layerData.layerKey === selectedLayer);
-  }, [layersData, selectedLayer]);
+    return mappedLayerData?.find((layerData) => layerData.layerPath === selectedLayer);
+  }, [mappedLayerData, selectedLayer]);
 
   /**
    * Create data table body cell
@@ -83,18 +91,25 @@ export default function DataTableModal(): JSX.Element {
 
   const columns = useMemo<MRTColumnDef<ColumnsType>[]>(() => {
     // Log
-    logger.logTraceUseMemo('DATA-TABLE-MODAL - columns', layer?.fieldAliases);
+    logger.logTraceUseMemo('DATA-TABLE-MODAL - columns', layer?.features);
 
-    if (!layer?.fieldAliases) {
+    if (!layer?.fieldInfos) {
       return [];
     }
-    const entries = Object.entries(layer?.fieldAliases ?? {});
+    const entries = Object.entries(layer?.fieldInfos ?? {});
     const columnList = [] as MRTColumnDef<ColumnsType>[];
 
     entries.forEach(([key, value]) => {
       columnList.push({
-        accessorKey: key,
-        header: value.alias,
+        id: key,
+        accessorFn: (row) => {
+          // check if row is valid react element.
+          if (isValidElement(row[key])) {
+            return row[key];
+          }
+          return row[key].value ?? '';
+        },
+        header: value?.alias ?? '',
         Cell: ({ cell }) => getCellValue(cell.getValue() as string),
         Header: ({ column }) => getTableHeader(column.columnDef.header),
         maxSize: 120,
@@ -103,19 +118,17 @@ export default function DataTableModal(): JSX.Element {
 
     return columnList;
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [layer?.fieldAliases]);
+  }, [layer?.fieldInfos]);
 
   const rows = useMemo(() => {
     // Log
-    logger.logTraceUseMemo('DATA-TABLE-MODAL - rows', layer?.fieldAliases);
+    logger.logTraceUseMemo('DATA-TABLE-MODAL - rows', layer?.fieldInfos);
 
-    return (
-      layer?.features.slice(0, 99).map((feature) => {
-        return feature.rows;
-      }) ?? []
-    );
+    return (layer?.features?.slice(0, 99).map((feature) => {
+      return feature.fieldInfo;
+    }) ?? []) as unknown as ColumnsType[];
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [layer?.fieldAliases]);
+  }, [layer?.fieldInfos]);
 
   useEffect(() => {
     // Log
@@ -134,7 +147,7 @@ export default function DataTableModal(): JSX.Element {
 
   return (
     <Dialog open={activeModalId === 'layerDatatable'} onClose={closeModal} maxWidth="xl">
-      <DialogTitle>{`${t('legend.tableDetails')} ${layer?.layerName![displayLanguage] ?? selectedLayer}`}</DialogTitle>
+      <DialogTitle>{`${t('legend.tableDetails')} ${layer?.layerName ?? selectedLayer}`}</DialogTitle>
       <DialogContent>
         {isLoading && (
           <Box sx={{ minHeight: '300px', minWidth: '450px', position: 'relative' }}>
@@ -148,7 +161,7 @@ export default function DataTableModal(): JSX.Element {
         )}
         {!isLoading && (
           <Table
-            columns={columns as MRTColumnDef<Record<string, string>, unknown>[]}
+            columns={columns}
             data={rows}
             enableColumnActions={false}
             enableBottomToolbar={false}

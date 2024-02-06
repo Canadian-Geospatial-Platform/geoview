@@ -54,7 +54,7 @@ import { useAppDisplayLanguage } from '@/core/stores/store-interface-and-intial-
 import { logger } from '@/core/utils/logger';
 import { MappedLayerDataType } from './data-panel';
 
-interface FieldInfos {
+export interface FieldInfos {
   alias: string;
   dataType: string;
   domain?: string;
