@@ -46,8 +46,8 @@ export interface TypeTabsProps {
   TabContentVisibilty?: string | undefined;
   onCollapse?: () => void;
   onSelectedTabChanged?: (tab: TypeTabs) => void;
-  onOpenModal?: (uiFocus: FocusItemProps) => void;
-  onCloseModal?: () => void;
+  onOpenKeyboard?: (uiFocus: FocusItemProps) => void;
+  onCloseKeyboard?: () => void;
 }
 
 /**
@@ -65,8 +65,8 @@ export function Tabs(props: TypeTabsProps): JSX.Element {
     activeTrap,
     onCollapse,
     onSelectedTabChanged,
-    onOpenModal,
-    onCloseModal,
+    onOpenKeyboard,
+    onCloseKeyboard,
     TabContentVisibilty = 'inherit',
   } = props;
   const mapId = useGeoViewMapId();
@@ -123,8 +123,8 @@ export function Tabs(props: TypeTabsProps): JSX.Element {
     if (isCollapsed || value === index) onCollapse?.();
 
     // WCAG - if keyboard navigation is on and the tabs gets expanded, set the trap store info to open, close otherwise
-    if (activeTrap) onOpenModal?.({ activeElementId: `panel-${index}`, callbackElementId: `tab-${index}` });
-    else onCloseModal?.();
+    if (activeTrap) onOpenKeyboard?.({ activeElementId: `panel-${index}`, callbackElementId: `tab-${index}` });
+    else onCloseKeyboard?.();
   };
 
   useEffect(() => {

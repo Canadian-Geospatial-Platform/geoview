@@ -409,8 +409,8 @@ export function FooterBar(): JSX.Element | null {
         isCollapsed={isCollapsed}
         onCollapse={handleCollapse}
         onSelectedTabChanged={handleSelectedTabChanged}
-        onOpenModal={openModal}
-        onCloseModal={closeModal}
+        onOpenKeyboard={openModal}
+        onCloseKeyboard={closeModal}
         selectedTab={footerBarTabs.findIndex((t) => t.id === selectedTab)}
         tabsProps={{ variant: 'scrollable' }}
         tabs={footerBarTabs}
