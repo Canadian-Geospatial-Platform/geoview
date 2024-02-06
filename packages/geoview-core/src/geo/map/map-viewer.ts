@@ -547,7 +547,7 @@ export class MapViewer {
    */
   reload(): void {
     // emit an event to reload the map with the stored config
-    api.event.emit(mapConfigPayload(EVENT_NAMES.MAP.EVENT_MAP_RELOAD, this.mapId, MapEventProcessor.getGeoViewConfig(this.mapId)!));
+    api.event.emit(mapConfigPayload(EVENT_NAMES.MAP.EVENT_MAP_RELOAD, this.mapId, MapEventProcessor.getGeoViewMapConfig(this.mapId)!));
   }
 
   /**

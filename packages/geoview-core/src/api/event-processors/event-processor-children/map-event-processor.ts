@@ -1,5 +1,4 @@
 import { Root } from 'react-dom/client';
-
 import { ScaleLine } from 'ol/control';
 import Overlay from 'ol/Overlay';
 import { Extent } from 'ol/extent';
@@ -7,8 +6,7 @@ import View, { FitOptions } from 'ol/View';
 import { KeyboardPan } from 'ol/interaction';
 
 import { GeoviewStoreType } from '@/core/stores/geoview-store';
-import { AbstractEventProcessor } from '../abstract-event-processor';
-import { api, Coordinate, NORTH_POLE_POSITION, TypeBasemapOptions, TypeBasemapProps, TypeClickMarker } from '@/app';
+import { api, Coordinate, NORTH_POLE_POSITION, TypeBasemapOptions, TypeBasemapProps, TypeClickMarker, TypeMapFeaturesConfig } from '@/app';
 import { TypeInteraction, TypeMapState, TypeValidMapProjectionCodes } from '@/geo/map/map-schema-types';
 import {
   mapPayload,
@@ -26,8 +24,13 @@ import { AppEventProcessor } from './app-event-processor';
 import { TypeLegendLayer } from '@/core/components/layers/types';
 import { logger } from '@/core/utils/logger';
 
+import { AbstractEventProcessor } from '../abstract-event-processor';
+
 export class MapEventProcessor extends AbstractEventProcessor {
-  onInitialize(store: GeoviewStoreType) {
+  /**
+   * Override the initialization process to wire subscriptions and return them so they can be destroyed later.
+   */
+  protected onInitialize(store: GeoviewStoreType): Array<() => void> | void {
     const { mapId } = store.getState();
 
     const unsubMapLoaded = store.subscribe(
@@ -148,8 +151,8 @@ export class MapEventProcessor extends AbstractEventProcessor {
       }
     );
 
-    // add to arr of subscriptions so it can be destroyed later
-    this.subscriptionArr.push(
+    // Return the array of subscriptions so they can be destroyed later
+    return [
       unsubMapHighlightedFeatures,
       unsubMapLoaded,
       unsubMapCenterCoord,
@@ -158,8 +161,8 @@ export class MapEventProcessor extends AbstractEventProcessor {
       unsubMapSelectedFeatures,
       unsubMapZoom,
       unsubMapSingleClick,
-      unsubLegendLayers
-    );
+      unsubLegendLayers,
+    ];
   }
 
   //! THIS IS THE ONLY FUNCTION TO SET STORE DIRECTLY
@@ -248,38 +251,61 @@ export class MapEventProcessor extends AbstractEventProcessor {
   // **********************************************************
   // Static functions for Typescript files to access store actions
   // **********************************************************
-  //! Typescript MUST always use store action to modify store - NEVER use setState!
+  //! Typescript MUST always use the defined store actions below to modify store - NEVER use setState!
   //! Some action does state modifications AND map actions.
   //! ALWAYS use map event processor when an action modify store and IS NOT trap by map state event handler
+
   // #region
+  /**
+   * Shortcut to get the Map state for a given map id
+   * @param {string} mapId The mapId
+   * @returns {ILayerState} The Map state
+   */
+  protected static getMapStateProtected(mapId: string) {
+    // TODO: Refactor - Rename this function when we want to clarify the small confusion with getMapState function below
+    // Return the map state
+    return this.getState(mapId).mapState;
+  }
+
+  /**
+   * Shortcut to get the Map config for a given map id
+   * @param {string} mapId the map id to retreive the config for
+   * @returns {TypeMapFeaturesConfig | undefined} the map config or undefined if there is no config for this map id
+   */
+  static getGeoViewMapConfig(mapId: string): TypeMapFeaturesConfig | undefined {
+    // Return the map config
+    return this.getState(mapId).mapConfig;
+  }
+
   static getBasemapOptions(mapId: string): TypeBasemapOptions {
-    return getGeoViewStore(mapId).getState().mapState.basemapOptions;
+    return this.getMapStateProtected(mapId).basemapOptions;
   }
 
   static clickMarkerIconHide(mapId: string): void {
-    getGeoViewStore(mapId).getState().mapState.actions.hideClickMarker();
+    this.getMapStateProtected(mapId).actions.hideClickMarker();
   }
 
   static clickMarkerIconShow(mapId: string, marker: TypeClickMarker): void {
-    getGeoViewStore(mapId).getState().mapState.actions.showClickMarker(marker);
+    this.getMapStateProtected(mapId).actions.showClickMarker(marker);
   }
 
   static getMapInteraction(mapId: string): TypeInteraction {
-    return getGeoViewStore(mapId).getState().mapState.interaction;
+    return this.getMapStateProtected(mapId).interaction;
   }
 
   static getMapState(mapId: string): TypeMapState {
+    const mapState = this.getMapStateProtected(mapId);
     return {
-      currentProjection: getGeoViewStore(mapId).getState().mapState.currentProjection as TypeValidMapProjectionCodes,
-      currentZoom: getGeoViewStore(mapId).getState().mapState.zoom,
-      mapCenterCoordinates: getGeoViewStore(mapId).getState().mapState.centerCoordinates,
-      pointerPosition: getGeoViewStore(mapId).getState().mapState.pointerPosition || {
+      currentProjection: mapState.currentProjection as TypeValidMapProjectionCodes,
+      currentZoom: mapState.zoom,
+      mapCenterCoordinates: mapState.centerCoordinates,
+      pointerPosition: mapState.pointerPosition || {
         pixel: [],
         lnglat: [],
         projected: [],
         dragging: false,
       },
-      singleClickedPosition: getGeoViewStore(mapId).getState().mapState.clickCoordinates || {
+      singleClickedPosition: mapState.clickCoordinates || {
         pixel: [],
         lnglat: [],
         projected: [],
@@ -289,11 +315,11 @@ export class MapEventProcessor extends AbstractEventProcessor {
   }
 
   static setMapAttribution(mapId: string, attribution: string[]): void {
-    getGeoViewStore(mapId).getState().mapState.actions.setAttribution(attribution);
+    this.getMapStateProtected(mapId).actions.setAttribution(attribution);
   }
 
   static setInteraction(mapId: string, interaction: TypeInteraction): void {
-    getGeoViewStore(mapId).getState().mapState.actions.setInteraction(interaction);
+    this.getMapStateProtected(mapId).actions.setInteraction(interaction);
   }
 
   static async setProjection(mapId: string, projectionCode: TypeValidMapProjectionCodes): Promise<void> {
@@ -318,7 +344,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
       });
 
       // use store action to set projection value in store and apply new view to the map
-      getGeoViewStore(mapId).getState().mapState.actions.setProjection(projectionCode, newView);
+      this.getMapStateProtected(mapId).actions.setProjection(projectionCode, newView);
 
       // refresh layers so new projection is render properly and await on it
       await api.maps[mapId].refreshLayers();
@@ -329,11 +355,11 @@ export class MapEventProcessor extends AbstractEventProcessor {
   }
 
   static rotate(mapId: string, rotation: number): void {
-    getGeoViewStore(mapId).getState().mapState.actions.setRotation(rotation);
+    this.getMapStateProtected(mapId).actions.setRotation(rotation);
   }
 
   static zoom(mapId: string, zoom: number): void {
-    getGeoViewStore(mapId).getState().mapState.actions.setZoom(zoom, OL_ZOOM_DURATION);
+    this.getMapStateProtected(mapId).actions.setZoom(zoom, OL_ZOOM_DURATION);
   }
   // #endregion
 
@@ -437,7 +463,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
       const projectedCoords = api.projection.transformPoints(
         [coords],
         `EPSG:4326`,
-        `EPSG:${getGeoViewStore(mapId).getState().mapState.currentProjection}`
+        `EPSG:${this.getMapStateProtected(mapId).currentProjection}`
       );
 
       const extent: Extent = [...projectedCoords[0], ...projectedCoords[0]];
@@ -458,7 +484,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
     const projectedCoords = api.projection.transformPoints(
       [center],
       `EPSG:4326`,
-      `EPSG:${getGeoViewStore(mapId).getState().mapState.currentProjection}`
+      `EPSG:${this.getMapStateProtected(mapId).currentProjection}`
     );
     const extent: Extent = [...projectedCoords[0], ...projectedCoords[0]];
     const options: FitOptions = { padding: OL_ZOOM_PADDING, maxZoom: zoom, duration: OL_ZOOM_DURATION };
@@ -471,7 +497,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
     const projectedCoords = api.projection.transformPoints(
       [coord],
       `EPSG:4326`,
-      `EPSG:${getGeoViewStore(mapId).getState().mapState.currentProjection}`
+      `EPSG:${this.getMapStateProtected(mapId).currentProjection}`
     );
 
     const extent: Extent = [...projectedCoords[0], ...projectedCoords[0]];
@@ -486,7 +512,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
    * @param {string} mapId Id of map to set layer Z indices
    */
   static setLayerZIndices = (mapId: string) => {
-    const reversedLayers = [...getGeoViewStore(mapId).getState().mapState.layerOrder].reverse();
+    const reversedLayers = [...this.getMapStateProtected(mapId).layerOrder].reverse();
     reversedLayers.forEach((layerPath, index) => {
       if (api.maps[mapId].layer.registeredLayers[layerPath]?.olLayer)
         api.maps[mapId].layer.registeredLayers[layerPath].olLayer?.setZIndex(index + 10);

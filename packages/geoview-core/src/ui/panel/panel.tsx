@@ -2,22 +2,17 @@
 /* eslint-disable react/jsx-no-useless-fragment */
 /* eslint-disable no-nested-ternary */
 import { useRef, useState, useEffect, useCallback, ReactNode, KeyboardEvent } from 'react';
-
 import { useTranslation } from 'react-i18next';
-
 import FocusTrap from 'focus-trap-react';
 
 import Card from '@mui/material/Card';
 import CardHeader from '@mui/material/CardHeader';
 import CardContent from '@mui/material/CardContent';
 import { useTheme } from '@mui/material/styles';
-
 import { Cast } from '@/core/types/global-types';
 import { HtmlToReact } from '@/core/containers/html-to-react';
-
 import { api, useGeoViewMapId, useUIActiveTrapGeoView } from '@/app';
 import { EVENT_NAMES } from '@/api/events/event-types';
-
 import { IconButton, CloseIcon, PanelApi, Box } from '..';
 import {
   payloadIsAPanelAction,
@@ -26,10 +21,12 @@ import {
   inKeyfocusPayload,
   PayloadBaseClass,
 } from '@/api/events/payloads';
+import { logger } from '@/core/utils/logger';
+// TODO: Refactor - UI - remove the dependency to the store for this component
+import { useMapStoreActions } from '@/core/stores/store-interface-and-intial-values/map-state';
+
 import { TypeIconButtonProps } from '../icon-button/icon-button-types';
 import { getSxClasses } from './panel-style';
-import { useMapStoreActions } from '@/core/stores/store-interface-and-intial-values/map-state';
-import { logger } from '@/core/utils/logger';
 
 /**
  * Interface for panel properties

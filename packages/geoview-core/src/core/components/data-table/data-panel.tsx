@@ -119,6 +119,7 @@ export function Datapanel() {
         orderedLayerData
       );
 
+      // TODO: Fix the queryStatus below when refactoring will be done for the data-panel (parallel development happening, not doing it now)
       return (
         <LayerList
           layerList={orderedLayerData
@@ -126,6 +127,7 @@ export function Datapanel() {
             .map((layer) => ({
               layerName: layer.layerName ?? '',
               layerPath: layer.layerPath,
+              queryStatus: 'processed',
               layerFeatures: getFeaturesOfLayer(layer.layerPath),
               tooltip: getLayerTooltip(layer.layerName ?? '', layer.layerPath),
               mapFilteredIcon: isMapFilteredSelectedForLayer(layer.layerPath) && (
@@ -146,6 +148,7 @@ export function Datapanel() {
     // Log
     logger.logTraceUseEffect('DATA-PANEL - isLoading', isLoading, selectedLayerPath);
 
+    // TODO: Get rid of this setTimeout of 1 second?
     const clearLoading = setTimeout(() => {
       setIsLoading(false);
     }, 1000);
@@ -158,6 +161,8 @@ export function Datapanel() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // TODO: Use the correct layer title in the title below
+  // TO.DOCONT: Dropped out when reworking the layer index/layer path indexing and not adjusted as parallel development happening on this component
   return (
     <Box sx={sxClasses.dataPanel}>
       <ResponsiveGrid.Root sx={{ pt: 8, pb: 8 }} ref={panelTitleRef}>

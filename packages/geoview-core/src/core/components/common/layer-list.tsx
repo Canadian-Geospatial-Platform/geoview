@@ -2,11 +2,12 @@ import { ReactNode, memo } from 'react';
 import { useTheme } from '@mui/material/styles';
 import { Box, ChevronRightIcon, IconButton, List, ListItem, ListItemButton, ListItemIcon, Paper, Tooltip, Typography } from '@/ui';
 import { getSxClasses } from './layer-list-style';
-import { IconStack } from '@/app';
+import { IconStack, TypeQueryStatus } from '@/app';
 
 export interface LayerListEntry {
   layerName: string;
   layerPath: string;
+  queryStatus: TypeQueryStatus;
   layerFeatures?: ReactNode;
   mapFilteredIcon?: ReactNode;
   tooltip?: ReactNode;
@@ -16,24 +17,49 @@ export interface LayerListEntry {
 interface LayerListProps {
   isEnlargeDataTable: boolean;
   layerList: LayerListEntry[];
-  selectedLayerIndex?: number;
-  selectedLayerPath?: string;
+  selectedLayerPath: string;
   handleListItemClick: (layer: LayerListEntry) => void;
 }
 
 interface LayerListItemProps {
   isSelected: boolean;
+  queryStatus: TypeQueryStatus;
   layer: LayerListEntry;
   handleListItemClick: (layer: LayerListEntry) => void;
   isEnlargeDataTable: boolean;
 }
 
-const LayerListItem = memo(function LayerListItem({ isSelected, layer, handleListItemClick, isEnlargeDataTable }: LayerListItemProps) {
+const LayerListItem = memo(function LayerListItem({
+  isSelected,
+  queryStatus,
+  layer,
+  handleListItemClick,
+  isEnlargeDataTable,
+}: LayerListItemProps) {
   const theme = useTheme();
   const sxClasses = getSxClasses(theme);
 
+  const renderQueryStatusBackground = () => {
+    // TODO: 1752 Fit this queryStatus flag with the layerStatus flag in a uniform manner
+    switch (queryStatus) {
+      case 'init':
+      case 'processing':
+        return sxClasses.backgroundProcessing;
+      case 'error':
+        return sxClasses.backgroundError;
+      default:
+        return 'unset';
+    }
+  };
+
   return (
-    <Paper sx={{ ...sxClasses.paper, border: isSelected ? sxClasses.borderWithIndex : sxClasses.borderNone }}>
+    <Paper
+      sx={{
+        ...sxClasses.paper,
+        border: isSelected ? sxClasses.borderWithIndex : sxClasses.borderNone,
+        backgroundColor: renderQueryStatusBackground(),
+      }}
+    >
       <Tooltip title={layer.tooltip} placement="top" arrow>
         <Box>
           <ListItem disablePadding>
@@ -93,19 +119,20 @@ const LayerListItem = memo(function LayerListItem({ isSelected, layer, handleLis
  * @param {Function} handleListItemClick  Callback function excecuted when list item is clicked.
  * @returns
  */
-export function LayerList({ layerList, isEnlargeDataTable, selectedLayerIndex, handleListItemClick, selectedLayerPath }: LayerListProps) {
+export function LayerList({ layerList, isEnlargeDataTable, selectedLayerPath, handleListItemClick }: LayerListProps) {
   const theme = useTheme();
   const sxClasses = getSxClasses(theme);
 
   return (
     <List sx={sxClasses.list}>
-      {layerList.map((layer, index) => (
+      {layerList.map((layer) => (
         <LayerListItem
           key={layer.layerPath}
           // Reason:- (layer?.numOffeatures ?? 1) > 0
           // Some of layers will not have numOfFeatures, so to make layer look like selected, we need to set default value to 1.
-          // Also we cant set numOfFeature initially, then numOffeatures will be display as sub title in the layer list item.
-          isSelected={(layer?.numOffeatures ?? 1) > 0 && (index === selectedLayerIndex || layer.layerPath === selectedLayerPath)}
+          // Also we cant set numOfFeature initially, then it num of features will be display as sub title.
+          isSelected={(layer?.numOffeatures ?? 1) > 0 && layer.layerPath === selectedLayerPath}
+          queryStatus={layer.queryStatus}
           layer={layer}
           handleListItemClick={handleListItemClick}
           isEnlargeDataTable={isEnlargeDataTable}
@@ -114,8 +141,3 @@ export function LayerList({ layerList, isEnlargeDataTable, selectedLayerIndex, h
     </List>
   );
 }
-
-LayerList.defaultProps = {
-  selectedLayerPath: '',
-  selectedLayerIndex: null,
-};
