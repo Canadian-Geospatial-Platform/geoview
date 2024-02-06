@@ -82,7 +82,7 @@ export class FooterBarApi {
     // find the tab to be selected
     const tabToSelect = this.tabs.find((tab) => tab.id === id);
     if (tabToSelect) {
-      UIEventProcessor.setActiveFooterTab(this.mapId, id);
+      UIEventProcessor.setActiveFooterBarTab(this.mapId, id);
     }
   };
 }
