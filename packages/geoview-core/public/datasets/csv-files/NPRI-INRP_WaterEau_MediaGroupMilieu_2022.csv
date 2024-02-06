@@ -1,0 +1,838 @@
+"Reporting_Year / Année_Déclaration","NPRI_ID / No_INRP","Company_Name / Dénomination_sociale_de_l'entreprise","Facility_Name / Installation","Address / Adresse","City / Ville","Province / Province","Latitude / Latitude","Longitude / Longitude","Datum / Datum","NAICS 4 Code / SCIAN 4 Chiffre","NAICS 4 Sector Name (English) / Nom de secteur SCIAN 4 (Anglais)","NAICS 4 Sector Name (French) / Nom de secteur SCIAN 4 (Français)","NAICS 6 Code / SCIAN 6 Chiffre","NAICS 6 Sector Name (English) / Nom de secteur SCIAN 6 (Anglais)","NAICS 6 Sector Name (French)","Key Industrial Sector (English)","Secteur_Industriel_Clé (French)","Units / Unités","TOTAL_ALL_RELEASES / Rejet_Total_Tout","Symbol / Symbole"
+2022,1,"Alberta-Pacific Forest Industries Inc.","Alberta-Pacific Forest Industries Inc.","","County of Athabasca","AB","54.923116","-112.861867",1983.00,3221,"Pulp, paper and paperboard mills","Usines de pâte à papier, de papier et de carton",322112,"Chemical pulp mills","Usines de pâte chimique","Pulp and Paper","Pâte à papier et papier
+","Tonnes",181.24,1
+2022,99,"Les Mines Agnico Eagle Limitée","Division Laronde","10200 route de Preissac","Rouyn-Noranda","QC","48.25072","-78.44184",1984.00,2122,"Metal ore mining","Extraction de minerais métalliques",212220,"Gold and silver ore mining","Extraction de minerais d'or et d'argent","Mining and Quarrying","Extraction minière et exploitation en carrière
+","Tonnes",243.00,1
+2022,201,"City of Peterborough","PTBO WASTE WATER TREATMENT PLANT","425 Kennedy Road","Peterborough","ON","44.2754","-78.3165",1983.00,2213,"Water, sewage and other systems","Réseaux d'aqueduc et d'égout et autres",221320,"Sewage treatment facilities","Installations d'épuration des eaux usées","Water and Wastewater Systems","Systèmes d'eau et des eaux usées
+","Tonnes",281.60,1
+2022,205,"City of Thunder Bay","Water Pollution Control Plant","901 Atlantic Avenue","Thunder Bay","ON","48.3989","-89.225",1983.00,2213,"Water, sewage and other systems","Réseaux d'aqueduc et d'égout et autres",221320,"Sewage treatment facilities","Installations d'épuration des eaux usées","Water and Wastewater Systems","Systèmes d'eau et des eaux usées
+","Tonnes",86.00,1
+2022,222,"Cytec Canada Inc.","Welland Plant","9061  Garner Road","Niagara Falls","ON","43.04687","-79.15261",1984.00,3259,"Other chemical product manufacturing","Fabrication d'autres produits chimiques",325999,"All other miscellaneous chemical product manufacturing","Fabrication de tous les autres produits chimiques divers","Chemicals","Produits chimiques
+","Tonnes",14.71,1
+2022,223,"Mercer Peace River Pulp Ltd.","Mercer Peace River","11/13/24-085-21-W5","MD of Northern Lights","AB","56.37297","-117.18442",1984.00,3221,"Pulp, paper and paperboard mills","Usines de pâte à papier, de papier et de carton",322112,"Chemical pulp mills","Usines de pâte chimique","Pulp and Paper","Pâte à papier et papier
+","Tonnes",31.33,1
+2022,267,"Capital Power Generation Services Inc.","Genesee Thermal Generating Station","0 50444 Highway 770","Warburg","AB","53.344","-114.305",1983.00,2211,"Electric power generation, transmission and distribution","Production, transport et distribution d'électricité",221112,"Fossil-fuel electric power generation","Production d'électricité à partir de combustibles fossiles","Electricity","Électricité
+","Tonnes",0.35,1
+2022,279,"Kraft Nordic, s.e.c.","Kraft Nordic, s.e.c. - Usine de pâtes kraft de Lebel-sur-Quévillon","30 du Moulin Road","Lebel-sur-Quévillon","QC","49.0254","-76.9538",1983.00,3221,"Pulp, paper and paperboard mills","Usines de pâte à papier, de papier et de carton",322112,"Chemical pulp mills","Usines de pâte chimique","Pulp and Paper","Pâte à papier et papier
+","Tonnes",2.53,1
+2022,403,"Cenovus Energy Inc.","Lloydminster Refinery","5650 52nd Street","Lloydminster","AB","53.2885","-110.0183",1983.00,3241,"Petroleum and coal product manufacturing","Fabrication de produits du pétrole et du charbon",324121,"Asphalt paving mixture and block manufacturing","Fabrication de mélanges d'asphaltage et de pavés d'asphalte","Petroleum and Coal Product Refining and Mfg.","Fabrication et raffinage des produits du pétrole et du charbon
+","Tonnes",7.66,1
+2022,428,"Imperial Oil Resources N.W.T. Limited","Norman Wells Central Processing Facility","General Delivery   tonnes  1001 Canol Drive Drive"," Norman Wells","NT","65.2873","-126.8812",1983.00,2111,"Oil and gas extraction","Extraction de pétrole et de gaz",211110,"Oil and gas extraction (except oil sands)","Extraction de pétrole et de gaz (à l'exception des sables bitumineux)","Conventional Oil and Gas extraction","Extraction de pétrole par des méthodes classiques
+","Tonnes",2.0e-03,1
+2022,479,"Cariboo Pulp and Paper Company","Cariboo Pulp and Paper Company","50 North Star Road","Quesnel","BC","52.998","-122.483",1983.00,3221,"Pulp, paper and paperboard mills","Usines de pâte à papier, de papier et de carton",322112,"Chemical pulp mills","Usines de pâte chimique","Pulp and Paper","Pâte à papier et papier
+","Tonnes",209.01,1
+2022,488,"Ingredion Canada Corporation","Ingredion Canada Corporation","4040 James Street","Cardinal","ON","44.785","-75.3767",1983.00,3112,"Grain and oilseed milling","Mouture de grains céréaliers et de graines oléagineuses",311221,"Wet corn milling","Mouture humide du maïs","Other Manufacturing","Autres fabrication
+","Tonnes",2.72,1
+2022,495,"City of Windsor","Lou Romano Water Reclamation Plant","4155 Ojibway Parkway","Windsor","ON","42.2833","-83.0864",1983.00,2213,"Water, sewage and other systems","Réseaux d'aqueduc et d'égout et autres",221320,"Sewage treatment facilities","Installations d'épuration des eaux usées","Water and Wastewater Systems","Systèmes d'eau et des eaux usées
+","Tonnes",554.16,4
+2022,672,"Mercer Celgar Limited Partnership","Mercer Celgar Limited Partnership","1921 Arrow Lakes Drive","Castlegar","BC","49.3357","-117.728",1983.00,3221,"Pulp, paper and paperboard mills","Usines de pâte à papier, de papier et de carton",322112,"Chemical pulp mills","Usines de pâte chimique","Pulp and Paper","Pâte à papier et papier
+","Tonnes",147.75,1
+2022,770,"City of Ottawa","Robert O. Pickard Environmental Centre","800 Greens Creek Drive","Ottawa","ON","45.4606","-75.5908",1983.00,2213,"Water, sewage and other systems","Réseaux d'aqueduc et d'égout et autres",221320,"Sewage treatment facilities","Installations d'épuration des eaux usées","Water and Wastewater Systems","Systèmes d'eau et des eaux usées
+","Tonnes",5553.21,4
+2022,878,"Millar Western Forest Products Ltd.","Whitecourt Pulp Division","50 Mill Road","Whitecourt","AB","54.14321","-115.69522",1984.00,3221,"Pulp, paper and paperboard mills","Usines de pâte à papier, de papier et de carton",322111,"Mechanical pulp mills","Usines de pâte mécanique","Pulp and Paper","Pâte à papier et papier
+","Tonnes",16.57,1
+2022,928,"Domtar Inc.","Dryden Mill","1  Duke Street","Dryden","ON","49.7831","-92.8472",1983.00,3221,"Pulp, paper and paperboard mills","Usines de pâte à papier, de papier et de carton",322112,"Chemical pulp mills","Usines de pâte chimique","Pulp and Paper","Pâte à papier et papier
+","Tonnes",153.02,1
+2022,929,"Produits forestiers Résolu","Usine de Gatineau","79 Main","Gatineau","QC","45.4808","-75.6556",1983.00,3221,"Pulp, paper and paperboard mills","Usines de pâte à papier, de papier et de carton",322122,"Newsprint mills","Usines de papier journal","Pulp and Paper","Pâte à papier et papier
+","Tonnes",55.03,1
+2022,930,"Produits forestiers Résolu","Resolute Forest Products - Thunder Bay Operations","2001 Neebing  Avenue","Thunder Bay","ON","48.3486","-89.3067",1983.00,3221,"Pulp, paper and paperboard mills","Usines de pâte à papier, de papier et de carton",322112,"Chemical pulp mills","Usines de pâte chimique","Pulp and Paper","Pâte à papier et papier
+","Tonnes",134.22,1
+2022,941,"Lantic Inc. - Vancouver Refinery","Lantic Inc. - Vancouver Refinery","0 123 Rogers Street","Vancouver","BC","49.2841","-123.0802",1983.00,3113,"Sugar and confectionery product manufacturing","Fabrication de sucre et de confiseries",311310,"Sugar manufacturing","Fabrication de sucre","Other Manufacturing","Autres fabrication
+","Tonnes",4.25,1
+2022,947,"Lantic Inc. Taber Factory","Lantic Inc. Taber Beet Sugar Factory","0 5405 64th Street Street","Taber","AB","49.7894","-112.1261",1983.00,3113,"Sugar and confectionery product manufacturing","Fabrication de sucre et de confiseries",311310,"Sugar manufacturing","Fabrication de sucre","Other Manufacturing","Autres fabrication
+","Tonnes",81.16,1
+2022,979,"Produits forestiers Résolu","Usine Kénogami","3750 de Champlain","Saguenay","QC","48.4289","-71.2437",1983.00,3221,"Pulp, paper and paperboard mills","Usines de pâte à papier, de papier et de carton",322122,"Newsprint mills","Usines de papier journal","Pulp and Paper","Pâte à papier et papier
+","Tonnes",32.57,1
+2022,983,"Produits forestiers Résolu","Division Alma","1100 Melanion Street","Alma","QC","48.565","-71.6558",1983.00,3221,"Pulp, paper and paperboard mills","Usines de pâte à papier, de papier et de carton",322111,"Mechanical pulp mills","Usines de pâte mécanique","Pulp and Paper","Pâte à papier et papier
+","Tonnes",157.82,1
+2022,1028,"Alberta Newsprint Co.","ALBERTA NEWSPRINT","43 Highway North","Whitecourt","AB","54.1791","-115.806",1983.00,3221,"Pulp, paper and paperboard mills","Usines de pâte à papier, de papier et de carton",322122,"Newsprint mills","Usines de papier journal","Pulp and Paper","Pâte à papier et papier
+","Tonnes",3.30,1
+2022,1070,"Algoma Steel Inc.","Algoma Steel Inc","105 West Street North","Sault Ste. Marie","ON","46.5208","-84.3697",1983.00,3311,"Iron and steel mills and ferro-alloy manufacturing","Sidérurgie",331110,"Iron and steel mills and ferro-alloy manufacturing","Sidérurgie","Iron and Steel","Fer et acier
+","Tonnes",130.86,1
+2022,1106,"AltaSteel Inc.","AltaSteel Inc.","9401 34th Street","Edmonton","AB","53.5291","-113.3875",1983.00,3311,"Iron and steel mills and ferro-alloy manufacturing","Sidérurgie",331110,"Iron and steel mills and ferro-alloy manufacturing","Sidérurgie","Iron and Steel","Fer et acier
+","Tonnes",0.01,1
+2022,1136,"Bombardier Inc.","Usine St-Laurent","1800 Marcel-Laurin","Saint-Laurent","QC","45.5139","-73.7",1983.00,3364,"Aerospace product and parts manufacturing","Fabrication de produits aérospatiaux et de leurs pièces",336410,"Aerospace product and parts manufacturing","Fabrication de produits aérospatiaux et de leurs pièces","Transportation Equipment Mfg.","Fabrication de matériel de transport
+","Tonnes",4.2109e-03,1
+2022,1147,"Cameco Corporation","Rabbit Lake Operation","2121 11th Street West","Saskatoon","SK","58.1938","-103.7158",1983.00,2122,"Metal ore mining","Extraction de minerais métalliques",212291,"Uranium ore mining","Extraction de minerais d'uranium","Mining and Quarrying","Extraction minière et exploitation en carrière
+","Tonnes",2.937e-03,1
+2022,1148,"Cameco Corporation","Key Lake Operation","2121 11th Street West","Saskatoon","SK","57.2122","-105.6788",1983.00,2122,"Metal ore mining","Extraction de minerais métalliques",212291,"Uranium ore mining","Extraction de minerais d'uranium","Mining and Quarrying","Extraction minière et exploitation en carrière
+","Tonnes",24.10,1
+2022,1149,"Cameco Corporation","McArthur River Operation","2121 11th Street West","Saskatoon","SK","57.7622","-105.05",1983.00,2122,"Metal ore mining","Extraction de minerais métalliques",212291,"Uranium ore mining","Extraction de minerais d'uranium","Mining and Quarrying","Extraction minière et exploitation en carrière
+","Tonnes",2.8e-05,1
+2022,1175,"Nutrien (Canada) Holdings ULC.","Joffre Nitrogen Operations","39015 815 Highway","Lacombe County","AB","52.3221","-113.5166",1983.00,3253,"Pesticide, fertilizer and other agricultural chemical manufacturing","Fabrication de pesticides, d'engrais et d'autres produits chimiques agricoles",325313,"Chemical fertilizer (except potash) manufacturing","Fabrication d'engrais chimiques (sauf la potasse)","Chemicals","Produits chimiques
+","Tonnes",6.8e-03,1
+2022,1185,"Skookumchuck Pulp Inc.","Skookumchuck Operation","4501 Farstad Way","Skookumchuck","BC","49.9151","-115.7579",1983.00,3221,"Pulp, paper and paperboard mills","Usines de pâte à papier, de papier et de carton",322112,"Chemical pulp mills","Usines de pâte chimique","Pulp and Paper","Pâte à papier et papier
+","Tonnes",83.39,1
+2022,1195,"Domtar Inc.","Domtar Usine de Windsor","609 rang 12","Windsor","QC","45.5644","-71.979",1983.00,3221,"Pulp, paper and paperboard mills","Usines de pâte à papier, de papier et de carton",322121,"Paper (except newsprint) mills","Usines de papier (sauf le papier journal)","Pulp and Paper","Pâte à papier et papier
+","Tonnes",136.06,1
+2022,1207,"INVISTA (Canada) Company","INVISTA (Canada) Company-Maitland Site","1400 County #2 Road East","Maitland","ON","44.6606","-75.6017",1983.00,3251,"Basic chemical manufacturing","Fabrication de produits chimiques de base",325190,"Other basic organic chemical manufacturing","Fabrication d'autres produits chimiques organiques de base","Chemicals","Produits chimiques
+","Tonnes",0.04,1
+2022,1221,"Twin Rivers Paper Company Inc.","Edmundston Pulp Mill","27 Rice Street","Edmundston","NB","47.36897","-68.33206",1984.00,3221,"Pulp, paper and paperboard mills","Usines de pâte à papier, de papier et de carton",322112,"Chemical pulp mills","Usines de pâte chimique","Pulp and Paper","Pâte à papier et papier
+","Tonnes",407.08,1
+2022,1233,"Glencore Canada Corporation","Sudbury Operations Mines Mill - Onaping Area","Strathcona Services Bldg Street","Onaping","ON","46.6742","-81.3425",1983.00,2122,"Metal ore mining","Extraction de minerais métalliques",212232,"Nickel-copper ore mining","Extraction de minerais de nickel-cuivre","Mining and Quarrying","Extraction minière et exploitation en carrière
+","Tonnes",54.12,1
+2022,1236,"Glencore Canada Corporation","Sudbury Integrated Nickel Operations Smelter","2 Longyear Drive","Falconbridge","ON","46.5775","-80.8042",1983.00,3314,"Non-ferrous metal (except aluminum) production and processing","Production et transformation de métaux non ferreux (sauf l'aluminium)",331410,"Non-ferrous metal (except aluminum) smelting and refining","Fonte et affinage de métaux non ferreux (sauf l'aluminium)","Metals (Except Aluminum and Iron and Steel)","Métaux (sauf aluminium et fer et acier)
+","Tonnes",1.47,1
+2022,1257,"Canfor Pulp Ltd.","Canfor Taylor Pulp","0 8300 Cherry Avenue East","Taylor","BC","56.145","-120.651",1983.00,3221,"Pulp, paper and paperboard mills","Usines de pâte à papier, de papier et de carton",322111,"Mechanical pulp mills","Usines de pâte mécanique","Pulp and Paper","Pâte à papier et papier
+","Tonnes",0.19,1
+2022,1266,"Catalyst Paper Corporation","Crofton Division","8541 Hay Road North","Crofton","BC","48.875","-123.645",1983.00,3221,"Pulp, paper and paperboard mills","Usines de pâte à papier, de papier et de carton",322112,"Chemical pulp mills","Usines de pâte chimique","Pulp and Paper","Pâte à papier et papier
+","Tonnes",192.38,1
+2022,1329,"ContiTech Canada Inc.","Usine Granford","127 rang Parent","St-Alphonse de Granby","QC","45.34317","-72.80522",1984.00,3262,"Rubber product manufacturing","Fabrication de produits en caoutchouc",326220,"Rubber and plastic hose and belting manufacturing","Fabrication de tuyaux souples et de courroies en caoutchouc et en plastique","Plastics and Rubber","Plastiques et caoutchouc
+","Tonnes",0.11,1
+2022,1338,"Greater Vancouver Sewerage and Drainage District","Annacis Island Wastewater Treatment Plant","1299  Derwent Way","Delta","BC","49.1661","-122.952",1983.00,2213,"Water, sewage and other systems","Réseaux d'aqueduc et d'égout et autres",221320,"Sewage treatment facilities","Installations d'épuration des eaux usées","Water and Wastewater Systems","Systèmes d'eau et des eaux usées
+","Tonnes",7219.60,4
+2022,1340,"Greater Vancouver Sewerage and Drainage District","Lulu Island Wastewater Treatment Plant","13500  Gilbert Road","Richmond","BC","49.1147","-123.145",1983.00,2213,"Water, sewage and other systems","Réseaux d'aqueduc et d'égout et autres",221320,"Sewage treatment facilities","Installations d'épuration des eaux usées","Water and Wastewater Systems","Systèmes d'eau et des eaux usées
+","Tonnes",1034.87,3
+2022,1342,"Greater Vancouver Sewerage and Drainage District","Lions Gate Wastewater Treatment Plant","101  Bridge Road","West Vancouver","BC","49.3195","-123.136",1983.00,2213,"Water, sewage and other systems","Réseaux d'aqueduc et d'égout et autres",221320,"Sewage treatment facilities","Installations d'épuration des eaux usées","Water and Wastewater Systems","Systèmes d'eau et des eaux usées
+","Tonnes",766.72,4
+2022,1383,"Nanaimo Forest Products Ltd.","Harmac Pacific Operations","1000 Wave Place","Nanaimo","BC","49.1369","-123.8564",1983.00,3221,"Pulp, paper and paperboard mills","Usines de pâte à papier, de papier et de carton",322112,"Chemical pulp mills","Usines de pâte chimique","Pulp and Paper","Pâte à papier et papier
+","Tonnes",153.57,1
+2022,1419,"Howe Sound Pulp & Paper Corporation","Howe Sound Pulp and Paper Mill","3838 Port Mellon Highway","Port Mellon","BC","49.5237","-123.4837",1983.00,3221,"Pulp, paper and paperboard mills","Usines de pâte à papier, de papier et de carton",322112,"Chemical pulp mills","Usines de pâte chimique","Pulp and Paper","Pâte à papier et papier
+","Tonnes",55.50,1
+2022,1464,"Imperial Oil","Sarnia Chemical Plant","602  Christina Street South","Sarnia","ON","42.9544","-82.4153",1983.00,3251,"Basic chemical manufacturing","Fabrication de produits chimiques de base",325110,"Petrochemical manufacturing","Fabrication de produits pétrochimiques","Chemicals","Produits chimiques
+","Tonnes",2.02,1
+2022,1465,"Vale Canada Limited","Clarabelle Mill","1 1701 Elm  Street","Copper Cliff","ON","46.495","-81.0561",1983.00,2122,"Metal ore mining","Extraction de minerais métalliques",212232,"Nickel-copper ore mining","Extraction de minerais de nickel-cuivre","Mining and Quarrying","Extraction minière et exploitation en carrière
+","Tonnes",116.55,1
+2022,1471,"Vale Canada Limited","Port Colborne Refinery","187 Davis Street","Port Colborne","ON","42.8826","-79.2405",1983.00,3314,"Non-ferrous metal (except aluminum) production and processing","Production et transformation de métaux non ferreux (sauf l'aluminium)",331410,"Non-ferrous metal (except aluminum) smelting and refining","Fonte et affinage de métaux non ferreux (sauf l'aluminium)","Metals (Except Aluminum and Iron and Steel)","Métaux (sauf aluminium et fer et acier)
+","Tonnes",1.73,1
+2022,1473,"Vale Canada Ltd","Thompson Operations","1 Inco Road","Thompson","MB","55.71286","-97.85106",1984.00,2122,"Metal ore mining","Extraction de minerais métalliques",212232,"Nickel-copper ore mining","Extraction de minerais de nickel-cuivre","Mining and Quarrying","Extraction minière et exploitation en carrière
+","Tonnes",6.78,1
+2022,1492,"Arkema Canada Inc.","Usine de Bécancour","655 Alphonse-Deshaies Boulevard","Bécancour","QC","46.3841","-72.3735",1983.00,3251,"Basic chemical manufacturing","Fabrication de produits chimiques de base",325189,"All other basic inorganic chemical manufacturing","Fabrication de tous les autres produits chimiques inorganiques de base","Chemicals","Produits chimiques
+","Tonnes",0.08,1
+2022,1525,"Papier Masson Ltée.","PAPIERS WHITE BIRCHmc - DIVISION PAPIER MASSON LTÉE","2 Chemin Montréal ouest Road","Gatineau","QC","45.5417","-75.425",1983.00,3221,"Pulp, paper and paperboard mills","Usines de pâte à papier, de papier et de carton",322122,"Newsprint mills","Usines de papier journal","Pulp and Paper","Pâte à papier et papier
+","Tonnes",0.01,1
+2022,1528,"Fortress Cellulose Spécialisée","Usine de Thurso","451 Victoria Street","Thurso","QC","45.5985","-75.2562",1983.00,3221,"Pulp, paper and paperboard mills","Usines de pâte à papier, de papier et de carton",322112,"Chemical pulp mills","Usines de pâte chimique","Pulp and Paper","Pâte à papier et papier
+","Tonnes",1.25,1
+2022,1561,"KRONOS Canada, Inc.","KRONOS Canada, Inc.","3390 Marie-Victorin Boulevard","Varennes","QC","45.7125","-73.425",1983.00,3251,"Basic chemical manufacturing","Fabrication de produits chimiques de base",325189,"All other basic inorganic chemical manufacturing","Fabrication de tous les autres produits chimiques inorganiques de base","Chemicals","Produits chimiques
+","Tonnes",20.60,1
+2022,1568,"Agnico Eagle Mines","Macassa Mine","66 Highway","Kirkland Lake","ON","48.13032","-80.08734",1984.00,2122,"Metal ore mining","Extraction de minerais métalliques",212220,"Gold and silver ore mining","Extraction de minerais d'or et d'argent","Mining and Quarrying","Extraction minière et exploitation en carrière
+","Tonnes",95.67,1
+2022,1572,"Lake Utopia Paper A Division of J.D. Irving, Limited","Lake Utopia Paper A Division of J.D. Irving, Limited","0 600 Route 785","Utopia","NB","45.1567","-66.7714",1983.00,3221,"Pulp, paper and paperboard mills","Usines de pâte à papier, de papier et de carton",322130,"Paperboard mills","Usines de carton","Pulp and Paper","Pâte à papier et papier
+","Tonnes",0.06,1
+2022,1593,"Catalyst Paper Corporation","Port Alberni Division","4000 Stamp Avenue","Port Alberni","BC","49.2478","-124.811",1983.00,3221,"Pulp, paper and paperboard mills","Usines de pâte à papier, de papier et de carton",322121,"Paper (except newsprint) mills","Usines de papier (sauf le papier journal)","Pulp and Paper","Pâte à papier et papier
+","Tonnes",290.01,1
+2022,1608,"Iamgold Corporation","La mine Doyon","2 Arthur Doyon Road","Preissac","QC","48.25856","-78.52673",1984.00,2122,"Metal ore mining","Extraction de minerais métalliques",212220,"Gold and silver ore mining","Extraction de minerais d'or et d'argent","Mining and Quarrying","Extraction minière et exploitation en carrière
+","Tonnes",37.95,1
+2022,1611,"Glencore Canada Corporation","Mine Matagami","500 Industriel Boulevard","Matagami","QC","49.75421","-77.65945",1984.00,2122,"Metal ore mining","Extraction de minerais métalliques",212233,"Copper-zinc ore mining","Extraction de minerais de cuivre-zinc","Mining and Quarrying","Extraction minière et exploitation en carrière
+","Tonnes",2.17,1
+2022,1651,"Gerdau Ameristeel Corporation","Gerdau Ameristeel Corporation, Manitoba Mill","27 Main Street","Selkirk","MB","50.1302","-96.9013",1983.00,3311,"Iron and steel mills and ferro-alloy manufacturing","Sidérurgie",331110,"Iron and steel mills and ferro-alloy manufacturing","Sidérurgie","Iron and Steel","Fer et acier
+","Tonnes",0.73,1
+2022,1696,"New Brunswick Power Corporation","Coleson Cove Generating Station","4077 King William Road","Saint John","NB","45.1534","-66.2025",1983.00,2211,"Electric power generation, transmission and distribution","Production, transport et distribution d'électricité",221112,"Fossil-fuel electric power generation","Production d'électricité à partir de combustibles fossiles","Electricity","Électricité
+","Tonnes",0.01,1
+2022,1698,"New Brunswick Power Corporation","Belledune Generating Station","1558 Main Street","Belledune","NB","47.9058","-65.867",1983.00,2211,"Electric power generation, transmission and distribution","Production, transport et distribution d'électricité",221112,"Fossil-fuel electric power generation","Production d'électricité à partir de combustibles fossiles","Electricity","Électricité
+","Tonnes",0.03,1
+2022,1710,"New Brunswick Power Corporation","Point Lepreau Generating Station","122 County Line Road","Maces Bay","NB","45.069","-66.4556",1983.00,2211,"Electric power generation, transmission and distribution","Production, transport et distribution d'électricité",221113,"Nuclear electric power generation","Production d'électricité d'origine nucléaire","Electricity","Électricité
+","Tonnes",0.08,1
+2022,1788,"NOVA Chemicals Corporation (OBPS)","Moore Site","510 Moore Line","Mooretown","ON","42.8489","-82.4244",1983.00,3252,"Resin, synthetic rubber, and artificial and synthetic fibres and filaments manufacturing","Fabrication de résines, de caoutchouc synthétique et de fibres et de filaments artificiels et synthétiques",325210,"Resin and synthetic rubber manufacturing","Fabrication de résines et de caoutchouc synthétique","Chemicals","Produits chimiques
+","Tonnes",0.06,1
+2022,1797,"Canfor Pulp Ltd.","Northwood Pulp Mill","5353 Northwood Pulp Mill Road","Prince George","BC","53.9779","-122.695",1983.00,3221,"Pulp, paper and paperboard mills","Usines de pâte à papier, de papier et de carton",322112,"Chemical pulp mills","Usines de pâte chimique","Pulp and Paper","Pâte à papier et papier
+","Tonnes",121.06,1
+2022,1872,"Cascades Canada ULC","CASCADES EMBALLAGE CARTON-CAISSE CABANO","520 Commerciale  North","Temiscouata-sur-le-Lac","QC","47.67","-68.8625",1983.00,3221,"Pulp, paper and paperboard mills","Usines de pâte à papier, de papier et de carton",322121,"Paper (except newsprint) mills","Usines de papier (sauf le papier journal)","Pulp and Paper","Pâte à papier et papier
+","Tonnes",1.33,1
+2022,1875,"PRODUITS KRUGER Inc.","Produits Kruger Inc.","100 1 ère avenue Avenue","Crabtree","QC","45.9633","-73.47",1983.00,3221,"Pulp, paper and paperboard mills","Usines de pâte à papier, de papier et de carton",322121,"Paper (except newsprint) mills","Usines de papier (sauf le papier journal)","Pulp and Paper","Pâte à papier et papier
+","Tonnes",15.30,1
+2022,1941,"GOLDCORP CANADA LTD","Porcupine Gold Mines","4315 Gold Mine Road","South Porcupine","ON","48.4633","-81.2475",1983.00,2122,"Metal ore mining","Extraction de minerais métalliques",212220,"Gold and silver ore mining","Extraction de minerais d'or et d'argent","Mining and Quarrying","Extraction minière et exploitation en carrière
+","Tonnes",0.31,1
+2022,1947,"Pinty's Delicious Foods","Port Colborne Poultry Ltd","2276 Second Concession Road","Port Colborne","ON","42.9108","-79.1879",1983.00,3116,"Meat product manufacturing","Fabrication de produits de viande",311615,"Poultry slaughtering and processing","Abattage et transformation de la volaille","Other Manufacturing","Autres fabrication
+","Tonnes",9.16,1
+2022,1961,"Pratt & Whitney Canada Inc.","Établissement 01","1000 Marie-Victorin","Longueuil","QC","45.5531","-73.495",1983.00,3364,"Aerospace product and parts manufacturing","Fabrication de produits aérospatiaux et de leurs pièces",336410,"Aerospace product and parts manufacturing","Fabrication de produits aérospatiaux et de leurs pièces","Transportation Equipment Mfg.","Fabrication de matériel de transport
+","Tonnes",8.0e-03,1
+2022,1979,"Produits forestiers Résolu","Papeterie de Dolbeau","1 4ième Avenue","Dolbeau-Mistassini","QC","48.8791","-72.2189",1983.00,3221,"Pulp, paper and paperboard mills","Usines de pâte à papier, de papier et de carton",322121,"Paper (except newsprint) mills","Usines de papier (sauf le papier journal)","Pulp and Paper","Pâte à papier et papier
+","Tonnes",114.84,1
+2022,2000,"ArcelorMittal Exploitation Minière Canada s.e.n.c.","Usine de Bouletage de Port-Cartier","186 Portage des Mousses","Port-Cartier","QC","50.0334","-66.791",1983.00,2122,"Metal ore mining","Extraction de minerais métalliques",212210,"Iron ore mining","Extraction de minerais de fer","Mining and Quarrying","Extraction minière et exploitation en carrière
+","Tonnes",0.63,1
+2022,2038,"Ne pas prendre - Alcoa Canada Co.","Aluminerie de Baie-Comeau","0 100 Maritime Route","Baie-Comeau","QC","49.2583","-68.1461",1983.00,3313,"Alumina and aluminum production and processing","Production et transformation d'alumine et d'aluminium",331313,"Primary production of alumina and aluminum","Production primaire d'alumine et d'aluminium","Aluminum","Aluminum","Tonnes",1.045e-04,1
+2022,2051,"Canadian Kraft Paper Industries Ltd.","Canadian Kraft Paper Industries Ltd.","1 Kraft Rd., Highway 10 North","The Pas","MB","53.860974","-101.213325",1983.00,3221,"Pulp, paper and paperboard mills","Usines de pâte à papier, de papier et de carton",322121,"Paper (except newsprint) mills","Usines de papier (sauf le papier journal)","Pulp and Paper","Pâte à papier et papier
+","Tonnes",59.59,1
+2022,2068,"Darling International Canada Inc.","Moorefield","8406 Wellington County Road #7, RR #1 Road","Moorefield","ON","43.8144","-80.7153",1983.00,3116,"Meat product manufacturing","Fabrication de produits de viande",311614,"Rendering and meat processing from carcasses","Fonte de graisses animales et transformation de la viande provenant de carcasses","Other Manufacturing","Autres fabrication
+","Tonnes",0.20,1
+2022,2100,"Magris Ressources","La Mine Niobec","3400 du Columbium Road","Saint-Honoré","QC","48.5322","-71.1578",1983.00,2122,"Metal ore mining","Extraction de minerais métalliques",212299,"All other metal ore mining","Extraction de tous les autres minerais métalliques","Mining and Quarrying","Extraction minière et exploitation en carrière
+","Tonnes",131.90,1
+2022,2134,"Nutrien (Canada) Holdings ULC.","Redwater Fertilizer Operations","56225 SH643","Sturgeon County","AB","53.8416","-113.0979",1983.00,3253,"Pesticide, fertilizer and other agricultural chemical manufacturing","Fabrication de pesticides, d'engrais et d'autres produits chimiques agricoles",325313,"Chemical fertilizer (except potash) manufacturing","Fabrication d'engrais chimiques (sauf la potasse)","Chemicals","Produits chimiques
+","Tonnes",21.14,1
+2022,2173,"Produits Forestiers GreenFirst (QC) Inc. / GreenFirst Forest Products (QC) Inc.","Kapuskasing Operations","1 Government Road","Kapuskasing","ON","49.41","-82.4239",1983.00,3221,"Pulp, paper and paperboard mills","Usines de pâte à papier, de papier et de carton",322122,"Newsprint mills","Usines de papier journal","Pulp and Paper","Pâte à papier et papier
+","Tonnes",7.97,1
+2022,2181,"AV Group NB Inc. - Nackawic Mill","Nackawic Mill","103 Pinder Road","Nackawic","NB","46.0111","-67.2265",1983.00,3221,"Pulp, paper and paperboard mills","Usines de pâte à papier, de papier et de carton",322112,"Chemical pulp mills","Usines de pâte chimique","Pulp and Paper","Pâte à papier et papier
+","Tonnes",188.08,1
+2022,2230,"Suncor Energy Oil Sands Limited Partnership","Suncor Energy Inc. Oil Sands","1 Tar Island","Fort McMurray","AB","57.0033","-111.4661",1983.00,2111,"Oil and gas extraction","Extraction de pétrole et de gaz",211142,"Mined oil sands extraction","Extraction minière de sables bitumineux","Non-Conventional Oil Extraction (including Oilsands and Heavy Oil)","Extraction de pétrole par des méthodes non classiques (incluant sables bitumineux et huile loudre)
+","Tonnes",6.75,1
+2022,2233,"Terra International (Canada) Inc.","CF Industries Courtright Nitrogen Complex","161 Bickford Line","Courtright","ON","42.76496","-82.45172",1984.00,3253,"Pesticide, fertilizer and other agricultural chemical manufacturing","Fabrication de pesticides, d'engrais et d'autres produits chimiques agricoles",325313,"Chemical fertilizer (except potash) manufacturing","Fabrication d'engrais chimiques (sauf la potasse)","Chemicals","Produits chimiques
+","Tonnes",27.39,1
+2022,2238,"City of Toronto","Humber Treatment Plant","130 The Queensway","Toronto","ON","43.6333","-79.4806",1983.00,2213,"Water, sewage and other systems","Réseaux d'aqueduc et d'égout et autres",221320,"Sewage treatment facilities","Installations d'épuration des eaux usées","Water and Wastewater Systems","Systèmes d'eau et des eaux usées
+","Tonnes",4891.08,3
+2022,2240,"City of Toronto","Ashbridges Bay Treatment Plant","9 Leslie Street","Toronto","ON","43.6569","-79.3194",1983.00,2213,"Water, sewage and other systems","Réseaux d'aqueduc et d'égout et autres",221320,"Sewage treatment facilities","Installations d'épuration des eaux usées","Water and Wastewater Systems","Systèmes d'eau et des eaux usées
+","Tonnes",16209.77,5
+2022,2274,"Syncrude Canada Ltd.","Syncrude Canada Ltd","Highway 63 Highway North","Fort McMurray","AB","57.0405","-111.6192",1983.00,2111,"Oil and gas extraction","Extraction de pétrole et de gaz",211142,"Mined oil sands extraction","Extraction minière de sables bitumineux","Non-Conventional Oil Extraction (including Oilsands and Heavy Oil)","Extraction de pétrole par des méthodes non classiques (incluant sables bitumineux et huile loudre)
+","Tonnes",0.86,1
+2022,2284,"TransAlta Generation Partnership","Sundance Thermal Electric Power Generating Plant","Site 4, Box 1, RR1","Duffield","AB","53.5085","-114.5571",1983.00,2211,"Electric power generation, transmission and distribution","Production, transport et distribution d'électricité",221112,"Fossil-fuel electric power generation","Production d'électricité à partir de combustibles fossiles","Electricity","Électricité
+","Tonnes",0.01,1
+2022,2372,"Myra Falls Mine Ltd","Myra Falls Mine Ltd","1 Westmin Road Highway","Campbell River","BC","49.5772","-125.602",1983.00,2122,"Metal ore mining","Extraction de minerais métalliques",212233,"Copper-zinc ore mining","Extraction de minerais de cuivre-zinc","Mining and Quarrying","Extraction minière et exploitation en carrière
+","Tonnes",9.07,1
+2022,2461,"Mintech Canada Ltd.","Usine de PCC de Windsor","609 12th","Windsor","QC","45.5605","-71.976",1983.00,3279,"Other non-metallic mineral product manufacturing","Fabrication d'autres produits minéraux non métalliques",327990,"All other non-metallic mineral product manufacturing","Fabrication de tous les autres produits minéraux non métalliques","Cement, Lime and Other Non-Metallic Minerals","Ciment, chaux et autres produits minéraux non métalliques
+","Tonnes",3.75,1
+2022,2478,"Stella-Jones Inc.","Masson-Angers","426  de Montréal","Gatineau","QC","45.5503","-75.3867",1983.00,3211,"Sawmills and wood preservation","Scieries et préservation du bois",321114,"Wood preservation","Préservation du bois","Wood Products","Produits en bois
+","Tonnes",1.4447e-03,1
+2022,2502,"Kruger Wayagamack S.E.C.","Kruger Wayagamack Inc.","1 Ile de la Potherie Street","Trois-Rivières","QC","46.3583","-72.5185",1983.00,3221,"Pulp, paper and paperboard mills","Usines de pâte à papier, de papier et de carton",322121,"Paper (except newsprint) mills","Usines de papier (sauf le papier journal)","Pulp and Paper","Pâte à papier et papier
+","Tonnes",64.00,1
+2022,2515,"Koch Fertilizer Canada, ULC","Koch Fertilizer Canada, ULC","1400 17th Street East","Brandon","MB","49.8309","-99.9078",1983.00,3253,"Pesticide, fertilizer and other agricultural chemical manufacturing","Fabrication de pesticides, d'engrais et d'autres produits chimiques agricoles",325313,"Chemical fertilizer (except potash) manufacturing","Fabrication d'engrais chimiques (sauf la potasse)","Chemicals","Produits chimiques
+","Tonnes",19.95,1
+2022,2553,"West Fraser Mills Ltd.","Quesnel River Pulp, a division of West Fraser Mills Ltd.","1000 Finning Road","Quesnel","BC","53.00666","-122.49816",1983.00,3221,"Pulp, paper and paperboard mills","Usines de pâte à papier, de papier et de carton",322111,"Mechanical pulp mills","Usines de pâte mécanique","Pulp and Paper","Pâte à papier et papier
+","Tonnes",31.00,1
+2022,2560,"Stella-Jones Inc.","Stella-Jones Inc. - Guelph Plant","7818 Wellington Rd. 22","Guelph","ON","43.6584","-80.3003",1983.00,3211,"Sawmills and wood preservation","Scieries et préservation du bois",321114,"Wood preservation","Préservation du bois","Wood Products","Produits en bois
+","Tonnes",3.1757e-03,1
+2022,2604,"Irving Pulp & Paper, Limited","Irving Pulp & Paper, Limited","408 Mill Street","Saint John","NB","45.262","-66.0924",1983.00,3221,"Pulp, paper and paperboard mills","Usines de pâte à papier, de papier et de carton",322112,"Chemical pulp mills","Usines de pâte chimique","Pulp and Paper","Pâte à papier et papier
+","Tonnes",169.02,1
+2022,2607,"AV Terrace Bay Inc.","AV Terrace Bay","21 Mill Road","Terrace Bay","ON","48.7965","-87.1039",1983.00,3221,"Pulp, paper and paperboard mills","Usines de pâte à papier, de papier et de carton",322112,"Chemical pulp mills","Usines de pâte chimique","Pulp and Paper","Pâte à papier et papier
+","Tonnes",155.44,1
+2022,2638,"City of Regina","Wastewater Facility","100 Fleming  Road","Regina","SK","50.47","-104.744",1983.00,2213,"Water, sewage and other systems","Réseaux d'aqueduc et d'égout et autres",221320,"Sewage treatment facilities","Installations d'épuration des eaux usées","Water and Wastewater Systems","Systèmes d'eau et des eaux usées
+","Tonnes",799.24,4
+2022,2669,"Prairie Forest Products","PRAIRIE FOREST PRODUCTS - NEEPAWA","205 16 Highway West","Neepawa","MB","50.2277","-99.5073",1983.00,3211,"Sawmills and wood preservation","Scieries et préservation du bois",321114,"Wood preservation","Préservation du bois","Wood Products","Produits en bois
+","Tonnes",1.1066e-03,1
+2022,2710,"Evolution Mining Gold Operations Ltd.","Red Lake Operation","15 Eric Radford Way","Balmertown","ON","51.06183","-93.74323",1984.00,2122,"Metal ore mining","Extraction de minerais métalliques",212220,"Gold and silver ore mining","Extraction de minerais d'or et d'argent","Mining and Quarrying","Extraction minière et exploitation en carrière
+","Tonnes",165.76,1
+2022,2749,"City of Medicine Hat","Wastewater Treatment Plant","580 1st  Street Southeast","Medicine Hat","AB","50.05","-110.6417",1983.00,2213,"Water, sewage and other systems","Réseaux d'aqueduc et d'égout et autres",221320,"Sewage treatment facilities","Installations d'épuration des eaux usées","Water and Wastewater Systems","Systèmes d'eau et des eaux usées
+","Tonnes",581.50,4
+2022,2776,"Parkland Refining (B.C.) Ltd.","Burnaby Refinery","355 Willingdon Avenue North","Burnaby","BC","49.28869","-123.00575",1983.00,3241,"Petroleum and coal product manufacturing","Fabrication de produits du pétrole et du charbon",324110,"Petroleum refineries","Raffineries de pétrole","Petroleum and Coal Product Refining and Mfg.","Fabrication et raffinage des produits du pétrole et du charbon
+","Tonnes",0.63,1
+2022,2788,"Rio Tinto Alcan Inc","Rio Tinto Alcan Inc.","1 Smeltersite Road","Kitimat","BC","54.0102","-128.7036",1983.00,3313,"Alumina and aluminum production and processing","Production et transformation d'alumine et d'aluminium",331313,"Primary production of alumina and aluminum","Production primaire d'alumine et d'aluminium","Aluminum","Aluminum","Tonnes",2.250785e-03,1
+2022,2815,"Glencore","Kidd Metallurgical Site","Suite 6900 10050 Highway 101 East Highway East","Timmins/District of Cochrane","ON","48.5493","-81.078",1983.00,2122,"Metal ore mining","Extraction de minerais métalliques",212233,"Copper-zinc ore mining","Extraction de minerais de cuivre-zinc","Mining and Quarrying","Extraction minière et exploitation en carrière
+","Tonnes",77.17,1
+2022,2875,"International Paper Company","International Paper Canadian Pulp Holdings ULC","10 km SE on Resources Road","Grande Prairie","AB","55.0712","-118.6912",1983.00,3221,"Pulp, paper and paperboard mills","Usines de pâte à papier, de papier et de carton",322112,"Chemical pulp mills","Usines de pâte chimique","Pulp and Paper","Pâte à papier et papier
+","Tonnes",57.50,1
+2022,2912,"Stella-Jones Inc.","Prince George Plant","7177 Pacific Street","Prince George","BC","53.8543","-122.7312",1983.00,3211,"Sawmills and wood preservation","Scieries et préservation du bois",321114,"Wood preservation","Préservation du bois","Wood Products","Produits en bois
+","Tonnes",2.670196e-03,1
+2022,2924,"Kruger inc","Kamloops Mill (SFO)","2005 Mission Flats Road","Kamloops","BC","50.6861","-120.4037",1983.00,3221,"Pulp, paper and paperboard mills","Usines de pâte à papier, de papier et de carton",322112,"Chemical pulp mills","Usines de pâte chimique","Pulp and Paper","Pâte à papier et papier
+","Tonnes",173.94,1
+2022,2935,"Mines d'Or Wesdome limitée","Complexe minier Kiena","950 Kienawisik Road","Val-d'Or","QC","48.12065","-77.91646",1984.00,2122,"Metal ore mining","Extraction de minerais métalliques",212220,"Gold and silver ore mining","Extraction de minerais d'or et d'argent","Mining and Quarrying","Extraction minière et exploitation en carrière
+","Tonnes",5.22,1
+2022,2938,"Société en commandite Revenu Noranda","SOCIÉTÉ EN COMMANDITE REVENU NORANDA - VALLEYFIELD","860  Gérard Cadieux Boulevard","Salaberry de Valleyfield","QC","45.2283","-74.0981",1983.00,3314,"Non-ferrous metal (except aluminum) production and processing","Production et transformation de métaux non ferreux (sauf l'aluminium)",331410,"Non-ferrous metal (except aluminum) smelting and refining","Fonte et affinage de métaux non ferreux (sauf l'aluminium)","Metals (Except Aluminum and Iron and Steel)","Métaux (sauf aluminium et fer et acier)
+","Tonnes",2.11,1
+2022,2948,"Rayonier A.M. Canada G.P.","Site de Témiscaming","33 Kipawa Road","Témiscaming","QC","46.7111","-79.0967",1983.00,3221,"Pulp, paper and paperboard mills","Usines de pâte à papier, de papier et de carton",322112,"Chemical pulp mills","Usines de pâte chimique","Pulp and Paper","Pâte à papier et papier
+","Tonnes",49.07,1
+2022,2960,"Shell Canada Products","Shell Scotford Refinery","55522 Range Road 214","Fort Saskatchewan","AB","53.7959","-113.0996",1983.00,3241,"Petroleum and coal product manufacturing","Fabrication de produits du pétrole et du charbon",324110,"Petroleum refineries","Raffineries de pétrole","Petroleum and Coal Product Refining and Mfg.","Fabrication et raffinage des produits du pétrole et du charbon
+","Tonnes",0.13,1
+2022,2984,"Stelco Inc.","Hamilton","386 Wilcox Street","Hamilton","ON","43.26926","-79.8246",1984.00,3311,"Iron and steel mills and ferro-alloy manufacturing","Sidérurgie",331110,"Iron and steel mills and ferro-alloy manufacturing","Sidérurgie","Iron and Steel","Fer et acier
+","Tonnes",1.08,1
+2022,2986,"ArcelorMittal Produits Longs Canada s.e.n.c","ArcelorMittal Contrecoeur Ouest","2050 Route des Aciéries","Contrecoeur","QC","45.8206","-73.2661",1983.00,3311,"Iron and steel mills and ferro-alloy manufacturing","Sidérurgie",331110,"Iron and steel mills and ferro-alloy manufacturing","Sidérurgie","Iron and Steel","Fer et acier
+","Tonnes",0.19,1
+2022,2991,"West Fraser Mills Ltd.","Hinton Pulp, a division of West Fraser Mills Ltd.","760 Switzer Drive","Hinton","AB","53.4133","-117.5706",1983.00,3221,"Pulp, paper and paperboard mills","Usines de pâte à papier, de papier et de carton",322112,"Chemical pulp mills","Usines de pâte chimique","Pulp and Paper","Pâte à papier et papier
+","Tonnes",177.12,1
+2022,3071,"Suncor Energy Products Partnership","Sarnia Refinery","1900 River Road","Sarnia","ON","42.9306","-82.4433",1983.00,3241,"Petroleum and coal product manufacturing","Fabrication de produits du pétrole et du charbon",324110,"Petroleum refineries","Raffineries de pétrole","Petroleum and Coal Product Refining and Mfg.","Fabrication et raffinage des produits du pétrole et du charbon
+","Tonnes",11.23,1
+2022,3140,"Compagnie WestRock du Canada Corp.","Usine de La Tuque","1000 Chemin de l'Usine","La Tuque","QC","47.45","-72.7917",1983.00,3221,"Pulp, paper and paperboard mills","Usines de pâte à papier, de papier et de carton",322130,"Paperboard mills","Usines de carton","Pulp and Paper","Pâte à papier et papier
+","Tonnes",92.42,1
+2022,3147,"Canadian Nuclear Laboratories","Chalk River Laboratories","286 Plant Road","Chalk River","ON","46.0554","-77.3628",1983.00,5419,"Other professional, scientific and technical services","Autres services professionnels, scientifiques et techniques",541990,"All other professional, scientific and technical services","Tous les autres services professionnels, scientifiques et techniques","Other (Except Manufacturing)","Autres (sauf fabrication)
+","Tonnes",1.196e-04,1
+2022,3161,"Ontario Power Generation Inc.","Pickering Nuclear - East Complex","1675 Montgomery Park Road Road","Pickering","ON","43.8104","-79.0676",1983.00,2211,"Electric power generation, transmission and distribution","Production, transport et distribution d'électricité",221113,"Nuclear electric power generation","Production d'électricité d'origine nucléaire","Electricity","Électricité
+","Tonnes",0.95,1
+2022,3163,"Ontario Power Generation Inc.","Darlington Nuclear","1 Holt Road","Bowmanville","ON","43.8681","-78.725",1983.00,2211,"Electric power generation, transmission and distribution","Production, transport et distribution d'électricité",221113,"Nuclear electric power generation","Production d'électricité d'origine nucléaire","Electricity","Électricité
+","Tonnes",2.13,1
+2022,3185,"Domtar Inc.","Espanola Mill","1 Station Road","Espanola","ON","46.2681","-81.7683",1983.00,3221,"Pulp, paper and paperboard mills","Usines de pâte à papier, de papier et de carton",322121,"Paper (except newsprint) mills","Usines de papier (sauf le papier journal)","Pulp and Paper","Pâte à papier et papier
+","Tonnes",105.30,1
+2022,3197,"Williams Operating Corporation","Williams Mine","3km West of Junction Hwy 17 and 614 Highway West","Marathon","ON","48.6942","-85.9188",1983.00,2122,"Metal ore mining","Extraction de minerais métalliques",212220,"Gold and silver ore mining","Extraction de minerais d'or et d'argent","Mining and Quarrying","Extraction minière et exploitation en carrière
+","Tonnes",360.54,1
+2022,3238,"Ontario Power Generation Inc.","Atikokan Generating Station","15202  622 Highway","Atikokan","ON","48.8361","-91.5656",1983.00,2211,"Electric power generation, transmission and distribution","Production, transport et distribution d'électricité",221119,"Other electric power generation","Autres activités de production d'électricité","Electricity","Électricité
+","Tonnes",4.87e-07,1
+2022,3242,"Fibrek S.E.N.C.","Fibrek SENC","4000 St-Eusebe Road","St-Félicien","QC","48.6667","-72.4583",1983.00,3221,"Pulp, paper and paperboard mills","Usines de pâte à papier, de papier et de carton",322112,"Chemical pulp mills","Usines de pâte chimique","Pulp and Paper","Pâte à papier et papier
+","Tonnes",148.33,1
+2022,3350,"McCain Foods Canada Ltd.","FLORENCEVILLE, NEW BRUNSWICK","8800 Main Street","Florenceville-Bristol","NB","46.4498","-67.6116",1983.00,3114,"Fruit and vegetable preserving and specialty food manufacturing","Mise en conserve de fruits et de légumes et fabrication de spécialités alimentaires",311410,"Frozen food manufacturing","Fabrication d'aliments congelés","Other Manufacturing","Autres fabrication
+","Tonnes",843.20,4
+2022,3353,"McCain Foods Canada Ltd.","McCain Foods (Canada) GRAND FALLS","795 Route 108","Grand Falls","NB","47.063","-67.7767",1983.00,3119,"Other food manufacturing","Fabrication d'autres aliments",311990,"All other food manufacturing","Fabrication de tous les autres aliments","Other Manufacturing","Autres fabrication
+","Tonnes",645.20,4
+2022,3356,"Teck Highland Valley Copper Partnership","Teck Highland Valley Copper Partnership","97C Highway","Logan Lake","BC","50.4742","-121.027",1983.00,2122,"Metal ore mining","Extraction de minerais métalliques",212233,"Copper-zinc ore mining","Extraction de minerais de cuivre-zinc","Mining and Quarrying","Extraction minière et exploitation en carrière
+","Tonnes",12.21,1
+2022,3394,"Irving Paper Limited","Irving Paper","435 Bayside Drive","Saint John","NB","45.2788","-66.0249",1983.00,3221,"Pulp, paper and paperboard mills","Usines de pâte à papier, de papier et de carton",322121,"Paper (except newsprint) mills","Usines de papier (sauf le papier journal)","Pulp and Paper","Pâte à papier et papier
+","Tonnes",36.28,1
+2022,3406,"Rio Tinto Alcan Inc","Usine Arvida","1955 Mellon Boulevard","Saguenay","QC","48.4274","-71.1599",1983.00,3313,"Alumina and aluminum production and processing","Production et transformation d'alumine et d'aluminium",331313,"Primary production of alumina and aluminum","Production primaire d'alumine et d'aluminium","Aluminum","Aluminum","Tonnes",1.99248e-03,1
+2022,3411,"Hudbay Minerals","HBMS Snow Lake Mill","1 393 Highway","Snow Lake","MB","54.8561","-99.9434",1983.00,2122,"Metal ore mining","Extraction de minerais métalliques",212233,"Copper-zinc ore mining","Extraction de minerais de cuivre-zinc","Mining and Quarrying","Extraction minière et exploitation en carrière
+","Tonnes",28.85,1
+2022,3414,"Hudbay Minerals","HBMS Flin Flon Metallurgical Complex","1 Company Road","Flin Flon","MB","54.771","-101.884",1983.00,2122,"Metal ore mining","Extraction de minerais métalliques",212233,"Copper-zinc ore mining","Extraction de minerais de cuivre-zinc","Mining and Quarrying","Extraction minière et exploitation en carrière
+","Tonnes",23.94,1
+2022,3422,"INVISTA (Canada) Company","Kingston Site","455 Front Road","Kingston","ON","44.2159","-76.5553",1983.00,3252,"Resin, synthetic rubber, and artificial and synthetic fibres and filaments manufacturing","Fabrication de résines, de caoutchouc synthétique et de fibres et de filaments artificiels et synthétiques",325220,"Artificial and synthetic fibres and filaments manufacturing","Fabrication de fibres et de filaments artificiels et synthétiques","Chemicals","Produits chimiques
+","Tonnes",0.05,1
+2022,3468,"Michelin North America (Canada)","Bridgewater Plant","233 Logan Road","Bridgewater","NS","44.3853","-64.541",1983.00,3262,"Rubber product manufacturing","Fabrication de produits en caoutchouc",326210,"Tire manufacturing","Fabrication de pneus","Plastics and Rubber","Plastiques et caoutchouc
+","Tonnes",0.06,1
+2022,3470,"Michelin North America (Canada)","Waterville Plant","866 Randolph Road Road","Waterville","NS","45.0493","-64.653",1983.00,3262,"Rubber product manufacturing","Fabrication de produits en caoutchouc",326210,"Tire manufacturing","Fabrication de pneus","Plastics and Rubber","Plastiques et caoutchouc
+","Tonnes",5.0e-03,1
+2022,3529,"Chemtrade Logistics Inc.","Chemtrade Electrochem - North Vancouver Chlor-alkali Facility","100 Amherst Avenue","North Vancouver","BC","49.3004","-123.0156",1983.00,3251,"Basic chemical manufacturing","Fabrication de produits chimiques de base",325181,"Alkali and chlorine manufacturing","Fabrication d'alcalis et de chlore","Chemicals","Produits chimiques
+","Tonnes",1308.00,3
+2022,3571,"Ville de Montréal","Station d'épuration des eaux usées Jean-R.-Marcotte","12001 Maurice-Duplessis Boulevard Northeast","Montréal","QC","45.6722","-73.525",1983.00,2213,"Water, sewage and other systems","Réseaux d'aqueduc et d'égout et autres",221320,"Sewage treatment facilities","Installations d'épuration des eaux usées","Water and Wastewater Systems","Systèmes d'eau et des eaux usées
+","Tonnes",6966.78,4
+2022,3623,"Glencore Canada Corporation","Glencore Canada Corporation - Fonderie Horne","156 Marcel-Baril Avenue","Rouyn-Noranda","QC","48.25935","-79.00796",1984.00,3314,"Non-ferrous metal (except aluminum) production and processing","Production et transformation de métaux non ferreux (sauf l'aluminium)",331410,"Non-ferrous metal (except aluminum) smelting and refining","Fonte et affinage de métaux non ferreux (sauf l'aluminium)","Metals (Except Aluminum and Iron and Steel)","Métaux (sauf aluminium et fer et acier)
+","Tonnes",77.98,1
+2022,3649,"ArcelorMittal Produits Longs Canada s.e.n.c","ArcelorMittal Contrecoeur Est","3900 Route des Aciéries","Contrecoeur","QC","45.833684","-73.261054",1983.00,3311,"Iron and steel mills and ferro-alloy manufacturing","Sidérurgie",331110,"Iron and steel mills and ferro-alloy manufacturing","Sidérurgie","Iron and Steel","Fer et acier
+","Tonnes",0.51,1
+2022,3655,"ArcelorMittal Produits Longs Canada s.e.n.c","Usine de déchiquetage - ArcelorMittal Contrecoeur","3185 Marie-Victorin Route","Contrecoeur","QC","45.83466","-73.255033",1983.00,4181,"Recyclable material merchant wholesalers","Grossistes-marchands de matières recyclables",418110,"Recyclable metal merchant wholesalers","Grossistes-marchands de métaux recyclables","Other (Except Manufacturing)","Autres (sauf fabrication)
+","Tonnes",3.7333e-03,1
+2022,3657,"Cameco Corporation","BLIND RIVER REFINERY","328 Eldorado Road Northwest","Blind River","ON","46.1799","-83.0172",1983.00,3251,"Basic chemical manufacturing","Fabrication de produits chimiques de base",325189,"All other basic inorganic chemical manufacturing","Fabrication de tous les autres produits chimiques inorganiques de base","Chemicals","Produits chimiques
+","Tonnes",4.81,1
+2022,3677,"Regional Municipality of Niagara","Niagara Falls Wastewater Treatment Plant","3450 Stanley Avenue","Niagara Falls","ON","43.1243","-79.0849",1983.00,2213,"Water, sewage and other systems","Réseaux d'aqueduc et d'égout et autres",221320,"Sewage treatment facilities","Installations d'épuration des eaux usées","Water and Wastewater Systems","Systèmes d'eau et des eaux usées
+","Tonnes",431.48,1
+2022,3680,"Regional Municipality of Niagara","Port Dalhousie Wastewater Treatment Plant","40 Lighthouse Road","St. Catharines","ON","43.2003","-79.2607",1983.00,2213,"Water, sewage and other systems","Réseaux d'aqueduc et d'égout et autres",221320,"Sewage treatment facilities","Installations d'épuration des eaux usées","Water and Wastewater Systems","Systèmes d'eau et des eaux usées
+","Tonnes",265.90,1
+2022,3683,"Regional Municipality of Niagara","Port Weller Wastewater Treatment Plant","27 Lombardy Street","St. Catharines","ON","43.2251","-79.219",1983.00,2213,"Water, sewage and other systems","Réseaux d'aqueduc et d'égout et autres",221320,"Sewage treatment facilities","Installations d'épuration des eaux usées","Water and Wastewater Systems","Systèmes d'eau et des eaux usées
+","Tonnes",376.72,1
+2022,3686,"Regional Municipality of Niagara","Port Colborne Wastewater Treatment Plant","30 Prosperity Avenue","Port Colborne","ON","42.9065","-79.2511",1983.00,2213,"Water, sewage and other systems","Réseaux d'aqueduc et d'égout et autres",221320,"Sewage treatment facilities","Installations d'épuration des eaux usées","Water and Wastewater Systems","Systèmes d'eau et des eaux usées
+","Tonnes",51.82,1
+2022,3701,"Imperial Oil","Imperial Oil Nanticoke Refinery","225 Concession 2 Concession","Nanticoke","ON","42.8375","-80.0517",1983.00,3241,"Petroleum and coal product manufacturing","Fabrication de produits du pétrole et du charbon",324110,"Petroleum refineries","Raffineries de pétrole","Petroleum and Coal Product Refining and Mfg.","Fabrication et raffinage des produits du pétrole et du charbon
+","Tonnes",38.55,1
+2022,3704,"Imperial Oil","Sarnia Refinery Plant","602  Christina Street South","Sarnia","ON","42.9542","-82.4158",1983.00,3241,"Petroleum and coal product manufacturing","Fabrication de produits du pétrole et du charbon",324110,"Petroleum refineries","Raffineries de pétrole","Petroleum and Coal Product Refining and Mfg.","Fabrication et raffinage des produits du pétrole et du charbon
+","Tonnes",307.89,1
+2022,3707,"Imperial Oil","Imperial Oil, Strathcona Refinery","3400 Baseline Road","Edmonton","AB","53.5417","-113.3917",1983.00,3241,"Petroleum and coal product manufacturing","Fabrication de produits du pétrole et du charbon",324110,"Petroleum refineries","Raffineries de pétrole","Petroleum and Coal Product Refining and Mfg.","Fabrication et raffinage des produits du pétrole et du charbon
+","Tonnes",0.41,1
+2022,3713,"ArcelorMittal Canada MP Inc. and ArcelorMittal Canada Inc. partners in ArcelorMittal Dofasco G.P.","ArcelorMittal Dofasco","1330 Burlington Street East","Hamilton","ON","43.2597","-79.8111",1983.00,3311,"Iron and steel mills and ferro-alloy manufacturing","Sidérurgie",331110,"Iron and steel mills and ferro-alloy manufacturing","Sidérurgie","Iron and Steel","Fer et acier
+","Tonnes",34.87,1
+2022,3802,"Teck Metals Ltd.","Trail Operations","25 Aldridge Avenue","Trail","BC","49.0999","-117.7178",1983.00,3314,"Non-ferrous metal (except aluminum) production and processing","Production et transformation de métaux non ferreux (sauf l'aluminium)",331410,"Non-ferrous metal (except aluminum) smelting and refining","Fonte et affinage de métaux non ferreux (sauf l'aluminium)","Metals (Except Aluminum and Iron and Steel)","Métaux (sauf aluminium et fer et acier)
+","Tonnes",59.42,1
+2022,3803,"Ontario Clean Water Agency","G.E. Booth (Lakeview) Wastewater Treatment Facility","1300 Lakeshore Road East","Mississauga","ON","43.5784","-79.5476",1983.00,2213,"Water, sewage and other systems","Réseaux d'aqueduc et d'égout et autres",221320,"Sewage treatment facilities","Installations d'épuration des eaux usées","Water and Wastewater Systems","Systèmes d'eau et des eaux usées
+","Tonnes",2459.84,3
+2022,3810,"McEwen Mining","McEwen Ontario Black Fox Mine","2839 Hwy 101 Highway East","Matheson","ON","48.5344","-80.3416",1983.00,2122,"Metal ore mining","Extraction de minerais métalliques",212220,"Gold and silver ore mining","Extraction de minerais d'or et d'argent","Mining and Quarrying","Extraction minière et exploitation en carrière
+","Tonnes",18.30,1
+2022,3812,"Groupe des tréfileries Sivaco 2004","Sivaco Québec","800  Ouellette","Marieville","QC","45.429756","-73.167875",1983.00,3312,"Steel product manufacturing from purchased steel","Fabrication de produits en acier à partir d'acier acheté",331222,"Steel wire drawing","Étirage de fils d'acier","Iron and Steel","Fer et acier
+","Tonnes",2.9e-03,1
+2022,3821,"Canadian Fertilizers Limited","Canadian Fertilizers Limited","1250 52 Street Northwest","Medicine Hat","AB","50.0866","-110.7167",1983.00,3253,"Pesticide, fertilizer and other agricultural chemical manufacturing","Fabrication de pesticides, d'engrais et d'autres produits chimiques agricoles",325313,"Chemical fertilizer (except potash) manufacturing","Fabrication d'engrais chimiques (sauf la potasse)","Chemicals","Produits chimiques
+","Tonnes",4.12,1
+2022,3824,"Gerdau Ameristeel Corporation","Gerdau Ameristeel Corporation, Whitby Mill","1 Gerdau Court","Whitby","ON","43.8578","-78.9097",1983.00,3311,"Iron and steel mills and ferro-alloy manufacturing","Sidérurgie",331110,"Iron and steel mills and ferro-alloy manufacturing","Sidérurgie","Iron and Steel","Fer et acier
+","Tonnes",0.05,1
+2022,3855,"Stelco Inc.","Lake Erie","2330 Regional #3 Road","Haldimand County","ON","42.81","-80.0967",1983.00,3311,"Iron and steel mills and ferro-alloy manufacturing","Sidérurgie",331110,"Iron and steel mills and ferro-alloy manufacturing","Sidérurgie","Iron and Steel","Fer et acier
+","Tonnes",50.02,1
+2022,3897,"Suncor Energy Products Partnership","Raffinerie de Montreal","11701 Sherbrooke Street East","Montreal","QC","45.6417","-73.5167",1983.00,3241,"Petroleum and coal product manufacturing","Fabrication de produits du pétrole et du charbon",324110,"Petroleum refineries","Raffineries de pétrole","Petroleum and Coal Product Refining and Mfg.","Fabrication et raffinage des produits du pétrole et du charbon
+","Tonnes",6.46,1
+2022,3899,"Petro-Canada Lubricants Inc.","Mississauga Lubricants Centre","385 Southdown Road","Mississauga","ON","43.5012","-79.6101",1983.00,3241,"Petroleum and coal product manufacturing","Fabrication de produits du pétrole et du charbon",324190,"Other petroleum and coal product manufacturing","Fabrication d'autres produits du pétrole et du charbon","Petroleum and Coal Product Refining and Mfg.","Fabrication et raffinage des produits du pétrole et du charbon
+","Tonnes",4.8e-03,1
+2022,3903,"Suncor Energy Products Partnership","Edmonton Refinery","801 Petroleum Way","Sherwood Park","AB","53.5505","-113.3589",1983.00,3241,"Petroleum and coal product manufacturing","Fabrication de produits du pétrole et du charbon",324110,"Petroleum refineries","Raffineries de pétrole","Petroleum and Coal Product Refining and Mfg.","Fabrication et raffinage des produits du pétrole et du charbon
+","Tonnes",0.27,1
+2022,3928,"Valero Energy Inc.","Raffinerie Jean-Gaulin","165 des Îles Road","Lévis","QC","46.7592","-71.1914",1983.00,3241,"Petroleum and coal product manufacturing","Fabrication de produits du pétrole et du charbon",324110,"Petroleum refineries","Raffineries de pétrole","Petroleum and Coal Product Refining and Mfg.","Fabrication et raffinage des produits du pétrole et du charbon
+","Tonnes",18.44,1
+2022,3959,"West Fraser Mills Ltd., Operating as Slave Lake Pulp","Slave Lake Pulp","20 km SE of Slave Lake","Slave Lake","AB","55.2481","-114.514",1983.00,3221,"Pulp, paper and paperboard mills","Usines de pâte à papier, de papier et de carton",322111,"Mechanical pulp mills","Usines de pâte mécanique","Pulp and Paper","Pâte à papier et papier
+","Tonnes",6.58,1
+2022,3962,"Shell Canada Products","Sarnia Manufacturing Centre","150 St. Clair Parkway","Corunna","ON","42.9025","-82.4511",1983.00,3241,"Petroleum and coal product manufacturing","Fabrication de produits du pétrole et du charbon",324110,"Petroleum refineries","Raffineries de pétrole","Petroleum and Coal Product Refining and Mfg.","Fabrication et raffinage des produits du pétrole et du charbon
+","Tonnes",5.85,1
+2022,3992,"Nova Scotia Power Incorporated","Lingan Generating Station","0 2599 Hinchey Avenue","Lingan","NS","46.2358","-60.0386",1983.00,2211,"Electric power generation, transmission and distribution","Production, transport et distribution d'électricité",221112,"Fossil-fuel electric power generation","Production d'électricité à partir de combustibles fossiles","Electricity","Électricité
+","Tonnes",0.58,1
+2022,3994,"Nova Scotia Power Incorporated","Point Tupper Generating Station","4137 Port Malcolm Road","Port Hawkesbury","NS","45.5872","-61.3489",1983.00,2211,"Electric power generation, transmission and distribution","Production, transport et distribution d'électricité",221112,"Fossil-fuel electric power generation","Production d'électricité à partir de combustibles fossiles","Electricity","Électricité
+","Tonnes",1.84766e-03,1
+2022,3996,"Nova Scotia Power Incorporated","Trenton Generating Station","1 Power Plant Road","Trenton","NS","45.6202","-62.6498",1983.00,2211,"Electric power generation, transmission and distribution","Production, transport et distribution d'électricité",221112,"Fossil-fuel electric power generation","Production d'électricité à partir de combustibles fossiles","Electricity","Électricité
+","Tonnes",0.22,1
+2022,3998,"Nova Scotia Power Incorporated","Tufts Cove Generating Station","315 Windmill Road","Dartmouth","NS","44.6764","-63.5961",1983.00,2211,"Electric power generation, transmission and distribution","Production, transport et distribution d'électricité",221112,"Fossil-fuel electric power generation","Production d'électricité à partir de combustibles fossiles","Electricity","Électricité
+","Tonnes",1.14e-04,1
+2022,4000,"Nova Scotia Power Incorporated","Point Aconi Generating Station","1800 Prince Mine Road","Point Aconi","NS","46.31948","-60.32856",1984.00,2211,"Electric power generation, transmission and distribution","Production, transport et distribution d'électricité",221112,"Fossil-fuel electric power generation","Production d'électricité à partir de combustibles fossiles","Electricity","Électricité
+","Tonnes",0.09,1
+2022,4045,"ArcelorMittal long Products Canada G.P.","ArcelorMittal long Products Canada - Hamilton East","690 Strathearne Avenue","Hamilton","ON","43.2625","-79.7857",1983.00,3312,"Steel product manufacturing from purchased steel","Fabrication de produits en acier à partir d'acier acheté",331222,"Steel wire drawing","Étirage de fils d'acier","Iron and Steel","Fer et acier
+","Tonnes",1.66e-04,1
+2022,4063,"Canfor Pulp Ltd.","Prince George Pulp and Paper and Intercontinental Pulp Mills","2789 Prince George Pulp Mill Road","Prince George","BC","53.92344","-122.68702",1984.00,3221,"Pulp, paper and paperboard mills","Usines de pâte à papier, de papier et de carton",322112,"Chemical pulp mills","Usines de pâte chimique","Pulp and Paper","Pâte à papier et papier
+","Tonnes",69.56,1
+2022,4068,"Stadacona WB S.E.C.","Usine de Québec","10 des Capucins Boulevard","Québec","QC","46.8242","-71.2153",1983.00,3221,"Pulp, paper and paperboard mills","Usines de pâte à papier, de papier et de carton",322122,"Newsprint mills","Usines de papier journal","Pulp and Paper","Pâte à papier et papier
+","Tonnes",77.67,1
+2022,4101,"Irving Oil Limited","Irving Oil Refinery","340 Loch Lomond Road","Saint John","NB","45.2838","-66.0102",1983.00,3241,"Petroleum and coal product manufacturing","Fabrication de produits du pétrole et du charbon",324110,"Petroleum refineries","Raffineries de pétrole","Petroleum and Coal Product Refining and Mfg.","Fabrication et raffinage des produits du pétrole et du charbon
+","Tonnes",42.98,1
+2022,4402,"Terrapure BR Ltd.","VSC","1200 Garnier Street","Sainte-Catherine","QC","45.4","-73.6",1983.00,3315,"Foundries","Fonderies",331529,"Non-ferrous metal foundries (except die-casting)","Fonderies de métaux non ferreux (sauf moulage sous pression)","Metals (Except Aluminum and Iron and Steel)","Métaux (sauf aluminium et fer et acier)
+","Tonnes",0.02,1
+2022,4435,"City of Toronto","Highland Creek Treatment Plant","51 Beechgrove Drive","Toronto","ON","43.7667","-79.15",1983.00,2213,"Water, sewage and other systems","Réseaux d'aqueduc et d'égout et autres",221320,"Sewage treatment facilities","Installations d'épuration des eaux usées","Water and Wastewater Systems","Systèmes d'eau et des eaux usées
+","Tonnes",6733.24,4
+2022,4610,"Stella-Jones Inc.","New Westminster Plant","25 Braid Street","New Westminster","BC","49.22671","-122.87557",1983.00,3211,"Sawmills and wood preservation","Scieries et préservation du bois",321114,"Wood preservation","Préservation du bois","Wood Products","Produits en bois
+","Tonnes",0.09,1
+2022,4700,"NOVA Chemicals Corporation","St. Clair River Site","285 Albert Street","Corunna","ON","42.8971","-82.4399",1983.00,3252,"Resin, synthetic rubber, and artificial and synthetic fibres and filaments manufacturing","Fabrication de résines, de caoutchouc synthétique et de fibres et de filaments artificiels et synthétiques",325210,"Resin and synthetic rubber manufacturing","Fabrication de résines et de caoutchouc synthétique","Chemicals","Produits chimiques
+","Tonnes",0.06,1
+2022,4723,"PKM Canada Marine Terminal Limited Partnership","Vancouver Wharves Terminal","1995 W 1st Street","North Vancouver","BC","49.31472","-123.11428",1984.00,4883,"Support activities for water transportation","Activités de soutien au transport par eau",488320,"Marine cargo handling","Manutention du fret maritime","Other (Except Manufacturing)","Autres (sauf fabrication)
+","Tonnes",0.07,1
+2022,4743,"Corporation of the City of London","Greenway Pollution Control Centre","109 Greenside Avenue","London","ON","42.9744","-81.2821",1983.00,2213,"Water, sewage and other systems","Réseaux d'aqueduc et d'égout et autres",221320,"Sewage treatment facilities","Installations d'épuration des eaux usées","Water and Wastewater Systems","Systèmes d'eau et des eaux usées
+","Tonnes",577.78,4
+2022,4755,"City of Windsor","Little River Pollution Control Plant 1","9400 Little River Road","Windsor","ON","42.3298","-82.9267",1983.00,2213,"Water, sewage and other systems","Réseaux d'aqueduc et d'égout et autres",221320,"Sewage treatment facilities","Installations d'épuration des eaux usées","Water and Wastewater Systems","Systèmes d'eau et des eaux usées
+","Tonnes",140.59,1
+2022,4771,"The Regional Municipality of Halton","Burlington Skyway Wastewater Treatment Plant","1125 Lakeshore Road","Burlington","ON","43.3097","-79.8014",1983.00,2213,"Water, sewage and other systems","Réseaux d'aqueduc et d'égout et autres",221320,"Sewage treatment facilities","Installations d'épuration des eaux usées","Water and Wastewater Systems","Systèmes d'eau et des eaux usées
+","Tonnes",5423.29,4
+2022,4778,"Aluminerie Alouette inc.","Aluminerie Alouette inc.","400 Chemin de de la Pointe-Noire","Sept-Îles","QC","50.1583","-66.4416",1983.00,3313,"Alumina and aluminum production and processing","Production et transformation d'alumine et d'aluminium",331313,"Primary production of alumina and aluminum","Production primaire d'alumine et d'aluminium","Aluminum","Aluminum","Tonnes",7.22e-05,1
+2022,4779,"City of Sarnia","Water Pollution Control Centre","333 St. Andrew Street","Sarnia","ON","42.9553","-82.406",1983.00,2213,"Water, sewage and other systems","Réseaux d'aqueduc et d'égout et autres",221320,"Sewage treatment facilities","Installations d'épuration des eaux usées","Water and Wastewater Systems","Systèmes d'eau et des eaux usées
+","Tonnes",135.40,1
+2022,4788,"Entreprises Sappi Canada Inc.","Sappi Matane","400 du Port","Matane","QC","48.8318","-67.5565",1983.00,3221,"Pulp, paper and paperboard mills","Usines de pâte à papier, de papier et de carton",322111,"Mechanical pulp mills","Usines de pâte mécanique","Pulp and Paper","Pâte à papier et papier
+","Tonnes",48.55,1
+2022,4790,"Société en commandite FF Soucy WB","F.F.SOUCY - RIVIÈRE-DU-LOUP","191 Delage","Rivière-du-Loup","QC","47.8186","-69.52",1983.00,3221,"Pulp, paper and paperboard mills","Usines de pâte à papier, de papier et de carton",322122,"Newsprint mills","Usines de papier journal","Pulp and Paper","Pâte à papier et papier
+","Tonnes",17.52,1
+2022,4803,"Produits forestiers Résolu","Usine de Clermont","100 Donohue","Clermont","QC","47.6994","-70.2255",1983.00,3221,"Pulp, paper and paperboard mills","Usines de pâte à papier, de papier et de carton",322122,"Newsprint mills","Usines de papier journal","Pulp and Paper","Pâte à papier et papier
+","Tonnes",22.27,1
+2022,4806,"Rio Tinto Fer et Titane inc.","Rio Tinto Fer et Titane inc.- Complexe  de Sorel-Tracy","1625 Marie-Victorin","Sorel-Tracy","QC","46.04043","-73.13692",1984.00,3311,"Iron and steel mills and ferro-alloy manufacturing","Sidérurgie",331110,"Iron and steel mills and ferro-alloy manufacturing","Sidérurgie","Iron and Steel","Fer et acier
+","Tonnes",7.10,1
+2022,4866,"Orano Canada Inc.","McClean Lake Operations","833 45 Street West","Saskatoon","SK","58.2501","-103.9172",1983.00,2122,"Metal ore mining","Extraction de minerais métalliques",212291,"Uranium ore mining","Extraction de minerais d'uranium","Mining and Quarrying","Extraction minière et exploitation en carrière
+","Tonnes",24.82,1
+2022,4870,"Chemtrade Logistics Inc.","Chemtrade Electrochem - Beauharnois","75 des Hauts-Fourneaux","Beauharnois","QC","45.3112","-73.888",1983.00,3251,"Basic chemical manufacturing","Fabrication de produits chimiques de base",325189,"All other basic inorganic chemical manufacturing","Fabrication de tous les autres produits chimiques inorganiques de base","Chemicals","Produits chimiques
+","Tonnes",0.04,1
+2022,4875,"Cavendish Farms Corporation","Cavendish Farms","25532 #2 Highway","New Annan","PE","46.4222","-63.679",1983.00,3114,"Fruit and vegetable preserving and specialty food manufacturing","Mise en conserve de fruits et de légumes et fabrication de spécialités alimentaires",311410,"Frozen food manufacturing","Fabrication d'aliments congelés","Other Manufacturing","Autres fabrication
+","Tonnes",154.02,1
+2022,4882,"Newfoundland and Labrador Hydro","Holyrood Thermal Generating Station","1 Thermal Plant  Road","Holyrood","NL","47.4506","-53.0963",1983.00,2211,"Electric power generation, transmission and distribution","Production, transport et distribution d'électricité",221112,"Fossil-fuel electric power generation","Production d'électricité à partir de combustibles fossiles","Electricity","Électricité
+","Tonnes",11.30,1
+2022,4908,"Regional Municipality of Durham","Duffin Creek WPCP","901 McKay Road","Pickering","ON","43.8182","-79.0513",1983.00,2213,"Water, sewage and other systems","Réseaux d'aqueduc et d'égout et autres",221320,"Sewage treatment facilities","Installations d'épuration des eaux usées","Water and Wastewater Systems","Systèmes d'eau et des eaux usées
+","Tonnes",128.97,1
+2022,4929,"Corner Brook Pulp and Paper Ltd.","Corner Brook Pulp and Paper","1 Mill  Road","Corner Brook","NL","48.9552","-57.9485",1983.00,3221,"Pulp, paper and paperboard mills","Usines de pâte à papier, de papier et de carton",322122,"Newsprint mills","Usines de papier journal","Pulp and Paper","Pâte à papier et papier
+","Tonnes",74.48,1
+2022,5008,"AV Group NB Inc. - Atholville Mill","Atholville Mill","175 Mill Road","Atholville","NB","47.9924","-66.7234",1983.00,3221,"Pulp, paper and paperboard mills","Usines de pâte à papier, de papier et de carton",322112,"Chemical pulp mills","Usines de pâte chimique","Pulp and Paper","Pâte à papier et papier
+","Tonnes",64.94,1
+2022,5013,"Iron Ore Company of Canada","Carol Project","1 2 Avalon Drive East","Labrador City","NL","52.9565","-66.8936",1983.00,2122,"Metal ore mining","Extraction de minerais métalliques",212210,"Iron ore mining","Extraction de minerais de fer","Mining and Quarrying","Extraction minière et exploitation en carrière
+","Tonnes",781.83,4
+2022,5070,"Maibec Inc.","East River","2005 3 Highway","East River","NS","44.584286","-64.162999",1983.00,3212,"Veneer, plywood and engineered wood product manufacturing","Fabrication de placages, de contreplaqués et de produits en bois reconstitué",321216,"Particle board and fibreboard mills","Usines de panneaux de particules et de fibres","Wood Products","Produits en bois
+","Tonnes",4.22e-04,1
+2022,5078,"Greater Moncton Wastewater Commission","GMWC Wastewater Treatment Facility","355 Hillsborough Road","Riverview","NB","46.0783","-64.7665",1983.00,2213,"Water, sewage and other systems","Réseaux d'aqueduc et d'égout et autres",221320,"Sewage treatment facilities","Installations d'épuration des eaux usées","Water and Wastewater Systems","Systèmes d'eau et des eaux usées
+","Tonnes",251.50,1
+2022,5087,"Cape Breton Regional","Battery Point Treatment Plant","36 Ortona Drive","Sydney","NS","46.14971","-60.20257",1984.00,2213,"Water, sewage and other systems","Réseaux d'aqueduc et d'égout et autres",221320,"Sewage treatment facilities","Installations d'épuration des eaux usées","Water and Wastewater Systems","Systèmes d'eau et des eaux usées
+","Tonnes",107.07,1
+2022,5090,"City of Charlottetown","Charlottetown Pollution Control Plant","18 Riverside Drive","Charlottetown","PE","46.2457","-63.1118",1983.00,2213,"Water, sewage and other systems","Réseaux d'aqueduc et d'égout et autres",221320,"Sewage treatment facilities","Installations d'épuration des eaux usées","Water and Wastewater Systems","Systèmes d'eau et des eaux usées
+","Tonnes",1127.71,3
+2022,5094,"City of Fredericton","Barker St. Treatment Facility","975 Barker St. Street East","Fredericton","NB","45.9584","-66.6178",1983.00,2213,"Water, sewage and other systems","Réseaux d'aqueduc et d'égout et autres",221320,"Sewage treatment facilities","Installations d'épuration des eaux usées","Water and Wastewater Systems","Systèmes d'eau et des eaux usées
+","Tonnes",76.75,1
+2022,5102,"Imperial Metals Corporation","Mount Polley Mine","5720 Bootjack Forest Service Road","Likely","BC","52.5508","-121.637",1983.00,2122,"Metal ore mining","Extraction de minerais métalliques",212299,"All other metal ore mining","Extraction de tous les autres minerais métalliques","Mining and Quarrying","Extraction minière et exploitation en carrière
+","Tonnes",0.33,1
+2022,5146,"Huckleberry Mines Ltd.","Huckleberry Mines Ltd.","Forest Service Road","Houston","BC","53.6793","-127.1776",1983.00,2122,"Metal ore mining","Extraction de minerais métalliques",212233,"Copper-zinc ore mining","Extraction de minerais de cuivre-zinc","Mining and Quarrying","Extraction minière et exploitation en carrière
+","Tonnes",1.37,1
+2022,5183,"Tree Island Industries Ltd","Tree Island Industries Ltd.","3933 Boundary Road","Richmond","BC","49.188","-122.9585",1983.00,3312,"Steel product manufacturing from purchased steel","Fabrication de produits en acier à partir d'acier acheté",331222,"Steel wire drawing","Étirage de fils d'acier","Iron and Steel","Fer et acier
+","Tonnes",1.53,1
+2022,5189,"Greater Vancouver Sewerage and Drainage District","Iona Island Wastewater Treatment Plant","1000  Ferguson Road","Richmond","BC","49.2185","-123.203",1983.00,2213,"Water, sewage and other systems","Réseaux d'aqueduc et d'égout et autres",221320,"Sewage treatment facilities","Installations d'épuration des eaux usées","Water and Wastewater Systems","Systèmes d'eau et des eaux usées
+","Tonnes",3955.80,3
+2022,5219,"Hudbay Minerals","New Britannia Mine","1 Company Road","Flin Flon","MB","54.8864","-100.0228",1983.00,2122,"Metal ore mining","Extraction de minerais métalliques",212220,"Gold and silver ore mining","Extraction de minerais d'or et d'argent","Mining and Quarrying","Extraction minière et exploitation en carrière
+","Tonnes",0.07,1
+2022,5235,"Cargill Foods","Cargill High River Plant","472 2A Highway Highway","High River","AB","50.626478","-113.878396",1983.00,3116,"Meat product manufacturing","Fabrication de produits de viande",311616,"Beef cattle slaughtering","Abattage de bovins de boucherie","Other Manufacturing","Autres fabrication
+","Tonnes",143.22,1
+2022,5308,"City of Calgary","Bonnybrook Wastewater Treatment Plant","4302 15 Street Southeast","Calgary","AB","51.0128","-114.022",1983.00,2213,"Water, sewage and other systems","Réseaux d'aqueduc et d'égout et autres",221320,"Sewage treatment facilities","Installations d'épuration des eaux usées","Water and Wastewater Systems","Systèmes d'eau et des eaux usées
+","Tonnes",8441.09,4
+2022,5309,"City of Calgary","Fish Creek Wastewater Treatment Plant","1905 153 Avenue Southeast","Calgary","AB","50.9127","-114.0118",1983.00,2213,"Water, sewage and other systems","Réseaux d'aqueduc et d'égout et autres",221320,"Sewage treatment facilities","Installations d'épuration des eaux usées","Water and Wastewater Systems","Systèmes d'eau et des eaux usées
+","Tonnes",540.80,4
+2022,5347,"City of Saskatoon","WASTEWATER TREATMENT PLANT","470 Whiteswan Drive","Saskatoon","SK","52.1827","-106.606",1983.00,2213,"Water, sewage and other systems","Réseaux d'aqueduc et d'égout et autres",221320,"Sewage treatment facilities","Installations d'épuration des eaux usées","Water and Wastewater Systems","Systèmes d'eau et des eaux usées
+","Tonnes",844.31,4
+2022,5380,"Aquatera Utilities Inc.","Aquatera Grande Prairie WWTP (and Landfill)","5306 100 Street","Grande Prairie","AB","55.127919","-118.79784",1983.00,2213,"Water, sewage and other systems","Réseaux d'aqueduc et d'égout et autres",221320,"Sewage treatment facilities","Installations d'épuration des eaux usées","Water and Wastewater Systems","Systèmes d'eau et des eaux usées
+","Tonnes",116.50,1
+2022,5386,"City of Winnipeg, Water & Waste Department","North End Water Pollution Control Centre (NEWPCC)","2230 Main Street","Winnipeg","MB","49.952","-97.1094",1983.00,2213,"Water, sewage and other systems","Réseaux d'aqueduc et d'égout et autres",221320,"Sewage treatment facilities","Installations d'épuration des eaux usées","Water and Wastewater Systems","Systèmes d'eau et des eaux usées
+","Tonnes",2702.66,3
+2022,5387,"City of Winnipeg, Water & Waste Department","South End Water Pollution Control Centre (SEWPCC)","100 Ed Spencer Drive","Winnipeg","MB","49.7951","-97.0958",1983.00,2213,"Water, sewage and other systems","Réseaux d'aqueduc et d'égout et autres",221320,"Sewage treatment facilities","Installations d'épuration des eaux usées","Water and Wastewater Systems","Systèmes d'eau et des eaux usées
+","Tonnes",552.13,4
+2022,5388,"City of Winnipeg, Water & Waste Department","West End Water Pollution Control Centre (WEWPCC)","7740 Wilkes Avenue","Winnipeg","MB","49.8346","-97.3335",1983.00,2213,"Water, sewage and other systems","Réseaux d'aqueduc et d'égout et autres",221320,"Sewage treatment facilities","Installations d'épuration des eaux usées","Water and Wastewater Systems","Systèmes d'eau et des eaux usées
+","Tonnes",39.12,1
+2022,5390,"EPCOR Water Services Inc.","Gold Bar Wastewater Treatment Plant","10977 50 Street Northwest","Edmonton","AB","53.5608","-113.4153",1983.00,2213,"Water, sewage and other systems","Réseaux d'aqueduc et d'égout et autres",221320,"Sewage treatment facilities","Installations d'épuration des eaux usées","Water and Wastewater Systems","Systèmes d'eau et des eaux usées
+","Tonnes",4197.96,3
+2022,5414,"Stella-Jones Inc","Stella-Jones Inc","2549 Francisco","Rivièere-Rouge","QC","46.3894","-74.8378",1983.00,3211,"Sawmills and wood preservation","Scieries et préservation du bois",321114,"Wood preservation","Préservation du bois","Wood Products","Produits en bois
+","Tonnes",5.0182e-04,1
+2022,5448,"Glencore Canada Corporation","Mine Raglan","120 Aéroport Avenue","Rouyn-Noranda","QC","61.6916","-73.6666",1983.00,2122,"Metal ore mining","Extraction de minerais métalliques",212232,"Nickel-copper ore mining","Extraction de minerais de nickel-cuivre","Mining and Quarrying","Extraction minière et exploitation en carrière
+","Tonnes",19.48,1
+2022,5460,"Tacora Resources Inc.","Wabush Mines - Scully","1 Wabush Mines Road Street","Wabush","NL","52.9077","-66.9109",1983.00,2122,"Metal ore mining","Extraction de minerais métalliques",212210,"Iron ore mining","Extraction de minerais de fer","Mining and Quarrying","Extraction minière et exploitation en carrière
+","Tonnes",5.31,1
+2022,5515,"Kruger inc","Kruger Trois-Rivières S.E.C.","3735 Gene-H.-Kruger Boulevard","Trois-Rivières","QC","46.3278","-72.558",1983.00,3221,"Pulp, paper and paperboard mills","Usines de pâte à papier, de papier et de carton",322130,"Paperboard mills","Usines de carton","Pulp and Paper","Pâte à papier et papier
+","Tonnes",132.37,1
+2022,5528,"Ville de Longueuil","Centre d'épuration Rive-Sud (CERS)","2999 De l'île Charron Street North","Longueuil","QC","45.5837","-73.4862",1983.00,2213,"Water, sewage and other systems","Réseaux d'aqueduc et d'égout et autres",221320,"Sewage treatment facilities","Installations d'épuration des eaux usées","Water and Wastewater Systems","Systèmes d'eau et des eaux usées
+","Tonnes",1437.92,3
+2022,5539,"IMTT-Québec Inc.","IMTT QUÉBEC - QUÉBEC","Montées des cinquantes nord","Québec","QC","46.8318","-71.2031",1983.00,4931,"Warehousing and storage","Entreposage",493190,"Other warehousing and storage","Autres activités d'entreposage","Other (Except Manufacturing)","Autres (sauf fabrication)
+","Tonnes",0.02,1
+2022,5612,"Regional Municipality of Niagara","Baker Road Wastewater Treatment Plant","160 Lake Street","Grimsby","ON","43.1942","-79.5371",1983.00,2213,"Water, sewage and other systems","Réseaux d'aqueduc et d'égout et autres",221320,"Sewage treatment facilities","Installations d'épuration des eaux usées","Water and Wastewater Systems","Systèmes d'eau et des eaux usées
+","Tonnes",153.11,1
+2022,5613,"Regional Municipality of Niagara","Fort Erie Wastewater Treatment Plant","1 Anger Avenue","Fort Erie","ON","42.9381","-78.9273",1983.00,2213,"Water, sewage and other systems","Réseaux d'aqueduc et d'égout et autres",221320,"Sewage treatment facilities","Installations d'épuration des eaux usées","Water and Wastewater Systems","Systèmes d'eau et des eaux usées
+","Tonnes",44.21,1
+2022,5614,"Regional Municipality of Niagara","Welland Wastewater Treatment Plant","505 River Road","Welland","ON","43.0077","-79.2379",1983.00,2213,"Water, sewage and other systems","Réseaux d'aqueduc et d'égout et autres",221320,"Sewage treatment facilities","Installations d'épuration des eaux usées","Water and Wastewater Systems","Systèmes d'eau et des eaux usées
+","Tonnes",250.74,1
+2022,5656,"GOLDCORP CANADA LTD","Musselwhite Mine","","N/A Concession, Kenora District","ON","52.6039","-90.3682",1983.00,2122,"Metal ore mining","Extraction de minerais métalliques",212220,"Gold and silver ore mining","Extraction de minerais d'or et d'argent","Mining and Quarrying","Extraction minière et exploitation en carrière
+","Tonnes",23.69,1
+2022,5705,"Nachurs Alpine Solutions","New Hamburg Manufacturing Plant","1356 Nafziger Road","Baden","ON","43.3912","-80.6895",1983.00,3253,"Pesticide, fertilizer and other agricultural chemical manufacturing","Fabrication de pesticides, d'engrais et d'autres produits chimiques agricoles",325314,"Mixed fertilizer manufacturing","Fabrication d'engrais mixtes","Chemicals","Produits chimiques
+","Tonnes",2.05,1
+2022,5762,"Oxy Vinyls Canada Co.","Niagara PVC Plant","8800 Thorold Townline Road","Thorold","ON","43.04686","-79.17427",1984.00,3252,"Resin, synthetic rubber, and artificial and synthetic fibres and filaments manufacturing","Fabrication de résines, de caoutchouc synthétique et de fibres et de filaments artificiels et synthétiques",325210,"Resin and synthetic rubber manufacturing","Fabrication de résines et de caoutchouc synthétique","Chemicals","Produits chimiques
+","Tonnes",3.00000007e-04,1
+2022,5808,"Cabot Canada Limited","Cabot Canada Limited","800 Tashmoo Avenue","Sarnia","ON","42.94437","-82.4153",1983.00,3251,"Basic chemical manufacturing","Fabrication de produits chimiques de base",325189,"All other basic inorganic chemical manufacturing","Fabrication de tous les autres produits chimiques inorganiques de base","Chemicals","Produits chimiques
+","Tonnes",6.6e-05,1
+2022,5884,"City of Toronto","North Toronto Treatment Plant","21 Redway Road","Toronto","ON","43.7003","-79.3569",1983.00,2213,"Water, sewage and other systems","Réseaux d'aqueduc et d'égout et autres",221320,"Sewage treatment facilities","Installations d'épuration des eaux usées","Water and Wastewater Systems","Systèmes d'eau et des eaux usées
+","Tonnes",384.90,1
+2022,5970,"City of Hamilton","Woodward Avenue Wastewater Treatment Plant","700 Woodward Avenue North","Hamilton","ON","43.253","-79.7711",1983.00,2213,"Water, sewage and other systems","Réseaux d'aqueduc et d'égout et autres",221320,"Sewage treatment facilities","Installations d'épuration des eaux usées","Water and Wastewater Systems","Systèmes d'eau et des eaux usées
+","Tonnes",2004.41,3
+2022,5971,"City of Hamilton","King Street Wastewater Treatment Plant","135 King Street West","Dundas","ON","43.2676","-79.9436",1983.00,2213,"Water, sewage and other systems","Réseaux d'aqueduc et d'égout et autres",221320,"Sewage treatment facilities","Installations d'épuration des eaux usées","Water and Wastewater Systems","Systèmes d'eau et des eaux usées
+","Tonnes",71.66,1
+2022,5986,"The Corporation of the City of Barrie","Wastewater Treatment Facility","249  Bradford Street","Barrie","ON","44.375992","-79.690567",1983.00,2213,"Water, sewage and other systems","Réseaux d'aqueduc et d'égout et autres",221320,"Sewage treatment facilities","Installations d'épuration des eaux usées","Water and Wastewater Systems","Systèmes d'eau et des eaux usées
+","Tonnes",7.62,1
+2022,5987,"Darling International Canada Inc.","Dundas","880 Highway 5 Highway","Dundas","ON","43.2894","-80.0125",1983.00,3116,"Meat product manufacturing","Fabrication de produits de viande",311614,"Rendering and meat processing from carcasses","Fonte de graisses animales et transformation de la viande provenant de carcasses","Other Manufacturing","Autres fabrication
+","Tonnes",0.01,1
+2022,6000,"City of Saint John","Millidgeville WWTP","700  Woodward Avenue","Saint John","NB","45.2867","-66.1161",1983.00,2213,"Water, sewage and other systems","Réseaux d'aqueduc et d'égout et autres",221320,"Sewage treatment facilities","Installations d'épuration des eaux usées","Water and Wastewater Systems","Systèmes d'eau et des eaux usées
+","Tonnes",26.55,1
+2022,6002,"City of Saint John","Lancaster Lagoon WWTP","1210  Sand Cove Road","Saint John","NB","45.2414","-66.1126",1983.00,2213,"Water, sewage and other systems","Réseaux d'aqueduc et d'égout et autres",221320,"Sewage treatment facilities","Installations d'épuration des eaux usées","Water and Wastewater Systems","Systèmes d'eau et des eaux usées
+","Tonnes",58.28,1
+2022,6005,"City of St. John's","Riverhead Wastewater Treatment Facility","209 Southside Road","St. John's","NL","47.5542","-52.7098",1983.00,2213,"Water, sewage and other systems","Réseaux d'aqueduc et d'égout et autres",221320,"Sewage treatment facilities","Installations d'épuration des eaux usées","Water and Wastewater Systems","Systèmes d'eau et des eaux usées
+","Tonnes",667.00,4
+2022,6016,"Pictou County Shared Services Authority","EAST RIVER ENVIRONMENTAL CONTROL CENTRE","22 River Bank Road","Trenton","NS","45.605","-62.6423",1983.00,2213,"Water, sewage and other systems","Réseaux d'aqueduc et d'égout et autres",221320,"Sewage treatment facilities","Installations d'épuration des eaux usées","Water and Wastewater Systems","Systèmes d'eau et des eaux usées
+","Tonnes",12.73,1
+2022,6021,"Halifax Regional Water Commission","Eastern Passage Wastewater Treatment Faciltiity","1039 Main Road","Eastern Passage","NS","44.6262","-63.5177",1983.00,2213,"Water, sewage and other systems","Réseaux d'aqueduc et d'égout et autres",221320,"Sewage treatment facilities","Installations d'épuration des eaux usées","Water and Wastewater Systems","Systèmes d'eau et des eaux usées
+","Tonnes",82.50,1
+2022,6022,"Halifax Regional Water Commission","Mill Cove Water Pollution Control Centre","10  Waterfront Drive","Bedford","NS","44.7162","-63.6728",1983.00,5622,"Waste treatment and disposal","Traitement et élimination des déchets",562210,"Waste treatment and disposal","Traitement et élimination des déchets","Waste Treatment and Disposal","Traitement et élimination des déchets
+","Tonnes",387.51,1
+2022,6051,"Municipality of the County of Colchester","Central Colchester Wastewater Treatment Facility","3899 236 Highway","Truro","NS","45.3667","-63.3443",1983.00,2213,"Water, sewage and other systems","Réseaux d'aqueduc et d'égout et autres",221320,"Sewage treatment facilities","Installations d'épuration des eaux usées","Water and Wastewater Systems","Systèmes d'eau et des eaux usées
+","Tonnes",29.42,1
+2022,6093,"Vale Newfoundland and Labrador Limited","Voisey's Bay Mine Site","","Happy Valley-Goose Bay","NL","56.33778","-62.0944",1984.00,2122,"Metal ore mining","Extraction de minerais métalliques",212232,"Nickel-copper ore mining","Extraction de minerais de nickel-cuivre","Mining and Quarrying","Extraction minière et exploitation en carrière
+","Tonnes",5.78,1
+2022,6096,"Hibernia Management and Development Company Limited","Hibernia Platform","Mobile Route   tonnes  20 Hebron Way  Way","Canada","NL","47.61796","-52.72607",1984.00,2111,"Oil and gas extraction","Extraction de pétrole et de gaz",211110,"Oil and gas extraction (except oil sands)","Extraction de pétrole et de gaz (à l'exception des sables bitumineux)","Conventional Oil and Gas extraction","Extraction de pétrole par des méthodes classiques
+","Tonnes",345.91,1
+2022,6111,"Ville de Repentigny","Station traitement étangs aérées, Repentigny/Charlemagne","45 Place des Roseaux Street","Repentigny","QC","45.7367","-73.4896",1983.00,2213,"Water, sewage and other systems","Réseaux d'aqueduc et d'égout et autres",221320,"Sewage treatment facilities","Installations d'épuration des eaux usées","Water and Wastewater Systems","Systèmes d'eau et des eaux usées
+","Tonnes",89.63,1
+2022,6112,"Ville de Repentigny","station de traitement des eaux usées","45 Lebel","Repentigny","QC","45.7359","-73.445",1983.00,2213,"Water, sewage and other systems","Réseaux d'aqueduc et d'égout et autres",221320,"Sewage treatment facilities","Installations d'épuration des eaux usées","Water and Wastewater Systems","Systèmes d'eau et des eaux usées
+","Tonnes",225.00,1
+2022,6117,"Ville de Saguenay","Usine Épuration La Baie","100 6 ième Street","La Baie","QC","48.3332","-70.8909",1983.00,2213,"Water, sewage and other systems","Réseaux d'aqueduc et d'égout et autres",221320,"Sewage treatment facilities","Installations d'épuration des eaux usées","Water and Wastewater Systems","Systèmes d'eau et des eaux usées
+","Tonnes",58.05,1
+2022,6118,"Ville de Saguenay","Usine Épuration Jonquière","2710 Saguenay Boulevard West","Jonquière","QC","48.442","-71.1887",1983.00,2213,"Water, sewage and other systems","Réseaux d'aqueduc et d'égout et autres",221320,"Sewage treatment facilities","Installations d'épuration des eaux usées","Water and Wastewater Systems","Systèmes d'eau et des eaux usées
+","Tonnes",174.40,1
+2022,6119,"Ville de Saguenay","Usine Épuration Chicoutimi","1740 St-Martin Road","Chicoutimi","QC","48.4381","-71.0111",1983.00,2213,"Water, sewage and other systems","Réseaux d'aqueduc et d'égout et autres",221320,"Sewage treatment facilities","Installations d'épuration des eaux usées","Water and Wastewater Systems","Systèmes d'eau et des eaux usées
+","Tonnes",185.33,1
+2022,6120,"Ville de Granby","Station d'épuration des eaux usées de Granby","1250 Industriel Boulevard","Granby","QC","45.3727","-72.7736",1983.00,2213,"Water, sewage and other systems","Réseaux d'aqueduc et d'égout et autres",221320,"Sewage treatment facilities","Installations d'épuration des eaux usées","Water and Wastewater Systems","Systèmes d'eau et des eaux usées
+","Tonnes",142.30,1
+2022,6123,"Ville de Cowansville","Usine d'épuration","200 des Prés-Verts Street North","Cowansville","QC","45.2214","-72.7753",1983.00,2213,"Water, sewage and other systems","Réseaux d'aqueduc et d'égout et autres",221320,"Sewage treatment facilities","Installations d'épuration des eaux usées","Water and Wastewater Systems","Systèmes d'eau et des eaux usées
+","Tonnes",2.15,1
+2022,6124,"Ville de Saint-Hyacinthe","Station d'épuration","1895  Girouard Street East","Saint-Hyacinthe","QC","45.6478","-72.9419",1983.00,2213,"Water, sewage and other systems","Réseaux d'aqueduc et d'égout et autres",221320,"Sewage treatment facilities","Installations d'épuration des eaux usées","Water and Wastewater Systems","Systèmes d'eau et des eaux usées
+","Tonnes",364.30,1
+2022,6125,"Ville de Chambly","Station d'épuration Chambly-Richelieu","2460 Industriel Boulevard","Chambly","QC","45.427","-73.2776",1983.00,2213,"Water, sewage and other systems","Réseaux d'aqueduc et d'égout et autres",221320,"Sewage treatment facilities","Installations d'épuration des eaux usées","Water and Wastewater Systems","Systèmes d'eau et des eaux usées
+","Tonnes",143.60,1
+2022,6126,"Ville de Shawinigan","Site de traitement des eaux usées du secteur Shawinigan","1000 du Vallon Street","Shawinigan","QC","46.5575","-72.7614",1983.00,2213,"Water, sewage and other systems","Réseaux d'aqueduc et d'égout et autres",221320,"Sewage treatment facilities","Installations d'épuration des eaux usées","Water and Wastewater Systems","Systèmes d'eau et des eaux usées
+","Tonnes",52.90,1
+2022,6128,"Ville de Saint-Eustache","Usine d'épuration","50 25em Avenue","Saint-Eustache","QC","45.5691","-73.8675",1983.00,2213,"Water, sewage and other systems","Réseaux d'aqueduc et d'égout et autres",221320,"Sewage treatment facilities","Installations d'épuration des eaux usées","Water and Wastewater Systems","Systèmes d'eau et des eaux usées
+","Tonnes",125.64,1
+2022,6157,"Énergie Valero Inc.","MIRAMICHI MARINE TERMINAL","21 Hay Lane","Miramichi","NB","47.01878","-65.4857",1983.00,4121,"Petroleum and petroleum products merchant wholesalers","Grossistes-marchands de pétrole et de produits pétroliers",412110,"Petroleum, petroleum products, and other hydrocarbons merchant wholesalers","Grossistes-marchands de pétrole, de produits pétroliers, et d'autres hydrocarbures","Oil and Gas Pipelines and Storage","Stockage et transport par gazoducs d'huile et de gaz
+","Tonnes",0.06,1
+2022,6173,"Waste Management of Canada Corporation","Sainte Sophie Landfill","2535 1ere Street","Sainte Sophie","QC","45.7846","-73.906",1983.00,5622,"Waste treatment and disposal","Traitement et élimination des déchets",562210,"Waste treatment and disposal","Traitement et élimination des déchets","Waste Treatment and Disposal","Traitement et élimination des déchets
+","Tonnes",0.10,1
+2022,6217,"ArcelorMittal Exploitation Minière Canada s.e.n.c.","Mine de Mont-Wright","1000 route 389","Fermont","QC","52.7643","-67.3197",1983.00,2122,"Metal ore mining","Extraction de minerais métalliques",212210,"Iron ore mining","Extraction de minerais de fer","Mining and Quarrying","Extraction minière et exploitation en carrière
+","Tonnes",551.91,4
+2022,6301,"Régie de gestion des matières résiduelles de la Mauricie","Lieu d'enfouissement technique","400 de la Gabelle Boulevard","Saint-Etienne-des-Grès","QC","46.4332","-72.7438",1983.00,5629,"Remediation and other waste management services","Services d'assainissement et autres services de gestion des déchets",562990,"All other waste management services","Tous les autres services de gestion des déchets","Waste Treatment and Disposal","Traitement et élimination des déchets
+","Tonnes",51.45,1
+2022,6314,"Ville de Rivière-du-Loup","Station d'épuration","300 Bellevue","Riviere-du-Loup","QC","47.8348","-69.5524",1983.00,2213,"Water, sewage and other systems","Réseaux d'aqueduc et d'égout et autres",221320,"Sewage treatment facilities","Installations d'épuration des eaux usées","Water and Wastewater Systems","Systèmes d'eau et des eaux usées
+","Tonnes",101.00,1
+2022,6342,"Régie d'Assainissement des Eaux du Bassin de Laprairie","Régie d'Assainissement des Eaux du Bassin de Laprairie","5000 Marie-Victorin Boulevard","Sainte-Catherine","QC","45.4047","-73.5577",1983.00,2213,"Water, sewage and other systems","Réseaux d'aqueduc et d'égout et autres",221320,"Sewage treatment facilities","Installations d'épuration des eaux usées","Water and Wastewater Systems","Systèmes d'eau et des eaux usées
+","Tonnes",326.07,1
+2022,6354,"Ville de Sherbrooke","Station d'épuration de Sherbrooke","2275 Claude-Greffard Street","Sherbrooke","QC","45.4429","-71.9317",1983.00,2213,"Water, sewage and other systems","Réseaux d'aqueduc et d'égout et autres",221320,"Sewage treatment facilities","Installations d'épuration des eaux usées","Water and Wastewater Systems","Systèmes d'eau et des eaux usées
+","Tonnes",529.78,4
+2022,6356,"Ville de Québec","Station Est d'épuration des eaux usées","105 Henri-Bourassa Boulevard","Québec","QC","46.8368","-71.2029",1983.00,2213,"Water, sewage and other systems","Réseaux d'aqueduc et d'égout et autres",221320,"Sewage treatment facilities","Installations d'épuration des eaux usées","Water and Wastewater Systems","Systèmes d'eau et des eaux usées
+","Tonnes",1042.61,3
+2022,6357,"Ville de Québec","Station Ouest d'épuration des eaux usées","2850 Einstein Street","Québec","QC","46.79006","-71.31845",1984.00,2213,"Water, sewage and other systems","Réseaux d'aqueduc et d'égout et autres",221320,"Sewage treatment facilities","Installations d'épuration des eaux usées","Water and Wastewater Systems","Systèmes d'eau et des eaux usées
+","Tonnes",811.96,4
+2022,6358,"Ville de Victoriaville","Usine d'épuration Achille-Gagnon","555 Jutras Boulevard West","Victoriaville","QC","46.0515","-71.9778",1983.00,2213,"Water, sewage and other systems","Réseaux d'aqueduc et d'égout et autres",221320,"Sewage treatment facilities","Installations d'épuration des eaux usées","Water and Wastewater Systems","Systèmes d'eau et des eaux usées
+","Tonnes",120.04,1
+2022,6373,"Régie d'asssainissement St-Basile-St-Bruno","Station d'épuration St-Basile-St-Bruno","333 du Richelieu","Saint-Basile","QC","45.4944","-73.2787",1983.00,2213,"Water, sewage and other systems","Réseaux d'aqueduc et d'égout et autres",221320,"Sewage treatment facilities","Installations d'épuration des eaux usées","Water and Wastewater Systems","Systèmes d'eau et des eaux usées
+","Tonnes",171.36,1
+2022,6374,"Régie d'asssainissement Sainte-Thérèse-Blainville","Station d'épuration Sainte-Thérèse-Blainville","500 Omer de Serres","Blainville","QC","45.68017","-73.85181",1984.00,2213,"Water, sewage and other systems","Réseaux d'aqueduc et d'égout et autres",221320,"Sewage treatment facilities","Installations d'épuration des eaux usées","Water and Wastewater Systems","Systèmes d'eau et des eaux usées
+","Tonnes",355.50,1
+2022,6375,"Ville de Laval","Station d'épuration Auteuil","300 Brissette","Laval","QC","45.6598","-73.7473",1983.00,2213,"Water, sewage and other systems","Réseaux d'aqueduc et d'égout et autres",221320,"Sewage treatment facilities","Installations d'épuration des eaux usées","Water and Wastewater Systems","Systèmes d'eau et des eaux usées
+","Tonnes",182.46,1
+2022,6376,"Ville de Laval","Station d'épuration Fabreville","3985 Séguin","Laval","QC","45.5762","-73.835",1983.00,2213,"Water, sewage and other systems","Réseaux d'aqueduc et d'égout et autres",221320,"Sewage treatment facilities","Installations d'épuration des eaux usées","Water and Wastewater Systems","Systèmes d'eau et des eaux usées
+","Tonnes",158.37,1
+2022,6377,"Ville de Laval","Station d'épuration La Pinière","1133 Masson Rise","Laval","QC","45.6291","-73.6445",1983.00,2213,"Water, sewage and other systems","Réseaux d'aqueduc et d'égout et autres",221320,"Sewage treatment facilities","Installations d'épuration des eaux usées","Water and Wastewater Systems","Systèmes d'eau et des eaux usées
+","Tonnes",1115.65,3
+2022,6378,"Ville de Magog","Station d'épuration des eaux","831 Hatley","Magog","QC","45.2576","-72.1402",1983.00,2213,"Water, sewage and other systems","Réseaux d'aqueduc et d'égout et autres",221320,"Sewage treatment facilities","Installations d'épuration des eaux usées","Water and Wastewater Systems","Systèmes d'eau et des eaux usées
+","Tonnes",95.44,1
+2022,6379,"Ville de Sept-Îles","B-1 Sept-Îles","601 des Montagnais Street North","Sept-Îles","QC","50.2382","-66.3781",1983.00,2213,"Water, sewage and other systems","Réseaux d'aqueduc et d'égout et autres",221320,"Sewage treatment facilities","Installations d'épuration des eaux usées","Water and Wastewater Systems","Systèmes d'eau et des eaux usées
+","Tonnes",61.00,1
+2022,6381,"Régie Intermunicipale d'ass. des eaux Rosemère et Lorraine","Station d'épuration des eaux usées","3 des Bernaches","Rosemère","QC","45.6491","-73.774",1983.00,2213,"Water, sewage and other systems","Réseaux d'aqueduc et d'égout et autres",221320,"Sewage treatment facilities","Installations d'épuration des eaux usées","Water and Wastewater Systems","Systèmes d'eau et des eaux usées
+","Tonnes",72.79,1
+2022,6382,"Ville de Lévis","Station Épuration St-Nicolas","395 rue de l'Aquifère","St-Nicolas","QC","46.7211","-71.2909",1983.00,2213,"Water, sewage and other systems","Réseaux d'aqueduc et d'égout et autres",221320,"Sewage treatment facilities","Installations d'épuration des eaux usées","Water and Wastewater Systems","Systèmes d'eau et des eaux usées
+","Tonnes",126.30,1
+2022,6383,"Ville de Lévis","Étangs Aérés secteur Desjardins","700 Archimède","Lévis","QC","46.7663","-71.1707",1983.00,2213,"Water, sewage and other systems","Réseaux d'aqueduc et d'égout et autres",221320,"Sewage treatment facilities","Installations d'épuration des eaux usées","Water and Wastewater Systems","Systèmes d'eau et des eaux usées
+","Tonnes",261.41,1
+2022,6384,"Ville de Gatineau","Usine d'épuration régionale","858 Notre-Dame Street","Gatineau","QC","45.4791","-75.6047",1983.00,2213,"Water, sewage and other systems","Réseaux d'aqueduc et d'égout et autres",221320,"Sewage treatment facilities","Installations d'épuration des eaux usées","Water and Wastewater Systems","Systèmes d'eau et des eaux usées
+","Tonnes",357.22,1
+2022,6385,"Ville de Shawinigan","Site de traitement des eaux usées du secteur Grand-Mère & St-Georges de Champlain","12600 Bois-Francs Road","Grand-Mère","QC","46.5959","-72.6717",1983.00,2213,"Water, sewage and other systems","Réseaux d'aqueduc et d'égout et autres",221320,"Sewage treatment facilities","Installations d'épuration des eaux usées","Water and Wastewater Systems","Systèmes d'eau et des eaux usées
+","Tonnes",71.39,1
+2022,6388,"Ville de Saint-Jerome","STATION D’ÉPURATION DES EAUX USÉES","100 Chemin Jean-Baptiste Rolland","Saint-Jerome","QC","45.75779","-74.00874",1984.00,2213,"Water, sewage and other systems","Réseaux d'aqueduc et d'égout et autres",221320,"Sewage treatment facilities","Installations d'épuration des eaux usées","Water and Wastewater Systems","Systèmes d'eau et des eaux usées
+","Tonnes",302.50,1
+2022,6389,"Régie d'asssainissement Terrebonne-Mascouche","Station d'épuration Terrebonne-Mascouche","199 de la Cabane Ronde Route","Mascouche","QC","45.7208","-73.5777",1983.00,2213,"Water, sewage and other systems","Réseaux d'aqueduc et d'égout et autres",221320,"Sewage treatment facilities","Installations d'épuration des eaux usées","Water and Wastewater Systems","Systèmes d'eau et des eaux usées
+","Tonnes",18.39,1
+2022,6392,"Régie de traitement des eaux usées de Deux-Montagnes","Station de traitement des eaux usées","3300 Maxime","Saint-Marthe-sur-le-Lac","QC","45.5351","-73.9672",1983.00,2213,"Water, sewage and other systems","Réseaux d'aqueduc et d'égout et autres",221320,"Sewage treatment facilities","Installations d'épuration des eaux usées","Water and Wastewater Systems","Systèmes d'eau et des eaux usées
+","Tonnes",129.00,1
+2022,6425,"Rio Tinto Fer et Titane inc.","Rio Tinto Fer et Titane inc. - HAVRE-SAINT-PIERRE","951 de l'Escale Boulevard","Havre-Saint-Pierre","QC","50.2435","-63.6064",1983.00,2122,"Metal ore mining","Extraction de minerais métalliques",212210,"Iron ore mining","Extraction de minerais de fer","Mining and Quarrying","Extraction minière et exploitation en carrière
+","Tonnes",3.14,1
+2022,6471,"Ville de Sainte-Julie","Usine d'épuration des eaux usées","1651 nobel","Sainte-Julie","QC","45.5801","-73.3155",1983.00,2213,"Water, sewage and other systems","Réseaux d'aqueduc et d'égout et autres",221320,"Sewage treatment facilities","Installations d'épuration des eaux usées","Water and Wastewater Systems","Systèmes d'eau et des eaux usées
+","Tonnes",60.87,1
+2022,6502,"Regional Municipality of Wood Buffalo","Fort McMurray WWTP","820 Memorial Drive","Fort McMurray","AB","56.76454","-111.41481",1983.00,2213,"Water, sewage and other systems","Réseaux d'aqueduc et d'égout et autres",221320,"Sewage treatment facilities","Installations d'épuration des eaux usées","Water and Wastewater Systems","Systèmes d'eau et des eaux usées
+","Tonnes",1.87,1
+2022,6546,"Shell Canada Energy Limited","Scotford Upgrader and Upgrader Cogeneration","55522 Range Road 214","Fort Saskatchewan","AB","53.798367","-113.094411",1983.00,2111,"Oil and gas extraction","Extraction de pétrole et de gaz",211142,"Mined oil sands extraction","Extraction minière de sables bitumineux","Non-Conventional Oil Extraction (including Oilsands and Heavy Oil)","Extraction de pétrole par des méthodes non classiques (incluant sables bitumineux et huile loudre)
+","Tonnes",0.48,1
+2022,6572,"Suncor Energy (Syncrude) Operating Inc","Aurora North Mine Site","","Fort McMurray","AB","57.2989","-111.5033",1983.00,2111,"Oil and gas extraction","Extraction de pétrole et de gaz",211142,"Mined oil sands extraction","Extraction minière de sables bitumineux","Non-Conventional Oil Extraction (including Oilsands and Heavy Oil)","Extraction de pétrole par des méthodes non classiques (incluant sables bitumineux et huile loudre)
+","Tonnes",0.61,1
+2022,6591,"NOVA Chemicals Corporation","Joffre Site; Cogeneration","","Red Deer","AB","52.3083","-113.55",1983.00,2211,"Electric power generation, transmission and distribution","Production, transport et distribution d'électricité",221112,"Fossil-fuel electric power generation","Production d'électricité à partir de combustibles fossiles","Electricity","Électricité
+","Tonnes",9.4e-03,1
+2022,6635,"City of Red Deer","Wastewater Treatment Plant","7890 40th Avenue","Red Deer","AB","52.3088","-113.79",1983.00,2213,"Water, sewage and other systems","Réseaux d'aqueduc et d'égout et autres",221320,"Sewage treatment facilities","Installations d'épuration des eaux usées","Water and Wastewater Systems","Systèmes d'eau et des eaux usées
+","Tonnes",1091.10,3
+2022,6648,"Alberta Capital Region Wastewater Commision","Alberta Capital Region Wastewater Commission Treatment Plant","23262 Township Road 540 Road","Fort Saskatchewan","AB","53.6288","-113.3077",1983.00,2213,"Water, sewage and other systems","Réseaux d'aqueduc et d'égout et autres",221320,"Sewage treatment facilities","Installations d'épuration des eaux usées","Water and Wastewater Systems","Systèmes d'eau et des eaux usées
+","Tonnes",711.88,4
+2022,6669,"Teck Coal Limited","Fording River Operations","0 100 PO Box Route","Elkford","BC","50.1895","-114.8793",1983.00,2121,"Coal mining","Extraction de charbon",212114,"Bituminous coal mining","Extraction de charbon bitumineux","Mining and Quarrying","Extraction minière et exploitation en carrière
+","Tonnes",614.03,4
+2022,6671,"Teck Coal Limited","Greenhills Operations","PO Box 5000 Highway","Elkford","BC","50.0843","-114.87",1983.00,2121,"Coal mining","Extraction de charbon",212114,"Bituminous coal mining","Extraction de charbon bitumineux","Mining and Quarrying","Extraction minière et exploitation en carrière
+","Tonnes",18.93,1
+2022,6674,"Teck Coal Limited","Coal Mountain Operations","0 2261 Corbin Road","Sparwood","BC","49.4988","-114.6584",1983.00,2121,"Coal mining","Extraction de charbon",212114,"Bituminous coal mining","Extraction de charbon bitumineux","Mining and Quarrying","Extraction minière et exploitation en carrière
+","Tonnes",13.21,1
+2022,6694,"City of Brandon","Water Reclamation Facility","800 65th Street East","Brandon","MB","49.8434","-99.8928",1983.00,2213,"Water, sewage and other systems","Réseaux d'aqueduc et d'égout et autres",221320,"Sewage treatment facilities","Installations d'épuration des eaux usées","Water and Wastewater Systems","Systèmes d'eau et des eaux usées
+","Tonnes",0.87,1
+2022,6796,"City of Prince Albert","JW Oliver Waste Water Plant","2000 1 Street East","Prince Albert","SK","53.206994","-105.689926",1983.00,2213,"Water, sewage and other systems","Réseaux d'aqueduc et d'égout et autres",221320,"Sewage treatment facilities","Installations d'épuration des eaux usées","Water and Wastewater Systems","Systèmes d'eau et des eaux usées
+","Tonnes",91.60,1
+2022,7041,"Bruce Power LP","Bruce Power","177 Tie Road","Tiverton","ON","44.3289","-81.5916",1983.00,2211,"Electric power generation, transmission and distribution","Production, transport et distribution d'électricité",221113,"Nuclear electric power generation","Production d'électricité d'origine nucléaire","Electricity","Électricité
+","Tonnes",3.34,1
+2022,7117,"Corporation of the City of Guelph","City of Guelph Wastewater Treatment Plant","530 Wellington Street West","Guelph","ON","43.5232","-80.2674",1983.00,2213,"Water, sewage and other systems","Réseaux d'aqueduc et d'égout et autres",221320,"Sewage treatment facilities","Installations d'épuration des eaux usées","Water and Wastewater Systems","Systèmes d'eau et des eaux usées
+","Tonnes",2355.66,3
+2022,7264,"Corporation of the Municipality of Leamington","LEAMINGTON POLLUTION CONTROL CENTRE","435 Seacliff  Drive East","Leamington","ON","42.0361","-82.5881",1983.00,2213,"Water, sewage and other systems","Réseaux d'aqueduc et d'égout et autres",221320,"Sewage treatment facilities","Installations d'épuration des eaux usées","Water and Wastewater Systems","Systèmes d'eau et des eaux usées
+","Tonnes",58.33,1
+2022,7293,"Jefferson Elora Corporation","JEFFERSON ELORA CORPORATION","60 First Line","Elora","ON","43.677","-80.4162",1983.00,3363,"Motor vehicle parts manufacturing","Fabrication de pièces pour véhicules automobiles",336390,"Other motor vehicle parts manufacturing","Fabrication d'autres pièces pour véhicules automobiles","Transportation Equipment Mfg.","Fabrication de matériel de transport
+","Tonnes",4.3e-03,1
+2022,7369,"Impala Canada Ltd.","Impala Canada Ltd.","Highway 527 Highway","Thunder Bay","ON","49.1593","-89.6167",1983.00,2122,"Metal ore mining","Extraction de minerais métalliques",212299,"All other metal ore mining","Extraction de tous les autres minerais métalliques","Mining and Quarrying","Extraction minière et exploitation en carrière
+","Tonnes",8.2611e-03,1
+2022,7371,"City of Toronto","Keele Valley Landfill","McNaughton Road","Maple","ON","43.8683","-79.4984",1983.00,5622,"Waste treatment and disposal","Traitement et élimination des déchets",562210,"Waste treatment and disposal","Traitement et élimination des déchets","Waste Treatment and Disposal","Traitement et élimination des déchets
+","Tonnes",119.05,1
+2022,7376,"Regional Municipality of Durham","Harmony Creek WPCP","CA1-019-001 785 Colonel Sam Drive","Oshawa","ON","43.8781","-78.8249",1983.00,2213,"Water, sewage and other systems","Réseaux d'aqueduc et d'égout et autres",221320,"Sewage treatment facilities","Installations d'épuration des eaux usées","Water and Wastewater Systems","Systèmes d'eau et des eaux usées
+","Tonnes",15.98,1
+2022,7393,"The Public Utilities Commission for the Municipality of Chatham-Kent","Chatham Water Pollution Control Plant","100 Irwin Street","Chatham","ON","42.3886","-82.2155",1983.00,2213,"Water, sewage and other systems","Réseaux d'aqueduc et d'égout et autres",221320,"Sewage treatment facilities","Installations d'épuration des eaux usées","Water and Wastewater Systems","Systèmes d'eau et des eaux usées
+","Tonnes",138.75,1
+2022,7406,"County of Oxford","Woodstock Wastewater Treatment Plant","195  Admiral Street","Woodstock","ON","43.1357","-80.7715",1983.00,2213,"Water, sewage and other systems","Réseaux d'aqueduc et d'égout et autres",221320,"Sewage treatment facilities","Installations d'épuration des eaux usées","Water and Wastewater Systems","Systèmes d'eau et des eaux usées
+","Tonnes",722.98,4
+2022,7413,"City of Brockville (Corporation of the)","Water Pollution Control Centre","1807 County Rd #2 Road East","Brockville","ON","44.6015","-75.6642",1983.00,2213,"Water, sewage and other systems","Réseaux d'aqueduc et d'égout et autres",221320,"Sewage treatment facilities","Installations d'épuration des eaux usées","Water and Wastewater Systems","Systèmes d'eau et des eaux usées
+","Tonnes",387.71,1
+2022,7600,"The Corporation of the City of Belleville","Belleville Wastewater Treatment Facility","131 St. Paul Street","Belleville","ON","44.1579","-77.3724",1983.00,2213,"Water, sewage and other systems","Réseaux d'aqueduc et d'égout et autres",221320,"Sewage treatment facilities","Installations d'épuration des eaux usées","Water and Wastewater Systems","Systèmes d'eau et des eaux usées
+","Tonnes",2.05,1
+2022,7629,"Ontario Clean Water Agency","Clarkson Wastewater Treatment Facility","2307  Lakeshore Road","Mississauga","ON","43.4926","-79.6181",1983.00,2213,"Water, sewage and other systems","Réseaux d'aqueduc et d'égout et autres",221320,"Sewage treatment facilities","Installations d'épuration des eaux usées","Water and Wastewater Systems","Systèmes d'eau et des eaux usées
+","Tonnes",1706.56,3
+2022,7645,"Regional Municipality of Waterloo","Kitchener Wastewater Treatment Plant","368 Mill Park Drive","Kitchener","ON","43.3989","-80.4208",1983.00,2213,"Water, sewage and other systems","Réseaux d'aqueduc et d'égout et autres",221320,"Sewage treatment facilities","Installations d'épuration des eaux usées","Water and Wastewater Systems","Systèmes d'eau et des eaux usées
+","Tonnes",658.07,4
+2022,7646,"Regional Municipality of Waterloo","Galt Wastewater Treatment Plant","230 Water Street","Cambridge","ON","43.3399","-80.315",1983.00,2213,"Water, sewage and other systems","Réseaux d'aqueduc et d'égout et autres",221320,"Sewage treatment facilities","Installations d'épuration des eaux usées","Water and Wastewater Systems","Systèmes d'eau et des eaux usées
+","Tonnes",283.45,1
+2022,7647,"City of Stratford","STRATFORD WASTE WATER TREATMENT PLANT","701 West Gore Street","Stratford","ON","43.3691","-81.0046",1983.00,2213,"Water, sewage and other systems","Réseaux d'aqueduc et d'égout et autres",221320,"Sewage treatment facilities","Installations d'épuration des eaux usées","Water and Wastewater Systems","Systèmes d'eau et des eaux usées
+","Tonnes",145.11,1
+2022,7649,"Regional Municipality of Waterloo","Waterloo Wastewater Treatment Plant","340 University Avenue East","Waterloo","ON","43.4877","-80.507",1983.00,2213,"Water, sewage and other systems","Réseaux d'aqueduc et d'égout et autres",221320,"Sewage treatment facilities","Installations d'épuration des eaux usées","Water and Wastewater Systems","Systèmes d'eau et des eaux usées
+","Tonnes",561.84,4
+2022,7681,"Regional Municipality of Durham","Port Darlington WPCP","93 Port Darlington Road","Bowmanville","ON","43.8931","-78.6634",1983.00,2213,"Water, sewage and other systems","Réseaux d'aqueduc et d'égout et autres",221320,"Sewage treatment facilities","Installations d'épuration des eaux usées","Water and Wastewater Systems","Systèmes d'eau et des eaux usées
+","Tonnes",27.74,1
+2022,7754,"Resort Municipality of Whistler.","RMOW Wastewater Treatment Plant","1135 Cheakamus Lake Road","Whistler","BC","50.0852","-123.0394",1983.00,2213,"Water, sewage and other systems","Réseaux d'aqueduc et d'égout et autres",221320,"Sewage treatment facilities","Installations d'épuration des eaux usées","Water and Wastewater Systems","Systèmes d'eau et des eaux usées
+","Tonnes",26.14,1
+2022,7755,"City of Abbotsford","JAMES Pollution Control Center","5959 Gladwin Road","Abbotsford","BC","49.11034","-122.32248",1984.00,2213,"Water, sewage and other systems","Réseaux d'aqueduc et d'égout et autres",221320,"Sewage treatment facilities","Installations d'épuration des eaux usées","Water and Wastewater Systems","Systèmes d'eau et des eaux usées
+","Tonnes",730.03,4
+2022,7781,"Regional District of Nanaimo","Greater Nanaimo Pollution Control Centre","4600  Hammond Bay Road","Nanaimo","BC","49.2319","-123.9729",1983.00,2213,"Water, sewage and other systems","Réseaux d'aqueduc et d'égout et autres",221320,"Sewage treatment facilities","Installations d'épuration des eaux usées","Water and Wastewater Systems","Systèmes d'eau et des eaux usées
+","Tonnes",403.51,1
+2022,7823,"City of Chilliwack","Wolfe Road WWTP","44820 Wolfe Road","Chilliwack","BC","49.1687","-121.9847",1983.00,2213,"Water, sewage and other systems","Réseaux d'aqueduc et d'égout et autres",221320,"Sewage treatment facilities","Installations d'épuration des eaux usées","Water and Wastewater Systems","Systèmes d'eau et des eaux usées
+","Tonnes",400.97,1
+2022,7824,"City of Kelowna","Wastewater Treatment Facility","951 Raymer Avenue","Kelowna","BC","49.8648","-119.48207",1984.00,2213,"Water, sewage and other systems","Réseaux d'aqueduc et d'égout et autres",221320,"Sewage treatment facilities","Installations d'épuration des eaux usées","Water and Wastewater Systems","Systèmes d'eau et des eaux usées
+","Tonnes",57.72,1
+2022,7838,"Teck Coal Limited","Elkview Operations","0 1 Highway 3 Highway","Sparwood","BC","49.72864","-114.85106",1984.00,2121,"Coal mining","Extraction de charbon",212114,"Bituminous coal mining","Extraction de charbon bitumineux","Mining and Quarrying","Extraction minière et exploitation en carrière
+","Tonnes",49.61,1
+2022,7839,"Teck Coal Limited","Line Creek Operations","0  15km North Highway 43 Highway","Sparwood","BC","49.88683","-114.85035",1984.00,2121,"Coal mining","Extraction de charbon",212114,"Bituminous coal mining","Extraction de charbon bitumineux","Mining and Quarrying","Extraction minière et exploitation en carrière
+","Tonnes",174.54,1
+2022,7858,"City of Kamloops","Wastewater Treatment Centre","3300 Mission Flats Road","Kamloops","BC","50.6905","-120.4625",1983.00,2213,"Water, sewage and other systems","Réseaux d'aqueduc et d'égout et autres",221320,"Sewage treatment facilities","Installations d'épuration des eaux usées","Water and Wastewater Systems","Systèmes d'eau et des eaux usées
+","Tonnes",5.04,1
+2022,7878,"City of Prince George","Lansdowne Road Wastewater Treatment Centre","4055 Lansdowne Road","Prince George","BC","53.88","-122.7666",1983.00,2213,"Water, sewage and other systems","Réseaux d'aqueduc et d'égout et autres",221320,"Sewage treatment facilities","Installations d'épuration des eaux usées","Water and Wastewater Systems","Systèmes d'eau et des eaux usées
+","Tonnes",291.60,1
+2022,7879,"City of Prince George","Blackburn Wastewater Treatment Plant","1392 Foreman Road","Prince George","BC","53.9277","-122.6531",1983.00,2213,"Water, sewage and other systems","Réseaux d'aqueduc et d'égout et autres",221320,"Sewage treatment facilities","Installations d'épuration des eaux usées","Water and Wastewater Systems","Systèmes d'eau et des eaux usées
+","Tonnes",6.06,1
+2022,7880,"City of Prince George","BCR Wastewater Treatment Plant","1154 Pacific Street","Prince George","BC","53.8799","-122.7553",1983.00,2213,"Water, sewage and other systems","Réseaux d'aqueduc et d'égout et autres",221320,"Sewage treatment facilities","Installations d'épuration des eaux usées","Water and Wastewater Systems","Systèmes d'eau et des eaux usées
+","Tonnes",1.22,1
+2022,7881,"City of Prince George","Danson Wastewater Treatment Plant","Milwaukee Road","Prince George","BC","53.8308","-122.735",1983.00,2213,"Water, sewage and other systems","Réseaux d'aqueduc et d'égout et autres",221320,"Sewage treatment facilities","Installations d'épuration des eaux usées","Water and Wastewater Systems","Systèmes d'eau et des eaux usées
+","Tonnes",0.68,1
+2022,7882,"City of Prince George","Western Acres Wastewater Treatment Plant","8377 16 Highway","Prince George","BC","53.8209","-122.8776",1983.00,2213,"Water, sewage and other systems","Réseaux d'aqueduc et d'égout et autres",221320,"Sewage treatment facilities","Installations d'épuration des eaux usées","Water and Wastewater Systems","Systèmes d'eau et des eaux usées
+","Tonnes",0.19,1
+2022,7944,"Comox Valley Regional District","Comox Valley Water Pollution Control Centre","445 Brent Road","Comox","BC","49.6804","-124.8875",1983.00,2213,"Water, sewage and other systems","Réseaux d'aqueduc et d'égout et autres",221320,"Sewage treatment facilities","Installations d'épuration des eaux usées","Water and Wastewater Systems","Systèmes d'eau et des eaux usées
+","Tonnes",157.02,1
+2022,7992,"Corporation of the District of North Cowichan","Duncan/North Cowichan Joint Utilities Board Lagoons","1101 Marchmont Road North","Duncan","BC","48.7777","-123.6809",1983.00,2213,"Water, sewage and other systems","Réseaux d'aqueduc et d'égout et autres",221320,"Sewage treatment facilities","Installations d'épuration des eaux usées","Water and Wastewater Systems","Systèmes d'eau et des eaux usées
+","Tonnes",205.69,1
+2022,8060,"Cenovus Energy Inc.","Sea Rose FPSO","Suite 107 351 Water Street","St John's","NL","46.7215","-48.1341",1983.00,2111,"Oil and gas extraction","Extraction de pétrole et de gaz",211110,"Oil and gas extraction (except oil sands)","Extraction de pétrole et de gaz (à l'exception des sables bitumineux)","Conventional Oil and Gas extraction","Extraction de pétrole par des méthodes classiques
+","Tonnes",642.61,4
+2022,8109,"Halifax Regional Water Commission","Dartmouth Wastewater Treatment Facility","12  Mawiomi Place","Dartmouth","NS","44.65885","-63.5555",1984.00,2213,"Water, sewage and other systems","Réseaux d'aqueduc et d'égout et autres",221320,"Sewage treatment facilities","Installations d'épuration des eaux usées","Water and Wastewater Systems","Systèmes d'eau et des eaux usées
+","Tonnes",296.60,1
+2022,8110,"Halifax Regional Water Commission","Halifax Wastewater Treatment Facility","2180  Upper Water Street","Halifax","NS","44.6535","-63.5801",1983.00,2213,"Water, sewage and other systems","Réseaux d'aqueduc et d'égout et autres",221320,"Sewage treatment facilities","Installations d'épuration des eaux usées","Water and Wastewater Systems","Systèmes d'eau et des eaux usées
+","Tonnes",651.64,4
+2022,8126,"Halifax Regional Water Commission","Herring Cove Wastewater Treatment Facility","59  Village Road","Herring Cove","NS","44.56158","-63.55909",1984.00,2213,"Water, sewage and other systems","Réseaux d'aqueduc et d'égout et autres",221320,"Sewage treatment facilities","Installations d'épuration des eaux usées","Water and Wastewater Systems","Systèmes d'eau et des eaux usées
+","Tonnes",59.12,1
+2022,8518,"Ville de Val-d'Or","Usine d'épuration","1500 des Eaux-Nettes Road","Val-d'Or","QC","48.1089","-77.8641",1983.00,2213,"Water, sewage and other systems","Réseaux d'aqueduc et d'égout et autres",221320,"Sewage treatment facilities","Installations d'épuration des eaux usées","Water and Wastewater Systems","Systèmes d'eau et des eaux usées
+","Tonnes",9.31,1
+2022,8540,"Ville de Boisbriand","Station d'épuration des eaux usées","150  Chauvin Street","Boisbriand","QC","45.6029","-73.8305",1983.00,2213,"Water, sewage and other systems","Réseaux d'aqueduc et d'égout et autres",221320,"Sewage treatment facilities","Installations d'épuration des eaux usées","Water and Wastewater Systems","Systèmes d'eau et des eaux usées
+","Tonnes",77.90,1
+2022,8561,"G Production Inc.","USINE BAIE D'URFÉ","19400 Transcanadienne Route","Baie D'Urfé","QC","45.43004","-73.90981",1984.00,3254,"Pharmaceutical and medicine manufacturing","Fabrication de produits pharmaceutiques et de médicaments",325410,"Pharmaceutical and medicine manufacturing","Fabrication de produits pharmaceutiques et de médicaments","Chemicals","Produits chimiques
+","Tonnes",22.72,1
+2022,8567,"Ville de Chibougamau","station d'épuration","1034  Hamel","Chibougamau","QC","49.9039","-74.4009",1983.00,2213,"Water, sewage and other systems","Réseaux d'aqueduc et d'égout et autres",221320,"Sewage treatment facilities","Installations d'épuration des eaux usées","Water and Wastewater Systems","Systèmes d'eau et des eaux usées
+","Tonnes",25.22,1
+2022,8570,"Ville de Montmagny","Station d'épuration ville de montmagny","1  François-Richard Street","Montmagny","QC","46.98631","-70.56614",1984.00,2213,"Water, sewage and other systems","Réseaux d'aqueduc et d'égout et autres",221320,"Sewage treatment facilities","Installations d'épuration des eaux usées","Water and Wastewater Systems","Systèmes d'eau et des eaux usées
+","Tonnes",39.30,1
+2022,8575,"Ville de Rouyn-Noranda","Étangs Rouyn-Noranda","1850  Perreault Est Street","Rouyn-Noranda","QC","48.24126","-78.9802",1984.00,2213,"Water, sewage and other systems","Réseaux d'aqueduc et d'égout et autres",221320,"Sewage treatment facilities","Installations d'épuration des eaux usées","Water and Wastewater Systems","Systèmes d'eau et des eaux usées
+","Tonnes",87.45,1
+2022,8600,"Hecla Québec Inc.","Casa Berardi","zone de la rivière Théo","Eeyou Istchee","QC","49.3357","-79.1646",1983.00,2122,"Metal ore mining","Extraction de minerais métalliques",212220,"Gold and silver ore mining","Extraction de minerais d'or et d'argent","Mining and Quarrying","Extraction minière et exploitation en carrière
+","Tonnes",88.95,1
+2022,8637,"Ville de Saint-Jean-sur-Richelieu","Station d'épuration des eaux usées","400 Du Parc Avenue","Saint-Jean-sur-Richelieu","QC","45.3631","-73.2848",1983.00,2213,"Water, sewage and other systems","Réseaux d'aqueduc et d'égout et autres",221320,"Sewage treatment facilities","Installations d'épuration des eaux usées","Water and Wastewater Systems","Systèmes d'eau et des eaux usées
+","Tonnes",307.09,1
+2022,8660,"Covia Canada Ltd.","St-Canut Facility","11974 Sir Wilfred Laurier","St-Canut, Mirabel","QC","45.7288","-74.0293",1983.00,2123,"Non-metallic mineral mining and quarrying","Extraction de minerais non métalliques",212317,"Sandstone mining and quarrying","Extraction de grès","Mining and Quarrying","Extraction minière et exploitation en carrière
+","Tonnes",3.479e-04,1
+2022,8697,"Ville d'Alma","Étangs Sud","station 916 Auger Boulevard East","Alma","QC","48.5308","-71.6253",1983.00,2213,"Water, sewage and other systems","Réseaux d'aqueduc et d'égout et autres",221320,"Sewage treatment facilities","Installations d'épuration des eaux usées","Water and Wastewater Systems","Systèmes d'eau et des eaux usées
+","Tonnes",77.20,1
+2022,8698,"Ville d'Alma","Étangs Nord","260 Bellevue Street","Alma","QC","48.5855","-71.6223",1983.00,9139,"Other local, municipal and regional public administration","Autres services des administrations publiques locales, municipales et régionales",913910,"Other local, municipal and regional public administration","Autres services des administrations publiques locales, municipales et régionales","Other (Except Manufacturing)","Autres (sauf fabrication)
+","Tonnes",5.88,1
+2022,8699,"Ville d'Alma","Étangs SCM","5172 du Pont Avenue North","Alma","QC","48.62809","-71.68543",1984.00,5629,"Remediation and other waste management services","Services d'assainissement et autres services de gestion des déchets",562910,"Remediation services","Services d'assainissement","Waste Treatment and Disposal","Traitement et élimination des déchets
+","Tonnes",3.03,1
+2022,8724,"Ville de Chateauguay","Station épuration St-Bernard","500 St-Bernard","Chateauguay","QC","45.3846","-73.7374",1983.00,2213,"Water, sewage and other systems","Réseaux d'aqueduc et d'égout et autres",221320,"Sewage treatment facilities","Installations d'épuration des eaux usées","Water and Wastewater Systems","Systèmes d'eau et des eaux usées
+","Tonnes",190.60,1
+2022,8730,"Régie d'assainissement des eaux Richelieu/St-Laurent","Station d'épuration","105 Poliquin Boulevard","Sorel-Tracy","QC","46.0386","-73.0791",1983.00,2213,"Water, sewage and other systems","Réseaux d'aqueduc et d'égout et autres",221320,"Sewage treatment facilities","Installations d'épuration des eaux usées","Water and Wastewater Systems","Systèmes d'eau et des eaux usées
+","Tonnes",152.00,1
+2022,8742,"Corporation ID Biomédical du Québec f.a.s. GSK Biologicals","Corporation ID Biomédical du Québec f.a.s. GSK Biologicals","2323 du Parc technologique","Sainte-Foy","QC","46.7956","-71.2949",1983.00,3254,"Pharmaceutical and medicine manufacturing","Fabrication de produits pharmaceutiques et de médicaments",325410,"Pharmaceutical and medicine manufacturing","Fabrication de produits pharmaceutiques et de médicaments","Chemicals","Produits chimiques
+","Tonnes",1.74e-04,1
+2022,8752,"Ville de Gatineau","Usine d'épuration Buckingham-Masson-Angers","150 de la Rive Road","Gatineau","QC","45.5359","-75.4189",1983.00,2213,"Water, sewage and other systems","Réseaux d'aqueduc et d'égout et autres",221320,"Sewage treatment facilities","Installations d'épuration des eaux usées","Water and Wastewater Systems","Systèmes d'eau et des eaux usées
+","Tonnes",76.31,1
+2022,8757,"Agnico-Eagle Mines Lted","Division Goldex","1953 3e avenue ouest Avenue","Val-d'Or","QC","48.0911","-77.87222",1984.00,2122,"Metal ore mining","Extraction de minerais métalliques",212220,"Gold and silver ore mining","Extraction de minerais d'or et d'argent","Mining and Quarrying","Extraction minière et exploitation en carrière
+","Tonnes",0.09,1
+2022,8772,"Ville de Saint-Georges-de-Beauce","Usine d'épuration","400 de la Chaudière","Saint-Georges-de-Beauce","QC","46.1269","-70.6955",1983.00,2213,"Water, sewage and other systems","Réseaux d'aqueduc et d'égout et autres",221320,"Sewage treatment facilities","Installations d'épuration des eaux usées","Water and Wastewater Systems","Systèmes d'eau et des eaux usées
+","Tonnes",63.09,1
+2022,8774,"Ville de Rimouski","Station d'épuration Rimouski-est","Lebrun Avenue","Rimouski","QC","48.4736","-68.4895",1983.00,2213,"Water, sewage and other systems","Réseaux d'aqueduc et d'égout et autres",221320,"Sewage treatment facilities","Installations d'épuration des eaux usées","Water and Wastewater Systems","Systèmes d'eau et des eaux usées
+","Tonnes",176.28,1
+2022,8778,"ArcelorMittal Exploitation Minière Canada s.e.n.c.","Mine de Fire Lake","1000 route 389","Mont-Wright","QC","52.35029","-67.36923",1983.00,2122,"Metal ore mining","Extraction de minerais métalliques",212210,"Iron ore mining","Extraction de minerais de fer","Mining and Quarrying","Extraction minière et exploitation en carrière
+","Tonnes",15.80,1
+2022,8783,"MINERAI DE FER QUÉBEC INC.","Mine du Lac Bloom","755 Route 389","Fermont","QC","52.8383","-67.2761",1983.00,2122,"Metal ore mining","Extraction de minerais métalliques",212210,"Iron ore mining","Extraction de minerais de fer","Mining and Quarrying","Extraction minière et exploitation en carrière
+","Tonnes",0.56,1
+2022,8803,"Goldcorp Canada Ltd","Mine Éléonore","1751 Davy Street","Rouyn-Noranda","QC","52.69871","-76.05828",1984.00,2122,"Metal ore mining","Extraction de minerais métalliques",212220,"Gold and silver ore mining","Extraction de minerais d'or et d'argent","Mining and Quarrying","Extraction minière et exploitation en carrière
+","Tonnes",161.06,1
+2022,8810,"Ville de Trois-Rivières","Étangs aérés de Trois-Rivières","1501 Bradley","Trois-Rivières","QC","46.4232","-72.4901",1983.00,2213,"Water, sewage and other systems","Réseaux d'aqueduc et d'égout et autres",221320,"Sewage treatment facilities","Installations d'épuration des eaux usées","Water and Wastewater Systems","Systèmes d'eau et des eaux usées
+","Tonnes",568.20,4
+2022,10010,"Wesdome Gold Mines Ltd.","Eagle River Mine & Mill Complex","93 Mission Road","Wawa","ON","47.98562","-85.46116",1984.00,2122,"Metal ore mining","Extraction de minerais métalliques",212220,"Gold and silver ore mining","Extraction de minerais d'or et d'argent","Mining and Quarrying","Extraction minière et exploitation en carrière
+","Tonnes",1.407041e-03,1
+2022,10134,"Town of Collingwood","Wastewater Treatment Plant","3 Birch Street","Collingwood","ON","44.5044","-80.2229",1983.00,2213,"Water, sewage and other systems","Réseaux d'aqueduc et d'égout et autres",221320,"Sewage treatment facilities","Installations d'épuration des eaux usées","Water and Wastewater Systems","Systèmes d'eau et des eaux usées
+","Tonnes",27.50,1
+2022,10149,"The Corporation of the City of Kingston","Ravensview Wastewater Treatment","947 2 Highway","Kingston","ON","44.2416","-76.4199",1983.00,2213,"Water, sewage and other systems","Réseaux d'aqueduc et d'égout et autres",221320,"Sewage treatment facilities","Installations d'épuration des eaux usées","Water and Wastewater Systems","Systèmes d'eau et des eaux usées
+","Tonnes",368.64,1
+2022,10153,"Glencore Canada Corporation","Kidd Mine Site","11335 Highway 655 North Highway North","Timmins","ON","48.687","-81.3701",1983.00,2122,"Metal ore mining","Extraction de minerais métalliques",212233,"Copper-zinc ore mining","Extraction de minerais de cuivre-zinc","Mining and Quarrying","Extraction minière et exploitation en carrière
+","Tonnes",42.33,1
+2022,10163,"Corporation of the City of London","Adelaide Pollution Control Plant","1201 Adelaide Street","London","ON","43.0162","-81.2483",1983.00,2213,"Water, sewage and other systems","Réseaux d'aqueduc et d'égout et autres",221320,"Sewage treatment facilities","Installations d'épuration des eaux usées","Water and Wastewater Systems","Systèmes d'eau et des eaux usées
+","Tonnes",131.24,1
+2022,10164,"Corporation of the City of London","Pottersburg Pollution Control Plant","1141 Hamilton Road","London","ON","42.9734","-81.1792",1983.00,2213,"Water, sewage and other systems","Réseaux d'aqueduc et d'égout et autres",221320,"Sewage treatment facilities","Installations d'épuration des eaux usées","Water and Wastewater Systems","Systèmes d'eau et des eaux usées
+","Tonnes",82.19,1
+2022,10165,"Corporation of the City of London","Oxford Pollution Control Plant","1570 Oxford Street West","London","ON","42.9686","-81.3426",1983.00,2213,"Water, sewage and other systems","Réseaux d'aqueduc et d'égout et autres",221320,"Sewage treatment facilities","Installations d'épuration des eaux usées","Water and Wastewater Systems","Systèmes d'eau et des eaux usées
+","Tonnes",80.65,1
+2022,10166,"Corporation of the City of London","Vauxhall Pollution Control Plant","54 Price Street","London","ON","42.9736","-81.2051",1983.00,2213,"Water, sewage and other systems","Réseaux d'aqueduc et d'égout et autres",221320,"Sewage treatment facilities","Installations d'épuration des eaux usées","Water and Wastewater Systems","Systèmes d'eau et des eaux usées
+","Tonnes",70.37,1
+2022,10202,"Vale Canada Limited","Garson Mine","60 Mine Road","Garson","ON","46.5667","-80.8562",1983.00,2122,"Metal ore mining","Extraction de minerais métalliques",212232,"Nickel-copper ore mining","Extraction de minerais de nickel-cuivre","Mining and Quarrying","Extraction minière et exploitation en carrière
+","Tonnes",8.87,1
+2022,10254,"The Regional Municipality of Halton","Oakville Southeast Wastewater Treatment Plant","2477 Lakeshore Road","Oakville","ON","43.48228","-79.63109",1984.00,2213,"Water, sewage and other systems","Réseaux d'aqueduc et d'égout et autres",221320,"Sewage treatment facilities","Installations d'épuration des eaux usées","Water and Wastewater Systems","Systèmes d'eau et des eaux usées
+","Tonnes",515.06,4
+2022,10256,"The Regional Municipality of Halton","Mid-Halton Wastewater Treatment Plant","2195 North Service Road","Oakville","ON","43.41935","-79.73289",1984.00,2213,"Water, sewage and other systems","Réseaux d'aqueduc et d'égout et autres",221320,"Sewage treatment facilities","Installations d'épuration des eaux usées","Water and Wastewater Systems","Systèmes d'eau et des eaux usées
+","Tonnes",3727.13,3
+2022,10257,"The Regional Municipality of Halton","Oakville Southwest Wastewater Treatment Plant","1385 Lakeshore Road","Oakville","ON","43.4133","-79.6936",1983.00,2213,"Water, sewage and other systems","Réseaux d'aqueduc et d'égout et autres",221320,"Sewage treatment facilities","Installations d'épuration des eaux usées","Water and Wastewater Systems","Systèmes d'eau et des eaux usées
+","Tonnes",731.66,4
+2022,10258,"The Regional Municipality of Halton","Georgetown Wastewater Treatment Plant","275 Mountainview Road South","Halton Hills","ON","43.6399","-79.8793",1983.00,2213,"Water, sewage and other systems","Réseaux d'aqueduc et d'égout et autres",221320,"Sewage treatment facilities","Installations d'épuration des eaux usées","Water and Wastewater Systems","Systèmes d'eau et des eaux usées
+","Tonnes",449.55,1
+2022,10294,"City of St Thomas","Water Pollution Control Plant","40359 Bush Line","St. Thomas","ON","42.76915","-81.20529",1984.00,2213,"Water, sewage and other systems","Réseaux d'aqueduc et d'égout et autres",221320,"Sewage treatment facilities","Installations d'épuration des eaux usées","Water and Wastewater Systems","Systèmes d'eau et des eaux usées
+","Tonnes",145.69,1
+2022,10303,"Jungbunzlauer Canada Inc.","Jungbunzlauer Canada Inc.","1555 Elm Street","Port Colborne","ON","42.92034","-79.24999",1984.00,3251,"Basic chemical manufacturing","Fabrication de produits chimiques de base",325190,"Other basic organic chemical manufacturing","Fabrication d'autres produits chimiques organiques de base","Chemicals","Produits chimiques
+","Tonnes",270.94,1
+2022,10304,"Corporation of the City of Cornwall","Cornwall Wastewater Treatment Plant","2800 Montreal Road East","Cornwall","ON","45.0297","-74.6784",1983.00,2213,"Water, sewage and other systems","Réseaux d'aqueduc et d'égout et autres",221320,"Sewage treatment facilities","Installations d'épuration des eaux usées","Water and Wastewater Systems","Systèmes d'eau et des eaux usées
+","Tonnes",876.01,4
+2022,10400,"The Corporation of the City of Kingston","CATARAQUI BAY WASTEWATER TREATMENT","409 Front Road","Kingston","ON","44.2143","-76.5516",1983.00,2213,"Water, sewage and other systems","Réseaux d'aqueduc et d'égout et autres",221320,"Sewage treatment facilities","Installations d'épuration des eaux usées","Water and Wastewater Systems","Systèmes d'eau et des eaux usées
+","Tonnes",310.28,1
+2022,10456,"The Corporation of the City of Brantford","City of Brantford Waste Water Treatment Plant","385 Mohawk Street","Brantford","ON","43.128","-80.2297",1983.00,2213,"Water, sewage and other systems","Réseaux d'aqueduc et d'égout et autres",221320,"Sewage treatment facilities","Installations d'épuration des eaux usées","Water and Wastewater Systems","Systèmes d'eau et des eaux usées
+","Tonnes",204.53,1
+2022,10484,"Regional Municipality of Durham","Corbett Creek WPCP","2400 Forbes Street","Whitby","ON","43.8561","-78.8925",1983.00,2213,"Water, sewage and other systems","Réseaux d'aqueduc et d'égout et autres",221320,"Sewage treatment facilities","Installations d'épuration des eaux usées","Water and Wastewater Systems","Systèmes d'eau et des eaux usées
+","Tonnes",17.11,1
+2022,10617,"The City of North Bay","North Bay Wastewater Treatment Plant","650 Memorial Drive","North Bay","ON","46.3026","-79.4617",1983.00,2213,"Water, sewage and other systems","Réseaux d'aqueduc et d'égout et autres",221320,"Sewage treatment facilities","Installations d'épuration des eaux usées","Water and Wastewater Systems","Systèmes d'eau et des eaux usées
+","Tonnes",608.13,4
+2022,10622,"SMC (CANADA) Ltd.","SMC (Canada) Ltd.","797318 Coleman Road","Cobalt","ON","47.3727","-79.6663",1983.00,3314,"Non-ferrous metal (except aluminum) production and processing","Production et transformation de métaux non ferreux (sauf l'aluminium)",331410,"Non-ferrous metal (except aluminum) smelting and refining","Fonte et affinage de métaux non ferreux (sauf l'aluminium)","Metals (Except Aluminum and Iron and Steel)","Métaux (sauf aluminium et fer et acier)
+","Tonnes",0.44,1
+2022,10762,"The Corporation of the City of Sault Ste. Marie","West End Water Pollution Control Plant","55 Allen's Side Road","Sault Ste. Marie","ON","46.5243","-84.4077",1983.00,2213,"Water, sewage and other systems","Réseaux d'aqueduc et d'égout et autres",221320,"Sewage treatment facilities","Installations d'épuration des eaux usées","Water and Wastewater Systems","Systèmes d'eau et des eaux usées
+","Tonnes",97.05,1
+2022,10809,"Conestoga Meat Packers Ltd.","Conestoga Meat Packers","313 Menno Street","Breslau","ON","43.473","-80.391",1983.00,3116,"Meat product manufacturing","Fabrication de produits de viande",311617,"Hog slaughtering","Abattage de porcs","Other Manufacturing","Autres fabrication
+","Tonnes",10.69,1
+2022,10884,"Town of Orangeville","Orangeville Water Pollution Control Plant","16 Townline","Orangeville","ON","43.9182","-80.087",1983.00,2213,"Water, sewage and other systems","Réseaux d'aqueduc et d'égout et autres",221320,"Sewage treatment facilities","Installations d'épuration des eaux usées","Water and Wastewater Systems","Systèmes d'eau et des eaux usées
+","Tonnes",15.47,1
+2022,10979,"City of Owen Sound","Owen Sound WPCP","2050 3rd Avenue East","Owen Sound","ON","44.5846","-80.9323",1983.00,2213,"Water, sewage and other systems","Réseaux d'aqueduc et d'égout et autres",221320,"Sewage treatment facilities","Installations d'épuration des eaux usées","Water and Wastewater Systems","Systèmes d'eau et des eaux usées
+","Tonnes",5.45,1
+2022,11017,"City of Kawartha Lakes","Lindsay WPCP","48 Lagoon Street","Lindsay","ON","44.386","-78.7389",1983.00,2213,"Water, sewage and other systems","Réseaux d'aqueduc et d'égout et autres",221320,"Sewage treatment facilities","Installations d'épuration des eaux usées","Water and Wastewater Systems","Systèmes d'eau et des eaux usées
+","Tonnes",76.21,1
+2022,11454,"Alamos Gold Incorporated","Island Gold Mine","15 Goudreau Road","Dubreuilville","ON","48.30072","-84.43404",1984.00,2122,"Metal ore mining","Extraction de minerais métalliques",212220,"Gold and silver ore mining","Extraction de minerais d'or et d'argent","Mining and Quarrying","Extraction minière et exploitation en carrière
+","Tonnes",24.49,1
+2022,11467,"The Corporation of the City of Sault Ste. Marie","East Wastewater Treatment Plant","2221 Queen Street East","Sault Ste. Marie","ON","46.5065","-84.2602",1983.00,2213,"Water, sewage and other systems","Réseaux d'aqueduc et d'égout et autres",221320,"Sewage treatment facilities","Installations d'épuration des eaux usées","Water and Wastewater Systems","Systèmes d'eau et des eaux usées
+","Tonnes",123.37,1
+2022,11623,"1911 Gold Corporation","True North Gold Mine","63 Antonio Road","Bissett","MB","51.0218","-95.6795",1983.00,2122,"Metal ore mining","Extraction de minerais métalliques",212220,"Gold and silver ore mining","Extraction de minerais d'or et d'argent","Mining and Quarrying","Extraction minière et exploitation en carrière
+","Tonnes",0.76,1
+2022,11685,"Green Lane Landfill","Green Lane Landfill","38593 Third Line R.R. 7","St. Thomas","ON","42.8156","-81.3267",1983.00,5622,"Waste treatment and disposal","Traitement et élimination des déchets",562210,"Waste treatment and disposal","Traitement et élimination des déchets","Waste Treatment and Disposal","Traitement et élimination des déchets
+","Tonnes",0.01,1
+2022,11690,"Regional Municipality of Durham","Courtice WPCP","100 Osborne Road","Courtice","ON","43.8711","-78.75291",1984.00,2213,"Water, sewage and other systems","Réseaux d'aqueduc et d'égout et autres",221320,"Sewage treatment facilities","Installations d'épuration des eaux usées","Water and Wastewater Systems","Systèmes d'eau et des eaux usées
+","Tonnes",20.76,1
+2022,11743,"McEwen Ontario","McEwen Ontario Black Fox Mill","5300 101 Highway West","Matheson","ON","48.5515","-80.7509",1983.00,2122,"Metal ore mining","Extraction de minerais métalliques",212220,"Gold and silver ore mining","Extraction de minerais d'or et d'argent","Mining and Quarrying","Extraction minière et exploitation en carrière
+","Tonnes",0.02,1
+2022,11796,"Lake Shore Gold","Bell Creek Complex","3160 Florence Street","Porcupine","ON","48.4741","-81.0419",1983.00,2122,"Metal ore mining","Extraction de minerais métalliques",212220,"Gold and silver ore mining","Extraction de minerais d'or et d'argent","Mining and Quarrying","Extraction minière et exploitation en carrière
+","Tonnes",0.30,1
+2022,11877,"Vale Canada Limited","Ellen Pit","Crean Hill Road Road","Denison Township","ON","46.43125","-81.34961",1983.00,2122,"Metal ore mining","Extraction de minerais métalliques",212232,"Nickel-copper ore mining","Extraction de minerais de nickel-cuivre","Mining and Quarrying","Extraction minière et exploitation en carrière
+","Tonnes",5.2e-04,1
+2022,11878,"Vale Canada Limited","Totten Mine","6 C. Johnson Road","Worthington","ON","46.3813","-81.4541",1983.00,2122,"Metal ore mining","Extraction de minerais métalliques",212232,"Nickel-copper ore mining","Extraction de minerais de nickel-cuivre","Mining and Quarrying","Extraction minière et exploitation en carrière
+","Tonnes",0.06,1
+2022,18241,"Rio Tinto plc","Diavik Diamond Mines (2012) Inc.","Suite 300 5201 50 Avenue","Yellowknife","NT","64.4951","-110.2832",1983.00,2123,"Non-metallic mineral mining and quarrying","Extraction de minerais non métalliques",212392,"Diamond mining","Extraction de diamant","Mining and Quarrying","Extraction minière et exploitation en carrière
+","Tonnes",0.50,1
+2022,18997,"MEGlobal Canada ULC","Prentiss Chemical Manufacturing Facility","Prentiss Road","Lacombe County","AB","52.9424","-113.5111",1983.00,3251,"Basic chemical manufacturing","Fabrication de produits chimiques de base",325190,"Other basic organic chemical manufacturing","Fabrication d'autres produits chimiques organiques de base","Chemicals","Produits chimiques
+","Tonnes",1.14,1
+2022,19397,"Cameco Corporation","Cigar Lake Operation","2121 11th Street West","Saskatoon","SK","58.0676","-104.542",1983.00,2122,"Metal ore mining","Extraction de minerais métalliques",212291,"Uranium ore mining","Extraction de minerais d'uranium","Mining and Quarrying","Extraction minière et exploitation en carrière
+","Tonnes",0.04,1
+2022,20147,"Greater Vancouver Sewerage and Drainage District","Northwest Langley Wastewater Treatment Plant","10301  201st Street","Township of Langley","BC","49.1905","-122.664",1983.00,2213,"Water, sewage and other systems","Réseaux d'aqueduc et d'égout et autres",221320,"Sewage treatment facilities","Installations d'épuration des eaux usées","Water and Wastewater Systems","Systèmes d'eau et des eaux usées
+","Tonnes",173.80,1
+2022,20173,"Corporation of the District of North Cowichan","Chemainus STP","9575 Bare Point Road","North Cowichan","BC","48.915","-123.7103",1983.00,2213,"Water, sewage and other systems","Réseaux d'aqueduc et d'égout et autres",221320,"Sewage treatment facilities","Installations d'épuration des eaux usées","Water and Wastewater Systems","Systèmes d'eau et des eaux usées
+","Tonnes",21.23,1
+2022,20190,"Regional District of Nanaimo","French Creek Pollution Control Centre","957 Lee Road","French Creek","BC","49.34617","-124.3617",1983.00,2213,"Water, sewage and other systems","Réseaux d'aqueduc et d'égout et autres",221320,"Sewage treatment facilities","Installations d'épuration des eaux usées","Water and Wastewater Systems","Systèmes d'eau et des eaux usées
+","Tonnes",150.72,1
+2022,21477,"Simplot Canada (II) Ltd.","Portage la Prairie","highway #1 and Simplot Road Highway West","Portage La Prairie","MB","49.9721","-98.3943",1983.00,3114,"Fruit and vegetable preserving and specialty food manufacturing","Mise en conserve de fruits et de légumes et fabrication de spécialités alimentaires",311410,"Frozen food manufacturing","Fabrication d'aliments congelés","Other Manufacturing","Autres fabrication
+","Tonnes",71.23,1
+2022,21543,"Hudbay Minerals","HBMS Chisel Lake Mine","1 395 Highway","Snow Lake","MB","54.83","-100.12",1983.00,2122,"Metal ore mining","Extraction de minerais métalliques",212233,"Copper-zinc ore mining","Extraction de minerais de cuivre-zinc","Mining and Quarrying","Extraction minière et exploitation en carrière
+","Tonnes",2582.60,3
+2022,22740,"City of Calgary","Pine Creek Wastewater Treatment Plant","3131 210 Avenue Southeast","Calgary","AB","50.8589","-113.9885",1983.00,2213,"Water, sewage and other systems","Réseaux d'aqueduc et d'égout et autres",221320,"Sewage treatment facilities","Installations d'épuration des eaux usées","Water and Wastewater Systems","Systèmes d'eau et des eaux usées
+","Tonnes",1137.26,3
+2022,23273,"SGO Mining Inc.","Seabee","202 2100 Airport Drive","Saskatoon","SK","55.6884","-103.6151",1983.00,2122,"Metal ore mining","Extraction de minerais métalliques",212220,"Gold and silver ore mining","Extraction de minerais d'or et d'argent","Mining and Quarrying","Extraction minière et exploitation en carrière
+","Tonnes",102.72,1
+2022,24216,"Agnico Eagle Mines Ltd.","Division Meadowbank","540","Baker Lake","NU","65.0149","-96.0524",1983.00,2122,"Metal ore mining","Extraction de minerais métalliques",212220,"Gold and silver ore mining","Extraction de minerais d'or et d'argent","Mining and Quarrying","Extraction minière et exploitation en carrière
+","Tonnes",0.65,1
+2022,25188,"Canadian Malartic GP","Mine Canadian Malartic GP","100 Chemin du Lac Mourier","Malartic","QC","48.124507","-78.129272",1983.00,2122,"Metal ore mining","Extraction de minerais métalliques",212220,"Gold and silver ore mining","Extraction de minerais d'or et d'argent","Mining and Quarrying","Extraction minière et exploitation en carrière
+","Tonnes",8.14,1
+2022,25191,"Corp. of the City of Timmins","Mattagami Water Pollution Control Plan","551 Airport Road","Timmins","ON","48.49344","-81.35769",1983.00,2213,"Water, sewage and other systems","Réseaux d'aqueduc et d'égout et autres",221320,"Sewage treatment facilities","Installations d'épuration des eaux usées","Water and Wastewater Systems","Systèmes d'eau et des eaux usées
+","Tonnes",11.47,1
+2022,25317,"City of Saint John","Eastern Wastewater Treatment Facility","441 Red Head Road","Saint John","NB","45.2649","-66.016",1983.00,2213,"Water, sewage and other systems","Réseaux d'aqueduc et d'égout et autres",221320,"Sewage treatment facilities","Installations d'épuration des eaux usées","Water and Wastewater Systems","Systèmes d'eau et des eaux usées
+","Tonnes",28.34,1
+2022,25421,"City of Portage la Prairie","City of Portage la Prairie Water Pollution Control Facility","400 River  Road","Portage la Prairie","MB","49.954036","-98.269186",1983.00,2213,"Water, sewage and other systems","Réseaux d'aqueduc et d'égout et autres",221320,"Sewage treatment facilities","Installations d'épuration des eaux usées","Water and Wastewater Systems","Systèmes d'eau et des eaux usées
+","Tonnes",455.81,1
+2022,26132,"Alamos Gold Incorporated","Young-Davidson","566 Hwy 566 Road West","Matachewan","ON","47.94722","-80.67722",1983.00,2122,"Metal ore mining","Extraction de minerais métalliques",212220,"Gold and silver ore mining","Extraction de minerais d'or et d'argent","Mining and Quarrying","Extraction minière et exploitation en carrière
+","Tonnes",118.57,1
+2022,26403,"Fort Hills Energy L.P.","Fort Hills Oil Sands","90 kms north of Fort McMurray","Fort McMurray","AB","57.39207","-111.567907",1983.00,2111,"Oil and gas extraction","Extraction de pétrole et de gaz",211142,"Mined oil sands extraction","Extraction minière de sables bitumineux","Non-Conventional Oil Extraction (including Oilsands and Heavy Oil)","Extraction de pétrole par des méthodes non classiques (incluant sables bitumineux et huile loudre)
+","Tonnes",2.66,1
+2022,27063,"Rambler Metals & Mining L","Ming Copper-Gold Mine","418 Ming's Bight Road Highway","Ming's Bight","NL","49.89556","-56.08144",1983.00,2122,"Metal ore mining","Extraction de minerais métalliques",212220,"Gold and silver ore mining","Extraction de minerais d'or et d'argent","Mining and Quarrying","Extraction minière et exploitation en carrière
+","Tonnes",0.08,1
+2022,27081,"The Corporation of the City of Orillia","Wastewater Treatment Centre","40 Kitchener Street","Orillia","ON","44.59085","-79.41309",1983.00,2213,"Water, sewage and other systems","Réseaux d'aqueduc et d'égout et autres",221320,"Sewage treatment facilities","Installations d'épuration des eaux usées","Water and Wastewater Systems","Systèmes d'eau et des eaux usées
+","Tonnes",34.72,1
+2022,27120,"Corporation of the District of North Cowichan","Crofton STP","1575 Chaplin Street East","Crofton","BC","48.86625","-123.64288",1983.00,2213,"Water, sewage and other systems","Réseaux d'aqueduc et d'égout et autres",221320,"Sewage treatment facilities","Installations d'épuration des eaux usées","Water and Wastewater Systems","Systèmes d'eau et des eaux usées
+","Tonnes",11.29,1
+2022,27853,"Rio Tinto Alcan Inc","Aluminerie Arvida - Centre technologique AP60","2685 Boulevard du Saguenay","Jonquière","QC","48.431927","-71.156743",1983.00,3313,"Alumina and aluminum production and processing","Production et transformation d'alumine et d'aluminium",331313,"Primary production of alumina and aluminum","Production primaire d'alumine et d'aluminium","Aluminum","Aluminum","Tonnes",1.8137e-05,1
+2022,27917,"Veolia ES Canada Services Industriels Inc.","Veolia ES Canada Services Industriels inc.","7950 Av. Pion","St-Hyacinthe","QC","45.65029","-72.97023",1983.00,5629,"Remediation and other waste management services","Services d'assainissement et autres services de gestion des déchets",562910,"Remediation services","Services d'assainissement","Waste Treatment and Disposal","Traitement et élimination des déchets
+","Tonnes",4.72e-05,1
+2022,28455,"Baffinland Iron Mines","Milne Port Site","NA","NA","NU","71.88444","-80.88611",1983.00,2122,"Metal ore mining","Extraction de minerais métalliques",212210,"Iron ore mining","Extraction de minerais de fer","Mining and Quarrying","Extraction minière et exploitation en carrière
+","Tonnes",6.032e-06,1
+2022,28456,"Baffinland Iron Mines","Mary River Mine Site","NA","NA","NU","71.3146","-79.28194",1983.00,2122,"Metal ore mining","Extraction de minerais métalliques",212210,"Iron ore mining","Extraction de minerais de fer","Mining and Quarrying","Extraction minière et exploitation en carrière
+","Tonnes",7.29,1
+2022,28761,"Vale Newfoundland and Labrador Limited","Long Harbour Operations","1 Nickel Road","Long Harbour","NL","47.40915","-53.81169",1983.00,3314,"Non-ferrous metal (except aluminum) production and processing","Production et transformation de métaux non ferreux (sauf l'aluminium)",331410,"Non-ferrous metal (except aluminum) smelting and refining","Fonte et affinage de métaux non ferreux (sauf l'aluminium)","Metals (Except Aluminum and Iron and Steel)","Métaux (sauf aluminium et fer et acier)
+","Tonnes",0.55,1
+2022,29030,"Matériaux Nano One Candiac Inc","Matériaux Nano One Candiac Inc","280 Liberté Avenue Northeast","Candiac","QC","45.372937","-73.524336",1983.00,3251,"Basic chemical manufacturing","Fabrication de produits chimiques de base",325189,"All other basic inorganic chemical manufacturing","Fabrication de tous les autres produits chimiques inorganiques de base","Chemicals","Produits chimiques
+","Tonnes",0.29,1
+2022,29381,"Coeur Silvertip Holdings Ltd.","Silvertip Mine","1084KM 1055 Dunsmuir Street","Vancouver","BC","59.92736","-130.34199",1983.00,2122,"Metal ore mining","Extraction de minerais métalliques",212231,"Lead-zinc ore mining","Extraction de minerais de plomb-zinc","Mining and Quarrying","Extraction minière et exploitation en carrière
+","Tonnes",8.4907e-03,1
+2022,29389,"Agnico Eagle Mines Ltd.","Meliadine Gold Project","Meliadine Mine","Rankin Inlet","NU","63.22418","-92.13443",1983.00,2122,"Metal ore mining","Extraction de minerais métalliques",212220,"Gold and silver ore mining","Extraction de minerais d'or et d'argent","Mining and Quarrying","Extraction minière et exploitation en carrière
+","Tonnes",0.03,1
+2022,29518,"Corp. of the City of Timmins","Whitney-Tisdale WPCP","815 Gervais Street","South Porcupine","ON","48.50214","-81.16084",1983.00,2213,"Water, sewage and other systems","Réseaux d'aqueduc et d'égout et autres",221320,"Sewage treatment facilities","Installations d'épuration des eaux usées","Water and Wastewater Systems","Systèmes d'eau et des eaux usées
+","Tonnes",8.65,1
+2022,29519,"Corp. of the City of Timmins","Bob's Lake Sewage Lagoon","300 Ida  Street","Porcupine","ON","48.49012","-81.15737",1983.00,2213,"Water, sewage and other systems","Réseaux d'aqueduc et d'égout et autres",221320,"Sewage treatment facilities","Installations d'épuration des eaux usées","Water and Wastewater Systems","Systèmes d'eau et des eaux usées
+","Tonnes",0.47,1
+2022,29877,"GOLDCORP CANADA LTD.","Borden Gold Mine","Highway 101  East","Chapleau","ON","47.87057","-83.25873",1983.00,2122,"Metal ore mining","Extraction de minerais métalliques",212220,"Gold and silver ore mining","Extraction de minerais d'or et d'argent","Mining and Quarrying","Extraction minière et exploitation en carrière
+","Tonnes",6.018801e-03,1
+2022,29897,"Silver Lake Ontario Inc.","Silver Lake Ontario Inc. - Sugar Zone Mine","113 Tukanee Lake Road","White River","ON","48.622573","-85.229848",1983.00,2122,"Metal ore mining","Extraction de minerais métalliques",212220,"Gold and silver ore mining","Extraction de minerais d'or et d'argent","Mining and Quarrying","Extraction minière et exploitation en carrière
+","Tonnes",15.73,1
+2022,29899,"Exxonmobil Canada Properties - Hebron","Hebron Platform","Suburban Services   tonnes  Mobile Route Hebron Way Route Northwest","Canada","NL","45.535","-48.48556",1983.00,2111,"Oil and gas extraction","Extraction de pétrole et de gaz",211110,"Oil and gas extraction (except oil sands)","Extraction de pétrole et de gaz (à l'exception des sables bitumineux)","Conventional Oil and Gas extraction","Extraction de pétrole par des méthodes classiques
+","Tonnes",74.59,1
+2022,30610,"9124-8161 QUEBEC INC","group altech","2455 Halpern Street","St- Laurent","QC","45.488162","-73.74889",1983.00,3328,"Coating, engraving, cold and heat treating and allied activities","Revêtement, gravure, traitement thermique et par le froid, et activités analogues",332810,"Coating, engraving, cold and heat treating and allied activities","Revêtement, gravure, traitement thermique et par le froid, et activités analogues","Other Manufacturing","Autres fabrication
+","Tonnes",3.872e-03,1
+2022,30745,"St Barbara Limited","Touquoy Mine","409 Billybell Way, Mooseland Road","Middle Musquodoboit","NS","44.97361","-62.91917",1983.00,2122,"Metal ore mining","Extraction de minerais métalliques",212220,"Gold and silver ore mining","Extraction de minerais d'or et d'argent","Mining and Quarrying","Extraction minière et exploitation en carrière
+","Tonnes",35.44,1
+2022,30798,"Copper Mountain Mine (BC) Ltd.","Copper Mountain Mine","6500 Copper Mountain Road","Princeton","BC","49.34556","-120.51",1983.00,2122,"Metal ore mining","Extraction de minerais métalliques",212233,"Copper-zinc ore mining","Extraction de minerais de cuivre-zinc","Mining and Quarrying","Extraction minière et exploitation en carrière
+","Tonnes",0.02,1
+2022,30807,"Eldorado Gold (Québec) Inc.","Eldorado Gold (Québec) Inc.","300 3e Avenue Est Avenue East","Val-d'Or","QC","48.094314","-77.585005",1983.00,2122,"Metal ore mining","Extraction de minerais métalliques",212220,"Gold and silver ore mining","Extraction de minerais d'or et d'argent","Mining and Quarrying","Extraction minière et exploitation en carrière
+","Tonnes",21.62,1
+2022,30870,"Inland Technologies Canada Inc","Calgary Recycling Facility","7910  McCall Way Northeast","Calgary","AB","51.12324","-114.00123",1983.00,4881,"Support activities for air transportation","Activités de soutien au transport aérien",488119,"Other airport operations","Autres opérations aéroportuaires","Other (Except Manufacturing)","Autres (sauf fabrication)
+","Tonnes",0.39,1
+2022,31558,"RTD Canada Inc","RTD Canada","465 Fraser View Place","Delta","BC","49.1598","-122.95173",1983.00,3121,"Beverage manufacturing","Fabrication de boissons",312120,"Breweries","Brasseries","Other Manufacturing","Autres fabrication
+","Tonnes",53.76,1
+2022,31595,"Keyera Corp","Wapiti Sour Gas Processing Plant","","Grand Prairie ","AB","54.80878","-119.05879",1983.00,2111,"Oil and gas extraction","Extraction de pétrole et de gaz",211110,"Oil and gas extraction (except oil sands)","Extraction de pétrole et de gaz (à l'exception des sables bitumineux)","Conventional Oil and Gas extraction","Extraction de pétrole par des méthodes classiques
+","Tonnes",2.294e-03,1
+2022,31764,"City of Corner Brook","Basin G","5 Park Street","Corner Brook","NL","48.9522","-57.9452",1983.00,9139,"Other local, municipal and regional public administration","Autres services des administrations publiques locales, municipales et régionales",913910,"Other local, municipal and regional public administration","Autres services des administrations publiques locales, municipales et régionales","Other (Except Manufacturing)","Autres (sauf fabrication)
+","Tonnes",30.90,1
+2022,31967,"The Corporation of the Town of Bradford West Gwillimbury","BWG Wastewater Treatment Plant","225 Dissette Street","Bradford","ON","44.12238","-79.55853",1983.00,2213,"Water, sewage and other systems","Réseaux d'aqueduc et d'égout et autres",221320,"Sewage treatment facilities","Installations d'épuration des eaux usées","Water and Wastewater Systems","Systèmes d'eau et des eaux usées
+","Tonnes",88.31,1
+2022,31976,"Osisko Mining inc","Projet Windfall","km 115 route 6000 Route","Lebel-sur-Quévillon","QC","49.07332","-75.65083",1983.00,2131,"Support activities for mining, and oil and gas extraction","Activités de soutien à l'extraction minière, pétrolière et gazière",213119,"Other support activities for mining","Autres activités de soutien à l'extraction minière","Other (Except Manufacturing)","Autres (sauf fabrication)
+","Tonnes",0.45,1
+2022,31978,"Capital Regional District","McLoughlin Point Wastewater Treatment Plant","337 Victoria View Road","Esquimalt","BC","48.42058","-123.3975",1983.00,2213,"Water, sewage and other systems","Réseaux d'aqueduc et d'égout et autres",221320,"Sewage treatment facilities","Installations d'épuration des eaux usées","Water and Wastewater Systems","Systèmes d'eau et des eaux usées
+","Tonnes",1135.00,3
+2022,33819,"Puregold Mine Inc","Puregold Mine","2 Mine Street","Madsen","ON","50.96764","-93.91802",1983.00,2122,"Metal ore mining","Extraction de minerais métalliques",212220,"Gold and silver ore mining","Extraction de minerais d'or et d'argent","Mining and Quarrying","Extraction minière et exploitation en carrière
+","Tonnes",153.52,1

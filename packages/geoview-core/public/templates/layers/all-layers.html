@@ -76,7 +76,7 @@
             {
               'geoviewLayerId': 'geojsonLYR1',
               'geoviewLayerName': { 'en': 'GeoJSON Sample' },
-              'metadataAccessPath': { 'en': './geojson/metadata.json' },
+              'metadataAccessPath': { 'en': './datasets/geojson/metadata.json' },
               'geoviewLayerType': 'GeoJSON',
               'initialSettings': { 'visible': 'yes' },
               'listOfLayerEntryConfig': [
@@ -103,6 +103,21 @@
                       'layerName': { 'en': 'Points' }
                     }
                   ]
+                }
+              ]
+            },
+            {
+              'geoviewLayerId': 'csvLYR1',
+              'geoviewLayerName': { 'en': 'NPRI' },
+              'geoviewLayerType': 'CSV',
+              'listOfLayerEntryConfig': [
+                {
+                  'layerId': 'NPRI-INRP_WaterEau_MediaGroupMilieu_2022',
+                  'layerName': { 'en': 'NPRI Water Media Group 2022' },
+                  'source': {
+                    'dataAccessPath': { 'en': './datasets/csv-files/NPRI-INRP_WaterEau_MediaGroupMilieu_2022.csv' },
+                    'separator': ','
+                  }
                 }
               ]
             },
@@ -164,7 +179,6 @@
                 }
               ]
             },
-            /*===========================================================================
             to be added back once geopackages are working
             {
               'geoviewLayerId': 'GeoPackageLYR1',
@@ -178,13 +192,12 @@
                   'layerName': { 'en': 'Natural Earth' },
                   'source': {
                     'dataAccessPath': {
-                      'en': './geojson'
+                      'en': './datasets/geopackages'
                     }
                   }
                 }
               ]
             },
-            /*===========================================================================*/
             {
               'geoviewLayerId': 'staticLYR10',
               'geoviewLayerName': {
