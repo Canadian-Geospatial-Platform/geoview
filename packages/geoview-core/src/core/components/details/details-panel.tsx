@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback, useEffect } from 'react';
+import { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '@mui/material/styles';
 import {
@@ -60,6 +60,9 @@ export function DetailsPanel(): JSX.Element {
   const [isEnlargeDataTable, setIsEnlargeDataTable] = useState(false);
   const [selectedLayerPathLocal, setselectedLayerPathLocal] = useState<string>(selectedLayerPath);
   const [arrayOfLayerListLocal, setArrayOfLayerListLocal] = useState<LayerListEntry[]>([]);
+
+  const prevLayerSelected = useRef<TypeLayerData>();
+  const prevFeatureIndex = useRef<number>(0); // 0 because that's the default index for the features
 
   // #endregion
 
@@ -142,7 +145,60 @@ export function DetailsPanel(): JSX.Element {
   }, [arrayOfLayerDataBatch, selectedLayerPath]);
 
   /**
-   * Effect used to persist persist the layer path bypass for the layerDataArray.
+   * Memoize the previously selected layer data
+   */
+  const memoPreviouslySelectedLayerData = useMemo(() => {
+    // Log
+    logger.logTraceUseMemo('DETAILS-PANEL - memoPreviouslySelectedLayerData', arrayOfLayerDataBatch, selectedLayerPathLocal);
+    return arrayOfLayerDataBatch.find((layer) => layer.layerPath === selectedLayerPathLocal);
+  }, [arrayOfLayerDataBatch, selectedLayerPathLocal]);
+
+  /**
+   * Updates the selected features for the highlight on the map.
+   * Removes the previously highlighted feature and adds a new one.
+   * @param {number} newIndex The new index to select the feature
+   * @param {TypeLayerData?} prevLayer The layer on which to unselect features
+   */
+  const updateFeatureSelected = useCallback(
+    (newIndex: number, prevLayer?: TypeLayerData) => {
+      // Log
+      logger.logTraceUseCallback('DETAILS-PANEL - updateFeatureSelected');
+
+      // Get the current feature in highlight
+      let currentFeature;
+      if (prevLayer?.features) {
+        currentFeature = prevLayer?.features?.[prevFeatureIndex.current];
+      }
+
+      // If found, remove it
+      if (currentFeature && !isFeatureInCheckedFeatures(currentFeature)) removeSelectedFeature(currentFeature);
+
+      // Get the next feature navigating to
+      const nextFeature = memoSelectedLayerData?.features?.[newIndex];
+
+      // If found, add it
+      if (nextFeature) addSelectedFeature(nextFeature);
+
+      // Update the current feature index
+      setCurrentFeatureIndex(newIndex);
+    },
+    [memoSelectedLayerData, isFeatureInCheckedFeatures, removeSelectedFeature, addSelectedFeature]
+  );
+
+  /**
+   * Effect used to modify the selected feature (the highlight) on the map.
+   * A useEffect is necessary in order to keep this component pure and be able to add/remove selected features elsewhere than in this component.
+   */
+  useEffect(() => {
+    // Log
+    logger.logTraceUseEffect('DETAILS-PANEL - memoSelectedLayerData changed', memoSelectedLayerData);
+
+    // Update feature selected
+    updateFeatureSelected(currentFeatureIndex, prevLayerSelected.current);
+  }, [currentFeatureIndex, memoSelectedLayerData, updateFeatureSelected]);
+
+  /**
+   * Effect used to reset the layer path for the bypass.
    * A useEffect is necessary in order to keep this component pure and be able to set the layer path bypass elsewhere than in this component.
    */
   useEffect(() => {
@@ -160,7 +216,6 @@ export function DetailsPanel(): JSX.Element {
   useEffect(() => {
     // Log
     logger.logTraceUseEffect('DETAILS-PANEL - check selection', memoLayerSelectedItem);
-    // logger.logDebug('DETAILS-PANEL - check selection', memoLayerSelectedItem);
 
     // Check if the layer we are on is not 'processed' or 'error', ignore if so
     if (memoLayerSelectedItem && !(memoLayerSelectedItem.queryStatus === 'processed' || memoLayerSelectedItem.queryStatus === 'error'))
@@ -219,18 +274,11 @@ export function DetailsPanel(): JSX.Element {
    * @param {-1 | 1} change The change to index number (-1 for back, 1 for forward)
    */
   const handleFeatureNavigateChange = (change: -1 | 1): void => {
-    // Get the current feature in highlight
-    const currentFeature = memoSelectedLayerData?.features?.[currentFeatureIndex];
-    // If found, remove it
-    if (currentFeature && !isFeatureInCheckedFeatures(currentFeature)) removeSelectedFeature(currentFeature);
+    // Keep previous index for navigation
+    prevFeatureIndex.current = currentFeatureIndex;
 
-    // Get the next feature navigating to
-    const nextFeature = memoSelectedLayerData?.features?.[currentFeatureIndex + change];
-    // If found, add it
-    if (nextFeature) addSelectedFeature(nextFeature);
-
-    // Update the current feature index
-    setCurrentFeatureIndex(currentFeatureIndex + change);
+    // Update current index
+    updateFeatureSelected(currentFeatureIndex + change, memoSelectedLayerData!);
   };
 
   /**
@@ -247,12 +295,26 @@ export function DetailsPanel(): JSX.Element {
 
   // #region PROCESSING ***********************************************************************************************
 
+  /**
+   * Resets the currently selected feature index to 0 and keeps in reference the previously selected layer and
+   * the previously selected feature index so that in the useEffect, later, the component can udpate
+   * the selected features with the store.
+   */
+  const resetCurrentIndex = () => {
+    // Keep reference on previously selected layer
+    prevLayerSelected.current = memoPreviouslySelectedLayerData;
+    // Keep reference on previously selected index
+    prevFeatureIndex.current = currentFeatureIndex;
+    // Reset the indexing
+    setCurrentFeatureIndex(0);
+  };
+
   // If the array of layer data has changed since last render
   if (arrayOfLayerListLocal !== memoLayersList) {
     // Selected array layer data changed
     setArrayOfLayerListLocal(memoLayersList);
     // Reset the feature index, because there may be less features this time than where the index was before
-    setCurrentFeatureIndex(0);
+    resetCurrentIndex();
   }
 
   // If the layer path has changed since last render
@@ -260,7 +322,7 @@ export function DetailsPanel(): JSX.Element {
     // Selected layer path changed
     setselectedLayerPathLocal(selectedLayerPath);
     // Reset the feature index, because it's a whole different selected layer with different features
-    setCurrentFeatureIndex(0);
+    resetCurrentIndex();
   }
 
   // #endregion
