@@ -3,10 +3,7 @@
     "interaction": "dynamic",
     "viewSettings": {
       "zoom": 5,
-      "center": [
-        -100,
-        55
-      ],
+      "center": [-100, 55],
       "projection": 3857
     },
     "basemapOptions": {
@@ -92,8 +89,8 @@
           "fr": "Échantillon GeoJSON"
         },
         "metadataAccessPath": {
-          "en": "./geojson/metadata.json",
-          "fr": "./geojson/metadata.json"
+          "en": "./datasets/geojson/metadata.json",
+          "fr": "./datasets/geojson/metadata.json"
         },
         "geoviewLayerType": "GeoJSON",
         "listOfLayerEntryConfig": [
@@ -142,17 +139,9 @@
   "theme": "geo.ca",
   "footerBar": {
     "tabs": {
-      "core": [
-        "legend",
-        "layers",
-        "details",
-        "geochart"
-      ]
+      "core": ["legend", "layers", "details", "geochart"]
     }
   },
   "corePackages": [],
-  "suportedLanguages": [
-    "en",
-    "fr"
-  ]
+  "suportedLanguages": ["en", "fr"]
 }

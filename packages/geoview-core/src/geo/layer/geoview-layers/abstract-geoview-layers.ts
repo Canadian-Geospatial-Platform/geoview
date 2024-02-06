@@ -111,6 +111,7 @@ export interface TypeImageStaticLegend extends Omit<TypeLegend, 'styleConfig'> {
 }
 
 const validVectorLayerLegendTypes: TypeGeoviewLayerType[] = [
+  'CSV',
   'GeoJSON',
   'esriDynamic',
   'esriFeature',
@@ -151,6 +152,7 @@ export type TypeVectorLayerStyles = Partial<Record<TypeStyleGeometry, TypeStyleR
 
 // Constant used to define the default layer names
 const DEFAULT_LAYER_NAMES: Record<TypeGeoviewLayerType, string> = {
+  CSV: 'CSV Layer',
   esriDynamic: 'Esri Dynamic Layer',
   esriFeature: 'Esri Feature Layer',
   esriImage: 'Esri Image Layer',
@@ -167,6 +169,7 @@ const DEFAULT_LAYER_NAMES: Record<TypeGeoviewLayerType, string> = {
 
 // Definition of the keys used to create the constants of the GeoView layer
 type LayerTypesKey =
+  | 'CSV'
   | 'ESRI_DYNAMIC'
   | 'ESRI_FEATURE'
   | 'ESRI_IMAGE'
@@ -184,6 +187,7 @@ type LayerTypesKey =
  * Type of GeoView layers
  */
 export type TypeGeoviewLayerType =
+  | 'CSV'
   | 'esriDynamic'
   | 'esriFeature'
   | 'esriImage'
@@ -201,6 +205,7 @@ export type TypeGeoviewLayerType =
  * Definition of the GeoView layer constants
  */
 export const CONST_LAYER_TYPES: Record<LayerTypesKey, TypeGeoviewLayerType> = {
+  CSV: 'CSV',
   ESRI_DYNAMIC: 'esriDynamic',
   ESRI_FEATURE: 'esriFeature',
   ESRI_IMAGE: 'esriImage',
@@ -219,6 +224,7 @@ export const CONST_LAYER_TYPES: Record<LayerTypesKey, TypeGeoviewLayerType> = {
  * Definition of the GeoView layer entry types for each type of Geoview layer
  */
 export const CONST_LAYER_ENTRY_TYPE: Record<TypeGeoviewLayerType, TypeLayerEntryType> = {
+  CSV: 'vector',
   imageStatic: 'raster-image',
   esriDynamic: 'raster-image',
   esriFeature: 'vector',
@@ -237,6 +243,7 @@ export const CONST_LAYER_ENTRY_TYPE: Record<TypeGeoviewLayerType, TypeLayerEntry
  * Definition of the sub schema to use for each type of Geoview layer
  */
 export const CONST_GEOVIEW_SCHEMA_BY_TYPE: Record<TypeGeoviewLayerType, string> = {
+  CSV: 'TypeVectorLayerEntryConfig',
   imageStatic: 'TypeImageStaticLayerEntryConfig',
   esriDynamic: 'TypeEsriDynamicLayerEntryConfig',
   esriFeature: 'TypeVectorLayerEntryConfig',

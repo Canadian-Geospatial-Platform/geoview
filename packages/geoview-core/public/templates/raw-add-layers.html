@@ -16,7 +16,7 @@
     <style>
       li.source-link {
         cursor: pointer;
-        color: #6082B6;
+        color: #6082b6;
       }
 
       .sourceLinkCopied {
@@ -137,7 +137,7 @@
           {
             'geoviewLayerId': 'geojsonLYR1',
             'geoviewLayerName': { 'en': 'GeoJSON Sample' },
-            'metadataAccessPath': { 'en': './geojson/metadata.json' },
+            'metadataAccessPath': { 'en': './datasets/geojson/metadata.json' },
             'geoviewLayerType': 'GeoJSON',
             'listOfLayerEntryConfig': [
               {
@@ -208,8 +208,18 @@
       <div>
         ESRI Dynamic Service Layer
         <ul>
-          <li class="source-link">https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/historical_flood_event_en/MapServer</li>
-          <li class="source-link">https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/forest_industry_hotspots_en/MapServer</li>
+          <li class="source-link">
+            https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/historical_flood_event_en/MapServer
+          </li>
+          <li class="source-link">
+            https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/forest_industry_hotspots_en/MapServer
+          </li>
+        </ul>
+      </div>
+      <div>
+        ESRI Image Layer
+        <ul>
+          <li class="source-link">https://www5.agr.gc.ca/atlas/rest/services/app_agclimate_agclimat/agclimate_tx/ImageServer/</li>
         </ul>
       </div>
       <div>
@@ -234,9 +244,9 @@
       <div>
         GeoJson Layer
         <ul>
-          <li class="source-link">https://canadian-geospatial-platform.github.io/geoview/public/geojson/polygons.json</li>
-          <li class="source-link">https://canadian-geospatial-platform.github.io/geoview/public/geojson/lines.json</li>
-          <li class="source-link">https://canadian-geospatial-platform.github.io/geoview/public/geojson/points.json</li>
+          <li class="source-link">https://canadian-geospatial-platform.github.io/geoview/public/datasets/geojson/polygons.json</li>
+          <li class="source-link">https://canadian-geospatial-platform.github.io/geoview/public/datasets/geojson/lines.json</li>
+          <li class="source-link">https://canadian-geospatial-platform.github.io/geoview/public/datasets/geojson/points.json</li>
         </ul>
       </div>
       <div>
@@ -255,7 +265,15 @@
       <div>
         GeoPackage Layer
         <ul>
-          <li class="source-link">https://canadian-geospatial-platform.github.io/geoview/public/geojson/rivers.gpkg</li>
+          <li class="source-link">https://canadian-geospatial-platform.github.io/geoview/public/datasets/geopackages/rivers.gpkg</li>
+        </ul>
+      </div>
+      <div>
+        CSV Layer
+        <ul>
+          <li class="source-link">
+            https://canadian-geospatial-platform.github.io/geoview/public/datasets/csv-files/Station_List_Minus_HQ-MELCC.csv
+          </li>
         </ul>
       </div>
     </div>
@@ -276,38 +294,38 @@
 
     <script>
       document.addEventListener('DOMContentLoaded', function () {
-          var sourceLinks = document.querySelectorAll('li.source-link');
+        var sourceLinks = document.querySelectorAll('li.source-link');
 
-          sourceLinks.forEach(function (link) {
-              link.addEventListener('click', function () {
-                  // Get the content to copy
-                  var contentToCopy = link.innerHTML;
+        sourceLinks.forEach(function (link) {
+          link.addEventListener('click', function () {
+            // Get the content to copy
+            var contentToCopy = link.innerHTML;
 
-                  // Create a temporary textarea element to copy the content
-                  var textarea = document.createElement('textarea');
-                  textarea.value = contentToCopy;
-                  document.body.appendChild(textarea);
+            // Create a temporary textarea element to copy the content
+            var textarea = document.createElement('textarea');
+            textarea.value = contentToCopy;
+            document.body.appendChild(textarea);
 
-                  // Select the content and copy it to the clipboard
-                  textarea.select();
-                  document.execCommand('copy');
+            // Select the content and copy it to the clipboard
+            textarea.select();
+            document.execCommand('copy');
 
-                  // Remove the temporary textarea
-                  document.body.removeChild(textarea);
+            // Remove the temporary textarea
+            document.body.removeChild(textarea);
 
-                  // Show a message for 5 seconds
-                  var message = document.createElement('div');
-                  message.classList.add('sourceLinkCopied');
-                  message.innerHTML = 'Copied to clipboard';
-                  document.body.appendChild(message);
-                  setTimeout(function () {
-                      // Remove the message after 5 seconds
-                      document.body.removeChild(message);
-                  }, 2000);
-              });
+            // Show a message for 5 seconds
+            var message = document.createElement('div');
+            message.classList.add('sourceLinkCopied');
+            message.innerHTML = 'Copied to clipboard';
+            document.body.appendChild(message);
+            setTimeout(function () {
+              // Remove the message after 5 seconds
+              document.body.removeChild(message);
+            }, 2000);
           });
+        });
       });
-  </script>
+    </script>
 
     <script>
       function reloadMap() {

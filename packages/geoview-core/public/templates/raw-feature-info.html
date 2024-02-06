@@ -115,7 +115,7 @@
           {
             'geoviewLayerId': 'geojsonLYR1',
             'geoviewLayerName': { 'en': 'GeoJSON Sample', 'fr': 'GeoJSON Échantillon' },
-            'metadataAccessPath': { 'en': './geojson/metadata.json', 'fr': './geojson/metadata.json' },
+            'metadataAccessPath': { 'en': './datasets/geojson/metadata.json', 'fr': './datasets/geojson/metadata.json' },
             'geoviewLayerType': 'GeoJSON',
             'listOfLayerEntryConfig': [
               {
@@ -253,7 +253,7 @@
             {
               'geoviewLayerId': 'geojsonLYR1',
               'geoviewLayerName': { 'en': 'GeoJSON Sample', 'fr': 'GeoJSON Échantillon' },
-              'metadataAccessPath': { 'en': './geojson/metadata.json', 'fr': './geojson/metadata.json' },
+              'metadataAccessPath': { 'en': './datasets/geojson/metadata.json', 'fr': './datasets/geojson/metadata.json' },
               'geoviewLayerType': 'GeoJSON',
               'listOfLayerEntryConfig': [
                 {
@@ -348,31 +348,33 @@
           tableRowElement.appendChild(tableDataText);
           if (key === 'all')
             configureTableRow(true, tableDataText.id, 'All layers are', buttonDisableElement.id, buttonEnableElement.id, '');
-          else
-            configureTableRow(true, tableDataText.id, `layer "${key}" is`, buttonDisableElement.id, buttonEnableElement.id, key);
-        }
+          else configureTableRow(true, tableDataText.id, `layer "${key}" is`, buttonDisableElement.id, buttonEnableElement.id, key);
+        };
 
         const getEventListenerFunctions = (clickFlag) => {
           if (clickFlag.endsWith('click-text')) {
-            return [cgpv.api.getFeatureInfoLayerSet('mapWM1').isClickListenerEnabled,
+            return [
+              cgpv.api.getFeatureInfoLayerSet('mapWM1').isClickListenerEnabled,
               cgpv.api.getFeatureInfoLayerSet('mapWM1').disableClickListener,
               cgpv.api.getFeatureInfoLayerSet('mapWM1').enableClickListener,
-              cgpv.api.getFeatureInfoLayerSet('mapWM1')
+              cgpv.api.getFeatureInfoLayerSet('mapWM1'),
             ];
           } else {
-            return [cgpv.api.getFeatureInfoLayerSet('mapWM1').isHoverListenerEnabled,
+            return [
+              cgpv.api.getFeatureInfoLayerSet('mapWM1').isHoverListenerEnabled,
               cgpv.api.getFeatureInfoLayerSet('mapWM1').disableHoverListener,
               cgpv.api.getFeatureInfoLayerSet('mapWM1').enableHoverListener,
-              cgpv.api.getFeatureInfoLayerSet('mapWM1')
+              cgpv.api.getFeatureInfoLayerSet('mapWM1'),
             ];
           }
-        }
+        };
 
         const configureTableRow = (setClickListener, textCellId, text, disableId, enableId, layerPath) => {
           const [isEventListenerEnabled, disableEventListener, enableEventListener, layerSet] = getEventListenerFunctions(textCellId);
           const textCell = document.getElementById(textCellId);
           const layerFlagDisabled = !isEventListenerEnabled.call(layerSet, layerPath);
-          const disableButton = document.getElementById(disableId);          const enableButton = document.getElementById(enableId);
+          const disableButton = document.getElementById(disableId);
+          const enableButton = document.getElementById(enableId);
           if (setClickListener) {
             disableButton.addEventListener('click', (e) => {
               disableEventListener.call(layerSet, layerPath);
@@ -391,16 +393,16 @@
           } else if (layerFlagDisabled) {
             disableButton.disabled = true;
             enableButton.disabled = false;
-            textCell.innerText =  `${text} disabled`;
+            textCell.innerText = `${text} disabled`;
           } else {
             disableButton.disabled = false;
             enableButton.disabled = true;
-            textCell.innerText =  `${text} enabled`;
+            textCell.innerText = `${text} enabled`;
           }
-        }
+        };
 
         const updateButtonTable = () => {
-          const registeredLayers = cgpv.api.maps.mapWM1?.layer?.registeredLayers
+          const registeredLayers = cgpv.api.maps.mapWM1?.layer?.registeredLayers;
           let firstpass = true;
           Object.keys(registeredLayers).forEach((key) => {
             if (['processed', 'loaded'].includes(registeredLayers[key].layerStatus)) {
@@ -416,7 +418,7 @@
               }
             }
           });
-        }
+        };
 
         const displayField = document.getElementById('buttonTable');
         displayField.innerHTML = `<table id="buttonTable" style="width:100%">
@@ -433,7 +435,7 @@
             </td>
           </tr>
         </table>`;
-        const registeredLayers = cgpv.api.maps.mapWM1?.layer?.registeredLayers
+        const registeredLayers = cgpv.api.maps.mapWM1?.layer?.registeredLayers;
         let firstpass = true;
         Object.keys(registeredLayers).forEach((key) => {
           if (['processed', 'loaded'].includes(registeredLayers[key].layerStatus)) {
@@ -448,7 +450,7 @@
               fillTableRow(key, 'hover-table', 'hover-disable', 'hover-enable', 'hover-text');
             }
           }
-        })
+        });
 
         //create snippets
         createConfigSnippet();

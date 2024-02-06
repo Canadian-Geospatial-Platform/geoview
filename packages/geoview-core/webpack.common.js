@@ -147,7 +147,7 @@ const config = {
         { from: './public/locales', to: 'locales', noErrorOnMissing: true },
         { from: './public/css', to: 'css' },
         { from: './public/markers', to: 'markers' },
-        { from: './public/geojson', to: 'geojson' },
+        { from: './public/datasets/geojson', to: 'geojson' },
         { from: './public/plugins', to: 'plugins', noErrorOnMissing: true },
         { from: './public/favicon.ico' },
         { from: './public/templates/codedoc.js' },

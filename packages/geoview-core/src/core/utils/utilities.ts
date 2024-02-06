@@ -495,7 +495,7 @@ export const disableScrolling = (e: KeyboardEvent, elem: MutableRefObject<HTMLEl
  * @returns {boolean} true if layer is a vector layer
  */
 export const isVectorLayer = (layer: AbstractGeoViewLayer): boolean => {
-  const vectorLayers = { esriFeature: '', GeoJSON: '', GeoPackage: '', ogcFeature: '', ogcWfs: '' };
+  const vectorLayers = { csv: '', esriFeature: '', GeoJSON: '', GeoPackage: '', ogcFeature: '', ogcWfs: '' };
   return layer?.type in vectorLayers;
 };
 

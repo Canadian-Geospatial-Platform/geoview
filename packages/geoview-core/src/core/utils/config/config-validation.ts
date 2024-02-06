@@ -19,6 +19,7 @@ import { TypeEsriFeatureLayerEntryConfig, geoviewEntryIsEsriFeature } from '@/ge
 import { TypeWfsLayerEntryConfig, geoviewEntryIsWFS } from '@/geo/layer/geoview-layers/vector/wfs';
 import { TypeOgcFeatureLayerEntryConfig, geoviewEntryIsOgcFeature } from '@/geo/layer/geoview-layers/vector/ogc-feature';
 import { TypeGeoJSONLayerEntryConfig, geoviewEntryIsGeoJSON } from '@/geo/layer/geoview-layers/vector/geojson';
+import { TypeCsvLayerEntryConfig, geoviewEntryIsCSV } from '@/geo/layer/geoview-layers/vector/csv';
 import { TypeGeoPackageLayerEntryConfig, geoviewEntryIsGeoPackage } from '@/geo/layer/geoview-layers/vector/geopackage';
 import {
   layerEntryIsGroupLayer,
@@ -525,6 +526,7 @@ export class ConfigValidation {
         // The default value for geoviewLayerConfig.initialSettings.visible is true.
         if (!geoviewLayerConfig.initialSettings) geoviewLayerConfig.initialSettings = { visible: 'yes' };
         switch (geoviewLayerConfig.geoviewLayerType) {
+          case 'CSV':
           case 'GeoJSON':
           case 'xyzTiles':
           case 'vectorTiles':
@@ -627,6 +629,8 @@ export class ConfigValidation {
         listOfLayerEntryConfig[i] = new TypeGeoPackageLayerEntryConfig(layerConfig);
       } else if (geoviewEntryIsGeoJSON(layerConfig)) {
         listOfLayerEntryConfig[i] = new TypeGeoJSONLayerEntryConfig(layerConfig);
+      } else if (geoviewEntryIsCSV(layerConfig)) {
+        listOfLayerEntryConfig[i] = new TypeCsvLayerEntryConfig(layerConfig);
       }
     });
   }
