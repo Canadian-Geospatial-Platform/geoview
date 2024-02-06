@@ -84,6 +84,22 @@ export function GeoChartPanel(props: GeoChartPanelProps): JSX.Element {
     [mapId]
   );
 
+  /**
+   * Handles clicks to layers in left panel. Sets selected layer.
+   *
+   * @param {LayerListEntry} layer The data of the selected layer
+   */
+  const handleLayerChange = useCallback(
+    (layer: LayerListEntry): void => {
+      // Log
+      logger.logTraceUseCallback('GEOCHART-PANEL - layer', layer);
+
+      // Set the selected layer path in the store which will in turn trigger the store listeners on this component
+      setSelectedLayerPath(layer.layerPath);
+    },
+    [setSelectedLayerPath]
+  );
+
   // Reacts when the array of layer data updates
   const memoLayersList = useMemo(() => {
     // Log
@@ -169,19 +185,6 @@ export function GeoChartPanel(props: GeoChartPanelProps): JSX.Element {
       }
     }
   }, [memoLayerSelectedItem, memoLayersList, setSelectedLayerPath, setLayerDataArrayBatchLayerPathBypass]);
-
-  /**
-   * Handles clicks to layers in left panel. Sets selected layer.
-   *
-   * @param {LayerListEntry} layer The data of the selected layer
-   */
-  const handleLayerChange = (layer: LayerListEntry): void => {
-    // Log
-    logger.logTraceUseCallback('GEOCHART-PANEL - layer', layer);
-
-    // Set the selected layer path in the store which will in turn trigger the store listeners on this component
-    setSelectedLayerPath(layer.layerPath);
-  };
 
   // If the array of layer data has changed since last render
   if (arrayOfLayerDataLocal !== memoLayersList) {
