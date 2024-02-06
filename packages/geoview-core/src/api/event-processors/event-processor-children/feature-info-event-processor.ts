@@ -80,7 +80,7 @@ export class FeatureInfoEventProcessor extends AbstractEventProcessor {
       if (atLeastOneFeature) {
         // If the current tab is not 'details' nor 'geochart', switch to details
         if (!['details', 'geochart'].includes(UIEventProcessor.getActiveFooterBarTab(mapId)))
-          UIEventProcessor.setActiveFooterTab(mapId, 'details');
+          UIEventProcessor.setActiveFooterBarTab(mapId, 'details');
       }
 
       // Also propagate in the batched array

@@ -8,6 +8,7 @@ import {
   isWmsLegend,
   layerEntryIsGroupLayer,
   TypeGeoviewLayerType,
+  TypeLayerEntryConfig,
   TypeLegend,
   TypeStyleGeometry,
 } from '@/geo';
@@ -146,7 +147,7 @@ export class LegendEventProcessor extends AbstractEventProcessor {
       existingEntries: TypeLegendLayer[]
     ): Promise<void> => {
       const entryLayerPath = `${layerPathBeginning}/${layerPathNodes[currentLevel]}`;
-      const layerConfig = api.maps[mapId].layer.registeredLayers[entryLayerPath];
+      const layerConfig = api.maps[mapId].layer.registeredLayers[entryLayerPath] as TypeLayerEntryConfig;
       let entryIndex = existingEntries.findIndex((entry) => entry.layerPath === entryLayerPath);
       if (layerEntryIsGroupLayer(layerConfig)) {
         if (entryIndex === -1) {
@@ -189,7 +190,6 @@ export class LegendEventProcessor extends AbstractEventProcessor {
           metadataAccessPath: getLocalizedValue(layerConfig.geoviewLayerConfig?.metadataAccessPath, mapId) || '',
           layerName: getLocalizedValue(legendResultsSetEntry.data?.layerName, mapId) || layerConfig.layerId!,
           layerStatus: legendResultsSetEntry.layerStatus,
-          layerPhase: legendResultsSetEntry.layerPhase,
           querySent: legendResultsSetEntry.querySent,
           styleConfig: legendResultsSetEntry.data?.styleConfig,
           type: legendResultsSetEntry.data?.type,
@@ -213,6 +213,12 @@ export class LegendEventProcessor extends AbstractEventProcessor {
         else existingEntries[entryIndex] = newLegendLayer;
 
         // TODO: find the best place to calculate layers item and assign https://github.com/Canadian-Geospatial-Platform/geoview/issues/1566
+        // !Question: What is the relationship between the legend and the bounds? To me, there is no relation between them. The Legend information
+        // !          saved in the store is there to list the layers on the map, to inform us if it is loaded on the map or in error, to show the
+        // !          symbology of the features, if the data layers is visible or not, etc. I agree that all the other properties of the legend
+        // !          type in the store are legit, but I strongly disagree that bounds is part of the legend and that we should throw an error
+        // !          in getGeoviewLayerByIdAsync if the layer does not reach the 'processed' or 'error' status. I propose to delete the try/catch
+        // !          instructions that follow and place the bounds in a nore logical place.
         try {
           // Await for the Geoview layer in loaded state
           const myLayer = await api.maps[mapId].layer.getGeoviewLayerByIdAsync(layerPathNodes[0], true);

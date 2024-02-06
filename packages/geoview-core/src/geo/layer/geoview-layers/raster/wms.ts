@@ -153,7 +153,7 @@ export class WMS extends AbstractGeoViewRaster {
               this.setLayerStatus('error', layerConfigsToQuery[i].layerPath);
             this.metadata = i < arrayOfMetadata.length ? arrayOfMetadata[i] : null;
             if (this.metadata) {
-              for (i++; i < arrayOfMetadata.length; i++) {
+              for (; i < arrayOfMetadata.length; i++) {
                 if (!arrayOfMetadata[i]?.Capability) this.setLayerStatus('error', layerConfigsToQuery[i].layerPath);
                 else if (!this.getLayerMetadataEntry(layerConfigsToQuery[i].layerId!)) {
                   const metadataLayerPathToAdd = this.getMetadataLayerPath(
@@ -170,12 +170,12 @@ export class WMS extends AbstractGeoViewRaster {
             }
             this.processMetadataInheritance();
           } catch (error) {
-            this.setAllLayerStatusToError(this.listOfLayerEntryConfig, 'Unable to read metadata');
+            this.setAllLayerStatusTo('error', this.listOfLayerEntryConfig, 'Unable to read metadata');
           }
         }
       }
     } else {
-      this.setAllLayerStatusToError(this.listOfLayerEntryConfig, 'Unable to read metadata');
+      this.setAllLayerStatusTo('error', this.listOfLayerEntryConfig, 'Unable to read metadata');
     }
   }
 
@@ -194,7 +194,7 @@ export class WMS extends AbstractGeoViewRaster {
       const metadata: TypeJsonObject = parser.read(capabilitiesString);
       return metadata;
     } catch (error) {
-      this.setAllLayerStatusToError(this.listOfLayerEntryConfig, 'Unable to read metadata');
+      this.setAllLayerStatusTo('error', this.listOfLayerEntryConfig, 'Unable to read metadata');
       return null;
     }
   }
@@ -230,10 +230,10 @@ export class WMS extends AbstractGeoViewRaster {
         };
         setDataAccessPath(this.listOfLayerEntryConfig);
       } else {
-        this.setAllLayerStatusToError(this.listOfLayerEntryConfig, 'Unable to read metadata');
+        this.setAllLayerStatusTo('error', this.listOfLayerEntryConfig, 'Unable to read metadata');
       }
     } catch (error) {
-      this.setAllLayerStatusToError(this.listOfLayerEntryConfig, 'Unable to read metadata');
+      this.setAllLayerStatusTo('error', this.listOfLayerEntryConfig, 'Unable to read metadata');
     }
   }
 
@@ -386,7 +386,7 @@ export class WMS extends AbstractGeoViewRaster {
       }
 
       if ((layerConfig as TypeBaseLayerEntryConfig).layerStatus !== 'error') {
-        this.setLayerStatus('loading', layerPath);
+        this.setLayerStatus('processing', layerPath);
 
         const layerFound = this.getLayerMetadataEntry(layerConfig.layerId!);
         if (!layerFound) {
@@ -434,7 +434,7 @@ export class WMS extends AbstractGeoViewRaster {
         fr: subLayer.Title as string,
       };
       newListOfLayerEntryConfig.push(subLayerEntryConfig);
-      api.maps[this.mapId].layer.registerLayerConfig(subLayerEntryConfig);
+      subLayerEntryConfig.registerLayerConfig();
     });
 
     if (this.registerToLayerSetListenerFunctions[layerPath]) this.unregisterFromLayerSets(layerConfig);
@@ -541,12 +541,11 @@ export class WMS extends AbstractGeoViewRaster {
           if (layerConfig.initialSettings?.visible !== undefined)
             imageLayerOptions.visible = layerConfig.initialSettings?.visible === 'yes' || layerConfig.initialSettings?.visible === 'always';
 
-          layerConfig.olLayer = new ImageLayer(imageLayerOptions);
+          layerConfig.olLayerAndLoadEndListeners = {
+            olLayer: new ImageLayer(imageLayerOptions),
+            loadEndListenerType: 'image',
+          };
           layerConfig.geoviewLayerInstance = this;
-
-          this.applyViewFilter(layerPath, layerConfig.layerFilter ? layerConfig.layerFilter : '');
-
-          this.addLoadendListener(layerPath, 'image');
 
           resolve(layerConfig.olLayer);
         } else {
@@ -558,6 +557,9 @@ export class WMS extends AbstractGeoViewRaster {
 
           resolve(null);
         }
+      } else {
+        logger.logError(`geoviewLayerType must be ${CONST_LAYER_TYPES.WMS}`);
+        resolve(null);
       }
     });
     return promisedVectorLayer;
@@ -660,7 +662,7 @@ export class WMS extends AbstractGeoViewRaster {
   protected async getFeatureInfoAtLongLat(lnglat: Coordinate, layerPath: string): Promise<TypeArrayOfFeatureInfoEntries> {
     try {
       // Get the layer config in a loaded phase
-      const layerConfig = (await this.getLayerConfigAsync(layerPath, true)) as TypeOgcWmsLayerEntryConfig;
+      const layerConfig = this.getLayerConfig(layerPath) as TypeOgcWmsLayerEntryConfig;
       if (!this.getVisible(layerPath)) return [];
 
       const viewResolution = api.maps[this.mapId].getView().getResolution() as number;
@@ -863,7 +865,7 @@ export class WMS extends AbstractGeoViewRaster {
   async getLegend(layerPath: string): Promise<TypeLegend | null> {
     try {
       // Get the layer config in a loaded phase
-      const layerConfig = (await this.getLayerConfigAsync(layerPath, true)) as TypeOgcWmsLayerEntryConfig;
+      const layerConfig = this.getLayerConfig(layerPath) as TypeOgcWmsLayerEntryConfig;
 
       let legend: TypeWmsLegend;
       const legendImage = await this.getLegendImage(layerConfig!);
@@ -1017,7 +1019,7 @@ export class WMS extends AbstractGeoViewRaster {
    * @param {never} notUsed1 This parameter must not be provided. It is there to allow overloading of the method signature.
    * @param {never} notUsed2 This parameter must not be provided. It is there to allow overloading of the method signature.
    */
-  applyViewFilter(filter: string, notUsed1?: never, notUsed2?: never): Promise<void>;
+  applyViewFilter(filter: string, notUsed1?: never, notUsed2?: never): void;
 
   /** ***************************************************************************************************************************
    * Apply a view filter to the layer identified by the path stored in the layerPathAssociatedToTheGeoviewLayer property stored
@@ -1030,7 +1032,7 @@ export class WMS extends AbstractGeoViewRaster {
    * @param {boolean} CombineLegendFilter Flag used to combine the legend filter and the filter together (default: true)
    * @param {never} notUsed This parameter must not be provided. It is there to allow overloading of the method signature.
    */
-  applyViewFilter(filter: string, CombineLegendFilter: boolean, notUsed?: never): Promise<void>;
+  applyViewFilter(filter: string, CombineLegendFilter: boolean, notUsed?: never): void;
 
   /** ***************************************************************************************************************************
    * Apply a view filter to the layer. When the CombineLegendFilter flag is false, the filter paramater is used alone to display
@@ -1043,42 +1045,58 @@ export class WMS extends AbstractGeoViewRaster {
    * @param {string} filter An optional filter to be used in place of the getViewFilter value.
    * @param {boolean} CombineLegendFilter Flag used to combine the legend filter and the filter together (default: true)
    */
-  applyViewFilter(layerPath: string, filter?: string, CombineLegendFilter?: boolean): Promise<void>;
+  applyViewFilter(layerPath: string, filter?: string, CombineLegendFilter?: boolean): void;
 
   // See above headers for signification of the parameters. The first lines of the method select the template
   // used based on the parameter types received.
-  async applyViewFilter(parameter1: string, parameter2?: string | boolean | never, parameter3?: boolean | never): Promise<void> {
+
+  applyViewFilter(parameter1: string, parameter2?: string | boolean | never, parameter3?: boolean | never) {
+    // At the beginning, we assume that:
+    // 1- the layer path was saved in this.layerPathAssociatedToTheGeoviewLayer using a call to
+    //    api.maps[mapId].layer.geoviewLayer(layerPath);
+    // 2- the filter is empty;
+    // 3- the combine legend filters is true
     let layerPath = this.layerPathAssociatedToTheGeoviewLayer;
-
-    // Log
-    logger.logTraceCore('wms.applyViewFilter', layerPath);
-
     let filter = '';
     let CombineLegendFilter = true;
-    if (parameter3) {
+
+    // Method signature detection
+    if (typeof parameter3 === 'boolean') {
+      // Signature detected is: applyViewFilter(layerPath: string, filter?: string, combineLegendFilter?: boolean): void;
       layerPath = parameter1;
       filter = parameter2 as string;
       CombineLegendFilter = parameter3;
-    } else if (parameter2 !== undefined) {
+    } else if (parameter2 !== undefined && parameter3 === undefined) {
       if (typeof parameter2 === 'boolean') {
+        // Signature detected is: applyViewFilter(filter: string, CombineLegendFilter: boolean): void;
         filter = parameter1;
         CombineLegendFilter = parameter2;
       } else {
+        // Signature detected is: applyViewFilter(layerPath: string, filter: string): void;
         layerPath = parameter1;
         filter = parameter2;
       }
-    } else filter = parameter1;
+    } else if (parameter2 === undefined && parameter3 === undefined) {
+      // Signature detected is: applyViewFilter(filter: string): void;
+      filter = parameter1;
+    }
 
-    // TODO: Refactor - Maybe try-catch higher in the call stack instead of here? Notably to 'try again'?
-    let layerConfig;
-    try {
-      // Get the layer config in a loaded phase
-      layerConfig = (await this.getLayerConfigAsync(layerPath, true)) as TypeOgcWmsLayerEntryConfig;
-    } catch (error) {
-      // Log
-      logger.logError('wms.applyViewFilter()\n', error);
+    const layerConfig = this.getLayerConfig(layerPath) as TypeOgcWmsLayerEntryConfig;
+    if (!layerConfig) {
+      // ! Things important to know about the applyViewFilter usage:
+      logger.logError(
+        `
+        The applyViewFilter method must never be called by GeoView code before the layer refered by the layerPath has reached the 'loaded' status.\n
+        It will never be called by the GeoView internal code except in the layerConfig.loadedFunction() that is called right after the 'loaded' signal.\n
+        If you are a user, you can set the layer filter in the configuration or using code called in the cgpv.init() method of the viewer.\n
+        It appeares that the layer refered by the layerPath "${layerPath} does not respect these rules.\n
+      `.replace(/\s+/g, ' ')
+      );
       return;
     }
+
+    // Log
+    logger.logTraceCore('wms.applyViewFilter', layerPath);
 
     // Get source
     const source = (layerConfig.olLayer as ImageLayer<ImageWMS>).getSource();

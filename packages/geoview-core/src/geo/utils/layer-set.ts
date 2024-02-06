@@ -4,13 +4,13 @@ import {
   LayerSetPayload,
   payloadIsLayerRegistration,
   payloadIsLayerSetChangeLayerStatus,
-  payloadIsLayerSetChangeLayerPhase,
   TypeResultsSet,
   GetLegendsPayload,
   PayloadBaseClass,
 } from '@/api/events/payloads';
-import { TypeLocalizedString, api, createLocalizedString, getLocalizedValue } from '@/app';
+import { api } from '@/app';
 import { logger } from '@/core/utils/logger';
+import { createLocalizedString, getLocalizedValue } from '@/core/utils/utilities';
 
 /** ***************************************************************************************************************************
  * A class to hold a set of layers associated with an value of any type. When this class is instantiated, all layers already
@@ -68,28 +68,24 @@ export class LayerSet {
 
         const { layerPath, layerStatus } = payload;
         if (this.resultsSet[layerPath]) {
+          const layerConfig = api.maps[mapId].layer.registeredLayers[layerPath];
           if (this.resultsSet[layerPath].layerStatus !== layerStatus) {
             this.resultsSet[layerPath].layerStatus = layerStatus;
-            if (!this.resultsSet[layerPath].layerName)
+            if (!this.resultsSet[layerPath].layerName) {
               this.resultsSet[layerPath].layerName =
-                getLocalizedValue(api.maps[mapId].layer.registeredLayers[layerPath].layerName, mapId) ||
+                getLocalizedValue(layerConfig.layerName, mapId) ||
                 getLocalizedValue(
                   {
                     en: `Anonymous Layer ${this.anonymousSequenceNumber}`,
-                    fr: `Couche Anonyme ${this.anonymousSequenceNumber++}`,
-                  } as TypeLocalizedString,
+                    fr: `Couche Anonyme ${this.anonymousSequenceNumber}`,
+                  },
                   mapId
                 );
-            if (this.resultsSet[layerPath].layerStatus === 'processed')
-              if (api.maps[mapId].layer.registeredLayers[layerPath].layerName)
-                this.resultsSet[layerPath].layerName = getLocalizedValue(
-                  api.maps[mapId].layer.registeredLayers[layerPath].layerName,
-                  mapId
-                );
-              else
-                api.maps[mapId].layer.registeredLayers[layerPath].layerName = createLocalizedString(
-                  this.resultsSet[layerPath].layerName || ''
-                );
+              this.anonymousSequenceNumber++;
+            }
+            if (layerConfig.geoviewLayerInstance!.allLayerStatusAreIn(['processed', 'error'], [layerConfig]))
+              if (layerConfig.layerName) this.resultsSet[layerPath].layerName = getLocalizedValue(layerConfig.layerName, mapId);
+              else layerConfig.layerName = createLocalizedString(this.resultsSet[layerPath].layerName!);
             api.event.emit(LayerSetPayload.createLayerSetUpdatedPayload(this.layerSetId, this.resultsSet, layerPath));
             if (this.layerSetId === `${mapId}/LegendsLayerSet`)
               // LegendLayerSet is the absolute reference for finding out whether a layer has been loaded or is in error. Then, every
@@ -100,34 +96,6 @@ export class LayerSet {
       }
     };
     api.event.on(EVENT_NAMES.LAYER_SET.CHANGE_LAYER_STATUS, changeLayerStatusListenerFunctions, this.mapId);
-
-    const changeLayerPhaseListenerFunctions = (payload: PayloadBaseClass) => {
-      if (payloadIsLayerSetChangeLayerPhase(payload)) {
-        // Log
-        logger.logTraceDetailed('layer-set on EVENT_NAMES.LAYER_SET.CHANGE_LAYER_PHASE', this.mapId, payload);
-
-        const { layerPath, layerPhase } = payload;
-        if (this.resultsSet[layerPath] && this.resultsSet[layerPath].layerStatus !== 'error') {
-          if (this.resultsSet[layerPath].layerPhase !== layerPhase) {
-            this.resultsSet[layerPath].layerPhase = layerPhase;
-            if (!this.resultsSet[layerPath].layerName)
-              this.resultsSet[layerPath].layerName =
-                getLocalizedValue(api.maps[mapId].layer.registeredLayers[layerPath].layerName, mapId) ||
-                getLocalizedValue(
-                  {
-                    en: `Anonymous Layer ${this.anonymousSequenceNumber}`,
-                    fr: `Couche Anonyme ${this.anonymousSequenceNumber++}`,
-                  } as TypeLocalizedString,
-                  mapId
-                );
-            api.event.emit(LayerSetPayload.createLayerSetUpdatedPayload(this.layerSetId, this.resultsSet, layerPath));
-            if (this.layerSetId === `${mapId}/LegendsLayerSet`)
-              api.event.emit(GetLegendsPayload.createLegendsLayersetUpdatedPayload(`${this.mapId}/LegendsLayerSet`, layerPath, resultsSet));
-          }
-        }
-      }
-    };
-    api.event.on(EVENT_NAMES.LAYER_SET.CHANGE_LAYER_PHASE, changeLayerPhaseListenerFunctions, this.mapId);
 
     // Register a layer to the layer set or unregister the layer when it is deleted from the map.
     api.event.on(
@@ -141,11 +109,11 @@ export class LayerSet {
           // update the registration of all layer sets if !payload.layerSetId or update only the specified layer set
           if (!layerSetId || layerSetId === this.layerSetId) {
             if (action === 'add' && this.registrationConditionFunction(layerPath) && !(layerPath in this.resultsSet)) {
+              const layerConfig = api.maps[mapId].layer.registeredLayers[layerPath];
               this.resultsSet[layerPath] = {
                 data: undefined,
                 layerStatus: 'newInstance',
-                layerPhase: 'newInstance',
-                layerName: getLocalizedValue(api.maps[this.mapId].layer.registeredLayers[layerPath].layerName, mapId),
+                layerName: getLocalizedValue(layerConfig.layerName, mapId),
               };
               if (this.registrationUserDataInitialisation) this.registrationUserDataInitialisation(layerPath);
               api.event.emit(LayerSetPayload.createLayerSetUpdatedPayload(this.layerSetId, this.resultsSet, layerPath));
