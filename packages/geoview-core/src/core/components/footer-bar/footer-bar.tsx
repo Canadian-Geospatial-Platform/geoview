@@ -226,7 +226,7 @@ export function FooterBar(): JSX.Element | null {
   /**
    * Handle a collapse, expand event for the tabs component
    */
-  const handleCollapse = () => {
+  const handleToggleCollapse = () => {
     setIsCollapsed(!isCollapsed);
   };
 
@@ -422,7 +422,7 @@ export function FooterBar(): JSX.Element | null {
       <Tabs
         activeTrap={activeTrapGeoView}
         isCollapsed={isCollapsed}
-        onCollapse={handleCollapse}
+        onToggleCollapse={handleToggleCollapse}
         onSelectedTabChanged={handleSelectedTabChanged}
         onOpenKeyboard={openModal}
         onCloseKeyboard={closeModal}

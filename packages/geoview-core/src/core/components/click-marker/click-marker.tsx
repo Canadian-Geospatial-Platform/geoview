@@ -40,7 +40,7 @@ export function ClickMarker(): JSX.Element {
 
   // get values from the store
   const clickMarker = useMapClickMarker();
-  const { hideClickMarker, setOverlayClickMarkerRef, showClickMarker, addSelectedFeature, removeSelectedFeature } = useMapStoreActions();
+  const { hideClickMarker, setOverlayClickMarkerRef, showClickMarker } = useMapStoreActions();
   const layerDataArray = useDetailsStoreLayerDataArray();
   const selectedLayerPath = useDetailsStoreSelectedLayerPath();
   setTimeout(() => setOverlayClickMarkerRef(clickMarkerRef.current as HTMLElement), 0);
@@ -50,7 +50,6 @@ export function ClickMarker(): JSX.Element {
     // Log
     logger.logTraceUseEffect('CLICK-MARKER - layerDataArray', layerDataArray);
 
-    removeSelectedFeature('all');
     let feature: TypeFeatureInfoEntry | undefined;
     const selectedLayerDataEntry = layerDataArray.filter((layerData) => layerData.layerPath === selectedLayerPath)[0];
     if (
@@ -72,7 +71,6 @@ export function ClickMarker(): JSX.Element {
 
     if (feature) {
       hideClickMarker();
-      addSelectedFeature(feature);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [layerDataArray]);
@@ -86,7 +84,6 @@ export function ClickMarker(): JSX.Element {
       (state) => state.mapState.clickCoordinates,
       (curClick, prevClick) => {
         if (curClick !== prevClick) {
-          removeSelectedFeature('all');
           markerCoordinates.current = curClick!.lnglat;
           showClickMarker({ lnglat: curClick!.lnglat });
         }
