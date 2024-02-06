@@ -40,7 +40,7 @@ export function FeatureInfo({ features, currentFeatureIndex }: TypeFeatureInfoPr
   const feature = features![currentFeatureIndex];
   const featureUid = feature?.geometry ? (feature.geometry as TypeGeometry).ol_uid : null;
   const featureIconSrc = feature?.featureIcon.toDataURL();
-  const nameFieldValue = feature?.nameField ? (feature.fieldInfo[feature.nameField!]!.value as string) : 'No name';
+  const nameFieldValue = feature?.nameField ? (feature?.fieldInfo?.[feature.nameField]?.value as string) || '' : 'No name';
 
   // states from store
   const checkedFeatures = useDetailsStoreCheckedFeatures();

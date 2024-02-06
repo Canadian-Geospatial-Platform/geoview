@@ -615,14 +615,19 @@ export abstract class AbstractGeoViewLayer {
   protected async processListOfLayerEntryMetadata(listOfLayerEntryConfig: TypeListOfLayerEntryConfig): Promise<void> {
     this.setLayerPhase('processListOfLayerEntryMetadata');
     try {
-      const promisedAllLayerDone: Promise<void>[] = [];
-      listOfLayerEntryConfig.forEach((layerConfig: TypeLayerEntryConfig) => {
+      const promisedAllLayerDone: Promise<TypeLayerEntryConfig>[] = [];
+      for (let i = 0; i < listOfLayerEntryConfig.length; i++) {
+        const layerConfig: TypeLayerEntryConfig = listOfLayerEntryConfig[i];
         if (layerEntryIsGroupLayer(layerConfig))
           if (layerConfig.isMetadataLayerGroup) promisedAllLayerDone.push(this.processMetadataGroupLayer(layerConfig));
-          else promisedAllLayerDone.push(this.processListOfLayerEntryMetadata(layerConfig.listOfLayerEntryConfig));
+          // eslint-disable-next-line no-await-in-loop
+          else await this.processListOfLayerEntryMetadata(layerConfig.listOfLayerEntryConfig);
         else promisedAllLayerDone.push(this.processLayerMetadata(layerConfig));
+      }
+      const arrayOfLayerConfigs = await Promise.all(promisedAllLayerDone);
+      arrayOfLayerConfigs.forEach((layerConfig) => {
+        if (layerConfig.layerStatus !== 'error') this.setLayerStatus('processed', layerConfig.layerPath);
       });
-      await Promise.all(promisedAllLayerDone);
     } catch (error) {
       // Log
       logger.logError(error);
@@ -636,16 +641,18 @@ export abstract class AbstractGeoViewLayer {
    *
    * @param {TypeLayerGroupEntryConfig} layerConfig The layer entry configuration to process.
    *
-   * @returns {Promise<void>} A promise that the vector layer configuration has its metadata and group layers processed.
+   * @returns {Promise<TypeLayerGroupEntryConfig>} A promise that the vector layer configuration has its metadata and group layers processed.
    */
-  private async processMetadataGroupLayer(layerConfig: TypeLayerGroupEntryConfig): Promise<void> {
+  private async processMetadataGroupLayer(layerConfig: TypeLayerGroupEntryConfig): Promise<TypeLayerGroupEntryConfig> {
     try {
       await this.processLayerMetadata(layerConfig);
       await this.processListOfLayerEntryMetadata(layerConfig.listOfLayerEntryConfig!);
+      return layerConfig;
     } catch (error) {
       // Log
       logger.logError(error);
     }
+    return layerConfig;
   }
 
   /** ***************************************************************************************************************************
@@ -654,12 +661,12 @@ export abstract class AbstractGeoViewLayer {
    *
    * @param {TypeLayerEntryConfig} layerConfig The layer entry configuration to process.
    *
-   * @returns {Promise<void>} A promise that the vector layer configuration has its metadata processed.
+   * @returns {Promise<TypeLayerEntryConfig>} A promise that the vector layer configuration has its metadata processed.
    */
-  protected processLayerMetadata(layerConfig: TypeLayerEntryConfig): Promise<void> {
+  protected processLayerMetadata(layerConfig: TypeLayerEntryConfig): Promise<TypeLayerEntryConfig> {
     if (!layerConfig.source) layerConfig.source = {};
     if (!layerConfig.source.featureInfo) layerConfig.source.featureInfo = { queryable: true };
-    return Promise.resolve();
+    return Promise.resolve(layerConfig);
   }
 
   /** ***************************************************************************************************************************
@@ -702,7 +709,6 @@ export abstract class AbstractGeoViewLayer {
         if (baseLayer) {
           this.registerToLayerSets(listOfLayerEntryConfig[0] as TypeBaseLayerEntryConfig);
           if (layerGroup) layerGroup!.getLayers().push(baseLayer!);
-          this.setLayerStatus('processed', layerPath);
           return layerGroup || baseLayer;
         }
         this.layerLoadError.push({
@@ -739,7 +745,6 @@ export abstract class AbstractGeoViewLayer {
           if (layerConfig) {
             if (!layerEntryIsGroupLayer(listOfLayerEntryConfig[i])) {
               this.registerToLayerSets(baseLayer.get('layerConfig') as TypeBaseLayerEntryConfig);
-              this.setLayerStatus('processed', layerPath);
             }
             layerGroup!.getLayers().push(baseLayer);
           }

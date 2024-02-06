@@ -241,10 +241,10 @@ export class OgcFeature extends AbstractGeoViewVector {
    *
    * @param {TypeVectorLayerEntryConfig} layerConfig The layer entry configuration to process.
    *
-   * @returns {Promise<void>} A promise that the vector layer configuration has its metadata processed.
+   * @returns {Promise<TypeLayerEntryConfig>} A promise that the vector layer configuration has its metadata processed.
    */
-  protected processLayerMetadata(layerConfig: TypeVectorLayerEntryConfig): Promise<void> {
-    const promiseOfExecution = new Promise<void>((resolve) => {
+  protected processLayerMetadata(layerConfig: TypeVectorLayerEntryConfig): Promise<TypeLayerEntryConfig> {
+    const promiseOfExecution = new Promise<TypeLayerEntryConfig>((resolve) => {
       const metadataUrl = getLocalizedValue(this.metadataAccessPath, this.mapId);
       if (metadataUrl) {
         const queryUrl = metadataUrl.endsWith('/')
@@ -256,9 +256,9 @@ export class OgcFeature extends AbstractGeoViewVector {
             this.layerMetadata[layerConfig.layerPath] = response.data.properties;
             this.processFeatureInfoConfig(response.data.properties, layerConfig);
           }
-          resolve();
+          resolve(layerConfig);
         });
-      } else resolve();
+      } else resolve(layerConfig);
     });
     return promiseOfExecution;
   }

@@ -80,7 +80,7 @@ export function HoverTooltip(): JSX.Element {
             const item = value.data.hover.features[0];
             const nameField = item.nameField || Object.entries(item.fieldInfo)[0][0];
             const field = item.fieldInfo[nameField];
-            setTooltipValue(field!.value as string | '');
+            setTooltipValue(field?.value as string | '');
             setTooltipIcon(item.featureIcon.toDataURL());
             setShowTooltip(true);
             break;

@@ -571,10 +571,10 @@ export class WMS extends AbstractGeoViewRaster {
    *
    * @param {TypeLayerEntryConfig} layerConfig The layer entry configuration to process.
    *
-   * @returns {Promise<void>} A promise that the layer configuration has its metadata processed.
+   * @returns {Promise<TypeLayerEntryConfig>} A promise that the layer configuration has its metadata processed.
    */
-  protected processLayerMetadata(layerConfig: TypeLayerEntryConfig): Promise<void> {
-    const promiseOfExecution = new Promise<void>((resolve) => {
+  protected processLayerMetadata(layerConfig: TypeLayerEntryConfig): Promise<TypeLayerEntryConfig> {
+    const promiseOfExecution = new Promise<TypeLayerEntryConfig>((resolve) => {
       if (geoviewEntryIsWMS(layerConfig)) {
         const layerCapabilities = this.getLayerMetadataEntry(layerConfig.layerId)!;
         this.layerMetadata[layerConfig.layerPath] = layerCapabilities;
@@ -605,7 +605,7 @@ export class WMS extends AbstractGeoViewRaster {
           }
         }
       }
-      resolve();
+      resolve(layerConfig);
     });
     return promiseOfExecution;
   }

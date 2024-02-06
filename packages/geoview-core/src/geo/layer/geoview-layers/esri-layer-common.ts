@@ -330,14 +330,14 @@ export function commonProcessInitialSettings(
  * @param {EsriDynamic | EsriFeature} this The ESRI layer instance pointer.
  * @param {TypeLayerEntryConfig} layerConfig The layer entry configuration to process.
  *
- * @returns {Promise<void>} A promise that the layer configuration has its metadata processed.
+ * @returns {Promise<TypeLayerEntryConfig>} A promise that the layer configuration has its metadata processed.
  */
 export async function commonProcessLayerMetadata(
   this: EsriDynamic | EsriFeature | EsriImage,
   layerConfig: TypeLayerEntryConfig
-): Promise<void> {
+): Promise<TypeLayerEntryConfig> {
   // User-defined groups do not have metadata provided by the service endpoint.
-  if (layerEntryIsGroupLayer(layerConfig) && !layerConfig.isMetadataLayerGroup) return;
+  if (layerEntryIsGroupLayer(layerConfig) && !layerConfig.isMetadataLayerGroup) return layerConfig;
   const { layerPath } = layerConfig;
 
   let queryUrl = getLocalizedValue(this.metadataAccessPath, this.mapId);
@@ -378,6 +378,7 @@ export async function commonProcessLayerMetadata(
       console.log(error);
     }
   }
+  return layerConfig;
 }
 
 /**

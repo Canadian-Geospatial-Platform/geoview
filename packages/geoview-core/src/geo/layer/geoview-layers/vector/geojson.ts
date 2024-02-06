@@ -216,11 +216,11 @@ export class GeoJSON extends AbstractGeoViewVector {
    *
    * @param {TypeVectorLayerEntryConfig} layerConfig The layer entry configuration to process.
    *
-   * @returns {Promise<void>} A promise that the vector layer configuration has its metadata processed.
+   * @returns {Promise<TypeLayerEntryConfig>} A promise that the vector layer configuration has its metadata processed.
    */
-  protected processLayerMetadata(layerConfig: TypeVectorLayerEntryConfig): Promise<void> {
-    const promiseOfExecution = new Promise<void>((resolve) => {
-      if (!this.metadata) resolve();
+  protected processLayerMetadata(layerConfig: TypeVectorLayerEntryConfig): Promise<TypeLayerEntryConfig> {
+    const promiseOfExecution = new Promise<TypeLayerEntryConfig>((resolve) => {
+      if (!this.metadata) resolve(layerConfig);
       else {
         const metadataLayerList = Cast<TypeVectorLayerEntryConfig[]>(this.metadata?.listOfLayerEntryConfig);
         const layerMetadataFound = metadataLayerList.find(
@@ -258,7 +258,7 @@ export class GeoJSON extends AbstractGeoViewVector {
             `EPSG:${MapEventProcessor.getMapState(this.mapId).currentProjection}`
           );
 
-        resolve();
+        resolve(layerConfig);
       }
     });
     return promiseOfExecution;
