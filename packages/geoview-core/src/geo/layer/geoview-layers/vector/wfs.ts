@@ -156,7 +156,7 @@ export class WFS extends AbstractGeoViewVector {
         getXMLHttpRequest(`${metadataUrl}${getCapabilitiesUrl}`)
           .then((metadataString) => {
             if (metadataString === '{}') {
-              this.setAllLayerStatusToError(this.listOfLayerEntryConfig, 'Unable to read metadata');
+              this.setAllLayerStatusTo('error', this.listOfLayerEntryConfig, 'Unable to read metadata');
             } else {
               // need to pass a xmldom to xmlToJson
               const xmlDOMCapabilities = new DOMParser().parseFromString(metadataString, 'text/xml');
@@ -170,10 +170,11 @@ export class WFS extends AbstractGeoViewVector {
             }
           }) // eslint-disable-next-line @typescript-eslint/no-unused-vars
           .catch((reason) => {
-            this.setAllLayerStatusToError(this.listOfLayerEntryConfig, 'Unable to read metadata');
+            this.setAllLayerStatusTo('error', this.listOfLayerEntryConfig, 'Unable to read metadata');
+            resolve();
           });
       } else {
-        this.setAllLayerStatusToError(this.listOfLayerEntryConfig, 'Unable to read metadata');
+        this.setAllLayerStatusTo('error', this.listOfLayerEntryConfig, 'Unable to read metadata');
       }
     });
     return promisedExecution;
@@ -201,7 +202,7 @@ export class WFS extends AbstractGeoViewVector {
         }
       }
 
-      this.setLayerStatus('loading', layerPath);
+      this.setLayerStatus('processing', layerPath);
 
       // Note that the code assumes wfs feature type list does not contains metadata layer group. If you need layer group,
       // you can define them in the configuration section.
@@ -250,10 +251,10 @@ export class WFS extends AbstractGeoViewVector {
    *
    * @param {TypeVectorLayerEntryConfig} layerConfig The layer entry configuration to process.
    *
-   * @returns {Promise<void>} A promise that the vector layer configuration has its metadata processed.
+   * @returns {Promise<TypeLayerEntryConfig>} A promise that the vector layer configuration has its metadata processed.
    */
-  protected processLayerMetadata(layerConfig: TypeVectorLayerEntryConfig): Promise<void> {
-    const promiseOfExecution = new Promise<void>((resolve) => {
+  protected processLayerMetadata(layerConfig: TypeVectorLayerEntryConfig): Promise<TypeLayerEntryConfig> {
+    const promiseOfExecution = new Promise<TypeLayerEntryConfig>((resolve) => {
       let queryUrl = getLocalizedValue(layerConfig.source!.dataAccessPath, this.mapId);
 
       // check if url contains metadata parameters for the getCapabilities request and reformat the urls
@@ -288,7 +289,7 @@ export class WFS extends AbstractGeoViewVector {
               this.layerMetadata[layerConfig.layerPath] = layerMetadata.featureTypes[0].properties;
               this.processFeatureInfoConfig(layerMetadata.featureTypes[0].properties as TypeJsonArray, layerConfig);
             }
-            resolve();
+            resolve(layerConfig);
           });
       } else if (describeFeatureUrl && outputFormat.toUpperCase().includes('XML')) {
         fetch(describeFeatureUrl)
@@ -318,9 +319,9 @@ export class WFS extends AbstractGeoViewVector {
               this.layerMetadata[layerConfig.layerPath] = featureTypeProperties as TypeJsonObject;
               this.processFeatureInfoConfig(featureTypeProperties as TypeJsonArray, layerConfig);
             }
-            resolve();
+            resolve(layerConfig);
           });
-      } else resolve();
+      } else resolve(layerConfig);
     });
     return promiseOfExecution;
   }
