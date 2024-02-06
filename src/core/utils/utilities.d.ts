@@ -14,6 +14,14 @@ import { TypeJsonArray, TypeJsonObject, TypeJsonValue, TypeMapFeaturesConfig } f
  */
 export declare function getLocalizedValue(localizedString: TypeLocalizedString | undefined, mapId: string): string | undefined;
 /**
+ * Create a localized string and set its "en" and "fr" properties to the same value.
+ *
+ * @param {TypeLocalizedString} localizedString the localized string to process.
+ *
+ * @returns {string} The string value according to the map display language,
+ */
+export declare function createLocalizedString(value: string): TypeLocalizedString;
+/**
  * Generate a unique id if an id was not provided
  * @param {string} id an id to return if it was already passed
  * @returns {string} the generated id
@@ -238,3 +246,9 @@ export declare function whenThisThen<T>(checkCallback: () => T, timeout?: number
  * @returns Promise<void> resolves when the delay timeout expires.
  */
 export declare const delay: (ms: number) => Promise<void>;
+/**
+ * Escape special characters from string
+ * @param {string} text text to escape
+ * @returns {string} espaced string
+ */
+export declare function escapeRegExp(text: string): string;

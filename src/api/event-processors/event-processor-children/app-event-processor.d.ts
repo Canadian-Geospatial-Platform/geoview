@@ -3,7 +3,7 @@ import { AbstractEventProcessor } from '../abstract-event-processor';
 import { NotificationDetailsType, TypeDisplayLanguage, TypeHTMLElement, TypeDisplayTheme } from '@/core/types/cgpv-types';
 export declare class AppEventProcessor extends AbstractEventProcessor {
     onInitialize(store: GeoviewStoreType): void;
-    static addAppNotification(mapId: string, notification: NotificationDetailsType): void;
+    static addAppNotification(mapId: string, notification: NotificationDetailsType): Promise<void>;
     static getDisplayLanguage(mapId: string): TypeDisplayLanguage;
     static getDisplayTheme(mapId: string): TypeDisplayTheme;
     static getSupportedLanguages(mapId: string): TypeDisplayLanguage[];

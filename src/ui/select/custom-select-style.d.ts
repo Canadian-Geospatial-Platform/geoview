@@ -4,7 +4,9 @@ export declare const getSxClasses: (theme: Theme) => {
         width: string;
         '& .MuiFormLabel-root.Mui-focused': {
             color: string;
-            background: string;
+            background: {
+                [x: number]: string;
+            };
         };
         '& .MuiOutlinedInput-root.Mui-focused': {
             border: string;
@@ -15,7 +17,9 @@ export declare const getSxClasses: (theme: Theme) => {
         left: number;
         top: number;
         transform: string;
-        background: string;
+        background: {
+            [x: number]: string;
+        };
     };
     select: {
         width: string;

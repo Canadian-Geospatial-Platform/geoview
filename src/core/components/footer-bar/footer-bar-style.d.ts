@@ -1,57 +1,14 @@
-export declare const sxClassesFooterBar: {
-    footerBarContainer: {
-        flexGrow: number;
-        zIndex: number;
-        display: string;
-        flexDirection: string;
-        justifyContent: string;
-        alignItems: string;
+import { Theme } from '@mui/material/styles';
+export declare const getSxClasses: (theme: Theme) => {
+    tabsContainer: {
+        position: string;
+        background: string;
+        boxShadow: string;
         width: string;
-        minHeight: string;
-        maxHeight: string;
-        backdropFilter: string;
-        backgroundColor: string;
-        pointerEvents: string;
-        gap: number;
-        order: number;
-    };
-    mouseScaleControlsContainer: {
-        display: string;
-        flexDirection: string;
-        '& button': {
-            cursor: string;
-            margin: string;
+        transition: string;
+        height: string;
+        '&.MuiGrid-container': {
+            background: string;
         };
-        justifyContent: string;
-    };
-    rotationControlsContainer: {
-        display: string;
-        flexDirection: string;
-        marginLeft: string;
-        alignItems: string;
-    };
-};
-export declare const sxClassesExportButton: {
-    expandbuttonContainer: {
-        display: string;
-        alignItems: string;
-        justifyContent: string;
-        color: string;
-        height: string;
-        width: string;
-        marginLeft: string;
-    };
-};
-export declare const sxClassesRotationButton: {
-    rotationButton: {
-        height: number;
-        width: number;
-        marginRight: number;
-    };
-    rotationIcon: {
-        fontSize: string;
-        width: string;
-        height: string;
-        color: string;
     };
 };

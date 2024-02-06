@@ -1,8 +1,9 @@
 import { TypeJsonArray, TypeJsonObject } from '@/core/types/global-types';
-import { TypeEsriDynamicLayerEntryConfig, TypeLayerEntryConfig, TypeListOfLayerEntryConfig } from '@/geo/map/map-schema-types';
+import { TypeEsriDynamicLayerEntryConfig, TypeEsriImageLayerEntryConfig, TypeLayerEntryConfig, TypeListOfLayerEntryConfig } from '@/geo/map/map-schema-types';
 import { EsriDynamic } from './raster/esri-dynamic';
 import { EsriFeature, TypeEsriFeatureLayerEntryConfig } from './vector/esri-feature';
 import { codedValueType, rangeDomainType, TypeFeatureInfoEntryPartial } from '@/api/events/payloads';
+import { EsriImage } from './raster/esri-image';
 /** ***************************************************************************************************************************
  * This method reads the service metadata from the metadataAccessPath.
  *
@@ -28,7 +29,7 @@ export declare function commonValidateListOfLayerEntryConfig(this: EsriDynamic |
  *
  * @returns {'string' | 'date' | 'number'} The type of the field.
  */
-export declare function commonGetFieldType(this: EsriDynamic | EsriFeature, fieldName: string, layerConfig: TypeLayerEntryConfig): 'string' | 'date' | 'number';
+export declare function commonGetFieldType(this: EsriDynamic | EsriFeature | EsriImage, fieldName: string, layerConfig: TypeLayerEntryConfig): 'string' | 'date' | 'number';
 /** ***************************************************************************************************************************
  * Return the type of the specified field.
  *
@@ -38,7 +39,7 @@ export declare function commonGetFieldType(this: EsriDynamic | EsriFeature, fiel
  *
  * @returns {null | codedValueType | rangeDomainType} The domain of the field.
  */
-export declare function commonGetFieldDomain(this: EsriDynamic | EsriFeature, fieldName: string, layerConfig: TypeLayerEntryConfig): null | codedValueType | rangeDomainType;
+export declare function commonGetFieldDomain(this: EsriDynamic | EsriFeature | EsriImage, fieldName: string, layerConfig: TypeLayerEntryConfig): null | codedValueType | rangeDomainType;
 /** ***************************************************************************************************************************
  * This method will create a Geoview temporal dimension if it exist in the service metadata
  *
@@ -46,7 +47,7 @@ export declare function commonGetFieldDomain(this: EsriDynamic | EsriFeature, fi
  * @param {TypeJsonObject} esriTimeDimension The ESRI time dimension object
  * @param {TypeEsriFeatureLayerEntryConfig | TypeEsriDynamicLayerEntryConfig} layerConfig The layer entry to configure
  */
-export declare function commonProcessTemporalDimension(this: EsriDynamic | EsriFeature, esriTimeDimension: TypeJsonObject, layerConfig: TypeEsriFeatureLayerEntryConfig | TypeEsriDynamicLayerEntryConfig): void;
+export declare function commonProcessTemporalDimension(this: EsriDynamic | EsriFeature | EsriImage, esriTimeDimension: TypeJsonObject, layerConfig: TypeEsriFeatureLayerEntryConfig | TypeEsriDynamicLayerEntryConfig | TypeEsriImageLayerEntryConfig): void;
 /** ***************************************************************************************************************************
  * This method verifies if the layer is queryable and sets the outfields and aliasFields of the source feature info.
  *
@@ -57,7 +58,7 @@ export declare function commonProcessTemporalDimension(this: EsriDynamic | EsriF
  * @param {TypeJsonArray} fields An array of field names and its aliases.
  * @param {TypeEsriFeatureLayerEntryConfig | TypeEsriDynamicLayerEntryConfig} layerConfig The layer entry to configure.
  */
-export declare function commonProcessFeatureInfoConfig(this: EsriDynamic | EsriFeature, capabilities: string, nameField: string, geometryFieldName: string, fields: TypeJsonArray, layerConfig: TypeEsriFeatureLayerEntryConfig | TypeEsriDynamicLayerEntryConfig): void;
+export declare function commonProcessFeatureInfoConfig(this: EsriDynamic | EsriFeature | EsriImage, capabilities: string, nameField: string, geometryFieldName: string, fields: TypeJsonArray, layerConfig: TypeEsriFeatureLayerEntryConfig | TypeEsriDynamicLayerEntryConfig | TypeEsriImageLayerEntryConfig): void;
 /** ***************************************************************************************************************************
  * This method set the initial settings based on the service metadata. Priority is given to the layer configuration.
  *
@@ -68,7 +69,7 @@ export declare function commonProcessFeatureInfoConfig(this: EsriDynamic | EsriF
  * @param {TypeJsonObject} extent The metadata layer extent.
  * @param {TypeEsriFeatureLayerEntryConfig | TypeEsriDynamicLayerEntryConfig} layerConfig The layer entry to configure.
  */
-export declare function commonProcessInitialSettings(this: EsriDynamic | EsriFeature, visibility: boolean, minScale: number, maxScale: number, extent: TypeJsonObject, layerConfig: TypeEsriFeatureLayerEntryConfig | TypeEsriDynamicLayerEntryConfig): void;
+export declare function commonProcessInitialSettings(this: EsriDynamic | EsriFeature | EsriImage, visibility: boolean, minScale: number, maxScale: number, extent: TypeJsonObject, layerConfig: TypeEsriFeatureLayerEntryConfig | TypeEsriDynamicLayerEntryConfig | TypeEsriImageLayerEntryConfig): void;
 /** ***************************************************************************************************************************
  * This method is used to process the layer's metadata. It will fill the empty fields of the layer's configuration (renderer,
  * initial settings, fields and aliases).
@@ -78,7 +79,7 @@ export declare function commonProcessInitialSettings(this: EsriDynamic | EsriFea
  *
  * @returns {Promise<void>} A promise that the layer configuration has its metadata processed.
  */
-export declare function commonProcessLayerMetadata(this: EsriDynamic | EsriFeature, layerConfig: TypeLayerEntryConfig): Promise<void>;
+export declare function commonProcessLayerMetadata(this: EsriDynamic | EsriFeature | EsriImage, layerConfig: TypeLayerEntryConfig): Promise<void>;
 /**
  * Transforms the query results of an Esri service response - when not querying on the Layers themselves (giving a 'reduced' FeatureInfoEntry).
  * The transformation reads the Esri formatted information and return a list of `TypeFeatureInfoEntryPartial` records.

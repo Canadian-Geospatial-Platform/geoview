@@ -1,9 +1,9 @@
 import { PayloadBaseClass } from './payload-base-class';
 import { EventStringId } from '../event-types';
-import { TypeLayerStatus, TypeLocalizedString } from '@/geo/map/map-schema-types';
-export type TypeResultSets = {
+import { TypeLayerStatus } from '@/geo/map/map-schema-types';
+export type TypeResultsSet = {
     [layerPath: string]: {
-        layerName?: TypeLocalizedString;
+        layerName?: string;
         layerStatus: TypeLayerStatus;
         layerPhase: string;
         data: any | null;
@@ -55,7 +55,7 @@ export declare const payloadIsLayerSetUpdated: (verifyIfPayload: PayloadBaseClas
  */
 export interface TypelayerSetUpdatedPayload extends LayerSetPayload {
     /** An object containing the result sets indexed using the layer path */
-    resultSets: TypeResultSets;
+    resultsSet: TypeResultsSet;
     layerPath: string;
 }
 /**
@@ -161,5 +161,5 @@ export declare class LayerSetPayload extends PayloadBaseClass {
      *
      * @returns {TypelayerSetUpdatedPayload} the requestLayerInventoryPayload object created
      */
-    static createLayerSetUpdatedPayload: (handlerName: string, resultSets: TypeResultSets, layerPath: string) => TypelayerSetUpdatedPayload;
+    static createLayerSetUpdatedPayload: (handlerName: string, resultsSet: TypeResultsSet, layerPath: string) => TypelayerSetUpdatedPayload;
 }

@@ -1,5 +1,5 @@
 import { IAppState } from './store-interface-and-intial-values/app-state';
-import { IDetailsState } from './store-interface-and-intial-values/details-state';
+import { IFeatureInfoState } from './store-interface-and-intial-values/feature-info-state';
 import { ILayerState } from './store-interface-and-intial-values/layer-state';
 import { IMapState } from './store-interface-and-intial-values/map-state';
 import { IMapDataTableState } from './store-interface-and-intial-values/data-table-state';
@@ -14,7 +14,7 @@ export interface IGeoviewState {
     mapId: string;
     setMapConfig: (config: TypeMapFeaturesConfig) => void;
     appState: IAppState;
-    detailsState: IDetailsState;
+    detailsState: IFeatureInfoState;
     dataTableState: IMapDataTableState;
     layerState: ILayerState;
     mapState: IMapState;

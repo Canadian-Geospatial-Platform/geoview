@@ -56,7 +56,7 @@ export declare const getSxClasses: (theme: Theme) => {
     };
     boxContainerFeatureInfo: {
         wordWrap: string;
-        fontSize: string;
+        fontSize: any;
         lineHeight: string;
     };
     flexBoxAlignCenter: {

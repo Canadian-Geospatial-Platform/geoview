@@ -42,7 +42,7 @@ export declare const getSxClasses: (theme: Theme) => {
     };
     tableIconLabel: {
         color: string;
-        fontSize: number;
+        fontSize: any;
         noWrap: boolean;
         marginLeft: number;
     };

@@ -6,11 +6,15 @@ export declare const getSxClasses: (theme: Theme) => {
         marginLeft: string;
         '& .MuiSwitch-switchBase.Mui-focusVisible': {
             color: string;
-            background: string;
+            background: {
+                [x: number]: string;
+            };
         };
         '& .MuiFormControlLabel-label': {
             fontSize: number;
-            color: string;
+            color: {
+                [x: number]: string;
+            };
             whiteSpace: string;
         };
     };

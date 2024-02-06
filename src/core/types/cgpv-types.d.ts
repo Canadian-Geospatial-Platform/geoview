@@ -10,7 +10,7 @@ export * from '../utils/date-mgt';
 export * from '../utils/utilities';
 export * from '../stores/store-interface-and-intial-values/app-state';
 export * from '../stores/store-interface-and-intial-values/data-table-state';
-export * from '../stores/store-interface-and-intial-values/details-state';
+export * from '../stores/store-interface-and-intial-values/feature-info-state';
 export * from '../stores/store-interface-and-intial-values/layer-state';
 export * from '../stores/store-interface-and-intial-values/map-state';
 export * from '../stores/store-interface-and-intial-values/ui-state';

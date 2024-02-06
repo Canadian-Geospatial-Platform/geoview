@@ -27,7 +27,7 @@ export declare const getSxClasses: (theme: Theme) => {
                 borderStyle: string;
             };
             '&.dragging': {
-                backgroundColor: string;
+                backgroundcolor: string;
                 cursor: string;
                 userSelect: string;
             };

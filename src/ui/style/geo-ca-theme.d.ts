@@ -1,2 +1,2 @@
-import { ThemeOptions } from '@mui/material';
-export declare const geoCaThemeOptions: ThemeOptions;
+import { IGeoViewColors } from './types';
+export declare const geoCaThemeColors: IGeoViewColors;

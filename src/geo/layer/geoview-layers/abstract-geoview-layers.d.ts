@@ -66,11 +66,11 @@ export type TypeStyleRepresentation = {
     arrayOfCanvas?: (HTMLCanvasElement | null)[];
 };
 export type TypeVectorLayerStyles = Partial<Record<TypeStyleGeometry, TypeStyleRepresentation>>;
-type LayerTypesKey = 'ESRI_DYNAMIC' | 'ESRI_FEATURE' | 'IMAGE_STATIC' | 'GEOJSON' | 'GEOCORE' | 'GEOPACKAGE' | 'XYZ_TILES' | 'VECTOR_TILES' | 'OGC_FEATURE' | 'WFS' | 'WMS';
+type LayerTypesKey = 'ESRI_DYNAMIC' | 'ESRI_FEATURE' | 'ESRI_IMAGE' | 'IMAGE_STATIC' | 'GEOJSON' | 'GEOCORE' | 'GEOPACKAGE' | 'XYZ_TILES' | 'VECTOR_TILES' | 'OGC_FEATURE' | 'WFS' | 'WMS';
 /**
  * Type of GeoView layers
  */
-export type TypeGeoviewLayerType = 'esriDynamic' | 'esriFeature' | 'imageStatic' | 'GeoJSON' | 'geoCore' | 'GeoPackage' | 'xyzTiles' | 'vectorTiles' | 'ogcFeature' | 'ogcWfs' | 'ogcWms';
+export type TypeGeoviewLayerType = 'esriDynamic' | 'esriFeature' | 'esriImage' | 'imageStatic' | 'GeoJSON' | 'geoCore' | 'GeoPackage' | 'xyzTiles' | 'vectorTiles' | 'ogcFeature' | 'ogcWfs' | 'ogcWms';
 /**
  * Definition of the GeoView layer constants
  */

@@ -5,7 +5,7 @@ import { TypeTabs } from '@/ui/tabs/tabs';
  * @exports
  * @class
  */
-export declare class FooterTabsApi {
+export declare class FooterBarApi {
     mapId: string;
     tabs: TypeTabs[];
     /**
@@ -15,22 +15,22 @@ export declare class FooterTabsApi {
      */
     constructor(mapId: string);
     /**
-     * Create a tab on the footer tabs
+     * Create a tab on the footer bar
      *
      * @param {TypeTabs} tabProps the properties of the tab to be created
      *
      */
-    createFooterTab: (tabProps: TypeTabs) => void;
+    createTab: (tabProps: TypeTabs) => void;
     /**
      * Remove a tab by value
      *
      * @param {string} id the id of the tab to be removed
      */
-    removeFooterTab: (id: string) => void;
+    removeTab: (id: string) => void;
     /**
      * Select a tab by id
      *
      * @param {string} id the id of the tab to be selected
      */
-    selectFooterTab: (id: string) => void;
+    selectTab: (id: string) => void;
 }
