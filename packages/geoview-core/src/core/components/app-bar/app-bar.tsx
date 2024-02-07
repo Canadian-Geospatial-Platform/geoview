@@ -15,7 +15,7 @@ import Notifications from '@/core/components/notifications/notifications';
 import Version from './buttons/version';
 import { getSxClasses } from './app-bar-style';
 import { useUIActiveFocusItem, useUIAppbarComponents } from '@/core/stores/store-interface-and-intial-values/ui-state';
-import { useMapInteraction } from '@/core/stores/store-interface-and-intial-values/map-state';
+import { useMapInteraction, useMapStoreActions } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { useGeoViewConfig } from '@/core/stores/geoview-store';
 import { logger } from '@/core/utils/logger';
 
@@ -40,6 +40,7 @@ export function Appbar(): JSX.Element {
   const activeModalId = useUIActiveFocusItem().activeElementId;
   const interaction = useMapInteraction();
   const appBarComponents = useUIAppbarComponents();
+  const { hideClickMarker } = useMapStoreActions();
 
   const appBarPanelCloseListenerFunction = () => setSelectedAppbarButtonId('');
 
@@ -214,7 +215,8 @@ export function Appbar(): JSX.Element {
                   key={buttonPanel.panel.panelId}
                   panel={buttonPanel.panel}
                   button={buttonPanel.button}
-                  handlePanelOpened={buttonPanel.handlePanelOpened}
+                  onPanelOpened={buttonPanel.onPanelOpened}
+                  onPanelClosed={hideClickMarker}
                 />
               ) : null;
             })}

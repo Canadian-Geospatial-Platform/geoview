@@ -36,7 +36,7 @@ export type TypePanelProps = {
   /** Custom panel styles */
   panelStyles?: PanelStyles;
   /** Handler callback triggered when a panel is fully opened */
-  handlePanelOpened?: () => void;
+  onPanelOpened?: () => void;
 };
 
 export interface PanelStyles {
@@ -107,8 +107,8 @@ export type TypeButtonPanel = {
   button: TypeIconButtonProps;
   /** Group name. */
   groupName?: string;
-  /** Handler callback triggered when a panel is fully opened */
-  handlePanelOpened?: () => void;
+  /** callback triggered when a panel is fully opened */
+  onPanelOpened?: () => void;
 };
 
 /** ******************************************************************************************************************************

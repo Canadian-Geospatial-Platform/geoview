@@ -22,8 +22,6 @@ import {
   PayloadBaseClass,
 } from '@/api/events/payloads';
 import { logger } from '@/core/utils/logger';
-// TODO: Refactor - UI - remove the dependency to the store for this component
-import { useMapStoreActions } from '@/core/stores/store-interface-and-intial-values/map-state';
 
 import { TypeIconButtonProps } from '../icon-button/icon-button-types';
 import { getSxClasses } from './panel-style';
@@ -37,7 +35,9 @@ type TypePanelAppProps = {
   button: TypeIconButtonProps;
 
   // Callback when the panel has completed opened (and transitioned in)
-  handlePanelOpened?: () => void;
+  onPanelOpened?: () => void;
+  // Callback when the panel has been closed
+  onPanelClosed?: () => void;
 };
 
 /**
@@ -47,7 +47,7 @@ type TypePanelAppProps = {
  * @returns {JSX.Element} the created Panel element
  */
 export function Panel(props: TypePanelAppProps): JSX.Element {
-  const { panel, button, handlePanelOpened } = props;
+  const { panel, button, onPanelOpened, onPanelClosed } = props;
   const { panelStyles } = panel;
 
   const mapId = useGeoViewMapId();
@@ -74,9 +74,6 @@ export function Panel(props: TypePanelAppProps): JSX.Element {
     transition: `width ${theme.transitions.duration.standard}ms ease`,
   };
 
-  // get store values and actions
-  const { hideClickMarker } = useMapStoreActions();
-
   /**
    * function that causes rerender when changing panel content
    */
@@ -88,9 +85,6 @@ export function Panel(props: TypePanelAppProps): JSX.Element {
    * Close the panel
    */
   const closePanel = (): void => {
-    // emit an event to hide the marker when using the details panel
-    hideClickMarker();
-
     const buttonElement = document.getElementById(mapId)?.querySelector(`#${button.id}`);
 
     if (buttonElement) {
@@ -108,6 +102,9 @@ export function Panel(props: TypePanelAppProps): JSX.Element {
     }
 
     setPanelStatus(false);
+
+    // Closed
+    onPanelClosed?.();
   };
 
   const panelChangeContentListenerFunction = (payload: PayloadBaseClass) => {
@@ -131,10 +128,10 @@ export function Panel(props: TypePanelAppProps): JSX.Element {
       // set focus on close button on panel open
       setPanelStatus(true);
 
-      if (handlePanelOpened) {
+      if (onPanelOpened) {
         // Wait the transition period (+50 ms just to be sure of shenanigans)
         setTimeout(() => {
-          handlePanelOpened!();
+          onPanelOpened();
         }, theme.transitions.duration.standard + 50);
       }
 
@@ -305,5 +302,6 @@ export function Panel(props: TypePanelAppProps): JSX.Element {
  * React's default properties for the Panel
  */
 Panel.defaultProps = {
-  handlePanelOpened: null,
+  onPanelOpened: null,
+  onPanelClosed: null,
 };
