@@ -156,6 +156,9 @@ export function Datapanel() {
   }, [isLoading, selectedLayerPath]);
 
   useEffect(() => {
+    // Log
+    logger.logTraceUseEffect('DATA-PANEL - set selected layer when component mounts', orderedLayerData[0].layerPath);
+
     setSelectedLayerPath(orderedLayerData[0].layerPath);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

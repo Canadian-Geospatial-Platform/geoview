@@ -3,6 +3,16 @@ import { AbstractGeoViewVector, EsriDynamic, TypeLayerEntryConfig, api } from '@
 import { AbstractEventProcessor } from '../abstract-event-processor';
 
 export class DataTableProcessor extends AbstractEventProcessor {
+  // **********************************************************
+  // Static functions for Typescript files to access store actions
+  // **********************************************************
+  //! Typescript MUST always use the defined store actions below to modify store - NEVER use setState!
+  //! Some action does state modifications AND map actions.
+  //! ALWAYS use map event processor when an action modify store and IS NOT trap by map state event handler
+
+  // **********************************************************
+  // Static functions for Store Map State to action on API
+  // **********************************************************
   /**
    * Filter the map based on filters set on date table.
    * @param {string} mapId  id of the map.
