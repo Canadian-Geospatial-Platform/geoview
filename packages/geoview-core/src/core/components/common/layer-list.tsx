@@ -52,7 +52,7 @@ const LayerListItem = memo(function LayerListItem({ isSelected, layer, handleLis
       case 'error':
         return sxClasses.backgroundError;
       default:
-        return 'unset';
+        return sxClasses.default;;
     }
   };
 

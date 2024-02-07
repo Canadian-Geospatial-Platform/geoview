@@ -39,7 +39,7 @@ export const getSxClasses = (theme: Theme) => ({
     },
   },
   mousePositionCheckmark: {
-    paddingRight: 5
+    paddingRight: 5,
   },
   mousePositionText: {
     fontSize: theme.typography.fontSize,

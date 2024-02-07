@@ -14,7 +14,7 @@ export const getSxClasses = (theme: Theme) => ({
     maxHeight: '35px',
     backdropFilter: 'blur(5px)',
     backgroundColor: theme.palette.geoViewColor.bgColor.dark[800],
-    color: theme.palette.geoViewColor.bgColor.light[800] + ' !important',
+    color: `${theme.palette.geoViewColor.bgColor.light[800]} !important`,
     pointerEvents: 'all',
     gap: 0.5,
     order: 3,
