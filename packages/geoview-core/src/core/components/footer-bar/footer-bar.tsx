@@ -15,6 +15,7 @@ import {
   useUIFooterPanelResizeValue,
   useUIFooterPanelResizeValues,
   useUIStoreActions,
+  useUIActiveTrapGeoView,
 } from '@/core/stores/store-interface-and-intial-values/ui-state';
 
 import { toJsonObject, TypeJsonObject, TypeJsonValue } from '@/core/types/global-types';
@@ -68,7 +69,8 @@ export function FooterBar(): JSX.Element | null {
   const footerPanelResizeValue = useUIFooterPanelResizeValue();
   const footerPanelResizeValues = useUIFooterPanelResizeValues();
   const selectedTab = useUIActiveFooterBarTabId();
-  const { setFooterPanelResizeValue, setActiveFooterBarTab } = useUIStoreActions();
+  const activeTrapGeoView = useUIActiveTrapGeoView();
+  const { setFooterPanelResizeValue, setActiveFooterBarTab, openModal, closeModal } = useUIStoreActions();
 
   // get store config for footer bar tabs to add (similar logic as in app-bar)
   const footerBarTabsConfig = useGeoViewConfig()?.footerBar;
@@ -246,6 +248,21 @@ export function FooterBar(): JSX.Element | null {
     if (payloadIsAFooterBar(payload)) removeTab(payload);
   };
 
+  useEffect(() => {
+    // If clicked on a tab with a plugin
+    if (api.maps[mapId].plugins[selectedTab]) {
+      // Get the plugin
+      const theSelectedPlugin = api.maps[mapId].plugins[selectedTab];
+
+      // A bit hacky, but not much other choice for now...
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      if (typeof (theSelectedPlugin as any).onSelected === 'function') {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (theSelectedPlugin as any).onSelected();
+      }
+    }
+  }, [mapId, selectedTab]);
+
   /**
    * Manage the tab 'create', 'remove'
    */
@@ -403,9 +420,12 @@ export function FooterBar(): JSX.Element | null {
       id="tabsContainer"
     >
       <Tabs
+        activeTrap={activeTrapGeoView}
         isCollapsed={isCollapsed}
-        handleCollapse={handleCollapse}
+        onCollapse={handleCollapse}
         onSelectedTabChanged={handleSelectedTabChanged}
+        onOpenKeyboard={openModal}
+        onCloseKeyboard={closeModal}
         selectedTab={footerBarTabs.findIndex((t) => t.id === selectedTab)}
         tabsProps={{ variant: 'scrollable' }}
         tabs={footerBarTabs}
