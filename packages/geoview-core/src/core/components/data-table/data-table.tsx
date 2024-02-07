@@ -434,15 +434,15 @@ function DataTable({ data, layerPath, tableHeight = 600 }: DataTableProps) {
     },
     muiTableBodyProps: {
       sx: (theme) => ({
-        // stripe style of table
-        '& tr:nth-of-type(odd)': {
-          backgroundColor: `${darken(theme.palette.background.default, 0.1)}!important`,
+        // stripe the rows, make odd rows a darker color
+        '& tr:nth-of-type(odd) > td': {
+          backgroundColor: `${darken(theme.palette.background.default, 0.1)}`,
         },
         '& tr:hover > td': {
-          backgroundColor: '#00ffff14',
+          backgroundColor: theme.palette.secondary.light,
         },
-        '& td': {
-          backgroundColor: 'inherit',
+        '& .Mui-selected > td': {
+          backgroundColor: theme.palette.secondary.light,
         },
       }),
     },
