@@ -164,7 +164,7 @@ export class VectorTiles extends AbstractGeoViewRaster {
         }
       }
 
-      this.setLayerStatus('loading', layerPath);
+      this.setLayerStatus('processing', layerPath);
     });
   }
 
@@ -216,16 +216,18 @@ export class VectorTiles extends AbstractGeoViewRaster {
       if (layerConfig.initialSettings?.visible !== undefined) tileLayerOptions.visible = layerConfig.initialSettings?.visible !== 'no';
 
       // TODO remove after demoing
+      // ! Humm! Have we done the demo?
       const declutter = this.mapId !== 'LYR2';
-      layerConfig.olLayer = new VectorTileLayer({ ...tileLayerOptions, declutter });
+      layerConfig.olLayerAndLoadEndListeners = {
+        olLayer: new VectorTileLayer({ ...tileLayerOptions, declutter }),
+        loadEndListenerType: 'tile',
+      };
       layerConfig.geoviewLayerInstance = this;
       if (this.metadata?.defaultStyles)
         applyStyle(
           layerConfig.olLayer as VectorTileLayer,
           `${getLocalizedValue(this.metadataAccessPath, this.mapId)}${this.metadata.defaultStyles}/root.json`
         );
-
-      this.addLoadendListener(layerPath, 'tile');
 
       resolve(layerConfig.olLayer);
     });
@@ -238,11 +240,11 @@ export class VectorTiles extends AbstractGeoViewRaster {
    *
    * @param {TypeTileLayerEntryConfig} layerConfig The layer entry configuration to process.
    *
-   * @returns {Promise<void>} A promise that the vector layer configuration has its metadata processed.
+   * @returns {Promise<TypeLayerEntryConfig>} A promise that the vector layer configuration has its metadata processed.
    */
-  protected processLayerMetadata(layerConfig: TypeTileLayerEntryConfig): Promise<void> {
-    const promiseOfExecution = new Promise<void>((resolve) => {
-      if (!this.metadata) resolve();
+  protected processLayerMetadata(layerConfig: TypeTileLayerEntryConfig): Promise<TypeLayerEntryConfig> {
+    const promiseOfExecution = new Promise<TypeLayerEntryConfig>((resolve) => {
+      if (!this.metadata) resolve(layerConfig);
       else {
         const { tileInfo } = this.metadata;
         const extent = this.metadata.fullExtent;
@@ -261,7 +263,7 @@ export class VectorTiles extends AbstractGeoViewRaster {
             `EPSG:${MapEventProcessor.getMapState(this.mapId).currentProjection}`
           );
 
-        resolve();
+        resolve(layerConfig);
       }
     });
     return promiseOfExecution;

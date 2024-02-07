@@ -164,7 +164,7 @@ export class XYZTiles extends AbstractGeoViewRaster {
         }
       }
 
-      this.setLayerStatus('loading', layerPath);
+      this.setLayerStatus('processing', layerPath);
 
       // When no metadata are provided, all layers are considered valid.
       if (!this.metadata) return;
@@ -231,10 +231,11 @@ export class XYZTiles extends AbstractGeoViewRaster {
       if (layerConfig.initialSettings?.visible !== undefined)
         tileLayerOptions.visible = layerConfig.initialSettings?.visible === 'yes' || layerConfig.initialSettings?.visible === 'always';
 
-      layerConfig.olLayer = new TileLayer(tileLayerOptions);
+      layerConfig.olLayerAndLoadEndListeners = {
+        olLayer: new TileLayer(tileLayerOptions),
+        loadEndListenerType: 'tile',
+      };
       layerConfig.geoviewLayerInstance = this;
-
-      this.addLoadendListener(layerPath, 'tile');
 
       resolve(layerConfig.olLayer);
     });
@@ -245,13 +246,13 @@ export class XYZTiles extends AbstractGeoViewRaster {
    * This method is used to process the layer's metadata. It will fill the empty fields of the layer's configuration (renderer,
    * initial settings, fields and aliases).
    *
-   * @param {TypeVectorLaTypeLayerEntryConfigyerEntryConfig} layerConfig The layer entry configuration to process.
+   * @param {TypeLayerEntryConfig} layerConfig The layer entry configuration to process.
    *
-   * @returns {Promise<void>} A promise that the vector layer configuration has its metadata processed.
+   * @returns {Promise<TypeLayerEntryConfig>} A promise that the vector layer configuration has its metadata processed.
    */
-  protected processLayerMetadata(layerConfig: TypeLayerEntryConfig): Promise<void> {
-    const promiseOfExecution = new Promise<void>((resolve) => {
-      if (!this.metadata) resolve();
+  protected processLayerMetadata(layerConfig: TypeLayerEntryConfig): Promise<TypeLayerEntryConfig> {
+    const promiseOfExecution = new Promise<TypeLayerEntryConfig>((resolve) => {
+      if (!this.metadata) resolve(layerConfig);
       else {
         const metadataLayerConfigFound = Cast<TypeXYZTilesLayerEntryConfig[]>(this.metadata?.listOfLayerEntryConfig).find(
           (metadataLayerConfig) => metadataLayerConfig.layerId === layerConfig.layerId
@@ -268,7 +269,7 @@ export class XYZTiles extends AbstractGeoViewRaster {
             `EPSG:${MapEventProcessor.getMapState(this.mapId).currentProjection}`
           );
 
-        resolve();
+        resolve(layerConfig);
       }
     });
     return promiseOfExecution;

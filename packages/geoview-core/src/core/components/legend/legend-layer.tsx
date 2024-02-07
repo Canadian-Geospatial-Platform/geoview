@@ -68,7 +68,7 @@ export function LegendLayer(props: LegendLayerProps): JSX.Element {
     return (
       <List sx={{ width: '100%', padding: '20px', margin: '20px 0px' }}>
         {layer.children
-          .filter((d) => d.isVisible !== 'no' && !['error', 'loading'].includes(d.layerStatus ?? ''))
+          .filter((d) => d.isVisible !== 'no' && !['error', 'processing'].includes(d.layerStatus ?? ''))
           .map((item) => (
             <LegendLayer layer={item} key={item.layerPath} />
           ))}
