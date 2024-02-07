@@ -52,7 +52,7 @@ const LayerListItem = memo(function LayerListItem({ isSelected, layer, handleLis
       case 'error':
         return sxClasses.backgroundError;
       default:
-        return sxClasses.default;;
+        return sxClasses.default;
     }
   };
 
@@ -126,7 +126,7 @@ const LayerListItem = memo(function LayerListItem({ isSelected, layer, handleLis
             size="small"
             sx={{
               color: `${theme.palette.geoViewColor.primary.main} !important`,
-              background: `${theme.palette.geoViewColor.grey.light[100]} !important`,
+              background: `${theme.palette.geoViewColor.grey.light[500]} !important`,
             }}
           >
             <ChevronRightIcon />

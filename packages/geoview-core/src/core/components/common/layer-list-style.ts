@@ -16,6 +16,7 @@ export const getSxClasses = (theme: Theme) => ({
       '& .MuiListItemButton-root': {
         padding: '0 0 0 16px',
         height: '100%',
+        backgroundColor: theme.palette.geoViewColor.bgColor.light[500],
       },
     },
     '& .MuiListItemButton-root': {
@@ -72,5 +73,6 @@ export const getSxClasses = (theme: Theme) => ({
   borderNone: 'none',
   backgroundProcessing: `${theme.palette.geoViewColor.warning.light[500]}`,
   backgroundError: `${theme.palette.geoViewColor.error.main}`,
+  default: `${theme.palette.geoViewColor.bgColor.light[100]}`,
   headline: { fontSize: '1.125rem', fontWeight: 'bold' },
 });
