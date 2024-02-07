@@ -123,12 +123,13 @@ export function Datapanel({ layerData, mapId, language }: DatapanelProps) {
         orderedLayerData
       );
 
-      // TODO: Fix the queryStatus below when refactoring will be done for the data-panel (parallel development happening, not doing it now)
+      // TODO: Fix the layerStatus and queryStatus below when refactoring will be done for the data-panel (parallel development happening, not doing it now)
       return (
         <LayerList
           layerList={orderedLayerData.map((layer, index) => ({
             layerName: layer.layerName![language] ?? '',
             layerPath: layer.layerKey,
+            layerStatus: 'loaded',
             queryStatus: 'processed',
             layerFeatures: getFeaturesOfLayer(layer.layerKey, index),
             tooltip: getLayerTooltip(layer.layerName![language] ?? '', layer.layerKey, index),

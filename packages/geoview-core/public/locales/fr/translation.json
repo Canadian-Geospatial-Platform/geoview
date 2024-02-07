@@ -107,7 +107,8 @@
     "reloadLayer": "Recharger la couche",
     "visibilityIsAlways": "La visibilité est toujours activée",
     "toggleVisibility": "Basculer la visibilité",
-    "toggleCollapse": "Basculer la fermeture"
+    "toggleCollapse": "Basculer la fermeture",
+    "querying": "Requête en cours"
   },
   "details": {
     "title": "Détails",

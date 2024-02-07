@@ -248,6 +248,21 @@ export function FooterBar(): JSX.Element | null {
     if (payloadIsAFooterBar(payload)) removeTab(payload);
   };
 
+  useEffect(() => {
+    // If clicked on a tab with a plugin
+    if (api.maps[mapId].plugins[selectedTab]) {
+      // Get the plugin
+      const theSelectedPlugin = api.maps[mapId].plugins[selectedTab];
+
+      // A bit hacky, but not much other choice for now...
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      if (typeof (theSelectedPlugin as any).onSelected === 'function') {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (theSelectedPlugin as any).onSelected();
+      }
+    }
+  }, [mapId, selectedTab]);
+
   /**
    * Manage the tab 'create', 'remove'
    */
