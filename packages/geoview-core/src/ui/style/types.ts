@@ -78,14 +78,12 @@ export interface IGeoViewColors {
   textColor: GeoViewColorClass;
   grey: GeoViewColorClass;
 
-
   primary: GeoViewColorClass;
   secondary: GeoViewColorClass;
   success: GeoViewColorClass;
   error: GeoViewColorClass;
   info: GeoViewColorClass;
   warning: GeoViewColorClass;
-  
 }
 
 export interface IGeoViewFontSizes {

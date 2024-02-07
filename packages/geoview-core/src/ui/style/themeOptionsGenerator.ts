@@ -1,6 +1,6 @@
 import { ThemeOptions } from '@mui/material';
 import { IGeoViewColors } from './types';
-import { font, headingStyles, opacity, geoViewColors as defaultGeoViewColors, defaultFontSize, geoViewFontSizes } from './default';
+import { font, headingStyles, opacity, geoViewColors as defaultGeoViewColors, geoViewFontSizes } from './default';
 
 export const generateThemeOptions = function (geoViewColors: IGeoViewColors = defaultGeoViewColors): ThemeOptions {
   const themeOptions: ThemeOptions = {
@@ -81,7 +81,7 @@ export const generateThemeOptions = function (geoViewColors: IGeoViewColors = de
 
     // start of other options
     typography: {
-      fontSize: defaultFontSize,
+      // fontSize: `${defaultFontSize}rem`,
       htmlFontSize: 16,
       fontFamily: font,
       h1: headingStyles,
