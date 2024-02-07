@@ -46,6 +46,7 @@ import { AbstractGeoViewVector, TypeLayerEntryConfig, api, TypeFieldEntry, TypeF
 import { getSxClasses } from './data-table-style';
 import { useMapStoreActions } from '@/core/stores/store-interface-and-intial-values/map-state';
 import {
+  useDataTableStoreActions,
   useDataTableStoreMapFilteredRecord,
   useDataTableStoreToolbarRowSelectedMessageRecord,
 } from '@/core/stores/store-interface-and-intial-values/data-table-state';
@@ -70,7 +71,6 @@ export interface ColumnsType {
 
 interface DataTableProps {
   data: MappedLayerDataType;
-  mapId: string;
   layerPath: string;
   tableHeight: number;
 }
@@ -120,7 +120,7 @@ const NUMBER_FILTER: Record<string, string> = {
  * @return {ReactElement} Data table as react element.
  */
 
-function DataTable({ data, mapId, layerPath, tableHeight = 600 }: DataTableProps) {
+function DataTable({ data, layerPath, tableHeight = 600 }: DataTableProps) {
   const { t } = useTranslation();
 
   const sxtheme = useTheme();
@@ -128,7 +128,7 @@ function DataTable({ data, mapId, layerPath, tableHeight = 600 }: DataTableProps
 
   // get store actions and values
   const { addHighlightedFeature, removeHighlightedFeature, zoomToExtent } = useMapStoreActions();
-
+  const { applyMapFilters } = useDataTableStoreActions();
   const language = useAppDisplayLanguage();
 
   const dataTableLocalization = language === 'fr' ? MRTLocalizationFR : MRTLocalizationEN;
@@ -455,23 +455,25 @@ function DataTable({ data, mapId, layerPath, tableHeight = 600 }: DataTableProps
 
     const selectedRows = Object.keys(rowSelection).map((key) => Number(key));
     const addAnimationRowIds = difference(selectedRows, rowSelectionRef.current);
+
     addAnimationRowIds.forEach((idx) => {
-      const row = data?.features ? data.features[idx] : null;
-      if (row) {
-        addHighlightedFeature(row);
+      const feature = data?.features ? data.features[idx] : null;
+
+      if (feature && mapFilteredRecord[layerPath]) {
+        addHighlightedFeature(feature);
       }
     });
     const removeAnimationRowIds = difference(rowSelectionRef.current, selectedRows);
     removeAnimationRowIds.forEach((idx) => {
       const feature = data?.features ? data.features[idx] : null;
-      if (feature) {
+      if (feature && mapFilteredRecord[layerPath]) {
         removeHighlightedFeature(feature);
       }
     });
 
     rowSelectionRef.current = selectedRows;
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [rowSelection]);
+  }, [rowSelection, mapFilteredRecord]);
 
   /**
    * Convert the filter list from the Column Filter state to filter the map.
@@ -532,16 +534,7 @@ function DataTable({ data, mapId, layerPath, tableHeight = 600 }: DataTableProps
     const filterStrings = buildFilterList(filters)
       .filter((filterValue) => filterValue.length)
       .join(' and ');
-
-    // TODO: use Store
-    const geoviewLayerInstance = api.maps[mapId].layer.geoviewLayer(layerPath);
-    const filterLayerConfig = api.maps[mapId].layer.registeredLayers[layerPath] as TypeLayerEntryConfig;
-
-    if (mapFilteredRecord[layerPath] && geoviewLayerInstance !== undefined && filterLayerConfig !== undefined && filterStrings.length) {
-      (api.maps[mapId].layer.geoviewLayer(layerPath) as AbstractGeoViewVector | EsriDynamic)?.applyViewFilter(filterStrings);
-    } else {
-      (api.maps[mapId].layer.geoviewLayer(layerPath) as AbstractGeoViewVector | EsriDynamic)?.applyViewFilter('');
-    }
+    applyMapFilters(filterStrings);
   }, 1000);
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -551,7 +544,8 @@ function DataTable({ data, mapId, layerPath, tableHeight = 600 }: DataTableProps
   useEffect(() => {
     // Log
     logger.logTraceUseEffect('DATA-TABLE - columnFilters', columnFilters);
-    if (!!columnFilters.length && !!Object.keys(mapFilteredRecord[layerPath] ?? {}).length) {
+
+    if (columnFilters && mapFilteredRecord[layerPath]) {
       debouncedColumnFilters(columnFilters);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps

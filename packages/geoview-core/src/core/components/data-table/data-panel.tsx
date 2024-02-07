@@ -11,7 +11,6 @@ import {
   useDataTableStoreRowsFiltered,
   useDataTableStoreSelectedLayerPath,
   useDetailsStoreLayerDataArray,
-  useGeoViewMapId,
   useMapVisibleLayers,
 } from '@/core/stores';
 import { ResponsiveGrid, EnlargeButton, CloseButton, LayerList, LayerListEntry, LayerTitle, useFooterPanelHeight } from '../common';
@@ -34,7 +33,6 @@ export function Datapanel() {
 
   // TODO: Update layer data from store when available.
   const layerData = useDetailsStoreLayerDataArray();
-  const mapId = useGeoViewMapId();
 
   const sxClasses = getSxClasses(theme);
 
@@ -208,7 +206,7 @@ export function Datapanel() {
                 <Box key={data.layerPath}>
                   {data.layerPath === selectedLayerPath ? (
                     <Box>
-                      <MapDataTable data={data} mapId={mapId} layerPath={data.layerPath} tableHeight={tableHeight} />
+                      <MapDataTable data={data} layerPath={data.layerPath} tableHeight={tableHeight} />
                     </Box>
                   ) : (
                     <Box />
