@@ -427,6 +427,12 @@ function DataTable({ data, layerPath, tableHeight = 600 }: DataTableProps) {
     muiTableHeadCellProps: {
       sx: () => sxClasses.tableHeadCell,
     },
+    // override z-index of table when table is in fullscreen mode
+    muiTablePaperProps: ({ table }) => ({
+      style: {
+        zIndex: table.getState().isFullScreen ? 999999 : undefined,
+      },
+    }),
     muiFilterTextFieldProps: {
       sx: () => ({
         minWidth: '50px',
