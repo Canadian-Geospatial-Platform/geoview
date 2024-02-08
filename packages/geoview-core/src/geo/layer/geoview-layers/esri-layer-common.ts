@@ -30,6 +30,7 @@ import {
 } from '@/api/events/payloads';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { EsriImage, layerConfigIsEsriImage } from './raster/esri-image';
+import { logger } from '@/core/utils/logger';
 
 /** ***************************************************************************************************************************
  * This method reads the service metadata from the metadataAccessPath.
@@ -47,11 +48,12 @@ export async function commonfetchServiceMetadata(this: EsriDynamic | EsriFeature
       if (metadataString === '{}') this.setAllLayerStatusTo('error', this.listOfLayerEntryConfig, 'Unable to read metadata');
       else {
         this.metadata = JSON.parse(metadataString) as TypeJsonObject;
+        if ('error' in this.metadata) throw new Error(`Error code = ${this.metadata.error.code}, ${this.metadata.error.message}`);
         const { copyrightText } = this.metadata;
         if (copyrightText) this.attributions.push(copyrightText as string);
       }
     } catch (error) {
-      console.log(error);
+      logger.logInfo('Unable to read metadata', error);
       this.setAllLayerStatusTo('error', this.listOfLayerEntryConfig, 'Unable to read metadata');
     }
   } else {
@@ -70,9 +72,10 @@ export function commonValidateListOfLayerEntryConfig(this: EsriDynamic | EsriFea
   this.setLayerPhase('validateListOfLayerEntryConfig');
   listOfLayerEntryConfig.forEach((layerConfig: TypeLayerEntryConfig, i) => {
     const { layerPath } = layerConfig;
+    if (layerConfig.layerStatus === 'error') return;
     if (layerEntryIsGroupLayer(layerConfig)) {
       this.validateListOfLayerEntryConfig(layerConfig.listOfLayerEntryConfig!);
-      if (!layerConfig.listOfLayerEntryConfig.length) {
+      if (!(layerConfig as TypeLayerGroupEntryConfig).listOfLayerEntryConfig.length) {
         this.layerLoadError.push({
           layer: layerPath,
           consoleMessage: `Empty layer group (mapId:  ${this.mapId}, layerPath: ${layerPath})`,
@@ -112,7 +115,7 @@ export function commonValidateListOfLayerEntryConfig(this: EsriDynamic | EsriFea
       const newListOfLayerEntryConfig: TypeListOfLayerEntryConfig = [];
       // Group layer are not registered to layer sets.
       if (this.registerToLayerSetListenerFunctions[layerPath]) this.unregisterFromLayerSets(layerConfig as TypeBaseLayerEntryConfig);
-      const switchToGroupLayer = cloneDeep(layerConfig);
+      const switchToGroupLayer = Cast<TypeLayerGroupEntryConfig>(cloneDeep(layerConfig));
       switchToGroupLayer.entryType = 'group';
       switchToGroupLayer.layerName = {
         en: this.metadata!.layers[esriIndex].name as string,
