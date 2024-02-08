@@ -203,6 +203,7 @@ function DataTable({ data, layerPath, tableHeight = 600 }: DataTableProps) {
         </Button>
       );
     }
+    // convert string to react component.
     return typeof cellValue === 'string' ? <HtmlToReact htmlContent={cellValue} /> : cellValue;
   };
 
