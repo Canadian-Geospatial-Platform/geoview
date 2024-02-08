@@ -186,16 +186,16 @@ export const generateThemeOptions = function (geoViewColors: IGeoViewColors = de
               backgroundColor: `${geoViewColors.bgColor.dark[100]} !important`,
               border: `3px solid transparent !important`,
               color: `${geoViewColors.primary.main} !important`,
-              '&:hover, &:active': {
+              '&:hover, &:active, &.active': {
                 backgroundColor: `${geoViewColors.primary.light[800]} !important`,
                 border: `3px solid ${geoViewColors.primary.light[500]} !important`,
                 color: `${geoViewColors.primary.dark[100]} !important`,
-                boxShadow: 1
+                boxShadow: 1,
               },
               '&:disabled': {
                 color: `${geoViewColors.bgColor.dark[450]} !important`,
-              }
-            }
+              },
+            },
           },
         },
       },

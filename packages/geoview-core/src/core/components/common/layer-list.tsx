@@ -120,11 +120,7 @@ const LayerListItem = memo(function LayerListItem({ isSelected, layer, handleLis
 
       default:
         return (
-          <IconButton
-            edge="end"
-            size="small"
-            className='style1'
-          >
+          <IconButton edge="end" size="small" className="style1">
             <ChevronRightIcon />
           </IconButton>
         );

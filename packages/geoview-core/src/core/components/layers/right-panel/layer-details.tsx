@@ -178,35 +178,21 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
     return (
       <Box sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '15px' }}>
         {layerDetails.items.length > 0 && (
-          <IconButton
-            id="table-details"
-            tooltip="legend.tableDetails"
-            className='style1'
-            onClick={handleOpenTable}
-          >
+          <IconButton id="table-details" tooltip="legend.tableDetails" className="style1" onClick={handleOpenTable}>
             <TableViewIcon />
           </IconButton>
         )}
-        <IconButton
-          tooltip="legend.refreshLayer"
-          className='style1'
-          onClick={handleRefreshLayer}
-        >
+        <IconButton tooltip="legend.refreshLayer" className="style1" onClick={handleRefreshLayer}>
           <RestartAltIcon />
         </IconButton>
         <IconButton
           tooltip="legend.highlightLayer"
-          className='style1'
           onClick={handleHighlightLayer}
+          className={highlightedLayer === layerDetails.layerPath ? 'style1 active' : 'style1'}
         >
           <HighlightOutlinedIcon />
         </IconButton>
-        <IconButton
-          tooltip="legend.zoomTo"
-          onClick={handleZoomTo}
-          className='style1'
-          disabled={layerDetails.bounds === undefined}
-        >
+        <IconButton tooltip="legend.zoomTo" onClick={handleZoomTo} className="style1" disabled={layerDetails.bounds === undefined}>
           <ZoomInSearchIcon />
         </IconButton>
       </Box>
