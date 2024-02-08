@@ -121,13 +121,9 @@ const LayerListItem = memo(function LayerListItem({ isSelected, layer, handleLis
       default:
         return (
           <IconButton
-            disabled
             edge="end"
             size="small"
-            sx={{
-              color: `${theme.palette.geoViewColor.primary.main} !important`,
-              background: `${theme.palette.geoViewColor.bgColor.main} !important`,
-            }}
+            className='style1'
           >
             <ChevronRightIcon />
           </IconButton>

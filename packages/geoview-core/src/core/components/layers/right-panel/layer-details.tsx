@@ -181,7 +181,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
           <IconButton
             id="table-details"
             tooltip="legend.tableDetails"
-            sx={{ backgroundColor: theme.palette.geoViewColor.bgColor.dark[100] }}
+            className='style1'
             onClick={handleOpenTable}
           >
             <TableViewIcon />
@@ -189,17 +189,14 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
         )}
         <IconButton
           tooltip="legend.refreshLayer"
-          sx={{ backgroundColor: theme.palette.geoViewColor.bgColor.dark[100] }}
+          className='style1'
           onClick={handleRefreshLayer}
         >
           <RestartAltIcon />
         </IconButton>
         <IconButton
           tooltip="legend.highlightLayer"
-          sx={{
-            backgroundColor:
-              layerDetails.layerPath !== highlightedLayer ? theme.palette.geoViewColor.bgColor.dark[100] : theme.palette.action.active,
-          }}
+          className='style1'
           onClick={handleHighlightLayer}
         >
           <HighlightOutlinedIcon />
@@ -207,7 +204,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
         <IconButton
           tooltip="legend.zoomTo"
           onClick={handleZoomTo}
-          sx={{ backgroundColor: theme.palette.geoViewColor.bgColor.dark[100] }}
+          className='style1'
           disabled={layerDetails.bounds === undefined}
         >
           <ZoomInSearchIcon />

@@ -179,6 +179,26 @@ export const generateThemeOptions = function (geoViewColors: IGeoViewColors = de
       left: '0%',
     },
     components: {
+      MuiIconButton: {
+        styleOverrides: {
+          root: {
+            '&.style1': {
+              backgroundColor: `${geoViewColors.bgColor.dark[100]} !important`,
+              border: `3px solid transparent !important`,
+              color: `${geoViewColors.primary.main} !important`,
+              '&:hover, &:active': {
+                backgroundColor: `${geoViewColors.primary.light[800]} !important`,
+                border: `3px solid ${geoViewColors.primary.light[500]} !important`,
+                color: `${geoViewColors.primary.dark[100]} !important`,
+                boxShadow: 1
+              },
+              '&:disabled': {
+                color: `${geoViewColors.bgColor.dark[450]} !important`,
+              }
+            }
+          },
+        },
+      },
       MuiFab: {
         styleOverrides: {
           root: { padding: '0 24px' },
