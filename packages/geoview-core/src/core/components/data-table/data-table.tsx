@@ -450,10 +450,7 @@ function DataTable({ data, layerPath, tableHeight = 600 }: DataTableProps) {
           backgroundColor: theme.palette.secondary.light,
         },
         '& .Mui-selected > td': {
-          backgroundColor: theme.palette.secondary.light,
-        },
-        '& td a': {
-          color: 'inherit',
+          backgroundColor: `${theme.palette.secondary.light} !important`,
         },
       }),
     },
