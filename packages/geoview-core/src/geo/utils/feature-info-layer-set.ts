@@ -14,10 +14,12 @@ import {
   QueryType,
   payloadIsQueryLayer,
 } from '@/api/events/payloads';
-import { Coordinate, api, getLocalizedValue } from '@/app';
+import { api } from '@/app';
 import { LayerSet } from './layer-set';
 import { FeatureInfoEventProcessor } from '@/api/event-processors/event-processor-children/feature-info-event-processor';
 import { logger } from '@/core/utils/logger';
+import { getLocalizedValue } from '@/core/utils/utilities';
+import { Coordinate } from '@/core/types/cgpv-types';
 
 /** ***************************************************************************************************************************
  * A class to hold a set of layers associated with an array of TypeArrayOfFeatureInfoEntries. When this class is instantiated,
@@ -67,7 +69,7 @@ export class FeatureInfoLayerSet {
       // Log
       logger.logTraceCore('FeatureInfoLayerSet registration condition...', layerPath, Object.keys(this.resultsSet));
 
-      const layerConfig = api.maps[this.mapId].layer.registeredLayers[layerPath];
+      const layerConfig = api.maps[mapId].layer.registeredLayers[layerPath];
       const queryable = layerConfig?.source?.featureInfo?.queryable;
       return !!queryable;
     };
@@ -77,16 +79,17 @@ export class FeatureInfoLayerSet {
       // Log
       logger.logTraceCore('FeatureInfoLayerSet initializing...', layerPath, Object.keys(this.resultsSet));
 
+      const layerConfig = api.maps[mapId].layer.registeredLayers[layerPath];
       this.resultsSet[layerPath] = {
-        layerStatus: api.maps[this.mapId].layer.registeredLayers[layerPath].layerStatus!,
-        layerPhase: api.maps[this.mapId].layer.registeredLayers[layerPath].layerPhase!,
+        layerStatus: layerConfig.layerStatus!,
+        layerPhase: layerConfig.layerPhase!,
         data: {},
-        layerName: getLocalizedValue(api.maps[mapId].layer.registeredLayers[layerPath].layerName, mapId) ?? '',
+        layerName: getLocalizedValue(layerConfig.layerName, mapId) ?? '',
       };
       ArrayOfEventTypes.forEach((eventType) => {
         this.resultsSet[layerPath].data[eventType] = {
-          layerName: getLocalizedValue(api.maps[mapId].layer.registeredLayers[layerPath].layerName, mapId) ?? '',
-          layerStatus: api.maps[this.mapId].layer.registeredLayers[layerPath].layerStatus!,
+          layerName: getLocalizedValue(layerConfig.layerName, mapId) ?? '',
+          layerStatus: layerConfig.layerStatus!,
           eventListenerEnabled: true,
           queryStatus: 'processed',
           features: [],
@@ -127,16 +130,17 @@ export class FeatureInfoLayerSet {
 
       // Loop on each layer path in the resultsSet
       Object.keys(this.resultsSet).forEach((layerPath) => {
+        const layerConfig = api.maps[mapId].layer.registeredLayers[layerPath];
         if (!this.resultsSet[layerPath].data[eventType]!.eventListenerEnabled) return;
         const dataForEventType = this.resultsSet[layerPath].data[eventType] as TypeLayerData;
-        if (api.maps[this.mapId].layer.registeredLayers[layerPath].layerStatus === 'loaded') {
+        if (layerConfig.layerStatus === 'loaded') {
           dataForEventType.features = dataForEventType.eventListenerEnabled ? undefined : [];
           dataForEventType.queryStatus = dataForEventType.eventListenerEnabled ? 'processing' : 'processed';
-          dataForEventType.layerName = getLocalizedValue(api.maps[mapId].layer.registeredLayers[layerPath].layerName, mapId) ?? '';
+          dataForEventType.layerName = getLocalizedValue(layerConfig.layerName, mapId) ?? '';
         } else {
           dataForEventType.features = [];
           dataForEventType.queryStatus = 'error';
-          dataForEventType.layerName = getLocalizedValue(api.maps[mapId].layer.registeredLayers[layerPath].layerName, mapId) ?? '';
+          dataForEventType.layerName = getLocalizedValue(layerConfig.layerName, mapId) ?? '';
         }
 
         if (dataForEventType.eventListenerEnabled && dataForEventType.queryStatus !== 'error') {
@@ -197,16 +201,17 @@ export class FeatureInfoLayerSet {
           logger.logTraceDetailed('feature-info-layer-set on EVENT_NAMES.GET_FEATURE_INFO.GET_ALL_LAYER_FEATURES', this.mapId);
 
           const layerPath = payload.location as string;
+          const layerConfig = api.maps[mapId].layer.registeredLayers[layerPath];
           if (!this.resultsSet[layerPath].data['all-features']!.eventListenerEnabled) return;
           const dataForEventType = this.resultsSet[layerPath].data['all-features'] as TypeLayerData;
-          if (api.maps[this.mapId].layer.registeredLayers[layerPath].layerStatus === 'loaded') {
+          if (layerConfig.layerStatus === 'loaded') {
             dataForEventType.features = undefined;
             dataForEventType.queryStatus = 'processing';
-            dataForEventType.layerName = getLocalizedValue(api.maps[mapId].layer.registeredLayers[layerPath].layerName, mapId) ?? '';
+            dataForEventType.layerName = getLocalizedValue(layerConfig.layerName, mapId) ?? '';
           } else {
             dataForEventType.features = [];
             dataForEventType.queryStatus = 'error';
-            dataForEventType.layerName = getLocalizedValue(api.maps[mapId].layer.registeredLayers[layerPath].layerName, mapId) ?? '';
+            dataForEventType.layerName = getLocalizedValue(layerConfig.layerName, mapId) ?? '';
           }
 
           if (dataForEventType.eventListenerEnabled && dataForEventType.queryStatus !== 'error') {
@@ -227,10 +232,11 @@ export class FeatureInfoLayerSet {
           logger.logTraceDetailed('feature-info-layer-set on EVENT_NAMES.GET_FEATURE_INFO.QUERY_RESULT', this.mapId, payload);
 
           const { layerPath, queryType, arrayOfRecords, eventType } = payload;
+          const layerConfig = api.maps[mapId].layer.registeredLayers[layerPath];
           if (this.resultsSet?.[layerPath]?.data) {
             const dataForEventType = this.resultsSet[layerPath].data[eventType] as TypeLayerData;
             dataForEventType.features = arrayOfRecords;
-            dataForEventType.layerStatus = api.maps[this.mapId].layer.registeredLayers[layerPath].layerStatus!;
+            dataForEventType.layerStatus = layerConfig.layerStatus!;
             // When property features is undefined, we are waiting for the query result.
             // when Array.isArray(features) is true, the features property contains the query result.
             // when property features is null, the query ended with an error.

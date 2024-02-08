@@ -600,9 +600,11 @@ export class ConfigValidation {
       );
 
       if (layerEntryIsGroupLayer(layerConfig)) {
+        // We must set the parents of all elements in the group.
+        this.recursivelySetChildParent(geoviewLayerConfig, [layerConfig], parentLayerConfig);
         const parent = new TypeLayerGroupEntryConfig(layerConfig);
         listOfLayerEntryConfig[i] = parent;
-        this.processLayerEntryConfig(geoviewLayerConfig, layerConfig.listOfLayerEntryConfig, parent);
+        this.processLayerEntryConfig(geoviewLayerConfig, parent.listOfLayerEntryConfig, parent);
       } else if (geoviewEntryIsWMS(layerConfig)) {
         listOfLayerEntryConfig[i] = new TypeOgcWmsLayerEntryConfig(layerConfig);
       } else if (geoviewEntryIsImageStatic(layerConfig)) {
@@ -626,6 +628,26 @@ export class ConfigValidation {
       } else if (geoviewEntryIsGeoJSON(layerConfig)) {
         listOfLayerEntryConfig[i] = new TypeGeoJSONLayerEntryConfig(layerConfig);
       }
+    });
+  }
+
+  /** ***************************************************************************************************************************
+   * Process recursively the layer entries to set the parents of each entries.
+   * @param {TypeGeoviewLayerConfig} geoviewLayerConfig The GeoView layer configuration.
+   * @param {TypeListOfLayerEntryConfig} listOfLayerEntryConfig The list of layer entry configurations to process.
+   * @param {TypeLayerGroupEntryConfig} parentLayerConfig The parent layer configuration of all the
+   * layer configurations found in the list of layer entries.
+   */
+  private recursivelySetChildParent(
+    geoviewLayerConfig: TypeGeoviewLayerConfig,
+    listOfLayerEntryConfig: TypeListOfLayerEntryConfig,
+    parentLayerConfig?: TypeLayerGroupEntryConfig
+  ) {
+    listOfLayerEntryConfig.forEach((layerConfig) => {
+      layerConfig.parentLayerConfig = parentLayerConfig;
+      layerConfig.geoviewLayerConfig = geoviewLayerConfig;
+      if (layerEntryIsGroupLayer(layerConfig))
+        this.recursivelySetChildParent(geoviewLayerConfig, layerConfig.listOfLayerEntryConfig, layerConfig);
     });
   }
 
@@ -659,8 +681,8 @@ export class ConfigValidation {
       const validateLocalizedString = (config: TypeJsonObject) => {
         if (typeof config === 'object') {
           Object.keys(config).forEach((key) => {
-            if (typeof config[key] === 'object') {
-              if ('en' in config[key] || 'fr' in config[key]) {
+            if (!key.startsWith('_') && typeof config[key] === 'object') {
+              if (config?.[key]?.en || config?.[key]?.fr) {
                 // delete empty localized strings
                 if (!config[key].en && !config[key].fr) delete config[key];
                 else if (!config[key].en || !config[key].fr) {
@@ -692,8 +714,9 @@ export class ConfigValidation {
       const propagateLocalizedString = (config: TypeJsonObject) => {
         if (typeof config === 'object') {
           Object.keys(config).forEach((key) => {
-            if (typeof config[key] === 'object') {
-              if ('en' in config[key] || 'fr' in config[key])
+            if (!key.startsWith('_') && typeof config[key] === 'object') {
+              logger.logDebug(`Key=${key}`, config[key]);
+              if (config?.[key]?.en || config?.[key]?.fr)
                 this.SynchronizeLocalizedString(Cast<TypeLocalizedString>(config[key]), sourceKey, destinationKey);
               // Avoid the 'geoviewLayerConfig' and 'parentLayerConfig' properties because they loop on themself and cause a
               // stack overflow error.
