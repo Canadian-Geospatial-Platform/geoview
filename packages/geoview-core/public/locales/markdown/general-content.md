@@ -1,20 +1,20 @@
-=How can I add my own layers?=
+=!How can I add my own layers?=
 ### Introduction about layers
 Lorem Ipsum is simply dummy text 
 
-=Learn more about notification?=
+=!Learn more about notification?=
 ### How notifications work:
 Lorem Ipsum is simply dummy text of
 
-=Learn more about attributions=
+=!Learn more about attributions=
 ### How attribution works:
 Lorem Ipsum is simply dummy text of
 
-=How map scales work?=
+=!How map scales work?=
 ### Learn about map scale:
 Lorem Ipsum is simply dummy text of
 
-=Footer=
+=!Footer=
 %legend%
 ### Legend help section
 - List 1 in section 1

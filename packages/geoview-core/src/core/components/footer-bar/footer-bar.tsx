@@ -23,12 +23,13 @@ import { AbstractPlugin } from '@/api/plugin/abstract-plugin';
 import { useGeoViewConfig } from '@/core/stores/geoview-store';
 
 // default tabs icon and class
-import { HubOutlinedIcon, InfoOutlinedIcon, LayersOutlinedIcon, StorageIcon } from '@/ui/icons';
+import { HubOutlinedIcon, InfoOutlinedIcon, LayersOutlinedIcon, StorageIcon, SchoolIcon } from '@/ui/icons';
 import { Legend } from '@/core/components/legend/legend';
 import { LayersPanel } from '@/core/components/layers/layers-panel';
 import { DetailsPanel } from '@/core/components/details/details-panel';
 import { Datapanel } from '@/core/components/data-table/data-panel';
 import { logger } from '@/core/utils/logger';
+import { GuidePanel } from '@/core/components/guide/guide-panel';
 
 interface ShellContainerCssProperties {
   mapVisibility: string;
@@ -84,6 +85,7 @@ export function FooterBar(): JSX.Element | null {
       layers: { icon: <LayersOutlinedIcon />, content: <LayersPanel /> },
       details: { icon: <InfoOutlinedIcon />, content: <DetailsPanel /> },
       'data-table': { icon: <StorageIcon />, content: <Datapanel /> },
+      guide: { icon: <SchoolIcon />, content: <GuidePanel /> },
     } as Record<string, Record<string, ReactNode>>;
   }, []);
 

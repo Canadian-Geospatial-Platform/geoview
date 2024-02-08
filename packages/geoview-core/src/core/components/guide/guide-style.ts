@@ -2,7 +2,7 @@ import { Theme } from '@mui/material/styles';
 
 export const getSxClasses = (theme: Theme) => ({
   guideContainer: {
-    background: theme.footerPanel.contentBg,
+    background: theme.palette.geoViewColor.bgColor.main,
     paddingBottom: '1rem',
   },
   rightPanelContainer: {
@@ -21,14 +21,6 @@ export const getSxClasses = (theme: Theme) => ({
       fontWeight: '700',
       textTransform: 'capitalize',
     },
-  },
-  footerGuideListItemBoxContainer: {
-    background: theme.footerPanel.contentBg,
-    boxShadow: theme.footerPanel.contentShadow,
-    padding: '0px',
-    margin: '20px',
-    width: 'unset',
-    boxSizing: 'border-box',
   },
   footerGuideListItemCollapse: {
     '& .MuiListItemText-primary': {

@@ -46,7 +46,14 @@ export function TimeSliderPanel(props: TypeTimeSliderProps): JSX.Element {
 
   const renderLayerList = useCallback(() => {
     const array = visibleTimeSliderLayers.map((layerPath: string) => {
-      return { layerName: timeSliderLayers[layerPath].name, layerPath, tooltip: timeSliderLayers[layerPath].name };
+      // TODO added, we needed to pass the default values layerStatus: 'processed' and queryStatus: 'processed'
+      return {
+        layerName: timeSliderLayers[layerPath].name,
+        layerPath,
+        tooltip: timeSliderLayers[layerPath].name,
+        layerStatus: 'processed',
+        queryStatus: 'processed',
+      };
     });
 
     return array;

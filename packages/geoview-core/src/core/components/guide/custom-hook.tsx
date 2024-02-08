@@ -14,10 +14,12 @@ export const useFetchAndParseMarkdown = (
         const content = await response.text();
         const sections = content.split(/=([^=]+)=/);
 
+        // TODO review line below, if we can get rid of logic === ''
         if (sections[0].trim() === '') {
           sections.shift();
         }
 
+        // TODO review this logic if we can make it more simplified
         const resultObject: Record<string, string> = {};
         for (let i = 0; i < sections.length; i += 2) {
           const heading = sections[i].trim();
