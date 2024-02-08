@@ -11,7 +11,7 @@ export const getSxClasses = (theme: Theme) => ({
     left: '0px',
     right: '0px',
     zIndex: 10000,
-    backgroundColor: theme.palette.geoViewColor.bgColor.dark[900],
+    backgroundColor: theme.palette.geoViewColor?.bgColor.dark[900],
     textAlign: 'center',
     transition: theme.transitions.create(['visibility', 'opacity'], {
       delay: theme.transitions.duration.shortest,

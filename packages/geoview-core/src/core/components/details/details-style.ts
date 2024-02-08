@@ -2,18 +2,19 @@ import { Theme } from '@mui/material/styles';
 
 export const getSxClasses = (theme: Theme) => ({
   detailsContainer: {
-    background: theme.footerPanel.contentBg,
+    background: theme.palette.geoViewColor.bgColor.main,
     paddingBottom: '1rem',
   },
   detailsInstructionsTitle: {
-    font: theme.footerPanel.titleFont,
-    fontSize: '1.5rem',
+    fontSize: theme.palette.geoViewFontSize.lg,
+    fontWeight: '600',
   },
   detailsInstructionsBody: {
     fontSize: '1rem',
   },
   panelHeaders: {
-    font: theme.footerPanel.titleFont,
+    fontSize: theme.palette.geoViewFontSize.lg,
+    fontWeight: '600',
   },
   rightPanelContainer: {
     border: `2px solid ${theme.palette.geoViewColor.primary.main}`,
@@ -37,7 +38,7 @@ export const getSxClasses = (theme: Theme) => ({
     borderRadius: 0,
     border: '1px solid',
     borderColor: theme.palette.geoViewColor.grey.dark[100],
-    boxShadow: theme.footerPanel.boxShadow,
+    boxShadow: 2,
     background: theme.palette.geoViewColor.white,
     objectFit: 'scale-down',
     width: '35px',

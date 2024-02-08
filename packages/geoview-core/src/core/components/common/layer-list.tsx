@@ -52,7 +52,7 @@ const LayerListItem = memo(function LayerListItem({ isSelected, layer, handleLis
       case 'error':
         return sxClasses.backgroundError;
       default:
-        return 'unset';
+        return sxClasses.default;
     }
   };
 
@@ -120,15 +120,7 @@ const LayerListItem = memo(function LayerListItem({ isSelected, layer, handleLis
 
       default:
         return (
-          <IconButton
-            disabled
-            edge="end"
-            size="small"
-            sx={{
-              color: `${theme.palette.geoViewColor.primary.main} !important`,
-              background: `${theme.palette.geoViewColor.grey.light[100]} !important`,
-            }}
-          >
+          <IconButton edge="end" size="small" className="style1">
             <ChevronRightIcon />
           </IconButton>
         );

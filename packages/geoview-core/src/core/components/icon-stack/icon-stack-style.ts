@@ -16,7 +16,7 @@ export const getSxClasses = (theme: Theme) => ({
     top: -2,
     padding: 0,
     borderRadius: 0,
-    boxShadow: theme?.footerPanel.boxShadow,
+    boxShadow: 2,
     transition: 'transform .3s ease-in-out',
     '&:hover': {
       transform: 'rotate(-18deg) translateX(-8px)',
@@ -29,7 +29,7 @@ export const getSxClasses = (theme: Theme) => ({
     borderRadius: 0,
     border: '1px solid',
     borderColor: theme.palette.geoViewColor.bgColor.dark[600],
-    boxShadow: theme?.footerPanel.boxShadow,
+    boxShadow: 2,
     backgroundColor: theme.palette.geoViewColor.white,
   },
   maxIconImg: {
@@ -57,7 +57,7 @@ export const getSxClasses = (theme: Theme) => ({
   iconPreview: {
     padding: 0,
     borderRadius: 0,
-    boxShadow: theme?.footerPanel.boxShadow,
+    boxShadow: 2,
     '&:focus': {
       border: 'revert',
     },

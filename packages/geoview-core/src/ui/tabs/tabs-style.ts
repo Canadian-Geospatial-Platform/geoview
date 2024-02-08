@@ -2,7 +2,7 @@ import { Theme } from '@mui/material';
 
 export const getSxClasses = (theme: Theme) => ({
   rightIcons: {
-    backgroundColor: theme.palette.geoViewColor.bgColor.dark[100],
+    backgroundColor: theme.palette.geoViewColor?.bgColor.dark[100],
     marginTop: 0,
     display: 'flex',
     justifyContent: 'flex-end',
@@ -15,7 +15,7 @@ export const getSxClasses = (theme: Theme) => ({
     height: '100%',
   },
   tab: {
-    fontSize: 16,
+    fontSize: theme.palette.geoViewFontSize.default,
     fontWeight: 'bold',
     minWidth: 'min(4vw, 24px)',
     padding: '16px 2%',

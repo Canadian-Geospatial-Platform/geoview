@@ -1,14 +1,14 @@
 import { Theme } from '@mui/material';
 
 export const getSxClasses = (theme: Theme) => ({
-  dataPanel: { background: theme.footerPanel.contentBg, paddingBottom: '1rem' },
+  dataPanel: { background: theme.palette.geoViewColor.bgColor.main, paddingBottom: '1rem' },
   gridContainer: { paddingLeft: '1rem', paddingRight: '1rem' },
   iconImage: {
     padding: 3,
     borderRadius: 0,
     border: '1px solid',
     borderColor: theme.palette.geoViewColor.grey.dark[100],
-    boxShadow: theme.footerPanel.boxShadow,
+    boxShadow: 2,
     background: theme.palette.geoViewColor.white,
     objectFit: 'scale-down',
     width: '35px',
