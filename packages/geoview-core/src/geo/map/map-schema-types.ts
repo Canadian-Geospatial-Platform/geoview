@@ -820,10 +820,10 @@ export abstract class TypeBaseLayerEntryConfig extends ConfigBaseClass {
 
         // Definition of the load end listener functions
         const loadEndListener = () => {
+          this.loadedFunction();
           this.geoviewLayerInstance!.setLayerPhase('loaded', this.layerPath);
           this.geoviewLayerInstance!.setLayerStatus('loaded', this.layerPath);
           this._olLayer!.get('source').un(`${loadEndListenerType}loaderror`, loadErrorListener);
-          this.loadedFunction();
         };
 
         loadErrorListener = () => {

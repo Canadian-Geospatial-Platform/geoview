@@ -182,7 +182,7 @@ export class MapViewer {
   mapIsReady(): boolean {
     if (this.layer === undefined) return false;
     return !Object.keys(this.layer.geoviewLayers).find((geoviewLayerId) => {
-      return !this.layer.geoviewLayers[geoviewLayerId].allLayerStatusAreIn(['processed', 'loading', 'loaded', 'error']);
+      return !this.layer.geoviewLayers[geoviewLayerId].allLayerStatusAreIn(['loaded', 'error']);
     });
   }
 
@@ -202,7 +202,7 @@ export class MapViewer {
         let allGeoviewLayerReady =
           this.mapFeaturesConfig.map.listOfGeoviewLayerConfig?.length === 0 || Object.keys(geoviewLayers).length !== 0;
         Object.keys(geoviewLayers).forEach((geoviewLayerId) => {
-          const layerIsReady = geoviewLayers[geoviewLayerId].allLayerStatusAreIn(['processed', 'loading', 'error', 'loaded']);
+          const layerIsReady = geoviewLayers[geoviewLayerId].allLayerStatusAreIn(['error', 'loaded']);
           logger.logTraceDetailed('map-viewer.mapReady? geoview layer ready?', geoviewLayerId, layerIsReady);
           allGeoviewLayerReady &&= layerIsReady;
         });
