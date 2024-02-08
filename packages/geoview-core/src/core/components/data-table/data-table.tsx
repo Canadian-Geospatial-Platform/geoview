@@ -2,7 +2,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState, memo, ReactNode, isValidElement } from 'react';
 
 import { useTranslation } from 'react-i18next';
-
 import debounce from 'lodash/debounce';
 import startCase from 'lodash/startCase';
 import { difference } from 'lodash';
@@ -18,6 +17,7 @@ import { Extent } from 'ol/extent'; // only for typing
 
 import { darken } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
+import { HtmlToReact } from '@/core/containers/html-to-react';
 
 import {
   MaterialReactTable,
@@ -203,7 +203,8 @@ function DataTable({ data, layerPath, tableHeight = 600 }: DataTableProps) {
         </Button>
       );
     }
-    return cellValue;
+    // convert string to react component.
+    return typeof cellValue === 'string' ? <HtmlToReact htmlContent={cellValue} /> : cellValue;
   };
 
   /**
@@ -449,7 +450,7 @@ function DataTable({ data, layerPath, tableHeight = 600 }: DataTableProps) {
           backgroundColor: theme.palette.secondary.light,
         },
         '& .Mui-selected > td': {
-          backgroundColor: theme.palette.secondary.light,
+          backgroundColor: `${theme.palette.secondary.light} !important`,
         },
       }),
     },
