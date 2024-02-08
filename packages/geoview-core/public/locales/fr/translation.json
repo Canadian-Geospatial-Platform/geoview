@@ -202,7 +202,7 @@
     "title": "Guide",
     "errorMessage": "Désolé, impossible de trouver le document d'aide !"
   },
-  "footerTabsContainer": {
+  "footerBar": {
     "focusToMap": "Aller à la carte",
     "focusToFooter": "Aller au pied de page",
     "resizeTooltip": "Redimensionner",
