@@ -1,8 +1,5 @@
-import { Theme } from '@mui/material';
-
-export const getSxClasses = (theme: Theme) => ({
+export const getSxClasses = () => ({
   rightIcons: {
-    backgroundColor: theme.palette.geoViewColor.bgColor.dark[100],
     marginTop: 0,
     display: 'flex',
     justifyContent: 'flex-end',
