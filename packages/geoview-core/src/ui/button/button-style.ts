@@ -11,7 +11,7 @@ export const getSxClasses = (theme: Theme) => ({
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
-    color: theme.palette.geoViewColor.primary.dark,
+    color: theme.palette.geoViewColor?.primary.dark,
   },
   text: {
     width: '100%',

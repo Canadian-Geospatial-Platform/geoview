@@ -25,68 +25,6 @@ declare module '@mui/material/styles' {
         size: { width: string | number; height: string | number };
       };
     };
-    iconImage?: {
-      padding: number | string;
-      borderRadius: number | string;
-      border: string;
-      borderColor: string;
-      boxShadow: string;
-      background: string;
-      objectFit: string;
-      width?: string;
-      height?: string;
-    };
-    appBar?: {
-      background?: string;
-      border?: string;
-      btnActiveBg?: string;
-      btnDefaultBg?: string;
-      btnFocusBg?: string;
-      btnHoverBg?: string;
-    };
-    navBar: {
-      borderColor?: string;
-      btnActiveBg?: string;
-      btnDefaultBg?: string;
-      btnFocusBg?: string;
-      btnHoverBg?: string;
-      btnActiveColor?: string;
-      btnDefaultColor?: string;
-      btnFocusColor?: string;
-      btnHoverColor?: string;
-      btnHeight?: string;
-      btnWidth?: string;
-    };
-    panel?: {
-      background?: string;
-      activeBg?: string;
-      border?: string;
-      borderLight?: string;
-      defaultBg?: string;
-      hoverBg?: string;
-    };
-    basemapPanel?: {
-      header?: string;
-      borderDefault?: string;
-      borderHover?: string;
-      borderActive?: string;
-      overlayDefault?: string;
-      overlayHover?: string;
-      overlayActive?: string;
-    };
-    footerPanel?: {
-      contentBg: string;
-      contentShadow: string;
-      titleFont: string;
-      layerTitleFont: string;
-      layerSecondaryTitleFont: string;
-      highlightColor: string;
-      featureNumbersFont: string;
-      featureKeyFont: string;
-      featureValueFont: string;
-      chooseLayerFont: string;
-      boxShadow: string;
-    };
   }
   interface Theme {
     overrides: {
@@ -99,57 +37,6 @@ declare module '@mui/material/styles' {
       crosshairIcon: {
         size: { width: number; height: number };
       };
-    };
-    appBar: {
-      background: string;
-      border: string;
-      btnActiveBg: string;
-      btnDefaultBg: string;
-      btnFocusBg: string;
-      btnHoverBg: string;
-    };
-    navBar: {
-      borderColor: string;
-      btnActiveBg: string;
-      btnDefaultBg: string;
-      btnFocusBg: string;
-      btnHoverBg: string;
-      btnActiveColor: string;
-      btnDefaultColor: string;
-      btnFocusColor: string;
-      btnHoverColor: string;
-      btnHeight: string;
-      btnWidth: string;
-    };
-    panel: {
-      activeBg: string;
-      background: string;
-      border: string;
-      borderLight: string;
-      defaultBg: string;
-      hoverBg: string;
-    };
-    basemapPanel: {
-      header: string;
-      borderDefault: string;
-      borderHover: string;
-      borderActive: string;
-      overlayDefault: string;
-      overlayHover: string;
-      overlayActive: string;
-    };
-    footerPanel: {
-      contentBg: string;
-      contentShadow: string;
-      titleFont: string;
-      layerTitleFont: string;
-      layerSecondaryTitleFont: string;
-      highlightColor: string;
-      featureNumbersFont: string;
-      featureKeyFont: string;
-      featureValueFont: string;
-      chooseLayerFont: string;
-      boxShadow: string;
     };
   }
 }

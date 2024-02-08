@@ -8,7 +8,7 @@ export const getSxClasses = (theme: Theme) => ({
     overflowY: 'auto',
     // layer title
     '& .MuiListItemText-primary': {
-      font: theme.footerPanel.layerTitleFont,
+      fontWeight: '600',
       padding: '5px 0px',
       fontSize: '1.15rem !important',
       lineHeight: 1.5,
@@ -104,8 +104,8 @@ export const getSxClasses = (theme: Theme) => ({
     },
   },
   evenDepthList: {
-    background: theme.footerPanel.contentBg,
-    boxShadow: theme.footerPanel.contentShadow,
+    background: theme.palette.geoViewColor.bgColor.main,
+    boxShadow: 2,
     padding: '0px',
     margin: '20px',
     width: 'unset',
@@ -117,7 +117,7 @@ export const getSxClasses = (theme: Theme) => ({
   },
   oddDepthList: {
     background: 'white',
-    boxShadow: theme.footerPanel.contentShadow,
+    boxShadow: 2,
     padding: '0px',
     margin: '20px',
     width: 'unset',

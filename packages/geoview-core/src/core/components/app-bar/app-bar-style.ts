@@ -7,8 +7,8 @@ export const getSxClasses = (theme: Theme) => ({
     justifyContent: 'space-between',
     zIndex: theme.zIndex.appBar,
     pointerEvents: 'all',
-    backgroundColor: theme.appBar.background,
-    border: theme.appBar.border,
+    backgroundColor: theme.palette.geoViewColor.bgColor.main,
+    border: theme.palette.geoViewColor.primary.light[100],
   },
   appBarList: {
     width: 60,
@@ -29,31 +29,31 @@ export const getSxClasses = (theme: Theme) => ({
   },
 
   appBarButtons: {
-    borderRightColor: theme.appBar.border,
+    borderRightColor: theme.palette.geoViewColor.primary.light[100],
     borderRightWidth: 1,
     borderRightStyle: 'solid',
     width: 64,
   },
   appBarButton: {
-    backgroundColor: theme.appBar.btnDefaultBg,
-    color: theme.palette.geoViewColor.primary.light[300],
+    backgroundColor: theme.palette.geoViewColor.primary.main,
+    color: theme.palette.geoViewColor.primary.light[700],
     height: 44,
     width: 44,
     transition: 'background-color 0.3s ease-in-out',
     '&:hover': {
-      backgroundColor: theme.appBar.btnHoverBg,
-      color: theme.palette.geoViewColor.primary.light[300],
+      backgroundColor: theme.palette.geoViewColor.primary.light[100],
+      color: theme.palette.geoViewColor.primary.light[700],
     },
     '&:focus': {
-      backgroundColor: theme.appBar.btnFocusBg,
-      color: theme.palette.geoViewColor.primary.light[300],
+      backgroundColor: theme.palette.geoViewColor.primary.light[150],
+      color: theme.palette.geoViewColor.primary.light[700],
     },
     '&:active': {
-      backgroundColor: theme.appBar.btnActiveBg,
-      color: theme.palette.geoViewColor.primary.light[300],
+      backgroundColor: theme.palette.geoViewColor.primary.light[100],
+      color: theme.palette.geoViewColor.primary.light[700],
     },
     '&.active': {
-      backgroundColor: theme.appBar.btnActiveBg,
+      backgroundColor: theme.palette.geoViewColor.primary.light[100],
       color: theme.palette.background.paper,
     },
     '& .MuiSvgIcon-root': {

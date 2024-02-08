@@ -1,6 +1,6 @@
 import { ThemeOptions } from '@mui/material';
 import { IGeoViewColors } from './types';
-import { font, headingStyles, opacity, geoViewColors as defaultGeoViewColors, defaultFontSize, geoViewFontSizes } from './default';
+import { font, headingStyles, opacity, geoViewColors as defaultGeoViewColors, geoViewFontSizes } from './default';
 
 export const generateThemeOptions = function (geoViewColors: IGeoViewColors = defaultGeoViewColors): ThemeOptions {
   const themeOptions: ThemeOptions = {
@@ -81,7 +81,7 @@ export const generateThemeOptions = function (geoViewColors: IGeoViewColors = de
 
     // start of other options
     typography: {
-      fontSize: defaultFontSize,
+      // fontSize: `${defaultFontSize}rem`,
       htmlFontSize: 16,
       fontFamily: font,
       h1: headingStyles,
@@ -179,6 +179,26 @@ export const generateThemeOptions = function (geoViewColors: IGeoViewColors = de
       left: '0%',
     },
     components: {
+      MuiIconButton: {
+        styleOverrides: {
+          root: {
+            '&.style1': {
+              backgroundColor: `${geoViewColors.bgColor.dark[100]} !important`,
+              border: `3px solid transparent !important`,
+              color: `${geoViewColors.primary.main} !important`,
+              '&:hover, &:active, &.active': {
+                backgroundColor: `${geoViewColors.primary.light[800]} !important`,
+                border: `3px solid ${geoViewColors.primary.light[500]} !important`,
+                color: `${geoViewColors.primary.dark[100]} !important`,
+                boxShadow: 1,
+              },
+              '&:disabled': {
+                color: `${geoViewColors.bgColor.dark[450]} !important`,
+              },
+            },
+          },
+        },
+      },
       MuiFab: {
         styleOverrides: {
           root: { padding: '0 24px' },
@@ -232,66 +252,6 @@ export const generateThemeOptions = function (geoViewColors: IGeoViewColors = de
       crosshairIcon: {
         size: { width: 275, height: 275 },
       },
-    },
-    iconImage: {
-      padding: 3,
-      borderRadius: 0,
-      border: '1px solid',
-      borderColor: '#757575',
-      boxShadow: 'rgb(0 0 0 / 20%) 0px 3px 1px -2px, rgb(0 0 0 / 14%) 0px 2px 2px 0px, rgb(0 0 0 / 12%) 0px 1px 5px 0px',
-      background: '#fff',
-      objectFit: 'scale-down',
-    },
-    appBar: {
-      background: '#FFFFFFee',
-      border: '1px solid #bdbbdb',
-      btnActiveBg: '#000000e6',
-      btnDefaultBg: '#222222',
-      btnFocusBg: '#333333',
-      btnHoverBg: '#666666',
-    },
-    navBar: {
-      borderColor: '#bdbbdb',
-      btnActiveBg: '#ffffff',
-      btnDefaultBg: '#ffffff',
-      btnFocusBg: '#ffffff',
-      btnHoverBg: '#f2f2f2',
-      btnActiveColor: '#393939',
-      btnDefaultColor: '#393939',
-      btnFocusColor: '#393939',
-      btnHoverColor: '#393939',
-      btnHeight: '44px',
-      btnWidth: '44px',
-    },
-    panel: {
-      background: '#fff',
-      border: '#393939',
-      borderLight: '#4f4f4f',
-      defaultBg: '#232323',
-      hoverBg: '#393939',
-      activeBg: '#4f4f4f',
-    },
-    basemapPanel: {
-      header: '#ffffff',
-      borderDefault: 'rgba(255,255,255,0.25)',
-      borderHover: 'rgba(255,255,255,0.5)',
-      borderActive: 'rgba(255,255,255,0.75)',
-      overlayDefault: 'rgba(0,0,0,0.15)',
-      overlayHover: 'rgba(0,0,0,0.25)',
-      overlayActive: 'transparent',
-    },
-    footerPanel: {
-      contentBg: `${geoViewColors.bgColor.main} 0% 0% no-repeat padding-box`,
-      contentShadow: 'inset 0px 3px 6px #00000029',
-      titleFont: `normal normal 600 20px/27px ${font}`,
-      layerTitleFont: `normal normal 600 18px/24px ${font}`,
-      layerSecondaryTitleFont: `normal normal normal 16px/22px ${font}`,
-      highlightColor: '#515BA5',
-      featureNumbersFont: `normal normal normal 16px/22px ${font}`,
-      featureKeyFont: `normal normal medium 16px/19px ${font}`,
-      featureValueFont: `normal normal normal 16px/19px ${font}`,
-      chooseLayerFont: `normal normal 600 16px/24px ${font}`,
-      boxShadow: 'rgb(0 0 0 / 20%) 0px 3px 1px -2px, rgb(0 0 0 / 14%) 0px 2px 2px 0px, rgb(0 0 0 / 12%) 0px 1px 5px 0px',
     },
   };
 

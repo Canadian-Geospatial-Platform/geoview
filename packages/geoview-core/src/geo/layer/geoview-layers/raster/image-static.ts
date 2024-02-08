@@ -211,7 +211,7 @@ export class ImageStatic extends AbstractGeoViewRaster {
         }
       }
 
-      this.setLayerStatus('loading', layerPath);
+      this.setLayerStatus('processing', layerPath);
 
       // When no metadata are provided, all layers are considered valid.
       if (!this.metadata) return;
@@ -274,10 +274,11 @@ export class ImageStatic extends AbstractGeoViewRaster {
     if (layerConfig.initialSettings?.visible !== undefined)
       staticImageOptions.visible = layerConfig.initialSettings?.visible === 'yes' || layerConfig.initialSettings?.visible === 'always';
 
-    layerConfig.olLayer = new ImageLayer(staticImageOptions);
+    layerConfig.olLayerAndLoadEndListeners = {
+      olLayer: new ImageLayer(staticImageOptions),
+      loadEndListenerType: 'image',
+    };
     layerConfig.geoviewLayerInstance = this;
-
-    this.addLoadendListener(layerPath, 'image');
 
     return Promise.resolve(layerConfig.olLayer);
   }

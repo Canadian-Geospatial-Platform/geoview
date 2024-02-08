@@ -2,7 +2,8 @@ import { Theme } from '@mui/material/styles';
 
 export const getSxClasses = (theme: Theme) => ({
   panelHeaders: {
-    font: theme.footerPanel.titleFont,
+    fontSize: theme.palette.geoViewFontSize.lg,
+    fontWeight: '600',
     marginBottom: '20px',
   },
   rightPanelContainer: {

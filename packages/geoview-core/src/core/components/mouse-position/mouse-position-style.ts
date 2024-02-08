@@ -33,7 +33,6 @@ export const getSxClasses = (theme: Theme) => ({
     alignItems: 'center',
     '& span': {
       fontSize: theme.typography.fontSize,
-      color: theme.palette.geoViewColor.primary.light[300],
       textOverflow: 'ellipsis',
       whiteSpace: 'nowrap',
       overflow: 'hidden',
@@ -41,11 +40,9 @@ export const getSxClasses = (theme: Theme) => ({
   },
   mousePositionCheckmark: {
     paddingRight: 5,
-    color: theme.palette.geoViewColor.primary.light[300],
   },
   mousePositionText: {
     fontSize: theme.typography.fontSize,
-    color: theme.palette.geoViewColor.primary.light[300],
     textOverflow: 'ellipsis',
     whiteSpace: 'nowrap',
     overflow: 'hidden',

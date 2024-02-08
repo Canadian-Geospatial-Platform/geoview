@@ -3,14 +3,14 @@ import { Theme } from '@mui/material/styles';
 export const getSxClasses = (theme: Theme) => ({
   tabsContainer: {
     position: 'relative',
-    background: theme.footerPanel.contentBg,
-    boxShadow: theme.footerPanel.contentShadow,
+    background: theme.palette.geoViewColor.bgColor.dark[50],
+    boxShadow: 2,
     width: '100%',
     transition: 'height 0.2s ease-out',
     height: '55px',
 
     '&.MuiGrid-container': {
-      background: theme.footerPanel.contentBg,
+      background: theme.palette.geoViewColor.bgColor.dark[50],
     },
   },
 });

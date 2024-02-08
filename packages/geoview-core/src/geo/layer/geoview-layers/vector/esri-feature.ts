@@ -248,9 +248,9 @@ export class EsriFeature extends AbstractGeoViewVector {
    *
    * @param {TypeLayerEntryConfig} layerConfig The layer entry configuration to process.
    *
-   * @returns {Promise<void>} A promise that the layer configuration has its metadata processed.
+   * @returns {Promise<TypeLayerEntryConfig>} A promise that the layer configuration has its metadata processed.
    */
-  protected processLayerMetadata(layerConfig: TypeLayerEntryConfig): Promise<void> {
+  protected processLayerMetadata(layerConfig: TypeLayerEntryConfig): Promise<TypeLayerEntryConfig> {
     return commonProcessLayerMetadata.call(this, layerConfig);
   }
 

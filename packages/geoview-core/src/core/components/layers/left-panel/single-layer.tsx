@@ -93,7 +93,7 @@ export function SingleLayer({ isDragging, depth, layer, setIsLayersListPanelVisi
     if (layer.layerStatus === 'error') {
       return t('legend.layerError');
     }
-    if (layer.layerStatus === 'loading') {
+    if (layer.layerStatus === 'processing') {
       return t('legend.layerLoading');
     }
 
@@ -165,7 +165,7 @@ export function SingleLayer({ isDragging, depth, layer, setIsLayersListPanelVisi
   }
 
   function renderMoreLayerButtons() {
-    if (layer.layerStatus === 'loading' || displayState !== 'view') {
+    if (layer.layerStatus === 'processing' || displayState !== 'view') {
       return null;
     }
     if (layer.layerStatus === 'error') {
@@ -178,14 +178,21 @@ export function SingleLayer({ isDragging, depth, layer, setIsLayersListPanelVisi
 
     if (isLayerAlwaysVisible) {
       return (
-        <IconButton edge="end" size="small" tooltip="layers.visibilityIsAlways" disabled>
+        <IconButton edge="end" size="small" tooltip="layers.visibilityIsAlways" className="style1" disabled>
           <VisibilityOutlinedIcon color="disabled" />
         </IconButton>
       );
     }
 
     return (
-      <IconButton color="primary" edge="end" size="small" onClick={() => handleToggleVisibility()} tooltip="layers.toggleVisibility">
+      <IconButton
+        color="primary"
+        edge="end"
+        size="small"
+        onClick={() => handleToggleVisibility()}
+        tooltip="layers.toggleVisibility"
+        className="style1"
+      >
         {(() => {
           if (layer.isVisible === 'no') return <VisibilityOffOutlinedIcon />;
           return <VisibilityOutlinedIcon />;
@@ -200,7 +207,14 @@ export function SingleLayer({ isDragging, depth, layer, setIsLayersListPanelVisi
     }
     if (layer.children?.length) {
       return (
-        <IconButton color="primary" edge="end" size="small" onClick={handleExpandGroupClick} tooltip="layers.toggleCollapse">
+        <IconButton
+          color="primary"
+          edge="end"
+          size="small"
+          onClick={handleExpandGroupClick}
+          tooltip="layers.toggleCollapse"
+          className="style1"
+        >
           {isGroupOpen ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
         </IconButton>
       );

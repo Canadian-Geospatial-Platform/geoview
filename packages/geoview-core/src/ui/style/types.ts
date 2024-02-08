@@ -40,6 +40,10 @@ export class GeoViewColorClass {
     return alpha(this.main, opacity);
   }
 
+  opacity(opacity: number): string {
+    return alpha(this.main, opacity);
+  }
+
   lighten(coefficient: number, opacity = 1): string {
     if (this.isInverse) {
       return alpha(darken(this.main, coefficient), opacity);
@@ -72,13 +76,14 @@ export interface IGeoViewColors {
 
   bgColor: GeoViewColorClass;
   textColor: GeoViewColorClass;
+  grey: GeoViewColorClass;
+
   primary: GeoViewColorClass;
   secondary: GeoViewColorClass;
   success: GeoViewColorClass;
   error: GeoViewColorClass;
   info: GeoViewColorClass;
   warning: GeoViewColorClass;
-  grey: GeoViewColorClass;
 }
 
 export interface IGeoViewFontSizes {

@@ -30,7 +30,6 @@ import {
 } from '@/geo/map/map-schema-types';
 import { TypeArrayOfFeatureInfoEntries, codedValueType, rangeDomainType } from '@/api/events/payloads';
 import { api } from '@/app';
-import { EVENT_NAMES } from '@/api/events/event-types';
 import {
   commonGetFieldDomain,
   commonGetFieldType,
@@ -234,9 +233,9 @@ export class EsriDynamic extends AbstractGeoViewRaster {
    *
    * @param {TypeLayerEntryConfig} layerConfig The layer entry configuration to process.
    *
-   * @returns {Promise<void>} A promise that the layer configuration has its metadata processed.
+   * @returns {Promise<TypeLayerEntryConfig>} A promise that the layer configuration has its metadata processed.
    */
-  protected processLayerMetadata(layerConfig: TypeLayerEntryConfig): Promise<void> {
+  protected processLayerMetadata(layerConfig: TypeLayerEntryConfig): Promise<TypeLayerEntryConfig> {
     return commonProcessLayerMetadata.call(this, layerConfig);
   }
 
@@ -273,22 +272,15 @@ export class EsriDynamic extends AbstractGeoViewRaster {
     if (layerConfig.initialSettings?.maxZoom !== undefined) imageLayerOptions.maxZoom = layerConfig.initialSettings?.maxZoom;
     if (layerConfig.initialSettings?.minZoom !== undefined) imageLayerOptions.minZoom = layerConfig.initialSettings?.minZoom;
     if (layerConfig.initialSettings?.opacity !== undefined) imageLayerOptions.opacity = layerConfig.initialSettings?.opacity;
-    // If all layers on the map have an initialSettings.visible set to false, a loading error occurs because nothing is drawn on the
-    // map and the 'change' or 'prerender' events are never sent to the addToMap method of the layer.ts file. The workaround is to
-    // postpone the setVisible action until all layers have been loaded on the map.
-    api.event.once(
-      EVENT_NAMES.LAYER.EVENT_IF_CONDITION,
-      () => {
-        this.setVisible(layerConfig.initialSettings!.visible! !== 'no', layerPath);
-      },
-      `${this.mapId}/visibilityTest`
-    );
+    // If a layer on the map has an initialSettings.visible set to false, its status will never reach the status 'loaded' because
+    // nothing is drawn on the map. We must wait until the 'loaded' status is reached to set the visibility to false. The call
+    // will be done in the layerConfig.loadedFunction() which is called right after the 'loaded' signal.
 
-    layerConfig.olLayer = new ImageLayer(imageLayerOptions);
+    layerConfig.olLayerAndLoadEndListeners = {
+      olLayer: new ImageLayer(imageLayerOptions),
+      loadEndListenerType: 'image',
+    };
     layerConfig.geoviewLayerInstance = this;
-    this.applyViewFilter(layerPath, layerConfig.layerFilter ? layerConfig.layerFilter : '');
-
-    this.addLoadendListener(layerPath, 'image');
 
     return Promise.resolve(layerConfig.olLayer);
   }
@@ -334,7 +326,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
   protected async getFeatureInfoAtLongLat(lnglat: Coordinate, layerPath: string): Promise<TypeArrayOfFeatureInfoEntries> {
     try {
       // Get the layer config in a loaded phase
-      const layerConfig = (await this.getLayerConfigAsync(layerPath, true)) as TypeEsriDynamicLayerEntryConfig;
+      const layerConfig = (await this.getLayerConfig(layerPath)) as TypeEsriDynamicLayerEntryConfig;
       if (!this.getVisible(layerPath)) return [];
       if (!layerConfig.source?.featureInfo?.queryable) return [];
 
@@ -727,7 +719,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
    * @param {never} notUsed1 This parameter must not be provided. It is there to allow overloading of the method signature.
    * @param {never} notUsed2 This parameter must not be provided. It is there to allow overloading of the method signature.
    */
-  applyViewFilter(filter: string, notUsed1?: never, notUsed2?: never): Promise<void>;
+  applyViewFilter(filter: string, notUsed1?: never, notUsed2?: never): void;
 
   /** ***************************************************************************************************************************
    * Apply a view filter to the layer identified by the path stored in the layerPathAssociatedToTheGeoviewLayer property stored
@@ -740,7 +732,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
    * @param {boolean} CombineLegendFilter Flag used to combine the legend filter and the filter together (default: true)
    * @param {never} notUsed This parameter must not be provided. It is there to allow overloading of the method signature.
    */
-  applyViewFilter(filter: string, CombineLegendFilter: boolean, notUsed?: never): Promise<void>;
+  applyViewFilter(filter: string, CombineLegendFilter: boolean, notUsed?: never): void;
 
   /** ***************************************************************************************************************************
    * Apply a view filter to the layer. When the CombineLegendFilter flag is false, the filter paramater is used alone to display
@@ -752,42 +744,58 @@ export class EsriDynamic extends AbstractGeoViewRaster {
    * @param {string} filter An optional filter to be used in place of the getViewFilter value.
    * @param {boolean} combineLegendFilter Flag used to combine the legend filter and the filter together (default: true)
    */
-  applyViewFilter(layerPath: string, filter?: string, combineLegendFilter?: boolean): Promise<void>;
+  applyViewFilter(layerPath: string, filter?: string, combineLegendFilter?: boolean): void;
 
   // See above headers for signification of the parameters. The first lines of the method select the template
   // used based on the parameter types received.
-  async applyViewFilter(parameter1: string, parameter2?: string | boolean | never, parameter3?: boolean | never): Promise<void> {
+
+  applyViewFilter(parameter1: string, parameter2?: string | boolean | never, parameter3?: boolean | never) {
+    // At the beginning, we assume that:
+    // 1- the layer path was saved in this.layerPathAssociatedToTheGeoviewLayer using a call to
+    //    api.maps[mapId].layer.geoviewLayer(layerPath);
+    // 2- the filter is empty;
+    // 3- the combine legend filters is true
     let layerPath = this.layerPathAssociatedToTheGeoviewLayer;
-
-    // Log
-    logger.logTraceCore('esri-dynamic.applyViewFilter', layerPath);
-
     let filter = '';
     let CombineLegendFilter = true;
-    if (parameter3) {
+
+    // Method signature detection
+    if (typeof parameter3 === 'boolean') {
+      // Signature detected is: applyViewFilter(layerPath: string, filter?: string, combineLegendFilter?: boolean): void;
       layerPath = parameter1;
       filter = parameter2 as string;
       CombineLegendFilter = parameter3;
-    } else if (parameter2 !== undefined) {
+    } else if (parameter2 !== undefined && parameter3 === undefined) {
       if (typeof parameter2 === 'boolean') {
+        // Signature detected is: applyViewFilter(filter: string, CombineLegendFilter: boolean): void;
         filter = parameter1;
         CombineLegendFilter = parameter2;
       } else {
+        // Signature detected is: applyViewFilter(layerPath: string, filter: string): void;
         layerPath = parameter1;
         filter = parameter2;
       }
-    } else filter = parameter1;
+    } else if (parameter2 === undefined && parameter3 === undefined) {
+      // Signature detected is: applyViewFilter(filter: string): void;
+      filter = parameter1;
+    }
 
-    // TODO: Refactor - Maybe try-catch higher in the call stack instead of here? Notably to 'try again'?
-    let layerConfig;
-    try {
-      // Get the layer config in a loaded phase
-      layerConfig = (await this.getLayerConfigAsync(layerPath, true)) as TypeEsriDynamicLayerEntryConfig;
-    } catch (error) {
-      // Log
-      logger.logError('esri-dynamic.applyViewFilter()\n', error);
+    const layerConfig = this.getLayerConfig(layerPath) as TypeEsriDynamicLayerEntryConfig;
+    if (!layerConfig) {
+      // ! Things important to know about the applyViewFilter usage:
+      logger.logError(
+        `
+        The applyViewFilter method must never be called by GeoView code before the layer refered by the layerPath has reached the 'loaded' status.\n
+        It will never be called by the GeoView internal code except in the layerConfig.loadedFunction() that is called right after the 'loaded' signal.\n
+        If you are a user, you can set the layer filter in the configuration or using code called in the cgpv.init() method of the viewer.\n
+        It appeares that the layer refered by the layerPath "${layerPath} does not respect these rules.\n
+      `.replace(/\s+/g, ' ')
+      );
       return;
     }
+
+    // Log
+    logger.logTraceCore('esri-dynamic.applyViewFilter', layerPath);
 
     let filterValueToUse = filter.replaceAll(/\s{2,}/g, ' ').trim();
     layerConfig.olLayer!.set('legendFilterIsOff', !CombineLegendFilter);

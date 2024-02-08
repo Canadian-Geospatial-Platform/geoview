@@ -10,6 +10,6 @@ export const darkThemeColors: IGeoViewColors = {
   ...defaultGeoViewColors,
 
   bgColor: new GeoViewColorClass('#3C3E42', true),
-  primary: new GeoViewColorClass('#515BA5'),
+  primary: new GeoViewColorClass('#8ec4fa'),
   textColor: new GeoViewColorClass('#ffffff'),
 };

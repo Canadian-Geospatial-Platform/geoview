@@ -2,7 +2,7 @@ import { GeoViewColorClass, IGeoViewColors, IGeoViewFontSizes } from './types';
 
 export const font = "'Roboto', 'Helvetica', 'Arial', sans-serif";
 
-export const defaultFontSize = 16;
+export const defaultFontSize = 1;
 
 export const headingStyles = {
   fontFamily: font,
@@ -32,18 +32,18 @@ export const geoViewColors: IGeoViewColors = {
 };
 
 const fontSizes: IGeoViewFontSizes = {
-  xs: `${defaultFontSize * 0.8}px`,
-  sm: `${defaultFontSize * 1}px`,
-  md: `${defaultFontSize * 1.2}px`,
-  lg: `${defaultFontSize * 1.6}px`,
-  xl: `${defaultFontSize * 2}px`,
-  xxl: `${defaultFontSize * 3}px`,
-  default: `${defaultFontSize}px`,
+  xs: `${defaultFontSize * 0.8}rem`,
+  sm: `${defaultFontSize * 1}rem`,
+  md: `${defaultFontSize * 1.1}rem`,
+  lg: `${defaultFontSize * 1.3}rem`,
+  xl: `${defaultFontSize * 1.6}rem`,
+  xxl: `${defaultFontSize * 2}rem`,
+  default: `${defaultFontSize}rem`,
 };
 
 for (let multiplier = 0.2; multiplier <= 10; multiplier += 0.1) {
   const key = `${multiplier}x`;
-  fontSizes[key] = `${defaultFontSize * multiplier}px`;
+  fontSizes[key] = `${defaultFontSize * multiplier}rem`;
 }
 
 export const geoViewFontSizes = fontSizes;

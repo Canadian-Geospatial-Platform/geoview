@@ -40,7 +40,7 @@ export class UIEventProcessor extends AbstractEventProcessor {
   // **********************************************************
   //! NEVER add a store action who does set state AND map action at a same time.
   //! Review the action in store state to make sure
-  static setActiveFooterTab(mapId: string, id: string): void {
+  static setActiveFooterBarTab(mapId: string, id: string): void {
     this.getUIState(mapId).actions.setActiveFooterBarTab(id);
   }
 }

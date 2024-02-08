@@ -1,4 +1,6 @@
-export const getSxClasses = () => ({
+import { Theme } from '@mui/material';
+
+export const getSxClasses = (theme: Theme) => ({
   rightIcons: {
     marginTop: 0,
     display: 'flex',
@@ -12,7 +14,7 @@ export const getSxClasses = () => ({
     height: '100%',
   },
   tab: {
-    fontSize: 16,
+    fontSize: theme.palette.geoViewFontSize.default,
     fontWeight: 'bold',
     minWidth: 'min(4vw, 24px)',
     padding: '16px 2%',

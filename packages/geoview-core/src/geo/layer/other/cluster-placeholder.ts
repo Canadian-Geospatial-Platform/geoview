@@ -148,7 +148,7 @@
 //   const baseLayer = await this.processOneLayerEntry(unclusteredLayerConfig as TypeBaseLayerEntryConfig);
 //   if (baseLayer) {
 //     baseLayer!.setVisible(false);
-//     api.maps[this.mapId].layer.registerLayerConfig(unclusteredLayerConfig);
+//     unclusteredLayerConfig.registerLayerConfig();
 //     this.registerToLayerSets(unclusteredLayerConfig as TypeBaseLayerEntryConfig);
 //     if (!layerGroup) layerGroup = this.createLayerGroup(unclusteredLayerConfig.parentLayerConfig as TypeLayerEntryConfig);
 //     layerGroup!.getLayers().push(baseLayer!);
@@ -161,7 +161,7 @@
 //   const unclusteredLayerConfig = cloneDeep(layerConfig) as TypeVectorLayerEntryConfig;
 //   unclusteredLayerConfig.layerId = `${layerConfig.layerId}-unclustered`;
 //   unclusteredLayerConfig.source!.cluster!.enable = false;
-//   api.maps[this.mapId].layer.registerLayerConfig(unclusteredLayerConfig);
+//   unclusteredLayerConfig.registerLayerConfig();
 //   promiseOfLayerCreated.push(this.processOneLayerEntry(unclusteredLayerConfig as TypeBaseLayerEntryConfig));
 //   (layerConfig.source as TypeBaseSourceVectorInitialConfig)!.cluster!.settings =
 //     unclusteredLayerConfig.source!.cluster!.settings;
@@ -215,6 +215,8 @@
 //     },
 //   };
 
+//    ! You must always set the layerConfig.loadEndListenerType before setting the layerConfig.olLayer except when entryType = 'group'.
+//    layerConfig.loadEndListenerType = 'features';
 //   layerConfig.olLayer = new VectorLayer(layerOptions);
 //   layerConfig.geoviewLayerInstance = this;
 
@@ -227,7 +229,6 @@
 //     this.setOpacity(layerConfig.initialSettings?.opacity, layerPath);
 //   if (layerConfig.initialSettings?.visible !== undefined)
 //     this.setVisible(layerConfig.initialSettings?.visible !== 'no', layerPath);
-//   this.applyViewFilter(layerConfig, layerConfig.layerFilter ? layerConfig.layerFilter : '');
 
 //   return layerConfig.olLayer as VectorLayer<VectorSource>;
 // }
@@ -242,18 +243,6 @@
 //     const unclusteredLayerPath = `${layerPath}-unclustered`;
 //     const cluster = !!api.maps[this.mapId].layer.registeredLayers[unclusteredLayerPath];
 //     if (cluster && checkCluster) {
-//       this.applyViewFilter(
-//         layerPath,
-//         filter,
-//         CombineLegendFilter,
-//         false
-//       );
-//       this.applyViewFilter(
-//         unclusteredLayerPath,
-//         filter,
-//         CombineLegendFilter,
-//         false
-//       );
 //       return;
 //     }
 
@@ -302,7 +291,7 @@
 //         for (let i = 0; i < layers.length; i++) {
 //           const newLayerEntryConfig = cloneDeep(layerConfig) as TypeBaseLayerEntryConfig;
 //           newLayerEntryConfig.layerId = layers[i].name;
-//           newLayerEntryConfig.layerName = { en: layers[i].name, fr: layers[i].name };
+//           newLayerEntryConfig.layerName =  createLocalizedString(layers[i].name);
 //           newLayerEntryConfig.entryType = 'vector';
 //           newLayerEntryConfig.parentLayerConfig = Cast<TypeLayerGroupEntryConfig>(layerConfig);
 //           if ((newLayerEntryConfig.source as TypeBaseSourceVectorInitialConfig)?.cluster?.enable) {

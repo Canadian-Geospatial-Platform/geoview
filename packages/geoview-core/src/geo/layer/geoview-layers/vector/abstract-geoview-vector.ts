@@ -166,19 +166,6 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
 
     vectorSource = new VectorSource(sourceOptions);
 
-    let featuresLoadErrorHandler: () => void;
-    const featuresLoadEndHandler = () => {
-      this.setLayerStatus('loaded', layerPath);
-      vectorSource.un('featuresloaderror', featuresLoadErrorHandler);
-    };
-    featuresLoadErrorHandler = () => {
-      this.setLayerStatus('error', layerPath);
-      vectorSource.un('featuresloadend', featuresLoadEndHandler);
-    };
-
-    vectorSource.once('featuresloadend', featuresLoadEndHandler);
-    vectorSource.once('featuresloaderror', featuresLoadErrorHandler);
-
     return vectorSource;
   }
 
@@ -208,15 +195,19 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
       },
     };
 
-    layerConfig.olLayer = new VectorLayer(layerOptions);
+    layerConfig.olLayerAndLoadEndListeners = {
+      olLayer: new VectorLayer(layerOptions),
+      loadEndListenerType: 'features',
+    };
     layerConfig.geoviewLayerInstance = this;
 
     if (layerConfig.initialSettings?.extent !== undefined) this.setExtent(layerConfig.initialSettings?.extent, layerPath);
     if (layerConfig.initialSettings?.maxZoom !== undefined) this.setMaxZoom(layerConfig.initialSettings?.maxZoom, layerPath);
     if (layerConfig.initialSettings?.minZoom !== undefined) this.setMinZoom(layerConfig.initialSettings?.minZoom, layerPath);
     if (layerConfig.initialSettings?.opacity !== undefined) this.setOpacity(layerConfig.initialSettings?.opacity, layerPath);
-    if (layerConfig.initialSettings?.visible !== undefined) this.setVisible(layerConfig.initialSettings?.visible !== 'no', layerPath);
-    this.applyViewFilter(layerPath, layerConfig.layerFilter ? layerConfig.layerFilter : '');
+    // If a layer on the map has an initialSettings.visible set to false, its status will never reach the status 'loaded' because
+    // nothing is drawn on the map. We must wait until the 'loaded' status is reached to set the visibility to false. The call
+    // will be done in the layerConfig.loadedFunction() which is called right after the 'loaded' signal.
 
     return layerConfig.olLayer as VectorLayer<VectorSource>;
   }
@@ -232,7 +223,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
     layerPath = layerPath || this.layerPathAssociatedToTheGeoviewLayer;
     try {
       // Get the layer config in a loaded phase
-      const layerConfig = (await this.getLayerConfigAsync(layerPath, true)) as TypeVectorLayerEntryConfig;
+      const layerConfig = this.getLayerConfig(layerPath) as TypeVectorLayerEntryConfig;
       const features = (layerConfig.olLayer as VectorLayer<VectorSource>).getSource()!.getFeatures();
       const arrayOfFeatureInfoEntries = await this.formatFeatureInfoResult(features, layerConfig as TypeVectorLayerEntryConfig);
       return arrayOfFeatureInfoEntries;
@@ -257,7 +248,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
     layerPath = layerPath || this.layerPathAssociatedToTheGeoviewLayer;
     try {
       // Get the layer config in a loaded phase
-      const layerConfig = (await this.getLayerConfigAsync(layerPath, true)) as TypeVectorLayerEntryConfig;
+      const layerConfig = this.getLayerConfig(layerPath) as TypeVectorLayerEntryConfig;
       const layerFilter = (layer: BaseLayer) => {
         const layerSource = layer.get('layerConfig')?.source;
         const configSource = layerConfig?.source;
@@ -353,7 +344,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
    * @param {never} notUsed1 This parameter must not be provided. It is there to allow overloading of the method signature.
    * @param {never} notUsed2 This parameter must not be provided. It is there to allow overloading of the method signature.
    */
-  applyViewFilter(filter: string, notUsed1?: never, notUsed2?: never): Promise<void>;
+  applyViewFilter(filter: string, notUsed1?: never, notUsed2?: never): void;
 
   /** ***************************************************************************************************************************
    * Apply a view filter to the layer identified by the path stored in the layerPathAssociatedToTheGeoviewLayer property stored
@@ -366,7 +357,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
    * @param {boolean} CombineLegendFilter Flag used to combine the legend filter and the filter together (default: true)
    * @param {never} notUsed This parameter must not be provided. It is there to allow overloading of the method signature.
    */
-  applyViewFilter(filter: string, CombineLegendFilter: boolean, notUsed?: never): Promise<void>;
+  applyViewFilter(filter: string, CombineLegendFilter: boolean, notUsed?: never): void;
 
   /** ***************************************************************************************************************************
    * Apply a view filter to the layer. When the CombineLegendFilter flag is false, the filter paramater is used alone to display
@@ -378,42 +369,58 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
    * @param {string} filter A filter to be used in place of the getViewFilter value.
    * @param {boolean} CombineLegendFilter Flag used to combine the legend filter and the filter together (default: true)
    */
-  applyViewFilter(layerPath: string, filter?: string, CombineLegendFilter?: boolean): Promise<void>;
+  applyViewFilter(layerPath: string, filter?: string, CombineLegendFilter?: boolean): void;
 
   // See above headers for signification of the parameters. The first lines of the method select the template
   // used based on the parameter types received.
-  async applyViewFilter(parameter1: string, parameter2?: string | boolean | never, parameter3?: boolean | never): Promise<void> {
+
+  applyViewFilter(parameter1: string, parameter2?: string | boolean | never, parameter3?: boolean | never) {
+    // At the beginning, we assume that:
+    // 1- the layer path was saved in this.layerPathAssociatedToTheGeoviewLayer using a call to
+    //    api.maps[mapId].layer.geoviewLayer(layerPath);
+    // 2- the filter is empty;
+    // 3- the combine legend filters is true
     let layerPath = this.layerPathAssociatedToTheGeoviewLayer;
-
-    // Log
-    logger.logTraceCore('abstract-geoview-vector.applyViewFilter', layerPath);
-
     let filter = '';
     let CombineLegendFilter = true;
-    if (parameter3) {
+
+    // Method signature detection
+    if (typeof parameter3 === 'boolean') {
+      // Signature detected is: applyViewFilter(layerPath: string, filter?: string, combineLegendFilter?: boolean): void;
       layerPath = parameter1;
       filter = parameter2 as string;
       CombineLegendFilter = parameter3;
-    } else if (parameter2 !== undefined) {
+    } else if (parameter2 !== undefined && parameter3 === undefined) {
       if (typeof parameter2 === 'boolean') {
+        // Signature detected is: applyViewFilter(filter: string, CombineLegendFilter: boolean): void;
         filter = parameter1;
         CombineLegendFilter = parameter2;
       } else {
+        // Signature detected is: applyViewFilter(layerPath: string, filter: string): void;
         layerPath = parameter1;
         filter = parameter2;
       }
-    } else filter = parameter1;
+    } else if (parameter2 === undefined && parameter3 === undefined) {
+      // Signature detected is: applyViewFilter(filter: string): void;
+      filter = parameter1;
+    }
 
-    // TODO: Refactor - Maybe try-catch higher in the call stack instead of here? Notably to 'try again'?
-    let layerConfig;
-    try {
-      // Get the layer config in a loaded phase
-      layerConfig = (await this.getLayerConfigAsync(layerPath, true)) as TypeVectorLayerEntryConfig;
-    } catch (error) {
-      // Log
-      logger.logError('abstract-geoview-vector.applyViewFilter()\n', error);
+    const layerConfig = this.getLayerConfig(layerPath) as TypeVectorLayerEntryConfig;
+    if (!layerConfig) {
+      // ! Things important to know about the applyViewFilter usage:
+      logger.logError(
+        `
+        The applyViewFilter method must never be called by GeoView code before the layer refered by the layerPath has reached the 'loaded' status.\n
+        It will never be called by the GeoView internal code except in the layerConfig.loadedFunction() that is called right after the 'loaded' signal.\n
+        If you are a user, you can set the layer filter in the configuration or using code called in the cgpv.init() method of the viewer.\n
+        It appeares that the layer refered by the layerPath "${layerPath} does not respect these rules.\n
+      `.replace(/\s+/g, ' ')
+      );
       return;
     }
+
+    // Log
+    logger.logTraceCore('abstract-geoview-vector.applyViewFilter', layerPath);
 
     let filterValueToUse = filter.replaceAll(/\s{2,}/g, ' ').trim();
     layerConfig.olLayer!.set('legendFilterIsOff', !CombineLegendFilter);

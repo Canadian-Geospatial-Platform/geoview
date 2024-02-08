@@ -7,7 +7,8 @@ export const getSxClasses = (theme: Theme) => ({
     width: '100%',
     paddingRight: '14px',
     '& .MuiListItemText-primary': {
-      font: theme.footerPanel.layerTitleFont,
+      fontSize: theme.palette.geoViewFontSize.lg,
+      fontWeight: '600',
     },
 
     '& .MuiListItem-root': {
@@ -15,6 +16,7 @@ export const getSxClasses = (theme: Theme) => ({
       '& .MuiListItemButton-root': {
         padding: '0 0 0 16px',
         height: '100%',
+        backgroundColor: theme.palette.geoViewColor.bgColor.light[500],
       },
     },
     '& .MuiListItemButton-root': {
@@ -44,8 +46,8 @@ export const getSxClasses = (theme: Theme) => ({
     display: 'flex',
     flexDirection: 'column',
     '& .layerTitle': {
-      fontSize: '1rem',
-      font: theme.footerPanel.layerTitleFont,
+      fontSize: theme.palette.geoViewFontSize.default,
+      fontWeight: '600',
       lineHeight: 1.5,
       overflow: 'hidden',
       textOverflow: 'ellipsis',
@@ -71,5 +73,6 @@ export const getSxClasses = (theme: Theme) => ({
   borderNone: 'none',
   backgroundProcessing: `${theme.palette.geoViewColor.warning.light[500]}`,
   backgroundError: `${theme.palette.geoViewColor.error.main}`,
+  default: `${theme.palette.geoViewColor.bgColor.light[100]}`,
   headline: { fontSize: '1.125rem', fontWeight: 'bold' },
 });
