@@ -1,4 +1,5 @@
-import { useCallback, useEffect, useMemo, useRef, useState, memo, ReactNode } from 'react';
+/* eslint-disable @typescript-eslint/no-unused-vars */
+import { useCallback, useEffect, useMemo, useRef, useState, memo, ReactNode, isValidElement } from 'react';
 
 import { useTranslation } from 'react-i18next';
 
@@ -45,33 +46,32 @@ import { AbstractGeoViewVector, TypeLayerEntryConfig, api, TypeFieldEntry, TypeF
 import { getSxClasses } from './data-table-style';
 import { useMapStoreActions } from '@/core/stores/store-interface-and-intial-values/map-state';
 import {
+  useDataTableStoreActions,
   useDataTableStoreMapFilteredRecord,
   useDataTableStoreToolbarRowSelectedMessageRecord,
 } from '@/core/stores/store-interface-and-intial-values/data-table-state';
 import { useLightBox, useSelectedRows, useFilterRows, useToolbarActionMessage } from './hooks';
 import { useAppDisplayLanguage } from '@/core/stores/store-interface-and-intial-values/app-state';
 import { logger } from '@/core/utils/logger';
+import { MappedLayerDataType } from './data-panel';
 
-export interface DataTableDataEntrys extends TypeFeatureInfoEntry {
-  rows: Record<string, string>;
-}
-
-export interface DataTableData {
-  features: DataTableDataEntrys[];
-  fieldAliases: Record<string, TypeFieldEntry>;
+export interface FieldInfos {
+  alias: string;
+  dataType: string;
+  domain?: string;
+  fieldKey: number;
+  value: string | null;
 }
 
 export interface ColumnsType {
-  ICON: string;
-  ZOOM: string;
-  [key: string]: string;
+  ICON: FieldInfos;
+  ZOOM: FieldInfos;
+  [key: string]: FieldInfos;
 }
 
 interface DataTableProps {
-  data: DataTableData;
-  layerId: string;
-  mapId: string;
-  layerKey: string;
+  data: MappedLayerDataType;
+  layerPath: string;
   tableHeight: number;
 }
 
@@ -114,14 +114,13 @@ const NUMBER_FILTER: Record<string, string> = {
 /**
  * Build Data table from map.
  * @param {DataTableProps} data map data which will be used to build data table.
- * @param {string} layerId id of the layer
  * @param {string} mapId id of the map.
  * @param {string} layerKey key of the layer.
  * @param {number} tableHeight Height of the container which contains all rows.
  * @return {ReactElement} Data table as react element.
  */
 
-function DataTable({ data, layerId, mapId, layerKey, tableHeight = 600 }: DataTableProps) {
+function DataTable({ data, layerPath, tableHeight = 600 }: DataTableProps) {
   const { t } = useTranslation();
 
   const sxtheme = useTheme();
@@ -129,7 +128,7 @@ function DataTable({ data, layerId, mapId, layerKey, tableHeight = 600 }: DataTa
 
   // get store actions and values
   const { addHighlightedFeature, removeHighlightedFeature, zoomToExtent } = useMapStoreActions();
-
+  const { applyMapFilters } = useDataTableStoreActions();
   const language = useAppDisplayLanguage();
 
   const dataTableLocalization = language === 'fr' ? MRTLocalizationFR : MRTLocalizationEN;
@@ -150,8 +149,8 @@ function DataTable({ data, layerId, mapId, layerKey, tableHeight = 600 }: DataTa
 
   // #region REACT CUSTOM HOOKS
   const { initLightBox, LightBoxComponent } = useLightBox();
-  const { rowSelection, setRowSelection } = useSelectedRows({ layerKey });
-  const { columnFilters, setColumnFilters } = useFilterRows({ layerKey });
+  const { rowSelection, setRowSelection } = useSelectedRows({ layerPath });
+  const { columnFilters, setColumnFilters } = useFilterRows({ layerPath });
   // #endregion
 
   useEffect(() => {
@@ -282,12 +281,18 @@ function DataTable({ data, layerId, mapId, layerKey, tableHeight = 600 }: DataTa
     // Log
     logger.logTraceUseMemo('DATA-TABLE - columns', density);
 
-    const entries = Object.entries({ ICON: iconColumn, ZOOM: zoomColumn, ...data.fieldAliases });
+    const entries = Object.entries({ ICON: iconColumn, ZOOM: zoomColumn, ...data.fieldInfos });
     const columnList = [] as MRTColumnDef<ColumnsType>[];
     entries.forEach(([key, value]) => {
       columnList.push({
         id: key,
-        accessorFn: (row) => row[key] ?? '',
+        accessorFn: (row) => {
+          // check if row is valid react element.
+          if (isValidElement(row[key])) {
+            return row[key];
+          }
+          return row[key].value ?? '';
+        },
         header: value.alias,
         filterFn: 'contains',
         columnFilterModeOptions: ['contains', 'startsWith', 'endsWith', 'empty', 'notEmpty'],
@@ -309,7 +314,7 @@ function DataTable({ data, layerId, mapId, layerKey, tableHeight = 600 }: DataTa
         Header: ({ column }) => getTableHeader(column.columnDef.header),
         Cell: ({ cell }) => getCellValueWithTooltip(cell.getValue() as string | number | ReactNode, cell.id),
         ...(value.dataType === 'date' && {
-          accessorFn: (row) => new Date(row[key]),
+          accessorFn: (row) => new Date(row[key].value as string),
           sortingFn: 'datetime',
           Cell: ({ cell }) => getDateColumnTooltip(cell.getValue<Date>()),
           Filter: ({ column }) => getDateFilter(column),
@@ -357,7 +362,7 @@ function DataTable({ data, layerId, mapId, layerKey, tableHeight = 600 }: DataTa
     // Log
     logger.logTraceUseMemo('DATA-TABLE - rows', data.features);
 
-    return data.features.map((feature) => {
+    return (data?.features ?? []).map((feature) => {
       return {
         ICON: (
           <Box
@@ -372,7 +377,7 @@ function DataTable({ data, layerId, mapId, layerKey, tableHeight = 600 }: DataTa
             <ZoomInSearchIcon />
           </IconButton>
         ),
-        ...feature.rows,
+        ...feature.fieldInfo,
       };
     }) as unknown as ColumnsType[];
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -396,17 +401,17 @@ function DataTable({ data, layerId, mapId, layerKey, tableHeight = 600 }: DataTa
     positionToolbarAlertBanner: 'none', // hide existing row count
     renderTopToolbarCustomActions: () => {
       // show rowSelection/Filter message on top-left corner of the table
-      return <Box sx={sxClasses.selectedRows}>{toolbarRowSelectedMessageRecord[layerKey]}</Box>;
+      return <Box sx={sxClasses.selectedRows}>{toolbarRowSelectedMessageRecord[layerPath]}</Box>;
     },
     renderToolbarInternalActions: ({ table }) => (
       <Box>
         <MRTToggleFiltersButton table={table} />
-        <FilterMap layerKey={layerKey} />
+        <FilterMap layerPath={layerPath} />
         <MRTShowHideColumnsButton table={table} />
         <MRTToggleDensePaddingButton table={table} />
         <MRTFullScreenToggleButton table={table} />
         <ExportButton rows={rows} columns={columns}>
-          <JSONExportButton features={data.features} layerId={layerId} />
+          <JSONExportButton features={data.features as TypeFeatureInfoEntry[]} layerPath={layerPath} />
         </ExportButton>
       </Box>
     ),
@@ -423,6 +428,12 @@ function DataTable({ data, layerId, mapId, layerKey, tableHeight = 600 }: DataTa
     muiTableHeadCellProps: {
       sx: () => sxClasses.tableHeadCell,
     },
+    // override z-index of table when table is in fullscreen mode
+    muiTablePaperProps: ({ table }) => ({
+      style: {
+        zIndex: table.getState().isFullScreen ? 999999 : undefined,
+      },
+    }),
     muiFilterTextFieldProps: {
       sx: () => ({
         minWidth: '50px',
@@ -430,15 +441,15 @@ function DataTable({ data, layerId, mapId, layerKey, tableHeight = 600 }: DataTa
     },
     muiTableBodyProps: {
       sx: (theme) => ({
-        // stripe style of table
-        '& tr:nth-of-type(odd)': {
-          backgroundColor: `${darken(theme.palette.background.default, 0.1)}!important`,
+        // stripe the rows, make odd rows a darker color
+        '& tr:nth-of-type(odd) > td': {
+          backgroundColor: `${darken(theme.palette.background.default, 0.1)}`,
         },
         '& tr:hover > td': {
-          backgroundColor: '#00ffff14',
+          backgroundColor: theme.palette.secondary.light,
         },
-        '& td': {
-          backgroundColor: 'inherit',
+        '& .Mui-selected > td': {
+          backgroundColor: theme.palette.secondary.light,
         },
       }),
     },
@@ -450,25 +461,26 @@ function DataTable({ data, layerId, mapId, layerKey, tableHeight = 600 }: DataTa
     logger.logTraceUseEffect('DATA-TABLE - rowSelection', rowSelection);
 
     const selectedRows = Object.keys(rowSelection).map((key) => Number(key));
-
     const addAnimationRowIds = difference(selectedRows, rowSelectionRef.current);
 
     addAnimationRowIds.forEach((idx) => {
-      const row = data.features[Number(idx)];
-      if (row) {
-        addHighlightedFeature(row);
+      const feature = data?.features ? data.features[idx] : null;
+
+      if (feature && mapFilteredRecord[layerPath]) {
+        addHighlightedFeature(feature);
       }
     });
-
     const removeAnimationRowIds = difference(rowSelectionRef.current, selectedRows);
-    removeAnimationRowIds.forEach((id) => {
-      const feature = data.features[Number(id)];
-      removeHighlightedFeature(feature);
+    removeAnimationRowIds.forEach((idx) => {
+      const feature = data?.features ? data.features[idx] : null;
+      if (feature && mapFilteredRecord[layerPath]) {
+        removeHighlightedFeature(feature);
+      }
     });
 
     rowSelectionRef.current = selectedRows;
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [rowSelection]);
+  }, [rowSelection, mapFilteredRecord]);
 
   /**
    * Convert the filter list from the Column Filter state to filter the map.
@@ -529,27 +541,18 @@ function DataTable({ data, layerId, mapId, layerKey, tableHeight = 600 }: DataTa
     const filterStrings = buildFilterList(filters)
       .filter((filterValue) => filterValue.length)
       .join(' and ');
-
-    // TODO: use Store
-    const geoviewLayerInstance = api.maps[mapId].layer.geoviewLayer(layerKey);
-    const filterLayerConfig = api.maps[mapId].layer.registeredLayers[layerKey] as TypeLayerEntryConfig;
-
-    if (mapFilteredRecord[layerKey] && geoviewLayerInstance !== undefined && filterLayerConfig !== undefined && filterStrings.length) {
-      (api.maps[mapId].layer.geoviewLayer(layerKey) as AbstractGeoViewVector | EsriDynamic)?.applyViewFilter(filterStrings);
-    } else {
-      (api.maps[mapId].layer.geoviewLayer(layerKey) as AbstractGeoViewVector | EsriDynamic)?.applyViewFilter('');
-    }
+    applyMapFilters(filterStrings);
   }, 1000);
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  const debouncedColumnFilters = useCallback((filters: MRTColumnFiltersState) => filterMap(filters), [mapFilteredRecord[layerKey]]);
+  const debouncedColumnFilters = useCallback((filters: MRTColumnFiltersState) => filterMap(filters), [mapFilteredRecord[layerPath]]);
 
   // update map when column filters change
   useEffect(() => {
     // Log
     logger.logTraceUseEffect('DATA-TABLE - columnFilters', columnFilters);
 
-    if (columnFilters && mapFilteredRecord[layerKey]) {
+    if (columnFilters && mapFilteredRecord[layerPath]) {
       debouncedColumnFilters(columnFilters);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -558,14 +561,14 @@ function DataTable({ data, layerId, mapId, layerKey, tableHeight = 600 }: DataTa
   // Update map when filter map switch is toggled.
   useEffect(() => {
     // Log
-    logger.logTraceUseEffect('DATA-TABLE - mapFilteredRecord', mapFilteredRecord[layerKey]);
+    logger.logTraceUseEffect('DATA-TABLE - mapFilteredRecord', mapFilteredRecord[layerPath]);
 
     filterMap(columnFilters);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [mapFilteredRecord[layerKey]]);
+  }, [mapFilteredRecord[layerPath]]);
 
   // set toolbar custom action message in store.
-  useToolbarActionMessage({ data, rowSelection, columnFilters, layerKey, tableInstance: useTable });
+  useToolbarActionMessage({ data, rowSelection, columnFilters, layerPath, tableInstance: useTable });
 
   return (
     <Box sx={sxClasses.dataTableWrapper}>

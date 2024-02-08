@@ -168,6 +168,7 @@ const LayerListItem = memo(function LayerListItem({ isSelected, layer, handleLis
  * @param {LayerListEntry} layerList  Array of layer list entries.
  * @param {boolean} isEnlargeDataTable  Boolean value if right panel is enlarged or not.
  * @param {number} selectedLayerIndex  Current index of list item selected.
+ * @param {string} selectedLayerPath  Selected path of the layer.
  * @param {Function} handleListItemClick  Callback function excecuted when list item is clicked.
  * @returns
  */

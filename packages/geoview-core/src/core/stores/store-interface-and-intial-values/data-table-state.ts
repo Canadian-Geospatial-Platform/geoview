@@ -2,17 +2,19 @@ import { useStore } from 'zustand';
 import { type MRT_ColumnFiltersState as MRTColumnFiltersState } from 'material-react-table';
 import { TypeSetStore, TypeGetStore } from '@/core/stores/geoview-store';
 import { useGeoViewStore } from '../stores-managers';
-import { LayersDataType } from '@/core/components/data-table/data-panel';
+import { TypeArrayOfLayerData } from '@/app';
+import { DataTableProcessor } from '@/api/event-processors/event-processor-children/data-table-processor';
 
 interface IMapDataTableStateActions {
-  setColumnFiltersEntry: (filtered: MRTColumnFiltersState, layerKey: string) => void;
+  setColumnFiltersEntry: (filtered: MRTColumnFiltersState, layerPath: string) => void;
   setIsEnlargeDataTable: (isEnlarge: boolean) => void;
-  setMapFilteredEntry: (mapFiltered: boolean, layerKey: string) => void;
-  setRowsFilteredEntry: (rows: number, layerKey: string) => void;
-  setRowSelectionsEntry: (rowSelection: Record<number, boolean>, layerKey: string) => void;
+  setMapFilteredEntry: (mapFiltered: boolean, layerPath: string) => void;
+  setRowsFilteredEntry: (rows: number, layerPath: string) => void;
+  setRowSelectionsEntry: (rowSelection: Record<number, boolean>, layerPath: string) => void;
   setSelectedLayerPath: (layerPath: string) => void;
-  setToolbarRowSelectedMessageEntry: (message: string, layerKey: string) => void;
-  setLayersData: (layers: LayersDataType[]) => void;
+  setToolbarRowSelectedMessageEntry: (message: string, layerPath: string) => void;
+  setLayersData: (layers: TypeArrayOfLayerData) => void;
+  applyMapFilters: (filterStrings: string) => void;
 }
 export interface IMapDataTableState {
   columnFiltersRecord: Record<string, MRTColumnFiltersState>;
@@ -22,7 +24,7 @@ export interface IMapDataTableState {
   rowSelectionsRecord: Record<string, Record<number, boolean>>;
   selectedLayerPath: string;
   toolbarRowSelectedMessageRecord: Record<string, string>;
-  layersData: LayersDataType[];
+  layersData: TypeArrayOfLayerData;
   actions: IMapDataTableStateActions;
 }
 
@@ -39,7 +41,7 @@ export function initialDataTableState(set: TypeSetStore, get: TypeGetStore): IMa
 
     // #region ACTIONS
     actions: {
-      setLayersData: (layersData: LayersDataType[]) => {
+      setLayersData: (layersData: TypeArrayOfLayerData) => {
         set({
           dataTableState: {
             ...get().dataTableState,
@@ -47,20 +49,20 @@ export function initialDataTableState(set: TypeSetStore, get: TypeGetStore): IMa
           },
         });
       },
-      setMapFilteredEntry: (mapFiltered: boolean, layerKey: string) => {
+      setMapFilteredEntry: (mapFiltered: boolean, layerPath: string) => {
         set({
           dataTableState: {
             ...get().dataTableState,
-            mapFilteredRecord: { ...get().dataTableState.mapFilteredRecord, [layerKey]: mapFiltered },
+            mapFilteredRecord: { ...get().dataTableState.mapFilteredRecord, [layerPath]: mapFiltered },
           },
         });
         // TODO: Apply the filter to the layer in map event processor
       },
-      setColumnFiltersEntry: (filtered: MRTColumnFiltersState, layerKey: string) => {
+      setColumnFiltersEntry: (filtered: MRTColumnFiltersState, layerPath: string) => {
         set({
           dataTableState: {
             ...get().dataTableState,
-            columnFiltersRecord: { ...get().dataTableState.columnFiltersRecord, [layerKey]: filtered },
+            columnFiltersRecord: { ...get().dataTableState.columnFiltersRecord, [layerPath]: filtered },
           },
         });
       },
@@ -72,19 +74,19 @@ export function initialDataTableState(set: TypeSetStore, get: TypeGetStore): IMa
           },
         });
       },
-      setRowsFilteredEntry: (rows: number, layerKey: string) => {
+      setRowsFilteredEntry: (rows: number, layerPath: string) => {
         set({
           dataTableState: {
             ...get().dataTableState,
-            rowsFilteredRecord: { ...get().dataTableState.rowsFilteredRecord, [layerKey]: rows },
+            rowsFilteredRecord: { ...get().dataTableState.rowsFilteredRecord, [layerPath]: rows },
           },
         });
       },
-      setRowSelectionsEntry: (rowSelection: Record<number, boolean>, layerKey: string) => {
+      setRowSelectionsEntry: (rowSelection: Record<number, boolean>, layerPath: string) => {
         set({
           dataTableState: {
             ...get().dataTableState,
-            rowSelectionsRecord: { ...get().dataTableState.rowSelectionsRecord, [layerKey]: rowSelection },
+            rowSelectionsRecord: { ...get().dataTableState.rowSelectionsRecord, [layerPath]: rowSelection },
           },
         });
       },
@@ -96,13 +98,17 @@ export function initialDataTableState(set: TypeSetStore, get: TypeGetStore): IMa
           },
         });
       },
-      setToolbarRowSelectedMessageEntry: (message: string, layerKey: string) => {
+      setToolbarRowSelectedMessageEntry: (message: string, layerPath: string) => {
         set({
           dataTableState: {
             ...get().dataTableState,
-            toolbarRowSelectedMessageRecord: { ...get().dataTableState.toolbarRowSelectedMessageRecord, [layerKey]: message },
+            toolbarRowSelectedMessageRecord: { ...get().dataTableState.toolbarRowSelectedMessageRecord, [layerPath]: message },
           },
         });
+      },
+      applyMapFilters: (filterStrings: string): void => {
+        const layerPath = get().dataTableState.selectedLayerPath;
+        DataTableProcessor.applyFilters(get().mapId, layerPath, filterStrings, !!get().dataTableState.mapFilteredRecord[layerPath]);
       },
     },
     // #endregion ACTIONS
@@ -126,7 +132,8 @@ export const useDataTableStoreMapFilteredRecord = (): Record<string, boolean> =>
   useStore(useGeoViewStore(), (state) => state.dataTableState.mapFilteredRecord);
 export const useDataTableStoreRowsFiltered = (): Record<string, number> =>
   useStore(useGeoViewStore(), (state) => state.dataTableState.rowsFilteredRecord);
-export const useDatatableStoreLayersData = (): LayersDataType[] => useStore(useGeoViewStore(), (state) => state.dataTableState.layersData);
+export const useDatatableStoreLayersData = (): TypeArrayOfLayerData =>
+  useStore(useGeoViewStore(), (state) => state.dataTableState.layersData);
 
 export const useDataTableStoreActions = (): IMapDataTableStateActions =>
   useStore(useGeoViewStore(), (state) => state.dataTableState.actions);

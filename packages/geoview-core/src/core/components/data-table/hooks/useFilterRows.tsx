@@ -7,15 +7,15 @@ import {
 import { logger } from '@/core/utils/logger';
 
 export interface UseFilterRowsProps {
-  layerKey: string;
+  layerPath: string;
 }
 
 /**
  * Custom hook to set the filtered row  for data table.
- * @param {string} layerKey key of the layer selected.
+ * @param {string} layerPath key of the layer selected.
  * @returns {Object}
  */
-export function useFilterRows({ layerKey }: UseFilterRowsProps): {
+export function useFilterRows({ layerPath }: UseFilterRowsProps): {
   columnFilters: MRTColumnFiltersState;
   setColumnFilters: Dispatch<SetStateAction<MRTColumnFiltersState>>;
 } {
@@ -23,14 +23,14 @@ export function useFilterRows({ layerKey }: UseFilterRowsProps): {
 
   const { setColumnFiltersEntry } = useDataTableStoreActions();
 
-  const [columnFilters, setColumnFilters] = useState<MRTColumnFiltersState>(columnFiltersRecord[layerKey] || []);
+  const [columnFilters, setColumnFilters] = useState<MRTColumnFiltersState>(columnFiltersRecord[layerPath] || []);
 
   // update store column filters
   useEffect(() => {
     // Log
     logger.logTraceUseEffect('USEFILTERROWS - columnFilters', columnFilters);
 
-    setColumnFiltersEntry(columnFilters, layerKey);
+    setColumnFiltersEntry(columnFilters, layerPath);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [columnFilters]);
 

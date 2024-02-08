@@ -144,7 +144,8 @@ export function Tabs(props: TypeTabsProps): JSX.Element {
       // Make sure it's visible
       if (isCollapsed) onCollapse?.();
     }
-  }, [onCollapse, isCollapsed, selectedTab, tabs]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedTab, tabs]);
 
   /**
    * Build mobile tab dropdown.
@@ -171,8 +172,8 @@ export function Tabs(props: TypeTabsProps): JSX.Element {
 
   return (
     <Grid container sx={{ width: '100%', height: '100%' }}>
-      <Grid container>
-        <Grid item xs={7} sm={10} sx={{ background: 'white' }}>
+      <Grid container sx={{ backgroundColor: theme.palette.geoViewColor.bgColor.dark[100] }}>
+        <Grid item xs={7} sm={10}>
           {!showMobileDropdown ? (
             <MaterialTabs
               // eslint-disable-next-line react/destructuring-assignment

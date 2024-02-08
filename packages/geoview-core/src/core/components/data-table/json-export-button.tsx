@@ -3,22 +3,22 @@ import { useTranslation } from 'react-i18next';
 import { Geometry, Point, Polygon, LineString, MultiPoint } from 'ol/geom';
 
 import { MenuItem } from '@/ui';
-import { DataTableDataEntrys } from './data-table';
 import { useMapStoreActions } from '@/core/stores/store-interface-and-intial-values/map-state';
+import { TypeFeatureInfoEntry } from '@/app';
 
 interface JSONExportButtonProps {
-  features: DataTableDataEntrys[];
-  layerId: string;
+  features: TypeFeatureInfoEntry[];
+  layerPath: string;
 }
 
 /**
  * Custom  GeoJson export button which will help to download data table data in geojson format.
- * @param {DataTableDataEntrys[]} features list of rows to be displayed in data table
- * @param {string} layerId id of the layer
+ * @param {TypeFeatureInfoEntry[]} features list of rows to be displayed in data table
+ * @param {string} layerPath id of the layer
  * @returns {JSX.Element} returns Menu Item
  *
  */
-function JSONExportButton({ features, layerId }: JSONExportButtonProps): JSX.Element {
+function JSONExportButton({ features, layerPath }: JSONExportButtonProps): JSX.Element {
   const { t } = useTranslation<string>();
 
   // get store value - projection config to transfer lat long.
@@ -59,11 +59,11 @@ function JSONExportButton({ features, layerId }: JSONExportButtonProps): JSX.Ele
    */
   const getJson = (): string => {
     const geoData = features.map((feature) => {
-      const { geometry, rows } = feature;
+      const { geometry, fieldInfo } = feature;
       return {
         type: 'Feature',
         geometry: buildGeometry(geometry?.getGeometry() as Geometry),
-        properties: rows,
+        properties: fieldInfo,
       };
     });
 
@@ -97,7 +97,7 @@ function JSONExportButton({ features, layerId }: JSONExportButtonProps): JSX.Ele
       type: 'text/json',
     });
 
-    exportBlob(blob, `table-${layerId}.json`);
+    exportBlob(blob, `table-${layerPath}.json`);
   };
 
   return <MenuItem onClick={handleExportData}>{t('dataTable.jsonExportBtn')}</MenuItem>;
