@@ -24,12 +24,13 @@ import { AbstractPlugin } from '@/api/plugin/abstract-plugin';
 import { useGeoViewConfig } from '@/core/stores/geoview-store';
 
 // default tabs icon and class
-import { HubOutlinedIcon, InfoOutlinedIcon, LayersOutlinedIcon, StorageIcon } from '@/ui/icons';
+import { HubOutlinedIcon, InfoOutlinedIcon, LayersOutlinedIcon, StorageIcon, SchoolIcon } from '@/ui/icons';
 import { Legend } from '@/core/components/legend/legend';
 import { LayersPanel } from '@/core/components/layers/layers-panel';
 import { DetailsPanel } from '@/core/components/details/details-panel';
 import { Datapanel } from '@/core/components/data-table/data-panel';
 import { logger } from '@/core/utils/logger';
+import { GuidePanel } from '@/core/components/guide/guide-panel';
 
 interface ShellContainerCssProperties {
   mapVisibility: string;
@@ -93,7 +94,7 @@ export function FooterBar(): JSX.Element | null {
     // Log
     logger.logTraceUseMemo('FOOTER-BAR - defaultFooterBarTabs', footerBarTabs);
 
-    return (footerBarTabsConfig?.tabs?.core ?? []).map((tab, index) => {
+    const tabsFromConfig = (footerBarTabsConfig?.tabs?.core ?? []).map((tab, index) => {
       return {
         id: tab,
         value: index,
@@ -102,6 +103,21 @@ export function FooterBar(): JSX.Element | null {
         content: tabs[tab]?.content ?? '',
       };
     }) as TypeTabs[];
+
+    const guideTab: TypeTabs[] = [
+      {
+        id: 'guide',
+        // If tabsFromConfig has values like 0, 1, 2, 3, then value of 'guide' tab is alway 4. That is always 1 number more thant the last tab value
+        value: tabsFromConfig.length,
+        label: 'guide.title',
+        icon: <SchoolIcon />,
+        content: <GuidePanel />,
+      },
+    ];
+
+    // Merge tabs from config with guide tab
+    return [...tabsFromConfig, ...guideTab];
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [footerBarTabs]); // TODO: Investigate - shouldn't this be footerBarTabsConfig (and tabs?) instead of footerBarTabs?
 

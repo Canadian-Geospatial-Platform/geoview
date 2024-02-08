@@ -1,5 +1,5 @@
 /* eslint-disable react/require-default-props */
-import React, { useState, useCallback, ReactNode, memo } from 'react';
+import React, { useState, useCallback, ReactNode, memo, useEffect } from 'react';
 import Markdown from 'markdown-to-jsx';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '@mui/material/styles';
@@ -10,9 +10,8 @@ import { ResponsiveGrid, CloseButton, EnlargeButton, LayerList, LayerTitle, useF
 import { useFetchAndParseMarkdown } from './custom-hook';
 
 import { useGeoViewConfig } from '@/core/stores/geoview-store';
-import { TypeFooterBarProps } from '@/geo/map/map-schema-types';
+import { TypeValidFooterBarTabsCoreProps } from '@/geo/map/map-schema-types';
 
-type coreTabsType = TypeFooterBarProps['tabs']['core'];
 type renderedMarkdownFileType = Record<string, string>;
 
 interface guideListItems extends LayerListEntry {
@@ -22,7 +21,7 @@ interface guideListItems extends LayerListEntry {
 type RenderFooterContentProps = {
   footerContenKeys: string[];
   footerContentKeyValues: Record<string, string>;
-  allTabs: coreTabsType | undefined;
+  allTabs: TypeValidFooterBarTabsCoreProps | undefined;
 };
 
 // eslint-disable-next-line react/display-name
@@ -31,7 +30,7 @@ const RenderFooterContentInRightPanel = memo(({ footerContenKeys, footerContentK
     <List>
       {footerContenKeys.map((footerKey: string) => {
         return (
-          allTabs?.includes(footerKey as coreTabsType[number]) && (
+          allTabs?.includes(footerKey as TypeValidFooterBarTabsCoreProps[number]) && (
             <ListItem key={footerKey}>
               <Markdown options={{ wrapper: 'article' }}>{footerContentKeyValues[footerKey]}</Markdown>
             </ListItem>
@@ -49,23 +48,24 @@ export function GuidePanel(): JSX.Element {
   const sxClasses = getSxClasses(theme);
   const mapId = useGeoViewMapId();
 
+  const [selectedLayerPath, setSelectedLayerPath] = useState<string>('');
   const [guideItemIndex, setGuideItemIndex] = useState<number>(0);
   const [isLayersPanelVisible, setIsLayersPanelVisible] = useState(false);
   const [isEnlargeDataTable, setIsEnlargeDataTable] = useState(false);
   const [leftPanelHelpItems, setLeftPanelHelpItems] = useState<renderedMarkdownFileType | null>(null);
 
   // Custom hook for calculating the height of footer panel
-  const { leftPanelRef, rightPanelRef, panelTitleRef } = useFooterPanelHeight({ footerPanelTab: 'details' });
+  const { leftPanelRef, rightPanelRef, panelTitleRef } = useFooterPanelHeight({ footerPanelTab: 'guide' });
 
-  // get store config for footer tabs
-  const footerTabsConfig = useGeoViewConfig()?.footerBar;
-  const allTabs: coreTabsType | undefined = footerTabsConfig?.tabs.core;
+  // get store config for footer bar
+  const footerBarConfig = useGeoViewConfig()?.footerBar;
+  const allTabs: TypeValidFooterBarTabsCoreProps | undefined = footerBarConfig?.tabs.core;
 
   // fetch the content of general guide items with custom hook
   useFetchAndParseMarkdown(mapId, '/geoview/locales/markdown/general-content.md', t('guide.errorMessage'), setLeftPanelHelpItems);
 
   const leftPanelItemKeys = leftPanelHelpItems && Object.keys(leftPanelHelpItems);
-  const contentOfFooterInRightPanel = leftPanelHelpItems?.Footer;
+  const contentOfFooterInRightPanel = leftPanelHelpItems && leftPanelHelpItems['!Footer'];
   // search for matches like %legend%
   const sectionsOfFooters = contentOfFooterInRightPanel?.split(/%([^%]+)%/);
 
@@ -81,7 +81,7 @@ export function GuidePanel(): JSX.Element {
     if (sectionsOfFooters[0]?.trim() === '') {
       sectionsOfFooters.shift();
     }
-    for (let i = 0; i < sectionsOfFooters.length; i += 2) {
+    for (let i = 0; i < sectionsOfFooters.length; i += 1) {
       const heading = sectionsOfFooters[i]?.trim();
       const sectionContent = sectionsOfFooters[i + 1]?.trim();
       footerContentKeyValues[heading] = sectionContent;
@@ -93,17 +93,23 @@ export function GuidePanel(): JSX.Element {
   const helpItems: guideListItems[] = [];
 
   leftPanelItemKeys?.forEach((item) => {
-    if (item !== 'Footer') {
+    // TODO review to see if we can change this logic to make it more reusable
+    if (item !== '!Footer') {
       helpItems.push({
-        layerName: item,
-        layerPath: '',
+        // remove the exclamation mark "!" from layer name that is in MD file
+        layerName: item.substring(1),
+        layerPath: item,
+        layerStatus: 'loaded',
+        queryStatus: 'processed',
         content: <Markdown options={{ wrapper: 'article' }}>{(leftPanelHelpItems && leftPanelHelpItems[item]) as string}</Markdown>,
       });
     } else {
       // we hit footer content now
       helpItems.push({
         layerName: 'Footer',
-        layerPath: '',
+        layerPath: '!footer',
+        layerStatus: 'loaded',
+        queryStatus: 'processed',
         content: <RenderFooterContentInRightPanel {...{ footerContenKeys, footerContentKeyValues, allTabs }} />,
       });
     }
@@ -112,6 +118,7 @@ export function GuidePanel(): JSX.Element {
   const guideItemClick = (layer: LayerListEntry) => {
     const index: number = helpItems.findIndex((item) => item.layerName === layer.layerName);
     setGuideItemIndex(index);
+    setSelectedLayerPath(layer.layerPath);
     setIsLayersPanelVisible(true);
   };
 
@@ -120,12 +127,20 @@ export function GuidePanel(): JSX.Element {
       <LayerList
         layerList={helpItems}
         isEnlargeDataTable={isEnlargeDataTable}
-        selectedLayerIndex={guideItemIndex}
+        selectedLayerPath={selectedLayerPath}
         handleListItemClick={(layer) => guideItemClick(layer)}
       />
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [guideItemIndex, helpItems]);
+
+  useEffect(() => {
+    if (leftPanelHelpItems) {
+      // select the first item in left panel
+      setSelectedLayerPath(helpItems[0].layerPath);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [leftPanelHelpItems]);
 
   return (
     <Box sx={sxClasses.guideContainer}>
