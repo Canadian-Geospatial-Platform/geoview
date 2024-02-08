@@ -5,7 +5,7 @@ import { useDetailsStoreLayerDataArray } from '@/core/stores/store-interface-and
 import { logger } from '@/core/utils/logger';
 
 interface UseFooterPanelHeightType {
-  footerPanelTab: 'layers' | 'details' | 'datatable' | 'legend' | 'default';
+  footerPanelTab: 'layers' | 'details' | 'data-table' | 'legend' | 'default';
 }
 
 /**
@@ -43,7 +43,7 @@ export function useFooterPanelHeight({ footerPanelTab }: UseFooterPanelHeightTyp
       leftPanelRef.current.style.overflow = 'auto';
       leftPanelRef.current.style.paddingBottom = '24px';
 
-      if (footerPanelTab === 'datatable') {
+      if (footerPanelTab === 'data-table') {
         setTableHeight(leftPanelHeight - 10);
       } else {
         let rightPanel;
@@ -63,7 +63,7 @@ export function useFooterPanelHeight({ footerPanelTab }: UseFooterPanelHeightTyp
     if (!isMapFullScreen && leftPanelRef.current) {
       leftPanelRef.current.style.maxHeight = `${defaultHeight}px`;
       leftPanelRef.current.style.overflow = 'auto';
-      if (footerPanelTab === 'datatable') {
+      if (footerPanelTab === 'data-table') {
         setTableHeight(defaultHeight);
       } else {
         let rightPanel;

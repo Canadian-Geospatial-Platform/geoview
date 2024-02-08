@@ -47,7 +47,7 @@ export function Datapanel() {
   const { setSelectedLayerPath, setIsEnlargeDataTable } = useDataTableStoreActions();
 
   // Custom hook for calculating the height of footer panel
-  const { leftPanelRef, rightPanelRef, panelTitleRef, tableHeight } = useFooterPanelHeight({ footerPanelTab: 'datatable' });
+  const { leftPanelRef, rightPanelRef, panelTitleRef, tableHeight } = useFooterPanelHeight({ footerPanelTab: 'data-table' });
 
   // Create columns for data table.
   const mappedLayerData = useFeatureFieldInfos(layerData);
