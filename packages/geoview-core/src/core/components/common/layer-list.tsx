@@ -1,4 +1,4 @@
-import { ReactNode, memo } from 'react';
+import { ReactNode, memo, useState } from 'react';
 import { useTheme } from '@mui/material/styles';
 import { useTranslation } from 'react-i18next';
 import { Box, ChevronRightIcon, IconButton, List, ListItem, ListItemButton, ListItemIcon, Paper, Tooltip, Typography } from '@/ui';
@@ -177,6 +177,13 @@ export function LayerList({ layerList, isEnlargeDataTable, selectedLayerPath, ha
   const sxClasses = getSxClasses(theme);
   const { t } = useTranslation<string>();
 
+  const [showNoLayersBody, setShowNoLayersBody] = useState(false);
+
+  const handleClickNoLayersTitle = () => {
+    // Toggle it
+    setShowNoLayersBody(!showNoLayersBody);
+  };
+
   return (
     <List sx={sxClasses.list}>
       {!!layerList.length &&
@@ -193,11 +200,14 @@ export function LayerList({ layerList, isEnlargeDataTable, selectedLayerPath, ha
           />
         ))}
       {!layerList.length && (
-        <Paper sx={{ padding: '2rem' }}>
-          <Typography variant="h3" gutterBottom sx={sxClasses.layersInstructionsTitle}>
+        <Paper sx={sxClasses.layersInstructionsPaper} onClick={handleClickNoLayersTitle}>
+          <Typography sx={sxClasses.layersInstructionsTitle} variant="h3" gutterBottom>
             {t('layers.instructionsNoLayersTitle')}
           </Typography>
-          <Typography component="p" sx={sxClasses.layersInstructionsBody}>
+          <Typography
+            sx={{ ...sxClasses.layersInstructionsBody, ...(showNoLayersBody ? { display: 'block' } : { display: 'none' }) }}
+            component="p"
+          >
             {t('layers.instructionsNoLayersBody')}
           </Typography>
         </Paper>
