@@ -59,10 +59,11 @@ const createInfoTable = (mapId, resultsSetId, resultsSet, eventType) => {
 
     // Header of the layer
     const infoH1 = document.createElement('h1');
-    infoH1.innerText = layerData.length ? layerPath : `${layerPath} (empty)`;
+    // eslint-disable-next-line no-nested-ternary
+    infoH1.innerText = !layerData ? `${layerPath} (error)` : layerData?.length ? layerPath : `${layerPath} (empty)`;
     content.appendChild(infoH1);
 
-    if (layerData.length) {
+    if (layerData?.length) {
       let infoH2 = document.createElement('h2');
       infoH2.innerText = 'Aliases and types';
       content.appendChild(infoH2);
