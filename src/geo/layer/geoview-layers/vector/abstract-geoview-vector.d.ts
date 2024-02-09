@@ -125,7 +125,7 @@ export declare abstract class AbstractGeoViewVector extends AbstractGeoViewLayer
      * @param {never} notUsed1 This parameter must not be provided. It is there to allow overloading of the method signature.
      * @param {never} notUsed2 This parameter must not be provided. It is there to allow overloading of the method signature.
      */
-    applyViewFilter(filter: string, notUsed1?: never, notUsed2?: never): Promise<void>;
+    applyViewFilter(filter: string, notUsed1?: never, notUsed2?: never): void;
     /** ***************************************************************************************************************************
      * Apply a view filter to the layer identified by the path stored in the layerPathAssociatedToTheGeoviewLayer property stored
      * in the layer instance associated to the map. When the CombineLegendFilter flag is false, the filter paramater is used alone
@@ -137,7 +137,7 @@ export declare abstract class AbstractGeoViewVector extends AbstractGeoViewLayer
      * @param {boolean} CombineLegendFilter Flag used to combine the legend filter and the filter together (default: true)
      * @param {never} notUsed This parameter must not be provided. It is there to allow overloading of the method signature.
      */
-    applyViewFilter(filter: string, CombineLegendFilter: boolean, notUsed?: never): Promise<void>;
+    applyViewFilter(filter: string, CombineLegendFilter: boolean, notUsed?: never): void;
     /** ***************************************************************************************************************************
      * Apply a view filter to the layer. When the CombineLegendFilter flag is false, the filter paramater is used alone to display
      * the features. Otherwise, the legend filter and the filter parameter are combined together to define the view filter. The
@@ -148,5 +148,5 @@ export declare abstract class AbstractGeoViewVector extends AbstractGeoViewLayer
      * @param {string} filter A filter to be used in place of the getViewFilter value.
      * @param {boolean} CombineLegendFilter Flag used to combine the legend filter and the filter together (default: true)
      */
-    applyViewFilter(layerPath: string, filter?: string, CombineLegendFilter?: boolean): Promise<void>;
+    applyViewFilter(layerPath: string, filter?: string, CombineLegendFilter?: boolean): void;
 }

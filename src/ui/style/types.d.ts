@@ -9,6 +9,7 @@ export declare class GeoViewColorClass {
     constructor(mainColor: string, isInverse?: boolean);
     private isValidColor;
     _main(opacity?: number): string;
+    opacity(opacity: number): string;
     lighten(coefficient: number, opacity?: number): string;
     darken(coefficient: number, opacity?: number): string;
     contrastText(): string;
@@ -17,13 +18,13 @@ export interface IGeoViewColors {
     white: string;
     bgColor: GeoViewColorClass;
     textColor: GeoViewColorClass;
+    grey: GeoViewColorClass;
     primary: GeoViewColorClass;
     secondary: GeoViewColorClass;
     success: GeoViewColorClass;
     error: GeoViewColorClass;
     info: GeoViewColorClass;
     warning: GeoViewColorClass;
-    grey: GeoViewColorClass;
 }
 export interface IGeoViewFontSizes {
     xxl: string;

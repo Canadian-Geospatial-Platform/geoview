@@ -2,13 +2,28 @@ import { Root } from 'react-dom/client';
 import { Extent } from 'ol/extent';
 import { FitOptions } from 'ol/View';
 import { GeoviewStoreType } from '@/core/stores/geoview-store';
-import { AbstractEventProcessor } from '../abstract-event-processor';
-import { Coordinate, TypeBasemapOptions, TypeBasemapProps, TypeClickMarker } from '@/app';
+import { Coordinate, TypeBasemapOptions, TypeBasemapProps, TypeClickMarker, TypeMapFeaturesConfig } from '@/app';
 import { TypeInteraction, TypeMapState, TypeValidMapProjectionCodes } from '@/geo/map/map-schema-types';
 import { TypeLegendLayer } from '@/core/components/layers/types';
+import { AbstractEventProcessor } from '../abstract-event-processor';
 export declare class MapEventProcessor extends AbstractEventProcessor {
-    onInitialize(store: GeoviewStoreType): void;
+    /**
+     * Override the initialization process to wire subscriptions and return them so they can be destroyed later.
+     */
+    protected onInitialize(store: GeoviewStoreType): Array<() => void> | void;
     static setMapLoaded(mapId: string): void;
+    /**
+     * Shortcut to get the Map state for a given map id
+     * @param {string} mapId The mapId
+     * @returns {ILayerState} The Map state
+     */
+    protected static getMapStateProtected(mapId: string): import("@/app").IMapState;
+    /**
+     * Shortcut to get the Map config for a given map id
+     * @param {string} mapId the map id to retreive the config for
+     * @returns {TypeMapFeaturesConfig | undefined} the map config or undefined if there is no config for this map id
+     */
+    static getGeoViewMapConfig(mapId: string): TypeMapFeaturesConfig | undefined;
     static getBasemapOptions(mapId: string): TypeBasemapOptions;
     static clickMarkerIconHide(mapId: string): void;
     static clickMarkerIconShow(mapId: string, marker: TypeClickMarker): void;
@@ -22,7 +37,7 @@ export declare class MapEventProcessor extends AbstractEventProcessor {
     static createEmptyBasemap(mapId: string): import("ol/layer/Tile").default<import("ol/source/XYZ").default>;
     static createOverviewMapBasemap(mapId: string): TypeBasemapProps | undefined;
     static resetBasemap(mapId: string): void;
-    static getLayerPathsFromLegendsArray(legendsArray: TypeLegendLayer[]): string[];
+    static evaluateLayerPathsFromLegendsArray(legendsArray: TypeLegendLayer[]): string[];
     static setMapKeyboardPanInteractions(mapId: string, panDelta: number): void;
     /**
      * Set the React root overview map element so it can be destroy if the map element is destroyed

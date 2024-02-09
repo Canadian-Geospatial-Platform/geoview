@@ -5,14 +5,15 @@ export declare const getSxClasses: (theme: Theme) => {
         paddingBottom: string;
     };
     detailsInstructionsTitle: {
-        font: string;
-        fontSize: string;
+        fontSize: any;
+        fontWeight: string;
     };
     detailsInstructionsBody: {
         fontSize: string;
     };
     panelHeaders: {
-        font: string;
+        fontSize: any;
+        fontWeight: string;
     };
     rightPanelContainer: {
         border: string;
@@ -36,7 +37,7 @@ export declare const getSxClasses: (theme: Theme) => {
         borderRadius: number;
         border: string;
         borderColor: string;
-        boxShadow: string;
+        boxShadow: number;
         background: string;
         objectFit: string;
         width: string;

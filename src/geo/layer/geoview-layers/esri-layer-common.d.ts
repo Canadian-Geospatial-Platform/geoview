@@ -77,9 +77,9 @@ export declare function commonProcessInitialSettings(this: EsriDynamic | EsriFea
  * @param {EsriDynamic | EsriFeature} this The ESRI layer instance pointer.
  * @param {TypeLayerEntryConfig} layerConfig The layer entry configuration to process.
  *
- * @returns {Promise<void>} A promise that the layer configuration has its metadata processed.
+ * @returns {Promise<TypeLayerEntryConfig>} A promise that the layer configuration has its metadata processed.
  */
-export declare function commonProcessLayerMetadata(this: EsriDynamic | EsriFeature | EsriImage, layerConfig: TypeLayerEntryConfig): Promise<void>;
+export declare function commonProcessLayerMetadata(this: EsriDynamic | EsriFeature | EsriImage, layerConfig: TypeLayerEntryConfig): Promise<TypeLayerEntryConfig>;
 /**
  * Transforms the query results of an Esri service response - when not querying on the Layers themselves (giving a 'reduced' FeatureInfoEntry).
  * The transformation reads the Esri formatted information and return a list of `TypeFeatureInfoEntryPartial` records.

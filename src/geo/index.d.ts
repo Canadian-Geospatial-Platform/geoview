@@ -13,6 +13,7 @@ export * from './layer/geoview-layers/raster/vector-tiles';
 export * from './layer/geoview-layers/raster/wms';
 export * from './layer/geoview-layers/raster/xyz-tiles';
 export * from './layer/geoview-layers/vector/abstract-geoview-vector';
+export * from './layer/geoview-layers/vector/csv';
 export * from './layer/geoview-layers/vector/esri-feature';
 export * from './layer/geoview-layers/vector/geojson';
 export * from './layer/geoview-layers/vector/geopackage';

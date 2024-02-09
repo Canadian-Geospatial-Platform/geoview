@@ -6,13 +6,15 @@ export declare const getSxClasses: (theme: Theme) => {
         width: string;
         paddingRight: string;
         '& .MuiListItemText-primary': {
-            font: string;
+            fontSize: any;
+            fontWeight: string;
         };
         '& .MuiListItem-root': {
             height: string;
             '& .MuiListItemButton-root': {
                 padding: string;
                 height: string;
+                backgroundColor: string;
             };
         };
         '& .MuiListItemButton-root': {
@@ -42,8 +44,8 @@ export declare const getSxClasses: (theme: Theme) => {
         display: string;
         flexDirection: string;
         '& .layerTitle': {
-            fontSize: string;
-            font: string;
+            fontSize: any;
+            fontWeight: string;
             lineHeight: number;
             overflow: string;
             textOverflow: string;
@@ -69,6 +71,9 @@ export declare const getSxClasses: (theme: Theme) => {
     };
     borderWithIndex: string;
     borderNone: string;
+    backgroundProcessing: string;
+    backgroundError: string;
+    default: string;
     headline: {
         fontSize: string;
         fontWeight: string;

@@ -193,6 +193,14 @@ export declare class ConfigValidation {
      */
     private processLayerEntryConfig;
     /** ***************************************************************************************************************************
+     * Process recursively the layer entries to set the parents of each entries.
+     * @param {TypeGeoviewLayerConfig} geoviewLayerConfig The GeoView layer configuration.
+     * @param {TypeListOfLayerEntryConfig} listOfLayerEntryConfig The list of layer entry configurations to process.
+     * @param {TypeLayerGroupEntryConfig} parentLayerConfig The parent layer configuration of all the
+     * layer configurations found in the list of layer entries.
+     */
+    private recursivelySetChildParent;
+    /** ***************************************************************************************************************************
      * Synchronize the English and French strings.
      * @param {TypeLocalizedString} localizedString The localized string to synchronize the en and fr string.
      * @param {TypeDisplayLanguage} sourceKey The source's key.

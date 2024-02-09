@@ -7,7 +7,8 @@ import { TypeIconButtonProps } from '../icon-button/icon-button-types';
 type TypePanelAppProps = {
     panel: PanelApi;
     button: TypeIconButtonProps;
-    handlePanelOpened?: () => void;
+    onPanelOpened?: () => void;
+    onPanelClosed?: () => void;
 };
 /**
  * Create a panel with a header title, icon and content
@@ -18,7 +19,8 @@ type TypePanelAppProps = {
 export declare function Panel(props: TypePanelAppProps): JSX.Element;
 export declare namespace Panel {
     var defaultProps: {
-        handlePanelOpened: null;
+        onPanelOpened: null;
+        onPanelClosed: null;
     };
 }
 export {};

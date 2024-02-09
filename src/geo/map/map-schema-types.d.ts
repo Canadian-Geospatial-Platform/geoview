@@ -61,7 +61,7 @@ export type TypeLayerInitialSettings = {
 /** ******************************************************************************************************************************
  * Type that defines the vector layer source formats.
  */
-export type TypeVectorSourceFormats = 'GeoJSON' | 'EsriJSON' | 'KML' | 'WFS' | 'featureAPI' | 'GeoPackage';
+export type TypeVectorSourceFormats = 'GeoJSON' | 'EsriJSON' | 'KML' | 'WFS' | 'featureAPI' | 'GeoPackage' | 'CSV';
 /** ******************************************************************************************************************************
  * Type used to configure a custom parser.
  */
@@ -116,6 +116,8 @@ export type TypeBaseSourceVectorInitialConfig = {
 export interface TypeVectorSourceInitialConfig extends TypeBaseSourceVectorInitialConfig {
     /** The feature format used by the XHR feature loader when url is set. */
     format?: TypeVectorSourceFormats;
+    /** The character used to separate columns of csv file */
+    separator?: string;
 }
 /** ******************************************************************************************************************************
  * Kind of symbol vector settings.
@@ -498,45 +500,79 @@ export declare const layerEntryIsGeocore: (verifyIfLayer: TypeLayerEntryConfig) 
 /** ******************************************************************************************************************************
  * Valid values for the layerStatus property.
  */
-export type TypeLayerStatus = 'newInstance' | 'loading' | 'processed' | 'loaded' | 'error';
+export type TypeLayerStatus = 'registered' | 'newInstance' | 'processing' | 'processed' | 'loading' | 'loaded' | 'error';
 /** ******************************************************************************************************************************
- * Base type used to define a GeoView layer to display on the map.
+ * Valid values for the loadEndListenerType.
  */
-export declare class BaseLayerProperties {
-    /** The layer path to this instance. */
-    layerPath: string;
-    /** The ending element of the layer configuration path. */
-    layerPathEnding?: string;
-    /** The id of the layer to display on the map. */
-    layerId: string;
+export type TypeLoadEndListenerType = 'features' | 'tile' | 'image';
+/** ******************************************************************************************************************************
+ * Type used to initialize the olLayer property and to setup the listeners.
+ */
+export type TypeLayerAndListenerType = {
+    olLayer: BaseLayer | LayerGroup | null;
+    loadEndListenerType?: TypeLoadEndListenerType;
+};
+/** ******************************************************************************************************************************
+ * Base type used to define a GeoView layer to display on the map. Unless specified,its properties are not part of the schema.
+ */
+export declare class ConfigBaseClass {
+    /** The identifier of the layer to display on the map. This element is part of the schema. */
+    private _layerId;
+    /** The ending extension (element) of the layer identifier. This element is part of the schema. */
+    layerIdExtension?: string;
+    /** Tag used to link the entry to a specific schema. This element is part of the schema. */
+    schemaTag?: TypeGeoviewLayerType;
+    /** Layer entry data type. This element is part of the schema. */
+    entryType?: TypeLayerEntryType;
     /** The geoview layer instance that contains this layer configuration. */
     geoviewLayerInstance?: AbstractGeoViewLayer;
-    /** This attribute is not part of the schema. It is used to identified unprocessed layers and shows the final layer state */
+    /** It is used to identified unprocessed layers and shows the final layer state */
     layerStatus?: TypeLayerStatus;
-    /** This attribute is not part of the schema. It is used to identified the process phase of the layer */
+    /** It is used to identified the process phase of the layer */
     layerPhase?: string;
-    /** This attribute is not part of the schema. It is used to link the layer entry config to the GeoView root layer config. */
+    /** It is used to link the layer entry config to the GeoView layer config. */
     geoviewLayerConfig: TypeGeoviewLayerConfig;
-    /** This attribute is not part of the schema. It is used to link the layer entry config to the parent's layer config. */
-    parentLayerConfig?: TypeGeoviewLayerConfig | TypeLayerGroupEntryConfig;
-    /** This attribute is not part of the schema. It is used to link the displayed layer to its layer entry config. */
-    olLayer?: BaseLayer | LayerGroup | null;
-    /** This attribute is not part of the schema. It is used internally to distinguish layer groups derived from the
+    /** It is used internally to distinguish layer groups derived from the
      * metadata. */
     isMetadataLayerGroup?: boolean;
+    /** It is used to link the layer entry config to the parent's layer config. */
+    parentLayerConfig?: TypeGeoviewLayerConfig | TypeLayerGroupEntryConfig;
+    /** The layer path to this instance. */
+    protected _layerPath: string;
+    /** This property is used to link the displayed layer to its layer entry config. it is not part of the schema. */
+    protected _olLayer: BaseLayer | LayerGroup | null;
     /**
      * The class constructor.
-     * @param {BaseLayerProperties} layerConfig The layer configuration we want to instanciate.
+     * @param {ConfigBaseClass} layerConfig The layer configuration we want to instanciate.
      */
-    constructor(layerConfig: BaseLayerProperties);
+    constructor(layerConfig: ConfigBaseClass);
     /**
-     * Get the layer Path of the layer configuration parameter.
-     * @param {BaseLayerProperties} layerConfig The layer configuration for which we want to get the layer path.
+     * The layerPath getter method for the ConfigBaseClass class and its descendant classes.
+     */
+    get layerPath(): string;
+    /**
+     * Getter for the layer Path of the layer configuration parameter.
+     * @param {ConfigBaseClass} layerConfig The layer configuration for which we want to get the layer path.
      * @param {string} layerPath Internal parameter used to build the layer path (should not be used by the user).
      *
      * @returns {string} Returns the layer path.
      */
-    getLayerPath(layerConfig: BaseLayerProperties, layerPath?: string): string;
+    static evaluateLayerPath(layerConfig: ConfigBaseClass, layerPath?: string): string;
+    /**
+     * The layerId getter method for the ConfigBaseClass class and its descendant classes.
+     */
+    get layerId(): string;
+    /**
+     * The layerId setter method for the ConfigBaseClass class and its descendant classes.
+     * @param {string} newLayerId The new layerId value.
+     */
+    set layerId(newLayerId: string);
+    /**
+     * Register the layer identifier. Duplicate identifier are not allowed.
+     *
+     * @returns {boolean} Returns false if the layer configuration can't be registered.
+     */
+    registerLayerConfig(): boolean;
     /**
      * This method returns the GeoView instance associated to a specific layer path. The first element of the layerPath
      * is the geoviewLayerId.
@@ -549,15 +585,9 @@ export declare class BaseLayerProperties {
 /** ******************************************************************************************************************************
  * Base type used to define a GeoView layer to display on the map.
  */
-export declare class TypeBaseLayerEntryConfig extends BaseLayerProperties {
-    /** Tag used to link the entry to a specific schema. */
-    schemaTag?: TypeGeoviewLayerType;
-    /** Layer entry data type. */
-    entryType?: TypeLayerEntryType;
+export declare abstract class TypeBaseLayerEntryConfig extends ConfigBaseClass {
     /** The ending element of the layer configuration path. */
-    layerPathEnding?: string | undefined;
-    /** The id of the layer to display on the map. */
-    layerId: string;
+    layerIdExtension?: string | undefined;
     /** The display name of the layer (English/French). */
     layerName?: TypeLocalizedString;
     /**
@@ -574,6 +604,29 @@ export declare class TypeBaseLayerEntryConfig extends BaseLayerProperties {
      * @param {TypeBaseLayerEntryConfig} layerConfig The layer configuration we want to instanciate.
      */
     constructor(layerConfig: TypeBaseLayerEntryConfig);
+    /**
+     * The olLayerAndLoadEndListeners setter method for the ConfigBaseClass class and its descendant classes.
+     * @param {TypeLayerAndListenerType} layerAndListenerType The layer configuration we want to instanciate
+     *                                                        and its listener type.
+     */
+    set olLayerAndLoadEndListeners(layerAndListenerType: TypeLayerAndListenerType);
+    /**
+     * The olLayer getter method for the ConfigBaseClass class and its descendant classes.
+     * All layerConfig has an olLayer property, but the olLayer setter can only be use on group layers.
+     */
+    get olLayer(): BaseLayer | LayerGroup | null;
+    /**
+     * The olLayer setter method for the ConfigBaseClass class and its descendant classes.
+     * All layerConfig has an olLayer property, but the olLayer setter can only be use on group layers.
+     * If you want to set the olLayer property for a descendant of TypeBaseLayerEntryConfig, you must
+     * use its olLayerAndLoadEndListeners because it enforce the creation of the load end listeners.
+     * @param {LayerGroup} olLayerValue The new olLayerd value.
+     */
+    set olLayer(olLayerValue: BaseLayer | LayerGroup | null);
+    /**
+     * Method to execute when the layer is loaded.
+     */
+    loadedFunction(): void;
 }
 /** ******************************************************************************************************************************
  * Type used to define a GeoView vector layer to display on the map.
@@ -592,6 +645,10 @@ export declare class TypeVectorLayerEntryConfig extends TypeBaseLayerEntryConfig
      * @param {TypeVectorLayerEntryConfig} layerConfig The layer configuration we want to instanciate.
      */
     constructor(layerConfig: TypeVectorLayerEntryConfig);
+    /**
+     * Method to execute when the layer is loaded.
+     */
+    loadedFunction(): void;
 }
 /** ******************************************************************************************************************************
  * Type that defines the domain of valid values for the ESRI format parameter.
@@ -717,6 +774,10 @@ export declare class TypeVectorHeatmapLayerEntryConfig extends TypeBaseLayerEntr
      * @param {TypeVectorHeatmapLayerEntryConfig} layerConfig The layer configuration we want to instanciate.
      */
     constructor(layerConfig: TypeVectorHeatmapLayerEntryConfig);
+    /**
+     * Method to execute when the layer is loaded.
+     */
+    loadedFunction(): void;
 }
 /** ******************************************************************************************************************************
  * Initial settings to apply to the GeoView vector tile layer source at creation time.
@@ -742,6 +803,10 @@ export declare class TypeVectorTileLayerEntryConfig extends TypeBaseLayerEntryCo
      * @param {TypeVectorTileLayerEntryConfig} layerConfig The layer configuration we want to instanciate.
      */
     constructor(layerConfig: TypeVectorTileLayerEntryConfig);
+    /**
+     * Method to execute when the layer is loaded.
+     */
+    loadedFunction(): void;
 }
 /** ******************************************************************************************************************************
  * Type used to define a GeoView image layer to display on the map.
@@ -762,6 +827,10 @@ export declare class TypeOgcWmsLayerEntryConfig extends TypeBaseLayerEntryConfig
      * @param {TypeOgcWmsLayerEntryConfig} layerConfig The layer configuration we want to instanciate.
      */
     constructor(layerConfig: TypeOgcWmsLayerEntryConfig);
+    /**
+     * Method to execute when the layer is loaded.
+     */
+    loadedFunction(): void;
 }
 /** ******************************************************************************************************************************
  * Type used to define a GeoView image layer to display on the map.
@@ -782,6 +851,10 @@ export declare class TypeEsriDynamicLayerEntryConfig extends TypeBaseLayerEntryC
      * @param {TypeEsriDynamicLayerEntryConfig} layerConfig The layer configuration we want to instanciate.
      */
     constructor(layerConfig: TypeEsriDynamicLayerEntryConfig);
+    /**
+     * Method to execute when the layer is loaded.
+     */
+    loadedFunction(): void;
 }
 /** ******************************************************************************************************************************
  * Type used to define a GeoView image layer to display on the map.
@@ -802,6 +875,10 @@ export declare class TypeEsriImageLayerEntryConfig extends TypeBaseLayerEntryCon
      * @param {TypeEsriImageLayerEntryConfig} layerConfig The layer configuration we want to instanciate.
      */
     constructor(layerConfig: TypeEsriImageLayerEntryConfig);
+    /**
+     * Method to execute when the layer is loaded.
+     */
+    loadedFunction(): void;
 }
 /** ******************************************************************************************************************************
  * Type used to define a GeoView image layer to display on the map.
@@ -820,6 +897,10 @@ export declare class TypeImageStaticLayerEntryConfig extends TypeBaseLayerEntryC
      * @param {TypeImageStaticLayerEntryConfig} layerConfig The layer configuration we want to instanciate.
      */
     constructor(layerConfig: TypeImageStaticLayerEntryConfig);
+    /**
+     * Method to execute when the layer is loaded.
+     */
+    loadedFunction(): void;
 }
 /** ******************************************************************************************************************************
  * Type used to define a GeoView image layer to display on the map.
@@ -834,26 +915,28 @@ export declare class TypeTileLayerEntryConfig extends TypeBaseLayerEntryConfig {
      * @param {TypeTileLayerEntryConfig} layerConfig The layer configuration we want to instanciate.
      */
     constructor(layerConfig: TypeTileLayerEntryConfig);
+    /**
+     * Method to execute when the layer is loaded.
+     */
+    loadedFunction(): void;
 }
 /** ******************************************************************************************************************************
  * Type used to define a GeoView layer where configration is extracted by a configuration snippet stored on a server. The server
  * configuration will handle bilangual informations.
  */
-export declare class TypeGeocoreLayerEntryConfig extends BaseLayerProperties {
-    /** This attribute from BaseLayerProperties is not used by groups. */
+export declare class TypeGeocoreLayerEntryConfig extends ConfigBaseClass {
+    /** This attribute from ConfigBaseClass is not used by groups. */
     layerStatus: never;
-    /** This attribute from BaseLayerProperties is not used by groups. */
+    /** This attribute from ConfigBaseClass is not used by groups. */
     layerPhase: never;
-    /** This attribute from BaseLayerProperties is not used by groups. */
+    /** This attribute from ConfigBaseClass is not used by groups. */
     isMetadataLayerGroup: never;
     /** Tag used to link the entry to a specific schema. */
     schemaTag: TypeGeoviewLayerType;
     /** Layer entry data type. */
     entryType: TypeLayerEntryType;
-    /** The layerId is not used by geocore layers. */
-    layerId: never;
-    /** The layerPathEnding is not used by geocore layers. */
-    layerPathEnding: never;
+    /** The layerIdExtension is not used by geocore layers. */
+    layerIdExtension: never;
     /** The display name of a geocore layer is in geocoreLayerName. */
     layerName: never;
     /** The display name of the layer (English/French). */
@@ -872,6 +955,19 @@ export declare class TypeGeocoreLayerEntryConfig extends BaseLayerProperties {
      * @param {TypeGeocoreLayerEntryConfig} layerConfig The layer configuration we want to instanciate.
      */
     constructor(layerConfig: TypeGeocoreLayerEntryConfig);
+    /**
+     * The olLayer getter method for the ConfigBaseClass class and its descendant classes.
+     * All layerConfig has an olLayer property, but the olLayer setter can only be use on group layers.
+     */
+    get olLayer(): BaseLayer | LayerGroup | null;
+    /**
+     * The olLayer setter method for the ConfigBaseClass class and its descendant classes.
+     * All layerConfig has an olLayer property, but the olLayer setter can only be use on group layers.
+     * If you want to set the olLayer property for a descendant of TypeBaseLayerEntryConfig, you must
+     * use its olLayerAndLoadEndListeners because it enforce the creation of the load end listeners.
+     * @param {LayerGroup} olLayerValue The new olLayerd value.
+     */
+    set olLayer(olLayerValue: BaseLayer | LayerGroup | null);
 }
 /** ******************************************************************************************************************************
  * Initial settings to apply to the GeoView vector layer source at creation time.
@@ -889,19 +985,17 @@ export type TypeSourceGeocoreConfig = {
 /** ******************************************************************************************************************************
  * Type used to define a layer group.
  */
-export declare class TypeLayerGroupEntryConfig extends BaseLayerProperties {
-    /** This attribute from BaseLayerProperties is not used by groups. */
+export declare class TypeLayerGroupEntryConfig extends ConfigBaseClass {
+    /** This attribute from ConfigBaseClass is not used by groups. */
     layerStatus: never;
-    /** This attribute from BaseLayerProperties is not used by groups. */
+    /** This attribute from ConfigBaseClass is not used by groups. */
     layerPhase: never;
     /** Tag used to link the entry to a specific schema is not used by groups. */
     schemaTag: never;
     /** Layer entry data type. */
     entryType: TypeLayerEntryType;
-    /** The id of the layer to display on the map. */
-    layerId: string;
     /** The ending element of the layer configuration path is not used on groups. */
-    layerPathEnding: never;
+    layerIdExtension: never;
     /** The display name of the layer (English/French). */
     layerName?: TypeLocalizedString;
     /**
@@ -918,11 +1012,24 @@ export declare class TypeLayerGroupEntryConfig extends BaseLayerProperties {
      * @param {TypeLayerGroupEntryConfig} layerConfig The layer configuration we want to instanciate.
      */
     constructor(layerConfig: TypeLayerGroupEntryConfig);
+    /**
+     * The olLayer getter method for the ConfigBaseClass class and its descendant classes.
+     * All layerConfig has an olLayer property, but the olLayer setter can only be use on group layers.
+     */
+    get olLayer(): BaseLayer | LayerGroup | null;
+    /**
+     * The olLayer setter method for the ConfigBaseClass class and its descendant classes.
+     * All layerConfig has an olLayer property, but the olLayer setter can only be use on group layers.
+     * If you want to set the olLayer property for a descendant of TypeBaseLayerEntryConfig, you must
+     * use its olLayerAndLoadEndListeners because it enforce the creation of the load end listeners.
+     * @param {LayerGroup} olLayerValue The new olLayerd value.
+     */
+    set olLayer(olLayerValue: BaseLayer | LayerGroup | null);
 }
 /** ******************************************************************************************************************************
  * Layer config type.
  */
-export type TypeLayerEntryConfig = TypeLayerGroupEntryConfig | TypeBaseLayerEntryConfig | TypeVectorHeatmapLayerEntryConfig | TypeVectorTileLayerEntryConfig | TypeVectorLayerEntryConfig | TypeOgcWmsLayerEntryConfig | TypeEsriDynamicLayerEntryConfig | TypeEsriImageLayerEntryConfig | TypeImageStaticLayerEntryConfig | TypeTileLayerEntryConfig | TypeGeocoreLayerEntryConfig;
+export type TypeLayerEntryConfig = TypeBaseLayerEntryConfig | TypeVectorHeatmapLayerEntryConfig | TypeVectorTileLayerEntryConfig | TypeVectorLayerEntryConfig | TypeOgcWmsLayerEntryConfig | TypeEsriDynamicLayerEntryConfig | TypeEsriImageLayerEntryConfig | TypeImageStaticLayerEntryConfig | TypeTileLayerEntryConfig | TypeLayerGroupEntryConfig | TypeGeocoreLayerEntryConfig;
 /** ******************************************************************************************************************************
  * List of layers. Corresponds to the layerList defined in the schema.
  */
@@ -1013,9 +1120,7 @@ export type TypeListOfGeoviewLayerConfig = TypeGeoviewLayerConfig[];
 export type TypeGeoviewLayerConfig = {
     /** This attribute is not part of the schema. It is used to link the displayed layer to its layer entry config. */
     olLayer?: Promise<BaseLayer>;
-    /**
-     * The GeoView layer identifier.
-     */
+    /** The GeoView layer identifier. */
     geoviewLayerId: string;
     /**
      * The display name of the layer (English/French). If it is not present the viewer will make an attempt to scrape this

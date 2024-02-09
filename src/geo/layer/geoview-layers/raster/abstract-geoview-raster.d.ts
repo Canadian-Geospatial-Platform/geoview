@@ -21,12 +21,4 @@ export type TypeBaseRasterLayer = BaseLayer | TypeRasterLayerGroup | TypeRasterL
  * features are placed.
  */
 export declare abstract class AbstractGeoViewRaster extends AbstractGeoViewLayer {
-    /** ***************************************************************************************************************************
-     * This method adds listeners for openlayers loadend events, indicating that the layer is visible on the map
-     *
-     * @param {string} layerPath The layer path to the layer's configuration to add the listener to.
-     * @param {'tile' | 'image'} layerType The type of raster layer)
-     */
-    addLoadendListener(layerPath: string, layerType: 'tile' | 'image'): void;
-    addLoadendListener_TEMPORARY(layerPath: string, layerType: 'tile' | 'image'): void;
 }

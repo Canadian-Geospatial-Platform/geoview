@@ -5,7 +5,8 @@ export declare const getSxClasses: (theme: Theme) => {
         paddingBottom: string;
     };
     panelHeaders: {
-        font: string;
+        fontSize: any;
+        fontWeight: string;
         marginBottom: string;
     };
     layerListPaper: {
@@ -19,21 +20,24 @@ export declare const getSxClasses: (theme: Theme) => {
     };
     layerNamePrimary: {
         '& .MuiListItemText-primary': {
-            font: string;
+            fontSize: any;
+            fontWeight: string;
         };
         marginLeft: string;
     };
     list: {
         [x: string]: string | {
             paddingRight: string;
-            font?: undefined;
+            fontSize?: undefined;
+            fontWeight?: undefined;
             height?: undefined;
             '& .MuiListItemButton-root'?: undefined;
             minWidth?: undefined;
             '>span'?: undefined;
             '> p'?: undefined;
         } | {
-            font: string;
+            fontSize: any;
+            fontWeight: string;
             paddingRight?: undefined;
             height?: undefined;
             '& .MuiListItemButton-root'?: undefined;
@@ -47,14 +51,16 @@ export declare const getSxClasses: (theme: Theme) => {
                 height: string;
             };
             paddingRight?: undefined;
-            font?: undefined;
+            fontSize?: undefined;
+            fontWeight?: undefined;
             minWidth?: undefined;
             '>span'?: undefined;
             '> p'?: undefined;
         } | {
             minWidth: string;
             paddingRight?: undefined;
-            font?: undefined;
+            fontSize?: undefined;
+            fontWeight?: undefined;
             height?: undefined;
             '& .MuiListItemButton-root'?: undefined;
             '>span'?: undefined;
@@ -70,7 +76,8 @@ export declare const getSxClasses: (theme: Theme) => {
                 whiteSpace: string;
             };
             paddingRight?: undefined;
-            font?: undefined;
+            fontSize?: undefined;
+            fontWeight?: undefined;
             height?: undefined;
             '& .MuiListItemButton-root'?: undefined;
             minWidth?: undefined;
@@ -78,7 +85,8 @@ export declare const getSxClasses: (theme: Theme) => {
         color: string;
         width: string;
         '& .MuiListItemText-primary': {
-            font: string;
+            fontSize: any;
+            fontWeight: string;
         };
         '& .MuiListItem-root': {
             height: string;

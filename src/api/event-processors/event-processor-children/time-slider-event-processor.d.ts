@@ -1,8 +1,19 @@
 import { GeoviewStoreType } from '@/core/stores/geoview-store';
+import { ITimeSliderState, TypeTimeSliderValues } from '@/app';
 import { AbstractEventProcessor } from '../abstract-event-processor';
-import { TypeTimeSliderValues } from '@/app';
 export declare class TimeSliderEventProcessor extends AbstractEventProcessor {
-    onInitialize(store: GeoviewStoreType): void;
+    /**
+     * Override the initialization process to wire subscriptions and return them so they can be destroyed later.
+     */
+    protected onInitialize(store: GeoviewStoreType): Array<() => void> | void;
+    /**
+     * Shortcut to get the TimeSlider state for a given map id
+     * @param {string} mapId The mapId
+     * @returns {ITimeSliderState | undefined} The Time Slider state. Forcing the return to also be 'undefined', because
+     *                                         there will be no timeSliderState if the TimeSlider plugin isn't active.
+     *                                         This helps the developers making sure the existence is checked.
+     */
+    protected static getTimesliderState(mapId: string): ITimeSliderState | undefined;
     /**
      * Filter array of legend layers to get usable time slider layer paths
      *

@@ -15,7 +15,7 @@ export declare const getSxClasses: (theme: Theme) => {
         top: number;
         padding: number;
         borderRadius: number;
-        boxShadow: string;
+        boxShadow: number;
         transition: string;
         '&:hover': {
             transform: string;
@@ -28,7 +28,7 @@ export declare const getSxClasses: (theme: Theme) => {
         borderRadius: number;
         border: string;
         borderColor: string;
-        boxShadow: string;
+        boxShadow: number;
         backgroundColor: string;
     };
     maxIconImg: {
@@ -56,7 +56,7 @@ export declare const getSxClasses: (theme: Theme) => {
     iconPreview: {
         padding: number;
         borderRadius: number;
-        boxShadow: string;
+        boxShadow: number;
         '&:focus': {
             border: string;
         };

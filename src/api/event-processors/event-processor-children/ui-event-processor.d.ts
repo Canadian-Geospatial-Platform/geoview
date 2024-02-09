@@ -1,8 +1,13 @@
-import { GeoviewStoreType } from '@/core/stores/geoview-store';
-import { AbstractEventProcessor } from '../abstract-event-processor';
 import { TypeValidAppBarCoreProps, TypeMapCorePackages } from '@/geo';
+import { IUIState } from '@/app';
+import { AbstractEventProcessor } from '../abstract-event-processor';
 export declare class UIEventProcessor extends AbstractEventProcessor {
-    onInitialize(store: GeoviewStoreType): void;
+    /**
+     * Shortcut to get the UI state for a given map id
+     * @param {string} mapId The mapId
+     * @returns {IUIState} The UI state.
+     */
+    protected static getUIState(mapId: string): IUIState;
     static getActiveFooterBarTab(mapId: string): string;
     static getAppBarComponents(mapId: string): TypeValidAppBarCoreProps;
     static getCorePackageComponents(mapId: string): TypeMapCorePackages;

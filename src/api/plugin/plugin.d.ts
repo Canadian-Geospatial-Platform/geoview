@@ -1,5 +1,5 @@
-import { AbstractPlugin } from './abstract-plugin';
 import { TypeJsonObject, TypeJsonValue } from '@/core/types/global-types';
+import { AbstractPlugin } from './abstract-plugin';
 /**
  * Class to manage plugins
  *

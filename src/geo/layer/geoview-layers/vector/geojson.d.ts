@@ -87,9 +87,9 @@ export declare class GeoJSON extends AbstractGeoViewVector {
      *
      * @param {TypeVectorLayerEntryConfig} layerConfig The layer entry configuration to process.
      *
-     * @returns {Promise<void>} A promise that the vector layer configuration has its metadata processed.
+     * @returns {Promise<TypeLayerEntryConfig>} A promise that the vector layer configuration has its metadata processed.
      */
-    protected processLayerMetadata(layerConfig: TypeVectorLayerEntryConfig): Promise<void>;
+    protected processLayerMetadata(layerConfig: TypeVectorLayerEntryConfig): Promise<TypeLayerEntryConfig>;
     /** ***************************************************************************************************************************
      * Create a source configuration for the vector layer.
      *

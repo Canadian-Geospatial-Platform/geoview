@@ -13,7 +13,7 @@ export declare const getSxClasses: (theme: Theme) => {
         borderRadius: number;
         border: string;
         borderColor: string;
-        boxShadow: string;
+        boxShadow: number;
         background: string;
         objectFit: string;
         width: string;

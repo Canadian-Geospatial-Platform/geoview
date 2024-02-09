@@ -11,6 +11,13 @@ export type TypeTabs = {
     icon?: JSX.Element;
 };
 /**
+ * Type used for focus
+ */
+type FocusItemProps = {
+    activeElementId: string | false;
+    callbackElementId: string | false;
+};
+/**
  * Tabs ui properties
  */
 export interface TypeTabsProps {
@@ -21,9 +28,12 @@ export interface TypeTabsProps {
     tabProps?: TabProps;
     rightButtons?: unknown;
     isCollapsed?: boolean;
-    handleCollapse?: () => void | undefined;
+    activeTrap?: boolean;
     TabContentVisibilty?: string | undefined;
+    onToggleCollapse?: () => void;
     onSelectedTabChanged?: (tab: TypeTabs) => void;
+    onOpenKeyboard?: (uiFocus: FocusItemProps) => void;
+    onCloseKeyboard?: () => void;
 }
 /**
  * Create a tabs ui
@@ -32,3 +42,4 @@ export interface TypeTabsProps {
  * @returns {JSX.Element} returns the tabs ui
  */
 export declare function Tabs(props: TypeTabsProps): JSX.Element;
+export {};

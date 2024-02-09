@@ -2,8 +2,8 @@ import { Theme } from '@mui/material/styles';
 export declare const getSxClasses: (theme: Theme) => {
     categoryTitle: {
         textAlign: string;
-        font: string;
-        fontSize: string;
+        fontWeight: string;
+        fontSize: any;
     };
     layerDetails: {
         borderColor: string;
