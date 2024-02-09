@@ -1086,26 +1086,6 @@ export abstract class AbstractGeoViewLayer {
     return api.maps?.[this.mapId]?.layer?.registeredLayers?.[layerPath] as TypeLayerEntryConfig;
   }
 
-  /**
-   * Returns a Promise that will be resolved once the given layer config is in a loaded or error status.
-   * This function waits the timeout period before abandonning (or uses the default timeout when not provided).
-   *
-   * @param {string} layerConfig the layer config
-   * @param {string} timeout optionally indicate the timeout after which time to abandon the promise
-   * @param {string} checkFrequency optionally indicate the frequency at which to check for the condition on the layer config
-   * @throws an exception when the layer failed to become in loaded or error status before the timeout expired
-   */
-  async waitForLoadedOrErrorStatus(layerConfig: TypeBaseLayerEntryConfig, timeout?: number, checkFrequency?: number): Promise<void> {
-    // Wait for the loaded state
-    await whenThisThen(
-      () => {
-        return this.allLayerStatusAreIn(['loaded', 'error'], [layerConfig]);
-      },
-      timeout,
-      checkFrequency
-    );
-  }
-
   /** ***************************************************************************************************************************
    * Returns the layer bounds or undefined if not defined in the layer configuration or the metadata. If projectionCode is
    * defined, returns the bounds in the specified projection otherwise use the map projection. The bounds are different from the

@@ -64,8 +64,8 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
   }
 
   const handleRefreshLayer = () => {
-    // eslint-disable-next-line no-console
-    console.log('refresh layer');
+    // TODO: Refresh the layer symbology on the map based on the selected symbology in the UI?
+    logger.logDebug('Refresh is not implemented');
   };
 
   const handleHighlightLayer = () => {

@@ -35,6 +35,7 @@ import { layerConfigIsWFS, WFS } from '@/geo/layer/geoview-layers/vector/wfs';
 import { layerConfigIsOgcFeature, OgcFeature } from '@/geo/layer/geoview-layers/vector/ogc-feature';
 import { layerConfigIsXYZTiles, XYZTiles } from '@/geo/layer/geoview-layers/raster/xyz-tiles';
 import { layerConfigIsVectorTiles, VectorTiles } from '@/geo/layer/geoview-layers/raster/vector-tiles';
+import { logger } from '@/core/utils/logger';
 
 export type TypeRegisteredLayers = { [layerPath: string]: TypeLayerEntryConfig };
 
@@ -292,10 +293,12 @@ export class Layer {
     if (geoviewLayer.layerLoadError.length !== 0) {
       geoviewLayer.layerLoadError.forEach((loadError) => {
         const { layer, consoleMessage } = loadError;
+
+        // Log the details in the console
+        logger.logError(consoleMessage);
+
         const message = replaceParams([layer, this.mapId], getLocalizedMessage(this.mapId, 'validation.layer.loadfailed'));
         showError(this.mapId, message);
-        // eslint-disable-next-line no-console
-        console.log(consoleMessage);
       });
     }
 

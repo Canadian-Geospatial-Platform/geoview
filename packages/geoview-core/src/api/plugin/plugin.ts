@@ -1,18 +1,16 @@
 import React from 'react';
-
-import { useTheme } from '@mui/material/styles';
-
 import i18next from 'i18next';
 import * as translate from 'react-i18next';
-
+import { useTheme } from '@mui/material/styles';
 import Ajv from 'ajv';
 
 import { whenThisThen, showError } from '@/core/utils/utilities';
-
 import { api } from '@/app';
+import { TypeJsonObject, TypeJsonValue } from '@/core/types/global-types';
+import { logger } from '@/core/utils/logger';
+
 import { AbstractPlugin } from './abstract-plugin';
 import { TypePluginStructure } from './plugin-types';
-import { TypeJsonObject, TypeJsonValue } from '@/core/types/global-types';
 
 /**
  * Class to manage plugins
@@ -160,8 +158,10 @@ export class Plugin {
           if (!valid && validate.errors && validate.errors.length) {
             for (let j = 0; j < validate.errors.length; j += 1) {
               const error = validate.errors[j];
-
               const errorMessage = `Plugin ${pluginId}: ${error.instancePath} ${error.message} - ${JSON.stringify(error.params)}`;
+
+              // Log
+              logger.logError(errorMessage);
               showError(mapId, errorMessage);
             }
           }
