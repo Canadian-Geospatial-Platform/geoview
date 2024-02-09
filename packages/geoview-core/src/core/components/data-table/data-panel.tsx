@@ -133,9 +133,9 @@ export function Datapanel() {
                 <FilterAltIcon sx={{ color: theme.palette.geoViewColor.grey.main }} />
               ),
             }))}
-          isEnlargeDataTable={isEnlargeDataTable}
+          isEnlarged={isEnlargeDataTable}
           selectedLayerPath={selectedLayerPath}
-          handleListItemClick={handleLayerChange}
+          onListItemClick={handleLayerChange}
         />
       );
     },
@@ -165,13 +165,14 @@ export function Datapanel() {
 
   // TODO: Use the correct layer title in the title below
   // TO.DOCONT: Dropped out when reworking the layer index/layer path indexing and not adjusted as parallel development happening on this component
+  // TODO: Reuse the Layout common component to render the layers list on the left and the right panel (like Details, Geochart, Timeslider panels)
   return (
     <Box sx={sxClasses.dataPanel}>
       <ResponsiveGrid.Root sx={{ pt: 8, pb: 8 }} ref={panelTitleRef}>
-        <ResponsiveGrid.Left isLayersPanelVisible={isLayersPanelVisible} isEnlargeDataTable={isEnlargeDataTable}>
+        <ResponsiveGrid.Left isLayersPanelVisible={isLayersPanelVisible} isEnlarged={isEnlargeDataTable}>
           {!!orderedLayerData?.length && <LayerTitle>{t('general.layers')}</LayerTitle>}
         </ResponsiveGrid.Left>
-        <ResponsiveGrid.Right isLayersPanelVisible={isLayersPanelVisible} isEnlargeDataTable={isEnlargeDataTable}>
+        <ResponsiveGrid.Right isLayersPanelVisible={isLayersPanelVisible} isEnlarged={isEnlargeDataTable}>
           <Box
             sx={{
               display: 'flex',
@@ -185,17 +186,17 @@ export function Datapanel() {
             )}
 
             <Box>
-              <EnlargeButton isEnlargeDataTable={isEnlargeDataTable} setIsEnlargeDataTable={setIsEnlargeDataTable} />
+              <EnlargeButton isEnlarged={isEnlargeDataTable} onSetIsEnlarged={setIsEnlargeDataTable} />
               {!isLoading && <CloseButton setIsLayersPanelVisible={setIsLayersPanelVisible} isLayersPanelVisible={isLayersPanelVisible} />}
             </Box>
           </Box>
         </ResponsiveGrid.Right>
       </ResponsiveGrid.Root>
       <ResponsiveGrid.Root>
-        <ResponsiveGrid.Left isLayersPanelVisible={isLayersPanelVisible} isEnlargeDataTable={isEnlargeDataTable} ref={leftPanelRef}>
+        <ResponsiveGrid.Left isLayersPanelVisible={isLayersPanelVisible} isEnlarged={isEnlargeDataTable} ref={leftPanelRef}>
           {renderList()}
         </ResponsiveGrid.Left>
-        <ResponsiveGrid.Right isEnlargeDataTable={isEnlargeDataTable} isLayersPanelVisible={isLayersPanelVisible} ref={rightPanelRef}>
+        <ResponsiveGrid.Right isEnlarged={isEnlargeDataTable} isLayersPanelVisible={isLayersPanelVisible} ref={rightPanelRef}>
           <CircularProgress
             isLoaded={!isLoading}
             sx={{

@@ -99,7 +99,7 @@ export function LayersPanel() {
     <Box sx={sxClasses.layersPanelContainer}>
       <LayersToolbar />
       <ResponsiveGrid.Root sx={{ pt: 8, pb: 8 }} ref={panelTitleRef}>
-        <ResponsiveGrid.Right isEnlargeDataTable={false} isLayersPanelVisible={isLayersListPanelVisible}>
+        <ResponsiveGrid.Right isEnlarged={false} isLayersPanelVisible={isLayersListPanelVisible}>
           <Box
             sx={{
               display: 'flex',
@@ -112,11 +112,11 @@ export function LayersPanel() {
         </ResponsiveGrid.Right>
       </ResponsiveGrid.Root>
       <ResponsiveGrid.Root>
-        <ResponsiveGrid.Left isEnlargeDataTable={false} isLayersPanelVisible={isLayersListPanelVisible} ref={leftPanelRef}>
+        <ResponsiveGrid.Left isEnlarged={false} isLayersPanelVisible={isLayersListPanelVisible} ref={leftPanelRef}>
           {leftPanel()}
         </ResponsiveGrid.Left>
 
-        <ResponsiveGrid.Right isEnlargeDataTable={false} isLayersPanelVisible={isLayersListPanelVisible} ref={rightPanelRef}>
+        <ResponsiveGrid.Right isEnlarged={false} isLayersPanelVisible={isLayersListPanelVisible} ref={rightPanelRef}>
           {rightPanel()}
         </ResponsiveGrid.Right>
       </ResponsiveGrid.Root>

@@ -75,4 +75,16 @@ export const getSxClasses = (theme: Theme) => ({
   backgroundError: `${theme.palette.geoViewColor.error.main}`,
   default: `${theme.palette.geoViewColor.bgColor.light[100]}`,
   headline: { fontSize: '1.125rem', fontWeight: 'bold' },
+  layersInstructionsPaper: {
+    padding: '2rem',
+    cursor: 'pointer',
+  },
+  layersInstructionsTitle: {
+    fontSize: theme.palette.geoViewFontSize.lg,
+    fontWeight: '600',
+    lineHeight: '1.5em',
+  },
+  layersInstructionsBody: {
+    fontSize: '1rem',
+  },
 });
