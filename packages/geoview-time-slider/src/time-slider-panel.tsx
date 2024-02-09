@@ -1,17 +1,18 @@
-import { TypeWindow } from 'geoview-core';
+import { useTheme } from '@mui/material/styles';
+import { TypeWindow, getLocalizedMessage } from 'geoview-core';
 import { LayerListEntry, Layout } from 'geoview-core/src/core/components/common';
 import { useVisibleTimeSliderLayers, useTimeSliderLayers } from 'geoview-core/src/core/stores';
-import { getLocalizedMessage } from 'geoview-core/src/core/utils/utilities';
-import { Typography } from 'geoview-core/src/ui';
+import { Paper, Typography } from 'geoview-core/src/ui';
+import { logger } from 'geoview-core/src/core/utils/logger';
+
 import { TimeSlider } from './time-slider';
 import { ConfigProps } from './time-slider-types';
+import { getSxClasses } from './time-slider-style';
 
 interface TypeTimeSliderProps {
   configObj: ConfigProps;
   mapId: string;
 }
-
-const { cgpv } = window as TypeWindow;
 
 /**
  * Time slider tab
@@ -21,8 +22,12 @@ const { cgpv } = window as TypeWindow;
  */
 export function TimeSliderPanel(props: TypeTimeSliderProps): JSX.Element {
   const { mapId, configObj } = props;
+  const { cgpv } = window as TypeWindow;
   const { react } = cgpv;
   const { useState, useEffect, useCallback } = react;
+
+  const theme = useTheme();
+  const sxClasses = getSxClasses(theme);
 
   // internal state
   const [selectedLayerPath, setSelectedLayerPath] = useState<string>();
@@ -35,18 +40,20 @@ export function TimeSliderPanel(props: TypeTimeSliderProps): JSX.Element {
    * handle Layer list when clicked on each layer.
    * @param {LayerListEntry} layer layer clicked by the user.
    */
-  const handleLayerList = (layer: LayerListEntry) => {
-    setSelectedLayerPath(layer.layerPath);
-  };
+  const handleLayerList = useCallback((layer: LayerListEntry) => {
+    // Log
+    logger.logTraceUseCallback('TIME-SLIDER-PANEL - handleLayerList');
 
-  useEffect(() => {
-    if (!selectedLayerPath) setSelectedLayerPath(visibleTimeSliderLayers[0]);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [visibleTimeSliderLayers]);
+    // Set the layer path
+    setSelectedLayerPath(layer.layerPath);
+  }, []);
 
   const renderLayerList = useCallback(() => {
+    // Log
+    logger.logTraceUseCallback('TIME-SLIDER-PANEL - renderLayerList');
+
     const array = visibleTimeSliderLayers.map((layerPath: string) => {
-      // TODO: Update the layerStatus and queryStatus below if necessary
+      // TODO: Check - Update the layerStatus and queryStatus below if necessary
       return {
         layerName: timeSliderLayers[layerPath].name,
         layerPath,
@@ -59,11 +66,30 @@ export function TimeSliderPanel(props: TypeTimeSliderProps): JSX.Element {
     return array;
   }, [timeSliderLayers, visibleTimeSliderLayers]);
 
-  return selectedLayerPath ? (
-    <Layout selectedLayerPath={selectedLayerPath} handleLayerList={handleLayerList} layerList={renderLayerList()}>
-      <TimeSlider mapId={mapId} config={configObj} layerPath={selectedLayerPath} key={selectedLayerPath} />
+  useEffect(() => {
+    // Log
+    logger.logTraceUseEffect('TIME-SLIDER-PANEL - visibleTimeSliderLayers', visibleTimeSliderLayers);
+
+    if (visibleTimeSliderLayers?.length) {
+      setSelectedLayerPath(visibleTimeSliderLayers[0]);
+    } else {
+      setSelectedLayerPath(undefined);
+    }
+  }, [visibleTimeSliderLayers]);
+
+  return (
+    <Layout selectedLayerPath={selectedLayerPath} onLayerListClicked={handleLayerList} layerList={renderLayerList()}>
+      {selectedLayerPath && <TimeSlider mapId={mapId} config={configObj} layerPath={selectedLayerPath} key={selectedLayerPath} />}
+      {!selectedLayerPath && (
+        <Paper sx={{ padding: '2rem' }}>
+          <Typography variant="h3" gutterBottom sx={sxClasses.timeSliderInstructionsTitle}>
+            {getLocalizedMessage(mapId, 'timeSlider.detailsInstructions')}
+          </Typography>
+          <Typography component="p" sx={sxClasses.timeSliderInstructionsBody}>
+            {getLocalizedMessage(mapId, 'timeSlider.detailsInstructions')}
+          </Typography>
+        </Paper>
+      )}
     </Layout>
-  ) : (
-    <Typography>{getLocalizedMessage(mapId, 'timeSlider.panel.noLayers')}</Typography>
   );
 }

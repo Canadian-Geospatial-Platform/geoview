@@ -1,20 +1,20 @@
 /* eslint-disable react/require-default-props */
-import React, { useState, useCallback, ReactNode, memo, useEffect } from 'react';
+import React, { useState, ReactNode, memo, useEffect } from 'react';
 import Markdown from 'markdown-to-jsx';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '@mui/material/styles';
-import { getSxClasses } from './guide-style';
 import { Box, List, ListItem } from '@/ui';
 import { useGeoViewMapId } from '@/app';
-import { ResponsiveGrid, CloseButton, EnlargeButton, LayerList, LayerTitle, useFooterPanelHeight, LayerListEntry } from '../common';
-import { useFetchAndParseMarkdown } from './custom-hook';
-
 import { useGeoViewConfig } from '@/core/stores/geoview-store';
 import { TypeValidFooterBarTabsCoreProps } from '@/geo/map/map-schema-types';
 
+import { getSxClasses } from './guide-style';
+import { LayerListEntry, Layout } from '../common';
+import { useFetchAndParseMarkdown } from './custom-hook';
+
 type renderedMarkdownFileType = Record<string, string>;
 
-interface guideListItems extends LayerListEntry {
+interface GuideListItem extends LayerListEntry {
   content: string | ReactNode;
 }
 
@@ -50,19 +50,16 @@ export function GuidePanel(): JSX.Element {
 
   const [selectedLayerPath, setSelectedLayerPath] = useState<string>('');
   const [guideItemIndex, setGuideItemIndex] = useState<number>(0);
-  const [isLayersPanelVisible, setIsLayersPanelVisible] = useState(false);
-  const [isEnlargeDataTable, setIsEnlargeDataTable] = useState(false);
   const [leftPanelHelpItems, setLeftPanelHelpItems] = useState<renderedMarkdownFileType | null>(null);
-
-  // Custom hook for calculating the height of footer panel
-  const { leftPanelRef, rightPanelRef, panelTitleRef } = useFooterPanelHeight({ footerPanelTab: 'guide' });
 
   // get store config for footer bar
   const footerBarConfig = useGeoViewConfig()?.footerBar;
   const allTabs: TypeValidFooterBarTabsCoreProps | undefined = footerBarConfig?.tabs.core;
 
   // fetch the content of general guide items with custom hook
-  useFetchAndParseMarkdown(mapId, '/geoview/locales/markdown/general-content.md', t('guide.errorMessage'), setLeftPanelHelpItems);
+  let mdFilePath = '/geoview/locales/markdown/general-content.md';
+  if (process.env.NODE_ENV === 'development') mdFilePath = '/locales/markdown/general-content.md';
+  useFetchAndParseMarkdown(mapId, mdFilePath, t('guide.errorMessage'), setLeftPanelHelpItems);
 
   const leftPanelItemKeys = leftPanelHelpItems && Object.keys(leftPanelHelpItems);
   const contentOfFooterInRightPanel = leftPanelHelpItems && leftPanelHelpItems['!Footer'];
@@ -71,7 +68,7 @@ export function GuidePanel(): JSX.Element {
 
   // example:
   /**
-    { 
+    {
        "legend": "Here is the markdown content of legend"
        "layers": "Here is the markdown content of layers"
     }
@@ -88,9 +85,9 @@ export function GuidePanel(): JSX.Element {
     }
   }
 
-  // [legend, layers, ...]
+  // TODO: Check - These 2 constants are probably not what we want, as they'll change on every render. Consider putting them to references or states.
   const footerContenKeys = Object.keys(footerContentKeyValues);
-  const helpItems: guideListItems[] = [];
+  const helpItems: GuideListItem[] = [];
 
   leftPanelItemKeys?.forEach((item) => {
     // TODO review to see if we can change this logic to make it more reusable
@@ -99,7 +96,7 @@ export function GuidePanel(): JSX.Element {
         // remove the exclamation mark "!" from layer name that is in MD file
         layerName: item.substring(1),
         layerPath: item,
-        layerStatus: 'loaded',
+        layerStatus: 'processed',
         queryStatus: 'processed',
         content: <Markdown options={{ wrapper: 'article' }}>{(leftPanelHelpItems && leftPanelHelpItems[item]) as string}</Markdown>,
       });
@@ -108,31 +105,18 @@ export function GuidePanel(): JSX.Element {
       helpItems.push({
         layerName: 'Footer',
         layerPath: '!footer',
-        layerStatus: 'loaded',
+        layerStatus: 'processed',
         queryStatus: 'processed',
         content: <RenderFooterContentInRightPanel {...{ footerContenKeys, footerContentKeyValues, allTabs }} />,
       });
     }
   });
 
-  const guideItemClick = (layer: LayerListEntry) => {
+  const handleGuideItemClick = (layer: LayerListEntry) => {
     const index: number = helpItems.findIndex((item) => item.layerName === layer.layerName);
     setGuideItemIndex(index);
     setSelectedLayerPath(layer.layerPath);
-    setIsLayersPanelVisible(true);
   };
-
-  const renderLayerList = useCallback(() => {
-    return (
-      <LayerList
-        layerList={helpItems}
-        isEnlargeDataTable={isEnlargeDataTable}
-        selectedLayerPath={selectedLayerPath}
-        handleListItemClick={(layer) => guideItemClick(layer)}
-      />
-    );
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [guideItemIndex, helpItems]);
 
   useEffect(() => {
     if (leftPanelHelpItems) {
@@ -143,45 +127,10 @@ export function GuidePanel(): JSX.Element {
   }, [leftPanelHelpItems]);
 
   return (
-    <Box sx={sxClasses.guideContainer}>
-      {helpItems.length ? (
-        <>
-          <ResponsiveGrid.Root sx={{ pt: 8, pb: 8 }} ref={panelTitleRef}>
-            <ResponsiveGrid.Left isEnlargeDataTable={isEnlargeDataTable} isLayersPanelVisible={isLayersPanelVisible}>
-              <LayerTitle>{t('guide.title')}</LayerTitle>
-            </ResponsiveGrid.Left>
-            <ResponsiveGrid.Right isEnlargeDataTable={isEnlargeDataTable} isLayersPanelVisible={isLayersPanelVisible}>
-              <Box
-                sx={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  [theme.breakpoints.up('md')]: { justifyContent: 'right' },
-                  [theme.breakpoints.down('md')]: { justifyContent: 'space-between' },
-                }}
-              >
-                <LayerTitle hideTitle>{t('guide.title')}</LayerTitle>
-
-                <Box>
-                  <EnlargeButton isEnlargeDataTable={isEnlargeDataTable} setIsEnlargeDataTable={setIsEnlargeDataTable} />
-                  <CloseButton isLayersPanelVisible={isLayersPanelVisible} setIsLayersPanelVisible={setIsLayersPanelVisible} />
-                </Box>
-              </Box>
-            </ResponsiveGrid.Right>
-          </ResponsiveGrid.Root>
-          <ResponsiveGrid.Root>
-            <ResponsiveGrid.Left isEnlargeDataTable={isEnlargeDataTable} isLayersPanelVisible={isLayersPanelVisible} ref={leftPanelRef}>
-              {renderLayerList()}
-            </ResponsiveGrid.Left>
-            <ResponsiveGrid.Right isEnlargeDataTable={isEnlargeDataTable} isLayersPanelVisible={isLayersPanelVisible} ref={rightPanelRef}>
-              <Box sx={sxClasses.rightPanelContainer}>
-                <Box sx={{ ml: '30px', mb: '18px' }}>{helpItems[guideItemIndex]?.content}</Box>
-              </Box>
-            </ResponsiveGrid.Right>
-          </ResponsiveGrid.Root>
-        </>
-      ) : (
-        <Box sx={sxClasses.errorMessage}>{t('guide.errorMessage')}</Box>
-      )}
-    </Box>
+    <Layout selectedLayerPath={selectedLayerPath || ''} layerList={helpItems} onLayerListClicked={handleGuideItemClick}>
+      <Box sx={sxClasses.rightPanelContainer}>
+        <Box sx={{ ml: '30px', mb: '18px' }}>{helpItems[guideItemIndex]?.content}</Box>
+      </Box>
+    </Layout>
   );
 }
