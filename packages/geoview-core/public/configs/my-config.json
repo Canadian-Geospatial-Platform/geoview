@@ -32,8 +32,8 @@
           "fr": "GeoJSON Line"
         },
         "metadataAccessPath": {
-          "en": "./geojson/metadata.json",
-          "fr": "./geojson/metadata.json"
+          "en": "./datasets/geojson/metadata.json",
+          "fr": "./datasets/geojson/metadata.json"
         },
         "geoviewLayerType": "GeoJSON",
         "listOfLayerEntryConfig": [{ "layerId": "points.json" }, { "layerId": "lines.json" }, { "layerId": "polygons.json" }]

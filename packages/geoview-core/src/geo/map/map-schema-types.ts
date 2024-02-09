@@ -74,7 +74,7 @@ export type TypeLayerInitialSettings = {
 /** ******************************************************************************************************************************
  * Type that defines the vector layer source formats.
  */
-export type TypeVectorSourceFormats = 'GeoJSON' | 'EsriJSON' | 'KML' | 'WFS' | 'featureAPI' | 'GeoPackage';
+export type TypeVectorSourceFormats = 'GeoJSON' | 'EsriJSON' | 'KML' | 'WFS' | 'featureAPI' | 'GeoPackage' | 'CSV';
 
 /** ******************************************************************************************************************************
  * Type used to configure a custom parser.
@@ -133,6 +133,8 @@ export type TypeBaseSourceVectorInitialConfig = {
 export interface TypeVectorSourceInitialConfig extends TypeBaseSourceVectorInitialConfig {
   /** The feature format used by the XHR feature loader when url is set. */
   format?: TypeVectorSourceFormats;
+  /** The character used to separate columns of csv file */
+  separator?: string;
 }
 
 /** ******************************************************************************************************************************

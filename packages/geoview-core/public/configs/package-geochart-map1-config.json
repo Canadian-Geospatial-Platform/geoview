@@ -85,7 +85,7 @@
       {
         "geoviewLayerId": "geojsonLYR5",
         "geoviewLayerName": { "en": "GeoJSON Sample", "fr": "Échantillon GeoJSON" },
-        "metadataAccessPath": { "en": "./geojson/metadata.json", "fr": "./geojson/metadata.json" },
+        "metadataAccessPath": { "en": "./datasets/geojson/metadata.json", "fr": "./datasets/geojson/metadata.json" },
         "geoviewLayerType": "GeoJSON",
         "listOfLayerEntryConfig": [
           {
