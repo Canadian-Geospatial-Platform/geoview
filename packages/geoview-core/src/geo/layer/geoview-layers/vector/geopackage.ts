@@ -1,8 +1,7 @@
-/* eslint-disable no-var, vars-on-top, block-scoped-var, no-param-reassign */
+/* eslint-disable no-param-reassign */
 // eslint-disable-next-line max-classes-per-file
 import { Options as SourceOptions } from 'ol/source/Vector';
 import { WKB as FormatWKB } from 'ol/format';
-
 import { ReadOptions } from 'ol/format/Feature';
 import { Vector as VectorSource } from 'ol/source';
 import BaseLayer from 'ol/layer/Base';
@@ -32,10 +31,7 @@ import {
   TypeFillStyle,
   TypeLocalizedString,
 } from '@/geo/map/map-schema-types';
-
 import { createLocalizedString, getLocalizedValue } from '@/core/utils/utilities';
-
-import { api } from '@/app';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 
 export interface TypeSourceGeoPackageInitialConfig extends TypeVectorSourceInitialConfig {
@@ -53,6 +49,8 @@ export class TypeGeoPackageLayerEntryConfig extends TypeVectorLayerEntryConfig {
     super(layerConfig);
     Object.assign(this, layerConfig);
 
+    // Default value for this.entryType is vector
+    if (this.entryType === undefined) this.entryType = 'vector';
     // Attribute 'style' must exist in layerConfig even if it is undefined
     if (!('style' in this)) this.style = undefined;
     // if this.source.dataAccessPath is undefined, we assign the metadataAccessPath of the GeoView layer to it.
@@ -200,49 +198,6 @@ export class GeoPackage extends AbstractGeoViewVector {
       }
 
       this.setLayerStatus('processing', layerPath);
-
-      // When no metadata are provided, all layers are considered valid.
-      if (!this.metadata) return;
-
-      // Note that the code assumes geopackage does not contains metadata layer group. If you need layer group,
-      // you can define them in the configuration section.
-      if (Array.isArray(this.metadata!.collections)) {
-        const foundCollection = this.metadata!.collections.find((layerMetadata) => layerMetadata.id === layerConfig.layerId);
-        if (!foundCollection) {
-          this.layerLoadError.push({
-            layer: layerPath,
-            consoleMessage: `GeoPackage feature layer not found (mapId:  ${this.mapId}, layerPath: ${layerPath})`,
-          });
-          this.setLayerStatus('error', layerPath);
-          return;
-        }
-
-        if (foundCollection.description)
-          layerConfig.layerName = {
-            en: foundCollection.description as string,
-            fr: foundCollection.description as string,
-          };
-
-        const { currentProjection } = MapEventProcessor.getMapState(this.mapId);
-        if (layerConfig.initialSettings?.extent)
-          layerConfig.initialSettings.extent = api.projection.transformExtent(
-            layerConfig.initialSettings.extent,
-            'EPSG:4326',
-            `EPSG:${currentProjection}`
-          );
-
-        if (!layerConfig.initialSettings?.bounds && foundCollection.extent?.spatial?.bbox && foundCollection.extent?.spatial?.crs) {
-          // layerConfig.initialSettings cannot be undefined because config-validation set it to {} if it is undefined.
-          layerConfig.initialSettings!.bounds = api.projection.transformExtent(
-            foundCollection.extent.spatial.bbox[0] as number[],
-            api.projection.getProjection(foundCollection.extent.spatial.crs as string)!,
-            `EPSG:${currentProjection}`
-          );
-        }
-        return;
-      }
-
-      throw new Error(`Invalid collection's metadata prevent loading of layer (mapId:  ${this.mapId}, layerPath: ${layerPath})`);
     });
   }
 
@@ -362,7 +317,7 @@ export class GeoPackage extends AbstractGeoViewVector {
         xhr.onload = () => {
           if (xhr.status === 200) {
             const db = new SQL.Database(new Uint8Array(xhr.response as ArrayBuffer));
-            var tables: tableInfo[] = [];
+            const tables: tableInfo[] = [];
 
             let stmt = db.prepare(`
             SELECT gpkg_contents.table_name, gpkg_contents.srs_id,
@@ -454,6 +409,146 @@ export class GeoPackage extends AbstractGeoViewVector {
    * This method creates a GeoView layer using the definition provided in the layerConfig parameter.
    *
    * @param {TypeLayerEntryConfig} layerConfig Information needed to create the GeoView layer.
+   * @param {string | number | Uint8Array} sld The SLD style associated with the layer
+   *
+   * @returns {Promise<BaseLayer | null>} The GeoView base layer that has been created.
+   */
+  protected processGeopackageStyle(layerConfig: TypeBaseLayerEntryConfig, sld: string | number | Uint8Array): void {
+    // Extract layer styles if they exist
+    const { rules } = SLDReader.Reader(sld).layers[0].styles[0].featuretypestyles[0];
+    if ((layerConfig as TypeVectorLayerEntryConfig).style === undefined) (layerConfig as TypeVectorLayerEntryConfig).style = {};
+
+    for (let i = 0; i < rules.length; i++) {
+      Object.keys(rules[i]).forEach((key) => {
+        // Polygon style
+        if (key.toLowerCase() === 'polygonsymbolizer' && !(layerConfig as TypeVectorLayerEntryConfig).style!.Polygon) {
+          const polyStyles = rules[i].polygonsymbolizer[0];
+          let color: string | undefined;
+          let graphicSize: number | undefined;
+          let patternWidth: number | undefined;
+          let fillStyle: TypeFillStyle | undefined;
+          if ('fill' in polyStyles && polyStyles.fill.styling?.fill) color = polyStyles.fill.styling.fill;
+
+          const stroke: TypeStrokeSymbolConfig = {};
+          if (polyStyles.stroke) {
+            if (polyStyles.stroke.styling?.stroke) stroke.color = polyStyles.stroke.styling.stroke;
+            if (polyStyles.stroke.styling?.strokeWidth) stroke.width = polyStyles.stroke.styling.strokeWidth;
+          }
+
+          if ('fill' in polyStyles && 'graphicfill' in polyStyles.fill) {
+            if (
+              polyStyles.fill.graphicfill.graphic &&
+              polyStyles.fill.graphicfill.graphic.mark &&
+              polyStyles.fill.graphicfill.graphic.mark.stroke
+            ) {
+              if (polyStyles.fill.graphicfill.graphic.mark.stroke.styling?.stroke) color = polyStyles.stroke.styling.stroke;
+              if (polyStyles.fill.graphicfill.graphic.mark.stroke.styling?.strokeWidth)
+                patternWidth = polyStyles.stroke.styling.strokeWidth;
+            }
+
+            if (polyStyles.fill.graphicfill.graphic) {
+              if (polyStyles.fill.graphicfill.graphic.size) graphicSize = polyStyles.fill.graphicfill.graphic.size;
+              if (polyStyles.fill.graphicfill.graphic.mark && polyStyles.fill.graphicfill.graphic.mark.wellknownname) {
+                const fillName = polyStyles.fill.graphicfill.graphic.mark.wellknownname;
+                // Translate sld fill styles to geoview versions
+                switch (fillName) {
+                  case 'vertline':
+                    fillStyle = 'vertical';
+                    break;
+                  case 'horline':
+                    fillStyle = 'horizontal';
+                    break;
+                  case 'slash':
+                    fillStyle = 'forwardDiagonal';
+                    break;
+                  case 'backslash':
+                    fillStyle = 'backwardDiagonal';
+                    break;
+                  case 'plus':
+                    fillStyle = 'cross';
+                    break;
+                  case 'times':
+                    fillStyle = 'diagonalCross';
+                    break;
+                  default:
+                    fillStyle = 'solid';
+                }
+              }
+            }
+          }
+
+          const styles: TypePolygonVectorConfig = {
+            type: 'filledPolygon',
+            color,
+            stroke,
+            paternSize: graphicSize || 8,
+            paternWidth: patternWidth || 1,
+            fillStyle: fillStyle || 'solid',
+          };
+          (layerConfig as TypeVectorLayerEntryConfig).style!.Polygon = { styleType: 'simple', settings: styles };
+          // LineString style
+        } else if (key.toLowerCase() === 'linesymbolizer' && !(layerConfig as TypeVectorLayerEntryConfig).style!.LineString) {
+          const lineStyles = rules[i].linesymbolizer[0];
+
+          const stroke: TypeStrokeSymbolConfig = {};
+          if (lineStyles.stroke) {
+            if (lineStyles.stroke.styling?.stroke) stroke.color = lineStyles.stroke.styling.stroke;
+            if (lineStyles.stroke.styling?.strokeWidth) stroke.width = lineStyles.stroke.styling.strokeWidth;
+          }
+
+          const styles: TypeLineStringVectorConfig = { type: 'lineString', stroke };
+          (layerConfig as TypeVectorLayerEntryConfig).style!.LineString = { styleType: 'simple', settings: styles };
+          // Point style
+        } else if (key.toLowerCase() === 'pointsymbolizer' && !(layerConfig as TypeVectorLayerEntryConfig).style!.Point) {
+          const { graphic } = rules[i].pointsymbolizer[0];
+
+          let offset: [number, number] | null = null;
+          if ('displacement' in graphic) {
+            offset = [
+              graphic.displacement.displacementx ? graphic.displacement.displacementx : 0,
+              graphic.displacement.displacementx ? graphic.displacement.displacementx : 0,
+            ];
+          }
+
+          const { size, rotation } = graphic;
+
+          if ('mark' in graphic) {
+            let color: string | null = null;
+            if ('fill' in graphic.mark && graphic.mark.fill.styling.fill) color = graphic.mark.fill.styling.fill;
+            if ('wellknownname' in graphic.mark) {
+              let symbol;
+              if (graphic.mark.wellknownname === 'cross') symbol = '+';
+              else if (graphic.mark.wellknownname === 'x') symbol = 'X';
+              else symbol = graphic.mark.wellknownname;
+
+              const styles: TypeSimpleSymbolVectorConfig = {
+                type: 'simpleSymbol',
+                symbol,
+              };
+
+              if (color) styles.color = color;
+              if (rotation) styles.rotation = rotation;
+              if (size) styles.size = size;
+              if (offset) styles.offset = offset;
+
+              const stroke: TypeStrokeSymbolConfig = {};
+              if (graphic.mark.stroke) {
+                if (graphic.mark.stroke.styling?.stroke) stroke.color = graphic.mark.stroke.styling.stroke;
+                if (graphic.mark.stroke.styling?.strokeWidth) stroke.width = graphic.mark.stroke.styling.strokeWidth;
+              }
+
+              (layerConfig as TypeVectorLayerEntryConfig).style!.Point = { styleType: 'simple', settings: styles };
+            }
+          }
+        }
+      });
+    }
+  }
+
+  /** ***************************************************************************************************************************
+   * This method creates a GeoView layer using the definition provided in the layerConfig parameter.
+   *
+   * @param {TypeLayerEntryConfig} layerConfig Information needed to create the GeoView layer.
    * @param {sldsInterface} sld The SLD style associated with the layers geopackage, if any
    *
    * @returns {Promise<BaseLayer | null>} The GeoView base layer that has been created.
@@ -465,142 +560,12 @@ export class GeoPackage extends AbstractGeoViewVector {
   ): Promise<BaseLayer | null> {
     const promisedVectorLayer = new Promise<BaseLayer | null>((resolve) => {
       layerConfig.registerLayerConfig();
-      this.registerToLayerSets(layerConfig);
 
       const { name, source } = layerInfo;
-      // entryType will be group if copied from group parent
-      layerConfig.entryType = 'vector';
 
       // Extract layer styles if they exist
       if (sld && sld[name]) {
-        const { rules } = SLDReader.Reader(sld[name]).layers[0].styles[0].featuretypestyles[0];
-        if ((layerConfig as TypeVectorLayerEntryConfig).style === undefined) (layerConfig as TypeVectorLayerEntryConfig).style = {};
-
-        for (let i = 0; i < rules.length; i++) {
-          Object.keys(rules[i]).forEach((key) => {
-            // Polygon style
-            if (key.toLowerCase() === 'polygonsymbolizer' && !(layerConfig as TypeVectorLayerEntryConfig).style!.Polygon) {
-              const polyStyles = rules[i].polygonsymbolizer[0];
-              let color: string | undefined;
-              let graphicSize: number | undefined;
-              let patternWidth: number | undefined;
-              let fillStyle: TypeFillStyle | undefined;
-              if ('fill' in polyStyles && polyStyles.fill.styling?.fill) color = polyStyles.fill.styling.fill;
-
-              const stroke: TypeStrokeSymbolConfig = {};
-              if (polyStyles.stroke) {
-                if (polyStyles.stroke.styling?.stroke) stroke.color = polyStyles.stroke.styling.stroke;
-                if (polyStyles.stroke.styling?.strokeWidth) stroke.width = polyStyles.stroke.styling.strokeWidth;
-              }
-
-              if ('fill' in polyStyles && 'graphicfill' in polyStyles.fill) {
-                if (
-                  polyStyles.fill.graphicfill.graphic &&
-                  polyStyles.fill.graphicfill.graphic.mark &&
-                  polyStyles.fill.graphicfill.graphic.mark.stroke
-                ) {
-                  if (polyStyles.fill.graphicfill.graphic.mark.stroke.styling?.stroke) color = polyStyles.stroke.styling.stroke;
-                  if (polyStyles.fill.graphicfill.graphic.mark.stroke.styling?.strokeWidth)
-                    patternWidth = polyStyles.stroke.styling.strokeWidth;
-                }
-
-                if (polyStyles.fill.graphicfill.graphic) {
-                  if (polyStyles.fill.graphicfill.graphic.size) graphicSize = polyStyles.fill.graphicfill.graphic.size;
-                  if (polyStyles.fill.graphicfill.graphic.mark && polyStyles.fill.graphicfill.graphic.mark.wellknownname) {
-                    const fillName = polyStyles.fill.graphicfill.graphic.mark.wellknownname;
-                    // Translate sld fill styles to geoview versions
-                    switch (fillName) {
-                      case 'vertline':
-                        fillStyle = 'vertical';
-                        break;
-                      case 'horline':
-                        fillStyle = 'horizontal';
-                        break;
-                      case 'slash':
-                        fillStyle = 'forwardDiagonal';
-                        break;
-                      case 'backslash':
-                        fillStyle = 'backwardDiagonal';
-                        break;
-                      case 'plus':
-                        fillStyle = 'cross';
-                        break;
-                      case 'times':
-                        fillStyle = 'diagonalCross';
-                        break;
-                      default:
-                        fillStyle = 'solid';
-                    }
-                  }
-                }
-              }
-
-              const styles: TypePolygonVectorConfig = {
-                type: 'filledPolygon',
-                color,
-                stroke,
-                paternSize: graphicSize || 8,
-                paternWidth: patternWidth || 1,
-                fillStyle: fillStyle || 'solid',
-              };
-              (layerConfig as TypeVectorLayerEntryConfig).style!.Polygon = { styleType: 'simple', settings: styles };
-              // LineString style
-            } else if (key.toLowerCase() === 'linesymbolizer' && !(layerConfig as TypeVectorLayerEntryConfig).style!.LineString) {
-              const lineStyles = rules[i].linesymbolizer[0];
-
-              const stroke: TypeStrokeSymbolConfig = {};
-              if (lineStyles.stroke) {
-                if (lineStyles.stroke.styling?.stroke) stroke.color = lineStyles.stroke.styling.stroke;
-                if (lineStyles.stroke.styling?.strokeWidth) stroke.width = lineStyles.stroke.styling.strokeWidth;
-              }
-
-              const styles: TypeLineStringVectorConfig = { type: 'lineString', stroke };
-              (layerConfig as TypeVectorLayerEntryConfig).style!.LineString = { styleType: 'simple', settings: styles };
-              // Point style
-            } else if (key.toLowerCase() === 'pointsymbolizer' && !(layerConfig as TypeVectorLayerEntryConfig).style!.Point) {
-              const { graphic } = rules[i].pointsymbolizer[0];
-
-              let offset: [number, number] | null = null;
-              if ('displacement' in graphic) {
-                offset = [
-                  graphic.displacement.displacementx ? graphic.displacement.displacementx : 0,
-                  graphic.displacement.displacementx ? graphic.displacement.displacementx : 0,
-                ];
-              }
-
-              const { size, rotation } = graphic;
-
-              if ('mark' in graphic) {
-                let color: string | null = null;
-                if ('fill' in graphic.mark && graphic.mark.fill.styling.fill) color = graphic.mark.fill.styling.fill;
-                if ('wellknownname' in graphic.mark) {
-                  let symbol;
-                  if (graphic.mark.wellknownname === 'cross') symbol = '+';
-                  else if (graphic.mark.wellknownname === 'x') symbol = 'X';
-                  else symbol = graphic.mark.wellknownname;
-
-                  const styles: TypeSimpleSymbolVectorConfig = {
-                    type: 'simpleSymbol',
-                    symbol,
-                  };
-
-                  if (color) styles.color = color;
-                  if (rotation) styles.rotation = rotation;
-                  if (size) styles.size = size;
-                  if (offset) styles.offset = offset;
-
-                  const stroke: TypeStrokeSymbolConfig = {};
-                  if (graphic.mark.stroke) {
-                    if (graphic.mark.stroke.styling?.stroke) stroke.color = graphic.mark.stroke.styling.stroke;
-                    if (graphic.mark.stroke.styling?.strokeWidth) stroke.width = graphic.mark.stroke.styling.strokeWidth;
-                  }
-
-                  (layerConfig as TypeVectorLayerEntryConfig).style!.Point = { styleType: 'simple', settings: styles };
-                }
-              }
-            }
-          });
-        }
+        this.processGeopackageStyle(layerConfig, sld[name]);
       }
 
       if (layerInfo.properties) {
@@ -676,6 +641,7 @@ export class GeoPackage extends AbstractGeoViewVector {
         }
       });
     });
+
     return promisedLayers;
   }
 
@@ -704,10 +670,9 @@ export class GeoPackage extends AbstractGeoViewVector {
         if (fields[fieldEntry].type === 'Geometry') return;
         if (processOutField) {
           layerConfig.source!.featureInfo!.outfields!.en = `${layerConfig.source!.featureInfo!.outfields!.en}${fieldEntry},`;
-          let fieldType: 'string' | 'date' | 'number';
+          let fieldType = 'string';
           if (fields[fieldEntry].type === 'date') fieldType = 'date';
-          else if (['int', 'number'].includes(fields[fieldEntry].type as string)) fieldType = 'number';
-          else fieldType = 'string';
+          else if (['bigint', 'number'].includes(typeof fields[fieldEntry])) fieldType = 'number';
           layerConfig.source!.featureInfo!.fieldTypes = `${layerConfig.source!.featureInfo!.fieldTypes}${fieldType},`;
         }
         layerConfig.source!.featureInfo!.aliasFields!.en = `${layerConfig.source!.featureInfo!.aliasFields!.en}${fieldEntry},`;
@@ -734,10 +699,10 @@ export class GeoPackage extends AbstractGeoViewVector {
    * @returns {Uint8Array} Uint8Array Subarray of inputted binary geoametry array.
    */
   protected parseGpkgGeom(gpkgBinGeom: Uint8Array): Uint8Array {
-    var flags = gpkgBinGeom[3];
+    const flags = gpkgBinGeom[3];
     // eslint-disable-next-line no-bitwise
-    var eFlags: number = (flags >> 1) & 7;
-    var envelopeSize: number;
+    const eFlags: number = (flags >> 1) & 7;
+    let envelopeSize: number;
     switch (eFlags) {
       case 0:
         envelopeSize = 0;

@@ -1,4 +1,4 @@
-/* eslint-disable block-scoped-var, no-var, vars-on-top, no-param-reassign */
+/* eslint-disable no-param-reassign */
 // eslint-disable-next-line max-classes-per-file
 import { Options as SourceOptions } from 'ol/source/Vector';
 import { GeoJSON as FormatGeoJSON } from 'ol/format';
@@ -140,22 +140,6 @@ export class GeoJSON extends AbstractGeoViewVector {
    */
   constructor(mapId: string, layerConfig: TypeGeoJSONLayerConfig) {
     super(CONST_LAYER_TYPES.GEOJSON, layerConfig, mapId);
-  }
-
-  /** ***************************************************************************************************************************
-   * Extract the type of the specified field from the metadata. If the type can not be found, return 'string'.
-   *
-   * @param {string} fieldName field name for which we want to get the type.
-   * @param {TypeLayerEntryConfig} layerConfig layer configuration.
-   *
-   * @returns {'string' | 'date' | 'number'} The type of the field.
-   */
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  protected getFieldType(fieldName: string, layerConfig: TypeLayerEntryConfig): 'string' | 'date' | 'number' {
-    const fieldDefinitions = this.layerMetadata[layerConfig.layerPath].source.featureInfo;
-    const fieldIndex = getLocalizedValue(Cast<TypeLocalizedString>(fieldDefinitions.outfields), this.mapId)?.split(',').indexOf(fieldName);
-    if (!fieldIndex || fieldIndex === -1) return 'string';
-    return (fieldDefinitions.fieldTypes as string).split(',')[fieldIndex!] as 'string' | 'date' | 'number';
   }
 
   /** ***************************************************************************************************************************
