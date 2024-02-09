@@ -232,7 +232,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
       logger.logError('abstract-geoview-vector.getAllFeatureInfo()\n', error);
       // TODO: Check - Shouldn't this return null instead of [] to be consistent with getFeatureInfoAtPixel and others?
       // TO.DO.CONT: If returning null is decided, the function should probably return Promise<TypeArrayOfFeatureInfoEntries | null>?
-      return [];
+      return null;
     }
   }
 

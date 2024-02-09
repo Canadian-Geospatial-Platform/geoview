@@ -799,7 +799,12 @@ export abstract class AbstractGeoViewLayer {
       // Get the layer config
       const layerConfig = this.getLayerConfig(layerPath);
 
-      if (!layerConfig || !layerConfig.source?.featureInfo?.queryable) return [];
+      if (!layerConfig || !layerConfig?.source?.featureInfo?.queryable) {
+        logger.logError('Invalid usage of getFeatureInfo\nlayerConfig = ', layerConfig);
+        const queryableOrNot = layerConfig?.source?.featureInfo?.queryable ? '' : 'not';
+        logger.logError(`Layer is ${queryableOrNot} queryable`);
+        return null;
+      }
 
       // Log
       logger.logTraceCore('abstract-geoview-layers.getFeatureInfo', queryType, layerPath);
@@ -846,7 +851,7 @@ export abstract class AbstractGeoViewLayer {
     } catch (error) {
       // Log
       logger.logError(error);
-      return [];
+      return null;
     }
   }
 
@@ -861,8 +866,8 @@ export abstract class AbstractGeoViewLayer {
 
   protected getAllFeatureInfo(layerPath: string): Promise<TypeArrayOfFeatureInfoEntries> {
     // Log
-    logger.logWarning('getAllFeatureInfo is not implemented!');
-    return Promise.resolve([]);
+    logger.logError('getAllFeatureInfo is not implemented!');
+    return Promise.resolve(null);
   }
 
   /** ***************************************************************************************************************************
@@ -877,8 +882,8 @@ export abstract class AbstractGeoViewLayer {
 
   protected getFeatureInfoAtPixel(location: Pixel, layerPath: string): Promise<TypeArrayOfFeatureInfoEntries> {
     // Log
-    logger.logWarning('getFeatureInfoAtPixel is not implemented!');
-    return Promise.resolve([]);
+    logger.logError('getFeatureInfoAtPixel is not implemented!');
+    return Promise.resolve(null);
   }
 
   /** ***************************************************************************************************************************
@@ -893,8 +898,8 @@ export abstract class AbstractGeoViewLayer {
 
   protected getFeatureInfoAtCoordinate(location: Coordinate, layerPath: string): Promise<TypeArrayOfFeatureInfoEntries> {
     // Log
-    logger.logWarning('getFeatureInfoAtCoordinate is not implemented!');
-    return Promise.resolve([]);
+    logger.logError('getFeatureInfoAtCoordinate is not implemented!');
+    return Promise.resolve(null);
   }
 
   /** ***************************************************************************************************************************
@@ -909,8 +914,8 @@ export abstract class AbstractGeoViewLayer {
 
   protected getFeatureInfoAtLongLat(location: Coordinate, layerPath: string): Promise<TypeArrayOfFeatureInfoEntries> {
     // Log
-    logger.logWarning('getFeatureInfoAtLongLat is not implemented!');
-    return Promise.resolve([]);
+    logger.logError('getFeatureInfoAtLongLat is not implemented!');
+    return Promise.resolve(null);
   }
 
   /** ***************************************************************************************************************************
@@ -925,8 +930,8 @@ export abstract class AbstractGeoViewLayer {
 
   protected getFeatureInfoUsingBBox(location: Coordinate[], layerPath: string): Promise<TypeArrayOfFeatureInfoEntries> {
     // Log
-    logger.logWarning('getFeatureInfoUsingBBox is not implemented!');
-    return Promise.resolve([]);
+    logger.logError('getFeatureInfoUsingBBox is not implemented!');
+    return Promise.resolve(null);
   }
 
   /** ***************************************************************************************************************************
@@ -941,8 +946,8 @@ export abstract class AbstractGeoViewLayer {
 
   protected getFeatureInfoUsingPolygon(location: Coordinate[], layerPath: string): Promise<TypeArrayOfFeatureInfoEntries> {
     // Log
-    logger.logWarning('getFeatureInfoUsingPolygon is not implemented!');
-    return Promise.resolve([]);
+    logger.logError('getFeatureInfoUsingPolygon is not implemented!');
+    return Promise.resolve(null);
   }
 
   /** ***************************************************************************************************************************
