@@ -165,6 +165,7 @@ export function Datapanel() {
 
   // TODO: Use the correct layer title in the title below
   // TO.DOCONT: Dropped out when reworking the layer index/layer path indexing and not adjusted as parallel development happening on this component
+  // TODO: Reuse the Layout common component to render the layers list on the left and the right panel (like Details, Geochart, Timeslider panels)
   return (
     <Box sx={sxClasses.dataPanel}>
       <ResponsiveGrid.Root sx={{ pt: 8, pb: 8 }} ref={panelTitleRef}>

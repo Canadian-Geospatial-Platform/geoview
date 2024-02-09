@@ -125,7 +125,8 @@
     "clearAllfeatures": "Clear all feature highlights",
     "highlightFeaturesOnMap": "Highlight features on map",
     "keepFeatureSelected": "Keep feature highlighted",
-    "detailsInstructions": "Details Instructions"
+    "detailsInstructions": "Details Instructions",
+    "loadingUI": "Loading user interface"
   },
   "lightbox": {
     "next": "Next",

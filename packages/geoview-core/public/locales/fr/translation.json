@@ -125,7 +125,8 @@
     "clearAllfeatures": "Déselctionner tout les items",
     "highlightFeaturesOnMap": "Déselctionner tout les items",
     "keepFeatureSelected": "Garder l'élément sélectionné",
-    "detailsInstructions": "Instructions détaillées"
+    "detailsInstructions": "Instructions détaillées",
+    "loadingUI": "Chargement de l'interface utilisateur"
   },
   "lightbox": {
     "next": "Prochaine",

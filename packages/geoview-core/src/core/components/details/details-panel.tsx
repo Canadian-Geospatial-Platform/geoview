@@ -22,7 +22,7 @@ import {
 } from '@/core/stores';
 import { logger } from '@/core/utils/logger';
 
-import { ResponsiveGrid, CloseButton, EnlargeButton, LayerList, LayerTitle, useFooterPanelHeight, LayerListEntry } from '../common';
+import { LayerListEntry, Layout } from '../common';
 import { getSxClasses } from './details-style';
 import { FeatureInfo } from './feature-info-new';
 
@@ -49,15 +49,10 @@ export function DetailsPanel(): JSX.Element {
   const { setSelectedLayerPath, removeCheckedFeature, setLayerDataArrayBatchLayerPathBypass } = useDetailsStoreActions();
   const { addSelectedFeature, removeSelectedFeature } = useMapStoreActions();
 
-  // Custom hook for calculating the height of footer panel
-  const { leftPanelRef, rightPanelRef, panelTitleRef } = useFooterPanelHeight({ footerPanelTab: 'details' });
-
   // #region USE STATE SECTION ****************************************************************************************
 
   // internal state
   const [currentFeatureIndex, setCurrentFeatureIndex] = useState<number>(0);
-  const [isLayersPanelVisible, setIsLayersPanelVisible] = useState(false);
-  const [isEnlargeDataTable, setIsEnlargeDataTable] = useState(false);
   const [selectedLayerPathLocal, setselectedLayerPathLocal] = useState<string>(selectedLayerPath);
   const [arrayOfLayerListLocal, setArrayOfLayerListLocal] = useState<LayerListEntry[]>([]);
 
@@ -375,46 +370,20 @@ export function DetailsPanel(): JSX.Element {
 
   // #region RENDER SECTION *******************************************************************************************
 
-  return (
-    <Box sx={sxClasses.detailsContainer}>
-      <ResponsiveGrid.Root sx={{ pt: 8, pb: 8 }} ref={panelTitleRef}>
-        <ResponsiveGrid.Left isEnlargeDataTable={isEnlargeDataTable} isLayersPanelVisible={isLayersPanelVisible}>
-          {!!memoLayersList.length && <LayerTitle>{t('general.layers')}</LayerTitle>}
-        </ResponsiveGrid.Left>
-        <ResponsiveGrid.Right isEnlargeDataTable={isEnlargeDataTable} isLayersPanelVisible={isLayersPanelVisible}>
-          <Box
-            sx={{
-              display: 'flex',
-              alignItems: 'center',
-              [theme.breakpoints.up('md')]: { justifyContent: 'right' },
-              [theme.breakpoints.down('md')]: { justifyContent: 'space-between' },
-            }}
-          >
-            <LayerTitle hideTitle>{memoSelectedLayerData?.layerName}</LayerTitle>
-
-            <Box>
-              <EnlargeButton isEnlargeDataTable={isEnlargeDataTable} setIsEnlargeDataTable={setIsEnlargeDataTable} />
-              <CloseButton isLayersPanelVisible={isLayersPanelVisible} setIsLayersPanelVisible={setIsLayersPanelVisible} />
-            </Box>
-          </Box>
-        </ResponsiveGrid.Right>
-      </ResponsiveGrid.Root>
-      <ResponsiveGrid.Root>
-        <ResponsiveGrid.Left isEnlargeDataTable={isEnlargeDataTable} isLayersPanelVisible={isLayersPanelVisible} ref={leftPanelRef}>
-          <LayerList
-            layerList={memoLayersList}
-            isEnlargeDataTable={isEnlargeDataTable}
-            selectedLayerPath={selectedLayerPath}
-            handleListItemClick={handleLayerChange}
-          />
-        </ResponsiveGrid.Left>
-        <ResponsiveGrid.Right isEnlargeDataTable={isEnlargeDataTable} isLayersPanelVisible={isLayersPanelVisible} ref={rightPanelRef}>
-          {!!memoSelectedLayerData?.features?.length && (
+  /**
+   * Renders the complete GeoChart Panel component
+   * @returns JSX.Element
+   */
+  const renderComplete = () => {
+    if (memoLayersList) {
+      return (
+        <Layout selectedLayerPath={selectedLayerPath || ''} layerList={memoLayersList} handleLayerList={handleLayerChange}>
+          {memoSelectedLayerDataFeatures && (
             <Box sx={sxClasses.rightPanelContainer}>
               <Grid container sx={sxClasses.rightPanelBtnHolder}>
                 <Grid item xs={6}>
                   <Box style={{ marginLeft: '22px' }}>
-                    Feature {currentFeatureIndex + 1} of {memoSelectedLayerData?.features.length}
+                    Feature {currentFeatureIndex + 1} of {memoSelectedLayerDataFeatures.length}
                     <IconButton
                       sx={{ marginLeft: '20px', [theme.breakpoints.down('sm')]: { display: 'none' } }}
                       aria-label="clear-all-features"
@@ -454,7 +423,7 @@ export function DetailsPanel(): JSX.Element {
               <FeatureInfo features={memoSelectedLayerData?.features} currentFeatureIndex={currentFeatureIndex} />
             </Box>
           )}
-          {!memoSelectedLayerData && (
+          {!memoSelectedLayerDataFeatures && (
             <Paper sx={{ padding: '2rem' }}>
               <Typography variant="h3" gutterBottom sx={sxClasses.detailsInstructionsTitle}>
                 {t('details.detailsInstructions')}
@@ -464,10 +433,16 @@ export function DetailsPanel(): JSX.Element {
               </Typography>
             </Paper>
           )}
-        </ResponsiveGrid.Right>
-      </ResponsiveGrid.Root>
-    </Box>
-  );
+        </Layout>
+      );
+    }
+
+    // Loading UI
+    return <Typography>{t('details.loadingUI')}</Typography>;
+  };
+
+  // Render
+  return renderComplete();
 
   // # endregion
 }
