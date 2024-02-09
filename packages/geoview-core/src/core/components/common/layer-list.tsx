@@ -175,21 +175,33 @@ const LayerListItem = memo(function LayerListItem({ isSelected, layer, handleLis
 export function LayerList({ layerList, isEnlargeDataTable, selectedLayerPath, handleListItemClick }: LayerListProps) {
   const theme = useTheme();
   const sxClasses = getSxClasses(theme);
+  const { t } = useTranslation<string>();
 
   return (
     <List sx={sxClasses.list}>
-      {layerList.map((layer) => (
-        <LayerListItem
-          key={layer.layerPath}
-          // Reason:- (layer?.numOffeatures ?? 1) > 0
-          // Some of layers will not have numOfFeatures, so to make layer look like selected, we need to set default value to 1.
-          // Also we cant set numOfFeature initially, then it num of features will be display as sub title.
-          isSelected={(layer?.numOffeatures ?? 1) > 0 && layer.layerPath === selectedLayerPath}
-          layer={layer}
-          handleListItemClick={handleListItemClick}
-          isEnlargeDataTable={isEnlargeDataTable}
-        />
-      ))}
+      {!!layerList.length &&
+        layerList.map((layer) => (
+          <LayerListItem
+            key={layer.layerPath}
+            // Reason:- (layer?.numOffeatures ?? 1) > 0
+            // Some of layers will not have numOfFeatures, so to make layer look like selected, we need to set default value to 1.
+            // Also we cant set numOfFeature initially, then it num of features will be display as sub title.
+            isSelected={(layer?.numOffeatures ?? 1) > 0 && layer.layerPath === selectedLayerPath}
+            layer={layer}
+            handleListItemClick={handleListItemClick}
+            isEnlargeDataTable={isEnlargeDataTable}
+          />
+        ))}
+      {!layerList.length && (
+        <Paper sx={{ padding: '2rem' }}>
+          <Typography variant="h3" gutterBottom sx={sxClasses.layersInstructionsTitle}>
+            {t('layers.instructionsNoLayersTitle')}
+          </Typography>
+          <Typography component="p" sx={sxClasses.layersInstructionsBody}>
+            {t('layers.instructionsNoLayersBody')}
+          </Typography>
+        </Paper>
+      )}
     </List>
   );
 }
