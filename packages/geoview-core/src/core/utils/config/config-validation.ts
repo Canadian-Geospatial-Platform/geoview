@@ -65,6 +65,13 @@ export class ConfigValidation {
   /** The language that will be used to display the GeoView layer. */
   private _displayLanguage: TypeDisplayLanguage;
 
+  // TODO: Refactor - Environment - How to edit this configuration easily per environment?
+  /** The default geocore url */
+  static CONFIG_GEOCORE_URL = 'https://geocore-stage.api.geo.ca';
+
+  /** The default geolocator url */
+  static CONFIG_GEOLOCATOR_URL = 'https://geolocator.api.geo.ca?keys=geonames,nominatim,locate';
+
   /** default configuration if provided configuration is missing or wrong */
   private _defaultMapFeaturesConfig: TypeMapFeaturesConfig = {
     mapId: '',
@@ -92,8 +99,8 @@ export class ConfigValidation {
     corePackages: [],
     overviewMap: undefined,
     serviceUrls: {
-      keys: 'https://geocore.api.geo.ca',
-      geolocator: 'https://geolocator.api.geo.ca?keys=geonames,nominatim,locate',
+      geocoreUrl: ConfigValidation.CONFIG_GEOCORE_URL,
+      geolocator: ConfigValidation.CONFIG_GEOLOCATOR_URL,
     },
     displayLanguage: 'en',
     triggerReadyCallback: false,

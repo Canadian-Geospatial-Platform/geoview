@@ -9,21 +9,18 @@ import {
   TypeMapComponents,
 } from '@/geo/map/map-schema-types';
 import { Cast, TypeJsonObject, TypeJsonValue, TypeMapFeaturesConfig } from '@/core/types/global-types';
-import { catalogUrl } from '../config';
 import { UUIDmapConfigReader } from './uuid-config-reader';
 import { ConfigValidation } from '../config-validation';
 import { logger } from '../../logger';
+import { getLocalizedMessage, replaceParams, showError } from '@/app';
 
-// ******************************************************************************************************************************
-// ******************************************************************************************************************************
-/** *****************************************************************************************************************************
+/**
  * A class to process GeoView map features configuration from a URL.
  * @exports
  * @class URLmapConfigReader
  */
-// ******************************************************************************************************************************
 export class URLmapConfigReader {
-  /** ***************************************************************************************************************************
+  /**
    * Parse the search parameters passed from a url
    *
    * @param {string} urlPath A url path with parameters "?..."
@@ -49,7 +46,7 @@ export class URLmapConfigReader {
     return obj;
   }
 
-  /** ***************************************************************************************************************************
+  /**
    * Get url parameters from url param search string
    *
    * @param {objStr} objStr the url parameters string
@@ -91,13 +88,13 @@ export class URLmapConfigReader {
     return obj;
   }
 
-  /** ***************************************************************************************************************************
+  /**
    * Get map config from url parameters
    * @param {string} mapId the map ID of the GeoView map.
    *
    * @returns {Promise<TypeMapFeaturesConfig | undefined>} A map features configuration object generated from url parameters
    */
-  static async getMapFeaturesConfig(mapId: string): Promise<TypeMapFeaturesConfig | undefined> {
+  static async getMapFeaturesConfig(baseUrl: string, mapId: string): Promise<TypeMapFeaturesConfig | undefined> {
     // instanciate the configValidation object used to validate map config attributes and define default values.
     const configValidation = new ConfigValidation();
 
@@ -132,9 +129,20 @@ export class URLmapConfigReader {
 
       // get layer information from catalog using their uuid's if any passed from url params
       if (urlParams.keys) {
-        const requestUrl = `${catalogUrl}/${displayLanguage.split('-')[0]}/${urlParams.keys}`;
-        // TODO: issue 1742, list of layers always empty
-        listOfGeoviewLayerConfig = await UUIDmapConfigReader.getGVlayersConfigFromUUID(mapId, requestUrl);
+        try {
+          // Get the layers config
+          const promise = UUIDmapConfigReader.getGVConfigFromUUIDs(
+            baseUrl,
+            displayLanguage.split('-')[0],
+            urlParams.keys.toString().split(',')
+          );
+          listOfGeoviewLayerConfig = (await promise).layers;
+        } catch (error) {
+          // Log
+          logger.logError('Failed to get the GeoView layers from url keys', urlParams.keys, error);
+          const message = replaceParams([error as TypeJsonValue, mapId], getLocalizedMessage(mapId, 'validation.layer.loadfailed'));
+          showError(mapId, message);
+        }
       }
 
       // get core components
@@ -162,6 +170,9 @@ export class URLmapConfigReader {
           basemapOptions,
           listOfGeoviewLayerConfig,
           extraOptions: {},
+        },
+        serviceUrls: {
+          geocoreUrl: baseUrl,
         },
         components,
         corePackages,

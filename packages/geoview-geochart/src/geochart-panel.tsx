@@ -58,7 +58,7 @@ export function GeoChartPanel(props: GeoChartPanelProps): JSX.Element {
   const handleIsEnlargeClicked = useCallback(
     (isEnlarge: boolean) => {
       // Log
-      logger.logTraceUseCallback('GEOCHART-PANEL - is enlarge', isEnlarge);
+      logger.logTraceUseCallback('GEOCHART-PANEL - handleIsEnlargeClicked', isEnlarge);
 
       // We need to redraw when the canvas isn't 'showing' in the DOM and when the user resizes the canvas placeholder.
       cgpv.api.maps[mapId].plugins.geochart.redrawChart();
@@ -67,7 +67,7 @@ export function GeoChartPanel(props: GeoChartPanelProps): JSX.Element {
   );
 
   /**
-   * Get the label for the number of features of a layer.
+   * Gets the label for the number of features of a layer.
    * @returns string
    */
   const getNumFeaturesLabel = useCallback(
@@ -89,7 +89,7 @@ export function GeoChartPanel(props: GeoChartPanelProps): JSX.Element {
   const handleLayerChange = useCallback(
     (layer: LayerListEntry): void => {
       // Log
-      logger.logTraceUseCallback('GEOCHART-PANEL - layer', layer);
+      logger.logTraceUseCallback('GEOCHART-PANEL - handleLayerChange', layer);
 
       // Set the selected layer path in the store which will in turn trigger the store listeners on this component
       setSelectedLayerPath(layer.layerPath);
@@ -100,7 +100,7 @@ export function GeoChartPanel(props: GeoChartPanelProps): JSX.Element {
   // Reacts when the array of layer data updates
   const memoLayersList = useMemo(() => {
     // Log
-    logger.logTraceUseMemo('GEOCHART-PANEL - ArrayOfLayerData', storeArrayOfLayerData);
+    logger.logTraceUseMemo('GEOCHART-PANEL - memoLayersList', storeArrayOfLayerData);
 
     // Set the layers list
     return visibleLayers
@@ -121,7 +121,7 @@ export function GeoChartPanel(props: GeoChartPanelProps): JSX.Element {
   }, [visibleLayers, storeArrayOfLayerData, configObj, getNumFeaturesLabel]);
 
   /**
-   * Memoize the selected layer for the LayerList component.
+   * Memoizes the selected layer for the LayerList component.
    */
   const memoLayerSelectedItem = useMemo(() => {
     // Log
