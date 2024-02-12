@@ -371,7 +371,7 @@ export function DetailsPanel(): JSX.Element {
   // #region RENDER SECTION *******************************************************************************************
 
   /**
-   * Renders the complete GeoChart Panel component
+   * Renders the complete Details Panel component
    * @returns JSX.Element
    */
   const renderComplete = () => {
