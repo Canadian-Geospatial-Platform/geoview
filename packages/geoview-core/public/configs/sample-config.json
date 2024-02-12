@@ -125,7 +125,7 @@
   },
   "externalPackages": [],
   "serviceUrls": {
-    "keys": "https://geocore.api.geo.ca"
+    "geocoreUrl": "https://geocore.api.geo.ca"
   },
   "suportedLanguages": ["en", "fr"],
   "version": "1.0"

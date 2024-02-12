@@ -1,13 +1,13 @@
 import { useStore } from 'zustand';
+import { TypeArrayOfLayerData } from '@/api/events/payloads/get-feature-info-payload';
+import { GeoChartConfig } from '@/core/utils/config/reader/uuid-config-reader';
+
 import { useGeoViewStore } from '../stores-managers';
 import { TypeGetStore, TypeSetStore } from '../geoview-store';
-import { TypeArrayOfLayerData } from '@/api/events/payloads/get-feature-info-payload';
 
 export type GeoChartStoreByLayerPath = {
-  [layerPath: string]: ChartInfo;
+  [layerPath: string]: GeoChartConfig;
 };
-
-export type ChartInfo = unknown; // unknown, because the definition is in the external package
 
 // #region INTERFACES
 
@@ -29,6 +29,12 @@ export interface IGeochartState {
 
 // #endregion INTERFACES
 
+/**
+ * Initializes a Geochart state object.
+ * @param {TypeSetStore} set The store set callback function
+ * @param {TypeSetStore} get The store get callback function
+ * @returns {IGeochartState} The Geochart state object
+ */
 export function initializeGeochartState(set: TypeSetStore, get: TypeGetStore): IGeochartState {
   const init = {
     geochartChartsConfig: {},

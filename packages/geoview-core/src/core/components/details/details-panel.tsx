@@ -65,7 +65,7 @@ export function DetailsPanel(): JSX.Element {
   // #region MAIN HOOKS SECTION ***************************************************************************************
 
   /**
-   * Check if feature is in the store checkedFeatures array
+   * Checks if feature is in the store checkedFeatures array
    *
    * @param {TypeFeatureInfoEntry} feature The feature to check
    * @returns {boolean} true if feature is in checkedFeatures
@@ -83,7 +83,7 @@ export function DetailsPanel(): JSX.Element {
   );
 
   /**
-   * Helper function to clear the highlighed features when they are not checked.
+   * Clears the highlighed features when they are not checked.
    * @param {TypeArrayOfFeatureInfoEntries} arrayToClear The array to clear of the unchecked features
    */
   const clearHighlightsUnchecked = useCallback(
@@ -100,7 +100,7 @@ export function DetailsPanel(): JSX.Element {
   );
 
   /**
-   * Get the label for the number of features of a layer.
+   * Gets the label for the number of features of a layer.
    * @returns string
    */
   const getNumFeaturesLabel = useCallback(
@@ -115,7 +115,7 @@ export function DetailsPanel(): JSX.Element {
   );
 
   /**
-   * Memoize the layers list for the LayerList component and centralizing indexing purposes.
+   * Memoizes the layers list for the LayerList component and centralizing indexing purposes.
    */
   const memoLayersList = useMemo(() => {
     // Log
@@ -140,7 +140,7 @@ export function DetailsPanel(): JSX.Element {
   }, [visibleLayers, arrayOfLayerDataBatch, getNumFeaturesLabel]);
 
   /**
-   * Memoize the selected layer for the LayerList component.
+   * Memoizes the selected layer for the LayerList component.
    */
   const memoLayerSelectedItem = useMemo(() => {
     // Log
@@ -149,7 +149,7 @@ export function DetailsPanel(): JSX.Element {
   }, [memoLayersList, selectedLayerPath]);
 
   /**
-   * Memoize the selected layer data.
+   * Memoizes the selected layer data.
    */
   const memoSelectedLayerData = useMemo(() => {
     // Log
@@ -158,7 +158,7 @@ export function DetailsPanel(): JSX.Element {
   }, [arrayOfLayerDataBatch, selectedLayerPath]);
 
   /**
-   * Memoize the selected layer data features.
+   * Memoizes the selected layer data features.
    */
   const memoSelectedLayerDataFeatures = useMemo(() => {
     // Log

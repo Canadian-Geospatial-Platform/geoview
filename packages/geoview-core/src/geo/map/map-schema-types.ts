@@ -1489,6 +1489,8 @@ export const VALID_DISPLAY_THEME: TypeDisplayTheme[] = ['dark', 'light', 'geo.ca
 export type TypeMapFeaturesInstance = {
   /** map configuration. */
   map: TypeMapConfig;
+  /** Service URLs. */
+  serviceUrls: TypeServiceUrls;
   /** Display theme, default = geo.ca. */
   theme?: TypeDisplayTheme;
   /** Nav bar properies. */
@@ -1505,9 +1507,6 @@ export type TypeMapFeaturesInstance = {
   corePackages?: TypeMapCorePackages;
   /** List of external packages. */
   externalPackages?: TypeExternalPackages;
-  /** Service URLs. */
-  // ?: Is this attribute realy needed, it is used nowhere in our code. If you delete it, update the doc (docs\app\map-config\README.md)
-  serviceUrls?: TypeServiceUrls;
   /**
    * ISO 639-1 code indicating the languages supported by the configuration file. It will use value(s) provided here to
    * access bilangual configuration nodes. For value(s) provided here, each bilingual configuration node MUST provide a value.
@@ -1712,8 +1711,7 @@ export type TypeServiceUrls = {
    * Service end point to access API for layers specification (loading and plugins parameters). By default it is GeoCore but can
    * be another endpoint with similar output.
    */
-  // ?: key or keys - The description only talk about a single service endpoint and the type is not an array but a string.
-  keys: string;
+  geocoreUrl: string;
   /**
    * An optional proxy to be used for dealing with same-origin issues.  URL must either be a relative path on the same server
    * or an absolute path on a server which sets CORS headers.

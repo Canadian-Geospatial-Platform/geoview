@@ -32,7 +32,7 @@ const findLayerConfig = (
       // If still not found
       if (!foundConfigLyr) {
         // Find the config that works with the layer (if any)
-        const layerConfigs = c.layers!.filter((x: GeoViewGeoChartConfigLayer) => {
+        const layerConfigs = c.layers.filter((x: GeoViewGeoChartConfigLayer) => {
           return x.layerId === layerId;
         });
 

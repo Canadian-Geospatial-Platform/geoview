@@ -3,9 +3,7 @@ import { TypeMapFeaturesConfig } from '@/core/types/global-types';
 import { isJsonString, removeCommentsFromJSON } from '../../utilities';
 import { logger } from '@/core/utils/logger';
 
-// ******************************************************************************************************************************
-// ******************************************************************************************************************************
-/** *****************************************************************************************************************************
+/**
  * A class to read the configuration of the GeoView map features from an online div. The configuration is provided in an HTML div
  * whose class name is "geoview-map". The div tag also has the attributes id to set the map id, data-lang to specify the display
  * language and data-config to provide the map configuration.
@@ -17,9 +15,8 @@ import { logger } from '@/core/utils/logger';
  * @exports
  * @class URLmapConfigReader
  */
-// ******************************************************************************************************************************
 export class InlineDivConfigReader {
-  /** ***************************************************************************************************************************
+  /**
    * Get the config object from inline map element div.
    * @param {string} mapId The ID of the map.
    * @param {Element} mapElement The map element.

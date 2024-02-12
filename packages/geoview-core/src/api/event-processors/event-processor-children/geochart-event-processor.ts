@@ -1,5 +1,8 @@
-import { TypeArrayOfLayerData, TypeJsonObject } from '@/core/types/global-types';
+import { GeoviewStoreType } from '@/core/stores';
+import { TypeArrayOfLayerData } from '@/core/types/global-types';
 import { GeoChartStoreByLayerPath, IGeochartState } from '@/core/stores/store-interface-and-intial-values/geochart-state';
+import { GeoChartConfig } from '@/core/utils/config/reader/uuid-config-reader';
+import { logger } from '@/core/utils/logger';
 
 import { AbstractEventProcessor, BatchedPropagationLayerDataArrayByMap } from '../abstract-event-processor';
 
@@ -24,6 +27,36 @@ export class GeochartEventProcessor extends AbstractEventProcessor {
   static timeDelayBetweenPropagationsForBatch = 2000;
 
   /**
+   * Overrides initialization of the GeoChart Event Processor
+   * @param {GeoviewStoreType} store The store associated with the GeoChart Event Processor
+   * @returns An array of the subscriptions callbacks which were created
+   */
+  protected onInitialize(store: GeoviewStoreType): Array<() => void> | void {
+    // Checks for added and removed layers with time dimension
+    const unsubLayerRemoved = store.subscribe(
+      (state) => state.mapState.layerOrder,
+      (cur, prev) => {
+        // Log
+        logger.logTraceCoreStoreSubscription('GEOCHART EVENT PROCESSOR - layerOrder', cur);
+
+        // For each chart config keys
+        Object.keys(store.getState().geochartState.geochartChartsConfig).forEach((chartLayerPath: string) => {
+          // If it was in the layerdata array and is not anymore
+          if (prev.includes(chartLayerPath) && !cur.includes(chartLayerPath)) {
+            // Remove it
+            GeochartEventProcessor.removeGeochartChart(store.getState().mapId, chartLayerPath);
+
+            // Log
+            logger.logDebug('Removed GeoChart configs for layer path:', chartLayerPath);
+          }
+        });
+      }
+    );
+
+    return [unsubLayerRemoved];
+  }
+
+  /**
    * Shortcut to get the Geochart state for a given map id
    * @param {string} mapId The mapId
    * @returns {IGeochartState | undefined} The Geochart state. Forcing the return to also be 'undefined', because
@@ -36,23 +69,21 @@ export class GeochartEventProcessor extends AbstractEventProcessor {
   }
 
   /**
-   * Set the default layers from configuration.
+   * Sets the default layers from configuration.
    * In the store, the GeoChart configurations are stored in an object with layerPath as its property name
    * (to retrieve the configuration per layer faster).
    *
    * @param {string} mapId the map id
-   * @param {TypeJsonObject} charts The array of JSON configuration for geochart
+   * @param {GeoChartConfig[]} charts The array of JSON configuration for GeoChart
    */
-  static setGeochartCharts(mapId: string, charts: TypeJsonObject[]): void {
+  static setGeochartCharts(mapId: string, charts: GeoChartConfig[]): void {
     // The store object representation
     const chartData: GeoChartStoreByLayerPath = {};
 
     // Loop on the charts
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    charts.forEach((chartInfo: any) => {
+    charts.forEach((chartInfo) => {
       // For each layer path
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      chartInfo.layers.forEach((layer: any) => {
+      chartInfo.layers.forEach((layer) => {
         // Get the layer path
         const layerPath = layer.layerId;
         chartData[layerPath] = chartInfo;
@@ -61,10 +92,59 @@ export class GeochartEventProcessor extends AbstractEventProcessor {
 
     // set store charts config
     this.getGeochartState(mapId)?.actions.setGeochartCharts(chartData);
+
+    // TODO: Also update the layer array in other store state to inform the later has a geochart attached to it (when code is done over there)
   }
 
   /**
-   * Propagate feature info layer sets to the store and the also in a batched manner.
+   * Adds a GeoChart Configuration to the specified map id and layer path
+   * @param {string} mapId The map ID
+   * @param {string} layerPath The layer path
+   * @param {GeoChartConfig} chartConfig The Geochart Configuration
+   */
+  static addGeochartChart(mapId: string, layerPath: string, chartConfig: GeoChartConfig): void {
+    // The processor needs an initialized chart store which is only initialized if the Geochart plugin exists.
+    // Therefore, we validate its existence first.
+    if (!this.getGeochartState(mapId)) return;
+
+    // Config to add
+    const toAdd: GeoChartStoreByLayerPath = {};
+    toAdd[layerPath] = chartConfig;
+
+    // Update the layer data array in the store
+    this.getGeochartState(mapId)!.actions.setGeochartCharts({ ...this.getGeochartState(mapId)?.geochartChartsConfig, ...toAdd });
+
+    // TODO: Also update the layer array in other store state to inform the later has a geochart attached to it (when code is done over there)
+  }
+
+  /**
+   * Removes a GeoChart Configuration at the specified map id and layer path
+   * @param {string} mapId The map ID
+   * @param {string} layerPath The layer path
+   */
+  static removeGeochartChart(mapId: string, layerPath: string): void {
+    // The processor needs an initialized chart store which is only initialized if the Geochart plugin exists.
+    // Therefore, we validate its existence first.
+    if (!this.getGeochartState(mapId)) return;
+    if (!this.getGeochartState(mapId)?.geochartChartsConfig) return;
+
+    // Config to remove
+    if (Object.keys(this.getGeochartState(mapId)!.geochartChartsConfig).includes(layerPath)) {
+      // Grab the config
+      const chartConfigs = this.getGeochartState(mapId)!.geochartChartsConfig;
+
+      // Delete the config
+      delete chartConfigs[layerPath];
+
+      // Update the layer data array in the store
+      this.getGeochartState(mapId)!.actions.setGeochartCharts({ ...chartConfigs });
+
+      // TODO: Also update the layer array in other store state to inform the later has a geochart attached to it (when code is done over there)
+    }
+  }
+
+  /**
+   * Propagates feature info layer sets to the store and the also in a batched manner.
    * @param {string} mapId The map id
    * @param {string} layerDataArray The layer data array to propagate in the store
    */
@@ -81,7 +161,7 @@ export class GeochartEventProcessor extends AbstractEventProcessor {
   }
 
   /**
-   * Propagate feature info layer sets to the store in a batched manner, every 'timeDelayBetweenPropagationsForBatch' millisecond.
+   * Propagates feature info layer sets to the store in a batched manner, every 'timeDelayBetweenPropagationsForBatch' millisecond.
    * This is used to provide another 'layerDataArray', in the store, which updates less often so that we save a couple 'layerDataArray'
    * update triggers in the components that are listening to the store array.
    * The propagation can be bypassed using the store 'layerDataArrayBatchLayerPathBypass' state which tells the process to

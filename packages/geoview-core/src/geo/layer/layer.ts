@@ -80,7 +80,7 @@ export class Layer {
   featureHighlight: FeatureHighlight;
 
   /**
-   * Initialize layer types and listen to add/remove layer events from outside
+   * Initializes layer types and listen to add/remove layer events from outside
    *
    * @param {string} mapId a reference to the map
    */
@@ -189,7 +189,7 @@ export class Layer {
   }
 
   /**
-   * Delete the event handler functions associated to the Layer instance.
+   * Deletes the event handler functions associated to the Layer instance.
    */
   deleteEventHandlerFunctionsOfThisLayerInstance() {
     api.event.off(EVENT_NAMES.LAYER.EVENT_ADD_LAYER, this.mapId, this.eventHandlerFunctions!.addLayer);
@@ -197,7 +197,7 @@ export class Layer {
   }
 
   /**
-   * Load layers that was passed in with the map config
+   * Loads layers that was passed in with the map config
    *
    * @param {TypeGeoviewLayerConfig[]} geoviewLayerConfigs an optional array containing layers passed within the map config
    */
@@ -232,7 +232,7 @@ export class Layer {
   }
 
   /**
-   * Validate the geoview layer configuration array to eliminate duplicate entries and inform the user.
+   * Validates the geoview layer configuration array to eliminate duplicate entries and inform the user.
    * @param {TypeGeoviewLayerConfig[]} geoviewLayerConfigs The geoview layer configurations to validate.
    *
    * @returns {TypeGeoviewLayerConfig} The new configuration with duplicate entries eliminated.
@@ -257,7 +257,7 @@ export class Layer {
   }
 
   /**
-   * Print an error message for the duplicate geoview layer configuration.
+   * Prints an error message for the duplicate geoview layer configuration.
    * @param {TypeGeoviewLayerConfig} geoviewLayerConfig The geoview layer configuration in error.
    */
   private printDuplicateGeoviewLayerConfigError(geoviewLayerConfig: TypeGeoviewLayerConfig) {
@@ -272,7 +272,7 @@ export class Layer {
   }
 
   /**
-   * This method returns the GeoView instance associated to a specific layer path. The first element of the layerPath
+   * Returns the GeoView instance associated to a specific layer path. The first element of the layerPath
    * is the geoviewLayerId.
    * @param {string} layerPath The layer path to the layer's configuration.
    *
@@ -285,7 +285,7 @@ export class Layer {
   }
 
   /**
-   * Method used to verify if a layer is registered. Returns true if registered.
+   * Verifies if a layer is registered. Returns true if registered.
    * @param {TypeLayerEntryConfig} layerConfig The layer configuration to test.
    *
    * @returns {boolean} Returns true if the layer configuration is registered.
@@ -296,7 +296,7 @@ export class Layer {
   }
 
   /**
-   * Add the layer to the map if valid. If not (is a string) emit an error
+   * Adds the layer to the map if valid. If not (is a string) emit an error
    * @param {any} geoviewLayer the layer config
    */
   addToMap(geoviewLayer: AbstractGeoViewLayer): void {
@@ -325,7 +325,7 @@ export class Layer {
   }
 
   /**
-   * Remove a layer from the map using its layer path. The path may point to the root geoview layer
+   * Removes a layer from the map using its layer path. The path may point to the root geoview layer
    * or a sub layer.
    *
    * @param {string} partialLayerPath the path of the layer to be removed
@@ -363,7 +363,7 @@ export class Layer {
   };
 
   /**
-   * Add a layer to the map
+   * Adds a layer to the map
    *
    * @param {TypeGeoviewLayerConfig} geoviewLayerConfig the geoview layer configuration to add
    * @param {TypeListOfLocalizedLanguages} optionalSuportedLanguages an optional list of supported language
@@ -389,7 +389,21 @@ export class Layer {
   };
 
   /**
-   * Remove a geoview layer from the map
+   * Adds a Geoview Layer by GeoCore UUID.
+   * Example: cgpv.api.maps['UIM10'].layer.addGeoviewLayerByGeoCoreUUID('21b821cf-0f1c-40ee-8925-eab12d357668')
+   * @param mapId The map id to add to
+   * @param uuid The GeoCore UUID
+   */
+  addGeoviewLayerByGeoCoreUUID = async (uuid: string): Promise<void> => {
+    const geoCoreGeoviewLayerInstance = new GeoCore(this.mapId);
+    const layers = await geoCoreGeoviewLayerInstance.createLayersFromUUID(uuid);
+    layers[0].forEach((geoviewLayerConfig) => {
+      api.maps[this.mapId].layer.addGeoviewLayer(geoviewLayerConfig);
+    });
+  };
+
+  /**
+   * Removes a geoview layer from the map
    *
    * @param {TypeGeoviewLayerConfig} geoviewLayer the layer configuration to remove
    */
@@ -400,7 +414,7 @@ export class Layer {
   };
 
   /**
-   * Remove all geoview layers from the map
+   * Removes all geoview layers from the map
    */
   removeAllGeoviewLayers = () => {
     Object.keys(this.geoviewLayers).forEach((layerId: string) => {
@@ -411,7 +425,7 @@ export class Layer {
   };
 
   /**
-   * Search for a layer using its id and return the layer data
+   * Searches for a layer using its id and return the layer data
    *
    * @param {string} geoviewLayerId the layer id to look for
    * @returns the found layer data object
@@ -485,7 +499,7 @@ export class Layer {
   };
 
   /**
-   * Highlight layer or sublayer on map
+   * Highlights layer or sublayer on map
    *
    * @param {string} layerPath ID of layer to highlight
    */
@@ -520,7 +534,7 @@ export class Layer {
   }
 
   /**
-   * Remove layer or sublayer highlight
+   * Removes layer or sublayer highlight
    */
   removeHighlightLayer(): void {
     api.maps[this.mapId].layer.featureHighlight.removeBBoxHighlight();
