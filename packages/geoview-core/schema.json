@@ -1604,8 +1604,7 @@
                   "details",
                   "data-table",
                   "time-slider",
-                  "geochart",
-                  "guide"
+                  "geochart"
                 ]
               },
               "minItems": 1,
