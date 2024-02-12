@@ -195,6 +195,13 @@
     "images": "Images",
     "close": "Close"
   },
+  "geoChart": {
+    "noChartAvailable": "Click on the map layer with chart"
+  },
+  "guide": {
+    "title": "Guide",
+    "errorMessage": "Sorry, unable to find the help document!"
+  },
   "footerBar": {
     "focusToMap": "Focus to map",
     "focusToFooter": "Focus to footer",

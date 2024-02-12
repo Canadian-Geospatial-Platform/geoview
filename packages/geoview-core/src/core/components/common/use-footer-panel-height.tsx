@@ -5,7 +5,7 @@ import { useDetailsStoreLayerDataArray } from '@/core/stores/store-interface-and
 import { logger } from '@/core/utils/logger';
 
 interface UseFooterPanelHeightType {
-  footerPanelTab: 'layers' | 'details' | 'data-table' | 'legend' | 'default';
+  footerPanelTab: 'layers' | 'details' | 'data-table' | 'legend' | 'default' | 'guide';
 }
 
 /**
