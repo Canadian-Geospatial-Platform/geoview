@@ -22,7 +22,6 @@ import {
   TypeLocalizedString,
 } from '@/geo/map/map-schema-types';
 import { addNotificationError, getLocalizedValue } from '@/core/utils/utilities';
-import { Cast } from '@/core/types/global-types';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { api } from '@/app';
 import { logger } from '@/core/utils/logger';
@@ -158,22 +157,6 @@ export class CSV extends AbstractGeoViewVector {
       resolve();
     });
     return promisedExecution;
-  }
-
-  /** ***************************************************************************************************************************
-   * Extract the type of the specified field from the metadata. If the type can not be found, return 'string'.
-   *
-   * @param {string} fieldName field name for which we want to get the type.
-   * @param {TypeLayerEntryConfig} layerConfig layer configuration.
-   *
-   * @returns {'string' | 'date' | 'number'} The type of the field.
-   */
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  protected getFieldType(fieldName: string, layerConfig: TypeLayerEntryConfig): 'string' | 'date' | 'number' {
-    const fieldDefinitions = this.layerMetadata[layerConfig.layerPath].source.featureInfo;
-    const fieldIndex = getLocalizedValue(Cast<TypeLocalizedString>(fieldDefinitions.outfields), this.mapId)?.split(',').indexOf(fieldName);
-    if (!fieldIndex || fieldIndex === -1) return 'string';
-    return (fieldDefinitions.fieldTypes as string).split(',')[fieldIndex!] as 'string' | 'date' | 'number';
   }
 
   /** ***************************************************************************************************************************

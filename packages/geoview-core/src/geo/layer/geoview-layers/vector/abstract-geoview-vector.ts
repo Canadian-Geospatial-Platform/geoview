@@ -16,10 +16,12 @@ import { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geovie
 import {
   TypeBaseLayerEntryConfig,
   TypeBaseSourceVectorInitialConfig,
+  TypeLayerEntryConfig,
   TypeListOfLayerEntryConfig,
+  TypeLocalizedString,
   TypeVectorLayerEntryConfig,
 } from '@/geo/map/map-schema-types';
-import { api } from '@/app';
+import { Cast, api } from '@/app';
 import { getLocalizedValue, getMinOrMaxExtents } from '@/core/utils/utilities';
 import { TypeArrayOfFeatureInfoEntries } from '@/api/events/payloads';
 import { NodeType } from '@/geo/renderer/geoview-renderer-types';
@@ -60,6 +62,21 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
    * @param {TypeListOfLayerEntryConfig} listOfLayerEntryConfig The list of layer entries configuration to validate.
    */
   protected abstract validateListOfLayerEntryConfig(listOfLayerEntryConfig: TypeListOfLayerEntryConfig): void;
+
+  /** ***************************************************************************************************************************
+   * Extract the type of the specified field from the metadata. If the type can not be found, return 'string'.
+   *
+   * @param {string} fieldName field name for which we want to get the type.
+   * @param {TypeLayerEntryConfig} layerConfig layer configuration.
+   *
+   * @returns {'string' | 'date' | 'number'} The type of the field.
+   */
+  protected getFieldType(fieldName: string, layerConfig: TypeLayerEntryConfig): 'string' | 'date' | 'number' {
+    const fieldDefinitions = this.layerMetadata[layerConfig.layerPath].source.featureInfo;
+    const fieldIndex = getLocalizedValue(Cast<TypeLocalizedString>(fieldDefinitions.outfields), this.mapId)?.split(',').indexOf(fieldName);
+    if (!fieldIndex || fieldIndex === -1) return 'string';
+    return (fieldDefinitions.fieldTypes as string).split(',')[fieldIndex!] as 'string' | 'date' | 'number';
+  }
 
   /** ***************************************************************************************************************************
    * This method creates a GeoView layer using the definition provided in the layerConfig parameter.
