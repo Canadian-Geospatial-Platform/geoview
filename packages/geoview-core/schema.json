@@ -1598,7 +1598,14 @@
               "type": "array",
               "items": {
                 "type": "string",
-                "enum": ["legend", "layers", "details", "data-table", "time-slider", "geochart"]
+                "enum": [
+                  "legend",
+                  "layers",
+                  "details",
+                  "data-table",
+                  "time-slider",
+                  "geochart"
+                ]
               },
               "minItems": 1,
               "default": ["legend", "layers", "details", "data-table"],

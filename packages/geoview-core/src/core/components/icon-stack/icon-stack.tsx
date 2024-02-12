@@ -1,3 +1,4 @@
+/* eslint-disable no-nested-ternary */
 /* eslint-disable react/require-default-props */
 import React from 'react';
 import { useTheme } from '@mui/material/styles';
@@ -17,7 +18,7 @@ export interface TypeIconStackProps {
  * @param {string} layerPath
  * @returns {JSX.Element} the icon stack item
  */
-export function IconStack({ layerPath, onIconClick, onStackIconClick }: TypeIconStackProps): JSX.Element {
+export function IconStack({ layerPath, onIconClick, onStackIconClick }: TypeIconStackProps): JSX.Element | null {
   const theme = useTheme();
   const sxClasses = getSxClasses(theme);
 
@@ -27,36 +28,38 @@ export function IconStack({ layerPath, onIconClick, onStackIconClick }: TypeIcon
   const iconImageStacked: string = iconData && iconData.length > 1 ? iconData[1] : '';
   const numOfIcons: number | undefined = iconData?.length;
 
-  // TODO for now just use 2 icons
-  // eslint-disable-next-line no-nested-ternary
-  return numOfIcons === 1 ? (
-    <IconButton sx={sxClasses.iconPreview} color="primary" size="small" onClick={iconImage === 'no data' ? undefined : onIconClick}>
-      {iconImage === 'no data' ? (
-        <BrowserNotSupportedIcon />
-      ) : (
-        <Box sx={sxClasses.legendIcon}>
-          <img alt="icon" src={iconImage} style={sxClasses.maxIconImg} />
-        </Box>
-      )}
-    </IconButton>
-  ) : numOfIcons && numOfIcons > 0 ? (
-    <Box tabIndex={0} onClick={onIconClick} sx={sxClasses.stackIconsBox} onKeyPress={(e) => onStackIconClick?.(e)}>
-      <IconButton sx={sxClasses.iconPreviewStacked} color="primary" size="small" tabIndex={-1}>
-        <Box sx={sxClasses.legendIconTransparent}>
-          {iconImageStacked && <img alt="icon" src={iconImageStacked} style={sxClasses.maxIconImg} />}
-        </Box>
-      </IconButton>
-      <IconButton sx={sxClasses.iconPreviewHoverable} color="primary" size="small" tabIndex={-1}>
-        <Box sx={sxClasses.legendIcon}>{iconImage && <img alt="icon" src={iconImage} style={sxClasses.maxIconImg} />}</Box>
-      </IconButton>
-    </Box>
-  ) : (
-    <Box tabIndex={0} onClick={onIconClick} sx={sxClasses.stackIconsBox} onKeyPress={(e) => onStackIconClick?.(e)}>
-      <IconButton sx={sxClasses.iconPreviewStacked} color="primary" size="small" tabIndex={-1}>
-        <Box sx={sxClasses.legendIconTransparent}>
+  const iconStackContent = () => {
+    return numOfIcons === 1 ? (
+      <IconButton sx={sxClasses.iconPreview} color="primary" size="small" onClick={iconImage === 'no data' ? undefined : onIconClick}>
+        {iconImage === 'no data' ? (
           <BrowserNotSupportedIcon />
-        </Box>
+        ) : (
+          <Box sx={sxClasses.legendIcon}>
+            <img alt="icon" src={iconImage} style={sxClasses.maxIconImg} />
+          </Box>
+        )}
       </IconButton>
-    </Box>
-  );
+    ) : numOfIcons && numOfIcons > 0 ? (
+      <Box tabIndex={0} onClick={onIconClick} sx={sxClasses.stackIconsBox} onKeyPress={(e) => onStackIconClick?.(e)}>
+        <IconButton sx={sxClasses.iconPreviewStacked} color="primary" size="small" tabIndex={-1}>
+          <Box sx={sxClasses.legendIconTransparent}>
+            {iconImageStacked && <img alt="icon" src={iconImageStacked} style={sxClasses.maxIconImg} />}
+          </Box>
+        </IconButton>
+        <IconButton sx={sxClasses.iconPreviewHoverable} color="primary" size="small" tabIndex={-1}>
+          <Box sx={sxClasses.legendIcon}>{iconImage && <img alt="icon" src={iconImage} style={sxClasses.maxIconImg} />}</Box>
+        </IconButton>
+      </Box>
+    ) : layerPath !== '' && iconData.length === 0 && layerPath.charAt(0) !== '!' ? (
+      <Box tabIndex={0} onClick={onIconClick} sx={sxClasses.stackIconsBox} onKeyPress={(e) => onStackIconClick?.(e)}>
+        <IconButton sx={sxClasses.iconPreviewStacked} color="primary" size="small" tabIndex={-1}>
+          <Box sx={sxClasses.legendIconTransparent}>
+            <BrowserNotSupportedIcon />
+          </Box>
+        </IconButton>
+      </Box>
+    ) : null;
+  };
+
+  return iconStackContent();
 }

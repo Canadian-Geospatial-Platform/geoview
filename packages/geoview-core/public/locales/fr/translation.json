@@ -195,6 +195,13 @@
     "images": "Images",
     "close": "Fermer"
   },
+  "geochart": {
+    "noChartAvailable": "Cliquez sur la couche de carte avec le graphique"
+  },
+  "guide": {
+    "title": "Guide",
+    "errorMessage": "Désolé, impossible de trouver le document d'aide !"
+  },
   "footerBar": {
     "focusToMap": "Aller à la carte",
     "focusToFooter": "Aller au pied de page",

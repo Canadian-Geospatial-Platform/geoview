@@ -129,6 +129,10 @@ const config = {
           },
         ],
       },
+      {
+        test: /\.md$/,
+        use: ['html-loader', 'markdown-loader'],
+      },
     ],
   },
   plugins: [
