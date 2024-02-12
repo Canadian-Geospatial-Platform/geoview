@@ -91,9 +91,9 @@ export declare class VectorTiles extends AbstractGeoViewRaster {
      *
      * @param {TypeTileLayerEntryConfig} layerConfig The layer entry configuration to process.
      *
-     * @returns {Promise<void>} A promise that the vector layer configuration has its metadata processed.
+     * @returns {Promise<TypeLayerEntryConfig>} A promise that the vector layer configuration has its metadata processed.
      */
-    protected processLayerMetadata(layerConfig: TypeTileLayerEntryConfig): Promise<void>;
+    protected processLayerMetadata(layerConfig: TypeTileLayerEntryConfig): Promise<TypeLayerEntryConfig>;
     /** ***************************************************************************************************************************
      * Get the bounds of the layer represented in the layerConfig pointed to by the cached layerPath, returns updated bounds
      *

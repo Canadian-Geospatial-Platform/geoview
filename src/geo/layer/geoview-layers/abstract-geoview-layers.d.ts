@@ -66,11 +66,11 @@ export type TypeStyleRepresentation = {
     arrayOfCanvas?: (HTMLCanvasElement | null)[];
 };
 export type TypeVectorLayerStyles = Partial<Record<TypeStyleGeometry, TypeStyleRepresentation>>;
-type LayerTypesKey = 'ESRI_DYNAMIC' | 'ESRI_FEATURE' | 'ESRI_IMAGE' | 'IMAGE_STATIC' | 'GEOJSON' | 'GEOCORE' | 'GEOPACKAGE' | 'XYZ_TILES' | 'VECTOR_TILES' | 'OGC_FEATURE' | 'WFS' | 'WMS';
+type LayerTypesKey = 'CSV' | 'ESRI_DYNAMIC' | 'ESRI_FEATURE' | 'ESRI_IMAGE' | 'IMAGE_STATIC' | 'GEOJSON' | 'GEOCORE' | 'GEOPACKAGE' | 'XYZ_TILES' | 'VECTOR_TILES' | 'OGC_FEATURE' | 'WFS' | 'WMS';
 /**
  * Type of GeoView layers
  */
-export type TypeGeoviewLayerType = 'esriDynamic' | 'esriFeature' | 'esriImage' | 'imageStatic' | 'GeoJSON' | 'geoCore' | 'GeoPackage' | 'xyzTiles' | 'vectorTiles' | 'ogcFeature' | 'ogcWfs' | 'ogcWms';
+export type TypeGeoviewLayerType = 'CSV' | 'esriDynamic' | 'esriFeature' | 'esriImage' | 'imageStatic' | 'GeoJSON' | 'geoCore' | 'GeoPackage' | 'xyzTiles' | 'vectorTiles' | 'ogcFeature' | 'ogcWfs' | 'ogcWms';
 /**
  * Definition of the GeoView layer constants
  */
@@ -157,6 +157,13 @@ export declare abstract class AbstractGeoViewLayer {
      */
     constructor(type: TypeGeoviewLayerType, mapLayerConfig: TypeGeoviewLayerConfig, mapId: string);
     /** ***************************************************************************************************************************
+     * Set the list of layer entry configuration and initialize the registered layer object and register all layers to layer sets.
+     *
+     * @param {TypeGeoviewLayer} mapLayerConfig The GeoView layer configuration options.
+     * @param {TypeListOfLayerEntryConfig} listOfLayerEntryConfig The list of layer's configuration
+     */
+    setListOfLayerEntryConfig(mapLayerConfig: TypeGeoviewLayerConfig, listOfLayerEntryConfig: TypeListOfLayerEntryConfig): void;
+    /** ***************************************************************************************************************************
      * Change the layer phase property and emit an event to update existing layer sets.
      *
      * @param {string} layerPhase The value to assign to the layer phase property.
@@ -173,21 +180,13 @@ export declare abstract class AbstractGeoViewLayer {
     /** ***************************************************************************************************************************
      * Process recursively the list of layer entries to see if all of them are processed.
      *
+     * @param {TypeLayerStatus[]} listOfStatusFlag The list of layer's configuration
      * @param {TypeListOfLayerEntryConfig} listOfLayerEntryConfig The list of layer's configuration
      *                                                            (default: this.listOfLayerEntryConfig).
      *
      * @returns {boolean} true when all layers are processed.
      */
-    allLayerEntryConfigProcessed(listOfLayerEntryConfig?: TypeListOfLayerEntryConfig): boolean;
-    /** ***************************************************************************************************************************
-     * Process recursively the list of layer entries to see if all of them are in error.
-     *
-     * @param {TypeListOfLayerEntryConfig} listOfLayerEntryConfig The list of layer's configuration
-     *                                                            (default: this.listOfLayerEntryConfig).
-     *
-     * @returns {boolean} true when all layers are in error.
-     */
-    allLayerEntryConfigAreInError(listOfLayerEntryConfig?: TypeListOfLayerEntryConfig): boolean;
+    allLayerStatusAreIn(listOfStatusFlag: TypeLayerStatus[], listOfLayerEntryConfig?: TypeListOfLayerEntryConfig): boolean;
     /** ***************************************************************************************************************************
      * Recursively process the list of layer entries to count all layers in error.
      *
@@ -203,12 +202,6 @@ export declare abstract class AbstractGeoViewLayer {
      * @param {TypeListOfLayerEntryConfig} listOfLayerEntryConfig The list of layer entries to process.
      */
     private initRegisteredLayers;
-    /** ***************************************************************************************************************************
-     * Process recursively the list of layer Entries to register all layers to the layerSets.
-     *
-     * @param {TypeListOfLayerEntryConfig} listOfLayerEntryConfig The list of layer entries to process.
-     */
-    private registerAllLayersToLayerSets;
     /** ***************************************************************************************************************************
      * This method is used to create the layers specified in the listOfLayerEntryConfig attribute inherited from its parent.
      * Normally, it is the second method called in the life cycle of a GeoView layer, the first one being the constructor.
@@ -230,9 +223,12 @@ export declare abstract class AbstractGeoViewLayer {
     createGeoViewLayers(): Promise<void>;
     /** ***************************************************************************************************************************
      * This method reads from the metadataAccessPath additional information to complete the GeoView layer configuration.
-     * If the GeoView layer does not have a service definition, this method does nothing.
      */
     protected getAdditionalServiceDefinition(): Promise<void>;
+    /** ***************************************************************************************************************************
+     * This method Validate the list of layer configs and extract them in the geoview instance.
+     */
+    validateAndExtractLayerMetadata(): Promise<void>;
     /** ***************************************************************************************************************************
      * This method reads the service metadata from the metadataAccessPath.
      *
@@ -261,7 +257,7 @@ export declare abstract class AbstractGeoViewLayer {
      *
      * @param {TypeLayerGroupEntryConfig} layerConfig The layer entry configuration to process.
      *
-     * @returns {Promise<void>} A promise that the vector layer configuration has its metadata and group layers processed.
+     * @returns {Promise<TypeLayerGroupEntryConfig>} A promise that the vector layer configuration has its metadata and group layers processed.
      */
     private processMetadataGroupLayer;
     /** ***************************************************************************************************************************
@@ -270,9 +266,9 @@ export declare abstract class AbstractGeoViewLayer {
      *
      * @param {TypeLayerEntryConfig} layerConfig The layer entry configuration to process.
      *
-     * @returns {Promise<void>} A promise that the vector layer configuration has its metadata processed.
+     * @returns {Promise<TypeLayerEntryConfig>} A promise that the vector layer configuration has its metadata processed.
      */
-    protected processLayerMetadata(layerConfig: TypeLayerEntryConfig): Promise<void>;
+    protected processLayerMetadata(layerConfig: TypeLayerEntryConfig): Promise<TypeLayerEntryConfig>;
     /** ***************************************************************************************************************************
      * Process recursively the list of layer Entries to create the layers and the layer groups.
      *
@@ -282,7 +278,7 @@ export declare abstract class AbstractGeoViewLayer {
      *
      * @returns {Promise<BaseLayer | null>} The promise that the layers were processed.
      */
-    protected processListOfLayerEntryConfig(listOfLayerEntryConfig: TypeListOfLayerEntryConfig, layerGroup?: LayerGroup): Promise<BaseLayer | null>;
+    processListOfLayerEntryConfig(listOfLayerEntryConfig: TypeListOfLayerEntryConfig, layerGroup?: LayerGroup): Promise<BaseLayer | null>;
     /** ***************************************************************************************************************************
      * This method creates a GeoView layer using the definition provided in the layerConfig parameter.
      *
@@ -365,7 +361,7 @@ export declare abstract class AbstractGeoViewLayer {
      *
      * @param {TypeBaseLayerEntryConfig} layerConfig The layer config to register.
      */
-    protected registerToLayerSets(layerConfig: TypeBaseLayerEntryConfig): void;
+    registerToLayerSets(layerConfig: TypeBaseLayerEntryConfig): void;
     /** ***************************************************************************************************************************
      * This method unregisters the layer from the layer sets.
      *
@@ -375,9 +371,10 @@ export declare abstract class AbstractGeoViewLayer {
     /** ***************************************************************************************************************************
      * This method create a layer group.
      * @param {TypeLayerEntryConfig} layerConfig The layer configuration.
+     * @param {TypeLayerInitialSettings } initialSettings Initial settings to apply to the layer.
      * @returns {LayerGroup} A new layer group.
      */
-    protected createLayerGroup(layerConfig: TypeLayerEntryConfig): LayerGroup;
+    protected createLayerGroup(layerConfig: TypeLayerEntryConfig, initialSettings: TypeLayerInitialSettings): LayerGroup;
     /** ***************************************************************************************************************************
      * Get the layer configuration of the specified layer path.
      *
@@ -386,30 +383,6 @@ export declare abstract class AbstractGeoViewLayer {
      * @returns {TypeLayerEntryConfig | undefined} The layer configuration or undefined if not found.
      */
     getLayerConfig(layerPath: string): TypeLayerEntryConfig | undefined;
-    /**
-     * Asynchronously gets the layer configuration of the specified layerPath.
-     * If the layer configuration we're searching for has to be loaded, set mustBeLoaded to true when awaiting on this method.
-     * This function waits the timeout period before abandonning (or uses the default timeout when not provided).
-     * Note this function uses the 'Async' suffix to differentiate it from 'getLayerConfig'.
-     *
-     * @param {string} layerPath the layer path to look for
-     * @param {string} mustBeLoaded indicate if the layer we're searching for must be found only once loaded
-     * @param {string} timeout optionally indicate the timeout after which time to abandon the promise
-     * @param {string} checkFrequency optionally indicate the frequency at which to check for the condition on the layer
-     * @returns a promise with the TypeLayerEntryConfig or null when layer config was not found
-     * @throws an exception when the layer config for the layer path was found, but failed to become in loaded status before the timeout expired
-     */
-    getLayerConfigAsync(layerPath: string, mustBeLoaded: boolean, timeout?: number, checkFrequency?: number): Promise<TypeLayerEntryConfig>;
-    /**
-     * Returns a Promise that will be resolved once the given layer config is in a loaded or error status.
-     * This function waits the timeout period before abandonning (or uses the default timeout when not provided).
-     *
-     * @param {string} layerConfig the layer config
-     * @param {string} timeout optionally indicate the timeout after which time to abandon the promise
-     * @param {string} checkFrequency optionally indicate the frequency at which to check for the condition on the layer config
-     * @throws an exception when the layer failed to become in loaded or error status before the timeout expired
-     */
-    waitForLoadedOrErrorStatus(layerConfig: TypeBaseLayerEntryConfig, timeout?: number, checkFrequency?: number): Promise<void>;
     /** ***************************************************************************************************************************
      * Returns the layer bounds or undefined if not defined in the layer configuration or the metadata. If projectionCode is
      * defined, returns the bounds in the specified projection otherwise use the map projection. The bounds are different from the
@@ -601,10 +574,11 @@ export declare abstract class AbstractGeoViewLayer {
     /** ***************************************************************************************************************************
      * Set the layerStatus code of all layers in the listOfLayerEntryConfig.
      *
+     * @param {TypeLayerStatus} newStatus The new status to assign to the layers.
      * @param {TypeListOfLayerEntryConfig} listOfLayerEntryConfig The list of layer's configuration.
      * @param {string} errorMessage The error message.
      */
-    setAllLayerStatusToError(listOfLayerEntryConfig: TypeListOfLayerEntryConfig, errorMessage: string): void;
+    setAllLayerStatusTo(newStatus: TypeLayerStatus, listOfLayerEntryConfig: TypeListOfLayerEntryConfig, errorMessage?: string): void;
     /** ***************************************************************************************************************************
      * remove a layer configuration.
      *

@@ -95,9 +95,9 @@ export declare class OgcFeature extends AbstractGeoViewVector {
      *
      * @param {TypeVectorLayerEntryConfig} layerConfig The layer entry configuration to process.
      *
-     * @returns {Promise<void>} A promise that the vector layer configuration has its metadata processed.
+     * @returns {Promise<TypeLayerEntryConfig>} A promise that the vector layer configuration has its metadata processed.
      */
-    protected processLayerMetadata(layerConfig: TypeVectorLayerEntryConfig): Promise<void>;
+    protected processLayerMetadata(layerConfig: TypeVectorLayerEntryConfig): Promise<TypeLayerEntryConfig>;
     /** ***************************************************************************************************************************
      * This method sets the outfields and aliasFields of the source feature info.
      *

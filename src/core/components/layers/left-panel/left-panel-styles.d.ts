@@ -6,7 +6,7 @@ export declare const getSxClasses: (theme: Theme) => {
         padding: string;
         overflowY: string;
         '& .MuiListItemText-primary': {
-            font: string;
+            fontWeight: string;
             padding: string;
             fontSize: string;
             lineHeight: number;
@@ -91,7 +91,7 @@ export declare const getSxClasses: (theme: Theme) => {
     };
     evenDepthList: {
         background: string;
-        boxShadow: string;
+        boxShadow: number;
         padding: string;
         margin: string;
         width: string;
@@ -103,7 +103,7 @@ export declare const getSxClasses: (theme: Theme) => {
     };
     oddDepthList: {
         background: string;
-        boxShadow: string;
+        boxShadow: number;
         padding: string;
         margin: string;
         width: string;

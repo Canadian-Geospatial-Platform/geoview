@@ -12,6 +12,7 @@ export declare const getSxClasses: (theme: Theme) => {
         maxHeight: string;
         backdropFilter: string;
         backgroundColor: string;
+        color: string;
         pointerEvents: string;
         gap: number;
         order: number;

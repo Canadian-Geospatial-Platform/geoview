@@ -8,12 +8,11 @@ export declare const getSxClasses: (theme: Theme) => {
     };
     title: {
         textAlign: string;
-        font: string;
+        fontWeight: string;
         color: string;
         fontSize: any;
     };
     subtitle: {
-        font: string;
         fontWeight: string;
         fontSize: any;
         textAlign: string;
@@ -31,7 +30,8 @@ export declare const getSxClasses: (theme: Theme) => {
     legendLayerListItem: {
         padding: string;
         '& .layerTitle > .MuiListItemText-primary': {
-            font: string;
+            fontSize: any;
+            fontWeight: string;
             textOverflow: string;
             whiteSpace: string;
             overflow: string;

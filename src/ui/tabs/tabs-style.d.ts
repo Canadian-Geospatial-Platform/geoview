@@ -1,7 +1,6 @@
 import { Theme } from '@mui/material';
 export declare const getSxClasses: (theme: Theme) => {
     rightIcons: {
-        backgroundColor: string;
         marginTop: number;
         display: string;
         justifyContent: string;
@@ -14,7 +13,7 @@ export declare const getSxClasses: (theme: Theme) => {
         height: string;
     };
     tab: {
-        fontSize: number;
+        fontSize: any;
         fontWeight: string;
         minWidth: string;
         padding: string;

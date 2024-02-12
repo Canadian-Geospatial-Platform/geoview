@@ -99,7 +99,7 @@ export declare class GeoPackage extends AbstractGeoViewVector {
      *
      * @returns {Promise<BaseLayer | null>} The promise that the layers were processed.
      */
-    protected processListOfLayerEntryConfig(listOfLayerEntryConfig: TypeListOfLayerEntryConfig, layerGroup?: LayerGroup): Promise<BaseLayer | null>;
+    processListOfLayerEntryConfig(listOfLayerEntryConfig: TypeListOfLayerEntryConfig, layerGroup?: LayerGroup): Promise<BaseLayer | null>;
     /** ***************************************************************************************************************************
      * Create a source configuration for the vector layer.
      *

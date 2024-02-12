@@ -1,17 +1,55 @@
 import { GeoviewStoreType } from '@/core/stores/geoview-store';
-import { TypeMapFeaturesConfig } from '@/core/types/cgpv-types';
+import { IGeoviewState, TypeArrayOfLayerData } from '@/core/types/cgpv-types';
+/**
+ * Holds the buffer, on a map basis, for the propagation in batch in the layer data array store
+ */
+export type BatchedPropagationLayerDataArrayByMap = {
+    [mapId: string]: TypeArrayOfLayerData[];
+};
 export declare abstract class AbstractEventProcessor {
-    protected store: GeoviewStoreType | undefined;
-    protected subscriptionArr: Array<() => void>;
-    constructor();
-    onInitialize(store: GeoviewStoreType): void;
-    onDestroy(store: GeoviewStoreType): void;
+    private subscriptionArr;
     /**
-     * ! Function available from all children class!!!
-     * Use to get the map configuration
+     * Shortcut to get the store state for a given map id
      *
-     * @param {string} mapId the map id to retreive the config for
-     * @returns {TypeMapFeaturesConfig | undefined} the map config or undefined if there is no config for this map id
+     * @param {string} mapId the map id to retreive the state for
+     * @returns {IGeoviewState} the store state
      */
-    static getGeoViewConfig(mapId: string): TypeMapFeaturesConfig | undefined;
+    protected static getState(mapId: string): IGeoviewState;
+    /**
+     * Shortcut to get the store state for a given map id
+     *
+     * @param {string} mapId the map id to retreive the state for
+     * @returns {IGeoviewState} the store state
+     */
+    protected static getStateAsync(mapId: string): Promise<IGeoviewState>;
+    /**
+     * Initializes the processor
+     * @param {GeoviewStoreType} store the store to initialize the processor with
+     */
+    initialize(store: GeoviewStoreType): void;
+    protected onInitialize(store: GeoviewStoreType): Array<() => void> | void;
+    /**
+     * Destroys the processor
+     * @param {GeoviewStoreType} store the store to initialize the processor with
+     */
+    destroy(): void;
+    protected onDestroy(): void;
+    /**
+     * Helper method to propagate in the layerDataArray in a batched manner.
+     * The propagation can be bypassed using 'layerPathBypass' parameter which tells the process to
+     * immediately batch out the array in the store for faster triggering of the state, for faster updating of the UI.
+     * @param {string} mapId The map id
+     * @param {TypeArrayOfLayerData} layerDataArray The layer data array to hold in buffer during the batch
+     * @param {BatchedPropagationLayerDataArrayByMap} batchPropagationObject A reference to the BatchedPropagationLayerDataArrayByMap object used to hold all the layer data arrays in the buffer
+     * @param {number} timeDelayBetweenPropagations The delay between actual propagations in the store
+     * @param {(layerDataArray: TypeArrayOfLayerData) => void} onSetLayerDataArray The store action callback used to store the layerDataArray in the actual store
+     * @param {string} traceProcessorIndication? Simple parameter for logging purposes
+     * @param {string} layerPathBypass? Indicates a layer path which, when processed, should bypass the buffer period and immediately trigger an update to the store
+     * @param {(layerPath: string) => void} onResetBypass? The store action callback used to reset the layerPathBypass value in the store.
+     *                                                     This is used so that when the bypass occurred once, it's not occuring again for all subsequent checks in the period of batch propagations.
+     *                                                     It's up to the components to re-initialize the layerPathBypass at a certain time.
+     *                                                     When no onResetBypass is specified, once the bypass occurs, all subsequent propagations happen immediately.
+     * @returns {Promise<void>} Promise upon completion
+     */
+    protected static helperPropagateArrayStoreBatch(mapId: string, layerDataArray: TypeArrayOfLayerData, batchPropagationObject: BatchedPropagationLayerDataArrayByMap, timeDelayBetweenPropagations: number, onSetLayerDataArray: (layerDataArray: TypeArrayOfLayerData) => void, traceProcessorIndication?: string, layerPathBypass?: string, onResetBypass?: (layerPath: string) => void): Promise<void>;
 }

@@ -32,7 +32,6 @@ export declare const getSxClasses: (theme: Theme) => {
         alignItems: string;
         '& span': {
             fontSize: number;
-            color: string;
             textOverflow: string;
             whiteSpace: string;
             overflow: string;
@@ -40,11 +39,9 @@ export declare const getSxClasses: (theme: Theme) => {
     };
     mousePositionCheckmark: {
         paddingRight: number;
-        color: string;
     };
     mousePositionText: {
         fontSize: number;
-        color: string;
         textOverflow: string;
         whiteSpace: string;
         overflow: string;

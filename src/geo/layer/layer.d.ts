@@ -63,13 +63,6 @@ export declare class Layer {
      */
     geoviewLayer(layerPath: string): AbstractGeoViewLayer;
     /**
-     * Register the layer identifier. Duplicate identifier are not allowed.
-     * @param {TypeLayerEntryConfig} layerConfig The layer configuration to register.
-     *
-     * @returns {boolean} Returns false if the layer configuration can't be registered.
-     */
-    registerLayerConfig(layerConfig: TypeLayerEntryConfig): boolean;
-    /**
      * Method used to verify if a layer is registered. Returns true if registered.
      * @param {TypeLayerEntryConfig} layerConfig The layer configuration to test.
      *
@@ -80,7 +73,7 @@ export declare class Layer {
      * Add the layer to the map if valid. If not (is a string) emit an error
      * @param {any} geoviewLayer the layer config
      */
-    private addToMap;
+    addToMap(geoviewLayer: AbstractGeoViewLayer): void;
     /**
      * Remove a layer from the map using its layer path. The path may point to the root geoview layer
      * or a sub layer.
@@ -135,7 +128,7 @@ export declare class Layer {
      * @param {string} checkFrequency optionally indicate the frequency at which to check for the condition on the layer
      * @throws an exception when the layer failed to become in processed phase before the timeout expired
      */
-    waitForProcessedPhase: (layer: AbstractGeoViewLayer, timeout?: number, checkFrequency?: number) => Promise<void>;
+    waitForProcesseOrErrorStatus: (layer: AbstractGeoViewLayer, timeout?: number, checkFrequency?: number) => Promise<void>;
     /**
      * Highlight layer or sublayer on map
      *

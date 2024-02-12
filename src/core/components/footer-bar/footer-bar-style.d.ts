@@ -3,7 +3,7 @@ export declare const getSxClasses: (theme: Theme) => {
     tabsContainer: {
         position: string;
         background: string;
-        boxShadow: string;
+        boxShadow: number;
         width: string;
         transition: string;
         height: string;

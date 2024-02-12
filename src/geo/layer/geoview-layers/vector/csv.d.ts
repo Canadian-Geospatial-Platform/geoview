@@ -5,66 +5,74 @@ import Feature from 'ol/Feature';
 import { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { AbstractGeoViewVector } from '@/geo/layer/geoview-layers/vector/abstract-geoview-vector';
 import { TypeLayerEntryConfig, TypeVectorLayerEntryConfig, TypeVectorSourceInitialConfig, TypeGeoviewLayerConfig, TypeListOfLayerEntryConfig, TypeBaseLayerEntryConfig } from '@/geo/map/map-schema-types';
-export interface TypeSourceWFSVectorInitialConfig extends TypeVectorSourceInitialConfig {
-    format: 'WFS';
+export interface TypeSourceCSVInitialConfig extends Omit<TypeVectorSourceInitialConfig, 'format'> {
+    format: 'CSV';
+    separator?: ',';
 }
-export declare class TypeWfsLayerEntryConfig extends TypeVectorLayerEntryConfig {
-    source: TypeSourceWFSVectorInitialConfig;
+export declare class TypeCsvLayerEntryConfig extends TypeVectorLayerEntryConfig {
+    source: TypeSourceCSVInitialConfig;
+    valueSeparator?: string | undefined;
     /**
      * The class constructor.
-     * @param {TypeWfsLayerEntryConfig} layerConfig The layer configuration we want to instanciate.
+     * @param {TypeCsvLayerEntryConfig} layerConfig The layer configuration we want to instanciate.
      */
-    constructor(layerConfig: TypeWfsLayerEntryConfig);
+    constructor(layerConfig: TypeCsvLayerEntryConfig);
 }
-export interface TypeWFSLayerConfig extends Omit<TypeGeoviewLayerConfig, 'geoviewLayerType'> {
-    geoviewLayerType: 'ogcWfs';
-    listOfLayerEntryConfig: TypeWfsLayerEntryConfig[];
+export interface TypeCSVLayerConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig'> {
+    geoviewLayerType: 'CSV';
+    listOfLayerEntryConfig: TypeCsvLayerEntryConfig[];
 }
 /** *****************************************************************************************************************************
- * type guard function that redefines a TypeGeoviewLayerConfig as a TypeWFSLayerConfig if the geoviewLayerType attribute of the
- * verifyIfLayer parameter is WFS. The type ascention applies only to the true block of the if clause that use this function.
+ * type guard function that redefines a TypeGeoviewLayerConfig as a TypeCSVLayerConfig if the geoviewLayerType attribute of the
+ * verifyIfLayer parameter is CSV. The type ascention applies only to the true block of the if clause that use this
+ * function.
  *
  * @param {TypeGeoviewLayerConfig} verifyIfLayer Polymorphic object to test in order to determine if the type ascention is valid.
  *
  * @returns {boolean} true if the type ascention is valid.
  */
-export declare const layerConfigIsWFS: (verifyIfLayer: TypeGeoviewLayerConfig) => verifyIfLayer is TypeWFSLayerConfig;
+export declare const layerConfigIsCSV: (verifyIfLayer: TypeGeoviewLayerConfig) => verifyIfLayer is TypeCSVLayerConfig;
 /** *****************************************************************************************************************************
- * type guard function that redefines an AbstractGeoViewLayer as a WFS if the type attribute of the verifyIfGeoViewLayer parameter
- * is WFS. The type ascention applies only to the true block of the if clause that use this function.
+ * type guard function that redefines an AbstractGeoViewLayer as a CSV if the type attribute of the verifyIfGeoViewLayer
+ * parameter is CSV. The type ascention applies only to the true block of the if clause that use this function.
  *
  * @param {AbstractGeoViewLayer} verifyIfGeoViewLayer Polymorphic object to test in order to determine if the type ascention is
  * valid.
  *
  * @returns {boolean} true if the type ascention is valid.
  */
-export declare const geoviewLayerIsWFS: (verifyIfGeoViewLayer: AbstractGeoViewLayer) => verifyIfGeoViewLayer is WFS;
+export declare const geoviewLayerIsCSV: (verifyIfGeoViewLayer: AbstractGeoViewLayer) => verifyIfGeoViewLayer is CSV;
 /** *****************************************************************************************************************************
- * type guard function that redefines a TypeLayerEntryConfig as a TypeWfsLayerEntryConfig if the geoviewLayerType attribute of the
- * verifyIfGeoViewEntry.geoviewLayerConfig attribute is WFS. The type ascention applies only to the true block of
- * the if clause that use this function.
+ * type guard function that redefines a TypeLayerEntryConfig as a TypeCsvLayerEntryConfig if the geoviewLayerType attribute of
+ * the verifyIfGeoViewEntry.geoviewLayerConfig attribute is CSV. The type ascention applies only to the true block of the if
+ * clause that use this function.
  *
  * @param {TypeLayerEntryConfig} verifyIfGeoViewEntry Polymorphic object to test in order to determine if the type ascention is
  * valid.
  *
  * @returns {boolean} true if the type ascention is valid.
  */
-export declare const geoviewEntryIsWFS: (verifyIfGeoViewEntry: TypeLayerEntryConfig) => verifyIfGeoViewEntry is TypeWfsLayerEntryConfig;
+export declare const geoviewEntryIsCSV: (verifyIfGeoViewEntry: TypeLayerEntryConfig) => verifyIfGeoViewEntry is TypeCsvLayerEntryConfig;
 /** *****************************************************************************************************************************
- * A class to add WFS layer.
+ * Class used to add CSV layer to the map
  *
  * @exports
- * @class WFS
+ * @class CSV
  */
-export declare class WFS extends AbstractGeoViewVector {
-    /** private varibale holding wfs version. */
-    private version;
+export declare class CSV extends AbstractGeoViewVector {
     /** ***************************************************************************************************************************
      * Initialize layer
+     *
      * @param {string} mapId the id of the map
-     * @param {TypeWFSLayerConfig} layerConfig the layer configuration
+     * @param {TypeCSVLayerConfig} layerConfig the layer configuration
      */
-    constructor(mapId: string, layerConfig: TypeWFSLayerConfig);
+    constructor(mapId: string, layerConfig: TypeCSVLayerConfig);
+    /** ***************************************************************************************************************************
+     * CSV has no metadata.
+     *
+     * @returns {Promise<void>} A promise that the execution is completed.
+     */
+    protected fetchServiceMetadata(): Promise<void>;
     /** ***************************************************************************************************************************
      * Extract the type of the specified field from the metadata. If the type can not be found, return 'string'.
      *
@@ -75,21 +83,14 @@ export declare class WFS extends AbstractGeoViewVector {
      */
     protected getFieldType(fieldName: string, layerConfig: TypeLayerEntryConfig): 'string' | 'date' | 'number';
     /** ***************************************************************************************************************************
-     * This method reads the service metadata from the metadataAccessPath.
-     *
-     * @returns {Promise<void>} A promise that the execution is completed.
-     */
-    protected fetchServiceMetadata(): Promise<void>;
-    /** ***************************************************************************************************************************
-     * This method recursively validates the configuration of the layer entries to ensure that each layer is correctly defined. If
-     * necessary, additional code can be executed in the child method to complete the layer configuration.
+     * This method recursively validates the layer configuration entries by filtering and reporting invalid layers. If needed,
+     * extra configuration may be done here.
      *
      * @param {TypeListOfLayerEntryConfig} listOfLayerEntryConfig The list of layer entries configuration to validate.
      */
     protected validateListOfLayerEntryConfig(listOfLayerEntryConfig: TypeListOfLayerEntryConfig): void;
     /** ***************************************************************************************************************************
-     * This method is used to process the layer's metadata. It will fill the empty outfields and aliasFields properties of the
-     * layer's configuration.
+     * Metadata is processed when parsing the file.
      *
      * @param {TypeVectorLayerEntryConfig} layerConfig The layer entry configuration to process.
      *
@@ -97,12 +98,32 @@ export declare class WFS extends AbstractGeoViewVector {
      */
     protected processLayerMetadata(layerConfig: TypeVectorLayerEntryConfig): Promise<TypeLayerEntryConfig>;
     /** ***************************************************************************************************************************
+     * Converts csv to array of rows of separated values.
+     *
+     * @param {string} csvData The raw csv text.
+     * @param {string} separator The character used to separate the values.
+     *
+     * @returns {string[][]} An array of the rows of the csv, split by separator.
+     */
+    private csvStringToArray;
+    /** ***************************************************************************************************************************
      * This method sets the outfields and aliasFields of the source feature info.
      *
-     * @param {TypeJsonArray} fields An array of field names and its aliases.
+     * @param {string[]} headers An array of field names.
+     * @param {string[]} firstRow The first row of data.
+     * @param {number[]} lonLatIndices The index of lon and lat in the array.
      * @param {TypeVectorLayerEntryConfig} layerConfig The vector layer entry to configure.
      */
     private processFeatureInfoConfig;
+    /** ***************************************************************************************************************************
+     * Converts csv text to feature array.
+     *
+     * @param {string} csvData The data from the .csv file.
+     * @param {TypeVectorLayerEntryConfig} layerConfig The config of the layer.
+     *
+     * @returns {Feature[]} The array of features.
+     */
+    convertCsv(csvData: string, layerConfig: TypeVectorLayerEntryConfig): Feature[] | null;
     /** ***************************************************************************************************************************
      * Create a source configuration for the vector layer.
      *

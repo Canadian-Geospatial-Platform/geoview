@@ -1,6 +1,6 @@
 import { IGeoViewColors, IGeoViewFontSizes } from './types';
 export declare const font = "'Roboto', 'Helvetica', 'Arial', sans-serif";
-export declare const defaultFontSize = 16;
+export declare const defaultFontSize = 1;
 export declare const headingStyles: {
     fontFamily: string;
     fontWeight: number;

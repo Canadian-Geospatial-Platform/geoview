@@ -5,7 +5,6 @@ import { TypeLayerStatus, TypeLocalizedString } from '@/geo/map/map-schema-types
 import { TypeResultsSet } from './layer-set-payload';
 export type TypeLegendResultsSetEntry = {
     layerStatus: TypeLayerStatus;
-    layerPhase: string;
     querySent: boolean;
     data: TypeLegend | undefined | null;
     layerName?: TypeLocalizedString;

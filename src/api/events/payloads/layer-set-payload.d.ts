@@ -5,8 +5,7 @@ export type TypeResultsSet = {
     [layerPath: string]: {
         layerName?: string;
         layerStatus: TypeLayerStatus;
-        layerPhase: string;
-        data: any | null;
+        data: any;
     };
 };
 /**
@@ -67,15 +66,6 @@ export interface TypelayerSetUpdatedPayload extends LayerSetPayload {
  * @returns {boolean} returns true if the payload is valid
  */
 export declare const payloadIsLayerSetChangeLayerStatus: (verifyIfPayload: PayloadBaseClass) => verifyIfPayload is TypeLayerSetChangeLayerStatusPayload;
-/**
- * type guard function that redefines a PayloadBaseClass as a TypeLayerSetChangeLayerPhasePayload
- * if the event attribute of the verifyIfPayload parameter is valid. The type ascention
- * applies only to the true block of the if clause.
- *
- * @param {PayloadBaseClass} verifyIfPayload object to test in order to determine if the type ascention is valid
- * @returns {boolean} returns true if the payload is valid
- */
-export declare const payloadIsLayerSetChangeLayerPhase: (verifyIfPayload: PayloadBaseClass) => verifyIfPayload is TypeLayerSetChangeLayerPhasePayload;
 /**
  * Additional attributes needed to define a TypeLayerSetChangeLayerStatusPayload
  */

@@ -150,9 +150,9 @@ export declare class WMS extends AbstractGeoViewRaster {
      *
      * @param {TypeLayerEntryConfig} layerConfig The layer entry configuration to process.
      *
-     * @returns {Promise<void>} A promise that the layer configuration has its metadata processed.
+     * @returns {Promise<TypeLayerEntryConfig>} A promise that the layer configuration has its metadata processed.
      */
-    protected processLayerMetadata(layerConfig: TypeLayerEntryConfig): Promise<void>;
+    protected processLayerMetadata(layerConfig: TypeLayerEntryConfig): Promise<TypeLayerEntryConfig>;
     /** ***************************************************************************************************************************
      * This method will create a Geoview temporal dimension if it existds in the service metadata
      * @param {TypeJsonObject} wmsTimeDimension The WMS time dimension object
@@ -257,7 +257,7 @@ export declare class WMS extends AbstractGeoViewRaster {
      * @param {never} notUsed1 This parameter must not be provided. It is there to allow overloading of the method signature.
      * @param {never} notUsed2 This parameter must not be provided. It is there to allow overloading of the method signature.
      */
-    applyViewFilter(filter: string, notUsed1?: never, notUsed2?: never): Promise<void>;
+    applyViewFilter(filter: string, notUsed1?: never, notUsed2?: never): void;
     /** ***************************************************************************************************************************
      * Apply a view filter to the layer identified by the path stored in the layerPathAssociatedToTheGeoviewLayer property stored
      * in the layer instance associated to the map. When the CombineLegendFilter flag is false, the filter paramater is used alone
@@ -269,7 +269,7 @@ export declare class WMS extends AbstractGeoViewRaster {
      * @param {boolean} CombineLegendFilter Flag used to combine the legend filter and the filter together (default: true)
      * @param {never} notUsed This parameter must not be provided. It is there to allow overloading of the method signature.
      */
-    applyViewFilter(filter: string, CombineLegendFilter: boolean, notUsed?: never): Promise<void>;
+    applyViewFilter(filter: string, CombineLegendFilter: boolean, notUsed?: never): void;
     /** ***************************************************************************************************************************
      * Apply a view filter to the layer. When the CombineLegendFilter flag is false, the filter paramater is used alone to display
      * the features. Otherwise, the legend filter and the filter parameter are combined together to define the view filter. The
@@ -281,7 +281,7 @@ export declare class WMS extends AbstractGeoViewRaster {
      * @param {string} filter An optional filter to be used in place of the getViewFilter value.
      * @param {boolean} CombineLegendFilter Flag used to combine the legend filter and the filter together (default: true)
      */
-    applyViewFilter(layerPath: string, filter?: string, CombineLegendFilter?: boolean): Promise<void>;
+    applyViewFilter(layerPath: string, filter?: string, CombineLegendFilter?: boolean): void;
     /** ***************************************************************************************************************************
      * Get the bounds of the layer represented in the layerConfig pointed to by the cached layerPath, returns updated bounds
      *
