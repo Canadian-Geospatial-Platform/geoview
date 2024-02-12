@@ -413,34 +413,56 @@ export function parseFeatureInfoEntries(records: TypeJsonObject[]): TypeFeatureI
 
 /**
  * Asynchronously queries an Esri feature layer given the url and returns an array of `TypeFeatureInfoEntryPartial` records.
- * @param url string An Esri url indicating a feature layer to query
- * @returns TypeFeatureInfoEntryPartial[] An array of relared records of type TypeFeatureInfoEntryPartial, or an empty array.
+ * @param {url} string An Esri url indicating a feature layer to query
+ * @returns {TypeFeatureInfoEntryPartial[] | null} An array of relared records of type TypeFeatureInfoEntryPartial, or an empty array.
  */
-export async function queryRecordsByUrl(url: string): Promise<TypeFeatureInfoEntryPartial[]> {
+export async function queryRecordsByUrl(url: string): Promise<TypeFeatureInfoEntryPartial[] | null> {
   // TODO: Refactor - Suggestion to rework this function and the one in EsriDynamic.getFeatureInfoAtLongLat(), making
   // TO.DO.CONT: the latter redirect to this one here and merge some logic between the 2 functions ideally making this one here return a TypeFeatureInfoEntry[] with options to have returnGeometry=true or false and such.
   // Query the data
-  const response = await fetch(url);
-  const respJson = await response.json();
+  try {
+    const response = await fetch(url);
+    const respJson = await response.json();
+    const jsonResponse = await response.json();
+    if (jsonResponse.error) {
+      logger.logInfo('There is a problem with this query: ', url);
+      throw new Error(`Error code = ${jsonResponse.error.code} ${jsonResponse.error.message}` || '');
+    }
 
-  // Return the array of TypeFeatureInfoEntryPartial
-  return parseFeatureInfoEntries(respJson.features);
+    // Return the array of TypeFeatureInfoEntryPartial
+    return parseFeatureInfoEntries(respJson.features);
+  } catch (error) {
+    // Log
+    logger.logError('esri-layer-common.queryRelatedRecordsByUrl()\n', error);
+    return null;
+  }
 }
 
 /**
  * Asynchronously queries an Esri relationship table given the url and returns an array of `TypeFeatureInfoEntryPartial` records.
- * @param url string An Esri url indicating a relationship table to query
- * @param recordGroupIndex number The group index of the relationship layer on which to read the related records
- * @returns TypeFeatureInfoEntryPartial[] An array of relared records of type TypeFeatureInfoEntryPartial, or an empty array.
+ * @param {url} string An Esri url indicating a relationship table to query
+ * @param {recordGroupIndex} number The group index of the relationship layer on which to read the related records
+ * @returns {TypeFeatureInfoEntryPartial[] | null} An array of relared records of type TypeFeatureInfoEntryPartial, or an empty array.
  */
-export async function queryRelatedRecordsByUrl(url: string, recordGroupIndex: number): Promise<TypeFeatureInfoEntryPartial[]> {
+export async function queryRelatedRecordsByUrl(url: string, recordGroupIndex: number): Promise<TypeFeatureInfoEntryPartial[] | null> {
   // Query the data
-  const response = await fetch(url);
-  const respJson = await response.json();
+  try {
+    const response = await fetch(url);
+    const respJson = await response.json();
+    const jsonResponse = await response.json();
+    if (jsonResponse.error) {
+      logger.logInfo('There is a problem with this query: ', url);
+      throw new Error(`Error code = ${jsonResponse.error.code} ${jsonResponse.error.message}` || '');
+    }
 
-  // If any related record groups found
-  if (respJson.relatedRecordGroups.length > 0)
-    // Return the array of TypeFeatureInfoEntryPartial
-    return parseFeatureInfoEntries(respJson.relatedRecordGroups[recordGroupIndex].relatedRecords);
-  return Promise.resolve([]);
+    // If any related record groups found
+    if (respJson.relatedRecordGroups.length > 0)
+      // Return the array of TypeFeatureInfoEntryPartial
+      return parseFeatureInfoEntries(respJson.relatedRecordGroups[recordGroupIndex].relatedRecords);
+    return Promise.resolve([]);
+  } catch (error) {
+    // Log
+    logger.logError('esri-layer-common.queryRelatedRecordsByUrl()\n', error);
+    return null;
+  }
 }

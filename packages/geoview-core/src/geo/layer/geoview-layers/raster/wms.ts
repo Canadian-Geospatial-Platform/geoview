@@ -677,10 +677,11 @@ export class WMS extends AbstractGeoViewRaster {
         return [];
 
       const wmsSource = (layerConfig.olLayer as OlLayer).getSource() as ImageWMS;
-      let infoFormat = 'text/xml';
-      if (!(this.metadata!.Capability.Request.GetFeatureInfo.Format as TypeJsonArray).includes('text/xml' as TypeJsonObject))
-        if ((this.metadata!.Capability.Request.GetFeatureInfo.Format as TypeJsonArray).includes('text/plain' as TypeJsonObject))
-          infoFormat = 'text/plain';
+      let infoFormat = '';
+      const featureInfoFormat = this.metadata?.Capability?.Request?.GetFeatureInfo?.Format as TypeJsonArray;
+      if (featureInfoFormat)
+        if (featureInfoFormat.includes('text/xml' as TypeJsonObject)) infoFormat = 'text/xml';
+        else if (featureInfoFormat.includes('text/plain' as TypeJsonObject)) infoFormat = 'text/plain';
         else throw new Error('Parameter info_format of GetFeatureInfo only support text/xml and text/plain for WMS services.');
 
       const featureInfoUrl = wmsSource.getFeatureInfoUrl(clickCoordinate, viewResolution, crs, {
@@ -726,7 +727,7 @@ export class WMS extends AbstractGeoViewRaster {
     } catch (error) {
       // Log
       logger.logError('wms.getFeatureInfoAtLongLat()\n', error);
-      return [];
+      return null;
     }
   }
 

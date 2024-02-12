@@ -356,6 +356,10 @@ export class EsriDynamic extends AbstractGeoViewRaster {
 
       const response = await fetch(identifyUrl);
       const jsonResponse = await response.json();
+      if (jsonResponse.error) {
+        logger.logInfo('There is a problem with this query: ', identifyUrl);
+        throw new Error(`Error code = ${jsonResponse.error.code} ${jsonResponse.error.message}` || '');
+      }
       const features = new EsriJSON().readFeatures(
         { features: jsonResponse.results },
         { dataProjection: 'EPSG:4326', featureProjection: `EPSG:${currentProjection}` }
