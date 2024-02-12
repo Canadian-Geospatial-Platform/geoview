@@ -8,6 +8,7 @@ import {
   EsriFeature,
   GeoCore,
   GeoJSON,
+  GeoPackage,
   TypeEsriDynamicLayerConfig,
   TypeEsriDynamicLayerEntryConfig,
   TypeEsriFeatureLayerConfig,
@@ -16,6 +17,8 @@ import {
   TypeGeoCoreLayerConfig,
   TypeGeoJSONLayerConfig,
   TypeGeoJSONLayerEntryConfig,
+  TypeGeoPackageLayerConfig,
+  TypeGeoPackageLayerEntryConfig,
   TypeGeocoreLayerEntryConfig,
   TypeGeoviewLayerConfig,
   TypeGeoviewLayerType,
@@ -710,35 +713,34 @@ export function AddNewLayer(): JSX.Element {
   /**
    * Using the layerURL state object, check whether URL is a valid GeoPackage.
    *
-   * @returns {Promise<boolean>} True if layer passes validation
+   * @returns {boolean} True if layer passes validation
    */
-  const geoPackageValidation = async (): Promise<boolean> => {
+  const geoPackageValidation = (): boolean => {
     try {
       // We assume a single GeoPackage file is present
       setHasMetadata(false);
       const geoPackageGeoviewLayerConfig = {
         geoviewLayerType: GEOPACKAGE,
-        listOfLayerEntryConfig: [] as TypeGeoJSONLayerEntryConfig[],
-      } as TypeGeoJSONLayerConfig;
-      const geojsonGeoviewLayerInstance = new GeoJSON(mapId, geoPackageGeoviewLayerConfig);
+        listOfLayerEntryConfig: [] as TypeGeoPackageLayerEntryConfig[],
+      } as TypeGeoPackageLayerConfig;
+      const geopackageGeoviewLayerInstance = new GeoPackage(mapId, geoPackageGeoviewLayerConfig);
       // Synchronize the geoviewLayerId.
-      geoPackageGeoviewLayerConfig.geoviewLayerId = geojsonGeoviewLayerInstance.geoviewLayerId;
-      setGeoviewLayerInstance(geojsonGeoviewLayerInstance);
-      await geojsonGeoviewLayerInstance.createGeoViewLayers();
+      geoPackageGeoviewLayerConfig.geoviewLayerId = geopackageGeoviewLayerInstance.geoviewLayerId;
+      setGeoviewLayerInstance(geopackageGeoviewLayerInstance);
       const layers = [
-        new TypeGeoJSONLayerEntryConfig({
+        new TypeGeoPackageLayerEntryConfig({
           geoviewLayerConfig: geoPackageGeoviewLayerConfig,
           layerId: geoPackageGeoviewLayerConfig.geoviewLayerId,
           layerName: createLocalizedString(''),
           source: {
             dataAccessPath: createLocalizedString(layerURL),
           },
-        } as TypeGeoJSONLayerEntryConfig),
+        } as TypeGeoPackageLayerEntryConfig),
       ];
       setLayerName(layers[0].layerName!.en!);
       setLayerEntries([layers[0]]);
     } catch (err) {
-      emitErrorServer('GeoJSON');
+      emitErrorServer('GeoPackage');
       return false;
     }
     return true;
@@ -809,7 +811,7 @@ export function AddNewLayer(): JSX.Element {
     else if (layerType === ESRI_FEATURE) valid = await esriValidation(ESRI_FEATURE);
     else if (layerType === ESRI_IMAGE) valid = await esriImageValidation();
     else if (layerType === GEOJSON) valid = await geoJSONValidation();
-    else if (layerType === GEOPACKAGE) valid = await geoPackageValidation();
+    else if (layerType === GEOPACKAGE) valid = geoPackageValidation();
     else if (layerType === GEOCORE) valid = await geocoreValidation();
     else if (layerType === CSV) valid = await csvValidation();
     if (valid) {

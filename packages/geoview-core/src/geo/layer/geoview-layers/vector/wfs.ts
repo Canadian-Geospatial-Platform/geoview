@@ -1,4 +1,4 @@
-/* eslint-disable no-var, vars-on-top, block-scoped-var, no-param-reassign */
+/* eslint-disable no-param-reassign */
 // eslint-disable-next-line max-classes-per-file
 import { Options as SourceOptions } from 'ol/source/Vector';
 import { WFS as FormatWFS } from 'ol/format';
@@ -126,7 +126,6 @@ export class WFS extends AbstractGeoViewVector {
    *
    * @returns {'string' | 'date' | 'number'} The type of the field.
    */
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   protected getFieldType(fieldName: string, layerConfig: TypeLayerEntryConfig): 'string' | 'date' | 'number' {
     const fieldDefinitions = this.layerMetadata[layerConfig.layerPath] as TypeJsonArray;
     const fieldDefinition = fieldDefinitions.find((metadataEntry) => metadataEntry.name === fieldName);
