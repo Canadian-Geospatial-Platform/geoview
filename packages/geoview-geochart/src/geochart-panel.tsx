@@ -7,11 +7,11 @@ import { Typography } from 'geoview-core/src/ui/typography/typography';
 import { Paper } from 'geoview-core/src/ui';
 import {
   useMapVisibleLayers,
+  useGeochartConfigs,
   useGeochartStoreActions,
-  useGeochartStoreLayerDataArray,
+  useGeochartStoreLayerDataArrayBatch,
   useGeochartStoreSelectedLayerPath,
 } from 'geoview-core/src/core/stores';
-import { useGeochartConfigs } from 'geoview-core/src/core/stores/store-interface-and-intial-values/geochart-state';
 import { logger } from 'geoview-core/src/core/utils/logger';
 
 import { GeoChart } from './geochart';
@@ -43,12 +43,9 @@ export function GeoChartPanel(props: GeoChartPanelProps): JSX.Element {
   // Get states and actions from store
   const configObj = useGeochartConfigs();
   const visibleLayers = useMapVisibleLayers() as string[];
-  const arrayOfLayerData = useGeochartStoreLayerDataArray() as TypeArrayOfLayerData;
+  const storeArrayOfLayerData = useGeochartStoreLayerDataArrayBatch() as TypeArrayOfLayerData;
   const selectedLayerPath = useGeochartStoreSelectedLayerPath() as string;
   const { setSelectedLayerPath, setLayerDataArrayBatchLayerPathBypass } = useGeochartStoreActions();
-
-  // Prepare the internal states
-  const [arrayOfLayerDataLocal, setArrayOfLayerDataLocal] = useState<LayerListEntry[]>([]);
 
   // Create the validator shared for all the charts in the footer
   const [schemaValidator] = useState<SchemaValidator>(new SchemaValidator());
@@ -103,11 +100,11 @@ export function GeoChartPanel(props: GeoChartPanelProps): JSX.Element {
   // Reacts when the array of layer data updates
   const memoLayersList = useMemo(() => {
     // Log
-    logger.logTraceUseMemo('GEOCHART-PANEL - ArrayOfLayerData', arrayOfLayerData);
+    logger.logTraceUseMemo('GEOCHART-PANEL - ArrayOfLayerData', storeArrayOfLayerData);
 
     // Set the layers list
     return visibleLayers
-      .map((layerPath) => arrayOfLayerData.find((layerData) => layerData.layerPath === layerPath))
+      .map((layerPath) => storeArrayOfLayerData.find((layerData) => layerData.layerPath === layerPath))
       .filter((layer) => layer && configObj[layer.layerPath])
       .map(
         (layer) =>
@@ -121,7 +118,7 @@ export function GeoChartPanel(props: GeoChartPanelProps): JSX.Element {
             tooltip: `${layer!.layerName}, ${getNumFeaturesLabel(layer!)}`,
           } as LayerListEntry)
       );
-  }, [visibleLayers, arrayOfLayerData, configObj, getNumFeaturesLabel]);
+  }, [visibleLayers, storeArrayOfLayerData, configObj, getNumFeaturesLabel]);
 
   /**
    * Memoize the selected layer for the LayerList component.
@@ -187,12 +184,6 @@ export function GeoChartPanel(props: GeoChartPanelProps): JSX.Element {
     }
   }, [memoLayerSelectedItem, memoLayersList, setSelectedLayerPath, setLayerDataArrayBatchLayerPathBypass]);
 
-  // If the array of layer data has changed since last render
-  if (arrayOfLayerDataLocal !== memoLayersList) {
-    // Selected array layer data changed
-    setArrayOfLayerDataLocal(memoLayersList);
-  }
-
   /**
    * Renders a single GeoChart component
    * @param chartConfig PluginGeoChartConfig<ChartType> the Chart Config to assign the the GeoChart
@@ -200,7 +191,16 @@ export function GeoChartPanel(props: GeoChartPanelProps): JSX.Element {
    * @returns JSX.Element
    */
   const renderChart = (chartConfig: GeoViewGeoChartConfig<ChartType>, sx: React.CSSProperties, key: string) => {
-    return <GeoChart sx={sx} key={key} mapId={mapId} config={{ charts: [chartConfig] }} schemaValidator={schemaValidator} />;
+    return (
+      <GeoChart
+        sx={sx}
+        key={key}
+        mapId={mapId}
+        config={{ charts: [chartConfig] }}
+        layers={storeArrayOfLayerData}
+        schemaValidator={schemaValidator}
+      />
+    );
   };
 
   /**
