@@ -24,7 +24,7 @@ export function EnlargeButton({ isEnlargeDataTable, setIsEnlargeDataTable }: Enl
       color="primary"
       variant="contained"
       startIcon={isEnlargeDataTable ? <ArrowForwardIcon /> : <ArrowBackIcon />}
-      sx={{height: '40px', borderRadius: '1.5rem'}}
+      sx={{ height: '40px', borderRadius: '1.5rem' }}
       onClick={() => setIsEnlargeDataTable(!isEnlargeDataTable)}
       tooltip={isEnlargeDataTable ? t('dataTable.reduceBtn')! : t('dataTable.enlargeBtn')!}
       tooltipPlacement="top"
