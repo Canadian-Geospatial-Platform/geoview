@@ -58,7 +58,7 @@ export function TimeSliderPanel(props: TypeTimeSliderProps): JSX.Element {
         layerName: timeSliderLayers[layerPath].name,
         layerPath,
         tooltip: timeSliderLayers[layerPath].name,
-        layerStatus: 'processed',
+        layerStatus: 'loaded',
         queryStatus: 'processed',
       };
     });
@@ -83,10 +83,10 @@ export function TimeSliderPanel(props: TypeTimeSliderProps): JSX.Element {
       {!selectedLayerPath && (
         <Paper sx={{ padding: '2rem' }}>
           <Typography variant="h3" gutterBottom sx={sxClasses.timeSliderInstructionsTitle}>
-            {getLocalizedMessage(mapId, 'timeSlider.detailsInstructions')}
+            {getLocalizedMessage(mapId, 'timeSlider.instructions')}
           </Typography>
           <Typography component="p" sx={sxClasses.timeSliderInstructionsBody}>
-            {getLocalizedMessage(mapId, 'timeSlider.detailsInstructions')}
+            {getLocalizedMessage(mapId, 'timeSlider.instructions')}
           </Typography>
         </Paper>
       )}

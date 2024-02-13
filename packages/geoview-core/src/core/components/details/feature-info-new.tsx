@@ -1,17 +1,19 @@
 /* eslint-disable react/require-default-props */
 import { useEffect, useState } from 'react';
-
 import { useTranslation } from 'react-i18next';
+import { getCenter } from 'ol/extent';
 
 import { useTheme, Theme } from '@mui/material/styles';
-
 import { List, ZoomInSearchIcon, Tooltip, IconButton, Checkbox, Paper, Box, Typography } from '@/ui';
+import { TypeWindow } from '@/app';
 import { TypeFieldEntry, TypeArrayOfFeatureInfoEntries, TypeGeometry } from '@/api/events/payloads';
-import { FeatureInfoTable } from './feature-info-table';
-import { getSxClasses } from './details-style';
 import { useDetailsStoreCheckedFeatures, useDetailsStoreActions } from '@/core/stores/store-interface-and-intial-values/feature-info-state';
 import { useMapStoreActions } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { logger } from '@/core/utils/logger';
+import { delay } from '@/core/utils/utilities';
+
+import { FeatureInfoTable } from './feature-info-table';
+import { getSxClasses } from './details-style';
 
 export interface TypeFeatureInfoProps {
   features: TypeArrayOfFeatureInfoEntries;
@@ -27,6 +29,10 @@ export interface TypeFeatureInfoProps {
 export function FeatureInfo({ features, currentFeatureIndex }: TypeFeatureInfoProps): JSX.Element {
   // Log
   logger.logTraceRender('components/details/feature-info-new');
+
+  // Fetch cgpv
+  const w = window as TypeWindow;
+  const { cgpv } = w;
 
   const { t } = useTranslation<string>();
 
@@ -45,7 +51,7 @@ export function FeatureInfo({ features, currentFeatureIndex }: TypeFeatureInfoPr
   // states from store
   const checkedFeatures = useDetailsStoreCheckedFeatures();
   const { addCheckedFeature, removeCheckedFeature } = useDetailsStoreActions();
-  const { zoomToExtent } = useMapStoreActions();
+  const { zoomToExtent, transformPoints, showClickMarker } = useMapStoreActions();
 
   const featureInfoList: TypeFieldEntry[] = Object.keys(feature?.fieldInfo ?? {}).map((fieldName) => {
     return {
@@ -67,9 +73,22 @@ export function FeatureInfo({ features, currentFeatureIndex }: TypeFeatureInfoPr
     }
   };
 
-  const handleZoomIn = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+  const handleZoomIn = async (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
     e.stopPropagation();
-    zoomToExtent(feature.extent);
+
+    // Project
+    const center = getCenter(feature.extent);
+    const newCenter = transformPoints([center], 4326)[0];
+
+    // Zoom to extent and wait for it to finish
+    await zoomToExtent(feature.extent);
+
+    // Typically, the click marker is removed after a zoom, so wait a bit here and re-add it...
+    // TODO: Refactor - Zoom ClickMarker - Improve the logic in general of when/if a click marker should be removed after a zoom
+    await delay(150);
+
+    // Add (back?) a click marker
+    showClickMarker({ lnglat: newCenter });
   };
 
   useEffect(() => {

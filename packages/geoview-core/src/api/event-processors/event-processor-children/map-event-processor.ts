@@ -428,12 +428,25 @@ export class MapEventProcessor extends AbstractEventProcessor {
    * @param {Extent} extent The extent to zoom to.
    * @param {FitOptions} options The options to configure the zoomToExtent (default: { padding: [100, 100, 100, 100], maxZoom: 11 }).
    */
-  static zoomToExtent(mapId: string, extent: Extent, options: FitOptions = { padding: [100, 100, 100, 100], maxZoom: 11, duration: 1000 }) {
+  static zoomToExtent(
+    mapId: string,
+    extent: Extent,
+    options: FitOptions = { padding: [100, 100, 100, 100], maxZoom: 11, duration: 1000 }
+  ): Promise<void> {
     // store state will be updated by map event
     api.maps[mapId].getView().fit(extent, options);
+
+    // Use a Promise and resolve it when the duration expired
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        resolve();
+      }, (options.duration || 1000) + 150);
+    });
+    // The +150 is to make sure the logic before turning these function async remains
+    // TODO: Refactor - Check the +150 relevancy and try to remove it by clarifying the reason for its existance
   }
 
-  static zoomToGeoLocatorLocation(mapId: string, coords: Coordinate, bbox?: Extent): void {
+  static async zoomToGeoLocatorLocation(mapId: string, coords: Coordinate, bbox?: Extent): Promise<void> {
     const indicatorBox = document.getElementsByClassName('ol-overviewmap-box') as HTMLCollectionOf<Element>;
     for (let i = 0; i < indicatorBox.length; i++) {
       (indicatorBox[i] as HTMLElement).style.display = 'none';
@@ -445,20 +458,22 @@ export class MapEventProcessor extends AbstractEventProcessor {
       //! fromLonLat and transformExtent give differing results in many cases, fromLonLat had issues with the first
       //! three results from a geolocator search for "vancouver river"
       const convertedExtent = api.projection.transformExtent(bbox, 'EPSG:4326', projectionConfig);
-      MapEventProcessor.zoomToExtent(mapId, convertedExtent, {
+
+      // Highlight
+      api.maps[mapId].layer.featureHighlight.highlightGeolocatorBBox(convertedExtent);
+
+      // Zoom to extent and await
+      await MapEventProcessor.zoomToExtent(mapId, convertedExtent, {
         padding: [50, 50, 50, 50],
         maxZoom: 16,
         duration: OL_ZOOM_DURATION,
       });
 
-      // TODO: use proper function
-      api.maps[mapId].layer.featureHighlight.highlightGeolocatorBBox(convertedExtent);
-      setTimeout(() => {
-        MapEventProcessor.clickMarkerIconShow(mapId, { lnglat: coords });
-        for (let i = 0; i < indicatorBox.length; i++) {
-          (indicatorBox[i] as HTMLElement).style.display = '';
-        }
-      }, OL_ZOOM_DURATION + 150);
+      // Now show the click marker icon
+      MapEventProcessor.clickMarkerIconShow(mapId, { lnglat: coords });
+      for (let i = 0; i < indicatorBox.length; i++) {
+        (indicatorBox[i] as HTMLElement).style.display = '';
+      }
     } else {
       const projectedCoords = api.projection.transformPoints(
         [coords],
@@ -468,18 +483,19 @@ export class MapEventProcessor extends AbstractEventProcessor {
 
       const extent: Extent = [...projectedCoords[0], ...projectedCoords[0]];
       const options: FitOptions = { padding: OL_ZOOM_PADDING, maxZoom: 13, duration: OL_ZOOM_DURATION };
-      MapEventProcessor.zoomToExtent(mapId, extent, options);
 
-      setTimeout(() => {
-        MapEventProcessor.clickMarkerIconShow(mapId, { lnglat: coords });
-        for (let i = 0; i < indicatorBox.length; i++) {
-          (indicatorBox[i] as HTMLElement).style.display = '';
-        }
-      }, OL_ZOOM_DURATION + 150);
+      // Zoom to extent and await
+      await MapEventProcessor.zoomToExtent(mapId, extent, options);
+
+      // Now show the click marker icon
+      MapEventProcessor.clickMarkerIconShow(mapId, { lnglat: coords });
+      for (let i = 0; i < indicatorBox.length; i++) {
+        (indicatorBox[i] as HTMLElement).style.display = '';
+      }
     }
   }
 
-  static zoomToInitialExtent(mapId: string): void {
+  static zoomToInitialExtent(mapId: string): Promise<void> {
     const { center, zoom } = getGeoViewStore(mapId).getState().mapConfig!.map.viewSettings;
     const projectedCoords = api.projection.transformPoints(
       [center],
@@ -489,10 +505,10 @@ export class MapEventProcessor extends AbstractEventProcessor {
     const extent: Extent = [...projectedCoords[0], ...projectedCoords[0]];
     const options: FitOptions = { padding: OL_ZOOM_PADDING, maxZoom: zoom, duration: OL_ZOOM_DURATION };
 
-    MapEventProcessor.zoomToExtent(mapId, extent, options);
+    return MapEventProcessor.zoomToExtent(mapId, extent, options);
   }
 
-  static zoomToMyLocation(mapId: string, position: GeolocationPosition): void {
+  static zoomToMyLocation(mapId: string, position: GeolocationPosition): Promise<void> {
     const coord: Coordinate = [position.coords.longitude, position.coords.latitude];
     const projectedCoords = api.projection.transformPoints(
       [coord],
@@ -503,7 +519,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
     const extent: Extent = [...projectedCoords[0], ...projectedCoords[0]];
     const options: FitOptions = { padding: OL_ZOOM_PADDING, maxZoom: 13, duration: OL_ZOOM_DURATION };
 
-    MapEventProcessor.zoomToExtent(mapId, extent, options);
+    return MapEventProcessor.zoomToExtent(mapId, extent, options);
   }
 
   /**
