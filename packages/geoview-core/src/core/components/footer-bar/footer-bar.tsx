@@ -83,6 +83,9 @@ export function FooterBar(): JSX.Element | null {
   const footerBarTabsConfig = useGeoViewConfig()?.footerBar;
 
   const footerBarTabKeys = useMemo(() => {
+    // Log
+    logger.logTraceUseMemo('FOOTER-BAR TABS KEYS', footerBarTabsConfig?.tabs?.core);
+
     return (footerBarTabsConfig?.tabs?.core ?? []).reduce((acc, curr) => {
       acc[curr] = {} as Tab;
       return acc;
@@ -94,6 +97,9 @@ export function FooterBar(): JSX.Element | null {
 
   // Panels for each tab in footer config file.
   const tabs = useMemo(() => {
+    // Log
+    logger.logTraceUseMemo('FOOTER-BAR TABS');
+
     return {
       legend: { icon: <HubOutlinedIcon />, content: <Legend /> },
       layers: { icon: <LayersOutlinedIcon />, content: <LayersPanel /> },
@@ -105,6 +111,9 @@ export function FooterBar(): JSX.Element | null {
 
   // Map the panels with footer bar tab keys.
   const footerBarTabs = useMemo(() => {
+    // Log
+    logger.logTraceUseMemo('FOOTER-BAR TABS', tabsList, tabs);
+
     const allTabs = { ...tabsList, ...tabs };
     // inject guide tab at last position of tabs.
     return Object.keys({ ...tabsList, ...{ guide: {} } }).map((tab, index) => {
@@ -173,6 +182,9 @@ export function FooterBar(): JSX.Element | null {
    * Remove a tab
    */
   const removeTab = useCallback((payload: FooterBarPayload) => {
+    // Log
+    logger.logTraceUseCallback('FOOTER-BAR - removeTab', payload);
+
     // remove the tab from the list
     setTabsList((prevState) => {
       const state = { ...prevState };
