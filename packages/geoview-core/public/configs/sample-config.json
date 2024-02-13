@@ -91,8 +91,8 @@
           "fr": "Exemple GeoJSON"
         },
         "url": {
-          "en": "./geojson/polygons.json",
-          "fr": "./geojson/polygons.json"
+          "en": "./datasets/geojson/polygons.json",
+          "fr": "./datasets/geojson/polygons.json"
         },
         "geoviewLayerType": "geojson"
       },

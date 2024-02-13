@@ -81,7 +81,7 @@
 //             "layerId": "lines.json",
 //             "source": {
 //               "dataAccessPath": {
-//                 "en": "./geojson/"
+//                 "en": "./datasets/geojson/"
 //               },
 //               "cluster": {
 //                 "enable": true,
@@ -93,7 +93,7 @@
 //             "layerId": "polygons.json",
 //             "source": {
 //               "dataAccessPath": {
-//                 "en": "./geojson/"
+//                 "en": "./datasets/geojson/"
 //               },
 //               "cluster": {
 //                 "enable": true

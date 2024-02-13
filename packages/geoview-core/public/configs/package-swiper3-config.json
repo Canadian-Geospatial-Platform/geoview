@@ -51,7 +51,7 @@
           "en": "GeoJSON Sample"
         },
         "metadataAccessPath": {
-          "en": "./geojson/metadata.json"
+          "en": "./datasets/geojson/metadata.json"
         },
         "geoviewLayerType": "GeoJSON",
         "listOfLayerEntryConfig": [

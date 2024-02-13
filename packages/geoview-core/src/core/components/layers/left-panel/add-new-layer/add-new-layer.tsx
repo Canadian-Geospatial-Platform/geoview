@@ -8,13 +8,17 @@ import {
   EsriFeature,
   GeoCore,
   GeoJSON,
+  GeoPackage,
   TypeEsriDynamicLayerConfig,
   TypeEsriDynamicLayerEntryConfig,
   TypeEsriFeatureLayerConfig,
   TypeEsriFeatureLayerEntryConfig,
+  TypeEsriImageLayerEntryConfig,
   TypeGeoCoreLayerConfig,
   TypeGeoJSONLayerConfig,
   TypeGeoJSONLayerEntryConfig,
+  TypeGeoPackageLayerConfig,
+  TypeGeoPackageLayerEntryConfig,
   TypeGeocoreLayerEntryConfig,
   TypeGeoviewLayerConfig,
   TypeGeoviewLayerType,
@@ -30,12 +34,14 @@ import {
 import { OgcFeature, TypeOgcFeatureLayerConfig, TypeOgcFeatureLayerEntryConfig } from '@/geo/layer/geoview-layers/vector/ogc-feature';
 import { TypeWMSLayerConfig, WMS as WmsGeoviewClass } from '@/geo/layer/geoview-layers/raster/wms';
 import { TypeWFSLayerConfig, TypeWfsLayerEntryConfig, WFS as WfsGeoviewClass } from '@/geo/layer/geoview-layers/vector/wfs';
+import { TypeCSVLayerConfig, TypeCsvLayerEntryConfig, CSV as CsvGeoviewClass } from '@/geo/layer/geoview-layers/vector/csv';
 import { ButtonPropsLayerPanel, SelectChangeEvent, TypeJsonArray, TypeJsonObject } from '@/core/types/global-types';
 import { useGeoViewMapId } from '@/core/stores/geoview-store';
 import { createLocalizedString } from '@/core/utils/utilities';
 import { useLayerStoreActions, useLayersList } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { Cast, Config, api, generateId } from '@/app';
 import { logger } from '@/core/utils/logger';
+import { EsriImage, TypeEsriImageLayerConfig } from '@/geo/layer/geoview-layers/raster/esri-image';
 
 type EsriOptions = {
   err: string;
@@ -48,7 +54,7 @@ export function AddNewLayer(): JSX.Element {
 
   const { t } = useTranslation<string>();
 
-  const { ESRI_DYNAMIC, ESRI_FEATURE, GEOJSON, GEOPACKAGE, WMS, WFS, OGC_FEATURE, XYZ_TILES, GEOCORE } = CONST_LAYER_TYPES;
+  const { CSV, ESRI_DYNAMIC, ESRI_FEATURE, ESRI_IMAGE, GEOJSON, GEOPACKAGE, WMS, WFS, OGC_FEATURE, XYZ_TILES, GEOCORE } = CONST_LAYER_TYPES;
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [geoviewLayerInstance, setGeoviewLayerInstance] = useState<AbstractGeoViewLayer | undefined>();
@@ -76,8 +82,10 @@ export function AddNewLayer(): JSX.Element {
    * List of layer types and labels
    */
   const layerOptions = [
+    [CSV, 'CSV'],
     [ESRI_DYNAMIC, 'ESRI Dynamic Service'],
     [ESRI_FEATURE, 'ESRI Feature Service'],
+    [ESRI_IMAGE, 'ESRI Image Service'],
     [GEOJSON, 'GeoJSON'],
     [GEOPACKAGE, 'GeoPackage'],
     [WMS, 'OGC Web Map Service (WMS)'],
@@ -516,6 +524,44 @@ export function AddNewLayer(): JSX.Element {
   };
 
   /**
+   * Using the layerURL state object, check whether URL is a valid ESRI Image.
+   *
+   * @returns {Promise<boolean>} True if layer passes validation
+   */
+  const esriImageValidation = async (): Promise<boolean> => {
+    try {
+      const esriImageGeoviewLayerConfig = {
+        geoviewLayerType: ESRI_IMAGE,
+        listOfLayerEntryConfig: [] as TypeEsriImageLayerEntryConfig[],
+        metadataAccessPath: createLocalizedString(layerURL),
+      } as TypeEsriImageLayerConfig;
+      const esriImageGeoviewLayerInstance = new EsriImage(mapId, esriImageGeoviewLayerConfig);
+      // Synchronize the geoviewLayerId.
+      esriImageGeoviewLayerConfig.geoviewLayerId = esriImageGeoviewLayerInstance.geoviewLayerId;
+      setGeoviewLayerInstance(esriImageGeoviewLayerInstance);
+      await esriImageGeoviewLayerInstance.createGeoViewLayers();
+      const layers = [
+        new TypeEsriImageLayerEntryConfig({
+          geoviewLayerConfig: esriImageGeoviewLayerConfig,
+          layerId: esriImageGeoviewLayerConfig.geoviewLayerId,
+          layerName: createLocalizedString(
+            typeof esriImageGeoviewLayerInstance.metadata?.name === 'string' ? esriImageGeoviewLayerInstance.metadata?.name : ''
+          ),
+          source: {
+            dataAccessPath: createLocalizedString(layerURL),
+          },
+        } as TypeEsriImageLayerEntryConfig),
+      ];
+      setLayerName(layers[0].layerName!.en!);
+      setLayerEntries([layers[0]]);
+    } catch (err) {
+      emitErrorServer('ESRI Image');
+      return false;
+    }
+    return true;
+  };
+
+  /**
    * Using the layerURL state object, check whether URL is a valid XYZ Server.
    *
    * @returns {boolean} True if layer passes validation
@@ -553,6 +599,44 @@ export function AddNewLayer(): JSX.Element {
       setLayerEntries([layers[0]]);
     } catch (err) {
       emitErrorServer('XYZ Tile');
+      return false;
+    }
+    return true;
+  };
+
+  /**
+   * Using the layerURL state object, check whether URL is a valid CSV file.
+   *
+   * @returns {Promise<boolean>} True if layer passes validation
+   */
+  const csvValidation = async (): Promise<boolean> => {
+    try {
+      // We assume a single CSV file is present
+      setHasMetadata(false);
+      const csvGeoviewLayerConfig = {
+        geoviewLayerType: CSV,
+        listOfLayerEntryConfig: [] as TypeCsvLayerEntryConfig[],
+      } as TypeCSVLayerConfig;
+      const csvGeoviewLayerInstance = new CsvGeoviewClass(mapId, csvGeoviewLayerConfig);
+      // Synchronize the geoviewLayerId.
+      csvGeoviewLayerConfig.geoviewLayerId = csvGeoviewLayerInstance.geoviewLayerId;
+      setGeoviewLayerInstance(csvGeoviewLayerInstance);
+      await csvGeoviewLayerInstance.createGeoViewLayers();
+      const layers = [
+        new TypeCsvLayerEntryConfig({
+          geoviewLayerConfig: csvGeoviewLayerConfig,
+          layerId: csvGeoviewLayerConfig.geoviewLayerId,
+          layerName: createLocalizedString(''),
+          schemaTag: 'CSV',
+          source: {
+            dataAccessPath: createLocalizedString(layerURL),
+          },
+        } as TypeCsvLayerEntryConfig),
+      ];
+      setLayerName(layers[0].layerName!.en!);
+      setLayerEntries([layers[0]]);
+    } catch (err) {
+      emitErrorServer('CSV');
       return false;
     }
     return true;
@@ -630,35 +714,34 @@ export function AddNewLayer(): JSX.Element {
   /**
    * Using the layerURL state object, check whether URL is a valid GeoPackage.
    *
-   * @returns {Promise<boolean>} True if layer passes validation
+   * @returns {boolean} True if layer passes validation
    */
-  const geoPackageValidation = async (): Promise<boolean> => {
+  const geoPackageValidation = (): boolean => {
     try {
       // We assume a single GeoPackage file is present
       setHasMetadata(false);
       const geoPackageGeoviewLayerConfig = {
         geoviewLayerType: GEOPACKAGE,
-        listOfLayerEntryConfig: [] as TypeGeoJSONLayerEntryConfig[],
-      } as TypeGeoJSONLayerConfig;
-      const geojsonGeoviewLayerInstance = new GeoJSON(mapId, geoPackageGeoviewLayerConfig);
+        listOfLayerEntryConfig: [] as TypeGeoPackageLayerEntryConfig[],
+      } as TypeGeoPackageLayerConfig;
+      const geopackageGeoviewLayerInstance = new GeoPackage(mapId, geoPackageGeoviewLayerConfig);
       // Synchronize the geoviewLayerId.
-      geoPackageGeoviewLayerConfig.geoviewLayerId = geojsonGeoviewLayerInstance.geoviewLayerId;
-      setGeoviewLayerInstance(geojsonGeoviewLayerInstance);
-      await geojsonGeoviewLayerInstance.createGeoViewLayers();
+      geoPackageGeoviewLayerConfig.geoviewLayerId = geopackageGeoviewLayerInstance.geoviewLayerId;
+      setGeoviewLayerInstance(geopackageGeoviewLayerInstance);
       const layers = [
-        new TypeGeoJSONLayerEntryConfig({
+        new TypeGeoPackageLayerEntryConfig({
           geoviewLayerConfig: geoPackageGeoviewLayerConfig,
           layerId: geoPackageGeoviewLayerConfig.geoviewLayerId,
           layerName: createLocalizedString(''),
           source: {
             dataAccessPath: createLocalizedString(layerURL),
           },
-        } as TypeGeoJSONLayerEntryConfig),
+        } as TypeGeoPackageLayerEntryConfig),
       ];
       setLayerName(layers[0].layerName!.en!);
       setLayerEntries([layers[0]]);
     } catch (err) {
-      emitErrorServer('GeoJSON');
+      emitErrorServer('GeoPackage');
       return false;
     }
     return true;
@@ -677,6 +760,8 @@ export function AddNewLayer(): JSX.Element {
       (displayURL.toUpperCase().indexOf('MAPSERVER') !== -1 && !Number.isNaN(layerId))
     ) {
       setLayerType(ESRI_FEATURE);
+    } else if (displayURL.toUpperCase().indexOf('IMAGESERVER') !== -1) {
+      setLayerType(ESRI_IMAGE);
     } else if (layerTokens.indexOf('WFS') !== -1) {
       setLayerType(WFS);
     } else if (displayURL.toUpperCase().endsWith('.JSON') || displayURL.toUpperCase().endsWith('.GEOJSON')) {
@@ -689,6 +774,8 @@ export function AddNewLayer(): JSX.Element {
       setLayerType(GEOCORE);
     } else if (displayURL.toUpperCase().indexOf('WMS') !== -1) {
       setLayerType(WMS);
+    } else if (displayURL.toUpperCase().endsWith('.CSV')) {
+      setLayerType(CSV);
     }
   };
 
@@ -723,9 +810,11 @@ export function AddNewLayer(): JSX.Element {
     else if (layerType === XYZ_TILES) valid = await xyzValidation();
     else if (layerType === ESRI_DYNAMIC) valid = await esriValidation(ESRI_DYNAMIC);
     else if (layerType === ESRI_FEATURE) valid = await esriValidation(ESRI_FEATURE);
+    else if (layerType === ESRI_IMAGE) valid = await esriImageValidation();
     else if (layerType === GEOJSON) valid = await geoJSONValidation();
-    else if (layerType === GEOPACKAGE) valid = await geoPackageValidation();
+    else if (layerType === GEOPACKAGE) valid = geoPackageValidation();
     else if (layerType === GEOCORE) valid = await geocoreValidation();
+    else if (layerType === CSV) valid = await csvValidation();
     if (valid) {
       setIsLoading(false);
       setActiveStep(2);
@@ -761,6 +850,8 @@ export function AddNewLayer(): JSX.Element {
       geoviewLayerConfig.geoviewLayerName = createLocalizedString(layerName);
       if (layerType === XYZ_TILES) (layerEntries[0] as TypeLayerEntryConfig).layerName = createLocalizedString(layerName);
       geoviewLayerInstance.setListOfLayerEntryConfig(geoviewLayerConfig, layerEntries as TypeListOfLayerEntryConfig);
+      if (geoviewLayerInstance.listOfLayerEntryConfig.length === 1)
+        geoviewLayerInstance.listOfLayerEntryConfig[0].layerName = geoviewLayerInstance.geoviewLayerName;
 
       // TODO probably want an option to add metadata if geojson or geopackage
       await geoviewLayerInstance.validateAndExtractLayerMetadata();
@@ -903,7 +994,7 @@ export function AddNewLayer(): JSX.Element {
     if (event.dataTransfer?.files) {
       const file = event.dataTransfer.files[0];
       const upFilename = file.name.toUpperCase();
-      if (upFilename.endsWith('.JSON') || upFilename.endsWith('.GEOJSON') || upFilename.endsWith('.GPKG')) {
+      if (upFilename.endsWith('.JSON') || upFilename.endsWith('.GEOJSON') || upFilename.endsWith('.GPKG') || upFilename.endsWith('.CSV')) {
         handleFile(file);
       } else {
         emitErrorFile();
@@ -988,7 +1079,7 @@ export function AddNewLayer(): JSX.Element {
                       onChange={(e) => {
                         if (e.target.files) handleFile(e.target.files[0]);
                       }}
-                      accept=".gpkg, .json, .geojson"
+                      accept=".gpkg, .json, .geojson, .csv"
                     />
                   </div>
                   <Button type="text" onClick={() => document.getElementById('fileUpload')?.click()} className="">

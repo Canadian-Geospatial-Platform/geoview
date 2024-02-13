@@ -16,15 +16,18 @@ import { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geovie
 import {
   TypeBaseLayerEntryConfig,
   TypeBaseSourceVectorInitialConfig,
+  TypeLayerEntryConfig,
   TypeListOfLayerEntryConfig,
+  TypeLocalizedString,
   TypeVectorLayerEntryConfig,
 } from '@/geo/map/map-schema-types';
-import { api } from '@/app';
+import { Cast, api } from '@/app';
 import { getLocalizedValue, getMinOrMaxExtents } from '@/core/utils/utilities';
 import { TypeArrayOfFeatureInfoEntries } from '@/api/events/payloads';
 import { NodeType } from '@/geo/renderer/geoview-renderer-types';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { logger } from '@/core/utils/logger';
+import { CSV } from './csv';
 
 /* *******************************************************************************************************************************
  * AbstractGeoViewVector types
@@ -59,6 +62,21 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
    * @param {TypeListOfLayerEntryConfig} listOfLayerEntryConfig The list of layer entries configuration to validate.
    */
   protected abstract validateListOfLayerEntryConfig(listOfLayerEntryConfig: TypeListOfLayerEntryConfig): void;
+
+  /** ***************************************************************************************************************************
+   * Extract the type of the specified field from the metadata. If the type can not be found, return 'string'.
+   *
+   * @param {string} fieldName field name for which we want to get the type.
+   * @param {TypeLayerEntryConfig} layerConfig layer configuration.
+   *
+   * @returns {'string' | 'date' | 'number'} The type of the field.
+   */
+  protected getFieldType(fieldName: string, layerConfig: TypeLayerEntryConfig): 'string' | 'date' | 'number' {
+    const fieldDefinitions = this.layerMetadata[layerConfig.layerPath].source.featureInfo;
+    const fieldIndex = getLocalizedValue(Cast<TypeLocalizedString>(fieldDefinitions.outfields), this.mapId)?.split(',').indexOf(fieldName);
+    if (!fieldIndex || fieldIndex === -1) return 'string';
+    return (fieldDefinitions.fieldTypes as string).split(',')[fieldIndex!] as 'string' | 'date' | 'number';
+  }
 
   /** ***************************************************************************************************************************
    * This method creates a GeoView layer using the definition provided in the layerConfig parameter.
@@ -117,16 +135,24 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
       xhr.onerror = onError;
       xhr.onload = () => {
         if (xhr.status === 200) {
-          const features = vectorSource.getFormat()!.readFeatures(xhr.responseText, {
-            ...readOptions,
-            featureProjection: projection,
-            extent,
-          }) as Feature[];
+          let features: Feature[] | null;
+          if (layerConfig.schemaTag === 'CSV') {
+            features = (api.maps[this.mapId].layer.geoviewLayer(layerPath) as CSV).convertCsv(
+              xhr.responseText,
+              layerConfig as TypeVectorLayerEntryConfig
+            );
+          } else {
+            features = vectorSource.getFormat()!.readFeatures(xhr.responseText, {
+              ...readOptions,
+              featureProjection: projection,
+              extent,
+            }) as Feature[];
+          }
           /* For vector layers, all fields of type date must be specified in milliseconds (number) that has elapsed since the epoch,
              which is defined as the midnight at the beginning of January 1, 1970, UTC (equivalent to the UNIX epoch). If the date type
              is not a number, we assume it is provided as an ISO UTC string. If not, the result is unpredictable.
           */
-          if (layerConfig.source?.featureInfo?.queryable) {
+          if (layerConfig.source?.featureInfo?.queryable && features) {
             const featureInfo = (layerConfig.source as TypeBaseSourceVectorInitialConfig).featureInfo!;
             const fieldTypes = featureInfo.fieldTypes?.split(',');
             const fieldNames = getLocalizedValue(featureInfo.outfields, this.mapId)!.split(',');
@@ -154,9 +180,11 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
               });
             }
           }
-          vectorSource.addFeatures(features);
-          if (success) success(features as Feature[]);
-          layerConfig.olLayer!.changed();
+          if (features) {
+            vectorSource.addFeatures(features);
+            if (success) success(features as Feature[]);
+            layerConfig.olLayer!.changed();
+          }
         } else {
           onError();
         }
@@ -230,9 +258,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
     } catch (error) {
       // Log
       logger.logError('abstract-geoview-vector.getAllFeatureInfo()\n', error);
-      // TODO: Check - Shouldn't this return null instead of [] to be consistent with getFeatureInfoAtPixel and others?
-      // TO.DO.CONT: If returning null is decided, the function should probably return Promise<TypeArrayOfFeatureInfoEntries | null>?
-      return [];
+      return null;
     }
   }
 

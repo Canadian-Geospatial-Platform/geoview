@@ -129,6 +129,10 @@ const config = {
           },
         ],
       },
+      {
+        test: /\.md$/,
+        use: ['html-loader', 'markdown-loader'],
+      },
     ],
   },
   plugins: [
@@ -147,7 +151,9 @@ const config = {
         { from: './public/locales', to: 'locales', noErrorOnMissing: true },
         { from: './public/css', to: 'css' },
         { from: './public/markers', to: 'markers' },
-        { from: './public/geojson', to: 'geojson' },
+        { from: './public/datasets/geojson', to: 'datasets/geojson' },
+        { from: './public/datasets/csv-files', to: 'datasets/csv-files' },
+        { from: './public/datasets/geopackages', to: 'datasets/geopackages' },
         { from: './public/plugins', to: 'plugins', noErrorOnMissing: true },
         { from: './public/favicon.ico' },
         { from: './public/templates/codedoc.js' },
