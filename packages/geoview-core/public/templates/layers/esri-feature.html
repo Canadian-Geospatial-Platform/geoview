@@ -375,7 +375,7 @@
                 const layerConfig = cgpv.api.maps.LYR2.layer.registeredLayers['historical-flood/0'];
                 const checkbox = document.getElementById('checkbox-LYR2-historical-flood');
                 cgpv.api.maps.LYR2.layer.geoviewLayer('historical-flood/0').applyViewFilter(
-                  LYR2_FILTERS[j],
+                  LYR2_FILTERS[i],
                   checkbox.value !== 'true'
                 );
                 if (++i === LYR2_FILTERS.length) i = 0;
