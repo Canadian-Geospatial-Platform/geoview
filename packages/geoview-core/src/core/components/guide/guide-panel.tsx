@@ -96,7 +96,7 @@ export function GuidePanel(): JSX.Element {
         // remove the exclamation mark "!" from layer name that is in MD file
         layerName: item.substring(1),
         layerPath: item,
-        layerStatus: 'processed',
+        layerStatus: 'loaded',
         queryStatus: 'processed',
         content: <Markdown options={{ wrapper: 'article' }}>{(leftPanelHelpItems && leftPanelHelpItems[item]) as string}</Markdown>,
       });
@@ -105,7 +105,7 @@ export function GuidePanel(): JSX.Element {
       helpItems.push({
         layerName: 'Footer',
         layerPath: '!footer',
-        layerStatus: 'processed',
+        layerStatus: 'loaded',
         queryStatus: 'processed',
         content: <RenderFooterContentInRightPanel {...{ footerContenKeys, footerContentKeyValues, allTabs }} />,
       });
