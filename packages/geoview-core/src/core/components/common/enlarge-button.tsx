@@ -3,18 +3,17 @@ import { useTranslation } from 'react-i18next';
 import { ArrowBackIcon, ArrowForwardIcon, Button } from '@/ui';
 
 interface EnlargeButtonProps {
-  isEnlargeDataTable: boolean;
-  // TODO: Refactor this props something like 'onEnlarge'? (getting rid of legacy 'data table' stuff and align with callback namings conv?)
-  setIsEnlargeDataTable: Dispatch<boolean>;
+  isEnlarged: boolean;
+  onSetIsEnlarged: Dispatch<boolean>;
 }
 
 /**
  * Create enlarge button
- * @param {boolean} isEnlargeDataTable
- * @param {function} setIsEnlargeDataTable
+ * @param {boolean} isEnlarged
+ * @param {function} setIsEnlarged
  * @returns JSX.element
  */
-export function EnlargeButton({ isEnlargeDataTable, setIsEnlargeDataTable }: EnlargeButtonProps) {
+export function EnlargeButton({ isEnlarged, onSetIsEnlarged }: EnlargeButtonProps) {
   const { t } = useTranslation<string>();
 
   return (
@@ -23,13 +22,13 @@ export function EnlargeButton({ isEnlargeDataTable, setIsEnlargeDataTable }: Enl
       size="small"
       color="primary"
       variant="contained"
-      startIcon={isEnlargeDataTable ? <ArrowForwardIcon /> : <ArrowBackIcon />}
+      startIcon={isEnlarged ? <ArrowForwardIcon /> : <ArrowBackIcon />}
       sx={{ height: '40px', borderRadius: '1.5rem' }}
-      onClick={() => setIsEnlargeDataTable(!isEnlargeDataTable)}
-      tooltip={isEnlargeDataTable ? t('dataTable.reduceBtn')! : t('dataTable.enlargeBtn')!}
+      onClick={() => onSetIsEnlarged(!isEnlarged)}
+      tooltip={isEnlarged ? t('dataTable.reduceBtn')! : t('dataTable.enlargeBtn')!}
       tooltipPlacement="top"
     >
-      {isEnlargeDataTable ? t('dataTable.reduceBtn') : t('dataTable.enlargeBtn')}
+      {isEnlarged ? t('dataTable.reduceBtn') : t('dataTable.enlargeBtn')}
     </Button>
   );
 }

@@ -67,7 +67,8 @@
     "refreshLayer": "Rafraîchir la couche",
     "highlightLayer": "Couche de mise en évidence",
     "subLayersCount": "{count} sous-couches",
-    "itemsCount": "{count} sur {totalCount} éléments"
+    "itemsCount": "{count} sur {totalCount} éléments",
+    "legendInstructions": "Legend Instructions"
   },
   "layers": {
     "title": "Couche",
@@ -110,7 +111,9 @@
     "toggleVisibility": "Basculer la visibilité",
     "toggleCollapse": "Basculer la fermeture",
     "querying": "Requête en cours",
-    "layerAddedSuccessfully": "Couche __param__ ajoutée avec succès"
+    "layerAddedSuccessfully": "Couche __param__ ajoutée avec succès",
+    "instructionsNoLayersTitle": "Aucune couche visible",
+    "instructionsNoLayersBody": "Ajoutez des couches visibles sur la carte."
   },
   "details": {
     "title": "Détails",
@@ -126,7 +129,8 @@
     "clearAllfeatures": "Déselctionner tout les items",
     "highlightFeaturesOnMap": "Déselctionner tout les items",
     "keepFeatureSelected": "Garder l'élément sélectionné",
-    "detailsInstructions": "Instructions détaillées"
+    "detailsInstructions": "Instructions détaillées",
+    "loadingUI": "Chargement de l'interface utilisateur"
   },
   "lightbox": {
     "next": "Prochaine",

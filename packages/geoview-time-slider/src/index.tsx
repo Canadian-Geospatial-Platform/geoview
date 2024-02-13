@@ -67,6 +67,7 @@ class TimeSliderPlugin extends FooterPlugin {
           changeDirection: 'Change animation direction',
           timeDelay: 'Animation time delay',
         },
+        instructions: 'Time Slider Instructions',
       },
     },
     fr: {
@@ -89,6 +90,7 @@ class TimeSliderPlugin extends FooterPlugin {
           changeDirection: `Changer la direction de l'animation`,
           timeDelay: `Délai d'animation`,
         },
+        instructions: 'Instructions Curseur Temporel',
       },
     },
   });

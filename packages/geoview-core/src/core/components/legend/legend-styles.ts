@@ -76,4 +76,12 @@ export const getSxClasses = (theme: Theme) => ({
     padding: '10px 0',
     margin: '0px 10px',
   },
+  legendInstructionsTitle: {
+    fontSize: theme.palette.geoViewFontSize.lg,
+    fontWeight: '600',
+    lineHeight: '1.5em',
+  },
+  legendInstructionsBody: {
+    fontSize: '1rem',
+  },
 });

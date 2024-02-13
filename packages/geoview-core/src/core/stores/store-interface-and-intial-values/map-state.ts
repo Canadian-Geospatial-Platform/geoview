@@ -492,17 +492,17 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
       transformPoints: (coords: Coordinate[], outputProjection: number): Coordinate[] => {
         return api.projection.transformPoints(coords, `EPSG:${get().mapState.currentProjection}`, `EPSG:${outputProjection}`);
       },
-      zoomToExtent: (extent: Extent, options?: FitOptions) => {
-        MapEventProcessor.zoomToExtent(get().mapId, extent, options);
+      zoomToExtent: (extent: Extent, options?: FitOptions): Promise<void> => {
+        return MapEventProcessor.zoomToExtent(get().mapId, extent, options);
       },
-      zoomToInitialExtent: () => {
-        MapEventProcessor.zoomToInitialExtent(get().mapId);
+      zoomToInitialExtent: (): Promise<void> => {
+        return MapEventProcessor.zoomToInitialExtent(get().mapId);
       },
-      zoomToGeoLocatorLocation: (coords: Coordinate, bbox?: Extent): void => {
-        MapEventProcessor.zoomToGeoLocatorLocation(get().mapId, coords, bbox);
+      zoomToGeoLocatorLocation: (coords: Coordinate, bbox?: Extent): Promise<void> => {
+        return MapEventProcessor.zoomToGeoLocatorLocation(get().mapId, coords, bbox);
       },
-      zoomToMyLocation: (position: GeolocationPosition) => {
-        MapEventProcessor.zoomToMyLocation(get().mapId, position);
+      zoomToMyLocation: (position: GeolocationPosition): Promise<void> => {
+        return MapEventProcessor.zoomToMyLocation(get().mapId, position);
       },
       // #endregion ACTIONS
     },
