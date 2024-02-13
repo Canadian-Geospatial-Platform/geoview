@@ -3,6 +3,15 @@ import { useGeoViewStore } from '../stores-managers';
 import { TypeGetStore, TypeSetStore } from '../geoview-store';
 import { TimeSliderEventProcessor } from '@/api/event-processors/event-processor-children/time-slider-event-processor';
 
+export type TemporalDimensionProps = {
+  field: string;
+  default: string;
+  unitSymbol: string;
+  range: string[];
+  nearestValues: string;
+  singleHandle: boolean;
+};
+
 // #region INTERFACES
 export interface TypeTimeSliderValues {
   title?: string;
@@ -19,6 +28,9 @@ export interface TypeTimeSliderValues {
   delay: number;
   locked?: boolean;
   reversed?: boolean;
+  nearestValues?: string;
+  unitSymbol?: string;
+  temporalDimension?: TemporalDimensionProps | null;
 }
 
 export interface ITimeSliderState {
@@ -38,6 +50,7 @@ export interface ITimeSliderState {
     setDefaultValue: (layerPath: string, defaultValue: string) => void;
     setValues: (layerPath: string, values: number[]) => void;
     setVisibleTimeSliderLayers: (visibleLayerPaths: string[]) => void;
+    setTemporalDimension: (layerPath: string, temporalDimension: TemporalDimensionProps | null) => void;
   };
 }
 // #endregion INTERFACES
@@ -163,6 +176,34 @@ export function initializeTimeSliderState(set: TypeSetStore, get: TypeGetStore):
         });
       },
       // #endregion ACTIONS
+      setTemporalDimension(layerPath: string, temporalDimension: TemporalDimensionProps | null): void {
+        const sliderLayers = get().timeSliderState.timeSliderLayers;
+        if (temporalDimension?.field) {
+          sliderLayers[layerPath].field = temporalDimension.field;
+        }
+        if (temporalDimension?.default) {
+          sliderLayers[layerPath].defaultValue = temporalDimension.default;
+        }
+        if (temporalDimension?.singleHandle) {
+          sliderLayers[layerPath].singleHandle = temporalDimension.singleHandle;
+        }
+        if (temporalDimension?.nearestValues) {
+          sliderLayers[layerPath].nearestValues = temporalDimension.nearestValues;
+        }
+        if (temporalDimension?.unitSymbol) {
+          sliderLayers[layerPath].unitSymbol = temporalDimension.unitSymbol;
+        }
+        if (temporalDimension?.range) {
+          sliderLayers[layerPath].range = temporalDimension.range;
+        }
+        sliderLayers[layerPath].temporalDimension = temporalDimension;
+        set({
+          timeSliderState: {
+            ...get().timeSliderState,
+            timeSliderLayers: { ...sliderLayers },
+          },
+        });
+      },
     },
   } as ITimeSliderState;
 
@@ -174,5 +215,4 @@ export function initializeTimeSliderState(set: TypeSetStore, get: TypeGetStore):
 // **********************************************************
 export const useTimeSliderLayers = () => useStore(useGeoViewStore(), (state) => state.timeSliderState.timeSliderLayers);
 export const useVisibleTimeSliderLayers = () => useStore(useGeoViewStore(), (state) => state.timeSliderState.visibleTimeSliderLayers);
-
 export const useTimeSliderStoreActions = () => useStore(useGeoViewStore(), (state) => state.timeSliderState.actions);
