@@ -8,6 +8,7 @@ export const getSxClasses = (theme: Theme) => ({
   detailsInstructionsTitle: {
     fontSize: theme.palette.geoViewFontSize.lg,
     fontWeight: '600',
+    lineHeight: '1.5em',
   },
   detailsInstructionsBody: {
     fontSize: '1rem',

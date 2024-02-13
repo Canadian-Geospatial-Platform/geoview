@@ -1,32 +1,33 @@
 import { useState, useCallback, type ReactNode } from 'react';
-import { useTheme } from '@mui/material/styles';
 import { useTranslation } from 'react-i18next';
+import { useTheme } from '@mui/material/styles';
+import { Box } from '@/ui';
+import { logger } from '@/core/utils/logger';
+
 import { getSxClasses } from './layout-style';
 import { LayerList, LayerListEntry } from './layer-list';
 import { ResponsiveGrid } from './responsive-grid';
 import { LayerTitle } from './layer-title';
 import { EnlargeButton } from './enlarge-button';
 import { CloseButton } from './close-button';
-import { Box } from '@/ui';
 import { useFooterPanelHeight } from './use-footer-panel-height';
 
 interface LayoutProps {
   children?: ReactNode;
   layerList: LayerListEntry[];
-  selectedLayerPath: string;
-  // TODO: Name this onLayerListClicked and make it optional with '?' suffix?
-  handleLayerList: (layer: LayerListEntry) => void;
+  selectedLayerPath: string | undefined;
+  onLayerListClicked: (layer: LayerListEntry) => void;
   onIsEnlargeClicked?: (isEnlarge: boolean) => void;
 }
 
-export function Layout({ children, layerList, selectedLayerPath, handleLayerList, onIsEnlargeClicked }: LayoutProps) {
+export function Layout({ children, layerList, selectedLayerPath, onLayerListClicked, onIsEnlargeClicked }: LayoutProps) {
   const { t } = useTranslation<string>();
 
   const theme = useTheme();
   const sxClasses = getSxClasses(theme);
 
   const [isLayersPanelVisible, setIsLayersPanelVisible] = useState(false);
-  const [isEnlargeDataTable, setIsEnlargeDataTable] = useState(false);
+  const [isEnlarged, setIsEnlarged] = useState(false);
 
   // Custom hook for calculating the height of footer panel
   const { leftPanelRef, rightPanelRef, panelTitleRef } = useFooterPanelHeight({ footerPanelTab: 'default' });
@@ -36,23 +37,33 @@ export function Layout({ children, layerList, selectedLayerPath, handleLayerList
    *
    * @param {LayerListEntry} layer The data of the selected layer
    */
-  const handleLayerChange = (layer: LayerListEntry): void => {
-    handleLayerList(layer);
-    setIsLayersPanelVisible(true);
-  };
+  const handleLayerChange = useCallback(
+    (layer: LayerListEntry): void => {
+      onLayerListClicked?.(layer);
+      // Show the panel (hiding the layers list in the process if we're on mobile)
+      setIsLayersPanelVisible(true);
+    },
+    [onLayerListClicked]
+  );
 
   /**
    * Handles click on the Enlarge button.
    *
    * @param {boolean} isEnlarge Indicate if enlarge
    */
-  const handleIsEnlarge = (isEnlarge: boolean): void => {
-    // Set the isEnlarge
-    setIsEnlargeDataTable(isEnlarge);
+  const handleIsEnlarge = useCallback(
+    (isEnlarge: boolean): void => {
+      // Log
+      logger.logTraceUseCallback('LAYOUT - handleIsEnlarge');
 
-    // Callback
-    onIsEnlargeClicked?.(isEnlarge);
-  };
+      // Set the isEnlarge
+      setIsEnlarged(isEnlarge);
+
+      // Callback
+      onIsEnlargeClicked?.(isEnlarge);
+    },
+    [onIsEnlargeClicked]
+  );
 
   /**
    * Render group layers as list.
@@ -60,24 +71,29 @@ export function Layout({ children, layerList, selectedLayerPath, handleLayerList
    * @returns JSX.Element
    */
   const renderLayerList = useCallback(() => {
+    // Log
+    logger.logTraceUseCallback('LAYOUT - renderLayerList');
+
     return (
-      <LayerList
-        isEnlargeDataTable={isEnlargeDataTable}
-        selectedLayerPath={selectedLayerPath}
-        handleListItemClick={handleLayerChange}
-        layerList={layerList}
-      />
+      <LayerList isEnlarged={isEnlarged} selectedLayerPath={selectedLayerPath} onListItemClick={handleLayerChange} layerList={layerList} />
     );
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedLayerPath, isEnlargeDataTable, layerList]);
+  }, [isEnlarged, selectedLayerPath, layerList, handleLayerChange]);
+
+  // If we're on mobile
+  if (theme.breakpoints.down('md')) {
+    // If there are no layers and not already showing the right-side panel
+    if (!layerList.length && !isLayersPanelVisible) {
+      setIsLayersPanelVisible(true);
+    }
+  }
 
   return (
     <Box sx={sxClasses.detailsContainer}>
       <ResponsiveGrid.Root sx={{ pt: 8, pb: 8 }} ref={panelTitleRef}>
-        <ResponsiveGrid.Left isLayersPanelVisible={isLayersPanelVisible} isEnlargeDataTable={isEnlargeDataTable}>
+        <ResponsiveGrid.Left isLayersPanelVisible={isLayersPanelVisible} isEnlarged={isEnlarged}>
           {!!layerList.length && <LayerTitle>{t('general.layers')}</LayerTitle>}
         </ResponsiveGrid.Left>
-        <ResponsiveGrid.Right isLayersPanelVisible={isLayersPanelVisible} isEnlargeDataTable={isEnlargeDataTable}>
+        <ResponsiveGrid.Right isLayersPanelVisible={isLayersPanelVisible} isEnlarged={isEnlarged}>
           <Box
             sx={{
               display: 'flex',
@@ -88,17 +104,19 @@ export function Layout({ children, layerList, selectedLayerPath, handleLayerList
           >
             <LayerTitle hideTitle>{layerList.find((layer) => layer.layerPath === selectedLayerPath)?.layerName ?? ''}</LayerTitle>
             <Box>
-              <EnlargeButton isEnlargeDataTable={isEnlargeDataTable} setIsEnlargeDataTable={handleIsEnlarge} />
-              <CloseButton isLayersPanelVisible={isLayersPanelVisible} setIsLayersPanelVisible={setIsLayersPanelVisible} />
+              <EnlargeButton isEnlarged={isEnlarged} onSetIsEnlarged={handleIsEnlarge} />
+              {(!theme.breakpoints.down('md') || (theme.breakpoints.down('md') && !!layerList.length)) && (
+                <CloseButton isLayersPanelVisible={isLayersPanelVisible} onSetIsLayersPanelVisible={setIsLayersPanelVisible} />
+              )}
             </Box>
           </Box>
         </ResponsiveGrid.Right>
       </ResponsiveGrid.Root>
       <ResponsiveGrid.Root>
-        <ResponsiveGrid.Left isLayersPanelVisible={isLayersPanelVisible} isEnlargeDataTable={isEnlargeDataTable} ref={leftPanelRef}>
+        <ResponsiveGrid.Left ref={leftPanelRef} isEnlarged={isEnlarged} isLayersPanelVisible={isLayersPanelVisible}>
           {renderLayerList()}
         </ResponsiveGrid.Left>
-        <ResponsiveGrid.Right isEnlargeDataTable={isEnlargeDataTable} isLayersPanelVisible={isLayersPanelVisible} ref={rightPanelRef}>
+        <ResponsiveGrid.Right ref={rightPanelRef} isEnlarged={isEnlarged} isLayersPanelVisible={isLayersPanelVisible}>
           {children}
         </ResponsiveGrid.Right>
       </ResponsiveGrid.Root>

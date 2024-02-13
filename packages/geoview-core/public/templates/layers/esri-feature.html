@@ -111,7 +111,8 @@
                   {
                     'layerId': '8',
                     'layerFilter': 'Total_CSO_Volume > 5000000',
-                    'initialSettings': { 'visible': 'yes' }
+                    'initialSettings': { 'visible': 'yes' },
+                    'source': { 'featureInfo': { 'queryable': true } }
                   }
                 ]
               }
@@ -125,12 +126,18 @@
     ></div>
     <button type="button" class="collapsible">Visibility and filters</button>
     <pre id="layer1-buttons-pre" class="panel"></pre>
+
     <button class="collapsible">Get Legend</button>
     <pre id="LegendsId1-table-pre" class="panel"></pre>
+
     <button type="button" class="collapsible">Get Feature Info</button>
     <pre id="ResultSetId1-click" class="panel">Click on feature on the map</pre>
+
     <button type="button" class="collapsible" id="AllFeatureInfo1">Get All Feature Info</button>
-    <pre id="ResultSetId1-all" class="panel"></pre>
+    <pre class="panel">
+      <select name="dropdown1" id="dropdown1"></select>
+      <div id="ResultSetId1-all-features"></div>
+    </pre>
     <hr />
     <p>This map has a wms layer added from configuration.</p>
     <button type="button" class="collapsible">Configuration Snippet</button>
@@ -375,7 +382,7 @@
                 const layerConfig = cgpv.api.maps.LYR2.layer.registeredLayers['historical-flood/0'];
                 const checkbox = document.getElementById('checkbox-LYR2-historical-flood');
                 cgpv.api.maps.LYR2.layer.geoviewLayer('historical-flood/0').applyViewFilter(
-                  LYR2_FILTERS[j],
+                  LYR2_FILTERS[i],
                   checkbox.value !== 'true'
                 );
                 if (++i === LYR2_FILTERS.length) i = 0;
@@ -425,27 +432,44 @@
       });
 
       // LYR1 ===================================================================================================================
-      const getAllFeatureInfo1 = document.getElementById('AllFeatureInfo1');
-      getAllFeatureInfo1.addEventListener('click', function (e) {
-            cgpv.api.event.emit({ event: 'map/get_all_features', handlerName: 'LYR1' });
+      cgpv.api.event.on(
+        cgpv.api.eventNames.MAP.EVENT_MAP_LOADED,
+        (payload) => {
+          const lyr1RegisteredLayers = cgpv.api.maps.LYR1.layer.registeredLayers;
+          const dropDownContent = document.getElementById('dropdown1');
+          Object.keys(lyr1RegisteredLayers).forEach((layerPath) => {
+            if (lyr1RegisteredLayers[layerPath].layerStatus === 'loaded') {
+              const layerName = lyr1RegisteredLayers[layerPath]?.layerName?.en;
+              element = document.createElement('option');
+              element.value = layerPath;
+              element.innerText = layerName ? layerName : lyr1RegisteredLayers[layerPath].layerId;
+              dropDownContent.appendChild(element);
+            }
+          });
+          dropDownContent.addEventListener('click', (e) => {
+            cgpv.api.getFeatureInfoLayerSet('LYR1').triggerGetAllFeatureInfo(e.currentTarget.value, 'all');
           });
 
-      cgpv.api.event.on(
-        cgpv.api.eventNames.GET_FEATURE_INFO.ALL_QUERIES_DONE,
-        (payload) => {
-          const { layerSetId, resultsSet, eventType } = payload;
-          createInfoTable('LYR1', 'ResultSetId1', resultsSet, eventType);
-        },
-        'LYR1/FeatureInfoLayerSet'
-      );
+          cgpv.api.event.on(
+            cgpv.api.eventNames.GET_FEATURE_INFO.ALL_QUERIES_DONE,
+            (payload) => {
+              const { layerSetId, resultsSet, eventType } = payload;
+              createInfoTable('LYR1', 'ResultSetId1', resultsSet, eventType);
+            },
+            'LYR1/FeatureInfoLayerSet'
+          );
 
-      cgpv.api.event.on(
-        cgpv.api.eventNames.GET_LEGENDS.LEGENDS_LAYERSET_UPDATED,
-        (payload) => {
-          const { resultsSet } = payload;
-          displayLegend('LegendsId1', resultsSet);
-        },
-        'LYR1/LegendsLayerSet'
+          cgpv.api.event.on(
+            cgpv.api.eventNames.GET_LEGENDS.LEGENDS_LAYERSET_UPDATED,
+            (payload) => {
+              const { resultsSet } = payload;
+              displayLegend('LegendsId1', resultsSet);
+            },
+            'LYR1/LegendsLayerSet'
+          );
+
+          },
+          'LYR1'
       );
 
       listenToLegendLayerSetChanges('HLYR1-state', 'LYR1/LegendsLayerSet');

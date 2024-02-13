@@ -59,6 +59,7 @@ export type EventStringId =
   | 'get_feature_info/get_all_layer_features'
   | 'get_feature_info/query_layer'
   | 'get_feature_info/query_result'
+  | 'get_feature_info/feature_info_layerset_updated'
   | 'get_legends/legends_layerset_updated'
   | 'get_legends/legend_info'
   | 'get_legends/query_legends'

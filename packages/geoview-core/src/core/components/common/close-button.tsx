@@ -6,7 +6,7 @@ import { getSxClasses } from './enlarge-button-style';
 
 interface CloseButtonProps {
   isLayersPanelVisible: boolean;
-  setIsLayersPanelVisible: Dispatch<SetStateAction<boolean>>;
+  onSetIsLayersPanelVisible: Dispatch<SetStateAction<boolean>>;
 }
 
 /**
@@ -15,7 +15,7 @@ interface CloseButtonProps {
  * @param {function} setIsLayersPanelVisible dispatch function to update isLayersPanelVisible
  * @returns JSX.element
  */
-export function CloseButton({ isLayersPanelVisible, setIsLayersPanelVisible }: CloseButtonProps) {
+export function CloseButton({ isLayersPanelVisible, onSetIsLayersPanelVisible }: CloseButtonProps) {
   const { t } = useTranslation<string>();
 
   const theme = useTheme();
@@ -32,7 +32,7 @@ export function CloseButton({ isLayersPanelVisible, setIsLayersPanelVisible }: C
         [theme.breakpoints.between('sm', 'md')]: { display: !isLayersPanelVisible ? 'none' : 'block' },
         [theme.breakpoints.down('md')]: { display: !isLayersPanelVisible ? 'none' : 'block' },
       }}
-      onClick={() => setIsLayersPanelVisible(false)}
+      onClick={() => onSetIsLayersPanelVisible(false)}
       tooltip={t('dataTable.close') ?? ''}
       tooltipPlacement="top"
     >

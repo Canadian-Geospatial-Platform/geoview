@@ -18,20 +18,20 @@ export interface LayerListEntry {
 }
 
 interface LayerListProps {
-  isEnlargeDataTable: boolean;
+  isEnlarged: boolean;
   layerList: LayerListEntry[];
-  selectedLayerPath: string;
-  handleListItemClick: (layer: LayerListEntry) => void;
+  selectedLayerPath: string | undefined;
+  onListItemClick: (layer: LayerListEntry) => void;
 }
 
 interface LayerListItemProps {
   isSelected: boolean;
   layer: LayerListEntry;
-  handleListItemClick: (layer: LayerListEntry) => void;
-  isEnlargeDataTable: boolean;
+  isEnlarged: boolean;
+  onListItemClick: (layer: LayerListEntry) => void;
 }
 
-const LayerListItem = memo(function LayerListItem({ isSelected, layer, handleListItemClick, isEnlargeDataTable }: LayerListItemProps) {
+const LayerListItem = memo(function LayerListItem({ isSelected, layer, onListItemClick, isEnlarged }: LayerListItemProps) {
   const theme = useTheme();
   const sxClasses = getSxClasses(theme);
   const { t } = useTranslation<string>();
@@ -46,7 +46,6 @@ const LayerListItem = memo(function LayerListItem({ isSelected, layer, handleLis
     }
 
     switch (layer.queryStatus) {
-      case 'init':
       case 'processing':
         return sxClasses.backgroundProcessing;
       case 'error':
@@ -62,11 +61,15 @@ const LayerListItem = memo(function LayerListItem({ isSelected, layer, handleLis
         return null;
 
       default:
-        return (
-          <ListItemIcon>
-            <IconStack layerPath={layer.layerPath} />
-          </ListItemIcon>
-        );
+        // If there's a layer path
+        if (layer.layerPath) {
+          return (
+            <ListItemIcon>
+              <IconStack layerPath={layer.layerPath} />
+            </ListItemIcon>
+          );
+        }
+        return null;
     }
   };
 
@@ -83,7 +86,6 @@ const LayerListItem = memo(function LayerListItem({ isSelected, layer, handleLis
 
       default:
         switch (layer.queryStatus) {
-          case 'init':
           case 'processing':
             return (
               <Box sx={{ display: 'flex', alignContent: 'center' }}>
@@ -138,15 +140,15 @@ const LayerListItem = memo(function LayerListItem({ isSelected, layer, handleLis
       <Tooltip title={layer.tooltip} placement="top" arrow>
         <Box>
           <ListItem disablePadding>
-            <ListItemButton selected={isSelected} disabled={layer?.numOffeatures === 0} onClick={() => handleListItemClick(layer)}>
+            <ListItemButton selected={isSelected} disabled={layer?.numOffeatures === 0} onClick={() => onListItemClick(layer)}>
               {renderLayerIcon()}
               {renderLayerBody()}
               <Box
                 sx={{
-                  padding: isEnlargeDataTable ? '0.25rem' : '1rem',
-                  paddingRight: isEnlargeDataTable ? '0.25rem' : '1rem',
+                  padding: isEnlarged ? '0.25rem' : '1rem',
+                  paddingRight: isEnlarged ? '0.25rem' : '1rem',
                   [theme.breakpoints.down('xl')]: {
-                    display: isEnlargeDataTable ? 'none !important' : 'block',
+                    display: isEnlarged ? 'none !important' : 'block',
                   },
                   [theme.breakpoints.down('sm')]: {
                     display: 'none',
@@ -166,30 +168,50 @@ const LayerListItem = memo(function LayerListItem({ isSelected, layer, handleLis
 /**
  * Create a list of layers
  * @param {LayerListEntry} layerList  Array of layer list entries.
- * @param {boolean} isEnlargeDataTable  Boolean value if right panel is enlarged or not.
+ * @param {boolean} isEnlarged Boolean value if right panel is enlarged or not.
  * @param {number} selectedLayerIndex  Current index of list item selected.
  * @param {string} selectedLayerPath  Selected path of the layer.
- * @param {Function} handleListItemClick  Callback function excecuted when list item is clicked.
+ * @param {Function} onListItemClick  Callback function excecuted when list item is clicked.
  * @returns
  */
-export function LayerList({ layerList, isEnlargeDataTable, selectedLayerPath, handleListItemClick }: LayerListProps) {
+export function LayerList({ layerList, isEnlarged, selectedLayerPath, onListItemClick }: LayerListProps) {
   const theme = useTheme();
   const sxClasses = getSxClasses(theme);
+  const { t } = useTranslation<string>();
 
   return (
     <List sx={sxClasses.list}>
-      {layerList.map((layer) => (
+      {!!layerList.length &&
+        layerList.map((layer) => (
+          <LayerListItem
+            key={layer.layerPath}
+            // Reason:- (layer?.numOffeatures ?? 1) > 0
+            // Some of layers will not have numOfFeatures, so to make layer look like selected, we need to set default value to 1.
+            // Also we cant set numOfFeature initially, then it num of features will be display as sub title.
+            isSelected={(layer?.numOffeatures ?? 1) > 0 && layer.layerPath === selectedLayerPath}
+            isEnlarged={isEnlarged}
+            layer={layer}
+            onListItemClick={onListItemClick}
+          />
+        ))}
+      {!layerList.length && (
         <LayerListItem
-          key={layer.layerPath}
-          // Reason:- (layer?.numOffeatures ?? 1) > 0
-          // Some of layers will not have numOfFeatures, so to make layer look like selected, we need to set default value to 1.
-          // Also we cant set numOfFeature initially, then it num of features will be display as sub title.
-          isSelected={(layer?.numOffeatures ?? 1) > 0 && layer.layerPath === selectedLayerPath}
-          layer={layer}
-          handleListItemClick={handleListItemClick}
-          isEnlargeDataTable={isEnlargeDataTable}
+          key="dummyPath"
+          isSelected={false}
+          isEnlarged
+          layer={
+            {
+              layerPath: '',
+              layerName: t('layers.instructionsNoLayersTitle'),
+              layerFeatures: t('layers.instructionsNoLayersBody'),
+              layerStatus: 'processed',
+              queryStatus: 'processed',
+              numOffeatures: 0, // Just so it's disabled..
+            } as LayerListEntry
+          }
+          onListItemClick={onListItemClick}
         />
-      ))}
+      )}
     </List>
   );
 }
