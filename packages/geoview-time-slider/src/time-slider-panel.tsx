@@ -24,7 +24,7 @@ export function TimeSliderPanel(props: TypeTimeSliderProps): JSX.Element {
   const { mapId, configObj } = props;
   const { cgpv } = window as TypeWindow;
   const { react } = cgpv;
-  const { useState, useCallback, useMemo } = react;
+  const { useState, useCallback, useMemo, useEffect } = react;
 
   const theme = useTheme();
   const sxClasses = getSxClasses(theme);
@@ -53,7 +53,7 @@ export function TimeSliderPanel(props: TypeTimeSliderProps): JSX.Element {
     // Log
     logger.logTraceUseMemo('TIME-SLIDER-PANEL - memoLayersList', timeSliderLayers);
 
-    // Set the layers list
+    // Return the layers
     return visibleLayers
       .map((layerPath) => {
         return { layerPath, timeSliderLayerInfo: timeSliderLayers[layerPath] };
@@ -69,6 +69,17 @@ export function TimeSliderPanel(props: TypeTimeSliderProps): JSX.Element {
         } as LayerListEntry;
       });
   }, [visibleLayers, timeSliderLayers]);
+
+  useEffect(() => {
+    // Log
+    logger.logTraceUseEffect('TIME-SLIDER-PANEL - memoLayersList', memoLayersList, selectedLayerPath);
+
+    // If the selected layer path isn't in the list of layers possible, clear it
+    if (selectedLayerPath && !memoLayersList.map((layer) => layer.layerPath).includes(selectedLayerPath)) {
+      // Clear the selected layer path
+      setSelectedLayerPath('');
+    }
+  }, [memoLayersList, selectedLayerPath]);
 
   return (
     <Layout selectedLayerPath={selectedLayerPath} onLayerListClicked={handleClickLayerList} layerList={memoLayersList}>

@@ -223,14 +223,8 @@ export class LegendEventProcessor extends AbstractEventProcessor {
           // Await for the Geoview layer in loaded state
           const myLayer = await api.maps[mapId].layer.getGeoviewLayerByIdAsync(layerPathNodes[0], true);
 
-          try {
-            // Calculate the bounds
-            newLegendLayer.bounds = myLayer.calculateBounds(layerPath);
-          } catch (error) {
-            // Log
-            logger.logError(`Couldn't calculate bounds on layer ${layerPath}`, error);
-            newLegendLayer.bounds = undefined;
-          }
+          // Calculate the bounds (the calculation may return undefined when it fails)
+          newLegendLayer.bounds = myLayer.calculateBounds(layerPath);
         } catch (error) {
           // Log
           logger.logError(`Couldn't initialize legend information on layer ${layerPath}`, error);
