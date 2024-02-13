@@ -9,6 +9,7 @@ import { PayloadBaseClass } from './payload-base-class';
 import { EventStringId, EVENT_NAMES } from '../event-types';
 import { TypeGeoviewLayerType } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { TypeLayerStatus } from '@/geo/map/map-schema-types';
+import { TypeResultsSet } from './layer-set-payload';
 
 /** Valid events that can create GetFeatureInfoPayload */
 const validEvents: EventStringId[] = [
@@ -16,6 +17,7 @@ const validEvents: EventStringId[] = [
   EVENT_NAMES.GET_FEATURE_INFO.GET_ALL_LAYER_FEATURES,
   EVENT_NAMES.GET_FEATURE_INFO.ALL_QUERIES_DONE,
   EVENT_NAMES.GET_FEATURE_INFO.QUERY_RESULT,
+  EVENT_NAMES.GET_FEATURE_INFO.FEATURE_INFO_LAYERSET_UPDATED,
 ];
 
 export type EventType = 'click' | 'hover' | 'crosshaire-enter' | 'all-features';
@@ -72,7 +74,7 @@ export type TypeFeatureInfoEntryPartial = Pick<TypeFeatureInfoEntry, 'fieldInfo'
 
 export type TypeArrayOfFeatureInfoEntries = TypeFeatureInfoEntry[] | undefined | null;
 
-export type TypeQueryStatus = 'init' | 'processing' | 'processed' | 'error';
+export type TypeQueryStatus = 'processing' | 'processed' | 'error';
 
 export type TypeLayerData = {
   layerPath: string;
@@ -115,6 +117,18 @@ export const payloadIsQueryLayer = (verifyIfPayload: PayloadBaseClass): verifyIf
 };
 
 /**
+ * type guard function that redefines a PayloadBaseClass as a TypeQueryAllLayerFeaturesPayload
+ * if the event attribute of the verifyIfPayload parameter is valid. The type assertion
+ * applies only to the true block of the if clause.
+ *
+ * @param {PayloadBaseClass} verifyIfPayload object to test in order to determine if the type assertion is valid
+ * @returns {boolean} returns true if the payload is valid
+ */
+export const payloadIsGetAllLayerFeatures = (verifyIfPayload: PayloadBaseClass): verifyIfPayload is TypeQueryAllLayerFeaturesPayload => {
+  return verifyIfPayload?.event === EVENT_NAMES.GET_FEATURE_INFO.GET_ALL_LAYER_FEATURES;
+};
+
+/**
  * Returns true if the payload is a TypeQueryLayerPayload with queryType equal to 'at_long_lat'.
  *
  * @param {PayloadBaseClass} verifyIfPayload object to test in order to determine if the type assertion and property are valid
@@ -122,6 +136,20 @@ export const payloadIsQueryLayer = (verifyIfPayload: PayloadBaseClass): verifyIf
  */
 export const payloadIsQueryLayerQueryTypeAtLongLat = (verifyIfPayload: PayloadBaseClass): verifyIfPayload is TypeQueryLayerPayload => {
   return payloadIsQueryLayer(verifyIfPayload) && verifyIfPayload.queryType === 'at_long_lat';
+};
+
+/**
+ * type guard function that redefines a PayloadBaseClass as a TypeFeatureInfoLayersetUpdatedPayload
+ * if the event attribute of the verifyIfPayload parameter is valid. The type assertion
+ * applies only to the true block of the if clause.
+ *
+ * @param {PayloadBaseClass} verifyIfPayload object to test in order to determine if the type assertion is valid
+ * @returns {boolean} returns true if the payload is valid
+ */
+export const payloadIsFeatureInfoLayersetUpdated = (
+  verifyIfPayload: PayloadBaseClass
+): verifyIfPayload is TypeFeatureInfoLayersetUpdatedPayload => {
+  return verifyIfPayload?.event === EVENT_NAMES.GET_FEATURE_INFO.FEATURE_INFO_LAYERSET_UPDATED;
 };
 
 /**
@@ -135,6 +163,8 @@ export interface TypeQueryLayerPayload extends GetFeatureInfoPayload {
   // Event type that triggered the query. It can be a click, a hover, a crosshair enter, all ...
   eventType: EventType;
 }
+
+export type TypeQueryAllLayerFeaturesPayload = TypeQueryLayerPayload;
 
 /**
  * type guard function that redefines a PayloadBaseClass as a TypeAllQueriesDonePayload
@@ -213,6 +243,18 @@ export const payloadIsGetFeatureInfo = (verifyIfPayload: PayloadBaseClass): veri
 };
 
 /**
+ * Additional attributes needed to define a TypeAllLegendsDonePayload
+ */
+export interface TypeFeatureInfoLayersetUpdatedPayload extends GetFeatureInfoPayload {
+  // the layer path updated
+  layerPath: string;
+  // The result set containing all the legends of the layers loaded on the map.
+  resultsSet: TypeFeatureInfoResultsSet;
+  // The layer status that is associated to the layer path.
+  layerStatus: TypeLayerStatus;
+}
+
+/**
  * Class definition for GetFeatureInfoPayload
  *
  * @exports
@@ -263,7 +305,11 @@ export class GetFeatureInfoPayload extends PayloadBaseClass {
    *
    * @returns {TypeQueryLayerPayload} the queryLayerPayload object created
    */
-  static createGetAllLayerFeaturesPayload = (handlerName: string, queryType: QueryType, location: string): TypeQueryLayerPayload => {
+  static createGetAllLayerFeaturesPayload = (
+    handlerName: string,
+    queryType: QueryType,
+    location?: string
+  ): TypeQueryAllLayerFeaturesPayload => {
     const queryLayerPayload = new GetFeatureInfoPayload(
       EVENT_NAMES.GET_FEATURE_INFO.GET_ALL_LAYER_FEATURES,
       handlerName
@@ -330,5 +376,30 @@ export class GetFeatureInfoPayload extends PayloadBaseClass {
     queryResultPayload.arrayOfRecords = arrayOfRecords;
     queryResultPayload.eventType = eventType;
     return queryResultPayload;
+  };
+
+  /**
+   * Static method used to create a "feature info updated" payload.
+   *
+   * @param {string | null} handlerName the handler Name
+   * @param {string} layerPath the layer path updated
+   * @param {TypeResultsSet | TypeFeatureInfoResultsSet} resultsSet the feature info resultset
+   *
+   * @returns {TypeFeatureInfoLayersetUpdatedPayload} the TypeFeatureInfoLayersetUpdatedPayload object created
+   */
+  static createFeatureInfoLayersetUpdatedPayload = (
+    handlerName: string,
+    layerPath: string,
+    resultsSet: TypeResultsSet | TypeFeatureInfoResultsSet,
+    layerStatus: TypeLayerStatus
+  ): TypeFeatureInfoLayersetUpdatedPayload => {
+    const featureInfoLayersetUpdatedPayload = new GetFeatureInfoPayload(
+      EVENT_NAMES.GET_FEATURE_INFO.FEATURE_INFO_LAYERSET_UPDATED,
+      handlerName
+    ) as TypeFeatureInfoLayersetUpdatedPayload;
+    featureInfoLayersetUpdatedPayload.layerPath = layerPath;
+    featureInfoLayersetUpdatedPayload.resultsSet = resultsSet as TypeFeatureInfoResultsSet;
+    featureInfoLayersetUpdatedPayload.layerStatus = layerStatus;
+    return featureInfoLayersetUpdatedPayload;
   };
 }

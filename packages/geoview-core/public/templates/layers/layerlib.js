@@ -45,7 +45,7 @@ const addBoundsPolygon = (mapId, bbox) => {
 
 // ==========================================================================================================================
 const createInfoTable = (mapId, resultsSetId, resultsSet, eventType) => {
-  if (eventType !== 'click') return;
+  if (!['click', 'all-features'].includes(eventType)) return;
   const infoTable = document.getElementById(`${resultsSetId}-${eventType}`);
   infoTable.textContent = '';
   const oldContent = document.getElementById(`layer${mapId.slice(-1)}-${eventType}-info`);

@@ -46,7 +46,6 @@ const LayerListItem = memo(function LayerListItem({ isSelected, layer, onListIte
     }
 
     switch (layer.queryStatus) {
-      case 'init':
       case 'processing':
         return sxClasses.backgroundProcessing;
       case 'error':
@@ -87,7 +86,6 @@ const LayerListItem = memo(function LayerListItem({ isSelected, layer, onListIte
 
       default:
         switch (layer.queryStatus) {
-          case 'init':
           case 'processing':
             return (
               <Box sx={{ display: 'flex', alignContent: 'center' }}>

@@ -45,7 +45,7 @@ export class LegendsLayerSet {
     };
 
     // This function is used to initialise the date property of the layer path entry.
-    const registrationUserDataInitialisation = (layerPath: string) => {
+    const registrationUserInitialisation = (layerPath: string) => {
       this.resultsSet[layerPath].querySent = false;
       this.resultsSet[layerPath].data = undefined;
     };
@@ -56,7 +56,7 @@ export class LegendsLayerSet {
       `${mapId}/LegendsLayerSet`,
       this.resultsSet as TypeResultsSet,
       registrationConditionFunction,
-      registrationUserDataInitialisation
+      registrationUserInitialisation
     );
 
     api.event.on(
@@ -65,7 +65,7 @@ export class LegendsLayerSet {
         if (payloadIsLayerSetUpdated(layerUpdatedPayload)) {
           // Log
           logger.logTraceDetailed(
-            'legends-layer-set on EVENT_NAMES.LAYER_SET.UPDATED (LegendsLayerSetStatusOrPhaseChanged)',
+            'legends-layer-set on EVENT_NAMES.LAYER_SET.UPDATED (LegendsLayerSetStatusChanged)',
             this.mapId,
             layerUpdatedPayload
           );
@@ -74,7 +74,7 @@ export class LegendsLayerSet {
           api.event.emit(GetLegendsPayload.createLegendsLayersetUpdatedPayload(`${this.mapId}/LegendsLayerSet`, layerPath, resultsSet));
         }
       },
-      `${mapId}/LegendsLayerSetStatusOrPhaseChanged`
+      `${mapId}/LegendsLayerSetStatusChanged`
     );
 
     // This listener receives the legend information returned by the layer's getLegend call and store it in the resultsSet.
