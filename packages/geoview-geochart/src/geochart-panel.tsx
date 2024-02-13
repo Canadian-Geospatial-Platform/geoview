@@ -213,7 +213,7 @@ export function GeoChartPanel(props: GeoChartPanelProps): JSX.Element {
         <Layout
           selectedLayerPath={selectedLayerPath || ''}
           layerList={memoLayersList}
-          handleLayerList={handleLayerChange}
+          onLayerListClicked={handleLayerChange}
           onIsEnlargeClicked={handleIsEnlargeClicked}
         >
           {selectedLayerPath &&
