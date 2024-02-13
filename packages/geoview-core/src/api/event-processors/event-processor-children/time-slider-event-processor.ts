@@ -4,7 +4,7 @@ import {
   EsriDynamic,
   ITimeSliderState,
   TypeFeatureInfoLayerConfig,
-  TypeTimeSliderValues,
+  TimeSliderLayerSet,
   WMS,
   api,
   getLocalizedValue,
@@ -30,9 +30,6 @@ export class TimeSliderEventProcessor extends AbstractEventProcessor {
             store.getState().timeSliderState.actions.addTimeSliderLayer(timeSliderLayer);
           });
         }
-        const { visibleLayers } = store.getState().mapState;
-        const initialVisibleLayers = TimeSliderEventProcessor.filterTimeSliderLayers(mapId, visibleLayers);
-        store.getState().timeSliderState.actions.setVisibleTimeSliderLayers(initialVisibleLayers);
       },
       mapId
     );
@@ -56,18 +53,8 @@ export class TimeSliderEventProcessor extends AbstractEventProcessor {
       }
     );
 
-    const unsubVisibleLayers = store.subscribe(
-      (state) => state.mapState.visibleLayers,
-      (cur) => {
-        const visibleLayers = TimeSliderEventProcessor.filterTimeSliderLayers(mapId, cur);
-        const prevVisibleTimeLayers = [...store.getState().timeSliderState.visibleTimeSliderLayers];
-        if (JSON.stringify(prevVisibleTimeLayers) !== JSON.stringify(visibleLayers))
-          store.getState().timeSliderState.actions.setVisibleTimeSliderLayers(visibleLayers);
-      }
-    );
-
     // Return the array of subscriptions so they can be destroyed later
-    return [unsubLayerOrder, unsubVisibleLayers];
+    return [unsubLayerOrder];
   }
 
   // **********************************************************
@@ -109,9 +96,9 @@ export class TimeSliderEventProcessor extends AbstractEventProcessor {
    *
    * @param {string} mapId The id of the map
    * @param {string} layerPath The path of the layer to add to time slider
-   * @returns {{ [index: string]: TypeTimeSliderValues }}
+   * @returns {TimeSliderLayer}
    */
-  static getInitialTimeSliderValues(mapId: string, layerPath: string): { [index: string]: TypeTimeSliderValues } {
+  static getInitialTimeSliderValues(mapId: string, layerPath: string): TimeSliderLayerSet {
     const name = getLocalizedValue(api.maps[mapId].layer.geoviewLayers[layerPath.split('/')[0]].geoviewLayerName, mapId) || layerPath;
     const temporalDimensionInfo = api.maps[mapId].layer.geoviewLayer(layerPath).getTemporalDimension();
     const { range } = temporalDimensionInfo.range;
@@ -128,7 +115,7 @@ export class TimeSliderEventProcessor extends AbstractEventProcessor {
     if (fieldIndex !== -1 && localizedAliasFields?.length === localizedOutFields?.length) fieldAlias = localizedAliasFields![fieldIndex];
 
     const values = singleHandle ? [new Date(temporalDimensionInfo.default).getTime()] : [...minAndMax];
-    const sliderData: { [index: string]: TypeTimeSliderValues } = {
+    const sliderData: TimeSliderLayerSet = {
       [layerPath]: {
         name,
         range,

@@ -1,7 +1,7 @@
 import { useTheme } from '@mui/material/styles';
 import { TypeWindow, getLocalizedMessage } from 'geoview-core';
 import { LayerListEntry, Layout } from 'geoview-core/src/core/components/common';
-import { useVisibleTimeSliderLayers, useTimeSliderLayers } from 'geoview-core/src/core/stores';
+import { useMapVisibleLayers, useTimeSliderLayers } from 'geoview-core/src/core/stores';
 import { Paper, Typography } from 'geoview-core/src/ui';
 import { logger } from 'geoview-core/src/core/utils/logger';
 
@@ -24,7 +24,7 @@ export function TimeSliderPanel(props: TypeTimeSliderProps): JSX.Element {
   const { mapId, configObj } = props;
   const { cgpv } = window as TypeWindow;
   const { react } = cgpv;
-  const { useState, useEffect, useCallback } = react;
+  const { useState, useCallback, useMemo } = react;
 
   const theme = useTheme();
   const sxClasses = getSxClasses(theme);
@@ -33,14 +33,14 @@ export function TimeSliderPanel(props: TypeTimeSliderProps): JSX.Element {
   const [selectedLayerPath, setSelectedLayerPath] = useState<string>();
 
   // get values from store
-  const visibleTimeSliderLayers = useVisibleTimeSliderLayers();
+  const visibleLayers = useMapVisibleLayers() as string[];
   const timeSliderLayers = useTimeSliderLayers();
 
   /**
    * handle Layer list when clicked on each layer.
    * @param {LayerListEntry} layer layer clicked by the user.
    */
-  const handleLayerList = useCallback((layer: LayerListEntry) => {
+  const handleClickLayerList = useCallback((layer: LayerListEntry) => {
     // Log
     logger.logTraceUseCallback('TIME-SLIDER-PANEL - handleLayerList');
 
@@ -48,37 +48,30 @@ export function TimeSliderPanel(props: TypeTimeSliderProps): JSX.Element {
     setSelectedLayerPath(layer.layerPath);
   }, []);
 
-  const renderLayerList = useCallback(() => {
+  // Reacts when the array of layer data updates
+  const memoLayersList = useMemo(() => {
     // Log
-    logger.logTraceUseCallback('TIME-SLIDER-PANEL - renderLayerList');
+    logger.logTraceUseMemo('TIME-SLIDER-PANEL - memoLayersList', timeSliderLayers);
 
-    const array = visibleTimeSliderLayers.map((layerPath: string) => {
-      // TODO: Check - Update the layerStatus and queryStatus below if necessary
-      return {
-        layerName: timeSliderLayers[layerPath].name,
-        layerPath,
-        tooltip: timeSliderLayers[layerPath].name,
-        layerStatus: 'loaded',
-        queryStatus: 'processed',
-      };
-    });
-
-    return array;
-  }, [timeSliderLayers, visibleTimeSliderLayers]);
-
-  useEffect(() => {
-    // Log
-    logger.logTraceUseEffect('TIME-SLIDER-PANEL - visibleTimeSliderLayers', visibleTimeSliderLayers);
-
-    if (visibleTimeSliderLayers?.length) {
-      setSelectedLayerPath(visibleTimeSliderLayers[0]);
-    } else {
-      setSelectedLayerPath(undefined);
-    }
-  }, [visibleTimeSliderLayers]);
+    // Set the layers list
+    return visibleLayers
+      .map((layerPath) => {
+        return { layerPath, timeSliderLayerInfo: timeSliderLayers[layerPath] };
+      })
+      .filter((layer) => layer && layer.timeSliderLayerInfo)
+      .map((layer) => {
+        return {
+          layerName: layer.timeSliderLayerInfo.name,
+          layerPath: layer.layerPath,
+          tooltip: layer.timeSliderLayerInfo.name,
+          layerStatus: 'loaded',
+          queryStatus: 'processed',
+        } as LayerListEntry;
+      });
+  }, [visibleLayers, timeSliderLayers]);
 
   return (
-    <Layout selectedLayerPath={selectedLayerPath} onLayerListClicked={handleLayerList} layerList={renderLayerList()}>
+    <Layout selectedLayerPath={selectedLayerPath} onLayerListClicked={handleClickLayerList} layerList={memoLayersList}>
       {selectedLayerPath && <TimeSlider mapId={mapId} config={configObj} layerPath={selectedLayerPath} key={selectedLayerPath} />}
       {!selectedLayerPath && (
         <Paper sx={{ padding: '2rem' }}>
