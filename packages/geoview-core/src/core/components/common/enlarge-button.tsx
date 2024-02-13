@@ -5,18 +5,17 @@ import { ArrowBackIcon, ArrowForwardIcon, Button } from '@/ui';
 import { getSxClasses } from './enlarge-button-style';
 
 interface EnlargeButtonProps {
-  isEnlargeDataTable: boolean;
-  // TODO: Refactor this props something like 'onEnlarge'? (getting rid of legacy 'data table' stuff and align with callback namings conv?)
-  setIsEnlargeDataTable: Dispatch<boolean>;
+  isEnlarged: boolean;
+  onSetIsEnlarged: Dispatch<boolean>;
 }
 
 /**
  * Create enlarge button
- * @param {boolean} isEnlargeDataTable
- * @param {function} setIsEnlargeDataTable
+ * @param {boolean} isEnlarged
+ * @param {function} setIsEnlarged
  * @returns JSX.element
  */
-export function EnlargeButton({ isEnlargeDataTable, setIsEnlargeDataTable }: EnlargeButtonProps) {
+export function EnlargeButton({ isEnlarged, onSetIsEnlarged }: EnlargeButtonProps) {
   const { t } = useTranslation<string>();
 
   const theme = useTheme();
@@ -27,12 +26,12 @@ export function EnlargeButton({ isEnlargeDataTable, setIsEnlargeDataTable }: Enl
       type="text"
       size="small"
       sx={sxClasses.enlargeBtn}
-      onClick={() => setIsEnlargeDataTable(!isEnlargeDataTable)}
-      tooltip={isEnlargeDataTable ? t('dataTable.reduceBtn')! : t('dataTable.enlargeBtn')!}
+      onClick={() => onSetIsEnlarged(!isEnlarged)}
+      tooltip={isEnlarged ? t('dataTable.reduceBtn')! : t('dataTable.enlargeBtn')!}
       tooltipPlacement="top"
     >
-      {isEnlargeDataTable ? <ArrowForwardIcon sx={sxClasses.enlargeBtnIcon} /> : <ArrowBackIcon sx={sxClasses.enlargeBtnIcon} />}
-      {isEnlargeDataTable ? t('dataTable.reduceBtn') : t('dataTable.enlargeBtn')}
+      {isEnlarged ? <ArrowForwardIcon sx={sxClasses.enlargeBtnIcon} /> : <ArrowBackIcon sx={sxClasses.enlargeBtnIcon} />}
+      {isEnlarged ? t('dataTable.reduceBtn') : t('dataTable.enlargeBtn')}
     </Button>
   );
 }

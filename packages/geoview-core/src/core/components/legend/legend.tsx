@@ -1,16 +1,20 @@
 import { useTheme } from '@mui/material';
 import { useEffect, useMemo, useState } from 'react';
-import { Box } from '@/ui';
+import { useTranslation } from 'react-i18next';
+import { Box, Paper, Typography } from '@/ui';
 import { useMapVisibleLayers, useLayerStoreActions } from '@/core/stores/';
+import { logger } from '@/core/utils/logger';
+
 import { getSxClasses } from './legend-styles';
 import { LegendLayer } from './legend-layer';
 import { TypeLegendLayer } from '../layers/types';
 import { useFooterPanelHeight } from '../common';
-import { logger } from '@/core/utils/logger';
 
 export function Legend(): JSX.Element {
   // Log
   logger.logTraceRender('components/legend/legend');
+
+  const { t } = useTranslation<string>();
 
   const theme = useTheme();
   const sxClasses = getSxClasses(theme);
@@ -86,6 +90,9 @@ export function Legend(): JSX.Element {
   }, [getLayer, visibleLayers]);
 
   useEffect(() => {
+    // Log
+    logger.logTraceUseEffect('LEGEND - legendLayers', legendLayers);
+
     // update subsets of list when window size updated.
     const formatLegendLayerList = () => {
       updateLegendLayerListByWindowSize(legendLayers);
@@ -98,19 +105,30 @@ export function Legend(): JSX.Element {
   return (
     <Box sx={sxClasses.container} ref={leftPanelRef} id="legendContainer">
       <Box display="flex" flexDirection="row" flexWrap="wrap">
-        {formattedLegendLayerList.map((layers, idx) => {
-          return (
-            <Box
-              key={`${idx.toString()}`}
-              width={{ xs: '100%', sm: '50%', md: '33.33%', lg: '25%', xl: '25%' }}
-              sx={{ paddingRight: '0.65rem' }}
-            >
-              {layers.map((layer) => {
-                return <LegendLayer layer={layer} key={layer.layerPath} />;
-              })}
-            </Box>
-          );
-        })}
+        {!!legendLayers.length &&
+          formattedLegendLayerList.map((layers, idx) => {
+            return (
+              <Box
+                key={`${idx.toString()}`}
+                width={{ xs: '100%', sm: '50%', md: '33.33%', lg: '25%', xl: '25%' }}
+                sx={{ paddingRight: '0.65rem' }}
+              >
+                {layers.map((layer) => {
+                  return <LegendLayer layer={layer} key={layer.layerPath} />;
+                })}
+              </Box>
+            );
+          })}
+        {!legendLayers.length && (
+          <Paper sx={{ padding: '2rem', width: '100%' }}>
+            <Typography variant="h3" gutterBottom sx={sxClasses.legendInstructionsTitle}>
+              {t('legend.legendInstructions')}
+            </Typography>
+            <Typography component="p" sx={sxClasses.legendInstructionsBody}>
+              {t('legend.legendInstructions')}
+            </Typography>
+          </Paper>
+        )}
       </Box>
     </Box>
   );

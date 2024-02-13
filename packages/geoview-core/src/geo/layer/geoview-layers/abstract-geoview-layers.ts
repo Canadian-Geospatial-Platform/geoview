@@ -1532,24 +1532,30 @@ export abstract class AbstractGeoViewLayer {
    * @returns {Extent} The layer bounding box.
    */
   calculateBounds(layerPath?: string): Extent | undefined {
-    layerPath = layerPath || this.layerPathAssociatedToTheGeoviewLayer;
-    let bounds: Extent | undefined;
-    const processGroupLayerBounds = (listOfLayerEntryConfig: TypeListOfLayerEntryConfig) => {
-      listOfLayerEntryConfig.forEach((layerConfig) => {
-        if (layerEntryIsGroupLayer(layerConfig)) processGroupLayerBounds(layerConfig.listOfLayerEntryConfig);
-        else {
-          bounds = this.getBounds(layerConfig.layerPath, bounds);
-        }
-      });
-    };
+    try {
+      layerPath = layerPath || this.layerPathAssociatedToTheGeoviewLayer;
+      let bounds: Extent | undefined;
+      const processGroupLayerBounds = (listOfLayerEntryConfig: TypeListOfLayerEntryConfig) => {
+        listOfLayerEntryConfig.forEach((layerConfig) => {
+          if (layerEntryIsGroupLayer(layerConfig)) processGroupLayerBounds(layerConfig.listOfLayerEntryConfig);
+          else {
+            bounds = this.getBounds(layerConfig.layerPath, bounds);
+          }
+        });
+      };
 
-    const initialLayerConfig = this.getLayerConfig(layerPath);
-    if (initialLayerConfig) {
-      if (Array.isArray(initialLayerConfig)) processGroupLayerBounds(initialLayerConfig);
-      else processGroupLayerBounds([initialLayerConfig]);
+      const initialLayerConfig = this.getLayerConfig(layerPath);
+      if (initialLayerConfig) {
+        if (Array.isArray(initialLayerConfig)) processGroupLayerBounds(initialLayerConfig);
+        else processGroupLayerBounds([initialLayerConfig]);
+      }
+
+      return bounds;
+    } catch (error) {
+      // Log
+      logger.logError(`Couldn't calculate bounds on layer ${layerPath}`, error);
+      return undefined;
     }
-
-    return bounds;
   }
 
   /** ***************************************************************************************************************************

@@ -558,8 +558,8 @@ export class MapViewer {
    * @param {Extent} extent The extent to zoom to.
    * @param {FitOptions} options The options to configure the zoomToExtent (default: { padding: [100, 100, 100, 100], maxZoom: 11 }).
    */
-  zoomToExtent(extent: Extent, options?: FitOptions): void {
-    MapEventProcessor.zoomToExtent(this.mapId, extent, options);
+  zoomToExtent(extent: Extent, options?: FitOptions): Promise<void> {
+    return MapEventProcessor.zoomToExtent(this.mapId, extent, options);
   }
   // #endregion
 
