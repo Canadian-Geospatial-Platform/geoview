@@ -10,7 +10,7 @@ export function LayerIcon({ layer }: LayerIconProps): JSX.Element {
   if (layer.layerStatus === 'error') {
     return <ErrorIcon color="error" />;
   }
-  if (layer.layerStatus === 'processing') {
+  if (layer.layerStatus === 'processing' || layer.layerStatus === 'loading') {
     return (
       <Box sx={{ padding: '5px', marginRight: '10px' }}>
         <CircularProgressBase size={20} />

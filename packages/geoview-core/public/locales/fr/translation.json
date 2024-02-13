@@ -109,7 +109,8 @@
     "visibilityIsAlways": "La visibilité est toujours activée",
     "toggleVisibility": "Basculer la visibilité",
     "toggleCollapse": "Basculer la fermeture",
-    "querying": "Requête en cours"
+    "querying": "Requête en cours",
+    "layerAddedSuccessfully": "Couche __param__ ajoutée avec succès"
   },
   "details": {
     "title": "Détails",

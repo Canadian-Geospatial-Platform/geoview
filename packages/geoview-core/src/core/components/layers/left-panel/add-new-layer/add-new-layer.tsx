@@ -33,7 +33,7 @@ import { TypeWFSLayerConfig, TypeWfsLayerEntryConfig, WFS as WfsGeoviewClass } f
 import { ButtonPropsLayerPanel, SelectChangeEvent, TypeJsonArray, TypeJsonObject } from '@/core/types/global-types';
 import { useGeoViewMapId } from '@/core/stores/geoview-store';
 import { createLocalizedString } from '@/core/utils/utilities';
-import { useLayersList } from '@/core/stores/store-interface-and-intial-values/layer-state';
+import { useLayerStoreActions, useLayersList } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { Cast, Config, api, generateId } from '@/app';
 import { logger } from '@/core/utils/logger';
 
@@ -68,6 +68,7 @@ export function AddNewLayer(): JSX.Element {
   // get values from store
   const mapId = useGeoViewMapId();
   const layersList = useLayersList();
+  const { setDisplayState, setSelectedLayerPath } = useLayerStoreActions();
 
   const isMultiple = () => hasMetadata && (layerType === ESRI_DYNAMIC || layerType === WFS || layerType === WMS || layerType === GEOJSON);
 
@@ -774,6 +775,10 @@ export function AddNewLayer(): JSX.Element {
       } else emitErrorNotLoaded();
     }
     setIsLoading(false);
+    setSelectedLayerPath(`${geoviewLayerInstance?.geoviewLayerId}/${geoviewLayerInstance?.geoviewLayerId}`);
+    setDisplayState('view');
+    const message = api.utilities.replaceParams([layerName], t('layers.layerAddedSuccessfully'));
+    api.utilities.showMessage(mapId, message, false);
   };
 
   /**
