@@ -1,4 +1,4 @@
-import { SyntheticEvent, ReactNode, useState, useEffect, useRef, useMemo } from 'react';
+import { SyntheticEvent, ReactNode, useState, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { Grid, Tab as MaterialTab, Tabs as MaterialTabs, TabsProps, TabProps, BoxProps, Box } from '@mui/material';
@@ -77,9 +77,8 @@ export function Tabs(props: TypeTabsProps): JSX.Element {
   const sxClasses = getSxClasses(theme);
   // internal state
   const [value, setValue] = useState(0);
+  const [tabPanels, setTabPanels] = useState([tabs[0]]);
 
-  // reference to display tab panels on demand.
-  const tabPanelRefs = useRef([tabs[0]]);
   // get store values and actions
   const mapSize = useMapSize();
 
@@ -96,9 +95,14 @@ export function Tabs(props: TypeTabsProps): JSX.Element {
     if (typeof tabValue === 'string') {
       setValue(tabValue);
     } else {
-      if (!tabPanelRefs.current[tabValue]) {
-        tabPanelRefs.current[tabValue] = tabs[tabValue];
-      }
+      // We are adding the new tabs into the state of tabPanels at specific position
+      // based on user selection of tabs, so that tabs id and values are in sync with index of tabPanels state.
+      //  initialy tab panel will look like [tab1], after user click on details tab ie. 3 tab
+      // this can looks like when debugging:- [tab1, undefined, tab3],
+      // undefined values are handled when rendering the tabs.
+      const newPanels = [...tabPanels];
+      newPanels[tabValue] = tabs[tabValue];
+      setTabPanels(newPanels);
       setValue(tabValue);
       // Callback
       onSelectedTabChanged?.(tabs[tabValue]);
@@ -128,14 +132,11 @@ export function Tabs(props: TypeTabsProps): JSX.Element {
   useEffect(() => {
     // Log
     logger.logTraceUseEffect('TABS - selectedTab', selectedTab);
-
     // If a selected tab is defined
     if (selectedTab !== undefined) {
-      // Keep the tab in reference
-      if (!tabPanelRefs.current[selectedTab]) {
-        tabPanelRefs.current[selectedTab] = tabs[selectedTab];
-      }
-
+      const newPanels = [...tabPanels];
+      newPanels[selectedTab] = tabs[selectedTab];
+      setTabPanels(newPanels);
       // Make sure internal state follows
       setValue(selectedTab);
 
@@ -234,11 +235,15 @@ export function Tabs(props: TypeTabsProps): JSX.Element {
           visibility: TabContentVisibilty,
         }}
       >
-        {tabPanelRefs.current?.map((tab, index) => (
-          <TabPanel value={value} index={index} key={tab.id}>
-            {typeof tab?.content === 'string' ? <HtmlToReact htmlContent={(tab?.content as string) ?? ''} /> : tab.content}
-          </TabPanel>
-        ))}
+        {tabPanels.map((tab, index) => {
+          return tab ? (
+            <TabPanel value={value} index={index} key={tab.id}>
+              {typeof tab?.content === 'string' ? <HtmlToReact htmlContent={(tab?.content as string) ?? ''} /> : tab.content}
+            </TabPanel>
+          ) : (
+            ''
+          );
+        })}
       </Grid>
     </Grid>
   );
