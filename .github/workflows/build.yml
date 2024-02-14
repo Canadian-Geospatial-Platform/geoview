@@ -9,7 +9,7 @@ permissions:
   contents: write
 
 env:
-  NODE_VERSION: '16.15.0'
+  NODE_VERSION: '20.11.0'
 
 jobs:
   build:
