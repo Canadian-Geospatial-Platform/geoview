@@ -1,5 +1,6 @@
 /* eslint-disable no-console */
-import { getItemAsNumber, getItemAsNumberSetValue } from './localStorage';
+import { isArray } from 'lodash';
+import { getItemAsNumber, getItemAsNumberOrNumberArraySetValue } from './localStorage';
 
 // The log levels.
 // The most detailed messages. Disabled by default. Only shows if actually running in dev environment, never shown otherwise.
@@ -14,6 +15,10 @@ export const LOG_TRACE_USE_CALLBACK = 4;
 export const LOG_TRACE_USE_MEMO = 5;
 // For tracing useEffect mounting. Disabled by default. Only shows if running in dev environment or GEOVIEW_LOG_ACTIVE key is set in local storage.
 export const LOG_TRACE_USE_EFFECT = 6;
+// For tracing store subscription events. Disabled by default. Only shows if running in dev environment or GEOVIEW_LOG_ACTIVE key is set in local storage.
+export const LOG_TRACE_CORE_STORE_SUBSCRIPTION = 8;
+// For tracing api events. Disabled by default. Only shows if running in dev environment or GEOVIEW_LOG_ACTIVE key is set in local storage.
+export const LOG_TRACE_CORE_API_EVENT = 9;
 // For tracing core functions. Disabled by default. Only shows if running in dev environment or GEOVIEW_LOG_ACTIVE key is set in local storage.
 export const LOG_TRACE_CORE = 10;
 // Default. For debugging and development. Enabled by default. Only shows if running in dev environment or GEOVIEW_LOG_ACTIVE key is set in local storage.
@@ -33,7 +38,7 @@ const LOCAL_STORAGE_KEY_LEVEL = 'GEOVIEW_LOG_LEVEL';
 const LOG_ACTIVE = process.env.NODE_ENV === 'development' || !!getItemAsNumber(LOCAL_STORAGE_KEY_ACTIVE);
 
 // Check the logging level and set it to LOG_DEBUG if not found
-const LOG_LEVEL = getItemAsNumberSetValue(LOCAL_STORAGE_KEY_LEVEL, LOG_DEBUG);
+const LOG_LEVEL = getItemAsNumberOrNumberArraySetValue(LOCAL_STORAGE_KEY_LEVEL, LOG_DEBUG);
 
 /**
  * Helper function to format a time for logging.
@@ -62,16 +67,18 @@ const formatTime = (date: Date): string => {
  * The supported color codes for logging
  */
 type ColorCode = {
-  darkorange: string;
-  dodgerblue: string;
-  yellowgreen: string;
-  green: string;
-  plum: string;
   turquoise: string;
   grey: string;
+  plum: string;
   orchid: string;
-  mediumorchid: string;
   darkorchid: string;
+  mediumorchid: string;
+  royalblue: string;
+  cornflowerblue: string;
+  dodgerblue: string;
+  darkorange: string;
+  yellowgreen: string;
+  green: string;
 };
 
 /**
@@ -86,7 +93,7 @@ type LogMarker = {
  */
 export class ConsoleLogger {
   // The logging level. The higher the number, the more detailed the log.
-  loggingLevel: number;
+  loggingLevel: number | number[];
 
   // The active markers for the logger.
   markers: LogMarker = {};
@@ -95,7 +102,7 @@ export class ConsoleLogger {
    * Constructor
    * @param logLevel? number Indicate the level of detail for the ConsoleLogger. The higher the number, the more detailed the log.
    */
-  constructor(logLevel: number) {
+  constructor(logLevel: number | number[]) {
     // Set the level for the logger so that it logs what we really want to see.
     this.loggingLevel = logLevel;
   }
@@ -175,6 +182,32 @@ export class ConsoleLogger {
     if (!LOG_ACTIVE) return;
     // Redirect
     this.logLevel(LOG_TRACE_USE_EFFECT, 'U_EFF', 'mediumorchid', useEffectFunction, ...message);
+  };
+
+  /**
+   * Logging function commonly used in the store subscriptions to track when a store has triggered a subscription.
+   * Only shows if LOG_ACTIVE is true.
+   * @param message string storeSubscription the store subscription event that was raised
+   * @param message unknown[] the messages to log
+   */
+  logTraceCoreStoreSubscription = (storeSubscription: string, ...message: unknown[]): void => {
+    // Validate log active
+    if (!LOG_ACTIVE) return;
+    // Redirect
+    this.logLevel(LOG_TRACE_CORE_STORE_SUBSCRIPTION, 'E_STO', 'royalblue', storeSubscription, ...message);
+  };
+
+  /**
+   * Logging function commonly used in the API event handlers to track when the API has triggered an event.
+   * Only shows if LOG_ACTIVE is true.
+   * @param message string apiEvent the api event that was raised
+   * @param message unknown[] the messages to log
+   */
+  logTraceCoreAPIEvent = (apiEvent: string, ...message: unknown[]): void => {
+    // Validate log active
+    if (!LOG_ACTIVE) return;
+    // Redirect
+    this.logLevel(LOG_TRACE_CORE_API_EVENT, 'E_API', 'cornflowerblue', apiEvent, ...message);
   };
 
   /**
@@ -277,6 +310,18 @@ export class ConsoleLogger {
   };
 
   /**
+   * Compares the provided level (number) with the logging level (number | number[]) to know if the log should appear or not.
+   * @param level number the level associated with the message to be logged.
+   * @returns boolean true if the log level indicates that it should appear
+   */
+  checkLevel = (level: number): boolean => {
+    // If regular number
+    if (!isArray(this.loggingLevel)) return this.loggingLevel <= level;
+    // Is an array. We want the log to show DEBUG and higher and whatever levels (<20) are included in the array
+    return level >= LOG_DEBUG || this.loggingLevel.includes(level);
+  };
+
+  /**
    * Checks that the level is greater or equal to the application logging level.
    * If level is valid, logs using console.log().
    * @param level number the level associated with the message to be logged.
@@ -284,7 +329,7 @@ export class ConsoleLogger {
    */
   logLevel = (level: number, header: string, color: keyof ColorCode, ...message: unknown[]): void => {
     // If the configured logging level accepts to log the given level
-    if (this.loggingLevel <= level) console.log(`%c${formatTime(new Date())} ${header}`, `color: ${color}`, ...message);
+    if (this.checkLevel(level)) console.log(`%c${formatTime(new Date())} ${header}`, `color: ${color}`, ...message);
   };
 
   /**
@@ -295,7 +340,7 @@ export class ConsoleLogger {
    */
   warnLevel = (level: number, ...message: unknown[]): void => {
     // If the configured logging level accepts to log the given level
-    if (this.loggingLevel <= level) console.warn(`${formatTime(new Date())}`, ...message);
+    if (this.checkLevel(level)) console.warn(`${formatTime(new Date())}`, ...message);
   };
 
   /**
@@ -306,7 +351,7 @@ export class ConsoleLogger {
    */
   errorLevel = (level: number, ...message: unknown[]): void => {
     // If the configured logging level accepts to log the given level
-    if (this.loggingLevel <= level) console.error(`${formatTime(new Date())}`, ...message);
+    if (this.checkLevel(level)) console.error(`${formatTime(new Date())}`, ...message);
   };
 }
 
@@ -319,7 +364,10 @@ logger.logInfo('Logger initialized');
 // logger.logTraceUseEffectUnmount('trace use effect unmount');
 // logger.logTraceRender('trace render');
 // logger.logTraceUseCallback('trace use callback');
+// logger.logTraceUseMemo('trace use memo');
 // logger.logTraceUseEffect('trace use effect');
+// logger.logTraceCoreStoreSubscription('trace store subscription');
+// logger.logTraceCoreAPIEvent('trace api event');
 // logger.logTraceCore('trace core');
 // logger.logDebug('debug');
 // logger.logMarkerStart('test');

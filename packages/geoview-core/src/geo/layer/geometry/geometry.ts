@@ -21,6 +21,7 @@ import {
 } from '@/api/events/payloads';
 import { TypeFeatureCircleStyle, TypeFeatureStyle, TypeIconStyle } from './geometry-types';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
+import { logger } from '@/core/utils/logger';
 
 /**
  * Store a group of features
@@ -68,6 +69,9 @@ export class Geometry {
     api.event.on(
       EVENT_NAMES.GEOMETRY.EVENT_GEOMETRY_ADD,
       (payload) => {
+        // Log
+        logger.logTraceCoreAPIEvent('GEOMETRY - EVENT_GEOMETRY_ADD', payload);
+
         if (payloadIsACircleConfig(payload)) {
           this.addCircle(payload.coordintate, payload.options, payload.id);
         } else if (payloadIsAPolygonConfig(payload)) {
@@ -85,6 +89,9 @@ export class Geometry {
     api.event.on(
       EVENT_NAMES.GEOMETRY.EVENT_GEOMETRY_REMOVE,
       (payload) => {
+        // Log
+        logger.logTraceCoreAPIEvent('GEOMETRY - EVENT_GEOMETRY_REMOVE', payload);
+
         if (payloadIsAGeometryConfig(payload)) {
           // remove geometry from outside
           this.deleteGeometry(payload.id!);
@@ -97,6 +104,9 @@ export class Geometry {
     api.event.on(
       EVENT_NAMES.GEOMETRY.EVENT_GEOMETRY_ON,
       () => {
+        // Log
+        logger.logTraceCoreAPIEvent('GEOMETRY - EVENT_GEOMETRY_ON');
+
         this.setGeometryGroupAsVisible();
       },
       this.#mapId
@@ -106,6 +116,9 @@ export class Geometry {
     api.event.on(
       EVENT_NAMES.GEOMETRY.EVENT_GEOMETRY_OFF,
       () => {
+        // Log
+        logger.logTraceCoreAPIEvent('GEOMETRY - EVENT_GEOMETRY_OFF');
+
         this.setGeometryGroupAsInvisible();
       },
       this.#mapId
