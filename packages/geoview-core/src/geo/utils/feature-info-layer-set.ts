@@ -290,6 +290,7 @@ export class FeatureInfoLayerSet {
    * @param {string} layerPath The layerPath that will be queried.
    * @param {QueryType} queryType the query's type to perform
    */
+  // TODO: (futur development) The queryType is a door opened to allow the triggering using a bounding box or a polygon.
   triggerGetAllFeatureInfo(layerPath: string, queryType: QueryType = 'all') {
     if (this.resultsSet[layerPath])
       api.event.emit(GetFeatureInfoPayload.createGetAllLayerFeaturesPayload(`${this.mapId}/${layerPath}`, queryType));

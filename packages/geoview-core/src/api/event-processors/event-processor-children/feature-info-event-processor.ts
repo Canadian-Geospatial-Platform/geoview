@@ -1,4 +1,5 @@
 import { TypeFeatureInfoResultsSet, EventType, TypeLayerData, TypeArrayOfLayerData } from '@/api/events/payloads/get-feature-info-payload';
+import { IFeatureInfoState } from '@/core/stores';
 
 import { GeochartEventProcessor } from './geochart-event-processor';
 import { AbstractEventProcessor, BatchedPropagationLayerDataArrayByMap } from '../abstract-event-processor';
@@ -25,6 +26,16 @@ export class FeatureInfoEventProcessor extends AbstractEventProcessor {
   private static timeDelayBetweenPropagationsForBatch = 1000;
 
   /**
+   * Shortcut to get the Feature Info state for a given map id
+   * @param {string} mapId The mapId
+   * @returns {IFeatureInfoState} The Feature Info state
+   */
+  protected static getFeatureInfoState(mapId: string): IFeatureInfoState {
+    // Return the feature info state
+    return super.getState(mapId).detailsState;
+  }
+
+  /**
    * Static method used to propagate feature info layer sets to the store
    *
    * @param {string} mapId The map identifier of the resul set modified.
@@ -33,16 +44,14 @@ export class FeatureInfoEventProcessor extends AbstractEventProcessor {
    * @param {TypeFeatureInfoResultsSet} resultsSet The resul sets associated to the map.
    */
   static propagateFeatureInfoToStore(mapId: string, layerPath: string, eventType: EventType, resultsSet: TypeFeatureInfoResultsSet) {
-    const featureInfoState = super.getState(mapId).detailsState;
+    const featureInfoState = this.getFeatureInfoState(mapId);
     if (eventType === 'click') {
       /**
        * Create a details object for each layer which is then used to render layers in details panel.
        */
       const layerDataArray = [...featureInfoState.layerDataArray];
-      if (!layerDataArray.find((layerEntry) => layerEntry.layerPath === layerPath)) {
+      if (!layerDataArray.find((layerEntry) => layerEntry.layerPath === layerPath))
         layerDataArray.push(resultsSet?.[layerPath]?.data.click as TypeLayerData);
-        featureInfoState.actions.setLayerDataArray(layerDataArray);
-      }
       const atLeastOneFeature = layerDataArray.find((layerEntry) => !!layerEntry.features?.length) || false;
 
       // Update the layer data array in the store, all the time, for all statuses
@@ -93,7 +102,7 @@ export class FeatureInfoEventProcessor extends AbstractEventProcessor {
    */
   private static propagateFeatureInfoToStoreBatch(mapId: string, layerDataArray: TypeArrayOfLayerData): Promise<void> {
     // The feature info state
-    const featureInfoState = super.getState(mapId).detailsState;
+    const featureInfoState = this.getFeatureInfoState(mapId);
 
     // Redirect to batch propagate
     return this.helperPropagateArrayStoreBatch(
