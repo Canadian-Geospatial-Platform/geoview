@@ -2,7 +2,7 @@ import { useTheme } from '@mui/material';
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Box, Paper, Typography } from '@/ui';
-import { useMapVisibleLayers, useLayerStoreActions } from '@/core/stores/';
+import { useLayerLegendLayers, useMapOrderedLayerInfo, useLayerStoreActions } from '@/core/stores/';
 import { logger } from '@/core/utils/logger';
 
 import { getSxClasses } from './legend-styles';
@@ -28,7 +28,8 @@ export function Legend({ fullWidth }: LegendType): JSX.Element {
   const [formattedLegendLayerList, setFormattedLegendLayersList] = useState<TypeLegendLayer[][]>([]);
 
   // store state
-  const visibleLayers = useMapVisibleLayers();
+  const orderedLayerInfo = useMapOrderedLayerInfo();
+  const layersList = useLayerLegendLayers();
   const { getLayer } = useLayerStoreActions();
 
   // Custom hook for calculating the height of footer panel
@@ -72,16 +73,24 @@ export function Legend({ fullWidth }: LegendType): JSX.Element {
 
   useEffect(() => {
     // Log
-    logger.logTraceUseEffect('LEGEND - visiblelayers', visibleLayers.length, visibleLayers);
+    logger.logTraceUseEffect('LEGEND - orderedLayerInfo', orderedLayerInfo.length, orderedLayerInfo);
+
+    const visibleLayers = orderedLayerInfo
+      .map((layerInfo) => {
+        if (layerInfo.visible !== 'no') return layerInfo.layerPath;
+        return undefined;
+      })
+      .filter((layerPath) => layerPath !== undefined);
 
     // Loop on the visible layers to retrieve the valid TypeLegendLayer objects
     const parentPaths: string[] = [];
+
     const layers = visibleLayers
       .map((layerPath) => {
-        const pathStart = layerPath.split('/')[0];
+        const pathStart = layerPath!.split('/')[0];
         if (!parentPaths.includes(pathStart)) {
           parentPaths.push(pathStart);
-          return getLayer(layerPath);
+          return getLayer(layerPath!);
         }
         return undefined;
       })
@@ -91,7 +100,7 @@ export function Legend({ fullWidth }: LegendType): JSX.Element {
     updateLegendLayerListByWindowSize(layers);
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [getLayer, visibleLayers]);
+  }, [orderedLayerInfo, layersList]);
 
   useEffect(() => {
     // Log

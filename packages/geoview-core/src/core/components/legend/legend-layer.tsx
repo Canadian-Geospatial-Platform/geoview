@@ -15,6 +15,7 @@ import {
   KeyboardArrowUpIcon,
 } from '@/ui';
 import { TypeLegendLayer } from '@/core/components/layers/types';
+import { useMapStoreActions } from '@/core/stores/';
 import { getSxClasses } from './legend-styles';
 import { LayerIcon } from '../layers/layer-icon';
 import { logger } from '@/core/utils/logger';
@@ -34,9 +35,12 @@ export function LegendLayer(props: LegendLayerProps): JSX.Element {
   const sxClasses = getSxClasses(theme);
 
   const [isGroupOpen, setGroupOpen] = useState(true);
+  const { getVisibilityFromOrderedLayerInfo } = useMapStoreActions();
 
   const getLayerChildren = () => {
-    return layer.children?.filter((c) => c.isVisible !== 'no' && ['processed', 'loaded'].includes(c.layerStatus ?? ''));
+    return layer.children?.filter(
+      (c) => getVisibilityFromOrderedLayerInfo(c.layerPath) !== 'no' && ['processed', 'loaded'].includes(c.layerStatus ?? '')
+    );
   };
 
   /**
@@ -68,7 +72,7 @@ export function LegendLayer(props: LegendLayerProps): JSX.Element {
     return (
       <List sx={{ width: '100%', padding: '20px', margin: '20px 0px' }}>
         {layer.children
-          .filter((d) => d.isVisible !== 'no' && !['error', 'processing'].includes(d.layerStatus ?? ''))
+          .filter((d) => getVisibilityFromOrderedLayerInfo(d.layerPath) !== 'no' && !['error', 'processing'].includes(d.layerStatus ?? ''))
           .map((item) => (
             <LegendLayer layer={item} key={item.layerPath} />
           ))}

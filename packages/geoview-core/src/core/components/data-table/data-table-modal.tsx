@@ -14,7 +14,7 @@ import {
   CircularProgress,
 } from '@/ui';
 import { useUIActiveFocusItem, useUIStoreActions } from '@/core/stores/store-interface-and-intial-values/ui-state';
-import { useSelectedLayerPath } from '@/core/stores/store-interface-and-intial-values/layer-state';
+import { useLayerSelectedLayerPath } from '@/core/stores/store-interface-and-intial-values/layer-state';
 
 import { FieldInfos } from './data-table';
 import { getSxClasses } from './data-table-style';
@@ -44,7 +44,7 @@ export default function DataTableModal(): JSX.Element {
   // get store function
   const { closeModal } = useUIStoreActions();
   const activeModalId = useUIActiveFocusItem().activeElementId;
-  const selectedLayer = useSelectedLayerPath();
+  const selectedLayer = useLayerSelectedLayerPath();
 
   // TODO:: update when correct data is available, mean time we will be using details store data.
   const layersData = useDetailsStoreLayerDataArray();

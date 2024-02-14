@@ -35,10 +35,11 @@ import { TypeCSVLayerConfig, TypeCsvLayerEntryConfig, CSV as CsvGeoviewClass } f
 import { ButtonPropsLayerPanel, SelectChangeEvent, TypeJsonArray, TypeJsonObject } from '@/core/types/global-types';
 import { useGeoViewMapId } from '@/core/stores/geoview-store';
 import { createLocalizedString } from '@/core/utils/utilities';
-import { useLayerStoreActions, useLayersList } from '@/core/stores/store-interface-and-intial-values/layer-state';
+import { useLayerStoreActions, useLayerLegendLayers } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { Cast, Config, api } from '@/app';
 import { logger } from '@/core/utils/logger';
 import { EsriImage, TypeEsriImageLayerConfig } from '@/geo/layer/geoview-layers/raster/esri-image';
+import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 
 type EsriOptions = {
   err: string;
@@ -70,7 +71,7 @@ export function AddNewLayer(): JSX.Element {
 
   // get values from store
   const mapId = useGeoViewMapId();
-  const layersList = useLayersList();
+  const layersList = useLayerLegendLayers();
   const { setDisplayState, setSelectedLayerPath } = useLayerStoreActions();
 
   const isMultiple = () => hasMetadata && (layerType === ESRI_DYNAMIC || layerType === WFS || layerType === WMS || layerType === GEOJSON);
@@ -829,6 +830,7 @@ export function AddNewLayer(): JSX.Element {
       if (layerList.length > 1) {
         (layerList as TypeListOfGeoviewLayerConfig).forEach((geoviewLayerConfig) => {
           api.maps[mapId].layer.addGeoviewLayer(geoviewLayerConfig);
+          MapEventProcessor.addOrderedLayerInfo(mapId, geoviewLayerConfig);
         });
       } else if (layerEntries.length > 0) {
         (layerEntries as TypeListOfGeoviewLayerConfig).forEach((geoviewLayerConfig) => {
@@ -853,6 +855,7 @@ export function AddNewLayer(): JSX.Element {
       if (geoviewLayerInstance.olLayers) {
         logger.logDebug('Before addToMap', geoviewLayerInstance);
         api.maps[mapId].layer.addToMap(geoviewLayerInstance);
+        MapEventProcessor.addOrderedLayerInfo(mapId, geoviewLayerConfig);
         logger.logDebug('After addToMap', geoviewLayerInstance);
       } else emitErrorNotLoaded();
     }

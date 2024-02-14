@@ -257,6 +257,7 @@ export class GeoPackage extends AbstractGeoViewVector {
               if (layers) {
                 layerGroup!.getLayers().push(layers);
                 this.setLayerStatus('processed', layerPath);
+                MapEventProcessor.replaceOrderedLayerInfo(this.mapId, layerConfig);
               } else {
                 this.layerLoadError.push({
                   layer: listOfLayerEntryConfig[0].layerPath,
@@ -274,6 +275,7 @@ export class GeoPackage extends AbstractGeoViewVector {
           const layerPath0 = listOfLayerEntryConfig[0].layerPath;
           if (layer) {
             this.setLayerStatus('processed', layerPath0);
+            MapEventProcessor.replaceOrderedLayerInfo(this.mapId, listOfLayerEntryConfig[0]);
             resolve(layer);
           } else {
             this.layerLoadError.push({

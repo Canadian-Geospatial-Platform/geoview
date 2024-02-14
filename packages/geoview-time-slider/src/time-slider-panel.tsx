@@ -1,7 +1,7 @@
 import { useTheme } from '@mui/material/styles';
-import { TypeWindow, getLocalizedMessage } from 'geoview-core';
+import { TypeOrderedLayerInfo, TypeWindow, getLocalizedMessage } from 'geoview-core';
 import { LayerListEntry, Layout } from 'geoview-core/src/core/components/common';
-import { useMapVisibleLayers, useTimeSliderLayers } from 'geoview-core/src/core/stores';
+import { useMapOrderedLayerInfo, useTimeSliderLayers } from 'geoview-core/src/core/stores';
 import { Paper, Typography } from 'geoview-core/src/ui';
 import { logger } from 'geoview-core/src/core/utils/logger';
 
@@ -33,7 +33,7 @@ export function TimeSliderPanel(props: TypeTimeSliderProps): JSX.Element {
   const [selectedLayerPath, setSelectedLayerPath] = useState<string>();
 
   // get values from store
-  const visibleLayers = useMapVisibleLayers() as string[];
+  const orderedLayerInfo = useMapOrderedLayerInfo() as TypeOrderedLayerInfo[];
   const timeSliderLayers = useTimeSliderLayers();
 
   /**
@@ -53,10 +53,17 @@ export function TimeSliderPanel(props: TypeTimeSliderProps): JSX.Element {
     // Log
     logger.logTraceUseMemo('TIME-SLIDER-PANEL - memoLayersList', timeSliderLayers);
 
+    const visibleLayers = orderedLayerInfo
+      .map((layerInfo) => {
+        if (layerInfo.visible !== 'no') return layerInfo.layerPath;
+        return undefined;
+      })
+      .filter((layerPath) => layerPath !== undefined);
+
     // Return the layers
     return visibleLayers
       .map((layerPath) => {
-        return { layerPath, timeSliderLayerInfo: timeSliderLayers[layerPath] };
+        return { layerPath, timeSliderLayerInfo: timeSliderLayers[layerPath!] };
       })
       .filter((layer) => layer && layer.timeSliderLayerInfo)
       .map((layer) => {
@@ -68,7 +75,7 @@ export function TimeSliderPanel(props: TypeTimeSliderProps): JSX.Element {
           queryStatus: 'processed',
         } as LayerListEntry;
       });
-  }, [visibleLayers, timeSliderLayers]);
+  }, [orderedLayerInfo, timeSliderLayers]);
 
   useEffect(() => {
     // Log
