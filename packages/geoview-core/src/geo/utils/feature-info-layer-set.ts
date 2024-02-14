@@ -12,14 +12,13 @@ import {
   TypeLayerData,
   EventType,
   QueryType,
-  payloadIsQueryLayer,
 } from '@/api/events/payloads';
 import { api } from '@/app';
 import { LayerSet } from './layer-set';
 import { FeatureInfoEventProcessor } from '@/api/event-processors/event-processor-children/feature-info-event-processor';
 import { logger } from '@/core/utils/logger';
 import { getLocalizedValue } from '@/core/utils/utilities';
-import { Coordinate } from '@/core/types/cgpv-types';
+import { Coordinate, TypeQueryStatus, payloadIsFeatureInfoLayersetUpdated, payloadIsGetAllLayerFeatures } from '@/core/types/cgpv-types';
 
 /** ***************************************************************************************************************************
  * A class to hold a set of layers associated with an array of TypeArrayOfFeatureInfoEntries. When this class is instantiated,
@@ -41,16 +40,6 @@ export class FeatureInfoLayerSet {
   /** The layer set object. */
   private layerSet: LayerSet;
 
-  /** Private variable that keeps the click disable flags associated to the layerPath  * /
-  private disableClickOnLayer: {
-    [layerPath: string]: boolean;
-  } = {};
-
-  /** Private variable that keeps the hover disable flags associated to the layerPath  * /
-  private disableHoverOverLayer: {
-    [layerPath: string]: boolean;
-  } = {};
-
   /** Flag used to disable hover event for the entire layerSet */
   private disableHover = false;
 
@@ -64,6 +53,7 @@ export class FeatureInfoLayerSet {
    *
    */
   private constructor(mapId: string) {
+    /* *********************************************************************************************************************** */
     // This function determines whether a layer can be registered.
     const registrationConditionFunction = (layerPath: string): boolean => {
       // Log
@@ -74,8 +64,10 @@ export class FeatureInfoLayerSet {
       return !!queryable;
     };
 
-    // This function is used to initialise the data property of the layer path entry.
-    const registrationUserDataInitialisation = (layerPath: string) => {
+    /* *********************************************************************************************************************** */
+    // Still in the constructor
+    // This function is used to initialise the layer path entries of the layer set.
+    const registrationUserInitialisation = (layerPath: string) => {
       // Log
       logger.logTraceCore('FeatureInfoLayerSet initializing...', layerPath, Object.keys(this.resultsSet));
 
@@ -86,6 +78,7 @@ export class FeatureInfoLayerSet {
         data: {},
         layerName: getLocalizedValue(layerConfig.layerName, mapId) ?? '',
       };
+
       ArrayOfEventTypes.forEach((eventType) => {
         this.resultsSet[layerPath].data[eventType] = {
           layerName: getLocalizedValue(layerConfig.layerName, mapId) ?? '',
@@ -95,64 +88,73 @@ export class FeatureInfoLayerSet {
           features: [],
           layerPath,
         };
+        FeatureInfoEventProcessor.propagateFeatureInfoToStore(mapId, layerPath, eventType, this.resultsSet);
       });
 
-      // Propagate feature info to the store, now that the this.resultsSet is more representative of the reality
+      api.event.on(
+        EVENT_NAMES.GET_FEATURE_INFO.GET_ALL_LAYER_FEATURES,
+        (payload) => {
+          if (payloadIsGetAllLayerFeatures(payload)) {
+            // Log
+            logger.logTraceDetailed('feature-info-layer-set on EVENT_NAMES.GET_FEATURE_INFO.GET_ALL_LAYER_FEATURES', this.mapId);
+
+            if (!this.resultsSet[layerPath].data['all-features']!.eventListenerEnabled) return;
+            const dataForEventType = this.resultsSet[layerPath].data['all-features'] as TypeLayerData;
+            if (layerConfig.layerStatus === 'loaded') {
+              dataForEventType.features = undefined;
+              dataForEventType.queryStatus = 'processing';
+            } else {
+              dataForEventType.features = null;
+              dataForEventType.queryStatus = 'error';
+              FeatureInfoEventProcessor.propagateFeatureInfoToStore(mapId, layerPath, 'all-features', this.resultsSet);
+              return;
+            }
+
+            api.event.emit(GetFeatureInfoPayload.createQueryLayerPayload(`${this.mapId}/${layerPath}`, 'all', layerPath));
+            FeatureInfoEventProcessor.propagateFeatureInfoToStore(mapId, layerPath, 'all-features', this.resultsSet);
+          }
+        },
+        `${mapId}/${layerPath}`
+      );
       FeatureInfoEventProcessor.propagateFeatureInfoToStore(mapId, layerPath, 'click', this.resultsSet);
     };
 
+    /* *********************************************************************************************************************** */
+    // Still in the constructor - initialize other properties.
     this.mapId = mapId;
     this.layerSet = new LayerSet(
       mapId,
       `${mapId}/FeatureInfoLayerSet`,
       this.resultsSet,
       registrationConditionFunction,
-      registrationUserDataInitialisation
+      registrationUserInitialisation
     );
 
-    /*
-     * @param {EventType} eventType The event type (ex.: "click" | "hover" | "crosshaire-enter" | "all-features")
-     * @param {QueryType} queryType The query type (ex.: "all" | "at_pixel" | "at_coordinate" | "at_long_lat", ...)
-     * @param {Coordinate} coordinate The coordinate of the event
-     */
-    const createQueryLayerPayload = (eventType: EventType, queryType: QueryType, coordinate: Coordinate): void => {
-      // Reinitialize the resultsSet
-      Object.keys(this.resultsSet).forEach((layerPath) => {
-        if (!this.resultsSet[layerPath].data[eventType]!.eventListenerEnabled) return;
-        const dataForEventType = this.resultsSet[layerPath].data[eventType] as TypeLayerData;
-        dataForEventType.queryStatus = 'init';
-        dataForEventType.features = undefined;
-        // TODO: Check if the above is enough for basically resetting the queryStatus to 'init'
-      });
+    /* *********************************************************************************************************************** */
+    // Still in the constructor
+    // Listen to "map click" and send a query layers event to queryable layers. These layers will return a result set
+    api.event.on(
+      EVENT_NAMES.GET_FEATURE_INFO.FEATURE_INFO_LAYERSET_UPDATED,
+      (payload) => {
+        if (payloadIsFeatureInfoLayersetUpdated(payload)) {
+          // Log
+          logger.logTraceDetailed(
+            'feature-info-layer-set on EVENT_NAMES.GET_FEATURE_INFO.FEATURE_INFO_LAYERSET_UPDATED',
+            this.mapId,
+            payload
+          );
 
-      // Propagate initialization to the store
-      FeatureInfoEventProcessor.propagateFeatureInfoToStore(mapId, 'unused_var', eventType, this.resultsSet);
-
-      // Loop on each layer path in the resultsSet
-      Object.keys(this.resultsSet).forEach((layerPath) => {
-        const layerConfig = api.maps[mapId].layer.registeredLayers[layerPath];
-        if (!this.resultsSet[layerPath].data[eventType]!.eventListenerEnabled) return;
-        const dataForEventType = this.resultsSet[layerPath].data[eventType] as TypeLayerData;
-        if (layerConfig.layerStatus === 'loaded') {
-          dataForEventType.features = dataForEventType.eventListenerEnabled ? undefined : [];
-          dataForEventType.queryStatus = dataForEventType.eventListenerEnabled ? 'processing' : 'processed';
-          dataForEventType.layerName = getLocalizedValue(layerConfig.layerName, mapId) ?? '';
-        } else {
-          dataForEventType.features = [];
-          dataForEventType.queryStatus = 'error';
-          dataForEventType.layerName = getLocalizedValue(layerConfig.layerName, mapId) ?? '';
+          const { layerPath, resultsSet, layerStatus } = payload;
+          if (layerStatus === 'error') delete resultsSet[layerPath];
         }
+      },
+      `${mapId}/FeatureInfoLayerSet`
+    );
 
-        if (dataForEventType.eventListenerEnabled && dataForEventType.queryStatus !== 'error') {
-          api.event.emit(GetFeatureInfoPayload.createQueryLayerPayload(`${this.mapId}/${layerPath}`, queryType, coordinate, eventType));
-        }
-
-        // Propagate feature info to the store for each layer path of the results set
-        FeatureInfoEventProcessor.propagateFeatureInfoToStore(mapId, layerPath, eventType, this.resultsSet);
-      });
-    };
-
-    // Listen to "map click"-"crosshair enter" and send a query layers event to queryable layers. These layers will return a result set of features.
+    /* *********************************************************************************************************************** */
+    // Still in the constructor
+    // Listen to "map click" and send a query layers event to queryable layers. These layers will return a result set
+    // of features.
     api.event.on(
       EVENT_NAMES.MAP.EVENT_MAP_SINGLE_CLICK,
       (payload) => {
@@ -160,12 +162,14 @@ export class FeatureInfoLayerSet {
           // Log
           logger.logTraceDetailed('feature-info-layer-set on EVENT_NAMES.MAP.EVENT_MAP_SINGLE_CLICK', this.mapId, payload);
 
-          createQueryLayerPayload('click', 'at_long_lat', payload.coordinates.lnglat);
+          this.createQueryLayerPayload('click', 'at_long_lat', payload.coordinates.lnglat);
         }
       },
       this.mapId
     );
 
+    /* *********************************************************************************************************************** */
+    // Still in the constructor
     // ! Do we want to keep this type of event? I think we already said that we want to remove it.
     api.event.on(
       EVENT_NAMES.MAP.EVENT_MAP_CROSSHAIR_ENTER,
@@ -174,12 +178,16 @@ export class FeatureInfoLayerSet {
           // Log
           logger.logTraceDetailed('feature-info-layer-set on EVENT_NAMES.MAP.EVENT_MAP_CROSSHAIR_ENTER', this.mapId, payload);
 
-          createQueryLayerPayload('crosshaire-enter', 'at_long_lat', payload.lnglat);
+          this.createQueryLayerPayload('crosshaire-enter', 'at_long_lat', payload.lnglat);
         }
       },
       this.mapId
     );
 
+    /* *********************************************************************************************************************** */
+    // Still in the constructor
+    // Listen to "hover" events and send a query layers event to queryable layers. These layers will return a result
+    // set of features.
     api.event.on(
       EVENT_NAMES.MAP.EVENT_MAP_POINTER_MOVE,
       debounce((payload) => {
@@ -187,43 +195,16 @@ export class FeatureInfoLayerSet {
           // Log
           logger.logTraceDetailed('feature-info-layer-set on EVENT_NAMES.MAP.EVENT_MAP_POINTER_MOVE', this.mapId, payload);
 
-          createQueryLayerPayload('hover', 'at_pixel', payload.coordinates.pixel);
+          this.createQueryLayerPayload('hover', 'at_pixel', payload.coordinates.pixel);
         }
       }, 750),
       this.mapId
     );
 
-    api.event.on(
-      EVENT_NAMES.GET_FEATURE_INFO.GET_ALL_LAYER_FEATURES,
-      (payload) => {
-        if (payloadIsQueryLayer(payload)) {
-          // Log
-          logger.logTraceDetailed('feature-info-layer-set on EVENT_NAMES.GET_FEATURE_INFO.GET_ALL_LAYER_FEATURES', this.mapId);
-
-          const layerPath = payload.location as string;
-          const layerConfig = api.maps[mapId].layer.registeredLayers[layerPath];
-          if (!this.resultsSet[layerPath].data['all-features']!.eventListenerEnabled) return;
-          const dataForEventType = this.resultsSet[layerPath].data['all-features'] as TypeLayerData;
-          if (layerConfig.layerStatus === 'loaded') {
-            dataForEventType.features = undefined;
-            dataForEventType.queryStatus = 'processing';
-            dataForEventType.layerName = getLocalizedValue(layerConfig.layerName, mapId) ?? '';
-          } else {
-            dataForEventType.features = [];
-            dataForEventType.queryStatus = 'error';
-            dataForEventType.layerName = getLocalizedValue(layerConfig.layerName, mapId) ?? '';
-          }
-
-          if (dataForEventType.eventListenerEnabled && dataForEventType.queryStatus !== 'error') {
-            api.event.emit(GetFeatureInfoPayload.createQueryLayerPayload(`${this.mapId}/${layerPath}`, 'all', layerPath));
-          }
-          // Propagate feature info to the store, now that the this.resultsSet is more representative of the reality
-          FeatureInfoEventProcessor.propagateFeatureInfoToStore(mapId, layerPath, 'all-features', this.resultsSet);
-        }
-      },
-      this.mapId
-    );
-
+    /* *********************************************************************************************************************** */
+    // Still in the constructor
+    // Listen to "query result" events and send a all query done event when all the layers have returned their result
+    // set of features.
     api.event.on(
       EVENT_NAMES.GET_FEATURE_INFO.QUERY_RESULT,
       (payload) => {
@@ -264,29 +245,46 @@ export class FeatureInfoLayerSet {
       },
       this.mapId
     );
-  }
+  } // constructor ends here
+
+  /* **************************************************************************************************************************
+   * Still in the constructor
+   * @param {EventType} eventType The event type (ex.: "click" | "hover" | "crosshaire-enter" | "all-features")
+   * @param {QueryType} queryType The query type (ex.: "all" | "at_pixel" | "at_coordinate" | "at_long_lat", ...)
+   * @param {Coordinate} coordinate The coordinate of the event
+   */
+  createQueryLayerPayload = (eventType: EventType, queryType: QueryType, coordinate: Coordinate): void => {
+    // Reinitialize the resultsSet
+    // Loop on each layer path in the resultsSet
+    Object.keys(this.resultsSet).forEach((layerPath) => {
+      const layerConfig = api.maps[this.mapId].layer.registeredLayers[layerPath];
+      const dataForEventType = this.resultsSet[layerPath].data[eventType] as TypeLayerData;
+      if (!dataForEventType.eventListenerEnabled) return;
+      if (layerConfig.layerStatus === 'loaded') {
+        dataForEventType.features = undefined;
+        dataForEventType.queryStatus = 'processing';
+      } else {
+        dataForEventType.features = null;
+        dataForEventType.queryStatus = 'error';
+      }
+
+      if (dataForEventType.eventListenerEnabled && dataForEventType.queryStatus !== ('error' as TypeQueryStatus)) {
+        api.event.emit(GetFeatureInfoPayload.createQueryLayerPayload(`${this.mapId}/${layerPath}`, queryType, coordinate, eventType));
+      }
+    });
+  };
 
   /**
-   * Helper function used to instanciate a FeatureInfoLayerSet object. This function
-   * must be used in place of the "new FeatureInfoLayerSet" syntax.
+   * Helper function used to launch the query on a layer to get all of its feature information
    *
-   * @param {string} mapId The map identifier the layer set belongs to.
-   *
-   * @returns {FeatureInfoLayerSet} the FeatureInfoLayerSet object created
+   * @param {string} layerPath The layerPath that will be queried.
+   * @param {QueryType} queryType the query's type to perform
    */
-  static get(mapId: string): FeatureInfoLayerSet {
-    if (!FeatureInfoLayerSet.featureInfoLayerSetInstance[mapId])
-      FeatureInfoLayerSet.featureInfoLayerSetInstance[mapId] = new FeatureInfoLayerSet(mapId);
-    return FeatureInfoLayerSet.featureInfoLayerSetInstance[mapId];
-  }
-
-  /**
-   * Function used to delete a FeatureInfoLayerSet object associated to a mapId.
-   *
-   * @param {string} mapId The map identifier the layer set belongs to.
-   */
-  static delete(mapId: string) {
-    if (FeatureInfoLayerSet.featureInfoLayerSetInstance[mapId]) delete FeatureInfoLayerSet.featureInfoLayerSetInstance[mapId];
+  // TODO: (futur development) The queryType is a door opened to allow the triggering using a bounding box or a polygon.
+  triggerGetAllFeatureInfo(layerPath: string, queryType: QueryType = 'all') {
+    if (this.resultsSet[layerPath])
+      api.event.emit(GetFeatureInfoPayload.createGetAllLayerFeaturesPayload(`${this.mapId}/${layerPath}`, queryType));
+    else logger.logError(`The triggerGetAllFeatureInfo method cannot be used on an inexistant layer path (${layerPath})`);
   }
 
   /**
@@ -381,5 +379,28 @@ export class FeatureInfoLayerSet {
       if (returnValue !== this.resultsSet[key].data.hover!.eventListenerEnabled) returnValue = undefined;
     });
     return returnValue;
+  }
+
+  /**
+   * Helper function used to instanciate a FeatureInfoLayerSet object. This function
+   * must be used in place of the "new FeatureInfoLayerSet" syntax.
+   *
+   * @param {string} mapId The map identifier the layer set belongs to.
+   *
+   * @returns {FeatureInfoLayerSet} the FeatureInfoLayerSet object created
+   */
+  static get(mapId: string): FeatureInfoLayerSet {
+    if (!FeatureInfoLayerSet.featureInfoLayerSetInstance[mapId])
+      FeatureInfoLayerSet.featureInfoLayerSetInstance[mapId] = new FeatureInfoLayerSet(mapId);
+    return FeatureInfoLayerSet.featureInfoLayerSetInstance[mapId];
+  }
+
+  /**
+   * Function used to delete a FeatureInfoLayerSet object associated to a mapId.
+   *
+   * @param {string} mapId The map identifier the layer set belongs to.
+   */
+  static delete(mapId: string) {
+    if (FeatureInfoLayerSet.featureInfoLayerSetInstance[mapId]) delete FeatureInfoLayerSet.featureInfoLayerSetInstance[mapId];
   }
 }

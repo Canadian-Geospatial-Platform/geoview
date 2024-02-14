@@ -1,4 +1,3 @@
-import { isEqual } from 'lodash';
 import { TypeFeatureInfoResultsSet, EventType, TypeLayerData, TypeArrayOfLayerData } from '@/api/events/payloads/get-feature-info-payload';
 import { IFeatureInfoState } from '@/core/stores';
 
@@ -45,33 +44,15 @@ export class FeatureInfoEventProcessor extends AbstractEventProcessor {
    * @param {TypeFeatureInfoResultsSet} resultsSet The resul sets associated to the map.
    */
   static propagateFeatureInfoToStore(mapId: string, layerPath: string, eventType: EventType, resultsSet: TypeFeatureInfoResultsSet) {
-    // TODO: Refactor - Remove the unnecessary 'layerPath' parameter? It is kind of confusing.
-    // TO.DOCONT: Indeed, the layerPath is irrelevant as the whole resultsSet is reprocessed.
-    // TO.DOCONT: If the parameter is used only for logging purposes I'd suggest to name it clearly to remove confusion.
-    const layerPathInResultsSet = Object.keys(resultsSet);
-
     const featureInfoState = this.getFeatureInfoState(mapId);
-
     if (eventType === 'click') {
       /**
        * Create a details object for each layer which is then used to render layers in details panel.
        */
-      const layerDataArray = [] as TypeArrayOfLayerData;
-      let atLeastOneFeature = false;
-      layerPathInResultsSet.forEach((layerPathItem) => {
-        const newLayerData: TypeLayerData = resultsSet?.[layerPathItem]?.data.click as TypeLayerData;
-        if (!atLeastOneFeature) atLeastOneFeature = !!newLayerData.features?.length;
-        const layerDataFound = layerDataArray.find((layerEntry) => layerEntry.layerPath === layerPathItem);
-        if (layerDataFound) {
-          if (!isEqual(layerDataFound, newLayerData)) {
-            layerDataFound.features = newLayerData.features;
-            layerDataFound.layerStatus = newLayerData.layerStatus;
-            layerDataFound.layerName = newLayerData.layerName;
-          }
-        } else {
-          layerDataArray.push(newLayerData);
-        }
-      });
+      const layerDataArray = [...featureInfoState.layerDataArray];
+      if (!layerDataArray.find((layerEntry) => layerEntry.layerPath === layerPath))
+        layerDataArray.push(resultsSet?.[layerPath]?.data.click as TypeLayerData);
+      const atLeastOneFeature = layerDataArray.find((layerEntry) => !!layerEntry.features?.length) || false;
 
       // Update the layer data array in the store, all the time, for all statuses
       featureInfoState.actions.setLayerDataArray(layerDataArray);
@@ -92,42 +73,20 @@ export class FeatureInfoEventProcessor extends AbstractEventProcessor {
       /**
        * Create a hover object for each layer which is then used to render layers
        */
-      const hoverDataArray = [] as TypeArrayOfLayerData;
-      layerPathInResultsSet.forEach((layerPathItem) => {
-        const newLayerData: TypeLayerData = resultsSet?.[layerPathItem]?.data.hover as TypeLayerData;
-        const layerDataFound = hoverDataArray.find((layerEntry) => layerEntry.layerPath === layerPathItem);
-        if (layerDataFound) {
-          if (!isEqual(layerDataFound, newLayerData)) {
-            layerDataFound.features = newLayerData.features;
-            layerDataFound.layerStatus = newLayerData.layerStatus;
-            layerDataFound.layerName = newLayerData.layerName;
-          }
-        } else {
-          hoverDataArray.push(newLayerData);
-        }
-      });
-
-      featureInfoState.actions.setHoverDataArray(hoverDataArray);
+      const hoverDataArray = [...featureInfoState.hoverDataArray];
+      if (!hoverDataArray.find((layerEntry) => layerEntry.layerPath === layerPath)) {
+        hoverDataArray.push(resultsSet?.[layerPath]?.data.hover as TypeLayerData);
+        featureInfoState.actions.setHoverDataArray(hoverDataArray);
+      }
     } else if (eventType === 'all-features') {
       /**
        * Create a get all features info object for each layer which is then used to render layers
        */
-      const allFeaturesDataArray = [] as TypeArrayOfLayerData;
-      layerPathInResultsSet.forEach((layerPathItem) => {
-        const newLayerData: TypeLayerData = resultsSet?.[layerPathItem]?.data['all-features'] as TypeLayerData;
-        const layerDataFound = allFeaturesDataArray.find((layerEntry) => layerEntry.layerPath === layerPathItem);
-        if (layerDataFound) {
-          if (!isEqual(layerDataFound, newLayerData)) {
-            layerDataFound.features = newLayerData.features;
-            layerDataFound.layerStatus = newLayerData.layerStatus;
-            layerDataFound.layerName = newLayerData.layerName;
-          }
-        } else {
-          allFeaturesDataArray.push(newLayerData);
-        }
-      });
-
-      featureInfoState.actions.setAllFeaturesDataArray(allFeaturesDataArray);
+      const allFeaturesDataArray = [...featureInfoState.allFeaturesDataArray];
+      if (!allFeaturesDataArray.find((layerEntry) => layerEntry.layerPath === layerPath)) {
+        allFeaturesDataArray.push(resultsSet?.[layerPath]?.data['all-features'] as TypeLayerData);
+        featureInfoState.actions.setAllFeaturesDataArray(allFeaturesDataArray);
+      }
     }
   }
 
