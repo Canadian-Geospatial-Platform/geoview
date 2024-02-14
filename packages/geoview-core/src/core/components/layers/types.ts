@@ -30,15 +30,12 @@ export interface TypeLegendLayer {
   layerPath: string;
   layerAttribution?: string[];
   metadataAccessPath?: string;
-  order: number; // useful for ordering layers
   layerName: string;
   type?: TypeGeoviewLayerType;
   styleConfig?: TypeStyleConfig | null;
   layerStatus?: TypeLayerStatus;
   layerPhase?: string;
   querySent?: boolean;
-
-  isVisible: TypeVisibilityFlags; // is layer is visible
   canToggle?: boolean; // can sublayer visibility be toggled
 
   icons?: TypeLegendLayerIcons;
@@ -49,7 +46,5 @@ export interface TypeLegendLayer {
   opacity?: number;
   opacityFromParent?: number;
   zoom?: number;
-
-  isRemovable?: boolean;
   canSetOpacity?: boolean;
 }

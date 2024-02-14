@@ -21,10 +21,11 @@ import {
 import { TypeLegendLayer } from '../types';
 import {
   useLayerStoreActions,
-  useLayersDisplayState,
-  useSelectedLayerPath,
+  useLayerDisplayState,
+  useLayerSelectedLayerPath,
 } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { useDataTableStoreMapFilteredRecord } from '@/core/stores/store-interface-and-intial-values/data-table-state';
+import { useMapStoreActions } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { DeleteUndoButton } from './delete-undo-button';
 import { LayersList } from './layers-list';
 import { LayerIcon } from '../layer-icon';
@@ -43,10 +44,11 @@ export function SingleLayer({ isDragging, depth, layer, setIsLayersListPanelVisi
 
   const { t } = useTranslation<string>();
 
-  const { toggleLayerVisibility, setSelectedLayerPath } = useLayerStoreActions(); // get store actions
-
-  const selectedLayerPath = useSelectedLayerPath(); // get store value
-  const displayState = useLayersDisplayState();
+  // Get store states
+  const { setSelectedLayerPath } = useLayerStoreActions();
+  const { getAlwaysVisibleFromOrderedLayerInfo, getVisibilityFromOrderedLayerInfo, setOrToggleLayerVisibility } = useMapStoreActions();
+  const selectedLayerPath = useLayerSelectedLayerPath();
+  const displayState = useLayerDisplayState();
   const mapFiltered = useDataTableStoreMapFilteredRecord();
 
   // if any of the chiild layers is selected return true
@@ -69,7 +71,7 @@ export function SingleLayer({ isDragging, depth, layer, setIsLayersListPanelVisi
 
   // returns true if any of the layer children or items has visibility of 'always'
   const layerHasAlwaysVisible = (startingLayer: TypeLegendLayer): boolean => {
-    if (startingLayer.isVisible === 'always') {
+    if (getAlwaysVisibleFromOrderedLayerInfo(layer.layerPath)) {
       return true;
     }
     let itemsHasAlways = false;
@@ -138,7 +140,7 @@ export function SingleLayer({ isDragging, depth, layer, setIsLayersListPanelVisi
   };
 
   const handleToggleVisibility = () => {
-    toggleLayerVisibility(layer.layerPath);
+    setOrToggleLayerVisibility(layer.layerPath);
   };
 
   const handleReloadLayer = () => {
@@ -194,7 +196,7 @@ export function SingleLayer({ isDragging, depth, layer, setIsLayersListPanelVisi
         className="style1"
       >
         {(() => {
-          if (layer.isVisible === 'no') return <VisibilityOffOutlinedIcon />;
+          if (!getVisibilityFromOrderedLayerInfo(layer.layerPath)) return <VisibilityOffOutlinedIcon />;
           return <VisibilityOutlinedIcon />;
         })()}
       </IconButton>
