@@ -23,8 +23,7 @@ import {
   ListItem,
   List,
 } from '@/ui';
-import { useLayerHighlightedLayer, useLayerStoreActions } from '@/core/stores/store-interface-and-intial-values/layer-state';
-import { useUIStoreActions } from '@/core/stores/store-interface-and-intial-values/ui-state';
+import { useLayerHighlightedLayer, useLayerStoreActions, useUIStoreActions, useMapStoreActions } from '@/core/stores';
 import { generateId } from '@/core/utils/utilities';
 import { LayerIcon } from '../layer-icon';
 import { LayerOpacityControl } from './layer-opacity-control/layer-opacity-control';
@@ -49,6 +48,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
   const highlightedLayer = useLayerHighlightedLayer();
   const { setAllItemsVisibility, toggleItemVisibility, setHighlightLayer, zoomToLayerExtent, getLayerBounds } = useLayerStoreActions();
   const { openModal } = useUIStoreActions();
+  const { getVisibilityFromOrderedLayerInfo } = useMapStoreActions();
 
   const handleZoomTo = () => {
     zoomToLayerExtent(layerDetails.layerPath);
@@ -94,7 +94,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
     ) {
       return null;
     }
-    if (item.isVisible === 'always' || layerDetails.isVisible === 'always' || !layerDetails.canToggle) {
+    if (item.isVisible === 'always' || getVisibilityFromOrderedLayerInfo(layerDetails.layerPath) === 'always' || !layerDetails.canToggle) {
       return (
         <IconButton disabled tooltip="layers.visibilityIsAlways">
           {' '}
@@ -112,7 +112,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
 
   function renderHeaderCheckbox() {
     const containsDisabled = _.some(layerDetails.items, (i) => i.isVisible === 'always');
-    if (layerDetails.isVisible === 'always' || !layerDetails.canToggle || containsDisabled) {
+    if (getVisibilityFromOrderedLayerInfo(layerDetails.layerPath) === 'always' || !layerDetails.canToggle || containsDisabled) {
       return (
         <IconButton disabled>
           {' '}

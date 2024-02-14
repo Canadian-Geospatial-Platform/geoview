@@ -245,6 +245,7 @@ export function commonProcessFeatureInfoConfig(
   layerConfig: TypeEsriFeatureLayerEntryConfig | TypeEsriDynamicLayerEntryConfig | TypeEsriImageLayerEntryConfig
 ) {
   if (!layerConfig.source.featureInfo) layerConfig.source.featureInfo = { queryable: capabilities.includes('Query') };
+  MapEventProcessor.setMapQueryable(this.mapId, layerConfig.layerPath, layerConfig.source.featureInfo.queryable);
   // dynamic group layer doesn't have fields definition
   if (!layerConfig.isMetadataLayerGroup) {
     // Process undefined outfields or aliasFields ('' = false and !'' = true). Also, if en is undefined, then fr is also undefined.

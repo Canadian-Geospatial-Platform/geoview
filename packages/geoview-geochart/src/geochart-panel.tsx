@@ -1,12 +1,12 @@
 import { useTheme } from '@mui/material/styles';
-import { TypeWindow, getLocalizedMessage } from 'geoview-core';
+import { TypeOrderedLayerInfo, TypeWindow, getLocalizedMessage } from 'geoview-core';
 import { ChartType, SchemaValidator } from 'geochart';
 import { LayerListEntry, Layout } from 'geoview-core/src/core/components/common';
 import { TypeLayerData, TypeArrayOfLayerData } from 'geoview-core/src/api/events/payloads/get-feature-info-payload';
 import { Typography } from 'geoview-core/src/ui/typography/typography';
 import { Paper } from 'geoview-core/src/ui';
 import {
-  useMapVisibleLayers,
+  useMapOrderedLayerInfo,
   useGeochartConfigs,
   useGeochartStoreActions,
   useGeochartStoreLayerDataArrayBatch,
@@ -42,7 +42,7 @@ export function GeoChartPanel(props: GeoChartPanelProps): JSX.Element {
 
   // Get states and actions from store
   const configObj = useGeochartConfigs();
-  const visibleLayers = useMapVisibleLayers() as string[];
+  const orderedLayerInfo = useMapOrderedLayerInfo() as TypeOrderedLayerInfo[];
   const storeArrayOfLayerData = useGeochartStoreLayerDataArrayBatch() as TypeArrayOfLayerData;
   const selectedLayerPath = useGeochartStoreSelectedLayerPath() as string;
   const { setSelectedLayerPath, setLayerDataArrayBatchLayerPathBypass } = useGeochartStoreActions();
@@ -102,6 +102,13 @@ export function GeoChartPanel(props: GeoChartPanelProps): JSX.Element {
     // Log
     logger.logTraceUseMemo('GEOCHART-PANEL - ArrayOfLayerData', storeArrayOfLayerData);
 
+    const visibleLayers = orderedLayerInfo
+      .map((layerInfo) => {
+        if (layerInfo.visible !== 'no') return layerInfo.layerPath;
+        return undefined;
+      })
+      .filter((layerPath) => layerPath !== undefined);
+
     // Set the layers list
     return visibleLayers
       .map((layerPath) => storeArrayOfLayerData.find((layerData) => layerData.layerPath === layerPath))
@@ -118,7 +125,7 @@ export function GeoChartPanel(props: GeoChartPanelProps): JSX.Element {
             tooltip: `${layer!.layerName}, ${getNumFeaturesLabel(layer!)}`,
           } as LayerListEntry)
       );
-  }, [visibleLayers, storeArrayOfLayerData, configObj, getNumFeaturesLabel]);
+  }, [orderedLayerInfo, storeArrayOfLayerData, configObj, getNumFeaturesLabel]);
 
   /**
    * Memoize the selected layer for the LayerList component.
