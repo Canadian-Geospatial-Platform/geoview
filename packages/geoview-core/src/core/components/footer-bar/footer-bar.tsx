@@ -39,6 +39,11 @@ interface ShellContainerCssProperties {
   tabMaxHeight: number;
 }
 
+interface Tab {
+  icon: ReactNode;
+  content: ReactNode;
+}
+
 /**
  * The FooterBar component is used to display a list of tabs and their content.
  *
@@ -54,7 +59,6 @@ export function FooterBar(): JSX.Element | null {
   const sxClasses = getSxClasses(theme);
 
   // internal state
-  const [footerBarTabs, setFooterBarTabs] = useState<TypeTabs[]>([]);
   const [isCollapsed, setIsCollapsed] = useState(false);
 
   const [isFocusToMap, setIsFocusToMap] = useState<boolean>(true);
@@ -78,48 +82,50 @@ export function FooterBar(): JSX.Element | null {
   // get store config for footer bar tabs to add (similar logic as in app-bar)
   const footerBarTabsConfig = useGeoViewConfig()?.footerBar;
 
+  const footerBarTabKeys = useMemo(() => {
+    // Log
+    logger.logTraceUseMemo('FOOTER-BAR TABS KEYS', footerBarTabsConfig?.tabs?.core);
+
+    return (footerBarTabsConfig?.tabs?.core ?? []).reduce((acc, curr) => {
+      acc[curr] = {} as Tab;
+      return acc;
+    }, {} as Record<string, Tab>);
+  }, [footerBarTabsConfig?.tabs?.core]);
+
+  // List of Footer Tabs created from config file.
+  const [tabsList, setTabsList] = useState<Record<string, Tab>>(footerBarTabKeys);
+
+  // Panels for each tab in footer config file.
   const tabs = useMemo(() => {
     // Log
-    logger.logTraceUseMemo('FOOTER-BAR - tabs');
+    logger.logTraceUseMemo('FOOTER-BAR TABS');
 
     return {
       legend: { icon: <HubOutlinedIcon />, content: <Legend /> },
       layers: { icon: <LayersOutlinedIcon />, content: <LayersPanel /> },
       details: { icon: <InfoOutlinedIcon />, content: <DetailsPanel /> },
       'data-table': { icon: <StorageIcon />, content: <Datapanel /> },
-    } as Record<string, Record<string, ReactNode>>;
+      guide: { icon: <SchoolIcon />, content: <GuidePanel /> },
+    } as Record<string, Tab>;
   }, []);
 
-  const defaultFooterBarTabs = useMemo(() => {
+  // Map the panels with footer bar tab keys.
+  const footerBarTabs = useMemo(() => {
     // Log
-    logger.logTraceUseMemo('FOOTER-BAR - defaultFooterBarTabs', footerBarTabs);
+    logger.logTraceUseMemo('FOOTER-BAR TABS', tabsList, tabs);
 
-    const tabsFromConfig = (footerBarTabsConfig?.tabs?.core ?? []).map((tab, index) => {
+    const allTabs = { ...tabsList, ...tabs };
+    // inject guide tab at last position of tabs.
+    return Object.keys({ ...tabsList, ...{ guide: {} } }).map((tab, index) => {
       return {
         id: tab,
         value: index,
         label: `${camelCase(tab)}.title`,
-        icon: tabs[tab]?.icon ?? '',
-        content: tabs[tab]?.content ?? '',
+        icon: allTabs[tab]?.icon ?? '',
+        content: allTabs[tab]?.content ?? '',
       };
-    }) as TypeTabs[];
-
-    const guideTab: TypeTabs[] = [
-      {
-        id: 'guide',
-        // If tabsFromConfig has values like 0, 1, 2, 3, then value of 'guide' tab is alway 4. That is always 1 number more thant the last tab value
-        value: tabsFromConfig.length,
-        label: 'guide.title',
-        icon: <SchoolIcon />,
-        content: <GuidePanel />,
-      },
-    ];
-
-    // Merge tabs from config with guide tab
-    return [...tabsFromConfig, ...guideTab];
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [footerBarTabs]); // TODO: Investigate - shouldn't this be footerBarTabsConfig (and tabs?) instead of footerBarTabs?
+    }) as unknown as TypeTabs[];
+  }, [tabs, tabsList]);
 
   /**
    * Calculate resize values from popover values defined in store.
@@ -166,32 +172,23 @@ export function FooterBar(): JSX.Element | null {
       // Log
       logger.logTraceUseCallback('FOOTER-BAR - addTab', payload);
 
-      const idx = defaultFooterBarTabs.findIndex((tab) => tab.id === payload.tab.id);
-      if (idx !== -1) {
-        defaultFooterBarTabs[idx].content = payload.tab.content;
-        defaultFooterBarTabs[idx].icon = payload.tab.icon;
-        defaultFooterBarTabs[idx].label = payload.tab.label;
-      } else {
-        defaultFooterBarTabs.push(payload.tab);
-      }
-      setFooterBarTabs(defaultFooterBarTabs);
-      // eslint-disable-next-line react-hooks/exhaustive-deps
+      const newTab = { [payload.tab.id]: { icon: payload.tab.icon, content: payload.tab.content } } as Record<string, Tab>;
+      setTabsList({ ...tabsList, ...newTab });
     },
-    [defaultFooterBarTabs]
+    [tabsList]
   );
 
   /**
    * Remove a tab
    */
   const removeTab = useCallback((payload: FooterBarPayload) => {
+    // Log
+    logger.logTraceUseCallback('FOOTER-BAR - removeTab', payload);
+
     // remove the tab from the list
-    setFooterBarTabs((prevState) => {
-      const state = [...prevState];
-      const index = state.findIndex((tab) => tab.value === payload.tab.value);
-      if (index > -1) {
-        state.splice(index, 1);
-        return state;
-      }
+    setTabsList((prevState) => {
+      const state = { ...prevState };
+      delete state[payload.tab.id];
       return state;
     });
   }, []);
@@ -392,7 +389,6 @@ export function FooterBar(): JSX.Element | null {
           );
         });
     }
-    setFooterBarTabs(defaultFooterBarTabs!);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [footerBarTabsConfig, mapId]);
 

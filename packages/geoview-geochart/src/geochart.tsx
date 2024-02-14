@@ -1,12 +1,6 @@
 import { TypeWindow, TypeLayerEntryConfig, useAppDisplayLanguageById } from 'geoview-core';
-import { useDetailsStoreLayerDataArray } from 'geoview-core/src/core/stores/store-interface-and-intial-values/feature-info-state';
 import { GeoChart as GeoChartComponent, GeoChartConfig, ChartType, GeoChartDefaultColors, SchemaValidator, GeoChartAction } from 'geochart';
-import {
-  PayloadBaseClass,
-  payloadIsQueryLayerQueryTypeAtLongLat,
-  TypeArrayOfLayerData,
-  TypeFeatureInfoEntry,
-} from 'geoview-core/src/api/events/payloads';
+import { TypeArrayOfLayerData, TypeFeatureInfoEntry } from 'geoview-core/src/api/events/payloads';
 import { logger } from 'geoview-core/src/core/utils/logger';
 import { findLayerDataAndConfigFromQueryResults, loadDatasources } from './geochart-parsing';
 import { PluginGeoChartConfig, GeoViewGeoChartConfig, GeoViewGeoChartConfigLayer } from './geochart-types';
@@ -21,6 +15,7 @@ interface GeoChartProps {
   mapId: string;
   config: PluginGeoChartConfig<ChartType>;
   schemaValidator: SchemaValidator;
+  layers: TypeArrayOfLayerData;
   // eslint-disable-next-line react/require-default-props
   sx?: React.CSSProperties;
 }
@@ -35,10 +30,10 @@ export function GeoChart(props: GeoChartProps): JSX.Element {
   const w = window as TypeWindow;
   const { cgpv } = w;
   const { useTheme } = cgpv.ui;
-  const { useEffect, useState, useCallback } = cgpv.react;
+  const { useEffect, useState, useCallback, useMemo } = cgpv.react;
 
   // Read props
-  const { mapId, config: parentConfig, schemaValidator, sx } = props;
+  const { mapId, config: parentConfig, layers, schemaValidator, sx } = props;
 
   // Get the theme
   const theme = useTheme();
@@ -56,10 +51,8 @@ export function GeoChart(props: GeoChartProps): JSX.Element {
   const [config, setConfig] = useState<PluginGeoChartConfig<ChartType>>(parentConfig);
   const [inputs, setInputs] = useState<GeoChartConfig<ChartType>>();
   const [action, setAction] = useState<GeoChartAction>();
-  const [isLoadingChart, setIsLoadingChart] = useState<boolean>();
 
   // Use Store
-  const storeLayerDataArray = useDetailsStoreLayerDataArray();
   const displayLanguage = useAppDisplayLanguageById(mapId);
 
   // #endregion
@@ -121,58 +114,6 @@ export function GeoChart(props: GeoChartProps): JSX.Element {
   }, []);
 
   /**
-   * Handles when a query is started in GeoView Core.
-   * @param e PayloadBaseClass The event payload determining the query that's happened
-   */
-  const handleQueryStarted = useCallback<(e: PayloadBaseClass) => void>((e: PayloadBaseClass): void => {
-    // Verify the payload
-    if (payloadIsQueryLayerQueryTypeAtLongLat(e)) {
-      // Log
-      logger.logTraceUseCallback('GEOVIEW-GEOCHART - handleQueryStarted', e);
-
-      // Loading
-      setIsLoadingChart(true);
-    }
-  }, []);
-
-  /**
-   * Fetches the datasources given the updated list of results.
-   * @param layerDataArray TypeArrayOfLayerData The array of layer data results from the store.
-   */
-  const fetchDatasources = useCallback<(layerDataArray: TypeArrayOfLayerData) => void>(
-    (layerDataArray: TypeArrayOfLayerData): void => {
-      // Log
-      logger.logTraceUseCallback('GEOVIEW-GEOCHART - fetchDatasources', mapId, layerDataArray);
-
-      try {
-        // Find the right config/layer/data for what we want based on the layerDataArray
-        const [foundConfigChart, foundConfigChartLyr, foundLayerEntry, foundData]: [
-          GeoViewGeoChartConfig<ChartType> | undefined,
-          GeoViewGeoChartConfigLayer | undefined,
-          TypeLayerEntryConfig | undefined,
-          TypeFeatureInfoEntry[] | undefined
-        ] = findLayerDataAndConfigFromQueryResults(config, cgpv.api.maps[mapId].layer.registeredLayers, layerDataArray);
-
-        // If found a chart for the layer
-        if (foundData) {
-          // Check and attach datasources to the Chart config
-          const chartConfig = loadDatasources(foundConfigChart!, foundConfigChartLyr!, foundData!);
-
-          // Set the title
-          chartConfig.title = foundLayerEntry.layerName![displayLanguage];
-
-          // Load the chart
-          setChart(chartConfig);
-        }
-      } finally {
-        // Loading
-        setIsLoadingChart(false);
-      }
-    },
-    [cgpv.api.maps, config, displayLanguage, mapId]
-  );
-
-  /**
    * Handles when an error happened with GeoChart.
    * @param error string The error.
    * @param exception unknown The exception if any
@@ -188,20 +129,31 @@ export function GeoChart(props: GeoChartProps): JSX.Element {
     [cgpv.api.utilities, mapId]
   );
 
-  // Effect hook when the storeLayerDataArray changes - coming from the store.
-  useEffect(() => {
-    // Log
-    const USE_EFFECT_FUNC = 'GEOVIEW-GEOCHART - storeLayerDataArray';
-    logger.logTraceUseEffect(USE_EFFECT_FUNC, storeLayerDataArray);
+  /**
+   * Memoize the fetching of the correct config based on the provided layers array (TypeArrayOfLayerData).
+   */
+  const memoAllInfo = useMemo(() => {
+    // Find the right config/layer/data for what we want based on the layerDataArray
+    const [foundConfigChart, foundConfigChartLyr, foundLayerEntry, foundData]: [
+      GeoViewGeoChartConfig<ChartType> | undefined,
+      GeoViewGeoChartConfigLayer | undefined,
+      TypeLayerEntryConfig | undefined,
+      TypeFeatureInfoEntry[] | undefined
+    ] = findLayerDataAndConfigFromQueryResults(config, cgpv.api.maps[mapId].layer.registeredLayers, layers);
 
-    // Fetches the datasources associated with the layerDataArray coming from the store - reloading the Chart in the process
-    fetchDatasources(storeLayerDataArray);
+    // If found a chart for the layer
+    let chartConfig;
+    if (foundData) {
+      // Check and attach datasources to the Chart config
+      chartConfig = loadDatasources(foundConfigChart!, foundConfigChartLyr!, foundData!);
 
-    return () => {
-      // Log
-      logger.logTraceUseEffectUnmount(USE_EFFECT_FUNC, storeLayerDataArray);
-    };
-  }, [fetchDatasources, storeLayerDataArray]);
+      // Set the title
+      chartConfig.title = foundLayerEntry.layerName![displayLanguage];
+    }
+
+    // Return all info
+    return { foundConfigChart, foundConfigChartLyr, foundLayerEntry, foundData, chartConfig };
+  }, [cgpv.api.maps, config, displayLanguage, mapId, layers]);
 
   // Effect hook to add and remove event listeners
   useEffect(() => {
@@ -213,20 +165,25 @@ export function GeoChart(props: GeoChartProps): JSX.Element {
     cgpv.api.event.on(EVENT_CHART_CONFIG, handleChartConfig, mapId);
     cgpv.api.event.on(EVENT_CHART_LOAD, handleChartLoad, mapId);
     cgpv.api.event.on(EVENT_CHART_REDRAW, handleChartRedraw, mapId);
-    cgpv.api.event.on(cgpv.api.eventNames.GET_FEATURE_INFO.QUERY_LAYER, handleQueryStarted, `${mapId}`);
 
     return () => {
       // Log
       logger.logTraceUseEffectUnmount(USE_EFFECT_FUNC, mapId);
 
       // Unwire handlers on component unmount
-      // TODO: Refactor - The store should have a 'loading features clicked state (with abortion mechanisms)'. An issue is being created for this already. For now, this works.
-      cgpv.api.event.off(cgpv.api.eventNames.GET_FEATURE_INFO.QUERY_LAYER, `${mapId}`, handleQueryStarted);
       cgpv.api.event.off(EVENT_CHART_REDRAW, mapId, handleChartRedraw);
       cgpv.api.event.off(EVENT_CHART_LOAD, mapId, handleChartLoad);
       cgpv.api.event.off(EVENT_CHART_CONFIG, mapId, handleChartConfig);
     };
-  }, [cgpv.api.event, cgpv.api.eventNames.GET_FEATURE_INFO.QUERY_LAYER, handleChartLoad, handleQueryStarted, mapId]);
+  }, [cgpv.api.event, cgpv.api.eventNames.GET_FEATURE_INFO.QUERY_LAYER, handleChartLoad, mapId]);
+
+  // #endregion
+
+  // #region PROCESSING ***********************************************************************************************
+
+  if (memoAllInfo.chartConfig && memoAllInfo.chartConfig !== inputs) {
+    setChart(memoAllInfo.chartConfig);
+  }
 
   // #endregion
 
@@ -239,7 +196,6 @@ export function GeoChart(props: GeoChartProps): JSX.Element {
       inputs={inputs}
       language={displayLanguage}
       defaultColors={defaultColors}
-      isLoadingChart={isLoadingChart}
       action={action}
       onError={handleError}
     />
