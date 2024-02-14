@@ -446,7 +446,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
     }
 
     // Log
-    logger.logTraceCore('abstract-geoview-vector.applyViewFilter', layerPath);
+    logger.logTraceCore('ABSTRACT-GEOVIEW-VECTOR - applyViewFilter', layerPath);
 
     let filterValueToUse = filter.replaceAll(/\s{2,}/g, ' ').trim();
     layerConfig.olLayer!.set('legendFilterIsOff', !CombineLegendFilter);

@@ -46,6 +46,9 @@ export function unmountMap(mapId: string) {
  */
 export function addReloadListener(mapId: string) {
   const reloadHandler = (payload: types.PayloadBaseClass) => {
+    // Log
+    logger.logTraceCoreAPIEvent('APP - reloadHandler', payload);
+
     if (payloadIsAmapFeaturesConfig(payload)) {
       const { mapFeaturesConfig } = payload;
       if (mapFeaturesConfig) {

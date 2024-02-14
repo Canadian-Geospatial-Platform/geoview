@@ -267,12 +267,18 @@ export function FooterBar(): JSX.Element | null {
   };
 
   const eventFooterBarCreateListenerFunction = (payload: PayloadBaseClass) => {
+    // Log
+    logger.logTraceCoreAPIEvent('FOOTER-BAR - eventFooterBarCreateListenerFunction', payload);
+
     if (payloadIsAFooterBar(payload)) {
       addTab(payload);
     }
   };
 
   const eventFooterBarRemoveListenerFunction = (payload: PayloadBaseClass) => {
+    // Log
+    logger.logTraceCoreAPIEvent('FOOTER-BAR - eventFooterBarRemoveListenerFunction', payload);
+
     if (payloadIsAFooterBar(payload)) removeTab(payload);
   };
 

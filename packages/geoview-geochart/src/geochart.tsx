@@ -84,6 +84,9 @@ export function GeoChart(props: GeoChartProps): JSX.Element {
    */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const handleChartRedraw = (e: PayloadBaseClassChart): void => {
+    // Log
+    logger.logTraceCoreAPIEvent('GEOVIEW-GEOCHART - handleChartRedraw', e);
+
     // Forces a redraw
     setAction({ shouldRedraw: true });
   };
@@ -93,6 +96,9 @@ export function GeoChart(props: GeoChartProps): JSX.Element {
    * @param e PayloadChartConfig The payload with a new Chart configuration
    */
   const handleChartConfig = (e: PayloadChartConfig): void => {
+    // Log
+    logger.logTraceCoreAPIEvent('GEOVIEW-GEOCHART - handleChartConfig', e);
+
     // Set the config
     setConfig(e.config);
   };
@@ -107,7 +113,7 @@ export function GeoChart(props: GeoChartProps): JSX.Element {
    */
   const handleChartLoad = useCallback<(e: PayloadChartLoad) => void>((e: PayloadChartLoad): void => {
     // Log
-    logger.logTraceUseCallback('GEOVIEW-GEOCHART - handleChartLoad', e);
+    logger.logTraceCoreAPIEvent('GEOVIEW-GEOCHART - handleChartLoad', e);
 
     // Redirect
     setChart(e.inputs);

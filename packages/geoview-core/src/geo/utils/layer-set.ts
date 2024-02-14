@@ -62,10 +62,10 @@ export class LayerSet {
     this.registrationUserDataInitialisation = registrationUserDataInitialisation;
 
     const changeLayerStatusListenerFunctions = (payload: PayloadBaseClass) => {
-      if (payloadIsLayerSetChangeLayerStatus(payload)) {
-        // Log
-        logger.logTraceDetailed('layer-set on EVENT_NAMES.LAYER_SET.CHANGE_LAYER_STATUS', this.mapId, payload);
+      // Log
+      logger.logTraceCoreAPIEvent('LAYER-SET - CHANGE_LAYER_STATUS', this.mapId, payload);
 
+      if (payloadIsLayerSetChangeLayerStatus(payload)) {
         const { layerPath, layerStatus } = payload;
         if (this.resultsSet[layerPath]) {
           const layerConfig = api.maps[mapId].layer.registeredLayers[layerPath];
@@ -101,10 +101,10 @@ export class LayerSet {
     api.event.on(
       EVENT_NAMES.LAYER_SET.LAYER_REGISTRATION,
       (payload) => {
-        if (payloadIsLayerRegistration(payload)) {
-          // Log
-          logger.logTraceDetailed('layer-set on EVENT_NAMES.LAYER_SET.LAYER_REGISTRATION', this.mapId, payload);
+        // Log
+        logger.logTraceCoreAPIEvent('LAYER-SET - LAYER_REGISTRATION', this.mapId, payload);
 
+        if (payloadIsLayerRegistration(payload)) {
           const { action, layerPath, layerSetId } = payload;
           // update the registration of all layer sets if !payload.layerSetId or update only the specified layer set
           if (!layerSetId || layerSetId === this.layerSetId) {

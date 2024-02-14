@@ -799,7 +799,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
     }
 
     // Log
-    logger.logTraceCore('esri-dynamic.applyViewFilter', layerPath);
+    logger.logTraceCore('ESRI-DYNAMIC - applyViewFilter', layerPath);
 
     let filterValueToUse = filter.replaceAll(/\s{2,}/g, ' ').trim();
     layerConfig.olLayer!.set('legendFilterIsOff', !CombineLegendFilter);

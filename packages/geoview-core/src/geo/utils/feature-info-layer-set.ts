@@ -67,7 +67,7 @@ export class FeatureInfoLayerSet {
     // This function determines whether a layer can be registered.
     const registrationConditionFunction = (layerPath: string): boolean => {
       // Log
-      logger.logTraceCore('FeatureInfoLayerSet registration condition...', layerPath, Object.keys(this.resultsSet));
+      logger.logTraceCore('FEATURE-INFO-LAYER-SET registration condition...', layerPath, Object.keys(this.resultsSet));
 
       const layerConfig = api.maps[mapId].layer.registeredLayers[layerPath];
       const queryable = layerConfig?.source?.featureInfo?.queryable;
@@ -77,7 +77,7 @@ export class FeatureInfoLayerSet {
     // This function is used to initialise the data property of the layer path entry.
     const registrationUserDataInitialisation = (layerPath: string) => {
       // Log
-      logger.logTraceCore('FeatureInfoLayerSet initializing...', layerPath, Object.keys(this.resultsSet));
+      logger.logTraceCore('FEATURE-INFO-LAYER-SET initializing...', layerPath, Object.keys(this.resultsSet));
 
       const layerConfig = api.maps[mapId].layer.registeredLayers[layerPath];
       this.resultsSet[layerPath] = {
@@ -156,10 +156,10 @@ export class FeatureInfoLayerSet {
     api.event.on(
       EVENT_NAMES.MAP.EVENT_MAP_SINGLE_CLICK,
       (payload) => {
-        if (payloadIsAMapMouseEvent(payload)) {
-          // Log
-          logger.logTraceDetailed('feature-info-layer-set on EVENT_NAMES.MAP.EVENT_MAP_SINGLE_CLICK', this.mapId, payload);
+        // Log
+        logger.logTraceCoreAPIEvent('FEATURE-INFO-LAYER-SET - EVENT_MAP_SINGLE_CLICK', this.mapId, payload);
 
+        if (payloadIsAMapMouseEvent(payload)) {
           createQueryLayerPayload('click', 'at_long_lat', payload.coordinates.lnglat);
         }
       },
@@ -167,13 +167,14 @@ export class FeatureInfoLayerSet {
     );
 
     // ! Do we want to keep this type of event? I think we already said that we want to remove it.
+    // TODO: Refactor - This doesn't seem to be used at all indeed?
     api.event.on(
       EVENT_NAMES.MAP.EVENT_MAP_CROSSHAIR_ENTER,
       (payload) => {
-        if (payloadIsALngLat(payload)) {
-          // Log
-          logger.logTraceDetailed('feature-info-layer-set on EVENT_NAMES.MAP.EVENT_MAP_CROSSHAIR_ENTER', this.mapId, payload);
+        // Log
+        logger.logTraceCoreAPIEvent('FEATURE-INFO-LAYER-SET - EVENT_MAP_CROSSHAIR_ENTER', this.mapId, payload);
 
+        if (payloadIsALngLat(payload)) {
           createQueryLayerPayload('crosshaire-enter', 'at_long_lat', payload.lnglat);
         }
       },
@@ -183,10 +184,10 @@ export class FeatureInfoLayerSet {
     api.event.on(
       EVENT_NAMES.MAP.EVENT_MAP_POINTER_MOVE,
       debounce((payload) => {
-        if (payloadIsAMapMouseEvent(payload)) {
-          // Log
-          logger.logTraceDetailed('feature-info-layer-set on EVENT_NAMES.MAP.EVENT_MAP_POINTER_MOVE', this.mapId, payload);
+        // Log
+        logger.logTraceCoreAPIEvent('FEATURE-INFO-LAYER-SET - EVENT_MAP_POINTER_MOVE', this.mapId, payload);
 
+        if (payloadIsAMapMouseEvent(payload)) {
           createQueryLayerPayload('hover', 'at_pixel', payload.coordinates.pixel);
         }
       }, 750),
@@ -196,10 +197,10 @@ export class FeatureInfoLayerSet {
     api.event.on(
       EVENT_NAMES.GET_FEATURE_INFO.GET_ALL_LAYER_FEATURES,
       (payload) => {
-        if (payloadIsQueryLayer(payload)) {
-          // Log
-          logger.logTraceDetailed('feature-info-layer-set on EVENT_NAMES.GET_FEATURE_INFO.GET_ALL_LAYER_FEATURES', this.mapId);
+        // Log
+        logger.logTraceCoreAPIEvent('FEATURE-INFO-LAYER-SET - GET_ALL_LAYER_FEATURES', this.mapId, payload);
 
+        if (payloadIsQueryLayer(payload)) {
           const layerPath = payload.location as string;
           const layerConfig = api.maps[mapId].layer.registeredLayers[layerPath];
           if (!this.resultsSet[layerPath].data['all-features']!.eventListenerEnabled) return;
@@ -227,10 +228,10 @@ export class FeatureInfoLayerSet {
     api.event.on(
       EVENT_NAMES.GET_FEATURE_INFO.QUERY_RESULT,
       (payload) => {
-        if (payloadIsQueryResult(payload)) {
-          // Log
-          logger.logTraceDetailed('feature-info-layer-set on EVENT_NAMES.GET_FEATURE_INFO.QUERY_RESULT', this.mapId, payload);
+        // Log
+        logger.logTraceCoreAPIEvent('FEATURE-INFO-LAYER-SET - QUERY_RESULT', this.mapId, payload);
 
+        if (payloadIsQueryResult(payload)) {
           const { layerPath, queryType, arrayOfRecords, eventType } = payload;
           const layerConfig = api.maps[mapId].layer.registeredLayers[layerPath];
           if (this.resultsSet?.[layerPath]?.data) {

@@ -14,6 +14,10 @@ export const LOG_TRACE_USE_CALLBACK = 4;
 export const LOG_TRACE_USE_MEMO = 5;
 // For tracing useEffect mounting. Disabled by default. Only shows if running in dev environment or GEOVIEW_LOG_ACTIVE key is set in local storage.
 export const LOG_TRACE_USE_EFFECT = 6;
+// For tracing store subscription events. Disabled by default. Only shows if running in dev environment or GEOVIEW_LOG_ACTIVE key is set in local storage.
+export const LOG_TRACE_CORE_STORE_SUBSCRIPTION = 8;
+// For tracing api events. Disabled by default. Only shows if running in dev environment or GEOVIEW_LOG_ACTIVE key is set in local storage.
+export const LOG_TRACE_CORE_API_EVENT = 9;
 // For tracing core functions. Disabled by default. Only shows if running in dev environment or GEOVIEW_LOG_ACTIVE key is set in local storage.
 export const LOG_TRACE_CORE = 10;
 // Default. For debugging and development. Enabled by default. Only shows if running in dev environment or GEOVIEW_LOG_ACTIVE key is set in local storage.
@@ -62,16 +66,18 @@ const formatTime = (date: Date): string => {
  * The supported color codes for logging
  */
 type ColorCode = {
-  darkorange: string;
-  dodgerblue: string;
-  yellowgreen: string;
-  green: string;
-  plum: string;
   turquoise: string;
   grey: string;
+  plum: string;
   orchid: string;
-  mediumorchid: string;
   darkorchid: string;
+  mediumorchid: string;
+  royalblue: string;
+  cornflowerblue: string;
+  dodgerblue: string;
+  darkorange: string;
+  yellowgreen: string;
+  green: string;
 };
 
 /**
@@ -175,6 +181,32 @@ export class ConsoleLogger {
     if (!LOG_ACTIVE) return;
     // Redirect
     this.logLevel(LOG_TRACE_USE_EFFECT, 'U_EFF', 'mediumorchid', useEffectFunction, ...message);
+  };
+
+  /**
+   * Logging function commonly used in the store subscriptions to track when a store has triggered a subscription.
+   * Only shows if LOG_ACTIVE is true.
+   * @param message string storeSubscription the store subscription event that was raised
+   * @param message unknown[] the messages to log
+   */
+  logTraceCoreStoreSubscription = (storeSubscription: string, ...message: unknown[]): void => {
+    // Validate log active
+    if (!LOG_ACTIVE) return;
+    // Redirect
+    this.logLevel(LOG_TRACE_CORE_STORE_SUBSCRIPTION, 'E_STO', 'royalblue', storeSubscription, ...message);
+  };
+
+  /**
+   * Logging function commonly used in the API event handlers to track when the API has triggered an event.
+   * Only shows if LOG_ACTIVE is true.
+   * @param message string apiEvent the api event that was raised
+   * @param message unknown[] the messages to log
+   */
+  logTraceCoreAPIEvent = (apiEvent: string, ...message: unknown[]): void => {
+    // Validate log active
+    if (!LOG_ACTIVE) return;
+    // Redirect
+    this.logLevel(LOG_TRACE_CORE_API_EVENT, 'E_API', 'cornflowerblue', apiEvent, ...message);
   };
 
   /**

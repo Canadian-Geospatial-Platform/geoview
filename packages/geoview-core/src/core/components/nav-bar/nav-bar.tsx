@@ -77,12 +77,18 @@ export function Navbar(): JSX.Element {
     logger.logTraceUseEffect('NAV-BAR - addButtonPanel', mapId);
 
     const navbarBtnPanelCreateListenerFunction = (payload: PayloadBaseClass) => {
+      // Log
+      logger.logTraceCoreAPIEvent('NAV-BAR - navbarBtnPanelCreateListenerFunction', payload);
+
       if (payloadIsAButtonPanel(payload)) addButtonPanel(payload);
     };
     // listen to new nav-bar panel creation
     api.event.on(EVENT_NAMES.NAVBAR.EVENT_NAVBAR_BUTTON_PANEL_CREATE, navbarBtnPanelCreateListenerFunction, mapId);
 
     const navbarBtnPanelRemoveListenerFunction = (payload: PayloadBaseClass) => {
+      // Log
+      logger.logTraceCoreAPIEvent('NAV-BAR - navbarBtnPanelRemoveListenerFunction', payload);
+
       if (payloadIsAButtonPanel(payload)) removeButtonPanel(payload);
     };
     // listen to new nav-bar panel removal

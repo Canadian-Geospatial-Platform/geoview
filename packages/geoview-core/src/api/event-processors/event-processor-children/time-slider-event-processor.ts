@@ -9,6 +9,7 @@ import {
   api,
   getLocalizedValue,
 } from '@/app';
+import { logger } from '@/core/utils/logger';
 
 import { AbstractEventProcessor } from '../abstract-event-processor';
 
@@ -22,6 +23,9 @@ export class TimeSliderEventProcessor extends AbstractEventProcessor {
     api.event.once(
       api.eventNames.MAP.EVENT_MAP_LOADED,
       () => {
+        // Log
+        logger.logTraceCoreAPIEvent('TIME SLIDER EVENT PROCESSOR - EVENT_MAP_LOADED');
+
         const orderedLayers = store.getState().mapState.layerOrder;
         const initialTimeSliderLayerPaths = TimeSliderEventProcessor.filterTimeSliderLayers(mapId, orderedLayers);
         if (initialTimeSliderLayerPaths) {
@@ -38,6 +42,9 @@ export class TimeSliderEventProcessor extends AbstractEventProcessor {
     const unsubLayerOrder = store.subscribe(
       (state) => state.mapState.layerOrder,
       (cur, prev) => {
+        // Log
+        logger.logTraceCoreStoreSubscription('TIME SLIDER EVENT PROCESSOR - layerOrder', cur);
+
         const newTimeSliderLayerPaths = TimeSliderEventProcessor.filterTimeSliderLayers(mapId, cur);
         const oldTimeSliderLayerPaths = TimeSliderEventProcessor.filterTimeSliderLayers(mapId, prev);
         const addedLayers = newTimeSliderLayerPaths.filter((layerPath) => !oldTimeSliderLayerPaths.includes(layerPath));

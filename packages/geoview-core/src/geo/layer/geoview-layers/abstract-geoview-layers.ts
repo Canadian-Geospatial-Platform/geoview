@@ -518,7 +518,7 @@ export abstract class AbstractGeoViewLayer {
     if (this.olLayers === null) {
       try {
         // Log
-        logger.logTraceCore('createGeoViewLayers', this.listOfLayerEntryConfig);
+        logger.logTraceCore('ABSTRACT-GEOVIEW-LAYERS - createGeoViewLayers', this.listOfLayerEntryConfig);
 
         // Try to get a key for logging timings
         let logTimingsKey;
@@ -690,7 +690,7 @@ export abstract class AbstractGeoViewLayer {
     layerGroup?: LayerGroup
   ): Promise<BaseLayer | null> {
     // Log
-    logger.logTraceCore('processListOfLayerEntryConfig', listOfLayerEntryConfig);
+    logger.logTraceCore('ABSTRACT-GEOVIEW-LAYERS - processListOfLayerEntryConfig', listOfLayerEntryConfig);
 
     this.setLayerPhase('processListOfLayerEntryConfig');
     try {
@@ -814,7 +814,7 @@ export abstract class AbstractGeoViewLayer {
       }
 
       // Log
-      logger.logTraceCore('abstract-geoview-layers.getFeatureInfo', queryType, layerPath);
+      logger.logTraceCore('ABSTRACT-GEOVIEW-LAYERS - getFeatureInfo', queryType, layerPath);
       const logMarkerKey = `${queryType} | ${layerPath}`;
       logger.logMarkerStart(logMarkerKey);
 
@@ -970,10 +970,10 @@ export abstract class AbstractGeoViewLayer {
       // Listen to events that request a layer inventory and emit a register payload event.
       // This will register all existing layers to a newly created layer set.
       this.registerToLayerSetListenerFunctions[layerPath].requestLayerInventory = (payload) => {
-        if (payloadIsRequestLayerInventory(payload)) {
-          // Log
-          logger.logTraceDetailed('abstract-geoview-layers on requestLayerInventory', this.mapId, payload);
+        // Log
+        logger.logTraceCoreAPIEvent('ABSTRACT-GEOVIEW-LAYERS - requestLayerInventory', layerPath, payload);
 
+        if (payloadIsRequestLayerInventory(payload)) {
           const { layerSetId } = payload;
           api.event.emit(LayerSetPayload.createLayerRegistrationPayload(this.mapId, layerPath, 'add', layerSetId));
         }
@@ -988,10 +988,10 @@ export abstract class AbstractGeoViewLayer {
 
     if (!this.registerToLayerSetListenerFunctions[layerPath].queryLegend) {
       this.registerToLayerSetListenerFunctions[layerPath].queryLegend = (payload) => {
-        if (payloadIsQueryLegend(payload)) {
-          // Log
-          logger.logTraceDetailed('abstract-geoview-layers on queryLegend', this.mapId, payload);
+        // Log
+        logger.logTraceCoreAPIEvent('ABSTRACT-GEOVIEW-LAYERS - queryLegend', layerPath, payload);
 
+        if (payloadIsQueryLegend(payload)) {
           this.getLegend(layerPath).then((queryResult) => {
             api.event.emit(GetLegendsPayload.createLegendInfoPayload(this.mapId, layerPath, queryResult));
           });
@@ -1009,10 +1009,10 @@ export abstract class AbstractGeoViewLayer {
       if ('featureInfo' in layerConfig.source! && layerConfig.source.featureInfo?.queryable) {
         // Listen to events that request to query a layer and return the resultset to the requester.
         this.registerToLayerSetListenerFunctions[layerPath].queryLayer = async (payload) => {
-          if (payloadIsQueryLayer(payload)) {
-            // Log
-            logger.logTraceDetailed('abstract-geoview-layers on queryLayer', this.mapId, payload);
+          // Log
+          logger.logTraceCoreAPIEvent('ABSTRACT-GEOVIEW-LAYERS - queryLayer', layerPath, payload);
 
+          if (payloadIsQueryLayer(payload)) {
             const { queryType, location, eventType } = payload;
 
             // Get Feature Info
