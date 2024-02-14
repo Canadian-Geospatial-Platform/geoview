@@ -28,6 +28,7 @@ export default function ExportButton(props: ExportProps): JSX.Element {
       tooltipPlacement="bottom-end"
       onClick={() => openModal({ activeElementId: 'export', callbackElementId: `${mapId}-export-btn` })}
       className={className}
+      color="primary"
     >
       <DownloadIcon />
     </IconButton>

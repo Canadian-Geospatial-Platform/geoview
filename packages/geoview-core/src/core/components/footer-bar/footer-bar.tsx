@@ -448,6 +448,7 @@ export function FooterBar(): JSX.Element | null {
             <IconButton
               onClick={handleDynamicFocus}
               tooltip={isFocusToMap ? 'footerBar.focusToMap' : 'footerBar.focusToFooter'}
+              color="primary"
               disabled={
                 isCollapsed || isMapFullScreen || footerPanelResizeValues[footerPanelResizeValues.length - 1] === footerPanelResizeValue
               }

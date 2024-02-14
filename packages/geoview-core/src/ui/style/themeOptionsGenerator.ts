@@ -63,10 +63,10 @@ export const generateThemeOptions = function (geoViewColors: IGeoViewColors = de
         // grey: '#eeeeee',
       },
       action: {
-        active: 'rgba(81,91,165, 0.94)',
-        hover: `rgba(81,91,165, ${opacity.hoverOpacity})`,
+        active: geoViewColors.primary.main,
+        hover: geoViewColors.primary.opacity(opacity.hoverOpacity), 
         hoverOpacity: opacity.hoverOpacity,
-        selected: `rgba(81,91,165, ${opacity.selectedOpacity})`,
+        selected:  geoViewColors.primary.opacity(opacity.selectedOpacity), 
         selectedOpacity: opacity.selectedOpacity,
         // hoverRow: `rgba(0, 255, 255, ${opacity.hoverOpacity})`,
         // selectedRow: `rgba(0, 255, 255, ${opacity.selectedOpacity})`,

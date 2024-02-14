@@ -100,6 +100,7 @@ export default function Notifications(): JSX.Element {
           tooltipPlacement="bottom-end"
           onClick={handleOpenPopover}
           className={open ? 'active' : ''}
+          color="primary"
         >
           <NotificationsIcon />
         </IconButton>
