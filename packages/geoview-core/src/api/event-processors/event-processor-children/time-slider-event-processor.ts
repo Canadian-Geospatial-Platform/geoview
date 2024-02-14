@@ -26,7 +26,7 @@ export class TimeSliderEventProcessor extends AbstractEventProcessor {
         // Log
         logger.logTraceCoreAPIEvent('TIME SLIDER EVENT PROCESSOR - EVENT_MAP_LOADED');
 
-        const orderedLayers = store.getState().mapState.layerOrder;
+        const orderedLayers = store.getState().mapState.orderedLayerInfo.map((info) => info.layerPath);
         const initialTimeSliderLayerPaths = TimeSliderEventProcessor.filterTimeSliderLayers(mapId, orderedLayers);
         if (initialTimeSliderLayerPaths) {
           initialTimeSliderLayerPaths.forEach((layerPath) => {
@@ -42,14 +42,20 @@ export class TimeSliderEventProcessor extends AbstractEventProcessor {
     );
 
     // Checks for added and removed layers with time dimension
-    const unsubLayerOrder = store.subscribe(
-      (state) => state.mapState.layerOrder,
+    const unsubOrderedLayerInfo = store.subscribe(
+      (state) => state.mapState.orderedLayerInfo,
       (cur, prev) => {
         // Log
-        logger.logTraceCoreStoreSubscription('TIME SLIDER EVENT PROCESSOR - layerOrder', cur);
+        logger.logTraceCoreStoreSubscription('TIME SLIDER EVENT PROCESSOR - orderedLayerInfo', cur);
 
-        const newTimeSliderLayerPaths = TimeSliderEventProcessor.filterTimeSliderLayers(mapId, cur);
-        const oldTimeSliderLayerPaths = TimeSliderEventProcessor.filterTimeSliderLayers(mapId, prev);
+        const newTimeSliderLayerPaths = TimeSliderEventProcessor.filterTimeSliderLayers(
+          mapId,
+          cur.map((info) => info.layerPath)
+        );
+        const oldTimeSliderLayerPaths = TimeSliderEventProcessor.filterTimeSliderLayers(
+          mapId,
+          prev.map((info) => info.layerPath)
+        );
         const addedLayers = newTimeSliderLayerPaths.filter((layerPath) => !oldTimeSliderLayerPaths.includes(layerPath));
         const removedLayers = oldTimeSliderLayerPaths.filter((layerPath) => !newTimeSliderLayerPaths.includes(layerPath));
         if (addedLayers.length) {
@@ -64,7 +70,7 @@ export class TimeSliderEventProcessor extends AbstractEventProcessor {
     );
 
     // Return the array of subscriptions so they can be destroyed later
-    return [unsubLayerOrder];
+    return [unsubOrderedLayerInfo];
   }
 
   // **********************************************************
@@ -109,7 +115,8 @@ export class TimeSliderEventProcessor extends AbstractEventProcessor {
    * @returns {TimeSliderLayer}
    */
   static getInitialTimeSliderValues(mapId: string, layerPath: string): TimeSliderLayerSet {
-    const name = getLocalizedValue(api.maps[mapId].layer.geoviewLayers[layerPath.split('/')[0]].geoviewLayerName, mapId) || layerPath;
+    const layerConfig = api.maps[mapId].layer.registeredLayers[layerPath];
+    const name = getLocalizedValue(layerConfig.layerName, mapId) || layerConfig.layerId;
     const temporalDimensionInfo = api.maps[mapId].layer.geoviewLayer(layerPath).getTemporalDimension();
     const { range } = temporalDimensionInfo.range;
     const defaultValueIsArray = Array.isArray(temporalDimensionInfo.default);

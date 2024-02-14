@@ -11,7 +11,7 @@ import {
   useDataTableStoreRowsFiltered,
   useDataTableStoreSelectedLayerPath,
   useDetailsStoreLayerDataArray,
-  useMapVisibleLayers,
+  useMapOrderedLayerInfo,
 } from '@/core/stores';
 import { ResponsiveGrid, EnlargeButton, CloseButton, LayerList, LayerListEntry, LayerTitle, useFooterPanelHeight } from '../common';
 import { logger } from '@/core/utils/logger';
@@ -43,7 +43,7 @@ export function Datapanel() {
   const isEnlargeDataTable = useDataTableStoreIsEnlargeDataTable();
   const mapFiltered = useDataTableStoreMapFilteredRecord();
   const rowsFiltered = useDataTableStoreRowsFiltered();
-  const visibleLayers = useMapVisibleLayers();
+  const orderedLayerInfo = useMapOrderedLayerInfo();
   const { setSelectedLayerPath, setIsEnlargeDataTable } = useDataTableStoreActions();
 
   // Custom hook for calculating the height of footer panel
@@ -53,10 +53,17 @@ export function Datapanel() {
   const mappedLayerData = useFeatureFieldInfos(layerData);
 
   const orderedLayerData = useMemo(() => {
+    const visibleLayers = orderedLayerInfo
+      .map((layerInfo) => {
+        if (layerInfo.visible) return layerInfo.layerPath;
+        return undefined;
+      })
+      .filter((layerPath) => layerPath !== undefined);
+
     return visibleLayers
       .map((layerPath) => mappedLayerData.filter((data) => data.layerPath === layerPath)[0])
       .filter((layer) => layer !== undefined);
-  }, [mappedLayerData, visibleLayers]);
+  }, [mappedLayerData, orderedLayerInfo]);
 
   const handleLayerChange = useCallback(
     (_layer: LayerListEntry) => {

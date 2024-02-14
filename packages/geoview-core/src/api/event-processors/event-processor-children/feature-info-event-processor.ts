@@ -33,18 +33,20 @@ export class FeatureInfoEventProcessor extends AbstractEventProcessor {
   protected onInitialize(store: GeoviewStoreType): Array<() => void> | void {
     // Checks for udpated layers in layer order
     const unsubLayerRemoved = store.subscribe(
-      (state) => state.mapState.layerOrder,
+      (state) => state.mapState.orderedLayerInfo,
       (cur, prev) => {
         // Log
-        logger.logTraceCoreStoreSubscription('FEATUREINFO EVENT PROCESSOR - layerOrder', cur);
+        logger.logTraceCoreStoreSubscription('FEATUREINFO EVENT PROCESSOR - orderedLayerInfo', cur);
 
         // For each layer path in the layer data array
+        const curOrderedLayerPaths = cur.map((layerInfo) => layerInfo.layerPath);
+        const prevOrderedLayerPaths = prev.map((layerInfo) => layerInfo.layerPath);
         store
           .getState()
           .detailsState.layerDataArray.map((layerInfo) => layerInfo.layerPath)
           .forEach((layerPath) => {
             // If it was in the layer data array and is not anymore
-            if (prev.includes(layerPath) && !cur.includes(layerPath)) {
+            if (prevOrderedLayerPaths.includes(layerPath) && !curOrderedLayerPaths.includes(layerPath)) {
               // Remove it from feature info array
               FeatureInfoEventProcessor.deleteFeatureInfo(store.getState().mapId, layerPath);
 
