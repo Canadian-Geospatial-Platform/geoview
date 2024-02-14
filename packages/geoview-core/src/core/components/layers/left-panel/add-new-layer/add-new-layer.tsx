@@ -868,7 +868,7 @@ export function AddNewLayer(): JSX.Element {
     setIsLoading(false);
     setSelectedLayerPath(`${geoviewLayerInstance?.geoviewLayerId}/${geoviewLayerInstance?.geoviewLayerId}`);
     setDisplayState('view');
-    const message = api.utilities.replaceParams([layerName], t('layers.layerAddedSuccessfully'));
+    const message = api.utilities.replaceParams([layerName], t('layers.layerAdded'));
     api.utilities.showMessage(mapId, message, false);
   };
 

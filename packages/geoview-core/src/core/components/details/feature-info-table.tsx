@@ -126,8 +126,8 @@ export function FeatureInfoTable({ featureInfoList }: FeatureInfoTableProps): JS
           container
           spacing={5}
           sx={{
-            backgroundColor: index % 2 > 0 ? theme.palette.geoViewColor.bgColor.dark[800] : '',
-            color: index % 2 > 0 ? theme.palette.geoViewColor.bgColor.light[800] : '',
+            backgroundColor: index % 2 > 0 ? theme.palette.geoViewColor.bgColor.darken(0.1) : '',
+            color: index % 2 > 0 ? theme.palette.geoViewColor.bgColor.darken(0.9) : '',
             marginBottom: '20px',
           }}
           key={index}

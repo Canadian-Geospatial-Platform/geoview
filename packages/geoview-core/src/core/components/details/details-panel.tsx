@@ -407,7 +407,6 @@ export function DetailsPanel(): JSX.Element {
                       tooltipPlacement="top"
                       onClick={() => handleFeatureNavigateChange(-1)}
                       disabled={currentFeatureIndex <= 0}
-                      color="primary"
                     >
                       <ArrowBackIosOutlinedIcon />
                     </IconButton>
@@ -418,7 +417,6 @@ export function DetailsPanel(): JSX.Element {
                       tooltipPlacement="top"
                       onClick={() => handleFeatureNavigateChange(1)}
                       disabled={!memoSelectedLayerData?.features || currentFeatureIndex + 1 >= memoSelectedLayerData!.features!.length}
-                      color="primary"
                     >
                       <ArrowForwardIosOutlinedIcon />
                     </IconButton>

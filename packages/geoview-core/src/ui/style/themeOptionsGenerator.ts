@@ -59,8 +59,7 @@ export const generateThemeOptions = function (geoViewColors: IGeoViewColors = de
       divider: 'rgba(0, 0, 0, 0.12)',
       background: {
         paper: geoViewColors.bgColor.light[600],
-        default: geoViewColors.bgColor.light[500],
-        // grey: '#eeeeee',
+        default: geoViewColors.bgColor.light[500]
       },
       action: {
         active: geoViewColors.primary.main,
