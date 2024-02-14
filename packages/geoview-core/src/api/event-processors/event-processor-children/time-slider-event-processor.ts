@@ -26,7 +26,7 @@ export class TimeSliderEventProcessor extends AbstractEventProcessor {
         // Log
         logger.logTraceCoreAPIEvent('TIME SLIDER EVENT PROCESSOR - EVENT_MAP_LOADED');
 
-        const orderedLayers = store.getState().mapState.layerOrder;
+        const orderedLayers = store.getState().mapState.orderedLayerInfo.map((info) => info.layerPath);
         const initialTimeSliderLayerPaths = TimeSliderEventProcessor.filterTimeSliderLayers(mapId, orderedLayers);
         if (initialTimeSliderLayerPaths) {
           initialTimeSliderLayerPaths.forEach((layerPath) => {
@@ -40,13 +40,19 @@ export class TimeSliderEventProcessor extends AbstractEventProcessor {
 
     // Checks for added and removed layers with time dimension
     const unsubLayerOrder = store.subscribe(
-      (state) => state.mapState.layerOrder,
+      (state) => state.mapState.orderedLayerInfo,
       (cur, prev) => {
         // Log
         logger.logTraceCoreStoreSubscription('TIME SLIDER EVENT PROCESSOR - layerOrder', cur);
 
-        const newTimeSliderLayerPaths = TimeSliderEventProcessor.filterTimeSliderLayers(mapId, cur);
-        const oldTimeSliderLayerPaths = TimeSliderEventProcessor.filterTimeSliderLayers(mapId, prev);
+        const newTimeSliderLayerPaths = TimeSliderEventProcessor.filterTimeSliderLayers(
+          mapId,
+          cur.map((info) => info.layerPath)
+        );
+        const oldTimeSliderLayerPaths = TimeSliderEventProcessor.filterTimeSliderLayers(
+          mapId,
+          prev.map((info) => info.layerPath)
+        );
         const addedLayers = newTimeSliderLayerPaths.filter((layerPath) => !oldTimeSliderLayerPaths.includes(layerPath));
         const removedLayers = oldTimeSliderLayerPaths.filter((layerPath) => !newTimeSliderLayerPaths.includes(layerPath));
         if (addedLayers.length) {

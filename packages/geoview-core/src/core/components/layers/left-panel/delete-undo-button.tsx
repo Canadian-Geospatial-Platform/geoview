@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Box, CircularProgressBase, DeleteOutlineIcon, IconButton, UndoIcon } from '@/ui';
 import { TypeLegendLayer } from '../types';
-import { useLayerStoreActions } from '@/core/stores/store-interface-and-intial-values/layer-state';
+import { useLayerStoreActions, useMapStoreActions } from '@/core/stores';
 import { logger } from '@/core/utils/logger';
 
 interface DeleteUndoButtonProps {
@@ -51,15 +51,16 @@ export function DeleteUndoButton(props: DeleteUndoButtonProps): JSX.Element {
   const [inUndoState, setInUndoState] = useState(false);
 
   // get store actions
-  const { deleteLayer, toggleLayerVisibility } = useLayerStoreActions();
+  const { deleteLayer } = useLayerStoreActions();
+  const { getVisibilityFromOrderedLayerInfo, getRemovableFromOrderedLayerInfo, setOrToggleLayerVisibility } = useMapStoreActions();
 
   const handleDeleteClick = () => {
-    if (layer.isVisible !== 'no') toggleLayerVisibility(layer.layerPath);
+    if (getVisibilityFromOrderedLayerInfo(layer.layerPath) !== 'no') setOrToggleLayerVisibility(layer.layerPath);
     setInUndoState(true);
   };
 
   const handleUndoClick = () => {
-    toggleLayerVisibility(layer.layerPath);
+    setOrToggleLayerVisibility(layer.layerPath);
     setInUndoState(false);
   };
 
@@ -85,10 +86,17 @@ export function DeleteUndoButton(props: DeleteUndoButtonProps): JSX.Element {
     return undefined;
   }, [inUndoState]);
 
-  if (!inUndoState) {
+  if (!inUndoState && getRemovableFromOrderedLayerInfo(layer.layerPath)) {
     return (
       <IconButton onClick={handleDeleteClick} edge="end" size="small">
         <DeleteOutlineIcon color="error" />
+      </IconButton>
+    );
+  }
+  if (!inUndoState) {
+    return (
+      <IconButton onClick={handleDeleteClick} edge="end" size="small" disabled>
+        <DeleteOutlineIcon color="disabled" />
       </IconButton>
     );
   }

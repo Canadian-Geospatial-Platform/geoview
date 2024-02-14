@@ -14,7 +14,7 @@ import {
 import { TypeFeatureInfoEntry, TypeLayerData, TypeGeometry, TypeArrayOfFeatureInfoEntries } from '@/api/events/payloads';
 import {
   useMapStoreActions,
-  useMapVisibleLayers,
+  useMapOrderedLayerInfo,
   useDetailsStoreActions,
   useDetailsStoreCheckedFeatures,
   useDetailsStoreLayerDataArrayBatch,
@@ -48,7 +48,7 @@ export function DetailsPanel({ fullWidth }: DetailsPanelType): JSX.Element {
   const selectedLayerPath = useDetailsStoreSelectedLayerPath();
   const arrayOfLayerDataBatch = useDetailsStoreLayerDataArrayBatch();
   const checkedFeatures = useDetailsStoreCheckedFeatures();
-  const visibleLayers = useMapVisibleLayers();
+  const orderedLayerInfo = useMapOrderedLayerInfo();
   const { setSelectedLayerPath, removeCheckedFeature, setLayerDataArrayBatchLayerPathBypass } = useDetailsStoreActions();
   const { addSelectedFeature, removeSelectedFeature } = useMapStoreActions();
 
@@ -122,7 +122,14 @@ export function DetailsPanel({ fullWidth }: DetailsPanelType): JSX.Element {
    */
   const memoLayersList = useMemo(() => {
     // Log
-    logger.logTraceUseMemo('DETAILS-PANEL - memoLayersList', visibleLayers, arrayOfLayerDataBatch);
+    logger.logTraceUseMemo('DETAILS-PANEL - memoLayersList', orderedLayerInfo, arrayOfLayerDataBatch);
+
+    const visibleLayers = orderedLayerInfo
+      .map((layerInfo) => {
+        if (layerInfo.visible !== 'no') return layerInfo.layerPath;
+        return undefined;
+      })
+      .filter((layerPath) => layerPath !== undefined);
 
     // Set the layers list
     return visibleLayers
@@ -140,7 +147,7 @@ export function DetailsPanel({ fullWidth }: DetailsPanelType): JSX.Element {
             tooltip: `${layer!.layerName}, ${getNumFeaturesLabel(layer!)}`,
           } as LayerListEntry)
       );
-  }, [visibleLayers, arrayOfLayerDataBatch, getNumFeaturesLabel]);
+  }, [orderedLayerInfo, arrayOfLayerDataBatch, getNumFeaturesLabel]);
 
   /**
    * Memoizes the selected layer for the LayerList component.

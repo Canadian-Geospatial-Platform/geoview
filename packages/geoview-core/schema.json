@@ -578,6 +578,14 @@
         "className": {
           "type": "string",
           "description": "A CSS class name to set to the layer element."
+        },
+        "removable": {
+          "type": "boolean",
+          "description": "Is the layer removable."
+        },
+        "hoverable": {
+          "type": "boolean",
+          "description": "Is the layer hoverable."
         }
       }
     },
@@ -1888,14 +1896,7 @@
               "type": "array",
               "items": {
                 "type": "string",
-                "enum": [
-                  "legend",
-                  "layers",
-                  "details",
-                  "data-table",
-                  "time-slider",
-                  "geochart"
-                ]
+                "enum": ["legend", "layers", "details", "data-table", "time-slider", "geochart"]
               },
               "minItems": 1,
               "default": [
