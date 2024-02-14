@@ -6,8 +6,24 @@ import View, { FitOptions } from 'ol/View';
 import { KeyboardPan } from 'ol/interaction';
 
 import { GeoviewStoreType } from '@/core/stores/geoview-store';
-import { api, Coordinate, NORTH_POLE_POSITION, TypeBasemapOptions, TypeBasemapProps, TypeClickMarker, TypeMapFeaturesConfig } from '@/app';
-import { TypeInteraction, TypeMapState, TypeValidMapProjectionCodes } from '@/geo/map/map-schema-types';
+import {
+  api,
+  Coordinate,
+  NORTH_POLE_POSITION,
+  TypeBasemapOptions,
+  TypeBasemapProps,
+  TypeClickMarker,
+  TypeMapFeaturesConfig,
+  TypeOrderedLayerInfo,
+} from '@/app';
+import {
+  TypeGeoviewLayerConfig,
+  TypeInteraction,
+  TypeLayerEntryConfig,
+  TypeMapState,
+  TypeValidMapProjectionCodes,
+  TypeVisibilityFlags,
+} from '@/geo/map/map-schema-types';
 import {
   mapPayload,
   lngLatPayload,
@@ -21,7 +37,6 @@ import { EVENT_NAMES } from '@/api/events/event-types';
 import { getGeoViewStore } from '@/core/stores/stores-managers';
 import { OL_ZOOM_DURATION, OL_ZOOM_PADDING } from '@/core/utils/constant';
 import { AppEventProcessor } from './app-event-processor';
-import { TypeLegendLayer } from '@/core/components/layers/types';
 import { logger } from '@/core/utils/logger';
 
 import { AbstractEventProcessor } from '../abstract-event-processor';
@@ -158,27 +173,6 @@ export class MapEventProcessor extends AbstractEventProcessor {
     );
     // #endregion FEATURE SELECTION
 
-    const unsubLegendLayers = store.subscribe(
-      (state) => state.layerState.legendLayers,
-      (cur) => {
-        // Log
-        logger.logTraceCoreStoreSubscription('MAP EVENT PROCESSOR - legendLayers', mapId, cur);
-
-        const orderedLayerPaths = MapEventProcessor.evaluateLayerPathsFromLegendsArray(cur);
-        const prevLayerOrder = [...store.getState().mapState.layerOrder];
-        if (JSON.stringify(prevLayerOrder) !== JSON.stringify(orderedLayerPaths))
-          store.getState().mapState.actions.setLayerOrder(orderedLayerPaths);
-        const orderedVisibleLayers = orderedLayerPaths.filter(
-          (layerPath) =>
-            store.getState().layerState.actions.getLayer(layerPath)?.isVisible === 'yes' ||
-            store.getState().layerState.actions.getLayer(layerPath)?.isVisible === 'always'
-        );
-        const prevVisibleLayers = [...store.getState().mapState.visibleLayers];
-        if (JSON.stringify(prevVisibleLayers) !== JSON.stringify(orderedVisibleLayers))
-          store.getState().mapState.actions.setVisibleLayers(orderedVisibleLayers);
-      }
-    );
-
     // Return the array of subscriptions so they can be destroyed later
     return [
       unsubMapHighlightedFeatures,
@@ -189,7 +183,6 @@ export class MapEventProcessor extends AbstractEventProcessor {
       unsubMapSelectedFeatures,
       unsubMapZoom,
       unsubMapSingleClick,
-      unsubLegendLayers,
     ];
   }
 
@@ -389,6 +382,82 @@ export class MapEventProcessor extends AbstractEventProcessor {
   static zoom(mapId: string, zoom: number): void {
     this.getMapStateProtected(mapId).actions.setZoom(zoom, OL_ZOOM_DURATION);
   }
+
+  static getMapIndexFromOrderedLayerInfo(mapId: string, layerPath: string): number {
+    return this.getMapStateProtected(mapId).actions.getIndexFromOrderedLayerInfo(layerPath);
+  }
+
+  static getMapOrderedLayerInfo(mapId: string): TypeOrderedLayerInfo[] {
+    return this.getMapStateProtected(mapId).orderedLayerInfo;
+  }
+
+  static getMapVisibilityFromOrderedLayerInfo(mapId: string, layerPath: string): boolean {
+    return this.getMapStateProtected(mapId).actions.getVisibilityFromOrderedLayerInfo(layerPath);
+  }
+
+  static setMapLayerHoverable(mapId: string, layerPath: string, hoverable: boolean): void {
+    this.getMapStateProtected(mapId).actions.setHoverable(layerPath, hoverable);
+  }
+
+  static setMapOrderedLayerInfo(mapId: string, orderedLayerInfo: TypeOrderedLayerInfo[]): void {
+    this.getMapStateProtected(mapId).actions.setOrderedLayerInfo(orderedLayerInfo);
+  }
+
+  static setMapLayerQueryable(mapId: string, layerPath: string, queryable: boolean): void {
+    this.getMapStateProtected(mapId).actions.setQueryable(layerPath, queryable);
+  }
+
+  static setOrToggleMapVisibilty(mapId: string, layerPath: string, newValue?: TypeVisibilityFlags): void {
+    this.getMapStateProtected(mapId).actions.setOrToggleLayerVisibility(layerPath, newValue);
+  }
+
+  /**
+   * Replace a layer in the orderedLayerInfo array.
+   *
+   * @param {string} mapId The ID of the map to add the layer to.
+   * @param {TypeGeoviewLayerConfig} geoviewLayerConfig The config of the layer to add.
+   * @return {void}
+   */
+  static replaceOrderedLayerInfo(mapId: string, geoviewLayerConfig: TypeGeoviewLayerConfig | TypeLayerEntryConfig): void {
+    const { orderedLayerInfo } = this.getMapStateProtected(mapId);
+    const layerPath = (geoviewLayerConfig as TypeGeoviewLayerConfig).geoviewLayerId
+      ? `${(geoviewLayerConfig as TypeGeoviewLayerConfig).geoviewLayerId}/${(geoviewLayerConfig as TypeGeoviewLayerConfig).geoviewLayerId}`
+      : (geoviewLayerConfig as TypeLayerEntryConfig).layerPath;
+    const index = this.getMapIndexFromOrderedLayerInfo(mapId, layerPath);
+    const replacedLayers = orderedLayerInfo.filter((layerInfo) => layerInfo.layerPath.startsWith(layerPath));
+    const newOrderedLayerInfo = api.maps[mapId].layer.generateArrayOfLayerOrderInfo(geoviewLayerConfig);
+    orderedLayerInfo.splice(index, replacedLayers.length, ...newOrderedLayerInfo);
+    this.setMapOrderedLayerInfo(mapId, orderedLayerInfo);
+  }
+
+  /**
+   * Add a new layer to the front of the orderedLayerInfo array.
+   *
+   * @param {string} mapId The ID of the map to add the layer to.
+   * @param {TypeGeoviewLayerConfig} geoviewLayerConfig The config of the layer to add.
+   * @return {void}
+   */
+  static addOrderedLayerInfo(mapId: string, geoviewLayerConfig: TypeGeoviewLayerConfig | TypeLayerEntryConfig, index?: number): void {
+    const { orderedLayerInfo } = this.getMapStateProtected(mapId);
+    const newOrderedLayerInfo = api.maps[mapId].layer.generateArrayOfLayerOrderInfo(geoviewLayerConfig);
+    if (!index) orderedLayerInfo.unshift(...newOrderedLayerInfo);
+    else orderedLayerInfo.splice(index, 0, ...newOrderedLayerInfo);
+    this.setMapOrderedLayerInfo(mapId, orderedLayerInfo);
+  }
+
+  /**
+   * Remove a layer from the orderedLayerInfo array.
+   *
+   * @param {string} mapId The ID of the map to remove the layer from.
+   * @param {string} layerPath The path of the layer to remove.
+   * @return {void}
+   */
+  static removeOrderedLayerInfo(mapId: string, layerPath: string): void {
+    const { orderedLayerInfo } = this.getMapStateProtected(mapId);
+    const newOrderedLayerInfo = orderedLayerInfo.filter((layerInfo) => !layerInfo.layerPath.startsWith(layerPath));
+    this.setMapOrderedLayerInfo(mapId, newOrderedLayerInfo);
+  }
+
   // #endregion
 
   // **********************************************************
@@ -410,21 +479,6 @@ export class MapEventProcessor extends AbstractEventProcessor {
     const language = AppEventProcessor.getDisplayLanguage(mapId);
     const projection = MapEventProcessor.getMapState(mapId).currentProjection as TypeValidMapProjectionCodes;
     api.maps[mapId].basemap.loadDefaultBasemaps(projection, language);
-  }
-
-  static evaluateLayerPathsFromLegendsArray(legendsArray: TypeLegendLayer[]): string[] {
-    const layerPathList: string[] = [];
-    const maxOrder = Math.max(...legendsArray.map((legendLayer) => legendLayer.order));
-    for (let i = 0; i <= maxOrder; i++) {
-      const nextLayerLegend = legendsArray.filter((layerLegend) => layerLegend.order === i)[0];
-      if (nextLayerLegend) {
-        layerPathList.push(nextLayerLegend.layerPath);
-        if (nextLayerLegend.children.length) {
-          layerPathList.push(...this.evaluateLayerPathsFromLegendsArray(nextLayerLegend.children));
-        }
-      }
-    }
-    return layerPathList;
   }
 
   static setMapKeyboardPanInteractions(mapId: string, panDelta: number): void {
@@ -556,10 +610,10 @@ export class MapEventProcessor extends AbstractEventProcessor {
    * @param {string} mapId Id of map to set layer Z indices
    */
   static setLayerZIndices = (mapId: string) => {
-    const reversedLayers = [...this.getMapStateProtected(mapId).layerOrder].reverse();
-    reversedLayers.forEach((layerPath, index) => {
-      if (api.maps[mapId].layer.registeredLayers[layerPath]?.olLayer)
-        api.maps[mapId].layer.registeredLayers[layerPath].olLayer?.setZIndex(index + 10);
+    const reversedLayers = [...this.getMapStateProtected(mapId).orderedLayerInfo].reverse();
+    reversedLayers.forEach((orderedLayerInfo, index) => {
+      if (api.maps[mapId].layer.registeredLayers[orderedLayerInfo.layerPath]?.olLayer)
+        api.maps[mapId].layer.registeredLayers[orderedLayerInfo.layerPath].olLayer?.setZIndex(index + 10);
     });
   };
 

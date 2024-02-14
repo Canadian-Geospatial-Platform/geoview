@@ -20,12 +20,11 @@ import { MapEventProcessor } from '@/api/event-processors/event-processor-childr
 
 export interface ILayerState {
   highlightedLayer: string;
-  selectedItem?: TypeLegendLayer;
-  selectedIsVisible: boolean;
   selectedLayer: TypeLegendLayer;
   selectedLayerPath: string | undefined | null;
   legendLayers: TypeLegendLayer[];
   displayState: TypeLayersViewDisplayState;
+
   actions: {
     setLegendLayers: (legendLayers: TypeLegendLayer[]) => void;
     getLayer: (layerPath: string) => TypeLegendLayer | undefined;
@@ -33,9 +32,7 @@ export interface ILayerState {
     setDisplayState: (newDisplayState: TypeLayersViewDisplayState) => void;
     setHighlightLayer: (layerPath: string) => void;
     setLayerOpacity: (layerPath: string, opacity: number) => void;
-    reorderLayer: (startIndex: number, endIndex: number, layerPath: string) => void;
     setSelectedLayerPath: (layerPath: string) => void;
-    toggleLayerVisibility: (layerPath: string) => void;
     toggleItemVisibility: (layerPath: string, geometryType: TypeStyleGeometry, itemName: string) => void;
     setAllItemsVisibility: (layerPath: string, visibility: 'yes' | 'no') => void;
     deleteLayer: (layerPath: string) => void;
@@ -46,7 +43,6 @@ export interface ILayerState {
 export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILayerState {
   const init = {
     highlightedLayer: '',
-    selectedIsVisible: false,
     legendLayers: [] as TypeLegendLayer[],
     selectedLayerPath: null,
     displayState: 'view',
@@ -133,50 +129,40 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
           },
         });
       },
-      toggleLayerVisibility: (layerPath: string) => {
-        const curLayers = get().layerState.legendLayers;
-        const layer = findLayerByPath(curLayers, layerPath);
-        setVisibilityInLayerAndItems(layer as TypeLegendLayer, layer?.isVisible === 'no' ? 'yes' : 'no');
-        // TODO: keep reference to geoview map instance in the store or keep accessing with api - discussion
-        //! may not work with group items ... see if Yves work will make this simplier
-        api.maps[get().mapId].layer.geoviewLayer(layerPath).setVisible(layer?.isVisible !== 'no', layerPath);
-
-        // now update store
-        set({
-          layerState: {
-            ...get().layerState,
-            legendLayers: [...curLayers],
-          },
-        });
-      },
       toggleItemVisibility: (layerPath: string, geometryType: TypeStyleGeometry, itemName: string) => {
         const curLayers = get().layerState.legendLayers;
 
         const registeredLayer = api.maps[get().mapId].layer.registeredLayers[layerPath] as TypeVectorLayerEntryConfig;
         const layer = findLayerByPath(curLayers, layerPath);
         if (layer) {
-          _.each(layer.items, (item, index) => {
+          _.each(layer.items, (item) => {
             if (item.geometryType === geometryType && item.name === itemName && item.isVisible !== 'always') {
               item.isVisible = item.isVisible === 'no' ? 'yes' : 'no'; // eslint-disable-line no-param-reassign
 
-              if (item.isVisible === 'yes' && layer.isVisible === 'no') {
-                layer.isVisible = 'yes';
+              if (item.isVisible === 'yes' && MapEventProcessor.getMapVisibilityFromOrderedLayerInfo(get().mapId, layerPath)) {
+                MapEventProcessor.setOrToggleMapVisibilty(get().mapId, layerPath, 'yes');
               }
 
               // assign value to registered layer. This is use by applyFilter function to set visibility
               // TODO: check if we need to refactor to centralize attribute setting....
               // TODO: know issue when we toggle a default visibility item https://github.com/Canadian-Geospatial-Platform/geoview/issues/1564
               if (registeredLayer.style![geometryType]?.styleType === 'classBreaks') {
-                (registeredLayer.style![geometryType]! as TypeClassBreakStyleConfig).classBreakStyleInfo[index].visible = item.isVisible;
+                const geometryStyleConfig = registeredLayer.style![geometryType]! as TypeClassBreakStyleConfig;
+                const classBreakStyleInfo = geometryStyleConfig.classBreakStyleInfo.find((styleInfo) => styleInfo.label === itemName);
+                if (classBreakStyleInfo) classBreakStyleInfo.visible = item.isVisible;
+                else geometryStyleConfig.defaultVisible = item.isVisible;
               } else if (registeredLayer.style![geometryType]?.styleType === 'uniqueValue') {
-                (registeredLayer.style![geometryType]! as TypeUniqueValueStyleConfig).uniqueValueStyleInfo[index].visible = item.isVisible;
+                const geometryStyleConfig = registeredLayer.style![geometryType]! as TypeUniqueValueStyleConfig;
+                const uniqueStyleInfo = geometryStyleConfig.uniqueValueStyleInfo.find((styleInfo) => styleInfo.label === itemName);
+                if (uniqueStyleInfo) uniqueStyleInfo.visible = item.isVisible;
+                else geometryStyleConfig.defaultVisible = item.isVisible;
               }
             }
           });
           // 'always' is neither 'yes', nor 'no'.
           const allItemsUnchecked = _.every(layer.items, (i) => ['no', 'always'].includes(i.isVisible!));
-          if (allItemsUnchecked && layer.isVisible !== 'always') {
-            layer.isVisible = 'no';
+          if (allItemsUnchecked) {
+            MapEventProcessor.setOrToggleMapVisibilty(get().mapId, layerPath, 'no');
           }
 
           // apply filter to layer
@@ -190,30 +176,40 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
         });
       },
       setAllItemsVisibility: (layerPath: string, visibility: 'yes' | 'no') => {
+        MapEventProcessor.setOrToggleMapVisibilty(get().mapId, layerPath, visibility);
         const curLayers = get().layerState.legendLayers;
 
         const registeredLayer = api.maps[get().mapId].layer.registeredLayers[layerPath] as TypeVectorLayerEntryConfig;
         const layer = findLayerByPath(curLayers, layerPath);
         if (layer) {
-          _.each(layer.items, (item, index) => {
-            if (item.isVisible !== 'always') {
-              item.isVisible = visibility; // eslint-disable-line no-param-reassign
-
-              // assign value to registered layer. This is use by applyFilter function to set visibility
-              // TODO: check if we need to refactor to centralize attribute setting....
-              if (registeredLayer.style && registeredLayer.style![item.geometryType]?.styleType === 'classBreaks') {
-                (registeredLayer.style![item.geometryType]! as TypeClassBreakStyleConfig).classBreakStyleInfo[index].visible =
-                  item.isVisible;
-              } else if (registeredLayer.style![item.geometryType]?.styleType === 'uniqueValue') {
-                (registeredLayer.style![item.geometryType]! as TypeUniqueValueStyleConfig).uniqueValueStyleInfo[index].visible =
-                  item.isVisible;
-              }
-            }
+          _.each(layer.items, (item) => {
+            // eslint-disable-next-line no-param-reassign
+            if (item.isVisible !== 'always') item.isVisible = visibility;
           });
-          // TODO: this visibility flag for the store should we use to show/hide icon on the layer item list (if always in child, no toggle visibility)
-          // This should be set at init of layer
-          if (layer.isVisible !== 'always') {
-            layer.isVisible = visibility;
+          // assign value to registered layer. This is use by applyFilter function to set visibility
+          // TODO: check if we need to refactor to centralize attribute setting....
+          if (registeredLayer.style) {
+            ['Point', 'LineString', 'Polygon'].forEach((geometry) => {
+              if (registeredLayer.style![geometry as TypeStyleGeometry]) {
+                if (registeredLayer.style![geometry as TypeStyleGeometry]?.styleType === 'classBreaks') {
+                  const geometryStyleConfig = registeredLayer.style![geometry as TypeStyleGeometry]! as TypeClassBreakStyleConfig;
+                  if (geometryStyleConfig.defaultVisible && geometryStyleConfig.defaultVisible !== 'always')
+                    geometryStyleConfig.defaultVisible = visibility;
+                  geometryStyleConfig.classBreakStyleInfo.forEach((styleInfo) => {
+                    // eslint-disable-next-line no-param-reassign
+                    if (styleInfo.visible !== 'always') styleInfo.visible = visibility;
+                  });
+                } else if (registeredLayer.style![geometry as TypeStyleGeometry]?.styleType === 'uniqueValue') {
+                  const geometryStyleConfig = registeredLayer.style![geometry as TypeStyleGeometry]! as TypeUniqueValueStyleConfig;
+                  if (geometryStyleConfig.defaultVisible && geometryStyleConfig.defaultVisible !== 'always')
+                    geometryStyleConfig.defaultVisible = visibility;
+                  geometryStyleConfig.uniqueValueStyleInfo.forEach((styleInfo) => {
+                    // eslint-disable-next-line no-param-reassign
+                    if (styleInfo.visible !== 'always') styleInfo.visible = visibility;
+                  });
+                }
+              }
+            });
           }
         }
 
@@ -228,7 +224,7 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
         // ! try to make reusable store actions....
         // ! we can have always item.... we cannot set visibility so if present we will need to trap. Need more use case
         // ! create a function setItemVisibility called with layer path and this function set the registered layer (from store values) then apply the filter.
-        (api.maps[get().mapId].layer.geoviewLayer(layerPath) as AbstractGeoViewVector).applyViewFilter(layerPath);
+        (api.maps[get().mapId].layer.geoviewLayer(layerPath) as AbstractGeoViewVector).applyViewFilter('');
       },
       deleteLayer: (layerPath: string) => {
         const curLayers = get().layerState.legendLayers;
@@ -249,16 +245,6 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
         const { bounds } = layer as TypeLegendLayer;
         if (bounds) MapEventProcessor.zoomToExtent(get().mapId, bounds, options);
       },
-      reorderLayer: (startIndex: number, endIndex: number, layerPath: string) => {
-        const curLayers = get().layerState.legendLayers;
-        const reorderedLayers = reorderSingleLayer(curLayers, startIndex, endIndex, layerPath);
-        set({
-          layerState: {
-            ...get().layerState,
-            legendLayers: [...reorderedLayers],
-          },
-        });
-      },
     },
   } as ILayerState;
 
@@ -266,24 +252,6 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
 }
 
 // private functions
-
-// function set visibility in layer and its items
-function setVisibilityInLayerAndItems(layer: TypeLegendLayer, visibility: 'yes' | 'no') {
-  if (layer.isVisible === 'always') {
-    return;
-  }
-  _.set(layer, 'isVisible', visibility);
-  _.each(layer.items, (item) => {
-    if (item.isVisible !== 'always') {
-      _.set(item, 'isVisible', visibility);
-    }
-  });
-  if (layer.children && layer.children.length > 0) {
-    _.each(layer.children, (child) => {
-      setVisibilityInLayerAndItems(child, visibility);
-    });
-  }
-}
 
 function setOpacityInLayerAndChildren(layer: TypeLegendLayer, opacity: number, mapId: string, isChild = false) {
   _.set(layer, 'opacity', opacity);
@@ -327,49 +295,14 @@ function deleteSingleLayer(layers: TypeLegendLayer[], layerPath: string) {
   }
 }
 
-function reorderSingleLayer(collection: TypeLegendLayer[], startIndex: number, endIndex: number, layerPath: string): TypeLegendLayer[] {
-  let layerFound = false;
-
-  function findLayerAndSortIt(startingCollection: TypeLegendLayer[]) {
-    if (layerFound) {
-      return;
-    }
-    layerFound = startingCollection.find((lyr) => lyr.layerPath === layerPath) !== undefined;
-
-    if (layerFound) {
-      const [removed] = startingCollection.splice(startIndex, 1);
-      startingCollection.splice(endIndex, 0, removed);
-
-      /* eslint-disable no-param-reassign */
-      for (let i = 0; i < startingCollection.length; i++) {
-        startingCollection[i].order = i;
-      }
-
-      return;
-    }
-
-    // if not found at this level, lets find it in children
-    for (let i = 0; i < startingCollection.length; i++) {
-      if (startingCollection[i].children.length > 0) {
-        findLayerAndSortIt(startingCollection[i].children);
-      }
-    }
-  }
-
-  findLayerAndSortIt(collection);
-
-  return collection;
-}
-
 // **********************************************************
 // Layer state selectors
 // **********************************************************
-export const useLayerBounds = () => useStore(useGeoViewStore(), (state) => state.layerState.legendLayers);
 export const useLayerHighlightedLayer = () => useStore(useGeoViewStore(), (state) => state.layerState.highlightedLayer);
-export const useLayersList = () => useStore(useGeoViewStore(), (state) => state.layerState.legendLayers);
+export const useLayerLegendLayers = () => useStore(useGeoViewStore(), (state) => state.layerState.legendLayers);
 export const useLayerSelectedLayer = () => useStore(useGeoViewStore(), (state) => state.layerState.selectedLayer);
-export const useSelectedLayerPath = () => useStore(useGeoViewStore(), (state) => state.layerState.selectedLayerPath);
-export const useLayersDisplayState = () => useStore(useGeoViewStore(), (state) => state.layerState.displayState);
+export const useLayerSelectedLayerPath = () => useStore(useGeoViewStore(), (state) => state.layerState.selectedLayerPath);
+export const useLayerDisplayState = () => useStore(useGeoViewStore(), (state) => state.layerState.displayState);
 
 export const useLayerStoreActions = () => useStore(useGeoViewStore(), (state) => state.layerState.actions);
 
