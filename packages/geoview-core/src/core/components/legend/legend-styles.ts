@@ -6,6 +6,7 @@ export const getSxClasses = (theme: Theme) => ({
     display: 'flex',
     flexDirection: 'column',
     height: '700px',
+    backgroundColor: theme.palette.geoViewColor.bgColor.main,
   },
   title: {
     textAlign: 'left',

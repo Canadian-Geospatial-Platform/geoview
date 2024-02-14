@@ -444,7 +444,7 @@ function DataTable({ data, layerPath, tableHeight = 600 }: DataTableProps) {
       sx: (theme) => ({
         // stripe the rows, make odd rows a darker color
         '& tr:nth-of-type(odd) > td': {
-          backgroundColor: `${darken(theme.palette.background.default, 0.1)}`,
+          backgroundColor: theme.palette.geoViewColor.bgColor.darken(0.1),
         },
         '& tr:hover > td': {
           backgroundColor: theme.palette.secondary.light,

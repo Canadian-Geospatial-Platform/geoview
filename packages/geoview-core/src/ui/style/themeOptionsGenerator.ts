@@ -59,21 +59,20 @@ export const generateThemeOptions = function (geoViewColors: IGeoViewColors = de
       divider: 'rgba(0, 0, 0, 0.12)',
       background: {
         paper: geoViewColors.bgColor.light[600],
-        default: '#fff',
-        // grey: '#eeeeee',
+        default: geoViewColors.bgColor.light[500]
       },
       action: {
-        active: 'rgba(81,91,165, 0.94)',
-        hover: `rgba(81,91,165, ${opacity.hoverOpacity})`,
+        active: geoViewColors.primary.main,
+        hover: geoViewColors.primary.opacity(opacity.hoverOpacity),
         hoverOpacity: opacity.hoverOpacity,
-        selected: `rgba(81,91,165, ${opacity.selectedOpacity})`,
+        selected: geoViewColors.primary.opacity(opacity.selectedOpacity),
         selectedOpacity: opacity.selectedOpacity,
         // hoverRow: `rgba(0, 255, 255, ${opacity.hoverOpacity})`,
         // selectedRow: `rgba(0, 255, 255, ${opacity.selectedOpacity})`,
         disabled: 'rgba(0, 0, 0, 0.26)',
         disabledBackground: `rgba(0, 0, 0, ${opacity.focusOpacity})`,
         disabledOpacity: opacity.disabledOpacity,
-        focus: `rgba(0, 0, 0, ${opacity.focusOpacity})`,
+        focus: geoViewColors.primary.opacity(opacity.focusOpacity),
         focusOpacity: opacity.focusOpacity,
         activatedOpacity: opacity.activatedOpacity,
       },
@@ -179,6 +178,14 @@ export const generateThemeOptions = function (geoViewColors: IGeoViewColors = de
       left: '0%',
     },
     components: {
+      MuiTooltip: {
+        styleOverrides: {
+          tooltip: {
+            backgroundColor: geoViewColors.bgColor.dark[800],
+            color: geoViewColors.bgColor.light[800],
+          },
+        },
+      },
       MuiIconButton: {
         styleOverrides: {
           root: {

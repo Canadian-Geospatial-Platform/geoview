@@ -111,6 +111,7 @@
     "toggleVisibility": "Toggle visibility",
     "toggleCollapse": "Toggle collapse",
     "querying": "Querying",
+    "layerAdded": "Layer __param__ added",
     "instructionsNoLayersTitle": "No layers visible",
     "instructionsNoLayersBody": "Add visible layers on the map."
   },

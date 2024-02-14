@@ -47,7 +47,7 @@ export const getSxClasses = (theme: Theme) => ({
           color: theme.palette.geoViewColor.error.main,
         },
       },
-      '&.loading': {
+      '&.loading, &.processing': {
         background: theme.palette.geoViewColor.info.light[600],
         '& .MuiListItemText-secondary': {
           fontWeight: 'bold',

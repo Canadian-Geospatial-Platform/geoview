@@ -125,7 +125,11 @@ export function FeatureInfoTable({ featureInfoList }: FeatureInfoTableProps): JS
         <Grid
           container
           spacing={5}
-          sx={{ backgroundColor: index % 2 > 0 ? theme.palette.geoViewColor.primary.main : '', marginBottom: '20px' }}
+          sx={{
+            backgroundColor: index % 2 > 0 ? theme.palette.geoViewColor.bgColor.darken(0.1) : '',
+            color: index % 2 > 0 ? theme.palette.geoViewColor.bgColor.darken(0.9) : '',
+            marginBottom: '20px',
+          }}
           key={index}
         >
           <Grid item xs="auto" sx={{ fontWeight: 'bold', width: '80% !important' }}>

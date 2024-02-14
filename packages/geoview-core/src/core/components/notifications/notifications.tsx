@@ -99,7 +99,8 @@ export default function Notifications(): JSX.Element {
           tooltip="appbar.notifications"
           tooltipPlacement="bottom-end"
           onClick={handleOpenPopover}
-          className={open ? 'active' : ''}
+          className={open ? 'style1' : ''}
+          color="primary"
         >
           <NotificationsIcon />
         </IconButton>

@@ -8,7 +8,8 @@ export const getSxClasses = (theme: Theme) => ({
   rightPanelContainer: {
     border: `2px solid ${theme.palette.primary.main}`,
     borderRadius: '5px',
-    backgroundColor: theme.palette.common.white,
+    backgroundColor: theme.palette.geoViewColor.bgColor.light[500],
+    color: theme.palette.geoViewColor.textColor.main,
   },
   footerGuideListItemText: {
     '&:hover': {

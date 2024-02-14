@@ -12,11 +12,11 @@ export const getSxClasses = (theme: Theme) => ({
     width: 'auto',
     backgroundColor: 'transparent !important',
     height: 'inherit !important',
-    color: theme.palette.geoViewColor.white,
+    color: theme.palette.geoViewColor.bgColor.light[800],
     lineHeight: 1.5,
     ':hover': {
       backgroundColor: 'transparent !important',
-      color: theme.palette.geoViewColor.white,
+      color: theme.palette.geoViewColor.bgColor.light[600],
     },
   },
   mousePositionTextContainer: {

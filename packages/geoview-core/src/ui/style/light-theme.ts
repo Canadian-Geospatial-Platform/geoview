@@ -4,7 +4,7 @@ import { GeoViewColorClass, IGeoViewColors } from './types';
 export const lightThemeColors: IGeoViewColors = {
   ...defaultGeoViewColors,
 
-  bgColor: new GeoViewColorClass('#F8F8F8'),
-  primary: new GeoViewColorClass('#515BA5'),
+  bgColor: new GeoViewColorClass('#F9F9F9'),
+  primary: new GeoViewColorClass('#AA4A44'),
   textColor: new GeoViewColorClass('#000000'),
 };

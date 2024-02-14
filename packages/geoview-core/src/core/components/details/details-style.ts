@@ -20,7 +20,7 @@ export const getSxClasses = (theme: Theme) => ({
   rightPanelContainer: {
     border: `2px solid ${theme.palette.geoViewColor.primary.main}`,
     borderRadius: '5px',
-    backgroundColor: theme.palette.geoViewColor.white,
+    color: theme.palette.geoViewColor.textColor.main,
   },
   rightPanelBtnHolder: {
     marginTop: '20px',
@@ -44,6 +44,7 @@ export const getSxClasses = (theme: Theme) => ({
     objectFit: 'scale-down',
     width: '35px',
     height: '35px',
+    marginRight: '10px',
   },
   selectFeatureCheckbox: {
     color: theme.palette.geoViewColor.primary.main,

@@ -184,7 +184,7 @@ export function Appbar(): JSX.Element {
           <Box>
             <List sx={sxClasses.appBarList}>
               <ListItem>
-                <ExportButton className={`${sxClasses.appBarButton} ${activeModalId ? 'export' : ''}`} />
+                <ExportButton className={` ${activeModalId ? 'export' : ''}`} />
               </ListItem>
             </List>
           </Box>
