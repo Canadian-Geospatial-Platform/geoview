@@ -45,7 +45,7 @@ export const getSxClasses = (theme: Theme) => ({
     objectFit: 'scale-down',
     width: '35px',
     height: '35px',
-    marginRight: '10px'
+    marginRight: '10px',
   },
   selectFeatureCheckbox: {
     color: theme.palette.geoViewColor.primary.main,

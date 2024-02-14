@@ -9,7 +9,7 @@ export const getSxClasses = (theme: Theme) => ({
     border: `2px solid ${theme.palette.primary.main}`,
     borderRadius: '5px',
     backgroundColor: theme.palette.geoViewColor.bgColor.light[500],
-    color: theme.palette.geoViewColor.textColor.main
+    color: theme.palette.geoViewColor.textColor.main,
   },
   footerGuideListItemText: {
     '&:hover': {
