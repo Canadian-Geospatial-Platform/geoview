@@ -4773,22 +4773,14 @@ packages:
       execa: 5.1.1
     dev: true
 
-<<<<<<< Updated upstream
   /define-data-property/1.1.3:
     resolution: {integrity: sha512-h3GBouC+RPtNX2N0hHVLo2ZwPYurq8mLmXpOLTsw71gr7lHt5VaI4vVkDUNOfiWmm48JEXe3VM7PmLX45AMmmg==}
-=======
-  /define-data-property/1.1.4:
-    resolution: {integrity: sha512-rBMvIzlpA8v6E+SJZoo++HAYqsLrkg7MSfIinMPFhmkorw7X+dOXVJQs+QT69zGkzMyfDnIMN2Wid1+NbL3T+A==}
->>>>>>> Stashed changes
     engines: {node: '>= 0.4'}
     dependencies:
       es-define-property: 1.0.0
       es-errors: 1.3.0
       gopd: 1.0.1
-<<<<<<< Updated upstream
       has-property-descriptors: 1.0.2
-=======
->>>>>>> Stashed changes
     dev: true
 
   /define-lazy-prop/2.0.0:
@@ -4800,11 +4792,7 @@ packages:
     resolution: {integrity: sha512-8QmQKqEASLd5nx0U1B1okLElbUuuttJ/AnYmRXbbbGDWh6uS208EjD4Xqq/I9wK7u0v6O08XhTWnt5XtEbR6Dg==}
     engines: {node: '>= 0.4'}
     dependencies:
-<<<<<<< Updated upstream
       define-data-property: 1.1.3
-=======
-      define-data-property: 1.1.4
->>>>>>> Stashed changes
       has-property-descriptors: 1.0.2
       object-keys: 1.1.1
     dev: true
@@ -4958,13 +4946,8 @@ packages:
     resolution: {integrity: sha512-WMwm9LhRUo+WUaRN+vRuETqG89IgZphVSNkdFgeb6sS/E4OrDIN7t48CAewSHXc6C8lefD8KKfr5vY61brQlow==}
     dev: true
 
-<<<<<<< Updated upstream
   /electron-to-chromium/1.4.667:
     resolution: {integrity: sha512-66L3pLlWhTNVUhnmSA5+qDM3fwnXsM6KAqE36e2w4KN0g6pkEtlT5bs41FQtQwVwKnfhNBXiWRLPs30HSxd7Kw==}
-=======
-  /electron-to-chromium/1.4.668:
-    resolution: {integrity: sha512-ZOBocMYCehr9W31+GpMclR+KBaDZOoAEabLdhpZ8oU1JFDwIaFY0UDbpXVEUFc0BIP2O2Qn3rkfCjQmMR4T/bQ==}
->>>>>>> Stashed changes
     dev: true
 
   /email-addresses/3.1.0:
@@ -6100,7 +6083,6 @@ packages:
 
   /hasown/2.0.1:
     resolution: {integrity: sha512-1/th4MHjnwncwXsIW6QMzlvYL9kG5e/CpVvLRZe4XPa8TOUNbCELqmvhDmnkNsAjwaG4+I8gJJL0JBvTTLO9qA==}
-    engines: {node: '>= 0.4'}
     dependencies:
       function-bind: 1.1.2
 
@@ -8947,11 +8929,7 @@ packages:
     resolution: {integrity: sha512-j4t6ccc+VsKwYHso+kElc5neZpjtq9EnRICFZtWyBsLojhmeF/ZBd/elqm22WJh/BziDe/SBiOeAt0m2mfLD0g==}
     engines: {node: '>= 0.4'}
     dependencies:
-<<<<<<< Updated upstream
       define-data-property: 1.1.3
-=======
-      define-data-property: 1.1.4
->>>>>>> Stashed changes
       es-errors: 1.3.0
       function-bind: 1.1.2
       get-intrinsic: 1.2.4
@@ -8963,11 +8941,7 @@ packages:
     resolution: {integrity: sha512-tMNCiqYVkXIZgc2Hnoy2IvC/f8ezc5koaRFkCjrpWzGpCd3qbZXPzVy9MAZzK1ch/X0jvSkojys3oqJN0qCmdA==}
     engines: {node: '>= 0.4'}
     dependencies:
-<<<<<<< Updated upstream
       define-data-property: 1.1.3
-=======
-      define-data-property: 1.1.4
->>>>>>> Stashed changes
       functions-have-names: 1.2.3
       has-property-descriptors: 1.0.2
     dev: true
