@@ -154,17 +154,12 @@ export class LegendEventProcessor extends AbstractEventProcessor {
           const legendLayerEntry: TypeLegendLayer = {
             bounds: undefined,
             layerId: layerConfig.layerId,
-            order:
-              api.maps[mapId].layer.initialLayerOrder.indexOf(entryLayerPath) !== -1 && !layerConfig.parentLayerConfig
-                ? api.maps[mapId].layer.initialLayerOrder.indexOf(entryLayerPath)
-                : existingEntries.length,
             // TODO: Why do we have the following line in the store? Do we have to fetch the metadata again since the GeoView layer read and keep them?
             metadataAccessPath: getLocalizedValue(layerConfig.geoviewLayerConfig?.metadataAccessPath, mapId) || '',
             layerPath: entryLayerPath,
             layerStatus: legendResultsSetEntry.layerStatus,
             layerName: getLocalizedValue(layerConfig.layerName, mapId) || layerConfig.layerId,
             type: layerConfig.entryType as TypeGeoviewLayerType,
-            isVisible: layerConfig.initialSettings?.visible ? layerConfig.initialSettings.visible : 'yes',
             canToggle: legendResultsSetEntry.data?.type !== 'esriImage',
             opacity: layerConfig.initialSettings?.opacity ? layerConfig.initialSettings.opacity : 1,
             items: [] as TypeLegendItem[],
@@ -180,10 +175,6 @@ export class LegendEventProcessor extends AbstractEventProcessor {
         const newLegendLayer: TypeLegendLayer = {
           bounds: undefined,
           layerId: layerPathNodes[currentLevel],
-          order:
-            api.maps[mapId].layer.initialLayerOrder.indexOf(entryLayerPath) !== -1 && !layerConfig.parentLayerConfig
-              ? api.maps[mapId].layer.initialLayerOrder.indexOf(entryLayerPath)
-              : existingEntries.length,
           layerPath: entryLayerPath,
           layerAttribution: api.maps[mapId].layer.geoviewLayers[layerPathNodes[0]].attributions,
           // ! Why do we have metadataAccessPath here? Do we need to fetch the metadata again? The GeoView layer fetch them and store them in this.metadata.
@@ -193,7 +184,6 @@ export class LegendEventProcessor extends AbstractEventProcessor {
           querySent: legendResultsSetEntry.querySent,
           styleConfig: legendResultsSetEntry.data?.styleConfig,
           type: legendResultsSetEntry.data?.type,
-          isVisible: layerConfig.initialSettings?.visible || 'yes',
           canToggle: legendResultsSetEntry.data?.type !== 'esriImage',
           opacity: layerConfig.initialSettings?.opacity || 1,
           items: [] as TypeLegendItem[],

@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { EVENT_NAMES } from '@/api/events/event-types';
 import {
   LayerSetPayload,
@@ -137,6 +138,7 @@ export class LayerSet {
                 );
             } else if (action === 'remove' && layerPath in this.resultsSet) {
               delete this.resultsSet[layerPath];
+              MapEventProcessor.removeOrderedLayerInfo(this.mapId, layerPath);
               api.event.emit(LayerSetPayload.createLayerSetUpdatedPayload(this.layerSetId, this.resultsSet, layerPath));
             }
           }

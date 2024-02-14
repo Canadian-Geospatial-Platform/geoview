@@ -34,15 +34,17 @@ export class GeochartEventProcessor extends AbstractEventProcessor {
   protected onInitialize(store: GeoviewStoreType): Array<() => void> | void {
     // Checks for udpated layers in layer order
     const unsubLayerRemoved = store.subscribe(
-      (state) => state.mapState.layerOrder,
+      (state) => state.mapState.orderedLayerInfo,
       (cur, prev) => {
         // Log
-        logger.logTraceCoreStoreSubscription('GEOCHART EVENT PROCESSOR - layerOrder', cur);
+        logger.logTraceCoreStoreSubscription('GEOCHART EVENT PROCESSOR - orderedLayerInfo', cur);
 
         // For each chart config keys
+        const curOrderedLayerPaths = cur.map((layerInfo) => layerInfo.layerPath);
+        const prevOrderedLayerPaths = prev.map((layerInfo) => layerInfo.layerPath);
         Object.keys(store.getState().geochartState.geochartChartsConfig).forEach((layerPath: string) => {
           // If it was in the layerdata array and is not anymore
-          if (prev.includes(layerPath) && !cur.includes(layerPath)) {
+          if (prevOrderedLayerPaths.includes(layerPath) && !curOrderedLayerPaths.includes(layerPath)) {
             // Remove it
             GeochartEventProcessor.removeGeochartChart(store.getState().mapId, layerPath);
 
