@@ -35,7 +35,7 @@ import { TypeCSVLayerConfig, TypeCsvLayerEntryConfig, CSV as CsvGeoviewClass } f
 import { ButtonPropsLayerPanel, SelectChangeEvent, TypeJsonArray, TypeJsonObject } from '@/core/types/global-types';
 import { useGeoViewMapId } from '@/core/stores/geoview-store';
 import { createLocalizedString } from '@/core/utils/utilities';
-import { useLayerStoreActions, useLayersList } from '@/core/stores/store-interface-and-intial-values/layer-state';
+import { useLayerStoreActions, useLayerLegendLayers } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { Cast, Config, api } from '@/app';
 import { logger } from '@/core/utils/logger';
 import { EsriImage, TypeEsriImageLayerConfig } from '@/geo/layer/geoview-layers/raster/esri-image';
@@ -70,7 +70,7 @@ export function AddNewLayer(): JSX.Element {
 
   // get values from store
   const mapId = useGeoViewMapId();
-  const layersList = useLayersList();
+  const layersList = useLayerLegendLayers();
   const { setDisplayState, setSelectedLayerPath } = useLayerStoreActions();
 
   const isMultiple = () => hasMetadata && (layerType === ESRI_DYNAMIC || layerType === WFS || layerType === WMS || layerType === GEOJSON);

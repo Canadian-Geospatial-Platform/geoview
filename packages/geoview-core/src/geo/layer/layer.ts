@@ -4,7 +4,7 @@ import { GeoCore, layerConfigIsGeoCore } from '@/geo/layer/other/geocore';
 import { Geometry } from '@/geo/layer/geometry/geometry';
 import { FeatureHighlight } from '@/geo/utils/feature-highlight';
 
-import { api } from '@/app';
+import { TypeOrderedLayerInfo, api } from '@/app';
 import { EVENT_NAMES } from '@/api/events/event-types';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 
@@ -62,7 +62,7 @@ export class Layer {
   geometry: Geometry | undefined;
 
   // order to load layers
-  initialLayerOrder: string[] = [];
+  initialLayerOrder: Array<TypeOrderedLayerInfo> = [];
 
   /** used to reference the map id */
   private mapId: string;
@@ -197,38 +197,72 @@ export class Layer {
   }
 
   /**
-   * Loads layers that was passed in with the map config
-   *
-   * @param {TypeGeoviewLayerConfig[]} geoviewLayerConfigs an optional array containing layers passed within the map config
+   * Generate an array of layer info for the orderedLayerList.
+   * @param {TypeGeoviewLayerConfig} geoviewLayerConfig The config to get the info from.
+   * @returns {TypeOrderedLayerInfo[]} The array of ordered layer info.
    */
-  loadListOfGeoviewLayer(geoviewLayerConfigs?: TypeGeoviewLayerConfig[]) {
-    const validGeoviewLayerConfigs = this.deleteDuplicatGeoviewLayerConfig(geoviewLayerConfigs);
+  generateArrayOfLayerOrderInfo(geoviewLayerConfig: TypeGeoviewLayerConfig | TypeLayerEntryConfig): TypeOrderedLayerInfo[] {
+    // TODO Add placeholder for geocore and the replacement when the layer is created in geocore.ts
+    if ((geoviewLayerConfig as TypeGeoviewLayerConfig).geoviewLayerType === 'geoCore') return [];
+    const newOrderedLayerInfos = [];
     const addSubLayerPathToLayerOrder = (layerEntryConfig: TypeLayerEntryConfig, layerPath: string): void => {
-      const subLayerPath = `${layerPath}/${layerEntryConfig.layerId}`;
-      this.initialLayerOrder.push(subLayerPath);
+      const subLayerPath = layerPath.endsWith(layerEntryConfig.layerId) ? layerPath : `${layerPath}/${layerEntryConfig.layerId}`;
+      const layerInfo: TypeOrderedLayerInfo = {
+        layerPath: subLayerPath,
+        alwaysVisible: layerEntryConfig.initialSettings?.visible === 'always',
+        visible: layerEntryConfig.initialSettings?.visible !== 'no',
+        removable: layerEntryConfig.initialSettings?.removable !== undefined ? layerEntryConfig.initialSettings?.removable : true,
+        queryable: layerEntryConfig.source?.featureInfo?.queryable !== undefined ? layerEntryConfig.source?.featureInfo?.queryable : true,
+        hoverable: layerEntryConfig.initialSettings?.hoverable !== undefined ? layerEntryConfig.initialSettings?.hoverable : true,
+      };
+      newOrderedLayerInfos.push(layerInfo);
       if (layerEntryConfig.listOfLayerEntryConfig?.length) {
         layerEntryConfig.listOfLayerEntryConfig?.forEach((subLayerEntryConfig) => {
           addSubLayerPathToLayerOrder(subLayerEntryConfig, subLayerPath);
         });
       }
     };
-
-    // set order for layers to appear on the map according to config
-    validGeoviewLayerConfigs.forEach((geoviewLayerConfig) => {
-      let layerPath = '';
-      if (geoviewLayerConfig.listOfLayerEntryConfig.length > 1) {
-        layerPath = `${geoviewLayerConfig.geoviewLayerId}/${geoviewLayerConfig.geoviewLayerId}`;
-        this.initialLayerOrder.push(layerPath);
-        geoviewLayerConfig.listOfLayerEntryConfig.forEach((layerEntryConfig) => {
+    if ((geoviewLayerConfig as TypeGeoviewLayerConfig).geoviewLayerId) {
+      if ((geoviewLayerConfig as TypeGeoviewLayerConfig).listOfLayerEntryConfig.length > 1) {
+        const layerPath = `${(geoviewLayerConfig as TypeGeoviewLayerConfig).geoviewLayerId}/${
+          (geoviewLayerConfig as TypeGeoviewLayerConfig).geoviewLayerId
+        }`;
+        const layerInfo: TypeOrderedLayerInfo = {
+          layerPath,
+          alwaysVisible: geoviewLayerConfig.initialSettings?.visible === 'always',
+          visible: geoviewLayerConfig.initialSettings?.visible !== 'no',
+          removable: geoviewLayerConfig.initialSettings?.removable !== undefined ? geoviewLayerConfig.initialSettings?.removable : true,
+        };
+        newOrderedLayerInfos.push(layerInfo);
+        (geoviewLayerConfig as TypeGeoviewLayerConfig).listOfLayerEntryConfig.forEach((layerEntryConfig) => {
           addSubLayerPathToLayerOrder(layerEntryConfig, layerPath);
         });
       } else {
-        layerPath = `${geoviewLayerConfig.geoviewLayerId}/${geoviewLayerConfig.listOfLayerEntryConfig[0].layerId}`;
-        this.initialLayerOrder.push(layerPath);
+        const layerEntryConfig = (geoviewLayerConfig as TypeGeoviewLayerConfig).listOfLayerEntryConfig[0];
+        addSubLayerPathToLayerOrder(layerEntryConfig, layerEntryConfig.layerPath);
       }
+    } else addSubLayerPathToLayerOrder(geoviewLayerConfig as TypeLayerEntryConfig, (geoviewLayerConfig as TypeLayerEntryConfig).layerPath);
+
+    return newOrderedLayerInfos;
+  }
+
+  /**
+   * Load layers that was passed in with the map config
+   *
+   * @param {TypeGeoviewLayerConfig[]} geoviewLayerConfigs an optional array containing layers passed within the map config
+   */
+  loadListOfGeoviewLayer(geoviewLayerConfigs?: TypeGeoviewLayerConfig[]) {
+    const validGeoviewLayerConfigs = this.deleteDuplicatGeoviewLayerConfig(geoviewLayerConfigs);
+
+    // set order for layers to appear on the map according to config
+    const orderedLayerInfos: TypeOrderedLayerInfo[] = [];
+    validGeoviewLayerConfigs.forEach((geoviewLayerConfig) => {
+      const layerInfos = this.generateArrayOfLayerOrderInfo(geoviewLayerConfig);
+      orderedLayerInfos.push(...layerInfos);
 
       api.event.emit(layerConfigPayload(EVENT_NAMES.LAYER.EVENT_ADD_LAYER, this.mapId, geoviewLayerConfig));
     });
+    MapEventProcessor.setMapOrderedLayerInfo(this.mapId, orderedLayerInfos);
   }
 
   /**
@@ -384,7 +418,12 @@ export class Layer {
       api.maps[this.mapId].setLayerAddedListener4ThisListOfLayer([geoviewLayerConfig]);
       api.event.emit(layerConfigPayload(EVENT_NAMES.LAYER.EVENT_ADD_LAYER, this.mapId, geoviewLayerConfig));
     }
-
+    if (
+      geoviewLayerConfig.listOfLayerEntryConfig[0].layerPath === undefined ||
+      MapEventProcessor.getMapIndexFromOrderedLayerInfo(this.mapId, geoviewLayerConfig.listOfLayerEntryConfig[0].layerPath) === -1
+    ) {
+      MapEventProcessor.addOrderedLayerInfo(this.mapId, geoviewLayerConfig);
+    }
     return geoviewLayerConfig.geoviewLayerId;
   };
 
