@@ -93,9 +93,7 @@ export class ConfigValidation {
     overviewMap: undefined,
     serviceUrls: {
       keys: 'https://geocore.api.geo.ca',
-      // TODO: update when new api is available,right now it is dev version.
-      // geolocator: 'https://geolocator.api.geo.ca?keys=geonames,nominatim,locate', prod url
-      geolocator: 'https://yh57qxljujd5dj33pqqahfjhyu0amqtn.lambda-url.ca-central-1.on.aws/?keys=geonames,nominatim,locate',
+      geolocator: 'https://geolocator.api.geo.ca?keys=geonames,nominatim,locate',
     },
     displayLanguage: 'en',
     triggerReadyCallback: false,

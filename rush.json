@@ -1,7 +1,8 @@
 {
   "$schema": "https://developer.microsoft.com/json-schemas/rush/v5/rush.schema.json",
-  "rushVersion": "5.62.3",
-  "pnpmVersion": "7.26.0",
+  "rushVersion": "5.113.4",
+  "pnpmVersion": "8.15.2",
+  "nodeSupportedVersionRange": ">=20.11.0 <21.8.0",
   "pnpmOptions": {
     "strictPeerDependencies": false,
     "useWorkspaces": true
