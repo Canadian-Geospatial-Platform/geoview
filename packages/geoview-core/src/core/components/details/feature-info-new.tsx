@@ -110,10 +110,11 @@ export function FeatureInfo({ features, currentFeatureIndex }: TypeFeatureInfoPr
       >
         {/* Left box - feature icon and feature name */}
         <Box sx={sxClasses.flexBoxAlignCenter}>
-          <img
+          <Box
+            component="img"
             src={featureIconSrc}
             alt={nameFieldValue}
-            style={{ ...theme.iconImage, marginRight: '5px', width: '35px', height: '35px' }}
+            sx={sxClasses.featureInfoSingleImage}
           />
           <Typography sx={{ display: 'inline-block' }} component="div">
             {nameFieldValue}
