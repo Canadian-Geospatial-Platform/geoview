@@ -59,7 +59,7 @@ export const generateThemeOptions = function (geoViewColors: IGeoViewColors = de
       divider: 'rgba(0, 0, 0, 0.12)',
       background: {
         paper: geoViewColors.bgColor.light[600],
-        default: '#fff',
+        default: geoViewColors.bgColor.light[500],
         // grey: '#eeeeee',
       },
       action: {
@@ -73,7 +73,7 @@ export const generateThemeOptions = function (geoViewColors: IGeoViewColors = de
         disabled: 'rgba(0, 0, 0, 0.26)',
         disabledBackground: `rgba(0, 0, 0, ${opacity.focusOpacity})`,
         disabledOpacity: opacity.disabledOpacity,
-        focus: `rgba(0, 0, 0, ${opacity.focusOpacity})`,
+        focus: geoViewColors.primary.opacity(opacity.focusOpacity), 
         focusOpacity: opacity.focusOpacity,
         activatedOpacity: opacity.activatedOpacity,
       },
@@ -179,6 +179,14 @@ export const generateThemeOptions = function (geoViewColors: IGeoViewColors = de
       left: '0%',
     },
     components: {
+      MuiTooltip: {
+        styleOverrides: {
+          tooltip: {
+            backgroundColor: geoViewColors.bgColor.dark[800],
+            color: geoViewColors.bgColor.light[800],
+          },
+        },
+      },
       MuiIconButton: {
         styleOverrides: {
           root: {
