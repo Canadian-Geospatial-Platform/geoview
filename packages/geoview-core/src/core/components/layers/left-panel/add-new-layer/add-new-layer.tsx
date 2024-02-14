@@ -866,10 +866,21 @@ export function AddNewLayer(): JSX.Element {
       } else emitErrorNotLoaded();
     }
     setIsLoading(false);
-    setSelectedLayerPath(`${geoviewLayerInstance?.geoviewLayerId}/${geoviewLayerInstance?.geoviewLayerId}`);
-    setDisplayState('view');
-    const message = api.utilities.replaceParams([layerName], t('layers.layerAdded'));
+    let message = '';
+    switch(geoviewLayerInstance?.layerPhase) {
+      case 'loading':
+        message = api.utilities.replaceParams([layerName], t('layers.layerAddedAndLoading'));
+        break;
+      case 'error':
+        message = api.utilities.replaceParams([layerName], t('layers.layerAddedWithError'));
+        break;
+      default:
+        setSelectedLayerPath(`${geoviewLayerInstance?.geoviewLayerId}/${geoviewLayerInstance?.geoviewLayerId}`);
+        message = api.utilities.replaceParams([layerName], t('layers.layerAdded'));
+        break;
+    }
     api.utilities.showMessage(mapId, message, false);
+    setDisplayState('view');
   };
 
   /**
