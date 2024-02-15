@@ -108,6 +108,9 @@ export function Panel(props: TypePanelAppProps): JSX.Element {
   };
 
   const panelChangeContentListenerFunction = (payload: PayloadBaseClass) => {
+    // Log
+    logger.logTraceCoreAPIEvent('UI.PANEL - panelChangeContentListenerFunction', payload);
+
     if (payloadIsAPanelContent(payload)) {
       // set focus on close button on panel content change
       setTimeout(() => {
@@ -120,10 +123,14 @@ export function Panel(props: TypePanelAppProps): JSX.Element {
     }
   };
 
+  // TODO: Check - This is probably not at the right place. This handler will be 'added' on every render and the single removal (in the useEffect unmount) likely isn't enough to remove them all
   // listen to change panel content and rerender right after the panel has been created
   api.event.on(EVENT_NAMES.PANEL.EVENT_PANEL_CHANGE_CONTENT, panelChangeContentListenerFunction, `${mapId}/${button.id!}`);
 
   const openPanelListenerFunction = (payload: PayloadBaseClass) => {
+    // Log
+    logger.logTraceCoreAPIEvent('UI.PANEL - openPanelListenerFunction', payload);
+
     if (payloadHasAButtonIdAndType(payload)) {
       // set focus on close button on panel open
       setPanelStatus(true);
@@ -142,14 +149,23 @@ export function Panel(props: TypePanelAppProps): JSX.Element {
   };
 
   const closePanelListenerFunction = (payload: PayloadBaseClass) => {
+    // Log
+    logger.logTraceCoreAPIEvent('UI.PANEL - closePanelListenerFunction', payload);
+
     if (payloadHasAButtonIdAndType(payload)) closePanel();
   };
 
   const closeAllPanelListenerFunction = (payload: PayloadBaseClass) => {
+    // Log
+    logger.logTraceCoreAPIEvent('UI.PANEL - closeAllPanelListenerFunction', payload);
+
     if (payloadHasAButtonIdAndType(payload)) setPanelStatus(false);
   };
 
   const panelAddActionListenerFunction = (payload: PayloadBaseClass) => {
+    // Log
+    logger.logTraceCoreAPIEvent('UI.PANEL - panelAddActionListenerFunction', payload);
+
     if (payloadIsAPanelAction(payload)) {
       if (payload.buttonId === button.id!) {
         const { actionButton } = payload;
@@ -182,6 +198,9 @@ export function Panel(props: TypePanelAppProps): JSX.Element {
   };
 
   const panelRemoveActionListenerFunction = (payload: PayloadBaseClass) => {
+    // Log
+    logger.logTraceCoreAPIEvent('UI.PANEL - panelRemoveActionListenerFunction', payload);
+
     if (payloadIsAPanelAction(payload)) {
       if (payload.buttonId === button.id!) {
         setActionButtons((list) =>
@@ -195,7 +214,7 @@ export function Panel(props: TypePanelAppProps): JSX.Element {
 
   useEffect(() => {
     // Log
-    logger.logTraceUseEffect('PANEL - mount');
+    logger.logTraceUseEffect('UI.PANEL - mount');
 
     // if the panel was still open on reload then close it
     if (panel.status) {
@@ -231,7 +250,7 @@ export function Panel(props: TypePanelAppProps): JSX.Element {
 
   useEffect(() => {
     // Log
-    logger.logTraceUseEffect('PANEL - button', button);
+    logger.logTraceUseEffect('UI.PANEL - button', button);
 
     // set focus on close button on panel open
     if (closeBtnRef && closeBtnRef.current) if (button.visible) Cast<HTMLElement>(closeBtnRef.current).focus();

@@ -46,6 +46,9 @@ export function unmountMap(mapId: string) {
  */
 export function addReloadListener(mapId: string) {
   const reloadHandler = (payload: types.PayloadBaseClass) => {
+    // Log
+    logger.logTraceCoreAPIEvent('APP - reloadHandler', payload);
+
     if (payloadIsAmapFeaturesConfig(payload)) {
       const { mapFeaturesConfig } = payload;
       if (mapFeaturesConfig) {
@@ -98,8 +101,13 @@ async function renderMap(mapElement: Element): Promise<void> {
     reactRoot[mapId] = createRoot(mapElement!);
     addReloadListener(mapId);
 
-    // TODO: Refactor - Activate <React.StrictMode>
+    // TODO: Refactor #1810 - Activate <React.StrictMode>
     reactRoot[mapId].render(<AppStart mapFeaturesConfig={configObj} />);
+    // reactRoot[mapId].render(
+    //   <React.StrictMode>
+    //     <AppStart mapFeaturesConfig={configObj} />
+    //   </React.StrictMode>
+    // );
   }
 }
 

@@ -45,6 +45,9 @@ export function ClickMarker(): JSX.Element {
     const unsubMapSingleClick = getGeoViewStore(mapId).subscribe(
       (state) => state.mapState.clickCoordinates,
       (curClick, prevClick) => {
+        // Log
+        logger.logTraceCoreStoreSubscription('CLICK-MARKER - clickCoordinates', curClick);
+
         if (curClick !== prevClick) {
           markerCoordinates.current = curClick!.lnglat;
           showClickMarker({ lnglat: curClick!.lnglat });

@@ -61,7 +61,7 @@ export abstract class FooterPlugin extends AbstractPlugin {
    */
   onSelected(): void {
     // Log
-    logger.logTraceCore('footer-plugin.onSelected');
+    logger.logTraceCore('FOOTER-PLUGIN - onSelected');
 
     // TODO: Refactor - Move 'onSelected' in AbstractPlugin class so that AppBar can eventually benefit as well?
 
