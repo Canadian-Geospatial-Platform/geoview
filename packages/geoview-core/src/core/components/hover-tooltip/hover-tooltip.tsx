@@ -147,7 +147,7 @@ export function HoverTooltip(): JSX.Element {
         visibility: showTooltip ? 'visible' : 'hidden',
       }}
     >
-      <img alt={t('hovertooltip.alticon')!} src={tooltipIcon} style={{ ...theme.iconImage, width: '35px', height: '35px' }} />
+      <Box component='img' className='layer-icon' alt={t('hovertooltip.alticon')!} src={tooltipIcon} />
       <Box sx={sxClasses.tooltipText}>{tooltipValue}</Box>
     </Box>
   );

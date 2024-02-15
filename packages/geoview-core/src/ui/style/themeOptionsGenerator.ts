@@ -1,6 +1,7 @@
 import { ThemeOptions } from '@mui/material';
 import { IGeoViewColors } from './types';
 import { font, headingStyles, opacity, geoViewColors as defaultGeoViewColors, geoViewFontSizes } from './default';
+import { globalStyleOverrides } from './global-style-overrides';
 
 export const generateThemeOptions = function (geoViewColors: IGeoViewColors = defaultGeoViewColors): ThemeOptions {
   const themeOptions: ThemeOptions = {
@@ -59,7 +60,7 @@ export const generateThemeOptions = function (geoViewColors: IGeoViewColors = de
       divider: 'rgba(0, 0, 0, 0.12)',
       background: {
         paper: geoViewColors.bgColor.light[600],
-        default: geoViewColors.bgColor.light[500]
+        default: geoViewColors.bgColor.light[500],
       },
       action: {
         active: geoViewColors.primary.main,
@@ -178,6 +179,9 @@ export const generateThemeOptions = function (geoViewColors: IGeoViewColors = de
       left: '0%',
     },
     components: {
+      MuiCssBaseline: {
+        styleOverrides: globalStyleOverrides(geoViewColors),
+      },
       MuiTooltip: {
         styleOverrides: {
           tooltip: {

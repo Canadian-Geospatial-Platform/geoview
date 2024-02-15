@@ -34,18 +34,6 @@ export const getSxClasses = (theme: Theme) => ({
     overflowY: 'auto',
     overflowX: 'hidden',
   },
-  featureInfoSingleImage: {
-    padding: 3,
-    borderRadius: 0,
-    border: '1px solid',
-    borderColor: theme.palette.geoViewColor.grey.dark[100],
-    boxShadow: 2,
-    background: theme.palette.geoViewColor.white,
-    objectFit: 'scale-down',
-    width: '35px',
-    height: '35px',
-    marginRight: '10px',
-  },
   selectFeatureCheckbox: {
     color: theme.palette.geoViewColor.primary.main,
     '&.Mui-checked': {
@@ -56,7 +44,7 @@ export const getSxClasses = (theme: Theme) => ({
     marginRight: 0,
     wordBreak: 'break-word',
     overflow: 'hidden',
-    textOverflow: 'ellipsis',
+    textOverflow: 'ellipsis'
   },
   boxContainerFeatureInfo: {
     wordWrap: 'break-word',
