@@ -8,7 +8,7 @@ function sleep(milliseconds) {
 }
 
 function createCodeSnippet() {
-  sleep(1000);
+  sleep(500);
 
   const scripts = Array.prototype.filter.call(document.getElementsByTagName('script'), (obj) => {
     return obj.getAttribute('id') === null;
@@ -27,7 +27,7 @@ function createCodeSnippet() {
 }
 
 function createCodeSnippetUsingIDs() {
-  sleep(1000);
+  sleep(500);
 
   // Enhanced code snippet generator which allows to associate a script id with a code snippet script (og function is using indexes)
   // and write down different code snippet spreaded in the dom tree (og function always reuses 'script' variable which is the last script tag found in the dom)
@@ -48,7 +48,7 @@ function createCodeSnippetUsingIDs() {
 }
 
 function createConfigSnippet() {
-  sleep(1000);
+  sleep(500);
 
   let j = 0;
   // inject configuration snippet inside panel

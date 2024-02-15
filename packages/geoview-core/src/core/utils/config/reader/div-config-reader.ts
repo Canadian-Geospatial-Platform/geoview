@@ -2,6 +2,7 @@
 import { TypeMapFeaturesConfig } from '@/core/types/global-types';
 import { isJsonString, removeCommentsFromJSON } from '../../utilities';
 import { logger } from '@/core/utils/logger';
+import { api } from '@/app';
 
 // ******************************************************************************************************************************
 // ******************************************************************************************************************************
@@ -45,6 +46,7 @@ export class InlineDivConfigReader {
 
       if (!isJsonString(configObjStr)) {
         logger.logWarning(`- Map: ${mapId} - Invalid JSON configuration object in div, a fallback strategy will be used -`);
+        api.utilities.showError(mapId, api.utilities.getLocalizedMessage(mapId, 'validation.invalidConfig'), true);
       } else {
         mapConfig = { ...JSON.parse(configObjStr) };
       }
