@@ -1659,7 +1659,7 @@ export type TypeAppBarProps = {
     core: TypeValidAppBarCoreProps;
   };
 };
-export type TypeValidAppBarCoreProps = Array<'geolocator' | 'export' | 'basemap-panel' | 'geochart'>;
+export type TypeValidAppBarCoreProps = Array<'geolocator' | 'export' | 'basemap-panel' | 'geochart' | 'guide' | 'legend'>;
 
 /** ******************************************************************************************************************************
  * Configuration available for the footer bar component.

@@ -163,7 +163,6 @@ export function Panel(props: TypePanelAppProps): JSX.Element {
             id={actionButton.actionButtonId}
             aria-label={actionButton.title}
             onClick={Cast<React.MouseEventHandler>(actionButton.action)}
-            size="small"
           >
             {typeof actionButton.children === 'string' ? (
               <HtmlToReact

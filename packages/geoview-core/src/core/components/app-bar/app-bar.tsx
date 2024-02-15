@@ -1,13 +1,14 @@
+import { useTranslation } from 'react-i18next';
 import { useState, useRef, useEffect, useCallback, Fragment } from 'react';
 
 import { useTheme } from '@mui/material/styles';
-import { Box, List, ListItem, Panel, IconButton } from '@/ui';
+import { Box, List, ListItem, Panel, IconButton, TypeIconButtonProps, SchoolIcon } from '@/ui';
 
 import { AbstractPlugin, TypeJsonObject, TypeJsonValue, api, toJsonObject, useGeoViewMapId } from '@/app';
 import { EVENT_NAMES } from '@/api/events/event-types';
 
 import { payloadIsAButtonPanel, ButtonPanelPayload, PayloadBaseClass } from '@/api/events/payloads';
-import { TypeButtonPanel } from '@/ui/panel/panel-types';
+import { TypeButtonPanel, TypePanelProps } from '@/ui/panel/panel-types';
 
 import ExportButton from '@/core/components/export/export-modal-button';
 import Geolocator from './buttons/geolocator';
@@ -18,6 +19,7 @@ import { useUIActiveFocusItem, useUIAppbarComponents } from '@/core/stores/store
 import { useMapInteraction, useMapStoreActions } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { useGeoViewConfig } from '@/core/stores/geoview-store';
 import { logger } from '@/core/utils/logger';
+import { GuidePanel } from '../guide/guide-panel';
 
 /**
  * Create an app-bar with buttons that can open a panel
@@ -25,6 +27,7 @@ import { logger } from '@/core/utils/logger';
 export function Appbar(): JSX.Element {
   // Log
   logger.logTraceRender('components/app-bar/app-bar');
+  const { t } = useTranslation();
 
   const mapId = useGeoViewMapId();
 
@@ -128,6 +131,31 @@ export function Appbar(): JSX.Element {
         });
     }
   }, [appBarConfig, mapId]);
+
+  useEffect(() => {
+    if (appBarConfig?.tabs.core.includes('guide')) {
+      const button: TypeIconButtonProps = {
+        id: 'AppbarPanelButtonGuide',
+        tooltip: t('guide.title')!,
+        tooltipPlacement: 'bottom',
+        children: <SchoolIcon />,
+      };
+
+      const panel: TypePanelProps = {
+        panelId: 'AppbarGuidePanelId',
+        type: 'app-bar',
+        title: 'Guide',
+        icon: <SchoolIcon />,
+        content: <GuidePanel fullWidth />,
+        width: 400,
+        panelStyles: {
+          panelCardContent: { padding: '0' },
+        },
+      };
+      api.maps[mapId].appBarButtons.createAppbarPanel(button, panel, null);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [appBarConfig?.tabs.core, mapId]);
 
   return (
     <Box sx={sxClasses.appBar} ref={appBar}>

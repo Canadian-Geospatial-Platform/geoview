@@ -18,9 +18,10 @@ interface LayoutProps {
   selectedLayerPath: string | undefined;
   onLayerListClicked: (layer: LayerListEntry) => void;
   onIsEnlargeClicked?: (isEnlarge: boolean) => void;
+  fullWidth?: boolean;
 }
 
-export function Layout({ children, layerList, selectedLayerPath, onLayerListClicked, onIsEnlargeClicked }: LayoutProps) {
+export function Layout({ children, layerList, selectedLayerPath, onLayerListClicked, onIsEnlargeClicked, fullWidth }: LayoutProps) {
   const { t } = useTranslation<string>();
 
   const theme = useTheme();
@@ -79,21 +80,23 @@ export function Layout({ children, layerList, selectedLayerPath, onLayerListClic
     );
   }, [isEnlarged, selectedLayerPath, layerList, handleLayerChange]);
 
-  // If we're on mobile
-  if (theme.breakpoints.down('md')) {
-    // If there are no layers and not already showing the right-side panel
-    if (!layerList.length && !isLayersPanelVisible) {
-      setIsLayersPanelVisible(true);
-    }
-  }
-
+  // // If we're on mobile
+  // if (theme.breakpoints.down('md')) {
+  //   // If there are no layers and not already showing the right-side panel
+  //   if (!layerList.length && !isLayersPanelVisible) {
+  //     setIsLayersPanelVisible(true);
+  //   }
+  // }
+  console.log('layerList', layerList, selectedLayerPath);
   return (
     <Box sx={sxClasses.detailsContainer}>
       <ResponsiveGrid.Root sx={{ pt: 8, pb: 8 }} ref={panelTitleRef}>
-        <ResponsiveGrid.Left isLayersPanelVisible={isLayersPanelVisible} isEnlarged={isEnlarged}>
-          {!!layerList.length && <LayerTitle>{t('general.layers')}</LayerTitle>}
-        </ResponsiveGrid.Left>
-        <ResponsiveGrid.Right isLayersPanelVisible={isLayersPanelVisible} isEnlarged={isEnlarged}>
+        {!fullWidth && (
+          <ResponsiveGrid.Left isLayersPanelVisible={isLayersPanelVisible} isEnlarged={isEnlarged}>
+            {!!layerList.length && <LayerTitle>{t('general.layers')}</LayerTitle>}
+          </ResponsiveGrid.Left>
+        )}
+        <ResponsiveGrid.Right isLayersPanelVisible={isLayersPanelVisible} isEnlarged={isEnlarged} fullWidth={fullWidth}>
           <Box
             sx={{
               display: 'flex',
@@ -102,21 +105,28 @@ export function Layout({ children, layerList, selectedLayerPath, onLayerListClic
               [theme.breakpoints.down('md')]: { justifyContent: 'space-between' },
             }}
           >
-            <LayerTitle hideTitle>{layerList.find((layer) => layer.layerPath === selectedLayerPath)?.layerName ?? ''}</LayerTitle>
+            <LayerTitle hideTitle fullWidth={fullWidth}>
+              {layerList.find((layer) => layer.layerPath === selectedLayerPath)?.layerName ?? ''}
+            </LayerTitle>
+
             <Box>
-              <EnlargeButton isEnlarged={isEnlarged} onSetIsEnlarged={handleIsEnlarge} />
-              {(!theme.breakpoints.down('md') || (theme.breakpoints.down('md') && !!layerList.length)) && (
-                <CloseButton isLayersPanelVisible={isLayersPanelVisible} onSetIsLayersPanelVisible={setIsLayersPanelVisible} />
+              {!fullWidth && <EnlargeButton isEnlarged={isEnlarged} onSetIsEnlarged={handleIsEnlarge} />}
+              {!!layerList.length && (
+                <CloseButton
+                  isLayersPanelVisible={isLayersPanelVisible}
+                  onSetIsLayersPanelVisible={setIsLayersPanelVisible}
+                  fullWidth={fullWidth}
+                />
               )}
             </Box>
           </Box>
         </ResponsiveGrid.Right>
       </ResponsiveGrid.Root>
       <ResponsiveGrid.Root>
-        <ResponsiveGrid.Left ref={leftPanelRef} isEnlarged={isEnlarged} isLayersPanelVisible={isLayersPanelVisible}>
+        <ResponsiveGrid.Left ref={leftPanelRef} isEnlarged={isEnlarged} isLayersPanelVisible={isLayersPanelVisible} fullWidth={fullWidth}>
           {renderLayerList()}
         </ResponsiveGrid.Left>
-        <ResponsiveGrid.Right ref={rightPanelRef} isEnlarged={isEnlarged} isLayersPanelVisible={isLayersPanelVisible}>
+        <ResponsiveGrid.Right ref={rightPanelRef} isEnlarged={isEnlarged} isLayersPanelVisible={isLayersPanelVisible} fullWidth={fullWidth}>
           {children}
         </ResponsiveGrid.Right>
       </ResponsiveGrid.Root>
@@ -127,4 +137,5 @@ export function Layout({ children, layerList, selectedLayerPath, onLayerListClic
 Layout.defaultProps = {
   children: null,
   onIsEnlargeClicked: undefined,
+  fullWidth: false,
 };
