@@ -62,14 +62,10 @@ export class LegendsLayerSet {
     api.event.on(
       EVENT_NAMES.LAYER_SET.UPDATED,
       (layerUpdatedPayload) => {
-        if (payloadIsLayerSetUpdated(layerUpdatedPayload)) {
-          // Log
-          logger.logTraceDetailed(
-            'legends-layer-set on EVENT_NAMES.LAYER_SET.UPDATED (LegendsLayerSetStatusChanged)',
-            this.mapId,
-            layerUpdatedPayload
-          );
+        // Log
+        logger.logTraceCoreAPIEvent('LEGENDS-LAYER-SET - UPDATED (LegendsLayerSetStatusChanged)', this.mapId, layerUpdatedPayload);
 
+        if (payloadIsLayerSetUpdated(layerUpdatedPayload)) {
           const { layerPath, resultsSet } = layerUpdatedPayload;
           api.event.emit(GetLegendsPayload.createLegendsLayersetUpdatedPayload(`${this.mapId}/LegendsLayerSet`, layerPath, resultsSet));
         }
@@ -77,15 +73,32 @@ export class LegendsLayerSet {
       `${mapId}/LegendsLayerSetStatusChanged`
     );
 
+    api.event.on(
+      EVENT_NAMES.LAYER_SET.UPDATED,
+      (layerUpdatedPayload) => {
+        // Log
+        logger.logTraceCoreAPIEvent('LEGENDS-LAYER-SET - UPDATED (LegendsLayerSet)', this.mapId, layerUpdatedPayload);
+
+        if (payloadIsLayerSetUpdated(layerUpdatedPayload)) {
+          const { layerPath, resultsSet } = layerUpdatedPayload;
+          if (resultsSet[layerPath]?.layerStatus === 'processed' && !(resultsSet as TypeLegendResultsSet)[layerPath].querySent) {
+            api.event.emit(GetLegendsPayload.createQueryLegendPayload(`${this.mapId}/${layerPath}`, layerPath));
+            this.resultsSet[layerPath].querySent = true;
+          }
+        }
+      },
+      `${mapId}/LegendsLayerSet`
+    );
+
     // This listener receives the legend information returned by the layer's getLegend call and store it in the resultsSet.
     // Every time a registered layer changes, an EVENT_NAMES.GET_LEGENDS.LEGENDS_LAYERSET_UPDATED event is triggered.
     api.event.on(
       EVENT_NAMES.GET_LEGENDS.LEGEND_INFO,
       (payload) => {
-        if (payloadIsLegendInfo(payload)) {
-          // Log
-          logger.logTraceDetailed('legends-layer-set on EVENT_NAMES.GET_LEGENDS.LEGEND_INFO', this.mapId, payload);
+        // Log
+        logger.logTraceCoreAPIEvent('LEGENDS-LAYER-SET - LEGEND_INFO', this.mapId, payload);
 
+        if (payloadIsLegendInfo(payload)) {
           const { layerPath, legendInfo } = payload;
           if (layerPath in this.resultsSet) {
             this.resultsSet[layerPath].data = legendInfo;
@@ -97,23 +110,6 @@ export class LegendsLayerSet {
         }
       },
       this.mapId
-    );
-
-    api.event.on(
-      EVENT_NAMES.LAYER_SET.UPDATED,
-      (layerUpdatedPayload) => {
-        if (payloadIsLayerSetUpdated(layerUpdatedPayload)) {
-          // Log
-          logger.logTraceDetailed('legends-layer-set on EVENT_NAMES.LAYER_SET.UPDATED (LegendsLayerSet)', this.mapId, layerUpdatedPayload);
-
-          const { layerPath, resultsSet } = layerUpdatedPayload;
-          if (resultsSet[layerPath]?.layerStatus === 'processed' && !(resultsSet as TypeLegendResultsSet)[layerPath].querySent) {
-            api.event.emit(GetLegendsPayload.createQueryLegendPayload(`${this.mapId}/${layerPath}`, layerPath));
-            this.resultsSet[layerPath].querySent = true;
-          }
-        }
-      },
-      `${mapId}/LegendsLayerSet`
     );
   }
 
