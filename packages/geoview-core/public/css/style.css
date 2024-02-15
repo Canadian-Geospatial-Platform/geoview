@@ -12,6 +12,7 @@ html {
 body {
   margin: 0;
   padding: 50px;
+  background-color: #ffffff !important;
 }
 
 td {

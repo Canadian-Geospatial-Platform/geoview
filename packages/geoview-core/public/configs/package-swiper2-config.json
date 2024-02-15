@@ -20,7 +20,7 @@
         "metadataAccessPath": {
           "en": "https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/historical_flood_event_en/MapServer/"
         },
-        "geoviewLayerType": "esriDynamic",
+        "geoviewLayerType": "esriFeature",
         "listOfLayerEntryConfig": [
           {
             "layerId": "0"
