@@ -18,8 +18,14 @@ export const LOG_TRACE_USE_EFFECT_UNMOUNT = 2;
 export const LOG_TRACE_RENDER = 3;
 // For tracing useCallback. Disabled by default. Only shows if running in dev environment or GEOVIEW_LOG_ACTIVE key is set in local storage.
 export const LOG_TRACE_USE_CALLBACK = 4;
+// For tracing useMemo. Disabled by default. Only shows if running in dev environment or GEOVIEW_LOG_ACTIVE key is set in local storage.
+export const LOG_TRACE_USE_MEMO = 5;
 // For tracing useEffect mounting. Disabled by default. Only shows if running in dev environment or GEOVIEW_LOG_ACTIVE key is set in local storage.
-export const LOG_TRACE_USE_EFFECT = 5;
+export const LOG_TRACE_USE_EFFECT = 6;
+// For tracing store subscription events. Disabled by default. Only shows if running in dev environment or GEOVIEW_LOG_ACTIVE key is set in local storage.
+export const LOG_TRACE_CORE_STORE_SUBSCRIPTION = 8;
+// For tracing api events. Disabled by default. Only shows if running in dev environment or GEOVIEW_LOG_ACTIVE key is set in local storage.
+export const LOG_TRACE_CORE_API_EVENT = 9;
 // For tracing core functions. Disabled by default. Only shows if running in dev environment or GEOVIEW_LOG_ACTIVE key is set in local storage.
 export const LOG_TRACE_CORE = 10;
 // Default. For debugging and development. Enabled by default. Only shows if running in dev environment or GEOVIEW_LOG_ACTIVE key is set in local storage.
@@ -35,7 +41,7 @@ export const LOG_ERROR = 50;
 
 The `logger` is active when (1) running in dev environment or (2) the local storage `GEOVIEW_LOG_ACTIVE` key is set.
 
-The `logger` singleton is created using the logging level specified by the local storage `GEOVIEW_LOG_LEVEL` value. __To change your logging level, edit that local storage key__. When no value can be found, the local storage is set to LOG_DEBUG level.
+The `logger` singleton is created using the logging level specified by the local storage `GEOVIEW_LOG_LEVEL` value. When `GEOVIEW_LOG_LEVEL` is a number, all levels above the specified number are logged. When `GEOVIEW_LOG_LEVEL` is a comma separate value e.g.: "4, 6,10" then only those levels and all levels >= 20 are logged. __To change your logging level, edit that local storage key__. When no value can be found, the local storage is set to LOG_DEBUG level.
 
 The `LOG_TRACE` functions are used when the developer wants to view the call stack in the console. The calls to `logger.logTrace` are meant to remain in the code forever. By default they will just be ignored, because the logger logs level LOG_DEBUG and higher. There is a extra level of granularity for tracing (`LOG_TRACE_USE_EFFECT`, `LOG_TRACE_RENDER`, etc) , due to GeoView needs.
 

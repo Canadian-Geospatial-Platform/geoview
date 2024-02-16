@@ -154,10 +154,10 @@ export class MapViewer {
           api.event.on(
             EVENT_NAMES.LAYER.EVENT_LAYER_ADDED,
             (payload) => {
-              if (payloadIsGeoViewLayerAdded(payload)) {
-                // Log
-                logger.logTraceDetailed('map-viewer on EVENT_NAMES.LAYER.EVENT_LAYER_ADDED', this.mapId, payload);
+              // Log
+              logger.logTraceCoreAPIEvent('MAP-VIEWER - EVENT_LAYER_ADDED', this.mapId, payload);
 
+              if (payloadIsGeoViewLayerAdded(payload)) {
                 const { geoviewLayer } = payload;
                 MapEventProcessor.setLayerZIndices(this.mapId);
                 // If metadata are processed

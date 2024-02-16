@@ -3,7 +3,7 @@ import { IGeoViewColors } from './types';
 import { font, headingStyles, opacity, geoViewColors as defaultGeoViewColors, geoViewFontSizes } from './default';
 import { globalStyleOverrides } from './global-style-overrides';
 
-export const generateThemeOptions = function (geoViewColors: IGeoViewColors = defaultGeoViewColors): ThemeOptions {
+export const generateThemeOptions = (geoViewColors: IGeoViewColors = defaultGeoViewColors): ThemeOptions => {
   const themeOptions: ThemeOptions = {
     palette: {
       geoViewColor: geoViewColors,

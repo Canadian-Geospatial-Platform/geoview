@@ -42,14 +42,15 @@ export function Appbar(): JSX.Element {
   const appBarComponents = useUIAppbarComponents();
   const { hideClickMarker } = useMapStoreActions();
 
-  const appBarPanelCloseListenerFunction = () => setSelectedAppbarButtonId('');
-
   // get store config for app bar to add (similar logic as in footer-bar)
   const appBarConfig = useGeoViewConfig()?.appBar;
 
   // #region REACT HOOKS
   const addButtonPanel = useCallback(
     (payload: ButtonPanelPayload) => {
+      // Log
+      logger.logTraceUseCallback('APP-BAR - addButtonPanel');
+
       setButtonPanelGroups({
         ...buttonPanelGroups,
         [payload.appBarGroupName]: {
@@ -63,6 +64,9 @@ export function Appbar(): JSX.Element {
 
   const removeButtonPanel = useCallback(
     (payload: ButtonPanelPayload) => {
+      // Log
+      logger.logTraceUseCallback('APP-BAR - removeButtonPanel');
+
       setButtonPanelGroups((prevState) => {
         const state = { ...prevState };
 
@@ -76,17 +80,30 @@ export function Appbar(): JSX.Element {
     [setButtonPanelGroups]
   );
 
+  const appBarPanelCloseListenerFunction = () => {
+    // Log
+    logger.logTraceCoreAPIEvent('APP-BAR - appBarPanelCloseListenerFunction');
+
+    setSelectedAppbarButtonId('');
+  };
+
   useEffect(() => {
     // Log
     logger.logTraceUseEffect('APP-BAR - addButtonPanel', mapId);
 
     const appBarPanelCreateListenerFunction = (payload: PayloadBaseClass) => {
+      // Log
+      logger.logTraceCoreAPIEvent('APP-BAR - appBarPanelCreateListenerFunction', payload);
+
       if (payloadIsAButtonPanel(payload)) addButtonPanel(payload);
     };
     // listen to new panel creation
     api.event.on(EVENT_NAMES.APPBAR.EVENT_APPBAR_PANEL_CREATE, appBarPanelCreateListenerFunction, mapId);
 
     const appBarPanelRemoveListenerFunction = (payload: PayloadBaseClass) => {
+      // Log
+      logger.logTraceCoreAPIEvent('APP-BAR - appBarPanelRemoveListenerFunction', payload);
+
       if (payloadIsAButtonPanel(payload)) removeButtonPanel(payload);
     };
 

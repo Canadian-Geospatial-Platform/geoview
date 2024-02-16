@@ -1,5 +1,6 @@
 import type React from 'react';
 import { toJsonObject, TypeJsonObject, TypeButtonPanel } from 'geoview-core';
+import { logger } from 'geoview-core/src/core/utils/logger';
 
 import LayerStepper from './layer-stepper';
 import ReorderLayersList from './reorder-layers-list';
@@ -88,10 +89,16 @@ function PanelContent(props: TypePanelContentProps): JSX.Element {
   const actionMenuOpen = Boolean(actionMenuAnchorElement);
 
   const updateLayers = () => {
+    // Log
+    logger.logTraceCoreAPIEvent('PANEL-CONTENT - updateLayers');
+
     if (api.maps[mapId].layer?.layerOrder !== undefined) setMapLayers([...api.maps[mapId].layer.layerOrder].reverse());
   };
 
   useEffect(() => {
+    // Log
+    logger.logTraceUseEffect('PANEL-CONTENT - mount 1');
+
     api.event.on(api.eventNames.MAP.EVENT_MAP_LOADED, updateLayers, mapId);
     api.event.on(api.eventNames.GET_LEGENDS.LEGENDS_LAYERSET_UPDATED, updateLayers, `${mapId}/LegendsLayerSet`);
 
@@ -108,7 +115,15 @@ function PanelContent(props: TypePanelContentProps): JSX.Element {
   }, [mapLayers]);
 
   useEffect(() => {
-    const setAddLayerVisibleListenerFunction = () => setAddLayerVisible(false);
+    // Log
+    logger.logTraceUseEffect('PANEL-CONTENT - mount 2');
+
+    const setAddLayerVisibleListenerFunction = () => {
+      // Log
+      logger.logTraceCoreAPIEvent('PANEL-CONTENT - setAddLayerVisibleListenerFunction');
+
+      setAddLayerVisible(false);
+    };
 
     api.event.on(api.eventNames.PANEL.EVENT_PANEL_CLOSE, setAddLayerVisibleListenerFunction, `${mapId}/${buttonPanel.buttonPanelId}`);
     return () => {

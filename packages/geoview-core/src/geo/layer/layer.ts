@@ -92,6 +92,9 @@ export class Layer {
 
     this.eventHandlerFunctions = {
       addLayer: (payload: PayloadBaseClass) => {
+        // Log
+        logger.logTraceCoreAPIEvent('LAYER - eventHandlerFunctions.addLayer', payload);
+
         if (payloadIsALayerConfig(payload)) {
           const { layerConfig } = payload;
 
@@ -168,6 +171,9 @@ export class Layer {
         }
       },
       removeLayer: (payload: PayloadBaseClass) => {
+        // Log
+        logger.logTraceCoreAPIEvent('LAYER - eventHandlerFunctions.removeLayer', payload);
+
         if (payloadIsRemoveGeoViewLayer(payload)) {
           // remove layer from outside
           this.removeLayersUsingPath(payload.geoviewLayer!.geoviewLayerId);

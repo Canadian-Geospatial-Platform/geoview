@@ -425,7 +425,7 @@ export class WMS extends AbstractGeoViewRaster {
 
     arrayOfLayerMetadata.forEach((subLayer) => {
       // Log for pertinent debugging purposes
-      logger.logTraceCore('wms.createGroupLayer', 'Cloning the layer config', layerConfig.layerPath);
+      logger.logTraceCore('WMS - createGroupLayer', 'Cloning the layer config', layerConfig.layerPath);
       const subLayerEntryConfig: TypeLayerEntryConfig = cloneDeep(layerConfig);
       subLayerEntryConfig.parentLayerConfig = Cast<TypeLayerGroupEntryConfig>(layerConfig);
       subLayerEntryConfig.layerId = subLayer.Name as string;
@@ -486,7 +486,7 @@ export class WMS extends AbstractGeoViewRaster {
    */
   protected processOneLayerEntry(layerConfig: TypeBaseLayerEntryConfig): Promise<TypeBaseRasterLayer | null> {
     // Log
-    logger.logTraceCore('processOneLayerEntry', layerConfig.layerPath);
+    logger.logTraceCore('WMS - processOneLayerEntry', layerConfig.layerPath);
 
     const promisedVectorLayer = new Promise<TypeBaseRasterLayer | null>((resolve) => {
       const { layerPath } = layerConfig;
@@ -1097,7 +1097,7 @@ export class WMS extends AbstractGeoViewRaster {
     }
 
     // Log
-    logger.logTraceCore('wms.applyViewFilter', layerPath);
+    logger.logTraceCore('WMS - applyViewFilter', layerPath);
 
     // Get source
     const source = (layerConfig.olLayer as ImageLayer<ImageWMS>).getSource();

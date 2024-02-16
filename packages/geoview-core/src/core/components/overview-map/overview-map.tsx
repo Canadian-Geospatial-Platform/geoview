@@ -130,6 +130,9 @@ export function OverviewMap(): JSX.Element {
     const unsubMapZoom = getGeoViewStore(mapId).subscribe(
       (state) => state.mapState.zoom,
       (curZoom, prevZoom) => {
+        // Log
+        logger.logTraceCoreStoreSubscription('OVERVIEW-MAP - zoom', curZoom);
+
         if (curZoom !== prevZoom) {
           if (curZoom! < hideOnZoom) getOverViewMap().setMap(null);
           else getOverViewMap().setMap(mapElement!);
@@ -141,6 +144,9 @@ export function OverviewMap(): JSX.Element {
     const unsubMapCurrentProjection = getGeoViewStore(mapId).subscribe(
       (state) => state.mapState.currentProjection,
       (curProj, prevProj) => {
+        // Log
+        logger.logTraceCoreStoreSubscription('OVERVIEW-MAP - currentProjection', curProj);
+
         if (curProj !== prevProj) {
           const overviewMap = getOverViewMap();
 

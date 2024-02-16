@@ -1,10 +1,8 @@
 /* eslint-disable react/jsx-props-no-spreading */
 import { useEffect, useState, useCallback, Fragment } from 'react';
-
 import { useTranslation } from 'react-i18next';
 
 import { useTheme } from '@mui/material/styles';
-
 import { FocusTrap } from '@mui/base/FocusTrap';
 
 import { Map } from '@/core/components/map/map';
@@ -14,11 +12,8 @@ import { FooterBar } from '@/core/components/footer-bar/footer-bar';
 import { Geolocator } from '@/core/components/geolocator/geolocator';
 import { MapInfo } from '@/core/components/map-info/map-info';
 
-import { FocusTrapDialog } from './focus-trap';
-
 import { api } from '@/app';
 import { EVENT_NAMES } from '@/api/events/event-types';
-
 import { Box, CircularProgress, Link, Modal, Snackbar } from '@/ui';
 import {
   PayloadBaseClass,
@@ -38,6 +33,9 @@ import {
 import ExportModal from '@/core/components/export/export-modal';
 import DataTableModal from '@/core/components/data-table/data-table-modal';
 import { useGeoViewConfig, useGeoViewMapId } from '@/core/stores/geoview-store';
+import { logger } from '@/core/utils/logger';
+
+import { FocusTrapDialog } from './focus-trap';
 
 /**
  * Interface for the shell properties
@@ -77,12 +75,18 @@ export function Shell(props: ShellProps): JSX.Element {
    * Causes the shell to re-render
    */
   const updateShell = useCallback(() => {
+    // Log
+    logger.logTraceUseCallback('SHELL - updateShell');
+
     setUpdate((prevState) => {
       return 1 + prevState;
     });
   }, []);
 
   const mapAddComponentHandler = (payload: PayloadBaseClass) => {
+    // Log
+    logger.logTraceCoreAPIEvent('SHELL - mapAddComponentHandler', payload);
+
     if (payloadIsAMapComponent(payload)) {
       setComponents((tempComponents) => ({
         ...tempComponents,
@@ -92,10 +96,16 @@ export function Shell(props: ShellProps): JSX.Element {
   };
 
   useEffect(() => {
+    // Log
+    logger.logTraceUseEffect('SHELL - mount', shellId, geoviewConfig, components);
+
     // listen to adding a new component events
     api.event.on(EVENT_NAMES.MAP.EVENT_MAP_ADD_COMPONENT, mapAddComponentHandler, shellId);
 
     const mapRemoveComponentHandler = (payload: PayloadBaseClass) => {
+      // Log
+      logger.logTraceCoreAPIEvent('SHELL - mapRemoveComponentHandler', payload);
+
       if (payloadIsAMapComponent(payload)) {
         const tempComponents: Record<string, JSX.Element> = { ...components };
         delete tempComponents[payload.mapComponentId];
@@ -110,6 +120,9 @@ export function Shell(props: ShellProps): JSX.Element {
     api.event.on(EVENT_NAMES.MAP.EVENT_MAP_REMOVE_COMPONENT, mapRemoveComponentHandler, shellId);
 
     const modalCreateHandler = (payload: PayloadBaseClass) => {
+      // Log
+      logger.logTraceCoreAPIEvent('SHELL - modalCreateHandler', payload);
+
       if (payloadIsAModal(payload)) updateShell();
     };
 
@@ -119,6 +132,9 @@ export function Shell(props: ShellProps): JSX.Element {
     // Reload
     // TODO: use store config when we relaod the map
     const mapReloadHandler = (payload: PayloadBaseClass) => {
+      // Log
+      logger.logTraceCoreAPIEvent('SHELL - mapReloadHandler', payload);
+
       if (payloadIsAmapFeaturesConfig(payload)) {
         api.event.emit(mapConfigPayload(EVENT_NAMES.MAP.EVENT_MAP_RELOAD, `${shellId}/delete_old_map`, geoviewConfig!));
         updateShell();

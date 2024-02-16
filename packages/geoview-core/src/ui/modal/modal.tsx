@@ -94,6 +94,9 @@ export function Modal(props: TypeDialogProps): JSX.Element {
    * Causes the modal to re-render
    */
   const updateModal = useCallback(() => {
+    // Log
+    logger.logTraceUseCallback('UI.MODAL - updateModal');
+
     setUpdate((prevState) => {
       return 1 + prevState;
     });
@@ -188,6 +191,9 @@ export function Modal(props: TypeDialogProps): JSX.Element {
   };
 
   const modalOpenListenerFunction = (payload: PayloadBaseClass) => {
+    // Log
+    logger.logTraceCoreAPIEvent('UI.MODAL - modalOpenListenerFunction', payload);
+
     if (payloadIsAModal(payload)) {
       if (modalId === payload.modalId) {
         const modal = api.maps[mapId].modal.modals[payload.modalId] as TypeModalProps;
@@ -199,6 +205,9 @@ export function Modal(props: TypeDialogProps): JSX.Element {
   };
 
   const modalUpdateListenerFunction = (payload: PayloadBaseClass) => {
+    // Log
+    logger.logTraceCoreAPIEvent('UI.MODAL - modalUpdateListenerFunction', payload);
+
     if (payloadIsAModal(payload)) {
       if (modalId === payload.modalId) {
         const modal = api.maps[mapId].modal.modals[payload.modalId] as TypeModalProps;
@@ -209,6 +218,9 @@ export function Modal(props: TypeDialogProps): JSX.Element {
   };
 
   const modalCloseListenerFunction = (payload: PayloadBaseClass) => {
+    // Log
+    logger.logTraceCoreAPIEvent('UI.MODAL - modalCloseListenerFunction', payload);
+
     if (payloadIsAModal(payload)) {
       if (modalId === payload.modalId) {
         if (!payload.open) openEvent = false;
@@ -219,7 +231,7 @@ export function Modal(props: TypeDialogProps): JSX.Element {
 
   useEffect(() => {
     // Log
-    logger.logTraceUseEffect('MODAL - updateModal');
+    logger.logTraceUseEffect('UI.MODAL - updateModal');
 
     // to open the modal
     api.event.on(EVENT_NAMES.MODAL.EVENT_MODAL_OPEN, modalOpenListenerFunction, mapId);
