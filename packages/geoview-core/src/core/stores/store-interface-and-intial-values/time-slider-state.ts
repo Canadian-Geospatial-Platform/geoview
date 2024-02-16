@@ -24,8 +24,6 @@ export interface TypeTimeSliderValues {
   delay: number;
   locked?: boolean;
   reversed?: boolean;
-  nearestValues?: string;
-  unitSymbol?: string;
 }
 
 export interface ITimeSliderState {
@@ -43,7 +41,6 @@ export interface ITimeSliderState {
     setReversed: (layerPath: string, locked: boolean) => void;
     setDefaultValue: (layerPath: string, defaultValue: string) => void;
     setValues: (layerPath: string, values: number[]) => void;
-    setVisibleTimeSliderLayers: (visibleLayerPaths: string[]) => void;
   };
 }
 // #endregion INTERFACES
