@@ -101,7 +101,7 @@ export function Layout({ children, layerList, selectedLayerPath, onLayerListClic
             sx={{
               display: 'flex',
               alignItems: 'center',
-              [theme.breakpoints.up('md')]: { justifyContent: 'right' },
+              [theme.breakpoints.up('md')]: { justifyContent: fullWidth ? 'space-between' : 'right' },
               [theme.breakpoints.down('md')]: { justifyContent: 'space-between' },
             }}
           >
