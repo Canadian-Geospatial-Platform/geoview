@@ -266,7 +266,7 @@ export function DetailsPanel({ fullWidth }: DetailsPanelType): JSX.Element {
     // If the layer has features
     if (memoLayerSelectedItem?.numOffeatures) {
       // Log
-      // logger.logDebug('DETAILS-PANEL', 'keep selection', memoLayerSelectedItem);
+      logger.logDebug('DETAILS-PANEL', 'keep selection', memoLayerSelectedItem);
       // All good, keep selection
       // Reset the bypass for next time
       setLayerDataArrayBatchLayerPathBypass(memoLayerSelectedItem.layerPath);
@@ -279,12 +279,12 @@ export function DetailsPanel({ fullWidth }: DetailsPanelType): JSX.Element {
       // If found
       if (anotherLayerEntry) {
         // Log
-        // logger.logDebug('DETAILS-PANEL', 'select another', memoLayerSelectedItem, anotherLayerEntry.layerPath);
+        logger.logDebug('DETAILS-PANEL', 'select another', memoLayerSelectedItem, anotherLayerEntry.layerPath);
         // Select that one
         setSelectedLayerPath(anotherLayerEntry.layerPath);
       } else {
         // Log
-        // logger.logDebug('DETAILS-PANEL', 'select none', memoLayerSelectedItem);
+        logger.logDebug('DETAILS-PANEL', 'select none', memoLayerSelectedItem);
         // None found, select none
         //  TODO:: Investigate infinte loop in appbar for statement.
         // setSelectedLayerPath('');

@@ -52,6 +52,7 @@ export function Appbar(): JSX.Element {
   const interaction = useMapInteraction();
   const appBarComponents = useUIAppbarComponents();
   const { hideClickMarker } = useMapStoreActions();
+  // TODO: remove active footerTab Id and create new one for appbar id.
   const activeFooterTabId = useUIActiveFooterBarTabId();
 
   // get store config for app bar to add (similar logic as in footer-bar)
@@ -149,7 +150,7 @@ export function Appbar(): JSX.Element {
   useEffect(() => {
     // Log
     logger.logTraceUseEffect('APP-BAR - open detail panel when clicked on map', mapId);
-
+    // TODO: remove active footerTab Id and create new one for appbar id.
     // open appbar detail drawer when click on map.
     if (activeFooterTabId === 'details' && buttonPanelGroups?.details?.AppbarPanelButtonDetails?.panel) {
       buttonPanelGroups.details.AppbarPanelButtonDetails.panel.open();
@@ -186,7 +187,7 @@ export function Appbar(): JSX.Element {
 
   useEffect(() => {
     // Log
-    logger.logTraceUseEffect('APP-BAR - create group of appbar buttons from footer bar group', mapId);
+    logger.logTraceUseEffect('APP-BAR - create group of appbar buttons', mapId);
 
     // render footer bar tabs
     (appBarConfig?.tabs.core ?? [])
