@@ -51,7 +51,7 @@ export function TimeSlider(TimeSliderPanelProps: TimeSliderPanelProps) {
 
   // Get actions and states from store
   // TODO: evaluate best option to set value by layer path.... trough a getter?
-  const { setTitle, setDescription, setDefaultValue, setValues, setLocked, setReversed, setDelay, setFiltering } =
+  const { setTitle, setDescription, setValues, setLocked, setReversed, setDelay, setFiltering } =
     useTimeSliderStoreActions();
 
   // TODO: check performance as we should technically have one selector by constant
@@ -69,7 +69,7 @@ export function TimeSlider(TimeSliderPanelProps: TimeSliderPanelProps) {
     values,
     delay,
     locked,
-    reversed
+    reversed,
   } = useTimeSliderLayers()[layerPath];
 
   // slider config

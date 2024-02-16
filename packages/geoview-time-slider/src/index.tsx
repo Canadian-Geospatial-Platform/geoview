@@ -5,6 +5,7 @@ import { FooterPlugin } from 'geoview-core/src/api/plugin/footer-plugin';
 import { TimeSliderPanel } from './time-slider-panel';
 import schema from '../schema.json';
 import defaultConfig from '../default-config-time-slider-panel.json';
+import { SliderProps } from './time-slider-types';
 
 export interface LayerProps {
   layerPath: string;
@@ -97,9 +98,11 @@ class TimeSliderPlugin extends FooterPlugin {
 
   onCreateContentProps = (): TypeTabs => {
     // Set custom time dimension if applicable
-    this.configObj.sliders.forEach((obj: any) => {
+    this.configObj.sliders.forEach((obj: SliderProps) => {
       if (obj.temporalDimension) {
-        api.maps[this.pluginProps.mapId].layer.geoviewLayer(obj.layerPaths[0]).setTemporalDimension(obj.layerPaths[0], obj.temporalDimension)
+        api.maps[this.pluginProps.mapId].layer
+          .geoviewLayer(obj.layerPaths[0])
+          .setTemporalDimension(obj.layerPaths[0], obj.temporalDimension);
       }
     });
 
