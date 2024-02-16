@@ -17,7 +17,7 @@ export declare class LayerSet {
     /** Function used to determine if the layerPath can be added to the layer set. */
     registrationConditionFunction: (layerPath: string) => boolean;
     /** Function used to initialise the data property of the layer path entry. */
-    registrationUserDataInitialisation?: (layerPath: string) => void;
+    registrationUserInitialisation?: (layerPath: string) => void;
     /** Sequence number to append to the layer name when we declare a layer as anonymous. */
     anonymousSequenceNumber: number;
     /** ***************************************************************************************************************************
@@ -27,9 +27,9 @@ export declare class LayerSet {
      * @param {string} layerSetIdentifier The layer set identifier.
      * @param {TypeResultsSet} resultsSet An object that will contain the result sets indexed using the layer path.
      * @param {(layerPath: string) => boolean} registrationConditionFunction A function to decide if the layer can be added.
-     * @param {(layerPath: string) => void} registrationUserDataInitialisation A function to initialise the data property of the layer path entry.
+     * @param {(layerPath: string) => void} registrationUserInitialisation A function to initialise the data property of the layer path entry.
      */
-    constructor(mapId: string, layerSetIdentifier: string, resultsSet: TypeResultsSet, registrationConditionFunction: (layerPath: string) => boolean, registrationUserDataInitialisation?: (layerPath: string) => void);
+    constructor(mapId: string, layerSetIdentifier: string, resultsSet: TypeResultsSet, registrationConditionFunction: (layerPath: string) => boolean, registrationUserInitialisation?: (layerPath: string) => void);
     /**
      * Helper function used to instanciate a LayerSet object. This function
      * avoids the "new LayerSet" syntax.

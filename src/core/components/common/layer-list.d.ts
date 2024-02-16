@@ -11,19 +11,19 @@ export interface LayerListEntry {
     numOffeatures?: number;
 }
 interface LayerListProps {
-    isEnlargeDataTable: boolean;
+    isEnlarged: boolean;
     layerList: LayerListEntry[];
-    selectedLayerPath: string;
-    handleListItemClick: (layer: LayerListEntry) => void;
+    selectedLayerPath: string | undefined;
+    onListItemClick: (layer: LayerListEntry) => void;
 }
 /**
  * Create a list of layers
  * @param {LayerListEntry} layerList  Array of layer list entries.
- * @param {boolean} isEnlargeDataTable  Boolean value if right panel is enlarged or not.
+ * @param {boolean} isEnlarged Boolean value if right panel is enlarged or not.
  * @param {number} selectedLayerIndex  Current index of list item selected.
  * @param {string} selectedLayerPath  Selected path of the layer.
- * @param {Function} handleListItemClick  Callback function excecuted when list item is clicked.
+ * @param {Function} onListItemClick  Callback function excecuted when list item is clicked.
  * @returns
  */
-export declare function LayerList({ layerList, isEnlargeDataTable, selectedLayerPath, handleListItemClick }: LayerListProps): import("react").JSX.Element;
+export declare function LayerList({ layerList, isEnlarged, selectedLayerPath, onListItemClick }: LayerListProps): import("react").JSX.Element;
 export {};

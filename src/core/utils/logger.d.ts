@@ -4,6 +4,8 @@ export declare const LOG_TRACE_RENDER = 3;
 export declare const LOG_TRACE_USE_CALLBACK = 4;
 export declare const LOG_TRACE_USE_MEMO = 5;
 export declare const LOG_TRACE_USE_EFFECT = 6;
+export declare const LOG_TRACE_CORE_STORE_SUBSCRIPTION = 8;
+export declare const LOG_TRACE_CORE_API_EVENT = 9;
 export declare const LOG_TRACE_CORE = 10;
 export declare const LOG_DEBUG = 20;
 export declare const LOG_INFO = 30;
@@ -13,16 +15,18 @@ export declare const LOG_ERROR = 50;
  * The supported color codes for logging
  */
 type ColorCode = {
-    darkorange: string;
-    dodgerblue: string;
-    yellowgreen: string;
-    green: string;
-    plum: string;
     turquoise: string;
     grey: string;
+    plum: string;
     orchid: string;
-    mediumorchid: string;
     darkorchid: string;
+    mediumorchid: string;
+    royalblue: string;
+    cornflowerblue: string;
+    dodgerblue: string;
+    darkorange: string;
+    yellowgreen: string;
+    green: string;
 };
 /**
  * A Log marker with various keys, used to track various timings
@@ -34,13 +38,13 @@ type LogMarker = {
  * A Console Logger to help out logging information with levels of details.
  */
 export declare class ConsoleLogger {
-    loggingLevel: number;
+    loggingLevel: number | number[];
     markers: LogMarker;
     /**
      * Constructor
      * @param logLevel? number Indicate the level of detail for the ConsoleLogger. The higher the number, the more detailed the log.
      */
-    constructor(logLevel: number);
+    constructor(logLevel: number | number[]);
     /**
      * Logs tracing calls at the highest level of detail.
      * Only shows if LOG_ACTIVE is true.
@@ -82,6 +86,20 @@ export declare class ConsoleLogger {
      * @param message unknown[] the messages to log
      */
     logTraceUseEffect: (useEffectFunction: string, ...message: unknown[]) => void;
+    /**
+     * Logging function commonly used in the store subscriptions to track when a store has triggered a subscription.
+     * Only shows if LOG_ACTIVE is true.
+     * @param message string storeSubscription the store subscription event that was raised
+     * @param message unknown[] the messages to log
+     */
+    logTraceCoreStoreSubscription: (storeSubscription: string, ...message: unknown[]) => void;
+    /**
+     * Logging function commonly used in the API event handlers to track when the API has triggered an event.
+     * Only shows if LOG_ACTIVE is true.
+     * @param message string apiEvent the api event that was raised
+     * @param message unknown[] the messages to log
+     */
+    logTraceCoreAPIEvent: (apiEvent: string, ...message: unknown[]) => void;
     /**
      * Logs trace information for core processing.
      * Only shows if LOG_ACTIVE is true.
@@ -125,6 +143,12 @@ export declare class ConsoleLogger {
      * @param message unknown[] the messages to log
      */
     logError: (...message: unknown[]) => void;
+    /**
+     * Compares the provided level (number) with the logging level (number | number[]) to know if the log should appear or not.
+     * @param level number the level associated with the message to be logged.
+     * @returns boolean true if the log level indicates that it should appear
+     */
+    checkLevel: (level: number) => boolean;
     /**
      * Checks that the level is greater or equal to the application logging level.
      * If level is valid, logs using console.log().

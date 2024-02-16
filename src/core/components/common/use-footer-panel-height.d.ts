@@ -1,6 +1,6 @@
 /// <reference types="react" />
 interface UseFooterPanelHeightType {
-    footerPanelTab: 'layers' | 'details' | 'data-table' | 'legend' | 'default';
+    footerPanelTab: 'layers' | 'details' | 'data-table' | 'legend' | 'default' | 'guide';
 }
 /**
  * Custom Hook to calculate the height of footer panel content when we set the map in fullscreen mode.

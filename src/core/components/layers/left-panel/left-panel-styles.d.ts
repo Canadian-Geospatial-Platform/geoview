@@ -38,7 +38,7 @@ export declare const getSxClasses: (theme: Theme) => {
                     color: string;
                 };
             };
-            '&.loading': {
+            '&.loading, &.processing': {
                 background: string;
                 '& .MuiListItemText-secondary': {
                     fontWeight: string;

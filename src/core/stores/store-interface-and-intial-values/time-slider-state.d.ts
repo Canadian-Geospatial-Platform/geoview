@@ -1,4 +1,7 @@
 import { TypeGetStore, TypeSetStore } from '../geoview-store';
+export type TimeSliderLayerSet = {
+    [layerPath: string]: TypeTimeSliderValues;
+};
 export interface TypeTimeSliderValues {
     title?: string;
     description?: string;
@@ -16,14 +19,9 @@ export interface TypeTimeSliderValues {
     reversed?: boolean;
 }
 export interface ITimeSliderState {
-    timeSliderLayers: {
-        [index: string]: TypeTimeSliderValues;
-    };
-    visibleTimeSliderLayers: string[];
+    timeSliderLayers: TimeSliderLayerSet;
     actions: {
-        addTimeSliderLayer: (newLayer: {
-            [index: string]: TypeTimeSliderValues;
-        }) => void;
+        addTimeSliderLayer: (newLayer: TimeSliderLayerSet) => void;
         applyFilters: (layerPath: string, values: number[]) => void;
         removeTimeSliderLayer: (layerPath: string) => void;
         setTitle: (layerPath: string, title: string) => void;
@@ -34,18 +32,12 @@ export interface ITimeSliderState {
         setReversed: (layerPath: string, locked: boolean) => void;
         setDefaultValue: (layerPath: string, defaultValue: string) => void;
         setValues: (layerPath: string, values: number[]) => void;
-        setVisibleTimeSliderLayers: (visibleLayerPaths: string[]) => void;
     };
 }
 export declare function initializeTimeSliderState(set: TypeSetStore, get: TypeGetStore): ITimeSliderState;
-export declare const useTimeSliderLayers: () => {
-    [index: string]: TypeTimeSliderValues;
-};
-export declare const useVisibleTimeSliderLayers: () => string[];
+export declare const useTimeSliderLayers: () => TimeSliderLayerSet;
 export declare const useTimeSliderStoreActions: () => {
-    addTimeSliderLayer: (newLayer: {
-        [index: string]: TypeTimeSliderValues;
-    }) => void;
+    addTimeSliderLayer: (newLayer: TimeSliderLayerSet) => void;
     applyFilters: (layerPath: string, values: number[]) => void;
     removeTimeSliderLayer: (layerPath: string) => void;
     setTitle: (layerPath: string, title: string) => void;
@@ -56,5 +48,4 @@ export declare const useTimeSliderStoreActions: () => {
     setReversed: (layerPath: string, locked: boolean) => void;
     setDefaultValue: (layerPath: string, defaultValue: string) => void;
     setValues: (layerPath: string, values: number[]) => void;
-    setVisibleTimeSliderLayers: (visibleLayerPaths: string[]) => void;
 };

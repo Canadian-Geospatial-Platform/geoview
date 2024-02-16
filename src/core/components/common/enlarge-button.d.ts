@@ -1,13 +1,13 @@
 import { Dispatch } from 'react';
 interface EnlargeButtonProps {
-    isEnlargeDataTable: boolean;
-    setIsEnlargeDataTable: Dispatch<boolean>;
+    isEnlarged: boolean;
+    onSetIsEnlarged: Dispatch<boolean>;
 }
 /**
  * Create enlarge button
- * @param {boolean} isEnlargeDataTable
- * @param {function} setIsEnlargeDataTable
+ * @param {boolean} isEnlarged
+ * @param {function} setIsEnlarged
  * @returns JSX.element
  */
-export declare function EnlargeButton({ isEnlargeDataTable, setIsEnlargeDataTable }: EnlargeButtonProps): import("react").JSX.Element;
+export declare function EnlargeButton({ isEnlarged, onSetIsEnlarged }: EnlargeButtonProps): import("react").JSX.Element;
 export {};

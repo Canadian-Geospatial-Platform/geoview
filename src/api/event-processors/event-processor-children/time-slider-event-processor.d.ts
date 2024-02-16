@@ -1,5 +1,5 @@
 import { GeoviewStoreType } from '@/core/stores/geoview-store';
-import { ITimeSliderState, TypeTimeSliderValues } from '@/app';
+import { ITimeSliderState, TimeSliderLayerSet } from '@/app';
 import { AbstractEventProcessor } from '../abstract-event-processor';
 export declare class TimeSliderEventProcessor extends AbstractEventProcessor {
     /**
@@ -27,11 +27,9 @@ export declare class TimeSliderEventProcessor extends AbstractEventProcessor {
      *
      * @param {string} mapId The id of the map
      * @param {string} layerPath The path of the layer to add to time slider
-     * @returns {{ [index: string]: TypeTimeSliderValues }}
+     * @returns {TimeSliderLayer}
      */
-    static getInitialTimeSliderValues(mapId: string, layerPath: string): {
-        [index: string]: TypeTimeSliderValues;
-    };
+    static getInitialTimeSliderValues(mapId: string, layerPath: string): TimeSliderLayerSet;
     /**
      * Filter the layer provided in the layerPath variable according to current states (filtering and values)
      *

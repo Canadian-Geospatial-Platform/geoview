@@ -112,6 +112,15 @@ export declare class GeoPackage extends AbstractGeoViewVector {
      * This method creates a GeoView layer using the definition provided in the layerConfig parameter.
      *
      * @param {TypeLayerEntryConfig} layerConfig Information needed to create the GeoView layer.
+     * @param {string | number | Uint8Array} sld The SLD style associated with the layer
+     *
+     * @returns {Promise<BaseLayer | null>} The GeoView base layer that has been created.
+     */
+    protected processGeopackageStyle(layerConfig: TypeBaseLayerEntryConfig, sld: string | number | Uint8Array): void;
+    /** ***************************************************************************************************************************
+     * This method creates a GeoView layer using the definition provided in the layerConfig parameter.
+     *
+     * @param {TypeLayerEntryConfig} layerConfig Information needed to create the GeoView layer.
      * @param {sldsInterface} sld The SLD style associated with the layers geopackage, if any
      *
      * @returns {Promise<BaseLayer | null>} The GeoView base layer that has been created.

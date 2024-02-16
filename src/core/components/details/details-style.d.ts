@@ -7,6 +7,7 @@ export declare const getSxClasses: (theme: Theme) => {
     detailsInstructionsTitle: {
         fontSize: any;
         fontWeight: string;
+        lineHeight: string;
     };
     detailsInstructionsBody: {
         fontSize: string;
@@ -18,7 +19,7 @@ export declare const getSxClasses: (theme: Theme) => {
     rightPanelContainer: {
         border: string;
         borderRadius: string;
-        backgroundColor: string;
+        color: string;
     };
     rightPanelBtnHolder: {
         marginTop: string;
@@ -42,6 +43,7 @@ export declare const getSxClasses: (theme: Theme) => {
         objectFit: string;
         width: string;
         height: string;
+        marginRight: string;
     };
     selectFeatureCheckbox: {
         color: string;

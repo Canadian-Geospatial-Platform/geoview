@@ -1,4 +1,5 @@
-import { TypeFeatureInfoResultsSet } from '@/api/events/payloads';
+import { TypeFeatureInfoResultsSet, EventType, QueryType } from '@/api/events/payloads';
+import { Coordinate } from '@/core/types/cgpv-types';
 /** ***************************************************************************************************************************
  * A class to hold a set of layers associated with an array of TypeArrayOfFeatureInfoEntries. When this class is instantiated,
  * all layers already loaded on the specified map that are queryable will be added to the set. Layers added afterwards will be
@@ -14,16 +15,6 @@ export declare class FeatureInfoLayerSet {
     private mapId;
     /** The layer set object. */
     private layerSet;
-    /** Private variable that keeps the click disable flags associated to the layerPath  * /
-    private disableClickOnLayer: {
-      [layerPath: string]: boolean;
-    } = {};
-  
-    /** Private variable that keeps the hover disable flags associated to the layerPath  * /
-    private disableHoverOverLayer: {
-      [layerPath: string]: boolean;
-    } = {};
-  
     /** Flag used to disable hover event for the entire layerSet */
     private disableHover;
     /** An object containing the result sets indexed using the layer path */
@@ -35,21 +26,14 @@ export declare class FeatureInfoLayerSet {
      *
      */
     private constructor();
+    createQueryLayerPayload: (eventType: EventType, queryType: QueryType, coordinate: Coordinate) => void;
     /**
-     * Helper function used to instanciate a FeatureInfoLayerSet object. This function
-     * must be used in place of the "new FeatureInfoLayerSet" syntax.
+     * Helper function used to launch the query on a layer to get all of its feature information
      *
-     * @param {string} mapId The map identifier the layer set belongs to.
-     *
-     * @returns {FeatureInfoLayerSet} the FeatureInfoLayerSet object created
+     * @param {string} layerPath The layerPath that will be queried.
+     * @param {QueryType} queryType the query's type to perform
      */
-    static get(mapId: string): FeatureInfoLayerSet;
-    /**
-     * Function used to delete a FeatureInfoLayerSet object associated to a mapId.
-     *
-     * @param {string} mapId The map identifier the layer set belongs to.
-     */
-    static delete(mapId: string): void;
+    triggerGetAllFeatureInfo(layerPath: string, queryType?: QueryType): void;
     /**
      * Function used to enable listening of click events. When a layer path is not provided,
      * click events listening is enabled for all layers
@@ -96,4 +80,19 @@ export declare class FeatureInfoLayerSet {
      * @returns {boolean | undefined} The flag value for the map or layer.
      */
     isHoverListenerEnabled(layerPath?: string): boolean | undefined;
+    /**
+     * Helper function used to instanciate a FeatureInfoLayerSet object. This function
+     * must be used in place of the "new FeatureInfoLayerSet" syntax.
+     *
+     * @param {string} mapId The map identifier the layer set belongs to.
+     *
+     * @returns {FeatureInfoLayerSet} the FeatureInfoLayerSet object created
+     */
+    static get(mapId: string): FeatureInfoLayerSet;
+    /**
+     * Function used to delete a FeatureInfoLayerSet object associated to a mapId.
+     *
+     * @param {string} mapId The map identifier the layer set belongs to.
+     */
+    static delete(mapId: string): void;
 }

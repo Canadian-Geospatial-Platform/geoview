@@ -194,7 +194,7 @@ export declare class MapViewer {
      * @param {Extent} extent The extent to zoom to.
      * @param {FitOptions} options The options to configure the zoomToExtent (default: { padding: [100, 100, 100, 100], maxZoom: 11 }).
      */
-    zoomToExtent(extent: Extent, options?: FitOptions): void;
+    zoomToExtent(extent: Extent, options?: FitOptions): Promise<void>;
     /**
      * Fit the map to its boundaries. It is assumed that the boundaries use the map projection. If projectionCode is undefined,
      * the boundaries are used as is, otherwise they are reprojected from the specified projection code to the map projection.
