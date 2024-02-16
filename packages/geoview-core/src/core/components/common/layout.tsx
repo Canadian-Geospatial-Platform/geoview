@@ -82,14 +82,13 @@ export function Layout({ children, layerList, selectedLayerPath, onLayerListClic
     );
   }, [isEnlarged, selectedLayerPath, layerList, handleLayerChange]);
 
-  //  TODO: Investigate this why we firing this.
   // // If we're on mobile
-  // if (theme.breakpoints.down('md')) {
-  //   // If there are no layers and not already showing the right-side panel
-  //   if (!layerList.length && !isLayersPanelVisible && !fullWidth) {
-  //     setIsLayersPanelVisible(true);
-  //   }
-  // }
+  if (theme.breakpoints.down('md')) {
+    // If there are no layers and not already showing the right-side panel
+    if (!layerList.length && !isLayersPanelVisible && !fullWidth) {
+      setIsLayersPanelVisible(true);
+    }
+  }
 
   return (
     <Box sx={sxClasses.detailsContainer}>
