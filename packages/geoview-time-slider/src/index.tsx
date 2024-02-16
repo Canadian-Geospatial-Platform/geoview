@@ -1,4 +1,4 @@
-import { AnySchemaObject, Cast, toJsonObject, TypeJsonObject, TypeTabs } from 'geoview-core';
+import { AnySchemaObject, api, Cast, toJsonObject, TypeJsonObject, TypeTabs } from 'geoview-core';
 import { TimeSliderIcon } from 'geoview-core/src/ui';
 import { FooterPlugin } from 'geoview-core/src/api/plugin/footer-plugin';
 
@@ -96,6 +96,13 @@ class TimeSliderPlugin extends FooterPlugin {
   });
 
   onCreateContentProps = (): TypeTabs => {
+    // Set custom time dimension if applicable
+    this.configObj.sliders.forEach((obj: any) => {
+      if (obj.temporalDimension) {
+        api.maps[this.pluginProps.mapId].layer.geoviewLayer(obj.layerPaths[0]).setTemporalDimension(obj.layerPaths[0], obj.temporalDimension)
+      }
+    });
+
     return {
       id: 'time-slider',
       value: this.value!,
