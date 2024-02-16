@@ -78,13 +78,19 @@ export function Panel(props: TypePanelAppProps): JSX.Element {
    * function that causes rerender when changing panel content
    */
   const updateComponent = useCallback(() => {
+    // Log
+    logger.logTraceUseCallback('UI.PANEL - updateComponent');
+
     updatePanelContent((count) => count + 1);
   }, []);
 
   /**
    * Close the panel
    */
-  const closePanel = (): void => {
+  const closePanel = useCallback((): void => {
+    // Log
+    logger.logTraceUseCallback('UI.PANEL - closePanel');
+
     const buttonElement = document.getElementById(mapId)?.querySelector(`#${button.id}`);
 
     if (buttonElement) {
@@ -105,55 +111,60 @@ export function Panel(props: TypePanelAppProps): JSX.Element {
 
     // Closed
     onPanelClosed?.();
-  };
+  }, [mapId, button, onPanelClosed]);
 
-  const panelChangeContentListenerFunction = (payload: PayloadBaseClass) => {
-    // Log
-    logger.logTraceCoreAPIEvent('UI.PANEL - panelChangeContentListenerFunction', payload);
+  const panelChangeContentListenerFunction = useCallback(
+    (payload: PayloadBaseClass) => {
+      // Log
+      logger.logTraceCoreAPIEvent('UI.PANEL - panelChangeContentListenerFunction', payload);
 
-    if (payloadIsAPanelContent(payload)) {
-      // set focus on close button on panel content change
-      setTimeout(() => {
-        if (closeBtnRef && closeBtnRef.current) (closeBtnRef.current as HTMLElement).focus();
-      }, 100);
-
-      if (payload.buttonId === button.id!) {
-        updateComponent();
-      }
-    }
-  };
-
-  // TODO: Check - This is probably not at the right place. This handler will be 'added' on every render and the single removal (in the useEffect unmount) likely isn't enough to remove them all
-  // listen to change panel content and rerender right after the panel has been created
-  api.event.on(EVENT_NAMES.PANEL.EVENT_PANEL_CHANGE_CONTENT, panelChangeContentListenerFunction, `${mapId}/${button.id!}`);
-
-  const openPanelListenerFunction = (payload: PayloadBaseClass) => {
-    // Log
-    logger.logTraceCoreAPIEvent('UI.PANEL - openPanelListenerFunction', payload);
-
-    if (payloadHasAButtonIdAndType(payload)) {
-      // set focus on close button on panel open
-      setPanelStatus(true);
-
-      if (onPanelOpened) {
-        // Wait the transition period (+50 ms just to be sure of shenanigans)
+      if (payloadIsAPanelContent(payload)) {
+        // set focus on close button on panel content change
         setTimeout(() => {
-          onPanelOpened();
-        }, theme.transitions.duration.standard + 50);
+          if (closeBtnRef && closeBtnRef.current) (closeBtnRef.current as HTMLElement).focus();
+        }, 100);
+
+        if (payload.buttonId === button.id!) {
+          updateComponent();
+        }
       }
+    },
+    [button, updateComponent]
+  );
 
-      if (closeBtnRef && closeBtnRef.current) {
-        (closeBtnRef.current as HTMLElement).focus();
+  const openPanelListenerFunction = useCallback(
+    (payload: PayloadBaseClass) => {
+      // Log
+      logger.logTraceCoreAPIEvent('UI.PANEL - openPanelListenerFunction', payload);
+
+      if (payloadHasAButtonIdAndType(payload)) {
+        // set focus on close button on panel open
+        setPanelStatus(true);
+
+        if (onPanelOpened) {
+          // Wait the transition period (+50 ms just to be sure of shenanigans)
+          setTimeout(() => {
+            onPanelOpened();
+          }, theme.transitions.duration.standard + 50);
+        }
+
+        if (closeBtnRef && closeBtnRef.current) {
+          (closeBtnRef.current as HTMLElement).focus();
+        }
       }
-    }
-  };
+    },
+    [onPanelOpened, theme]
+  );
 
-  const closePanelListenerFunction = (payload: PayloadBaseClass) => {
-    // Log
-    logger.logTraceCoreAPIEvent('UI.PANEL - closePanelListenerFunction', payload);
+  const closePanelListenerFunction = useCallback(
+    (payload: PayloadBaseClass) => {
+      // Log
+      logger.logTraceCoreAPIEvent('UI.PANEL - closePanelListenerFunction', payload);
 
-    if (payloadHasAButtonIdAndType(payload)) closePanel();
-  };
+      if (payloadHasAButtonIdAndType(payload)) closePanel();
+    },
+    [closePanel]
+  );
 
   const closeAllPanelListenerFunction = (payload: PayloadBaseClass) => {
     // Log
@@ -162,55 +173,61 @@ export function Panel(props: TypePanelAppProps): JSX.Element {
     if (payloadHasAButtonIdAndType(payload)) setPanelStatus(false);
   };
 
-  const panelAddActionListenerFunction = (payload: PayloadBaseClass) => {
-    // Log
-    logger.logTraceCoreAPIEvent('UI.PANEL - panelAddActionListenerFunction', payload);
+  const panelAddActionListenerFunction = useCallback(
+    (payload: PayloadBaseClass) => {
+      // Log
+      logger.logTraceCoreAPIEvent('UI.PANEL - panelAddActionListenerFunction', payload);
 
-    if (payloadIsAPanelAction(payload)) {
-      if (payload.buttonId === button.id!) {
-        const { actionButton } = payload;
+      if (payloadIsAPanelAction(payload)) {
+        if (payload.buttonId === button.id!) {
+          const { actionButton } = payload;
 
-        setActionButtons((prev) => [
-          ...prev,
-          <IconButton
-            key={actionButton.actionButtonId}
-            tooltip={actionButton.title}
-            tooltipPlacement="right"
-            id={actionButton.actionButtonId}
-            aria-label={actionButton.title}
-            onClick={Cast<React.MouseEventHandler>(actionButton.action)}
-            size="small"
-          >
-            {typeof actionButton.children === 'string' ? (
-              <HtmlToReact
-                style={{
-                  display: 'flex',
-                }}
-                htmlContent={actionButton.children}
-              />
-            ) : (
-              (actionButton.children as ReactNode)
-            )}
-          </IconButton>,
-        ]);
+          setActionButtons((prev) => [
+            ...prev,
+            <IconButton
+              key={actionButton.actionButtonId}
+              tooltip={actionButton.title}
+              tooltipPlacement="right"
+              id={actionButton.actionButtonId}
+              aria-label={actionButton.title}
+              onClick={Cast<React.MouseEventHandler>(actionButton.action)}
+              size="small"
+            >
+              {typeof actionButton.children === 'string' ? (
+                <HtmlToReact
+                  style={{
+                    display: 'flex',
+                  }}
+                  htmlContent={actionButton.children}
+                />
+              ) : (
+                (actionButton.children as ReactNode)
+              )}
+            </IconButton>,
+          ]);
+        }
       }
-    }
-  };
+    },
+    [button.id]
+  );
 
-  const panelRemoveActionListenerFunction = (payload: PayloadBaseClass) => {
-    // Log
-    logger.logTraceCoreAPIEvent('UI.PANEL - panelRemoveActionListenerFunction', payload);
+  const panelRemoveActionListenerFunction = useCallback(
+    (payload: PayloadBaseClass) => {
+      // Log
+      logger.logTraceCoreAPIEvent('UI.PANEL - panelRemoveActionListenerFunction', payload);
 
-    if (payloadIsAPanelAction(payload)) {
-      if (payload.buttonId === button.id!) {
-        setActionButtons((list) =>
-          list.filter((item) => {
-            return item.props.id !== payload.actionButton.actionButtonId;
-          })
-        );
+      if (payloadIsAPanelAction(payload)) {
+        if (payload.buttonId === button.id!) {
+          setActionButtons((list) =>
+            list.filter((item) => {
+              return item.props.id !== payload.actionButton.actionButtonId;
+            })
+          );
+        }
       }
-    }
-  };
+    },
+    [button]
+  );
 
   useEffect(() => {
     // Log
@@ -237,16 +254,27 @@ export function Panel(props: TypePanelAppProps): JSX.Element {
     // listen to remove action button event
     api.event.on(EVENT_NAMES.PANEL.EVENT_PANEL_REMOVE_ACTION, panelRemoveActionListenerFunction, `${mapId}/${button.id!}`);
 
+    // listen to change panel content and rerender right after the panel has been created
+    api.event.on(EVENT_NAMES.PANEL.EVENT_PANEL_CHANGE_CONTENT, panelChangeContentListenerFunction, `${mapId}/${button.id!}`);
+
     return () => {
-      api.event.off(EVENT_NAMES.PANEL.EVENT_PANEL_OPEN, `${mapId}/${button.id!}`, openPanelListenerFunction);
-      api.event.off(EVENT_NAMES.PANEL.EVENT_PANEL_CLOSE, `${mapId}/${button.id!}`, closePanelListenerFunction);
-      api.event.off(EVENT_NAMES.PANEL.EVENT_PANEL_CLOSE_ALL, `${mapId}/${button.id!}`, closeAllPanelListenerFunction);
-      api.event.off(EVENT_NAMES.PANEL.EVENT_PANEL_ADD_ACTION, `${mapId}/${button.id!}`, panelAddActionListenerFunction);
-      api.event.off(EVENT_NAMES.PANEL.EVENT_PANEL_REMOVE_ACTION, `${mapId}/${button.id!}`, panelRemoveActionListenerFunction);
       api.event.off(EVENT_NAMES.PANEL.EVENT_PANEL_CHANGE_CONTENT, `${mapId}/${button.id!}`, panelChangeContentListenerFunction);
+      api.event.off(EVENT_NAMES.PANEL.EVENT_PANEL_REMOVE_ACTION, `${mapId}/${button.id!}`, panelRemoveActionListenerFunction);
+      api.event.off(EVENT_NAMES.PANEL.EVENT_PANEL_ADD_ACTION, `${mapId}/${button.id!}`, panelAddActionListenerFunction);
+      api.event.off(EVENT_NAMES.PANEL.EVENT_PANEL_CLOSE_ALL, `${mapId}/${button.id!}`, closeAllPanelListenerFunction);
+      api.event.off(EVENT_NAMES.PANEL.EVENT_PANEL_CLOSE, `${mapId}/${button.id!}`, closePanelListenerFunction);
+      api.event.off(EVENT_NAMES.PANEL.EVENT_PANEL_OPEN, `${mapId}/${button.id!}`, openPanelListenerFunction);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [
+    mapId,
+    button.id,
+    panel,
+    openPanelListenerFunction,
+    closePanelListenerFunction,
+    panelAddActionListenerFunction,
+    panelChangeContentListenerFunction,
+    panelRemoveActionListenerFunction,
+  ]);
 
   useEffect(() => {
     // Log
