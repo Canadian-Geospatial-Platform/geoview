@@ -2,7 +2,7 @@ import { ThemeOptions } from '@mui/material';
 import { IGeoViewColors } from './types';
 import { font, headingStyles, opacity, geoViewColors as defaultGeoViewColors, geoViewFontSizes } from './default';
 
-export const generateThemeOptions = function (geoViewColors: IGeoViewColors = defaultGeoViewColors): ThemeOptions {
+export const generateThemeOptions = (geoViewColors: IGeoViewColors = defaultGeoViewColors): ThemeOptions => {
   const themeOptions: ThemeOptions = {
     palette: {
       geoViewColor: geoViewColors,
@@ -59,7 +59,7 @@ export const generateThemeOptions = function (geoViewColors: IGeoViewColors = de
       divider: 'rgba(0, 0, 0, 0.12)',
       background: {
         paper: geoViewColors.bgColor.light[600],
-        default: geoViewColors.bgColor.light[500]
+        default: geoViewColors.bgColor.light[500],
       },
       action: {
         active: geoViewColors.primary.main,
