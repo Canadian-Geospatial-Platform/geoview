@@ -1,13 +1,5 @@
+import { TimeDimension } from 'geoview-core';
 import { TypeLocalizedString } from 'geoview-core/src/geo/map/map-schema-types';
-
-export type TemporalDimensionProps = {
-  field: string;
-  default: string;
-  unitSymbol: string;
-  range: string[];
-  nearestValues: string;
-  singleHandle: boolean;
-};
 
 export type SliderProps = {
   layerPaths: string[];
@@ -16,7 +8,7 @@ export type SliderProps = {
   locked: boolean;
   reversed: boolean;
   defaultValue: string;
-  temporalDimension: TemporalDimensionProps | null;
+  temporalDimension: TimeDimension;
 };
 
 export type ConfigProps = {
