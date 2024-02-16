@@ -19,8 +19,8 @@
     "coordinates": "Basculer le format des coordonnées",
     "scale": "Basculer entre l'échelle et la résolution",
     "location": "Zoom sur ma position",
-    "collapseBtn": "réduire",
-    "expandBtn": "agrandir"
+    "collapseBtn": "Réduire",
+    "expandBtn": "Agrandir"
   },
   "mapctrl": {
     "rotation": {
