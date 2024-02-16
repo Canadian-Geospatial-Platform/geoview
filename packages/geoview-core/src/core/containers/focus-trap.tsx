@@ -40,6 +40,8 @@ export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
 
   const fullScreen = useMediaQuery(theme.breakpoints.down('md'));
 
+  const arrowKeyCodes: string[] = ['ArrowUp', 'ArrowRight', 'ArrowDown', 'ArrowLeft'];
+
   // internal component state
   const [open, setOpen] = useState(false);
   const navigationLinkRef = useRef() as MutableRefObject<string | undefined>;
@@ -86,7 +88,14 @@ export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
 
   // handle FocusTrap states (Exit)
   const handleExit = (evt: KeyboardEvent) => {
-    if (evt.code === 'KeyQ' && evt.ctrlKey) exitFocus();
+    if (!arrowKeyCodes.includes(evt.code as string)) {
+      // remove the border from the map
+      document.getElementById(`mapbox-${mapId}`)!.style.border = '';
+    }
+
+    if (evt.code === 'KeyQ' && evt.ctrlKey) {
+      exitFocus();
+    }
   };
 
   /**
@@ -109,6 +118,9 @@ export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
   const handleEnable = () => {
     setOpen(false);
     setFocusTrap();
+    const borderColor =
+      theme.palette.mode === 'light' ? theme.palette.geoViewColor.primary.dark[300] : theme.palette.geoViewColor.primary.light[300];
+    document.getElementById(`mapbox-${mapId}`)!.style.border = `5px solid ${borderColor}`;
   };
 
   const handleSkip = () => {
@@ -141,6 +153,8 @@ export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
         () => {
           setOpen(false);
           exitFocus();
+          // remvoe border from the map
+          document.getElementById(`mapbox-${mapId}`)!.style.border = '';
         },
         { once: true }
       );
