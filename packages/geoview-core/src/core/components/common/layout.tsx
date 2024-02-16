@@ -41,6 +41,7 @@ export function Layout({ children, layerList, selectedLayerPath, onLayerListClic
   const handleLayerChange = useCallback(
     (layer: LayerListEntry): void => {
       onLayerListClicked?.(layer);
+      console.log('change is firing..');
       // Show the panel (hiding the layers list in the process if we're on mobile)
       setIsLayersPanelVisible(true);
     },
@@ -83,7 +84,7 @@ export function Layout({ children, layerList, selectedLayerPath, onLayerListClic
   // // If we're on mobile
   // if (theme.breakpoints.down('md')) {
   //   // If there are no layers and not already showing the right-side panel
-  //   if (!layerList.length && !isLayersPanelVisible) {
+  //   if (!layerList.length && !isLayersPanelVisible && !fullWidth) {
   //     setIsLayersPanelVisible(true);
   //   }
   // }

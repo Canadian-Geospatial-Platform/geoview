@@ -20,7 +20,7 @@ export function LayerTitle({ children, hideTitle, fullWidth }: LayerTitleProp) {
   return (
     <Typography
       sx={{
-        fontSize: theme.palette.geoViewFontSize.lg,
+        fontSize: fullWidth ? theme.palette.geoViewFontSize.sm : theme.palette.geoViewFontSize.lg,
         fontWeight: '600',
         marginTop: '12px',
         ...(!fullWidth && { [theme.breakpoints.up('md')]: { display: hideTitle ? 'none' : 'block' } }),
