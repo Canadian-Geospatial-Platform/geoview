@@ -51,7 +51,7 @@ export function TimeSlider(TimeSliderPanelProps: TimeSliderPanelProps) {
 
   // Get actions and states from store
   // TODO: evaluate best option to set value by layer path.... trough a getter?
-  const { setTitle, setDescription, setDefaultValue, setValues, setLocked, setReversed, setDelay, setFiltering, setTemporalDimension } =
+  const { setTitle, setDescription, setDefaultValue, setValues, setLocked, setReversed, setDelay, setFiltering } =
     useTimeSliderStoreActions();
 
   // TODO: check performance as we should technically have one selector by constant
@@ -69,8 +69,7 @@ export function TimeSlider(TimeSliderPanelProps: TimeSliderPanelProps) {
     values,
     delay,
     locked,
-    reversed,
-    temporalDimension,
+    reversed
   } = useTimeSliderLayers()[layerPath];
 
   // slider config
@@ -82,8 +81,6 @@ export function TimeSlider(TimeSliderPanelProps: TimeSliderPanelProps) {
     if (defaultValue === undefined) setDefaultValue(layerPath, sliderConfig?.defaultValue || '');
     if (locked === undefined) setLocked(layerPath, sliderConfig?.locked !== undefined ? sliderConfig?.locked : false);
     if (reversed === undefined) setReversed(layerPath, sliderConfig?.reversed !== undefined ? sliderConfig?.reversed : false);
-    if (temporalDimension === undefined)
-      setTemporalDimension(layerPath, sliderConfig?.temporalDimension !== undefined ? sliderConfig?.temporalDimension : null);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
