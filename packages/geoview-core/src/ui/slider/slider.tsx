@@ -86,6 +86,9 @@ export function Slider(props: TypeSliderProps): JSX.Element {
   };
 
   const sliderSetMinMaxListenerFunction = (payload: PayloadBaseClass) => {
+    // Log
+    logger.logTraceCoreAPIEvent('UI.SLIDER - sliderSetMinMaxListenerFunction', payload);
+
     if (payloadIsASlider(payload)) {
       setMin(payload.sliderValues.min);
       setMax(payload.sliderValues.max);
@@ -102,6 +105,9 @@ export function Slider(props: TypeSliderProps): JSX.Element {
   };
 
   const sliderSetValuesListenerFunction = (payload: PayloadBaseClass) => {
+    // Log
+    logger.logTraceCoreAPIEvent('UI.SLIDER - sliderSetValuesListenerFunction', payload);
+
     if (payloadIsASlider(payload)) {
       setValue(payload.sliderValues.value);
 
@@ -142,6 +148,9 @@ export function Slider(props: TypeSliderProps): JSX.Element {
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const removeLabelOverlap = () => {
+    // Log
+    logger.logTraceCore('UI.SLIDER - window resize event');
+
     // get slider labels
     const markers = containerId
       ? document.getElementById(containerId)?.getElementsByClassName('MuiSlider-markLabel') || []
@@ -205,7 +214,7 @@ export function Slider(props: TypeSliderProps): JSX.Element {
 
   useEffect(() => {
     // Log
-    logger.logTraceUseEffect('SLIDER - minmax', min, max, value);
+    logger.logTraceUseEffect('UI.SLIDER - minmax', min, max, value);
 
     // on set min/max, update slider
     api.event.on(EVENT_NAMES.SLIDER.EVENT_SLIDER_SET_MINMAX, sliderSetMinMaxListenerFunction, properties.id);

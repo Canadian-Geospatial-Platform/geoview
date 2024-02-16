@@ -99,6 +99,9 @@ export function Legend({ fullWidth }: LegendType): JSX.Element {
 
     // update subsets of list when window size updated.
     const formatLegendLayerList = () => {
+      // Log
+      logger.logTraceCore('LEGEND - window resize event');
+
       updateLegendLayerListByWindowSize(legendLayers);
     };
     window.addEventListener('resize', formatLegendLayerList);

@@ -53,7 +53,6 @@ export function Appbar(): JSX.Element {
   const appBarComponents = useUIAppbarComponents();
   const { hideClickMarker } = useMapStoreActions();
   const activeFooterTabId = useUIActiveFooterBarTabId();
-  const appBarPanelCloseListenerFunction = () => setSelectedAppbarButtonId('');
 
   // get store config for app bar to add (similar logic as in footer-bar)
   const appBarConfig = useGeoViewConfig()?.appBar;
@@ -70,6 +69,9 @@ export function Appbar(): JSX.Element {
 
   const addButtonPanel = useCallback(
     (payload: ButtonPanelPayload) => {
+      // Log
+      logger.logTraceUseCallback('APP-BAR - addButtonPanel');
+
       setButtonPanelGroups((prevState) => {
         return {
           ...prevState,
@@ -86,6 +88,9 @@ export function Appbar(): JSX.Element {
 
   const removeButtonPanel = useCallback(
     (payload: ButtonPanelPayload) => {
+      // Log
+      logger.logTraceUseCallback('APP-BAR - removeButtonPanel');
+
       setButtonPanelGroups((prevState) => {
         const state = { ...prevState };
 
@@ -99,18 +104,30 @@ export function Appbar(): JSX.Element {
     [setButtonPanelGroups]
   );
 
+  const appBarPanelCloseListenerFunction = () => {
+    // Log
+    logger.logTraceCoreAPIEvent('APP-BAR - appBarPanelCloseListenerFunction');
+
+    setSelectedAppbarButtonId('');
+  };
+
   useEffect(() => {
     // Log
+    logger.logTraceUseEffect('APP-BAR - addButtonPanel', mapId);
 
     const appBarPanelCreateListenerFunction = (payload: PayloadBaseClass) => {
+      // Log
+      logger.logTraceCoreAPIEvent('APP-BAR - appBarPanelCreateListenerFunction', payload);
+
       if (payloadIsAButtonPanel(payload)) addButtonPanel(payload);
     };
 
     const appBarPanelRemoveListenerFunction = (payload: PayloadBaseClass) => {
+      // Log
+      logger.logTraceCoreAPIEvent('APP-BAR - appBarPanelRemoveListenerFunction', payload);
+
       if (payloadIsAButtonPanel(payload)) removeButtonPanel(payload);
     };
-
-    logger.logTraceUseEffect('APP-BAR - addButtonPanel', mapId);
 
     // listen to new panel creation
     api.event.on(EVENT_NAMES.APPBAR.EVENT_APPBAR_PANEL_CREATE, appBarPanelCreateListenerFunction, mapId);
@@ -130,6 +147,9 @@ export function Appbar(): JSX.Element {
   // #endregion
 
   useEffect(() => {
+    // Log
+    logger.logTraceUseEffect('APP-BAR - open detail panel when clicked on map', mapId);
+
     // open appbar detail drawer when click on map.
     if (activeFooterTabId === 'details' && buttonPanelGroups?.details?.AppbarPanelButtonDetails?.panel) {
       buttonPanelGroups.details.AppbarPanelButtonDetails.panel.open();
@@ -165,6 +185,9 @@ export function Appbar(): JSX.Element {
   }, [appBarConfig, mapId]);
 
   useEffect(() => {
+    // Log
+    logger.logTraceUseEffect('APP-BAR - create group of appbar buttons from footer bar group', mapId);
+
     // render footer bar tabs
     (appBarConfig?.tabs.core ?? [])
       .filter((tab) => tab === 'guide' || tab === 'details' || tab === 'legend')
