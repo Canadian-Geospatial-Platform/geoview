@@ -10,7 +10,11 @@ import { LegendLayer } from './legend-layer';
 import { TypeLegendLayer } from '../layers/types';
 import { useFooterPanelHeight } from '../common';
 
-export function Legend(): JSX.Element {
+interface LegendType {
+  fullWidth?: boolean;
+}
+
+export function Legend({ fullWidth }: LegendType): JSX.Element {
   // Log
   logger.logTraceRender('components/legend/legend');
 
@@ -103,14 +107,18 @@ export function Legend(): JSX.Element {
   }, [legendLayers]);
 
   return (
-    <Box sx={sxClasses.container} ref={leftPanelRef} id="legendContainer">
+    <Box
+      sx={fullWidth ? sxClasses.container : { ...sxClasses.container, ...sxClasses.containerHeight }}
+      ref={leftPanelRef}
+      id="legendContainer"
+    >
       <Box display="flex" flexDirection="row" flexWrap="wrap">
         {!!legendLayers.length &&
           formattedLegendLayerList.map((layers, idx) => {
             return (
               <Box
                 key={`${idx.toString()}`}
-                width={{ xs: '100%', sm: '50%', md: '33.33%', lg: '25%', xl: '25%' }}
+                width={fullWidth ? { xs: '100%' } : { xs: '100%', sm: '50%', md: '33.33%', lg: '25%', xl: '25%' }}
                 sx={{ paddingRight: '0.65rem' }}
               >
                 {layers.map((layer) => {
@@ -133,3 +141,7 @@ export function Legend(): JSX.Element {
     </Box>
   );
 }
+
+Legend.defaultProps = {
+  fullWidth: false,
+};

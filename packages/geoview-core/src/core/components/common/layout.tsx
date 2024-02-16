@@ -87,7 +87,7 @@ export function Layout({ children, layerList, selectedLayerPath, onLayerListClic
   //     setIsLayersPanelVisible(true);
   //   }
   // }
-  console.log('layerList', layerList, selectedLayerPath);
+
   return (
     <Box sx={sxClasses.detailsContainer}>
       <ResponsiveGrid.Root sx={{ pt: 8, pb: 8 }} ref={panelTitleRef}>

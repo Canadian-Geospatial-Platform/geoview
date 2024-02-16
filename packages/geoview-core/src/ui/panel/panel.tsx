@@ -72,6 +72,9 @@ export function Panel(props: TypePanelAppProps): JSX.Element {
     ...(panelStyles?.panelContainer && { ...panelStyles.panelContainer }),
     width: panelStatus ? panelWidth : 0,
     transition: `width ${theme.transitions.duration.standard}ms ease`,
+    position: 'absolute',
+    left: '64px',
+    height: '100%',
   };
 
   /**

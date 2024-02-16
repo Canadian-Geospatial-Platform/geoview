@@ -26,13 +26,16 @@ import { LayerListEntry, Layout } from '../common';
 import { getSxClasses } from './details-style';
 import { FeatureInfo } from './feature-info-new';
 
+interface DetailsPanelType {
+  fullWidth?: boolean;
+}
 /**
  * layers list
  *
  * @param {DetailsPanelProps} props The properties passed to LayersListFooter
  * @returns {JSX.Element} the layers list
  */
-export function DetailsPanel(): JSX.Element {
+export function DetailsPanel({ fullWidth }: DetailsPanelType): JSX.Element {
   // Log
   logger.logTraceRender('components/details/details-panel');
 
@@ -380,7 +383,12 @@ export function DetailsPanel(): JSX.Element {
   const renderComplete = () => {
     if (memoLayersList) {
       return (
-        <Layout selectedLayerPath={selectedLayerPath || ''} layerList={memoLayersList} onLayerListClicked={handleLayerChange}>
+        <Layout
+          selectedLayerPath={selectedLayerPath || ''}
+          layerList={memoLayersList}
+          onLayerListClicked={handleLayerChange}
+          fullWidth={fullWidth}
+        >
           {memoSelectedLayerDataFeatures && (
             <Box sx={sxClasses.rightPanelContainer}>
               <Grid container sx={sxClasses.rightPanelBtnHolder}>

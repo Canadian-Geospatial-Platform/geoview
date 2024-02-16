@@ -2,7 +2,7 @@ import { useTranslation } from 'react-i18next';
 import { useState, useRef, useEffect, useCallback, Fragment } from 'react';
 
 import { useTheme } from '@mui/material/styles';
-import { Box, List, ListItem, Panel, IconButton, TypeIconButtonProps, SchoolIcon } from '@/ui';
+import { Box, List, ListItem, Panel, IconButton, TypeIconButtonProps, SchoolIcon, InfoOutlinedIcon, HubOutlinedIcon } from '@/ui';
 
 import { AbstractPlugin, TypeJsonObject, TypeJsonValue, api, toJsonObject, useGeoViewMapId } from '@/app';
 import { EVENT_NAMES } from '@/api/events/event-types';
@@ -15,11 +15,15 @@ import Geolocator from './buttons/geolocator';
 import Notifications from '@/core/components/notifications/notifications';
 import Version from './buttons/version';
 import { getSxClasses } from './app-bar-style';
-import { useUIActiveFocusItem, useUIAppbarComponents } from '@/core/stores/store-interface-and-intial-values/ui-state';
+import {
+  useUIActiveFocusItem,
+  useUIActiveFooterBarTabId,
+  useUIAppbarComponents,
+} from '@/core/stores/store-interface-and-intial-values/ui-state';
 import { useMapInteraction, useMapStoreActions } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { useGeoViewConfig } from '@/core/stores/geoview-store';
 import { logger } from '@/core/utils/logger';
-import { GuidePanel } from '../guide/guide-panel';
+import { GuidePanel, Legend, DetailsPanel } from '@/core/components';
 
 /**
  * Create an app-bar with buttons that can open a panel
@@ -44,21 +48,25 @@ export function Appbar(): JSX.Element {
   const interaction = useMapInteraction();
   const appBarComponents = useUIAppbarComponents();
   const { hideClickMarker } = useMapStoreActions();
-
+  const activeFooterTabId = useUIActiveFooterBarTabId();
   const appBarPanelCloseListenerFunction = () => setSelectedAppbarButtonId('');
 
   // get store config for app bar to add (similar logic as in footer-bar)
   const appBarConfig = useGeoViewConfig()?.appBar;
 
   // #region REACT HOOKS
+
   const addButtonPanel = useCallback(
     (payload: ButtonPanelPayload) => {
-      setButtonPanelGroups({
-        ...buttonPanelGroups,
-        [payload.appBarGroupName]: {
-          ...buttonPanelGroups[payload.appBarGroupName],
-          [payload.appBarId]: payload.buttonPanel as TypeButtonPanel,
-        },
+      setButtonPanelGroups((prevState) => {
+        return {
+          ...prevState,
+          ...buttonPanelGroups,
+          [payload.appBarGroupName]: {
+            ...buttonPanelGroups[payload.appBarGroupName],
+            [payload.appBarId]: payload.buttonPanel as TypeButtonPanel,
+          },
+        };
       });
     },
     [buttonPanelGroups]
@@ -81,17 +89,19 @@ export function Appbar(): JSX.Element {
 
   useEffect(() => {
     // Log
-    logger.logTraceUseEffect('APP-BAR - addButtonPanel', mapId);
 
     const appBarPanelCreateListenerFunction = (payload: PayloadBaseClass) => {
       if (payloadIsAButtonPanel(payload)) addButtonPanel(payload);
     };
-    // listen to new panel creation
-    api.event.on(EVENT_NAMES.APPBAR.EVENT_APPBAR_PANEL_CREATE, appBarPanelCreateListenerFunction, mapId);
 
     const appBarPanelRemoveListenerFunction = (payload: PayloadBaseClass) => {
       if (payloadIsAButtonPanel(payload)) removeButtonPanel(payload);
     };
+
+    logger.logTraceUseEffect('APP-BAR - addButtonPanel', mapId);
+
+    // listen to new panel creation
+    api.event.on(EVENT_NAMES.APPBAR.EVENT_APPBAR_PANEL_CREATE, appBarPanelCreateListenerFunction, mapId);
 
     // listen on panel removal
     api.event.on(EVENT_NAMES.APPBAR.EVENT_APPBAR_PANEL_REMOVE, appBarPanelRemoveListenerFunction, mapId);
@@ -107,6 +117,13 @@ export function Appbar(): JSX.Element {
   }, [addButtonPanel, mapId, removeButtonPanel, selectedAppBarButtonId]);
   // #endregion
 
+  useEffect(() => {
+    if (activeFooterTabId === 'details') {
+      buttonPanelGroups.details.AppbarPanelButtonDetails.panel?.open();
+      setSelectedAppbarButtonId(buttonPanelGroups.details.AppbarPanelButtonDetails?.button?.id ?? '');
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeFooterTabId]);
   /**
    * Create default tabs from configuration parameters (similar logic as in footer-bar).
    */
@@ -152,7 +169,50 @@ export function Appbar(): JSX.Element {
           panelCardContent: { padding: '0' },
         },
       };
-      api.maps[mapId].appBarButtons.createAppbarPanel(button, panel, null);
+      api.maps[mapId].appBarButtons.createAppbarPanel(button, panel, 'guide');
+    }
+
+    if (appBarConfig?.tabs.core.includes('details')) {
+      const button: TypeIconButtonProps = {
+        id: 'AppbarPanelButtonDetails',
+        tooltip: t('details.title')!,
+        tooltipPlacement: 'bottom',
+        children: <InfoOutlinedIcon />,
+      };
+
+      const panel: TypePanelProps = {
+        panelId: 'AppbarDetailsPanelId',
+        type: 'app-bar',
+        title: t('details.title')!,
+        icon: <InfoOutlinedIcon />,
+        content: <DetailsPanel fullWidth />,
+        width: 400,
+        panelStyles: {
+          panelCardContent: { padding: '0' },
+        },
+      };
+      api.maps[mapId].appBarButtons.createAppbarPanel(button, panel, 'details');
+    }
+    if (appBarConfig?.tabs.core.includes('legend')) {
+      const button: TypeIconButtonProps = {
+        id: 'AppbarPanelButtonLegend',
+        tooltip: t('legend.title')!,
+        tooltipPlacement: 'bottom',
+        children: <HubOutlinedIcon />,
+      };
+
+      const panel: TypePanelProps = {
+        panelId: 'AppbarLegendPanelId',
+        type: 'app-bar',
+        title: t('legend.title')!,
+        icon: <HubOutlinedIcon />,
+        content: <Legend fullWidth />,
+        width: 400,
+        panelStyles: {
+          panelCardContent: { padding: '0' },
+        },
+      };
+      api.maps[mapId].appBarButtons.createAppbarPanel(button, panel, 'legend');
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [appBarConfig?.tabs.core, mapId]);
