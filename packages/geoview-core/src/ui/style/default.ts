@@ -20,7 +20,7 @@ export const opacity = {
 export const geoViewColors: IGeoViewColors = {
   white: '#FFFFFF',
 
-  bgColor: new GeoViewColorClass('#F1F2F5'),
+  bgColor: new GeoViewColorClass('#F2F3F6'),
   primary: new GeoViewColorClass('#515BA5'),
   secondary: new GeoViewColorClass('#1976d2'),
   textColor: new GeoViewColorClass('#393939'),
