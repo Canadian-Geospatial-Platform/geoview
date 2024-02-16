@@ -4,7 +4,10 @@ export declare const getSxClasses: (theme: Theme) => {
         padding: string;
         display: string;
         flexDirection: string;
-        height: string;
+        backgroundColor: string;
+    };
+    containerHeight: {
+        height: number;
     };
     title: {
         textAlign: string;
@@ -62,5 +65,13 @@ export declare const getSxClasses: (theme: Theme) => {
         width: string;
         padding: string;
         margin: string;
+    };
+    legendInstructionsTitle: {
+        fontSize: any;
+        fontWeight: string;
+        lineHeight: string;
+    };
+    legendInstructionsBody: {
+        fontSize: string;
     };
 };

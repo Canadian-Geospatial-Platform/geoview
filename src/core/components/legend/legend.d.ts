@@ -1,2 +1,11 @@
 /// <reference types="react" />
-export declare function Legend(): JSX.Element;
+interface LegendType {
+    fullWidth?: boolean;
+}
+export declare function Legend({ fullWidth }: LegendType): JSX.Element;
+export declare namespace Legend {
+    var defaultProps: {
+        fullWidth: boolean;
+    };
+}
+export {};

@@ -53,10 +53,10 @@ export declare class MapEventProcessor extends AbstractEventProcessor {
      * @param {Extent} extent The extent to zoom to.
      * @param {FitOptions} options The options to configure the zoomToExtent (default: { padding: [100, 100, 100, 100], maxZoom: 11 }).
      */
-    static zoomToExtent(mapId: string, extent: Extent, options?: FitOptions): void;
-    static zoomToGeoLocatorLocation(mapId: string, coords: Coordinate, bbox?: Extent): void;
-    static zoomToInitialExtent(mapId: string): void;
-    static zoomToMyLocation(mapId: string, position: GeolocationPosition): void;
+    static zoomToExtent(mapId: string, extent: Extent, options?: FitOptions): Promise<void>;
+    static zoomToGeoLocatorLocation(mapId: string, coords: Coordinate, bbox?: Extent): Promise<void>;
+    static zoomToInitialExtent(mapId: string): Promise<void>;
+    static zoomToMyLocation(mapId: string, position: GeolocationPosition): Promise<void>;
     /**
      * Set Z index for layers
      *

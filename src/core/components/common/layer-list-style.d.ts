@@ -78,4 +78,16 @@ export declare const getSxClasses: (theme: Theme) => {
         fontSize: string;
         fontWeight: string;
     };
+    layersInstructionsPaper: {
+        padding: string;
+        cursor: string;
+    };
+    layersInstructionsTitle: {
+        fontSize: any;
+        fontWeight: string;
+        lineHeight: string;
+    };
+    layersInstructionsBody: {
+        fontSize: string;
+    };
 };

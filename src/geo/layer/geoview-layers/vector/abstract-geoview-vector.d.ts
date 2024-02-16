@@ -9,7 +9,7 @@ import { Coordinate } from 'ol/coordinate';
 import { Extent } from 'ol/extent';
 import { Pixel } from 'ol/pixel';
 import { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
-import { TypeBaseLayerEntryConfig, TypeListOfLayerEntryConfig, TypeVectorLayerEntryConfig } from '@/geo/map/map-schema-types';
+import { TypeBaseLayerEntryConfig, TypeLayerEntryConfig, TypeListOfLayerEntryConfig, TypeVectorLayerEntryConfig } from '@/geo/map/map-schema-types';
 import { TypeArrayOfFeatureInfoEntries } from '@/api/events/payloads';
 export type TypeVectorLayerGroup = LayerGroup;
 export type TypeVectorLayer = VectorSource<Feature>;
@@ -35,6 +35,15 @@ export declare abstract class AbstractGeoViewVector extends AbstractGeoViewLayer
      * @param {TypeListOfLayerEntryConfig} listOfLayerEntryConfig The list of layer entries configuration to validate.
      */
     protected abstract validateListOfLayerEntryConfig(listOfLayerEntryConfig: TypeListOfLayerEntryConfig): void;
+    /** ***************************************************************************************************************************
+     * Extract the type of the specified field from the metadata. If the type can not be found, return 'string'.
+     *
+     * @param {string} fieldName field name for which we want to get the type.
+     * @param {TypeLayerEntryConfig} layerConfig layer configuration.
+     *
+     * @returns {'string' | 'date' | 'number'} The type of the field.
+     */
+    protected getFieldType(fieldName: string, layerConfig: TypeLayerEntryConfig): 'string' | 'date' | 'number';
     /** ***************************************************************************************************************************
      * This method creates a GeoView layer using the definition provided in the layerConfig parameter.
      *

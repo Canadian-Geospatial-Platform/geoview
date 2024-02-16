@@ -66,15 +66,6 @@ export declare class GeoJSON extends AbstractGeoViewVector {
      */
     constructor(mapId: string, layerConfig: TypeGeoJSONLayerConfig);
     /** ***************************************************************************************************************************
-     * Extract the type of the specified field from the metadata. If the type can not be found, return 'string'.
-     *
-     * @param {string} fieldName field name for which we want to get the type.
-     * @param {TypeLayerEntryConfig} layerConfig layer configuration.
-     *
-     * @returns {'string' | 'date' | 'number'} The type of the field.
-     */
-    protected getFieldType(fieldName: string, layerConfig: TypeLayerEntryConfig): 'string' | 'date' | 'number';
-    /** ***************************************************************************************************************************
      * This method recursively validates the layer configuration entries by filtering and reporting invalid layers. If needed,
      * extra configuration may be done here.
      *

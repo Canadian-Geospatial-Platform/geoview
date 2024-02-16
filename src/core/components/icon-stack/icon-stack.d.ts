@@ -10,4 +10,4 @@ export interface TypeIconStackProps {
  * @param {string} layerPath
  * @returns {JSX.Element} the icon stack item
  */
-export declare function IconStack({ layerPath, onIconClick, onStackIconClick }: TypeIconStackProps): JSX.Element;
+export declare function IconStack({ layerPath, onIconClick, onStackIconClick }: TypeIconStackProps): JSX.Element | null;

@@ -1198,7 +1198,7 @@ export type TypeAppBarProps = {
         core: TypeValidAppBarCoreProps;
     };
 };
-export type TypeValidAppBarCoreProps = Array<'geolocator' | 'export' | 'basemap-panel' | 'geochart'>;
+export type TypeValidAppBarCoreProps = Array<'geolocator' | 'export' | 'basemap-panel' | 'geochart' | 'guide' | 'legend' | 'details'>;
 /** ******************************************************************************************************************************
  * Configuration available for the footer bar component.
  */
@@ -1209,7 +1209,7 @@ export type TypeFooterBarProps = {
     };
     collapsed: boolean;
 };
-export type TypeValidFooterBarTabsCoreProps = Array<'legend' | 'layers' | 'details' | 'data-table' | 'time-slider' | 'geochart'>;
+export type TypeValidFooterBarTabsCoreProps = Array<'legend' | 'layers' | 'details' | 'data-table' | 'time-slider' | 'geochart' | 'guide'>;
 /** ******************************************************************************************************************************
  *  Overview map options. Default none.
  */

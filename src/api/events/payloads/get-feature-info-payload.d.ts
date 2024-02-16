@@ -7,6 +7,7 @@ import { PayloadBaseClass } from './payload-base-class';
 import { EventStringId } from '../event-types';
 import { TypeGeoviewLayerType } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { TypeLayerStatus } from '@/geo/map/map-schema-types';
+import { TypeResultsSet } from './layer-set-payload';
 export type EventType = 'click' | 'hover' | 'crosshaire-enter' | 'all-features';
 export declare const ArrayOfEventTypes: EventType[];
 export type QueryType = 'at_pixel' | 'at_coordinate' | 'at_long_lat' | 'using_a_bounding_box' | 'using_a_polygon' | 'all';
@@ -84,12 +85,30 @@ export type TypeFeatureInfoResultsSet = {
  */
 export declare const payloadIsQueryLayer: (verifyIfPayload: PayloadBaseClass) => verifyIfPayload is TypeQueryLayerPayload;
 /**
+ * type guard function that redefines a PayloadBaseClass as a TypeQueryAllLayerFeaturesPayload
+ * if the event attribute of the verifyIfPayload parameter is valid. The type assertion
+ * applies only to the true block of the if clause.
+ *
+ * @param {PayloadBaseClass} verifyIfPayload object to test in order to determine if the type assertion is valid
+ * @returns {boolean} returns true if the payload is valid
+ */
+export declare const payloadIsGetAllLayerFeatures: (verifyIfPayload: PayloadBaseClass) => verifyIfPayload is TypeQueryLayerPayload;
+/**
  * Returns true if the payload is a TypeQueryLayerPayload with queryType equal to 'at_long_lat'.
  *
  * @param {PayloadBaseClass} verifyIfPayload object to test in order to determine if the type assertion and property are valid
  * @returns {boolean} returns true if the payload is valid
  */
 export declare const payloadIsQueryLayerQueryTypeAtLongLat: (verifyIfPayload: PayloadBaseClass) => verifyIfPayload is TypeQueryLayerPayload;
+/**
+ * type guard function that redefines a PayloadBaseClass as a TypeFeatureInfoLayersetUpdatedPayload
+ * if the event attribute of the verifyIfPayload parameter is valid. The type assertion
+ * applies only to the true block of the if clause.
+ *
+ * @param {PayloadBaseClass} verifyIfPayload object to test in order to determine if the type assertion is valid
+ * @returns {boolean} returns true if the payload is valid
+ */
+export declare const payloadIsFeatureInfoLayersetUpdated: (verifyIfPayload: PayloadBaseClass) => verifyIfPayload is TypeFeatureInfoLayersetUpdatedPayload;
 /**
  * Additional attributes needed to define a GetFeatureInfoPayload
  */
@@ -98,6 +117,7 @@ export interface TypeQueryLayerPayload extends GetFeatureInfoPayload {
     location?: TypeLocation | string;
     eventType: EventType;
 }
+export type TypeQueryAllLayerFeaturesPayload = TypeQueryLayerPayload;
 /**
  * type guard function that redefines a PayloadBaseClass as a TypeAllQueriesDonePayload
  * if the event attribute of the verifyIfPayload parameter is valid. The type assertion
@@ -152,6 +172,14 @@ export interface TypeQueryResultPayload extends GetFeatureInfoPayload {
  */
 export declare const payloadIsGetFeatureInfo: (verifyIfPayload: PayloadBaseClass) => verifyIfPayload is GetFeatureInfoPayload;
 /**
+ * Additional attributes needed to define a TypeAllLegendsDonePayload
+ */
+export interface TypeFeatureInfoLayersetUpdatedPayload extends GetFeatureInfoPayload {
+    layerPath: string;
+    resultsSet: TypeFeatureInfoResultsSet;
+    layerStatus: TypeLayerStatus;
+}
+/**
  * Class definition for GetFeatureInfoPayload
  *
  * @exports
@@ -186,7 +214,7 @@ export declare class GetFeatureInfoPayload extends PayloadBaseClass {
      *
      * @returns {TypeQueryLayerPayload} the queryLayerPayload object created
      */
-    static createGetAllLayerFeaturesPayload: (handlerName: string, queryType: QueryType, location: string) => TypeQueryLayerPayload;
+    static createGetAllLayerFeaturesPayload: (handlerName: string, queryType: QueryType, location?: string) => TypeQueryAllLayerFeaturesPayload;
     /**
      * Static method used to create an "all queries done" payload.
      *
@@ -212,4 +240,14 @@ export declare class GetFeatureInfoPayload extends PayloadBaseClass {
      * @returns {TypeQueryResultPayload} the queryResultPayload object created
      */
     static createQueryResultPayload: (handlerName: string, layerPath: string, queryType: QueryType, arrayOfRecords: TypeArrayOfFeatureInfoEntries, eventType: EventType) => TypeQueryResultPayload;
+    /**
+     * Static method used to create a "feature info updated" payload.
+     *
+     * @param {string | null} handlerName the handler Name
+     * @param {string} layerPath the layer path updated
+     * @param {TypeResultsSet | TypeFeatureInfoResultsSet} resultsSet the feature info resultset
+     *
+     * @returns {TypeFeatureInfoLayersetUpdatedPayload} the TypeFeatureInfoLayersetUpdatedPayload object created
+     */
+    static createFeatureInfoLayersetUpdatedPayload: (handlerName: string, layerPath: string, resultsSet: TypeResultsSet | TypeFeatureInfoResultsSet, layerStatus: TypeLayerStatus) => TypeFeatureInfoLayersetUpdatedPayload;
 }

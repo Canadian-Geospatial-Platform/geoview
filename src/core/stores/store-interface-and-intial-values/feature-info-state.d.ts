@@ -1,5 +1,5 @@
 import { TypeSetStore, TypeGetStore } from '@/core/stores/geoview-store';
-import { TypeArrayOfLayerData, TypeFeatureInfoEntry } from '@/api/events/payloads/get-feature-info-payload';
+import { QueryType, TypeArrayOfLayerData, TypeFeatureInfoEntry } from '@/api/events/payloads/get-feature-info-payload';
 export interface IFeatureInfoState {
     checkedFeatures: Array<TypeFeatureInfoEntry>;
     layerDataArray: TypeArrayOfLayerData;
@@ -17,6 +17,7 @@ export interface IFeatureInfoState {
         setHoverDataArray: (hoverDataArray: TypeArrayOfLayerData) => void;
         setAllFeaturesDataArray: (allFeaturesDataArray: TypeArrayOfLayerData) => void;
         setSelectedLayerPath: (selectedLayerPath: string) => void;
+        triggerGetAllFeatureInfo: (layerPath: string, queryType: QueryType) => void;
     };
 }
 export declare function initFeatureInfoState(set: TypeSetStore, get: TypeGetStore): IFeatureInfoState;
@@ -33,4 +34,5 @@ export declare const useDetailsStoreActions: () => {
     setHoverDataArray: (hoverDataArray: TypeArrayOfLayerData) => void;
     setAllFeaturesDataArray: (allFeaturesDataArray: TypeArrayOfLayerData) => void;
     setSelectedLayerPath: (selectedLayerPath: string) => void;
+    triggerGetAllFeatureInfo: (layerPath: string, queryType: QueryType) => void;
 };
