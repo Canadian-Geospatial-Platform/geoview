@@ -17,7 +17,7 @@ export function MapInfoRotationButton(): JSX.Element {
 
   const theme = useTheme();
   const sxClasses = getSxClasses(theme);
-  const tooltipAndAria = t('mapctrl.rotation.resetRotation')!;
+  const tooltipAndAria = 'mapctrl.rotation.resetRotation';
 
   // internal state
   const iconRef = useRef(null);
