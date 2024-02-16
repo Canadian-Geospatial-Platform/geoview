@@ -280,18 +280,18 @@ export function DetailsPanel({ fullWidth }: DetailsPanelType): JSX.Element {
       if (anotherLayerEntry) {
         // Log
         // logger.logDebug('DETAILS-PANEL', 'select another', memoLayerSelectedItem, anotherLayerEntry.layerPath);
-
         // Select that one
         setSelectedLayerPath(anotherLayerEntry.layerPath);
       } else {
         // Log
         // logger.logDebug('DETAILS-PANEL', 'select none', memoLayerSelectedItem);
-
         // None found, select none
-        setSelectedLayerPath('');
+        //  TODO:: Investigate infinte loop in appbar for statement.
+        // setSelectedLayerPath('');
       }
     }
-  }, [memoLayerSelectedItem, memoLayersList, setSelectedLayerPath, setLayerDataArrayBatchLayerPathBypass]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [memoLayerSelectedItem, memoLayersList]);
 
   // #endregion
 
