@@ -27,7 +27,7 @@ export const getSxClasses = (theme: Theme) => ({
   footerBarEnlargeButton: {
     width: '7rem !important',
   },
-  appBarEnlargeBtn: {
+  appBarEnlargeButton: {
     width: '5rem !important',
     padding: '8px !important',
   },

@@ -30,7 +30,7 @@ export function CloseButton({ isLayersPanelVisible, onSetIsLayersPanelVisible, f
       sx={{
         ...sxClasses.enlargeBtn,
         marginLeft: '1rem',
-        ...(fullWidth ? sxClasses.appBarEnlargeBtn : sxClasses.footerBarEnlargeButton),
+        ...(fullWidth ? sxClasses.appBarEnlargeButton : sxClasses.footerBarEnlargeButton),
         ...(fullWidth && { display: !isLayersPanelVisible ? 'none' : 'block' }),
         ...(!fullWidth && {
           [theme.breakpoints.up('md')]: { display: 'none' },
