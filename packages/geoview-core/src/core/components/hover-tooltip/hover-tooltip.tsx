@@ -65,6 +65,9 @@ export function HoverTooltip(): JSX.Element {
   const selectedFeature = useRef<TypeFeatureInfoEntry>();
 
   const allQueriesDoneListenerFunciton = (payload: PayloadBaseClass) => {
+    // Log
+    logger.logTraceCoreAPIEvent('HOVER-TOOLTIP - allQueriesDoneListenerFunciton', payload);
+
     if (payloadIsAllQueriesDone(payload)) {
       const { eventType, resultsSet } = payload;
       if (eventType === 'hover') {
@@ -107,6 +110,9 @@ export function HoverTooltip(): JSX.Element {
     const unsubMapPointer = getGeoViewStore(mapId).subscribe(
       (state) => state.mapState.pointerPosition,
       (curPos, prevPos) => {
+        // Log too annoying
+        // logger.logTraceCoreStoreSubscription('CLICK-MARKER - pointerPosition', mapId, curPos);
+
         if (curPos !== prevPos) {
           setShowTooltip(false);
           setTooltipValue('');
@@ -119,6 +125,9 @@ export function HoverTooltip(): JSX.Element {
     const unsubMapSingleClick = getGeoViewStore(mapId).subscribe(
       (state) => state.mapState.clickCoordinates,
       (curClick, prevClick) => {
+        // Log
+        logger.logTraceCoreStoreSubscription('CLICK-MARKER - clickCoordinates', mapId, curClick);
+
         if (curClick !== prevClick) {
           selectedFeature.current = undefined;
           setShowTooltip(false);

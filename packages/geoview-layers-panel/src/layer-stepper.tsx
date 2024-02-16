@@ -12,6 +12,7 @@ import {
   PayloadBaseClass,
   payloadIsASnackbarMessage,
 } from 'geoview-core';
+import { logger } from 'geoview-core/src/core/utils/logger';
 
 type Event = { target: { value: string } };
 
@@ -142,6 +143,9 @@ function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
   };
 
   const snackbarEventOpenListenerFunction = (payload: PayloadBaseClass) => {
+    // Log
+    logger.logTraceCoreAPIEvent('LAYER-STEPPER - snackbarEventOpenListenerFunction', payload);
+
     if (payloadIsASnackbarMessage(payload)) {
       if (payload.message && payload.message.value === 'validation.layer.loadfailed') {
         setIsLoading(false);
@@ -150,12 +154,14 @@ function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
   };
 
   useEffect(() => {
+    // Log
+    logger.logTraceUseEffect('LAYER-STEPPER - mount', mapId);
+
     api.event.on(api.eventNames.SNACKBAR.EVENT_SNACKBAR_OPEN, snackbarEventOpenListenerFunction, mapId);
     return () => {
       api.event.off(api.eventNames.SNACKBAR.EVENT_SNACKBAR_OPEN, mapId, snackbarEventOpenListenerFunction);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [api.event, api.eventNames.SNACKBAR.EVENT_SNACKBAR_OPEN, mapId]);
 
   /**
    * Returns the appropriate error config for ESRI layer types
@@ -605,6 +611,9 @@ function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
     api.event.on(
       api.eventNames.LAYER.EVENT_LAYER_ADDED,
       () => {
+        // Log
+        logger.logTraceCoreAPIEvent('LAYER-STEPPER - EVENT_LAYER_ADDED');
+
         api.event.off(api.eventNames.LAYER.EVENT_LAYER_ADDED, mapId);
         setIsLoading(false);
         setAddLayerVisible(false);
