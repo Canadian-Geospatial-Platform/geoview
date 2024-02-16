@@ -18,6 +18,10 @@ interface GuideListItem extends LayerListEntry {
   content: string | ReactNode;
 }
 
+interface GuidePanelType {
+  fullWidth?: boolean;
+}
+
 type RenderFooterContentProps = {
   footerContenKeys: string[];
   footerContentKeyValues: Record<string, string>;
@@ -41,7 +45,7 @@ const RenderFooterContentInRightPanel = memo(({ footerContenKeys, footerContentK
   );
 });
 
-export function GuidePanel(): JSX.Element {
+export function GuidePanel({ fullWidth }: GuidePanelType): JSX.Element {
   const { t } = useTranslation<string>();
 
   const theme = useTheme();
@@ -127,7 +131,12 @@ export function GuidePanel(): JSX.Element {
   }, [leftPanelHelpItems]);
 
   return (
-    <Layout selectedLayerPath={selectedLayerPath || ''} layerList={helpItems} onLayerListClicked={handleGuideItemClick}>
+    <Layout
+      selectedLayerPath={selectedLayerPath || ''}
+      layerList={helpItems}
+      onLayerListClicked={handleGuideItemClick}
+      fullWidth={fullWidth}
+    >
       <Box sx={sxClasses.rightPanelContainer}>
         <Box sx={{ ml: '30px', mb: '18px' }}>{helpItems[guideItemIndex]?.content}</Box>
       </Box>

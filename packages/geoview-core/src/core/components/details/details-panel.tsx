@@ -26,13 +26,16 @@ import { LayerListEntry, Layout } from '../common';
 import { getSxClasses } from './details-style';
 import { FeatureInfo } from './feature-info-new';
 
+interface DetailsPanelType {
+  fullWidth?: boolean;
+}
 /**
  * layers list
  *
  * @param {DetailsPanelProps} props The properties passed to LayersListFooter
  * @returns {JSX.Element} the layers list
  */
-export function DetailsPanel(): JSX.Element {
+export function DetailsPanel({ fullWidth }: DetailsPanelType): JSX.Element {
   // Log
   logger.logTraceRender('components/details/details-panel');
 
@@ -263,7 +266,7 @@ export function DetailsPanel(): JSX.Element {
     // If the layer has features
     if (memoLayerSelectedItem?.numOffeatures) {
       // Log
-      // logger.logDebug('DETAILS-PANEL', 'keep selection', memoLayerSelectedItem);
+      logger.logDebug('DETAILS-PANEL', 'keep selection', memoLayerSelectedItem);
       // All good, keep selection
       // Reset the bypass for next time
       setLayerDataArrayBatchLayerPathBypass(memoLayerSelectedItem.layerPath);
@@ -276,19 +279,19 @@ export function DetailsPanel(): JSX.Element {
       // If found
       if (anotherLayerEntry) {
         // Log
-        // logger.logDebug('DETAILS-PANEL', 'select another', memoLayerSelectedItem, anotherLayerEntry.layerPath);
-
+        logger.logDebug('DETAILS-PANEL', 'select another', memoLayerSelectedItem, anotherLayerEntry.layerPath);
         // Select that one
         setSelectedLayerPath(anotherLayerEntry.layerPath);
       } else {
         // Log
-        // logger.logDebug('DETAILS-PANEL', 'select none', memoLayerSelectedItem);
-
+        logger.logDebug('DETAILS-PANEL', 'select none', memoLayerSelectedItem);
         // None found, select none
-        setSelectedLayerPath('');
+        //  TODO:: Investigate infinte loop in appbar for statement.
+        // setSelectedLayerPath('');
       }
     }
-  }, [memoLayerSelectedItem, memoLayersList, setSelectedLayerPath, setLayerDataArrayBatchLayerPathBypass]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [memoLayerSelectedItem, memoLayersList]);
 
   // #endregion
 
@@ -380,7 +383,12 @@ export function DetailsPanel(): JSX.Element {
   const renderComplete = () => {
     if (memoLayersList) {
       return (
-        <Layout selectedLayerPath={selectedLayerPath || ''} layerList={memoLayersList} onLayerListClicked={handleLayerChange}>
+        <Layout
+          selectedLayerPath={selectedLayerPath || ''}
+          layerList={memoLayersList}
+          onLayerListClicked={handleLayerChange}
+          fullWidth={fullWidth}
+        >
           {memoSelectedLayerDataFeatures && (
             <Box sx={sxClasses.rightPanelContainer}>
               <Grid container sx={sxClasses.rightPanelBtnHolder}>

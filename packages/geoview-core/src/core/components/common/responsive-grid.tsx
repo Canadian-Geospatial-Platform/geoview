@@ -11,6 +11,7 @@ interface ResponsiveGridPanelProps extends GridProps {
   isLayersPanelVisible: boolean;
   sxProps?: SxProps | undefined;
   isEnlarged: boolean;
+  fullWidth?: boolean;
 }
 
 /**
@@ -26,6 +27,24 @@ const ResponsiveGridRoot = forwardRef(({ children, ...rest }: ResponsiveGridProp
 ResponsiveGridRoot.displayName = 'ResponsiveGridRoot';
 
 /**
+ * Get the left panel grid width size based on fullwidth flag.
+ * @param {boolean} fullWidth panel with is maximum.
+ * @param {boolean} isLayersPanelVisible layer panel is visibel
+ * @param {boolean} isEnlarged panel is enlarge
+ * @returns
+ */
+const getLeftPanelSize = (fullWidth: boolean, isLayersPanelVisible: boolean, isEnlarged: boolean) => {
+  if (fullWidth) {
+    return { xs: 12 };
+  }
+  return {
+    xs: isLayersPanelVisible ? 0 : 12,
+    md: !isEnlarged ? 4 : 2,
+    lg: !isEnlarged ? 4 : 1.25,
+  };
+};
+
+/**
  * Create Left Panel for responsive grid.
  * @param {ReactNode} children child elements to be rendered
  * @param {boolean} isLayersPanelVisible panel visibility
@@ -33,16 +52,15 @@ ResponsiveGridRoot.displayName = 'ResponsiveGridRoot';
  * @returns JSX.Element
  */
 const ResponsiveGridLeftPanel = forwardRef(
-  ({ children, isLayersPanelVisible = false, sxProps = {}, isEnlarged, ...rest }: ResponsiveGridPanelProps, ref) => {
+  ({ children, isLayersPanelVisible = false, sxProps = {}, isEnlarged, fullWidth = false, ...rest }: ResponsiveGridPanelProps, ref) => {
     const theme = useTheme();
     return (
       <Grid
         item
-        xs={isLayersPanelVisible ? 0 : 12}
-        md={!isEnlarged ? 4 : 2}
-        lg={!isEnlarged ? 4 : 1.25}
+        {...getLeftPanelSize(fullWidth, isLayersPanelVisible, isEnlarged)}
         sx={{
-          [theme.breakpoints.down('md')]: { display: isLayersPanelVisible ? 'none' : 'block' },
+          ...(!fullWidth && { [theme.breakpoints.down('md')]: { display: isLayersPanelVisible ? 'none' : 'block' } }),
+          ...(fullWidth && { display: isLayersPanelVisible ? 'none' : 'block' }),
           ...sxProps,
         }}
         component="div"
@@ -57,6 +75,24 @@ const ResponsiveGridLeftPanel = forwardRef(
 ResponsiveGridLeftPanel.displayName = 'ResponsiveGridLeftPanel';
 
 /**
+ * Get the right panel grid width size based on fullwidth flag.
+ * @param {boolean} fullWidth panel with is maximum.
+ * @param {boolean} isLayersPanelVisible layer panel is visibel
+ * @param {boolean} isEnlarged panel is enlarge
+ * @returns
+ */
+const getRightPanelSize = (fullWidth: boolean, isLayersPanelVisible: boolean, isEnlarged: boolean) => {
+  if (fullWidth) {
+    return { xs: 12 };
+  }
+  return {
+    xs: !isLayersPanelVisible ? 0 : 12,
+    md: !isEnlarged ? 8 : 10,
+    lg: !isEnlarged ? 8 : 10.75,
+  };
+};
+
+/**
  * Create Right Panel for responsive grid.
  * @param {ReactNode} children child elements to be rendered
  * @param {boolean} isLayersPanelVisible panel visibility
@@ -65,18 +101,17 @@ ResponsiveGridLeftPanel.displayName = 'ResponsiveGridLeftPanel';
  * @returns JSX.Element
  */
 const ResponsiveGridRightPanel = forwardRef(
-  ({ children, isLayersPanelVisible = false, sxProps = {}, isEnlarged, ...rest }: ResponsiveGridPanelProps, ref) => {
+  ({ children, isLayersPanelVisible = false, sxProps = {}, isEnlarged, fullWidth = false, ...rest }: ResponsiveGridPanelProps, ref) => {
     const theme = useTheme();
     return (
       <Grid
         item
-        xs={!isLayersPanelVisible ? 0 : 12}
-        md={!isEnlarged ? 8 : 10}
-        lg={!isEnlarged ? 8 : 10.75}
+        {...getRightPanelSize(fullWidth, isLayersPanelVisible, isEnlarged)}
         sx={{
           position: 'relative',
           [theme.breakpoints.up('md')]: { paddingLeft: '1rem' },
-          [theme.breakpoints.down('md')]: { display: !isLayersPanelVisible ? 'none' : 'block' },
+          ...(!fullWidth && { [theme.breakpoints.down('md')]: { display: !isLayersPanelVisible ? 'none' : 'block' } }),
+          ...(fullWidth && { display: !isLayersPanelVisible ? 'none' : 'block' }),
           ...sxProps,
         }}
         component="div"
@@ -98,8 +133,10 @@ export const ResponsiveGrid = {
 
 ResponsiveGridLeftPanel.defaultProps = {
   sxProps: undefined,
+  fullWidth: false,
 };
 
 ResponsiveGridRightPanel.defaultProps = {
   sxProps: undefined,
+  fullWidth: false,
 };

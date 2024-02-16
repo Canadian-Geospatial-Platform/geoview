@@ -1,30 +1,41 @@
-import { useState, useRef, useEffect, useCallback, Fragment } from 'react';
-
+import { useTranslation } from 'react-i18next';
+import { useState, useRef, useEffect, useCallback, Fragment, useMemo, ReactNode } from 'react';
+import { capitalize } from 'lodash';
 import { useTheme } from '@mui/material/styles';
-import { Box, List, ListItem, Panel, IconButton } from '@/ui';
+import { Box, List, ListItem, Panel, IconButton, TypeIconButtonProps, SchoolIcon, InfoOutlinedIcon, HubOutlinedIcon } from '@/ui';
 
 import { AbstractPlugin, TypeJsonObject, TypeJsonValue, api, toJsonObject, useGeoViewMapId } from '@/app';
 import { EVENT_NAMES } from '@/api/events/event-types';
 
 import { payloadIsAButtonPanel, ButtonPanelPayload, PayloadBaseClass } from '@/api/events/payloads';
-import { TypeButtonPanel } from '@/ui/panel/panel-types';
+import { TypeButtonPanel, TypePanelProps } from '@/ui/panel/panel-types';
 
 import ExportButton from '@/core/components/export/export-modal-button';
 import Geolocator from './buttons/geolocator';
 import Notifications from '@/core/components/notifications/notifications';
 import Version from './buttons/version';
 import { getSxClasses } from './app-bar-style';
-import { useUIActiveFocusItem, useUIAppbarComponents } from '@/core/stores/store-interface-and-intial-values/ui-state';
+import {
+  useUIActiveFocusItem,
+  useUIActiveFooterBarTabId,
+  useUIAppbarComponents,
+} from '@/core/stores/store-interface-and-intial-values/ui-state';
 import { useMapInteraction, useMapStoreActions } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { useGeoViewConfig } from '@/core/stores/geoview-store';
 import { logger } from '@/core/utils/logger';
+import { GuidePanel, Legend, DetailsPanel } from '@/core/components';
 
+interface GroupPanelType {
+  icon: ReactNode;
+  content: ReactNode;
+}
 /**
  * Create an app-bar with buttons that can open a panel
  */
 export function Appbar(): JSX.Element {
   // Log
   logger.logTraceRender('components/app-bar/app-bar');
+  const { t } = useTranslation();
 
   const mapId = useGeoViewMapId();
 
@@ -41,22 +52,36 @@ export function Appbar(): JSX.Element {
   const interaction = useMapInteraction();
   const appBarComponents = useUIAppbarComponents();
   const { hideClickMarker } = useMapStoreActions();
+  // TODO: remove active footerTab Id and create new one for appbar id.
+  const activeFooterTabId = useUIActiveFooterBarTabId();
 
   // get store config for app bar to add (similar logic as in footer-bar)
   const appBarConfig = useGeoViewConfig()?.appBar;
 
   // #region REACT HOOKS
+
+  const panels = useMemo(() => {
+    return {
+      legend: { icon: <HubOutlinedIcon />, content: <Legend fullWidth /> },
+      guide: { icon: <SchoolIcon />, content: <GuidePanel fullWidth /> },
+      details: { icon: <InfoOutlinedIcon />, content: <DetailsPanel fullWidth /> },
+    } as unknown as Record<string, GroupPanelType>;
+  }, []);
+
   const addButtonPanel = useCallback(
     (payload: ButtonPanelPayload) => {
       // Log
       logger.logTraceUseCallback('APP-BAR - addButtonPanel');
 
-      setButtonPanelGroups({
-        ...buttonPanelGroups,
-        [payload.appBarGroupName]: {
-          ...buttonPanelGroups[payload.appBarGroupName],
-          [payload.appBarId]: payload.buttonPanel as TypeButtonPanel,
-        },
+      setButtonPanelGroups((prevState) => {
+        return {
+          ...prevState,
+          ...buttonPanelGroups,
+          [payload.appBarGroupName]: {
+            ...buttonPanelGroups[payload.appBarGroupName],
+            [payload.appBarId]: payload.buttonPanel as TypeButtonPanel,
+          },
+        };
       });
     },
     [buttonPanelGroups]
@@ -97,8 +122,6 @@ export function Appbar(): JSX.Element {
 
       if (payloadIsAButtonPanel(payload)) addButtonPanel(payload);
     };
-    // listen to new panel creation
-    api.event.on(EVENT_NAMES.APPBAR.EVENT_APPBAR_PANEL_CREATE, appBarPanelCreateListenerFunction, mapId);
 
     const appBarPanelRemoveListenerFunction = (payload: PayloadBaseClass) => {
       // Log
@@ -106,6 +129,9 @@ export function Appbar(): JSX.Element {
 
       if (payloadIsAButtonPanel(payload)) removeButtonPanel(payload);
     };
+
+    // listen to new panel creation
+    api.event.on(EVENT_NAMES.APPBAR.EVENT_APPBAR_PANEL_CREATE, appBarPanelCreateListenerFunction, mapId);
 
     // listen on panel removal
     api.event.on(EVENT_NAMES.APPBAR.EVENT_APPBAR_PANEL_REMOVE, appBarPanelRemoveListenerFunction, mapId);
@@ -120,6 +146,19 @@ export function Appbar(): JSX.Element {
     };
   }, [addButtonPanel, mapId, removeButtonPanel, selectedAppBarButtonId]);
   // #endregion
+
+  useEffect(() => {
+    // Log
+    logger.logTraceUseEffect('APP-BAR - open detail panel when clicked on map', mapId);
+    // TODO: remove active footerTab Id and create new one for appbar id.
+    // open appbar detail drawer when click on map.
+    if (activeFooterTabId === 'details' && buttonPanelGroups?.details?.AppbarPanelButtonDetails?.panel) {
+      buttonPanelGroups.details.AppbarPanelButtonDetails.panel.open();
+      buttonPanelGroups.details.AppbarPanelButtonDetails.panel.content = panels.details.content;
+      setSelectedAppbarButtonId(buttonPanelGroups.details.AppbarPanelButtonDetails?.button?.id ?? '');
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeFooterTabId]);
 
   /**
    * Create default tabs from configuration parameters (similar logic as in footer-bar).
@@ -145,6 +184,38 @@ export function Appbar(): JSX.Element {
         });
     }
   }, [appBarConfig, mapId]);
+
+  useEffect(() => {
+    // Log
+    logger.logTraceUseEffect('APP-BAR - create group of appbar buttons', mapId);
+
+    // render footer bar tabs
+    (appBarConfig?.tabs.core ?? [])
+      .filter((tab) => tab === 'guide' || tab === 'details' || tab === 'legend')
+      .map((tab): [TypeIconButtonProps, TypePanelProps, string] => {
+        const button: TypeIconButtonProps = {
+          id: `AppbarPanelButton${capitalize(tab)}`,
+          tooltip: t(`${tab}.title`)!,
+          tooltipPlacement: 'bottom',
+          children: panels[tab].icon,
+        };
+        const panel: TypePanelProps = {
+          panelId: `Appbar${capitalize(tab)}PanelId`,
+          type: 'app-bar',
+          title: capitalize(tab),
+          icon: panels[tab].icon,
+          content: '',
+          width: 400,
+          panelStyles: {
+            panelCardContent: { padding: '0' },
+          },
+        };
+        return [button, panel, tab];
+      })
+      .forEach((footerGroup) => api.maps[mapId].appBarButtons.createAppbarPanel(footerGroup[0], footerGroup[1], footerGroup[2]));
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [appBarConfig?.tabs.core, mapId]);
 
   return (
     <Box sx={sxClasses.appBar} ref={appBar}>
@@ -181,6 +252,9 @@ export function Appbar(): JSX.Element {
                         onClick={() => {
                           if (!buttonPanel.panel?.status) {
                             buttonPanel.panel?.open();
+                            if (buttonPanel.panel && buttonPanel.groupName) {
+                              buttonPanel.panel.content = panels[buttonPanel.groupName].content;
+                            }
                             setSelectedAppbarButtonId(buttonPanel?.button?.id ?? '');
                           } else {
                             buttonPanel.panel?.close();
