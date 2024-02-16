@@ -112,7 +112,7 @@ export function Legend({ fullWidth }: LegendType): JSX.Element {
   return (
     <Box
       sx={fullWidth ? sxClasses.container : { ...sxClasses.container, ...sxClasses.containerHeight }}
-      ref={leftPanelRef}
+      {...(!fullWidth && { ref: leftPanelRef })}
       id="legendContainer"
     >
       <Box display="flex" flexDirection="row" flexWrap="wrap">
