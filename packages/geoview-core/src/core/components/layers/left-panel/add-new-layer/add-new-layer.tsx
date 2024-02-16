@@ -867,7 +867,7 @@ export function AddNewLayer(): JSX.Element {
     }
     setIsLoading(false);
     let message = '';
-    switch(geoviewLayerInstance?.layerPhase) {
+    switch (geoviewLayerInstance?.layerPhase) {
       case 'loading':
         message = api.utilities.replaceParams([layerName], t('layers.layerAddedAndLoading'));
         break;
