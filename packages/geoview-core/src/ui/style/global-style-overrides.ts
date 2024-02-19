@@ -1,8 +1,6 @@
-import { IGeoViewColors } from "./types";
+import { IGeoViewColors } from './types';
 
-
-export  const globalStyleOverrides = (geoViewColors: IGeoViewColors) => ({
-
+export const globalStyleOverrides = (geoViewColors: IGeoViewColors) => ({
   '.layer-icon': {
     padding: 3,
     borderRadius: 0,
@@ -20,6 +18,6 @@ export  const globalStyleOverrides = (geoViewColors: IGeoViewColors) => ({
     color: geoViewColors.primary.main,
     '*:hover': {
       color: geoViewColors.primary.dark[300],
-    }
-  }
-})
+    },
+  },
+});
