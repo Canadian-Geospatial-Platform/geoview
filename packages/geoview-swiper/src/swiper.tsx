@@ -1,6 +1,11 @@
+import Draggable from 'react-draggable';
+
 import { RefObject, useAppDisplayLanguageById } from 'geoview-core';
 
-import Draggable from 'react-draggable';
+import { getLocalizedMessage } from 'geoview-core/src/core/utils/utilities';
+import { EVENT_NAMES } from 'geoview-core/src/api/events/event-types';
+import { PayloadBaseClass, TypeResultsSet, payloadIsLayerSetUpdated } from 'geoview-core/src/api/events/payloads';
+import { logger } from 'geoview-core/src/core/utils/logger';
 
 import { getRenderPixel } from 'ol/render';
 import Map from 'ol/Map';
@@ -12,10 +17,6 @@ import { EventTypes } from 'ol/Observable';
 import BaseEvent from 'ol/events/Event';
 
 import debounce from 'lodash/debounce';
-
-import { getLocalizedMessage } from 'geoview-core/src/core/utils/utilities';
-import { EVENT_NAMES } from 'geoview-core/src/api/events/event-types';
-import { PayloadBaseClass, TypeResultsSet, payloadIsLayerSetUpdated } from 'geoview-core/src/api/events/payloads';
 
 const sxClasses = {
   layerSwipe: {
@@ -231,6 +232,9 @@ export function Swiper(props: SwiperProps): JSX.Element {
   };
 
   useEffect(() => {
+    // Log
+    logger.logTraceUseEffect('GEOVIEW-SWIPER - layersIds.displayLanguage', layersIds, displayLanguage);
+
     // set listener for layers in config array
     const { geoviewLayers } = api.maps[mapId].layer;
     layersIds.forEach((layer: string) => {
@@ -254,7 +258,13 @@ export function Swiper(props: SwiperProps): JSX.Element {
 
   // Update layer list if a layer loads late
   useEffect(() => {
+    // Log
+    logger.logTraceUseEffect('GEOVIEW-SWIPER - layersIds', layersIds);
+
     const layerSetUpdatedHandler = (payload: PayloadBaseClass) => {
+      // Log
+      logger.logTraceCoreAPIEvent('GEOVIEW-SWIPER - layerSetUpdatedHandler', payload);
+
       if (payloadIsLayerSetUpdated(payload) && payload.resultsSet[payload.layerPath]?.layerStatus === 'loaded') {
         const layerId = payload.layerPath.split('/')[0];
         const ids = [...layersIds];
@@ -264,6 +274,7 @@ export function Swiper(props: SwiperProps): JSX.Element {
         }
       }
     };
+
     api.event.on(EVENT_NAMES.LAYER_SET.UPDATED, layerSetUpdatedHandler, `${mapId}/LegendsLayerSet`);
     return () => {
       api.event.off(EVENT_NAMES.LAYER_SET.UPDATED, mapId, layerSetUpdatedHandler);

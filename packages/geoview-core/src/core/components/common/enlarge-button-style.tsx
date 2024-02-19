@@ -2,8 +2,8 @@ import { Theme } from '@mui/material';
 
 export const getSxClasses = (theme: Theme) => ({
   enlargeBtn: {
-    width: '7rem !important',
-    height: '2.5rem !important',
+    height: '2rem !important',
+    lineHeight: 1,
     borderRadius: '1.5rem',
     boxShadow: `0px 3px 6px ${theme.palette.geoViewColor.bgColor.dark[600]}`,
     marginTop: '0.25rem',
@@ -23,7 +23,13 @@ export const getSxClasses = (theme: Theme) => ({
         color: `${theme.palette.geoViewColor.white} !important`,
       },
     },
-    [theme.breakpoints.down('md')]: { display: 'none' },
+  },
+  footerBarEnlargeButton: {
+    width: '7rem !important',
+  },
+  appBarEnlargeButton: {
+    width: '5rem !important',
+    padding: '8px !important',
   },
   enlargeBtnIcon: {
     color: theme.palette.geoViewColor.primary.main,

@@ -56,6 +56,9 @@ export function Snackbar(props: SnackBarProps): JSX.Element {
   const [button, setButton] = useState<JSX.Element | undefined>();
 
   const snackBarOpenListenerFunction = (payload: PayloadBaseClass) => {
+    // Log
+    logger.logTraceCoreAPIEvent('UI.SNACKBAR - snackBarOpenListenerFunction', payload);
+
     if (payloadIsASnackbarMessage(payload)) {
       // apply function if provided
       const myButton = payload.button?.label
@@ -85,7 +88,7 @@ export function Snackbar(props: SnackBarProps): JSX.Element {
 
   useEffect(() => {
     // Log
-    logger.logTraceUseEffect('SNACKBAR - mount', mapId);
+    logger.logTraceUseEffect('UI.SNACKBAR - mount', mapId);
 
     // listen to API event when app wants to show message
     api.event.on(EVENT_NAMES.SNACKBAR.EVENT_SNACKBAR_OPEN, snackBarOpenListenerFunction, mapId);

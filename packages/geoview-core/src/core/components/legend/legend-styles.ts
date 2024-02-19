@@ -5,8 +5,10 @@ export const getSxClasses = (theme: Theme) => ({
     padding: '20px',
     display: 'flex',
     flexDirection: 'column',
-    height: '700px',
     backgroundColor: theme.palette.geoViewColor.bgColor.main,
+  },
+  containerHeight: {
+    height: 700,
   },
   title: {
     textAlign: 'left',

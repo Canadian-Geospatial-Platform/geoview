@@ -34,7 +34,7 @@ export function useFooterPanelHeight({ footerPanelTab }: UseFooterPanelHeightTyp
     if (leftPanelRef.current && isMapFullScreen && (activeFooterBarTabId === footerPanelTab || footerPanelTab === 'default')) {
       const panelTitleHeight = panelTitleRef.current?.clientHeight ?? 0;
       const tabsContainer = document.getElementById('tabsContainer')!;
-      const firstChild = tabsContainer.firstElementChild?.firstElementChild;
+      const firstChild = tabsContainer?.firstElementChild?.firstElementChild;
       const firstChildHeight = firstChild?.clientHeight ?? 0;
       const leftPanelHeight = (window.screen.height * footerPanelResizeValue) / 100 - panelTitleHeight - firstChildHeight;
 

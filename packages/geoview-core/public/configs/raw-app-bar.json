@@ -1,0 +1,178 @@
+{
+  "map": {
+    "interaction": "dynamic",
+    "viewSettings": {
+      "zoom": 3,
+      "center": [
+        -100,
+        50
+      ],
+      "projection": 3978
+    },
+    "basemapOptions": {
+      "basemapId": "osm",
+      "shaded": false,
+      "labeled": false
+    },
+    "listOfGeoviewLayerConfig": [
+      {
+        "geoviewLayerId": "esriFeatureLYR4",
+        "geoviewLayerName": {
+          "en": "Water quality at monitoring sites",
+          "fr": "Qualité eau"
+        },
+        "metadataAccessPath": {
+          "en": "https://maps-cartes.ec.gc.ca/arcgis/rest/services/DMS/DEU_CSO_Volume/MapServer",
+          "fr": "https://maps-cartes.ec.gc.ca/arcgis/rest/services/DMS/DEU_CSO_Volume/MapServer"
+        },
+        "geoviewLayerType": "esriFeature",
+        "initialSettings": {
+          "visible": "always"
+        },
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "8"
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "uniqueValueId",
+        "geoviewLayerName": {
+          "en": "uniqueValue",
+          "fr": "uniqueValue"
+        },
+        "metadataAccessPath": {
+          "en": "https://maps-cartes.ec.gc.ca/arcgis/rest/services/CESI/MapServer/",
+          "fr": "https://maps-cartes.ec.gc.ca/arcgis/rest/services/CESI/MapServer/"
+        },
+        "geoviewLayerType": "esriFeature",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "1"
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "esriFeatureLYR5",
+        "geoviewLayerName": {
+          "en": "Top Projects",
+          "fr": "Projets super"
+        },
+        "metadataAccessPath": {
+          "en": "https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/900A_and_top_100_en/MapServer/",
+          "fr": "https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/900A_and_top_100_en/MapServer/"
+        },
+        "geoviewLayerType": "esriFeature",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "0"
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "geojsonLYR1",
+        "geoviewLayerName": {
+          "en": "GeoJSON Sample",
+          "fr": "GeoJSON Échantillon"
+        },
+        "metadataAccessPath": {
+          "en": "./datasets/geojson/metadata.json",
+          "fr": "./datasets/geojson/metadata.json"
+        },
+        "geoviewLayerType": "GeoJSON",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "polygons.json",
+            "layerName": {
+              "en": "Polygons",
+              "fr": "Polygones"
+            }
+          },
+          {
+            "layerId": "lines.json",
+            "layerName": {
+              "en": "Lines",
+              "fr": "Lignes"
+            }
+          },
+          {
+            "entryType": "group",
+            "layerId": "point-feature-group",
+            "layerName": {
+              "en": "point-feature-group",
+              "fr": "point-feature-group"
+            },
+            "listOfLayerEntryConfig": [
+              {
+                "layerId": "icon_points.json",
+                "layerName": {
+                  "en": "Icons",
+                  "fr": "Icones"
+                },
+                "initialSettings": {
+                  "visible": "yes"
+                }
+              },
+              {
+                "layerId": "points.json",
+                "layerName": {
+                  "en": "Points",
+                  "fr": "Points"
+                }
+              },
+              {
+                "layerId": "points_1.json",
+                "layerName": {
+                  "en": "Points 1",
+                  "fr": "Points 1"
+                }
+              },
+              {
+                "layerId": "points_2.json",
+                "layerName": {
+                  "en": "Points 2",
+                  "fr": "Points 2"
+                }
+              },
+              {
+                "layerId": "points_3.json",
+                "layerName": {
+                  "en": "Points 3",
+                  "fr": "Points 3"
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "theme": "geo.ca",
+  "appBar": {
+    "tabs": {
+      "core": [
+        "geolocator",
+        "export",
+        "guide",
+        "details",
+        "legend"
+      ]
+    }
+  },
+  "navBar": [
+    "zoom",
+    "fullscreen",
+    "home",
+    "location",
+    "export"
+  ],
+  "components": [
+    "north-arrow"
+  ],
+  "corePackages": [],
+  "externalPackages": [],
+  "suportedLanguages": [
+    "en",
+    "fr"
+  ]
+}

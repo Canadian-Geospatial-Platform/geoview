@@ -7,15 +7,17 @@ import { getSxClasses } from './enlarge-button-style';
 interface CloseButtonProps {
   isLayersPanelVisible: boolean;
   onSetIsLayersPanelVisible: Dispatch<SetStateAction<boolean>>;
+  fullWidth?: boolean;
 }
 
 /**
  * Create close button
  * @param {boolean} isLayersPanelVisible show/hide the list in left panel
  * @param {function} setIsLayersPanelVisible dispatch function to update isLayersPanelVisible
+ * @param {boolean} fullWidth show close button when full width is true
  * @returns JSX.element
  */
-export function CloseButton({ isLayersPanelVisible, onSetIsLayersPanelVisible }: CloseButtonProps) {
+export function CloseButton({ isLayersPanelVisible, onSetIsLayersPanelVisible, fullWidth }: CloseButtonProps) {
   const { t } = useTranslation<string>();
 
   const theme = useTheme();
@@ -28,9 +30,13 @@ export function CloseButton({ isLayersPanelVisible, onSetIsLayersPanelVisible }:
       sx={{
         ...sxClasses.enlargeBtn,
         marginLeft: '1rem',
-        [theme.breakpoints.up('md')]: { display: 'none' },
-        [theme.breakpoints.between('sm', 'md')]: { display: !isLayersPanelVisible ? 'none' : 'block' },
-        [theme.breakpoints.down('md')]: { display: !isLayersPanelVisible ? 'none' : 'block' },
+        ...(fullWidth ? sxClasses.appBarEnlargeButton : sxClasses.footerBarEnlargeButton),
+        ...(fullWidth && { display: !isLayersPanelVisible ? 'none' : 'block' }),
+        ...(!fullWidth && {
+          [theme.breakpoints.up('md')]: { display: 'none' },
+          [theme.breakpoints.between('sm', 'md')]: { display: !isLayersPanelVisible ? 'none' : 'block' },
+          [theme.breakpoints.down('md')]: { display: !isLayersPanelVisible ? 'none' : 'block' },
+        }),
       }}
       onClick={() => onSetIsLayersPanelVisible(false)}
       tooltip={t('dataTable.close') ?? ''}
@@ -40,3 +46,7 @@ export function CloseButton({ isLayersPanelVisible, onSetIsLayersPanelVisible }:
     </Button>
   );
 }
+
+CloseButton.defaultProps = {
+  fullWidth: false,
+};
