@@ -29,12 +29,10 @@ export interface TypeLegendLayer {
   layerId: string;
   layerPath: string;
   layerAttribution?: string[];
-  metadataAccessPath?: string;
   layerName: string;
   type?: TypeGeoviewLayerType;
   styleConfig?: TypeStyleConfig | null;
   layerStatus?: TypeLayerStatus;
-  layerPhase?: string;
   querySent?: boolean;
   canToggle?: boolean; // can sublayer visibility be toggled
 

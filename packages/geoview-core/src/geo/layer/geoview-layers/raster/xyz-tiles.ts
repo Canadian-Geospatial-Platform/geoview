@@ -157,14 +157,14 @@ export class XYZTiles extends AbstractGeoViewRaster {
         if (!layerConfig.listOfLayerEntryConfig.length) {
           this.layerLoadError.push({
             layer: layerPath,
-            consoleMessage: `Empty layer group (mapId:  ${this.mapId}, layerPath: ${layerPath})`,
+            loggerMessage: `Empty layer group (mapId:  ${this.mapId}, layerPath: ${layerPath})`,
           });
-          this.setLayerStatus('error', layerPath);
+          layerConfig.layerStatus = 'error';
           return;
         }
       }
 
-      this.setLayerStatus('processing', layerPath);
+      layerConfig.layerStatus = 'processing';
 
       // When no metadata are provided, all layers are considered valid.
       if (!this.metadata) return;
@@ -177,9 +177,9 @@ export class XYZTiles extends AbstractGeoViewRaster {
         if (!foundEntry) {
           this.layerLoadError.push({
             layer: layerPath,
-            consoleMessage: `XYZ layer not found (mapId:  ${this.mapId}, layerPath: ${layerPath})`,
+            loggerMessage: `XYZ layer not found (mapId:  ${this.mapId}, layerPath: ${layerPath})`,
           });
-          this.setLayerStatus('error', layerPath);
+          layerConfig.layerStatus = 'error';
           return;
         }
         return;
@@ -199,80 +199,82 @@ export class XYZTiles extends AbstractGeoViewRaster {
    * @returns {TypeBaseRasterLayer} The GeoView raster layer that has been created.
    */
   protected processOneLayerEntry(layerConfig: TypeXYZTilesLayerEntryConfig): Promise<TypeBaseRasterLayer | null> {
-    const promisedVectorLayer = new Promise<TypeBaseRasterLayer | null>((resolve) => {
-      const { layerPath } = layerConfig;
-      this.setLayerPhase('processOneLayerEntry', layerPath);
-      const sourceOptions: SourceOptions = {
-        url: getLocalizedValue(layerConfig.source.dataAccessPath, this.mapId),
+    // ! IMPORTANT: The processOneLayerEntry method must call the corresponding method of its parent to ensure that the flow of
+    // !            layerStatus values is correctly sequenced.
+    super.processOneLayerEntry(layerConfig);
+    const { layerPath } = layerConfig;
+    this.setLayerPhase('processOneLayerEntry', layerPath);
+    const sourceOptions: SourceOptions = {
+      url: getLocalizedValue(layerConfig.source.dataAccessPath, this.mapId),
+    };
+    if (layerConfig.source.crossOrigin) {
+      sourceOptions.crossOrigin = layerConfig.source.crossOrigin;
+    } else {
+      sourceOptions.crossOrigin = 'Anonymous';
+    }
+    if (layerConfig.source.projection) sourceOptions.projection = `EPSG:${layerConfig.source.projection}`;
+    if (layerConfig.source.tileGrid) {
+      const tileGridOptions: TileGridOptions = {
+        origin: layerConfig.source.tileGrid?.origin,
+        resolutions: layerConfig.source.tileGrid?.resolutions as number[],
       };
-      if (layerConfig.source.crossOrigin) {
-        sourceOptions.crossOrigin = layerConfig.source.crossOrigin;
-      } else {
-        sourceOptions.crossOrigin = 'Anonymous';
-      }
-      if (layerConfig.source.projection) sourceOptions.projection = `EPSG:${layerConfig.source.projection}`;
-      if (layerConfig.source.tileGrid) {
-        const tileGridOptions: TileGridOptions = {
-          origin: layerConfig.source.tileGrid?.origin,
-          resolutions: layerConfig.source.tileGrid?.resolutions as number[],
-        };
-        if (layerConfig.source.tileGrid?.tileSize) tileGridOptions.tileSize = layerConfig.source.tileGrid?.tileSize;
-        if (layerConfig.source.tileGrid?.extent) tileGridOptions.extent = layerConfig.source.tileGrid?.extent;
-        sourceOptions.tileGrid = new TileGrid(tileGridOptions);
-      }
+      if (layerConfig.source.tileGrid?.tileSize) tileGridOptions.tileSize = layerConfig.source.tileGrid?.tileSize;
+      if (layerConfig.source.tileGrid?.extent) tileGridOptions.extent = layerConfig.source.tileGrid?.extent;
+      sourceOptions.tileGrid = new TileGrid(tileGridOptions);
+    }
 
-      const tileLayerOptions: TileOptions<XYZ> = { source: new XYZ(sourceOptions) };
-      // layerConfig.initialSettings cannot be undefined because config-validation set it to {} if it is undefined.
-      if (layerConfig.initialSettings?.className !== undefined) tileLayerOptions.className = layerConfig.initialSettings?.className;
-      if (layerConfig.initialSettings?.extent !== undefined) tileLayerOptions.extent = layerConfig.initialSettings?.extent;
-      if (layerConfig.initialSettings?.maxZoom !== undefined) tileLayerOptions.maxZoom = layerConfig.initialSettings?.maxZoom;
-      if (layerConfig.initialSettings?.minZoom !== undefined) tileLayerOptions.minZoom = layerConfig.initialSettings?.minZoom;
-      if (layerConfig.initialSettings?.opacity !== undefined) tileLayerOptions.opacity = layerConfig.initialSettings?.opacity;
-      if (layerConfig.initialSettings?.visible !== undefined)
-        tileLayerOptions.visible = layerConfig.initialSettings?.visible === 'yes' || layerConfig.initialSettings?.visible === 'always';
+    const tileLayerOptions: TileOptions<XYZ> = { source: new XYZ(sourceOptions) };
+    // layerConfig.initialSettings cannot be undefined because config-validation set it to {} if it is undefined.
+    if (layerConfig.initialSettings?.className !== undefined) tileLayerOptions.className = layerConfig.initialSettings?.className;
+    if (layerConfig.initialSettings?.extent !== undefined) tileLayerOptions.extent = layerConfig.initialSettings?.extent;
+    if (layerConfig.initialSettings?.maxZoom !== undefined) tileLayerOptions.maxZoom = layerConfig.initialSettings?.maxZoom;
+    if (layerConfig.initialSettings?.minZoom !== undefined) tileLayerOptions.minZoom = layerConfig.initialSettings?.minZoom;
+    if (layerConfig.initialSettings?.opacity !== undefined) tileLayerOptions.opacity = layerConfig.initialSettings?.opacity;
+    if (layerConfig.initialSettings?.visible !== undefined)
+      tileLayerOptions.visible = layerConfig.initialSettings?.visible === 'yes' || layerConfig.initialSettings?.visible === 'always';
 
-      layerConfig.olLayerAndLoadEndListeners = {
-        olLayer: new TileLayer(tileLayerOptions),
-        loadEndListenerType: 'tile',
-      };
-      layerConfig.geoviewLayerInstance = this;
+    layerConfig.olLayerAndLoadEndListeners = {
+      olLayer: new TileLayer(tileLayerOptions),
+      loadEndListenerType: 'tile',
+    };
+    layerConfig.geoviewLayerInstance = this;
 
-      resolve(layerConfig.olLayer);
-    });
-    return promisedVectorLayer;
+    return Promise.resolve(layerConfig.olLayer);
   }
 
   /** ***************************************************************************************************************************
    * This method is used to process the layer's metadata. It will fill the empty fields of the layer's configuration (renderer,
-   * initial settings, fields and aliases).
+   * initial settings, fields and aliases). This routine must imperatively ends with layerConfig.layerStatus = 'processed' or
+   * 'error' if an error happens.
    *
    * @param {TypeLayerEntryConfig} layerConfig The layer entry configuration to process.
    *
    * @returns {Promise<TypeLayerEntryConfig>} A promise that the vector layer configuration has its metadata processed.
    */
   protected processLayerMetadata(layerConfig: TypeLayerEntryConfig): Promise<TypeLayerEntryConfig> {
-    const promiseOfExecution = new Promise<TypeLayerEntryConfig>((resolve) => {
-      if (!this.metadata) resolve(layerConfig);
-      else {
-        const metadataLayerConfigFound = Cast<TypeXYZTilesLayerEntryConfig[]>(this.metadata?.listOfLayerEntryConfig).find(
-          (metadataLayerConfig) => metadataLayerConfig.layerId === layerConfig.layerId
+    if (this.metadata) {
+      const metadataLayerConfigFound = Cast<TypeXYZTilesLayerEntryConfig[]>(this.metadata?.listOfLayerEntryConfig).find(
+        (metadataLayerConfig) => metadataLayerConfig.layerId === layerConfig.layerId
+      );
+      // metadataLayerConfigFound can not be undefined because we have already validated the config exist
+      this.layerMetadata[layerConfig.layerPath] = toJsonObject(metadataLayerConfigFound);
+      layerConfig.source = defaultsDeep(layerConfig.source, metadataLayerConfigFound!.source);
+      layerConfig.initialSettings = defaultsDeep(layerConfig.initialSettings, metadataLayerConfigFound!.initialSettings);
+
+      if (layerConfig.initialSettings?.extent)
+        layerConfig.initialSettings.extent = api.projection.transformExtent(
+          layerConfig.initialSettings.extent,
+          'EPSG:4326',
+          `EPSG:${MapEventProcessor.getMapState(this.mapId).currentProjection}`
         );
-        // metadataLayerConfigFound can not be undefined because we have already validated the config exist
-        this.layerMetadata[layerConfig.layerPath] = toJsonObject(metadataLayerConfigFound);
-        layerConfig.source = defaultsDeep(layerConfig.source, metadataLayerConfigFound!.source);
-        layerConfig.initialSettings = defaultsDeep(layerConfig.initialSettings, metadataLayerConfigFound!.initialSettings);
+    }
 
-        if (layerConfig.initialSettings?.extent)
-          layerConfig.initialSettings.extent = api.projection.transformExtent(
-            layerConfig.initialSettings.extent,
-            'EPSG:4326',
-            `EPSG:${MapEventProcessor.getMapState(this.mapId).currentProjection}`
-          );
+    // When we get here, we know that the metadata (if the service provide some) are processed.
+    // We need to signal to the layer sets that the 'processed' phase is done. Be aware that the
+    // layerStatus setter is doing a lot of things behind the scene.
+    layerConfig.layerStatus = 'processed';
 
-        resolve(layerConfig);
-      }
-    });
-    return promiseOfExecution;
+    return Promise.resolve(layerConfig);
   }
 
   /** ***************************************************************************************************************************

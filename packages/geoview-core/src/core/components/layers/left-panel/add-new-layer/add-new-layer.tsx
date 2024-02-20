@@ -72,7 +72,7 @@ export function AddNewLayer(): JSX.Element {
   // get values from store
   const mapId = useGeoViewMapId();
   const layersList = useLayerLegendLayers();
-  const { setDisplayState, setSelectedLayerPath } = useLayerStoreActions();
+  const { setDisplayState } = useLayerStoreActions();
 
   const isMultiple = () => hasMetadata && (layerType === ESRI_DYNAMIC || layerType === WFS || layerType === WMS || layerType === GEOJSON);
 
@@ -859,19 +859,13 @@ export function AddNewLayer(): JSX.Element {
     }
     setIsLoading(false);
     let message = '';
-    switch (geoviewLayerInstance?.layerPhase) {
-      case 'loading':
-        message = api.utilities.replaceParams([layerName], t('layers.layerAddedAndLoading'));
-        break;
-      case 'error':
-        message = api.utilities.replaceParams([layerName], t('layers.layerAddedWithError'));
-        break;
-      default:
-        setSelectedLayerPath(`${geoviewLayerInstance?.geoviewLayerId}/${geoviewLayerInstance?.geoviewLayerId}`);
-        message = api.utilities.replaceParams([layerName], t('layers.layerAdded'));
-        break;
-    }
+    if (geoviewLayerInstance?.allLayerStatusAreGreaterThanOrEqualTo('error'))
+      message = api.utilities.replaceParams([layerName], t('layers.layerAddedWithError'));
+    else if (geoviewLayerInstance?.allLayerStatusAreGreaterThanOrEqualTo('loaded'))
+      message = api.utilities.replaceParams([layerName], t('layers.layerAdded'));
+    else message = api.utilities.replaceParams([layerName], t('layers.layerAddedAndLoading'));
     api.utilities.showMessage(mapId, message, false);
+
     setDisplayState('view');
     MapEventProcessor.setLayerZIndices(mapId);
   };

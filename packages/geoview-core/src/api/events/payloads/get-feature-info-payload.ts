@@ -9,15 +9,13 @@ import { PayloadBaseClass } from './payload-base-class';
 import { EventStringId, EVENT_NAMES } from '../event-types';
 import { TypeGeoviewLayerType } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { TypeLayerStatus } from '@/geo/map/map-schema-types';
-import { TypeResultsSet } from './layer-set-payload';
 
 /** Valid events that can create GetFeatureInfoPayload */
 const validEvents: EventStringId[] = [
   EVENT_NAMES.GET_FEATURE_INFO.QUERY_LAYER,
-  EVENT_NAMES.GET_FEATURE_INFO.GET_ALL_LAYER_FEATURES,
+  EVENT_NAMES.GET_FEATURE_INFO.QUERY_ALL_FEATURES,
   EVENT_NAMES.GET_FEATURE_INFO.ALL_QUERIES_DONE,
   EVENT_NAMES.GET_FEATURE_INFO.QUERY_RESULT,
-  EVENT_NAMES.GET_FEATURE_INFO.FEATURE_INFO_LAYERSET_UPDATED,
 ];
 
 export type EventType = 'click' | 'hover' | 'crosshaire-enter' | 'all-features';
@@ -93,15 +91,14 @@ export type TypeFeatureInfoByEventTypes = {
   [eventName in EventType]?: TypeLayerData;
 };
 
-export type TypeFeatureInfoResultsSetEntry = {
-  layerStatus: TypeLayerStatus;
-  layerPhase: string;
-  data: TypeFeatureInfoByEventTypes;
+export type TypeFeatureInfoResultSetEntry = {
   layerName?: string;
+  layerStatus: TypeLayerStatus;
+  data: TypeFeatureInfoByEventTypes;
 };
 
-export type TypeFeatureInfoResultsSet = {
-  [layerPath: string]: TypeFeatureInfoResultsSetEntry;
+export type TypeFeatureInfoResultSet = {
+  [layerPath: string]: TypeFeatureInfoResultSetEntry;
 };
 
 /**
@@ -125,7 +122,7 @@ export const payloadIsQueryLayer = (verifyIfPayload: PayloadBaseClass): verifyIf
  * @returns {boolean} returns true if the payload is valid
  */
 export const payloadIsGetAllLayerFeatures = (verifyIfPayload: PayloadBaseClass): verifyIfPayload is TypeQueryAllLayerFeaturesPayload => {
-  return verifyIfPayload?.event === EVENT_NAMES.GET_FEATURE_INFO.GET_ALL_LAYER_FEATURES;
+  return verifyIfPayload?.event === EVENT_NAMES.GET_FEATURE_INFO.QUERY_ALL_FEATURES;
 };
 
 /**
@@ -136,20 +133,6 @@ export const payloadIsGetAllLayerFeatures = (verifyIfPayload: PayloadBaseClass):
  */
 export const payloadIsQueryLayerQueryTypeAtLongLat = (verifyIfPayload: PayloadBaseClass): verifyIfPayload is TypeQueryLayerPayload => {
   return payloadIsQueryLayer(verifyIfPayload) && verifyIfPayload.queryType === 'at_long_lat';
-};
-
-/**
- * type guard function that redefines a PayloadBaseClass as a TypeFeatureInfoLayersetUpdatedPayload
- * if the event attribute of the verifyIfPayload parameter is valid. The type assertion
- * applies only to the true block of the if clause.
- *
- * @param {PayloadBaseClass} verifyIfPayload object to test in order to determine if the type assertion is valid
- * @returns {boolean} returns true if the payload is valid
- */
-export const payloadIsFeatureInfoLayersetUpdated = (
-  verifyIfPayload: PayloadBaseClass
-): verifyIfPayload is TypeFeatureInfoLayersetUpdatedPayload => {
-  return verifyIfPayload?.event === EVENT_NAMES.GET_FEATURE_INFO.FEATURE_INFO_LAYERSET_UPDATED;
 };
 
 /**
@@ -200,8 +183,8 @@ export interface TypeAllQueriesDonePayload extends GetFeatureInfoPayload {
   queryType: QueryType;
   // The layer set identifier
   layerSetId: string;
-  // the resultsSet that contains the query results
-  resultsSet: TypeFeatureInfoResultsSet;
+  // the resultSet that contains the query results
+  resultSet: TypeFeatureInfoResultSet;
 }
 
 /**
@@ -249,7 +232,7 @@ export interface TypeFeatureInfoLayersetUpdatedPayload extends GetFeatureInfoPay
   // the layer path updated
   layerPath: string;
   // The result set containing all the legends of the layers loaded on the map.
-  resultsSet: TypeFeatureInfoResultsSet;
+  resultSet: TypeFeatureInfoResultSet;
   // The layer status that is associated to the layer path.
   layerStatus: TypeLayerStatus;
 }
@@ -311,7 +294,7 @@ export class GetFeatureInfoPayload extends PayloadBaseClass {
     location?: string
   ): TypeQueryAllLayerFeaturesPayload => {
     const queryLayerPayload = new GetFeatureInfoPayload(
-      EVENT_NAMES.GET_FEATURE_INFO.GET_ALL_LAYER_FEATURES,
+      EVENT_NAMES.GET_FEATURE_INFO.QUERY_ALL_FEATURES,
       handlerName
     ) as TypeQueryLayerPayload;
     queryLayerPayload.queryType = queryType;
@@ -328,7 +311,7 @@ export class GetFeatureInfoPayload extends PayloadBaseClass {
    * @param {string} layerPath the layer path updated
    * @param {QueryType} queryType the query's type done
    * @param {string} layerSetId the layer set identifier
-   * @param {TypeFeatureInfoResultsSet} resultsSet the result set for the query
+   * @param {TypeFeatureInfoResultSet} resultSet the result set for the query
    *
    * @returns {TypeAllQueriesDonePayload} the TypeAllQueriesDonePayload object created
    */
@@ -338,7 +321,7 @@ export class GetFeatureInfoPayload extends PayloadBaseClass {
     layerPath: string,
     queryType: QueryType,
     layerSetId: string,
-    resultsSet: TypeFeatureInfoResultsSet
+    resultSet: TypeFeatureInfoResultSet
   ): TypeAllQueriesDonePayload => {
     const allQueriesDonePayload = new GetFeatureInfoPayload(
       EVENT_NAMES.GET_FEATURE_INFO.ALL_QUERIES_DONE,
@@ -348,7 +331,7 @@ export class GetFeatureInfoPayload extends PayloadBaseClass {
     allQueriesDonePayload.layerPath = layerPath;
     allQueriesDonePayload.queryType = queryType;
     allQueriesDonePayload.layerSetId = layerSetId;
-    allQueriesDonePayload.resultsSet = resultsSet;
+    allQueriesDonePayload.resultSet = resultSet;
     return allQueriesDonePayload;
   };
 
@@ -376,30 +359,5 @@ export class GetFeatureInfoPayload extends PayloadBaseClass {
     queryResultPayload.arrayOfRecords = arrayOfRecords;
     queryResultPayload.eventType = eventType;
     return queryResultPayload;
-  };
-
-  /**
-   * Static method used to create a "feature info updated" payload.
-   *
-   * @param {string | null} handlerName the handler Name
-   * @param {string} layerPath the layer path updated
-   * @param {TypeResultsSet | TypeFeatureInfoResultsSet} resultsSet the feature info resultset
-   *
-   * @returns {TypeFeatureInfoLayersetUpdatedPayload} the TypeFeatureInfoLayersetUpdatedPayload object created
-   */
-  static createFeatureInfoLayersetUpdatedPayload = (
-    handlerName: string,
-    layerPath: string,
-    resultsSet: TypeResultsSet | TypeFeatureInfoResultsSet,
-    layerStatus: TypeLayerStatus
-  ): TypeFeatureInfoLayersetUpdatedPayload => {
-    const featureInfoLayersetUpdatedPayload = new GetFeatureInfoPayload(
-      EVENT_NAMES.GET_FEATURE_INFO.FEATURE_INFO_LAYERSET_UPDATED,
-      handlerName
-    ) as TypeFeatureInfoLayersetUpdatedPayload;
-    featureInfoLayersetUpdatedPayload.layerPath = layerPath;
-    featureInfoLayersetUpdatedPayload.resultsSet = resultsSet as TypeFeatureInfoResultsSet;
-    featureInfoLayersetUpdatedPayload.layerStatus = layerStatus;
-    return featureInfoLayersetUpdatedPayload;
   };
 }

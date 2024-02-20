@@ -150,11 +150,11 @@ export class WMS extends AbstractGeoViewRaster {
           try {
             const arrayOfMetadata = await Promise.all(promisedArrayOfMetadata);
             for (i = 0; i < arrayOfMetadata.length && !arrayOfMetadata[i]?.Capability; i++)
-              this.setLayerStatus('error', layerConfigsToQuery[i].layerPath);
+              this.getLayerConfig(layerConfigsToQuery[i].layerPath)!.layerStatus = 'error';
             this.metadata = i < arrayOfMetadata.length ? arrayOfMetadata[i] : null;
             if (this.metadata) {
               for (; i < arrayOfMetadata.length; i++) {
-                if (!arrayOfMetadata[i]?.Capability) this.setLayerStatus('error', layerConfigsToQuery[i].layerPath);
+                if (!arrayOfMetadata[i]?.Capability) this.getLayerConfig(layerConfigsToQuery[i].layerPath)!.layerStatus = 'error';
                 else if (!this.getLayerMetadataEntry(layerConfigsToQuery[i].layerId!)) {
                   const metadataLayerPathToAdd = this.getMetadataLayerPath(
                     layerConfigsToQuery[i].layerId!,
@@ -378,23 +378,23 @@ export class WMS extends AbstractGeoViewRaster {
         if (!layerConfig?.listOfLayerEntryConfig?.length) {
           this.layerLoadError.push({
             layer: layerPath,
-            consoleMessage: `Empty layer group (mapId:  ${this.mapId}, layerPath: ${layerPath})`,
+            loggerMessage: `Empty layer group (mapId:  ${this.mapId}, layerPath: ${layerPath})`,
           });
-          this.setLayerStatus('error', layerPath);
+          layerConfig.layerStatus = 'error';
         }
         return;
       }
 
       if ((layerConfig as TypeBaseLayerEntryConfig).layerStatus !== 'error') {
-        this.setLayerStatus('processing', layerPath);
+        layerConfig.layerStatus = 'processing';
 
         const layerFound = this.getLayerMetadataEntry(layerConfig.layerId!);
         if (!layerFound) {
           this.layerLoadError.push({
             layer: layerPath,
-            consoleMessage: `Layer metadata not found (mapId:  ${this.mapId}, layerPath: ${layerPath})`,
+            loggerMessage: `Layer metadata not found (mapId:  ${this.mapId}, layerPath: ${layerPath})`,
           });
-          this.setLayerStatus('error', layerPath);
+          layerConfig.layerStatus = 'error';
           return;
         }
 
@@ -439,7 +439,6 @@ export class WMS extends AbstractGeoViewRaster {
 
     if (this.registerToLayerSetListenerFunctions[layerPath]) this.unregisterFromLayerSets(layerConfig);
     const switchToGroupLayer = Cast<TypeLayerGroupEntryConfig>(layerConfig);
-    delete layerConfig.layerStatus;
     switchToGroupLayer.entryType = 'group';
     switchToGroupLayer.layerName = {
       en: layer.Title as string,
@@ -485,130 +484,132 @@ export class WMS extends AbstractGeoViewRaster {
    * @returns {TypeBaseRasterLayer | null} The GeoView raster layer that has been created.
    */
   protected processOneLayerEntry(layerConfig: TypeBaseLayerEntryConfig): Promise<TypeBaseRasterLayer | null> {
+    // ! IMPORTANT: The processOneLayerEntry method must call the corresponding method of its parent to ensure that the flow of
+    // !            layerStatus values is correctly sequenced.
+    super.processOneLayerEntry(layerConfig);
     // Log
     logger.logTraceCore('WMS - processOneLayerEntry', layerConfig.layerPath);
 
-    const promisedVectorLayer = new Promise<TypeBaseRasterLayer | null>((resolve) => {
-      const { layerPath } = layerConfig;
-      this.setLayerPhase('processOneLayerEntry', layerPath);
-      if (geoviewEntryIsWMS(layerConfig)) {
-        const layerCapabilities = this.getLayerMetadataEntry(layerConfig.layerId);
-        if (layerCapabilities) {
-          const dataAccessPath = getLocalizedValue(layerConfig.source.dataAccessPath, this.mapId)!;
+    const { layerPath } = layerConfig;
+    this.setLayerPhase('processOneLayerEntry', layerPath);
+    if (geoviewEntryIsWMS(layerConfig)) {
+      const layerCapabilities = this.getLayerMetadataEntry(layerConfig.layerId);
+      if (layerCapabilities) {
+        const dataAccessPath = getLocalizedValue(layerConfig.source.dataAccessPath, this.mapId)!;
 
-          let styleToUse = '';
-          if (Array.isArray(layerConfig.source?.style) && layerConfig.source?.style) {
-            styleToUse = layerConfig.source?.style[0];
-          } else if (layerConfig.source.style) {
-            styleToUse = layerConfig.source?.style as string;
-          } else if (layerCapabilities.Style) {
-            styleToUse = layerCapabilities.Style[0].Name as string;
-          }
-
-          if (Array.isArray(layerConfig.source?.style)) {
-            this.WMSStyles = layerConfig.source.style;
-          } else if ((layerCapabilities.Style.length as number) > 1) {
-            this.WMSStyles = [];
-            for (let i = 0; i < (layerCapabilities.Style.length as number); i++) {
-              this.WMSStyles.push(layerCapabilities.Style[i].Name as string);
-            }
-          } else this.WMSStyles = [styleToUse];
-
-          const sourceOptions: SourceOptions = {
-            url: dataAccessPath.endsWith('?') ? dataAccessPath : `${dataAccessPath}?`,
-            params: { LAYERS: layerConfig.layerId, STYLES: styleToUse },
-          };
-
-          sourceOptions.attributions = this.attributions;
-          sourceOptions.serverType = layerConfig.source.serverType;
-          if (layerConfig.source.crossOrigin) {
-            sourceOptions.crossOrigin = layerConfig.source.crossOrigin;
-          } else {
-            sourceOptions.crossOrigin = 'Anonymous';
-          }
-          if (layerConfig.source.projection) sourceOptions.projection = `EPSG:${layerConfig.source.projection}`;
-
-          const imageLayerOptions: ImageOptions<ImageWMS> = {
-            source: new ImageWMS(sourceOptions),
-            properties: { layerCapabilities, layerConfig },
-          };
-          // layerConfig.initialSettings cannot be undefined because config-validation set it to {} if it is undefined.
-          if (layerConfig.initialSettings?.className !== undefined) imageLayerOptions.className = layerConfig.initialSettings?.className;
-          if (layerConfig.initialSettings?.extent !== undefined) imageLayerOptions.extent = layerConfig.initialSettings?.extent;
-          if (layerConfig.initialSettings?.maxZoom !== undefined) imageLayerOptions.maxZoom = layerConfig.initialSettings?.maxZoom;
-          if (layerConfig.initialSettings?.minZoom !== undefined) imageLayerOptions.minZoom = layerConfig.initialSettings?.minZoom;
-          if (layerConfig.initialSettings?.opacity !== undefined) imageLayerOptions.opacity = layerConfig.initialSettings?.opacity;
-          if (layerConfig.initialSettings?.visible !== undefined)
-            imageLayerOptions.visible = layerConfig.initialSettings?.visible === 'yes' || layerConfig.initialSettings?.visible === 'always';
-
-          layerConfig.olLayerAndLoadEndListeners = {
-            olLayer: new ImageLayer(imageLayerOptions),
-            loadEndListenerType: 'image',
-          };
-          layerConfig.geoviewLayerInstance = this;
-
-          resolve(layerConfig.olLayer);
-        } else {
-          const message = replaceParams(
-            [layerConfig.layerId, this.geoviewLayerId],
-            getLocalizedMessage(this.mapId, 'validation.layer.notfound')
-          );
-          showError(this.mapId, message);
-
-          resolve(null);
+        let styleToUse = '';
+        if (Array.isArray(layerConfig.source?.style) && layerConfig.source?.style) {
+          styleToUse = layerConfig.source?.style[0];
+        } else if (layerConfig.source.style) {
+          styleToUse = layerConfig.source?.style as string;
+        } else if (layerCapabilities.Style) {
+          styleToUse = layerCapabilities.Style[0].Name as string;
         }
-      } else {
-        logger.logError(`geoviewLayerType must be ${CONST_LAYER_TYPES.WMS}`);
-        resolve(null);
+
+        if (Array.isArray(layerConfig.source?.style)) {
+          this.WMSStyles = layerConfig.source.style;
+        } else if ((layerCapabilities.Style.length as number) > 1) {
+          this.WMSStyles = [];
+          for (let i = 0; i < (layerCapabilities.Style.length as number); i++) {
+            this.WMSStyles.push(layerCapabilities.Style[i].Name as string);
+          }
+        } else this.WMSStyles = [styleToUse];
+
+        const sourceOptions: SourceOptions = {
+          url: dataAccessPath.endsWith('?') ? dataAccessPath : `${dataAccessPath}?`,
+          params: { LAYERS: layerConfig.layerId, STYLES: styleToUse },
+        };
+
+        sourceOptions.attributions = this.attributions;
+        sourceOptions.serverType = layerConfig.source.serverType;
+        if (layerConfig.source.crossOrigin) {
+          sourceOptions.crossOrigin = layerConfig.source.crossOrigin;
+        } else {
+          sourceOptions.crossOrigin = 'Anonymous';
+        }
+        if (layerConfig.source.projection) sourceOptions.projection = `EPSG:${layerConfig.source.projection}`;
+
+        const imageLayerOptions: ImageOptions<ImageWMS> = {
+          source: new ImageWMS(sourceOptions),
+          properties: { layerCapabilities, layerConfig },
+        };
+        // layerConfig.initialSettings cannot be undefined because config-validation set it to {} if it is undefined.
+        if (layerConfig.initialSettings?.className !== undefined) imageLayerOptions.className = layerConfig.initialSettings?.className;
+        if (layerConfig.initialSettings?.extent !== undefined) imageLayerOptions.extent = layerConfig.initialSettings?.extent;
+        if (layerConfig.initialSettings?.maxZoom !== undefined) imageLayerOptions.maxZoom = layerConfig.initialSettings?.maxZoom;
+        if (layerConfig.initialSettings?.minZoom !== undefined) imageLayerOptions.minZoom = layerConfig.initialSettings?.minZoom;
+        if (layerConfig.initialSettings?.opacity !== undefined) imageLayerOptions.opacity = layerConfig.initialSettings?.opacity;
+        if (layerConfig.initialSettings?.visible !== undefined)
+          imageLayerOptions.visible = layerConfig.initialSettings?.visible === 'yes' || layerConfig.initialSettings?.visible === 'always';
+
+        layerConfig.olLayerAndLoadEndListeners = {
+          olLayer: new ImageLayer(imageLayerOptions),
+          loadEndListenerType: 'image',
+        };
+        layerConfig.geoviewLayerInstance = this;
+
+        return Promise.resolve(layerConfig.olLayer);
       }
-    });
-    return promisedVectorLayer;
+
+      const message = replaceParams(
+        [layerConfig.layerId, this.geoviewLayerId],
+        getLocalizedMessage(this.mapId, 'validation.layer.notfound')
+      );
+      showError(this.mapId, message);
+      return Promise.resolve(null);
+    }
+
+    logger.logError(`geoviewLayerType must be ${CONST_LAYER_TYPES.WMS}`);
+    return Promise.resolve(null);
   }
 
   /** ***************************************************************************************************************************
    * This method is used to process the layer's metadata. It will fill the empty fields of the layer's configuration (renderer,
-   * initial settings, fields and aliases).
+   * initial settings, fields and aliases). This routine must imperatively ends with layerConfig.layerStatus = 'processed' or
+   * 'error' if an error happens.
    *
    * @param {TypeLayerEntryConfig} layerConfig The layer entry configuration to process.
    *
    * @returns {Promise<TypeLayerEntryConfig>} A promise that the layer configuration has its metadata processed.
    */
   protected processLayerMetadata(layerConfig: TypeLayerEntryConfig): Promise<TypeLayerEntryConfig> {
-    const promiseOfExecution = new Promise<TypeLayerEntryConfig>((resolve) => {
-      if (geoviewEntryIsWMS(layerConfig)) {
-        const layerCapabilities = this.getLayerMetadataEntry(layerConfig.layerId)!;
-        this.layerMetadata[layerConfig.layerPath] = layerCapabilities;
-        if (layerCapabilities) {
-          if (layerCapabilities.Attribution) this.attributions.push(layerCapabilities.Attribution.Title as string);
-          if (!layerConfig.source.featureInfo) layerConfig.source.featureInfo = { queryable: !!layerCapabilities.queryable };
-          MapEventProcessor.setMapLayerQueryable(this.mapId, layerConfig.layerPath, layerConfig.source.featureInfo.queryable);
-          // ! TODO: The solution implemented in the following lines is not right. scale and zoom are not the same things.
-          // if (layerConfig.initialSettings?.minZoom === undefined && layerCapabilities.MinScaleDenominator !== undefined)
-          //   layerConfig.initialSettings.minZoom = layerCapabilities.MinScaleDenominator as number;
-          // if (layerConfig.initialSettings?.maxZoom === undefined && layerCapabilities.MaxScaleDenominator !== undefined)
-          //   layerConfig.initialSettings.maxZoom = layerCapabilities.MaxScaleDenominator as number;
-          if (layerConfig.initialSettings?.extent)
-            layerConfig.initialSettings.extent = api.projection.transformExtent(
-              layerConfig.initialSettings.extent,
-              'EPSG:4326',
-              `EPSG:${MapEventProcessor.getMapState(this.mapId).currentProjection}`
-            );
+    if (geoviewEntryIsWMS(layerConfig)) {
+      const layerCapabilities = this.getLayerMetadataEntry(layerConfig.layerId)!;
+      this.layerMetadata[layerConfig.layerPath] = layerCapabilities;
+      if (layerCapabilities) {
+        if (layerCapabilities.Attribution) this.attributions.push(layerCapabilities.Attribution.Title as string);
+        if (!layerConfig.source.featureInfo) layerConfig.source.featureInfo = { queryable: !!layerCapabilities.queryable };
+        MapEventProcessor.setMapLayerQueryable(this.mapId, layerConfig.layerPath, layerConfig.source.featureInfo.queryable);
+        // ! TODO: The solution implemented in the following lines is not right. scale and zoom are not the same things.
+        // if (layerConfig.initialSettings?.minZoom === undefined && layerCapabilities.MinScaleDenominator !== undefined)
+        //   layerConfig.initialSettings.minZoom = layerCapabilities.MinScaleDenominator as number;
+        // if (layerConfig.initialSettings?.maxZoom === undefined && layerCapabilities.MaxScaleDenominator !== undefined)
+        //   layerConfig.initialSettings.maxZoom = layerCapabilities.MaxScaleDenominator as number;
+        if (layerConfig.initialSettings?.extent)
+          layerConfig.initialSettings.extent = api.projection.transformExtent(
+            layerConfig.initialSettings.extent,
+            'EPSG:4326',
+            `EPSG:${MapEventProcessor.getMapState(this.mapId).currentProjection}`
+          );
 
-          if (!layerConfig.initialSettings?.bounds && layerCapabilities.EX_GeographicBoundingBox) {
-            layerConfig.initialSettings!.bounds = layerCapabilities.EX_GeographicBoundingBox as Extent;
-          }
+        if (!layerConfig.initialSettings?.bounds && layerCapabilities.EX_GeographicBoundingBox) {
+          layerConfig.initialSettings!.bounds = layerCapabilities.EX_GeographicBoundingBox as Extent;
+        }
 
-          if (layerCapabilities.Dimension) {
-            const temporalDimension: TypeJsonObject | undefined = (layerCapabilities.Dimension as TypeJsonArray).find(
-              (dimension) => dimension.name === 'time'
-            );
-            if (temporalDimension) this.processTemporalDimension(temporalDimension, layerConfig);
-          }
+        if (layerCapabilities.Dimension) {
+          const temporalDimension: TypeJsonObject | undefined = (layerCapabilities.Dimension as TypeJsonArray).find(
+            (dimension) => dimension.name === 'time'
+          );
+          if (temporalDimension) this.processTemporalDimension(temporalDimension, layerConfig);
         }
       }
-      resolve(layerConfig);
-    });
-    return promiseOfExecution;
+    }
+    // When we get here, we know that the metadata (if the service provide some) are processed.
+    // We need to signal to the layer sets that the 'processed' phase is done. Be aware that the
+    // layerStatus setter is doing a lot of things behind the scene.
+    layerConfig.layerStatus = 'processed';
+
+    return Promise.resolve(layerConfig);
   }
 
   /** ***************************************************************************************************************************
