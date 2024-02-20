@@ -174,14 +174,12 @@ export class CSV extends AbstractGeoViewVector {
         if (!layerConfig.listOfLayerEntryConfig.length) {
           this.layerLoadError.push({
             layer: layerPath,
-            consoleMessage: `Empty layer group (mapId:  ${this.mapId}, layerPath: ${layerPath})`,
+            loggerMessage: `Empty layer group (mapId:  ${this.mapId}, layerPath: ${layerPath})`,
           });
-          this.setLayerStatus('error', layerPath);
+          layerConfig.layerStatus = 'error';
         }
         return;
       }
-
-      this.setLayerStatus('loading', layerPath);
 
       // When no metadata are provided, all layers are considered valid.
       if (!this.metadata) return;
@@ -200,11 +198,12 @@ export class CSV extends AbstractGeoViewVector {
    * @returns {Promise<TypeLayerEntryConfig>} A promise that the vector layer configuration has its metadata processed.
    */
   protected processLayerMetadata(layerConfig: TypeVectorLayerEntryConfig): Promise<TypeLayerEntryConfig> {
-    const promiseOfExecution = new Promise<TypeLayerEntryConfig>((resolve) => {
-      resolve(layerConfig);
-    });
+    // When we get here, we know that the metadata (if the service provide some) are processed.
+    // We need to signal to the layer sets that the 'processed' phase is done. Be aware that the
+    // layerStatus setter is doing a lot of things behind the scene.
+    layerConfig.layerStatus = 'processed';
 
-    return promiseOfExecution;
+    return Promise.resolve(layerConfig);
   }
 
   /** ***************************************************************************************************************************
@@ -306,7 +305,7 @@ export class CSV extends AbstractGeoViewVector {
     if (latIndex === undefined || lonIndex === undefined) {
       logger.logError(`Could not find geographic data for ${getLocalizedValue(this.geoviewLayerName, this.mapId)}`);
       addNotificationError(this.mapId, `Could not find geographic data for ${getLocalizedValue(this.geoviewLayerName, this.mapId)}`);
-      this.setLayerStatus('error', layerConfig.layerPath);
+      layerConfig.layerStatus = 'error';
       return null;
     }
     this.processFeatureInfoConfig(headers, csvRows[1], [latIndex, lonIndex], layerConfig);

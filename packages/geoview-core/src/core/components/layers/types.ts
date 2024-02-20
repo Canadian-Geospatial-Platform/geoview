@@ -34,7 +34,6 @@ export interface TypeLegendLayer {
   type?: TypeGeoviewLayerType;
   styleConfig?: TypeStyleConfig | null;
   layerStatus?: TypeLayerStatus;
-  layerPhase?: string;
   querySent?: boolean;
   canToggle?: boolean; // can sublayer visibility be toggled
 
