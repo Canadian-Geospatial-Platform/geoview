@@ -1,3 +1,4 @@
 {
-  "supportedLanguages": ["en", "fr"]
+  "supportedLanguages": ["en", "fr"],
+  "charts": []
 }
