@@ -268,7 +268,7 @@ export function Swiper(props: SwiperProps): JSX.Element {
       if (payloadIsLayerSetUpdated(payload) && payload.resultsSet[payload.layerPath]?.layerStatus === 'loaded') {
         const layerId = payload.layerPath.split('/')[0];
         const ids = [...layersIds];
-        if (ids.indexOf(layerId) === -1) {
+        if (ids.indexOf(layerId) === -1 && config.layers.includes(layerId)) {
           ids.push(layerId);
           setLayersIds(ids);
         }

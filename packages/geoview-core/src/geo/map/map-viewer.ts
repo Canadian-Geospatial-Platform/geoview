@@ -202,7 +202,7 @@ export class MapViewer {
         let allGeoviewLayerReady =
           this.mapFeaturesConfig.map.listOfGeoviewLayerConfig?.length === 0 || Object.keys(geoviewLayers).length !== 0;
         Object.keys(geoviewLayers).forEach((geoviewLayerId) => {
-          const layerIsReady = geoviewLayers[geoviewLayerId].allLayerStatusAreIn(['error', 'loaded']);
+          const layerIsReady = geoviewLayers[geoviewLayerId].allLayerStatusAreIn(['processed', 'error', 'loaded']);
           logger.logTraceDetailed('map-viewer.mapReady? geoview layer ready?', geoviewLayerId, layerIsReady);
           allGeoviewLayerReady &&= layerIsReady;
         });
@@ -210,7 +210,9 @@ export class MapViewer {
           // Log
           logger.logInfo('Map is ready', this.mapId);
           logger.logMarkerCheck(`mapReady-${this.mapId}`, 'for map to be ready');
-          MapEventProcessor.setMapLoaded(this.mapId);
+          // ! We added processed to layers check so this map loaded event is fired faster
+          // TODO: solve this without using a timeout...
+          setTimeout(() => MapEventProcessor.setMapLoaded(this.mapId), 1000);
           clearInterval(layerInterval);
         }
       }
