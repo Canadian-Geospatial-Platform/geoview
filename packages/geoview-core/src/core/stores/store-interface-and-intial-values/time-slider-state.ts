@@ -8,7 +8,6 @@ export type TimeSliderLayerSet = {
   [layerPath: string]: TypeTimeSliderValues;
 };
 
-// #region INTERFACES
 export interface TypeTimeSliderValues {
   title?: string;
   description?: string;

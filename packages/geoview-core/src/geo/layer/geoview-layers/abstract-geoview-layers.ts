@@ -1500,11 +1500,10 @@ export abstract class AbstractGeoViewLayer {
   }
 
   /** ***************************************************************************************************************************
-   * Change the layer phase property and emit an event to update existing layer sets.
-   * Change the layer temporal dimension property and emit an event to update existing layer sets.
+   * Set the layerTemporalDimension for the layer identified by specified layerPath.
    *
    * @param {string} layerPath The layer path to the layer's configuration affected by the change.
-   * @param {TimeDimension} timeDimension The value to assign to the layer temporal dimension property.
+   * @param {TimeDimension} temporalDimension The value to assign to the layer temporal dimension property.
    */
   setTemporalDimension(layerPath: string, temporalDimension: TimeDimension): void {
     layerPath = layerPath || this.layerPathAssociatedToTheGeoviewLayer;
