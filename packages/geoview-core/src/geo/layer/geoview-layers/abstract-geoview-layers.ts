@@ -1506,8 +1506,16 @@ export abstract class AbstractGeoViewLayer {
    * @param {string} layerPath The layer path to the layer's configuration affected by the change.
    * @param {TimeDimension} timeDimension The value to assign to the layer temporal dimension property.
    */
-  setTemporalDimension(layerPath: string, timeDimension: TimeDimension): void {
+  setTemporalDimension(layerPath: string, temporalDimension: TimeDimension): void {
     layerPath = layerPath || this.layerPathAssociatedToTheGeoviewLayer;
+    const timeDimension: TimeDimension = {
+      field: temporalDimension.field,
+      default: temporalDimension.default,
+      unitSymbol: temporalDimension.unitSymbol,
+      nearestValues: temporalDimension.nearestValues,
+      range: api.dateUtilities.createRangeOGC(temporalDimension.range as unknown as string),
+      singleHandle: temporalDimension.singleHandle,
+    };
     this.layerTemporalDimension[layerPath] = timeDimension;
   }
 
