@@ -6,9 +6,6 @@ import { AnyValidateFunction } from 'ajv/dist/types';
 
 import defaultsDeep from 'lodash/defaultsDeep';
 
-import { generateId, replaceParams, getLocalizedMessage, showError } from '../utilities';
-
-import schema from '../../../../schema.json';
 import { TypeBasemapId, TypeBasemapOptions, VALID_BASEMAP_ID } from '@/geo/layer/basemap/basemap-types';
 import { geoviewEntryIsWMS } from '@/geo/layer/geoview-layers/raster/wms';
 import { geoviewEntryIsImageStatic } from '@/geo/layer/geoview-layers/raster/image-static';
@@ -42,10 +39,13 @@ import {
   TypeEsriImageLayerEntryConfig,
 } from '@/geo/map/map-schema-types';
 import { Cast, toJsonObject, TypeJsonObject, TypeMapFeaturesConfig } from '@/core/types/global-types';
-
 import { CONST_GEOVIEW_SCHEMA_BY_TYPE, TypeGeoviewLayerType } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { geoviewEntryIsEsriImage } from '@/geo/layer/geoview-layers/raster/esri-image';
 import { logger } from '@/core/utils/logger';
+import { CONFIG_GEOCORE_URL, CONFIG_GEOLOCATOR_URL } from '@/app';
+
+import { generateId, replaceParams, getLocalizedMessage, showError } from '../utilities';
+import schema from '../../../../schema.json';
 
 // ******************************************************************************************************************************
 // ******************************************************************************************************************************
@@ -64,13 +64,6 @@ export class ConfigValidation {
 
   /** The language that will be used to display the GeoView layer. */
   private _displayLanguage: TypeDisplayLanguage;
-
-  // TODO: Refactor - Environment - How to edit this configuration easily per environment?
-  /** The default geocore url */
-  static CONFIG_GEOCORE_URL = 'https://geocore-stage.api.geo.ca';
-
-  /** The default geolocator url */
-  static CONFIG_GEOLOCATOR_URL = 'https://geolocator.api.geo.ca?keys=geonames,nominatim,locate';
 
   /** default configuration if provided configuration is missing or wrong */
   private _defaultMapFeaturesConfig: TypeMapFeaturesConfig = {
@@ -99,8 +92,8 @@ export class ConfigValidation {
     corePackages: [],
     overviewMap: undefined,
     serviceUrls: {
-      geocoreUrl: ConfigValidation.CONFIG_GEOCORE_URL,
-      geolocator: ConfigValidation.CONFIG_GEOLOCATOR_URL,
+      geocoreUrl: CONFIG_GEOCORE_URL,
+      geolocator: CONFIG_GEOLOCATOR_URL,
     },
     displayLanguage: 'en',
     triggerReadyCallback: false,

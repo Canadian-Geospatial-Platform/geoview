@@ -123,15 +123,14 @@ export class GeoCore {
       // Get the language
       const lang = api.maps[this.mapId].getDisplayLanguage();
 
-      // Generate the url
-      // TODO: Check - Is the metadataAccessPath still used? Because it seems to be incompatible with the rest now?
+      // Generate the url using metadataAccessPath when specified or using the geocore url
       const url = geocoreLayerConfig.metadataAccessPath?.[lang] || `${mapConfig!.serviceUrls.geocoreUrl}`;
-      const uuids = [layerConfig.layerId];
+      const uuid = layerConfig.layerId;
 
       try {
         // Get the GV config from UUID and await even if within loop
         // eslint-disable-next-line no-await-in-loop
-        const response = await UUIDmapConfigReader.getGVConfigFromUUIDs(url, lang, uuids);
+        const response = await UUIDmapConfigReader.getGVConfigFromUUIDs(url, lang, [uuid]);
 
         // Cumulate
         listOfLayerCreated.push(response.layers);
@@ -149,7 +148,7 @@ export class GeoCore {
         });
       } catch (error) {
         // Log
-        logger.logError(`Failed to get the GeoView layer from UUI ${uuids}`, error);
+        logger.logError(`Failed to get the GeoView layer from UUI ${uuid}`, error);
         const message = replaceParams([error as TypeJsonValue, this.mapId], getLocalizedMessage(this.mapId, 'validation.layer.loadfailed'));
         showError(this.mapId, message);
       }
