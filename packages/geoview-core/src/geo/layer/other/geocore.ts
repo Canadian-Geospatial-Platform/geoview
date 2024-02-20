@@ -1,6 +1,6 @@
 import defaultsDeep from 'lodash/defaultsDeep';
 import { TypeJsonValue, api, generateId, getLocalizedMessage, replaceParams, showError } from '@/app';
-import { UUIDmapConfigReader, UUIDmapConfigReaderResponse } from '@/core/utils/config/reader/uuid-config-reader';
+import { UUIDmapConfigReader } from '@/core/utils/config/reader/uuid-config-reader';
 import { ConfigValidation } from '@/core/utils/config/config-validation';
 import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
 import { GeochartEventProcessor } from '@/api/event-processors/event-processor-children/geochart-event-processor';
@@ -115,47 +115,48 @@ export class GeoCore {
     const mapConfig = MapEventProcessor.getGeoViewMapConfig(this.mapId);
 
     // For each layer entry config in the list
-    const promiseOfLayerConfigs: Promise<UUIDmapConfigReaderResponse>[] = [];
-    geocoreLayerConfig.listOfLayerEntryConfig.forEach((layerConfig: TypeLayerEntryConfig) => {
+    const listOfLayerCreated: TypeListOfGeoviewLayerConfig[] = [];
+    for (let i = 0; i < geocoreLayerConfig.listOfLayerEntryConfig.length; i++) {
+      // Get the config
+      const layerConfig = geocoreLayerConfig.listOfLayerEntryConfig[i];
+
       // Get the language
       const lang = api.maps[this.mapId].getDisplayLanguage();
 
       // Generate the url
       // TODO: Check - Is the metadataAccessPath still used? Because it seems to be incompatible with the rest now?
       const url = geocoreLayerConfig.metadataAccessPath?.[lang] || `${mapConfig!.serviceUrls.geocoreUrl}`;
+      const uuids = [layerConfig.layerId];
 
       try {
-        // Get the GV config from UUID
-        promiseOfLayerConfigs.push(UUIDmapConfigReader.getGVConfigFromUUIDs(url, lang, [layerConfig.layerId]));
+        // Get the GV config from UUID and await even if within loop
+        // eslint-disable-next-line no-await-in-loop
+        const response = await UUIDmapConfigReader.getGVConfigFromUUIDs(url, lang, uuids);
+
+        // Cumulate
+        listOfLayerCreated.push(response.layers);
+
+        // For each found layer associated with the Geocore UUIDs
+        response.layers.forEach((geoviewLayerConfig) => {
+          this.copyConfigSettingsOverGeocoreSettings(layerConfig, geoviewLayerConfig);
+        });
+        this.configValidation.validateListOfGeoviewLayerConfig(AppEventProcessor.getSupportedLanguages(this.mapId), response.layers);
+
+        // For each found geochart associated with the Geocore UUIDs
+        response.geocharts?.forEach((geochartConfig) => {
+          // Add a GeoChart
+          GeochartEventProcessor.addGeochartChart(this.mapId, geochartConfig.layers[0].layerId as string, geochartConfig);
+        });
       } catch (error) {
         // Log
-        logger.logError('Failed to get the GeoView layer from UUI', layerConfig.layerId, error);
+        logger.logError(`Failed to get the GeoView layer from UUI ${uuids}`, error);
         const message = replaceParams([error as TypeJsonValue, this.mapId], getLocalizedMessage(this.mapId, 'validation.layer.loadfailed'));
         showError(this.mapId, message);
       }
-    });
+    }
 
-    // Wait until all configs processed
-    const listOfLayerCreated = await Promise.all(promiseOfLayerConfigs);
-
-    // For each config
-    listOfLayerCreated.forEach((listOfGeoviewLayerConfig, index) => {
-      listOfGeoviewLayerConfig.layers.forEach((geoviewLayerConfig) => {
-        this.copyConfigSettingsOverGeocoreSettings(geocoreLayerConfig.listOfLayerEntryConfig[index], geoviewLayerConfig);
-      });
-      this.configValidation.validateListOfGeoviewLayerConfig(
-        AppEventProcessor.getSupportedLanguages(this.mapId),
-        listOfGeoviewLayerConfig.layers
-      );
-
-      // For each found geochart associated with the Geocore UUID
-      listOfGeoviewLayerConfig.geocharts?.forEach((geochartConfig) => {
-        // Add a GeoChart
-        GeochartEventProcessor.addGeochartChart(this.mapId, geochartConfig.layers[0].layerId as string, geochartConfig);
-      });
-    });
-
-    return listOfLayerCreated.map((config) => config.layers);
+    // Return the created layers
+    return listOfLayerCreated;
   }
 
   /**
