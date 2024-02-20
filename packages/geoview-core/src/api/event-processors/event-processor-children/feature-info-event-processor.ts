@@ -1,7 +1,7 @@
+import { GeoviewStoreType, IFeatureInfoState } from '@/core/stores';
 import { TypeFeatureInfoResultsSet, EventType, TypeLayerData, TypeArrayOfLayerData } from '@/api/events/payloads/get-feature-info-payload';
-import { IFeatureInfoState } from '@/core/stores';
+import { logger } from '@/core/utils/logger';
 
-import { GeochartEventProcessor } from './geochart-event-processor';
 import { AbstractEventProcessor, BatchedPropagationLayerDataArrayByMap } from '../abstract-event-processor';
 import { UIEventProcessor } from './ui-event-processor';
 
@@ -26,6 +26,39 @@ export class FeatureInfoEventProcessor extends AbstractEventProcessor {
   private static timeDelayBetweenPropagationsForBatch = 1000;
 
   /**
+   * Overrides initialization of the Feature Info Event Processor
+   * @param {GeoviewStoreType} store The store associated with the Feature Info Event Processor
+   * @returns An array of the subscriptions callbacks which were created
+   */
+  protected onInitialize(store: GeoviewStoreType): Array<() => void> | void {
+    // Checks for udpated layers in layer order
+    const unsubLayerRemoved = store.subscribe(
+      (state) => state.mapState.layerOrder,
+      (cur, prev) => {
+        // Log
+        logger.logTraceCoreStoreSubscription('FEATUREINFO EVENT PROCESSOR - layerOrder', cur);
+
+        // For each layer path in the layer data array
+        store
+          .getState()
+          .detailsState.layerDataArray.map((layerInfo) => layerInfo.layerPath)
+          .forEach((layerPath) => {
+            // If it was in the layer data array and is not anymore
+            if (prev.includes(layerPath) && !cur.includes(layerPath)) {
+              // Remove it
+              FeatureInfoEventProcessor.deleteFeatureInfo(store.getState().mapId, layerPath);
+
+              // Log
+              logger.logDebug('Removed Feature Info for layer path:', layerPath);
+            }
+          });
+      }
+    );
+
+    return [unsubLayerRemoved];
+  }
+
+  /**
    * Shortcut to get the Feature Info state for a given map id
    * @param {string} mapId The mapId
    * @returns {IFeatureInfoState} The Feature Info state
@@ -36,15 +69,43 @@ export class FeatureInfoEventProcessor extends AbstractEventProcessor {
   }
 
   /**
-   * Static method used to propagate feature info layer sets to the store
+   * Deletes the specified layer path from the layer sets in the store
+   * @param {string} mapId The map identifier
+   * @param {string} layerPath The layer path to delete
+   */
+  static deleteFeatureInfo(mapId: string, layerPath: string) {
+    // The feature info state
+    const featureInfoState = this.getFeatureInfoState(mapId);
+
+    // Find the layer data info to delete from the array
+    const layerDataInfoToDelIndex = featureInfoState.layerDataArray.findIndex((layerInfo) => layerInfo.layerPath === layerPath);
+
+    // If found
+    if (layerDataInfoToDelIndex >= 0) {
+      // Remove from the array
+      featureInfoState.layerDataArray.splice(layerDataInfoToDelIndex, 1);
+
+      // Update the layer data array in the store
+      featureInfoState.actions.setLayerDataArray(featureInfoState.layerDataArray);
+
+      // Also propagate in the batched array
+      FeatureInfoEventProcessor.propagateFeatureInfoToStoreBatch(mapId, featureInfoState.layerDataArray);
+    }
+  }
+
+  /**
+   * Propagates feature info layer sets to the store
    *
-   * @param {string} mapId The map identifier of the resul set modified.
+   * @param {string} mapId The map identifier of the modified result set.
    * @param {string} layerPath The layer path that has changed.
    * @param {EventType} eventType The event type that triggered the layer set update.
    * @param {TypeFeatureInfoResultsSet} resultsSet The resul sets associated to the map.
    */
   static propagateFeatureInfoToStore(mapId: string, layerPath: string, eventType: EventType, resultsSet: TypeFeatureInfoResultsSet) {
+    // The feature info state
     const featureInfoState = this.getFeatureInfoState(mapId);
+
+    // Depending on the event type
     if (eventType === 'click') {
       /**
        * Create a details object for each layer which is then used to render layers in details panel.
@@ -66,9 +127,6 @@ export class FeatureInfoEventProcessor extends AbstractEventProcessor {
 
       // Also propagate in the batched array
       FeatureInfoEventProcessor.propagateFeatureInfoToStoreBatch(mapId, layerDataArray);
-
-      // Also propagate in the geochart arrays
-      GeochartEventProcessor.propagateArrayDataToStore(mapId, layerDataArray);
     } else if (eventType === 'hover') {
       /**
        * Create a hover object for each layer which is then used to render layers
@@ -91,7 +149,7 @@ export class FeatureInfoEventProcessor extends AbstractEventProcessor {
   }
 
   /**
-   * Propagate feature info layer sets to the store in a batched manner, every 'timeDelayBetweenPropagationsForBatch' millisecond.
+   * Propagates feature info layer sets to the store in a batched manner, every 'timeDelayBetweenPropagationsForBatch' millisecond.
    * This is used to provide another 'layerDataArray', in the store, which updates less often so that we save a couple 'layerDataArray'
    * update triggers in the components that are listening to the store array.
    * The propagation can be bypassed using the store 'layerDataArrayBatchLayerPathBypass' state which tells the process to

@@ -32,7 +32,7 @@ export class GeochartEventProcessor extends AbstractEventProcessor {
    * @returns An array of the subscriptions callbacks which were created
    */
   protected onInitialize(store: GeoviewStoreType): Array<() => void> | void {
-    // Checks for added and removed layers with time dimension
+    // Checks for udpated layers in layer order
     const unsubLayerRemoved = store.subscribe(
       (state) => state.mapState.layerOrder,
       (cur, prev) => {
@@ -40,20 +40,32 @@ export class GeochartEventProcessor extends AbstractEventProcessor {
         logger.logTraceCoreStoreSubscription('GEOCHART EVENT PROCESSOR - layerOrder', cur);
 
         // For each chart config keys
-        Object.keys(store.getState().geochartState.geochartChartsConfig).forEach((chartLayerPath: string) => {
+        Object.keys(store.getState().geochartState.geochartChartsConfig).forEach((layerPath: string) => {
           // If it was in the layerdata array and is not anymore
-          if (prev.includes(chartLayerPath) && !cur.includes(chartLayerPath)) {
+          if (prev.includes(layerPath) && !cur.includes(layerPath)) {
             // Remove it
-            GeochartEventProcessor.removeGeochartChart(store.getState().mapId, chartLayerPath);
+            GeochartEventProcessor.removeGeochartChart(store.getState().mapId, layerPath);
 
             // Log
-            logger.logDebug('Removed GeoChart configs for layer path:', chartLayerPath);
+            logger.logDebug('Removed GeoChart configs for layer path:', layerPath);
           }
         });
       }
     );
 
-    return [unsubLayerRemoved];
+    // Checks for updated layers in layer data array
+    const layerDataArrayUpdate = store.subscribe(
+      (state) => state.detailsState.layerDataArray,
+      (cur) => {
+        // Log
+        logger.logTraceCoreStoreSubscription('GEOCHART EVENT PROCESSOR - layerDataArray', cur);
+
+        // Also propagate in the geochart arrays
+        GeochartEventProcessor.propagateArrayDataToStore(store.getState().mapId, cur);
+      }
+    );
+
+    return [unsubLayerRemoved, layerDataArrayUpdate];
   }
 
   /**
@@ -93,7 +105,7 @@ export class GeochartEventProcessor extends AbstractEventProcessor {
     // set store charts config
     this.getGeochartState(mapId)?.actions.setGeochartCharts(chartData);
 
-    // TODO: Also update the layer array in other store state to inform the later has a geochart attached to it (when code is done over there)
+    // TODO: Also update the layer array in other store state to inform the later has a geochart attached to it (when code is done over there)?
   }
 
   /**
@@ -114,7 +126,7 @@ export class GeochartEventProcessor extends AbstractEventProcessor {
     // Update the layer data array in the store
     this.getGeochartState(mapId)!.actions.setGeochartCharts({ ...this.getGeochartState(mapId)?.geochartChartsConfig, ...toAdd });
 
-    // TODO: Also update the layer array in other store state to inform the later has a geochart attached to it (when code is done over there)
+    // TODO: Also update the layer array in other store state to inform the later has a geochart attached to it (when code is done over there)?
   }
 
   /**
@@ -139,7 +151,7 @@ export class GeochartEventProcessor extends AbstractEventProcessor {
       // Update the layer data array in the store
       this.getGeochartState(mapId)!.actions.setGeochartCharts({ ...chartConfigs });
 
-      // TODO: Also update the layer array in other store state to inform the later has a geochart attached to it (when code is done over there)
+      // TODO: Also update the layer array in other store state to inform the later has a geochart attached to it (when code is done over there)?
     }
   }
 
