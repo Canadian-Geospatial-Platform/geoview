@@ -260,7 +260,7 @@ export const generateThemeOptions = (geoViewColors: IGeoViewColors = defaultGeoV
         size: { width: 275, height: 275 },
       },
     },
-  };
+  } as ThemeOptions;
 
   return themeOptions;
 };

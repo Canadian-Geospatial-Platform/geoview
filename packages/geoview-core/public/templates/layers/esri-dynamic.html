@@ -1137,17 +1137,17 @@
       cgpv.api.event.on(
         cgpv.api.eventNames.GET_FEATURE_INFO.ALL_QUERIES_DONE,
         (payload) => {
-          const { layerSetId, resultsSet, eventType } = payload;
-          createInfoTable('LYR1', 'ResultSetId1', resultsSet, eventType);
+          const { layerSetId, resultSet, eventType } = payload;
+          createInfoTable('LYR1', 'ResultSetId1', resultSet, eventType);
         },
         'LYR1/FeatureInfoLayerSet'
       );
 
       cgpv.api.event.on(
-        cgpv.api.eventNames.GET_LEGENDS.LEGENDS_LAYERSET_UPDATED,
+        cgpv.api.eventNames.GET_LEGENDS.LEGEND_LAYERSET_UPDATED,
         (payload) => {
-          const { resultsSet } = payload;
-          displayLegend('LegendsId1', resultsSet);
+          const { resultSet } = payload;
+          displayLegend('LegendsId1', resultSet);
         },
         'LYR1/LegendsLayerSet'
       );
@@ -1159,17 +1159,17 @@
       cgpv.api.event.on(
         cgpv.api.eventNames.GET_FEATURE_INFO.ALL_QUERIES_DONE,
         (payload) => {
-          const { layerSetId, resultsSet, eventType } = payload;
-          createInfoTable('LYR2', 'ResultSetId2', resultsSet, eventType);
+          const { layerSetId, resultSet, eventType } = payload;
+          createInfoTable('LYR2', 'ResultSetId2', resultSet, eventType);
         },
         'LYR2/FeatureInfoLayerSet'
       );
 
       cgpv.api.event.on(
-        cgpv.api.eventNames.GET_LEGENDS.LEGENDS_LAYERSET_UPDATED,
+        cgpv.api.eventNames.GET_LEGENDS.LEGEND_LAYERSET_UPDATED,
         (payload) => {
-          const { resultsSet } = payload;
-          displayLegend('LegendsId2', resultsSet);
+          const { resultSet } = payload;
+          displayLegend('LegendsId2', resultSet);
         },
         'LYR2/LegendsLayerSet'
       );
@@ -1181,17 +1181,17 @@
       cgpv.api.event.on(
         cgpv.api.eventNames.GET_FEATURE_INFO.ALL_QUERIES_DONE,
         (payload) => {
-          const { layerSetId, resultsSet, eventType } = payload;
-          createInfoTable('LYR3', 'ResultSetId3', resultsSet, eventType);
+          const { layerSetId, resultSet, eventType } = payload;
+          createInfoTable('LYR3', 'ResultSetId3', resultSet, eventType);
         },
         'LYR3/FeatureInfoLayerSet'
       );
 
       cgpv.api.event.on(
-        cgpv.api.eventNames.GET_LEGENDS.LEGENDS_LAYERSET_UPDATED,
+        cgpv.api.eventNames.GET_LEGENDS.LEGEND_LAYERSET_UPDATED,
         (payload) => {
-          const { resultsSet } = payload;
-          displayLegend('LegendsId3', resultsSet);
+          const { resultSet } = payload;
+          displayLegend('LegendsId3', resultSet);
         },
         'LYR3/LegendsLayerSet'
       );

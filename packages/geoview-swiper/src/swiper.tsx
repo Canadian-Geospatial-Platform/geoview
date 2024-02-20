@@ -4,7 +4,7 @@ import { RefObject, useAppDisplayLanguageById } from 'geoview-core';
 
 import { getLocalizedMessage } from 'geoview-core/src/core/utils/utilities';
 import { EVENT_NAMES } from 'geoview-core/src/api/events/event-types';
-import { PayloadBaseClass, TypeResultsSet, payloadIsLayerSetUpdated } from 'geoview-core/src/api/events/payloads';
+import { PayloadBaseClass, TypeResultSet, payloadIsLayerSetUpdated } from 'geoview-core/src/api/events/payloads';
 import { logger } from 'geoview-core/src/core/utils/logger';
 
 import { getRenderPixel } from 'ol/render';
@@ -124,19 +124,19 @@ export function Swiper(props: SwiperProps): JSX.Element {
 
   /**
    * Sort layers to only include those that are loaded
-   * @param {TypeResultsSet} resultsSets The resulstSet from the layer set
+   * @param {TypeResultSet} resultSets The resulstSet from the layer set
    *
    * @returns {string[]} array of IDs for layers that are loaded on the map
    */
-  function sortLayerIds(resultsSets: TypeResultsSet) {
+  function sortLayerIds(resultSets: TypeResultSet) {
     const layerIds: string[] = [];
-    Object.keys(resultsSets).forEach((result) => {
-      if (resultsSets[result].layerStatus === 'loaded') layerIds.push(result.split('/')[0]);
+    Object.keys(resultSets).forEach((result) => {
+      if (resultSets[result].layerStatus === 'loaded') layerIds.push(result.split('/')[0]);
     });
     return layerIds;
   }
 
-  const [layersIds, setLayersIds] = useState<string[]>(sortLayerIds(api.getLegendsLayerSet(mapId).resultsSet));
+  const [layersIds, setLayersIds] = useState<string[]>(sortLayerIds(api.getLegendsLayerSet(mapId).resultSet));
 
   /**
    * Pre compose, Pre render event callback
@@ -265,7 +265,7 @@ export function Swiper(props: SwiperProps): JSX.Element {
       // Log
       logger.logTraceCoreAPIEvent('GEOVIEW-SWIPER - layerSetUpdatedHandler', payload);
 
-      if (payloadIsLayerSetUpdated(payload) && payload.resultsSet[payload.layerPath]?.layerStatus === 'loaded') {
+      if (payloadIsLayerSetUpdated(payload) && payload.resultSet[payload.layerPath]?.layerStatus === 'loaded') {
         const layerId = payload.layerPath.split('/')[0];
         const ids = [...layersIds];
         if (ids.indexOf(layerId) === -1 && config.layers.includes(layerId)) {
