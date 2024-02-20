@@ -439,7 +439,6 @@ export class WMS extends AbstractGeoViewRaster {
 
     if (this.registerToLayerSetListenerFunctions[layerPath]) this.unregisterFromLayerSets(layerConfig);
     const switchToGroupLayer = Cast<TypeLayerGroupEntryConfig>(layerConfig);
-    delete layerConfig.layerStatus;
     switchToGroupLayer.entryType = 'group';
     switchToGroupLayer.layerName = {
       en: layer.Title as string,
@@ -605,6 +604,11 @@ export class WMS extends AbstractGeoViewRaster {
           }
         }
       }
+      // When we get here, we know that the metadata (if the service provide some) are processed.
+      // We need to signal to the layer sets that the 'processed' phase is done.
+      layerConfig.layerStatus = 'processed';
+      // Then, we signal that the loading phase has begun
+      layerConfig.layerStatus = 'loading';
       resolve(layerConfig);
     });
     return promiseOfExecution;

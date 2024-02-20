@@ -215,11 +215,8 @@ export class EsriImage extends AbstractGeoViewRaster {
             consoleMessage: `Empty layer group (mapId:  ${this.mapId}, layerPath: ${layerPath})`,
           });
           this.setLayerStatus('error', layerPath);
-          return;
         }
       }
-
-      this.setLayerStatus('loading', layerPath);
     });
   }
 

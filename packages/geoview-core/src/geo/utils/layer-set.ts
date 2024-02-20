@@ -2,12 +2,10 @@
 import { EVENT_NAMES } from '@/api/events/event-types';
 import {
   LayerSetPayload,
+  PayloadBaseClass,
   payloadIsLayerRegistration,
   payloadIsLayerSetChangeLayerStatus,
-  TypeResultsSet,
-  GetLegendsPayload,
-  PayloadBaseClass,
-  GetFeatureInfoPayload,
+  TypeResultSet,
 } from '@/api/events/payloads';
 import { api } from '@/app';
 import { logger } from '@/core/utils/logger';
@@ -23,94 +21,108 @@ import { createLocalizedString, getLocalizedValue } from '@/core/utils/utilities
  */
 export class LayerSet {
   /** The map identifier the layer set belongs to. */
-  mapId: string;
+  protected mapId: string;
 
   /** The layer set identifier. */
-  layerSetId: string;
+  protected layerSetId: string;
 
   /** An object containing the result sets indexed using the layer path */
-  resultsSet: TypeResultsSet = {};
+  resultSet: TypeResultSet;
 
   /** Function used to determine if the layerPath can be added to the layer set. */
-  registrationConditionFunction: (layerPath: string) => boolean;
+  protected registrationConditionFunction: (layerPath: string) => boolean;
 
   /** Function used to initialise the data property of the layer path entry. */
-  registrationUserInitialisation?: (layerPath: string) => void;
+  protected registrationUserInitialisation?: (layerPath: string) => void;
 
   /** Sequence number to append to the layer name when we declare a layer as anonymous. */
-  anonymousSequenceNumber = 1;
+  protected anonymousSequenceNumber = 1;
 
   /** ***************************************************************************************************************************
    * The class constructor that instanciate a set of layer.
    *
    * @param {string} mapId The map identifier the layer set belongs to.
    * @param {string} layerSetIdentifier The layer set identifier.
-   * @param {TypeResultsSet} resultsSet An object that will contain the result sets indexed using the layer path.
+   * @param {TypeResultSet} resultSet An object that will contain the result sets indexed using the layer path.
    * @param {(layerPath: string) => boolean} registrationConditionFunction A function to decide if the layer can be added.
    * @param {(layerPath: string) => void} registrationUserInitialisation A function to initialise the data property of the layer path entry.
    */
   constructor(
     mapId: string,
     layerSetIdentifier: string,
-    resultsSet: TypeResultsSet,
-    registrationConditionFunction: (layerPath: string) => boolean,
+    resultSet: TypeResultSet,
+    registrationConditionFunction?: true | ((layerPath: string) => boolean),
     registrationUserInitialisation?: (layerPath: string) => void
   ) {
     this.mapId = mapId;
     this.layerSetId = layerSetIdentifier;
-    this.resultsSet = resultsSet;
-    this.registrationConditionFunction = registrationConditionFunction;
-    this.registrationUserInitialisation = registrationUserInitialisation;
-
-    const changeLayerStatusListenerFunctions = (payload: PayloadBaseClass) => {
-      // Log
-      logger.logTraceCoreAPIEvent('LAYER-SET - CHANGE_LAYER_STATUS', this.mapId, payload);
-
-      if (payloadIsLayerSetChangeLayerStatus(payload)) {
-        const { layerPath, layerStatus } = payload;
-        if (layerStatus === 'error' && resultsSet[layerPath]) {
-          api.event.emit(LayerSetPayload.createLayerSetUpdatedPayload(`${mapId}/LegendsLayerSetStatusChanged`, this.resultsSet, layerPath));
-          // eslint-disable-next-line no-param-reassign
-          resultsSet[layerPath].layerStatus = 'error';
-          api.event.emit(
-            GetFeatureInfoPayload.createFeatureInfoLayersetUpdatedPayload(
-              `${mapId}/FeatureInfoLayerSet`,
-              layerPath,
-              resultsSet,
-              layerStatus
-            )
-          );
-        } else if (this.resultsSet[layerPath]) {
-          const layerConfig = api.maps[mapId].layer.registeredLayers[layerPath];
-          if (this.resultsSet[layerPath].layerStatus !== layerStatus) {
-            this.resultsSet[layerPath].layerStatus = layerStatus;
-            if (!this.resultsSet[layerPath].layerName) {
-              this.resultsSet[layerPath].layerName =
-                getLocalizedValue(layerConfig.layerName, mapId) ||
-                getLocalizedValue(
-                  {
-                    en: `Anonymous Layer ${this.anonymousSequenceNumber}`,
-                    fr: `Couche Anonyme ${this.anonymousSequenceNumber}`,
-                  },
-                  mapId
-                );
-              this.anonymousSequenceNumber++;
-            }
-            // Synchronize the layer name property in the config and the layer set object when the geoview instance is ready.
-            if (layerConfig.geoviewLayerInstance!.allLayerStatusAreIn(['processed', 'error'], [layerConfig]))
-              if (layerConfig.layerName) this.resultsSet[layerPath].layerName = getLocalizedValue(layerConfig.layerName, mapId);
-              else layerConfig.layerName = createLocalizedString(this.resultsSet[layerPath].layerName!);
-            api.event.emit(LayerSetPayload.createLayerSetUpdatedPayload(this.layerSetId, this.resultsSet, layerPath));
-            if (this.layerSetId === `${mapId}/LegendsLayerSet`)
-              // LegendLayerSet is the absolute reference for finding out whether a layer has been loaded or is in error. Then, every
-              // time we modify a layerSet in the Legend family, we have to inform the viewer that a change has occurred.
-              api.event.emit(GetLegendsPayload.createLegendsLayersetUpdatedPayload(`${this.mapId}/LegendsLayerSet`, layerPath, resultsSet));
+    this.resultSet = resultSet;
+    this.registrationConditionFunction =
+      registrationConditionFunction === true || registrationConditionFunction === undefined
+        ? () => {
+            return true;
           }
-        }
-      }
-    };
-    api.event.on(EVENT_NAMES.LAYER_SET.CHANGE_LAYER_STATUS, changeLayerStatusListenerFunctions, this.mapId);
+        : registrationConditionFunction;
+    this.registrationUserInitialisation = registrationUserInitialisation;
+    this.setChangeLayerStatusListenerFunctions();
+    this.setLayerRegistrationListenerFunctions();
+  }
 
+  /** ***************************************************************************************************************************
+   * The listener that will handle the CHANGE_LAYER_STATUS event triggered on the map.
+   *
+   * @param {PayloadBaseClass} payload The payload to process.
+   */
+  protected changeLayerStatusListenerFunctions(payload: PayloadBaseClass) {
+    if (payloadIsLayerSetChangeLayerStatus(payload)) {
+      // Log
+      logger.logTraceDetailed('layer-set on EVENT_NAMES.LAYER_SET.CHANGE_LAYER_STATUS', this.mapId, payload);
+
+      const { layerPath, layerStatus } = payload;
+      // if layer's status flag exists and is different than the new one
+      if (this.resultSet?.[layerPath]?.layerStatus && this.resultSet?.[layerPath]?.layerStatus !== layerStatus) {
+        this.resultSet[layerPath].layerStatus = layerStatus;
+        if (['processed', 'error'].includes(layerStatus) && !this.resultSet[layerPath].layerName) {
+          const layerConfig = api.maps[this.mapId].layer.registeredLayers[layerPath];
+          const layerName = getLocalizedValue(layerConfig.layerName, this.mapId);
+          if (layerName) this.resultSet[layerPath].layerName = layerName;
+          else {
+            this.resultSet[layerPath].layerName = getLocalizedValue(
+              {
+                en: `Anonymous Layer ${this.anonymousSequenceNumber}`,
+                fr: `Couche Anonyme ${this.anonymousSequenceNumber}`,
+              },
+              this.mapId
+            );
+            this.anonymousSequenceNumber++;
+          }
+
+          // Synchronize the layer name property in the config and the layer set object when the geoview instance is ready.
+          if (!layerConfig.layerName) layerConfig.layerName = createLocalizedString(this.resultSet[layerPath].layerName!);
+        }
+        api.event.emit(LayerSetPayload.createLayerSetUpdatedPayload(this.layerSetId, this.resultSet, layerPath));
+      }
+    }
+  }
+
+  /** ***************************************************************************************************************************
+   * Set the listener that will handle the CHANGE_LAYER_STATUS event triggered on the map.
+   */
+  protected setChangeLayerStatusListenerFunctions() {
+    api.event.on(
+      EVENT_NAMES.LAYER_SET.CHANGE_LAYER_STATUS,
+      (payload) => {
+        this.changeLayerStatusListenerFunctions.call(this, payload);
+      },
+      this.mapId
+    );
+  }
+
+  /** ***************************************************************************************************************************
+   * Set the listener that will handle the LAYER_REGISTRATION event triggered on the map. Layer registration is the action of
+   * adding or deleting a layer in the layerset
+   */
+  private setLayerRegistrationListenerFunctions() {
     // Register a layer to the layer set or unregister the layer when it is deleted from the map.
     api.event.on(
       EVENT_NAMES.LAYER_SET.LAYER_REGISTRATION,
@@ -122,22 +134,18 @@ export class LayerSet {
           const { action, layerPath, layerSetId } = payload;
           // update the registration of all layer sets if !payload.layerSetId or update only the specified layer set
           if (!layerSetId || layerSetId === this.layerSetId) {
-            if (action === 'add' && this.registrationConditionFunction(layerPath) && !(layerPath in this.resultsSet)) {
-              const layerConfig = api.maps[mapId].layer.registeredLayers[layerPath];
-              this.resultsSet[layerPath] = {
+            if (action === 'add' && this.registrationConditionFunction(layerPath) && !(layerPath in this.resultSet)) {
+              const layerConfig = api.maps[this.mapId].layer.registeredLayers[layerPath];
+              this.resultSet[layerPath] = {
                 data: undefined,
                 layerStatus: 'newInstance',
-                layerName: getLocalizedValue(layerConfig.layerName, mapId),
+                layerName: getLocalizedValue(layerConfig.layerName, this.mapId),
               };
               if (this.registrationUserInitialisation) this.registrationUserInitialisation(layerPath);
-              api.event.emit(LayerSetPayload.createLayerSetUpdatedPayload(this.layerSetId, this.resultsSet, layerPath));
-              if (this.layerSetId === `${mapId}/LegendsLayerSet`)
-                api.event.emit(
-                  LayerSetPayload.createLayerSetUpdatedPayload(`${mapId}/LegendsLayerSetStatusChanged`, this.resultsSet, layerPath)
-                );
-            } else if (action === 'remove' && layerPath in this.resultsSet) {
-              delete this.resultsSet[layerPath];
-              api.event.emit(LayerSetPayload.createLayerSetUpdatedPayload(this.layerSetId, this.resultsSet, layerPath));
+              api.event.emit(LayerSetPayload.createLayerSetUpdatedPayload(this.layerSetId, this.resultSet, layerPath));
+            } else if (action === 'remove' && layerPath in this.resultSet) {
+              delete this.resultSet[layerPath];
+              api.event.emit(LayerSetPayload.createLayerSetUpdatedPayload(this.layerSetId, this.resultSet, layerPath));
             }
           }
         }
@@ -155,7 +163,7 @@ export class LayerSet {
    *
    * @param {string} mapId The map identifier the layer set belongs to.
    * @param {string} layerSetId The layer set identifier.
-   * @param {TypeResultsSet} resultsSet An object that will contain the result sets indexed using the layer path.
+   * @param {TypeResultSet} resultSet An object that will contain the result sets indexed using the layer path.
    * @param {(layerPath: string) => boolean} registrationConditionFunction A function to decide if the layer can be added.
    *
    * @returns {LayerSet} the LayerSet object created
@@ -163,9 +171,9 @@ export class LayerSet {
   static create(
     mapId: string,
     layerSetId: string,
-    resultsSet: TypeResultsSet,
+    resultSet: TypeResultSet,
     registrationConditionFunction: (layerPath: string) => boolean
   ): LayerSet {
-    return new LayerSet(mapId, layerSetId, resultsSet, registrationConditionFunction);
+    return new LayerSet(mapId, layerSetId, resultSet, registrationConditionFunction);
   }
 }

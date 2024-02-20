@@ -10,7 +10,7 @@ import { AbstractGeoViewLayer, TypeGeoviewLayerType } from '@/geo/layer/geoview-
 import { TypeMapMouseInfo } from '@/api/events/payloads';
 import { createLocalizedString } from '@/core/utils/utilities';
 import { logger } from '@/core/utils/logger';
-import { Cast } from '@/core/types/cgpv-types';
+import { Cast, LayerSetPayload } from '@/core/types/cgpv-types';
 import { api } from '@/app';
 
 /** ******************************************************************************************************************************
@@ -659,9 +659,6 @@ export class ConfigBaseClass {
   /** The geoview layer instance that contains this layer configuration. */
   geoviewLayerInstance?: AbstractGeoViewLayer;
 
-  /** It is used to identified unprocessed layers and shows the final layer state */
-  layerStatus?: TypeLayerStatus;
-
   /** It is used to identified the process phase of the layer */
   layerPhase?: string;
 
@@ -680,6 +677,9 @@ export class ConfigBaseClass {
 
   /** This property is used to link the displayed layer to its layer entry config. it is not part of the schema. */
   protected _olLayer: BaseLayer | LayerGroup | null = null;
+
+  /** It is used to identified unprocessed layers and shows the final layer state */
+  protected _layerStatus: TypeLayerStatus = 'newInstance';
 
   /**
    * The class constructor.
@@ -740,6 +740,23 @@ export class ConfigBaseClass {
   }
 
   /**
+   * The layerId getter method for the ConfigBaseClass class and its descendant classes.
+   */
+  get layerStatus() {
+    return this._layerStatus;
+  }
+
+  /**
+   * The layerId setter method for the ConfigBaseClass class and its descendant classes.
+   * @param {string} newLayerId The new layerId value.
+   */
+  set layerStatus(layerStatus: TypeLayerStatus) {
+    this._layerStatus = layerStatus;
+    api.event.emit(LayerSetPayload.createLayerSetChangeLayerStatusPayload(this.geoviewLayerInstance!.mapId, this.layerPath, layerStatus));
+    if (layerStatus === 'processed') this.geoviewLayerInstance!.setLayerPhase('processed', this.layerPath);
+  }
+
+  /**
    * Register the layer identifier. Duplicate identifier are not allowed.
    *
    * @returns {boolean} Returns false if the layer configuration can't be registered.
@@ -749,9 +766,9 @@ export class ConfigBaseClass {
     const { registeredLayers } = api.maps[this.geoviewLayerInstance!.mapId].layer;
     if (registeredLayers[this.layerPath]) return false;
     (registeredLayers[this.layerPath] as ConfigBaseClass) = this;
-    if (!this.layerStatus) this.geoviewLayerInstance!.setLayerStatus('registered', this.layerPath);
     if (this.entryType !== 'group')
       (this.geoviewLayerInstance as AbstractGeoViewLayer).registerToLayerSets(Cast<TypeBaseLayerEntryConfig>(this));
+    this.layerStatus = 'registered';
     return true;
   }
 
@@ -1314,12 +1331,6 @@ export class TypeTileLayerEntryConfig extends TypeBaseLayerEntryConfig {
  */
 export class TypeGeocoreLayerEntryConfig extends ConfigBaseClass {
   /** This attribute from ConfigBaseClass is not used by groups. */
-  declare layerStatus: never;
-
-  /** This attribute from ConfigBaseClass is not used by groups. */
-  declare layerPhase: never;
-
-  /** This attribute from ConfigBaseClass is not used by groups. */
   declare isMetadataLayerGroup: never;
 
   /** Tag used to link the entry to a specific schema. */
@@ -1395,12 +1406,6 @@ export type TypeSourceGeocoreConfig = {
  * Type used to define a layer group.
  */
 export class TypeLayerGroupEntryConfig extends ConfigBaseClass {
-  /** This attribute from ConfigBaseClass is not used by groups. */
-  declare layerStatus: never;
-
-  /** This attribute from ConfigBaseClass is not used by groups. */
-  declare layerPhase: never;
-
   /** Tag used to link the entry to a specific schema is not used by groups. */
   declare schemaTag: never;
 

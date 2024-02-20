@@ -280,9 +280,6 @@ export abstract class AbstractGeoViewLayer {
   /** The unique identifier of the map on which the GeoView layer will be drawn. */
   mapId: string;
 
-  /** Flag used to indicate the layer's phase */
-  layerPhase = '';
-
   /** The type of GeoView layer that is instantiated. */
   type: TypeGeoviewLayerType;
 
@@ -404,18 +401,14 @@ export abstract class AbstractGeoViewLayer {
    */
   setLayerPhase(layerPhase: string, layerPath?: string) {
     if (layerPath) {
-      this.layerPhase = layerPhase;
       const layerConfig = this.getLayerConfig(layerPath) as TypeBaseLayerEntryConfig;
       layerConfig.layerPhase = layerPhase;
-      api.event.emit(LayerSetPayload.createLayerSetChangeLayerPhasePayload(this.mapId, layerPath, layerPhase));
     } else {
-      this.layerPhase = layerPhase;
       const changeAllSublayerPhase = (listOfLayerEntryConfig = this.listOfLayerEntryConfig) => {
         listOfLayerEntryConfig.forEach((subLayerConfig) => {
           if (layerEntryIsGroupLayer(subLayerConfig)) changeAllSublayerPhase(subLayerConfig.listOfLayerEntryConfig);
           else {
             (subLayerConfig as TypeBaseLayerEntryConfig).layerPhase = layerPhase;
-            api.event.emit(LayerSetPayload.createLayerSetChangeLayerPhasePayload(this.mapId, subLayerConfig.layerPath, layerPhase));
           }
         });
       };
@@ -433,8 +426,6 @@ export abstract class AbstractGeoViewLayer {
     layerPath = layerPath || this.layerPathAssociatedToTheGeoviewLayer;
     const layerConfig = this.getLayerConfig(layerPath) as TypeBaseLayerEntryConfig;
     layerConfig.layerStatus = layerStatus;
-    api.event.emit(LayerSetPayload.createLayerSetChangeLayerStatusPayload(this.mapId, layerPath, layerStatus!));
-    if (layerStatus === 'processed') this.setLayerPhase('processed', layerPath);
   }
 
   /** ***************************************************************************************************************************
@@ -593,9 +584,12 @@ export abstract class AbstractGeoViewLayer {
     if (metadataUrl) {
       try {
         const metadataString = await getXMLHttpRequest(`${metadataUrl}?f=json`);
-        this.metadata = toJsonObject(JSON.parse(metadataString));
-        const { copyrightText } = this.metadata;
-        if (copyrightText) this.attributions.push(copyrightText as string);
+        if (metadataString === '{}') this.metadata = null;
+        else {
+          this.metadata = toJsonObject(JSON.parse(metadataString));
+          const { copyrightText } = this.metadata;
+          if (copyrightText) this.attributions.push(copyrightText as string);
+        }
       } catch (error) {
         // Log
         logger.logError(error);
@@ -633,7 +627,11 @@ export abstract class AbstractGeoViewLayer {
       }
       const arrayOfLayerConfigs = await Promise.all(promisedAllLayerDone);
       arrayOfLayerConfigs.forEach((layerConfig) => {
-        if (layerConfig.layerStatus !== 'error') this.setLayerStatus('processed', layerConfig.layerPath);
+        if (layerConfig.layerStatus === 'error') {
+          const message = `Error while loading layer path "${layerConfig.layerPath})" on map "${this.mapId}"`;
+          this.layerLoadError.push({ layer: layerConfig.layerPath, consoleMessage: message });
+          throw new Error(message);
+        }
       });
     } catch (error) {
       // Log
@@ -672,7 +670,13 @@ export abstract class AbstractGeoViewLayer {
    */
   protected processLayerMetadata(layerConfig: TypeLayerEntryConfig): Promise<TypeLayerEntryConfig> {
     if (!layerConfig.source) layerConfig.source = {};
-    if (!layerConfig.source.featureInfo) layerConfig.source.featureInfo = { queryable: true };
+    if (!layerConfig.source.featureInfo) layerConfig.source.featureInfo = { queryable: false };
+    // When we get here, we know that the metadata (if the service provide some) are processed.
+    // We need to signal to the layer sets that the 'processed' phase is done.
+    layerConfig.layerStatus = 'processed';
+    // Then, we signal that the loading phase has begun
+    layerConfig.layerStatus = 'loading';
+
     return Promise.resolve(layerConfig);
   }
 
@@ -1320,7 +1324,7 @@ export abstract class AbstractGeoViewLayer {
             style: TypeStyleConfig;
           })
         | undefined;
-
+      logger.logDebug('getLegend:layerConfig=', layerConfig);
       if (!layerConfig) {
         const legend: TypeLegend = {
           type: this.type,

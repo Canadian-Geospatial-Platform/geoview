@@ -1,4 +1,4 @@
-import { TypeLegendResultsSetEntry } from '@/api/events/payloads';
+import { TypeLegendResultSetEntry } from '@/api/events/payloads';
 import {
   isClassBreakStyleConfig,
   isImageStaticLegend,
@@ -14,7 +14,7 @@ import {
 } from '@/geo';
 import { TypeLegendLayer, TypeLegendLayerIcons, TypeLegendLayerItem, TypeLegendItem } from '@/core/components/layers/types';
 import { api, getLocalizedValue, ILayerState } from '@/app';
-import { delay } from '@/core/utils/utilities';
+// import { delay } from '@/core/utils/utilities';
 import { logger } from '@/core/utils/logger';
 
 import { AbstractEventProcessor } from '../abstract-event-processor';
@@ -135,17 +135,16 @@ export class LegendEventProcessor extends AbstractEventProcessor {
     return undefined;
   }
 
-  public static async propagateLegendToStore(
-    mapId: string,
-    layerPath: string,
-    legendResultsSetEntry: TypeLegendResultsSetEntry
-  ): Promise<void> {
+  /** ***************************************************************************************************************************
+   * This method propagates the information stored in the legend layer set to the store.
+   *
+   * @param {string} mapId The map identifier.
+   * @param {string} layerPath The layer path that changed.
+   * @param {TypeLegendResultSetEntry} legendResultSetEntry The legend result set that triggered the propagation.
+   */
+  public static propagateLegendToStore(mapId: string, layerPath: string, legendResultSetEntry: TypeLegendResultSetEntry) {
     const layerPathNodes = layerPath.split('/');
-    const createNewLegendEntries = async (
-      layerPathBeginning: string,
-      currentLevel: number,
-      existingEntries: TypeLegendLayer[]
-    ): Promise<void> => {
+    const createNewLegendEntries = (layerPathBeginning: string, currentLevel: number, existingEntries: TypeLegendLayer[]) => {
       const entryLayerPath = `${layerPathBeginning}/${layerPathNodes[currentLevel]}`;
       const layerConfig = api.maps[mapId].layer.registeredLayers[entryLayerPath] as TypeLayerEntryConfig;
       let entryIndex = existingEntries.findIndex((entry) => entry.layerPath === entryLayerPath);
@@ -158,14 +157,12 @@ export class LegendEventProcessor extends AbstractEventProcessor {
               api.maps[mapId].layer.initialLayerOrder.indexOf(entryLayerPath) !== -1 && !layerConfig.parentLayerConfig
                 ? api.maps[mapId].layer.initialLayerOrder.indexOf(entryLayerPath)
                 : existingEntries.length,
-            // TODO: Why do we have the following line in the store? Do we have to fetch the metadata again since the GeoView layer read and keep them?
-            metadataAccessPath: getLocalizedValue(layerConfig.geoviewLayerConfig?.metadataAccessPath, mapId) || '',
             layerPath: entryLayerPath,
-            layerStatus: legendResultsSetEntry.layerStatus,
+            layerStatus: legendResultSetEntry.layerStatus,
             layerName: getLocalizedValue(layerConfig.layerName, mapId) || layerConfig.layerId,
             type: layerConfig.entryType as TypeGeoviewLayerType,
             isVisible: layerConfig.initialSettings?.visible ? layerConfig.initialSettings.visible : 'yes',
-            canToggle: legendResultsSetEntry.data?.type !== 'esriImage',
+            canToggle: legendResultSetEntry.data?.type !== 'esriImage',
             opacity: layerConfig.initialSettings?.opacity ? layerConfig.initialSettings.opacity : 1,
             items: [] as TypeLegendItem[],
             children: [] as TypeLegendLayer[],
@@ -186,19 +183,17 @@ export class LegendEventProcessor extends AbstractEventProcessor {
               : existingEntries.length,
           layerPath: entryLayerPath,
           layerAttribution: api.maps[mapId].layer.geoviewLayers[layerPathNodes[0]].attributions,
-          // ! Why do we have metadataAccessPath here? Do we need to fetch the metadata again? The GeoView layer fetch them and store them in this.metadata.
-          metadataAccessPath: getLocalizedValue(layerConfig.geoviewLayerConfig?.metadataAccessPath, mapId) || '',
-          layerName: getLocalizedValue(legendResultsSetEntry.data?.layerName, mapId) || layerConfig.layerId!,
-          layerStatus: legendResultsSetEntry.layerStatus,
-          querySent: legendResultsSetEntry.querySent,
-          styleConfig: legendResultsSetEntry.data?.styleConfig,
-          type: legendResultsSetEntry.data?.type,
+          layerName: getLocalizedValue(legendResultSetEntry.data?.layerName, mapId) || layerConfig.layerId!,
+          layerStatus: legendResultSetEntry.layerStatus,
+          querySent: legendResultSetEntry.querySent,
+          styleConfig: legendResultSetEntry.data?.styleConfig,
+          type: legendResultSetEntry.data?.type,
           isVisible: layerConfig.initialSettings?.visible || 'yes',
-          canToggle: legendResultsSetEntry.data?.type !== 'esriImage',
+          canToggle: legendResultSetEntry.data?.type !== 'esriImage',
           opacity: layerConfig.initialSettings?.opacity || 1,
           items: [] as TypeLegendItem[],
           children: [] as TypeLegendLayer[],
-          icons: LegendEventProcessor.getLayerIconImage(mapId, layerPath, legendResultsSetEntry.data!),
+          icons: LegendEventProcessor.getLayerIconImage(mapId, layerPath, legendResultSetEntry.data!),
         };
 
         newLegendLayer.items = [];
@@ -221,7 +216,7 @@ export class LegendEventProcessor extends AbstractEventProcessor {
         // !          instructions that follow and place the bounds in a nore logical place.
         try {
           // Await for the Geoview layer in loaded state
-          const myLayer = await api.maps[mapId].layer.getGeoviewLayerByIdAsync(layerPathNodes[0], true);
+          const myLayer = api.maps[mapId].layer.geoviewLayers[layerPathNodes[0]];
 
           // Calculate the bounds (the calculation may return undefined when it fails)
           newLegendLayer.bounds = myLayer.calculateBounds(layerPath);
@@ -247,7 +242,7 @@ export class LegendEventProcessor extends AbstractEventProcessor {
       LegendEventProcessor.propagatedOnce = true;
 
       // Give it some time so that each layer has their chance to load on time
-      await delay(LegendEventProcessor.timeDelayBeforeSelectingLayerInStore);
+      // await delay(LegendEventProcessor.timeDelayBeforeSelectingLayerInStore);
 
       // Find the layers that are processed
       const validFirstLayer = layers.find((layer) => {

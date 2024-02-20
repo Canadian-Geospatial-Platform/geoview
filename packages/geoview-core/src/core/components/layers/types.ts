@@ -35,7 +35,6 @@ export interface TypeLegendLayer {
   type?: TypeGeoviewLayerType;
   styleConfig?: TypeStyleConfig | null;
   layerStatus?: TypeLayerStatus;
-  layerPhase?: string;
   querySent?: boolean;
 
   isVisible: TypeVisibilityFlags; // is layer is visible

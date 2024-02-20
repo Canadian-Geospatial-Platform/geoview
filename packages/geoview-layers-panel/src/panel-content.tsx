@@ -100,11 +100,11 @@ function PanelContent(props: TypePanelContentProps): JSX.Element {
     logger.logTraceUseEffect('PANEL-CONTENT - mount 1');
 
     api.event.on(api.eventNames.MAP.EVENT_MAP_LOADED, updateLayers, mapId);
-    api.event.on(api.eventNames.GET_LEGENDS.LEGENDS_LAYERSET_UPDATED, updateLayers, `${mapId}/LegendsLayerSet`);
+    api.event.on(api.eventNames.GET_LEGENDS.LEGEND_LAYERSET_UPDATED, updateLayers, `${mapId}/LegendsLayerSet`);
 
     return () => {
       api.event.off(api.eventNames.MAP.EVENT_MAP_LOADED, mapId, updateLayers);
-      api.event.off(api.eventNames.GET_LEGENDS.LEGENDS_LAYERSET_UPDATED, mapId, updateLayers);
+      api.event.off(api.eventNames.GET_LEGENDS.LEGEND_LAYERSET_UPDATED, mapId, updateLayers);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

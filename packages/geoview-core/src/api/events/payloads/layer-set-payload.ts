@@ -8,17 +8,18 @@ const validEvents: EventStringId[] = [
   EVENT_NAMES.LAYER_SET.LAYER_REGISTRATION,
   EVENT_NAMES.LAYER_SET.REQUEST_LAYER_INVENTORY,
   EVENT_NAMES.LAYER_SET.CHANGE_LAYER_STATUS,
-  EVENT_NAMES.LAYER_SET.CHANGE_LAYER_PHASE,
   EVENT_NAMES.LAYER_SET.UPDATED,
 ];
 
-export type TypeResultsSet = {
-  [layerPath: string]: {
-    layerName?: string;
-    layerStatus: TypeLayerStatus;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    data: any;
-  };
+export type TypeResultSetEntry = {
+  layerName?: string;
+  layerStatus: TypeLayerStatus;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  data: any;
+};
+
+export type TypeResultSet = {
+  [layerPath: string]: TypeResultSetEntry;
 };
 
 /**
@@ -82,7 +83,7 @@ export const payloadIsLayerSetUpdated = (verifyIfPayload: PayloadBaseClass): ver
  */
 export interface TypelayerSetUpdatedPayload extends LayerSetPayload {
   /** An object containing the result sets indexed using the layer path */
-  resultsSet: TypeResultsSet;
+  resultSet: TypeResultSet;
   // The layerPath affected
   layerPath: string;
 }
@@ -109,16 +110,6 @@ export interface TypeLayerSetChangeLayerStatusPayload extends LayerSetPayload {
   layerPath: string;
   // The new layer status to assign to the layer path.
   layerStatus: TypeLayerStatus;
-}
-
-/**
- * Additional attributes needed to define a TypeLayerSetChangeLayerPhasePayload
- */
-export interface TypeLayerSetChangeLayerPhasePayload extends LayerSetPayload {
-  // the layer path affected.
-  layerPath: string;
-  // The new layer phase to assign to the layer path.
-  layerPhase: string;
 }
 
 /**
@@ -218,29 +209,6 @@ export class LayerSetPayload extends PayloadBaseClass {
   };
 
   /**
-   * Static method used to create a layer set payload when we need to change a layer phase
-   *
-   * @param {string} handlerName the handler Name
-   * @param {string} layerPath the layer path affected by the change
-   * @param {string} layerPhase the value to assign to the layerPhase property
-   *
-   * @returns {TypelayerSetUpdatedPayload} the requestLayerInventoryPayload object created
-   */
-  static createLayerSetChangeLayerPhasePayload = (
-    handlerName: string,
-    layerPath: string,
-    layerPhase: string
-  ): TypeLayerSetChangeLayerPhasePayload => {
-    const layerSetChangeLayerPhasePayload = new LayerSetPayload(
-      EVENT_NAMES.LAYER_SET.CHANGE_LAYER_PHASE,
-      handlerName
-    ) as TypeLayerSetChangeLayerPhasePayload;
-    layerSetChangeLayerPhasePayload.layerPath = layerPath;
-    layerSetChangeLayerPhasePayload.layerPhase = layerPhase;
-    return layerSetChangeLayerPhasePayload;
-  };
-
-  /**
    * Static method used to create a layer set payload sent when a layer is updated
    *
    * @param {string | null} handlerName the handler Name
@@ -248,13 +216,9 @@ export class LayerSetPayload extends PayloadBaseClass {
    *
    * @returns {TypelayerSetUpdatedPayload} the requestLayerInventoryPayload object created
    */
-  static createLayerSetUpdatedPayload = (
-    handlerName: string,
-    resultsSet: TypeResultsSet,
-    layerPath: string
-  ): TypelayerSetUpdatedPayload => {
+  static createLayerSetUpdatedPayload = (handlerName: string, resultSet: TypeResultSet, layerPath: string): TypelayerSetUpdatedPayload => {
     const layerSetUpdatedPayload = new LayerSetPayload(EVENT_NAMES.LAYER_SET.UPDATED, handlerName) as TypelayerSetUpdatedPayload;
-    layerSetUpdatedPayload.resultsSet = resultsSet;
+    layerSetUpdatedPayload.resultSet = resultSet;
     layerSetUpdatedPayload.layerPath = layerPath;
     return layerSetUpdatedPayload;
   };

@@ -318,7 +318,6 @@ export class Layer {
       // an empty geoview layer is created
       api.event.emit(GeoViewLayerPayload.createGeoviewLayerAddedPayload(`${this.mapId}/${geoviewLayer.geoviewLayerId}`, geoviewLayer));
     else {
-      geoviewLayer.setAllLayerStatusTo('loading', geoviewLayer.listOfLayerEntryConfig);
       api.maps[this.mapId].map.addLayer(geoviewLayer.olLayers!);
       api.event.emit(GeoViewLayerPayload.createGeoviewLayerAddedPayload(`${this.mapId}/${geoviewLayer.geoviewLayerId}`, geoviewLayer));
     }

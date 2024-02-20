@@ -242,6 +242,12 @@ export class GeoJSON extends AbstractGeoViewVector {
             `EPSG:${MapEventProcessor.getMapState(this.mapId).currentProjection}`
           );
 
+        // When we get here, we know that the metadata (if the service provide some) are processed.
+        // We need to signal to the layer sets that the 'processed' phase is done.
+        layerConfig.layerStatus = 'processed';
+        // Then, we signal that the loading phase has begun
+        layerConfig.layerStatus = 'loading';
+
         resolve(layerConfig);
       }
     });
