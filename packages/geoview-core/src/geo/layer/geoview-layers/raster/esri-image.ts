@@ -212,14 +212,11 @@ export class EsriImage extends AbstractGeoViewRaster {
         if (!layerConfig.listOfLayerEntryConfig.length) {
           this.layerLoadError.push({
             layer: layerPath,
-            consoleMessage: `Empty layer group (mapId:  ${this.mapId}, layerPath: ${layerPath})`,
+            loggerMessage: `Empty layer group (mapId:  ${this.mapId}, layerPath: ${layerPath})`,
           });
-          this.setLayerStatus('error', layerPath);
-          return;
+          layerConfig.layerStatus = 'error';
         }
       }
-
-      this.setLayerStatus('loading', layerPath);
     });
   }
 
@@ -314,6 +311,9 @@ export class EsriImage extends AbstractGeoViewRaster {
    * @returns {TypeBaseRasterLayer} The GeoView raster layer that has been created.
    */
   protected processOneLayerEntry(layerConfig: TypeEsriImageLayerEntryConfig): Promise<TypeBaseRasterLayer | null> {
+    // ! IMPORTANT: The processOneLayerEntry method must call the corresponding method of its parent to ensure that the flow of
+    // !            layerStatus values is correctly sequenced.
+    super.processOneLayerEntry(layerConfig);
     const { layerPath } = layerConfig;
     this.setLayerPhase('processOneLayerEntry', layerPath);
     const sourceOptions: SourceOptions = {};
