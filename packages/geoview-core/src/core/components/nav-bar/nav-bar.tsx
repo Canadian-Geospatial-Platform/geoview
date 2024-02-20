@@ -181,7 +181,7 @@ export function Navbar(): JSX.Element {
           {navBarComponents.includes('fullscreen') && <Fullscreen />}
           {navBarComponents.includes('location') && <Location />}
           {navBarComponents.includes('home') && <Home />}
-          {navBarComponents.includes('export') && <ExportButton className={`${sxClasses.navButton} ${activeModalId ? 'export' : ''}`} />}
+          {navBarComponents.includes('export') && <ExportButton sxDetails={sxClasses.navButton} className={``} />}
         </ButtonGroup>
       </Box>
     </Box>
