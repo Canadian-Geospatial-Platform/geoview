@@ -280,9 +280,6 @@ export abstract class AbstractGeoViewLayer {
   /** The unique identifier of the map on which the GeoView layer will be drawn. */
   mapId: string;
 
-  /** Flag used to indicate the layer's phase */
-  layerPhase = '';
-
   /** The type of GeoView layer that is instantiated. */
   type: TypeGeoviewLayerType;
 
@@ -404,18 +401,14 @@ export abstract class AbstractGeoViewLayer {
    */
   setLayerPhase(layerPhase: string, layerPath?: string) {
     if (layerPath) {
-      this.layerPhase = layerPhase;
       const layerConfig = this.getLayerConfig(layerPath) as TypeBaseLayerEntryConfig;
       layerConfig.layerPhase = layerPhase;
-      api.event.emit(LayerSetPayload.createLayerSetChangeLayerPhasePayload(this.mapId, layerPath, layerPhase));
     } else {
-      this.layerPhase = layerPhase;
       const changeAllSublayerPhase = (listOfLayerEntryConfig = this.listOfLayerEntryConfig) => {
         listOfLayerEntryConfig.forEach((subLayerConfig) => {
           if (layerEntryIsGroupLayer(subLayerConfig)) changeAllSublayerPhase(subLayerConfig.listOfLayerEntryConfig);
           else {
             (subLayerConfig as TypeBaseLayerEntryConfig).layerPhase = layerPhase;
-            api.event.emit(LayerSetPayload.createLayerSetChangeLayerPhasePayload(this.mapId, subLayerConfig.layerPath, layerPhase));
           }
         });
       };
@@ -424,36 +417,23 @@ export abstract class AbstractGeoViewLayer {
   }
 
   /** ***************************************************************************************************************************
-   * Change the layer status property and emit an event to update existing layer sets.
-   *
-   * @param {TypeLayerStatus} layerStatus The value to assign to the layer status property.
-   * @param {string} layerPath The layer path to the layer's configuration affected by the change.
-   */
-  setLayerStatus(layerStatus: TypeLayerStatus, layerPath?: string) {
-    layerPath = layerPath || this.layerPathAssociatedToTheGeoviewLayer;
-    const layerConfig = this.getLayerConfig(layerPath) as TypeBaseLayerEntryConfig;
-    layerConfig.layerStatus = layerStatus;
-    api.event.emit(LayerSetPayload.createLayerSetChangeLayerStatusPayload(this.mapId, layerPath, layerStatus!));
-    if (layerStatus === 'processed') this.setLayerPhase('processed', layerPath);
-  }
-
-  /** ***************************************************************************************************************************
    * Process recursively the list of layer entries to see if all of them are processed.
    *
-   * @param {TypeLayerStatus[]} listOfStatusFlag The list of layer's configuration
+   * @param {TypeLayerStatus} layerStatus The layer status to compare with the internal value of the config.
    * @param {TypeListOfLayerEntryConfig} listOfLayerEntryConfig The list of layer's configuration
    *                                                            (default: this.listOfLayerEntryConfig).
    *
-   * @returns {boolean} true when all layers are processed.
+   * @returns {boolean} true when all layers are greater than or equal to the layerStatus parameter.
    */
-  allLayerStatusAreIn(
-    listOfStatusFlag: TypeLayerStatus[],
+  allLayerStatusAreGreaterThanOrEqualTo(
+    layerStatus: TypeLayerStatus,
     listOfLayerEntryConfig: TypeListOfLayerEntryConfig = this.listOfLayerEntryConfig
   ): boolean {
-    // Try to find an unprocessed layer. If you can, return false
+    // Try to find a layer that is not greater than or equal to the layerStatus parameter. If you can, return false
     return !listOfLayerEntryConfig.find((layerConfig: TypeLayerEntryConfig) => {
-      if (layerEntryIsGroupLayer(layerConfig)) return !this.allLayerStatusAreIn(listOfStatusFlag, layerConfig.listOfLayerEntryConfig);
-      return !listOfStatusFlag.includes((layerConfig as TypeBaseLayerEntryConfig).layerStatus || 'newInstance');
+      if (layerEntryIsGroupLayer(layerConfig))
+        return !this.allLayerStatusAreGreaterThanOrEqualTo(layerStatus, layerConfig.listOfLayerEntryConfig);
+      return !layerConfig.IsGreaterThanOrEqualTo(layerStatus || 'newInstance');
     });
   }
 
@@ -593,9 +573,12 @@ export abstract class AbstractGeoViewLayer {
     if (metadataUrl) {
       try {
         const metadataString = await getXMLHttpRequest(`${metadataUrl}?f=json`);
-        this.metadata = toJsonObject(JSON.parse(metadataString));
-        const { copyrightText } = this.metadata;
-        if (copyrightText) this.attributions.push(copyrightText as string);
+        if (metadataString === '{}') this.metadata = null;
+        else {
+          this.metadata = toJsonObject(JSON.parse(metadataString));
+          const { copyrightText } = this.metadata;
+          if (copyrightText) this.attributions.push(copyrightText as string);
+        }
       } catch (error) {
         // Log
         logger.logError(error);
@@ -633,7 +616,11 @@ export abstract class AbstractGeoViewLayer {
       }
       const arrayOfLayerConfigs = await Promise.all(promisedAllLayerDone);
       arrayOfLayerConfigs.forEach((layerConfig) => {
-        if (layerConfig.layerStatus !== 'error') this.setLayerStatus('processed', layerConfig.layerPath);
+        if (layerConfig.layerStatus === 'error') {
+          const message = `Error while loading layer path "${layerConfig.layerPath})" on map "${this.mapId}"`;
+          this.layerLoadError.push({ layer: layerConfig.layerPath, consoleMessage: message });
+          throw new Error(message);
+        }
       });
     } catch (error) {
       // Log
@@ -672,7 +659,13 @@ export abstract class AbstractGeoViewLayer {
    */
   protected processLayerMetadata(layerConfig: TypeLayerEntryConfig): Promise<TypeLayerEntryConfig> {
     if (!layerConfig.source) layerConfig.source = {};
-    if (!layerConfig.source.featureInfo) layerConfig.source.featureInfo = { queryable: true };
+    if (!layerConfig.source.featureInfo) layerConfig.source.featureInfo = { queryable: false };
+    // When we get here, we know that the metadata (if the service provide some) are processed.
+    // We need to signal to the layer sets that the 'processed' phase is done.
+    layerConfig.layerStatus = 'processed';
+    // Then, we signal that the loading phase has begun
+    layerConfig.layerStatus = 'loading';
+
     return Promise.resolve(layerConfig);
   }
 
@@ -722,7 +715,7 @@ export abstract class AbstractGeoViewLayer {
           layer: listOfLayerEntryConfig[0].layerPath,
           consoleMessage: `Unable to create layer ${listOfLayerEntryConfig[0].layerPath} on map ${this.mapId}`,
         });
-        this.setLayerStatus('error', layerPath);
+        this.getLayerConfig(layerPath)!.layerStatus = 'error';
         return null;
       }
 
@@ -762,7 +755,7 @@ export abstract class AbstractGeoViewLayer {
               listOfLayerEntryConfig[i].layerPath
             } on map ${this.mapId}`,
           });
-          this.setLayerStatus('error', layerPath);
+          this.getLayerConfig(layerPath)!.layerStatus = 'error';
         }
       });
 
@@ -1570,9 +1563,9 @@ export abstract class AbstractGeoViewLayer {
       if (layerEntryIsGroupLayer(layerConfig)) this.setAllLayerStatusTo(newStatus, layerConfig.listOfLayerEntryConfig, errorMessage);
       else {
         if (layerConfig.layerStatus === 'error') return;
-        const { layerPath } = layerConfig;
-        this.setLayerStatus(newStatus, layerPath);
+        layerConfig.layerStatus = newStatus;
         if (newStatus === 'error') {
+          const { layerPath } = layerConfig;
           this.layerLoadError.push({
             layer: layerPath,
             consoleMessage: `${errorMessage} for layer ${layerPath} of map ${this.mapId}`,

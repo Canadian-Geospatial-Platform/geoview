@@ -262,7 +262,7 @@
 //               baseLayer.setVisible(false);
 //               if (!layerGroup) layerGroup = this.createLayerGroup(unclusteredLayerConfig.parentLayerConfig as TypeLayerEntryConfig);
 //               layerGroup.getLayers().push(baseLayer);
-//               this.setLayerStatus('processed', unclusteredLayerConfig.layerPath);
+//               layerConfig.layerStatus = 'processed';
 //             }
 //           });
 
@@ -272,7 +272,7 @@
 
 //         this.processOneGeopackageLayer(layerConfig, layers[0], slds).then((baseLayer) => {
 //           if (baseLayer) {
-//             this.setLayerStatus('processed', layerConfig.layerPath);
+//             layerConfig.layerStatus = 'processed';
 //             if (layerGroup) layerGroup.getLayers().push(baseLayer);
 //             resolve(layerGroup || baseLayer);
 //           } else {
@@ -280,7 +280,7 @@
 //               layer: layerConfig.layerPath,
 //               consoleMessage: `Unable to create layer ${layerConfig.layerPath} on map ${this.mapId}`,
 //             });
-//             this.setLayerStatus('error', layerConfig.layerPath);
+//             layerConfig.layerStatus = 'error';
 //             resolve(null);
 //           }
 //         });
@@ -303,7 +303,7 @@
 //               if (baseLayer) {
 //                 baseLayer.setVisible(false);
 //                 newLayerGroup.getLayers().push(baseLayer);
-//                 this.setLayerStatus('processed', unclusteredLayerConfig.layerPath);
+//                 newLayerEntryConfig.layerStatus = 'processed';
 //               }
 //             });
 
@@ -315,13 +315,13 @@
 //             if (baseLayer) {
 //               (layerConfig as unknown as TypeLayerGroupEntryConfig).listOfLayerEntryConfig!.push(newLayerEntryConfig);
 //               newLayerGroup.getLayers().push(baseLayer);
-//               this.setLayerStatus('processed', newLayerEntryConfig.layerPath;
+//               newLayerEntryConfig.layerStatus = 'processed';
 //             } else {
 //               this.layerLoadError.push({
 //                 layer: layerConfig.layerPath,
 //                 consoleMessage: `Unable to create layer ${layerConfig.layerPath} on map ${this.mapId}`,
 //               });
-//               this.setLayerStatus('error', newLayerEntryConfig.layerPath);
+//               newLayerEntryConfig.layerStatus = 'error';
 //               resolve(null);
 //             }
 //           });

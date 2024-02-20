@@ -26,6 +26,7 @@ import {
 import { getLocalizedValue } from '@/core/utils/utilities';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { api } from '@/app';
+import { logger } from '@/core/utils/logger';
 
 export interface TypeSourceOgcFeatureInitialConfig extends TypeVectorSourceInitialConfig {
   format: 'featureAPI';
@@ -185,12 +186,12 @@ export class OgcFeature extends AbstractGeoViewVector {
             layer: layerPath,
             consoleMessage: `Empty layer group (mapId:  ${this.mapId}, layerPath: ${layerPath})`,
           });
-          this.setLayerStatus('error', layerPath);
+          layerConfig.layerStatus = 'error';
           return;
         }
       }
 
-      this.setLayerStatus('processing', layerPath);
+      layerConfig.layerStatus = 'processing';
 
       // Note that the code assumes ogc-feature collections does not contains metadata layer group. If you need layer group,
       // you can define them in the configuration section.
@@ -201,7 +202,7 @@ export class OgcFeature extends AbstractGeoViewVector {
             layer: layerPath,
             consoleMessage: `OGC feature layer not found (mapId:  ${this.mapId}, layerPath: ${layerPath})`,
           });
-          this.setLayerStatus('error', layerPath);
+          layerConfig.layerStatus = 'error';
           return;
         }
 
@@ -242,24 +243,29 @@ export class OgcFeature extends AbstractGeoViewVector {
    *
    * @returns {Promise<TypeLayerEntryConfig>} A promise that the vector layer configuration has its metadata processed.
    */
-  protected processLayerMetadata(layerConfig: TypeVectorLayerEntryConfig): Promise<TypeLayerEntryConfig> {
-    const promiseOfExecution = new Promise<TypeLayerEntryConfig>((resolve) => {
+  protected async processLayerMetadata(layerConfig: TypeVectorLayerEntryConfig): Promise<TypeLayerEntryConfig> {
+    try {
       const metadataUrl = getLocalizedValue(this.metadataAccessPath, this.mapId);
       if (metadataUrl) {
         const queryUrl = metadataUrl.endsWith('/')
           ? `${metadataUrl}collections/${String(layerConfig.layerId)}/queryables?f=json`
           : `${metadataUrl}/collections/${String(layerConfig.layerId)}/queryables?f=json`;
-        const queryResult = axios.get<TypeJsonObject>(queryUrl);
-        queryResult.then((response) => {
-          if (response.data.properties) {
-            this.layerMetadata[layerConfig.layerPath] = response.data.properties;
-            this.processFeatureInfoConfig(response.data.properties, layerConfig);
-          }
-          resolve(layerConfig);
-        });
-      } else resolve(layerConfig);
-    });
-    return promiseOfExecution;
+        const queryResult = await axios.get<TypeJsonObject>(queryUrl);
+        if (queryResult.data.properties) {
+          this.layerMetadata[layerConfig.layerPath] = queryResult.data.properties;
+          this.processFeatureInfoConfig(queryResult.data.properties, layerConfig);
+        }
+      }
+      // When we get here, we know that the metadata (if the service provide some) are processed.
+      // We need to signal to the layer sets that the 'processed' phase is done.
+      layerConfig.layerStatus = 'processed';
+      // Then, we signal that the loading phase has begun
+      layerConfig.layerStatus = 'loading';
+    } catch (error) {
+      logger.logError(`Error processing layer metadata for layer path "${layerConfig.layerPath}`, error);
+      layerConfig.layerStatus = 'error';
+    }
+    return layerConfig;
   }
 
   /** ***************************************************************************************************************************

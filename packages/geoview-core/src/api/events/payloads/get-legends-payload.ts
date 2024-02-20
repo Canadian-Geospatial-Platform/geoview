@@ -2,42 +2,23 @@ import { PayloadBaseClass } from './payload-base-class';
 
 import { EventStringId, EVENT_NAMES } from '../event-types';
 import { TypeLegend } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
-import { TypeLayerStatus, TypeLocalizedString } from '@/geo/map/map-schema-types';
-import { TypeResultsSet } from './layer-set-payload';
+import { TypeLayerStatus } from '@/geo/map/map-schema-types';
 
 /** Valid events that can create GetLegendsPayload */
-const validEvents: EventStringId[] = [
-  EVENT_NAMES.GET_LEGENDS.LEGENDS_LAYERSET_UPDATED,
-  EVENT_NAMES.GET_LEGENDS.LEGEND_INFO,
-  EVENT_NAMES.GET_LEGENDS.QUERY_LEGEND,
-];
+const validEvents: EventStringId[] = [EVENT_NAMES.GET_LEGENDS.LEGEND_INFO, EVENT_NAMES.GET_LEGENDS.QUERY_LEGEND];
 
-export type TypeLegendResultsSetEntry = {
+export type TypeLegendResultSetEntry = {
+  layerName?: string;
   layerStatus: TypeLayerStatus;
-  querySent: boolean;
   data: TypeLegend | undefined | null;
-  layerName?: TypeLocalizedString;
+  querySent: boolean;
 };
 
 /** The legend resultset type associate a layer path to a legend object. The undefined value indicate that the get legend query
  * hasn't been run and the null value indicate that there was a get legend error.
  */
-export type TypeLegendResultsSet = {
-  [layerPath: string]: TypeLegendResultsSetEntry;
-};
-
-/**
- * type guard function that redefines a PayloadBaseClass as a TypeLegendsLayersetUpdatedPayload
- * if the event attribute of the verifyIfPayload parameter is valid. The type ascention
- * applies only to the true block of the if clause.
- *
- * @param {PayloadBaseClass} verifyIfPayload object to test in order to determine if the type ascention is valid
- * @returns {boolean} returns true if the payload is valid
- */
-export const payloadIsLegendsLayersetUpdated = (
-  verifyIfPayload: PayloadBaseClass
-): verifyIfPayload is TypeLegendsLayersetUpdatedPayload => {
-  return verifyIfPayload?.event === EVENT_NAMES.GET_LEGENDS.LEGENDS_LAYERSET_UPDATED;
+export type TypeLegendResultSet = {
+  [layerPath: string]: TypeLegendResultSetEntry;
 };
 
 /**
@@ -47,7 +28,7 @@ export interface TypeLegendsLayersetUpdatedPayload extends GetLegendsPayload {
   // the layer path updated
   layerPath: string;
   // The result set containing all the legends of the layers loaded on the map.
-  resultsSet: TypeLegendResultsSet;
+  resultSet: TypeLegendResultSet;
 }
 
 /**
@@ -126,29 +107,6 @@ export class GetLegendsPayload extends PayloadBaseClass {
     if (!validEvents.includes(event)) throw new Error(`GetLegendsPayload can't be instanciated for event of type ${event}`);
     super(event, handlerName);
   }
-
-  /**
-   * Static method used to create a "legend updated" payload.
-   *
-   * @param {string | null} handlerName the handler Name
-   * @param {string} layerPath the layer path updated
-   * @param {TypeResultsSet | TypeLegendResultsSet} resultsSet the legend resultset
-   *
-   * @returns {TypeLegendsLayersetUpdatedPayload} the TypeLegendsLayersetUpdatedPayload object created
-   */
-  static createLegendsLayersetUpdatedPayload = (
-    handlerName: string,
-    layerPath: string,
-    resultsSet: TypeResultsSet | TypeLegendResultsSet
-  ): TypeLegendsLayersetUpdatedPayload => {
-    const legendsLayersetUpdatedPayload = new GetLegendsPayload(
-      EVENT_NAMES.GET_LEGENDS.LEGENDS_LAYERSET_UPDATED,
-      handlerName
-    ) as TypeLegendsLayersetUpdatedPayload;
-    legendsLayersetUpdatedPayload.layerPath = layerPath;
-    legendsLayersetUpdatedPayload.resultsSet = resultsSet as TypeLegendResultsSet;
-    return legendsLayersetUpdatedPayload;
-  };
 
   /**
    * Static method used to create a get legends payload that will return the legend's query result

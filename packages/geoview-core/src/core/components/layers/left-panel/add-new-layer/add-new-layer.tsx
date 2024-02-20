@@ -74,7 +74,7 @@ export function AddNewLayer(): JSX.Element {
   // get values from store
   const mapId = useGeoViewMapId();
   const layersList = useLayersList();
-  const { setDisplayState, setSelectedLayerPath } = useLayerStoreActions();
+  const { setDisplayState } = useLayerStoreActions();
 
   const isMultiple = () => hasMetadata && (layerType === ESRI_DYNAMIC || layerType === WFS || layerType === WMS || layerType === GEOJSON);
 
@@ -866,6 +866,8 @@ export function AddNewLayer(): JSX.Element {
       } else emitErrorNotLoaded();
     }
     setIsLoading(false);
+    // TODO: Geoview layers doesn't have a LayerPhase property. This code must be revised
+    /*
     let message = '';
     switch (geoviewLayerInstance?.layerPhase) {
       case 'loading':
@@ -880,6 +882,7 @@ export function AddNewLayer(): JSX.Element {
         break;
     }
     api.utilities.showMessage(mapId, message, false);
+    */
     setDisplayState('view');
   };
 

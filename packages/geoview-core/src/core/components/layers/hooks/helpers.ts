@@ -12,7 +12,7 @@ export function useLegendHelpers() {
   const { mapId } = store.getState();
 
   function populateLegendStoreWithFakeData() {
-    const legendInfo = api.getLegendsLayerSet(mapId).resultsSet;
+    const legendInfo = api.getLegendsLayerSet(mapId).resultSet;
     // console.log('I got here ', legendInfo, _.keys(legendInfo));
     const keys = _.keys(legendInfo);
 
@@ -69,7 +69,6 @@ export function useLegendHelpers() {
         order: 20,
         type: 'GeoJSON',
         layerStatus: 'loaded',
-        layerPhase: 'processed',
         isVisible: 'yes',
         querySent: true,
         children: [],
@@ -83,7 +82,6 @@ export function useLegendHelpers() {
         order: 21,
         type: 'GeoJSON',
         layerStatus: 'loaded',
-        layerPhase: 'processed',
         isVisible: 'yes',
         querySent: true,
         children: [],
@@ -97,7 +95,6 @@ export function useLegendHelpers() {
         type: 'GeoJSON',
         order: 22,
         layerStatus: 'loaded',
-        layerPhase: 'processed',
         isVisible: 'yes',
         querySent: true,
         children: [
@@ -109,7 +106,6 @@ export function useLegendHelpers() {
             order: 2,
             type: 'GeoJSON',
             layerStatus: 'loaded',
-            layerPhase: 'processed',
             isVisible: 'yes',
             querySent: true,
             children: [
@@ -121,7 +117,6 @@ export function useLegendHelpers() {
                 type: 'GeoJSON',
                 order: 1,
                 layerStatus: 'error',
-                layerPhase: 'processed',
                 isVisible: 'no',
                 querySent: true,
                 children: [],
@@ -135,7 +130,6 @@ export function useLegendHelpers() {
                 type: 'GeoJSON',
                 order: 2,
                 layerStatus: 'processing',
-                layerPhase: 'processed',
                 isVisible: 'no',
                 querySent: true,
                 children: [],
@@ -149,7 +143,6 @@ export function useLegendHelpers() {
                 type: 'GeoJSON',
                 order: 3,
                 layerStatus: 'newInstance',
-                layerPhase: 'processed',
                 isVisible: 'yes',
                 querySent: true,
                 children: [],
@@ -166,7 +159,6 @@ export function useLegendHelpers() {
             type: 'GeoJSON',
             order: 24,
             layerStatus: 'loaded',
-            layerPhase: 'processed',
             isVisible: 'no',
             querySent: true,
             children: [],
@@ -180,7 +172,6 @@ export function useLegendHelpers() {
             type: 'GeoJSON',
             order: 25,
             layerStatus: 'loaded',
-            layerPhase: 'processed',
             isVisible: 'yes',
             querySent: true,
             children: [],

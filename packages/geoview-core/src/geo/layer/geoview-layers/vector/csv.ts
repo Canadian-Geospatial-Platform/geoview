@@ -176,12 +176,10 @@ export class CSV extends AbstractGeoViewVector {
             layer: layerPath,
             consoleMessage: `Empty layer group (mapId:  ${this.mapId}, layerPath: ${layerPath})`,
           });
-          this.setLayerStatus('error', layerPath);
+          layerConfig.layerStatus = 'error';
         }
         return;
       }
-
-      this.setLayerStatus('loading', layerPath);
 
       // When no metadata are provided, all layers are considered valid.
       if (!this.metadata) return;
@@ -201,6 +199,11 @@ export class CSV extends AbstractGeoViewVector {
    */
   protected processLayerMetadata(layerConfig: TypeVectorLayerEntryConfig): Promise<TypeLayerEntryConfig> {
     const promiseOfExecution = new Promise<TypeLayerEntryConfig>((resolve) => {
+      // When we get here, we know that the metadata (if the service provide some) are processed.
+      // We need to signal to the layer sets that the 'processed' phase is done.
+      layerConfig.layerStatus = 'processed';
+      // Then, we signal that the loading phase has begun
+      layerConfig.layerStatus = 'loading';
       resolve(layerConfig);
     });
 
@@ -306,7 +309,7 @@ export class CSV extends AbstractGeoViewVector {
     if (latIndex === undefined || lonIndex === undefined) {
       logger.logError(`Could not find geographic data for ${getLocalizedValue(this.geoviewLayerName, this.mapId)}`);
       addNotificationError(this.mapId, `Could not find geographic data for ${getLocalizedValue(this.geoviewLayerName, this.mapId)}`);
-      this.setLayerStatus('error', layerConfig.layerPath);
+      layerConfig.layerStatus = 'error';
       return null;
     }
     this.processFeatureInfoConfig(headers, csvRows[1], [latIndex, lonIndex], layerConfig);

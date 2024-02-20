@@ -150,11 +150,11 @@ export class WMS extends AbstractGeoViewRaster {
           try {
             const arrayOfMetadata = await Promise.all(promisedArrayOfMetadata);
             for (i = 0; i < arrayOfMetadata.length && !arrayOfMetadata[i]?.Capability; i++)
-              this.setLayerStatus('error', layerConfigsToQuery[i].layerPath);
+              this.getLayerConfig(layerConfigsToQuery[i].layerPath)!.layerStatus = 'error';
             this.metadata = i < arrayOfMetadata.length ? arrayOfMetadata[i] : null;
             if (this.metadata) {
               for (; i < arrayOfMetadata.length; i++) {
-                if (!arrayOfMetadata[i]?.Capability) this.setLayerStatus('error', layerConfigsToQuery[i].layerPath);
+                if (!arrayOfMetadata[i]?.Capability) this.getLayerConfig(layerConfigsToQuery[i].layerPath)!.layerStatus = 'error';
                 else if (!this.getLayerMetadataEntry(layerConfigsToQuery[i].layerId!)) {
                   const metadataLayerPathToAdd = this.getMetadataLayerPath(
                     layerConfigsToQuery[i].layerId!,
@@ -380,13 +380,13 @@ export class WMS extends AbstractGeoViewRaster {
             layer: layerPath,
             consoleMessage: `Empty layer group (mapId:  ${this.mapId}, layerPath: ${layerPath})`,
           });
-          this.setLayerStatus('error', layerPath);
+          layerConfig.layerStatus = 'error';
         }
         return;
       }
 
       if ((layerConfig as TypeBaseLayerEntryConfig).layerStatus !== 'error') {
-        this.setLayerStatus('processing', layerPath);
+        layerConfig.layerStatus = 'processing';
 
         const layerFound = this.getLayerMetadataEntry(layerConfig.layerId!);
         if (!layerFound) {
@@ -394,7 +394,7 @@ export class WMS extends AbstractGeoViewRaster {
             layer: layerPath,
             consoleMessage: `Layer metadata not found (mapId:  ${this.mapId}, layerPath: ${layerPath})`,
           });
-          this.setLayerStatus('error', layerPath);
+          layerConfig.layerStatus = 'error';
           return;
         }
 
@@ -439,7 +439,6 @@ export class WMS extends AbstractGeoViewRaster {
 
     if (this.registerToLayerSetListenerFunctions[layerPath]) this.unregisterFromLayerSets(layerConfig);
     const switchToGroupLayer = Cast<TypeLayerGroupEntryConfig>(layerConfig);
-    delete layerConfig.layerStatus;
     switchToGroupLayer.entryType = 'group';
     switchToGroupLayer.layerName = {
       en: layer.Title as string,
@@ -605,6 +604,11 @@ export class WMS extends AbstractGeoViewRaster {
           }
         }
       }
+      // When we get here, we know that the metadata (if the service provide some) are processed.
+      // We need to signal to the layer sets that the 'processed' phase is done.
+      layerConfig.layerStatus = 'processed';
+      // Then, we signal that the loading phase has begun
+      layerConfig.layerStatus = 'loading';
       resolve(layerConfig);
     });
     return promiseOfExecution;

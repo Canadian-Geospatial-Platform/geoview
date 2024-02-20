@@ -314,11 +314,10 @@ export class Layer {
       });
     }
 
-    if (geoviewLayer.allLayerStatusAreIn(['error']))
+    if (geoviewLayer.allLayerStatusAreGreaterThanOrEqualTo('error'))
       // an empty geoview layer is created
       api.event.emit(GeoViewLayerPayload.createGeoviewLayerAddedPayload(`${this.mapId}/${geoviewLayer.geoviewLayerId}`, geoviewLayer));
     else {
-      geoviewLayer.setAllLayerStatusTo('loading', geoviewLayer.listOfLayerEntryConfig);
       api.maps[this.mapId].map.addLayer(geoviewLayer.olLayers!);
       api.event.emit(GeoViewLayerPayload.createGeoviewLayerAddedPayload(`${this.mapId}/${geoviewLayer.geoviewLayerId}`, geoviewLayer));
     }
@@ -470,11 +469,15 @@ export class Layer {
    * @param {string} checkFrequency optionally indicate the frequency at which to check for the condition on the layer
    * @throws an exception when the layer failed to become in processed phase before the timeout expired
    */
-  waitForProcesseOrErrorStatus = async (layer: AbstractGeoViewLayer, timeout?: number, checkFrequency?: number): Promise<void> => {
+  waitForProcesseOrErrorStatus = async (
+    geoviewLayerConfig: AbstractGeoViewLayer,
+    timeout?: number,
+    checkFrequency?: number
+  ): Promise<void> => {
     // Wait for the processed phase
     await whenThisThen(
       () => {
-        return layer.allLayerStatusAreIn(['processed', 'loading', 'loaded', 'error']);
+        return geoviewLayerConfig.allLayerStatusAreGreaterThanOrEqualTo('processed');
       },
       timeout,
       checkFrequency

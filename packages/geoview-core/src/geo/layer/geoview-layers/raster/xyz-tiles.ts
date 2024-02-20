@@ -159,12 +159,12 @@ export class XYZTiles extends AbstractGeoViewRaster {
             layer: layerPath,
             consoleMessage: `Empty layer group (mapId:  ${this.mapId}, layerPath: ${layerPath})`,
           });
-          this.setLayerStatus('error', layerPath);
+          layerConfig.layerStatus = 'error';
           return;
         }
       }
 
-      this.setLayerStatus('processing', layerPath);
+      layerConfig.layerStatus = 'processing';
 
       // When no metadata are provided, all layers are considered valid.
       if (!this.metadata) return;
@@ -179,7 +179,7 @@ export class XYZTiles extends AbstractGeoViewRaster {
             layer: layerPath,
             consoleMessage: `XYZ layer not found (mapId:  ${this.mapId}, layerPath: ${layerPath})`,
           });
-          this.setLayerStatus('error', layerPath);
+          layerConfig.layerStatus = 'error';
           return;
         }
         return;
@@ -252,8 +252,7 @@ export class XYZTiles extends AbstractGeoViewRaster {
    */
   protected processLayerMetadata(layerConfig: TypeLayerEntryConfig): Promise<TypeLayerEntryConfig> {
     const promiseOfExecution = new Promise<TypeLayerEntryConfig>((resolve) => {
-      if (!this.metadata) resolve(layerConfig);
-      else {
+      if (this.metadata) {
         const metadataLayerConfigFound = Cast<TypeXYZTilesLayerEntryConfig[]>(this.metadata?.listOfLayerEntryConfig).find(
           (metadataLayerConfig) => metadataLayerConfig.layerId === layerConfig.layerId
         );
@@ -268,9 +267,15 @@ export class XYZTiles extends AbstractGeoViewRaster {
             'EPSG:4326',
             `EPSG:${MapEventProcessor.getMapState(this.mapId).currentProjection}`
           );
-
-        resolve(layerConfig);
       }
+
+      // When we get here, we know that the metadata (if the service provide some) are processed.
+      // We need to signal to the layer sets that the 'processed' phase is done.
+      layerConfig.layerStatus = 'processed';
+      // Then, we signal that the loading phase has begun
+      layerConfig.layerStatus = 'loading';
+
+      resolve(layerConfig);
     });
     return promiseOfExecution;
   }

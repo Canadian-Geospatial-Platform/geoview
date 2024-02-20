@@ -80,12 +80,12 @@ export function commonValidateListOfLayerEntryConfig(this: EsriDynamic | EsriFea
           layer: layerPath,
           consoleMessage: `Empty layer group (mapId:  ${this.mapId}, layerPath: ${layerPath})`,
         });
-        this.setLayerStatus('error', layerPath);
+        layerConfig.layerStatus = 'error';
         return;
       }
     }
 
-    this.setLayerStatus('processing', layerPath);
+    layerConfig.layerStatus = 'processing';
 
     let esriIndex = Number(layerConfig.layerId);
     if (Number.isNaN(esriIndex)) {
@@ -93,7 +93,7 @@ export function commonValidateListOfLayerEntryConfig(this: EsriDynamic | EsriFea
         layer: layerPath,
         consoleMessage: `ESRI layerId must be a number (mapId:  ${this.mapId}, layerPath: ${layerPath})`,
       });
-      this.setLayerStatus('error', layerPath);
+      layerConfig.layerStatus = 'error';
       return;
     }
 
@@ -106,7 +106,7 @@ export function commonValidateListOfLayerEntryConfig(this: EsriDynamic | EsriFea
         layer: layerPath,
         consoleMessage: `ESRI layerId not found (mapId:  ${this.mapId}, layerPath: ${layerPath})`,
       });
-      this.setLayerStatus('error', layerPath);
+      layerConfig.layerStatus = 'error';
       return;
     }
 
@@ -148,7 +148,7 @@ export function commonValidateListOfLayerEntryConfig(this: EsriDynamic | EsriFea
     }
 
     if (this.esriChildHasDetectedAnError(layerConfig, esriIndex)) {
-      this.setLayerStatus('error', layerPath);
+      layerConfig.layerStatus = 'error';
       return;
     }
 
@@ -350,7 +350,7 @@ export async function commonProcessLayerMetadata(
       const { data } = await axios.get<TypeJsonObject>(`${queryUrl}?f=pjson`);
       // layers must have a fields attribute except if it is an metadata layer group.
       if (!data?.fields && !(layerConfig as TypeLayerGroupEntryConfig).isMetadataLayerGroup && layerConfig.schemaTag !== 'esriImage') {
-        this.setLayerStatus('error', layerPath);
+        layerConfig.layerStatus = 'error';
         if (data?.error) throw new Error(`Error code = ${data.error.code}, ${data.error.message}`);
         else throw new Error(`Despite a return code of 200, no fields was returned with this query (${queryUrl}?f=pjson)`);
       }
@@ -376,8 +376,13 @@ export async function commonProcessLayerMetadata(
         );
         commonProcessTemporalDimension.call(this, data.timeInfo as TypeJsonObject, layerConfig);
       }
+      // When we get here, we know that the metadata (if the service provide some) are processed.
+      // We need to signal to the layer sets that the 'processed' phase is done.
+      layerConfig.layerStatus = 'processed';
+      // Then, we signal that the loading phase has begun
+      layerConfig.layerStatus = 'loading';
     } catch (error) {
-      this.setLayerStatus('error', layerPath);
+      layerConfig.layerStatus = 'error';
       console.log(error);
     }
   }

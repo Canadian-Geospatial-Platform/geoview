@@ -206,12 +206,12 @@ export class ImageStatic extends AbstractGeoViewRaster {
             layer: layerPath,
             consoleMessage: `Empty layer group (mapId:  ${this.mapId}, layerPath: ${layerPath})`,
           });
-          this.setLayerStatus('error', layerPath);
+          layerConfig.layerStatus = 'error';
           return;
         }
       }
 
-      this.setLayerStatus('processing', layerPath);
+      layerConfig.layerStatus = 'processing';
 
       // When no metadata are provided, all layers are considered valid.
       if (!this.metadata) return;
@@ -226,7 +226,7 @@ export class ImageStatic extends AbstractGeoViewRaster {
             layer: layerPath,
             consoleMessage: `GeoJSON layer not found (mapId:  ${this.mapId}, layerPath: ${layerPath})`,
           });
-          this.setLayerStatus('error', layerPath);
+          layerConfig.layerStatus = 'error';
           return;
         }
         return;

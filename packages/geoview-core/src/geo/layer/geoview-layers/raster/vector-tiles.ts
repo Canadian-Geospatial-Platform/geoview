@@ -159,12 +159,12 @@ export class VectorTiles extends AbstractGeoViewRaster {
             layer: layerPath,
             consoleMessage: `Empty layer group (mapId:  ${this.mapId}, layerPath: ${layerPath})`,
           });
-          this.setLayerStatus('error', layerPath);
+          layerConfig.layerStatus = 'error';
           return;
         }
       }
 
-      this.setLayerStatus('processing', layerPath);
+      layerConfig.layerStatus = 'processing';
     });
   }
 
@@ -189,7 +189,7 @@ export class VectorTiles extends AbstractGeoViewRaster {
         showError(this.mapId, `Error: vector tile layer (${layerConfig.layerId}) projection does not match map projection`);
         // eslint-disable-next-line no-console
         console.log(`Error: vector tile layer (${layerConfig.layerId}) projection does not match map projection`);
-        this.setLayerStatus('error', layerPath);
+        layerConfig.layerStatus = 'error';
         resolve(null);
       } else if (layerConfig.source.projection) sourceOptions.projection = `EPSG:${layerConfig.source.projection}`;
       if (layerConfig.source.tileGrid) {
@@ -262,6 +262,12 @@ export class VectorTiles extends AbstractGeoViewRaster {
             'EPSG:4326',
             `EPSG:${MapEventProcessor.getMapState(this.mapId).currentProjection}`
           );
+
+        // When we get here, we know that the metadata (if the service provide some) are processed.
+        // We need to signal to the layer sets that the 'processed' phase is done.
+        layerConfig.layerStatus = 'processed';
+        // Then, we signal that the loading phase has begun
+        layerConfig.layerStatus = 'loading';
 
         resolve(layerConfig);
       }
