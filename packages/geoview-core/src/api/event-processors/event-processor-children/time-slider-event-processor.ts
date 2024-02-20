@@ -112,6 +112,7 @@ export class TimeSliderEventProcessor extends AbstractEventProcessor {
     const defaultValue = temporalDimensionInfo.default;
     const minAndMax: number[] = [new Date(range[0]).getTime(), new Date(range[range.length - 1]).getTime()];
     const { field, singleHandle } = temporalDimensionInfo;
+
     // If the field type has an alias, use that as a label
     let fieldAlias = field;
     const { featureInfo } = api.maps[mapId].layer.registeredLayers[layerPath].source!;
@@ -121,12 +122,7 @@ export class TimeSliderEventProcessor extends AbstractEventProcessor {
     const fieldIndex = localizedOutFields ? localizedOutFields.indexOf(field) : -1;
     if (fieldIndex !== -1 && localizedAliasFields?.length === localizedOutFields?.length) fieldAlias = localizedAliasFields![fieldIndex];
 
-    // eslint-disable-next-line no-nested-ternary
-    const values = singleHandle
-      ? [new Date(temporalDimensionInfo.default).getTime()]
-      : defaultValue
-      ? [new Date(defaultValue[0]).getTime(), new Date(defaultValue[1]).getTime()]
-      : [...minAndMax];
+    const values = singleHandle ? [new Date(temporalDimensionInfo.default).getTime()] : [...minAndMax];
 
     const sliderData: TimeSliderLayerSet = {
       [layerPath]: {
