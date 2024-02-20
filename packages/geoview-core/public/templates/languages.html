@@ -157,6 +157,10 @@
         const lang = cgpv.api.maps['LNG1'].getDisplayLanguage() === 'en' ? 'fr' : 'en';
         cgpv.api.maps['LNG1'].setLanguage(lang, true);
       });
+
+      // create snippets
+      createCodeSnippet();
+      createConfigSnippet();
     </script>
   </body>
 </html>

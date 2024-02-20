@@ -164,7 +164,8 @@
     "changeDisplayLanguageLayers": "Layers can not be relaoded because the configuration does not support this language",
     "changeDisplayLanguage": "Only 'en' and 'fr' are supported",
     "changeDisplayTheme": "Theme unsuported",
-    "changeDisplayProjection": "Projection unsuported"
+    "changeDisplayProjection": "Projection unsuported",
+    "invalidConfig": "Invalid JSON config, default configuration applied"
   },
   "exportModal": {
     "title": "Export Map as PNG",

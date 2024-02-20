@@ -164,7 +164,8 @@
     "changeDisplayLanguageLayers": "Les couches ne peuvent être chargée(s) de nouveau car la configuration ne supporte pas ce langage",
     "changeDisplayLanguage": "Seulement 'en' et 'fr' sont supporées",
     "changeDisplayTheme": "Theme non supporté",
-    "changeDisplayProjection": "Projection non supportée"
+    "changeDisplayProjection": "Projection non supportée",
+    "invalidConfig": "Configuration JSON non valide, configuration par défaut appliquée"
   },
   "exportModal": {
     "title": "Exporter la carte en PNG",
