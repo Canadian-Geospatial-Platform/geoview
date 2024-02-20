@@ -25,6 +25,7 @@ import {
 import { getLocalizedValue, getXMLHttpRequest, xmlToJson, findPropertyNameByRegex } from '@/core/utils/utilities';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { api } from '@/app';
+import { logger } from '@/core/utils/logger';
 
 export interface TypeSourceWFSVectorInitialConfig extends TypeVectorSourceInitialConfig {
   format: 'WFS';
@@ -194,14 +195,14 @@ export class WFS extends AbstractGeoViewVector {
         if (!layerConfig.listOfLayerEntryConfig.length) {
           this.layerLoadError.push({
             layer: layerPath,
-            consoleMessage: `Empty layer group (mapId:  ${this.mapId}, layerPath: ${layerPath})`,
+            loggerMessage: `Empty layer group (mapId:  ${this.mapId}, layerPath: ${layerPath})`,
           });
-          this.setLayerStatus('error', layerPath);
+          layerConfig.layerStatus = 'error';
           return;
         }
       }
 
-      this.setLayerStatus('processing', layerPath);
+      layerConfig.layerStatus = 'processing';
 
       // Note that the code assumes wfs feature type list does not contains metadata layer group. If you need layer group,
       // you can define them in the configuration section.
@@ -219,9 +220,9 @@ export class WFS extends AbstractGeoViewVector {
         if (!foundMetadata) {
           this.layerLoadError.push({
             layer: layerPath,
-            consoleMessage: `WFS feature layer not found (mapId:  ${this.mapId}, layerPath: ${layerPath})`,
+            loggerMessage: `WFS feature layer not found (mapId:  ${this.mapId}, layerPath: ${layerPath})`,
           });
-          this.setLayerStatus('error', layerPath);
+          layerConfig.layerStatus = 'error';
           return;
         }
 
@@ -252,8 +253,8 @@ export class WFS extends AbstractGeoViewVector {
    *
    * @returns {Promise<TypeLayerEntryConfig>} A promise that the vector layer configuration has its metadata processed.
    */
-  protected processLayerMetadata(layerConfig: TypeVectorLayerEntryConfig): Promise<TypeLayerEntryConfig> {
-    const promiseOfExecution = new Promise<TypeLayerEntryConfig>((resolve) => {
+  protected async processLayerMetadata(layerConfig: TypeVectorLayerEntryConfig): Promise<TypeLayerEntryConfig> {
+    try {
       let queryUrl = getLocalizedValue(layerConfig.source!.dataAccessPath, this.mapId);
 
       // check if url contains metadata parameters for the getCapabilities request and reformat the urls
@@ -279,50 +280,46 @@ export class WFS extends AbstractGeoViewVector {
       }&outputFormat=${encodeURIComponent(outputFormat as string)}&typeName=${layerConfig.layerId}`;
 
       if (describeFeatureUrl && outputFormat === 'application/json') {
-        fetch(describeFeatureUrl)
-          .then<TypeJsonObject>((fetchResponse) => {
-            return fetchResponse.json();
-          })
-          .then((layerMetadata) => {
-            if (Array.isArray(layerMetadata.featureTypes) && Array.isArray(layerMetadata.featureTypes[0].properties)) {
-              this.layerMetadata[layerConfig.layerPath] = layerMetadata.featureTypes[0].properties;
-              this.processFeatureInfoConfig(layerMetadata.featureTypes[0].properties as TypeJsonArray, layerConfig);
-            }
-            resolve(layerConfig);
-          });
+        const layerMetadata = (await (await fetch(describeFeatureUrl)).json()) as TypeJsonObject;
+        if (Array.isArray(layerMetadata.featureTypes) && Array.isArray(layerMetadata.featureTypes[0].properties)) {
+          this.layerMetadata[layerConfig.layerPath] = layerMetadata.featureTypes[0].properties;
+          this.processFeatureInfoConfig(layerMetadata.featureTypes[0].properties as TypeJsonArray, layerConfig);
+        }
       } else if (describeFeatureUrl && outputFormat.toUpperCase().includes('XML')) {
-        fetch(describeFeatureUrl)
-          .then<string>((fetchResponse) => {
-            return fetchResponse.text();
-          })
-          .then((layerMetadata) => {
-            // need to pass a xmldom to xmlToJson to convert xsd schema to json
-            const xmlDOMDescribe = new DOMParser().parseFromString(layerMetadata, 'text/xml');
-            const xmlJsonDescribe = xmlToJson(xmlDOMDescribe);
-            const prefix = Object.keys(xmlJsonDescribe)[0].includes('xsd:') ? 'xsd:' : '';
-            const xmlJsonSchema = xmlJsonDescribe[`${prefix}schema`];
-            const xmlJsonDescribeElement =
-              xmlJsonSchema[`${prefix}complexType`] !== undefined
-                ? xmlJsonSchema[`${prefix}complexType`][`${prefix}complexContent`][`${prefix}extension`][`${prefix}sequence`][
-                    `${prefix}element`
-                  ]
-                : [];
+        const layerMetadata = (await (await fetch(describeFeatureUrl)).text()) as string;
+        // need to pass a xmldom to xmlToJson to convert xsd schema to json
+        const xmlDOMDescribe = new DOMParser().parseFromString(layerMetadata, 'text/xml');
+        const xmlJsonDescribe = xmlToJson(xmlDOMDescribe);
+        const prefix = Object.keys(xmlJsonDescribe)[0].includes('xsd:') ? 'xsd:' : '';
+        const xmlJsonSchema = xmlJsonDescribe[`${prefix}schema`];
+        const xmlJsonDescribeElement =
+          xmlJsonSchema[`${prefix}complexType`] !== undefined
+            ? xmlJsonSchema[`${prefix}complexType`][`${prefix}complexContent`][`${prefix}extension`][`${prefix}sequence`][
+                `${prefix}element`
+              ]
+            : [];
 
-            if (Array.isArray(xmlJsonDescribeElement)) {
-              // recreate the array of properties as if it was json
-              const featureTypeProperties: TypeJsonArray = [];
-              xmlJsonDescribeElement.forEach((element) => {
-                featureTypeProperties.push(element['@attributes']);
-              });
-
-              this.layerMetadata[layerConfig.layerPath] = featureTypeProperties as TypeJsonObject;
-              this.processFeatureInfoConfig(featureTypeProperties as TypeJsonArray, layerConfig);
-            }
-            resolve(layerConfig);
+        if (Array.isArray(xmlJsonDescribeElement)) {
+          // recreate the array of properties as if it was json
+          const featureTypeProperties: TypeJsonArray = [];
+          xmlJsonDescribeElement.forEach((element) => {
+            featureTypeProperties.push(element['@attributes']);
           });
-      } else resolve(layerConfig);
-    });
-    return promiseOfExecution;
+
+          this.layerMetadata[layerConfig.layerPath] = featureTypeProperties as TypeJsonObject;
+          this.processFeatureInfoConfig(featureTypeProperties as TypeJsonArray, layerConfig);
+        }
+      }
+
+      // When we get here, we know that the metadata (if the service provide some) are processed.
+      // We need to signal to the layer sets that the 'processed' phase is done. Be aware that the
+      // layerStatus setter is doing a lot of things behind the scene.
+      layerConfig.layerStatus = 'processed';
+    } catch (error) {
+      logger.logError(`Error processing layer metadata for layer path "${layerConfig.layerPath}`, error);
+      layerConfig.layerStatus = 'error';
+    }
+    return layerConfig;
   }
 
   /** ***************************************************************************************************************************

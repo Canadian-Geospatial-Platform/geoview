@@ -13,6 +13,7 @@ type Shape = {
 declare module '@mui/material/styles' {
   // allow configuration using `createTheme`
   interface ThemeOptions {
+    geoViewColor?: IGeoViewColors;
     shape?: Shape;
     overrides?: {
       button: {
