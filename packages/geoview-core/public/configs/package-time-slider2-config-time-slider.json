@@ -14,7 +14,7 @@
       "reversed": false,
       "temporalDimension": {
         "field": "datetime",
-        "default": ["1940-01-01T05:00:00Z", "1980-01-01T05:00:00Z"],
+        "default": ["1940-01-01T05:00:00Z", "1960-01-01T05:00:00Z"],
         "unitSymbol": "",
         "range": "1900-01-01T05:00:00Z/2000-01-01T05:00:00Z/P1Y",
         "nearestValues": "absolute",
