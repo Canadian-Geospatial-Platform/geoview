@@ -51,7 +51,8 @@ export function TimeSlider(TimeSliderPanelProps: TimeSliderPanelProps) {
 
   // Get actions and states from store
   // TODO: evaluate best option to set value by layer path.... trough a getter?
-  const { setTitle, setDescription, setValues, setLocked, setReversed, setDelay, setFiltering } = useTimeSliderStoreActions();
+  const { setTitle, setDefaultValue, setDescription, setValues, setLocked, setReversed, setDelay, setFiltering } =
+    useTimeSliderStoreActions();
 
   // TODO: check performance as we should technically have one selector by constant
   const {
@@ -79,8 +80,22 @@ export function TimeSlider(TimeSliderPanelProps: TimeSliderPanelProps) {
     if (description === undefined) setDescription(layerPath, getLocalizedValue(sliderConfig?.description, mapId) || '');
     if (locked === undefined) setLocked(layerPath, sliderConfig?.locked !== undefined ? sliderConfig?.locked : false);
     if (reversed === undefined) setReversed(layerPath, sliderConfig?.reversed !== undefined ? sliderConfig?.reversed : false);
+    if (defaultValue === undefined) setDefaultValue(layerPath, sliderConfig?.defaultValue || '');
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  useEffect(() => {
+    const sliderConfig = config?.sliders?.find((o: { layerPaths: string[] }) => o.layerPaths.includes(layerPath));
+    if (sliderConfig?.defaultValue) {
+      // update values based on slider's default value
+      const defaultValueIsArray = Array.isArray(sliderConfig?.defaultValue);
+      if (defaultValueIsArray) {
+        setValues(layerPath, [new Date(sliderConfig?.defaultValue[0]).getTime(), new Date(sliderConfig?.defaultValue[1]).getTime()]);
+      } else {
+        setValues(layerPath, [new Date(sliderConfig?.defaultValue).getTime()]);
+      }
+    }
+  }, [config, layerPath, setValues]);
 
   const timeStampRange = range.map((entry: string | number | Date) => new Date(entry).getTime());
   // Check if range occurs in a single day or year
@@ -293,7 +308,7 @@ export function TimeSlider(TimeSliderPanelProps: TimeSliderPanelProps) {
       : getLocalizedMessage(mapId, 'timeSlider.slider.lockLeft');
     return text;
   }
-
+  console.log('DEFE: ', range, defaultValue);
   return (
     <Grid>
       <div style={sxClasses.rightPanelContainer}>

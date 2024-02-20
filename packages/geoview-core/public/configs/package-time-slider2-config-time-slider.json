@@ -32,10 +32,12 @@
         "fr": "Descriptif personnalisé"
       },
       "locked": true,
-      "reversed": true
+      "reversed": true,
+      "defaultValue": "2024-02-20T15:48:00Z"
     },
     {
-      "layerPaths": ["MSI/msi-94-or-more"]
+      "layerPaths": ["MSI/msi-94-or-more"],
+      "defaultValue": "2011-08-15T00:00:00Z"
     }
   ],
   "suportedLanguages": ["en", "fr"]
