@@ -61,7 +61,7 @@ export default function Version(): JSX.Element {
         tooltip="appbar.version"
         tooltipPlacement="bottom-end"
         onClick={handleClick}
-        className={open ? 'active' : ''}
+        className={open ? 'style2' : ''}
       >
         <SvgIcon viewBox="-4 -2 38 36">
           <GeoCaIcon />
