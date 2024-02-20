@@ -121,7 +121,13 @@ export class TimeSliderEventProcessor extends AbstractEventProcessor {
     const fieldIndex = localizedOutFields ? localizedOutFields.indexOf(field) : -1;
     if (fieldIndex !== -1 && localizedAliasFields?.length === localizedOutFields?.length) fieldAlias = localizedAliasFields![fieldIndex];
 
-    const values = singleHandle ? [new Date(temporalDimensionInfo.default).getTime()] : [...minAndMax];
+    // eslint-disable-next-line no-nested-ternary
+    const values = singleHandle
+      ? [new Date(temporalDimensionInfo.default).getTime()]
+      : defaultValue
+      ? [new Date(defaultValue[0]).getTime(), new Date(defaultValue[1]).getTime()]
+      : [...minAndMax];
+
     const sliderData: TimeSliderLayerSet = {
       [layerPath]: {
         name,
