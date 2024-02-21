@@ -3,26 +3,11 @@ import { IconButton, SearchIcon } from '@/ui';
 import { useUIStoreActions } from '@/core/stores/store-interface-and-intial-values/ui-state';
 
 /**
- * Interface used for geolocator button properties
- */
-interface GeolocatorProps {
-  sx?: React.CSSProperties;
-}
-
-/**
- * default properties values
- */
-const defaultProps = {
-  sx: {},
-};
-
-/**
  * Geolocator Button component
  *
  * @returns {JSX.Element} the geolocator button
  */
-export default function Geolocator(props: GeolocatorProps): JSX.Element {
-  const { sx = {} } = props;
+export default function Geolocator(): JSX.Element {
   const [active, setActive] = useState(true);
 
   const { setGeolocatorActive } = useUIStoreActions();
@@ -45,5 +30,3 @@ export default function Geolocator(props: GeolocatorProps): JSX.Element {
     </IconButton>
   );
 }
-
-Geolocator.defaultProps = defaultProps;

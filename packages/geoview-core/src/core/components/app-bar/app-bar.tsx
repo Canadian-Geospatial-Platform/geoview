@@ -224,7 +224,7 @@ export function Appbar(): JSX.Element {
           <Box>
             <List sx={sxClasses.appBarList}>
               <ListItem>
-                <Geolocator sx={sxClasses.appBarButton} />
+                <Geolocator />
               </ListItem>
             </List>
           </Box>
