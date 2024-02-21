@@ -8,8 +8,6 @@ import { JsonConfigReader } from './reader/json-config-reader';
 import { URLmapConfigReader } from './reader/url-config-reader';
 import { logger } from '@/core/utils/logger';
 
-export const catalogUrl = 'https://maps.canada.ca/geonetwork/srv/api/v2/docs';
-
 // ******************************************************************************************************************************
 // ******************************************************************************************************************************
 /** *****************************************************************************************************************************
@@ -168,7 +166,10 @@ export class Config {
     const shared = this.mapElement.getAttribute('data-shared');
     if (shared === 'true') {
       // check if config params have been passed
-      const urlParamsConfig = await URLmapConfigReader.getMapFeaturesConfig(this.mapId);
+      const urlParamsConfig = await URLmapConfigReader.getMapFeaturesConfig(
+        this.configValidation.defaultMapFeaturesConfig.serviceUrls.geocoreUrl,
+        this.mapId
+      );
 
       // use the url params config if provided
       if (urlParamsConfig) mapFeaturesConfig = { ...urlParamsConfig };

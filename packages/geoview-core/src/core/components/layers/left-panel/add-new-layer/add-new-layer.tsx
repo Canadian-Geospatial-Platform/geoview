@@ -14,16 +14,13 @@ import {
   TypeEsriFeatureLayerConfig,
   TypeEsriFeatureLayerEntryConfig,
   TypeEsriImageLayerEntryConfig,
-  TypeGeoCoreLayerConfig,
   TypeGeoJSONLayerConfig,
   TypeGeoJSONLayerEntryConfig,
   TypeGeoPackageLayerConfig,
   TypeGeoPackageLayerEntryConfig,
-  TypeGeocoreLayerEntryConfig,
   TypeGeoviewLayerConfig,
   TypeGeoviewLayerType,
   TypeLayerEntryConfig,
-  TypeLayerEntryType,
   TypeListOfGeoviewLayerConfig,
   TypeListOfLayerEntryConfig,
   TypeOgcWmsLayerEntryConfig,
@@ -39,7 +36,7 @@ import { ButtonPropsLayerPanel, SelectChangeEvent, TypeJsonArray, TypeJsonObject
 import { useGeoViewMapId } from '@/core/stores/geoview-store';
 import { createLocalizedString } from '@/core/utils/utilities';
 import { useLayerStoreActions, useLayersList } from '@/core/stores/store-interface-and-intial-values/layer-state';
-import { Cast, Config, api, generateId } from '@/app';
+import { Cast, Config, api } from '@/app';
 import { logger } from '@/core/utils/logger';
 import { EsriImage, TypeEsriImageLayerConfig } from '@/geo/layer/geoview-layers/raster/esri-image';
 
@@ -98,10 +95,10 @@ export function AddNewLayer(): JSX.Element {
   // const acceptedFiles = ["*.json"];
 
   useEffect(() => {
-    // eslint-disable-next-line no-console
-    console.log('layersList ', layersList);
+    // Log
+    logger.logTraceUseEffect('layersList ', layersList);
+
     // setIsLoading(false);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [layersList]);
 
   const sxClasses = {
@@ -413,19 +410,9 @@ export function AddNewLayer(): JSX.Element {
     try {
       const isValid = layerURL.indexOf('/') === -1 && layerURL.replaceAll('-', '').length === 32;
       if (!isValid) throw new Error('err');
-      const geoCoreGeoviewLayerConfig = {
-        geoviewLayerId: generateId(),
-        geoviewLayerType: 'geoCore',
-        listOfLayerEntryConfig: [
-          new TypeGeocoreLayerEntryConfig({
-            schemaTag: 'geoCore' as TypeGeoviewLayerType,
-            entryType: 'geoCore' as TypeLayerEntryType,
-            layerId: layerURL,
-          } as TypeGeocoreLayerEntryConfig),
-        ] as TypeGeocoreLayerEntryConfig[],
-      } as TypeGeoCoreLayerConfig;
+
       const geoCoreGeoviewLayerInstance = new GeoCore(mapId);
-      const layers = await geoCoreGeoviewLayerInstance.createLayers(geoCoreGeoviewLayerConfig);
+      const layers = await geoCoreGeoviewLayerInstance.createLayersFromUUID(layerURL);
       if (layers.length === 1) {
         if (layers[0].length === 1) {
           setLayerName(layers[0][0].geoviewLayerName!.en! as string);
@@ -841,6 +828,10 @@ export function AddNewLayer(): JSX.Element {
     if (layerType === GEOCORE) {
       if (layerList.length > 1) {
         (layerList as TypeListOfGeoviewLayerConfig).forEach((geoviewLayerConfig) => {
+          api.maps[mapId].layer.addGeoviewLayer(geoviewLayerConfig);
+        });
+      } else if (layerEntries.length > 0) {
+        (layerEntries as TypeListOfGeoviewLayerConfig).forEach((geoviewLayerConfig) => {
           api.maps[mapId].layer.addGeoviewLayer(geoviewLayerConfig);
         });
       }
