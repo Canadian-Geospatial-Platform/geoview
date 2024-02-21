@@ -308,7 +308,7 @@ export function TimeSlider(TimeSliderPanelProps: TimeSliderPanelProps) {
       : getLocalizedMessage(mapId, 'timeSlider.slider.lockLeft');
     return text;
   }
-  console.log('DEFE: ', range, defaultValue);
+
   return (
     <Grid>
       <div style={sxClasses.rightPanelContainer}>
