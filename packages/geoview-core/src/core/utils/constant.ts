@@ -7,6 +7,12 @@ export const GEO_URL_TEXT = {
   text: 'Geo.ca',
 };
 
+/** The default geocore url */
+export const CONFIG_GEOCORE_URL = 'https://geocore-stage.api.geo.ca';
+
+/** The default geolocator url */
+export const CONFIG_GEOLOCATOR_URL = 'https://geolocator.api.geo.ca?keys=geonames,nominatim,locate';
+
 // OpenLayer constants
 export const OL_ZOOM_DURATION = 500;
 
