@@ -26,3 +26,6 @@ export const OL_OVERVIEWMAP_SIZE = {
   width: '150px',
   height: '150px',
 };
+
+export const ARROW_KEY_CODES: string[] = ['ArrowUp', 'ArrowRight', 'ArrowDown', 'ArrowLefts'];
+export const ARROW_KEYS_WITH_SPACE: string[] = [...ARROW_KEY_CODES, 'Space'];

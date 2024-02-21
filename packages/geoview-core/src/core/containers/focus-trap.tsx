@@ -9,6 +9,7 @@ import { Modal, Button } from '@/ui';
 import { HtmlToReact } from './html-to-react';
 import { getFocusTrapSxClasses } from './containers-style';
 import { disableScrolling } from '@/app';
+import { ARROW_KEY_CODES } from '@/core/utils/constant';
 import { useAppStoreActions } from '../stores/store-interface-and-intial-values/app-state';
 import { useUIStoreActions } from '../stores/store-interface-and-intial-values/ui-state';
 import { useMapElement } from '../stores/store-interface-and-intial-values/map-state';
@@ -39,8 +40,6 @@ export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
   const sxClasses = getFocusTrapSxClasses(theme);
 
   const fullScreen = useMediaQuery(theme.breakpoints.down('md'));
-
-  const arrowKeyCodes: string[] = ['ArrowUp', 'ArrowRight', 'ArrowDown', 'ArrowLeft'];
 
   // internal component state
   const [open, setOpen] = useState(false);
@@ -88,9 +87,9 @@ export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
 
   // handle FocusTrap states (Exit)
   const handleExit = (evt: KeyboardEvent) => {
-    if (!arrowKeyCodes.includes(evt.code as string)) {
+    if (!ARROW_KEY_CODES.includes(evt.code as string)) {
       // remove the border from the map
-      document.getElementById(`mapbox-${mapId}`)!.style.border = '';
+      document.getElementById(`mapbox-${mapId}`)!.style.border = sxClasses.exitFocus.border;
     }
 
     if (evt.code === 'KeyQ' && evt.ctrlKey) {
@@ -118,9 +117,7 @@ export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
   const handleEnable = () => {
     setOpen(false);
     setFocusTrap();
-    const borderColor =
-      theme.palette.mode === 'light' ? theme.palette.geoViewColor.primary.dark[300] : theme.palette.geoViewColor.primary.light[300];
-    document.getElementById(`mapbox-${mapId}`)!.style.border = `5px solid ${borderColor}`;
+    document.getElementById(`mapbox-${mapId}`)!.style.border = sxClasses.enableFocus.border;
   };
 
   const handleSkip = () => {
@@ -153,8 +150,8 @@ export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
         () => {
           setOpen(false);
           exitFocus();
-          // remvoe border from the map
-          document.getElementById(`mapbox-${mapId}`)!.style.border = '';
+          // remove border from the map
+          document.getElementById(`mapbox-${mapId}`)!.style.border = sxClasses.exitFocus.border;
         },
         { once: true }
       );
