@@ -136,7 +136,7 @@ export function GeoChart(props: GeoChartProps): JSX.Element {
   );
 
   /**
-   * Memoize the fetching of the correct config based on the provided layers array (TypeArrayOfLayerData).
+   * Memoizes the fetching of the correct config based on the provided layers array (TypeArrayOfLayerData).
    */
   const memoAllInfo = useMemo(() => {
     // Find the right config/layer/data for what we want based on the layerDataArray
