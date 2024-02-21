@@ -40,7 +40,7 @@ export default function Geolocator(props: GeolocatorProps): JSX.Element {
       tooltipPlacement="bottom-end"
       onClick={click}
       sx={sx}
-      className={`${active ? 'active' : ''}`}
+      className={`${!active ? 'active' : ''}`}
     >
       <SearchIcon />
     </IconButton>
