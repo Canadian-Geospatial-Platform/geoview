@@ -197,9 +197,9 @@ export const generateThemeOptions = (geoViewColors: IGeoViewColors = defaultGeoV
             borderWith: '2px',
             borderColor: geoViewColors.bgColor.darken(0.1, 0.9),
             borderStyle: 'solid',
-            boxShadow: 'none'
-          }
-        }
+            boxShadow: 'none',
+          },
+        },
       },
       MuiIconButton: {
         styleOverrides: {
