@@ -91,11 +91,13 @@ export function TimeSlider(TimeSliderPanelProps: TimeSliderPanelProps) {
       const defaultValueIsArray = Array.isArray(sliderConfig?.defaultValue);
       if (defaultValueIsArray) {
         setValues(layerPath, [new Date(sliderConfig?.defaultValue[0]).getTime(), new Date(sliderConfig?.defaultValue[1]).getTime()]);
-      } else {
+      } else if (range.includes(sliderConfig?.defaultValue)) {
         setValues(layerPath, [new Date(sliderConfig?.defaultValue).getTime()]);
+      } else {
+        setValues(layerPath, [new Date(range[0]).getTime()]);
       }
     }
-  }, [config, layerPath, setValues]);
+  }, [config, layerPath, range, setValues]);
 
   const timeStampRange = range.map((entry: string | number | Date) => new Date(entry).getTime());
   // Check if range occurs in a single day or year
