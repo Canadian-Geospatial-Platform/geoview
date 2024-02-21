@@ -32,6 +32,9 @@ export class TimeSliderEventProcessor extends AbstractEventProcessor {
           initialTimeSliderLayerPaths.forEach((layerPath) => {
             const timeSliderLayer = TimeSliderEventProcessor.getInitialTimeSliderValues(mapId, layerPath);
             store.getState().timeSliderState.actions.addTimeSliderLayer(timeSliderLayer);
+
+            const { defaultValue, field, filtering, minAndMax, values } = timeSliderLayer[layerPath];
+            TimeSliderEventProcessor.applyFilters(mapId, layerPath, defaultValue, field, filtering, minAndMax, values);
           });
         }
       },
