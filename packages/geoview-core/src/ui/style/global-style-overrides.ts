@@ -20,4 +20,11 @@ export const globalStyleOverrides = (geoViewColors: IGeoViewColors) => ({
       color: geoViewColors.primary.dark[300],
     },
   },
+
+  '.bordered': {
+    border: `2px solid ${geoViewColors.bgColor.darken(0.1, 0.9)}`,
+  },
+  '.bordered-primary': {
+    border: `2px solid ${geoViewColors.primary.darken(0.1, 0.9)}`,
+  }
 });

@@ -138,6 +138,7 @@ const LayerListItem = memo(function LayerListItem({ isSelected, layer, onListIte
         border: isSelected ? sxClasses.borderWithIndex : sxClasses.borderNone,
         backgroundColor: renderLayerBackground(),
       }}
+      className="bordered"
     >
       <Tooltip title={layer.tooltip} placement="top" arrow>
         <Box>

@@ -190,6 +190,17 @@ export const generateThemeOptions = (geoViewColors: IGeoViewColors = defaultGeoV
           },
         },
       },
+      MuiPaper: {
+        styleOverrides: {
+          root: {
+            borderRadius: 5,
+            borderWith: '2px',
+            borderColor: geoViewColors.bgColor.darken(0.1, 0.9),
+            borderStyle: 'solid',
+            boxShadow: 'none'
+          }
+        }
+      },
       MuiIconButton: {
         styleOverrides: {
           root: {

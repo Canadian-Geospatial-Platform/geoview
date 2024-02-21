@@ -243,13 +243,19 @@ export function SingleLayer({ isDragging, depth, layer, setIsLayersListPanelVisi
   function getContainerClass() {
     const result: string[] = ['layerItemContainer', layer.layerStatus ?? ''];
 
+    if(depth === 0) { 
+      result.push('bordered');
+    }
+
     // if layer has selected child but its not itself selected
     if (layerChildIsSelected && !layerIsSelected && !isGroupOpen) {
       result.push('selectedLayer');
+      result.push('bordered-primary');
     }
 
     if (layerIsSelected) {
       result.push('selectedLayer');
+      result.push('bordered-primary');
     }
 
     if (isDragging) {
@@ -260,7 +266,7 @@ export function SingleLayer({ isDragging, depth, layer, setIsLayersListPanelVisi
   }
 
   return (
-    <Box className={getContainerClass()}>
+    <Box className={getContainerClass()}  data-layer-depth={depth}>
       <ListItem key={layer.layerName} divider>
         <ListItemButton selected={layerIsSelected || (layerChildIsSelected && !isGroupOpen)}>
           <LayerIcon layer={layer} />
