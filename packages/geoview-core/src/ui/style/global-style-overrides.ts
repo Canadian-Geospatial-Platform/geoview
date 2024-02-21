@@ -22,7 +22,7 @@ export const globalStyleOverrides = (geoViewColors: IGeoViewColors) => ({
   },
 
   '.bordered': {
-    border: `2px solid ${geoViewColors.bgColor.darken(0.1, 0.9)}`,
+    border: `2px solid ${geoViewColors.bgColor.darken(0.5, 0.5)}`,
   },
   '.bordered-primary': {
     border: `2px solid ${geoViewColors.primary.darken(0.1, 0.9)}`,

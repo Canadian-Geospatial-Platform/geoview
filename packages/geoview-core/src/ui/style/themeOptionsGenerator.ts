@@ -195,7 +195,7 @@ export const generateThemeOptions = (geoViewColors: IGeoViewColors = defaultGeoV
           root: {
             borderRadius: 5,
             borderWith: '2px',
-            borderColor: geoViewColors.bgColor.darken(0.1, 0.9),
+            borderColor: geoViewColors.bgColor.darken(0.5, 0.5),
             borderStyle: 'solid',
             boxShadow: 'none',
           },
