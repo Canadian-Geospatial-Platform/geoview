@@ -21,6 +21,8 @@ export function MapInfoExpandButton(): JSX.Element {
   const expanded = useUIMapInfoExpanded();
   const { setMapInfoExpanded } = useUIStoreActions();
 
+  const tooltipAndAria = expanded ? 'mapnav.collapseBtn' : 'mapnav.expandBtn';
+
   const handleTransitionEnd = () => {
     setMapInfoExpanded(true);
   };
@@ -82,7 +84,12 @@ export function MapInfoExpandButton(): JSX.Element {
 
   return (
     <Box>
-      <IconButton sx={sxClasses.expandButton} onClick={() => (expanded ? collapseMapInfo() : expandMapInfo())}>
+      <IconButton
+        aria-label={tooltipAndAria}
+        tooltip={tooltipAndAria}
+        sx={sxClasses.expandButton}
+        onClick={() => (expanded ? collapseMapInfo() : expandMapInfo())}
+      >
         {expanded ? <ExpandMoreIcon /> : <ExpandLessIcon />}
       </IconButton>
     </Box>

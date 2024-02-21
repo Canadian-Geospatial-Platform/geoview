@@ -18,7 +18,9 @@
     "zoomOut": "Zoom out",
     "coordinates": "Toggle Coordinates format",
     "scale": "Toggle between scale and resolution",
-    "location": "Zoom to my location"
+    "location": "Zoom to my location",
+    "collapseBtn": "Collapse",
+    "expandBtn": "Expand"
   },
   "mapctrl": {
     "rotation": {

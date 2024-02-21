@@ -60,6 +60,7 @@ export function Attribution(): JSX.Element {
           width: '30px',
           height: '30px',
         }}
+        aria-label="mapctrl.attribution.tooltip"
       >
         <MoreHorizIcon />
       </IconButton>
