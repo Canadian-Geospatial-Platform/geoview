@@ -35,7 +35,7 @@ export function IconButton(props: TypeIconButtonProps): JSX.Element {
       <MaterialIconButton
         id={id}
         sx={sx}
-        aria-label={t((ariaLabel as string) || '') as string}
+        aria-label={(t(ariaLabel as string) || t(tooltip as string)) as string}
         style={style}
         className={className}
         onClick={onClick}
