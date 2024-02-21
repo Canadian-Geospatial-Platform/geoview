@@ -200,8 +200,8 @@ export const generateThemeOptions = (geoViewColors: IGeoViewColors = defaultGeoV
             boxShadow: `0px 12px 9px -13px ${geoViewColors.bgColor.dark[200]}`,
 
             '&.unbordered': {
-              borderStyle: 'none'
-            }
+              borderStyle: 'none',
+            },
           },
         },
       },
