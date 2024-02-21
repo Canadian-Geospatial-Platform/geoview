@@ -194,12 +194,16 @@ export const generateThemeOptions = (geoViewColors: IGeoViewColors = defaultGeoV
         styleOverrides: {
           root: {
             borderRadius: 5,
-            borderWith: '2px',
-            borderColor: geoViewColors.bgColor.darken(0.1, 0.9),
+            borderWith: '1px',
+            borderColor: geoViewColors.bgColor.darken(0.5, 0.5),
             borderStyle: 'solid',
-            boxShadow: 'none'
-          }
-        }
+            boxShadow: `0px 12px 9px -13px ${geoViewColors.bgColor.dark[200]}`,
+
+            '&.unbordered': {
+              borderStyle: 'none',
+            },
+          },
+        },
       },
       MuiIconButton: {
         styleOverrides: {
