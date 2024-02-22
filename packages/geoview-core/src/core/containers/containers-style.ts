@@ -1,19 +1,31 @@
 import { Theme } from '@mui/material/styles';
 
-export const getFocusTrapSxClasses = (theme: Theme) => ({
-  trap: {
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
-    position: 'absolute',
-    top: theme.spacing(0),
-    left: theme.spacing(0),
-    width: '100%',
-    height: '100%',
-    zIndex: theme.zIndex.focusDialog,
-    overflow: 'hidden',
-  },
-});
+export const getFocusTrapSxClasses = (theme: Theme) => {
+  const borderColor =
+    theme.palette.mode === 'light' ? theme.palette.geoViewColor.primary.dark[300] : theme.palette.geoViewColor.primary.light[300];
+
+  return {
+    trap: {
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center',
+      position: 'absolute',
+      top: theme.spacing(0),
+      left: theme.spacing(0),
+      width: '100%',
+      height: '100%',
+      zIndex: theme.zIndex.focusDialog,
+      overflow: 'hidden',
+    },
+    exitFocus: {
+      border: 'unset',
+    },
+    enableFocus: {
+      border: `5px solid ${borderColor}
+      }`,
+    },
+  };
+};
 
 export const getShellSxClasses = (theme: Theme) => ({
   all: {

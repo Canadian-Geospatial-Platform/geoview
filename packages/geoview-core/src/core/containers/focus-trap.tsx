@@ -9,6 +9,7 @@ import { Modal, Button } from '@/ui';
 import { HtmlToReact } from './html-to-react';
 import { getFocusTrapSxClasses } from './containers-style';
 import { disableScrolling } from '@/app';
+import { ARROW_KEY_CODES } from '@/core/utils/constant';
 import { useAppStoreActions } from '../stores/store-interface-and-intial-values/app-state';
 import { useUIStoreActions } from '../stores/store-interface-and-intial-values/ui-state';
 import { useMapElement } from '../stores/store-interface-and-intial-values/map-state';
@@ -86,7 +87,14 @@ export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
 
   // handle FocusTrap states (Exit)
   const handleExit = (evt: KeyboardEvent) => {
-    if (evt.code === 'KeyQ' && evt.ctrlKey) exitFocus();
+    if (!ARROW_KEY_CODES.includes(evt.code as string)) {
+      // remove the border from the map
+      document.getElementById(`mapbox-${mapId}`)!.style.border = sxClasses.exitFocus.border;
+    }
+
+    if (evt.code === 'KeyQ' && evt.ctrlKey) {
+      exitFocus();
+    }
   };
 
   /**
@@ -109,6 +117,7 @@ export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
   const handleEnable = () => {
     setOpen(false);
     setFocusTrap();
+    document.getElementById(`mapbox-${mapId}`)!.style.border = sxClasses.enableFocus.border;
   };
 
   const handleSkip = () => {
@@ -141,6 +150,8 @@ export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
         () => {
           setOpen(false);
           exitFocus();
+          // remove border from the map
+          document.getElementById(`mapbox-${mapId}`)!.style.border = sxClasses.exitFocus.border;
         },
         { once: true }
       );
