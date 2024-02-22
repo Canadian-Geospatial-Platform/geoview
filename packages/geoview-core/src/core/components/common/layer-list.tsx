@@ -2,7 +2,7 @@ import { ReactNode, memo } from 'react';
 import { useTheme } from '@mui/material/styles';
 import { useTranslation } from 'react-i18next';
 import { Box, ChevronRightIcon, IconButton, List, ListItem, ListItemButton, ListItemIcon, Paper, Tooltip, Typography } from '@/ui';
-import { IconStack, TypeLayerStatus, TypeQueryStatus } from '@/app';
+import { IconStack, TypeArrayOfFeatureInfoEntries, TypeLayerStatus, TypeQueryStatus } from '@/app';
 
 import { getSxClasses } from './layer-list-style';
 
@@ -15,6 +15,7 @@ export interface LayerListEntry {
   mapFilteredIcon?: ReactNode;
   tooltip?: ReactNode;
   numOffeatures?: number;
+  features: TypeArrayOfFeatureInfoEntries;
 }
 
 interface LayerListProps {
@@ -132,7 +133,12 @@ const LayerListItem = memo(function LayerListItem({ isSelected, layer, onListIte
       <Tooltip title={layer.tooltip} placement="top" arrow>
         <Box>
           <ListItem disablePadding>
-            <ListItemButton selected={isSelected} disabled={layer?.numOffeatures === 0} onClick={() => onListItemClick(layer)}>
+            <ListItemButton
+              selected={isSelected}
+              // disable when layer features has null value.
+              disabled={layer?.numOffeatures === 0 || layer.features === null}
+              onClick={() => onListItemClick(layer)}
+            >
               {renderLayerIcon()}
               {renderLayerBody()}
               <Box

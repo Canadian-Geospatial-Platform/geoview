@@ -114,6 +114,13 @@ export function Datapanel({ fullWidth }: DataPanelType) {
     );
   };
 
+  /**
+   * Checks if layer is disabled when layer is selected and features have null value.
+   * @returns bool
+   */
+  const isLayerDisabled = (): boolean =>
+    !!orderedLayerData.find((layer) => layer.layerPath === selectedLayerPath && layer.features === null);
+
   useEffect(() => {
     // Log
     logger.logTraceUseEffect('DATA-PANEL - isLoading', isLoading, selectedLayerPath);
@@ -157,7 +164,7 @@ export function Datapanel({ fullWidth }: DataPanelType) {
           ))}
 
       {/* show data table instructions when all layers has no features */}
-      {!isLoading && orderedLayerData.every((layers) => !layers?.features?.length) && (
+      {((!isLoading && orderedLayerData.every((layers) => !layers?.features?.length)) || isLayerDisabled()) && (
         <Paper sx={{ padding: '2rem' }}>
           <Typography variant="h3" gutterBottom sx={sxClasses.dataTableInstructionsTitle}>
             {t('dataTable.dataTableInstructions')}
