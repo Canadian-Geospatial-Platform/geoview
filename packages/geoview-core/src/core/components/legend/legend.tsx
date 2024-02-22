@@ -2,7 +2,7 @@ import { useTheme } from '@mui/material';
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Box, Paper, Typography } from '@/ui';
-import { useLayerLegendLayers, useMapOrderedLayerInfo, useLayerStoreActions } from '@/core/stores/';
+import { useLayerLegendLayers, useLayerStoreActions, useMapVisibleLayers } from '@/core/stores/';
 import { logger } from '@/core/utils/logger';
 
 import { getSxClasses } from './legend-styles';
@@ -28,7 +28,7 @@ export function Legend({ fullWidth }: LegendType): JSX.Element {
   const [formattedLegendLayerList, setFormattedLegendLayersList] = useState<TypeLegendLayer[][]>([]);
 
   // store state
-  const orderedLayerInfo = useMapOrderedLayerInfo();
+  const visibleLayers = useMapVisibleLayers();
   const layersList = useLayerLegendLayers();
   const { getLayer } = useLayerStoreActions();
 
@@ -73,14 +73,7 @@ export function Legend({ fullWidth }: LegendType): JSX.Element {
 
   useEffect(() => {
     // Log
-    logger.logTraceUseEffect('LEGEND - orderedLayerInfo', orderedLayerInfo.length, orderedLayerInfo);
-
-    const visibleLayers = orderedLayerInfo
-      .map((layerInfo) => {
-        if (layerInfo.visible) return layerInfo.layerPath;
-        return undefined;
-      })
-      .filter((layerPath) => layerPath !== undefined);
+    logger.logTraceUseEffect('LEGEND - orderedLayerInfo', visibleLayers.length, visibleLayers);
 
     // Loop on the visible layers to retrieve the valid TypeLegendLayer objects
     const parentPaths: string[] = [];
@@ -100,7 +93,7 @@ export function Legend({ fullWidth }: LegendType): JSX.Element {
     updateLegendLayerListByWindowSize(layers);
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [orderedLayerInfo, layersList]);
+  }, [visibleLayers, layersList]);
 
   useEffect(() => {
     // Log

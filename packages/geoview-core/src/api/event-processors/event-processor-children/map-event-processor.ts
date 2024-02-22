@@ -173,6 +173,24 @@ export class MapEventProcessor extends AbstractEventProcessor {
     );
     // #endregion FEATURE SELECTION
 
+    const unsubOrderedLayerInfo = store.subscribe(
+      (state) => state.mapState.orderedLayerInfo,
+      (cur) => {
+        // Log
+        logger.logTraceCoreStoreSubscription('MAP EVENT PROCESSOR - legendLayers', mapId, cur);
+
+        const visibleLayers = cur
+          .map((layerInfo) => {
+            if (layerInfo.visible) return layerInfo.layerPath;
+            return undefined;
+          })
+          .filter((layerPath) => layerPath);
+        const prevVisibleLayers = [...store.getState().mapState.visibleLayers];
+        if (JSON.stringify(prevVisibleLayers) !== JSON.stringify(visibleLayers))
+          store.getState().mapState.actions.setVisibleLayers(visibleLayers as string[]);
+      }
+    );
+
     // Return the array of subscriptions so they can be destroyed later
     return [
       unsubMapHighlightedFeatures,
@@ -183,6 +201,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
       unsubMapSelectedFeatures,
       unsubMapZoom,
       unsubMapSingleClick,
+      unsubOrderedLayerInfo,
     ];
   }
 
