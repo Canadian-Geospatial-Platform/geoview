@@ -94,7 +94,7 @@ export class URLmapConfigReader {
    *
    * @returns {Promise<TypeMapFeaturesConfig | undefined>} A map features configuration object generated from url parameters
    */
-  static async getMapFeaturesConfig(baseUrl: string, mapId: string): Promise<TypeMapFeaturesConfig | undefined> {
+  static async getMapFeaturesConfig(mapId: string): Promise<TypeMapFeaturesConfig | undefined> {
     // instanciate the configValidation object used to validate map config attributes and define default values.
     const configValidation = new ConfigValidation();
 
@@ -132,7 +132,7 @@ export class URLmapConfigReader {
         try {
           // Get the layers config
           const promise = UUIDmapConfigReader.getGVConfigFromUUIDs(
-            baseUrl,
+            configValidation.defaultMapFeaturesConfig.serviceUrls.geocoreUrl,
             displayLanguage.split('-')[0],
             urlParams.keys.toString().split(',')
           );
@@ -172,7 +172,7 @@ export class URLmapConfigReader {
           extraOptions: {},
         },
         serviceUrls: {
-          geocoreUrl: baseUrl,
+          geocoreUrl: configValidation.defaultMapFeaturesConfig.serviceUrls.geocoreUrl,
         },
         components,
         corePackages,
@@ -182,7 +182,7 @@ export class URLmapConfigReader {
     }
 
     // Trace the detail config read from url
-    logger.logTraceDetailed('URL Config - ', mapConfig);
+    logger.logTraceDetailed('URL Config - ', mapId, mapConfig);
 
     return mapConfig;
   }
