@@ -1,10 +1,11 @@
-import { AnySchemaObject, Cast, toJsonObject, TypeJsonObject, TypeTabs } from 'geoview-core';
+import { AnySchemaObject, api, Cast, TimeDimension, toJsonObject, TypeJsonObject, TypeTabs } from 'geoview-core';
 import { TimeSliderIcon } from 'geoview-core/src/ui';
 import { FooterPlugin } from 'geoview-core/src/api/plugin/footer-plugin';
 
 import { TimeSliderPanel } from './time-slider-panel';
 import schema from '../schema.json';
 import defaultConfig from '../default-config-time-slider-panel.json';
+import { SliderProps } from './time-slider-types';
 
 export interface LayerProps {
   layerPath: string;
@@ -96,6 +97,31 @@ class TimeSliderPlugin extends FooterPlugin {
   });
 
   onCreateContentProps = (): TypeTabs => {
+    // Set custom time dimension if applicable
+    this.configObj.sliders.forEach((obj: SliderProps) => {
+      if (obj.temporalDimension) {
+        const timeDimension: TimeDimension = {
+          field: obj.temporalDimension.field,
+          default: obj.temporalDimension.default,
+          unitSymbol: obj.temporalDimension.unitSymbol,
+          nearestValues: obj.temporalDimension.nearestValues,
+          range: api.dateUtilities.createRangeOGC(obj.temporalDimension.range as unknown as string),
+          singleHandle: obj.temporalDimension.singleHandle,
+        };
+        api.maps[this.pluginProps.mapId].layer.geoviewLayer(obj.layerPaths[0]).setTemporalDimension(obj.layerPaths[0], timeDimension);
+      }
+
+      // Set override default value under time dimension if applicable
+      if (obj.defaultValue) {
+        const layerPath = obj.layerPaths[0];
+        const timeDimension = api.maps[this.pluginProps.mapId].layer.geoviewLayer(layerPath).layerTemporalDimension[layerPath];
+        api.maps[this.pluginProps.mapId].layer.geoviewLayer(layerPath).setTemporalDimension(layerPath, {
+          ...timeDimension,
+          default: obj.defaultValue,
+        });
+      }
+    });
+
     return {
       id: 'time-slider',
       value: this.value!,

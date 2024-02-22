@@ -51,7 +51,7 @@ export function TimeSlider(TimeSliderPanelProps: TimeSliderPanelProps) {
 
   // Get actions and states from store
   // TODO: evaluate best option to set value by layer path.... trough a getter?
-  const { setTitle, setDescription, setDefaultValue, setValues, setLocked, setReversed, setDelay, setFiltering } =
+  const { setTitle, setDefaultValue, setDescription, setValues, setLocked, setReversed, setDelay, setFiltering } =
     useTimeSliderStoreActions();
 
   // TODO: check performance as we should technically have one selector by constant
@@ -78,14 +78,28 @@ export function TimeSlider(TimeSliderPanelProps: TimeSliderPanelProps) {
     const sliderConfig = config?.sliders?.find((o: { layerPaths: string[] }) => o.layerPaths.includes(layerPath));
     if (title === undefined) setTitle(layerPath, getLocalizedValue(sliderConfig?.title, mapId) || '');
     if (description === undefined) setDescription(layerPath, getLocalizedValue(sliderConfig?.description, mapId) || '');
-    if (defaultValue === undefined) setDefaultValue(layerPath, sliderConfig?.defaultValue || '');
     if (locked === undefined) setLocked(layerPath, sliderConfig?.locked !== undefined ? sliderConfig?.locked : false);
     if (reversed === undefined) setReversed(layerPath, sliderConfig?.reversed !== undefined ? sliderConfig?.reversed : false);
+    if (defaultValue === undefined) setDefaultValue(layerPath, sliderConfig?.defaultValue || '');
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const timeStampRange = range.map((entry: string | number | Date) => new Date(entry).getTime());
+  useEffect(() => {
+    const sliderConfig = config?.sliders?.find((o: { layerPaths: string[] }) => o.layerPaths.includes(layerPath));
+    if (sliderConfig?.defaultValue) {
+      // update values based on slider's default value
+      const defaultValueIsArray = Array.isArray(sliderConfig?.defaultValue);
+      if (defaultValueIsArray) {
+        setValues(layerPath, [new Date(sliderConfig?.defaultValue[0]).getTime(), new Date(sliderConfig?.defaultValue[1]).getTime()]);
+      } else if (range.includes(sliderConfig?.defaultValue)) {
+        setValues(layerPath, [new Date(sliderConfig?.defaultValue).getTime()]);
+      } else {
+        setValues(layerPath, [new Date(range[0]).getTime()]);
+      }
+    }
+  }, [config, layerPath, range, setFiltering, setValues]);
 
+  const timeStampRange = range.map((entry: string | number | Date) => new Date(entry).getTime());
   // Check if range occurs in a single day or year
   const timeDelta = minAndMax[1] - minAndMax[0];
   const dayDelta = new Date(minAndMax[1]).getDate() - new Date(minAndMax[0]).getDate();
@@ -332,7 +346,6 @@ export function TimeSlider(TimeSliderPanelProps: TimeSliderPanelProps) {
               style={{ width: '80%', color: 'primary' }}
               min={minAndMax[0]}
               max={minAndMax[1]}
-              defaultValue={Number(defaultValue)}
               value={values}
               valueLabelFormat={(value) => valueLabelFormat(value)}
               marks={sliderMarks}

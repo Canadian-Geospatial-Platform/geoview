@@ -32,6 +32,9 @@ export class TimeSliderEventProcessor extends AbstractEventProcessor {
           initialTimeSliderLayerPaths.forEach((layerPath) => {
             const timeSliderLayer = TimeSliderEventProcessor.getInitialTimeSliderValues(mapId, layerPath);
             store.getState().timeSliderState.actions.addTimeSliderLayer(timeSliderLayer);
+
+            const { defaultValue, field, filtering, minAndMax, values } = timeSliderLayer[layerPath];
+            TimeSliderEventProcessor.applyFilters(mapId, layerPath, defaultValue, field, filtering, minAndMax, values);
           });
         }
       },
@@ -109,9 +112,11 @@ export class TimeSliderEventProcessor extends AbstractEventProcessor {
     const name = getLocalizedValue(api.maps[mapId].layer.geoviewLayers[layerPath.split('/')[0]].geoviewLayerName, mapId) || layerPath;
     const temporalDimensionInfo = api.maps[mapId].layer.geoviewLayer(layerPath).getTemporalDimension();
     const { range } = temporalDimensionInfo.range;
-    const defaultValue = temporalDimensionInfo.default;
+    const defaultValueIsArray = Array.isArray(temporalDimensionInfo.default);
+    const defaultValue = defaultValueIsArray ? temporalDimensionInfo.default[0] : temporalDimensionInfo.default;
     const minAndMax: number[] = [new Date(range[0]).getTime(), new Date(range[range.length - 1]).getTime()];
     const { field, singleHandle } = temporalDimensionInfo;
+
     // If the field type has an alias, use that as a label
     let fieldAlias = field;
     const { featureInfo } = api.maps[mapId].layer.registeredLayers[layerPath].source!;
@@ -121,7 +126,13 @@ export class TimeSliderEventProcessor extends AbstractEventProcessor {
     const fieldIndex = localizedOutFields ? localizedOutFields.indexOf(field) : -1;
     if (fieldIndex !== -1 && localizedAliasFields?.length === localizedOutFields?.length) fieldAlias = localizedAliasFields![fieldIndex];
 
-    const values = singleHandle ? [new Date(temporalDimensionInfo.default).getTime()] : [...minAndMax];
+    // eslint-disable-next-line no-nested-ternary
+    const values = singleHandle
+      ? [new Date(temporalDimensionInfo.default).getTime()]
+      : defaultValueIsArray
+      ? [new Date(temporalDimensionInfo.default[0]).getTime(), new Date(temporalDimensionInfo.default[1]).getTime()]
+      : [...minAndMax];
+
     const sliderData: TimeSliderLayerSet = {
       [layerPath]: {
         name,
