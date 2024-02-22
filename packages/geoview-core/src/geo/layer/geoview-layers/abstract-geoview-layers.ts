@@ -1504,10 +1504,11 @@ export abstract class AbstractGeoViewLayer {
    *
    * @param {string} layerPath The layer path to the layer's configuration affected by the change.
    * @param {TimeDimension} temporalDimension The value to assign to the layer temporal dimension property.
+   * @param {boolean} custom Flag allow's to customize the layer's temporal dimension property.
    */
-  setTemporalDimension(layerPath: string, temporalDimension: TimeDimension, override: boolean): void {
+  setTemporalDimension(layerPath: string, temporalDimension: TimeDimension, custom: boolean): void {
     layerPath = layerPath || this.layerPathAssociatedToTheGeoviewLayer;
-    if (override) {
+    if (custom) {
       const timeDimension: TimeDimension = {
         field: temporalDimension.field,
         default: temporalDimension.default,
