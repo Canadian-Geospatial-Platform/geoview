@@ -4,9 +4,9 @@ import { DragDropContext, Droppable, Draggable, DropResult, DraggingStyle, NotDr
 import { SingleLayer } from './single-layer';
 import { getSxClasses } from './left-panel-styles';
 import { Box } from '@/ui';
-import { TypeLegendLayer } from '../types';
-import { useLayerStoreActions, useLayersDisplayState } from '@/core/stores/';
+import { useMapStoreActions, useLayerDisplayState } from '@/core/stores/';
 import { logger } from '@/core/utils/logger';
+import { TypeLegendLayer } from '../types';
 
 interface LayerListProps {
   depth: number;
@@ -22,19 +22,21 @@ export function LayersList({ layersList, setIsLayersListPanelVisible, parentLaye
   const theme = useTheme();
   const sxClasses = getSxClasses(theme);
 
-  const displayState = useLayersDisplayState();
-  const { reorderLayer } = useLayerStoreActions(); // get store actions
+  const displayState = useLayerDisplayState();
+  const { getIndexFromOrderedLayerInfo, reorderLayer } = useMapStoreActions();
 
   const isDragEnabled = displayState === 'order';
 
-  const sortedLayers = layersList.sort((a, b) => (a.order > b.order ? 1 : -1));
+  const sortedLayers = layersList.sort((a, b) =>
+    getIndexFromOrderedLayerInfo(a.layerPath) > getIndexFromOrderedLayerInfo(b.layerPath) ? 1 : -1
+  );
 
   const onDragEnd = (result: DropResult) => {
     // dropped outside the list
     if (!result.destination) {
       return;
     }
-    reorderLayer(result.source.index, result.destination.index, result.draggableId);
+    reorderLayer(result.draggableId, result.destination.index - result.source.index);
   };
 
   const textToSlug = (text: string): string => {
@@ -82,7 +84,7 @@ export function LayersList({ layersList, setIsLayersListPanelVisible, parentLaye
         isDragDisabled={!isDragEnabled}
         key={textToSlug(`${index}${details.layerPath}`)}
         draggableId={details.layerPath}
-        index={details.order}
+        index={index}
       >
         {(provided, snapshot) => (
           <div

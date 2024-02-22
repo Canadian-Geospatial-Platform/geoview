@@ -4,7 +4,7 @@ import { useTheme } from '@mui/material/styles';
 import { CloseButton, ResponsiveGrid, useFooterPanelHeight } from '../common';
 import { Box, DeleteOutlineIcon, IconButton, Paper } from '@/ui';
 import { getSxClasses } from './layers-style';
-import { useLayersDisplayState, useSelectedLayer } from '@/core/stores/store-interface-and-intial-values/layer-state';
+import { useLayerDisplayState, useSelectedLayer } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { LayersToolbar } from './layers-toolbar';
 import { LayerDetails } from './right-panel/layer-details';
 import { LeftPanel } from './left-panel/left-panel';
@@ -22,7 +22,7 @@ export function LayersPanel() {
   const [isLayersListPanelVisible, setIsLayersListPanelVisible] = useState(false);
 
   const selectedLayer = useSelectedLayer(); // get store value
-  const displayState = useLayersDisplayState();
+  const displayState = useLayerDisplayState();
 
   /*
   // Using helpers

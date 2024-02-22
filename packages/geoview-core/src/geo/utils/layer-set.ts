@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { EVENT_NAMES } from '@/api/events/event-types';
 import {
   LayerSetPayload,
@@ -135,8 +136,23 @@ export class LayerSet {
                 api.event.emit(
                   LayerSetPayload.createLayerSetUpdatedPayload(`${mapId}/LegendsLayerSetStatusChanged`, this.resultsSet, layerPath)
                 );
+              if (MapEventProcessor.getMapIndexFromOrderedLayerInfo(this.mapId, layerPath) === -1) {
+                if (layerConfig.parentLayerConfig) {
+                  const parentLayerPathArray = layerPath.split('/');
+                  parentLayerPathArray.pop();
+                  const parentLayerPath = parentLayerPathArray.join('/');
+                  const parentLayerIndex = MapEventProcessor.getMapIndexFromOrderedLayerInfo(this.mapId, parentLayerPath);
+                  const numberOfLayers = MapEventProcessor.getMapOrderedLayerInfo(this.mapId).filter((layerInfo) =>
+                    layerInfo.layerPath.startsWith(parentLayerPath)
+                  ).length;
+                  if (parentLayerIndex !== -1)
+                    MapEventProcessor.addOrderedLayerInfo(this.mapId, layerConfig, parentLayerIndex + numberOfLayers);
+                  else MapEventProcessor.addOrderedLayerInfo(this.mapId, layerConfig.parentLayerConfig);
+                } else MapEventProcessor.addOrderedLayerInfo(this.mapId, layerConfig);
+              }
             } else if (action === 'remove' && layerPath in this.resultsSet) {
               delete this.resultsSet[layerPath];
+              MapEventProcessor.removeOrderedLayerInfo(this.mapId, layerPath);
               api.event.emit(LayerSetPayload.createLayerSetUpdatedPayload(this.layerSetId, this.resultsSet, layerPath));
             }
           }
