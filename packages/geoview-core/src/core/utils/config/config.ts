@@ -152,7 +152,7 @@ export class Config {
     let mapFeaturesConfig: TypeMapFeaturesConfig | undefined;
 
     // check if inline div config has been passed
-    const inlineDivConfig = InlineDivConfigReader.getMapFeaturesConfig(this.mapId, this.mapElement);
+    const inlineDivConfig = await InlineDivConfigReader.getMapFeaturesConfig(this.mapId, this.mapElement);
 
     // use inline config if provided
     if (inlineDivConfig) mapFeaturesConfig = { ...inlineDivConfig };
@@ -166,10 +166,7 @@ export class Config {
     const shared = this.mapElement.getAttribute('data-shared');
     if (shared === 'true') {
       // check if config params have been passed
-      const urlParamsConfig = await URLmapConfigReader.getMapFeaturesConfig(
-        this.configValidation.defaultMapFeaturesConfig.serviceUrls.geocoreUrl,
-        this.mapId
-      );
+      const urlParamsConfig = await URLmapConfigReader.getMapFeaturesConfig(this.mapId);
 
       // use the url params config if provided
       if (urlParamsConfig) mapFeaturesConfig = { ...urlParamsConfig };
