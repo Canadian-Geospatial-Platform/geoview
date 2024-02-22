@@ -24,7 +24,8 @@ export default function Geolocator(): JSX.Element {
       tooltip="appbar.geolocator"
       tooltipPlacement="bottom-end"
       onClick={click}
-      className={`${!active ? 'style2' : ''}`}
+      color="primary"
+      className={`style3 ${!active ? 'active' : ''}`}
     >
       <SearchIcon />
     </IconButton>

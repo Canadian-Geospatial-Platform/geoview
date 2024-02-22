@@ -236,6 +236,20 @@ export const generateThemeOptions = (geoViewColors: IGeoViewColors = defaultGeoV
                 color: `${geoViewColors.bgColor.dark[450]} !important`,
               },
             },
+            '&.style3': {
+              backgroundColor: `tranparent !important`,
+              border: `2px solid transparent !important`,
+              color: `${geoViewColors.primary.main} !important`,
+              '&:hover, &:active, &.active': {
+                backgroundColor: `${geoViewColors.primary.main} !important`,
+                border: `2px solid ${geoViewColors.primary.light[500]} !important`,
+                color: `${geoViewColors.white} !important`,
+                boxShadow: 1,
+              },
+              '&:disabled': {
+                color: `${geoViewColors.bgColor.dark[450]} !important`,
+              },
+            },
           },
         },
       },
