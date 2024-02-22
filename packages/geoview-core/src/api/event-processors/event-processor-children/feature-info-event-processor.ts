@@ -57,7 +57,7 @@ export class FeatureInfoEventProcessor extends AbstractEventProcessor {
               FeatureInfoEventProcessor.deleteFeatureAllInfo(store.getState().mapId, layerPath);
 
               // Log
-              logger.logDebug('Removed Feature Info in stores for layer path:', layerPath);
+              logger.logInfo('Removed Feature Info in stores for layer path:', layerPath);
             }
           });
       }
