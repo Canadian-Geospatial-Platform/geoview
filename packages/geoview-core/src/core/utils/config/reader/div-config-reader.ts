@@ -1,8 +1,10 @@
 /* eslint-disable no-console */
-import { TypeMapFeaturesConfig } from '@/core/types/global-types';
-import { isJsonString, removeCommentsFromJSON } from '../../utilities';
+import { TypeJsonValue, TypeMapFeaturesConfig } from '@/core/types/global-types';
+import { getLocalizedMessage, isJsonString, removeCommentsFromJSON, replaceParams, showError } from '../../utilities';
 import { logger } from '@/core/utils/logger';
 import { api } from '@/app';
+import { ConfigValidation } from '../config-validation';
+import { UUIDmapConfigReader } from './uuid-config-reader';
 
 /**
  * A class to read the configuration of the GeoView map features from an online div. The configuration is provided in an HTML div
@@ -24,9 +26,9 @@ export class InlineDivConfigReader {
    *
    * @returns {TypeMapFeaturesConfig | undefined} The generated map features config object from inline map element.
    */
-  static getMapFeaturesConfig(mapId: string, mapElement: Element): TypeMapFeaturesConfig | undefined {
-    // create a new config object
-    let mapConfig: TypeMapFeaturesConfig | undefined;
+  static async getMapFeaturesConfig(mapId: string, mapElement: Element): Promise<TypeMapFeaturesConfig | undefined> {
+    // instanciate the configValidation object used to validate map config attributes and define default values.
+    const configValidation = new ConfigValidation();
 
     let configObjStr = mapElement.getAttribute('data-config');
 
@@ -41,14 +43,53 @@ export class InlineDivConfigReader {
       // Then, replace apostrophes preceded by a backslash with a single apostrophe
       configObjStr = configObjStr.replace(/\\'/gm, "'");
 
-      if (!isJsonString(configObjStr)) {
-        logger.logWarning(`- Map: ${mapId} - Invalid JSON configuration object in div, a fallback strategy will be used -`);
-        api.utilities.showError(mapId, api.utilities.getLocalizedMessage(mapId, 'validation.invalidConfig'), true);
-      } else {
-        mapConfig = { ...JSON.parse(configObjStr) };
+      if (isJsonString(configObjStr)) {
+        // Create the config
+        const gvConfig = JSON.parse(configObjStr);
+
+        // Read the geocore keys
+        const geocoreKeys = mapElement.getAttribute('data-geocore-keys');
+
+        // If any
+        if (geocoreKeys) {
+          try {
+            // Make sure we have a mapConfig.serviceUrls.geocodeUrl set by default..
+            if (!gvConfig.serviceUrls)
+              gvConfig.serviceUrls = { geocoreUrl: configValidation.defaultMapFeaturesConfig.serviceUrls.geocoreUrl };
+
+            // If there's a data-geocore-endpoint attribute, use it as the geoCoreUrl
+            const geocoreEndpoint = mapElement.getAttribute('data-geocore-endpoint');
+            if (geocoreEndpoint) gvConfig.serviceUrls.geocoreUrl = geocoreEndpoint;
+
+            // Get the layers config
+            const promise = UUIDmapConfigReader.getGVConfigFromUUIDs(
+              gvConfig.serviceUrls.geocoreUrl,
+              gvConfig.displayLanguage || 'en',
+              geocoreKeys.split(',')
+            );
+            const listOfGeoviewLayerConfig = (await promise).layers;
+
+            // Append the layers to the config (possibly with others)
+            if (!gvConfig.map.listOfGeoviewLayerConfig) gvConfig.map.listOfGeoviewLayerConfig = [];
+            gvConfig.map.listOfGeoviewLayerConfig.push(...listOfGeoviewLayerConfig);
+          } catch (error) {
+            // Log
+            logger.logError('Failed to get the GeoView layers from url keys', mapElement.getAttribute('data-geocore-keys'), error);
+            const message = replaceParams([error as TypeJsonValue, mapId], getLocalizedMessage(mapId, 'validation.layer.loadfailed'));
+            showError(mapId, message);
+          }
+        }
+
+        // Return the config
+        return gvConfig;
       }
+
+      // Log
+      logger.logWarning(`- Map: ${mapId} - Invalid JSON configuration object in div, a fallback strategy will be used -`);
+      api.utilities.showError(mapId, api.utilities.getLocalizedMessage(mapId, 'validation.invalidConfig'), true);
     }
 
-    return mapConfig;
+    // None
+    return undefined;
   }
 }
