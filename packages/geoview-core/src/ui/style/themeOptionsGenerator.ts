@@ -205,51 +205,52 @@ export const generateThemeOptions = (geoViewColors: IGeoViewColors = defaultGeoV
           },
         },
       },
+      MuiButton: {},
       MuiIconButton: {
         styleOverrides: {
           root: {
             '&.style1': {
-              backgroundColor: `${geoViewColors.bgColor.dark[100]} !important`,
-              border: `3px solid transparent !important`,
-              color: `${geoViewColors.primary.main} !important`,
+              backgroundColor: `${geoViewColors.bgColor.dark[100]}`,
+              border: `3px solid transparent`,
+              color: `${geoViewColors.primary.main}`,
               '&:hover, &:active, &.active': {
-                backgroundColor: `${geoViewColors.primary.light[400]} !important`,
-                border: `3px solid ${geoViewColors.primary.light[500]} !important`,
-                color: `${geoViewColors.primary.dark[100]} !important`,
+                backgroundColor: `${geoViewColors.bgColor.light[100]}`,
+                border: `3px solid ${geoViewColors.primary.light[500]}`,
+                color: `${geoViewColors.primary.dark[100]}`,
                 boxShadow: 1,
               },
               '&:disabled': {
-                color: `${geoViewColors.bgColor.dark[450]} !important`,
+                color: `${geoViewColors.bgColor.dark[450]}`,
               },
             },
             '&.style2': {
-              backgroundColor: `${geoViewColors.primary.main} !important`,
-              border: `3px solid transparent !important`,
-              color: `${geoViewColors.white} !important`,
+              backgroundColor: `${geoViewColors.primary.main}`,
+              border: `3px solid transparent`,
+              color: `${geoViewColors.white}`,
               '&:hover, &:active, &.active': {
-                backgroundColor: `${geoViewColors.primary.light[800]} !important`,
-                border: `3px solid ${geoViewColors.primary.light[500]} !important`,
-                color: `${geoViewColors.primary.dark[100]} !important`,
+                backgroundColor: `${geoViewColors.primary.light[800]}`,
+                border: `3px solid ${geoViewColors.primary.light[500]}`,
+                color: `${geoViewColors.primary.dark[100]}`,
                 boxShadow: 1,
               },
               '&:disabled': {
-                color: `${geoViewColors.bgColor.dark[450]} !important`,
+                color: `${geoViewColors.bgColor.dark[450]}`,
               },
             },
-            '&.style3': {
-              backgroundColor: `tranparent !important`,
-              border: `2px solid transparent !important`,
-              color: `${geoViewColors.primary.main} !important`,
+            '&.style3': { //used for app-bar buttons
+              backgroundColor: `tranparent`,
+              border: `2px solid transparent`,
+              color: `${geoViewColors.primary.main}`,
               '&:hover, &:active, &.active': {
-                backgroundColor: `${geoViewColors.primary.main} !important`,
-                border: `2px solid ${geoViewColors.primary.light[500]} !important`,
-                color: `${geoViewColors.white} !important`,
+                backgroundColor: `${geoViewColors.primary.main}`,
+                border: `2px solid ${geoViewColors.primary.light[500]}`,
+                color: `${geoViewColors.white}`,
                 boxShadow: 1,
               },
               '&:disabled': {
-                color: `${geoViewColors.bgColor.dark[450]} !important`,
+                color: `${geoViewColors.bgColor.dark[450]}`,
               },
-            },
+            }
           },
         },
       },
@@ -290,7 +291,7 @@ export const generateThemeOptions = (geoViewColors: IGeoViewColors = defaultGeoV
           root: {
             color: geoViewColors.textColor.light[100], // Text color for the tabs
             '&.Mui-selected': {
-              color: `${geoViewColors.primary.light[200]} !important`, // Text color for the selected tab
+              color: `${geoViewColors.primary.light[200]}`, // Text color for the selected tab
             },
           },
         },

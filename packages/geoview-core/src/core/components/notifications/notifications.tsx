@@ -84,7 +84,7 @@ export default function Notifications(): JSX.Element {
       <Box sx={sxClasses.notificationItem} key={index}>
         <Box>{getNotificationIcon(notification)}</Box>
         <Box sx={{ flexGrow: 1 }}>{notification.message}</Box>
-        <IconButton onClick={() => handleRemoveNotificationClick(notification)}>
+        <IconButton className="style3" onClick={() => handleRemoveNotificationClick(notification)}>
           <CloseIcon />
         </IconButton>
       </Box>
