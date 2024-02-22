@@ -15,7 +15,7 @@ export interface LayerListEntry {
   mapFilteredIcon?: ReactNode;
   tooltip?: ReactNode;
   numOffeatures?: number;
-  features: TypeArrayOfFeatureInfoEntries;
+  features?: TypeArrayOfFeatureInfoEntries;
 }
 
 interface LayerListProps {
@@ -136,7 +136,7 @@ const LayerListItem = memo(function LayerListItem({ isSelected, layer, onListIte
             <ListItemButton
               selected={isSelected}
               // disable when layer features has null value.
-              disabled={layer?.numOffeatures === 0 || layer.features === null}
+              disabled={layer?.numOffeatures === 0 || layer?.features === null}
               onClick={() => onListItemClick(layer)}
             >
               {renderLayerIcon()}
