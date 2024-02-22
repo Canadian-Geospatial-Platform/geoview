@@ -61,7 +61,7 @@ export function GuidePanel({ fullWidth }: GuidePanelType): JSX.Element {
   const allTabs: TypeValidFooterBarTabsCoreProps | undefined = footerBarConfig?.tabs.core;
 
   // fetch the content of general guide items with custom hook
-  let mdFilePath = '/geoview/locales/markdown/general-content.md';
+  let mdFilePath = '/geoview/public/locales/markdown/general-content.md';
   if (process.env.NODE_ENV === 'development') mdFilePath = '/locales/markdown/general-content.md';
   useFetchAndParseMarkdown(mapId, mdFilePath, t('guide.errorMessage'), setLeftPanelHelpItems);
 

@@ -1,6 +1,6 @@
 {
   "orientation": "horizontal",
   "keyboardOffset": 10,
-  "layers": ["esriFeatureLYR4-map2", "esriDynamicLYR3-map2"],
+  "layers": ["esriFeatureLYR4-map2/2", "esriDynamicLYR3-map2/0"],
   "suportedLanguages": ["en", "fr"]
 }

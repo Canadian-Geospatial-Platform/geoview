@@ -47,9 +47,6 @@ export class GeochartEventProcessor extends AbstractEventProcessor {
           if (prevOrderedLayerPaths.includes(layerPath) && !curOrderedLayerPaths.includes(layerPath)) {
             // Remove it
             GeochartEventProcessor.removeGeochartChart(store.getState().mapId, layerPath);
-
-            // Log
-            logger.logDebug('Removed GeoChart configs for layer path:', layerPath);
           }
         });
       }
@@ -95,17 +92,22 @@ export class GeochartEventProcessor extends AbstractEventProcessor {
     const chartData: GeoChartStoreByLayerPath = {};
 
     // Loop on the charts
+    const layerPaths: string[] = [];
     charts.forEach((chartInfo) => {
       // For each layer path
       chartInfo.layers.forEach((layer) => {
         // Get the layer path
         const layerPath = layer.layerId;
         chartData[layerPath] = chartInfo;
+        layerPaths.push(layerPath);
       });
     });
 
     // set store charts config
     this.getGeochartState(mapId)?.actions.setGeochartCharts(chartData);
+
+    // Log
+    logger.logInfo('Added GeoChart configs for layer paths:', layerPaths);
 
     // TODO: Also update the layer array in other store state to inform the later has a geochart attached to it (when code is done over there)?
   }
@@ -127,6 +129,9 @@ export class GeochartEventProcessor extends AbstractEventProcessor {
 
     // Update the layer data array in the store
     this.getGeochartState(mapId)!.actions.setGeochartCharts({ ...this.getGeochartState(mapId)?.geochartChartsConfig, ...toAdd });
+
+    // Log
+    logger.logInfo('Added GeoChart configs for layer path:', layerPath);
 
     // TODO: Also update the layer array in other store state to inform the later has a geochart attached to it (when code is done over there)?
   }
@@ -152,6 +157,9 @@ export class GeochartEventProcessor extends AbstractEventProcessor {
 
       // Update the layer data array in the store
       this.getGeochartState(mapId)!.actions.setGeochartCharts({ ...chartConfigs });
+
+      // Log
+      logger.logInfo('Removed GeoChart configs for layer path:', layerPath);
 
       // TODO: Also update the layer array in other store state to inform the later has a geochart attached to it (when code is done over there)?
     }

@@ -56,6 +56,7 @@ import { MapEventProcessor } from '@/api/event-processors/event-processor-childr
 import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
 import { logger } from '@/core/utils/logger';
 
+// TODO: Refactor - Typo TypeDcoument - actually, remove the type altogether, doesn't seem useful
 interface TypeDcoument extends Document {
   webkitExitFullscreen: () => void;
   msExitFullscreen: () => void;
@@ -115,8 +116,15 @@ export class MapViewer {
   private i18nInstance!: i18n;
 
   /**
-   * Add the map instance to the maps array in the api
-   *
+   * Constructor for a MapViewer, setting:
+   * - the mapId
+   * - the mapFeaturesConfig
+   * - i18n
+   * - appbar, navbar, footerbar
+   * - modalApi
+   * - geoviewRenderer
+   * - basemap
+   * - layers
    * @param {TypeMapFeaturesConfig} mapFeaturesConfig map properties
    * @param {i18n} i18instance language instance
    */
@@ -143,6 +151,26 @@ export class MapViewer {
   }
 
   /**
+   * Initializes map, layer class and geometries
+   *
+   * @param {OLMap} cgpMap The OpenLayers map object
+   */
+  initMap(cgpMap: OLMap): void {
+    // Set the map
+    this.map = cgpMap;
+
+    // TODO: Refactor - Is it necessary to set the mapId again? It was set in constructor. Preferably set it at one or the other.
+    this.mapId = cgpMap.get('mapId');
+
+    // initialize layers and load the layers passed in from map config if any
+    this.layer = new Layer(this.mapId);
+    this.layer.loadListOfGeoviewLayer(this.mapFeaturesConfig.map.listOfGeoviewLayerConfig);
+
+    // check if geometries are provided from url
+    this.loadGeometries();
+  }
+
+  /**
    * Set the layer added event listener and timeout function for the list of geoview layer configurations.
    *
    * @param {TypeListOfGeoviewLayerConfig} listOfGeoviewLayerConfig The list of geoview layer configurations.
@@ -159,6 +187,10 @@ export class MapViewer {
 
               if (payloadIsGeoViewLayerAdded(payload)) {
                 const { geoviewLayer } = payload;
+
+                // Log
+                logger.logInfo(`GeoView Layer added on map ${geoviewLayer.geoviewLayerId}`, geoviewLayer);
+
                 MapEventProcessor.setLayerZIndices(this.mapId);
                 // If metadata are processed
                 if (geoviewLayer.allLayerStatusAreIn(['processed', 'loading', 'loaded', 'error'])) {
@@ -174,10 +206,10 @@ export class MapViewer {
   }
 
   /**
-   * Method used to test all geoview layers status flags to determine if all the metadata of the map are loaded.
+   * Tests all geoview layers status flags to determine if all the metadata of the map are loaded.
    * This doesn't mean that all the layers are loaded on the map, Only the metadata are read and processed.
    *
-   * @returns true if all geoview layers on the map are loaded or detected as a load error.
+   * @returns {boolean} true if all geoview layers on the map are loaded or detected as a load error.
    */
   mapIsReady(): boolean {
     if (this.layer === undefined) return false;
@@ -220,29 +252,13 @@ export class MapViewer {
   }
 
   /**
-   * Initialize layers, basemap and projection
-   *
-   * @param cgpMap
-   */
-  initMap(cgpMap: OLMap): void {
-    this.mapId = cgpMap.get('mapId');
-    this.map = cgpMap;
-
-    // initialize layers and load the layers passed in from map config if any
-    this.layer = new Layer(this.mapId);
-    this.layer.loadListOfGeoviewLayer(this.mapFeaturesConfig.map.listOfGeoviewLayerConfig);
-
-    // check if geometries are provided from url
-    this.loadGeometries();
-  }
-
-  /**
    * Add a new custom component to the map
    *
    * @param {string} mapComponentId an id to the new component
    * @param {JSX.Element} component the component to add
    */
   addComponent(mapComponentId: string, component: JSX.Element): void {
+    // TODO: Refactor - Doesn't seem to be used anymore, keep? If keep it, refactor to call a function instead of event.emit.
     if (mapComponentId && component) {
       // emit an event to add the component
       api.event.emit(mapComponentPayload(EVENT_NAMES.MAP.EVENT_MAP_ADD_COMPONENT, this.mapId, mapComponentId, component));
@@ -255,6 +271,7 @@ export class MapViewer {
    * @param imapComponentIdd the id of the component to remove
    */
   removeComponent(mapComponentId: string): void {
+    // TODO: Refactor - Doesn't seem to be used anymore, keep? If keep it, refactor to call a function instead of event.emit.
     if (mapComponentId) {
       // emit an event to add the component
       api.event.emit(mapComponentPayload(EVENT_NAMES.MAP.EVENT_MAP_REMOVE_COMPONENT, this.mapId, mapComponentId));
@@ -318,6 +335,8 @@ export class MapViewer {
    * @param {HTMLElement} element the element to toggle fullscreen on
    */
   setFullscreen(status: boolean, element: TypeHTMLElement): void {
+    // TODO: Refactor - For reusability, this function should be static and moved to a browser-utilities class
+    // TO.DOCONT: If we want to keep a function here, in MapViewer, it should just be a redirect to the browser-utilities'
     // enter fullscreen
     if (status) {
       if (element.requestFullscreen) {

@@ -1,5 +1,6 @@
 import { createRoot } from 'react-dom/client';
 import { AbstractPlugin } from './abstract-plugin';
+import { MapContext } from '@/app';
 
 /** ******************************************************************************************************************************
  * Map Plugin abstract class.
@@ -24,19 +25,16 @@ export abstract class MapPlugin extends AbstractPlugin {
    * Called when a map plugin is being added
    */
   onAdd(): void {
-    // If some layers set
-    if ((this.configObj?.layers as string[]).length > 0) {
-      // create the swiper container and insert it after top link
-      const el = document.createElement('div');
-      el.setAttribute('id', `${this.pluginProps.mapId}-${this.pluginId}`);
-      const mapElement = document.getElementById(`mapbox-${this.pluginProps.mapId}`);
-      mapElement?.insertBefore(el, mapElement.firstChild);
+    // create the swiper container and insert it after top link
+    const el = document.createElement('div');
+    el.setAttribute('id', `${this.pluginProps.mapId}-${this.pluginId}`);
+    const mapElement = document.getElementById(`mapbox-${this.pluginProps.mapId}`);
+    mapElement?.prepend(el);
 
-      // create the swiper component and render
-      const node = this.onCreateContent();
-      const root = createRoot(document.getElementById(`${this.pluginProps.mapId}-${this.pluginId}`)!);
-      root.render(node);
-    }
+    // create the swiper component and render
+    const node = this.onCreateContent();
+    const root = createRoot(el);
+    root.render(<MapContext.Provider value={{ mapId: this.pluginProps.mapId }}>{node}</MapContext.Provider>);
   }
 
   /**

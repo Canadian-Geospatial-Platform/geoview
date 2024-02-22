@@ -1,5 +1,5 @@
-/* eslint-disable no-param-reassign */
-
+import BaseLayer from 'ol/layer/Base';
+import LayerGroup from 'ol/layer/Group';
 import { GeoCore, layerConfigIsGeoCore } from '@/geo/layer/other/geocore';
 import { Geometry } from '@/geo/layer/geometry/geometry';
 import { FeatureHighlight } from '@/geo/utils/feature-highlight';
@@ -301,8 +301,8 @@ export class Layer {
     );
     showError(this.mapId, message);
 
-    // eslint-disable-next-line no-console
-    console.log(`Duplicate use of geoview layer identifier ${geoviewLayerConfig.geoviewLayerId} on map ${this.mapId}`);
+    // Log
+    logger.logError(`Duplicate use of geoview layer identifier ${geoviewLayerConfig.geoviewLayerId} on map ${this.mapId}`);
   }
 
   /**
@@ -313,7 +313,16 @@ export class Layer {
    * @returns {AbstractGeoViewLayer} Returns the geoview instance associated to the layer path.
    */
   geoviewLayer(layerPath: string): AbstractGeoViewLayer {
+    // TODO: Refactor - Move this method next to the getGeoviewLayerByLayerPath equivalent. And then rename it?
+    // The first element of the layerPath is the geoviewLayerId
     const geoviewLayerInstance = this.geoviewLayers[layerPath.split('/')[0]];
+
+    // TODO: Check #1857 - Why set the `layerPathAssociatedToTheGeoviewLayer` property on the fly like that? Should likely set this somewhere else than in this function that looks more like a getter.
+    // TO.DOCONT: It seems `layerPathAssociatedToTheGeoviewLayer` is indeed used many places, notably in applyFilters logic.
+    // TO.DOCONT: If all those places rely on the `layerPathAssociatedToTheGeoviewLayer` to be set, that logic using layerPathAssociatedToTheGeoviewLayer should be moved over there.
+    // TO.DOCONT: If there's more other places relying on the `layerPathAssociatedToTheGeoviewLayer`, then it's not ideal,
+    // TO.DOCONT: because it's assuming/relying on the fact that all those other places use this specific geoviewLayer() prior to do their work.
+    // TO.DOCONT: There's likely some separation of logic to apply here. Make this function more evident that it 'sets' something, not just 'gets' a GeoViewLayer.
     geoviewLayerInstance.layerPathAssociatedToTheGeoviewLayer = layerPath;
     return geoviewLayerInstance;
   }
@@ -394,6 +403,9 @@ export class Layer {
           (geoviewLayerConfig) => geoviewLayerConfig.geoviewLayerId !== partialLayerPath
         );
     }
+
+    // Log
+    logger.logInfo(`Layer removed for ${partialLayerPath}`);
   };
 
   /**
@@ -471,7 +483,7 @@ export class Layer {
    * Asynchronously gets a layer using its id and return the layer data.
    * If the layer we're searching for has to be processed, set mustBeProcessed to true when awaiting on this method.
    * This function waits the timeout period before abandonning (or uses the default timeout when not provided).
-   * Note this function uses the 'Async' suffix only to differentiate it from 'getGeoviewLayerById'.
+   * Note this function uses the 'Async' suffix to differentiate it from 'getGeoviewLayerById'.
    *
    * @param {string} layerID the layer id to look for
    * @param {string} mustBeProcessed indicate if the layer we're searching for must be found only once processed
@@ -506,6 +518,40 @@ export class Layer {
 
     // Throw
     throw new Error(`Layer ${geoviewLayerId} not found.`);
+  };
+
+  /**
+   * Returns the OpenLayer layer associated to a specific layer path.
+   * @param {string} layerPath The layer path to the layer's configuration.
+   *
+   * @returns {BaseLayer | LayerGroup} Returns the OpenLayer layer associated to the layer path.
+   */
+  getLayerByLayerPath = (layerPath: string): BaseLayer | LayerGroup => {
+    // Return the olLayer object from the registered layers
+    const olLayer = api.maps[this.mapId].layer.registeredLayers[layerPath]?.olLayer;
+    if (olLayer) return olLayer;
+    throw new Error(`Layer at path ${layerPath} not found.`);
+  };
+
+  /**
+   * Asynchronously returns the OpenLayer layer associated to a specific layer path.
+   * This function waits the timeout period before abandonning (or uses the default timeout when not provided).
+   * Note this function uses the 'Async' suffix to differentiate it from 'getLayerByLayerPath'.
+   * @param {string} layerPath The layer path to the layer's configuration.
+   *
+   * @returns {BaseLayer | LayerGroup} Returns the OpenLayer layer associated to the layer path.
+   */
+  getLayerByLayerPathAsync = async (layerPath: string, timeout?: number, checkFrequency?: number): Promise<BaseLayer | LayerGroup> => {
+    // Make sure the open layer has been created, sometimes it can still be in the process of being created
+    const promisedLayer = await whenThisThen(
+      () => {
+        return api.maps[this.mapId].layer.registeredLayers[layerPath]?.olLayer;
+      },
+      timeout,
+      checkFrequency
+    );
+    // Here, the layer resolved
+    return promisedLayer!;
   };
 
   /**

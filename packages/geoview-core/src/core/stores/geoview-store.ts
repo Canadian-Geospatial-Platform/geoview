@@ -11,6 +11,7 @@ import { IMapState, initializeMapState } from './store-interface-and-intial-valu
 import { IMapDataTableState, initialDataTableState } from './store-interface-and-intial-values/data-table-state';
 import { ITimeSliderState, initializeTimeSliderState } from './store-interface-and-intial-values/time-slider-state';
 import { IGeochartState, initializeGeochartState } from './store-interface-and-intial-values/geochart-state';
+import { ISwiperState, initializeSwiperState } from './store-interface-and-intial-values/swiper-state';
 import { IUIState, initializeUIState } from './store-interface-and-intial-values/ui-state';
 
 import { TypeMapFeaturesConfig } from '@/core/types/global-types';
@@ -38,6 +39,7 @@ export interface IGeoviewState {
   // packages state interface
   geochartState: IGeochartState;
   timeSliderState: ITimeSliderState;
+  swiperState: ISwiperState;
 }
 
 export const geoviewStoreDefinition = (set: TypeSetStore, get: TypeGetStore) => {
@@ -61,6 +63,7 @@ export const geoviewStoreDefinition = (set: TypeSetStore, get: TypeGetStore) => 
       // TODO: Change this check for something more generic that checks in appBar too
       if (config.footerBar?.tabs.core.includes('time-slider')) set({ timeSliderState: initializeTimeSliderState(set, get) });
       if (config.footerBar?.tabs.core.includes('geochart')) set({ geochartState: initializeGeochartState(set, get) });
+      if (config.corePackages?.includes('swiper')) set({ swiperState: initializeSwiperState(set, get) });
     },
 
     // core states
@@ -75,6 +78,7 @@ export const geoviewStoreDefinition = (set: TypeSetStore, get: TypeGetStore) => 
 
 export const geoviewStoreDefinitionWithSubscribeSelector = subscribeWithSelector(geoviewStoreDefinition);
 
+// TODO: Refactor - Indicate why we need to use a fake store?
 const fakeStore = create<IGeoviewState>()(geoviewStoreDefinitionWithSubscribeSelector);
 export type GeoviewStoreType = typeof fakeStore;
 
