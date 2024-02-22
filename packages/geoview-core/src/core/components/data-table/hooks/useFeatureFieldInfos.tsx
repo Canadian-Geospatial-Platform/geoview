@@ -1,4 +1,3 @@
-import { useMemo } from 'react';
 import { TypeArrayOfLayerData, TypeFieldEntry } from '@/app';
 import { MappedLayerDataType } from '../data-panel';
 
@@ -8,17 +7,13 @@ import { MappedLayerDataType } from '../data-panel';
  * @returns {MappedLayerDataType[]} layerData with columns.
  */
 export function useFeatureFieldInfos(layerData: TypeArrayOfLayerData): MappedLayerDataType[] {
-  const mappedLayerData = useMemo(() => {
-    return layerData.map((layer) => {
-      let fieldInfos = {} as Record<string, TypeFieldEntry | undefined>;
-      if (layer.features?.length) {
-        layer.features.forEach((feature) => {
-          fieldInfos = { ...fieldInfos, ...feature.fieldInfo };
-        });
-      }
-      return { ...layer, fieldInfos };
-    });
-  }, [layerData]);
+  const mappedLayerData = layerData?.map((layer) => {
+    let fieldInfos = {} as Record<string, TypeFieldEntry | undefined>;
+    if (layer.features?.length) {
+      fieldInfos = layer.features[0].fieldInfo;
+    }
+    return { ...layer, fieldInfos };
+  });
 
   return mappedLayerData;
 }

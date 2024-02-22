@@ -20,3 +20,13 @@ export const OL_OVERVIEWMAP_SIZE = {
   width: '150px',
   height: '150px',
 };
+
+export const LAYER_STATUS = {
+  REGISTERED: 'registered',
+  NEW_INSTANCE: 'newInstance',
+  PROCESSING: 'processing',
+  PROCESSED: 'processed',
+  LOADING: 'loading',
+  LOADED: 'loaded',
+  ERROR: 'error',
+};

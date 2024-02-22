@@ -113,7 +113,9 @@
     "querying": "Requête en cours",
     "layerAdded": "Couche __param__  ajoutée",
     "instructionsNoLayersTitle": "Aucune couche visible",
-    "instructionsNoLayersBody": "Ajoutez des couches visibles sur la carte."
+    "instructionsNoLayersBody": "Ajoutez des couches visibles sur la carte.",
+    "dataTableInstructions": "Instructions relatives aux tableaux de données",
+    "selectVisbleLayer": "Cliquez sur une couche pour afficher le tableau de données"
   },
   "details": {
     "title": "Détails",

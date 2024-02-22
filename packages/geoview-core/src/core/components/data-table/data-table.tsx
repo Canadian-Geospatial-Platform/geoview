@@ -292,7 +292,7 @@ function DataTable({ data, layerPath, tableHeight = 600 }: DataTableProps) {
           if (isValidElement(row[key])) {
             return row[key];
           }
-          return row[key].value ?? '';
+          return row[key]?.value ?? '';
         },
         header: value.alias,
         filterFn: 'contains',

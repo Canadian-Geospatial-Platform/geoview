@@ -77,32 +77,18 @@ const LayerListItem = memo(function LayerListItem({ isSelected, layer, onListIte
   const renderLayerStatus = () => {
     switch (layer.layerStatus) {
       case 'error':
-        return (
-          <Box sx={{ display: 'flex', alignContent: 'center' }}>
-            <Typography component="p" variant="subtitle1" noWrap>
-              {t('legend.layerError')}
-            </Typography>
-          </Box>
-        );
+        return t('legend.layerError');
 
       default:
         switch (layer.queryStatus) {
           case 'init':
           case 'processing':
-            return (
-              <Box sx={{ display: 'flex', alignContent: 'center' }}>
-                <Typography component="p" variant="subtitle1" noWrap>
-                  {`${t('layers.querying')}...`}
-                </Typography>
-              </Box>
-            );
+            return `${t('layers.querying')}...`;
           default:
             return (
-              <Box sx={{ display: 'flex', alignContent: 'center' }}>
-                <Typography component="p" variant="subtitle1" noWrap>
-                  {layer.layerFeatures}
-                </Typography>
-              </Box>
+              <>
+                {layer.layerFeatures} {layer?.mapFilteredIcon ?? ''}
+              </>
             );
         }
     }
@@ -112,7 +98,11 @@ const LayerListItem = memo(function LayerListItem({ isSelected, layer, onListIte
     return (
       <Box sx={sxClasses.listPrimaryText}>
         <Typography className="layerTitle">{layer.layerName}</Typography>
-        {renderLayerStatus()}
+        <Box display="flex" alignContent="center">
+          <Typography component="p" variant="subtitle1" noWrap display="flex">
+            {renderLayerStatus()}
+          </Typography>
+        </Box>
       </Box>
     );
   };
